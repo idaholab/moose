@@ -930,21 +930,20 @@ template <typename AuxKernelType>
 void
 AuxiliarySystem::computeElementalVarsHelper(const TheWarehouse::Query & query)
 {
-  // Get all elemental aux-kernels of this type/group/exec-flag, regardless of restriction. This
-  // is only used as a non-emptiness check below, and spans every thread's copy of each kernel (no
-  // AttribThread condition), so it must stay unsorted - sorting would run dependency/cyclic
-  // resolution across per-thread duplicates of the same kernel, which can falsely detect a cycle.
-  std::vector<AuxKernelType *> auxs;
-  query.clone().condition<AttribInterfaces>(Interfaces::BlockRestrictable).queryIntoUnsorted(auxs);
+  // Block Elemental AuxKernels. Boundary-restricted kernels are excluded here - even if they are
+  // not also block-restricted (and would otherwise match every block) - since they are handled
+  // entirely by the boundary-element loop below, matching the old warehouse's mutually exclusive
+  // block/boundary dispatch.
+  // The non-emptiness checks span every thread's copy of each kernel (no AttribThread condition),
+  // so they must stay unsorted: sorting would run dependency resolution across per-thread
+  // duplicates of the same kernel, which can falsely detect a cycle.
+  const TheWarehouse::Query block_query =
+      query.clone().condition<AttribAuxKernelBoundaryRestricted>(false);
+  std::vector<AuxKernelType *> block_auxs;
+  block_query.clone().queryIntoUnsorted(block_auxs);
 
-  if (auxs.size())
+  if (block_auxs.size())
   {
-    // Block Elemental AuxKernels. Boundary-restricted kernels are excluded here - even if they
-    // are not also block-restricted (and would otherwise match every block) - since they are
-    // handled entirely by the boundary-element loop below, matching the old warehouse's mutually
-    // exclusive block/boundary dispatch.
-    const TheWarehouse::Query block_query =
-        query.clone().condition<AttribAuxKernelBoundaryRestricted>(false);
     PARALLEL_TRY
     {
       const ConstElemRange & range = *_mesh.getActiveLocalElementRange();
@@ -968,10 +967,11 @@ AuxiliarySystem::computeElementalVarsHelper(const TheWarehouse::Query & query)
     _sys.update();
   }
 
-  // Boundary Elemental AuxKernels. Reuses the "any elemental aux kernels at all" check above as a
-  // cheap gate; ComputeElemAuxBcsThread itself finds nothing per-element if none of them are
-  // actually boundary restricted.
-  if (auxs.size())
+  // Boundary Elemental AuxKernels
+  std::vector<AuxKernelType *> boundary_auxs;
+  query.clone().condition<AttribAuxKernelBoundaryRestricted>(true).queryIntoUnsorted(boundary_auxs);
+
+  if (boundary_auxs.size())
   {
     TIME_SECTION("computeElementalVecVars", 3);
 
@@ -1003,22 +1003,20 @@ template <typename AuxKernelType>
 void
 AuxiliarySystem::computeNodalVarsHelper(const TheWarehouse::Query & query)
 {
-  // Get all block restricted aux-kernels. This is only used as a non-emptiness check below, and
-  // spans every thread's copy of each kernel (no AttribThread condition), so it must stay
-  // unsorted - sorting would run dependency/cyclic resolution across per-thread duplicates of the
-  // same kernel, which can falsely detect a cycle.
-  // NOTE: we should use this query to pass to the loop instead
-  std::vector<AuxKernelType *> auxs;
-  query.clone().condition<AttribInterfaces>(Interfaces::BlockRestrictable).queryIntoUnsorted(auxs);
+  // Block Nodal AuxKernels. Boundary-restricted kernels are excluded here - even if they are not
+  // also block-restricted (and would otherwise match every block) - since they are handled entirely
+  // by the boundary-node loop below, matching the old warehouse's mutually exclusive block/boundary
+  // dispatch.
+  // The non-emptiness checks span every thread's copy of each kernel (no AttribThread condition),
+  // so they must stay unsorted: sorting would run dependency resolution across per-thread
+  // duplicates of the same kernel, which can falsely detect a cycle.
+  const TheWarehouse::Query block_query =
+      query.clone().condition<AttribAuxKernelBoundaryRestricted>(false);
+  std::vector<AuxKernelType *> block_auxs;
+  block_query.clone().queryIntoUnsorted(block_auxs);
 
-  if (auxs.size())
+  if (block_auxs.size())
   {
-    // Block Nodal AuxKernels. Boundary-restricted kernels are excluded here - even if they are
-    // not also block-restricted (and would otherwise match every block) - since they are handled
-    // entirely by the boundary-node loop below, matching the old warehouse's mutually exclusive
-    // block/boundary dispatch.
-    const TheWarehouse::Query block_query =
-        query.clone().condition<AttribAuxKernelBoundaryRestricted>(false);
     PARALLEL_TRY
     {
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
@@ -1031,10 +1029,11 @@ AuxiliarySystem::computeNodalVarsHelper(const TheWarehouse::Query & query)
     PARALLEL_CATCH;
   }
 
-  // Boundary Nodal AuxKernels. Reuses the "any nodal aux kernels at all" check above as a cheap
-  // gate; ComputeNodalAuxBcsThread itself finds nothing per-node if none of them are actually
-  // boundary restricted.
-  if (auxs.size())
+  // Boundary Nodal AuxKernels
+  std::vector<AuxKernelType *> boundary_auxs;
+  query.clone().condition<AttribAuxKernelBoundaryRestricted>(true).queryIntoUnsorted(boundary_auxs);
+
+  if (boundary_auxs.size())
   {
     TIME_SECTION("computeBoundaryObjects", 3);
 
