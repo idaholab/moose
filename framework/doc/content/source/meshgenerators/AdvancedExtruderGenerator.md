@@ -58,8 +58,9 @@ curved (higher-order) surface elements contribute their local normal at that nod
 The input surface mesh is expected to have consistently oriented elements, which [OrientSurfaceMeshGenerator.md] can enforce. To flip the overall
 growth direction (inward versus outward), negate the [!param](/Mesh/AdvancedExtruderGenerator/heights).
 
-This option is only supported when extruding a 2D surface mesh into 3D, and is not currently implemented for distributed
-meshes.
+This option is supported when extruding a 2D surface mesh into 3D, and when extruding a 1D mesh into 2D. In the latter
+case, the 1D mesh must lie in a plane of constant $z$, and the normal of each element at a node is its tangent rotated by
+90 degrees counterclockwise about the $z$ axis. This option is not currently implemented for distributed meshes.
 
 !listing test/tests/meshgenerators/advanced_extruder_generator/extrude_along_normals.i block=Mesh/extrude
 

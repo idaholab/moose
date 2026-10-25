@@ -125,8 +125,9 @@ AdvancedExtruderGenerator::validParams()
       "extrude_along_node_normals",
       false,
       "If true, each node is extruded along the averaged normal of the elements it is connected "
-      "to, instead of along a fixed 'direction'. Only supported when extruding a 2D surface mesh "
-      "into 3D. This is useful to create boundary layers.");
+      "to, instead of along a fixed 'direction'. Only supported when extruding a 1D mesh in a "
+      "plane of constant z into 2D, or a 2D surface mesh into 3D. This is useful to create "
+      "boundary layers.");
 
   // Boundaries and interfaces
   params.addParam<BoundaryName>(
@@ -508,16 +509,9 @@ AdvancedExtruderGenerator::generate()
   if (_extrude_along_curve)
     extrusion_curve = std::move(_extrusion_curve);
 
-  if (_extrude_along_node_normals)
-  {
-    if (input->mesh_dimension() != 2)
-      paramError("extrude_along_node_normals",
-                 "Extruding along node normals is only supported for 2D surface meshes (extruded "
-                 "into 3D).");
-    if (!input->is_replicated())
-      paramError("extrude_along_node_normals",
-                 "Extruding along node normals is not implemented for distributed meshes yet.");
-  }
+  if (_extrude_along_node_normals && !input->is_replicated())
+    paramError("extrude_along_node_normals",
+               "Extruding along node normals is not implemented for distributed meshes yet.");
 
   // We must serialize the curve to know how to extrude across all ranks
   std::unique_ptr<libMesh::MeshSerializer> serializer;
@@ -1775,13 +1769,15 @@ AdvancedExtruderGenerator::computeNodeNormals(const MeshBase & input) const
   // Evaluate the geometric map of each element at its nodes with a nodal quadrature rule, as done
   // for mortar nodal normals. On curved (higher-order) elements this captures the local surface
   // normal at each node rather than a single per-element normal.
-  libMesh::QNodal qrule(2);
+  const auto dim = input.mesh_dimension();
+  libMesh::QNodal qrule(dim);
   const auto & qweights = qrule.get_weights();
-  std::unique_ptr<FEBase> fe(FEBase::build(2, FEType(FIRST, LAGRANGE)));
+  std::unique_ptr<FEBase> fe(FEBase::build(dim, FEType(FIRST, LAGRANGE)));
   fe->attach_quadrature_rule(&qrule);
   const auto & dxyzdxi = fe->get_dxyzdxi();
   const auto & dxyzdeta = fe->get_dxyzdeta();
   const auto & q_points = fe->get_xyz();
+  const Point z_axis(0, 0, 1);
 
   // Sum the JxW-weighted normals of the elements connected to each node
   std::unordered_map<dof_id_type, Point> node_normals;
@@ -1789,12 +1785,28 @@ AdvancedExtruderGenerator::computeNodeNormals(const MeshBase & input) const
   {
     fe->reinit(elem);
     const auto qpoint_to_node = MooseMeshUtils::nodalQuadraturePointToNodeMap(*elem, q_points);
-    // The weighted normal JxW * n is the quadrature weight times the area vector
-    // dxyz/dxi x dxyz/deta, which has the orientation of the element's node ordering
     for (const auto qp : index_range(q_points))
-    for (const auto qp : index_range(q_points))
-      node_normals[elem->node_id(qpoint_to_node[qp])] +=
-          qweights[qp] * dxyzdxi[qp].cross(dxyzdeta[qp]);
+    {
+      // The weighted normal JxW * n is the quadrature weight times the area vector
+      // dxyz/dxi x dxyz/deta in 2D, or the in-plane rotation z x dxyz/dxi of the tangent in 1D.
+      // Both have the orientation of the element's node ordering, so that the extruded elements
+      // are not inverted.
+      Point weighted_normal;
+      if (dim == 2)
+        weighted_normal = dxyzdxi[qp].cross(dxyzdeta[qp]);
+      else
+      {
+        // A curve only defines a unique normal within its plane
+        if (std::abs(dxyzdxi[qp](2)) > libMesh::TOLERANCE * dxyzdxi[qp].norm())
+          paramError("extrude_along_node_normals",
+                     "Extruding a 1D mesh along node normals requires the mesh to lie in a plane "
+                     "of constant z, but element ",
+                     elem->id(),
+                     " is not.");
+        weighted_normal = z_axis.cross(dxyzdxi[qp]);
+      }
+      node_normals[elem->node_id(qpoint_to_node[qp])] += qweights[qp] * weighted_normal;
+    }
   }
 
   // The input surface mesh is expected to have consistently oriented elements.
