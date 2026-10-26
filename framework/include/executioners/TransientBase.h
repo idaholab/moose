@@ -295,6 +295,9 @@ protected:
   Real & _target_time;
   bool _use_multiapp_dt;
 
+  /// Whether to restore the restartable data when a time step is rejected
+  const bool _restore_restartable_data_on_restep;
+
   void setupTimeIntegrator();
 
 private:

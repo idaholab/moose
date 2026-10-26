@@ -96,8 +96,7 @@ PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & par
     _penalty_multiplier_friction(getParam<Real>("penalty_multiplier_friction")),
     _adaptivity_friction(
         getParam<MooseEnum>("adaptivity_penalty_friction").getEnum<AdaptivityFrictionalPenalty>()),
-    _epsilon_tolerance(1.0e-40),
-    _t_step_old_friction(declareRestartableData<int>("t_step_old_friction", 0))
+    _epsilon_tolerance(1.0e-40)
 
 {
   if (!_augmented_lagrange_problem == isParamValid("slip_tolerance"))
@@ -134,21 +133,6 @@ PenaltyFrictionUserObject::timestepSetup()
   // instead we call it explicitly here
   WeightedGapUserObject::timestepSetup();
 
-  // timestepSetup() runs once per time step attempt, so on a retried timestep (e.g. --test-restep
-  // or a rejected step) the maps below hold the discarded attempt's values and keys. Restore the
-  // state saved at the start of the first attempt so the retry starts from the accepted state.
-  const bool retried_timestep = _fe_problem.timeStep() == _t_step_old_friction;
-  _t_step_old_friction = _fe_problem.timeStep();
-  if (retried_timestep)
-  {
-    _dof_to_step_slip = _dof_to_step_slip_start;
-    _dof_to_accumulated_slip = _dof_to_accumulated_slip_start;
-    _dof_to_tangential_traction = _dof_to_tangential_traction_start;
-    _dof_to_frictional_lagrange_multipliers = _dof_to_frictional_lagrange_multipliers_start;
-    _dof_to_local_penalty_friction = _dof_to_local_penalty_friction_start;
-    return;
-  }
-
   // Clear step slip (values used in between AL iterations for penalty adaptivity)
   for (auto & map_pr : _dof_to_step_slip)
   {
@@ -178,12 +162,6 @@ PenaltyFrictionUserObject::timestepSetup()
 
   for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
     delta_tangential_lm.setZero();
-
-  _dof_to_step_slip_start = _dof_to_step_slip;
-  _dof_to_accumulated_slip_start = _dof_to_accumulated_slip;
-  _dof_to_tangential_traction_start = _dof_to_tangential_traction;
-  _dof_to_frictional_lagrange_multipliers_start = _dof_to_frictional_lagrange_multipliers;
-  _dof_to_local_penalty_friction_start = _dof_to_local_penalty_friction;
 }
 
 void

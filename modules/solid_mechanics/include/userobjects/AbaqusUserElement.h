@@ -151,7 +151,9 @@ protected:
   std::array<std::map<dof_id_type, std::vector<Real>>, 2> _statev;
   std::size_t _statev_index_current;
   std::size_t _statev_index_old;
-  int & _t_step_old;
+  /// Time step number of the previous timestepSetup() call. Not restartable, because _statev is
+  /// not restored when a time step is repeated.
+  int _t_step_old;
 
   /// Abaqus element type
   const int _jtype;

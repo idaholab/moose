@@ -64,8 +64,9 @@ protected:
   const Real _y_shift;
   ///@}
 
-  /// The last timestep that this object operated on
-  int & _last_t_step;
+  /// The last timestep that this object operated on. Not restartable, so that a repeated time step
+  /// can be detected after its restartable data has been restored.
+  int _last_t_step;
 
   /// Vector of times
   VectorPostprocessorValue * _times;

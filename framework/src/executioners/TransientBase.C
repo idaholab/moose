@@ -129,13 +129,19 @@ TransientBase::validParams()
                         "chosen by the MultiApps.  If false (the "
                         "default) then the minimum over the master dt "
                         "and the MultiApps is used");
+  params.addParam<bool>(
+      "restore_restartable_data_on_restep",
+      true,
+      "Whether to restore the restartable data of all objects (e.g. user object state) to its "
+      "values at the start of a time step when that step is rejected and repeated");
 
   params.addParamNamesToGroup(
       "steady_state_detection steady_state_convergence steady_state_start_time",
       "Steady State Detection");
 
   params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps "
-                              "abort_on_solve_fail timestep_tolerance use_multiapp_dt",
+                              "abort_on_solve_fail timestep_tolerance use_multiapp_dt "
+                              "restore_restartable_data_on_restep",
                               "Advanced");
 
   params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
@@ -177,6 +183,7 @@ TransientBase::TransientBase(const InputParameters & parameters)
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(declareRecoverableData<Real>("target_time", -std::numeric_limits<Real>::max())),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
+    _restore_restartable_data_on_restep(getParam<bool>("restore_restartable_data_on_restep")),
     _testing_restep(false)
 {
   _t_step = 0;
@@ -482,6 +489,10 @@ TransientBase::takeStep(Real input_dt)
 
   // Increment time
   _time = _time_old + _dt;
+
+  // Save the state that rejecting this attempt must restore, before any object changes it
+  if (_restore_restartable_data_on_restep)
+    _problem.backupRestartableData();
 
   _problem.timestepSetup();
 

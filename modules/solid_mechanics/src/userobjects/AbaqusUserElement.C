@@ -73,7 +73,7 @@ AbaqusUserElement::AbaqusUserElement(const InputParameters & params)
     _nstatev(getParam<unsigned int>("num_state_vars")),
     _statev_index_current(0),
     _statev_index_old(1),
-    _t_step_old(declareRestartableData<int>("uel_tstep_old", -1)),
+    _t_step_old(-1),
     _jtype(getParam<int>("jtype"))
 {
   // coupled variables must be nonlinear scalar fields

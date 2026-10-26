@@ -73,6 +73,9 @@ dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void *
   dataLoad(stream, feature._var_index, context);
   dataLoad(stream, feature._id, context);
   dataLoad(stream, feature._bboxes, context);
+  // The list loader appends, and the feature may already hold ids (e.g. when its restartable state
+  // is restored for a repeated time step)
+  feature._orig_ids.clear();
   dataLoad(stream, feature._orig_ids, context);
   dataLoad(stream, feature._min_entity_id, context);
   dataLoad(stream, feature._vol_count, context);

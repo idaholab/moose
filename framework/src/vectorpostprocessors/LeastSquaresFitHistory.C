@@ -61,7 +61,7 @@ LeastSquaresFitHistory::LeastSquaresFitHistory(const InputParameters & parameter
     _x_shift(parameters.get<Real>("x_shift")),
     _y_scale(parameters.get<Real>("y_scale")),
     _y_shift(parameters.get<Real>("y_shift")),
-    _last_t_step(declareRecoverableData<int>("ls_last_t_step", -1))
+    _last_t_step(-1)
 {
   _coeffs.resize(_order + 1);
   for (unsigned int i = 0; i < _coeffs.size(); ++i)

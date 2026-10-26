@@ -46,13 +46,10 @@ PCNSFVKTDC::PCNSFVKTDC(const InputParameters & params)
 void
 PCNSFVKTDC::timestepSetup()
 {
-  // The SubProblem converged method is not restartable (it relies on data from libMesh) but the
-  // Executioner converged method is, so we use that
-  if (_app.getExecutioner()->lastSolveConverged())
-  {
-    _old_upwind_fluxes = _current_upwind_fluxes;
-    _old_ho_fluxes = _current_ho_fluxes;
-  }
+  // The current fluxes are those of the last accepted time step: when a time step is rejected, the
+  // restartable flux maps are restored to their values at the start of that step
+  _old_upwind_fluxes = _current_upwind_fluxes;
+  _old_ho_fluxes = _current_ho_fluxes;
 }
 
 void

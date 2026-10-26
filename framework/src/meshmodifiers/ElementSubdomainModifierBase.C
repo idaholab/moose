@@ -113,7 +113,7 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
     _displaced_mesh(_displaced_problem ? &_displaced_problem->mesh() : nullptr),
     _nl_sys(_fe_problem.getNonlinearSystemBase(systemNumber())),
     _aux_sys(_fe_problem.getAuxiliarySystem()),
-    _t_step_old(declareRestartableData<int>("t_step_old", 0)),
+    _t_step_old(0),
     _restep(false),
     _skip_restore_subdomain_changes(getParam<bool>("skip_restore_subdomain_changes")),
     _old_subdomain_reinitialized(getParam<bool>("old_subdomain_reinitialized")),

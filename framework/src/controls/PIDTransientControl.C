@@ -213,13 +213,10 @@ void
 PIDTransientControl::timestepSetup()
 {
   const auto * t_ex = dynamic_cast<const TransientBase *>(_app.getExecutioner());
-  if (t_ex && t_ex->getTimeStepper()->justFailedTimeStep() &&
-      getExecuteOnEnum().contains(EXEC_TIMESTEP_END))
+  if (t_ex && t_ex->getTimeStepper()->justFailedTimeStep())
   {
-    // We need to revert to the timestep begin state
-    _integral = _integral_old;
-    _value = _value_old;
-    _old_delta = _old_delta_prev_tstep;
+    // Rejecting the time step restored the controller state to the timestep begin state, but not
+    // the controlled value, which still holds the rejected attempt's value
     if (isParamValid("parameter"))
       setControllableValue<Real>("parameter", _value);
     else

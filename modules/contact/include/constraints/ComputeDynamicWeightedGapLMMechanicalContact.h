@@ -160,8 +160,9 @@ protected:
   /// The timestep index at which the history maps (_dof_to_old_weighted_gap, _dof_to_old_velocity,
   /// _dof_to_nodal_old_wear_depth) were last advanced. Used to detect a retried timestep (e.g.
   /// --test-restep or a rejected step), since timestepSetup() runs once per time step attempt
-  /// rather than once per accepted step.
-  int & _t_step_old;
+  /// rather than once per accepted step. Not restartable, so that the retry can still be detected
+  /// after the restartable data has been restored, because these maps are not restartable.
+  int _t_step_old;
 
   /// Set by timestepSetup() to indicate whether the current call is for a retried timestep, so
   /// that derived classes advancing their own history in an overriding timestepSetup() can skip

@@ -161,8 +161,9 @@ private:
   /// Cached moved elements for potential restore
   std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> _moved_elems;
 
-  /// Previous time step number
-  int & _t_step_old;
+  /// Time step number of the previous timestepSetup() call. Not restartable, so that a repeated
+  /// time step can be detected after its restartable data has been restored.
+  int _t_step_old;
 
   /// Whether this is a re-step
   bool _restep;

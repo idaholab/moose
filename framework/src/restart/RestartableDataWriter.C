@@ -12,6 +12,7 @@
 #include "DataIO.h"
 #include "RestartableDataMap.h"
 
+#include <algorithm>
 #include <fstream>
 #include <system_error>
 
@@ -26,8 +27,13 @@ RestartableDataWriter::RestartableDataWriter(MooseApp & app, std::vector<Restart
 }
 
 void
-RestartableDataWriter::write(std::ostream & header_stream, std::ostream & data_stream)
+RestartableDataWriter::write(std::ostream & header_stream,
+                             std::ostream & data_stream,
+                             const std::function<bool(const std::string &)> & skip /* = {} */)
 {
+  const auto write_value = [&skip](const RestartableDataValue & value)
+  { return !skip || !skip(value.name()); };
+
   // Set everything as not stored
   for (const auto tid : make_range(dataSize()))
     for (auto & value : currentData(tid))
@@ -56,7 +62,8 @@ RestartableDataWriter::write(std::ostream & header_stream, std::ostream & data_s
   // Size of data for each thread
   for (const auto tid : make_range(dataSize()))
   {
-    std::size_t n_data = currentData(tid).size();
+    const auto & data = currentData(tid);
+    std::size_t n_data = std::count_if(data.begin(), data.end(), write_value);
     dataStore(header_stream, n_data, nullptr);
   }
 
@@ -64,6 +71,9 @@ RestartableDataWriter::write(std::ostream & header_stream, std::ostream & data_s
   for (const auto tid : make_range(dataSize()))
     for (auto & data : currentData(tid))
     {
+      if (!write_value(data))
+        continue;
+
       // Store the data
       const std::size_t data_start_position = static_cast<std::size_t>(data_stream.tellp());
       data.store(data_stream);
