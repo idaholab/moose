@@ -844,6 +844,14 @@ footer.page-footer {
     flex-direction: column;
     align-items: center;
 }
+/* Materialize leaves the inactive slides fully visible beside the carousel, so at some window
+   widths and display scalings anti-aliasing leaks a one-pixel column of a neighboring slide's
+   image into the active slide. Hide them while the carousel is at rest; Materialize adds the
+   'scrolling' class for the duration of a transition, so slides still slide in and out. The
+   !important overrides the inline visibility that Materialize sets on every slide. */
+.moose-slideshow:not(.scrolling) .carousel-item:not(.active) {
+    visibility: hidden !important;
+}
 /* Box as wide as the slide image, so an overlay is bounded by the image. */
 .moose-slide {
     position: relative;
