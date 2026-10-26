@@ -10,6 +10,8 @@
 #pragma once
 
 #include "Material.h"
+
+class Function;
 #include "DerivativeMaterialInterfaceTHM.h"
 
 /**
@@ -40,7 +42,7 @@ protected:
   /// Hydraulic diameter
   const MaterialProperty<Real> & _D_h;
   /// Roughness of the surface
-  const Real & _roughness;
+  const Function & _roughness_fn;
 
 public:
   static InputParameters validParams();

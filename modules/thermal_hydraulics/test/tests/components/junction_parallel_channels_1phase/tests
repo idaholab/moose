@@ -62,11 +62,11 @@
   [conservation_1phase_K_crtl]
     type = 'CSVDiff'
     input = 'conservation.i'
-    cli_args = "ControlLogic/active=K_crtl Outputs/file_base=conservation_K "
+    cli_args = "Components/junction1/K=K_loss_fn Outputs/file_base=conservation_K "
                "Outputs/out/show='dp_junction'"
     csvdiff = 'conservation_K.csv'
     restep = false # Test is prescribed to abort on failed timestep
-    requirement = 'The system shall be able to show conservation of mass and energy when connecting parallel channels and leveraging the control system to dynamically control the simulation.'
+    requirement = 'The system shall be able to show conservation of mass and energy when connecting parallel channels and dynamically varying the form loss coefficient with a function.'
   []
 
   # error checking

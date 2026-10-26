@@ -18,9 +18,8 @@ GateValve1Phase::validParams()
 {
   InputParameters params = FlowJunction1Phase::validParams();
 
-  params.addRequiredParam<Real>("open_area_fraction", "Fraction of flow area that is open [-]");
-
-  params.declareControllable("open_area_fraction");
+  params.addRequiredParam<FunctionName>(
+      "open_area_fraction", "Function specifying the fraction of flow area that is open [-]");
 
   params.addClassDescription("Gate valve component for 1-phase flow");
 
@@ -80,7 +79,7 @@ GateValve1Phase::addMooseObjects()
     // It is assumed that each channel should have the same numerical flux, so
     // just use the first one.
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_names[0];
-    params.set<Real>("open_area_fraction") = getParam<Real>("open_area_fraction");
+    params.set<FunctionName>("open_area_fraction") = getParam<FunctionName>("open_area_fraction");
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
     params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
@@ -88,8 +87,6 @@ GateValve1Phase::addMooseObjects()
     params.set<std::string>("component_name") = name();
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, _junction_uo_name, params);
-
-    connectObject(params, _junction_uo_name, "open_area_fraction");
   }
 
   const std::vector<NonlinearVariableName> var_names = {

@@ -12,6 +12,7 @@
 #include "ADBoundaryFlux3EqnGhostBase.h"
 
 class SinglePhaseFluidProperties;
+class Function;
 
 /**
  * Computes boundary flux from a specified pressure for the 1-D, 1-phase, variable-area Euler
@@ -26,8 +27,8 @@ protected:
   virtual std::vector<ADReal> getGhostCellSolution(const std::vector<ADReal> & U1,
                                                    const Point & point) const override;
 
-  /// Specified pressure
-  const Real & _p;
+  /// Function specifying the pressure
+  const Function & _p_fn;
 
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;

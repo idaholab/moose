@@ -28,10 +28,10 @@ public:
 protected:
   virtual void computeFluxesAndResiduals(const unsigned int & c) override;
 
-  /// Flag determining if turbine is operating or not
-  const bool & _on;
-  /// Turbine power, [W]
-  const Real & _W_dot;
+  /// Function determining if turbine is operating or not (0=false, 1=true)
+  const Function & _on_fn;
+  /// Function specifying the turbine power [W]
+  const Function & _W_dot_fn;
 
 public:
   static InputParameters validParams();

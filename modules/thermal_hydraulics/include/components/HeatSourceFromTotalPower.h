@@ -27,8 +27,8 @@ protected:
 
   /// The name of the variable that represents total power
   VariableName _power_var_name;
-  /// The fraction of the power that goes into the heat structure
-  const Real & _power_fraction;
+  /// Function specifying the fraction of the power that goes into the heat structure
+  const FunctionName & _power_fraction_fn_name;
   /// true if power shape function is being used
   const bool _has_psf;
   /// The name of the power shape function

@@ -19,17 +19,18 @@ HeatSourceFromTotalPower::validParams()
 {
   InputParameters params = HeatSourceBase::validParams();
   params.addRequiredParam<std::string>("power", "Component that provides total power");
-  params.addParam<Real>(
-      "power_fraction", 1., "Fraction of the total power that goes into the heat structure [-]");
+  params.addParam<FunctionName>(
+      "power_fraction",
+      "1",
+      "Function specifying the fraction of the total power that goes into the heat structure [-]");
   params.addParam<FunctionName>("power_shape_function", "Axial power shape [-]");
-  params.declareControllable("power_fraction");
   params.addClassDescription("Heat generation from total power");
   return params;
 }
 
 HeatSourceFromTotalPower::HeatSourceFromTotalPower(const InputParameters & parameters)
   : HeatSourceBase(parameters),
-    _power_fraction(getParam<Real>("power_fraction")),
+    _power_fraction_fn_name(getParam<FunctionName>("power_fraction")),
     _has_psf(isParamValid("power_shape_function")),
     _power_shape_func(_has_psf ? getParam<FunctionName>("power_shape_function") : "")
 {
@@ -118,7 +119,7 @@ HeatSourceFromTotalPower::addMooseObjects()
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     pars.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     pars.set<Real>("num_units") = n_units;
-    pars.set<Real>("power_fraction") = _power_fraction;
+    pars.set<FunctionName>("power_fraction") = _power_fraction_fn_name;
     pars.set<FunctionName>("power_shape_function") = _power_shape_func;
     pars.set<std::vector<VariableName>>("total_power") =
         std::vector<VariableName>(1, _power_var_name);
@@ -136,6 +137,5 @@ HeatSourceFromTotalPower::addMooseObjects()
     pars.set<PostprocessorName>("power_shape_integral_pp") = power_shape_integral_name;
     std::string mon = genName(name(), "heat_src");
     getTHMProblem().addKernel(class_name, mon, pars);
-    connectObject(pars, mon, "power_fraction");
   }
 }

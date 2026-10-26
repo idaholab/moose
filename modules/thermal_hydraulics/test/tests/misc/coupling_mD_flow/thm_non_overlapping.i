@@ -75,15 +75,15 @@ pout = 7e6
 
   [core_top_bc]
     type = Outlet1Phase
-    p = ${pout}
+    p = core_inlet_pressure_fn
     input = 'core_top:out'
   []
 
   [core_bottom_bc]
     type = InletMassFlowRateTemperature1Phase
     input = 'core_bottom:in'
-    m_dot = ${mdot}
-    T = ${T_in}
+    m_dot = core_outlet_mdot_fn
+    T = core_outlet_temperature_fn
   []
 
   [core_bottom]
@@ -121,26 +121,24 @@ pout = 7e6
   []
 []
 
-[ControlLogic]
-  [set_core_inlet_pressure]
-    type = SetComponentRealValueControl
-    component = core_top_bc
-    parameter = p
-    value = core_inlet_pressure
+[Functions]
+  [core_inlet_pressure_fn]
+    type = ParsedFunction
+    expression = 'core_inlet_pressure'
+    symbol_names = 'core_inlet_pressure'
+    symbol_values = 'core_inlet_pressure'
   []
-
-  [set_core_outlet_mdot]
-    type = SetComponentRealValueControl
-    component = core_bottom_bc
-    parameter = m_dot
-    value = core_outlet_mdot
+  [core_outlet_mdot_fn]
+    type = ParsedFunction
+    expression = 'core_outlet_mdot'
+    symbol_names = 'core_outlet_mdot'
+    symbol_values = 'core_outlet_mdot'
   []
-
-  [set_core_outlet_temperature]
-    type = SetComponentRealValueControl
-    component = core_bottom_bc
-    parameter = T
-    value = core_outlet_temperature
+  [core_outlet_temperature_fn]
+    type = ParsedFunction
+    expression = 'core_outlet_temperature'
+    symbol_names = 'core_outlet_temperature'
+    symbol_values = 'core_outlet_temperature'
   []
 []
 

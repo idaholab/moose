@@ -20,10 +20,8 @@ Pump1Phase::validParams()
 {
   InputParameters params = VolumeJunction1Phase::validParams();
 
-  params.addRequiredParam<Real>("head", "Pump head [m]");
+  params.addRequiredParam<FunctionName>("head", "Function specifying the pump head [m]");
   params.makeParamRequired<Real>("A_ref");
-
-  params.declareControllable("head");
 
   params.addClassDescription("Pump between two 1-phase flow channels that has a non-zero volume");
 
@@ -31,7 +29,7 @@ Pump1Phase::validParams()
 }
 
 Pump1Phase::Pump1Phase(const InputParameters & params)
-  : VolumeJunction1Phase(params), _head(getParam<Real>("head"))
+  : VolumeJunction1Phase(params), _head_fn_name(getParam<FunctionName>("head"))
 {
 }
 
@@ -60,14 +58,13 @@ Pump1Phase::buildVolumeJunctionUserObject()
     params.set<std::vector<VariableName>>("rhovV") = {_rhovV_var_name};
     params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
     params.set<std::vector<VariableName>>("rhoEV") = {_rhoEV_var_name};
-    params.set<Real>("head") = _head;
+    params.set<FunctionName>("head") = _head_fn_name;
     params.set<Real>("gravity_magnitude") = THM::gravity_const;
     params.set<Real>("A_ref") = getParam<Real>("A_ref");
-    params.set<Real>("K") = getParam<Real>("K");
+    params.set<FunctionName>("K") = getParam<FunctionName>("K");
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<bool>("apply_velocity_scaling") = getParam<bool>("apply_velocity_scaling");
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, _junction_uo_name, params);
-    connectObject(params, _junction_uo_name, "head");
   }
 }
