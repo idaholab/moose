@@ -12,8 +12,6 @@
 #include "ADFunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "ThermalSolidProperties.h"
-#include "MooseMesh.h"
-#include "libmesh/point_locator_base.h"
 
 InputParameters
 ADPipeWallTemperatureScalarKernelBase::validParams()
@@ -56,10 +54,6 @@ ADPipeWallTemperatureScalarKernelBase::validParams()
       "upstream_area", "Cross-sectional area of the upstream node's wall layer [m^2]");
   params.addRequiredParam<MooseFunctorName>(
       "downstream_area", "Cross-sectional area of the downstream node's wall layer [m^2]");
-  params.addParam<Point>("functor_evaluation_point",
-                         Point(),
-                         "Point at which spatially varying functors (functions, field variables, "
-                         "functor material properties) are evaluated");
 
   return params;
 }
@@ -79,26 +73,15 @@ ADPipeWallTemperatureScalarKernelBase::ADPipeWallTemperatureScalarKernelBase(
     _upstream_spacing(this->template getFunctor<ADReal>("upstream_spacing")),
     _downstream_spacing(this->template getFunctor<ADReal>("downstream_spacing")),
     _upstream_area(this->template getFunctor<ADReal>("upstream_area")),
-    _downstream_area(this->template getFunctor<ADReal>("downstream_area")),
-    _functor_point(getParam<Point>("functor_evaluation_point"))
+    _downstream_area(this->template getFunctor<ADReal>("downstream_area"))
 {
-}
-
-void
-ADPipeWallTemperatureScalarKernelBase::initialSetup()
-{
-  ADScalarKernel::initialSetup();
-
-  // Locate the element that spatially varying functors will be evaluated on
-  auto pl = _mesh.getPointLocator();
-  pl->enable_out_of_mesh_mode();
-  _functor_elem = (*pl)(_functor_point);
 }
 
 ADReal
 ADPipeWallTemperatureScalarKernelBase::computeQpResidual()
 {
-  const auto elem_arg = functorArg();
+  const libMesh::Node node(0., 0., 0.);
+  const Moose::NodeArg elem_arg = {&node, &Moose::NodeArg::undefined_subdomain_connection};
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
 
