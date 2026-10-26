@@ -47,20 +47,6 @@ protected:
     return _fe_problem->getUserObject<TabulatedPVTFluidProperties>(name);
   }
 
-  /// Check that constructing an object with the given parameters fails with the given message
-  void expectConstructionError(InputParameters params, const std::string & msg)
-  {
-    try
-    {
-      _fe_problem->addUserObject("TabulatedPVTFluidProperties", "invalid_fp", params);
-      FAIL() << "missing expected error: " << msg;
-    }
-    catch (const std::exception & err)
-    {
-      EXPECT_NE(std::string(err.what()).find(msg), std::string::npos) << err.what();
-    }
-  }
-
   const Real _rho_sc = 850.0;
   const std::vector<Real> _p = {2.0e6, 1.0e7, 2.0e7, 3.0e7};
   const std::vector<Real> _B = {1.062, 1.050, 1.038, 1.028};
