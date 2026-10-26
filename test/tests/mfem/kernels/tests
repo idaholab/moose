@@ -370,4 +370,42 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMRejectsUnknownRestriction]
+    design = 'MFEMBlockRestrictable.md MFEMBoundaryRestrictable.md'
+    issues = '#34198'
+    requirement = 'The system shall report an input error when an MFEM object is restricted to a '
+                  'block or boundary that the mesh does not have, given by'
+    [block_name]
+      type = RunException
+      input = diffusion.i
+      cli_args = 'Kernels/diff/block=nonexistent'
+      expect_err = "Kernels/diff/block: the mesh has no block named 'nonexistent'"
+      capabilities = 'mfem'
+      detail = 'a block name,'
+    []
+    [block_id]
+      type = RunException
+      input = diffusion.i
+      cli_args = 'Kernels/diff/block=7'
+      expect_err = "Kernels/diff/block: the mesh has no block with ID 7"
+      capabilities = 'mfem'
+      detail = 'a block ID,'
+    []
+    [boundary_name]
+      type = RunException
+      input = diffusion.i
+      cli_args = 'BCs/bottom/boundary=nonexistent'
+      expect_err = "BCs/bottom/boundary: the mesh has no boundary named 'nonexistent'"
+      capabilities = 'mfem'
+      detail = 'a boundary name,'
+    []
+    [boundary_id]
+      type = RunException
+      input = diffusion.i
+      cli_args = 'BCs/bottom/boundary=7'
+      expect_err = "BCs/bottom/boundary: the mesh has no boundary with ID 7"
+      capabilities = 'mfem'
+      detail = 'or a boundary ID.'
+    []
+  []
 []
