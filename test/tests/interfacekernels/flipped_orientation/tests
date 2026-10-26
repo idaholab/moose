@@ -14,7 +14,13 @@
       input = 'flipped.i'
       cli_args = "InterfaceKernels/penalty/variable=u InterfaceKernels/penalty/neighbor_var=u"
       expect_err = "'neighbor_var' \(u\) on the secondary side \(block\(s\) 1\)"
-      detail = "its neighbor variable is not defined on the secondary side of the boundary."
+      detail = "its neighbor variable is not defined on the secondary side of the boundary, or"
+    []
+    [mismatched_pair]
+      type = RunException
+      input = 'multi_pair.i'
+      expect_err = "The interface kernel will not contribute on all or part of boundary 'interface'"
+      detail = "its variable and neighbor variable are defined on the primary and secondary sides of the boundary, but never across the same face."
     []
   []
   [orientation_check_disabled]

@@ -139,6 +139,7 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/enum_norm_type.h"
 #include "libmesh/petsc_solver_exception.h"
+#include "libmesh/remote_elem.h"
 
 #include "metaphysicl/dualnumber.h"
 
@@ -1604,25 +1605,42 @@ FEProblemBase::initialSetup()
 
     // Interface kernels skip any face where 'variable' is not active on the primary (element)
     // side or 'neighbor_var' is not active on the secondary (neighbor) side, so a kernel whose
-    // variables do not match the sideset orientation silently contributes nothing
+    // variables do not match the sideset orientation silently contributes nothing.
+    // A boundary may join several block pairs, so both variables must be active on the two
+    // sides of the same pair rather than anywhere on each side.
+    std::set<std::tuple<BoundaryID, SubdomainID, SubdomainID>> face_block_pairs;
+    for (const auto & bnd_elem : *_mesh.getBoundaryElementRange())
+      // A remote neighbor is paired by the processor that holds both elements
+      if (const auto * const neighbor = bnd_elem->_elem->neighbor_ptr(bnd_elem->_side);
+          neighbor && neighbor != libMesh::remote_elem)
+        face_block_pairs.emplace(
+            bnd_elem->_bnd_id, bnd_elem->_elem->subdomain_id(), neighbor->subdomain_id());
+    _communicator.set_union(face_block_pairs);
+
     for (const auto & nl : _nl)
       for (const auto & ik : nl->getInterfaceKernelWarehouse().getObjects())
         for (const auto bnd_id : ik->boundaryIDs())
         {
+          const auto & var = ik->variable();
+          const auto & neighbor_var = ik->neighborVariable();
+          // Whether any face of the boundary has 'elem_var' on its element side and
+          // 'neigh_var' on its neighbor side
+          const auto active_on_pair =
+              [&face_block_pairs, bnd_id](const auto & elem_var, const auto & neigh_var)
+          {
+            return std::any_of(face_block_pairs.begin(),
+                               face_block_pairs.end(),
+                               [&](const auto & pair)
+                               {
+                                 const auto & [bid, elem_blk, neighbor_blk] = pair;
+                                 return bid == bnd_id && elem_var.activeOnSubdomain(elem_blk) &&
+                                        neigh_var.activeOnSubdomain(neighbor_blk);
+                               });
+          };
           const auto primary_blocks = _mesh.getBoundaryConnectedBlocks(bnd_id);
           const auto secondary_blocks = _mesh.getBoundaryConnectedSecondaryBlocks(bnd_id);
           // A boundary without neighbors is reported as an external side during assembly
-          if (secondary_blocks.empty())
-            continue;
-          const auto & var = ik->variable();
-          const auto & neighbor_var = ik->neighborVariable();
-          const auto active_on_any = [](const auto & v, const std::set<SubdomainID> & blocks)
-          {
-            return std::any_of(blocks.begin(),
-                               blocks.end(),
-                               [&v](const auto blk) { return v.activeOnSubdomain(blk); });
-          };
-          if (active_on_any(var, primary_blocks) && active_on_any(neighbor_var, secondary_blocks))
+          if (secondary_blocks.empty() || active_on_pair(var, neighbor_var))
             continue;
 
           const auto block_names = [this](const std::set<SubdomainID> & blocks)
@@ -1633,8 +1651,7 @@ FEProblemBase::initialSetup()
                                                                   : _mesh.getSubdomainName(blk));
             return MooseUtils::join(names, ", ");
           };
-          const bool flipped =
-              active_on_any(var, secondary_blocks) && active_on_any(neighbor_var, primary_blocks);
+          const bool flipped = active_on_pair(neighbor_var, var);
           ik->paramError(
               "boundary",
               "The interface kernel will not contribute on all or part of boundary '",
