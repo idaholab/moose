@@ -301,6 +301,11 @@ FEProblemBase::validParams()
                         "Set to false to disable checking of boundary restricted elemental object "
                         "variable dependencies, e.g. are the variable dependencies defined on the "
                         "selected boundaries?");
+  params.addParam<bool>("interface_kernel_integrity_check",
+                        true,
+                        "Set to false to disable checking that each interface kernel's 'variable' "
+                        "is defined on the primary side and 'neighbor_var' on the secondary side "
+                        "of each of its boundaries");
   params.addParam<bool>(
       "side_uo_interface_mat_prop_integrity_check",
       true,
@@ -448,7 +453,7 @@ FEProblemBase::validParams()
   params.addParamNamesToGroup(
       "skip_nl_system_check kernel_coverage_check kernel_coverage_block_list "
       "boundary_restricted_node_integrity_check "
-      "boundary_restricted_elem_integrity_check "
+      "boundary_restricted_elem_integrity_check interface_kernel_integrity_check "
       "side_uo_interface_mat_prop_integrity_check material_coverage_check "
       "material_coverage_block_list fv_bcs_integrity_check fv_face_integrity_check "
       "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
@@ -588,6 +593,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         getParam<bool>("boundary_restricted_node_integrity_check")),
     _boundary_restricted_elem_integrity_check(
         getParam<bool>("boundary_restricted_elem_integrity_check")),
+    _interface_kernel_integrity_check(getParam<bool>("interface_kernel_integrity_check")),
     _side_uo_interface_mat_prop_integrity_check(
         getParam<bool>("side_uo_interface_mat_prop_integrity_check")),
     _material_coverage_check(
@@ -1590,6 +1596,11 @@ FEProblemBase::initialSetup()
     ConstBndElemRange & bnd_elems = *mesh().getBoundaryElementRange();
     BoundaryElemIntegrityCheckThread beict(*this, uo_query);
     Threads::parallel_reduce(bnd_elems, beict, numThreads());
+  }
+
+  if (_interface_kernel_integrity_check)
+  {
+    TIME_SECTION("InterfaceKernelIntegrityCheck", 5);
 
     // Interface kernels skip any face where 'variable' is not active on the primary (element)
     // side or 'neighbor_var' is not active on the secondary (neighbor) side, so a kernel whose
@@ -1626,7 +1637,7 @@ FEProblemBase::initialSetup()
               active_on_any(var, secondary_blocks) && active_on_any(neighbor_var, primary_blocks);
           ik->paramError(
               "boundary",
-              "The interface kernel will not contribute on boundary '",
+              "The interface kernel will not contribute on all or part of boundary '",
               _mesh.getBoundaryName(bnd_id),
               "': 'variable' (",
               var.name(),
@@ -1637,11 +1648,11 @@ FEProblemBase::initialSetup()
               ") on the secondary side (block(s) ",
               block_names(secondary_blocks),
               ").",
-              flipped ? " The variables appear to be flipped relative to the boundary orientation; "
-                        "swap 'variable' and 'neighbor_var', or reverse the orientation of the "
-                        "boundary (e.g. swap 'primary_block' and 'paired_block' in "
-                        "SideSetsBetweenSubdomainsGenerator)."
-                      : "");
+              flipped
+                  ? "\nThe variables appear to be flipped relative to the boundary orientation; "
+                    "swap 'variable' and 'neighbor_var', or reverse the orientation of the "
+                    "boundary."
+                  : "");
         }
   }
 
