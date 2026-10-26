@@ -24,8 +24,9 @@ GapFluxModelPressureDependentConduction::validParams()
       "contact_pressure_uo",
       "The mortar contact user object that provides the normal contact pressure. Required when the "
       "contact pressure comes from a mechanical contact solve.");
-  params.addCoupledVar("contact_pressure",
-                       "An auxiliary variable holding a prescribed normal contact pressure");
+  params.addCoupledVar(
+      "contact_pressure",
+      "An auxiliary variable holding a prescribed physical normal contact pressure");
 
   params.addParam<Real>(
       "scaling_coefficient",

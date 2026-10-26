@@ -40,7 +40,7 @@ protected:
   const MortarContactPressureProvider * const _contact_pressure_provider;
 
   /// Prescribed normal contact pressure variable, or nullptr when the pressure comes from the
-  /// provider
+  /// user object provider
   const VariableValue * const _normal_pressure;
 
   /// Friction coefficient used to compute Archard's law
