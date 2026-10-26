@@ -1,7 +1,7 @@
 [Mesh]
   [square]
     type = GeneratedMeshGenerator
-    nx = 2                     # Removed via --remove on the command line
+    nx = 2                     # Removed via --remove-param in some tests
     ny = 2
     dim = 2
   []
@@ -49,7 +49,17 @@
   solve_type = 'PJFNK'
 []
 
+[Postprocessors]
+  [num_elems]
+    type = NumElements
+    execute_on = 'initial timestep_end'
+  []
+  [extra]
+    type = NumElements
+    execute_on = 'initial timestep_end'
+  []
+[]
+
 [Outputs]
-  file_base = out
-  exodus = true
+  csv = true
 []
