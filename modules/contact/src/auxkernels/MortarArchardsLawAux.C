@@ -32,8 +32,9 @@ MortarArchardsLawAux::validParams()
       "weighted_gap_uo",
       "The mortar contact user object that provides the normal contact pressure. Required when the "
       "contact pressure comes from a mechanical contact solve.");
-  params.addCoupledVar("normal_pressure",
-                       "An auxiliary variable holding a prescribed normal contact pressure");
+  params.addCoupledVar(
+      "normal_pressure",
+      "An auxiliary variable holding a prescribed physical normal contact pressure");
   params.addParam<bool>("use_displaced_mesh",
                         true,
                         "Whether to use the displaced mesh to compute the auxiliary kernel value");
