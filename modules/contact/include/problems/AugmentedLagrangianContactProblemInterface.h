@@ -12,8 +12,8 @@
 #include "InputParameters.h"
 
 /**
- *  Class to provide an interface for parameters and routines required to check
- *  convergence for the augmented Lagrangian contact problem.
+ *  Interface of the augmented Lagrangian contact problems that gives the contact constraints,
+ *  user objects and postprocessors access to the augmented Lagrangian iteration number.
  */
 class AugmentedLagrangianContactProblemInterface
 {

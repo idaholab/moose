@@ -24,6 +24,21 @@
     design = 'MechanicalContactConstraint.md AugmentedLagrangianContactProblem.md'
   [../]
 
+  [./pressureAugLag_reuse_preconditioner]
+    type = 'CSVDiff'
+    input = 'pressureAugLag.i'
+    csvdiff = 'pressureAugLag_reuse_pc.csv'
+    cli_args = 'Postprocessors/nl_its/type=NumNonlinearIterations Outputs/exodus=false '
+               'Outputs/csv=true Outputs/file_base=pressureAugLag_reuse_pc Executioner/num_steps=2 '
+               'Executioner/nl_abs_tol=5e-2 Executioner/reuse_preconditioner=true '
+               'Executioner/solve_type=NEWTON'
+    max_parallel = 1
+    requirement = 'The contact system shall not force nonlinear iterations in a time step that '
+                  'needs no augmented Lagrangian update when the preconditioner is reused.'
+    issues = '#34078'
+    design = 'AugmentedLagrangianContactProblem.md'
+  [../]
+
   [./pressurePenalty]
     type = 'Exodiff'
     input = 'pressurePenalty.i'

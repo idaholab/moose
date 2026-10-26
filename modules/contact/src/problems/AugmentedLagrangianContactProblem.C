@@ -79,6 +79,10 @@ AugmentedLagrangianContactProblemTempl<T>::solve(const unsigned int nl_sys_num)
   auto & convergence = static_cast<DefaultNonlinearConvergence &>(
       this->getConvergence(this->getNonlinearConvergenceNames()[nl_sys_num]));
   const auto forced_its = convergence.getForcedIterations();
+  // The convergence check passes forced iterations on to SNES, which keeps them across solves
+  // when the preconditioner is reused
+  PetscBool snes_force_iteration;
+  LibmeshPetscCall(SNESGetForceIteration(nl.getSNES(), &snes_force_iteration));
 
   while (true)
   {
@@ -103,6 +107,7 @@ AugmentedLagrangianContactProblemTempl<T>::solve(const unsigned int nl_sys_num)
   nl.setPredictor(predictor_ptr);
   nl.computeScalingOnce(compute_scaling_once);
   convergence.setForcedIterations(forced_its);
+  LibmeshPetscCall(SNESSetForceIteration(nl.getSNES(), snes_force_iteration));
 }
 
 template <class T>
