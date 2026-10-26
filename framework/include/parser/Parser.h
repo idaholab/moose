@@ -200,9 +200,8 @@ public:
    * parsed input (input file(s) + command line overrides) once parsing
    * is complete.
    *
-   * Removal happens after command line HIT arguments have been merged in,
-   * so this can also be used to remove a parameter that was only set via
-   * the command line.
+   * Removal happens after command line HIT arguments have been merged in.
+   * It is an error to remove a path that is also set on the command line.
    */
   void setRemoveParams(const std::vector<std::string> & paths);
 
