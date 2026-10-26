@@ -1,7 +1,8 @@
 // Initializes the revolving image galleries created by the MooseDocs gallery extension's
 // 'slideshow' command. Each slideshow is a Materialize carousel in full-width (one slide at
-// a time) mode. Materialize supplies the slide transitions and the indicator dots, but not
-// autoplay, so that is added here from the token's data attributes.
+// a time) mode; see https://materializeweb.com/carousel.html. Materialize
+// supplies the slide transitions and the indicator dots, but not autoplay, so that is added
+// here from the token's data attributes.
 (function($){
     $(function(){
         $('.carousel.moose-slideshow').each(function(){
