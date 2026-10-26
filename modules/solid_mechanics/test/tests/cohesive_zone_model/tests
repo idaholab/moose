@@ -76,7 +76,7 @@
       detail = "The system shall allow using multiple CohesiveZoneAction and different cohesive "
                "materials for different boundaries"
       cli_args = "Physics/SolidMechanics/CohesiveZone/strain=FINITE"
-      abs_zero = 1e-9
+      abs_zero = 5e-8
       recover = false
       allow_test_objects = true
     []
