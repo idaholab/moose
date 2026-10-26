@@ -9,13 +9,13 @@ a closed gap between two solid bodies as a function of the normal mechanical pre
 at the interface. This class requires the use of
 [ModularGapConductanceConstraint](ModularGapConductanceConstraint.md).
 
-When the contact pressure comes from a mortar mechanical contact solve, pass the mortar contact
-user object through [!param](/UserObjects/GapFluxModelPressureDependentConduction/contact_pressure_uo).
-The `Contact` action names that object `lm_weightedgap_object_<contact block name>`.
-The contact Lagrange multiplier variable can store a scaled pressure, for example under node-based
-scaling, so the user object recovers the physical pressure from it.
-[!param](/UserObjects/GapFluxModelPressureDependentConduction/contact_pressure) accepts an
-auxiliary variable that holds a prescribed contact pressure.
+With mortar mechanical contact, set
+[!param](/UserObjects/GapFluxModelPressureDependentConduction/contact_pressure_uo) to the contact
+user object, which the `Contact` action names `lm_weightedgap_object_<contact block name>`. The
+contact Lagrange multiplier variable can store a scaled pressure, for example under node-based
+scaling; the user object always provides the physical pressure. Without a contact solve, set
+[!param](/UserObjects/GapFluxModelPressureDependentConduction/contact_pressure) to an auxiliary
+variable holding a prescribed physical contact pressure.
 
 The thermal conductance of the interface is calculated as
 \begin{equation}

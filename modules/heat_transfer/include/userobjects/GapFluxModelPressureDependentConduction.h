@@ -41,7 +41,8 @@ protected:
   /// Mortar contact object that provides the physical contact pressure, or nullptr
   const MortarContactPressureProvider * const _contact_pressure_provider;
 
-  /// Prescribed contact pressure variable, or nullptr when the pressure comes from the provider
+  /// Prescribed contact pressure variable, or nullptr when the pressure comes from the user object
+  /// provider
   const ADVariableValue * const _contact_pressure;
 
   /// Parameter used to scale the closed gap interface conductance value
