@@ -12,8 +12,6 @@
 #include "Assembly.h"
 #include "libmesh/quadrature.h"
 
-#include <iomanip>
-
 registerMooseObject("MooseTestApp", MortarContactPressureIntegral);
 
 InputParameters
@@ -52,5 +50,4 @@ void
 MortarContactPressureIntegral::finalize()
 {
   gatherSum(_integral);
-  _console << "Contact pressure integral: " << std::setprecision(8) << _integral << std::endl;
 }

@@ -15,7 +15,7 @@ class MortarContactPressureProvider;
 
 /**
  * Integrates over a mortar interface the contact pressure that a MortarContactPressureProvider
- * supplies, interpolating its nodal pressures with its traction basis, and prints the result.
+ * supplies, interpolating its nodal pressures with its traction basis.
  */
 class MortarContactPressureIntegral : public MortarUserObject
 {
@@ -28,6 +28,9 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
   virtual void reinit() override {}
+
+  /// The integrated contact pressure
+  Real integral() const { return _integral; }
 
 protected:
   /// The object that provides the contact pressure

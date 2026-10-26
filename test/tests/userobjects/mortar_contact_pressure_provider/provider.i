@@ -59,6 +59,18 @@ scaling = 1e3
   []
 []
 
+[Postprocessors]
+  [contact_pressure_integral]
+    type = MortarContactPressureIntegralPostprocessor
+    integral = integral
+    execute_on = 'timestep_end'
+  []
+[]
+
 [Executioner]
   type = Steady
+[]
+
+[Outputs]
+  csv = true
 []
