@@ -1,50 +1,58 @@
 [Tests]
   design = 'CommandLine.md'
   issues = '#20549'
-
   [remove_optional_param]
-    # nx=2 is set in the input file but removed via --remove, so the mesh
-    # generator should fall back to its default value (nx=1) and run
-    # successfully instead of erroring or using the input file's value.
-    type = RunApp
+    # nx=2 is set in the input file but removed, so the mesh generator falls
+    # back to its default (nx=1): 1x2 = 2 elements instead of 2x2 = 4
+    type = CSVDiff
     input = 'cli_remove_param.i'
-    cli_args = '--remove Mesh/square/nx'
-
+    cli_args = '--remove-param Mesh/square/nx Outputs/file_base=optional_out'
+    csvdiff = 'optional_out.csv'
     requirement = 'The system shall support removing a parameter that is set in an input file '
                   'via a command line argument, falling back to that parameter default value.'
   []
-
-  [remove_overridden_param]
-    # Removal should also apply (and win) when the same parameter is also
-    # being overridden via the command line.
-    type = RunApp
+  [remove_block]
+    # The 'extra' postprocessor block is removed, so only num_elems is output
+    type = CSVDiff
     input = 'cli_remove_param.i'
-    cli_args = 'Mesh/square/nx=5 --remove Mesh/square/nx'
-
-    requirement = 'The system shall support removing a parameter via a command line argument '
-                  'even when that same parameter is also being overridden on the command line.'
+    cli_args = '--remove-param Postprocessors/extra Outputs/file_base=block_out'
+    csvdiff = 'block_out.csv'
+    requirement = 'The system shall support removing an entire block via a command line '
+                  'argument.'
   []
-
+  [remove_repeated]
+    type = CSVDiff
+    input = 'cli_remove_param.i'
+    cli_args = '--remove-param Mesh/square/nx --remove-param Postprocessors/extra '
+               'Outputs/file_base=repeated_out'
+    csvdiff = 'repeated_out.csv'
+    requirement = 'The system shall support removing multiple parameters or blocks by repeating '
+                  'the remove command line argument.'
+  []
+  [remove_and_set_param]
+    type = RunException
+    input = 'cli_remove_param.i'
+    cli_args = 'Mesh/square/nx=5 --remove-param Mesh/square/nx'
+    expect_err = "Cannot remove 'Mesh/square/nx' via --remove-param: it is also set on the "
+                 "command line"
+    requirement = 'The system shall report an error when a parameter is both set and removed '
+                  'on the command line.'
+  []
+  [remove_block_with_set_param]
+    type = RunException
+    input = 'cli_remove_param.i'
+    cli_args = 'Outputs/csv=false --remove-param Outputs'
+    expect_err = "Cannot remove 'Outputs' via --remove-param: it is also set on the command line"
+    requirement = 'The system shall report an error when a block is removed while a parameter '
+                  'within it is set on the command line.'
+  []
   [remove_nonexistent_param]
     type = RunException
     input = 'cli_remove_param.i'
-    cli_args = '--remove Mesh/square/does_not_exist'
-    expect_err = "Cannot remove parameter or block 'Mesh/square/does_not_exist' via --remove: "
-                 "no such path exists in the parsed input\."
-
+    cli_args = '--remove-param Mesh/square/does_not_exist'
+    expect_err = "Cannot remove parameter or block 'Mesh/square/does_not_exist' via "
+                 "--remove-param: no such path exists in the parsed input\."
     requirement = 'The system shall report an error when a user attempts to remove a parameter '
                   'or block via the command line that does not exist in the parsed input.'
-  []
-
-  [remove_block]
-    # An entire block/section can be removed too, not just a single
-    # parameter -- here the whole 'Outputs' block is removed, so the run
-    # falls back to MOOSE's default console output instead of erroring.
-    type = RunApp
-    input = 'cli_remove_param.i'
-    cli_args = '--remove Outputs'
-
-    requirement = 'The system shall support removing an entire block via a command line '
-                  'argument.'
   []
 []
