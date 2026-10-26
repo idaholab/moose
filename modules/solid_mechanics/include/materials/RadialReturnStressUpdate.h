@@ -228,11 +228,14 @@ protected:
   /// Scalar effective inelastic strain increment from the current Newton iteration
   GenericReal<is_ad> _effective_inelastic_strain_increment;
 
-  /// Stateful scalar effective inelastic strain increment
-  GenericMaterialProperty<Real, is_ad> & _effective_inelastic_strain_increment_state;
+  /// Whether to warm start the return mapping solve from the previous step's converged increment
+  const bool _use_warm_start_initial_guess;
+
+  /// Stateful scalar effective inelastic strain increment (only allocated when warm starting)
+  GenericMaterialProperty<Real, is_ad> * const _effective_inelastic_strain_increment_state;
 
   /// Converged scalar effective inelastic strain increment from the previous time step
-  const MaterialProperty<Real> & _effective_inelastic_strain_increment_state_old;
+  const MaterialProperty<Real> * const _effective_inelastic_strain_increment_state_old;
 
   /**
    * Maximum allowable scalar inelastic strain increment, used to control the
