@@ -246,54 +246,51 @@ TEST_F(TabulatedPVTFluidPropertiesTest, extrapolationError)
 }
 
 /**
- * Invalid tables must be rejected with an informative error
+ * Invalid tables must be rejected with an informative error. Each test constructs only one
+ * invalid object: an object whose constructor throws is not removed from the application's
+ * interface registry, so constructing a second object at the same address in the same test would
+ * trigger the "Interface already registered" assertion in debug builds
  */
-TEST_F(TabulatedPVTFluidPropertiesTest, invalidTables)
+TEST_F(TabulatedPVTFluidPropertiesTest, nonIncreasingPressure)
 {
-  auto expect_error =
-      [this](InputParameters params, const std::string & name, const std::string & msg)
-  {
-    try
-    {
-      _fe_problem->addUserObject("TabulatedPVTFluidProperties", name, params);
-      FAIL() << "missing expected error: " << msg;
-    }
-    catch (const std::exception & err)
-    {
-      EXPECT_NE(std::string(err.what()).find(msg), std::string::npos) << err.what();
-    }
-  };
+  InputParameters params = validFPParams();
+  params.set<std::vector<Real>>("pressure") = {2.0e6, 1.0e7, 1.0e7, 3.0e7};
+  expectConstructionError(params, "Tabulated pressures must be strictly increasing");
+}
 
-  {
-    InputParameters params = validFPParams();
-    params.set<std::vector<Real>>("pressure") = {2.0e6, 1.0e7, 1.0e7, 3.0e7};
-    expect_error(params, "non_increasing", "Tabulated pressures must be strictly increasing");
-  }
-  {
-    InputParameters params = validFPParams();
-    params.set<std::vector<Real>>("pressure") = {2.0e6};
-    params.set<std::vector<Real>>("formation_volume_factor") = {1.062};
-    params.set<std::vector<Real>>("viscosity") = {1.04e-3};
-    expect_error(params, "one_point", "At least two tabulated pressures are required");
-  }
-  {
-    InputParameters params = validFPParams();
-    params.set<std::vector<Real>>("formation_volume_factor") = {1.062, 1.050, 1.038};
-    expect_error(params, "wrong_size_B", "Must have the same number of entries as 'pressure'");
-  }
-  {
-    InputParameters params = validFPParams();
-    params.set<std::vector<Real>>("viscosity") = {1.04e-3, 1.10e-3};
-    expect_error(params, "wrong_size_mu", "Must have the same number of entries as 'pressure'");
-  }
-  {
-    InputParameters params = validFPParams();
-    params.set<std::vector<Real>>("formation_volume_factor") = {1.062, 0.0, 1.038, 1.028};
-    expect_error(params, "zero_B", "All entries must be positive");
-  }
-  {
-    InputParameters params = validFPParams();
-    params.set<std::vector<Real>>("viscosity") = {1.04e-3, -1.10e-3, 1.17e-3, 1.24e-3};
-    expect_error(params, "negative_mu", "All entries must be positive");
-  }
+TEST_F(TabulatedPVTFluidPropertiesTest, tooFewPressures)
+{
+  InputParameters params = validFPParams();
+  params.set<std::vector<Real>>("pressure") = {2.0e6};
+  params.set<std::vector<Real>>("formation_volume_factor") = {1.062};
+  params.set<std::vector<Real>>("viscosity") = {1.04e-3};
+  expectConstructionError(params, "At least two tabulated pressures are required");
+}
+
+TEST_F(TabulatedPVTFluidPropertiesTest, wrongSizeFormationVolumeFactor)
+{
+  InputParameters params = validFPParams();
+  params.set<std::vector<Real>>("formation_volume_factor") = {1.062, 1.050, 1.038};
+  expectConstructionError(params, "Must have the same number of entries as 'pressure'");
+}
+
+TEST_F(TabulatedPVTFluidPropertiesTest, wrongSizeViscosity)
+{
+  InputParameters params = validFPParams();
+  params.set<std::vector<Real>>("viscosity") = {1.04e-3, 1.10e-3};
+  expectConstructionError(params, "Must have the same number of entries as 'pressure'");
+}
+
+TEST_F(TabulatedPVTFluidPropertiesTest, nonPositiveFormationVolumeFactor)
+{
+  InputParameters params = validFPParams();
+  params.set<std::vector<Real>>("formation_volume_factor") = {1.062, 0.0, 1.038, 1.028};
+  expectConstructionError(params, "All entries must be positive");
+}
+
+TEST_F(TabulatedPVTFluidPropertiesTest, nonPositiveViscosity)
+{
+  InputParameters params = validFPParams();
+  params.set<std::vector<Real>>("viscosity") = {1.04e-3, -1.10e-3, 1.17e-3, 1.24e-3};
+  expectConstructionError(params, "All entries must be positive");
 }
