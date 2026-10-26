@@ -17,7 +17,7 @@
             // Materialize sizes the carousel to the active slide's image, which clips anything
             // beneath the image and any slide taller than the first. Size it to the tallest
             // slide instead, plus a strip beneath for the indicator dots (8px dots with 24px
-            // vertical margins). Replacing the private _setCarouselHeight method (Materialize is
+            // vertical margins) and the row of arrow buttons below them (40px). Replacing the private _setCarouselHeight method (Materialize is
             // vendored, so its version is fixed) also covers the calls Materialize makes on
             // window resize. The image load handlers run after the one Materialize registered
             // during init, so they win over its image-height setting.
@@ -25,7 +25,7 @@
               var height = 0;
               $carousel.find('.carousel-item')
                   .each(function() { height = Math.max(height, $(this).outerHeight()); });
-              $carousel.css('height', (height + 56) + 'px');
+              $carousel.css('height', (height + 96) + 'px');
             };
             instance._setCarouselHeight = setHeight;
             $carousel.find('img').on('load', setHeight);
@@ -59,6 +59,27 @@
               }
             }).observe(carousel);
 
+            // Previous/next arrow buttons, which Materialize does not provide: one on each side
+            // of the slide, and a pair beneath the indicator dots.
+            var arrow = function(direction) {
+              var button = $('<button type="button" class="moose-slideshow-arrow" aria-label="' +
+                             (direction > 0 ? 'Next slide' : 'Previous slide') + '">' +
+                             '<i class="material-icons">' +
+                             (direction > 0 ? 'chevron_right' : 'chevron_left') + '</i></button>');
+              button.on('click', function() {
+                if (direction > 0)
+                  instance.next();
+                else
+                  instance.prev();
+              });
+              // Materialize treats a press anywhere on the carousel as the start of a drag.
+              button.on('mousedown touchstart', function(e) { e.stopPropagation(); });
+              return button;
+            };
+            $carousel.append(arrow(-1).addClass('moose-slideshow-side moose-slideshow-prev'),
+                             arrow(1).addClass('moose-slideshow-side moose-slideshow-next'),
+                             $('<div class="moose-slideshow-nav"></div>').append(arrow(-1), arrow(1)));
+
             if (!isNaN(interval) && interval > 0) {
                 // Pause autoplay while a slide image's Materialbox lightbox is open:
                 // advancing the carousel underneath the zoomed image transforms the very
@@ -72,11 +93,12 @@
                   }
                 }, interval);
 
-                // Clicking an indicator dot means the viewer has taken control of the
+                // Clicking an indicator dot or arrow means the viewer has taken control of the
                 // slideshow, so stop autoplay for good rather than advance past their choice.
-                // Bind on the dots themselves (created by M.Carousel.init above): the click
-                // does not bubble up to the carousel element.
-                $carousel.find('.indicator-item').on('click', function() { clearInterval(timer); });
+                // Bind on the controls themselves (created above): the dots' click does not
+                // bubble up to the carousel element.
+                $carousel.find('.indicator-item, .moose-slideshow-arrow')
+                    .on('click', function() { clearInterval(timer); });
             }
         });
     });

@@ -886,6 +886,59 @@ footer.page-footer {
 .moose-slide-overlay .carousel-caption {
     text-shadow: 1px 1px 9px rgba(0, 0, 0, 1);
 }
+/* Previous/next arrow buttons (added by carousel.js): one on each side of the slide and a pair
+   beneath the indicator dots. The strip at the bottom of the carousel holds the dots (56px: 8px
+   dots with 24px margins) above the pair (40px); carousel.js sizes the carousel to include it. */
+.moose-slideshow .indicators {
+    bottom: 40px;
+}
+.moose-slideshow-nav {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+.moose-slideshow-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #fff;
+    /* --gray, translucent; keeps the white icon readable on both light and dark pages */
+    background: rgba(117, 117, 117, 0.75);
+}
+.moose-slideshow-arrow:hover {
+    background: rgba(117, 117, 117, 1);
+}
+.moose-slideshow-arrow .material-icons {
+    float: none;
+    margin: 0;
+    height: auto;
+    line-height: 1;
+}
+/* The side arrows overlay the slide, vertically centered above the 96px bottom strip. */
+.moose-slideshow-side {
+    position: absolute;
+    top: calc((100% - 96px) / 2);
+    transform: translateY(-50%);
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.4);
+}
+.moose-slideshow-side:hover {
+    background: rgba(0, 0, 0, 0.7);
+}
+.moose-slideshow-prev { left: 10px; }
+.moose-slideshow-next { right: 10px; }
 /* The indicator dots sit beneath the slides, on the page background rather than over an
    image, so Materialize's white dots would be invisible on a light page. */
 .moose-slideshow .indicators .indicator-item {

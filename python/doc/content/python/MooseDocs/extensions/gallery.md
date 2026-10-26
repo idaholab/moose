@@ -69,9 +69,10 @@ may be set on the `!slideshow` command to change the default behavior to have th
 overlaid on the image. Additionally, the choice to overlay the content may be customized
 on each slide by setting the `overlay` option on the corresponding `!slide` command.
 
-The slideshow displays an indicator dot for each image and, by default, advances only when the
-viewer clicks one. Set the `interval` setting to a number of seconds to advance
-automatically; clicking an indicator then stops the automatic advance. The settings for the two commands are listed in
+The slideshow displays an indicator dot for each image, and previous/next arrow buttons beside
+the slide and beneath the dots. By default it advances only when the viewer clicks one of these.
+Set the `interval` setting to a number of seconds to advance automatically; clicking an
+indicator or arrow then stops the automatic advance. The settings for the two commands are listed in
 [slideshow-settings] and [slide-settings].
 
 !devel! example id=gallery-example-slideshow
