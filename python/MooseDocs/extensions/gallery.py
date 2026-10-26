@@ -35,7 +35,13 @@ CardContent = tokens.newToken("CardContent")
 CardReveal = tokens.newToken("CardReveal")
 CardTitle = tokens.newToken("CardTitle", deactivator=False, activator=False)
 Gallery = tokens.newToken("Gallery", large=3, medium=6, small=12)
-Slideshow = tokens.newToken("Slideshow", interval=None, overlay_default=False)
+Slideshow = tokens.newToken(
+    "Slideshow",
+    interval=None,
+    overlay_default=False,
+    side_arrows=True,
+    bottom_arrows=True,
+)
 Slide = tokens.newToken("Slide", overlay=None)
 SlideContent = tokens.newToken("SlideContent")
 SlideCaption = tokens.newToken("SlideCaption")
@@ -172,6 +178,14 @@ class SlideshowComponent(command.CommandComponent):
             False,
             "Default for the 'overlay' setting of each slide in the slideshow.",
         )
+        settings["side_arrows"] = (
+            True,
+            "Display previous/next arrow buttons on the left and right of the slide.",
+        )
+        settings["bottom_arrows"] = (
+            True,
+            "Display previous/next arrow buttons beneath the indicator dots.",
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -179,6 +193,8 @@ class SlideshowComponent(command.CommandComponent):
             parent,
             interval=settings["interval"],
             overlay_default=settings["overlay_default"],
+            side_arrows=settings["side_arrows"],
+            bottom_arrows=settings["bottom_arrows"],
             **self.attributes(settings),
         )
 
@@ -371,6 +387,8 @@ class RenderSlideshow(components.RenderComponent):
         if token["interval"]:
             # The carousel script uses milliseconds, as does JavaScript's setInterval.
             div["data-interval"] = str(round(token["interval"] * 1000))
+        div["data-side-arrows"] = "true" if token["side_arrows"] else "false"
+        div["data-bottom-arrows"] = "true" if token["bottom_arrows"] else "false"
         return div
 
 

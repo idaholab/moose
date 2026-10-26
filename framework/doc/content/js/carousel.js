@@ -11,21 +11,25 @@
 
             // jQuery's data() coerces numeric strings to numbers.
             var interval = parseInt($carousel.data('interval'), 10);
+            var sideArrows = $carousel.data('side-arrows') !== false;
+            var bottomArrows = $carousel.data('bottom-arrows') !== false;
+            $carousel.toggleClass('moose-slideshow-bottom-arrows', bottomArrows);
 
             var instance = M.Carousel.init(carousel, {fullWidth : true, indicators : true});
 
             // Materialize sizes the carousel to the active slide's image, which clips anything
             // beneath the image and any slide taller than the first. Size it to the tallest
             // slide instead, plus a strip beneath for the indicator dots (8px dots with 24px
-            // vertical margins) and the row of arrow buttons below them (40px). Replacing the private _setCarouselHeight method (Materialize is
-            // vendored, so its version is fixed) also covers the calls Materialize makes on
-            // window resize. The image load handlers run after the one Materialize registered
-            // during init, so they win over its image-height setting.
+            // vertical margins) and, if shown, the row of arrow buttons below them (40px).
+            // Replacing the private _setCarouselHeight method (Materialize is vendored, so its
+            // version is fixed) also covers the calls Materialize makes on window resize. The image
+            // load handlers run after the one Materialize registered during init, so they win over
+            // its image-height setting.
             var setHeight = function() {
               var height = 0;
               $carousel.find('.carousel-item')
                   .each(function() { height = Math.max(height, $(this).outerHeight()); });
-              $carousel.css('height', (height + 96) + 'px');
+              $carousel.css('height', (height + (bottomArrows ? 96 : 56)) + 'px');
             };
             instance._setCarouselHeight = setHeight;
             $carousel.find('img').on('load', setHeight);
@@ -59,8 +63,8 @@
               }
             }).observe(carousel);
 
-            // Previous/next arrow buttons, which Materialize does not provide: one on each side
-            // of the slide, and a pair beneath the indicator dots.
+            // Previous/next arrow buttons, which Materialize does not provide: optionally one on
+            // each side of the slide, and optionally a pair beneath the indicator dots.
             var arrow = function(direction) {
               var button = $('<button type="button" class="moose-slideshow-arrow" aria-label="' +
                              (direction > 0 ? 'Next slide' : 'Previous slide') + '">' +
@@ -76,9 +80,16 @@
               button.on('mousedown touchstart', function(e) { e.stopPropagation(); });
               return button;
             };
-            $carousel.append(arrow(-1).addClass('moose-slideshow-side moose-slideshow-prev'),
-                             arrow(1).addClass('moose-slideshow-side moose-slideshow-next'),
-                             $('<div class="moose-slideshow-nav"></div>').append(arrow(-1), arrow(1)));
+            if (sideArrows)
+            {
+              $carousel.append(arrow(-1).addClass('moose-slideshow-side moose-slideshow-prev'),
+                               arrow(1).addClass('moose-slideshow-side moose-slideshow-next'));
+            }
+            if (bottomArrows)
+            {
+              $carousel.append(
+                  $('<div class="moose-slideshow-nav"></div>').append(arrow(-1), arrow(1)));
+            }
 
             if (!isNaN(interval) && interval > 0) {
                 // Pause autoplay while a slide image's Materialbox lightbox is open:

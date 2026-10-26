@@ -70,14 +70,15 @@ overlaid on the image. Additionally, the choice to overlay the content may be cu
 on each slide by setting the `overlay` option on the corresponding `!slide` command.
 
 The slideshow displays an indicator dot for each image, and previous/next arrow buttons beside
-the slide and beneath the dots. By default it advances only when the viewer clicks one of these.
+the slide and beneath the dots. Set `side_arrows=False` or `bottom_arrows=False` to remove either
+pair of arrows. By default it advances only when the viewer clicks one of these controls.
 Set the `interval` setting to a number of seconds to advance automatically; clicking an
 indicator or arrow then stops the automatic advance. The settings for the two commands are listed in
 [slideshow-settings] and [slide-settings].
 
 !devel! example id=gallery-example-slideshow
                caption=Example use of the 'slideshow' command.
-!slideshow! interval=3 style=max-width:450px;margin-left:auto;margin-right:auto;
+!slideshow! interval=3 style=max-width:400px;margin-left:auto;margin-right:auto;
 !slide application_logos/griffin_description.png caption=Griffin
 
 !slide application_logos/grizzly_description.png caption=Grizzly

@@ -886,10 +886,11 @@ footer.page-footer {
 .moose-slide-overlay .carousel-caption {
     text-shadow: 1px 1px 9px rgba(0, 0, 0, 1);
 }
-/* Previous/next arrow buttons (added by carousel.js): one on each side of the slide and a pair
-   beneath the indicator dots. The strip at the bottom of the carousel holds the dots (56px: 8px
-   dots with 24px margins) above the pair (40px); carousel.js sizes the carousel to include it. */
-.moose-slideshow .indicators {
+/* Previous/next arrow buttons (added by carousel.js): optionally one on each side of the slide
+   and a pair beneath the indicator dots. The strip at the bottom of the carousel holds the dots
+   (56px: 8px dots with 24px margins) and, with the 'moose-slideshow-bottom-arrows' class, the
+   pair (40px) beneath them; carousel.js sizes the carousel to include it. */
+.moose-slideshow-bottom-arrows .indicators {
     bottom: 40px;
 }
 .moose-slideshow-nav {
@@ -926,16 +927,20 @@ footer.page-footer {
     height: auto;
     line-height: 1;
 }
-/* The side arrows overlay the slide, vertically centered above the 96px bottom strip. */
+/* The side arrows overlay the slide, vertically centered above the bottom strip (56px, or
+   96px with the bottom arrows). */
 .moose-slideshow-side {
     position: absolute;
-    top: calc((100% - 96px) / 2);
+    top: calc((100% - 56px) / 2);
     transform: translateY(-50%);
     z-index: 1;
     background: rgba(0, 0, 0, 0.4);
 }
 .moose-slideshow-side:hover {
     background: rgba(0, 0, 0, 0.7);
+}
+.moose-slideshow-bottom-arrows .moose-slideshow-side {
+    top: calc((100% - 96px) / 2);
 }
 .moose-slideshow-prev { left: 10px; }
 .moose-slideshow-next { right: 10px; }

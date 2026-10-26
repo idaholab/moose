@@ -93,7 +93,15 @@ class TestSlideshow(MooseDocsTestCase):
 
     def testAST(self):
         ast = self.tokenize(self.SLIDESHOW)(0)
-        self.assertToken(ast, "Slideshow", size=2, interval=3.0, overlay_default=False)
+        self.assertToken(
+            ast,
+            "Slideshow",
+            size=2,
+            interval=3.0,
+            overlay_default=False,
+            side_arrows=True,
+            bottom_arrows=True,
+        )
 
         self.assertToken(ast(0), "Slide", size=2, overlay=None)
         self.assertToken(ast(0, 0), "Image", size=0, src="Flag_of_Idaho.svg")
@@ -112,6 +120,8 @@ class TestSlideshow(MooseDocsTestCase):
             res, "div", size=2, class_="carousel carousel-slider moose-slideshow"
         )
         self.assertEqual(res["data-interval"], "3000")
+        self.assertEqual(res["data-side-arrows"], "true")
+        self.assertEqual(res["data-bottom-arrows"], "true")
 
         self.assertHTMLTag(res(0), "div", class_="carousel-item")
         self.assertHTMLTag(res(0, 0, 0), "picture")  # image, tested in test_media
@@ -122,6 +132,21 @@ class TestSlideshow(MooseDocsTestCase):
         self.assertHTMLTag(res(1), "div", size=1, class_="carousel-item")
         self.assertHTMLTag(res(1, 0), "div", size=1, class_="moose-slide")
         self.assertHTMLTag(res(1, 0, 0), "picture")
+
+    # Each pair of arrow buttons can be turned off.
+    SLIDESHOW_NO_ARROWS = (
+        "!slideshow! side_arrows=False bottom_arrows=False\n"
+        "!slide Flag_of_Idaho.svg\n"
+        "!slideshow-end!"
+    )
+
+    def testArrows(self):
+        ast = self.tokenize(self.SLIDESHOW_NO_ARROWS)(0)
+        self.assertToken(ast, "Slideshow", side_arrows=False, bottom_arrows=False)
+
+        res = self.render(ast, renderer=base.MaterializeRenderer())(0)
+        self.assertEqual(res["data-side-arrows"], "false")
+        self.assertEqual(res["data-bottom-arrows"], "false")
 
     # A slide's 'overlay' setting overrides the slideshow's 'overlay_default'.
     SLIDESHOW_OVERLAY = (
