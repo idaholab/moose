@@ -1430,6 +1430,7 @@ public:
   bool supportsElemSideQpArg() const override final { return false; }
 
 private:
+  using FunctorBase<T>::evaluate;
   ValueType evaluate(const ElemArg &, const StateArg &) const override
   {
     mooseError("We should never get here. If you have, contact a MOOSE developer and tell them "
