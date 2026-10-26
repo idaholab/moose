@@ -29,7 +29,10 @@ ADIncompressibleMomentumSPBase::validParams()
       false,
       "Whether an explicit (previous value calculation) or implicit (current value) is used");
   params.addRequiredParam<MooseFunctorName>("reference_pressure", "system reference pressure [Pa]");
-  params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
+  params.addRequiredParam<std::vector<UserObjectName>>(
+      "fp",
+      "Fluid properties user object(s). Supply either one (applied to all segments) "
+      "or one per segment.");
   params.addParam<std::vector<MooseFunctorName>>(
       "areas",
       std::vector<MooseFunctorName>({}),
@@ -75,8 +78,9 @@ ADIncompressibleMomentumSPBase::ADIncompressibleMomentumSPBase(const InputParame
     _T(_n_temps),
     _is_implicit(this->template getParam<bool>("is_implicit")),
     _Pref(this->template getFunctor<ADReal>("reference_pressure")),
-    _fp(this->template getUserObject<SinglePhaseFluidProperties>("fp")),
+    _n_fp(this->template getParam<std::vector<UserObjectName>>("fp").size()),
     _n_segments(this->template getParam<std::vector<MooseFunctorName>>("areas").size()),
+    _fp(_n_segments), // size it here, or after _n_segments if declared later in the header
     _areas(this->template getParam<std::vector<MooseFunctorName>>("areas").size()),
     _perimeters(this->template getParam<std::vector<MooseFunctorName>>("perimeters").size()),
     _lengths(this->template getParam<std::vector<MooseFunctorName>>("lengths").size()),
@@ -114,6 +118,16 @@ ADIncompressibleMomentumSPBase::ADIncompressibleMomentumSPBase(const InputParame
     _dPps[j] = &(this->template getFunctor<ADReal>(dPp_names[j]));
     _roughnesses[j] = &(this->template getFunctor<ADReal>(roughness_names[j]));
   }
+  const auto & fp_names = MooseBase::getParam<std::vector<UserObjectName>>("fp");
+  if (_n_fp != 1 && _n_fp != _n_segments)
+    paramError(
+        "fp", "Provide either one fluid properties object or one per segment (", _n_segments, ").");
+
+  for (const auto j : make_range(_n_segments))
+  {
+    const auto & name = (_n_fp == 1) ? fp_names[0] : fp_names[j];
+    _fp[j] = &getUserObjectByName<SinglePhaseFluidProperties>(name);
+  }
 }
 
 void
@@ -134,10 +148,8 @@ ADIncompressibleMomentumSPBase::computeQpResidual()
   const auto qp = functorArg();
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
-  // start by getting global fluid properties
+  // start by getting global average temperature
   const auto Tave = ((*(_T[0]))[i] + (*(_T[_n_temps - 1]))[i]) / 2;
-  const auto mu = _fp.mu_from_p_T(_Pref(qp, state), Tave);
-  const auto rhog = _fp.rho_from_p_T(_Pref(qp, state), Tave);
   // Global rescale factor so the mass flow rate's transient term has a unit coefficient,
   // matching the coefficient of ODETimeDerivative kernel: the path's lumped L_over_A_sum is
   // Sum_j(length_j / area_j), so the whole equation is divided through by that single sum.
@@ -148,6 +160,9 @@ ADIncompressibleMomentumSPBase::computeQpResidual()
   // loop over segments
   for (const auto j : make_range(_n_segments))
   {
+    // Get properties
+    const auto mu = _fp[j]->mu_from_p_T(_Pref(qp, state), Tave);
+    const auto rhog = _fp[j]->rho_from_p_T(_Pref(qp, state), Tave);
     // Decide flow regime for friction factor
     const auto Dh = 4.0 * (*(_areas[j]))(qp, state) / (*(_perimeters[j]))(qp, state);
     const auto G = massFlowRate() / (*(_areas[j]))(qp, state);
@@ -158,7 +173,7 @@ ADIncompressibleMomentumSPBase::computeQpResidual()
     momentum_residual += (*(_forms_losses[j]))(qp, state) * G * abs(G) / 2.0 / rhog;
     // Gravity
     // get local density for natural circulation aspect
-    auto rhol = _fp.rho_from_p_T(_Pref(qp, state), (*(_T[j]))[i]);
+    auto rhol = _fp[j]->rho_from_p_T(_Pref(qp, state), (*(_T[j]))[i]);
     momentum_residual += rhol * _gravity(qp, state) * (*(_dHs[j]))(qp, state);
     // Pump pressure
     momentum_residual -= (*(_dPps[j]))(qp, state);

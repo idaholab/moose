@@ -43,10 +43,12 @@ protected:
   const bool _is_implicit;
   /// System reference pressure
   const Moose::Functor<ADReal> & _Pref;
-  /// Fluid properties object
-  const SinglePhaseFluidProperties & _fp;
+  /// Number of fluid property user objects supplied
+  const unsigned int _n_fp;
   /// Number of geometrically/thermally unique segments
   const size_t _n_segments;
+  /// Fluid properties per segment (non-owning pointers)
+  std::vector<const SinglePhaseFluidProperties *> _fp;
   /// Flow area of each segment
   std::vector<const Moose::Functor<ADReal> *> _areas;
   /// Wetted perimeter of each segment
