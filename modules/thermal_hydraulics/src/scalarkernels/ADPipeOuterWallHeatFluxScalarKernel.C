@@ -11,8 +11,6 @@
 
 #include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
-#include "MooseMesh.h"
-#include "libmesh/point_locator_base.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADPipeOuterWallHeatFluxScalarKernel);
 
@@ -46,7 +44,8 @@ ADPipeOuterWallHeatFluxScalarKernel::ADPipeOuterWallHeatFluxScalarKernel(
 ADReal
 ADPipeOuterWallHeatFluxScalarKernel::convectiveLinearHeatRate() const
 {
-  const auto elem_arg = functorArg();
+  const libMesh::Node node(0., 0., 0.);
+  const Moose::NodeArg elem_arg = {&node, &Moose::NodeArg::undefined_subdomain_connection};
   const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
 
   // Prescribed heat flux applied to this node, positive into the wall

@@ -24,7 +24,6 @@ class ADPipeWallTemperatureScalarKernelBase : public ADScalarKernel, public ADFu
 public:
   ADPipeWallTemperatureScalarKernelBase(const InputParameters & parameters);
   static InputParameters validParams();
-  virtual void initialSetup() override;
 
 protected:
   virtual ADReal computeQpResidual() override;
@@ -36,8 +35,6 @@ protected:
   virtual ADReal convectiveLinearHeatRate() const = 0;
   /// Derivative of convectiveLinearHeatRate() with respect to this node's own temperature
   virtual Real convectiveJacobian() const = 0;
-  /// Spatial argument used for every functor evaluation
-  Moose::ElemPointArg functorArg() const { return {_functor_elem, _functor_point, false}; }
 
   /// Solid properties object for the pipe wall
   const ThermalSolidProperties & _sp;
@@ -63,8 +60,4 @@ protected:
   const Moose::Functor<ADReal> & _upstream_area;
   /// Cross-sectional area of the downstream node's wall layer
   const Moose::Functor<ADReal> & _downstream_area;
-  /// Point at which spatially varying functors are evaluated
-  const Point _functor_point;
-  /// Element containing _functor_point (nullptr if outside the mesh / not on this process)
-  const Elem * _functor_elem = nullptr;
 };
