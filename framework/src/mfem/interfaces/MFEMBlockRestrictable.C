@@ -30,7 +30,7 @@ MFEMBlockRestrictable::MFEMBlockRestrictable(const InputParameters & parameters,
                                              const mfem::ParMesh & mfem_mesh)
   : _mfem_mesh(mfem_mesh),
     _subdomain_names(parameters.get<std::vector<SubdomainName>>("block")),
-    _subdomain_attributes(subdomainsToAttributes())
+    _subdomain_attributes(subdomainsToAttributes(parameters))
 {
   if (!_subdomain_attributes.IsEmpty())
     mfem::common::AttrToMarker(
@@ -38,7 +38,7 @@ MFEMBlockRestrictable::MFEMBlockRestrictable(const InputParameters & parameters,
 }
 
 mfem::Array<int>
-MFEMBlockRestrictable::subdomainsToAttributes()
+MFEMBlockRestrictable::subdomainsToAttributes(const InputParameters & parameters)
 {
   mfem::Array<int> attributes;
   auto & mesh = getMesh();
@@ -54,11 +54,17 @@ MFEMBlockRestrictable::subdomainsToAttributes()
     catch (...)
     {
       // It was not
+      if (!mesh.attribute_sets.AttributeSetExists(subdomain_name))
+        parameters.paramError("block", "the mesh has no block named '", subdomain_name, "'.");
       auto & subdomain_ids = mesh.attribute_sets.GetAttributeSet(subdomain_name);
       for (const auto & subdomain_id : subdomain_ids)
         attributes.Append(subdomain_id);
     }
   }
+
+  for (const auto attribute : attributes)
+    if (mesh.attributes.Find(attribute) == -1)
+      parameters.paramError("block", "the mesh has no block with ID ", attribute, ".");
   return attributes;
 }
 

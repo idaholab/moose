@@ -18,6 +18,8 @@
 #include "MooseVariableScalar.h"
 #include "NonlinearSystem.h"
 
+#include "libmesh/petsc_vector.h"
+
 registerMooseObject("MooseApp", ReferenceResidualConvergence);
 
 InputParameters
@@ -304,6 +306,31 @@ ReferenceResidualConvergence::updateReferenceResidual()
   std::fill(_group_resid.begin(), _group_resid.end(), 0.0);
   std::fill(_group_ref_resid.begin(), _group_ref_resid.end(), 0.0);
 
+  // With a variational inequality (VI) solver, the residual at degrees of freedom in the active
+  // set (those held at a bound) is not driven to zero: there the bound constraint holds in place
+  // of the residual equation. Exclude those entries from the residual norms, matching the norm
+  // PETSc uses for its own VI convergence test.
+  std::unique_ptr<NumericVector<Number>> inactive_residual;
+  SNES snes = nonlinear_sys.getSNES();
+  PetscBool is_vi;
+  LibmeshPetscCallA(
+      _fe_problem.comm().get(),
+      PetscObjectTypeCompareAny((PetscObject)snes, &is_vi, SNESVINEWTONRSLS, SNESVINEWTONSSLS, ""));
+  if (is_vi)
+  {
+    Vec x, f;
+    IS active_set;
+    LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetSolution(snes, &x));
+    LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetFunction(snes, &f, nullptr, nullptr));
+    LibmeshPetscCallA(_fe_problem.comm().get(), SNESVIGetActiveSetIS(snes, x, f, &active_set));
+    inactive_residual = _residual_vector->clone();
+    LibmeshPetscCallA(
+        _fe_problem.comm().get(),
+        VecISSet(cast_ref<PetscVector<Number> &>(*inactive_residual).vec(), active_set, 0));
+    LibmeshPetscCallA(_fe_problem.comm().get(), ISDestroy(&active_set));
+  }
+  const auto & residual = inactive_residual ? *inactive_residual : *_residual_vector;
+
   for (const auto i : index_range(_soln_vars))
   {
     if (_converge_on_var[i])
@@ -311,7 +338,7 @@ ReferenceResidualConvergence::updateReferenceResidual()
       const auto group = _group_index[i];
 
       // Prepare residual
-      auto resid = Utility::pow<2>(s.calculate_norm(*_residual_vector, _soln_vars[i], _norm_type));
+      auto resid = Utility::pow<2>(s.calculate_norm(residual, _soln_vars[i], _norm_type));
       if (_unscale_the_residual)
       {
         mooseAssert(_scaling_factors[i], "Scaling factor must not be zero");
@@ -324,13 +351,13 @@ ReferenceResidualConvergence::updateReferenceResidual()
       Real ref_resid;
       if (_local_norm)
       {
-        mooseAssert((*_residual_vector).size() == (*_reference_vector).size(),
+        mooseAssert(residual.size() == (*_reference_vector).size(),
                     "Sizes of nonlinear RHS and reference vector should be the same.");
         mooseAssert((*_reference_vector).size(), "Reference vector must be provided.");
         auto ref = _reference_vector->clone();
         // Add a tiny number to the reference to prevent a divide by zero.
         ref->add(std::numeric_limits<Number>::min());
-        auto div = (*_residual_vector).clone();
+        auto div = residual.clone();
         *div /= *ref;
         ref_resid = Utility::pow<2>(s.calculate_norm(*div, _soln_vars[i], _norm_type));
       }
