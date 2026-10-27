@@ -123,7 +123,9 @@
 
 [ICs]
   [close_pack]
-    radius = 0.01
+    # Slightly below the 0.01 mesh spacing so that no node lies exactly on a circle edge, where
+    # the inside test would depend on floating-point rounding and so on the platform
+    radius = 0.00999
     outvalue = 0 # water
     variable = phi
     invalue = 1 #steel
