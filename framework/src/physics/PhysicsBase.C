@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PhysicsBase.h"
+#include "PhysicsVariableCoordinator.h"
 #include "MooseUtils.h"
 #include "FEProblemBase.h"
 
@@ -442,6 +443,29 @@ PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_t
           var_name, var_name, getParam<std::string>("initial_from_file_timestep"));
     }
   }
+}
+
+void
+PhysicsBase::addSharedSolverVariable(const VariableName & var_name,
+                                     const std::string & family,
+                                     const std::string & order,
+                                     const Real scaling)
+{
+  // Saved first as getSolverSystem() looks for the variable among the Physics' solver variables
+  saveSolverVariableName(var_name);
+  PhysicsVariableCoordinator::findOrCreate(_awh, _action_factory)
+      .requestVariable(
+          var_name, {true, family, order, scaling, getSolverSystem(var_name), _blocks}, name());
+}
+
+void
+PhysicsBase::addSharedAuxVariable(const VariableName & var_name,
+                                  const std::string & family,
+                                  const std::string & order)
+{
+  saveAuxVariableName(var_name);
+  PhysicsVariableCoordinator::findOrCreate(_awh, _action_factory)
+      .requestVariable(var_name, {false, family, order, 1.0, "", _blocks}, name());
 }
 
 bool

@@ -1,0 +1,17 @@
+[Tests]
+  design = 'Physics/index.md'
+  issues = '#30533'
+  [shared]
+    type = CSVDiff
+    input = 'shared_variables.i'
+    csvdiff = 'shared_variables_out.csv'
+    requirement = 'The system shall allow multiple physics to share variables across their blocks, creating a single variable on the union of the blocks that is available to the objects the physics add.'
+  []
+  [inconsistent]
+    type = RunException
+    input = 'shared_variables.i'
+    cli_args = 'order=SECOND'
+    expect_err = "Physics 'right' requests the shared variable 'u' with a different variable type, family, order, scaling factor or solver system than Physics 'left' did"
+    requirement = 'The system shall return an error if multiple physics request the same shared variable with different definitions.'
+  []
+[]
