@@ -31,6 +31,8 @@ protected:
 
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
+  /// Pure liquid fluid properties reference (for draining problems, not for multiphase flow)
+  const SinglePhaseFluidProperties * _fp_ref;
   /// Coupled mass flow rate through the segment
   const ADVariableValue & _m;
   /// Coupled temperature of the upstream segment

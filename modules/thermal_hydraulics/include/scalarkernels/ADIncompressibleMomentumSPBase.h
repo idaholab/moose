@@ -49,6 +49,8 @@ protected:
   const size_t _n_segments;
   /// Fluid properties per segment (non-owning pointers)
   std::vector<const SinglePhaseFluidProperties *> _fp;
+  /// Pure liquid fluid properties reference (for draining problems, not for multiphase flow)
+  const SinglePhaseFluidProperties * _fp_ref;
   /// Flow area of each segment
   std::vector<const Moose::Functor<ADReal> *> _areas;
   /// Wetted perimeter of each segment
