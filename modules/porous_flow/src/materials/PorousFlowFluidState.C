@@ -242,17 +242,16 @@ PorousFlowFluidStateTempl<is_ad>::computeQpProperties()
           _pc.d2CapillaryPressure(_fsp[_aqueous_phase_number].saturation.value(), _qp);
 
       // Gradients of saturation and porepressure in all phases. The saturation depends on the
-      // gas porepressure, every composition variable and the temperature. The salt mass fraction
-      // only contributes when it is a PorousFlow variable
-      (*_grads_qp)[_qp][_gas_phase_number] =
-          (*_dsaturation_dvar)[_qp][_gas_phase_number][_pvar] * _gas_gradp_qp[_qp];
+      // gas porepressure, every composition variable and the temperature. The derivatives are
+      // read from the fluid state rather than _dsaturation_dvar, which only holds derivatives wrt
+      // PorousFlow variables, as the salt mass fraction and the temperature are often
+      // AuxVariables
+      const auto & dsat = _fsp[_gas_phase_number].saturation.derivatives();
+      (*_grads_qp)[_qp][_gas_phase_number] = dsat[_pidx] * _gas_gradp_qp[_qp];
       for (const auto m : index_range(_composition))
-        if (m < _num_Z_vars || _dictator.isPorousFlowVariable(_composition_varnum[m]))
-          (*_grads_qp)[_qp][_gas_phase_number] +=
-              (*_dsaturation_dvar)[_qp][_gas_phase_number][_composition_var[m]] *
-              (*_grad_composition_qp[m])[_qp];
-      (*_grads_qp)[_qp][_gas_phase_number] +=
-          (*_dsaturation_dvar)[_qp][_gas_phase_number][_Tvar] * (*_gradT_qp)[_qp];
+        (*_grads_qp)[_qp][_gas_phase_number] +=
+            dsat[_fs.getZIndex(m)] * (*_grad_composition_qp[m])[_qp];
+      (*_grads_qp)[_qp][_gas_phase_number] += dsat[_Tidx] * (*_gradT_qp)[_qp];
       (*_grads_qp)[_qp][_aqueous_phase_number] = -(*_grads_qp)[_qp][_gas_phase_number];
 
       (*_gradp_qp)[_qp][_gas_phase_number] = _gas_gradp_qp[_qp];
@@ -260,17 +259,15 @@ PorousFlowFluidStateTempl<is_ad>::computeQpProperties()
           _gas_gradp_qp[_qp] - dpc * (*_grads_qp)[_qp][_aqueous_phase_number];
 
       // Gradient of the mass fraction of every component in every phase. Each mass fraction
-      // depends on the gas porepressure, every composition variable and the temperature, with the
-      // salt mass fraction only contributing when it is a PorousFlow variable
+      // depends on the gas porepressure, every composition variable and the temperature
       for (const auto ph : make_range(_num_phases))
         for (const auto comp : make_range(_num_components))
         {
           RealGradient grad_mf =
               _fsp[ph].mass_fraction[comp].derivatives()[_pidx] * _gas_gradp_qp[_qp];
           for (const auto m : index_range(_composition))
-            if (m < _num_Z_vars || _dictator.isPorousFlowVariable(_composition_varnum[m]))
-              grad_mf += _fsp[ph].mass_fraction[comp].derivatives()[_fs.getZIndex(m)] *
-                         (*_grad_composition_qp[m])[_qp];
+            grad_mf += _fsp[ph].mass_fraction[comp].derivatives()[_fs.getZIndex(m)] *
+                       (*_grad_composition_qp[m])[_qp];
           grad_mf += _fsp[ph].mass_fraction[comp].derivatives()[_Tidx] * (*_gradT_qp)[_qp];
           (*_grad_mass_frac_qp)[_qp][ph][comp] = grad_mf;
         }

@@ -289,4 +289,14 @@
     design = 'PorousFlowFluidState.md'
     issues = '#34233'
   []
+  [aux_gradients]
+    type = CSVDiff
+    input = 'residual_gradients.i'
+    cli_args = "UserObjects/dictator/porous_flow_vars='pgas z'"
+    csvdiff = 'residual_gradients_out.csv'
+    prereq = 'salt_not_in_dictator'
+    requirement = 'The system shall include the contributions of a spatially varying salt mass fraction and temperature in the gradients of the fluid state properties when the salt mass fraction and temperature are not PorousFlow variables, giving the same solution as when they are.'
+    design = 'PorousFlowFluidState.md'
+    issues = '#34233'
+  []
 []
