@@ -260,4 +260,23 @@
       detail = 'a salt mass fraction for a fluid state that has no salt.'
     []
   []
+  [aux_gradients]
+    requirement = 'The system shall compute the gradients of the fluid state properties, including the contributions of a spatially varying salt mass fraction and temperature, when the salt mass fraction and temperature'
+    design = 'PorousFlowFluidState.md'
+    issues = '#34233'
+    [porous_flow_vars]
+      type = CSVDiff
+      input = 'aux_gradients.i'
+      csvdiff = 'aux_gradients_out.csv'
+      detail = 'are PorousFlow variables, and'
+    []
+    [not_porous_flow_vars]
+      type = CSVDiff
+      input = 'aux_gradients.i'
+      cli_args = "UserObjects/dictator/porous_flow_vars='pgas z'"
+      csvdiff = 'aux_gradients_out.csv'
+      prereq = 'aux_gradients/porous_flow_vars'
+      detail = 'are not PorousFlow variables, giving the same result.'
+    []
+  []
 []
