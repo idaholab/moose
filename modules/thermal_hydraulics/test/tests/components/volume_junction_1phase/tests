@@ -132,7 +132,7 @@
     abs_zero = 1e-7
     restep = false # Test is prescribed to abort on failed timestep
     issues = '#34097'
-    requirement = 'The system shall conserve mass across a VolumeJunction1Phase component when the area of a connected flow channel varies within the element at the connection.'
+    requirement = 'The system shall conserve mass across a volume junction when the area of a connected flow channel varies within the element at the connection.'
   []
   # error checking
   [err.missing_ics]
