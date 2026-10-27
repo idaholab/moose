@@ -73,7 +73,8 @@ LinearFVAnisotropicDiffusionFunctorNeumannBC::computeBoundaryNormalGradient() co
   const auto boundary_normal =
       (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0) *
       _current_face_info->normal();
-  const auto diffusion_tensor = _diffusion_tensor(singleSidedFaceArg(_current_face_info), state);
+  const auto diffusion_tensor =
+      _diffusion_tensor(functorFaceArg(_diffusion_tensor, _current_face_info), state);
 
   RealVectorValue normal_scaled_diffusion;
   for (const auto i : make_range(Moose::dim))
@@ -88,7 +89,7 @@ LinearFVAnisotropicDiffusionFunctorNeumannBC::computeBoundaryNormalGradient() co
   const auto tangential_diffusion = normal_scaled_diffusion - normal_diffusion * boundary_normal;
   const Real tangential_flux = tangential_diffusion * _var.gradSln(*elem_info, state);
 
-  return (_functor(singleSidedFaceArg(_current_face_info), state) - tangential_flux) /
+  return (_functor(functorFaceArg(_functor, _current_face_info), state) - tangential_flux) /
          normal_diffusion;
 }
 
