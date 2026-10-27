@@ -367,18 +367,8 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
 void
 SubChannel1PhaseProblem::initialSetup()
 {
-  ExternalProblem::initialSetup();
-
-  _fp = &getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
-  _friction_closure =
-      &getUserObject<SCMFrictionClosureBase>(getParam<UserObjectName>("friction_closure"));
-  _mixing_closure =
-      &getUserObject<SCMMixingClosureBase>(getParam<UserObjectName>("mixing_closure"));
-
-  /// Set value for turbulent momentum modeling parameter CT
-  _CT = _mixing_closure->getCT();
-
-  // Create variables for output and storage
+  // Create variables for output and storage. This comes before the base class setup, which runs
+  // the user objects executed on initial, such as SCMPinPowerPostprocessor, that read them.
   _mdot_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::MASS_FLOW_RATE));
   _SumWij_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::SUM_CROSSFLOW));
   _P_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::PRESSURE));
@@ -395,8 +385,6 @@ SubChannel1PhaseProblem::initialSetup()
     _Dpin_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::PIN_DIAMETER));
     _HTC_soln =
         std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::HEAT_TRANSFER_COEFFICIENT));
-    _pin_HTC_closure =
-        &getUserObject<SCMHTCClosureBase>(getParam<UserObjectName>("pin_HTC_closure"));
   }
   _rho_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DENSITY));
   _mu_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::VISCOSITY));
@@ -410,9 +398,25 @@ SubChannel1PhaseProblem::initialSetup()
     _duct_heat_flux_soln =
         std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DUCT_HEAT_FLUX));
     _Tduct_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DUCT_TEMPERATURE));
+  }
+
+  ExternalProblem::initialSetup();
+
+  _fp = &getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
+  _friction_closure =
+      &getUserObject<SCMFrictionClosureBase>(getParam<UserObjectName>("friction_closure"));
+  _mixing_closure =
+      &getUserObject<SCMMixingClosureBase>(getParam<UserObjectName>("mixing_closure"));
+
+  /// Set value for turbulent momentum modeling parameter CT
+  _CT = _mixing_closure->getCT();
+
+  if (_pin_mesh_exist)
+    _pin_HTC_closure =
+        &getUserObject<SCMHTCClosureBase>(getParam<UserObjectName>("pin_HTC_closure"));
+  if (_duct_mesh_exist)
     _duct_HTC_closure =
         &getUserObject<SCMHTCClosureBase>(getParam<UserObjectName>("duct_HTC_closure"));
-  }
 }
 
 void

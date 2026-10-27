@@ -1839,20 +1839,27 @@ AutomaticMortarGeneration::computeMsmStatistics()
     for (const auto [_, volume] : primary_elems_to_volume)
       primary.push_back(volume);
 
+    // An interface on which no mortar segments formed has empty primary and segment lists, for
+    // which libMesh's maximum() and minimum() are undefined. Report 0, as median() does.
+    const auto max_volume = [](const auto & volumes)
+    { return volumes.empty() ? Real(0) : volumes.maximum(); };
+    const auto min_volume = [](const auto & volumes)
+    { return volumes.empty() ? Real(0) : volumes.minimum(); };
+
     MsmSubdomainStats stats;
     stats.primary_subd_id = primary_subd_id;
     stats.secondary_subd_id = secondary_subd_id;
     stats.secondary_lower_n_elems = secondary.size();
-    stats.secondary_lower_max_volume = secondary.maximum();
-    stats.secondary_lower_min_volume = secondary.minimum();
+    stats.secondary_lower_max_volume = max_volume(secondary);
+    stats.secondary_lower_min_volume = min_volume(secondary);
     stats.secondary_lower_median_volume = secondary.median();
     stats.primary_lower_n_elems = primary.size();
-    stats.primary_lower_max_volume = primary.maximum();
-    stats.primary_lower_min_volume = primary.minimum();
+    stats.primary_lower_max_volume = max_volume(primary);
+    stats.primary_lower_min_volume = min_volume(primary);
     stats.primary_lower_median_volume = primary.median();
     stats.msm_n_elems = msm.size();
-    stats.msm_max_volume = msm.maximum();
-    stats.msm_min_volume = msm.minimum();
+    stats.msm_max_volume = max_volume(msm);
+    stats.msm_min_volume = min_volume(msm);
     stats.msm_median_volume = msm.median();
     result.push_back(stats);
 
