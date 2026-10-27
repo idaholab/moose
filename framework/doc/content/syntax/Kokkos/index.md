@@ -49,9 +49,9 @@ using Array2D = Array<T, 2, index_type, layout>;
 `MOOSE_KOKKOS_INDEX_TYPE` is a macro holding the default index type of Kokkos-MOOSE containers and thread indices.
 It is set at configure time to `uint32_t` by default or to `uint64_t` when MOOSE is configured with `--with-kokkos-index-size=8`.
 For instance, a three-dimensional array of type `double` with default index type and layout can be declared either by `Array<double, 3>` or `Array3D<double>`.
-The entries of an array can be accessed with either `operator()` with multi-dimensional indices or `operator[]` with a flattened, dimensionless index, where the flattening follows a layout in which the innermost dimension varies the fastest.
+The entries of an array can be accessed with either `operator()` with multi-dimensional indices or `operator[]` with a flattened, dimensionless index, where the flattening follows a layout in which the left-most dimension varies the fastest (column-major, Fortran style).
 They automatically return either CPU or GPU data depending on where they are being accessed.
-If having the outermost dimension run the fastest is desired for multi-dimensional arrays, the layout template argument can be optionally set to `LayoutType::RIGHT`.
+If having the right-most dimension run the fastest (row-major, C style) is desired for multi-dimensional arrays, the layout template argument can be optionally set to `LayoutType::RIGHT`.
 
 Arrays can be allocated through the following APIs: `create()`, `createHost()`, and `createDevice()`.
 `create()` allocates memories on both CPU and GPU, while `createHost()` or `createDevice()` only allocates memory on either CPU or GPU.
@@ -229,7 +229,7 @@ The map can only be populated on CPU, and upon calling `copyToDevice()`, the cor
 It also provides `copyToDeviceNested()` for convenience in case the values are of type `Moose::Kokkos::Array`, which calls `copyToDeviceNested()` for each array entry.
 
 The key/value lookup on GPU is index-based.
-`find()` returns the index of the value corresponding to the key or `Moose::Kokkos::Map::invalid_id`, the maximum value of `index_type`, if the key does not exist.
+`find()` returns the index corresponding to the key or `Moose::Kokkos::Map::invalid_id`, the maximum value of `index_type`, if the key does not exist.
 If the index is valid, you can get the value by using the index with `value()`.
 If you know in advance that a key always exists, you can simply call `operator[]` without going through those steps.
 However, if `operator[]` is called for a key that does not exist, the calculation will crash.

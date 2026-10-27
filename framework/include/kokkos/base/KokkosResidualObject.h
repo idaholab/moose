@@ -282,9 +282,9 @@ ResidualObject::accumulateTaggedElementalResidual(const Real local_re,
       if (constraints.size())
         for (unsigned int c = 0; c < constraints.size(); ++c)
         {
-          auto [r, w] = constraints[c];
+          auto [constraint_dof, weight] = constraints[c];
 
-          ::Kokkos::atomic_add(&sys.getVectorDofValue(r, tag), w * local_re);
+          ::Kokkos::atomic_add(&sys.getVectorDofValue(constraint_dof, tag), weight * local_re);
         }
       else
         ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), local_re);
@@ -372,19 +372,21 @@ ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
     {
       for (unsigned int rc = 0; rc < ::Kokkos::max(1u, row_constraints.size()); ++rc)
       {
-        auto r = row_constraints.size() ? row_constraints[rc].first : row;
-        auto rw = row_constraints.size() ? row_constraints[rc].second : 1.0;
+        auto constraint_row = row_constraints.size() ? row_constraints[rc].first : row;
+        auto weight_row = row_constraints.size() ? row_constraints[rc].second : 1.0;
 
-        if (sys.hasNodalBCMatrixTag(r, tag))
+        if (sys.hasNodalBCMatrixTag(constraint_row, tag))
           continue;
 
         for (unsigned int cc = 0; cc < ::Kokkos::max(1u, col_constraints.size()); ++cc)
         {
-          auto c = col_constraints.size() ? sys.localToGlobalDofIndex(col_constraints[cc].first)
-                                          : col_global;
-          auto cw = col_constraints.size() ? col_constraints[cc].second : 1.0;
+          auto constraint_col = col_constraints.size()
+                                    ? sys.localToGlobalDofIndex(col_constraints[cc].first)
+                                    : col_global;
+          auto weight_col = col_constraints.size() ? col_constraints[cc].second : 1.0;
 
-          ::Kokkos::atomic_add(&sys.getMatrixValue(r, c, tag), rw * cw * local_ke);
+          ::Kokkos::atomic_add(&sys.getMatrixValue(constraint_row, constraint_col, tag),
+                               weight_row * weight_col * local_ke);
         }
       }
     }
@@ -410,10 +412,10 @@ ResidualObject::accumulateTaggedElementalMatrix(const DNDerivativeType & local_k
     {
       for (unsigned int rc = 0; rc < ::Kokkos::max(1u, row_constraints.size()); ++rc)
       {
-        auto r = row_constraints.size() ? row_constraints[rc].first : row;
-        auto rw = row_constraints.size() ? row_constraints[rc].second : 1.0;
+        auto constraint_row = row_constraints.size() ? row_constraints[rc].first : row;
+        auto weight_row = row_constraints.size() ? row_constraints[rc].second : 1.0;
 
-        if (sys.hasNodalBCMatrixTag(r, tag))
+        if (sys.hasNodalBCMatrixTag(constraint_row, tag))
           continue;
 
         for (unsigned int j = 0; j < local_ke.size(); ++j)
@@ -423,11 +425,12 @@ ResidualObject::accumulateTaggedElementalMatrix(const DNDerivativeType & local_k
 
           for (unsigned int cc = 0; cc < ::Kokkos::max(1u, col_constraints.size()); ++cc)
           {
-            auto c =
+            auto constraint_col =
                 sys.localToGlobalDofIndex(col_constraints.size() ? col_constraints[cc].first : col);
-            auto cw = col_constraints.size() ? col_constraints[cc].second : 1.0;
+            auto weight_col = col_constraints.size() ? col_constraints[cc].second : 1.0;
 
-            ::Kokkos::atomic_add(&sys.getMatrixValue(r, c, tag), rw * cw * local_ke.raw_at(j));
+            ::Kokkos::atomic_add(&sys.getMatrixValue(constraint_row, constraint_col, tag),
+                                 weight_row * weight_col * local_ke.raw_at(j));
           }
         }
       }
