@@ -106,6 +106,7 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/petsc_solver_exception.h"
 
+#include <algorithm>
 #include <ios>
 #include <type_traits>
 
@@ -2026,12 +2027,16 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
                          "contributions would be silently dropped. Please use "
                          "residual_and_jacobian_together = false");
   if (_constraints.hasActiveNodalConstraints())
-    mooseDocumentedError(
-        "moose",
-        33531,
-        "residual_and_jacobian_together does not yet support nodal constraints. Their "
-        "contributions would be silently dropped. Please use "
-        "residual_and_jacobian_together = false");
+  {
+    const auto & ncs = _constraints.getActiveNodalConstraints();
+    if (std::any_of(
+            ncs.begin(), ncs.end(), [](const auto & nc) { return !nc->usesExactConstraints(); }))
+      mooseDocumentedError("moose",
+                           33531,
+                           "residual_and_jacobian_together does not yet support nodal constraints. "
+                           "Their contributions would be silently dropped. Please use "
+                           "residual_and_jacobian_together = false");
+  }
 
   // Make matrix ready to use
   activateAllMatrixTags();
