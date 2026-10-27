@@ -128,6 +128,6 @@ DerivativeMaterialInterfaceTHM<T>::getMaterialPropertyDerivativeTHMPhase(
     const std::string prop_name = this->getMaterialPropertyName(base);
     const std::string der_var_name = this->coupledName(var_name, i);
     const std::string der_prop_name = this->derivativePropertyNameFirst(prop_name, der_var_name);
-    return this->template getZeroMaterialProperty<U>(der_prop_name);
+    return this->template getGenericOrZeroMaterialProperty<U, false>(der_prop_name);
   }
 }

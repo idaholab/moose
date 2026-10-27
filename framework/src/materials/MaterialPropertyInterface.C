@@ -264,6 +264,21 @@ MaterialPropertyInterface::checkExecutionStage()
                "problem.");
 }
 
+bool
+MaterialPropertyInterface::materialsAdded() const
+{
+  // Tasks that may add materials, in their execution order. A task with no registered action
+  // (e.g. no Physics in this app) cannot add materials, and isTaskComplete() rejects it
+  const auto & awh = _mi_feproblem.getMooseApp().actionWarehouse();
+  for (const auto & task : {"add_material",
+                            "add_master_action_material",
+                            "add_functor_material",
+                            "add_materials_physics"})
+    if (awh.hasTask(task) && !awh.isTaskComplete(task))
+      return false;
+  return true;
+}
+
 void
 MaterialPropertyInterface::resolveOptionalProperties()
 {

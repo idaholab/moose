@@ -252,11 +252,12 @@ FunctionMaterialPropertyDescriptor<is_ad>::value(unsigned int qp) const
 
       // get the material property reference
       if (_material_parent)
-        _value = required ? &(_material_parent->getGenericMaterialProperty<Real, is_ad>(name))
-                          : &(_material_parent->getGenericZeroMaterialProperty<Real, is_ad>(name));
+        _value = required
+                     ? &(_material_parent->getGenericMaterialProperty<Real, is_ad>(name))
+                     : &(_material_parent->getGenericOrZeroMaterialProperty<Real, is_ad>(name));
       else if (_kernel_parent)
         _value = required ? &(_kernel_parent->getGenericMaterialProperty<Real, is_ad>(name))
-                          : &(_kernel_parent->getGenericZeroMaterialProperty<Real, is_ad>(name));
+                          : &(_kernel_parent->getGenericOrZeroMaterialProperty<Real, is_ad>(name));
       else
         mooseError("A FunctionMaterialPropertyDescriptor must be owned by either a Material or a "
                    "Kernel object.");

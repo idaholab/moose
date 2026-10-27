@@ -40,7 +40,14 @@ ComputeDamageStressTempl<is_ad>::initialSetup()
   DamageBaseTempl<is_ad> * dmb =
       dynamic_cast<DamageBaseTempl<is_ad> *>(&this->getMaterialByName(damage_model_name));
   if (dmb)
+  {
     _damage_model = dmb;
+
+    // _damage_model is called directly rather than through the normal material property system,
+    // so its own dependencies must be added to ours for them to stay active
+    const auto & damage_deps = _damage_model->getMatPropDependencies();
+    this->_material_property_dependencies.insert(damage_deps.begin(), damage_deps.end());
+  }
   else
     this->paramError("damage_model",
                      "Damage Model " + damage_model_name +

@@ -286,7 +286,7 @@ DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & n
     return *default_property;
 
   // if found return the requested property
-  return this->template getGenericZeroMaterialPropertyByName<U, is_ad>(prop_name);
+  return this->template getGenericOrZeroMaterialPropertyByName<U, is_ad>(prop_name);
 }
 
 template <class T>
@@ -295,7 +295,7 @@ const GenericMaterialProperty<U, is_ad> &
 DerivativeMaterialInterface<T>::getDefaultMaterialPropertyByName(const std::string & prop_name)
 {
   // TODO: deprecate this
-  return this->template getGenericZeroMaterialPropertyByName<U, is_ad>(prop_name);
+  return this->template getGenericOrZeroMaterialPropertyByName<U, is_ad>(prop_name);
 }
 
 template <class T>
@@ -360,7 +360,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
   if (this->template defaultGenericMaterialProperty<U, is_ad>(prop_name))
     return this->template getGenericZeroMaterialProperty<U, is_ad>();
 
-  return this->template getGenericZeroMaterialPropertyByName<U, is_ad>(
+  return this->template getGenericOrZeroMaterialPropertyByName<U, is_ad>(
       derivativePropertyName(prop_name, c));
 }
 
@@ -383,12 +383,12 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
     return this->template getGenericZeroMaterialProperty<U, is_ad>();
 
   if (c3 != "")
-    return this->template getGenericZeroMaterialPropertyByName<U, is_ad>(
+    return this->template getGenericOrZeroMaterialPropertyByName<U, is_ad>(
         derivativePropertyNameThird(prop_name, c1, c2, c3));
   if (c2 != "")
-    return this->template getGenericZeroMaterialPropertyByName<U, is_ad>(
+    return this->template getGenericOrZeroMaterialPropertyByName<U, is_ad>(
         derivativePropertyNameSecond(prop_name, c1, c2));
-  return this->template getGenericZeroMaterialPropertyByName<U, is_ad>(
+  return this->template getGenericOrZeroMaterialPropertyByName<U, is_ad>(
       derivativePropertyNameFirst(prop_name, c1));
 }
 
@@ -438,7 +438,7 @@ const GenericMaterialProperty<U, is_ad> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivativeByName(
     const MaterialPropertyName & base, const std::vector<SymbolName> & c)
 {
-  return this->template getGenericZeroMaterialPropertyByName<U, is_ad>(
+  return this->template getGenericOrZeroMaterialPropertyByName<U, is_ad>(
       derivativePropertyName(base, c));
 }
 
@@ -483,12 +483,12 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivativeByName(
     const SymbolName & c3)
 {
   if (c3 != "")
-    return this->template getGenericZeroMaterialPropertyByName<U, is_ad>(
+    return this->template getGenericOrZeroMaterialPropertyByName<U, is_ad>(
         derivativePropertyNameThird(base, c1, c2, c3));
   if (c2 != "")
-    return this->template getGenericZeroMaterialPropertyByName<U, is_ad>(
+    return this->template getGenericOrZeroMaterialPropertyByName<U, is_ad>(
         derivativePropertyNameSecond(base, c1, c2));
-  return this->template getGenericZeroMaterialPropertyByName<U, is_ad>(
+  return this->template getGenericOrZeroMaterialPropertyByName<U, is_ad>(
       derivativePropertyNameFirst(base, c1));
 }
 

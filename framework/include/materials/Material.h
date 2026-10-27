@@ -195,6 +195,8 @@ public:
   }
   ///@}
 
+  using MaterialBase::getGenericOrZeroMaterialProperty;
+  using MaterialBase::getGenericOrZeroMaterialPropertyByName;
   using MaterialBase::getGenericZeroMaterialProperty;
   using MaterialBase::getGenericZeroMaterialPropertyByName;
   using MaterialBase::getZeroMaterialProperty;
@@ -204,6 +206,10 @@ public:
   virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override
   {
     return MaterialPropertyInterface::getMatPropDependencies();
+  }
+  virtual void addMatPropDependencyById(const unsigned int prop_id) override
+  {
+    MaterialPropertyInterface::addMatPropDependencyById(prop_id);
   }
   virtual void subdomainSetup() override;
 

@@ -311,7 +311,16 @@ public:
    */
   template <typename T, bool is_ad>
   const GenericMaterialProperty<T, is_ad> &
+  getGenericOrZeroMaterialProperty(const std::string & name);
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
+  getGenericOrZeroMaterialPropertyByName(const std::string & prop_name);
+
+  /// Deprecated, use getGenericOrZeroMaterialProperty()
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
   getGenericZeroMaterialProperty(const std::string & name);
+  /// Deprecated, use getGenericOrZeroMaterialPropertyByName()
   template <typename T, bool is_ad>
   const GenericMaterialProperty<T, is_ad> &
   getGenericZeroMaterialPropertyByName(const std::string & prop_name);
@@ -442,6 +451,11 @@ public:
   virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const
   {
     return _material_property_dependencies;
+  }
+
+  virtual void addMatPropDependencyById(const unsigned int prop_id)
+  {
+    _material_property_dependencies.insert(prop_id);
   }
 
   /// resolve all optional properties
@@ -662,6 +676,12 @@ protected:
   void checkExecutionStage();
 
   /**
+   * @returns True if all materials have been added (the task associated with adding them is
+   * complete)
+   */
+  bool materialsAdded() const;
+
+  /**
    * True by default. If false, this class throws an error if any of
    * the stateful material properties interfaces are used.
    */
@@ -825,16 +845,41 @@ MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name_in
 
 template <typename T, bool is_ad>
 const GenericMaterialProperty<T, is_ad> &
-MaterialPropertyInterface::getGenericZeroMaterialProperty(const std::string & name)
+MaterialPropertyInterface::getGenericOrZeroMaterialProperty(const std::string & name)
 {
   const auto prop_name = getMaterialPropertyName(name);
-  return getGenericZeroMaterialPropertyByName<T, is_ad>(prop_name);
+  return getGenericOrZeroMaterialPropertyByName<T, is_ad>(prop_name);
+}
+
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+MaterialPropertyInterface::getGenericZeroMaterialProperty(const std::string & name)
+{
+  mooseDeprecated("getGenericZeroMaterialProperty(name) was renamed to "
+                  "getGenericOrZeroMaterialProperty(name)");
+  return getGenericOrZeroMaterialProperty<T, is_ad>(name);
 }
 
 template <typename T, bool is_ad>
 const GenericMaterialProperty<T, is_ad> &
 MaterialPropertyInterface::getGenericZeroMaterialPropertyByName(const std::string & prop_name)
 {
+  mooseDeprecated("getGenericZeroMaterialPropertyByName() was renamed to "
+                  "getGenericOrZeroMaterialPropertyByName()");
+  return getGenericOrZeroMaterialPropertyByName<T, is_ad>(prop_name);
+}
+
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+MaterialPropertyInterface::getGenericOrZeroMaterialPropertyByName(const std::string & prop_name)
+{
+  // Whether the property is declared is decided right here, so a material declaring it must
+  // already exist, or this would silently return zero instead of the declared property
+  mooseAssert(materialsAdded(),
+              "getGenericOrZeroMaterialPropertyByName() was called for '" + prop_name +
+                  "' before Materials have been constructed. A Material declaring it would be "
+                  "ignored and zero returned.");
+
   // if found return the requested property
   if (hasGenericMaterialPropertyByName<T, is_ad>(prop_name))
     return getGenericMaterialPropertyByName<T, is_ad>(prop_name);

@@ -31,6 +31,20 @@ public:
 #ifdef NEML2_ENABLED
   void computeProperties() override;
 
+  /**
+   * Always report active properties, even on a pass where nothing consumes this property's
+   * current value through the normal MaterialPropertyInterface dependency walk. A NEML2 model
+   * input with history_order > 0 is read only as "Old" by its MOOSEOld<Type>ToNEML2 gatherer,
+   * which runs (via ComputeUserObjectsThread) before NEML2ModelExecutor::execute()/finalize()
+   * produce this iteration's converged output; the only later pass that could pick up that fresh
+   * output (e.g. NonlinearThread for the Kernel/Jacobian evaluation) has no live consumer of the
+   * current value and would otherwise skip computeProperties() entirely. computeProperties()
+   * itself is a cheap no-op whenever _execute_neml2_model.outputReady() is false, so recomputing
+   * unconditionally is safe and keeps the stateful swap() at the end of the timestep from
+   * capturing a stale, one-iteration-behind value.
+   */
+  bool hasActiveProperties() override { return true; }
+
 protected:
   void initQpStatefulProperties() override {}
 
