@@ -40,23 +40,12 @@ PorousFlowWaterNCG::PorousFlowWaterNCG(const InputParameters & parameters)
   if (_water_fp.fluidName() != "water")
     paramError("water_fp", "A valid water FluidProperties UserObject must be provided in water_fp");
 
-  // Set the number of phases and components, and their indexes
+  // Set the number of phases and components, and their indexes: the phases are liquid (0) and
+  // gas (1) (set by the base class), and the components are water (0, set by the base class) and
+  // the non-condensable gas (1). There is no salt component.
   _num_phases = 2;
   _num_components = 2;
-  _gas_phase_number = 1 - _aqueous_phase_number;
-  _gas_fluid_component = 1 - _aqueous_fluid_component;
-
-  // Check that _aqueous_phase_number is <= total number of phases
-  if (_aqueous_phase_number >= _num_phases)
-    paramError("liquid_phase_number",
-               "This value is larger than the possible number of phases ",
-               _num_phases);
-
-  // Check that _aqueous_fluid_component is <= total number of fluid components
-  if (_aqueous_fluid_component >= _num_components)
-    paramError("liquid_fluid_component",
-               "This value is larger than the possible number of fluid components",
-               _num_components);
+  _gas_fluid_component = 1;
 
   _empty_fsp = FluidStateProperties(_num_components);
 }
@@ -70,33 +59,34 @@ PorousFlowWaterNCG::fluidStateName() const
 void
 PorousFlowWaterNCG::thermophysicalProperties(Real pressure,
                                              Real temperature,
-                                             Real Xnacl,
-                                             Real Z,
+                                             const std::vector<Real> & composition,
                                              unsigned int qp,
                                              std::vector<FluidStateProperties> & fsp) const
 {
+  mooseAssert(composition.size() == 1, "PorousFlowWaterNCG expects a single total mass fraction");
+
   // Make AD versions of primary variables then call AD thermophysicalProperties()
   ADReal p = pressure;
-  Moose::derivInsert(p.derivatives(), _pidx, 1.0);
+  Moose::derivInsert(p.derivatives(), getPressureIndex(), 1.0);
   ADReal T = temperature;
-  Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
-  ADReal Zncg = Z;
-  Moose::derivInsert(Zncg.derivatives(), _Zidx, 1.0);
-  // X is not used, but needed for consistency with PorousFlowFluidState interface
-  ADReal X = Xnacl;
-  Moose::derivInsert(X.derivatives(), _Xidx, 1.0);
+  Moose::derivInsert(T.derivatives(), getTemperatureIndex(), 1.0);
+  ADReal Zncg = composition[0];
+  Moose::derivInsert(Zncg.derivatives(), getZIndex(), 1.0);
 
-  thermophysicalProperties(p, T, X, Zncg, qp, fsp);
+  thermophysicalProperties(p, T, {Zncg}, qp, fsp);
 }
 
 void
 PorousFlowWaterNCG::thermophysicalProperties(const ADReal & pressure,
                                              const ADReal & temperature,
-                                             const ADReal & /* Xnacl */,
-                                             const ADReal & Z,
+                                             const std::vector<ADReal> & composition,
                                              unsigned int qp,
                                              std::vector<FluidStateProperties> & fsp) const
 {
+  // Water/NCG has a single NCG component, so a single total mass fraction
+  mooseAssert(composition.size() == 1, "PorousFlowWaterNCG expects a single total mass fraction");
+  const ADReal & Z = composition[0];
+
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
@@ -415,7 +405,8 @@ PorousFlowWaterNCG::enthalpyOfDissolution(const ADReal & temperature) const
   // Henry's constant
   const ADReal Kh = _water97_fp.henryConstant(temperature, _ncg_henry);
 
-  ADReal hdis = -_R * temperature * temperature * Kh.derivatives()[_Tidx] / Kh / _Mncg;
+  ADReal hdis =
+      -_R * temperature * temperature * Kh.derivatives()[getTemperatureIndex()] / Kh / _Mncg;
 
   // Derivative of enthalpy of dissolution wrt temperature requires the second derivative of
   // Henry's constant wrt temperature. For simplicity, approximate this numerically
@@ -424,7 +415,7 @@ PorousFlowWaterNCG::enthalpyOfDissolution(const ADReal & temperature) const
   const ADReal Kh2 = _water97_fp.henryConstant(t2, _ncg_henry);
 
   const Real dhdis_dT =
-      (-_R * t2 * t2 * Kh2.derivatives()[_Tidx] / Kh2 / _Mncg - hdis).value() / dT;
+      (-_R * t2 * t2 * Kh2.derivatives()[getTemperatureIndex()] / Kh2 / _Mncg - hdis).value() / dT;
 
   hdis.derivatives() = temperature.derivatives() * dhdis_dT;
 
