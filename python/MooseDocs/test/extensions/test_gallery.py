@@ -198,6 +198,38 @@ class TestSlideshow(MooseDocsTestCase):
         self.assertHTMLTag(res(0, 0, 1, 1), "p")
         self.assertHTMLTag(res(0, 0, 1, 1, 0), "a")
 
+    def testNonSlideContent(self):
+        # Everything in a slideshow must be a slide; each offending child is reported.
+        ast = self.tokenize("!slideshow!\nOne\n\nTwo\n!slideshow-end!")
+        with self.assertLogs(level=logging.ERROR) as cm:
+            self.render(ast, renderer=base.MaterializeRenderer())
+        self.assertEqual(len(cm.output), 2)
+        for output in cm.output:
+            self.assertIn("requires that all content be slides", output)
+            self.assertIn("'Paragraph' token", output)
+
+    def testInvalidSlideCommand(self):
+        # A slide requires an image, which must have a supported extension
+        for command, combination in (
+            ("!slide caption=Idaho", "'slide None'"),
+            ("!slide Flag_of_Idaho.txt", "'slide txt'"),
+        ):
+            with self.assertLogs(level=logging.ERROR) as cm:
+                ast = self.tokenize("!slideshow!\n" + command + "\n!slideshow-end!")
+                self.render(ast, renderer=base.MaterializeRenderer())
+            self.assertEqual(len(cm.output), 2)
+            self.assertIn("command combination is unknown", cm.output[0])
+            self.assertIn(combination, cm.output[0])
+            self.assertIn("'ErrorToken' token", cm.output[1])
+
+    def testMissingImage(self):
+        ast = self.tokenize("!slideshow!\n!slide Missing.svg\n!slideshow-end!")
+        with self.assertLogs(level=logging.ERROR) as cm:
+            self.render(ast, renderer=base.MaterializeRenderer())
+        self.assertEqual(len(cm.output), 1)
+        self.assertIn("Unable to locate a page", cm.output[0])
+        self.assertIn("Missing.svg", cm.output[0])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
