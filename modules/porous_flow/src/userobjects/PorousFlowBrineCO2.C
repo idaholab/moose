@@ -21,14 +21,12 @@ PorousFlowBrineCO2::validParams()
   InputParameters params = PorousFlowFluidStateMultiComponentBase::validParams();
   params.addRequiredParam<UserObjectName>("brine_fp", "The name of the user object for brine");
   params.addRequiredParam<UserObjectName>("co2_fp", "The name of the user object for CO2");
-  params.addParam<unsigned int>("salt_component", 2, "The component number of salt");
   params.addClassDescription("Fluid state class for brine and CO2");
   return params;
 }
 
 PorousFlowBrineCO2::PorousFlowBrineCO2(const InputParameters & parameters)
   : PorousFlowFluidStateMultiComponentBase(parameters),
-    _salt_component(getParam<unsigned int>("salt_component")),
     _brine_fp(getUserObject<BrineFluidProperties>("brine_fp")),
     _co2_fp(getUserObject<SinglePhaseFluidProperties>("co2_fp")),
     _Mh2o(_brine_fp.molarMassH2O()),
@@ -48,35 +46,19 @@ PorousFlowBrineCO2::PorousFlowBrineCO2(const InputParameters & parameters)
   if (_brine_fp.fluidName() != "brine")
     paramError("brine_fp", "A valid Brine FluidProperties UserObject must be provided");
 
-  // Set the number of phases and components, and their indexes
+  // Set the number of phases and components, and their indexes: the phases are liquid (0) and
+  // gas (1) (set by the base class), and the components are water (0, set by the base class),
+  // CO2 (1) and salt (2)
   _num_phases = 2;
   _num_components = 3;
-  _gas_phase_number = 1 - _aqueous_phase_number;
-  _gas_fluid_component = 3 - _aqueous_fluid_component - _salt_component;
+  _gas_fluid_component = 1;
+  _salt_component = 2;
 
-  // Check that _aqueous_phase_number is <= total number of phases
-  if (_aqueous_phase_number >= _num_phases)
-    paramError("liquid_phase_number",
-               "This value is larger than the possible number of phases ",
-               _num_phases);
-
-  // Check that _aqueous_fluid_component is <= total number of fluid components
-  if (_aqueous_fluid_component >= _num_components)
-    paramError("liquid_fluid_component",
-               "This value is larger than the possible number of fluid components",
-               _num_components);
-
-  // Check that the salt component index is not identical to the liquid fluid component
-  if (_salt_component == _aqueous_fluid_component)
-    paramError(
-        "salt_component",
-        "The value provided must be different from the value entered in liquid_fluid_component");
-
-  // Check that _salt_component is <= total number of fluid components
-  if (_salt_component >= _num_components)
+  // The component numbering is fixed, so reject any other value rather than silently ignore it
+  if (getParam<unsigned int>("salt_component") != _salt_component)
     paramError("salt_component",
-               "The value provided is larger than the possible number of fluid components",
-               _num_components);
+               "Salt is now always fluid component 2. Remove this parameter and renumber the fluid "
+               "components in the rest of the input file to match");
 
   _empty_fsp = FluidStateProperties(_num_components);
 }
@@ -90,32 +72,39 @@ PorousFlowBrineCO2::fluidStateName() const
 void
 PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
                                              Real temperature,
-                                             Real Xnacl,
-                                             Real Z,
+                                             const std::vector<Real> & composition,
                                              unsigned int qp,
                                              std::vector<FluidStateProperties> & fsp) const
 {
+  mooseAssert(composition.size() == 2,
+              "PorousFlowBrineCO2 expects the total CO2 and the NaCl mass fractions");
+
   // Make AD versions of primary variables then call AD thermophysicalProperties()
   ADReal p = pressure;
-  Moose::derivInsert(p.derivatives(), _pidx, 1.0);
+  Moose::derivInsert(p.derivatives(), getPressureIndex(), 1.0);
   ADReal T = temperature;
-  Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
-  ADReal Zco2 = Z;
-  Moose::derivInsert(Zco2.derivatives(), _Zidx, 1.0);
-  ADReal X = Xnacl;
-  Moose::derivInsert(X.derivatives(), _Xidx, 1.0);
+  Moose::derivInsert(T.derivatives(), getTemperatureIndex(), 1.0);
+  ADReal Zco2 = composition[0];
+  Moose::derivInsert(Zco2.derivatives(), getZIndex(), 1.0);
+  ADReal X = composition[1];
+  Moose::derivInsert(X.derivatives(), getXIndex(), 1.0);
 
-  thermophysicalProperties(p, T, X, Zco2, qp, fsp);
+  thermophysicalProperties(p, T, {Zco2, X}, qp, fsp);
 }
 
 void
 PorousFlowBrineCO2::thermophysicalProperties(const ADReal & pressure,
                                              const ADReal & temperature,
-                                             const ADReal & Xnacl,
-                                             const ADReal & Z,
+                                             const std::vector<ADReal> & composition,
                                              unsigned int qp,
                                              std::vector<FluidStateProperties> & fsp) const
 {
+  // Brine/CO2 has a single CO2 component, so a single total mass fraction, followed by the salt
+  mooseAssert(composition.size() == 2,
+              "PorousFlowBrineCO2 expects the total CO2 and the NaCl mass fractions");
+  const ADReal & Z = composition[0];
+  const ADReal & Xnacl = composition[1];
+
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
@@ -707,13 +696,13 @@ PorousFlowBrineCO2::equilibriumMoleFractions(const ADReal & pressure,
 
     // Equilibrium mole fractions and derivatives at the lower temperature
     ADReal Tlower = _Tlower;
-    Moose::derivInsert(Tlower.derivatives(), _Tidx, 1.0);
+    Moose::derivInsert(Tlower.derivatives(), getTemperatureIndex(), 1.0);
 
     ADReal xco2_lower, yh2o_lower;
     equilibriumMoleFractionsLowTemp(pressure, Tlower, Xnacl, xco2_lower, yh2o_lower);
 
-    const Real dxco2_dT_lower = xco2_lower.derivatives()[_Tidx];
-    const Real dyh2o_dT_lower = yh2o_lower.derivatives()[_Tidx];
+    const Real dxco2_dT_lower = xco2_lower.derivatives()[getTemperatureIndex()];
+    const Real dyh2o_dT_lower = yh2o_lower.derivatives()[getTemperatureIndex()];
 
     // Equilibrium mole fractions and derivatives at the upper temperature
     Real xco2_upper, yh2o_upper;
@@ -749,14 +738,16 @@ PorousFlowBrineCO2::equilibriumMoleFractions(const ADReal & pressure,
         Tint, yh2o_lower.value(), dyh2o_dT_lower, yh2o_upper, dyh2o_dT_upper, yh2or, dyh2o_dT);
 
     xco2 = xco2r;
-    Moose::derivInsert(xco2.derivatives(), _pidx, xco2_lower.derivatives()[_pidx]);
-    Moose::derivInsert(xco2.derivatives(), _Tidx, dxco2_dT);
-    Moose::derivInsert(xco2.derivatives(), _Xidx, xco2_lower.derivatives()[_Xidx]);
+    Moose::derivInsert(
+        xco2.derivatives(), getPressureIndex(), xco2_lower.derivatives()[getPressureIndex()]);
+    Moose::derivInsert(xco2.derivatives(), getTemperatureIndex(), dxco2_dT);
+    Moose::derivInsert(xco2.derivatives(), getXIndex(), xco2_lower.derivatives()[getXIndex()]);
 
     yh2o = yh2or;
-    Moose::derivInsert(yh2o.derivatives(), _pidx, yh2o_lower.derivatives()[_pidx]);
-    Moose::derivInsert(yh2o.derivatives(), _Tidx, dyh2o_dT);
-    Moose::derivInsert(yh2o.derivatives(), _Xidx, yh2o_lower.derivatives()[_Xidx]);
+    Moose::derivInsert(
+        yh2o.derivatives(), getPressureIndex(), yh2o_lower.derivatives()[getPressureIndex()]);
+    Moose::derivInsert(yh2o.derivatives(), getTemperatureIndex(), dyh2o_dT);
+    Moose::derivInsert(yh2o.derivatives(), getXIndex(), yh2o_lower.derivatives()[getXIndex()]);
   }
   else
   {
@@ -796,14 +787,14 @@ PorousFlowBrineCO2::equilibriumMoleFractions(const ADReal & pressure,
     const Real dxco2_dX = dB_dX * (1.0 - yh2or) - B * dyh2o_dX;
 
     xco2 = xco2r;
-    Moose::derivInsert(xco2.derivatives(), _pidx, dxco2_dp);
-    Moose::derivInsert(xco2.derivatives(), _Tidx, dxco2_dT);
-    Moose::derivInsert(xco2.derivatives(), _Xidx, dxco2_dX);
+    Moose::derivInsert(xco2.derivatives(), getPressureIndex(), dxco2_dp);
+    Moose::derivInsert(xco2.derivatives(), getTemperatureIndex(), dxco2_dT);
+    Moose::derivInsert(xco2.derivatives(), getXIndex(), dxco2_dX);
 
     yh2o = yh2or;
-    Moose::derivInsert(yh2o.derivatives(), _pidx, dyh2o_dp);
-    Moose::derivInsert(yh2o.derivatives(), _Tidx, dyh2o_dT);
-    Moose::derivInsert(yh2o.derivatives(), _Xidx, dyh2o_dX);
+    Moose::derivInsert(yh2o.derivatives(), getPressureIndex(), dyh2o_dp);
+    Moose::derivInsert(yh2o.derivatives(), getTemperatureIndex(), dyh2o_dT);
+    Moose::derivInsert(yh2o.derivatives(), getXIndex(), dyh2o_dX);
   }
 }
 
@@ -1131,7 +1122,8 @@ PorousFlowBrineCO2::enthalpyOfDissolutionGas(const ADReal & temperature, const A
   // Henry's constant
   const ADReal Kh = henryConstant(temperature, Xnacl);
 
-  ADReal hdis = -_R * temperature * temperature * Kh.derivatives()[_Tidx] / Kh / _Mco2;
+  ADReal hdis =
+      -_R * temperature * temperature * Kh.derivatives()[getTemperatureIndex()] / Kh / _Mco2;
 
   // Derivative of enthalpy of dissolution wrt temperature and xnacl requires the second
   // derivatives of Henry's constant. For simplicity, approximate these numerically
@@ -1140,14 +1132,16 @@ PorousFlowBrineCO2::enthalpyOfDissolutionGas(const ADReal & temperature, const A
   const ADReal Kh2 = henryConstant(T2, Xnacl);
 
   const Real dhdis_dT =
-      (-_R * T2 * T2 * Kh2.derivatives()[_Tidx] / Kh2 / _Mco2 - hdis).value() / dT;
+      (-_R * T2 * T2 * Kh2.derivatives()[getTemperatureIndex()] / Kh2 / _Mco2 - hdis).value() / dT;
 
   const Real dX = Xnacl.value() * 1.0e-8;
   const ADReal X2 = Xnacl + dX;
   const ADReal Kh3 = henryConstant(temperature, X2);
 
   const Real dhdis_dX =
-      (-_R * temperature * temperature * Kh3.derivatives()[_Tidx] / Kh3 / _Mco2 - hdis).value() /
+      (-_R * temperature * temperature * Kh3.derivatives()[getTemperatureIndex()] / Kh3 / _Mco2 -
+       hdis)
+          .value() /
       dX;
 
   hdis.derivatives() = temperature.derivatives() * dhdis_dT + Xnacl.derivatives() * dhdis_dX;

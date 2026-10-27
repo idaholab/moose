@@ -53,19 +53,20 @@ public:
 
   virtual std::string fluidStateName() const override;
 
+  /// The composition is the total CO2 mass fraction followed by the NaCl mass fraction
   void thermophysicalProperties(Real pressure,
                                 Real temperature,
-                                Real Xnacl,
-                                Real Z,
+                                const std::vector<Real> & composition,
                                 unsigned int qp,
                                 std::vector<FluidStateProperties> & fsp) const override;
 
   void thermophysicalProperties(const ADReal & pressure,
                                 const ADReal & temperature,
-                                const ADReal & Xnacl,
-                                const ADReal & Z,
+                                const std::vector<ADReal> & composition,
                                 unsigned int qp,
                                 std::vector<FluidStateProperties> & fsp) const override;
+
+  bool hasSalt() const override { return true; }
 
   /**
    * Mole fractions of CO2 in brine and water vapor in CO2 at equilibrium
@@ -315,12 +316,6 @@ public:
       Real pressure, Real temperature, Real Xnacl, Real saturation, unsigned int qp) const override;
 
   /**
-   * The index of the salt component
-   * @return salt component number
-   */
-  unsigned int saltComponentIndex() const { return _salt_component; };
-
-  /**
    * Henry's constant of dissolution of gas phase CO2 in brine. From
    * Battistelli et al, A fluid property module for the TOUGH2 simulator for saline brines
    * with non-condensible gas, Proc. Eighteenth Workshop on Geothermal Reservoir Engineering (1993)
@@ -456,8 +451,6 @@ protected:
                      ADReal & B) const;
   ///@}
 
-  /// Salt component index
-  const unsigned int _salt_component;
   /// Fluid properties UserObject for water
   const BrineFluidProperties & _brine_fp;
   /// Fluid properties UserObject for the CO2

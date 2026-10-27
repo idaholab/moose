@@ -19,10 +19,17 @@ PorousFlowFluidStateTempl<is_ad>::validParams()
   InputParameters params = PorousFlowFluidStateBaseMaterialTempl<is_ad>::validParams();
   params.addRequiredCoupledVar("gas_porepressure",
                                "Variable that is the porepressure of the gas phase");
-  params.addRequiredCoupledVar("z", "Total mass fraction of component i summed over all phases");
+  params.addRequiredCoupledVar(
+      "z",
+      "Total mass fractions summed over all phases. The i-th entry is the total mass fraction of "
+      "fluid component i + 1; component 0 (the aqueous component) is the remainder. The fluid "
+      "state sets how many are required");
   params.addCoupledVar(
       "temperature", 20, "The fluid temperature (C or K, depending on temperature_unit)");
-  params.addCoupledVar("xnacl", 0, "The salt mass fraction in the brine (kg/kg)");
+  params.addCoupledVar("xnacl",
+                       0,
+                       "The salt mass fraction in the brine (kg/kg). Only for fluid states with "
+                       "salt, such as PorousFlowBrineCO2");
   params.addRequiredParam<UserObjectName>("fluid_state", "Name of the FluidState UserObject");
   params.addClassDescription("Class for fluid state calculations using persistent primary "
                              "variables and a vapor-liquid flash");
@@ -85,6 +92,29 @@ PorousFlowFluidStateTempl<is_ad>::PorousFlowFluidStateTempl(const InputParameter
                " phases are allowed. Please check the number of phases entered in the dictator is "
                "correct");
 
+  // Check that the fluid state and the Dictator have the same number of fluid components. The
+  // Dictator may omit the salt component when there is no salt conservation equation
+  const auto fs_components = _fs.numComponents();
+  if (_num_components != fs_components && !(_fs.hasSalt() && _num_components == fs_components - 1))
+    mooseError(name(),
+               ": the fluid state has ",
+               fs_components,
+               " fluid components",
+               _fs.hasSalt() ? " (or one fewer if salt is not transported)" : "",
+               ". Please check the number of fluid components entered in the dictator is correct");
+
+  // Check that one total mass fraction is supplied for every fluid component other than the
+  // aqueous component and salt
+  if (_num_Z_vars != _fs.numTotalMassFractions())
+    this->paramError("z",
+                     "The fluid state '",
+                     _fs.name(),
+                     "' requires ",
+                     _fs.numTotalMassFractions(),
+                     " total mass fraction(s), but ",
+                     _num_Z_vars,
+                     " were supplied");
+
   // Store all total mass fractions and associated variable numbers
   _Z.resize(_num_Z_vars);
   _gradZ_qp.resize(_num_Z_vars);
@@ -101,6 +131,12 @@ PorousFlowFluidStateTempl<is_ad>::PorousFlowFluidStateTempl(const InputParameter
                     ? _dictator.porousFlowVariableNum(_Z_varnum[i])
                     : 0);
   }
+
+  if (!_fs.hasSalt() && this->isParamSetByUser("xnacl"))
+    this->paramError("xnacl",
+                     "The fluid state '",
+                     _fs.name(),
+                     "' has no salt, so a salt mass fraction cannot be supplied");
 }
 
 template <bool is_ad>
@@ -110,8 +146,16 @@ PorousFlowFluidStateTempl<is_ad>::thermophysicalProperties()
   // The FluidProperty objects use temperature in K
   const GenericReal<is_ad> Tk = _temperature[_qp] + _T_c2k;
 
+  // Gather the composition: the coupled total mass fraction(s), then the salt mass fraction for
+  // fluid states with salt
+  std::vector<GenericReal<is_ad>> composition;
+  for (const auto m : make_range(_num_Z_vars))
+    composition.push_back((*_Z[m])[_qp]);
+  if (_fs.hasSalt())
+    composition.push_back(_Xnacl[_qp]);
+
   _fs.clearFluidStateProperties(_fsp);
-  _fs.thermophysicalProperties(_gas_porepressure[_qp], Tk, _Xnacl[_qp], (*_Z[0])[_qp], _qp, _fsp);
+  _fs.thermophysicalProperties(_gas_porepressure[_qp], Tk, composition, _qp, _fsp);
 }
 
 template <bool is_ad>
@@ -150,21 +194,23 @@ PorousFlowFluidStateTempl<is_ad>::computeQpProperties()
               _fsp[ph].mass_fraction[comp].derivatives()[_pidx];
       }
 
-      // If Z is a PorousFlow variable (it usually is), add derivatives wrt Z
-      if (_dictator.isPorousFlowVariable(_Z_varnum[0]))
-      {
-        (*_dporepressure_dvar)[_qp][ph][_Zvar[0]] = _fsp[ph].pressure.derivatives()[_Zidx];
-        (*_dsaturation_dvar)[_qp][ph][_Zvar[0]] = _fsp[ph].saturation.derivatives()[_Zidx];
-        (*_dfluid_density_dvar)[_qp][ph][_Zvar[0]] = _fsp[ph].density.derivatives()[_Zidx];
-        (*_dfluid_viscosity_dvar)[_qp][ph][_Zvar[0]] = _fsp[ph].viscosity.derivatives()[_Zidx];
-        (*_dfluid_enthalpy_dvar)[_qp][ph][_Zvar[0]] = _fsp[ph].enthalpy.derivatives()[_Zidx];
-        (*_dfluid_internal_energy_dvar)[_qp][ph][_Zvar[0]] =
-            _fsp[ph].internal_energy.derivatives()[_Zidx];
+      // For each total mass fraction Z that is a PorousFlow variable, add derivatives wrt Z
+      for (unsigned int m = 0; m < _num_Z_vars; ++m)
+        if (_dictator.isPorousFlowVariable(_Z_varnum[m]))
+        {
+          const unsigned int Zidx = _fs.getZIndex(m);
+          (*_dporepressure_dvar)[_qp][ph][_Zvar[m]] = _fsp[ph].pressure.derivatives()[Zidx];
+          (*_dsaturation_dvar)[_qp][ph][_Zvar[m]] = _fsp[ph].saturation.derivatives()[Zidx];
+          (*_dfluid_density_dvar)[_qp][ph][_Zvar[m]] = _fsp[ph].density.derivatives()[Zidx];
+          (*_dfluid_viscosity_dvar)[_qp][ph][_Zvar[m]] = _fsp[ph].viscosity.derivatives()[Zidx];
+          (*_dfluid_enthalpy_dvar)[_qp][ph][_Zvar[m]] = _fsp[ph].enthalpy.derivatives()[Zidx];
+          (*_dfluid_internal_energy_dvar)[_qp][ph][_Zvar[m]] =
+              _fsp[ph].internal_energy.derivatives()[Zidx];
 
-        for (unsigned int comp = 0; comp < _num_components; ++comp)
-          (*_dmass_frac_dvar)[_qp][ph][comp][_Zvar[0]] =
-              _fsp[ph].mass_fraction[comp].derivatives()[_Zidx];
-      }
+          for (unsigned int comp = 0; comp < _num_components; ++comp)
+            (*_dmass_frac_dvar)[_qp][ph][comp][_Zvar[m]] =
+                _fsp[ph].mass_fraction[comp].derivatives()[Zidx];
+        }
 
       // If temperature is a PorousFlow variable (nonisothermal case), add derivatives wrt
       // temperature

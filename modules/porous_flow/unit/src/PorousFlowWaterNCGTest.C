@@ -15,6 +15,28 @@
  */
 TEST_F(PorousFlowWaterNCGTest, name) { EXPECT_EQ("water-ncg", _fs->fluidStateName()); }
 
+/**
+ * Verify that the correct values for the fluid phase, component and AD derivative indices are
+ * supplied. Water/NCG has no salt, so the salt indices are invalid
+ */
+TEST_F(PorousFlowWaterNCGTest, indices)
+{
+  EXPECT_EQ((unsigned int)2, _fs->numPhases());
+  EXPECT_EQ((unsigned int)2, _fs->numComponents());
+  EXPECT_EQ((unsigned int)0, _fs->aqueousPhaseIndex());
+  EXPECT_EQ((unsigned int)1, _fs->gasPhaseIndex());
+  EXPECT_EQ((unsigned int)0, _fs->aqueousComponentIndex());
+  EXPECT_EQ((unsigned int)1, _fs->gasComponentIndex());
+  EXPECT_EQ(libMesh::invalid_uint, _fs->saltComponentIndex());
+
+  EXPECT_EQ((unsigned int)0, _fs->getPressureIndex());
+  EXPECT_EQ((unsigned int)1, _fs->getTemperatureIndex());
+  EXPECT_EQ((unsigned int)2, _fs->getZIndex());
+  EXPECT_EQ(libMesh::invalid_uint, _fs->getXIndex());
+  EXPECT_FALSE(_fs->hasSalt());
+  EXPECT_EQ((unsigned int)1, _fs->numTotalMassFractions());
+}
+
 /*
  * Verify calculation of equilibrium mass fraction and derivatives
  */
@@ -704,7 +726,7 @@ TEST_F(PorousFlowWaterNCGTest, enthalpyOfDissolution)
 
   // T = 350C
   T = 623.15;
-  Moose::derivInsert(T.derivatives(), 2, 1.0);
+  Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
 
   // Enthalpy of dissolution of NCG in water
   hdis = _fs->enthalpyOfDissolution(T);

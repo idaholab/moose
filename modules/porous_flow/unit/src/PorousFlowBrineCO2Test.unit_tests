@@ -1,0 +1,112 @@
+[Tests]
+  design = 'PorousFlowBrineCO2.md'
+
+  [brineco2]
+    requirement = 'The system shall compute the phase equilibrium and phase properties of a brine and CO2 system,'
+    issues = '#10480'
+    [name]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.name
+      detail = 'returning the fluid state name;'
+    []
+    [equilibrium_constants]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.equilibriumConstants
+      detail = 'computing the H2O and CO2 equilibrium constants and their temperature derivatives in the low and high temperature formulations;'
+    []
+    [fugacity_coefficients]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.fugacityCoefficients
+      detail = 'computing the H2O and CO2 fugacity coefficients in the low and high temperature formulations;'
+    []
+    [partial_density]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.partialDensity
+      detail = 'computing the partial density of dissolved CO2 and its temperature derivative;'
+    []
+    [equilibrium_mass_fraction]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.equilibriumMassFraction
+      detail = 'computing the equilibrium mass fractions of CO2 in the liquid and H2O in the gas, with pressure, temperature and salt mass fraction derivatives that match finite differences;'
+    []
+    [mass_fraction]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.MassFraction
+      detail = 'computing the phase mass fractions and their derivatives from the total mass fraction in the liquid, gas and two-phase regions;'
+    []
+    [gas_properties]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.gasProperties
+      detail = 'computing the gas density, viscosity and enthalpy, with derivatives that match finite differences;'
+    []
+    [liquid_properties]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.liquidProperties
+      detail = 'computing the liquid density, viscosity and enthalpy, with derivatives that match finite differences in the liquid and two-phase regions; and'
+    []
+    [saturation]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.saturation
+      detail = 'computing the gas saturation in the two-phase region, with derivatives that match finite differences.'
+    []
+  []
+
+  [brineco2_total_mass_fraction]
+    type = GoogleTest
+    unit_test = PorousFlowBrineCO2Test.totalMassFraction
+    requirement = 'The system shall compute the total mass fraction of CO2 that gives a specified gas saturation in a brine and CO2 system, for use as an initial condition.'
+    issues = '#9377'
+  []
+
+  [brineco2_enthalpy]
+    requirement = 'The system shall compute the enthalpy change on dissolution of CO2 in a brine and CO2 system,'
+    issues = '#10167'
+    [henry_constant]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.henryConstant
+      detail = 'from the Henry constant with a brine correction, with temperature and salt mass fraction derivatives that match finite differences;'
+    []
+    [enthalpy_of_dissolution_gas]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.enthalpyOfDissolutionGas
+      detail = 'for CO2 in brine from the Henry constant, with temperature and salt mass fraction derivatives that match finite differences; and'
+    []
+    [enthalpy_of_dissolution]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.enthalpyOfDissolution
+      detail = 'for CO2 in water, with a temperature derivative that matches finite differences.'
+    []
+  []
+
+  [brineco2_high_temperature]
+    requirement = 'The system shall compute the phase equilibrium of a brine and CO2 system at elevated temperatures,'
+    issues = '#11359'
+    [activity_coefficients]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.activityCoefficients
+      detail = 'computing the H2O and CO2 activity coefficients, which are unity in the low temperature formulation;'
+    []
+    [activity_coefficient_co2_brine]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.activityCoefficientCO2Brine
+      detail = 'computing the activity coefficient of CO2 in brine, which is unity without salt, with pressure, temperature and salt mass fraction derivatives that match finite differences in both temperature formulations;'
+    []
+    [solve_equilibrium_mole_fraction_high_temp]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.solveEquilibriumMoleFractionHighTemp
+      detail = 'iteratively solving for the equilibrium mole fractions in the high temperature formulation; and'
+    []
+    [equilibrium_mole_fractions]
+      type = GoogleTest
+      unit_test = PorousFlowBrineCO2Test.equilibriumMoleFractions
+      detail = 'computing the equilibrium mole fractions of water and brine over the low, intermediate and high temperature ranges.'
+    []
+  []
+
+  [brineco2_indices]
+    type = GoogleTest
+    unit_test = PorousFlowBrineCO2Test.indices
+    requirement = 'The system shall number the phases and fluid components of a brine and CO2 system with the aqueous phase and water component first and salt as the last component, and order the derivatives of its fluid properties as pressure, temperature, total mass fraction and salt mass fraction.'
+    issues = '#11302 #34233'
+  []
+[]
