@@ -62,3 +62,13 @@ public:
 protected:
   std::string _message;
 };
+
+/**
+ * Thrown by FEProblemBase::checkExceptionAndStopSolve() once an exception has been communicated
+ * to all processes and the solve has been stopped, so that it is not handled a second time.
+ */
+class MooseHandledException : public MooseException
+{
+public:
+  MooseHandledException(const std::string & message) : MooseException(message) {}
+};

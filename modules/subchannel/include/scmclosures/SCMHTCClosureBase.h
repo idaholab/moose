@@ -58,6 +58,9 @@ public:
                   const Real conduction_k) const;
 
 protected:
+  /// Reynolds number used to evaluate the turbulent endpoint for transition-region blending.
+  Real turbulentReynoldsNumber(const NusseltPreInfo & nusselt_info) const;
+
   /// Blends turbulent Nusselt number through the transition range using the base laminar value.
   Real blendTurbulentNusseltNumber(const NusseltPreInfo & nusselt_info,
                                    const Real turbulent_nusselt) const;

@@ -49,6 +49,8 @@ private:
   void checkNonPlanarSides(const std::unique_ptr<MeshBase> & mesh) const;
   /// Routine to check whether a mesh presents non-conformality
   void checkNonConformalMesh(const std::unique_ptr<MeshBase> & mesh) const;
+  /// Routine to check for element faces that border material but match no neighbor face
+  void checkNonConformingFaces(const std::unique_ptr<MeshBase> & mesh) const;
   /// Routine to check whether a mesh presents non-conformality born from adaptivity
   void checkNonConformalMeshFromAdaptivity(const std::unique_ptr<MeshBase> & mesh) const;
   /// Routine to check whether the Jacobians (elem and side) are not negative
@@ -78,6 +80,10 @@ private:
   std::vector<BoundaryName> _watertight_boundary_names;
   /// IDs of boundaries to be checked in watertight checks
   std::vector<BoundaryID> _watertight_boundaries;
+  /// Names of blocks whose envelope forms the region checked in the watertight checks
+  std::vector<SubdomainName> _watertight_block_names;
+  /// IDs of blocks whose envelope forms the region checked in the watertight checks
+  std::set<SubdomainID> _watertight_blocks;
   /// whether to check element volumes
   const MooseEnum _check_element_volumes;
   /// minimum size for element volume to be counted as a tiny element
@@ -94,6 +100,8 @@ private:
   const MooseEnum _check_non_conformal_mesh;
   /// tolerance for detecting when meshes are not conformal
   const Real _non_conformality_tol;
+  /// whether to check for element faces that border material but match no neighbor face
+  const MooseEnum _check_nonconforming_faces;
   //// whether to check for intersecting edges
   const MooseEnum _check_non_matching_edges;
   //// tolerance for detecting when edges intersect

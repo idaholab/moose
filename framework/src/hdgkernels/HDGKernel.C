@@ -39,5 +39,6 @@ HDGKernel::HDGKernel(const InputParameters & parameters)
 void
 HDGKernel::computeResidualAndJacobianOnSide()
 {
-  mooseError("not implemented");
+  computeResidualOnSide();
+  computeJacobianOnSide();
 }

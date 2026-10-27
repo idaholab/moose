@@ -18,10 +18,6 @@
 []
 
 [Variables]
-  [./u_x]
-  [../]
-  [./u_y]
-  [../]
   [./global_strain]
     order = THIRD
     family = SCALAR
@@ -57,10 +53,15 @@
   block = 0
 []
 
-[Kernels]
-  [SolidMechanics]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = false
+    global_strain = global_strain
   [../]
 []
+
 
 [ScalarKernels]
   [./global_strain]
@@ -99,10 +100,6 @@
     block = 0
     C_ijkl = '1 1'
     fill_method = symmetric_isotropic
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
-    global_strain = global_strain
   [../]
   [./global_strain]
     type = ComputeGlobalStrain

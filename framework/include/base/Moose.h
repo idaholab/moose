@@ -14,6 +14,7 @@
 #include "libmesh/libmesh_common.h"
 #include "XTermConstants.h"
 
+#include <csignal>
 #include <limits>
 #include <memory>
 #include <set>
@@ -133,7 +134,7 @@ extern const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_ITERATION_END;
 extern const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_BEGIN;
 extern const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_END;
 extern const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_CONVERGENCE;
-extern const ExecFlagType EXEC_MULTISYSTEM_FIXED_POINT_CONVERGENCE;
+extern const ExecFlagType EXEC_MULTISYSTEM_FIXED_POINT_ITERATION_END;
 extern const ExecFlagType EXEC_FINAL;
 extern const ExecFlagType EXEC_FORCED;
 extern const ExecFlagType EXEC_FAILED;
@@ -151,6 +152,16 @@ extern const ExecFlagType EXEC_POST_ADAPTIVITY;
 
 namespace Moose
 {
+/**
+ * @return whether \p exec_flag is a solver execution flag, e.g. a flag on which a solver
+ * evaluation such as a residual, Jacobian, or postcheck evaluation is performed
+ *
+ * When a solver execution flag is added to the list of execution flags above, add it to the
+ * implementation of this method as well so that logic keyed on solver evaluations, such as the
+ * MooseException handling in FEProblemBase::checkExceptionAndStopSolve(), picks it up
+ */
+bool isSolverExecFlag(const ExecFlagType & exec_flag);
+
 // MOOSE is not tested with LIBMESH_DIM != 3
 static_assert(LIBMESH_DIM == 3,
               "MOOSE must be built with a libmesh library compiled without --enable-1D-only "
@@ -170,7 +181,7 @@ inline constexpr std::size_t invalid_size_t = std::numeric_limits<std::size_t>::
  * Used by the signal handler to determine if we should write a checkpoint file out at any point
  * during operation.
  */
-extern int interrupt_signal_number;
+extern volatile std::sig_atomic_t interrupt_signal_number;
 
 /**
  * Set to false (the default) to display an error message only once for each error call code

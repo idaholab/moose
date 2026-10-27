@@ -1,6 +1,6 @@
 [Tests]
   issues = '#19000'
-  design = 'TensorClasses.md'
+  design = 'MandelConverter.md'
 
   [small_strain]
     requirement = 'The system shall solve the continuum mechanics equations in the small strain '

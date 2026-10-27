@@ -1,0 +1,11 @@
+# Existing GoogleTests awaiting SQA metadata. New entries are prohibited; this list may only shrink.
+unit:
+  - EquilibriumConstantFitTest.constructor
+  - EquilibriumConstantFitTest.sample
+  - HenryGasConstantTest.test
+  - ReactionNetworkParserUtilsTest.metadata
+  - ReactionNetworkParserUtilsTest.minus_sign
+  - ReactionNetworkParserUtilsTest.multiple_reactions
+  - ReactionNetworkParserUtilsTest.non_unique_species
+  - ReactionNetworkParserUtilsTest.simple
+  - ReactionNetworkParserUtilsTest.two_terms

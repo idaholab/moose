@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,6 +12,7 @@
 #include "MooseMesh.h"
 #include "FEProblemBase.h"
 #include "NonlinearSystemBase.h"
+#include "LinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "Assembly.h"
 #include "BoundaryRestrictable.h"
@@ -93,9 +94,6 @@ Assembly::initQuadrature()
 
   // Cache quadrature data
 
-  std::map<SubdomainID, std::map<ElemType, unsigned int>> n_qps;
-  std::map<SubdomainID, std::map<ElemType, std::vector<unsigned int>>> n_qps_face;
-
   _max_qps_per_elem = 0;
 
   for (auto subdomain : _mesh.meshSubdomains())
@@ -106,8 +104,9 @@ Assembly::initQuadrature()
     auto qrule = assembly.writeableQRule(_dimension, subdomain, {});
     auto qrule_face = assembly.writeableQRuleFace(_dimension, subdomain, {});
 
-    for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
+    for (auto & [elem_type_and_p_level, elem_type_id] : kokkosMesh().getElementTypeMap())
     {
+      const auto [elem_type, p_level] = elem_type_and_p_level;
       auto elem = &libMesh::ReferenceElem::get(elem_type);
 
       _q_points_face(sid, elem_type_id).create(elem->n_sides());
@@ -115,13 +114,12 @@ Assembly::initQuadrature()
 
       // Cache volume quadrature of each reference element
 
-      qrule->init(*elem, /* p-level */ 0);
-      n_qps[subdomain][elem_type] = qrule->n_points();
+      qrule->init(*elem, p_level);
 
       _q_points(sid, elem_type_id).create(qrule->n_points());
       _weights(sid, elem_type_id).create(qrule->n_points());
 
-      for (unsigned int qp = 0; qp < qrule->n_points(); ++qp)
+      for (const auto qp : make_range(qrule->n_points()))
       {
         _q_points(sid, elem_type_id)[qp] = qrule->qp(qp);
         _weights(sid, elem_type_id)[qp] = qrule->w(qp);
@@ -129,22 +127,21 @@ Assembly::initQuadrature()
 
       // Cache face quadrature of each reference element
 
-      for (unsigned int side = 0; side < elem->n_sides(); ++side)
+      for (const auto side : elem->side_index_range())
       {
-        qrule_face->init(*elem->side_ptr(side), /* p-level */ 0);
-        n_qps_face[subdomain][elem_type].push_back(qrule_face->n_points());
+        qrule_face->init(*elem->side_ptr(side), p_level);
 
         _q_points_face(sid, elem_type_id)[side].create(qrule_face->n_points());
         _weights_face(sid, elem_type_id)[side].create(qrule_face->n_points());
 
-        for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
+        for (const auto qp : make_range(qrule_face->n_points()))
         {
           _q_points_face(sid, elem_type_id)[side][qp] = qrule_face->qp(qp);
           _weights_face(sid, elem_type_id)[side][qp] = qrule_face->w(qp);
         }
       }
 
-      _max_qps_per_elem = std::max(_max_qps_per_elem, n_qps[subdomain][elem_type]);
+      _max_qps_per_elem = std::max(_max_qps_per_elem, qrule->n_points());
     }
   }
 
@@ -173,13 +170,14 @@ Assembly::initQuadrature()
   {
     auto eid = kokkosMesh().getContiguousElementID(elem);
     auto sid = kokkosMesh().getContiguousSubdomainID(elem->subdomain_id());
+    const auto elem_type_id = kokkosMesh().getElementTypeID(elem);
 
-    _n_qps[eid] = n_qps[elem->subdomain_id()][elem->type()];
+    _n_qps[eid] = _q_points(sid, elem_type_id).size();
     _qp_offset[eid] = _n_subdomain_qps[sid];
     _n_subdomain_qps[sid] += _n_qps[eid];
 
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
-      _n_qps_face(side, eid) = n_qps_face[elem->subdomain_id()][elem->type()][side];
+    for (const auto side : elem->side_index_range())
+      _n_qps_face(side, eid) = _q_points_face(sid, elem_type_id)[side].size();
   }
 
   for (auto boundary : _material_boundaries)
@@ -191,13 +189,17 @@ Assembly::initQuadrature()
       {
         auto sid = kokkosMesh().getContiguousSubdomainID(elem->subdomain_id());
         auto eid = kokkosMesh().getContiguousElementID(elem);
-        auto side = _mesh.sideWithBoundaryID(elem, boundary);
 
-        _qp_offset_face(side, eid) = _n_subdomain_qps_face[sid];
-        _n_subdomain_qps_face[sid] += _n_qps_face(side, eid);
+        for (const auto side :
+             _mesh.getMesh().get_boundary_info().sides_with_boundary_id(elem, boundary))
+          if (_qp_offset_face(side, eid) == libMesh::DofObject::invalid_id)
+          {
+            _qp_offset_face(side, eid) = _n_subdomain_qps_face[sid];
+            _n_subdomain_qps_face[sid] += _n_qps_face(side, eid);
 
-        _elem_face_property_idx(side, eid) = _n_elem_face_properties[sid];
-        ++_n_elem_face_properties[sid];
+            _elem_face_property_idx(side, eid) = _n_elem_face_properties[sid];
+            ++_n_elem_face_properties[sid];
+          }
       }
     }
 
@@ -226,12 +228,33 @@ Assembly::initShape()
 
   auto getFETypes = [&](::System & system)
   {
-    for (unsigned int var = 0; var < system.n_vars(); var++)
-      fe_types.insert(system.variable_type(var));
+    for (const auto var : make_range(system.n_vars()))
+    {
+      const auto fe_type = system.variable_type(var);
+      const auto field_type = FEInterface::field_type(fe_type);
+
+      if (field_type == libMesh::TYPE_VECTOR)
+      {
+        if (fe_type.family != libMesh::LAGRANGE_VEC)
+          mooseError("Kokkos currently only supports LAGRANGE_VEC for vector FE families.");
+      }
+      else
+      {
+        if (fe_type.family != libMesh::LAGRANGE && fe_type.family != libMesh::L2_LAGRANGE &&
+            fe_type.family != libMesh::MONOMIAL && fe_type.family != libMesh::SCALAR)
+          mooseError("Kokkos currently only supports LAGRANGE, L2_LAGRNAGE, MONOMIAL, SCALAR for "
+                     "scalar FE families.");
+      }
+
+      fe_types.insert(fe_type);
+    }
   };
 
-  for (unsigned int nl = 0; nl < _problem.numNonlinearSystems(); ++nl)
+  for (const auto nl : make_range(_problem.numNonlinearSystems()))
     getFETypes(_problem.getNonlinearSystemBase(nl).system());
+
+  for (const auto linear : make_range(_problem.numLinearSystems()))
+    getFETypes(_problem.getLinearSystem(linear).system());
 
   getFETypes(_problem.getAuxiliarySystem().system());
 
@@ -239,6 +262,13 @@ Assembly::initShape()
 
   for (auto & fet : fe_types)
     _fe_type_map[fet] = _fe_type_map.size();
+
+  _is_vector_fe_type.create(_fe_type_map.size());
+
+  for (auto & [fe_type, fe_type_id] : _fe_type_map)
+    _is_vector_fe_type[fe_type_id] = FEInterface::field_type(fe_type) == libMesh::TYPE_VECTOR;
+
+  _is_vector_fe_type.copyToDevice();
 
   // Cache reference shape data
 
@@ -249,6 +279,10 @@ Assembly::initShape()
   _phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _grad_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _vector_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _vector_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _vector_grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _vector_grad_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
 
   _map_phi.create(num_subdomains, num_elem_types);
   _map_phi_face.create(num_subdomains, num_elem_types);
@@ -263,6 +297,18 @@ Assembly::initShape()
   _n_dofs.create(num_elem_types, _fe_type_map.size());
   _n_dofs = 0;
 
+  auto buildReferenceElem = [](const libMesh::ElemType elem_type, const unsigned int p_level)
+  {
+    const auto & reference_elem = libMesh::ReferenceElem::get(elem_type);
+    auto elem = libMesh::Elem::build(elem_type);
+
+    for (const auto node : elem->node_index_range())
+      elem->set_node(node, const_cast<libMesh::Node *>(reference_elem.node_ptr(node)));
+
+    elem->set_p_level(p_level);
+    return elem;
+  };
+
   for (auto subdomain : _mesh.meshSubdomains())
   {
     auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
@@ -273,79 +319,156 @@ Assembly::initShape()
 
     for (auto & [fe_type, fe_type_id] : _fe_type_map)
     {
-      std::unique_ptr<FEBase> fe(FEBase::build(_dimension, fe_type));
-      std::unique_ptr<FEBase> fe_face(FEBase::build(_dimension, fe_type));
+      const bool is_vector_fe = FEInterface::field_type(fe_type) == libMesh::TYPE_VECTOR;
 
-      fe->attach_quadrature_rule(qrule);
-      fe_face->attach_quadrature_rule(qrule_face);
+      std::unique_ptr<FEBase> fe;
+      std::unique_ptr<FEBase> fe_face;
+      std::unique_ptr<FEVectorBase> vector_fe;
+      std::unique_ptr<FEVectorBase> vector_fe_face;
 
-      for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
+      if (is_vector_fe)
       {
-        auto elem = &libMesh::ReferenceElem::get(elem_type);
+        vector_fe = FEVectorBase::build(_dimension, fe_type);
+        vector_fe_face = FEVectorBase::build(_dimension, fe_type);
 
-        auto & phi = fe->get_phi();
-        auto & grad_phi = fe->get_dphi();
+        vector_fe->add_p_level_in_reinit(fe_type.p_refinement);
+        vector_fe_face->add_p_level_in_reinit(fe_type.p_refinement);
 
-        fe->reinit(elem);
+        vector_fe->attach_quadrature_rule(qrule);
+        vector_fe_face->attach_quadrature_rule(qrule_face);
+      }
+      else
+      {
+        fe = FEBase::build(_dimension, fe_type);
+        fe_face = FEBase::build(_dimension, fe_type);
 
-        _n_dofs(elem_type_id, fe_type_id) = phi.size();
+        fe->add_p_level_in_reinit(fe_type.p_refinement);
+        fe_face->add_p_level_in_reinit(fe_type.p_refinement);
 
-        _phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
-        _grad_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
+        fe->attach_quadrature_rule(qrule);
+        fe_face->attach_quadrature_rule(qrule_face);
+      }
 
-        for (unsigned int i = 0; i < phi.size(); ++i)
-          for (unsigned int qp = 0; qp < qrule->n_points(); ++qp)
-          {
-            _phi(sid, elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
-            _grad_phi(sid, elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
-          }
+      for (auto & [elem_type_and_p_level, elem_type_id] : kokkosMesh().getElementTypeMap())
+      {
+        const auto [elem_type, p_level] = elem_type_and_p_level;
+        auto elem = buildReferenceElem(elem_type, p_level);
 
-        _phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-        _grad_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-
-        for (unsigned int side = 0; side < elem->n_sides(); ++side)
+        if (is_vector_fe)
         {
-          auto & phi = fe_face->get_phi();
-          auto & grad_phi = fe_face->get_dphi();
+          auto & phi = vector_fe->get_phi();
+          auto & grad_phi = vector_fe->get_dphi();
 
-          fe_face->reinit(elem, side);
+          vector_fe->reinit(elem.get());
 
-          _phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(), qrule_face->n_points());
-          _grad_phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
-                                                                     qrule_face->n_points());
+          _n_dofs(elem_type_id, fe_type_id) = phi.size();
 
-          for (unsigned int i = 0; i < phi.size(); ++i)
-            for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
+          _vector_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
+          _vector_grad_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
+
+          for (const auto i : index_range(phi))
+            for (const auto qp : make_range(qrule->n_points()))
             {
-              _phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
-              _grad_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
+              _vector_phi(sid, elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
+              _vector_grad_phi(sid, elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
             }
+
+          _vector_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
+          _vector_grad_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
+
+          for (const auto side : elem->side_index_range())
+          {
+            auto & phi = vector_fe_face->get_phi();
+            auto & grad_phi = vector_fe_face->get_dphi();
+
+            vector_fe_face->reinit(elem.get(), side);
+
+            _vector_phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
+                                                                         qrule_face->n_points());
+            _vector_grad_phi_face(sid, elem_type_id, fe_type_id)(side).create(
+                phi.size(), qrule_face->n_points());
+
+            for (const auto i : index_range(phi))
+              for (const auto qp : make_range(qrule_face->n_points()))
+              {
+                _vector_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
+                _vector_grad_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
+              }
+          }
+        }
+        else
+        {
+          auto & phi = fe->get_phi();
+          auto & grad_phi = fe->get_dphi();
+
+          fe->reinit(elem.get());
+
+          _n_dofs(elem_type_id, fe_type_id) = phi.size();
+
+          _phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
+          _grad_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
+
+          for (const auto i : index_range(phi))
+            for (const auto qp : make_range(qrule->n_points()))
+            {
+              _phi(sid, elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
+              _grad_phi(sid, elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
+            }
+
+          _phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
+          _grad_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
+
+          for (const auto side : elem->side_index_range())
+          {
+            auto & phi = fe_face->get_phi();
+            auto & grad_phi = fe_face->get_dphi();
+
+            fe_face->reinit(elem.get(), side);
+
+            _phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
+                                                                  qrule_face->n_points());
+            _grad_phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
+                                                                       qrule_face->n_points());
+
+            for (const auto i : index_range(phi))
+              for (const auto qp : make_range(qrule_face->n_points()))
+              {
+                _phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
+                _grad_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
+              }
+          }
         }
       }
     }
 
-    for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
+    for (auto & [elem_type_and_p_level, elem_type_id] : kokkosMesh().getElementTypeMap())
     {
-      auto elem = &libMesh::ReferenceElem::get(elem_type);
-      auto fe_type = FEType(elem->default_order(), LAGRANGE);
-      auto shape_deriv_ptr = libMesh::FEInterface::shape_deriv_function(fe_type, elem);
+      const auto [elem_type, p_level] = elem_type_and_p_level;
+      const auto & reference_elem = libMesh::ReferenceElem::get(elem_type);
+      auto fe_type = FEType(reference_elem.default_order(), LAGRANGE);
+      auto shape_deriv_ptr = libMesh::FEInterface::shape_deriv_function(fe_type, &reference_elem);
 
       std::unique_ptr<FEBase> fe(FEBase::build(_dimension, fe_type));
       std::unique_ptr<FEBase> fe_face(FEBase::build(_dimension, fe_type));
 
+      fe->add_p_level_in_reinit(false);
+      fe_face->add_p_level_in_reinit(false);
+
       fe->attach_quadrature_rule(qrule);
       fe_face->attach_quadrature_rule(qrule_face);
+
+      auto elem = buildReferenceElem(elem_type, p_level);
 
       auto & phi = fe->get_phi();
       auto & grad_phi = fe->get_dphi();
 
-      fe->reinit(elem);
+      fe->reinit(elem.get());
 
       _map_phi(sid, elem_type_id).create(phi.size(), qrule->n_points());
       _map_grad_phi(sid, elem_type_id).create(phi.size(), qrule->n_points());
 
-      for (unsigned int i = 0; i < phi.size(); ++i)
-        for (unsigned int qp = 0; qp < qrule->n_points(); ++qp)
+      for (const auto i : index_range(phi))
+        for (const auto qp : make_range(qrule->n_points()))
         {
           _map_phi(sid, elem_type_id)(i, qp) = phi[i][qp];
           _map_grad_phi(sid, elem_type_id)(i, qp) = grad_phi[i][qp];
@@ -359,20 +482,20 @@ Assembly::initShape()
       _normal_dx_dxi(sid, elem_type_id).create(elem->n_sides());
       _normal_dx_deta(sid, elem_type_id).create(elem->n_sides());
 
-      for (unsigned int side = 0; side < elem->n_sides(); ++side)
+      for (const auto side : elem->side_index_range())
       {
         auto side_ptr = elem->build_side_ptr(side);
 
         auto & phi = fe_face->get_phi();
         auto & grad_phi = fe_face->get_dphi();
 
-        fe_face->reinit(elem, side);
+        fe_face->reinit(elem.get(), side);
 
         _map_phi_face(sid, elem_type_id)(side).create(phi.size(), qrule_face->n_points());
         _map_grad_phi_face(sid, elem_type_id)(side).create(phi.size(), qrule_face->n_points());
 
-        for (unsigned int i = 0; i < phi.size(); ++i)
-          for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
+        for (const auto i : index_range(phi))
+          for (const auto qp : make_range(qrule_face->n_points()))
           {
             _map_phi_face(sid, elem_type_id)(side)(i, qp) = phi[i][qp];
             _map_grad_phi_face(sid, elem_type_id)(side)(i, qp) = grad_phi[i][qp];
@@ -385,8 +508,8 @@ Assembly::initShape()
         _map_psi_face(sid, elem_type_id)(side).create(psi.size(), qrule_face->n_points());
         _map_grad_psi_face(sid, elem_type_id)(side).create(psi.size(), qrule_face->n_points());
 
-        for (unsigned int i = 0; i < psi.size(); ++i)
-          for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
+        for (const auto i : index_range(psi))
+          for (const auto qp : make_range(qrule_face->n_points()))
           {
             _map_psi_face(sid, elem_type_id)(side)(i, qp) = psi[i][qp];
             if (elem->dim() > 1)
@@ -398,24 +521,24 @@ Assembly::initShape()
         _normal_dx_dxi(sid, elem_type_id)(side).create(phi.size(), qrule_face->n_points());
         _normal_dx_deta(sid, elem_type_id)(side).create(phi.size(), qrule_face->n_points());
 
-        for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
+        for (const auto qp : make_range(qrule_face->n_points()))
         {
           Point reference_point;
 
           if (_dimension == 1)
             reference_point = side ? Point(1) : Point(-1);
           else if (_dimension == 2)
-            for (unsigned int i = 0; i < psi.size(); ++i)
+            for (const auto i : index_range(psi))
               reference_point.add_scaled(side_ptr->point(i), psi[i][qp]);
 
-          for (unsigned int i = 0; i < phi.size(); ++i)
+          for (const auto i : index_range(phi))
           {
             if (_dimension < 3)
               _normal_dx_dxi(sid, elem_type_id)(side)(i, qp) =
-                  shape_deriv_ptr(fe_type, elem, i, 0, reference_point, false);
+                  shape_deriv_ptr(fe_type, elem.get(), i, 0, reference_point, false);
             if (_dimension == 2)
               _normal_dx_deta(sid, elem_type_id)(side)(i, qp) =
-                  shape_deriv_ptr(fe_type, elem, i, 1, reference_point, false);
+                  shape_deriv_ptr(fe_type, elem.get(), i, 1, reference_point, false);
           }
         }
       }
@@ -426,6 +549,10 @@ Assembly::initShape()
   _phi_face.copyToDeviceNested();
   _grad_phi.copyToDeviceNested();
   _grad_phi_face.copyToDeviceNested();
+  _vector_phi.copyToDeviceNested();
+  _vector_phi_face.copyToDeviceNested();
+  _vector_grad_phi.copyToDeviceNested();
+  _vector_grad_phi_face.copyToDeviceNested();
 
   _map_phi.copyToDeviceNested();
   _map_phi_face.copyToDeviceNested();

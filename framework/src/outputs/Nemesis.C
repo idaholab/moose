@@ -19,8 +19,6 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/nemesis_io.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", Nemesis);
 
 InputParameters
@@ -78,7 +76,7 @@ Nemesis::outputSetup()
   }
 
   // Create the new NemesisIO object
-  _nemesis_io_ptr = std::make_unique<Nemesis_IO>(_problem_ptr->mesh().getMesh());
+  _nemesis_io_ptr = std::make_unique<libMesh::Nemesis_IO>(_problem_ptr->mesh().getMesh());
   _nemesis_initialized = false;
 
   if (_write_hdf5)

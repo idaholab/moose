@@ -40,23 +40,12 @@ void
 TimeSequenceFromTimes::updateTimeSequence()
 {
   auto time_points = _times.getTimes();
-  resetSequence();
   updateSequence(time_points);
 }
 
-Real
-TimeSequenceFromTimes::computeDT()
+void
+TimeSequenceFromTimes::refreshSequence()
 {
   if (_times.isDynamicTimeSequence())
     updateTimeSequence();
-
-  return TimeSequenceStepperBase::computeDT();
-}
-
-Real
-TimeSequenceFromTimes::getNextTimeInSequence()
-{
-  if (_times.isDynamicTimeSequence())
-    updateTimeSequence();
-  return TimeSequenceStepperBase::getNextTimeInSequence();
 }

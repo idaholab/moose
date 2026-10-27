@@ -544,7 +544,7 @@ protected:
 
   /**
    * Returns a *writable* MooseVariable object for a nodal or elemental variable. Use
-   * var.setNodalValue(val[, idx]) in both cases (!) to set the solution DOF values. Only one
+   * var.setNodalValue(val) in both cases (!) to set the solution DOF values. Only one
    * object can obtain a writable reference in a simulation. Note that the written values will
    * not ba available in the same system loop! E.g. values written using this API by a nodal
    * AuxKernel will not be updated for other nodal AuxKernels during the same iteration over all
@@ -1607,6 +1607,12 @@ private:
 
 protected:
   /**
+   * Whether this object evaluates coupled variables on element faces, so that it must request
+   * coupled AD gradients through the face accessors. Base classes of face objects override this.
+   */
+  virtual bool usesFaceCoupledValues() const { return false; }
+
+  /**
    * Deprecated method. Use \p getFieldVar instead
    * Extract pointer to a base coupled field variable. Could be either a finite volume or finite
    * element variable
@@ -1851,6 +1857,11 @@ private:
                                                          unsigned int comp) const;
   Moose::Kokkos::Variable kokkosCoupledVectorTagVariables(const std::string & var_name,
                                                           const std::string & tag_name) const;
+  Moose::Kokkos::Variable kokkosCoupledVectorTagVectorVariable(const std::string & var_name,
+                                                               const std::string & tag_name,
+                                                               unsigned int comp) const;
+  Moose::Kokkos::Variable kokkosCoupledVectorTagVectorVariables(const std::string & var_name,
+                                                                const std::string & tag_name) const;
   Moose::Kokkos::Variable kokkosZeroVariable() const;
 
 public:
@@ -1904,6 +1915,56 @@ public:
   kokkosCoupledVectorTagDofValues(const std::string & var_name,
                                   const std::string & tag_param_name) const;
 
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorTagVectorValueByName(
+      const std::string & var_name, const std::string & tag_name, unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorTagVectorValuesByName(const std::string & var_name,
+                                           const std::string & tag_name) const;
+  Moose::Kokkos::VectorVariableGradient kokkosCoupledVectorTagVectorGradientByName(
+      const std::string & var_name, const std::string & tag_name, unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableGradient
+  kokkosCoupledVectorTagVectorGradientsByName(const std::string & var_name,
+                                              const std::string & tag_name) const;
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorTagVectorNodalValueByName(
+      const std::string & var_name, const std::string & tag_name, unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorTagVectorNodalValuesByName(const std::string & var_name,
+                                                const std::string & tag_name) const;
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorTagVectorDofValueByName(
+      const std::string & var_name, const std::string & tag_name, unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorTagVectorDofValuesByName(const std::string & var_name,
+                                              const std::string & tag_name) const;
+
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorTagVectorValue(const std::string & var_name,
+                                    const std::string & tag_param_name,
+                                    unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorTagVectorValues(const std::string & var_name,
+                                     const std::string & tag_param_name) const;
+  Moose::Kokkos::VectorVariableGradient
+  kokkosCoupledVectorTagVectorGradient(const std::string & var_name,
+                                       const std::string & tag_param_name,
+                                       unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableGradient
+  kokkosCoupledVectorTagVectorGradients(const std::string & var_name,
+                                        const std::string & tag_param_name) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorTagVectorNodalValue(const std::string & var_name,
+                                         const std::string & tag_param_name,
+                                         unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorTagVectorNodalValues(const std::string & var_name,
+                                          const std::string & tag_param_name) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorTagVectorDofValue(const std::string & var_name,
+                                       const std::string & tag_param_name,
+                                       unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorTagVectorDofValues(const std::string & var_name,
+                                        const std::string & tag_param_name) const;
+
   Moose::Kokkos::VariableValue kokkosCoupledValue(const std::string & var_name,
                                                   unsigned int comp = 0) const;
   Moose::Kokkos::VariableValue kokkosCoupledValues(const std::string & var_name) const;
@@ -1949,6 +2010,64 @@ public:
   Moose::Kokkos::VariableValue kokkosCoupledNodalDot(const std::string & var_name,
                                                      unsigned int comp = 0) const;
   Moose::Kokkos::VariableValue kokkosCoupledNodalDots(const std::string & var_name) const;
+
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorValue(const std::string & var_name,
+                                                              unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableGradient kokkosCoupledVectorGradient(const std::string & var_name,
+                                                                    unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorNodalValue(const std::string & var_name,
+                                                                   unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorDofValue(const std::string & var_name,
+                                                                 unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorValues(const std::string & var_name) const;
+  Moose::Kokkos::VectorVariableGradient
+  kokkosCoupledVectorGradients(const std::string & var_name) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorNodalValues(const std::string & var_name) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorDofValues(const std::string & var_name) const;
+
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorValueOld(const std::string & var_name,
+                                                                 unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableGradient kokkosCoupledVectorGradientOld(const std::string & var_name,
+                                                                       unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorNodalValueOld(const std::string & var_name,
+                                                                      unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorDofValueOld(const std::string & var_name,
+                                                                    unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorValuesOld(const std::string & var_name) const;
+  Moose::Kokkos::VectorVariableGradient
+  kokkosCoupledVectorGradientsOld(const std::string & var_name) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorNodalValuesOld(const std::string & var_name) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorDofValuesOld(const std::string & var_name) const;
+
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorValueOlder(const std::string & var_name,
+                                                                   unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableGradient
+  kokkosCoupledVectorGradientOlder(const std::string & var_name, unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorNodalValueOlder(const std::string & var_name, unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorDofValueOlder(const std::string & var_name,
+                                                                      unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorValuesOlder(const std::string & var_name) const;
+  Moose::Kokkos::VectorVariableGradient
+  kokkosCoupledVectorGradientsOlder(const std::string & var_name) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorNodalValuesOlder(const std::string & var_name) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorDofValuesOlder(const std::string & var_name) const;
+
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorDot(const std::string & var_name,
+                                                            unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorNodalDot(const std::string & var_name,
+                                                                 unsigned int comp = 0) const;
+  Moose::Kokkos::VectorVariableValue kokkosCoupledVectorDots(const std::string & var_name) const;
+  Moose::Kokkos::VectorVariableValue
+  kokkosCoupledVectorNodalDots(const std::string & var_name) const;
 
   Moose::Kokkos::ADVariableValue kokkosADCoupledVectorTagValueByName(const std::string & var_name,
                                                                      const std::string & tag_name,
@@ -2061,7 +2180,7 @@ template <typename T>
 T *
 Coupleable::getVarHelper(const std::string & var_name_in, unsigned int comp)
 {
-  const auto var_name = _c_parameters.checkForRename(var_name_in);
+  const auto & var_name = _c_parameters.checkForRename(var_name_in);
   auto name_to_use = var_name;
 
   // First check for supplied name
@@ -2085,29 +2204,33 @@ Coupleable::getVarHelper(const std::string & var_name_in, unsigned int comp)
 
   mooseAssert(coupled_vars_it != _coupled_vars.end(),
               "Trying to get a coupled var " << name_to_use << " that doesn't exist");
+  mooseAssert(comp < coupled_vars_it->second.size(),
+              "Component index outside of coupled variables vector");
+  auto * const base_var = coupled_vars_it->second[comp];
 
-  if (auto coupled_var = dynamic_cast<T *>(coupled_vars_it->second[comp]))
+  if (auto coupled_var = dynamic_cast<T *>(base_var))
     return coupled_var;
   else
   {
     for (auto & var : _coupled_standard_moose_vars)
-      if (var->name() == name_to_use)
+      if (var->name() == base_var->name())
         mooseError("The named variable is a standard variable, try a "
                    "'coupled[Value/Gradient/Dot/etc]...' function instead");
     for (auto & var : _coupled_vector_moose_vars)
-      if (var->name() == name_to_use)
+      if (var->name() == base_var->name())
         mooseError("The named variable is a vector variable, try a "
                    "'coupledVector[Value/Gradient/Dot/etc]...' function instead");
     for (auto & var : _coupled_array_moose_vars)
-      if (var->name() == name_to_use)
+      if (var->name() == base_var->name())
         mooseError("The named variable is an array variable, try a "
                    "'coupledArray[Value/Gradient/Dot/etc]...' function instead");
     for (auto & var : _coupled_fv_moose_vars)
-      if (var->name() == name_to_use)
+      if (var->name() == base_var->name())
         mooseError("The named variable is a finite volume variable, which the coupled[...] routine "
                    "used does not support. Try using the functor system routines instead.");
-    mooseError(
-        "Variable '", name_to_use, "' is of a different C++ type than you tried to fetch it as.");
+    mooseError("Variable '",
+               base_var->name(),
+               "' is of a different C++ type than you tried to fetch it as.");
   }
 }
 

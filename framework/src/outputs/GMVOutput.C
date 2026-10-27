@@ -13,8 +13,6 @@
 #include "libmesh/equation_systems.h"
 #include "libmesh/gmv_io.h"
 
-using namespace libMesh;
-
 registerMooseObjectAliased("MooseApp", GMVOutput, "GMV");
 
 InputParameters
@@ -46,7 +44,7 @@ GMVOutput::GMVOutput(const InputParameters & parameters)
 void
 GMVOutput::output()
 {
-  GMVIO out(_es_ptr->get_mesh());
+  libMesh::GMVIO out(_es_ptr->get_mesh());
   out.write_equation_systems(filename(), *_es_ptr);
   _file_num++;
 }

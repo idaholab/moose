@@ -84,6 +84,23 @@ public:
   void clearNearestNodeLocators();
 
   /**
+   * Snapshot the PenetrationLocators' restartable state (the same state used for
+   * restart/recover), so it can be restored() if the current timestep is later rejected. Called
+   * from FEProblemBase::advanceState(), i.e. once per accepted step, before that step's
+   * timestepSetup(). Intentionally not restartable data itself: it is intra-run scratch that a
+   * checkpoint never needs, and is only ever read back within the same run.
+   */
+  void backup();
+
+  /**
+   * Restore the PenetrationLocators' state captured by the most recent backup(). Called from
+   * TimeStepper::rejectStep(), before FEProblemBase::restoreSolutions() re-projects the geometric
+   * search onto the restored mesh, so that re-projection starts from the same seeds attempt 1 did
+   * rather than from attempt 1's discarded, converged state.
+   */
+  void restore();
+
+  /**
    * Maximum percentage through the search patch that any NearestNodeLocator had to look.
    *
    * As this goes towards 1.0 it's indicative of needing to rebuild the patches.
@@ -145,4 +162,10 @@ private:
    * the nearest nodes have been identified.
    */
   bool _search_using_point_locator;
+
+  /**
+   * Per-locator PenetrationLocator::backup() snapshots taken by backup(), keyed the same way as
+   * _penetration_locators. Not restartable: see the comment on backup() above.
+   */
+  std::map<std::pair<BoundaryID, BoundaryID>, std::string> _penetration_locator_backups;
 };

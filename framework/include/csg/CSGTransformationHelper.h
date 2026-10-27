@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,10 @@
 
 #include "MooseTypes.h"
 #include "MooseEnum.h"
+
+#ifdef MOOSE_UNIT_TEST
+#include "gtest/gtest.h"
+#endif
 
 namespace CSG
 {
@@ -99,6 +103,7 @@ protected:
   ///@{
   FRIEND_TEST(CSGSurfaceTest, testHalfspaceWithTransform);
   FRIEND_TEST(CSGSurfaceTest, testHalfspaceWithNullTransform);
+  FRIEND_TEST(CSGEngUnitTest, testEngUnitEqual);
   ///@}
 #endif
 };

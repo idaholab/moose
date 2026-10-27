@@ -73,7 +73,7 @@ Sampler1DRealTempl<is_ad>::execute()
   needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 
-  ConstElemRange & elem_range = *(_mesh.getActiveLocalElementRange());
+  const ConstElemRange & elem_range = *(_mesh.getActiveLocalElementRange());
   for (typename ConstElemRange::const_iterator el = elem_range.begin(); el != elem_range.end();
        ++el)
   {

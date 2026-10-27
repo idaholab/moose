@@ -6,13 +6,11 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-
 #pragma once
 
 #include "GeneralReporter.h"
 #include "AdaptiveImportanceSampler.h"
 #include "ParallelSubsetSimulation.h"
-#include "ActiveLearningGPDecision.h"
 
 /**
  * AdaptiveMonteCarloDecision will help make sample accept/reject decisions in adaptive Monte Carlo
@@ -54,31 +52,28 @@ private:
   const ParallelSubsetSimulation * const _pss;
 
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
-  int _check_step;
-
-  /// Communicator that was split based on samples that have rows
-  libMesh::Parallel::Communicator & _local_comm;
+  int & _check_step;
 
   /// Storage for previously accepted input values. This helps in making decision on the next proposed inputs.
-  std::vector<std::vector<Real>> _prev_val;
+  std::vector<std::vector<Real>> & _prev_val;
 
   /// Storage for previously accepted output value.
-  std::vector<Real> _prev_val_out;
+  std::vector<Real> & _prev_val_out;
 
   /// Storage for the previously accepted sample inputs across all the subsets
-  std::vector<std::vector<Real>> _inputs_sto;
+  std::vector<std::vector<Real>> & _inputs_sto;
 
   /// Store the sorted input samples according to their corresponding outputs
-  std::vector<std::vector<Real>> _inputs_sorted;
+  std::vector<std::vector<Real>> & _inputs_sorted;
 
   /// Storage for previously accepted sample outputs across all the subsets
-  std::vector<Real> _outputs_sto;
+  std::vector<Real> & _outputs_sto;
 
   /// Store the sorted output sample values
-  std::vector<Real> _output_sorted;
+  std::vector<Real> & _output_sorted;
 
   /// Store the intermediate ouput failure thresholds
-  Real _output_limit;
+  Real & _output_limit;
 
   /// Check if a GP is used
   const bool _gp_used;

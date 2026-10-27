@@ -61,7 +61,11 @@ CoupledPenaltyInterfaceDiffusion::computeQpResidual(Moose::DGResidualType type)
   return r;
 }
 
-Real CoupledPenaltyInterfaceDiffusion::computeQpJacobian(Moose::DGJacobianType) { return 0; }
+Real
+CoupledPenaltyInterfaceDiffusion::computeQpJacobian(Moose::DGJacobianType)
+{
+  return 0;
+}
 
 Real
 CoupledPenaltyInterfaceDiffusion::computeQpOffDiagJacobian(Moose::DGJacobianType type,

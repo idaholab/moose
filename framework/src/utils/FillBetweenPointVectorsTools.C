@@ -24,8 +24,6 @@
 #include "libmesh/face_tri3.h"
 #include "libmesh/face_quad4.h"
 
-using namespace libMesh;
-
 namespace FillBetweenPointVectorsTools
 {
 void

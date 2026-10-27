@@ -40,7 +40,7 @@ LevelSetOlssonReinitialization::LevelSetOlssonReinitialization(const InputParame
 ADRealVectorValue
 LevelSetOlssonReinitialization::precomputeQpResidual()
 {
-  ADReal s = _grad_levelset_0[_qp].norm() + std::numeric_limits<ADReal>::epsilon();
+  ADReal s = _grad_levelset_0[_qp].norm() + std::numeric_limits<Real>::epsilon();
   ADRealVectorValue n_hat = _grad_levelset_0[_qp] / s;
   ADRealVectorValue f = _u[_qp] * (1 - _u[_qp]) * n_hat;
   if (_use_modified_reinitilization_formulation)

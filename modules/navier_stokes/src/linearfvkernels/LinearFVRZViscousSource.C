@@ -53,7 +53,7 @@ LinearFVRZViscousSource::LinearFVRZViscousSource(const InputParameters & params)
     paramError("momentum_component", "LinearFVRZViscousSource must act on the radial component.");
 
   if (_use_deviatoric_terms)
-    _var.computeCellGradients();
+    _var.requestCellGradients();
 
   const auto get_velocity_var =
       [this](const std::string & param_name) -> MooseLinearVariableFVReal *
@@ -78,7 +78,7 @@ LinearFVRZViscousSource::LinearFVRZViscousSource(const InputParameters & params)
       paramError("v", "The y-velocity must be provided when using deviatoric terms.");
 
     for (const auto dir : make_range(_dim))
-      _velocity_vars[dir]->computeCellGradients();
+      _velocity_vars[dir]->requestCellGradients();
   }
 }
 

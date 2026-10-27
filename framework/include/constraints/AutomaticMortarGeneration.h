@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MortarSegmentInfo.h"
+#include "Mortar3DSubpatchPlane.h"
 #include "MooseHashing.h"
 #include "ConsoleStreamInterface.h"
 #include "MooseError.h"
@@ -20,8 +21,14 @@
 #include "libmesh/equation_systems.h"
 #include "libmesh/elem.h"
 #include "libmesh/int_range.h"
+#include "libmesh/vector_value.h"
+
+#include "metaphysicl/raw_type.h"
 
 // C++ includes
+#include <array>
+#include <cmath>
+#include <functional>
 #include <optional>
 #include <set>
 #include <memory>
@@ -29,26 +36,73 @@
 #include <unordered_map>
 
 // Forward declarations
-namespace libMesh
-{
-class MeshBase;
-class System;
-}
 class GetPot;
 
 // Using statements
-using libMesh::boundary_id_type;
 using libMesh::CompareDofObjectsByID;
-using libMesh::dof_id_type;
-using libMesh::Elem;
-using libMesh::MeshBase;
-using libMesh::Node;
-using libMesh::Point;
-using libMesh::Real;
-using libMesh::subdomain_id_type;
 
 typedef boundary_id_type BoundaryID;
 typedef subdomain_id_type SubdomainID;
+
+namespace Moose
+{
+namespace Mortar
+{
+/**
+ * Construct the two tangent vectors used by mortar from a unit normal. The template keeps the
+ * Real-valued and AD contact geometry on the same Householder chart and therefore gives them
+ * identical values.
+ *
+ * The returned vectors are the reflections of two Cartesian basis vectors, so together with the
+ * normal they form an orthonormal frame everywhere, including the singular pole of the primary
+ * chart. Callers may use them directly and must not renormalize.
+ * See Lopes, Silva, and Ambrosio, Computer-Aided Design 45(3), 2013, pp. 683-694.
+ */
+template <typename Vector>
+std::array<Vector, 2>
+householderTangents(const Vector & normal)
+{
+  mooseAssert(MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(normal.norm()), 1),
+              "The input nodal normal should have unity norm");
+
+  const Vector h_vector(normal(0) + 1.0, normal(1), normal(2));
+
+  // The h = n + e_x chart is singular at (-1, 0, 0), where the complementary h2 = n - e_x chart
+  // is regular. The h2 frame has determinant -1, so negating its second tangent gives the same
+  // positive orientation as the primary chart. At the pole, the frame is
+  // {(0, 1, 0), (0, 0, -1)} with nonzero derivatives.
+  if (std::abs(MetaPhysicL::raw_value(h_vector(0))) < TOLERANCE)
+  {
+    const Vector h2_vector(normal(0) - 1.0, normal(1), normal(2));
+    const auto h2_squared = h2_vector.norm_sq();
+    return {{Vector(-2.0 * h2_vector(0) * h2_vector(1) / h2_squared,
+                    1.0 - 2.0 * h2_vector(1) * h2_vector(1) / h2_squared,
+                    -2.0 * h2_vector(1) * h2_vector(2) / h2_squared),
+             Vector(2.0 * h2_vector(0) * h2_vector(2) / h2_squared,
+                    2.0 * h2_vector(1) * h2_vector(2) / h2_squared,
+                    2.0 * h2_vector(2) * h2_vector(2) / h2_squared - 1.0)}};
+  }
+
+  // The squared norm avoids propagating derivatives through a square root.
+  const auto h_squared = h_vector.norm_sq();
+  return {{Vector(-2.0 * h_vector(0) * h_vector(1) / h_squared,
+                  1.0 - 2.0 * h_vector(1) * h_vector(1) / h_squared,
+                  -2.0 * h_vector(1) * h_vector(2) / h_squared),
+           Vector(-2.0 * h_vector(0) * h_vector(2) / h_squared,
+                  -2.0 * h_vector(1) * h_vector(2) / h_squared,
+                  1.0 - 2.0 * h_vector(2) * h_vector(2) / h_squared)}};
+}
+}
+}
+
+/**
+ * Parent-face reference coordinates associated with the vertices of one triangular mortar segment.
+ */
+struct MortarSegmentReferencePoints
+{
+  std::array<Point, 3> secondary_reference_points;
+  std::array<Point, 3> primary_reference_points;
+};
 
 /**
  * This class is a container/interface for the objects involved in
@@ -76,8 +130,11 @@ public:
                             const bool debug,
                             const bool correct_edge_dropping,
                             const Real minimum_projection_angle,
+                            const Mortar3DSubpatchPlane mortar_3d_subpatch_plane,
                             const MortarSegmentTriangulationMode triangulation_mode,
-                            const bool triangulate_triangles);
+                            const bool triangulate_triangles,
+                            const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping =
+                                Mortar3DQuadraturePointMapping::NORMAL_PROJECTION);
 
   /**
    * Once the secondary_requested_boundary_ids and
@@ -220,6 +277,16 @@ public:
   getNodalTangents(const Elem & secondary_elem) const;
 
   /**
+   * Build the normalized JxW-weighted secondary nodal normals from AD nodal coordinates.
+   *
+   * The coordinate functor adds displacement derivatives to each node's current coordinates, so the
+   * stored normal values and their derivatives use the same geometry state.
+   */
+  void
+  computeADNodalNormals(const std::function<ADPoint(const Node &)> & coordinate,
+                        std::unordered_map<const Node *, ADRealVectorValue> & nodal_normals) const;
+
+  /**
    * Compute on-the-fly mapping from secondary interior parent nodes to lower dimensional nodes
    * @return The map from secondary interior parent nodes to lower dimensional nodes
    */
@@ -314,6 +381,13 @@ public:
   }
 
   int dim() const { return _mesh.mesh_dimension(); }
+
+  /// Return the 3D mortar quadrature-point mapping method.
+  Mortar3DQuadraturePointMapping mortar3DQpMapping() const { return _mortar_3d_qp_mapping; }
+
+  /// Return the parent-face reference coordinates for a mortar segment.
+  const MortarSegmentReferencePoints &
+  mortarSegmentReferencePoints(const Elem & mortar_segment_elem) const;
 
   /**
    * @return The set of nodes on which mortar constraints are not active
@@ -483,7 +557,7 @@ private:
   /// Map from full dimensional secondary element id to lower dimensional secondary element
   std::unordered_map<dof_id_type, const Elem *> _secondary_element_to_secondary_lowerd_element;
 
-  // List of inactive lagrange multiplier nodes (for nodal variables)
+  /// List of inactive lagrange multiplier nodes owned by this processor (for nodal variables)
   std::unordered_set<const Node *> _inactive_local_lm_nodes;
 
   /// List of inactive lagrange multiplier nodes (for elemental variables)
@@ -514,12 +588,6 @@ private:
    */
   void projectPrimaryNodesSinglePair(SubdomainID lower_dimensional_primary_subdomain_id,
                                      SubdomainID lower_dimensional_secondary_subdomain_id);
-
-  /**
-   * Householder orthogonalization procedure to obtain proper basis for tangent and binormal vectors
-   */
-  void
-  householderOrthogolization(const Point & normal, Point & tangent_one, Point & tangent_two) const;
 
   /**
    * Process aligned nodes
@@ -563,11 +631,20 @@ private:
   /// segment mesh in extreme cases. This parameter is mostly intended for mortar mesh debugging purposes in 2D.
   const Real _minimum_projection_angle;
 
+  /// Method used to define the local projection planes for 3D secondary subpatches.
+  const Mortar3DSubpatchPlane _mortar_3d_subpatch_plane;
+
   /// Triangulation mode used for clipped 3D mortar polygons.
   const MortarSegmentTriangulationMode _triangulation_mode;
 
   /// Whether already-triangular clipped polygons should still be centroid-subdivided.
   const bool _triangulate_triangles;
+
+  /// Method used to map 3D mortar segment quadrature points to primary and secondary faces.
+  const Mortar3DQuadraturePointMapping _mortar_3d_qp_mapping;
+
+  /// Reference-coordinate data used only by the reference-interpolation mapping mode.
+  std::unordered_map<const Elem *, MortarSegmentReferencePoints> _msm_elem_to_reference_points;
 
   /// Storage for the input parameters used by the mortar nodal geometry output
   std::unique_ptr<InputParameters> _output_params;

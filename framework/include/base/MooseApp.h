@@ -66,6 +66,7 @@ class RelationshipManager;
 class ReporterData;
 class SolutionInvalidity;
 class MultiApp;
+class MooseMesh;
 #ifdef MOOSE_MFEM_ENABLED
 class MFEMProblemSolve;
 #endif
@@ -108,9 +109,6 @@ class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddCapability);
 class MooseApp : public PerfGraphInterface, public libMesh::ParallelObject, public MooseBase
 {
 public:
-  /// Get the device accelerated computations are supposed to be running on.
-  std::optional<MooseEnum> getComputeDevice() const;
-
 #ifdef MOOSE_LIBTORCH_ENABLED
   /// Get the device torch is supposed to be running on.
   torch::DeviceType getLibtorchDevice() const { return _libtorch_device; }
@@ -414,6 +412,13 @@ public:
    * Returns the MPI processor ID of the current processor.
    */
   processor_id_type processor_id() const { return _comm->rank(); }
+
+  /**
+   * Returns the number of threads this application uses.
+   * This is set by the [Application] num_threads value, or the process-wide count,
+   * which is set by the command line --n-threads, when unset
+   */
+  THREAD_ID numThreads() const { return _num_threads; }
 
   /**
    * Get the command line
@@ -737,6 +742,31 @@ public:
    * @return The backup
    */
   std::unique_ptr<Backup> backup();
+
+  /**
+   * Whether this app has an initial Backup object with mesh checkpoint entries.
+   */
+  bool hasInitialBackupMesh() const;
+
+  /**
+   * Whether this app has restored mesh topology from its initial Backup object.
+   */
+  bool restoredInitialBackupMesh() const { return _restored_initial_backup_mesh; }
+
+  /**
+   * Mark this app as requiring mesh topology data in its next Backup object.
+   */
+  void markMeshChangedForBackup() { _mesh_changed_for_backup = true; }
+
+  /**
+   * Whether this app requires mesh topology data in its next Backup object.
+   */
+  bool meshChangedForBackup() const { return _mesh_changed_for_backup; }
+
+  /**
+   * Restore \p mesh from this app's initial Backup object and consume the mesh checkpoint entries.
+   */
+  void restoreMeshFromInitialBackup(MooseMesh & mesh);
 
   /**
    * Insertion point for other apps that is called before backup()
@@ -1095,22 +1125,12 @@ public:
 
 #ifdef MOOSE_MFEM_ENABLED
   /**
-   * Create/configure the MFEM device with the provided \p device_string. More than one device can
-   * be configured. If supplying multiple devices, they should be comma separated
+   * Create/configure the MFEM device. If the application-level \p compute_device parameter was
+   * explicitly set, it takes precedence over \p executioner_device; otherwise,
+   * \p executioner_device is used. More than one device can be configured. If supplying multiple
+   * devices, they should be comma separated.
    */
-  void setMFEMDevice(const std::string & device_string,
-                     bool gpu_aware_mpi,
-                     Moose::PassKey<MFEMProblemSolve>);
-
-  /**
-   * Get the MFEM device object
-   */
-  std::shared_ptr<mfem::Device> getMFEMDevice(Moose::PassKey<MultiApp>) { return _mfem_device; }
-
-  /**
-   * Get the configured MFEM devices
-   */
-  const std::set<std::string> & getMFEMDevices(Moose::PassKey<MultiApp>) const;
+  void setMFEMDevice(const std::string & executioner_device, const bool & gpu_aware_mpi);
 #endif
 
   /**
@@ -1316,6 +1336,9 @@ protected:
   /// Builder for building app related parser tree
   Moose::Builder _builder;
 
+  /// The number of threads this application uses
+  THREAD_ID _num_threads;
+
   /// Where the restartable data is held (indexed on tid)
   std::vector<RestartableDataMap> _restartable_data;
 
@@ -1449,6 +1472,20 @@ protected:
   std::unordered_map<std::string, DynamicLibraryInfo> _lib_handles;
 
 private:
+  /**
+   * @return the raw num_threads value requested in the [Application] input block, read directly
+   * from the parser (the block is not applied to the app's InputParameters), or std::nullopt if
+   * unset. May be out of range; determineNumThreads() clamps it.
+   */
+  std::optional<THREAD_ID> requestedNumThreads() const;
+
+  /**
+   * Determines the number of threads this application should use from the [Application] block's
+   * num_threads parameter. Used to initialize _num_threads. An over-request is warned about
+   * in setupOptions(). See numThreads().
+   */
+  THREAD_ID determineNumThreads() const;
+
   /**
    * Internal function used to recursively create the executor objects.
    *
@@ -1706,17 +1743,15 @@ private:
   /// the backup will not be filled yet.
   std::unique_ptr<Backup> * const _initial_backup;
 
+  /// Whether mesh topology has been restored from the initial Backup object.
+  bool _restored_initial_backup_mesh = false;
+
+  /// Whether mesh topology has changed and should be included in Backup objects.
+  bool _mesh_changed_for_backup = false;
+
 #ifdef MOOSE_LIBTORCH_ENABLED
   /// The libtorch device this app is using (converted from compute_device)
   const torch::DeviceType _libtorch_device;
-#endif
-
-#ifdef MOOSE_MFEM_ENABLED
-  /// The MFEM Device object
-  std::shared_ptr<mfem::Device> _mfem_device;
-
-  /// MFEM supported devices based on user-provided config
-  std::set<std::string> _mfem_devices;
 #endif
 
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
@@ -1757,7 +1792,7 @@ MooseApp::registerInterfaceObject(T & interface)
     _interface_registry.emplace(typeid(T), std::move(new_registry));
   }
   else
-    registry = static_cast<InterfaceRegistryObjects<T> *>(it->second.get());
+    registry = cast_ptr<InterfaceRegistryObjects<T> *>(it->second.get());
 
   mooseAssert(std::count(registry->_objects.begin(), registry->_objects.end(), &interface) == 0,
               "Interface already registered");
@@ -1772,15 +1807,7 @@ MooseApp::getInterfaceObjects() const
 
   const auto it = _interface_registry.find(typeid(T));
   if (it != _interface_registry.end())
-    return static_cast<InterfaceRegistryObjects<T> *>(it->second.get())->_objects;
+    return cast_ptr<InterfaceRegistryObjects<T> *>(it->second.get())->_objects;
   const static std::vector<T *> empty;
   return empty;
 }
-
-#ifdef MOOSE_MFEM_ENABLED
-inline const std::set<std::string> &
-MooseApp::getMFEMDevices(Moose::PassKey<MultiApp>) const
-{
-  return _mfem_devices;
-}
-#endif

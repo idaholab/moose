@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMHyprePCG);
 InputParameters
 MFEMHyprePCG::validParams()
 {
-  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LORLinearSolverBase<mfem::HyprePCG>::validParams();
   params.addClassDescription("Hypre solver for the iterative solution of MFEM equation systems "
                              "using the preconditioned conjugate gradient method.");
 
@@ -31,7 +31,7 @@ MFEMHyprePCG::validParams()
 }
 
 MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters)
+  : Moose::MFEM::LORLinearSolverBase<mfem::HyprePCG>(parameters)
 {
   ConstructSolver();
 }
@@ -40,40 +40,27 @@ void
 MFEMHyprePCG::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::HyprePCG>(getMFEMProblem().getComm());
-  solver->iterative_mode = getParam<bool>("use_initial_guess");
-  solver->SetTol(getParam<mfem::real_t>("l_tol"));
-  solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
-  solver->SetMaxIter(getParam<int>("l_max_its"));
-  solver->SetPrintLevel(getParam<int>("print_level"));
-  SetPreconditioner(*solver);
+  SetSolverParameters(*solver);
   _solver = std::move(solver);
 }
 
 void
-MFEMHyprePCG::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers)
+MFEMHyprePCG::SetSolverParameters(mfem::HyprePCG & solver)
 {
-  if (_lor && _preconditioner)
-    mooseError("LOR solver cannot take a preconditioner");
+  solver.iterative_mode = getParam<bool>("use_initial_guess");
+  solver.SetTol(getParam<mfem::real_t>("l_tol"));
+  solver.SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
+  solver.SetMaxIter(getParam<int>("l_max_its"));
+  solver.SetPrintLevel(getParam<int>("print_level"));
+}
 
-  mfem::Array<int> ess_tdofs;
-  a.ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
-  if (_preconditioner)
-  {
-    _preconditioner->SetupLOR(a, ess_tdofs);
-    SetPreconditioner(static_cast<mfem::HyprePCG &>(*_solver));
-  }
-  else if (_lor)
-  {
-    CheckSpectralEquivalence(a);
-    mfem::ParLORDiscretization lor_disc(a, ess_tdofs);
-    auto lor_solver = new mfem::LORSolver<mfem::HyprePCG>(lor_disc, getMFEMProblem().getComm());
-    lor_solver->GetSolver().SetTol(getParam<mfem::real_t>("l_tol"));
-    lor_solver->GetSolver().SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
-    lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
-    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
-
-    _solver.reset(lor_solver);
-  }
+void
+MFEMHyprePCG::SetPreconditionerImpl()
+{
+  if (auto * prec = dynamic_cast<mfem::HypreSolver *>(&_preconditioner->GetSolver()))
+    cast_ref<mfem::HyprePCG &>(GetSolver()).SetPreconditioner(*prec);
+  else
+    paramError("preconditioner", "MFEMHyprePCG requires a hypre solver as its preconditioner");
 }
 
 #endif

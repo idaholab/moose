@@ -36,7 +36,6 @@
 #include "LinearFVFluxKernel.h"
 #include "LinearFVElementalKernel.h"
 #include "LinearFVBoundaryCondition.h"
-#include "GradientLimiterType.h"
 
 // libMesh
 #include "libmesh/linear_solver.h"
@@ -59,8 +58,6 @@
 
 #include <ios>
 
-using namespace libMesh;
-
 namespace Moose
 {
 void
@@ -78,7 +75,7 @@ compute_linear_system(libMesh::EquationSystems & es, const std::string & system_
 LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
   : SolverSystem(fe_problem, fe_problem, name, Moose::VAR_SOLVER),
     PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "LinearSystem"),
-    LinearFVGradientInterface(static_cast<SystemBase &>(*this)),
+    LinearFVGradientManager(cast_ref<SystemBase &>(*this)),
     _sys(fe_problem.es().add_system<LinearImplicitSystem>(name)),
     _rhs_time_tag(-1),
     _rhs_time(NULL),
@@ -104,10 +101,29 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
 LinearSystem::~LinearSystem() = default;
 
 void
+LinearSystem::preInit()
+{
+  SolverSystem::preInit();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_fe_problem.hasKokkosResidualObjects())
+    _sys.get_dof_map().full_sparsity_pattern_needed();
+#endif
+}
+
+void
+LinearSystem::initSolutionState()
+{
+  SolverSystem::initSolutionState();
+  LinearFVGradientManager::initializeLinearFVGradientHistoryStorage();
+}
+
+void
 LinearSystem::initialSetup()
 {
   SystemBase::initialSetup();
   _current_solution = system().current_local_solution.get();
+  LinearFVGradientManager::initializeLinearFVGradientStorage();
   // Checking if somebody accidentally assigned nonlinear variables to this system
   const auto & var_names = _vars[0].names();
   for (const auto & name : var_names)
@@ -116,15 +132,15 @@ LinearSystem::initialSetup()
                  "which is assigned to the wrong system: ",
                  name);
 
-  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
-
   // Calling initial setup for the linear kernels
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < numThreads(); tid++)
   {
     std::vector<LinearFVElementalKernel *> fv_elemental_kernels;
     _fe_problem.theWarehouse()
         .query()
+        .template condition<AttribSysNum>(number())
         .template condition<AttribSystem>("LinearFVElementalKernel")
+        .template condition<AttribKokkos>(false)
         .template condition<AttribThread>(tid)
         .queryInto(fv_elemental_kernels);
 
@@ -134,7 +150,9 @@ LinearSystem::initialSetup()
     std::vector<LinearFVFluxKernel *> fv_flux_kernels;
     _fe_problem.theWarehouse()
         .query()
+        .template condition<AttribSysNum>(number())
         .template condition<AttribSystem>("LinearFVFluxKernel")
+        .template condition<AttribKokkos>(false)
         .template condition<AttribThread>(tid)
         .queryInto(fv_flux_kernels);
 
@@ -144,20 +162,40 @@ LinearSystem::initialSetup()
     std::vector<LinearFVBoundaryCondition *> fv_bcs;
     _fe_problem.theWarehouse()
         .query()
+        .template condition<AttribSysNum>(number())
         .template condition<AttribSystem>("LinearFVBoundaryCondition")
+        .template condition<AttribKokkos>(false)
         .template condition<AttribThread>(tid)
         .queryInto(fv_bcs);
 
     for (auto * fv_bc : fv_bcs)
       fv_bc->initialSetup();
   }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  initialSetupKokkosLinearFV();
+#endif
 }
 
 void
 LinearSystem::reinit()
 {
   _current_solution = system().current_local_solution.get();
-  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
+  LinearFVGradientManager::rebuildLinearFVGradientStorage();
+}
+
+void
+LinearSystem::copyAdditionalStateBackwards(const Moose::SolutionIterationType iteration_type,
+                                           const bool skip_current_to_old)
+{
+  if (iteration_type == Moose::SolutionIterationType::Time)
+    LinearFVGradientManager::copyPreviousGradientStates(iteration_type, skip_current_to_old);
+}
+
+void
+LinearSystem::restoreAdditionalStates()
+{
+  LinearFVGradientManager::restoreGradientStates();
 }
 
 void
@@ -187,19 +225,8 @@ LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
 }
 
 void
-LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
-                                          const std::set<TagID> & matrix_tags,
-                                          const bool compute_gradients)
+LinearSystem::setMatrixOptions(const std::set<TagID> & matrix_tags)
 {
-  TIME_SECTION("computeLinearSystemInternal", 3);
-
-  // Before we assemble we clear up the matrix and the vector
-  _linear_implicit_system.matrix->zero();
-  _linear_implicit_system.rhs->zero();
-
-  // Make matrix ready to use
-  activateAllMatrixTags();
-
   for (auto tag : matrix_tags)
   {
     auto & matrix = getMatrix(tag);
@@ -214,9 +241,40 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
             MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE));
     }
   }
+}
+
+void
+LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
+                                          const std::set<TagID> & matrix_tags,
+                                          const bool compute_gradients)
+{
+  TIME_SECTION("computeLinearSystemInternal", 3);
+
+  // Before we assemble we clear up the matrix and the vector
+  _linear_implicit_system.matrix->zero();
+  _linear_implicit_system.rhs->zero();
+
+  // Make matrix ready to use
+  activateAllMatrixTags();
+
+  setMatrixOptions(matrix_tags);
 
   if (compute_gradients)
     computeGradients();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  // Kokkos assembly runs first: it accumulates via device-side atomics and syncs
+  // back to PETSc before the CPU path writes. The CPU queries below filter out
+  // Kokkos objects via AttribKokkos(false) so there is no double-counting.
+  if (_fe_problem.hasKokkosResidualObjects())
+  {
+    computeKokkosLinearSystem(vector_tags, matrix_tags);
+    // The first Kokkos assembly preallocates the matrices for COO assembly, which recreates the
+    // diagonal and off-diagonal blocks of distributed PETSc matrices and drops the options set on
+    // them above
+    setMatrixOptions(matrix_tags);
+  }
+#endif
 
   // linear contributions from the domain
   PARALLEL_TRY
@@ -233,14 +291,14 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
 
     ComputeLinearFVElementalThread elem_thread(
         _fe_problem, this->number(), vector_tags, matrix_tags);
-    Threads::parallel_reduce(elem_info_range, elem_thread);
+    Threads::parallel_reduce(elem_info_range, elem_thread, this->numThreads());
 
     ComputeLinearFVFaceThread face_thread(_fe_problem,
                                           this->number(),
                                           Moose::FV::LinearFVComputationMode::FullSystem,
                                           vector_tags,
                                           matrix_tags);
-    Threads::parallel_reduce(face_info_range, face_thread);
+    Threads::parallel_reduce(face_info_range, face_thread, this->numThreads());
   }
   PARALLEL_CATCH;
 
@@ -289,7 +347,7 @@ LinearSystem::solve()
   _n_linear_iters = _linear_implicit_system.n_linear_iterations();
 
   auto & linear_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*_linear_implicit_system.get_linear_solver());
+      cast_ref<libMesh::PetscLinearSolver<Real> &>(*_linear_implicit_system.get_linear_solver());
   _initial_linear_residual = linear_solver.get_initial_residual();
   _final_linear_residual = _linear_implicit_system.final_linear_residual();
   _converged = linear_solver.get_converged_reason() > 0;

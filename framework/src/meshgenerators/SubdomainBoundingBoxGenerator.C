@@ -115,7 +115,7 @@ SubdomainBoundingBoxGenerator::generate()
 
     // Assign block name, if provided
     if (isParamValid("block_name"))
-      mesh->subdomain_name(_block_id) = getParam<SubdomainName>("block_name");
+      mesh->set_subdomain_name(_block_id, getParam<SubdomainName>("block_name"));
   }
 
   mesh->unset_is_prepared();

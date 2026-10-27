@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,8 +9,10 @@
 
 #include "KokkosMesh.h"
 
+#include "Assembly.h"
 #include "MooseMesh.h"
 
+#include "libmesh/elem_side_builder.h"
 #include "libmesh/reference_elem.h"
 
 namespace Moose::Kokkos
@@ -23,6 +25,11 @@ Mesh::update()
   initElement();
 
   _initialized = true;
+
+  if (_needs_element_geometry)
+    initElementGeometry();
+  if (_needs_element_side_geometry)
+    initElementSideGeometry();
 }
 
 void
@@ -38,19 +45,21 @@ Mesh::initMap()
     _node_id_integer = _mesh.getMesh().add_node_integer("kokkos_contiguous_node_id");
 
   _num_local_elems = 0;
+  _num_ghost_elems = 0;
   _num_local_nodes = 0;
 
   _maps->subdomain_id_mapping.clear();
   _maps->boundary_id_mapping.clear();
   _maps->elem_type_id_mapping.clear();
   _maps->local_nodes.clear();
-  _maps->semi_local_node_id_mapping.clear();
+  _maps->ghost_node_id_mapping.clear();
+  _maps->ghost_elem_id_mapping.clear();
   _maps->subdomain_elem_id_ranges.clear();
   _maps->subdomain_node_ids.clear();
   _maps->boundary_node_ids.clear();
 
-  std::unordered_set<ElemType> elem_types;
-  std::unordered_set<Node *> semi_local_nodes;
+  std::set<std::pair<ElemType, unsigned int>> elem_types;
+  std::unordered_set<Node *> ghost_nodes;
 
   for (const auto subdomain : _mesh.meshSubdomains())
   {
@@ -62,7 +71,7 @@ Mesh::initMap()
 
     for (auto elem : _mesh.getMesh().active_local_subdomain_elements_ptr_range(subdomain))
     {
-      elem_types.insert(elem->type());
+      elem_types.emplace(elem->type(), elem->p_level());
 
       eid = _num_local_elems;
       elem->set_extra_integer(_elem_id_integer, _num_local_elems++);
@@ -72,7 +81,7 @@ Mesh::initMap()
 
       for (auto & node : elem->node_ref_range())
         if (node.processor_id() != _mesh.processor_id())
-          semi_local_nodes.insert(&node);
+          ghost_nodes.insert(&node);
     }
 
     _maps->subdomain_elem_id_ranges[subdomain] = eid != libMesh::DofObject::invalid_id
@@ -86,15 +95,29 @@ Mesh::initMap()
     _maps->boundary_node_ids[boundary];
   }
 
+  // Enumerate one off-process neighbor layer for element-side geometry data.
+  if (_needs_element_side_geometry)
+    for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
+      for (const auto side : elem->side_index_range())
+      {
+        const auto neighbor = elem->neighbor_ptr(side);
+        if (neighbor && neighbor != libMesh::remote_elem &&
+            neighbor->processor_id() != _mesh.processor_id() &&
+            !_maps->ghost_elem_id_mapping.count(neighbor))
+        {
+          _maps->ghost_elem_id_mapping[neighbor] = _num_local_elems + _num_ghost_elems++;
+          elem_types.emplace(neighbor->type(), neighbor->p_level());
+        }
+      }
+
   // Setup node maps
 
-  for (const auto type : elem_types)
+  for (const auto & type : elem_types)
     _maps->elem_type_id_mapping[type] = _maps->elem_type_id_mapping.size();
 
   _maps->local_nodes.insert(
       _maps->local_nodes.end(), _mesh.localNodesBegin(), _mesh.localNodesEnd());
-  _maps->local_nodes.insert(
-      _maps->local_nodes.end(), semi_local_nodes.begin(), semi_local_nodes.end());
+  _maps->local_nodes.insert(_maps->local_nodes.end(), ghost_nodes.begin(), ghost_nodes.end());
 
   for (auto node : _maps->local_nodes)
   {
@@ -106,7 +129,7 @@ Mesh::initMap()
         _maps->subdomain_node_ids[subdomain].push_back(_num_local_nodes);
     }
     else
-      _maps->semi_local_node_id_mapping[node] = _num_local_nodes;
+      _maps->ghost_node_id_mapping[node] = _num_local_nodes;
 
     ++_num_local_nodes;
   }
@@ -128,8 +151,9 @@ Mesh::initElement()
   _num_side_nodes.create(num_elem_types);
   _local_side_node.create(num_elem_types);
 
-  for (auto & [elem_type, elem_type_id] : getElementTypeMap())
+  for (auto & [elem_type_and_p_level, elem_type_id] : getElementTypeMap())
   {
+    const auto [elem_type, _] = elem_type_and_p_level;
     auto elem = &libMesh::ReferenceElem::get(elem_type);
 
     _num_sides[elem_type_id] = elem->n_sides();
@@ -138,11 +162,13 @@ Mesh::initElement()
     _num_side_nodes[elem_type_id].create(elem->n_sides());
     _local_side_node[elem_type_id].create(elem->n_nodes(), elem->n_sides());
 
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+    for (const auto side : elem->side_index_range())
     {
-      _num_side_nodes[elem_type_id][side] = elem->side_ptr(side)->n_nodes();
+      const auto side_ptr = elem->build_side_ptr(side);
 
-      for (unsigned int node = 0; node < elem->side_ptr(side)->n_nodes(); ++node)
+      _num_side_nodes[elem_type_id][side] = side_ptr->n_nodes();
+
+      for (const auto node : side_ptr->node_index_range())
         _local_side_node[elem_type_id](node, side) = elem->local_side_node(side, node);
     }
 
@@ -157,10 +183,12 @@ Mesh::initElement()
 
   // Cache element data
 
+  const auto num_local_plus_one_neighbor_layer_elems =
+      getNumLocalAndPossiblyOneNeighborLayerGhostElements();
   const auto num_elems = getNumLocalElements();
   const auto num_subdomains = getNumSubdomains();
 
-  _elem_info.create(num_elems);
+  _elem_info.create(num_local_plus_one_neighbor_layer_elems);
   _elem_neighbor.create(_mesh.getMaxSidesPerElem(), num_elems);
   _extra_elem_ids.create(num_elems, _mesh.getMesh().n_elem_integers());
   _starting_elem_id.create(num_subdomains);
@@ -188,8 +216,16 @@ Mesh::initElement()
     _starting_elem_id[sid] = *getSubdomainContiguousElementIDRange(subdomain).begin();
   }
 
+  // Cache ElementInfo for one-layer ghost neighbors so side-based computations can identify
+  // off-process neighbor element subdomains.
+  for (const auto & [ghost_elem, ghost_eid] : _maps->ghost_elem_id_mapping)
+  {
+    _elem_info[ghost_eid].type = getElementTypeID(ghost_elem);
+    _elem_info[ghost_eid].id = ghost_eid;
+    _elem_info[ghost_eid].subdomain = getContiguousSubdomainID(ghost_elem->subdomain_id());
+  }
+
   _elem_info.moveToDevice();
-  _elem_neighbor.moveToDevice();
   _extra_elem_ids.moveToDevice();
   _starting_elem_id.moveToDevice();
 
@@ -198,7 +234,7 @@ Mesh::initElement()
   const auto num_nodes = getNumLocalNodes();
 
   _points.create(num_nodes);
-  _nodes.create(_mesh.getMaxNodesPerElem(), num_elems);
+  _nodes.create(_mesh.getMaxNodesPerElem(), num_local_plus_one_neighbor_layer_elems);
   _boundary_nodes.create(_mesh.meshBoundaryIds().size());
 
   for (const auto node : getLocalNodes())
@@ -208,7 +244,7 @@ Mesh::initElement()
   {
     const auto eid = getContiguousElementID(elem);
 
-    for (unsigned int node = 0; node < elem->n_nodes(); ++node)
+    for (const auto node : elem->node_index_range())
       _nodes(node, eid) = getContiguousNodeID(elem->node_ptr(node));
   }
 
@@ -219,6 +255,40 @@ Mesh::initElement()
   _points.moveToDevice();
   _nodes.moveToDevice();
   _boundary_nodes.copyToDevice();
+
+  // Cache side boundary data
+
+  _side_boundary_ids.create(_mesh.getMaxSidesPerElem(), num_elems);
+
+  Array2D<unsigned int> num_side_boundary_ids(_mesh.getMaxSidesPerElem(), num_elems);
+
+  num_side_boundary_ids = 0;
+
+  for (const auto * const bnd_elem : *_mesh.getBoundaryElementRange())
+    if (bnd_elem->_elem->processor_id() == _mesh.processor_id())
+      ++num_side_boundary_ids(bnd_elem->_side, getContiguousElementID(bnd_elem->_elem));
+
+  for (const auto * const bnd_elem : *_mesh.getBoundaryElementRange())
+    if (bnd_elem->_elem->processor_id() == _mesh.processor_id())
+    {
+      const auto side = bnd_elem->_side;
+      const auto eid = getContiguousElementID(bnd_elem->_elem);
+      _side_boundary_ids.reserve({side, eid}, {num_side_boundary_ids(side, eid)});
+    }
+
+  _side_boundary_ids.finalize();
+
+  num_side_boundary_ids = 0;
+
+  for (const auto * const bnd_elem : *_mesh.getBoundaryElementRange())
+    if (bnd_elem->_elem->processor_id() == _mesh.processor_id())
+    {
+      const auto side = bnd_elem->_side;
+      const auto eid = getContiguousElementID(bnd_elem->_elem);
+      _side_boundary_ids(side, eid)[num_side_boundary_ids(side, eid)++] = bnd_elem->_bnd_id;
+    }
+
+  _side_boundary_ids.copyToDevice();
 }
 
 ContiguousSubdomainID
@@ -238,7 +308,8 @@ Mesh::getElementTypeID(const Elem * elem) const
 {
   mooseAssert(elem, "Element pointer is null");
 
-  return libmesh_map_find(_maps->elem_type_id_mapping, elem->type());
+  return libmesh_map_find(_maps->elem_type_id_mapping,
+                          std::make_pair(elem->type(), elem->p_level()));
 }
 
 ContiguousElementID
@@ -246,7 +317,10 @@ Mesh::getContiguousElementID(const Elem * elem) const
 {
   mooseAssert(elem, "Element pointer is null");
 
-  return elem->get_extra_integer(_elem_id_integer);
+  if (elem->processor_id() == _mesh.processor_id())
+    return elem->get_extra_integer(_elem_id_integer);
+
+  return libmesh_map_find(_maps->ghost_elem_id_mapping, elem);
 }
 
 ContiguousNodeID
@@ -257,7 +331,119 @@ Mesh::getContiguousNodeID(const Node * node) const
   if (node->processor_id() == _mesh.processor_id())
     return node->get_extra_integer(_node_id_integer);
   else
-    return libmesh_map_find(_maps->semi_local_node_id_mapping, node);
+    return libmesh_map_find(_maps->ghost_node_id_mapping, node);
+}
+
+void
+Mesh::initElementGeometry()
+{
+  const auto num_local_elems = getNumLocalElements();
+
+  _elem_volume.create(num_local_elems);
+  _elem_centroid.create(num_local_elems);
+
+  _elem_volume = 0;
+  _elem_centroid = Real3();
+
+  for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
+  {
+    const auto eid = getContiguousElementID(elem);
+    const auto elem_centroid = elem->vertex_average();
+    Real coord_factor;
+    ::coordTransformFactor(_mesh, elem->subdomain_id(), elem_centroid, coord_factor);
+
+    _elem_volume[eid] = elem->volume() * coord_factor;
+    _elem_centroid[eid] = elem_centroid;
+  }
+
+  _elem_volume.moveToDevice();
+  _elem_centroid.moveToDevice();
+
+  _element_geometry_initialized = true;
+}
+
+void
+Mesh::initElementSideGeometry()
+{
+  mooseAssert(_element_geometry_initialized,
+              "initElementGeometry() must be called before initElementSideGeometry().");
+
+  const auto num_elems = getNumLocalElements();
+  const auto max_sides = _mesh.getMaxSidesPerElem();
+
+  _side_area.create(max_sides, num_elems);
+  _side_centroid.create(max_sides, num_elems);
+  _side_normal.create(max_sides, num_elems);
+  _elem_centroid_to_side_centroid.create(max_sides, num_elems);
+  _elem_centroid_to_side_centroid_distance.create(max_sides, num_elems);
+  _elem_centroid_to_neighbor_centroid.create(max_sides, num_elems);
+  _elem_centroid_to_neighbor_centroid_distance.create(max_sides, num_elems);
+
+  _side_area = 0;
+  _side_centroid = Real3();
+  _side_normal = Real3();
+  _elem_centroid_to_side_centroid = Real3();
+  _elem_centroid_to_side_centroid_distance = 0;
+  _elem_centroid_to_neighbor_centroid = Real3();
+  _elem_centroid_to_neighbor_centroid_distance = 0;
+
+  libMesh::ElemSideBuilder side_builder;
+
+  for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
+  {
+    const auto eid = getContiguousElementID(elem);
+    const auto elem_centroid = elem->vertex_average();
+
+    for (const auto side : elem->side_index_range())
+    {
+      auto & face = side_builder(*elem, side);
+      const auto face_centroid = face.vertex_average();
+      const auto * const neighbor = elem->neighbor_ptr(side);
+      Real coord_factor;
+      mooseAssert(!neighbor || neighbor != libMesh::remote_elem,
+                  "First layer neighbors should be ghosted");
+      ::coordTransformFactor(_mesh,
+                             elem->subdomain_id(),
+                             face_centroid,
+                             coord_factor,
+                             neighbor ? neighbor->subdomain_id()
+                                      : libMesh::Elem::invalid_subdomain_id);
+
+      ContiguousElementID neighbor_eid = libMesh::DofObject::invalid_id;
+      if (neighbor)
+      {
+        neighbor_eid = getContiguousElementID(neighbor);
+        mooseAssert(
+            neighbor_eid != libMesh::DofObject::invalid_id,
+            "We should have determined a contiguous element ID for our local element neighbors");
+        _elem_neighbor(side, eid) = neighbor_eid;
+      }
+
+      const auto elem_centroid_to_side_centroid = face_centroid - elem_centroid;
+      const auto elem_centroid_to_neighbor_centroid =
+          neighbor ? neighbor->vertex_average() - elem_centroid : Real3();
+
+      _side_area(side, eid) = face.volume() * coord_factor;
+      _side_centroid(side, eid) = face_centroid;
+      _side_normal(side, eid) = elem->side_vertex_average_normal(side);
+      _elem_centroid_to_side_centroid(side, eid) = elem_centroid_to_side_centroid;
+      _elem_centroid_to_side_centroid_distance(side, eid) = elem_centroid_to_side_centroid.norm();
+      _elem_centroid_to_neighbor_centroid(side, eid) = elem_centroid_to_neighbor_centroid;
+      _elem_centroid_to_neighbor_centroid_distance(side, eid) =
+          neighbor ? elem_centroid_to_neighbor_centroid.norm() : Real(0);
+    }
+  }
+
+  _elem_neighbor.moveToDevice();
+  _side_area.moveToDevice();
+  _side_centroid.moveToDevice();
+  _side_normal.moveToDevice();
+  _elem_centroid_to_side_centroid.moveToDevice();
+  _elem_centroid_to_side_centroid_distance.moveToDevice();
+  _elem_centroid_to_neighbor_centroid.moveToDevice();
+  _elem_centroid_to_neighbor_centroid_distance.moveToDevice();
+
+  _element_side_geometry_initialized = true;
 }
 
 } // namespace Moose::Kokkos

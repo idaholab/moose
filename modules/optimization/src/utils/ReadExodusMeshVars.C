@@ -17,8 +17,6 @@
 #include "libmesh/numeric_vector.h"
 #include <memory>
 
-using namespace libMesh;
-
 ReadExodusMeshVars::ReadExodusMeshVars(const FEType & param_type,
                                        const std::string & exodus_mesh,
                                        const std::string var_name)
@@ -30,7 +28,7 @@ ReadExodusMeshVars::ReadExodusMeshVars(const FEType & param_type,
   _exodusII_io->read(exodus_mesh);
   _mesh.read(exodus_mesh);
   // Create system to store parameter values
-  _eq = std::make_unique<EquationSystems>(_mesh);
+  _eq = std::make_unique<libMesh::EquationSystems>(_mesh);
   _sys = &_eq->add_system<ExplicitSystem>("_reading_exodus_mesh_var");
 
   // Make Exodus vars for equation system

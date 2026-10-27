@@ -21,6 +21,15 @@ struct DataStorage : public UniqueStorage<DataType>
   FRIEND_TEST(DataIOTest, uniqueStorage);
 };
 
+enum class DataIOTestEnum
+{
+  FIRST,
+  SECOND
+};
+
+dataStoreEnum(DataIOTestEnum, int)
+dataLoadEnum(DataIOTestEnum, int)
+
 void
 dataStore(std::ostream & stream, DataType & v, void * context)
 {
@@ -49,13 +58,52 @@ dataLoad(std::istream & stream, std::unique_ptr<DataType> & v, void * context)
 void
 dataStore(std::ostream & stream, DataStorage & v, void * context)
 {
-  storeHelper(stream, static_cast<UniqueStorage<DataType> &>(v), context);
+  dataStore(stream, cast_ref<UniqueStorage<DataType> &>(v), context);
 }
 
 void
 dataLoad(std::istream & stream, DataStorage & v, void * context)
 {
-  loadHelper(stream, static_cast<UniqueStorage<DataType> &>(v), context);
+  dataLoad(stream, cast_ref<UniqueStorage<DataType> &>(v), context);
+}
+
+TEST(DataIOTest, signedChar)
+{
+  signed char stored = -42;
+  std::stringstream stream;
+  dataStore(stream, stored, nullptr);
+
+  stream.seekg(0, std::ios::beg);
+  signed char loaded = 0;
+  dataLoad(stream, loaded, nullptr);
+
+  EXPECT_EQ(stored, loaded);
+}
+
+TEST(DataIOTest, nestedVectorBool)
+{
+  std::list<std::vector<bool>> stored = {{true, false, true}, {}, {false, true, true, false}};
+  std::stringstream stream;
+  dataStore(stream, stored, nullptr);
+
+  stream.seekg(0, std::ios::beg);
+  std::list<std::vector<bool>> loaded;
+  dataLoad(stream, loaded, nullptr);
+
+  EXPECT_EQ(stored, loaded);
+}
+
+TEST(DataIOTest, enumClass)
+{
+  DataIOTestEnum stored = DataIOTestEnum::SECOND;
+  std::stringstream stream;
+  dataStore(stream, stored, nullptr);
+
+  stream.seekg(0, std::ios::beg);
+  DataIOTestEnum loaded = DataIOTestEnum::FIRST;
+  dataLoad(stream, loaded, nullptr);
+
+  EXPECT_EQ(stored, loaded);
 }
 
 TEST(DataIOTest, uniqueStorage)
@@ -115,3 +163,62 @@ TEST(DataIOTest, uniquePtrNumericVector)
   for (const auto i : index_range(data))
     ASSERT_EQ((*new_vec)(i), data[i]);
 }
+
+#ifdef MOOSE_LIBTORCH_ENABLED
+
+TEST(DataIOTest, torchTensor)
+{
+  auto tensor = torch::arange(6, at::kDouble).reshape({2, 3}).transpose(0, 1);
+  ASSERT_FALSE(tensor.is_contiguous());
+
+  std::stringstream ss;
+  dataStore(ss, tensor, nullptr);
+
+  ss.seekg(0, std::ios::beg);
+  torch::Tensor loaded_tensor;
+  dataLoad(ss, loaded_tensor, nullptr);
+
+  EXPECT_EQ(loaded_tensor.scalar_type(), at::kDouble);
+  EXPECT_TRUE(loaded_tensor.device().is_cpu());
+  EXPECT_TRUE(loaded_tensor.is_contiguous());
+  EXPECT_EQ(loaded_tensor.dim(), 2);
+  EXPECT_EQ(loaded_tensor.size(0), 3);
+  EXPECT_EQ(loaded_tensor.size(1), 2);
+  EXPECT_TRUE(torch::equal(loaded_tensor, tensor));
+}
+
+TEST(DataIOTest, emptyTorchTensor)
+{
+  auto tensor = torch::empty({2, 0, 3}, at::kDouble);
+
+  std::stringstream ss;
+  dataStore(ss, tensor, nullptr);
+
+  ss.seekg(0, std::ios::beg);
+  torch::Tensor loaded_tensor;
+  dataLoad(ss, loaded_tensor, nullptr);
+
+  EXPECT_EQ(loaded_tensor.scalar_type(), at::kDouble);
+  EXPECT_EQ(loaded_tensor.dim(), 3);
+  EXPECT_EQ(loaded_tensor.size(0), 2);
+  EXPECT_EQ(loaded_tensor.size(1), 0);
+  EXPECT_EQ(loaded_tensor.size(2), 3);
+  EXPECT_EQ(loaded_tensor.numel(), 0);
+}
+
+TEST(DataIOTest, undefinedTorchTensor)
+{
+  auto tensor = torch::Tensor();
+
+  std::stringstream ss;
+  dataStore(ss, tensor, nullptr);
+  EXPECT_EQ(tensor.defined(), false);
+
+  ss.seekg(0, std::ios::beg);
+  torch::Tensor loaded_tensor;
+  dataLoad(ss, loaded_tensor, nullptr);
+
+  EXPECT_EQ(loaded_tensor.defined(), false);
+}
+
+#endif

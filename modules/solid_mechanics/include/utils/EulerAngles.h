@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "DataIO.h"
 #include "libmesh/vector_value.h"
 // Ignore depcrecated copy warnings for this class from libmesh Eigen contrib
 #include "libmesh/ignore_warnings.h"
@@ -40,6 +41,24 @@ public:
   // Euler to Quaternions
   Eigen::Quaternion<Real> toQuaternion();
 };
+
+template <>
+inline void
+dataStore(std::ostream & ostream, EulerAngles & v, void * ctx)
+{
+  dataStore(ostream, v.phi1, ctx);
+  dataStore(ostream, v.Phi, ctx);
+  dataStore(ostream, v.phi2, ctx);
+}
+
+template <>
+inline void
+dataLoad(std::istream & ostream, EulerAngles & v, void * ctx)
+{
+  dataLoad(ostream, v.phi1, ctx);
+  dataLoad(ostream, v.Phi, ctx);
+  dataLoad(ostream, v.phi2, ctx);
+}
 
 // Restore warnings for other classes
 #include "libmesh/restore_warnings.h"

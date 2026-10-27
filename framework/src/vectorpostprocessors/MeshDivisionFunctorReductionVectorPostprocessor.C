@@ -135,7 +135,7 @@ MeshDivisionFunctorReductionVectorPostprocessor::finalize()
 void
 MeshDivisionFunctorReductionVectorPostprocessor::threadJoin(const UserObject & s)
 {
-  const auto & sibling = static_cast<const MeshDivisionFunctorReductionVectorPostprocessor &>(s);
+  const auto & sibling = cast_ref<const MeshDivisionFunctorReductionVectorPostprocessor &>(s);
 
   for (const auto i_f : make_range(_nfunctors))
     for (const auto i : index_range(*_functor_reductions[i_f]))

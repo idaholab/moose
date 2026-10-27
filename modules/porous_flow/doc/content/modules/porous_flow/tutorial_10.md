@@ -8,15 +8,15 @@ Now we're ready to build an input file from scratch using `Kernels` and `Materia
 
 We're going to build the simulation from [Page 08](porous_flow/tutorial_08.md) which involved unsaturated flow.  After building the input file, you can compare it with the `Action` version.  The mesh and `Variables` remain unchanged.  For clarity later on, the porepressure variable has been renamed 'pp'
 
-!listing modules/porous_flow/examples/tutorial/10.i start=[Variables] end=[Kernels]
+!listing modules/porous_flow/examples/tutorial/10.i block=Variables
 
 Let's start by building the [`PorousFlowDictator`](PorousFlowDictator.md).  We have one phase, one component and no chemistry.  The single PorousFlow variable is called pp:
 
-!listing modules/porous_flow/examples/tutorial/10.i start=[UserObjects] end=[pc]
+!listing modules/porous_flow/examples/tutorial/10.i block=dictator
 
 It is always useful to put the name of the `PorousFlowDictator` in the `GlobalParams` block, since all PorousFlow objects need it:
 
-!listing modules/porous_flow/examples/tutorial/10.i start=[GlobalParams] end=[Variables]
+!listing modules/porous_flow/examples/tutorial/10.i block=GlobalParams
 
 The DE is unsaturated single-phase flow.  Refer to the [governing equations](porous_flow/governing_equations.md) document.  Unsaturated single-phase flow is described by the first equation without the coupling terms to solid mechanics, radioactive decay, chemistry and sources:
 
@@ -27,7 +27,7 @@ The DE is unsaturated single-phase flow.  Refer to the [governing equations](por
 
 Here $\kappa = 0$ since there is just one fluid component.  The fluid mass is $M = \phi S \rho$ and the fluid velocity is $F_{i} = -\rho k_{ij} (\nabla_{j} P - \rho g_{j}) / \mu$.  Hence we have two `Kernels` (refer to the bottom of [governing equations](porous_flow/governing_equations.md) for their types)
 
-!listing modules/porous_flow/examples/tutorial/10.i start=[Kernels] end=[AuxVariables]
+!listing modules/porous_flow/examples/tutorial/10.i block=Kernels
 
 It is often common to define some `AuxVariables` for visualisation purposes (or to feed as coupled variables to other MOOSE objects).  A useful variable here is the fluid saturation, which is computed using a [`PorousFlowPropertyAux`](PorousFlowPropertyAux.md) so the variable must be a constant monomial:
 
@@ -35,7 +35,7 @@ It is often common to define some `AuxVariables` for visualisation purposes (or 
 
 The `BCs` remain the same: they used a [`PorousFlowSink`](porous_flow/boundaries.md) to withdraw fluid from the injection area.  The fluid properties also remain the same.  For reference, these two blocks are:
 
-!listing modules/porous_flow/examples/tutorial/10.i start=[BCs] end=[Materials]
+!listing modules/porous_flow/examples/tutorial/10.i block=BCs
 
 The final block to create is the `Materials`.  This is always the most complicated part of creating an input file, and really only comes by experience.
 
@@ -55,7 +55,7 @@ The final block to create is the `Materials`.  This is always the most complicat
 
 In this case, the DEs involve porosity, fluid saturation, fluid density, permeability and viscosity.  The fluid mass is lumped to the nodes, so we'll only need porosity at the nodes:
 
-!listing modules/porous_flow/examples/tutorial/10.i start=[porosity] end=[permeability_aquifer]
+!listing modules/porous_flow/examples/tutorial/10.i block=porosity
 
 The permeability is also needed:
 
@@ -69,17 +69,17 @@ Now we need to build the saturation.  This is *not* computed by the `PorousFlowP
 
 These are our so-called "fundamental Materials".  In almost every PorousFlow simulation you will see similar `Materials`.  The saturation calculator uses the capillary-pressure function.  It is a `UserObject`:
 
-!listing modules/porous_flow/examples/tutorial/10.i start=[UserObjects] end=[GlobalParams]
+!listing modules/porous_flow/examples/tutorial/10.i block=pc
 
 The density and viscosity need to be computed.  This is achieved by a [`PorousFlowSingleComponentFluid`](PorousFlowSingleComponentFluid.md)
 
-!listing modules/porous_flow/examples/tutorial/10.i start=[simple_fluid] end=[relperm]
+!listing modules/porous_flow/examples/tutorial/10.i block=simple_fluid
 
 Finally, the relative permeability must be defined for each phase (just one phase in this example)
 
-!listing modules/porous_flow/examples/tutorial/10.i start=[relperm] end=[]
+!listing modules/porous_flow/examples/tutorial/10.i block=relperm
 
-Our input file has been built!  You may check that it gives exactly the same answers as the one on [Page 08](porous_flow/tutorial_08.md).  It is 232 lines long while the one on Page 08 is only 139 lines long.  Now that you've reached this point, you can start to build much more powerful models that don't use the PorousFlow `Actions`: models that involve multi-phase, multi-component flows, complicated thermal couplings, elasto-plasticity, chemical reactions, line sources and sinks, and sophisticated boundary terms!
+Our input file has been built!  You may check that it gives exactly the same answers as the one on [Page 08](porous_flow/tutorial_08.md).  It is 189 lines long while the one on Page 08 is only 136 lines long.  Now that you've reached this point, you can start to build much more powerful models that don't use the PorousFlow `Actions`: models that involve multi-phase, multi-component flows, complicated thermal couplings, elasto-plasticity, chemical reactions, line sources and sinks, and sophisticated boundary terms!
 
 [Start](porous_flow/tutorial_00.md) |
 [Previous](porous_flow/tutorial_09.md) |

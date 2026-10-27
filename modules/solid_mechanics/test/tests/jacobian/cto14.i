@@ -17,6 +17,10 @@
 # This is presumably because of compiler internals, or the BLAS routines being
 # optimised differently or something similar.
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -32,20 +36,15 @@
 []
 
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = true
+    eigenstrain_names = ini_stress
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-[]
 
 
 
@@ -360,11 +359,6 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '1.0E3 1.3E3'
-  [../]
-  [./strain]
-    type = ComputeIncrementalStrain
-    displacements = 'disp_x disp_y disp_z'
-    eigenstrain_names = ini_stress
   [../]
   [./ini_stress]
     type = ComputeEigenstrainFromInitialStress

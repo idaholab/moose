@@ -15,7 +15,7 @@ PetscVectorReader::PetscVectorReader(PetscVector<Number> & vec)
 }
 
 PetscVectorReader::PetscVectorReader(NumericVector<Number> & vec)
-  : _vec(libMesh::cast_ref<PetscVector<Number> &>(vec)), _raw_value(_vec.get_array_read())
+  : _vec(cast_ref<PetscVector<Number> &>(vec)), _raw_value(_vec.get_array_read())
 {
 }
 

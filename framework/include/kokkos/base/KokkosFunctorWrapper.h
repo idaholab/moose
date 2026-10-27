@@ -30,7 +30,7 @@ public:
   /**
    * Virtual destructor
    */
-  KOKKOS_FUNCTION virtual ~FunctorWrapperDeviceBase() {}
+  KOKKOS_FUNCTION KOKKOS_VIRTUAL ~FunctorWrapperDeviceBase() {}
 };
 
 /**

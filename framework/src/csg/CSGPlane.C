@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,14 +13,14 @@ namespace CSG
 {
 
 CSGPlane::CSGPlane(const std::string & name, const Point & p1, const Point & p2, const Point & p3)
-  : CSGSurface(name, MooseUtils::prettyCppType<CSGPlane>())
+  : CSGSurface(name)
 {
   coeffsFromPoints(p1, p2, p3);
   normalizePlaneCoefficients();
 }
 
 CSGPlane::CSGPlane(const std::string & name, const Real a, const Real b, const Real c, const Real d)
-  : CSGSurface(name, MooseUtils::prettyCppType<CSGPlane>()), _a(a), _b(b), _c(c), _d(d)
+  : CSGSurface(name), _a(a), _b(b), _c(c), _d(d)
 {
   normalizePlaneCoefficients();
 }

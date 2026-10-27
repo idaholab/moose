@@ -48,7 +48,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
-  advected_interp_method = ${advected_interp_method}
 []
 
 [UserObjects]
@@ -90,11 +89,17 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu_t'
     u = vel_x
     v = vel_y
@@ -118,7 +123,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu_t'
     u = vel_x
     v = vel_y
@@ -141,7 +146,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   []
 
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false
@@ -156,6 +161,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [TKE_advection]
     type = LinearFVTurbulentAdvection
     variable = TKE
+    advected_interp_method_name = ${advected_interp_method}
   []
   [TKE_diffusion]
     type = LinearFVTurbulentDiffusion
@@ -187,6 +193,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [TKED_advection]
     type = LinearFVTurbulentAdvection
     variable = TKED
+    advected_interp_method_name = ${advected_interp_method}
     walls = ${walls}
   []
   [TKED_diffusion]

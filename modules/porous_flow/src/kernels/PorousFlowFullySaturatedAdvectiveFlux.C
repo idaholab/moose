@@ -10,11 +10,13 @@
 #include "PorousFlowFullySaturatedAdvectiveFlux.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowFullySaturatedAdvectiveFlux);
+registerMooseObject("PorousFlowApp", ADPorousFlowFullySaturatedAdvectiveFlux);
 
+template <bool is_ad>
 InputParameters
-PorousFlowFullySaturatedAdvectiveFlux::validParams()
+PorousFlowFullySaturatedAdvectiveFluxTempl<is_ad>::validParams()
 {
-  InputParameters params = PorousFlowDarcyBase::validParams();
+  InputParameters params = PorousFlowDarcyBaseTempl<is_ad>::validParams();
   params.addParam<unsigned int>(
       "fluid_component", 0, "The index corresponding to the fluid component for this kernel");
   params.addParam<bool>("multiply_by_density",
@@ -28,15 +30,19 @@ PorousFlowFullySaturatedAdvectiveFlux::validParams()
   return params;
 }
 
-PorousFlowFullySaturatedAdvectiveFlux::PorousFlowFullySaturatedAdvectiveFlux(
+template <bool is_ad>
+PorousFlowFullySaturatedAdvectiveFluxTempl<is_ad>::PorousFlowFullySaturatedAdvectiveFluxTempl(
     const InputParameters & parameters)
-  : PorousFlowDarcyBase(parameters),
+  : PorousFlowDarcyBaseTempl<is_ad>(parameters),
     _mass_fractions(
-        getMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_nodal")),
-    _dmass_fractions_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real>>>>(
-        "dPorousFlow_mass_frac_nodal_dvar")),
-    _fluid_component(getParam<unsigned int>("fluid_component")),
-    _multiply_by_density(getParam<bool>("multiply_by_density"))
+        this->template getGenericMaterialProperty<std::vector<std::vector<Real>>, is_ad>(
+            "PorousFlow_mass_frac_nodal")),
+    _dmass_fractions_dvar(
+        is_ad ? nullptr
+              : &this->template getMaterialProperty<std::vector<std::vector<std::vector<Real>>>>(
+                    "dPorousFlow_mass_frac_nodal_dvar")),
+    _fluid_component(this->template getParam<unsigned int>("fluid_component")),
+    _multiply_by_density(this->template getParam<bool>("multiply_by_density"))
 {
   if (_dictator.numPhases() != 1)
     mooseError(
@@ -44,8 +50,9 @@ PorousFlowFullySaturatedAdvectiveFlux::PorousFlowFullySaturatedAdvectiveFlux(
         "it does not include relative-permeability effects");
 }
 
-Real
-PorousFlowFullySaturatedAdvectiveFlux::mobility(unsigned nodenum, unsigned phase) const
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowFullySaturatedAdvectiveFluxTempl<is_ad>::mobility(unsigned nodenum, unsigned phase) const
 {
   if (_multiply_by_density == false)
     return _mass_fractions[nodenum][phase][_fluid_component] / _fluid_viscosity[nodenum][phase];
@@ -53,23 +60,33 @@ PorousFlowFullySaturatedAdvectiveFlux::mobility(unsigned nodenum, unsigned phase
          _fluid_viscosity[nodenum][phase];
 }
 
+template <bool is_ad>
 Real
-PorousFlowFullySaturatedAdvectiveFlux::dmobility(unsigned nodenum,
-                                                 unsigned phase,
-                                                 unsigned pvar) const
+PorousFlowFullySaturatedAdvectiveFluxTempl<is_ad>::dmobility(unsigned nodenum,
+                                                             unsigned phase,
+                                                             unsigned pvar) const
 {
-  if (_multiply_by_density == false)
-    return _dmass_fractions_dvar[nodenum][phase][_fluid_component][pvar] /
-               _fluid_viscosity[nodenum][phase] -
-           _mass_fractions[nodenum][phase][_fluid_component] *
-               _dfluid_viscosity_dvar[nodenum][phase][pvar] /
-               Utility::pow<2>(_fluid_viscosity[nodenum][phase]);
-  Real dm = _dmass_fractions_dvar[nodenum][phase][_fluid_component][pvar] *
-            _fluid_density_node[nodenum][phase] / _fluid_viscosity[nodenum][phase];
-  dm += _mass_fractions[nodenum][phase][_fluid_component] *
-        _dfluid_density_node_dvar[nodenum][phase][pvar] / _fluid_viscosity[nodenum][phase];
-  dm -= _mass_fractions[nodenum][phase][_fluid_component] * _fluid_density_node[nodenum][phase] *
-        _dfluid_viscosity_dvar[nodenum][phase][pvar] /
-        Utility::pow<2>(_fluid_viscosity[nodenum][phase]);
-  return dm;
+  if constexpr (!is_ad)
+  {
+    if (_multiply_by_density == false)
+      return (*_dmass_fractions_dvar)[nodenum][phase][_fluid_component][pvar] /
+                 _fluid_viscosity[nodenum][phase] -
+             _mass_fractions[nodenum][phase][_fluid_component] *
+                 (*_dfluid_viscosity_dvar)[nodenum][phase][pvar] /
+                 Utility::pow<2>(_fluid_viscosity[nodenum][phase]);
+    Real dm = (*_dmass_fractions_dvar)[nodenum][phase][_fluid_component][pvar] *
+              _fluid_density_node[nodenum][phase] / _fluid_viscosity[nodenum][phase];
+    dm += _mass_fractions[nodenum][phase][_fluid_component] *
+          (*_dfluid_density_node_dvar)[nodenum][phase][pvar] / _fluid_viscosity[nodenum][phase];
+    dm -= _mass_fractions[nodenum][phase][_fluid_component] * _fluid_density_node[nodenum][phase] *
+          (*_dfluid_viscosity_dvar)[nodenum][phase][pvar] /
+          Utility::pow<2>(_fluid_viscosity[nodenum][phase]);
+    return dm;
+  }
+  else
+    libmesh_ignore(nodenum, phase, pvar);
+  return 0.0;
 }
+
+template class PorousFlowFullySaturatedAdvectiveFluxTempl<false>;
+template class PorousFlowFullySaturatedAdvectiveFluxTempl<true>;

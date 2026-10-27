@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
+#include "FVQpFluxBC.h"
 
 /**
  * This BC applies a heat flux to a boundary, where the heat flux is
@@ -28,7 +28,7 @@
  * radiative heat transfer depends on the surface temperature. This iteration is
  * performed with a simple underrelaxation method.
  */
-class FVThermalResistanceBC : public FVFluxBC
+class FVThermalResistanceBC : public FVQpFluxBC
 {
 public:
   FVThermalResistanceBC(const InputParameters & parameters);

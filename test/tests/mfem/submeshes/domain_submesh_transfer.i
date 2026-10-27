@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/cylinder-hex-q2.gen
 []
 
@@ -63,13 +63,11 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHypreGMRES
     preconditioner = boomeramg
@@ -91,10 +89,19 @@
   []
 []
 
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMVariableLineValueSampler
+    variable = 'potential'
+    start_point = '0 0.5 -0.5'
+    end_point = '0 0.5 0.5'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/DomainPotentialTransfer
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    file_base = OutputData/domain_submesh_transfer
   []
 []

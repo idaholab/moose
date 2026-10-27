@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,7 +13,7 @@ namespace CSG
 {
 
 CSGZCylinder::CSGZCylinder(const std::string & name, const Real x0, const Real y0, const Real r)
-  : CSGSurface(name, MooseUtils::prettyCppType<CSGZCylinder>()), _x0(x0), _y0(y0), _r(r)
+  : CSGSurface(name), _x0(x0), _y0(y0), _r(r)
 {
   checkRadius();
 }

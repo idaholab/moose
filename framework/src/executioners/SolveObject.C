@@ -26,8 +26,8 @@ SolveObject::SolveObject(Executioner & ex)
     _mesh(_problem.mesh()),
     _displaced_mesh(_displaced_problem ? &_displaced_problem->mesh() : nullptr),
     _solver_sys(_problem.numNonlinearSystems()
-                    ? static_cast<SystemBase &>(_problem.getNonlinearSystemBase(/*nl_sys=*/0))
-                    : static_cast<SystemBase &>(_problem.getLinearSystem(/*l_sys_num=*/0))),
+                    ? cast_ref<SystemBase &>(_problem.getNonlinearSystemBase(/*nl_sys=*/0))
+                    : cast_ref<SystemBase &>(_problem.getLinearSystem(/*l_sys_num=*/0))),
     _aux(_problem.getAuxiliarySystem()),
     _inner_solve(nullptr)
 {

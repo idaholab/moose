@@ -29,6 +29,5 @@ AddLinearFVKernelAction::AddLinearFVKernelAction(const InputParameters & params)
 void
 AddLinearFVKernelAction::act()
 {
-  if (_current_task == "add_linear_fv_kernel")
-    _problem->addLinearFVKernel(_type, _name, _moose_object_pars);
+  _problem->addLinearFVKernel(_type, _name, _moose_object_pars);
 }

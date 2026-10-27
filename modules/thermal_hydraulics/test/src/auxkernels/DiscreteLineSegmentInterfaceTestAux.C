@@ -25,8 +25,11 @@ DiscreteLineSegmentInterfaceTestAux::validParams()
   return params;
 }
 
-DiscreteLineSegmentInterfaceTestAux::DiscreteLineSegmentInterfaceTestAux(const InputParameters & params)
-  : AuxKernel(params), DiscreteLineSegmentInterface(this), _test_type(getParam<MooseEnum>("test_type"))
+DiscreteLineSegmentInterfaceTestAux::DiscreteLineSegmentInterfaceTestAux(
+    const InputParameters & params)
+  : AuxKernel(params),
+    DiscreteLineSegmentInterface(this),
+    _test_type(getParam<MooseEnum>("test_type"))
 {
 }
 

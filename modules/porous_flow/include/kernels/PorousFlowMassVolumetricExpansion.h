@@ -9,26 +9,25 @@
 
 #pragma once
 
-#include "TimeDerivative.h"
+#include "PorousFlowLumpedKernelBase.h"
 #include "PorousFlowDictator.h"
-#include "RankTwoTensor.h"
 
 /**
- * Kernel = mass_component * d(volumetric_strain)/dt
- * where mass_component =
- * porosity*sum_phases(density_phase*saturation_phase*massfrac_phase^component)
- * which is lumped to the nodes
- * If _multiply_by_density = false then density_phase does not appear in the above expression
+ * Kernel = mass_component * rate_of_solid_volumetric_expansion
+ * where mass_component = porosity * sum_phases(density_phase * saturation_phase *
+ * massfrac_phase^component) It is lumped to the nodes. If multiply_by_density = false then
+ * density_phase is not included in the above sum.
  */
-class PorousFlowMassVolumetricExpansion : public TimeKernel
+template <bool is_ad>
+class PorousFlowMassVolumetricExpansionTempl : public PorousFlowLumpedKernelBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowMassVolumetricExpansion(const InputParameters & parameters);
+  PorousFlowMassVolumetricExpansionTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
@@ -41,56 +40,50 @@ protected:
   /// Whether the Variable for this Kernel is a PorousFlow variable according to the Dictator
   const bool _var_is_porflow_var;
 
-  /// Number of displacement variables
-  unsigned int _ndisp;
-
-  /// Variable number of the displacements variables
-  std::vector<unsigned int> _disp_var_num;
-
   /// Number of fluid phases
   const unsigned int _num_phases;
 
   /// Whether the porosity uses the volumetric strain at the closest quadpoint
   const bool _strain_at_nearest_qp;
 
-  /// Whether to multiply by density: if true then this Kernel involves the fluid mass, otherwise it involves the fluid volume
+  /// Whether to multiply by density
   const bool _multiply_by_density;
 
-  /// Porosity
-  const MaterialProperty<Real> & _porosity;
+  /// Porosity at the nodes
+  const GenericMaterialProperty<Real, is_ad> & _porosity;
 
-  /// d(porosity)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<Real>> & _dporosity_dvar;
+  /// d(porosity)/d(PorousFlow variable) at the nodes
+  const MaterialProperty<std::vector<Real>> * const _dporosity_dvar;
 
-  /// d(porosity)/d(grad PorousFlow variable)
-  const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
+  /// d(porosity)/d(grad PorousFlow variable) at the qps
+  const MaterialProperty<std::vector<RealGradient>> * const _dporosity_dgradvar;
 
   /// The nearest qp to the node
   const MaterialProperty<unsigned int> * const _nearest_qp;
 
-  /// Fluid density
-  const MaterialProperty<std::vector<Real>> * const _fluid_density;
+  /// Nodal fluid density
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * const _fluid_density;
 
-  /// d(fluid density)/d(PorousFlow variable)
+  /// d(nodal fluid density)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_density_dvar;
 
-  /// Fluid saturation
-  const MaterialProperty<std::vector<Real>> & _fluid_saturation;
+  /// Nodal fluid saturation
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _fluid_saturation;
 
-  /// d(fluid saturation)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_saturation_dvar;
+  /// d(nodal fluid saturation)/d(PorousFlow variable)
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_saturation_dvar;
 
-  /// Mass fraction
-  const MaterialProperty<std::vector<std::vector<Real>>> & _mass_frac;
+  /// Nodal mass fraction
+  const GenericMaterialProperty<std::vector<std::vector<Real>>, is_ad> & _mass_frac;
 
-  /// d(mass fraction)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_frac_dvar;
+  /// d(nodal mass fraction)/d(PorousFlow variable)
+  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> * const _dmass_frac_dvar;
 
   /// Strain rate
-  const MaterialProperty<Real> & _strain_rate_qp;
+  const GenericMaterialProperty<Real, is_ad> & _strain_rate_qp;
 
   /// d(strain rate)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<RealGradient>> & _dstrain_rate_qp_dvar;
+  const MaterialProperty<std::vector<RealGradient>> * const _dstrain_rate_qp_dvar;
 
   /**
    * Derivative of mass part of the residual with respect to the Variable
@@ -108,4 +101,10 @@ protected:
    * number
    */
   Real computedVolQpJac(unsigned int jvar) const;
+
+  usingGenericKernelMembers;
+  using GenericKernel<is_ad>::_grad_phi;
 };
+
+typedef PorousFlowMassVolumetricExpansionTempl<false> PorousFlowMassVolumetricExpansion;
+typedef PorousFlowMassVolumetricExpansionTempl<true> ADPorousFlowMassVolumetricExpansion;

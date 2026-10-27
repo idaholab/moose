@@ -22,8 +22,8 @@ public:
   StatVector(const InputParameters & parameters);
   virtual void execute() override;
   virtual Real getValue() const override;
-  virtual void initialize() final{};
-  virtual void finalize() final{};
+  virtual void initialize() final {};
+  virtual void finalize() final {};
 
 protected:
   const MooseEnum & _stat;

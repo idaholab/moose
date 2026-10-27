@@ -24,6 +24,17 @@ Flags provided to `PorousFlowPorosity` control its evolution.
 - If `chemical = true` then porosity will depend on $M$.  Otherwise that term in
   [eq:poro_evolve] is ignored.
 
+!alert note title=Lower bound on porosity (`porosity_min`)
+The optional parameter `porosity_min` places a hard lower bound on the computed
+porosity: if [eq:poro_evolve] yields a value below `porosity_min`, the porosity is
+set to `porosity_min` instead (its derivatives are scaled by `zero_modifier` rather
+than zeroed, to aid Newton convergence).  By default no bound is imposed.  This is
+primarily useful for `chemical = true` porosity: the exponential form only
+guarantees a positive porosity for a positive decay (pore-pressure/strain/thermal)
+term, so mineral precipitation - which enters through $M$, not the decay - can
+otherwise drive the porosity negative once the precipitated mineral fills the pore
+space.  Setting `porosity_min` to a small positive value prevents this.
+
 !alert note
 On the parameter `solid_bulk`: Selecting a functor with dependency on a model
 variable $u$ (such as pore pressure) for the parameter `solid_bulk` $K$ in a way

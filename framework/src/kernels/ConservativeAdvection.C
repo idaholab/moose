@@ -10,8 +10,6 @@
 #include "ConservativeAdvection.h"
 #include "SystemBase.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", ConservativeAdvection);
 registerMooseObject("MooseApp", ADConservativeAdvection);
 

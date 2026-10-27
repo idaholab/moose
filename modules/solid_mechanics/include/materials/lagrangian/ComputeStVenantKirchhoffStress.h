@@ -22,7 +22,7 @@
 /// tensor but enforce it to be isotropic with the Guarantee system
 /// as this is only a hyperelastic model for an isotropic tensor.
 ///
-class ComputeStVenantKirchhoffStress : public ComputeLagrangianStressPK2, public GuaranteeConsumer
+class ComputeStVenantKirchhoffStress : public ComputeLagrangianStressPK2
 {
 public:
   static InputParameters validParams();

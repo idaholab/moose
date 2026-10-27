@@ -31,10 +31,20 @@ GenericConstantArray::validParams()
 
 GenericConstantArray::GenericConstantArray(const InputParameters & parameters)
   : Material(parameters),
+    VariableSizeMaterialPropertiesInterface(parameters),
     _prop_name(getParam<std::string>("prop_name")),
     _prop_value(getParam<RealEigenVector>("prop_value")),
     _property(declareProperty<RealEigenVector>(_prop_name))
 {
+}
+
+std::size_t
+GenericConstantArray::getVectorPropertySize(const MaterialPropertyName & prop_name) const
+{
+  libmesh_ignore(prop_name);
+  mooseAssert(prop_name == _prop_name,
+              "Property '" + prop_name + "' is not declared by this material");
+  return _prop_value.size();
 }
 
 void

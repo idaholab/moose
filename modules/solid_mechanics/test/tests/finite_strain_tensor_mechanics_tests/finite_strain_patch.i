@@ -62,22 +62,6 @@
   [../]
 []
 
-[Variables]
-  # Variables
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
 [AuxVariables]
   # AuxVariables
   [./stress_xx]
@@ -106,10 +90,12 @@
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    use_displaced_mesh = true
-  [../]
+[Physics/SolidMechanics/QuasiStatic]
+  [all]
+    add_variables = true
+    strain = finite
+    incremental = true
+  []
 []
 
 [AuxKernels]
@@ -313,11 +299,6 @@
     C_ijkl = '1.0e6  0.0   0.0 1.0e6  0.0  1.0e6 0.5e6 0.5e6 0.5e6'
     fill_method = symmetric9
   [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = '1 2 3 4 5 6 7'
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2 3 4 5 6 7'
@@ -350,4 +331,4 @@
 
 [Outputs]
   exodus = true
-[] # Output
+[]

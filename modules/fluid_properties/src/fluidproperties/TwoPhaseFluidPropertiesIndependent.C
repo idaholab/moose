@@ -63,7 +63,8 @@ TwoPhaseFluidPropertiesIndependent::T_triple() const
   return getTwoPhaseInterfaceDummyValue();
 }
 
-Real TwoPhaseFluidPropertiesIndependent::T_sat(Real) const
+Real
+TwoPhaseFluidPropertiesIndependent::T_sat(Real) const
 {
   return getTwoPhaseInterfaceDummyValue();
 }
@@ -74,7 +75,8 @@ TwoPhaseFluidPropertiesIndependent::T_sat(const ADReal &) const
   return getTwoPhaseInterfaceDummyValue();
 }
 
-Real TwoPhaseFluidPropertiesIndependent::p_sat(Real) const
+Real
+TwoPhaseFluidPropertiesIndependent::p_sat(Real) const
 {
   return getTwoPhaseInterfaceDummyValue();
 }
@@ -85,7 +87,8 @@ TwoPhaseFluidPropertiesIndependent::p_sat(const ADReal &) const
   return getTwoPhaseInterfaceDummyValue();
 }
 
-Real TwoPhaseFluidPropertiesIndependent::dT_sat_dp(Real) const
+Real
+TwoPhaseFluidPropertiesIndependent::dT_sat_dp(Real) const
 {
   return getTwoPhaseInterfaceDummyValue();
 }
@@ -96,7 +99,8 @@ TwoPhaseFluidPropertiesIndependent::L_fusion() const
   return getTwoPhaseInterfaceDummyValue();
 }
 
-Real TwoPhaseFluidPropertiesIndependent::sigma_from_T(Real) const
+Real
+TwoPhaseFluidPropertiesIndependent::sigma_from_T(Real) const
 {
   return getTwoPhaseInterfaceDummyValue();
 }
@@ -107,7 +111,8 @@ TwoPhaseFluidPropertiesIndependent::sigma_from_T(const ADReal &) const
   return getTwoPhaseInterfaceDummyValue();
 }
 
-Real TwoPhaseFluidPropertiesIndependent::dsigma_dT_from_T(Real) const
+Real
+TwoPhaseFluidPropertiesIndependent::dsigma_dT_from_T(Real) const
 {
   return getTwoPhaseInterfaceDummyValue();
 }

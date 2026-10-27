@@ -2,105 +2,118 @@
 
 !syntax description /Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics
 
-The Solid Mechanics Physics Action is a convenience [Action](Action.md) that simplifies part of the
-mechanics system setup.
+The QuasiStatic Physics is the recommended way to set up a static or quasi-static solid mechanics
+problem.  From a compact set of parameters it creates the displacement variables, the strain
+calculator, the [stress-divergence kernels](solid_mechanics/BalanceOfLinearMomentum.md), and the
+requested outputs -- consistently and with the correct settings -- so you do not have to assemble
+these objects by hand.
 
-It applies to both the current kernel system based on the [StressDivergenceTensors](/StressDivergenceTensors.md) kernels
-and to the new kernel system based on the
-[TotalLagrangianStressDivergence](/TotalLagrangianStressDivergence.md) and [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) kernels.
-Some options only apply to one or the other system, as outlined below.
+The parameters are organized into the groups below; each group points to the reference documentation
+for the underlying theory.  The complete parameter list appears at the bottom of this page.
 
-It performs
+## Variables id=variables
 
-- Add StressDivergence Kernels (for the current coordinate system) -- both systems, only Cartesian coordinates for the *Lagrangian* kernel system
-- Add WeakPlaneStress Kernel (for weak enforcement of the plane stress condition) -- only the `StressDivergenceTensors` system
-- Add Strain calculation material (for the chosen strain model) -- both systems
-- Correctly set use of displaced mesh -- both systems
-- Optional: Setup of displacement variables (with the correct order for the current mesh) -- both systems
-- Optional: Add AuxVariables and AuxKernels for various tensor components and quantity outputs -- both systems
-- Optional: Set up out-of-plane stress/strain consistently -- only the `StressDivergenceTensors` system
-- Optional: Automatic extraction of eigenstrain names from materials and correct application to proper blocks -- both systems
-- Optional: Setup cell-average homogenization constraints on the simulation -- only the new *Lagrangian* kernels
+Declare the displacement field the problem solves for (and any coupled temperature).  Set
+[!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/add_variables) to have
+the action create the displacement variables at the order matching the mesh.
 
-## Constructed MooseObjects
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/displacements)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/add_variables)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/temperature)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/scaling)
 
-The Solid Mechanics QuasiStatic Physics Action is used to construct the kernels, displacement variables, and strain materials in a consistent manner as required for a continuum mechanics simulation simulation. Optionally it generates aux variables and auxkernels to aid in the output of tensor components and scalar quantities.
+## Strain id=strain
 
-### For the `StressDivergenceTensors` Kernels
+Choose the kinematic model, apply eigenstrains, correct volumetric locking, and tune the strain
+time integration.  `strain = FINITE` selects large-deformation kinematics and `SMALL` selects
+small-deformation kinematics; eigenstrains are subtracted from the total strain;
+`volumetric_locking_correction` applies the $\bar{F}$ stabilization for linear elements; and the
+kinematic approximation and generalized-midpoint weight control how the incremental deformation is
+integrated.  See [Kinematics](solid_mechanics/Kinematics.md),
+[Kinematic Approximations](solid_mechanics/KinematicApproximations.md),
+[Stabilization](solid_mechanics/Stabilization.md), and
+[Generalized Midpoint Rule](solid_mechanics/GeneralizedMidpointRule.md).
 
-!table id=tmMaster_action_table_sdt caption=Correspondence Among Action Functionality and MooseObjects for the Solid Mechanics QuasiStatic Physics Action, current kernel system
-| Functionality     | Replaced Classes   | Associated Parameters   |
-|-------------------|--------------------|-------------------------|
-| Calculate stress divergence equilibrium for the given coordinate system | [StressDivergenceTensors](/StressDivergenceTensors.md) and optionally [WeakPlaneStress](/WeakPlaneStress.md) or [StressDivergenceRZTensors](/StressDivergenceRZTensors.md) or [StressDivergenceRSphericalTensors](/StressDivergenceRSphericalTensors.md) | `displacements` : a string of the displacement field variables |
-| Add the displacement variables | [Variables](syntax/Variables/index.md) | `add_variables`: boolean |
-| Calculation of strain for the given coordinate system | [ComputeFiniteStrain](/ComputeFiniteStrain.md) or [ComputePlaneFiniteStrain](/ComputePlaneFiniteStrain.md) or [ComputeAxisymmetric1DFiniteStrain](/ComputeAxisymmetric1DFiniteStrain.md) or [ComputeAxisymmetricRZFiniteStrain](/ComputeAxisymmetricRZFiniteStrain.md) | `strain`: MooseEnum to select finite or strain formulations |
-|   | [ComputeSmallStrain](/ComputeSmallStrain.md) or [ComputePlaneSmallStrain](/ComputePlaneSmallStrain.md) or [ComputeAxisymmetric1DSmallStrain](/ComputeAxisymmetric1DSmallStrain.md) or [ComputeAxisymmetricRZSmallStrain](/ComputeAxisymmetricRZSmallStrain.md) |   |
-|   | [ComputeIncrementalStrain](/ComputeIncrementalStrain.md) or [ComputePlaneIncrementalStrain](/ComputePlaneIncrementalStrain.md) or [ComputeAxisymmetric1DIncrementalStrain](/ComputeAxisymmetric1DIncrementalStrain.md) or [ComputeAxisymmetricRZIncrementalStrain](/ComputeAxisymmetricRZIncrementalStrain.md) | `incremental` : boolean for using a incremental strain formulation |
-| Add AuxVariables and AuxKernels for various tensor component and quantity outputs | Material Properties as well as [AuxVariables](/AuxVariables/index.md) and [RankTwoAux](/RankTwoAux.md) or [RankTwoScalarAux](/RankTwoScalarAux.md) or [RankFourAux](/RankFourAux.md) | `generate_output`: a string of the quantities to add |
-| Add Material Properties for various tensor component and quantity outputs |  | `generate_output`: a string of the quantities to add |
-| Add the optional global strain contribution to the strain calculation | Couples the [GlobalStrain](/SolidMechanics/GlobalStrain/index.md) system | `global_strain`: name of the material property that computes the global strain tensor |
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/strain)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/volumetric_locking_correction)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/volumetric_locking_correction_mode)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/kinematic_approximation)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/generalized_midpoint_alpha)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/eigenstrain_names)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/automatic_eigenstrain_names)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/strain_base_name)
 
-Note that there are many variations for the calculation of the stress divergence and the strain measure. Review the theoretical introduction for the [Stress Divergence](solid_mechanics/StressDivergence.md) and the [Strain Formulations](solid_mechanics/Strains.md) for more information.
+## Lagrangian Formulation id=lagrangian-formulation
 
-### For the New Lagrangian Kernel system
+Select the total or updated Lagrangian formulation.  The two produce identical results, so choose
+whichever is more convenient (homogenization requires `TOTAL`).  See
+[Balance of Linear Momentum](solid_mechanics/BalanceOfLinearMomentum.md).
 
-!table id=tmMaster_action_table_lc caption=Correspondence Among Action Functionality and MooseObjects for the Solid Mechanics QuasiStatic Physics Action, new kernel system
-| Functionality     | Replaced Classes   | Associated Parameters   |
-|-------------------|--------------------|-------------------------|
-| Calculate stress divergence equilibrium for the given coordinate system | [TotalLagrangianStressDivergence](/TotalLagrangianStressDivergence.md) or [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) | `displacements` : a string of the displacement field variables, `formulation` : a MooseEnum controlling if the `UPDATED` or `TOTAL` Lagrangian formulation is used |
-| Add the displacement variables | [Variables](syntax/Variables/index.md) | `add_variables`: boolean |
-| Calculation of strain for the given coordinate system | [ComputeLagrangianStrain](/ComputeLagrangianStrain.md) | `strain`: MooseEnum to select finite or small kinematic formulations |
-| Add AuxVariables and AuxKernels for various tensor component and quantity outputs | Material Properties as well as [AuxVariables](/AuxVariables/index.md) and [RankTwoAux](/RankTwoAux.md) or [RankTwoScalarAux](/RankTwoScalarAux.md) or [RankFourAux](/RankFourAux.md) | `generate_output`: a string of the quantities to add |
-| Add Material Properties for various tensor component and quantity outputs |  | `generate_output`: a string of the quantities to add |
-| Add the optional homogenization constraints | Adds all objects required to impose the [homogenization constraints](Homogenization.md) | `constraint_types` : MooseEnum controlling whether `strain` or `stress` constraints and imposed, `targets` : Functions providing the time-dependent targets  |
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/new_system)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/formulation)
 
-!alert warning If the using the `Physics/SolidMechanics/QuasiStatic` with
-`automatic_eigenstrain_names = true`, the eigenstrain_names will be populated
-under restrictive conditions for classes such as
-[CompositeEigenstrain](CompositeEigenstrain.md),
-[ComputeReducedOrderEigenstrain](ComputeReducedOrderEigenstrain.md), and
-[RankTwoTensorMaterialADConverter](MaterialADConverter.md).  The input components for
-these classes are not included in the
-[!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/eigenstrain_names) passed to the
-`Physics/SolidMechanics/QuasiStatic` block.  Set the `automatic_eigenstrain_names = false` and
-populate this list manually if these components need to be included.
+## Homogenization id=homogenization
 
-## Example Input File Syntax
+Impose cell-average stress or strain constraints on a periodic unit cell (total Lagrangian only).
+See [Homogenization](solid_mechanics/Homogenization.md).
 
-### New Kernel System
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/constraint_types)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/targets)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/homogenized_off_diagonal_jacobian)
 
-The following example sets up the new *Lagrangian* kernel system with a total Lagrangian formulation for a
-large displacement kinematics problem.
+## Output id=output
+
+Add AuxVariables that output stress and strain tensor components and derived scalar quantities.  See
+[Visualizing Tensor Components](solid_mechanics/VisualizingTensors.md) for the available quantities.
+
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/generate_output)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/material_output_order)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/material_output_family)
+
+## Plane Stress and Plane Strain id=planar
+
+Impose out-of-plane conditions for two-dimensional models.
+
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/planar_formulation)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/scalar_out_of_plane_strain)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/out_of_plane_pressure)
+
+## Advanced id=advanced
+
+Subdomain restriction, automatic differentiation, and residual/Jacobian output.
+
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/block)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/base_name)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/use_automatic_differentiation)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/global_strain)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/save_in)
+- [!param](/Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics/diag_save_in)
+
+## Example Input File Syntax id=examples
+
+A small deformation, total Lagrangian problem:
 
 !listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/action/action_L.i block=Physics/SolidMechanics/QuasiStatic
 
-### New Kernel System, with Homogenization Constraints
-
-The following uses the action to setup homogenization constraints in a problem using the new kernel system.
+A large deformation problem with homogenization constraints:
 
 !listing modules/solid_mechanics/test/tests/lagrangian/cartesian/total/homogenization/action/action_3d.i block=Physics/SolidMechanics/QuasiStatic
 
-### Subblocks
-
-The subblocks of the QuasiStatic Physics Action are what triggers MOOSE objects to be built.
-If none of the mechanics is subdomain restricted a single subblock can be used
+A single sub-block sets up the mechanics everywhere; use multiple sub-blocks (with `block`) for
+different models on different subdomains:
 
 !listing modules/solid_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Physics/SolidMechanics/QuasiStatic
 
-if different mechanics models are needed, multiple subblocks with subdomain restrictions
-can be used.
-
 !listing modules/solid_mechanics/test/tests/action/two_block_new.i block=Physics/SolidMechanics/QuasiStatic
 
-Parameters supplied at the `[Physics/SolidMechanics/QuasiStatic]` level act as
-defaults for the QuasiStatic Solid Mechanics Physics subblocks.
+Parameters supplied at the `[Physics/SolidMechanics/QuasiStatic]` level act as defaults for its
+sub-blocks.
+
+!alert note
+With `automatic_eigenstrain_names = true`, eigenstrain names are populated only under restrictive
+conditions for classes such as [CompositeEigenstrain](CompositeEigenstrain.md),
+[ComputeReducedOrderEigenstrain](ComputeReducedOrderEigenstrain.md), and
+[RankTwoTensorMaterialADConverter](MaterialADConverter.md).  Set `automatic_eigenstrain_names = false`
+and list the names manually if these components need to be included.
 
 !syntax parameters /Physics/SolidMechanics/QuasiStatic/QuasiStaticSolidMechanicsPhysics
-
-## Associated Actions
-
-!syntax list /Physics/SolidMechanics/QuasiStatic objects=True actions=False subsystems=False
-
-!syntax list /Physics/SolidMechanics/QuasiStatic objects=False actions=False subsystems=True
-
-!syntax list /Physics/SolidMechanics/QuasiStatic objects=False actions=True subsystems=False

@@ -52,4 +52,3 @@ protected:
 
   EulerAngles _angles;
 };
-

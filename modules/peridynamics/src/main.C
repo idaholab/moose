@@ -1,4 +1,3 @@
-
 //* This file is part of the MOOSE framework
 //* https://mooseframework.inl.gov
 //*
@@ -7,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "PeridynamicsTestApp.h"
 #include "MooseMain.h"
 

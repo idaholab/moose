@@ -16,7 +16,7 @@
 InputParameters
 FVScalarLagrangeMultiplierConstraint::validParams()
 {
-  InputParameters params = FVElementalKernel::validParams();
+  InputParameters params = FVQpElementalKernel::validParams();
   params.addClassDescription(
       "Base class for imposing constraints using scalar Lagrange multipliers");
   params.addParam<PostprocessorName>("phi0", "0", "The value that the constraint will enforce.");
@@ -26,7 +26,7 @@ FVScalarLagrangeMultiplierConstraint::validParams()
 
 FVScalarLagrangeMultiplierConstraint::FVScalarLagrangeMultiplierConstraint(
     const InputParameters & parameters)
-  : FVElementalKernel(parameters),
+  : FVQpElementalKernel(parameters),
     _phi0(getPostprocessorValue("phi0")),
     _lambda_var(*getScalarVar("lambda", 0)),
     _lambda(adCoupledScalarValue("lambda"))

@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/beam-tet.mesh
 []
 
@@ -38,16 +38,13 @@
   []
 []
 
-[Preconditioner]
+[Solvers]
   [ams]
     type = MFEMHypreAMS
     fespace = HCurlFESpace
     print_level = 0
     singular = true
   []
-[]
-
-[Solvers]
   [AME]
     type = MFEMHypreAME
     preconditioner = ams

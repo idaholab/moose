@@ -117,6 +117,53 @@
                   'when solves fail.'
   []
 
+  [preserve_sequence_after_failed_step]
+    type = CSVDiff
+    input = timesequence_preserve_after_failed_step.i
+    csvdiff = timesequence_preserve_after_failed_step_out.csv
+    max_threads = 1
+    max_parallel = 1
+
+    requirement = 'The system shall preserve future sequence times when retrying a failed time '
+                  'step with a reduced time-step size.'
+  []
+
+  [off_sequence_sync]
+    type = CSVDiff
+    input = timesequence_off_sequence_sync.i
+    csvdiff = timesequence_off_sequence_sync_out.csv
+
+    requirement = 'The system shall target the next scheduled time after accepting an '
+                  'intermediate synchronization time.'
+  []
+
+  [restart_after_cutback]
+    requirement = 'The system shall support restarting a time sequence calculation after a '
+                  'failed time step is retried successfully with a reduced time-step size:'
+
+    [checkpoint]
+      type = RunApp
+      input = timesequence_cutback_restart1.i
+      recover = false
+      max_threads = 1
+      max_parallel = 1
+
+      detail = 'by writing a checkpoint after the reduced time-step retry succeeds, and'
+    []
+
+    [restart]
+      type = CSVDiff
+      input = timesequence_cutback_restart2.i
+      csvdiff = timesequence_cutback_restart2_out.csv
+      recover = false
+      prereq = restart_after_cutback/checkpoint
+      max_threads = 1
+      max_parallel = 1
+
+      detail = 'by retaining completed history while accepting changes to future sequence times.'
+    []
+  []
+
   [restart_from_timesequence]
     requirement = 'The system shall support the ability to run a calculation for the purpose of '
                   'creating a time sequence restart file:'

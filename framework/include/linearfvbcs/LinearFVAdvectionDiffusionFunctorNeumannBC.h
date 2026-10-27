@@ -40,6 +40,8 @@ public:
 
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
 
+  virtual bool providesCompleteBoundaryFlux() const override { return true; }
+
 protected:
   /// The functor for this BC (can be variable, function, etc)
   const Moose::Functor<Real> & _functor;

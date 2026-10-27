@@ -220,6 +220,7 @@ offset = 0.00
     disp_z = disp_z
     use_displaced_mesh = true
     weighted_gap_uo = weighted_gap_uo
+    c = 1
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -306,16 +307,14 @@ offset = 0.00
   end_time = 1
   dt = .5
   dtmin = .01
-  solve_type = 'PJFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
-                  '-snes_linesearch_monitor'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
-  petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-15                   1e-5'
+  solve_type = 'NEWTON'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type'
+  petsc_options_value = 'lu       mumps                      NONZERO'
   l_max_its = 100
   nl_max_its = 30
   nl_abs_tol = 1e-12
   line_search = 'none'
-  snesmf_reuse_base = false
 []
 
 [Debug]

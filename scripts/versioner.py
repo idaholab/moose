@@ -52,8 +52,6 @@ class ApptainerPackage:
     name: str
     # Name base (no variants) of the apptainer container
     name_base: str
-    # Name suffix (arch) of the apptainer container
-    name_suffix: str
     # The apptainer package this package depends on (if any)
     from_name: Union[str, None]
     # Tag (version for apptainer)
@@ -720,8 +718,7 @@ class Versioner:
         name_base = package_name
         if not name_base.startswith("moose-") and not package.is_app:
             name_base = f"moose-{name_base}"
-        name_suffix = platform.machine()
-        name = f"{name_base}-{name_suffix}"
+        name = f"{name_base}"
 
         from_name = apptainer.get("from")
         if from_name:
@@ -734,7 +731,6 @@ class Versioner:
             "name": name,
             "from_name": from_name,
             "name_base": name_base,
-            "name_suffix": name_suffix,
             "tag": package.full_version,
             "uri": f"{name}:{package.full_version}",
             "def_path": os.path.abspath(

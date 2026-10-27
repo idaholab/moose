@@ -24,7 +24,7 @@ public:
   KokkosDirectionalNeumannBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
   {
     return -_value * datum.normals(qp);
   }

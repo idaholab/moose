@@ -11,8 +11,6 @@
 
 #include "NonlinearSystemBase.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseTestApp", FixedPointProblem);
 
 InputParameters

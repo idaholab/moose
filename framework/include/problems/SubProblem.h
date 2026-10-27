@@ -88,6 +88,9 @@ public:
   virtual const MooseMesh & mesh() const = 0;
   virtual const MooseMesh & mesh(bool use_displaced) const = 0;
 
+  /// @return the number of threads the associated application uses (see MooseApp::numThreads())
+  THREAD_ID numThreads() const;
+
   /**
    * @returns whether there will be nonlocal coupling at any point in the simulation, e.g. whether
    * there are any active \emph or inactive nonlocal kernels or boundary conditions
@@ -438,8 +441,8 @@ public:
                                 const std::vector<Real> * const weights = nullptr);
   virtual void reinitNode(const Node * node, const THREAD_ID tid) = 0;
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, const THREAD_ID tid) = 0;
-  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid) = 0;
-  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid) = 0;
+  void reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid);
+  void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid);
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, const THREAD_ID tid) = 0;
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   unsigned int neighbor_side,
@@ -842,12 +845,6 @@ public:
   bool automaticScaling() const;
 
   /**
-   * Tells this problem that the assembly associated with the given nonlinear system number involves
-   * a scaling vector
-   */
-  void hasScalingVector(const unsigned int nl_sys_num);
-
-  /**
    * Whether we have a displaced problem in our simulation
    */
   virtual bool haveDisplaced() const = 0;
@@ -1017,17 +1014,6 @@ public:
    * @returns whether we're doing p-refinement
    */
   [[nodiscard]] bool doingPRefinement() const;
-
-  /**
-   * Query whether p-refinement has been requested at any point during the simulation
-   */
-  [[nodiscard]] bool havePRefinement() const { return _have_p_refinement; }
-
-  /**
-   * Mark a variable family for either disabling or enabling p-refinement with valid parameters of a
-   * variable
-   */
-  void markFamilyPRefinement(const InputParameters & params);
 
   /**
    * Set the current lower dimensional element. This can be null
@@ -1216,14 +1202,6 @@ private:
                      std::vector<std::shared_ptr<libMesh::GhostingFunctor>>>
       _root_coupling_gf_to_sys_clones;
 
-  /// Whether p-refinement has been requested at any point during the simulation
-  bool _have_p_refinement;
-
-  /// Indicate whether a family is disabled for p-refinement
-  std::unordered_map<FEFamily, bool> _family_for_p_refinement;
-  /// The set of variable families by default disable p-refinement
-  static const std::unordered_set<FEFamily> _default_families_without_p_refinement;
-
   friend class Restartable;
 };
 
@@ -1310,9 +1288,9 @@ SubProblem::getFunctor(const std::string & name,
                                          std::make_unique<Moose::Functor<ADType>>(
                                              std::make_unique<Moose::NullFunctor<ADType>>())));
 
-    return static_cast<Moose::Functor<T> &>(*(requested_functor_is_ad
-                                                  ? std::get<2>(emplace_ret->second)
-                                                  : std::get<1>(emplace_ret->second)));
+    return cast_ref<Moose::Functor<T> &>(*(requested_functor_is_ad
+                                               ? std::get<2>(emplace_ret->second)
+                                               : std::get<1>(emplace_ret->second)));
   }
   else
   {
@@ -1327,9 +1305,9 @@ SubProblem::getFunctor(const std::string & name,
                                          std::make_unique<Moose::Functor<ADType>>(
                                              std::make_unique<Moose::NullFunctor<ADType>>())));
 
-    return static_cast<Moose::Functor<T> &>(*(requested_functor_is_ad
-                                                  ? std::get<2>(emplace_ret->second)
-                                                  : std::get<1>(emplace_ret->second)));
+    return cast_ref<Moose::Functor<T> &>(*(requested_functor_is_ad
+                                               ? std::get<2>(emplace_ret->second)
+                                               : std::get<1>(emplace_ret->second)));
   }
 }
 

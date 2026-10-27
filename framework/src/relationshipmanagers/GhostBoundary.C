@@ -20,8 +20,6 @@
 
 registerMooseObject("MooseApp", GhostBoundary);
 
-using namespace libMesh;
-
 InputParameters
 GhostBoundary::validParams()
 {

@@ -31,7 +31,7 @@ class Mesh;
 }
 #endif
 
-class MooseVariableFieldBase;
+class MooseVariableBase;
 
 /**
  * \class BlockRestrictable BlockRestrictable.h
@@ -225,7 +225,7 @@ public:
    *
    * @param variable The variable to check against.
    */
-  virtual void checkVariable(const MooseVariableFieldBase & variable) const;
+  virtual void checkVariable(const MooseVariableBase & variable) const;
 
 protected:
   /// Pointer to the MaterialData class for this object

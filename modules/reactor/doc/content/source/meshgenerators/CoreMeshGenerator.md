@@ -106,7 +106,7 @@ This is the resulting mesh block layout:
 
 `CoreMeshGenerator` can generate a [constructive solid geometry (CSG)](syntax/CSG/index.md), meaning that `--csg-only` can be called on a mesh input file that contains CoreMeshGenerator to represent the assembly structure as a CSG object.
 
-All incoming assembly structures are added to the core CSG structure as their own universes with name `[ASSEMBLY_MG_NAME]_univ`, where `[ASSEMBLY_MG_NAME]` denotes the name of the input assembly mesh generator. Each of these assembly universes are assembled into a [CSGLattice.md] structure. Additionally, dummy assembly positions are filled with an empty universe named "empty_univ", represented by a single universe filled with a void cell that has an empty region.
+All incoming assembly structures are added to the core CSG structure as their own universes based on the universe fill of the root cell contained within the root universe of the pin. Each of these assembly universes are assembled into a [CSGLattice.md] structure. Additionally, dummy assembly positions are filled with an empty universe named "empty_univ", represented by a single universe filled with a void cell that has an empty region.
 
 When a core peripheral ring is present, the core lattice outer region is filled by a material named `"rgmb_region_[REGION_ID]"`, where `[REGION_ID]` refers to the region ID of the peripheral ring region. The lattice is then used as a fill for a cell whose region is bounded by the peripheral ring radius and if extruded, the top and bottom axial planes of the core.
 

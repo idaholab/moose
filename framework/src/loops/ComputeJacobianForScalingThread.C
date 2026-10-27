@@ -16,8 +16,6 @@
 // C++
 #include <cstring> // for "Jacobian" exception test
 
-using namespace libMesh;
-
 ComputeJacobianForScalingThread::ComputeJacobianForScalingThread(FEProblemBase & fe_problem,
                                                                  const std::set<TagID> & tags)
   : ComputeFullJacobianThread(fe_problem, tags)

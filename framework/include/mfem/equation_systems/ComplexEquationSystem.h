@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
@@ -9,16 +18,16 @@
 #include "MFEMComplexKernel.h"
 #include "MFEMComplexIntegratedBC.h"
 #include "MFEMComplexEssentialBC.h"
+#include "MFEMMixedBilinearFormKernel.h"
 
 namespace Moose::MFEM
 {
-/*
+/**
 Class to store weak form components (bilinear and linear forms, and optionally
 mixed and nonlinear forms) and build methods
 */
 class ComplexEquationSystem : public EquationSystem
 {
-
 public:
   ComplexEquationSystem() = default;
   ~ComplexEquationSystem() = default;
@@ -31,22 +40,22 @@ public:
   ///Nonlinear Mult (Used by Newton-solver not necessarily nonlinear)
   virtual void Mult(const mfem::Vector & x, mfem::Vector & y) const override;
 
-  /// Build all forms comprising this EquationSystem
-  virtual void BuildEquationSystem() override;
-
   /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms() override;
 
   /// Build bilinear forms (diagonal Jacobian contributions)
   virtual void BuildBilinearForms() override;
 
-  /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
-  /// markers of all essential boundaries
+  /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
+  virtual void BuildMixedBilinearForms() override;
+
+  /// Update all essentially constrained true DoF markers and values on boundaries
+  virtual void ApplyEssentialBCs() override;
+
+  /// Applies complex BCs to a single trial variable
   virtual void ApplyComplexEssentialBC(const std::string & var_name,
                                        mfem::ParComplexGridFunction & trial_gf,
                                        mfem::Array<int> & global_ess_markers);
-  /// Update all essentially constrained true DoF markers and values on boundaries
-  virtual void ApplyEssentialBCs() override;
 
   /// Add complex kernels
   void AddComplexKernel(std::shared_ptr<MFEMComplexKernel> kernel);
@@ -56,6 +65,9 @@ public:
 
   /// Add complex essential BCs
   void AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc);
+
+  /// Perform trivial eliminations of coupled variables lacking corresponding test variables
+  void EliminateCoupledVariables() override;
 
   /// Form matrix-free representation of system operator.
   /// Used when EquationSystem assembly level is set to 'FULL', 'ELEMENT', 'PARTIAL', or 'NONE'.
@@ -104,12 +116,13 @@ public:
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
           integrated_bc_map);
 
-  virtual bool Complex() const override { return true; }
+  bool IsComplex() const override { return true; }
 
 protected:
   // Complex Linear and Bilinear Forms
   NamedFieldsMap<mfem::ParSesquilinearForm> _slfs;
   NamedFieldsMap<mfem::ParComplexLinearForm> _clfs;
+  NamedFieldsMap<NamedFieldsMap<mfem::ParMixedSesquilinearForm>> _mslfs;
 
   // Complex kernels and integrated BCs
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>
@@ -120,7 +133,7 @@ protected:
   // Complex essential BCs
   NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>> _cmplx_essential_bc_map;
 
-  /// Pointers to coupled variables not part of the reduced EquationSystem.
+  /// Pointers to coupled variables not part of the reduced ComplexEquationSystem.
   ComplexGridFunctions _cmplx_eliminated_variables;
 
   /// Complex Gridfunctions holding essential constraints from Dirichlet BCs

@@ -30,12 +30,6 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
   [./p]
   [../]
 []
@@ -72,9 +66,6 @@
     type = Diffusion
     variable = p
   [../]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./poro_x]
     type = PoroMechanicsCoupling
     variable = disp_x
@@ -92,6 +83,15 @@
     variable = disp_z
     porepressure = p
     component = 2
+  [../]
+[]
+
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    incremental = false
+    strain = small
+    block = 0
   [../]
 []
 
@@ -193,10 +193,6 @@
     C_ijkl = '0.5 0.75'
     fill_method = symmetric_isotropic
   [../]
-  [./strain]
-    type = ComputeSmallStrain
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./stress]
     type = ComputeLinearElasticStress
   [../]
@@ -211,14 +207,17 @@
   [./andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
-    petsc_options_value = 'gmres bjacobi 1E-10 1E-10 10 1E-15 1E-10'
+    petsc_options_iname = '-ksp_type -pc_type -ksp_atol -ksp_rtol'
+    petsc_options_value = 'gmres bjacobi 1E-15 1E-10'
   [../]
 []
 
 [Executioner]
   type = Transient
   solve_type = Newton
+  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-10
+  nl_max_its = 10
   start_time = 0
   dt = 0.1
   end_time = 1

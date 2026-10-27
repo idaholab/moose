@@ -10,7 +10,6 @@
 """Utilities for reading files."""
 
 import sys
-import codecs
 import os
 
 
@@ -18,8 +17,8 @@ def read(filename):
     """
     Reads file using utf-8 encoding.
 
-    This function exists simply for convenience and not needing to remember to use "codecs" when
-    reading files.
+    This function exists simply for convenience and not needing to remember to specify the
+    encoding when reading files.
 
     Additionally, it handles the MOOSE headers automatically. The prism.js package syntax
     highlighting messes up with the headers, so this makes them sane.
@@ -27,7 +26,7 @@ def read(filename):
     Inputs:
         filename[str]: The filename to open.
     """
-    with codecs.open(filename, encoding="utf-8") as fid:
+    with open(filename, encoding="utf-8") as fid:
         content = fid.read()
     return content
 
@@ -36,7 +35,7 @@ def write(filename, content):
     """
     Write utf-8 file.
     """
-    with codecs.open(filename, "w", encoding="utf-8") as fid:
+    with open(filename, "w", encoding="utf-8") as fid:
         fid.write(content)
 
 

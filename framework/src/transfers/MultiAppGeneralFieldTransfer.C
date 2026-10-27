@@ -29,8 +29,6 @@
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 
-using namespace libMesh;
-
 namespace GeneralFieldTransfer
 {
 Number OutOfMeshValue = std::numeric_limits<Real>::infinity();
@@ -1476,7 +1474,8 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     {
       // We may need to use existing data values in places where the
       // from app domain doesn't overlap
-      MeshFunction to_func(es, *to_sys->current_local_solution, to_sys->get_dof_map(), var_num);
+      libMesh::MeshFunction to_func(
+          es, *to_sys->current_local_solution, to_sys->get_dof_map(), var_num);
       to_func.init();
 
       GeneralFieldTransfer::CachedData<Number> f(
@@ -2089,7 +2088,7 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes() const
           continue;
 
         at_least_one = true;
-        for (const auto i : make_range(LIBMESH_DIM))
+        for (const auto i : make_range(Moose::dim))
         {
           min(i) = std::min(min(i), node(i));
           max(i) = std::max(max(i), node(i));
@@ -2135,7 +2134,7 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes() const
   // TODO move up
   // Check for a user-set fixed bounding box size and modify the sizes as appropriate
   if (_fixed_bbox_size != std::vector<Real>(3, 0))
-    for (const auto i : make_range(LIBMESH_DIM))
+    for (const auto i : make_range(Moose::dim))
       if (!MooseUtils::absoluteFuzzyEqual(_fixed_bbox_size[i], 0))
         for (const auto j : make_range(bboxes.size()))
         {
@@ -2194,7 +2193,7 @@ MultiAppGeneralFieldTransfer::getMaxToProblemsBBoxDimensions() const
   for (const auto & to_mesh : _to_meshes)
   {
     const auto bbox = to_mesh->getInflatedProcessorBoundingBox();
-    for (const auto dim : make_range(LIBMESH_DIM))
+    for (const auto dim : make_range(Moose::dim))
       max_dimension(dim) = std::max(
           max_dimension(dim), std::max(std::abs(bbox.first(dim)), std::abs(bbox.second(dim))));
   }

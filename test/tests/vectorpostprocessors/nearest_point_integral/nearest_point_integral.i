@@ -55,6 +55,29 @@
   []
 []
 
+[Postprocessors]
+  # check that vpp npi == spatial_from_uo
+  [compare_from_uo]
+    type = VectorPostprocessorComparison
+    comparison_type = EQUALS
+    vectorpostprocessor_a = npi
+    vector_name_a = np_post_processor_values
+    vectorpostprocessor_b = spatial_from_uo
+    vector_name_b = spatial_from_uo
+    execute_on = 'final'
+  []
+  # check that vpp npi == spatial_manually_provided
+  [compare_manually_provided]
+    type = VectorPostprocessorComparison
+    comparison_type = EQUALS
+    vectorpostprocessor_a = npi
+    vector_name_a = np_post_processor_values
+    vectorpostprocessor_b = spatial_manually_provided
+    vector_name_b = spatial_manually_provided
+    execute_on = 'final'
+  []
+[]
+
 [VectorPostprocessors]
   [npi]
     type = NearestPointIntegralVariablePostprocessor
@@ -88,6 +111,9 @@
 []
 
 [Outputs]
-  csv = true
-  execute_on = final
+  [out]
+    type = CSV
+    execute_on = final
+    show = 'compare_from_uo compare_manually_provided'
+  []
 []

@@ -34,7 +34,7 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/fe.h"
 
-using namespace libMesh;
+#include <algorithm>
 
 template <typename P, typename C>
 void
@@ -88,7 +88,8 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _tid(tid),
     _mesh(sys.mesh()),
     _mesh_dimension(_mesh.dimension()),
-    _helper_type(_mesh.hasSecondOrderElements() ? SECOND : FIRST, LAGRANGE),
+    _helper_type(
+        FEType(_mesh.hasSecondOrderElements() ? SECOND : FIRST, LAGRANGE).set_p_refinement(false)),
     _user_added_fe_of_helper_type(false),
     _user_added_fe_face_of_helper_type(false),
     _user_added_fe_face_neighbor_of_helper_type(false),
@@ -139,39 +140,39 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _calculate_face_xyz(false),
     _calculate_curvatures(false),
     _calculate_ad_coord(false),
-    _have_p_refinement(false)
+    _prepared_for_p_refinement(false)
 {
   const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
   _building_helpers = true;
   // Build fe's for the helpers
-  buildFE(FEType(helper_order, LAGRANGE));
-  buildFaceFE(FEType(helper_order, LAGRANGE));
-  buildNeighborFE(FEType(helper_order, LAGRANGE));
-  buildFaceNeighborFE(FEType(helper_order, LAGRANGE));
-  buildLowerDFE(FEType(helper_order, LAGRANGE));
+  buildFE(_helper_type);
+  buildFaceFE(_helper_type);
+  buildNeighborFE(_helper_type);
+  buildFaceNeighborFE(_helper_type);
+  buildLowerDFE(_helper_type);
   _building_helpers = false;
 
   // Build an FE helper object for this type for each dimension up to the dimension of the current
   // mesh
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
-    _holder_fe_helper[dim] = _fe[dim][FEType(helper_order, LAGRANGE)];
-    _holder_fe_face_helper[dim] = _fe_face[dim][FEType(helper_order, LAGRANGE)];
-    _holder_fe_face_neighbor_helper[dim] = _fe_face_neighbor[dim][FEType(helper_order, LAGRANGE)];
-    _holder_fe_neighbor_helper[dim] = _fe_neighbor[dim][FEType(helper_order, LAGRANGE)];
+    _holder_fe_helper[dim] = _fe[dim][_helper_type];
+    _holder_fe_face_helper[dim] = _fe_face[dim][_helper_type];
+    _holder_fe_face_neighbor_helper[dim] = _fe_face_neighbor[dim][_helper_type];
+    _holder_fe_neighbor_helper[dim] = _fe_neighbor[dim][_helper_type];
   }
 
   for (unsigned int dim = 0; dim < _mesh_dimension; dim++)
-    _holder_fe_lower_helper[dim] = _fe_lower[dim][FEType(helper_order, LAGRANGE)];
+    _holder_fe_lower_helper[dim] = _fe_lower[dim][_helper_type];
 
   // request phi, dphi, xyz, JxW, etc. data
   helpersRequestData();
 
   // For 3D mortar, mortar segments are always TRI3 elements so we want FIRST LAGRANGE regardless
   // of discretization
-  _fe_msm = (_mesh_dimension == 2)
-                ? FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE))
-                : FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(FIRST, LAGRANGE));
+  const auto mortar_helper_type =
+      FEType(_mesh_dimension == 2 ? helper_order : FIRST, LAGRANGE).set_p_refinement(false);
+  _fe_msm = FEGenericBase<Real>::build(_mesh_dimension - 1, mortar_helper_type);
   // This FE object should not take part in p-refinement
   _fe_msm->add_p_level_in_reinit(false);
   _JxW_msm = &_fe_msm->get_JxW();
@@ -275,7 +276,10 @@ Assembly::buildFE(FEType type) const
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe[dim][type])
+    {
       _fe[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _fe[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _fe[dim][type]->get_phi();
     _fe[dim][type]->get_dphi();
@@ -301,7 +305,10 @@ Assembly::buildFaceFE(FEType type) const
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_face[dim][type])
+    {
       _fe_face[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _fe_face[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _fe_face[dim][type]->get_phi();
     _fe_face[dim][type]->get_dphi();
@@ -323,7 +330,10 @@ Assembly::buildNeighborFE(FEType type) const
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_neighbor[dim][type])
+    {
       _fe_neighbor[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _fe_neighbor[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _fe_neighbor[dim][type]->get_phi();
     _fe_neighbor[dim][type]->get_dphi();
@@ -345,7 +355,10 @@ Assembly::buildFaceNeighborFE(FEType type) const
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
   {
     if (!_fe_face_neighbor[dim][type])
+    {
       _fe_face_neighbor[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _fe_face_neighbor[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _fe_face_neighbor[dim][type]->get_phi();
     _fe_face_neighbor[dim][type]->get_dphi();
@@ -369,7 +382,10 @@ Assembly::buildLowerDFE(FEType type) const
   for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
   {
     if (!_fe_lower[dim][type])
+    {
       _fe_lower[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _fe_lower[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _fe_lower[dim][type]->get_phi();
     _fe_lower[dim][type]->get_dphi();
@@ -390,7 +406,10 @@ Assembly::buildLowerDDualFE(FEType type) const
   for (unsigned int dim = 0; dim <= _mesh_dimension - 1; dim++)
   {
     if (!_fe_lower[dim][type])
+    {
       _fe_lower[dim][type] = FEGenericBase<Real>::build(dim, type).release();
+      _fe_lower[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _fe_lower[dim][type]->get_dual_phi();
     _fe_lower[dim][type]->get_dual_dphi();
@@ -415,7 +434,10 @@ Assembly::buildVectorLowerDFE(FEType type) const
   for (; dim <= ending_dim; dim++)
   {
     if (!_vector_fe_lower[dim][type])
+    {
       _vector_fe_lower[dim][type] = FEVectorBase::build(dim, type).release();
+      _vector_fe_lower[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _vector_fe_lower[dim][type]->get_phi();
     _vector_fe_lower[dim][type]->get_dphi();
@@ -440,7 +462,10 @@ Assembly::buildVectorDualLowerDFE(FEType type) const
   for (; dim <= ending_dim; dim++)
   {
     if (!_vector_fe_lower[dim][type])
+    {
       _vector_fe_lower[dim][type] = FEVectorBase::build(dim, type).release();
+      _vector_fe_lower[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _vector_fe_lower[dim][type]->get_dual_phi();
     _vector_fe_lower[dim][type]->get_dual_dphi();
@@ -468,7 +493,10 @@ Assembly::buildVectorFE(const FEType type) const
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe[dim][type])
+    {
       _vector_fe[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+      _vector_fe[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _vector_fe[dim][type]->get_phi();
     _vector_fe[dim][type]->get_dphi();
@@ -499,7 +527,10 @@ Assembly::buildVectorFaceFE(const FEType type) const
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_face[dim][type])
+    {
       _vector_fe_face[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+      _vector_fe_face[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _vector_fe_face[dim][type]->get_phi();
     _vector_fe_face[dim][type]->get_dphi();
@@ -529,7 +560,10 @@ Assembly::buildVectorNeighborFE(const FEType type) const
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_neighbor[dim][type])
+    {
       _vector_fe_neighbor[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+      _vector_fe_neighbor[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _vector_fe_neighbor[dim][type]->get_phi();
     _vector_fe_neighbor[dim][type]->get_dphi();
@@ -559,8 +593,11 @@ Assembly::buildVectorFaceNeighborFE(const FEType type) const
   for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_face_neighbor[dim][type])
+    {
       _vector_fe_face_neighbor[dim][type] =
           FEGenericBase<VectorValue<Real>>::build(dim, type).release();
+      _vector_fe_face_neighbor[dim][type]->add_p_level_in_reinit(type.p_refinement);
+    }
 
     _vector_fe_face_neighbor[dim][type]->get_phi();
     _vector_fe_face_neighbor[dim][type]->get_dphi();
@@ -634,7 +671,7 @@ Assembly::createQRules(QuadratureType type,
     q.vol->allow_rules_with_negative_weights = allow_negative_qweights;
     q.face = QBase::build(type, dim - 1, face_order);
     q.face->allow_rules_with_negative_weights = allow_negative_qweights;
-    q.fv_face = QBase::build(QMONOMIAL, dim - 1, CONSTANT);
+    q.fv_face = QBase::build(libMesh::QMONOMIAL, dim - 1, CONSTANT);
     q.fv_face->allow_rules_with_negative_weights = allow_negative_qweights;
     q.neighbor = std::make_unique<ArbitraryQuadrature>(dim - 1, face_order);
     q.neighbor->allow_rules_with_negative_weights = allow_negative_qweights;
@@ -1042,8 +1079,10 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
 
   auto dim = elem->dim();
   const auto & elem_nodes = elem->get_nodes();
-  auto num_shapes = FEInterface::n_shape_functions(fe->get_fe_type(), elem);
   const auto & phi_map = fe->get_fe_map().get_phi_map();
+  // The mapping basis includes every mapping node, including enriched nodes on elements such as
+  // TET14.
+  const auto num_shapes = phi_map.size();
   const auto & dphidxi_map = fe->get_fe_map().get_dphidxi_map();
   const auto & dphideta_map = fe->get_fe_map().get_dphideta_map();
   const auto & dphidzeta_map = fe->get_fe_map().get_dphidzeta_map();
@@ -1427,7 +1466,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
           _ad_d2xyzdxi2_map[p].zero();
 
       const auto n_mapping_shape_functions =
-          FE<2, LAGRANGE>::n_dofs(&side_elem, side_elem.default_order());
+          libMesh::FE<2, LAGRANGE>::n_dofs(&side_elem, side_elem.default_order());
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
@@ -1495,7 +1534,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         }
 
       const unsigned int n_mapping_shape_functions =
-          FE<3, LAGRANGE>::n_dofs(&side_elem, side_elem.default_order());
+          libMesh::FE<3, LAGRANGE>::n_dofs(&side_elem, side_elem.default_order());
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
@@ -2105,6 +2144,15 @@ Assembly::reinitElemFaceRef(const Elem * elem,
         const_cast<std::vector<Real> &>(_holder_fe_face_helper[elem_dim]->get_curvatures()));
 
   computeADFace(*elem, elem_side);
+
+  // Keep the current-side bookkeeping consistent with the other elem/side reinit overloads so
+  // that consumers of _current_side, _current_side_elem, and _current_side_volume (e.g.
+  // InterfaceKernelBase) see correct values rather than whatever was left over from a previous
+  // reinit.
+  _current_side = elem_side;
+  _current_side_elem = &_current_side_elem_builder(*elem, elem_side);
+  _current_side_volume_computed = false;
+  computeCurrentFaceVolume();
 }
 
 void
@@ -2147,45 +2195,48 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
           _ad_curvatures[qp] = _curvatures[qp];
     }
 
-    for (const auto & it : _fe_face[dim])
+    if (_need_ad_grad_phi_face)
     {
-      FEBase & fe = *it.second;
-      auto fe_type = it.first;
-      auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
-      auto & grad_phi = _ad_grad_phi_data_face[fe_type];
+      for (const auto & it : _fe_face[dim])
+      {
+        FEBase & fe = *it.second;
+        auto fe_type = it.first;
+        auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
+        auto & grad_phi = _ad_grad_phi_data_face[fe_type];
 
-      grad_phi.resize(num_shapes);
-      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-        grad_phi[i].resize(n_qp);
-
-      const auto & regular_grad_phi = _fe_shape_data_face[fe_type]->_grad_phi;
-
-      if (_displaced)
-        computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
-      else
+        grad_phi.resize(num_shapes);
         for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-          for (unsigned qp = 0; qp < n_qp; ++qp)
-            grad_phi[i][qp] = regular_grad_phi[i][qp];
-    }
-    for (const auto & it : _vector_fe_face[dim])
-    {
-      FEVectorBase & fe = *it.second;
-      auto fe_type = it.first;
-      auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
-      auto & grad_phi = _ad_vector_grad_phi_data_face[fe_type];
+          grad_phi[i].resize(n_qp);
 
-      grad_phi.resize(num_shapes);
-      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-        grad_phi[i].resize(n_qp);
+        const auto & regular_grad_phi = _fe_shape_data_face[fe_type]->_grad_phi;
 
-      const auto & regular_grad_phi = _vector_fe_shape_data_face[fe_type]->_grad_phi;
+        if (_displaced)
+          computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
+        else
+          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+            for (unsigned qp = 0; qp < n_qp; ++qp)
+              grad_phi[i][qp] = regular_grad_phi[i][qp];
+      }
+      for (const auto & it : _vector_fe_face[dim])
+      {
+        FEVectorBase & fe = *it.second;
+        auto fe_type = it.first;
+        auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
+        auto & grad_phi = _ad_vector_grad_phi_data_face[fe_type];
 
-      if (_displaced)
-        computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
-      else
+        grad_phi.resize(num_shapes);
         for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-          for (unsigned qp = 0; qp < n_qp; ++qp)
-            grad_phi[i][qp] = regular_grad_phi[i][qp];
+          grad_phi[i].resize(n_qp);
+
+        const auto & regular_grad_phi = _vector_fe_shape_data_face[fe_type]->_grad_phi;
+
+        if (_displaced)
+          computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
+        else
+          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+            for (unsigned qp = 0; qp < n_qp; ++qp)
+              grad_phi[i][qp] = regular_grad_phi[i][qp];
+      }
     }
   }
 }
@@ -2277,12 +2328,15 @@ Assembly::reinitDual(const Elem * elem,
   mooseAssert(elem_dim == _mesh_dimension - 1,
               "Dual shape functions should only be computed on lower dimensional face elements");
 
-  for (const auto & it : _fe_lower[elem_dim])
+  for (const auto & [fe_type, fe_lower] : _fe_lower[elem_dim])
   {
-    FEBase & fe_lower = *it.second;
+    const auto dual_shape_data = _fe_shape_data_dual_lower.find(fe_type);
+    if (dual_shape_data == _fe_shape_data_dual_lower.end() || !dual_shape_data->second)
+      continue;
+
     // We use customized quadrature rule for integration along the mortar segment elements
-    fe_lower.set_calculate_default_dual_coeff(false);
-    fe_lower.reinit_dual_shape_coeffs(elem, pts, JxW);
+    fe_lower->set_calculate_default_dual_coeff(false);
+    fe_lower->reinit_dual_shape_coeffs(elem, pts, JxW);
   }
 }
 
@@ -2488,7 +2542,7 @@ Assembly::init(const CouplingMatrix * cm)
     for (unsigned int k = 0; k < ivar->count(); ++k)
     {
       unsigned int iv = i + k;
-      for (const auto & j : ConstCouplingRow(iv, *_cm))
+      for (const auto & j : libMesh::ConstCouplingRow(iv, *_cm))
       {
         if (_sys.isScalarVariable(j))
         {
@@ -2532,7 +2586,7 @@ Assembly::init(const CouplingMatrix * cm)
     if (i >= _component_block_diagonal.size())
       _component_block_diagonal.resize(i + 1, true);
 
-    for (const auto & j : ConstCouplingRow(i, *_cm))
+    for (const auto & j : libMesh::ConstCouplingRow(i, *_cm))
       if (_sys.isScalarVariable(j))
       {
         auto & jvar = _sys.getScalarVariable(_tid, j);
@@ -2659,7 +2713,7 @@ Assembly::initNonlocalCoupling()
     for (unsigned int k = 0; k < ivar->count(); ++k)
     {
       unsigned int iv = i + k;
-      for (const auto & j : ConstCouplingRow(iv, _nonlocal_cm))
+      for (const auto & j : libMesh::ConstCouplingRow(iv, _nonlocal_cm))
         if (!_sys.isScalarVariable(j))
         {
           auto & jvar = _sys.getVariable(_tid, j);
@@ -3568,7 +3622,7 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
 
   for (unsigned int i = 0; i < ivar.count(); ++i)
   {
-    for (const auto & jt : ConstCouplingRow(iv + i, *_cm))
+    for (const auto & jt : libMesh::ConstCouplingRow(iv + i, *_cm))
     {
       if (jt < jv || jt >= jv + jvar.count())
         continue;
@@ -3601,7 +3655,7 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
 
 // private method, so no key required
 void
-Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
+Assembly::cacheJacobianBlock(const DenseMatrix<Number> & jac_block,
                              const MooseVariableBase & ivar,
                              const MooseVariableBase & jvar,
                              const std::vector<dof_id_type> & idof_indices,
@@ -3621,7 +3675,7 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
 
   for (unsigned int i = 0; i < ivar.count(); ++i)
   {
-    for (const auto & jt : ConstCouplingRow(iv + i, *_cm))
+    for (const auto & jt : libMesh::ConstCouplingRow(iv + i, *_cm))
     {
       if (jt < jv || jt >= jv + jvar.count())
         continue;
@@ -3656,13 +3710,11 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
         }
     }
   }
-
-  jac_block.zero();
 }
 
 // private method, so no key required
 void
-Assembly::cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
+Assembly::cacheJacobianBlockNonzero(const DenseMatrix<Number> & jac_block,
                                     const MooseVariableBase & ivar,
                                     const MooseVariableBase & jvar,
                                     const std::vector<dof_id_type> & idof_indices,
@@ -3681,7 +3733,7 @@ Assembly::cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
   for (unsigned int i = 0; i < ivar.count(); ++i)
   {
     unsigned int iv = ivar.number();
-    for (const auto & jt : ConstCouplingRow(iv + i, *_cm))
+    for (const auto & jt : libMesh::ConstCouplingRow(iv + i, *_cm))
     {
       unsigned int jv = jvar.number();
       if (jt < jv || jt >= jv + jvar.count())
@@ -3715,43 +3767,42 @@ Assembly::cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
           }
     }
   }
-
-  jac_block.zero();
 }
 
 void
-Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
+Assembly::cacheJacobianBlock(const DenseMatrix<Number> & jac_block,
                              const std::vector<dof_id_type> & idof_indices,
                              const std::vector<dof_id_type> & jdof_indices,
                              Real scaling_factor,
                              LocalDataKey,
-                             TagID tag)
+                             const std::set<TagID> & tags)
 {
-  // Only cache data when the matrix exists
+  const auto has_matrix =
+      std::any_of(tags.begin(), tags.end(), [this](const auto tag) { return _sys.hasMatrix(tag); });
+
+  // Work on a reusable Assembly-owned copy so callers retain their local matrix. This also lets us
+  // apply constraints and scaling once before caching the same block to every requested matrix tag.
   if ((idof_indices.size() > 0) && (jdof_indices.size() > 0) && jac_block.n() && jac_block.m() &&
-      _sys.hasMatrix(tag))
+      has_matrix)
   {
-    std::vector<dof_id_type> di(idof_indices);
-    std::vector<dof_id_type> dj(jdof_indices);
+    _row_indices.assign(idof_indices.begin(), idof_indices.end());
+    _column_indices.assign(jdof_indices.begin(), jdof_indices.end());
+    _element_matrix = jac_block;
 
     // If we're computing the jacobian for automatically scaling variables we do not want to
     // constrain the element matrix because it introduces 1s on the diagonal for the constrained
     // dofs
     if (!_sys.computingScalingJacobian())
-      _dof_map.constrain_element_matrix(jac_block, di, dj, false);
+      _dof_map.constrain_element_matrix(_element_matrix, _row_indices, _column_indices, false);
 
     if (scaling_factor != 1.0)
-      jac_block *= scaling_factor;
+      _element_matrix *= scaling_factor;
 
-    for (MooseIndex(di) i = 0; i < di.size(); i++)
-      for (MooseIndex(dj) j = 0; j < dj.size(); j++)
-      {
-        _cached_jacobian_values[tag].push_back(jac_block(i, j));
-        _cached_jacobian_rows[tag].push_back(di[i]);
-        _cached_jacobian_cols[tag].push_back(dj[j]);
-      }
+    for (const auto i : index_range(_row_indices))
+      for (const auto j : index_range(_column_indices))
+        cacheJacobian(
+            _row_indices[i], _column_indices[j], _element_matrix(i, j), LocalDataKey{}, tags);
   }
-  jac_block.zero();
 }
 
 Real
@@ -4447,10 +4498,9 @@ Assembly::addJacobianScalar(GlobalDataKey)
 void
 Assembly::addJacobianOffDiagScalar(unsigned int ivar, GlobalDataKey)
 {
-  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
-  MooseVariableScalar & var_i = _sys.getScalarVariable(_tid, ivar);
-  for (const auto & var_j : vars)
-    addJacobianCoupledVarPair(var_i, *var_j);
+  for (const auto & it : _cm_sf_entry)
+    if (it.first->number() == ivar)
+      addJacobianCoupledVarPair(*it.first, *it.second);
 }
 
 void
@@ -4554,12 +4604,6 @@ Assembly::modifyFaceWeightsDueToXFEM(const Elem * elem, unsigned int side)
 
     xfem_face_weight_multipliers.release();
   }
-}
-
-void
-Assembly::hasScalingVector()
-{
-  _scaling_vector = &_sys.getVector("scaling_factors");
 }
 
 void
@@ -4799,12 +4843,10 @@ const MooseArray<ADReal> &
 Assembly::adCurvatures() const
 {
   _calculate_curvatures = true;
-  const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
-  const FEType helper_type(helper_order, LAGRANGE);
   // Must prerequest the second derivatives. Sadly because there is only one
   // _need_second_derivative map for both volumetric and face FE objects we must request both here
-  feSecondPhi<Real>(helper_type);
-  feSecondPhiFace<Real>(helper_type);
+  feSecondPhi<Real>(_helper_type);
+  feSecondPhiFace<Real>(_helper_type);
   return _ad_curvatures;
 }
 
@@ -4842,32 +4884,18 @@ Assembly::helpersRequestData()
 }
 
 void
-Assembly::havePRefinement(const std::unordered_set<FEFamily> & disable_families)
+Assembly::preparePRefinement()
 {
-  if (_have_p_refinement)
+  if (_prepared_for_p_refinement)
     // Already performed tasks for p-refinement
     return;
 
-  const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
-  const FEType helper_type(helper_order, LAGRANGE);
-  auto process_fe =
-      [&disable_families](const unsigned int num_dimensionalities, auto & fe_container)
-  {
-    if (!disable_families.empty())
-      for (const auto dim : make_range(num_dimensionalities))
-      {
-        auto fe_container_it = fe_container.find(dim);
-        if (fe_container_it != fe_container.end())
-          for (auto & [fe_type, fe_ptr] : fe_container_it->second)
-            if (disable_families.count(fe_type.family))
-              fe_ptr->add_p_level_in_reinit(false);
-      }
-  };
-  auto process_fe_and_helpers = [process_fe, &helper_type](auto & unique_helper_container,
-                                                           auto & helper_container,
-                                                           const unsigned int num_dimensionalities,
-                                                           const bool user_added_helper_type,
-                                                           auto & fe_container)
+  const auto helper_type = _helper_type;
+  auto process_fe_and_helpers = [&helper_type](auto & unique_helper_container,
+                                               auto & helper_container,
+                                               const unsigned int num_dimensionalities,
+                                               const bool user_added_helper_type,
+                                               auto & fe_container)
   {
     unique_helper_container.resize(num_dimensionalities);
     for (const auto dim : make_range(num_dimensionalities))
@@ -4878,9 +4906,8 @@ Assembly::havePRefinement(const std::unordered_set<FEFamily> & disable_families)
       unique_helper->add_p_level_in_reinit(false);
       helper_container[dim] = unique_helper.get();
 
-      // If the user did not request the helper type then we should erase it from our FE container
-      // so that they're not penalized (in the "we should be able to do p-refinement sense") for
-      // our perhaps silly helpers
+      // If the user did not request the helper type then we should erase the original helper FE
+      // from the ordinary FE container. The unique helper above replaces it for helper use.
       if (!user_added_helper_type)
       {
         auto & fe_container_dim = libmesh_map_find(fe_container, dim);
@@ -4890,8 +4917,6 @@ Assembly::havePRefinement(const std::unordered_set<FEFamily> & disable_families)
         fe_container_dim.erase(fe_it);
       }
     }
-
-    process_fe(num_dimensionalities, fe_container);
   };
 
   // Handle scalar field families
@@ -4920,16 +4945,10 @@ Assembly::havePRefinement(const std::unordered_set<FEFamily> & disable_families)
                          _mesh_dimension,
                          _user_added_fe_lower_of_helper_type,
                          _fe_lower);
-  // Handle vector field families
-  process_fe(_mesh_dimension + 1, _vector_fe);
-  process_fe(_mesh_dimension + 1, _vector_fe_face);
-  process_fe(_mesh_dimension + 1, _vector_fe_neighbor);
-  process_fe(_mesh_dimension + 1, _vector_fe_face_neighbor);
-  process_fe(_mesh_dimension, _vector_fe_lower);
 
   helpersRequestData();
 
-  _have_p_refinement = true;
+  _prepared_for_p_refinement = true;
 }
 
 template void coordTransformFactor<Point, Real>(const SubProblem & s,

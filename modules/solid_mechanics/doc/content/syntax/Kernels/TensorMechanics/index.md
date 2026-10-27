@@ -26,7 +26,7 @@ specified coordinate system.
 
 Note that there are many variations for the calculation of the stress divergence.
 Review the theoretical introduction for the
-[Stress Divergence](solid_mechanics/StressDivergence.md).
+[Stress Divergence](solid_mechanics/BalanceOfLinearMomentum.md).
 Pay particular attention to the setting of the `use_displaced_mesh` parameter
 discussion; this parameter depends on the strain formulation used in the simulation.
 

@@ -68,6 +68,20 @@ ParsedConvergence::initialSetup()
 }
 
 void
+ParsedConvergence::preLoop()
+{
+  for (const auto & convergence : _convergences)
+    convergence->preLoop();
+}
+
+void
+ParsedConvergence::preIteration()
+{
+  for (const auto & convergence : _convergences)
+    convergence->preIteration();
+}
+
+void
 ParsedConvergence::initializeSymbols()
 {
   for (const auto i : index_range(_symbol_values))
@@ -144,9 +158,9 @@ ParsedConvergence::makeParsedFunction(const std::string & expression)
 }
 
 Convergence::MooseConvergenceStatus
-ParsedConvergence::checkConvergence(unsigned int iter)
+ParsedConvergence::checkConvergence(unsigned int n_iter)
 {
-  updateSymbolValues(iter);
+  updateSymbolValues(n_iter);
 
   const Real converged_real = evaluate(_convergence_function, _convergence_function_params, name());
   const Real diverged_real =
@@ -162,11 +176,11 @@ ParsedConvergence::checkConvergence(unsigned int iter)
 }
 
 void
-ParsedConvergence::updateSymbolValues(unsigned int iter)
+ParsedConvergence::updateSymbolValues(unsigned int n_iter)
 {
   updatePostprocessorSymbolValues();
   updateFunctionSymbolValues();
-  updateConvergenceSymbolValues(iter);
+  updateConvergenceSymbolValues(n_iter);
 }
 
 void
@@ -191,11 +205,11 @@ ParsedConvergence::updateFunctionSymbolValues()
 }
 
 void
-ParsedConvergence::updateConvergenceSymbolValues(unsigned int iter)
+ParsedConvergence::updateConvergenceSymbolValues(unsigned int n_iter)
 {
   for (const auto i : index_range(_convergence_indices))
   {
-    const auto status = _convergences[i]->checkConvergence(iter);
+    const auto status = _convergences[i]->checkConvergence(n_iter);
     _convergence_function_params[_convergence_indices[i]] =
         status == MooseConvergenceStatus::CONVERGED;
     _divergence_function_params[_convergence_indices[i]] =

@@ -15,27 +15,40 @@
  * Advection of heat via flux of component k in fluid phase alpha.
  * A fully-updwinded version is implemented, where the mobility
  * of the upstream nodes is used.
+ *
+ * Templated on is_ad: the false instantiation uses hand-coded Jacobians;
+ * the true instantiation propagates derivatives through AD material properties.
  */
-class PorousFlowHeatAdvection : public PorousFlowDarcyBase
+template <bool is_ad>
+class PorousFlowHeatAdvectionTempl : public PorousFlowDarcyBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowHeatAdvection(const InputParameters & parameters);
+  PorousFlowHeatAdvectionTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real mobility(unsigned nodenum, unsigned phase) const override;
+  virtual GenericReal<is_ad> mobility(unsigned nodenum, unsigned phase) const override;
   virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar) const override;
 
   /// Enthalpy of each phase
-  const MaterialProperty<std::vector<Real>> & _enthalpy;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _enthalpy;
 
-  /// Derivative of the enthalpy wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real>>> & _denthalpy_dvar;
+  /// Derivative of the enthalpy wrt PorousFlow variables -- null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _denthalpy_dvar;
 
   /// Relative permeability of each phase
-  const MaterialProperty<std::vector<Real>> & _relative_permeability;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _relative_permeability;
 
-  /// Derivative of relative permeability of each phase wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real>>> & _drelative_permeability_dvar;
+  /// Derivative of relative permeability of each phase wrt PorousFlow variables -- null for AD path
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _drelative_permeability_dvar;
+
+  using PorousFlowDarcyBaseTempl<is_ad>::_fluid_density_node;
+  using PorousFlowDarcyBaseTempl<is_ad>::_fluid_viscosity;
+  using PorousFlowDarcyBaseTempl<is_ad>::_dfluid_density_node_dvar;
+  using PorousFlowDarcyBaseTempl<is_ad>::_dfluid_viscosity_dvar;
+  usingGenericKernelMembers;
 };
+
+typedef PorousFlowHeatAdvectionTempl<false> PorousFlowHeatAdvection;
+typedef PorousFlowHeatAdvectionTempl<true> ADPorousFlowHeatAdvection;

@@ -32,14 +32,16 @@ PorousFlowRelativePermeabilityConstTempl<is_ad>::PorousFlowRelativePermeabilityC
 }
 
 template <bool is_ad>
-GenericReal<is_ad> PorousFlowRelativePermeabilityConstTempl<is_ad>::relativePermeability(
+GenericReal<is_ad>
+PorousFlowRelativePermeabilityConstTempl<is_ad>::relativePermeability(
     GenericReal<is_ad> /*seff*/) const
 {
   return _relperm;
 }
 
 template <bool is_ad>
-Real PorousFlowRelativePermeabilityConstTempl<is_ad>::dRelativePermeability(Real /*seff*/) const
+Real
+PorousFlowRelativePermeabilityConstTempl<is_ad>::dRelativePermeability(Real /*seff*/) const
 {
   return 0.0;
 }

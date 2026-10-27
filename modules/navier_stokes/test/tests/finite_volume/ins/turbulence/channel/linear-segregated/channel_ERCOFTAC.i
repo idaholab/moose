@@ -1,6 +1,8 @@
 
 !include header_and_mesh.i
 
+turbulence_advected_interp_method = ${advected_interp_method}
+
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system TKE_system TKED_system'
   previous_nl_solution_required = true
@@ -8,7 +10,6 @@
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
-  advected_interp_method = ${advected_interp_method}
 []
 
 [UserObjects]
@@ -50,11 +51,20 @@
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+  [vanLeer]
+    type = FVAdvectedVanLeerWeightBased
+  []
+[]
+
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     # we use mu_eff directly here to be able to have deviatoric term for both mu and mu_t
     mu = 'mu_eff'
     u = vel_x
@@ -73,7 +83,7 @@
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu_eff'
     u = vel_x
     v = vel_y
@@ -90,7 +100,7 @@
   []
 
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false
@@ -105,6 +115,7 @@
   [TKE_advection]
     type = LinearFVTurbulentAdvection
     variable = TKE
+    advected_interp_method_name = ${turbulence_advected_interp_method}
   []
   [TKE_diffusion]
     type = LinearFVTurbulentDiffusion
@@ -136,6 +147,7 @@
   [TKED_advection]
     type = LinearFVTurbulentAdvection
     variable = TKED
+    advected_interp_method_name = ${turbulence_advected_interp_method}
     walls = ${walls}
   []
   [TKED_diffusion]

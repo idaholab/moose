@@ -179,22 +179,11 @@ selected strain formulation.  We recommend that users employ the
 [Solid Mechanics Physics](/Physics/SolidMechanics/QuasiStatic/index.md) whenever possible
 to ensure consistency between the test function gradients and the strain formulation selected.
 
-Although not recommended, it is possible to directly use the `ComputeFiniteStrain` material
-in the input file.
-
-!listing modules/solid_mechanics/test/tests/volumetric_deform_grad/elastic_stress.i
-         block=Materials/strain
-
 When directly using `ComputeFiniteStrain` in an input file as shown above, the
 [StressDivergenceTensors](/StressDivergenceTensors.md) kernel must be modified
 from the default by setting the parameter `use_displaced_mesh = true`. This setting
 is required to maintain consistency in the test function gradients and the
-strain formulation. For a complete discussion of the stress divergence kernel
-settings and the corresponding strain classes, see the section on
-[Consistency Between Stress and Strain](/solid_mechanics/StressDivergence.md#consistency_stress_strain_use_displaced_mesh)
-in the SolidMechanics module overview. In addition, be aware of the loading
-cycle limitations while using finite strains as outlined in the section
-[Large Strain Closed Loop Loading Cycle](/solid_mechanics/Strains.md#large_strain_closed_loop_loading_cycle).
+strain formulation.
 
 
 !syntax parameters /Materials/ComputeFiniteStrain

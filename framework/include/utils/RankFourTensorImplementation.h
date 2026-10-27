@@ -130,16 +130,32 @@ RankFourTensorTempl<T>::operator*(const Tensor<T2> & b) const ->
   typedef decltype(T() * T2()) ValueType;
   RankTwoTensorTempl<ValueType> result;
 
-  unsigned int index = 0;
-  for (unsigned int ij = 0; ij < N2; ++ij)
+  if constexpr (std::is_same_v<T, Real> && std::is_same_v<T2, Real>)
   {
-    ValueType tmp = 0;
+    // result_ij = A_ijkl b_kl: an (N2 x N2) . (N2) matvec over the flat storage. Gather b into a
+    // contiguous vector once (b's storage type is generic here), then use Eigen's kernel -- the
+    // scalar loop below re-derives b's index with a div/mod on every inner iteration.
+    Eigen::Matrix<Real, N2, 1> bvec;
     for (unsigned int kl = 0; kl < N2; ++kl)
-      tmp += _vals[index++] * b(kl / LIBMESH_DIM, kl % LIBMESH_DIM);
-    result._coords[ij] = tmp;
+      bvec(kl) = b(kl / N, kl % N);
+    const Eigen::Map<const Eigen::Matrix<Real, N2, N2, Eigen::RowMajor>> a(_vals);
+    Eigen::Map<Eigen::Matrix<Real, N2, 1>> r(result._coords);
+    r.noalias() = a * bvec;
+    return result;
   }
+  else
+  {
+    unsigned int index = 0;
+    for (unsigned int ij = 0; ij < N2; ++ij)
+    {
+      ValueType tmp = 0;
+      for (unsigned int kl = 0; kl < N2; ++kl)
+        tmp += _vals[index++] * b(kl / LIBMESH_DIM, kl % LIBMESH_DIM);
+      result._coords[ij] = tmp;
+    }
 
-  return result;
+    return result;
+  }
 }
 
 template <typename T>
@@ -221,15 +237,30 @@ RankFourTensorTempl<T>::operator*(const RankFourTensorTempl<T2> & b) const
   typedef decltype(T() * T2()) ValueType;
   RankFourTensorTempl<ValueType> result;
 
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
-          for (auto p : make_range(N))
-            for (auto q : make_range(N))
-              result(i, j, k, l) += (*this)(i, j, p, q) * b(p, q, k, l);
+  if constexpr (std::is_same_v<T, Real> && std::is_same_v<T2, Real>)
+  {
+    // C_ijkl = A_ijpq B_pqkl. With the row-major flat storage (linear index ij*N2 + kl, where
+    // ij = i*N + j and kl = k*N + l) this is exactly an (N2 x N2) matrix product over the
+    // flattened tensors. Dispatch to Eigen's vectorized kernel instead of the six-deep loop,
+    // which recomputes the flat index via operator() ~3x per innermost iteration.
+    const Eigen::Map<const Eigen::Matrix<Real, N2, N2, Eigen::RowMajor>> a(_vals);
+    const Eigen::Map<const Eigen::Matrix<Real, N2, N2, Eigen::RowMajor>> bmat(b._vals);
+    Eigen::Map<Eigen::Matrix<Real, N2, N2, Eigen::RowMajor>> r(result._vals);
+    r.noalias() = a * bmat;
+    return result;
+  }
+  else
+  {
+    for (auto i : make_range(N))
+      for (auto j : make_range(N))
+        for (auto k : make_range(N))
+          for (auto l : make_range(N))
+            for (auto p : make_range(N))
+              for (auto q : make_range(N))
+                result(i, j, k, l) += (*this)(i, j, p, q) * b(p, q, k, l);
 
-  return result;
+    return result;
+  }
 }
 
 template <typename T>

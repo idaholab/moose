@@ -24,6 +24,18 @@ The epsilon (turbulent kinetic energy dissipation, TKED) equation is created wit
 - a [LinearFVTurbulentDiffusion.md] for the turbulent kinetic energy dissipation rate diffusion term
 - a [LinearFVTKEDSourceSink.md] for the turbulent kinetic energy dissipation rate source and removal (sink) terms
 
+## Selecting interpolation methods
+
+The
+[!param](/Physics/NavierStokes/TurbulenceSegregated/WCNSLinearFVTurbulencePhysics/tke_advection_interpolation)
+and
+[!param](/Physics/NavierStokes/TurbulenceSegregated/WCNSLinearFVTurbulencePhysics/tked_advection_interpolation)
+parameters select the interpolation used by the [LinearFVTurbulentAdvection.md] kernels for TKE and
+TKED. The supported choices are `average`, `upwind`, `vanLeer`, `min_mod`, and `venkatakrishnan`.
+
+Use these shortcut parameters directly in the Physics block. For direct
+[LinearFVTurbulentAdvection.md] kernel syntax, add the interpolation methods in
+`[FVInterpolationMethods]` and pass their names to the kernels.
 
 The boundary conditions are not set in this object for the `TKE` and `TKED` variables, as they
 are computed by the wall-functions in the relevant kernels. A boundary condition is set for the turbulent

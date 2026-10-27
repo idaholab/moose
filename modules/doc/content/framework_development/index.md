@@ -22,6 +22,8 @@ For development of MOOSE-based applications see [Application Development](applic
 
 ## Documentation
 
+[Computational Backends](framework_development/computational_backends.md)
+
 [MOOSE Doxygen](https://mooseframework.inl.gov/docs/doxygen/moose/classes.html)
 
 [Modules Doxygen](https://mooseframework.inl.gov/docs/doxygen/modules/classes.html)

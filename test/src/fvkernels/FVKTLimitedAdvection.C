@@ -17,7 +17,7 @@ using namespace Moose::FV;
 InputParameters
 FVKTLimitedAdvection::validParams()
 {
-  InputParameters params = FVFluxKernel::validParams();
+  InputParameters params = FVQpFluxKernel::validParams();
   params.addClassDescription(
       "Residual contribution from advection operator for finite volume method.");
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
@@ -30,7 +30,7 @@ FVKTLimitedAdvection::validParams()
 }
 
 FVKTLimitedAdvection::FVKTLimitedAdvection(const InputParameters & params)
-  : FVFluxKernel(params),
+  : FVQpFluxKernel(params),
     _velocity(getParam<RealVectorValue>("velocity")),
     _limiter(Limiter<ADReal>::build(LimiterType(int(getParam<MooseEnum>("limiter"))))),
     _cd_limiter(Limiter<ADReal>::build(LimiterType::CentralDifference)),

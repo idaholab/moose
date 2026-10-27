@@ -96,6 +96,11 @@ public:
   void computeValues();
 
   /**
+   * Prepare the initial condition: initialize DOF indices and resize the DOF value array.
+   */
+  void prepareIC();
+
+  /**
    * Set local DOF values to the entries of \p values .
    */
   void setDofValues(const DenseVector<DofValue> & values);

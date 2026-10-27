@@ -18,8 +18,6 @@
 
 #include "libmesh/string_to_enum.h"
 
-using namespace libMesh;
-
 registerMooseAction("PhaseFieldApp", NonconservedAction, "add_variable");
 
 registerMooseAction("PhaseFieldApp", NonconservedAction, "add_kernel");

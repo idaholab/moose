@@ -41,7 +41,7 @@ links to test pages for the various extensions within MooseDocs.
 
 ## Subsite Link Test
 
-If the [subconfiguration](python/MooseDocs/test/subsite_config.yml language=yaml) test was also loaded during
+If the [!file text=subconfiguration language=yaml](python/MooseDocs/test/subsite_config.yml) test was also loaded during
 this build job, then a hyperlink to its home page should be rendered below.
 
 [MooseDocs Subsite](subsite/index.md optional=True)

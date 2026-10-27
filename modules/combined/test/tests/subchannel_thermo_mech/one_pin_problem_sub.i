@@ -1,0 +1,302 @@
+pin_diameter = 0.00950
+heated_length = 1.0
+T_in = 359.15
+[GlobalParams]
+    displacements = 'disp_x disp_y'
+[]
+
+[Problem]
+    # Residual of the heat conduction and heat source kernels. At the nodes of the Dirichlet
+    # boundary, it is the heat flowing through that boundary
+    extra_tag_vectors = 'heat_residual'
+[]
+
+[Mesh]
+    second_order = true
+    [PinMesh]
+        type = GeneratedMeshGenerator
+        dim = 2
+        xmax = '${fparse pin_diameter / 2.0}'
+        bias_x = 1.0
+        nx = 20
+        ymax = ${heated_length}
+        ny = 100 # number of axial cells
+    []
+    coord_type = RZ
+    rz_coord_axis = Y
+    beta_rotation = 90
+[]
+
+[Functions]
+    [Tpin_fn] # linear interpolation of the SCM pin surface temperature along the pin axis
+        type = PiecewiseLinearFromVectorPostprocessor
+        vectorpostprocessor_name = Tpin_profile
+        argument_column = z
+        value_column = Tpin
+        component = y
+    []
+    [volumetric_heat_rate] # Defined such as to be consistent with the IC in SCM
+        type = ParsedFunction
+        expression = '(4.0 * 100000.0 / (pi * D * D * L)) * (pi/2)*sin(pi*y/L)'
+        symbol_names = 'L D'
+        symbol_values = '${heated_length} ${pin_diameter}'
+    []
+[]
+
+[Variables]
+    [temperature]
+        order = SECOND
+        family = LAGRANGE
+    []
+[]
+
+[AuxVariables]
+    [Pin_surface_temperature]
+        # Same order as temperature, so the MatchedValueBC has a value at every boundary node
+        order = SECOND
+    []
+    [pin_diameter_deformed]
+        # order = CONSTANT
+        # family = MONOMIAL
+    []
+    [q_prime]
+        order = CONSTANT
+        family = MONOMIAL
+    []
+    # q_prime on the nodes, so that the transfer to the subchannel nodes is not ambiguous
+    [q_prime_nodal]
+    []
+    [heat_residual]
+        # Same order as temperature, to hold the residual at every temperature node
+        order = SECOND
+    []
+[]
+
+[Physics]
+    [SolidMechanics]
+        [QuasiStatic]
+            add_variables = true
+            strain = SMALL
+            incremental = true
+            generate_output = 'stress_xx stress_yy stress_xy'
+            temperature = temperature
+
+            [block0]
+                eigenstrain_names = eigenstrain
+                block = 0
+            []
+        []
+    []
+[]
+
+[AuxKernels]
+    [QPrime]
+        type = SCMRZPinQPrimeAux # This kernel calculates linear heat rate for the 2D-RZ pin model
+        diffusivity = 'thermal_conductivity'
+        variable = q_prime
+        diffusion_variable = temperature
+        component = normal
+        boundary = 'right'
+        execute_on = 'TIMESTEP_END'
+        use_displaced_mesh = true
+    []
+    [QPrimeNodal]
+        type = ProjectionAux
+        variable = q_prime_nodal
+        v = q_prime
+        execute_on = 'TIMESTEP_END'
+    []
+    [HeatResidual]
+        type = TagVectorAux
+        variable = heat_residual
+        v = temperature
+        vector_tag = 'heat_residual'
+    []
+    [Deformation]
+        type = ParsedAux
+        variable = pin_diameter_deformed
+        coupled_variables = 'disp_x'
+        expression = '2.0 * disp_x + ${pin_diameter}'
+        execute_on = 'timestep_end'
+    []
+[]
+
+[Kernels]
+    [heat_conduction]
+        type = HeatConduction
+        variable = temperature
+        use_displaced_mesh = true
+        extra_vector_tags = 'heat_residual'
+    []
+    [heat_source]
+        type = HeatSource
+        variable = temperature
+        function = volumetric_heat_rate
+        use_displaced_mesh = false
+        extra_vector_tags = 'heat_residual'
+    []
+[]
+
+[Materials]
+    [elasticity_tensor]
+        type = ComputeIsotropicElasticityTensor
+        block = 0
+        bulk_modulus = 0.333333333333e6
+        poissons_ratio = 0.0
+    []
+    [thermal_strain]
+        type = ComputeThermalExpansionEigenstrain
+        block = 0
+        temperature = temperature
+        stress_free_temperature = 117.56
+        thermal_expansion_coeff = 1e-5
+        eigenstrain_name = eigenstrain
+    []
+    [stress]
+        type = ComputeStrainIncrementBasedStress
+        block = 0
+    []
+    [heat_conductor]
+        type = HeatConductionMaterial
+        thermal_conductivity = 1.0
+        block = 0
+    []
+[]
+
+[BCs]
+    # right_interpolated replaces right when SCM sends Tpin with the Tpin_interpolated transfer
+    inactive = right_interpolated
+    [left]
+        type = NeumannBC
+        variable = temperature
+        boundary = 'left'
+    []
+    [right]
+        type = MatchedValueBC
+        variable = temperature
+        boundary = 'right'
+        v = Pin_surface_temperature
+    []
+    [right_interpolated]
+        type = FunctionDirichletBC
+        variable = temperature
+        boundary = 'right'
+        function = Tpin_fn
+    []
+    [no_x]
+        type = DirichletBC
+        variable = disp_x
+        boundary = 'left'
+        value = 0.0
+    []
+    [no_y]
+        type = DirichletBC
+        variable = disp_y
+        boundary = 'bottom top'
+        value = 0.0
+    []
+[]
+
+[ICs]
+    [temperature_ic]
+        type = ConstantIC
+        variable = temperature
+        value = ${T_in}
+    []
+    [q_prime_ic]
+        type = ConstantIC
+        variable = q_prime
+        value = 0.0
+    []
+    [RD_IC]
+        type = ConstantIC
+        variable = pin_diameter_deformed
+        value = ${pin_diameter}
+    []
+[]
+
+[Preconditioning]
+    [smp]
+        type = SMP
+        full = true
+    []
+[]
+
+[Executioner]
+    type = Transient
+    solve_type = 'PJFNK'
+    nl_abs_tol = 1e-7
+    l_max_its = 20
+    start_time = 0.0
+    dt = 0.5
+    num_steps = 2
+    end_time = 1.0
+    petsc_options_iname = '-pc_type -mat_fd_coloring_err -mat_fd_type'
+    petsc_options_value = 'lu       1e-6                 ds'
+
+    [Quadrature]
+        order = FIFTH
+        side_order = SEVENTH
+    []
+[]
+
+[Postprocessors]
+    # Heat rate through the pin surface from the residual at the pin surface nodes, preserved by the
+    # q_prime transfer to SCM. The weak form balances it with the heat source, so it equals the pin
+    # power up to the nonlinear tolerance on any mesh
+    [pin_surface_residual]
+        type = NodalSum
+        variable = heat_residual
+        boundary = right
+        outputs = none
+    []
+    [pin_surface_heat_rate]
+        # The residual is negative for heat leaving the pin
+        type = ParsedPostprocessor
+        expression = '-pin_surface_residual'
+        pp_names = 'pin_surface_residual'
+    []
+    # Heat rate through the pin surface from the temperature gradient, which exceeds the heat source
+    # by the discretization error of the gradient
+    [pin_surface_heat_rate_gradient]
+        type = SideDiffusiveFluxIntegral
+        variable = temperature
+        boundary = right
+        diffusivity = thermal_conductivity
+        use_displaced_mesh = true
+    []
+    [total_power]
+        type = ElementIntegralFunctorPostprocessor
+        functor = volumetric_heat_rate
+        use_displaced_mesh = false
+    []
+    [total_power_disp]
+        type = ElementIntegralFunctorPostprocessor
+        functor = volumetric_heat_rate
+        use_displaced_mesh = true
+    []
+    [volume]
+        type = VolumePostprocessor
+    []
+    [volume_disp]
+        type = VolumePostprocessor
+        use_displaced_mesh = true
+    []
+[]
+
+[VectorPostprocessors]
+    # Filled by the Tpin_interpolated transfer from SCM: pin surface temperature at the SCM axial nodes
+    [Tpin_profile]
+        type = ConstantVectorPostprocessor
+        vector_names = 'z Tpin'
+        value = '0 ${heated_length}; ${T_in} ${T_in}'
+    []
+[]
+
+[Outputs]
+    exodus = true
+    [csv]
+        type = CSV
+        show = 'pin_surface_heat_rate pin_surface_heat_rate_gradient total_power'
+    []
+[]

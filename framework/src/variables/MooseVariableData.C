@@ -22,8 +22,6 @@
 #include "libmesh/type_n_tensor.h"
 #include "libmesh/fe_interface.h"
 
-using namespace libMesh;
-
 template <typename OutputType>
 MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputType> & var,
                                                  SystemBase & sys,
@@ -135,6 +133,13 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
   _phi_face = &_phi_face_assembly_method(_assembly, _fe_type);
   _grad_phi = &_grad_phi_assembly_method(_assembly, _fe_type);
   _grad_phi_face = &_grad_phi_face_assembly_method(_assembly, _fe_type);
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::needADGradPhiFace() const
+{
+  _assembly.needADGradPhiFace();
 }
 
 template <typename OutputType>
@@ -675,7 +680,10 @@ MooseVariableData<OutputType>::computeValuesInternal()
           _grad_u_dotdot, *_current_grad_phi, _dof_values_dotdot, nqp, num_shapes);
   }
 
-  if (_need_ad)
+  // A variable whose AD was only ever requested through the face-scoped accessors has no
+  // consumer on element interiors, so seeding the derivatives there is wasted work. In the
+  // volume context _current_qrule is _qrule; see setGeometry().
+  if (_need_ad && (_need_ad_volume || _current_qrule != _qrule))
     computeAD<constant_monomial>(num_dofs, nqp);
 }
 
@@ -795,8 +803,15 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
   // Values
   if (_need_ad_u)
     fill<constant_monomial>(_ad_u, *_current_phi, _ad_dof_values, nqp, n_test);
-  // Grad
-  if (_need_ad_grad_u)
+  // Grad. On an element face, only fill the gradient when a face object requested it. Otherwise it
+  // stays empty so that a face object that read it through the volume accessor adGradSln() fails
+  // the bounds assertion instead of silently using gradients built without the AD face shape
+  // function gradients. Neighbor data never uses AD shape function gradients and is not affected.
+  const bool on_element_face =
+      _element_type == Moose::ElementType::Element && _current_qrule != _qrule;
+  if (_need_ad_grad_u && on_element_face && !_need_ad_grad_u_face)
+    _ad_grad_u.resize(0);
+  else if (_need_ad_grad_u)
   {
     // The latter check here is for handling the fact that we have not yet implemented
     // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
@@ -843,7 +858,11 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       }
     }
 
-    if (_need_ad_grad_u_dot)
+    // The gradient time derivative is volume-only, so on an element face it is left empty for the
+    // same reason as the gradient above
+    if (_need_ad_grad_u_dot && on_element_face)
+      _ad_grad_u_dot.resize(0);
+    else if (_need_ad_grad_u_dot)
     {
       if (_time_integrator)
       {

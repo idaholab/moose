@@ -66,6 +66,7 @@ The purpose of these lists is two fold:
 ### Geomechanics, Ground Flow, and Earth Sciences
 
 - [FalCon](https://github.com/idaholab/falcon) - Fracturing and liquid conservation; geothermal reservoir simulation and analysis code for coupled and fully implicit Thermo-Hydro-Mechanical-Chemical (THMC) geosystems
+- [GOLEM](https://github.com/ajacquey/golem) - Numerical simulator for modelling coupled Thermo-Hydro-Mechanical processes in faulted geothermal reservoirs, developed at GFZ Postdam
 - [Redback](https://github.com/pou036/redback) - Rock Mechanics with Dissipative (Thermo-Hydro-Mechanical-Chemical) Feedbacks: joint development between CSIRO and UNSW Australia
 - [TIGER](https://github.com/MGK-Lab/tiger) - Thermo-Hydro-Mechanical-Chemical sImulator for GEoscience Research, developed by Karlsruhe Institute of Technology
 
@@ -79,6 +80,7 @@ The purpose of these lists is two fold:
 - [Ranger](https://github.com/idaholab/ranger) - Python-based auto-response bot that uses the GitHub API and LlamaIndex package to monitor and generate relevant responses for new discussions
 - [Virtual Test Bed](https://mooseframework.inl.gov/virtual_test_bed/) - An open repository of simulations of nuclear systems
 - [Isopod](https://github.com/idaholab/isopod) - Multiphysics PDE constrained optimization, mostly merged into MOOSE as the optimization module
+- [Tetra](https://github.com/licharlot/tetra) - ThermoElectric Transport and Response Analysis, solves the coupled current continuity and heat conduction equations in the presence of Seebeck, Peltier, and Thomson effects to evaluate the performance of thermoelectric devices
 
 
 ## Closed Source Applications
@@ -109,7 +111,6 @@ Combined applications
 - Great White - 3D discrete dislocation dynamic application using the Mechanics of Defects Library
 - Mixcoatl$^{TM}$ - Conjugate heat transfer in microreactors, developed at BWXT
 - MONARCH - Radiation damage modeling in semiconductors, developed at LANL
-- GOLEM - Numerical simulator for modelling coupled Thermo-Hydro-Mechanical processes in faulted geothermal reservoirs, developed at GFZ Postdam
 - Fizzy - Couples FISPACT-II to MOOSE and Cardinal for radiation activation calculations
 - [Okami](https://hpcgitlab.hpc.inl.gov/idaholab/okami/) - Mixed Oxide fuel studies
 - [BEEs](https://yznkxjs.xml-journal.net/en/article/doi/10.7538/yzk.2020.youxian.0515) - PWR fuel performance analysis code

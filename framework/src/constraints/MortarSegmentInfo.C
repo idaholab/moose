@@ -12,8 +12,6 @@
 
 #include "libmesh/elem.h"
 
-using namespace libMesh;
-
 // Initialize constant static members.
 const Real MortarSegmentInfo::invalid_xi = 99;
 

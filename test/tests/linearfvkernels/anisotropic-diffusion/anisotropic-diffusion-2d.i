@@ -20,6 +20,12 @@
   []
 []
 
+[FVInterpolationMethods]
+  [harmonic]
+    type = FVHarmonicAverage
+  []
+[]
+
 [LinearFVKernels]
   [diffusion]
     type = LinearFVAnisotropicDiffusion

@@ -1,0 +1,3 @@
+# Existing GoogleTests awaiting SQA metadata. New entries are prohibited; this list may only shrink.
+unit:
+  - GasLiquidMassTransferTest.test

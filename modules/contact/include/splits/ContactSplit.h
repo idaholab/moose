@@ -23,6 +23,11 @@ public:
   ContactSplit(const InputParameters & params);
   virtual void setup(NonlinearSystemBase & nl, const std::string & prefix) override;
 
+  virtual bool restrictsRegion() const override
+  {
+    return Split::restrictsRegion() || !_contact_pairs.empty() || !_uncontact_pairs.empty();
+  }
+
 protected:
   const std::vector<std::pair<BoundaryName, BoundaryName>> _contact_pairs;
   std::vector<int> _contact_displaced;

@@ -19,7 +19,7 @@
   [res_norm]
     type = Residual
     residual_type = COMPUTE
-    execute_on = 'MULTISYSTEM_FIXED_POINT_CONVERGENCE'
+    execute_on = 'MULTISYSTEM_FIXED_POINT_ITERATION_END'
   []
 []
 
@@ -40,7 +40,7 @@
     type = PostprocessorConvergence
     postprocessor = res_norm
     tolerance = 1e-8
-    max_iterations = 10
+    max_iterations = 12
     verbose = true
   []
 []

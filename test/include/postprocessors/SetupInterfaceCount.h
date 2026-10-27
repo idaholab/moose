@@ -142,7 +142,7 @@ void
 SetupInterfaceCount<T>::threadJoinHelper(const UserObject & uo)
 {
   // Accumulate 'execute' count from other threads
-  const SetupInterfaceCount<T> & sic = static_cast<const SetupInterfaceCount<T> &>(uo);
+  const SetupInterfaceCount<T> & sic = cast_ref<const SetupInterfaceCount<T> &>(uo);
   _execute += sic._execute;
   _counts.at("THREADJOIN")++;
 }

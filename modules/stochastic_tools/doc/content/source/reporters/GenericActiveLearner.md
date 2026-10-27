@@ -1,5 +1,7 @@
 # GenericActiveLearner
 
+!if! function=hasCapability('libtorch')
+
 !syntax description /Reporters/GenericActiveLearner
 
 ## Description
@@ -16,3 +18,8 @@ This object should be used in conjuction to the Reporter [GenericActiveLearningS
 !syntax inputs /Reporters/GenericActiveLearner
 
 !syntax children /Reporters/GenericActiveLearner
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md

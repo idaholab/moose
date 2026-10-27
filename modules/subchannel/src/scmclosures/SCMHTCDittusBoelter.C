@@ -46,7 +46,7 @@ SCMHTCDittusBoelter::computeNusseltNumber(const FrictionStruct & /*friction_args
   const auto corr = computeCorrectionFactor(pre.poD);
   const Real psi = corr.psi;
   const Real b = corr.b;
-  auto NuT = 0.023 * std::pow(pre.Re, 0.8) * std::pow(pre.Pr, b);
+  auto NuT = 0.023 * std::pow(turbulentReynoldsNumber(pre), 0.8) * std::pow(pre.Pr, b);
   NuT *= psi;
 
   return blendTurbulentNusseltNumber(pre, NuT);

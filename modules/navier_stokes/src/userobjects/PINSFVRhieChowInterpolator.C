@@ -44,8 +44,8 @@ PINSFVRhieChowInterpolator::PINSFVRhieChowInterpolator(const InputParameters & p
   : INSFVRhieChowInterpolator(params),
     _eps(getFunctor<ADReal>(NS::porosity)),
     _smoothed_eps(_moose_mesh, NS::smoothed_porosity, /*extrapolated_boundary*/ true),
-    _epss(libMesh::n_threads(), nullptr),
-    _smoothed_epss(libMesh::n_threads(), nullptr),
+    _epss(UserObject::_subproblem.numThreads(), nullptr),
+    _smoothed_epss(UserObject::_subproblem.numThreads(), nullptr),
     _smoothing_layers(getParam<unsigned short>("smoothing_layers"))
 {
   if (_smoothing_layers && _eps.wrapsType<MooseVariableBase>())
@@ -61,7 +61,7 @@ PINSFVRhieChowInterpolator::PINSFVRhieChowInterpolator(const InputParameters & p
 
   const auto porosity_name = deduceFunctorName(NS::porosity);
 
-  for (const auto tid : make_range(libMesh::n_threads()))
+  for (const auto tid : make_range(UserObject::_subproblem.numThreads()))
   {
     _epss[tid] = &UserObject::_subproblem.getFunctor<ADReal>(porosity_name, tid, name(), true);
 
@@ -117,7 +117,7 @@ PINSFVRhieChowInterpolator::pinsfvSetup()
   ADReal::do_derivatives = saved_do_derivatives;
 
   // Assign the new functor to all
-  for (const auto tid : make_range((unsigned int)(1), libMesh::n_threads()))
+  for (const auto tid : make_range((unsigned int)(1), UserObject::_subproblem.numThreads()))
   {
     auto & other_smoothed_epss = const_cast<Moose::Functor<ADReal> &>(
         UserObject::_subproblem.getFunctor<ADReal>(NS::smoothed_porosity, tid, name(), true));

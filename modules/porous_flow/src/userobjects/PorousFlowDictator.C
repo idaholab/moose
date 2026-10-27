@@ -8,7 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PorousFlowDictator.h"
+#include "Conversion.h"
 #include "NonlinearSystem.h"
+
+#include "libmesh/enum_to_string.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowDictator);
 
@@ -57,7 +60,8 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters)
     _num_aqueous_kinetic(getParam<unsigned int>("number_aqueous_kinetic")),
     _aqueous_phase_number(getParam<unsigned int>("aqueous_phase_number")),
     _consistent_fe_type(false),
-    _fe_type(0)
+    _fe_type(0),
+    _is_fv(false)
 {
   _moose_var_num.resize(_num_variables);
   for (unsigned int i = 0; i < _num_variables; ++i)
@@ -66,6 +70,7 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters)
   if (_num_variables > 0)
   {
     _consistent_fe_type = true;
+    _is_fv = getFieldVar("porous_flow_vars", 0)->isFV();
     _fe_type = FEType(getFieldVar("porous_flow_vars", 0)->feType());
     for (unsigned int i = 1; i < _num_variables; ++i)
       if (getFieldVar("porous_flow_vars", i)->feType() != _fe_type)
@@ -175,4 +180,45 @@ FEType
 PorousFlowDictator::feType() const
 {
   return _fe_type;
+}
+
+bool
+PorousFlowDictator::isFV() const
+{
+  return _is_fv;
+}
+
+void
+PorousFlowDictator::registerNodalVariable(const VariableName & var_name) const
+{
+  // Resolved here rather than passed in by the caller, so the type cannot disagree with the
+  // name.  getVariable rather than getFieldVar("porous_flow_vars", ...) because a variable read
+  // at the nodes need not be a PorousFlow variable: an AuxVariable cannot be one at all, yet a
+  // nodal AuxVariable is routinely read at the nodes.
+  const FEType & fe_type = _fe_problem.getVariable(0, var_name).feType();
+
+  // The first variable to be registered defines the type the rest must match
+  if (!_nodal_fe_type)
+    _nodal_fe_type = fe_type;
+
+  if (*_nodal_fe_type != fe_type)
+    mooseError("Nodal PorousFlow Materials read variables of more than one FE type at the nodes: '",
+               var_name,
+               "' is ",
+               feTypeName(fe_type),
+               ", but ",
+               feTypeName(*_nodal_fe_type),
+               " was already registered by ",
+               Moose::stringify(_nodal_fe_type_vars, ", ", "'"),
+               ".  Every variable read at the nodes must share an FE type, because nodal Materials "
+               "index their properties with a single node counter that must be a valid "
+               "degree-of-freedom index for all of them.");
+
+  _nodal_fe_type_vars.insert(var_name);
+}
+
+std::string
+PorousFlowDictator::feTypeName(const FEType & fe_type)
+{
+  return Utility::enum_to_string<Order>(fe_type.order) + " " + Moose::stringify(fe_type.family);
 }

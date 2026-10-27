@@ -23,6 +23,9 @@
   to_multi_app = sub2
   source_variable = x1
   variable = x2
+  # Get around the ordering check
+  execute_on = 'INITIAL'
+  check_multiapp_execute_on = false
 []
 
 [Executioner]

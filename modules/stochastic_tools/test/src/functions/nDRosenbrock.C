@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -38,7 +38,7 @@ nDRosenbrock::execute()
   _values.reserve(_sampler.getNumberOfLocalRows());
   for (dof_id_type r = _sampler.getLocalRowBegin(); r < _sampler.getLocalRowEnd(); ++r)
   {
-    std::vector<Real> x = _sampler.getNextLocalRow();
+    std::vector<Real> x = _sampler.getSampleRow(r);
     Real y = 0.0;
     for (std::size_t i = 0; i < x.size() - 1; ++i)
       y += (100.0 * Utility::pow<2>(x[i + 1] - Utility::pow<2>(x[i])) + Utility::pow<2>(1 - x[i]));

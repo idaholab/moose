@@ -219,7 +219,7 @@ template <typename UserObjectType, typename BaseType>
 void
 NearestPointBase<UserObjectType, BaseType>::threadJoin(const UserObject & y)
 {
-  auto & npla = static_cast<const NearestPointBase &>(y);
+  auto & npla = cast_ref<const NearestPointBase &>(y);
 
   for (MooseIndex(_user_objects) i = 0; i < _user_objects.size(); ++i)
     _user_objects[i]->threadJoin(*npla._user_objects[i]);

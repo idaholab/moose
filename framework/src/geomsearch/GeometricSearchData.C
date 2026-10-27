@@ -121,6 +121,20 @@ GeometricSearchData::reinit()
 }
 
 void
+GeometricSearchData::backup()
+{
+  for (const auto & [boundary_pair, pl] : _penetration_locators)
+    _penetration_locator_backups[boundary_pair] = pl->backup();
+}
+
+void
+GeometricSearchData::restore()
+{
+  for (const auto & [boundary_pair, pl] : _penetration_locators)
+    pl->restore(libmesh_map_find(_penetration_locator_backups, boundary_pair));
+}
+
+void
 GeometricSearchData::clearNearestNodeLocators()
 {
   for (const auto & nnl_it : _nearest_node_locators)

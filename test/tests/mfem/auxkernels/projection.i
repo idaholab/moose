@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/hinomaru.e
 []
 
@@ -96,13 +96,11 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHyprePCG
     preconditioner = boomeramg
@@ -114,10 +112,40 @@
   type = MFEMSteady
 []
 
+[VectorPostprocessors]
+  [line_sample_Az]
+    type = MFEMVariableLineValueSampler
+    variable = 'Az'
+    start_point = '-3 -2 0'
+    end_point = '3 2 0'
+    num_points = 101
+  []
+  [line_sample_J]
+    type = MFEMVariableLineValueSampler
+    variable = 'J'
+    start_point = '-2.9 -1.9 0'
+    end_point = '2.9 1.9 0'
+    num_points = 101
+  []
+  [line_sample_GAz]
+    type = MFEMVariableLineValueSampler
+    variable = 'GAz'
+    start_point = '-2.9 -1.9 0'
+    end_point = '2.9 1.9 0'
+    num_points = 101
+  []
+  [line_sample_GAz_copy]
+    type = MFEMVariableLineValueSampler
+    variable = 'GAz(copy)'
+    start_point = '-2.9 -1.9 0'
+    end_point = '2.9 1.9 0'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/Projection
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    file_base = OutputData/Projection/projection
   []
 []

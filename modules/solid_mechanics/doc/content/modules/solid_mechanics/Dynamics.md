@@ -1,127 +1,142 @@
 # Dynamics
 
-Dynamic problems like the response of a multi degree of freedom structure to external forcing and wave propagation in a medium can also be solved using the Solid Mechanics module.
+Dynamic problems -- the transient response of a structure to time-varying loads, wave propagation, and
+similar -- extend the [balance of linear momentum](BalanceOfLinearMomentum.md) with an inertial term.
 
-The equation of motion for a typical dynamics problem has the following format:
+## Equation of Motion id=equation
+
+The strong form of the dynamic balance of linear momentum is
 \begin{equation}
-\mathbf{M \ddot{u}}+\mathbf{C \dot{u}}+\mathbf{Ku}=\mathbf{F}_{ext}
+   \rho\, \ddot{u}_i + \eta\, \rho\, \dot{u}_i = \sigma_{ij,j} + b_i
 \end{equation}
+where $\rho$ is the mass density, $\ddot{u}_i$ the acceleration, $\dot{u}_i$ the velocity, $\eta$ the
+mass-proportional damping coefficient, $\sigma_{ij}$ the stress, and $b_i$ the body force per unit
+volume.  This is the [static balance](BalanceOfLinearMomentum.md) with the inertial force $\rho\ddot
+u_i$ and a mass-proportional damping force $\eta\rho\dot u_i$ added; it reduces to the static problem
+when $\dot u_i = \ddot u_i = 0$, and it holds on the reference or current configuration following the
+same total/updated convention as the static case.
 
-Here, $\mathbf{M}$ is the mass matrix, $\mathbf{C}$ is the damping matrix, $\mathbf{K}$ is the stiffness matrix and $\mathbf{F}_{ext}$ is the vector of external forces acting at the nodes. $\mathbf{u}$, $\mathbf{\dot{u}}$ and $\mathbf{\ddot{u}}$ are the vector of displacement, velocity and acceleration at the nodes, respectively.
+Each term is supplied by a separate object, one per displacement component:
 
-## Time integration
+| Term                    | Meaning                   | Object                                                                                 |
+| ----------------------- | ------------------------- | -------------------------------------------------------------------------------------- |
+| $\rho\,\ddot{u}_i$      | inertia                   | [`InertialForce`](InertialForce.md)                                                    |
+| $\eta\,\rho\,\dot{u}_i$ | mass-proportional damping | [`InertialForce`](InertialForce.md) (`eta`)                                            |
+| $\sigma_{ij,j}$         | internal force            | Lagrangian [stress-divergence kernel](BalanceOfLinearMomentum.md) + constitutive model |
+| $b_i$                   | body force                | e.g. [`Gravity`](Gravity.md)                                                           |
 
-To solve the above equation for $\mathbf{u}$, an appropriate time integration scheme needs to be chosen. Newmark [!citep](newmark1959amethod) and Hilber-Hughes-Taylor (HHT) [!citep](hughes2000fem) time integration schemes are two of the commonly used methods in dynamics.
+Stiffness-proportional damping does not appear as a separate term: it is carried inside $\sigma_{ij}$
+as a [viscous stress](#damping).
 
-### Newmark time integration
+## Time Integration id=time-integration
 
-In Newmark time integration, the acceleration and velocity at $t+\Delta t$ are written in terms of the displacement, velocity and acceleration at time $t$ and the displacement at $t+\Delta t$ using the [NewmarkAccelAux](/NewmarkAccelAux.md) and [NewmarkVelAux](/NewmarkVelAux.md) Aux Kernels, respectively.
+The velocity and acceleration are related to the displacement by a time-integration scheme.  The
+implicit Newmark [!citep](newmark1959amethod) and Hilber-Hughes-Taylor (HHT) [!citep](hughes2000fem)
+schemes are described below, along with experimental support for explicit dynamics.
 
+### Newmark
+
+Newmark integration expresses the acceleration and velocity at $t+\Delta t$ in terms of the state at
+$t$ and the displacement at $t+\Delta t$:
 \begin{equation}
 \begin{aligned}
-\mathbf{\ddot{u}}(t+\Delta t) &=& \frac{\mathbf{u}(t+\Delta t)-\mathbf{u}(t)}{\beta \Delta t^2}- \frac{\mathbf{\dot{u}}(t)}{\beta \Delta t}+\frac{\beta -0.5}{\beta}\mathbf{\ddot{u}}(t) \\
-\mathbf{\dot{u}}(t+ \Delta t) &=& \mathbf{\dot{u}}(t)+ (1-\gamma)\Delta t \mathbf{\ddot{u}}(t) + \gamma \Delta t \mathbf{\ddot{u}}(t+\Delta t)
+\ddot{u}_i(t+\Delta t) &= \frac{u_i(t+\Delta t)-u_i(t)}{\beta \Delta t^2}
+   - \frac{\dot{u}_i(t)}{\beta \Delta t} + \frac{\beta - \tfrac{1}{2}}{\beta}\,\ddot{u}_i(t), \\
+\dot{u}_i(t+\Delta t) &= \dot{u}_i(t) + (1-\gamma)\Delta t\, \ddot{u}_i(t)
+   + \gamma \Delta t\, \ddot{u}_i(t+\Delta t),
 \end{aligned}
 \end{equation}
+with parameters $\beta$ and $\gamma$.  Common choices:
 
-In the above equations, $\beta$ and $\gamma$ are Newmark time integration parameters. Substituting the above two equations into the equation of motion will result in a linear system of equations ($\mathbf{Au}(t+\Delta t) = \mathbf{b}$) from which $\mathbf{u}(t+\Delta t)$ can be estimated.
-
-- For $\beta = \frac{1}{4}$ and $\gamma = \frac{1}{2}$, the Newmark time integration method is implicit and unconditionally stable. This is the constant average acceleration method with no numerical damping. This is recommended only when a constant timestep is used throughout the simulation. If for some reason, the simulation does not converge and the timestep is halved, this time integration method with no numerical damping can result in high frequency noise.
-- $\beta = \frac{1}{6}$ and $\gamma = \frac{1}{2}$ results in the linear acceleration method where the acceleration is linearly varying between $t$ and $t+\Delta t$.
-- $\beta = 0$ and $\gamma = \frac{1}{2}$ is identical to the central difference method.
+- $\beta = \tfrac{1}{4}$, $\gamma = \tfrac{1}{2}$: constant average acceleration -- unconditionally
+  stable with no numerical damping (recommended with a constant time step).
+- $\beta = \tfrac{1}{6}$, $\gamma = \tfrac{1}{2}$: linear acceleration.
+- $\beta = 0$, $\gamma = \tfrac{1}{2}$: the central-difference method in theory (but see
+  [Explicit Dynamics](#explicit-dynamics)).
 
 !alert note
-For $\frac{1}{2} \le \gamma \le 2 \beta$ in structural dynamics problems, the Newmark method is unconditionally stable irrespective of the time-step $\Delta t$. For $\gamma = \frac{1}{2}$, the Newmark method is at least second order accurate; it is first order accurate for all other values of $\gamma$.
+For $\gamma = \tfrac{1}{2}$ the Newmark method is second-order accurate and, for
+$\tfrac{1}{2} \le \gamma \le 2\beta$, unconditionally stable; it is first-order accurate for other
+values of $\gamma$.
 
-### Hilber-Hughes-Taylor time integration
+### Hilber-Hughes-Taylor
 
-The HHT time integration scheme is built upon Newmark time integration method. Here, in addition to the Newmark equations, the equation of motion is also altered resulting in:
-
+The constant-average-acceleration Newmark scheme introduces no numerical damping, which can leave
+spurious high-frequency content.  HHT damps the high frequencies by evaluating the non-inertial terms
+at a weighted time using the parameter $\alpha$:
 \begin{equation}
-\mathbf{M}\mathbf{\ddot{u}}(t+\Delta t)+ \mathbf{C}[(1+\alpha)\mathbf{\dot{u}}(t+\Delta t)-\alpha\mathbf{\dot{u}}(t)] +(1+\alpha)\mathbf{K}\mathbf{u}(t+\Delta t) - \alpha K \mathbf{u}(t) = \mathbf{F}_{ext}(t+ (1 + \alpha) \Delta t)
+   \rho\,\ddot{u}_i(t+\Delta t)
+   + \eta\rho\left[(1+\alpha)\dot{u}_i(t+\Delta t) - \alpha\,\dot{u}_i(t)\right]
+   = (1+\alpha)\left[\sigma_{ij,j} + b_i\right]_{t+\Delta t}
+   - \alpha\left[\sigma_{ij,j} + b_i\right]_{t}.
 \end{equation}
+Choosing $-\tfrac{1}{3} \le \alpha \le 0$ with $\beta = \tfrac{(1-\alpha)^2}{4}$ and
+$\gamma = \tfrac{1}{2} - \alpha$ keeps the scheme second-order accurate and unconditionally stable
+while damping frequencies above $\tfrac{1}{2\Delta t}$.  The inertial term is not weighted; the
+internal force, damping, and external loads are, so loads such as gravity and pressure are evaluated
+at $t + (1+\alpha)\Delta t$.  Setting $\alpha = 0$ recovers Newmark.
 
-Here, $\alpha$ is the HHT parameter. For $-\frac{1}{3} \le \alpha \le 0$, $\beta = \frac{(1-\alpha)^2}{4}$ and $\gamma = \frac{1}{2} - \alpha$, the HHT method is at least second-order accurate and unconditionally stable. For non-zero values of $\alpha$, the response at high frequencies (above $\frac{1}{2 dt}$) are numerically damped, provided $\beta$ and $\gamma$ are defined as above.
+### Explicit Dynamics id=explicit-dynamics
 
-More details about the Newmark method and HHT method can be found in these [lecture notes](http://people.duke.edu/~hpgavin/cee541/NumericalIntegration.pdf).
+!alert warning title=Experimental
+Explicit dynamics support is under active development and should be considered experimental.
 
-## Rayleigh damping
+The Newmark and HHT schemes above are implicit.  For wave-propagation and high strain-rate problems,
+an explicit central-difference scheme -- which advances the solution without a nonlinear solve, at the
+cost of a conditionally stable (critical) time step -- is available through the
+[`ExplicitMixedOrder`](ExplicitMixedOrder.md) time integrator.
 
-This is the most common form of structural damping used in dynamic problems. Here, the damping matrix ($\mathbf{C}$) is assumed to be a linear combination of the mass and stiffness matrices, i.e., $\mathbf{C} = \eta \mathbf{M} +\zeta\mathbf{K}$. Here, $\eta$ and $\zeta$ are the mass and stiffness dependent Rayleigh damping parameters, respectively.
+!alert note title=Newmark beta = 0 is not an explicit solve
+Setting $\beta = 0$ in the Newmark integrator is the central-difference method *in theory*, but the
+implementation still assembles and solves the full system every step -- it is not a genuine explicit
+solve.  For explicit dynamics, use [`ExplicitMixedOrder`](ExplicitMixedOrder.md).
 
-The equation of motion in the presence of Rayleigh damping is:
+## Damping id=damping
+
+Rayleigh damping combines a mass-proportional and a stiffness-proportional contribution, giving a
+damping ratio that varies with the modal frequency $\omega$ as
 \begin{equation}
-\mathbf{M}\mathbf{\ddot{u}}+ (\eta M + \zeta K)\mathbf{\dot{u}} +\mathbf{K}\mathbf{u} = \mathbf{F_{ext}}
+   \xi(\omega) = \frac{\eta}{2\omega} + \frac{\zeta}{2}\,\omega,
 \end{equation}
-
-The degree of damping in the system depends on the coefficients $\zeta$ and $\eta$ as follows:
+where $\eta$ is the mass-proportional and $\zeta$ the stiffness-proportional coefficient.
+To obtain a target damping ratio $\xi_t$ at two frequencies $\omega_1$ and $\omega_2$, solving
+$\xi(\omega_1) = \xi(\omega_2) = \xi_t$ gives
 \begin{equation}
-\label{eqn:general_rayleigh}
-\xi (\omega) = \frac{\eta}{2} \frac{1}{\omega} + \frac{\zeta}{2} \omega
+   \eta = 2\,\xi_t\,\frac{\omega_1 \omega_2}{\omega_1 + \omega_2}, \qquad
+   \zeta = \frac{2\,\xi_t}{\omega_1 + \omega_2}.
 \end{equation}
+Between $\omega_1$ and $\omega_2$ the actual ratio dips slightly below $\xi_t$; outside the band it
+rises.
 
-where, $\xi(\omega)$ is the damping ratio of the system as a function of frequency $\omega$. For example, the damping ratio as a function of frequency for $\zeta = 0.0035$ and $\eta = 0.09$ is presented in [fig:rayleigh]. Note that $\omega$ has units of rad/s and $f$ used in the figure has units of Hz.
+The mass-proportional force $\eta\rho\dot{u}_i$ is applied by the [`InertialForce`](InertialForce.md)
+kernel through its `eta` parameter. The stiffness-proportional contribution is treated as a
+*viscous stress* and can be written as a rate-dependent constitutive model.
 
-!media media/solid_mechanics/rayleigh.png style=width:60%;margin-left:150px;float:center; id=fig:rayleigh caption=Damping ratio as a function of frequency.
+## Implementation and Usage id=usage
 
-To model a constant damping ratio using Rayleigh damping, the aim is to find $\zeta$ and $\eta$ such that the $\xi(f)$ is close to the target damping ratio $\xi_t$, which is a constant value, between the frequency range $[f_1, f_2]$. This can be achieved by minimizing the difference between $\xi_t$ and $\xi(f)$ for all the frequencies between $f_1$ and $f_2$, i.e., if
+A dynamic model adds, for each displacement component:
 
-\begin{equation}
-I = \int_{f_1}^{f_2} \xi_t - \left(\frac{\eta}{2}\frac{1}{\omega} + \frac{\zeta}{2} \omega\right) df
-\end{equation}
+- a Lagrangian [stress-divergence kernel](BalanceOfLinearMomentum.md) for the internal force,
+- an [`InertialForce`](InertialForce.md) kernel for $\rho\ddot{u}_i$ (and, via `eta`, the
+  mass-proportional damping), and
+- a time integrator, with the Newmark `beta`/`gamma` and, for HHT, the `alpha` parameter.
 
-Then, $\frac{dI}{d \eta} = 0$ and $\frac{dI}{d \zeta}=0$ results in two equations that are linear in $\eta$ and $\zeta$. Solving these two linear equations simultaneously gives:
-
-\begin{equation}
-\begin{aligned}
-\zeta &= \frac{\xi_t}{2 \pi} \; \frac{3}{(\Delta f)^2} \; \left(f_1 + f_2 - 2 \frac{f_1 f_1}{\Delta f} \; ln \frac{f_2}{f_1}\right) \\
-\eta &= 2 \pi \xi_t \; \frac{f_1 f_2}{\Delta_f} \; \left[ln \frac{f_2}{f_1}\; \left(2 + 6 \frac{f_1 f_2}{(\Delta_f)^2}\right) - \frac{3(f_1 + f_2)}{\Delta_f}\right]
-\end{aligned}
-\end{equation}
-
-A similar method can be used to estimate $\eta$ and $\zeta$ for non-constant damping ratios.
-
-## Implementation and Usage
-
-In the MOOSE framework, the mass and stiffness matrices are not explicitly calculated. Only the residuals are calculated. To get the residual, the equation of motion (with Rayleigh damping and HHT time integration) can be written as:
-
-\begin{equation}
-\rho \ddot{u}(t+\Delta t) + \eta \rho [(1+\alpha)\dot{u}(t + \Delta t)-\alpha \dot{u}(t)] + \zeta  \nabla \cdot [(1+\alpha)\frac{d}{dt}\sigma(t+\Delta t)- \alpha \frac{d}{dt}\sigma(t)] + \nabla \cdot [(1+\alpha) \sigma(t+\Delta t) - \alpha \sigma(t)] = F_{ext}(t+ (1 + \alpha) \Delta t)
-\end{equation}
-
-Here, $\rho$ is the density of the material and $\sigma$ is the stress tensor. The weak form of the above equation is used to get the residuals.
-
-The first two terms to the left that contain $\rho$ are calculated in the [InertialForce](/InertialForce.md) kernel. $\alpha$, $\beta$, $\gamma$ and $\eta$ need to be passed as input to the InertialForce kernel.
-
-The next two terms to the left involving $\sigma$ are calculated in [DynamicStressDivergenceTensors](/DynamicStressDivergenceTensors.md).
-
-Note that the time derivative of $\sigma(t+\Delta t)$ and $\sigma(t)$ are approximated as follows:
-
-\begin{equation}
-\begin{aligned}
-\frac{d}{dt}\sigma(t+\Delta t) &= \frac{\sigma(t+\Delta t)-\sigma(t)}{\Delta t} \\
-\frac{d}{dt}\sigma(t) &= \frac{\sigma(t)-\sigma(t-\Delta t)}{\Delta t}
-\end{aligned}
-\end{equation}
-
-The input file syntax for calculating the residual due to both the Inertial force and the DynamicStressDivergenceTensors is:
-
-!listing modules/solid_mechanics/test/tests/dynamics/rayleigh_damping/rayleigh_hht.i start=Kernels end=AuxKernels
-
-Here, `./DynamicSolidMechanics` is the action that calls the [DynamicStressDivergenceTensors](/DynamicStressDivergenceTensors.md) kernel.
-
-Finally, when using HHT time integration method, external forces like gravity and pressure also require $\alpha$ as input.
+The [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md) action sets up the
+stress-divergence kernels and the strain calculator; the inertial kernel and time integrator are added
+alongside it.  A material `density` is required, and stiffness-proportional damping, when needed, is
+supplied as the [viscous constitutive stress](#damping) above.
 
 !alert note
-For dynamic problems, it is recommended to use [PresetDisplacement](/PresetDisplacement.md) and [PresetAcceleration](/PresetAcceleration.md) for prescribing the displacement and acceleration at a boundary, respectively.
+For dynamic problems, prescribe boundary motion with [`PresetDisplacement`](PresetDisplacement.md) and
+[`PresetAcceleration`](PresetAcceleration.md) rather than a plain Dirichlet condition on the
+displacement.
 
-!alert warning
-[DynamicStressDivergenceTensors](/DynamicStressDivergenceTensors.md) uses the undisplaced mesh by default but kernels such as [InertialForce](/InertialForce.md) and [Gravity](/Gravity.md), and boundary conditions such as [Pressure](/Pressure.md) use the displaced mesh by default. All calculations should be performed either using the undisplaced mesh (recommended for small strain problems) or the displaced mesh (recommended for finite strain problems). Therefore, `use_displaced_mesh` parameter should be appropriately set for all the kernels and boundary conditions.
+## Static Initialization id=static-initialization
 
-## Static Initialization
-
-To initialize the system under a constant initial loading such as gravity, an initial static analysis can be conducted by turning off all the dynamics related Kernels and AuxKernels such as [InertialForce](/InertialForce.md), [NewmarkVelAux](/NewmarkVelAux.md) and [NewmarkAccelAux](/NewmarkAccelAux.md) for the first time step. To turn off stiffness proportional Rayleigh damping for the first time step `static_initialization` flag can be set to true in [DynamicSolidMechanics](/DynamicSolidMechanicsPhysics.md) or [DynamicStressDivergenceTensors](/DynamicStressDivergenceTensors.md). An example of static initialization can be found in this following test:
-
-!listing /modules/solid_mechanics/test/tests/dynamics/prescribed_displacement/3D_QStatic_1_Ramped_Displacement_with_gravity.i
+To start from a statically loaded state (for example under gravity), run an initial static step with
+the inertial contribution disabled, then enable it for the transient.  Activating the
+[`InertialForce`](InertialForce.md) kernel only after the first step (for instance with a
+[`Controls`](/Controls/index.md) block) makes the first solve return the static equilibrium under the
+sustained load.
 
 !bibtex bibliography

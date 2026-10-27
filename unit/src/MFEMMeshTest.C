@@ -34,7 +34,7 @@ MFEMMeshTest::SetUp()
   const char * argv[2] = {"foo", "\0"};
   _app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
   _factory = &_app->getFactory();
-  _mesh_type = "MFEMMesh";
+  _mesh_type = "MFEMFileMesh";
 }
 
 /**
@@ -51,6 +51,7 @@ MFEMMeshTest::buildMFEMMesh(MeshFileName filename, int serial_ref, int parallel_
   _app->actionWarehouse().mesh() = _mfem_mesh_ptr;
   _mfem_mesh_ptr->setMeshBase(_mfem_mesh_ptr->buildMeshBaseObject());
   _mfem_mesh_ptr->buildMesh();
+  _mfem_mesh_ptr->prepare();
 }
 
 /**

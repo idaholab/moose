@@ -29,7 +29,7 @@ public:
   /**
    * Method that should be executed once, before any solve calls
    */
-  virtual void initialSetup() {};
+  virtual void initialSetup() {}
 
   /**
    * Solve routine provided by this object.

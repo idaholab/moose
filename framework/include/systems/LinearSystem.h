@@ -10,9 +10,8 @@
 #pragma once
 
 #include "SolverSystem.h"
-#include "LinearFVGradientInterface.h"
+#include "LinearFVGradientManager.h"
 #include "PerfGraphInterface.h"
-#include "GradientLimiterType.h"
 
 #include <set>
 
@@ -21,6 +20,15 @@
 #include "libmesh/linear_solver.h"
 
 class LinearFVKernel;
+class InputParameters;
+namespace Moose::Kokkos
+{
+class LinearFVKernel;
+class LinearFVElementalKernel;
+class LinearFVFluxKernel;
+class LinearFVBoundaryCondition;
+class System;
+}
 
 // libMesh forward declarations
 namespace libMesh
@@ -36,15 +44,14 @@ class DiagonalMatrix;
 /**
  * Linear system to be solved
  */
-class LinearSystem : public SolverSystem,
-                     public PerfGraphInterface,
-                     public LinearFVGradientInterface
+class LinearSystem : public SolverSystem, public PerfGraphInterface, public LinearFVGradientManager
 {
 public:
   LinearSystem(FEProblemBase & problem, const std::string & name);
   virtual ~LinearSystem();
 
   virtual void solve() override;
+  virtual void preInit() override;
 
   /**
    * At the moment, this is only used for the multi-system fixed point
@@ -53,8 +60,31 @@ public:
    */
   virtual bool converged() override { return _converged; }
 
+  virtual void initSolutionState() override;
   virtual void initialSetup() override;
   virtual void reinit() override;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Add a Kokkos linear finite volume kernel to this system
+   * @param kernel_name The type of the kernel to add
+   * @param name The name of the kernel to add
+   * @param parameters The input parameters of the kernel
+   */
+  void addKokkosKernel(const std::string & kernel_name,
+                       const std::string & name,
+                       InputParameters & parameters);
+
+  /**
+   * Add a Kokkos linear finite volume boundary condition to this system
+   * @param bc_name The type of the boundary condition to add
+   * @param name The name of the boundary condition to add
+   * @param parameters The input parameters of the boundary condition
+   */
+  void addKokkosBoundaryCondition(const std::string & bc_name,
+                                  const std::string & name,
+                                  InputParameters & parameters);
+#endif
 
   // Overriding these to make sure the linear systems don't do anything during
   // residual/jacobian setup
@@ -133,13 +163,18 @@ public:
   SparseMatrix<Number> & getSystemMatrix() { return *_linear_implicit_system.matrix; }
   const SparseMatrix<Number> & getSystemMatrix() const { return *_linear_implicit_system.matrix; }
 
-  using LinearFVGradientInterface::computeGradients;
-  using LinearFVGradientInterface::linearFVLimitedGradientContainer;
-  using LinearFVGradientInterface::requestLinearFVLimitedGradients;
+  using LinearFVGradientManager::computeGradients;
+  using LinearFVGradientManager::computeGradientsExcept;
+  using LinearFVGradientManager::registerFVGradient;
+  using LinearFVGradientManager::updateFVGradient;
 
   virtual void compute(ExecFlagType type) override;
 
 protected:
+  virtual void copyAdditionalStateBackwards(Moose::SolutionIterationType iteration_type,
+                                            bool skip_current_to_old) override;
+  virtual void restoreAdditionalStates() override;
+
   /**
    * Compute the right hand side and system matrix for given tags
    * @param vector_tags The tags of kernels for which the right hand side is to be computed.
@@ -150,6 +185,27 @@ protected:
   void computeLinearSystemInternal(const std::set<TagID> & vector_tags,
                                    const std::set<TagID> & matrix_tags,
                                    const bool compute_gradients = true);
+
+  /**
+   * Set the PETSc options used for assembling the system matrices of the given tags
+   * @param matrix_tags The matrix tags
+   */
+  void setMatrixOptions(const std::set<TagID> & matrix_tags);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Perform the initial setup of the Kokkos linear finite volume kernels and boundary conditions
+   */
+  void initialSetupKokkosLinearFV();
+
+  /**
+   * Assemble the Kokkos contributions to the linear system for the given tags
+   * @param vector_tags The vector (right-hand side) tags to assemble
+   * @param matrix_tags The matrix tags to assemble
+   */
+  void computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
+                                 const std::set<TagID> & matrix_tags);
+#endif
 
   /// Base class reference to the libmesh system
   System & _sys;

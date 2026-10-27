@@ -151,7 +151,7 @@ WCNSFVTurbulencePhysics::addAuxiliaryVariables()
     if (isParamValid("mixing_length_two_term_bc_expansion"))
       params.set<bool>("two_term_boundary_expansion") =
           getParam<bool>("mixing_length_two_term_bc_expansion");
-    if (!shouldCreateVariable(_tke_name, _blocks, /*error if aux*/ false))
+    if (!shouldCreateVariable(_mixing_length_name, _blocks, /*error if aux*/ false))
       reportPotentiallyMissedParameters({"mixing_length_two_term_bc_expansion"},
                                         "MooseVariableFVReal");
     else

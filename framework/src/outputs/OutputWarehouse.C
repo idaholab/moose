@@ -134,7 +134,7 @@ OutputWarehouse::hasMaterialPropertyOutput(const std::string & name) const
   else
   {
     // Check if output object supports material property output
-    const auto * output_object = static_cast<const Output *>(_object_map.at(name));
+    const auto * output_object = cast_ptr<const Output *>(_object_map.at(name));
     return output_object->supportsMaterialPropertyOutput();
   }
 }
@@ -157,7 +157,11 @@ OutputWarehouse::addOutputFilename(const OutputName & obj_name, const OutFileBas
   _file_base_map[obj_name].insert(filename);
   for (const auto & it : _file_base_map)
     if (it.first != obj_name && it.second.find(filename) != it.second.end())
-      mooseError("An output file with the name, ", filename, ", already exists.");
+      mooseError("An output file with the name, ",
+                 filename,
+                 ", already exists. If both outputs fall back to a common 'file_base' set in the "
+                 "[Outputs] block, give one of them its own distinct 'file_base' or set "
+                 "'append_object_name = true' on it to avoid this collision.");
 }
 
 void
@@ -206,41 +210,51 @@ OutputWarehouse::mooseConsole(std::ostringstream & buffer)
 {
   std::lock_guard<std::mutex> lock(moose_console_mutex);
 
-  std::string message = buffer.str();
-
-  // If someone else is writing - then we may need a newline
-  if (&buffer != _last_buffer && !_last_message_ended_in_newline)
-    message = '\n' + message;
-
-  // Loop through all Console Output objects and pass the current output buffer
-  std::vector<Console *> objects = getOutputs<Console>();
-  if (!objects.empty())
+  const auto clear_buffer = [&buffer]()
   {
-    for (const auto & obj : objects)
-      obj->mooseConsole(message);
-
-    // Reset
     buffer.clear();
     buffer.str("");
+  };
+
+  const auto objects = getOutputs<Console>();
+  const auto & awh = _app.actionWarehouse();
+  const bool has_add_output = awh.hasTask("add_output");
+  const bool add_output_done = has_add_output && awh.isTaskComplete("add_output");
+
+  if (objects.empty() && add_output_done)
+  {
+    // No Console exists and none can be added anymore (e.g. console = false): drop the
+    // message, otherwise the buffer grows without bound and every flush copies it.
+    // No need to build the message string or track newline state.
+    clear_buffer();
   }
-  else if (_app.actionWarehouse().hasTask("add_output") &&
-           !_app.actionWarehouse().isTaskComplete("add_output") && !_buffer_action_console_outputs)
+  else
   {
-    // this will cause messages to console before its construction immediately flushed and
-    // cleared.
-    bool this_message_ends_in_newline = message.empty() ? true : message.back() == '\n';
+    std::string message = buffer.str();
 
-    // If that last message ended in newline then this one may need
-    // to start with indenting
-    // Note that we only indent the first line if the last message ended in new line
-    if (_app.multiAppLevel() > 0)
-      MooseUtils::indentMessage(_app.name(), message, COLOR_CYAN, _last_message_ended_in_newline);
+    // If someone else is writing - then we may need a newline
+    if (&buffer != _last_buffer && !_last_message_ended_in_newline)
+      message = '\n' + message;
 
-    Moose::out << message << std::flush;
-    buffer.clear();
-    buffer.str("");
+    if (!objects.empty())
+    {
+      // Pass the current output buffer to all Console Output objects
+      for (const auto & obj : objects)
+        obj->mooseConsole(message);
+      clear_buffer();
+    }
+    else if (has_add_output && !_buffer_action_console_outputs)
+    {
+      // Messages to console before its construction are immediately flushed and cleared.
+      // Only indent the first line if the last message ended in a newline.
+      const bool ends_in_newline = message.empty() || message.back() == '\n';
+      if (_app.multiAppLevel() > 0)
+        MooseUtils::indentMessage(_app.name(), message, COLOR_CYAN, _last_message_ended_in_newline);
 
-    _last_message_ended_in_newline = this_message_ends_in_newline;
+      Moose::out << message << std::flush;
+      clear_buffer();
+      _last_message_ended_in_newline = ends_in_newline;
+    }
   }
 
   _last_buffer = &buffer;
@@ -302,6 +316,12 @@ OutputWarehouse::getCommonParameters() const
   return _common_params_ptr;
 }
 
+bool
+OutputWarehouse::commonFileBaseSet() const
+{
+  return _common_params_ptr && _common_params_ptr->isParamValid("file_base");
+}
+
 std::set<Real> &
 OutputWarehouse::getSyncTimes()
 {
@@ -354,7 +374,7 @@ OutputWarehouse::getAllMaterialPropertyOutputNames() const
   std::set<OutputName> output_names;
   for (const auto & pair : _object_map)
   {
-    const auto * output = static_cast<const Output *>(pair.second);
+    const auto * output = cast_ptr<const Output *>(pair.second);
     if (output->supportsMaterialPropertyOutput())
       output_names.insert(pair.first);
   }
@@ -409,6 +429,24 @@ OutputWarehouse::reset()
 void
 OutputWarehouse::resetFileBase()
 {
+  // Tentatively resolve every FileOutput that will fall back to the app's
+  // file_base -- shortcut-syntax outputs built by CommonOutputAction and
+  // sub-block outputs alike, as long as neither sets its own 'file_base' --
+  // and tally the results by the resulting (extension-inclusive) filename.
+  // Two fallback outputs whose tentative filenames match this way would
+  // otherwise collide (see #4215); shortcut outputs are included here so a
+  // sub-block output colliding with a shortcut output is detected too, even
+  // though only sub-block outputs act on the collision below (shortcut
+  // outputs always keep the common file_base verbatim).
+  std::map<std::string, unsigned int> fallback_filename_counts;
+  for (const auto & obj : _all_objects)
+    if (FileOutput * file_output = dynamic_cast<FileOutput *>(obj))
+      if (!obj->getParam<bool>("_file_base_set_by_own_block"))
+      {
+        file_output->setFileBase(_app.getOutputFileBase());
+        fallback_filename_counts[file_output->filename()]++;
+      }
+
   // Set the file base from the application to FileOutputs and add associated filenames
   for (const auto & obj : _all_objects)
     if (FileOutput * file_output = dynamic_cast<FileOutput *>(obj))
@@ -416,13 +454,54 @@ OutputWarehouse::resetFileBase()
       std::string file_base;
       if (obj->parameters().get<bool>("_built_by_moose"))
       {
+        // Shortcut-syntax outputs always keep the common/default file_base
+        // verbatim; the object name is never appended to them.
         if (obj->isParamValid("file_base"))
           file_base = obj->getParam<std::string>("file_base");
         else
           file_base = _app.getOutputFileBase();
       }
       else
-        file_base = _app.getOutputFileBase(true) + "_" + obj->name();
+      {
+        // A sub-block output that doesn't set its own 'file_base' and whose
+        // tentatively-resolved filename collides with another output's --
+        // another sub-block, or a shortcut-syntax output -- must be
+        // disambiguated. MOOSE will not silently choose a name for the user
+        // in that case: require the user to explicitly opt in to appending
+        // the object name (or to explicitly opt out and accept the
+        // collision) rather than doing it for them. With no common
+        // 'file_base' set at all, the object name is always appended,
+        // matching the ordinary default naming scheme -- there is no
+        // collision to speak of in that case.
+        const bool collides = commonFileBaseSet() &&
+                              !obj->getParam<bool>("_file_base_set_by_own_block") &&
+                              fallback_filename_counts[file_output->filename()] > 1;
+
+        if (collides && !obj->parameters().isParamSetByUser("append_object_name"))
+          mooseError(
+              "The output object '",
+              obj->name(),
+              "' would write to the file '",
+              file_output->filename(),
+              "', which is also used by another output object, because both fall back to the "
+              "common 'file_base' set in the [Outputs] block. MOOSE will not silently rename an "
+              "output to resolve this collision. Set 'append_object_name = true' on '",
+              obj->name(),
+              "' (or on the other colliding output(s)) to have the object name appended and "
+              "disambiguate the filenames, or give '",
+              obj->name(),
+              "' its own distinct 'file_base'.");
+
+        const bool append_by_default = !commonFileBaseSet();
+        const bool append = obj->parameters().isParamSetByUser("append_object_name")
+                                ? obj->getParam<bool>("append_object_name")
+                                : append_by_default;
+
+        if (append)
+          file_base = _app.getOutputFileBase(true) + "_" + obj->name();
+        else
+          file_base = _app.getOutputFileBase();
+      }
 
       file_output->setFileBase(file_base);
       addOutputFilename(obj->name(), file_output->filename());

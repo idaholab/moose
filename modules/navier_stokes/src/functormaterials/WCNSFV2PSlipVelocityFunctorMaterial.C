@@ -54,7 +54,8 @@ WCNSFV2PSlipVelocityFunctorMaterial::validParams()
       "ElementSideNeighborLayers",
       Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
           Moose::RelationshipManagerType::COUPLING,
-      [](const InputParameters & obj_params, InputParameters & rm_params) {
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
         rm_params.set<unsigned short>("layers") = obj_params.get<unsigned short>("ghost_layers");
       });
   return params;
@@ -102,11 +103,11 @@ WCNSFV2PSlipVelocityFunctorMaterial::WCNSFV2PSlipVelocityFunctorMaterial(
   // TODO: this could be set less often, keeping it false until the two phase mixture system is
   // solved
   if (auto u = dynamic_cast<MooseLinearVariableFV<Real> *>(_u_var))
-    u->computeCellGradients();
+    u->requestCellGradients();
   if (auto v = dynamic_cast<MooseLinearVariableFV<Real> *>(_v_var))
-    v->computeCellGradients();
+    v->requestCellGradients();
   if (auto w = dynamic_cast<MooseLinearVariableFV<Real> *>(_w_var))
-    w->computeCellGradients();
+    w->requestCellGradients();
 
   addFunctorProperty<ADReal>(
       getParam<MooseFunctorName>("slip_velocity_name"),

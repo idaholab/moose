@@ -13,6 +13,8 @@
 #include "MooseApp.h"
 #include "Executioner.h"
 
+class NonlinearSystemBase;
+
 /**
  * Default nonlinear convergence criteria for FEProblem
  */
@@ -24,14 +26,30 @@ public:
 
   DefaultNonlinearConvergence(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
   virtual void checkIterationType(IterationType it_type) const override;
+  virtual void preLoop() override;
+  virtual MooseConvergenceStatus checkConvergence(unsigned int n_iter) override;
 
-  virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override;
+  /// Sets the maximum nonlinear iterations
+  void setMaximumIterations(const unsigned int max_iter);
+  /// Sets the absolute nonlinear tolerance
+  void setAbsoluteTolerance(const Real abs_tol);
+  /// Sets the relative nonlinear tolerance
+  void setRelativeTolerance(const Real rel_tol);
 
 protected:
+  /// Sets the nonlinear system parameters, such as tolerances
+  void setNonlinearSystemParameters();
+
+  /**
+   * Nonlinear system whose convergence state should be checked.
+   */
+  virtual NonlinearSystemBase & nonlinearSystem();
+
   /**
    * Check the absolute and relative convergence of the nonlinear solution
-   * @param iter       Iteration number
+   * @param n_iter     Number of iterations performed
    * @param fnorm      Norm of the residual vector
    * @param ref_norm   Norm to use for reference value
    * @param rel_tol    Relative tolerance
@@ -39,7 +57,7 @@ protected:
    * @param oss        Output streamstring
    * @return           Bool signifying convergence
    */
-  virtual bool checkResidualConvergence(const unsigned int iter,
+  virtual bool checkResidualConvergence(const unsigned int n_iter,
                                         const Real fnorm,
                                         const Real ref_norm,
                                         const Real rel_tol,
@@ -49,11 +67,15 @@ protected:
   /// Performs setup necessary for each call to checkConvergence
   virtual void nonlinearConvergenceSetup() {}
 
+  /**
+   * Warns, once per simulation, if any PETSc SNES tolerance/iteration options (e.g.
+   * -snes_rtol) were set to a value different from what this object caches and enforces,
+   * since such PETSc-level settings are otherwise silently ignored by this object's own
+   * convergence check.
+   */
+  void checkPetscToleranceOverrides();
+
   FEProblemBase & _fe_problem;
-  /// Nonlinear absolute tolerance
-  PetscReal _abs_tol;
-  /// Nonlinear relative tolerance
-  PetscReal _rel_tol;
   /// Nonlinear absolute divergence tolerance
   const Real _nl_abs_div_tol;
   /// Nonlinear relative divergence tolerance
@@ -66,4 +88,18 @@ protected:
   const unsigned int _nl_max_pingpong;
   /// Current number of nonlinear ping-pong iterations for the current solve
   unsigned int _nl_current_pingpong;
+  /// Nonlinear relative step tolerance
+  const Real _nl_rel_step_tol;
+  /// Maximum number of residual (function) evaluations
+  const unsigned int _nl_max_funcs;
+  /// Nonlinear maximum nonlinear iterations (modifiable by setMaximumIterations)
+  unsigned int _nl_max_its;
+  /// Nonlinear absolute tolerance (modifiable by setAbsoluteTolerance)
+  Real _nl_abs_tol;
+  /// Nonlinear relative tolerance (modifiable by setRelativeTolerance)
+  Real _nl_rel_tol;
+
+private:
+  /// Whether checkPetscToleranceOverrides() has already run for this simulation
+  bool _nl_checked_petsc_tolerance_overrides = false;
 };

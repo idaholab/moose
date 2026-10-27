@@ -10,11 +10,13 @@
 #include "PorousFlowBasicAdvection.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowBasicAdvection);
+registerMooseObject("PorousFlowApp", ADPorousFlowBasicAdvection);
 
+template <bool is_ad>
 InputParameters
-PorousFlowBasicAdvection::validParams()
+PorousFlowBasicAdvectionTempl<is_ad>::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addParam<unsigned int>("phase", 0, "Use the Darcy velocity of this fluid phase");
@@ -23,17 +25,22 @@ PorousFlowBasicAdvection::validParams()
   return params;
 }
 
-PorousFlowBasicAdvection::PorousFlowBasicAdvection(const InputParameters & parameters)
-  : Kernel(parameters),
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _ph(getParam<unsigned int>("phase")),
-    _darcy_velocity(
-        getMaterialProperty<std::vector<RealVectorValue>>("PorousFlow_darcy_velocity_qp")),
-    _ddarcy_velocity_dvar(getMaterialProperty<std::vector<std::vector<RealVectorValue>>>(
-        "dPorousFlow_darcy_velocity_qp_dvar")),
-    _ddarcy_velocity_dgradvar(
-        getMaterialProperty<std::vector<std::vector<std::vector<RealVectorValue>>>>(
-            "dPorousFlow_darcy_velocity_qp_dgradvar"))
+template <bool is_ad>
+PorousFlowBasicAdvectionTempl<is_ad>::PorousFlowBasicAdvectionTempl(
+    const InputParameters & parameters)
+  : GenericKernel<is_ad>(parameters),
+    _dictator(this->template getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _ph(this->template getParam<unsigned int>("phase")),
+    _darcy_velocity(this->template getGenericMaterialProperty<std::vector<RealVectorValue>, is_ad>(
+        "PorousFlow_darcy_velocity_qp")),
+    _ddarcy_velocity_dvar(
+        is_ad ? nullptr
+              : &this->template getMaterialProperty<std::vector<std::vector<RealVectorValue>>>(
+                    "dPorousFlow_darcy_velocity_qp_dvar")),
+    _ddarcy_velocity_dgradvar(is_ad ? nullptr
+                                    : &this->template getMaterialProperty<
+                                          std::vector<std::vector<std::vector<RealVectorValue>>>>(
+                                          "dPorousFlow_darcy_velocity_qp_dgradvar"))
 {
   if (_ph >= _dictator.numPhases())
     paramError("phase",
@@ -45,31 +52,49 @@ PorousFlowBasicAdvection::PorousFlowBasicAdvection(const InputParameters & param
                "ensure your wellbeing.");
 }
 
-Real
-PorousFlowBasicAdvection::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowBasicAdvectionTempl<is_ad>::computeQpResidual()
 {
   return -_grad_test[_i][_qp] * _darcy_velocity[_qp][_ph] * _u[_qp];
 }
 
+template <bool is_ad>
 Real
-PorousFlowBasicAdvection::computeQpJacobian()
+PorousFlowBasicAdvectionTempl<is_ad>::computeQpJacobian()
 {
-  const Real result = -_grad_test[_i][_qp] * _darcy_velocity[_qp][_ph] * _phi[_j][_qp];
-  return result + computeQpOffDiagJacobian(_var.number());
+  if constexpr (!is_ad)
+  {
+    const Real result = -_grad_test[_i][_qp] * _darcy_velocity[_qp][_ph] * _phi[_j][_qp];
+    return result + computeQpOffDiagJacobian(_var.number());
+  }
+  return 0.0;
 }
 
+template <bool is_ad>
 Real
-PorousFlowBasicAdvection::computeQpOffDiagJacobian(unsigned int jvar)
+PorousFlowBasicAdvectionTempl<is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (_dictator.notPorousFlowVariable(jvar))
+  if constexpr (!is_ad)
+  {
+    if (_dictator.notPorousFlowVariable(jvar))
+      return 0.0;
+
+    const unsigned pvar = _dictator.porousFlowVariableNum(jvar);
+    Real result =
+        -_grad_test[_i][_qp] * (*_ddarcy_velocity_dvar)[_qp][_ph][pvar] * _phi[_j][_qp] * _u[_qp];
+    for (unsigned j = 0; j < LIBMESH_DIM; ++j)
+      result -= _grad_test[_i][_qp] *
+                ((*_ddarcy_velocity_dgradvar)[_qp][_ph][j][pvar] * _grad_phi[_j][_qp](j)) * _u[_qp];
+
+    return result;
+  }
+  else
+  {
+    libmesh_ignore(jvar);
     return 0.0;
-
-  const unsigned pvar = _dictator.porousFlowVariableNum(jvar);
-  Real result =
-      -_grad_test[_i][_qp] * _ddarcy_velocity_dvar[_qp][_ph][pvar] * _phi[_j][_qp] * _u[_qp];
-  for (unsigned j = 0; j < LIBMESH_DIM; ++j)
-    result -= _grad_test[_i][_qp] *
-              (_ddarcy_velocity_dgradvar[_qp][_ph][j][pvar] * _grad_phi[_j][_qp](j)) * _u[_qp];
-
-  return result;
+  }
 }
+
+template class PorousFlowBasicAdvectionTempl<false>;
+template class PorousFlowBasicAdvectionTempl<true>;

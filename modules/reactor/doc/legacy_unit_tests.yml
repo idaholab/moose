@@ -1,0 +1,19 @@
+# Existing GoogleTests awaiting SQA metadata. New entries are prohibited; this list may only shrink.
+unit:
+  - HexagonalLatticeTest.channel_index
+  - HexagonalLatticeTest.channel_index_shifted
+  - HexagonalLatticeTest.closest_gap
+  - HexagonalLatticeTest.constructor
+  - HexagonalLatticeTest.gaps1
+  - HexagonalLatticeTest.gaps2
+  - HexagonalLatticeTest.gaps3
+  - HexagonalLatticeTest.hydraulic_diameters
+  - HexagonalLatticeTest.normals1
+  - HexagonalLatticeTest.normals2
+  - HexagonalLatticeTest.normals3
+  - HexagonalLatticeTest.pin_bundle_spacing
+  - HexagonalLatticeTest.pin_centers
+  - HexagonalLatticeTest.pin_centers_rotated_pi
+  - HexagonalLatticeTest.pin_corners
+  - HexagonalLatticeTest.rings_and_pins
+  - HexagonalLatticeTest.variation_with_rings

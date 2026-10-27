@@ -37,7 +37,6 @@
     displacements = 'disp_x disp_y disp_z'
     component = 0
     use_displaced_mesh = true
-    large_kinematics = true
   []
   [sdy]
     type = UpdatedLagrangianStressDivergence
@@ -45,7 +44,6 @@
     displacements = 'disp_x disp_y disp_z'
     component = 1
     use_displaced_mesh = true
-    large_kinematics = true
   []
   [sdz]
     type = UpdatedLagrangianStressDivergence
@@ -53,7 +51,6 @@
     displacements = 'disp_x disp_y disp_z'
     component = 2
     use_displaced_mesh = true
-    large_kinematics = true
   []
 []
 
@@ -250,7 +247,6 @@
   []
   [compute_stress]
     type = ComputeLagrangianLinearElasticStress
-    large_kinematics = true
   []
   [compute_strain]
     type = ComputeLagrangianStrain

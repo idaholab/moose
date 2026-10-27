@@ -16,11 +16,10 @@
 #include "MooseObjectAction.h"
 #include "MooseMesh.h"
 #include "CopyNodalVarsAction.h"
+#include "MooseUtils.h"
 
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
-
-using namespace libMesh;
 
 registerMooseAction("MooseApp", AddVariableAction, "add_variable");
 
@@ -44,6 +43,14 @@ AddVariableAction::validParams()
                              "variable (additional orders not listed are allowed)");
   params.addParam<std::vector<Real>>("scaling",
                                      "Specifies a scaling factor to apply to this variable");
+  params.addParam<bool>(
+      "p_refinement",
+      "Whether this variable's finite element basis should use element p-levels when the mesh is "
+      "p-refined. If this is not specified, MOOSE sets the default based on the finite element "
+      "family.");
+  params.addDeprecatedParam<bool>("disable_p_refinement",
+                                  "True to disable p-refinement for this variable.",
+                                  "Use 'p_refinement = false' instead.");
   params.addParam<std::vector<Real>>("initial_condition",
                                      "Specifies a constant initial condition for this variable");
   params.transferParam<std::string>(CopyNodalVarsAction::validParams(), "initial_from_file_var");
@@ -86,8 +93,7 @@ AddVariableAction::getNonlinearVariableOrders()
 FEType
 AddVariableAction::feType(const InputParameters & params)
 {
-  return {Utility::string_to_enum<Order>(params.get<MooseEnum>("order")),
-          Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"))};
+  return MooseUtils::variableFEType(params);
 }
 
 void
@@ -138,7 +144,11 @@ AddVariableAction::init()
                " using the 'initial_condition' and 'initial_from_file_var' parameters. Please "
                "remove one of them.");
 
-  _moose_object_pars.applySpecificParameters(_pars, {"order", "family", "scaling"});
+  _moose_object_pars.applySpecificParameters(
+      _pars, {"order", "family", "scaling", "p_refinement", "disable_p_refinement"});
+
+  _fe_type = feType(_moose_object_pars);
+  _scalar_var = _fe_type.family == SCALAR;
 
   // Determine the MooseVariable type
   _fv_var = _moose_object_pars.get<bool>("fv");
@@ -190,7 +200,7 @@ AddVariableAction::createInitialConditionAction(const std::vector<Real> & value)
   associateWithParameter("initial_condition", action_params);
 
   const auto fe_field_type = FEInterface::field_type(_fe_type);
-  const bool is_vector = fe_field_type == TYPE_VECTOR;
+  const bool is_vector = fe_field_type == libMesh::TYPE_VECTOR;
   const auto is_array = _components > 1 || _moose_object_pars.get<bool>("array");
 
   if (_scalar_var)
@@ -265,16 +275,16 @@ AddVariableAction::variableType(const FEType & fe_type, const bool is_fv, const 
 
   if (is_array)
   {
-    if (fe_field_type == TYPE_VECTOR)
+    if (fe_field_type == libMesh::TYPE_VECTOR)
       ::mooseError("Vector finite element families do not currently have ArrayVariable support");
     else
       return "ArrayMooseVariable";
   }
-  else if (fe_type == FEType(0, MONOMIAL))
+  else if (fe_type.order == CONSTANT && fe_type.family == MONOMIAL && !fe_type.p_refinement)
     return "MooseVariableConstMonomial";
   else if (fe_type.family == SCALAR)
     return "MooseVariableScalar";
-  else if (fe_field_type == TYPE_VECTOR)
+  else if (fe_field_type == libMesh::TYPE_VECTOR)
     return "VectorMooseVariable";
   else
     return "MooseVariable";

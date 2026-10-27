@@ -24,6 +24,18 @@ The kernels created are:
 - [LinearFVDiffusion.md] for the scalar diffusion term
 - [LinearFVSource.md] for the source terms
 
+## Selecting interpolation methods
+
+The
+[!param](/Physics/NavierStokes/ScalarTransportSegregated/WCNSLinearFVScalarTransportPhysics/passive_scalar_advection_interpolation)
+parameter selects the interpolation used by the [LinearFVScalarAdvection.md] kernels created by this
+Physics. The supported choices are `average`, `upwind`, `vanLeer`, `min_mod`, and
+`venkatakrishnan`.
+
+Use this shortcut parameter directly in the Physics block. For direct [LinearFVScalarAdvection.md]
+kernel syntax, add the interpolation method in `[FVInterpolationMethods]` and pass its name to the
+kernel.
+
 Reaction terms can be expressed as source terms by using a negative coefficient in the
 [!param](/Physics/NavierStokes/ScalarTransportSegregated/WCNSLinearFVScalarTransportPhysics/passive_scalar_coupled_source_coeff)
 parameter, and the scalar variable as one of the

@@ -199,7 +199,7 @@
   []
   [co2]
     type = TabulatedBicubicFluidProperties
-    fp = co2sw
+    input_fp = co2sw
   []
   [brine]
     type = BrineFluidProperties

@@ -10,7 +10,7 @@
       csvdiff = 'kokkos_side_integral_value_test_out.csv'
       detail = 'a variable and'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [material_property]
       type = 'CSVDiff'
@@ -18,7 +18,7 @@
       csvdiff = 'kokkos_side_integral_material_property_out.csv'
       detail = 'a scalar material property.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 
@@ -31,7 +31,7 @@
       csvdiff = 'kokkos_side_average_value_test_out.csv'
       detail = 'a variable and'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [material_property]
       type = 'CSVDiff'
@@ -39,7 +39,7 @@
       csvdiff = 'kokkos_side_average_material_property_out.csv'
       detail = 'a scalar material property.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 []

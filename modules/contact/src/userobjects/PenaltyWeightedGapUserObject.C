@@ -20,6 +20,9 @@ InputParameters
 PenaltyWeightedGapUserObject::validParams()
 {
   InputParameters params = WeightedGapUserObject::validParams();
+  // The weighted-gap object supplies penalty contact's nodal-normal point-neighbor matrix coupling.
+  addNodalNormalCoupling(params);
+  params.suppressParameter<bool>("ghost_point_neighbors");
   params.addClassDescription("Computes the mortar normal contact force via a penalty approach.");
   params.addRequiredParam<Real>("penalty", "The penalty factor");
   params.addRangeCheckedParam<Real>(
@@ -78,6 +81,9 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
     _lagrangian_iteration_number(_augmented_lagrange_problem
                                      ? _augmented_lagrange_problem->getLagrangianIterationNumber()
                                      : _no_iterations),
+    _dof_to_lagrange_multiplier(declareRestartableData<std::unordered_map<dof_id_type, Real>>(
+        "dof_to_lagrange_multiplier")),
+    _t_step_old_normal(declareRestartableData<int>("t_step_old_normal", 0)),
     _dt(_fe_problem.dt()),
     _use_physical_gap(getParam<bool>("use_physical_gap")),
     _aux_lm_var(isCoupled("aux_lm") ? getVar("aux_lm", 0) : nullptr),
@@ -107,6 +113,13 @@ const VariableTestValue &
 PenaltyWeightedGapUserObject::test() const
 {
   return _aux_lm_var ? _aux_lm_var->phiLower() : _disp_x_var->phiLower();
+}
+
+const VariableTestValue &
+PenaltyWeightedGapUserObject::tractionBasis() const
+{
+  // Penalty contact interpolates traction and weighted gap with the same basis.
+  return test();
 }
 
 const ADVariableValue &
@@ -143,7 +156,7 @@ PenaltyWeightedGapUserObject::selfFinalize()
     auto gap = _use_physical_gap ? adPhysicalGap(wgap) / wgap.second : wgap.first;
 
     const auto lagrange_multiplier =
-        _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[dof_object] : 0.0;
+        _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[dof_object->id()] : 0.0;
 
     // keep the negative normal pressure (compressive per convention here)
     auto normal_pressure = min(0.0, penalty * gap + lagrange_multiplier);
@@ -174,7 +187,7 @@ PenaltyWeightedGapUserObject::getNormalContactPressure(const Node * const node) 
 Real
 PenaltyWeightedGapUserObject::getNormalLagrangeMultiplier(const Node * const node) const
 {
-  const auto it = _dof_to_lagrange_multiplier.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it = _dof_to_lagrange_multiplier.find(node->id());
 
   if (it != _dof_to_lagrange_multiplier.end())
     return -MetaPhysicL::raw_value(it->second);
@@ -198,11 +211,29 @@ PenaltyWeightedGapUserObject::reinit()
   }
 }
 
+ADReal
+PenaltyWeightedGapUserObject::nodalContactPressure(const Node & node) const
+{
+  // A node only enters this map once it has received a weighted-gap contribution, so a node on a
+  // partially integrated element may be absent. Absent means no contact pressure, matching how the
+  // interpolated pressure in reinit() treats it.
+  return findValue(_dof_to_normal_pressure, cast_ptr<const DofObject *>(&node), ADReal(0));
+}
+
 void
 PenaltyWeightedGapUserObject::selfTimestepSetup()
 {
   // Let's not clear the LMs for improved performance in
   // nonlinear problems
+
+  // timestepSetup() runs once per time step attempt, so on a retried timestep (e.g. --test-restep
+  // or a rejected step) the LMs hold the discarded attempt's values; restore the accepted ones
+  const bool retried_timestep = _fe_problem.timeStep() == _t_step_old_normal;
+  _t_step_old_normal = _fe_problem.timeStep();
+  if (retried_timestep)
+    _dof_to_lagrange_multiplier = _dof_to_lagrange_multiplier_start;
+  else
+    _dof_to_lagrange_multiplier_start = _dof_to_lagrange_multiplier;
 
   // reset penalty
   for (auto & dof_lp : _dof_to_local_penalty)
@@ -236,7 +267,7 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
     const auto gap = physicalGap(wgap);
     {
       // Check condition for nodes that are active
-      if (gap < 0 || _dof_to_lagrange_multiplier[dof_object] < 0.0)
+      if (gap < 0 || _dof_to_lagrange_multiplier[dof_object->id()] < 0.0)
       {
         max_positive_gap = max(max_positive_gap, gap);
         min_negative_gap = min(min_negative_gap, gap);
@@ -307,7 +338,7 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
       penalty = _penalty;
 
     const auto gap = getNormalGap(static_cast<const Node *>(dof_object));
-    auto & lagrange_multiplier = _dof_to_lagrange_multiplier[dof_object];
+    auto & lagrange_multiplier = _dof_to_lagrange_multiplier[dof_object->id()];
 
     const auto possible_normalization =
         (_use_physical_gap ? libmesh_map_find(_dof_to_weighted_gap, dof_object).second : 1.0);

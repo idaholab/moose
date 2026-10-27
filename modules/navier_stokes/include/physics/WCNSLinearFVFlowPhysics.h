@@ -28,11 +28,14 @@ public:
 
   WCNSLinearFVFlowPhysics(const InputParameters & parameters);
 
+  virtual std::vector<UserObjectName> getSuppliedUserObjects() const override;
+
 protected:
   virtual void initializePhysicsAdditional() override;
 
 private:
   virtual void addSolverVariables() override;
+  virtual void addFVInterpolationMethods() override;
   virtual void addFVKernels() override;
   virtual void addUserObjects() override;
 

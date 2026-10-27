@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ElementIntegralPostprocessor.h"
+#include "MooseEnum.h"
 
 /**
  * This postprocessor computes an element integral of the specified functor
@@ -26,13 +27,20 @@ public:
   ElementIntegralFunctorPostprocessorTempl(const InputParameters & parameters);
 
 protected:
-  Real computeQpIntegral() override;
+  CreateMooseEnumClass(FunctorEvaluationType, CELL_AVERAGE, QUADRATURE_POINT);
+
+  virtual Real computeIntegral() override;
+  virtual Real computeQpIntegral() override;
+  virtual Real cellAverage();
 
   /// Functor being integrated
   const Moose::Functor<GenericReal<is_ad>> & _functor;
 
   /// Factor multiplying the functor being integrated
   const Moose::Functor<GenericReal<is_ad>> & _prefactor;
+
+  /// How to evaluate the functor
+  const FunctorEvaluationType _evaluation_type;
 };
 
 typedef ElementIntegralFunctorPostprocessorTempl<false> ElementIntegralFunctorPostprocessor;

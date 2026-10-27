@@ -57,7 +57,7 @@ SingleInternalFaceValue::execute()
 void
 SingleInternalFaceValue::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const SingleInternalFaceValue &>(y);
+  const auto & pps = cast_ref<const SingleInternalFaceValue &>(y);
   _value += pps.getValue();
 }
 

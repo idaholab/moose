@@ -52,9 +52,18 @@ k_d = 1
   []
 []
 
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
+  []
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [LinearFVKernels]
   [flow_p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false
     variable = pressure
@@ -67,7 +76,7 @@ k_d = 1
   []
   [flow_ins_momentum_flux_x]
     type = LinearWCNSFVMomentumFlux
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     momentum_component = x
     mu = mu_mixture
     rhie_chow_user_object = ins_rhie_chow_interpolator
@@ -79,7 +88,7 @@ k_d = 1
   []
   [flow_ins_momentum_flux_y]
     type = LinearWCNSFVMomentumFlux
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     momentum_component = y
     mu = mu_mixture
     rhie_chow_user_object = ins_rhie_chow_interpolator
@@ -141,7 +150,7 @@ k_d = 1
   # Mixture phase equation
   [mixture_ins_phase_2_advection]
     type = LinearFVScalarAdvection
-    advected_interp_method = upwind
+    advected_interp_method_name = upwind
     rhie_chow_user_object = ins_rhie_chow_interpolator
     u_slip = vel_slip_x
     v_slip = vel_slip_y

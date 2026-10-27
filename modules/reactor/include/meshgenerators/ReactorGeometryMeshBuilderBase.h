@@ -65,6 +65,10 @@ static const std::string region_id_as_block_name = "region_id_as_block_name";
 // only generating the mesh metadata
 static const std::string bypass_meshgen = "bypass_meshgen";
 
+// Name of a boolean metadata that controls whether CSG components or engineering units are used in
+// --csg-only mode
+static const std::string expand_units = "expand_units";
+
 // Default values for setting block IDs and region IDs of RGMB regions
 const subdomain_id_type PIN_BLOCK_ID_TRI_FLEXIBLE = 9998;
 const subdomain_id_type PIN_BLOCK_ID_TRI = 9999;
@@ -116,7 +120,7 @@ public:
 
   ReactorGeometryMeshBuilderBase(const InputParameters & parameters);
 
-  void generateData() override{};
+  void generateData() override {};
 
 protected:
   /**
@@ -282,23 +286,16 @@ protected:
                       const bool extrude);
 
   /**
-   * Get CSGSurfaces corresponding to hexagonal or square region with given halfpitch and centered
-   * around (0, 0, 0)
-   * @param radial_index Radial index of hex / square region, for surface naming
-   * @param halfpitch Halfpitch of square or hexagon
-   * @param csg_obj Reference to CSGBase object for adding defined surfaces to
-   * @return vector of surfaces that correspond to hexagonal or square region
-   */
-  std::vector<std::reference_wrapper<const CSG::CSGSurface>> getOuterRadialSurfacesForUnitCell(
-      unsigned int radial_index, Real halfpitch, CSG::CSGBase & csg_obj);
-
-  /**
    * Get CSGSurfaces corresponding to axial planes of the extruded RGMB mesh
-   * @param csg_obj Reference to CSGBase object for adding defined surfaces to
+   * @param csg_obj Reference to CSGBase object for retrieving axial plane surfaces
+   * @param skip_intermediate_plane_generation Skip generation of intermediate axial planes
+   *                                           if they don't exist.
    * @return vector of surfaces that correspond to axial planes of extruded RGMB mesh
+   * @note This method will always generate the top and bottom axial surfaces if they do not
+   *       exist in the CSGBase instance
    */
   std::vector<std::reference_wrapper<const CSG::CSGSurface>>
-  getAxialPlaneSurfaces(CSG::CSGBase & csg_obj);
+  getAxialPlaneSurfaces(CSG::CSGBase & csg_obj, const bool skip_intermediate_plane_generation);
 
   /**
    * Create CSG lattice for assembly and core lattices. This method does not set the outer universe
@@ -311,6 +308,26 @@ protected:
       const Real pitch,
       const std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> pattern,
       CSG::CSGBase & csg_obj);
+
+  /**
+   * Check if input vector of Reals is defined in ascending order
+   *
+   * @param input_vec Input vector to check
+   * @return true if vector is in ascending order, false otherwise
+   */
+  bool checkInputVectorInAscendingOrder(const std::vector<Real> & input_vec);
+
+  /**
+   * Check if input lattice has values that are less than the number of input elements in lattice
+   *
+   * @param input_lattice Input lattice to check
+   * @param num_inputs number of expected inputs in lattice. This sets the value that the lattice
+   *                   entries should all be less than
+   * @return true if all elements in `input_lattice` have values less than `num_inputs`, false
+   *         otherwise
+   */
+  bool checkUndefinedLatticeRefs(const std::vector<std::vector<unsigned int>> & input_lattice,
+                                 unsigned int num_inputs);
 
 private:
   /// The dummy param mesh that we need to clear once we've generated (in freeReactorMeshParams)

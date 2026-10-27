@@ -29,13 +29,13 @@ public:
 
 protected:
   /// Axis direction of the cylinder
-  const Point _direction;
+  Point _direction;
   /// Point at the center of the cylinder, serving as the coordinate frame center
   const Point * const _center;
   /// Positions giving all the centers of the cylinders, serving as the coordinate frame center
   const Positions * const _center_positions;
   /// Azimuthal axis direction (angle = 0)
-  const Point _azim_dir;
+  Point _azim_dir;
 
   /// Minimal radial extent of the cylinder
   const Real _min_r;

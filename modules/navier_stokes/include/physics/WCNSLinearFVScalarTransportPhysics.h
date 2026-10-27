@@ -24,6 +24,7 @@ public:
 
 private:
   virtual void addSolverVariables() override;
+  virtual void addFVInterpolationMethods() override;
 
   /**
    * Functions adding kernels for the incompressible / weakly-compressible scalar transport
@@ -39,6 +40,8 @@ private:
   /// Functions adding boundary conditions for the incompressible simulation.
   /// These are used for weakly-compressible simulations as well.
   virtual void addScalarInletBC() override;
-  virtual void addScalarWallBC() override{};
+  virtual void addScalarWallBC() override {};
   virtual void addScalarOutletBC() override;
+
+  virtual unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 };

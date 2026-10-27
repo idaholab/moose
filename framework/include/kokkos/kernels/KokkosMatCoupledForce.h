@@ -26,12 +26,12 @@ public:
   KokkosMatCoupledForce(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int j,
-                                                const unsigned int jvar,
-                                                const unsigned int qp,
-                                                AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpOffDiagJacobian(const unsigned int j,
+                                                   const unsigned int jvar,
+                                                   const unsigned int qp,
+                                                   AssemblyDatum & datum) const;
 
 private:
   const unsigned int _n_coupled;
@@ -45,7 +45,7 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosMatCoupledForce::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosMatCoupledForce::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   Real r = 0;
   if (_coupled_props)
@@ -59,10 +59,10 @@ KokkosMatCoupledForce::computeQpResidual(const unsigned int qp, AssemblyDatum & 
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosMatCoupledForce::computeQpOffDiagJacobian(const unsigned int j,
-                                                const unsigned int jvar,
-                                                const unsigned int qp,
-                                                AssemblyDatum & datum) const
+KokkosMatCoupledForce::precomputeQpOffDiagJacobian(const unsigned int j,
+                                                   const unsigned int jvar,
+                                                   const unsigned int qp,
+                                                   AssemblyDatum & datum) const
 {
   if (!_v_var_to_index.exists(jvar))
     return 0;

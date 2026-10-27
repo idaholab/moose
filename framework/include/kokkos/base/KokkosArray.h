@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,12 +16,13 @@
 #include "Conversion.h"
 #include "DataIO.h"
 
+#include <iterator>
+
 #define usingKokkosArrayBaseMembers(T, dimension, index_type)                                      \
 private:                                                                                           \
   using ArrayBase<T, dimension, index_type>::_n;                                                   \
   using ArrayBase<T, dimension, index_type>::_s;                                                   \
   using ArrayBase<T, dimension, index_type>::_d;                                                   \
-  using ArrayBase<T, dimension, index_type>::_is_offset;                                           \
                                                                                                    \
 public:                                                                                            \
   using typename ArrayBase<T, dimension, index_type>::signed_index_type;                           \
@@ -172,6 +173,94 @@ public:
    */
   unsigned int useCount() const { return _counter.use_count(); }
 
+  /**
+   * Get whether slot i is tracked as constructed
+   *
+   * For an array created with initialization (initialize = true) every slot is default-constructed
+   * at allocation, so all slots are reported as constructed. For an array created without
+   * initialization (initialize = false) only slots constructed through emplace() are tracked;
+   * placement-new directly into the storage is not recorded here, so such a slot is reported as not
+   * constructed and its destructor is skipped on free (a leak for types that own resources).
+   * @param i The slot index
+   * @returns true if the slot is tracked as constructed
+   */
+  bool isSlotConstructed(index_type i) const;
+
+  template <bool is_const>
+  class constructed_entry_range;
+
+  /**
+   * Iterator over tracked constructed entries.
+   */
+  template <bool is_const>
+  class constructed_entry_iterator
+  {
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = T;
+    using difference_type = std::ptrdiff_t;
+    using pointer = std::conditional_t<is_const, const T *, T *>;
+    using reference = std::conditional_t<is_const, const T &, T &>;
+    using array_type = std::conditional_t<is_const, const ArrayBase, ArrayBase>;
+
+    reference operator*() const { return _array._host_data[_i]; }
+    pointer operator->() const { return _array._host_data + _i; }
+    constructed_entry_iterator & operator++();
+    constructed_entry_iterator operator++(int);
+    bool operator==(const constructed_entry_iterator & other) const;
+    bool operator!=(const constructed_entry_iterator & other) const;
+
+  private:
+    friend class constructed_entry_range<is_const>;
+
+    constructed_entry_iterator(array_type & array, index_type i);
+
+    void advanceToConstructed();
+
+    /**
+     * Array whose constructed entries are being iterated.
+     */
+    array_type & _array;
+    /**
+     * Current slot index in _array.
+     */
+    index_type _i = 0;
+  };
+
+  /**
+   * Range over tracked constructed entries.
+   */
+  template <bool is_const>
+  class constructed_entry_range
+  {
+  public:
+    using array_type = std::conditional_t<is_const, const ArrayBase, ArrayBase>;
+    using iterator = constructed_entry_iterator<is_const>;
+
+    explicit constructed_entry_range(array_type & array);
+
+    iterator begin() const;
+    iterator end() const;
+
+  private:
+    /**
+     * Array that provides the constructed-entry iteration bounds.
+     */
+    array_type & _array;
+  };
+
+  /**
+   * Get host-side range over entries tracked as constructed.
+   * @returns Range that skips slots for which isSlotConstructed() is false
+   */
+  constructed_entry_range<false> constructedEntries();
+
+  /**
+   * Get host-side range over entries tracked as constructed.
+   * @returns Range that skips slots for which isSlotConstructed() is false
+   */
+  constructed_entry_range<true> constructedEntries() const;
+
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Get whether the array was allocated either on host or device
@@ -227,6 +316,8 @@ public:
    */
   KOKKOS_FUNCTION T & first() const
   {
+    KOKKOS_ASSERT(_size);
+
     KOKKOS_IF_ON_HOST(return _host_data[0];)
 
     return _device_data[0];
@@ -238,6 +329,8 @@ public:
    */
   KOKKOS_FUNCTION T & last() const
   {
+    KOKKOS_ASSERT(_size);
+
     KOKKOS_IF_ON_HOST(return _host_data[_size - 1];)
 
     return _device_data[_size - 1];
@@ -507,14 +600,6 @@ protected:
    * Offset of each dimension
    */
   signed_index_type _d[dimension] = {0};
-  /**
-   * Flag whether the array indices are offset
-   */
-  bool _is_offset = false;
-  /**
-   * Flag whether host data was allocated using malloc
-   */
-  bool _is_malloc = false;
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -554,6 +639,14 @@ protected:
    */
   template <typename TargetSpace, typename SourceSpace>
   void copyInternal(T * target, const T * source, index_type n);
+  /**
+   * Placement-new construct slot i from args, recording initialization
+   * @param i The dimensionless slot index
+   * @param args Arguments forwarded to T's constructor
+   * @returns Reference to the constructed element
+   */
+  template <typename... Args>
+  T & emplaceAt(index_type i, Args &&... args);
 #endif
 
 private:
@@ -582,6 +675,10 @@ private:
    * Reference counter
    */
   std::shared_ptr<unsigned int> _counter;
+  /**
+   * Non-null only for malloc-allocated arrays; tracks which slots have been emplace-constructed
+   */
+  std::shared_ptr<std::vector<bool>> _slots_constructed;
   /**
    * Flag whether array was initialized
    */
@@ -621,6 +718,133 @@ private:
 };
 
 template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+ArrayBase<T, dimension, index_type>::constructed_entry_iterator<is_const>::
+    constructed_entry_iterator(
+        typename ArrayBase<T, dimension, index_type>::template constructed_entry_iterator<
+            is_const>::array_type & array,
+        index_type i)
+  : _array(array), _i(i)
+{
+  advanceToConstructed();
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+typename ArrayBase<T, dimension, index_type>::template constructed_entry_iterator<is_const> &
+ArrayBase<T, dimension, index_type>::constructed_entry_iterator<is_const>::operator++()
+{
+  ++_i;
+  advanceToConstructed();
+  return *this;
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+typename ArrayBase<T, dimension, index_type>::template constructed_entry_iterator<is_const>
+ArrayBase<T, dimension, index_type>::constructed_entry_iterator<is_const>::operator++(int)
+{
+  constructed_entry_iterator pre = *this;
+  ++(*this);
+  return pre;
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+bool
+ArrayBase<T, dimension, index_type>::constructed_entry_iterator<is_const>::operator==(
+    const constructed_entry_iterator & other) const
+{
+  return &_array == &other._array && _i == other._i;
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+bool
+ArrayBase<T, dimension, index_type>::constructed_entry_iterator<is_const>::operator!=(
+    const constructed_entry_iterator & other) const
+{
+  return !(*this == other);
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+void
+ArrayBase<T, dimension, index_type>::constructed_entry_iterator<is_const>::advanceToConstructed()
+{
+  while (_i < _array._size && !_array.isSlotConstructed(_i))
+    ++_i;
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+ArrayBase<T, dimension, index_type>::constructed_entry_range<is_const>::constructed_entry_range(
+    typename ArrayBase<T, dimension, index_type>::template constructed_entry_range<
+        is_const>::array_type & array)
+  : _array(array)
+{
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+typename ArrayBase<T, dimension, index_type>::template constructed_entry_range<is_const>::iterator
+ArrayBase<T, dimension, index_type>::constructed_entry_range<is_const>::begin() const
+{
+  return iterator(_array, 0);
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+template <bool is_const>
+typename ArrayBase<T, dimension, index_type>::template constructed_entry_range<is_const>::iterator
+ArrayBase<T, dimension, index_type>::constructed_entry_range<is_const>::end() const
+{
+  return iterator(_array, _array._size);
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+typename ArrayBase<T, dimension, index_type>::template constructed_entry_range<false>
+ArrayBase<T, dimension, index_type>::constructedEntries()
+{
+  return constructed_entry_range<false>(*this);
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+typename ArrayBase<T, dimension, index_type>::template constructed_entry_range<true>
+ArrayBase<T, dimension, index_type>::constructedEntries() const
+{
+  return constructed_entry_range<true>(*this);
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+bool
+ArrayBase<T, dimension, index_type>::isSlotConstructed(index_type i) const
+{
+  mooseAssert(i < _size, "isSlotConstructed index out of bounds");
+
+  if (!_slots_constructed)
+    return _is_host_alloc;
+
+  return (*_slots_constructed)[i];
+}
+
+#ifdef MOOSE_KOKKOS_SCOPE
+template <typename T, unsigned int dimension, typename index_type>
+template <typename... Args>
+T &
+ArrayBase<T, dimension, index_type>::emplaceAt(index_type i, Args &&... args)
+{
+  mooseAssert(_is_host_alloc && _slots_constructed,
+              "emplaceAt requires a malloc-allocated array (create<false>)");
+  mooseAssert(i < _size, "emplaceAt index out of bounds");
+
+  new (_host_data + i) T(std::forward<Args>(args)...);
+  (*_slots_constructed)[i] = true;
+
+  return _host_data[i];
+}
+#endif // MOOSE_KOKKOS_SCOPE
+
+template <typename T, unsigned int dimension, typename index_type>
 void
 ArrayBase<T, dimension, index_type>::freeHost()
 {
@@ -634,21 +858,23 @@ ArrayBase<T, dimension, index_type>::freeHost()
   }
   else
   {
-    if (!_is_malloc)
+    if (!_slots_constructed)
       // Allocated by new
       delete[] _host_data;
     else
     {
       // Allocated by malloc
-      for (index_type i = 0; i < _size; ++i)
-        _host_data[i].~T();
+      for (const auto i : make_range(_size))
+        if (isSlotConstructed(i))
+          _host_data[i].~T();
 
       std::free(_host_data);
+
+      _slots_constructed.reset();
     }
   }
 
   _is_host_alloc = false;
-  _is_malloc = false;
 }
 
 template <typename T, unsigned int dimension, typename index_type>
@@ -689,7 +915,7 @@ ArrayBase<T, dimension, index_type>::destroy()
 
   _size = 0;
 
-  for (unsigned int i = 0; i < dimension; ++i)
+  for (const auto i : make_range(dimension))
   {
     _n[i] = 0;
     _s[i] = 0;
@@ -697,14 +923,13 @@ ArrayBase<T, dimension, index_type>::destroy()
   }
 
   _is_init = false;
-  _is_offset = false;
-  _is_malloc = false;
   _is_host_alloc = false;
   _is_device_alloc = false;
   _is_host_alias = false;
   _is_device_alias = false;
 
   _counter.reset();
+  _slots_constructed.reset();
 }
 
 template <typename T, unsigned int dimension, typename index_type>
@@ -717,10 +942,11 @@ ArrayBase<T, dimension, index_type>::shallowCopy(const ArrayBase<T, dimension, i
   destroy();
 
   _counter = array._counter;
+  _slots_constructed = array._slots_constructed;
 
   _size = array._size;
 
-  for (unsigned int i = 0; i < dimension; ++i)
+  for (const auto i : make_range(dimension))
   {
     _n[i] = array._n[i];
     _s[i] = array._s[i];
@@ -728,8 +954,6 @@ ArrayBase<T, dimension, index_type>::shallowCopy(const ArrayBase<T, dimension, i
   }
 
   _is_init = array._is_init;
-  _is_offset = array._is_offset;
-  _is_malloc = array._is_malloc;
   _is_host_alloc = array._is_host_alloc;
   _is_device_alloc = array._is_device_alloc;
   _is_host_alias = array._is_host_alias;
@@ -787,10 +1011,12 @@ ArrayBase<T, dimension, index_type>::allocHost()
     _host_data = new T[_size];
   }
   else
+  {
     _host_data = static_cast<T *>(std::malloc(_size * sizeof(T)));
+    _slots_constructed = std::make_shared<std::vector<bool>>(_size, false);
+  }
 
   _is_host_alloc = true;
-  _is_malloc = !initialize;
 }
 
 template <typename T, unsigned int dimension, typename index_type>
@@ -849,7 +1075,7 @@ ArrayBase<T, dimension, index_type>::createInternal(const std::vector<index_type
   {
     _s[0] = 1;
 
-    for (unsigned int i = 1; i < dimension; ++i)
+    for (const auto i : make_range(1u, dimension))
       _s[i] = _s[i - 1] * _n[i - 1];
   }
   else
@@ -923,8 +1149,6 @@ ArrayBase<T, dimension, index_type>::offset(const std::vector<signed_index_type>
 
   for (const auto i : index_range(d))
     _d[i] = d[i];
-
-  _is_offset = true;
 }
 
 template <typename T, unsigned int dimension, typename index_type>
@@ -1150,7 +1374,7 @@ template <typename T, unsigned int dimension, typename index_type>
 void
 ArrayBase<T, dimension, index_type>::copyToDeviceNested()
 {
-  for (index_type i = 0; i < _size; ++i)
+  for (const auto i : make_range(_size))
     copyToDeviceInner(_host_data[i]);
 
   copyToDevice();
@@ -1171,29 +1395,21 @@ ArrayBase<T, dimension, index_type>::deepCopy(const ArrayBase<T, dimension, inde
 
   createInternal<false>(n, array._is_host_alloc, array._is_device_alloc);
 
-  if constexpr (ArrayDeepCopy<T>::value)
-  {
-    for (index_type i = 0; i < _size; ++i)
-      new (_host_data + i) T(array._host_data[i]);
+  if (_is_host_alloc)
+    for (const auto i : make_range(_size))
+      if (array.isSlotConstructed(i))
+        emplaceAt(i, array._host_data[i]);
 
+  if (ArrayDeepCopy<T>::value)
     copyToDevice();
-  }
-  else
-  {
-    if (_is_host_alloc)
-      std::memcpy(_host_data, array._host_data, _size * sizeof(T));
+  else if (_is_device_alloc)
+    copyInternal<MemSpace, MemSpace>(_device_data, array._device_data, _size);
 
-    if (_is_device_alloc)
-      copyInternal<MemSpace, MemSpace>(_device_data, array._device_data, _size);
-  }
-
-  for (unsigned int i = 0; i < dimension; ++i)
+  for (const auto i : make_range(dimension))
   {
     _d[i] = array._d[i];
     _s[i] = array._s[i];
   }
-
-  _is_offset = array._is_offset;
 }
 
 template <typename T, unsigned int dimension, typename index_type>
@@ -1215,7 +1431,7 @@ ArrayBase<T, dimension, index_type>::operator=(const T & scalar)
     std::fill_n(_host_data, _size, scalar);
 
   if (_is_device_alloc)
-    ::Kokkos::Experimental::fill_n(ExecSpace(), deviceView(), _size, scalar);
+    ::Kokkos::deep_copy(deviceView(), scalar);
 
   return *this;
 }
@@ -1238,7 +1454,7 @@ dataStore(std::ostream & stream, Array<T, dimension, index_type, layout> & array
   unsigned int dim = dimension;
   dataStore(stream, dim, nullptr);
 
-  for (unsigned int dim = 0; dim < dimension; ++dim)
+  for (const auto dim : make_range(dimension))
   {
     auto n = array.n(dim);
     dataStore(stream, n, nullptr);
@@ -1254,7 +1470,7 @@ dataStore(std::ostream & stream, Array<T, dimension, index_type, layout> & array
 
     array.copyOut(data, MemcpyType::DEVICE_TO_HOST, array.size());
 
-    for (index_type i = 0; i < array.size(); ++i)
+    for (const auto i : make_range(array.size()))
       dataStore(stream, data[i], context);
 
     std::free(data);
@@ -1299,7 +1515,7 @@ dataLoad(std::istream & stream, Array<T, dimension, index_type, layout> & array,
   std::vector<index_type> from_n(dimension);
   std::vector<index_type> n(dimension);
 
-  for (unsigned int dim = 0; dim < dimension; ++dim)
+  for (const auto dim : make_range(dimension))
   {
     dataLoad(stream, from_n[dim], nullptr);
     n[dim] = array.n(dim);
@@ -1399,7 +1615,10 @@ public:
    * on
    */
   template <typename... indices>
-  KOKKOS_FUNCTION T & operator()(indices... i) const;
+  KOKKOS_FUNCTION T & operator()(indices... i) const
+  {
+    return this->operator[](linearIndex(i...));
+  }
   /**
    * Get an array entry using indices stored in an array
    * @param idx The array storing the indices
@@ -1408,29 +1627,57 @@ public:
    */
   KOKKOS_FUNCTION T & operator()(const signed_index_type (&idx)[dimension]) const
   {
-    return operatorInternal(idx, std::make_integer_sequence<unsigned int, dimension>{});
+    return this->operator[](linearIndex(idx));
   }
+  /**
+   * Placement-new construct an entry from args, recording initialization
+   * @param idx The array storing the indices
+   * @param args Arguments forwarded to T's constructor
+   * @returns Reference to the constructed element
+   */
+  template <typename indices, typename... Args>
+  T & emplace(const indices (&idx)[dimension], Args &&... args);
 #endif
 
 private:
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
-   * Internal method for calling operator() with array indices
+   * Get the dimensionless index for a multi-dimensional index
    */
-  template <unsigned int... i>
-  KOKKOS_FUNCTION T & operatorInternal(const signed_index_type (&idx)[dimension],
-                                       std::integer_sequence<unsigned int, i...>) const
+  template <typename... indices>
+  KOKKOS_FUNCTION index_type linearIndex(indices... i) const;
+  /**
+   * Get the dimensionless index for indices stored in an array
+   */
+  ///@{
+  template <typename indices>
+  KOKKOS_FUNCTION index_type linearIndex(const indices (&idx)[dimension]) const
   {
-    return operator()(idx[i]...);
+    return linearIndexHelper(idx, std::make_integer_sequence<unsigned int, dimension>{});
   }
+  template <typename indices, unsigned int... i>
+  KOKKOS_FUNCTION index_type linearIndexHelper(const indices (&idx)[dimension],
+                                               std::integer_sequence<unsigned int, i...>) const
+  {
+    return linearIndex(idx[i]...);
+  }
+  ///@}
 #endif
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
 template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
+template <typename indices, typename... Args>
+T &
+Array<T, dimension, index_type, layout>::emplace(const indices (&idx)[dimension], Args &&... args)
+{
+  return this->emplaceAt(linearIndex(idx), std::forward<Args>(args)...);
+}
+
+template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
 template <typename... indices>
-KOKKOS_FUNCTION T &
-Array<T, dimension, index_type, layout>::operator()(indices... i) const
+KOKKOS_FUNCTION index_type
+Array<T, dimension, index_type, layout>::linearIndex(indices... i) const
 {
   static_assert((std::is_convertible<indices, signed_index_type>::value && ...),
                 "All arguments must be convertible to signed_index_type");
@@ -1448,34 +1695,18 @@ Array<T, dimension, index_type, layout>::operator()(indices... i) const
   index_type idx = 0;
   unsigned int d = 0;
 
-  if (_is_offset)
-  {
-    if constexpr (layout == LayoutType::LEFT)
-      (((idx += (d == 0 ? static_cast<signed_index_type>(i) - _d[d]
-                        : (static_cast<signed_index_type>(i) - _d[d]) * _s[d])),
-        ++d),
-       ...);
-    else
-      (((idx += (d == dimension - 1 ? static_cast<signed_index_type>(i) - _d[d]
-                                    : (static_cast<signed_index_type>(i) - _d[d]) * _s[d])),
-        ++d),
-       ...);
-  }
+  if constexpr (layout == LayoutType::LEFT)
+    (((idx += (d == 0 ? static_cast<signed_index_type>(i) - _d[d]
+                      : (static_cast<signed_index_type>(i) - _d[d]) * _s[d])),
+      ++d),
+     ...);
   else
-  {
-    if constexpr (layout == LayoutType::LEFT)
-      (((idx +=
-         (d == 0 ? static_cast<signed_index_type>(i) : static_cast<signed_index_type>(i) * _s[d])),
-        ++d),
-       ...);
-    else
-      (((idx += (d == dimension - 1 ? static_cast<signed_index_type>(i)
-                                    : static_cast<signed_index_type>(i) * _s[d])),
-        ++d),
-       ...);
-  }
+    (((idx += (d == dimension - 1 ? static_cast<signed_index_type>(i) - _d[d]
+                                  : (static_cast<signed_index_type>(i) - _d[d]) * _s[d])),
+      ++d),
+     ...);
 
-  return this->operator[](idx);
+  return idx;
 }
 #endif
 
@@ -1543,7 +1774,12 @@ public:
     this->template createInternal<host, device, false>({static_cast<index_type>(vector.size())});
 
     if (host)
-      std::memcpy(this->hostData(), vector.data(), this->size() * sizeof(T));
+    {
+      if constexpr (std::is_trivially_copyable<T>())
+        std::memcpy(this->hostData(), vector.data(), this->size() * sizeof(T));
+      else
+        std::copy(vector.begin(), vector.end(), this->begin());
+    }
 
     if (device)
       this->template copyInternal<MemSpace, ::Kokkos::HostSpace>(
@@ -1594,13 +1830,16 @@ public:
    */
   KOKKOS_FUNCTION T & operator()(signed_index_type i) const
   {
-    KOKKOS_ASSERT(i - _d[0] >= 0 && static_cast<index_type>(i - _d[0]) < _n[0]);
-
-    if (_is_offset)
-      return this->operator[](i - _d[0]);
-    else
-      return this->operator[](i);
+    return this->operator[](linearIndex(i));
   }
+  /**
+   * Placement-new construct an entry from args, recording initialization
+   * @param idx The array storing the index
+   * @param args Arguments forwarded to T's constructor
+   * @returns Reference to the constructed element
+   */
+  template <typename indices, typename... Args>
+  T & emplace(const indices (&idx)[1], Args &&... args);
   /**
    * Device BLAS operations
    */
@@ -1632,9 +1871,35 @@ public:
    */
   T nrm2();
   ///}@
+
+private:
+  /**
+   * Get the dimensionless index for an array index
+   */
+  KOKKOS_FUNCTION index_type linearIndex(signed_index_type i) const;
 #endif
 };
 ///@}
+
+#ifdef MOOSE_KOKKOS_SCOPE
+template <typename T, typename index_type>
+template <typename indices, typename... Args>
+T &
+Array<T, 1, index_type, LayoutType::LEFT>::emplace(const indices (&idx)[1], Args &&... args)
+{
+  return this->emplaceAt(linearIndex(idx[0]), std::forward<Args>(args)...);
+}
+
+template <typename T, typename index_type>
+KOKKOS_FUNCTION index_type
+Array<T, 1, index_type, LayoutType::LEFT>::linearIndex(
+    typename Array<T, 1, index_type, LayoutType::LEFT>::signed_index_type i) const
+{
+  KOKKOS_ASSERT(i - _d[0] >= 0 && static_cast<index_type>(i - _d[0]) < _n[0]);
+
+  return i - _d[0];
+}
+#endif
 
 template <typename T, typename index_type = MOOSE_KOKKOS_INDEX_TYPE>
 using Array1D = Array<T, 1, index_type, LayoutType::LEFT>;

@@ -69,9 +69,9 @@ $\Delta t = 0.01~s$ timestep is used to solve the transient problem.
 
 This problem involves the generation of three surrogates: a [NearestPointSurrogate.md],
 a [PolynomialRegressionSurrogate.md] and a [PolynomialChaos.md].
-All three of them are constructed using multiple instances of the [full-order problem](surrogates/combined/trans_diff_2d/trans_diff_sub.i)
+All three of them are constructed using multiple instances of the [!file text=full-order problem](surrogates/combined/trans_diff_2d/trans_diff_sub.i)
 as sub-applications.
-This step is managed by a [trainer input](surrogates/combined/trans_diff_2d/trans_diff_trainer.i) file which is responsible for creating parameter samples, transferring those
+This step is managed by a [!file text=trainer input](surrogates/combined/trans_diff_2d/trans_diff_trainer.i) file which is responsible for creating parameter samples, transferring those
 to sub-applications and collecting the corresponding results.
 The reader is recommended to read [examples/surrogate_training.md] and [examples/parameter_study.md]
 to get a clear picture on how to train and set up a surrogate model.
@@ -117,7 +117,7 @@ again without repeating the training process.
 
 ## Evaluation of surrogate models
 
-A [new main input file](surrogates/combined/trans_diff_2d/trans_diff_surr.i) has been created to
+A [!file text=new main input file](surrogates/combined/trans_diff_2d/trans_diff_surr.i) has been created to
 evaluate the surrogate models.
 This input file uses the same parameter distribution as the one used for the training of the surrogates.
 Each surrogate model is tested using a new, test parameter sample set, which is generated
@@ -143,7 +143,7 @@ are generated as well.
 
 In this section the results from the different surrogate models are provided. Additionally,
 the full-order model has been tested with a 2,000 sample batch to serve as a reference solution.
-The main input file for testing with the full-order model is available [here](surrogates/combined/trans_diff_2d/trans_diff_main.i).
+The main input file for testing with the full-order model is available [!file text=here](surrogates/combined/trans_diff_2d/trans_diff_main.i).
 A short analysis of the results is provided as well.
 
 First, the distributions of QoI-s from the surrogates are compared to the reference results.

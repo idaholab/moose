@@ -1,101 +1,64 @@
-# Compute Axisymmetric 1D Incremental Strain
+# ComputeAxisymmetric1DIncrementalStrain
 
 !syntax description /Materials/ComputeAxisymmetric1DIncrementalStrain
 
 ## Description
 
-The material `ComputeAxisymmetric1DIncrementalStrain` calculates the small
-incremental strain for 1D Axisymmetric systems and is intended for use with
-[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md) simulations.
-This material assumes symmetry about the $z$-axis.
-This 'strain calculator' material computes the strain within the cylindrical
-coordinate system and relies on the specialized
-[Axisymmetric RZ kernel](/StressDivergenceRZTensors.md) to handle the stress
-divergence calculation.
+`ComputeAxisymmetric1DIncrementalStrain` computes the small strain increment
+for a 1D axisymmetric plane-strain or generalized-plane-strain model. This is a non-[!ac](AD)
+model that has an [!ac](AD) counterpart, [ADComputeAxisymmetric1DIncrementalStrain.md].
 
-!alert warning title=Symmetry Assumed About the $z$-axis
-The axis of symmetry must lie along the $z$-axis in a $\left(r, z, \theta \right)$
-cylindrical coordinate system. This symmetry orientation is required for the
-calculation of the residual and of the jacobian.
-See [StressDivergenceRZTensors](/StressDivergenceRZTensors.md) for the
-residual equation and the germane discussion.
+!template load file=modules/solid_mechanics/common/Axisymmetric1DStrainOverview.md.template
+
+The out-of-plane strain can be supplied by either
+[!param](/Materials/ComputeAxisymmetric1DIncrementalStrain/scalar_out_of_plane_strain)
+or [!param](/Materials/ComputeAxisymmetric1DIncrementalStrain/out_of_plane_strain),
+but not both. Scalar out-of-plane strain values are commonly used by
+[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
+models. If multiple scalar components are coupled,
+[!param](/Materials/ComputeAxisymmetric1DIncrementalStrain/subblock_index_provider)
+selects which scalar component applies to the current element; without that
+user object, component 0 is used.
 
 ## 1D Axisymmetric Strain Formulation
 
-The axisymmetric model uses the cylindrical coordinates, $r$, $z$, and $\theta$,
-where the linear section formed by the $r$ axis is rotated about the $z$ axis in
-the $\theta$ direction.
-The small, total, strain increment is calculated with the form
-\begin{equation}
-  \label{eqn:strain_increment}
-  \Delta \boldsymbol{\epsilon} = \frac{1}{2} \left( \boldsymbol{D} + \boldsymbol{D}^T \right)
-  \text{ where } \boldsymbol{D} = \boldsymbol{A} - \bar{\boldsymbol{F}} + \boldsymbol{I}
-\end{equation}
-where $\boldsymbol{I}$ is the Rank-2 identity tensor and the deformation gradient,
-$\boldsymbol{A}$, and the old deformation gradient,
-$\bar{\boldsymbol{F}}$, are given as
-\begin{equation}
-  \label{eqn:deform_grads}
-  \boldsymbol{A} = \begin{bmatrix}
-                \epsilon_{rr} & 0 & 0 \\
-                0 & \epsilon_{zz} & 0 \\
-                0 & 0 & \epsilon_{\theta \theta}
-              \end{bmatrix}
-  \text{  and  }
-  \bar{\boldsymbol{F}} = \begin{bmatrix}
-                \epsilon_{rr}|_{old} & 0 & 0 \\
-                0 & \epsilon_{zz}|_{old} & 0 \\
-                0 & 0 & \epsilon_{\theta \theta}|_{old}
-              \end{bmatrix}
-\end{equation}
-Note that $\bar{\boldsymbol{F}}$ uses the values of the strain expressions from
-the previous time step.
-The components of the tensors in [eqn:deform_grads] are given as
-\begin{equation}
-  \label{eqn:strain_components}
-  \begin{aligned}
-  \epsilon_{rr} & = u_{r,r} \\
-  \epsilon_{zz} & = \epsilon|^{op} \\
-  \epsilon_{\theta \theta} & = \frac{u_r}{X_r}
-  \end{aligned}
-\end{equation}
-where $\epsilon|^{op}$ is a prescribed out-of-plane strain value: this strain
-value can be given either as a scalar variable or a nonlinear variable.
-The [Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md)
-problems use scalar variables.
-The value of the strain $\epsilon_{\theta \theta}$ depends on the displacement
-and position in the radial direction.
+!template load file=modules/solid_mechanics/common/Axisymmetric1DIncrementalStrainFormulation.md.template
 
-!alert note title=Notation Order Change
-The axisymmetric system changes the order of the displacement vector from
-$(u_r, u_{\theta}, u_z)$, usually seen in textbooks, to $(u_r, u_z, u_{\theta})$.
-Take care to follow this convention in your input files and when adding
-eigenstrains or extra stresses.
+## Example Input File Syntax
 
+Rather than directly specifying this model in the input file, it is recommended to
+create it using the solid mechanics [QuasiStatic Physics](/Physics/SolidMechanics/QuasiStatic/index.md)
+The usage examples listed below specify options within that block to create this model.
 
-## Example Input File
+### Plane Strain
 
-!alert note title=Use RZ Coordinate Type
-The coordinate type in the Problem block of the input file must be set to
-+`COORD_TYPE = RZ`+.
+Under plane-strain assumptions, the strain in the axial direction
+(typically the y-direction) is zero, which is appropriate for
+modeling an axisymmetric body restrained against displacement at its ends.
+This model can be created with plane-strain assumptions by setting 
+`planar_formulation = PLANE_STRAIN` and `incremental = TRUE` in the
+QuasiStatic Physics block.
 
-The common use of the `ComputeAxisymmetric1DIncrementalStrain` class is with the
-[Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md) system;
-this type of simulation uses the scalar strain variables
+!listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymm_plane_strain_incremental.i block=Physics/SolidMechanics/QuasiStatic
 
-!listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymm_gps_incremental.i block=Materials/strain
+### Generalized Plane Strain
 
-which uses a scalar variable for the coupled out-of-plane strain; the argument
-for the `scalar_out_of_plane_strain` parameter is the name of the scalar strain
-variable:
+Under generalized-plane-strain assumptions, the strain in the axial direction
+(typically the y-direction) is nonzero, and calculated to satisfy equilibrium
+in the axial direction. This is appropriate for modeling an axisymmetric body
+with a long axial dimension, unrestrained at its ends.
+This model can be created with generalized-plane-strain assumptions by setting 
+`planar_formulation = GENERALIZED_PLANE_STRAIN` and `incremental = TRUE` in the
+QuasiStatic Physics block.
+
+!listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymm_gps_incremental.i block=Physics/SolidMechanics/QuasiStatic
+
+The coupled scalar variable is defined in the same input file.
 
 !listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymm_gps_incremental.i block=Variables/scalar_strain_yy
-
 
 !syntax parameters /Materials/ComputeAxisymmetric1DIncrementalStrain
 
 !syntax inputs /Materials/ComputeAxisymmetric1DIncrementalStrain
 
 !syntax children /Materials/ComputeAxisymmetric1DIncrementalStrain
-
-!bibtex bibliography

@@ -14,8 +14,8 @@
     prereq = 'basic'
     command = './test_hdf5_file.py exodus_out.e false'
     required_python_packages = 'h5py'
+    min_slots = 2 # memory heavy
     requirement = "The system ExodusII output shall not use HDF5 unless requested."
-    min_slots = 2 # Memory heavy
   []
 
   [input]
@@ -81,6 +81,7 @@
 
     requirement = "The system shall support outputting side-discontinuous edge element data with the "
                   "ExodusII format."
+    skip = 'libmesh/libmesh#4494 adding nodal output'
   []
 
   [side_discontinuous]
@@ -90,6 +91,7 @@
 
     requirement = "The system shall support outputting side-discontinuous quad element data with the "
                   "ExodusII format."
+    skip = 'libmesh/libmesh#4494 adding nodal output'
   []
 
   [output_elem_id]

@@ -26,8 +26,6 @@
 #include "libmesh/enum_xdr_mode.h"
 #include "libmesh/utility.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", Checkpoint);
 
 InputParameters
@@ -134,17 +132,14 @@ Checkpoint::output()
   // Create the output filename
   const auto current_file = filename();
 
-  // Create the libMesh Checkpoint_IO object
-  MeshBase & mesh = _es_ptr->get_mesh();
-  CheckpointIO io(mesh, false);
-
   // Create checkpoint file structure
   CheckpointFileNames curr_file_struct;
 
   curr_file_struct.checkpoint = current_file + _app.checkpointSuffix();
 
-  // Write the checkpoint file
-  io.write(curr_file_struct.checkpoint);
+  const auto mesh_paths = _problem_ptr->mesh().writeRecoveryFiles(curr_file_struct.checkpoint);
+  curr_file_struct.restart.insert(
+      curr_file_struct.restart.end(), mesh_paths.begin(), mesh_paths.end());
 
   // Write out meta data if there is any (only on processor zero)
   if (processor_id() == 0)
@@ -219,8 +214,8 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     // Delete checkpoint files
     // This file may not exist so don't worry about checking for success
     if (processor_id() == 0)
-      CheckpointIO::cleanup(delete_files.checkpoint,
-                            _problem_ptr->mesh().isDistributedMesh() ? comm().size() : 1);
+      libMesh::CheckpointIO::cleanup(delete_files.checkpoint,
+                                     _problem_ptr->mesh().isDistributedMesh() ? comm().size() : 1);
   }
 }
 

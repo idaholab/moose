@@ -25,6 +25,9 @@ template <>
 void
 TotalLagrangianStressDivergenceBase<GradientOperatorCentrosymmetricSpherical>::initialSetup()
 {
+  // Derives _large_kinematics from the strain calculator's LARGE_KINEMATICS guarantee.
+  LagrangianStressDivergenceBase::initialSetup();
+
   if (getBlockCoordSystem() != Moose::COORD_RSPHERICAL)
     mooseError("This kernel should only act in centrosymmetric spherical coordinates.");
 }

@@ -236,23 +236,29 @@ RestartableEquationSystems::load(std::istream & stream)
 
   // Sanity check on if we're loading the same thing
   {
+    const std::string mesh_mismatch_message =
+        ". This means that equation-system data is being restored onto a different mesh topology. "
+        "If this occurs while restoring a MultiApp sub-application that uses mesh adaptivity, the "
+        "backup may not contain mesh checkpoint data for the restored topology, or the "
+        "sub-application mesh may have changed after the backup was made. Use clone_parent_mesh = "
+        "true when the sub-application should share the parent application's mesh topology, or "
+        "avoid changing the sub-application mesh between backup and restore.";
+
     std::vector<dof_id_type> from_ordered_objects_ids;
     dataLoad(stream, from_ordered_objects_ids, nullptr);
     if (_loaded_ordered_objects.size() != from_ordered_objects_ids.size())
       mooseError("RestartableEquationSystems::load(): Number of previously stored elements/nodes (",
-                 _loaded_ordered_objects.size(),
-                 ") does not "
-                 "match the current number of elements/nodes (",
                  from_ordered_objects_ids.size(),
-                 ")");
+                 ") does not match the current number of elements/nodes (",
+                 _loaded_ordered_objects.size(),
+                 mesh_mismatch_message);
     for (const auto i : index_range(_loaded_ordered_objects))
       if (_loaded_ordered_objects[i]->id() != from_ordered_objects_ids[i])
         mooseError("RestartableEquationSystems::load(): Id of previously stored element/node (",
-                   _loaded_ordered_objects[i]->id(),
-                   ") does not "
-                   "match the current element/node id (",
                    from_ordered_objects_ids[i],
-                   ")");
+                   ") does not match the current element/node id (",
+                   _loaded_ordered_objects[i]->id(),
+                   mesh_mismatch_message);
   }
 
   _loaded_stream_data_begin = static_cast<std::size_t>(stream.tellg());

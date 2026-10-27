@@ -14,14 +14,15 @@
 #include "NonlinearSystemBase.h"
 #include "NonlinearSystem.h"
 #include "NodalBCBase.h"
+#include "MooseVariableFieldBase.h"
+#include "MooseVariableScalar.h"
 #include "Executioner.h"
 
+#include "libmesh/dof_map.h"
 #include "libmesh/fuzzy_equals.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/petsc_vector.h"
 #include "petscmat.h"
-
-using namespace libMesh;
 
 InputParameters
 AdjointSolve::validParams()
@@ -57,11 +58,6 @@ AdjointSolve::AdjointSolve(Executioner & ex)
   // Adjoint system should never perform its own automatic scaling. Scaling factors from the forward
   // system are applied.
   _nl_adjoint.automaticScaling(false);
-
-  // We need to force the forward system to have a scaling vector. This is
-  // in case a user provides scaling for an individual variables but doesn't have any
-  // AD objects.
-  _nl_forward.addScalingVector();
 
   // Set the solver options for the adjoint system
   mooseAssert(_problem.numSolverSystems() > 1,
@@ -102,7 +98,7 @@ AdjointSolve::solve()
 
   // Convenient references
   // Adjoint matrix, solution, and right-hand-side
-  auto & matrix = static_cast<ImplicitSystem &>(_nl_forward.system()).get_system_matrix();
+  auto & matrix = cast_ref<ImplicitSystem &>(_nl_forward.system()).get_system_matrix();
   auto & solution = _nl_adjoint.solution();
   auto & rhs = _nl_adjoint.getResidualNonTimeVector();
   // Linear solver parameters
@@ -110,7 +106,7 @@ AdjointSolve::solve()
   const auto tol = es.parameters.get<Real>("linear solver tolerance");
   const auto maxits = es.parameters.get<unsigned int>("linear solver maximum iterations");
   // Linear solver for adjoint system
-  auto & solver = *static_cast<ImplicitSystem &>(_nl_adjoint.system()).get_linear_solver();
+  auto & solver = *cast_ref<ImplicitSystem &>(_nl_adjoint.system()).get_linear_solver();
 
   // Assemble adjoint system by evaluating the forward Jacobian, computing the adjoint
   // residual/source, and homogenizing nodal BCs
@@ -120,8 +116,32 @@ AdjointSolve::solve()
   // Solve the adjoint system
   solver.adjoint_solve(matrix, solution, rhs, tol, maxits);
 
-  // For scaling of the forward problem we need to apply correction factor
-  solution *= _nl_forward.getVector("scaling_factors");
+  // The forward Jacobian has its rows scaled by the variable scaling factors S, so the transposed
+  // solve returns mu with (S J)^T mu = -g. The adjoint is therefore lambda = S mu.
+  const auto & dof_map = _nl_forward.dofMap();
+  auto scaling = solution.zero_clone();
+  std::vector<dof_id_type> dof_indices;
+  const auto fill_scaling = [&](const MooseVariableBase & var)
+  {
+    const auto & factors = var.arrayScalingFactor();
+    for (const auto i : make_range(var.count()))
+    {
+      dof_map.local_variable_indices(dof_indices, _mesh.getMesh(), var.number() + i);
+      for (const auto dof : dof_indices)
+        scaling->set(dof, factors[i]);
+    }
+  };
+  for (const auto * const var : _nl_forward.getVariables(0))
+    fill_scaling(*var);
+  for (const auto * const var : _nl_forward.getScalarVariables(0))
+    fill_scaling(*var);
+  scaling->close();
+  solution *= *scaling;
+
+  // Hanging-node (and other DofMap) constraints are not applied by the raw transpose solve above,
+  // which leaves constrained dofs at zero, so back-substitute them here. The vector being
+  // constrained belongs to the adjoint system, not the forward system that owns the matrix.
+  _nl_adjoint.system().get_dof_map().enforce_constraints_exactly(_nl_adjoint.system(), &solution);
 
   _nl_adjoint.update();
   if (solver.get_converged_reason() < 0)
@@ -186,7 +206,7 @@ AdjointSolve::applyNodalBCs(SparseMatrix<Number> & matrix,
     if (petsc_matrix && petsc_solution && petsc_rhs)
       LibmeshPetscCall(MatZeroRowsColumns(petsc_matrix->mat(),
                                           cast_int<PetscInt>(nbc_dofs.size()),
-                                          numeric_petsc_cast(nbc_dofs.data()),
+                                          libMesh::numeric_petsc_cast(nbc_dofs.data()),
                                           1.0,
                                           petsc_solution->vec(),
                                           petsc_rhs->vec()));
@@ -203,15 +223,10 @@ AdjointSolve::checkIntegrity()
   for (const auto & adj_var : adj_vars)
     // If the user supplies any scaling factors for individual variables the
     // adjoint system won't be consistent.
-    if (!absolute_fuzzy_equals(adj_var->scalingFactor(), 1.0))
+    if (!libMesh::absolute_fuzzy_equals(adj_var->scalingFactor(), 1.0))
       mooseError(
           "User cannot supply scaling factors for adjoint variables.   Adjoint system is scaled "
           "automatically by the forward system.");
-
-  // This is to prevent automatic scaling of the adjoint system. Scaling is
-  // taken from the forward system
-  if (_nl_adjoint.hasVector("scaling_factors"))
-    _nl_adjoint.removeVector("scaling_factors");
 
   // Main thing is that the number of dofs in each system is the same
   if (_nl_forward.system().n_dofs() != _nl_adjoint.system().n_dofs())

@@ -484,7 +484,7 @@ ReporterData::getReporterValue(const ReporterName & reporter_name,
                "\" is not declared.");
 
   // Force the const version of value, which does not allow for increasing time index
-  return static_cast<const ReporterState<T> &>(
+  return cast_ref<const ReporterState<T> &>(
              getReporterStateHelper<T>(reporter_name, /* declare = */ false))
       .value(time_index);
 }

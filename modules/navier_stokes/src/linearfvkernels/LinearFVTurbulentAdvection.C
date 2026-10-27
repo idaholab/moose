@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,8 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVTurbulentAdvection.h"
+#include "LinearFVGradientManager.h"
 #include "MooseLinearVariableFV.h"
-#include "NSFVUtils.h"
 #include "NavierStokesMethods.h"
 #include "NS.h"
 
@@ -26,7 +26,9 @@ LinearFVTurbulentAdvection::validParams()
       "rhie_chow_user_object",
       "The rhie-chow user-object which is used to determine the face velocity.");
 
-  params += Moose::FV::advectedInterpolationParameter();
+  params.addRequiredParam<InterpolationMethodName>(
+      "advected_interp_method_name",
+      "Name of the FVInterpolationMethod to use for the advected quantity.");
 
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
@@ -36,12 +38,16 @@ LinearFVTurbulentAdvection::validParams()
 
 LinearFVTurbulentAdvection::LinearFVTurbulentAdvection(const InputParameters & params)
   : LinearFVFluxKernel(params),
+    FVInterpolationMethodInterface(this),
     _mass_flux_provider(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
-    _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
+    _adv_interp_method(getFVAdvectedInterpolationMethod(
+        getParam<InterpolationMethodName>("advected_interp_method_name"))),
+    _gradient_field(_adv_interp_method.needsGradients()
+                        ? &_var.requestCellGradients(_adv_interp_method.gradientMethodName())
+                        : nullptr),
     _mass_face_flux(0.0),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
-  Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
 }
 
 void
@@ -189,31 +195,33 @@ LinearFVTurbulentAdvection::addRightHandSideContribution()
 Real
 LinearFVTurbulentAdvection::computeElemMatrixContribution()
 {
-  return _advected_interp_coeffs.first * _mass_face_flux * _current_face_area;
+  const auto & coeffs = _adv_interp_result.weights_matrix;
+  return coeffs.first * _mass_face_flux * _current_face_area;
 }
 
 Real
 LinearFVTurbulentAdvection::computeNeighborMatrixContribution()
 {
-  return _advected_interp_coeffs.second * _mass_face_flux * _current_face_area;
+  const auto & coeffs = _adv_interp_result.weights_matrix;
+  return coeffs.second * _mass_face_flux * _current_face_area;
 }
 
 Real
 LinearFVTurbulentAdvection::computeElemRightHandSideContribution()
 {
-  return 0.0;
+  return _adv_interp_result.rhs_face_value * _mass_face_flux * _current_face_area;
 }
 
 Real
 LinearFVTurbulentAdvection::computeNeighborRightHandSideContribution()
 {
-  return 0.0;
+  return -_adv_interp_result.rhs_face_value * _mass_face_flux * _current_face_area;
 }
 
 Real
 LinearFVTurbulentAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * const adv_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const adv_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_bc, "This should be a valid BC!");
 
   const auto boundary_value_matrix_contrib = adv_bc->computeBoundaryValueMatrixContribution();
@@ -227,7 +235,7 @@ LinearFVTurbulentAdvection::computeBoundaryMatrixContribution(const LinearFVBoun
 Real
 LinearFVTurbulentAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * const adv_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const adv_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_bc, "This should be a valid BC!");
 
   // We support internal boundaries too so we have to make sure the normal points always outward
@@ -246,8 +254,28 @@ LinearFVTurbulentAdvection::setupFaceData(const FaceInfo * face_info)
   // hand side contributions
   _mass_face_flux = _mass_flux_provider.getMassFlux(*face_info);
 
-  // Caching the interpolation coefficients so they will be reused for the matrix and right hand
-  // side terms
-  _advected_interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, _mass_face_flux);
+  // Only internal faces need advected interpolation results; boundary contributions are handled
+  // through the linear FV boundary conditions.
+  if (_current_face_type != FaceInfo::VarFaceNeighbors::BOTH)
+    return;
+
+  const auto state = determineState();
+  const auto & elem_info = *_current_face_info->elemInfo();
+  const auto & neighbor_info = *_current_face_info->neighborInfo();
+
+  const Real elem_value = _var.getElemValue(elem_info, state);
+  const Real neighbor_value = _var.getElemValue(neighbor_info, state);
+  if (_adv_interp_method.needsGradients())
+  {
+    mooseAssert(_gradient_field, "Gradient field should be registered when gradients are needed.");
+    _elem_grad_storage = _gradient_field->gradient(elem_info);
+    _neighbor_grad_storage = _gradient_field->gradient(neighbor_info);
+  }
+
+  _adv_interp_result = _adv_interp_method.advectedInterpolate(*_current_face_info,
+                                                              elem_value,
+                                                              neighbor_value,
+                                                              &_elem_grad_storage,
+                                                              &_neighbor_grad_storage,
+                                                              _mass_face_flux);
 }

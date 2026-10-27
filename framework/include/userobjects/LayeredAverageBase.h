@@ -101,7 +101,7 @@ void
 LayeredAverageBase<BaseType>::threadJoin(const UserObject & y)
 {
   LayeredIntegralBase<BaseType>::threadJoin(y);
-  const auto & lsa = static_cast<const LayeredAverageBase<BaseType> &>(y);
+  const auto & lsa = cast_ref<const LayeredAverageBase<BaseType> &>(y);
   for (const auto i : index_range(_layer_volumes))
     if (lsa.layerHasValue(i))
       _layer_volumes[i] += lsa._layer_volumes[i];

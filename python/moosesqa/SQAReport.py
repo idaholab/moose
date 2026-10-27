@@ -7,7 +7,9 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import enum
+import glob
 import logging
+import os
 import collections
 import copy
 import mooseutils
@@ -159,6 +161,11 @@ class SQAReport(object):
         file_list = list()
         for working_dir in locations:
             path = mooseutils.eval_path(working_dir)
+            if not os.path.isdir(path):
+                LOG.warning(
+                    "Working directory does not exist and will be skipped: %s", path
+                )
+                continue
             if mooseutils.git_is_repo(path):
                 file_list += mooseutils.git_ls_files(path)
             else:

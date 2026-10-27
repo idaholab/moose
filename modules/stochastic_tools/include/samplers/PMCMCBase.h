@@ -83,7 +83,7 @@ protected:
   virtual void executeSetUp() override;
 
   // See Sampler.h for description
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) const override;
 
   /**
    * Sample a random number between 0 and 1
@@ -133,10 +133,10 @@ protected:
   std::vector<std::vector<Real>> _new_samples;
 
   /// Vector of new proposed variance samples
-  std::vector<Real> _new_var_samples;
+  std::vector<Real> & _new_var_samples;
 
   /// Vector of random numbers for decision making
-  std::vector<Real> _rnd_vec;
+  std::vector<Real> & _rnd_vec;
 
 private:
   /**
@@ -157,5 +157,5 @@ private:
   std::vector<std::vector<Real>> _confg_values;
 
   /// Vectors of new proposed samples combined with the experimental configuration values
-  std::vector<std::vector<Real>> _new_samples_confg;
+  std::vector<std::vector<Real>> & _new_samples_confg;
 };

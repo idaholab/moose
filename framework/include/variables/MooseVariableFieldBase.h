@@ -95,25 +95,6 @@ public:
   virtual const Elem * const & currentElem() const = 0;
 
   /**
-   * The subdomains the variable is active on
-   */
-  const std::set<SubdomainID> & activeSubdomains() const;
-
-  /**
-   * Is the variable active on the subdomain?
-   * @param subdomain The subdomain id in question
-   * @return true if active on subdomain, false otherwise
-   */
-  bool activeOnSubdomain(SubdomainID subdomain) const;
-
-  /**
-   * Is the variable active on the subdomains?
-   * @param subdomains The subdomain ids in question
-   * @return true if active on all provided subdomains, false otherwise
-   */
-  bool activeOnSubdomains(const std::set<SubdomainID> & subdomains) const;
-
-  /**
    * Check if this variable needs a raw vector of gradients at dof-values.
    * This is mainly used for finite volume variables.
    */
@@ -216,6 +197,13 @@ public:
    * (0 = current, 1 = old, 2 = older, etc).
    */
   virtual unsigned int oldestSolutionStateRequested() const = 0;
+
+  /**
+   * Request that quadrature point data be (pre)computed. FE variables (pre)compute quadrature point
+   * data by default, so this is a no-op for them. Some FV variables (e.g. linear FV variables) do
+   * not compute it by default and use this call to opt in.
+   */
+  virtual void requireQpComputations() const {}
 };
 
 #define usingMooseVariableFieldBaseMembers usingMooseVariableBaseMembers

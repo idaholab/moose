@@ -19,7 +19,7 @@ convergence check. See [SetupInterface.md] for details on different execution po
 | Nonlinear | `NONLINEAR_CONVERGENCE` |
 | Steady-state | `TIMESTEP_END` |
 | MultiApp fixed point | `MULTIAPP_FIXED_POINT_CONVERGENCE` (see [/Residual.md] for specific guidance for `Residual`) |
-| Multi-system fixed point | `MULTISYSTEM_FIXED_POINT_CONVERGENCE` |
+| Multi-system fixed point | `MULTISYSTEM_FIXED_POINT_ITERATION_END` |
 
 !alert note
 The parameter [!param](/Convergence/MultiPostprocessorConvergence/min_iterations) is recommended to be set $\geq 1$ whenever step criteria are used, since the step in the first iteration is always zero.

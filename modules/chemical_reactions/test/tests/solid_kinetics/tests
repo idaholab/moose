@@ -5,6 +5,9 @@
     exodiff = '2species_out.e'
     # Diffs with parallel that aren't worth customizing tolerances over
     max_parallel = 1
+    issues = '#7669'
+    design = 'ReactionNetwork/SolidKineticReactions/index.md'
+    requirement = 'The system shall be able to solve for a solid kinetic precipitation reaction between two primary species in solution with a shorthand action syntax.'
   [../]
   [./2species_without_action]
     type = 'Exodiff'
@@ -13,15 +16,24 @@
     prereq = 2species
     # Diffs with parallel that aren't worth customizing tolerances over
     max_parallel = 1
+    issues = '#7669'
+    design = 'ReactionNetwork/SolidKineticReactions/index.md'
+    requirement = 'The system shall be able to solve for a solid kinetic precipitation reaction between two primary species in solution.'
   [../]
   [./calcite_precipitation]
     type = 'CSVDiff'
     input = 'calcite_precipitation.i'
     csvdiff = 'calcite_precipitation_out.csv'
+    issues = '#7669 #10808'
+    design = 'ReactionNetwork/AqueousEquilibriumReactions/index.md ReactionNetwork/SolidKineticReactions/index.md TotalMineralVolumeFraction.md PHAux.md'
+    requirement = 'The system shall be able to solve a batch reaction network of aqueous equilibrium and solid kinetic reactions describing the precipitation of calcite from calcium and bicarbonate.'
   [../]
   [./calcite_dissolution]
     type = 'CSVDiff'
     input = 'calcite_dissolution.i'
     csvdiff = 'calcite_dissolution_out.csv'
+    issues = '#7669 #10808'
+    design = 'ReactionNetwork/AqueousEquilibriumReactions/index.md ReactionNetwork/SolidKineticReactions/index.md TotalMineralVolumeFraction.md PHAux.md'
+    requirement = 'The system shall be able to solve a batch reaction network of aqueous equilibrium and solid kinetic reactions describing the dissolution of calcite into calcium and bicarbonate.'
   [../]
 []

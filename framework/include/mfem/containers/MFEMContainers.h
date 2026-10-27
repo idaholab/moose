@@ -11,13 +11,28 @@
 
 #pragma once
 
+#include "MooseError.h"
+
 #include <map>
-#include <set>
 #include <string>
 #include <vector>
 
+namespace mfem
+{
+class FiniteElementCollection;
+class ParFiniteElementSpace;
+class ParSubMesh;
+class ParGridFunction;
+class ParComplexGridFunction;
+class ParFiniteElementSpaceHierarchy;
+}
+
+class MFEMKernel;
+class MFEMBoundaryCondition;
+
 namespace Moose::MFEM
 {
+class EquationSystem;
 
 /// Lightweight adaptor over an std::map from strings to pointer to T
 template <typename T>
@@ -113,7 +128,7 @@ public:
   [[nodiscard]] inline const_iterator end() const { return _field_map.end(); }
 
   /// Returns the number of elements in the map
-  int size() { return _field_map.size(); }
+  int size() const { return _field_map.size(); }
 
 protected:
   /// Returns a const iterator to the field.
@@ -225,11 +240,15 @@ private:
   const std::string null_str;
 };
 
-using FECollections = Moose::MFEM::NamedFieldsMap<mfem::FiniteElementCollection>;
-using FESpaces = Moose::MFEM::NamedFieldsMap<mfem::ParFiniteElementSpace>;
-using SubMeshes = Moose::MFEM::NamedFieldsMap<mfem::ParSubMesh>;
-using GridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParGridFunction>;
-using ComplexGridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParComplexGridFunction>;
+using FECollections = NamedFieldsMap<mfem::FiniteElementCollection>;
+using FESpaces = NamedFieldsMap<mfem::ParFiniteElementSpace>;
+using SubMeshes = NamedFieldsMap<mfem::ParSubMesh>;
+using GridFunctions = NamedFieldsMap<mfem::ParGridFunction>;
+using ComplexGridFunctions = NamedFieldsMap<mfem::ParComplexGridFunction>;
+using FESpaceHierarchies = NamedFieldsMap<mfem::ParFiniteElementSpaceHierarchy>;
+using Kernels = NamedFieldsMap<MFEMKernel>;
+using BoundaryConditions = NamedFieldsMap<MFEMBoundaryCondition>;
+using EquationSystems = NamedFieldsMap<EquationSystem>;
 
 } // namespace Moose::MFEM
 

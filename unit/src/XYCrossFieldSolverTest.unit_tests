@@ -1,0 +1,25 @@
+[Tests]
+  design = '/XYFrontalDelaunayGenerator.md'
+  issues = '#33522'
+
+  [disk_boundary_tangent_angle]
+    type = GoogleTest
+    unit_test = XYCrossFieldSolverTest.diskBoundaryTangentAngle
+    requirement = 'The system shall solve a cross field on a disk that is aligned with the boundary tangent at every boundary node, points along the radius in the interior, and returns an orthonormal frame at any point.'
+  []
+  [disk_singularity_index_sum]
+    type = GoogleTest
+    unit_test = XYCrossFieldSolverTest.diskSingularityIndexSum
+    requirement = 'The system shall solve a cross field on a disk with a single singularity of total index one at the center, reported through the singular nodes near the center and nowhere else.'
+  []
+  [l_shape_no_interior_singularity]
+    type = GoogleTest
+    unit_test = XYCrossFieldSolverTest.lShapeHasNoInteriorSingularity
+    requirement = 'The system shall solve a cross field on an axis-aligned L-shaped domain that is the constant axis-aligned cross everywhere, reentrant corner included, with no singular node.'
+  []
+  [equilateral_triangle_singularity]
+    type = GoogleTest
+    unit_test = XYCrossFieldSolverTest.equilateralTriangleSingularityAtCentroid
+    requirement = 'The system shall solve a cross field on an equilateral triangle with a single singularity of index one quarter at the centroid, reporting the centroid node and at most its lattice neighbors as singular.'
+  []
+[]

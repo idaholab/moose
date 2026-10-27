@@ -160,7 +160,7 @@ inline const INSFVPressureVariable &
 RhieChowInterpolatorBase::pressure(const THREAD_ID tid) const
 {
   mooseAssert(tid < _ps.size(), "Attempt to access out-of-bounds in pressure variable container");
-  return *static_cast<INSFVPressureVariable *>(_ps[tid]);
+  return *cast_ptr<INSFVPressureVariable *>(_ps[tid]);
 }
 
 template <typename Container>
@@ -168,7 +168,7 @@ void
 RhieChowInterpolatorBase::fillContainer(const std::string & name, Container & container)
 {
   typedef typename Container::value_type ContainedType;
-  for (const auto tid : make_range(libMesh::n_threads()))
+  for (const auto tid : make_range(UserObject::_subproblem.numThreads()))
   {
     auto * const var = static_cast<ContainedType>(
         &UserObject::_subproblem.getVariable(tid, getParam<VariableName>(name)));

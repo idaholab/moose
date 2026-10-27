@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADArrayReaction.h"
+#include "FEProblemBase.h"
+#include "VariableSizeMaterialPropertiesInterface.h"
 
 registerMooseObject("MooseApp", ADArrayReaction);
 
@@ -41,6 +43,18 @@ ADArrayReaction::ADArrayReaction(const InputParameters & parameters)
     MaterialPropertyName mat = getParam<MaterialPropertyName>("reaction_coefficient");
     mooseError("Property '" + mat + "' is of unsupported type for ADArrayReaction");
   }
+}
+
+void
+ADArrayReaction::initialSetup()
+{
+  if (_r_array || _r_2d_array)
+    Moose::checkArrayMaterialPropertySize(*this,
+                                          _fe_problem.getMaterialWarehouse(),
+                                          blockRestricted() ? blockIDs() : meshBlockIDs(),
+                                          "reaction_coefficient",
+                                          _count,
+                                          _r_2d_array);
 }
 
 void

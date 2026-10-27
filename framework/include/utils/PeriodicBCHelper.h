@@ -53,7 +53,7 @@ protected:
   /**
    * Entry-point for derived actions to extend the addition of a periodic boundary.
    */
-  virtual void onSetupPeriodicBoundary(libMesh::PeriodicBoundaryBase & /* p */) {};
+  virtual void onSetupPeriodicBoundary(libMesh::PeriodicBoundaryBase & /* p */) {}
 
   /**
    * Get the PeriodicBoundaries map produced in setupPeriodicBoundaries().

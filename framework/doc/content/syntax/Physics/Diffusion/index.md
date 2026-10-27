@@ -6,7 +6,7 @@ can be created, nested under the relevant discretization sub-block.
 
 For example, a [DiffusionCG.md] can be created inside the [Physics/Diffusion/ContinuousGalerkin](Physics/Diffusion/ContinuousGalerkin/index.md) block.
 
-!listing test/tests/physics/diffusion_cg.i block=Physics
+!listing test/tests/physics/diffusion/diffusion_cg.i block=Physics
 
 !syntax list /Physics/Diffusion objects=True actions=False subsystems=False
 

@@ -22,7 +22,7 @@ subclass of MOOSE's `InitialCondition` class and then specify the IC in our inpu
 
 We create a header file and subclass the `InitialCondition` class and add a `Real` (i.e. floating
 point number) member variable to hold the user-specified coefficient - see
-[examples/ex07_ics/include/ics/ExampleIC.h] for details. The `.C` file defines an input parameter
+[!file](examples/ex07_ics/include/ics/ExampleIC.h) for details. The `.C` file defines an input parameter
 named `coefficient`, stores its value in a member variable in the constructor, and uses that value
 to compute the IC.
 
@@ -30,7 +30,7 @@ to compute the IC.
 
 ## Using ICs in an Input File
 
-The input file [examples/ex07_ics/transient.i] sets up a simple transient diffusion problem with
+The input file [!file](examples/ex07_ics/transient.i) sets up a simple transient diffusion problem with
 initial conditions specified in the `Variables` block:
 
 !listing examples/ex07_ics/transient.i block=Variables
@@ -38,7 +38,7 @@ initial conditions specified in the `Variables` block:
 We can also use the initial condition when running steady-state problems (i.e. with the `Steady`
 Executioner); this effectively functions as an initial guess for the solver - usually not
 necessary, but occasionally useful.  For steady cases, the IC is specified in exactly the same way
-- see e.g. [examples/ex07_ics/steady.i].
+- see e.g. [!file](examples/ex07_ics/steady.i).
 
 # Results
 
@@ -62,10 +62,10 @@ surfaces.
 
 ## Complete Source Files
 
-- [examples/ex07_ics/include/ics/ExampleIC.h]
-- [examples/ex07_ics/src/ics/ExampleIC.C]
-- [examples/ex07_ics/transient.i]
-- [examples/ex07_ics/steady.i]
+- [!file](examples/ex07_ics/include/ics/ExampleIC.h)
+- [!file](examples/ex07_ics/src/ics/ExampleIC.C)
+- [!file](examples/ex07_ics/transient.i)
+- [!file](examples/ex07_ics/steady.i)
 
 !content pagination use_title=True
                     previous=examples/ex06_transient.md

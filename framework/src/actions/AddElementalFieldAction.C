@@ -36,8 +36,9 @@ AddElementalFieldAction::init()
 {
   _moose_object_pars.set<MooseEnum>("order") = "CONSTANT";
   _moose_object_pars.set<MooseEnum>("family") = "MONOMIAL";
+  _moose_object_pars.set<bool>("p_refinement") = false;
 
-  _fe_type = libMesh::FEType(CONSTANT, MONOMIAL);
+  _fe_type = libMesh::FEType(CONSTANT, MONOMIAL).set_p_refinement(false);
 
   _type = "MooseVariableConstMonomial";
 

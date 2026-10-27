@@ -47,7 +47,7 @@ AverageElementSize::getValue() const
 void
 AverageElementSize::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const AverageElementSize &>(y);
+  const auto & pps = cast_ref<const AverageElementSize &>(y);
   _total_size += pps._total_size;
   _elems += pps._elems;
 }

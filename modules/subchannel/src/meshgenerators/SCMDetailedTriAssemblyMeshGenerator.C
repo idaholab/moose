@@ -852,7 +852,7 @@ SCMDetailedTriAssemblyMeshGenerator::generate()
     _console << "Element counter: " << element_counter << std::endl;
   boundary_info.sideset_name(0) = "inlet";
   boundary_info.sideset_name(1) = "outlet";
-  mesh_base->subdomain_name(_subchannel_block_id) = "subchannel";
+  mesh_base->set_subdomain_name(_subchannel_block_id, "subchannel", true);
   if (n_pins > 0)
   {
     _elem_id = mesh_base->n_elem();
@@ -860,7 +860,7 @@ SCMDetailedTriAssemblyMeshGenerator::generate()
       generatePin(mesh_base, ctr);
   }
   if (n_pins > 0)
-    mesh_base->subdomain_name(_pin_block_id) = "fuel_pins";
+    mesh_base->set_subdomain_name(_pin_block_id, "fuel_pins", true);
   if (_verbose)
     _console << "Mesh assembly done" << std::endl;
   mesh_base->prepare_for_use();

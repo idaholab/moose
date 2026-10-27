@@ -57,7 +57,7 @@
   type = Steady
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type'
-  petsc_options_value = 'asm'
+  petsc_options_value = 'lu'
   petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_linesearch_monitor'
 []
 

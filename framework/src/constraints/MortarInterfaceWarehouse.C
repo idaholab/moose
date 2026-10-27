@@ -12,6 +12,7 @@
 #include "MooseMesh.h"
 #include "MooseError.h"
 #include "MooseEnum.h"
+#include "MooseUtils.h"
 #include "MortarExecutorInterface.h"
 #include "AutomaticMortarGeneration.h"
 
@@ -49,8 +50,10 @@ MortarInterfaceWarehouse::createMortarInterface(
     const bool debug,
     const bool correct_edge_dropping,
     const Real minimum_projection_angle,
+    const Mortar3DSubpatchPlane mortar_3d_subpatch_plane,
     const MooseEnum & triangulation,
-    const bool triangulate_triangles)
+    const bool triangulate_triangles,
+    const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping)
 {
   _mortar_subdomain_coverage.insert(subdomain_key.first);
   _mortar_subdomain_coverage.insert(subdomain_key.second);
@@ -77,11 +80,21 @@ MortarInterfaceWarehouse::createMortarInterface(
           "We do not currently support generating and not generating debug output "
           "on the same boundary primary-secondary surface pair. Please set debug_mesh = true for "
           "all constraints sharing the same primary-secondary surface pairs");
+    if (!MooseUtils::absoluteFuzzyEqual(existing.minimum_projection_angle,
+                                        minimum_projection_angle))
+      mooseError("We do not currently support multiple values of 'minimum_projection_angle' on "
+                 "the same boundary primary-secondary surface pair.");
+    if (existing.mortar_3d_subpatch_plane != mortar_3d_subpatch_plane)
+      mooseError("Mortar constraints sharing the same primary/secondary mortar interface must use "
+                 "the same 'mortar_3d_subpatch_plane' value.");
     if (existing.triangulation != triangulation_mode)
       mooseError("We do not currently support multiple values of 'triangulation' on the same "
                  "boundary primary-secondary surface pair.");
     if (existing.triangulate_triangles != triangulate_triangles)
       mooseError("We do not currently support multiple values of 'triangulate_triangles' on the "
+                 "same boundary primary-secondary surface pair.");
+    if (existing.mortar_3d_qp_mapping != mortar_3d_qp_mapping)
+      mooseError("We do not currently support multiple values of 'mortar_3d_qp_mapping' on the "
                  "same boundary primary-secondary surface pair.");
   }
   else
@@ -96,12 +109,17 @@ MortarInterfaceWarehouse::createMortarInterface(
                                                     debug,
                                                     correct_edge_dropping,
                                                     minimum_projection_angle,
+                                                    mortar_3d_subpatch_plane,
                                                     triangulation_mode,
-                                                    triangulate_triangles),
+                                                    triangulate_triangles,
+                                                    mortar_3d_qp_mapping),
         periodic,
         debug,
+        minimum_projection_angle,
+        mortar_3d_subpatch_plane,
         triangulation_mode,
-        triangulate_triangles};
+        triangulate_triangles,
+        mortar_3d_qp_mapping};
     config.amg->initOutput();
     mortar_interfaces.emplace(boundary_key, std::move(config));
   }
@@ -167,15 +185,19 @@ MortarInterfaceWarehouse::getMortarInterface(
           boundary_key, subdomain_key, on_displaced));
 }
 
-void
+bool
 MortarInterfaceWarehouse::update()
 {
+  bool coverage_changed = false;
+
   for (auto & mortar_pair : _mortar_interfaces)
-    update(*mortar_pair.second.amg);
+    coverage_changed |= update(*mortar_pair.second.amg);
   for (auto & mortar_pair : _displaced_mortar_interfaces)
-    update(*mortar_pair.second.amg);
+    coverage_changed |= update(*mortar_pair.second.amg);
 
   _mortar_initd = true;
+
+  return coverage_changed;
 }
 
 void
@@ -188,9 +210,17 @@ MortarInterfaceWarehouse::meshChanged()
   update();
 }
 
-void
+bool
 MortarInterfaceWarehouse::update(AutomaticMortarGeneration & amg)
 {
+  // Snapshot the interior-parent subdomain coverage before clearing so we can tell afterward
+  // whether this rebuild changed which subdomains the mortar segment mesh touches. Consumers
+  // registered via notifyWhenMortarSetup() rebuild material dependency lists keyed off exactly
+  // these sets (see Moose::Mortar::setupMortarMaterials), so a change here is what they need to
+  // be notified of.
+  const auto secondary_ip_sub_ids_before = amg.secondaryIPSubIDs();
+  const auto primary_ip_sub_ids_before = amg.primaryIPSubIDs();
+
   // Clear exiting data
   amg.clear();
 
@@ -224,6 +254,20 @@ MortarInterfaceWarehouse::update(AutomaticMortarGeneration & amg)
 
   amg.computeInactiveLMNodes();
   amg.computeInactiveLMElems();
+
+  // Fire on the first build unconditionally (nothing to compare against yet), and otherwise only
+  // when coverage actually changed: setupMortarMaterials() rebuilds three containers via
+  // MaterialBase::buildRequiredMaterials dependency resolution, which we do not want to redo on
+  // every residual/Jacobian evaluation.
+  const bool coverage_changed = !_mortar_initd ||
+                                secondary_ip_sub_ids_before != amg.secondaryIPSubIDs() ||
+                                primary_ip_sub_ids_before != amg.primaryIPSubIDs();
+
+  if (coverage_changed)
+    for (const auto mei : _mei_objs)
+      mei->mortarSetup(amg);
+
+  return coverage_changed;
 }
 
 const std::set<SubdomainID> &

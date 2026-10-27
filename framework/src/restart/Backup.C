@@ -19,6 +19,7 @@ dataStore(std::ostream & stream, Backup & backup, void * context)
 
   dataStore(stream, *backup.header, context);
   dataStore(stream, *backup.data, context);
+  dataStore(stream, backup.mesh_files, context);
 }
 
 void
@@ -29,6 +30,7 @@ dataLoad(std::istream & stream, Backup & backup, void * context)
 
   dataLoad(stream, *backup.header, context);
   dataLoad(stream, *backup.data, context);
+  dataLoad(stream, backup.mesh_files, context);
 }
 
 void

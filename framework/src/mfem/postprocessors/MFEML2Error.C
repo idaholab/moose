@@ -35,16 +35,6 @@ MFEML2Error::MFEML2Error(const InputParameters & parameters)
 {
 }
 
-void
-MFEML2Error::initialize()
-{
-}
-
-void
-MFEML2Error::execute()
-{
-}
-
 PostprocessorValue
 MFEML2Error::getValue() const
 {

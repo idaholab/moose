@@ -44,6 +44,8 @@ public:
   const SCMHTCClosureBase * getDuctHTCClosure() const { return _duct_HTC_closure; }
   const SCMHTCClosureBase * getPinHTCClosure() const { return _pin_HTC_closure; } // optional
   const SCMFrictionClosureBase * getFrictionClosure() const { return _friction_closure; }
+  Real getBulkReynoldsNumber() const { return _bulk_Re; }
+  Real getBulkVelocity() const { return _bulk_V; }
 
   /// structure with the needed information to compute the friction factor at a specific subchannel cell
   struct FrictionStruct
@@ -125,8 +127,9 @@ protected:
   void computeP(int iblock);
   /// Computes Enthalpy per channel for block iblock
   virtual void computeh(int iblock) = 0;
-  /// Computes Temperature per channel for block iblock
-  void computeT(int iblock);
+  /// Computes and relaxes Temperature per channel for block iblock
+  /// @return The normalized norm of (T - T_prev).
+  Real computeT(int iblock);
   /// Computes Density per channel for block iblock
   void computeRho(int iblock);
   /// Computes Viscosity per channel for block iblock
@@ -151,6 +154,8 @@ protected:
   virtual void initializeSolution() = 0;
   /// Detects whether pin diameter or duct displacement fields require geometry recalculation
   void detectDeformation();
+  /// Computes the assembly bulk Reynolds number from inlet flow conditions
+  void computeBulkReynoldsNumber();
 
   /// Functions that computes the interpolation scheme given the Peclet number
   PetscScalar computeInterpolationCoefficients(PetscScalar Peclet = 0.0);
@@ -195,7 +200,7 @@ protected:
   unsigned int _n_blocks;
   libMesh::DenseMatrix<Real> _DP;
   libMesh::DenseMatrix<Real> & _Wij;
-  libMesh::DenseMatrix<Real> _Wij_old;
+  libMesh::DenseMatrix<Real> & _Wij_old;
   libMesh::DenseMatrix<Real> _WijPrime;
   libMesh::DenseMatrix<Real> _Wij_residual_matrix;
   const Real _g_grav;
@@ -222,6 +227,10 @@ protected:
   const bool _duct_mesh_exist;
   /// Variable that informs whether we exited external solve with a converged solution or not
   bool _converged;
+  /// Assembly bulk Reynolds number
+  Real _bulk_Re;
+  /// Assembly bulk velocity
+  Real _bulk_V;
   /// Whether the time integrator has been checked for consistency with the implementation
   bool _time_integrator_checked = false;
   /// Time step
@@ -230,10 +239,28 @@ protected:
   Real _CT;
   /// Convergence tolerance for the pressure loop in external solve
   const Real & _P_tol;
+  /// Maximum number of pressure iterations; zero selects the solver's existing automatic limit
+  const int & _P_maxit;
   /// Convergence tolerance for the temperature loop in internal solve
   const Real & _T_tol;
   /// Maximum iterations for the inner temperature loop
   const int & _T_maxit;
+  /// Relaxation factor for temperature updates in the inner thermal-hydraulic iteration
+  const Real & _T_relaxation;
+  /// Number of enthalpy, temperature, and property updates performed per flow solve
+  const unsigned int & _enthalpy_subcycles;
+  /// Equation relaxation factor for mass flow rate in the coupled implicit solve
+  const Real & _mass_flow_equation_relaxation;
+  /// Equation relaxation factor for pressure in the coupled implicit solve
+  const Real & _pressure_equation_relaxation;
+  /// Equation relaxation factor for crossflow in the coupled implicit solve
+  const Real & _crossflow_equation_relaxation;
+  /// Relaxation factor for mass flow rate updates in the coupled implicit solve
+  const Real & _mass_flow_relaxation;
+  /// Relaxation factor for pressure updates in the coupled implicit solve
+  const Real & _pressure_relaxation;
+  /// Relaxation factor for crossflow updates in the coupled implicit solve
+  const Real & _crossflow_relaxation;
   /// The relative convergence tolerance, (relative decrease) for the ksp linear solver
   const PetscReal & _rtol;
   /// The absolute convergence tolerance for the ksp linear solver
@@ -342,8 +369,8 @@ protected:
   /// Mass conservation - axial convection
   Mat _mc_axial_convection_mat;
   Vec _mc_axial_convection_rhs;
-  /// Mass conservation - density time derivative
-  /// No implicit matrix
+  /// Mass conservation - pressure derivative of transient density
+  Mat _mc_density_pressure_mat;
 
   /// Axial momentum
   /// Axial momentum conservation - compute turbulent cross fluxes
@@ -410,6 +437,8 @@ protected:
   PetscScalar _max_sumWij;
   PetscScalar _max_sumWij_new;
   PetscScalar _correction_factor = 1.0;
+  /// Maximum pressure fixed-point update before solution relaxation over the blocks
+  Real _pressure_fixed_point_error = 1.0;
 
 public:
   static InputParameters validParams();

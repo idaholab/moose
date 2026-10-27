@@ -32,7 +32,15 @@ FileOutput::validParams()
       "with Outputs/file_base when available. Otherwise, MOOSE uses input file name and this "
       "object name for a master input or uses master file_base, the subapp name and this object "
       "name for a subapp input to set it.");
+  // Captured by FEProblemBase::addOutput(), before the common [Outputs] block's file_base (if
+  // any) is copied down onto this object's own parameters, since that copy makes 'file_base'
+  // appear valid and user-set here even when this object's own block never set it (see #4215).
+  params.addPrivateParam<bool>("_file_base_set_by_own_block", false);
   params.addParam<std::string>("file_base_suffix", "Suffix to add to the file base");
+  params.addParam<bool>(
+      "append_object_name",
+      true,
+      "Append the output object name to the default file base when using full output syntax.");
   params.addParam<bool>(
       "append_date", false, "When true the date and time are appended to the output filename.");
   params.addParam<std::string>("append_date_format",
@@ -48,7 +56,7 @@ FileOutput::validParams()
                                             "strings.  This is helpful in outputting only a subset "
                                             "of outputs when using MultiApps.");
   params.addParamNamesToGroup(
-      "file_base append_date append_date_format padding output_if_base_contains",
+      "file_base append_object_name append_date append_date_format padding output_if_base_contains",
       "File name customization");
 
   return params;
@@ -118,7 +126,10 @@ FileOutput::filename()
 void
 FileOutput::setFileBase(const std::string & file_base)
 {
-  if (!isParamValid("file_base"))
+  // Only refuse to override this object's file base if its own block explicitly set 'file_base';
+  // 'isParamValid' alone is not enough, since a 'file_base' inherited from a common [Outputs]
+  // block also reads as valid here even though this object's own block never set it (see #4215).
+  if (!getParam<bool>("_file_base_set_by_own_block"))
     setFileBaseInternal(file_base);
 }
 

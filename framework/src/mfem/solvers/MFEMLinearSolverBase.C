@@ -21,81 +21,57 @@ LinearSolverBase::validParams()
   InputParameters params = SolverBase::validParams();
   params.addClassDescription(
       "Base class for defining linear mfem::Solver derived classes for Moose.");
-  params.addParam<bool>("low_order_refined", false, "Set usage of Low-Order Refined solver.");
+  params.addParam<MFEMWeakFormName>(
+      "weak_form",
+      "",
+      "Name of the weak form in the WeakForms block whose equation system provides context for "
+      "this solver. May be omitted only if the problem has a single weak form, whose equation "
+      "system is then used.");
   return params;
 }
 
 LinearSolverBase::LinearSolverBase(const InputParameters & parameters)
-  : SolverBase(parameters), _lor{getParam<bool>("low_order_refined")}, _preconditioner{nullptr}
+  : SolverBase(parameters), _preconditioner{nullptr}
 {
-}
+  const auto & weak_form_name = getParam<MFEMWeakFormName>("weak_form");
+  if (!weak_form_name.empty() && !getMFEMProblem().getProblemData().eqn_systems.Has(weak_form_name))
+    paramError("weak_form",
+               "No weak form named '",
+               weak_form_name,
+               "' has been added to the problem. Weak forms are added in the 'WeakForms' block.");
 
-template <typename T>
-void
-LinearSolverBase::SetPreconditioner(T & solver)
-{
-  if (isParamSetByUser("preconditioner"))
-  {
-    if (!_preconditioner)
-    {
-      auto & pre = getMFEMProblem().getMFEMObject<LinearSolverBase>(
-          "Moose::MFEM::SolverBase", getParam<MFEMSolverName>("preconditioner"));
-      // Take shared ownership so the preconditioner outlives the solver
-      _preconditioner = std::static_pointer_cast<LinearSolverBase>(pre.shared_from_this());
-    }
-
-    if (dynamic_cast<const EigensolverBase *>(GetPreconditioner()))
-      mooseError("Eigensolvers cannot be used as preconditioners.");
-
-    auto & mfem_pre = _preconditioner->GetSolver();
-    if constexpr (std::is_base_of_v<mfem::HypreSolver, T> || std::is_same_v<mfem::HypreAME, T>)
-      if (auto * const hypre_pre = dynamic_cast<mfem::HypreSolver *>(&mfem_pre))
-        solver.SetPreconditioner(*hypre_pre);
-      else
-        mooseError("hypre solver preconditioners must themselves be hypre solvers");
-    else
-      solver.SetPreconditioner(mfem_pre);
-  }
-}
-
-template void LinearSolverBase::SetPreconditioner(mfem::CGSolver &);
-template void LinearSolverBase::SetPreconditioner(mfem::GMRESSolver &);
-template void LinearSolverBase::SetPreconditioner(mfem::HypreFGMRES &);
-template void LinearSolverBase::SetPreconditioner(mfem::HypreGMRES &);
-template void LinearSolverBase::SetPreconditioner(mfem::HyprePCG &);
-template void LinearSolverBase::SetPreconditioner(mfem::HypreLOBPCG &);
-template void LinearSolverBase::SetPreconditioner(mfem::HypreAME &);
-
-void
-LinearSolverBase::SetOperator(mfem::OperatorHandle & op)
-{
-  mooseAssert(_solver, "setOperator called before the solver was constructed");
-  _solver->SetOperator(*op);
+  _equation_system = getMFEMProblem().getEquationSystem(weak_form_name);
 }
 
 void
-LinearSolverBase::CheckSpectralEquivalence(mfem::ParBilinearForm & blf) const
+LinearSolverBase::SetPreconditioner(const mfem::Operator & op)
 {
-  if (auto fec = dynamic_cast<const mfem::H1_FECollection *>(blf.FESpace()->FEColl()))
-  {
-    if (fec->GetBasisType() != mfem::BasisType::GaussLobatto)
-      mooseError("Low-Order-Refined solver requires the FESpace basis to be GaussLobatto "
-                 "for H1 elements.");
-  }
-  else if (auto fec = dynamic_cast<const mfem::ND_FECollection *>(blf.FESpace()->FEColl()))
-  {
-    if (fec->GetClosedBasisType() != mfem::BasisType::GaussLobatto ||
-        fec->GetOpenBasisType() != mfem::BasisType::IntegratedGLL)
-      mooseError("Low-Order-Refined solver requires the FESpace closed-basis to be GaussLobatto "
-                 "and the open-basis to be IntegratedGLL for ND elements.");
-  }
-  else if (auto fec = dynamic_cast<const mfem::RT_FECollection *>(blf.FESpace()->FEColl()))
-  {
-    if (fec->GetClosedBasisType() != mfem::BasisType::GaussLobatto ||
-        fec->GetOpenBasisType() != mfem::BasisType::IntegratedGLL)
-      mooseError("Low-Order-Refined solver requires the FESpace closed-basis to be GaussLobatto "
-                 "and the open-basis to be IntegratedGLL for RT elements.");
-  }
+  if (!isParamSetByUser("preconditioner"))
+    return;
+
+  auto & pre = getMFEMProblem().getMFEMObject<LinearSolverBase>(
+      "Moose::MFEM::SolverBase", getParam<MFEMSolverName>("preconditioner"));
+  if (dynamic_cast<const EigensolverBase *>(&pre))
+    paramError("preconditioner", "Eigensolvers cannot be used as preconditioners.");
+  // Take shared ownership so the preconditioner outlives the solver
+  _preconditioner = std::static_pointer_cast<LinearSolverBase>(pre.getSharedPtr());
+  // SetOperatorImpl() may build the preconditioner (e.g. MatrixFreeAMS) for SetPreconditionerImpl()
+  _preconditioner->SetOperator(op);
+  SetPreconditionerImpl();
+}
+
+void
+LinearSolverBase::SetOperator(const mfem::Operator & op)
+{
+  // May replace the wrapped solver (e.g. LOR), so this must precede SetPreconditioner()
+  UpdateEquationSystemContext();
+
+  SetPreconditioner(op);
+
+  // SetOperatorImpl() calls SetOperator() on the wrapped mfem solver. In most cases, this will
+  // redundantly reset the operator on the preconditioner. For others it requires the preconditioner
+  // be already set (e.g. AME), thus why it follows SetPreconditioner().
+  SetOperatorImpl(op);
 }
 } // namespace Moose::MFEM
 

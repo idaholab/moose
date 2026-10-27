@@ -15,8 +15,6 @@
 // libMesh includes
 #include "libmesh/nonlinear_solver.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", ExplicitSSPRungeKutta);
 
 InputParameters

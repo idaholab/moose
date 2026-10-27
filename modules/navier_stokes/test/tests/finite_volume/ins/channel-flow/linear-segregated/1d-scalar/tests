@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#28819'
+  issues = '#28819 #31965'
   design = 'SIMPLE.md LinearFVScalarAdvection.md'
   [channel]
     requirement = "The system shall be able to solve a "
@@ -9,7 +9,7 @@
       csvdiff = 'channel-conservation-physics_csv.csv'
       recover = false # no recover testing for steady solves
       max_threads = 1 # see libmesh issue #3808
-      detail = "1D steady scalar advection problem using the shorthand Physics syntax and show scalar conservation,"
+      detail = "1D steady scalar advection problem using the shorthand Physics syntax, externally supplied interpolation methods, and show scalar conservation,"
     []
     [transient-physics]
       type = 'CSVDiff'

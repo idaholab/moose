@@ -27,7 +27,6 @@
   []
 []
 
-
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
@@ -37,8 +36,8 @@
   l_tol = 1e-15
   l_max_its = 50
 
-  nl_abs_tol = 1e-16
-  nl_rel_tol = 1e-16
+  nl_abs_tol = 1e-12
+  nl_rel_tol = 1e-12
   nl_max_its = 15
 
   start_time = 0.0
@@ -50,7 +49,6 @@
       time_sequence = '1 2 3 4 5 6 7 8 9 10 11'
     []
   []
-
 []
 
 [Outputs]

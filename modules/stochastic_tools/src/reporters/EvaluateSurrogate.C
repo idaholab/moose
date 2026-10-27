@@ -94,7 +94,7 @@ EvaluateSurrogate::execute()
   // Loop over samples
   for (const auto ind : make_range(_sampler.getNumberOfLocalRows()))
   {
-    const std::vector<Real> data = _sampler.getNextLocalRow();
+    const std::vector<Real> data = _sampler.getSampleRow(ind + _sampler.getLocalRowBegin());
     for (const auto m : index_range(_model))
     {
       if (_real_values[m] && _real_std[m])

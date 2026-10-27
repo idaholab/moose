@@ -5,7 +5,7 @@ iteration in various solves:
 
 - Nonlinear system solves
 - Linear system solves (for `solve_type = LINEAR` in the executioner, not for inner linear solves within a nonlinear solve)
-- Steady-state detection in [Transient.md] (not yet implemented)
+- Steady-state detection in [Transient.md]
 - Fixed point solves with [MultiApps](syntax/MultiApps/index.md)
 - Fixed point solves with multiple systems
 

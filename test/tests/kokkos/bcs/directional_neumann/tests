@@ -10,7 +10,7 @@
       exodiff = 'kokkos_1d_directional_neumann_bc_test_out.e'
       detail = 'in 1D geometries'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [2d]
       type = Exodiff
@@ -18,7 +18,7 @@
       exodiff = 'kokkos_2d_directional_neumann_bc_test_out.e'
       detail = 'in 2D geometries'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [3d]
       type = Exodiff
@@ -26,7 +26,7 @@
       exodiff = 'kokkos_3d_directional_neumann_bc_test_out.e'
       detail = 'in 3D geometries'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 []

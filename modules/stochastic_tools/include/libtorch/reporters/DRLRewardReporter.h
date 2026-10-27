@@ -15,19 +15,50 @@
 #include "GeneralReporter.h"
 #include "SurrogateModelInterface.h"
 
-/// Reporter which saves the reward values from a Deep Reinforcement Learning controller trainer
+/**
+ * Reporter which saves the reward values from a Deep Reinforcement Learning controller trainer.
+ */
 class DRLRewardReporter : public GeneralReporter, public SurrogateModelInterface
 {
 public:
+  /**
+   * Return the input parameters supported by this reporter.
+   */
   static InputParameters validParams();
+
+  /**
+   * Construct using input parameters.
+   */
   DRLRewardReporter(const InputParameters & parameters);
+
+  /**
+   * Initialize the reporter.
+   */
   virtual void initialize() override {}
+
+  /**
+   * Finalize the reporter.
+   */
   virtual void finalize() override {}
+
+  /**
+   * Update the reported reward statistics.
+   */
   virtual void execute() override;
 
 protected:
   /// The reward values which will be saved
-  Real & _reward;
+  Real & _average_reward;
+
+  /// The standard deviation of the reward values which will be saved
+  Real & _std_reward;
+
+  /// The per-sample average reward values which will be saved
+  std::vector<Real> & _sample_average_reward;
+
+  /// The per-sample reward standard deviations which will be saved
+  std::vector<Real> & _sample_std_reward;
+
   /// The DRL trainer which computes the reward values
   LibtorchDRLControlTrainer & _trainer;
 };

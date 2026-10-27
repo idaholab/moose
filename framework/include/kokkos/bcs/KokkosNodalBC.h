@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -170,7 +170,7 @@ NodalBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc)
 {
   auto node = kokkosBoundaryNodeID(_thread(tid, 1));
   auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 0)];
+  auto jvar = sys.getFieldCoupling(_kokkos_var.var())[_thread(tid, 0)];
 
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;

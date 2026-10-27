@@ -27,8 +27,6 @@
 #include "libmesh/periodic_boundary.h"
 #include "libmesh/periodic_boundaries.h"
 
-using namespace libMesh;
-
 InputParameters
 RayTracingStudy::validParams()
 {
@@ -187,6 +185,14 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
 
     _elem_index_helper(_mesh.getMesh(), name() + "_elem_index")
 {
+  // Ray tracing's per-thread data structures (below) are always sized to the process-wide
+  // libMesh/OpenMP thread count, not this application's (possibly smaller) thread count, so the
+  // two must match or ray tracing threads would run with no corresponding per-thread storage.
+  if (_fe_problem.numThreads() != libMesh::n_threads())
+    mooseError("Ray tracing requires that this application's number of threads "
+               "(Application/num_threads) match the number of threads used by libMesh/OpenMP "
+               "(set by --n-threads).");
+
   // Initialize a tracing object for each thread
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
@@ -194,8 +200,9 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
     _threaded_trace_ray[tid] = std::make_shared<TraceRay>(*this, tid);
 
     // Setup the face FEs for normal computation on the fly
-    _threaded_fe_face[tid] = FEBase::build(_mesh.dimension(), FEType(CONSTANT, MONOMIAL));
-    _threaded_q_face[tid] = QBase::build(QGAUSS, _mesh.dimension() - 1, CONSTANT);
+    _threaded_fe_face[tid] =
+        FEBase::build(_mesh.dimension(), FEType(CONSTANT, MONOMIAL).set_p_refinement(false));
+    _threaded_q_face[tid] = QBase::build(libMesh::QGAUSS, _mesh.dimension() - 1, CONSTANT);
     _threaded_fe_face[tid]->attach_quadrature_rule(_threaded_q_face[tid].get());
     _threaded_fe_face[tid]->get_normals();
   }
@@ -264,8 +271,8 @@ RayTracingStudy::initialSetup()
                  "\nIn this case, the study must use the execute_on = PRE_KERNELS");
 
   // Build 1D quadrature rule for along a segment
-  _segment_qrule =
-      QBase::build(QGAUSS, 1, _fe_problem.getSystemBase(_sys.number()).getMinQuadratureOrder());
+  _segment_qrule = QBase::build(
+      libMesh::QGAUSS, 1, _fe_problem.getSystemBase(_sys.number()).getMinQuadratureOrder());
 }
 
 void

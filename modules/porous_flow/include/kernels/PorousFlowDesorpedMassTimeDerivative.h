@@ -9,22 +9,26 @@
 
 #pragma once
 
-#include "TimeDerivative.h"
+#include "GenericKernel.h"
 #include "PorousFlowDictator.h"
 
 /**
  * Kernel = (desorped_mass - desorped_mass_old)/dt
  * It is NOT lumped to the nodes
+ *
+ * Templated on is_ad: the false instantiation uses hand-coded Jacobians;
+ * the true instantiation propagates derivatives through AD material properties.
  */
-class PorousFlowDesorpedMassTimeDerivative : public TimeKernel
+template <bool is_ad>
+class PorousFlowDesorpedMassTimeDerivativeTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowDesorpedMassTimeDerivative(const InputParameters & parameters);
+  PorousFlowDesorpedMassTimeDerivativeTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
@@ -34,28 +38,32 @@ protected:
   /// The MOOSE variable number of the concentration variable
   const unsigned int _conc_var_number;
 
-  /// The concentration variable
-  const VariableValue & _conc;
+  /// The concentration variable (AD or non-AD)
+  const GenericVariableValue<is_ad> & _conc;
 
-  /// Old value of the concentration variable
+  /// Old value of the concentration variable (always non-AD)
   const VariableValue & _conc_old;
 
-  /// Porosity at the qps
-  const MaterialProperty<Real> & _porosity;
+  /// Porosity at the qps (AD or non-AD)
+  const GenericMaterialProperty<Real, is_ad> & _porosity;
 
   /// Old value of porosity
   const MaterialProperty<Real> & _porosity_old;
 
-  /// d(porosity)/d(PorousFlow variable) - these derivatives will be wrt variables at the qps
-  const MaterialProperty<std::vector<Real>> & _dporosity_dvar;
+  /// d(porosity)/d(PorousFlow variable) -- null for AD
+  const MaterialProperty<std::vector<Real>> * const _dporosity_dvar;
 
-  /// d(porosity)/d(grad PorousFlow variable) - these derivatives will be wrt grad(vars) at qps
-  const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
+  /// d(porosity)/d(grad PorousFlow variable) -- null for AD
+  const MaterialProperty<std::vector<RealGradient>> * const _dporosity_dgradvar;
 
   /**
-   * Derivative of residual with respect to variable number jvar
-   * This is used by both computeQpJacobian and computeQpOffDiagJacobian
-   * @param jvar take the derivative of the residual wrt this Moose variable
+   * Derivative of residual with respect to variable number jvar (non-AD path only)
    */
-  Real computeQpJac(unsigned int jvar) const;
+  Real computeQpJac(unsigned int jvar);
+
+  usingGenericKernelMembers;
+  using GenericKernel<is_ad>::_grad_phi;
 };
+
+typedef PorousFlowDesorpedMassTimeDerivativeTempl<false> PorousFlowDesorpedMassTimeDerivative;
+typedef PorousFlowDesorpedMassTimeDerivativeTempl<true> ADPorousFlowDesorpedMassTimeDerivative;

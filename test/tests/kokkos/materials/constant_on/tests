@@ -10,7 +10,7 @@
       exodiff = 'kokkos_constant_on_test_out.e'
       detail = 'quadrature points;'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [element]
       type = 'Exodiff'
@@ -19,7 +19,7 @@
       cli_args = 'Materials/mat/constant_on=ELEMENT'
       detail = 'elements;'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [subdomain]
       type = 'Exodiff'
@@ -28,7 +28,7 @@
       cli_args = 'Materials/mat/constant_on=SUBDOMAIN'
       detail = 'subdomains;'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [mixed]
       type = 'Exodiff'
@@ -36,7 +36,7 @@
       exodiff = 'kokkos_constant_on_test_out.e'
       detail = 'quadrature points, elements, and subdomains at the same time on different subdomains.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 []

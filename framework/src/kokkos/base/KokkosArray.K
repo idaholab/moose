@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -137,8 +137,6 @@ Array<T, 1, index_type, LayoutType::LEFT>::nrm2()
   return KokkosBlas::nrm2(self);
 }
 
-template class Array<Real, 1, uint8_t, LayoutType::LEFT>;
-template class Array<Real, 1, uint16_t, LayoutType::LEFT>;
 template class Array<Real, 1, uint32_t, LayoutType::LEFT>;
 template class Array<Real, 1, uint64_t, LayoutType::LEFT>;
 

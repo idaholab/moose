@@ -46,7 +46,6 @@
   [all]
     strain = SMALL
     add_variables = true
-    displacements = 'disp_x disp_y'
     generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy strain_zz'
     planar_formulation = GENERALIZED_PLANE_STRAIN
     eigenstrain_names = eigenstrain

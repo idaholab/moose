@@ -63,7 +63,7 @@ public:
   /**
    * Constructor
    */
-  OutputMapWrapper(){};
+  OutputMapWrapper() {}
 
   /**
    * A map accessor that errors if the key is not found

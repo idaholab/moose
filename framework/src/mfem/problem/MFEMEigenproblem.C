@@ -12,6 +12,7 @@
 #include "MFEMEigenproblem.h"
 #include "MFEMVariable.h"
 #include "MFEMEigensolverBase.h"
+#include "EigenproblemESProblemOperator.h"
 
 registerMooseObject("MooseApp", MFEMEigenproblem);
 
@@ -27,6 +28,13 @@ MFEMEigenproblem::validParams()
       "_",
       "Separator string inserted between a variable name and its eigenmode index when "
       "registering the gridfunction that stores the corresponding eigenvector.");
+  params.addParam<MFEMScalarCoefficientName>(
+      "rhs_coefficient",
+      "1.",
+      "Name of the coefficient to scale the right-hand side of the eigenproblem equation by.");
+  params.addParam<MFEMMatrixCoefficientName>("rhs_matrix_coefficient",
+                                             "Name of the matrix coefficient to scale the "
+                                             "right-hand side of the eigenproblem equation by.");
 
   return params;
 }
@@ -36,19 +44,21 @@ MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMProblem
   getProblemData().mode_separator = getParam<std::string>("mode_separator");
   if (_num_type == NumericType::COMPLEX)
     mooseError("Complex numbers are not currently supported for eigenproblems.");
+
+  if (isParamSetByUser("rhs_matrix_coefficient") && isParamSetByUser("rhs_coefficient"))
+    paramError("rhs_coefficient",
+               "Only one of 'rhs_coefficient' and 'rhs_matrix_coefficient' may be set to a "
+               "non-default value.");
 }
 
-void
-MFEMEigenproblem::addMFEMSolver(const std::string & type,
-                                const std::string & name,
-                                InputParameters & parameters)
+Moose::MFEM::EigenRHSCoefficient
+MFEMEigenproblem::getRHSCoefficient()
 {
-  getProblemData().jacobian_solver =
-      addObject<Moose::MFEM::LinearSolverBase>(type, name, parameters).front();
-
-  if (!std::dynamic_pointer_cast<Moose::MFEM::EigensolverBase>(getProblemData().jacobian_solver))
-    mooseError("The selected solver '" + name +
-               "' is not an eigensolver, but the problem is marked as an eigenproblem.");
+  if (isParamSetByUser("rhs_matrix_coefficient"))
+    return &getCoefficients().getMatrixCoefficient(
+        getParam<MFEMMatrixCoefficientName>("rhs_matrix_coefficient"));
+  return &getCoefficients().getScalarCoefficient(
+      getParam<MFEMScalarCoefficientName>("rhs_coefficient"));
 }
 
 void
@@ -56,6 +66,8 @@ MFEMEigenproblem::addVariable(const std::string & var_type,
                               const std::string & var_name,
                               InputParameters & parameters)
 {
+  validateVariableNumericType(var_type, var_name);
+
   // Reject names that would collide with the mode-suffix convention or with any
   // already-registered eigenmode storage entry.
   const auto num_modes = getParam<int>("num_modes");
@@ -83,6 +95,44 @@ MFEMEigenproblem::addVariable(const std::string & var_type,
 
   for (int i = 0; i < num_modes; ++i)
     addGridFunction(var_type, var_name + sep + std::to_string(i), parameters);
+}
+
+void
+MFEMEigenproblem::resolveMFEMSolvers()
+{
+  MFEMProblem::resolveMFEMSolvers();
+
+  if (getProblemData().nonlinear_solver)
+    mooseError("MFEMEigenproblem does not support nonlinear solver '",
+               getProblemData().nonlinear_solver->name(),
+               "'.");
+
+  if (getProblemData().jacobian_solver &&
+      !std::dynamic_pointer_cast<Moose::MFEM::EigensolverBase>(getProblemData().jacobian_solver))
+    mooseError("The selected solver '",
+               getProblemData().jacobian_solver->name(),
+               "' is not an eigensolver, but the problem is marked as an eigenproblem.");
+}
+
+std::shared_ptr<MFEMWeakFormBase>
+MFEMEigenproblem::addDefaultWeakForm()
+{
+  if (getNumericType() != MFEMProblem::NumericType::REAL)
+    mooseError("Complex MFEM eigenproblems are not currently supported. Please set the Problem "
+               "numeric type to 'real'.");
+
+  InputParameters parameters = _factory.getValidParams("MFEMEigenproblemWeakForm");
+  return addObject<MFEMWeakFormBase>("MFEMEigenproblemWeakForm", "__DefaultWeakForm", parameters)
+      .front();
+}
+
+std::shared_ptr<MFEMProblemComposer>
+MFEMEigenproblem::addDefaultProblemComposer()
+{
+  InputParameters params = _factory.getValidParams("MFEMEigenWeakFormProblemComposer");
+  return addObject<MFEMProblemComposer>(
+             "MFEMEigenWeakFormProblemComposer", "__DefaultWeakFormProblemComposer", params)
+      .front();
 }
 
 #endif

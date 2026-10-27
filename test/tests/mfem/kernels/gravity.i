@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/beam-tet.mesh
   uniform_refine = 2
   displacement = "displacement"
@@ -75,23 +75,16 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
     fespace = H1FESpace
-    l_max_its = 20
-    l_tol = 1e-5
-    print_level = 2
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHyprePCG
     preconditioner = boomeramg
-    l_max_its = 100
-    l_tol = 1e-4
-    l_abs_tol = 0.0
+    l_tol = 1e-12
     print_level = 2
   []
 []
@@ -101,10 +94,15 @@
   device = "cpu"
 []
 
-[Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/Gravity
-    vtk_format = ASCII
+[Postprocessors]
+  [displacement_l2_norm]
+    type = MFEMVectorL2Error
+    variable = displacement
+    function = '0 0 0'
   []
+[]
+
+[Outputs]
+  csv = true
+  file_base = OutputData/Gravity
 []

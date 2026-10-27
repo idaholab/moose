@@ -21,11 +21,11 @@ public:
   KokkosConvectionPrecompute(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int j,
+                                            const unsigned int qp,
+                                            AssemblyDatum & datum) const;
 
 private:
   const Real3 _velocity;
@@ -33,16 +33,16 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosConvectionPrecompute::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosConvectionPrecompute::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _velocity * _grad_u(datum, qp);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosConvectionPrecompute::computeQpJacobian(const unsigned int j,
-                                              const unsigned int qp,
-                                              AssemblyDatum & datum) const
+KokkosConvectionPrecompute::precomputeQpJacobian(const unsigned int j,
+                                                 const unsigned int qp,
+                                                 AssemblyDatum & datum) const
 {
   return _velocity * _grad_phi(datum, j, qp);
 }

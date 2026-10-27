@@ -14,11 +14,15 @@
 #include "libmesh/quadrature.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowDesorpedMassTimeDerivative);
+registerMooseObject("PorousFlowApp", ADPorousFlowDesorpedMassTimeDerivative);
 
+template <bool is_ad>
 InputParameters
-PorousFlowDesorpedMassTimeDerivative::validParams()
+PorousFlowDesorpedMassTimeDerivativeTempl<is_ad>::validParams()
 {
-  InputParameters params = TimeKernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
+  params.set<MultiMooseEnum>("vector_tags") = "time";
+  params.set<MultiMooseEnum>("matrix_tags") = "system time";
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addRequiredCoupledVar(
@@ -27,55 +31,74 @@ PorousFlowDesorpedMassTimeDerivative::validParams()
   return params;
 }
 
-PorousFlowDesorpedMassTimeDerivative::PorousFlowDesorpedMassTimeDerivative(
+template <bool is_ad>
+PorousFlowDesorpedMassTimeDerivativeTempl<is_ad>::PorousFlowDesorpedMassTimeDerivativeTempl(
     const InputParameters & parameters)
-  : TimeKernel(parameters),
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _conc_var_number(coupled("conc_var")),
-    _conc(coupledValue("conc_var")),
-    _conc_old(coupledValueOld("conc_var")),
-    _porosity(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
-    _porosity_old(getMaterialPropertyOld<Real>("PorousFlow_porosity_qp")),
-    _dporosity_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_qp_dvar")),
-    _dporosity_dgradvar(
-        getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_porosity_qp_dgradvar"))
+  : GenericKernel<is_ad>(parameters),
+    _dictator(this->template getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _conc_var_number(this->coupled("conc_var")),
+    _conc(this->template coupledGenericValue<is_ad>("conc_var")),
+    _conc_old(this->coupledValueOld("conc_var")),
+    _porosity(this->template getGenericMaterialProperty<Real, is_ad>("PorousFlow_porosity_qp")),
+    _porosity_old(this->template getMaterialPropertyOld<Real>("PorousFlow_porosity_qp")),
+    _dporosity_dvar(is_ad ? nullptr
+                          : &this->template getMaterialProperty<std::vector<Real>>(
+                                "dPorousFlow_porosity_qp_dvar")),
+    _dporosity_dgradvar(is_ad ? nullptr
+                              : &this->template getMaterialProperty<std::vector<RealGradient>>(
+                                    "dPorousFlow_porosity_qp_dgradvar"))
 {
 }
 
-Real
-PorousFlowDesorpedMassTimeDerivative::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowDesorpedMassTimeDerivativeTempl<is_ad>::computeQpResidual()
 {
-  Real c = (1.0 - _porosity[_qp]) * _conc[_qp];
+  GenericReal<is_ad> c = (1.0 - _porosity[_qp]) * _conc[_qp];
   Real c_old = (1.0 - _porosity_old[_qp]) * _conc_old[_qp];
-  return _test[_i][_qp] * (c - c_old) / _dt;
+  return _test[_i][_qp] * (c - c_old) / this->_dt;
 }
 
+template <bool is_ad>
 Real
-PorousFlowDesorpedMassTimeDerivative::computeQpJacobian()
+PorousFlowDesorpedMassTimeDerivativeTempl<is_ad>::computeQpJacobian()
 {
   return computeQpJac(_var.number());
 }
 
+template <bool is_ad>
 Real
-PorousFlowDesorpedMassTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
+PorousFlowDesorpedMassTimeDerivativeTempl<is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   return computeQpJac(jvar);
 }
 
+template <bool is_ad>
 Real
-PorousFlowDesorpedMassTimeDerivative::computeQpJac(unsigned int jvar) const
+PorousFlowDesorpedMassTimeDerivativeTempl<is_ad>::computeQpJac(unsigned int jvar)
 {
-  Real deriv = 0.0;
+  if constexpr (!is_ad)
+  {
+    Real deriv = 0.0;
 
-  if (jvar == _conc_var_number)
-    deriv = (1.0 - _porosity[_qp]) * _phi[_j][_qp];
+    if (jvar == _conc_var_number)
+      deriv = (1.0 - this->_porosity[this->_qp]) * this->_phi[this->_j][this->_qp];
 
-  if (_dictator.notPorousFlowVariable(jvar))
-    return _test[_i][_qp] * deriv / _dt;
-  const unsigned int pvar = _dictator.porousFlowVariableNum(jvar);
+    if (_dictator.notPorousFlowVariable(jvar))
+      return this->_test[this->_i][this->_qp] * deriv / this->_dt;
+    const unsigned int pvar = _dictator.porousFlowVariableNum(jvar);
 
-  deriv -= _dporosity_dgradvar[_qp][pvar] * _grad_phi[_j][_qp] * _conc[_qp];
-  deriv -= _dporosity_dvar[_qp][pvar] * _phi[_j][_qp] * _conc[_qp];
+    deriv -= (*_dporosity_dgradvar)[this->_qp][pvar] * this->_grad_phi[this->_j][this->_qp] *
+             this->_conc[this->_qp];
+    deriv -= (*_dporosity_dvar)[this->_qp][pvar] * this->_phi[this->_j][this->_qp] *
+             this->_conc[this->_qp];
 
-  return _test[_i][_qp] * deriv / _dt;
+    return this->_test[this->_i][this->_qp] * deriv / this->_dt;
+  }
+  else
+    libmesh_ignore(jvar);
+  return 0.0;
 }
+
+template class PorousFlowDesorpedMassTimeDerivativeTempl<false>;
+template class PorousFlowDesorpedMassTimeDerivativeTempl<true>;

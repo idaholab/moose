@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -51,7 +51,7 @@ NodalBC::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
-    _thread.resize(sys.getCoupling(_kokkos_var.var()).size(), numKokkosBoundaryNodes());
+    _thread.resize(sys.getFieldCoupling(_kokkos_var.var()).size(), numKokkosBoundaryNodes());
 
     Policy policy(0, _thread.size());
 

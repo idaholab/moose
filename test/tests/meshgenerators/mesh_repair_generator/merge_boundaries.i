@@ -51,7 +51,8 @@
   [mesh]
     type = MeshInfo
     outputs = json
-    items = 'sidesets sideset_elems'
+    items = 'sidesets'
+    sideset_items = elems
   []
 []
 

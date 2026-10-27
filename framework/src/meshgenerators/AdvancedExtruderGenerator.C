@@ -125,6 +125,10 @@ AdvancedExtruderGenerator::validParams()
   params.addParam<BoundaryName>(
       "bottom_boundary",
       "The boundary name to set on the bottom boundary. If omitted an ID will be generated.");
+  params.addParam<BoundaryName>(
+      "side_boundary",
+      "The boundary name to add the extruded exterior sides of the input mesh, and their nodes, "
+      "to. If omitted, no side boundary is added.");
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
       "upward_boundary_source_blocks", "Block ids used to generate upward interface boundaries.");
   params.addParam<std::vector<std::vector<boundary_id_type>>>("upward_boundary_ids",
@@ -151,10 +155,10 @@ AdvancedExtruderGenerator::validParams()
   params.addParam<Real>("start_radial_growth_rate", 1., "Starting rate of radial expansion.");
   params.addParam<Real>("end_radial_growth_rate", 1., "Ending rate of radial expansion.");
 
-  params.addParamNamesToGroup(
-      "top_boundary bottom_boundary upward_boundary_source_blocks upward_boundary_ids "
-      "downward_boundary_source_blocks downward_boundary_ids",
-      "Boundary Assignment");
+  params.addParamNamesToGroup("top_boundary bottom_boundary side_boundary "
+                              "upward_boundary_source_blocks upward_boundary_ids "
+                              "downward_boundary_source_blocks downward_boundary_ids",
+                              "Boundary Assignment");
   params.addParamNamesToGroup(
       "subdomain_swaps boundary_swaps elem_integer_names_to_swap elem_integers_swaps", "ID Swap");
   params.addParamNamesToGroup("extrusion_curve start_extrusion_direction end_extrusion_direction",
@@ -192,6 +196,8 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     _has_bottom_boundary(isParamValid("bottom_boundary")),
     _bottom_boundary(isParamValid("bottom_boundary") ? getParam<BoundaryName>("bottom_boundary")
                                                      : "0"),
+    _has_side_boundary(isParamValid("side_boundary")),
+    _side_boundary(isParamValid("side_boundary") ? getParam<BoundaryName>("side_boundary") : ""),
     _upward_boundary_source_blocks(
         isParamValid("upward_boundary_source_blocks")
             ? getParam<std::vector<std::vector<subdomain_id_type>>>("upward_boundary_source_blocks")
@@ -480,6 +486,10 @@ AdvancedExtruderGenerator::generate()
   if (_extrude_along_curve)
     serializer = std::make_unique<libMesh::MeshSerializer>(*extrusion_curve);
 
+  // Exterior sides of the input mesh are identified by their lack of neighbor
+  if (_has_side_boundary && !input->preparation().has_neighbor_ptrs)
+    input->find_neighbors();
+
   // If we're using a distributed mesh... then make sure we don't have any remote elements hanging
   // around
   if (!input->is_serial())
@@ -531,12 +541,23 @@ AdvancedExtruderGenerator::generate()
     new_boundary_names.push_back(_bottom_boundary);
   if (_has_top_boundary)
     new_boundary_names.push_back(_top_boundary);
+  if (_has_side_boundary)
+    new_boundary_names.push_back(_side_boundary);
   std::vector<boundary_id_type> new_boundary_ids =
       MooseMeshUtils::getBoundaryIDs(*input, new_boundary_names, true);
+  // getBoundaryIDs generates a distinct ID for each unknown name, even a repeated one, so make
+  // boundaries given the same name share an ID
+  for (const auto i : index_range(new_boundary_names))
+    for (const auto j : make_range(i))
+      if (new_boundary_names[i] == new_boundary_names[j])
+        new_boundary_ids[i] = new_boundary_ids[j];
   const auto user_bottom_boundary_id =
       _has_bottom_boundary ? new_boundary_ids.front() : libMesh::BoundaryInfo::invalid_id;
-  const auto user_top_boundary_id =
-      _has_top_boundary ? new_boundary_ids.back() : libMesh::BoundaryInfo::invalid_id;
+  const auto user_top_boundary_id = _has_top_boundary
+                                        ? new_boundary_ids[_has_bottom_boundary ? 1 : 0]
+                                        : libMesh::BoundaryInfo::invalid_id;
+  const auto user_side_boundary_id =
+      _has_side_boundary ? new_boundary_ids.back() : libMesh::BoundaryInfo::invalid_id;
 
   // We know a priori how many elements we'll need
   mesh->reserve_elem(total_num_layers * orig_elem);
@@ -887,6 +908,12 @@ AdvancedExtruderGenerator::generate()
   // some processors may have underestimated the next_side_id; let's
   // fix that.
   input->comm().max(next_side_id);
+
+  // A generated side boundary ID starts after the largest input boundary ID, so it can coincide
+  // with the default bottom (next_side_id) and top (next_side_id + 1) IDs
+  if (_has_side_boundary)
+    while (user_side_boundary_id == next_side_id || user_side_boundary_id == next_side_id + 1)
+      ++next_side_id;
 
   // Map to keep track of polygon sides of polygonal prisms
   std::map<std::array<unsigned int, 3>, std::shared_ptr<libMesh::Polygon>> poly_extruded_sides;
@@ -1577,6 +1604,16 @@ AdvancedExtruderGenerator::generate()
                                            ? _boundary_swap_pairs[e][id_to_copy]
                                            : id_to_copy);
           }
+
+          // Add the extruded exterior sides and their nodes to the side boundary
+          if (_has_side_boundary && !elem->neighbor_ptr(s))
+          {
+            const unsigned short new_side =
+                added_elem->dim() == 3 ? cast_int<unsigned short>(s + 1) : (s == 0 ? 3 : 1);
+            boundary_info.add_side(added_elem, new_side, user_side_boundary_id);
+            for (const auto n : added_elem->nodes_on_side(new_side))
+              boundary_info.add_node(added_elem->node_ptr(n), user_side_boundary_id);
+          }
         }
 
         // Give new boundary ids to bottom and top
@@ -1643,10 +1680,10 @@ AdvancedExtruderGenerator::generate()
     mesh->get_boundary_info().set_nodeset_name_map().insert(input_nodeset_map.begin(),
                                                             input_nodeset_map.end());
 
-  if (_has_bottom_boundary)
-    boundary_info.sideset_name(new_boundary_ids.front()) = new_boundary_names.front();
-  if (_has_top_boundary)
-    boundary_info.sideset_name(new_boundary_ids.back()) = new_boundary_names.back();
+  for (const auto i : index_range(new_boundary_names))
+    boundary_info.sideset_name(new_boundary_ids[i]) = new_boundary_names[i];
+  if (_has_side_boundary)
+    boundary_info.nodeset_name(user_side_boundary_id) = _side_boundary;
 
   mesh->unset_is_prepared();
   // Creating the layered meshes creates a lot of leftover nodes, notably in the boundary_info,

@@ -273,6 +273,12 @@ protected:
     if (data == 0)
       return 1;
 
+    // Negative values need one extra character for the minus sign; take the magnitude in
+    // double so that the most negative value does not overflow
+    if constexpr (std::is_signed<T>::value)
+      if (data < 0)
+        return std::log10(-static_cast<double>(data)) + 2;
+
     return std::log10(data) + 1;
   }
 

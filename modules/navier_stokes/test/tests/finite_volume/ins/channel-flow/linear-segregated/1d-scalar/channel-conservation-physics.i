@@ -22,6 +22,15 @@ k2 = 0
   linear_sys_names = 'u_system pressure_system s1_system s2_system'
 []
 
+[FVInterpolationMethods]
+  [custom_flow_upwind]
+    type = FVAdvectedUpwind
+  []
+  [custom_scalar_upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [Physics]
   [NavierStokes]
     [FlowSegregated]
@@ -48,7 +57,7 @@ k2 = 0
         orthogonality_correction = false
         pressure_two_term_bc_expansion = false
         momentum_two_term_bc_expansion = false
-        momentum_advection_interpolation = ${advected_interp_method}
+        momentum_advection_interpolation_method_name = custom_flow_upwind
       []
     []
     [ScalarTransportSegregated]
@@ -64,7 +73,7 @@ k2 = 0
         passive_scalar_inlet_types = 'fixed-value fixed-value'
         passive_scalar_inlet_functors = '1; 2'
 
-        passive_scalar_advection_interpolation = ${advected_interp_method}
+        passive_scalar_advection_interpolation_method_name = custom_scalar_upwind
         passive_scalar_two_term_bc_expansion = false
         use_nonorthogonal_correction = false
       []
@@ -121,10 +130,14 @@ k2 = 0
 
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
+  # added to test PC reuse feature
+  momentum_pc_recompute_frequency = 2
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
   passive_scalar_petsc_options_iname = '-pc_type -pc_hypre_type'
   passive_scalar_petsc_options_value = 'hypre boomeramg'
+  # added to test PC reuse feature
+  passive_scalar_pc_recompute_frequency = 10
 
   print_fields = false
   continue_on_max_its = true

@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
+#include "FVQpFluxBC.h"
 
 class SinglePhaseFluidProperties;
 class MfrPostprocessor;
 
-class PCNSFVStrongBC : public FVFluxBC
+class PCNSFVStrongBC : public FVQpFluxBC
 {
 public:
   static InputParameters validParams();

@@ -31,7 +31,8 @@ class Assembly;
 namespace Moose::Kokkos
 {
 class ResidualObject;
-class System;
+class LinearSystemContributionObject;
+class FESystem;
 }
 #endif
 
@@ -82,7 +83,8 @@ public:
     friend class MooseObjectTagWarehouse;
 #ifdef MOOSE_KOKKOS_ENABLED
     friend class Moose::Kokkos::ResidualObject;
-    friend class Moose::Kokkos::System;
+    friend class Moose::Kokkos::FESystem;
+    friend class Moose::Kokkos::LinearSystemContributionObject;
 #endif
 
     VectorTagsKey() {}
@@ -102,7 +104,8 @@ public:
     friend class MooseObjectTagWarehouse;
 #ifdef MOOSE_KOKKOS_ENABLED
     friend class Moose::Kokkos::ResidualObject;
-    friend class Moose::Kokkos::System;
+    friend class Moose::Kokkos::FESystem;
+    friend class Moose::Kokkos::LinearSystemContributionObject;
 #endif
 
     MatrixTagsKey() {}
@@ -375,7 +378,7 @@ protected:
    * Add a local Jacobian matrix
    */
   void addJacobian(Assembly & assembly,
-                   DenseMatrix<Real> & local_k,
+                   const DenseMatrix<Real> & local_k,
                    const std::vector<dof_id_type> & row_indices,
                    const std::vector<dof_id_type> & column_indices,
                    Real scaling_factor);
@@ -645,14 +648,13 @@ TaggingInterface::addJacobianElement(Assembly & assembly,
 
 inline void
 TaggingInterface::addJacobian(Assembly & assembly,
-                              DenseMatrix<Real> & local_k,
+                              const DenseMatrix<Real> & local_k,
                               const std::vector<dof_id_type> & row_indices,
                               const std::vector<dof_id_type> & column_indices,
                               const Real scaling_factor)
 {
-  for (const auto matrix_tag : _matrix_tags)
-    assembly.cacheJacobianBlock(
-        local_k, row_indices, column_indices, scaling_factor, Assembly::LocalDataKey{}, matrix_tag);
+  assembly.cacheJacobianBlock(
+      local_k, row_indices, column_indices, scaling_factor, Assembly::LocalDataKey{}, _matrix_tags);
 }
 
 template <typename T>

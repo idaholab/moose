@@ -133,15 +133,19 @@ MultiApp::validParams()
   params.setDocString("execute_on", exec_enum.getDocString());
 #endif
 
-  params.addParam<processor_id_type>("max_procs_per_app",
-                                     std::numeric_limits<processor_id_type>::max(),
-                                     "Maximum number of processors to give to each App in this "
-                                     "MultiApp.  Useful for restricting small solves to just a few "
-                                     "procs so they don't get spread out");
-  params.addParam<processor_id_type>("min_procs_per_app",
-                                     1,
-                                     "Minimum number of processors to give to each App in this "
-                                     "MultiApp.  Useful for larger, distributed mesh solves.");
+  params.addRangeCheckedParam<processor_id_type>(
+      "max_procs_per_app",
+      std::numeric_limits<processor_id_type>::max(),
+      "max_procs_per_app > 0",
+      "Maximum number of processors to give to each App in this "
+      "MultiApp.  Useful for restricting small solves to just a few "
+      "procs so they don't get spread out");
+  params.addRangeCheckedParam<processor_id_type>(
+      "min_procs_per_app",
+      1,
+      "min_procs_per_app > 0",
+      "Minimum number of processors to give to each App in this "
+      "MultiApp.  Useful for larger, distributed mesh solves.");
   params.addParam<bool>(
       "wait_for_first_app_init",
       false,
@@ -243,8 +247,16 @@ MultiApp::validParams()
                                   false,
                                   "True to clone parent app mesh and use it for this MultiApp.",
                                   "clone_master_mesh is deprecated, use clone_parent_mesh instead");
-  params.addParam<bool>(
-      "clone_parent_mesh", false, "True to clone parent app mesh and use it for this MultiApp.");
+  params.addParam<bool>("clone_parent_mesh",
+                        false,
+                        "True to clone parent app mesh and use it for this MultiApp. In this "
+                        "situation, all MeshGenerator parameters in the 'input_files' are ignored, "
+                        "as well as nearly all parameters at the root level of the 'Mesh' block.");
+
+  params.addParam<unsigned int>("execution_order_group",
+                                0,
+                                "Execution order group. If Problem/num_concurrent_multiapps>1, "
+                                "multiple multiapps may be executed synchronously.");
 
   params.addPrivateParam<bool>("use_positions", true);
   params.declareControllable("enable");
@@ -278,6 +290,8 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type"))
                                        : _fe_problem.getMooseApp().type()),
     _use_positions(getParam<bool>("use_positions")),
+    _create_child_apps_on_initial_setup(!_use_positions ||
+                                        _fe_problem.numConcurrentMultiApps() > 1),
     _input_files(getParam<std::vector<FileName>>("input_files")),
     _wait_for_first_app_init(getParam<bool>("wait_for_first_app_init")),
     _total_num_apps(0),
@@ -373,14 +387,25 @@ MultiApp::init(unsigned int num_apps, const LocalRankConfig & config)
 }
 
 void
-MultiApp::setupPositions()
+MultiApp::possiblyCreateChildApplications()
 {
+  // We need to count the apps to be able to partition them, either here in init(),
+  // or in the FEProblem before calling initialSetup()
   if (_use_positions)
   {
     fillPositions();
+    // This counts the apps and partitions them. The partitioning can be changed
+    // if the apps are not created straight away
     init(_positions.size());
-    createApps();
   }
+
+  if (_create_child_apps_on_initial_setup)
+    return;
+
+  mooseAssert(_use_positions,
+              "The number of apps is currently determined by the positions when creating child "
+              "apps immediately after multiapp construction");
+  createApps();
 }
 
 void
@@ -436,9 +461,11 @@ MultiApp::createLocalApp(const unsigned int i)
 void
 MultiApp::initialSetup()
 {
-  if (!_use_positions)
-    // if not using positions, we create the sub-apps in initialSetup instead of right after
-    // construction of MultiApp
+  // Sub-apps are created here (rather than right after constructing the MultiApp) when:
+  // - using concurrent multiapps as the partitioning is only assigned after all
+  //   MultiApps have been constructed and child apps have been counted
+  // - using sampler-type multiapps as the partitioning is also handled by the sampler
+  if (_create_child_apps_on_initial_setup)
     createApps();
 }
 
@@ -686,12 +713,17 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
         for (const auto i : make_range(_my_num_apps))
         {
           auto app_ptr = _apps[i];
+          auto & mesh = app_ptr->getExecutioner()->feProblem().mesh();
           if (usingPositions())
             app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
-                app_ptr->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
+                mesh, _positions[_first_local_app + i]);
           else
-            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
-                app_ptr->getExecutioner()->feProblem().mesh(), Point(0, 0, 0));
+            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(mesh,
+                                                                                  Point(0, 0, 0));
+
+          // Transforming marks mesh->spatial_dimension() as invalid,
+          // so we reprepare before trying to print that later.
+          mesh.getMesh().complete_preparation();
         }
 
       // If the time step covers multiple reset times, set them all as having 'happened'
@@ -1178,25 +1210,6 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app_params.set<unsigned int>("_multiapp_level") = _app.multiAppLevel() + 1;
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
   app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();
-#ifdef MOOSE_MFEM_ENABLED
-  // MFEM device must only be set once across all apps
-  // FIXME: this required that the base app is an MFEM app; itwill
-  // still fail if multiple MFEM sub-apps are launched from a libMesh base app
-  if (i == 0)
-  {
-    app_params.set<std::shared_ptr<mfem::Device>>("_mfem_device") =
-        _app.getMFEMDevice(Moose::PassKey<MultiApp>());
-    const auto & mfem_device_set = _app.getMFEMDevices(Moose::PassKey<MultiApp>());
-    app_params.set<std::set<std::string>>("_mfem_devices") = mfem_device_set;
-  }
-  else
-  {
-    app_params.set<std::shared_ptr<mfem::Device>>("_mfem_device") =
-        _apps[0]->getMFEMDevice(Moose::PassKey<MultiApp>());
-    const auto & mfem_device_set = _apps[0]->getMFEMDevices(Moose::PassKey<MultiApp>());
-    app_params.set<std::set<std::string>>("_mfem_devices") = mfem_device_set;
-  }
-#endif
   if (getParam<bool>("clone_master_mesh") || getParam<bool>("clone_parent_mesh"))
   {
     if (_fe_problem.verboseMultiApps())
@@ -1286,12 +1299,16 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // Transform the app mesh if requested
   if (_run_in_position)
   {
+    auto & mesh = app->getExecutioner()->feProblem().mesh();
     if (usingPositions())
       app->getExecutioner()->feProblem().coordTransform().transformMesh(
-          app->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
+          mesh, _positions[_first_local_app + i]);
     else
-      app->getExecutioner()->feProblem().coordTransform().transformMesh(
-          app->getExecutioner()->feProblem().mesh(), Point(0, 0, 0));
+      app->getExecutioner()->feProblem().coordTransform().transformMesh(mesh, Point(0, 0, 0));
+
+    // Transforming marks mesh->spatial_dimension() as invalid, so we
+    // reprepare before trying to print that later.
+    mesh.getMesh().complete_preparation();
   }
 }
 
@@ -1549,7 +1566,7 @@ dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
 
   multi_app->backup();
 
-  dataStore(stream, static_cast<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
+  dataStore(stream, cast_ref<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
 }
 
 void
@@ -1558,7 +1575,7 @@ dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
   MultiApp * multi_app = static_cast<MultiApp *>(context);
   mooseAssert(multi_app, "Not set");
 
-  dataLoad(stream, static_cast<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
+  dataLoad(stream, cast_ref<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
 
   multi_app->restore();
 }

@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/mug.e
 []
 
@@ -72,16 +72,15 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
+  inactive = 'jacobi'
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
   [jacobi]
     type = MFEMOperatorJacobiSmoother
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHypreGMRES
     preconditioner = boomeramg
@@ -99,10 +98,20 @@
   end_time = 6.0
 []
 
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMVariableLineValueSampler
+    variable = 'temperature'
+    start_point = '2.125 0 -2.375'
+    end_point = '2.125 0 2.625'
+    num_points = 101
+  []
+[]
+
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/HeatTransfer
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    file_base = OutputData/HeatTransfer/heattransfer
   []
 []

@@ -14,11 +14,13 @@ For coupling purposes several new functors are created under the hood:
 
 - +heat_flux_to_solid_*+ (where * is the interface boundary name),
 - +heat_flux_to_fluid_*+ (where * is the interface boundary name),
-- +interface_temperature_solid_*+ (where * is the interface boundary name),
-- +interface_temperature_fluid_*+ (where * is the interface boundary name),
+- +interface_temperature_to_solid_*+ (where * is the interface boundary name),
+- +interface_temperature_to_fluid_*+ (where * is the interface boundary name),
 
 where the first two describe the heat flux from one domain to the other, while the
-other express the interface temperatures from both sides.
+other two describe the interface temperature supplied to the named destination side.
+The fluid boundary condition must use +interface_temperature_to_fluid_*+, and the
+solid boundary condition must use +interface_temperature_to_solid_*+.
 
 ## Energy Conservation Equations
 
@@ -37,15 +39,72 @@ Where $h_f = f(T_f)$ and $h_s = f(T_s)$ are the fluid and solid specific enthalp
 
 The coupling of the solid and fluid domains is done through boundary conditions that ensure:
 
-1. **Continuity of Interface Temperature**
+1. **Interface Temperature Relation**
    \begin{equation}
-       T_\mathrm{f,wall} = T_\mathrm{s,wall}
+       T_\mathrm{f,wall} - T_\mathrm{s,wall}
+       = R_\mathrm{th}^{\prime\prime} q_\mathrm{f\rightarrow s}^{\prime\prime}
    \end{equation}
+
+   where the area-normalized thermal resistance is $R_\mathrm{th}^{\prime\prime}$ and
+   $q_\mathrm{f\rightarrow s}^{\prime\prime}$ is positive for heat flow from the fluid
+   into the solid. Temperature continuity is recovered when
+   $R_\mathrm{th}^{\prime\prime}=0$.
 
 2. **Continuity of Conductive Flux at the Interface**
    \begin{equation}
        q_\mathrm{f,wall} = -q_\mathrm{s,wall}
    \end{equation}
+
+## Interface Thermal Resistance
+
+The [!param](/Executioner/SIMPLE/thermal_resistance) parameter specifies the
+area-normalized thermal resistance(s) in $\mathrm{m^2\,K/W}$. Its default value is zero.
+It accepts either one functor that is used for every entry in
+[!param](/Executioner/SIMPLE/cht_interfaces), or one functor per interface in the same
+order as +cht_interfaces+. Every evaluated resistance must be nonnegative. A spatially
+varying functor may be used, but it must be defined on at least one side of every face
+on the corresponding CHT interface.
+
+For each destination side, the handler applies the resistance drop to the boundary
+temperature computed on the source side:
+
+\begin{equation}
+    T_\mathrm{to\,side} = T_\mathrm{other,wall}
+    - R_\mathrm{th}^{\prime\prime} q_\mathrm{to\,side}^{\prime\prime}\,.
+\end{equation}
+
+The signed heat flux $q_\mathrm{to\,side}^{\prime\prime}$ follows the outward-flux
+convention of the source side. Consequently, the two directional temperature functors
+represent the values seen by their destination regions and naturally produce the two
+sides of the temperature jump. The heat-flux continuity condition is unchanged.
+
+## Surface-to-Surface Radiation
+
+Radiation exchanged between solid surfaces across a transparent fluid can be included by
+setting [!param](/Executioner/SIMPLE/surface_radiation_object_name) to a
+[GrayLambertSurfaceRadiationBase.md] user object, such as [ViewFactorObjectSurfaceRadiation.md].
+The user object must contain at least one boundary listed in
+[!param](/Executioner/SIMPLE/cht_interfaces).
+
+On every CHT interface that belongs to the user object, the net outward radiative heat flux
+density $q_\mathrm{rad}^{\prime\prime}$ leaves the solid without being deposited in the fluid.
+The flux handed to the receiving domain is therefore the conductive flux leaving the source
+domain minus the radiative flux:
+
+\begin{equation}
+    q_\mathrm{to\,side}^{\prime\prime} = q_\mathrm{source}^{\prime\prime} - q_\mathrm{rad}^{\prime\prime}\,.
+\end{equation}
+
+This applies to both the Dirichlet-Neumann and Robin-Robin coupling methods below. The CHT
+iteration is considered converged when the integrated fluxes satisfy
+$Q_s + Q_f - Q_\mathrm{rad} = 0$ on each interface within
+[!param](/Executioner/SIMPLE/cht_heat_flux_tolerance), where $Q_s$ and $Q_f$ are the
+outward conductive heat rates from the solid and fluid and $Q_\mathrm{rad}$ is the net outward
+radiative heat rate.
+
+The user object computes one averaged radiative flux per sideset, which is applied uniformly
+over the corresponding CHT interface. To resolve the spatial distribution of the radiative
+flux, split the walls into several sidesets, for example with [PatchSidesetGenerator.md].
 
 ## Coupling Methods
 
@@ -57,12 +116,12 @@ emulate a Neumann BC by setting the [!param](/LinearFVBCs/LinearFVRobinCHTBC/h) 
 
 !algorithm
 [!function!begin name=NeumannDirichletCoupling]
-[!state text=Initialize $T_\mathrm{fluid,wall}^0$, $q_\mathrm{solid,wall}^0$]
+[!state text=Initialize $T_\mathrm{to\,fluid}^0$, $q_\mathrm{solid,wall}^0$]
 [!while!begin condition=Convergence criteria not met]
 [!state text=1. Solve fluid equation]
 [!state text=2. Update heat flux from fluid to solid $q_\mathrm{s,wall}^n$]
 [!state text=3. Solve solid equation]
-[!state text=4. Update boundary temperature $T_\mathrm{f,wall}^n$]
+[!state text=4. Update the temperature supplied to the fluid $T_\mathrm{to\,fluid}^n$]
 [!while!end]
 [!function!end]
 
@@ -70,13 +129,13 @@ emulate a Neumann BC by setting the [!param](/LinearFVBCs/LinearFVRobinCHTBC/h) 
 
 !algorithm
 [!function!begin name=RobinRobinCoupling]
-[!state text=Initialize $T_\mathrm{fluid,wall}^0$, $q_\mathrm{s\rightarrow f}^0 = 0$]
+[!state text=Initialize $T_\mathrm{to\,fluid}^0$, $q_\mathrm{s\rightarrow f}^0 = 0$]
 [!while!begin condition=Convergence criteria not met]
-[!state text=1. Solve fluid equation with Robin boundary condition using $T_\mathrm{s,wall}^{n-1}$ and $q_\mathrm{s\rightarrow f}^{n-1}$]
-[!state text=2. Update wall temperature $T_\mathrm{f,wall}^n$]
+[!state text=1. Solve fluid equation with Robin boundary condition using $T_\mathrm{to\,fluid}^{n-1}$ and $q_\mathrm{s\rightarrow f}^{n-1}$]
+[!state text=2. Update the temperature supplied to the solid $T_\mathrm{to\,solid}^n$]
 [!state text=3. Update heat flux $q_\mathrm{f\rightarrow s}^n$]
-[!state text=4. Solve solid equation with Robin boundary condition using $T_\mathrm{f,wall}^{n}$ and $q_\mathrm{f\rightarrow s}^{n}$]
-[!state text=5. Update wall temperature $T_\mathrm{s,wall}^n$]
+[!state text=4. Solve solid equation with Robin boundary condition using $T_\mathrm{to\,solid}^{n}$ and $q_\mathrm{f\rightarrow s}^{n}$]
+[!state text=5. Update the temperature supplied to the fluid $T_\mathrm{to\,fluid}^n$]
 [!state text=6. Update heat flux $q_\mathrm{s\rightarrow f}^n$]
 [!while!end]
 [!function!end]

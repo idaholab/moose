@@ -24,8 +24,6 @@
 #include "petscsnes.h"
 #include "slepceps.h"
 
-using namespace libMesh;
-
 namespace Moose
 {
 namespace SlepcSupport
@@ -613,7 +611,7 @@ mooseEPSFormMatrices(EigenProblem & eigen_problem, EPS eps, Vec x, void * ctx)
 namespace
 {
 void
-updateCurrentLocalSolution(CondensedEigenSystem & sys, Vec x)
+updateCurrentLocalSolution(libMesh::CondensedEigenSystem & sys, Vec x)
 {
   auto & dof_map = sys.get_dof_map();
 
@@ -641,7 +639,7 @@ updateCurrentLocalSolution(CondensedEigenSystem & sys, Vec x)
 }
 
 std::unique_ptr<NumericVector<Number>>
-createWrappedResidual(CondensedEigenSystem & sys, Vec r)
+createWrappedResidual(libMesh::CondensedEigenSystem & sys, Vec r)
 {
   auto & dof_map = sys.get_dof_map();
 

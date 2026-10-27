@@ -291,8 +291,9 @@ TEST(FunctionalExpansionsTest, cylindricalDuoEvaluator)
   for (std::size_t i = 0; i < locations.size(); ++i)
   {
     cylindrical.setLocation(locations[i]);
-    EXPECT_NEAR(cylindrical.getExpansionSeriesSum(), standard_truth[i], tol);
-    EXPECT_NEAR(cylindrical.getGenerationSeriesSum(), orthogonal_truth[i], tol);
+    // loose tolerances due to diffs with -march=x86-64-v3
+    EXPECT_NEAR(cylindrical.getExpansionSeriesSum(), standard_truth[i], 5.e-12);
+    EXPECT_NEAR(cylindrical.getGenerationSeriesSum(), orthogonal_truth[i], 5.e-10);
   }
 }
 

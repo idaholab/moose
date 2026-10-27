@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -72,6 +72,22 @@ public:
   void update();
 
   /**
+   * Mark that element geometry data is needed; initElementGeometry() will be called on the next
+   * update()
+   */
+  void setNeedsElementGeometry() { _needs_element_geometry = true; }
+
+  /**
+   * Mark that element-side geometry data is needed; initElementSideGeometry() will be called on the
+   * next update()
+   */
+  void setNeedsElementSideGeometry()
+  {
+    _needs_element_side_geometry = true;
+    setNeedsElementGeometry();
+  }
+
+  /**
    * Get the number of subdomains
    * @returns The number of subdomains
    */
@@ -90,7 +106,12 @@ public:
    * Get the number of local elements
    * @returns The number of local elements
    */
-  auto getNumLocalElements() const { return _num_local_elems; }
+  dof_id_type getNumLocalElements() const { return _num_local_elems; }
+  /**
+   * Get the total number of elements, i.e. the local elements plus the ghost elements
+   * @returns The total number of elements
+   */
+  dof_id_type getNumLocalAndPossiblyOneNeighborLayerGhostElements() const;
   /**
    * Get the number of local elements in a MOOSE subdomain
    * @param subdomain The MOOSE subdomain ID
@@ -136,6 +157,11 @@ public:
    */
   ContiguousElementID getContiguousElementID(const Elem * elem) const;
   /**
+   * Get the ghost element ID map (host-side only)
+   * @returns Map from ghost Elem* to contiguous element ID
+   */
+  const auto & getGhostElemIdMapping() const { return _maps->ghost_elem_id_mapping; }
+  /**
    * Get the range of contiguous element IDs for a subdomain
    * @param subdomain The MOOSE subdomain ID
    * @returns The range of contiguous element IDs in the subdomain
@@ -179,6 +205,8 @@ public:
    */
   KOKKOS_FUNCTION const auto & getElementInfo(ContiguousElementID elem) const
   {
+    KOKKOS_ASSERT(elem < _elem_info.size());
+
     return _elem_info[elem];
   }
   /**
@@ -191,6 +219,124 @@ public:
   {
     return _elem_neighbor(side, elem);
   }
+  /**
+   * Get the coordinate-weighted area of an element side
+   * @param elem The local contiguous element ID
+   * @param side The side index
+   * @returns The side area including the coordinate transformation factor
+   */
+  KOKKOS_FUNCTION Real getSideArea(ContiguousElementID elem, unsigned int side) const
+  {
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _side_area(side, elem);
+  }
+  /**
+   * Get the centroid of an element side
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The side centroid
+   */
+  KOKKOS_FUNCTION Real3 getSideCentroid(ContiguousElementID elem, unsigned int side) const
+  {
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _side_centroid(side, elem);
+  }
+  /**
+   * Get the outward unit normal of an element side
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The side normal
+   */
+  KOKKOS_FUNCTION Real3 getSideNormal(ContiguousElementID elem, unsigned int side) const
+  {
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _side_normal(side, elem);
+  }
+  /**
+   * Get the element-centroid to side-centroid vector for an element side
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The element-centroid to side-centroid vector
+   */
+  KOKKOS_FUNCTION Real3 getElementCentroidToSideCentroidVector(ContiguousElementID elem,
+                                                               unsigned int side) const
+  {
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _elem_centroid_to_side_centroid(side, elem);
+  }
+  /**
+   * Get the element-centroid to side-centroid distance for an element side
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The element-centroid to side-centroid distance
+   */
+  KOKKOS_FUNCTION Real getElementCentroidToSideCentroidDistance(ContiguousElementID elem,
+                                                                unsigned int side) const
+  {
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _elem_centroid_to_side_centroid_distance(side, elem);
+  }
+  /**
+   * Get the element-centroid to neighbor-centroid vector for an element side with a neighbor
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The element-centroid to neighbor-centroid vector, or a zero vector when the side has
+   *          no contiguous neighbor ID
+   */
+  KOKKOS_FUNCTION Real3 getElementCentroidToNeighborCentroidVector(ContiguousElementID elem,
+                                                                   unsigned int side) const
+  {
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _elem_centroid_to_neighbor_centroid(side, elem);
+  }
+  /**
+   * Get the element-centroid to neighbor-centroid distance for an element side with a neighbor
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The element-centroid to neighbor-centroid distance, or zero when the side has no
+   *          contiguous neighbor ID
+   */
+  KOKKOS_FUNCTION Real getElementCentroidToNeighborCentroidDistance(ContiguousElementID elem,
+                                                                    unsigned int side) const
+  {
+    KOKKOS_ASSERT(_element_side_geometry_initialized);
+    return _elem_centroid_to_neighbor_centroid_distance(side, elem);
+  }
+  /**
+   * Get the coordinate-weighted volume of a local element
+   * @param elem The local contiguous element ID
+   * @returns The element volume including the coordinate transformation factor
+   */
+  KOKKOS_FUNCTION Real getElementVolume(ContiguousElementID elem) const
+  {
+    KOKKOS_ASSERT(_element_geometry_initialized);
+    KOKKOS_ASSERT(elem < _elem_volume.size());
+    return _elem_volume[elem];
+  }
+  /**
+   * Get the centroid of a local element
+   * @param elem The local contiguous element ID
+   * @returns The element centroid
+   */
+  KOKKOS_FUNCTION Real3 getElementCentroid(ContiguousElementID elem) const
+  {
+    KOKKOS_ASSERT(_element_geometry_initialized);
+    KOKKOS_ASSERT(elem < _elem_centroid.size());
+    return _elem_centroid[elem];
+  }
+
+  /**
+   * Allocate and populate local element centroids and coordinate-weighted volumes
+   */
+  void initElementGeometry();
+
+  /**
+   * Allocate and populate cached side geometry: side areas, centroids, normals, element-centroid
+   * to side-centroid and element-centroid to neighbor-centroid vectors and their magnitudes, and
+   * boundary IDs
+   */
+  void initElementSideGeometry();
+
   /**
    * Get the number of sides of an element type
    * @param elem_type The element type ID
@@ -227,6 +373,7 @@ public:
    */
   KOKKOS_FUNCTION dof_id_type getExtraElementID(ContiguousElementID elem, unsigned int index) const
   {
+    KOKKOS_ASSERT(elem < _extra_elem_ids.n(0));
     KOKKOS_ASSERT(index < _extra_elem_ids.n(1));
 
     return _extra_elem_ids(elem, index);
@@ -277,6 +424,39 @@ public:
    * @returns Whether the node is on the boundary
    */
   KOKKOS_FUNCTION bool isBoundaryNode(ContiguousNodeID node, ContiguousBoundaryID boundary) const;
+  /**
+   * Get the number of boundary IDs of a local element side
+   * @param elem The local contiguous element ID
+   * @param side The side index
+   * @returns The number of boundary IDs the side belongs to
+   */
+  KOKKOS_FUNCTION unsigned int getNumSideBoundaryIDs(ContiguousElementID elem,
+                                                     unsigned int side) const
+  {
+    return _side_boundary_ids(side, elem).size();
+  }
+  /**
+   * Get a boundary ID of a local element side
+   * @param elem The local contiguous element ID
+   * @param side The side index
+   * @param i The index into the boundary IDs of the side, in ascending order of boundary ID
+   * @returns The boundary ID
+   */
+  KOKKOS_FUNCTION BoundaryID getSideBoundaryID(ContiguousElementID elem,
+                                               unsigned int side,
+                                               unsigned int i) const
+  {
+    return _side_boundary_ids(side, elem)[i];
+  }
+  /**
+   * Get whether a local element side belongs to a boundary
+   * @param elem The local contiguous element ID
+   * @param side The side index
+   * @param boundary The boundary ID
+   * @returns Whether the side belongs to the boundary
+   */
+  KOKKOS_FUNCTION bool
+  isSideOnBoundary(ContiguousElementID elem, unsigned int side, BoundaryID boundary) const;
 #endif
 
 private:
@@ -312,17 +492,21 @@ private:
      */
     std::unordered_map<BoundaryID, ContiguousBoundaryID> boundary_id_mapping;
     /**
-     * Map from the MOOSE element type to the element type ID
+     * Map from the MOOSE element type and p-refinement level to the element type ID
      */
-    std::unordered_map<ElemType, unsigned int> elem_type_id_mapping;
+    std::map<std::pair<ElemType, unsigned int>, unsigned int> elem_type_id_mapping;
     /**
      * List of local nodes including semi-local nodes
      */
     std::vector<Node *> local_nodes;
     /**
-     * Map from the libMesh semi-local node to the contiguous node ID
+     * Map from off-process ghost node to the contiguous node ID
      */
-    std::unordered_map<const Node *, ContiguousNodeID> semi_local_node_id_mapping;
+    std::unordered_map<const Node *, ContiguousNodeID> ghost_node_id_mapping;
+    /**
+     * Map from off-process ghost Elem* to its contiguous element ID on this process
+     */
+    std::unordered_map<const Elem *, ContiguousElementID> ghost_elem_id_mapping;
     /**
      * Range of the contiguous element IDs in each subdomain
      */
@@ -356,6 +540,10 @@ private:
    * Number of local elements
    */
   dof_id_type _num_local_elems = 0;
+  /**
+   * Number of ghost (off-process neighbor) elements
+   */
+  dof_id_type _num_ghost_elems = 0;
   /**
    * Number of local nodes including semi-local nodes
    */
@@ -404,6 +592,38 @@ private:
    * Contiguous node IDs on each boundary
    */
   Array<Array<ContiguousNodeID>> _boundary_nodes;
+  /**
+   * Boundary IDs of each local element side indexed by (side, contiguous element ID), each inner
+   * array sorted in ascending order
+   */
+  JaggedArray<BoundaryID, 1, 2> _side_boundary_ids;
+
+  /// Whether initElementGeometry() has been called and the element geometry cache is populated
+  bool _element_geometry_initialized = false;
+  /// Whether initElementGeometry() should be called on the next update()
+  bool _needs_element_geometry = false;
+  /// Whether initElementSideGeometry() has been called and the side geometry cache is populated
+  bool _element_side_geometry_initialized = false;
+  /// Whether initElementSideGeometry() should be called on the next update()
+  bool _needs_element_side_geometry = false;
+  /// Cached coordinate-weighted local element volumes indexed by contiguous element ID
+  Array<Real> _elem_volume;
+  /// Cached local element centroids indexed by contiguous element ID
+  Array<Real3> _elem_centroid;
+  /// Cached coordinate-weighted side areas indexed by (side, local contiguous element ID)
+  Array2D<Real> _side_area;
+  /// Cached side centroids indexed by (side, contiguous element ID)
+  Array2D<Real3> _side_centroid;
+  /// Cached side normals indexed by (side, contiguous element ID)
+  Array2D<Real3> _side_normal;
+  /// Element-centroid to side-centroid vectors indexed by (side, contiguous element ID)
+  Array2D<Real3> _elem_centroid_to_side_centroid;
+  /// Element-centroid to side-centroid distances indexed by (side, contiguous element ID)
+  Array2D<Real> _elem_centroid_to_side_centroid_distance;
+  /// Element-centroid to neighbor-centroid vectors indexed by (side, contiguous element ID)
+  Array2D<Real3> _elem_centroid_to_neighbor_centroid;
+  /// Element-centroid to neighbor-centroid distances indexed by (side, contiguous element ID)
+  Array2D<Real> _elem_centroid_to_neighbor_centroid_distance;
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
@@ -419,7 +639,25 @@ Mesh::isBoundaryNode(ContiguousNodeID node, ContiguousBoundaryID boundary) const
 
   return target != end;
 }
+
+KOKKOS_FUNCTION inline bool
+Mesh::isSideOnBoundary(ContiguousElementID elem, unsigned int side, BoundaryID boundary) const
+{
+  const auto boundaries = _side_boundary_ids(side, elem);
+
+  for (unsigned int i = 0; i < boundaries.size(); ++i)
+    if (boundaries[i] == boundary)
+      return true;
+
+  return false;
+}
 #endif
+
+inline dof_id_type
+Mesh::getNumLocalAndPossiblyOneNeighborLayerGhostElements() const
+{
+  return _num_local_elems + _num_ghost_elems;
+}
 
 /**
  * The Kokkos interface that holds the host reference of the Kokkos mesh and copies it to device

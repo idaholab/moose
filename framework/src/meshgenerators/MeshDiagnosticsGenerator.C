@@ -60,6 +60,13 @@ MeshDiagnosticsGenerator::validParams()
       {},
       "Names boundaries that should form a watertight envelope around the mesh. Defaults to all "
       "the boundaries combined.");
+  params.addParam<std::vector<SubdomainName>>(
+      "watertight_check_blocks",
+      {},
+      "Blocks whose combined volume should form a watertight region for the sideset/nodeset "
+      "checks. When set, only the envelope of these blocks is examined: the mesh-exterior sides "
+      "and the internal sides bordering blocks outside this list are expected to be covered by "
+      "sidesets/nodesets. Defaults to the whole mesh.");
   params.addParam<MooseEnum>(
       "examine_element_volumes", chk_option, "whether to examine volume of the elements");
   params.addParam<Real>("minimum_element_volumes", 1e-16, "minimum size for element volume");
@@ -74,7 +81,15 @@ MeshDiagnosticsGenerator::validParams()
       "examine_nonplanar_sides", chk_option, "whether to check element sides are planar");
   params.addParam<MooseEnum>("examine_non_conformality",
                              chk_option,
-                             "whether to examine the conformality of elements in the mesh");
+                             "whether to examine the conformality of elements in the mesh. "
+                             "Automatically turns on 'examine_nonconforming_faces' as well,"
+                             " unless specified otherwise.");
+  params.addParam<MooseEnum>(
+      "examine_nonconforming_faces",
+      chk_option,
+      "whether to check for element faces that border another element but do not match a "
+      "neighbor face (for example a quad face abutting two triangle faces). Unlike "
+      "'examine_non_conformality', this does not require a hanging node.");
   params.addParam<MooseEnum>("examine_non_matching_edges",
                              chk_option,
                              "Whether to check if there are any intersecting edges");
@@ -103,6 +118,7 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_watertight_sidesets(getParam<MooseEnum>("check_for_watertight_sidesets")),
     _check_watertight_nodesets(getParam<MooseEnum>("check_for_watertight_nodesets")),
     _watertight_boundary_names(getParam<std::vector<BoundaryName>>("boundaries_to_check")),
+    _watertight_block_names(getParam<std::vector<SubdomainName>>("watertight_check_blocks")),
     _check_element_volumes(getParam<MooseEnum>("examine_element_volumes")),
     _min_volume(getParam<Real>("minimum_element_volumes")),
     _max_volume(getParam<Real>("maximum_element_volumes")),
@@ -111,6 +127,7 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_non_planar_sides(getParam<MooseEnum>("examine_nonplanar_sides")),
     _check_non_conformal_mesh(getParam<MooseEnum>("examine_non_conformality")),
     _non_conformality_tol(getParam<Real>("nonconformal_tol")),
+    _check_nonconforming_faces(getParam<MooseEnum>("examine_nonconforming_faces")),
     _check_non_matching_edges(getParam<MooseEnum>("examine_non_matching_edges")),
     _non_matching_edge_tol(getParam<Real>("intersection_tol")),
     _check_adaptivity_non_conformality(
@@ -128,12 +145,18 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
   if (isParamSetByUser("nonconformal_tol") && _check_non_conformal_mesh == "NO_CHECK")
     paramError("examine_non_conformality",
                "You must set this parameter to true to trigger mesh conformality check");
+  if (isParamSetByUser("watertight_check_blocks") && _check_watertight_sidesets == "NO_CHECK" &&
+      _check_watertight_nodesets == "NO_CHECK")
+    paramError("watertight_check_blocks",
+               "This parameter only applies to the watertight checks. You must turn on "
+               "'check_for_watertight_sidesets' or 'check_for_watertight_nodesets' to use it");
   if (_check_sidesets_orientation == "NO_CHECK" && _check_watertight_sidesets == "NO_CHECK" &&
       _check_watertight_nodesets == "NO_CHECK" && _check_element_volumes == "NO_CHECK" &&
       _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" &&
       _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" &&
       _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK" &&
-      _check_non_matching_edges == "NO_CHECK" && _check_polygons == "NO_CHECK")
+      _check_non_matching_edges == "NO_CHECK" && _check_nonconforming_faces == "NO_CHECK" &&
+      _check_polygons == "NO_CHECK")
     mooseError("You need to turn on at least one diagnostic. Did you misspell a parameter?");
 }
 
@@ -159,6 +182,14 @@ MeshDiagnosticsGenerator::generate()
   _watertight_boundaries = MooseMeshUtils::getBoundaryIDs(*mesh, _watertight_boundary_names, false);
   std::sort(_watertight_boundaries.begin(), _watertight_boundaries.end());
 
+  // check that specified blocks are valid and convert SubdomainNames to SubdomainIDs
+  for (const auto & block_name : _watertight_block_names)
+    if (!MooseMeshUtils::hasSubdomainName(*mesh, block_name))
+      mooseError("User specified watertight_check_blocks \'", block_name, "\' does not exist");
+  const auto watertight_block_ids = MooseMeshUtils::getSubdomainIDs(*mesh, _watertight_block_names);
+  _watertight_blocks =
+      std::set<SubdomainID>(watertight_block_ids.begin(), watertight_block_ids.end());
+
   if (_check_sidesets_orientation != "NO_CHECK")
     checkSidesetsOrientation(mesh);
 
@@ -182,6 +213,10 @@ MeshDiagnosticsGenerator::generate()
 
   if (_check_non_conformal_mesh != "NO_CHECK")
     checkNonConformalMesh(mesh);
+
+  if (_check_nonconforming_faces != "NO_CHECK" ||
+      (_check_non_conformal_mesh != "NO_CHECK" && !isParamSetByUser("examine_nonconforming_faces")))
+    checkNonConformingFaces(mesh);
 
   if (_check_adaptivity_non_conformality != "NO_CHECK")
     checkNonConformalMeshFromAdaptivity(mesh);
@@ -327,63 +362,74 @@ MeshDiagnosticsGenerator::checkWatertightSidesets(const std::unique_ptr<MeshBase
 {
   /*
   Algorithm Overview:
-  1) Loop through all elements
+  1) Loop through all elements (only those in 'watertight_check_blocks' if that is set)
   2) For each element loop through all its sides
-  3) If it has no neighbors it's an external side
-  4) If external check if it's part of a sideset
+  3) A side is on the envelope of the checked region if it has no neighbor (mesh exterior) or,
+     when 'watertight_check_blocks' is set, if its neighbor is in a block outside that list
+  4) For each envelope side check whether it is part of a sideset
   */
   if (mesh->mesh_dimension() < 2)
     mooseError("The sideset check only works for 2D and 3D meshes");
   auto & boundary_info = mesh->get_boundary_info();
-  boundary_info.build_side_list();
-  const auto sideset_map = boundary_info.get_sideset_map();
   unsigned int num_faces_without_sideset = 0;
+
+  // Whether the checks are restricted to the envelope of a subset of blocks
+  const bool restrict_blocks = !_watertight_blocks.empty();
+  const std::string side_word = (mesh->mesh_dimension() == 3) ? "face" : "edge";
+  // Indefinite article matching side_word ("a face" / "an edge")
+  const std::string side_article = (mesh->mesh_dimension() == 3) ? "a " : "an ";
 
   for (const auto elem : mesh->active_element_ptr_range())
   {
+    // Only examine the boundary of the requested region
+    if (restrict_blocks && !_watertight_blocks.count(elem->subdomain_id()))
+      continue;
     for (auto i : elem->side_index_range())
     {
-      // Check if side is external
-      if (elem->neighbor_ptr(i) == nullptr)
-      {
-        // If external get the boundary ids associated with this side
-        std::vector<boundary_id_type> boundary_ids;
-        auto side_range = sideset_map.equal_range(elem);
-        for (const auto & itr : as_range(side_range))
-          if (itr.second.first == i)
-            boundary_ids.push_back(i);
-        // get intersection of boundary_ids and _watertight_boundaries
-        std::vector<boundary_id_type> intersections =
-            findBoundaryOverlap(_watertight_boundaries, boundary_ids);
+      const Elem * const neighbor = elem->neighbor_ptr(i);
+      // A side is on the mesh exterior if it has no neighbor
+      const bool exterior_side = (neighbor == nullptr);
+      // A side is on the interface of the checked region if its neighbor is outside the checked
+      // blocks. It only matters when the checks are restricted to a subset of blocks
+      const bool block_interface_side =
+          restrict_blocks && neighbor && !_watertight_blocks.count(neighbor->subdomain_id());
+      if (!exterior_side && !block_interface_side)
+        continue;
 
-        bool no_specified_ids = boundary_ids.empty();
-        bool specified_ids = !_watertight_boundaries.empty() && intersections.empty();
-        std::string message;
-        if (mesh->mesh_dimension() == 3)
-          message = "Element " + std::to_string(elem->id()) +
-                    " contains an external face which has not been assigned to ";
-        else
-          message = "Element " + std::to_string(elem->id()) +
-                    " contains an external edge which has not been assigned to ";
-        if (no_specified_ids)
-          message = message + "a sideset";
-        else if (specified_ids)
-          message = message + "one of the specified sidesets";
-        if ((no_specified_ids || specified_ids) && num_faces_without_sideset < _num_outputs)
-        {
-          _console << message << std::endl;
-          num_faces_without_sideset++;
-        }
-      }
+      // Get the boundary ids associated with this side
+      std::vector<boundary_id_type> boundary_ids;
+      boundary_info.boundary_ids(elem, i, boundary_ids);
+      // get intersection of boundary_ids and _watertight_boundaries
+      std::vector<boundary_id_type> intersections =
+          findBoundaryOverlap(_watertight_boundaries, boundary_ids);
+
+      bool no_specified_ids = boundary_ids.empty();
+      bool specified_ids = !_watertight_boundaries.empty() && intersections.empty();
+      if (!no_specified_ids && !specified_ids)
+        continue;
+
+      std::string message = "Element " + std::to_string(elem->id()) + " contains ";
+      message += exterior_side ? "an external " + side_word
+                               : side_article + side_word +
+                                     " bordering a block outside 'watertight_check_blocks'";
+      message += " which has not been assigned to ";
+      message += no_specified_ids ? "a sideset" : "one of the specified sidesets";
+      if (num_faces_without_sideset < _num_outputs)
+        _console << message << std::endl;
+      else if (num_faces_without_sideset == _num_outputs)
+        _console << "Maximum output reached, log is silenced" << std::endl;
+      num_faces_without_sideset++;
     }
   }
   std::string message;
-  if (mesh->mesh_dimension() == 3)
-    message = "Number of external element faces that have not been assigned to a sideset: " +
+  if (restrict_blocks)
+    message = "Number of element " + side_word +
+              "s on the boundary of the checked blocks that have not been assigned to a sideset: " +
               std::to_string(num_faces_without_sideset);
   else
-    message = "Number of external element edges that have not been assigned to a sideset: " +
-              std::to_string(num_faces_without_sideset);
+    message =
+        "Number of external element " + side_word +
+        "s that have not been assigned to a sideset: " + std::to_string(num_faces_without_sideset);
   diagnosticsLog(message, _check_watertight_sidesets, num_faces_without_sideset);
 }
 
@@ -393,9 +439,10 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
   /*
   Diagnostic Overview:
   1) Mesh precheck
-  2) Loop through all elements
+  2) Loop through all elements (only those in 'watertight_check_blocks' if that is set)
   3) Loop through all sides of that element
-  4) If side is external loop through its nodes
+  4) If the side is on the envelope of the checked region (mesh exterior, or bordering a block
+     outside 'watertight_check_blocks' when that is set) loop through its nodes
   5) If node is not associated with any nodeset add to list
   6) Print out node id
   */
@@ -405,49 +452,64 @@ MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase
   unsigned int num_nodes_without_nodeset = 0;
   std::set<dof_id_type> checked_nodes_id;
 
+  // Whether the checks are restricted to the envelope of a subset of blocks
+  const bool restrict_blocks = !_watertight_blocks.empty();
+
   for (const auto elem : mesh->active_element_ptr_range())
   {
+    // Only examine the boundary of the requested region
+    if (restrict_blocks && !_watertight_blocks.count(elem->subdomain_id()))
+      continue;
     for (const auto i : elem->side_index_range())
     {
-      // Check if side is external
-      if (elem->neighbor_ptr(i) == nullptr)
-      {
-        // Side is external, now check nodes
-        auto side = elem->side_ptr(i);
-        const auto & node_list = side->get_nodes();
-        for (unsigned int j = 0; j < side->n_nodes(); j++)
-        {
-          const auto node = node_list[j];
-          if (checked_nodes_id.count(node->id()))
-            continue;
-          // get vector of node's boundaries (in most cases it will only have one)
-          std::vector<boundary_id_type> boundary_ids;
-          boundary_info.boundary_ids(node, boundary_ids);
-          std::vector<boundary_id_type> intersection =
-              findBoundaryOverlap(_watertight_boundaries, boundary_ids);
+      const Elem * const neighbor = elem->neighbor_ptr(i);
+      // The side is on the envelope of the checked region if it is on the mesh exterior (no
+      // neighbor) or, with block restriction, if its neighbor is in a block outside the list
+      const bool exterior_side = (neighbor == nullptr);
+      const bool block_interface_side =
+          restrict_blocks && neighbor && !_watertight_blocks.count(neighbor->subdomain_id());
+      if (!exterior_side && !block_interface_side)
+        continue;
 
-          bool no_specified_ids = boundary_info.n_boundary_ids(node) == 0;
-          bool specified_ids = !_watertight_boundaries.empty() && intersection.empty();
-          std::string message =
-              "Node " + std::to_string(node->id()) +
-              " is on an external boundary of the mesh, but has not been assigned to ";
-          if (no_specified_ids)
-            message = message + "a nodeset";
-          else if (specified_ids)
-            message = message + "one of the specified nodesets";
-          if ((no_specified_ids || specified_ids) && num_nodes_without_nodeset < _num_outputs)
-          {
-            checked_nodes_id.insert(node->id());
-            num_nodes_without_nodeset++;
-            _console << message << std::endl;
-          }
-        }
+      // Side is on the envelope, now check its nodes
+      auto side = elem->side_ptr(i);
+      for (const auto & node : side->node_ref_range())
+      {
+        if (checked_nodes_id.count(node.id()))
+          continue;
+        // get vector of node's boundaries (in most cases it will only have one)
+        std::vector<boundary_id_type> boundary_ids;
+        boundary_info.boundary_ids(&node, boundary_ids);
+        std::vector<boundary_id_type> intersection =
+            findBoundaryOverlap(_watertight_boundaries, boundary_ids);
+
+        bool no_specified_ids = boundary_info.n_boundary_ids(&node) == 0;
+        bool specified_ids = !_watertight_boundaries.empty() && intersection.empty();
+        if (!no_specified_ids && !specified_ids)
+          continue;
+
+        std::string message = "Node " + std::to_string(node.id());
+        message += restrict_blocks ? " is on the boundary of the checked blocks"
+                                   : " is on an external boundary of the mesh";
+        message += ", but has not been assigned to ";
+        message += no_specified_ids ? "a nodeset" : "one of the specified nodesets";
+        checked_nodes_id.insert(node.id());
+        if (num_nodes_without_nodeset < _num_outputs)
+          _console << message << std::endl;
+        else if (num_nodes_without_nodeset == _num_outputs)
+          _console << "Maximum output reached, log is silenced" << std::endl;
+        num_nodes_without_nodeset++;
       }
     }
   }
   std::string message;
-  message = "Number of external nodes that have not been assigned to a nodeset: " +
-            std::to_string(num_nodes_without_nodeset);
+  if (restrict_blocks)
+    message = "Number of nodes on the boundary of the checked blocks that have not been assigned "
+              "to a nodeset: " +
+              std::to_string(num_nodes_without_nodeset);
+  else
+    message = "Number of external nodes that have not been assigned to a nodeset: " +
+              std::to_string(num_nodes_without_nodeset);
   diagnosticsLog(message, _check_watertight_nodesets, num_nodes_without_nodeset);
 }
 
@@ -690,6 +752,64 @@ MeshDiagnosticsGenerator::checkNonConformalMesh(const std::unique_ptr<MeshBase> 
   diagnosticsLog("Number of non-conformal nodes: " + Moose::stringify(num_nonconformal_nodes),
                  _check_non_conformal_mesh,
                  num_nonconformal_nodes);
+}
+
+void
+MeshDiagnosticsGenerator::checkNonConformingFaces(const std::unique_ptr<MeshBase> & mesh) const
+{
+  // A conforming internal interface has a matching face on each side, so libMesh assigns a
+  // neighbor across it. This check finds element faces that have NO neighbor on a side,
+  // (considered external) yet have material on the other side -- i.e. the face is covered by
+  // neighbor faces that share only part of it, such as a HEX8 quad face abutting two TET4
+  // triangle faces. All corners are shared in that situation, so no node lies on another
+  // element's face and the hanging-node 'examine_non_conformality' check does not detect it.
+  //
+  // For each external (no-neighbor) face, we probe a point just outside it, along the outward
+  // direction from the element centroid. If the point locator finds another element there, the
+  // face borders material but matched no neighbor face, so the interface is non-conforming.
+  auto pl = mesh->sub_point_locator();
+  pl->enable_out_of_mesh_mode();
+  unsigned int num_nonconforming_faces = 0;
+  for (const auto elem : mesh->active_element_ptr_range())
+  {
+    const Point elem_center = elem->vertex_average();
+    for (const auto s : elem->side_index_range())
+    {
+      // Skip faces that already have a matching neighbor; those are conforming.
+      if (elem->neighbor_ptr(s) != nullptr)
+        continue;
+      const auto side = elem->side_ptr(s);
+      const Point side_center = side->vertex_average();
+      // Just outside the face (1% of the centroid-to-face distance beyond it).
+      const Point probe = side_center + 0.01 * (side_center - elem_center);
+      std::set<const Elem *> found;
+      (*pl)(probe, found);
+      bool material_outside = false;
+      for (const auto other : found)
+        if (other != elem && other->active())
+        {
+          material_outside = true;
+          break;
+        }
+      if (material_outside)
+      {
+        if (num_nonconforming_faces < _num_outputs)
+          _console << "Non-conforming element face (borders another cell but matches no neighbor "
+                      "element across the face) on "
+                      "element "
+                   << elem->id() << " side " << s << " near " << side_center << std::endl;
+        num_nonconforming_faces++;
+      }
+    }
+  }
+  pl->disable_out_of_mesh_mode();
+  diagnosticsLog(
+      "Number of non-conforming element faces (border another cell but match no neighbor "
+      "element across the face): " +
+          std::to_string(num_nonconforming_faces),
+      _check_nonconforming_faces != "NO_CHECK" ? _check_nonconforming_faces
+                                               : _check_non_conformal_mesh,
+      num_nonconforming_faces);
 }
 
 void

@@ -1,6 +1,16 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "ComplexEquationSystem.h"
+#include "CoefficientManager.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
@@ -50,13 +60,6 @@ ComplexEquationSystem::Init(GridFunctions & gridfunctions,
 }
 
 void
-ComplexEquationSystem::BuildEquationSystem()
-{
-  BuildBilinearForms();
-  BuildLinearForms();
-}
-
-void
 ComplexEquationSystem::BuildLinearForms()
 {
   // Register linear forms
@@ -67,8 +70,6 @@ ComplexEquationSystem::BuildLinearForms()
                    std::make_shared<mfem::ParComplexLinearForm>(_test_pfespaces.at(i)));
     _clfs.GetRef(test_var_name) = 0.0;
   }
-  // Apply boundary conditions
-  ApplyEssentialBCs();
 
   for (auto & test_var_name : _test_var_names)
   {
@@ -78,6 +79,12 @@ ComplexEquationSystem::BuildLinearForms()
     ApplyBoundaryLFIntegrators(test_var_name, clf, _cmplx_integrated_bc_map);
     clf->Assemble();
   }
+
+  // Apply boundary conditions
+  ApplyEssentialBCs();
+
+  // Eliminate trivially eliminated variables by subtracting contributions from linear forms
+  EliminateCoupledVariables();
 }
 
 void
@@ -99,6 +106,50 @@ ComplexEquationSystem::BuildBilinearForms()
         test_var_name, test_var_name, slf, _cmplx_kernels_map);
     // Assemble
     slf->Assemble();
+    slf->Finalize();
+  }
+}
+
+void
+ComplexEquationSystem::BuildMixedBilinearForms()
+{
+  // Register mixed sesquilinear forms. Note that not all combinations may
+  // have a kernel.
+
+  // Create mslf for each test/coupled variable pair with an added kernel.
+  // Mixed sesquilinear forms with coupled variables that are not trial variables are
+  // associated with contributions from eliminated variables.
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    auto test_mslfs =
+        std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedSesquilinearForm>>();
+    for (const auto j : index_range(_coupled_var_names))
+    {
+      const auto & coupled_var_name = _coupled_var_names.at(j);
+      auto mslf = std::make_shared<mfem::ParMixedSesquilinearForm>(_coupled_pfespaces.at(j),
+                                                                   _test_pfespaces.at(i));
+      // Register MixedSesquilinearForm if kernels exist for it, and assemble
+      // kernels
+      if (_cmplx_kernels_map.Has(test_var_name) &&
+          _cmplx_kernels_map.Get(test_var_name)->Has(coupled_var_name) &&
+          test_var_name != coupled_var_name)
+      {
+        mslf->SetAssemblyLevel(_assembly_level);
+        // Apply all mixed kernels with this test/trial pair
+        ApplyDomainBLFIntegrators<mfem::ParMixedSesquilinearForm>(
+            coupled_var_name, test_var_name, mslf, _cmplx_kernels_map);
+        // Assemble mixed bilinear forms
+        mslf->Assemble();
+        mslf->Finalize();
+        // Register mixed bilinear forms associated with a single trial variable
+        // for the current test variable
+        test_mslfs->Register(coupled_var_name, mslf);
+      }
+    }
+    // Register all mixed bilinear form sets associated with a single test
+    // variable
+    _mslfs.Register(test_var_name, test_mslfs);
   }
 }
 
@@ -108,25 +159,23 @@ ComplexEquationSystem::ApplyComplexEssentialBC(const std::string & var_name,
                                                mfem::Array<int> & global_ess_markers)
 {
   if (_cmplx_essential_bc_map.Has(var_name))
-  {
-    auto & bcs = _cmplx_essential_bc_map.GetRef(var_name);
-    for (auto & bc : bcs)
+    for (auto & bc : _cmplx_essential_bc_map.GetRef(var_name))
     {
       // Set constrained DoFs values on essential boundaries
       bc->ApplyBC(trial_gf);
       // Fetch marker array labelling essential boundaries of current BC
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
       // Add these boundary markers to the set of markers labelling all essential boundaries
-      for (const auto i : make_range(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max()))
-        global_ess_markers[i] = std::max(global_ess_markers[i], ess_bdrs[i]);
+      for (const auto i : make_range(ess_bdrs.Size()))
+        global_ess_markers[i] |= ess_bdrs[i];
     }
-  }
 }
 
 void
 ComplexEquationSystem::ApplyEssentialBCs()
 {
   _ess_tdof_lists.resize(_trial_var_names.size());
+  _ess_markers.resize(_trial_var_names.size());
   for (const auto i : index_range(_trial_var_names))
   {
     const auto & trial_var_name = _trial_var_names.at(i);
@@ -136,14 +185,13 @@ ComplexEquationSystem::ApplyEssentialBCs()
     trial_gf.Update();
 
     // Initial guess for iterative solvers (initial condition or the previous time step solution)
-    static_cast<mfem::Vector &>(trial_gf) = _complex_gfuncs->GetRef(trial_var_name);
+    cast_ref<mfem::Vector &>(trial_gf) = _complex_gfuncs->GetRef(trial_var_name);
 
-    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-    global_ess_markers = 0;
+    _ess_markers.at(i).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
     // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
-    // essential boundaries to the global_ess_markers array
-    ApplyComplexEssentialBC(trial_var_name, trial_gf, global_ess_markers);
-    trial_gf.FESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
+    // essential boundaries to the _ess_markers array
+    ApplyComplexEssentialBC(trial_var_name, trial_gf, _ess_markers.at(i));
+    trial_gf.ParFESpace()->GetEssentialTrueDofs(_ess_markers.at(i), _ess_tdof_lists.at(i));
   }
 }
 
@@ -208,6 +256,34 @@ ComplexEquationSystem::AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssenti
 }
 
 void
+ComplexEquationSystem::EliminateCoupledVariables()
+{
+  for (const auto & test_var_name : _test_var_names)
+    for (const auto & eliminated_var_name : _eliminated_var_names)
+      if (_mslfs.Has(test_var_name) && _mslfs.Get(test_var_name)->Has(eliminated_var_name) &&
+          !VectorContainsName(_test_var_names, eliminated_var_name))
+      {
+        auto & mslf = *_mslfs.Get(test_var_name)->Get(eliminated_var_name);
+        auto & clf = *_clfs.Get(test_var_name);
+        const mfem::real_t scale = -1.0;
+        const mfem::real_t conv =
+            (mslf.GetConvention() == mfem::ComplexOperator::HERMITIAN) ? 1.0 : -1.0;
+
+        // y += scale * (A_r + i * A_i) * (x_r + i * x_i)
+        // and take the complex conjugate of the result if convention is BLOCK_SYMMETRIC
+        mslf.real().AddMult(
+            _cmplx_eliminated_variables.Get(eliminated_var_name)->real(), clf.real(), scale);
+        mslf.real().AddMult(
+            _cmplx_eliminated_variables.Get(eliminated_var_name)->imag(), clf.imag(), conv * scale);
+        mslf.imag().AddMult(
+            _cmplx_eliminated_variables.Get(eliminated_var_name)->imag(), clf.real(), -scale);
+        mslf.imag().AddMult(
+            _cmplx_eliminated_variables.Get(eliminated_var_name)->real(), clf.imag(), conv * scale);
+        clf.SyncAlias();
+      }
+}
+
+void
 ComplexEquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
                                           mfem::BlockVector & trueX,
                                           mfem::BlockVector & trueRHS)
@@ -239,7 +315,6 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                                         mfem::BlockVector & trueX,
                                         mfem::BlockVector & trueRHS)
 {
-
   // Allocate block operator
   DeleteHBlocks();
   _h_blocks.SetSize(_test_var_names.size(), _trial_var_names.size());
@@ -248,26 +323,50 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   trueRHS = 0.0;
   trueRHS.SyncToBlocks();
 
-  // Form diagonal blocks.
   for (const auto i : index_range(_test_var_names))
   {
-    auto & test_var_name = _test_var_names.at(i);
+    auto test_var_name = _test_var_names.at(i);
 
-    mfem::Vector aux_x, aux_rhs;
-    mfem::OperatorHandle aux_a;
+    for (const auto j : index_range(_trial_var_names))
+    {
+      auto trial_var_name = _trial_var_names.at(j);
 
-    auto slf = _slfs.Get(test_var_name);
-    slf->FormLinearSystem(_ess_tdof_lists.at(i),
-                          *_cmplx_var_ess_constraints.at(i),
-                          *_clfs.Get(test_var_name),
-                          aux_a,
-                          aux_x,
-                          aux_rhs,
-                          /*copy_interior=*/true);
-    trueX.GetBlock(i) = aux_x;
-    trueRHS.GetBlock(i) = aux_rhs;
-    _h_blocks(i, i) = aux_a.As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
+      mfem::Vector aux_x, aux_rhs;
+      mfem::ParComplexLinearForm aux_lf(_test_pfespaces.at(i));
+      std::unique_ptr<mfem::OperatorHandle> aux_a = std::make_unique<mfem::OperatorHandle>();
+
+      if (test_var_name == trial_var_name)
+      {
+        mooseAssert(i == j, "Trial and test variables must have the same ordering.");
+        auto slf = _slfs.Get(test_var_name);
+        slf->FormLinearSystem(_ess_tdof_lists.at(j),
+                              *_cmplx_var_ess_constraints.at(j),
+                              *_clfs.Get(test_var_name),
+                              *aux_a,
+                              aux_x,
+                              aux_rhs,
+                              /*copy_interior=*/true);
+        trueX.GetBlock(i) = aux_x;
+      }
+      else if (_mslfs.Has(test_var_name) && _mslfs.Get(test_var_name)->Has(trial_var_name))
+      {
+        auto mslf = _mslfs.Get(test_var_name)->Get(trial_var_name);
+        mslf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
+                                          _ess_tdof_lists.at(i),
+                                          *_cmplx_var_ess_constraints.at(j),
+                                          aux_lf = 0.,
+                                          *aux_a,
+                                          aux_x,
+                                          aux_rhs);
+      }
+      else
+        continue;
+
+      trueRHS.GetBlock(i) += aux_rhs;
+      _h_blocks(i, j) = aux_a->As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
+    }
   }
+
   // Sync memory
   trueX.SyncFromBlocks();
   trueRHS.SyncFromBlocks();
@@ -294,8 +393,10 @@ ComplexEquationSystem::SetTrialVariablesFromTrueVectors(const mfem::BlockVector 
     trueX.GetBlock(i).SyncMemory(trueX);
     _complex_gfuncs->Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
   }
+  // Solution variables changed: stored projections of solution-dependent coefficients are stale.
+  if (_coefficient_manager)
+    _coefficient_manager->markSolutionChanged();
 }
-
 }
 
 #endif

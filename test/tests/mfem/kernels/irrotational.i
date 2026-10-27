@@ -4,7 +4,7 @@ centre_x = -0.75
 centre_y = 0.1
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/vortex.msh
 []
 
@@ -82,17 +82,14 @@ centre_y = 0.1
     type = MFEMGradAux
     variable = velocity
     source = velocity_potential
-    execute_on = TIMESTEP_END
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHypreGMRES
     preconditioner = boomeramg

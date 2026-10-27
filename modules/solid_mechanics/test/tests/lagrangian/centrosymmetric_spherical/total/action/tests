@@ -10,8 +10,7 @@
                   "centrosymmetric R-spherical coordinates"
     cli_args = "Outputs/file_base=small_unstabilized "
                "Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
-               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false "
-               "Materials/compute_stress/large_kinematics=false"
+               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false"
   []
   [action_large_unstabilized]
     type = Exodiff
@@ -22,7 +21,6 @@
                   "centrosymmetric R-spherical coordinates"
     cli_args = "Outputs/file_base=large_unstabilized "
                "Physics/SolidMechanics/QuasiStatic/all/strain=FINITE "
-               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false "
-               "Materials/compute_stress/large_kinematics=true"
+               "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false"
   []
 []

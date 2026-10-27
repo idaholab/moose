@@ -144,7 +144,7 @@ Output::Output(const InputParameters & parameters)
     _sync_times(std::set<Real>(getParam<std::vector<Real>>("sync_times").begin(),
                                getParam<std::vector<Real>>("sync_times").end())),
     _sync_times_object(isParamValid("sync_times_object")
-                           ? static_cast<Times *>(&_problem_ptr->getUserObject<Times>(
+                           ? cast_ptr<Times *>(&_problem_ptr->getUserObject<Times>(
                                  getParam<TimesName>("sync_times_object")))
                            : nullptr),
     _start_time(isParamValid("start_time") ? getParam<Real>("start_time")
@@ -239,9 +239,13 @@ Output::outputStep(const ExecFlagType & type)
   // Return if the current output is not on the desired interval and there is
   // no signal to process
   const bool on_interval_or_exec_final = (onInterval() || (type == EXEC_FINAL));
-  // Sync across processes and only output one time per signal received.
-  comm().max(Moose::interrupt_signal_number);
-  const bool signal_received = Moose::interrupt_signal_number;
+  // Reduce a copy so MPI cannot overwrite a signal received during the collective.
+  int signal_number = Moose::interrupt_signal_number;
+  comm().max(signal_number);
+  // Do not write back zero because the handler may have set the latch after the copy.
+  if (signal_number)
+    Moose::interrupt_signal_number = signal_number;
+  const bool signal_received = signal_number;
   if (!(on_interval_or_exec_final || signal_received))
     return;
 

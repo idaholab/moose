@@ -1,0 +1,44 @@
+{
+    "reporters": {
+        "mesh_info": {
+            "type": "MeshInfo",
+            "values": {
+                "subdomains": {
+                    "type": "MeshInfo::InfoMap<MeshInfo::DomainInfo<unsigned short, unsigned long>, MeshInfo::DomainInfoItems>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "mesh_info": {
+                "subdomains": null
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "mesh_info": {
+                "subdomains": [
+                    {
+                        "id": 0,
+                        "elem_qualities": {
+                            "max_max_angle": 90.0,
+                            "min_min_angle": 90.0
+                        }
+                    },
+                    {
+                        "id": 1,
+                        "name": "foo",
+                        "elem_qualities": {
+                            "max_max_angle": 90.0,
+                            "min_min_angle": 90.0
+                        }
+                    }
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -338,10 +338,9 @@ RPNEvaluator::RPNEvaluator(const RPNEvaluator & evaluator)
     else if (type == VariableType::FIELD)
       _fields[idx] = *static_cast<const VariableValue *>(ptr);
     else if (type == VariableType::MATERIAL)
-      new (&_properties[idx])
-          MaterialProperty<Real>(*static_cast<const MaterialProperty<Real> *>(ptr));
+      _properties.emplace({idx}, *static_cast<const MaterialProperty<Real> *>(ptr));
     else if (type == VariableType::FUNCTION)
-      new (&_functions[idx]) Function(*static_cast<const Function *>(ptr));
+      _functions.emplace({idx}, *static_cast<const Function *>(ptr));
   }
 
   _scalars.copyToDevice();

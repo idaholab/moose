@@ -17,8 +17,6 @@
 
 #include <algorithm>
 
-using namespace libMesh;
-
 namespace Moose
 {
 

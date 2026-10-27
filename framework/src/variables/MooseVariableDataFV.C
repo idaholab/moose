@@ -581,10 +581,10 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
     assignForAllQps(_ad_dof_values[0], _ad_u, nqp);
 
   if (_need_ad_grad_u)
-    assignForAllQps(static_cast<const MooseVariableFV<OutputType> &>(_var).adGradSln(
-                        _elem, Moose::currentState()),
-                    _ad_grad_u,
-                    nqp);
+    assignForAllQps(
+        cast_ref<const MooseVariableFV<OutputType> &>(_var).adGradSln(_elem, Moose::currentState()),
+        _ad_grad_u,
+        nqp);
 
   if (_need_ad_u_dot)
   {
@@ -779,6 +779,66 @@ void
 MooseVariableDataFV<OutputType>::meshChanged()
 {
   _prev_elem = nullptr;
+}
+
+template <typename OutputType>
+const MooseArray<ADReal> &
+MooseVariableDataFV<OutputType>::adDofValues() const
+{
+  _var.requireQpComputations();
+  _need_ad = true;
+  return _ad_dof_values;
+}
+
+template <typename OutputType>
+const MooseArray<ADReal> &
+MooseVariableDataFV<OutputType>::adDofValuesDot() const
+{
+  _var.requireQpComputations();
+  _need_ad = _need_ad_u_dot = true;
+  return _ad_dofs_dot;
+}
+
+template <typename OutputType>
+const ADTemplateVariableValue<OutputType> &
+MooseVariableDataFV<OutputType>::adSln() const
+{
+  _var.requireQpComputations();
+  _need_ad = _need_ad_u = true;
+  return _ad_u;
+}
+
+template <typename OutputType>
+const ADTemplateVariableGradient<OutputType> &
+MooseVariableDataFV<OutputType>::adGradSln() const
+{
+  _var.requireQpComputations();
+  _need_ad = _need_ad_grad_u = true;
+  return _ad_grad_u;
+}
+
+template <typename OutputType>
+const ADTemplateVariableSecond<OutputType> &
+MooseVariableDataFV<OutputType>::adSecondSln() const
+{
+  _var.requireQpComputations();
+  _need_ad = _need_ad_second_u = true;
+  return _ad_second_u;
+}
+
+template <typename OutputType>
+inline const ADTemplateVariableValue<OutputType> &
+MooseVariableDataFV<OutputType>::adUDot() const
+{
+  _var.requireQpComputations();
+
+  _need_ad = _need_ad_u_dot = true;
+
+  if (!safeToComputeADUDot())
+    // We will just copy the value of _u_dot into _ad_u_dot
+    _need_u_dot = true;
+
+  return _ad_u_dot;
 }
 
 template class MooseVariableDataFV<Real>;

@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import collections
+import fnmatch
 import logging
 import pyhit
 import mooseutils
@@ -25,10 +26,14 @@ def get_requirements_from_tests(directories, specs, include_non_testable=False):
         specs[list]: A list of test specification names (e.g., ['tests'])
     """
     out = collections.defaultdict(list)
+    if isinstance(specs, str):
+        specs = specs.split()
     for location in directories:
         root_dir = mooseutils.git_root_dir(location)
         for filename in sorted(mooseutils.git_ls_files(location)):
-            if os.path.isfile(filename) and (os.path.basename(filename) in specs):
+            if os.path.isfile(filename) and any(
+                fnmatch.fnmatch(os.path.basename(filename), spec) for spec in specs
+            ):
                 local = os.path.relpath(filename, location)
                 group = local.split("/")[0]
                 out[group] += get_requirements_from_file(

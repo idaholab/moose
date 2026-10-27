@@ -3,6 +3,7 @@
 # This is used to initialise the transient solute-transport simulation
 [Mesh]
   type = FileMesh
+  allow_renumbering = false
   # The gold mesh is used to reduce the number of large files in the MOOSE repository.
   # The porepressure is not read from the gold mesh
   file = 'gold/fine_thick_fracture_steady_out.e'
@@ -130,8 +131,17 @@
   nl_rel_tol = 1e-10
 []
 
+[VectorPostprocessors]
+  [fracture_pressure]
+    type = NodalValueSampler
+    variable = pp
+    block = fracture
+    sort_by = id
+  []
+[]
 
 [Outputs]
   exodus = true
+  csv = true
   execute_on = 'timestep_end'
 []

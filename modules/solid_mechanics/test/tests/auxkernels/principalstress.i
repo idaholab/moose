@@ -1,3 +1,7 @@
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   elem_type = HEX8
@@ -11,7 +15,6 @@
   ymax=1.0
   zmin=0.0
   zmax=1.0
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -31,9 +34,9 @@
 
 [Kernels]
   [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
   [../]
 []
+
 
 [Materials]
   [./fplastic]
@@ -50,7 +53,6 @@
   [./strain]
     type = ComputeFiniteStrain
     block = 0
-    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 

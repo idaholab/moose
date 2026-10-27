@@ -7,7 +7,7 @@ If you are using [Mesh Adaptivity](syntax/Adaptivity/index.md), the number of DO
 You might consider using `execute_on = initial timestep_end` in that case. Otherwise `execute_on = initial` should be sufficient.
 
 When scaling your problem up to more processor cores, try not to spread your problem out too much. A good target should be around
-20,000 DOFs in your Nonlinear System. Please see this [PETSc FAQ](http://www.mcs.anl.gov/petsc/documentation/faq.html#slowerparallel) for more information.
+20,000 DOFs in your Nonlinear System. Please see this [PETSc FAQ](https://petsc.org/main/faq/#why-is-my-parallel-solver-slower-than-my-sequential-solver-or-i-have-poor-speed-up) for more information.
 
 ## Description and Syntax
 

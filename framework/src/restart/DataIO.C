@@ -21,14 +21,17 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/enum_solver_package.h"
 #include "libmesh/petsc_solver_exception.h"
+#include "libmesh/bounding_box.h"
 
-using namespace libMesh;
+#include "mtwist.h"
 
 template <>
 void
-dataStore(std::ostream & stream, Real & v, void * /*context*/)
+dataStore<mt_state>(std::ostream & stream, mt_state & foo, void * ctx)
 {
-  stream.write((char *)&v, sizeof(v));
+  dataStore(stream, foo.statevec, ctx);
+  dataStore(stream, foo.stateptr, ctx);
+  dataStore(stream, foo.initialized, ctx);
 }
 
 template <>
@@ -47,7 +50,7 @@ template <>
 void
 dataStore(std::ostream & stream, VariableName & v, void * context)
 {
-  auto & name = static_cast<std::string &>(v);
+  auto & name = cast_ref<std::string &>(v);
   dataStore(stream, name, context);
 }
 
@@ -55,15 +58,8 @@ template <>
 void
 dataStore(std::ostream & stream, UserObjectName & v, void * context)
 {
-  auto & name = static_cast<std::string &>(v);
+  auto & name = cast_ref<std::string &>(v);
   dataStore(stream, name, context);
-}
-
-template <>
-void
-dataStore(std::ostream & stream, bool & v, void * /*context*/)
-{
-  stream.write((char *)&v, sizeof(v));
 }
 
 template <>
@@ -95,6 +91,8 @@ template <>
 void
 dataStore(std::ostream & stream, std::vector<bool> & v, void * context)
 {
+  std::size_t size = v.size();
+  dataStore(stream, size, nullptr);
   for (bool b : v)
     dataStore(stream, b, context);
 }
@@ -153,7 +151,7 @@ dataStore(std::ostream & stream, const Elem *& e, void * context)
       mooseError("Can't output Elems with invalid ids!");
   }
 
-  storeHelper(stream, id, context);
+  dataStore(stream, id, context);
 }
 
 template <>
@@ -170,7 +168,7 @@ dataStore(std::ostream & stream, const Node *& n, void * context)
       mooseError("Can't output Nodes with invalid ids!");
   }
 
-  storeHelper(stream, id, context);
+  dataStore(stream, id, context);
 }
 
 template <>
@@ -187,7 +185,7 @@ dataStore(std::ostream & stream, Elem *& e, void * context)
       mooseError("Can't output Elems with invalid ids!");
   }
 
-  storeHelper(stream, id, context);
+  dataStore(stream, id, context);
 }
 
 template <>
@@ -204,7 +202,7 @@ dataStore(std::ostream & stream, Node *& n, void * context)
       mooseError("Can't output Nodes with invalid ids!");
   }
 
-  storeHelper(stream, id, context);
+  dataStore(stream, id, context);
 }
 
 template <>
@@ -218,6 +216,39 @@ dataStore(std::ostream & stream, std::stringstream & s, void * /* context */)
 
   stream.write(s_str.c_str(), sizeof(char) * (s_str.size()));
 }
+
+#ifdef MOOSE_LIBTORCH_ENABLED
+template <>
+void
+dataStore(std::ostream & stream, torch::Tensor & t, void * context)
+{
+  const bool defined = t.defined();
+  dataStore(stream, defined, nullptr);
+
+  if (!defined)
+    return;
+
+  const auto tensor = LibtorchUtils::toCPUContiguous(t);
+  mooseAssert(tensor.scalar_type() == at::kDouble,
+              "Restart storage currently supports only double tensors.");
+
+  auto rank = cast_int<unsigned int>(tensor.dim());
+  dataStore(stream, rank, nullptr);
+  for (unsigned int dim = 0; dim < rank; ++dim)
+  {
+    auto size = cast_int<unsigned int>(tensor.sizes()[dim]);
+    dataStore(stream, size, nullptr);
+  }
+
+  const auto flattened = tensor.reshape({tensor.numel()});
+  const auto t_accessor = flattened.accessor<Real, 1>();
+  for (int64_t i = 0; i < flattened.numel(); ++i)
+  {
+    Real r = t_accessor[i];
+    dataStore(stream, r, context);
+  }
+}
+#endif
 
 template <typename T>
 void
@@ -269,14 +300,25 @@ dataStore(std::ostream & stream, VectorValue<T> & v, void * context)
 template void dataStore(std::ostream & stream, VectorValue<Real> & v, void * context);
 template void dataStore(std::ostream & stream, VectorValue<ADReal> & v, void * context);
 
+template <>
+void
+dataStore(std::ostream & stream, const Point & p, void * context)
+{
+  for (const auto i : make_range(Moose::dim))
+    dataStore(stream, p(i), context);
+}
+
+void
+dataStore(std::ostream & stream, libMesh::BoundingBox & bbox, void * context)
+{
+  dataStore(stream, cast_ref<std::pair<Point, Point> &>(bbox), context);
+}
+
+template <>
 void
 dataStore(std::ostream & stream, Point & p, void * context)
 {
-  for (const auto i : make_range(Moose::dim))
-  {
-    Real r = p(i);
-    dataStore(stream, r, context);
-  }
+  dataStore(stream, const_cast<const Point &>(p), context);
 }
 
 template <>
@@ -295,11 +337,11 @@ dataStore(std::ostream & stream, libMesh::Parameters & p, void * context)
     auto & key = const_cast<std::string &>(it->first);
     auto type = it->second->type();
 
-    storeHelper(stream, key, context);
-    storeHelper(stream, type, context);
+    dataStore(stream, key, context);
+    dataStore(stream, type, context);
 
 #define storescalar(ptype)                                                                         \
-  else if (it->second->type() == demangle(typeid(ptype).name())) storeHelper(                      \
+  else if (it->second->type() == demangle(typeid(ptype).name())) dataStore(                        \
       stream,                                                                                      \
       (dynamic_cast<libMesh::Parameters::Parameter<ptype> *>(MooseUtils::get(it->second)))->get(), \
       context)
@@ -346,7 +388,7 @@ dataStore(std::ostream & stream,
   // Store the solver package so that we know what vector type to construct
   libMesh::SolverPackage solver_package;
   if (dynamic_cast<libMesh::PetscVector<Number> *>(v.get()))
-    solver_package = PETSC_SOLVERS;
+    solver_package = libMesh::PETSC_SOLVERS;
   else
     mooseError("Can only store unique_ptrs of PetscVectors");
   int solver_package_int = solver_package;
@@ -366,9 +408,11 @@ dataStore(std::ostream & stream,
 
 template <>
 void
-dataLoad(std::istream & stream, Real & v, void * /*context*/)
+dataLoad<mt_state>(std::istream & stream, mt_state & foo, void * ctx)
 {
-  stream.read((char *)&v, sizeof(v));
+  dataLoad(stream, foo.statevec, ctx);
+  dataLoad(stream, foo.stateptr, ctx);
+  dataLoad(stream, foo.initialized, ctx);
 }
 
 template <>
@@ -390,7 +434,7 @@ template <>
 void
 dataLoad(std::istream & stream, VariableName & v, void * context)
 {
-  auto & name = static_cast<std::string &>(v);
+  auto & name = cast_ref<std::string &>(v);
   dataLoad(stream, name, context);
 }
 
@@ -398,15 +442,8 @@ template <>
 void
 dataLoad(std::istream & stream, UserObjectName & v, void * context)
 {
-  auto & name = static_cast<std::string &>(v);
+  auto & name = cast_ref<std::string &>(v);
   dataLoad(stream, name, context);
-}
-
-template <>
-void
-dataLoad(std::istream & stream, bool & v, void * /*context*/)
-{
-  stream.read((char *)&v, sizeof(v));
 }
 
 template <>
@@ -435,8 +472,15 @@ template <>
 void
 dataLoad(std::istream & stream, std::vector<bool> & v, void * context)
 {
-  for (bool b : v)
+  std::size_t size = 0;
+  dataLoad(stream, size, nullptr);
+  v.resize(size);
+  for (std::size_t i = 0; i < size; i++)
+  {
+    bool b;
     dataLoad(stream, b, context);
+    v[i] = b;
+  }
 }
 
 template <>
@@ -472,7 +516,7 @@ dataLoad(std::istream & stream, const Elem *& e, void * context)
   // TODO: Write out the unique ID of this element
   dof_id_type id = libMesh::DofObject::invalid_id;
 
-  loadHelper(stream, id, context);
+  dataLoad(stream, id, context);
 
   if (id != libMesh::DofObject::invalid_id)
     e = mesh->elemPtr(id);
@@ -492,7 +536,7 @@ dataLoad(std::istream & stream, const Node *& n, void * context)
   // TODO: Write out the unique ID of this nodeent
   dof_id_type id = libMesh::DofObject::invalid_id;
 
-  loadHelper(stream, id, context);
+  dataLoad(stream, id, context);
 
   if (id != libMesh::DofObject::invalid_id)
     n = mesh->nodePtr(id);
@@ -512,7 +556,7 @@ dataLoad(std::istream & stream, Elem *& e, void * context)
   // TODO: Write out the unique ID of this element
   dof_id_type id = libMesh::DofObject::invalid_id;
 
-  loadHelper(stream, id, context);
+  dataLoad(stream, id, context);
 
   if (id != libMesh::DofObject::invalid_id)
     e = mesh->elemPtr(id);
@@ -532,7 +576,7 @@ dataLoad(std::istream & stream, Node *& n, void * context)
   // TODO: Write out the unique ID of this nodeent
   dof_id_type id = libMesh::DofObject::invalid_id;
 
-  loadHelper(stream, id, context);
+  dataLoad(stream, id, context);
 
   if (id != libMesh::DofObject::invalid_id)
     n = mesh->nodePtr(id);
@@ -554,6 +598,42 @@ dataLoad(std::istream & stream, std::stringstream & s, void * /* context */)
   s.str(std::string());
   s.write(s_s.get(), s_size);
 }
+
+#ifdef MOOSE_LIBTORCH_ENABLED
+template <>
+void
+dataLoad(std::istream & stream, torch::Tensor & t, void * context)
+{
+  bool defined = false;
+  dataLoad(stream, defined, nullptr);
+  if (!defined)
+  {
+    t = torch::Tensor(); // undefined tensor
+    return;
+  }
+
+  unsigned int rank = 0;
+  dataLoad(stream, rank, nullptr);
+
+  std::vector<int64_t> sizes(rank);
+  for (unsigned int dim = 0; dim < rank; ++dim)
+  {
+    unsigned int size = 0;
+    dataLoad(stream, size, nullptr);
+    sizes[dim] = size;
+  }
+
+  t = torch::empty(sizes, at::kDouble);
+  auto flattened = t.reshape({t.numel()});
+  auto t_accessor = flattened.accessor<Real, 1>();
+  for (int64_t i = 0; i < flattened.numel(); ++i)
+  {
+    Real r = 0;
+    dataLoad(stream, r, context);
+    t_accessor[i] = r;
+  }
+}
+#endif
 
 template <typename T>
 void
@@ -610,15 +690,18 @@ dataLoad(std::istream & stream, VectorValue<T> & v, void * context)
 template void dataLoad(std::istream & stream, VectorValue<Real> & v, void * context);
 template void dataLoad(std::istream & stream, VectorValue<ADReal> & v, void * context);
 
+template <>
 void
 dataLoad(std::istream & stream, Point & p, void * context)
 {
   for (const auto i : make_range(Moose::dim))
-  {
-    Real r = 0;
-    dataLoad(stream, r, context);
-    p(i) = r;
-  }
+    dataLoad(stream, p(i), context);
+}
+
+void
+dataLoad(std::istream & stream, libMesh::BoundingBox & bbox, void * context)
+{
+  dataLoad(stream, cast_ref<std::pair<Point, Point> &>(bbox), context);
 }
 
 template <>
@@ -634,14 +717,14 @@ dataLoad(std::istream & stream, libMesh::Parameters & p, void * context)
   for (unsigned int i = 0; i < size; i++)
   {
     std::string key, type;
-    loadHelper(stream, key, context);
-    loadHelper(stream, type, context);
+    dataLoad(stream, key, context);
+    dataLoad(stream, type, context);
 
 #define loadscalar(ptype)                                                                          \
   else if (type == demangle(typeid(ptype).name())) do                                              \
   {                                                                                                \
     ptype & value = p.set<ptype>(key);                                                             \
-    loadHelper(stream, value, context);                                                            \
+    dataLoad(stream, value, context);                                                              \
   }                                                                                                \
   while (0)
 

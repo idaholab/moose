@@ -8,7 +8,7 @@ associated algorithmic tangent
 \begin{equation}
       T_{ijkl} = \frac{d \sigma_{ij}}{d \Delta l_{kl}}
 \end{equation}
-See [here](NewMaterialSystem.md) for a complete description of the Lagrangian
+See [here](ObjectiveStressRates.md) for a complete description of the Lagrangian
 kernel material system and for detailed instructions on how to implement
 a new material model.
 

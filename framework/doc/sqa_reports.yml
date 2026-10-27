@@ -38,6 +38,7 @@ Requirements:
     moose_test:
         directories:
             - test/tests
+            - unit/src
         show_warning: false
         include_non_testable: true
         log_testable: WARNING

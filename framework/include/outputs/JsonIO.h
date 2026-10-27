@@ -25,7 +25,8 @@
 class MooseApp;
 
 /**
- * Type definition for a variant that can hold all the supported types for lattice attributes
+ * Type definition for a variant that can hold all the supported types for lattice and CSG
+ * engineering unit attributes
  */
 typedef std::variant<int,
                      unsigned int,
@@ -36,11 +37,13 @@ typedef std::variant<int,
                      std::vector<unsigned int>,
                      std::vector<std::string>,
                      std::vector<Real>,
-                     std::vector<bool>>
+                     std::vector<bool>,
+                     std::vector<std::vector<std::string>>>
     AttributeVariant;
 
 namespace libMesh
 {
+class BoundingBox;
 class Point;
 template <typename T>
 class DenseVector;
@@ -57,6 +60,7 @@ void to_json(nlohmann::json & json, const MooseApp & app); // MooseDocs:to_json
 
 namespace libMesh
 {
+void to_json(nlohmann::json & json, const BoundingBox & p);
 void to_json(nlohmann::json & json, const Point & p);
 void to_json(nlohmann::json & json, const DenseVector<Real> & vector);
 void to_json(nlohmann::json & json, const DenseMatrix<Real> & matrix);
@@ -160,5 +164,5 @@ template <typename T>
 void
 to_json(nlohmann::json & json, const GenericTwoVector<T> & two_vector)
 {
-  to_json(json, static_cast<const Eigen::Matrix<T, 2, 1> &>(two_vector));
+  to_json(json, libMesh::cast_ref<const Eigen::Matrix<T, 2, 1> &>(two_vector));
 }

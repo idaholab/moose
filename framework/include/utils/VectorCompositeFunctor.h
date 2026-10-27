@@ -12,8 +12,6 @@
 #include "MooseFunctor.h"
 #include "libmesh/vector_value.h"
 
-using libMesh::VectorValue;
-
 namespace Moose
 {
 /**

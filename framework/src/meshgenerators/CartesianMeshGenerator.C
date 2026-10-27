@@ -305,15 +305,15 @@ CartesianMeshGenerator::generate()
   switch (_dim)
   {
     case 1:
-      MeshTools::Generation::build_line(static_cast<UnstructuredMesh &>(*mesh), _nx, 0, _nx, EDGE2);
+      MeshTools::Generation::build_line(cast_ref<UnstructuredMesh &>(*mesh), _nx, 0, _nx, EDGE2);
       break;
     case 2:
       MeshTools::Generation::build_square(
-          static_cast<UnstructuredMesh &>(*mesh), _nx, _ny, 0, _nx, 0, _ny, QUAD4);
+          cast_ref<UnstructuredMesh &>(*mesh), _nx, _ny, 0, _nx, 0, _ny, QUAD4);
       break;
     case 3:
       MeshTools::Generation::build_cube(
-          static_cast<UnstructuredMesh &>(*mesh), _nx, _ny, _nz, 0, _nx, 0, _ny, 0, _nz, HEX8);
+          cast_ref<UnstructuredMesh &>(*mesh), _nx, _ny, _nz, 0, _nx, 0, _ny, 0, _nz, HEX8);
       break;
   }
 

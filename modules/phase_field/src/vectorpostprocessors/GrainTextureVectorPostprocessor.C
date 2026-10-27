@@ -69,7 +69,7 @@ GrainTextureVectorPostprocessor::execute()
 void
 GrainTextureVectorPostprocessor::threadJoin(const UserObject & y)
 {
-  const auto & vpp = static_cast<const GrainTextureVectorPostprocessor &>(y);
+  const auto & vpp = cast_ref<const GrainTextureVectorPostprocessor &>(y);
   SamplerBase::threadJoin(vpp);
 }
 

@@ -49,7 +49,7 @@ approaches. Both approaches are implemented by overloading the `evaluateSolution
 
    In this case, the approximate solution vectors are reconstructed and stored within the surrogate object and
    the QoI-s for a given variable can be acquired using the `getNodalQoI` function.
-   A good example for this approach is the implementation of the `execute` function in [/PODSurrogateTester.C].
+   A good example for this approach is the implementation of the `execute` function in [!file](/PODSurrogateTester.C).
 
    !listing PODSurrogateTester.C re=PODSurrogateTester::execute.*?^}
 

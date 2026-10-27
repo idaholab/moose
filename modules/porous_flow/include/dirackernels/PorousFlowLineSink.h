@@ -11,6 +11,7 @@
 
 #include "PorousFlowLineGeometry.h"
 #include "PorousFlowSumQuantity.h"
+#include "PorousFlowPointFluxQuantity.h"
 #include "PorousFlowDictator.h"
 
 /**
@@ -62,6 +63,13 @@ protected:
    * from porespace into the line sink (and hence removed from the model)
    */
   PorousFlowSumQuantity & _total_outflow_mass;
+
+  /**
+   * Optional recorder of the instantaneous flux at each Dirac point of this line sink.  nullptr
+   * unless the PointFluxUO parameter was supplied.  Unlike _total_outflow_mass, this is not
+   * multiplied by the timestep size.
+   */
+  PorousFlowPointFluxQuantity * const _point_fluxes;
 
   /// Whether a quadpoint porepressure material exists (for error checking)
   const bool _has_porepressure;

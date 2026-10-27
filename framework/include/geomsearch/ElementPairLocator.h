@@ -43,9 +43,9 @@ public:
 
   typedef std::list<std::pair<const Elem *, const Elem *>> ElementPairList;
 
-  virtual void reinit(){};
+  virtual void reinit() {}
 
-  virtual void update(){};
+  virtual void update() {}
 
   const ElementPairList & getElemPairs() const
   {

@@ -28,6 +28,9 @@ AddMFEMComplexKernelComponentAction::AddMFEMComplexKernelComponentAction(
     const InputParameters & parameters)
   : MooseObjectAction(parameters)
 {
+  // Block restriction is taken from the parent MFEMComplexKernel.
+  if (_moose_object_pars.have_parameter<std::vector<SubdomainName>>("block"))
+    _moose_object_pars.suppressParameter<std::vector<SubdomainName>>("block");
 }
 
 void
@@ -37,10 +40,10 @@ AddMFEMComplexKernelComponentAction::act()
   MooseUtils::tokenize<std::string>(_pars.blockFullpath(), elements);
 
   if (_problem->feBackend() == Moose::FEBackend::MFEM && _name == "RealComponent")
-    static_cast<MFEMProblem &>(*_problem).addRealComponentToKernel(
+    cast_ref<MFEMProblem &>(*_problem).addRealComponentToKernel(
         _type, elements[elements.size() - 2], _moose_object_pars);
   else if (_problem->feBackend() == Moose::FEBackend::MFEM && _name == "ImagComponent")
-    static_cast<MFEMProblem &>(*_problem).addImagComponentToKernel(
+    cast_ref<MFEMProblem &>(*_problem).addImagComponentToKernel(
         _type, elements[elements.size() - 2], _moose_object_pars);
 }
 

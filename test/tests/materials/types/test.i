@@ -204,23 +204,28 @@
     type = MaterialStdVectorRealGradientAux
     variable = stdvecgrad00
     property = stdvec_grad_prop
+    index = 0
+    component = 0
   [../]
   [./stdvecgrad01]
     type = MaterialStdVectorRealGradientAux
     variable = stdvecgrad01
     property = stdvec_grad_prop
+    index = 0
     component = 1
   [../]
   [./stdvecgrad02]
     type = MaterialStdVectorRealGradientAux
     variable = stdvecgrad02
     property = stdvec_grad_prop
+    index = 0
     component = 2
   [../]
   [./stdvecgrad10]
     type = MaterialStdVectorRealGradientAux
     variable = stdvecgrad10
     index = 1
+    component = 0
     property = stdvec_grad_prop
   [../]
   [./stdvecgrad11]

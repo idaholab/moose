@@ -1,6 +1,8 @@
 
 !include header_and_mesh.i
 
+turbulence_advected_interp_method = ${advected_interp_method}
+
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system TKE_system TKED_system'
   previous_nl_solution_required = true
@@ -63,6 +65,8 @@
       turbulence_walls = ${walls}
       wall_treatment_eps = ${wall_treatment}
       bulk_wall_treatment = ${bulk_wall_treatment}
+      tke_advection_interpolation = ${turbulence_advected_interp_method}
+      tked_advection_interpolation = ${turbulence_advected_interp_method}
       use_nonorthogonal_correction = false
     []
   []

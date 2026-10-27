@@ -9,8 +9,6 @@
 
 #include "CoupledDiffusionReactionSub.h"
 
-using libMesh::RealGradient;
-
 registerMooseObject("ChemicalReactionsApp", CoupledDiffusionReactionSub);
 
 InputParameters
@@ -96,7 +94,6 @@ CoupledDiffusionReactionSub::computeQpResidual()
   mooseAssert(_gamma_eq[_qp] > 0.0, "Activity coefficient must be greater than zero");
   return _weight * std::pow(10.0, _log_k[_qp]) * _diffusivity[_qp] * _grad_test[_i][_qp] *
          (diff1 + diff2_sum) / _gamma_eq[_qp];
-  ;
 }
 
 Real

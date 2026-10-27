@@ -37,6 +37,8 @@ MortarConstraintBase::validParams()
                                       obj_params.get<SubdomainName>("secondary_subdomain");
                                   rm_params.set<SubdomainName>("primary_subdomain") =
                                       obj_params.get<SubdomainName>("primary_subdomain");
+                                  rm_params.set<bool>("ghost_point_neighbors") =
+                                      obj_params.get<bool>("ghost_point_neighbors");
                                   rm_params.set<bool>("ghost_higher_d_neighbors") =
                                       obj_params.get<bool>("ghost_higher_d_neighbors");
                                 });
@@ -46,8 +48,9 @@ MortarConstraintBase::validParams()
   // variable, the process that owns the node needs to have local copies of any lower-d elements
   // that have the connected node. Note that the geometric ghosting done here is different than that
   // done by the AugmentSparsityOnInterface RM, even when ghost_point_neighbors is true. The latter
-  // ghosts equal-manifold lower-dimensional secondary element point neighbors and their interface
-  // couplings. This ghosts lower-dimensional point neighbors of higher-dimensional elements.
+  // ghosts equal-manifold lower-dimensional secondary element point neighbors, their interior
+  // parents, and their interface couplings. This ghosts lower-dimensional point neighbors of
+  // higher-dimensional elements.
   // Neither is guaranteed to be a superset of the other. For instance ghosting of lower-d point
   // neighbors (AugmentSparsityOnInterface with ghost_point_neighbors = true) is only guaranteed to
   // ghost those lower-d point neighbors on *processes that own lower-d elements*. And you may have
@@ -251,6 +254,14 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
   {
     for (const auto node : inactive_lm_nodes)
     {
+      // AutomaticMortarGeneration::computeInactiveLMNodes and
+      // computeIncorrectEdgeDroppingInactiveLMNodes only return nodes owned by this processor.
+      // The ownership check guarantees that no node is zeroed by more than one processor, which
+      // would add its Jacobian/residual contribution once per processor and over-constrain the
+      // dof.
+      if (node->processor_id() != _subproblem.processor_id())
+        continue;
+
       // Allow mixed Lagrange orders between primal and LM
       if (!node->n_comp(sn, vn))
         continue;

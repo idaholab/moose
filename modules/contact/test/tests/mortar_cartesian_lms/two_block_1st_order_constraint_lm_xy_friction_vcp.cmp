@@ -1,0 +1,17 @@
+# Frictional mortar contact is a non-smooth complementarity problem, so the exact
+# number of Newton/linear iterations needed to reach convergence is sensitive to
+# platform-specific floating-point rounding, even though the converged nodal
+# solution (checked below) is unaffected. Widen the solver-iteration-count
+# postprocessors accordingly, following the precedent set for the analogous
+# num_nl/cumulative postprocessors in
+# contact/test/tests/3d-mortar-contact/frictionless-mortar-3d.cmp.
+
+ELEMENT VARIABLES (all)
+
+NODAL VARIABLES (all)
+
+GLOBAL VARIABLES (all)
+	num_lin_it       relative 3e-1
+	num_nonlin_it    relative 3e-1
+	tot_lin_it       relative 3e-1
+	tot_nonlin_it    relative 3e-1

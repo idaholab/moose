@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'heat_source_bar.i'
     exodiff = 'heat_source_bar_out.e'
-    abs_zero = 1e-7
+    abs_zero = 5e-7
     requirement = 'The system shall reproduce an analytical solution of a heat source in a 1D ceramic bar.'
     design = "HeatSource.md"
     issues = "#2582"

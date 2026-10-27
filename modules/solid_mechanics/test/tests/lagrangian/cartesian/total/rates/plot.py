@@ -80,4 +80,10 @@ if __name__ == "__main__":
         analytical_green_naghdi,
     )
 
+    compare(
+        "Rashid rate of Cauchy stress",
+        "rashid_shear_out.csv",
+        analytical_jaumann,
+    )
+
     plt.show()

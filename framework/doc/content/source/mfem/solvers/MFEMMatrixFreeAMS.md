@@ -16,7 +16,7 @@ where $\vec u, \vec v \in H(\mathrm{curl})$ and $\alpha$ and $\beta$ are scalar 
 
 The number of CG iterations to use for inner solves on the auxiliary spaces associated with the
 Nédélec interpolation operator $\Pi$ and the gradient operator $G$ can be controlled by the
-`inner_pi_iterations` and `inner_g_iterations` parameters, which default to 0 and 1, respectively.
+`inner_pi_iterations` and `inner_g_iterations` parameters, which both default to 2.
 Increasing these may aid convergence when $\alpha$ and/or $\beta$ are highly discontinuous.
 
 The method used corresponds to a matrix-free version of Hypre's AMS preconditioner (with default
@@ -28,7 +28,7 @@ comparisons against Hypre's AMS preconditioner for 2D problems, can be found in
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/curlcurl.i block=Preconditioner Solvers
+!listing test/tests/mfem/kernels/curlcurl.i block=Solvers
 
 !syntax parameters /Solvers/MFEMMatrixFreeAMS
 

@@ -16,11 +16,9 @@
       []
       [verify]
         type = RunCommand
-        command = '../check.sh
-                  u
-                  OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
-                  u
-                  OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
+        command = 'python -m mooseutils.csvdiff
+                  OutputData/parent_line_sample_0001.csv
+                  OutputData/sub_line_sample_0001.csv'
         prereq = MFEMShapeEvaluationTransfer/FromSubToParent/run
         capabilities = 'mfem'
         recover = false
@@ -37,7 +35,6 @@
         recover = false
         cli_args = 'Transfers/active=general_transfer_from_sub'
         detail = 'running the inputs, and '
-        max_parallel = 1 # idaholab/moose#32250
       []
       [verify]
         type = RunCommand
@@ -118,14 +115,13 @@
       []
       [verify]
         type = RunCommand
-        command = '../check.sh
-                  u
-                  OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
-                  u
-                  OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
+        command = 'python -m mooseutils.csvdiff
+                  OutputData/parent_line_sample_0001.csv
+                  OutputData/sub_line_sample_0001.csv'
         prereq = MFEMCopyTransfer/FromSubToParent/run
         capabilities = 'mfem'
         recover = false
+        min_slots = 2 # memory heavy
         detail = 'checking the sub-application and parent application outputs against each other.'
       []
     []
@@ -143,14 +139,13 @@
       []
       [verify]
         type = RunCommand
-        command = '../check.sh
-                  u
-                  OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
-                  u
-                  OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
+        command = 'python -m mooseutils.csvdiff
+                  OutputData/parent_line_sample_0001.csv
+                  OutputData/sub_line_sample_0001.csv'
         prereq = MFEMCopyTransfer/ToSubFromParent/run
         capabilities = 'mfem'
         recover = false
+        min_slots = 2 # memory heavy
         detail = 'checking the sub-application and parent application outputs against each other.'
       []
     []
@@ -163,7 +158,6 @@
         compute_devices = 'cpu cuda'
         recover = false
         detail = 'running the inputs, and'
-        max_parallel = 1 # idaholab/moose#32250
       []
       [verify]
         type = RunCommand
@@ -176,6 +170,7 @@
         capabilities = 'mfem'
         recover = false
         detail = 'checking the complex sub-application and complex parent application outputs against each other.'
+        min_slots = 2
       []
     []
     [ComplexToSubFromParent]
@@ -189,7 +184,6 @@
         cli_args = 'MultiApps/active=subapp Transfers/active=to_sub '
                   'subapp:MultiApps/active="" subapp:Transfers/active=""'
         detail = 'running the inputs, and'
-        max_parallel = 1 # idaholab/moose#32250
       []
       [verify]
         type = RunCommand

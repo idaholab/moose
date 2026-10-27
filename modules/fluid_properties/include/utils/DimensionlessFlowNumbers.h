@@ -13,8 +13,6 @@
 
 #include "libmesh/libmesh_common.h"
 
-using namespace libMesh;
-
 namespace fp
 {
 

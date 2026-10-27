@@ -33,11 +33,11 @@ R_{\sigma} \approx V\epsilon_{\sigma}
 \end{equation}
 Corresponding to the choice $\epsilon_{P}\approx  1\,$Pa.m$^{-1}$ made in [Page 02](porous_flow/tutorial_02.md) the choice $\epsilon_{\sigma}\approx 1\,$Pa.m$^{-1}$ may be made here.  This means $R_{\sigma}\approx V$ which is significantly greater than $R_{P}\approx 10^{-10}V$ for the fluid equation.  Therefore, the displacement variables are scaled by $10^{-10}$.
 
-Many mechanically-related MOOSE objects (`Kernels`, `BCs`, etc) accept the `use_displaced_mesh` input parameter.  For virtually all PorousFlow simulations, it is appropriate to set this to false: `use_displaced_mesh = false`.  This means that the Kernel's residual (or BC's residual, Postprocessor's value, etc) will be evaluated using the undisplaced mesh.  This has the great numerical advantage that the solid-mechanics elasticity equations remain linear.
+Some mechanically-related MOOSE objects (`Kernels`, `BCs`, etc) accept the `use_displaced_mesh` input parameter.  For virtually all PorousFlow simulations, it is appropriate to set this to false: `use_displaced_mesh = false`.  This means that the Kernel's residual (or BC's residual, Postprocessor's value, etc) will be evaluated using the undisplaced mesh.  This has the great numerical advantage that the solid-mechanics elasticity equations remain linear.
 
-Also, many mechanically-related MOOSE objects require the `displacements` input parameter.  Therefore, it is convenient to put this parameter into the `GlobalParams` block:
+Also, some mechanically-related MOOSE objects require the `displacements` input parameter.  Therefore, it is convenient to put this parameter into the `GlobalParams` block:
 
-!listing modules/porous_flow/examples/tutorial/04.i start=[GlobalParams] end=[Variables]
+!listing modules/porous_flow/examples/tutorial/04.i block=GlobalParams
 
 To model this thermo-hydro-mechanical system, the `PorousFlowBasicTHM` action needs to be enhanced to read:
 
@@ -49,7 +49,9 @@ The boundary conditions used here are roller boundary conditions, as well as bou
 
 The `SolidMechanics` module of MOOSE provides some useful `AuxKernels` for extracting effective stresses of interest to this problem (the effective radial stress and the effective hoop stress)
 
-!listing modules/porous_flow/examples/tutorial/04.i start=[AuxVariables] end=[Modules]
+!listing modules/porous_flow/examples/tutorial/04.i block=AuxVariables
+
+!listing modules/porous_flow/examples/tutorial/04.i block=AuxKernels
 
 Finally, some mechanics-related `Materials` need to be defined
 

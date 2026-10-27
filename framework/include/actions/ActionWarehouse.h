@@ -138,7 +138,7 @@ public:
   template <class T>
   T & getAction(const std::string & name)
   {
-    return const_cast<T &>(static_cast<const ActionWarehouse *>(this)->getAction<T>(name));
+    return const_cast<T &>(cast_ptr<const ActionWarehouse *>(this)->getAction<T>(name));
   }
 
   /**
@@ -316,6 +316,22 @@ protected:
    * @param task The name of the task to find and build Actions for.
    */
   void buildBuildableActions(const std::string & task);
+
+  /**
+   * @return The names of the UserObjects referenced by \p params through its UserObjectName (or
+   * std::vector<UserObjectName>) parameters. Mirrors
+   * MeshGeneratorSystem::getMeshGeneratorParamDependencies.
+   */
+  std::vector<UserObjectName> getUserObjectParamDependencies(const InputParameters & params) const;
+
+  /**
+   * Reorder the UserObject-constructing actions \p actions so that a UserObject that references
+   * another (through a UserObjectName parameter) is constructed after the one it references. This
+   * makes the input order-agnostic: a referenced UserObject no longer has to be declared before the
+   * UserObject that uses it in its constructor. Mirrors the dependency resolution
+   * MeshGeneratorSystem performs for mesh generators.
+   */
+  void sortUserObjectActions(std::list<Action *> & actions) const;
 
   std::vector<std::shared_ptr<Action>> _all_ptrs;
 

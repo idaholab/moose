@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #pragma once
 
@@ -83,9 +84,9 @@ protected:
   const Real & _learning_function_parameter;
 
   /// Store all the input vectors used for training
-  std::vector<std::vector<Real>> _inputs_batch;
+  std::vector<std::vector<Real>> & _inputs_batch;
   /// Store all the outputs used for training
-  std::vector<Real> _outputs_batch;
+  std::vector<Real> & _outputs_batch;
 
   /// The active learning GP trainer that permits re-training
   const ActiveLearningGaussianProcess & _al_gp;
@@ -107,10 +108,12 @@ protected:
   std::vector<Real> & _gp_std;
 
   /// GP pass/fail decision
-  bool _decision;
+  bool & _decision;
 
   /// Reference to global input data requested from base class
   const std::vector<std::vector<Real>> & _inputs_global;
   /// Reference to global output data requested from base class
   const std::vector<Real> & _outputs_global;
 };
+
+#endif

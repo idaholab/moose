@@ -167,7 +167,7 @@ The skewness-correction of the compact (central-difference) stencil can be expre
 meaning that the approximate face value ($\phi_{f'}$) at the intersection of
 the line connecting the cell centroids and the face ($\vec{r}_{f'}$) is corrected using the
 approximate gradient at that point and a correction vector $(\vec{r}_{f'}-\vec{r}_f)$.
-This yields second order convergence on [skewed](skewness-correction/adv-diff-react/skewed.i)
+This yields second order convergence on [!file text=skewed](skewness-correction/adv-diff-react/skewed.i)
 meshes where the compact stencil falls back to first order. However, this
 comes with an additional computational cost in the system assembly process.
 

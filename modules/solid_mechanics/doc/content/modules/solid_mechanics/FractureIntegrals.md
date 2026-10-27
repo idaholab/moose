@@ -54,7 +54,7 @@ The first term in $\bar{J}$, $\bar{J}_1$, represents the effects of strain energ
 \begin{equation}
 \bar{J}_2 = \int_{V_0} \sigma_{ij} \left [ \alpha_{ij} \frac{\partial \bar{\theta}}{\partial X_k} + \frac{\partial \alpha_{ij}}{\partial X_k} \bar{\theta} \right] q_k dV_0
 \end{equation}
-where $\sigma_{ij}$, $\alpha_{ij}$ and $\bar{\theta}$ are the Cauchy stress, thermal conductivity, and difference between the current temperature and a reference temperature, respectively.
+where $\sigma_{ij}$, $\alpha_{ij}$ and $\bar{\theta}$ are the Cauchy stress, coefficient of thermal expansion, and difference between the current temperature and a reference temperature, respectively.
 
 The third term in $\bar{J}$, $\bar{J}_3$, accounts for inertial effects in a dynamic analysis, and the fourth term, $\bar{J}_4$ accounts for the effects of surface tractions on the crack face.
 

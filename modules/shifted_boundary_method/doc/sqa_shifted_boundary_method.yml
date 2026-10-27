@@ -1,0 +1,11 @@
+directories:
+    - ${MOOSE_DIR}/modules/shifted_boundary_method/test/tests
+    - ${MOOSE_DIR}/modules/shifted_boundary_method/unit/src
+specs:
+    - tests
+    - '*.unit_tests'
+dependencies:
+    - framework
+repos:
+    default: https://github.com/idaholab/moose
+reports: !include ${MOOSE_DIR}/modules/shifted_boundary_method/doc/sqa_reports.yml

@@ -33,7 +33,7 @@ KokkosCopyValueAux::KokkosCopyValueAux(const InputParameters & parameters)
     _v(_state == 0   ? kokkosCoupledDofValue("source")
        : _state == 1 ? kokkosCoupledDofValueOld("source")
                      : kokkosCoupledDofValueOlder("source")),
-    _source_variable(*getVar("source", 0))
+    _source_variable(*getVarHelper<MooseVariableBase>("source", 0))
 {
   if (_var.feType().family != _source_variable.feType().family)
     paramError("variable",

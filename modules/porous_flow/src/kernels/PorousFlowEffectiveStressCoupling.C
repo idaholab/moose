@@ -14,11 +14,13 @@
 #include "MooseVariable.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowEffectiveStressCoupling);
+registerMooseObject("PorousFlowApp", ADPorousFlowEffectiveStressCoupling);
 
+template <bool is_ad>
 InputParameters
-PorousFlowEffectiveStressCoupling::validParams()
+PorousFlowEffectiveStressCouplingTempl<is_ad>::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
   params.addClassDescription("Implements the weak form of the expression biot_coefficient * "
                              "grad(effective fluid pressure)");
   params.addRequiredParam<UserObjectName>(
@@ -30,49 +32,70 @@ PorousFlowEffectiveStressCoupling::validParams()
   return params;
 }
 
-PorousFlowEffectiveStressCoupling::PorousFlowEffectiveStressCoupling(
+template <bool is_ad>
+PorousFlowEffectiveStressCouplingTempl<is_ad>::PorousFlowEffectiveStressCouplingTempl(
     const InputParameters & parameters)
-  : Kernel(parameters),
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _coefficient(getParam<Real>("biot_coefficient")),
-    _component(getParam<unsigned int>("component")),
-    _pf(getMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_qp")),
-    _dpf_dvar(
-        getMaterialProperty<std::vector<Real>>("dPorousFlow_effective_fluid_pressure_qp_dvar")),
-    _rz(getBlockCoordSystem() == Moose::COORD_RZ)
+  : GenericKernel<is_ad>(parameters),
+    _dictator(this->template getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _coefficient(this->template getParam<Real>("biot_coefficient")),
+    _component(this->template getParam<unsigned int>("component")),
+    _pf(this->template getGenericMaterialProperty<Real, is_ad>(
+        "PorousFlow_effective_fluid_pressure_qp")),
+    _dpf_dvar(is_ad ? nullptr
+                    : &this->template getMaterialProperty<std::vector<Real>>(
+                          "dPorousFlow_effective_fluid_pressure_qp_dvar")),
+    _rz(this->getBlockCoordSystem() == Moose::COORD_RZ)
 {
-  if (_component >= _mesh.dimension())
-    paramError("component", "The component cannot be greater than the mesh dimension");
+  if (_component >= this->_mesh.dimension())
+    this->paramError("component", "The component cannot be greater than the mesh dimension");
 }
 
-Real
-PorousFlowEffectiveStressCoupling::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowEffectiveStressCouplingTempl<is_ad>::computeQpResidual()
 {
   if (_rz && _component == 0)
     return -_coefficient * _pf[_qp] * (_grad_test[_i][_qp](0) + _test[_i][_qp] / _q_point[_qp](0));
   return -_coefficient * _pf[_qp] * _grad_test[_i][_qp](_component);
 }
 
+template <bool is_ad>
 Real
-PorousFlowEffectiveStressCoupling::computeQpJacobian()
+PorousFlowEffectiveStressCouplingTempl<is_ad>::computeQpJacobian()
 {
-  if (_dictator.notPorousFlowVariable(_var.number()))
-    return 0.0;
-  const unsigned int pvar = _dictator.porousFlowVariableNum(_var.number());
-  if (_rz && _component == 0)
-    return -_coefficient * _phi[_j][_qp] * _dpf_dvar[_qp][pvar] *
-           (_grad_test[_i][_qp](0) + _test[_i][_qp] / _q_point[_qp](0));
-  return -_coefficient * _phi[_j][_qp] * _dpf_dvar[_qp][pvar] * _grad_test[_i][_qp](_component);
+  if constexpr (!is_ad)
+  {
+    if (_dictator.notPorousFlowVariable(_var.number()))
+      return 0.0;
+    const unsigned int pvar = _dictator.porousFlowVariableNum(_var.number());
+    if (_rz && _component == 0)
+      return -_coefficient * _phi[_j][_qp] * (*_dpf_dvar)[_qp][pvar] *
+             (_grad_test[_i][_qp](0) + _test[_i][_qp] / _q_point[_qp](0));
+    return -_coefficient * _phi[_j][_qp] * (*_dpf_dvar)[_qp][pvar] *
+           _grad_test[_i][_qp](_component);
+  }
+  return 0.0;
 }
 
+template <bool is_ad>
 Real
-PorousFlowEffectiveStressCoupling::computeQpOffDiagJacobian(unsigned int jvar)
+PorousFlowEffectiveStressCouplingTempl<is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (_dictator.notPorousFlowVariable(jvar))
-    return 0.0;
-  const unsigned int pvar = _dictator.porousFlowVariableNum(jvar);
-  if (_rz && _component == 0)
-    return -_coefficient * _phi[_j][_qp] * _dpf_dvar[_qp][pvar] *
-           (_grad_test[_i][_qp](0) + _test[_i][_qp] / _q_point[_qp](0));
-  return -_coefficient * _phi[_j][_qp] * _dpf_dvar[_qp][pvar] * _grad_test[_i][_qp](_component);
+  if constexpr (!is_ad)
+  {
+    if (_dictator.notPorousFlowVariable(jvar))
+      return 0.0;
+    const unsigned int pvar = _dictator.porousFlowVariableNum(jvar);
+    if (_rz && _component == 0)
+      return -_coefficient * _phi[_j][_qp] * (*_dpf_dvar)[_qp][pvar] *
+             (_grad_test[_i][_qp](0) + _test[_i][_qp] / _q_point[_qp](0));
+    return -_coefficient * _phi[_j][_qp] * (*_dpf_dvar)[_qp][pvar] *
+           _grad_test[_i][_qp](_component);
+  }
+  else
+    libmesh_ignore(jvar);
+  return 0.0;
 }
+
+template class PorousFlowEffectiveStressCouplingTempl<false>;
+template class PorousFlowEffectiveStressCouplingTempl<true>;

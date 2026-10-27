@@ -26,7 +26,7 @@ public:
 
   virtual void checkIterationType(IterationType it_type) const override;
 
-  virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override;
+  virtual MooseConvergenceStatus checkConvergence(unsigned int n_iter) override;
 
 protected:
   /// Steady-state tolerance for the solution variables or aux variables

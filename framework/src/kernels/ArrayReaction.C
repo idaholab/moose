@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ArrayReaction.h"
+#include "FEProblemBase.h"
+#include "VariableSizeMaterialPropertiesInterface.h"
 
 registerMooseObject("MooseApp", ArrayReaction);
 
@@ -40,6 +42,18 @@ ArrayReaction::ArrayReaction(const InputParameters & parameters)
     MaterialPropertyName mat = getParam<MaterialPropertyName>("reaction_coefficient");
     mooseError("Property " + mat + " is of unsupported type for ArrayReaction");
   }
+}
+
+void
+ArrayReaction::initialSetup()
+{
+  if (_r_array || _r_2d_array)
+    Moose::checkArrayMaterialPropertySize(*this,
+                                          _fe_problem.getMaterialWarehouse(),
+                                          blockRestricted() ? blockIDs() : meshBlockIDs(),
+                                          "reaction_coefficient",
+                                          _var.count(),
+                                          _r_2d_array);
 }
 
 void

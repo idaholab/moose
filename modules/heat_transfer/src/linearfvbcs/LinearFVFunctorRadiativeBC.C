@@ -45,7 +45,7 @@ LinearFVFunctorRadiativeBC::LinearFVFunctorRadiativeBC(const InputParameters & p
     _sigma(getParam<Real>("stefan_boltzmann_constant")),
     _diffusion_coeff(getFunctor<Real>("diffusion_coeff"))
 {
-  _var.computeCellGradients();
+  _var.requestCellGradients();
 }
 
 Real

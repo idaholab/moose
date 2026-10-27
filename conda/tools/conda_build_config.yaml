@@ -9,16 +9,16 @@ black:
   - 26.5.1
 
 clang_format:
-  - 19.1.7
+  - 21.1.8
 
 clang_tools:
-  - 19.1.7
+  - 21.1.8
 
 coverage:
   - 7.13.2
 
 ruff:
-  - 0.15.15
+  - 0.16.7
 
 xmltodict:
   - <0.14

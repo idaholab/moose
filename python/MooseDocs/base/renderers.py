@@ -13,7 +13,6 @@ import os
 import re
 import logging
 import traceback
-import codecs
 import shutil
 import moosetree
 import copy
@@ -173,7 +172,7 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
         if isinstance(page, pages.Source):
             self._create_directory(page.destination)
             LOG.debug("WRITE %s-->%s", page.source, page.destination)
-            with codecs.open(page.destination, "w", encoding="utf-8") as fid:
+            with open(page.destination, "w", encoding="utf-8") as fid:
                 fid.write(result.write())
 
         elif isinstance(page, pages.File):

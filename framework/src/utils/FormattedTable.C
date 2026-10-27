@@ -27,22 +27,22 @@ void
 dataStore(std::ostream & stream, FormattedTable & table, void * context)
 {
   table.fillEmptyValues();
-  storeHelper(stream, table._data, context);
-  storeHelper(stream, table._align_widths, context);
-  storeHelper(stream, table._column_names, context);
-  storeHelper(stream, table._output_row_index, context);
-  storeHelper(stream, table._headers_output, context);
+  dataStore(stream, table._data, context);
+  dataStore(stream, table._align_widths, context);
+  dataStore(stream, table._column_names, context);
+  dataStore(stream, table._output_row_index, context);
+  dataStore(stream, table._headers_output, context);
 }
 
 template <>
 void
 dataLoad(std::istream & stream, FormattedTable & table, void * context)
 {
-  loadHelper(stream, table._data, context);
-  loadHelper(stream, table._align_widths, context);
-  loadHelper(stream, table._column_names, context);
-  loadHelper(stream, table._output_row_index, context);
-  loadHelper(stream, table._headers_output, context);
+  dataLoad(stream, table._data, context);
+  dataLoad(stream, table._align_widths, context);
+  dataLoad(stream, table._column_names, context);
+  dataLoad(stream, table._output_row_index, context);
+  dataLoad(stream, table._headers_output, context);
 }
 
 template <>

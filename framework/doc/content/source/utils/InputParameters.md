@@ -37,3 +37,11 @@ the new, blessed name that users should use. This name should have a
 corresponding `params.addCoupledVar('blessed_name', 'blessed_name_doc_string')`
 in the relevant `Class::validParams()` block. The final optional argument is the
 date that the deprecated variable name will be removed.
+
+A value provided locally in an object block always takes precedence over a value
+provided in `[GlobalParams]`, even when the two use different (deprecated versus
+blessed) names for the same parameter. Providing both the deprecated name and the
+blessed name for the same parameter within the same scope (both in an object block
+or both in `[GlobalParams]`) is an error, so that the value that will be used is
+never ambiguous. The same precedence and conflict rules apply to parameters
+deprecated with `deprecateParam` and renamed with `renameParam`/`renameCoupledVar`.

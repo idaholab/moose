@@ -195,8 +195,8 @@ BilinearInterpolation::sampleDerivativeInternal(const T s1,
     const auto & fQ13 = _z_surface(ly + 1, lx);     // fQ at (x1,y3)
     const auto & fQ31 = _z_surface(ly, lx + 1);     // fQ at (x3,y1)
     const auto & fQ33 = _z_surface(ly + 1, lx + 1); // fQ at (x3,y3)
-    const Real & x3 = _x1[lx + 1];                 // ux value
-    const Real & y3 = _x2[ly + 1];                 // uy value
+    const Real & x3 = _x1[lx + 1];                  // ux value
+    const Real & y3 = _x2[ly + 1];                  // uy value
 
     if (deriv_var == 1)
     {
@@ -222,8 +222,8 @@ BilinearInterpolation::sampleDerivativeInternal(const T s1,
     const auto & fQ01 = _z_surface(ly, lx - 1);     // fQ at (x0,y1)
     const auto & fQ03 = _z_surface(ly + 1, lx - 1); // fQ at (x0,y3)
     const auto & fQ23 = _z_surface(ly + 1, lx);     // fQ at (x2,y3)
-    const Real & x0 = _x1[lx - 1];                 // lx value
-    const Real & y3 = _x2[ly + 1];                 // uy value
+    const Real & x0 = _x1[lx - 1];                  // lx value
+    const Real & y3 = _x2[ly + 1];                  // uy value
 
     if (deriv_var == 1)
     {
@@ -249,8 +249,8 @@ BilinearInterpolation::sampleDerivativeInternal(const T s1,
     const auto & fQ10 = _z_surface(ly - 1, lx);     // fQ at (x1,y0)
     const auto & fQ30 = _z_surface(ly - 1, lx + 1); // fQ at (x3,y0)
     const auto & fQ32 = _z_surface(ly, lx + 1);     // fQ at (x3,y2)
-    const Real & x3 = _x1[lx + 1];                 // ux value
-    const Real & y0 = _x2[ly - 1];                 // ly value
+    const Real & x3 = _x1[lx + 1];                  // ux value
+    const Real & y0 = _x2[ly - 1];                  // ly value
 
     if (deriv_var == 1)
     {
@@ -276,8 +276,8 @@ BilinearInterpolation::sampleDerivativeInternal(const T s1,
     const auto & fQ00 = _z_surface(ly - 1, lx - 1); // fQ at (x0,y0)
     const auto & fQ20 = _z_surface(ly - 1, lx);     // fQ at (x2,y0)
     const auto & fQ02 = _z_surface(ly, lx - 1);     // fQ at (x0,y2)
-    const Real & x0 = _x1[lx - 1];                 // lx value
-    const Real & y0 = _x2[ly - 1];                 // ly value
+    const Real & x0 = _x1[lx - 1];                  // lx value
+    const Real & y0 = _x2[ly - 1];                  // ly value
 
     if (deriv_var == 1)
     {
@@ -506,7 +506,7 @@ BilinearInterpolation::sampleDerivativeInternal(const T s1,
     {
       const auto & fQ01 = _z_surface(ly, ux - 1); // new lx at ly
       const auto & fQ02 = _z_surface(uy, ux - 1); // new lx at uy
-      const Real & x0 = _x1[ux - 1];             // lx value
+      const Real & x0 = _x1[ux - 1];              // lx value
 
       auto dfdx = fQ01 * (y - y2);
       dfdx += fQ11 * (y2 - y);
@@ -575,7 +575,7 @@ BilinearInterpolation::sampleDerivativeInternal(const T s1,
     {
       const auto & fQ10 = _z_surface(ly - 1, lx); // new ly at lx
       const auto & fQ20 = _z_surface(ly - 1, ux); // new ly at ux
-      const Real & y0 = _x2[ly - 1];             // lx value
+      const Real & y0 = _x2[ly - 1];              // lx value
 
       auto dfdy = fQ10 * (x - x2);
       dfdy += fQ20 * (x1 - x);

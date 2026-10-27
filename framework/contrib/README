@@ -107,6 +107,21 @@ pcre/
   |* License: http://opensource.org/licenses/BSD-3-Clause                            *|
   /***********************************************************************************\
 
+predicates/
+  /***********************************************************************************\
+  |* Adaptive precision floating-point arithmetic and fast robust geometric          *|
+  |* predicates (2D subset: orient2d and incircle)                                   *|
+  |* http://www.cs.cmu.edu/~quake/robust.html                                        *|
+  |*---------------------------------------------------------------------------------*|
+  |* Copyright: Public Domain                                                        *|
+  |* License: Placed in the public domain by Jonathan Richard Shewchuk               *|
+  |* Local changes: Only the 2D subset is vendored, the old-style (K&R) function     *|
+  |* definitions are written as prototypes because C23 removed them, point           *|
+  |* arguments are const, everything but exactinit/orient2d/incircle has internal    *|
+  |* linkage, and floating-point contraction is turned off because the arithmetic    *|
+  |* is exact only without it.  See the file header for details.                     *|
+  /***********************************************************************************\
+
 tinydir/
   /***********************************************************************************\
   |* Tinydir - Small directory reading utilities for C++                             *|

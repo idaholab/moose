@@ -25,8 +25,8 @@ public:
   virtual void initialSetup() override;
 
   /// Not used; all parallel computation is wrapped in the SobolCalculator objects
-  virtual void initialize() final{};
-  virtual void finalize() final{};
+  virtual void initialize() final {};
+  virtual void finalize() final {};
 
 protected:
   /// The sampler that generated the samples that produced results for the _results_vectors

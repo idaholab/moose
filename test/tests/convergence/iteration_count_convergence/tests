@@ -8,17 +8,62 @@
     csvdiff = 'min_iterations_out.csv'
     requirement = 'The system shall be able to specify a minimum number of iterations.'
   []
-  [max_iterations_converge]
+  [nonlinear_max_iterations_converge]
     type = CSVDiff
     input = 'max_iterations_converge.i'
     csvdiff = 'max_iterations_converge_out.csv'
     requirement = 'The system shall be able to specify to converge after a certain number of iterations.'
   []
-  [max_iterations_diverge]
+  [nonlinear_max_iterations_diverge]
     type = RunException
     input = 'max_iterations_diverge.i'
+    # Specified 'max_iterations = 4'; 4 iterations should print:
+    #   0 Nonlinear |R| (initial residual)
+    #   1 Nonlinear |R| (residual after first iteration)
+    #   2 Nonlinear |R| (residual after second iteration)
+    #   3 Nonlinear |R| (residual after third iteration)
+    #   4 Nonlinear |R| (residual after fourth iteration)
+    expect_out = "4 Nonlinear"
+    absent_out = "5 Nonlinear"
     expect_err = "Solve Did NOT Converge"
     requirement = 'The system shall be able to specify to diverge if not converged after a certain number of iterations.'
+  []
+  [multiapp_fp_max_iterations]
+    type = RunException
+    input = 'multiapp_fp_max_iterations.i'
+    # Specified 'max_iterations = 3'; 3 iterations should print:
+    #   Beginning fixed point iteration 0 (before first iteration)
+    #   Beginning fixed point iteration 1 (before second iteration)
+    #   Beginning fixed point iteration 2 (before third iteration)
+    expect_out = "Beginning fixed point iteration 2"
+    absent_out = "Beginning fixed point iteration 3"
+    expect_err = "Aborting as solve did not converge"
+    requirement = 'The system shall stop multi-app fixed-point iteration when exceeding the maximum number of iterations.'
+  []
+  [multisystem_fp_max_iterations]
+    type = RunException
+    input = 'multisystem_fp_max_iterations.i'
+    # Specified 'max_iterations = 3'; 3 iterations should print:
+    #   Multi-system fixed point iteration 0 (before first iteration)
+    #   Multi-system fixed point iteration 1 (before second iteration)
+    #   Multi-system fixed point iteration 2 (before third iteration)
+    expect_out = "Multi-system fixed point iteration 2"
+    absent_out = "Multi-system fixed point iteration 3"
+    expect_err = "Aborting as solve did not converge"
+    requirement = 'The system shall stop multi-system fixed-point iteration when exceeding the maximum number of iterations.'
+  []
+  [steady_max_iterations]
+    type = RunException
+    input = 'steady_max_iterations.i'
+    # Specified 'max_iterations = 3'; 3 time steps of size 10 should print:
+    #   Time Step 0, time = 0
+    #   Time Step 1, time = 10, dt = 10 (before first step)
+    #   Time Step 2, time = 20, dt = 10 (before second step)
+    #   Time Step 3, time = 30, dt = 10 (before third step)
+    expect_out = "Time Step 3"
+    absent_out = "Time Step 4"
+    expect_err = "The steady-state Convergence object \(steady_conv\) reported divergence"
+    requirement = 'The system shall stop steady-state iteration when exceeding the maximum number of iterations.'
   []
   [error_max_greater_than_min]
     type = RunException

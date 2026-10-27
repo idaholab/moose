@@ -95,7 +95,9 @@
     function = 'exact'
   []
   [middle]
-    # by adding a dirichlet BC we ensure that flux kernels will run for variable v
+    # The BC producer variable v is defined on block 1 while the functor u is defined on block 0.
+    # This exercises evaluating a functor on the opposite side of the face from the producer while
+    # also ensuring that flux kernels run for variable v.
     type = FVADUseFunctorSideForSsfDirichletBC
     variable = v
     functor = u

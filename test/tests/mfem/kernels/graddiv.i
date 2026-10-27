@@ -2,7 +2,7 @@
 # based on MFEM Example 4.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/beam-tet.mesh
   uniform_refine = 1
 []
@@ -45,7 +45,6 @@
     type = MFEMDivAux
     variable = divF
     source = F
-    execute_on = TIMESTEP_END
   []
 []
 
@@ -95,14 +94,12 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [ADS]
     type = MFEMHypreADS
     fespace = HDivFESpace
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMCGSolver
     preconditioner = ADS
@@ -117,10 +114,26 @@
   device = "cpu"
 []
 
+[VectorPostprocessors]
+  [F_line_sample]
+    type = MFEMVariableLineValueSampler
+    variable = 'F'
+    start_point = '0.01 0.013 0.014'
+    end_point = '7.98 0.99 0.97'
+    num_points = 114
+  []
+  [divF_line_sample]
+    type = MFEMVariableLineValueSampler
+    variable = 'divF'
+    start_point = '0.01 0.013 0.014'
+    end_point = '7.98 0.99 0.97'
+    num_points = 114
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/GradDiv
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    file_base = OutputData/GradDiv/graddiv
   []
 []

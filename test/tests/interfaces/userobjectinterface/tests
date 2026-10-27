@@ -92,4 +92,24 @@
       detail = 'name and type.'
     []
   []
+
+  [construction_order]
+    requirement = 'The system shall order user object construction to satisfy dependencies on other '
+                  'user objects regardless of input file order by'
+    issues = '#7879'
+    [resolves]
+      type = RunApp
+      input = 'uoi_construction_order.i'
+      expect_out = 'hasUserObject success'
+
+      detail = 'resolving a referenced user object that is declared after the user object referencing '
+               'it, and'
+    []
+    [mutual_references]
+      type = RunApp
+      input = 'uoi_cyclic.i'
+      detail = 'tolerating user objects that reference each other through parameters without resolving '
+               'each other at construction.'
+    []
+  []
 []

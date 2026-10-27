@@ -152,11 +152,17 @@ advected_interp_method = 'upwind'
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
@@ -167,7 +173,7 @@ advected_interp_method = 'upwind'
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
@@ -189,7 +195,7 @@ advected_interp_method = 'upwind'
   []
 
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false
@@ -327,7 +333,7 @@ advected_interp_method = 'upwind'
     boundary = interface
     h = ${h_f}
     incoming_flux = heat_flux_to_fluid_interface
-    surface_temperature = interface_temperature_solid_interface
+    surface_temperature = interface_temperature_to_fluid_interface
     thermal_conductivity = ${k}
   []
   [solid_fluid]
@@ -336,7 +342,7 @@ advected_interp_method = 'upwind'
     boundary = interface
     h = ${h_s}
     incoming_flux = heat_flux_to_solid_interface
-    surface_temperature = interface_temperature_fluid_interface
+    surface_temperature = interface_temperature_to_solid_interface
     thermal_conductivity = ${k_s}
   []
 []

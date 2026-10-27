@@ -158,8 +158,9 @@ INSADTauMaterialTempl<T>::INSADTauMaterialTempl(const InputParameters & paramete
     _momentum_strong_residual(
         this->template declareADProperty<RealVectorValue>("momentum_strong_residual")),
     _velocity_var(getVectorVar("velocity", 0)),
-    _scalar_lagrange_fe(
-        _assembly.getFE(FEType(_velocity_var->feType().order, LAGRANGE), _mesh.dimension())),
+    _scalar_lagrange_fe(_assembly.getFE(FEType(_velocity_var->feType().order, LAGRANGE)
+                                            .set_p_refinement(_velocity_var->feType().p_refinement),
+                                        _mesh.dimension())),
     _vel_number(_velocity_var->number()),
     _vel_sys_number(_velocity_var->sys().number())
 {

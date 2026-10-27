@@ -1,0 +1,65 @@
+[Tests]
+  design = 'AdaptiveRayContainmentCheck.md'
+  issues = '#33397'
+
+  [rectangle]
+    type = GoogleTest
+    unit_test = AdaptiveRayContainmentCheck.RectangleAdaptiveRayContainmentCheck
+    requirement = 'The system shall classify points as \"inside\", \"on\", and \"outside\" a closed rectangle composed of first-order line elements using a user-specified ray.'
+  []
+  [pca_fallback]
+    type = GoogleTest
+    unit_test = AdaptiveRayContainmentCheck.PcaFallbackUsesFallbackDirection
+    requirement = 'The system shall classify a point as outside when opposite rays along the primary Principal Component Analysis (PCA) direction yield inconsistent crossing parity and a fallback PCA ray exits without crossing the surface.'
+  []
+  [cube_user_ray]
+    type = GoogleTest
+    unit_test = AdaptiveRayContainmentCheck.UnitCube3DUserRay
+    requirement = 'The system shall classify points against a closed cube composed of first-order triangular elements using a normalized user-specified ray.'
+  []
+  [box_pca_ray]
+    type = GoogleTest
+    unit_test = AdaptiveRayContainmentCheck.Box3DPcaRay
+    requirement = 'The system shall classify points against a closed box composed of first-order triangular elements using a unit direction selected by principal-component analysis.'
+  []
+  [symmetric_vertex_hits]
+    type = GoogleTest
+    unit_test = AdaptiveRayContainmentCheck.SymmetricLDiagonalVertexHits
+    requirement = 'The system shall consistently classify ray intersections at shared vertices of a symmetric concave polygon.'
+  []
+  [true_vertex_crossing]
+    type = GoogleTest
+    unit_test = AdaptiveRayContainmentCheck.TrueCrossingAtVertex
+    requirement = 'The system shall count a ray crossing a polygon vertex as one crossing when its incident edges lie on opposite sides of the ray.'
+  []
+  [tangent_vertex_touch]
+    type = GoogleTest
+    unit_test = AdaptiveRayContainmentCheck.TangentTouchAtSpikeTip
+    requirement = 'The system shall not count a tangential ray contact at a polygon vertex as a surface crossing.'
+  []
+  [near_vertex_miss]
+    type = GoogleTest
+    unit_test = AdaptiveRayContainmentCheck.NearMissVertex
+    requirement = 'The system shall treat ray intersections outside the endpoint tolerance as interior edge crossings.'
+  []
+  [collinear_edge]
+    type = GoogleTest
+    unit_test = AdaptiveRayContainmentCheck.CollinearRayAlongEdge
+    requirement = 'The system shall classify a point when its ray is collinear with a polygon edge.'
+  []
+  [surface_tolerance]
+    type = GoogleTest
+    unit_test = AdaptiveRayContainmentCheck.EpsSensitivityOnEdge
+    requirement = 'The system shall use the configured surface tolerance when identifying points on a surface composed of first-order line elements.'
+  []
+  [empty_surface]
+    type = GoogleTest
+    unit_test = AdaptiveRayContainmentCheck.EmptyBoundaryElementsThrow
+    requirement = 'The system shall reject an empty set of boundary elements.'
+  []
+  [non_finite_ray]
+    type = GoogleTest
+    unit_test = AdaptiveRayContainmentCheck.NonFiniteRayDirectionThrows
+    requirement = 'The system shall reject a user-specified ray direction containing a non-finite component.'
+  []
+[]

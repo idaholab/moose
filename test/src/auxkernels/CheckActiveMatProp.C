@@ -37,6 +37,6 @@ CheckActiveMatProp::computeValue()
 {
   mooseAssert(dynamic_cast<CheckActiveMatPropProblem *>(&_problem),
               "We don't want undefined behavior");
-  return static_cast<CheckActiveMatPropProblem &>(_problem).getActiveMaterialProperties(_tid).count(
+  return cast_ref<CheckActiveMatPropProblem &>(_problem).getActiveMaterialProperties(_tid).count(
              _prop_id) > 0;
 }

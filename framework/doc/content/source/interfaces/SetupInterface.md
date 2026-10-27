@@ -24,7 +24,7 @@ The default (and thus most common) flags are listed below:
 `MULTIAPP_FIXED_POINT_BEGIN` | At the beginning of each fixed point solve loop, after transfers to the multiapps have been executed on `TIMESTEP_BEGIN` but before the multiapps (followed by the parent problem) have been executed on `TIMESTEP_BEGIN`.
 `MULTIAPP_FIXED_POINT_END` | At the end of each fixed point solve loop (only if the fixed point solve converged).
 `MULTIAPP_FIXED_POINT_CONVERGENCE` | In each iteration of the MultiApp fixed point loop, immediately prior to the MultiApp fixed point convergence check, after `TIMESTEP_END` and MultiApps/transfers executing on `TIMESTEP_END`.
-`MULTISYSTEM_FIXED_POINT_CONVERGENCE` | In each iteration of the multi-system fixed point loop, immediately prior to the multi-system fixed point convergence check.
+`MULTISYSTEM_FIXED_POINT_ITERATION_END` | At the end of each iteration of the multi-system fixed point loop.
 `POST_ADAPTIVITY` | Once all adaptivity steps have been performed on a timestep (after `TIMESTEP_END` and before progressing to the next step). Note that `POST_ADAPTIVITY` is not executed on initial adaptivity, the final timestep, or during multi-app Picard iterations. `POST_ADAPTIVITY` will be executed even if the mesh is not changed by adaptivity, as long as adaptivity is executed.
 `FINAL` | At the end of the entire simulation.
 `CUSTOM` | At user specified instants.
@@ -72,7 +72,7 @@ can be found in their `validParams()` method. Some examples are as follows:
 
 When creating objects that inherit from `SetupInterface` it is possible to set, add, or remove
 available execute flags by retrieving and then modifying the `ExecFlagEnum` parameter. For example,
-consider the snippet below (see [Output.C](/framework/src/outputs/Output.C)).
+consider the snippet below (see [!file text=Output.C](/framework/src/outputs/Output.C)).
 
 !listing framework/src/outputs/Output.C start=ExecFlagEnum end=setDocString include-end=True
 

@@ -11,15 +11,51 @@
 
 #pragma once
 
-#include "MFEMProblem.h"
+#include "PerfGraphInterface.h"
+#include "libmesh/ignore_warnings.h"
+#include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
 #include <functional>
+
+class MFEMProblem;
+struct MFEMProblemData;
 
 namespace Moose::MFEM
 {
-class EquationSystem;
 
-/// Interface inherited by ProblemOperator and TimeDependentProblemOperator. Removes duplicated code in both classes.
-class ProblemOperatorBase
+/**
+ * Connects MFEMProblem's MOOSE solver objects to EquationSystem's mathematics.
+ *
+ * Three distinct layers collaborate to run an MFEM solve inside MOOSE:
+ *
+ *  - **MFEMProblem** owns MOOSE infrastructure: the object factory, the action system,
+ *    ProblemData, and the configured solver objects.  Embedding the mfem::Operator
+ *    solve-dispatch logic here would couple MOOSE's object-management layer directly
+ *    to specific MFEM operator patterns, so it delegates to ProblemOperator instead.
+ *
+ *  - **EquationSystem** owns the mathematics: it builds weak-form components
+ *    (bilinear/linear/nonlinear forms contributed by kernels and BCs), forms the constrained
+ *    linear part, retains nonlinear action forms for residual/Jacobian evaluation, and exposes
+ *    the resulting mfem::Operator interface consumed by both linear solvers (CG, GMRES, direct)
+ *    and nonlinear solvers (Newton).  Solver selection is a user-configuration concern owned by
+ *    MFEMProblem; coupling it into EquationSystem would conflate the mathematical description of
+ *    a PDE with how MOOSE happens to solve it.
+ *
+ *  - **ProblemOperator** (this class) connects the two.  It provides:
+ *      1. The steady vs. time-dependent dispatch boundary: all subclasses implement
+ *         Solve() as the MOOSE-level entry point ("do whatever this step requires").
+ *         Transient subclasses additionally inherit from mfem::TimeDependentOperator
+ *         and implement ImplicitSolve(dt, t, x) - a different, MFEM-level contract
+ *         that MFEM's ODE solvers (BackwardEuler, SDIRK, etc.) call internally.
+ *         Solve() and ImplicitSolve() live at different abstraction layers and are
+ *         not interchangeable; ImplicitSolve() carries dt and t precisely because
+ *         it is the per-step callback in an ODE integration loop.
+ *      2. SolveWithOperator() - the linear/nonlinear dispatch that requires knowing
+ *         which MOOSE solver objects are configured (jacobian_solver, nonlinear_solver).
+ *      3. Block-vector bookkeeping (trial/test true-DoF offsets and vectors) that
+ *         bridges between the true-DoF algebraic world with the FE gridfunction world.
+ */
+class ProblemOperatorBase : public PerfGraphInterface
 {
 public:
   ProblemOperatorBase(MFEMProblem & problem);
@@ -27,7 +63,7 @@ public:
 
   virtual void SetGridFunctions();
   virtual void SetTrialVariablesFromTrueVectors();
-  virtual void Init(mfem::BlockVector & X);
+  virtual void Init();
   virtual void Solve() = 0;
 
   mfem::Array<int> _block_true_offsets_test;
@@ -35,11 +71,24 @@ public:
 
   mfem::BlockVector _true_x, _true_rhs;
 
+  /// Persistent true-DoF solution vector backing this operator's trial grid functions after
+  /// Init(). Each operator owns its own, because Init() aliases its trial grid functions into
+  /// this vector; sharing one across operators would make each alias the same storage.
+  mfem::BlockVector _true_solution;
+
 protected:
-  /// Solve the current equation system/operator using the configured nonlinear solver or linear
-  /// solver for a purely linear problem
+  /// Solve the current system operator using the configured nonlinear and linear solvers
+  void SolveWithOperator(mfem::Operator & system_operator,
+                         mfem::Operator & linear_operator,
+                         const mfem::Vector & rhs,
+                         mfem::Vector & x);
+
+  /// Solve the current system operator using system_operator.GetGradient(x) as the linear operator
   void
-  SolveWithOperator(EquationSystem & equation_system, const mfem::Vector & rhs, mfem::Vector & x);
+  SolveWithOperator(mfem::Operator & system_operator, const mfem::Vector & rhs, mfem::Vector & x)
+  {
+    return SolveWithOperator(system_operator, system_operator.GetGradient(x), rhs, x);
+  }
 
   /// Reference to the current problem.
   MFEMProblem & _problem;

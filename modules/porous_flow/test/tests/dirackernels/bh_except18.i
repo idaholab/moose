@@ -1,0 +1,132 @@
+# PorousFlowPeacemanBorehole exception test: unit_weight / fp mutual-exclusivity checks
+[Mesh]
+  type = GeneratedMesh
+  dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
+  xmin = -1
+  xmax = 1
+  ymin = -1
+  ymax = 1
+  zmin = -1
+  zmax = 1
+[]
+
+[GlobalParams]
+  PorousFlowDictator = dictator
+[]
+
+[Variables]
+  [pp]
+    initial_condition = 1E7
+  []
+[]
+
+[AuxVariables]
+  [T]
+    initial_condition = 300
+  []
+[]
+
+[Kernels]
+  [mass0]
+    type = TimeDerivative
+    variable = pp
+  []
+[]
+
+[UserObjects]
+  [dictator]
+    type = PorousFlowDictator
+    porous_flow_vars = 'pp'
+    number_fluid_phases = 1
+    number_fluid_components = 1
+  []
+  [borehole_total_outflow_mass]
+    type = PorousFlowSumQuantity
+  []
+  [pc]
+    type = PorousFlowCapillaryPressureVG
+    m = 0.5
+    alpha = 1e-7
+  []
+[]
+
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    bulk_modulus = 2e9
+    viscosity = 1e-3
+    density0 = 1000
+    thermal_expansion = 0
+  []
+[]
+
+[Materials]
+  [temperature]
+    type = PorousFlowTemperature
+  []
+  [ppss]
+    type = PorousFlow1PhaseP
+    porepressure = pp
+    capillary_pressure = pc
+  []
+  [massfrac]
+    type = PorousFlowMassFraction
+  []
+  [simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
+    phase = 0
+  []
+  [porosity]
+    type = PorousFlowPorosityConst
+    porosity = 0.1
+  []
+  [permeability]
+    type = PorousFlowPermeabilityConst
+    permeability = '1E-12 0 0 0 1E-12 0 0 0 1E-12'
+  []
+  [relperm]
+    type = PorousFlowRelativePermeabilityCorey
+    n = 2
+    phase = 0
+  []
+[]
+
+[DiracKernels]
+  [bh]
+    type = PorousFlowPeacemanBorehole
+    bottom_p_or_t = 0
+    fluid_phase = 0
+    point_file = bh02.bh
+    SumQuantityUO = borehole_total_outflow_mass
+    variable = pp
+    character = 1
+  []
+[]
+
+[Postprocessors]
+  [bh_report]
+    type = PorousFlowPlotQuantity
+    uo = borehole_total_outflow_mass
+  []
+[]
+
+[Preconditioning]
+  [usual]
+    type = SMP
+    full = true
+    petsc_options = '-snes_converged_reason'
+    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it'
+    petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 10000 30'
+  []
+[]
+
+[Executioner]
+  type = Transient
+  end_time = 0.5
+  dt = 1E-2
+  solve_type = NEWTON
+[]

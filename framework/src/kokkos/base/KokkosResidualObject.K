@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -41,19 +41,20 @@ ResidualObject::ResidualObject(const InputParameters & parameters,
   : ::ResidualObject(parameters, nodal),
     MeshHolder(*_fe_problem.mesh().getKokkosMesh()),
     AssemblyHolder(_fe_problem.kokkosAssembly()),
-    SystemHolder(_fe_problem.getKokkosSystems()),
+    FESystemHolder(_fe_problem.getKokkosFESystems()),
     _var(_subproblem.getVariable(_tid,
                                  getParam<NonlinearVariableName>("variable"),
                                  Moose::VarKindType::VAR_SOLVER,
                                  field_type)),
+    _dimension(_fe_problem.mesh().dimension()),
     _t(TransientInterface::_t),
     _t_old(TransientInterface::_t_old),
     _t_step(TransientInterface::_t_step),
     _dt(TransientInterface::_dt),
     _dt_old(TransientInterface::_dt_old)
 {
-  if (_var.isVector())
-    paramError("variable", "Kokkos residual objects do not support vector variables yet.");
+  if (_var.isVector() && field_type != Moose::VarFieldType::VAR_FIELD_VECTOR)
+    paramError("variable", "Vector variable specified to a scalar Kokkos residual object.");
 
   _kokkos_var.init(_var);
 }
@@ -62,16 +63,23 @@ ResidualObject::ResidualObject(const ResidualObject & object)
   : ::ResidualObject(object, {}),
     MeshHolder(object),
     AssemblyHolder(object),
-    SystemHolder(object),
+    FESystemHolder(object),
     _var(object._var),
     _kokkos_var(object._kokkos_var),
     _thread(object._thread),
+    _dimension(object._dimension),
     _t(object._t),
     _t_old(object._t_old),
     _t_step(object._t_step),
     _dt(object._dt),
-    _dt_old(object._dt_old)
+    _dt_old(object._dt_old),
+    _vector_tags(object._vector_tags),
+    _matrix_tags(object._matrix_tags)
 {
+  // Tags may be added to the governing tag sets held by the TaggingInterface later than the time
+  // that the primary constructor is run. So it's more robust to build our tag set, immediately
+  // before being dispatched to device, from the governing TaggingInterface set instead of relying
+  // on copying the tag set from object's \p _vector_tags and \p _matrix_tags arrays
   _vector_tags = object.getVectorTags({});
   _matrix_tags = object.getMatrixTags({});
 }

@@ -1,16 +1,15 @@
+# These tests reproduce some of the cases shown in Tables 1 and 2 of
+# "A method for smoothing multiple yield functions", Int. J. Numer. Methods Eng., 2020,
+# 121:434-450 (doi:10.1002/nme.6215)
+# The unsmoothed cases were previously included as 'cmc_planar.i' and 'biaxial_planar.i'
+# in this directory, but were removed because they are poorly conditioned by design and
+# are hence subject to machine-specific differences in their behavior.
+
 [Tests]
   [confined_uniaxial]
     issues = '#13766'
-    design = 'solid_mechanics/Stresses.md'
+    design = 'ComputeMultiPlasticityStress.md ComputeMultipleInelasticStress.md'
     requirement = 'SolidMechanics shall be able to simulate the confined, uniaxial extension of a notched block which has constitutive law described by:'
-    [cmc_planar]
-      type = 'CSVDiff'
-      input = 'cmc_planar.i'
-      csvdiff = 'cmc_planar.csv'
-      heavy = true
-      cli_args = 'Executioner/end_time=1 Postprocessors/active=s_zz'
-      detail = 'unsmoothed capped-Mohr-Coulomb plasticity'
-    []
     [cmc_smooth]
       type = 'CSVDiff'
       input = 'cmc_smooth.i'
@@ -18,16 +17,6 @@
       heavy = true
       cli_args = 'Executioner/end_time=1 Postprocessors/active=s_zz'
       detail = 'smoothed capped-Mohr-Coulomb plasticity, with smoothing performed by the novel MOOSE smoothing method described in Wilkins et al'
-    []
-    [biaxial_planar]
-      type = 'CSVDiff'
-      input = 'biaxial_planar.i'
-      csvdiff = 'biaxial_planar_out.csv'
-      heavy = true
-      # note, the number of residual calls for this test was documented in a published journal article.  To get no diffs when testing in parallel, various tolerances and settings must be set differently, resulting in a different number of residual calls.  Therefore, to keep the journal article correct, only test in serial.
-      max_parallel = 1
-      cli_args = 'Physics/SolidMechanics/QuasiStatic/all/strain=FINITE Executioner/end_time=1 Postprocessors/active=s_zz'
-      detail = 'unsmoothed Mohr-Coulomb plasticity'
     []
     [biaxial_abbo]
       type = 'CSVDiff'

@@ -28,6 +28,10 @@ Boundary ID remapping also works similarly to subdomain ID remapping. During ext
 
 The other categories of the boundaries that can be defined are the interfaces between subdomains in different elevations, as well as the top/bottom surfaces of the subdomains. As each elevation interface (or top/bottom surface) is simply a duplicate of the `input` mesh, these interface (or top/bottom surface) boundaries correspond to the subdomains of the `input` mesh, which are referred to as `source_blocks`. Also, due to the nature of sidesets, they can be defined on either side of the elevation interface. Thus, both `upward` and `downward` boundaries can be defined. Here `upward` means the normal vector of the sideset has the "same-ish" direction as the [!param](/Mesh/AdvancedExtruderGenerator/direction) vector; `downward` means the normal vector of the sideset has the "opposite-ish" direction as the [!param](/Mesh/AdvancedExtruderGenerator/direction) vector.
 
+## Side Boundary
+
+The lateral surface of the extruded mesh, formed by extruding the exterior sides of the `input` mesh, can be added to a boundary named by [!param](/Mesh/AdvancedExtruderGenerator/side_boundary). Both the extruded sides and their nodes are added to this boundary, so it is available as a sideset and as a nodeset. The exterior sides are the sides of the `input` mesh without a neighbor element.
+
 ## Extrusion along a line mesh / curve
 
 Instead of a fixed direction, the mesh can be extruded following a line mesh. The extrusion is performed following the direction of the line mesh.

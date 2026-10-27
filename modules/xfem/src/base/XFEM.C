@@ -35,6 +35,7 @@
 
 XFEM::XFEM(const InputParameters & params)
   : XFEMInterface(params),
+    _state_marked_t_step(0),
     _efa_mesh(Moose::out),
     _debug_output_level(1),
     _min_weight_multiplier(0.0)
@@ -119,6 +120,7 @@ XFEM::addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal)
   if (mit != _state_marked_elems.end())
     mooseError(" ERROR: element ", elem->id(), " already marked for crack growth.");
   _state_marked_elems[elem] = normal;
+  _state_marked_t_step = _fe_problem->timeStep();
 }
 
 void
@@ -235,8 +237,8 @@ XFEM::updateHeal()
   if (mesh_changed)
   {
     _mesh->update_parallel_id_counts();
-    MeshCommunication().make_elems_parallel_consistent(*_mesh);
-    MeshCommunication().make_nodes_parallel_consistent(*_mesh);
+    libMesh::MeshCommunication().make_elems_parallel_consistent(*_mesh);
+    libMesh::MeshCommunication().make_nodes_parallel_consistent(*_mesh);
     //    _mesh->find_neighbors();
     //    _mesh->contract();
     _mesh->allow_renumbering(false);
@@ -246,8 +248,8 @@ XFEM::updateHeal()
     if (_displaced_mesh)
     {
       _displaced_mesh->update_parallel_id_counts();
-      MeshCommunication().make_elems_parallel_consistent(*_displaced_mesh);
-      MeshCommunication().make_nodes_parallel_consistent(*_displaced_mesh);
+      libMesh::MeshCommunication().make_elems_parallel_consistent(*_displaced_mesh);
+      libMesh::MeshCommunication().make_nodes_parallel_consistent(*_displaced_mesh);
       _displaced_mesh->allow_renumbering(false);
       _displaced_mesh->skip_partitioning(true);
       _displaced_mesh->prepare_for_use();
@@ -267,7 +269,14 @@ XFEM::update(Real time,
   if (_moose_mesh->isDistributedMesh())
     mooseError("Use of XFEM with distributed mesh is not yet supported");
 
+  for (const auto & elem : _mesh->active_element_ptr_range())
+    if (elem->level() > 0)
+      mooseError("XFEM does not currently support mesh adaptivity or adaptively refined meshes");
+
   bool mesh_changed = false;
+
+  if (!_state_marked_elems.empty() && _state_marked_t_step == _fe_problem->timeStep())
+    clearStateMarkedElems();
 
   buildEFAMesh();
 

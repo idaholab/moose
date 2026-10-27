@@ -9,25 +9,34 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 
 /**
  * Kernel = _rate * (variable - reference)
+ *
+ * Templated on is_ad: the false instantiation uses the hand-coded Jacobian;
+ * the true instantiation propagates the derivative through the AD residual.
  */
-class PorousFlowExponentialDecay : public Kernel
+template <bool is_ad>
+class PorousFlowExponentialDecayTempl : public GenericKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowExponentialDecay(const InputParameters & parameters);
+  PorousFlowExponentialDecayTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
   /// The decay rate
-  const VariableValue & _rate;
+  const GenericVariableValue<is_ad> & _rate;
 
   /// The reference
-  const VariableValue & _reference;
+  const GenericVariableValue<is_ad> & _reference;
+
+  usingGenericKernelMembers;
 };
+
+typedef PorousFlowExponentialDecayTempl<false> PorousFlowExponentialDecay;
+typedef PorousFlowExponentialDecayTempl<true> ADPorousFlowExponentialDecay;

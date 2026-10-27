@@ -1,0 +1,11 @@
+# Existing GoogleTests awaiting SQA metadata. New entries are prohibited; this list may only shrink.
+unit:
+  - MeshTests.triRodCoordinates
+  - PBSodiumFluidPropertiesTest.density
+  - PBSodiumFluidPropertiesTest.isobaricSpecificHeat
+  - PBSodiumFluidPropertiesTest.isochoricSpecificHeat
+  - PBSodiumFluidPropertiesTest.specificEnthalpy
+  - PBSodiumFluidPropertiesTest.temperature
+  - PBSodiumFluidPropertiesTest.thermalConductivity
+  - PBSodiumFluidPropertiesTest.viscosity
+  - PBSodiumFluidPropertiesTest.volumetricThermalExpansionCoefficient

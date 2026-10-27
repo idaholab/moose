@@ -27,20 +27,20 @@ template <>
 void
 dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, void * context)
 {
-  storeHelper(stream, feature.boundary_intersection, context);
-  storeHelper(stream, feature.id, context);
-  storeHelper(stream, feature.centroid, context);
-  storeHelper(stream, feature.status, context);
+  dataStore(stream, feature.boundary_intersection, context);
+  dataStore(stream, feature.id, context);
+  dataStore(stream, feature.centroid, context);
+  dataStore(stream, feature.status, context);
 }
 
 template <>
 void
 dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void * context)
 {
-  loadHelper(stream, feature.boundary_intersection, context);
-  loadHelper(stream, feature.id, context);
-  loadHelper(stream, feature.centroid, context);
-  loadHelper(stream, feature.status, context);
+  dataLoad(stream, feature.boundary_intersection, context);
+  dataLoad(stream, feature.id, context);
+  dataLoad(stream, feature.centroid, context);
+  dataLoad(stream, feature.status, context);
 }
 
 registerMooseObject("PhaseFieldApp", GrainTracker);

@@ -51,12 +51,18 @@ half_width = 0.2
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [LinearFVKernels]
   inactive = v_viscous_forcing
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
@@ -67,7 +73,7 @@ half_width = 0.2
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
@@ -96,7 +102,7 @@ half_width = 0.2
   []
 
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false

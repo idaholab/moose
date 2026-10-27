@@ -3,6 +3,7 @@
   scaling_factor_temperature = 1e-2
 
   initial_from_file = 'steady_state_out.e'
+  initial_from_file_weighting_type = average
 
   closures = simple_closures
 []

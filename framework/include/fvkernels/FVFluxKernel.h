@@ -74,11 +74,6 @@ protected:
 
   const unsigned int _qp = 0;
 
-  /// The elem solution value of the kernel's _var for the current face.
-  const ADVariableValue & _u_elem;
-  /// The neighbor solution value of the kernel's _var for the current face.
-  const ADVariableValue & _u_neighbor;
-
   /// This is the outward unit normal vector for the face the kernel is currently
   /// operating on.  By convention, this is set to be pointing outward from the
   /// face's elem element and residual calculations should keep this in mind.

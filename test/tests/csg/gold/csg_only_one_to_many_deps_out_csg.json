@@ -15,10 +15,10 @@
       "fill": "mat1",
       "filltype": "CSG_MATERIAL",
       "region_infix": [
-        "-inner_surf_copy_1"
+        "-inner_surf_copy_2"
       ],
       "region_postfix": [
-        "inner_surf_copy_1",
+        "inner_surf_copy_2",
         "-"
       ]
     },
@@ -37,10 +37,10 @@
       "fill": "mat2",
       "filltype": "CSG_MATERIAL",
       "region_infix": [
-        "+inner_surf_copy_1"
+        "+inner_surf_copy_2"
       ],
       "region_postfix": [
-        "inner_surf_copy_1",
+        "inner_surf_copy_2",
         "+"
       ]
     },
@@ -59,10 +59,10 @@
       "fill": "cartesian_lat_copy_2",
       "filltype": "LATTICE",
       "region_infix": [
-        "-lattice_surf_copy_1"
+        "-lattice_surf_copy_2"
       ],
       "region_postfix": [
-        "lattice_surf_copy_1",
+        "lattice_surf_copy_2",
         "-"
       ]
     },
@@ -81,10 +81,10 @@
       "fill": "mat3",
       "filltype": "CSG_MATERIAL",
       "region_infix": [
-        "+outer_surf_copy_1"
+        "+outer_surf_copy_2"
       ],
       "region_postfix": [
-        "outer_surf_copy_1",
+        "outer_surf_copy_2",
         "+"
       ]
     },
@@ -103,10 +103,10 @@
       "fill": "nested_inner_univ_copy_2",
       "filltype": "UNIVERSE",
       "region_infix": [
-        "-outer_surf_copy_1"
+        "-outer_surf_copy_2"
       ],
       "region_postfix": [
-        "outer_surf_copy_1",
+        "outer_surf_copy_2",
         "-"
       ]
     },
@@ -125,10 +125,10 @@
       "fill": "",
       "filltype": "VOID",
       "region_infix": [
-        "+lattice_surf_copy_1"
+        "+lattice_surf_copy_2"
       ],
       "region_postfix": [
-        "lattice_surf_copy_1",
+        "lattice_surf_copy_2",
         "+"
       ]
     }

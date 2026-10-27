@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ArrayTimeDerivative.h"
+#include "FEProblemBase.h"
+#include "VariableSizeMaterialPropertiesInterface.h"
 
 registerMooseObject("MooseApp", ArrayTimeDerivative);
 
@@ -43,6 +45,18 @@ ArrayTimeDerivative::ArrayTimeDerivative(const InputParameters & parameters)
     MaterialPropertyName mat = getParam<MaterialPropertyName>("time_derivative_coefficient");
     mooseError("Property " + mat + " is of unsupported type for ArrayTimeDerivative");
   }
+}
+
+void
+ArrayTimeDerivative::initialSetup()
+{
+  if (_coeff_array || _coeff_2d_array)
+    Moose::checkArrayMaterialPropertySize(*this,
+                                          _fe_problem.getMaterialWarehouse(),
+                                          blockRestricted() ? blockIDs() : meshBlockIDs(),
+                                          "time_derivative_coefficient",
+                                          _var.count(),
+                                          _coeff_2d_array);
 }
 
 void

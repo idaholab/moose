@@ -4,7 +4,7 @@
             "type": "MeshInfo",
             "values": {
                 "subdomains": {
-                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo>>>"
+                    "type": "MeshInfo::DomainInfoMap<unsigned short, MeshInfo::SubdomainInfo>"
                 }
             }
         }

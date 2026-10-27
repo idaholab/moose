@@ -342,8 +342,8 @@
   [andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_max_it -snes_stol'
-    petsc_options_value = 'bcgs bjacobi 10000 1E-11'
+    petsc_options_iname = '-ksp_type -pc_type'
+    petsc_options_value = 'bcgs bjacobi'
   []
 []
 
@@ -353,6 +353,8 @@
   start_time = 0
   end_time = 10
   dt = 1
+  nl_max_its = 10000
+  nl_rel_step_tol = 1E-11
 []
 
 [Outputs]

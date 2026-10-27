@@ -10,8 +10,6 @@
 #include "ReferenceResidualProblem.h"
 #include "ReferenceResidualConvergence.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", ReferenceResidualProblem);
 
 InputParameters

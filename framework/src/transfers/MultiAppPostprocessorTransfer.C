@@ -52,14 +52,19 @@ MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const InputParamete
   if (_directions.size() != 1)
     paramError("direction", "This transfer is only unidirectional");
 
-  if (_current_direction == FROM_MULTIAPP)
-    if (!_reduction_type.isValid())
-      mooseError("In MultiAppPostprocessorTransfer, must specify 'reduction_type' if direction = "
-                 "from_multiapp");
+  if (isParamValid("from_multi_app") && !isParamValid("to_multi_app") &&
+      !isParamValid("reduction_type"))
+    paramError("reduction_type",
+               "In MultiAppPostprocessorTransfer, must specify 'reduction_type' if "
+               "'from_multi_app' is set");
+
+  if (isParamValid("to_multi_app") && !isParamValid("from_multi_app") &&
+      isParamValid("reduction_type"))
+    paramError("reduction_type", "Reduction is not supported for transfer from parent application");
 
   if (isParamValid("to_multi_app") && isParamValid("from_multi_app") &&
       isParamValid("reduction_type"))
-    mooseError("Reductions are not supported for multiapp sibling transfers");
+    paramError("reduction_type", "Reductions are not supported for multiapp sibling transfers");
 }
 
 void
@@ -103,7 +108,7 @@ MultiAppPostprocessorTransfer::execute()
                           !getToMultiApp()->hasLocalApp(i),
                       "Source and target app parallel distribution must be the same");
 
-        // Case 1: a single source app, multiple target apps
+        // Case 1: a single source app, possibly multiple target apps
         // All target apps must be local
         if (getFromMultiApp()->numGlobalApps() == 1)
           for (const auto j : make_range(getToMultiApp()->numGlobalApps()))
@@ -210,7 +215,9 @@ MultiAppPostprocessorTransfer::checkSiblingsTransferSupported() const
   // Check that we are in one of the supported configurations
   // Case 2: same number of source and target apps
   // The allocation of the child apps on the processors must be the same
-  if (getFromMultiApp()->numGlobalApps() == getToMultiApp()->numGlobalApps())
+  // Note: case 1 is supported because we do a reduction on the postprocessor value
+  if (getFromMultiApp()->numGlobalApps() == getToMultiApp()->numGlobalApps() &&
+      getFromMultiApp()->numGlobalApps() != 1)
   {
     for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
       if (getFromMultiApp()->hasLocalApp(i) + getToMultiApp()->hasLocalApp(i) == 1)

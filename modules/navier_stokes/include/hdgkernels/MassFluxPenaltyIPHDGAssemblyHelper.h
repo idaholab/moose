@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,8 +9,11 @@
 
 #pragma once
 
-#include "IPHDGAssemblyHelper.h"
+#include "ElementAndTraceScalarHDGAssemblyHelper.h"
 #include "ADFunctorInterface.h"
+
+template <typename>
+class MooseVariableField;
 
 /*
  * Imposes a singular perturbation on the component momentum equations penalizing discontinuities in
@@ -18,7 +21,8 @@
  * neighboring elements, which makes this class useful in tandem with hybridized discretizations
  * because it supports static condensation
  */
-class MassFluxPenaltyIPHDGAssemblyHelper : public IPHDGAssemblyHelper, public ADFunctorInterface
+class MassFluxPenaltyIPHDGAssemblyHelper : public ElementAndTraceScalarHDGAssemblyHelper,
+                                           public ADFunctorInterface
 {
 public:
   static InputParameters validParams();

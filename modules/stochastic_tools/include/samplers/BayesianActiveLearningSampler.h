@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -44,7 +44,7 @@ private:
   const unsigned int & _num_tries;
 
   /// Storage for all the proposed samples
-  std::vector<std::vector<Real>> _inputs_test;
+  std::vector<std::vector<Real>> & _inputs_test;
 
   /// Storage for all the proposed variances
   std::vector<Real> _var_test;

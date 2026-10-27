@@ -1,0 +1,11 @@
+[Tests]
+  design = 'python/paraview_exodus.md'
+  issues = '#32497'
+  [render_exodus]
+    type = PythonUnitTest
+    input = test_render_exodus.py
+    requirement = "The system shall provide a ParaView based tool for rendering ExodusII files, "
+                  "which resolves colors, selects a default field, fits the frame to the mesh, "
+                  "and encodes a frame series whose name contains spaces."
+  []
+[]

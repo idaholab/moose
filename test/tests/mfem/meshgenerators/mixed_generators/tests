@@ -1,0 +1,18 @@
+[Tests]
+  design = 'MFEMGeneratedMeshGenerator.md MeshGeneratorMesh.md MFEMMeshGeneratorMesh.md RenameBlockGenerator.md'
+  issues = '#32827'
+  [chaining]
+    type = RunException
+    input = 'chaining.i'
+    expect_err = "Cannot chain MFEM-native mesh generator 'gen' of type 'MFEMGeneratedMeshGenerator' with libMesh-native mesh generator 'rename' of type 'RenameBlockGenerator'"
+    requirement = 'The system shall report an error if a libMesh-native mesh generator takes an MFEM-native mesh generator as an input, or vice versa.'
+    capabilities = 'mfem'
+  []
+  [final_type]
+    type = RunException
+    input = 'final_type.i'
+    expect_err = 'MeshGeneratorMesh requires the final mesh generator to produce a libMesh mesh'
+    requirement = 'The system shall report an error if the final mesh generator passed to a libMesh mesh type produces an MFEM-native mesh.'
+    capabilities = 'mfem'
+  []
+[]

@@ -25,8 +25,6 @@
 #include "libmesh/system_norm.h"
 #include "libmesh/enum_norm_type.h"
 
-using namespace libMesh;
-
 registerMooseAction("MooseApp", AdaptivityAction, "setup_adaptivity");
 registerMooseAction("MooseApp", AdaptivityAction, "add_geometric_rm");
 registerMooseAction("MooseApp", AdaptivityAction, "add_algebraic_rm");
@@ -181,14 +179,15 @@ AdaptivityAction::act()
         weights[system.getVariable(0, name).number()] = value;
       }
 
-      std::vector<FEMNormType> norms(system.nVariables(), H1_SEMINORM);
+      std::vector<libMesh::FEMNormType> norms(system.nVariables(), libMesh::H1_SEMINORM);
 
-      SystemNorm sys_norm(norms, weights);
+      libMesh::SystemNorm sys_norm(norms, weights);
 
       adapt.setErrorNorm(sys_norm);
     }
 
     adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
+    adapt.setAdaptivityControlFlag(&getParam<bool>("enable"));
     adapt.setInterval(getParam<unsigned int>("interval"));
   }
 }

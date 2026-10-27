@@ -15,7 +15,7 @@ registerMooseObject("HeatTransferApp", FVThermalResistanceBC);
 InputParameters
 FVThermalResistanceBC::validParams()
 {
-  auto params = FVFluxBC::validParams();
+  auto params = FVQpFluxBC::validParams();
   params.addCoupledVar("temperature", "temperature variable");
   params.addRequiredParam<Real>(HeatConduction::T_ambient, "constant ambient temperature");
   params.addRequiredParam<MaterialPropertyName>("htc", "heat transfer coefficient");
@@ -51,7 +51,7 @@ FVThermalResistanceBC::validParams()
 }
 
 FVThermalResistanceBC::FVThermalResistanceBC(const InputParameters & parameters)
-  : FVFluxBC(parameters),
+  : FVQpFluxBC(parameters),
     _geometry(getParam<MooseEnum>("geometry").getEnum<Moose::CoordinateSystemType>()),
     _inner_radius(
         _geometry == Moose::CoordinateSystemType::COORD_RZ ? getParam<Real>("inner_radius") : 1.0),

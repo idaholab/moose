@@ -42,6 +42,7 @@ protected:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
+  virtual bool providesCompleteBoundaryFlux() const override { return true; }
 
 protected:
   /// The virtual convective heat transfer coefficient

@@ -10,6 +10,7 @@
 #include "KernelScalarBase.h"
 
 #include "Assembly.h"
+#include "FEProblemBase.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
@@ -142,7 +143,7 @@ KernelScalarBase::computeScalarOffDiagJacobian(const unsigned int jvar_num)
   if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
     // Get dofs and order of this variable; at least one will be _var
-    // const auto & jv0 = static_cast<const MooseVariable &>(jvar);
+    // const auto & jv0 = cast_ref<const MooseVariable &>(jvar);
     // const auto & loc_phi = jv0.phi();
     const auto jvar_size = jvar.phiSize();
     _local_ke.resize(_k_order, jvar_size);
@@ -249,7 +250,9 @@ KernelScalarBase::computeResidualAndJacobian()
 {
   Kernel::computeResidualAndJacobian(); // compute and assemble regular variable contributions
 
+  // only if this coupling is being used by the preconditioner (otherwise the value is zero)
   if (_is_implicit)
     for (const auto * jvar : getCoupledMooseScalarVars())
-      computeOffDiagJacobianScalar(jvar->number());
+      if (_fe_problem.areCoupled(_var.number(), jvar->number(), _sys.number()))
+        computeOffDiagJacobianScalar(jvar->number());
 }

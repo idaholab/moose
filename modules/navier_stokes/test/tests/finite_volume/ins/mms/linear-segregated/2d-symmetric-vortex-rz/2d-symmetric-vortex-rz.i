@@ -1,6 +1,7 @@
 mu = 1.2
 rho = 1.5
 advected_interp_method = 'average'
+pressure_gradient_method = 'green-gauss'
 
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system'
@@ -48,11 +49,25 @@ advected_interp_method = 'average'
   []
 []
 
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
+  []
+[]
+
+[FVGradientMethods]
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.1
+  []
+[]
+
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
@@ -63,7 +78,7 @@ advected_interp_method = 'average'
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
@@ -76,12 +91,14 @@ advected_interp_method = 'average'
     variable = vel_x
     pressure = pressure
     momentum_component = 'x'
+    gradient_method = ${pressure_gradient_method}
   []
   [v_pressure]
     type = LinearFVMomentumPressure
     variable = vel_y
     pressure = pressure
     momentum_component = 'y'
+    gradient_method = ${pressure_gradient_method}
   []
   [u_forcing]
     type = LinearFVSource
@@ -100,7 +117,7 @@ advected_interp_method = 'average'
     momentum_component = 'y'
   []
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = 'Ainv'
     use_nonorthogonal_correction = false

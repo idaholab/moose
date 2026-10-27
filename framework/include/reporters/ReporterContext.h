@@ -203,6 +203,11 @@ public:
    */
   virtual void vectorSum() = 0;
 
+  /**
+   * Helper for broadcasting reporter value from processor \p root.
+   */
+  virtual void broadcast(processor_id_type root) = 0;
+
 protected:
   /**
    * Helper for checking whether or not the state \p state has only the modes \p modes.
@@ -299,15 +304,15 @@ public:
                                   dof_id_type index,
                                   unsigned int time_index = 0) const override;
 
-protected:
-  void broadcast()
+  virtual void broadcast([[maybe_unused]] processor_id_type root = 0) override
   {
     if constexpr (MooseUtils::canBroadcast<T>::value)
-      this->comm().broadcast(this->_state.value());
+      this->comm().broadcast(this->_state.value(), root);
     else
       mooseError("Cannot broadcast Reporter type '", MooseUtils::prettyCppType<T>(), "'");
   }
 
+protected:
   /// Output meta data to JSON, see JSONOutput
   virtual void storeInfo(nlohmann::json & json) const override;
 

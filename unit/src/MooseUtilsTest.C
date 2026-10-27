@@ -10,9 +10,44 @@
 #include "gtest/gtest.h"
 
 // Moose includes
+#include "InputParameters.h"
+#include "MooseEnum.h"
 #include "MooseUtils.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
+
+#include <limits>
+
+namespace
+{
+InputParameters
+variableParams(const std::string & order, const std::string & family)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<MooseEnum>(
+      "order", MooseEnum("CONSTANT FIRST SECOND", "FIRST", true), "Variable order");
+  params.addParam<MooseEnum>(
+      "family", MooseEnum("LAGRANGE MONOMIAL MONOMIAL_VEC HERMITE", "LAGRANGE"), "Variable family");
+  params.addParam<bool>("p_refinement", "Whether to p-refine this FE type");
+
+  params.set<MooseEnum>("order") = order;
+  params.set<MooseEnum>("family") = family;
+
+  return params;
+}
+
+void
+expectVariableFEType(const InputParameters & params,
+                     const libMesh::Order order,
+                     const libMesh::FEFamily family,
+                     const bool p_refinement)
+{
+  const auto fe_type = MooseUtils::variableFEType(params);
+  EXPECT_EQ(order, fe_type.order);
+  EXPECT_EQ(family, fe_type.family);
+  EXPECT_EQ(p_refinement, fe_type.p_refinement);
+}
+}
 
 TEST(MooseUtils, camelCaseToUnderscore)
 {
@@ -28,6 +63,30 @@ TEST(MooseUtils, camelCaseToUnderscore)
 
   EXPECT_EQ(MooseUtils::camelCaseToUnderscore("FOO_BAR"), "foo_bar");
   EXPECT_EQ(MooseUtils::camelCaseToUnderscore("FoO__BAR"), "fo_o__bar");
+}
+
+TEST(MooseUtils, variableFETypeDefaults)
+{
+  expectVariableFEType(
+      variableParams("CONSTANT", "MONOMIAL"), libMesh::CONSTANT, libMesh::MONOMIAL, false);
+  expectVariableFEType(
+      variableParams("CONSTANT", "MONOMIAL_VEC"), libMesh::CONSTANT, libMesh::MONOMIAL_VEC, false);
+  expectVariableFEType(
+      variableParams("FIRST", "LAGRANGE"), libMesh::FIRST, libMesh::LAGRANGE, false);
+  expectVariableFEType(
+      variableParams("FIRST", "MONOMIAL"), libMesh::FIRST, libMesh::MONOMIAL, true);
+  expectVariableFEType(variableParams("FIRST", "HERMITE"), libMesh::FIRST, libMesh::HERMITE, true);
+}
+
+TEST(MooseUtils, variableFETypePRefinementOverrides)
+{
+  auto params = variableParams("CONSTANT", "MONOMIAL");
+  params.set<bool>("p_refinement") = true;
+  expectVariableFEType(params, libMesh::CONSTANT, libMesh::MONOMIAL, true);
+
+  params = variableParams("FIRST", "HERMITE");
+  params.set<bool>("p_refinement") = false;
+  expectVariableFEType(params, libMesh::FIRST, libMesh::HERMITE, false);
 }
 
 TEST(MooseUtils, underscoreToCamelCase)
@@ -107,6 +166,13 @@ TEST(MooseUtils, tokenizeAndConvert)
     MooseUtils::tokenizeAndConvert(raw, tokens, ",");
     EXPECT_EQ(tokens, std::vector<Real>({1, 2, 3}));
   }
+}
+
+TEST(MooseUtils, tokenizeAndConvertThrowOnUnreadable)
+{
+  std::string raw("1,abc,3");
+  std::vector<Real> tokens;
+  EXPECT_THROW(MooseUtils::tokenizeAndConvert(raw, tokens, ",", true), std::invalid_argument);
 }
 
 TEST(MooseUtils, numDigits)
@@ -555,4 +621,20 @@ TEST(MooseUtils, isZero)
   EXPECT_TRUE(!MooseUtils::isZero(ADRealTensorValue(1)));
   EXPECT_TRUE(!MooseUtils::isZero(std::vector<Real>(1, 1)));
   EXPECT_TRUE(!MooseUtils::isZero(std::array<Real, 1>{{1}}));
+}
+
+TEST(MooseUtils, IsFinitePoint)
+{
+  const Point finite_point;
+  EXPECT_TRUE(MooseUtils::isFinitePoint(finite_point));
+
+  for (const auto i : make_range(Moose::dim))
+  {
+    Point nonfinite_point;
+    nonfinite_point(i) = std::numeric_limits<Real>::quiet_NaN();
+    EXPECT_FALSE(MooseUtils::isFinitePoint(nonfinite_point));
+
+    nonfinite_point(i) = std::numeric_limits<Real>::infinity();
+    EXPECT_FALSE(MooseUtils::isFinitePoint(nonfinite_point));
+  }
 }

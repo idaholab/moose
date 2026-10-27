@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGUniverse.h"
+#include "CSGEngUnit.h"
 #include "CSGUtils.h"
 #include "MooseError.h"
 
@@ -72,6 +73,16 @@ CSGUniverse::removeCell(const std::string & name)
 bool
 CSGUniverse::operator==(const CSGUniverse & other) const
 {
+  // If both objects are engineering units, delegate to CSGEngUnit::operator==. The
+  // isEngUnit() check keeps the common plain-universe path free of any dynamic_cast;
+  // the casts below only run once we know the objects are engineering units.
+  if (isEngUnit())
+  {
+    if (other.isEngUnit())
+      return *dynamic_cast<const CSGEngUnit *>(this) == *dynamic_cast<const CSGEngUnit *>(&other);
+    return false; // an engineering unit cannot equal a plain universe
+  }
+
   if ((this->getName() != other.getName()) ||
       (this->getTransformations() != other.getTransformations()))
     return false;

@@ -435,6 +435,28 @@ private:
   bool rootIsValid() const;
 
   /**
+   * @return - current document check app or fall back to return parent app
+   * to get Syntax, Factory, and ActionFactory static registration metadata
+   * when parent app could still be beneficial if check app failed to build
+   */
+  MooseApp & getRegistrationApp();
+
+  /**
+   * struct to store syntax metadata for each registration application type
+   */
+  struct SyntaxMetadata
+  {
+    std::map<std::string, std::set<std::string>> syntax_to_subblocks;
+    std::map<std::string, std::set<std::string>> type_to_input_paths;
+    std::map<std::string, std::set<std::string>> input_path_to_types;
+  };
+
+  /**
+   * @return - syntax metadata for type of current registration application
+   */
+  SyntaxMetadata & getSyntaxMetadata();
+
+  /**
    * Helper for storing the state for a single document
    */
   struct CheckState
@@ -492,19 +514,9 @@ private:
   std::shared_ptr<wasp::lsp::IOStreamConnection> _connection;
 
   /**
-   * @brief _syntax_to_subblocks - map of syntax paths to valid subblocks
+   * @brief _app_type_to_syntax_metadata - syntax metadata per app type map
    */
-  std::map<std::string, std::set<std::string>> _syntax_to_subblocks;
-
-  /**
-   * @brief _type_to_input_paths - map of parameter types to lookup paths
-   */
-  std::map<std::string, std::set<std::string>> _type_to_input_paths;
-
-  /**
-   * @brief _type_to_input_paths - map of lookup paths to parameter types
-   */
-  std::map<std::string, std::set<std::string>> _input_path_to_types;
+  std::map<std::string, SyntaxMetadata> _app_type_to_syntax_metadata;
 
   /**
    * @brief _formatting_tab_size - number of indent spaces for formatting

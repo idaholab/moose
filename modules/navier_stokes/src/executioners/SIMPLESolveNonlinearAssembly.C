@@ -14,8 +14,6 @@
 
 #include "libmesh/nonlinear_implicit_system.h"
 
-using namespace libMesh;
-
 InputParameters
 SIMPLESolveNonlinearAssembly::validParams()
 {
@@ -64,7 +62,7 @@ SIMPLESolveNonlinearAssembly::SIMPLESolveNonlinearAssembly(Executioner & ex)
     _momentum_system_numbers.push_back(_problem.nlSysNum(_momentum_system_names[system_i]));
     _momentum_systems.push_back(
         &_problem.getNonlinearSystemBase(_momentum_system_numbers[system_i]));
-    _momentum_systems[system_i]->addVector(_pressure_tag_id, false, ParallelType::PARALLEL);
+    _momentum_systems[system_i]->addVector(_pressure_tag_id, false, PARALLEL);
 
     // We disable this considering that this object passes petsc options a little differently
     _momentum_systems[system_i]->system().prefix_with_name(false);
@@ -182,10 +180,10 @@ SIMPLESolveNonlinearAssembly::solveMomentumPredictor()
 
     // We will need the right hand side and the solution of the next component
     NonlinearImplicitSystem & momentum_system =
-        libMesh::cast_ref<NonlinearImplicitSystem &>(_momentum_systems[system_i]->system());
+        cast_ref<NonlinearImplicitSystem &>(_momentum_systems[system_i]->system());
 
-    PetscLinearSolver<Real> & momentum_solver =
-        libMesh::cast_ref<PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
+    libMesh::PetscLinearSolver<Real> & momentum_solver =
+        cast_ref<libMesh::PetscLinearSolver<Real> &>(*momentum_system.get_linear_solver());
 
     NumericVector<Number> & solution = *(momentum_system.solution);
     NumericVector<Number> & rhs = *(momentum_system.rhs);
@@ -235,7 +233,7 @@ SIMPLESolveNonlinearAssembly::solveMomentumPredictor()
     }
 
     _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
-    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
+    _momentum_systems[system_i]->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
   }
 
   return its_normalized_residuals;
@@ -248,7 +246,7 @@ SIMPLESolveNonlinearAssembly::solvePressureCorrector()
 
   // We will need some members from the implicit nonlinear system
   NonlinearImplicitSystem & pressure_system =
-      libMesh::cast_ref<NonlinearImplicitSystem &>(_pressure_system.system());
+      cast_ref<NonlinearImplicitSystem &>(_pressure_system.system());
 
   // We will need the solution, the right hand side and the matrix
   NumericVector<Number> & current_local_solution = *(pressure_system.current_local_solution);
@@ -257,8 +255,8 @@ SIMPLESolveNonlinearAssembly::solvePressureCorrector()
   NumericVector<Number> & rhs = *(pressure_system.rhs);
 
   // Fetch the linear solver from the system
-  PetscLinearSolver<Real> & pressure_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
+  libMesh::PetscLinearSolver<Real> & pressure_solver =
+      cast_ref<libMesh::PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
 
   // We need a zero vector to be able to emulate the Ax=b system by evaluating the
   // residual and jacobian. Unfortunately, this will leave us with the -b on the right hand side
@@ -313,8 +311,7 @@ SIMPLESolveNonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
   _problem.setCurrentNonlinearSystem(system_num);
 
   // We will need some members from the implicit nonlinear system
-  NonlinearImplicitSystem & ni_system =
-      libMesh::cast_ref<NonlinearImplicitSystem &>(system.system());
+  NonlinearImplicitSystem & ni_system = cast_ref<NonlinearImplicitSystem &>(system.system());
 
   // We will need the solution, the right hand side and the matrix
   NumericVector<Number> & current_local_solution = *(ni_system.current_local_solution);
@@ -326,8 +323,8 @@ SIMPLESolveNonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
   auto diff_diagonal = solution.zero_clone();
 
   // Fetch the linear solver from the system
-  PetscLinearSolver<Real> & linear_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*ni_system.get_linear_solver());
+  libMesh::PetscLinearSolver<Real> & linear_solver =
+      cast_ref<libMesh::PetscLinearSolver<Real> &>(*ni_system.get_linear_solver());
 
   // We need a zero vector to be able to emulate the Ax=b system by evaluating the
   // residual and jacobian. Unfortunately, this will leave us with the -b on the right hand side
@@ -383,7 +380,7 @@ SIMPLESolveNonlinearAssembly::solveSolidEnergySystem()
 
   // We will need some members from the implicit nonlinear system
   NonlinearImplicitSystem & se_system =
-      libMesh::cast_ref<NonlinearImplicitSystem &>(_solid_energy_system->system());
+      cast_ref<NonlinearImplicitSystem &>(_solid_energy_system->system());
 
   // We will need the solution, the right hand side and the matrix
   NumericVector<Number> & current_local_solution = *(se_system.current_local_solution);
@@ -392,8 +389,8 @@ SIMPLESolveNonlinearAssembly::solveSolidEnergySystem()
   NumericVector<Number> & rhs = *(se_system.rhs);
 
   // Fetch the linear solver from the system
-  PetscLinearSolver<Real> & se_solver =
-      libMesh::cast_ref<PetscLinearSolver<Real> &>(*se_system.get_linear_solver());
+  libMesh::PetscLinearSolver<Real> & se_solver =
+      cast_ref<libMesh::PetscLinearSolver<Real> &>(*se_system.get_linear_solver());
 
   // We need a zero vector to be able to emulate the Ax=b system by evaluating the
   // residual and jacobian. Unfortunately, this will leave us with the -b on the righ hand side
@@ -438,6 +435,8 @@ SIMPLESolveNonlinearAssembly::solveSolidEnergySystem()
 bool
 SIMPLESolveNonlinearAssembly::solve()
 {
+  Moose::PetscSupport::PetscOptionsScope petsc_options_scope(_problem);
+
   // Dummy solver parameter file which is needed for switching petsc options
   SolverParams solver_params;
   solver_params._type = Moose::SolveType::ST_LINEAR;
@@ -452,7 +451,18 @@ SIMPLESolveNonlinearAssembly::solve()
   if (_has_turbulence_systems)
     no_systems += _turbulence_systems.size();
   std::vector<std::pair<unsigned int, Real>> ns_its_residuals(no_systems, std::make_pair(0, 1.0));
-  std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
+
+  std::vector<Real> ns_abs_tols;
+  ns_abs_tols.reserve(no_systems);
+
+  for (const auto system_i : index_range(_momentum_systems))
+  {
+    const auto abs_tol = _momentum_absolute_tolerance.size() == 1
+                             ? _momentum_absolute_tolerance[0]
+                             : _momentum_absolute_tolerance[system_i];
+    ns_abs_tols.push_back(abs_tol);
+  }
+
   ns_abs_tols.push_back(_pressure_absolute_tolerance);
   if (_has_energy_system)
   {

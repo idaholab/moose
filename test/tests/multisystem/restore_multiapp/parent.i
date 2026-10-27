@@ -71,7 +71,7 @@
 [Convergence]
   [linear]
     type = IterationCountConvergence
-    max_iterations = 6
+    max_iterations = 7
     converge_at_max_iterations = true
   []
 []

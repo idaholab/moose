@@ -7,6 +7,6 @@
     csvdiff = 'kokkos_element_l2_norm_out.csv'
     requirement = 'The Kokkos system shall compute the volumetric L2 norm of a variable over the mesh.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

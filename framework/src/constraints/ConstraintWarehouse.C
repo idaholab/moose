@@ -18,7 +18,7 @@
 #include "NodeElemConstraintBase.h"
 #include "FEProblemBase.h"
 
-ConstraintWarehouse::ConstraintWarehouse() : MooseObjectWarehouse<Constraint>(/*threaded=*/false) {}
+ConstraintWarehouse::ConstraintWarehouse() : MooseObjectWarehouse<Constraint>(/*num_threads=*/1) {}
 
 void
 ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,

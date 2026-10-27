@@ -99,7 +99,7 @@
   solve_type = 'NEWTON'
   line_search = 'basic'
   nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-5
+  nl_abs_tol = 1e-4
   nl_max_its = 10
 
   l_tol = 1e-2

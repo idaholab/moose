@@ -18,7 +18,6 @@
 
 #include "XFEMApp.h"
 
-
 GTEST_API_ int
 main(int argc, char ** argv)
 {

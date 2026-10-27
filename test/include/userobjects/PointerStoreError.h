@@ -28,9 +28,9 @@ public:
   virtual void initialSetup();
   virtual void timestepSetup();
 
-  virtual void initialize(){};
+  virtual void initialize() {}
   virtual void execute();
-  virtual void finalize(){};
+  virtual void finalize() {}
 
 protected:
   TypeWithNoStore *& _pointer_data;

@@ -11,12 +11,13 @@
     dmax = 90
   []
   [make3D]
+    type = AdvancedExtruderGenerator
+    direction = '0 0 1'
+    heights = '4 4 4'
+    num_layers = '1 1 1'
+    bottom_boundary = 'bottom'
+    top_boundary = 'top'
     input = annular
-    type = MeshExtruderGenerator
-    extrusion_vector = '0 0 12'
-    num_layers = 3
-    bottom_sideset = 'bottom'
-    top_sideset = 'top'
   []
   [shift_down]
     type = TransformGenerator
@@ -290,7 +291,6 @@
     type = Pressure
     boundary = injection_area
     variable = disp_x
-    component = 0
     postprocessor = constrained_effective_fluid_pressure_at_wellbore
     use_displaced_mesh = false
   []
@@ -298,7 +298,6 @@
     type = Pressure
     boundary = injection_area
     variable = disp_y
-    component = 1
     postprocessor = constrained_effective_fluid_pressure_at_wellbore
     use_displaced_mesh = false
   []
@@ -350,8 +349,8 @@
     type = Water97FluidProperties
   []
   [tabulated_water]
-    type = TabulatedFluidProperties
-    fp = true_water
+    type = TabulatedBicubicFluidProperties
+    input_fp = true_water
     temperature_min = 275
     pressure_max = 1E8
     interpolated_properties = 'density viscosity enthalpy internal_energy'
@@ -363,8 +362,8 @@
     type = CO2FluidProperties
   []
   [tabulated_co2]
-    type = TabulatedFluidProperties
-    fp = true_co2
+    type = TabulatedBicubicFluidProperties
+    input_fp = true_co2
     temperature_min = 275
     pressure_max = 1E8
     interpolated_properties = 'density viscosity enthalpy internal_energy'

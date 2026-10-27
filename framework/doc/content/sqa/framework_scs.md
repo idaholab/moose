@@ -15,7 +15,8 @@ git clang-format [<branch>]
 ```
 
 The automated testing that occurs on all Pull Requests will produce a "diff" of changes needed to
-conform with the standard.
+conform with the standard. Alternatively, installing the [pre-commit](https://pre-commit.com) hooks
+(see [framework/contributing.md]) applies this formatting to staged files automatically at commit time.
 
 General style guidelines include:
 
@@ -38,6 +39,9 @@ from the root of the [!ac](MOOSE) repository:
 ```
 black .
 ```
+
+Alternatively, installing the [pre-commit](https://pre-commit.com) hooks (see
+[framework/contributing.md]) formats staged Python files automatically at commit time.
 
 ## File Layout
 
@@ -495,4 +499,5 @@ class MyClass:
 - Every class with virtual methods must have a virtual destructor
 - All function definitions should be in *.C files.
     - The only exceptions are for inline functions for speed and templates.
+    - When defining inline or template methods in a header file, definitions that span more than one line must be placed outside of the class definition (after the closing brace), not inside the class body.
 - Thou shalt not commit accidental insertion in a std::map by using brackets in a right-hand side operator unless proof is provided that it can't fail.

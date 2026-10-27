@@ -81,11 +81,18 @@ advected_interp_method = 'upwind'
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [LinearFVKernels]
 
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu'
     momentum_component = 'x'
     use_nonorthogonal_correction = false
@@ -98,7 +105,7 @@ advected_interp_method = 'upwind'
   []
 
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false

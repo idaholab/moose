@@ -1,12 +1,12 @@
 mu = 1
-rho = 1
+rho = 1000
 advected_interp_method = 'average'
+pressure_gradient_method = 'green-gauss'
 
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system'
   previous_nl_solution_required = true
 []
-
 
 [Mesh]
   [gmg]
@@ -25,9 +25,9 @@ advected_interp_method = 'average'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
+    pressure_projection_method = CONSISTENT
   []
 []
-
 
 [Variables]
   [vel_x]
@@ -47,11 +47,37 @@ advected_interp_method = 'average'
   []
 []
 
+[FVGradientMethods]
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.2
+  []
+[]
+
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
+  []
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+  [min_mod]
+    type = FVAdvectedMinmodWeightBased
+  []
+  [vanLeer]
+    type = FVAdvectedVanLeerWeightBased
+  []
+  [venkatakrishnan]
+    type = FVAdvectedMUSCLDeferredCorrection
+  []
+[]
+
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
@@ -62,7 +88,7 @@ advected_interp_method = 'average'
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
@@ -75,12 +101,14 @@ advected_interp_method = 'average'
     variable = vel_x
     pressure = pressure
     momentum_component = 'x'
+    gradient_method = ${pressure_gradient_method}
   []
   [v_pressure]
     type = LinearFVMomentumPressure
     variable = vel_y
     pressure = pressure
     momentum_component = 'y'
+    gradient_method = ${pressure_gradient_method}
   []
   [u_forcing]
     type = LinearFVSource
@@ -93,7 +121,7 @@ advected_interp_method = 'average'
     source_density = forcing_v
   []
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false
@@ -143,15 +171,13 @@ advected_interp_method = 'average'
   []
   [forcing_u]
     type = ParsedFunction
-    expression = '-4*mu*(-1+2*y)*(y^2-6*x*y^2+6*x^2*y^2-y+6*x*y-6*x^2*y+3*x^2-6*x^3+3*x^4)+1-2*x+rho*4*x^3'
-            '*y^2*(2*y^2-2*y+1)*(y-1)^2*(-1+2*x)*(x-1)^3'
+    expression = '-4*mu*(-1+2*y)*(y^2-6*x*y^2+6*x^2*y^2-y+6*x*y-6*x^2*y+3*x^2-6*x^3+3*x^4)+1-2*x+rho*4*x^3*y^2*(2*y^2-2*y+1)*(y-1)^2*(-1+2*x)*(x-1)^3'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
   []
   [forcing_v]
     type = ParsedFunction
-    expression = '4*mu*(-1+2*x)*(x^2-6*y*x^2+6*x^2*y^2-x+6*x*y-6*x*y^2+3*y^2-6*y^3+3*y^4)+rho*4*y^3*x^2*(2'
-            '*x^2-2*x+1)*(x-1)^2*(-1+2*y)*(y-1)^3'
+    expression = '4*mu*(-1+2*x)*(x^2-6*y*x^2+6*x^2*y^2-x+6*x*y-6*x*y^2+3*y^2-6*y^3+3*y^4)+rho*4*y^3*x^2*(2*x^2-2*x+1)*(x-1)^2*(-1+2*y)*(y-1)^3'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
   []
@@ -166,9 +192,9 @@ advected_interp_method = 'average'
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
-  momentum_equation_relaxation = 0.8
-  pressure_variable_relaxation = 0.3
-  num_iterations = 2000
+  momentum_equation_relaxation = 0.7
+  pressure_variable_relaxation = 1.0
+  num_iterations = 20000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'

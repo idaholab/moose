@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,6 +12,7 @@
 #include "KokkosTypes.h"
 #include "KokkosMaterialPropertyValue.h"
 #include "KokkosDispatcher.h"
+#include "KokkosFESystem.h"
 
 #include "MaterialBase.h"
 
@@ -24,7 +25,7 @@ namespace Moose::Kokkos
 class MaterialBase : public ::MaterialBase,
                      public MeshHolder,
                      public AssemblyHolder,
-                     public SystemHolder
+                     public FESystemHolder
 {
 public:
   static InputParameters validParams();

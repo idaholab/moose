@@ -141,12 +141,9 @@ ActiveLearningReporterTempl<T>::execute()
   if (_input_data_requested)
   {
     // Gather inputs for the current step
-    _input_data.assign(_sampler.getNumberOfRows(),
-                       std::vector<Real>(_sampler.getNumberOfCols(), 0.0));
-    for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
-      _input_data[i] = _sampler.getNextLocalRow();
-    for (auto & inp : _input_data)
-      gatherSum(inp);
+    _input_data.resize(_sampler.getNumberOfRows());
+    for (const auto i : make_range(_sampler.getNumberOfRows()))
+      _input_data[i] = _sampler.getSampleRow(i);
   }
   if (_output_data_requested)
   {
@@ -164,11 +161,11 @@ ActiveLearningReporterTempl<T>::execute()
   // Loop over samples to determine if sample is needed. Replace value in _data
   // (typically only if a sample is not needed). We insert a dummy value in case
   // _data has not been declared.
-  for (const auto & i : make_range(_sampler.getNumberOfLocalRows()))
-    _need_sample[i] = needSample(_sampler.getNextLocalRow(),
-                                 i,
-                                 i + _sampler.getLocalRowBegin(),
-                                 (_data ? (*_data)[i] : dummy));
+  for (dof_id_type i = 0, global_i = _sampler.getLocalRowBegin();
+       i < _sampler.getNumberOfLocalRows();
+       ++i, ++global_i)
+    _need_sample[i] =
+        needSample(_sampler.getSampleRow(global_i), i, global_i, (_data ? (*_data)[i] : dummy));
 }
 
 template <typename T>

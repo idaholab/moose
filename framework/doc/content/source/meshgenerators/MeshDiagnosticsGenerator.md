@@ -59,6 +59,35 @@ The sideset orientation is only checked for sides that are delimiting two differ
 makes sure that the order of the subdomains, e.g. which one owns the element and which one owns the element on the
 other side of the side (the neighbor), does not change throughout the sideset.
 
+## Watertightness checks
+
+Turn these checks on with the [!param](/Mesh/MeshDiagnosticsGenerator/check_for_watertight_sidesets) and
+[!param](/Mesh/MeshDiagnosticsGenerator/check_for_watertight_nodesets) parameters.
+
+These diagnostics verify that the boundary of the mesh is fully covered by sidesets (respectively
+nodesets). They loop over every element side that is on the mesh exterior (has no neighbor) and report
+each side (respectively node) that has not been assigned to any sideset (respectively nodeset). This is
+useful to confirm that boundary conditions can be applied everywhere they are needed.
+
+By default the entire mesh boundary must be covered. The
+[!param](/Mesh/MeshDiagnosticsGenerator/boundaries_to_check) parameter may be used to instead require that
+a specified list of boundaries forms the watertight envelope.
+
+### Restricting the check to a subset of blocks
+
+The [!param](/Mesh/MeshDiagnosticsGenerator/watertight_check_blocks) parameter restricts the checks to the
+*envelope* of a subset of blocks, treating their combined volume as the region of interest. This is
+motivated by flow solvers, for which the sidesets must cover the entire flow volume rather than the whole
+mesh volume. When `watertight_check_blocks` is set, a side is considered part of the envelope, and therefore
+expected to be covered by a sideset/nodeset, if it is either:
+
+- on the mesh exterior (it has no neighbor), or
+- an internal side whose neighbor element is in a block that is *not* in the list.
+
+The second case captures the internal sides between the region of interest and the rest of the mesh, which
+must be part of the sidesets for a flow solver even though they are internal to the mesh. This makes it
+easier to debug finite volume flow problems where the flow volume is only a portion of the mesh.
+
 ## Element overlap checks
 
 Turn this check on with the [!param](/Mesh/MeshDiagnosticsGenerator/examine_element_overlap) parameter.
@@ -115,6 +144,26 @@ element, it will not be detected.
 !alert note
 This check may report false positives on some immersed meshes and slit meshes because it will detect non-conformal nodes
 and will try to examine if the elements next to these nodes can be grouped to form coarser elements.
+
+## Non-conforming faces check
+
+Turn this check on with the [!param](/Mesh/MeshDiagnosticsGenerator/examine_nonconforming_faces) parameter.
+
+This check detects element faces that border another element but do not match a neighbor face. A
+common example is a HEX8 quad face abutting two TET4 triangle faces over the same four corner nodes
+(for instance at the interface between a hexahedral region and a tetrahedral boundary layer). Because
+all four corner nodes are shared, no node lies on another element's face, so the
+[!param](/Mesh/MeshDiagnosticsGenerator/examine_non_conformality) (hanging-node) check does not report
+this situation; this check is complementary to it.
+
+The check looks at every face that has no neighbor (i.e. that the mesh library treats as external)
+and probes a point just outside it. If another element is found there, the face borders material but
+matched no neighbor face, so the interface is non-conforming.
+
+!alert note
+The probe relies on the element's outward face direction, so this check is intended for meshes of
+standard elements (such as HEX, TET, PYRAMID, PRISM). It is the right tool to verify that a cut or
+converted mesh did not leave quad-versus-two-triangle interfaces behind.
 
 ## Elements and sides local Jacobian check
 

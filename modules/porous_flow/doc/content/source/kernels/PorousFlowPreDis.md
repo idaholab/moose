@@ -51,7 +51,9 @@ Then the stoichiometric coefficients for the `PorousFlowPreDis` Kernels would be
 
 !alert note
 This `Kernel` lumps the mineral masses to the nodes.  It also only uses the *old* values of porosity,
-which is an approximation: see [porosity](/porous_flow/porosity.md) for a discussion.
+which is an approximation: see [porosity](/porous_flow/porosity.md) for a discussion.  Because it lumps
+to the nodes, this Kernel requires a nodal (Lagrange) variable; using a non-nodal variable (such as a
+monomial variable) is an error.
 
 See [mass lumping](/porous_flow/mass_lumping.md) for details.
 

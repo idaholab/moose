@@ -1,0 +1,33 @@
+# MFEMScalarCoefficientPointValueSampler
+
+!if! function=hasCapability('mfem')
+
+## Overview
+
+This vector postprocessor evaluates a real scalar MFEM coefficient at specified
+points. Unlike an MFEM variable, a coefficient is a function used by finite
+element operators and need not belong to a finite element space. The sampler
+therefore evaluates the coefficient directly in the owning element selected by
+MFEM's [`FindPointsGSLIB`](https://mfem.org/howto/findpts/) point search.
+
+!alert note An arbitrary coefficient may be discontinuous anywhere in space.
+Beware of sampling at discontinuity surfaces.
+
+Quadrature-function-backed coefficients are defined only at the quadrature
+points configured by their quadrature rule. They cannot be evaluated at
+arbitrary sample points and are rejected by this sampler.
+
+## Example Input File Syntax
+
+!listing mfem/vectorpostprocessors/coefficient_value_sampler/coefficient_value_sampler.i block=VectorPostprocessors
+
+!syntax parameters /VectorPostprocessors/MFEMScalarCoefficientPointValueSampler
+
+!syntax inputs /VectorPostprocessors/MFEMScalarCoefficientPointValueSampler
+
+!syntax children /VectorPostprocessors/MFEMScalarCoefficientPointValueSampler
+
+!if-end!
+
+!else
+!include mfem/mfem_warning.md

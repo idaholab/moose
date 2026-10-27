@@ -21,7 +21,6 @@
 #include "libmesh/tensor_value.h"
 #include "MooseMain.h"
 
-using namespace libMesh;
 using namespace Moose::FV;
 
 TEST(LimitersTest, limitVector)

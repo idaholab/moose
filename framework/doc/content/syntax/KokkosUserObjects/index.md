@@ -121,7 +121,7 @@ As a result, you still cannot call virtual functions of your user objects on GPU
 
 In order to realize virtual dispatch with your user objects, therefore, you need to implement a wrapper with virtual functions that can be easily constructed on GPU, and call your own APIs through the wrapper.
 This wrapper will hold the GPU copy of your user object in its concrete type and the virtual functions that call the corresponding user object functions statically.
-This approach is implemented in `Moose::Kokkos::Function` using a registry design pattern and can be found across framework source files such as [KokkosFunctionWrapper.h](include/kokkos/functions/KokkosFunctionWrapper.h) and [KokkosFunction.h](include/kokkos/functions/KokkosFunction.h), but it requires a deep understanding of dynamic polymorphism and GPU backends.
+This approach is implemented in `Moose::Kokkos::Function` using a registry design pattern and can be found across framework source files such as [!file text=KokkosFunctionWrapper.h](include/kokkos/functions/KokkosFunctionWrapper.h) and [!file text=KokkosFunction.h](include/kokkos/functions/KokkosFunction.h), but it requires a deep understanding of dynamic polymorphism and GPU backends.
 Therefore, we plan to explore developing base classes for the wrapper that the users can easily derive from and providing programming guidelines, once the RDC option is in place.
 
 !syntax list /UserObjects objects=True actions=False subsystems=False

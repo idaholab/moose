@@ -1,0 +1,21 @@
+
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               2 @ t5
+
+NODAL VARIABLES relative 5.5e-6 floor 1e-10
+	contact_pressure relative 5.5e-6 floor 1e-5  # min:               0 @ t1,n1	max:       2926068.3 @ t3,n3
+	disp_x                                       # min:               0 @ t1,n1	max:            0.02 @ t3,n1
+	disp_y                                       # min:               0 @ t1,n1	max:   9.8349233e-17 @ t5,n40
+	nodal_area                                   # min:               0 @ t1,n1	max:      0.66666667 @ t1,n62
+	penetration                                  # min:               0 @ t1,n1	max:     0.010000036 @ t5,n45
+	saved_x          relative 5.5e-6 floor 1e-5  # min:               0 @ t1,n1	max:       1950712.2 @ t3,n60
+	saved_y          relative 5.5e-6 floor 1e-5  # min:               0 @ t1,n1	max:   3.1433109e-08 @ t5,n48
+
+ELEMENT VARIABLES relative 5.5e-6 floor 1e-5
+	stress_xx  # min:               0 @ t1,b1,e1	max:       2926068.3 @ t3,b2,e4
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
+

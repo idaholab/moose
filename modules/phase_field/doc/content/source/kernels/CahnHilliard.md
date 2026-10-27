@@ -24,7 +24,7 @@ number of concentration variables $c_j$. It uses the relation
 which implies that $f$ cannot be a function of anything but the listed MOOSE variables $c_j$.
 
 $M$ (`mob_name`) is a scalar (isotropic) mobility, and $f$ (`f_name`) is a free energy density
-provided by the [function material](../../introduction/FunctionMaterials).
+provided by the [function material](FunctionMaterials.md).
 
 Note that this kernel implements only the component of the free energy functional $F$ that is
 *not* depending on $\nabla c$. The $\nabla c$ dependent terms that arise from the gradient

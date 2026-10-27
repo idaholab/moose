@@ -11,23 +11,24 @@
 
 #pragma once
 
-#include "MFEMLinearSolverBase.h"
+#include "MFEMLORLinearSolverBase.h"
 
 /**
  * Wrapper for mfem::OperatorJacobiSmoother solver.
  */
-class MFEMOperatorJacobiSmoother : public Moose::MFEM::LinearSolverBase
+class MFEMOperatorJacobiSmoother
+  : public Moose::MFEM::LORLinearSolverBase<mfem::OperatorJacobiSmoother>
 {
 public:
   static InputParameters validParams();
 
   MFEMOperatorJacobiSmoother(const InputParameters & parameters);
 
-  /// Updates the solver with the bilinear form in case LOR solve is required
-  void SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers) override;
+  void ConstructSolver() override;
 
 protected:
-  void ConstructSolver() override;
+  /// Update the wrapped MFEM solver parameters
+  virtual void SetSolverParameters(mfem::OperatorJacobiSmoother & solver) override;
 };
 
 #endif

@@ -58,11 +58,12 @@ SIMPLESolveBase::validParams()
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
       "momentum equation");
 
-  params.addRangeCheckedParam<Real>(
+  params.addRangeCheckedParam<std::vector<Real>>(
       "momentum_absolute_tolerance",
-      1e-5,
+      {1e-5},
       "0.0<momentum_absolute_tolerance",
-      "The absolute tolerance on the normalized residual of the momentum equation.");
+      "The absolute tolerance(s) on the normalized residual(s) of the momentum equation(s). "
+      "If a single value is provided it is applied to all momentum components.");
 
   params.addRangeCheckedParam<Real>("momentum_l_tol",
                                     1e-5,
@@ -81,7 +82,7 @@ SIMPLESolveBase::validParams()
 
   params.addParamNamesToGroup(
       "momentum_equation_relaxation momentum_petsc_options momentum_petsc_options_iname "
-      "momentum_petsc_options_value momentum_petsc_options_value momentum_absolute_tolerance "
+      "momentum_petsc_options_value momentum_absolute_tolerance "
       "momentum_l_tol momentum_l_abs_tol momentum_l_max_its momentum_systems",
       "Momentum Equation");
 
@@ -128,7 +129,7 @@ SIMPLESolveBase::validParams()
 
   params.addParamNamesToGroup(
       "pressure_variable_relaxation pressure_petsc_options pressure_petsc_options_iname "
-      "pressure_petsc_options_value pressure_petsc_options_value pressure_absolute_tolerance "
+      "pressure_petsc_options_value pressure_absolute_tolerance "
       "pressure_l_tol pressure_l_abs_tol pressure_l_max_its pressure_system",
       "Pressure Equation");
 
@@ -187,6 +188,13 @@ SIMPLESolveBase::validParams()
                                     "0.0<energy_l_abs_tol",
                                     "The absolute tolerance on the normalized residual in the "
                                     "linear solver of the energy equation.");
+  params.addRangeCheckedParam<Real>(
+      "energy_field_relaxation",
+      1.0,
+      "0.0<energy_field_relaxation<=1.0",
+      "The relaxation which should be used for the energy field. (=1 for no relaxation, "
+      "diagonal dominance will still be enforced)");
+
   params.addRangeCheckedParam<unsigned int>(
       "energy_l_max_its",
       10000,
@@ -195,7 +203,7 @@ SIMPLESolveBase::validParams()
 
   params.addParamNamesToGroup(
       "energy_equation_relaxation energy_petsc_options energy_petsc_options_iname "
-      "energy_petsc_options_value energy_petsc_options_value energy_absolute_tolerance "
+      "energy_petsc_options_value energy_absolute_tolerance "
       "energy_l_tol energy_l_abs_tol energy_l_max_its",
       "Energy Equation");
 
@@ -284,10 +292,10 @@ SIMPLESolveBase::validParams()
   params.addParamNamesToGroup(
       "passive_scalar_systems passive_scalar_equation_relaxation passive_scalar_petsc_options "
       "passive_scalar_petsc_options_iname "
-      "passive_scalar_petsc_options_value passive_scalar_petsc_options_value "
+      "passive_scalar_petsc_options_value "
       "passive_scalar_absolute_tolerance "
       "passive_scalar_l_tol passive_scalar_l_abs_tol passive_scalar_l_max_its",
-      "passive_scalar Equation");
+      "Passive Scalars Advection Equation");
 
   /*
    * Parameters to control the solution of each participating media radiation equation
@@ -335,7 +343,7 @@ SIMPLESolveBase::validParams()
   params.addParamNamesToGroup(
       "pm_radiation_systems pm_radiation_equation_relaxation pm_radiation_petsc_options "
       "pm_radiation_petsc_options_iname "
-      "pm_radiation_petsc_options_value pm_radiation_petsc_options_value "
+      "pm_radiation_petsc_options_value "
       "pm_radiation_absolute_tolerance "
       "pm_radiation_l_tol pm_radiation_l_abs_tol pm_radiation_l_max_its",
       "Participating Medium Radiation Equation");
@@ -395,7 +403,7 @@ SIMPLESolveBase::validParams()
                               "turbulence_field_min_limit "
                               "turbulence_petsc_options "
                               "turbulence_petsc_options_iname "
-                              "turbulence_petsc_options_value turbulence_petsc_options_value "
+                              "turbulence_petsc_options_value "
                               "turbulence_absolute_tolerance "
                               "turbulence_l_tol turbulence_l_abs_tol turbulence_l_max_its",
                               "Turbulence Equations");
@@ -432,6 +440,7 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _has_energy_system(isParamValid("energy_system")),
     _energy_equation_relaxation(getParam<Real>("energy_equation_relaxation")),
     _energy_l_abs_tol(getParam<Real>("energy_l_abs_tol")),
+    _energy_field_relaxation(getParam<Real>("energy_field_relaxation")),
     _has_solid_energy_system(_has_energy_system && isParamValid("solid_energy_system")),
     _solid_energy_l_abs_tol(getParam<Real>("solid_energy_l_abs_tol")),
     _passive_scalar_system_names(getParam<std::vector<SolverSystemName>>("passive_scalar_systems")),
@@ -450,7 +459,7 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _turbulence_field_relaxation(getParam<std::vector<Real>>("turbulence_field_relaxation")),
     _turbulence_field_min_limit(getParam<std::vector<Real>>("turbulence_field_min_limit")),
     _turbulence_l_abs_tol(getParam<Real>("turbulence_l_abs_tol")),
-    _momentum_absolute_tolerance(getParam<Real>("momentum_absolute_tolerance")),
+    _momentum_absolute_tolerance(getParam<std::vector<Real>>("momentum_absolute_tolerance")),
     _pressure_absolute_tolerance(getParam<Real>("pressure_absolute_tolerance")),
     _energy_absolute_tolerance(getParam<Real>("energy_absolute_tolerance")),
     _solid_energy_absolute_tolerance(getParam<Real>("solid_energy_absolute_tolerance")),
@@ -463,10 +472,13 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _continue_on_max_its(getParam<bool>("continue_on_max_its")),
     _print_fields(getParam<bool>("print_fields"))
 {
-  if (_momentum_system_names.size() != _problem.mesh().dimension())
-    paramError("momentum_systems",
-               "The number of momentum components should be equal to the number of "
-               "spatial dimensions on the mesh.");
+  // The momentum absolute tolerances must either be given as a single value
+  // (applied to all components) or one value per momentum component.
+  if (!_momentum_absolute_tolerance.empty() && _momentum_absolute_tolerance.size() != 1 &&
+      _momentum_absolute_tolerance.size() != _momentum_system_names.size())
+    paramError("momentum_absolute_tolerance",
+               "The number of momentum absolute tolerances must be one or match the number of "
+               "momentum systems.");
 
   const auto & momentum_petsc_options = getParam<MultiMooseEnum>("momentum_petsc_options");
   const auto & momentum_petsc_pair_options = getParam<MooseEnumItem, std::string>(

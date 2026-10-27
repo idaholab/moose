@@ -12,30 +12,44 @@
 #include "PorousFlowDarcyBase.h"
 
 /**
- * Convective flux of component k in a single-phase fluid
- * A fully-updwinded version is implemented, where the mobility
+ * Convective flux of component k in a single-phase fluid.
+ * A fully-upwinded version is implemented, where the mobility
  * of the upstream nodes is used.
+ *
+ * Templated on is_ad: the false instantiation uses hand-coded Jacobians;
+ * the true instantiation propagates derivatives through AD material properties.
  */
-class PorousFlowFullySaturatedAdvectiveFlux : public PorousFlowDarcyBase
+template <bool is_ad>
+class PorousFlowFullySaturatedAdvectiveFluxTempl : public PorousFlowDarcyBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowFullySaturatedAdvectiveFlux(const InputParameters & parameters);
+  PorousFlowFullySaturatedAdvectiveFluxTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real mobility(unsigned nodenum, unsigned phase) const override;
+  virtual GenericReal<is_ad> mobility(unsigned nodenum, unsigned phase) const override;
   virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar) const override;
 
   /// Mass fraction of each component in each phase
-  const MaterialProperty<std::vector<std::vector<Real>>> & _mass_fractions;
+  const GenericMaterialProperty<std::vector<std::vector<Real>>, is_ad> & _mass_fractions;
 
-  /// Derivative of the mass fraction of each component in each phase wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_fractions_dvar;
+  /// Derivative of mass fraction wrt PorousFlow variables -- null for AD path
+  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> * const _dmass_fractions_dvar;
 
   /// Index of the fluid component that this kernel acts on
   const unsigned int _fluid_component;
 
-  /// Whether the flux is multiplied by density (so it will be a mass flux) or not (it will be a volume flux)
+  /// Whether the flux is multiplied by density (mass flux) or not (volume flux)
   const bool _multiply_by_density;
+
+  using PorousFlowDarcyBaseTempl<is_ad>::_dictator;
+  using PorousFlowDarcyBaseTempl<is_ad>::_fluid_density_node;
+  using PorousFlowDarcyBaseTempl<is_ad>::_fluid_viscosity;
+  using PorousFlowDarcyBaseTempl<is_ad>::_dfluid_density_node_dvar;
+  using PorousFlowDarcyBaseTempl<is_ad>::_dfluid_viscosity_dvar;
+  usingGenericKernelMembers;
 };
+
+typedef PorousFlowFullySaturatedAdvectiveFluxTempl<false> PorousFlowFullySaturatedAdvectiveFlux;
+typedef PorousFlowFullySaturatedAdvectiveFluxTempl<true> ADPorousFlowFullySaturatedAdvectiveFlux;

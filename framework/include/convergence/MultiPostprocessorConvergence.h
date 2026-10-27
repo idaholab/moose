@@ -22,7 +22,7 @@ public:
   MultiPostprocessorConvergence(const InputParameters & parameters);
 
   virtual void initialSetup() override;
-  virtual MooseConvergenceStatus checkConvergenceInner(unsigned int iter) override;
+  virtual MooseConvergenceStatus checkConvergenceInner(unsigned int n_iter) override;
 
 protected:
   /// Returns the maximum description length

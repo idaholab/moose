@@ -792,9 +792,9 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
 
   boundary_info.sideset_name(0) = "inlet";
   boundary_info.sideset_name(1) = "outlet";
-  mesh_base->subdomain_name(_subchannel_block_id) = "subchannel";
+  mesh_base->set_subdomain_name(_subchannel_block_id, "subchannel", true);
   if (n_pins > 0)
-    mesh_base->subdomain_name(_pin_block_id) = "fuel_pins";
+    mesh_base->set_subdomain_name(_pin_block_id, "fuel_pins", true);
   mesh_base->prepare_for_use();
 
   return mesh_base;

@@ -122,6 +122,7 @@ private:
   /// cache the final property name of the derivative
   std::string _property_name;
 
-  /// is this a property that was directly specified by the user? Then it _must_ exist.
+  /// whether a directly specified (non-derivative) property must exist; derivative properties
+  /// (D[u,x]) are always optional regardless of this flag (see value())
   bool _required;
 };

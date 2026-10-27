@@ -16,8 +16,6 @@
 
 registerMooseObject("MooseApp", GhostPrimaryFace);
 
-using namespace libMesh;
-
 InputParameters
 GhostPrimaryFace::validParams()
 {
@@ -160,7 +158,7 @@ GhostPrimaryFace::operator>=(const RelationshipManager & other) const
          _secondary_boundary_name == primary_face->_secondary_boundary_name;
 }
 
-std::unique_ptr<GhostingFunctor>
+std::unique_ptr<libMesh::GhostingFunctor>
 GhostPrimaryFace::clone() const
 {
   return _app.getFactory().copyConstruct(*this);

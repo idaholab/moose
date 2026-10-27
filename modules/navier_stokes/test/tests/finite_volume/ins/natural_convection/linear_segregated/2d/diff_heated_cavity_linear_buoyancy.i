@@ -51,7 +51,6 @@ walls = 'right left top bottom'
     pressure = pressure
     rho = 'rho'
     p_diffusion_kernel = p_diffusion
-    body_force_kernel_names = 'u_buoyancy; v_buoyancy'
   []
 []
 
@@ -76,10 +75,17 @@ walls = 'right left top bottom'
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
+    advected_interp_method_name = upwind
     mu = ${mu}
     momentum_component = 'x'
     use_nonorthogonal_correction = false
@@ -102,6 +108,7 @@ walls = 'right left top bottom'
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
+    advected_interp_method_name = upwind
     mu = ${mu}
     momentum_component = 'y'
     use_nonorthogonal_correction = false
@@ -122,7 +129,7 @@ walls = 'right left top bottom'
   []
 
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false
@@ -186,6 +193,9 @@ walls = 'right left top bottom'
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
+    u = vel_x
+    v = vel_y
+    rho = 'rho'
   []
 []
 
@@ -247,4 +257,3 @@ walls = 'right left top bottom'
 [Outputs]
   exodus = true
 []
-

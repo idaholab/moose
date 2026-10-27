@@ -24,10 +24,10 @@ public:
   virtual ~MessageFromInput();
 
   /// Required implementation of a pure virtual function (not used)
-  virtual void initialize() override{};
+  virtual void initialize() override {};
 
   /// Required implementation of a pure virtual function (not used)
-  virtual void finalize() override{};
+  virtual void finalize() override {};
 
   /// Print out the message
   virtual void execute() override;

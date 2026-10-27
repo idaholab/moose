@@ -92,6 +92,9 @@ public:
     _direction = direction;
   }
 
+  /// Whether the transfer should be executed after its source application
+  bool executeAfterSiblingSourceApp() const { return _exec_after_source_app_exec; }
+
 protected:
   SubProblem & _subproblem;
   FEProblemBase & _fe_problem;
@@ -108,6 +111,11 @@ protected:
 
   /// The directions this Transfer is to be executed on
   MultiMooseEnum _directions;
+
+  /// Whether a transfer executing on BETWEEN_MULTIAPPS and on the same execute_on flag
+  /// should execute before or after that application
+  /// For FROM and TO_MULTIAPP this is is true and we refuse setting it to false
+  const bool _exec_after_source_app_exec;
 
 public:
   const static libMesh::Number OutOfMeshValue;

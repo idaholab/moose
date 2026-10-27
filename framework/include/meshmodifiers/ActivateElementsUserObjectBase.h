@@ -30,9 +30,9 @@ public:
 
   virtual bool isElementActivated() = 0;
 
-  void initialize() override{};
+  void initialize() override {};
   void execute() override;
-  void threadJoin(const UserObject & /*uo*/) override{};
+  void threadJoin(const UserObject & /*uo*/) override {};
   void finalize() override;
 
 protected:

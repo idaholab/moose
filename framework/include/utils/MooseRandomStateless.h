@@ -273,7 +273,7 @@ inline void
 dataStore(std::ostream & stream, MooseRandomStateless & v, void * context)
 {
   std::size_t count = v.getAdvanceCount();
-  storeHelper(stream, count, context);
+  dataStore(stream, count, context);
 }
 
 template <>
@@ -281,7 +281,7 @@ inline void
 dataLoad(std::istream & stream, MooseRandomStateless & v, void * context)
 {
   std::size_t count;
-  loadHelper(stream, count, context);
+  dataLoad(stream, count, context);
   v.advance(count);
 }
 
@@ -290,8 +290,8 @@ inline void
 dataStore(std::ostream & stream, std::unique_ptr<MooseRandomStateless> & v, void * context)
 {
   unsigned int seed = v->getSeed();
-  storeHelper(stream, seed, context);
-  storeHelper(stream, *v, context);
+  dataStore(stream, seed, context);
+  dataStore(stream, *v, context);
 }
 
 template <>
@@ -299,7 +299,7 @@ inline void
 dataLoad(std::istream & stream, std::unique_ptr<MooseRandomStateless> & v, void * context)
 {
   unsigned int seed;
-  loadHelper(stream, seed, context);
+  dataLoad(stream, seed, context);
   v = std::make_unique<MooseRandomStateless>(seed);
-  loadHelper(stream, *v, context);
+  dataLoad(stream, *v, context);
 }

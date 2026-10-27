@@ -132,7 +132,7 @@ class TestReporterReader(unittest.TestCase):
         """
 
         data = mooseutils.ReporterReader(self._partsfile)
-        self.assertEqual(data._data["number_of_parts"], 2)
+        self.assertEqual(data._data["number_of_parts"], 4)
         self.assertEqual(data._data["part"], 0)
 
         data.update(part=1)

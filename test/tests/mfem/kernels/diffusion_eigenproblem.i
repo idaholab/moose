@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/star.mesh
   serial_refine = 1
 []
@@ -28,7 +28,7 @@
   [all]
     type = MFEMScalarDirichletBC
     variable = u
-    coefficient = 1.0
+    coefficient = 0.0
   []
 []
 
@@ -39,14 +39,12 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
     print_level = 0
   []
-[]
-
-[Solvers]
   [LOBPCG]
     type = MFEMHypreLOBPCG
     preconditioner = boomeramg

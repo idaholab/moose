@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/cylinder-hex-q2.gen
 []
 
@@ -81,13 +81,11 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHypreGMRES
     preconditioner = boomeramg
@@ -103,10 +101,26 @@
   end_time = 2.0
 []
 
+[VectorPostprocessors]
+  [line_sample_h1_scalar]
+    type = MFEMVariableLineValueSampler
+    variable = 'h1_scalar'
+    start_point = '-1 0 -0.5'
+    end_point = '1 0 0.5'
+    num_points = 101
+  []
+  [line_sample_l2_scalar]
+    type = MFEMVariableLineValueSampler
+    variable = 'l2_scalar'
+    start_point = '-0.99 -0.01 -0.49'
+    end_point = '0.99 0.01 0.49'
+    num_points = 114
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/TransientScalarIC
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    file_base = OutputData/ScalarIC/scalar_ic
   []
 []

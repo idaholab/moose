@@ -1,6 +1,7 @@
 mu = .01
 rho = 1
 advected_interp_method = 'average'
+pressure_diffusion_ainv_interp_method = 'average'
 
 [Mesh]
   [gen]
@@ -44,6 +45,7 @@ advected_interp_method = 'average'
       orthogonality_correction = false
       pressure_two_term_bc_expansion = true
       momentum_advection_interpolation = ${advected_interp_method}
+      pressure_diffusion_interpolation = ${pressure_diffusion_ainv_interp_method}
     []
   []
 []

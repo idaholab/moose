@@ -126,7 +126,7 @@ NestedSolveTempl<is_ad>::isRelSmall(const NSRealVectorValue & a,
                                     const NSRealVectorValue & b,
                                     const NSReal & c)
 {
-  for (const auto i : make_range(LIBMESH_DIM))
+  for (const auto i : make_range(Moose::dim))
   {
     if (abs(MetaPhysicL::raw_value(a)(i)) >=
         abs(MetaPhysicL::raw_value(b)(i) * MetaPhysicL::raw_value(c)))

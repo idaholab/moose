@@ -19,19 +19,14 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = true
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-  [../]
-[]
 
 [BCs]
   [./no_x2]
@@ -381,9 +376,6 @@
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '6.4E9 6.4E9'  # young 16MPa, Poisson 0.25
-  [../]
-  [./strain]
-    type = ComputeIncrementalStrain
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress

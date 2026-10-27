@@ -71,6 +71,12 @@ NearestPointTrainer::postTrain()
   for (auto & it : _sample_points)
     _communicator.allgather(it);
 
+  // A rank with no local rows never resizes _sample_results in train(), which would make
+  // it call allgather() below fewer times than other ranks.
+  dof_id_type n_results = _sample_results.size();
+  _communicator.max(n_results);
+  _sample_results.resize(n_results);
+
   for (auto & it : _sample_results)
     _communicator.allgather(it);
 }

@@ -34,6 +34,13 @@ public:
   void computeJacobian(const FaceInfo & fi) override;
   void computeResidualAndJacobian(const FaceInfo & fi) override;
 
+  /**
+   * Check that this boundary condition's variable is defined on exactly one side of the face.
+   *
+   * @return the checked variable face type
+   */
+  FaceInfo::VarFaceNeighbors checkFaceIntegrity(const FaceInfo & fi) const;
+
   /// Update internal structures (normal, face type, etc) for the given face
   void updateCurrentFace(const FaceInfo & fi);
 
@@ -43,21 +50,8 @@ protected:
   const ADRealVectorValue & normal() const { return _normal; }
 
   const unsigned int _qp = 0;
-  const ADVariableValue & _u;
-  const ADVariableValue & _u_neighbor;
   // TODO: add gradients once we have reconstruction.
   ADRealVectorValue _normal;
-
-  /**
-   * @return the value of u at the cell centroid on the subdomain on which u is defined. E.g. u is
-   * defined on either the FaceInfo elem or FacInfo neighbor subdomain
-   */
-  const ADReal & uOnUSub() const;
-
-  /**
-   * @return the value of u at the ghost cell centroid
-   */
-  const ADReal & uOnGhost() const;
 
   /**
    * @return an element argument corresponding to the face info elem

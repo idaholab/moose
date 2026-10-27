@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosDispatcher.h"
+#include "KokkosFESystem.h"
 #include "KokkosVariableValue.h"
 #include "KokkosMaterialPropertyValue.h"
 
@@ -25,10 +26,16 @@ namespace Moose::Kokkos
 class ResidualObject : public ::ResidualObject,
                        public MeshHolder,
                        public AssemblyHolder,
-                       public SystemHolder
+                       public FESystemHolder
 {
 public:
   static InputParameters validParams();
+
+  /// Whether this object's hooks factor out the test function
+  static constexpr bool uses_precompute_hooks = false;
+
+  /// Whether this object has computeQpOffDiagJacobianScalar() hook
+  static constexpr bool supports_scalar_jacobian = false;
 
   /**
    * Constructor
@@ -54,6 +61,9 @@ public:
   {
   };
   struct OffDiagJacobianLoop
+  {
+  };
+  struct OffDiagJacobianScalarLoop
   {
   };
   ///@}
@@ -90,7 +100,13 @@ protected:
   std::unique_ptr<DispatcherBase> _residual_dispatcher;
   std::unique_ptr<DispatcherBase> _jacobian_dispatcher;
   std::unique_ptr<DispatcherBase> _offdiag_jacobian_dispatcher;
+  std::unique_ptr<DispatcherBase> _offdiag_jacobian_scalar_dispatcher;
   ///@}
+
+  /**
+   * Mesh dimension
+   */
+  const unsigned int _dimension;
 
   /**
    * TODO: Move to TransientInterface
@@ -141,6 +157,17 @@ protected:
                                                      const ContiguousNodeID node,
                                                      const unsigned int comp = 0) const;
   /**
+   * Accumulate or set local nodal residual contribution to tagged vectors for vector FE variables
+   * @param add Whether to add or set the local residual
+   * @param local_re The local nodal residual contribution
+   * @param node The contiguous node ID
+   * @param i The vector component/node-local DOF index
+   */
+  KOKKOS_FUNCTION void accumulateTaggedVectorNodalResidual(const bool add,
+                                                           const Real local_re,
+                                                           const ContiguousNodeID node,
+                                                           const unsigned int i) const;
+  /**
    * Accumulate local elemental Jacobian contribution to tagged matrices
    * @param local_ke The local elemental Jacobian contribution
    * @param elem The contiguous element ID
@@ -180,6 +207,21 @@ protected:
                                                    const ContiguousNodeID node,
                                                    const unsigned int jvar,
                                                    const unsigned int comp = 0) const;
+  /**
+   * Accumulate or set local nodal Jacobian contribution to tagged matrices for vector FE variables
+   * @param add Whether to add or set the local Jacobian
+   * @param local_ke The local nodal Jacobian contribution
+   * @param node The contiguous node ID
+   * @param i The vector component/node-local DOF index for the row
+   * @param j The node-local DOF index for the column
+   * @param jvar The variable number for column
+   */
+  KOKKOS_FUNCTION void accumulateTaggedVectorNodalMatrix(const bool add,
+                                                         const Real local_ke,
+                                                         const ContiguousNodeID node,
+                                                         const unsigned int i,
+                                                         const unsigned int j,
+                                                         const unsigned int jvar) const;
   /**
    * Accumulate or set local nodal Jacobian contribution to tagged matrices using automatic
    * differentiation (AD)
@@ -228,14 +270,16 @@ ResidualObject::accumulateTaggedElementalResidual(const Real local_re,
     return;
 
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
-  auto dof = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
+  const auto var = _kokkos_var.var(comp);
+  auto dof = sys.getElemLocalDofIndex(elem, i, var);
+  const auto scaled_local_re = local_re * sys.getVariableScalingFactor(var);
 
   for (unsigned int t = 0; t < _vector_tags.size(); ++t)
   {
     auto tag = _vector_tags[t];
 
     if (sys.isResidualTagActive(tag))
-      ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), local_re);
+      ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), scaled_local_re);
   }
 }
 
@@ -266,6 +310,32 @@ ResidualObject::accumulateTaggedNodalResidual(const bool add,
 }
 
 KOKKOS_FUNCTION inline void
+ResidualObject::accumulateTaggedVectorNodalResidual(const bool add,
+                                                    const Real local_re,
+                                                    const ContiguousNodeID node,
+                                                    const unsigned int i) const
+{
+  if (!local_re && add)
+    return;
+
+  auto & sys = kokkosSystem(_kokkos_var.sys());
+  auto dof = sys.getNodeLocalDofIndex(node, i, _kokkos_var.var());
+
+  for (unsigned int t = 0; t < _vector_tags.size(); ++t)
+  {
+    auto tag = _vector_tags[t];
+
+    if (sys.isResidualTagActive(tag))
+    {
+      if (add)
+        sys.getVectorDofValue(dof, tag) += local_re;
+      else
+        sys.getVectorDofValue(dof, tag) = local_re;
+    }
+  }
+}
+
+KOKKOS_FUNCTION inline void
 ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
                                                 const ContiguousElementID elem,
                                                 const unsigned int i,
@@ -277,15 +347,18 @@ ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
     return;
 
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
-  auto row = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
-  auto col = sys.getElemGlobalDofIndex(elem, j, jvar);
+  const auto ivar = _kokkos_var.var(comp);
+  auto row = sys.getElemLocalDofIndex(elem, i, ivar);
+  auto col = sys.isScalarVariable(jvar) ? sys.getScalarGlobalDofIndex(j, jvar)
+                                        : sys.getElemGlobalDofIndex(elem, j, jvar);
+  const auto scaled_local_ke = local_ke * sys.getVariableScalingFactor(ivar);
 
   for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
   {
     auto tag = _matrix_tags[t];
 
     if (sys.isMatrixTagActive(tag) && !sys.hasNodalBCMatrixTag(row, tag))
-      ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), local_ke);
+      ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), scaled_local_ke);
   }
 }
 
@@ -296,7 +369,9 @@ ResidualObject::accumulateTaggedElementalMatrix(const DNDerivativeType & local_k
                                                 const unsigned int comp) const
 {
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
-  auto row = sys.getElemLocalDofIndex(datum.elem().id, i, _kokkos_var.var(comp));
+  const auto ivar = _kokkos_var.var(comp);
+  auto row = sys.getElemLocalDofIndex(datum.elem().id, i, ivar);
+  const auto scaling_factor = sys.getVariableScalingFactor(ivar);
 
   for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
   {
@@ -307,7 +382,8 @@ ResidualObject::accumulateTaggedElementalMatrix(const DNDerivativeType & local_k
       {
         auto col = local_ke.raw_index(j);
 
-        ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), local_ke.raw_at(j));
+        ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag),
+                             local_ke.raw_at(j) * scaling_factor);
       }
   }
 }
@@ -324,7 +400,41 @@ ResidualObject::accumulateTaggedNodalMatrix(const bool add,
 
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto row = sys.getNodeLocalDofIndex(node, 0, _kokkos_var.var(comp));
-  auto col = sys.getNodeGlobalDofIndex(node, jvar);
+  auto col = sys.getNodeGlobalDofIndex(node, 0, jvar);
+
+  for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
+  {
+    auto tag = _matrix_tags[t];
+
+    if (sys.isMatrixTagActive(tag))
+    {
+      auto & matrix = sys.getMatrix(tag);
+
+      if (add)
+        matrix(row, col) += local_ke;
+      else
+      {
+        matrix.zero(row);
+        matrix(row, col) = local_ke;
+      }
+    }
+  }
+}
+
+KOKKOS_FUNCTION inline void
+ResidualObject::accumulateTaggedVectorNodalMatrix(const bool add,
+                                                  const Real local_ke,
+                                                  const ContiguousNodeID node,
+                                                  const unsigned int i,
+                                                  const unsigned int j,
+                                                  const unsigned int jvar) const
+{
+  if (!local_ke && add)
+    return;
+
+  auto & sys = kokkosSystem(_kokkos_var.sys());
+  auto row = sys.getNodeLocalDofIndex(node, i, _kokkos_var.var());
+  auto col = sys.getNodeGlobalDofIndex(node, j, jvar);
 
   for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
   {

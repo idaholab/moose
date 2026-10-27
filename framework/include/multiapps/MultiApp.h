@@ -74,6 +74,30 @@ struct LocalRankConfig
   processor_id_type my_first_rank;
 };
 
+template <>
+inline void
+dataStore(std::ostream & stream, LocalRankConfig & v, void * context)
+{
+  dataStore(stream, v.num_local_sims, context);
+  dataStore(stream, v.first_local_sim_index, context);
+  dataStore(stream, v.num_local_apps, context);
+  dataStore(stream, v.first_local_app_index, context);
+  dataStore(stream, v.is_first_local_rank, context);
+  dataStore(stream, v.my_first_rank, context);
+}
+
+template <>
+inline void
+dataLoad(std::istream & stream, LocalRankConfig & v, void * context)
+{
+  dataLoad(stream, v.num_local_sims, context);
+  dataLoad(stream, v.first_local_sim_index, context);
+  dataLoad(stream, v.num_local_apps, context);
+  dataLoad(stream, v.first_local_app_index, context);
+  dataLoad(stream, v.is_first_local_rank, context);
+  dataLoad(stream, v.my_first_rank, context);
+}
+
 /// Returns app partitioning information relevant to the given rank for a
 /// multiapp scenario with the given number of apps (napps) and parallel/mpi
 /// procs (nprocs).  min_app_procs and max_app_procs define the min and max
@@ -135,7 +159,15 @@ public:
    * Called just after construction to allow derived classes to set _positions and create
    * sub-apps accordingly.
    */
-  void setupPositions();
+  void possiblyCreateChildApplications();
+
+  /**
+   * Build communicators and reserve backups using a custom rank configuration. Used by
+   * FEProblemBase::partitionConcurrentMultiApps() to (re)assign this multiapp the disjoint subset
+   * of ranks it will run on when multiapps are executed concurrently, before its sub-apps are
+   * created.
+   */
+  void init(unsigned int num_apps, const LocalRankConfig & config);
 
   /**
    * Create the i-th local app
@@ -358,7 +390,8 @@ public:
   bool isRootProcessor() { return _my_rank == 0; }
 
   /**
-   * Whether or not this MultiApp is using positions or its own way for constructing sub-apps.
+   * Whether or not this MultiApp is using positions to track the number and location
+   * of the child applications
    */
   bool usingPositions() const { return _use_positions; }
 
@@ -455,11 +488,6 @@ protected:
   void init(unsigned int num_apps, bool batch_mode = false);
 
   /**
-   * Same as other init method, except defining a custom rank configuration
-   */
-  void init(unsigned int num_apps, const LocalRankConfig & config);
-
-  /**
    * Create the provided number of apps.
    *
    * This is called in the setupPositions().
@@ -507,6 +535,10 @@ protected:
   /// Toggle use of "positions". Subapps are created at each different position.
   /// List of positions can be created using the Positions system
   const bool _use_positions;
+
+  /// Whether we create child apps during the initialSetup() call or immediately after
+  /// the multiapps construction (earlier)
+  const bool _create_child_apps_on_initial_setup;
 
   /// The input file for each app's simulation
   std::vector<FileName> _input_files;

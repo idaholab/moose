@@ -203,8 +203,7 @@
   []
   [methane_tab]
     type = TabulatedBicubicFluidProperties
-    fp = methane
-    save_file = false
+    input_fp = methane
   []
 []
 

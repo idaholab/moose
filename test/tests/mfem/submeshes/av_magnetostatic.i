@@ -2,7 +2,7 @@
 # global loop voltage constraint.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/embedded_concentric_torus.e
 []
 
@@ -71,16 +71,6 @@
     variable = b_field
     source = a_field
     scale_factor = 1.0
-    execute_on = TIMESTEP_END
-  []
-[]
-
-[Functions]
-  [exact_a_field]
-    type = ParsedVectorFunction
-    expression_x = '0'
-    expression_y = '0'
-    expression_z = '0'
   []
 []
 
@@ -88,7 +78,6 @@
   [tangential_a_bdr]
     type = MFEMVectorTangentialDirichletBC
     variable = a_field
-    vector_coefficient = exact_a_field
     boundary = 'Exterior'
   []
 []
@@ -134,14 +123,12 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [ams]
     type = MFEMHypreAMS
     fespace = HCurlFESpace
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHyprePCG
     preconditioner = ams

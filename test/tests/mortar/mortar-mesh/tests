@@ -19,6 +19,90 @@
       detail = 'three dimensional mortar mesh.'
     []
   []
+  [non_contiguous_node_ids]
+    issues = '#34030'
+    requirement = 'The system shall build the same three dimensional mortar segment mesh when the '
+                  'mesh node ids are not contiguous.'
+    type = JSONDiff
+    input = 'mortar_stats_reporter_3d.i'
+    jsondiff = 'mortar_stats_reporter_3d_out.json'
+    cli_args = 'Mesh/allow_renumbering=false'
+    keep_reporter_types = true
+    skip_keys = 'number_of_parts part'
+    absent_out = 'Some secondary elements on mortar interface'
+    prereq = 'mortar_stats_reporter/3d'
+  []
+  [no_mortar_segments]
+    issues = '#34173'
+    requirement = 'The system shall report mortar segment mesh statistics for an interface on which '
+                  'no mortar segments form.'
+    type = RunApp
+    input = 'mortar_stats_reporter_3d.i'
+    # Shift the primary block so it does not overlap the secondary face
+    cli_args = 'Mesh/right_block/ymin=1 Mesh/right_block/ymax=1.5 '
+               'Outputs/file_base=no_mortar_segments'
+    expect_out = 'primary_lower\s*\|\s*0\s*\|.*\n.*mortar_segment\s*\|\s*0\s*\|'
+    allow_warnings = true
+  []
+  [adjacent_corner_mortar_segment_mesh]
+    issues = '#33282'
+    requirement = 'The system shall be able to build a three dimensional mortar segment mesh for '
+                  'adjacent corner sidesets'
+    [statistics]
+      type = JSONDiff
+      input = 'mortar_stats_reporter_3d_adjacent_corner_sidesets.i'
+      jsondiff = 'mortar_stats_reporter_3d_adjacent_corner_sidesets_out.json'
+      keep_reporter_types = true
+      absent_out = 'Some secondary elements on mortar interface'
+      detail = 'with stable reported segment statistics and no missing-primary warning, and'
+    []
+    [missing_primary]
+      type = RunException
+      input = 'mortar_stats_reporter_3d_adjacent_corner_sidesets.i'
+      cli_args = 'Mesh/primary_lower/sidesets=primary_top Constraints/mortar/primary_boundary=primary_top'
+      expect_err = 'Some secondary elements on mortar interface were unable to identify'
+      prereq = 'adjacent_corner_mortar_segment_mesh/statistics'
+      detail = 'with a missing-primary diagnostic when part of the primary corner interface is absent.'
+    []
+  []
+  [mortar_interface_consistency]
+    issues = '#33282'
+    requirement = 'The system shall reject inconsistent settings on constraints that share the '
+                  'same primary and secondary mortar interface for'
+    [subpatch-plane]
+      type = RunException
+      input = 'mortar_subpatch_plane_mismatch.i'
+      expect_err = 'same primary/secondary mortar interface.*mortar_3d_subpatch_plane'
+      detail = 'the 3D mortar subpatch plane mode and'
+    []
+    [projection-angle]
+      type = RunException
+      input = 'mortar_subpatch_plane_mismatch.i'
+      cli_args = 'Constraints/mortar_averaged/mortar_3d_subpatch_plane=GEOMETRIC_NORMAL '
+                 'Constraints/mortar_averaged/minimum_projection_angle=35'
+      expect_err = 'multiple values of.*minimum_projection_angle'
+      detail = 'the minimum projection angle.'
+    []
+  []
+  [mortar_subpatch_plane_angle_validation]
+    issues = '#33282'
+    requirement = 'The system shall validate the minimum projection angle according to the selected '
+                  '3D mortar subpatch-plane mode by'
+    [averaged-normal]
+      type = RunApp
+      input = 'mortar_stats_reporter_3d.i'
+      cli_args = 'Constraints/mortar/mortar_3d_subpatch_plane=AVERAGED_NODAL_NORMAL '
+                 'Constraints/mortar/minimum_projection_angle=-40'
+      detail = 'accepting an unrestricted angle with averaged nodal normals and'
+    []
+    [geometric-default]
+      type = RunException
+      input = 'mortar_stats_reporter_3d.i'
+      cli_args = 'Constraints/mortar/minimum_projection_angle=-1'
+      expect_err = 'Must be between 0 and 90 degrees.*GEOMETRIC_NORMAL'
+      detail = 'requiring an angle between zero and ninety degrees with the default geometric normal.'
+    []
+  []
   [mortar_segment_mesh]
     requirement = 'When requested through a mortar constraint, the system shall be able to write out a spatially'
     [2d]

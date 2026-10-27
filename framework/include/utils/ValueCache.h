@@ -303,13 +303,13 @@ template <typename T>
 inline void
 dataStore(std::ostream & stream, ValueCache<T> & c, void * context)
 {
-  storeHelper(stream, c._location_data, context);
+  dataStore(stream, c._location_data, context);
 }
 
 template <typename T>
 inline void
 dataLoad(std::istream & stream, ValueCache<T> & c, void * context)
 {
-  loadHelper(stream, c._location_data, context);
+  dataLoad(stream, c._location_data, context);
   c.rebuildTree();
 }

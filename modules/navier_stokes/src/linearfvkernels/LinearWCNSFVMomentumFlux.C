@@ -9,11 +9,11 @@
 
 #include "LinearWCNSFVMomentumFlux.h"
 #include "MooseLinearVariableFV.h"
-#include "NSFVUtils.h"
 #include "NS.h"
 #include "RhieChowMassFlux.h"
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVGradientManager.h"
 
 registerMooseObject("NavierStokesApp", LinearWCNSFVMomentumFlux);
 
@@ -42,50 +42,57 @@ LinearWCNSFVMomentumFlux::validParams()
   params.addParam<bool>(
       "use_deviatoric_terms", false, "If deviatoric terms in the stress terms need to be used.");
 
-  params += Moose::FV::advectedInterpolationParameter();
+  params.addRequiredParam<InterpolationMethodName>(
+      "advected_interp_method_name",
+      "Name of the FVInterpolationMethod to use for the advected velocity.");
   return params;
 }
 
 LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & params)
   : LinearFVFluxKernel(params),
+    FVInterpolationMethodInterface(this),
     _dim(_subproblem.mesh().dimension()),
     _mass_flux_provider(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
     _mu(getFunctor<Real>(getParam<MooseFunctorName>(NS::mu))),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _use_deviatoric_terms(getParam<bool>("use_deviatoric_terms")),
-    _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
+    _adv_interp_method(getFVAdvectedInterpolationMethod(
+        getParam<InterpolationMethodName>("advected_interp_method_name"))),
+    _advected_gradient_field(
+        _adv_interp_method.needsGradients()
+            ? &_var.requestCellGradients(_adv_interp_method.gradientMethodName())
+            : nullptr),
     _face_mass_flux(0.0),
     _boundary_normal_factor(1.0),
     _stress_matrix_contribution(0.0),
     _stress_rhs_contribution(0.0),
     _index(getParam<MooseEnum>("momentum_component")),
     _velocity_vars{nullptr, nullptr, nullptr},
+    _gradient_field(_use_nonorthogonal_correction || _use_deviatoric_terms
+                        ? &_var.requestCellGradients()
+                        : nullptr),
+    _velocity_gradient_fields{nullptr, nullptr, nullptr},
     _coord_type(getBlockCoordSystem()),
     _rz_radial_coord(_fe_problem.mesh().getAxisymmetricRadialCoord())
 {
-  // We only need gradients if the nonorthogonal correction is enabled or when we request the
-  // computation of the deviatoric parts of the stress tensor.
-  if (_use_nonorthogonal_correction || _use_deviatoric_terms)
-    _var.computeCellGradients();
-
-  Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
-
   auto get_velocity_var = [&](const std::string & param_name)
   {
-    return dynamic_cast<const MooseLinearVariableFVReal *>(
+    return dynamic_cast<MooseLinearVariableFVReal *>(
         &_fe_problem.getVariable(_tid, getParam<SolverVariableName>(param_name)));
   };
 
-  _velocity_vars[0] = get_velocity_var("u");
-  if (!_velocity_vars[0])
+  std::array<MooseLinearVariableFVReal *, 3> velocity_vars{nullptr, nullptr, nullptr};
+
+  velocity_vars[0] = get_velocity_var("u");
+  if (!velocity_vars[0])
     paramError("u", "the u velocity must be a MooseLinearVariableFVReal.");
 
   if (_dim >= 2)
   {
     if (!params.isParamValid("v"))
       paramError("v", "In two or more dimensions, the v velocity must be supplied.");
-    _velocity_vars[1] = get_velocity_var("v");
-    if (!_velocity_vars[1])
+    velocity_vars[1] = get_velocity_var("v");
+    if (!velocity_vars[1])
       paramError("v",
                  "In two or more dimensions, the v velocity must be supplied and it must be a "
                  "MooseLinearVariableFVReal.");
@@ -95,12 +102,19 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
   {
     if (!params.isParamValid("w"))
       paramError("w", "In three-dimensions, the w velocity must be supplied.");
-    _velocity_vars[2] = get_velocity_var("w");
-    if (!_velocity_vars[2])
+    velocity_vars[2] = get_velocity_var("w");
+    if (!velocity_vars[2])
       paramError("w",
                  "In three-dimensions, the w velocity must be supplied and it must be a "
                  "MooseLinearVariableFVReal.");
   }
+
+  for (const auto dir : make_range(_dim))
+    _velocity_vars[dir] = velocity_vars[dir];
+
+  if (_use_deviatoric_terms)
+    for (const auto dir : make_range(_dim))
+      _velocity_gradient_fields[dir] = &velocity_vars[dir]->requestCellGradients();
 }
 
 Real
@@ -122,19 +136,23 @@ LinearWCNSFVMomentumFlux::computeNeighborMatrixContribution()
 Real
 LinearWCNSFVMomentumFlux::computeElemRightHandSideContribution()
 {
-  return computeInternalStressRHSContribution() * _current_face_area;
+  return (computeInternalStressRHSContribution() +
+          _adv_interp_result.rhs_face_value * _face_mass_flux) *
+         _current_face_area;
 }
 
 Real
 LinearWCNSFVMomentumFlux::computeNeighborRightHandSideContribution()
 {
-  return -computeInternalStressRHSContribution() * _current_face_area;
+  return -(computeInternalStressRHSContribution() +
+           _adv_interp_result.rhs_face_value * _face_mass_flux) *
+         _current_face_area;
 }
 
 Real
 LinearWCNSFVMomentumFlux::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * const adv_diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const adv_diff_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
 
   mooseAssert(adv_diff_bc, "This should be a valid BC!");
   return (computeStressBoundaryMatrixContribution(adv_diff_bc) +
@@ -145,7 +163,7 @@ LinearWCNSFVMomentumFlux::computeBoundaryMatrixContribution(const LinearFVBounda
 Real
 LinearWCNSFVMomentumFlux::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * const adv_diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const adv_diff_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_diff_bc, "This should be a valid BC!");
   return (computeStressBoundaryRHSContribution(adv_diff_bc) +
           computeAdvectionBoundaryRHSContribution(adv_diff_bc)) *
@@ -155,13 +173,13 @@ LinearWCNSFVMomentumFlux::computeBoundaryRHSContribution(const LinearFVBoundaryC
 Real
 LinearWCNSFVMomentumFlux::computeInternalAdvectionElemMatrixContribution()
 {
-  return _advected_interp_coeffs.first * _face_mass_flux;
+  return _adv_interp_result.weights_matrix.first * _face_mass_flux;
 }
 
 Real
 LinearWCNSFVMomentumFlux::computeInternalAdvectionNeighborMatrixContribution()
 {
-  return _advected_interp_coeffs.second * _face_mass_flux;
+  return _adv_interp_result.weights_matrix.second * _face_mass_flux;
 }
 
 Real
@@ -201,10 +219,12 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
     {
       const auto face_arg = makeCDFace(*_current_face_info);
       const auto state_arg = determineState();
+      mooseAssert(_gradient_field,
+                  "Gradient field should be registered when gradients are needed.");
 
       // Get the gradients from the adjacent cells
-      const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo(), state_arg);
-      const auto & grad_neighbor = _var.gradSln(*_current_face_info->neighborInfo(), state_arg);
+      const auto grad_elem = _gradient_field->gradient(*_current_face_info->elemInfo());
+      const auto grad_neighbor = _gradient_field->gradient(*_current_face_info->neighborInfo());
 
       // Interpolate the two gradients to the face
       const auto interp_coeffs =
@@ -240,9 +260,9 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
       // Loop over every velocity component so we can form the symmetric gradient pieces
       for (const auto dir : make_range(_dim))
       {
-        grad_elem[dir] = velocityVar(dir).gradSln(*_current_face_info->elemInfo(), state_arg);
-        grad_neighbor[dir] =
-            velocityVar(dir).gradSln(*_current_face_info->neighborInfo(), state_arg);
+        const auto & gradient_field = velocityGradientField(dir);
+        grad_elem[dir] = gradient_field.gradient(*_current_face_info->elemInfo());
+        grad_neighbor[dir] = gradient_field.gradient(*_current_face_info->neighborInfo());
         trace_elem += grad_elem[dir](dir);
         trace_neighbor += grad_neighbor[dir](dir);
       }
@@ -313,7 +333,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
-  if (_use_nonorthogonal_correction && bc->useBoundaryGradientExtrapolation())
+  if (_use_nonorthogonal_correction && bc->needsBoundaryNonorthogonalCorrection())
   {
     // We support internal boundaries as well. In that case we have to decide on which side
     // of the boundary we are on.
@@ -328,11 +348,13 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
         _current_face_info->normal() - 1 / (_current_face_info->normal() * e_Cf) * e_Cf;
 
     const auto state_arg = determineState();
-    grad_contrib += _mu(face_arg, state_arg) * _var.gradSln(*elem_info, state_arg) *
+    mooseAssert(_gradient_field, "Gradient field should be registered when gradients are needed.");
+    grad_contrib += _mu(face_arg, state_arg) * _gradient_field->gradient(*elem_info) *
                     _boundary_normal_factor * correction_vector;
   }
 
-  if (_use_deviatoric_terms && bc->useBoundaryGradientExtrapolation())
+  // Complete prescribed fluxes already include all applicable stress contributions.
+  if (_use_deviatoric_terms && !bc->providesCompleteBoundaryFlux())
   {
     // We might be on a face which is an internal boundary so we want to make sure we
     // get the gradient from the right side.
@@ -348,7 +370,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
 
     for (const auto dir : make_range(_dim))
     {
-      grad_elem[dir] = velocityVar(dir).gradSln(*elem_info, state_arg);
+      grad_elem[dir] = velocityGradientField(dir).gradient(*elem_info);
       trace_elem += grad_elem[dir](dir);
     }
 
@@ -403,10 +425,30 @@ LinearWCNSFVMomentumFlux::setupFaceData(const FaceInfo * face_info)
   // right hand side contributions
   _face_mass_flux = _mass_flux_provider.getMassFlux(*face_info);
 
-  // Caching the interpolation coefficients so they will be reused for the matrix and right hand
-  // side terms
-  _advected_interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, _face_mass_flux);
+  if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  {
+    const auto state = determineState();
+    const auto & elem_info = *_current_face_info->elemInfo();
+    const auto & neighbor_info = *_current_face_info->neighborInfo();
+
+    const Real elem_value = _var.getElemValue(elem_info, state);
+    const Real neighbor_value = _var.getElemValue(neighbor_info, state);
+
+    if (_adv_interp_method.needsGradients())
+    {
+      mooseAssert(_advected_gradient_field,
+                  "Gradient field should be registered when gradients are needed.");
+      _elem_grad_storage = _advected_gradient_field->gradient(elem_info);
+      _neighbor_grad_storage = _advected_gradient_field->gradient(neighbor_info);
+    }
+
+    _adv_interp_result = _adv_interp_method.advectedInterpolate(*_current_face_info,
+                                                                elem_value,
+                                                                neighbor_value,
+                                                                &_elem_grad_storage,
+                                                                &_neighbor_grad_storage,
+                                                                _face_mass_flux);
+  }
 
   // We'll have to set this to zero to make sure that we don't accumulate values over multiple
   // faces. The matrix contribution should be fine.
@@ -419,4 +461,12 @@ LinearWCNSFVMomentumFlux::velocityVar(unsigned int dir) const
   mooseAssert(dir < _velocity_vars.size() && _velocity_vars[dir],
               "Velocity variable for requested direction is not available.");
   return *_velocity_vars[dir];
+}
+
+const LinearFVGradientReader &
+LinearWCNSFVMomentumFlux::velocityGradientField(unsigned int dir) const
+{
+  mooseAssert(dir < _velocity_gradient_fields.size() && _velocity_gradient_fields[dir],
+              "Velocity gradient field for requested direction is not available.");
+  return *_velocity_gradient_fields[dir];
 }

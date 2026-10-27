@@ -3,7 +3,8 @@
 !if! function=hasCapability('mfem')
 
 Allows copying [MFEM variables](MFEMVariable.md) between MFEM-based applications. The variables must
-be of the same type, number system (real or complex), dimension and the [MFEMMesh.md] must be identical in both multiapps.
+be of the same type, number system (real or complex), and dimension, and the MFEM meshes must be
+identical in both multiapps.
 
 !syntax parameters /Transfers/MultiAppMFEMCopyTransfer
 

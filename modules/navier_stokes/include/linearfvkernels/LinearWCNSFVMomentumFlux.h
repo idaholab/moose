@@ -10,18 +10,21 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
+#include "FVAdvectedInterpolationMethod.h"
+#include "FVInterpolationMethodInterface.h"
 
 #include <array>
 
 class RhieChowMassFlux;
 class LinearFVBoundaryCondition;
 class LinearFVAdvectionDiffusionBC;
+class LinearFVGradientReader;
 
 /**
  * Kernel that implements the stress tensor and advection terms for the momentum
  * equation.
  */
-class LinearWCNSFVMomentumFlux : public LinearFVFluxKernel
+class LinearWCNSFVMomentumFlux : public LinearFVFluxKernel, public FVInterpolationMethodInterface
 {
 public:
   static InputParameters validParams();
@@ -103,9 +106,18 @@ protected:
   /// Switch to enable/disable deviatoric parts in the stress term
   const bool _use_deviatoric_terms;
 
-  /// Container for the current advected interpolation coefficients on the face to make sure
-  /// we don't compute it multiple times for different terms.
-  std::pair<Real, Real> _advected_interp_coeffs;
+  /// The interpolation method to use for the advected quantity
+  const FVAdvectedInterpolationMethod & _adv_interp_method;
+
+  /// Gradient field used by advected interpolations that require gradients.
+  const LinearFVGradientReader * const _advected_gradient_field;
+
+  /// Current advected interpolation contribution on the face
+  FVAdvectedInterpolationMethod::AdvectedSystemContribution _adv_interp_result;
+
+  /// Reusable gradient storage used when advected interpolation requires gradients.
+  VectorValue<Real> _elem_grad_storage;
+  VectorValue<Real> _neighbor_grad_storage;
 
   /// Container for the mass flux on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
@@ -121,15 +133,18 @@ protected:
   /// The cached right hand side contribution
   Real _stress_rhs_contribution;
 
-  /// The interpolation method to use for the advected quantity
-  Moose::FV::InterpMethod _advected_interp_method;
-
   /// Index x|y|z, this is mainly to handle the deviatoric parts correctly in
   /// in the stress term
   const unsigned int _index;
 
   /// Velocity variables for each coordinate direction
   std::array<const MooseLinearVariableFVReal *, 3> _velocity_vars;
+
+  /// Gradient field used for the kernel variable nonorthogonal correction.
+  const LinearFVGradientReader * _gradient_field;
+
+  /// Gradient fields used for velocity variables in deviatoric stress terms.
+  std::array<const LinearFVGradientReader *, 3> _velocity_gradient_fields;
 
   /// Coordinate system of the blocks this kernel operates on
   const Moose::CoordinateSystemType _coord_type;
@@ -139,4 +154,7 @@ protected:
 
   /// Helper to access the velocity variable for a given direction
   const MooseLinearVariableFVReal & velocityVar(unsigned int dir) const;
+
+  /// Helper to access the velocity gradient field for a given direction
+  const LinearFVGradientReader & velocityGradientField(unsigned int dir) const;
 };

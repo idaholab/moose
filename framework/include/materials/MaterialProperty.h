@@ -42,7 +42,7 @@ public:
 
   PropertyValue(const id_type id) : _id(id) {}
 
-  virtual ~PropertyValue(){};
+  virtual ~PropertyValue() {}
 
   /// The material property ID for an invalid property
   /// We only have this because there are a few cases where folks want to instantiate their
@@ -260,12 +260,10 @@ MaterialPropertyBase<T, is_ad>::qpCopy(const unsigned int to_qp,
 {
   // If we're the same
   if (rhs.isAD() == is_ad)
-    _value[to_qp] =
-        libMesh::cast_ptr<const MaterialPropertyBase<T, is_ad> *>(&rhs)->_value[from_qp];
+    _value[to_qp] = cast_ptr<const MaterialPropertyBase<T, is_ad> *>(&rhs)->_value[from_qp];
   else
     moose::internal::rawValueEqualityHelper(
-        _value[to_qp],
-        (*libMesh::cast_ptr<const MaterialPropertyBase<T, !is_ad> *>(&rhs))[from_qp]);
+        _value[to_qp], (*cast_ptr<const MaterialPropertyBase<T, !is_ad> *>(&rhs))[from_qp]);
 }
 
 template <typename T, bool is_ad>
@@ -273,7 +271,7 @@ inline void
 MaterialPropertyBase<T, is_ad>::store(std::ostream & stream)
 {
   for (const auto i : index_range(_value))
-    storeHelper(stream, _value[i], nullptr);
+    dataStore(stream, _value[i], nullptr);
 }
 
 template <typename T, bool is_ad>
@@ -281,7 +279,7 @@ inline void
 MaterialPropertyBase<T, is_ad>::load(std::istream & stream)
 {
   for (const auto i : index_range(_value))
-    loadHelper(stream, _value[i], nullptr);
+    dataLoad(stream, _value[i], nullptr);
 }
 
 template <typename T, bool is_ad>
@@ -295,7 +293,7 @@ MaterialPropertyBase<T, is_ad>::swap(PropertyValue & rhs)
   if (rhs.isAD() == is_ad)
   {
     mooseAssert(dynamic_cast<decltype(this)>(&rhs), "Expected same type is not the same");
-    this->_value.swap(libMesh::cast_ptr<decltype(this)>(&rhs)->_value);
+    this->_value.swap(cast_ptr<decltype(this)>(&rhs)->_value);
     return;
   }
 
@@ -311,7 +309,7 @@ MaterialPropertyBase<T, is_ad>::swap(PropertyValue & rhs)
   // name, *is* appropriate to how this method is used in practice. See shallowCopyData and
   // shallowCopyDataBack in MaterialPropertyStorage.C
 
-  auto * different_type_prop = libMesh::cast_ptr<MaterialPropertyBase<T, !is_ad> *>(&rhs);
+  auto * different_type_prop = cast_ptr<MaterialPropertyBase<T, !is_ad> *>(&rhs);
 
   this->resize(different_type_prop->size());
   for (const auto qp : make_range(this->size()))

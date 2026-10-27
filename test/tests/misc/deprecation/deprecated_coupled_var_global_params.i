@@ -1,0 +1,78 @@
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 2
+  ny = 2
+[]
+
+[Variables]
+  [u]
+  []
+  [v]
+  []
+[]
+
+# Set the blessed coupled variable name globally. An object that sets the
+# deprecated name locally should override this global value (see #32350).
+[GlobalParams]
+  source = v
+[]
+
+[Kernels]
+  [diff_u]
+    type = Diffusion
+    variable = u
+  []
+  [diff_v]
+    type = Diffusion
+    variable = v
+  []
+  # Consumes 'source' from GlobalParams (so the global value is used somewhere)
+  [global_coupled_u]
+    type = DeprecatedCoupledVarKernel
+    variable = u
+  []
+  # Sets the deprecated name locally; this must take precedence over the
+  # 'source' value provided in GlobalParams and produce a deprecation warning
+  [local_coupled_v]
+    type = DeprecatedCoupledVarKernel
+    variable = v
+    stupid_name = u
+  []
+[]
+
+[BCs]
+  [left_u]
+    type = DirichletBC
+    variable = u
+    boundary = left
+    value = 0
+  []
+  [right_u]
+    type = DirichletBC
+    variable = u
+    boundary = right
+    value = 1
+  []
+  [left_v]
+    type = DirichletBC
+    variable = v
+    boundary = left
+    value = 1
+  []
+  [right_v]
+    type = DirichletBC
+    variable = v
+    boundary = right
+    value = 0
+  []
+[]
+
+[Executioner]
+  type = Steady
+  solve_type = 'NEWTON'
+[]
+
+[Outputs]
+  exodus = true
+[]

@@ -23,6 +23,10 @@ SolutionIC::validParams()
                                           "The SolutionUserObject to extract data from.");
   params.addRequiredParam<VariableName>(
       "from_variable", "The name of the variable in the file that is to be extracted");
+  params.addParam<MooseEnum>(
+      "weighting_type",
+      SolutionUserObjectBase::weightingType(),
+      "The policy used to select a unique value when the imported solution is multivalued.");
   params.addParam<std::vector<SubdomainName>>(
       "from_subdomains",
       "The name(s) of the subdomain(s) in the solution file providing the data. If not specified, "
@@ -36,7 +40,11 @@ SolutionIC::validParams()
 SolutionIC::SolutionIC(const InputParameters & parameters)
   : InitialCondition(parameters),
     _solution_object(getUserObject<SolutionUserObjectBase>("solution_uo")),
-    _solution_object_var_name(getParam<VariableName>("from_variable"))
+    _solution_object_var_name(getParam<VariableName>("from_variable")),
+    _weighting_type(isParamSetByUser("weighting_type")
+                        ? std::make_optional(getParam<MooseEnum>("weighting_type")
+                                                 .getEnum<SolutionUserObjectBase::WeightingType>())
+                        : std::nullopt)
 {
 }
 
@@ -84,10 +92,31 @@ SolutionIC::initialSetup()
                "Source subdomain block restriction is not supported if the solution file type is "
                "not Exodus. Current file type: " +
                    std::string(_solution_object.getSolutionFileType()));
+
+  if (!_solution_object.isVariableScalarValued(_solution_object_var_name))
+    paramError(
+        "from_variable",
+        "The imported variable '",
+        _solution_object_var_name,
+        "' is vector-valued, but SolutionIC supports only scalar-valued imported variables.");
+
+  // Warn when no explicit weighting policy is provided for a spatially discontinuous variable
+  if (_solution_object.isVariableADiscontinuousScalarField(_solution_object_var_name) &&
+      !_weighting_type)
+    paramWarning(
+        "weighting_type",
+        "A weighting policy should be specified when the imported variable '",
+        _solution_object_var_name,
+        "' is spatially discontinuous. Values evaluated on element interfaces may depend on "
+        "source element ordering.");
 }
 
 Real
 SolutionIC::value(const Point & p)
 {
+  if (_weighting_type)
+    return _solution_object.pointValue(
+        0., p, _solution_object_var_name, *_weighting_type, &_exo_block_ids);
+
   return _solution_object.pointValue(0., p, _solution_object_var_name, &_exo_block_ids);
 }

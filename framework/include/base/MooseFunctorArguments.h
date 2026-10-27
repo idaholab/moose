@@ -171,9 +171,15 @@ previousNonlinearState()
 }
 
 inline StateArg
-previousFixedPointState()
+previousMultiAppFixedPointState()
 {
-  return {(unsigned int)1, SolutionIterationType::FixedPoint};
+  return {(unsigned int)1, SolutionIterationType::MultiAppFixedPoint};
+}
+
+inline StateArg
+previousMultiSystemFixedPointState()
+{
+  return {(unsigned int)1, SolutionIterationType::MultiSystemFixedPoint};
 }
 
 /**

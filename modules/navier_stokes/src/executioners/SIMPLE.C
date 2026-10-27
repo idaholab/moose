@@ -11,8 +11,6 @@
 #include "SIMPLE.h"
 #include "FEProblem.h"
 
-using namespace libMesh;
-
 registerMooseObject("NavierStokesApp", SIMPLE);
 
 InputParameters

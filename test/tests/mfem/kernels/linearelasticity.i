@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/beam-tet.mesh
   uniform_refine = 2
   displacement = "displacement"
@@ -64,19 +64,14 @@
   []
 []
 
-[Preconditioner]
-  [boomeramg]
-    type = MFEMHypreBoomerAMG
-    l_max_its = 500
-    l_tol = 1e-8
-    print_level = 2
-  []
-[]
 
 [Solvers]
+  [boomeramg]
+    type = MFEMHypreBoomerAMG
+  []
   [main]
     type = MFEMHyprePCG
-    #preconditioner = boomeramg
+    preconditioner = boomeramg
     l_max_its = 5000
     l_tol = 1e-8
     l_abs_tol = 0.0
@@ -89,10 +84,17 @@
   device = "cpu"
 []
 
+[Postprocessors]
+  [displacement_l2_norm]
+    type = MFEMVectorL2Error
+    variable = displacement
+    function = '0 0 0'
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
+  [CSV]
+    type = CSV
     file_base = OutputData/LinearElasticity
-    vtk_format = ASCII
   []
 []

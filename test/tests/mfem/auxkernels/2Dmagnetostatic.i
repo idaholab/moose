@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/hinomaru.e
 []
 
@@ -103,26 +103,23 @@
   []
 []
 
-[Preconditioner]
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solvers]
   [PCG]
     type = MFEMHyprePCG
     preconditioner = boomeramg
-    l_tol = 1e-8
+    l_tol = 1e-12
   []
 []
 
 [VectorPostprocessors]
   [line_sample]
-    type = MFEMLineValueSampler
+    type = MFEMVariableLineValueSampler
     variable = 'B'
-    start_point = '0 2 0'
-    end_point = '0 -2 0'
+    start_point = '0 1.99 0'
+    end_point = '0 -1.99 0'
     num_points = 10
   []
 []

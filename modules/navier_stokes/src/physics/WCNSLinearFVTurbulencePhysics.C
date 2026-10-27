@@ -17,6 +17,9 @@
 #include "NSFVBase.h"
 
 registerWCNSFVTurbulenceBaseTasks("NavierStokesApp", WCNSLinearFVTurbulencePhysics);
+registerMooseAction("NavierStokesApp",
+                    WCNSLinearFVTurbulencePhysics,
+                    "add_interpolation_method_physics");
 registerMooseAction("NavierStokesApp", WCNSLinearFVTurbulencePhysics, "add_functor_material");
 
 InputParameters
@@ -58,17 +61,42 @@ WCNSLinearFVTurbulencePhysics::validParams()
       ", but reduces numerical dispersion on non-orthogonal meshes. Can be safely turned off on "
       "orthogonal meshes.");
   params.addParamNamesToGroup("use_nonorthogonal_correction", "Numerical scheme");
+  params.addParam<InterpolationMethodName>(
+      "tke_advection_interpolation_method_name",
+      "Name of an externally defined FVInterpolationMethod to use for turbulent kinetic energy "
+      "advection. When provided, this overrides 'tke_advection_interpolation'.");
+  params.addParam<InterpolationMethodName>(
+      "tked_advection_interpolation_method_name",
+      "Name of an externally defined FVInterpolationMethod to use for turbulent kinetic energy "
+      "dissipation advection. When provided, this overrides 'tked_advection_interpolation'.");
+  params.addParamNamesToGroup(
+      "tke_advection_interpolation_method_name tked_advection_interpolation_method_name",
+      "K-Epsilon model numerical");
   return params;
 }
 
 WCNSLinearFVTurbulencePhysics::WCNSLinearFVTurbulencePhysics(const InputParameters & parameters)
   : WCNSFVTurbulencePhysicsBase(parameters)
 {
+  addRequiredPhysicsTask("add_interpolation_method_physics");
+
   if (_turbulence_model != "k-epsilon")
     errorDependentParameter("turbulence_handling", "k-epsilon", {"use_nonorthogonal_correction"});
   if (_turbulence_model == "mixing-length")
     paramError("turbulence_handling",
                "Mixing length is not implemented for the linear finite volume discretization");
+}
+
+void
+WCNSLinearFVTurbulencePhysics::addFVInterpolationMethods()
+{
+  if (_turbulence_model != "k-epsilon")
+    return;
+
+  if (!isParamValid("tke_advection_interpolation_method_name"))
+    addFVAdvectedInterpolationMethod(getParam<MooseEnum>("tke_advection_interpolation"));
+  if (!isParamValid("tked_advection_interpolation_method_name"))
+    addFVAdvectedInterpolationMethod(getParam<MooseEnum>("tked_advection_interpolation"));
 }
 
 void
@@ -176,20 +204,29 @@ WCNSLinearFVTurbulencePhysics::addKEpsilonTimeDerivatives()
 void
 WCNSLinearFVTurbulencePhysics::addKEpsilonAdvection()
 {
+  const auto tke_method_name =
+      isParamValid("tke_advection_interpolation_method_name")
+          ? getParam<InterpolationMethodName>("tke_advection_interpolation_method_name")
+          : InterpolationMethodName(
+                std::string(getParam<MooseEnum>("tke_advection_interpolation")));
+  const auto tked_method_name =
+      isParamValid("tked_advection_interpolation_method_name")
+          ? getParam<InterpolationMethodName>("tked_advection_interpolation_method_name")
+          : InterpolationMethodName(
+                std::string(getParam<MooseEnum>("tked_advection_interpolation")));
+
   const std::string kernel_type = "LinearFVTurbulentAdvection";
   InputParameters params = getFactory().getValidParams(kernel_type);
 
   assignBlocks(params, _blocks);
 
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
-  params.set<MooseEnum>("advected_interp_method") =
-      getParam<MooseEnum>("tke_advection_interpolation");
+  params.set<InterpolationMethodName>("advected_interp_method_name") = tke_method_name;
   params.set<LinearVariableName>("variable") = _tke_name;
   getProblem().addLinearFVKernel(kernel_type, prefix() + "tke_advection", params);
   params.set<LinearVariableName>("variable") = _tked_name;
   params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
-  params.set<MooseEnum>("advected_interp_method") =
-      getParam<MooseEnum>("tked_advection_interpolation");
+  params.set<InterpolationMethodName>("advected_interp_method_name") = tked_method_name;
   getProblem().addLinearFVKernel(kernel_type, prefix() + "tked_advection", params);
 }
 

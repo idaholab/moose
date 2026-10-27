@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "FVFluxKernel.h"
+#include "FVQpFluxKernel.h"
 
 #include <memory>
 
@@ -22,7 +22,7 @@ class Limiter;
 }
 }
 
-class FVKTLimitedAdvection : public FVFluxKernel
+class FVKTLimitedAdvection : public FVQpFluxKernel
 {
 public:
   static InputParameters validParams();

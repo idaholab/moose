@@ -1,6 +1,6 @@
 # Step 1: Flow Through a Channel
 
-+Complete input file for this step:+ [01_flow_channel.i](thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i)
++Complete input file for this step:+ [!file text=01_flow_channel.i](thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i)
 
 !media thermal_hydraulics/tutorials/single_phase_flow/step-01.png
        style=width:15%;float:right;margin-left:40px

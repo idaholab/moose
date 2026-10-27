@@ -1,5 +1,18 @@
 # Test for central difference integration for 1D elements
 
+[GlobalParams]
+  displacements = 'disp_x'
+[]
+
+[Physics/SolidMechanics/Dynamic]
+  [./all]
+    add_variables = true
+    strain = SMALL
+    incremental = true
+  [../]
+[]
+
+
 [Mesh]
   [./generated_mesh]
     type = GeneratedMeshGenerator
@@ -17,37 +30,6 @@
   [../]
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-[]
-
-[AuxVariables]
-  [./accel_x]
-  [../]
-  [./vel_x]
-  [../]
-[]
-
-[AuxKernels]
-  [./accel_x]
-    type = TestNewmarkTI
-    variable = accel_x
-    displacement = disp_x
-    first = false
-  [../]
-  [./vel_x]
-    type = TestNewmarkTI
-    variable = vel_x
-    displacement = disp_x
-  [../]
-[]
-
-[Kernels]
-  [./DynamicSolidMechanics]
-    displacements = 'disp_x'
-  [../]
-[]
 
 [NodalKernels]
   [./force_x]
@@ -89,14 +71,16 @@
     poissons_ratio = 0.25
     block = 0
   [../]
-  [./strain_block]
-    type = ComputeIncrementalStrain
-    block = 0
-    displacements = 'disp_x'
-  [../]
   [./stress_block]
     type = ComputeFiniteStrainElasticStress
     block = 0
+  [../]
+  [./density]
+    type = GenericConstantMaterial
+    block = 0
+    # The effects of density (inertia) is done through a nodal kernel
+    prop_names = density
+    prop_values = 0
   [../]
 []
 

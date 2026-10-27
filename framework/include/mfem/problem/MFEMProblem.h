@@ -14,9 +14,19 @@
 #include "Attributes.h"
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
+#include "MFEMWeakFormBase.h"
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
+#include "MFEMProblemComposer.h"
+#include "ProblemOperatorBase.h"
+
+#include <map>
+
+namespace Moose::MFEM
+{
+struct SolutionState;
+}
 
 class MFEMProblem : public ExternalProblem
 {
@@ -55,6 +65,13 @@ public:
    */
   virtual std::vector<VariableName> getAuxVariableNames();
 
+  template <typename T>
+  std::vector<std::shared_ptr<T>>
+  addObject(const std::string & type, const std::string & name, InputParameters & parameters)
+  {
+    return ExternalProblem::addObject<T>(type, name, parameters, /*threaded=*/false);
+  }
+
   void addBoundaryCondition(const std::string & bc_name,
                             const std::string & name,
                             InputParameters & parameters) override;
@@ -71,6 +88,13 @@ public:
    * Add an MFEM FESpace to the problem.
    */
   void addFESpace(const std::string & type, const std::string & name, InputParameters & parameters);
+
+  /**
+   * Add an MFEMFESpaceHierarchy to the problem.
+   */
+  void addFESpaceHierarchy(const std::string & type,
+                           const std::string & name,
+                           InputParameters & parameters);
 
   /**
    * Set the mesh used by MFEM.
@@ -158,6 +182,53 @@ public:
                             InputParameters & parameters);
 
   /**
+   * Add an MFEM WeakForm to the problem.
+   */
+  void addWeakForm(const std::string & weak_form_name,
+                   const std::string & name,
+                   InputParameters & parameters);
+
+  /**
+   * Add default weak form if none has been added by the user
+   */
+  virtual std::shared_ptr<MFEMWeakFormBase> addDefaultWeakForm();
+
+  /**
+   * Set all MFEM EquationSystems for this problem
+   */
+  void setEquationSystems();
+
+  /**
+   * Return the EquationSystem built by the weak form named @p weak_form_name. If the name is
+   * empty, return the problem's sole EquationSystem; it is an error to omit the name when more
+   * than one weak form has been added, since the choice would otherwise be silently arbitrary.
+   */
+  std::shared_ptr<Moose::MFEM::EquationSystem>
+  getEquationSystem(const std::string & weak_form_name = "") const;
+
+  /**
+   * Method called in AddMFEMProblemComposerAction which will create the problem composer.
+   */
+  void addProblemComposer(const std::string & composer_type,
+                          const std::string & name,
+                          InputParameters & parameters);
+
+  /**
+   * Add default problem composer if none has been added by the user
+   */
+  virtual std::shared_ptr<MFEMProblemComposer> addDefaultProblemComposer();
+
+  /**
+   * Set all MFEM ProblemOperators to solve in this problem
+   */
+  void setProblemOperators();
+
+  /**
+   * Get vector of all ProblemOperators added to this problem.
+   */
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & getProblemOperators();
+
+  /**
    * Override of ExternalProblem::addAuxKernel. Creates the MOOSE-side MFEM auxkernel wrapper.
    */
   void addAuxKernel(const std::string & kernel_name,
@@ -196,12 +267,6 @@ public:
                               InputParameters & parameters) override;
 
   /**
-   * Method called in AddMFEMPreconditionerAction which will create the solver.
-   */
-  void addMFEMPreconditioner(const std::string & user_object_name,
-                             const std::string & name,
-                             InputParameters & parameters);
-  /**
    * Override of FEProblemBase::addIndicator. Creates the MFEMIndicator used when setting up
    * adaptive mesh refinement later.
    */
@@ -218,11 +283,17 @@ public:
                  InputParameters & parameters) override;
 
   /**
-   * Method called in AddMFEMSolverAction which will create the solver.
+   * Method called in AddMFEMSolverAction which records a solver for later dependency-ordered
+   * construction.
    */
   virtual void addMFEMSolver(const std::string & user_object_name,
                              const std::string & name,
                              InputParameters & parameters);
+
+  /**
+   * Construct recorded MFEM solvers in dependency order and select the problem driver solver(s).
+   */
+  virtual void resolveMFEMSolvers();
 
   /**
    * Execute MFEM executed objects scheduled on the supplied execute flag.
@@ -284,10 +355,9 @@ public:
   void rebalanceMesh(mfem::ParMesh & pmesh);
 
   /**
-   * Returns optional reference to the displacement GridFunction to apply to nodes.
+   * Returns reference to the displacement GridFunction to apply to nodes.
    */
-  std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
-  getMeshDisplacementGridFunction();
+  const mfem::ParGridFunction & getMeshDisplacementGridFunction();
 
   Moose::FEBackend feBackend() const override { return Moose::FEBackend::MFEM; }
 
@@ -356,7 +426,32 @@ public:
    */
   bool hasMFEMObject(const std::string & system, const std::string & name) const;
 
+  /**
+   * Return the default assembly level to use for EquationSystem assembly.
+   */
+  mfem::AssemblyLevel assemblyLevel() const { return _assembly_level; }
+
+  /**
+   * Set the default assembly level to use for EquationSystem assembly. Called by the MFEM
+   * executioners, which own the user-facing assembly_level parameter, during their construction;
+   * weak forms read it back when building their EquationSystems in setEquationSystems().
+   */
+  void setAssemblyLevel(mfem::AssemblyLevel assembly_level) { _assembly_level = assembly_level; }
+
 protected:
+  /**
+   * Verify that a primary variable's numeric type matches the problem's equation system.
+   */
+  void validateVariableNumericType(const std::string & var_type,
+                                   const std::string & var_name) const;
+
+  struct MFEMSolverDefinition
+  {
+    std::string type;
+    InputParameters * parameters;
+    bool referenced = false;
+  };
+
   /**
    * Aggregated MFEM-side state for meshes, spaces, variables, coefficients, and solvers.
    */
@@ -366,6 +461,33 @@ protected:
    * The numeric representation currently active for this problem.
    */
   NumericType _num_type;
+
+  /**
+   * Solver definitions recorded by AddMFEMSolverAction before the dependency resolver constructs
+   * them. Each key is the user-provided solver object name, which corresponds to a child block
+   * name under [Solvers]. Solver parameters of type MFEMSolverName refer to these same keys when
+   * declaring dependencies between solver objects.
+   */
+  std::map<std::string, MFEMSolverDefinition> _mfem_solver_definitions;
+
+  /// Restartable MFEM solution state associated with this problem.
+  Moose::MFEM::SolutionState & _solution_state_data;
+
+  /**
+   * The problem operator builders for this mfem problem.
+   */
+  std::shared_ptr<MFEMProblemComposer> _problem_composer;
+  /**
+   * Vector of MFEM problem operators executed in this problem.
+   */
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> _problem_operators;
+
+  /**
+   * Default assembly level to use for EquationSystem assembly. Defaults to the same level as the
+   * assembly_level parameter shared by the MFEM executioners, so that the value is well-defined
+   * even if no MFEM executioner is in use.
+   */
+  mfem::AssemblyLevel _assembly_level{mfem::AssemblyLevel::LEGACY};
 };
 
 template <typename T>

@@ -52,7 +52,7 @@ RandomElementalUserObject::finalize()
 void
 RandomElementalUserObject::threadJoin(const UserObject & y)
 {
-  const RandomElementalUserObject & uo = static_cast<const RandomElementalUserObject &>(y);
+  const RandomElementalUserObject & uo = cast_ref<const RandomElementalUserObject &>(y);
 
   _random_data.insert(uo._random_data.begin(), uo._random_data.end());
 }

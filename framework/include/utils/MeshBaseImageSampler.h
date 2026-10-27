@@ -58,12 +58,21 @@ Define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS=1 if built with vendored nlohm
 #include "vtkTIFFReader.h"
 #include "vtkImageData.h"
 #include "vtkStringArray.h"
-#include "vtkImageThreshold.h"
 #include "vtkImageNormalize.h"
 #include "vtkImageCast.h"
 #include "vtkImageShiftScale.h"
 #include "vtkImageMagnitude.h"
 #include "vtkImageFlip.h"
+
+// Compatibility with both older and new VTK
+#if LIBMESH_DETECTED_VTK_VERSION_MAJOR < 9 ||                                                      \
+    (LIBMESH_DETECTED_VTK_VERSION_MAJOR == 9 && LIBMESH_DETECTED_VTK_VERSION_MINOR < 7)
+#include "vtkImageThreshold.h"
+#define mooseVtkImageBinaryThreshold vtkImageThreshold
+#else
+#include "vtkImageBinaryThreshold.h"
+#define mooseVtkImageBinaryThreshold vtkImageBinaryThreshold
+#endif
 
 // If VTK is built without an external nlohmann, then it assumes it
 // will never be compiled against another nlohmann, and it defines an
@@ -145,7 +154,7 @@ private:
   vtkSmartPointer<vtkImageReader2> _image;
 
   /// Pointer to thresholding filter
-  vtkSmartPointer<vtkImageThreshold> _image_threshold;
+  vtkSmartPointer<mooseVtkImageBinaryThreshold> _image_threshold;
 
   /// Pointer to the shift and scaling filter
   vtkSmartPointer<vtkImageShiftScale> _shift_scale_filter;

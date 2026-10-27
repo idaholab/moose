@@ -9,7 +9,11 @@
 
 """Defines the SubprocessPortRunner."""
 
+import os
 from logging import getLogger
+from random import choice
+from string import ascii_lowercase, digits
+from tempfile import gettempdir
 from typing import Optional
 
 from moosecontrol.runners.interfaces.subprocessrunnerinterface import (
@@ -50,8 +54,10 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
         Optional Parameters
         -------------------
         port : Optional[int]
-            The port to connect to. If unset, find
-            a random available port.
+            The port to connect to. If unset, the
+            application binds a free port of the
+            operating system's choosing and reports
+            it back.
         directory : str
             Directory to run in. Defaults to the current
             working directory.
@@ -72,11 +78,28 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
             use_subprocess_reader=use_subprocess_reader,
         )
 
-        # Find an available port if one was not provided
+        # With no port provided, ask for port zero, which the application
+        # resolves to a free port of the operating system's choosing and then
+        # publishes in this file. A free port cannot be reserved from here: a
+        # probe has to release the port before the application can bind it.
+        self._port_file: Optional[str] = None
         if port is None:
-            port = PortRunner.find_available_port()
+            self._port_file = self.random_port_file_path()
+            port = 0
 
         PortRunner.__init__(self, port=port, *args, **kwargs)
+
+    @property
+    def port_file(self) -> Optional[str]:
+        """Get the file the application reports its port in, if it chooses one."""
+        return self._port_file
+
+    @staticmethod
+    def random_port_file_path() -> str:
+        """Generate a random port file path in the temporary directory."""
+        characters = ascii_lowercase + digits
+        name = "".join(choice(characters) for i in range(7))
+        return os.path.join(gettempdir(), f"moosecontrol_{name}.port")
 
     def get_additional_command(self) -> list[str]:
         """
@@ -84,11 +107,38 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
 
         Takes the user's command and also:
             - Sets the port for the control
+            - Sets where to report the bound port, if the application chooses it
             - Disables color in output
         """
         control_path = f"Controls/{self.moose_control_name}"
-        control_socket = f"{control_path}/port={self.port}"
-        return [control_socket, "--color=off"]
+        command = [f"{control_path}/port={self.port}"]
+        if self.port_file is not None:
+            command.append(f'{control_path}/port_file="{self.port_file}"')
+        command.append("--color=off")
+        return command
+
+    def resolve_port(self):
+        """
+        Wait for the application to publish the port it bound, and adopt it.
+
+        The application renames the file into place only once its socket is
+        listening, so a file that exists holds a port that can be connected to.
+        """
+        assert self._port_file is not None
+
+        logger.info("Waiting for MOOSE to report the server port...")
+        self.initialize_poll(lambda: os.path.exists(self._port_file))
+
+        with open(self._port_file) as f:
+            port = int(f.read().strip())
+        logger.info(f"MOOSE server is listening on port {port}")
+
+        self._set_port(port)
+
+    def delete_port_file(self):
+        """Delete the port file if the application wrote one."""
+        if self._port_file is not None and os.path.exists(self._port_file):
+            os.remove(self._port_file)
 
     def initialize(self, data: dict):
         """
@@ -102,11 +152,16 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
         """
         self.initialize_start()
 
-        if not self.port_is_available(self.port):
+        # A port named by the caller can be checked before spawning; one the
+        # application chooses needs no check, as it binds what it reports
+        if self.port_file is None and not self.port_is_available(self.port):
             raise ConnectionRefusedError(f"Port {self.port} is already used")
 
         # Start the subprocess
         SubprocessRunnerInterface.initialize(self)
+        # Learn where it is listening before trying to reach it
+        if self.port_file is not None:
+            self.resolve_port()
         # And then wait for a connection
         PortRunner.initialize(self, data)
 
@@ -116,6 +171,8 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
         SubprocessRunnerInterface.finalize(self)
         # And then close the connection
         PortRunner.finalize(self)
+        # And drop the port file, which has served its purpose
+        self.delete_port_file()
 
     def cleanup(self):
         """Kill the server and the process."""
@@ -123,3 +180,5 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
         PortRunner.cleanup(self)
         # Kill process if needed
         SubprocessRunnerInterface.cleanup(self)
+        # And drop the port file, which may not have been read
+        self.delete_port_file()

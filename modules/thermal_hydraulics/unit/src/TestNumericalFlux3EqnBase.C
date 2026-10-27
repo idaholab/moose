@@ -12,9 +12,7 @@
 #include "IdealGasFluidProperties.h"
 
 TestNumericalFlux3EqnBase::TestNumericalFlux3EqnBase()
-  : TestNumericalFlux1D(),
-    _fp_name("fp"),
-    _fp(getFluidPropertiesObject())
+  : TestNumericalFlux1D(), _fp_name("fp"), _fp(getFluidPropertiesObject())
 {
 }
 

@@ -26,4 +26,7 @@ if MOOSE_PYTHON_DIR not in sys.path:
 
 from MooseDocs import main
 if __name__ == '__main__':
+    # Pass large_media=False if this application does not reference any 'large_media' content, to
+    # skip initializing and indexing the large_media submodule. See MooseDocs/setup.md for details.
+    # sys.exit(main.run(large_media=False))
     sys.exit(main.run())

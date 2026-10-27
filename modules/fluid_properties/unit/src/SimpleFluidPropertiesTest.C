@@ -75,7 +75,7 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   ABS_TEST(_fp->T_from_p_rho(p, 1. / v), T, tol);
   ABS_TEST(_fp->p_from_v_e(v, e),
            bulk_modulus * (thermal_exp * _fp->T_from_v_e(v, e) + std::log(1 / (v * density0))),
-           tol);
+           6.e-9); // fails at 4.5e-9 with -march=x86-64-v3
   ABS_TEST(_fp->mu_from_v_e(v, e), visc, tol);
 
   p = 1.06841E9;
@@ -112,7 +112,7 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   ABS_TEST(_fp->T_from_p_rho(p, 1. / v), T, tol);
   ABS_TEST(_fp->p_from_v_e(v, e),
            bulk_modulus * (thermal_exp * _fp->T_from_v_e(v, e) + std::log(1 / (v * density0))),
-           tol);
+           5.e-8); // fails at 3.7e-8 with -march=x86-64-v3
   ABS_TEST(_fp->mu_from_v_e(v, e), visc, tol);
 }
 

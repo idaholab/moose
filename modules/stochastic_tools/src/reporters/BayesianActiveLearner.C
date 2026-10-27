@@ -1,11 +1,12 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "BayesianActiveLearner.h"
 
@@ -136,3 +137,5 @@ BayesianActiveLearner::includeAdditionalInputs()
     for (unsigned int i = 0; i < _inputs_test.size(); ++i)
       _inputs_test_modified[i].push_back(_var_test[i]);
 }
+
+#endif

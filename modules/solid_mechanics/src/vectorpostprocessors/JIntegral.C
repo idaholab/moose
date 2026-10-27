@@ -249,7 +249,7 @@ JIntegral::finalize()
 void
 JIntegral::threadJoin(const UserObject & y)
 {
-  const auto & uo = static_cast<const JIntegral &>(y);
+  const auto & uo = cast_ref<const JIntegral &>(y);
 
   for (auto i = beginIndex(_j_integral); i < _j_integral.size(); ++i)
     _j_integral[i] += uo._j_integral[i];

@@ -31,7 +31,7 @@ public:
   bool resample() const { return _resample; }
 
 protected:
-  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
+  virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) const override;
 
   /**
    * Sobol sampling should have a slightly different partitioning in order to keep
@@ -39,12 +39,6 @@ protected:
    * efficient.
    */
   virtual LocalRankConfig constructRankConfig(bool batch_mode) const override;
-
-  ///@{
-  /// Sobol Monte Carlo rows
-  std::vector<Real> _row_a;
-  std::vector<Real> _row_b;
-  ///@}
 
   /// Sampler matrix
   Sampler & _sampler_a;

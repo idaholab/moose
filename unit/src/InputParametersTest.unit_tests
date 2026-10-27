@@ -1,0 +1,53 @@
+[Tests]
+  design = 'InputParameters.md'
+  issues = '#20935 #33699'
+
+  [group_assignment]
+    type = GoogleTest
+    unit_test = InputParametersTest.addParamNamesToGroup
+    requirement = 'The system shall allow a parameter to be assigned to a documentation group.'
+  []
+  [different_group_assignment]
+    type = GoogleTest
+    unit_test = InputParametersTest.addParamNamesToGroupDifferentGroup
+    requirement = 'The system shall allow a parameter to be reassigned to a different documentation group.'
+  []
+  [duplicate_group_assignment]
+    type = GoogleTest
+    unit_test = InputParametersTest.addParamNamesToGroupSameGroupError
+    requirement = 'The system shall error when a parameter is assigned to the same documentation group it has already been assigned to.'
+  []
+  [duplicate_group_assignment_within_call]
+    type = GoogleTest
+    unit_test = InputParametersTest.addParamNamesToGroupDuplicateWithinCallError
+    requirement = 'The system shall error when a single group-assignment call lists the same parameter more than once.'
+  []
+  [move_param_to_group]
+    type = GoogleTest
+    unit_test = InputParametersTest.moveParamToGroup
+    requirement = 'The system shall allow a parameter to be intentionally moved to a different documentation group.'
+  []
+  [move_param_to_group_missing_param_error]
+    type = GoogleTest
+    unit_test = InputParametersTest.moveParamToGroupMissingParamError
+    requirement = 'The system shall error when moving a nonexistent parameter to a documentation group.'
+  []
+  [missing_required_params]
+    type = GoogleTest
+    unit_test = InputParametersTest.missingRequiredParamErrors
+    requirement = 'The system shall list missing required parameters with their documentation strings, optionally skipping parameters by name or skipping private parameters.'
+    issues = '#33156'
+  []
+  [missing_required_params_renamed]
+    type = GoogleTest
+    unit_test = InputParametersTest.missingRequiredParamErrorsRenamed
+    requirement = 'The system shall report a missing renamed required parameter by its current name and shall consider it set when set through its old name.'
+    issues = '#33156'
+  []
+  [missing_required_params_deprecated_coupled_var]
+    type = GoogleTest
+    unit_test = InputParametersTest.missingRequiredParamErrorsDeprecatedCoupledVar
+    requirement = 'The system shall consider a required coupled variable set when its deprecated coupled variable name is set.'
+    issues = '#33156'
+  []
+[]

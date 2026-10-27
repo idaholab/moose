@@ -11,8 +11,6 @@
 
 #include "MooseArray.h"
 
-using libMesh::Real;
-
 TEST(MooseArray, defaultConstructor)
 {
   MooseArray<int> ma;

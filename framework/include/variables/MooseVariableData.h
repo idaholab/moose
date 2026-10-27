@@ -36,7 +36,6 @@ class DenseVector;
 using libMesh::DenseVector;
 using libMesh::DofMap;
 using libMesh::QBase;
-using libMesh::VectorValue;
 
 class TimeIntegrator;
 class Assembly;
@@ -297,19 +296,45 @@ public:
 
   const ADTemplateVariableValue<OutputType> & adSln() const
   {
-    _need_ad = _need_ad_u = true;
+    _need_ad = _need_ad_volume = _need_ad_u = true;
     return _ad_u;
   }
 
   const ADTemplateVariableGradient<OutputType> & adGradSln() const
   {
-    _need_ad = _need_ad_grad_u = true;
+    _need_ad = _need_ad_volume = _need_ad_grad_u = true;
     return _ad_grad_u;
   }
 
+  /**
+   * Solution getter for objects that only ever evaluate on element faces, such as AD
+   * integrated BCs. Identical to adSln() except that it does not request AD on element
+   * interiors, where such an object never reads the result.
+   */
+  const ADTemplateVariableValue<OutputType> & adSlnFace() const
+  {
+    _need_ad = _need_ad_u = true;
+    return _ad_u;
+  }
+
+  /**
+   * Face counterpart of adGradSln(); see adSlnFace(). Objects evaluating on element faces must use
+   * this accessor: on a face, the AD gradient is only computed when it was requested here.
+   */
+  const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const
+  {
+    _need_ad = _need_ad_grad_u = _need_ad_grad_u_face = true;
+    needADGradPhiFace();
+    return _ad_grad_u;
+  }
+
+  /**
+   * Volume-only: on element faces the AD gradient time derivative is not computed, because it
+   * would require the AD face shape function gradients, and the returned array is left empty
+   */
   const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const
   {
-    _need_ad = _need_ad_grad_u_dot = true;
+    _need_ad = _need_ad_volume = _need_ad_grad_u_dot = true;
 
     if (!_time_integrator)
       // If we don't have a time integrator (this will be the case for variables that are a part of
@@ -323,7 +348,7 @@ public:
 
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const
   {
-    _need_ad = _need_ad_second_u = true;
+    _need_ad = _need_ad_volume = _need_ad_second_u = true;
     secondPhi();
     secondPhiFace();
     return _ad_second_u;
@@ -355,7 +380,7 @@ public:
 
   const ADTemplateVariableCurl<OutputType> & adCurlSln() const
   {
-    _need_ad = _need_ad_curl_u = true;
+    _need_ad = _need_ad_volume = _need_ad_curl_u = true;
     curlPhi();
     curlPhiFace();
     return _ad_curl_u;
@@ -495,6 +520,10 @@ private:
             unsigned int nqp,
             std::size_t num_shapes);
 
+  /// Ask the assembly to compute the AD face shape function gradients, which this variable's AD
+  /// gradient and AD face test function gradients are built from
+  void needADGradPhiFace() const;
+
   /// A const reference to the owning MooseVariableFE object
   const MooseVariableFE<OutputType> & _var;
 
@@ -543,8 +572,14 @@ private:
 
   /// AD flags
   mutable bool _need_ad = false;
+  /// Whether AD is needed with the volume quadrature rule. Requests made through the
+  /// face-scoped accessors do not set this, so a variable whose only AD consumers are
+  /// face objects (an AD integrated BC, for instance) skips AD seeding on element interiors.
+  mutable bool _need_ad_volume = false;
   mutable bool _need_ad_u = false;
   mutable bool _need_ad_grad_u = false;
+  /// Whether the AD gradient is needed on element faces, i.e. requested through adGradSlnFace()
+  mutable bool _need_ad_grad_u_face = false;
   mutable bool _need_ad_grad_u_dot = false;
   mutable bool _need_ad_second_u = false;
   mutable bool _need_ad_curl_u = false;
@@ -771,7 +806,7 @@ template <typename OutputType>
 const typename MooseVariableData<OutputType>::ADDofValues &
 MooseVariableData<OutputType>::adDofValues() const
 {
-  _need_ad = true;
+  _need_ad = _need_ad_volume = true;
   return _ad_dof_values;
 }
 
@@ -779,7 +814,7 @@ template <typename OutputType>
 const typename MooseVariableData<OutputType>::ADDofValues &
 MooseVariableData<OutputType>::adDofValuesDot() const
 {
-  _need_ad = _need_ad_u_dot = true;
+  _need_ad = _need_ad_volume = _need_ad_u_dot = true;
   if (!_time_integrator)
     // See explanation in adUDot() body
     _need_u_dot = true;
@@ -790,6 +825,8 @@ template <typename OutputType>
 const typename Moose::ADType<OutputType>::type &
 MooseVariableData<OutputType>::adNodalValue() const
 {
+  // _ad_nodal_value is assigned by computeNodalValues(), not by the quadrature-rule path, so
+  // this request carries no need for AD with the volume quadrature rule.
   _need_ad = true;
   return _ad_nodal_value;
 }
@@ -798,7 +835,7 @@ template <typename OutputType>
 const ADTemplateVariableValue<OutputType> &
 MooseVariableData<OutputType>::adUDot() const
 {
-  _need_ad = _need_ad_u_dot = true;
+  _need_ad = _need_ad_volume = _need_ad_u_dot = true;
 
   if (!_time_integrator)
     // If we don't have a time integrator (this will be the case for variables that are a part of
@@ -814,7 +851,7 @@ template <typename OutputType>
 const ADTemplateVariableValue<OutputType> &
 MooseVariableData<OutputType>::adUDotDot() const
 {
-  _need_ad = _need_ad_u_dotdot = true;
+  _need_ad = _need_ad_volume = _need_ad_u_dotdot = true;
 
   if (!_time_integrator)
     // If we don't have a time integrator (this will be the case for variables that are a part
@@ -843,5 +880,6 @@ MooseVariableData<OutputType>::adGradPhiFace() const
   if (_element_type == Moose::ElementType::Neighbor || _element_type == Moose::ElementType::Lower)
     mooseError("Unsupported element type: ", Moose::stringify(_element_type));
   mooseAssert(_ad_grad_phi_face, "this should be non-null");
+  needADGradPhiFace();
   return *_ad_grad_phi_face;
 }

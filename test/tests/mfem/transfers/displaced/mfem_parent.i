@@ -4,7 +4,7 @@
 []
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = base_strip.e
 []
 

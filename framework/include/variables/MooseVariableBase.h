@@ -75,6 +75,25 @@ public:
   const SystemBase & sys() const { return _sys; }
 
   /**
+   * The subdomains the variable is active on
+   */
+  const std::set<SubdomainID> & activeSubdomains() const;
+
+  /**
+   * Is the variable active on the subdomain?
+   * @param subdomain The subdomain id in question
+   * @return true if active on subdomain, false otherwise
+   */
+  bool activeOnSubdomain(SubdomainID subdomain) const;
+
+  /**
+   * Is the variable active on the subdomains?
+   * @param subdomains The subdomain ids in question
+   * @return true if active on all provided subdomains, false otherwise
+   */
+  bool activeOnSubdomains(const std::set<SubdomainID> & subdomains) const;
+
+  /**
    * Get dual mortar option
    */
   bool useDual() const { return _use_dual; }
@@ -126,6 +145,18 @@ public:
   virtual bool hasDoFsOnNodes() const { mooseError("Base class cannot determine this"); };
 
   /**
+   * Whether this variable supports QP-indexed loops. Returns true for FE variables and nonlinear
+   * FV variables. Returns false for linear FV variables by default and for scalar variables.
+   */
+  virtual bool supportsQpBasedLoops() const;
+
+  /**
+   * Whether this variable supports geometric-info-based loops, such as ElemInfo/FaceInfo loops.
+   * Static, per-class property - never toggled by requireQpComputations().
+   */
+  virtual bool supportsGeometricInfoBasedLoops() const;
+
+  /**
    * Return the continuity of this variable
    */
   virtual libMesh::FEContinuity getContinuity() const
@@ -169,8 +200,6 @@ public:
    * Mark this variable as an eigen var or non-eigen var
    */
   void eigen(bool eigen) { _is_eigen = eigen; }
-
-  void initialSetup() override;
 
   virtual void clearAllDofIndices() { _dof_indices.clear(); }
 

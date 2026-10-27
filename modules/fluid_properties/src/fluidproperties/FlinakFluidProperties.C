@@ -161,7 +161,11 @@ FlinakFluidProperties::T_from_p_rho(Real p, Real rho) const
   return temperature;
 }
 
-Real FlinakFluidProperties::cp_from_v_e(Real /*v*/, Real /*e*/) const { return _cp; }
+Real
+FlinakFluidProperties::cp_from_v_e(Real /*v*/, Real /*e*/) const
+{
+  return _cp;
+}
 
 void
 FlinakFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const
@@ -317,7 +321,8 @@ FlinakFluidProperties::beta_from_p_T(Real pressure, Real temperature) const
   return -drho_dT / rho;
 }
 
-Real FlinakFluidProperties::cp_from_p_T(Real /*pressure*/, Real /*temperature*/) const
+Real
+FlinakFluidProperties::cp_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _cp;
 }

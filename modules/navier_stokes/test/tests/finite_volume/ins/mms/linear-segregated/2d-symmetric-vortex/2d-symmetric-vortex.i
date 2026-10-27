@@ -1,6 +1,7 @@
 mu = 1.2
 rho = 1.5
 advected_interp_method = 'average'
+pressure_gradient_method = 'green-gauss'
 
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system'
@@ -24,7 +25,12 @@ advected_interp_method = 'average'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
-    body_force_kernel_names = "u_forcing; v_forcing"
+  []
+[]
+
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
   []
 []
 
@@ -46,11 +52,19 @@ advected_interp_method = 'average'
   []
 []
 
+[FVGradientMethods]
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.1
+  []
+[]
+
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
@@ -61,7 +75,7 @@ advected_interp_method = 'average'
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
@@ -74,12 +88,14 @@ advected_interp_method = 'average'
     variable = vel_x
     pressure = pressure
     momentum_component = 'x'
+    gradient_method = ${pressure_gradient_method}
   []
   [v_pressure]
     type = LinearFVMomentumPressure
     variable = vel_y
     pressure = pressure
     momentum_component = 'y'
+    gradient_method = ${pressure_gradient_method}
   []
   [u_forcing]
     type = LinearFVSource
@@ -92,7 +108,7 @@ advected_interp_method = 'average'
     source_density = forcing_v
   []
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = 'Ainv' # Functor created in the RhieChowMassFlux UO
     use_nonorthogonal_correction = false
@@ -141,6 +157,9 @@ advected_interp_method = 'average'
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
+    rho = ${rho}
+    u = vel_x
+    v = vel_y
   []
   [pressure-symmetry]
     type = LinearFVPressureSymmetryBC
@@ -199,7 +218,7 @@ advected_interp_method = 'average'
   pressure_variable_relaxation = 0.3
   num_iterations = 10000
   pressure_absolute_tolerance = 1e-7
-  momentum_absolute_tolerance = 1e-7
+  momentum_absolute_tolerance = '1e-7 1e-7'
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'

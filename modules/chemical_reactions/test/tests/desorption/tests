@@ -1,10 +1,13 @@
 [Tests]
+  issues = '#3119'
   [./langmuir_jac_de]
     type = 'PetscJacobianTester'
     input = 'langmuir_jac_de.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
     cli_args = 'Executioner/num_steps=1'
+    design = 'DesorptionFromMatrix.md DesorptionToPorespace.md LangmuirMaterial.md'
+    requirement = 'The system shall compute a correct Jacobian for the Langmuir desorption kernels during desorption from a matrix into pore space.'
   [../]
   [./langmuir_jac_ad]
     type = 'PetscJacobianTester'
@@ -12,6 +15,8 @@
     ratio_tol = 1E-6
     difference_tol = 1E10
     cli_args = 'Executioner/num_steps=1'
+    design = 'DesorptionFromMatrix.md DesorptionToPorespace.md LangmuirMaterial.md'
+    requirement = 'The system shall compute a correct Jacobian for the Langmuir desorption kernels during adsorption from pore space into a matrix.'
   [../]
 
   [./mollified_langmuir_jac_de]
@@ -20,6 +25,8 @@
     ratio_tol = 1E-6
     difference_tol = 1E10
     cli_args = 'Executioner/num_steps=1'
+    design = 'DesorptionFromMatrix.md DesorptionToPorespace.md MollifiedLangmuirMaterial.md'
+    requirement = 'The system shall compute a correct Jacobian for the mollified Langmuir desorption kernels during desorption from a matrix into pore space.'
   [../]
   [./mollified_langmuir_jac_ad]
     type = 'PetscJacobianTester'
@@ -27,6 +34,8 @@
     ratio_tol = 1E-6
     difference_tol = 1E10
     cli_args = 'Executioner/num_steps=1'
+    design = 'DesorptionFromMatrix.md DesorptionToPorespace.md MollifiedLangmuirMaterial.md'
+    requirement = 'The system shall compute a correct Jacobian for the mollified Langmuir desorption kernels during adsorption from pore space into a matrix.'
   [../]
   [./mollified_langmuir_jac_de2]
     type = 'PetscJacobianTester'
@@ -34,6 +43,8 @@
     ratio_tol = 1E-6
     difference_tol = 1E10
     cli_args = 'Executioner/num_steps=1'
+    design = 'DesorptionFromMatrix.md DesorptionToPorespace.md MollifiedLangmuirMaterial.md'
+    requirement = 'The system shall compute a correct Jacobian for the mollified Langmuir desorption kernels during desorption from a matrix into pore space, using a large mollification parameter.'
   [../]
   [./mollified_langmuir_jac_ad2]
     type = 'PetscJacobianTester'
@@ -41,6 +52,8 @@
     ratio_tol = 1E-6
     difference_tol = 1E10
     cli_args = 'Executioner/num_steps=1'
+    design = 'DesorptionFromMatrix.md DesorptionToPorespace.md MollifiedLangmuirMaterial.md'
+    requirement = 'The system shall compute a correct Jacobian for the mollified Langmuir desorption kernels during adsorption from pore space into a matrix, using a large mollification parameter.'
   [../]
 
   [./langmuir_jac2]
@@ -49,6 +62,8 @@
     ratio_tol = 1E-6
     difference_tol = 1E10
     cli_args = 'Executioner/num_steps=1'
+    design = 'DesorptionFromMatrix.md DesorptionToPorespace.md MollifiedLangmuirMaterial.md'
+    requirement = 'The system shall compute a correct Jacobian for the mollified Langmuir desorption kernels when the concentration variable is a constant monomial defined on a single mesh block.'
   [../]
 
   [./langmuir_desorption]
@@ -56,6 +71,8 @@
     input = 'langmuir_desorption.i'
     csvdiff = 'langmuir_desorption.csv'
     rel_err = 1.0E-5
+    design = 'DesorptionFromMatrix.md DesorptionToPorespace.md LangmuirMaterial.md'
+    requirement = 'The system shall solve the coupled matrix and pore-space concentration differential equations describing Langmuir desorption and adsorption.'
   [../]
 
   [./mollified_langmuir_desorption]
@@ -63,5 +80,7 @@
     input = 'mollified_langmuir_desorption.i'
     csvdiff = 'mollified_langmuir_desorption.csv'
     rel_err = 1.0E-5
+    design = 'DesorptionFromMatrix.md DesorptionToPorespace.md MollifiedLangmuirMaterial.md'
+    requirement = 'The system shall solve the coupled matrix and pore-space concentration differential equations describing mollified Langmuir desorption and adsorption.'
   [../]
 []

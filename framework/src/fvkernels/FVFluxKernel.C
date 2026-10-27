@@ -54,8 +54,6 @@ FVFluxKernel::FVFluxKernel(const InputParameters & params)
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(
         this, false, false, /*is_fv=*/true),
     _var(*mooseVariableFV()),
-    _u_elem(_var.adSln()),
-    _u_neighbor(_var.adSlnNeighbor()),
     _force_boundary_execution(getParam<bool>("force_boundary_execution"))
 {
   addMooseVariableDependency(&_var);

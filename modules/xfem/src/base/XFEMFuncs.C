@@ -12,8 +12,6 @@
 #include "MooseError.h"
 #include "Conversion.h"
 
-using namespace libMesh;
-
 namespace Xfem
 {
 

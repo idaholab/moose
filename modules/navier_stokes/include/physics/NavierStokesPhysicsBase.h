@@ -10,6 +10,7 @@
 #pragma once
 
 #include "PhysicsBase.h"
+#include "MooseEnum.h"
 
 #define registerNavierStokesPhysicsBaseTasks(app_name, derived_name)                               \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
@@ -36,6 +37,9 @@ protected:
 
   /// Parameters to change or add relationship managers
   InputParameters getAdditionalRMParams() const override;
+
+  /// Add the FVInterpolationMethod object for an advected interpolation method if absent
+  void addFVAdvectedInterpolationMethod(const MooseEnum & interpolation_method);
 
   /// Return the number of ghosting layers needed
   virtual unsigned short getNumberAlgebraicGhostingLayersNeeded() const = 0;

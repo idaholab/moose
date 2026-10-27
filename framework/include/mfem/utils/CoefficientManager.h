@@ -152,12 +152,12 @@ public:
   }
 
   /// Return a scalar coefficient with the given name or, if that
-  /// doesn't exists, try interpreting the name as a number with which
+  /// doesn't exist, try interpreting the name as a number with which
   /// to build a new constant coefficient.
   mfem::Coefficient & getScalarCoefficient(const std::string & name);
 
   /// Return a vector coefficient with the given name or, if that
-  /// doesn't exists, try interpreting the name as a vector of number with which
+  /// doesn't exist, try interpreting the name as a vector of number with which
   /// to build a new constant vector coefficient.
   mfem::VectorCoefficient & getVectorCoefficient(const std::string & name);
 
@@ -171,6 +171,11 @@ public:
   bool vectorPropertyIsDefined(const std::string & name, const std::string & block) const;
   bool matrixPropertyIsDefined(const std::string & name, const std::string & block) const;
   void setTime(const mfem::real_t time);
+
+  /// Notify quadrature function coefficients that solution variables have changed, marking the
+  /// stored values of those with a NONLINEAR update policy as stale so their source coefficients
+  /// are re-projected on next use.
+  void markSolutionChanged();
 
 private:
   ScalarMap _scalar_coeffs;

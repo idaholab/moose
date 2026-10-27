@@ -125,7 +125,8 @@ CoupledInjectionProductionPhysics::addPostprocessorTransfer(const PostprocessorN
     params.set<MultiAppName>("to_multi_app") = getParam<MultiAppName>("multi_app");
   params.set<PostprocessorName>("from_postprocessor") = pp_name;
   params.set<PostprocessorName>("to_postprocessor") = pp_name;
-  params.set<MooseEnum>("reduction_type") = "average";
+  if (from_multi_app)
+    params.set<MooseEnum>("reduction_type") = "average";
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   getProblem().addTransfer(class_name, pp_name + "_transfer", params);
 }

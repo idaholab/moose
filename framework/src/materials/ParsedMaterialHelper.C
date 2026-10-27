@@ -21,8 +21,10 @@ ParsedMaterialHelper<is_ad>::validParams()
   params.addClassDescription("Parsed Function Material.");
   params.addParam<bool>("error_on_missing_material_properties",
                         true,
-                        "Throw an error if any explicitly requested material property does not "
-                        "exist. Otherwise assume it to be zero.");
+                        "Throw an error if any explicitly requested non-derivative material "
+                        "property does not exist. Otherwise assume it to be zero. Requested "
+                        "derivative properties (the D[u,x] syntax) are always optional and "
+                        "default to zero when they do not exist.");
   params.addParam<MultiMooseEnum>(
       "extra_symbols",
       MultiMooseEnum(getExtraSymbolsOptions()),

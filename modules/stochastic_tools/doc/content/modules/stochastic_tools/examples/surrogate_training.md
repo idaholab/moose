@@ -75,7 +75,7 @@ These values in the `sub.i` file are arbitrary since the stochastic master app w
 
 ## Training
 
-This section describes how to set up an input file to train a surrogate and output the training data. This file will act as the master app and use the [MultiApps](MultiApps/index.md) and [Transfers](Transfers/index.md) systems to communicate and run the [sub app](examples/surrogates/sub.i).
+This section describes how to set up an input file to train a surrogate and output the training data. This file will act as the master app and use the [MultiApps](MultiApps/index.md) and [Transfers](Transfers/index.md) systems to communicate and run the [!file text=sub app](examples/surrogates/sub.i).
 
 !! omitting_solve_begin
 

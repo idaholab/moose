@@ -35,23 +35,24 @@ public:
   /// Enumeration for fixed point convergence reasons
   enum class MooseFixedPointConvergenceReason
   {
-    UNSOLVED = 0,                  /// Not solved yet
-    CONVERGED_NONLINEAR = 1,       /// Main app nonlinear solve converged, FP unassessed
-    CONVERGED_ABS = 2,             /// FP converged by absolute residual tolerance
-    CONVERGED_RELATIVE = 3,        /// FP converged by relative residual tolerance
-    CONVERGED_PP = 4,              /// FP converged by absolute or relative PP tolerance
-    REACH_MAX_ITS = 5,             /// FP converged by hitting max iterations and accepting
-    CONVERGED_OBJECT = 6,          /// FP converged according to Convergence object
-    DIVERGED_MAX_ITS = -1,         /// FP diverged by hitting max iterations
-    DIVERGED_NONLINEAR = -2,       /// Main app nonlinear solve diverged
-    DIVERGED_FAILED_MULTIAPP = -3, /// Multiapp solve diverged
-    DIVERGED_OBJECT = -4           /// FP diverged according to Convergence object
+    UNSOLVED = 0,                   /// Not solved yet
+    CONVERGED_NONLINEAR = 1,        /// Main app nonlinear solve converged, FP unassessed
+    CONVERGED_ABS = 2,              /// FP converged by absolute residual tolerance
+    CONVERGED_RELATIVE = 3,         /// FP converged by relative residual tolerance
+    CONVERGED_PP = 4,               /// FP converged by absolute or relative PP tolerance
+    REACH_MAX_ITS = 5,              /// FP converged by hitting max iterations and accepting
+    CONVERGED_OBJECT = 6,           /// FP converged according to Convergence object
+    DIVERGED_MAX_ITS = -1,          /// FP diverged by hitting max iterations
+    DIVERGED_NONLINEAR = -2,        /// Main app nonlinear solve diverged
+    DIVERGED_FAILED_MULTIAPP = -3,  /// Multiapp solve diverged
+    DIVERGED_OBJECT = -4,           /// FP diverged according to Convergence object
+    DIVERGED_FAILED_FIXEDPOINT = -5 /// FP failed most likely by a terminator user object
   };
 
   /**
    * Get the number of fixed point iterations performed
    * Because this returns the number of fixed point iterations, rather than the current
-   * iteration count (which starts at 0), increment by 1.
+   * iteration index (which starts at 0), shift by 1.
    *
    * @return Number of fixed point iterations performed
    */
@@ -234,9 +235,9 @@ protected:
   std::vector<std::vector<PostprocessorValue>> _secondary_transformed_pps_values;
 
   ///@{ Variables used by the fixed point iteration
-  /// fixed point iteration counter
+  /// Current fixed point iteration index; 0 for the first iteration
   unsigned int _fixed_point_it;
-  /// fixed point iteration counter for the main app
+  /// Current fixed point iteration index for the main app; 0 for the first iteration
   unsigned int _main_fixed_point_it;
   /// Status of fixed point solve
   MooseFixedPointConvergenceReason _fixed_point_status;

@@ -10,15 +10,15 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "ProblemOperatorBase.h"
-#include "EquationSystem.h"
-
-class MFEMProblem;
+#include "MFEMProblem.h"
 
 namespace Moose::MFEM
 {
 
 ProblemOperatorBase::ProblemOperatorBase(MFEMProblem & problem)
-  : _problem(problem), _problem_data(problem.getProblemData())
+  : PerfGraphInterface(problem.getMooseApp()),
+    _problem(problem),
+    _problem_data(problem.getProblemData())
 {
 }
 
@@ -47,20 +47,21 @@ ProblemOperatorBase::SetGridFunctions()
 }
 
 void
-ProblemOperatorBase::Init(mfem::BlockVector & X)
+ProblemOperatorBase::Init()
 {
-  X.Update(_block_true_offsets_trial);
+  SetGridFunctions();
+  _true_solution.Update(_block_true_offsets_trial);
   for (const auto i : index_range(_trial_variables))
-    X.GetBlock(i) = _trial_variables[i]->GetTrueVector();
+    _true_solution.GetBlock(i) = _trial_variables[i]->GetTrueVector();
   // Sync the flags from the global vector with the sub-vectors (copies to global vector location)
-  X.SyncFromBlocks();
+  _true_solution.SyncFromBlocks();
 
-  // After initial assignment of X from the grid function, which may contain initial conditions,
-  // we alias the grid function to X
+  // After initial assignment of the true solution from the grid function, which may contain
+  // initial conditions, we alias the grid function to it
   for (const auto i : index_range(_trial_variables))
     _trial_variables[i]->MakeTRef(
-        _trial_variables[i]->ParFESpace(), X, _block_true_offsets_trial[i]);
-  _trial_true_vector = &X;
+        _trial_variables[i]->ParFESpace(), _true_solution, _block_true_offsets_trial[i]);
+  _trial_true_vector = &_true_solution;
 }
 
 void
@@ -76,20 +77,15 @@ ProblemOperatorBase::SetTrialVariablesFromTrueVectors()
 }
 
 void
-ProblemOperatorBase::SolveWithOperator(EquationSystem & equation_system,
+ProblemOperatorBase::SolveWithOperator(mfem::Operator & system_operator,
+                                       mfem::Operator & linear_operator,
                                        const mfem::Vector & rhs,
                                        mfem::Vector & x)
 {
-  const bool nonlinear = equation_system.Nonlinear();
-
-  // `nonlinear` describes the assembled MFEM operator, not whether the user configured a
-  // nonlinear solver object. A linear problem may still intentionally be solved through the
-  // nonlinear solver machinery when one is provided.
-  if (nonlinear || _problem_data.nonlinear_solver)
+  // Nonlinear solver path for both linear and nonlinear problems. (as a linear problem may still
+  // intentionally be solved through the nonlinear solver machinery when one is provided)
+  if (_problem_data.nonlinear_solver)
   {
-    if (nonlinear && !_problem_data.nonlinear_solver)
-      mooseError("A nonlinear MFEM solve requires a nonlinear solver, but none was provided.");
-
     auto & nonlinear_solver = *_problem_data.nonlinear_solver;
     if (nonlinear_solver.RequiresExternalLinearSolver())
     {
@@ -97,26 +93,22 @@ ProblemOperatorBase::SolveWithOperator(EquationSystem & equation_system,
         mooseError("The configured MFEM nonlinear solver requires an external linear solver, but "
                    "none was provided.");
       auto & linear_solver = *_problem_data.jacobian_solver;
-      equation_system.PrepareLinearSolver(linear_solver);
+      linear_solver.SetOperator(linear_operator);
       nonlinear_solver.SetLinearSolver(linear_solver.GetSolver());
     }
 
-    nonlinear_solver.SetOperator(equation_system);
+    nonlinear_solver.SetOperator(system_operator);
     nonlinear_solver.Mult(rhs, x);
-    return;
   }
+  // Linear solver path for linear problems.
   else
   {
-    //
-    // pure linear path
-    //
-
     if (!_problem_data.jacobian_solver)
       mooseError("A linear MFEM solve requires a linear solver, but none was provided.");
 
     auto & linear_solver = *_problem_data.jacobian_solver;
-    equation_system.PrepareLinearSolver(linear_solver);
-    linear_solver.GetSolver().Mult(rhs, x);
+    linear_solver.SetOperator(linear_operator);
+    linear_solver.Mult(rhs, x);
   }
 }
 

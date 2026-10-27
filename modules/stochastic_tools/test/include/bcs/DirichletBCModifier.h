@@ -11,7 +11,6 @@
 
 #include "DirichletBCBase.h"
 
-
 /**
  * Boundary condition of a Dirichlet type
  *

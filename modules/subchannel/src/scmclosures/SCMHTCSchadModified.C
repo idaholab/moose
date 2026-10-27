@@ -35,28 +35,32 @@ SCMHTCSchadModified::computeNusseltNumber(const FrictionStruct & /*friction_args
 {
   const auto pre = computeNusseltNumberPreInfo(nusselt_args);
   const auto Pe = pre.Re * pre.Pr;
+  const auto turbulent_Pe = turbulentReynoldsNumber(pre) * pre.Pr;
 
   if (pre.poD < 1.1 || pre.poD > 1.5)
     flagSolutionWarning(
         "Pitch over pin diameter ratio out of range for the Schad-Modified correlation.");
 
-  const Real poly = -16.15 + 24.96 * pre.poD - 8.55 * Utility::pow<2>(pre.poD);
-  auto NuT = 0.0;
-  if (Pe <= 1000 && Pe >= 150)
-  {
-    NuT = poly * std::pow(Pe, 0.3);
-  }
-  else if (Pe < 150)
-  {
-    NuT = poly * 4.496;
+  if (Pe < 150)
     flagSolutionWarning(
         "Peclet number (Pe) below recommended range for the Schad-Modified correlation.");
+  else if (Pe > 1000)
+    flagSolutionWarning(
+        "Peclet number (Pe) above recommended range for the Schad-Modified correlation.");
+
+  const Real poly = -16.15 + 24.96 * pre.poD - 8.55 * Utility::pow<2>(pre.poD);
+  auto NuT = 0.0;
+  if (turbulent_Pe <= 1000 && turbulent_Pe >= 150)
+  {
+    NuT = poly * std::pow(turbulent_Pe, 0.3);
+  }
+  else if (turbulent_Pe < 150)
+  {
+    NuT = poly * 4.496;
   }
   else
   {
-    flagSolutionWarning(
-        "Peclet number (Pe) above recommended range for the Schad-Modified correlation.");
-    NuT = poly * std::pow(Pe, 0.3);
+    NuT = poly * std::pow(turbulent_Pe, 0.3);
   }
 
   return blendTurbulentNusseltNumber(pre, NuT);

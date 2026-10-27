@@ -63,6 +63,7 @@
       add_variables = false
       [all]
         new_system = true
+        strain = FINITE
         block = 'blk1 blk2'
       []
     []
@@ -75,7 +76,6 @@
     # lambda and mu for young_modulus=5 and poissons_ratio=0.3
     lambda = '${fparse 5.0*0.3/(1+0.3)/(1-2*0.3)}'
     mu = '${fparse 5.0/2.0/(1+0.3)}'
-    large_kinematics = true
     block = 'blk1 blk2'
   []
 []

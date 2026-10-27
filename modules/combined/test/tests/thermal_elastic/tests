@@ -34,5 +34,7 @@
     design = "jacobian_definition.md"
     issues = '#8265'
     input = 'derivatives.i'
+    allow_test_objects = true
+    recover = false
   [../]
 []

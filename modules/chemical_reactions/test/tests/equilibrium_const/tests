@@ -1,17 +1,22 @@
 [Tests]
+  issues = '#10903'
+  design = 'EquilibriumConstantAux.md'
   [./constant]
     type = 'Exodiff'
     input = 'constant.i'
     exodiff = 'constant_out.e'
+    requirement = 'The system shall be able to compute a temperature-dependent equilibrium constant from a single log(K) value, which should simply be constant.'
   [../]
   [./linear]
     type = 'Exodiff'
     input = 'linear.i'
     exodiff = 'linear_out.e'
+    requirement = 'The system shall be able to compute a temperature-dependent equilibrium constant from three log(K) values using a linear best fit.'
   [../]
   [./maier_kelly]
     type = 'Exodiff'
     input = 'maier_kelly.i'
     exodiff = 'maier_kelly_out.e'
+    requirement = 'The system shall be able to compute a temperature-dependent equilibrium constant from eight log10(Keq) values using a Maier-Kelly best fit.'
   [../]
 []

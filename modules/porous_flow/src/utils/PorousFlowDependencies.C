@@ -59,6 +59,7 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowPropertyAux", "porosity_qp");
 
   // BC dependencies
+  _deps.insertDependency("PorousFlowAquiferBC", "PorousFlowSink");
   _deps.insertDependency("PorousFlowHalfCubicSink", "PorousFlowSink");
   _deps.insertDependency("PorousFlowHalfGaussianSink", "PorousFlowSink");
   _deps.insertDependency("PorousFlowPiecewiseLinearSink", "PorousFlowSink");
@@ -103,11 +104,15 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowAdvectiveFlux", "PorousFlowDarcyBase");
   _deps.insertDependency("PorousFlowAdvectiveFlux", "mass_fraction_nodal");
   _deps.insertDependency("PorousFlowAdvectiveFlux", "relative_permeability_nodal");
+  _deps.insertDependency("ADPorousFlowAdvectiveFlux", "PorousFlowAdvectiveFlux");
 
   _deps.insertDependency("PorousFlowFullySaturatedAdvectiveFlux", "PorousFlowDarcyBase");
   _deps.insertDependency("PorousFlowFullySaturatedAdvectiveFlux", "mass_fraction_nodal");
+  _deps.insertDependency("ADPorousFlowFullySaturatedAdvectiveFlux",
+                         "PorousFlowFullySaturatedAdvectiveFlux");
 
   _deps.insertDependency("PorousFlowBasicAdvection", "darcy_velocity_qp");
+  _deps.insertDependency("ADPorousFlowBasicAdvection", "PorousFlowBasicAdvection");
 
   _deps.insertDependency("PorousFlowDarcyBase", "permeability_qp");
   _deps.insertDependency("PorousFlowDarcyBase", "density_qp");
@@ -116,9 +121,13 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowDarcyBase", "pressure_saturation_qp");
 
   _deps.insertDependency("PorousFlowDesorpedMassTimeDerivative", "porosity_qp");
+  _deps.insertDependency("ADPorousFlowDesorpedMassTimeDerivative",
+                         "PorousFlowDesorpedMassTimeDerivative");
 
   _deps.insertDependency("PorousFlowDesorpedMassVolumetricExpansion", "porosity_qp");
   _deps.insertDependency("PorousFlowDesorpedMassVolumetricExpansion", "volumetric_strain_qp");
+  _deps.insertDependency("ADPorousFlowDesorpedMassVolumetricExpansion",
+                         "PorousFlowDesorpedMassVolumetricExpansion");
 
   _deps.insertDependency("PorousFlowDispersiveFlux", "density_qp");
   _deps.insertDependency("PorousFlowDispersiveFlux", "viscosity_qp");
@@ -128,8 +137,11 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowDispersiveFlux", "relative_permeability_qp");
   _deps.insertDependency("PorousFlowDispersiveFlux", "permeability_qp");
   _deps.insertDependency("PorousFlowDispersiveFlux", "pressure_saturation_qp");
+  _deps.insertDependency("ADPorousFlowDispersiveFlux", "PorousFlowDispersiveFlux");
 
   _deps.insertDependency("PorousFlowEffectiveStressCoupling", "effective_pressure_qp");
+  _deps.insertDependency("ADPorousFlowEffectiveStressCoupling",
+                         "PorousFlowEffectiveStressCoupling");
 
   _deps.insertDependency("PorousFlowEnergyTimeDerivative", "porosity_nodal");
   _deps.insertDependency("PorousFlowEnergyTimeDerivative", "nearest_qp_nodal");
@@ -138,6 +150,8 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowEnergyTimeDerivative", "enthalpy_nodal");
   _deps.insertDependency("PorousFlowEnergyTimeDerivative", "internal_energy_nodal");
   _deps.insertDependency("PorousFlowEnergyTimeDerivative", "pressure_saturation_nodal");
+
+  _deps.insertDependency("ADPorousFlowEnergyTimeDerivative", "PorousFlowEnergyTimeDerivative");
 
   _deps.insertDependency("PorousFlowFullySaturatedDarcyBase", "permeability_qp");
   _deps.insertDependency("PorousFlowFullySaturatedDarcyBase", "density_qp");
@@ -150,9 +164,13 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowFullySaturatedHeatAdvection",
                          "PorousFlowFullySaturatedDarcyBase");
   _deps.insertDependency("PorousFlowFullySaturatedHeatAdvection", "enthalpy_qp");
+  _deps.insertDependency("ADPorousFlowFullySaturatedHeatAdvection",
+                         "PorousFlowFullySaturatedHeatAdvection");
 
   _deps.insertDependency("PorousFlowFullySaturatedUpwindHeatAdvection", "PorousFlowDarcyBase");
   _deps.insertDependency("PorousFlowFullySaturatedUpwindHeatAdvection", "enthalpy_nodal");
+  _deps.insertDependency("ADPorousFlowFullySaturatedUpwindHeatAdvection",
+                         "PorousFlowFullySaturatedUpwindHeatAdvection");
 
   _deps.insertDependency("PorousFlowFullySaturatedMassTimeDerivative", "biot_modulus_qp");
   _deps.insertDependency("PorousFlowFullySaturatedMassTimeDerivative", "thermal_expansion_qp");
@@ -164,9 +182,11 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowHeatAdvection", "PorousFlowDarcyBase");
   _deps.insertDependency("PorousFlowHeatAdvection", "enthalpy_nodal");
   _deps.insertDependency("PorousFlowHeatAdvection", "relative_permeability_nodal");
+  _deps.insertDependency("ADPorousFlowHeatAdvection", "PorousFlowHeatAdvection");
 
   _deps.insertDependency("PorousFlowHeatConduction", "thermal_conductivity_qp");
   _deps.insertDependency("PorousFlowHeatConduction", "temperature_qp");
+  _deps.insertDependency("ADPorousFlowHeatConduction", "PorousFlowHeatConduction");
 
   _deps.insertDependency("PorousFlowHeatVolumetricExpansion", "porosity_nodal");
   _deps.insertDependency("PorousFlowHeatVolumetricExpansion", "nearest_qp_nodal");
@@ -176,11 +196,16 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowHeatVolumetricExpansion", "pressure_saturation_nodal");
   _deps.insertDependency("PorousFlowHeatVolumetricExpansion", "volumetric_strain_qp");
 
+  _deps.insertDependency("ADPorousFlowHeatVolumetricExpansion",
+                         "PorousFlowHeatVolumetricExpansion");
+
   _deps.insertDependency("PorousFlowMassRadioactiveDecay", "porosity_nodal");
   _deps.insertDependency("PorousFlowMassRadioactiveDecay", "nearest_qp_nodal");
   _deps.insertDependency("PorousFlowMassRadioactiveDecay", "density_nodal");
   _deps.insertDependency("PorousFlowMassRadioactiveDecay", "pressure_saturation_nodal");
   _deps.insertDependency("PorousFlowMassRadioactiveDecay", "mass_fraction_nodal");
+
+  _deps.insertDependency("ADPorousFlowMassRadioactiveDecay", "PorousFlowMassRadioactiveDecay");
 
   _deps.insertDependency("PorousFlowMassTimeDerivative", "porosity_nodal");
   _deps.insertDependency("PorousFlowMassTimeDerivative", "nearest_qp_nodal");
@@ -188,12 +213,17 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowMassTimeDerivative", "pressure_saturation_nodal");
   _deps.insertDependency("PorousFlowMassTimeDerivative", "mass_fraction_nodal");
 
+  _deps.insertDependency("ADPorousFlowMassTimeDerivative", "PorousFlowMassTimeDerivative");
+
   _deps.insertDependency("PorousFlowMassVolumetricExpansion", "porosity_nodal");
   _deps.insertDependency("PorousFlowMassVolumetricExpansion", "nearest_qp_nodal");
   _deps.insertDependency("PorousFlowMassVolumetricExpansion", "density_nodal");
   _deps.insertDependency("PorousFlowMassVolumetricExpansion", "pressure_saturation_nodal");
   _deps.insertDependency("PorousFlowMassVolumetricExpansion", "mass_fraction_nodal");
   _deps.insertDependency("PorousFlowMassVolumetricExpansion", "volumetric_strain_qp");
+
+  _deps.insertDependency("ADPorousFlowMassVolumetricExpansion",
+                         "PorousFlowMassVolumetricExpansion");
 
   _deps.insertDependency("PorousFlowPlasticHeatEnergy", "PlasticHeatEnergy");
   _deps.insertDependency("PorousFlowPlasticHeatEnergy", "nearest_qp_nodal");
@@ -203,6 +233,8 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowPreDis", "porosity_nodal");
   _deps.insertDependency("PorousFlowPreDis", "chemistry_nodal");
   _deps.insertDependency("PorousFlowPreDis", "mineral_nodal");
+
+  _deps.insertDependency("ADPorousFlowPreDis", "PorousFlowPreDis");
 
   // Material dependencies
   _deps.insertDependency("density_qp", "fluid_properties_qp");

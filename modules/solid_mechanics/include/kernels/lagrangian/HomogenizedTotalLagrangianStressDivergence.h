@@ -57,6 +57,10 @@ protected:
    */
   virtual Real computeQpOffDiagJacobianScalar(const unsigned int svar_num) override;
 
+protected:
+  /// Whether to use the off diagonal term
+  const bool _use_off_diagonal;
+
 private:
   /// Indices for off-diagonal Jacobian components
   unsigned int _m, _n;

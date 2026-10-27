@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ArrayDiffusion.h"
+#include "FEProblemBase.h"
+#include "VariableSizeMaterialPropertiesInterface.h"
 
 registerMooseObject("MooseApp", ArrayDiffusion);
 
@@ -41,6 +43,18 @@ ArrayDiffusion::ArrayDiffusion(const InputParameters & parameters)
     MaterialPropertyName mat = getParam<MaterialPropertyName>("diffusion_coefficient");
     mooseError("Property " + mat + " is of unsupported type for ArrayDiffusion");
   }
+}
+
+void
+ArrayDiffusion::initialSetup()
+{
+  if (_d_array || _d_2d_array)
+    Moose::checkArrayMaterialPropertySize(*this,
+                                          _fe_problem.getMaterialWarehouse(),
+                                          blockRestricted() ? blockIDs() : meshBlockIDs(),
+                                          "diffusion_coefficient",
+                                          _var.count(),
+                                          _d_2d_array);
 }
 
 void

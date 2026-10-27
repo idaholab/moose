@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/cylinder-hex-q2.gen
 []
 
@@ -70,17 +70,15 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHypreGMRES
     preconditioner = boomeramg
-    l_tol = 1e-12
+    l_tol = 1e-16
   []
 []
 

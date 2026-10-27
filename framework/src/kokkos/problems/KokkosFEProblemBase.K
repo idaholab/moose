@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,12 +16,32 @@
 
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
+#include "LinearSystem.h"
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 #include "MaterialBase.h"
 #include "MooseVariableDependencyInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "Coupleable.h"
+
+namespace
+{
+void
+checkKokkosObject(const std::string & api,
+                  const std::string & type,
+                  const std::string & name,
+                  const InputParameters & parameters)
+{
+  if (!parameters.isKokkosObject())
+    mooseError("FEProblemBase::",
+               api,
+               "() can only add Kokkos objects, but '",
+               name,
+               "' of type '",
+               type,
+               "' is not a Kokkos object");
+}
+}
 
 Moose::Kokkos::System &
 FEProblemBase::getKokkosSystem(const unsigned int sys_num)
@@ -35,11 +55,25 @@ FEProblemBase::getKokkosSystem(const unsigned int sys_num) const
   return _kokkos_systems[sys_num];
 }
 
+Moose::Kokkos::FESystem &
+FEProblemBase::getKokkosFESystem(const unsigned int sys_num)
+{
+  return _kokkos_fe_systems[sys_num];
+}
+
+const Moose::Kokkos::FESystem &
+FEProblemBase::getKokkosFESystem(const unsigned int sys_num) const
+{
+  return _kokkos_fe_systems[sys_num];
+}
+
 void
 FEProblemBase::addKokkosKernel(const std::string & kernel_name,
                                const std::string & name,
                                InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosKernel", kernel_name, name, parameters);
+
   parallel_object_only();
 
   const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
@@ -61,6 +95,8 @@ FEProblemBase::addKokkosNodalKernel(const std::string & kernel_name,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosNodalKernel", kernel_name, name, parameters);
+
   parallel_object_only();
 
   const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
@@ -79,6 +115,8 @@ FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
                                           const std::string & name,
                                           InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosBoundaryCondition", bc_name, name, parameters);
+
   parallel_object_only();
 
   const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
@@ -97,10 +135,64 @@ FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
 }
 
 void
+FEProblemBase::addKokkosLinearFVKernel(const std::string & kernel_name,
+                                       const std::string & name,
+                                       InputParameters & parameters)
+{
+  checkKokkosObject("addKokkosLinearFVKernel", kernel_name, name, parameters);
+
+  parallel_object_only();
+
+  const auto sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (isSolverSystemNonlinear(sys_num))
+    mooseError("You are trying to add a LinearFVKernel to a nonlinear variable/system, which is "
+               "not supported.");
+
+  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.set<SystemBase *>("_sys") = _linear_systems[sys_num - _num_nl_sys].get();
+
+  logAdd("KokkosLinearFVKernel", name, kernel_name, parameters);
+  _linear_systems[sys_num - _num_nl_sys]->addKokkosKernel(kernel_name, name, parameters);
+
+  _mesh.getKokkosMesh()->setNeedsElementSideGeometry();
+
+  _has_kokkos_objects = true;
+  _has_kokkos_residual_objects = true;
+}
+
+void
+FEProblemBase::addKokkosLinearFVBC(const std::string & bc_name,
+                                   const std::string & name,
+                                   InputParameters & parameters)
+{
+  checkKokkosObject("addKokkosLinearFVBC", bc_name, name, parameters);
+
+  parallel_object_only();
+
+  const auto sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (isSolverSystemNonlinear(sys_num))
+    mooseError("You are trying to add a LinearFVBoundaryCondition to a nonlinear variable/system, "
+               "which is not supported.");
+
+  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.set<SystemBase *>("_sys") = _linear_systems[sys_num - _num_nl_sys].get();
+
+  logAdd("KokkosLinearFVBoundaryCondition", name, bc_name, parameters);
+  _linear_systems[sys_num - _num_nl_sys]->addKokkosBoundaryCondition(bc_name, name, parameters);
+
+  _mesh.getKokkosMesh()->setNeedsElementSideGeometry();
+
+  _has_kokkos_objects = true;
+  _has_kokkos_residual_objects = true;
+}
+
+void
 FEProblemBase::addKokkosAuxKernel(const std::string & kernel_name,
                                   const std::string & name,
                                   InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosAuxKernel", kernel_name, name, parameters);
+
   parallel_object_only();
 
   setAuxKernelParamsAndLog(kernel_name, name, parameters, "KokkosAuxKernel");
@@ -115,6 +207,8 @@ FEProblemBase::addKokkosFunction(const std::string & type,
                                  const std::string & name,
                                  InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosFunction", type, name, parameters);
+
   parallel_object_only();
 
   parameters.set<SubProblem *>("_subproblem") = this;
@@ -153,6 +247,8 @@ FEProblemBase::addKokkosPostprocessor(const std::string & pp_name,
                                       const std::string & name,
                                       InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosPostprocessor", pp_name, name, parameters);
+
   checkUserObjectNameCollision(name, "KokkosPostprocessor");
 
   addKokkosUserObject(pp_name, name, parameters);
@@ -163,6 +259,8 @@ FEProblemBase::addKokkosVectorPostprocessor(const std::string & pp_name,
                                             const std::string & name,
                                             InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosVectorPostprocessor", pp_name, name, parameters);
+
   checkUserObjectNameCollision(name, "KokkosVectorPostprocessor");
 
   addKokkosUserObject(pp_name, name, parameters);
@@ -173,6 +271,8 @@ FEProblemBase::addKokkosReporter(const std::string & pp_name,
                                  const std::string & name,
                                  InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosReporter", pp_name, name, parameters);
+
   checkUserObjectNameCollision(name, "KokkosReporter");
 
   addKokkosUserObject(pp_name, name, parameters);
@@ -183,6 +283,8 @@ FEProblemBase::addKokkosUserObject(const std::string & user_object_name,
                                    const std::string & name,
                                    InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosUserObject", user_object_name, name, parameters);
+
   parallel_object_only();
 
   // Add the _subproblem and _sys parameters depending on use_displaced_mesh
@@ -215,6 +317,8 @@ FEProblemBase::addKokkosMaterial(const std::string & mat_name,
                                  const std::string & name,
                                  InputParameters & parameters)
 {
+  checkKokkosObject("addKokkosMaterial", mat_name, name, parameters);
+
   addMaterialHelper({&_kokkos_materials}, mat_name, name, parameters);
 
   _has_kokkos_objects = true;
@@ -294,20 +398,71 @@ FEProblemBase::initKokkos()
   for (unsigned int s = 0; s < numNonlinearSystems(); ++s)
     max_system_number = std::max(max_system_number, getNonlinearSystemBase(s).number());
 
+  for (unsigned int s = 0; s < numLinearSystems(); ++s)
+    max_system_number = std::max(max_system_number, getLinearSystem(s).number());
+
   max_system_number = std::max(max_system_number, getAuxiliarySystem().number());
 
-  // Kokkos system does not have a default constructor, so this simply allocates buffer to which we
-  // should do placement new later
+  // Allocate Kokkos system infrastructure per-system based on what each system needs.
+  // Both arrays are pre-created; placement-new fills only the slots each system requires.
+
   _kokkos_systems.create<false>(max_system_number + 1);
+  _kokkos_fe_systems.create<false>(max_system_number + 1);
+
+  auto allocate_system = [&](::SystemBase & sys)
+  {
+    if (!sys.nVariables())
+      return;
+
+    const auto sys_num = sys.number();
+
+    // Scan variables to determine what Kokkos infrastructure this system needs.
+    // needs_fe: at least one variable precomputes QP-indexed solution arrays
+    //           -> system needs a Kokkos::FESystem.
+    // needs_fv: at least one variable assembles via the FV path (ElemInfo/FaceInfo,
+    //           no QP reinit) -> system needs a standalone Kokkos::System.
+    // Both false (scalar-only): FESystem is absent, so FESystem's inherited
+    //   Kokkos::System cannot serve as the system entry; a standalone Kokkos::System
+    //   is still required.
+    bool needs_fv = false;
+    bool needs_fe = false;
+
+    for (const auto v : make_range(sys.nFieldVariables()))
+    {
+      const auto & var = sys.getVariable(0, v);
+      if (var.supportsQpBasedLoops())
+        needs_fe = true;
+      if (var.supportsGeometricInfoBasedLoops())
+        needs_fv = true;
+      if (needs_fv && needs_fe)
+        break;
+    }
+
+    if (!needs_fe)
+      // No FE/QP-based variables: allocate a plain Kokkos::System. Covers FV-only and
+      // scalar-only.
+      _kokkos_systems.emplace({sys_num}, sys);
+    else if (needs_fv)
+    {
+      // Mixed FV + FE/QP: construct Kokkos::System first, then FESystem via the
+      // sharing constructor so both objects operate on the same device memory.
+      // FV kernels write through Kokkos::System; FE/QP kernels read and write
+      // through FESystem; shared device pointers keep them consistent.
+      _kokkos_systems.emplace({sys_num}, sys);
+      _kokkos_fe_systems.emplace({sys_num}, _kokkos_systems[sys_num], sys);
+    }
+    else
+      // Pure FE/QP (or FE/QP + scalar): FESystem inherits Kokkos::System, so a standalone
+      // FESystem is self-contained. No separate Kokkos::System entry is needed;
+      // scalar variable data is accessible through the inherited base.
+      _kokkos_fe_systems.emplace({sys_num}, sys);
+  };
 
   for (unsigned int s = 0; s < numNonlinearSystems(); ++s)
-  {
-    auto & nl = getNonlinearSystemBase(s);
-    new (&_kokkos_systems[nl.number()]) Moose::Kokkos::System(nl);
-  }
-
-  auto & aux = getAuxiliarySystem();
-  new (&_kokkos_systems[aux.number()]) Moose::Kokkos::System(aux);
+    allocate_system(getNonlinearSystemBase(s));
+  for (unsigned int s = 0; s < numLinearSystems(); ++s)
+    allocate_system(getLinearSystem(s));
+  allocate_system(getAuxiliarySystem());
 
   // Initialize Kokkos material properties
 
@@ -327,9 +482,9 @@ FEProblemBase::initKokkosStatefulProps()
   _kokkos_materials.updateVariableDependency(needed_moose_vars);
   _kokkos_materials.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
 
-  // Copy data and preallocate quadature point solution vectors
+  // Copy data and preallocate quadrature point solution vectors
 
-  for (auto & system : _kokkos_systems)
+  for (auto & system : _kokkos_fe_systems.constructedEntries())
   {
     system.setActiveVariables(needed_moose_vars);
     system.setActiveSolutionTags(needed_fe_var_vector_tags);
@@ -338,7 +493,7 @@ FEProblemBase::initKokkosStatefulProps()
     system.reinit();
   }
 
-  _kokkos_systems.copyToDevice();
+  _kokkos_fe_systems.copyToDevice();
 
   // Initialize stateful properties
 
@@ -366,7 +521,7 @@ FEProblemBase::initKokkosStatefulProps()
 
   // Clear
 
-  for (auto & system : _kokkos_systems)
+  for (auto & system : _kokkos_fe_systems.constructedEntries())
   {
     system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
@@ -461,9 +616,9 @@ FEProblemBase::computeKokkosUserObjectsInternal(const ExecFlagType & type,
       _kokkos_materials.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
     }
 
-    // Copy vectors and cache variable values at element quadature points
+    // Copy vectors and cache variable values at element quadrature points
 
-    for (auto & system : _kokkos_systems)
+    for (auto & system : _kokkos_fe_systems.constructedEntries())
     {
       system.setActiveVariables(needed_moose_vars);
       system.setActiveSolutionTags(needed_fe_var_vector_tags);
@@ -478,7 +633,7 @@ FEProblemBase::computeKokkosUserObjectsInternal(const ExecFlagType & type,
       }
     }
 
-    _kokkos_systems.copyToDevice();
+    _kokkos_fe_systems.copyToDevice();
 
     {
       TIME_SECTION("KokkosMaterial", 1);
@@ -518,13 +673,13 @@ FEProblemBase::computeKokkosUserObjectsInternal(const ExecFlagType & type,
     {
       TIME_SECTION("KokkosCopy", 1);
 
-      for (auto & system : _kokkos_systems)
+      for (auto & system : _kokkos_fe_systems.constructedEntries())
         system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
     }
 
     // Clear
 
-    for (auto & system : _kokkos_systems)
+    for (auto & system : _kokkos_fe_systems.constructedEntries())
     {
       system.clearActiveVariables();
       system.clearActiveSolutionTags();

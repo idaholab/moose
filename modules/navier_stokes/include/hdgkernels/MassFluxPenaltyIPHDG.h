@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "IPHDGKernel.h"
+#include "ElementAndTraceScalarHDGKernel.h"
 
 class MassFluxPenaltyIPHDGAssemblyHelper;
 
@@ -19,17 +19,16 @@ class MassFluxPenaltyIPHDGAssemblyHelper;
  * neighboring elements, which makes this class useful in tandem with hybridized discretizations
  * because it supports static condensation
  */
-class MassFluxPenaltyIPHDG : public IPHDGKernel
+class MassFluxPenaltyIPHDG : public ElementAndTraceScalarHDGKernel
 {
 public:
   static InputParameters validParams();
 
   MassFluxPenaltyIPHDG(const InputParameters & parameters);
 
-protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() override;
-
 private:
+  virtual ElementAndTraceScalarHDGAssemblyHelper & hdgHelper() override;
+
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<MassFluxPenaltyIPHDGAssemblyHelper> _iphdg_helper;
 };

@@ -1,6 +1,6 @@
 # Step 3: Upper Loop
 
-+Complete input file for this step:+  [03_upper_loop.i](thermal_hydraulics/tutorials/single_phase_flow/03_upper_loop.i)
++Complete input file for this step:+  [!file text=03_upper_loop.i](thermal_hydraulics/tutorials/single_phase_flow/03_upper_loop.i)
 
 !media thermal_hydraulics/tutorials/single_phase_flow/step-03.png
        style=width:33%;float:right;margin-left:40px

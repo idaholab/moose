@@ -67,8 +67,7 @@ LowerDBlockFromSidesetGenerator::generate()
                                                 new_block_id,
                                                 isParamValid("new_block_name")
                                                     ? getParam<SubdomainName>("new_block_name")
-                                                    : SubdomainName(),
-                                                type());
+                                                    : SubdomainName());
   }
   catch (MooseException & e)
   {

@@ -54,6 +54,11 @@ protected:
    * Functions associated with symbols
    */
   std::vector<Moose::Kokkos::Function> _symbol_functions;
+  /**
+   * Mathematical constants
+   */
+  static inline const std::unordered_map<std::string, Real> _math_symbols = {{"pi", libMesh::pi},
+                                                                             {"e", std::exp(1.0)}};
 
 private:
   FEProblemBase & _problem;

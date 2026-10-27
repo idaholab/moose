@@ -1,8 +1,10 @@
 mu = 2.6
 rho = 1.0
 advected_interp_method = 'average'
+pressure_gradient_method = 'green-gauss'
 
 [Mesh]
+  allow_renumbering = false # Keep IDs stable for the ID-sorted ElementValueSampler output.
   [mesh]
     type = CartesianMeshGenerator
     dim = 2
@@ -44,6 +46,24 @@ advected_interp_method = 'average'
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.2
+    gradient_method = ${pressure_gradient_method}
+  []
+[]
+
+[FVGradientMethods]
+  [gg]
+    type = FVGreenGaussGradient
+  []
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.1
+  []
+[]
+
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
   []
 []
 
@@ -51,7 +71,7 @@ advected_interp_method = 'average'
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
@@ -62,7 +82,7 @@ advected_interp_method = 'average'
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = ${mu}
     u = vel_x
     v = vel_y
@@ -83,7 +103,7 @@ advected_interp_method = 'average'
     momentum_component = 'y'
   []
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false
@@ -97,6 +117,8 @@ advected_interp_method = 'average'
 []
 
 [LinearFVBCs]
+  inactive = 'inlet_and_wall_pressure_flux'
+
   [inlet-u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'left'
@@ -127,6 +149,16 @@ advected_interp_method = 'average'
     variable = pressure
     functor = 1.4
   []
+  [inlet_and_wall_pressure_flux]
+    type = LinearFVPressureFluxBC
+    boundary = 'left top bottom'
+    variable = pressure
+    HbyA_flux = HbyA
+    Ainv = Ainv
+    u = vel_x
+    v = vel_y
+    rho = ${rho}
+  []
   [outlet_u]
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = vel_x
@@ -138,6 +170,15 @@ advected_interp_method = 'average'
     variable = vel_y
     use_two_term_expansion = false
     boundary = right
+  []
+[]
+
+[VectorPostprocessors]
+  [solution]
+    type = ElementValueSampler
+    variable = 'vel_x vel_y pressure'
+    sort_by = id
+    execute_on = TIMESTEP_END
   []
 []
 

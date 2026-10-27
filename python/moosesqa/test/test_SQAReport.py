@@ -7,6 +7,8 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
+import os
+import tempfile
 import unittest
 import mock
 import logging
@@ -95,6 +97,19 @@ class TestSQAReport(unittest.TestCase):
         self.assertEqual(txt, "LIGHT_RED::1")
         txt = r._colorTextByMode(1, logging.WARNING)
         self.assertEqual(txt, "LIGHT_YELLOW::1")
+
+    def testGetFiles(self):
+        # missing directory is skipped with a warning, not raised
+        missing = tempfile.mkdtemp()
+        os.rmdir(missing)
+        with self.assertLogs("moosesqa", level="WARNING") as cm:
+            files = SQAReport._getFiles([missing])
+        self.assertEqual(files, [])
+        self.assertIn("does not exist", cm.output[0])
+
+        # mixed: missing entry is skipped, existing entry still contributes files
+        files = SQAReport._getFiles([missing, os.path.dirname(__file__)])
+        self.assertIn(__file__, files)
 
     @mock.patch(
         "mooseutils.colorText", side_effect=lambda t, c, **kwargs: "{}::{}".format(c, t)

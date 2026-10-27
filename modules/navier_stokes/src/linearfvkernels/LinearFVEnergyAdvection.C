@@ -75,7 +75,7 @@ LinearFVEnergyAdvection::computeNeighborRightHandSideContribution()
 Real
 LinearFVEnergyAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * const adv_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const adv_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_bc, "This should be a valid BC!");
 
   const auto boundary_value_matrix_contrib = adv_bc->computeBoundaryValueMatrixContribution();
@@ -89,7 +89,7 @@ LinearFVEnergyAdvection::computeBoundaryMatrixContribution(const LinearFVBoundar
 Real
 LinearFVEnergyAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
-  const auto * const adv_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+  const auto * const adv_bc = cast_ptr<const LinearFVAdvectionDiffusionBC *>(&bc);
   mooseAssert(adv_bc, "This should be a valid BC!");
 
   // We support internal boundaries too so we have to make sure the normal points always outward

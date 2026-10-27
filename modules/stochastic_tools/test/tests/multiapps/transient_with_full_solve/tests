@@ -16,6 +16,7 @@
       input = main.i
       jsondiff = main_out.json
       cli_args = MultiApps/runner/mode=batch-restore
+      prereq = repeat/normal
 
       detail = "using in memory backup operation;"
     []
@@ -25,6 +26,7 @@
       input = main.i
       jsondiff = main_out.json
       cli_args = MultiApps/runner/mode=batch-reset
+      prereq = repeat/batch-restore
 
       detail = "using reset operation."
     []
@@ -47,6 +49,7 @@
       jsondiff = main_new_out.json
       cli_args = "MultiApps/runner/mode=batch-restore Outputs/file_base=main_new_out "
                  "Samplers/dynamic/execute_on='INITIAL TIMESTEP_END'"
+      prereq = new/normal
 
       detail = "using in memory backup operation;"
     []
@@ -57,6 +60,7 @@
       jsondiff = main_new_out.json
       cli_args = "MultiApps/runner/mode=batch-reset Outputs/file_base=main_new_out "
                  "Samplers/dynamic/execute_on='INITIAL TIMESTEP_END'"
+      prereq = new/batch-restore
 
       detail = "using reset operation."
     []

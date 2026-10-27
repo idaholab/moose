@@ -15,8 +15,6 @@
 #include "HeatStructureInterface.h"
 #include "HeatStructureCylindricalBase.h"
 
-using namespace libMesh;
-
 InputParameters
 HeatConductionModel::validParams()
 {

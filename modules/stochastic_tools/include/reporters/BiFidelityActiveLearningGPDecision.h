@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #pragma once
 
@@ -65,7 +66,6 @@ private:
 
   /// Broadcast the GP-corrected LF prediciton to JSON
   std::vector<Real> & _lf_corrected;
-
-  /// Communicator that was split based on samples that have rows
-  libMesh::Parallel::Communicator & _local_comm;
 };
+
+#endif

@@ -1,12 +1,10 @@
 !include nldiffusion_common.i
 
-[Preconditioner]
+
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solvers]
   [lin]
     type = MFEMHyprePCG
     preconditioner = boomeramg

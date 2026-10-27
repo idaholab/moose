@@ -76,7 +76,6 @@ ACInterfaceKobayashi1::precomputeQpJacobian()
   // Derivative of epsilon wrt nodal op values
   Real depsdop_i = _depsdgrad_op[_qp] * _grad_phi[_j][_qp];
   Real ddepsdop_i = _ddepsdgrad_op[_qp] * _grad_phi[_j][_qp];
-  ;
 
   // Set the Jacobian
   RealGradient jac1 = _eps[_qp] * _deps[_qp] * dv;

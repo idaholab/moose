@@ -10,10 +10,7 @@
 #include "TestNumericalFlux1D.h"
 #include "FluidPropertiesTestUtils.h"
 
-TestNumericalFlux1D::TestNumericalFlux1D()
-  : MooseObjectUnitTest("ThermalHydraulicsApp")
-{
-}
+TestNumericalFlux1D::TestNumericalFlux1D() : MooseObjectUnitTest("ThermalHydraulicsApp") {}
 
 void
 TestNumericalFlux1D::testSymmetry()

@@ -136,21 +136,21 @@ T_ambient = 300.0
   [nodal_mat]
     type = ADFunctorChangeFunctorMaterial
     functor = T_nodal
-    change_over = fixed_point
+    change_over = multiapp_fixed_point
     take_absolute_value = false
     prop_name = T_nodal_change
   []
   [elem_mat]
     type = ADFunctorChangeFunctorMaterial
     functor = T_elem
-    change_over = fixed_point
+    change_over = multiapp_fixed_point
     take_absolute_value = false
     prop_name = T_elem_change
   []
   [S_mat]
     type = ADFunctorChangeFunctorMaterial
     functor = S_parent
-    change_over = fixed_point
+    change_over = multiapp_fixed_point
     take_absolute_value = false
     prop_name = S_change
   []
@@ -200,7 +200,7 @@ T_ambient = 300.0
 [Convergence]
   [fp_conv]
     type = IterationCountConvergence
-    max_iterations = 5
+    max_iterations = 6
     converge_at_max_iterations = true
   []
 []

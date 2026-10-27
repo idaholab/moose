@@ -27,7 +27,7 @@ public:
   GrainCentersPostprocessor(const InputParameters & parameters);
 
   virtual ~GrainCentersPostprocessor() {}
-  virtual void initialize(){};
+  virtual void initialize() {}
   virtual void execute();
 
 protected:

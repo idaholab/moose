@@ -49,8 +49,6 @@
     to_multi_app = sub
     sampler = sobol
     parameters = 'BCs/left/value BCs/right/value'
-    execute_on = INITIAL
-    check_multiapp_execute_on = false
   []
 []
 

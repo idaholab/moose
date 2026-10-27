@@ -1,0 +1,45 @@
+[Tests]
+  design = 'TriangleManifold.md PointContainmentClassifier.md'
+  issues = '#33397'
+
+  [sideness]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.sideness
+    requirement = 'The system shall classify interior and exterior points of a closed manifold composed of first-order triangular elements and report consistent containment results.'
+  []
+  [on_surface]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.sidenessOnSurface
+    requirement = 'The system shall classify points on the face interiors and vertices of first-order triangular elements as on the manifold surface.'
+  []
+  [solid_angle_fallback]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.sidenessSolidAngleFallback
+    requirement = 'The system shall use solid-angle containment when a fixed-axis ray ambiguously intersects an edge shared by first-order triangular elements.'
+  []
+  [on_edge]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.sidenessOnEdge
+    requirement = 'The system shall classify a point on an edge of a closed manifold composed of first-order triangular elements as on the surface.'
+  []
+  [multiple_crossings]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.multiCrossingTwoCubes
+    requirement = 'The system shall apply odd-even parity across multiple disconnected closed components.'
+  []
+  [fixed_ray_direction]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.classifierFixedXRayHasNoRayDirection
+    requirement = 'The system shall reject requests for a configurable ray direction when point containment uses a fixed-axis ray.'
+  []
+  [missing_user_ray_options]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.classifierUserSelectedRayRequiresOptions
+    requirement = 'The system shall require a direction when classifying point containment with a user-selected ray.'
+  []
+  [ambiguous_user_ray]
+    type = GoogleTest
+    unit_test = TriangleManifoldTest.classifierAmbiguousUserSelectedRay
+    requirement = 'The system shall report an ambiguous user-selected ray intersection rather than silently changing the requested direction.'
+  []
+[]

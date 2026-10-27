@@ -1,5 +1,7 @@
 # Gaussian Process Surrogate
 
+!if! function=hasCapability('libtorch')
+
 This example walks through the creation of a few gaussian process surrogates on a simple example system with an analytical solution for comparison. The first surrogate considers a single input parameter to be varied, which lends itself to a simple visual interpretation of the surrogate behavior. The next surrogate extends this idea to two input parameters being modeled. Lastly the full system is modeled with all input parameters, and compared to the analytical solution using sampling. It's recommended users be familiar with the basic surrogate framework, such as [examples/surrogate_creation.md], [examples/surrogate_training.md], and [examples/surrogate_evaluate.md].
 
 ## Problem Statement
@@ -98,7 +100,7 @@ Hyperparameter tuning is then enabled by setting [!param](/Trainers/GaussianProc
 
 ## Full 4D Problem
 
-This idea is then extended naturally to the full problem in which the parameter set $\lbrace k, q, L, T_{\infty} \rbrace$ is modeled. Training occurs using $500$ training points in. Evaluation occurs by sampling the surrogate $10000$ times with perturbed inputs, with results shown in histogram form in [hist]. While the $10000$ evaluation points are sampled from the normal distribution in [param_table],the $500$ training data points are sampled from the uniform distributions. Sampling the training data from the normal distribution can result in an imbalance of data points near the mean, causing poor performance in outlying regions. The training and evaluation inputs are [examples/surrogates/gaussian_process/GP_normal_mc.i] and [examples/surrogates/gaussian_process/GP_normal.i] respectively.
+This idea is then extended naturally to the full problem in which the parameter set $\lbrace k, q, L, T_{\infty} \rbrace$ is modeled. Training occurs using $500$ training points in. Evaluation occurs by sampling the surrogate $10000$ times with perturbed inputs, with results shown in histogram form in [hist]. While the $10000$ evaluation points are sampled from the normal distribution in [param_table],the $500$ training data points are sampled from the uniform distributions. Sampling the training data from the normal distribution can result in an imbalance of data points near the mean, causing poor performance in outlying regions. The training and evaluation inputs are [!file](examples/surrogates/gaussian_process/GP_normal_mc.i) and [!file](examples/surrogates/gaussian_process/GP_normal.i) respectively.
 
 !media normal_hist.png id=hist style=width:60% caption=Histogram of $10000$ samples of surrogate $\bar{T}(q,k,L,T_{\infty})$ compared to exact.
 
@@ -106,3 +108,8 @@ To showcase more optimization options available in [GaussianProcessTrainer.md], 
 in this process. The parameters for Adam (number of iterations, learning rate, etc.) can be set using the following syntax:
 
 !listing examples/surrogates/gaussian_process/GP_normal_mc.i block=Trainers
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md

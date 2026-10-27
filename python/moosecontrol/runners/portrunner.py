@@ -65,17 +65,21 @@ class PortRunner(BaseRunner):
         """Get the port that the server is listening on."""
         return self._port
 
+    def _set_port(self, port: int):
+        """
+        Set the port after construction.
+
+        Used by SubprocessPortRunner when the application chooses the port,
+        which it cannot know until the process it spawned is listening.
+        """
+        assert isinstance(port, int)
+        assert port > 0
+        self._port = port
+
     @property
     def host(self) -> str:
         """Get the host to connect to."""
         return self._host
-
-    @staticmethod
-    def find_available_port() -> int:
-        """Find a random available local port."""
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(("", 0))
-            return s.getsockname()[1]
 
     @staticmethod
     def port_is_available(port: int) -> bool:

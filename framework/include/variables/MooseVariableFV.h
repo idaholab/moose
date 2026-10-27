@@ -166,7 +166,7 @@ public:
 
   virtual bool isNodalDefined() const override final { return false; }
 
-  virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
+  virtual void setNodalValue(const OutputType & value) override;
 
   virtual void setDofValue(const DofValue & value, unsigned int index) override;
 
@@ -268,6 +268,11 @@ public:
   const ADTemplateVariableGradient<OutputType> & adGradSln() const override
   {
     return _element_data->adGradSln();
+  }
+  /// Finite volume variables do not distinguish face and volume AD gradient requests
+  const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const override
+  {
+    return adGradSln();
   }
 
   /**
@@ -480,12 +485,8 @@ public:
 
   void setActiveTags(const std::set<TagID> & vtags) override;
 
-  /**
-   * Request that quadrature point data be (pre)computed. Quadrature point data is (pre)computed by
-   * default for this base class but derived variable classes may choose not to unless this API is
-   * called
-   */
-  virtual void requireQpComputations() const {}
+  bool supportsQpBasedLoops() const override { return true; }
+  bool supportsGeometricInfoBasedLoops() const override { return true; }
 
   /**
    * Determine whether a specified face side is a Dirichlet boundary face. In the base

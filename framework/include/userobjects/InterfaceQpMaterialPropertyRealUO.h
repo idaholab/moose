@@ -23,7 +23,7 @@ public:
    * @param parameters The input parameters for this object
    */
   InterfaceQpMaterialPropertyRealUO(const InputParameters & parameters);
-  virtual ~InterfaceQpMaterialPropertyRealUO(){};
+  virtual ~InterfaceQpMaterialPropertyRealUO() {}
 
 protected:
   /**

@@ -21,8 +21,6 @@
 
 #include "libmesh/string_to_enum.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", DumpObjectsProblem);
 
 InputParameters
@@ -276,7 +274,7 @@ void
 DumpObjectsProblem::initialSetup()
 {
   TIME_SECTION("initializingFunctions", 5, "Initializing Functions");
-  mooseAssert(libMesh::n_threads() == 1, "We should only use one thread for dumping objects");
+  mooseAssert(numThreads() == 1, "We should only use one thread for dumping objects");
 
   // Call the initialSetup methods for functions
   // We need to do that at least for the parsed functions that can be used as parameters

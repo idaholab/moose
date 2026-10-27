@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #pragma once
 
@@ -19,6 +20,14 @@
 class CovarianceFunctionBase : public MooseObject, public CovarianceInterface
 {
 public:
+  using HyperParameterMap = std::unordered_map<std::string, torch::Tensor>;
+
+  /// Return true if a hyperparameter tensor stores one scalar value
+  static bool isScalarHyperParameter(const torch::Tensor & tensor);
+
+  /// Return true if a hyperparameter tensor stores a vector of values
+  static bool isVectorHyperParameter(const torch::Tensor & tensor);
+
   static InputParameters validParams();
   CovarianceFunctionBase(const InputParameters & parameters);
 
@@ -27,22 +36,18 @@ public:
   /// @param x Reference to the first set of points
   /// @param xp Reference to the second set of points
   /// @param is_self_covariance Switch to enable adding the noise variance to the diagonal of the covariance matrix
-  virtual void computeCovarianceMatrix(RealEigenMatrix & K,
-                                       const RealEigenMatrix & x,
-                                       const RealEigenMatrix & xp,
+  virtual void computeCovarianceMatrix(torch::Tensor & K,
+                                       const torch::Tensor & x,
+                                       const torch::Tensor & xp,
                                        const bool is_self_covariance) const = 0;
 
-  /// Load some hyperparameters into the local maps contained in this object.
-  /// @param map Input map of scalar hyperparameters
-  /// @param vec_map Input map of vector hyperparameters
-  void loadHyperParamMap(const std::unordered_map<std::string, Real> & map,
-                         const std::unordered_map<std::string, std::vector<Real>> & vec_map);
+  /// Load some hyperparameters into the local map contained in this object.
+  /// @param map Input map of hyperparameters
+  void loadHyperParamMap(const HyperParameterMap & map);
 
   /// Populates the input maps with the owned hyperparameters.
-  /// @param map Map of scalar hyperparameters that should be populated
-  /// @param vec_map Map of vector hyperparameters that should be populated
-  void buildHyperParamMap(std::unordered_map<std::string, Real> & map,
-                          std::unordered_map<std::string, std::vector<Real>> & vec_map) const;
+  /// @param map Map of hyperparameters that should be populated
+  void buildHyperParamMap(HyperParameterMap & map) const;
 
   /// Get the default minimum and maximum and size of a hyperparameter.
   /// Returns false is the parameter has not been found in this covariance object.
@@ -72,8 +77,8 @@ public:
   /// @param hyper_param_name The name of the hyperparameter
   /// @param ind The index within the hyperparameter. 0 if it is a scalar parameter.
   ///            If it is a vector parameter, it should be the index within the vector.
-  virtual bool computedKdhyper(RealEigenMatrix & dKdhp,
-                               const RealEigenMatrix & x,
+  virtual bool computedKdhyper(torch::Tensor & dKdhp,
+                               const torch::Tensor & x,
                                const std::string & hyper_param_name,
                                unsigned int ind) const;
 
@@ -84,36 +89,24 @@ public:
   /// Return the number of outputs assumed for this covariance function
   unsigned int numOutputs() const { return _num_outputs; }
 
-  /// Get the map of scalar parameters
-  std::unordered_map<std::string, Real> & hyperParamMapReal() { return _hp_map_real; }
-
-  /// Get the map of vector parameters
-  std::unordered_map<std::string, std::vector<Real>> & hyperParamMapVectorReal()
-  {
-    return _hp_map_vector_real;
-  }
-
 protected:
   /// Register a scalar hyperparameter to this covariance function
   /// @param name The name of the parameter
   /// @param value The initial value of the parameter
   /// @param is_tunable If the parameter is tunable during optimization
-  const Real &
+  torch::Tensor &
   addRealHyperParameter(const std::string & name, const Real value, const bool is_tunable);
 
   /// Register a vector hyperparameter to this covariance function
   /// @param name The name of the parameter
   /// @param value The initial value of the parameter
   /// @param is_tunable If the parameter is tunable during optimization
-  const std::vector<Real> & addVectorRealHyperParameter(const std::string & name,
-                                                        const std::vector<Real> value,
-                                                        const bool is_tunable);
+  torch::Tensor & addVectorRealHyperParameter(const std::string & name,
+                                              const std::vector<Real> & value,
+                                              const bool is_tunable);
 
-  /// Map of real-valued hyperparameters
-  std::unordered_map<std::string, Real> _hp_map_real;
-
-  /// Map of vector-valued hyperparameters
-  std::unordered_map<std::string, std::vector<Real>> _hp_map_vector_real;
+  /// Map of hyperparameters stored as rank-0 or rank-1 tensors
+  HyperParameterMap _hyperparameters;
 
   /// list of tunable hyper-parameters
   std::unordered_set<std::string> _tunable_hp;
@@ -130,3 +123,5 @@ protected:
   /// Vector of pointers to the dependent covariance functions
   std::vector<CovarianceFunctionBase *> _covariance_functions;
 };
+
+#endif

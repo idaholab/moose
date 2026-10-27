@@ -19,6 +19,7 @@
 [Variables]
   [face_u]
     family = SIDE_HIERARCHIC
+    order = CONSTANT
   []
   [u]
     family = MONOMIAL
@@ -26,6 +27,13 @@
   []
   [grad_u]
     family = L2_RAVIART_THOMAS
+    # default first order means affine within the element interior but
+    # the normal trace is constant along any given side. libMesh first
+    # order corresponds to what is known in the literature as RT_0.
+    # The lowest-order unstabilized HDG method here uses:
+    # RT_0 for the vector field on the element interior
+    # P_0 for the scalar field on the element interior
+    # P_0 for the trace field on the mesh skeleton
   []
 []
 

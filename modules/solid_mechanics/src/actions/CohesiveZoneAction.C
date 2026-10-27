@@ -157,7 +157,7 @@ CohesiveZoneAction::addRequiredCZMInterfaceMaterials()
   std::string unique_material_name = _disp_jump_provider_name + "_" + _name;
   InputParameters paramsm = _factory.getValidParams(_disp_jump_provider_name);
   paramsm.set<std::vector<BoundaryName>>("boundary") = _boundary;
-  ;
+
   paramsm.set<std::vector<VariableName>>("displacements") = _displacements;
   paramsm.set<std::string>("base_name") = _base_name;
   _problem->addInterfaceMaterial(_disp_jump_provider_name, unique_material_name, paramsm);
@@ -166,7 +166,7 @@ CohesiveZoneAction::addRequiredCZMInterfaceMaterials()
   unique_material_name = _equilibrium_traction_calculator_name + "_" + _name;
   paramsm = _factory.getValidParams(_equilibrium_traction_calculator_name);
   paramsm.set<std::vector<BoundaryName>>("boundary") = _boundary;
-  ;
+
   paramsm.set<std::string>("base_name") = _base_name;
   _problem->addInterfaceMaterial(
       _equilibrium_traction_calculator_name, unique_material_name, paramsm);

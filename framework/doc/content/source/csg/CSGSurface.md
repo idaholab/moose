@@ -22,11 +22,6 @@ For example, a plane is defined by the equation $ax + by + cz = d$ and so this m
 In [!ac](CSG) representation, knowing which half-space of the surface is positive or negative is necessary for correct construction of a [cell](source/csg/CSGBase.md#cells) [region](source/csg/CSGBase.md#regions).
 To help determine the sign of these half-spaces, each surface type should have a `evaluateSurfaceEquationAtPoint` method implemented that returns a floating point value, where a positive value indicates that the point lies in the positive half-space, a negative value indicates that the point lies in the negative half-space, and a value of 0 indicates that the point lies on the surface.
 
-### Setting the Surface Type
-
-The type of surface must be set for `_surface_type` in the surface constructor.
-It is recommended that this be done based on the class name using `MooseUtils::prettyCppType<SurfaceClassName>()` so that the surface type automatically matches the class that created it.
-
 ### Creating a Surface Clone
 
 In order to make sure that clones of CSGBase objects are created properly, each derived `CSGSurface` type must implement a `clone()` method, which returns a `std::unique_ptr<CSGSurface>` from the given surface instance. This can typically be done by calling `std::make_unique` on the constructor for the derived surface type.

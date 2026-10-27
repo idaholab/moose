@@ -19,30 +19,21 @@
 []
 
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = true
+    eigenstrain_names = ini_stress
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-[]
 
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1
     poissons_ratio = 0.25
-  [../]
-  [./strain]
-    type = ComputeIncrementalStrain
-    eigenstrain_names = ini_stress
   [../]
   [./ini_stress]
     type = ComputeEigenstrainFromInitialStress

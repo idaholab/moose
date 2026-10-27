@@ -4,6 +4,14 @@
 
   [quality_checks]
     requirement = 'The system shall evaluate the quality of all the mesh elements and '
+    [statistics]
+      type = 'RunApp'
+      input = 'statistics.i'
+      expect_out = 'Minimum Angle Metric values:\s+Minimum: 90\s+Maximum: 90\s+Average: 90'
+
+      detail = 'report the minimum, maximum, and average values, '
+    []
+
     [failure_warning]
       type = 'RunApp'
       input = 'failure_warning.i'
@@ -24,7 +32,8 @@
     [bypass_warning]
       type = 'RunApp'
       input = 'bypass_warning.i'
-      expect_out = "Provided quality metric doesn't apply to following element type:"
+      expect_out = "Provided quality metric doesn't apply to following element type:.*"
+                   "No elements were checked."
       allow_warnings = true
 
       detail = 'report a message when the selected metric does not apply to the element type being examined, or'

@@ -802,4 +802,17 @@ TEST(CSGLatticeTest, testUpdateOuter)
     ASSERT_EQ(cart_lattice.getOuterType(), "VOID");
   }
 }
+
+/// tests that getType() resolves to the derived lattice type even when the object is accessed
+/// through a base CSGLattice reference (getType() uses typeid(*this))
+TEST(CSGLatticeTest, testGetTypeThroughBase)
+{
+  auto cart_lattice = CSGCartesianLattice("cartlat", 1.0);
+  auto hex_lattice = CSGHexagonalLattice("hexlat", 1.0);
+
+  const CSGLattice & cart_base = cart_lattice;
+  const CSGLattice & hex_base = hex_lattice;
+  ASSERT_EQ("CSG::CSGCartesianLattice", cart_base.getType());
+  ASSERT_EQ("CSG::CSGHexagonalLattice", hex_base.getType());
+}
 }

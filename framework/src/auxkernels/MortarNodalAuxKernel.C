@@ -50,6 +50,8 @@ template <typename ComputeValueType>
 MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
     const InputParameters & parameters)
   : AuxKernelTempl<ComputeValueType>(setBoundaryParam(parameters)),
+    MortarExecutorInterface(
+        *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     MortarConsumerInterface(this),
     _displaced(this->template getParam<bool>("use_displaced_mesh")),
     _fe_problem(*this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
@@ -70,6 +72,13 @@ MortarNodalAuxKernelTempl<ComputeValueType>::initialSetup()
 {
   AuxKernelTempl<ComputeValueType>::initialSetup();
 
+  setupMortarMaterials();
+}
+
+template <typename ComputeValueType>
+void
+MortarNodalAuxKernelTempl<ComputeValueType>::setupMortarMaterials()
+{
   std::array<const MortarNodalAuxKernelTempl<ComputeValueType> *, 1> consumers = {{this}};
 
   Moose::Mortar::setupMortarMaterials(consumers,
@@ -79,6 +88,16 @@ MortarNodalAuxKernelTempl<ComputeValueType>::initialSetup()
                                       _secondary_ip_sub_to_mats,
                                       _primary_ip_sub_to_mats,
                                       _secondary_boundary_mats);
+}
+
+template <typename ComputeValueType>
+void
+MortarNodalAuxKernelTempl<ComputeValueType>::mortarSetup(const AutomaticMortarGeneration & amg_in)
+{
+  // We may be registered with a warehouse that owns multiple interfaces; only react to the one
+  // we actually consume.
+  if (&amg_in == &amg())
+    setupMortarMaterials();
 }
 
 template <typename ComputeValueType>

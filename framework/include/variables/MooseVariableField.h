@@ -91,7 +91,7 @@ public:
 
   static InputParameters validParams();
 
-  virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) = 0;
+  virtual void setNodalValue(const OutputType & value) = 0;
 
   ///@{
   /**
@@ -114,6 +114,11 @@ public:
    * AD grad solution getter
    */
   virtual const ADTemplateVariableGradient<OutputType> & adGradSln() const = 0;
+
+  /**
+   * AD grad solution getter for objects evaluating on element faces
+   */
+  virtual const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const = 0;
 
   /**
    * AD grad of time derivative solution getter

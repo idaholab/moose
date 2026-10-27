@@ -11,15 +11,14 @@
   xmax = 5
 []
 
-[Variables]
-  [./disp_x]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = false
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-  [../]
-[]
 
 [BCs]
   [./2_x]
@@ -43,9 +42,6 @@
     poissons_ratio = 0.1
     youngs_modulus = 1e6
     elasticity_tensor_prefactor = prefac
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
   [../]
   [./stress]
     type = ComputeLinearElasticStress

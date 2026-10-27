@@ -226,8 +226,8 @@
   [andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_rtol -snes_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-12 10000'
+    petsc_options_iname = '-ksp_type -pc_type'
+    petsc_options_value = 'bcgs bjacobi'
   []
 []
 
@@ -236,6 +236,8 @@
   solve_type = Newton
   dt = 1
   end_time = 5
+  nl_rel_tol = 1E-12
+  nl_max_its = 10000
 []
 
 [Outputs]

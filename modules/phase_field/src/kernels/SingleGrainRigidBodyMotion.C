@@ -45,7 +45,8 @@ SingleGrainRigidBodyMotion::computeQpOffDiagJacobian(unsigned int /*jvar*/)
   return _velocity_advection_jacobian * _grad_u[_qp] * _test[_i][_qp];
 }
 
-Real SingleGrainRigidBodyMotion::computeQpNonlocalJacobian(dof_id_type /*dof_index*/)
+Real
+SingleGrainRigidBodyMotion::computeQpNonlocalJacobian(dof_id_type /*dof_index*/)
 {
   return _velocity_advection_jacobian * _grad_u[_qp] * _test[_i][_qp];
 }

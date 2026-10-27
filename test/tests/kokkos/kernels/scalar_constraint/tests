@@ -1,0 +1,20 @@
+[Tests]
+  design = 'syntax/KokkosKernels/index.md syntax/KokkosBCs/index.md'
+  issues = '#33709'
+  [test]
+    type = Exodiff
+    input = 'kokkos_scalar_constraint.i'
+    exodiff = 'kokkos_scalar_constraint_out.e'
+    requirement = 'The Kokkos system shall support the ability to compute the scalar variable contribution to weak forms in residual objects.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+  [test_jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_scalar_constraint.i'
+    run_sim = True
+    requirement = 'The Kokkos residual objects should produce the correct Jacobian including the scalar variable contribution.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+[]

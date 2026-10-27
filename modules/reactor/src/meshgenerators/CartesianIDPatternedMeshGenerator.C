@@ -69,7 +69,8 @@ CartesianIDPatternedMeshGenerator::CartesianIDPatternedMeshGenerator(
 std::unique_ptr<MeshBase>
 CartesianIDPatternedMeshGenerator::generate()
 {
-  auto mesh = PatternedMeshGenerator::generate();
+  std::vector<std::unique_ptr<ReplicatedMesh>> input_meshes;
+  auto mesh = PatternedMeshGenerator::generate(&input_meshes);
 
   unsigned int extra_id_index;
   if (!mesh->has_elem_integer(_element_id_name))
@@ -92,7 +93,7 @@ CartesianIDPatternedMeshGenerator::generate()
                                                 _exclude_ids,
                                                 has_assembly_duct,
                                                 duct_block_ids,
-                                                _meshes,
+                                                input_meshes,
                                                 _pattern,
                                                 _id_pattern);
 

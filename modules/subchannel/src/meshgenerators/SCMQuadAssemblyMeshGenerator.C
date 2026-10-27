@@ -247,7 +247,18 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
         _subch_type[i_ch] = EChannelType::CENTER;
     }
 
-  // Index the east-west gaps.
+  /**
+   * Build channel-gap connectivity directly from the rectilinear channel grid.
+   *
+   * Each gap separates exactly two neighboring channels. The east-west pass connects channels that
+   * are adjacent in the x direction, and the north-south pass connects channels that are adjacent
+   * in the y direction.
+   * As each gap is created, both the reverse map (_gap_to_chan_map) and the forward channel maps
+   * (_chan_to_gap_map) are filled, and opposite crossflow signs are assigned to the two channels.
+   *
+   * Boundary gaps use a half pin-to-pin spacing plus the duct side gap, while interior gaps use the
+   * full pin-to-pin gap width.
+   */
   unsigned int i_gap = 0;
   for (unsigned int iy = 0; iy < _ny; iy++)
     for (unsigned int ix = 0; ix < _nx - 1; ix++)
@@ -455,7 +466,7 @@ SCMQuadAssemblyMeshGenerator::buildSubchannelMesh(MeshBase & mesh_base,
           boundary_info.add_side(elem, 1, 1);
       }
 
-  mesh_base.subdomain_name(_subchannel_block_id) = "subchannel";
+  mesh_base.set_subdomain_name(_subchannel_block_id, "subchannel", true);
 }
 
 void
@@ -499,7 +510,7 @@ SCMQuadAssemblyMeshGenerator::buildPinMesh(MeshBase & mesh_base)
         elem->set_node(1, _pin_nodes[i_pin][iz + 1]);
       }
 
-  mesh_base.subdomain_name(_pin_block_id) = "fuel_pins";
+  mesh_base.set_subdomain_name(_pin_block_id, "fuel_pins", true);
 }
 
 void
@@ -565,7 +576,7 @@ SCMQuadAssemblyMeshGenerator::generate()
 
   mesh_base->prepare_for_use();
 
-  auto & sch_mesh = static_cast<QuadSubChannelMesh &>(*_mesh);
+  auto & sch_mesh = cast_ref<QuadSubChannelMesh &>(*_mesh);
   transferMetadata(sch_mesh);
   sch_mesh.computeAssemblyHydraulicParameters();
 

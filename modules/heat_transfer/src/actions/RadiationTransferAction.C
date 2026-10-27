@@ -17,10 +17,11 @@
 #include "ViewFactorRayStudy.h"
 
 registerMooseAction("HeatTransferApp", RadiationTransferAction, "append_mesh_generator");
-registerMooseAction("HeatTransferApp", RadiationTransferAction, "setup_mesh_complete");
 registerMooseAction("HeatTransferApp", RadiationTransferAction, "add_user_object");
 registerMooseAction("HeatTransferApp", RadiationTransferAction, "add_bc");
 registerMooseAction("HeatTransferApp", RadiationTransferAction, "add_ray_boundary_condition");
+registerMooseAction("HeatTransferApp", RadiationTransferAction, "add_aux_variable");
+registerMooseAction("HeatTransferApp", RadiationTransferAction, "add_aux_kernel");
 
 InputParameters
 RadiationTransferAction::validParams()
@@ -107,13 +108,21 @@ RadiationTransferAction::validParams()
       "a plane perpendicular to the normal]. Only used if view_factor_calculator = "
       "ray_tracing.");
 
+  params.addParam<bool>("add_heat_flux_aux", false, "If true, add a heat flux aux variable");
+  params.addParam<VariableName>(
+      "heat_flux_variable",
+      "Heat flux aux variable name; this must be provided if 'add_heat_flux_aux' is true");
+  params.addParam<std::vector<SubdomainName>>(
+      "heat_flux_aux_block", "Subdomains to use for heat flux aux if 'add_heat_flux_aux' is true");
+
   return params;
 }
 
 RadiationTransferAction::RadiationTransferAction(const InputParameters & params)
   : Action(params),
     _boundary_names(getParam<std::vector<BoundaryName>>("boundary")),
-    _view_factor_calculator(getParam<MooseEnum>("view_factor_calculator"))
+    _view_factor_calculator(getParam<MooseEnum>("view_factor_calculator")),
+    _add_heat_flux_aux(getParam<bool>("add_heat_flux_aux"))
 {
   const auto & symmetry_names = getParam<std::vector<BoundaryName>>("symmetry_boundary");
 
@@ -143,6 +152,43 @@ RadiationTransferAction::RadiationTransferAction(const InputParameters & params)
                    name,
                    " is present in parameter boundary and symmetry_boundary.");
   }
+
+  if (_add_heat_flux_aux)
+  {
+    if (isParamValid("heat_flux_variable"))
+      _heat_flux_variable = getParam<VariableName>("heat_flux_variable");
+    else
+      paramError("heat_flux_variable",
+                 "If 'add_heat_flux_aux' is true, then this parameter must be provided.");
+
+    if (isParamValid("heat_flux_aux_block"))
+      _heat_flux_aux_block = getParam<std::vector<SubdomainName>>("heat_flux_aux_block");
+    else
+      paramError("heat_flux_aux_block",
+                 "If 'add_heat_flux_aux' is true, then this parameter must be provided.");
+  }
+
+  const auto & fixed_temperature_boundaries =
+      getParam<std::vector<BoundaryName>>("fixed_temperature_boundary");
+  const auto & fixed_boundary_temperatures =
+      getParam<std::vector<FunctionName>>("fixed_boundary_temperatures");
+
+  if (fixed_temperature_boundaries.size() != fixed_boundary_temperatures.size())
+    paramError("fixed_boundary_temperatures",
+               "The number of entries must match the number of entries in "
+               "'fixed_temperature_boundary'.");
+
+  checkBoundaryParameterIsSubset("adiabatic_boundary");
+  checkBoundaryParameterIsSubset("fixed_temperature_boundary");
+}
+
+void
+RadiationTransferAction::checkBoundaryParameterIsSubset(const std::string & param) const
+{
+  const auto boundary_names = getParam<std::vector<BoundaryName>>(param);
+  for (const auto & bname : boundary_names)
+    if (std::find(_boundary_names.begin(), _boundary_names.end(), bname) == _boundary_names.end())
+      paramError(param, "The boundaries in '" + param + "' must be a subset of 'boundary'.");
 }
 
 void
@@ -150,8 +196,6 @@ RadiationTransferAction::act()
 {
   if (_current_task == "append_mesh_generator")
     addMeshGenerator();
-  else if (_current_task == "setup_mesh_complete")
-    radiationPatchNames();
   else if (_current_task == "add_user_object")
   {
     addRadiationObject();
@@ -159,9 +203,16 @@ RadiationTransferAction::act()
     addViewFactorObject();
   }
   else if (_current_task == "add_bc")
+  {
     addRadiationBCs();
+    addFixedTemperatureBCs();
+  }
   else if (_current_task == "add_ray_boundary_condition")
     addRayBCs();
+  else if (_current_task == "add_aux_variable" && _add_heat_flux_aux)
+    addHeatFluxAuxVariable();
+  else if (_current_task == "add_aux_kernel" && _add_heat_flux_aux)
+    addHeatFluxAuxKernel();
 }
 
 void
@@ -188,14 +239,31 @@ RadiationTransferAction::addRadiationBCs() const
 }
 
 void
+RadiationTransferAction::addFixedTemperatureBCs() const
+{
+  const auto & fixed_temperature_boundaries =
+      getParam<std::vector<BoundaryName>>("fixed_temperature_boundary");
+  const auto & fixed_boundary_temperatures =
+      getParam<std::vector<FunctionName>>("fixed_boundary_temperatures");
+  const auto & temperature = getParam<VariableName>("temperature");
+
+  for (unsigned int i = 0; i < fixed_temperature_boundaries.size(); ++i)
+  {
+    InputParameters params = _factory.getValidParams("FunctionDirichletBC");
+    params.set<FunctionName>("function") = fixed_boundary_temperatures[i];
+    params.set<NonlinearVariableName>("variable") = temperature;
+    params.set<std::vector<BoundaryName>>("boundary") = {fixed_temperature_boundaries[i]};
+
+    _problem->addBoundaryCondition("FunctionDirichletBC",
+                                   "fixed_temperature_bc_" + _name + "_" +
+                                       fixed_temperature_boundaries[i],
+                                   params);
+  }
+}
+
+void
 RadiationTransferAction::addViewFactorObject() const
 {
-  std::vector<std::vector<std::string>> radiation_patch_names = radiationPatchNames();
-  std::vector<BoundaryName> boundary_names;
-  for (auto & e1 : radiation_patch_names)
-    for (auto & e2 : e1)
-      boundary_names.push_back(e2);
-
   // this userobject is only executed on initial
   ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
   exec_enum = {EXEC_INITIAL};
@@ -204,7 +272,7 @@ RadiationTransferAction::addViewFactorObject() const
   {
     // this branch adds the UnobstructedPlanarViewFactor
     InputParameters params = _factory.getValidParams("UnobstructedPlanarViewFactor");
-    params.set<std::vector<BoundaryName>>("boundary") = boundary_names;
+    params.set<std::vector<BoundaryName>>("boundary") = radiationPatchBoundaryNames();
     params.set<ExecFlagEnum>("execute_on") = exec_enum;
 
     _problem->addUserObject("UnobstructedPlanarViewFactor", viewFactorObjectName(), params);
@@ -213,7 +281,7 @@ RadiationTransferAction::addViewFactorObject() const
   {
     // this branch adds the ray tracing UO
     InputParameters params = _factory.getValidParams("RayTracingViewFactor");
-    params.set<std::vector<BoundaryName>>("boundary") = boundary_names;
+    params.set<std::vector<BoundaryName>>("boundary") = radiationPatchBoundaryNames();
     params.set<ExecFlagEnum>("execute_on") = exec_enum;
     params.set<UserObjectName>("ray_study_name") = rayStudyName();
     params.set<bool>("print_view_factor_info") = getParam<bool>("print_view_factor_info");
@@ -228,15 +296,9 @@ RadiationTransferAction::addRayStudyObject() const
   if (_view_factor_calculator == "analytical")
     return;
 
-  std::vector<std::vector<std::string>> radiation_patch_names = radiationPatchNames();
-  std::vector<BoundaryName> boundary_names;
-  for (auto & e1 : radiation_patch_names)
-    for (auto & e2 : e1)
-      boundary_names.push_back(e2);
-
   InputParameters params = _factory.getValidParams("ViewFactorRayStudy");
 
-  params.set<std::vector<BoundaryName>>("boundary") = boundary_names;
+  params.set<std::vector<BoundaryName>>("boundary") = radiationPatchBoundaryNames();
 
   // set this object to be execute on initial only
   ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
@@ -259,15 +321,9 @@ RadiationTransferAction::addRayBCs() const
   if (_view_factor_calculator == "analytical")
     return;
 
-  std::vector<std::vector<std::string>> radiation_patch_names = radiationPatchNames();
-  std::vector<BoundaryName> boundary_names;
-  for (auto & e1 : radiation_patch_names)
-    for (auto & e2 : e1)
-      boundary_names.push_back(e2);
-
   {
     InputParameters params = _factory.getValidParams("ViewFactorRayBC");
-    params.set<std::vector<BoundaryName>>("boundary") = boundary_names;
+    params.set<std::vector<BoundaryName>>("boundary") = radiationPatchBoundaryNames();
     params.set<RayTracingStudy *>("_ray_tracing_study") =
         &_problem->getUserObject<ViewFactorRayStudy>(rayStudyName());
     _problem->addObject<RayBoundaryConditionBase>("ViewFactorRayBC", rayBCName(), params);
@@ -337,57 +393,19 @@ RadiationTransferAction::addRadiationObject() const
   params.set<std::vector<FunctionName>>("emissivity") = extended_emissivity;
 
   // add boundary parameter
-  std::vector<BoundaryName> boundary_names;
-  for (auto & e1 : radiation_patch_names)
-    for (auto & e2 : e1)
-      boundary_names.push_back(e2);
-  params.set<std::vector<BoundaryName>>("boundary") = boundary_names;
+  params.set<std::vector<BoundaryName>>("boundary") = radiationPatchBoundaryNames();
 
   // add adiabatic_boundary parameter if required
   if (isParamValid("adiabatic_boundary"))
-  {
-    std::vector<BoundaryName> adiabatic_boundary_names =
-        getParam<std::vector<BoundaryName>>("adiabatic_boundary");
-    std::vector<BoundaryName> adiabatic_patch_names;
-    for (unsigned int k = 0; k < adiabatic_boundary_names.size(); ++k)
-    {
-      BoundaryName bnd_name = adiabatic_boundary_names[k];
+    params.set<std::vector<BoundaryName>>("adiabatic_boundary") = adiabaticPatchBoundaryNames();
 
-      // find the right entry in _boundary_names
-      auto it = std::find(_boundary_names.begin(), _boundary_names.end(), bnd_name);
-
-      // check if entry was found: it must be found or an error would occur later
-      if (it == _boundary_names.end())
-        mooseError("Adiabatic boundary ", bnd_name, " not present in boundary.");
-
-      // this is the position in the _boundary_names vector; this is what
-      // we are really after
-      auto index = std::distance(_boundary_names.begin(), it);
-
-      // collect the correct boundary names
-      for (auto & e : radiation_patch_names[index])
-        adiabatic_patch_names.push_back(e);
-    }
-    params.set<std::vector<BoundaryName>>("adiabatic_boundary") = adiabatic_patch_names;
-  }
+  const auto & fixed_T_boundary_names =
+      getParam<std::vector<BoundaryName>>("fixed_temperature_boundary");
 
   // add isothermal sidesets if required
-  if (isParamValid("fixed_temperature_boundary"))
+  if (!fixed_T_boundary_names.empty())
   {
-    if (!isParamValid("fixed_boundary_temperatures"))
-      mooseError("fixed_temperature_boundary is provided so fixed_boundary_temperatures must be "
-                 "provided too");
-
-    std::vector<BoundaryName> fixed_T_boundary_names =
-        getParam<std::vector<BoundaryName>>("fixed_temperature_boundary");
-
-    std::vector<FunctionName> fixed_T_funcs =
-        getParam<std::vector<FunctionName>>("fixed_boundary_temperatures");
-
-    // check length of fixed_boundary_temperatures
-    if (fixed_T_funcs.size() != fixed_T_boundary_names.size())
-      mooseError("Size of parameter fixed_boundary_temperatures and fixed_temperature_boundary "
-                 "must be equal.");
+    const auto & fixed_T_funcs = getParam<std::vector<FunctionName>>("fixed_boundary_temperatures");
 
     std::vector<BoundaryName> fixed_T_patch_names;
     std::vector<FunctionName> fixed_T_function_names;
@@ -481,6 +499,46 @@ RadiationTransferAction::bcRadiationPatchNames() const
   return radiation_patch_names;
 }
 
+std::vector<BoundaryName>
+RadiationTransferAction::patchBoundaryNames(
+    const std::vector<BoundaryName> & boundary_names_or_ids) const
+{
+  std::vector<BoundaryName> patch_boundary_names;
+  std::vector<BoundaryID> ids = _mesh->getBoundaryIDs(boundary_names_or_ids);
+  for (const auto i : index_range(boundary_names_or_ids))
+  {
+    const auto boundary_name_or_id = boundary_names_or_ids[i];
+    const auto it = std::find(_boundary_names.begin(), _boundary_names.end(), boundary_name_or_id);
+    mooseAssert(it != _boundary_names.end(), boundary_name_or_id + " not found in 'boundary'.");
+    const auto boundary_index = std::distance(_boundary_names.begin(), it);
+    const auto n_patches = nPatch(boundary_index);
+    const auto boundary_name = _mesh->getBoundaryName(ids[i]);
+    for (const auto j : make_range(n_patches))
+    {
+      std::stringstream ss;
+      ss << boundary_name << "_" << j;
+      patch_boundary_names.push_back(ss.str());
+    }
+  }
+  return patch_boundary_names;
+}
+
+std::vector<BoundaryName>
+RadiationTransferAction::radiationPatchBoundaryNames() const
+{
+  return patchBoundaryNames(_boundary_names);
+}
+
+std::vector<BoundaryName>
+RadiationTransferAction::adiabaticPatchBoundaryNames() const
+{
+  std::vector<BoundaryName> patch_boundary_names;
+  if (isParamValid("adiabatic_boundary"))
+    patch_boundary_names =
+        patchBoundaryNames(getParam<std::vector<BoundaryName>>("adiabatic_boundary"));
+  return patch_boundary_names;
+}
+
 void
 RadiationTransferAction::addMeshGenerator()
 {
@@ -544,4 +602,27 @@ RadiationTransferAction::meshGeneratorName(unsigned int j) const
   std::stringstream ss;
   ss << "patch_side_set_generator_" << _boundary_names[j];
   return ss.str();
+}
+
+void
+RadiationTransferAction::addHeatFluxAuxVariable() const
+{
+  const std::string var_type = "MooseVariable";
+  auto params = _factory.getValidParams(var_type);
+  params.set<std::vector<SubdomainName>>("block") = _heat_flux_aux_block;
+  params.set<MooseEnum>("order") = "CONSTANT";
+  params.set<MooseEnum>("family") = "MONOMIAL";
+  _problem->addAuxVariable(var_type, _heat_flux_variable, params);
+}
+
+void
+RadiationTransferAction::addHeatFluxAuxKernel() const
+{
+  const std::string class_name = "GrayLambertRadiationHeatFluxAux";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<AuxVariableName>("variable") = _heat_flux_variable;
+  params.set<std::vector<BoundaryName>>("boundary") = radiationPatchBoundaryNames();
+  params.set<UserObjectName>("surface_radiation_object") = radiationObjectName();
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+  _problem->addAuxKernel(class_name, "radiation_heat_flux_aux_kernel", params);
 }

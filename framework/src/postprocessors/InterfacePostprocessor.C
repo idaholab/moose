@@ -42,7 +42,7 @@ InterfacePostprocessor::execute()
 void
 InterfacePostprocessor::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const InterfacePostprocessor &>(y);
+  const auto & pps = cast_ref<const InterfacePostprocessor &>(y);
   _interface_primary_area += pps._interface_primary_area;
 }
 

@@ -1,0 +1,12 @@
+[Tests]
+  design = 'NodalKernels/index.md NonlinearSystem.md'
+  issues = '#33531'
+
+  [error]
+    type = 'RunException'
+    input = 'constant_rate.i'
+    cli_args = 'Executioner/residual_and_jacobian_together=true'
+    requirement = "The system shall return an error if attempting to compute residual and jacobian together with nodal kernels that currently do not support this functionality."
+    expect_err = "residual_and_jacobian_together does not yet support NodalKernels"
+  []
+[]

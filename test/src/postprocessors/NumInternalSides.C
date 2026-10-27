@@ -52,6 +52,6 @@ NumInternalSides::getValue() const
 void
 NumInternalSides::threadJoin(const UserObject & uo)
 {
-  const NumInternalSides & obj = static_cast<const NumInternalSides &>(uo);
+  const NumInternalSides & obj = cast_ref<const NumInternalSides &>(uo);
   _count += obj.count();
 }

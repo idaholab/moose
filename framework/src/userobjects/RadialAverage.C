@@ -131,7 +131,7 @@ RadialAverage::finalize()
 
     // update after mesh changes and/or if a displaced problem exists
     if (_update_communication_lists || _fe_problem.getDisplacedProblem() ||
-        libMesh::n_threads() > 1)
+        getMooseApp().numThreads() > 1)
       updateCommunicationLists();
 
     // data structures for sparse point to point communication
@@ -198,13 +198,14 @@ RadialAverage::finalize()
   auto local_range_begin = _qp_data.begin();
   auto local_range_end = local_range_begin;
   std::advance(local_range_end, local_size);
-  Threads::parallel_reduce(QPDataRange(local_range_begin, local_range_end), rgcl);
+  Threads::parallel_reduce(
+      QPDataRange(local_range_begin, local_range_end), rgcl, getMooseApp().numThreads());
 }
 
 void
 RadialAverage::threadJoin(const UserObject & y)
 {
-  const auto & uo = static_cast<const RadialAverage &>(y);
+  const auto & uo = cast_ref<const RadialAverage &>(y);
   _qp_data.insert(_qp_data.begin(), uo._qp_data.begin(), uo._qp_data.end());
   _average.insert(uo._average.begin(), uo._average.end());
 }

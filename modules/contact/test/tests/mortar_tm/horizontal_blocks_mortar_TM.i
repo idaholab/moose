@@ -162,8 +162,8 @@ offset = 0.01
   type = Transient
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount -snes_max_it'
-  petsc_options_value = 'lu       1e-5          NONZERO               1e-15                   20'
+  petsc_options_iname = '-pc_type -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'lu 1e-5 NONZERO 1e-15'
 
   dt = 0.1
   dtmin = 0.1
@@ -174,5 +174,5 @@ offset = 0.01
 
   nl_rel_tol = 1e-10
   nl_abs_tol = 1e-6
-  nl_max_its = 100
+  nl_max_its = 20
 []

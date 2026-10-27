@@ -19,7 +19,7 @@ registerMooseObject("NavierStokesApp", PCNSFVKT);
 InputParameters
 PCNSFVKT::validParams()
 {
-  InputParameters params = FVFluxKernel::validParams();
+  InputParameters params = FVQpFluxKernel::validParams();
   params.addClassDescription("Computes the residual of advective term using finite volume method.");
   params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid userobject");
   MooseEnum eqn("mass momentum energy scalar");
@@ -40,7 +40,7 @@ PCNSFVKT::validParams()
 }
 
 PCNSFVKT::PCNSFVKT(const InputParameters & params)
-  : FVFluxKernel(params),
+  : FVQpFluxKernel(params),
     _fluid(getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
 
     _sup_vel_x_elem(getADMaterialProperty<Real>(NS::superficial_velocity_x)),

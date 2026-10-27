@@ -1,24 +1,33 @@
 [Tests]
+  issues = '#9972'
 [./equilibrium_without_action]
   type = 'Exodiff'
   input = 'equilibrium_without_action.i'
   exodiff = 'equilibrium_out.e'
+  design = 'AddCoupledEqSpeciesAction.md'
+  requirement = 'The system shall be able to solve an aqueous equilibrium reaction system that is set up explicitly, without using the parsing action, to provide a reference solution for the parser test.'
 [../]
 [./equilibrium_action]
   type = 'Exodiff'
   input = 'equilibrium_action.i'
   exodiff = 'equilibrium_out.e'
   prereq = equilibrium_without_action
+  design = 'AddCoupledEqSpeciesAction.md'
+  requirement = 'The system shall be able to parse a comma delimited list of aqueous equilibrium reactions and reproduce the solution obtained without using the parsing action.'
 [../]
   [./kinetic_without_action]
     type = 'Exodiff'
     input = 'kinetic_without_action.i'
     exodiff = 'kinetic_out.e'
+    design = 'AddCoupledSolidKinSpeciesAction.md'
+    requirement = 'The system shall be able to solve a solid kinetic reaction system that is set up explicitly, without using the parsing action, to provide a reference solution for the parser test.'
   [../]
   [./kinetic_action]
     type = 'Exodiff'
     input = 'kinetic_action.i'
     exodiff = 'kinetic_out.e'
     prereq = kinetic_without_action
+    design = 'AddCoupledSolidKinSpeciesAction.md'
+    requirement = 'The system shall be able to parse a comma delimited list of solid kinetic reactions and reproduce the solution obtained without using the parsing action.'
   [../]
 []

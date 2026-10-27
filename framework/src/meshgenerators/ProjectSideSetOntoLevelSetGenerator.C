@@ -134,7 +134,7 @@ ProjectSideSetOntoLevelSetGenerator::generate()
     new_mesh->add_elem(std::move(new_elem));
   }
 
-  new_mesh->subdomain_name(projection_block_id) = getParam<SubdomainName>("subdomain_name");
+  new_mesh->set_subdomain_name(projection_block_id, getParam<SubdomainName>("subdomain_name"));
   new_mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(new_mesh);
 }

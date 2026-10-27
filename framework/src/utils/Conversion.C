@@ -15,11 +15,10 @@
 
 #include "libmesh/string_to_enum.h"
 #include "libmesh/point.h"
+#include "libmesh/fe_type.h"
 
 // system includes
 #include <iomanip>
-
-using namespace libMesh;
 
 namespace Moose
 {
@@ -346,6 +345,31 @@ stringify(const RelationshipManagerType & t)
   mooseError("Unknown RelationshipManagerType");
 }
 
+// Definition in MooseTypes.h
+std::string
+stringify(const TimeIntegratorType & t)
+{
+  switch (t)
+  {
+    case TimeIntegratorType::TI_IMPLICIT_EULER:
+      return "IMPLICIT_EULER";
+    case TimeIntegratorType::TI_EXPLICIT_EULER:
+      return "EXPLICIT_EULER";
+    case TimeIntegratorType::TI_CRANK_NICOLSON:
+      return "CRANK_NICOLSON";
+    case TimeIntegratorType::TI_BDF2:
+      return "BDF2";
+    case TimeIntegratorType::TI_EXPLICIT_MIDPOINT:
+      return "EXPLICIT_MIDPOINT";
+    case TimeIntegratorType::TI_LSTABLE_DIRK2:
+      return "LSTABLE_DIRK2";
+    case TimeIntegratorType::TI_EXPLICIT_TVD_RK_2:
+      return "EXPLICIT_TVDRK2";
+    default:
+      mooseError("Unknown TimeIntegratorType");
+  }
+}
+
 std::string
 stringify(libMesh::FEFamily f)
 {
@@ -354,6 +378,16 @@ stringify(libMesh::FEFamily f)
 
 // Turn the warnings back on
 #include "libmesh/restore_warnings.h"
+
+std::string
+stringify(const libMesh::FEType & t)
+{
+  auto msg = stringify(t.family) + " of order " + stringify(t.order);
+  // A scalar variable has no spatial basis, so p-refinement carries no meaning for it
+  if (t.family != libMesh::SCALAR)
+    msg += t.p_refinement ? " with p-refinement" : " without p-refinement";
+  return msg;
+}
 
 std::string
 stringify(const SolveType & t)
@@ -429,8 +463,10 @@ stringify(SolutionIterationType t)
       return "time";
     case SolutionIterationType::Nonlinear:
       return "nonlinear";
-    case SolutionIterationType::FixedPoint:
-      return "fixed_point";
+    case SolutionIterationType::MultiAppFixedPoint:
+      return "multiapp_fixed_point";
+    case SolutionIterationType::MultiSystemFixedPoint:
+      return "multisystem_fixed_point";
     default:
       mooseError("Unhandled SolutionIterationType");
   }

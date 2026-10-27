@@ -159,7 +159,9 @@ class SubprocessRunner(Runner):
         # Load combined output
         for file in [self.outfile, self.errfile]:
             file.flush()
-            output = self.readOutput(file)
+            output = self.readOutput(
+                file, "stdout" if file == self.outfile else "stderr"
+            )
             file.close()
 
             # For some reason openmpi will append a null character at the end
@@ -262,20 +264,22 @@ class SubprocessRunner(Runner):
             except OSError:  # Process already terminated
                 pass
 
-    def sendSignal(self, signal):
+    def sendSignal(self, signal, ready_output):
+        assert self.process is not None
+        assert self.outfile is not None
+
+        ready_output = ready_output.encode("utf-8")
+
         # process.poll() returns the process's exit code if it has completed,
         # and None if it is still running. This acts as a safety precaution
         # against an infinite loop; this will always close.
         while self.process.poll() is None:
-
-            # tell() gives the current position in the file. If it is greater
-            # than zero, the binary has started running and writing output. If
-            # the output is blank, the moose_test binary hasn't actually started
-            # doing anything yet. If so, sleep briefly and check again.
-            if not self.outfile.tell():
-                time.sleep(0.05)
-
-            # If the output isn't blank, then we finally send the signal and exit the loop
-            else:
+            output_size = os.fstat(self.outfile.fileno()).st_size
+            # pread() leaves the file offset shared with the subprocess unchanged.
+            output = os.pread(self.outfile.fileno(), output_size, 0)
+            if ready_output in output:
                 os.kill(self.process.pid, signal)
                 break
+
+            # Retain the original 50 ms polling interval while avoiding a busy loop.
+            time.sleep(0.05)

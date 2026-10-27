@@ -58,7 +58,8 @@ protected:
     {
       const std::string class_name = "IdealGasMixtureFluidProperties";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<std::vector<UserObjectName>>("component_fluid_properties") = {fp_steam_name, fp_nitrogen_name};
+      params.set<std::vector<UserObjectName>>("component_fluid_properties") = {fp_steam_name,
+                                                                               fp_nitrogen_name};
       _fe_problem->addUserObject(class_name, fp_mix_name, params);
       _fp_mix = &_fe_problem->getUserObject<IdealGasMixtureFluidProperties>(fp_mix_name);
     }

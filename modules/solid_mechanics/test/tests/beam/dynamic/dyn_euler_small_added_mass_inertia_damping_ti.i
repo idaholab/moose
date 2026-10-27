@@ -318,6 +318,8 @@
 
   # Time integrator scheme
   scheme = "newmark-beta"
+
+  nl_abs_tol = 1e-11
 []
 
 [Kernels]

@@ -27,6 +27,10 @@
                     "FEProblemBase/MOOSE Problem/time_old": {
                         "type": "double",
                         "value": 0.0
+                    },
+                    "FEProblemBase/MOOSE Problem/time_older": {
+                        "type": "double",
+                        "value": 0.0
                     }
                 }
             },
@@ -43,6 +47,10 @@
                     "FEProblemBase/MOOSE Problem/time_old": {
                         "type": "double",
                         "value": 1.0
+                    },
+                    "FEProblemBase/MOOSE Problem/time_older": {
+                        "type": "double",
+                        "value": 0.0
                     }
                 }
             },

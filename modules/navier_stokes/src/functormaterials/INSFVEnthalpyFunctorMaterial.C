@@ -120,10 +120,10 @@ INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters
         [this](const auto & r, const auto & t)
         { return _rho(r, t) * _fp->h_from_p_T((*_pressure)(r, t), (*_temperature)(r, t)); });
 
-    addFunctorProperty<ADReal>(NS::specific_enthalpy,
-                               [this](const auto & r, const auto & t) {
-                                 return _fp->h_from_p_T((*_pressure)(r, t), (*_temperature)(r, t));
-                               });
+    addFunctorProperty<ADReal>(
+        NS::specific_enthalpy,
+        [this](const auto & r, const auto & t)
+        { return _fp->h_from_p_T((*_pressure)(r, t), (*_temperature)(r, t)); });
 
     addFunctorProperty<ADReal>(
         NS::time_deriv(getParam<MooseFunctorName>(NS::specific_enthalpy)),

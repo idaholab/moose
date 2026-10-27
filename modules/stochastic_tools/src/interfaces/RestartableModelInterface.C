@@ -36,7 +36,13 @@ RestartableModelInterface::getModelDataFileName() const
 }
 
 bool
-RestartableModelInterface::hasModelData() const
+RestartableModelInterface::hasExplicitModelData() const
 {
   return _model_object.isParamValid("filename");
+}
+
+bool
+RestartableModelInterface::hasModelData() const
+{
+  return hasExplicitModelData() || _model_object.getMooseApp().isRecovering();
 }

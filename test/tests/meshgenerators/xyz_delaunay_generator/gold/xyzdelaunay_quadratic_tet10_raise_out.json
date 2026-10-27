@@ -1,0 +1,43 @@
+{
+    "reporters": {
+        "mesh_info": {
+            "type": "MeshInfo",
+            "values": {
+                "subdomains": {
+                    "type": "MeshInfo::InfoMap<MeshInfo::DomainInfo<unsigned short, unsigned long long>, MeshInfo::DomainInfoItems>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "mesh_info": {
+                "subdomains": null
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "mesh_info": {
+                "subdomains": [
+                    {
+                        "elem_types": [
+                            "TET10"
+                        ],
+                        "id": 0,
+                        "volume": 1.0480000000000005
+                    },
+                    {
+                        "elem_types": [
+                            "TET10"
+                        ],
+                        "id": 3,
+                        "volume": 0.02700000000000001
+                    }
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

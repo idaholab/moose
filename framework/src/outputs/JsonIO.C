@@ -12,6 +12,7 @@
 #include "MooseRevision.h"
 #include "SystemInfo.h"
 
+#include "libmesh/bounding_box.h"
 #include "libmesh/libmesh_config.h"
 #include "libmesh/int_range.h"
 #include "libmesh/dense_vector.h"
@@ -44,11 +45,15 @@ to_json(nlohmann::json & json, const MooseApp & app)
 namespace libMesh
 {
 void
+to_json(nlohmann::json & json, const libMesh::BoundingBox & bbox)
+{
+  json = {{"max", bbox.max()}, {"min", bbox.min()}};
+}
+
+void
 to_json(nlohmann::json & json, const libMesh::Point & p)
 {
-  json["x"] = p(0);
-  json["y"] = p(1);
-  json["z"] = p(2);
+  json = {{"x", p(0)}, {"y", p(1)}, {"z", p(2)}};
 }
 
 void

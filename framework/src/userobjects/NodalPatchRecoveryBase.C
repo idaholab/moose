@@ -47,7 +47,10 @@ NodalPatchRecoveryBase::validParams()
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::ALGEBRAIC,
                                 [](const InputParameters &, InputParameters & rm_params)
-                                { rm_params.set<unsigned short>("layers") = 2; });
+                                {
+                                  rm_params.set<bool>("use_point_neighbors") = true;
+                                  rm_params.set<unsigned short>("layers") = 1;
+                                });
 
   params.addParamNamesToGroup("patch_polynomial_order", "Advanced");
 
@@ -186,7 +189,7 @@ NodalPatchRecoveryBase::execute()
 void
 NodalPatchRecoveryBase::threadJoin(const UserObject & uo)
 {
-  const auto & npr = static_cast<const NodalPatchRecoveryBase &>(uo);
+  const auto & npr = cast_ref<const NodalPatchRecoveryBase &>(uo);
   _Ae.insert(npr._Ae.begin(), npr._Ae.end());
   _be.insert(npr._be.begin(), npr._be.end());
 }

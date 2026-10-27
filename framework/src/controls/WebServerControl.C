@@ -14,6 +14,9 @@
 #include "minijson/minijson.h"
 #include "tinyhttp/http.h"
 
+#include <cstdio>
+#include <fstream>
+
 registerMooseObject("MooseApp", WebServerControl);
 
 InputParameters
@@ -23,10 +26,15 @@ WebServerControl::validParams()
   params.addClassDescription("Starts a webserver for sending/receiving JSON messages to get data "
                              "and control a running MOOSE calculation");
   params.addParam<unsigned int>("port",
-                                "The port to listen on; must provide either this or 'file_socket'");
+                                "The port to listen on; must provide either this or 'file_socket'. "
+                                "Set to zero to have the operating system choose a free port, "
+                                "which is then reported in the output and in 'port_file'");
   params.addParam<FileName>(
       "file_socket",
       "The path to the unix file socket to listen on; must provide either this or 'port'");
+  params.addParam<FileName>("port_file",
+                            "A path to write the bound port to once the server is listening. Lets "
+                            "a client that set 'port' to zero learn the chosen port");
   params.addParam<Real>("initial_client_timeout",
                         10,
                         "Time in seconds to allow the client to begin communicating on init; if "
@@ -42,6 +50,7 @@ WebServerControl::WebServerControl(const InputParameters & parameters)
   : Control(parameters),
     _port(queryParam<unsigned int>("port")),
     _file_socket(queryParam<FileName>("file_socket")),
+    _port_file(queryParam<FileName>("port_file")),
     _initial_client_timeout(getParam<Real>("initial_client_timeout")),
     _client_timeout(getParam<Real>("client_timeout"))
 {
@@ -50,6 +59,8 @@ WebServerControl::WebServerControl(const InputParameters & parameters)
                "to listen");
   if (_port && _file_socket)
     paramError("port", "Cannot provide both 'port' and 'file_socket'");
+  if (_port_file && !_port)
+    paramError("port_file", "Can only be used together with 'port'");
 }
 
 WebServerControl::~WebServerControl()
@@ -80,22 +91,11 @@ WebServerControl::startServer(const Moose::PassKey<StartWebServerControlAction>)
       // Add all of the actions
       addServerActionsInternal();
 
-      // Post message about server start
-      {
-        std::ostringstream message;
-        message << "Starting server on ";
-        if (_port)
-          message << "port " << *_port;
-        else if (_file_socket)
-          message << "file socket " << *_file_socket;
-        outputMessage(message.str());
-      }
-
       // Start the server thread, giving the thread the server
       // shared_ptr, as the control only has a weak_ptr to the server
       auto console = _console;
       _server_thread_ptr = std::make_unique<std::thread>(
-          [server_ptr, console](const auto port, const auto file_socket)
+          [server_ptr, console, this](const auto port, const auto file_socket)
           {
             mooseAssert(server_ptr, "Null server");
             auto & server = *server_ptr;
@@ -111,10 +111,41 @@ WebServerControl::startServer(const Moose::PassKey<StartWebServerControlAction>)
             catch (std::exception & e)
             {
               console << "Server failed with exception: " << e.what() << std::endl;
+              // Stored as well as printed, so that the thread waiting on the
+              // server can report it
+              std::lock_guard lock(_server_error_lock);
+              _server_error = e.what();
             }
           },
           _port,
           _file_socket);
+
+      // Wait for the socket to be bound before reporting where it is listening.
+      // With 'port' set to zero the operating system chooses the port, so this
+      // is where it becomes known.
+      if (_port)
+      {
+        while (!serverError() && server_ptr->boundPort() == 0)
+          std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        if (const auto error = serverError())
+          mooseError("The server failed to start: ", *error);
+      }
+
+      // Post message about server start
+      {
+        std::ostringstream message;
+        message << "Starting server on ";
+        if (_port)
+          message << "port " << server_ptr->boundPort();
+        else if (_file_socket)
+          message << "file socket " << *_file_socket;
+        outputMessage(message.str());
+      }
+
+      // Safe to publish before the client can connect: the socket is already
+      // listening, so the operating system queues a client that arrives now
+      if (_port_file)
+        writePortFile(server_ptr->boundPort());
     }
 
     // Wait for the client to call /initialize
@@ -127,6 +158,10 @@ WebServerControl::startServer(const Moose::PassKey<StartWebServerControlAction>)
 
       while (!isClientInitialized())
       {
+        // A failed server can never initialize the client, so report its error
+        if (const auto error = serverError())
+          mooseError("The server failed: ", *error);
+
         // Kill command sent before initialize
         if (isKillRequested())
         {
@@ -800,6 +835,33 @@ WebServerControl::stopServer()
     {
     }
   }
+}
+
+std::optional<std::string>
+WebServerControl::serverError() const
+{
+  std::lock_guard lock(_server_error_lock);
+  return _server_error;
+}
+
+void
+WebServerControl::writePortFile(const unsigned int port) const
+{
+  mooseAssert(_port_file, "Not set");
+
+  // Written to a sibling and renamed, because rename within a directory is
+  // atomic and a client polling for the file must never read a partial value
+  const std::string temporary_path = *_port_file + ".tmp";
+  {
+    std::ofstream out(temporary_path);
+    if (!out)
+      mooseError("Failed to open '", temporary_path, "' to write the server port");
+    out << port << std::endl;
+    if (!out)
+      mooseError("Failed to write the server port to '", temporary_path, "'");
+  }
+  if (std::rename(temporary_path.c_str(), _port_file->c_str()) != 0)
+    mooseError("Failed to rename '", temporary_path, "' to '", *_port_file, "'");
 }
 
 /// Explicitly instantiate the addServerAction method for the valid request types

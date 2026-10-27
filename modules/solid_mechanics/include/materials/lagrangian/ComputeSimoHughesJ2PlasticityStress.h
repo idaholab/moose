@@ -19,7 +19,6 @@
 /* This class implements the Simo-Hughes style J2 plasticity */
 class ComputeSimoHughesJ2PlasticityStress
   : public DerivativeMaterialInterface<ComputeLagrangianStressPK1>,
-    public GuaranteeConsumer,
     public SingleVariableReturnMappingSolution
 {
 public:

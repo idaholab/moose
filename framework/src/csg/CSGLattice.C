@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,10 +13,8 @@
 namespace CSG
 {
 
-CSGLattice::CSGLattice(const std::string & name,
-                       const std::string & lattice_type,
-                       const std::optional<OuterVariant> & outer)
-  : _name(name), _lattice_type(lattice_type), _outer_type("VOID"), _outer_universe(nullptr)
+CSGLattice::CSGLattice(const std::string & name, const std::optional<OuterVariant> & outer)
+  : _name(name), _outer_type("VOID"), _outer_universe(nullptr)
 {
   CSGUtils::checkValidCSGName(name);
   // Handle the outer variant if provided

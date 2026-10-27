@@ -26,9 +26,7 @@ public:
 protected:
   virtual void init() override;
 
-  virtual Real computeDT() override;
-
-  virtual Real getNextTimeInSequence() override;
+  virtual void refreshSequence() override;
 
   void updateTimeSequence();
 

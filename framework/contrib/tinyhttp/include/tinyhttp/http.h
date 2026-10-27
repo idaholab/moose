@@ -40,6 +40,7 @@
 #define TINYHTTP_CLIENT_TIMEOUT (30) // Seconds
 #endif
 
+#include <atomic>
 #include <cstdint>
 #include <cstring>
 #include <string>
@@ -454,6 +455,9 @@ class HttpServer {
     std::vector<std::pair<std::regex, std::shared_ptr<HandlerBuilder>>> mReHandlers;
     MessageBuilder mDefault404Message, mDefault400Message;
     int mSocket = -1;
+    /// Port that startListening() bound, zero until it has bound one. Written by
+    /// the thread inside startListening() and read by whoever started it.
+    std::atomic<uint16_t> mBoundPort = 0;
     bool mCleanupThreadShutdown = false;
 
     std::shared_ptr<HttpResponse> processRequest(std::string key, const HttpRequest& req) {
@@ -551,6 +555,13 @@ class HttpServer {
         }
 
         void startListening(const std::variant<uint16_t, std::string> listen_on);
+
+        /// Get the port that startListening() bound, or zero if it has not bound
+        /// one yet. Passing port 0 to startListening() has the operating system
+        /// choose a free port, and this is the only place that choice can be
+        /// read. Stays zero when listening on a file socket, which has no port.
+        uint16_t boundPort() const { return mBoundPort; }
+
         void shutdown();
 };
 

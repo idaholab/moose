@@ -69,6 +69,5 @@ TestTwoPhaseNCGFluidProperties::TestTwoPhaseNCGFluidProperties(const InputParame
         getParam<std::vector<UserObjectName>>("fp_ncgs");
     _fe_problem.addUserObject(class_name, _vapor_mixture_name, params);
   }
-  _fp_vapor_mixture =
-      &_fe_problem.getUserObject<VaporMixtureFluidProperties>(_vapor_mixture_name);
+  _fp_vapor_mixture = &_fe_problem.getUserObject<VaporMixtureFluidProperties>(_vapor_mixture_name);
 }

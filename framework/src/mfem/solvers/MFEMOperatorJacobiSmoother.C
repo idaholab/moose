@@ -17,14 +17,19 @@ registerMooseObject("MooseApp", MFEMOperatorJacobiSmoother);
 InputParameters
 MFEMOperatorJacobiSmoother::validParams()
 {
-  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
+  InputParameters params =
+      Moose::MFEM::LORLinearSolverBase<mfem::OperatorJacobiSmoother>::validParams();
   params.addClassDescription("MFEM solver for performing Jacobi smoothing of the equation system.");
-
+  params.addParam<mfem::real_t>(
+      "damping",
+      1.0,
+      "Damping factor omega for the scaled-Jacobi iteration y = omega * D^{-1} * x. "
+      "When used as a multigrid smoother, omega must satisfy omega < 2/lambda_max(D^{-1}A).");
   return params;
 }
 
 MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters)
+  : Moose::MFEM::LORLinearSolverBase<mfem::OperatorJacobiSmoother>(parameters)
 {
   ConstructSolver();
 }
@@ -32,20 +37,15 @@ MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & p
 void
 MFEMOperatorJacobiSmoother::ConstructSolver()
 {
-  _solver = std::make_unique<mfem::OperatorJacobiSmoother>();
-  _solver->iterative_mode = getParam<bool>("use_initial_guess");
+  auto solver = std::make_unique<mfem::OperatorJacobiSmoother>(getParam<double>("damping"));
+  SetSolverParameters(*solver);
+  _solver = std::move(solver);
 }
 
 void
-MFEMOperatorJacobiSmoother::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers)
+MFEMOperatorJacobiSmoother::SetSolverParameters(mfem::OperatorJacobiSmoother & solver)
 {
-  if (_lor)
-  {
-    CheckSpectralEquivalence(a);
-    mfem::Array<int> ess_tdofs;
-    a.ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
-    _solver.reset(new mfem::LORSolver<mfem::OperatorJacobiSmoother>(a, ess_tdofs));
-  }
+  solver.iterative_mode = getParam<bool>("use_initial_guess");
 }
 
 #endif

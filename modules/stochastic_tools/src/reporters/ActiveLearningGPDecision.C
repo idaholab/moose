@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "ActiveLearningGPDecision.h"
 #include "Sampler.h"
@@ -46,6 +47,8 @@ ActiveLearningGPDecision::ActiveLearningGPDecision(const InputParameters & param
     _learning_function(getParam<MooseEnum>("learning_function")),
     _learning_function_threshold(getParam<Real>("learning_function_threshold")),
     _learning_function_parameter(getParam<Real>("learning_function_parameter")),
+    _inputs_batch(declareRecoverableData<std::vector<std::vector<Real>>>("inputs_batch")),
+    _outputs_batch(declareRecoverableData<std::vector<Real>>("outputs_batch")),
     _al_gp(getUserObject<ActiveLearningGaussianProcess>("al_gp")),
     _gp_eval(getSurrogateModel<GaussianProcessSurrogate>("gp_evaluator")),
     _flag_sample(declareValue<std::vector<bool>>(
@@ -59,7 +62,7 @@ ActiveLearningGPDecision::ActiveLearningGPDecision(const InputParameters & param
         declareValue<std::vector<Real>>("gp_mean", std::vector<Real>(sampler().getNumberOfRows()))),
     _gp_std(
         declareValue<std::vector<Real>>("gp_std", std::vector<Real>(sampler().getNumberOfRows()))),
-    _decision(true),
+    _decision(declareRecoverableData<bool>("decision", true)),
     _inputs_global(getGlobalInputData()),
     _outputs_global(getGlobalOutputData())
 {
@@ -138,3 +141,5 @@ ActiveLearningGPDecision::needSample(const std::vector<Real> &,
     val = _gp_mean[global_ind];
   return _decision;
 }
+
+#endif

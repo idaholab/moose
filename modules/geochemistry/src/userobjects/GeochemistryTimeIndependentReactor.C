@@ -93,29 +93,31 @@ GeochemistryTimeIndependentReactor::initialSetup()
 }
 
 const GeochemicalSystem &
-    GeochemistryTimeIndependentReactor::getGeochemicalSystem(dof_id_type /*node_id*/) const
+GeochemistryTimeIndependentReactor::getGeochemicalSystem(dof_id_type /*node_id*/) const
 {
   return _egs;
 }
 
 const std::stringstream &
-    GeochemistryTimeIndependentReactor::getSolverOutput(dof_id_type /*node_id*/) const
+GeochemistryTimeIndependentReactor::getSolverOutput(dof_id_type /*node_id*/) const
 {
   return _solver_output[0];
 }
 
-unsigned GeochemistryTimeIndependentReactor::getSolverIterations(dof_id_type /*node_id*/) const
+unsigned
+GeochemistryTimeIndependentReactor::getSolverIterations(dof_id_type /*node_id*/) const
 {
   return _tot_iter[0];
 }
 
-Real GeochemistryTimeIndependentReactor::getSolverResidual(dof_id_type /*node_id*/) const
+Real
+GeochemistryTimeIndependentReactor::getSolverResidual(dof_id_type /*node_id*/) const
 {
   return _abs_residual[0];
 }
 
 const DenseVector<Real> &
-    GeochemistryTimeIndependentReactor::getMoleAdditions(dof_id_type /*node_id*/) const
+GeochemistryTimeIndependentReactor::getMoleAdditions(dof_id_type /*node_id*/) const
 {
   return _mole_additions;
 }

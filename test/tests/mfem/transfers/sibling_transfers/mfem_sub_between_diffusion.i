@@ -4,7 +4,7 @@
 []
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../../mesh/square_quad9.e
 []
 
@@ -91,20 +91,18 @@
 
 [VectorPostprocessors]
   [nodal_sample]
-    type = MFEMLineValueSampler
+    type = MFEMVariableLineValueSampler
     variable = 'received_nodal'
     start_point = '0.0 0.0 0.0'
     end_point = '1.0 1.0 0.0'
     num_points = 14
-    execute_on = TIMESTEP_END
   []
   [elem_sample]
-    type = MFEMLineValueSampler
+    type = MFEMVariableLineValueSampler
     variable = 'received_elem'
     start_point = '0.0 0.0 0.0'
     end_point = '1.0 1.0 0.0'
     num_points = 14
-    execute_on = TIMESTEP_END
   []
 []
 

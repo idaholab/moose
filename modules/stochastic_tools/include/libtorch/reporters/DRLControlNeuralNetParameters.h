@@ -25,9 +25,9 @@ public:
   static InputParameters validParams();
   DRLControlNeuralNetParameters(const InputParameters & params);
 
-  void initialize() override{};
-  void execute() override{};
-  void finalize() override{};
+  void initialize() override {};
+  void execute() override {};
+  void finalize() override {};
 };
 
 #endif

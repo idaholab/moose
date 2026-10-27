@@ -75,6 +75,24 @@
       mesh_mode = REPLICATED
       detail = 'specifies a final generator to create a CSG representation for an intermediate generator.'
     []
+    [csg_only_poly_unit]
+      type = 'JSONDiff'
+      input = 'csg_only_poly_unit.i'
+      cli_args = '--csg-only'
+      jsondiff = 'csg_only_poly_unit_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'includes an engineering unit.'
+    []
+    [csg_only_poly_unit_expand]
+      type = 'JSONDiff'
+      input = 'csg_only_poly_unit_expand.i'
+      cli_args = '--csg-only'
+      jsondiff = 'csg_only_poly_unit_expand_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'includes an engineering unit that has been expanded.'
+    []
   []
   [errors]
     requirement = 'The system shall report an error when generating a mesh in CSG-only mode when'

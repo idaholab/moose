@@ -39,25 +39,33 @@ P_out = 2.0e5 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  T_tol = 1.0e-6
-  P_tol = 1.0e-6
+  T_tol = 1.0e-8
+  P_tol = 1.0e-8
+  rtol = 1.0e-10
+  atol = 1.0e-10
+  mass_flow_equation_relaxation = 0.8
+  pressure_equation_relaxation = 0.8
+  crossflow_equation_relaxation = 0.08
+  mass_flow_relaxation = 0.8
+  pressure_relaxation = 0.8
+  crossflow_relaxation = 0.8
   implicit = true
   segregated = false
   duct_HTC_closure = 'gnielinski'
-  pin_HTC_closure = 'Dittus-Boelter'
-  friction_closure = 'cheng'
-  mixing_closure = 'cheng_todreas'
+  pin_HTC_closure = 'gnielinski'
+  friction_closure = 'Chen'
+  mixing_closure = 'Chen_Todreas'
 []
 
 [SCMClosures]
-  [cheng]
-    type = SCMFrictionUpdatedChengTodreas
+  [Chen]
+    type = SCMFrictionChenTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
   []
-  [cheng_todreas]
-    type = SCMMixingChengTodreas
+  [Chen_Todreas]
+    type = SCMMixingChenTodreas
   []
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter

@@ -209,6 +209,76 @@ Here
 
 Although unusual, PorousFlow also allows $P_{\mathrm{wellbore}}$ to represent a temperature, by setting `function_of = temperature`, which is useful for non-fluid models that contain polyline sources/sinks of heat.
 
+### The wellbore pressure with a temperature-dependent fluid density
+
+A single constant $\gamma$ is a poor approximation of the fluid column in a well with a
+significant thermal gradient along its length, such as a geothermal well.  For this case,
+[`PorousFlowPeacemanBorehole`](PorousFlowPeacemanBorehole.md) may instead be given a
+`unit_weight_fp` parameter (a `SinglePhaseFluidProperties` UserObject), a
+`unit_weight_temperature`, and a `unit_weight_gravity` vector, in which case the wellbore
+pressure is built by integrating a temperature-dependent fluid density along the well, instead
+of using a constant `unit_weight`:
+\begin{equation}
+P_{\mathrm{wellbore}}(x_{N-1}) = P_{\mathrm{bot}}, \qquad
+P_{\mathrm{wellbore}}(x_{i}) = P_{\mathrm{wellbore}}(x_{i+1}) +
+\tfrac{1}{2}\left(\rho_{i} + \rho_{i+1}\right)\, \mathbf{g}\cdot\left(x_{i} - x_{i+1}\right) \ ,
+\end{equation}
+where the wellbore points are indexed $0$ (top) to $N-1$ (bottom, where $P_{\mathrm{bot}}$ =
+`bottom_p_or_t` is defined), $\mathbf{g}$ is `unit_weight_gravity`, and
+\begin{equation}
+\rho_{i} = \rho\left(P_{\mathrm{ref}}, T(x_{i})\right)
+\end{equation}
+is the fluid density from `unit_weight_fp`, evaluated at the fixed reference pressure
+`unit_weight_reference_pressure` ($P_{\mathrm{ref}}$) and the temperature $T(x_{i})$ sampled from
+`unit_weight_temperature` at each wellbore point.
+
+!alert note
+These four parameters are deliberately not named `fp`/`gravity`/`temperature_variable`, even
+though that would mirror convention elsewhere in PorousFlow, because those are common
+`[GlobalParams]` names used by unrelated Darcy kernels or fluid-properties materials.  An input
+file that sets `gravity` or `fp` at the `[GlobalParams]` level, intending it for those other
+objects, would otherwise silently activate (or fail to validate) this mode on every
+`PorousFlowPeacemanBorehole` in the input.
+
+A fixed reference pressure is used, rather than the local (coupled) porepressure, because liquid
+water's density is far more sensitive to temperature than to the modest pressure range
+encountered in a wellbore (for water, roughly a 0.9% density change per 20&nbsp;MPa of pressure,
+versus several percent per 100&nbsp;K of temperature).  This trapezoidal-rule integration reduces
+exactly to the constant-`unit_weight` formula above when $\rho$ is constant along the well, with
+$\gamma = \rho\mathbf{g}$.
+
+The temperature is sampled from the current nonlinear iterate every time the wellbore pressure
+is (re)computed, so the residual is always consistent with the current best estimate of the
+in-well density profile.  However, the Jacobian does not differentiate $P_{\mathrm{wellbore}}$
+with respect to temperature: doing so exactly would require coupling each wellbore point's
+residual to the temperature degrees of freedom at every other point between it and the bottom of
+the well, which lie in other finite elements that a `DiracKernel` cannot assemble into.  This is
+a deliberate approximation: it does not change the converged solution (since the residual is
+exact), but may mildly slow Newton convergence.
+
+Note that `unit_weight_fp` controls only the density of the fluid *column inside the well*, used
+solely to build $P_{\mathrm{wellbore}}$.  It is independent of the *reservoir* fluid properties
+used to compute the mobility, enthalpy, etc. multipliers described below (`use_mobility`,
+`use_enthalpy`, ...), which continue to come from the reservoir's own PorousFlow materials.  The
+two may legitimately use different fluid-properties objects, pressures and temperatures.
+
+`unit_weight` and `unit_weight_fp` are mutually exclusive: exactly one must be supplied.
+`unit_weight_fp` is not compatible with `function_of = temperature`, since in that mode
+`bottom_p_or_t` is itself a temperature, not a pressure, so there is no pressure profile to
+build.
+
+### Reporting the flux at each point of a line sink
+
+By default, [`PorousFlowSumQuantity`](PorousFlowSumQuantity.md) and
+[`PorousFlowPlotQuantity`](PorousFlowPlotQuantity.md) only give the *total* mass or heat flowing
+into or out of an entire line sink (`PorousFlowPeacemanBorehole` or
+[`PorousFlowPolyLineSink`](PorousFlowPolyLineSink.md)) during a time step.  To see the flow-rate
+*profile* along the line sink instead, supply a `PointFluxUO` parameter naming a
+[`PorousFlowPointFluxQuantity`](PorousFlowPointFluxQuantity.md) UserObject, and read its values
+with a [`PorousFlowPlotPointFluxQuantity`](PorousFlowPlotPointFluxQuantity.md)
+VectorPostprocessor, which reports the instantaneous flow rate (not multiplied by the timestep
+size) at each point of the line sink, alongside that point's coordinates.
+
 ### Peaceman's fluid flux
 
 Peaceman writes $f$ as

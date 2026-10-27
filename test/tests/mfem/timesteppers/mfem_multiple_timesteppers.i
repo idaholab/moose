@@ -3,7 +3,7 @@
 []
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/square.e
 []
 
@@ -57,13 +57,11 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHyprePCG
     preconditioner = boomeramg
@@ -111,7 +109,6 @@
 [Postprocessors]
   [timestep]
     type = TimePostprocessor
-    execute_on = 'timestep_end'
   []
 []
 

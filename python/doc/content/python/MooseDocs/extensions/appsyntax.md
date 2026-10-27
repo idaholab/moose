@@ -88,6 +88,31 @@ available settings for the `children` command are provided below.
                 id=appsyntax-children-settings
                 caption=Command settings for the `!syntax children` command.
 
+## Object Parameter (`!param`) id=param
+
+While the `!syntax parameters` command (see [appsyntax-parameters-example]) displays an entire
+input parameters table, the `param` command displays a single input file parameter inline within a
+sentence, which is useful for referring to a specific parameter within descriptive text. Unlike the
+other commands on this page, `param` is invoked using the markdown link syntax rather than the
+`!command subcommand` form, with the object syntax and parameter name (separated by a slash)
+supplied as the link target, as in [appsyntax-param-example].
+
+!devel! example id=appsyntax-param-example caption=Example use of the `!param` command.
+The `variable` parameter, [!param](/Kernels/Diffusion/variable), of the Diffusion kernel is required.
+!devel-end!
+
+The resulting link opens a modal window containing the same information (type, description, default,
+etc.) that would appear for that parameter within a `!syntax parameters` table.
+
+If the referenced object syntax or parameter name cannot be found, an error is raised that lists the
+closest matching parameter names, to aid in catching typos.
+
+If the page containing the `!param` command is associated with content marked `external` (see
+[MooseDocs/config.md#optional-dependencies]), the parameter information is not available because the
+application supplying that syntax was not built. In this case, `!param` skips creating the modal
+link, logs a warning, and instead renders the plain object syntax and parameter name as placeholder
+text so that the surrounding sentence is not left with a gap.
+
 ## Actions, Objects, and Systems (`!syntax list`)
 
 MOOSE is based on systems (e.g., Kernels), where each system contains a set of objects, actions,

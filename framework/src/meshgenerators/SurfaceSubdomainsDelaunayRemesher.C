@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -295,11 +295,8 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   const auto new_block_id_1d = MooseMeshUtils::getNextFreeSubdomainID(*mesh_2d_dummy);
 
   if (has_external_side)
-    MooseMeshUtils::createSubdomainFromSidesets(*mesh_2d_dummy,
-                                                {std::to_string(mesh_2d_ext_bdry)},
-                                                new_block_id_1d,
-                                                SubdomainName(),
-                                                type());
+    MooseMeshUtils::createSubdomainFromSidesets(
+        *mesh_2d_dummy, {std::to_string(mesh_2d_ext_bdry)}, new_block_id_1d, SubdomainName());
 
   // Create a 1D mesh from the 1D block
   auto mesh_1d = buildMeshBaseObject();
@@ -448,6 +445,13 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
       }
     }
   }
+
+  // get_mesh_subdomains() pulls from a cache, and can scream at us
+  // if the Mesh thinks the element caches have been invalidated by
+  // Modification.
+  if (!mesh_2d.preparation().has_cached_elem_data)
+    mesh_2d.cache_elem_data();
+
   // Give the old subdomain to all elements
   const auto common_id = mesh_2d.get_mesh_subdomains().begin();
   for (auto & elem : mesh->active_element_ptr_range())

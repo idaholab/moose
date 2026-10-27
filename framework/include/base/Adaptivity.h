@@ -208,6 +208,13 @@ public:
   void setTimeActive(Real start_time, Real stop_time);
 
   /**
+   * Sets the boolean control flag to enable / disable adaptivity
+   * @param adapt_control_flag a pointer to a controllable boolean
+   * dictating if adaptivity should be executed or not on a given step
+   */
+  void setAdaptivityControlFlag(const bool * adapt_control_flag);
+
+  /**
    * Tells this object we're using the "new" adaptivity system.
    */
   void setUseNewSystem();
@@ -305,6 +312,8 @@ protected:
   Real _start_time;
   /// When adaptivity stops
   Real _stop_time;
+  /// If adaptivity is allowed by the control system.
+  const bool * _controls_allow_adaptivity;
   /// The number of adaptivity cycles per step
   unsigned int _cycles_per_step;
 

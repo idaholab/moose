@@ -10,6 +10,10 @@
 #include "LMWeightedGapUserObject.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
+#include "MortarContactUtils.h"
+#include "AutomaticMortarGeneration.h"
+
+#include "libmesh/fe.h"
 
 registerMooseObject("ContactApp", LMWeightedGapUserObject);
 
@@ -24,6 +28,12 @@ LMWeightedGapUserObject::newParams()
   params.addCoupledVar("aux_lm",
                        "Auxiliary Lagrange multiplier variable that is utilized together with the "
                        "Petrov-Galerkin approach.");
+  params.addParam<bool>(
+      "use_nodal_scaling",
+      false,
+      "Whether to apply the node-based Lagrange-multiplier scaling of Popp et al. (2013) to "
+      "improve the conditioning of the linear system when secondary elements are only partially "
+      "covered (edge dropping). See the documentation for the current limitations.");
   return params;
 }
 
@@ -33,6 +43,8 @@ LMWeightedGapUserObject::validParams()
   InputParameters params = WeightedGapUserObject::validParams();
   params.addClassDescription(
       "Provides the mortar normal Lagrange multiplier for constraint enforcement.");
+  addNodalNormalCoupling(params);
+  params.suppressParameter<bool>("ghost_point_neighbors");
   params += LMWeightedGapUserObject::newParams();
   return params;
 }
@@ -41,7 +53,8 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
   : WeightedGapUserObject(parameters),
     _lm_var(getVar("lm_variable", 0)),
     _use_petrov_galerkin(getParam<bool>("use_petrov_galerkin")),
-    _aux_lm_var(isCoupled("aux_lm") ? getVar("aux_lm", 0) : nullptr)
+    _aux_lm_var(isCoupled("aux_lm") ? getVar("aux_lm", 0) : nullptr),
+    _use_nodal_scaling(getParam<bool>("use_nodal_scaling"))
 {
   checkInput(_lm_var, "lm_variable");
   verifyLagrange(*_lm_var, "lm_variable");
@@ -55,6 +68,30 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
     paramError("aux_lm",
                "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
                "false`.");
+
+  if (_use_nodal_scaling)
+  {
+    // kappa_j's denominator int_e N_j is zero at TRI6 and TET10 vertices and negative at QUAD8 and
+    // HEX20 corners, and its numerator has to be integrated with the same basis, so every variable
+    // entering kappa_j has to be first order.
+    if (_lm_var->feType().order != FIRST || _disp_x_var->feType().order != FIRST ||
+        (_use_petrov_galerkin && _aux_lm_var->feType().order != FIRST))
+      paramError("use_nodal_scaling",
+                 "Node-based scaling is only implemented for first-order Lagrange multiplier and "
+                 "displacement variables.");
+
+    // Scaling rescales the partially covered multiplier DOFs that the default treatment zeroes.
+    if (!getParam<bool>("correct_edge_dropping"))
+      paramError("use_nodal_scaling",
+                 "Node-based scaling requires 'correct_edge_dropping = true'.");
+
+    // This FE object is shared by all fullNodalIntegrals() evaluations.
+    const FEType fe_type(FIRST, LAGRANGE);
+    const auto lower_dim = _subproblem.mesh().dimension() - 1;
+    _nodal_scaling_fe = FEBase::build(lower_dim, fe_type);
+    _nodal_scaling_qrule = std::make_unique<QGauss>(lower_dim, fe_type.default_quadrature_order());
+    _nodal_scaling_fe->attach_quadrature_rule(_nodal_scaling_qrule.get());
+  }
 }
 
 void
@@ -77,6 +114,31 @@ LMWeightedGapUserObject::verifyLagrange(const MooseVariable & var,
     paramError(var_param_name, "The Lagrange multiplier variables must be of Lagrange type");
 }
 
+void
+LMWeightedGapUserObject::verifyLagrange(const MooseVariable & var,
+                                        const std::string & var_param_name,
+                                        const MooseVariable & reference_var,
+                                        const std::string & reference_var_param_name) const
+{
+  verifyLagrange(var, var_param_name);
+
+  if (var.feType() != reference_var.feType())
+    paramError(var_param_name,
+               "'",
+               var_param_name,
+               "' must use the same finite element type (order and family) as '",
+               reference_var_param_name,
+               "'.");
+
+  if (var.useDual() != reference_var.useDual())
+    paramError(var_param_name,
+               "'",
+               var_param_name,
+               "' must use the same dual/standard basis setting as '",
+               reference_var_param_name,
+               "'.");
+}
+
 const VariableTestValue &
 LMWeightedGapUserObject::test() const
 {
@@ -86,7 +148,143 @@ LMWeightedGapUserObject::test() const
 const ADVariableValue &
 LMWeightedGapUserObject::contactPressure() const
 {
+  // Under node-based scaling, the stored multiplier is zhat_j = kappa_j*lambda_j.
+  // nodalContactPressure() and getNormalContactPressure() return the physical pressure lambda_j.
   return _lm_var->adSlnLower();
+}
+
+void
+LMWeightedGapUserObject::initialize()
+{
+  WeightedGapUserObject::initialize();
+  initializeNodalScaling();
+}
+
+void
+LMWeightedGapUserObject::finalize()
+{
+  WeightedGapUserObject::finalize();
+  finalizeNodalScaling();
+}
+
+void
+LMWeightedGapUserObject::computeQpIProperties()
+{
+  WeightedGapUserObject::computeQpIProperties();
+  computeQpINodalScaling();
+}
+
+void
+LMWeightedGapUserObject::initializeNodalScaling()
+{
+  if (!_use_nodal_scaling)
+    return;
+
+  _dof_to_covered_fraction_sum.clear();
+  _dof_to_nodal_scale.clear();
+  _elem_to_full_nodal_integral.clear();
+  _dof_to_full_normalization.clear();
+  _full_normalization_elems.clear();
+}
+
+void
+LMWeightedGapUserObject::computeQpINodalScaling()
+{
+  if (!_use_nodal_scaling)
+    return;
+
+  const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
+
+  // Numerator of kappa_j (Popp 2013 eq. 36): covered fraction (int_{e_int} N_j)/(int_e N_j) summed
+  // over adjacent elements. Both use the standard N_j (fePhiLower), not the dual test, so kappa_j
+  // is 1 at full coverage in every coordinate system.
+  const auto & std_phi = _assembly.fePhiLower<Real>(_disp_x_var->feType());
+  const auto & full_integrals = fullNodalIntegrals(_lower_secondary_elem);
+  _dof_to_covered_fraction_sum[dof] += std_phi[_i][_qp] * _qp_factor / full_integrals[_i];
+
+  // Coverage-independent divisor for `normalize_c` (see normalizeCDivisor()): sum the full-element
+  // integral int_e N_j once per distinct adjacent element, not once per quadrature point, since it
+  // does not depend on qp and multiple mortar segments may cover the same element.
+  if (_full_normalization_elems[dof].insert(_lower_secondary_elem->id()).second)
+    _dof_to_full_normalization[dof] += full_integrals[_i];
+}
+
+void
+LMWeightedGapUserObject::finalizeNodalScaling()
+{
+  if (!_use_nodal_scaling)
+    return;
+
+  // Reduce the processor-local numerators (the thread sums only rank-owned elements).
+  // send_data_back = true: non-owner ranks also need kappa_j for the primary-side coupling.
+  Moose::Mortar::Contact::communicateRealObject(_dof_to_covered_fraction_sum,
+                                                _subproblem.mesh(),
+                                                _nodal,
+                                                _communicator,
+                                                /*send_data_back=*/true);
+
+  // Same reduction for the normalize_c divisor sum; also needed on non-owner ranks.
+  Moose::Mortar::Contact::communicateRealObject(_dof_to_full_normalization,
+                                                _subproblem.mesh(),
+                                                _nodal,
+                                                _communicator,
+                                                /*send_data_back=*/true);
+
+  // Divide by n_j^e (adjacent-element count, including fully dropped neighbors) for the eq. 36
+  // mean; the fully ghosted mortar interface makes that count global on every process.
+  const auto & nodes_to_secondary_elem = amg().nodesToSecondaryElem();
+  for (const auto & [dof, fraction_sum] : _dof_to_covered_fraction_sum)
+    _dof_to_nodal_scale[dof] =
+        fraction_sum / libmesh_map_find(nodes_to_secondary_elem, dof->id()).size();
+}
+
+const std::vector<Real> &
+LMWeightedGapUserObject::fullNodalIntegrals(const Elem * const elem)
+{
+  const auto it = _elem_to_full_nodal_integral.find(elem->id());
+  if (it != _elem_to_full_nodal_integral.end())
+    return it->second;
+
+  // A separate finite element avoids reinit of the shared mortar-segment state.
+  const std::vector<Real> & JxW = _nodal_scaling_fe->get_JxW();
+  const std::vector<Point> & q_points = _nodal_scaling_fe->get_xyz();
+  const std::vector<std::vector<Real>> & phi = _nodal_scaling_fe->get_phi();
+  _nodal_scaling_fe->reinit(elem);
+
+  std::vector<Real> integrals(phi.size(), 0);
+  for (const auto qp : make_range(_nodal_scaling_qrule->n_points()))
+  {
+    Real coord;
+    coordTransformFactor(_subproblem, elem->subdomain_id(), q_points[qp], coord);
+    for (const auto j : index_range(integrals))
+      integrals[j] += phi[j][qp] * JxW[qp] * coord;
+  }
+
+  return _elem_to_full_nodal_integral.emplace(elem->id(), std::move(integrals)).first->second;
+}
+
+const VariableTestValue &
+LMWeightedGapUserObject::tractionBasis() const
+{
+  return _lm_var->phiLower();
+}
+
+ADReal
+LMWeightedGapUserObject::nodalContactPressure(const Node & node) const
+{
+  const auto sys_num = _lm_var->sys().number();
+  const auto var_num = _lm_var->number();
+  mooseAssert(node.n_dofs(sys_num, var_num),
+              "The Lagrange multiplier must have a degree of freedom at this secondary node.");
+
+  // Seed the lower-dimensional nodal Lagrange multiplier derivative explicitly.
+  const auto dof_index = node.dof_number(sys_num, var_num, 0);
+  ADReal nodal_pressure = (*_lm_var->sys().currentSolution())(dof_index);
+  if (Moose::doDerivatives(_subproblem, _sys))
+    Moose::derivInsert(nodal_pressure.derivatives(), dof_index, 1.);
+  // Recover the physical pressure lambda_j = zhat_j / kappa_j (Popp 2013 eq. 39). nodalScale() is
+  // keyed by displaced-mesh node pointers, so resolve the supplied node id through that mesh.
+  return nodal_pressure / nodalScale(_subproblem.mesh().nodePtr(node.id()));
 }
 
 Real
@@ -100,5 +298,8 @@ LMWeightedGapUserObject::getNormalContactPressure(const Node * const node) const
                "your Lagrange multiplier");
 
   const auto dof_number = node->dof_number(sys_num, var_num, /*component=*/0);
-  return (*_lm_var->sys().currentSolution())(dof_number);
+  // Recover the physical pressure lambda_j = zhat_j / kappa_j (Popp 2013 eq. 39). nodalScale() is
+  // keyed by displaced-mesh node pointers, so resolve the supplied node id through that mesh.
+  return (*_lm_var->sys().currentSolution())(dof_number) /
+         nodalScale(_subproblem.mesh().nodePtr(node->id()));
 }

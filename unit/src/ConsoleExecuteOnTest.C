@@ -12,25 +12,10 @@
 #include "Console.h"
 #include "Moose.h"
 #include "MooseApp.h"
+#include "MooseAppTestUtils.h"
 #include "MooseMain.h"
 
-namespace
-{
-struct Args
-{
-  Args(const std::vector<std::string> & args) : _args(args)
-  {
-    _args.insert(_args.begin(), "/path/to/exe");
-    for (auto & arg : _args)
-      _argv.push_back((char *)arg.data());
-    _argv.push_back(nullptr);
-  }
-  int argc() const { return _argv.size() - 1; }
-  char ** argv() { return _argv.data(); }
-  std::vector<std::string> _args;
-  std::vector<char *> _argv;
-};
-}
+using MooseAppTestUtils::Args;
 
 // Verify that setting execute_on on a Console propagates to sub-type flags
 // (postprocessors, scalars, etc.) that the user did not explicitly configure.

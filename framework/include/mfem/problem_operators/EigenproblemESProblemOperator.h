@@ -22,17 +22,13 @@ class EigensolverBase;
 class EigenproblemESProblemOperator : public EquationSystemProblemOperator
 {
 public:
-  EigenproblemESProblemOperator(MFEMProblem & problem) : EquationSystemProblemOperator(problem)
-  {
-    mooseAssert(std::dynamic_pointer_cast<EigenproblemEquationSystem>(_problem_data.eqn_system),
-                "MFEMProblemData::eqn_system is not an EigenproblemEquationSystem.");
-  }
+  EigenproblemESProblemOperator(MFEMProblem & problem, const std::string & weak_form_name = "");
 
   virtual void Solve() override;
 
   [[nodiscard]] EigenproblemEquationSystem * GetEquationSystem() const override
   {
-    return static_cast<EigenproblemEquationSystem *>(
+    return cast_ptr<EigenproblemEquationSystem *>(
         EquationSystemProblemOperator::GetEquationSystem());
   }
 
@@ -40,8 +36,8 @@ private:
   void RecoverEigenproblemSolution(GridFunctions & gridfunctions, EigensolverBase * eigensolver);
 
 protected:
-  /// Add kernels/bcs and assemble the linear part of the equation system
-  void BuildEquationSystemOperator();
+  /// Form the equation-system operator used by the eigensolver.
+  void FormEquationSystemOperator();
 };
 
 } // namespace Moose::MFEM

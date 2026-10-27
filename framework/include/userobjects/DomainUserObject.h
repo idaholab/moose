@@ -104,7 +104,7 @@ public:
    */
   bool shouldExecuteOnInterface() const;
 
-  void checkVariable(const MooseVariableFieldBase & variable) const override;
+  void checkVariable(const MooseVariableBase & variable) const override;
 
 protected:
   const MooseArray<Point> & qPoints() const { return *_current_q_point; }

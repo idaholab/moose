@@ -22,6 +22,7 @@ St_g =
 \end{equation}
 
 where $Pr_t = Pr(Re/\gamma)\sqrt{f/8}$, $\lambda = g/L_x$, and $L_x$ is the lattice-dependent axial length scale. Because this closure is intended for low-Prandtl-number liquid-metal applications, the implementation flags a solution warning when the local average $Pr$ is outside the expected low-$Pr$ range.
+The Kim and Chung axial length-scale term uses natural logarithms.
 
 Information about the use of $\beta$ can be found in [Turbulent crossflow](subchannel_theory.md#turbulent-crossflow).
 Additionally, the user may opt to provide the turbulent momentum mixing parameter `CT`. Information about the use of this parameter can be found in [Turbulent momentum transfer](subchannel_theory.md#turbulent-momentum-transfer).

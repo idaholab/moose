@@ -44,6 +44,7 @@
     solution_uo = exo_soln
     variable = u_elem
     from_variable = 'u_elem'
+    weighting_type = average
   []
   [initial_cond_aux]
     type = SolutionIC
@@ -56,6 +57,7 @@
     solution_uo = exo_soln
     variable = u_aux_elem
     from_variable = 'u_aux_elem'
+    weighting_type = average
   []
 []
 

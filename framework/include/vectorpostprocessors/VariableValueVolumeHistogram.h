@@ -29,6 +29,9 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
+  /// get the width of a histogram bin
+  inline Real binWidth() const { return (_max_value - _min_value) / static_cast<Real>(_nbins); }
+
   /// compute the volume contribution at the current quadrature point
   virtual Real computeVolume();
 
@@ -36,13 +39,10 @@ protected:
   const unsigned int _nbins;
 
   /// minimum variable value
-  const Real _min_value;
+  const Real & _min_value;
 
   /// maximum variable value
-  const Real _max_value;
-
-  /// bin width
-  const Real _deltaV;
+  const Real & _max_value;
 
   /// coupled variable that is being binned
   const VariableValue & _value;

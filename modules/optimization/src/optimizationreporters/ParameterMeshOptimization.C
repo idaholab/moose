@@ -16,8 +16,6 @@
 
 #include "ReadExodusMeshVars.h"
 
-using namespace libMesh;
-
 registerMooseObject("OptimizationApp", ParameterMeshOptimization);
 
 InputParameters

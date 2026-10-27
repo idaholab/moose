@@ -49,12 +49,6 @@ public:
   void setInitialCondition(libMesh::PetscVector<Number> & param);
 
   /**
-   * Function to override misfit values with the simulated values from the matrix free hessian
-   * forward solve.
-   */
-  virtual void setMisfitToSimulatedValues(){};
-
-  /**
    * Upper and lower bounds for each parameter being controlled
    *
    * @param i Parameter index
@@ -119,7 +113,7 @@ protected:
   parseInputData(std::string type, Real default_value, unsigned int param_id) const;
 
   /// Sets the initial conditions and bounds right before it is needed.
-  virtual void setICsandBounds(){};
+  virtual void setICsandBounds() {}
 
   /// Parameter names
   const std::vector<ReporterValueName> & _parameter_names;

@@ -58,8 +58,10 @@ TEST_F(ADFluidPropsTest, ad_two_phase)
   const ADReal T_ad(T, dTdU);
 
   const auto & fp_2phase = buildTwoPhaseFluidProperties();
-  const auto & fp_liquid = _fe_problem->getUserObject<SinglePhaseFluidProperties>(fp_2phase.getLiquidName());
-  const auto & fp_vapor = _fe_problem->getUserObject<SinglePhaseFluidProperties>(fp_2phase.getVaporName());
+  const auto & fp_liquid =
+      _fe_problem->getUserObject<SinglePhaseFluidProperties>(fp_2phase.getLiquidName());
+  const auto & fp_vapor =
+      _fe_problem->getUserObject<SinglePhaseFluidProperties>(fp_2phase.getVaporName());
 
   // Latent heat
 

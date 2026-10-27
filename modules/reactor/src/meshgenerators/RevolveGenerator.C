@@ -31,8 +31,6 @@
 #include "libmesh/point.h"
 #include "libmesh/mesh_tools.h"
 
-using namespace libMesh;
-
 // C++ includes
 #include <cmath>
 

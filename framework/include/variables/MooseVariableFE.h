@@ -148,6 +148,8 @@ public:
 
   bool isNodal() const override { return _element_data->isNodal(); }
   bool hasDoFsOnNodes() const override { return _element_data->hasDoFsOnNodes(); }
+  bool supportsQpBasedLoops() const override { return true; }
+  bool supportsGeometricInfoBasedLoops() const override { return false; }
   libMesh::FEContinuity getContinuity() const override { return _element_data->getContinuity(); };
   const Node * const & node() const { return _element_data->node(); }
   const dof_id_type & nodalDofIndex() const override { return _element_data->nodalDofIndex(); }
@@ -345,6 +347,16 @@ public:
   {
     return _element_data->adGradSln();
   }
+
+  /// Face-only AD solution getters; see MooseVariableData::adSlnFace()
+  const ADTemplateVariableValue<OutputType> & adSlnFace() const
+  {
+    return _element_data->adSlnFace();
+  }
+  const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const override
+  {
+    return _element_data->adGradSlnFace();
+  }
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
   {
     return _element_data->adSecondSln();
@@ -510,7 +522,7 @@ public:
   virtual void computeNeighborValues() override;
   virtual void computeLowerDValues() override;
 
-  virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
+  virtual void setNodalValue(const OutputType & value) override;
 
   virtual void setDofValue(const DofValue & value, unsigned int index) override;
 

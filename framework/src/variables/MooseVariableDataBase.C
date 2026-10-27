@@ -13,6 +13,8 @@
 #include "SystemBase.h"
 #include "SubProblem.h"
 #include "MooseVariableField.h"
+#include "MooseMesh.h"
+#include "libmesh/mesh_base.h"
 
 template <typename OutputType>
 MooseVariableDataBase<OutputType>::MooseVariableDataBase(const MooseVariableField<OutputType> & var,
@@ -181,6 +183,8 @@ MooseVariableDataBase<OutputType>::vectorTagValue(TagID tag) const
   if (tag >= _need_vector_tag_u.size())
     const_cast<MooseVariableDataBase<OutputType> *>(this)->resizeVectorTagData(tag);
 
+  _var.requireQpComputations();
+
   _need_vector_tag_u[tag] = true;
 
   if (_sys.hasVector(tag))
@@ -196,6 +200,8 @@ MooseVariableDataBase<OutputType>::vectorTagDofValue(TagID tag) const
   if (tag >= _need_vector_tag_dof_u.size())
     const_cast<MooseVariableDataBase<OutputType> *>(this)->resizeVectorTagData(tag);
 
+  _var.requireQpComputations();
+
   _need_vector_tag_dof_u[tag] = true;
 
   if (_sys.hasVector(tag))
@@ -210,6 +216,8 @@ MooseVariableDataBase<OutputType>::vectorTagGradient(TagID tag) const
 {
   if (tag >= _need_vector_tag_grad.size())
     const_cast<MooseVariableDataBase<OutputType> *>(this)->resizeVectorTagData(tag);
+
+  _var.requireQpComputations();
 
   _need_vector_tag_grad[tag] = true;
 
@@ -228,6 +236,8 @@ MooseVariableDataBase<OutputType>::matrixTagValue(TagID tag) const
     _need_matrix_tag_u.resize(tag + 1, false);
     const_cast<MooseVariableDataBase<OutputType> *>(this)->_matrix_tag_u.resize(tag + 1);
   }
+
+  _var.requireQpComputations();
 
   _need_matrix_tag_u[tag] = true;
 
@@ -308,6 +318,8 @@ MooseVariableDataBase<OutputType>::sln(Moose::SolutionState state) const
   auto functor = [this](TagID tag_id) -> const FieldVariableValue &
   { return vectorTagValue(tag_id); };
 
+  _var.requireQpComputations();
+
   return const_cast<MooseVariableDataBase<OutputType> *>(this)
       ->stateToTagHelper<FieldVariableValue>(state, functor);
 }
@@ -319,6 +331,8 @@ MooseVariableDataBase<OutputType>::gradSln(Moose::SolutionState state) const
   auto functor = [this](TagID tag_id) -> const FieldVariableGradient &
   { return vectorTagGradient(tag_id); };
 
+  _var.requireQpComputations();
+
   return const_cast<MooseVariableDataBase<OutputType> *>(this)
       ->stateToTagHelper<FieldVariableGradient>(state, functor);
 }
@@ -328,6 +342,8 @@ const typename MooseVariableDataBase<OutputType>::DofValues &
 MooseVariableDataBase<OutputType>::vectorTagDofValue(Moose::SolutionState state) const
 {
   auto functor = [this](TagID tag_id) -> const DofValues & { return vectorTagDofValue(tag_id); };
+
+  _var.requireQpComputations();
 
   return const_cast<MooseVariableDataBase<OutputType> *>(this)->stateToTagHelper<DofValues>(
       state, functor);
@@ -363,11 +379,20 @@ MooseVariableDataBase<OutputType>::dofValuesPreviousNL() const
 
 template <typename OutputType>
 void
-MooseVariableDataBase<OutputType>::setNodalValue(const OutputType & value, unsigned int idx)
+MooseVariableDataBase<OutputType>::setNodalValue(const OutputType & value)
 {
+  // dof_values here is indexed per shape function, with each entry holding all _count array
+  // components packed into a single OutputType value. setNodalValue writes only one shape
+  // function's value, so it is only valid for a variable with a single shape function, e.g. a
+  // nodal Lagrange variable or a CONSTANT-order elemental variable; a variable with more than
+  // one shape function must use setDofValues instead. A subparametric variable, e.g. the pressure
+  // of a Taylor-Hood pair, has nodes on its elements that carry none of its degrees of freedom;
+  // callers query isNodalDefined() to skip those nodes before reaching this method.
+  mooseAssert(_dof_indices.size() == _count,
+              "setNodalValue is only valid for a variable with one shape function per node");
   auto & dof_values = _vector_tags_dof_u[_solution_tag];
-  mooseAssert(idx < dof_values.size(), "idx is out of the bounds of degree of freedom values");
-  dof_values[idx] = value; // update variable nodal value
+  dof_values.resize(/*n_shapes=*/1);
+  dof_values[0] = value; // update variable nodal value
   _has_dof_values = true;
   _nodal_value = value;
 
@@ -379,12 +404,28 @@ MooseVariableDataBase<OutputType>::setNodalValue(const OutputType & value, unsig
 
 template <>
 void
-MooseVariableDataBase<RealVectorValue>::setNodalValue(const RealVectorValue & value,
-                                                      unsigned int idx)
+MooseVariableDataBase<RealVectorValue>::setNodalValue(const RealVectorValue & value)
 {
+  // Unlike the generic implementation above, a vector-valued variable is never an array
+  // variable, so _count is always 1 and dof_values is indexed per component of the vector
+  // rather than per shape function -- each shape function contributes one raw degree of
+  // freedom per component given the finite element family and order constraints we set below.
+  mooseAssert(_count == 1, "Vector-valued variables cannot be array variables");
+  mooseAssert(
+      _var.feType().family == LAGRANGE_VEC ||
+          (_var.feType().family == MONOMIAL_VEC && _var.feType().order == CONSTANT &&
+           (!_var.feType().p_refinement || !_subproblem.doingPRefinement())),
+      "setNodalValue only makes sense for LAGRANGE_VEC or non-p-refined CONSTANT MONOMIAL_VEC "
+      "vector variables");
+  mooseAssert(_dof_indices.size() <= _var.sys().mesh().getMesh().mesh_dimension(),
+              "The number of dof indices for a vector variable should be at most the mesh manifold "
+              "dimension. We cannot use an exact equality because it's possible the vector "
+              "variable could live on a lower-dimensional manifold.");
+
   auto & dof_values = _vector_tags_dof_u[_solution_tag];
-  for (decltype(idx) i = 0; i < dof_values.size(); ++i, ++idx)
-    dof_values[idx] = value(i);
+  dof_values.resize(_dof_indices.size());
+  for (const auto i : index_range(dof_values))
+    dof_values[i] = value(i);
 
   _has_dof_values = true;
   _nodal_value = value;
@@ -550,6 +591,18 @@ MooseVariableDataBase<OutputType>::fetchDofValues()
       _dof_values_dotdot_old.resize(n);
       _sys.solutionUDotDotOld()->get(_dof_indices, &_dof_values_dotdot_old[0]);
     }
+    if (_need_du_dot_du || _need_dof_du_dot_du)
+    {
+      _dof_du_dot_du.resize(n);
+      for (decltype(n) i = 0; i < n; ++i)
+        _dof_du_dot_du[i] = _sys.duDotDu(_var.number());
+    }
+    if (_need_du_dotdot_du || _need_dof_du_dotdot_du)
+    {
+      _dof_du_dotdot_du.resize(n);
+      for (decltype(n) i = 0; i < n; ++i)
+        _dof_du_dotdot_du[i] = _sys.duDotDotDu();
+    }
   }
 
   for (auto tag : _required_vector_tags)
@@ -577,30 +630,17 @@ MooseVariableDataBase<OutputType>::fetchDofValues()
 
     for (auto tag : active_coupleable_matrix_tags)
     {
-      _matrix_tags_dof_u[tag].resize(n);
       if (_need_matrix_tag_dof_u[tag] || _need_matrix_tag_u[tag])
         if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
         {
           mooseAssert(_sys.getMatrix(tag).closed(),
                       "Matrix with tag '" + std::to_string(tag) + "' should be closed");
           auto & mat = _sys.getMatrix(tag);
+          _matrix_tags_dof_u[tag].resize(n);
           for (unsigned i = 0; i < n; i++)
             _matrix_tags_dof_u[tag][i] = mat(_dof_indices[i], _dof_indices[i]);
         }
     }
-  }
-
-  if (_need_du_dot_du || _need_dof_du_dot_du)
-  {
-    _dof_du_dot_du.resize(n);
-    for (decltype(n) i = 0; i < n; ++i)
-      _dof_du_dot_du[i] = _sys.duDotDu(_var.number());
-  }
-  if (_need_du_dotdot_du || _need_dof_du_dotdot_du)
-  {
-    _dof_du_dotdot_du.resize(n);
-    for (decltype(n) i = 0; i < n; ++i)
-      _dof_du_dotdot_du[i] = _sys.duDotDotDu();
   }
 }
 
@@ -638,7 +678,7 @@ MooseVariableDataBase<RealEigenVector>::fetchDofValues()
     if (_need_u_dotdot || _need_grad_dotdot || _need_dof_values_dotdot)
     {
       libmesh_assert(_sys.solutionUDotDot());
-      getArrayDofValues(*_sys.solutionUDot(), n, _dof_values_dotdot);
+      getArrayDofValues(*_sys.solutionUDotDot(), n, _dof_values_dotdot);
     }
     if (_need_u_dot_old || _need_dof_values_dot_old)
     {

@@ -1,0 +1,351 @@
+{
+    "number_of_parts": 2,
+    "part": 0,
+    "reporters": {
+        "mesh_info": {
+            "type": "MeshInfo",
+            "values": {
+                "local_elems": {
+                    "type": "MeshInfo::InfoMap<MeshInfo::ElemInfo, MeshInfo::ElemInfoItems>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "mesh_info": {
+                "local_elems": null
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "mesh_info": {
+                "local_elems": [
+                    {
+                        "id": 0,
+                        "elem_qualities": {
+                            "jacobian": 0.00963355103616486,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 1,
+                        "elem_qualities": {
+                            "jacobian": 0.008670195932548372,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 2,
+                        "elem_qualities": {
+                            "jacobian": 0.007803176339293533,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 3,
+                        "elem_qualities": {
+                            "jacobian": 0.007022858705364182,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 4,
+                        "elem_qualities": {
+                            "jacobian": 0.010596906139781346,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 5,
+                        "elem_qualities": {
+                            "jacobian": 0.00953721552580321,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 6,
+                        "elem_qualities": {
+                            "jacobian": 0.008583493973222885,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 7,
+                        "elem_qualities": {
+                            "jacobian": 0.0077251445759006,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 8,
+                        "elem_qualities": {
+                            "jacobian": 0.01165659675375949,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 9,
+                        "elem_qualities": {
+                            "jacobian": 0.01049093707838354,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 10,
+                        "elem_qualities": {
+                            "jacobian": 0.009441843370545183,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 11,
+                        "elem_qualities": {
+                            "jacobian": 0.008497659033490668,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 12,
+                        "elem_qualities": {
+                            "jacobian": 0.01282225642913544,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 13,
+                        "elem_qualities": {
+                            "jacobian": 0.011540030786221895,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 14,
+                        "elem_qualities": {
+                            "jacobian": 0.010386027707599702,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 15,
+                        "elem_qualities": {
+                            "jacobian": 0.009347424936839734,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 16,
+                        "elem_qualities": {
+                            "jacobian": 0.014104482072048972,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 17,
+                        "elem_qualities": {
+                            "jacobian": 0.012694033864844073,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 18,
+                        "elem_qualities": {
+                            "jacobian": 0.011424630478359662,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 19,
+                        "elem_qualities": {
+                            "jacobian": 0.0102821674305237,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 20,
+                        "elem_qualities": {
+                            "jacobian": 0.015514930279253882,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 21,
+                        "elem_qualities": {
+                            "jacobian": 0.013963437251328491,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 22,
+                        "elem_qualities": {
+                            "jacobian": 0.012567093526195637,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 23,
+                        "elem_qualities": {
+                            "jacobian": 0.011310384173576079,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 1
+                    },
+                    {
+                        "id": 24,
+                        "elem_qualities": {
+                            "jacobian": 0.01706642330717927,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 25,
+                        "elem_qualities": {
+                            "jacobian": 0.01535978097646134,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 26,
+                        "elem_qualities": {
+                            "jacobian": 0.0138238028788152,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 27,
+                        "elem_qualities": {
+                            "jacobian": 0.012441422590933686,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 28,
+                        "elem_qualities": {
+                            "jacobian": 0.01877306563789718,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 29,
+                        "elem_qualities": {
+                            "jacobian": 0.01689575907410746,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 30,
+                        "elem_qualities": {
+                            "jacobian": 0.015206183166696708,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 31,
+                        "elem_qualities": {
+                            "jacobian": 0.013685564850027043,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 32,
+                        "elem_qualities": {
+                            "jacobian": 0.020650372201686917,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 33,
+                        "elem_qualities": {
+                            "jacobian": 0.01858533498151822,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 34,
+                        "elem_qualities": {
+                            "jacobian": 0.01672680148336639,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 35,
+                        "elem_qualities": {
+                            "jacobian": 0.01505412133502976,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 36,
+                        "elem_qualities": {
+                            "jacobian": 0.0227154094218556,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 37,
+                        "elem_qualities": {
+                            "jacobian": 0.020443868479670037,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 38,
+                        "elem_qualities": {
+                            "jacobian": 0.01839948163170303,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    },
+                    {
+                        "id": 39,
+                        "elem_qualities": {
+                            "jacobian": 0.01655953346853273,
+                            "min_angle": 90.0
+                        },
+                        "subdomain_id": 0
+                    }
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

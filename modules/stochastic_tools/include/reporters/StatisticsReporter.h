@@ -136,8 +136,8 @@ public:
   virtual void initialize() final;
 
   /// Not used; all operations are  wrapped in the ReporterStatisticsContext
-  virtual void execute() final{};
-  virtual void finalize() final{};
+  virtual void execute() final {};
+  virtual void finalize() final {};
   virtual void store(nlohmann::json & json) const override;
 
 private:

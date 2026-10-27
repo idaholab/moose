@@ -49,7 +49,16 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
   const auto & libmesh_system = nl.system();
   auto cm = std::make_unique<CouplingMatrix>(n_vars);
 
-  if (!getParam<bool>("full"))
+  // NEWTON and LINEAR solves are best solved with the exact Jacobian, so default to the full
+  // coupling unless the user specified the coupling themselves. This matches the preconditioner
+  // that is created automatically when there is no [Preconditioning] block.
+  const auto solve_type = _fe_problem.solverParams(_nl_sys_num)._type;
+  const bool full = getParam<bool>("full") ||
+                    (!isParamSetByUser("full") && !isParamValid("off_diag_row") &&
+                     getParam<std::vector<NonlinearVariableName>>("coupled_groups").empty() &&
+                     (solve_type == Moose::ST_NEWTON || solve_type == Moose::ST_LINEAR));
+
+  if (!full)
   {
     // put 1s on diagonal
     for (unsigned int i = 0; i < n_vars; ++i)

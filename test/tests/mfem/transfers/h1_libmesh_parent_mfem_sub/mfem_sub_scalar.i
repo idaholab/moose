@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../../mesh/square_quad9.e
 []
 
@@ -42,13 +42,10 @@
   []
 []
 
-[Preconditioner]
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solvers]
   [gmres]
     type = MFEMHypreGMRES
     preconditioner = boomeramg

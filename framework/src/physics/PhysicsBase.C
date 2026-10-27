@@ -140,6 +140,9 @@ PhysicsBase::act()
     addInitialConditions();
 
   // Kernels
+  else if (_current_task == "add_interpolation_method_physics" &&
+           !getParam<bool>("dont_create_kernels"))
+    addFVInterpolationMethods();
   else if (_current_task == "add_kernel" && !getParam<bool>("dont_create_kernels"))
     addFEKernels();
   else if (_current_task == "add_nodal_kernel" && !getParam<bool>("dont_create_kernels"))
@@ -224,6 +227,23 @@ PhysicsBase::act()
     if (_aux_var_names.size() > 0)
       copyVariablesFromMesh(auxVariableNames(), false);
   }
+}
+
+void
+PhysicsBase::addUserObject(const std::string & uo_type,
+                           const std::string & uo_name,
+                           InputParameters & params)
+{
+  mooseAssert(
+      [&]()
+      {
+        const auto supplied = getSuppliedUserObjects();
+        return std::find(supplied.begin(), supplied.end(), uo_name) != supplied.end();
+      }(),
+      "The UserObject '" + uo_name + "' added by Physics '" + name() +
+          "' was not declared in getSuppliedUserObjects(). Declare it there so its construction "
+          "order can be resolved.");
+  getProblem().addUserObject(uo_type, uo_name, params);
 }
 
 void

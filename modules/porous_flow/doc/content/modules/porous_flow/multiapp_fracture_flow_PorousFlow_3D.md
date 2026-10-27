@@ -9,7 +9,7 @@ PorousFlow can be used to simulate flow through fractured porous media in the ca
 - [Transfers](multiapp_fracture_flow_transfers.md)
 - [MultiApp primer](multiapp_fracture_flow_primer.md): the diffusion equation with no fractures, and quantifying the errors introduced by the MultiApp approach
 - [Diffusion in mixed dimensions](multiapp_fracture_flow_diffusion.md)
-- [Porous flow in a single matrix system](multiapp_fracture_flow_PorousFlow_2D.md)
+- [Porous flow in a single 1D fracturein a single 1D fracture](multiapp_fracture_flow_PorousFlow_2D.md)
 - [Porous flow in a small fracture network](multiapp_fracture_flow_PorousFlow_3D.md)
 
 ## Porous flow through a 3D fracture network
@@ -239,6 +239,10 @@ with $h$ being calculated by the following AuxKernel that implements [eqn.sugges
 
 
 ### Coupling and transfers
+
+Pictorially, the simulation involves the transfers shown in [transfers_fig]
+
+!media media/porous_flow/3dFracture_transfers.png style=width:60%;margin-left:10px caption=Transfers and simulation flow in the 3D multiapp case with a fracture system and a matrix.  id=transfers_fig
 
 The simulation's coupling involves the following steps (see also the [page on transfers](multiapp_fracture_flow_transfers.md)).
 

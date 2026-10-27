@@ -62,7 +62,7 @@ The `large_kinematics` flag controls the kinematic theory.
 
 The constitutive model needs to provide the first Piola-Kirchhoff stress and the derivative of
 that stress with respect to the deformation gradient.
-However, the [material system](solid_mechanics/NewMaterialSystem.md)
+However, the [material system](solid_mechanics/ObjectiveStressRates.md)
 provides a common interface to define the constitutive model with any stress and strain
 measures that are convenient, translating the user-defined stress and Jacobian to the correct
 form automatically.

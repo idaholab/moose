@@ -14,7 +14,7 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableDataLinearFV.h"
-#include "GradientLimiterType.h"
+#include "LinearFVGradientManager.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
@@ -23,6 +23,9 @@
 #include "libmesh/dense_vector.h"
 #include "libmesh/enum_fe_family.h"
 
+#include <memory>
+#include <unordered_map>
+
 template <typename>
 class MooseLinearVariableFV;
 
@@ -30,6 +33,7 @@ typedef MooseLinearVariableFV<Real> MooseLinearVariableFVReal;
 class AuxiliarySystem;
 class FVDirichletBCBase;
 class FVFluxBC;
+class FVGradientMethod;
 class LinearFVBoundaryCondition;
 class LinearSystem;
 
@@ -83,35 +87,50 @@ public:
   using typename MooseVariableField<OutputType>::DotType;
   using typename MooseVariableField<OutputType>::GradientType;
 
+  /// Input parameters for a linear finite-volume variable.
   static InputParameters validParams();
+
+  /**
+   * @param parameters Input parameters used to construct the variable.
+   */
   MooseLinearVariableFV(const InputParameters & parameters);
 
   virtual bool isFV() const override { return true; }
 
   /**
    * If the variable has a dirichlet boundary condition at face described by \p fi .
+   * @param fi Face where boundary conditions should be queried.
    */
   virtual bool isDirichletBoundaryFace(const FaceInfo & fi) const;
 
   /**
-   * Switch to request cell gradient computations.
+   * Register the configured default gradient method with time-state storage.
+   * @param oldest_state Oldest time state that consumers need to read. (0 is the current state
+   * only)
    */
-  void computeCellGradients() { _needs_cell_gradients = true; }
+  const LinearFVGradientReader & requestCellGradients(unsigned int oldest_state = 0);
 
   /**
-   * Switch to request cell gradient computations with an optional gradient limiter.
-   *
-   * `GradientLimiterType::None` is equivalent to requesting the regular gradients only.
+   * Backward-compatible interface for requesting cell gradients.
+   * Equivalent to calling requestCellGradients() with the default method.
    */
-  void computeCellGradients(const Moose::FV::GradientLimiterType limiter_type);
+  void computeCellGradients();
 
   /**
-   * Switch to request limited cell gradient computations.
-   *
-   * Limited gradients are stored in limiter-specific containers on the system and are computed
-   * using the raw cell gradients.
+   * Register a named gradient method with time-state storage.
+   * @param method_name Name of the gradient method to register.
+   * @param oldest_state Oldest time state that consumers need to read. (0 is the current state)
    */
-  void computeCellLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
+  const LinearFVGradientReader & requestCellGradients(const GradientMethodName & method_name,
+                                                      unsigned int oldest_state = 0);
+
+  /**
+   * Register a specific gradient method object with time-state storage.
+   * @param method Gradient method to register.
+   * @param oldest_state Oldest time state that consumers need to read. (0 is the current only)
+   */
+  const LinearFVGradientReader & requestCellGradients(const FVGradientMethod & method,
+                                                      unsigned int oldest_state = 0);
 
   /**
    * Check if cell gradient computations were requested for this variable.
@@ -130,31 +149,21 @@ public:
   VectorValue<Real> gradSln(const ElemInfo & elem_info, const StateArg & state) const;
 
   /**
-   * Get one raw gradient component at a cell center without materializing the full gradient.
+   * Get one default gradient component at a cell center without materializing the full gradient.
    * @param elem_info The ElemInfo of the cell where we need the gradient
    * @param component The gradient component to retrieve
    */
   Real gradSlnComponent(const ElemInfo & elem_info, unsigned int component) const;
 
   /**
-   * Get either the raw or limited gradient at a cell center.
+   * Get one default gradient component at a cell center and solution state.
    * @param elem_info The ElemInfo of the cell where we need the gradient
+   * @param component The gradient component to retrieve
    * @param state State argument describing which solution state to evaluate
-   * @param limiter_type The limiter type used to compute/store limited gradients
    */
-  VectorValue<Real> gradSln(const ElemInfo & elem_info,
-                            const StateArg & state,
-                            const Moose::FV::GradientLimiterType limiter_type) const;
-
-  /**
-   * Get the limited gradient at a cell center.
-   * @param elem_info The ElemInfo of the cell where we need the gradient
-   * @param state State argument describing which solution state to evaluate
-   * @param limiter_type The limiter type used to compute/store limited gradients
-   */
-  VectorValue<Real> limitedGradSln(const ElemInfo & elem_info,
-                                   const StateArg & state,
-                                   const Moose::FV::GradientLimiterType limiter_type) const;
+  Real gradSlnComponent(const ElemInfo & elem_info,
+                        unsigned int component,
+                        const StateArg & state) const;
 
   /**
    * Compute interpolated gradient on the provided face.
@@ -162,26 +171,6 @@ public:
    * @param state State argument describing which solution state to evaluate
    */
   VectorValue<Real> gradSln(const FaceInfo & fi, const StateArg & state) const;
-
-  /**
-   * Compute interpolated raw/limited gradient on the provided face.
-   * @param fi The face for which to retrieve the gradient
-   * @param state State argument describing which solution state to evaluate
-   * @param limiter_type The limiter type used to compute/store limited gradients
-   */
-  VectorValue<Real> gradSln(const FaceInfo & fi,
-                            const StateArg & state,
-                            const Moose::FV::GradientLimiterType limiter_type) const;
-
-  /**
-   * Compute interpolated limited gradient on the provided face.
-   * @param fi The face for which to retrieve the gradient
-   * @param state State argument describing which solution state to evaluate
-   * @param limiter_type The limiter type used to compute/store limited gradients
-   */
-  VectorValue<Real> limitedGradSln(const FaceInfo & fi,
-                                   const StateArg & state,
-                                   const Moose::FV::GradientLimiterType limiter_type) const;
 
   virtual void initialSetup() override;
   virtual void timestepSetup() override;
@@ -201,12 +190,14 @@ public:
    */
   LinearFVBoundaryCondition * getBoundaryCondition(const BoundaryID bd_id) const;
 
-  const std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> & getBoundaryConditionMap()
+  /// Boundary-condition map keyed by boundary ID for this variable.
+  const std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> &
+  getBoundaryConditionMap() const
   {
     return _boundary_id_to_bc;
   }
 
-  virtual void prepareIC() override {}
+  virtual void prepareIC() override;
 
   virtual bool isNodal() const override final { return false; }
 
@@ -226,6 +217,10 @@ public:
 
   virtual void sizeMatrixTagData() override;
 
+  void requireQpComputations() const override { _compute_qp_data = true; }
+  bool supportsQpBasedLoops() const override { return _compute_qp_data; }
+  bool supportsGeometricInfoBasedLoops() const override { return true; }
+
 protected:
   /// Throw an error when somebody requests time-related data from this variable
   [[noreturn]] void timeIntegratorError() const;
@@ -239,9 +234,6 @@ protected:
   /// Throw an error when somebody wants to use this variable with automatic differentiation
   [[noreturn]] void adError() const;
 
-  /// Throw an error when somebody requests gradients at a non-current solution state
-  [[noreturn]] void gradientStateError(const StateArg & state) const;
-
   /**
    * Setup the boundary to Dirichlet BC map
    */
@@ -249,18 +241,28 @@ protected:
 
   usingMooseVariableBaseMembers;
 
+  /// Whether QP computation has been requested for this variable (opt-in)
+  mutable bool _compute_qp_data = false;
+
   /// Boolean to check if this variable needs gradient computations.
   bool _needs_cell_gradients;
 
-  /// Temporary storage for the cell gradient to avoid unnecessary allocations.
-  mutable RealVectorValue _cell_gradient;
+  /// Oldest time state requested for any cell gradient method.
+  unsigned int _oldest_gradient_state_requested = 0;
 
   /// Owning concrete system pointers. One will be null.
   LinearSystem * const _linear_system;
   AuxiliarySystem * const _auxiliary_system;
 
-  /// Pointer to the unlimited cell gradient stored by the owning concrete system
-  const std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> & _grad_container;
+  /// Read-only reader for the default cell gradient stored by the owning concrete system.
+  const LinearFVGradientReader * _gradient_reader;
+
+  /// Gradient readers keyed by the methods that produced them.
+  std::unordered_map<const FVGradientMethod *, std::unique_ptr<LinearFVGradientReader>>
+      _gradient_readers_by_method;
+
+  /// Default gradient method registered when consumers request gradients from this variable.
+  const GradientMethodName _default_gradient_method_name;
 
   /// Holder for all the data associated with the "main" element. The data in this is
   /// mainly used by finite element-based loops such as the postprocessor and auxkernel
@@ -358,7 +360,7 @@ public:
     return _element_data->getContinuity();
   };
 
-  virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
+  virtual void setNodalValue(const OutputType & value) override;
 
   [[noreturn]] virtual const DofValues & nodalVectorTagValue(TagID) const override;
 
@@ -459,6 +461,8 @@ public:
   adGradSlnNeighborDot() const override;
   [[noreturn]] virtual const ADTemplateVariableValue<OutputType> & adSln() const override;
   [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> & adGradSln() const override;
+  [[noreturn]] virtual const ADTemplateVariableGradient<OutputType> &
+  adGradSlnFace() const override;
   [[noreturn]] virtual const ADTemplateVariableCurl<OutputType> & adCurlSln() const override;
   [[noreturn]] virtual const ADTemplateVariableCurl<OutputType> &
   adCurlSlnNeighbor() const override;
@@ -570,18 +574,6 @@ MooseLinearVariableFV<OutputType>::timeIntegratorError() const
   mooseError("MooseLinearVariableFV does not support time integration at the moment! The variable "
              "which is causing the issue: ",
              this->name());
-}
-
-template <typename OutputType>
-void
-MooseLinearVariableFV<OutputType>::gradientStateError(const StateArg & state) const
-{
-  mooseError("MooseLinearVariableFV does not currently support ElemInfo/FaceInfo gradient "
-             "evaluation for non-current states. Requested state index ",
-             state.state,
-             " for variable '",
-             this->name(),
-             "'. Old-state requests typically use state index 1.");
 }
 
 template <typename OutputType>

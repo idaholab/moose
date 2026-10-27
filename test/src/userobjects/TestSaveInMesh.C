@@ -15,8 +15,6 @@
 #include "libmesh/checkpoint_io.h"
 #include "libmesh/nemesis_io.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseTestApp", TestSaveInMesh);
 
 InputParameters

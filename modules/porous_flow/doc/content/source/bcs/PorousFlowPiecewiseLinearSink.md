@@ -19,6 +19,7 @@ quantities through the `optional parameters` list.
 - Fluid relative permeability
 - Fluid mobility ($k_{ij}n_{i}n_{j}k_{r} \rho / \nu$, where $n$ is the normal vector to the boundary)
 - Fluid mass fraction
+- Fluid enthalpy
 - Fluid internal energy
 - Thermal conductivity
 

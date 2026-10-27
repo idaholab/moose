@@ -25,6 +25,7 @@
 #include "ElemInfo.h"
 
 #include <memory> //std::unique_ptr
+#include <filesystem>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -180,6 +181,17 @@ public:
    * This is where the Mesh object is actually created and filled in.
    */
   virtual void buildMesh() = 0;
+
+  /**
+   * Write the mesh files needed for recovery/checkpointing.
+   *
+   * The base implementation writes the libMesh checkpoint mesh.
+   * Derived classes may extend this to write additional backend-specific files.
+   *
+   * @return The additional backend-specific files written by the derived class.
+   */
+  virtual std::vector<std::filesystem::path>
+  writeRecoveryFiles(const std::filesystem::path & file_base);
 
   /**
    * Returns MeshBase::mesh_dimension(), (not
@@ -440,7 +452,7 @@ public:
    * Return pointers to range objects for various types of ranges
    * (local nodes, boundary elems, etc.).
    */
-  libMesh::ConstElemRange * getActiveLocalElementRange();
+  const libMesh::ConstElemRange * getActiveLocalElementRange();
   libMesh::NodeRange * getActiveNodeRange();
   SemiLocalNodeRange * getActiveSemiLocalNodeRange() const;
   libMesh::ConstNodeRange * getLocalNodeRange();
@@ -537,22 +549,16 @@ public:
 
   /**
    * Calls prepare_for_use() if the underlying MeshBase object isn't prepared, then communicates
-   * various boundary information on parallel meshes. Also calls update() internally. Instead of
-   * calling \p prepare_for_use on the currently held \p MeshBase object, a \p mesh_to_clone can be
-   * provided. If it is provided (e.g. this method is given a non-null argument), then \p _mesh will
-   * be assigned a clone of the \p mesh_to_clone. The provided \p mesh_to_clone must already be
-   * prepared
-   * @param mesh_to_clone If nonnull, we will clone this mesh instead of preparing our current one
-   * @return Whether the libMesh mesh was prepared. This should really only be relevant in MOOSE
-   * framework contexts where we need to make a decision about what to do with the displaced mesh.
-   * If the reference mesh base object has \p complete_preparation() called (e.g. this method
-   * returns \p true when called for the reference mesh), then we must pass the reference mesh base
-   * object into this method when we call this for the displaced mesh. This is because the displaced
-   * mesh \emph must be an exact clone of the reference mesh. We have seen that \p
-   * complete_preparation() called on two previously identical meshes can result in two different
-   * meshes even with Metis partitioning
+   * various boundary information on parallel meshes. Also calls update() internally.
    */
-  bool prepare(const MeshBase * mesh_to_clone);
+  void prepare();
+
+  /**
+   * Deprecated method; \p mesh_to_clone is no longer supported and must be null. Use the
+   * no-argument prepare() instead.
+   * @param mesh_to_clone Must be null; mesh cloning is handled elsewhere now
+   */
+  void prepare(const MeshBase * mesh_to_clone);
 
   /**
    * Calls buildNodeListFromSideList(), buildNodeList(), and buildBndElemList().
@@ -768,13 +774,17 @@ public:
   /**
    * This method sets the name for \p subdomain_id to \p name
    */
-  void setSubdomainName(SubdomainID subdomain_id, const SubdomainName & name);
+  void setSubdomainName(SubdomainID subdomain_id,
+                        const SubdomainName & name,
+                        const bool synchronous = false);
 
   /**
    * This method sets the name for \p subdomain_id on the provided \p mesh to \p name
    */
-  static void
-  setSubdomainName(MeshBase & mesh, SubdomainID subdomain_id, const SubdomainName & name);
+  static void setSubdomainName(MeshBase & mesh,
+                               SubdomainID subdomain_id,
+                               const SubdomainName & name,
+                               const bool synchronous = false);
 
   /**
    * Return the name of a block given an id.
@@ -1557,6 +1567,11 @@ public:
   bool possiblyRebuildNodeToElemMap();
 
 protected:
+  /**
+   * Returns whether this mesh is allowed to read a recovery file.
+   */
+  bool allowRecovery() const { return _allow_recovery; }
+
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<libMesh::GhostingFunctor>> _ghosting_functors;
 
@@ -1641,11 +1656,9 @@ protected:
   std::set<Node *> _semilocal_node_list;
 
   /**
-   * A range for use with threading.  We do this so that it doesn't have
-   * to get rebuilt all the time (which takes time).
+   * Ranges for use with threading, cached so they don't have to get
+   * rebuilt all the time (which takes time).
    */
-  std::unique_ptr<libMesh::ConstElemRange> _active_local_elem_range;
-
   std::unique_ptr<SemiLocalNodeRange> _active_semilocal_node_range;
   std::unique_ptr<libMesh::NodeRange> _active_node_range;
   std::unique_ptr<libMesh::ConstNodeRange> _local_node_range;

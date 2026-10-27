@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "FVFluxKernel.h"
+#include "FVQpFluxKernel.h"
 #include <memory>
 #include <utility>
 
@@ -26,7 +26,7 @@ class SinglePhaseFluidProperties;
 /**
  * Implements the centered Kurganov-Tadmor discretization of advective fluxes
  */
-class PCNSFVKT : public FVFluxKernel
+class PCNSFVKT : public FVQpFluxKernel
 {
 public:
   static InputParameters validParams();

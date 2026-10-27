@@ -9,7 +9,7 @@ Before reading this documentation, consider reading the following materials firs
 - [Kokkos Kernels System](syntax/KokkosKernels/index.md) to understand the common design pattern of objects in Kokkos-MOOSE.
 
 !alert note
-Kokkos-MOOSE functions do not support automatic differention yet.
+Kokkos-MOOSE functions do not support automatic differentiation yet.
 
 A Kokkos-MOOSE function can be created by subclassing `Moose::Kokkos::FunctionBase` (not `Moose::Kokkos::Function`), which should be registered with `registerKokkosFunction()` instead of `registerMooseObject()`.
 The signatures of the hook methods are defined as follows:
@@ -29,13 +29,13 @@ KOKKOS_FUNCTION Real average() const;
 As in other Kokkos-MOOSE objects, they should be defined in the derived class as +*inlined public*+ methods instead of virtual override.
 It is not mandatory to define each hook method in the derived class, but any hook method that was not defined in the derived class should not be called.
 
-See the following source codes of `KokkosPiecewiseConstant` for an example of a function:
+See the following source codes of `KokkosConstantFunction` for an example derived directly from `Moose::Kokkos::FunctionBase`:
 
-!listing framework/include/kokkos/functions/KokkosPiecewiseConstant.h id=kokkos-piecewise-constant-header
-         caption=The `KokkosPiecewiseConstant` header file.
+!listing framework/include/kokkos/functions/KokkosConstantFunction.h id=kokkos-constant-function-header
+         caption=The `KokkosConstantFunction` header file.
 
-!listing framework/src/kokkos/functions/KokkosPiecewiseConstant.K id=kokkos-piecewise-constant-source language=cpp
-         caption=The `KokkosPiecewiseConstant` source file.
+!listing framework/src/kokkos/functions/KokkosConstantFunction.K id=kokkos-constant-function-source language=cpp
+         caption=The `KokkosConstantFunction` source file.
 
 Functions can be acquired in your object by calling `getKokkosFunction<T>()`, where `T` should be your function type.
 Namely, the actual type of the function should be known in advance.

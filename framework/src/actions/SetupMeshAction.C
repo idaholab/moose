@@ -62,18 +62,6 @@ SetupMeshAction::validParams()
                         "every node on a give side is in a nodeset then add that side to a "
                         "sideset");
 
-  params.addParam<std::vector<std::string>>(
-      "displacements",
-      "The variables corresponding to the x y z displacements of the mesh.  If "
-      "this is provided then the displacements will be taken into account during "
-      "the computation. Creation of the displaced mesh can be suppressed even if "
-      "this is set by setting 'use_displaced_mesh = false'.");
-  params.addParam<bool>(
-      "use_displaced_mesh",
-      true,
-      "Create the displaced mesh if the 'displacements' "
-      "parameter is set. If this is 'false', a displaced mesh will not be created, "
-      "regardless of whether 'displacements' is set.");
   params.addParam<std::vector<BoundaryName>>(
       "ghosted_boundaries", {}, "Boundaries to be ghosted if using Nemesis");
   params.addParam<std::vector<Real>>("ghosted_boundaries_inflation",
@@ -110,8 +98,7 @@ SetupMeshAction::validParams()
                                "by the --split-file command line option");
 
   // groups
-  params.addParamNamesToGroup("displacements ghosted_boundaries ghosted_boundaries_inflation",
-                              "Advanced");
+  params.addParamNamesToGroup("ghosted_boundaries ghosted_boundaries_inflation", "Advanced");
   params.addParamNamesToGroup("second_order construct_side_list_from_node_list skip_partitioning",
                               "Advanced");
   params.addParamNamesToGroup("block_id block_name boundary_id boundary_name", "Add Names");
@@ -252,46 +239,60 @@ SetupMeshAction::act()
   {
     TIME_SECTION("SetupMeshAction::act::setup_mesh", 1, "Setting Up Mesh", true);
 
+    const auto & generator_actions = _awh.getActionListByName("add_mesh_generator");
+
+    // If we trigger any actions that can build MeshGenerators, whether through input file
+    // syntax or through custom actions, change the default type to construct. We can't yet
+    // check whether there are any actual MeshGenerator objects because those are added after
+    // setup_mesh. We do this even when cloning the parent app mesh so that MeshGeneratorMesh-only
+    // parameters set in this [Mesh] block (e.g. "data_driven_generator") are not reported unused,
+    // even though the generators themselves are never built in that case.
+    if (!generator_actions.empty())
+    {
+      // Check for whether type has been set or whether for the default type (FileMesh) a file has
+      // been provided
+      if (!_pars.isParamSetByUser("type") && !_moose_object_pars.isParamValid("file"))
+      {
+        // Auto-select MFEMMeshGeneratorMesh when a generator carries the MFEM flag.
+        bool has_mfem_generator = false;
+#ifdef MOOSE_MFEM_ENABLED
+        // We'll have to do something smarter when people add actions other than
+        // AddMeshGeneratorAction that add MFEM mesh generators
+        if (const auto * const mesh_generator_action =
+                dynamic_cast<AddMeshGeneratorAction *>(generator_actions.front()))
+          if (const auto * const is_mfem =
+                  mesh_generator_action->getObjectParams().queryParam<bool>("_mfem_mesh_generator"))
+            has_mfem_generator = *is_mfem;
+#endif
+
+        _type = has_mfem_generator ? "MFEMMeshGeneratorMesh" : "MeshGeneratorMesh";
+        auto original_params = _moose_object_pars;
+        _moose_object_pars = _factory.getValidParams(_type);
+
+        // Since we changing the type on the fly, we'll have to manually extract parameters again
+        // from the input file object.
+        _app.builder().extractParams(_registered_identifier, _moose_object_pars);
+      }
+      else if (!_app.useMasterMesh() && !_moose_object_pars.get<bool>("_mesh_generator_mesh"))
+      {
+        // There are cases where a custom action may register the "add_mesh_generator" task, but
+        // may not actually add any mesh generators depending on user input. We don't want to risk
+        // giving false warnings in this case. However, if we triggered the "add_mesh_generator"
+        // task through explicit input file syntax, then it is definitely safe to warn
+        for (auto generator_action_ptr : generator_actions)
+          if (dynamic_cast<AddMeshGeneratorAction *>(generator_action_ptr))
+          {
+            mooseError("Mesh Generators present but the [Mesh] block is set to construct a \"",
+                       _type,
+                       "\" mesh, which does not use Mesh Generators in constructing the mesh. ");
+          }
+      }
+    }
+
     if (_app.useMasterMesh())
       _mesh = _app.masterMesh()->safeClone();
     else
     {
-      const auto & generator_actions = _awh.getActionListByName("add_mesh_generator");
-
-      // If we trigger any actions that can build MeshGenerators, whether through input file
-      // syntax or through custom actions, change the default type to construct. We can't yet
-      // check whether there are any actual MeshGenerator objects because those are added after
-      // setup_mesh
-      if (!generator_actions.empty())
-      {
-        // Check for whether type has been set or whether for the default type (FileMesh) a file has
-        // been provided
-        if (!_pars.isParamSetByUser("type") && !_moose_object_pars.isParamValid("file"))
-        {
-          _type = "MeshGeneratorMesh";
-          auto original_params = _moose_object_pars;
-          _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
-
-          // Since we changing the type on the fly, we'll have to manually extract parameters again
-          // from the input file object.
-          _app.builder().extractParams(_registered_identifier, _moose_object_pars);
-        }
-        else if (!_moose_object_pars.get<bool>("_mesh_generator_mesh"))
-        {
-          // There are cases where a custom action may register the "add_mesh_generator" task, but
-          // may not actually add any mesh generators depending on user input. We don't want to risk
-          // giving false warnings in this case. However, if we triggered the "add_mesh_generator"
-          // task through explicit input file syntax, then it is definitely safe to warn
-          for (auto generator_action_ptr : generator_actions)
-            if (dynamic_cast<AddMeshGeneratorAction *>(generator_action_ptr))
-            {
-              mooseError("Mesh Generators present but the [Mesh] block is set to construct a \"",
-                         _type,
-                         "\" mesh, which does not use Mesh Generators in constructing the mesh. ");
-            }
-        }
-      }
-
       // switch non-file meshes to be a file-mesh if using a pre-split mesh configuration.
       if (_use_split)
         _type = modifyParamsForUseSplit(_moose_object_pars);
@@ -352,33 +353,10 @@ SetupMeshAction::act()
   {
     TIME_SECTION("SetupMeshAction::act::set_mesh_base", 1, "Initializing Mesh", true);
 
-    if (_app.useMasterMesh())
-    {
-      if (_app.masterDisplacedMesh())
-        _displaced_mesh = _app.masterDisplacedMesh()->safeClone();
-    }
-    else
+    if (!_app.useMasterMesh())
     {
       _mesh->init();
-
-      if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
-      {
-        _displaced_mesh = _mesh->safeClone();
-        _displaced_mesh->isDisplaced(true);
-        _displaced_mesh->getMesh().allow_remote_element_removal(
-            _mesh->getMesh().allow_remote_element_removal());
-
-        std::vector<std::string> displacements =
-            getParam<std::vector<std::string>>("displacements");
-        if (displacements.size() < _displaced_mesh->dimension())
-          mooseError("Number of displacements must be greater than or equal to the dimension of "
-                     "the mesh!");
-      }
-
       setupMesh(_mesh.get());
-
-      if (_displaced_mesh)
-        setupMesh(_displaced_mesh.get());
     }
   }
 }

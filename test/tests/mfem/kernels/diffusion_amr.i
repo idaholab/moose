@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/square.msh
   nonconforming = true
 []
@@ -58,7 +58,6 @@
     type = MFEMGradAux
     variable = concentration_gradient
     source = concentration
-    execute_on = TIMESTEP_END
   []
 []
 
@@ -95,13 +94,11 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHypreGMRES
     preconditioner = boomeramg

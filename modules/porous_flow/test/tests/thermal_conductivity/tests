@@ -3,5 +3,8 @@
     type = 'CSVDiff'
     input = 'ThermalCondPorosity01.i'
     csvdiff = 'ThermalCondPorosity01.csv'
+    issues = '#9081'
+    design = 'PorousFlowThermalConductivityFromPorosity.md'
+    requirement = 'The system shall be able to compute the thermal conductivity of a porous medium as a porosity-weighted average of the solid and fluid thermal conductivities.'
   [../]
 []

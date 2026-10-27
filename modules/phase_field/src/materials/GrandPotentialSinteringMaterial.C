@@ -257,7 +257,7 @@ GrandPotentialSinteringMaterial::computeQpProperties()
         }
       }
       break;
-    }       // case 0; // PARABOLIC
+    } // case 0; // PARABOLIC
     case 1: // DILUTE
     {
       Real rho_exp = std::exp(_w[_qp] / _kB / _T[_qp]);
@@ -283,7 +283,7 @@ GrandPotentialSinteringMaterial::computeQpProperties()
         }
       }
       break;
-    }       // case 1: // DILUTE
+    } // case 1: // DILUTE
     case 2: // IDEAL
     {
       Real Ef = -_kB * _T[_qp] * std::log(_cs_eq[_qp] / (1.0 - _cs_eq[_qp]));
@@ -334,7 +334,7 @@ GrandPotentialSinteringMaterial::computeQpProperties()
       }
       break;
     } // case 2: // IDEAL
-  }   // switch (_solid_energy)
+  } // switch (_solid_energy)
 
   // Calculate the susceptibility
   _chi[_qp] = _hs[_qp] * _drhosdw[_qp] + _hv[_qp] * _drhovdw[_qp];

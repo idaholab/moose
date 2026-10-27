@@ -23,6 +23,7 @@
 #include "NodalUserObject.h"
 #include "NodeFaceConstraint.h"
 #include "NodeElemConstraintBase.h"
+#include "Material.h"
 
 Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
   : _c_parameters(moose_object->parameters()),
@@ -57,7 +58,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
     _coupleable_max_qps(Moose::constMaxQpsPerElem),
     _is_fv(is_fv),
     _obj(moose_object),
-    _writable_coupled_variables(libMesh::n_threads())
+    _writable_coupled_variables(_c_fe_problem.numThreads())
 {
   SubProblem & problem = *_c_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
   _obj->getMooseApp().registerInterfaceObject(*this);
@@ -90,13 +91,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
           else if (auto * tmp_var = dynamic_cast<ArrayMooseVariable *>(moose_var))
             _coupled_array_moose_vars.push_back(tmp_var);
           else if (auto * tmp_var = dynamic_cast<MooseVariableFV<Real> *>(moose_var))
-          {
-            // We are using a finite volume variable through add*CoupledVar as opposed to getFunctor
-            // so we can be reasonably confident that the variable values will be obtained using
-            // traditional pre-evaluation and quadrature point indexing
-            tmp_var->requireQpComputations();
             _coupled_fv_moose_vars.push_back(tmp_var);
-          }
           else if (auto * tmp_var = dynamic_cast<MooseLinearVariableFV<Real> *>(moose_var))
             _coupled_fv_moose_vars.push_back(tmp_var);
           else
@@ -158,7 +153,7 @@ Coupleable::Coupleable(const Coupleable & object, const Moose::Kokkos::FunctorCo
 bool
 Coupleable::isCoupled(const std::string & var_name_in, unsigned int i) const
 {
-  const auto var_name = _c_parameters.checkForRename(var_name_in);
+  const auto & var_name = _c_parameters.checkForRename(var_name_in);
 
   auto it = _coupled_vars.find(var_name);
   if (it != _coupled_vars.end())
@@ -187,7 +182,7 @@ Coupleable::isCoupledConstant(const std::string & var_name) const
 unsigned int
 Coupleable::coupledComponents(const std::string & var_name_in) const
 {
-  const auto var_name = _c_parameters.checkForRename(var_name_in);
+  const auto & var_name = _c_parameters.checkForRename(var_name_in);
 
   if (isCoupled(var_name))
   {
@@ -240,7 +235,7 @@ Coupleable::checkVar(const std::string & var_name_in,
                      unsigned int comp,
                      unsigned int comp_bound) const
 {
-  const auto var_name = _c_parameters.checkForRename(var_name_in);
+  const auto & var_name = _c_parameters.checkForRename(var_name_in);
   auto it = _c_coupled_scalar_vars.find(var_name);
   if (it != _c_coupled_scalar_vars.end())
   {
@@ -920,10 +915,11 @@ Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
   const auto * nuo = dynamic_cast<const NodalUserObject *>(this);
   const auto * nfc = dynamic_cast<const NodeFaceConstraint *>(this);
   const auto * nec = dynamic_cast<const NodeElemConstraintBase *>(this);
+  const auto * mat = dynamic_cast<const Material *>(this);
 
-  if (!aux && !euo && !nuo && !nfc && !nec)
+  if (!aux && !euo && !nuo && !nfc && !nec && !mat)
     mooseError("writableVariable() can only be called from AuxKernels, ElementUserObjects, "
-               "NodalUserObjects, NodeFaceConstraints, or NodeElemConstraints. '",
+               "NodalUserObjects, NodeFaceConstraints, NodeElemConstraints or Materials. '",
                _obj->name(),
                "' is none of those.");
 
@@ -990,6 +986,7 @@ Coupleable::checkWritableVar(MooseWritableVariable * var)
   // check domain restrictions for compatibility
   const auto * br = dynamic_cast<const BlockRestrictable *>(this);
   const auto * nfc = dynamic_cast<const NodeFaceConstraint *>(this);
+  const auto * mat = dynamic_cast<const Material *>(this);
 
   if (br && !var->hasBlocks(br->blockIDs()))
     mooseError("The variable '",
@@ -1016,6 +1013,9 @@ Coupleable::checkWritableVar(MooseWritableVariable * var)
           !MooseUtils::setsIntersect(br->blockIDs(), br_other->blockIDs()))
         continue;
       else if (nfc)
+        continue;
+      // three materials per material declared
+      else if (mat)
         continue;
 
       mooseError("'",
@@ -2238,7 +2238,7 @@ Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp) c
     mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
-    return var->adGradSln();
+    return usesFaceCoupledValues() ? var->adGradSlnFace() : var->adGradSln();
   return var->adGradSlnNeighbor();
 }
 
@@ -2253,6 +2253,8 @@ Coupleable::adCoupledGradientDot(const std::string & var_name, unsigned int comp
 
   if (!_c_is_implicit)
     mooseError("Not implemented");
+  mooseAssert(!usesFaceCoupledValues(),
+              "The AD gradient time derivative is not computed on element faces");
 
   if (!_coupleable_neighbor)
     return var->adGradSlnDot();
@@ -2370,7 +2372,7 @@ Coupleable::adCoupledVectorGradient(const std::string & var_name, unsigned int c
     mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
-    return var->adGradSln();
+    return usesFaceCoupledValues() ? var->adGradSlnFace() : var->adGradSln();
   return var->adGradSlnNeighbor();
 }
 

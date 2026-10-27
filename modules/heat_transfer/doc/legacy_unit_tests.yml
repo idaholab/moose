@@ -1,0 +1,8 @@
+# Existing GoogleTests awaiting SQA metadata. New entries are prohibited; this list may only shrink.
+unit:
+  - HeatTransferUtils.grashof
+  - HeatTransferUtils.laplace
+  - HeatTransferUtils.peclet
+  - HeatTransferUtils.prandtl
+  - HeatTransferUtils.reynolds
+  - HeatTransferUtils.thermal_diffusivity

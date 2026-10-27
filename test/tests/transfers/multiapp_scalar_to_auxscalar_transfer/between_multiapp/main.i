@@ -66,6 +66,11 @@
   []
 []
 
+[GlobalParams]
+  # the test relies on the child apps output, but the multiapps cannot both execute before transfers
+  execute_after_from_multiapp = false
+[]
+
 [Transfers]
   [pp_transfer_1]
     type = MultiAppScalarToAuxScalarTransfer

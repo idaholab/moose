@@ -18,23 +18,48 @@ registerMooseObject("MooseApp", MFEMHypreBoomerAMG);
 InputParameters
 MFEMHypreBoomerAMG::validParams()
 {
-  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LORLinearSolverBase<mfem::HypreBoomerAMG>::validParams();
   params.addClassDescription("Hypre BoomerAMG solver and preconditioner for the iterative solution "
                              "of MFEM equation systems.");
-  params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
-  params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
+  params.addParam<mfem::real_t>("l_tol", 0, "Set the relative tolerance.");
+  params.addParam<int>("l_max_its", 1, "Set the maximum number of iterations.");
+  params.suppressParameter<mfem::real_t>("l_tol"); // mfem/mfem#5627
+  params.suppressParameter<int>("l_max_its");      // mfem/mfem#5627
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
   params.addParam<MFEMFESpaceName>(
-      "fespace", "H1 FESpace to use in HypreBoomerAMG setup for elasticity problems.");
+      "fespace",
+      "Vector H1 FESpace of the unknown, required when vector_treatment is 'by_component' or "
+      "'rigid_body_modes'.");
+  MooseEnum vector_treatment("auto scalar by_component rigid_body_modes", "auto");
+  params.addParam<MooseEnum>("vector_treatment",
+                             vector_treatment,
+                             "Specifies how BoomerAMG treats the components of a vector unknown.");
+  vector_treatment.addDocumentation("scalar",
+                                    "Coarsens all degrees of "
+                                    "freedom together as one unknown.");
+  vector_treatment.addDocumentation(
+      "by_component",
+      "Coarsens each component separately and "
+      "does not interpolate between them (hypre's 'unknown' approach, SetSystemsOptions).");
+  vector_treatment.addDocumentation(
+      "rigid_body_modes",
+      "Adds the rigid body modes of the fespace to the interpolation "
+      "(hypre's GM/LN approach, SetElasticityOptions). Only applied on the CPU.");
+  vector_treatment.addDocumentation("auto",
+                                    "Applies 'rigid_body_modes' vector_treatment option if fespace "
+                                    "is set and 'scalar' otherwise.");
   params.addParam<mfem::real_t>(
-      "strength_threshold", 0.25, "HypreBoomerAMG strong threshold. Defaults to 0.25.");
-  MooseEnum errmode("ignore=0 warn=1 abort=2", "abort", false);
+      "strength_threshold",
+      0.25,
+      "HypreBoomerAMG strong threshold. Defaults to 0.25, or to 0.5 when vector_treatment is "
+      "'by_component' or 'rigid_body_modes'.");
+  MooseEnum errmode("ignore=0 warn=1 abort=2", "abort");
   params.addParam<MooseEnum>("error_mode", errmode, "Set the behavior for treating hypre errors.");
   return params;
 }
 
 MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters),
+  : Moose::MFEM::LORLinearSolverBase<mfem::HypreBoomerAMG>(parameters),
     _mfem_fespace(
         isParamSetByUser("fespace")
             ? getMFEMProblem()
@@ -42,6 +67,30 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
                   .getFESpace()
             : nullptr)
 {
+  _vector_treatment = getParam<MooseEnum>("vector_treatment").getEnum<VectorTreatment>();
+  if (_vector_treatment == VectorTreatment::AUTO)
+    _vector_treatment = _mfem_fespace ? VectorTreatment::RIGID_BODY_MODES : VectorTreatment::SCALAR;
+
+  if (_vector_treatment == VectorTreatment::SCALAR && _mfem_fespace)
+    paramError("fespace",
+               "is only used when vector_treatment is 'by_component' or 'rigid_body_modes'.");
+  if (_vector_treatment != VectorTreatment::SCALAR)
+  {
+    if (!_mfem_fespace)
+      paramError("vector_treatment",
+                 "'by_component' and 'rigid_body_modes' require fespace to be set.");
+    if (_mfem_fespace->GetVDim() < 2)
+      paramError("fespace",
+                 "must be a vector space when vector_treatment is 'by_component' or "
+                 "'rigid_body_modes'.");
+    // mfem::HypreBoomerAMG builds the component map of a byNODES space from the size of its
+    // operator, which a preconditioner does not have when these options are applied.
+    if (_mfem_fespace->GetOrdering() != mfem::Ordering::byVDIM)
+      paramError("fespace",
+                 "must have ordering = VDIM when vector_treatment is 'by_component' or "
+                 "'rigid_body_modes'.");
+  }
+
   ConstructSolver();
 }
 
@@ -51,40 +100,36 @@ void
 MFEMHypreBoomerAMG::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::HypreBoomerAMG>();
-
-  solver->iterative_mode = getParam<bool>("use_initial_guess");
-  solver->SetTol(getParam<mfem::real_t>("l_tol"));
-  solver->SetMaxIter(getParam<int>("l_max_its"));
-  solver->SetPrintLevel(getParam<int>("print_level"));
-  solver->SetStrengthThresh(getParam<mfem::real_t>("strength_threshold"));
-  solver->SetErrorMode(mfem::HypreSolver::ErrorMode(int(getParam<MooseEnum>("error_mode"))));
-
-  if (_mfem_fespace && !mfem::HypreUsingGPU())
-    solver->SetElasticityOptions(_mfem_fespace.get());
-
+  SetSolverParameters(*solver);
   _solver = std::move(solver);
 }
 
 void
-MFEMHypreBoomerAMG::SetupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & ess_bdr_markers)
+MFEMHypreBoomerAMG::SetSolverParameters(mfem::HypreBoomerAMG & solver)
 {
-  if (_lor)
+  solver.iterative_mode = getParam<bool>("use_initial_guess");
+  solver.SetTol(getParam<mfem::real_t>("l_tol"));
+  solver.SetMaxIter(getParam<int>("l_max_its"));
+  solver.SetPrintLevel(getParam<int>("print_level"));
+  solver.SetErrorMode(mfem::HypreSolver::ErrorMode(int(getParam<MooseEnum>("error_mode"))));
+
+  switch (_vector_treatment)
   {
-    CheckSpectralEquivalence(a);
-    mfem::Array<int> ess_tdofs;
-    a.ParFESpace()->GetEssentialTrueDofs(ess_bdr_markers, ess_tdofs);
-    auto lor_solver = new mfem::LORSolver<mfem::HypreBoomerAMG>(a, ess_tdofs);
-    lor_solver->GetSolver().SetTol(getParam<mfem::real_t>("l_tol"));
-    lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
-    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
-    lor_solver->GetSolver().SetStrengthThresh(getParam<mfem::real_t>("strength_threshold"));
-
-    /// HypreBoomerAMG options for elasticity problems are not compatible with GPU execution
-    if (_mfem_fespace && !mfem::HypreUsingGPU())
-      lor_solver->GetSolver().SetElasticityOptions(_mfem_fespace.get());
-
-    _solver.reset(lor_solver);
+    case VectorTreatment::BY_COMPONENT:
+      solver.SetSystemsOptions(_mfem_fespace->GetVDim(), /*order_bynodes=*/false);
+      break;
+    case VectorTreatment::RIGID_BODY_MODES:
+      if (!mfem::HypreUsingGPU())
+        solver.SetElasticityOptions(_mfem_fespace.get());
+      break;
+    default:
+      break;
   }
+
+  // Both option sets above reset the strength threshold to 0.5, so it is applied after them,
+  // and only when given, to leave each set's own default in place otherwise.
+  if (isParamSetByUser("strength_threshold"))
+    solver.SetStrengthThresh(getParam<mfem::real_t>("strength_threshold"));
 }
 
 #endif

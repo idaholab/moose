@@ -1,0 +1,15 @@
+# Existing GoogleTests awaiting SQA metadata. New entries are prohibited; this list may only shrink.
+unit:
+  - BootstrapCalculators.BiasCorrectedAccelerated
+  - BootstrapCalculators.BiasCorrectedAccelerated_Vec
+  - BootstrapCalculators.Percentile
+  - BootstrapCalculators.Percentile_Vec
+  - PolynomialQuadrature.dataStoreLoad_hermite
+  - PolynomialQuadrature.dataStoreLoad_legendre
+  - PolynomialQuadrature.hermite
+  - PolynomialQuadrature.legendre
+  - StochasticTools.Calculators
+  - StochasticTools.CartesianProduct
+  - StochasticTools.Sobol_Analytical
+  - StochasticTools.Sobol_Saltelli2002
+  - StochasticTools.WeightedCartesianProduct

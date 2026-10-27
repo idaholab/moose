@@ -14,11 +14,11 @@ registerMooseObject("MooseTestApp", FVBurgers1D);
 InputParameters
 FVBurgers1D::validParams()
 {
-  InputParameters params = FVFluxKernel::validParams();
+  InputParameters params = FVQpFluxKernel::validParams();
   return params;
 }
 
-FVBurgers1D::FVBurgers1D(const InputParameters & params) : FVFluxKernel(params) {}
+FVBurgers1D::FVBurgers1D(const InputParameters & params) : FVQpFluxKernel(params) {}
 
 ADReal
 FVBurgers1D::computeQpResidual()

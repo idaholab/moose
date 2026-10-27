@@ -9,8 +9,6 @@
 
 #include "ElemIndexHelper.h"
 
-using namespace libMesh;
-
 ElemIndexHelper::ElemIndexHelper(MeshBase & mesh, const std::string & extra_elem_integer_name)
   : _mesh(mesh), _extra_integer(invalid_uint), _initialized(false)
 {

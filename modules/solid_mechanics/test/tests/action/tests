@@ -44,6 +44,30 @@
                   "subblocks requesting different strain formulations with the new kernel system."
   []
 
+  [error_new_only_param_in_legacy]
+    type = RunException
+    input = "two_block.i"
+    cli_args = "Physics/SolidMechanics/QuasiStatic/block1/homogenized_off_diagonal_jacobian=false"
+    expect_err = "belongs to the new Lagrangian kernel system"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    issues = "#33006"
+    requirement = "The QuasiStatic SolidMechanics Physics shall error if a parameter exclusive to "
+                  "the new Lagrangian kernel system is supplied while the legacy kernel system is "
+                  "active."
+  []
+
+  [error_legacy_only_param_in_new]
+    type = RunException
+    input = "two_block_lagrangian.i"
+    cli_args = "Physics/SolidMechanics/QuasiStatic/block1/global_strain=global_strain"
+    expect_err = "belongs to the legacy StressDivergenceTensors kernel system"
+    design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
+    issues = "#33006"
+    requirement = "The QuasiStatic SolidMechanics Physics shall error if a parameter exclusive to "
+                  "the legacy kernel system is supplied while the new Lagrangian kernel system is "
+                  "active."
+  []
+
   [two_block.error_unrestricted]
     type = RunException
     input = "two_block.i"

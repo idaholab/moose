@@ -14,16 +14,16 @@
 #include "SystemBase.h"
 #include "LinearSystem.h"
 #include "AuxiliarySystem.h"
+#include "FEProblemBase.h"
 #include "SubProblem.h"
 #include "Assembly.h"
 #include "MathFVUtils.h"
 #include "FVUtils.h"
 #include "FVFluxBC.h"
 #include "FVDirichletBCBase.h"
-#include "GreenGaussGradient.h"
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
-#include "GradientLimiterType.h"
+#include "FVGradientMethod.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -34,22 +34,6 @@ using namespace Moose;
 
 registerMooseObject("MooseApp", MooseLinearVariableFVReal);
 
-namespace
-{
-const std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> &
-linearFVGradientContainer(SystemBase & sys)
-{
-  if (auto * const linear_system = dynamic_cast<LinearSystem *>(&sys))
-    return linear_system->linearFVGradientContainer();
-
-  if (auto * const auxiliary_system = dynamic_cast<AuxiliarySystem *>(&sys))
-    return auxiliary_system->linearFVGradientContainer();
-
-  mooseError("The assigned system is not a linear or an auxiliary system. Linear variables can "
-             "only be assigned to linear or auxiliary systems.");
-}
-}
-
 template <typename OutputType>
 InputParameters
 MooseLinearVariableFV<OutputType>::validParams()
@@ -58,6 +42,17 @@ MooseLinearVariableFV<OutputType>::validParams()
   params.set<bool>("fv") = true;
   params.set<MooseEnum>("family") = "MONOMIAL";
   params.set<MooseEnum>("order") = "CONSTANT";
+  params.addParam<GradientMethodName>(
+      "gradient_method",
+      "green-gauss",
+      "Default gradient computation method to register when a consumer requests gradients from "
+      "this variable. This may be a built-in method name like 'green-gauss' or "
+      "'green-gauss-venkatakrishnan', or the name of an object in [FVGradientMethods].");
+  // A finite volume variable is always a CONSTANT MONOMIAL, whose basis has no p-refined
+  // counterpart, so the p-refinement parameters are fixed here and hidden from the user
+  params.set<bool>("p_refinement") = false;
+  params.suppressParameter<bool>("p_refinement");
+  params.suppressParameter<bool>("disable_p_refinement");
   return params;
 }
 
@@ -67,22 +62,21 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
     _needs_cell_gradients(false),
     _linear_system(dynamic_cast<LinearSystem *>(&this->_sys)),
     _auxiliary_system(dynamic_cast<AuxiliarySystem *>(&this->_sys)),
-    _grad_container(linearFVGradientContainer(this->_sys)),
+    _gradient_reader(nullptr),
+    _default_gradient_method_name(this->template getParam<GradientMethodName>("gradient_method")),
     _sys_num(this->_sys.number()),
     _solution(this->_sys.currentSolution()),
     // The following members are needed to be able to interface with the postprocessor and
     // auxiliary systems
-    _phi(this->_assembly.template fePhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi(this->_assembly.template feGradPhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_face(this->_assembly.template fePhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi_face(this->_assembly.template feGradPhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_face_neighbor(
-        this->_assembly.template fePhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi(this->_assembly.template fePhi<OutputShape>(this->_fe_type)),
+    _grad_phi(this->_assembly.template feGradPhi<OutputShape>(this->_fe_type)),
+    _phi_face(this->_assembly.template fePhiFace<OutputShape>(this->_fe_type)),
+    _grad_phi_face(this->_assembly.template feGradPhiFace<OutputShape>(this->_fe_type)),
+    _phi_face_neighbor(this->_assembly.template fePhiFaceNeighbor<OutputShape>(this->_fe_type)),
     _grad_phi_face_neighbor(
-        this->_assembly.template feGradPhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi_neighbor(
-        this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL)))
+        this->_assembly.template feGradPhiFaceNeighbor<OutputShape>(this->_fe_type)),
+    _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(this->_fe_type)),
+    _grad_phi_neighbor(this->_assembly.template feGradPhiNeighbor<OutputShape>(this->_fe_type))
 {
   if (!_linear_system && !_auxiliary_system)
     this->paramError("solver_sys",
@@ -93,32 +87,60 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
   _neighbor_data = std::make_unique<MooseVariableDataLinearFV<OutputType>>(
       *this, _sys, _tid, Moose::ElementType::Neighbor, this->_assembly.neighbor());
 
-  if (libMesh::n_threads() > 1)
+  if (this->getMooseApp().numThreads() > 1)
     mooseError("MooseLinearVariableFV does not support threading at the moment!");
 }
 
 template <typename OutputType>
-void
-MooseLinearVariableFV<OutputType>::computeCellGradients(
-    const Moose::FV::GradientLimiterType limiter_type)
+const LinearFVGradientReader &
+MooseLinearVariableFV<OutputType>::requestCellGradients(const unsigned int oldest_state)
 {
-  if (limiter_type == Moose::FV::GradientLimiterType::None)
-    computeCellGradients();
-  else
-    computeCellLimitedGradients(limiter_type);
+  const auto & reader = requestCellGradients(_default_gradient_method_name, oldest_state);
+
+  _gradient_reader = &reader;
+  return reader;
 }
 
 template <typename OutputType>
 void
-MooseLinearVariableFV<OutputType>::computeCellLimitedGradients(
-    const Moose::FV::GradientLimiterType limiter_type)
+MooseLinearVariableFV<OutputType>::computeCellGradients()
 {
-  computeCellGradients();
+  requestCellGradients();
+}
 
-  if (_linear_system)
-    _linear_system->requestLinearFVLimitedGradients(limiter_type, this->_var_num);
-  else
-    _auxiliary_system->requestLinearFVLimitedGradients(limiter_type, this->_var_num);
+template <typename OutputType>
+const LinearFVGradientReader &
+MooseLinearVariableFV<OutputType>::requestCellGradients(const GradientMethodName & method_name,
+                                                        const unsigned int oldest_state)
+{
+  const auto & method = _linear_system ? _linear_system->resolveFVGradientMethod(method_name)
+                                       : _auxiliary_system->resolveFVGradientMethod(method_name);
+
+  return requestCellGradients(method, oldest_state);
+}
+
+template <typename OutputType>
+const LinearFVGradientReader &
+MooseLinearVariableFV<OutputType>::requestCellGradients(const FVGradientMethod & method,
+                                                        const unsigned int oldest_state)
+{
+  _needs_cell_gradients = true;
+  _oldest_gradient_state_requested = std::max(_oldest_gradient_state_requested, oldest_state);
+
+  auto new_reader =
+      _linear_system ? _linear_system->registerFVGradient(this->_var_num, method, oldest_state)
+                     : _auxiliary_system->registerFVGradient(this->_var_num, method, oldest_state);
+
+  const auto it = _gradient_readers_by_method.find(&method);
+  if (it != _gradient_readers_by_method.end())
+    return *it->second;
+
+  auto reader = std::make_unique<LinearFVGradientReader>(std::move(new_reader));
+
+  auto & reader_ref = *reader;
+  _gradient_readers_by_method.emplace(&method, std::move(reader));
+
+  return reader_ref;
 }
 
 template <typename OutputType>
@@ -158,18 +180,8 @@ template <typename OutputType>
 VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info, const StateArg & state) const
 {
-  if (state.state != 0)
-    gradientStateError(state);
-
-  if (_needs_cell_gradients)
-  {
-    _cell_gradient.zero();
-    for (const auto i : make_range(this->_mesh.dimension()))
-      _cell_gradient(i) =
-          (*_grad_container[i])(elem_info.dofIndices()[this->_sys_num][this->_var_num]);
-  }
-
-  return _cell_gradient;
+  mooseAssert(_gradient_reader, "Gradient requested without calling requestCellGradients().");
+  return _gradient_reader->gradient(elem_info, state);
 }
 
 template <typename OutputType>
@@ -177,109 +189,26 @@ Real
 MooseLinearVariableFV<OutputType>::gradSlnComponent(const ElemInfo & elem_info,
                                                     const unsigned int component) const
 {
-  mooseAssert(_needs_cell_gradients,
-              "Gradient component requested without calling computeCellGradients().");
-  mooseAssert(component < _grad_container.size(), "Gradient component index out of range.");
-
-  return (*_grad_container[component])(elem_info.dofIndices()[this->_sys_num][this->_var_num]);
+  return gradSlnComponent(elem_info, component, Moose::currentState());
 }
 
 template <typename OutputType>
-VectorValue<Real>
-MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info,
-                                           const StateArg & state,
-                                           const Moose::FV::GradientLimiterType limiter_type) const
+Real
+MooseLinearVariableFV<OutputType>::gradSlnComponent(const ElemInfo & elem_info,
+                                                    const unsigned int component,
+                                                    const StateArg & state) const
 {
-  return (limiter_type == Moose::FV::GradientLimiterType::None)
-             ? gradSln(elem_info, state)
-             : limitedGradSln(elem_info, state, limiter_type);
-}
-
-template <typename OutputType>
-VectorValue<Real>
-MooseLinearVariableFV<OutputType>::limitedGradSln(
-    const ElemInfo & elem_info,
-    const StateArg & state,
-    const Moose::FV::GradientLimiterType limiter_type) const
-{
-  if (state.state != 0)
-    gradientStateError(state);
-
-  _cell_gradient.zero();
-  const auto & limited_grad_container =
-      _linear_system ? _linear_system->linearFVLimitedGradientContainer(limiter_type)
-                     : _auxiliary_system->linearFVLimitedGradientContainer(limiter_type);
-  for (const auto i : make_range(this->_mesh.dimension()))
-    _cell_gradient(i) =
-        (*limited_grad_container[i])(elem_info.dofIndices()[this->_sys_num][this->_var_num]);
-
-  return _cell_gradient;
+  mooseAssert(_gradient_reader,
+              "Gradient component requested without calling requestCellGradients().");
+  return _gradient_reader->component(elem_info, component, state);
 }
 
 template <typename OutputType>
 VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi, const StateArg & state) const
 {
-  const auto face_type = fi.faceType(std::make_pair(this->_var_num, this->_sys_num));
-  mooseAssert(face_type != FaceInfo::VarFaceNeighbors::NEITHER,
-              "Gradient requested on a face where the variable is defined on neither side.");
-
-  const bool var_defined_on_elem = (face_type == FaceInfo::VarFaceNeighbors::BOTH) ||
-                                   (face_type == FaceInfo::VarFaceNeighbors::ELEM);
-  const auto * const elem_one = var_defined_on_elem ? fi.elemInfo() : fi.neighborInfo();
-  const auto * const elem_two = var_defined_on_elem ? fi.neighborInfo() : fi.elemInfo();
-
-  const auto elem_one_grad = gradSln(*elem_one, state);
-
-  // If we have a neighbor then we interpolate between the two to the face.
-  if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
-  {
-    mooseAssert(elem_two, "Face type indicates BOTH but neighbor information is missing.");
-    const auto elem_two_grad = gradSln(*elem_two, state);
-    return Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, var_defined_on_elem);
-  }
-  else
-    return elem_one_grad;
-}
-
-template <typename OutputType>
-VectorValue<Real>
-MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi,
-                                           const StateArg & state,
-                                           const Moose::FV::GradientLimiterType limiter_type) const
-{
-  return (limiter_type == Moose::FV::GradientLimiterType::None)
-             ? gradSln(fi, state)
-             : limitedGradSln(fi, state, limiter_type);
-}
-
-template <typename OutputType>
-VectorValue<Real>
-MooseLinearVariableFV<OutputType>::limitedGradSln(
-    const FaceInfo & fi,
-    const StateArg & state,
-    const Moose::FV::GradientLimiterType limiter_type) const
-{
-  const auto face_type = fi.faceType(std::make_pair(this->_var_num, this->_sys_num));
-  mooseAssert(face_type != FaceInfo::VarFaceNeighbors::NEITHER,
-              "Limited gradient requested on a face where the variable is defined on neither "
-              "side.");
-
-  const bool var_defined_on_elem = (face_type == FaceInfo::VarFaceNeighbors::BOTH) ||
-                                   (face_type == FaceInfo::VarFaceNeighbors::ELEM);
-  const auto * const elem_one = var_defined_on_elem ? fi.elemInfo() : fi.neighborInfo();
-  const auto * const elem_two = var_defined_on_elem ? fi.neighborInfo() : fi.elemInfo();
-
-  const auto elem_one_grad = limitedGradSln(*elem_one, state, limiter_type);
-
-  if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
-  {
-    mooseAssert(elem_two, "Face type indicates BOTH but neighbor information is missing.");
-    const auto elem_two_grad = limitedGradSln(*elem_two, state, limiter_type);
-    return Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, var_defined_on_elem);
-  }
-  else
-    return elem_one_grad;
+  mooseAssert(_gradient_reader, "Gradient requested without calling requestCellGradients().");
+  return _gradient_reader->gradient(fi, state);
 }
 
 template <typename OutputType>
@@ -320,12 +249,12 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
   // element value
   else if (face_type == FaceInfo::VarFaceNeighbors::ELEM)
   {
-    const auto & elem_info = this->_mesh.elemInfo(fi->elemPtr()->id());
+    const auto & elem_info = *(face.fi->elemInfo());
     return getElemValue(elem_info, state);
   }
   else if (face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
-    const auto & elem_info = this->_mesh.elemInfo(fi->neighborPtr()->id());
+    const auto & elem_info = *(face.fi->neighborInfo());
     return getElemValue(elem_info, state);
   }
   else
@@ -597,32 +526,44 @@ template <typename OutputType>
 void
 MooseLinearVariableFV<OutputType>::computeElemValues()
 {
-  _element_data->setGeometry(Moose::Volume);
-  _element_data->computeValues();
+  if (_compute_qp_data)
+  {
+    _element_data->setGeometry(Moose::Volume);
+    _element_data->computeValues();
+  }
 }
 
 template <typename OutputType>
 void
 MooseLinearVariableFV<OutputType>::computeElemValuesFace()
 {
-  _element_data->setGeometry(Moose::Face);
-  _element_data->computeValues();
+  if (_compute_qp_data)
+  {
+    _element_data->setGeometry(Moose::Face);
+    _element_data->computeValues();
+  }
 }
 
 template <typename OutputType>
 void
 MooseLinearVariableFV<OutputType>::computeNeighborValuesFace()
 {
-  _neighbor_data->setGeometry(Moose::Face);
-  _neighbor_data->computeValues();
+  if (_compute_qp_data)
+  {
+    _neighbor_data->setGeometry(Moose::Face);
+    _neighbor_data->computeValues();
+  }
 }
 
 template <typename OutputType>
 void
 MooseLinearVariableFV<OutputType>::computeNeighborValues()
 {
-  _neighbor_data->setGeometry(Moose::Volume);
-  _neighbor_data->computeValues();
+  if (_compute_qp_data)
+  {
+    _neighbor_data->setGeometry(Moose::Volume);
+    _neighbor_data->computeValues();
+  }
 }
 
 template <typename OutputType>
@@ -671,10 +612,17 @@ template <typename OutputType>
 unsigned int
 MooseLinearVariableFV<OutputType>::oldestSolutionStateRequested() const
 {
-  unsigned int state = 0;
+  unsigned int state = _oldest_gradient_state_requested;
   state = std::max(state, _element_data->oldestSolutionStateRequested());
   state = std::max(state, _neighbor_data->oldestSolutionStateRequested());
   return state;
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::prepareIC()
+{
+  _element_data->prepareIC();
 }
 
 template <typename OutputType>
@@ -687,7 +635,7 @@ MooseLinearVariableFV<OutputType>::clearAllDofIndices()
 
 template <typename OutputType>
 void
-MooseLinearVariableFV<OutputType>::setNodalValue(const OutputType & /*value*/, unsigned int /*idx*/)
+MooseLinearVariableFV<OutputType>::setNodalValue(const OutputType & /*value*/)
 {
   nodalError();
 }
@@ -983,6 +931,13 @@ MooseLinearVariableFV<OutputType>::adSln() const
 template <typename OutputType>
 const ADTemplateVariableGradient<OutputType> &
 MooseLinearVariableFV<OutputType>::adGradSln() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableGradient<OutputType> &
+MooseLinearVariableFV<OutputType>::adGradSlnFace() const
 {
   adError();
 }

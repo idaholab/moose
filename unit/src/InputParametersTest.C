@@ -148,6 +148,59 @@ TEST(InputParametersTest, checkSetDocStringError)
       "Unable to set the documentation string (using setDocString)");
 }
 
+TEST(InputParametersTest, addParamNamesToGroup)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("a", "A parameter");
+  params.addParamNamesToGroup("a", "Group1");
+  ASSERT_EQ(params.getGroupName("a"), "Group1");
+}
+
+TEST(InputParametersTest, addParamNamesToGroupDifferentGroup)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("a", "A parameter");
+  params.addParamNamesToGroup("a", "Group1");
+  params.addParamNamesToGroup("a", "Group2");
+  ASSERT_EQ(params.getGroupName("a"), "Group2");
+}
+
+TEST(InputParametersTest, addParamNamesToGroupSameGroupError)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("a", "A parameter");
+  params.addParamNamesToGroup("a", "Group1");
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.addParamNamesToGroup("a", "Group1"); },
+      "The parameter 'a' has already been added to the group 'Group1'.");
+}
+
+TEST(InputParametersTest, addParamNamesToGroupDuplicateWithinCallError)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("a", "A parameter");
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.addParamNamesToGroup("a a", "Group1"); },
+      "The parameter 'a' has already been added to the group 'Group1'.");
+}
+
+TEST(InputParametersTest, moveParamToGroup)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("a", "A parameter");
+  params.addParamNamesToGroup("a", "Group1");
+  params.moveParamToGroup("a", "Group2");
+  ASSERT_EQ(params.getGroupName("a"), "Group2");
+}
+
+TEST(InputParametersTest, moveParamToGroupMissingParamError)
+{
+  InputParameters params = emptyInputParameters();
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.moveParamToGroup("a", "Group1"); },
+      "Unable to find a parameter with name: a when moving to group Group1.");
+}
+
 TEST(InputParametersTest, setCoupledVar)
 {
   InputParameters params = emptyInputParameters();
@@ -518,6 +571,136 @@ TEST(InputParametersTest, transferParameters)
   EXPECT_EQ(p1.getDocString("od2"), p2.getDocString("od2"));
   EXPECT_EQ(p1.getDocString("od3a"), p2.getDocString("od3a"));
   EXPECT_EQ(p1.getDocString("od3b"), p2.getDocString("od3b"));
+}
+
+TEST(InputParametersTest, checkForRename)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("new_param", 1.5, "Documentation");
+  params.renameParam("new_param", "renamed_param", "Updated documentation");
+
+  const std::string old_name = "new_param";
+  const std::string current_name = "renamed_param";
+  const std::string unknown = "does_not_exist";
+
+  // Renamed name resolves to the current name; address must be stable rename metadata
+  const auto & resolved_old = params.checkForRename(old_name);
+  EXPECT_EQ(resolved_old, current_name);
+  EXPECT_EQ(std::addressof(resolved_old), std::addressof(params.checkForRename(old_name)));
+
+  // Current / unknown names return a reference to the input argument (no allocation)
+  const auto & resolved_current = params.checkForRename(current_name);
+  EXPECT_EQ(resolved_current, current_name);
+  EXPECT_EQ(std::addressof(resolved_current), std::addressof(current_name));
+
+  const auto & resolved_unknown = params.checkForRename(unknown);
+  EXPECT_EQ(resolved_unknown, unknown);
+  EXPECT_EQ(std::addressof(resolved_unknown), std::addressof(unknown));
+
+  // Access through the old name still works after rename
+  EXPECT_TRUE(params.have_parameter<Real>(old_name));
+  EXPECT_TRUE(params.have_parameter<Real>(current_name));
+  EXPECT_EQ(params.get<Real>(old_name), 1.5);
+  EXPECT_EQ(params.get<Real>(current_name), 1.5);
+  EXPECT_EQ(params.getDocString(old_name), "Updated documentation");
+  EXPECT_EQ(params.getDocString(current_name), "Updated documentation");
+
+  // Aliases include both the current name and the old name
+  const auto aliases = params.paramAliases(current_name);
+  ASSERT_EQ(aliases.size(), 2);
+  EXPECT_EQ(aliases[0], current_name);
+  EXPECT_EQ(aliases[1], old_name);
+}
+
+TEST(InputParametersTest, deprecateCoupledVar)
+{
+  InputParameters params = emptyInputParameters();
+  params.addCoupledVar("old_var", "An old coupled variable");
+  params.deprecateCoupledVar("old_var", "new_var", "01/01/2099");
+
+  // The coupled-var set stores only the current name; the old name resolves via checkForRename
+  EXPECT_TRUE(params.hasCoupledVar("new_var"));
+  EXPECT_FALSE(params.hasCoupledVar("old_var"));
+  EXPECT_EQ(params.checkForRename("old_var"), "new_var");
+  EXPECT_EQ(params.checkForRename("new_var"), "new_var");
+
+  // Setting / reading through the deprecated name uses the new name under the hood
+  params.setCoupledVar("old_var", NonlinearVariableName("u"));
+  EXPECT_EQ(params.getCoupledVar("new_var"), std::vector<VariableName>{"u"});
+  EXPECT_EQ(params.getCoupledVar("old_var"), std::vector<VariableName>{"u"});
+
+  const auto message = params.queryDeprecatedParamMessage("old_var");
+  ASSERT_TRUE(message.has_value());
+  EXPECT_NE(message->find("old_var"), std::string::npos);
+  EXPECT_NE(message->find("new_var"), std::string::npos);
+  EXPECT_NE(message->find("01/01/2099"), std::string::npos);
+}
+
+TEST(InputParametersTest, missingRequiredParamErrors)
+{
+  InputParameters params = emptyInputParameters();
+  params.addRequiredParam<Real>("req", "Required doc");
+  params.addParam<Real>("opt", "Optional doc");
+  params.addPrivateParam<Real>("_priv");
+  params.makeParamRequired<Real>("_priv");
+
+  // Without a hit node, the parsing syntax is used as the block path
+  auto errors = params.missingRequiredParamErrors("Block");
+  ASSERT_EQ(errors.size(), 2);
+  EXPECT_EQ(errors[0], "missing required parameter 'Block/_priv'\n\tDoc String: \"\"");
+  EXPECT_EQ(errors[1], "missing required parameter 'Block/req'\n\tDoc String: \"Required doc\"");
+
+  // Skipped by name
+  errors = params.missingRequiredParamErrors("Block", {"req"});
+  ASSERT_EQ(errors.size(), 1);
+  EXPECT_NE(errors[0].find("'Block/_priv'"), std::string::npos);
+
+  // Skipped because private
+  errors = params.missingRequiredParamErrors("Block", {}, true);
+  ASSERT_EQ(errors.size(), 1);
+  EXPECT_NE(errors[0].find("'Block/req'"), std::string::npos);
+
+  // Set required parameters are not reported
+  params.set<Real>("req") = 1;
+  params.set<Real>("_priv") = 2;
+  EXPECT_TRUE(params.missingRequiredParamErrors("Block").empty());
+}
+
+TEST(InputParametersTest, missingRequiredParamErrorsRenamed)
+{
+  InputParameters params = emptyInputParameters();
+  params.addRequiredParam<Real>("old_param", "Required doc");
+  params.renameParam("old_param", "new_param", "");
+  params.addRequiredCoupledVar("old_var", "Required coupled doc");
+  params.deprecateCoupledVar("old_var", "new_var", "01/01/2099");
+
+  // Missing renamed parameters are reported by their current names
+  auto errors = params.missingRequiredParamErrors("Block");
+  ASSERT_EQ(errors.size(), 2);
+  EXPECT_NE(errors[0].find("'Block/new_param'"), std::string::npos);
+  EXPECT_NE(errors[1].find("'Block/new_var'"), std::string::npos);
+
+  // The old and new names share one value, so setting either satisfies the requirement
+  params.set<Real>("old_param") = 1;
+  params.set<std::vector<VariableName>>("old_var") = {"u"};
+  EXPECT_TRUE(params.missingRequiredParamErrors("Block").empty());
+}
+
+TEST(InputParametersTest, missingRequiredParamErrorsDeprecatedCoupledVar)
+{
+  InputParameters params = emptyInputParameters();
+  params.addRequiredCoupledVar("new_var", "Required coupled doc");
+  params.addDeprecatedCoupledVar("old_var", "new_var");
+
+  // addDeprecatedCoupledVar keeps a separate parameter for the old name
+  auto errors = params.missingRequiredParamErrors("Block");
+  ASSERT_EQ(errors.size(), 1);
+  EXPECT_NE(errors[0].find("'Block/new_var'"), std::string::npos);
+
+  // Setting the old name satisfies the required new name
+  params.set<std::vector<VariableName>>("old_var") = {"u"};
+  EXPECT_FALSE(params.isParamValid("new_var"));
+  EXPECT_TRUE(params.missingRequiredParamErrors("Block").empty());
 }
 
 TEST(InputParametersTest, noDefaultValueError)

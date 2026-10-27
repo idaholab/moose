@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -86,6 +86,17 @@ public:
    */
   bool isRoot() const { return _is_root; }
 
+  /**
+   * @brief Whether this universe is an engineering unit.
+   *
+   * Returns false for a plain CSGUniverse; overridden to return true by the
+   * engineering unit types. Used to avoid a dynamic_cast on the common
+   * plain-universe comparison path (see operator==).
+   *
+   * @return true if this object is a CSGEngUnit, otherwise false
+   */
+  virtual bool isEngUnit() const { return false; }
+
   /// Operator overload for checking if two CSGUniverse objects are equal
   bool operator==(const CSGUniverse & other) const;
 
@@ -128,7 +139,7 @@ protected:
   // CSGUniverseList needs to be friend to access setName()
   friend class CSGUniverseList;
 
-  // CSGUniverseList needs to be friend to access addCell()
+  // CSGBase needs to be friend to access addCell()
   friend class CSGBase;
 
 #ifdef MOOSE_UNIT_TEST

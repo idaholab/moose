@@ -23,8 +23,6 @@
 #include <cxxabi.h>
 #include <fstream>
 
-using namespace libMesh;
-
 registerMooseObjectAliased("MooseApp", DOFMapOutput, "DOFMap");
 
 InputParameters
@@ -140,7 +138,7 @@ DOFMapOutput::output()
   oss << ", \"vars\": [";
   for (unsigned int vg = 0; vg < dof_map.n_variable_groups(); ++vg)
   {
-    const VariableGroup & vg_description(dof_map.variable_group(vg));
+    const libMesh::VariableGroup & vg_description(dof_map.variable_group(vg));
     for (unsigned int vn = 0; vn < vg_description.n_variables(); ++vn)
     {
       unsigned int var = vg_description.number(vn);
@@ -171,7 +169,7 @@ DOFMapOutput::output()
         // get the list of unique DOFs for this variable
         // Start by looking at local DOFs
         std::set<dof_id_type> dofs;
-        ConstElemRange * active_local_elems = _mesh.getActiveLocalElementRange();
+        const ConstElemRange * active_local_elems = _mesh.getActiveLocalElementRange();
         for (const auto & elem : *active_local_elems)
         {
           if (elem->subdomain_id() == *sd)

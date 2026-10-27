@@ -62,19 +62,17 @@
 #include <optional>
 #include <string>
 
-using namespace libMesh;
-
 void
 MooseVecView(NumericVector<Number> & vector)
 {
-  PetscVector<Number> & petsc_vec = static_cast<PetscVector<Number> &>(vector);
+  PetscVector<Number> & petsc_vec = cast_ref<PetscVector<Number> &>(vector);
   LibmeshPetscCallA(vector.comm().get(), VecView(petsc_vec.vec(), 0));
 }
 
 void
 MooseMatView(SparseMatrix<Number> & mat)
 {
-  PetscMatrixBase<Number> & petsc_mat = static_cast<PetscMatrix<Number> &>(mat);
+  libMesh::PetscMatrixBase<Number> & petsc_mat = cast_ref<PetscMatrix<Number> &>(mat);
   LibmeshPetscCallA(mat.comm().get(), MatView(petsc_mat.mat(), 0));
 }
 
@@ -82,15 +80,15 @@ void
 MooseVecView(const NumericVector<Number> & vector)
 {
   PetscVector<Number> & petsc_vec =
-      static_cast<PetscVector<Number> &>(const_cast<NumericVector<Number> &>(vector));
+      cast_ref<PetscVector<Number> &>(const_cast<NumericVector<Number> &>(vector));
   LibmeshPetscCallA(vector.comm().get(), VecView(petsc_vec.vec(), 0));
 }
 
 void
 MooseMatView(const SparseMatrix<Number> & mat)
 {
-  PetscMatrixBase<Number> & petsc_mat =
-      static_cast<PetscMatrix<Number> &>(const_cast<SparseMatrix<Number> &>(mat));
+  libMesh::PetscMatrixBase<Number> & petsc_mat =
+      cast_ref<PetscMatrix<Number> &>(const_cast<SparseMatrix<Number> &>(mat));
   LibmeshPetscCallA(mat.comm().get(), MatView(petsc_mat.mat(), 0));
 }
 
@@ -98,6 +96,25 @@ namespace Moose
 {
 namespace PetscSupport
 {
+
+PetscOptionsScope::PetscOptionsScope(FEProblemBase & problem) : _problem(problem), _pushed(false)
+{
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  if (!_problem.getMooseApp().isUltimateMaster())
+  {
+    LibmeshPetscCallA(_problem.comm().get(), PetscOptionsPush(_problem.petscOptionsDatabase()));
+    _pushed = true;
+  }
+#endif
+}
+
+PetscOptionsScope::~PetscOptionsScope()
+{
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  if (_pushed)
+    PetscCallAbort(_problem.comm().get(), PetscOptionsPop());
+#endif
+}
 
 namespace
 {
@@ -203,7 +220,8 @@ applyMatrixTypeOptions(FEProblemBase & problem,
       continue;
 
     for (auto & [_, mat] : as_range(lm_sys.matrices_begin(), lm_sys.matrices_end()))
-      if (auto * const petsc_mat = dynamic_cast<PetscMatrixBase<Number> *>(mat.get()); petsc_mat)
+      if (auto * const petsc_mat = dynamic_cast<libMesh::PetscMatrixBase<Number> *>(mat.get());
+          petsc_mat)
       {
         LibmeshPetscCallA(
             problem.comm().get(),
@@ -436,8 +454,7 @@ petscNonlinearConverged(SNES /*snes*/,
   }
   else
   {
-    auto & convergence = problem.getConvergence(
-        problem.getNonlinearConvergenceNames()[problem.currentNonlinearSystem().number()]);
+    auto & convergence = problem.currentNonlinearSystem().convergence();
     status = convergence.checkConvergence(it);
   }
 
@@ -610,7 +627,8 @@ petscSetDefaults(FEProblemBase & problem)
     NonlinearSystemBase & nl = problem.getNonlinearSystemBase(nl_index);
 
     // dig out PETSc solver
-    auto * const petsc_solver = cast_ptr<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
+    auto * const petsc_solver =
+        cast_ptr<libMesh::PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
 
     // Ensure we properly prefix SNES which in turn prefixes its KSP
     const char * snes_prefix = nullptr;
@@ -638,7 +656,7 @@ petscSetDefaults(FEProblemBase & problem)
     LinearSystem & lin_sys = problem.getLinearSystem(sys_index);
     auto & lm_lin_sys = lin_sys.linearImplicitSystem();
     auto * const petsc_solver =
-        dynamic_cast<PetscLinearSolver<Number> *>(lm_lin_sys.get_linear_solver());
+        dynamic_cast<libMesh::PetscLinearSolver<Number> *>(lm_lin_sys.get_linear_solver());
     // Ensure we properly prefix KSP
     if (lm_lin_sys.prefix_with_name())
       petsc_solver->init(lm_lin_sys.prefix().c_str());
@@ -731,8 +749,9 @@ setLineSearchFromParams(FEProblemBase & fe_problem, const InputParameters & para
           if (!nl_system)
             mooseError("You've requested a line search but you must be solving an EigenProblem. "
                        "These two things are not consistent.");
-          PetscNonlinearSolver<Real> * petsc_nonlinear_solver =
-              dynamic_cast<PetscNonlinearSolver<Real> *>(nl_system->nonlinear_solver.get());
+          libMesh::PetscNonlinearSolver<Real> * petsc_nonlinear_solver =
+              dynamic_cast<libMesh::PetscNonlinearSolver<Real> *>(
+                  nl_system->nonlinear_solver.get());
           if (!petsc_nonlinear_solver)
             mooseError("Currently the MOOSE line searches all use Petsc, so you "
                        "must use Petsc as your non-linear solver.");

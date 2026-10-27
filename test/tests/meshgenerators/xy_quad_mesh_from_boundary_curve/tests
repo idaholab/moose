@@ -1,0 +1,28 @@
+[Tests]
+  design = '/XYQuadrilateralMeshFromBoundaryCurve.md'
+  issues = '#33522'
+  [gear]
+    type = 'CSVDiff'
+    input = 'gear.i'
+    csvdiff = 'gear_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+    requirement = 'The system shall mesh a gear profile containing a rotated gear-profile bore '
+                  'with quadrilaterals through a single mesh generator that chains a frontal '
+                  'Delaunay triangulation, the triangle-to-quadrilateral conversion, the snapping '
+                  'of both boundaries onto their parametric curves, and a variational smoothing '
+                  'pass, and shall report the meshed area.'
+  []
+  [annulus_fixed_boundary]
+    type = 'CSVDiff'
+    input = 'annulus_fixed_boundary.i'
+    csvdiff = 'annulus_fixed_boundary_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+    requirement = 'The system shall keep the boundary nodes of the input curves when meshing a '
+                  'region with quadrilaterals through the single mesh generator with the boundary '
+                  'refinement turned off, so that the mesh can be stitched to a neighbor sharing '
+                  'those curves, even when the desired element area is smaller than the boundary '
+                  'segments allow.'
+  []
+[]

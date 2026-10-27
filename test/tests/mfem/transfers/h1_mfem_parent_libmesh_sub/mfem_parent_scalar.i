@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../../mesh/square_quad9.e
 []
 
@@ -46,16 +46,10 @@
   []
 []
 
-[Preconditioner]
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-  [jacobi]
-    type = MFEMOperatorJacobiSmoother
-  []
-[]
-
-[Solvers]
   [gmres]
     type = MFEMHypreGMRES
     preconditioner = boomeramg
@@ -91,7 +85,6 @@
     type = MFEML2Error
     variable = mfem_scalar_var
     function = libmesh_scalar_var
-    execute_on = TIMESTEP_END
   []
 []
 

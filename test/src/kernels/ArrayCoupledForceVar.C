@@ -29,7 +29,7 @@ ArrayCoupledForceVar::ArrayCoupledForceVar(const InputParameters & parameters)
     _vars.push_back(&coupledArrayValueByName(var_name));
 
     std::vector<Real> coefs;
-    MooseUtils::tokenizeAndConvert(coef_str, coefs, ",");
+    MooseUtils::tokenizeAndConvert(coef_str, coefs, ",", true);
 
     ArrayMooseVariable * var = &_fe_problem.getArrayVariable(_tid, var_name);
     unsigned int n = coefs.size();

@@ -79,6 +79,38 @@ private:
     _query_boundary.queryInto(results, _tid, std::make_tuple(bnd, false), iface);
   }
 
+  struct BoundaryMaterialReinitCache
+  {
+    std::deque<MaterialBase *> face_materials;
+    std::deque<MaterialBase *> boundary_materials;
+  };
+
+  struct InternalSideMaterialReinitCache
+  {
+    std::deque<MaterialBase *> face_materials;
+    std::deque<MaterialBase *> neighbor_materials;
+  };
+
+  struct InterfaceMaterialReinitCache
+  {
+    std::deque<MaterialBase *> face_materials;
+    std::deque<MaterialBase *> boundary_materials;
+    std::deque<MaterialBase *> neighbor_materials;
+  };
+
+  /// Return the exact face and boundary materials required while executing on this boundary.
+  const BoundaryMaterialReinitCache & getBoundaryMaterialReinitCache(BoundaryID bnd_id,
+                                                                     SubdomainID subdomain_id);
+
+  /// Return the face and neighbor materials required while executing on this internal side.
+  const InternalSideMaterialReinitCache &
+  getInternalSideMaterialReinitCache(SubdomainID subdomain_id, SubdomainID neighbor_subdomain_id);
+  /// Return the face, boundary, and neighbor materials required while executing on this interface.
+  const InterfaceMaterialReinitCache &
+  getInterfaceMaterialReinitCache(BoundaryID bnd_id,
+                                  SubdomainID subdomain_id,
+                                  SubdomainID neighbor_subdomain_id,
+                                  const std::vector<UserObject *> & interface_objs);
   const TheWarehouse::Query _query;
   TheWarehouse::QueryCache<AttribThread, AttribSubdomains, AttribInterfaces> _query_subdomain;
   TheWarehouse::QueryCache<AttribThread, AttribBoundaries, AttribInterfaces> _query_boundary;
@@ -90,6 +122,16 @@ private:
   std::vector<DomainUserObject *> _all_domain_objs;
 
   AuxiliarySystem & _aux_sys;
+
+  // Exact material sets required for each boundary/subdomain pair. This cache is valid only for
+  // this ComputeUserObjectsThread mesh traversal; a new ComputeUserObjectsThread, and therefore a
+  // new cache, is created for each computeUserObjectsInternal() execution.
+  std::map<std::pair<BoundaryID, SubdomainID>, BoundaryMaterialReinitCache>
+      _boundary_material_reinit_cache;
+  std::map<std::pair<SubdomainID, SubdomainID>, InternalSideMaterialReinitCache>
+      _internal_side_material_reinit_cache;
+  std::map<std::tuple<BoundaryID, SubdomainID, SubdomainID>, InterfaceMaterialReinitCache>
+      _interface_material_reinit_cache;
 };
 
 // determine when we need to run user objects based on whether any initial conditions or aux
