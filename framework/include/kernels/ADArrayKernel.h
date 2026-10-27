@@ -28,6 +28,7 @@ public:
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeResidualAndJacobian() override;
   virtual void jacobianSetup() override;
 
   virtual const ArrayMooseVariable & variable() const override { return _var; }
@@ -40,7 +41,7 @@ protected:
   virtual void computeQpResidual(ADRealEigenVector & residual) = 0;
 
   /**
-   * Put necessary evaluations depending on qp but independent on test functions here
+   * Put necessary evaluations depending on qp but independent of test functions here
    */
   virtual void initQpResidual() {}
 
@@ -73,8 +74,14 @@ protected:
   std::vector<ADReal> _local_ad_re;
 
 private:
+  /// Fill _local_ad_re with the AD residuals of all test functions on the current element
+  void computeResidualsForJacobian();
+
   /// Work vector for residual and diag jacobian
   ADRealEigenVector _work_vector;
+
+  /// Values of _work_vector without derivatives, for the residual computation
+  RealEigenVector _raw_work_vector;
 
   /// Cache variable to prevent multiple invocations of Jacobian computation for one element (recall that AD computes the Jacobian at all once for all variable couplings)
   const Elem * _my_elem = nullptr;
