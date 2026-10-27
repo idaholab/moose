@@ -51,7 +51,6 @@ heated_length = 1.0
   atol = 1.0e-10
   implicit = true
   segregated = false
-  staggered_pressure = false
   verbose_multiapps = true
   verbose_subchannel = false
   interpolation_scheme = 'upwind'
