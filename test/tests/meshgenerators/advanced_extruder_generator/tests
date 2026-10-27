@@ -208,6 +208,21 @@
       expect_err = 'direction cannot be set if extruding along curve!'
       detail = 'the extrusion direction is specified along with a curve to extrude along,'
     []
+    [param_node_normals_with_curve]
+      type = RunException
+      input = extrude_along_curve_2D.i
+      cli_args = "Mesh/ext_along_curve/extrude_along_node_normals=true --mesh-only"
+      expect_err = 'extrude_along_node_normals cannot be set if extruding along curve!'
+      detail = 'the extrusion is requested along the node normals along with a curve to extrude along,'
+    []
+    [param_node_normals_1d_not_planar]
+      type = RunException
+      input = extrude_along_normals_1d.i
+      cli_args = "Mesh/arc/z_function=x --mesh-only"
+      expect_err = 'requires the mesh to lie in a plane of constant z'
+      detail = 'the extrusion is requested along the node normals of a 1D mesh that does not lie in a plane of constant z.'
+      mesh_mode = 'REPLICATED'
+    []
   []
   [named_boundaries]
     type = Exodiff
@@ -263,5 +278,57 @@
     recover = false
     issues = '#31112'
     requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve with linear radial growth rate.'
+  []
+  [extrude_along_node_normals]
+    type = Exodiff
+    input = 'extrude_along_normals.i'
+    exodiff = 'extrude_along_normals_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+    issues = '#34096'
+    requirement = 'The system shall be able to extrude each node of a 2D surface mesh along the averaged normal of the elements it is connected to, for example to create boundary layers.'
+    mesh_mode = 'REPLICATED'
+  []
+  [extrude_along_node_normals_polygons]
+    type = CSVDiff
+    input = 'polygons_node_normals.i'
+    csvdiff = 'polygons_node_normals_out_div_out_0001.csv'
+    recover = false
+    issues = '#34096'
+    requirement = 'The system shall be able to extrude each node of a 2D polygon mesh along the averaged normal of the elements it is connected to.'
+    # no support yet for distributed polygon extrusion since sides have to be shared
+    mesh_mode = 'REPLICATED'
+  []
+  [extrude_along_node_normals_curved]
+    type = Exodiff
+    input = 'extrude_along_normals.i'
+    exodiff = 'extrude_along_normals_curved.e'
+    cli_args = 'Mesh/gmg/elem_type=QUAD9 --mesh-only extrude_along_normals_curved.e'
+    recover = false
+    issues = '#34096'
+    requirement = 'The system shall be able to extrude each node of a curved, second-order 2D surface mesh along the averaged normal of the elements it is connected to, with each element normal evaluated at the node.'
+    mesh_mode = 'REPLICATED'
+  []
+  [extrude_along_node_normals_1d]
+    requirement = 'The system shall be able to extrude each node of a curved 1D mesh into 2D along the averaged normal of the elements it is connected to, with each element normal evaluated at the node, for'
+    issues = '#34096'
+    [first_order]
+      type = Exodiff
+      input = 'extrude_along_normals_1d.i'
+      exodiff = 'extrude_along_normals_1d_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      detail = 'first-order elements, and'
+      mesh_mode = 'REPLICATED'
+    []
+    [second_order]
+      type = Exodiff
+      input = 'extrude_along_normals_1d.i'
+      exodiff = 'extrude_along_normals_1d_curved.e'
+      cli_args = 'Mesh/gmg/elem_type=EDGE3 --mesh-only extrude_along_normals_1d_curved.e'
+      recover = false
+      detail = 'second-order elements.'
+      mesh_mode = 'REPLICATED'
+    []
   []
 []

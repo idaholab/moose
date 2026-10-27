@@ -627,4 +627,17 @@ void buildPolyLineMesh(MeshBase & mesh,
  * shell)
  */
 void addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_external_bid);
+
+/**
+ * Match the points of a nodal quadrature rule (e.g. QNodal on a side of a parent element) to the
+ * nodes of an element at the same physical locations. The quadrature ordering is not guaranteed to
+ * match the node ordering of the element, especially for higher-order faces, so the association
+ * is built geometrically so each quadrature value is attached to the node at the same physical
+ * point.
+ * @param elem the element whose nodes are matched
+ * @param q_points the physical locations of the nodal quadrature points
+ * @return a map from each quadrature point index to the local index of the matching node
+ */
+std::vector<unsigned int> nodalQuadraturePointToNodeMap(const Elem & elem,
+                                                        const std::vector<Point> & q_points);
 }
