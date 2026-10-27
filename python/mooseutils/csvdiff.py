@@ -545,7 +545,7 @@ def parseArgs(args=None):
     )
     parser.add_argument(
         "--abs-zero",
-        metavar="absolute zero",
+        metavar="value",
         default="1e-10",
         help="Value representing an absolute zero (default: 1e-10)",
     )
@@ -570,20 +570,20 @@ def parseArgs(args=None):
     parser.add_argument(
         "--custom-abs-zero",
         nargs="+",
-        metavar="exponential",
-        help="Space separated list of corresponding exponential absolute zero values for --custom-columns",
+        metavar="value",
+        help="Space separated list of corresponding absolute zero values for --custom-columns",
     )
     parser.add_argument(
         "--custom-abs-err",
         nargs="+",
-        metavar="exponential",
-        help="Space separated list of corresponding acceptable exponential absolute tolerance values for --custom-columns",
+        metavar="tolerance",
+        help="Space separated list of corresponding acceptable absolute tolerance values for --custom-columns",
     )
     parser.add_argument(
         "--custom-rel-err",
         nargs="+",
-        metavar="exponential",
-        help="Space separated list of corresponding acceptable exponential relative tolerance values for --custom-columns",
+        metavar="tolerance",
+        help="Space separated list of corresponding acceptable relative tolerance values for --custom-columns",
     )
     return verifyArgs(parser.parse_args(args))
 
