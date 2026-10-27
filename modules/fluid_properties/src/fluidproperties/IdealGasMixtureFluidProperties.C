@@ -117,9 +117,7 @@ IdealGasMixtureFluidProperties::IdealGasMixtureFluidProperties(const InputParame
     mooseError("There must be at least one entry in 'component_fluid_properties'.");
 
   // With components whose specific heats depend on temperature, Newton's method starts at the
-  // lowest of their start temperatures. For NASA 7-coefficient components, these are the upper ends
-  // of the temperature ranges of their data, above the solution, because their internal energies
-  // are convex in temperature over nearly all of these ranges (see NASA7IdealGasFluidProperties).
+  // lowest of their start temperatures (see IdealGasMixtureInterface)
   _component_fps.resize(_n_components);
   for (const auto i : make_range(_n_components))
   {

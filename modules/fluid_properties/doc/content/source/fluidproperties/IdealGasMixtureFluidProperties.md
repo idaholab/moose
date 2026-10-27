@@ -6,10 +6,11 @@ can be a component if it implements `IdealGasMixtureInterface`, which tells the 
 specific heats are constant and at which temperature Newton's method should start.
 
 !alert note
-The internal energies of these two kinds of components have different references: that of
+Components can have different references for the internal energy. For example, that of
 [IdealGasFluidProperties.md] is $c_v T$ plus a user-supplied reference value, whereas that of
-[NASA7IdealGasFluidProperties.md] includes the enthalpy of formation. Only the latter accounts
-for the heat of reaction when the composition changes by reaction.
+[NASA7IdealGasFluidProperties.md] includes the enthalpy of formation. Only a reference that includes
+the enthalpy of formation accounts for the heat of reaction when the composition changes by
+reaction.
 
 First note the following definitions and relations:
 
