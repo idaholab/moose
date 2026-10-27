@@ -76,7 +76,6 @@ P_out = 14.72e6 # Pa
   P_out = ${P_out}
   implicit = true
   segregated = false
-  staggered_pressure = false
   verbose_subchannel = true
   # At this Peclet number the exponential scheme reduces to upwind, where the cell-center
   # turbulent mixing uses only the bottom-face enthalpies. On this 20-cell mesh the mixing flow of a
