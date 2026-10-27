@@ -32,7 +32,9 @@ public:
   virtual void jacobianSetup() override {}
   virtual void residualEnd() override {}
 
-  virtual bool addCouplingEntriesToJacobian() override { return true; }
+  virtual bool usesExactConstraints() const override { return _formulation == Formulation::EXACT; }
+
+  virtual void addExactConstraints(libMesh::DofMap & dof_map) const override;
 
   bool shouldApply() override final;
 
@@ -53,8 +55,8 @@ protected:
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
   FEProblem & _fe_problem;
 
-  /// Formulations, currently only supports KINEMATIC and PENALTY
-  CreateMooseEnumClass(Formulation, KINEMATIC, PENALTY) _formulation;
+  /// Formulations, KINEMATIC and PENALTY are enforced with a residual, EXACT with exact constraints
+  CreateMooseEnumClass(Formulation, KINEMATIC, PENALTY, EXACT) _formulation;
   /// Penalty parameter used in constraint enforcement for kinematic and penalty formulations
   const Real _penalty;
   /// copy of the residual before the constraint is applied

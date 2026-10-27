@@ -53,8 +53,9 @@ libMesh admits one `libMesh::System::Constraint` object per `System` and calls i
 `System::user_constrain()` every time it rebuilds the constraints of that system.
 `MultiPointConstraintHub` is that single object. It holds the nonlinear system and asks every
 active constraint of that system whose `usesExactConstraints()` is true for its exact constraints. Every
-`MultiPointConstraint` answers true, and any other constraint that enforces its relation exactly is
-served by the same hub.
+`MultiPointConstraint` answers true, and so does any other constraint that enforces its relation
+exactly: a [NodalConstraint.md] or an [EqualValueEmbeddedConstraint.md] with
+`formulation = exact` is served by the same hub.
 
 `NonlinearSystemBase` builds a hub and attaches it when the first exact constraint is
 added, which happens before libMesh distributes the degrees of freedom. The attachment fails with
@@ -85,6 +86,8 @@ takes effect at the next solve.
 The rebuild covers the coefficients of an existing set of exact constraints. The sparsity pattern and the send
 list are built once, from the exact constraints of the first build, so a provider may change the weight of a tie
 between solves but not which degrees of freedom the tie connects. Changing that is a mesh change.
+[LinearNodalConstraint.md], whose `weights` parameter is controllable, is the implementation to
+follow.
 
 ## Behavior under an eigenvalue solve
 
@@ -93,7 +96,9 @@ both the stiffness matrix and the mass matrix, so the solve sees the exact reduc
 $\tilde K \mathbf{v} = \lambda \tilde M \mathbf{v}$, with no spurious eigenvalue and no shift from a
 penalty.
 [The eigen tag section of the Constraints syntax page](syntax/Constraints/index.md#eigen-tag)
-gives the executioner settings that a constrained `DofMap` requires.
+gives the executioner settings that a constrained `DofMap` requires, the sparsity setting that it
+does not require, and the behavior of the penalty and Lagrange-multiplier constraint families for
+comparison.
 
 ## Deriving a multipoint constraint
 
