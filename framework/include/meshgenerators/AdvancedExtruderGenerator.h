@@ -118,8 +118,8 @@ protected:
   Real radialExpansionRatio(const Real t) const;
 
   /// Compute, for each node, the extrusion direction as the JxW-weighted average of the normals,
-  /// evaluated at that node with nodal quadrature, of all the elements connected to it. The input surface mesh is expected to have consistently oriented
-  /// elements.
+  /// evaluated at that node with nodal quadrature, of all the elements connected to it.
+  /// The input surface mesh is expected to have consistently oriented elements.
   /// @param input the 1D or 2D mesh being extruded
   /// @return a map from node id to its (unit) extrusion direction
   std::unordered_map<dof_id_type, Point> computeNodeNormals(const MeshBase & input) const;

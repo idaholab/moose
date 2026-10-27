@@ -509,9 +509,10 @@ AdvancedExtruderGenerator::generate()
   if (_extrude_along_curve)
     extrusion_curve = std::move(_extrusion_curve);
 
-  if (_extrude_along_node_normals && !input->is_replicated())
+  if (_extrude_along_node_normals && !input->is_serial())
     paramError("extrude_along_node_normals",
-               "Extruding along node normals is not implemented for distributed meshes yet.");
+               "Extruding along node normals is not implemented for non-serialized distributed "
+               "meshes yet.");
 
   // We must serialize the curve to know how to extrude across all ranks
   std::unique_ptr<libMesh::MeshSerializer> serializer;
