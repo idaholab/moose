@@ -155,6 +155,26 @@
     override_rel_err = '1.0e-6 1.0e-6'
     override_abs_zero = '1.0e-4 1.0e-4'
   []
+  [traction_curve_modeII_no_healing]
+    type = CSVDiff
+    issues = '#34029'
+    design = 'userobjects/BilinearMixedModeCohesiveZoneModel.md'
+    input = traction_curve_modeII.i
+    csvdiff = traction_curve_modeII_no_healing_out.csv
+    # The top block slides off the base at a tangential jump of about 1.1 (t = 3.7), after which
+    # the mortar projection no longer pairs the secondary nodes and their damage is not recomputed
+    cli_args = 'Executioner/end_time=4 Executioner/dt=0.1 Executioner/dtmin=0.1 '
+               'Outputs/file_base=traction_curve_modeII_no_healing_out'
+    requirement = 'The system shall retain full cohesive zone damage at interface nodes whose '
+                  'damage is no longer recomputed because they are no longer paired with a '
+                  'primary face.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+    ignore_columns = 'mode_mixity'
+    override_columns = 'jump_n traction_n'
+    override_rel_err = '1.0e-6 1.0e-6'
+    override_abs_zero = '1.0e-4 1.0e-4'
+  []
   [traction_curve_mixed_power]
     type = CSVDiff
     issues = '#33045'

@@ -12,7 +12,7 @@ added to [!param](/MeshModifiers/CZMPressureSidesetUpdater/pressure_boundary_sec
 face on the primary side that the secondary face was bonded to is added to
 [!param](/MeshModifiers/CZMPressureSidesetUpdater/pressure_boundary_primary). Together the two
 sidesets bound the debonded region, so they can be used both to apply boundary conditions to the
-void and to measure it, for example with [InternalVolume](InternalVolume.md) .
+void.
 
 A segment is considered fully separated when the damage given by
 [!param](/MeshModifiers/CZMPressureSidesetUpdater/damage_variable) is at or above
