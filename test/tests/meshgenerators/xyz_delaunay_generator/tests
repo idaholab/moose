@@ -116,7 +116,6 @@
       ignore_columns = 'volume'
       recover = false
       detail = "selectively stitching 'hole' meshes into the final mesh after converting non-TET4 meshes using boundary element conversion, and naming the subdomains of the converted elements"
-      issues = '#20976'
       valgrind = none # see #31360
       capabilities = 'netgen'
     []
