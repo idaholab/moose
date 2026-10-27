@@ -10,7 +10,9 @@
       valgrind = NONE
       recover = false
       abs_zero = 1e-5
-      rel_err = 5e-5
+      # Tightening the crossflow linear tolerances from 1e-6 to 1e-7 changes mdot by up to 1e-4,
+      # so differences of that size between compilers are within the solver tolerance
+      rel_err = 2e-4
       max_threads = 1
       requirement = 'The system will examine the subchannel solver for the PNNL 12-pin transient case'
   []
