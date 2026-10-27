@@ -38,7 +38,7 @@
   [A_time]
     type = CoefVectorTimeDerivative
     variable = A
-    Coefficient = 9.8696      # pi^2
+    coef = 9.8696      # pi^2
   []
   [A_diff]
     type = VectorDiffusion
