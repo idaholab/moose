@@ -71,7 +71,6 @@ FlowChannel1PhasePhysics::FlowChannel1PhasePhysics(const InputParameters & param
     _initial_vel_fn(getParam<FunctionName>("initial_vel")),
     _scaling_factors(getParam<std::vector<Real>>("scaling_factor_1phase")),
     _numerical_flux_name(genName(name(), "numerical_flux")),
-    _coordinator(THMVariableCoordinator::findOrCreate(_awh, _action_factory)),
     _temperature_mode(false)
 {
   if (_scaling_factors.size() != 3)
@@ -183,12 +182,10 @@ FlowChannel1PhasePhysics::addFlowVariable(bool nl,
                                           const std::string & order,
                                           Real scaling_factor)
 {
-  _coordinator.requestVariable(nl, var_name, family, order, scaling_factor, _blocks);
-
   if (nl)
-    saveSolverVariableName(var_name);
+    addSharedSolverVariable(var_name, family, order, scaling_factor);
   else
-    saveAuxVariableName(var_name);
+    addSharedAuxVariable(var_name, family, order);
 }
 
 void

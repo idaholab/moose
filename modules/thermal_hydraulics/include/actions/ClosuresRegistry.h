@@ -16,8 +16,8 @@ class ClosuresBase;
 
 /**
  * Problem-agnostic, name-keyed registry of Closures objects (see ClosuresBase), auto-created via
- * findOrCreate() the same way THMVariableCoordinator is - so a [Closures] block can be looked up
- * by name from either a classic THM Component (via Simulation::addClosures()/getClosures(),
+ * findOrCreate() the same way PhysicsVariableCoordinator is - so a [Closures] block can be looked
+ * up by name from either a classic THM Component (via Simulation::addClosures()/getClosures(),
  * which now just delegate here) or a native ActionComponent's Physics (e.g.
  * FlowChannel1PhasePhysics), without needing a THMProblem to exist.
  *

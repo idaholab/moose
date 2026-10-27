@@ -12,7 +12,6 @@
 #include "PhysicsBase.h"
 #include "GravityInterface.h"
 #include "NamingInterface.h"
-#include "THMVariableCoordinator.h"
 #include "FlowChannelClosuresInterface.h"
 
 class ClosuresBase;
@@ -136,9 +135,6 @@ private:
   const std::vector<Real> _scaling_factors;
   /// Name of the numerical flux user object this Physics creates
   const UserObjectName _numerical_flux_name;
-  /// Coordinator that merges this and other components' requests for shared, bare-named
-  /// variables (rhoA, A, ...) into single MOOSE variables spanning the union of their blocks
-  THMVariableCoordinator & _coordinator;
 
   /// Name of the single connected heat-transfer component (empty if none). Mutable because
   /// addHeatTransferName() is called through a const reference (see that method).
