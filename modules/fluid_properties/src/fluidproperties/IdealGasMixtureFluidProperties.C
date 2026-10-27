@@ -8,8 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "IdealGasMixtureFluidProperties.h"
-#include "IdealGasFluidProperties.h"
-#include "NASA7IdealGasFluidProperties.h"
+#include "IdealGasMixtureInterface.h"
+#include "SinglePhaseFluidProperties.h"
 #include "NewtonInversion.h"
 
 #include <limits>
@@ -116,23 +116,25 @@ IdealGasMixtureFluidProperties::IdealGasMixtureFluidProperties(const InputParame
   if (_n_components == 0)
     mooseError("There must be at least one entry in 'component_fluid_properties'.");
 
-  // With NASA 7-coefficient components, Newton's method starts above the solution, at the lowest
-  // upper end of the temperature ranges of their data, because their internal energies are convex
-  // in temperature over nearly all of these ranges (see NASA7IdealGasFluidProperties)
+  // With components whose specific heats depend on temperature, Newton's method starts at the
+  // lowest of their start temperatures. For NASA 7-coefficient components, these are the upper ends
+  // of the temperature ranges of their data, above the solution, because their internal energies
+  // are convex in temperature over nearly all of these ranges (see NASA7IdealGasFluidProperties).
   _component_fps.resize(_n_components);
   for (const auto i : make_range(_n_components))
   {
     const auto & single_phase_fp =
         getUserObjectByName<SinglePhaseFluidProperties>(_component_fp_names[i]);
-    const auto nasa7_fp = dynamic_cast<const NASA7IdealGasFluidProperties *>(&single_phase_fp);
-    if (nasa7_fp)
+    const auto ideal_gas_fp = dynamic_cast<const IdealGasMixtureInterface *>(&single_phase_fp);
+    if (!ideal_gas_fp)
+      mooseError("Each entry in 'component_fluid_properties' must be an ideal gas that implements "
+                 "IdealGasMixtureInterface, such as 'IdealGasFluidProperties' or "
+                 "'NASA7IdealGasFluidProperties'.");
+    if (!ideal_gas_fp->hasConstantSpecificHeats())
     {
       _constant_specific_heats = false;
-      _T_newton_start = std::min(_T_newton_start, nasa7_fp->maximumTemperature());
+      _T_newton_start = std::min(_T_newton_start, ideal_gas_fp->newtonStartTemperature());
     }
-    else if (!dynamic_cast<const IdealGasFluidProperties *>(&single_phase_fp))
-      mooseError("Each entry in 'component_fluid_properties' must have type "
-                 "'IdealGasFluidProperties' or 'NASA7IdealGasFluidProperties'.");
     _component_fps[i] = &single_phase_fp;
   }
 }

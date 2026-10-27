@@ -50,8 +50,10 @@ NASA7IdealGasFluidProperties::molarMass() const
 }
 
 Real
-NASA7IdealGasFluidProperties::maximumTemperature() const
+NASA7IdealGasFluidProperties::newtonStartTemperature() const
 {
+  // The internal energy is convex in temperature over nearly all of the range of the data, so
+  // Newton's method started above the solution approaches it from above (see T_from_energy)
   return _data.T_max;
 }
 

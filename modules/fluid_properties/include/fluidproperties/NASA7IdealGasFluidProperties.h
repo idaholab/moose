@@ -11,6 +11,7 @@
 
 #include "SinglePhaseFluidProperties.h"
 #include "NASA7Polynomials.h"
+#include "IdealGasMixtureInterface.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
@@ -20,7 +21,8 @@
  * 7-coefficient polynomials. The enthalpy includes the enthalpy of formation, and the entropy is
  * the absolute entropy.
  */
-class NASA7IdealGasFluidProperties : public SinglePhaseFluidProperties
+class NASA7IdealGasFluidProperties : public SinglePhaseFluidProperties,
+                                     public IdealGasMixtureInterface
 {
 public:
   static InputParameters validParams();
@@ -58,8 +60,9 @@ public:
   std::string fluidName() const override;
   Real molarMass() const override;
 
-  /// Upper end of the temperature range of the NASA 7-coefficient data [K]
-  Real maximumTemperature() const;
+  virtual bool hasConstantSpecificHeats() const override { return false; }
+  /// The upper end of the temperature range of the NASA 7-coefficient data [K]
+  virtual Real newtonStartTemperature() const override;
 
 private:
   /// NASA 7-coefficient data of the species
