@@ -96,7 +96,6 @@ PenaltyFrictionUserObject::PenaltyFrictionUserObject(const InputParameters & par
     _penalty_multiplier_friction(getParam<Real>("penalty_multiplier_friction")),
     _adaptivity_friction(
         getParam<MooseEnum>("adaptivity_penalty_friction").getEnum<AdaptivityFrictionalPenalty>()),
-    _epsilon_tolerance(1.0e-40),
     _t_step_old_friction(declareRestartableData<int>("t_step_old_friction", 0))
 
 {
@@ -294,8 +293,6 @@ PenaltyFrictionUserObject::reinit()
     // Keep active set fixed from second Uzawa loop
     if (normal_lm < -TOLERANCE && normal_pressure > TOLERANCE)
     {
-      using std::abs;
-
       const auto & real_tangential_velocity =
           libmesh_map_find(_dof_to_real_tangential_velocity, node);
       const ADTwoVector slip_distance = {real_tangential_velocity[0] * _dt,
@@ -306,24 +303,8 @@ PenaltyFrictionUserObject::reinit()
           _augmented_lagrange_problem ? _dof_to_frictional_lagrange_multipliers[node->id()] : zero;
 
       // tangential trial traction (Simo 3.12)
-      // Modified for implementation in MOOSE: Avoid pingponging on frictional sign (max. 0.4
-      // capacity)
-      ADTwoVector inner_iteration_penalty_friction = penalty_friction * slip_distance;
-
-      const auto slip_metric = MetaPhysicL::raw_value(slip_distance).cwiseAbs().norm();
-
-      if (slip_metric > _epsilon_tolerance &&
-          penalty_friction * slip_distance.norm() >
-              0.4 * _friction_coefficient * abs(normal_pressure))
-      {
-        inner_iteration_penalty_friction =
-            MetaPhysicL::raw_value(0.4 * _friction_coefficient * abs(normal_pressure) /
-                                   (penalty_friction * slip_distance.norm())) *
-            penalty_friction * slip_distance;
-      }
-
       ADTwoVector tangential_trial_traction =
-          old_tangential_traction + tangential_lm + inner_iteration_penalty_friction;
+          old_tangential_traction + tangential_lm + penalty_friction * slip_distance;
 
       // Nonlinearity below
       ADReal tangential_trial_traction_norm = tangential_trial_traction.norm();
