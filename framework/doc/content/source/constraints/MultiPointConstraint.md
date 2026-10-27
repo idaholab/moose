@@ -7,9 +7,10 @@ the nonlinear system. libMesh applies them to the element matrices and element v
 assembles.
 
 This class is not registered, so you cannot use it in an input file. The Solid Mechanics module
-builds two objects on it:
-[RBE2Constraint](source/constraints/RBE2Constraint.md optional=True) and
-[RBE3Constraint](source/constraints/RBE3Constraint.md optional=True).
+builds three objects on it:
+[RBE2Constraint](source/constraints/RBE2Constraint.md optional=True),
+[RBE3Constraint](source/constraints/RBE3Constraint.md optional=True), and
+[InclinedNoDisplacementConstraint](source/constraints/InclinedNoDisplacementConstraint.md optional=True).
 
 ## Exact constraints
 
