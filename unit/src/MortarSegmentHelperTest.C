@@ -18,7 +18,6 @@
 
 #include <algorithm>
 #include <array>
-#include <iostream>
 #include <optional>
 #include <string>
 #include <vector>
@@ -269,10 +268,10 @@ TEST_F(MortarSegmentHelperTest, delaunayFlipsAreScaleIndependent)
 
     auto segment_helper = helper(scaled_secondary, mode);
     std::vector<std::vector<unsigned int>> elements;
-    std::cout << "delaunayFlipsAreScaleIndependent: mode " << static_cast<int>(mode) << " scale "
-              << scale << " primary " << primary[0] << std::endl;
+    Moose::out << "delaunayFlipsAreScaleIndependent: mode " << static_cast<int>(mode) << " scale "
+               << scale << " primary " << primary[0] << std::endl;
     segment_helper.getMortarSegments(scaled_primary, nodes, elements);
-    std::cout << "delaunayFlipsAreScaleIndependent: done" << std::endl;
+    Moose::out << "delaunayFlipsAreScaleIndependent: done" << std::endl;
     return elements;
   };
 
