@@ -2,8 +2,8 @@
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 50
-    ny = 50
+    nx = 10
+    ny = 10
     xmax = 40
     ymax = 40
     elem_type = QUAD4
@@ -55,6 +55,7 @@
   type = Transient
   dt = 1
   num_steps = 20
+  nl_rel_tol = 1e-12
   solve_type = NEWTON
 []
 

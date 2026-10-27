@@ -406,8 +406,6 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
 
     for (auto & system : systems.constructedEntries())
       system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
-
-    systems[number()].applyDiagonalConstraints();
   }
 
   // Clear
@@ -524,8 +522,6 @@ NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & ve
 
     for (auto & system : systems.constructedEntries())
       system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
-
-    systems[number()].applyDiagonalConstraints();
   }
 
   // Clear

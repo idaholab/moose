@@ -281,8 +281,11 @@ ResidualObject::accumulateTaggedElementalResidual(const Real local_re,
     {
       if (constraints.size())
         for (unsigned int c = 0; c < constraints.size(); ++c)
-          ::Kokkos::atomic_add(&sys.getVectorDofValue(constraints[c].first, tag),
-                               constraints[c].second * local_re);
+        {
+          auto [r, w] = constraints[c];
+
+          ::Kokkos::atomic_add(&sys.getVectorDofValue(r, tag), w * local_re);
+        }
       else
         ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), local_re);
     }
@@ -355,27 +358,35 @@ ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   const auto ivar = _kokkos_var.var(comp);
   auto row = sys.getElemLocalDofIndex(elem, i, ivar);
-  auto col = sys.isScalarVariable(jvar) ? sys.getScalarGlobalDofIndex(j, jvar)
-                                        : sys.getElemGlobalDofIndex(elem, j, jvar);
+  auto col = sys.isScalarVariable(jvar) ? sys.getScalarLocalDofIndex(j, jvar)
+                                        : sys.getElemLocalDofIndex(elem, j, jvar);
+  auto col_global = sys.localToGlobalDofIndex(col);
   auto row_constraints = sys.getLocalConstraints(row);
-  auto col_constraints = sys.getGlobalConstraints(col);
+  auto col_constraints = sys.getLocalConstraints(col);
 
   for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
   {
     auto tag = _matrix_tags[t];
 
-    if (sys.isMatrixTagActive(tag) && !sys.hasNodalBCMatrixTag(row, tag))
+    if (sys.isMatrixTagActive(tag))
     {
       for (unsigned int rc = 0; rc < ::Kokkos::max(1u, row_constraints.size()); ++rc)
+      {
+        auto r = row_constraints.size() ? row_constraints[rc].first : row;
+        auto rw = row_constraints.size() ? row_constraints[rc].second : 1.0;
+
+        if (sys.hasNodalBCMatrixTag(r, tag))
+          continue;
+
         for (unsigned int cc = 0; cc < ::Kokkos::max(1u, col_constraints.size()); ++cc)
         {
-          auto r = row_constraints.size() ? row_constraints[rc].first : row;
-          auto c = col_constraints.size() ? col_constraints[cc].first : col;
-          auto w = (row_constraints.size() ? row_constraints[rc].second : 1.0) *
-                   (col_constraints.size() ? col_constraints[cc].second : 1.0);
+          auto c = col_constraints.size() ? sys.localToGlobalDofIndex(col_constraints[cc].first)
+                                          : col_global;
+          auto cw = col_constraints.size() ? col_constraints[cc].second : 1.0;
 
-          ::Kokkos::atomic_add(&sys.getMatrixValue(r, c, tag), w * local_ke);
+          ::Kokkos::atomic_add(&sys.getMatrixValue(r, c, tag), rw * cw * local_ke);
         }
+      }
     }
   }
 }
