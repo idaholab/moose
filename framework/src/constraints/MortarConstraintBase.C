@@ -176,6 +176,29 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     paramError("aux_lm",
                "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
                "false`.");
+
+  // libMesh builds a SECOND order Lagrange dual basis on QUAD8 and TRI6 faces against a transformed
+  // basis. Petrov-Galerkin weights the gap with the standard basis, whose nodal integrals are not
+  // positive on these faces, so the two cannot be combined.
+  if (_use_petrov_galerkin && _use_dual && _var->feType().family == LAGRANGE &&
+      _var->feType().order == SECOND)
+  {
+    bool quadratic_face = false;
+    for (const auto * const lower_elem :
+         _mci_mesh.getMesh().active_subdomain_elements_ptr_range(secondarySubdomain()))
+      if (lower_elem->type() == QUAD8 || lower_elem->type() == TRI6)
+      {
+        quadratic_face = true;
+        break;
+      }
+    comm().max(quadratic_face);
+    if (quadratic_face)
+      paramError("use_petrov_galerkin",
+                 "The Petrov-Galerkin approach is not supported for a SECOND order dual Lagrange "
+                 "multiplier on QUAD8 or TRI6 secondary faces. Use a FIRST order multiplier or "
+                 "disable `use_petrov_galerkin`.");
+  }
+
   if (isParamSetByUser("quadrature") && isParamSetByUser("segment_quadrature"))
     paramError("quadrature", "Only one of 'quadrature' and 'segment_quadrature' should be set.");
 

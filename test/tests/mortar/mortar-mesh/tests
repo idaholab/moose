@@ -122,4 +122,17 @@
       detail = 'three dimensional mortar mesh.'
     []
   []
+  [petrov_galerkin_quadratic_dual]
+    type = RunException
+    input = 'mortar_stats_reporter_3d_adjacent_corner_sidesets.i'
+    cli_args = 'Variables/lambda/order=SECOND Variables/lambda/use_dual=true '
+               'AuxVariables/aux/block=secondary_lower AuxVariables/aux/order=SECOND '
+               'Constraints/mortar/use_petrov_galerkin=true Constraints/mortar/aux_lm=aux'
+    expect_err = 'The Petrov-Galerkin approach is not supported for a SECOND order dual Lagrange'
+    issues = '#33558'
+    design = 'Petrov-Galerkin_approach_for_Lagrange_multipliers.md'
+    requirement = 'The system shall report an error if the Petrov-Galerkin approach is requested for '
+                  'a second-order dual Lagrange multiplier on quadratic QUAD8 or TRI6 secondary '
+                  'faces.'
+  []
 []
