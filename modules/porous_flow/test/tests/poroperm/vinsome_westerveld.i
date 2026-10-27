@@ -21,6 +21,15 @@
 #     = (4 - 1/4) * theta / 7 = 15 * theta / 28 = -80.357142857
 #   I = I_old + a * (theta / d - p) = 4 * (theta - 15 * theta / 28) = 13 * theta / 7 = -278.57142857
 #   porosity = 0.1 - 1E-5 * I = 0.10278571429
+#
+# The same step with matrix_thickness = L = 1 (vinsome_westerveld_thickness_one_step test):
+#   u = L / d = 1,  q from 2 q d^3 = I - theta d - p d^2 = 9 * theta / 28
+#   I_L = theta d (1 - e^-u) + p d^2 (1 - 2 e^-u) + 2 q d^3 (2 - 5 e^-u) / 2
+#       = theta * (104 - 161 / e) / 56 = -119.92341957
+#   porosity = 0.1 - 1E-5 * I_L = 0.10119923420
+# With matrix_thickness = 1E6 (vinsome_westerveld_large_thickness) the results equal those without
+# it, and with matrix_thickness = 0.01 (vinsome_westerveld_small_thickness) I_L approaches
+# theta * L = -1.5 as d becomes much larger than L.
 [GlobalParams]
   PorousFlowDictator = dictator
 []

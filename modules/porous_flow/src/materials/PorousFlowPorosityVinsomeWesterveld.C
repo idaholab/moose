@@ -45,6 +45,13 @@ PorousFlowPorosityVinsomeWesterveld::validParams()
       "(for instance, when injection begins).  The matrix adjacent to the fracture "
       "is at matrix_reference_temperature at this time, and the thermal-opening "
       "term is zero before it");
+  params.addRangeCheckedParam<Real>(
+      "matrix_thickness",
+      "matrix_thickness > 0",
+      "Thickness of the matrix layer next to the fracture that contributes to the thermal "
+      "opening, for instance half the spacing between neighbouring fractures.  If given, the "
+      "opening uses the heat content of the layer 0 <= z <= matrix_thickness only, so it is "
+      "bounded.  If not given, the whole semi-infinite matrix contributes");
   params.addClassDescription(
       "This Material calculates porosity (usually the aperture of a lower-dimensional fracture) "
       "using the PorousFlowPorosityLinear relationship plus a thermal-opening term proportional to "
@@ -60,6 +67,8 @@ PorousFlowPorosityVinsomeWesterveld::PorousFlowPorosityVinsomeWesterveld(
     _kappa(getParam<Real>("matrix_thermal_diffusivity")),
     _T_matrix_ref(nodalOrQpValue("matrix_reference_temperature")),
     _start_time(getParam<Real>("vw_start_time")),
+    _finite_thickness(isParamValid("matrix_thickness")),
+    _matrix_thickness(_finite_thickness ? getParam<Real>("matrix_thickness") : 0.0),
     _theta(_nodal_material ? declareProperty<Real>("PorousFlow_vw_theta_nodal")
                            : declareProperty<Real>("PorousFlow_vw_theta_qp")),
     _theta_old(_nodal_material ? getMaterialPropertyOld<Real>("PorousFlow_vw_theta_nodal")
@@ -100,6 +109,11 @@ PorousFlowPorosityVinsomeWesterveld::computeUnboundedPorosityQp()
   // dI/dT, used for the Jacobian (equal to dI/dtheta, because theta = T - T_matrix_ref)
   Real dI_dT = 0.0;
 
+  // Heat content that opens the fracture (I, or I_L if matrix_thickness is given) and its
+  // derivative
+  Real opening_heat = 0.0;
+  Real dopening_heat_dT = 0.0;
+
   const Real time = _t - _start_time;
   if (time <= 0.0)
   {
@@ -124,10 +138,25 @@ PorousFlowPorosityVinsomeWesterveld::computeUnboundedPorosityQp()
 
     const Real dp_dT = (a / d - Utility::pow<3>(d) / a) / denom;
     dI_dT = a * (1.0 / d - dp_dT);
+
+    opening_heat = _heat_content[_qp];
+    dopening_heat_dT = dI_dT;
+    if (_finite_thickness)
+    {
+      // Heat content of the layer 0 <= z <= L, from the same profile:
+      // I_L = theta c0 + p c1 + 2 q d^3 c2, where 2 q d^3 = I - theta d - p d^2
+      const Real u = _matrix_thickness / d;
+      const Real e = std::exp(-u);
+      const Real c0 = -d * std::expm1(-u);
+      const Real c1 = d * d * (1.0 - e * (1.0 + u));
+      const Real c2 = 0.5 * (2.0 - e * (u * u + 2.0 * u + 2.0));
+      opening_heat = theta * c0 + p * c1 + (_heat_content[_qp] - theta * d - p * d * d) * c2;
+      dopening_heat_dT = c0 + dp_dT * c1 + (dI_dT - d - dp_dT * d * d) * c2;
+    }
   }
 
-  _porosity[_qp] -= _thermal_opening_coeff * _heat_content[_qp];
+  _porosity[_qp] -= _thermal_opening_coeff * opening_heat;
   for (unsigned int pvar = 0; pvar < _num_var; ++pvar)
     (*_dporosity_dvar)[_qp][pvar] -=
-        _thermal_opening_coeff * dI_dT * (*_dtemperature_dvar)[_qp][pvar];
+        _thermal_opening_coeff * dopening_heat_dT * (*_dtemperature_dvar)[_qp][pvar];
 }

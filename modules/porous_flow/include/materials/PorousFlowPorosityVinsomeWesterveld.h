@@ -32,6 +32,10 @@
  * I = I_old + a (theta / d - p)
  *
  * so I is linear in the current temperature, and dI/dT is a scalar.
+ *
+ * If matrix_thickness = L is given, only the matrix within distance L of the fracture contributes
+ * to the opening: I is replaced by I_L = int_0^L (T(z) - T_ref) dz, computed from the same profile.
+ * I_L is also linear in the current temperature.
  */
 class PorousFlowPorosityVinsomeWesterveld : public PorousFlowPorosityLinear
 {
@@ -58,6 +62,12 @@ protected:
 
   /// Time at which the matrix temperature profile is undisturbed
   const Real _start_time;
+
+  /// Whether only a layer of finite thickness next to the fracture contributes to the opening
+  const bool _finite_thickness;
+
+  /// Thickness of the matrix layer that contributes to the opening (used if _finite_thickness)
+  const Real _matrix_thickness;
 
   /// Temperature change at the fracture face, theta = T - T_matrix_ref
   MaterialProperty<Real> & _theta;

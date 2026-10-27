@@ -325,4 +325,39 @@
     issues = '#33944'
     design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
   []
+  [vinsome_westerveld_large_thickness]
+    type = CSVDiff
+    input = vinsome_westerveld.i
+    cli_args = 'Materials/porosity_VW/matrix_thickness=1E6 Outputs/file_base=vinsome_westerveld_large_thickness_out'
+    csvdiff = vinsome_westerveld_large_thickness_out.csv
+    requirement = 'The system shall calculate the same Vinsome-Westerveld thermal-opening porosity as for a semi-infinite matrix when the matrix thickness is very large.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
+  [vinsome_westerveld_small_thickness]
+    type = CSVDiff
+    input = vinsome_westerveld.i
+    cli_args = 'Materials/porosity_VW/matrix_thickness=0.01 Outputs/file_base=vinsome_westerveld_small_thickness_out'
+    csvdiff = vinsome_westerveld_small_thickness_out.csv
+    requirement = 'The system shall limit the Vinsome-Westerveld thermal opening to that of a fully cooled matrix layer when the matrix thickness is small compared with the diffusion length.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
+  [vinsome_westerveld_thickness_one_step]
+    type = CSVDiff
+    input = vinsome_westerveld.i
+    cli_args = 'Executioner/dt=4E6 Executioner/num_steps=1 Materials/porosity_VW/matrix_thickness=1 Outputs/file_base=vinsome_westerveld_thickness_one_step_out'
+    csvdiff = vinsome_westerveld_thickness_one_step_out.csv
+    requirement = 'The system shall calculate the Vinsome-Westerveld thermal-opening porosity of a matrix layer of finite thickness in agreement with a hand calculation of a single time step.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
+  [vinsome_westerveld_cyclic]
+    type = CSVDiff
+    input = vinsome_westerveld_cyclic.i
+    csvdiff = vinsome_westerveld_cyclic_out.csv
+    requirement = 'The system shall calculate the Vinsome-Westerveld thermal-opening porosity of a matrix layer of finite thickness when the fracture-face temperature repeatedly changes sign.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
 []
