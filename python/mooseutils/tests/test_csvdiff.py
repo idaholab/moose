@@ -196,6 +196,66 @@ class TestCsvDiff(unittest.TestCase):
             0,
         )
 
+    def _belowFloorAndAbove(self):
+        """
+        Return paths to two files with column v where only the gold value is below the default
+        absolute zero of 1e-10, so it is compared as 0 against the test value.
+
+        After zeroing, the relative difference is 1 and the absolute difference is 3e-10. Before
+        zeroing, they would be 0.7 and 2.1e-10.
+        """
+        gold = self._writeColumns("floor_gold.csv", {"v": 9e-11})
+        test = self._writeColumns("floor_test.csv", {"v": 3e-10})
+        return gold, test
+
+    def testAbsoluteZeroRelativeTolerance(self):
+        gold, test = self._belowFloorAndAbove()
+        # Neither tolerance passes the zeroed comparison
+        self.assertEqual(self._numErrors(gold, test), 1)
+        # The relative difference of a zeroed value is 1, so a relative tolerance of 1 passes
+        self.assertEqual(self._numErrors(gold, test, "--relative-tolerance", "1"), 0)
+        # 0.8 is above the unzeroed relative difference of 0.7 but below 1: it only fails
+        # because the floor was applied
+        self.assertEqual(self._numErrors(gold, test, "--relative-tolerance", "0.8"), 1)
+        self.assertEqual(
+            self._numErrors(
+                gold, test, "--relative-tolerance", "0.8", "--abs-zero", "1e-11"
+            ),
+            0,
+        )
+
+    def testAbsoluteZeroAbsoluteTolerance(self):
+        gold, test = self._belowFloorAndAbove()
+        # The absolute difference of the zeroed comparison is 3e-10
+        self.assertEqual(
+            self._numErrors(gold, test, "--absolute-tolerance", "3.1e-10"), 0
+        )
+        # 2.5e-10 is above the unzeroed absolute difference of 2.1e-10 but below 3e-10: it only
+        # fails because the floor was applied
+        self.assertEqual(
+            self._numErrors(gold, test, "--absolute-tolerance", "2.5e-10"), 1
+        )
+        self.assertEqual(
+            self._numErrors(
+                gold, test, "--absolute-tolerance", "2.5e-10", "--abs-zero", "1e-11"
+            ),
+            0,
+        )
+        # The same through the per-column options
+        self.assertEqual(
+            self._numErrors(
+                gold,
+                test,
+                "--custom-columns",
+                "v",
+                "--custom-abs-zero",
+                "1e-10",
+                "--custom-abs-err",
+                "3.1e-10",
+            ),
+            0,
+        )
+
     def testComparisonFileAbsoluteTolerance(self):
         gold, test = self._goldAndTest()
         # Global tolerance covers both columns

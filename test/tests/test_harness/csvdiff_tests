@@ -120,6 +120,26 @@
     issues = '#32561'
     prereq = 'test_csvdiff_spec_override_rel_err_only'
   []
+  # The next two tests compare a gold value below abs_zero (compared as 0) to a test value above it
+  # (see csvdiff_abs_zero.i), so the relative error is 1 and the absolute error is 3e-10. They
+  # share csvdiff_abs_zero_out.csv, so they run in sequence.
+  [test_csvdiff_spec_abs_zero_rel_err]
+    type = CSVDiff
+    input = csvdiff_abs_zero.i
+    csvdiff = csvdiff_abs_zero_out.csv
+    rel_err = 1 # equal to the relative error after zeroing, which is the largest it can be
+    requirement = 'The system shall pass a CSV comparison in which one value is below the absolute zero tolerance when the relative error tolerance is met.'
+    issues = '#32561'
+  []
+  [test_csvdiff_spec_abs_zero_abs_err]
+    type = CSVDiff
+    input = csvdiff_abs_zero.i
+    csvdiff = csvdiff_abs_zero_out.csv
+    abs_err = 5e-10 # above the absolute error of 3e-10; the default rel_err of 5.5e-6 fails
+    requirement = 'The system shall pass a CSV comparison in which one value is below the absolute zero tolerance when the absolute error tolerance is met.'
+    issues = '#32561'
+    prereq = 'test_csvdiff_spec_abs_zero_rel_err'
+  []
   [test_csvdiff_spec_override_global_relative]
     type = CSVDiff
     input = csvdiff_spec_override_global_relative.i
