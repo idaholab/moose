@@ -79,8 +79,9 @@ ADDittusBoelterHTCFunctorMaterial::ADDittusBoelterHTCFunctorMaterial(
         const unsigned int i = 0;
 
         // Upwind the segment inlet temperature on the flow direction
-        const auto T_in = 1.0 / 2.0 * (1 - abs(_m[i]) / _m[i]) * _T_fluid_outlet[i] +
-                          1.0 / 2.0 * (1 + abs(_m[i]) / _m[i]) * _T_fluid_inlet[i];
+        const auto T_in =
+            1.0 / 2.0 * (1 - _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _T_fluid_outlet[i] +
+            1.0 / 2.0 * (1 + _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _T_fluid_inlet[i];
 
         // Properties at the bulk film temperature of the segment
         const auto T_film = (_T_fluid[i] + T_in) / 2;
