@@ -124,11 +124,20 @@ protected:
   /// Use scaled or physical gap
   const bool _use_physical_gap;
 
-  /// The gap multiplied by the penalty factor to obtain the normal pressure: the physical gap
-  /// divided by the nodal area if _use_physical_gap, otherwise the weighted gap
-  ADReal penaltyGap(const std::pair<ADReal, Real> & wgap) const
+  /**
+   * Penalty normal pressure at a node, before the augmented Lagrange multiplier is added. Let
+   * g~ = int psi g be the weighted gap and A = int psi the nodal area. The pressure is:
+   * - penalty * g~ if not _use_physical_gap
+   * - (penalty / A) * (g~ / A) if _use_physical_gap. The second factor is the physical gap, and
+   *   dividing the penalty by A normalizes it with the area assigned to the node.
+   * The sign follows the gap, so the pressure is negative in penetration.
+   * @param wgap The (weighted gap, nodal area) pair of the node
+   * @param penalty The penalty factor of the node
+   */
+  ADReal penaltyPressure(const std::pair<ADReal, Real> & wgap, const Real penalty) const
   {
-    return _use_physical_gap ? adPhysicalGap(wgap) / wgap.second : wgap.first;
+    const auto & [weighted_gap, area] = wgap;
+    return _use_physical_gap ? (penalty / area) * (weighted_gap / area) : penalty * weighted_gap;
   }
 
   /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
