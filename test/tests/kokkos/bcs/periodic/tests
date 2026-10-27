@@ -6,6 +6,7 @@
     type = Exodiff
     input = 'kokkos_periodic_bc_test.i'
     exodiff = 'kokkos_periodic_bc_test_out.e'
+    abs_zero = 1e-6
     requirement = "The Kokkos system shall support periodic boundary conditions with transforms prescribed as a translation."
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'

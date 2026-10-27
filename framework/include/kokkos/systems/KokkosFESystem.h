@@ -141,7 +141,7 @@ public:
    * @param dof The local DOF index
    * @param tag The vector tag
    * @param seed The derivative seed
-   * @returns The DOF AD value with optional seed derivative
+   * @returns The DOF AD value with optional seed derivative keyed by the local DOF index
    */
   KOKKOS_FUNCTION ADReal getVectorDofADValue(const dof_id_type dof,
                                              const TagID tag,
@@ -447,7 +447,7 @@ FESystem::getVectorDofADValue(const dof_id_type dof, TagID tag, const Real seed)
   ADReal value = _vectors[tag][dof];
 
   if (seed != 0)
-    value.derivatives().insert(_local_to_global_dof_index[dof]) = seed;
+    value.derivatives().insert(dof) = seed;
 
   return value;
 }
