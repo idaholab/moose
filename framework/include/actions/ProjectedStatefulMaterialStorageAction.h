@@ -43,6 +43,16 @@ public:
   /// get an enum with all supported types
   static MooseEnum getTypeEnum();
 
+  /**
+   * The name of the auxiliary variable that stores one scalar component of a projected property.
+   *
+   * @param prop_name the projected material property
+   * @param component the scalar component, in Moose::SerialAccess order
+   * @return the variable name, which this action adds and every reader of the projection looks up
+   */
+  static VariableName projectedVariableName(const MaterialPropertyName & prop_name,
+                                            unsigned int component);
+
   template <typename T, bool is_ad>
   void processProperty(const MaterialPropertyName & prop_name);
 
@@ -98,7 +108,7 @@ ProjectedStatefulMaterialStorageAction::processProperty(const MaterialPropertyNa
   // generate variable names
   std::vector<VariableName> vars;
   for (const auto i : make_range(size))
-    vars.push_back("_var_" + prop_name + '_' + Moose::stringify(i));
+    vars.push_back(projectedVariableName(prop_name, i));
 
   if (_current_task == "setup_projected_properties")
   {
