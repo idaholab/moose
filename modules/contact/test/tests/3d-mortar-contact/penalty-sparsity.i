@@ -103,8 +103,9 @@
 [Executioner]
   type = Steady
   solve_type = NEWTON
-  # Assembling the Jacobian once is all this test checks, so a single Newton step with a tolerance
-  # well below the initial residual of 7e-7 suffices
+  # Assembling the Jacobian once is all this test checks, so a single forced Newton step suffices
+  # and the tolerance is loose enough that the solve converges after it
+  nl_forced_its = 1
   nl_max_its = 1
-  nl_abs_tol = 1e-8
+  nl_abs_tol = 1e-3
 []
