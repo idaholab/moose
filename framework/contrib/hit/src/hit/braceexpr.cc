@@ -183,13 +183,24 @@ private:
   std::size_t _column = 1;
 };
 
+/// Location of the first character of the field's unquoted value text
 std::pair<int, int>
 fieldValueStart(const Field * n)
 {
-  int column = n->column() + static_cast<int>(n->path().size()) + 3;
+  // A field's children are its name, the assignment operator ('=' or ':='), and then either the
+  // value token or the opening quote of a quoted value; taking the location from that token keeps
+  // it correct regardless of the whitespace around the assignment operator.
+  const auto hnv = n->getNodeView();
+  int line = n->line();
+  int column = n->column();
+  if (hnv.child_count() > 2)
+  {
+    line = hnv.child_at(2).line();
+    column = hnv.child_at(2).column();
+  }
   if (quoteChar(n->val()) != "")
     ++column;
-  return {n->line(), column};
+  return {line, column};
 }
 
 std::pair<int, int>
@@ -505,11 +516,21 @@ BraceExpander::evaluate(Field * n, const BraceExpr & expr)
   std::vector<std::vector<std::string>> child_used;
   expanded_args.reserve(expr.args().size());
   child_used.reserve(expr.args().size());
+  const auto error_count = errors.size();
   for (const auto & arg : expr.args())
   {
     auto child = evaluate(n, arg.value());
     expanded_args.push_back(child.value);
     child_used.push_back(std::move(child.used));
+  }
+
+  // A nested expression that recorded an error yields unexpanded text; running this command on
+  // it would only add a misleading follow-on error to the one already reported.
+  if (errors.size() != error_count)
+  {
+    EvalResult result;
+    result.value = expr.text();
+    return result;
   }
 
   if (expanded_args.empty())

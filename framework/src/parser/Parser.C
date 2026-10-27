@@ -59,7 +59,14 @@ FuncParseEvaler::eval(hit::Field * n,
     {
       result.used.push_back(used_path);
       const auto & resolved = exp.resolve(src);
-      var_vals.push_back(MooseUtils::convert<double>(resolved.value));
+      double var_val;
+      if (MooseUtils::convert(resolved.value, var_val, false))
+        var_vals.push_back(var_val);
+      else
+        exp.errors.push_back(exp.currentExpressionErrorMessage(
+            n,
+            "fparse error: variable '" + var + "' with value '" + resolved.value +
+                "' is not a number in '" + n->fullpath() + "'"));
     }
     else
       exp.errors.push_back(exp.currentExpressionErrorMessage(

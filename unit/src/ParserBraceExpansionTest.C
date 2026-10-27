@@ -150,3 +150,175 @@ TEST(ParserBraceExpansionTest, ReportsUnitConversionsInDebugMode)
             std::string::npos);
 #endif
 }
+
+namespace
+{
+
+/// Parses the given input, expecting it to fail, and returns the reported error messages
+std::vector<hit::ErrorMessage>
+parseErrors(const std::string & input)
+{
+  try
+  {
+    parseInputs({{"errors.i", input}});
+  }
+  catch (const Parser::Error & err)
+  {
+    return err.error_messages;
+  }
+  ADD_FAILURE() << "missing expected parse error";
+  return {};
+}
+
+/// Expects \p error to contain \p message and to span [start_column, end_column] on \p line
+void
+expectErrorAt(const hit::ErrorMessage & error,
+              const std::string & message,
+              int line,
+              int start_column,
+              int end_column)
+{
+  EXPECT_NE(error.message.find(message), std::string::npos) << error.message;
+  ASSERT_TRUE(error.lineinfo.has_value()) << error.message;
+  EXPECT_EQ(error.lineinfo->start_line, line) << error.message;
+  EXPECT_EQ(error.lineinfo->start_column, start_column) << error.message;
+  EXPECT_EQ(error.lineinfo->end_column, end_column) << error.message;
+}
+
+} // namespace
+
+TEST(ParserBraceExpansionTest, ParsesNestedBraceTemplate)
+{
+  const auto root = hit::parseBraceTemplate("a${b ${c}x}d");
+
+  ASSERT_EQ(root.parts().size(), 3);
+  EXPECT_EQ(std::get<std::string>(root.parts()[0]), "a");
+  EXPECT_EQ(std::get<std::string>(root.parts()[2]), "d");
+  EXPECT_FALSE(root.pureExpression());
+  EXPECT_EQ(root.expressionCount(), 1);
+
+  const auto & outer = *std::get<std::shared_ptr<hit::BraceExpr>>(root.parts()[1]);
+  EXPECT_EQ(outer.text(), "${b ${c}x}");
+  EXPECT_EQ(outer.position(), 1);
+  EXPECT_EQ(outer.length(), 10);
+  EXPECT_EQ(outer.column(), 2);
+  ASSERT_EQ(outer.args().size(), 2);
+  EXPECT_EQ(std::get<std::string>(outer.args()[0].value().parts()[0]), "b");
+
+  // the second argument is a nested expression followed by literal text
+  const auto & arg = outer.args()[1].value();
+  ASSERT_EQ(arg.parts().size(), 2);
+  const auto & inner = *std::get<std::shared_ptr<hit::BraceExpr>>(arg.parts()[0]);
+  EXPECT_EQ(inner.text(), "${c}");
+  EXPECT_EQ(inner.position(), 5);
+  EXPECT_EQ(std::get<std::string>(arg.parts()[1]), "x");
+}
+
+TEST(ParserBraceExpansionTest, ReportsUnclosedBraceTemplate)
+{
+  hit::BraceParseError error;
+  EXPECT_THROW(hit::parseBraceTemplate("x ${fparse ${a} + 1", &error), hit::Error);
+  EXPECT_EQ(error.message, "missing closing '}' in brace expression");
+  EXPECT_EQ(error.line, 1);
+  EXPECT_EQ(error.column, 20);
+}
+
+TEST(ParserBraceExpansionTest, PropagatesFieldKinds)
+{
+  auto parser = parseInputs({{"kinds.i",
+                              "x = 3\n"
+                              "pure_float = ${fparse 1 + 2}\n"
+                              "pure_int = ${x}\n"
+                              "prefixed = foo_${x}\n"
+                              "two_exprs = '${x} ${x}'\n"}});
+
+  auto & root = parser->getRoot();
+  EXPECT_EQ(requireField(root, "pure_float").kind(), hit::Field::Kind::Float);
+  EXPECT_EQ(requireField(root, "pure_int").kind(), hit::Field::Kind::Int);
+  EXPECT_EQ(requireField(root, "prefixed").kind(), hit::Field::Kind::String);
+  EXPECT_EQ(requireField(root, "prefixed").strVal(), "foo_3");
+  EXPECT_EQ(requireField(root, "two_exprs").kind(), hit::Field::Kind::String);
+  EXPECT_EQ(requireField(root, "two_exprs").strVal(), "3 3");
+}
+
+TEST(ParserBraceExpansionTest, ExpandsNestedCommandArguments)
+{
+  auto parser = parseInputs({{"nested_args.i",
+                              "n = 2\n"
+                              "ranged = '${range 0 ${fparse 2 * n}}'\n"
+                              "enumerated = '${enumerate block ${n} ${fparse n + 1}}'\n"}});
+
+  auto & root = parser->getRoot();
+  EXPECT_EQ(requireField(root, "ranged").strVal(), "0 1 2 3");
+  EXPECT_EQ(requireField(root, "enumerated").strVal(), "block2 block3");
+}
+
+TEST(ParserBraceExpansionTest, ReportsCyclicBraceDependencyChain)
+{
+  // the walker reaches every field in the cycle, so each one reports the chain starting from itself
+  const auto errors = parseErrors("a = ${b}\nb = ${c}\nc = ${a}\n");
+  ASSERT_EQ(errors.size(), 3);
+  EXPECT_NE(errors[0].message.find("cyclic brace-expression dependency detected: a -> b -> c -> a"),
+            std::string::npos)
+      << errors[0].message;
+  for (const auto & error : errors)
+    EXPECT_NE(error.message.find("cyclic brace-expression dependency detected"), std::string::npos)
+        << error.message;
+}
+
+TEST(ParserBraceExpansionTest, ReportsEmptyBraceExpression)
+{
+  const auto errors = parseErrors("b = ${}\n");
+  ASSERT_EQ(errors.size(), 1);
+  expectErrorAt(errors[0], "empty brace expression in 'b'", 1, 5, 7);
+}
+
+TEST(ParserBraceExpansionTest, ReportsInvalidCommand)
+{
+  const auto errors = parseErrors("b = ${nosuchcmd 1 2}\n");
+  ASSERT_EQ(errors.size(), 1);
+  expectErrorAt(errors[0], "invalid brace-expression command 'nosuchcmd' in 'b'", 1, 5, 20);
+}
+
+TEST(ParserBraceExpansionTest, ReportsMissingSubstitutionVariable)
+{
+  const auto errors = parseErrors("b = foo_${missing}\n");
+  ASSERT_EQ(errors.size(), 1);
+  expectErrorAt(
+      errors[0], "no variable 'missing' found for substitution expression in 'b'", 1, 9, 18);
+}
+
+TEST(ParserBraceExpansionTest, ReportsErrorSpanIndependentOfSpacing)
+{
+  {
+    const auto errors = parseErrors("b=${nosuchcmd 1 2}\n");
+    ASSERT_EQ(errors.size(), 1);
+    expectErrorAt(errors[0], "invalid brace-expression command", 1, 3, 18);
+  }
+  {
+    const auto errors = parseErrors("b    :=    ${nosuchcmd 1 2}\n");
+    ASSERT_EQ(errors.size(), 1);
+    expectErrorAt(errors[0], "invalid brace-expression command", 1, 12, 27);
+  }
+  {
+    const auto errors = parseErrors("[s]\n  b = '  ${nosuchcmd 1 2}'\n[]\n");
+    ASSERT_EQ(errors.size(), 1);
+    expectErrorAt(errors[0], "invalid brace-expression command", 2, 10, 25);
+  }
+}
+
+TEST(ParserBraceExpansionTest, ReportsErrorAtInnerExpression)
+{
+  // only the failing inner expression is reported, not the enclosing fparse that consumes it
+  const auto errors = parseErrors("b = ${fparse ${units 1 m -> s} + 1}\n");
+  ASSERT_EQ(errors.size(), 1);
+  expectErrorAt(errors[0], "units error: m", 1, 14, 30);
+}
+
+TEST(ParserBraceExpansionTest, ReportsNonNumericFparseVariable)
+{
+  const auto errors = parseErrors("a = foo\nb = ${fparse a + 1}\n");
+  ASSERT_EQ(errors.size(), 1);
+  expectErrorAt(
+      errors[0], "fparse error: variable 'a' with value 'foo' is not a number in 'b'", 2, 5, 19);
+}
