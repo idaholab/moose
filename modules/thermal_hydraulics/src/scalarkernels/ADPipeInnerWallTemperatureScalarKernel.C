@@ -71,8 +71,8 @@ ADPipeInnerWallTemperatureScalarKernel::convectiveLinearHeatRate() const
   const int i = 0;
   const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
   // Upwind the segment inlet temperature on the flow direction
-  const auto Tin = 1.0 / 2.0 * (1 - abs(_m[i]) / _m[i]) * _Tfdown[i] +
-                   1.0 / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tfup[i];
+  const auto Tin = 1.0 / 2.0 * (1 - _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tfdown[i] +
+                   1.0 / 2.0 * (1 + _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tfup[i];
 
   // Convective heat transfer with the fluid
   return _h(elem_arg, state) * _wetted_perimeter(elem_arg, state) / 2.0 *
