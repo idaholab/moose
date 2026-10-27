@@ -20,8 +20,8 @@ TEST_F(NaKFluidPropertiesTest, fluidName) { EXPECT_EQ(_fp->fluidName(), "NaK"); 
  */
 TEST_F(NaKFluidPropertiesTest, molarMass)
 {
-  // Mass-fraction average 1 / (0.778 / 39.102 + 0.222 / 22.9898) g/mol of the eutectic
-  REL_TEST(_fp->molarMass(), 1e-3 / (0.778 / 39.102 + 0.222 / 22.9898), REL_TOL_SAVED_VALUE);
+  // Mass-fraction average 1 / (0.778 / M_K + 0.222 / M_Na) of the eutectic, in kg/mol
+  REL_TEST(_fp->molarMass(), 1 / (0.778 / 39.102e-3 + 0.222 / 22.9898e-3), REL_TOL_SAVED_VALUE);
   REL_TEST(_fp->molarMass(), 33.837e-3, 1e-4);
 }
 
