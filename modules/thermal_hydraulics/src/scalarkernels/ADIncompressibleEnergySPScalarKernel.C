@@ -39,7 +39,7 @@ ADIncompressibleEnergySPScalarKernel::validParams()
                        "scalar variable name");
   params.addParam<bool>(
       "is_implicit",
-      false,
+      true,
       "Whether an explicit (previous value calculation) or implicit (current value) is used");
   params.addRequiredParam<MooseFunctorName>("reference_pressure", "system reference pressure [Pa]");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
@@ -99,8 +99,8 @@ ADIncompressibleEnergySPScalarKernel::computeQpResidual()
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
   // start by getting fluid properties
-  const auto in = 1.0 / 2.0 * (1 - abs(_m[i]) / _m[i]) * _Tdown[i] +
-                  1.0 / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tup[i];
+  const auto in = 1.0 / 2.0 * (1 - _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tdown[i] +
+                  1.0 / 2.0 * (1 + _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tup[i];
   const auto Tm = (Base::_u[i] + in) / 2;
   const auto rho = _fp.rho_from_p_T(_Pref(qp, state), Tm);
   const auto cp = _fp.cp_from_p_T(_Pref(qp, state), Tm);
@@ -109,8 +109,9 @@ ADIncompressibleEnergySPScalarKernel::computeQpResidual()
   // Heat transfer to fluid (Dittus-Boelter)
   const auto q = _h(qp, state) * _perimeter(qp, state) / 2.0 * (2.0 * _Tw[i] - Base::_u[i] - in);
   // Advection component
-  energy_residual += (_m[i] / 2.0 * (1 - abs(_m[i]) / _m[i]) * _Tdown[i] -
-                      _m[i] / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tup[i] + abs(_m[i]) * Base::_u[i]) /
+  energy_residual += (_m[i] / 2.0 * (1 - _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tdown[i] -
+                      _m[i] / 2.0 * (1 + _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tup[i] +
+                      _m[i] * _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08) * Base::_u[i]) /
                      _length(qp, state) / _area(qp, state) / rho_ref;
   // Wall heat transfer
   energy_residual -= q / _area(qp, state) / rho / cp;

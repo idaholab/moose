@@ -26,7 +26,7 @@ ADIncompressibleMomentumSPBase::validParams()
                        "list of scalar variable names");
   params.addParam<bool>(
       "is_implicit",
-      false,
+      true,
       "Whether an explicit (previous value calculation) or implicit (current value) is used");
   params.addRequiredParam<MooseFunctorName>("reference_pressure", "system reference pressure [Pa]");
   params.addRequiredParam<std::vector<UserObjectName>>(
@@ -164,7 +164,7 @@ ADIncompressibleMomentumSPBase::computeQpResidual()
     const auto rho_j = _fp[j]->rho_from_p_T(P, Tj);
     const auto rho_ref = _fp_ref ? _fp_ref->rho_from_p_T(P, Tj) : rho_j;
     L_over_A_sum +=
-        max(rho_j / rho_ref, 1e-3) * (*(_lengths[j]))(qp, state) / (*(_areas[j]))(qp, state);
+        max(rho_j / rho_ref, 1e-6) * (*(_lengths[j]))(qp, state) / (*(_areas[j]))(qp, state);
   }
   const auto inv_L_over_A_sum = 1.0 / L_over_A_sum;
 
@@ -219,7 +219,8 @@ ADIncompressibleMomentumSPBase::computeFrictionFactor(const ADReal & mu,
   {
     const auto f_lam_2300 = 64.0 / 2300.0;
     const auto f_turb_4000 =
-        0.25 / pow(log10((*(_roughnesses[j]))(qp, state) / 3.7 + 5.74 / pow(4000.0, 0.9)), 2);
+        0.25 /
+        pow(log10((*(_roughnesses[j]))(qp, state) / (Dh * 3.7) + 5.74 / pow(4000.0, 0.9)), 2);
     return f_lam_2300 + (f_turb_4000 - f_lam_2300) * (Re - 2300.0) / 1700.0;
   }
 }
