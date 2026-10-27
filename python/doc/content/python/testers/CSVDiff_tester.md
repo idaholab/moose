@@ -31,7 +31,8 @@ Test configuration options are added to the `tests` file.
 
 ## Comparison criteria id=comparison
 
-Columns are matched by header, so their order does not matter, but every column must be present
+Each column not present in `ignored_columns` is compared.
+Columns are matched by header, so their order does not matter, but every compared column must be present
 in both files with the same number of rows. For each row of each compared column, the gold value
 $a$ and the test value $b$ are checked with the absolute zero $z$ (`abs_zero`), the absolute
 tolerance $\tau_\mathrm{abs}$ (`abs_err`), and the relative tolerance $\tau_\mathrm{rel}$
@@ -49,7 +50,7 @@ Otherwise, the pair passes if either tolerance is met:
 \quad \text{or} \quad
 \lvert a - b \rvert \le \tau_\mathrm{rel} \max\left( \lvert a \rvert, \lvert b \rvert \right)
 
-- The values are never modified by the absolute zero. If only one value is within it, the
+- The values are never modified by the absolute zero. If only one value is within the absolute zero value, the
   original values are compared with [eq-csvdiff-pass], so a very small value can still be
   compared with a much larger one. This is the same definition of the floor that
   [Exodiff](Exodiff.md#comparison) uses.
@@ -70,7 +71,7 @@ Otherwise, the pair passes if either tolerance is met:
 $\tau_\mathrm{rel}$ for those columns, in the same order, and any of them that is not given
 keeps the global value. In a `comparison_file`, the `floor`, `absolute`, and `relative` keywords
 on the header line set the defaults for the listed columns, and the same keywords on a column
-line override them. A keyword that is not given is zero, which demands an exact match, and
+line override them. A keyword that is not given is treated as zero, and
 columns that are not listed are not compared.
 
 

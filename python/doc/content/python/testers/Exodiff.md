@@ -48,7 +48,7 @@ Otherwise, the pair is considered different if
 !equation id=eq-exodiff-rel
 \lvert a - b \rvert > \tau \max\left( \lvert a \rvert, \lvert b \rvert \right)
 
-The values are not modified by the floor: if only one is within it, the original values are
+The values are not modified by the floor: if only one is within the floor, the original values are
 compared with [eq-exodiff-rel]. With `use_old_floor`, the floor is instead defined on the
 difference, and a pair is considered equal if $\lvert a - b \rvert < F$.
 
