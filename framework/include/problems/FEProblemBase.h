@@ -542,7 +542,7 @@ public:
    *  * The exception have be registered by calling setException() prior to calling this.
    *  * This is collective on MPI, and must be called simultaneously by all processors!
    *  * If called when the solve can be interruped, it will do so and also throw a
-   *    MooseException, which must be handled.
+   *    MooseHandledException, which must be handled.
    *  * If called at a stage in the execution when the solve cannot be interupted (i.e.,
    *    there is no solve active), it will generate an error and terminate the application.
    *  * DO NOT CALL THIS IN A THREADED REGION! This is meant to be called just after a
@@ -3595,10 +3595,26 @@ protected:
 
 private:
   /**
+   * Classify the exception currently being handled and register its message with setException(),
+   * or error if the exception cannot be recovered from. Must be called from within a catch block.
+   * This does not communicate, so every rank must subsequently call checkExceptionAndStopSolve().
+   * A MooseHandledException has already been communicated and is rethrown unchanged.
+   */
+  void translateCaughtException(const std::string & calling_method);
+
+  /**
    * Handle exceptions. Note that the result of this call will be a thrown MooseException. The
    * caller of this method must determine how to handle the thrown exception
    */
   void handleException(const std::string & calling_method);
+
+  /**
+   * Execute \p work, user object computations local to this process, and register any exception
+   * it raises with translateCaughtException() instead of letting it propagate, so that this
+   * process does not skip communication entered by the other processes. Every process must
+   * subsequently call checkExceptionAndStopSolve().
+   */
+  void translateUserObjectExceptions(const std::function<void()> & work);
 
   /**
    * Helper for getting mortar objects corresponding to primary boundary ID, secondary boundary ID,

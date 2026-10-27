@@ -14,6 +14,9 @@
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/dof_map.h"
+#include "libmesh/sparse_matrix.h"
+#include "libmesh/petsc_matrix.h"
+#include "libmesh/petsc_solver_exception.h"
 
 InputParameters
 TimeIntegrator::validParams()
@@ -81,6 +84,15 @@ TimeIntegrator::init()
     _var_restriction = false;
     return;
   }
+
+  // the stage weights of weightNonTimeJacobian() apply to all rows of the Jacobian, which belong
+  // to this integrator only if it integrates all variables of the system
+  if (_Ke_time)
+    paramError("variables",
+               "The ",
+               type(),
+               " time integrator weights the time and non-time residuals of its stages "
+               "differently, so it must integrate all variables of the system");
 
   std::vector<dof_id_type> var_dof_indices, work_vec;
   for (const auto var_num : _vars)
@@ -150,6 +162,39 @@ TimeIntegrator::integratesVar(const unsigned int var_num) const
     return true;
 
   return _vars.count(var_num);
+}
+
+void
+TimeIntegrator::requestTimeJacobian()
+{
+  if (!_nl)
+    return;
+  _Ke_time = &_nl->addMatrix(_fe_problem.getMatrixTagID("TIME"));
+}
+
+void
+TimeIntegrator::weightNonTimeJacobian(SparseMatrix<Number> & jacobian, const Real weight) const
+{
+  mooseAssert(_Ke_time, "requestTimeJacobian() must be called first");
+  if (weight == 1)
+    return;
+  // J_time + w J_non_time = w J + (1 - w) J_time, where J = J_time + J_non_time
+  // In the separate Jacobian assembly the cached element contributions are not assembled into
+  // these matrices yet; only the constraint assembly and the combined residual and Jacobian
+  // assembly close them earlier.
+  jacobian.close();
+  _Ke_time->close();
+  jacobian.scale(weight);
+  // Both matrices have the sparsity pattern of the DofMap, and the time Jacobian may have fewer
+  // entries. Adding with SparseMatrix::add() would rebuild the system matrix with a different
+  // pattern and lose the preallocation that the nodal boundary conditions rely on.
+  auto * petsc_jacobian = dynamic_cast<PetscMatrix<Number> *>(&jacobian);
+  auto * petsc_time = dynamic_cast<PetscMatrix<Number> *>(_Ke_time);
+  if (petsc_jacobian && petsc_time)
+    LibmeshPetscCall(
+        MatAXPY(petsc_jacobian->mat(), 1 - weight, petsc_time->mat(), SUBSET_NONZERO_PATTERN));
+  else
+    jacobian.add(1 - weight, *_Ke_time);
 }
 
 void

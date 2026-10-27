@@ -26,7 +26,7 @@
       input = test.py
       test_case = TestLagrangeTri
       detail = 'simplex elements and'
-      min_slots = '2'
+      min_slots = '2' # memory heavy
       max_threads = 1 # static condensation doesn't currently support threading
     []
     [quad]
@@ -34,7 +34,7 @@
       input = test.py
       test_case = TestLagrangeQuad
       detail = 'tensor-product elements.'
-      min_slots = '2'
+      min_slots = '2' # memory heavy
       max_threads = 1 # static condensation doesn't currently support threading
     []
   []
@@ -45,7 +45,6 @@
       input = test.py
       test_case = TestRTTri
       detail = 'simplex elements and'
-      min_slots = 2 # memory intensive
       max_threads = 1 # static condensation doesn't currently support threading
     []
     [quad]
@@ -53,7 +52,7 @@
       input = test.py
       test_case = TestRTQuad
       detail = 'tensor-product elements.'
-      min_slots = 2 # memory intensive
+      min_slots = 2 # memory heavy
       max_threads = 1 # static condensation doesn't currently support threading
     []
   []

@@ -66,3 +66,16 @@ TEST_F(StiffenedGasTwoPhaseFluidPropertiesTest, test)
   EXPECT_NEAR(_fp->T_triple(), _T_triple, 1e-14);
   EXPECT_NEAR(_fp->L_fusion(), _L_fusion, 1e-14);
 }
+
+/**
+ * Verify that the default latent heat of fusion is that of water, consistent with the other
+ * default parameters, which correspond to water
+ */
+TEST_F(StiffenedGasTwoPhaseFluidPropertiesTest, defaultLatentHeatOfFusion)
+{
+  InputParameters params = _factory.getValidParams("StiffenedGasTwoPhaseFluidProperties");
+  _fe_problem->addUserObject("StiffenedGasTwoPhaseFluidProperties", "fp_default", params);
+  const auto & fp = _fe_problem->getUserObject<StiffenedGasTwoPhaseFluidProperties>("fp_default");
+  // Latent heat of fusion of water at 0 C, 333.55 kJ/kg
+  REL_TEST(fp.L_fusion(), 333.55e3, 2e-3);
+}

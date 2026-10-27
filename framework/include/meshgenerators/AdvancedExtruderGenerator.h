@@ -73,11 +73,19 @@ protected:
   /// Whether we are extruding along a curve
   bool _extrude_along_curve;
 
+  /// Whether to extrude each node along the averaged normal of the elements connected to it
+  const bool _extrude_along_node_normals;
+
   const bool _has_top_boundary;
   const BoundaryName _top_boundary;
 
   const bool _has_bottom_boundary;
   const BoundaryName _bottom_boundary;
+
+  /// Whether to add the lateral exterior sides (and their nodes) to a boundary
+  const bool _has_side_boundary;
+  /// Boundary for the lateral exterior sides and their nodes
+  const BoundaryName _side_boundary;
 
   /// The list of input mesh's blocks that need to be assigned upward boundary interfaces for each layer of elevation
   const std::vector<std::vector<subdomain_id_type>> _upward_boundary_source_blocks;
@@ -108,4 +116,11 @@ protected:
   /// This share goes from 0 at the beginning of the extrusion to 1 at the end
   /// @param t coordinate along the curve (in the axial direction of extrusion)
   Real radialExpansionRatio(const Real t) const;
+
+  /// Compute, for each node, the extrusion direction as the JxW-weighted average of the normals,
+  /// evaluated at that node with nodal quadrature, of all the elements connected to it.
+  /// The input surface mesh is expected to have consistently oriented elements.
+  /// @param input the 1D or 2D mesh being extruded
+  /// @return a map from node id to its (unit) extrusion direction
+  std::unordered_map<dof_id_type, Point> computeNodeNormals(const MeshBase & input) const;
 };

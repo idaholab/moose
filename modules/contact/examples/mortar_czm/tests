@@ -1,0 +1,21 @@
+[Tests]
+  issues = '#34147'
+  design = 'BilinearMixedModeCohesiveZoneModel.md'
+  [progressive_debonding]
+    type = CSVDiff
+    input = progressive_debonding.i
+    csvdiff = progressive_debonding_out.csv
+    restep = false
+    requirement = 'The system shall have an example of a mortar cohesive zone interface whose normal '
+                  'strength varies along the interface, so that the weak part debonds before the '
+                  'strong part.'
+  []
+  [debond_recontact]
+    type = CSVDiff
+    input = debond_recontact.i
+    csvdiff = debond_recontact_out.csv
+    abs_zero = 1e-6
+    requirement = 'The system shall have an example of a fully debonded mortar cohesive zone interface '
+                  'that transmits compressive traction again when it closes.'
+  []
+[]

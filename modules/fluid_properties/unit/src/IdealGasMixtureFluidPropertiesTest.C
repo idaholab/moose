@@ -20,7 +20,7 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, test)
   const Real v = 1.38490747936373;
   const Real rho = 0.7220698962933115;
   const Real e = 1.995566878921797e+06;
-  const Real s = 3129.64317643634;
+  const Real s = 3362.64537354375;
   const Real c = 442.127817187648;
   const Real cp = 1187.64406714542;
   const Real cv = 841.417197304492;
@@ -34,6 +34,21 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, test)
   REL_TEST(_fp_mix->e_from_p_T(p, T, x), e, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp_mix->e_from_p_rho(p, rho, x), e, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp_mix->s_from_p_T(p, T, x), s, REL_TOL_SAVED_VALUE);
+
+  // The mixture entropy exceeds the mass-weighted component entropies at the mixture pressure
+  // by the ideal entropy of mixing, -R / M sum_i psi_i ln(psi_i), with psi_i the mole fractions
+  {
+    const Real M_steam = 0.01801488;
+    const Real M_nitrogen = 0.028012734746133888;
+    const Real M_mix = 1.0 / ((1.0 - x[0]) / M_steam + x[0] / M_nitrogen);
+    const Real psi_steam = (1.0 - x[0]) * M_mix / M_steam;
+    const Real psi_nitrogen = x[0] * M_mix / M_nitrogen;
+    const Real s_unmixed =
+        (1.0 - x[0]) * _fp_steam->s_from_p_T(p, T) + x[0] * _fp_nitrogen->s_from_p_T(p, T);
+    const Real s_mixing = -FluidProperties::_R / M_mix *
+                          (psi_steam * std::log(psi_steam) + psi_nitrogen * std::log(psi_nitrogen));
+    REL_TEST(_fp_mix->s_from_p_T(p, T, x), s_unmixed + s_mixing, REL_TOL_CONSISTENCY);
+  }
   REL_TEST(_fp_mix->c_from_p_T(p, T, x), c, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp_mix->cp_from_p_T(p, T, x), cp, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp_mix->cv_from_p_T(p, T, x), cv, REL_TOL_SAVED_VALUE);

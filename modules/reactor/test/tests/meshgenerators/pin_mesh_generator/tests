@@ -535,4 +535,51 @@
       mesh_mode = REPLICATED
     []
   []
+  issues = '#33088'
+  [param_errors]
+    design = 'meshgenerators/PinMeshGenerator.md'
+    requirement = 'The system shall throw an error for pin definitions in --csg-only mode where '
+    [pin_radius_larger_than_pin_pitch]
+      detail = 'the pin radius exceeds the pin pitch'
+      type = RunException
+      input = pin_error.i
+      cli_args = '--csg-only'
+      expect_err = "Ring radii of pin must not exceed half the pin pitch"
+      mesh_mode = REPLICATED
+    []
+    [pin_pitch_larger_than_assemby_pitch]
+      detail = 'the pin pitch exceeds the assembly pitch'
+      type = RunException
+      input = pin_error.i
+      cli_args = 'Mesh/pmg/ring_radii="0.5 0.6"
+                  Mesh/pmg/pitch=100
+                  --csg-only'
+      expect_err = "Pin pitch must not exceed assembly pitch defined in ReactorMeshParams"
+      mesh_mode = REPLICATED
+    []
+    [pin_radius_larger_than_duct_halfpitch]
+      detail = 'the pin radius exceeds the pin duct pitch'
+      type = RunException
+      input = pin_error.i
+      cli_args = 'Mesh/pmg/ring_radii="0.5 0.6"
+                  Mesh/pmg/duct_halfpitch=0.01
+                  Mesh/pmg/region_ids="5 3 4 5"
+                  Mesh/pmg/mesh_intervals="1 1 1 1"
+                  --csg-only'
+      expect_err = "Ring radii of pin must not exceed duct halfpitches of pin"
+      mesh_mode = REPLICATED
+    []
+    [pin_duct_halpitch_larger_than_pin_pitch]
+      detail = 'the pin duct pitch exceeds the pin pitch'
+      type = RunException
+      input = pin_error.i
+      cli_args = 'Mesh/pmg/ring_radii="0.5 0.6"
+                  Mesh/pmg/duct_halfpitch=5
+                  Mesh/pmg/region_ids="5 3 4 5"
+                  Mesh/pmg/mesh_intervals="1 1 1 1"
+                  --csg-only'
+      expect_err = "Duct halfpitches of pin must not exceed half the pin pitch"
+      mesh_mode = REPLICATED
+    []
+  []
 []

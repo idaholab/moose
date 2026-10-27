@@ -81,6 +81,8 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
     _lagrangian_iteration_number(_augmented_lagrange_problem
                                      ? _augmented_lagrange_problem->getLagrangianIterationNumber()
                                      : _no_iterations),
+    _dof_to_lagrange_multiplier(declareRestartableData<std::unordered_map<dof_id_type, Real>>(
+        "dof_to_lagrange_multiplier")),
     _t_step_old_normal(declareRestartableData<int>("t_step_old_normal", 0)),
     _dt(_fe_problem.dt()),
     _use_physical_gap(getParam<bool>("use_physical_gap")),
@@ -154,7 +156,7 @@ PenaltyWeightedGapUserObject::selfFinalize()
     auto gap = _use_physical_gap ? adPhysicalGap(wgap) / wgap.second : wgap.first;
 
     const auto lagrange_multiplier =
-        _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[dof_object] : 0.0;
+        _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[dof_object->id()] : 0.0;
 
     // keep the negative normal pressure (compressive per convention here)
     auto normal_pressure = min(0.0, penalty * gap + lagrange_multiplier);
@@ -185,7 +187,7 @@ PenaltyWeightedGapUserObject::getNormalContactPressure(const Node * const node) 
 Real
 PenaltyWeightedGapUserObject::getNormalLagrangeMultiplier(const Node * const node) const
 {
-  const auto it = _dof_to_lagrange_multiplier.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it = _dof_to_lagrange_multiplier.find(node->id());
 
   if (it != _dof_to_lagrange_multiplier.end())
     return -MetaPhysicL::raw_value(it->second);
@@ -265,7 +267,7 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
     const auto gap = physicalGap(wgap);
     {
       // Check condition for nodes that are active
-      if (gap < 0 || _dof_to_lagrange_multiplier[dof_object] < 0.0)
+      if (gap < 0 || _dof_to_lagrange_multiplier[dof_object->id()] < 0.0)
       {
         max_positive_gap = max(max_positive_gap, gap);
         min_negative_gap = min(min_negative_gap, gap);
@@ -273,41 +275,32 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
     }
   }
 
-  // Communicate the extreme gap values in parallel.
-  std::vector<Real> recv;
-  if (this->_communicator.rank() == 0)
-    recv.resize(this->_communicator.size());
-  this->_communicator.gather(
-      0, -min_negative_gap > max_positive_gap ? min_negative_gap : max_positive_gap, recv);
+  // Reduce the extreme gap values on all ranks so that every rank returns the same result
+  this->_communicator.max(max_positive_gap);
+  this->_communicator.min(min_negative_gap);
 
-  if (this->_communicator.rank() == 0)
+  // report the gap value with the largest magnitude
+  const Real reported_gap =
+      -min_negative_gap > max_positive_gap ? min_negative_gap : max_positive_gap;
+  if (abs(reported_gap) > _penetration_tolerance)
   {
-    min_negative_gap = *std::min_element(recv.begin(), recv.end());
-    max_positive_gap = *std::max_element(recv.begin(), recv.end());
-
-    // report the gap value with the largest magnitude
-    const Real reported_gap =
-        -min_negative_gap > max_positive_gap ? min_negative_gap : max_positive_gap;
-    if (abs(reported_gap) > _penetration_tolerance)
-    {
-      mooseInfoRepeated("Penetration tolerance fail max_gap = ",
-                        reported_gap,
-                        " (gap_tol=",
-                        _penetration_tolerance,
-                        "). Iteration number is: ",
-                        _lagrangian_iteration_number,
-                        ".");
-      return false;
-    }
-    else
-      mooseInfoRepeated("Penetration tolerance success max_gap = ",
-                        reported_gap,
-                        " (gap_tol=",
-                        _penetration_tolerance,
-                        "). Iteration number is: ",
-                        _lagrangian_iteration_number,
-                        ".");
+    mooseInfoRepeated("Gap tolerance fail max_gap = ",
+                      reported_gap,
+                      " (gap_tol=",
+                      _penetration_tolerance,
+                      "). Iteration number is: ",
+                      _lagrangian_iteration_number,
+                      ".");
+    return false;
   }
+  else
+    mooseInfoRepeated("Gap tolerance success max_gap = ",
+                      reported_gap,
+                      " (gap_tol=",
+                      _penetration_tolerance,
+                      "). Iteration number is: ",
+                      _lagrangian_iteration_number,
+                      ".");
 
   return true;
 }
@@ -336,7 +329,7 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
       penalty = _penalty;
 
     const auto gap = getNormalGap(static_cast<const Node *>(dof_object));
-    auto & lagrange_multiplier = _dof_to_lagrange_multiplier[dof_object];
+    auto & lagrange_multiplier = _dof_to_lagrange_multiplier[dof_object->id()];
 
     const auto possible_normalization =
         (_use_physical_gap ? libmesh_map_find(_dof_to_weighted_gap, dof_object).second : 1.0);

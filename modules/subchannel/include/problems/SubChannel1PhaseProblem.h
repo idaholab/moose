@@ -45,6 +45,7 @@ public:
   const SCMHTCClosureBase * getPinHTCClosure() const { return _pin_HTC_closure; } // optional
   const SCMFrictionClosureBase * getFrictionClosure() const { return _friction_closure; }
   Real getBulkReynoldsNumber() const { return _bulk_Re; }
+  Real getBulkVelocity() const { return _bulk_V; }
 
   /// structure with the needed information to compute the friction factor at a specific subchannel cell
   struct FrictionStruct
@@ -228,6 +229,8 @@ protected:
   bool _converged;
   /// Assembly bulk Reynolds number
   Real _bulk_Re;
+  /// Assembly bulk velocity
+  Real _bulk_V;
   /// Whether the time integrator has been checked for consistency with the implementation
   bool _time_integrator_checked = false;
   /// Time step

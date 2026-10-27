@@ -42,6 +42,8 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/unstructured_mesh.h"
 #include "libmesh/point.h"
+#include "libmesh/fe_base.h"
+#include "libmesh/quadrature_nodal.h"
 
 #include <numeric>
 #include <cmath>
@@ -63,7 +65,9 @@ AdvancedExtruderGenerator::validParams()
       "axial element sizes within each elevation and remap subdomain_ids, boundary_ids and element "
       "extra integers within each elevation as well as interface boundaries between neighboring "
       "elevation layers, as well as following a 1D curve and modifying the radial (normal to "
-      "the extrusion axis) extent of the geometry.");
+      "the extrusion axis) extent of the geometry. It can also extrude each node along the "
+      "averaged normal of the elements it is connected to, which is useful to create boundary "
+      "layers.");
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh to extrude");
 
@@ -117,6 +121,13 @@ AdvancedExtruderGenerator::validParams()
       "A vector that points in the ending direction for extruding along a curve. This vector "
       "should be the tangent vector at the LAST node of the extrusion curve. Vector will be "
       "normalized in code, so don't worry about it here.");
+  params.addParam<bool>(
+      "extrude_along_node_normals",
+      false,
+      "If true, each node is extruded along the averaged normal of the elements it is connected "
+      "to, instead of along a fixed 'direction'. Only supported when extruding a 1D mesh in a "
+      "plane of constant z into 2D, or a 2D surface mesh into 3D. This is useful to create "
+      "boundary layers.");
 
   // Boundaries and interfaces
   params.addParam<BoundaryName>(
@@ -125,6 +136,10 @@ AdvancedExtruderGenerator::validParams()
   params.addParam<BoundaryName>(
       "bottom_boundary",
       "The boundary name to set on the bottom boundary. If omitted an ID will be generated.");
+  params.addParam<BoundaryName>(
+      "side_boundary",
+      "The boundary name to add the extruded exterior sides of the input mesh, and their nodes, "
+      "to. If omitted, no side boundary is added.");
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
       "upward_boundary_source_blocks", "Block ids used to generate upward interface boundaries.");
   params.addParam<std::vector<std::vector<boundary_id_type>>>("upward_boundary_ids",
@@ -151,10 +166,10 @@ AdvancedExtruderGenerator::validParams()
   params.addParam<Real>("start_radial_growth_rate", 1., "Starting rate of radial expansion.");
   params.addParam<Real>("end_radial_growth_rate", 1., "Ending rate of radial expansion.");
 
-  params.addParamNamesToGroup(
-      "top_boundary bottom_boundary upward_boundary_source_blocks upward_boundary_ids "
-      "downward_boundary_source_blocks downward_boundary_ids",
-      "Boundary Assignment");
+  params.addParamNamesToGroup("top_boundary bottom_boundary side_boundary "
+                              "upward_boundary_source_blocks upward_boundary_ids "
+                              "downward_boundary_source_blocks downward_boundary_ids",
+                              "Boundary Assignment");
   params.addParamNamesToGroup(
       "subdomain_swaps boundary_swaps elem_integer_names_to_swap elem_integers_swaps", "ID Swap");
   params.addParamNamesToGroup("extrusion_curve start_extrusion_direction end_extrusion_direction",
@@ -187,11 +202,14 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
                                  ? getParam<RealVectorValue>("end_extrusion_direction").unit()
                                  : Point(0, 0, 0)),
     _extrude_along_curve(isParamValid("extrusion_curve")),
+    _extrude_along_node_normals(getParam<bool>("extrude_along_node_normals")),
     _has_top_boundary(isParamValid("top_boundary")),
     _top_boundary(isParamValid("top_boundary") ? getParam<BoundaryName>("top_boundary") : "0"),
     _has_bottom_boundary(isParamValid("bottom_boundary")),
     _bottom_boundary(isParamValid("bottom_boundary") ? getParam<BoundaryName>("bottom_boundary")
                                                      : "0"),
+    _has_side_boundary(isParamValid("side_boundary")),
+    _side_boundary(isParamValid("side_boundary") ? getParam<BoundaryName>("side_boundary") : ""),
     _upward_boundary_source_blocks(
         isParamValid("upward_boundary_source_blocks")
             ? getParam<std::vector<std::vector<subdomain_id_type>>>("upward_boundary_source_blocks")
@@ -228,6 +246,22 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
       paramError("num_layers", "num_layers cannot be set if extruding along curve!");
     if (isParamValid("direction"))
       paramError("direction", "direction cannot be set if extruding along curve!");
+    if (_extrude_along_node_normals)
+      paramError("extrude_along_node_normals",
+                 "extrude_along_node_normals cannot be set if extruding along curve!");
+  }
+  else if (_extrude_along_node_normals)
+  {
+    if (isParamValid("direction"))
+      paramError("direction",
+                 "direction cannot be set if 'extrude_along_node_normals' is set, as the extrusion "
+                 "direction is computed from the element normals!");
+    if (!MooseUtils::absoluteFuzzyEqual(_twist_pitch, 0.))
+      paramError("twist_pitch",
+                 "twist_pitch cannot be set if 'extrude_along_node_normals' is set!");
+    if (_end_radial_extent)
+      paramError("end_radial_extent",
+                 "end_radial_extent cannot be set if 'extrude_along_node_normals' is set!");
   }
   else
   {
@@ -475,10 +509,19 @@ AdvancedExtruderGenerator::generate()
   if (_extrude_along_curve)
     extrusion_curve = std::move(_extrusion_curve);
 
+  if (_extrude_along_node_normals && !input->is_serial())
+    paramError("extrude_along_node_normals",
+               "Extruding along node normals is not implemented for non-serialized distributed "
+               "meshes yet.");
+
   // We must serialize the curve to know how to extrude across all ranks
   std::unique_ptr<libMesh::MeshSerializer> serializer;
   if (_extrude_along_curve)
     serializer = std::make_unique<libMesh::MeshSerializer>(*extrusion_curve);
+
+  // Exterior sides of the input mesh are identified by their lack of neighbor
+  if (_has_side_boundary && !input->preparation().has_neighbor_ptrs)
+    input->find_neighbors();
 
   // If we're using a distributed mesh... then make sure we don't have any remote elements hanging
   // around
@@ -531,12 +574,23 @@ AdvancedExtruderGenerator::generate()
     new_boundary_names.push_back(_bottom_boundary);
   if (_has_top_boundary)
     new_boundary_names.push_back(_top_boundary);
+  if (_has_side_boundary)
+    new_boundary_names.push_back(_side_boundary);
   std::vector<boundary_id_type> new_boundary_ids =
       MooseMeshUtils::getBoundaryIDs(*input, new_boundary_names, true);
+  // getBoundaryIDs generates a distinct ID for each unknown name, even a repeated one, so make
+  // boundaries given the same name share an ID
+  for (const auto i : index_range(new_boundary_names))
+    for (const auto j : make_range(i))
+      if (new_boundary_names[i] == new_boundary_names[j])
+        new_boundary_ids[i] = new_boundary_ids[j];
   const auto user_bottom_boundary_id =
       _has_bottom_boundary ? new_boundary_ids.front() : libMesh::BoundaryInfo::invalid_id;
-  const auto user_top_boundary_id =
-      _has_top_boundary ? new_boundary_ids.back() : libMesh::BoundaryInfo::invalid_id;
+  const auto user_top_boundary_id = _has_top_boundary
+                                        ? new_boundary_ids[_has_bottom_boundary ? 1 : 0]
+                                        : libMesh::BoundaryInfo::invalid_id;
+  const auto user_side_boundary_id =
+      _has_side_boundary ? new_boundary_ids.back() : libMesh::BoundaryInfo::invalid_id;
 
   // We know a priori how many elements we'll need
   mesh->reserve_elem(total_num_layers * orig_elem);
@@ -603,6 +657,12 @@ AdvancedExtruderGenerator::generate()
   else
     total_extrusion_distance_at_axis = std::accumulate(_heights.begin(), _heights.end(), 0);
 
+  // When extruding along node normals, precompute each node's extrusion direction from the
+  // normals of the elements connected to it
+  std::unordered_map<dof_id_type, Point> node_normals;
+  if (_extrude_along_node_normals)
+    node_normals = computeNodeNormals(*input);
+
   // Create translated layers of nodes in the direction of extrusion
   for (const auto & node : input->node_ptr_range())
   {
@@ -613,6 +673,20 @@ AdvancedExtruderGenerator::generate()
     Real sum_step_sizes_at_axis = 0.;
     // Initial distance from the node to the extrusion axis
     Real start_node_radius = (*node - reference_point).norm();
+
+    // Direction to extrude this node along: a fixed direction, or the averaged normal of the
+    // elements connected to it
+    Point node_extrude_direction = _direction;
+    if (_extrude_along_node_normals)
+    {
+      auto it = node_normals.find(node->id());
+      if (it == node_normals.end())
+        mooseError("Node ",
+                   node->id(),
+                   " is not connected to any element with a well-defined normal; its extrusion "
+                   "direction cannot be determined.");
+      node_extrude_direction = it->second;
+    }
 
     // e is the elevation layer ordering
     for (const auto e : make_range(total_num_elevations))
@@ -750,9 +824,8 @@ AdvancedExtruderGenerator::generate()
                             : height * std::pow(bias, (Real)(layer_index - 1)) * (1.0 - bias) /
                                   (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
             step_size_at_axis = step_size;
-            orig_node_to_current =
-                orig_node_to_previous +
-                _direction * step_size; // update distance from starting node to new node
+            // update distance from starting node to new node
+            orig_node_to_current = orig_node_to_previous + node_extrude_direction * step_size;
           }
 
           // Keep track of the cumulative step size as an extrusion axis coordinate
@@ -887,6 +960,12 @@ AdvancedExtruderGenerator::generate()
   // some processors may have underestimated the next_side_id; let's
   // fix that.
   input->comm().max(next_side_id);
+
+  // A generated side boundary ID starts after the largest input boundary ID, so it can coincide
+  // with the default bottom (next_side_id) and top (next_side_id + 1) IDs
+  if (_has_side_boundary)
+    while (user_side_boundary_id == next_side_id || user_side_boundary_id == next_side_id + 1)
+      ++next_side_id;
 
   // Map to keep track of polygon sides of polygonal prisms
   std::map<std::array<unsigned int, 3>, std::shared_ptr<libMesh::Polygon>> poly_extruded_sides;
@@ -1577,6 +1656,16 @@ AdvancedExtruderGenerator::generate()
                                            ? _boundary_swap_pairs[e][id_to_copy]
                                            : id_to_copy);
           }
+
+          // Add the extruded exterior sides and their nodes to the side boundary
+          if (_has_side_boundary && !elem->neighbor_ptr(s))
+          {
+            const unsigned short new_side =
+                added_elem->dim() == 3 ? cast_int<unsigned short>(s + 1) : (s == 0 ? 3 : 1);
+            boundary_info.add_side(added_elem, new_side, user_side_boundary_id);
+            for (const auto n : added_elem->nodes_on_side(new_side))
+              boundary_info.add_node(added_elem->node_ptr(n), user_side_boundary_id);
+          }
         }
 
         // Give new boundary ids to bottom and top
@@ -1643,10 +1732,10 @@ AdvancedExtruderGenerator::generate()
     mesh->get_boundary_info().set_nodeset_name_map().insert(input_nodeset_map.begin(),
                                                             input_nodeset_map.end());
 
-  if (_has_bottom_boundary)
-    boundary_info.sideset_name(new_boundary_ids.front()) = new_boundary_names.front();
-  if (_has_top_boundary)
-    boundary_info.sideset_name(new_boundary_ids.back()) = new_boundary_names.back();
+  for (const auto i : index_range(new_boundary_names))
+    boundary_info.sideset_name(new_boundary_ids[i]) = new_boundary_names[i];
+  if (_has_side_boundary)
+    boundary_info.nodeset_name(user_side_boundary_id) = _side_boundary;
 
   mesh->unset_is_prepared();
   // Creating the layered meshes creates a lot of leftover nodes, notably in the boundary_info,
@@ -1673,4 +1762,64 @@ AdvancedExtruderGenerator::radialExpansionRatio(const Real t) const
                  MathUtils::pow(t, 2) +
              _start_radial_growth_rate * t;
   }
+}
+
+std::unordered_map<dof_id_type, Point>
+AdvancedExtruderGenerator::computeNodeNormals(const MeshBase & input) const
+{
+  // Evaluate the geometric map of each element at its nodes with a nodal quadrature rule, as done
+  // for mortar nodal normals. On curved (higher-order) elements this captures the local surface
+  // normal at each node rather than a single per-element normal.
+  const auto dim = input.mesh_dimension();
+  libMesh::QNodal qrule(dim);
+  const auto & qweights = qrule.get_weights();
+  std::unique_ptr<FEBase> fe(FEBase::build(dim, FEType(FIRST, LAGRANGE)));
+  fe->attach_quadrature_rule(&qrule);
+  const auto & dxyzdxi = fe->get_dxyzdxi();
+  const auto & dxyzdeta = fe->get_dxyzdeta();
+  const auto & q_points = fe->get_xyz();
+  const Point z_axis(0, 0, 1);
+
+  // Sum the JxW-weighted normals of the elements connected to each node
+  std::unordered_map<dof_id_type, Point> node_normals;
+  for (const auto & elem : input.element_ptr_range())
+  {
+    fe->reinit(elem);
+    const auto qpoint_to_node = MooseMeshUtils::nodalQuadraturePointToNodeMap(*elem, q_points);
+    for (const auto qp : index_range(q_points))
+    {
+      // The weighted normal JxW * n is the quadrature weight times the area vector
+      // dxyz/dxi x dxyz/deta in 2D, or the in-plane rotation z x dxyz/dxi of the tangent in 1D.
+      // Both have the orientation of the element's node ordering, so that the extruded elements
+      // are not inverted.
+      Point weighted_normal;
+      if (dim == 2)
+        weighted_normal = dxyzdxi[qp].cross(dxyzdeta[qp]);
+      else
+      {
+        // A curve only defines a unique normal within its plane
+        if (std::abs(dxyzdxi[qp](2)) > libMesh::TOLERANCE * dxyzdxi[qp].norm())
+          paramError("extrude_along_node_normals",
+                     "Extruding a 1D mesh along node normals requires the mesh to lie in a plane "
+                     "of constant z, but element ",
+                     elem->id(),
+                     " is not.");
+        weighted_normal = z_axis.cross(dxyzdxi[qp]);
+      }
+      node_normals[elem->node_id(qpoint_to_node[qp])] += qweights[qp] * weighted_normal;
+    }
+  }
+
+  // The input surface mesh is expected to have consistently oriented elements.
+  for (auto & [node_id, normal] : node_normals)
+  {
+    if (normal.norm_sq() == 0)
+      mooseError("The averaged normal at node ",
+                 node_id,
+                 " is zero; an extrusion direction cannot be determined. This can happen if the "
+                 "connected elements do not have consistent orientations.");
+    normal = normal.unit();
+  }
+
+  return node_normals;
 }

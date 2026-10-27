@@ -73,6 +73,16 @@
     requirement = "The system shall report a failure if a test is missing its gold file"
     collections = 'FAILURE_ANALYSIS'
   []
+  [missing_output]
+    type = PythonUnitTest
+    input = test_MissingOutput.py
+    min_slots = 2 # calls TestHarness, which could use threads
+    # diff and write_results run the diffs fixture, which writes the same exodiff_out.e
+    prereq = 'diff write_results'
+    requirement = "The system shall report a failure if a test does not produce the file it is to compare against its gold file"
+    issues = '#21309'
+    collections = 'FAILURE_ANALYSIS'
+  []
   [expect]
     type = PythonUnitTest
     input = test_Expect.py
@@ -333,6 +343,15 @@
     type = PythonUnitTest
     input = test_SubprocessRunner.py
     requirement = 'The system shall wait for specified application output before delivering a signal.'
+  []
+  [monitor_processes]
+    type = PythonUnitTest
+    input = test_MonitorProcesses.py
+    required_python_packages = 'psutil'
+    requirement = "The system shall measure the memory usage of a process and its descendants, "
+                  "splitting memory shared between processes proportionally and excluding "
+                  "file-backed memory when the kernel reports it separately."
+    issues = '#33796'
   []
   [test_method]
     type = PythonUnitTest

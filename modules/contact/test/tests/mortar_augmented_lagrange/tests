@@ -103,4 +103,15 @@
                    "derived object\."
     []
   []
+  [two_pairs]
+    type = CSVDiff
+    input = two_pairs.i
+    csvdiff = two_pairs_out.csv
+    min_parallel = 3
+    design = AugmentedLagrangianContactConvergence.md
+    issues = '#34098'
+    requirement = 'The system shall check augmented Lagrange convergence of several mortar penalty '
+                  'contact pairs consistently across processes, so that the result does not depend '
+                  'on the number of processes.'
+  []
 []

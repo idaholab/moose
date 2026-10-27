@@ -120,6 +120,13 @@ PorousFlowPorosityLinear::initQpStatefulProperties()
 void
 PorousFlowPorosityLinear::computeQpProperties()
 {
+  computeUnboundedPorosityQp();
+  applyPorosityMin();
+}
+
+void
+PorousFlowPorosityLinear::computeUnboundedPorosityQp()
+{
   // note the [0] below: _phi_ref is a constant monomial and we use [0] regardless of
   // _nodal_material
   Real porosity = _phi_ref[0];
@@ -160,6 +167,4 @@ PorousFlowPorosityLinear::computeQpProperties()
     }
     (*_dporosity_dgradvar)[_qp][pvar] = deriv_grad;
   }
-
-  applyPorosityMin();
 }

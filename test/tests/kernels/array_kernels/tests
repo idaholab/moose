@@ -80,6 +80,13 @@
     exodiff = 'array_diffusion_reaction_transient_out.e'
     requirement = 'The system shall provide array time derivative kernels on an array variable.'
   []
+  [second_time_derivative_values]
+    type = 'CSVDiff'
+    input = 'array_second_time_derivative_aux.i'
+    csvdiff = 'array_second_time_derivative_aux_out.csv'
+    issues = '#34103'
+    requirement = 'The system shall provide the second time derivatives of coupled array variables, equal to those of the same field on standard variables.'
+  []
   [test_body_force]
     type = 'Exodiff'
     input = 'array_body_force.i'

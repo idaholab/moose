@@ -678,7 +678,7 @@ MooseVariableDataBase<RealEigenVector>::fetchDofValues()
     if (_need_u_dotdot || _need_grad_dotdot || _need_dof_values_dotdot)
     {
       libmesh_assert(_sys.solutionUDotDot());
-      getArrayDofValues(*_sys.solutionUDot(), n, _dof_values_dotdot);
+      getArrayDofValues(*_sys.solutionUDotDot(), n, _dof_values_dotdot);
     }
     if (_need_u_dot_old || _need_dof_values_dot_old)
     {
