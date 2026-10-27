@@ -14,6 +14,7 @@
 #include "MooseVariableFieldBase.h"
 #include "SystemBase.h"
 #include "libmesh/system.h"
+#include "libmesh/utility.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowPeacemanBorehole);
 
@@ -176,6 +177,14 @@ PorousFlowPeacemanBorehole::PorousFlowPeacemanBorehole(const InputParameters & p
   if (_p_or_t == PorTchoice::temperature && !_has_thermal_conductivity)
     mooseError("PorousFlowPeacemanBorehole: You have specified function_of=temperature, but you do "
                "not have a quadpoint thermal_conductivity material");
+
+  // use_mobility already includes the relative permeability of fluid_phase, so this would count it
+  // twice, and for an injecting point would multiply the total mobility by a relative permeability
+  // that is zero wherever the injected phase is absent
+  if (_use_mobility && _use_relative_permeability)
+    paramError("use_relative_permeability",
+               "use_mobility=true already includes the relative permeability, so "
+               "use_relative_permeability must be false");
 
   // The wellbore pressure profile is built from either a single constant unit_weight, or a
   // fluid density computed from temperature at each point (via 'unit_weight_fp') - never both,
@@ -418,6 +427,42 @@ PorousFlowPeacemanBorehole::wellConstant(const RealTensorValue & perm,
                "\n");
 
   return 4 * halfPi * effective_perm * half_len / std::log(r0 / rad);
+}
+
+Real
+PorousFlowPeacemanBorehole::mobility(const bool injecting) const
+{
+  // Fluid leaving the porespace carries only what is mobile at the node, so production takes the
+  // nominated phase's mobility
+  if (!injecting)
+    return PorousFlowLineSink::mobility(injecting);
+
+  // Injected fluid displaces whatever is resident, so the resistance it meets is that of all the
+  // phases together.  Unlike the phase mobility, this is nonzero in a block containing none of the
+  // injected phase, which is what allows an injection well to begin flowing.
+  Real total_mobility = 0.0;
+  for (const auto p : make_range(_dictator.numPhases()))
+    total_mobility += (*_relative_permeability)[_i][p] / (*_fluid_viscosity)[_i][p];
+  return (*_fluid_density_node)[_i][_ph] * total_mobility;
+}
+
+Real
+PorousFlowPeacemanBorehole::dmobility(const unsigned pvar, const bool injecting) const
+{
+  if (!injecting)
+    return PorousFlowLineSink::dmobility(pvar, injecting);
+
+  Real total_mobility = 0.0;
+  Real dtotal_mobility = 0.0;
+  for (const auto p : make_range(_dictator.numPhases()))
+  {
+    total_mobility += (*_relative_permeability)[_i][p] / (*_fluid_viscosity)[_i][p];
+    dtotal_mobility += (*_drelative_permeability_dvar)[_i][p][pvar] / (*_fluid_viscosity)[_i][p] -
+                       (*_relative_permeability)[_i][p] * (*_dfluid_viscosity_dvar)[_i][p][pvar] /
+                           Utility::pow<2>((*_fluid_viscosity)[_i][p]);
+  }
+  return (*_dfluid_density_node_dvar)[_i][_ph][pvar] * total_mobility +
+         (*_fluid_density_node)[_i][_ph] * dtotal_mobility;
 }
 
 Real
