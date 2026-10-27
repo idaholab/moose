@@ -166,7 +166,14 @@ ADJunctionParallelChannels1PhaseUserObject::finalize()
 
   if (Aout_total > Ain_total)
   {
-    if (Aout_total > 1e-15)
+    // The wall at an abrupt expansion is at the upstream pressure (Borda-Carnot). The outlet
+    // pressure is used only when no connection is an inlet, as at zero flow.
+    if (Ain_total > 1e-15)
+    {
+      p_wall = pAin_total / Ain_total;
+      _c_wall = _c_in;
+    }
+    else if (Aout_total > 1e-15)
     {
       p_wall = pAout_total / Aout_total;
       _c_wall = _c_out;

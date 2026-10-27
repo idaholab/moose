@@ -50,19 +50,21 @@ area, the geometry of the junction is shown below.
        style=width:40%;display:block;margin-left:auto;margin-right:auto
        alt=Diagram for the problem of a junction between a narrow inlet pipe and a wider outlet pipe.
 
-It is assumed that the wall pressure is:
-
-- constant and equal to the inlet pressure upstream of the area change.
-- constant and equal to the outlet pressure downstream the area change.
-
-Then the term $\int_{\Gamma_{\text{wall}}}{p\bf{n}}{d\Gamma}$
-is reduced to the surface that is in red in the above diagram.
+It is assumed that the wall pressure is constant and equal to the inlet pressure. Then
+the term $\int_{\Gamma_{\text{wall}}}{p\bf{n}}{d\Gamma}$ is reduced to the surface
+that is in red in the above diagram.
 
 If the outlet flow area is +greater+ than the inlet flow area, the wall pressure
  integral projected in the flow direction is:
 
 !equation id=dp_out
-\int_{\Gamma_{\text{wall}}}{p n_{\text{flow}}}{d\Gamma} = - p_{\text{wall}} A_{\text{wall}} =-p_{\text{out}} \left(A_{\text{out}}-A_{\text{in}}\right)
+\int_{\Gamma_{\text{wall}}}{p n_{\text{flow}}}{d\Gamma} = - p_{\text{wall}} A_{\text{wall}} =-p_{\text{in}} \left(A_{\text{out}}-A_{\text{in}}\right)
+
+The flow separates at the area step, so the fluid in contact with the step is at the
+pressure of the jet leaving the inlet channel. This is the Borda-Carnot model of a
+sudden expansion: the steady pressure rise across the junction is
+$\rho_{\text{in}} u_{\text{in}}^2 (A_{\text{in}} / A_{\text{out}}) (1 - A_{\text{in}} / A_{\text{out}})$,
+and total pressure decreases across it.
 
 If the outlet flow area is +smaller+ than the inlet flow area,
 the wall pressure integral projected in the flow direction is:

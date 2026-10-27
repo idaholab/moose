@@ -10,7 +10,9 @@ SC_core = 0.0004980799633447909 #m2
 
 # core parameters
 core_length = 1. # m
-core_n_elems = 1
+# More than one element keeps the core friction source out of the cells next to the
+# junctions, whose pressures set the junction momentum terms
+core_n_elems = 16
 A_core = 0.005 #dummy
 
 # pipe parameters
@@ -495,7 +497,9 @@ m_dot_sec_in = 1. # kg/s
     dt = 2
   []
   dtmax = 50
-  end_time = 10
+  # The pump-driven flow and the THM-SCM pressure drop settle by about 100 s; the loop
+  # temperature continues to rise slowly as the heat exchanger heats up
+  end_time = 120
 
   line_search = basic
   solve_type = NEWTON
