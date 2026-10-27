@@ -9,6 +9,7 @@
 
 #include "PenaltyWeightedGapUserObject.h"
 #include "AugmentedLagrangianContactProblem.h"
+#include "AutomaticMortarGeneration.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
 
