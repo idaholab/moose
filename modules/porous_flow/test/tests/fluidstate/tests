@@ -279,4 +279,14 @@
       detail = 'a salt mass fraction for a fluid state that has no salt.'
     []
   []
+  [salt_not_in_dictator]
+    type = CSVDiff
+    input = 'residual_gradients.i'
+    cli_args = "UserObjects/dictator/number_fluid_components=2 Materials/diffusivity/diffusion_coeff='1e-6 1e-6 1e-6 1e-6'"
+    csvdiff = 'residual_gradients_out.csv'
+    prereq = 'residual_gradients/residual_and_jacobian_together'
+    requirement = 'The system shall compute the gradients of the fluid state properties when the salt mass fraction is a PorousFlow variable but the dictator does not include the salt component, giving the same solution as when it does.'
+    design = 'PorousFlowFluidState.md'
+    issues = '#34233'
+  []
 []
