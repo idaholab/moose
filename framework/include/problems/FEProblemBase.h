@@ -628,6 +628,23 @@ public:
   void restoreGeometricSearchState();
 
   /**
+   * Snapshot the restartable data (e.g. user object state) so that it can be restored with
+   * restoreRestartableData() if this time step attempt is rejected. Called before the attempt's
+   * timestepSetup().
+   *
+   * Data that rejecting a step restores separately (solutions, stateful material properties,
+   * reporters, geometric search, MultiApp sub-apps) or that must keep the rejected attempt's values
+   * (time stepping and output state) is left out.
+   */
+  void backupRestartableData();
+
+  /**
+   * Restore the restartable data captured by the most recent backupRestartableData() and discard
+   * the snapshot. Does nothing if there is no snapshot.
+   */
+  void restoreRestartableData();
+
+  /**
    * Allocate vectors and save old solutions into them.
    */
   virtual void saveOldSolutions();
@@ -3553,6 +3570,9 @@ protected:
 
   /// Whether or not to be verbose on solution restoration post a failed time step
   bool _verbose_restore;
+
+  /// Restartable data at the start of the current time step attempt, see backupRestartableData()
+  std::unique_ptr<Backup> _restep_backup;
 
   /// The error message to go with an exception
   std::string _exception_message;

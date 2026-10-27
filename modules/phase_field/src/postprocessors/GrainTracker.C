@@ -102,7 +102,8 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _reserve_grain_first_index(0),
     _old_max_grain_id(0),
     _max_curr_grain_id(declareRestartableData<unsigned int>("max_curr_grain_id", invalid_id)),
-    _is_transient(_subproblem.isTransient())
+    _is_transient(_subproblem.isTransient()),
+    _remap_backup_t_step(std::numeric_limits<int>::min())
 {
   if (_tolerate_failure)
     paramInfo("tolerate_failure",
@@ -114,6 +115,30 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
 }
 
 GrainTracker::~GrainTracker() {}
+
+void
+GrainTracker::timestepSetup()
+{
+  SetupInterface::timestepSetup();
+
+  // timestepSetup() runs once per timestep attempt, so finding the solution history saved for this
+  // timestep means that an attempt remapped it and was rejected. The restartable tracker state is
+  // restored by the framework; the remap of the old and older solutions is undone here. Rejecting
+  // the timestep also copied the remapped old solution into the current one, so undo all three.
+  if (_t_step == _remap_backup_t_step && _solution_old_backup)
+  {
+    _sys.solutionOld() = *_solution_old_backup;
+    _sys.solutionOlder() = *_solution_older_backup;
+    _sys.solution() = *_solution_old_backup;
+    _sys.solutionOld().close();
+    _sys.solutionOlder().close();
+    _sys.solution().close();
+    _sys.system().update();
+  }
+
+  _solution_old_backup.reset();
+  _solution_older_backup.reset();
+}
 
 Real
 GrainTracker::getEntityValue(dof_id_type entity_id,
@@ -264,6 +289,10 @@ GrainTracker::meshChanged()
 
     _communicator.gather(0, range, _all_ranges);
   }
+
+  // The saved solution history is not projected onto a changed mesh
+  _solution_old_backup.reset();
+  _solution_older_backup.reset();
 
   FeatureFloodCount::meshChanged();
 }
@@ -1142,6 +1171,14 @@ GrainTracker::remapGrains()
   // Perform swaps if any occurred
   if (!grain_id_to_new_var.empty())
   {
+    // Save the old and older solutions before the first remap of a timestep
+    if (_is_transient && (_t_step != _remap_backup_t_step || !_solution_old_backup))
+    {
+      _remap_backup_t_step = _t_step;
+      _solution_old_backup = _sys.solutionOld().clone();
+      _solution_older_backup = _sys.solutionOlder().clone();
+    }
+
     // Cache for holding values during swaps
     std::vector<std::map<Node *, CacheValues>> cache(_n_vars);
 

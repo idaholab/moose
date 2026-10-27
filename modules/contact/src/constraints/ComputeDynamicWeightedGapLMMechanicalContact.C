@@ -109,7 +109,7 @@ ComputeDynamicWeightedGapLMMechanicalContact::ComputeDynamicWeightedGapLMMechani
     _wear_depth(_has_wear ? coupledValueLower("wear_depth") : _zero),
     _newmark_beta(getParam<Real>("newmark_beta")),
     _newmark_gamma(getParam<Real>("newmark_gamma")),
-    _t_step_old(declareRestartableData<int>("t_step_old", 0)),
+    _t_step_old(0),
     _retried_timestep(false)
 {
   if (!useDual())

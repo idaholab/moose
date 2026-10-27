@@ -25,6 +25,7 @@ public:
   GrainTracker(const InputParameters & parameters);
   virtual ~GrainTracker();
 
+  virtual void timestepSetup() override;
   virtual void meshChanged() override;
   virtual void initialize() override;
   virtual void execute() override;
@@ -248,6 +249,19 @@ private:
 
   /// Data structure to hold element ID ranges when using Distributed Mesh (populated on rank 0 only)
   std::vector<std::pair<dof_id_type, dof_id_type>> _all_ranges;
+
+  /**
+   * The timestep at which the old and older solutions were last saved before a remap. Finding the
+   * saved solutions for the current timestep in timestepSetup() means that an attempt at this
+   * timestep remapped them and was rejected. Not restartable, so that it survives the framework
+   * restore of restartable data on a rejected timestep.
+   */
+  int _remap_backup_t_step;
+
+  ///@{ Old and older solutions at the start of the current timestep, saved before the first remap
+  std::unique_ptr<NumericVector<Number>> _solution_old_backup;
+  std::unique_ptr<NumericVector<Number>> _solution_older_backup;
+  ///@}
 };
 
 /**

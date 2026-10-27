@@ -61,6 +61,9 @@ MFEMTransient::takeStep(Real input_dt)
   // meaningful console output in timestepSetup(). We decrement it back
   // immediately after so step() below behaves as expected.
   _time += _dt;
+  // Save the state that rejecting this attempt must restore, before any object changes it
+  if (_restore_restartable_data_on_restep)
+    _problem.backupRestartableData();
   _problem.timestepSetup();
   _time -= _dt;
 

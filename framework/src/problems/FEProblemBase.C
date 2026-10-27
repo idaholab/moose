@@ -18,6 +18,7 @@
 #include "Factory.h"
 #include "MooseUtils.h"
 #include "DisplacedProblem.h"
+#include "RestartableDataWriter.h"
 #include "SystemBase.h"
 #include "MaterialData.h"
 #include "ComputeUserObjectsThread.h"
@@ -7732,6 +7733,57 @@ FEProblemBase::restoreGeometricSearchState()
 
   if (_displaced_problem)
     _displaced_problem->geomSearchData().restore();
+}
+
+void
+FEProblemBase::backupRestartableData()
+{
+  TIME_SECTION("backupRestartableData", 5, "Backing Up Restartable Data");
+
+  // Restartable systems whose data is restored separately when a time step is rejected, or that
+  // must keep the values of the rejected attempt (time, dt and cut-back state, output counters).
+  // The FEProblemBase data holds the time state, the equation systems and the stateful material
+  // property storage. Predictors detect a repeated time step themselves and keep solution vectors
+  // that are not part of this data.
+  static const std::vector<std::string> skipped_systems = {
+      "FEProblemBase",
+      "Executioners",
+      "TimeSteppers",
+      "TimeIntegrators",
+      "Predictors",
+      "MultiApps",
+      "Output",
+      "Mesh",
+      "PenetrationLocator",
+      "NearestNodeLocator",
+      ReporterName::REPORTER_RESTARTABLE_DATA_PREFIX,
+      "chain_control"};
+  const auto skip = [](const std::string & name)
+  {
+    return std::any_of(skipped_systems.begin(),
+                       skipped_systems.end(),
+                       [&name](const auto & system)
+                       { return MooseUtils::beginsWith(name, system + "/"); });
+  };
+
+  _restep_backup = std::make_unique<Backup>();
+  RestartableDataWriter writer(_app, _app.getRestartableData());
+  writer.write(*_restep_backup->header, *_restep_backup->data, skip);
+}
+
+void
+FEProblemBase::restoreRestartableData()
+{
+  if (!_restep_backup)
+    return;
+
+  TIME_SECTION("restoreRestartableData", 5, "Restoring Restartable Data");
+
+  RestartableDataReader reader(_app, _app.getRestartableData());
+  reader.setInput(std::move(_restep_backup->header), std::move(_restep_backup->data));
+  reader.restore();
+  reader.clear();
+  _restep_backup.reset();
 }
 
 void

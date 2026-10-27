@@ -16,8 +16,6 @@
       type = 'CSVDiff'
       input = 'force_postaux.i'
       csvdiff = 'force_postaux_out.csv'
-      # Test is meant to showcase a stateful userobject
-      restep = false
       detail = 'by forcing a user object to execute after auxiliary kernels'
     []
   []

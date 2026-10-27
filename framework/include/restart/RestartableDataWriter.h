@@ -11,6 +11,8 @@
 
 #include "RestartableDataIO.h"
 
+#include <functional>
+
 /**
  * Writer for restartable data, to be read by the RestartableDataReader.
  */
@@ -23,8 +25,12 @@ public:
   /**
    * Writes the restartable data to header stream \p header_stream
    * and data stream \p data_stream
+   *
+   * @param skip Optional predicate on the data name; data for which it returns true is not written
    */
-  void write(std::ostream & header_stream, std::ostream & data_stream);
+  void write(std::ostream & header_stream,
+             std::ostream & data_stream,
+             const std::function<bool(const std::string &)> & skip = {});
   /**
    * Writes the restartable data to the folder with base \p folder_base
    */
