@@ -43,6 +43,8 @@ ADIncompressibleEnergySPScalarKernel::validParams()
       "Whether an explicit (previous value calculation) or implicit (current value) is used");
   params.addRequiredParam<MooseFunctorName>("reference_pressure", "system reference pressure [Pa]");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
+  params.addParam<UserObjectName>("reference_fp",
+                                  "Liquid-phase fluid properties; see momentum kernel.");
   params.addRequiredParam<MooseFunctorName>("area", "Segment/Component flow area [m^2]");
   params.addRequiredParam<MooseFunctorName>("perimeter", "Segment/Component wetted perimeter [m]");
   params.addRequiredParam<MooseFunctorName>("length", "Segment/Component length [m]");
@@ -61,6 +63,9 @@ ADIncompressibleEnergySPScalarKernel::ADIncompressibleEnergySPScalarKernel(
   : Base(parameters),
     ADFunctorInterface(this),
     _fp(this->template getUserObject<SinglePhaseFluidProperties>("fp")),
+    _fp_ref(isParamValid("reference_fp") ? &getUserObjectByName<SinglePhaseFluidProperties>(
+                                               getParam<UserObjectName>("reference_fp"))
+                                         : nullptr),
     _m(ScalarCoupleable::adCoupledScalarValue("mass_flow_rate")),
     _Tup(ScalarCoupleable::adCoupledScalarValue("inlet_temperature")),
     _Tdown(ScalarCoupleable::adCoupledScalarValue("outlet_temperature")),
@@ -96,15 +101,17 @@ ADIncompressibleEnergySPScalarKernel::computeQpResidual()
   // start by getting fluid properties
   const auto in = 1.0 / 2.0 * (1 - abs(_m[i]) / _m[i]) * _Tdown[i] +
                   1.0 / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tup[i];
-  const auto rho = _fp.rho_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
-  const auto cp = _fp.cp_from_p_T(_Pref(qp, state), (Base::_u[i] + in) / 2);
+  const auto Tm = (Base::_u[i] + in) / 2;
+  const auto rho = _fp.rho_from_p_T(_Pref(qp, state), Tm);
+  const auto cp = _fp.cp_from_p_T(_Pref(qp, state), Tm);
+  const auto rho_ref = _fp_ref ? _fp_ref->rho_from_p_T(_Pref(qp, state), Tm) : rho;
 
   // Heat transfer to fluid (Dittus-Boelter)
   const auto q = _h(qp, state) * _perimeter(qp, state) / 2.0 * (2.0 * _Tw[i] - Base::_u[i] - in);
   // Advection component
   energy_residual += (_m[i] / 2.0 * (1 - abs(_m[i]) / _m[i]) * _Tdown[i] -
                       _m[i] / 2.0 * (1 + abs(_m[i]) / _m[i]) * _Tup[i] + abs(_m[i]) * Base::_u[i]) /
-                     _length(qp, state) / _area(qp, state) / rho;
+                     _length(qp, state) / _area(qp, state) / rho_ref;
   // Wall heat transfer
   energy_residual -= q / _area(qp, state) / rho / cp;
 

@@ -33,6 +33,8 @@ ADIncompressibleMomentumSPBase::validParams()
       "fp",
       "Fluid properties user object(s). Supply either one (applied to all segments) "
       "or one per segment.");
+  params.addParam<UserObjectName>("reference_fp",
+                                  "Fluid properties of the liquid phase for draining problems.");
   params.addParam<std::vector<MooseFunctorName>>(
       "areas",
       std::vector<MooseFunctorName>({}),
@@ -81,6 +83,9 @@ ADIncompressibleMomentumSPBase::ADIncompressibleMomentumSPBase(const InputParame
     _n_fp(this->template getParam<std::vector<UserObjectName>>("fp").size()),
     _n_segments(this->template getParam<std::vector<MooseFunctorName>>("areas").size()),
     _fp(_n_segments), // size it here, or after _n_segments if declared later in the header
+    _fp_ref(isParamValid("reference_fp") ? &getUserObjectByName<SinglePhaseFluidProperties>(
+                                               getParam<UserObjectName>("reference_fp"))
+                                         : nullptr),
     _areas(this->template getParam<std::vector<MooseFunctorName>>("areas").size()),
     _perimeters(this->template getParam<std::vector<MooseFunctorName>>("perimeters").size()),
     _lengths(this->template getParam<std::vector<MooseFunctorName>>("lengths").size()),
@@ -148,39 +153,44 @@ ADIncompressibleMomentumSPBase::computeQpResidual()
   const auto qp = functorArg();
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
-  // start by getting global average temperature
-  const auto Tave = ((*(_T[0]))[i] + (*(_T[_n_temps - 1]))[i]) / 2;
-  // Global rescale factor so the mass flow rate's transient term has a unit coefficient,
-  // matching the coefficient of ODETimeDerivative kernel: the path's lumped L_over_A_sum is
-  // Sum_j(length_j / area_j), so the whole equation is divided through by that single sum.
+  const auto P = _Pref(qp, state);
+
+  // Inertia scale: Sum_j (rho_j / rho_ref,j) L_j / A_j. Reduces to Sum_j L_j / A_j when
+  // every segment holds the reference liquid. Gas-filled segments carry ~no inertia.
   ADReal L_over_A_sum = 0;
   for (const auto j : make_range(_n_segments))
-    L_over_A_sum += (*(_lengths[j]))(qp, state) / (*(_areas[j]))(qp, state);
+  {
+    const auto Tj = (*(_T[j]))[i];
+    const auto rho_j = _fp[j]->rho_from_p_T(P, Tj);
+    const auto rho_ref = _fp_ref ? _fp_ref->rho_from_p_T(P, Tj) : rho_j;
+    L_over_A_sum +=
+        max(rho_j / rho_ref, 1e-3) * (*(_lengths[j]))(qp, state) / (*(_areas[j]))(qp, state);
+  }
   const auto inv_L_over_A_sum = 1.0 / L_over_A_sum;
-  // loop over segments
+
   for (const auto j : make_range(_n_segments))
   {
-    // Get properties
-    const auto mu = _fp[j]->mu_from_p_T(_Pref(qp, state), Tave);
-    const auto rhog = _fp[j]->rho_from_p_T(_Pref(qp, state), Tave);
-    // Decide flow regime for friction factor
-    const auto Dh = 4.0 * (*(_areas[j]))(qp, state) / (*(_perimeters[j]))(qp, state);
-    const auto G = massFlowRate() / (*(_areas[j]))(qp, state);
-    const auto fd = computeFrictionFactor(mu, G, Dh, j);
-    // Friction
-    momentum_residual += fd * (*(_lengths[j]))(qp, state) / Dh * G * abs(G) / 2.0 / rhog;
-    // Form losses
-    momentum_residual += (*(_forms_losses[j]))(qp, state) * G * abs(G) / 2.0 / rhog;
-    // Gravity
-    // get local density for natural circulation aspect
-    auto rhol = _fp[j]->rho_from_p_T(_Pref(qp, state), (*(_T[j]))[i]);
-    momentum_residual += rhol * _gravity(qp, state) * (*(_dHs[j]))(qp, state);
-    // Pump pressure
+    const auto Tj = (*(_T[j]))[i];
+    const auto A = (*(_areas[j]))(qp, state);
+    const auto Dh = 4.0 * A / (*(_perimeters[j]))(qp, state);
+    // Segment properties (blended liquid/gas) and liquid reference density
+    const auto mu = _fp[j]->mu_from_p_T(P, Tj);
+    const auto rho_j = _fp[j]->rho_from_p_T(P, Tj);
+    const auto rho_ref = _fp_ref ? _fp_ref->rho_from_p_T(P, Tj) : rho_j;
+    // Velocity is continuous along the path (volumetric continuity); the mass flux
+    // actually present in this segment is rho_j * v.
+    const auto v = massFlowRate() / (rho_ref * A);
+    const auto Gj = rho_j * v;
+    const auto fd = computeFrictionFactor(mu, Gj, Dh, j);
+    // Friction and form losses: f L/Dh * rho_j v|v| / 2  (-> 0 as rho_j -> 0)
+    momentum_residual += fd * (*(_lengths[j]))(qp, state) / Dh * Gj * abs(Gj) / 2.0 / rho_j;
+    momentum_residual += (*(_forms_losses[j]))(qp, state) * Gj * abs(Gj) / 2.0 / rho_j;
+    // Gravity: hydrostatic head of whatever is in the segment
+    momentum_residual += rho_j * _gravity(qp, state) * (*(_dHs[j]))(qp, state);
+    // Pump
     momentum_residual -= (*(_dPps[j]))(qp, state);
   }
-  // Pressure drop (single path-wide unknown, applied once)
   momentum_residual += pressureDrop();
-
   return momentum_residual * inv_L_over_A_sum;
 }
 
@@ -199,14 +209,17 @@ ADIncompressibleMomentumSPBase::computeFrictionFactor(const ADReal & mu,
 {
   const auto qp = functorArg();
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
-  const auto Re = abs(G) * Dh / mu;
-  const auto f_lam = 64.0 / Re;
-  const auto f_turb =
-      0.25 / pow((log10((*(_roughnesses[j]))(qp, state) / (Dh * 3.7) + 5.74 / pow(Re, 0.9))), 2);
+  const auto Re = max(abs(G) * Dh / mu, 1.0e-03);
   if (Re < 2300.0) // laminar
-    return f_lam;
+    return 64.0 / Re;
   else if (Re > 4000.0) // turbulent using Swamee-Jain approx. of Colebrook-White eq.
-    return f_turb;
+    return 0.25 /
+           pow((log10((*(_roughnesses[j]))(qp, state) / (Dh * 3.7) + 5.74 / pow(Re, 0.9))), 2);
   else // transition, conservative interpolation between the two
-    return std::max((f_turb - f_lam) / 1700 * Re + f_lam, std::max(f_lam, f_turb));
+  {
+    const auto f_lam_2300 = 64.0 / 2300.0;
+    const auto f_turb_4000 =
+        0.25 / pow(log10((*(_roughnesses[j]))(qp, state) / 3.7 + 5.74 / pow(4000.0, 0.9)), 2);
+    return f_lam_2300 + (f_turb_4000 - f_lam_2300) * (Re - 2300.0) / 1700.0;
+  }
 }
