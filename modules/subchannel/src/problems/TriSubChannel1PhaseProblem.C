@@ -593,57 +593,29 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         LibmeshPetscCall(
             VecSetValues(_hc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES));
 
-        // Advective derivative term
+        // Advective derivative term. mdot and h are face values, so the axial enthalpy flux
+        // through a face is mdot * h at that face and needs no interpolation
         if (iz == first_node)
         {
           PetscInt row_at = i_ch + _n_channels * iz_ind;
-          PetscScalar value_at = alpha * (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
+          PetscScalar value_at = (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
           LibmeshPetscCall(
               VecSetValues(_hc_advective_derivative_rhs, 1, &row_at, &value_at, ADD_VALUES));
-
-          value_at = alpha * (*_mdot_soln)(node_out) - (1 - alpha) * (*_mdot_soln)(node_in);
-          PetscInt col_at = i_ch + _n_channels * iz_ind;
-          LibmeshPetscCall(MatSetValues(
-              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
-
-          value_at = (1 - alpha) * (*_mdot_soln)(node_out);
-          col_at = i_ch + _n_channels * (iz_ind + 1);
-          LibmeshPetscCall(MatSetValues(
-              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
-        }
-        else if (iz == last_node)
-        {
-          PetscInt row_at = i_ch + _n_channels * iz_ind;
-          PetscScalar value_at = 1.0 * (*_mdot_soln)(node_out);
-          PetscInt col_at = i_ch + _n_channels * iz_ind;
-          LibmeshPetscCall(MatSetValues(
-              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
-
-          value_at = -1.0 * (*_mdot_soln)(node_in);
-          col_at = i_ch + _n_channels * (iz_ind - 1);
-          LibmeshPetscCall(MatSetValues(
-              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
         }
         else
         {
           PetscInt row_at = i_ch + _n_channels * iz_ind;
-          PetscInt col_at;
-
-          PetscScalar value_at = -alpha * (*_mdot_soln)(node_in);
-          col_at = i_ch + _n_channels * (iz_ind - 1);
-          LibmeshPetscCall(MatSetValues(
-              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
-
-          value_at = alpha * (*_mdot_soln)(node_out) - (1 - alpha) * (*_mdot_soln)(node_in);
-          col_at = i_ch + _n_channels * iz_ind;
-          LibmeshPetscCall(MatSetValues(
-              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
-
-          value_at = (1 - alpha) * (*_mdot_soln)(node_out);
-          col_at = i_ch + _n_channels * (iz_ind + 1);
+          PetscInt col_at = i_ch + _n_channels * (iz_ind - 1);
+          PetscScalar value_at = -1.0 * (*_mdot_soln)(node_in);
           LibmeshPetscCall(MatSetValues(
               _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
         }
+
+        PetscInt row_at = i_ch + _n_channels * iz_ind;
+        PetscInt col_at = i_ch + _n_channels * iz_ind;
+        PetscScalar value_at = (*_mdot_soln)(node_out);
+        LibmeshPetscCall(MatSetValues(
+            _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES));
 
         // Axial heat conduction
         auto * node_center = _subchannel_mesh.getChannelNode(i_ch, iz);
@@ -920,23 +892,15 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           auto base_value = harm_A * shape_factor * Sij / dist_ij;
           auto neg_base_value = -1.0 * base_value;
 
-          row_ct = ii_ch + _n_channels * iz_ind;
-          col_ct = ii_ch + _n_channels * iz_ind;
+          // Each gap is visited once from each of its two channels, so only the row of the
+          // current channel is written here
+          const auto other_ch = (i_ch == ii_ch) ? jj_ch : ii_ch;
+          row_ct = i_ch + _n_channels * iz_ind;
+          col_ct = i_ch + _n_channels * iz_ind;
           LibmeshPetscCall(MatSetValues(
               _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &base_value, ADD_VALUES));
 
-          row_ct = jj_ch + _n_channels * iz_ind;
-          col_ct = jj_ch + _n_channels * iz_ind;
-          LibmeshPetscCall(MatSetValues(
-              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &base_value, ADD_VALUES));
-
-          row_ct = ii_ch + _n_channels * iz_ind;
-          col_ct = jj_ch + _n_channels * iz_ind;
-          LibmeshPetscCall(MatSetValues(
-              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &neg_base_value, ADD_VALUES));
-
-          row_ct = jj_ch + _n_channels * iz_ind;
-          col_ct = ii_ch + _n_channels * iz_ind;
+          col_ct = other_ch + _n_channels * iz_ind;
           LibmeshPetscCall(MatSetValues(
               _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &neg_base_value, ADD_VALUES));
           counter++;
@@ -1007,26 +971,33 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           auto sweep_hout = (*_h_soln)(node_in);
           sweep_enthalpy = (wsweep_in * sweep_hin - wsweep_out * sweep_hout);
 
+          // Sweep flow acts over the cell, so the enthalpies are interpolated to the cell center
+          PetscInt row_sh = i_ch + _n_channels * iz_ind;
           if (iz == first_node)
           {
-            PetscInt row_sh = i_ch + _n_channels * iz_ind;
-            PetscScalar value_hs = -sweep_enthalpy;
+            PetscScalar value_hs = alpha * sweep_enthalpy;
             LibmeshPetscCall(
                 VecSetValues(_hc_sweep_enthalpy_rhs, 1, &row_sh, &value_hs, ADD_VALUES));
           }
           else
           {
-            // coefficient of sweep_hin
-            PetscInt row_sh = i_ch + _n_channels * (iz_ind - 1);
             PetscInt col_sh = i_ch + _n_channels * (iz_ind - 1);
+            PetscScalar value_sh = alpha * wsweep_out;
             LibmeshPetscCall(MatSetValues(
-                _hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh, &wsweep_out, ADD_VALUES));
-            PetscInt col_sh_l = sweep_donor + _n_channels * (iz_ind - 1);
-            PetscScalar neg_sweep_in = -1.0 * wsweep_in;
-            // coefficient of sweep_hout
+                _hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh, &value_sh, ADD_VALUES));
+            col_sh = sweep_donor + _n_channels * (iz_ind - 1);
+            value_sh = -alpha * wsweep_in;
             LibmeshPetscCall(MatSetValues(
-                _hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh_l, &(neg_sweep_in), ADD_VALUES));
+                _hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh, &value_sh, ADD_VALUES));
           }
+          PetscInt col_sh = i_ch + _n_channels * iz_ind;
+          PetscScalar value_sh = (1.0 - alpha) * wsweep_out;
+          LibmeshPetscCall(
+              MatSetValues(_hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh, &value_sh, ADD_VALUES));
+          col_sh = sweep_donor + _n_channels * iz_ind;
+          value_sh = -(1.0 - alpha) * wsweep_in;
+          LibmeshPetscCall(
+              MatSetValues(_hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh, &value_sh, ADD_VALUES));
         }
 
         // Add heat enthalpy from pin and/or duct
