@@ -7,6 +7,6 @@
     input = 'coef_vector_time_derivative_diffusion.i'
     exodiff = 'coef_vector_time_derivative_diffusion_out.e'
 
-    requirement = 'The system shall support scaling the computed time derivative by a vector coefficient.'
+    requirement = 'The system shall support scaling the computed vector time derivative by a scalar coefficient.'
   [../]
 []

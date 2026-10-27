@@ -2,7 +2,7 @@
 
 ## Description
 
-The `CoefVectorTimeDerivative` kernel implements the time derivative term multiplied by a vector coefficient.
+The `CoefVectorTimeDerivative` kernel implements the vector time derivative term multiplied by a coefficient.
 
 This class inherits from the `VectorTimeDerivative` class.
 
