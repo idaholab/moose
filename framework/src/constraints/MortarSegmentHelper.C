@@ -156,6 +156,12 @@ performLocalDelaunayFlips(const std::vector<Point> & poly_nodes,
                           const std::set<std::array<unsigned int, 2>> & constrained_edges,
                           std::vector<std::array<unsigned int, 3>> & triangles)
 {
+  // A flip only happens when it lowers the triangulation on the paraboloid lifting of the nodes,
+  // so an edge that is flipped away never comes back, and there are at most n (n - 1) / 2 flips
+  // for n nodes
+  const auto max_flips = poly_nodes.size() * (poly_nodes.size() - 1) / 2;
+  std::size_t n_flips = 0;
+
   bool flipped = true;
   while (flipped)
   {
@@ -215,6 +221,12 @@ performLocalDelaunayFlips(const std::vector<Point> & poly_nodes,
           makeCCWTriangleHelper(poly_nodes, first_opposite, second_opposite, b);
       triangles[second_tri_index] =
           makeCCWTriangleHelper(poly_nodes, second_opposite, first_opposite, a);
+      if (++n_flips > max_flips)
+        mooseError("The local Delaunay flips of a ",
+                   poly_nodes.size(),
+                   "-node mortar segment polygon did not terminate after ",
+                   max_flips,
+                   " flips.");
       flipped = true;
       break;
     }
