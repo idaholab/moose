@@ -27,15 +27,32 @@ Basically, it is safe to assume that any dynamically-allocated data on CPU canno
 Therefore, we provide alternative data containers to be used on GPU: `Moose::Kokkos::Array`, `Moose::Kokkos::JaggedArray`, and `Moose::Kokkos::Map`.
 
 `Moose::Kokkos::Array` is a template class designed to hold arbitrary type of data.
-It receives up to four template arguments: data type, dimension, index type, and layout type.
-It supports multi-dimensional indexing.
-The dimension can either be specified through the second template argument with the default being one-dimension or using type aliases: for instance, a three-dimensional array of type `double` can be declared either by `Array<double, 3>` or `Array3D<double>`.
+It is declared as follows, along with the type aliases for each dimension:
+
+```cpp
+template <typename T,
+          unsigned int dimension = 1,
+          typename index_type = MOOSE_KOKKOS_INDEX_TYPE,
+          LayoutType layout = LayoutType::LEFT>
+class Array;
+
+template <typename T, typename index_type = MOOSE_KOKKOS_INDEX_TYPE>
+using Array1D = Array<T, 1, index_type, LayoutType::LEFT>;
+template <typename T,
+          typename index_type = MOOSE_KOKKOS_INDEX_TYPE,
+          LayoutType layout = LayoutType::LEFT>
+using Array2D = Array<T, 2, index_type, layout>;
+// Array3D, Array4D, and Array5D are defined likewise
+```
+
+`T` is the data type, `dimension` is the number of dimensions, `index_type` is the unsigned integer type used for indexing, and `layout` is the memory layout.
+`MOOSE_KOKKOS_INDEX_TYPE` is a macro holding the default index type of Kokkos-MOOSE containers and thread indices.
+It is set at configure time to `uint32_t` by default or to `uint64_t` when MOOSE is configured with `--with-kokkos-index-size=8`.
+For instance, a three-dimensional array of type `double` with default index type and layout can be declared either by `Array<double, 3>` or `Array3D<double>`.
 The entries of an array can be accessed with either `operator()` with multi-dimensional indices or `operator[]` with a flattened, dimensionless index, where the flattening follows a layout in which the innermost dimension varies the fastest.
 They automatically return either CPU or GPU data depending on where they are being accessed.
-The index type template argument is set to a 4-byte unsigned integer by default.
-If your array requires an 8-byte index, configure MOOSE with `--with-kokkos-index-size=8`.
-You can also explicitly set the index type through the third template argument for individual arrays.
-If having the outermost dimension run the fastest is desired for multi-dimensional arrays, the fourth layout template argument can be optionally set to `Moose::Kokkos::LayoutType::RIGHT` (default is `LEFT`).
+If having the outermost dimension run the fastest is desired for multi-dimensional arrays, the layout template argument can be optionally set to `LayoutType::RIGHT`.
+
 Arrays can be allocated through the following APIs: `create()`, `createHost()`, and `createDevice()`.
 `create()` allocates memories on both CPU and GPU, while `createHost()` or `createDevice()` only allocates memory on either CPU or GPU.
 It is important to note that if the creation APIs are called for an initialized array, the original array will be destroyed and a new array will be created.
@@ -141,8 +158,20 @@ Therefore, `Moose::Kokkos::JaggedArray` stores the data of a jagged array sequen
 It is divided into inner and outer arrays.
 The outer array is the regular part of a jagged array.
 Each entry of the outer array is the inner array, whose size can vary with each other.
-As a result, it is defined with up to five template arguments: the data type, inner array dimension size, outer array dimension size, outer array index type (defaults to 8-byte integer; inner arrays always use 4-byte integer), and inner array layout type (defaults to `Moose::Kokkos::LayoutType::LEFT`).
-However, it is not possible to have inner arrays with different dimensions in a single jagged array.
+As a result, it is declared as follows:
+
+```cpp
+template <typename T,
+          unsigned int inner,
+          unsigned int outer,
+          typename index_type = MOOSE_KOKKOS_INDEX_TYPE,
+          LayoutType layout = LayoutType::LEFT>
+class JaggedArray;
+```
+
+`T` is the data type, `inner` and `outer` are the numbers of dimensions of the inner and outer arrays, `index_type` is the index type of the outer array and of the sequential data storage, and `layout` is the memory layout of the inner arrays.
+Inner arrays are always indexed with `unsigned int`, so each inner array is limited to a 4-byte index range.
+It is not possible to have inner arrays with different dimensions in a single jagged array.
 
 The accessors of a jagged array, `operator()` (dimensional) or `operator[]` (dimensionless), receive the indices for the outer array.
 They return a temporary object that wraps the inner array at the given index, which provides its own accessors that work with the local indices for the inner array.
@@ -162,20 +191,20 @@ array.create(n1, n2);
 
 for (unsigned int i = 0; i < n1; ++i)
   for (unsigned int j = 0; j < n2; ++j)
-    array.reserve({n1, n2}, {nx[i], ny[j]});
+    array.reserve({i, j}, {nx[i], ny[j]});
 
-data.finalize();
+array.finalize();
 
 for (unsigned int i = 0; i < n1; ++i)
   for (unsigned int j = 0; j < n2; ++j)
   {
     auto inner = array(i, j);
     for (unsigned int x = 0; x < nx[i]; ++x)
-      for (unsigned int y = 0; y < ny[j]; ++j)
+      for (unsigned int y = 0; y < ny[j]; ++y)
         inner(x, y) = ... // Populating data
   }
 
-data.copyToDevice();
+array.copyToDevice();
 ```
 
 !listing framework/include/kokkos/base/KokkosJaggedArray.h
@@ -183,13 +212,24 @@ data.copyToDevice();
          caption=The `Moose::Kokkos::JaggedArray` source code.
 
 `Moose::Kokkos::Map` is designed to be used for certain classes of data whose index-based storage using `Moose::Kokkos::Array` is difficult.
-It contains a CPU `std::map` and two GPU arrays for storing the keys and values, along with an offset array to store the starting location of each bucket.
-It uses the 32-bit FNV-1a hash algorithm on GPU to implement a hash table.
+It is declared as follows, along with `Moose::Kokkos::UnorderedMap` which uses `std::unordered_map` instead of `std::map` on CPU:
+
+```cpp
+template <typename T1, typename T2, typename index_type = MOOSE_KOKKOS_INDEX_TYPE>
+class Map;
+
+template <typename T1, typename T2, typename index_type = MOOSE_KOKKOS_INDEX_TYPE>
+class UnorderedMap;
+```
+
+`T1` is the key type, `T2` is the value type, and `index_type` is the index type of the GPU arrays and of the indices returned by `find()`.
+It contains a CPU map and two GPU arrays for storing the keys and values, along with an offset array to store the starting location of each bucket.
+Regardless of the CPU map type, the GPU map is implemented with a hash table using the 32-bit FNV-1a hash algorithm.
 The map can only be populated on CPU, and upon calling `copyToDevice()`, the corresponding hash table is created on GPU.
 It also provides `copyToDeviceNested()` for convenience in case the values are of type `Moose::Kokkos::Array`, which calls `copyToDeviceNested()` for each array entry.
 
 The key/value lookup on GPU is index-based.
-`find()` returns the index of the value corresponding to the key or `Moose::Kokkos::Map::invalid_id` if the key does not exist.
+`find()` returns the index of the value corresponding to the key or `Moose::Kokkos::Map::invalid_id`, the maximum value of `index_type`, if the key does not exist.
 If the index is valid, you can get the value by using the index with `value()`.
 If you know in advance that a key always exists, you can simply call `operator[]` without going through those steps.
 However, if `operator[]` is called for a key that does not exist, the calculation will crash.
@@ -401,7 +441,7 @@ Unlike in dynamic polymorphism where inconsistent overriding can be detected dur
 In the CRTP, the base class calls the derived class method by casting `this` pointer to the derived class type and explicitly calling the method.
 As the result, the method being called should be public, which is different from the common practice of encapsulation.
 
-- Complexity of Multiple Inheritance
+- Complexity of Multilevel Inheritance
 
 When there are multiple levels of inheritance, all the intermediate classes should be template classes as well.
 Because the class type of the final derived class should be seen by the base class through the template argument, the intermediate classes should relay the class type to the base class.
