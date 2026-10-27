@@ -41,7 +41,8 @@ In file b: The values in column "x" don't match at row 0.
 ## Extended Usage
 
 The CSVDiff tool can be used to test specific fields with specific error tolerances. It can also be made to detect when not to perform a differentiation
-if the value being tested is below a certain threshold (floor, or zero). These features can be used as direct arguments to csvdiff, or through the use
+if both values being compared are within a certain threshold (floor, or zero), as in exodiff. If only one of the values is within the threshold, the values are compared as they are.
+The criteria are given as equations in the [CSVDiff tester](CSVDiff_tester.md#comparison) documentation. These features can be used as direct arguments to csvdiff, or through the use
 of a comparison file.
 
 ## Syntax

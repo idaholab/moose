@@ -19,6 +19,15 @@ Test configuration options are added to the `tests` file.
 
 Other test commands & restrictions may be found in the [TestHarness documentation](TestHarness.md).
 
+## Comparison criteria id=comparison
+
+`XMLDiff` compares the parsed elements and attributes of the two files, so their structure must
+match. Because the contents of an `XML` file are text, every value that parses as a number is
+compared with the tolerances `abs_zero` and `rel_err`, including each entry of a
+space-separated list of numbers. All other text must match exactly. The tolerance equations are
+the same as for `JSONDiff`, see [JSONDiff](JSONDiff.md#comparison): the relative difference is
+normalized by the test value, and a pair is skipped if both values are below `abs_zero`.
+
 ## Example test configuration in the MOOSE test suite
 
 In this example, the `XMLDiff` tester is used to check the `XML` output of two `VectorPostprocessors`.
