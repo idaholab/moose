@@ -3,6 +3,18 @@
 !style! halign=left
 Upcoming MOOSE related training in chronological order:
 
+- MOOSE-based Microreactor and MSR Simulation Training (2027 January 5-6, Washington DC Area)
+
+- [MOOSE Framework User training (2027 January 26-27, Massachusetts Institute of Technology)](https://github.com/idaholab/moose/discussions/34121)
+
+- [BISON](https://mooseframework.inl.gov/bison) [Fuels Performance (2027 January 28-29, Massachusetts Institute of Technology)](https://github.com/idaholab/moose/discussions/34121)
+
+- [MOOSE Introductory training during M&C 2027](https://www.ans.org/meetings/mc2027/) (2027 April 18, Columbus OH)
+
+- [Griffin Workshop during M&C 2027](https://www.ans.org/meetings/mc2027/) (2027 April 18, Columbus OH)
+
+- MOOSE Framework Fundamentals (2027 June TBD, Idaho Falls)
+
 !style-end!
 
 !!!
