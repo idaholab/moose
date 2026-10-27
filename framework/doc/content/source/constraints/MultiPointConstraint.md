@@ -6,9 +6,10 @@ that assembles neither a residual nor a Jacobian. Instead it adds exact constrai
 the nonlinear system, and libMesh applies those exact constraints to everything MOOSE assembles.
 
 This class is not registered, so it does not appear in an input file. The objects built on it are
-[RBE2Constraint](source/constraints/RBE2Constraint.md optional=True) and
-[RBE3Constraint](source/constraints/RBE3Constraint.md optional=True), both in the Solid Mechanics
-module.
+[RBE2Constraint](source/constraints/RBE2Constraint.md optional=True),
+[RBE3Constraint](source/constraints/RBE3Constraint.md optional=True) and
+[InclinedNoDisplacementConstraint](source/constraints/InclinedNoDisplacementConstraint.md optional=True),
+all three in the Solid Mechanics module.
 
 ## Exact constraints
 
