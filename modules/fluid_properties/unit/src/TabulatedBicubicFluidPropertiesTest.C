@@ -10,6 +10,7 @@
 #include "TabulatedBicubicFluidPropertiesTest.h"
 #include "SinglePhaseFluidPropertiesTestUtils.h"
 #include "SinglePhaseFluidProperties.h"
+#include "CheckNaNsTabulatedFluidProperties.h"
 
 #include <fstream>
 
@@ -222,6 +223,16 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromPTFileToVE)
     Real s1 = _tab_ve_from_pT->s_from_p_T(p, T);
     Real s2 = _tab_ve_from_pT->s_from_v_e(v, e);
     REL_TEST(s1, s2, 0.001);
+
+    // Gibbs free energy from the (p, T) from (v, e) interpolations
+    REL_TEST(_tab_ve_from_pT->g_from_v_e(v, e), h1 - T * s1, 0.001);
+
+    // entropy derivatives from the (p, T) from (v, e) interpolations: de = T ds - p dv
+    Real s3, ds_dv, ds_de;
+    _tab_ve_from_pT->s_from_v_e(v, e, s3, ds_dv, ds_de);
+    REL_TEST(s3, s2, REL_TOL_CONSISTENCY);
+    REL_TEST(ds_de, 1.0 / T, 0.01);
+    REL_TEST(ds_dv, p / T, 0.01);
   }
 
   // check computation of fluid props from p, s
@@ -831,6 +842,8 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromVEGeneratedFromFP)
     _tab_ve_from_fp->T_from_p_rho(p, rho, T, dT_dp, dT_drho);
     REL_TEST(T_ad.derivatives()[0], dT_dp, 0.0001);
     REL_TEST(T_ad.derivatives()[1], dT_drho, 0.0001);
+    // The AD and non-AD overloads must use the same (v, e) tabulation
+    REL_TEST(T_ad.value(), _tab_ve_from_fp->T_from_p_rho(p, rho), REL_TOL_CONSISTENCY);
   }
 
   // AD e_from_p_T
@@ -924,6 +937,16 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, derivatives)
 
     DERIV_TEST(_tab_ve_from_pT->T_from_p_s, p, s, tol);
     DERIV_TEST(_tab_ve_from_pT->rho_from_p_s, p, s, tol);
+
+    // The temperature derivatives must not rely on relative perturbations of the arguments,
+    // which vanish at zero entropy: (dT/ds)_p = T / cp. The CO2 entropy reference puts s = 0
+    // within the range of the tabulation generated from CO2FluidProperties.
+    {
+      const Real s0 = 0.0;
+      Real T0, dT_dp, dT_ds;
+      _tab_pT_from_fp->T_from_p_s(p, s0, T0, dT_dp, dT_ds);
+      REL_TEST(dT_ds, T0 / _tab_pT_from_fp->cp_from_p_T(p, T0), 1e-3);
+    }
   }
 
   {
@@ -1167,4 +1190,63 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, combined)
   ABS_TEST(e, e2, tol);
   ABS_TEST(de_dp, de2_dp, tol);
   ABS_TEST(de_dT, de2_dT, tol);
+}
+
+/**
+ * Verify the Gibbs free energy of a (v, e) tabulation that does not interpolate temperature
+ * but does construct (p, T) from (v, e)
+ */
+TEST_F(TabulatedBicubicFluidPropertiesTest, gibbsWithoutTemperatureColumn)
+{
+  InputParameters params = _factory.getValidParams("TabulatedBicubicFluidProperties");
+  params.set<UserObjectName>("input_fp") = "idg_fp";
+  params.set<MooseEnum>("out_of_bounds_behavior") = "set_to_closest_bound";
+  params.set<bool>("create_pT_interpolations") = false;
+  params.set<bool>("create_ve_interpolations") = true;
+  params.set<bool>("construct_pT_from_ve") = true;
+  params.set<Real>("temperature_min") = 400;
+  params.set<Real>("temperature_max") = 500;
+  params.set<Real>("pressure_min") = 1e6;
+  params.set<Real>("pressure_max") = 2e6;
+  params.set<Real>("T_initial_guess") = 450;
+  params.set<Real>("p_initial_guess") = 1.5e6;
+  MultiMooseEnum properties("density enthalpy viscosity k c cv cp entropy pressure temperature",
+                            "density enthalpy entropy");
+  params.set<MultiMooseEnum>("interpolated_properties") = properties;
+  _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "tab_ve_no_T", params);
+  auto & fp = _fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_ve_no_T");
+  Moose::_throw_on_warning = false;
+  fp.initialSetup();
+  Moose::_throw_on_warning = true;
+
+  const Real p = 1.5e6;
+  const Real T = 450.0;
+  const Real v = _idg_fp->v_from_p_T(p, T);
+  const Real e = _idg_fp->e_from_p_T(p, T);
+  REL_TEST(fp.g_from_v_e(v, e), _idg_fp->g_from_v_e(v, e), 1e-3);
+}
+
+/**
+ * Verify that NaNs from the (p, T) from (v, e) inversion are replaced by a bound for every
+ * specific volume, including the midpoint of the specific volume range
+ */
+TEST_F(TabulatedBicubicFluidPropertiesTest, checkNaNsMidpoint)
+{
+  InputParameters params = _factory.getValidParams("CheckNaNsTabulatedFluidProperties");
+  params.set<UserObjectName>("input_fp") = "idg_fp";
+  _fe_problem->addUserObject("CheckNaNsTabulatedFluidProperties", "check_nans_fp", params);
+  auto & fp = _fe_problem->getUserObject<CheckNaNsTabulatedFluidProperties>("check_nans_fp");
+  fp.setSpecificVolumeGrid({1.0, 2.0, 3.0});
+
+  for (const auto i : make_range(3u))
+  {
+    Real p = std::numeric_limits<Real>::quiet_NaN();
+    Real T = std::numeric_limits<Real>::quiet_NaN();
+    unsigned int num_nans_p = 0, num_nans_T = 0;
+    fp.checkNaNs(1e5, 1e6, 300, 500, i, p, T, num_nans_p, num_nans_T);
+    EXPECT_FALSE(std::isnan(p));
+    EXPECT_FALSE(std::isnan(T));
+    EXPECT_EQ(num_nans_p, 1u);
+    EXPECT_EQ(num_nans_T, 1u);
+  }
 }
