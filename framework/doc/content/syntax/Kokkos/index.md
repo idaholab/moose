@@ -224,7 +224,7 @@ class UnorderedMap;
 
 `T1` is the key type, `T2` is the value type, and `index_type` is the index type of the GPU arrays and of the indices returned by `find()`.
 It contains a CPU map and two GPU arrays for storing the keys and values, along with an offset array to store the starting location of each bucket.
-Regardless of the CPU map type, the GPU map is implemented with a hash table using the 32-bit FNV-1a hash algorithm.
+Regardless of the CPU map type, the GPU map is implemented with a hash table using the 32-bit MurmurHash3 algorithm provided by Kokkos (`Kokkos::pod_hash`).
 The map can only be populated on CPU, and upon calling `copyToDevice()`, the corresponding hash table is created on GPU.
 It also provides `copyToDeviceNested()` for convenience in case the values are of type `Moose::Kokkos::Array`, which calls `copyToDeviceNested()` for each array entry.
 
@@ -239,7 +239,7 @@ However, if `operator[]` is called for a key that does not exist, the calculatio
          caption=The `Moose::Kokkos::Map` source code.
 
 !alert note
-If you need to use keys of a custom data type, a specialization of the template function `Moose::Kokkos::fnv1aHash` should be provided for the custom type.
+Keys are hashed by their object byte representation, so a key of a custom data type with padding bytes should have an overload of `Moose::Kokkos::hashKey` that hashes its members individually.
 
 !alert note
 `Moose::Kokkos::Map` has not been optimized for performance.

@@ -9,6 +9,10 @@
 
 #pragma once
 
+#ifdef MOOSE_KOKKOS_SCOPE
+#include "Kokkos_Functional.hpp"
+#endif
+
 #include "KokkosArray.h"
 
 #include <memory>
@@ -19,39 +23,31 @@ namespace Moose::Kokkos
 {
 
 #ifdef MOOSE_KOKKOS_SCOPE
-constexpr uint32_t FNV_PRIME = 0x01000193;        // 16777619
-constexpr uint32_t FNV_OFFSET_BASIS = 0x811C9DC5; // 2166136261
-
+/**
+ * Hash a key for the device hash table using the MurmurHash3 implementation of Kokkos, which
+ * hashes the object representation of the key
+ * @param key The key
+ * @param seed The hash seed
+ * @returns The 32-bit hash
+ */
 template <typename T>
 KOKKOS_FUNCTION uint32_t
-fnv1aHash(const T & key, uint32_t hash)
+hashKey(const T & key, uint32_t seed = 0)
 {
-  auto bytes = reinterpret_cast<const uint8_t *>(&key);
-
-  for (size_t i = 0; i < sizeof(T); ++i)
-  {
-    hash ^= bytes[i];
-    hash *= FNV_PRIME;
-  }
-
-  return hash;
-}
-
-template <typename T>
-KOKKOS_FUNCTION uint32_t
-fnv1aHash(const T & key)
-{
-  return fnv1aHash(key, FNV_OFFSET_BASIS);
+  return ::Kokkos::pod_hash<T>()(key, seed);
 }
 
 template <typename T1, typename T2>
 struct Pair;
 
+/**
+ * Hash a pair member by member so that padding bytes between the members do not contribute
+ */
 template <typename T1, typename T2>
 KOKKOS_FUNCTION uint32_t
-fnv1aHash(const Pair<T1, T2> & key)
+hashKey(const Pair<T1, T2> & key, uint32_t seed = 0)
 {
-  return fnv1aHash(key.second, fnv1aHash(key.first));
+  return hashKey(key.second, hashKey(key.first, seed));
 }
 #endif
 
@@ -267,7 +263,7 @@ MapBase<T1, T2, index_type, MapType>::copy()
 
   for (const auto & [key, value] : get())
   {
-    auto bucket = fnv1aHash(key) % size();
+    auto bucket = hashKey(key) % size();
 
     _offset[bucket]++;
   }
@@ -280,7 +276,7 @@ MapBase<T1, T2, index_type, MapType>::copy()
 
   for (const auto & [key, value] : get())
   {
-    auto bucket = fnv1aHash(key) % size();
+    auto bucket = hashKey(key) % size();
 
     _keys[_offset[bucket] + idx[bucket]] = key;
     _values[_offset[bucket] + idx[bucket]] = value;
@@ -325,7 +321,7 @@ MapBase<T1, T2, index_type, MapType>::find(const T1 & key) const
   if (!size())
     return invalid_id;
 
-  auto bucket = fnv1aHash(key) % size();
+  auto bucket = hashKey(key) % size();
   auto begin = _offset[bucket];
   auto end = _offset[bucket + 1];
 
