@@ -44,10 +44,11 @@ It was adapted from `Numerical Recipes in C++`.
 
 More information may be found [here](https://en.wikipedia.org/wiki/Brent%27s_method).
 
-## NASA 7-coefficient polynomials
+## NASA 7-coefficient polynomials id=nasa7-polynomials
 
-The `NASA7` utilities evaluate the standard-state thermodynamic properties of ideal-gas species
-from NASA 7-coefficient polynomials [!citep](mcbride1993). Each species has two sets of
+The `NASA7` utilities, as used in [NASA7IdealGasFluidProperties.md], evaluate the standard-state
+thermodynamic properties of ideal-gas species from NASA 7-coefficient polynomials
+[!citep](mcbride1993). Each species has two sets of
 coefficients $a_0, \ldots, a_6$, one for temperatures $T \le T_\text{mid}$ and one for
 $T > T_\text{mid}$:
 

@@ -8,7 +8,7 @@ species. The species is selected with [!param](/FluidProperties/NASA7IdealGasFlu
 H$_2$, O$_2$, H$_2$O, CH$_4$, CO, CO$_2$, or N$_2$. The data are those of GRI-Mech 3.0
 [!citep](smith_grimech30) as distributed with Cantera 3.2.0 [!citep](cantera320); the polynomials,
 the data, and their temperature ranges are described with the
-[NASA 7-coefficient polynomial utilities](utils/FluidPropertiesUtils.md).
+[NASA 7-coefficient polynomial utilities](utils/FluidPropertiesUtils.md#nasa7-polynomials).
 
 ```
 [FluidProperties]
@@ -45,9 +45,7 @@ $\gamma = c_p / c_v$, and the sound speed is $c = \sqrt{\gamma R_s T}$.
 
 The enthalpy includes the enthalpy of formation of the species, and the entropy is the absolute
 entropy. The enthalpies of different species therefore share a common reference, so a mixture
-energy balance accounts for the heat of reaction when the composition changes by reaction. This
-differs from [IdealGasFluidProperties.md], whose internal energy is $c_v T$ plus a user-supplied
-reference value.
+energy balance accounts for the heat of reaction when the composition changes by reaction.
 
 The derivatives of the properties are computed by forward-mode automatic differentiation of the
 expressions above, so they are exact.
@@ -58,6 +56,21 @@ pressure from enthalpy and entropy and the internal energy from pressure and den
 specific volume and enthalpy. It does not provide viscosity or thermal conductivity, so it cannot
 yet be used in flow models that need them, such as the gas-mixture flow channels of the thermal
 hydraulics module. Mixtures of these gases are described by [IdealGasMixtureFluidProperties.md].
+
+## Comparison with IdealGasFluidProperties
+
+Both classes describe ideal gases, but they differ as follows:
+
+| | [IdealGasFluidProperties.md] | NASA7IdealGasFluidProperties |
+| :- | :- | :- |
+| Gas | Any gas, given by its ratio of specific heats and molar mass | One of the built-in species |
+| Specific heats | Constant | Functions of temperature |
+| Internal energy | $c_v T$ plus a user-supplied reference value | Includes the enthalpy of formation |
+| Entropy | Relative to an arbitrary reference | Absolute |
+| Temperature from internal energy or enthalpy | Explicit | Newton iteration |
+| Temperature range | Unlimited | That of the data, with a solution warning outside it |
+| Viscosity and thermal conductivity | Constant, user-supplied | Not provided |
+| Density from pressure and entropy, critical-point properties | Provided | Not provided |
 
 ## Temperature from internal energy or enthalpy
 

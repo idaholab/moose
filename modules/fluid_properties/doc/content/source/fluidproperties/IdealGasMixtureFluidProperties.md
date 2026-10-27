@@ -1,8 +1,7 @@
 # IdealGasMixtureFluidProperties
 
 This is a [VaporMixtureFluidProperties.md] where each of the components are assumed to be ideal gases,
-either with constant specific heats (see [IdealGasFluidProperties.md]) or with specific heats from
-NASA 7-coefficient polynomials (see [NASA7IdealGasFluidProperties.md]).
+such as [IdealGasFluidProperties.md] or [NASA7IdealGasFluidProperties.md].
 
 !alert note
 The internal energies of these two kinds of components have different references: that of
