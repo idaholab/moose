@@ -13,6 +13,7 @@
 #include "MortarUtils.h"
 #include "MooseUtils.h"
 #include "MortarContactUtils.h"
+#include "MortarNodalFrames.h"
 #include "AutomaticMortarGeneration.h"
 #include "ADUtils.h"
 
@@ -129,19 +130,8 @@ WeightedGapUserObject::initialSetup()
                "Nodal-normal derivatives require normalized secondary nodal normals and cannot be "
                "combined with quadrature-point normal interpolation.");
 
-  const std::array<std::pair<const MooseVariable *, const char *>, 3> displacement_variables{
-      {{_disp_x_var, "disp_x"}, {_disp_y_var, "disp_y"}, {_disp_z_var, "disp_z"}}};
-  for (const auto & [variable, parameter_name] : displacement_variables)
-    if (variable)
-    {
-      if (!variable->isNodal())
-        paramError(parameter_name,
-                   "Nodal-normal derivatives require a nodal displacement variable.");
-      if (&variable->sys() != &_sys)
-        paramError(parameter_name,
-                   "Nodal-normal derivatives require displacement variables in the nonlinear "
-                   "system assembled by this contact object.");
-    }
+  Moose::Mortar::checkNodalNormalDisplacements(
+      *this, {{_disp_x_var, _disp_y_var, _disp_z_var}}, _sys);
 }
 
 void
@@ -246,24 +236,7 @@ WeightedGapUserObject::nodalCoordinate(const Node & node) const
               "derivatives.");
   mooseAssert(Moose::doDerivatives(_subproblem, _sys),
               "AD nodal coordinates require derivative recording.");
-  ADPoint point = node;
-
-  const std::array<std::pair<const MooseVariable *, unsigned int>, 3> displacement_variables{
-      {{_disp_x_var, 0}, {_disp_y_var, 1}, {_disp_z_var, 2}}};
-  for (const auto & [variable, component] : displacement_variables)
-    if (variable)
-    {
-      const auto sys_num = variable->sys().number();
-      const auto var_num = variable->number();
-      // Enriched elements can have mapping nodes without independent displacement degrees of
-      // freedom. Their positions enter the geometric map, but they contribute no independent
-      // displacement derivative.
-      if (node.n_dofs(sys_num, var_num))
-        Moose::derivInsert(
-            point(component).derivatives(), node.dof_number(sys_num, var_num, 0), 1.0);
-    }
-
-  return point;
+  return Moose::Mortar::nodalCoordinate(node, {{_disp_x_var, _disp_y_var, _disp_z_var}});
 }
 
 void

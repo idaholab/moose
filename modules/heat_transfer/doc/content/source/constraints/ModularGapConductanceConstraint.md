@@ -12,6 +12,11 @@ gap.  The flux is computed by user objects derived from `GapFluxModelBase`. Such
 
 Multiple models can be specified with their contributions getting summed up.
 
+On a displaced mesh, the gap width passed to the models is the projection of the
+primary-secondary point difference onto the secondary normal, interpolated from the nodal normals.
+When the displacements are nodal variables of the same nonlinear system, the Jacobian includes
+the displacement derivatives of those nodal normals.
+
 ## Gap geometry types
 
 Plate, cylindrical, and spherical gap geometries can be specified using the [!param](/Constraints/ModularGapConductanceConstraint/gap_geometry_type) parameter.

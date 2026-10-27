@@ -132,19 +132,22 @@ ComputeFrictionalForceCartesianLMMechanicalContact::computeQpIProperties()
 {
   ComputeWeightedGapCartesianLMMechanicalContact::computeQpIProperties();
 
-  const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
+  const auto & nodal_tangents = _nodal_frames.tangents(amg(),
+                                                       _lower_secondary_elem->node_ref(_i),
+                                                       _normals[_i],
+                                                       Moose::doDerivatives(_subproblem, _sys));
   // Get the _dof_to_weighted_tangential_velocity map
   const DofObject * const dof =
       _lm_vars[0]->isNodal() ? cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                              : cast_ptr<const DofObject *>(_lower_secondary_elem);
 
   _dof_to_weighted_tangential_velocity[dof][0] +=
-      _test[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[0][_i];
+      _test[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[0];
 
   // Get the _dof_to_weighted_tangential_velocity map for a second direction
   if (_has_disp_z)
     _dof_to_weighted_tangential_velocity[dof][1] +=
-        _test[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[1][_i];
+        _test[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[1];
 }
 
 void
@@ -311,8 +314,8 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
   // Intially, use the current normal vector
   if (_dof_to_old_normal_vector[dof].norm() < TOLERANCE)
   {
-    ny = _dof_to_normal_vector[dof](1);
-    nz = _dof_to_normal_vector[dof](2);
+    ny = MetaPhysicL::raw_value(_dof_to_normal_vector[dof](1));
+    nz = MetaPhysicL::raw_value(_dof_to_normal_vector[dof](2));
   }
   else
   {
