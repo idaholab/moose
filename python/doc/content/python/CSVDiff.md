@@ -1,20 +1,23 @@
 # CSVDiff Tool
 
-The supplied CSVDiff tool (csvdiff.py) provides the TestHarness the capability to perform differentiations with comma separated value (CSV) files.
+The supplied CSVDiff tool (csvdiff) provides the TestHarness the capability to perform differentiations with comma separated value (CSV) files.
 
 ## Basic Usage
+
+A link to the script is located in the `scripts/` directory. The examples below assume you
+are located at the root directory of MOOSE; adjust the path according to your current directory.
 
 In its simplest behavior, performing a differentiation on two CSV files (a and b) requires the following syntax:
 
 ```
-csvdiff.py a b
+./scripts/csvdiff a b
 ```
 
 If the two files are the same, the program will state this and exit with return code 0. Example:
 
 ```
 > echo -e "x\n0" | tee a b
-> moose/scripts/csvdiff.py a b
+> ./scripts/csvdiff a b
 Files are the same
 
 > echo $?
@@ -27,7 +30,7 @@ If any differences are detected, the program will state this and exit with a non
 > echo -e "x\n0.000001" > a
 > echo -e "x\n0.000001000005501" > b
 
-> moose/scripts/csvdiff.py a b
+> ./scripts/csvdiff a b
 In file b: The values in column "x" don't match at row 0.
 	1.000e-06 vs. 1.000e-06: relative diff = 5.501e-06; absolute diff = 5.501e-12
 
@@ -38,7 +41,7 @@ In file b: The values in column "x" don't match at row 0.
 ## Extended Usage
 
 The CSVDiff tool can be used to test specific fields with specific error tolerances. It can also be made to detect when not to perform a differentiation
-if the value being tested is below a certain threshold (floor, or zero). These features can be used as direct arguments to csvdiff.py, or through the use
+if the value being tested is below a certain threshold (floor, or zero). These features can be used as direct arguments to csvdiff, or through the use
 of a comparison file.
 
 ## Syntax
@@ -46,13 +49,13 @@ of a comparison file.
 The basic usage is
 
 ```
-./csvdiff.py CSV_FILE1 CSV_FILE2 [additional arguments]
+./scripts/csvdiff CSV_FILE1 CSV_FILE2 [additional arguments]
 ```
 
 To see an up-to-date list of options, use the help option:
 
 ```
-./csvdiff.py -h
+./scripts/csvdiff -h
 ```
 
 ## Comparison File
@@ -60,12 +63,12 @@ To see an up-to-date list of options, use the help option:
 Using a comparison file is ideal when needing to adjust a complex set of fields and tolerances, which would make for a very long and confusing command line argument. The CSVDiff tool can generate this comparison
 file which, can be used to set the above arguments quickly.
 
-To generate a comparison file, run the CSVdiff tool with the appropriate `--summary csv_file` argument. In the following example, we use `echo` to create a simple csv file. We then instruct csvdiff.py to create
+To generate a comparison file, run the CSVdiff tool with the appropriate `--summary csv_file` argument. In the following example, we use `echo` to create a simple csv file. We then instruct csvdiff to create
 a comparison file from our csv file, and redirect the output to a file named `a.cmp`:
 
 ```
 > echo -e "x\n0" > a
-> moose/scripts/csvdiff.py --summary a > a.cmp
+> ./scripts/csvdiff --summary a > a.cmp
 > cat a.cmp
 TIME STEPS absolute 0.0 relative 1 floor 0  # min: 0 @ t0  max: 0 @ t0
 
@@ -126,10 +129,10 @@ y,z,x
 !alert note
 We purposely altered the field header to demonstrate CSVDiff's capability of correctly mapping the field labels between two files.
 
-If we run csvdiff.py on a and b, we see there is a small difference of 5.501e-06 for field 'y' at time step 1 (or simply put, row 1). Just a bit more than what our default global tolerance allows for:
+If we run csvdiff on a and b, we see there is a small difference of 5.501e-06 for field 'y' at time step 1 (or simply put, row 1). Just a bit more than what our default global tolerance allows for:
 
 ```
-> moose/scripts/csvdiff.py a b
+> ./scripts/csvdiff a b
 In file b: The values in column "y" don't match at row 1.
 	1.000e-06 vs. 1.000e-06: relative diff = 5.501e-06; absolute diff = 5.501e-12
 ```
@@ -137,7 +140,7 @@ In file b: The values in column "y" don't match at row 1.
 We can create a comparison file to set forth new tolerances which will allow the two files to be considered identical. Start off by creating a comparison file using file 'a':
 
 ```
-> moose/scripts/csvdiff.py --summary a > a.cmp
+> ./scripts/csvdiff --summary a > a.cmp
 ```
 
 The following example changes would allow both files to be considered identical:
@@ -188,7 +191,7 @@ GLOBAL VARIABLES absolute 0.0 relative 5.5e-06 floor 1e-10
 Any one of the above example comparison files, would allow a and b to be considered identical:
 
 ```
-> moose/scripts/csvdiff.py a b --comparison-file a.cmp
+> ./scripts/csvdiff a b --comparison-file a.cmp
 Files are the same
 ```
 
