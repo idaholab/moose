@@ -26,6 +26,20 @@ class TestHarnessTester(TestHarnessTestCase):
 
         self.checkStatus(result.harness, failed=1)
 
+    def testExceedsBothTolerances(self):
+        """
+        Verify the TestHarness will report a failure when a value exceeds both the relative and absolute tolerances
+        """
+        result = self.runTests("-i", "csvdiff_abs_tol_fail", exit_code=129)
+
+        out = result.output
+        self.assertRegex(
+            out,
+            r"test_harness\.test_csvdiff_abs_tol_fail.*?FAILED \(CSVDIFF\)",
+        )
+
+        self.checkStatus(result.harness, failed=1)
+
     def testCSVDiffScript(self):
         """
         Test features of the csvdiff.py script via the TestHarness specification test file.

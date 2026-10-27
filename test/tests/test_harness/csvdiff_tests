@@ -82,6 +82,44 @@
     requirement = 'The system shall allow the user to specify absolute tolerances for CSV file testing in the test specifications file.'
     issues = '#32561'
   []
+  # The next three tests give a single override_* list for val2. The global tolerances apply to
+  # val1 and to the tolerances the list leaves unset. csvdiff_abs_tol.i has val1 with an absolute
+  # error of 1e-11 and val2 with an absolute error of 1e-8 and relative error of ~0.0099, so a
+  # global abs_err of 1e-10 passes val1 and fails val2 until the override is applied. The tests
+  # share csvdiff_abs_tol_out.csv with the tests above, so they run in sequence.
+  [test_csvdiff_spec_override_abs_err_only]
+    type = CSVDiff
+    input = csvdiff_abs_tol.i
+    csvdiff = csvdiff_abs_tol_out.csv
+    abs_err = 1e-10
+    override_columns = 'val2'
+    override_abs_err = '1e-7' # above the val2 absolute error of 1e-8
+    requirement = 'The system shall allow the user to override only the absolute error tolerance of a CSV column in the test specifications file, using the global values for its other tolerances.'
+    issues = '#32561'
+    prereq = 'test_csvdiff_comparison_abs_tol'
+  []
+  [test_csvdiff_spec_override_rel_err_only]
+    type = CSVDiff
+    input = csvdiff_abs_tol.i
+    csvdiff = csvdiff_abs_tol_out.csv
+    abs_err = 1e-10
+    override_columns = 'val2'
+    override_rel_err = '1e-1' # above the val2 relative error of ~0.0099
+    requirement = 'The system shall allow the user to override only the relative error tolerance of a CSV column in the test specifications file, using the global values for its other tolerances.'
+    issues = '#32561'
+    prereq = 'test_csvdiff_spec_override_abs_err_only'
+  []
+  [test_csvdiff_spec_override_abs_zero_only]
+    type = CSVDiff
+    input = csvdiff_abs_tol.i
+    csvdiff = csvdiff_abs_tol_out.csv
+    abs_err = 1e-10
+    override_columns = 'val2'
+    override_abs_zero = '1e-5' # above both val2 values (1e-6 and 1.01e-6), so both are treated as zero
+    requirement = 'The system shall allow the user to override only the absolute zero tolerance of a CSV column in the test specifications file, using the global values for its other tolerances.'
+    issues = '#32561'
+    prereq = 'test_csvdiff_spec_override_rel_err_only'
+  []
   [test_csvdiff_spec_override_global_relative]
     type = CSVDiff
     input = csvdiff_spec_override_global_relative.i
