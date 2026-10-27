@@ -1,0 +1,8 @@
+[Tests]
+  [exodiff]
+    type = Exodiff
+    input = exodiff.i
+    # exodiff.i does not enable exodus output, so exodiff_out.e is never written
+    exodiff = exodiff_out.e
+  []
+[]
