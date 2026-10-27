@@ -39,6 +39,8 @@ ADDittusBoelterHTCFunctorMaterial::validParams()
       "Fluid temperature of the nominal outlet segment/component. Takes a scalar variable name");
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "The name of the user object for fluid properties");
+  params.addParam<UserObjectName>("reference_fp",
+                                  "Liquid-phase fluid properties; see momentum kernel.");
   params.addRequiredParam<MooseFunctorName>("reference_pressure", "System reference pressure [Pa]");
   params.addRequiredParam<MooseFunctorName>("flow_area",
                                             "Cross-sectional area of the fluid flow channel [m^2]");
@@ -52,6 +54,9 @@ ADDittusBoelterHTCFunctorMaterial::ADDittusBoelterHTCFunctorMaterial(
     const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties")),
+    _fp_ref(isParamValid("reference_fp") ? &getUserObjectByName<SinglePhaseFluidProperties>(
+                                               getParam<UserObjectName>("reference_fp"))
+                                         : nullptr),
     _m(ScalarCoupleable::adCoupledScalarValue("mass_flow_rate")),
     _T_fluid(ScalarCoupleable::adCoupledScalarValue("T_fluid")),
     _T_fluid_inlet(ScalarCoupleable::adCoupledScalarValue("T_fluid_inlet")),
@@ -83,15 +88,17 @@ ADDittusBoelterHTCFunctorMaterial::ADDittusBoelterHTCFunctorMaterial(
         const auto mu = _fp.mu_from_p_T(P_ref, T_film);
         const auto cp = _fp.cp_from_p_T(P_ref, T_film);
         const auto k = _fp.k_from_p_T(P_ref, T_film);
+        const auto rho = _fp.rho_from_p_T(P_ref, T_film);
+        const auto rho_ref = _fp_ref ? _fp_ref->rho_from_p_T(P_ref, T_film) : rho;
 
         const auto A = _flow_area(r, t);
         const auto D_h = 4.0 * A / _wetted_perimeter(r, t);
         // Formed from the mass flux G = rho * vel, which the segment's mass flow rate gives
         // directly, so no density evaluation is needed
-        const auto G = abs(_m[i]) / A;
-        const auto Re = G * D_h / mu;
+        const auto G = abs(_m[i]) / A * rho / rho_ref;
+        const auto Re = max(G * D_h / mu, 1.0e-03);
         const auto Pr = THM::Prandtl(cp, mu, k);
-        const auto Nu = 0.023 * pow(Re, 0.8) * pow(Pr, 0.4);
+        const auto Nu = max(0.023 * pow(Re, 0.8) * pow(Pr, 0.4), 4.0);
 
         return THM::wallHeatTransferCoefficient(Nu, k, D_h);
       },
