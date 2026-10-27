@@ -48,5 +48,5 @@ protected:
   MooseEnum _portion;
 
   /// Prefix to prepend to boundary names declared by this generator
-  const std::string _boundary_name_prefix;
+  const std::string & _boundary_name_prefix;
 };

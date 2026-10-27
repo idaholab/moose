@@ -234,7 +234,7 @@ StitchMeshGenerator::generate()
         auto & secondary_name_map = meshes[i]->set_subdomain_name_map();
         for (const auto & [old_id, _] : id_remapping)
           secondary_name_map.erase(old_id);
-        meshes[i]->unset_is_prepared();
+        meshes[i]->unset_has_synched_subdomain_name_map();
       }
     }
 

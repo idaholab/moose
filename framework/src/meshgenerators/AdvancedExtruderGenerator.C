@@ -444,11 +444,15 @@ AdvancedExtruderGenerator::generate()
   for (const auto & swap : _subdomain_swaps)
     for (const auto i : index_range(swap))
       if (i % 2 == 0 && !MooseMeshUtils::hasSubdomainName(*_input, swap[i]))
+      {
+        std::string blocks;
+        for (const auto & [name, id] : MooseMeshUtils::getAllSubdomainNamesAndIDs(*_input))
+          blocks += (blocks.empty() ? "" : ", ") + name + " (" + std::to_string(id) + ")";
         paramError("subdomain_swaps",
                    "The block '",
                    swap[i],
-                   "' was not found within the mesh.\nBlocks in the mesh: " +
-                       Moose::stringify(MooseMeshUtils::getAllSubdomainNamesAndIDs(*_input)));
+                   "' was not found within the mesh.\nBlock names (ID) in the mesh: " + blocks);
+      }
 
   // Convert the subdomain swaps from names to IDs. Target subdomains that are neither IDs nor
   // names of subdomains in the input mesh are assigned new IDs, unused by the input mesh and by
