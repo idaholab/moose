@@ -199,10 +199,11 @@ class TestCsvDiff(unittest.TestCase):
     def _belowFloorAndAbove(self):
         """
         Return paths to two files with column v where only the gold value is below the default
-        absolute zero of 1e-10, so it is compared as 0 against the test value.
+        absolute zero of 1e-10.
 
-        After zeroing, the relative difference is 1 and the absolute difference is 3e-10. Before
-        zeroing, they would be 0.7 and 2.1e-10.
+        The values are compared as they are (the absolute zero only skips the comparison when
+        both values are within it, as in exodiff): the relative difference is 0.7 and the
+        absolute difference is 2.1e-10.
         """
         gold = self._writeColumns("floor_gold.csv", {"v": 9e-11})
         test = self._writeColumns("floor_test.csv", {"v": 3e-10})
@@ -210,38 +211,26 @@ class TestCsvDiff(unittest.TestCase):
 
     def testAbsoluteZeroRelativeTolerance(self):
         gold, test = self._belowFloorAndAbove()
-        # Neither tolerance passes the zeroed comparison
+        # The comparison is not skipped, so neither tolerance passes by default
         self.assertEqual(self._numErrors(gold, test), 1)
-        # The relative difference of a zeroed value is 1, so a relative tolerance of 1 passes
-        self.assertEqual(self._numErrors(gold, test, "--relative-tolerance", "1"), 0)
-        # 0.8 is above the unzeroed relative difference of 0.7 but below 1: it only fails
-        # because the floor was applied
-        self.assertEqual(self._numErrors(gold, test, "--relative-tolerance", "0.8"), 1)
-        self.assertEqual(
-            self._numErrors(
-                gold, test, "--relative-tolerance", "0.8", "--abs-zero", "1e-11"
-            ),
-            0,
-        )
+        # The relative difference of the original values is 0.7
+        self.assertEqual(self._numErrors(gold, test, "--relative-tolerance", "0.69"), 1)
+        self.assertEqual(self._numErrors(gold, test, "--relative-tolerance", "0.71"), 0)
 
     def testAbsoluteZeroAbsoluteTolerance(self):
         gold, test = self._belowFloorAndAbove()
-        # The absolute difference of the zeroed comparison is 3e-10
+        # The absolute difference of the original values is 2.1e-10
         self.assertEqual(
-            self._numErrors(gold, test, "--absolute-tolerance", "3.1e-10"), 0
-        )
-        # 2.5e-10 is above the unzeroed absolute difference of 2.1e-10 but below 3e-10: it only
-        # fails because the floor was applied
-        self.assertEqual(
-            self._numErrors(gold, test, "--absolute-tolerance", "2.5e-10"), 1
+            self._numErrors(gold, test, "--absolute-tolerance", "2e-10"), 1
         )
         self.assertEqual(
-            self._numErrors(
-                gold, test, "--absolute-tolerance", "2.5e-10", "--abs-zero", "1e-11"
-            ),
-            0,
+            self._numErrors(gold, test, "--absolute-tolerance", "2.2e-10"), 0
         )
-        # The same through the per-column options
+
+    def testAbsoluteZeroSkipsComparison(self):
+        gold, test = self._belowFloorAndAbove()
+        # Raising the absolute zero above both values skips the comparison
+        self.assertEqual(self._numErrors(gold, test, "--abs-zero", "1e-9"), 0)
         self.assertEqual(
             self._numErrors(
                 gold,
@@ -249,12 +238,16 @@ class TestCsvDiff(unittest.TestCase):
                 "--custom-columns",
                 "v",
                 "--custom-abs-zero",
-                "1e-10",
-                "--custom-abs-err",
-                "3.1e-10",
+                "1e-9",
             ),
             0,
         )
+        # Values equal to the absolute zero are within it
+        gold_eq = self._writeColumns("eq_gold.csv", {"v": 1e-10})
+        test_eq = self._writeColumns("eq_test.csv", {"v": 5e-11})
+        self.assertEqual(self._numErrors(gold_eq, test_eq), 0)
+        # Only one value within the absolute zero does not skip the comparison
+        self.assertEqual(self._numErrors(gold_eq, test), 1)
 
     def testComparisonFileAbsoluteTolerance(self):
         gold, test = self._goldAndTest()

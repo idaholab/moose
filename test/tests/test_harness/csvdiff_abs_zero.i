@@ -1,14 +1,14 @@
 # Tests when CSVDiff compares a value below the absolute zero (floor) to a value above it.
 #
-# The gold value is below the default abs_zero of 1e-10, so it is compared as 0.
+# The gold value is below the default abs_zero of 1e-10 but the test value is not, so the
+# comparison is not skipped (it is only skipped when both values are below abs_zero).
 #
 #                              val
 #                 ----------------
 # gold value      |          9e-11 |
 # test value      |          3e-10 |
-# comparison      |   0 vs. 3e-10 |
-# absolute error  |          3e-10 |
-# relative error  |              1 |
+# absolute error  |        2.1e-10 |
+# relative error  |            0.7 |
 
 [Mesh]
   type = GeneratedMesh

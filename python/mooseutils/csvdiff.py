@@ -395,11 +395,6 @@ class CSVDiffer(CSVTools):
                 abs_tol = abs_err_map[key] if key in abs_err_map else self.abs_tol
                 rel_tol = rel_err_map[key] if key in rel_err_map else self.rel_tol
 
-                if abs(val1) < abs_zero:
-                    val1 = 0
-                if abs(val2) < abs_zero:
-                    val2 = 0
-
                 # disallow nan and inf in both files
                 ne = self.getNumErrors()
                 for f, v in [(self.files[0], val1), (self.files[1], val2)]:
@@ -409,8 +404,9 @@ class CSVDiffer(CSVTools):
                 if self.getNumErrors() != ne:
                     break
 
-                # if they're both exactly zero (due to the threshold above) then they're equal so pass this test
-                if val1 == 0 and val2 == 0:
+                # if both values are within the absolute zero then they're equal so pass this test;
+                # if only one is, the original values are compared (consistent with exodiff)
+                if abs(val1) <= abs_zero and abs(val2) <= abs_zero:
                     continue
 
                 abs_diff = abs(val1 - val2)

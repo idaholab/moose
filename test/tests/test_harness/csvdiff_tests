@@ -115,19 +115,19 @@
     csvdiff = csvdiff_abs_tol_out.csv
     abs_err = 1e-10
     override_columns = 'val2'
-    override_abs_zero = '1e-5' # above both val2 values (1e-6 and 1.01e-6), so both are treated as zero
+    override_abs_zero = '1e-5' # above both val2 values (1e-6 and 1.01e-6), so the comparison is skipped
     requirement = 'The system shall allow the user to override only the absolute zero tolerance of a CSV column in the test specifications file, using the global values for its other tolerances.'
     issues = '#32561'
     prereq = 'test_csvdiff_spec_override_rel_err_only'
   []
-  # The next two tests compare a gold value below abs_zero (compared as 0) to a test value above it
-  # (see csvdiff_abs_zero.i), so the relative error is 1 and the absolute error is 3e-10. They
-  # share csvdiff_abs_zero_out.csv, so they run in sequence.
+  # The next two tests compare a gold value below abs_zero to a test value above it (see
+  # csvdiff_abs_zero.i). The comparison is not skipped, so the relative error is 0.7 and the
+  # absolute error is 2.1e-10. They share csvdiff_abs_zero_out.csv, so they run in sequence.
   [test_csvdiff_spec_abs_zero_rel_err]
     type = CSVDiff
     input = csvdiff_abs_zero.i
     csvdiff = csvdiff_abs_zero_out.csv
-    rel_err = 1 # equal to the relative error after zeroing, which is the largest it can be
+    rel_err = 0.8 # above the relative error of 0.7; the default abs_err of 0 fails
     requirement = 'The system shall pass a CSV comparison in which one value is below the absolute zero tolerance when the relative error tolerance is met.'
     issues = '#32561'
   []
@@ -135,7 +135,7 @@
     type = CSVDiff
     input = csvdiff_abs_zero.i
     csvdiff = csvdiff_abs_zero_out.csv
-    abs_err = 5e-10 # above the absolute error of 3e-10; the default rel_err of 5.5e-6 fails
+    abs_err = 3e-10 # above the absolute error of 2.1e-10; the default rel_err of 5.5e-6 fails
     requirement = 'The system shall pass a CSV comparison in which one value is below the absolute zero tolerance when the absolute error tolerance is met.'
     issues = '#32561'
     prereq = 'test_csvdiff_spec_abs_zero_rel_err'
