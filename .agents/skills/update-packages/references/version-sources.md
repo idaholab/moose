@@ -16,7 +16,7 @@ submodule, and the conda recipes build from the in-tree source.
 
 | Submodule path | Upstream | Versioner package | Notes |
 |---|---|---|---|
-| `petsc` | gitlab.com/petsc/petsc | `petsc` | Currently tracks release tags (`v3.25.4`). The `version:` in `versioner.yaml` is the bare release number. |
+| `petsc` | gitlab.com/petsc/petsc | `petsc` | Currently tracks release tags. The `version:` in `versioner.yaml` is the bare release number. |
 | `libmesh` | github.com/libMesh/libmesh | `libmesh` | Tracks upstream `devel`/master tip. Coordinate with libMesh PRs when a fix is needed. |
 | `framework/contrib/wasp` | code.ornl.gov/neams-workbench/wasp (mirrored at github.com/ornl-neams-workbench/wasp) | `wasp` | |
 | `framework/contrib/mfem` | github.com/mfem/mfem | `moose-dev` | apptainer only; no conda package. |
