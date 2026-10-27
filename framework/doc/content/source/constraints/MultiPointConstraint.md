@@ -66,7 +66,8 @@ libMesh accepts one `libMesh::System::Constraint` object for each `System`. libM
 object through `System::user_constrain()` each time it rebuilds the constraints of the system.
 `ExactConstraintFunctor` is this object for a nonlinear system. It adds the exact constraints of
 each active constraint whose `usesExactConstraints()` is true. Each `MultiPointConstraint` is such a
-constraint, but other constraint families can also use exact constraints.
+constraint. So is a [NodalConstraint.md] or an [EqualValueEmbeddedConstraint.md] with
+`formulation = exact`.
 
 `NonlinearSystemBase` builds and attaches the functor when it adds the first constraint that uses
 exact constraints. This occurs before libMesh distributes the degrees of freedom. If the libMesh
@@ -87,6 +88,7 @@ get their exact constraints at the same time.
 An exact constraint can have coefficients that depend on a controllable parameter. Such an object
 overrides `virtual bool exactConstraintsChanged()`. The override compares the parameter with the
 value that the object last used, records the new value, and returns true when they differ.
+[LinearNodalConstraint.md], with its controllable `weights` parameter, is an example.
 
 At the start of each solve, before the first residual evaluation (the pre-SMO residual included),
 MOOSE asks each active constraint that uses exact constraints if its coefficients changed. When an

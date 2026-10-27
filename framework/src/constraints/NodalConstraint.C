@@ -11,13 +11,18 @@
 
 // MOOSE includes
 #include "Assembly.h"
+#include "DisplacedProblem.h"
+#include "FEProblemBase.h"
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
+#include "NodalBCBase.h"
+#include "NonlinearSystemBase.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 
 #include "libmesh/compare_elems_by_level.h"
 #include "libmesh/distributed_mesh.h"
+#include "libmesh/dof_map.h"
 #include "libmesh/null_output_iterator.h"
 #include "libmesh/parallel_elem.h"
 #include "libmesh/parallel_node.h"
@@ -29,10 +34,13 @@ InputParameters
 NodalConstraint::validParams()
 {
   InputParameters params = Constraint::validParams();
-  MooseEnum formulationtype("penalty kinematic", "penalty");
-  params.addParam<MooseEnum>("formulation",
-                             formulationtype,
-                             "Formulation used to calculate constraint - penalty or kinematic.");
+  MooseEnum formulationtype("penalty kinematic exact", "penalty");
+  params.addParam<MooseEnum>(
+      "formulation",
+      formulationtype,
+      "Formulation used to calculate constraint - penalty, kinematic or exact. With 'exact' the "
+      "constraint assembles no residual and no Jacobian: it hands one degree of freedom exact "
+      "constraint per secondary node to the DofMap, which enforces it exactly with no penalty.");
   params.addParam<NonlinearVariableName>("variable_secondary",
                                          "The name of the variable for the secondary nodes, if it "
                                          "is different from the primary nodes' variable");
@@ -61,8 +69,21 @@ NodalConstraint::NodalConstraint(const InputParameters & parameters)
     _formulation = Moose::Penalty;
   else if (temp_formulation == "kinematic")
     _formulation = Moose::Kinematic;
+  else if (temp_formulation == "exact")
+    _formulation = Moose::Exact;
   else
-    mooseError("Formulation must be either Penalty or Kinematic");
+    mooseError("Formulation must be penalty, kinematic or exact");
+}
+
+void
+NodalConstraint::checkPenaltyParam() const
+{
+  if (_formulation != Moose::Exact && !isParamValid("penalty"))
+    paramError("penalty",
+               "A penalty is required with formulation '",
+               getParam<MooseEnum>("formulation"),
+               "'. It may only be omitted with formulation 'exact', which enforces the constraint "
+               "with exact constraints instead of a penalty term.");
 }
 
 std::vector<dof_id_type>
@@ -163,6 +184,16 @@ NodalConstraint::gatherAndRetainConnectedElems(MooseMesh & mesh,
 }
 
 void
+NodalConstraint::ghostPrimaryNodes()
+{
+  for (const auto elem_id : gatherAndRetainConnectedElems(_fe_problem.mesh(), _primary_node_vector))
+    _subproblem.addGhostedElem(elem_id);
+
+  if (const auto displaced_problem = _fe_problem.getDisplacedProblem())
+    gatherAndRetainConnectedElems(displaced_problem->mesh(), _primary_node_vector);
+}
+
+void
 NodalConstraint::reinitConstraintNodes()
 {
   // _subproblem is the displaced problem when this constraint uses the displaced mesh, which is
@@ -192,6 +223,10 @@ NodalConstraint::computeResidual(const NumericVector<Number> & residual)
     {
       switch (_formulation)
       {
+        case Moose::Exact:
+          mooseError("The exact formulation is enforced by the DofMap, so the enforcement loop "
+                     "never asks this constraint for a residual");
+          break;
         case Moose::Penalty:
           re(_j) += computeQpResidual(Moose::Primary) * _var.scalingFactor();
           neighbor_re(_i) += computeQpResidual(Moose::Secondary) * _var_secondary.scalingFactor();
@@ -237,6 +272,10 @@ NodalConstraint::computeJacobian(const SparseMatrix<Number> & jacobian)
     {
       switch (_formulation)
       {
+        case Moose::Exact:
+          mooseError("The exact formulation is enforced by the DofMap, so the enforcement loop "
+                     "never asks this constraint for a Jacobian");
+          break;
         case Moose::Penalty:
           Kee(_j, _j) += computeQpJacobian(Moose::PrimaryPrimary);
           Ken(_j, _i) += computeQpJacobian(Moose::PrimarySecondary);
@@ -261,6 +300,10 @@ NodalConstraint::computeJacobian(const SparseMatrix<Number> & jacobian)
     Number value = 0.0;
     switch (_formulation)
     {
+      case Moose::Exact:
+        mooseError("The exact formulation is enforced by the DofMap, so the enforcement loop never "
+                   "asks this constraint for a Jacobian");
+        break;
       case Moose::Penalty:
         value = computeQpJacobian(Moose::SecondarySecondary);
         break;
@@ -272,6 +315,127 @@ NodalConstraint::computeJacobian(const SparseMatrix<Number> & jacobian)
     addJacobianElement(
         _assembly, value, secondarydof[_i], secondarydof[_i], _var_secondary.scalingFactor());
   }
+}
+
+void
+NodalConstraint::addExactConstraints(libMesh::DofMap & dof_map) const
+{
+  addTieConstraints(dof_map, _connected_nodes);
+}
+
+std::vector<dof_id_type>
+NodalConstraint::ownedBoundaryNodes(const BoundaryName & boundary_name) const
+{
+  std::vector<dof_id_type> node_ids;
+  for (const auto nid : _mesh.getNodeList(_mesh.getBoundaryID(boundary_name)))
+  {
+    const Node * const node = _mesh.queryNodePtr(nid);
+    if (node && node->processor_id() == _subproblem.processor_id())
+      node_ids.push_back(nid);
+  }
+
+  return node_ids;
+}
+
+void
+NodalConstraint::addTieConstraints(libMesh::DofMap & dof_map,
+                                   const std::vector<dof_id_type> & secondary_nodes) const
+{
+  // A single primary node defaults to a unit weight, as in computeResidual()
+  std::vector<Real> weights = _weights;
+  if (weights.empty() && _primary_node_vector.size() == 1)
+    weights.push_back(1.0);
+
+  // Built on the reference mesh even with 'use_displaced_mesh': the displaced system has no dofs
+  // yet when this first runs, and both systems share the dof numbering
+  MooseMesh & mesh = _fe_problem.mesh();
+  NonlinearSystemBase & nl_sys = referenceSystem(_var_secondary.name());
+  MooseVariable & var = nl_sys.getFieldVariable<Real>(_tid, _var.name());
+  MooseVariable & var_secondary = nl_sys.getFieldVariable<Real>(_tid, _var_secondary.name());
+  const auto sys_num = nl_sys.number();
+
+  const auto pinned_nodes = nodesPinnedByNodalBCs(var_secondary.name());
+
+  CollectiveError error(*this);
+
+  if (weights.size() != _primary_node_vector.size())
+  {
+    error.record("This rank holds " + std::to_string(_primary_node_vector.size()) +
+                 " of the primary nodes but " + std::to_string(weights.size()) +
+                 " weights. Every rank that constrains a secondary node needs all the primary "
+                 "nodes and their weights, so either provide as many weights as primary nodes or "
+                 "use a replicated mesh.");
+
+    error.raise();
+    return;
+  }
+
+  // The dof of \p var at \p node, or invalid_id when the variable is not defined there
+  auto node_dof = [&error, sys_num](const MooseVariable & var, const Node & node) -> dof_id_type
+  {
+    if (node.n_comp(sys_num, var.number()) == 0)
+    {
+      error.record("The variable '" + var.name() + "' has no degree of freedom at node " +
+                   std::to_string(node.id()) + ", so this constraint cannot tie it there.");
+      return libMesh::DofObject::invalid_id;
+    }
+    return node.dof_number(sys_num, var.number(), 0);
+  };
+
+  for (const auto secondary_id : secondary_nodes)
+  {
+    const Node * const secondary_node = mesh.queryNodePtr(secondary_id);
+    if (!secondary_node)
+      continue;
+
+    // A primary node already satisfies the tie
+    if (std::find(_primary_node_vector.begin(), _primary_node_vector.end(), secondary_id) !=
+        _primary_node_vector.end())
+      continue;
+
+    if (pinned_nodes.count(secondary_id))
+      continue;
+
+    libMesh::DofConstraintRow row;
+    bool row_is_complete = true;
+    for (const auto j : index_range(_primary_node_vector))
+    {
+      const Node * const primary_node = mesh.queryNodePtr(_primary_node_vector[j]);
+      if (!primary_node)
+      {
+        error.record(
+            "The primary node " + std::to_string(_primary_node_vector[j]) +
+            " is not present on the rank that holds the secondary node " +
+            std::to_string(secondary_id) +
+            ". This constraint builds its exact constraints from node ids alone, so every primary "
+            "node must be present wherever a secondary node is; use a replicated mesh.");
+        row_is_complete = false;
+        break;
+      }
+
+      const auto primary_dof = node_dof(var, *primary_node);
+      if (primary_dof == libMesh::DofObject::invalid_id)
+      {
+        row_is_complete = false;
+        break;
+      }
+
+      // A node repeated in the primary list contributes the sum of its weights
+      row[primary_dof] += weights[j];
+    }
+
+    if (!row_is_complete)
+      break;
+
+    const auto secondary_dof = node_dof(var_secondary, *secondary_node);
+    if (secondary_dof == libMesh::DofObject::invalid_id)
+      break;
+
+    // Error on a dof libMesh already constrains, such as a hanging node, instead of overwriting it
+    dof_map.add_constraint_row(secondary_dof, row, /*forbid_constraint_overwrite=*/true);
+  }
+
+  error.raise();
 }
 
 void

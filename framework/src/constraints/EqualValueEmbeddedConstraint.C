@@ -18,7 +18,12 @@
 #include "MooseMesh.h"
 #include "AddVariableAction.h"
 
+#include "libmesh/dof_map.h"
+#include "libmesh/fe_interface.h"
+#include "libmesh/fe_map.h"
 #include "libmesh/sparse_matrix.h"
+
+#include <algorithm>
 
 registerMooseObject("MooseApp", EqualValueEmbeddedConstraint);
 registerMooseObject("MooseApp", ADEqualValueEmbeddedConstraint);
@@ -33,11 +38,14 @@ EqualValueEmbeddedConstraintTempl<is_ad>::validParams()
                              "have the same variable value");
   params.set<bool>("use_displaced_mesh") = false;
   MooseEnum formulation(getFormulationOptions(), "kinematic");
-  params.addParam<MooseEnum>(
-      "formulation", formulation, "Formulation used to enforce the constraint");
-  params.addRequiredParam<Real>(
+  params.addParam<MooseEnum>("formulation",
+                             formulation,
+                             "Formulation used to enforce the constraint. 'exact' enforces it with "
+                             "exact constraints and needs no penalty.");
+  params.addParam<Real>(
       "penalty",
-      "Penalty parameter used in constraint enforcement for kinematic and penalty formulations.");
+      "Penalty parameter used in constraint enforcement for kinematic and penalty formulations. "
+      "It is required with those two formulations and unused with the exact formulation.");
 
   return params;
 }
@@ -49,11 +57,19 @@ EqualValueEmbeddedConstraintTempl<is_ad>::EqualValueEmbeddedConstraintTempl(
     _displaced_problem(parameters.get<FEProblemBase *>("_fe_problem_base")->getDisplacedProblem()),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _formulation(this->template getParam<MooseEnum>("formulation").template getEnum<Formulation>()),
-    _penalty(this->template getParam<Real>("penalty")),
+    _penalty(this->isParamValid("penalty") ? this->template getParam<Real>("penalty") : 0.0),
     _residual_copy(_sys.residualGhosted())
 {
   _overwrite_secondary_residual = false;
+
+  if (_formulation != Formulation::EXACT && !this->isParamValid("penalty"))
+    this->paramError("penalty",
+                     "A penalty is required with formulation '",
+                     this->template getParam<MooseEnum>("formulation"),
+                     "'. It may only be omitted with formulation 'exact'.");
+
   prepareSecondaryToPrimaryMap();
+
   if constexpr (is_ad)
   {
     if (_formulation == Formulation::KINEMATIC)
@@ -95,6 +111,68 @@ EqualValueEmbeddedConstraintTempl<is_ad>::prepareSecondaryToPrimaryMap()
       }
     }
   }
+}
+
+template <bool is_ad>
+void
+EqualValueEmbeddedConstraintTempl<is_ad>::addExactConstraints(libMesh::DofMap & dof_map) const
+{
+  const auto sys_num = _sys.number();
+  const MooseVariable & primary_var = this->_primary_var;
+  const libMesh::FEType & fe_type = primary_var.feType();
+
+  const auto pinned_nodes = this->nodesPinnedByNodalBCs(_var.name());
+
+  Constraint::CollectiveError error(*this);
+
+  std::vector<dof_id_type> primary_dofs;
+  for (const auto & [secondary_id, primary_id] : _secondary_to_primary_map)
+  {
+    const Node * const secondary_node = _mesh.queryNodePtr(secondary_id);
+    const Elem * const primary_elem = _mesh.queryElemPtr(primary_id);
+    if (!secondary_node || !primary_elem)
+      continue;
+
+    if (pinned_nodes.count(secondary_id))
+      continue;
+
+    if (secondary_node->n_comp(sys_num, _var.number()) == 0)
+    {
+      error.record("The variable '" + _var.name() +
+                   "' has no degree of freedom at the secondary node " +
+                   std::to_string(secondary_id) + ", so this constraint cannot tie it there.");
+      break;
+    }
+    const auto secondary_dof = secondary_node->dof_number(sys_num, _var.number(), 0);
+
+    dof_map.dof_indices(primary_elem, primary_dofs, primary_var.number());
+    if (primary_dofs.empty())
+    {
+      error.record("The variable '" + primary_var.name() +
+                   "' has no degrees of freedom on the primary element " +
+                   std::to_string(primary_id) + ", which contains the secondary node " +
+                   std::to_string(secondary_id) +
+                   ", so this constraint has nothing to tie that node to.");
+      break;
+    }
+
+    // A node the two blocks share already satisfies the tie
+    if (std::find(primary_dofs.begin(), primary_dofs.end(), secondary_dof) != primary_dofs.end())
+      continue;
+
+    const Point reference_point =
+        libMesh::FEMap::inverse_map(primary_elem->dim(), primary_elem, *secondary_node);
+
+    // Shape function i belongs to primary_dofs[i]
+    libMesh::DofConstraintRow row;
+    for (const auto i : index_range(primary_dofs))
+      row[primary_dofs[i]] = libMesh::FEInterface::shape(fe_type, primary_elem, i, reference_point);
+
+    // Error on a dof libMesh already constrains, such as a hanging node, instead of overwriting it
+    dof_map.add_constraint_row(secondary_dof, row, /*forbid_constraint_overwrite=*/true);
+  }
+
+  error.raise();
 }
 
 template <bool is_ad>

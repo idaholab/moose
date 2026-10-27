@@ -145,10 +145,13 @@ libMesh removes the dependent degrees of freedom of each exact constraint, for e
 degrees of freedom on the eigenvector. Other constraints act on degrees of freedom that stay in
 the eigen matrices.
 
+Use `formulation = exact` for a nodal constraint in an eigenvalue problem. A penalty or kinematic
+nodal constraint does not enter the eigen matrices.
+
 Exact constraints in an eigenvalue problem need a nonlinear eigen solve, such as
 `solve_type = newton`. This solve returns one eigenpair, so set `n_eigen_pairs = 1`.
 
-!listing test/tests/problems/eigen_problem/constraints/multipoint_tie_eigen.i block=Executioner
+!listing test/tests/problems/eigen_problem/constraints/nodal_exact_eigen.i block=Constraints
 
 !syntax list /Constraints objects=True actions=False subsystems=False
 
