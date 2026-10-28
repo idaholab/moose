@@ -32,7 +32,10 @@ are already triangles are left intact or centroid-subdivided again.
 
 On HEX20 and TET10 meshes, dual mortar contact with a SECOND order Lagrange multiplier uses the
 transformed dual basis of [!cite](popp2012dual) (see
-[Transformed_dual_basis_for_higher_order_mortar.md]).
+[Transformed_dual_basis_for_higher_order_mortar.md]). With `use_petrov_galerkin = true`, these
+meshes require `petrov_galerkin_test = PIECEWISE_LINEAR`, which weights the gap with the
+non-negative piecewise-linear basis of [!cite](carvalho2023efficient) (see
+[Petrov-Galerkin_approach_for_Lagrange_multipliers.md]).
 
 ## Constructed Objects
 

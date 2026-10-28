@@ -38,7 +38,8 @@ diagonal on transformed faces.
 The Petrov-Galerkin approach ([Petrov-Galerkin_approach_for_Lagrange_multipliers.md]) weights the
 gap with the standard basis $N$, whose nodal integrals $d_k$ are not positive on these faces. MOOSE
 therefore reports an error when `use_petrov_galerkin = true` is combined with a SECOND order dual
-multiplier on QUAD8 or TRI6 secondary faces.
+multiplier on QUAD8 or TRI6 secondary faces, unless the gap is weighted with the piecewise-linear
+basis described there.
 
 ## References
 

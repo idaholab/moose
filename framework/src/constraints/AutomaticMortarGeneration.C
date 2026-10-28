@@ -399,7 +399,8 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     const Mortar3DSubpatchPlane mortar_3d_subpatch_plane,
     const MortarSegmentTriangulationMode triangulation_mode,
     const bool triangulate_triangles,
-    const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping)
+    const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping,
+    const bool split_segments_at_sub_elements)
   : ConsoleStreamInterface(app),
     _app(app),
     _mesh(mesh_in),
@@ -415,7 +416,8 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     _mortar_3d_subpatch_plane(mortar_3d_subpatch_plane),
     _triangulation_mode(triangulation_mode),
     _triangulate_triangles(triangulate_triangles),
-    _mortar_3d_qp_mapping(mortar_3d_qp_mapping)
+    _mortar_3d_qp_mapping(mortar_3d_qp_mapping),
+    _split_segments_at_sub_elements(split_segments_at_sub_elements)
 {
   _primary_secondary_boundary_id_pairs.push_back(boundary_key);
   _primary_requested_boundary_ids.insert(boundary_key.first);
@@ -678,6 +680,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
                     << secondary_bnd_id << ". Does that bondary ID even exist on the mesh?");
 
     node_unique_id_offset += num_primary_nodes + 2 * num_secondary_nodes;
+    // Splitting at the sub-elements adds two segments per EDGE3 secondary face, and an EDGE3 face
+    // has more than two nodes
+    if (_split_segments_at_sub_elements)
+      node_unique_id_offset += num_secondary_nodes;
   }
 
   // 1.) Add all lower-dimensional secondary side elements as the "initial" mortar segments.
@@ -1070,6 +1076,103 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // The original mortar segment has been split, so erase it from
     // the mortar segment mesh.
     _mortar_segment_mesh->delete_elem(current_mortar_segment);
+  }
+
+  // 3.) Optionally split segments at the mid node of EDGE3 secondary faces (xi1 = 0). Within a
+  // segment, xi2 is interpolated linearly in xi1 when mapping quadrature points, so the halves
+  // take the interpolated xi2 at the split and the quadrature point map is unchanged.
+  if (_split_segments_at_sub_elements)
+  {
+    // New node and element ids must agree across processes, so visit secondary elements in id
+    // order rather than in the order of the unordered map
+    std::vector<dof_id_type> secondary_elem_ids;
+    secondary_elem_ids.reserve(_secondary_elems_to_mortar_segments.size());
+    for (const auto & [secondary_elem_id, _] : _secondary_elems_to_mortar_segments)
+      secondary_elem_ids.push_back(secondary_elem_id);
+    std::sort(secondary_elem_ids.begin(), secondary_elem_ids.end());
+
+    for (const auto secondary_elem_id : secondary_elem_ids)
+    {
+      const Elem * const secondary_elem = _mesh.elem_ptr(secondary_elem_id);
+      if (secondary_elem->type() != EDGE3)
+        continue;
+      auto & mortar_segment_set =
+          libmesh_map_find(_secondary_elems_to_mortar_segments, secondary_elem_id);
+
+      std::vector<Elem *> straddling_segments;
+      for (auto * const segment : mortar_segment_set)
+      {
+        const auto & info = libmesh_map_find(_msm_elem_to_info, segment);
+        // Segments without a valid primary contribution are removed below
+        if (info.primary_elem && std::abs(info.xi2_a) <= 1.0 + TOLERANCE &&
+            std::abs(info.xi2_b) <= 1.0 + TOLERANCE && info.xi1_a < -_xi_tolerance &&
+            info.xi1_b > _xi_tolerance)
+          straddling_segments.push_back(segment);
+      }
+
+      for (auto * const segment : straddling_segments)
+      {
+        const MortarSegmentInfo info = libmesh_map_find(_msm_elem_to_info, segment);
+        const Real split_xi1 = 0;
+        const Real fraction = (split_xi1 - info.xi1_a) / (info.xi1_b - info.xi1_a);
+        const Real split_xi2 = info.xi2_a + fraction * (info.xi2_b - info.xi2_a);
+
+        // Segment point at the parent reference coordinate xi1
+        const auto segment_point = [&segment, &info](const Real xi1)
+        {
+          const Real eta = (2. * xi1 - info.xi1_a - info.xi1_b) / (info.xi1_b - info.xi1_a);
+          Point point(0);
+          for (const auto n : make_range(segment->n_nodes()))
+            point += Moose::fe_lagrange_1D_shape(SECOND, n, eta) * segment->point(n);
+          return point;
+        };
+
+        const auto add_node = [this, &segment, node_unique_id_offset](const Point & point)
+        {
+          const auto new_id = _mortar_segment_mesh->max_node_id();
+          mooseAssert(_mortar_segment_mesh->comm().verify(new_id),
+                      "new_id must be the same on all processes");
+          Node * const new_node =
+              _mortar_segment_mesh->add_point(point, new_id, segment->processor_id());
+          new_node->set_unique_id(new_id + node_unique_id_offset);
+          return new_node;
+        };
+
+        Node * const split_node = add_node(segment_point(split_xi1));
+        const std::array<std::pair<Real, Real>, 2> xi1_ranges = {
+            {{info.xi1_a, split_xi1}, {split_xi1, info.xi1_b}}};
+        const std::array<std::pair<Real, Real>, 2> xi2_ranges = {
+            {{info.xi2_a, split_xi2}, {split_xi2, info.xi2_b}}};
+        const std::array<Node *, 2> first_nodes = {{segment->node_ptr(0), split_node}};
+        const std::array<Node *, 2> second_nodes = {{split_node, segment->node_ptr(1)}};
+
+        for (const auto half : make_range(2))
+        {
+          auto new_elem = std::make_unique<Edge3>();
+          new_elem->processor_id() = segment->processor_id();
+          new_elem->subdomain_id() = segment->subdomain_id();
+          new_elem->set_id(local_id_index++);
+          new_elem->set_unique_id(new_elem->id());
+          new_elem->set_node(0, first_nodes[half]);
+          new_elem->set_node(1, second_nodes[half]);
+          const auto & [xi1_a, xi1_b] = xi1_ranges[half];
+          new_elem->set_node(2, add_node(segment_point(0.5 * (xi1_a + xi1_b))));
+
+          MortarSegmentInfo new_info = info;
+          new_info.xi1_a = xi1_a;
+          new_info.xi1_b = xi1_b;
+          std::tie(new_info.xi2_a, new_info.xi2_b) = xi2_ranges[half];
+
+          Elem * const msm_new_elem = _mortar_segment_mesh->add_elem(std::move(new_elem));
+          _msm_elem_to_info.emplace(msm_new_elem, new_info);
+          mortar_segment_set.insert(msm_new_elem);
+        }
+
+        _msm_elem_to_info.erase(segment);
+        mortar_segment_set.erase(segment);
+        _mortar_segment_mesh->delete_elem(segment);
+      }
+    }
   }
 
   // Remove all MSM elements without a primary contribution

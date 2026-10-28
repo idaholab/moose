@@ -94,6 +94,21 @@ protected:
                                          const MooseVariableFieldBase & lm_var) const;
 
   /**
+   * Check a Petrov-Galerkin auxiliary variable that uses the piecewise-linear lower-dimensional
+   * basis: Petrov-Galerkin must be enabled, the Lagrange multiplier must be dual and of the same
+   * finite element type, and in two dimensions the mortar interface must split segments at the
+   * sub-elements of the secondary faces.
+   * @param moose_object The object reporting errors
+   * @param use_petrov_galerkin Whether the object uses the Petrov-Galerkin approach
+   * @param lm_var The Lagrange multiplier
+   * @param aux_lm_var The auxiliary variable weighting the gap
+   */
+  void checkPiecewiseLinearBasis(const MooseObject & moose_object,
+                                 bool use_petrov_galerkin,
+                                 const MooseVariableFieldBase & lm_var,
+                                 const MooseVariableFieldBase & aux_lm_var) const;
+
+  /**
    * Get rid of AD derivative entries by dof index
    */
   static void trimDerivative(dof_id_type remove_derivative_index, ADReal & dual_number);

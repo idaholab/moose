@@ -1,0 +1,82 @@
+[Tests]
+  design = 'Petrov-Galerkin_approach_for_Lagrange_multipliers.md'
+  issues = '#34265'
+  [tilted_gap]
+    requirement = 'The system shall weight the gap of mortar contact with the piecewise-linear basis '
+                  'of the linear sub-elements of second-order secondary faces, so that a node on the '
+                  'edge of a tilted open interface weights the gap only over its adjacent '
+                  'sub-elements, on'
+    [edge3]
+      type = CSVDiff
+      input = 'tilted_gap.i'
+      csvdiff = 'tilted_gap_out_weighted_gap_0002.csv'
+      ignore_columns = 'id'
+      detail = 'EDGE3 faces of QUAD8 elements, with mortar segments split at the face mid nodes,'
+    []
+    [quad8]
+      type = CSVDiff
+      input = 'tilted_gap_3d.i'
+      csvdiff = 'tilted_gap_3d_out.csv'
+      capabilities = 'ad_size>=150'
+      detail = 'QUAD8 faces of HEX20 elements, and'
+    []
+    [tri6]
+      type = CSVDiff
+      input = 'tilted_gap_3d.i'
+      csvdiff = 'tilted_gap_3d_tet10.csv'
+      cli_args = 'Mesh/bottom/elem_type=TET10 Mesh/top/elem_type=TET10 '
+                 'Outputs/file_base=tilted_gap_3d_tet10'
+      capabilities = 'ad_size>=150'
+      detail = 'TRI6 faces of TET10 elements.'
+    []
+  []
+  [dynamics]
+    type = RunApp
+    input = 'tilted_gap_3d.i'
+    cli_args = 'Contact/mortar/mortar_dynamics=true Executioner/type=Transient '
+               'Executioner/num_steps=2 Executioner/dt=0.1 '
+               'Executioner/TimeIntegrator/type=NewmarkBeta BCs/fix_z/boundary=bottom_back '
+               'BCs/push/type=FunctionDirichletBC BCs/push/variable=disp_z '
+               'BCs/push/boundary=top_front BCs/push/function=-0.2*t Outputs/csv=false'
+    capabilities = 'ad_size>=150'
+    requirement = 'The system shall weight the gap of dynamic mortar contact with the piecewise-linear '
+                  'basis of second-order secondary faces when requested in the contact action.'
+  []
+  [errors]
+    requirement = 'The system shall report an error if'
+    [no_petrov_galerkin]
+      type = RunException
+      input = 'tilted_gap_3d.i'
+      cli_args = 'Contact/mortar/use_petrov_galerkin=false --check-input'
+      expect_err = "'petrov_galerkin_test = PIECEWISE_LINEAR' requires 'use_petrov_galerkin = true'"
+      detail = 'the piecewise-linear basis is requested without the Petrov-Galerkin approach,'
+    []
+    [first_order_variable]
+      type = RunException
+      input = 'tilted_gap_3d.i'
+      cli_args = 'Mesh/bottom/elem_type=HEX8 Mesh/top/elem_type=HEX8 --check-input'
+      expect_err = 'The piecewise-linear basis requires a SECOND order LAGRANGE auxiliary variable'
+      detail = 'the piecewise-linear basis is requested for a first-order variable,'
+    []
+    [unsupported_face]
+      type = RunException
+      input = 'tilted_gap_3d.i'
+      cli_args = 'Mesh/bottom/elem_type=TET14 Mesh/top/elem_type=TET14 '
+                 'Physics/SolidMechanics/QuasiStatic/all/add_variables=false '
+                 'Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+                 'Variables/disp_z/order=SECOND --check-input'
+      expect_err = 'The piecewise-linear basis is only available on EDGE3, TRI6, QUAD8 and QUAD9'
+      detail = 'the piecewise-linear basis is requested on unsupported secondary faces, or'
+    []
+    [no_segment_split]
+      type = RunException
+      input = 'tilted_gap.i'
+      cli_args = 'Contact/mortar/petrov_galerkin_test=STANDARD AuxVariables/mortar_aux_lm/order=SECOND '
+                 'AuxVariables/mortar_aux_lm/block=mortar_secondary_subdomain '
+                 'AuxVariables/mortar_aux_lm/use_piecewise_linear_basis=true --check-input'
+      expect_err = "requires 'split_segments_at_sub_elements = true' in two dimensions"
+      detail = 'two-dimensional mortar segments are not split at the sub-elements of the secondary '
+               'faces.'
+    []
+  []
+[]

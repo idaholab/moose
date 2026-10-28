@@ -53,7 +53,8 @@ MortarInterfaceWarehouse::createMortarInterface(
     const Mortar3DSubpatchPlane mortar_3d_subpatch_plane,
     const MooseEnum & triangulation,
     const bool triangulate_triangles,
-    const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping)
+    const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping,
+    const bool split_segments_at_sub_elements)
 {
   _mortar_subdomain_coverage.insert(subdomain_key.first);
   _mortar_subdomain_coverage.insert(subdomain_key.second);
@@ -96,6 +97,9 @@ MortarInterfaceWarehouse::createMortarInterface(
     if (existing.mortar_3d_qp_mapping != mortar_3d_qp_mapping)
       mooseError("We do not currently support multiple values of 'mortar_3d_qp_mapping' on the "
                  "same boundary primary-secondary surface pair.");
+    if (existing.split_segments_at_sub_elements != split_segments_at_sub_elements)
+      mooseError("Mortar objects sharing the same primary/secondary mortar interface must use the "
+                 "same 'split_segments_at_sub_elements' value.");
   }
   else
   {
@@ -112,14 +116,16 @@ MortarInterfaceWarehouse::createMortarInterface(
                                                     mortar_3d_subpatch_plane,
                                                     triangulation_mode,
                                                     triangulate_triangles,
-                                                    mortar_3d_qp_mapping),
+                                                    mortar_3d_qp_mapping,
+                                                    split_segments_at_sub_elements),
         periodic,
         debug,
         minimum_projection_angle,
         mortar_3d_subpatch_plane,
         triangulation_mode,
         triangulate_triangles,
-        mortar_3d_qp_mapping};
+        mortar_3d_qp_mapping,
+        split_segments_at_sub_elements};
     config.amg->initOutput();
     mortar_interfaces.emplace(boundary_key, std::move(config));
   }

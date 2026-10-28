@@ -20,6 +20,7 @@
 #include "XFEMInterface.h"
 #include "DisplacedSystem.h"
 #include "MooseMeshUtils.h"
+#include "MortarUtils.h"
 
 // libMesh
 #include "libmesh/coupling_matrix.h"
@@ -415,6 +416,48 @@ Assembly::buildLowerDDualFE(FEType type) const
     _fe_lower[dim][type]->get_dual_dphi();
     if (_need_second_derivative.count(type))
       _fe_lower[dim][type]->get_dual_d2phi();
+  }
+}
+
+const VariablePhiValue &
+Assembly::fePiecewiseLinearPhiLower(FEType type) const
+{
+  auto & fesd = _fe_shape_data_piecewise_linear_lower[type];
+  if (!fesd)
+    fesd = std::make_unique<FEShapeData>();
+  return fesd->_phi;
+}
+
+const VariablePhiGradient &
+Assembly::feGradPiecewiseLinearPhiLower(FEType type) const
+{
+  auto & fesd = _fe_shape_data_piecewise_linear_lower[type];
+  if (!fesd)
+    fesd = std::make_unique<FEShapeData>();
+  return fesd->_grad_phi;
+}
+
+void
+Assembly::computePiecewiseLinearLowerDShapes(const Elem & elem)
+{
+  const auto & ref_points = _current_qrule_lower->get_points();
+  // Lower-dimensional elements of other blocks, which the requesting variables do not live on, get
+  // no functions
+  const auto n_shapes = Moose::Mortar::hasPiecewiseLinearShapes(elem.type()) ? elem.n_nodes() : 0;
+  std::vector<Real> phi;
+
+  for (auto & [_, fesd] : _fe_shape_data_piecewise_linear_lower)
+  {
+    fesd->_phi.resize(n_shapes);
+    for (const auto i : make_range(n_shapes))
+      fesd->_phi[i].resize(ref_points.size());
+
+    for (const auto qp : make_range(n_shapes ? ref_points.size() : 0))
+    {
+      Moose::Mortar::piecewiseLinearShapes(elem, ref_points[qp], phi);
+      for (const auto i : make_range(n_shapes))
+        fesd->_phi[i][qp] = phi[i];
+    }
   }
 }
 
@@ -2395,6 +2438,8 @@ Assembly::reinitLowerDElem(const Elem * elem,
             const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower.get_dual_d2phi()));
     }
   }
+  if (!_fe_shape_data_piecewise_linear_lower.empty())
+    computePiecewiseLinearLowerDShapes(*elem);
   if (!_unique_fe_lower_helper.empty())
   {
     mooseAssert(elem_dim < _unique_fe_lower_helper.size(), "We should be in bounds here");
