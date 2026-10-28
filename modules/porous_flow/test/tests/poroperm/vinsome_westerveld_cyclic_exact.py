@@ -17,7 +17,9 @@ def exact_heat_content(t, n=20000):
         s = (i + 0.5) * h
         tau = t - s
         x = L / (2.0 * math.sqrt(KAPPA * tau))
-        f = L * math.erfc(x) + 2.0 * math.sqrt(KAPPA * tau / math.pi) * (1.0 - math.exp(-x * x))
+        f = L * math.erfc(x) + 2.0 * math.sqrt(KAPPA * tau / math.pi) * (
+            1.0 - math.exp(-x * x)
+        )
         total += (math.sin(s) + s * math.cos(s)) * f * h
     return total
 
