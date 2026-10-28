@@ -9,7 +9,6 @@
 
 #include "ADIncompressibleMomentumSPBase.h"
 
-#include "ADFunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
 #include "PhysicalConstants.h"
@@ -18,7 +17,6 @@ InputParameters
 ADIncompressibleMomentumSPBase::validParams()
 {
   InputParameters params = ADScalarKernel::validParams();
-  params += ADFunctorInterface::validParams();
   params.addClassDescription("Base class for path-integrated incompressible momentum kernels.");
   params.addCoupledVar("temperatures",
                        {},
@@ -75,7 +73,6 @@ ADIncompressibleMomentumSPBase::validParams()
 
 ADIncompressibleMomentumSPBase::ADIncompressibleMomentumSPBase(const InputParameters & parameters)
   : Base(parameters),
-    ADFunctorInterface(this),
     _n_temps(ScalarCoupleable::coupledScalarComponents("temperatures")),
     _T(_n_temps),
     _is_implicit(this->template getParam<bool>("is_implicit")),

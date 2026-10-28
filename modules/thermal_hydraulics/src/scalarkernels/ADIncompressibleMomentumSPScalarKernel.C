@@ -9,7 +9,6 @@
 
 #include "ADIncompressibleMomentumSPScalarKernel.h"
 
-#include "ADFunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
 
@@ -19,7 +18,6 @@ InputParameters
 ADIncompressibleMomentumSPScalarKernel::validParams()
 {
   InputParameters params = ADIncompressibleMomentumSPBase::validParams();
-  params += ADFunctorInterface::validParams();
   params.addClassDescription(
       "Implements a generic momentum solve over a 1D flow path, acting on the mass flow rate.");
   params.addCoupledVar("reference_pressure_drop",

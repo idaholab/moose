@@ -9,7 +9,6 @@
 
 #include "ADIncompressibleEnergySPScalarKernel.h"
 
-#include "ADFunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
 
@@ -19,7 +18,6 @@ InputParameters
 ADIncompressibleEnergySPScalarKernel::validParams()
 {
   InputParameters params = ADScalarKernel::validParams();
-  params += ADFunctorInterface::validParams();
   params.addClassDescription("Implements a generic energy solve over a 1D flow path segment.");
   params.addCoupledVar("mass_flow_rate",
                        {},
@@ -61,7 +59,6 @@ ADIncompressibleEnergySPScalarKernel::validParams()
 ADIncompressibleEnergySPScalarKernel::ADIncompressibleEnergySPScalarKernel(
     const InputParameters & parameters)
   : Base(parameters),
-    ADFunctorInterface(this),
     _fp(this->template getUserObject<SinglePhaseFluidProperties>("fp")),
     _fp_ref(isParamValid("reference_fp") ? &getUserObjectByName<SinglePhaseFluidProperties>(
                                                getParam<UserObjectName>("reference_fp"))
