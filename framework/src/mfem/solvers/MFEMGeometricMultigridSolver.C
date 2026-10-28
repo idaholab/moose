@@ -196,12 +196,6 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
     auto & level_fespace =
         cast_ref<mfem::ParFiniteElementSpace &>(_hierarchy->GetFESpaceAtLevel(level));
 
-    // Compute essential true DoFs for this level. They are kept as long as the level operator,
-    // because the constrained operator of a level that is not fully assembled references them
-    // instead of copying them.
-    auto level_tdofs = std::make_unique<mfem::Array<int>>();
-    level_fespace.GetEssentialTrueDofs(ess_bdr, *level_tdofs);
-
     // Build level operator.
     mfem::Operator * level_op = nullptr;
 
@@ -211,6 +205,12 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
     {
       auto blf = _equation_system->BuildBilinearFormForFESpace(
           _var_name, level_fespace, _assembly_levels[level]);
+
+      // Compute essential true DoFs for this level. They are kept as long as the level operator,
+      // because the constrained operator of a level that is not fully assembled references them
+      // instead of copying them.
+      auto level_tdofs = std::make_unique<mfem::Array<int>>();
+      level_fespace.GetEssentialTrueDofs(ess_bdr, *level_tdofs);
 
       auto level_op_handle = std::make_unique<mfem::OperatorHandle>();
       blf->FormSystemMatrix(*level_tdofs, *level_op_handle);
