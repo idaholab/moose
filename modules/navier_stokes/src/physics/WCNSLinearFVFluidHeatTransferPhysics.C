@@ -67,9 +67,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addSolverVariables()
   {
     const auto var_type = "MooseLinearVariableFVReal";
     auto params = getFactory().getValidParams(var_type);
-    assignBlocks(params, _blocks);
-    params.set<SolverSystemName>("solver_sys") = getSolverSystem(variable_name);
-    getProblem().addVariable(var_type, variable_name, params);
+    addSharedSolverVariable(var_type, variable_name, params);
   }
   else
     paramError(_solve_for_enthalpy ? "solve_for_enthalpy" : "fluid_temperature_variable",
@@ -232,8 +230,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addAuxiliaryVariables()
     {
       const auto var_type = "MooseLinearVariableFVReal";
       auto params = getFactory().getValidParams(var_type);
-      assignBlocks(params, _blocks);
-      getProblem().addAuxVariable(var_type, _fluid_temperature_name, params);
+      addSharedAuxVariable(var_type, _fluid_temperature_name, params);
     }
     else
       paramError("fluid_temperature_variable",
