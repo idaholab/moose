@@ -23,8 +23,11 @@ InputParameters
 TriSubChannel1PhaseProblem::validParams()
 {
   InputParameters params = SubChannel1PhaseProblem::validParams();
-  params.addClassDescription("Solver class for subchannels in a triangular lattice assembly and "
-                             "bare/wire-wrapped fuel pins");
+  params.addClassDescription(
+      "Solver class for subchannels in a triangular lattice assembly and bare/wire-wrapped fuel "
+      "pins. All variables are face values stored at the axial nodes, except the diversion and "
+      "turbulent crossflows, the pressure drop DP and the friction factor ff, which are cell "
+      "values stored at the top node of their cell.");
   return params;
 }
 

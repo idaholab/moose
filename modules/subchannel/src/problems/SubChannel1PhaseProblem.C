@@ -68,7 +68,10 @@ SubChannel1PhaseProblem::validParams()
   // Inputs
   InputParameters params = ExternalProblem::validParams();
   params += PostprocessorInterface::validParams();
-  params.addClassDescription("Base class of the subchannel solvers");
+  params.addClassDescription(
+      "Base class of the subchannel solvers. All variables are face values stored at the axial "
+      "nodes, except the diversion and turbulent crossflows, the pressure drop DP and the "
+      "friction factor ff, which are cell values stored at the top node of their cell.");
   params.addParam<unsigned int>("n_blocks", 1, "The number of blocks in the axial direction");
   params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
   params.addRangeCheckedParam<int>(
@@ -571,7 +574,18 @@ SubChannel1PhaseProblem::computeInterpolationCoefficients(PetscScalar Peclet)
     case 2: // central_difference interpolation
       return 0.5;
     case 3: // exponential interpolation (Peclet limited)
-      return ((Peclet - 1.0) * std::exp(Peclet) + 1) / (Peclet * (std::exp(Peclet) - 1.) + 1e-10);
+    {
+      // Weight of the bottom value, alpha = 1 - 1 / Pe + 1 / (exp(Pe) - 1), from the exponential
+      // profile of the steady 1D advection-diffusion equation. It is evaluated with exp(-|Pe|)
+      // so that it stays finite for large |Pe|; the original form overflows to NaN once exp(Pe)
+      // exceeds the double range. For |Pe| below 1e-6 the series limit 0.5 + Pe / 12 is used
+      const auto Pe = Peclet;
+      if (std::abs(Pe) < 1e-6)
+        return 0.5 + Pe / 12.0;
+      const auto e = std::exp(-std::abs(Pe));
+      const auto alpha_pos = 1.0 - 1.0 / std::abs(Pe) + e / (1.0 - e);
+      return Pe > 0 ? alpha_pos : 1.0 - alpha_pos;
+    }
     default:
       mooseError(name(),
                  ": Interpolation scheme should be a string: upwind, downwind, central_difference, "

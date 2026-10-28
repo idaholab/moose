@@ -1,0 +1,11 @@
+[Tests]
+  design = 'TriSubChannel1PhaseProblem.md'
+  issues = '#33956'
+  [radial_conduction_7pin]
+    type = PythonUnitTest
+    input = 'test_radial_conduction.py'
+    capabilities = 'method!=dbg & installation_type=in_tree'
+    max_threads = 1
+    requirement = 'The system shall compute the subchannel temperatures of a triangular assembly heated on one side of the duct and cooled on the other, with crossflow suppressed and turbulent mixing disabled, in agreement with an independent solution of the radial heat conduction network.'
+  []
+[]

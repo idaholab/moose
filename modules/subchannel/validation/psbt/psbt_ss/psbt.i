@@ -78,7 +78,9 @@ P_out = 14.72e6 # Pa
   segregated = false
   staggered_pressure = false
   verbose_subchannel = true
-  interpolation_scheme = exponential
+  # At this high-flow Peclet number the exponential scheme reduces to upwind, which makes the
+  # cell-center turbulent mixing explicit in z and unstable on this axial mesh
+  interpolation_scheme = central_difference
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'
   full_output = true
