@@ -263,7 +263,7 @@ Applications:
         unregister:
             - framework/doc/unregister.yml
 
-    THM:
+    thermal_hydraulics:
         exe_directory: modules/combined
         app_types:
             - ThermalHydraulicsApp
