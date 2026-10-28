@@ -105,13 +105,11 @@ WCNSFVTurbulencePhysics::addSolverVariables()
     else if (_define_variables)
     {
       auto params = getFactory().getValidParams("INSFVEnergyVariable");
-      assignBlocks(params, _blocks);
       params.set<std::vector<Real>>("scaling") = {getParam<Real>("tke_scaling")};
       params.set<MooseEnum>("face_interp_method") = getParam<MooseEnum>("tke_face_interpolation");
       params.set<bool>("two_term_boundary_expansion") = getParam<bool>("tke_two_term_bc_expansion");
-      params.set<SolverSystemName>("solver_sys") = getSolverSystem(_tke_name);
 
-      getProblem().addVariable("INSFVEnergyVariable", _tke_name, params);
+      addSharedSolverVariable("INSFVEnergyVariable", _tke_name, params);
     }
     else
       paramError("turbulence_kinetic_energy_variable",
@@ -126,13 +124,11 @@ WCNSFVTurbulencePhysics::addSolverVariables()
     else if (_define_variables)
     {
       auto params = getFactory().getValidParams("INSFVEnergyVariable");
-      assignBlocks(params, _blocks);
       params.set<std::vector<Real>>("scaling") = {getParam<Real>("tked_scaling")};
       params.set<MooseEnum>("face_interp_method") = getParam<MooseEnum>("tked_face_interpolation");
       params.set<bool>("two_term_boundary_expansion") =
           getParam<bool>("tked_two_term_bc_expansion");
-      params.set<SolverSystemName>("solver_sys") = getSolverSystem(_tked_name);
-      getProblem().addVariable("INSFVEnergyVariable", _tked_name, params);
+      addSharedSolverVariable("INSFVEnergyVariable", _tked_name, params);
     }
     else
       paramError("turbulence_kinetic_energy_dissipation_variable",
@@ -147,7 +143,6 @@ WCNSFVTurbulencePhysics::addAuxiliaryVariables()
   if (_turbulence_model == "mixing-length" && _define_variables)
   {
     auto params = getFactory().getValidParams("MooseVariableFVReal");
-    assignBlocks(params, _blocks);
     if (isParamValid("mixing_length_two_term_bc_expansion"))
       params.set<bool>("two_term_boundary_expansion") =
           getParam<bool>("mixing_length_two_term_bc_expansion");
@@ -155,7 +150,7 @@ WCNSFVTurbulencePhysics::addAuxiliaryVariables()
       reportPotentiallyMissedParameters({"mixing_length_two_term_bc_expansion"},
                                         "MooseVariableFVReal");
     else
-      getProblem().addAuxVariable("MooseVariableFVReal", _mixing_length_name, params);
+      addSharedAuxVariable("MooseVariableFVReal", _mixing_length_name, params);
   }
   WCNSFVTurbulencePhysicsBase::addAuxiliaryVariables();
 }
