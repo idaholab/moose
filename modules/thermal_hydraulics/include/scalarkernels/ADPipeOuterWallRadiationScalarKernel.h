@@ -10,7 +10,6 @@
 #pragma once
 
 #include "ADScalarKernel.h"
-#include "ADFunctorInterface.h"
 
 class ThermalSolidProperties;
 
@@ -18,7 +17,7 @@ class ThermalSolidProperties;
  * Outer wall radiative heat transfer kernel for the path-integrated incompressible conjugate heat
  * transfer model
  */
-class ADPipeOuterWallRadiationScalarKernel : public ADScalarKernel, public ADFunctorInterface
+class ADPipeOuterWallRadiationScalarKernel : public ADScalarKernel
 {
   using Base = ADScalarKernel;
 
