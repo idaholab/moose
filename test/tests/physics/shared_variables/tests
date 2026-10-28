@@ -2,16 +2,42 @@
   design = 'Physics/index.md'
   issues = '#30533'
   [shared]
-    type = CSVDiff
-    input = 'shared_variables.i'
-    csvdiff = 'shared_variables_out.csv'
-    requirement = 'The system shall allow multiple physics to share variables across their blocks, creating a single variable on the union of the blocks that is available to the objects the physics add.'
+    requirement = 'The system shall allow multiple physics to share variables across their blocks, creating a single variable on the union of the blocks that is available to the objects the physics add,'
+    [fe]
+      type = CSVDiff
+      input = 'shared_variables.i'
+      csvdiff = 'shared_variables_out.csv'
+      detail = 'for finite element variables,'
+    []
+    [fv]
+      type = CSVDiff
+      input = 'shared_variables_fv.i'
+      csvdiff = 'shared_variables_fv_out.csv'
+      detail = 'and for finite volume variables on subdomains that are not adjacent.'
+    []
   []
-  [inconsistent]
-    type = RunException
-    input = 'shared_variables.i'
-    cli_args = 'order=SECOND'
-    expect_err = "Physics 'right' requests the shared variable 'u' with a different variable type, family, order, scaling factor or solver system than Physics 'left' did"
-    requirement = 'The system shall return an error if multiple physics request the same shared variable with different definitions.'
+  [errors]
+    requirement = 'The system shall return an error if multiple physics share a variable'
+    [inconsistent_fe]
+      type = RunException
+      input = 'shared_variables.i'
+      cli_args = 'order=SECOND'
+      expect_err = "Physics 'right' requests the shared variable 'u' with different values for parameter\(s\) .*order.* than Physics 'left' did"
+      detail = 'with different finite element definitions,'
+    []
+    [inconsistent_fv]
+      type = RunException
+      input = 'shared_variables_fv.i'
+      cli_args = 'right_scaling=2'
+      expect_err = "Physics 'right' requests the shared variable 'u' with different values for parameter\(s\) .*scaling.* than Physics 'left' did"
+      detail = 'with different finite volume definitions,'
+    []
+    [fv_adjacent]
+      type = RunException
+      input = 'shared_variables_fv.i'
+      cli_args = 'right_block=2'
+      expect_err = "Physics 'left' and 'right' share the finite volume variable 'u' on the adjacent subdomains '0' and '2', but neither is defined on both"
+      detail = 'that is a finite volume variable, on adjacent subdomains that no single physics is defined on.'
+    []
   []
 []
