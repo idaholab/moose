@@ -276,10 +276,8 @@ DiffusionCG::addSolverVariables()
   const std::string variable_type = "MooseVariable";
   InputParameters params = getFactory().getValidParams(variable_type);
   params.set<MooseEnum>("order") = getParam<MooseEnum>("variable_order");
-  assignBlocks(params, _blocks);
-  params.set<SolverSystemName>("solver_sys") = getSolverSystem(_var_name);
 
-  getProblem().addVariable(variable_type, _var_name, params);
+  addSharedSolverVariable(variable_type, _var_name, params);
 }
 
 void

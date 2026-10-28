@@ -450,8 +450,11 @@ PhysicsBase::addSharedSolverVariable(const std::string & var_type,
                                      const VariableName & var_name,
                                      InputParameters params)
 {
-  // Saved first as getSolverSystem() looks for the variable among the Physics' solver variables
-  saveSolverVariableName(var_name);
+  // Saved first as getSolverSystem() looks for the variable among the Physics' solver variables.
+  // Some Physics already saved their variables in their constructor.
+  if (std::find(_solver_var_names.begin(), _solver_var_names.end(), var_name) ==
+      _solver_var_names.end())
+    saveSolverVariableName(var_name);
   params.set<SolverSystemName>("solver_sys") = getSolverSystem(var_name);
   PhysicsVariableCoordinator::findOrCreate(_awh, _action_factory)
       .requestVariable(true, var_type, var_name, params, _blocks, name());
@@ -462,7 +465,8 @@ PhysicsBase::addSharedAuxVariable(const std::string & var_type,
                                   const VariableName & var_name,
                                   const InputParameters & params)
 {
-  saveAuxVariableName(var_name);
+  if (std::find(_aux_var_names.begin(), _aux_var_names.end(), var_name) == _aux_var_names.end())
+    saveAuxVariableName(var_name);
   PhysicsVariableCoordinator::findOrCreate(_awh, _action_factory)
       .requestVariable(false, var_type, var_name, params, _blocks, name());
 }

@@ -13,7 +13,19 @@
       type = CSVDiff
       input = 'shared_variables_fv.i'
       csvdiff = 'shared_variables_fv_out.csv'
-      detail = 'and for finite volume variables on subdomains that are not adjacent.'
+      detail = 'for finite volume variables on subdomains that are not adjacent,'
+    []
+    [diffusion_cg]
+      type = CSVDiff
+      input = 'diffusion_two_physics.i'
+      csvdiff = 'diffusion_two_physics_out.csv'
+      detail = 'for the variable of multiple continuous Galerkin diffusion physics,'
+    []
+    [diffusion_fv]
+      type = CSVDiff
+      input = 'diffusion_two_physics_fv.i'
+      csvdiff = 'diffusion_two_physics_fv_out.csv'
+      detail = 'and for the variable of multiple finite volume diffusion physics.'
     []
   []
   [errors]
@@ -37,7 +49,14 @@
       input = 'shared_variables_fv.i'
       cli_args = 'right_block=2'
       expect_err = "Physics 'left' and 'right' share the finite volume variable 'u' on the adjacent subdomains '0' and '2', but neither is defined on both"
-      detail = 'that is a finite volume variable, on adjacent subdomains that no single physics is defined on.'
+      detail = 'that is a finite volume variable, on adjacent subdomains that no single physics is defined on,'
+    []
+    [diffusion_fv_adjacent]
+      type = RunException
+      input = 'diffusion_two_physics_fv.i'
+      cli_args = 'right_block=2'
+      expect_err = "Physics 'left' and 'right' share the finite volume variable 'u' on the adjacent subdomains '0' and '2', but neither is defined on both"
+      detail = 'for the variable of finite volume diffusion physics on adjacent subdomains.'
     []
   []
 []
