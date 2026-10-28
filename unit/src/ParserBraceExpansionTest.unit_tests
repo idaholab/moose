@@ -3,17 +3,16 @@
   issues = '#32524'
   [substitution]
     requirement = 'The system shall support parameter substitution in input files using variable expressions'
+    issues = '#5649 #32524'
     [command_line]
       type = GoogleTest
       unit_test = ParserBraceExpansionTest.SubstitutesCommandLineParameter
       detail = 'from the command line and'
-      issues = '#5649 #32524'
     []
     [in_file]
       type = GoogleTest
       unit_test = ParserBraceExpansionTest.SubstitutesInFileParameter
       detail = 'from within the same input file.'
-      issues = '#5649 #32524'
     []
   []
   [unit_conversion]
