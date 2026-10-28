@@ -49,10 +49,6 @@
     [RealComponent]
       type = MFEMDiffusionKernel
     []
-    [ImagComponent]
-      type = MFEMDiffusionKernel
-      coefficient = 0.0
-    []
   []
   [mass]
     type = MFEMComplexKernel
