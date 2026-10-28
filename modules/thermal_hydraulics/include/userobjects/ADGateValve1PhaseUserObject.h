@@ -34,8 +34,10 @@ protected:
   /// Minimum open area fraction
   const Real & _f_open_min;
 
-  /// Cross-sectional area of connected flow channels
+  /// Cross-sectional area of connected flow channels, elemental
   const ADVariableValue & _A;
+  /// Cross-sectional area of connected flow channels, linear; evaluated at the connection
+  const ADVariableValue & _A_linear;
   /// rho*A of the connected flow channels
   const ADVariableValue & _rhoA;
   /// rho*u*A of the connected flow channels

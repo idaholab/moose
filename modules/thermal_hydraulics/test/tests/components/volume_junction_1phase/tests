@@ -124,6 +124,16 @@
     restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall conserve mass and energy when a VolumJunction1Phase component is used'
   []
+  [variable_area_conservation]
+    type = 'CSVDiff'
+    input = 'variable_area_conservation.i'
+    csvdiff = 'variable_area_conservation_out.csv'
+    # The differences are relative and limited by the nonlinear tolerance
+    abs_zero = 1e-7
+    restep = false # Test is prescribed to abort on failed timestep
+    issues = '#34097'
+    requirement = 'The system shall conserve mass across a volume junction when the area of a connected flow channel varies within the element at the connection.'
+  []
   # error checking
   [err.missing_ics]
     type = 'RunException'
