@@ -50,6 +50,8 @@ FanningFrictionFactorCheng(
     const T1 & Re, const T2 & a, const T3 & b, const T4 & c, const T5 & n, const T6 & PoD)
 {
   using std::pow, std::max;
-  return (a + b * (PoD - 1) + c * pow(PoD - 1, 2)) / pow(max(Re, 10.0), n);
+  // The correlation gives the Darcy friction factor (Cheng and Todreas, 1986), which is 4 times
+  // the Fanning friction factor
+  return (a + b * (PoD - 1) + c * pow(PoD - 1, 2)) / pow(max(Re, 10.0), n) / 4;
 }
 }
