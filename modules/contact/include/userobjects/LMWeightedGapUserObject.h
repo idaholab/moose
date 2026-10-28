@@ -35,6 +35,8 @@ public:
    */
   static InputParameters newParams();
 
+  virtual const libMesh::FEType & testFEType() const override;
+
   LMWeightedGapUserObject(const InputParameters & parameters);
 
   virtual const ADVariableValue & contactPressure() const override;
@@ -46,6 +48,7 @@ public:
   /// The traction stays on the Lagrange multiplier's own basis, which is the basis adSlnLower()
   /// uses. Under Petrov-Galerkin test() is the auxiliary standard basis carrying the weighted gap.
   virtual const VariableTestValue & tractionBasis() const override;
+  virtual const libMesh::FEType & tractionBasisFEType() const override { return _lm_var->feType(); }
 
   virtual void initialize() override;
   virtual void finalize() override;
@@ -54,6 +57,7 @@ public:
   {
     return findValue(_dof_to_nodal_scale, dof, Real(1));
   }
+  virtual ADReal adNodalScale(const DofObject * const dof) const override;
   virtual bool usesNodalScaling() const override { return _use_nodal_scaling; }
 
   virtual Real normalizeCDivisor(const DofObject * const dof,
@@ -62,6 +66,8 @@ public:
     return _use_nodal_scaling ? findValue(_dof_to_full_normalization, dof, covered_normalization)
                               : covered_normalization;
   }
+  virtual ADReal adNormalizeCDivisor(const DofObject * const dof,
+                                     const Real covered_normalization) const override;
 
 protected:
   virtual const VariableTestValue & test() const override;
@@ -83,6 +89,14 @@ protected:
    * @return Per-local-node full shape-function integrals
    */
   const std::vector<Real> & fullNodalIntegrals(const Elem * elem);
+
+  /**
+   * \p fullNodalIntegrals() with their dependence on the displaced node positions, cached per
+   * element
+   * @param elem The secondary lower-dimensional element
+   * @return Per-local-node full shape-function integrals
+   */
+  const std::vector<ADReal> & adFullNodalIntegrals(const Elem * elem);
 
   /**
    * Check user input validity for provided variable
@@ -138,6 +152,14 @@ protected:
   /// int_e Phi_j = int_e N_j for the dual basis by construction. Not from Popp (2013); a PR-review
   /// proposal for composing `normalize_c` with node-based scaling.
   std::unordered_map<const DofObject *, Real> _dof_to_full_normalization;
+
+  /// The numerator of kappa_j, the nodal scaling factors, the full integrals, and the full
+  /// normalizations above with their dependence on the mortar segment geometry. Only filled when
+  /// \p _ad_segment_geometry is true.
+  std::unordered_map<const DofObject *, ADReal> _dof_to_ad_covered_fraction_sum;
+  std::unordered_map<const DofObject *, ADReal> _dof_to_ad_nodal_scale;
+  std::unordered_map<dof_id_type, std::vector<ADReal>> _elem_to_ad_full_nodal_integral;
+  std::unordered_map<const DofObject *, ADReal> _dof_to_ad_full_normalization;
 
   /// Elements already folded into _dof_to_full_normalization for a given node, to avoid double
   /// counting when multiple mortar segments cover the same element

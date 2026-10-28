@@ -39,6 +39,14 @@ public:
   const std::unordered_map<const DofObject *, std::pair<ADReal, Real>> & dofToWeightedGap() const;
 
   /**
+   * @param dof Node/element dof object
+   * @param normalization The normalization stored with the dof in \p dofToWeightedGap()
+   * @return The normalization with its dependence on the mortar segment geometry when it was
+   * computed with segment geometry derivatives, otherwise \p normalization
+   */
+  ADReal adNormalization(const DofObject * dof, Real normalization) const;
+
+  /**
    * @return The contact force at quadrature points on the mortar segment
    */
   virtual const ADVariableValue & contactPressure() const = 0;
@@ -61,6 +69,20 @@ public:
    * The default returns \p test().
    */
   virtual const VariableTestValue & tractionBasis() const;
+
+  /**
+   * @return The finite element type of \p tractionBasis(). The default returns \p testFEType().
+   */
+  virtual const libMesh::FEType & tractionBasisFEType() const { return testFEType(); }
+
+  /**
+   * @return The finite element type of \p test(), which selects its AD values when
+   * segment_geometry_derivatives = true
+   */
+  virtual const libMesh::FEType & testFEType() const;
+
+  /// Whether AD includes the displacement dependence of the mortar segment geometry
+  bool segmentGeometryDerivatives() const { return _segment_geometry_derivatives; }
 
   /**
    * @param node Node pointer
@@ -107,6 +129,12 @@ public:
    */
   virtual Real nodalScale(const DofObject * const /*dof*/) const { return 1; }
 
+  /**
+   * @return \p nodalScale() with its dependence on the mortar segment geometry when it was
+   * computed with segment geometry derivatives
+   */
+  virtual ADReal adNodalScale(const DofObject * const dof) const { return nodalScale(dof); }
+
   /// @return Whether node-based Lagrange-multiplier scaling is active
   virtual bool usesNodalScaling() const { return false; }
 
@@ -125,7 +153,18 @@ public:
     return covered_normalization;
   }
 
-  ADReal adPhysicalGap(const std::pair<ADReal, Real> & gap) const { return gap.first / gap.second; }
+  /**
+   * @param dof Node/element dof object
+   * @param covered_normalization The covered-region normalization stored with the dof in
+   * \p dofToWeightedGap()
+   * @return \p normalizeCDivisor() with its dependence on the mortar segment geometry when it was
+   * computed with segment geometry derivatives
+   */
+  virtual ADReal adNormalizeCDivisor(const DofObject * const dof,
+                                     const Real covered_normalization) const
+  {
+    return adNormalization(dof, covered_normalization);
+  }
 
   /**
    * @param node Node pointer
@@ -257,6 +296,19 @@ protected:
   /// A pointer to the test function associated with the weighted gap. We have this member so that
   /// we don't do virtual calls during inner quadrature-point/test-function loops
   const VariableTestValue * _test = nullptr;
+
+  /// The AD values of \p test() that carry the motion of the mortar segment quadrature points.
+  /// Only set when segment_geometry_derivatives = true and only filled when
+  /// \p _ad_segment_geometry is true.
+  const MooseArray<std::vector<ADReal>> * _ad_test = nullptr;
+
+  /// The AD mortar segment JxW and coord at the current quadrature point. Only set when
+  /// \p _ad_segment_geometry is true.
+  ADReal _ad_qp_factor;
+
+  /// A map from node to the normalization in \p _dof_to_weighted_gap including its derivatives.
+  /// Only filled when \p _ad_segment_geometry is true.
+  std::unordered_map<const DofObject *, ADReal> _dof_to_ad_normalization;
 
   /// AD nodal normals, each averaged over the secondary faces containing that node
   mutable std::unordered_map<const Node *, ADRealVectorValue> _ad_nodal_normals;

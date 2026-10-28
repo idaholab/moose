@@ -1953,6 +1953,94 @@ public:
   const Elem * const & msmElem() const { return _msm_elem; }
 
   /**
+   * Set the displacement derivatives of the current mortar segment geometry. Call this after
+   * reinitMortarElem() and before the face and lower-dimensional reinits at the segment
+   * quadrature points. Until clearMortarSegmentGeometryDerivatives() is called, those reinits
+   * also compute the AD shape function values at the moving quadrature points, and this method
+   * computes the AD quadrature points on both faces and the AD mortar segment JxW and coordinate
+   * transformation. The values of all AD quantities equal their Real counterparts.
+   * @param secondary_face The secondary lower-dimensional face element
+   * @param secondary_xi The quadrature points in the reference coordinates of \p secondary_face
+   * @param secondary_dxi The displacement derivatives of \p secondary_xi (zero values)
+   * @param primary_face The primary lower-dimensional face element
+   * @param primary_xi The quadrature points in the reference coordinates of \p primary_face
+   * @param primary_dxi The displacement derivatives of \p primary_xi (zero values)
+   * @param msm_nodes The positions of the mortar segment nodes with their displacement
+   * derivatives
+   */
+  void setMortarSegmentGeometryDerivatives(const Elem & secondary_face,
+                                           const std::vector<Point> & secondary_xi,
+                                           const std::vector<ADPoint> & secondary_dxi,
+                                           const Elem & primary_face,
+                                           const std::vector<Point> & primary_xi,
+                                           const std::vector<ADPoint> & primary_dxi,
+                                           const std::vector<ADPoint> & msm_nodes);
+
+  /**
+   * Stop computing the AD mortar segment geometry quantities
+   */
+  void clearMortarSegmentGeometryDerivatives() { _mortar_segment_geometry_derivatives = false; }
+
+  /**
+   * @return Whether the displacement derivatives of the current mortar segment geometry are set,
+   * which is the case only while derivatives are computed
+   */
+  const bool & mortarSegmentGeometryDerivatives() const
+  {
+    return _mortar_segment_geometry_derivatives;
+  }
+
+  /**
+   * @return The current position of \p node with the derivatives with respect to the
+   * displacement degrees of freedom of this assembly's system
+   */
+  ADPoint adNodalPoint(const Node & node) const;
+
+  /**
+   * @return The AD shape function values of \p type at the mortar segment quadrature points on
+   * the secondary interior face, the primary interior face, and the secondary lower-dimensional
+   * face, respectively. Only the requested types are filled while mortar segment geometry
+   * derivatives are set.
+   */
+  const MooseArray<std::vector<ADReal>> & adMortarPhiFace(FEType type) const
+  {
+    return _ad_mortar_phi_face[type];
+  }
+  const MooseArray<std::vector<ADReal>> & adMortarPhiFaceNeighbor(FEType type) const
+  {
+    return _ad_mortar_phi_face_neighbor[type];
+  }
+  const MooseArray<std::vector<ADReal>> & adMortarPhiLower(FEType type) const
+  {
+    return _ad_mortar_phi_lower[type];
+  }
+
+  /**
+   * @return The AD shape function values of \p type for the data of \p element_type at the
+   * current mortar segment quadrature points, or nullptr if mortar segment geometry derivatives
+   * are not set or there are no shape functions of \p type. A type that was not requested before
+   * is computed here and from then on at every mortar segment.
+   */
+  const MooseArray<std::vector<ADReal>> * adMortarPhi(Moose::ElementType element_type,
+                                                      FEType type) const;
+
+  /**
+   * @return The AD quadrature points of the current mortar segment on the secondary and primary
+   * faces
+   */
+  const MooseArray<ADPoint> & adQPointsMortarSecondary() const
+  {
+    return _ad_q_points_mortar_secondary;
+  }
+  const MooseArray<ADPoint> & adQPointsMortarPrimary() const { return _ad_q_points_mortar_primary; }
+
+  /**
+   * @return The AD JxW and coordinate transformation of the current mortar segment
+   */
+  const MooseArray<ADReal> & adJxWMortar() const { return _ad_JxW_msm; }
+  const MooseArray<ADReal> & adMortarCoordTransformation() const { return _ad_coord_msm; }
+
+  /**
    * Prepare helper FEs for p-refinement. The helper FEs are used for physical locations of
    * quadrature points and JxW, and should not apply element p-levels to their own basis.
    */
@@ -2870,6 +2958,35 @@ protected:
   libMesh::ElemSideBuilder _compute_face_map_side_elem_builder;
 
   const Elem * _msm_elem = nullptr;
+
+  /// Compute the AD shape function values \p ad_phi at quadrature points that move in the
+  /// physical direction \p shift, from the Real values and physical gradients in \p fesd
+  static void computeADMortarPhi(const FEShapeData & fesd,
+                                 const MooseArray<ADRealVectorValue> & shift,
+                                 MooseArray<std::vector<ADReal>> & ad_phi);
+
+  /// Compute the AD shape function values of every requested type in \p ad_phi
+  static void computeADMortarPhis(const std::map<FEType, std::unique_ptr<FEShapeData>> & shape_data,
+                                  const MooseArray<ADRealVectorValue> & shift,
+                                  std::map<FEType, MooseArray<std::vector<ADReal>>> & ad_phi);
+
+  /// Whether the displacement derivatives of the current mortar segment geometry are set
+  bool _mortar_segment_geometry_derivatives = false;
+  /// The physical displacement derivatives of the mortar segment quadrature points that come from
+  /// the motion of their reference coordinates on the secondary and primary faces (zero values)
+  MooseArray<ADRealVectorValue> _mortar_qp_shift_secondary;
+  MooseArray<ADRealVectorValue> _mortar_qp_shift_primary;
+  /// AD quadrature points of the current mortar segment on the secondary and primary faces
+  MooseArray<ADPoint> _ad_q_points_mortar_secondary;
+  MooseArray<ADPoint> _ad_q_points_mortar_primary;
+  /// AD JxW and coordinate transformation of the current mortar segment
+  MooseArray<ADReal> _ad_JxW_msm;
+  MooseArray<ADReal> _ad_coord_msm;
+  /// AD shape function values at the current mortar segment quadrature points, keyed by the
+  /// requested types
+  mutable std::map<FEType, MooseArray<std::vector<ADReal>>> _ad_mortar_phi_face;
+  mutable std::map<FEType, MooseArray<std::vector<ADReal>>> _ad_mortar_phi_face_neighbor;
+  mutable std::map<FEType, MooseArray<std::vector<ADReal>>> _ad_mortar_phi_lower;
 
   /// A working vector to avoid repeated heap allocations when caching residuals that must have
   /// libMesh-level constraints (hanging nodes, periodic bcs) applied to them. This stores local

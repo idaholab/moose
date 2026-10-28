@@ -253,6 +253,20 @@ Assembly::~Assembly()
   _ad_curvatures.release();
   _ad_coord.release();
 
+  _mortar_qp_shift_secondary.release();
+  _mortar_qp_shift_primary.release();
+  _ad_q_points_mortar_secondary.release();
+  _ad_q_points_mortar_primary.release();
+  _ad_JxW_msm.release();
+  _ad_coord_msm.release();
+  for (auto * ad_phi_data :
+       {&_ad_mortar_phi_face, &_ad_mortar_phi_face_neighbor, &_ad_mortar_phi_lower})
+    for (auto & [fe_type, ad_phi] : *ad_phi_data)
+    {
+      libmesh_ignore(fe_type);
+      ad_phi.release();
+    }
+
   delete _qrule_msm;
 }
 
@@ -2145,6 +2159,14 @@ Assembly::reinitElemFaceRef(const Elem * elem,
 
   computeADFace(*elem, elem_side);
 
+  if (_mortar_segment_geometry_derivatives)
+  {
+    computeADMortarPhis(_fe_shape_data_face, _mortar_qp_shift_secondary, _ad_mortar_phi_face);
+    for (const auto qp : index_range(_ad_q_points_mortar_secondary))
+      for (const auto d : make_range(Moose::dim))
+        _ad_q_points_mortar_secondary[qp](d).value() = _current_q_points_face[qp](d);
+  }
+
   // Keep the current-side bookkeeping consistent with the other elem/side reinit overloads so
   // that consumers of _current_side, _current_side_elem, and _current_side_volume (e.g.
   // InterfaceKernelBase) see correct values rather than whatever was left over from a previous
@@ -2317,6 +2339,15 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
   // We need to dig out the q_points from it
   _current_q_points_face_neighbor.shallowCopy(
       const_cast<std::vector<Point> &>(_holder_fe_face_neighbor_helper[neighbor_dim]->get_xyz()));
+
+  if (_mortar_segment_geometry_derivatives)
+  {
+    computeADMortarPhis(
+        _fe_shape_data_face_neighbor, _mortar_qp_shift_primary, _ad_mortar_phi_face_neighbor);
+    for (const auto qp : index_range(_ad_q_points_mortar_primary))
+      for (const auto d : make_range(Moose::dim))
+        _ad_q_points_mortar_primary[qp](d).value() = _current_q_points_face_neighbor[qp](d);
+  }
 }
 
 void
@@ -2401,6 +2432,9 @@ Assembly::reinitLowerDElem(const Elem * elem,
     _unique_fe_lower_helper[elem_dim]->reinit(elem);
   }
 
+  if (_mortar_segment_geometry_derivatives)
+    computeADMortarPhis(_fe_shape_data_lower, _mortar_qp_shift_secondary, _ad_mortar_phi_lower);
+
   if (!_need_lower_d_elem_volume)
     return;
 
@@ -2452,6 +2486,163 @@ Assembly::reinitNeighborLowerDElem(const Elem * elem)
     // We manually compute the volume taking the curvilinear coordinate transformations into
     // account
     _current_neighbor_lower_d_elem_volume = elementVolume(elem);
+}
+
+ADPoint
+Assembly::adNodalPoint(const Node & node) const
+{
+  ADPoint point = node;
+  const auto sys_num = _sys.number();
+  if (ADReal::do_derivatives && sys_num == _subproblem.currentNlSysNum())
+    for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
+      // Enriched elements can have mapping nodes without independent displacement degrees of
+      // freedom
+      if (node.n_dofs(sys_num, disp_num))
+        Moose::derivInsert(
+            point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
+  return point;
+}
+
+void
+Assembly::setMortarSegmentGeometryDerivatives(const Elem & secondary_face,
+                                              const std::vector<Point> & secondary_xi,
+                                              const std::vector<ADPoint> & secondary_dxi,
+                                              const Elem & primary_face,
+                                              const std::vector<Point> & primary_xi,
+                                              const std::vector<ADPoint> & primary_dxi,
+                                              const std::vector<ADPoint> & msm_nodes)
+{
+  mooseAssert(_msm_elem, "reinitMortarElem() must be called first");
+  const auto n_qp = _qrule_msm->n_points();
+  mooseAssert(secondary_xi.size() == n_qp && secondary_dxi.size() == n_qp &&
+                  primary_xi.size() == n_qp && primary_dxi.size() == n_qp,
+              "Every mortar segment quadrature point needs reference coordinates on both faces");
+  mooseAssert(msm_nodes.size() == _msm_elem->n_nodes(),
+              "Every mortar segment node needs a position");
+  _mortar_segment_geometry_derivatives = true;
+
+  // The physical quadrature point on a face is x(xi) = sum_a N_a(xi) X_a. Its derivative splits
+  // into the motion of the face nodes X_a at fixed xi and the motion dx/dxi dxi of the reference
+  // point along the face.
+  const auto face_points = [this, n_qp](const Elem & face,
+                                        const std::vector<Point> & xi,
+                                        const std::vector<ADPoint> & dxi,
+                                        MooseArray<ADRealVectorValue> & shift,
+                                        MooseArray<ADPoint> & ad_points)
+  {
+    // The geometric map ignores the element p-level
+    const FEType map_type(face.default_order(), FEMap::map_fe_type(face));
+    const auto face_dim = face.dim();
+    shift.resize(n_qp);
+    ad_points.resize(n_qp);
+    for (const auto qp : make_range(n_qp))
+    {
+      shift[qp].zero();
+      ad_points[qp].zero();
+    }
+    for (const auto a : make_range(face.n_nodes()))
+    {
+      const auto node_point = adNodalPoint(face.node_ref(a));
+      for (const auto qp : make_range(n_qp))
+      {
+        ad_points[qp].add_scaled(node_point, FEInterface::shape(map_type, 0, &face, a, xi[qp]));
+        for (const auto j : make_range(face_dim))
+          shift[qp].add_scaled(Point(face.point(a)) *
+                                   FEInterface::shape_deriv(map_type, 0, &face, a, j, xi[qp]),
+                               dxi[qp](j));
+      }
+    }
+    for (const auto qp : make_range(n_qp))
+      ad_points[qp] += shift[qp];
+  };
+  face_points(secondary_face,
+              secondary_xi,
+              secondary_dxi,
+              _mortar_qp_shift_secondary,
+              _ad_q_points_mortar_secondary);
+  face_points(
+      primary_face, primary_xi, primary_dxi, _mortar_qp_shift_primary, _ad_q_points_mortar_primary);
+
+  // The mortar segment JxW and coordinate transformation follow its nodes. Their values are set to
+  // the Real values from reinitMortarElem() so that residuals do not depend on this method.
+  const FEType msm_type(_msm_elem->default_order(), FEMap::map_fe_type(*_msm_elem));
+  const auto msm_dim = _msm_elem->dim();
+  _ad_JxW_msm.resize(n_qp);
+  _ad_coord_msm.resize(n_qp);
+  for (const auto qp : make_range(n_qp))
+  {
+    const auto & ref_point = _qrule_msm->qp(qp);
+    ADPoint physical_point;
+    std::array<ADRealVectorValue, 2> tangents;
+    for (const auto a : index_range(msm_nodes))
+    {
+      physical_point.add_scaled(msm_nodes[a],
+                                FEInterface::shape(msm_type, 0, _msm_elem, a, ref_point));
+      for (const auto j : make_range(msm_dim))
+        tangents[j].add_scaled(msm_nodes[a],
+                               FEInterface::shape_deriv(msm_type, 0, _msm_elem, a, j, ref_point));
+    }
+    _ad_JxW_msm[qp] = (msm_dim == 1 ? tangents[0].norm() : tangents[0].cross(tangents[1]).norm()) *
+                      _qrule_msm->w(qp);
+    _ad_JxW_msm[qp].value() = (*_JxW_msm)[qp];
+    coordTransformFactor(_subproblem, _msm_elem->subdomain_id(), physical_point, _ad_coord_msm[qp]);
+    _ad_coord_msm[qp].value() = _coord_msm[qp];
+  }
+}
+
+void
+Assembly::computeADMortarPhi(const FEShapeData & fesd,
+                             const MooseArray<ADRealVectorValue> & shift,
+                             MooseArray<std::vector<ADReal>> & ad_phi)
+{
+  // A shape function evaluated at a quadrature point that moves by dx changes by grad(phi) dx
+  const auto & phi = fesd._phi;
+  const auto & grad_phi = fesd._grad_phi;
+  ad_phi.resize(phi.size());
+  for (const auto i : index_range(phi))
+  {
+    mooseAssert(phi[i].size() == shift.size(),
+                "The shape functions and quadrature point shifts must use the same points");
+    ad_phi[i].resize(phi[i].size());
+    for (const auto qp : index_range(phi[i]))
+      ad_phi[i][qp] = phi[i][qp] + grad_phi[i][qp] * shift[qp];
+  }
+}
+
+void
+Assembly::computeADMortarPhis(const std::map<FEType, std::unique_ptr<FEShapeData>> & shape_data,
+                              const MooseArray<ADRealVectorValue> & shift,
+                              std::map<FEType, MooseArray<std::vector<ADReal>>> & ad_phi)
+{
+  for (auto & [fe_type, ad_phi_type] : ad_phi)
+    if (const auto it = shape_data.find(fe_type); it != shape_data.end() && it->second)
+      computeADMortarPhi(*it->second, shift, ad_phi_type);
+}
+
+const MooseArray<std::vector<ADReal>> *
+Assembly::adMortarPhi(const Moose::ElementType element_type, const FEType type) const
+{
+  if (!_mortar_segment_geometry_derivatives)
+    return nullptr;
+
+  const bool neighbor = element_type == Moose::ElementType::Neighbor;
+  const auto & shape_data = element_type == Moose::ElementType::Element ? _fe_shape_data_face
+                            : neighbor ? _fe_shape_data_face_neighbor
+                                       : _fe_shape_data_lower;
+  auto & ad_phi = element_type == Moose::ElementType::Element ? _ad_mortar_phi_face
+                  : neighbor                                  ? _ad_mortar_phi_face_neighbor
+                                                              : _ad_mortar_phi_lower;
+  const auto shape_it = shape_data.find(type);
+  if (shape_it == shape_data.end() || !shape_it->second)
+    return nullptr;
+  if (const auto it = ad_phi.find(type); it != ad_phi.end())
+    return &it->second;
+
+  auto & ad_phi_type = ad_phi[type];
+  computeADMortarPhi(*shape_it->second,
+                     neighbor ? _mortar_qp_shift_primary : _mortar_qp_shift_secondary,
+                     ad_phi_type);
+  return &ad_phi_type;
 }
 
 void

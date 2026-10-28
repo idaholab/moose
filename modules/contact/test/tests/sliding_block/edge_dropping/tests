@@ -49,6 +49,112 @@
     allow_test_objects = true
     capabilities = 'ad_size>=100'
   []
+  [segment-geometry-derivatives]
+    requirement = 'The system shall reduce the number of Newton iterations of sliding mortar contact '
+                  'with standard Lagrange multiplier bases when the displacement dependence of the '
+                  'mortar segment geometry is included in the Jacobian, in'
+    design = 'AutomaticMortarGeneration.md'
+    issues = '#34177'
+    [2d]
+      type = 'CSVDiff'
+      input = 'two_equal_blocks_slide_2d.i'
+      csvdiff = 'segment_geometry_derivatives_2d.csv'
+      mesh_mode = 'REPLICATED'
+      # A linear elastic bulk response with an exact Jacobian isolates the contact Jacobian. The
+      # Newton iterations per step drop from 6 to 2 or 3.
+      cli_args = 'Physics/SolidMechanics/QuasiStatic/all/strain=SMALL '
+                 'Physics/SolidMechanics/QuasiStatic/all/incremental=false '
+                 'Materials/stress_left/type=ComputeLinearElasticStress '
+                 'Materials/stress_right/type=ComputeLinearElasticStress '
+                 'GlobalParams/volumetric_locking_correction=false Executioner/solve_type=NEWTON '
+                 'Variables/normal_lm/use_dual=false GlobalParams/segment_geometry_derivatives=true '
+                 'Postprocessors/nl/type=NumNonlinearIterations Outputs/execute_on=TIMESTEP_END '
+                 'Outputs/file_base=segment_geometry_derivatives_2d'
+      detail = '2D,'
+      allow_test_objects = true
+      capabilities = 'ad_size>=100'
+    []
+    [2d-nodal-scaling]
+      type = 'CSVDiff'
+      input = 'two_equal_blocks_slide_2d.i'
+      csvdiff = 'segment_geometry_derivatives_2d_nodal_scaling.csv'
+      mesh_mode = 'REPLICATED'
+      # The Newton iterations per sliding step drop from 6 to 2 or 3
+      cli_args = 'Physics/SolidMechanics/QuasiStatic/all/strain=SMALL '
+                 'Physics/SolidMechanics/QuasiStatic/all/incremental=false '
+                 'Materials/stress_left/type=ComputeLinearElasticStress '
+                 'Materials/stress_right/type=ComputeLinearElasticStress '
+                 'GlobalParams/volumetric_locking_correction=false Executioner/solve_type=NEWTON '
+                 'Variables/normal_lm/use_dual=false GlobalParams/segment_geometry_derivatives=true '
+                 'UserObjects/weighted_gap_uo/use_nodal_scaling=true '
+                 'Postprocessors/nl/type=NumNonlinearIterations Outputs/execute_on=TIMESTEP_END '
+                 'Outputs/file_base=segment_geometry_derivatives_2d_nodal_scaling'
+      detail = '2D with node-based Lagrange multiplier scaling, and'
+      allow_test_objects = true
+      capabilities = 'ad_size>=100'
+    []
+    [3d]
+      type = 'CSVDiff'
+      input = 'two_equal_blocks_slide_3d.i'
+      csvdiff = 'segment_geometry_derivatives_3d.csv'
+      mesh_mode = 'REPLICATED'
+      # The Newton iterations per sliding step drop from 6 to 2 or 3
+      cli_args = 'Physics/SolidMechanics/QuasiStatic/all/strain=SMALL '
+                 'Physics/SolidMechanics/QuasiStatic/all/incremental=false '
+                 'Materials/stress_left/type=ComputeLinearElasticStress '
+                 'Materials/stress_right/type=ComputeLinearElasticStress '
+                 'GlobalParams/volumetric_locking_correction=false Executioner/solve_type=NEWTON '
+                 'Variables/normal_lm/use_dual=false GlobalParams/segment_geometry_derivatives=true '
+                 'Postprocessors/nl/type=NumNonlinearIterations Outputs/execute_on=TIMESTEP_END '
+                 'Outputs/file_base=segment_geometry_derivatives_3d'
+      detail = '3D.'
+      allow_test_objects = true
+      capabilities = 'ad_size>=100'
+    []
+  []
+  [segment-geometry-derivatives-errors]
+    requirement = 'The system shall report an error when the mortar segment geometry derivatives '
+                  'are requested'
+    design = 'AutomaticMortarGeneration.md'
+    issues = '#34177'
+    [dual]
+      type = 'RunException'
+      input = 'two_equal_blocks_slide_2d.i'
+      cli_args = 'GlobalParams/segment_geometry_derivatives=true'
+      expect_err = 'Segment geometry derivatives are not available with dual Lagrange multiplier '
+                   'bases'
+      detail = 'with a dual Lagrange multiplier basis,'
+      allow_test_objects = true
+    []
+    [mismatch]
+      type = 'RunException'
+      input = 'two_equal_blocks_slide_2d.i'
+      cli_args = 'Variables/normal_lm/use_dual=false '
+                 'GlobalParams/segment_geometry_derivatives=true '
+                 'Constraints/normal_x/segment_geometry_derivatives=false'
+      expect_err = "must use the same 'segment_geometry_derivatives' value"
+      detail = 'by only some of the objects on a mortar interface,'
+      allow_test_objects = true
+    []
+    [undisplaced]
+      type = 'RunException'
+      input = 'two_equal_blocks_slide_2d.i'
+      cli_args = 'Variables/normal_lm/use_dual=false '
+                 'GlobalParams/segment_geometry_derivatives=true '
+                 'UserObjects/weighted_gap_uo/use_displaced_mesh=false'
+      expect_err = "Segment geometry derivatives require 'use_displaced_mesh = true'"
+      detail = 'on the undisplaced mesh, and'
+      allow_test_objects = true
+    []
+    [unsupported-constraint]
+      type = 'RunException'
+      input = '../../cohesive_zone_model/bilinear_mixed_mortar_only_czm.i'
+      cli_args = 'GlobalParams/segment_geometry_derivatives=true'
+      expect_err = 'Segment geometry derivatives are not supported by this mortar constraint'
+      detail = 'by a mortar constraint that does not support them, such as a cohesive zone '
+               'traction.'
+    []
+  []
   [frictionless-slide-2d-nodal-scaling]
     type = 'CSVDiff'
     input = 'two_equal_blocks_slide_2d.i'

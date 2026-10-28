@@ -281,4 +281,68 @@
     requirement = 'Quasistatic mortar contact shall execute with active HEX27 elements and QUAD9 '
                   'interface faces when sufficient AD storage is available.'
   []
+
+  [segment_geometry_derivatives]
+    requirement = 'Mortar contact shall compute a Jacobian that includes the displacement dependence '
+                  'of the mortar segment geometry and agrees with a finite-difference '
+                  'approximation'
+    design = 'AutomaticMortarGeneration.md ContactAction.md'
+    issues = '#34177'
+    [lm_3d]
+      type = PetscJacobianTester
+      input = curved_3d_action.i
+      cli_args = 'Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 '
+                 'Mesh/bottom_block/nx=2 Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 '
+                 'Contact/mortar/model=frictionless Contact/mortar/use_dual=false '
+                 'Contact/mortar/segment_geometry_derivatives=true -snes_test_err 1e-6'
+      run_sim = false
+      # Without the segment geometry derivatives the relative error is 3.2e-2
+      ratio_tol = 1e-6
+      detail = 'for three-dimensional frictionless Lagrange-multiplier contact,'
+    []
+    [lm_3d_reference_interpolation]
+      type = PetscJacobianTester
+      input = curved_3d_action.i
+      cli_args = 'Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 '
+                 'Mesh/bottom_block/nx=2 Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 '
+                 'Contact/mortar/model=frictionless Contact/mortar/use_dual=false '
+                 'Contact/mortar/segment_geometry_derivatives=true '
+                 'Contact/mortar/mortar_3d_qp_mapping=reference_interpolation '
+                 'Contact/mortar/triangulate_triangles=true -snes_test_err 1e-6'
+      run_sim = false
+      ratio_tol = 1e-6
+      detail = 'for three-dimensional frictionless Lagrange-multiplier contact with quadrature '
+               'points interpolated from the segment vertices and area-weighted segment centers,'
+    []
+    [penalty_3d]
+      type = PetscJacobianTester
+      input = curved_3d_action.i
+      cli_args = 'Mesh/top_block/nx=1 Mesh/top_block/ny=1 Mesh/top_block/nz=1 '
+                 'Mesh/bottom_block/nx=2 Mesh/bottom_block/ny=1 Mesh/bottom_block/nz=1 '
+                 'Contact/mortar/formulation=mortar_penalty Contact/mortar/penalty=1e2 '
+                 'Contact/mortar/penalty_friction=1e2 Contact/mortar/use_dual=false '
+                 'ICs/inactive=normal_lm Contact/mortar/segment_geometry_derivatives=true '
+                 'Executioner/abort_on_solve_fail=true -snes_test_err 1e-6'
+      run_sim = false
+      # The checked Jacobian precedes a forced full Newton step that leaves the function domain, so
+      # the solve aborts once the Jacobian check is complete. Without the segment geometry
+      # derivatives the relative error is 8.5e-3.
+      ratio_tol = 4e-6
+      detail = 'for three-dimensional frictional penalty contact, and'
+    []
+    [friction_2d_rz]
+      type = PetscJacobianTester
+      input = ../bouncing-block-contact/variational-frictional-action.i
+      cli_args = 'Mesh/coord_type=RZ Executioner/num_steps=4 Outputs/exodus/enable=false '
+                 'Contact/contact_action/segment_geometry_derivatives=true -snes_test_err 1e-8'
+      # The input names its Exodus output, which Outputs/exodus/enable disables
+      turn_off_exodus_output = false
+      run_sim = true
+      only_final_jacobian = true
+      # The final Jacobian is evaluated in sliding contact. Without the segment geometry
+      # derivatives the relative error is 2.6e-2.
+      ratio_tol = 1e-7
+      detail = 'for axisymmetric frictional Lagrange-multiplier contact.'
+    []
+  []
 []

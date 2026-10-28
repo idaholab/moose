@@ -38,4 +38,8 @@ protected:
 
   /// The weighted velocities user object which supplies the contact pressure tangential vectors
   const WeightedVelocitiesUserObject & _weighted_velocities_uo;
+
+  /// The AD tangential traction basis that carries the motion of the mortar segment quadrature
+  /// points. Only set when segment_geometry_derivatives = true.
+  const MooseArray<std::vector<ADReal>> * _ad_traction_basis = nullptr;
 };

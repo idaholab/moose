@@ -223,7 +223,7 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
   // The stored multiplier is zhat = kappa*lambda; recover lambda for the Coulomb bound
-  contact_pressure /= _weighted_gap_uo.nodalScale(dof);
+  contact_pressure /= _weighted_gap_uo.adNodalScale(dof);
 
   // Get friction LMs
   std::array<const ADReal *, 2> & tangential_vel = _tangential_vel_ptr;
@@ -239,23 +239,23 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   }
 
   // Get normalized c and c_t values (if normalization specified
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
-  const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
+  const auto normalization = _weighted_gap_uo.adNormalization(dof, *_normalization_ptr);
+  const ADReal c = _normalize_c ? _c / normalization : ADReal(_c);
+  const ADReal c_t = _normalize_c ? _c_t / normalization : ADReal(_c_t);
 
   // Compute the friction coefficient (constant or function). The nodal slip rate is the weighted
   // tangential velocity divided by the integral of the same test function, which is the nodal
   // coefficient of the mortar projection of the relative tangential velocity
   // (Wohlmuth 2011, eq. 3.10a).
-  ADReal mu_ad = computeFrictionValue(contact_pressure,
-                                      *tangential_vel[0] / *_normalization_ptr,
-                                      *tangential_vel[1] / *_normalization_ptr);
+  ADReal mu_ad = computeFrictionValue(
+      contact_pressure, *tangential_vel[0] / normalization, *tangential_vel[1] / normalization);
 
   const std::array<ADReal, 2> tangential_velocity{{*tangential_vel[0], *tangential_vel[1]}};
 
   const auto residual =
       Moose::Mortar::Contact::frictionalContactResidual(friction_lm_values,
                                                         tangential_velocity,
-                                                        ADReal(c_t),
+                                                        c_t,
                                                         ADReal(_dt),
                                                         contact_pressure,
                                                         c * weighted_gap,
@@ -292,15 +292,16 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
   // The stored multiplier is zhat = kappa*lambda; recover lambda for the Coulomb bound
-  contact_pressure /= _weighted_gap_uo.nodalScale(dof);
+  contact_pressure /= _weighted_gap_uo.adNodalScale(dof);
 
   // Get normalized c and c_t values (if normalization specified
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
-  const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
+  const auto normalization = _weighted_gap_uo.adNormalization(dof, *_normalization_ptr);
+  const ADReal c = _normalize_c ? _c / normalization : ADReal(_c);
+  const ADReal c_t = _normalize_c ? _c_t / normalization : ADReal(_c_t);
 
   // Compute the friction coefficient (constant or function) from the projected nodal slip rate, as
   // in enforceConstraintOnDof3d()
-  ADReal mu_ad = computeFrictionValue(contact_pressure, tangential_vel / *_normalization_ptr, 0.0);
+  ADReal mu_ad = computeFrictionValue(contact_pressure, tangential_vel / normalization, 0.0);
 
   const std::array<ADReal, 1> tangential_pressure{{friction_lm_value}};
   const std::array<ADReal, 1> tangential_velocity{{tangential_vel}};
@@ -308,7 +309,7 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   const ADReal dof_residual =
       Moose::Mortar::Contact::frictionalContactResidual(tangential_pressure,
                                                         tangential_velocity,
-                                                        ADReal(c_t),
+                                                        c_t,
                                                         ADReal(_dt),
                                                         contact_pressure,
                                                         c * weighted_gap,

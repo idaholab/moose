@@ -117,6 +117,15 @@ MortarConsumerInterface::validParams()
       "parent-face reference coordinates. This parameter has no effect for 2D mortar.");
 
   params.addParam<bool>(
+      "segment_geometry_derivatives",
+      false,
+      "Whether automatic differentiation includes the dependence of the mortar segment geometry on "
+      "the displacements: the segment end points or vertices, the quadrature point locations on "
+      "the primary and secondary faces, and the mortar segment Jacobian. The Jacobian of AD "
+      "mortar constraints on displaced meshes is then consistent with the residual while the "
+      "segmentation does not change. It requires standard (not dual) Lagrange multiplier bases.");
+
+  params.addParam<bool>(
       "ghost_higher_d_neighbors",
       false,
       "Whether we should ghost higher-dimensional neighbors. This is necessary when we are doing "
@@ -193,6 +202,12 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
     _lower_secondary_elem(_mci_assembly.lowerDElem()),
     _lower_primary_elem(_mci_assembly.neighborLowerDElem()),
     _JxW_msm(_mci_assembly.jxWMortar()),
+    _segment_geometry_derivatives(moose_object->getParam<bool>("segment_geometry_derivatives")),
+    _ad_segment_geometry(_mci_assembly.mortarSegmentGeometryDerivatives()),
+    _ad_JxW_msm(_mci_assembly.adJxWMortar()),
+    _ad_coord_msm(_mci_assembly.adMortarCoordTransformation()),
+    _ad_phys_points_secondary(_mci_assembly.adQPointsMortarSecondary()),
+    _ad_phys_points_primary(_mci_assembly.adQPointsMortarPrimary()),
     _msm_elem(_mci_assembly.msmElem())
 {
   const bool displaced = moose_object->isParamValid("use_displaced_mesh")
@@ -212,6 +227,11 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
                              "Must be between 0 and 90 degrees when "
                              "mortar_3d_subpatch_plane = GEOMETRIC_NORMAL.");
 
+  // The segment geometry moves with the displacements only on the displaced mesh
+  if (moose_object->getParam<bool>("segment_geometry_derivatives") && !displaced)
+    moose_object->paramError("segment_geometry_derivatives",
+                             "Segment geometry derivatives require 'use_displaced_mesh = true'.");
+
   // Create the mortar interface if it hasn't already been created
   _mci_fe_problem.createMortarInterface(
       std::make_pair(_primary_id, _secondary_id),
@@ -225,7 +245,8 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
       moose_object->getParam<MooseEnum>("triangulation"),
       moose_object->getParam<bool>("triangulate_triangles"),
       moose_object->getParam<MooseEnum>("mortar_3d_qp_mapping")
-          .getEnum<Mortar3DQuadraturePointMapping>());
+          .getEnum<Mortar3DQuadraturePointMapping>(),
+      moose_object->getParam<bool>("segment_geometry_derivatives"));
 
   _amg = &_mci_fe_problem.getMortarInterface(
       std::make_pair(_primary_id, _secondary_id),
@@ -241,6 +262,21 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
                  primary_set.end(),
                  std::inserter(_higher_dim_subdomain_ids, _higher_dim_subdomain_ids.begin()));
   _boundary_ids = {_secondary_id, _primary_id};
+}
+
+const MooseArray<std::vector<ADReal>> &
+MortarConsumerInterface::adMortarTest(const Moose::ElementType element_type,
+                                      const FEType & fe_type) const
+{
+  switch (element_type)
+  {
+    case Moose::ElementType::Element:
+      return _mci_assembly.adMortarPhiFace(fe_type);
+    case Moose::ElementType::Neighbor:
+      return _mci_assembly.adMortarPhiFaceNeighbor(fe_type);
+    default:
+      return _mci_assembly.adMortarPhiLower(fe_type);
+  }
 }
 
 void
