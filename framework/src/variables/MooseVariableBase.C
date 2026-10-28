@@ -17,6 +17,7 @@
 #include "InputParameterWarehouse.h"
 #include "BlockRestrictable.h"
 #include "MooseUtils.h"
+#include "MortarUtils.h"
 
 #include "libmesh/variable.h"
 #include "libmesh/dof_map.h"
@@ -66,9 +67,16 @@ MooseVariableBase::validParams()
   params.transferParam<bool>(AddVariableAction::validParams(), "disable_p_refinement");
 
   params.addParam<bool>("use_dual", false, "True to use dual basis for Lagrange multipliers");
+  params.addParam<bool>(
+      "use_piecewise_linear_basis",
+      false,
+      "True to use, on lower-dimensional quadratic faces, the first-order Lagrange basis of the "
+      "linear sub-elements used for mortar segmentation instead of the quadratic basis. Each "
+      "function belongs to one face node and is non-negative. Only for auxiliary variables used "
+      "as a mortar test basis.");
   params.transferParam<std::vector<Real>>(AddVariableAction::validParams(), "initial_condition");
   params.transferParam<std::string>(AddVariableAction::validParams(), "initial_from_file_var");
-  params.addParamNamesToGroup("scaling eigen use_dual", "Advanced");
+  params.addParamNamesToGroup("scaling eigen use_dual use_piecewise_linear_basis", "Advanced");
 
   params.registerBase("MooseVariableBase");
   params.addPrivateParam<SystemBase *>("_system_base");
@@ -101,7 +109,8 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _tid(getParam<THREAD_ID>("tid")),
     _count(getParam<unsigned int>("components")),
     _scaling_factor(_count, 1.0),
-    _use_dual(getParam<bool>("use_dual"))
+    _use_dual(getParam<bool>("use_dual")),
+    _use_piecewise_linear_basis(getParam<bool>("use_piecewise_linear_basis"))
 {
   scalingFactor(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
                                         : std::vector<Real>(_count, 1.));
@@ -113,6 +122,31 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     paramError("order", "finite volume (fv=true) variables currently support CONST order only");
   if (getParam<bool>("fv") && _fe_type.p_refinement)
     paramError("p_refinement", "finite volume (fv=true) variables do not support p-refinement");
+  if (_use_piecewise_linear_basis)
+  {
+    // The basis has no gradients, which only the Jacobians of nonlinear variables would read
+    if (_var_kind != Moose::VAR_AUXILIARY || _use_dual || _fe_type.family != LAGRANGE ||
+        _fe_type.order != SECOND || _fe_type.p_refinement)
+      paramError("use_piecewise_linear_basis",
+                 "The piecewise-linear basis requires a SECOND order LAGRANGE auxiliary variable "
+                 "with 'use_dual = false' and without p-refinement.");
+
+    // Assembly sizes the basis by the number of face nodes, so every element of the variable must
+    // be a supported face
+    bool supported = true;
+    for (const auto * const elem :
+         _mesh.getMesh().active_subdomain_set_elements_ptr_range(blockIDs()))
+      if (!Moose::Mortar::hasPiecewiseLinearShapes(elem->type()))
+      {
+        supported = false;
+        break;
+      }
+    comm().min(supported);
+    if (!supported)
+      paramError("use_piecewise_linear_basis",
+                 "The piecewise-linear basis is only available on EDGE3, TRI6, QUAD8 and QUAD9 "
+                 "lower-dimensional blocks.");
+  }
 
   if (isParamValid("array_var_component_names"))
   {

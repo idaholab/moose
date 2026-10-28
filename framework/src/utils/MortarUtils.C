@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -135,6 +136,74 @@ getMortarSubElementNodeIndices(const Elem & parent_elem, const unsigned int sub_
                  libMesh::Utility::enum_to_string<ElemType>(parent_elem.type()),
                  " for 3D mortar sub-element topology.");
   }
+}
+
+bool
+hasPiecewiseLinearShapes(const ElemType type)
+{
+  return type == EDGE3 || type == TRI6 || type == QUAD8 || type == QUAD9;
+}
+
+void
+piecewiseLinearShapes(const Elem & parent_elem,
+                      const Point & reference_point,
+                      std::vector<Real> & phi)
+{
+  if (!hasPiecewiseLinearShapes(parent_elem.type()))
+    mooseError("Piecewise-linear shape functions are not available for face element ",
+               parent_elem.id(),
+               " of type ",
+               libMesh::Utility::enum_to_string<ElemType>(parent_elem.type()),
+               ".");
+
+  phi.assign(parent_elem.n_nodes(), 0);
+
+  // EDGE3 is split at its mid node (node 2, xi = 0) into two EDGE2.
+  if (parent_elem.type() == EDGE3)
+  {
+    const Real xi = reference_point(0);
+    phi[xi <= 0 ? 0 : 1] = std::abs(xi);
+    phi[2] = 1 - std::abs(xi);
+    return;
+  }
+
+  // Every sub-element is a triangle or a parallelogram in the parent reference coordinates, so the
+  // map from its own reference coordinates is affine: x = origin + local(0) * e0 + local(1) * e1.
+  // Points on a shared sub-element edge get the same values from either sub-element, so the first
+  // sub-element containing the point is used. Quadrature points lie inside the face, so the
+  // fallback to the least violated sub-element only absorbs roundoff.
+  std::vector<unsigned int> best_nodes;
+  Point best_local;
+  Real best_violation = std::numeric_limits<Real>::max();
+  for (const auto sub_elem : make_range(parent_elem.n_sub_elem()))
+  {
+    auto nodes = getMortarSubElementNodeIndices(parent_elem, sub_elem);
+    const bool triangle = nodes.size() == 3;
+    const Point p0 = parent_elem.master_point(nodes[0]);
+    // A parallelogram is centered in its reference square [-1, 1]^2
+    const Point origin = triangle ? p0 : Point(0.5 * (p0 + parent_elem.master_point(nodes[2])));
+    const Real scale = triangle ? 1 : 0.5;
+    const Point e0 = scale * (parent_elem.master_point(nodes[1]) - p0);
+    const Point e1 = scale * (parent_elem.master_point(nodes.back()) - p0);
+    const Real det = e0(0) * e1(1) - e0(1) * e1(0);
+    const Point d = reference_point - origin;
+    const Point local((d(0) * e1(1) - d(1) * e1(0)) / det, (e0(0) * d(1) - e0(1) * d(0)) / det);
+    const Real violation =
+        triangle ? std::max({Real(0), -local(0), -local(1), local(0) + local(1) - 1})
+                 : std::max({Real(0), std::abs(local(0)) - 1, std::abs(local(1)) - 1});
+    if (violation < best_violation)
+    {
+      best_violation = violation;
+      best_nodes = std::move(nodes);
+      best_local = local;
+    }
+    if (best_violation == 0)
+      break;
+  }
+
+  const auto sub_type = best_nodes.size() == 3 ? TRI3 : QUAD4;
+  for (const auto i : index_range(best_nodes))
+    phi[best_nodes[i]] = Moose::fe_lagrange_2D_shape(sub_type, FIRST, i, best_local);
 }
 
 namespace
