@@ -11,6 +11,8 @@
 
 #include "MortarNodalAuxKernel.h"
 
+class MortarContactPressureProvider;
+
 /**
  * Compute worn-out depth based on Archard's wear law
  */
@@ -31,8 +33,15 @@ protected:
 
   void computeQpIProperties();
 
-  // Mortar normal contact pressure
-  const VariableValue & _normal_pressure;
+  /// The normal contact pressure at the current node
+  Real normalPressure() const;
+
+  /// Mortar contact object that provides the physical normal contact pressure, or nullptr
+  const MortarContactPressureProvider * const _contact_pressure_provider;
+
+  /// Prescribed normal contact pressure variable, or nullptr when the pressure comes from the
+  /// user object provider
+  const VariableValue * const _normal_pressure;
 
   /// Friction coefficient used to compute Archard's law
   const Real _friction_coefficient;

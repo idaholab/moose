@@ -44,6 +44,7 @@ GapFluxModelBase::computeFluxInternal(
   _surface_integration_factor = mortar_constraint._surface_integration_factor;
   _adjusted_length = mortar_constraint._adjusted_length;
   _normal_pressure = mortar_constraint._normal_pressure;
+  _lower_secondary_elem = mortar_constraint._lower_secondary_elem;
   _secondary_point = Moose::ElemPointArg({mortar_constraint._interior_secondary_elem,
                                           mortar_constraint._phys_points_secondary[_qp],
                                           false});
