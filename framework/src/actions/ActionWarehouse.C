@@ -102,8 +102,15 @@ ActionWarehouse::sortActionsByDependency(
     const auto & sorted = resolver.getSortedValues();
     actions.assign(sorted.begin(), sorted.end());
   }
-  catch (const CyclicDependencyException<Action *> &)
+  catch (const CyclicDependencyException<Action *> & e)
   {
+    // The cycle begins and ends with the same action
+    std::string cycle;
+    for (const auto act : e.getCyclicDependencies())
+      cycle += (cycle.empty() ? "" : " -> ") + act->name();
+    mooseInfo("A cyclic dependency was found among actions, so they will be ordered as in the "
+              "input: ",
+              cycle);
   }
 }
 
