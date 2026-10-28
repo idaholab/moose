@@ -88,3 +88,209 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, test)
   const Real v_gold = FluidProperties::_R * T / (M * p);
   REL_TEST(v, v_gold, REL_TOL_SAVED_VALUE);
 }
+
+namespace
+{
+/**
+ * Compares the derivatives of the automatic differentiation version of a mixture property
+ * f(a, b, x) with respect to a, b, and the secondary mass fraction x with central differences of
+ * its Real version
+ */
+template <typename F>
+void
+expectADDerivatives(const F & f, const Real a, const Real b, const Real x)
+{
+  DNDerivativeType da, db, dx;
+  Moose::derivInsert(da, 0, 1);
+  Moose::derivInsert(db, 1, 1);
+  Moose::derivInsert(dx, 2, 1);
+  const ADReal f_ad = f(ADReal(a, da), ADReal(b, db), std::vector<ADReal>{ADReal(x, dx)});
+  REL_TEST(f_ad, f(a, b, std::vector<Real>{x}), REL_TOL_CONSISTENCY);
+
+  const Real ha = REL_PERTURBATION * a;
+  const Real hb = REL_PERTURBATION * b;
+  const Real hx = REL_PERTURBATION * x;
+  REL_TEST(f_ad.derivatives()[0],
+           (f(a + ha, b, std::vector<Real>{x}) - f(a - ha, b, std::vector<Real>{x})) / (2 * ha),
+           REL_TOL_DERIVATIVE);
+  REL_TEST(f_ad.derivatives()[1],
+           (f(a, b + hb, std::vector<Real>{x}) - f(a, b - hb, std::vector<Real>{x})) / (2 * hb),
+           REL_TOL_DERIVATIVE);
+  REL_TEST(f_ad.derivatives()[2],
+           (f(a, b, std::vector<Real>{x + hx}) - f(a, b, std::vector<Real>{x - hx})) / (2 * hx),
+           REL_TOL_DERIVATIVE);
+}
+
+/**
+ * Checks the automatic differentiation derivatives of the temperature and pressure from (v, e), of
+ * the internal energy from (p, rho), and of the sound speed from (p, T) of a two-component mixture
+ * at a pressure, temperature, and secondary mass fraction
+ */
+void
+expectMixtureADDerivatives(const IdealGasMixtureFluidProperties & fp,
+                           const Real p,
+                           const Real T,
+                           const Real x)
+{
+  const Real v = fp.v_from_p_T(p, T, {x});
+  const Real e = fp.e_from_p_T(p, T, {x});
+
+  expectADDerivatives([&fp](const auto & v, const auto & e, const auto & x)
+                      { return fp.T_from_v_e(v, e, x); },
+                      v,
+                      e,
+                      x);
+  expectADDerivatives([&fp](const auto & v, const auto & e, const auto & x)
+                      { return fp.p_from_v_e(v, e, x); },
+                      v,
+                      e,
+                      x);
+  expectADDerivatives([&fp](const auto & p, const auto & rho, const auto & x)
+                      { return fp.e_from_p_rho(p, rho, x); },
+                      p,
+                      1 / v,
+                      x);
+  expectADDerivatives([&fp](const auto & p, const auto & T, const auto & x)
+                      { return fp.c_from_p_T(p, T, x); },
+                      p,
+                      T,
+                      x);
+}
+}
+
+TEST_F(IdealGasMixtureFluidPropertiesTest, adDerivatives)
+{
+  expectMixtureADDerivatives(*_fp_mix, 100000, 400, 0.7);
+}
+
+TEST_F(IdealGasMixtureFluidPropertiesTest, deprecatedSpecificHeatRatio)
+{
+  // The deprecated specific heat ratio without pressure and temperature arguments still works for
+  // components with constant specific heats
+  const std::vector<Real> x = {0.3, 0.7};
+  REL_TEST(_fp_mix->mixtureSpecificHeatRatio(x),
+           _fp_mix->mixtureSpecificHeatRatio(100000.0, 400.0, x),
+           REL_TOL_CONSISTENCY);
+
+  // It reports an error for components with temperature-dependent specific heats
+  const std::vector<std::string> species = {"N2", "O2"};
+  const std::string name = "air";
+  const auto & air = buildNASA7Mixture(species, name);
+  EXPECT_THROW(air.mixtureSpecificHeatRatio(std::vector<Real>{0.767, 0.233}), std::exception);
+}
+
+TEST_F(IdealGasMixtureFluidPropertiesTest, nasa7Cantera)
+{
+  // Reformed fuel of a solid oxide cell, with mole fractions H2O 0.35, H2 0.30, CO 0.10, CO2 0.15,
+  // CH4 0.05, and N2 0.05, at 1073.15 K (800 C). The secondary mass fractions and the reference
+  // values were computed with Cantera 3.2.0 from gri30.yaml. Cantera uses the gas constant
+  // 8.31446261815324 J/(mol K), whereas FluidProperties::_R is 8.3144598 J/(mol K). Properties
+  // proportional to the gas constant are rescaled by the ratio of the two, density by its inverse,
+  // and sound speed by its square root, so that only roundoff separates the results.
+  const std::vector<std::string> species = {"H2O", "H2", "CO", "CO2", "CH4", "N2"};
+  const std::string name = "reformate";
+  const auto & fp = buildNASA7Mixture(species, name);
+  const std::vector<Real> x = {0.03266496536638716,
+                               0.1512807010437342,
+                               0.3565358285737432,
+                               0.04332374664128218,
+                               0.0756511524284036};
+  const Real p = 1.5e5;
+  const Real T = 1073.15;
+  const Real R_ratio = FluidProperties::_R / 8.31446261815324;
+  const Real tol = 1e-12;
+
+  const Real rho = 0.311262086619508 / R_ratio;
+  const Real e = -7502142.694955811 * R_ratio;
+  REL_TEST(fp.rho_from_p_T(p, T, x), rho, tol);
+  REL_TEST(fp.e_from_p_T(p, T, x), e, tol);
+  REL_TEST(fp.cp_from_p_T(p, T, x), 2216.7883592581443 * R_ratio, tol);
+  REL_TEST(fp.cv_from_p_T(p, T, x), 1767.7281187454187 * R_ratio, tol);
+  REL_TEST(fp.c_from_p_T(p, T, x), 777.386327867082 * std::sqrt(R_ratio), tol);
+
+  // The (v, e) and (p, rho) variable sets describe the same state
+  REL_TEST(fp.T_from_v_e(1 / rho, e, x), T, REL_TOL_CONSISTENCY);
+  REL_TEST(fp.p_from_v_e(1 / rho, e, x), p, REL_TOL_CONSISTENCY);
+  REL_TEST(fp.e_from_p_rho(p, rho, x), e, REL_TOL_CONSISTENCY);
+}
+
+TEST_F(IdealGasMixtureFluidPropertiesTest, nasa7Inversion)
+{
+  // The internal energy and enthalpy of ideal gases do not depend on pressure or specific volume
+  const Real p = 1e5;
+  const Real v = 1;
+
+  // Computes the temperature from the internal energy at temperatures spread geometrically between
+  // T_low and T_high, 60 intervals placing consecutive temperatures about 7% apart
+  const auto sweep = [p, v](const IdealGasMixtureFluidProperties & fp,
+                            const std::vector<Real> & x,
+                            const Real T_low,
+                            const Real T_high)
+  {
+    const unsigned int n = 60;
+    for (const auto i : make_range(n + 1))
+    {
+      const Real T = T_low * std::pow(T_high / T_low, Real(i) / n);
+      REL_TEST(fp.T_from_v_e(v, fp.e_from_p_T(p, T, x), x), T, REL_TOL_CONSISTENCY);
+    }
+  };
+
+  // From half the highest lower end to 1.5 times the lowest upper end of the temperature ranges of
+  // the data of the components: 300 K for N2 and 3500 K for the others
+  const std::vector<std::string> reformate_species = {"H2O", "H2", "CO", "CO2", "CH4", "N2"};
+  const std::string reformate_name = "reformate";
+  const auto & reformate = buildNASA7Mixture(reformate_species, reformate_name);
+  sweep(reformate, {0.033, 0.151, 0.357, 0.043, 0.076}, 150, 5250);
+
+  // Air, with the O2 mass fraction 0.233
+  const std::vector<std::string> air_species = {"N2", "O2"};
+  const std::string air_name = "air";
+  const auto & air = buildNASA7Mixture(air_species, air_name);
+  const std::vector<Real> x_air = {0.233};
+  sweep(air, x_air, 150, 5250);
+
+  // CH4 and N2 in equal mass fractions. Started below the solution, Newton's method can overshoot
+  // to a spurious solution of the extrapolated CH4 polynomials.
+  const std::vector<std::string> methane_nitrogen_species = {"N2", "CH4"};
+  const std::string methane_nitrogen_name = "methane_nitrogen";
+  const auto & methane_nitrogen =
+      buildNASA7Mixture(methane_nitrogen_species, methane_nitrogen_name);
+  sweep(methane_nitrogen, {0.5}, 150, 5250);
+
+  // The internal energy of air, which includes the zero enthalpies of formation of N2 and O2,
+  // passes through zero near 417 K, where a convergence test relative to the target energy would
+  // demand accuracy below roundoff
+  for (const Real e : {-1e-3, -1e-6, 0.0, 1e-6, 1e-3})
+  {
+    const Real T = air.T_from_v_e(v, e, x_air);
+    ABS_TEST(
+        air.e_from_p_T(p, T, x_air), e, REL_TOL_CONSISTENCY * air.cv_from_p_T(p, T, x_air) * T);
+  }
+
+  // A NASA 7-coefficient gas, CO2, as a secondary component of nitrogen with constant specific
+  // heats; the latter has no temperature range
+  {
+    InputParameters params = _factory.getValidParams("NASA7IdealGasFluidProperties");
+    params.set<MooseEnum>("species") = "CO2";
+    _fe_problem->addUserObject("NASA7IdealGasFluidProperties", "co2", params);
+  }
+  {
+    InputParameters params = _factory.getValidParams("IdealGasMixtureFluidProperties");
+    params.set<std::vector<UserObjectName>>("component_fluid_properties") = {"fp_nitrogen", "co2"};
+    _fe_problem->addUserObject("IdealGasMixtureFluidProperties", "nitrogen_co2", params);
+  }
+  sweep(
+      _fe_problem->getUserObject<IdealGasMixtureFluidProperties>("nitrogen_co2"), {0.3}, 100, 5250);
+}
+
+TEST_F(IdealGasMixtureFluidPropertiesTest, nasa7AdDerivatives)
+{
+  // Air, with the O2 mass fraction 0.233, on each side of the midpoint temperature of the data. The
+  // temperature from (v, e) comes from a nonlinear Newton solve here, whose derivatives with
+  // respect to the internal energy and the mass fraction the automatic differentiation must carry.
+  const std::vector<std::string> species = {"N2", "O2"};
+  const std::string name = "air";
+  const auto & air = buildNASA7Mixture(species, name);
+  for (const Real T : {700.0, 1500.0})
+    expectMixtureADDerivatives(air, 100000, T, 0.233);
+}

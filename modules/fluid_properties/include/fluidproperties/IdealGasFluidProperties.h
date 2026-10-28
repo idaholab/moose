@@ -11,6 +11,7 @@
 
 #include "SinglePhaseFluidProperties.h"
 #include "NaNInterface.h"
+#include "IdealGasMixtureInterface.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
@@ -19,7 +20,9 @@
  * Ideal gas fluid properties
  * Default parameters are for air at atmospheric pressure and temperature
  */
-class IdealGasFluidProperties : public SinglePhaseFluidProperties, public NaNInterface
+class IdealGasFluidProperties : public SinglePhaseFluidProperties,
+                                public NaNInterface,
+                                public IdealGasMixtureInterface
 {
 public:
   static InputParameters validParams();
@@ -127,6 +130,9 @@ public:
   k_from_p_T(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
   virtual std::string fluidName() const override;
   virtual Real molarMass() const override;
+  virtual bool hasConstantSpecificHeats() const override { return true; }
+  /// The internal energy is linear in temperature, so Newton's method converges from any start
+  virtual Real newtonStartTemperature() const override { return _T_initial_guess; }
   virtual Real criticalTemperature() const override;
   virtual Real criticalDensity() const override;
   virtual Real criticalInternalEnergy() const override;
