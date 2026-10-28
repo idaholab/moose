@@ -1,110 +1,22 @@
 # Troubleshooting a package update in CI
 
-Expansion of Step 10. A package update spends most of its calendar time here. The failures
-are rarely in the versioner — they are new compiler diagnostics, upstream channels moving
-under the PR, and resource limits. This is the method, not a catalogue of past incidents.
+Expansion of Step 10 (Iterate) in `../SKILL.md`. A package update spends most of its
+calendar time here. The failures are rarely in the versioner — they are new compiler
+diagnostics, upstream channels moving under the PR, and resource limits.
 
-## 1. Establish what is failing, before explaining anything
+## 1. Find and route the failures
 
-`gh pr checks <n>` gives the job names, their states and their URLs. Reduce that list before
-touching any code:
+Use `civet-ci-failures` to list the failing jobs, separate causes from dependency cascades,
+read the error text, and get each failure's reproduce command. Then route each cause:
 
-- **Group by cause, not by job.** N red jobs are usually far fewer causes. Fixing them as
-  one change, or reading them as one problem, is the standard way to waste a CI cycle.
-- **Find the earliest job in each chain.** Recipes build on each other, so a build failure
-  reappears as a test failure and a coverage failure downstream. Diagnose the earliest one
-  and re-check the rest only after it is green.
-- **Batch the fixes.** Any push restarts the whole matrix, and a force-push restarts it from
-  scratch, so collect fixes and push once.
-- **A gated matrix is not a hundred failures.** `Precheck` gates every other job. When it
-  fails, `gh pr checks` reports the rest of the matrix as `ERROR` with a zeroed
-  `startedAt` (`0001-01-01T00:00:00`), which reads as a catastrophic failure but means
-  those jobs are `Not_Started`. The Civet event page (`/event/<id>`, linked from any job
-  page) gives the real per-job status; count causes from that, not from `gh` rows.
+| Signature | Section |
+|---|---|
+| conda solve failure naming a pinned package | 2 |
+| compile `error:` | 6 |
+| `TIMEOUT` that repeats on retry, or a crash | 8 |
+| `CSVDiff`/`Exodiff`/`SCHEMADIFF` | 9 |
 
-State the cause count explicitly before proposing fixes. If you cannot say how many
-distinct causes there are, you are not ready to fix any of them.
-
-Present the result as a table the user can act on: cause, jobs, proposed fix, and status
-(diagnosed, not investigated, fixed elsewhere). Separate what needs a change in this PR from
-what will clear by itself, so the next push is planned rather than hoped for.
-
-## 2. Get the real error text
-
-`WebFetch` silently truncates a CI job page and then answers from the fragment it kept,
-which reads as "no failure found" for a job that plainly failed. Never conclude a job is
-healthy from a truncated fetch. Download the page and search it locally instead.
-
-Three properties of these pages shape how to read them:
-
-- Every build step prints `Exit: <code>` in step order, so those markers alone locate the
-  failing step before you read a line of output.
-- The page is effectively one enormous line, so `grep -C` gives either nothing or the whole
-  file. Window by character offset around each match rather than by line.
-- The compiler's angle brackets arrive HTML-escaped. Strip tags first and unescape entities
-  second. Unescaping first makes any tag-stripping regex eat template arguments, silently
-  turning `std::vector<std::string>` into `std::vector`.
-
-Search for compiler diagnostics (`error:`), TestHarness failures (`FAILED`), and whatever
-else the failure at hand prints. Quote the diagnostic verbatim in your report — a paraphrase
-hides which of several plausible causes it is.
-
-Before reading the failure, read the job's own record of what it built:
-
-- `CIVET_HEAD_SHA` is the branch commit under test, and `CIVET_BASE_SHA` with
-  `CIVET_BASE_REF` is what Civet merged it onto. A PR is usually tested merged onto `next`,
-  so the code under test is neither the branch nor `devel` alone.
-- The TestHarness prints `Framework Information` per test (MOOSE commit, libMesh SHA, PETSc
-  version), and apptainer jobs name their container
-  (`MOOSEBUILD_FROM_VERSIONER`, `...:pr-<n>`). These say which version of each library the
-  failing binary really used.
-
-A job that ran before the latest push, or on an old base, is evidence about that state only.
-
-Download pages into a fresh scratch directory and keep the parsing script in a different
-one, so nothing downloaded sits next to code that runs. Save the stripped text per job and
-query it repeatedly instead of re-fetching.
-
-Tester output is prefixed with the test name on every line. Slice from
-`<test>: Begin runner_run output` to `<test>: End runner_run output`, drop the prefix, and
-the result reads like a normal log. The message that explains an abort sits just above the
-first stack frame (`0: libMesh::print_trace`), not at the end.
-
-## 3. Classify each failure before investigating it
-
-The signature usually says which kind of problem it is, and each kind has a different first
-move:
-
-| Signature | Likely kind | First move |
-|---|---|---|
-| clone or download error (`remote error`, `unable to handle this request due to load`, `Failed to clone ... a second time`) | infrastructure outage | Confirm the same message in every affected job; rerun once the host recovers. Nothing to fix. |
-| `TIMEOUT` that also times out on the TestHarness retry, with output stopping mid-solve | reproducible hang | Section 10: isolate with an environment matrix, then a backtrace. |
-| `EXIT CODE 1` with an abort or `mooseError` | crash or new library behaviour | Read the message above the stack trace; check whether only debug builds fail. |
-| `CSVDiff`/`Exodiff`/`SCHEMADIFF` | numerical change | Section 11: size the diff against the tolerance and look for a changed solver library. |
-| compile `error:` | toolchain or API change | Section 8. |
-| a build step fails after earlier steps passed | the earliest failing step is the cause | Ignore later steps until it is green. |
-
-An outage reads like a failure of the change under test, so rule it out first. Several jobs
-failing in the same container build step with the same remote error is an outage, not a
-regression.
-
-**Treat the first explanation as a hypothesis, and try to break it.** A mechanism that fits
-the first two failing tests perfectly can still be wrong for the rest. Before acting on it,
-name a case that would disprove it and check that case: a failing test that does not use
-the component you blame, a job on a different platform, a build without the suspected
-change. If such a case fails the same way, the explanation is incomplete.
-
-**Keep tested claims apart from inferred ones.** In every report, say which statements come
-from a run and which are reasoning ("fails with version X" versus "probably also fails in
-case Y"). An inference that later drives a decision, such as how widely users are affected,
-needs its own run first.
-
-Check also whether the failure is confined to one build mode, platform or thread count.
-Code under `#ifndef NDEBUG` runs only in debug builds, so a failure in every debug job and
-no opt job points at a debug-only path; a failure only in the `--n-threads` steps points at
-threading.
-
-## 4. Separate your change from upstream drift
+## 2. Separate your change from upstream drift
 
 A conda package update is exposed to channels that move independently of the PR, so a red
 job is not proof the diff is wrong. Before changing anything in MOOSE, ask whether the
@@ -126,7 +38,7 @@ failing input moved:
 If the cause is upstream drift, say so in the commit message. A reviewer who thinks the PR
 caused it will ask why the pin moved at all.
 
-## 5. Trace the versions a submodule bump drags in
+## 3. Trace the versions a submodule bump drags in
 
 A submodule bump moves more than its own code. PETSc is the main case: `configure_petsc.sh`
 passes `--download-openblas`, `--download-mumps`, `--download-hypre` and others without a
@@ -149,7 +61,7 @@ git diff v<old> v<new> -- config/BuildSystem/config/packages/MUMPS.py
 ```
 
 File names are case-sensitive and not uniform: `OpenBLAS.py`, `MUMPS.py`, `HDF5.py`,
-`SuperLU_DIST.py`, but `hypre.py`, `kokkos.py`, `kokkos-kernels.py`. List the directory
+`SuperLU_DIST.py`, `hypre.py`, `kokkos.py`, `kokkos-kernels.py`. List the directory
 with `git ls-tree --name-only` before concluding a file does not exist. A raw-file URL to
 GitLab can return nothing while a fetch works.
 
@@ -166,7 +78,7 @@ The same applies to anything else that vendors or bundles sources (pytorch carri
 protobuf and ONNX, for example). When a component is not checked out in the worktree, read
 it from the upstream tag, or download the conda package and inspect its files.
 
-## 6. Compare against what is already fixed upstream
+## 4. Compare against what is already fixed upstream
 
 Before writing a fix, check whether `next` already has one, and whether the failing run
 included it:
@@ -200,7 +112,7 @@ Check each step's exit status, not just that its output file exists. A failing c
 preprocessor can leave an empty or partial file behind, and `make` then treats that file
 as up to date, so later steps quietly test the wrong thing.
 
-## 7. Use the two distributions as a bisect lever
+## 5. Use the two distributions as a bisect lever
 
 conda recipes build with the compiler pins from `conda/conda_build_config.yaml`; apptainer
 containers carry their own toolchain from their base images. When a source-level failure
@@ -217,23 +129,23 @@ The same reasoning applies across the variant matrix: `[linux]`, `[osx]` and
 `[osx and arm64]` selectors mean a pin can be satisfiable on one platform and not another,
 so a failure on Mac alone is normal and points at the selectors rather than at the code.
 
-## 8. Fallout to expect from a toolchain bump
+## 6. Fallout to expect from a toolchain bump
 
 Check for these directly rather than waiting for CI to find them:
 
-- **New warnings promoted by `-Werror`.** Often false positives in unit tests. Decide
-  explicitly whether to fix the code or to stop treating that warning as an error; do not
-  silence it by accident.
+- **New warnings promoted by `-Werror`.** These usually flag real defects, so fix the code.
+  Stop treating a warning as an error only after showing it is a false positive, and do so
+  explicitly.
 - **Generated and preprocessed headers picking up new upstream constructs.** MOOSE
   preprocesses standard headers into a monolithic header for parsed-function JIT
   compilation. `-imacros` drops the scanned header's declarations from the output but keeps
   its `#pragma` directives, so a pragma newly added inside the standard library lands at
   file scope in the generated header and every JIT compile fails. Any compiler or
   libstdc++ bump can introduce one.
-- **New deprecations and removals** in the standard library or in a dependency's API,
-  surfacing as build failures in the modules rather than the framework.
-- **Numerical differences** requiring regolds or tolerance changes, which are expected and
-  belong in this PR as their own commits.
+- **New deprecations and removals** in the standard library or in a dependency's API.
+- **Numerical differences.** Follow `brittle-numerics-root-cause` to decide between a regold,
+  a tolerance change, and a code change that removes the sensitivity. Each fix belongs in
+  this PR as its own commit.
 
 When the failure is inside a submodule that is not initialized in the worktree, read the
 file at the pinned SHA rather than initializing it — an initialized submodule tree must
@@ -255,11 +167,11 @@ job, is the sign; read the `.cfg` from the conda package itself.
 Prove a flag or include-order fix with the smallest program that would show it working
 before shipping it, because compilers silently discard some combinations. GCC and clang, for
 one, drop a `-I` directory that is also given with `-isystem`, so adding `-I` for a
-directory a build already passes as a system directory does nothing. Two headers of the
-same name in two directories, each defining a different string, settle which one wins in
-seconds.
+directory a build already passes as a system directory does nothing. To test an include
+order, put a header of the same name in each directory, have each define a different string,
+and compile a program that prints it.
 
-## 9. Reproduce locally in the PR's own environment
+## 7. Reproduce locally in the PR's own environment
 
 Civet is slow to iterate on. When a failure needs more than reading logs, reproduce it in the
 environment the job used.
@@ -292,7 +204,7 @@ Large downloads, long builds and long test runs are the user's call. Offer copy-
 they can run themselves, with what each result means, and ask before running them yourself.
 AGENTS.md section 6 still applies: settle the conda question before building.
 
-## 10. Isolate a hang or crash
+## 8. Isolate a hang or crash
 
 **Measure how far the failure reaches before choosing a fix.** Search every job in the
 matrix for the same signature, not only the job where it was first seen: for a hang, every
@@ -359,28 +271,23 @@ fixed run often finishes before the check, and the file is then gone. Also check
 variable holding the path is set in the current shell; an empty `LD_PRELOAD` silently runs
 the original library.
 
-Build the old version with the options the stack uses (Section 5). When the installed PETSc
+Build the old version with the options the stack uses (Section 3). When the installed PETSc
 keeps no `configure.log`, take the compilers from
 `$PETSC_DIR/lib/petsc/conf/petscvariables` and the threading model from the library's
-installed config header. Options that only change CPU dispatch can be dropped to shorten
-the build. Keep the ones that change behaviour, such as the threading model and integer
-size.
+installed config header. Match every option, including the threading model, integer size
+and CPU architecture targets; the targets select different kernels, which round
+differently.
 
-## 11. Size a numerical diff before regolding
+## 9. Size a numerical diff before regolding
 
 A diff is evidence of a cause only once its size is known. Extract the changed values, and
 report the relative change against the test's `rel_err` (and `abs_zero`). Separate values
 near zero, where large relative changes mean nothing, from values near the field's maximum.
 
-Then look for the library that moved under the solve. A solver or preconditioner bump,
-often one PETSc downloads (Section 5), changes the result at the level of the solver
-tolerance. If the input converges only loosely (a linear tolerance around `1e-4`, say), any
-preconditioner change moves the stored answer by about that much. Tightening the solver tolerance and regolding makes the gold
-reflect the discretization instead of the solver path; loosening `rel_err` only hides the
-sensitivity. The test spec's comments often record earlier sensitivity, which supports the
-diagnosis.
+Then look for the library that moved under the solve, often one PETSc downloads (Section 3),
+and follow `brittle-numerics-root-cause` to choose the fix.
 
-## 12. Choosing a replacement pin or other fix
+## 10. Choosing a replacement pin or other fix
 
 The target is what `conda-forge-pinning-feedstock` pins, **not** the newest build on the
 channel. The channel routinely carries versions several majors ahead of the pin; picking
@@ -406,7 +313,7 @@ Beware that a pin's key name is not always the package name (keys use `_`, conda
 often use `-`). Querying the key name returns nothing and looks like "no such package";
 the `meta.yaml.template` that consumes the key shows the real package name.
 
-When the culprit is a dependency that a submodule downloads (Section 5), there is usually
+When the culprit is a dependency that a submodule downloads (Section 3), there is usually
 more than one way to resolve it, and which one fits depends on the case:
 
 - hold that dependency at a good version with `--download-<pkg>-commit=<ref>` in
@@ -423,13 +330,13 @@ and the owners may prefer a fix in their own code. `git log -- scripts/configure
 shows what has been done before, which informs the discussion but does not decide it.
 
 Whichever option is chosen, check that it is accepted by the new submodule version and
-prove locally that it fixes the failure (Section 10) before pushing it. For a pin, choose the
+prove locally that it fixes the failure (Section 8) before pushing it. For a pin, choose the
 **newest** good release, not just a known good one: test the release right before the bad
 one first, since an older pin drops fixes for no reason. Give the change a comment that says
 why, add a newsletter line, and put any follow-up ("drop the pin once upstream is fixed") on
 the `## To do` list.
 
-## 13. Landing fixes without breaking the versioner gate
+## 11. Landing fixes without breaking the versioner gate
 
 `Update versioner hashes` must be the final commit, and the block it adds is keyed on
 `git rev-parse HEAD` at the moment `--summary` ran — in the committed history, the commit
@@ -474,14 +381,7 @@ but leaves the branch pointer behind and lands you on a detached HEAD; recover w
 remote, so publishing needs `git push --force-with-lease origin <branch-name>` and the
 user's approval.
 
-A late commit that touches an influential file usually needs **no** further version bump:
-the invariant is measured against the base ref, and the version sweep already moved that
-package's `full_version` away from it, so `--verify` reports `CHANGE`. Bump again only when
-`--verify` actually says `NEED BUMP` — the case where the package was not in the original
-sweep and its version still matches the base ref. Let `--verify` decide; do not
-pre-emptively bump on the theory that a changed file must mean a changed version.
-
-## 14. Satisfy the Precheck format and lint gates before pushing
+## 12. Satisfy the Precheck format and lint gates before pushing
 
 `Precheck` runs the formatters and linters, and it gates the whole matrix: when it fails,
 every other job stays `Not_Started` and nothing else in the PR is tested that cycle. Its
@@ -490,19 +390,21 @@ three format steps are not allowed to fail, unlike `Size check`, `Fixup commit c
 
 ```bash
 git clang-format upstream/devel                   # C and C++, diff-scoped
+git clang-format --extensions=k upstream/devel    # Kokkos (.K), diff-scoped
 black --check --diff --config pyproject.toml .    # Python, whole tree
 ruff check --no-cache --config pyproject.toml .   # Python, whole tree
 ```
 
-Those are Civet's own invocations. Drop `--check --diff` from black, or add `--fix` to ruff,
-to apply what they report instead of printing it.
+Those are Civet's own invocations; black and ruff are separate `Precheck` steps. Drop
+`--check --diff` from black, or add `--fix` to ruff, to apply what they report instead of
+printing it.
 
 What is in scope differs per tool, which is what makes "my edit was small" an unreliable
 guide:
 
-- **`git clang-format` is diff-scoped** and reformats only the lines the diff touches. It
-  covers `.C`/`.h` and plain `.c` alike through clang-format's default extension list, so a
-  C file is gated exactly like a C++ one.
+- **`git clang-format` is diff-scoped** and reformats only the lines the diff touches. Its
+  default extension list covers `.C`/`.h` and plain `.c`, so a C file is gated exactly like a
+  C++ one; Kokkos `.K` files need the second, `--extensions=k` run.
 - **black runs over the whole tree**, minus the `extend-exclude` list in `[tool.black]`
   (contrib, submodules, `petsc`, `libmesh`). Every other Python file is in scope whether or
   not this PR touched it, so a file that arrives unformatted from elsewhere fails the gate
@@ -541,7 +443,7 @@ curl -s https://mooseframework.inl.gov/docs/PRs/<pr>/clang_format/style.patch | 
 Fold the formatting into the commit that introduced the code rather than adding a follow-up
 commit, and regenerate the hash block afterwards — the amend invalidates it, as above.
 
-## 15. Re-read what the fix falsified
+## 13. Re-read what the fix falsified
 
 `--verify` checks versions, not claims. A fix late in the PR can contradict something the
 newsletter or the PR body already asserts — most often a paragraph explaining why a pin was
@@ -549,7 +451,7 @@ deliberately left where it was, which stops being true the moment the pin moves.
 catch this. After each fix, re-read both documents for the rationale you just invalidated,
 and add the bullets the fix earns.
 
-## 16. Know what not to fix
+## 14. Know what not to fix
 
 - **Deferred failures** go on the `## To do` checklist with enough detail to resume from
   cold: the diagnostic, the mechanism, and where it fires. A deferred item with no
