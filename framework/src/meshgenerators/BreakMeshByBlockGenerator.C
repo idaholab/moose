@@ -485,9 +485,14 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
     const bool has_reverse =
         _subid_pairs_to_boundary_id.find(rev_pair) != _subid_pairs_to_boundary_id.end();
     if (has_reverse)
+    {
+      const auto reverse_boundary_id = _subid_pairs_to_boundary_id[rev_pair];
+      mooseAssert(boundary_id != reverse_boundary_id,
+                  "Disjoint neighbor boundary pairs must use different boundary IDs.");
       // Normal disconnected boundary pair: blockA_blockB <-> blockB_blockA
       mesh.add_disjoint_neighbor_boundary_pairs(
-          boundary_id, _subid_pairs_to_boundary_id[rev_pair], RealVectorValue(0.0, 0.0, 0.0));
+          boundary_id, reverse_boundary_id, RealVectorValue(0.0, 0.0, 0.0));
+    }
   }
 }
 
