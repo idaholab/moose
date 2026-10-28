@@ -498,7 +498,7 @@ EOF
 
         # The build script installs NEML2 but not its build backend, and runs with
         # --no-build-isolation, so provide scikit-build-core in the container Python.
-        ${PYTHON_DIR}/bin/pip install --no-cache scikit-build-core
+        ${PYTHON_DIR}/bin/pip install --no-cache scikit-build-core 'nmhit>=0.3.6' 'pyzag==2.0.0'
 
         # Build + install neml2 into the container Python (site-packages)
         cd ${ROOT_BUILD_DIR}
