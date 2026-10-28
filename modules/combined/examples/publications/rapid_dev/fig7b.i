@@ -219,7 +219,7 @@
   # global chemical free energy
   [./chemical_free_energy]
     type = DerivativeTwoPhaseMaterial
-    f_name = Fc
+    property_name = Fc
     fa_name = Fc1
     fb_name = Fc2
     eta = eta
@@ -230,7 +230,7 @@
   # global elastic free energy
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    f_name = Fe
+    property_name = Fe
     coupled_variables = 'eta'
     output_properties = Fe
     outputs = 'all'

@@ -96,7 +96,7 @@
     coupled_variables = c
     outputs = exodus
     output_properties = 'var_dep'
-    f_name = var_dep
+    property_name = var_dep
     enable_jit = true
     derivative_order = 2
   [../]
