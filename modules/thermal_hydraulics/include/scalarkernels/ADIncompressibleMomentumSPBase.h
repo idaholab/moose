@@ -10,11 +10,10 @@
 #pragma once
 
 #include "ADScalarKernel.h"
-#include "ADFunctorInterface.h"
 
 class SinglePhaseFluidProperties;
 
-class ADIncompressibleMomentumSPBase : public ADScalarKernel, public ADFunctorInterface
+class ADIncompressibleMomentumSPBase : public ADScalarKernel
 {
   using Base = ADScalarKernel;
 
