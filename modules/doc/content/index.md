@@ -5,7 +5,7 @@
 !media large_media/organization_logos/26-50459_webbanner_April6.jpg link=https://inl.gov/moose-international-workshop/ style=display:block;margin-left:auto;margin-right:auto;width:80%;
 
 !style! halign=center fontsize=140%
-For more information please click the above image to go to the training website.
+For more information, please click the above image to go to the event website.
 !style-end!
 
 !!! disable while training banner is in place

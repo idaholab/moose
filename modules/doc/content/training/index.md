@@ -9,7 +9,7 @@ Upcoming MOOSE related training in chronological order:
 
 - [BISON](https://mooseframework.inl.gov/bison) [Fuels Performance (2027 January 28-29, Massachusetts Institute of Technology)](https://github.com/idaholab/moose/discussions/34121)
 
-- [MOOSE Introductory training during M&C 2027](https://www.ans.org/meetings/mc2027/) (2027 April 18, Columbus OH)
+- [MOOSE Introductory Training during M&C 2027](https://www.ans.org/meetings/mc2027/) (2027 April 18, Columbus OH)
 
 - [Griffin Workshop during M&C 2027](https://www.ans.org/meetings/mc2027/) (2027 April 18, Columbus OH)
 
@@ -31,9 +31,9 @@ refer to the [getting_started/examples_and_tutorials/index.md] page.
 
 #### Past Training:
 
-- MOOSE Developer Training (2026 June 2-4, Idaho Falls) [Registration](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
+- MOOSE Developer Training (2026 June 2-4, Idaho Falls)
 
-- MOOSE-based Thermal Hydraulics and Fluid Dynamics Training (2026 August 13-14, North Carolina State University) [Registration](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
+- MOOSE-based Thermal Hydraulics and Fluid Dynamics Training (2026 August 13-14, North Carolina State University)
 
 - [Griffin Workshop during PHYSOR 2026](https://www.physor2026.org/info-workshop/) (2026 April 19, Turin, Italy)
 
