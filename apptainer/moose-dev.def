@@ -394,6 +394,7 @@ EOF
         git checkout {{ PYTORCH_GIT_SHA }}
         git submodule update --init --depth 1 --recursive
 
+        export PATH={{ PYTHON_DIR }}/bin:${PATH}
         source ${ROOT_BUILD_DIR}/configure_libtorch.sh
 
         # Require CUDA if we have cuda available
