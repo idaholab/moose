@@ -278,15 +278,24 @@ tot_power = 2000 # W
   []
 []
 
-[ControlLogic]
+[ChainControls]
+  [get_m_dot_pump]
+    type = GetPostprocessorChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    postprocessor = m_dot_pump
+    name_data_same_as_postprocessor = true
+  []
+
   [set_point]
-    type = GetFunctionValueControl
+    type = GetFunctionValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     function = ${m_dot_in}
   []
 
   [pid]
-    type = PIDControl
-    initial_value = 0
+    type = PIDChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    initial_integral = 0
     set_point = set_point:value
     input = m_dot_pump
     K_p = 1.
@@ -295,10 +304,10 @@ tot_power = 2000 # W
   []
 
   [set_pump_head]
-    type = SetComponentRealValueControl
-    component = pump
-    parameter = head
-    value = pid:output
+    type = SetRealValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    parameter = component::pump/head
+    value = pid:value
   []
 []
 

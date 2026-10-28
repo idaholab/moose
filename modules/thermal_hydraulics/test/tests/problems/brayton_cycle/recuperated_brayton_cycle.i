@@ -688,20 +688,42 @@ hs_power = 105750
 
 
 # Control logics which govern startup of the motor, startup of the "reactor core", and shutdown of the motor
-[ControlLogic]
+[ChainControls]
+
+  # Bring the postprocessors used by the controls into the control data system
+  [get_shaft_RPM]
+    type = GetPostprocessorChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    postprocessor = shaft_RPM
+    name_data_same_as_postprocessor = true
+  []
+  [get_motor_torque]
+    type = GetPostprocessorChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    postprocessor = motor_torque
+    name_data_same_as_postprocessor = true
+  []
+  [get_turbine_torque]
+    type = GetPostprocessorChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    postprocessor = turbine_torque
+    name_data_same_as_postprocessor = true
+  []
 
   # Sets desired shaft speed to be reached by motor NOTE: SHOULD BE SET LOWER THAN RATED TURBINE RPM
   [set_point]
-    type = GetFunctionValueControl
+    type = GetFunctionValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     function = ${fparse speed_rated_rpm - 9000}
   []
 
   # PID with gains determined by iterative process NOTE: Gain values are system specific
   [initial_motor_PID]
-    type = PIDControl
+    type = PIDChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     set_point = set_point:value
     input = shaft_RPM
-    initial_value = 0
+    initial_integral = 0
     K_p = 0.0011
     K_i = 0.00000004
     K_d = 0
@@ -709,30 +731,33 @@ hs_power = 105750
 
   # Determines when the PID system should be running and when it should begin the shutdown cycle. If needed: PID output, else: shutdown function
   [logic]
-    type = ParsedFunctionControl
-    function = 'if(motor+0.5 > turb, PID, shutdown_fn)'
+    type = ParsedChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    expression = 'if(motor+0.5 > turb, PID, shutdown_fn)'
     symbol_names = 'motor turb PID shutdown_fn'
-    symbol_values = 'motor_torque turbine_torque initial_motor_PID:output motor_torque_fn_shutdown'
+    symbol_values = 'motor_torque turbine_torque initial_motor_PID:value motor_torque_fn_shutdown'
   []
 
   # Takes the output generated in [logic] and applies it to the motor torque
   [motor_PID]
-    type = SetRealValueControl
+    type = SetRealValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     parameter = Functions/motor_torque_fn/value
     value = logic:value
   []
   # Determines when to turn on heat source
   [power_logic]
-    type = ParsedFunctionControl
-    function = 'power_fn'
+    type = ParsedChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    expression = 'power_fn'
     symbol_names = 'power_fn'
     symbol_values = 'power_fn'
   []
   # Applies heat source to the total_power block
   [power_applied]
-    type = SetComponentRealValueControl
-    component = total_power
-    parameter = power
+    type = SetRealValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    parameter = component::total_power/power
     value = power_logic:value
   []
 []
