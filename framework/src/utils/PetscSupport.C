@@ -256,6 +256,8 @@ stringify(const LineSearchType & t)
       return "contact";
     case LS_PROJECT:
       return "project";
+    case LS_SEMISMOOTH:
+      return "semismooth";
     case LS_INVALID:
       mooseError("Invalid LineSearchType");
   }
@@ -318,7 +320,8 @@ setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & dont
   if (ls_type == Moose::LS_NONE)
     ls_type = Moose::LS_BASIC;
 
-  if (ls_type != Moose::LS_DEFAULT && ls_type != Moose::LS_CONTACT && ls_type != Moose::LS_PROJECT)
+  if (ls_type != Moose::LS_DEFAULT && ls_type != Moose::LS_CONTACT &&
+      ls_type != Moose::LS_PROJECT && ls_type != Moose::LS_SEMISMOOTH)
     setSinglePetscOptionIfAppropriate(
         dont_add_these_options, prefix_with_dash + "snes_linesearch_type", stringify(ls_type));
 }
@@ -742,7 +745,8 @@ setLineSearchFromParams(FEProblemBase & fe_problem, const InputParameters & para
         Moose::LineSearchType enum_line_search =
             Moose::stringToEnum<Moose::LineSearchType>(line_search);
         fe_problem.solverParams(i)._line_search = enum_line_search;
-        if (enum_line_search == LS_CONTACT || enum_line_search == LS_PROJECT)
+        if (enum_line_search == LS_CONTACT || enum_line_search == LS_PROJECT ||
+            enum_line_search == LS_SEMISMOOTH)
         {
           NonlinearImplicitSystem * nl_system = dynamic_cast<NonlinearImplicitSystem *>(
               &fe_problem.getNonlinearSystemBase(i).system());
