@@ -42,6 +42,7 @@ struct MortarInterfaceConfig
   MortarSegmentTriangulationMode triangulation;
   bool triangulate_triangles;
   Mortar3DQuadraturePointMapping mortar_3d_qp_mapping;
+  bool split_segments_at_sub_elements;
 };
 
 class MortarInterfaceWarehouse : public libMesh::ParallelObject
@@ -67,6 +68,8 @@ public:
    * @param triangulate_triangles whether a clipped polygon that is already a triangle should still
    * be subdivided
    * @param mortar_3d_qp_mapping method for mapping 3D mortar quadrature points to faces
+   * @param split_segments_at_sub_elements whether 2D mortar segments are split at the sub-elements
+   * of their secondary faces
    */
   void createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
                              const std::pair<SubdomainID, SubdomainID> & subdomain_key,
@@ -80,7 +83,8 @@ public:
                              const MooseEnum & triangulation,
                              const bool triangulate_triangles,
                              const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping =
-                                 Mortar3DQuadraturePointMapping::NORMAL_PROJECTION);
+                                 Mortar3DQuadraturePointMapping::NORMAL_PROJECTION,
+                             const bool split_segments_at_sub_elements = false);
 
   /**
    * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and

@@ -69,9 +69,12 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
                "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
                "false`.");
 
-  // The Contact action couples aux_lm only to this object, not to the constraint
-  if (_use_petrov_galerkin)
+  // The Contact action couples aux_lm only to this object, not to the constraint, so the test basis
+  // is checked here as well
+  if (_use_petrov_galerkin && !_aux_lm_var->usePiecewiseLinearBasis())
     checkPetrovGalerkinQuadraticFaces(*this, *_lm_var);
+  if (_aux_lm_var && _aux_lm_var->usePiecewiseLinearBasis())
+    checkPiecewiseLinearBasis(*this, _use_petrov_galerkin, *_lm_var, *_aux_lm_var);
 
   if (_use_nodal_scaling)
   {
