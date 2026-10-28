@@ -1740,7 +1740,7 @@ Coupleable::adCoupledArrayGradient(const std::string & var_name, unsigned int co
     mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
-    return var->adGradSln();
+    return usesFaceCoupledValues() ? var->adGradSlnFace() : var->adGradSln();
   return var->adGradSlnNeighbor();
 }
 

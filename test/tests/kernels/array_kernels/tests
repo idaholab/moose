@@ -50,7 +50,7 @@
       type = 'PetscJacobianTester'
       input = 'ad_array_coupling.i'
       run_sim = True
-      detail = 'with exact derivatives with respect to the coupled array variable degrees of freedom, and'
+      detail = 'with exact derivatives with respect to the coupled array variable degrees of freedom,'
     []
     [default_reference]
       type = 'CSVDiff'
@@ -63,7 +63,13 @@
       input = 'ad_array_coupling_default.i'
       csvdiff = 'ad_array_coupling_default_out.csv'
       prereq = 'ad_coupling/default_reference'
-      detail = 'in the coupling kernel.'
+      detail = 'in the coupling kernel, and'
+    []
+    [side]
+      type = 'CSVDiff'
+      input = 'ad_array_side_flux.i'
+      csvdiff = 'ad_array_side_flux_out.csv'
+      detail = 'on boundary faces for side objects.'
     []
   []
   [test_diffusion_reaction_dg]

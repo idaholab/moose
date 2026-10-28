@@ -543,7 +543,7 @@ protected:
   std::vector<const ArrayVariableValue *> coupledArrayValues(const std::string & var_name) const;
 
   /**
-   * Returns value of a coupled array variable for use in Automatic Differentiation
+   * Returns value of a coupled array variable for use with Automatic Differentiation
    * @param var_name Name of coupled array variable
    * @param comp Component number for vector of coupled array variables
    * @return Reference to a ADArrayVariableValue for the coupled array variable
