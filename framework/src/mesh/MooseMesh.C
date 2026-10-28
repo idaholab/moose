@@ -1246,7 +1246,7 @@ MooseMesh::nodeToElemMap()
 const ConstElemRange *
 MooseMesh::getActiveLocalElementRange()
 {
-  return &getMesh().active_local_element_stored_range();
+  return &const_cast<const MeshBase &>(getMesh()).active_local_element_stored_range();
 }
 
 NodeRange *
