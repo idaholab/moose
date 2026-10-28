@@ -75,6 +75,9 @@ protected:
    * Compute coefficient of friction. Allows the use of contact pressure and relative velocity
    * dependent friction.
    */
+  /// The tangential contact constant c_t at \p dof, normalized when 'normalize_c' is true
+  Real tangentialConstant(const DofObject * dof) const;
+
   ADReal computeFrictionValue(const ADReal & contact_pressure,
                               const ADReal & tangential_vel,
                               const ADReal & tangential_vel_dir);

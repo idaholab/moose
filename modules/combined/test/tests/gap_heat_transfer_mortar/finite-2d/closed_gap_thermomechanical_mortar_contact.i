@@ -236,7 +236,7 @@
     primary_conductivity = steel_thermal_conductivity
     secondary_conductivity = aluminum_thermal_conductivity
     temperature = temperature
-    contact_pressure = interface_normal_lm
+    contact_pressure_uo = lm_weightedgap_object_interface
     primary_hardness = steel_hardness
     secondary_hardness = aluminum_hardness
     boundary = moving_block_right

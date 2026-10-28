@@ -128,7 +128,7 @@ offset = -0.05
     displacements = 'disp_x disp_y'
     friction_coefficient = 0.5
     energy_wear_coefficient = 1.0
-    normal_pressure = normal_lm
+    weighted_gap_uo = weighted_gap_uo
   []
   [accel_x]
     type = NewmarkAccelAux
