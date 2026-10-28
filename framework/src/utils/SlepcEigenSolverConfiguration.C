@@ -16,6 +16,7 @@
 #include "EigenProblem.h"
 #include "NonlinearEigenSystem.h"
 #include "libmesh/slepc_eigen_solver.h"
+#include "libmesh/petsc_vector.h"
 #include <slepceps.h>
 
 /**
@@ -69,6 +70,30 @@ SlepcEigenSolverConfiguration::configure_solver()
         _eigen_problem.comm().get(),
         EPSMonitorSet(
             _slepc_solver.eps(), Moose::SlepcSupport::mooseSlepcEPSMonitor, &_eigen_problem, NULL));
+  }
+
+  // The default BV type (BVMAT) stores the basis in a single dense matrix and does not support
+  // Kokkos vectors, so store the basis as individual vectors instead unless the user chose a type
+  const auto comm = _eigen_problem.comm().get();
+  EPS eps = _slepc_solver.eps();
+  const char * prefix = nullptr;
+  LibmeshPetscCallA(comm, EPSGetOptionsPrefix(eps, &prefix));
+  PetscBool bv_type_set = PETSC_FALSE;
+  LibmeshPetscCallA(comm, PetscOptionsHasName(nullptr, prefix, "-bv_type", &bv_type_set));
+  if (!bv_type_set)
+  {
+    const auto & solution =
+        cast_ref<const libMesh::PetscVector<libMesh::Number> &>(_nl_eigen_sys.solution());
+    PetscBool is_kokkos = PETSC_FALSE;
+    LibmeshPetscCallA(comm,
+                      PetscObjectTypeCompareAny(
+                          (PetscObject)solution.vec(), &is_kokkos, VECSEQKOKKOS, VECMPIKOKKOS, ""));
+    if (is_kokkos)
+    {
+      BV bv;
+      LibmeshPetscCallA(comm, EPSGetBV(eps, &bv));
+      LibmeshPetscCallA(comm, BVSetType(bv, BVVECS));
+    }
   }
 }
 
