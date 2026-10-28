@@ -54,4 +54,10 @@
     issues = '#34223'
     requirement = 'The system shall count each evaluation of the viscosity or thermal conductivity of steam from NASA 7-coefficient polynomials at a temperature outside the range of validity of the IAPWS transport formulations as a solution warning.'
   []
+  [density_from_entropy]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.densityFromEntropy
+    issues = '#34223'
+    requirement = 'The system shall compute the density of each built-in ideal gas from NASA 7-coefficient polynomials from its pressure and specific entropy, consistently with the density from pressure and temperature, from half the lower end to 1.5 times the upper end of the temperature range of its data, together with derivatives with respect to pressure and entropy, with real and automatic differentiation arguments, in agreement with finite differences and with the isobaric relation between density, entropy, and specific heat.'
+  []
 []

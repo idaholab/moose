@@ -440,6 +440,50 @@ NASA7IdealGasFluidProperties::e_from_v_h_template(const CppType & /*v*/, const C
   return h - _R_specific * T;
 }
 
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::T_from_p_s(const CppType & p, const CppType & s) const
+{
+  using std::exp, std::log;
+
+  // Solve s0(T)/R = s/R_s + ln(p/p_ref) for x = ln(T). The standard entropy s0/R increases with x,
+  // with slope cp/R, and is convex in x over nearly all of the range of the data, because the heat
+  // capacity increases with temperature, so Newton's method started at the upper end of the range
+  // approaches the solution from above. In T instead of ln(T), the first step from the upper end
+  // would overshoot to negative temperatures for solutions near the lower end.
+  const CppType target = s / _R_specific + log(p / NASA7::reference_pressure);
+  const auto s0_from_x = [this](const CppType & /*target*/,
+                                const CppType & x,
+                                CppType & s0_x,
+                                CppType & ds0_x_dtarget,
+                                CppType & ds0_x_dx)
+  {
+    const CppType T = exp(x);
+    s0_x = NASA7::sOverR(_data, T);
+    ds0_x_dtarget = 0;
+    ds0_x_dx = NASA7::cpOverR(_data, T);
+  };
+
+  return exp(FluidPropertiesUtils::NewtonSolve(target,
+                                               target,
+                                               std::log(_data.T_max),
+                                               _tolerance,
+                                               s0_from_x,
+                                               name() + "::T_from_p_s",
+                                               _max_newton_its,
+                                               _verbose_newton)
+                 .first);
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::rho_from_p_s_template(const CppType & p, const CppType & s) const
+{
+  const auto T = T_from_p_s(p, s);
+  checkTemperature(T);
+  return p / (_R_specific * T);
+}
+
 /**
  * Defines the value and derivative methods of a property, for Real and AD arguments, from the
  * value template of the property. The derivatives come from forward-mode dual numbers.
@@ -516,6 +560,7 @@ definePropertyFromTemplate(T, p, h)
 definePropertyFromTemplate(s, h, p)
 definePropertyFromTemplate(p, h, s)
 definePropertyFromTemplate(e, v, h)
+definePropertyFromTemplate(rho, p, s)
 // clang-format on
 
 #undef definePropertyFromTemplate

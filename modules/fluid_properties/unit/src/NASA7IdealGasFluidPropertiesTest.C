@@ -446,3 +446,43 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, steamTransportRange)
   _fp_h2o->k_from_p_T(p, 1500);
   EXPECT_EQ(flagCount(*_app, true), warnings + 2);
 }
+
+TEST_F(NASA7IdealGasFluidPropertiesTest, densityFromEntropy)
+{
+  // Invert the entropy of every built-in species at two pressures and at temperatures spread
+  // geometrically from half the lower end of the range of its data to 1.5 times the upper end
+  // 60 geometric intervals place consecutive temperatures about 7% apart
+  const unsigned int n = 60;
+  for (const std::string species : {"H2", "O2", "H2O", "CH4", "CO", "CO2", "N2"})
+  {
+    const auto & fp = buildFluidProperties(species, "entropy_" + species);
+    const auto & data = NASA7::speciesData(species);
+    const Real T_low = data.T_min / 2;
+    const Real T_high = 1.5 * data.T_max;
+    for (const Real p : {1e3, 1e7})
+      for (const auto i : make_range(n + 1))
+      {
+        const Real T = T_low * std::pow(T_high / T_low, Real(i) / n);
+        REL_TEST(
+            fp.rho_from_p_s(p, fp.s_from_p_T(p, T)), fp.rho_from_p_T(p, T), REL_TOL_CONSISTENCY);
+      }
+  }
+
+  // Derivatives on each side of the midpoint temperature
+  for (const auto & [fp, T] : {std::pair<const NASA7IdealGasFluidProperties *, Real>(_fp_h2o, 700),
+                               std::pair<const NASA7IdealGasFluidProperties *, Real>(_fp_n2, 1500)})
+  {
+    const Real p = 2e5;
+    const Real s = fp->s_from_p_T(p, T);
+    DERIV_TEST(fp->rho_from_p_s, p, s, REL_TOL_DERIVATIVE);
+    const ADReal p_ad = p;
+    const ADReal s_ad = s;
+    AD_DERIV_TEST(fp->rho_from_p_s, p_ad, s_ad, REL_TOL_DERIVATIVE);
+
+    // At constant pressure, (dT/ds)_p = T / cp and, for an ideal gas, (drho/dT)_p = -rho / T, so
+    // (drho/ds)_p = -rho / cp
+    Real rho, drho_dp, drho_ds;
+    fp->rho_from_p_s(p, s, rho, drho_dp, drho_ds);
+    REL_TEST(drho_ds, -rho / fp->cp_from_p_T(p, T), REL_TOL_CONSISTENCY);
+  }
+}

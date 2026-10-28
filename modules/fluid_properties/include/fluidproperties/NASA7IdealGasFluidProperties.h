@@ -61,6 +61,7 @@ public:
   propfuncWithDefinitionOverride(s, h, p);
   propfuncWithDefinitionOverride(p, h, s);
   propfuncWithDefinitionOverride(e, v, h);
+  propfuncWithDefinitionOverride(rho, p, s);
 
   std::string fluidName() const override;
   Real molarMass() const override;
@@ -119,6 +120,13 @@ private:
    */
   template <typename CppType>
   CppType T_from_energy(const CppType & y, const Real k) const;
+
+  /**
+   * Temperature at which the specific entropy at pressure p equals s, by Newton's method on the
+   * logarithm of temperature. The temperature range is not checked.
+   */
+  template <typename CppType>
+  CppType T_from_p_s(const CppType & p, const CppType & s) const;
 };
 
 #pragma GCC diagnostic pop

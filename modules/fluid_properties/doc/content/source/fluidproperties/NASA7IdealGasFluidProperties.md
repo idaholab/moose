@@ -52,8 +52,9 @@ expressions above, so they are exact.
 
 This class provides the properties from pressure and temperature, from temperature and specific
 volume, from specific volume and internal energy, and from pressure and enthalpy, as well as the
-pressure from enthalpy and entropy and the internal energy from pressure and density and from
-specific volume and enthalpy. Mixtures of these gases are described by
+pressure from enthalpy and entropy, the density from pressure and entropy, and the internal energy
+from pressure and density and from specific volume and enthalpy. Mixtures of these gases are
+described by
 [IdealGasMixtureFluidProperties.md].
 
 ## Viscosity and thermal conductivity
@@ -90,10 +91,10 @@ Both classes describe ideal gases, but they differ as follows:
 | Specific heats | Constant | Functions of temperature |
 | Internal energy | $c_v T$ plus a user-supplied reference value | Includes the enthalpy of formation |
 | Entropy | Relative to an arbitrary reference | Absolute |
-| Temperature from internal energy or enthalpy | Explicit | Newton iteration |
+| Temperature from internal energy, enthalpy, or entropy | Explicit | Newton iteration |
 | Temperature range | Unlimited | That of the data, with a solution warning outside it |
 | Viscosity and thermal conductivity | Constant, user-supplied | Kinetic theory, or IAPWS formulations for steam |
-| Density from pressure and entropy, critical-point properties | Provided | Not provided |
+| Critical-point properties | User-supplied | Not provided |
 
 ## Temperature from internal energy or enthalpy
 
@@ -122,6 +123,14 @@ inversion robust:
 At the midpoint temperature of the data, where the two polynomials do not match exactly, the same
 internal energy or enthalpy is also reached slightly above the midpoint temperature, by less than
 $3 \times 10^{-4}$ K for the built-in species. The inversion may return either temperature.
+
+The density from pressure and entropy requires the temperature at which
+$s^\circ / R = s / R_s + \ln (p / p^\circ)$. Newton's method solves this equation for $\ln T$,
+again from the upper end of the temperature range of the data. As a function of $\ln T$, the
+standard entropy increases with slope $c_p^\circ / R$ and is convex wherever the heat capacity
+increases with temperature, which holds over nearly all of the range of each species, so the
+iterates approach the solution from above. Newton's method on $T$ itself would overshoot to negative
+temperatures in its first step for solutions near the lower end of the range.
 
 ## Temperature range
 
