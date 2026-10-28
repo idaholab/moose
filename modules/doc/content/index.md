@@ -8,16 +8,16 @@
 For more information please click the above image to go to the training website.
 !style-end!
 
-<!-- disable while training banner is in place
+!!! disable while training banner is in place
 !media media/moose_logo.png
        style=display:block;margin-left:auto;margin-right:auto;width:60%;
        alt=MOOSE logo
--->
+!!!
 
-<!-- disable while training banner is in place
+!!! disable while training banner is in place
 !style halign=center fontsize=120% color=0.5 0.5 0.5
 Multiphysics Object-Oriented Simulation Environment
--->
+!!!
 
 # An open-source, parallel finite element framework class=center style=font-weight:200;font-size:200%
 
