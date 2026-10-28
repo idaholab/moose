@@ -51,7 +51,7 @@
 
 [BCs]
   [flux_boundaries]
-    type = MFEMVectorFEBoundaryFluxIntegratedBC
+    type = MFEMVectorFEBoundaryFluxLFIntegratedBC
     variable = velocity
     coefficient = exact_pressure_rhs
   []

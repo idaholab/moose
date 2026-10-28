@@ -33,7 +33,7 @@
     boundary = '1'
   []
   [pull_down]
-    type = MFEMVectorBoundaryIntegratedBC
+    type = MFEMVectorBoundaryLFIntegratedBC
     variable = displacement
     boundary = '2'
     vector_coefficient = '0.0 0.0 -0.01'

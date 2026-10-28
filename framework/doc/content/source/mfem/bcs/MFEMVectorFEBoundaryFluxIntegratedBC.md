@@ -4,17 +4,16 @@
 
 ## Overview
 
-Adds the boundary integrator for integrating the linear form
+Adds the boundary integrator for integrating the bilinear form
 
 !equation
-(f, \vec v \cdot \hat n)_{\partial\Omega} \,\,\, \forall v \in V
+(k \vec u \cdot \hat n, \vec v \cdot \hat n)_{\partial\Omega} \,\,\, \forall \vec v \in V
 
-where $\vec v \in H(\mathrm{div})$, $f$ is a scalar coefficient, and $\hat n$ is the
-outward facing unit normal vector on the boundary.
+where $\vec u$ and $\vec v$ are both in $H(\mathrm{div})$, $k$ is a scalar coefficient, and $\hat n$ is the outward facing unit normal vector on the boundary. The coefficient $k$ is set by [!param](/BCs/MFEMVectorFEBoundaryFluxIntegratedBC/coefficient).
+
+`createBFIntegrator()` returns an [`mfem::VectorFEBoundaryFluxIntegrator`](https://docs.mfem.org/html/classmfem_1_1VectorFEBoundaryFluxIntegrator.html).
 
 ## Example Input File Syntax
-
-!listing test/tests/mfem/kernels/darcy.i block=BCs
 
 !syntax parameters /BCs/MFEMVectorFEBoundaryFluxIntegratedBC
 
