@@ -10,7 +10,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     recover = false
-    abs_zero = 1e-6
   []
   [MFEMPMGPartialIntermediateLevel]
     type = CSVDiff
@@ -26,7 +25,7 @@
                   'level is partially assembled.'
     issues = '#34196'
     capabilities = 'mfem'
-    compute_devices = 'cpu'
+    compute_devices = 'cpu cuda'
     recover = false
   []
   [MFEMPMGRejectsNonlinear]
