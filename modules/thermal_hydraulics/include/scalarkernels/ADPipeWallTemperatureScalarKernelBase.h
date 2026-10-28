@@ -10,14 +10,13 @@
 #pragma once
 
 #include "ADScalarKernel.h"
-#include "ADFunctorInterface.h"
 
 class ThermalSolidProperties;
 
 /**
  * Base class for path-integrated incompressible conjugate heat transfer kernels
  */
-class ADPipeWallTemperatureScalarKernelBase : public ADScalarKernel, public ADFunctorInterface
+class ADPipeWallTemperatureScalarKernelBase : public ADScalarKernel
 {
   using Base = ADScalarKernel;
 

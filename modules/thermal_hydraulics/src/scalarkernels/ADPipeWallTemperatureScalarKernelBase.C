@@ -9,7 +9,6 @@
 
 #include "ADPipeWallTemperatureScalarKernelBase.h"
 
-#include "ADFunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "ThermalSolidProperties.h"
 
@@ -61,7 +60,6 @@ ADPipeWallTemperatureScalarKernelBase::validParams()
 ADPipeWallTemperatureScalarKernelBase::ADPipeWallTemperatureScalarKernelBase(
     const InputParameters & parameters)
   : Base(parameters),
-    ADFunctorInterface(this),
     _sp(this->template getUserObject<ThermalSolidProperties>("solid_properties")),
     _Tup(ScalarCoupleable::adCoupledScalarValue("upstream_wall_temperature")),
     _Tdown(ScalarCoupleable::adCoupledScalarValue("downstream_wall_temperature")),

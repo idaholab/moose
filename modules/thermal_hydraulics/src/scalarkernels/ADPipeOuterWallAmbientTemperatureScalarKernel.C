@@ -9,7 +9,6 @@
 
 #include "ADPipeOuterWallAmbientTemperatureScalarKernel.h"
 
-#include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADPipeOuterWallAmbientTemperatureScalarKernel);
