@@ -446,16 +446,39 @@ PhysicsBase::copyVariablesFromMesh(const std::vector<VariableName> & variables_t
 }
 
 void
+PhysicsBase::addSharedSolverVariable(const std::string & var_type,
+                                     const VariableName & var_name,
+                                     InputParameters params)
+{
+  // Saved first as getSolverSystem() looks for the variable among the Physics' solver variables
+  saveSolverVariableName(var_name);
+  params.set<SolverSystemName>("solver_sys") = getSolverSystem(var_name);
+  PhysicsVariableCoordinator::findOrCreate(_awh, _action_factory)
+      .requestVariable(true, var_type, var_name, params, _blocks, name());
+}
+
+void
+PhysicsBase::addSharedAuxVariable(const std::string & var_type,
+                                  const VariableName & var_name,
+                                  const InputParameters & params)
+{
+  saveAuxVariableName(var_name);
+  PhysicsVariableCoordinator::findOrCreate(_awh, _action_factory)
+      .requestVariable(false, var_type, var_name, params, _blocks, name());
+}
+
+void
 PhysicsBase::addSharedSolverVariable(const VariableName & var_name,
                                      const std::string & family,
                                      const std::string & order,
                                      const Real scaling)
 {
-  // Saved first as getSolverSystem() looks for the variable among the Physics' solver variables
-  saveSolverVariableName(var_name);
-  PhysicsVariableCoordinator::findOrCreate(_awh, _action_factory)
-      .requestVariable(
-          var_name, {true, family, order, scaling, getSolverSystem(var_name), _blocks}, name());
+  const std::string var_type = "MooseVariable";
+  InputParameters params = getFactory().getValidParams(var_type);
+  params.set<MooseEnum>("family") = family;
+  params.set<MooseEnum>("order") = order;
+  params.set<std::vector<Real>>("scaling") = {scaling};
+  addSharedSolverVariable(var_type, var_name, params);
 }
 
 void
@@ -463,9 +486,11 @@ PhysicsBase::addSharedAuxVariable(const VariableName & var_name,
                                   const std::string & family,
                                   const std::string & order)
 {
-  saveAuxVariableName(var_name);
-  PhysicsVariableCoordinator::findOrCreate(_awh, _action_factory)
-      .requestVariable(var_name, {false, family, order, 1.0, "", _blocks}, name());
+  const std::string var_type = "MooseVariable";
+  InputParameters params = getFactory().getValidParams(var_type);
+  params.set<MooseEnum>("family") = family;
+  params.set<MooseEnum>("order") = order;
+  addSharedAuxVariable(var_type, var_name, params);
 }
 
 bool

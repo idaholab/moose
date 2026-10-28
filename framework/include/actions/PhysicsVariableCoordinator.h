@@ -23,6 +23,11 @@
  * variables by name (initial conditions, materials, kernels, user objects, boundary conditions,
  * auxiliary kernels).
  *
+ * A finite volume variable may not be shared across two adjacent subdomains unless one of the
+ * requesting Physics is defined on both: otherwise each Physics' flux kernels would treat the faces
+ * between the subdomains as boundaries of their own blocks, so no flux would cross them, even
+ * though the variable is defined on both sides.
+ *
  * There is at most one coordinator per simulation. It is created on demand by
  * PhysicsBase (see findOrCreate()) and is not meant to be declared in an input file.
  */
@@ -34,33 +39,24 @@ public:
 
   virtual void act() override;
 
-  /// The definition of a shared variable that a Physics asks for
-  struct VariableRequest
-  {
-    /// Whether the variable is a solver variable, as opposed to an auxiliary one
-    bool _nl;
-    /// Finite element family
-    std::string _family;
-    /// Finite element order
-    std::string _order;
-    /// Scaling factor (solver variables only)
-    Real _scaling;
-    /// Solver system the variable belongs to (solver variables only)
-    SolverSystemName _solver_sys;
-    /// Blocks the variable is defined on
-    std::vector<SubdomainName> _blocks;
-  };
-
   /**
-   * Requests that a shared variable be created on the blocks of \p request, in addition to any
-   * blocks already requested for this name by another Physics
+   * Requests that a shared variable be created on \p blocks, in addition to any blocks already
+   * requested for this name by another Physics
+   *
+   * @param nl whether the variable is a solver variable, as opposed to an auxiliary one
+   * @param var_type type of the variable, e.g. 'MooseVariable' or 'MooseVariableFVReal'
    * @param var_name name of the variable
-   * @param request definition of the variable. Everything but the blocks must be identical to the
-   * definition in any previous request for the same name
+   * @param params parameters of the variable. The 'block' parameter is ignored and set to the
+   * union of the requested blocks. Every other parameter must be identical to the parameters of
+   * any previous request for the same name.
+   * @param blocks blocks to define the variable on
    * @param requester name of the Physics making the request, for error messages
    */
-  void requestVariable(const VariableName & var_name,
-                       const VariableRequest & request,
+  void requestVariable(bool nl,
+                       const std::string & var_type,
+                       const VariableName & var_name,
+                       const InputParameters & params,
+                       const std::vector<SubdomainName> & blocks,
                        const std::string & requester);
 
   /// Finds this simulation's coordinator, creating it and adding it to \p awh (using
@@ -69,12 +65,22 @@ public:
                                                    ActionFactory & action_factory);
 
 private:
-  /// A request along with the first Physics that made it
+  /// The merged requests for one shared variable
   struct MergedRequest
   {
-    VariableRequest _request;
-    std::string _requester;
+    /// Whether the variable is a solver variable, as opposed to an auxiliary one
+    bool _nl;
+    /// Type of the variable
+    std::string _type;
+    /// Parameters of the variable, from the first request
+    InputParameters _params;
+    /// Name of each requesting Physics, in request order, with the blocks it requested
+    std::vector<std::pair<std::string, std::vector<SubdomainName>>> _requester_blocks;
   };
+
+  /// Errors if \p req is a finite volume variable on two adjacent subdomains that no single
+  /// requester is defined on
+  void checkFVAdjacency(const VariableName & var_name, const MergedRequest & req) const;
 
   /// Pending variable requests, keyed by variable name
   std::map<VariableName, MergedRequest> _requests;
