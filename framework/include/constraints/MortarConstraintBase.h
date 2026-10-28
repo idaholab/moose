@@ -17,6 +17,8 @@
 #include "MortarConsumerInterface.h"
 #include "TwoMaterialPropertyInterface.h"
 
+#include <optional>
+
 // Forward Declarations
 class FEProblemBase;
 namespace libMesh
@@ -123,6 +125,18 @@ protected:
 
   /// Whether to compute lagrange multiplier residuals
   const bool _compute_lm_residuals;
+
+  /**
+   * Whether the primary side is a surface without an interior parent whose variable is prescribed
+   * by a nodal boundary condition on the primary boundary. That condition replaces the primary
+   * Jacobian rows, so they need not be computed (Carvalho et al. 2023, Sec. 3.1). The primary
+   * residual is still computed, so that tagged residuals such as reaction forces keep the contact
+   * contribution.
+   */
+  bool skipPrimaryJacobian();
+
+  /// Cached result of \p skipPrimaryJacobian(), computed on first use
+  std::optional<bool> _skip_primary_jacobian;
 
   /// A dummy object useful for constructing _test when not using Lagrange multipliers
   const VariableTestValue _test_dummy;

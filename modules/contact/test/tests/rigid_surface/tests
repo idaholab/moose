@@ -34,6 +34,15 @@
       csvdiff = rigid_surface_3d_out.csv
       detail = 'Frictionless mortar contact against QUAD4 surface elements in 3D.'
     []
+    [mortar_3d_petrov_galerkin]
+      type = CSVDiff
+      input = rigid_surface_3d.i
+      csvdiff = rigid_surface_3d_petrov_galerkin_out.csv
+      cli_args = 'Contact/rigid/use_petrov_galerkin=true '
+                 'Outputs/file_base=rigid_surface_3d_petrov_galerkin_out'
+      detail = 'Frictionless mortar contact against QUAD4 surface elements in 3D, with the weighted '
+               'gap tested by the standard basis (Petrov-Galerkin).'
+    []
     [node_face_3d]
       type = CSVDiff
       input = rigid_surface_3d.i

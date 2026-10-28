@@ -118,10 +118,14 @@ materials, the [!param](/Problem/FEProblem/kernel_coverage_check) and
 
 For mortar formulations, the surface block is given in
 [!param](/Contact/ContactAction/primary_surface_blocks), so that no lower-dimensional primary block
-is generated. Node/face formulations use surface elements whose nodes are all in the primary
-nodeset as contact faces without additional input. Their contact normal follows the right-hand
-rule from the surface element node ordering and must point toward the secondary body; otherwise
-no contact is detected. [OrientSurfaceMeshGenerator.md] can orient `TRI` and `QUAD` surfaces.
+is generated. [!param](/Contact/ContactAction/use_petrov_galerkin) is supported and tests the
+weighted gap with the standard basis instead of the dual basis. For each displacement component that
+is prescribed by a nodal boundary condition on the surface, the contact Jacobian rows of the surface
+are not computed, since that condition replaces them [!cite](carvalho2023efficient). Node/face
+formulations use surface elements whose nodes are all in the primary nodeset as contact faces
+without additional input. Their contact normal follows the right-hand rule from the surface element
+node ordering and must point toward the secondary body; otherwise no contact is detected.
+[OrientSurfaceMeshGenerator.md] can orient `TRI` and `QUAD` surfaces.
 
 !listing test/tests/rigid_surface/rigid_surface_3d.i block=Mesh Contact
 
@@ -156,3 +160,5 @@ Gap offset:
 !syntax inputs /Contact/ContactAction
 
 !syntax children /Contact/ContactAction
+
+!bibtex bibliography
