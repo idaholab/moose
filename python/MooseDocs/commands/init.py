@@ -222,9 +222,14 @@ def _insert_sorted_entry(
     i = start_idx
     while i < len(lines):
         stripped = lines[i].rstrip("\n")
+        # Blank lines are separators within the block, not the end of it (e.g. the blank
+        # line left between entries by 'blank_separated'); skip them without ending the scan.
         if stripped == "":
             i += 1
             continue
+        # Assumes the block is contiguous: the first line indented less than 'entry_indent'
+        # (a dedented key, or the literal start of the next top-level section) marks the end
+        # of this block, so the scan can stop here.
         if not stripped.startswith(entry_indent):
             break
         # A line is a new entry (rather than a continuation of the previous one) only
