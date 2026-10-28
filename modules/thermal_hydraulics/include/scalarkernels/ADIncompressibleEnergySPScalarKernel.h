@@ -9,12 +9,11 @@
 
 #pragma once
 
-#include "ADScalarKernel.h"
 #include "ADFunctorInterface.h"
 
 class SinglePhaseFluidProperties;
 
-class ADIncompressibleEnergySPScalarKernel : public ADScalarKernel, public ADFunctorInterface
+class ADIncompressibleEnergySPScalarKernel : public ADScalarKernel
 {
   using Base = ADScalarKernel;
 

@@ -93,6 +93,7 @@ area = '${fparse 3.14159* ${R}^2}'
     reference_pressure = ${Pin}
     variable = T1
     is_implicit = True
+    heat_transfer_coefficient = h1
   []
   [temp1_DT]
     type = ADScalarTimeDerivative
@@ -117,6 +118,20 @@ area = '${fparse 3.14159* ${R}^2}'
     type = ParsedODEKernel
     expression = 'dPc - ${dP}'
     variable = dPc
+  []
+[]
+
+[FunctorMaterials]
+  [h1]
+    type = ADDittusBoelterHTCFunctorMaterial
+    mass_flow_rate = m1
+    fluid_properties = water
+    T_fluid = T1
+    T_fluid_inlet = T0
+    T_fluid_outlet = T2
+    reference_pressure = ${Pin}
+    flow_area = ${area}
+    wetted_perimeter = '${fparse 2*3.14159* ${R}}'
   []
 []
 
