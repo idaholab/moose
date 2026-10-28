@@ -9,7 +9,6 @@
 
 #include "ADPipeOuterWallRadiationScalarKernel.h"
 
-#include "ADFunctorInterface.h"
 #include "ThermalSolidProperties.h"
 #include "PhysicalConstants.h"
 
@@ -19,7 +18,6 @@ InputParameters
 ADPipeOuterWallRadiationScalarKernel::validParams()
 {
   InputParameters params = ADScalarKernel::validParams();
-  params += ADFunctorInterface::validParams();
   params.addClassDescription(
       "Adds a radiative heat transfer term, exchanged with an ambient/surrounding "
       "environment, to the outer-surface radial node of a pipe wall.");
@@ -48,7 +46,6 @@ ADPipeOuterWallRadiationScalarKernel::validParams()
 ADPipeOuterWallRadiationScalarKernel::ADPipeOuterWallRadiationScalarKernel(
     const InputParameters & parameters)
   : Base(parameters),
-    ADFunctorInterface(this),
     _sp(this->template getUserObject<ThermalSolidProperties>("solid_properties")),
     _is_implicit(this->template getParam<bool>("is_implicit")),
     _area(this->template getFunctor<ADReal>("area")),
