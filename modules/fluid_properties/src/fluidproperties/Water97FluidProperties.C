@@ -546,7 +546,7 @@ Water97FluidProperties::vaporTemperature_ad(const ADReal & pressure) const
   using std::pow, std::sqrt;
   // Check whether the input pressure is within the region of validity of this equation.
   // Valid for 611.213 Pa <= p <= 22.064 MPa
-  if (pressure.value() < 611.23 || pressure.value() > _p_critical)
+  if (pressure.value() < 611.213 || pressure.value() > _p_critical)
     mooseException(name() + ": vaporTemperature(): Pressure ",
                    pressure.value(),
                    " is outside range 611.213 Pa <= p <= 22.064 MPa");

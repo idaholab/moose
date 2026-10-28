@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#20976'
+
+  [all_subdomain_names_and_ids]
+    type = GoogleTest
+    unit_test = MooseMeshUtilsTest.getAllSubdomainNamesAndIDs
+    requirement = 'The system shall be able to list the names and IDs of all subdomains in a mesh, including unnamed subdomains, to report them in error messages.'
+    design = 'AdvancedExtruderGenerator.md'
+  []
+  [all_boundary_names_and_ids]
+    type = GoogleTest
+    unit_test = MooseMeshUtilsTest.getAllBoundaryNamesAndIDs
+    requirement = 'The system shall be able to list the names and IDs of all boundaries in a mesh, using the nodeset name for boundaries without a sideset name, to report them in error messages.'
+    design = 'LowerDBlockFromSidesetGenerator.md'
+  []
+[]

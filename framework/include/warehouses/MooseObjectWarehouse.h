@@ -104,18 +104,22 @@ MooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object,
   if (recurse)
   {
     if (auto mvir = std::dynamic_pointer_cast<MooseVariableInterface<Real>>(object); mvir)
-      _variable_objects[mvir->mooseVariableBase()->number()].addObject(object, tid, false);
+      _variable_objects.try_emplace(mvir->mooseVariableBase()->number(), this->_num_threads)
+          .first->second.addObject(object, tid, false);
     else if (auto mviv = std::dynamic_pointer_cast<MooseVariableInterface<RealVectorValue>>(object);
              mviv)
-      _variable_objects[mviv->mooseVariableBase()->number()].addObject(object, tid, false);
+      _variable_objects.try_emplace(mviv->mooseVariableBase()->number(), this->_num_threads)
+          .first->second.addObject(object, tid, false);
     else if (auto mvie = std::dynamic_pointer_cast<MooseVariableInterface<RealEigenVector>>(object);
              mvie)
-      _variable_objects[mvie->mooseVariableBase()->number()].addObject(object, tid, false);
+      _variable_objects.try_emplace(mvie->mooseVariableBase()->number(), this->_num_threads)
+          .first->second.addObject(object, tid, false);
     // Some objects, such as ScalarKernels, do not inherit from the MooseVariableInterface (which is
     // for field variables). These objects *do* inherit from ResidualObject which has this more
     // generic variable() API
     else if (auto ro = std::dynamic_pointer_cast<ResidualObject>(object); ro)
-      _variable_objects[ro->variable().number()].addObject(object, tid, false);
+      _variable_objects.try_emplace(ro->variable().number(), this->_num_threads)
+          .first->second.addObject(object, tid, false);
   }
 }
 

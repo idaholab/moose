@@ -31,7 +31,8 @@ public:
           const libMesh::RealVectorValue & start_direction,
           const libMesh::RealVectorValue & end_direction,
           const unsigned int cps_per_half,
-          const libMesh::Real sharpness);
+          const libMesh::Real sharpness,
+          const std::string & caller_name);
 
   /**
    * Evaluate the BSpline interpolation at given value of t.
@@ -94,6 +95,9 @@ private:
   const unsigned int _cps_per_half;
   /// sharpness of the curve
   const libMesh::Real _sharpness;
+  /// Name of the object working with this class, used for error reporting. Declared before the
+  /// control points and knot vector because their construction may report errors
+  const std::string _caller_name;
   /// The control points.
   const std::vector<libMesh::Point> _control_points;
   /// The knot vector.

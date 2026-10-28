@@ -125,7 +125,7 @@ To prevent stalling or significant over-speeding of the shaft while the coolant
 is reaching a fully developed and fully heated flow, a shutdown function is
 applied to the motor. A linearly decreasing torque is applied to the motor
 starting from the time the turbine first provides more torque and reaches 0 N·m
-after 35,000 s. This function uses `ControlLogic` to determine when the torque
+after 35,000 s. This function uses [ChainControls](syntax/ChainControls/index.md) to determine when the torque
 supplied by the turbine is greater than the motor, and initiates a graceful ramp
 down of the motor. The proceeding sections discuss in detail how this control
 logic is implemented in the input file.
@@ -134,39 +134,49 @@ logic is implemented in the input file.
 
 ### PID Control
 
-Shown below is the `ControlLogic` block containing the PID block utilizing
-[PIDControl.md]. Here, the $K_p$, $K_i$, and $K_d$ variables are the
+Shown below is the `ChainControls` block containing the PID block utilizing
+[PIDChainControl.md]. Here, the $K_p$, $K_i$, and $K_d$ variables are the
 proportional, integral, and derivative gains respectively. As with any PID
 control, gains must be determined for a specific system and are not universal.
 In this specific PID, the output signal is used to govern the torque supplied by
 the motor to the system shaft based upon the current shaft speed.
 
 !listing thermal_hydraulics/test/tests/problems/brayton_cycle/recuperated_brayton_cycle.i
-       block=ControlLogic/initial_motor_PID
+       block=ChainControls/initial_motor_PID
        link=False
 
 The PID attempts to reach a desired shaft speed, in RPM, which is determined by
-the `set_point` block using [GetFunctionValueControl.md]. The rated speed of the
+the `set_point` block using [GetFunctionValueChainControl.md]. The rated speed of the
 turbine is set at the beginning of the input file as a global parameter
 `speed_rated_rpm`. To prevent over-speeding of the turbine and compressor, the
 set point of the PID is adjusted to be lower than the rated turbine speed.
 
 !listing thermal_hydraulics/test/tests/problems/brayton_cycle/recuperated_brayton_cycle.i
-       block=ControlLogic/set_point
+       block=ChainControls/set_point
        link=False
 
-A [ParsedFunctionControl.md] is applied to determine whether to send the PID
+The PID input `shaft_RPM` and the torques compared below, `motor_torque` and
+`turbine_torque`, are postprocessors. They are brought into the control data
+system with [GetPostprocessorChainControl.md] blocks, using
+[!param](/ChainControls/GetPostprocessorChainControl/name_data_same_as_postprocessor)
+so that the control data have the same names as the postprocessors.
+
+!listing thermal_hydraulics/test/tests/problems/brayton_cycle/recuperated_brayton_cycle.i
+       block=ChainControls/get_shaft_RPM ChainControls/get_motor_torque ChainControls/get_turbine_torque
+       link=False
+
+A [ParsedChainControl.md] is applied to determine whether to send the PID
 output to the motor or shutdown the motor because the turbine is supplying
 enough torque.
 
 !listing thermal_hydraulics/test/tests/problems/brayton_cycle/recuperated_brayton_cycle.i
-       block=ControlLogic/logic
+       block=ChainControls/logic
        link=False
 
-If `logic` determines to send the PID signal to the motor, then [SetComponentRealValueControl.md] `motor_PID` is used to apply the signal directly to the `motor` component torque.
+If `logic` determines to send the PID signal to the motor, then [SetValueChainControl.md] `motor_PID` is used to apply the signal to the `motor` component torque.
 
 !listing thermal_hydraulics/test/tests/problems/brayton_cycle/recuperated_brayton_cycle.i
-       block=ControlLogic/motor_PID
+       block=ChainControls/motor_PID
        link=False
 
 ## Motor Shutdown

@@ -151,10 +151,16 @@ CylinderComponent::addMeshGenerators()
     circle_params.set<unsigned int>("num_sectors") = getParam<unsigned int>("n_sectors");
     if (isParamValid("block"))
     {
+      // The concentric circle generator creates one subdomain per radius, so the boundary layer
+      // gets its own subdomain
       const auto block_name = getParam<SubdomainName>("block");
-      circle_params.set<SubdomainName>("subdomain_name") = block_name;
-      _blocks.push_back(block_name);
+      std::vector<SubdomainName> block_names = {block_name};
+      if (isParamValid("boundary_layer_width"))
+        block_names.push_back(block_name + "_boundary_layer");
+      circle_params.set<std::vector<SubdomainName>>("subdomain_name") = block_names;
+      _blocks.insert(_blocks.end(), block_names.begin(), block_names.end());
     }
+    circle_params.set<std::string>("boundary_name_prefix") = name() + "_";
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "ConcentricCircleMeshGenerator", name() + "_circle_base", circle_params);
     _mg_names.push_back(name() + "_circle_base");

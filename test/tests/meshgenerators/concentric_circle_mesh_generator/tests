@@ -22,4 +22,31 @@
     design = 'meshgenerators/ConcentricCircleMeshGenerator.md'
     issues = '#17533'
   [../]
+  [subdomain_names]
+    type = 'Exodiff'
+    input = 'concentric_circle_mesh_generator.i'
+    cli_args = "Mesh/ccmg/radii='0.2546 0.4750' Mesh/ccmg/rings='2 3 2'
+                Mesh/ccmg/subdomain_name='inner outer square'
+                Mesh/ccmg/boundary_name_prefix='ccmg_' --mesh-only subdomain_names_in.e"
+    exodiff = 'subdomain_names_in.e'
+    exodiff_opts = '-pedantic'
+    mesh_mode = 'REPLICATED'
+    recover = false
+
+    requirement = 'The system shall be able to generate a mesh of concentric circles contained within a square with one named subdomain per circle and for the square, and with prefixed boundary names.'
+    design = 'meshgenerators/ConcentricCircleMeshGenerator.md'
+    issues = '#20976'
+  []
+  [subdomain_names_wrong_size]
+    type = RunException
+    input = 'concentric_circle_mesh_generator.i'
+    cli_args = "Mesh/ccmg/radii='0.2546 0.4750' Mesh/ccmg/rings='2 3 2'
+                Mesh/ccmg/subdomain_name='inner outer' --mesh-only"
+    expect_err = 'Parameter \(size: 2\) must be the same size as the number of rings \(= 2\) \+1 if the outer square is created'
+    mesh_mode = 'REPLICATED'
+
+    requirement = 'The system shall report an error if the number of subdomain names does not match the number of subdomains in the concentric circle mesh.'
+    design = 'meshgenerators/ConcentricCircleMeshGenerator.md'
+    issues = '#20976'
+  []
 []

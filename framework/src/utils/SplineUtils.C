@@ -69,29 +69,34 @@ bSplineControlPoints(const libMesh::Point & start_point,
                      const libMesh::RealVectorValue & start_direction,
                      const libMesh::RealVectorValue & end_direction,
                      const unsigned int cps_per_half,
-                     const libMesh::Real sharpness)
+                     const libMesh::Real sharpness,
+                     const std::string & caller_name)
 {
   // check that start_point is different from end_point
   if ((start_point - end_point).norm_sq() < libMesh::TOLERANCE * libMesh::TOLERANCE)
-    mooseError("Start and end points must be different.");
+    mooseError(caller_name + ": Start and end points must be different.");
   // check that neither direction is the zero vector
   if (start_direction.norm_sq() < libMesh::TOLERANCE * libMesh::TOLERANCE ||
       end_direction.norm_sq() < libMesh::TOLERANCE * libMesh::TOLERANCE)
-    mooseError("Direction vectors must have a nonzero magnitude.");
+    mooseError(caller_name + ": Direction vectors must have a nonzero magnitude.");
   mooseAssert(sharpness <= 1.0 && sharpness >= 0, "Sharpness must be in [0,1]!");
 
   // check if directions are parallel, use a special case if so
   const bool parallel = ((start_direction.cross(end_direction)).norm() < libMesh::TOLERANCE);
-  if (parallel)
+  const bool aligned =
+      ((start_direction.cross(end_point - start_point)).norm() < libMesh::TOLERANCE);
+  if (parallel && !aligned)
   {
     // We should not revert to a circle for this case
     if (MooseUtils::absoluteFuzzyEqual(start_direction.unit(), -end_direction.unit()))
-      mooseError("Start and end directions are opposite, this is not currently supported");
+      mooseError(caller_name +
+                 ": Start and end directions are opposite, this is not currently supported");
     mooseWarning("Directions are parallel! Attempting to use circular control points...");
     unsigned int num_cps = 2 * cps_per_half + 1;
     if (num_cps < 30)
-      mooseWarning("Number of control points required for circular control points is much greater "
-                   "than for BSplines. Current num_cps: " +
+      mooseWarning(caller_name +
+                   ": Number of control points required for circular control points "
+                   "is much greater than for BSplines. Current num_cps: " +
                    std::to_string(num_cps));
     return SplineUtils::circularControlPoints(start_point, end_point, start_direction, num_cps);
   }
@@ -187,10 +192,16 @@ closestPoints(const libMesh::Point & point_1,
               const libMesh::RealVectorValue & direction_2)
 {
   const auto n_vec = direction_1.cross(direction_2);
+  const bool aligned = ((direction_1.cross(point_2 - point_1)).norm() < libMesh::TOLERANCE);
 
   // check if n_vec is the zero vector (indicates parallel lines)
   if (n_vec.norm_sq() < libMesh::TOLERANCE * libMesh::TOLERANCE)
-    mooseError("Lines are parallel! Infinitely many closest points exist.");
+  {
+    if (!aligned)
+      mooseError("Lines are parallel! Infinitely many closest points exist.");
+    else
+      return std::make_pair((point_1 + point_2) / 2., (point_1 + point_2) / 2.);
+  }
 
   const auto n1_vec = direction_1.cross(n_vec);
   const auto n2_vec = direction_2.cross(n_vec);

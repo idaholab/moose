@@ -275,41 +275,32 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
     }
   }
 
-  // Communicate the extreme gap values in parallel.
-  std::vector<Real> recv;
-  if (this->_communicator.rank() == 0)
-    recv.resize(this->_communicator.size());
-  this->_communicator.gather(
-      0, -min_negative_gap > max_positive_gap ? min_negative_gap : max_positive_gap, recv);
+  // Reduce the extreme gap values on all ranks so that every rank returns the same result
+  this->_communicator.max(max_positive_gap);
+  this->_communicator.min(min_negative_gap);
 
-  if (this->_communicator.rank() == 0)
+  // report the gap value with the largest magnitude
+  const Real reported_gap =
+      -min_negative_gap > max_positive_gap ? min_negative_gap : max_positive_gap;
+  if (abs(reported_gap) > _penetration_tolerance)
   {
-    min_negative_gap = *std::min_element(recv.begin(), recv.end());
-    max_positive_gap = *std::max_element(recv.begin(), recv.end());
-
-    // report the gap value with the largest magnitude
-    const Real reported_gap =
-        -min_negative_gap > max_positive_gap ? min_negative_gap : max_positive_gap;
-    if (abs(reported_gap) > _penetration_tolerance)
-    {
-      mooseInfoRepeated("Penetration tolerance fail max_gap = ",
-                        reported_gap,
-                        " (gap_tol=",
-                        _penetration_tolerance,
-                        "). Iteration number is: ",
-                        _lagrangian_iteration_number,
-                        ".");
-      return false;
-    }
-    else
-      mooseInfoRepeated("Penetration tolerance success max_gap = ",
-                        reported_gap,
-                        " (gap_tol=",
-                        _penetration_tolerance,
-                        "). Iteration number is: ",
-                        _lagrangian_iteration_number,
-                        ".");
+    mooseInfoRepeated("Gap tolerance fail max_gap = ",
+                      reported_gap,
+                      " (gap_tol=",
+                      _penetration_tolerance,
+                      "). Iteration number is: ",
+                      _lagrangian_iteration_number,
+                      ".");
+    return false;
   }
+  else
+    mooseInfoRepeated("Gap tolerance success max_gap = ",
+                      reported_gap,
+                      " (gap_tol=",
+                      _penetration_tolerance,
+                      "). Iteration number is: ",
+                      _lagrangian_iteration_number,
+                      ".");
 
   return true;
 }

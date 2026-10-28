@@ -69,7 +69,6 @@
   petsc_options_iname = '-pc_type -snes_type'
   petsc_options_value = 'lu vinewtonrsls'
   nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-50
   nl_max_its = 20
 []
 

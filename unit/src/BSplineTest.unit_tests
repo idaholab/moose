@@ -1,0 +1,9 @@
+[Tests]
+  [too_few_control_points_error]
+    type = GoogleTest
+    unit_test = BSplineTest.TooFewControlPointsError
+    requirement = 'The system shall report an error, including the name of the object creating the spline, when too few control points are provided for the requested spline degree.'
+    design = 'BSplineCurveGenerator.md'
+    issues = '#31003'
+  []
+[]
