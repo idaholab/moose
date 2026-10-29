@@ -1,5 +1,5 @@
-# Two Physics on adjacent blocks share the variables 'u' and 'v'
-order = FIRST
+# Two Physics on adjacent blocks share the solver variable 'u' and the auxiliary variable 'v'
+right_scaling = 1
 
 [Mesh]
   [gmg]
@@ -31,7 +31,7 @@ order = FIRST
       []
       [right]
         block = 2
-        order = ${order}
+        scaling = ${right_scaling}
       []
     []
   []
@@ -52,6 +52,16 @@ order = FIRST
   []
 []
 
+[AuxKernels]
+  # Covers the union of the blocks, which is only valid if 'v' is shared
+  [v]
+    type = ConstantAux
+    variable = v
+    value = 2
+    block = '1 2'
+  []
+[]
+
 [Executioner]
   type = Steady
   solve_type = NEWTON
@@ -67,6 +77,12 @@ order = FIRST
     type = ElementExtremeValue
     variable = u
     value_type = max
+    block = '1 2'
+  []
+  [v_blocks]
+    type = ElementExtremeValue
+    variable = v
+    value_type = min
     block = '1 2'
   []
 []

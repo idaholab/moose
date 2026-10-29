@@ -1,5 +1,7 @@
 # Two diffusion Physics on adjacent blocks share the variable 'u'. Without sharing, the second
 # Physics would add 'u' again, or error because the existing 'u' does not cover its blocks.
+right_order = FIRST
+
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -33,6 +35,7 @@
       []
       [right]
         block = 2
+        variable_order = ${right_order}
         diffusivity_functor = 1
         dirichlet_boundaries = 'right'
         boundary_values = '0'

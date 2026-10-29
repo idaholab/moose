@@ -7,13 +7,7 @@
       type = CSVDiff
       input = 'shared_variables.i'
       csvdiff = 'shared_variables_out.csv'
-      detail = 'for finite element variables,'
-    []
-    [fv]
-      type = CSVDiff
-      input = 'shared_variables_fv.i'
-      csvdiff = 'shared_variables_fv_out.csv'
-      detail = 'for finite volume variables on subdomains that are not adjacent,'
+      detail = 'for a solver variable and an auxiliary variable,'
     []
     [diffusion_cg]
       type = CSVDiff
@@ -32,31 +26,24 @@
     requirement = 'The system shall return an error if multiple physics share a variable'
     [inconsistent_fe]
       type = RunException
-      input = 'shared_variables.i'
-      cli_args = 'order=SECOND'
+      input = 'diffusion_two_physics.i'
+      cli_args = 'right_order=SECOND'
       expect_err = "Physics 'right' requests the shared variable 'u' with different values for parameter\(s\) .*order.* than Physics 'left' did"
       detail = 'with different finite element definitions,'
     []
-    [inconsistent_fv]
+    [inconsistent_scaling]
       type = RunException
-      input = 'shared_variables_fv.i'
+      input = 'shared_variables.i'
       cli_args = 'right_scaling=2'
       expect_err = "Physics 'right' requests the shared variable 'u' with different values for parameter\(s\) .*scaling.* than Physics 'left' did"
-      detail = 'with different finite volume definitions,'
-    []
-    [fv_adjacent]
-      type = RunException
-      input = 'shared_variables_fv.i'
-      cli_args = 'right_block=2'
-      expect_err = "Physics 'left' and 'right' share the finite volume variable 'u' on the adjacent subdomains '0' and '2', but neither is defined on both"
-      detail = 'that is a finite volume variable, on adjacent subdomains that no single physics is defined on,'
+      detail = 'with different scaling factors,'
     []
     [diffusion_fv_adjacent]
       type = RunException
       input = 'diffusion_two_physics_fv.i'
       cli_args = 'right_block=2'
       expect_err = "Physics 'left' and 'right' share the finite volume variable 'u' on the adjacent subdomains '0' and '2', but neither is defined on both"
-      detail = 'for the variable of finite volume diffusion physics on adjacent subdomains.'
+      detail = 'for a finite volume variable on adjacent subdomains that no single physics is defined on.'
     []
   []
 []

@@ -12,9 +12,9 @@
 #include "PhysicsBase.h"
 
 /**
- * Test Physics that requests a solver variable and an auxiliary variable shared with other
- * instances of this Physics, to test PhysicsVariableCoordinator. The solver variable is either a
- * finite element or a finite volume variable, with a diffusion kernel of the same discretization.
+ * Test Physics that requests a finite element solver variable and an auxiliary variable shared
+ * with other instances of this Physics, to test PhysicsVariableCoordinator for what the diffusion
+ * Physics cannot: a different scaling factor and a shared auxiliary variable.
  */
 class SharedVariablePhysics : public PhysicsBase
 {
@@ -23,16 +23,8 @@ public:
 
   SharedVariablePhysics(const InputParameters & parameters);
 
-  virtual InputParameters getAdditionalRMParams() const override;
-
 private:
   virtual void addSolverVariables() override;
   virtual void addAuxiliaryVariables() override;
   virtual void addFEKernels() override;
-  virtual void addFVKernels() override;
-
-  /// Whether the shared solver variable is a finite volume variable
-  const bool _fv;
-  /// Order of the shared solver variable (finite element only)
-  const std::string _order;
 };
