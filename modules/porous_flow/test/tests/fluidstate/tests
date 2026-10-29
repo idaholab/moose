@@ -205,4 +205,78 @@
     issues = '#13108'
     rel_err = 4e-5
   []
+  [fixed_numbering]
+    requirement = 'The system shall report an error if a fluid state is given a numbering other than its fixed numbering of'
+    design = 'PorousFlowWaterNCG.md PorousFlowBrineCO2.md'
+    issues = '#34233'
+    [liquid_phase_number]
+      type = RunException
+      input = 'waterncg.i'
+      cli_args = 'UserObjects/fs/liquid_phase_number=1'
+      expect_err = 'The liquid phase is now always phase 0'
+      allow_deprecated = true
+      detail = 'the phases,'
+    []
+    [liquid_fluid_component]
+      type = RunException
+      input = 'waterncg.i'
+      cli_args = 'UserObjects/fs/liquid_fluid_component=1'
+      expect_err = 'Water is now always fluid component 0'
+      allow_deprecated = true
+      detail = 'the water component, and'
+    []
+    [salt_component]
+      type = RunException
+      input = 'brineco2.i'
+      cli_args = 'UserObjects/fs/salt_component=1'
+      expect_err = 'Salt is now always fluid component 2'
+      allow_deprecated = true
+      detail = 'the salt component.'
+    []
+  []
+  [composition_errors]
+    requirement = 'The system shall report an error if the fluid state material is given'
+    design = 'PorousFlowFluidState.md'
+    issues = '#34233'
+    [wrong_number_of_z]
+      type = RunException
+      input = 'brineco2.i'
+      cli_args = 'Materials/brineco2/z="z z"'
+      expect_err = 'requires 1 total mass fraction\(s\), but 2 were supplied'
+      detail = 'a number of total mass fractions that differs from the number the fluid state requires,'
+    []
+    [wrong_number_of_components]
+      type = RunException
+      input = 'waterncg.i'
+      cli_args = 'UserObjects/dictator/number_fluid_components=3'
+      expect_err = 'the fluid state has 2 fluid components'
+      detail = 'a number of fluid components that differs from the fluid state, or'
+    []
+    [salt_without_salt_fluid_state]
+      type = RunException
+      input = 'waterncg.i'
+      cli_args = 'Materials/waterncg/xnacl=0.1'
+      expect_err = 'has no salt, so a salt mass fraction cannot be supplied'
+      detail = 'a salt mass fraction for a fluid state that has no salt.'
+    []
+  []
+  [aux_gradients]
+    requirement = 'The system shall compute the gradients of the fluid state properties, including the contributions of a spatially varying salt mass fraction and temperature, when the salt mass fraction and temperature'
+    design = 'PorousFlowFluidState.md'
+    issues = '#34233'
+    [porous_flow_vars]
+      type = CSVDiff
+      input = 'aux_gradients.i'
+      csvdiff = 'aux_gradients_out.csv'
+      detail = 'are PorousFlow variables, and'
+    []
+    [not_porous_flow_vars]
+      type = CSVDiff
+      input = 'aux_gradients.i'
+      cli_args = "UserObjects/dictator/porous_flow_vars='pgas z'"
+      csvdiff = 'aux_gradients_out.csv'
+      prereq = 'aux_gradients/porous_flow_vars'
+      detail = 'are not PorousFlow variables, giving the same result.'
+    []
+  []
 []

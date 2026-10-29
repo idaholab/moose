@@ -36,16 +36,10 @@ PorousFlowWaterVapor::PorousFlowWaterVapor(const InputParameters & parameters)
   if (_water_fp.fluidName() != "water")
     paramError("water_fp", "A valid water FluidProperties UserObject must be provided in water_fp");
 
-  // Set the number of phases and components, and their indexes
+  // Set the number of phases and components. The phases are liquid (0) and gas (1), fixed by the
+  // base class.
   _num_phases = 2;
   _num_components = 1;
-  _gas_phase_number = 1 - _aqueous_phase_number;
-
-  // Check that _aqueous_phase_number is <= total number of phases
-  if (_aqueous_phase_number >= _num_phases)
-    paramError("liquid_phase_number",
-               "This value is larger than the possible number of phases ",
-               _num_phases);
 
   // Check that _fluid_component is <= total number of fluid components
   if (_fluid_component >= _num_components)
