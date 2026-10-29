@@ -41,6 +41,7 @@ class FlowChannel1PhasePhysics : public PhysicsBase,
                                  public FlowChannelClosuresInterface
 {
 public:
+  static InputParameters sharedComponentParams();
   static InputParameters validParams();
   FlowChannel1PhasePhysics(const InputParameters & params);
 

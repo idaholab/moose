@@ -32,39 +32,13 @@ FlowChannel1PhaseAC::validParams()
 {
   InputParameters params = ActionComponent::validParams();
   params += ComponentMeshTransformHelper::validParams();
-  params += GravityInterface::validParams();
+  params += FlowChannel1PhasePhysics::sharedComponentParams();
   params.addClassDescription(
       "A 1D single-phase flow channel, with its mesh generated through the MeshGenerator system.");
 
   params.addRequiredRangeCheckedParam<Real>("length", "length > 0", "Length of the flow channel");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "n_elems", "n_elems > 0", "Number of elements along the flow channel");
-
-  // These are forwarded as-is to the FlowChannel1PhasePhysics this component creates (see the
-  // constructor) - kept here, rather than requiring a separate [Physics] block, so that an input
-  // file can move a flow channel from [Components]/FlowChannel1Phase to
-  // [ActionComponents]/FlowChannel1PhaseAC with no other changes.
-  params.addRequiredParam<UserObjectName>("fp",
-                                          "The name of the user object that defines fluid "
-                                          "properties");
-  params.addRequiredParam<FunctionName>(
-      "A", "Area of the flow channel, can be a constant or a function");
-  params.addRequiredParam<FunctionName>("initial_p", "Initial pressure [Pa]");
-  params.addRequiredParam<FunctionName>("initial_T", "Initial temperature [K]");
-  params.addRequiredParam<FunctionName>("initial_vel", "Initial velocity [m/s]");
-  params.addParam<std::vector<Real>>(
-      "scaling_factor_1phase",
-      std::vector<Real>(3, 1.0),
-      "Scaling factors for each single phase variable (rhoA, rhouA, rhoEA)");
-  params.addParam<std::vector<std::string>>(
-      "closures",
-      {},
-      "Closures object(s) providing wall friction. This is optional since closure relations can "
-      "be supplied directly by Materials as well.");
-  params.addParam<FunctionName>("f", "Wall friction factor [-]");
-  params.addParam<FunctionName>("D_h", "Hydraulic diameter [m]");
-  params.addParam<Real>("roughness", 0.0, "Roughness [m]");
-  params.addParam<Real>("PoD", 1, "Pitch-to-diameter ratio for parallel bundle heat transfer [-]");
 
   // Use THM's classic naming for the flow channel's orientation, instead of
   // ComponentMeshTransformHelper's generic 'direction'. InputParameters::renameParam() redirects

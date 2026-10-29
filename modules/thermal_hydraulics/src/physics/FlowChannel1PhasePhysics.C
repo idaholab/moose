@@ -28,13 +28,9 @@ registerMooseAction("ThermalHydraulicsApp", FlowChannel1PhasePhysics, "add_user_
 registerMooseAction("ThermalHydraulicsApp", FlowChannel1PhasePhysics, "check_integrity");
 
 InputParameters
-FlowChannel1PhasePhysics::validParams()
+FlowChannel1PhasePhysics::sharedComponentParams()
 {
-  InputParameters params = PhysicsBase::validParams();
-  params += GravityInterface::validParams();
-  params.addClassDescription(
-      "Single-phase flow (mass, momentum, energy) physics for a 1D flow channel "
-      "ActionComponent, without wall friction or wall heat transfer.");
+  InputParameters params = GravityInterface::validParams();
 
   params.addRequiredParam<UserObjectName>("fp",
                                           "The name of the user object that defines fluid "
@@ -44,20 +40,31 @@ FlowChannel1PhasePhysics::validParams()
   params.addRequiredParam<FunctionName>("initial_p", "Initial pressure [Pa]");
   params.addRequiredParam<FunctionName>("initial_T", "Initial temperature [K]");
   params.addRequiredParam<FunctionName>("initial_vel", "Initial velocity [m/s]");
-  params.addRequiredParam<std::vector<Real>>(
+  params.addParam<std::vector<Real>>(
       "scaling_factor_1phase",
+      std::vector<Real>(3, 1.0),
       "Scaling factors for each single phase variable (rhoA, rhouA, rhoEA)");
 
-  params.addParam<std::vector<std::string>>(
-      "closures",
-      {},
-      "Closures object(s) providing wall friction. This is optional since closure relations can "
-      "be supplied directly by Materials as well.");
+  params.addParam<std::vector<std::string>>("closures",
+                                            {},
+                                            "Closures object(s) providing closures such as "
+                                            "friction factors and heat transfer coefficients.");
   params.addParam<FunctionName>("f", "Wall friction factor [-]");
   params.addParam<FunctionName>("D_h", "Hydraulic diameter [m]");
   params.addParam<Real>("roughness", 0.0, "Roughness [m]");
   params.addParam<Real>("PoD", 1, "Pitch-to-diameter ratio for parallel bundle heat transfer [-]");
 
+  return params;
+}
+
+InputParameters
+FlowChannel1PhasePhysics::validParams()
+{
+  InputParameters params = PhysicsBase::validParams();
+  params += sharedComponentParams();
+  params.addClassDescription(
+      "Single-phase flow (mass, momentum, energy) physics for a 1D flow channel "
+      "ActionComponent, without wall friction or wall heat transfer.");
   return params;
 }
 
