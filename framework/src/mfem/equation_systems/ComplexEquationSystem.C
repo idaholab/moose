@@ -187,7 +187,9 @@ ComplexEquationSystem::ApplyEssentialBCs()
     // Initial guess for iterative solvers (initial condition or the previous time step solution)
     cast_ref<mfem::Vector &>(trial_gf) = _complex_gfuncs->GetRef(trial_var_name);
 
-    _ess_markers.at(i).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
+    // A mesh without boundary elements, such as a periodic one, has no boundary attributes
+    const auto & bdr_attributes = trial_gf.ParFESpace()->GetParMesh()->bdr_attributes;
+    _ess_markers.at(i).SetSize(bdr_attributes.Size() ? bdr_attributes.Max() : 0, 0);
     // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
     // essential boundaries to the _ess_markers array
     ApplyComplexEssentialBC(trial_var_name, trial_gf, _ess_markers.at(i));

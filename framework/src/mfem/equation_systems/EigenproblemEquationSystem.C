@@ -24,7 +24,9 @@ EigenproblemEquationSystem::ApplyEssentialBCs()
   mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(0));
   trial_gf.Update();
   trial_gf = _gfuncs->GetRef(_trial_var_names.at(0));
-  _ess_markers.at(0).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
+  // A mesh without boundary elements, such as a periodic one, has no boundary attributes
+  const auto & bdr_attributes = trial_gf.ParFESpace()->GetParMesh()->bdr_attributes;
+  _ess_markers.at(0).SetSize(bdr_attributes.Size() ? bdr_attributes.Max() : 0, 0);
   // Set constrained DoF values on user-declared essential boundaries and collect their markers
   ApplyEssentialBC(_trial_var_names.at(0), trial_gf, _ess_markers.at(0));
   trial_gf.FESpace()->GetEssentialTrueDofs(_ess_markers.at(0), _ess_tdof_lists.at(0));
