@@ -44,7 +44,22 @@
     []
   []
 
-  [wrong_interface_number_calls]
+  [prevent_wrong_boundary_calls]
+    # This test is designed to check whether the system correctly performs DomainUO callbacks
+    # and does not mistakenly execute executeOnBoundary() on an interface boundary.
+    # Without the fix in ComputeUserObjectsThread, the test fails because executeOnBoundary()
+    # is called on an interface boundary.
+    type = RunApp
+    # ParsedGenerateSideset requires a replicated mesh.
+    mesh_mode = REPLICATED
+    input = overlapping-interface.i
+    cli_args = 'UserObjects/conservation/check_interface_calls=false'
+    requirement = 'The system shall be able to execute user objects that perform operations on elements, boundaries, and interfaces and verify that boundary callbacks are not executed on interface boundaries.'
+    design = 'UserObjects/index.md'
+    issues = '#19995'
+  []
+
+  [prevent_wrong_interface_number_calls]
     # This test is designed to check whether the system correctly performs DomainUO callbacks
     # and does not execute the interface callback an incorrect number of times.
     # Without the fix in ComputeUserObjectsThread, the test fails because executeOnInterface()

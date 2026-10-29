@@ -262,7 +262,7 @@ ComputeUserObjectsThread::getInterfaceMaterialReinitCache(
     add_material_consumer(uo);
 
   for (const auto * const uo : _all_domain_objs)
-    if (uo->shouldExecuteOnInterface())
+    if (uo->shouldExecuteOnInterface(bnd_id))
       add_material_consumer(uo);
 
   // Interface materials execute after face and neighbor reinitialization, so include their
@@ -294,7 +294,18 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
 {
   std::vector<UserObject *> userobjs;
   queryBoundary(Interfaces::SideUserObject, bnd_id, userobjs);
-  if (userobjs.size() == 0 && _domain_objs.size() == 0)
+
+  bool has_domain_objs = false;
+  // we need to check all domain user objects because if the boundary is included as an interface
+  // boundary, it will be handled by onInterface
+  for (const auto * const domain_uo : _domain_objs)
+    if (domain_uo->shouldExecuteOnBoundary(bnd_id))
+    {
+      has_domain_objs = true;
+      break;
+    }
+
+  if (userobjs.size() == 0 && !has_domain_objs)
     return;
 
   _fe_problem.reinitElemFace(elem, side, _tid);
@@ -319,10 +330,11 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
     uo->execute();
 
   for (auto & uo : _domain_objs)
-  {
-    uo->preExecuteOnBoundary();
-    uo->executeOnBoundary();
-  }
+    if (uo->shouldExecuteOnBoundary(bnd_id))
+    {
+      uo->preExecuteOnBoundary();
+      uo->executeOnBoundary();
+    }
 
   // UserObject Jacobians
   std::vector<ShapeSideUserObject *> shapers;
@@ -398,6 +410,8 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
   if (!(neighbor->active()))
     return;
 
+  _fe_problem.setCurrentBoundaryID(bnd_id, _tid);
+
   std::vector<UserObject *> interface_objs;
   queryBoundary(Interfaces::InterfaceUserObject, bnd_id, interface_objs);
 
@@ -405,7 +419,7 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
   // we need to check all domain user objects because a domain user object may not be active
   // on the current subdomain but should be executed on the interface that it attaches to
   for (const auto * const domain_uo : _all_domain_objs)
-    if (domain_uo->shouldExecuteOnInterface())
+    if (domain_uo->shouldExecuteOnInterface(bnd_id))
     {
       has_domain_objs = true;
       break;
@@ -443,7 +457,7 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
     uo->execute();
 
   for (auto & uo : _all_domain_objs)
-    if (uo->shouldExecuteOnInterface())
+    if (uo->shouldExecuteOnInterface(bnd_id))
     {
       uo->preExecuteOnInterface();
       uo->executeOnInterface();
@@ -515,7 +529,7 @@ ComputeUserObjectsThread::printBlockExecutionInformation() const
 
   std::vector<const DomainUserObject *> domain_interface_uos;
   for (const auto * const domain_uo : _domain_objs)
-    if (domain_uo->shouldExecuteOnInterface())
+    if (domain_uo->hasInterfaceBoundaries())
       domain_interface_uos.push_back(domain_uo);
 
   // Approximation of the number of user objects currently executing

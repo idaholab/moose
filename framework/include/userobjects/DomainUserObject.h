@@ -100,9 +100,29 @@ public:
   void preExecuteOnInterface();
 
   /**
+   * Return whether this object should run \p executeOnBoundary
+   */
+  bool shouldExecuteOnBoundary() const;
+
+  /**
+   * Return whether this object should run \p executeOnBoundary for boundary \p bnd_id
+   */
+  bool shouldExecuteOnBoundary(BoundaryID bnd_id) const;
+
+  /**
    * Return whether this object should run \p executeOnInterface
    */
   bool shouldExecuteOnInterface() const;
+
+  /**
+   * Return whether this object should run \p executeOnInterface for boundary \p bnd_id
+   */
+  bool shouldExecuteOnInterface(BoundaryID bnd_id) const;
+
+  /**
+   * Return whether this object executes on any interface
+   */
+  bool hasInterfaceBoundaries() const { return !_interface_bnd_ids.empty(); }
 
   void checkVariable(const MooseVariableBase & variable) const override;
 
@@ -252,7 +272,25 @@ DomainUserObject::setFaceData()
 }
 
 inline bool
+DomainUserObject::shouldExecuteOnBoundary(BoundaryID bnd_id) const
+{
+  return !_interface_bnd_ids.count(bnd_id);
+}
+
+inline bool
+DomainUserObject::shouldExecuteOnBoundary() const
+{
+  return shouldExecuteOnBoundary(_current_boundary_id);
+}
+
+inline bool
 DomainUserObject::shouldExecuteOnInterface() const
 {
   return _interface_bnd_ids.count(_current_boundary_id);
+}
+
+inline bool
+DomainUserObject::shouldExecuteOnInterface(BoundaryID bnd_id) const
+{
+  return _interface_bnd_ids.count(bnd_id);
 }
