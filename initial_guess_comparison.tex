@@ -1,0 +1,122 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{siunitx}
+
+\title{Comparison of Initial Guesses for the Local Return-Mapping Newton Solve in MOOSE}
+\author{}
+\date{August 11, 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{Objective}
+
+This report compares two initial guesses for the scalar variable in the local Newton solve used by radial-return constitutive models in MOOSE:
+\begin{align}
+  \text{zero guess:} \qquad
+  \Delta\alpha_{n+1}^{(0)} &= 0, \\
+  \text{previous-increment guess:} \qquad
+  \Delta\alpha_{n+1}^{(0)} &= \Delta\alpha_n.
+\end{align}
+Here, $\Delta\alpha_n$ is the converged scalar effective inelastic strain increment from the previous time step.  The previous-increment guess is limited to the admissible range of the current local problem.  For an elastic plasticity step, the initial guess is set to zero so that a previous nonzero plastic increment is not applied to the elastic step.
+
+\section{Test configuration}
+
+The comparison used the optimized Solid Mechanics executable built in the Conda environment \texttt{moose}.  Both variants used identical input files, solver tolerances, loading histories, and material parameters.  Only the local Newton initial guess was changed.
+
+The following MOOSE tests were used:
+\begin{sloppypar}
+\begin{enumerate}
+  \item \textbf{Isotropic plasticity}: \path{modules/solid_mechanics/test/tests/recompute_radial_return/isotropic_plasticity_incremental_strain.i}.  The complete 15-step loading history was run with \texttt{IsotropicPlasticityStressUpdate}.
+  \item \textbf{Power-law creep}: \path{modules/solid_mechanics/test/tests/power_law_creep/power_law_creep.i}.  The complete 10-step loading history was run with \texttt{PowerLawCreepStressUpdate}.
+\end{enumerate}
+\end{sloppypar}
+
+The option \texttt{internal\_solve\_output\_on=always} was used to record the iteration summary for every local return-mapping solve.
+
+\section{Definition of the iteration metrics}
+
+The total local iteration count is accumulated over all quadrature points, all material evaluations performed during the global nonlinear iterations, and all time steps.  It is not the number of global nonlinear iterations.
+
+The number reported by the current MOOSE local solver has an important interpretation: a solve is reported as requiring zero iterations if it converges at the initial guess or during its first Newton update, because the internal iteration counter is incremented only after a nonconverged update.  Consequently, the reported values are useful for comparing the two variants but should not be interpreted as the exact number of residual or Jacobian evaluations.
+
+\section{Results}
+
+\subsection{Power-law creep}
+
+Table~\ref{tab:creep-step} gives the average reported local Newton iteration count at each time step.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Average local Newton iterations per solve for the power-law creep test.}
+  \label{tab:creep-step}
+  \begin{tabular}{S[table-format=2.0] S[table-format=1.3] S[table-format=1.3]}
+    \toprule
+    {Time step} & {Zero guess} & {Previous-increment guess} \\
+    \midrule
+     1 & 7.160 & 7.160 \\
+     2 & 8.000 & 5.375 \\
+     3 & 8.000 & 5.362 \\
+     4 & 8.000 & 5.542 \\
+     5 & 7.963 & 5.375 \\
+     6 & 8.034 & 5.224 \\
+     7 & 7.963 & 5.415 \\
+     8 & 8.034 & 5.366 \\
+     9 & 7.963 & 5.402 \\
+    10 & 8.000 & 5.371 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The first time step is identical for both variants because no converged increment from a previous time step is available.  The previous-increment guess reduces the average iteration count in every subsequent time step.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Aggregate power-law creep results over the complete 10-step history.}
+  \label{tab:creep-total}
+  \begin{tabular}{lrr}
+    \toprule
+    Metric & Zero guess & Previous-increment guess \\
+    \midrule
+    Number of local solves & 2208 & 2216 \\
+    Total reported local iterations & 17488 & 12278 \\
+    Average iterations per local solve & 7.920 & 5.541 \\
+    Maximum reported iterations & 9 & 16 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The reduction in the average iteration count is
+\begin{equation}
+  \frac{7.920290 - 5.540614}{7.920290}\times 100\% = 30.05\%.
+\end{equation}
+The reduction in the accumulated iteration count is
+\begin{equation}
+  \frac{17488 - 12278}{17488}\times 100\% = 29.79\%.
+\end{equation}
+The two variants execute slightly different numbers of local solves because changing the local initial guess can alter the path taken by the global nonlinear solver, even when the final constitutive results satisfy the same regression tolerances.
+
+\subsection{Isotropic plasticity}
+
+Both variants produced 240 local solves reported at zero iterations.  Thus, this test showed no measurable difference between the initial guesses.  The piecewise-linear plasticity problem converges at the minimum resolution of the current iteration diagnostic, so this result does not establish that the two guesses require exactly the same number of residual evaluations.
+
+\section{Regression verification}
+
+After adding admissible-range limiting and elastic-step handling, the following registered MOOSE tests passed without changing their reference results:
+\begin{itemize}
+  \item \texttt{recompute\_radial\_return.isotropic\_plasticity\_incremental},
+  \item \texttt{recompute\_radial\_return.isotropic\_plasticity\_finite},
+  \item \texttt{power\_law\_creep.nonad/power\_law\_creep}, and
+  \item \texttt{power\_law\_creep.ad/power\_law\_creep}.
+\end{itemize}
+
+\section{Conclusion}
+
+For the tested power-law creep problem, initializing the local scalar solve with the previous time step's converged increment reduced the average reported local Newton iteration count from 7.92 to 5.54, a reduction of approximately 30\%.  The benefit begins at the second time step, when a previous converged increment becomes available.  The isotropic plasticity test showed no measurable change because both variants converged at the minimum resolution of the existing iteration counter.  Although the warm start reduced total work, it also produced a larger observed worst-case local iteration count, increasing from 9 to 16; therefore, both average and worst-case behavior should be considered when evaluating this strategy on additional constitutive models and loading histories.
+
+\end{document}
