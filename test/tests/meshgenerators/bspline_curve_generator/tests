@@ -131,7 +131,7 @@
       input = 'bspline_curve_2D_circle.i'
       # tentative use of circles triggers a warning
       allow_warnings = true
-      cli_args = 'Mesh/bscg/start_direction=\'0 1 0\' Mesh/bscg/end_direction=\'0 1 0\' --mesh-only error.e'
+      cli_args = 'Mesh/bscg/start_direction=\'1 1 0\' Mesh/bscg/end_direction=\'1 1 0\' --mesh-only error.e'
       expect_err = 'Parallel lines cannot be interpolated using points along a circle! Direction vectors are incompatible with point locations.'
       detail = 'with parallel starting and ending directions for a general (non-circular) spline curve mesh generation in 2D as this is not currently supported,'
     []

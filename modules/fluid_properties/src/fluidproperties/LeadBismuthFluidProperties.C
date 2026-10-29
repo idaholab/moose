@@ -15,7 +15,7 @@ InputParameters
 LeadBismuthFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
-  params.addClassDescription("Fluid properties for Lead Bismuth eutectic 2LiF-BeF2");
+  params.addClassDescription("Fluid properties for lead-bismuth eutectic");
 
   return params;
 }

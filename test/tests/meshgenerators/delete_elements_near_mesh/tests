@@ -10,4 +10,14 @@
     recover = false
     requirement = 'The system shall be able to delete elements in a mesh that are nearer than a user-defined distance to another mesh.'
   []
+  [blocks_included]
+    type = 'Exodiff'
+    input = 'test_2d_2d.i'
+    cli_args = "Mesh/to_be_cut/subdomain_id='0 1' Mesh/to_be_cut/dx='3 3' Mesh/to_be_cut/ix='3 3'
+                Mesh/delete/blocks_included='1' --mesh-only blocks_included_in.e"
+    exodiff = 'blocks_included_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall be able to delete elements in a mesh that are nearer than a user-defined distance to another mesh, only in a subset of the subdomains of the mesh.'
+  []
 []

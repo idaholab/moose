@@ -25,8 +25,8 @@ HydrogenFluidProperties::validParams()
 HydrogenFluidProperties::HydrogenFluidProperties(const InputParameters & parameters)
   : HelmholtzFluidProperties(parameters),
     _Mh2(2.01588e-3),
-    _p_critical(1.315e6),
-    _T_critical(33.19),
+    _p_critical(1.2964e6),
+    _T_critical(33.145),
     _rho_molar_critical(15.508),
     _rho_critical(1000.0 * _rho_molar_critical * _Mh2),
     _p_triple(7.7e3),
@@ -131,7 +131,8 @@ HydrogenFluidProperties::mu_from_rho_T(Real density,
   for (std::size_t i = 0; i < _amu.size(); ++i)
   {
     sum += _amu[i] * MathUtils::pow(logTstar, i);
-    dsum_dT += i * _amu[i] * MathUtils::pow(logTstar, i) / (temperature * logTstar);
+    if (i > 0)
+      dsum_dT += i * _amu[i] * MathUtils::pow(logTstar, i - 1) / temperature;
   }
 
   const Real mu0 =
@@ -434,10 +435,8 @@ HydrogenFluidProperties::d2alpha_dtau2(Real delta, Real tau) const
     dalphar += _N3[i] * MathUtils::pow(delta, _d3[i]) * std::pow(tau, _t3[i]) *
                std::exp(_phi3[i] * Utility::pow<2>(delta - _D3[i]) +
                         _beta3[i] * Utility::pow<2>(tau - _gamma3[i])) *
-               (_t3[i] * _t3[i] +
-                2.0 * _beta3[i] * tau * tau *
-                    (1.0 + 2.0 * _beta3[i] * MathUtils::pow(tau - _gamma3[i], 2)) -
-                _t3[i] * (1.0 + 4.0 * _beta3[i] * tau * (tau - _gamma3[i])));
+               (Utility::pow<2>(_t3[i] + 2.0 * _beta3[i] * tau * (tau - _gamma3[i])) - _t3[i] +
+                2.0 * _beta3[i] * tau * tau);
 
   // The Helmholtz free energy is the sum of these two
   return dalpha0 + dalphar / tau / tau;

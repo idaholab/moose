@@ -176,7 +176,12 @@ NaClFluidProperties::cp_from_p_T(
 Real
 NaClFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 {
-  return e_from_p_T(pressure, temperature) / temperature;
+  // cv = cp - T alpha^2 / (rho kappa_T), with alpha = -(1/rho) drho/dT the thermal expansion
+  // coefficient and kappa_T = (1/rho) drho/dp the isothermal compressibility
+  Real rho, drho_dp, drho_dT;
+  rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
+  return cp_from_p_T(pressure, temperature) -
+         temperature * drho_dT * drho_dT / (rho * rho * drho_dp);
 }
 
 Real

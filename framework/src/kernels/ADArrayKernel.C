@@ -43,7 +43,8 @@ ADArrayKernel::ADArrayKernel(const InputParameters & parameters)
     _u(_var.adSln()),
     _grad_u(_var.adGradSln()),
     _count(_var.count()),
-    _work_vector(_count)
+    _work_vector(_count),
+    _raw_work_vector(_count)
 {
   _subproblem.haveADObjects(true);
   addMooseVariableDependency(mooseVariable());
@@ -63,9 +64,10 @@ ADArrayKernel::computeResidual()
     {
       _work_vector.setZero();
       computeQpResidual(_work_vector);
-      auto raw_work_vector = MetaPhysicL::raw_value(_work_vector);
-      raw_work_vector *= _JxW[_qp] * _coord[_qp];
-      _assembly.saveLocalArrayResidual(_local_re, _i, _test.size(), raw_work_vector);
+      for (const auto c : make_range(_count))
+        _raw_work_vector(c) = MetaPhysicL::raw_value(_work_vector(c));
+      _raw_work_vector *= _JxW[_qp] * _coord[_qp];
+      _assembly.saveLocalArrayResidual(_local_re, _i, _test.size(), _raw_work_vector);
     }
   }
 
@@ -73,7 +75,7 @@ ADArrayKernel::computeResidual()
 }
 
 void
-ADArrayKernel::computeJacobian()
+ADArrayKernel::computeResidualsForJacobian()
 {
   _local_ad_re.resize(_test.size() * _count);
   for (auto & residual : _local_ad_re)
@@ -90,7 +92,20 @@ ADArrayKernel::computeJacobian()
       _assembly.saveLocalADArray(_local_ad_re, _i, _test.size(), _work_vector);
     }
   }
+}
 
+void
+ADArrayKernel::computeJacobian()
+{
+  computeResidualsForJacobian();
+  addJacobian(_assembly, _local_ad_re, _var.dofIndices(), _var.arrayScalingFactor());
+}
+
+void
+ADArrayKernel::computeResidualAndJacobian()
+{
+  computeResidualsForJacobian();
+  addResiduals(_assembly, _local_ad_re, _var.dofIndices(), _var.arrayScalingFactor());
   addJacobian(_assembly, _local_ad_re, _var.dofIndices(), _var.arrayScalingFactor());
 }
 

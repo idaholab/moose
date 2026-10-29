@@ -91,7 +91,7 @@
       cli_args = 'Mesh/rename/old_block="0"
                   Mesh/rename/new_block="1 2"
                   --mesh-only'
-      expect_err = "Must be the same length as 'old_block'"
+      expect_err = "Length \(2\) must be the same length as 'old_block' \(1\)"
 
       detail = 'and when the provided old and new blocks are not the same length.'
     []

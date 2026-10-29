@@ -42,6 +42,11 @@ Users must provide the input parameters, such as:
 - whether the volume for concentric circles should be preserved or not (true/false)
 - iteration number: number of iterations for Laplace smoothing
 
+Each circle, including all its rings, is assigned its own subdomain, as is the enclosing square
+when it is created. Subdomain IDs start at 1 for the innermost circle and increase outward, with the
+enclosing square having the highest ID. Subdomain names may be assigned to each of these subdomains,
+in the same order, using the [!param](/Mesh/ConcentricCircleMeshGenerator/subdomain_name) parameter.
+
 Users can choose if the mesh for the enclosing square is added to the concentric circle mesh or not.
 A portion can be specified, however, it is not required. The default setting generates the full
 concentric circles.
