@@ -14,7 +14,7 @@ $H^1$ functions,
 so a problem of the form $(k\,\vec\nabla\times\vec u, \vec\nabla\times\vec v) = (\vec f, \vec v)$ with no
 (or only partial) mass term is singular. Whenever a mass-like term is absent over part or all
 of the domain, that part of the operator retains the null space and the discrete system
-cannot be solved without either an artificial regularisation or a gauge.
+cannot be solved without either an artificial regularization or a gauge.
 
 The constraint removes the null space by building a spanning tree of the mesh 1-skeleton
 (its vertices and edges) and strongly fixing the lowest-order edge degree of freedom on
@@ -45,9 +45,9 @@ stays compatible with the boundary condition instead of over-constraining it.
 
 Where another term of the weak form already removes the null space, there is no gauge
 freedom left to fix and gauging anyway would over-constrain the solution. Set `block` to the
-subdomain(s) that do need gauging; edges of the excluded elements then seed the spanning
-forest but are never gauged, while edges of a gauged subdomain that merely touch an excluded
-one are still gauged, so every free vertex is reached. Leaving `block` empty gauges the whole
+subdomain(s) that do need gauging; all edges of the excluded elements, including those
+at the interface between gauged and non-gauged subdomains, then seed the spanning
+forest but are never gauged. Leaving `block` empty gauges the whole
 mesh, which is correct only when the operator is genuinely unregularised everywhere.
 
 Getting this wrong is not a subtle effect: in the example below, gauging only the
@@ -64,10 +64,9 @@ and imaginary parts.
 
 - The gauge acts on the lowest-order (edge) DOFs only. For `fec_order` greater than
   `FIRST` the higher-order gradient modes are not removed.
-- Conforming meshes only; the coordinate key assumes vertex coordinates are identical
-  across ranks (true for a mesh read from a file, not for periodic meshes).
-- Construction is fully distributed in memory, but it is a global graph computation: it
-  costs `O(log V)` communication rounds and is rebuilt whenever the mesh or the finite
+- Conforming and non-periodic meshes only.
+- Construction is fully distributed in memory, but it is a global graph computation: for
+  a mesh with `V` vertices, it costs `O(log V)` communication rounds and is rebuilt whenever the mesh or the finite
   element space is refined. The result is cached between solves, so a transient pays for it
   once rather than once per time step.
 

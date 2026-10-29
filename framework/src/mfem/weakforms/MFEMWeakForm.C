@@ -51,10 +51,6 @@ MFEMWeakForm::addConstraint(const std::string & name, std::shared_ptr<MFEMConstr
 {
   if (auto essential_constraint = std::dynamic_pointer_cast<MFEMEssentialConstraint>(constraint))
     _equation_system->AddEssentialConstraint(std::move(essential_constraint));
-  else if (std::dynamic_pointer_cast<MFEMComplexEssentialConstraint>(constraint))
-    mooseError("Cannot add constraint with name '",
-               name,
-               "' because there is no corresponding complex equation system.");
   else
     mooseError("Unsupported constraint of name '", name, "' detected.");
 }

@@ -29,8 +29,8 @@ public:
 
   MFEMComplexEssentialConstraint(const InputParameters & parameters);
 
-  /// Apply the essential constraint, overwriting the values of gridfunc in the
-  /// subdomain as desired and appending the constrained true dofs.
+  /// Apply the essential constraint, overwriting the values of @p gridfunc in the
+  /// subdomain as desired and appending the constrained true dofs to @p ess_tdof_list.
   virtual void ApplyConstraint(mfem::ParComplexGridFunction & gridfunc,
                                mfem::Array<int> & ess_tdof_list) = 0;
 };

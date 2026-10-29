@@ -137,7 +137,7 @@ omega_sigma = 1.0 # angular frequency * conductivity
     block = ${insulator_block}
   []
   # Time-averaged |A|^2 in the conductor: independent of the gauge (which does
-  # not touch the conductor), a physics sanity check.
+  # not touch the conductor), a physics sanity check (matches result w/ Constraints/active='').
   [ConductorField]
     type = MFEMComplexVectorPeriodAveragedPostprocessor
     primal_variable = a_field

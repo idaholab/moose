@@ -41,31 +41,27 @@ struct LabelQuery
 namespace Moose::MFEM
 {
 
-BlockDistribution::BlockDistribution(std::int64_t n, int nprocs) : _n(n)
+BlockDistribution::BlockDistribution(std::int64_t n, int nprocs) : _n(n), _nprocs(nprocs)
 {
-  // Round up so the last rank absorbs the remainder and chunk * nprocs >= n. A
-  // chunk of at least 1 keeps owner() well defined for an empty range.
-  _chunk = std::max<std::int64_t>(1, (n + nprocs - 1) / nprocs);
 }
 
 int
 BlockDistribution::owner(std::int64_t g) const
 {
   mooseAssert(g >= 0 && g < _n, "Global id out of range");
-  // With chunk rounded up, g / chunk is always < nprocs for g < n.
-  return static_cast<int>(g / _chunk);
+  return static_cast<int>(((g + 1) * _nprocs - 1) / _n);
 }
 
 std::int64_t
 BlockDistribution::begin(int rank) const
 {
-  return std::min<std::int64_t>(static_cast<std::int64_t>(rank) * _chunk, _n);
+  return rank * _n / _nprocs;
 }
 
 std::int64_t
 BlockDistribution::end(int rank) const
 {
-  return std::min<std::int64_t>(static_cast<std::int64_t>(rank + 1) * _chunk, _n);
+  return (rank + 1) * _n / _nprocs;
 }
 
 std::vector<std::int64_t>
