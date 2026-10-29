@@ -3,5 +3,10 @@
     type = Exodiff
     input = thermomech_step01.i
     exodiff = thermomech_step01_out.e
+    requirement = 'The system shall be able to model coupled thermal and mechanical physics in '
+                  'a single block, including thermal expansion, as the first step of the '
+                  'thermomechanical tutorial.'
+    design = 'modules/combined/tutorials/introduction/thermomech_step01.md'
+    issues = '#18791'
   []
 []
