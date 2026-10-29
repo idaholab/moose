@@ -1,0 +1,26 @@
+[Tests]
+  design = 'syntax/Constraints/index.md source/constraints/MultiPointConstraint.md'
+  issues = '#33821'
+
+  [multipoint_tie_eigen]
+    type = 'CSVDiff'
+    input = 'multipoint_tie_eigen.i'
+    csvdiff = 'multipoint_tie_eigen_out_eigenvalues_0001.csv multipoint_tie_eigen_out.csv'
+    capabilities = 'slepc & mumps'
+    rel_err = 1e-6
+    abs_zero = 1e-10
+    requirement = 'The system shall condense a user-added multipoint constraint out of '
+                  'both eigen matrices and restore the constrained value on the eigenvector.'
+  []
+
+  [constraint_object_attached]
+    type = RunException
+    input = 'multipoint_tie_eigen.i'
+    cli_args = 'UserObjects/dummy/type=AttachDummySystemConstraint'
+    expect_err = "Another constraint object is already attached to the libMesh system 'nl0', so "
+                 "the exact constraints of 'tie_0' cannot be applied."
+    capabilities = 'slepc'
+    requirement = 'The system shall report an error when another libMesh constraint object is '
+                  'already attached to the system that receives exact constraints.'
+  []
+[]

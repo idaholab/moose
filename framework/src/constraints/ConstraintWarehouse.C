@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "ElemElemConstraint.h"
 #include "MortarConstraintBase.h"
+#include "MultiPointConstraint.h"
 #include "MooseVariable.h"
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
@@ -36,6 +37,8 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
   std::shared_ptr<ElemElemConstraint> ec = std::dynamic_pointer_cast<ElemElemConstraint>(object);
   std::shared_ptr<NodeElemConstraintBase> nec =
       std::dynamic_pointer_cast<NodeElemConstraintBase>(object);
+  std::shared_ptr<MultiPointConstraint> mpc =
+      std::dynamic_pointer_cast<MultiPointConstraint>(object);
 
   // NodeFaceConstraint
   if (nfc)
@@ -100,6 +103,10 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
   else if (nc)
     _nodal_constraints.addObject(nc);
 
+  // MultiPointConstraint
+  else if (mpc)
+    _multi_point_constraints.addObject(mpc);
+
   else
     mooseError("Unknown type of Constraint object");
 }
@@ -108,6 +115,12 @@ const std::vector<std::shared_ptr<NodalConstraint>> &
 ConstraintWarehouse::getActiveNodalConstraints() const
 {
   return _nodal_constraints.getActiveObjects();
+}
+
+const std::vector<std::shared_ptr<MultiPointConstraint>> &
+ConstraintWarehouse::getActiveMultiPointConstraints() const
+{
+  return _multi_point_constraints.getActiveObjects();
 }
 
 const std::vector<std::shared_ptr<NodeFaceConstraint>> &
@@ -296,6 +309,7 @@ ConstraintWarehouse::updateActive(THREAD_ID /*tid*/)
 {
   MooseObjectWarehouse<Constraint>::updateActive();
   _nodal_constraints.updateActive();
+  _multi_point_constraints.updateActive();
 
   for (auto & it : _node_face_constraints)
     it.second.updateActive();

@@ -50,6 +50,8 @@
 #include "NodeElemConstraintBase.h"
 #include "MortarConstraint.h"
 #include "ElemElemConstraint.h"
+#include "MultiPointConstraint.h"
+#include "MultiPointConstraintHub.h"
 #include "ScalarKernelBase.h"
 #include "Parser.h"
 #include "Split.h"
@@ -617,6 +619,32 @@ NonlinearSystemBase::addConstraint(const std::string & c_name,
   _constraints.addObject(constraint);
   postAddResidualObject(*constraint);
 
+  // Exact constraints are applied by the DofMap through one libMesh constraint object per system
+  if (constraint->usesExactConstraints() && !_mpc_hub)
+  {
+    auto attach_hub =
+        [this, &name](SystemBase & constrained_sys, std::unique_ptr<MultiPointConstraintHub> & hub)
+    {
+      if (constrained_sys.system().has_constraint_object())
+        mooseError("Another constraint object is already attached to the libMesh system '",
+                   constrained_sys.system().name(),
+                   "', so the exact constraints of '",
+                   name,
+                   "' cannot be applied.");
+
+      hub = std::make_unique<MultiPointConstraintHub>(*this, constrained_sys);
+      constrained_sys.system().attach_constraint_object(*hub);
+    };
+
+    attach_hub(*this, _mpc_hub);
+
+    // The displaced DofMap reduces the element matrices of objects on the displaced mesh. It shares
+    // the dof numbering of this system, so it gets the same exact constraints
+    if (auto displaced_problem = _fe_problem.getDisplacedProblem())
+      attach_hub(displaced_problem->solverSys(_fe_problem.nlSysNum(this->name())),
+                 _displaced_mpc_hub);
+  }
+
   if (!_fe_problem.useHashTableMatrixAssembly())
     if (constraint && constraint->addCouplingEntriesToJacobian())
       addImplicitGeometricCouplingEntriesToJacobian(true);
@@ -1092,6 +1120,9 @@ NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & res
     const auto & ncs = _constraints.getActiveNodalConstraints();
     for (const auto & nc : ncs)
     {
+      if (nc->usesExactConstraints())
+        continue;
+
       std::vector<dof_id_type> & secondary_node_ids = nc->getSecondaryNodeId();
       std::vector<dof_id_type> & primary_node_ids = nc->getPrimaryNodeId();
 
@@ -1119,6 +1150,9 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian(const SparseMatrix<Number> 
     const auto & ncs = _constraints.getActiveNodalConstraints();
     for (const auto & nc : ncs)
     {
+      if (nc->usesExactConstraints())
+        continue;
+
       std::vector<dof_id_type> & secondary_node_ids = nc->getSecondaryNodeId();
       std::vector<dof_id_type> & primary_node_ids = nc->getPrimaryNodeId();
 
@@ -1318,6 +1352,9 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
 
             for (const auto & nec : constraints)
             {
+              if (nec->usesExactConstraints())
+                continue;
+
               if (nec->shouldApply())
               {
                 constraints_applied = true;
@@ -1593,6 +1630,9 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
             for (const auto & nec : constraints)
             {
+              if (nec->usesExactConstraints())
+                continue;
+
               if (nec->shouldApply())
               {
                 constraints_applied = true;
@@ -2814,6 +2854,9 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
 
             for (const auto & nec : constraints)
             {
+              if (nec->usesExactConstraints())
+                continue;
+
               if (nec->shouldApply())
               {
                 constraints_applied = true;
@@ -4267,6 +4310,34 @@ NonlinearSystemBase::computeScaling()
 
   _computed_scaling = true;
   return true;
+}
+
+void
+NonlinearSystemBase::reinitExactConstraints()
+{
+  if (_mpc_hub)
+    _mpc_hub->reinit();
+  if (_displaced_mpc_hub)
+    _displaced_mpc_hub->reinit();
+}
+
+void
+NonlinearSystemBase::updateExactConstraints()
+{
+  if (!_mpc_hub)
+    return;
+
+  // Every constraint is asked, because asking is how it records the coefficients it emitted
+  bool changed = false;
+  for (const auto & constraint : _constraints.getActiveObjects())
+    if (constraint->usesExactConstraints() && constraint->exactConstraintsChanged())
+      changed = true;
+
+  // The rebuild is collective
+  _communicator.max(changed);
+
+  if (changed)
+    reinitExactConstraints();
 }
 
 bool

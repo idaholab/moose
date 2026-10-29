@@ -40,6 +40,7 @@
 #include "ElementH1Error.h"
 #include "Function.h"
 #include "Convergence.h"
+#include "MultiPointConstraint.h"
 #include "NonlinearSystem.h"
 #include "LinearSystem.h"
 #include "SolverSystem.h"
@@ -3425,8 +3426,10 @@ FEProblemBase::addConstraint(const std::string & c_name,
 
   auto determine_var_param_name = [&parameters, this]()
   {
-    if (parameters.isParamValid("variable"))
-      return "variable";
+    if (parameters.have_parameter<std::string>(MultiPointConstraint::system_variable_param))
+      return parameters.get<std::string>(MultiPointConstraint::system_variable_param);
+    else if (parameters.isParamValid("variable"))
+      return std::string("variable");
     else
     {
       // must be a mortar constraint
@@ -3437,7 +3440,7 @@ FEProblemBase::addConstraint(const std::string & c_name,
             "Either a 'secondary_variable' or 'primary_variable' parameter must be supplied for '",
             parameters.getObjectName(),
             "'");
-      return has_secondary_var ? "secondary_variable" : "primary_variable";
+      return std::string(has_secondary_var ? "secondary_variable" : "primary_variable");
     }
   };
 
