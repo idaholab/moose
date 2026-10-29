@@ -11,7 +11,6 @@
 
 #include "ScalarKernel.h"
 #include "ADScalarKernel.h"
-#include "FunctorInterface.h"
 
 class SinglePhaseFluidProperties;
 
@@ -20,8 +19,7 @@ class SinglePhaseFluidProperties;
  */
 template <bool is_ad>
 class IncompressibleMomentumSPBaseTempl
-  : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type,
-    public FunctorInterface
+  : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type
 {
   using Base = typename std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type;
 
