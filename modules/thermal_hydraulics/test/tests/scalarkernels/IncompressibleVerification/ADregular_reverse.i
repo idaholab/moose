@@ -8,7 +8,7 @@ dP = -10130
 Tin = 293.15
 rho = 998.2
 mu = 0.001002
-alpha = 0.0
+dH = 0.0
 epsilon = 0.0001
 forms = 0.0
 pump = 0.0
@@ -46,7 +46,7 @@ area = '${fparse 3.14159* ${R}^2}'
 
 [ScalarKernels]
   [pipe1_mom]
-    type = IncompressibleMomentumSPScalarKernel
+    type = ADIncompressibleMomentumSPScalarKernel
     variable = 'm1'
     reference_pressure_drop = 'dPc'
     temperatures = 'T1'
@@ -55,7 +55,7 @@ area = '${fparse 3.14159* ${R}^2}'
     areas = '${area}'
     perimeters = '${fparse 2*3.14159* ${R}}'
     lengths = '${length}'
-    alphas = '${alpha}'
+    height_changes = '${dH}'
     forms_losses = '${forms}'
     pump_pressures = '${pump}'
     roughnesses = '${epsilon}'
@@ -63,7 +63,7 @@ area = '${fparse 3.14159* ${R}^2}'
     is_implicit = True
   []
   [pipe1_DT]
-    type = ODETimeDerivative
+    type = ADScalarTimeDerivative
     variable = 'm1'
   []
   [temp]
@@ -98,7 +98,7 @@ area = '${fparse 3.14159* ${R}^2}'
   []
   [analytical_mdot]
     type = ParsedPostprocessor
-    expression = '-sqrt(abs(-(${dP} + ${rho} * ${gravity} * ${length} * sin(${alpha}) - ${pump}) / (f * ${length} / 4 / ${R} / ${rho} / ${area}^2 + ${forms} / 2 / ${rho} / ${area}^2)))'
+    expression = '-sqrt(abs(-(${dP} + ${rho} * ${gravity} * ${dH} - ${pump}) / (f * ${length} / 4 / ${R} / ${rho} / ${area}^2 + ${forms} / 2 / ${rho} / ${area}^2)))'
     pp_names = 'f'
     execute_on = 'TIMESTEP_END'
   []

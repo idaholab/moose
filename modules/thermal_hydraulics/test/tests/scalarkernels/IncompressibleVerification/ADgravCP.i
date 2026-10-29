@@ -8,7 +8,7 @@ dP = 10130
 Tin = 293.15
 rho = 998.2
 mu = 0.001002
-alpha = 0.0
+dH = 0.0
 epsilon = 0.0001
 forms = 0.0
 pump = 0.0
@@ -46,7 +46,7 @@ area = '${fparse 3.14159* ${R}^2}'
 
 [ScalarKernels]
   [pipe1_mom]
-    type = CoupledPressureIncompressibleMomentumSPScalarKernel
+    type = ADCoupledPressureIncompressibleMomentumSPScalarKernel
     variable = 'dPc'
     coupled_mass_flow_rate = 'm1'
     temperatures = 'T1'
@@ -55,7 +55,7 @@ area = '${fparse 3.14159* ${R}^2}'
     areas = '${area}'
     perimeters = '${fparse 2*3.14159* ${R}}'
     lengths = '${length}'
-    alphas = '${alpha}'
+    height_changes = '${dH}'
     forms_losses = '${forms}'
     pump_pressures = '${pump}'
     roughnesses = '${epsilon}'
@@ -104,7 +104,7 @@ area = '${fparse 3.14159* ${R}^2}'
   []
   [analytical_dP]
     type = ParsedPostprocessor
-    expression = '-${pump} + f * ${length} * mdot^2 / 4 / ${R} / ${rho} / ${area}^2 + ${forms} * mdot^2 / 2 / ${rho} / ${area}^2 + ${rho} * ${gravity} * ${length} * sin(${alpha})'
+    expression = '-${pump} + f * ${length} * mdot^2 / 4 / ${R} / ${rho} / ${area}^2 + ${forms} * mdot^2 / 2 / ${rho} / ${area}^2 + ${rho} * ${gravity} * ${dH}'
     pp_names = 'f mdot'
     execute_on = 'TIMESTEP_END'
   []

@@ -1,8 +1,8 @@
-# IncompressibleMomentumSPBase
+# ADIncompressibleMomentumSPBase
 
 ## Overview
 
-This object acts as a base class for the [IncompressibleMomentumSPScalarKernel.md] and [CoupledPressureIncompressibleMomentumSPScalarKernel.md]. It contains the shared input parameters but does not implement any residual terms or Jacobian.
+This object acts as a base class for the [ADIncompressibleMomentumSPScalarKernel.md] and [ADCoupledPressureIncompressibleMomentumSPScalarKernel.md]. It contains the shared input parameters but does not implement any residual terms or Jacobian.
 
 This object takes a fluid properties object based on the [SinglePhaseFluidProperties.md] base class.
 It also takes vector-of-functor inputs for flow area, perimeter, length, angle with respect to horizontal, minor/forms loss coefficients, pump pressures, and component surface roughnesses. This allows one unique geometry to be specified per segment.
