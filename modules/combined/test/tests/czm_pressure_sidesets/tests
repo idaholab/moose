@@ -1,0 +1,17 @@
+[Tests]
+  design = 'CZMPressureSidesetUpdater.md'
+  issues = '#34029'
+  [czm_sidesets]
+    type = CSVDiff
+    input = czm_pressure_sideset.i
+    csvdiff = czm_pressure_sideset_out.csv
+    requirement = "The system shall add the primary and secondary faces of fully debonded mortar cohesive zone segments to new sidesets as the debonded region grows."
+  []
+  [czm_sidesets_cavity_pressure]
+    type = CSVDiff
+    input = czm_pressure_sideset_cavity.i
+    csvdiff = czm_pressure_sideset_cavity_out.csv
+    abs_zero = 1e-6
+    requirement = "The system shall apply an ideal gas cavity pressure, computed from the void enclosed by the sidesets of debonded mortar cohesive zone faces to every face added to those sidesets during the simulation."
+  []
+[]
