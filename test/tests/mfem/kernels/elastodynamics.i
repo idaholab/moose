@@ -1,4 +1,4 @@
-# Vibration of a cantilever beam after a gravitational load is switched on at t = 0.
+# Vibration of a cantilever beam after a uniform body load is applied at t = 0.
 #
 # The second order elastodynamic equation rho d^2u/dt^2 = div(sigma(u)) + f is solved as
 # a first order system in the displacement u and velocity v,
@@ -58,9 +58,9 @@
     prop_names = 'lambda mu density'
     prop_values = '50.0 50.0 1.0'
   []
-  [WeightDensity]
+  [LoadDensity]
     type = MFEMGenericFunctorVectorMaterial
-    prop_names = 'gravitational_force_density'
+    prop_names = 'body_force_density'
     prop_values = '{0.0 0.0 -1e-2}'
   []
 []
@@ -79,10 +79,10 @@
     trial_variable = velocity
     coefficient = density
   []
-  [gravity]
+  [body_force]
     type = MFEMVectorDomainLFKernel
     variable = displacement
-    vector_coefficient = gravitational_force_density
+    vector_coefficient = body_force_density
   []
   # Kinematic relation v = du/dt, tested with the velocity test functions.
   [displacement_rate]

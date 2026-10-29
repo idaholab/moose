@@ -407,6 +407,7 @@
       capabilities = 'mfem'
       detail = 'or a boundary ID.'
     []
+  []
   [MFEMElastodynamics]
     type = CSVDiff
     input = elastodynamics.i
@@ -417,6 +418,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    restep = false
   []
   [MFEMCurlCurlLFCurl]
     type = CSVDiff
