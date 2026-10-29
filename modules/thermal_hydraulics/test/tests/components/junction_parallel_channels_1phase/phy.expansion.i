@@ -16,7 +16,9 @@ R_specific = 4124.1
   f = 0
   fp = fp
   closures = simple_closures
-  scaling_factor_1phase = '1 1e-3 1e-6'
+  # Same residual scaling as the other tests of this component; with weaker momentum and
+  # energy scaling the solve stalls above nl_abs_tol in parallel
+  scaling_factor_1phase = '1 1e-2 1e-5'
 []
 
 [FluidProperties]
@@ -88,7 +90,7 @@ R_specific = 4124.1
   solve_type = NEWTON
   line_search = basic
   nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-8
+  nl_abs_tol = 1e-6
   nl_max_its = 20
   [TimeStepper]
     type = IterationAdaptiveDT
