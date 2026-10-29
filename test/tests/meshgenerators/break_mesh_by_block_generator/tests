@@ -122,6 +122,79 @@
     recover = false
   []
 
+  [deprecated_parameters]
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
+    issues = '#34228'
+    requirement = 'The system shall preserve the default mesh and warn when a deprecated interface option is explicitly enabled:'
+    # Run in sequence because these cases share the default mesh output filename.
+    [split_interface]
+      type = Exodiff
+      input = break_mesh_2DJunction_auto.i
+      cli_args = 'Mesh/breakmesh/split_interface=true --mesh-only'
+      exodiff = 'break_mesh_2DJunction_auto_in.e'
+      exodiff_opts = '-pedantic'
+      prereq = 'break_mesh_by_blocks_generator/2d_auto_test'
+      expect_out = 'split_interface.*Remove this parameter'
+      no_error_deprecated = true
+      recover = false
+      detail = 'the split_interface option.'
+    []
+    [add_interface_on_two_sides]
+      type = Exodiff
+      input = break_mesh_2DJunction_auto.i
+      cli_args = 'Mesh/breakmesh/add_interface_on_two_sides=true --mesh-only'
+      exodiff = 'break_mesh_2DJunction_auto_in.e'
+      exodiff_opts = '-pedantic'
+      prereq = 'deprecated_parameters/split_interface'
+      expect_out = 'add_interface_on_two_sides.*Remove this parameter'
+      no_error_deprecated = true
+      recover = false
+      detail = 'the add_interface_on_two_sides option.'
+    []
+    [split_transition_interface]
+      type = Exodiff
+      input = break_mesh_2DJunction_auto.i
+      cli_args = 'Mesh/breakmesh/split_transition_interface=true --mesh-only'
+      exodiff = 'break_mesh_2DJunction_auto_in.e'
+      exodiff_opts = '-pedantic'
+      prereq = 'deprecated_parameters/add_interface_on_two_sides'
+      expect_out = 'split_transition_interface.*Remove this parameter'
+      no_error_deprecated = true
+      recover = false
+      detail = 'the split_transition_interface option.'
+    []
+  []
+
+  [unsupported_parameters]
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
+    issues = '#34228'
+    requirement = 'The system shall reject disabling the deprecated interface options:'
+    [split_interface]
+      type = RunException
+      input = break_mesh_2DJunction_auto.i
+      cli_args = 'Mesh/breakmesh/split_interface=false --mesh-only'
+      expect_err = 'Setting split_interface=false is no longer supported'
+      no_error_deprecated = true
+      detail = 'the split_interface option.'
+    []
+    [add_interface_on_two_sides]
+      type = RunException
+      input = break_mesh_2DJunction_auto.i
+      cli_args = 'Mesh/breakmesh/add_interface_on_two_sides=false --mesh-only'
+      expect_err = 'Setting add_interface_on_two_sides=false is no longer supported'
+      no_error_deprecated = true
+      detail = 'the add_interface_on_two_sides option.'
+    []
+    [split_transition_interface]
+      type = RunException
+      input = break_mesh_2DJunction_auto.i
+      cli_args = 'Mesh/breakmesh/split_transition_interface=false --mesh-only'
+      expect_err = 'Setting split_transition_interface=false is no longer supported'
+      no_error_deprecated = true
+      detail = 'the split_transition_interface option.'
+    []
+  []
+
   [invalid_block_pair]
     type = RunException
     input = break_mesh_block_pairs_restricted.i

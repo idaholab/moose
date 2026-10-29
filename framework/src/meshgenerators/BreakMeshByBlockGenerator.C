@@ -28,6 +28,13 @@ BreakMeshByBlockGenerator::validParams()
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
 
+  for (const auto & name :
+       {"split_interface", "add_interface_on_two_sides", "split_transition_interface"})
+    params.addDeprecatedParam<bool>(
+        name,
+        "Interfaces are always created on both sides and split by block pairs.",
+        "Remove this parameter. Interfaces are always created on both sides with separate "
+        "block-pair boundary names and IDs; false is no longer supported.");
   params.addParam<std::vector<SubdomainName>>(
       "surrounding_blocks",
       "The list of subdomain names surrounding which interfaces will be generated.");
@@ -47,6 +54,17 @@ BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & par
     _block_pairs_restricted(parameters.isParamSetByUser("block_pairs")),
     _surrounding_blocks_restricted(parameters.isParamSetByUser("surrounding_blocks"))
 {
+  for (const auto & name :
+       {"split_interface", "add_interface_on_two_sides", "split_transition_interface"})
+    if (isParamValid(name) && !getParam<bool>(name))
+      paramError(name,
+                 "Setting ",
+                 name,
+                 "=false is no longer supported. Interfaces must be created on both sides with "
+                 "separate block-pair boundary names and IDs to support distributed-mesh disjoint "
+                 "neighbor pairs and avoid merging both directions into one boundary for interface "
+                 "kernels. Remove this parameter.");
+
   if (_block_pairs_restricted && _surrounding_blocks_restricted)
     paramError("block_pairs_restricted",
                "BreakMeshByBlockGenerator: 'surrounding_blocks' and 'block_pairs' can not be used "
