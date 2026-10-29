@@ -19,7 +19,9 @@
             var instance = M.Carousel.init(carousel, {fullWidth : true, indicators : true});
 
             // The slide images differ in height. The side arrows stay at the middle of the tallest
-            // image, and every other image is moved down to be centered on the same height.
+            // image, and every other image is moved down to be centered on the same height. The
+            // images are positioned this way even without side arrows, so that the layout does not
+            // change with that setting.
             // Materialize sizes the carousel to the active slide's image, which clips anything
             // beneath the image and any slide taller than the first. Size it to the tallest
             // slide instead, plus a strip beneath for the indicator dots (8px dots with 24px
@@ -30,19 +32,36 @@
             // its image-height setting.
             var setHeight = function() {
               var $slides = $carousel.find('.carousel-item');
-              var imageHeight = function(slide) {
-                return $(slide).find('img')[0].getBoundingClientRect().height;
-              };
+              var imageHeight = function(
+                  slide) { return $(slide).find('img')[0].getBoundingClientRect().height; };
               var tallest = 0;
               $slides.each(function() { tallest = Math.max(tallest, imageHeight(this)); });
               $slides.each(function() {
-                $(this).find('.moose-slide').css('margin-top', (tallest - imageHeight(this)) / 2 + 'px');
+                $(this)
+                    .find('.moose-slide')
+                    .css('margin-top', (tallest - imageHeight(this)) / 2 + 'px');
               });
               $carousel.find('.moose-slideshow-side').css('top', tallest / 2 + 'px');
 
               var height = 0;
               $slides.each(function() { height = Math.max(height, $(this).outerHeight()); });
               $carousel.css('height', (height + (bottomArrows ? 96 : 56)) + 'px');
+              fitExample();
+            };
+
+            // A slideshow in a documentation example (the devel extension's 'example' command)
+            // sits in a tab pane whose height init.js fixed, together with that of the code pane,
+            // when the page loaded. The slideshow was hidden and not yet laid out then, so that
+            // height is wrong. Once the slideshow has its size, refit both panes to their content.
+            var $example = $carousel.closest('.moose-devel-example');
+            var fitExample = function() {
+              if (!$example.length || carousel.offsetWidth === 0)
+                return;
+              var $panes = $example.find('.moose-devel-example-code, .moose-devel-example-html');
+              $panes.css('height', '');
+              var height = 0;
+              $panes.each(function() { height = Math.max(height, $(this).height()); });
+              $panes.height(height);
             };
             instance._setCarouselHeight = setHeight;
             $carousel.find('img').on('load', setHeight);

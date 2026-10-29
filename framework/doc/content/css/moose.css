@@ -941,6 +941,18 @@ footer.page-footer {
 }
 .moose-slideshow-prev { left: 10px; }
 .moose-slideshow-next { right: 10px; }
+/* Materialbox puts the zoomed image and its dimming overlay (z-index 1000) inside the slide,
+   which is its own stacking context, so they cannot rise above the arrows, which are siblings of
+   the slides, or above page content after the slideshow. While a zoom is open (Materialbox
+   inserts '#materialbox-overlay' into the slide for its whole open-and-closing window), lift the
+   slideshow and its active slide above the rest of the page. The !important overrides the inline
+   z-index that Materialize sets on every slide. */
+.moose-slideshow:has(#materialbox-overlay) {
+    z-index: 1000;
+}
+.moose-slideshow:has(#materialbox-overlay) .carousel-item.active {
+    z-index: 1000 !important;
+}
 /* The indicator dots sit beneath the slides, on the page background rather than over an
    image, so Materialize's white dots would be invisible on a light page. */
 .moose-slideshow .indicators .indicator-item {
