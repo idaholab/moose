@@ -47,6 +47,39 @@ struct enable_bitmask_operators<Interfaces>
 
 std::ostream & operator<<(std::ostream & os, Interfaces & iface);
 
+/**
+ * Classifies AuxKernels by computed value type and by how they are executed. Every AuxKernel is
+ * tagged with exactly one value-type bit and exactly one execution-category bit. A query combines
+ * the bits it accepts: within each of the two groups the query specifies, the object must match one
+ * of the requested bits, and a group the query leaves empty is not constrained.
+ */
+enum class AuxKernelType
+{
+  /// Value types
+  ///@{
+  Real = 1 << 0,
+  Vector = 1 << 1,
+  Array = 1 << 2,
+  ///@}
+  /// Execution categories
+  ///@{
+  Nodal = 1 << 3,
+  Mortar = 1 << 4,
+  Elemental = 1 << 5,
+  ///@}
+  /// Convenience groups
+  ///@{
+  AllValueTypes = (1 << 0) | (1 << 1) | (1 << 2),
+  AllCategories = (1 << 3) | (1 << 4) | (1 << 5)
+  ///@}
+};
+
+template <>
+struct enable_bitmask_operators<AuxKernelType>
+{
+  static const bool enable = true;
+};
+
 #define clonefunc(T)                                                                               \
   virtual std::unique_ptr<Attribute> clone() const override                                        \
   {                                                                                                \
@@ -189,24 +222,40 @@ private:
 class AttribBoundaries : public Attribute
 {
 public:
+  /// Which boundary restriction a query accepts, on top of matching its boundary IDs
+  enum class Restriction
+  {
+    /// Objects restricted to one of the query boundaries, and unrestricted objects
+    Any,
+    /// Only objects restricted to one of the query boundaries. With Moose::ANY_BOUNDARY_ID as the
+    /// query boundary, every boundary-restricted object
+    RestrictedOnly,
+    /// Only objects that are not boundary restricted, whatever the query boundaries
+    UnrestrictedOnly
+  };
+
   typedef std::tuple<BoundaryID, bool> Key;
   void setFrom(Key k)
   {
     _vals.clear();
     _vals.push_back(std::get<0>(k));
-    _must_be_restricted = std::get<1>(k);
+    _restriction = toRestriction(std::get<1>(k));
   }
 
   AttribBoundaries(TheWarehouse & w) : Attribute(w, "boundaries") {}
   AttribBoundaries(TheWarehouse & w, BoundaryID id, bool must_be_restricted = false)
-    : Attribute(w, "boundaries"), _must_be_restricted(must_be_restricted)
+    : AttribBoundaries(w, id, toRestriction(must_be_restricted))
+  {
+  }
+  AttribBoundaries(TheWarehouse & w, BoundaryID id, Restriction restriction)
+    : Attribute(w, "boundaries"), _restriction(restriction)
   {
     _vals.push_back(id);
   }
   AttribBoundaries(TheWarehouse & w,
                    const std::set<BoundaryID> & ids,
                    bool must_be_restricted = false)
-    : Attribute(w, "boundaries"), _must_be_restricted(must_be_restricted)
+    : Attribute(w, "boundaries"), _restriction(toRestriction(must_be_restricted))
   {
     for (auto id : ids)
       _vals.push_back(id);
@@ -214,7 +263,7 @@ public:
   AttribBoundaries(TheWarehouse & w,
                    const std::vector<BoundaryID> & ids,
                    bool must_be_restricted = false)
-    : Attribute(w, "boundaries"), _must_be_restricted(must_be_restricted)
+    : Attribute(w, "boundaries"), _restriction(toRestriction(must_be_restricted))
   {
     _vals.reserve(ids.size());
     for (auto id : ids)
@@ -223,12 +272,17 @@ public:
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
   virtual bool isEqual(const Attribute & other) const override;
-  hashfunc(_vals, _must_be_restricted);
+  hashfunc(_vals, static_cast<int>(_restriction));
   clonefunc(AttribBoundaries);
 
 private:
+  static Restriction toRestriction(bool must_be_restricted)
+  {
+    return must_be_restricted ? Restriction::RestrictedOnly : Restriction::Any;
+  }
+
   std::vector<BoundaryID> _vals;
-  bool _must_be_restricted = false;
+  Restriction _restriction = Restriction::Any;
 };
 
 class AttribThread : public Attribute
@@ -268,6 +322,35 @@ public:
 
 private:
   int _val = 0;
+};
+
+/**
+ * Tracks the AuxKernelType of an AuxKernel: its value type (Real/Vector/Array) and its execution
+ * category (nodal, mortar nodal or elemental). AttribSystem intentionally groups every AuxKernel
+ * under the same "AuxKernel" system-attribute tag (registerSystemAttributeName groups objects that
+ * execute through the same machinery, unlike registerBase which associates input file syntax), so
+ * it cannot select the objects that a given AuxiliarySystem compute loop or queryInto type expects.
+ * Objects that are not AuxKernels have no bits set and match no query.
+ */
+class AttribAuxKernelType : public Attribute
+{
+public:
+  typedef AuxKernelType Key;
+  void setFrom(const Key & k) { _val = k; }
+
+  AttribAuxKernelType(TheWarehouse & w) : Attribute(w, "aux_kernel_type") {}
+  AttribAuxKernelType(TheWarehouse & w, AuxKernelType type)
+    : Attribute(w, "aux_kernel_type"), _val(type)
+  {
+  }
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(static_cast<unsigned int>(_val));
+  clonefunc(AttribAuxKernelType);
+
+private:
+  AuxKernelType _val = static_cast<AuxKernelType>(0);
 };
 
 /**

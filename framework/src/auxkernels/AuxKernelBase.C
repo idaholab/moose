@@ -34,6 +34,15 @@ AuxKernelBase::validParams()
   exec_enum.addAvailableFlags(EXEC_PRE_DISPLACE);
   exec_enum = {EXEC_LINEAR, EXEC_TIMESTEP_END};
   params.setDocString("execute_on", exec_enum.getDocString());
+  params.addParam<int>(
+      "execution_order_group",
+      0,
+      "Execution order groups are executed in increasing order (e.g., the lowest "
+      "number is executed first). Note that negative group numbers may be used to execute groups "
+      "before the default (0) group. Please refer to the auxkernel documentation "
+      "for ordering of auxkernel execution within a group for example elemental vs nodal or "
+      "between scalar, regular, vector and array auxkernels.");
+  params.addParamNamesToGroup("execute_on execution_order_group", "Execution scheduling");
 
   params.addRequiredParam<AuxVariableName>("variable",
                                            "The name of the variable that this object applies to");
@@ -91,6 +100,7 @@ AuxKernelBase::AuxKernelBase(const InputParameters & parameters)
     NonADFunctorInterface(this),
 
     _var(getVariableHelper(parameters)),
+    _is_nodal_kernel(_var.isNodal()),
     _bnd(boundaryRestricted()),
     _check_boundary_restricted(getParam<bool>("check_boundary_restricted")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
@@ -144,6 +154,7 @@ AuxKernelBase::AuxKernelBase(const AuxKernelBase & object, const Moose::Kokkos::
     NonADFunctorInterface(object, key),
 
     _var(object._var),
+    _is_nodal_kernel(object._is_nodal_kernel),
     _bnd(object._bnd),
     _check_boundary_restricted(object._check_boundary_restricted),
     _subproblem(object._subproblem),

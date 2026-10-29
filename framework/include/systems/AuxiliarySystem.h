@@ -108,7 +108,7 @@ public:
   virtual void compute(ExecFlagType type) override;
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  void kokkosCompute(ExecFlagType type);
+  void kokkosCompute(ExecFlagType type, int group);
 
   /**
    * Group the active Kokkos auxiliary kernels of each execution flag into stages that can each be
@@ -151,15 +151,6 @@ public:
 
   void clearScalarVariableCoupleableTags();
 
-  const ExecuteMooseObjectWarehouse<AuxKernel> & nodalAuxWarehouse() const;
-  const ExecuteMooseObjectWarehouse<AuxKernel> & mortarNodalAuxWarehouse() const;
-  const ExecuteMooseObjectWarehouse<VectorAuxKernel> & nodalVectorAuxWarehouse() const;
-  const ExecuteMooseObjectWarehouse<ArrayAuxKernel> & nodalArrayAuxWarehouse() const;
-
-  const ExecuteMooseObjectWarehouse<AuxKernel> & elemAuxWarehouse() const;
-  const ExecuteMooseObjectWarehouse<VectorAuxKernel> & elemVectorAuxWarehouse() const;
-  const ExecuteMooseObjectWarehouse<ArrayAuxKernel> & elemArrayAuxWarehouse() const;
-
 #ifdef MOOSE_KOKKOS_ENABLED
   const ExecuteMooseObjectWarehouse<AuxKernelBase> & kokkosNodalAuxWarehouse() const;
   const ExecuteMooseObjectWarehouse<AuxKernelBase> & kokkosElemAuxWarehouse() const;
@@ -175,19 +166,30 @@ protected:
   virtual void restoreAdditionalStates() override;
 
   void computeScalarVars(ExecFlagType type);
-  void computeNodalVars(ExecFlagType type);
-  void computeMortarNodalVars(ExecFlagType type);
-  void computeNodalVecVars(ExecFlagType type);
-  void computeNodalArrayVars(ExecFlagType type);
-  void computeElementalVars(ExecFlagType type);
-  void computeElementalVecVars(ExecFlagType type);
-  void computeElementalArrayVars(ExecFlagType type);
+  void computeNodalVars(ExecFlagType type, int group);
+  void computeMortarNodalVars(ExecFlagType type, int group);
+  void computeNodalVecVars(ExecFlagType type, int group);
+  void computeNodalArrayVars(ExecFlagType type, int group);
+  void computeElementalVars(ExecFlagType type, int group);
+  void computeElementalVecVars(ExecFlagType type, int group);
+  void computeElementalArrayVars(ExecFlagType type, int group);
 
   template <typename AuxKernelType>
-  void computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse);
+  void computeElementalVarsHelper(const TheWarehouse::Query & query);
 
   template <typename AuxKernelType>
-  void computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse);
+  void computeNodalVarsHelper(const TheWarehouse::Query & query);
+
+  /**
+   * Get every AuxKernel, of any value type, on a thread, in dependency order
+   *
+   * Dependencies are resolved within each execute_on flag, as they are for computing, so that
+   * kernels which only depend on each other under different flags are not a cycle. The flags are
+   * visited in the order they are registered and each kernel is listed once, at its first flag.
+   * @param tid The thread to retrieve the AuxKernels for
+   * @param active_only Whether to exclude disabled AuxKernels
+   */
+  std::vector<AuxKernelBase *> sortedAuxKernels(THREAD_ID tid, bool active_only);
 
   libMesh::System & _sys;
 
@@ -210,19 +212,6 @@ protected:
   // Storage for AuxScalarKernel objects
   ExecuteMooseObjectWarehouse<AuxScalarKernel> _aux_scalar_storage;
 
-  // Storage for AuxKernel objects
-  ExecuteMooseObjectWarehouse<AuxKernel> _nodal_aux_storage;
-  ExecuteMooseObjectWarehouse<AuxKernel> _mortar_nodal_aux_storage;
-  ExecuteMooseObjectWarehouse<AuxKernel> _elemental_aux_storage;
-
-  // Storage for VectorAuxKernel objects
-  ExecuteMooseObjectWarehouse<VectorAuxKernel> _nodal_vec_aux_storage;
-  ExecuteMooseObjectWarehouse<VectorAuxKernel> _elemental_vec_aux_storage;
-
-  // Storage for ArrayAuxKernel objects
-  ExecuteMooseObjectWarehouse<ArrayAuxKernel> _nodal_array_aux_storage;
-  ExecuteMooseObjectWarehouse<ArrayAuxKernel> _elemental_array_aux_storage;
-
 #ifdef MOOSE_KOKKOS_ENABLED
   // Storage for KokkosAuxKernel objects
   ExecuteMooseObjectWarehouse<AuxKernelBase> _kokkos_nodal_aux_storage;
@@ -244,6 +233,9 @@ protected:
   std::map<ExecFlagType, std::vector<KokkosAuxStage>> _kokkos_aux_stages;
 #endif
 
+  /// Execution order groups present within the simulation
+  std::set<int> _execution_order_groups;
+
   friend class ComputeIndicatorThread;
   friend class ComputeMarkerThread;
   friend class FlagElementsThread;
@@ -254,48 +246,6 @@ protected:
 
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
 };
-
-inline const ExecuteMooseObjectWarehouse<AuxKernel> &
-AuxiliarySystem::nodalAuxWarehouse() const
-{
-  return _nodal_aux_storage;
-}
-
-inline const ExecuteMooseObjectWarehouse<AuxKernel> &
-AuxiliarySystem::mortarNodalAuxWarehouse() const
-{
-  return _mortar_nodal_aux_storage;
-}
-
-inline const ExecuteMooseObjectWarehouse<VectorAuxKernel> &
-AuxiliarySystem::nodalVectorAuxWarehouse() const
-{
-  return _nodal_vec_aux_storage;
-}
-
-inline const ExecuteMooseObjectWarehouse<ArrayAuxKernel> &
-AuxiliarySystem::nodalArrayAuxWarehouse() const
-{
-  return _nodal_array_aux_storage;
-}
-
-inline const ExecuteMooseObjectWarehouse<AuxKernel> &
-AuxiliarySystem::elemAuxWarehouse() const
-{
-  return _elemental_aux_storage;
-}
-
-inline const ExecuteMooseObjectWarehouse<VectorAuxKernel> &
-AuxiliarySystem::elemVectorAuxWarehouse() const
-{
-  return _elemental_vec_aux_storage;
-}
-
-inline const ExecuteMooseObjectWarehouse<ArrayAuxKernel> &
-AuxiliarySystem::elemArrayAuxWarehouse() const
-{
-  return _elemental_array_aux_storage;
-}
 
 #ifdef MOOSE_KOKKOS_ENABLED
 inline const ExecuteMooseObjectWarehouse<AuxKernelBase> &
