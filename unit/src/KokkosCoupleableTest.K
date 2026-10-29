@@ -41,9 +41,13 @@ public:
     params.addCoupledVar("fields", "Multiple coupled field variables");
     params.addCoupledVar("vector", "A coupled vector field variable");
     params.addCoupledVar("vectors", "Multiple coupled vector field variables");
+    params.addCoupledVar("array", "A coupled array variable");
+    params.addCoupledVar("arrays", "Multiple coupled array variables");
     params.addCoupledVar("scalar", "A coupled scalar variable");
     params.addCoupledVar("default_field", std::vector<Real>{1.25, -2.5}, "Default field values");
     params.addCoupledVar("default_vector", std::vector<Real>{1, 2, 3}, "Default vector value");
+    params.addCoupledVar(
+        "default_array", std::vector<Real>{0.5, -1, 2}, "Default array component values");
     params.addCoupledVar("default_scalar", 4.5, "Default scalar value");
     params.addParam<TagName>("tag", Moose::OLD_SOLUTION_TAG, "Vector tag used by the tests");
     params.addParam<bool>("implicit", true, "Whether the object uses an implicit scheme");
@@ -171,6 +175,61 @@ private:
   Moose::Kokkos::Array<Real> _results;
 };
 
+class KokkosCoupledArrayEvaluator : public Moose::Kokkos::AssemblyHolder,
+                                    public Moose::Kokkos::FESystemHolder
+{
+public:
+  KokkosCoupledArrayEvaluator(
+      const Moose::Kokkos::Assembly & assembly,
+      Moose::Kokkos::Array<Moose::Kokkos::FESystem> & systems,
+      const Moose::Kokkos::ArrayVariableValue & value,
+      const Moose::Kokkos::ArrayVariableValue & dof_value,
+      const Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue> & values,
+      const Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableGradient> & gradients,
+      Moose::Kokkos::Array<Real> & results)
+    : AssemblyHolder(assembly),
+      FESystemHolder(systems),
+      _value(value),
+      _dof_value(dof_value),
+      _values(values),
+      _gradients(gradients),
+      _results(results)
+  {
+  }
+
+  KOKKOS_FUNCTION void operator()(const int) const
+  {
+    const auto & primary = _value.variable();
+
+    // Evaluate each array component with a datum whose active component is that component, so the
+    // two-argument accessors resolve to it
+    for (unsigned int comp = 0; comp < 2; ++comp)
+    {
+      AssemblyDatum datum(0,
+                          libMesh::invalid_uint,
+                          kokkosAssembly(),
+                          kokkosSystems(),
+                          primary,
+                          primary.var(comp),
+                          comp);
+
+      _results(comp) = _value(datum, 0);
+      _results(2 + comp) = _dof_value(datum, 0);
+      _results(4 + comp) = _values[0](datum, 0);
+      _results(6 + comp) = _values[1](datum, 0);
+      _results(8 + comp) = _gradients[1](datum, 0)(0);
+      _results(10 + comp) = _values[1].array(datum, 0)(comp);
+    }
+  }
+
+private:
+  const Moose::Kokkos::ArrayVariableValue _value;
+  const Moose::Kokkos::ArrayVariableValue _dof_value;
+  const Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue> _values;
+  const Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableGradient> _gradients;
+  Moose::Kokkos::Array<Real> _results;
+};
+
 class KokkosCoupleableTest : public ::testing::Test
 {
 public:
@@ -208,6 +267,24 @@ protected:
     InputParameters params = _factory.getValidParams("VectorMooseVariable");
     params.set<MooseEnum>("family") = "LAGRANGE_VEC";
     _problem->addVariable("VectorMooseVariable", name, params);
+    return _problem->getVariable(0, name);
+  }
+
+  MooseVariableFieldBase & addArrayVariable(const std::string & name)
+  {
+    InputParameters params = _factory.getValidParams("ArrayMooseVariable");
+    params.set<unsigned int>("components") = 2;
+    _problem->addVariable("ArrayMooseVariable", name, params);
+    return _problem->getVariable(0, name);
+  }
+
+  MooseVariableFieldBase & addElementalArrayVariable(const std::string & name)
+  {
+    InputParameters params = _factory.getValidParams("ArrayMooseVariable");
+    params.set<MooseEnum>("family") = "MONOMIAL";
+    params.set<MooseEnum>("order") = "CONSTANT";
+    params.set<unsigned int>("components") = 2;
+    _problem->addVariable("ArrayMooseVariable", name, params);
     return _problem->getVariable(0, name);
   }
 
@@ -250,6 +327,21 @@ protected:
     }
   }
 
+  void setArrayFieldValue(MooseVariableFieldBase & variable, const std::vector<Real> & values)
+  {
+    auto & system = variable.sys();
+    auto & solution = system.solution();
+    std::vector<dof_id_type> dof_indices;
+
+    for (const auto comp : index_range(values))
+      for (const auto * elem : _mesh->getMesh().active_local_element_ptr_range())
+      {
+        system.dofMap().dof_indices(elem, dof_indices, variable.number() + comp);
+        for (const auto dof : dof_indices)
+          solution.set(dof, values[comp]);
+      }
+  }
+
   void setScalarValue(MooseVariableScalar & variable, Real value)
   {
     auto & system = variable.sys();
@@ -280,7 +372,9 @@ protected:
                const std::vector<VariableName> & vectors = {},
                const std::vector<VariableName> & scalar = {},
                bool implicit = true,
-               bool nodal = false)
+               bool nodal = false,
+               const std::vector<VariableName> & array = {},
+               const std::vector<VariableName> & arrays = {})
   {
     InputParameters params = _factory.getValidParams("KokkosCoupleableTestObject");
     params.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
@@ -297,6 +391,10 @@ protected:
       params.set<std::vector<VariableName>>("vectors") = vectors;
     if (!scalar.empty())
       params.set<std::vector<VariableName>>("scalar") = scalar;
+    if (!array.empty())
+      params.set<std::vector<VariableName>>("array") = array;
+    if (!arrays.empty())
+      params.set<std::vector<VariableName>>("arrays") = arrays;
     return _factory.create<KokkosCoupleableTestObject>("KokkosCoupleableTestObject", name, params);
   }
 
@@ -330,6 +428,35 @@ protected:
     EXPECT_EQ(variable.sys(0), first.sys().number());
     EXPECT_EQ(variable.sys(1), second.sys().number());
     EXPECT_EQ(variable.tag(), _problem->getVectorTagID(tag));
+  }
+
+  template <typename Wrapper>
+  void expectArrayVariable(const Wrapper & wrapper,
+                           const MooseVariableBase & moose_variable,
+                           const TagName & tag)
+  {
+    const auto & variable = wrapper.variable();
+    EXPECT_TRUE(variable.initialized());
+    EXPECT_TRUE(variable.coupled());
+    EXPECT_FALSE(variable.vector());
+    EXPECT_EQ(variable.components(), moose_variable.count());
+    for (const auto comp : make_range(moose_variable.count()))
+    {
+      EXPECT_EQ(variable.var(comp), moose_variable.number() + comp);
+      EXPECT_EQ(variable.sys(comp), moose_variable.sys().number());
+    }
+    EXPECT_EQ(variable.tag(), _problem->getVectorTagID(tag));
+  }
+
+  template <typename Wrapper>
+  void expectArrayVariables(const Moose::Kokkos::Array<Wrapper> & wrappers,
+                            const MooseVariableBase & first,
+                            const MooseVariableBase & second,
+                            const TagName & tag)
+  {
+    ASSERT_EQ(wrappers.size(), 2);
+    expectArrayVariable(wrappers[0], first, tag);
+    expectArrayVariable(wrappers[1], second, tag);
   }
 
   std::unique_ptr<MooseMesh> _mesh;
@@ -526,6 +653,112 @@ TEST_F(KokkosCoupleableTest, VectorVariableAPIs)
   expectVariables(object->kokkosCoupledVectorNodalDots("vectors"), u, v, Moose::SOLUTION_DOT_TAG);
 }
 
+TEST_F(KokkosCoupleableTest, ArrayVariableAPIs)
+{
+  auto & u = addArrayVariable("u");
+  auto & v = addArrayVariable("v");
+  auto object = createObject("array_object", {}, {}, {}, {}, {}, true, false, {"u"}, {"u", "v"});
+
+  expectArrayVariable(object->kokkosCoupledVectorTagArrayValueByName("array", Moose::SOLUTION_TAG),
+                      u,
+                      Moose::SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledVectorTagArrayValuesByName("arrays", Moose::SOLUTION_TAG),
+      u,
+      v,
+      Moose::SOLUTION_TAG);
+  expectArrayVariable(
+      object->kokkosCoupledVectorTagArrayGradientByName("array", Moose::SOLUTION_TAG),
+      u,
+      Moose::SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledVectorTagArrayGradientsByName("arrays", Moose::SOLUTION_TAG),
+      u,
+      v,
+      Moose::SOLUTION_TAG);
+  expectArrayVariable(
+      object->kokkosCoupledVectorTagArrayNodalValueByName("array", Moose::SOLUTION_TAG),
+      u,
+      Moose::SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledVectorTagArrayNodalValuesByName("arrays", Moose::SOLUTION_TAG),
+      u,
+      v,
+      Moose::SOLUTION_TAG);
+  expectArrayVariable(
+      object->kokkosCoupledVectorTagArrayDofValueByName("array", Moose::SOLUTION_TAG),
+      u,
+      Moose::SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledVectorTagArrayDofValuesByName("arrays", Moose::SOLUTION_TAG),
+      u,
+      v,
+      Moose::SOLUTION_TAG);
+
+  expectArrayVariable(
+      object->kokkosCoupledVectorTagArrayValue("array", "tag"), u, Moose::OLD_SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledVectorTagArrayValues("arrays", "tag"), u, v, Moose::OLD_SOLUTION_TAG);
+  expectArrayVariable(
+      object->kokkosCoupledVectorTagArrayGradient("array", "tag"), u, Moose::OLD_SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledVectorTagArrayGradients("arrays", "tag"), u, v, Moose::OLD_SOLUTION_TAG);
+  expectArrayVariable(
+      object->kokkosCoupledVectorTagArrayNodalValue("array", "tag"), u, Moose::OLD_SOLUTION_TAG);
+  expectArrayVariables(object->kokkosCoupledVectorTagArrayNodalValues("arrays", "tag"),
+                       u,
+                       v,
+                       Moose::OLD_SOLUTION_TAG);
+  expectArrayVariable(
+      object->kokkosCoupledVectorTagArrayDofValue("array", "tag"), u, Moose::OLD_SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledVectorTagArrayDofValues("arrays", "tag"), u, v, Moose::OLD_SOLUTION_TAG);
+
+  expectArrayVariable(object->kokkosCoupledArrayValue("array"), u, Moose::SOLUTION_TAG);
+  expectArrayVariables(object->kokkosCoupledArrayValues("arrays"), u, v, Moose::SOLUTION_TAG);
+  expectArrayVariable(object->kokkosCoupledArrayGradient("array"), u, Moose::SOLUTION_TAG);
+  expectArrayVariables(object->kokkosCoupledArrayGradients("arrays"), u, v, Moose::SOLUTION_TAG);
+  expectArrayVariable(object->kokkosCoupledArrayNodalValue("array"), u, Moose::SOLUTION_TAG);
+  expectArrayVariables(object->kokkosCoupledArrayNodalValues("arrays"), u, v, Moose::SOLUTION_TAG);
+  expectArrayVariable(object->kokkosCoupledArrayDofValue("array"), u, Moose::SOLUTION_TAG);
+  expectArrayVariables(object->kokkosCoupledArrayDofValues("arrays"), u, v, Moose::SOLUTION_TAG);
+
+  expectArrayVariable(object->kokkosCoupledArrayValueOld("array"), u, Moose::OLD_SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledArrayValuesOld("arrays"), u, v, Moose::OLD_SOLUTION_TAG);
+  expectArrayVariable(object->kokkosCoupledArrayGradientOld("array"), u, Moose::OLD_SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledArrayGradientsOld("arrays"), u, v, Moose::OLD_SOLUTION_TAG);
+  expectArrayVariable(object->kokkosCoupledArrayNodalValueOld("array"), u, Moose::OLD_SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledArrayNodalValuesOld("arrays"), u, v, Moose::OLD_SOLUTION_TAG);
+  expectArrayVariable(object->kokkosCoupledArrayDofValueOld("array"), u, Moose::OLD_SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledArrayDofValuesOld("arrays"), u, v, Moose::OLD_SOLUTION_TAG);
+
+  expectArrayVariable(object->kokkosCoupledArrayValueOlder("array"), u, Moose::OLDER_SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledArrayValuesOlder("arrays"), u, v, Moose::OLDER_SOLUTION_TAG);
+  expectArrayVariable(
+      object->kokkosCoupledArrayGradientOlder("array"), u, Moose::OLDER_SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledArrayGradientsOlder("arrays"), u, v, Moose::OLDER_SOLUTION_TAG);
+  expectArrayVariable(
+      object->kokkosCoupledArrayNodalValueOlder("array"), u, Moose::OLDER_SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledArrayNodalValuesOlder("arrays"), u, v, Moose::OLDER_SOLUTION_TAG);
+  expectArrayVariable(
+      object->kokkosCoupledArrayDofValueOlder("array"), u, Moose::OLDER_SOLUTION_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledArrayDofValuesOlder("arrays"), u, v, Moose::OLDER_SOLUTION_TAG);
+
+  expectArrayVariable(object->kokkosCoupledArrayDot("array"), u, Moose::SOLUTION_DOT_TAG);
+  expectArrayVariables(object->kokkosCoupledArrayDots("arrays"), u, v, Moose::SOLUTION_DOT_TAG);
+  expectArrayVariable(object->kokkosCoupledArrayNodalDot("array"), u, Moose::SOLUTION_DOT_TAG);
+  expectArrayVariables(
+      object->kokkosCoupledArrayNodalDots("arrays"), u, v, Moose::SOLUTION_DOT_TAG);
+}
+
 TEST_F(KokkosCoupleableTest, ADFieldVariableAPIs)
 {
   auto & u = addFieldVariable("u");
@@ -715,6 +948,59 @@ TEST_F(KokkosCoupleableTest, CoupledValuesOnDevice)
   EXPECT_DOUBLE_EQ(results(25), 1);
 }
 
+TEST_F(KokkosCoupleableTest, CoupledArrayValuesOnDevice)
+{
+  if (!_problem->mesh().getKokkosMesh())
+    GTEST_SKIP() << "Kokkos mesh not available";
+
+  auto & u = addElementalArrayVariable("u");
+  auto & v = addElementalArrayVariable("v");
+  auto object =
+      createObject("array_value_object", {}, {}, {}, {}, {}, true, false, {"u"}, {"u", "v"});
+
+  const auto value = object->kokkosCoupledArrayValue("array");
+  const auto dof_value = object->kokkosCoupledArrayDofValue("array");
+  const auto values = object->kokkosCoupledArrayValues("arrays");
+  const auto gradients = object->kokkosCoupledArrayGradients("arrays");
+
+  initSystems();
+  setArrayFieldValue(u, {1.5, -2.25});
+  setArrayFieldValue(v, {3.75, 0.5});
+  u.sys().solution().close();
+  u.sys().update();
+
+  _problem->initKokkos();
+
+  auto & systems = _problem->getKokkosFESystems();
+  auto & system = systems[u.sys().number()];
+  system.setActiveVariables({&u, &v});
+  system.setActiveSolutionTags({_problem->getVectorTagID(Moose::SOLUTION_TAG)});
+  system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+  system.reinit();
+  systems.copyToDevice();
+
+  Moose::Kokkos::Array<Real> results(12);
+  KokkosCoupledArrayEvaluator evaluator(
+      _problem->kokkosAssembly(), systems, value, dof_value, values, gradients, results);
+  Kokkos::parallel_for(1, evaluator);
+  Kokkos::fence();
+
+  results.copyToHost();
+  EXPECT_DOUBLE_EQ(results(0), 1.5);
+  EXPECT_DOUBLE_EQ(results(1), -2.25);
+  EXPECT_DOUBLE_EQ(results(2), 1.5);
+  EXPECT_DOUBLE_EQ(results(3), -2.25);
+  EXPECT_DOUBLE_EQ(results(4), 1.5);
+  EXPECT_DOUBLE_EQ(results(5), -2.25);
+  EXPECT_DOUBLE_EQ(results(6), 3.75);
+  EXPECT_DOUBLE_EQ(results(7), 0.5);
+  // A constant monomial has a zero gradient
+  EXPECT_NEAR(results(8), 0, TOLERANCE);
+  EXPECT_NEAR(results(9), 0, TOLERANCE);
+  EXPECT_DOUBLE_EQ(results(10), 3.75);
+  EXPECT_DOUBLE_EQ(results(11), 0.5);
+}
+
 TEST_F(KokkosCoupleableTest, DefaultAPIs)
 {
   auto object = createObject("default_object");
@@ -739,6 +1025,21 @@ TEST_F(KokkosCoupleableTest, DefaultAPIs)
   EXPECT_DOUBLE_EQ(default_vector.vectorValue()(0), 1);
   EXPECT_DOUBLE_EQ(default_vector.vectorValue()(1), 2);
   EXPECT_DOUBLE_EQ(default_vector.vectorValue()(2), 3);
+
+  const auto default_array_wrapper = object->kokkosCoupledArrayValue("default_array");
+  const auto & default_array = default_array_wrapper.variable();
+  EXPECT_FALSE(default_array.coupled());
+  EXPECT_FALSE(default_array.vector());
+  EXPECT_EQ(default_array.components(), 3);
+  EXPECT_DOUBLE_EQ(default_array.value(0), 0.5);
+  EXPECT_DOUBLE_EQ(default_array.value(1), -1);
+  EXPECT_DOUBLE_EQ(default_array.value(2), 2);
+
+  // Each default value is one component of a single uncoupled array variable
+  const auto default_arrays = object->kokkosCoupledArrayValues("default_array");
+  ASSERT_EQ(default_arrays.size(), 3);
+  for (const auto i : make_range(3))
+    EXPECT_FALSE(default_arrays[i].variable().coupled());
 
   const auto zero_value_wrapper = object->kokkosZeroValue();
   const auto & zero_value = zero_value_wrapper.variable();
@@ -786,7 +1087,17 @@ TEST_F(KokkosCoupleableTest, ValidationErrors)
   auto & field = addFieldVariable("field_var");
   addVectorVariable("vector_var");
   addScalarVariable("scalar_var");
-  auto object = createObject("error_object", {"field_var"}, {}, {"vector_var"}, {}, {"scalar_var"});
+  addArrayVariable("array_var");
+  addElementalArrayVariable("elemental_array_var");
+  auto object = createObject("error_object",
+                             {"field_var"},
+                             {"elemental_array_var"},
+                             {"vector_var"},
+                             {},
+                             {"scalar_var"},
+                             true,
+                             false,
+                             {"array_var"});
 
   EXPECT_THROW(object->kokkosCoupledVectorTagValue("field", "invalid_tag_parameter"),
                MooseRuntimeError);
@@ -798,6 +1109,13 @@ TEST_F(KokkosCoupleableTest, ValidationErrors)
   EXPECT_THROW(object->kokkosCoupledScalarValueOlder("scalar"), MooseRuntimeError);
   EXPECT_THROW(object->kokkosCoupledScalarDot("scalar"), MooseRuntimeError);
   EXPECT_THROW(object->kokkosCoupledScalarDotDu("scalar"), MooseRuntimeError);
+  EXPECT_THROW(object->kokkosCoupledArrayValue("field"), MooseRuntimeError);
+  EXPECT_THROW(object->kokkosCoupledValue("array"), MooseRuntimeError);
+  EXPECT_THROW(object->kokkosCoupledArrayValues("field"), MooseRuntimeError);
+  EXPECT_THROW(object->kokkosCoupledVectorTagArrayValue("array", "invalid_tag_parameter"),
+               MooseRuntimeError);
+  EXPECT_THROW(object->kokkosCoupledArrayNodalValue("fields"), MooseRuntimeError);
+  EXPECT_THROW(object->kokkosCoupledArrayNodalValues("fields"), MooseRuntimeError);
 
   _problem->transient(true);
   auto explicit_object =

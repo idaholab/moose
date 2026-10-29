@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#33501'
+  design = 'KokkosArrayCoupledForce.md'
+
+  [array_coupled_force]
+    requirement = 'The Kokkos system shall provide coupling of'
+    [value]
+      type = CSVDiff
+      input = 'kokkos_array_coupled_force.i'
+      csvdiff = 'kokkos_array_coupled_force_out.csv'
+      detail = 'standard variables, single array variables, and multiple array variables into array kernels.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [jacobian]
+      type = PetscJacobianTester
+      input = 'kokkos_array_coupled_force.i'
+      cli_args = 'Outputs/csv=false'
+      recover = false
+      detail = 'standard variables, single array variables, and multiple array variables into array kernels with correct off-diagonal Jacobians.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+  []
+[]

@@ -1,0 +1,43 @@
+[Tests]
+  issues = '#33501'
+  design = 'KokkosArrayDirichletBC.md KokkosArrayNeumannBC.md KokkosArrayDiffusion.md'
+
+  [array_bcs]
+    requirement = 'The Kokkos system shall provide array diffusion with Dirichlet and Neumann boundary conditions'
+    [scalar]
+      type = CSVDiff
+      input = 'kokkos_array_bcs.i'
+      csvdiff = 'kokkos_array_bcs_out.csv'
+      detail = 'with a scalar,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [diagonal]
+      type = CSVDiff
+      input = 'kokkos_array_bcs.i'
+      cli_args = 'Materials/active=diagonal Outputs/file_base=kokkos_array_bcs_diagonal_out'
+      csvdiff = 'kokkos_array_bcs_diagonal_out.csv'
+      detail = 'diagonal,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [full]
+      type = CSVDiff
+      input = 'kokkos_array_bcs.i'
+      cli_args = 'Materials/active=full Outputs/file_base=kokkos_array_bcs_full_out'
+      csvdiff = 'kokkos_array_bcs_full_out.csv'
+      detail = 'and full matrix diffusivity,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [jacobian]
+      type = PetscJacobianTester
+      input = 'kokkos_array_bcs.i'
+      cli_args = 'Materials/active=full Outputs/csv=false'
+      recover = false
+      detail = 'and a correct Jacobian.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+  []
+[]
