@@ -145,7 +145,11 @@ ComputeMaterialsObjectThread::onBoundary(const Elem * elem,
       // Boundary Materials
       if (_discrete_materials.hasActiveBoundaryObjects(bnd_id, _tid))
         _bnd_material_props.initStatefulProps(
-            _tid, _materials.getActiveBoundaryObjects(bnd_id, _tid), face_n_points, *elem, side);
+            _tid,
+            _discrete_materials.getActiveBoundaryObjects(bnd_id, _tid),
+            face_n_points,
+            *elem,
+            side);
       if (_materials.hasActiveBoundaryObjects(bnd_id, _tid))
         _bnd_material_props.initStatefulProps(
             _tid, _materials.getActiveBoundaryObjects(bnd_id, _tid), face_n_points, *elem, side);
@@ -195,8 +199,8 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
             _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(
                 neighbor->subdomain_id(), _tid),
             face_n_points,
-            *elem,
-            side);
+            *neighbor,
+            neighbor_side);
       if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(neighbor->subdomain_id(),
                                                                           _tid))
         _neighbor_material_props.initStatefulProps(
@@ -244,7 +248,11 @@ ComputeMaterialsObjectThread::onInterface(const Elem * elem, unsigned int side, 
     // Boundary Materials
     if (_discrete_materials.hasActiveBoundaryObjects(bnd_id, _tid))
       _bnd_material_props.initStatefulProps(
-          _tid, _materials.getActiveBoundaryObjects(bnd_id, _tid), face_n_points, *elem, side);
+          _tid,
+          _discrete_materials.getActiveBoundaryObjects(bnd_id, _tid),
+          face_n_points,
+          *elem,
+          side);
 
     if (_materials.hasActiveBoundaryObjects(bnd_id, _tid))
       _bnd_material_props.initStatefulProps(
@@ -272,8 +280,8 @@ ComputeMaterialsObjectThread::onInterface(const Elem * elem, unsigned int side, 
           _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(
               neighbor->subdomain_id(), _tid),
           face_n_points,
-          *elem,
-          side);
+          *neighbor,
+          neighbor_side);
 
     if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(neighbor->subdomain_id(),
                                                                         _tid))
