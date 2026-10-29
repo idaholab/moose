@@ -653,6 +653,8 @@ using VariableValue = VariableValueTempl<false>;
 using ADVariableValue = VariableValueTempl<true>;
 using VariableGradient = VariableGradientTempl<false>;
 using ADVariableGradient = VariableGradientTempl<true>;
+using ArrayVariableValue = VariableValue;
+using ArrayVariableGradient = VariableGradient;
 
 class VectorVariableValue
 {
