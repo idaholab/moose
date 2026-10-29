@@ -182,7 +182,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   []
 
   [TKE_time]
-    type = LinearFVTimeDerivative
+    type = LinearFVTurbulentTimeDerivative
     variable = TKE
     factor = ${rho}
   []
@@ -219,9 +219,10 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   []
 
   [TKED_time]
-    type = LinearFVTimeDerivative
+    type = LinearFVTurbulentTimeDerivative
     variable = TKED
     factor = ${rho}
+    walls = ${walls}
   []
   [TKED_advection]
     type = LinearFVTurbulentAdvection
