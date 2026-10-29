@@ -1796,16 +1796,42 @@ AutomaticMortarGeneration::buildCouplingInformation()
   // node's owner. The weighted gap at a node shared by a local element E and a nonlocal element F
   // carries the derivatives of the primary elements coupled to F, and the process owning E (or a
   // volume parent coupled to E) applies that gap to its own rows. When AugmentSparsityOnInterface
-  // ghosts point neighbors, it reads the couplings of F to add those primary columns to the rows,
-  // so pull the couplings of every nonlocal secondary lower-dimensional element this process can
-  // see from its owner, which holds the complete set after the push
-  std::unordered_map<processor_id_type, std::vector<dof_id_type>> secondary_elems_to_query;
+  // ghosts point neighbors, it reads the couplings of F to add those primary columns to the rows.
+  // For a local element, it reads the couplings of the point neighbors of the element's own
+  // secondary lower-dimensional elements and of the secondary elements coupled to it (e.g. those
+  // paired with a local primary element), so pull the couplings of those point neighbors from
+  // their owners, which hold the complete sets after the push
+  const auto is_secondary = [this](const Elem * const elem)
+  { return _secondary_boundary_subdomain_ids.count(elem->subdomain_id()); };
+  const auto pid = _mesh.processor_id();
+  std::set<const Elem *> secondary_elems_read;
   for (const auto secondary_subdomain_id : _secondary_boundary_subdomain_ids)
     for (const Elem * const secondary_elem :
          as_range(_mesh.active_subdomain_elements_begin(secondary_subdomain_id),
                   _mesh.active_subdomain_elements_end(secondary_subdomain_id)))
-      if (secondary_elem->processor_id() != _mesh.processor_id())
-        secondary_elems_to_query[secondary_elem->processor_id()].push_back(secondary_elem->id());
+      if (secondary_elem->processor_id() == pid ||
+          secondary_elem->interior_parent()->processor_id() == pid)
+        secondary_elems_read.insert(secondary_elem);
+  for (const auto & [elem_id, coupled_elem_ids] : _mortar_interface_coupling)
+    if (const Elem * const elem = _mesh.query_elem_ptr(elem_id);
+        elem && elem->processor_id() == pid)
+      for (const auto coupled_elem_id : coupled_elem_ids)
+        if (const Elem * const coupled_elem = _mesh.query_elem_ptr(coupled_elem_id);
+            coupled_elem && is_secondary(coupled_elem))
+          secondary_elems_read.insert(coupled_elem);
+
+  std::set<const Elem *> secondary_elems_queried;
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> secondary_elems_to_query;
+  for (const Elem * const secondary_elem : secondary_elems_read)
+  {
+    std::set<const Elem *> point_neighbors;
+    secondary_elem->find_point_neighbors(point_neighbors);
+    point_neighbors.insert(secondary_elem);
+    for (const Elem * const neigh : point_neighbors)
+      if (neigh->active() && is_secondary(neigh) && neigh->processor_id() != pid &&
+          secondary_elems_queried.insert(neigh).second)
+        secondary_elems_to_query[neigh->processor_id()].push_back(neigh->id());
+  }
 
   auto gather_functor = [this](processor_id_type,
                                const std::vector<dof_id_type> & secondary_elem_ids,
