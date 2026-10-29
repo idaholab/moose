@@ -1,6 +1,6 @@
 # PhysicsVariableCoordinator
 
-This action lets several [Physics](Physics/index.md) objects, for example one per component, share a
+This action lets several [Physics](Physics/index.md) objects, for example one per [ActionComponent](syntax/ActionComponents/index.md), share a
 single variable defined on the union of their blocks.
 
 A Physics requests such a variable with `PhysicsBase::addSharedSolverVariable()` or
