@@ -188,7 +188,7 @@ WCNSLinearFVTurbulencePhysics::addFVKernels()
 void
 WCNSLinearFVTurbulencePhysics::addKEpsilonTimeDerivatives()
 {
-  const std::string kernel_type = "LinearFVTimeDerivative";
+  const std::string kernel_type = "LinearFVTurbulentTimeDerivative";
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
 
@@ -197,6 +197,7 @@ WCNSLinearFVTurbulencePhysics::addKEpsilonTimeDerivatives()
   if (shouldCreateTimeDerivative(_tke_name, _blocks, /*error if already defined*/ false))
     getProblem().addLinearFVKernel(kernel_type, prefix() + "tke_time", params);
   params.set<LinearVariableName>("variable") = _tked_name;
+  params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
   if (shouldCreateTimeDerivative(_tked_name, _blocks, /*error if already defined*/ false))
     getProblem().addLinearFVKernel(kernel_type, prefix() + "tked_time", params);
 }
