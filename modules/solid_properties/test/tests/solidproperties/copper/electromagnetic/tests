@@ -1,0 +1,16 @@
+[Tests]
+  [NIST_csvdiff]
+    type = CSVDiff
+    input = '../../electromagnetic_solid_properties.i'
+    cli_args = "
+      solid_properties_class=ElectromagneticOFHCCopperProperties
+      file_base=copper_electromagnetic
+      T_min=2.0
+      T_max=900.0"
+    csvdiff = 'copper_electromagnetic_vpp_0000.csv'
+    mesh_mode = 'replicated'
+    requirement = "The system shall compute electromagnetic properties for OFHC copper."
+    design = 'ElectromagneticOFHCCopperProperties.md ElectromagneticSolidPropertiesMaterial.md'
+    issues = '#33677'
+  []
+[]
