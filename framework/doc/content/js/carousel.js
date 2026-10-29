@@ -13,10 +13,13 @@
             var interval = parseInt($carousel.data('interval'), 10);
             var sideArrows = $carousel.data('side-arrows') !== false;
             var bottomArrows = $carousel.data('bottom-arrows') !== false;
+            $carousel.toggleClass('moose-slideshow-side-arrows', sideArrows);
             $carousel.toggleClass('moose-slideshow-bottom-arrows', bottomArrows);
 
             var instance = M.Carousel.init(carousel, {fullWidth : true, indicators : true});
 
+            // The slide images differ in height. The side arrows stay at the middle of the tallest
+            // image, and every other image is moved down to be centered on the same height.
             // Materialize sizes the carousel to the active slide's image, which clips anything
             // beneath the image and any slide taller than the first. Size it to the tallest
             // slide instead, plus a strip beneath for the indicator dots (8px dots with 24px
@@ -26,9 +29,19 @@
             // load handlers run after the one Materialize registered during init, so they win over
             // its image-height setting.
             var setHeight = function() {
+              var $slides = $carousel.find('.carousel-item');
+              var imageHeight = function(slide) {
+                return $(slide).find('img')[0].getBoundingClientRect().height;
+              };
+              var tallest = 0;
+              $slides.each(function() { tallest = Math.max(tallest, imageHeight(this)); });
+              $slides.each(function() {
+                $(this).find('.moose-slide').css('margin-top', (tallest - imageHeight(this)) / 2 + 'px');
+              });
+              $carousel.find('.moose-slideshow-side').css('top', tallest / 2 + 'px');
+
               var height = 0;
-              $carousel.find('.carousel-item')
-                  .each(function() { height = Math.max(height, $(this).outerHeight()); });
+              $slides.each(function() { height = Math.max(height, $(this).outerHeight()); });
               $carousel.css('height', (height + (bottomArrows ? 96 : 56)) + 'px');
             };
             instance._setCarouselHeight = setHeight;
@@ -90,6 +103,7 @@
               $carousel.append(
                   $('<div class="moose-slideshow-nav"></div>').append(arrow(-1), arrow(1)));
             }
+            setHeight(); // positions the side arrows just added
 
             if (!isNaN(interval) && interval > 0) {
                 // Pause autoplay while a slide image's Materialbox lightbox is open:

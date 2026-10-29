@@ -927,20 +927,17 @@ footer.page-footer {
     height: auto;
     line-height: 1;
 }
-/* The side arrows overlay the slide, vertically centered above the bottom strip (56px, or
-   96px with the bottom arrows). */
+/* The side arrows sit in a gutter on each side of the slide. The gutter is the arrow's 10px
+   offset from the carousel edge, its 36px width, and a 6px gap, so a slide image never
+   reaches an arrow. carousel.js sets 'top' to the middle of the tallest image, and centers
+   every other image on the same height. */
+.moose-slideshow-side-arrows .carousel-item {
+    padding: 0 52px;
+}
 .moose-slideshow-side {
     position: absolute;
-    top: calc((100% - 56px) / 2);
     transform: translateY(-50%);
     z-index: 1;
-    background: rgba(0, 0, 0, 0.4);
-}
-.moose-slideshow-side:hover {
-    background: rgba(0, 0, 0, 0.7);
-}
-.moose-slideshow-bottom-arrows .moose-slideshow-side {
-    top: calc((100% - 96px) / 2);
 }
 .moose-slideshow-prev { left: 10px; }
 .moose-slideshow-next { right: 10px; }
