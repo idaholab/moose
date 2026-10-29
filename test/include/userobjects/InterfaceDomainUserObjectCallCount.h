@@ -24,7 +24,7 @@ public:
   void finalize() override;
   void threadJoin(const UserObject & y) override;
 
-protected:
+private:
   /// Whether to error if executeOnBoundary is called on an interface boundary
   const bool _check_boundary_calls;
 
