@@ -58,10 +58,6 @@ ADIncompressibleEnergySPScalarKernel::validParams()
       "can then grow without bound. 'node': the node temperature T (well-mixed node); "
       "monotone for any NTU and any flow rate. Must match the setting of the coupled "
       "ADPipeInnerWallTemperatureScalarKernel so wall and fluid exchange the same heat.");
-  params.addParam<Point>("functor_evaluation_point",
-                         Point(),
-                         "Point at which spatially varying functors (functions, field variables, "
-                         "functor material properties) are evaluated");
 
   return params;
 }
@@ -82,27 +78,16 @@ ADIncompressibleEnergySPScalarKernel::ADIncompressibleEnergySPScalarKernel(
     _area(this->template getFunctor<ADReal>("area")),
     _perimeter(this->template getFunctor<ADReal>("perimeter")),
     _length(this->template getFunctor<ADReal>("length")),
-    _h(this->template getFunctor<ADReal>("heat_transfer_coefficient")),
-    _functor_point(getParam<Point>("functor_evaluation_point"))
+    _h(this->template getFunctor<ADReal>("heat_transfer_coefficient"))
 {
-}
-
-void
-ADIncompressibleEnergySPScalarKernel::initialSetup()
-{
-  ADScalarKernel::initialSetup();
-
-  // Locate the element that spatially varying functors will be evaluated on
-  auto pl = _mesh.getPointLocator();
-  pl->enable_out_of_mesh_mode();
-  _functor_elem = (*pl)(_functor_point);
 }
 
 ADReal
 ADIncompressibleEnergySPScalarKernel::computeQpResidual()
 {
   ADReal energy_residual = 0;
-  const auto qp = functorArg();
+  const libMesh::Node node(0., 0., 0.);
+  const Moose::NodeArg elem_arg = {&node, &Moose::NodeArg::undefined_subdomain_connection};
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
   // start by getting fluid properties
@@ -111,19 +96,19 @@ ADIncompressibleEnergySPScalarKernel::computeQpResidual()
   // Bulk temperature seen by the wall: segment average (legacy) or node temperature
   const bool node_bulk = getParam<MooseEnum>("heat_transfer_bulk_temperature") == "node";
   const auto Tm = node_bulk ? ADReal(Base::_u[i]) : ADReal((Base::_u[i] + in) / 2);
-  const auto rho = _fp.rho_from_p_T(_Pref(qp, state), Tm);
-  const auto cp = _fp.cp_from_p_T(_Pref(qp, state), Tm);
-  const auto rho_ref = _fp_ref ? _fp_ref->rho_from_p_T(_Pref(qp, state), Tm) : rho;
+  const auto rho = _fp.rho_from_p_T(_Pref(elem_arg, state), Tm);
+  const auto cp = _fp.cp_from_p_T(_Pref(elem_arg, state), Tm);
+  const auto rho_ref = _fp_ref ? _fp_ref->rho_from_p_T(_Pref(elem_arg, state), Tm) : rho;
 
   // Heat transfer to fluid (Dittus-Boelter)
-  const auto q = _h(qp, state) * _perimeter(qp, state) * (_Tw[i] - Tm);
+  const auto q = _h(elem_arg, state) * _perimeter(elem_arg, state) * (_Tw[i] - Tm);
   // Advection component
   energy_residual += (_m[i] / 2.0 * (1 - _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tdown[i] -
                       _m[i] / 2.0 * (1 + _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tup[i] +
                       _m[i] * _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08) * Base::_u[i]) /
-                     _length(qp, state) / _area(qp, state) / rho_ref;
+                     _length(elem_arg, state) / _area(elem_arg, state) / rho_ref;
   // Wall heat transfer
-  energy_residual -= q / _area(qp, state) / rho / cp;
+  energy_residual -= q / _area(elem_arg, state) / rho / cp;
 
   return energy_residual;
 }
