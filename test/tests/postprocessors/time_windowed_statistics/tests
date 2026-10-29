@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#34278'
+  design = 'TimeWindowedStatisticsPostProcessor.md'
+
+  [time_windowed_statistics]
+    type = 'CSVDiff'
+    input = 'time_windowed_statistics.i'
+    csvdiff = 'time_windowed_statistics_out.csv'
+
+    requirement = 'The system shall have the ability to compute the windowed mean, the windowed standard deviation, and the cumulative time-weighted mean of a postprocessor over time, using only samples after a given start time.'
+  []
+[]
