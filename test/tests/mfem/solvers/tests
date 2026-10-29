@@ -8,9 +8,25 @@
     requirement = 'The system shall have the ability to solve a diffusion problem using a '
                   'p-multigrid (geometric multigrid) preconditioner with MFEM.'
     capabilities = 'mfem'
-    compute_devices = 'cpu'
+    compute_devices = 'cpu cuda'
     recover = false
-    abs_zero = 1e-6
+  []
+  [MFEMPMGPartialIntermediateLevel]
+    type = CSVDiff
+    input = pmg_diffusion.i
+    csvdiff = 'OutputData/PMGDiffusionPartialLevel.csv'
+    cli_args = 'FESpaceHierarchies/h1_hierarchy/refinements="2 3" '
+               'Solvers/chebyshev_fine/type=MFEMOperatorChebyshevSmoother '
+               'Solvers/pmg/smoothers="chebyshev chebyshev_fine" '
+               'Solvers/pmg/assembly_levels="legacy partial legacy" '
+               'Outputs/csv/file_base=OutputData/PMGDiffusionPartialLevel'
+    requirement = 'The system shall have the ability to solve a diffusion problem using a '
+                  'p-multigrid (geometric multigrid) preconditioner with MFEM whose intermediate '
+                  'level is partially assembled.'
+    issues = '#34196'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
   []
   [MFEMPMGRejectsNonlinear]
     type = RunException
@@ -31,5 +47,35 @@
     requirement = 'The system shall reject an MFEM geometric multigrid preconditioner for a '
                   'complex equation system.'
     capabilities = 'mfem'
+  []
+  [MFEMPMGRejectsSharedLevelSolver]
+    issues = '#34197'
+    requirement = 'The system shall reject an MFEM geometric multigrid preconditioner that uses one '
+                  'solver object on more than one level, when'
+    [one_smoother_for_two_levels]
+      type = RunException
+      input = pmg_diffusion.i
+      cli_args = 'FESpaceHierarchies/h1_hierarchy/refinements="2 3"'
+      expect_err = "smoothers: must have one entry per level above the coarsest \(N-1 = 2\), got 1"
+      capabilities = 'mfem'
+      detail = 'a single smoother is given for two levels above the coarsest,'
+    []
+    [repeated_smoother]
+      type = RunException
+      input = pmg_diffusion.i
+      cli_args = 'FESpaceHierarchies/h1_hierarchy/refinements="2 3" '
+                 'Solvers/pmg/smoothers="chebyshev chebyshev"'
+      expect_err = "smoothers: names solver 'chebyshev' for more than one level"
+      capabilities = 'mfem'
+      detail = 'a smoother is named twice,'
+    []
+    [coarse_solver_as_smoother]
+      type = RunException
+      input = pmg_diffusion.i
+      cli_args = 'Solvers/active="boomeramg coarse pmg main" Solvers/pmg/smoothers=coarse'
+      expect_err = "smoothers: names solver 'coarse' for more than one level"
+      capabilities = 'mfem'
+      detail = 'or the coarse solver is also named as a smoother.'
+    []
   []
 []
