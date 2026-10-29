@@ -74,40 +74,50 @@ AugmentedLagrangianContactProblemTempl<T>::solve(const unsigned int nl_sys_num)
       predictor ? std::static_pointer_cast<Predictor>(predictor->getSharedPtr()) : nullptr;
   const bool compute_scaling_once = nl.computeScalingOnce();
 
-  // A multiplier update can change the residual by less than the nonlinear tolerance. At least
-  // one Newton step after each update makes the solution respond to the new multipliers.
-  auto & convergence = static_cast<DefaultNonlinearConvergence &>(
+  // A multiplier update changes the residual, but the default nonlinear convergence test (through
+  // nl_abs_tol) and a reference residual test can accept the first residual of a solve without a
+  // Newton step. The solution would then not respond to the new multipliers. At least one Newton
+  // step after each update prevents that.
+  auto & convergence = cast_ref<DefaultNonlinearConvergence &>(
       this->getConvergence(this->getNonlinearConvergenceNames()[nl_sys_num]));
   const auto forced_its = convergence.getForcedIterations();
-  // The convergence check passes forced iterations on to SNES, which keeps them across solves
-  // when the preconditioner is reused
-  PetscBool snes_force_iteration;
-  LibmeshPetscCall(SNESGetForceIteration(nl.getSNES(), &snes_force_iteration));
 
-  while (true)
+  const auto restore = [&]()
   {
-    T::solve(nl_sys_num);
-    _n_nonlinear_iterations += nl.nNonlinearIterations();
-    _n_linear_iterations += nl.nLinearIterations();
+    nl.setPredictor(predictor_ptr);
+    nl.computeScalingOnce(compute_scaling_once);
+    convergence.setForcedIterations(forced_its);
+  };
 
-    if (!this->shouldSolve() || !T::solverSystemConverged(nl_sys_num))
-      break;
-
-    if (updateAugmentedLagrangianMultipliers() || _augmented_lagrangian_failed)
-      break;
-
-    if (_lagrangian_iteration_number == 1)
+  try
+  {
+    while (true)
     {
-      nl.setPredictor(nullptr);
-      nl.computeScalingOnce(true);
-      convergence.setForcedIterations(std::max(forced_its, 1u));
+      T::solve(nl_sys_num);
+      _n_nonlinear_iterations += nl.nNonlinearIterations();
+      _n_linear_iterations += nl.nLinearIterations();
+
+      if (!this->shouldSolve() || !T::solverSystemConverged(nl_sys_num))
+        break;
+
+      if (updateAugmentedLagrangianMultipliers() || _augmented_lagrangian_failed)
+        break;
+
+      if (_lagrangian_iteration_number == 1)
+      {
+        nl.setPredictor(nullptr);
+        nl.computeScalingOnce(true);
+        convergence.setForcedIterations(std::max(forced_its, 1u));
+      }
     }
   }
+  catch (...)
+  {
+    restore();
+    throw;
+  }
 
-  nl.setPredictor(predictor_ptr);
-  nl.computeScalingOnce(compute_scaling_once);
-  convergence.setForcedIterations(forced_its);
-  LibmeshPetscCall(SNESSetForceIteration(nl.getSNES(), snes_force_iteration));
+  restore();
 }
 
 template <class T>
@@ -126,39 +136,43 @@ AugmentedLagrangianContactProblemTempl<T>::updateAugmentedLagrangianMultipliers(
   // loop over contact pairs (penetration locators)
   const ConstraintWarehouse & constraints = this->currentNonlinearSystem().getConstraintWarehouse();
   std::list<std::shared_ptr<MechanicalContactConstraint>> mccs;
-  for (const auto & pair : penetration_locators)
+  for (const auto & [boundaries, _] : penetration_locators)
   {
-    const auto & boundaries = pair.first;
+    const auto & [primary_id, secondary_id] = boundaries;
 
-    if (!constraints.hasActiveNodeFaceConstraints(boundaries.second, bool(displaced_problem)))
+    if (!constraints.hasActiveNodeFaceConstraints(secondary_id, bool(displaced_problem)))
       continue;
     const auto & ncs =
-        constraints.getActiveNodeFaceConstraints(boundaries.second, bool(displaced_problem));
+        constraints.getActiveNodeFaceConstraints(secondary_id, bool(displaced_problem));
 
-    mccs.emplace_back(nullptr);
+    std::shared_ptr<MechanicalContactConstraint> first_mcc;
     for (const auto & nc : ncs)
-      if (const auto mcc = std::dynamic_pointer_cast<MechanicalContactConstraint>(nc); !mcc)
-        mooseError("AugmentedLagrangianContactProblem: dynamic cast of "
-                   "MechanicalContactConstraint object failed.");
-      else
-      {
-        // Return if this constraint does not correspond to the primary-secondary pair
-        // prepared by the outer loops.
-        // This continue statement is required when, e.g. one secondary surface constrains
-        // more than one primary surface.
-        if (mcc->secondaryBoundary() != boundaries.second ||
-            mcc->primaryBoundary() != boundaries.first)
-          continue;
+    {
+      // Other node-face constraints, and contact constraints that do not use the augmented
+      // Lagrangian formulation, take no part in the augmented Lagrangian iteration
+      const auto mcc = std::dynamic_pointer_cast<MechanicalContactConstraint>(nc);
+      if (!mcc || !mcc->isAugmentedLagrangian())
+        continue;
 
-        // save one constraint pointer for each contact pair
-        if (!mccs.back())
-          mccs.back() = mcc;
+      // Return if this constraint does not correspond to the primary-secondary pair
+      // prepared by the outer loops.
+      // This continue statement is required when, e.g. one secondary surface constrains
+      // more than one primary surface.
+      if (mcc->secondaryBoundary() != secondary_id || mcc->primaryBoundary() != primary_id)
+        continue;
 
-        // check if any of the constraints is not yet converged. The check is collective, so
-        // it must run for every constraint on every rank.
-        if (!mcc->AugmentedLagrangianContactConverged())
-          repeat_augmented_lagrange_step = true;
-      }
+      // save one constraint pointer for each contact pair
+      if (!first_mcc)
+        first_mcc = mcc;
+
+      // check if any of the constraints is not yet converged. The check is collective, so
+      // it must run for every constraint on every rank.
+      if (!mcc->AugmentedLagrangianContactConverged())
+        repeat_augmented_lagrange_step = true;
+    }
+
+    if (first_mcc)
+      mccs.push_back(first_mcc);
   }
 
   // next loop over penalty mortar user objects
@@ -204,7 +218,7 @@ AugmentedLagrangianContactProblemTempl<T>::updateAugmentedLagrangianMultipliers(
   for (const auto & pmuo : pmuos)
     pmuo->updateAugmentedLagrangianMultipliers();
 
-  // call AM setup again (e.g. to update active sets)
+  // Store the current gaps, which the next multiplier update compares against to adapt the penalty
   for (const auto & pmuo : pmuos)
     pmuo->augmentedLagrangianSetup();
 
