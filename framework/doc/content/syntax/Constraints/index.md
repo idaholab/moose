@@ -136,6 +136,16 @@ standard interfaces for quadrature point contributions to primary, secondary, lo
 scalar variables in the residual and Jacobian. Additional discussion can be found at
 [`ScalarKernels`](syntax/ScalarKernels/index.md).
 
+## Constraints in Eigenvalue Problems id=eigen-tag
+
+A constraint enforced with exact constraints, such as a [MultiPointConstraint.md], is removed
+from both eigen matrices, and the constrained values are restored on the eigenvector.
+
+Exact constraints in an eigenvalue problem need a nonlinear eigen solve, such as
+`solve_type = newton`. This solve returns one eigenpair, so set `n_eigen_pairs = 1`.
+
+!listing test/tests/problems/eigen_problem/constraints/multipoint_tie_eigen.i block=Executioner
+
 !syntax list /Constraints objects=True actions=False subsystems=False
 
 !syntax list /Constraints objects=False actions=False subsystems=True
