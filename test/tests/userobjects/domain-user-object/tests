@@ -21,7 +21,7 @@
     # executeOnBoundary() is mistakenly called for the interface.
     requirement = 'The system shall preserve the solution and domain user object interface conservation check on partially overlapping sidesets'
     design = 'UserObjects/index.md'
-    issues = '#19995'
+    issues = '#34282'
     # finalize() detects missing or repeated DomainUO contributions.
     # Exodiff checks the solution against the same gold file in both cases.
     [higher_id]
@@ -56,7 +56,7 @@
     cli_args = 'UserObjects/conservation/check_interface_calls=false Outputs/exodus=false'
     requirement = 'The system shall be able to execute user objects that perform operations on elements, boundaries, and interfaces and verify that boundary callbacks are not executed on interface boundaries.'
     design = 'UserObjects/index.md'
-    issues = '#19995'
+    issues = '#34282'
   []
 
   [prevent_wrong_interface_number_calls]
@@ -71,6 +71,6 @@
     cli_args = 'UserObjects/conservation/check_boundary_calls=false Outputs/exodus=false'
     requirement = 'The system shall be able to execute user objects that perform operations on elements, boundaries, and interfaces and verify interface execution counts when boundary call checking is disabled.'
     design = 'UserObjects/index.md'
-    issues = '#19995'
+    issues = '#34282'
   []
 []
