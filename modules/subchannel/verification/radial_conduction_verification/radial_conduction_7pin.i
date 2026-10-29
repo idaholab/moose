@@ -64,6 +64,8 @@ duct_flux = 2.0e4 # W/m2
   atol = 1e-10
   friction_closure = 'Chen'
   mixing_closure = 'no_mixing'
+  # The pin heat transfer closure only sets the pin surface temperature after the solve; with
+  # q_prime = 0 the pins add no heat to the coolant. It is required whenever a pin mesh exists
   pin_HTC_closure = 'gnielinski'
   duct_HTC_closure = 'gnielinski'
 []

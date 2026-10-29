@@ -78,8 +78,10 @@ P_out = 14.72e6 # Pa
   segregated = false
   staggered_pressure = false
   verbose_subchannel = true
-  # At this high-flow Peclet number the exponential scheme reduces to upwind, which makes the
-  # cell-center turbulent mixing explicit in z and unstable on this axial mesh
+  # At this Peclet number the exponential scheme reduces to upwind, where the cell-center
+  # turbulent mixing uses only the bottom-face enthalpies. On this 20-cell mesh the mixing flow of a
+  # cell is about twice its axial flow, above the stability limit of one for that weighting; central
+  # differencing puts half the weight on the top face and is stable
   interpolation_scheme = central_difference
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'

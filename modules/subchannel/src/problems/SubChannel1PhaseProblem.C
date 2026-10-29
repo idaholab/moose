@@ -68,10 +68,7 @@ SubChannel1PhaseProblem::validParams()
   // Inputs
   InputParameters params = ExternalProblem::validParams();
   params += PostprocessorInterface::validParams();
-  params.addClassDescription(
-      "Base class of the subchannel solvers. All variables are face values stored at the axial "
-      "nodes, except the diversion and turbulent crossflows, the pressure drop DP and the "
-      "friction factor ff, which are cell values stored at the top node of their cell.");
+  params.addClassDescription("Base class of the subchannel solvers");
   params.addParam<unsigned int>("n_blocks", 1, "The number of blocks in the axial direction");
   params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
   params.addRangeCheckedParam<int>(

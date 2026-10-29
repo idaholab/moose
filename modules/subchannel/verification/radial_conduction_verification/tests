@@ -1,5 +1,5 @@
 [Tests]
-  design = 'TriSubChannel1PhaseProblem.md'
+  design = 'radial_conduction.md'
   issues = '#33956'
   [radial_conduction_7pin]
     type = PythonUnitTest

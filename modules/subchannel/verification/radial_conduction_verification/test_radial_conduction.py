@@ -189,11 +189,11 @@ class TestRadialConductionVerification(unittest.TestCase):
 
         # The heated and cooled sides span about 25 K; the solver and the network agree to a few
         # 1e-3 K, the remainder being the diversion crossflow over the hydrodynamic development
-        # length, which the network does not model. 0.02 K is ten times that difference and a
-        # thousandth of the spread, so a doubled or halved gap conductance (about 4 K) fails
+        # length, which the network does not model. 0.004 K is less than a thousandth of the
+        # spread, so a doubled or halved gap conductance (about 4 K) fails
         self.assertGreater(spread, 20.0)
         self.assertLess(
-            error, 0.02, f"Largest difference from the network: {error:.3e} K"
+            error, 0.004, f"Largest difference from the network: {error:.3e} K"
         )
 
 

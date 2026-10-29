@@ -19,10 +19,7 @@ QuadSubChannel1PhaseProblem::validParams()
 {
   InputParameters params = SubChannel1PhaseProblem::validParams();
   params.addClassDescription(
-      "Solver class for subchannels in a square lattice assembly and bare fuel pins. All "
-      "variables are face values stored at the axial nodes, except the diversion and turbulent "
-      "crossflows, the pressure drop DP and the friction factor ff, which are cell values stored "
-      "at the top node of their cell.");
+      "Solver class for subchannels in a square lattice assembly and bare fuel pins");
   return params;
 }
 
@@ -344,7 +341,7 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
         PetscScalar Pe = 0.5;
         if (_interpolation_scheme == 3)
         {
-          // Compute the Peclet number
+          // Compute the cell Peclet number
           auto w_perim_in = (*_w_perim_soln)(node_in);
           auto w_perim_out = (*_w_perim_soln)(node_out);
           auto w_perim_interp = this->computeInterpolatedValue(w_perim_out, w_perim_in, 0.5);
