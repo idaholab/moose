@@ -198,7 +198,11 @@ endif
 # already uses for its Python bindings; --embed adds -lpython. Linking libpython also enables
 # the framework's "embedded_python" capability (see framework/src/base/Capabilities.C).
 ifeq ($(ENABLE_NEML2),true)
-	libmesh_LDFLAGS += -Wl,-rpath,$(shell $(pyconfig) --prefix)/lib $(shell $(pyconfig) --ldflags --embed)
+	# python-config reports <prefix>/lib, but a venv (e.g. uv) has no libpython there; the library
+	# is in the base interpreter's LIBDIR, so add that directory as well.
+	moose_python_libdir := $(shell python3 -c 'import sysconfig; print(sysconfig.get_config_var("LIBDIR"))')
+	libmesh_LDFLAGS += -Wl,-rpath,$(shell $(pyconfig) --prefix)/lib $(shell $(pyconfig) --ldflags --embed) \
+	                   -L$(moose_python_libdir) -Wl,-rpath,$(moose_python_libdir)
 endif
 
 UNAME := $(shell uname)
