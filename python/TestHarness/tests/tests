@@ -401,6 +401,13 @@
     requirement = 'The system shall be able to import python utilities when running tests.'
     issues = '#31457'
   []
+  [test_root_app_name]
+    type = PythonUnitTest
+    input = test_TestRootAppName.py
+    min_slots = 2 # calls TestHarness, which could use threads
+    requirement = 'The system shall use the application of the current directory when running tests from another folder whose testroot does not specify an application, and report an error naming the --app-name option when no application can be determined.'
+    issues = '#33068'
+  []
   [option_min_parallel]
     type = PythonUnitTest
     input = test_option_min_parallel.py
