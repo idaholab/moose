@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AddClosuresAction.h"
-#include "THMProblem.h"
+#include "ClosuresRegistry.h"
 #include "ClosuresBase.h"
 
 registerMooseAction("ThermalHydraulicsApp", AddClosuresAction, "THM:add_closures");
@@ -26,12 +26,10 @@ AddClosuresAction::AddClosuresAction(const InputParameters & params) : MooseObje
 void
 AddClosuresAction::act()
 {
-  THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());
-  if (thm_problem)
-  {
-    _moose_object_pars.set<THMProblem *>("_thm_problem") = thm_problem;
-    _moose_object_pars.set<Logger *>("_logger") = &(thm_problem->log());
+  ClosuresRegistry & registry = ClosuresRegistry::findOrCreate(_awh, _action_factory);
 
-    thm_problem->addClosures(_type, _name, _moose_object_pars);
-  }
+  _moose_object_pars.set<FEProblemBase *>("_problem") = _problem.get();
+  _moose_object_pars.set<Logger *>("_logger") = &registry.getLogger();
+
+  registry.addClosures(_type, _name, _moose_object_pars);
 }

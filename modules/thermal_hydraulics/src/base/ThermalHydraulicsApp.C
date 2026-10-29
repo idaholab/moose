@@ -83,6 +83,15 @@ ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   THM::associateSyntax(s);
   THM::registerActions(s);
 
+  s.registerActionSyntax("FlowChannel1PhasePhysics",
+                         "Physics/ThermalHydraulics/FlowChannel1Phase/*");
+
+  // Closures objects (see ClosuresBase/ClosuresRegistry) must exist before a Physics that
+  // consumes them (e.g. FlowChannel1PhasePhysics) looks them up.
+  s.addDependency("init_component_physics", "THM:add_closures");
+  s.addDependency("add_material", "THM:add_closures");
+  s.addDependency("check_integrity", "THM:add_closures");
+
   // flow models
   registerFlowModel(THM::FM_SINGLE_PHASE, FlowModelSinglePhase);
 

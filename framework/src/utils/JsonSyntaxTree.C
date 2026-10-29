@@ -33,7 +33,13 @@ JsonSyntaxTree::JsonSyntaxTree(const std::string & search_string) : _search(sear
   auto & actmap = Registry::allActions();
   for (auto & entry : actmap)
     for (auto & act : entry.second)
+    {
       _action_label_map[act->_classname] = std::make_pair(entry.first, act->_file);
+      // An action registered under an alias, such as an ActionComponent that takes the name of
+      // another class, is dumped to the syntax tree under that alias
+      if (!act->_alias.empty())
+        _action_label_map[act->_alias] = std::make_pair(entry.first, act->_file);
+    }
 
   auto & objmap = Registry::allObjects();
   for (auto & entry : objmap)

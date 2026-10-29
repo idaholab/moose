@@ -356,21 +356,19 @@ WCNSFVTurbulencePhysicsBase::addAuxiliaryVariables()
   if (_turbulence_model == "k-epsilon" && getParam<bool>("mu_t_as_aux_variable"))
   {
     auto params = getFactory().getValidParams(var_type);
-    assignBlocks(params, _blocks);
     if (!is_linear && isParamValid("turbulent_viscosity_two_term_bc_expansion"))
       params.set<bool>("two_term_boundary_expansion") =
           getParam<bool>("turbulent_viscosity_two_term_bc_expansion");
     if (!shouldCreateVariable(_turbulent_viscosity_name, _blocks, /*error if aux*/ false))
       reportPotentiallyMissedParameters({"turbulent_viscosity_two_term_bc_expansion"}, var_type);
     else
-      getProblem().addAuxVariable(var_type, _turbulent_viscosity_name, params);
+      addSharedAuxVariable(var_type, _turbulent_viscosity_name, params);
   }
   if (_turbulence_model == "k-epsilon" && getParam<bool>("k_t_as_aux_variable"))
   {
     auto params = getFactory().getValidParams(var_type);
-    assignBlocks(params, _blocks);
     if (shouldCreateVariable(NS::k_t, _blocks, /*error if aux*/ false))
-      getProblem().addAuxVariable(var_type, NS::k_t, params);
+      addSharedAuxVariable(var_type, NS::k_t, params);
   }
 }
 
