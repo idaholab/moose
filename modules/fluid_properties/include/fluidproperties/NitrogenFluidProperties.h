@@ -199,7 +199,7 @@ protected:
   const std::array<Real, 6> _tk{{0.0, 0.03, 0.2, 0.8, 0.6, 1.9}};
   const std::array<unsigned int, 6> _dk{{1, 2, 3, 4, 8, 10}};
   const std::array<unsigned int, 6> _lk{{0, 0, 1, 2, 2, 2}};
-  const std::array<Real, 6> _gammak{{0.0, 0.0, 1.0, 1.0, 1.0}};
+  const std::array<Real, 6> _gammak{{0.0, 0.0, 1.0, 1.0, 1.0, 1.0}};
 };
 
 #pragma GCC diagnostic pop

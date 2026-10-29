@@ -13,7 +13,6 @@
 #include "NaNInterface.h"
 
 class SinglePhaseFluidProperties;
-class IdealGasFluidProperties;
 
 /**
  * Overrides the value methods for a property from some arguments
@@ -59,10 +58,24 @@ public:
   /**
    * Computes the mixture specific heat ratio
    *
+   * @param[in] p   Pressure
+   * @param[in] T   Temperature
    * @param[in] x   All mass fractions
    */
   template <typename CppType>
-  CppType mixtureSpecificHeatRatio_templ(const std::vector<CppType> & x) const;
+  CppType mixtureSpecificHeatRatio_templ(const CppType & p,
+                                         const CppType & T,
+                                         const std::vector<CppType> & x) const;
+  ADReal
+  mixtureSpecificHeatRatio(const ADReal & p, const ADReal & T, const std::vector<ADReal> & x) const;
+  Real mixtureSpecificHeatRatio(Real p, Real T, const std::vector<Real> & x) const;
+
+  /**
+   * Computes the specific heat ratio of a mixture whose components all have constant specific
+   * heats. Deprecated: use the version with pressure and temperature arguments.
+   *
+   * @param[in] x   All mass fractions
+   */
   ADReal mixtureSpecificHeatRatio(const std::vector<ADReal> & x) const;
   Real mixtureSpecificHeatRatio(const std::vector<Real> & x) const;
 
@@ -110,5 +123,17 @@ protected:
   const unsigned int _n_secondary_components;
 
   /// Component fluid properties objects
-  std::vector<const IdealGasFluidProperties *> _component_fps;
+  std::vector<const SinglePhaseFluidProperties *> _component_fps;
+
+  /// Whether all components have constant specific heats, so that the internal energy is linear
+  /// in temperature and the temperature follows explicitly from it
+  bool _constant_specific_heats;
+  /// Temperature at which Newton's method starts to compute the temperature from the internal
+  /// energy when some components have temperature-dependent specific heats [K]
+  Real _T_newton_start;
+
+private:
+  /// Implements the deprecated mixtureSpecificHeatRatio(x)
+  template <typename CppType>
+  CppType constantSpecificHeatRatio(const std::vector<CppType> & x) const;
 };

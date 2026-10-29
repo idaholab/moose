@@ -125,7 +125,30 @@ TEST_F(MethaneFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->mu_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e_from_p_T, p, T, tol);
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->s_from_p_T, p, T, tol);
   DERIV_TEST(_fp->k_from_p_T, p, T, tol);
+}
+
+/**
+ * Verify the derivatives near the critical point, where the Gaussian bell-shaped terms
+ * of the residual Helmholtz free energy contribute significantly
+ */
+TEST_F(MethaneFluidPropertiesTest, derivativesNearCritical)
+{
+  const Real tol = REL_TOL_DERIVATIVE;
+
+  // Slightly supercritical state (Tc = 190.564 K, pc = 4.5992 MPa)
+  const Real p = 4.7e6;
+  const Real T = 192.0;
+
+  DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->e_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->h_from_p_T, p, T, tol);
+
+  // The isobaric heat capacity is the temperature derivative of the enthalpy
+  Real h, dh_dp, dh_dT;
+  _fp->h_from_p_T(p, T, h, dh_dp, dh_dT);
+  REL_TEST(_fp->cp_from_p_T(p, T), dh_dT, REL_TOL_CONSISTENCY);
 }
 
 /**

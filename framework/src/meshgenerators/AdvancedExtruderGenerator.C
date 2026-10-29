@@ -42,6 +42,8 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/unstructured_mesh.h"
 #include "libmesh/point.h"
+#include "libmesh/fe_base.h"
+#include "libmesh/quadrature_nodal.h"
 
 #include <numeric>
 #include <cmath>
@@ -63,7 +65,9 @@ AdvancedExtruderGenerator::validParams()
       "axial element sizes within each elevation and remap subdomain_ids, boundary_ids and element "
       "extra integers within each elevation as well as interface boundaries between neighboring "
       "elevation layers, as well as following a 1D curve and modifying the radial (normal to "
-      "the extrusion axis) extent of the geometry.");
+      "the extrusion axis) extent of the geometry. It can also extrude each node along the "
+      "averaged normal of the elements it is connected to, which is useful to create boundary "
+      "layers.");
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh to extrude");
 
@@ -77,11 +81,12 @@ AdvancedExtruderGenerator::validParams()
       "The number of layers for each elevation - must be num_elevations in length!");
 
   // Swaps on every height
-  params.addParam<std::vector<std::vector<subdomain_id_type>>>(
+  params.addParam<std::vector<std::vector<SubdomainName>>>(
       "subdomain_swaps",
       {},
       "For each row, every two entries are interpreted as a pair of "
-      "'from' and 'to' to remap the subdomains for that elevation");
+      "'from' and 'to' to remap the subdomains for that elevation. Subdomains may be specified by "
+      "name or ID. A 'to' name absent from the input mesh creates a new subdomain");
   params.addParam<std::vector<std::vector<boundary_id_type>>>(
       "boundary_swaps",
       {},
@@ -117,6 +122,13 @@ AdvancedExtruderGenerator::validParams()
       "A vector that points in the ending direction for extruding along a curve. This vector "
       "should be the tangent vector at the LAST node of the extrusion curve. Vector will be "
       "normalized in code, so don't worry about it here.");
+  params.addParam<bool>(
+      "extrude_along_node_normals",
+      false,
+      "If true, each node is extruded along the averaged normal of the elements it is connected "
+      "to, instead of along a fixed 'direction'. Only supported when extruding a 1D mesh in a "
+      "plane of constant z into 2D, or a 2D surface mesh into 3D. This is useful to create "
+      "boundary layers.");
 
   // Boundaries and interfaces
   params.addParam<BoundaryName>(
@@ -177,7 +189,7 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     _biases(isParamValid("biases") ? getParam<std::vector<Real>>("biases")
                                    : std::vector<Real>(_heights.size(), 1.0)),
     _num_layers(getParam<std::vector<unsigned int>>("num_layers")),
-    _subdomain_swaps(getParam<std::vector<std::vector<subdomain_id_type>>>("subdomain_swaps")),
+    _subdomain_swaps(getParam<std::vector<std::vector<SubdomainName>>>("subdomain_swaps")),
     _boundary_swaps(getParam<std::vector<std::vector<boundary_id_type>>>("boundary_swaps")),
     _elem_integer_names_to_swap(getParam<std::vector<std::string>>("elem_integer_names_to_swap")),
     _elem_integers_swaps(
@@ -191,6 +203,7 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
                                  ? getParam<RealVectorValue>("end_extrusion_direction").unit()
                                  : Point(0, 0, 0)),
     _extrude_along_curve(isParamValid("extrusion_curve")),
+    _extrude_along_node_normals(getParam<bool>("extrude_along_node_normals")),
     _has_top_boundary(isParamValid("top_boundary")),
     _top_boundary(isParamValid("top_boundary") ? getParam<BoundaryName>("top_boundary") : "0"),
     _has_bottom_boundary(isParamValid("bottom_boundary")),
@@ -234,6 +247,22 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
       paramError("num_layers", "num_layers cannot be set if extruding along curve!");
     if (isParamValid("direction"))
       paramError("direction", "direction cannot be set if extruding along curve!");
+    if (_extrude_along_node_normals)
+      paramError("extrude_along_node_normals",
+                 "extrude_along_node_normals cannot be set if extruding along curve!");
+  }
+  else if (_extrude_along_node_normals)
+  {
+    if (isParamValid("direction"))
+      paramError("direction",
+                 "direction cannot be set if 'extrude_along_node_normals' is set, as the extrusion "
+                 "direction is computed from the element normals!");
+    if (!MooseUtils::absoluteFuzzyEqual(_twist_pitch, 0.))
+      paramError("twist_pitch",
+                 "twist_pitch cannot be set if 'extrude_along_node_normals' is set!");
+    if (_end_radial_extent)
+      paramError("end_radial_extent",
+                 "end_radial_extent cannot be set if 'extrude_along_node_normals' is set!");
   }
   else
   {
@@ -267,16 +296,6 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
                      ") in ",
                  name());
     }
-  }
-
-  try
-  {
-    MooseMeshUtils::idSwapParametersProcessor(
-        name(), "subdomain_swaps", _subdomain_swaps, _subdomain_swap_pairs);
-  }
-  catch (const MooseException & e)
-  {
-    paramError("subdomain_swaps", e.what());
   }
 
   if (_boundary_swaps.size() && (_boundary_swaps.size() != num_elevations))
@@ -452,14 +471,63 @@ AdvancedExtruderGenerator::generate()
   // Check that the swaps source blocks are present in the mesh
   for (const auto & swap : _subdomain_swaps)
     for (const auto i : index_range(swap))
-      if (i % 2 == 0 && !MooseMeshUtils::hasSubdomainID(*_input, swap[i]))
-        paramError("subdomain_swaps", "The block '", swap[i], "' was not found within the mesh");
+      if (i % 2 == 0 && !MooseMeshUtils::hasSubdomainName(*_input, swap[i]))
+      {
+        std::string blocks;
+        for (const auto & [name, id] : MooseMeshUtils::getAllSubdomainNamesAndIDs(*_input))
+          blocks += (blocks.empty() ? "" : ", ") + name + " (" + std::to_string(id) + ")";
+        paramError("subdomain_swaps",
+                   "The block '",
+                   swap[i],
+                   "' was not found within the mesh.\nBlock names (ID) in the mesh: " + blocks);
+      }
+
+  // Convert the subdomain swaps from names to IDs. Target subdomains that are neither IDs nor
+  // names of subdomains in the input mesh are assigned new IDs, unused by the input mesh and by
+  // any other target ID
+  subdomain_id_type next_free_subdomain_id = MooseMeshUtils::getNextFreeSubdomainID(*_input);
+  for (const auto & swap : _subdomain_swaps)
+    for (const auto i : index_range(swap))
+      if (i % 2 == 1 && MooseUtils::isDigits(swap[i]))
+        next_free_subdomain_id = std::max(
+            next_free_subdomain_id,
+            cast_int<subdomain_id_type>(MooseMeshUtils::getSubdomainID(swap[i], *_input) + 1));
+  std::map<SubdomainName, subdomain_id_type> new_subdomain_ids;
+  std::vector<std::vector<subdomain_id_type>> subdomain_swap_ids(_subdomain_swaps.size());
+  for (const auto row : index_range(_subdomain_swaps))
+    for (const auto i : index_range(_subdomain_swaps[row]))
+    {
+      const auto & subdomain = _subdomain_swaps[row][i];
+      if (i % 2 == 0 || MooseUtils::isDigits(subdomain) ||
+          MooseMeshUtils::hasSubdomainName(*_input, subdomain))
+        subdomain_swap_ids[row].push_back(MooseMeshUtils::getSubdomainID(subdomain, *_input));
+      else
+      {
+        if (!new_subdomain_ids.count(subdomain))
+          new_subdomain_ids[subdomain] = next_free_subdomain_id++;
+        subdomain_swap_ids[row].push_back(new_subdomain_ids[subdomain]);
+      }
+    }
+
+  try
+  {
+    MooseMeshUtils::idSwapParametersProcessor(
+        name(), "subdomain_swaps", subdomain_swap_ids, _subdomain_swap_pairs);
+  }
+  catch (const MooseException & e)
+  {
+    paramError("subdomain_swaps", e.what());
+  }
 
   // Check that the swaps source boundaries are present in the mesh
   for (const auto & swap : _boundary_swaps)
     for (const auto i : index_range(swap))
       if (i % 2 == 0 && !MooseMeshUtils::hasBoundaryID(*_input, swap[i]))
-        paramError("boundary_swaps", "The boundary '", swap[i], "' was not found within the mesh");
+        paramError("boundary_swaps",
+                   "The boundary '",
+                   swap[i],
+                   "' was not found within the mesh.\nBoundaries in the mesh: " +
+                       Moose::stringify(MooseMeshUtils::getAllBoundaryNamesAndIDs(*_input)));
 
   // Check that the source blocks for layer top/bottom boundaries exist in the mesh
   for (const auto & layer_vec : _upward_boundary_source_blocks)
@@ -480,6 +548,11 @@ AdvancedExtruderGenerator::generate()
   std::unique_ptr<MeshBase> extrusion_curve;
   if (_extrude_along_curve)
     extrusion_curve = std::move(_extrusion_curve);
+
+  if (_extrude_along_node_normals && !input->is_serial())
+    paramError("extrude_along_node_normals",
+               "Extruding along node normals is not implemented for non-serialized distributed "
+               "meshes yet.");
 
   // We must serialize the curve to know how to extrude across all ranks
   std::unique_ptr<libMesh::MeshSerializer> serializer;
@@ -624,6 +697,12 @@ AdvancedExtruderGenerator::generate()
   else
     total_extrusion_distance_at_axis = std::accumulate(_heights.begin(), _heights.end(), 0);
 
+  // When extruding along node normals, precompute each node's extrusion direction from the
+  // normals of the elements connected to it
+  std::unordered_map<dof_id_type, Point> node_normals;
+  if (_extrude_along_node_normals)
+    node_normals = computeNodeNormals(*input);
+
   // Create translated layers of nodes in the direction of extrusion
   for (const auto & node : input->node_ptr_range())
   {
@@ -634,6 +713,20 @@ AdvancedExtruderGenerator::generate()
     Real sum_step_sizes_at_axis = 0.;
     // Initial distance from the node to the extrusion axis
     Real start_node_radius = (*node - reference_point).norm();
+
+    // Direction to extrude this node along: a fixed direction, or the averaged normal of the
+    // elements connected to it
+    Point node_extrude_direction = _direction;
+    if (_extrude_along_node_normals)
+    {
+      auto it = node_normals.find(node->id());
+      if (it == node_normals.end())
+        mooseError("Node ",
+                   node->id(),
+                   " is not connected to any element with a well-defined normal; its extrusion "
+                   "direction cannot be determined.");
+      node_extrude_direction = it->second;
+    }
 
     // e is the elevation layer ordering
     for (const auto e : make_range(total_num_elevations))
@@ -771,9 +864,8 @@ AdvancedExtruderGenerator::generate()
                             : height * std::pow(bias, (Real)(layer_index - 1)) * (1.0 - bias) /
                                   (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
             step_size_at_axis = step_size;
-            orig_node_to_current =
-                orig_node_to_previous +
-                _direction * step_size; // update distance from starting node to new node
+            // update distance from starting node to new node
+            orig_node_to_current = orig_node_to_previous + node_extrude_direction * step_size;
           }
 
           // Keep track of the cumulative step size as an extrusion axis coordinate
@@ -1673,6 +1765,8 @@ AdvancedExtruderGenerator::generate()
   // Copy all the subdomain/sideset/nodeset name maps to the extruded mesh
   if (!input_subdomain_map.empty())
     mesh->set_subdomain_name_map().insert(input_subdomain_map.begin(), input_subdomain_map.end());
+  for (const auto & [subdomain_name, subdomain_id] : new_subdomain_ids)
+    mesh->set_subdomain_name(subdomain_id, subdomain_name, true);
   if (!input_sideset_map.empty())
     mesh->get_boundary_info().set_sideset_name_map().insert(input_sideset_map.begin(),
                                                             input_sideset_map.end());
@@ -1710,4 +1804,64 @@ AdvancedExtruderGenerator::radialExpansionRatio(const Real t) const
                  MathUtils::pow(t, 2) +
              _start_radial_growth_rate * t;
   }
+}
+
+std::unordered_map<dof_id_type, Point>
+AdvancedExtruderGenerator::computeNodeNormals(const MeshBase & input) const
+{
+  // Evaluate the geometric map of each element at its nodes with a nodal quadrature rule, as done
+  // for mortar nodal normals. On curved (higher-order) elements this captures the local surface
+  // normal at each node rather than a single per-element normal.
+  const auto dim = input.mesh_dimension();
+  libMesh::QNodal qrule(dim);
+  const auto & qweights = qrule.get_weights();
+  std::unique_ptr<FEBase> fe(FEBase::build(dim, FEType(FIRST, LAGRANGE)));
+  fe->attach_quadrature_rule(&qrule);
+  const auto & dxyzdxi = fe->get_dxyzdxi();
+  const auto & dxyzdeta = fe->get_dxyzdeta();
+  const auto & q_points = fe->get_xyz();
+  const Point z_axis(0, 0, 1);
+
+  // Sum the JxW-weighted normals of the elements connected to each node
+  std::unordered_map<dof_id_type, Point> node_normals;
+  for (const auto & elem : input.element_ptr_range())
+  {
+    fe->reinit(elem);
+    const auto qpoint_to_node = MooseMeshUtils::nodalQuadraturePointToNodeMap(*elem, q_points);
+    for (const auto qp : index_range(q_points))
+    {
+      // The weighted normal JxW * n is the quadrature weight times the area vector
+      // dxyz/dxi x dxyz/deta in 2D, or the in-plane rotation z x dxyz/dxi of the tangent in 1D.
+      // Both have the orientation of the element's node ordering, so that the extruded elements
+      // are not inverted.
+      Point weighted_normal;
+      if (dim == 2)
+        weighted_normal = dxyzdxi[qp].cross(dxyzdeta[qp]);
+      else
+      {
+        // A curve only defines a unique normal within its plane
+        if (std::abs(dxyzdxi[qp](2)) > libMesh::TOLERANCE * dxyzdxi[qp].norm())
+          paramError("extrude_along_node_normals",
+                     "Extruding a 1D mesh along node normals requires the mesh to lie in a plane "
+                     "of constant z, but element ",
+                     elem->id(),
+                     " is not.");
+        weighted_normal = z_axis.cross(dxyzdxi[qp]);
+      }
+      node_normals[elem->node_id(qpoint_to_node[qp])] += qweights[qp] * weighted_normal;
+    }
+  }
+
+  // The input surface mesh is expected to have consistently oriented elements.
+  for (auto & [node_id, normal] : node_normals)
+  {
+    if (normal.norm_sq() == 0)
+      mooseError("The averaged normal at node ",
+                 node_id,
+                 " is zero; an extrusion direction cannot be determined. This can happen if the "
+                 "connected elements do not have consistent orientations.");
+    normal = normal.unit();
+  }
+
+  return node_normals;
 }

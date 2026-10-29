@@ -15,6 +15,7 @@
 #include "MooseLagrangeHelpers.h"
 #include "MortarSegmentHelper.h"
 #include "MortarUtils.h"
+#include "MooseMeshUtils.h"
 #include "FormattedTable.h"
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
@@ -65,175 +66,6 @@ namespace nanoflann
 typedef SearchParams SearchParameters;
 }
 #endif
-
-namespace
-{
-// QNodal on a parent side returns normals, weights, and physical points in the
-// parent-side quadrature ordering. That ordering is not guaranteed to match the
-// node ordering of the generated lower-dimensional secondary element, especially
-// for higher-order faces. Build the association geometrically so each
-// quadrature value is attached to the secondary node at the same physical point.
-std::vector<unsigned int>
-nodalQuadraturePointToSecondaryNodeMap(const Elem & secondary_elem,
-                                       const std::vector<Point> & q_points)
-{
-  const auto n_nodes = secondary_elem.n_nodes();
-  if (q_points.size() != n_nodes)
-    mooseError("Nodal quadrature produced ",
-               q_points.size(),
-               " points for secondary mortar element ",
-               secondary_elem.id(),
-               " of type ",
-               libMesh::Utility::enum_to_string<ElemType>(secondary_elem.type()),
-               ", but the element has ",
-               n_nodes,
-               " nodes.");
-
-  const auto invalid_node = std::numeric_limits<unsigned int>::max();
-  std::vector<unsigned int> qpoint_to_node(n_nodes, invalid_node);
-  std::vector<bool> node_used(n_nodes, false);
-
-  const Real element_size = secondary_elem.hmax();
-  mooseAssert(element_size > 0,
-              "Secondary mortar element "
-                  << secondary_elem.id() << " of type "
-                  << libMesh::Utility::enum_to_string<ElemType>(secondary_elem.type())
-                  << " has a non-positive hmax and cannot be used for nodal quadrature point "
-                     "matching.");
-
-  // The nodal quadrature locations and the generated secondary nodes are two floating-point
-  // reconstructions of the same physical points. Scale the tolerance by element size so the
-  // matching is insensitive to coordinate magnitude; the 100*TOLERANCE factor allows roundoff
-  // from FE reinitialization and mesh generation while remaining far below a valid node spacing.
-  const Real matching_tol = 100 * TOLERANCE * element_size;
-  const Real matching_tol_sq = matching_tol * matching_tol;
-
-  // Each nodal quadrature point should coincide with exactly one still-unused
-  // secondary node. The unused-node search makes the mapping one-to-one and
-  // avoids silently assigning two quadrature entries to the same node.
-  for (const auto qp : make_range(q_points.size()))
-  {
-    unsigned int closest_node = invalid_node;
-    Real closest_dist_sq = std::numeric_limits<Real>::max();
-    Real second_closest_dist_sq = std::numeric_limits<Real>::max();
-
-    for (const auto n : make_range(n_nodes))
-    {
-      if (node_used[n])
-        continue;
-
-      const Real dist_sq = (q_points[qp] - secondary_elem.point(n)).norm_sq();
-      if (dist_sq < closest_dist_sq)
-      {
-        second_closest_dist_sq = closest_dist_sq;
-        closest_dist_sq = dist_sq;
-        closest_node = n;
-      }
-      else if (dist_sq < second_closest_dist_sq)
-        second_closest_dist_sq = dist_sq;
-    }
-
-    if (closest_node == invalid_node || closest_dist_sq > matching_tol_sq)
-      mooseError("Could not match nodal quadrature point ",
-                 qp,
-                 " at ",
-                 q_points[qp],
-                 " to a node on secondary mortar element ",
-                 secondary_elem.id(),
-                 " of type ",
-                 libMesh::Utility::enum_to_string<ElemType>(secondary_elem.type()),
-                 ". The nearest unmatched node distance is ",
-                 std::sqrt(closest_dist_sq),
-                 ", which exceeds the tolerance ",
-                 matching_tol,
-                 ".");
-
-    if (second_closest_dist_sq <= matching_tol_sq)
-      mooseError("Nodal quadrature point ",
-                 qp,
-                 " at ",
-                 q_points[qp],
-                 " does not map uniquely to secondary mortar element ",
-                 secondary_elem.id(),
-                 " of type ",
-                 libMesh::Utility::enum_to_string<ElemType>(secondary_elem.type()),
-                 ". Two unmatched nodes are within the matching tolerance ",
-                 matching_tol,
-                 ".");
-
-    qpoint_to_node[qp] = closest_node;
-    node_used[closest_node] = true;
-  }
-
-#ifdef DEBUG
-  // In optimized builds the mapping above skips already matched nodes for speed. In debug builds,
-  // audit the full candidate set to catch ambiguous geometry or accidental many-to-one matches.
-  std::vector<unsigned int> node_to_qpoint(n_nodes, invalid_node);
-  for (const auto qp : make_range(q_points.size()))
-  {
-    const auto mapped_node = qpoint_to_node[qp];
-    mooseAssert(mapped_node != invalid_node && mapped_node < n_nodes,
-                "Invalid secondary node mapping for nodal quadrature point " << qp << ".");
-    mooseAssert(node_to_qpoint[mapped_node] == invalid_node,
-                "Secondary node " << mapped_node << " on mortar element " << secondary_elem.id()
-                                  << " was matched to both nodal quadrature point "
-                                  << node_to_qpoint[mapped_node] << " and " << qp << ".");
-    node_to_qpoint[mapped_node] = qp;
-
-    // Check the qp -> node direction without excluding nodes already matched by previous qps.
-    unsigned int candidate_count = 0;
-    unsigned int candidate_node = invalid_node;
-    for (const auto n : make_range(n_nodes))
-      if ((q_points[qp] - secondary_elem.point(n)).norm_sq() <= matching_tol_sq)
-      {
-        ++candidate_count;
-        candidate_node = n;
-      }
-
-    mooseAssert(candidate_count == 1,
-                "Nodal quadrature point " << qp << " on mortar element " << secondary_elem.id()
-                                          << " has " << candidate_count
-                                          << " secondary node candidates within tolerance "
-                                          << matching_tol << ".");
-    mooseAssert(candidate_node == mapped_node,
-                "Nodal quadrature point " << qp << " on mortar element " << secondary_elem.id()
-                                          << " was matched to node " << mapped_node
-                                          << ", but the full candidate search found node "
-                                          << candidate_node << ".");
-  }
-
-  for (const auto n : make_range(n_nodes))
-  {
-    mooseAssert(node_to_qpoint[n] != invalid_node,
-                "Secondary node " << n << " on mortar element " << secondary_elem.id()
-                                  << " was not matched to a nodal quadrature point.");
-
-    // Check the node -> qp direction so every secondary node is also uniquely represented.
-    unsigned int candidate_count = 0;
-    unsigned int candidate_qp = invalid_node;
-    for (const auto qp : make_range(q_points.size()))
-      if ((q_points[qp] - secondary_elem.point(n)).norm_sq() <= matching_tol_sq)
-      {
-        ++candidate_count;
-        candidate_qp = qp;
-      }
-
-    mooseAssert(candidate_count == 1,
-                "Secondary node " << n << " on mortar element " << secondary_elem.id() << " has "
-                                  << candidate_count
-                                  << " nodal quadrature point candidates within tolerance "
-                                  << matching_tol << ".");
-    mooseAssert(candidate_qp == node_to_qpoint[n],
-                "Secondary node " << n << " on mortar element " << secondary_elem.id()
-                                  << " was matched to nodal quadrature point " << node_to_qpoint[n]
-                                  << ", but the full candidate search found point " << candidate_qp
-                                  << ".");
-  }
-#endif
-
-  return qpoint_to_node;
-}
-}
 
 class MortarNodalGeometryOutput : public Output
 {
@@ -2154,7 +1986,7 @@ AutomaticMortarGeneration::computeNodalGeometry()
     // quadrature ordering and lower-dimensional side-element node ordering are
     // identical.
     const auto qpoint_to_secondary_node =
-        nodalQuadraturePointToSecondaryNodeMap(*secondary_elem, face_points);
+        MooseMeshUtils::nodalQuadraturePointToNodeMap(*secondary_elem, face_points);
 
     mooseAssert(face_normals.size() == face_points.size() && JxW.size() == face_points.size(),
                 "Face nodal geometry vectors must have the same size.");
@@ -2237,7 +2069,7 @@ AutomaticMortarGeneration::computeADNodalNormals(
       fe_face->reinit(interior_parent, side);
 
       const auto qpoint_to_secondary_node =
-          nodalQuadraturePointToSecondaryNodeMap(*secondary_elem, face_points);
+          MooseMeshUtils::nodalQuadraturePointToNodeMap(*secondary_elem, face_points);
 
       mooseAssert(face_normals.size() == face_points.size() &&
                       qweights.size() == face_points.size(),

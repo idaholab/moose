@@ -35,11 +35,6 @@ protected:
   /// 1-phase gate valve user object
   const ADGateValve1PhaseUserObject & _gate_valve_uo;
 
-  /// Cross-sectional area, elemental
-  const ADVariableValue & _A_elem;
-  /// Cross-sectional area, linear
-  const ADVariableValue & _A_linear;
-
   /// rho*A coupled variable index
   const unsigned int _rhoA_jvar;
   /// rho*u*A coupled variable index

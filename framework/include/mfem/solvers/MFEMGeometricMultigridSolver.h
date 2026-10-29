@@ -36,7 +36,7 @@
  *     type = MFEMGeometricMultigridSolver
  *     variable          = u
  *     fespace_hierarchy = h1_hierarchy
- *     smoothers         = chebyshev   # use on all interior levels
+ *     smoothers         = chebyshev   # one per level above the coarsest
  *     coarse_solver     = boomeramg
  *     assembly_levels   = legacy      # use on all levels
  *   []
@@ -120,6 +120,9 @@ private:
 
   /// Rediscretized bilinear forms kept alive for the active linear coarse-level operators.
   std::vector<std::shared_ptr<mfem::ParBilinearForm>> _level_blfs;
+
+  /// Essential true DoFs of the coarse levels, which their constrained operators reference.
+  std::vector<std::unique_ptr<mfem::Array<int>>> _level_tdofs;
 
   /// Constrained linear coarse-level operators; destroyed before the forms that own their data.
   std::vector<std::unique_ptr<mfem::OperatorHandle>> _level_ops;

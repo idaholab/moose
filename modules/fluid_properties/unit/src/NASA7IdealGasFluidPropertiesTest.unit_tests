@@ -1,0 +1,45 @@
+[Tests]
+  design = 'NASA7IdealGasFluidProperties.md'
+  issues = '#34116'
+
+  [cantera]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.cantera
+    requirement = 'The system shall compute the density, specific internal energy, specific enthalpy, specific entropy, isobaric and isochoric specific heats, and sound speed of an ideal gas from NASA 7-coefficient polynomials, reproducing Cantera values below and above the temperature where the two polynomials meet and at a pressure other than the reference pressure.'
+  []
+  [consistency]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.consistency
+    requirement = 'The system shall compute the same state of an ideal gas from NASA 7-coefficient polynomials with the (pressure, temperature), (temperature, specific volume), and (pressure, density) variable sets, and satisfy the definition of enthalpy, the Mayer relation, the ideal-gas sound speed, and the relations between the temperature and pressure derivatives of enthalpy, internal energy, and entropy and the specific heats and specific volume.'
+  []
+  [derivatives]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.derivatives
+    requirement = 'The system shall compute the derivatives of the properties of an ideal gas from NASA 7-coefficient polynomials with respect to their arguments, with real and automatic differentiation arguments, in agreement with finite differences.'
+  []
+  [out_of_range]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.outOfRange
+    requirement = 'The system shall extrapolate NASA 7-coefficient polynomials outside the temperature range of their data and count each such evaluation, including the evaluation of a temperature found by inverting the internal energy, as a solution warning, and shall flag a non-positive or not-a-number temperature as an invalid solution.'
+  []
+  [inverses]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.inverses
+    requirement = 'The system shall compute the temperature of an ideal gas from NASA 7-coefficient polynomials from its specific volume and internal energy and from its pressure and enthalpy by Newton iteration, together with the properties that depend on these variable sets, consistently with the properties from pressure and temperature, and within the mismatch of the two polynomials at the temperature where they meet.'
+  []
+  [energy_near_zero]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.energyNearZero
+    requirement = 'The system shall compute the temperature of an ideal gas from NASA 7-coefficient polynomials whose specific internal energy, which includes the enthalpy of formation, is close to zero.'
+  []
+  [inverse_range]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.inverseRange
+    requirement = 'The system shall compute the temperature of each built-in NASA 7-coefficient ideal gas from its specific internal energy and from its specific enthalpy from half the lower end to 1.5 times the upper end of the temperature range of its data.'
+  []
+  [inverse_derivatives]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.inverseDerivatives
+    requirement = 'The system shall compute the derivatives of the properties of an ideal gas from NASA 7-coefficient polynomials from the (specific volume, internal energy), (pressure, enthalpy), (enthalpy, entropy), and (specific volume, enthalpy) variable sets, with real and automatic differentiation arguments, in agreement with finite differences.'
+  []
+[]

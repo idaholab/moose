@@ -44,17 +44,16 @@ ADPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c)
   ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(c);
 
   const auto & rhoV = _cached_junction_var_values[VolumeJunction1Phase::RHOV_INDEX];
-  const auto & rhouV = _cached_junction_var_values[VolumeJunction1Phase::RHOUV_INDEX];
-  const auto & rhovV = _cached_junction_var_values[VolumeJunction1Phase::RHOVV_INDEX];
-  const auto & rhowV = _cached_junction_var_values[VolumeJunction1Phase::RHOWV_INDEX];
 
   const ADRealVectorValue di = _dir[0];
   const ADReal rho = rhoV / _volume;
-  const ADRealVectorValue uvec(rhouV / rhoV, rhovV / rhoV, rhowV / rhoV);
 
   // compute momentum and energy source terms
   const ADRealVectorValue S_momentum = 0.5 * rho * _g * _head * _A_ref * di;
-  const ADReal S_energy = S_momentum * uvec;
+  // The energy source is the work of the head on the flow through this connection, so that the
+  // pump adds m_dot * g * head over its two connections. The velocity of the junction volume is
+  // not used because the head raises it above the through-flow velocity.
+  const ADReal S_energy = 0.5 * _g * _head * _flux[c][THMVACE1D::MASS];
 
   _residual[VolumeJunction1Phase::RHOUV_INDEX] -= S_momentum(0);
   _residual[VolumeJunction1Phase::RHOVV_INDEX] -= S_momentum(1);

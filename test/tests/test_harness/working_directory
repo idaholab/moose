@@ -18,6 +18,7 @@
     type = Exodiff
     input = sub_exodiff.i
     exodiff = sub_exodiff_out.e
+    cli_args = 'Outputs/exodus=true'
     working_directory = sub_directory
   [../]
   [./csvdiff]

@@ -129,9 +129,10 @@ void
 SalineMoltenSaltFluidProperties::e_from_p_T(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
-  const Real rho = rho_from_p_T(pressure, temperature);
+  Real rho, drho_dp, drho_dT;
+  rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
   e = _tp.h_t_kg(temperature) - pressure / rho;
-  de_dp = -1 / rho;
+  de_dp = -1 / rho + pressure * drho_dp / (rho * rho);
   // finite difference approximation
   de_dT = (e_from_p_T(pressure, temperature * (1 + _fd_size)) - e) / (temperature * _fd_size);
 }
@@ -153,9 +154,11 @@ SalineMoltenSaltFluidProperties::mu_from_p_T(
     Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
   mu = _tp.mu(temperature, pressure * Pa_to_kPa) * mN_to_N;
-  Real mu_p1 = _tp.mu(temperature, pressure * (1 + _fd_size) * Pa_to_kPa) * mN_to_N; // Ns/m^2
+  // The pressure step is in Pa, and is absolute at zero pressure so that it does not vanish
+  const Real dp = _fd_size * (pressure == 0 ? 1.0 : std::abs(pressure));
+  Real mu_p1 = _tp.mu(temperature, (pressure + dp) * Pa_to_kPa) * mN_to_N;           // Ns/m^2
   Real mu_T1 = _tp.mu(temperature * (1 + _fd_size), pressure * Pa_to_kPa) * mN_to_N; // Ns/m^2
-  dmu_dp = (mu_p1 - mu) / (_fd_size * pressure * Pa_to_kPa);
+  dmu_dp = (mu_p1 - mu) / dp;
   dmu_dT = (mu_T1 - mu) / (_fd_size * temperature);
 }
 
@@ -170,9 +173,11 @@ SalineMoltenSaltFluidProperties::k_from_p_T(
     Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
 {
   k = _tp.k(temperature, pressure * Pa_to_kPa);
-  Real k_p1 = _tp.k(temperature, pressure * (1 + _fd_size) * Pa_to_kPa);
+  // The pressure step is in Pa, and is absolute at zero pressure so that it does not vanish
+  const Real dp = _fd_size * (pressure == 0 ? 1.0 : std::abs(pressure));
+  Real k_p1 = _tp.k(temperature, (pressure + dp) * Pa_to_kPa);
   Real k_T1 = _tp.k(temperature * (1 + _fd_size), pressure * Pa_to_kPa);
-  dk_dp = (k_p1 - k) / (_fd_size * pressure * Pa_to_kPa);
+  dk_dp = (k_p1 - k) / dp;
   dk_dT = (k_T1 - k) / (_fd_size * temperature);
 }
 

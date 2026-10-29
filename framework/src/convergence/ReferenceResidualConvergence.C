@@ -307,10 +307,10 @@ ReferenceResidualConvergence::updateReferenceResidual()
   std::fill(_group_ref_resid.begin(), _group_ref_resid.end(), 0.0);
 
   // With a variational inequality (VI) solver, the residual at degrees of freedom in the active
-  // set (those held at a bound) is not driven to zero: there the bound constraint holds in place
-  // of the residual equation. Exclude those entries from the residual norms, matching the norm
-  // PETSc uses for its own VI convergence test.
-  std::unique_ptr<NumericVector<Number>> inactive_residual;
+  // set of constraints (those held at a bound) is not driven to zero: there the bound constraint
+  // holds in place of the residual equation. Exclude those entries from the residual norms,
+  // matching the norm PETSc uses for its own VI convergence test.
+  std::unique_ptr<NumericVector<Number>> inactive_constraint_set_residual;
   SNES snes = nonlinear_sys.getSNES();
   PetscBool is_vi;
   LibmeshPetscCallA(
@@ -323,13 +323,16 @@ ReferenceResidualConvergence::updateReferenceResidual()
     LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetSolution(snes, &x));
     LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetFunction(snes, &f, nullptr, nullptr));
     LibmeshPetscCallA(_fe_problem.comm().get(), SNESVIGetActiveSetIS(snes, x, f, &active_set));
-    inactive_residual = _residual_vector->clone();
+    inactive_constraint_set_residual = _residual_vector->clone();
     LibmeshPetscCallA(
         _fe_problem.comm().get(),
-        VecISSet(cast_ref<PetscVector<Number> &>(*inactive_residual).vec(), active_set, 0));
+        VecISSet(cast_ref<PetscVector<Number> &>(*inactive_constraint_set_residual).vec(),
+                 active_set,
+                 0));
     LibmeshPetscCallA(_fe_problem.comm().get(), ISDestroy(&active_set));
   }
-  const auto & residual = inactive_residual ? *inactive_residual : *_residual_vector;
+  const auto & residual =
+      inactive_constraint_set_residual ? *inactive_constraint_set_residual : *_residual_vector;
 
   for (const auto i : index_range(_soln_vars))
   {
