@@ -4,7 +4,7 @@
   [BFS_ERCOFTAC_linear_transient]
     type = 'CSVDiff'
     input = 'BFS_ERCOFTAC.i'
-    csvdiff = 'BFS_ERCOFTAC_out_line_entry_channel_wall_0010.csv BFS_ERCOFTAC_out_side_bottom_0010.csv BFS_ERCOFTAC_out_line_quarter_entry_channel_0010.csv BFS_ERCOFTAC_out_side_top_0010.csv'
+    csvdiff = 'BFS_ERCOFTAC_out_line_entry_channel_wall_FINAL.csv BFS_ERCOFTAC_out_side_bottom_FINAL.csv BFS_ERCOFTAC_out_line_quarter_entry_channel_FINAL.csv BFS_ERCOFTAC_out_side_top_FINAL.csv'
     abs_zero = 5e-6
     # see #31193
     restep = false

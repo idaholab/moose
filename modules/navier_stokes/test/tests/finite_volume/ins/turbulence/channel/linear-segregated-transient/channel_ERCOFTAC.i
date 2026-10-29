@@ -417,13 +417,14 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
   pressure_l_tol = 1e-14
   turbulence_l_tol = 1e-14
 
-  momentum_equation_relaxation = 0.7
+  momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  turbulence_equation_relaxation = '0.25 0.25'
-  num_iterations = 1000
-  pressure_absolute_tolerance = 1e-12
-  momentum_absolute_tolerance = 1e-12
-  turbulence_absolute_tolerance = '1e-12 1e-12'
+  turbulence_equation_relaxation = '0.4 0.4'
+  # Only partially converge each time step, we are marching to steady state
+  num_iterations = 10
+  pressure_absolute_tolerance = 1e-8
+  momentum_absolute_tolerance = 1e-8
+  turbulence_absolute_tolerance = '1e-8 1e-8'
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -433,12 +434,22 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
 
   print_fields = false
   continue_on_max_its = true
-  dt = 1.0
-  num_steps = 2
+  num_steps = 35
+  # Ramp up the time step to march to steady state
+  [TimeStepper]
+    type = FunctionDT
+    function = 'min(1 + t, 10)'
+  []
 []
 
 [Outputs]
-  csv = true
+  [csv]
+    type = CSV
+    file_base = 'channel_ERCOFTAC_out'
+    # Only the steady state at the final time is checked
+    execute_on = 'FINAL'
+    create_final_symlink = true
+  []
 []
 
 [VectorPostprocessors]

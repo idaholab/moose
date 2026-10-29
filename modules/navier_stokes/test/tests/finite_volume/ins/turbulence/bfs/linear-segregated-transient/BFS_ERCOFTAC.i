@@ -414,7 +414,8 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
   turbulence_equation_relaxation = '0.5 0.5'
-  num_iterations = 20
+  # Only partially converge each time step, we are marching to steady state
+  num_iterations = 30
   pressure_absolute_tolerance = 1e-6
   momentum_absolute_tolerance = 1e-6
   turbulence_absolute_tolerance = '1e-6 1e-6'
@@ -427,13 +428,23 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
   print_fields = false
   continue_on_max_its = true
-  dt = 10.0
   num_steps = 10
+  # Ramp up the time step to march to steady state
+  [TimeStepper]
+    type = FunctionDT
+    function = 'min(10 + 2 * t, 2000)'
+  []
   num_piso_iterations = 2
 []
 
 [Outputs]
-  csv = true
+  [csv]
+    type = CSV
+    file_base = 'BFS_ERCOFTAC_out'
+    # Only the steady state at the final time is checked
+    execute_on = 'FINAL'
+    create_final_symlink = true
+  []
 []
 
 [VectorPostprocessors]
