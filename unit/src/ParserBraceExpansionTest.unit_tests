@@ -1,0 +1,111 @@
+[Tests]
+  design = 'Parser.md'
+  issues = '#32524'
+  [substitution]
+    requirement = 'The system shall support parameter substitution in input files using variable expressions'
+    issues = '#5649 #32524'
+    [command_line]
+      type = GoogleTest
+      unit_test = ParserBraceExpansionTest.SubstitutesCommandLineParameter
+      detail = 'from the command line and'
+    []
+    [in_file]
+      type = GoogleTest
+      unit_test = ParserBraceExpansionTest.SubstitutesInFileParameter
+      detail = 'from within the same input file.'
+    []
+  []
+  [unit_conversion]
+    type = GoogleTest
+    unit_test = ParserBraceExpansionTest.ExpandsUnitsConversions
+    requirement = 'The system shall support unit conversion in input files using variable expressions.'
+    issues = '#14827 #32524'
+  []
+  [debug_units]
+    type = GoogleTest
+    unit_test = ParserBraceExpansionTest.ReportsUnitConversionsInDebugMode
+    requirement = 'The system shall report the unit conversions performed at parse time when running in debug mode.'
+    issues = '#25362 #32524'
+  []
+  [nested]
+    requirement = 'The system shall evaluate brace expressions nested to arbitrary depth, from the innermost expression outward,'
+    [commands_and_arguments]
+      type = GoogleTest
+      unit_test = ParserBraceExpansionTest.ExpandsNestedBraceExpressions
+      detail = 'where nested expressions form command names, arguments, and substitution targets,'
+    []
+    [deep_fparse_units]
+      type = GoogleTest
+      unit_test = ParserBraceExpansionTest.ExpandsDeepNestedFparseAndUnits
+      detail = 'when function parser and unit conversion expressions are alternately nested many levels deep, and'
+    []
+    [command_arguments]
+      type = GoogleTest
+      unit_test = ParserBraceExpansionTest.ExpandsNestedCommandArguments
+      detail = 'when the integer arguments of list-generating commands are themselves expressions.'
+    []
+  []
+  [parse_template]
+    type = GoogleTest
+    unit_test = ParserBraceExpansionTest.ParsesNestedBraceTemplate
+    requirement = 'The system shall parse a field value containing brace expressions into literal text and nested expressions, recording the source position of each expression.'
+  []
+  [forward_dependencies]
+    type = GoogleTest
+    unit_test = ParserBraceExpansionTest.ResolvesForwardBraceDependencies
+    requirement = 'The system shall resolve brace expressions that reference fields defined later in the input.'
+  []
+  [field_kinds]
+    type = GoogleTest
+    unit_test = ParserBraceExpansionTest.PropagatesFieldKinds
+    requirement = 'The system shall assign a field the value type of its brace expression when the value consists of a single expression, and a string type otherwise.'
+  []
+  [errors]
+    requirement = 'The system shall report an error'
+    [cycle]
+      type = GoogleTest
+      unit_test = ParserBraceExpansionTest.ReportsCyclicBraceDependencies
+      detail = 'when brace expressions in two fields depend on each other,'
+    []
+    [cycle_chain]
+      type = GoogleTest
+      unit_test = ParserBraceExpansionTest.ReportsCyclicBraceDependencyChain
+      detail = 'listing every field involved when brace expressions form a dependency cycle through several fields,'
+    []
+    [unclosed]
+      type = GoogleTest
+      unit_test = ParserBraceExpansionTest.ReportsUnclosedBraceTemplate
+      detail = 'at the end of the input when a brace expression is not closed,'
+    []
+    [empty]
+      type = GoogleTest
+      unit_test = ParserBraceExpansionTest.ReportsEmptyBraceExpression
+      detail = 'at the location of an empty brace expression,'
+    []
+    [invalid_command]
+      type = GoogleTest
+      unit_test = ParserBraceExpansionTest.ReportsInvalidCommand
+      detail = 'at the location of a brace expression that uses an unknown command,'
+    []
+    [missing_variable]
+      type = GoogleTest
+      unit_test = ParserBraceExpansionTest.ReportsMissingSubstitutionVariable
+      detail = 'at the location of a substitution expression that references a missing field,'
+    []
+    [spacing]
+      type = GoogleTest
+      unit_test = ParserBraceExpansionTest.ReportsErrorSpanIndependentOfSpacing
+      detail = 'at the correct location of a failing brace expression regardless of the spacing around the assignment operator or inside quotes,'
+    []
+    [inner_expression]
+      type = GoogleTest
+      unit_test = ParserBraceExpansionTest.ReportsErrorAtInnerExpression
+      detail = 'only at the location of a failing nested expression, without an additional error for the expression that contains it, and'
+    []
+    [non_numeric_fparse_variable]
+      type = GoogleTest
+      unit_test = ParserBraceExpansionTest.ReportsNonNumericFparseVariable
+      detail = 'when a function parser expression references a field whose value is not a number.'
+    []
+  []
+[]
