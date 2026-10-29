@@ -237,6 +237,8 @@ NonlinearEigenSystem::reinit()
 void
 NonlinearEigenSystem::solve()
 {
+  updateExactConstraints();
+
   const bool presolve_succeeded = preSolve();
   if (!presolve_succeeded)
     return;

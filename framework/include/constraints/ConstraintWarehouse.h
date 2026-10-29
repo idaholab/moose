@@ -19,6 +19,7 @@ class NodeFaceConstraint;
 class ElemElemConstraint;
 class NodeElemConstraintBase;
 class MortarConstraintBase;
+class MultiPointConstraint;
 
 /**
  * Warehouse for storing constraints
@@ -50,6 +51,7 @@ public:
   getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
   const std::vector<std::shared_ptr<NodeElemConstraintBase>> & getActiveNodeElemConstraints(
       SubdomainID secondary_id, SubdomainID primary_id, bool displaced) const;
+  const std::vector<std::shared_ptr<MultiPointConstraint>> & getActiveMultiPointConstraints() const;
   ///@}
 
   ///@{
@@ -83,6 +85,9 @@ public:
 protected:
   /// NodalConstraint objects
   MooseObjectWarehouse<NodalConstraint> _nodal_constraints;
+
+  /// MultiPointConstraint objects
+  MooseObjectWarehouse<MultiPointConstraint> _multi_point_constraints;
 
   /// NodeFaceConstraint objects (non-displaced)
   std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint>> _node_face_constraints;

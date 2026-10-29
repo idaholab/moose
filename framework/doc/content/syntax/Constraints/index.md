@@ -136,6 +136,17 @@ standard interfaces for quadrature point contributions to primary, secondary, lo
 scalar variables in the residual and Jacobian. Additional discussion can be found at
 [`ScalarKernels`](syntax/ScalarKernels/index.md).
 
+## Constraints in Eigenvalue Problems id=eigen-tag
+
+Use `formulation = exact` for a nodal constraint in an eigenvalue problem. A penalty or kinematic
+nodal constraint does not enter the eigen matrices. An exact constraint is removed from both
+matrices, and the constrained values are restored on the eigenvector.
+
+Exact constraints in an eigenvalue problem need a nonlinear eigen solve, such as
+`solve_type = newton`. This solve returns one eigenpair, so set `n_eigen_pairs = 1`.
+
+!listing test/tests/problems/eigen_problem/constraints/nodal_exact_eigen.i block=Constraints
+
 !syntax list /Constraints objects=True actions=False subsystems=False
 
 !syntax list /Constraints objects=False actions=False subsystems=True

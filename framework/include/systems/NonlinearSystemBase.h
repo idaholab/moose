@@ -48,6 +48,7 @@ class ResidualObject;
 class PenetrationInfo;
 class FieldSplitPreconditionerBase;
 class Convergence;
+class MultiPointConstraintHub;
 
 // libMesh forward declarations
 namespace libMesh
@@ -655,6 +656,19 @@ public:
   const ConstraintWarehouse & getConstraintWarehouse() const { return _constraints; }
 
   /**
+   * Rebuild the exact constraints of this system and of its displaced copy. Only coefficients may
+   * change: the sparsity pattern is not rebuilt.
+   */
+  void reinitExactConstraints();
+
+  /**
+   * Rebuild the exact constraints when a constraint reports changed coefficients, for instance
+   * through a Control. The solve calls this before any residual evaluation, the pre-SMO residual
+   * included, so that every residual of the solve sees the same constraints.
+   */
+  void updateExactConstraints();
+
+  /**
    * Return the NodalBCBase warehouse
    */
   const MooseObjectTagWarehouse<NodalBCBase> & getNodalBCWarehouse() const { return _nodal_bcs; }
@@ -997,6 +1011,12 @@ protected:
 
   /// Constraints storage object
   ConstraintWarehouse _constraints;
+
+  /// Applies the exact constraints to this system; built when the first exact constraint is added
+  std::unique_ptr<MultiPointConstraintHub> _mpc_hub;
+
+  /// Applies the same exact constraints to the displaced copy of this system
+  std::unique_ptr<MultiPointConstraintHub> _displaced_mpc_hub;
 
   /// increment vector
   NumericVector<Number> * _increment_vec;
