@@ -152,6 +152,7 @@ MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_
     registerSyntax("TestPhysicsComponentInterfaceErrors",
                    "Physics/Test/ComponentInterfaceErrors/*");
     registerSyntax("AddUserObjectPhysics", "Physics/Test/AddUserObject/*");
+    registerSyntax("SharedVariablePhysics", "Physics/Test/SharedVariable/*");
   }
 }
 

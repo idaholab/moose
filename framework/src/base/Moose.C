@@ -325,6 +325,7 @@ addActionTypes(Syntax & syntax)
   registerTask("resolve_optional_materials", true);
   registerTask("check_integrity_early", true);
   registerTask("check_integrity_early_physics", false);
+  registerTask("flush_shared_physics_variables", false);
   registerTask("setup_quadrature", true);
   registerTask("create_tagged_matrices", true);
 
@@ -428,6 +429,7 @@ addActionTypes(Syntax & syntax)
                            "(add_aux_variable, add_variable, add_elemental_field_variable,"
                            " add_external_aux_variables)"
                            "(add_variables_physics)" // physics can skip adding variables if they already exist
+                           "(flush_shared_physics_variables)" // adds the variables that Physics requested to share
                            "(add_mortar_variable)"
                            "(setup_variable_complete)"
                            "(check_integrity_early_physics)"  // checks that systems and variables are consistent

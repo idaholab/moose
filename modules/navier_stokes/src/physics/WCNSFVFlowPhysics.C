@@ -171,15 +171,14 @@ WCNSFVFlowPhysics::addSolverVariables()
         variable_type = "PINSFVSuperficialVelocityVariable";
 
       auto params = getFactory().getValidParams(variable_type);
-      assignBlocks(params, _blocks); // TODO: check wrt components
       params.set<std::vector<Real>>("scaling") = {getParam<Real>("momentum_scaling")};
       params.set<MooseEnum>("face_interp_method") =
           getParam<MooseEnum>("momentum_face_interpolation");
       params.set<bool>("two_term_boundary_expansion") =
           getParam<bool>("momentum_two_term_bc_expansion");
 
-      params.set<SolverSystemName>("solver_sys") = getSolverSystem(_velocity_names[d]);
-      getProblem().addVariable(variable_type, _velocity_names[d], params);
+      // TODO: check wrt components
+      addSharedSolverVariable(variable_type, _velocity_names[d], params);
     }
     else
       paramError("velocity_variable",
@@ -211,7 +210,6 @@ WCNSFVFlowPhysics::addSolverVariables()
   else if (_define_variables)
   {
     auto params = getFactory().getValidParams(pressure_type);
-    assignBlocks(params, _blocks);
     params.set<std::vector<Real>>("scaling") = {getParam<Real>("mass_scaling")};
     params.set<MooseEnum>("face_interp_method") =
         getParam<MooseEnum>("pressure_face_interpolation");
@@ -234,8 +232,7 @@ WCNSFVFlowPhysics::addSolverVariables()
       params.set<std::vector<Real>>("pressure_drop_form_factors") =
           getParam<std::vector<Real>>("pressure_drop_form_factors");
     }
-    params.set<SolverSystemName>("solver_sys") = getSolverSystem(_pressure_name);
-    getProblem().addVariable(pressure_type, _pressure_name, params);
+    addSharedSolverVariable(pressure_type, _pressure_name, params);
   }
   else
     paramError("pressure_variable",
