@@ -8,7 +8,7 @@ This class implements a MeshGenerator to split a monolithic mesh by blocks simil
 
 To split the mesh, nodes shared by multiple blocks are duplicated N-1 times (where N is the number of blocks sharing a particular node). Each duplicated node is assigned to one block and all the elements sharing that node are updated. Separate directional sidesets are always created on both sides of each cut. Their names are formed from the adjacent block names, and each direction has its own boundary ID. These boundary pairs allow libMesh to reconstruct disjoint neighbors on distributed meshes.
 
-Two block restriction options are provided: `surrounding_blocks` and `block_pairs`. The `surrounding_blocks` option creates interfaces both between the listed blocks and between the listed blocks and the rest of the mesh. The `block_pairs` option creates interfaces only between the specified block pairs. Multiple block pairs are separated by semicolons (`;`). These two options cannot be used together. When neither is specified, interfaces are generated between all adjacent blocks.
+Two block restriction options are provided: [!param](/Mesh/BreakMeshByBlockGenerator/surrounding_blocks) and [!param](/Mesh/BreakMeshByBlockGenerator/block_pairs). The [!param](/Mesh/BreakMeshByBlockGenerator/surrounding_blocks) option creates interfaces both between the listed blocks and between the listed blocks and the rest of the mesh. The [!param](/Mesh/BreakMeshByBlockGenerator/block_pairs) option creates interfaces only between the specified block pairs. Multiple block pairs are separated by semicolons (`;`). These two options cannot be used together. When neither is specified, interfaces are generated between all adjacent blocks.
 
 Elements on the two sides of a generated interface are connected as disjoint neighbors, which libMesh matches by the position of their sides. Because the two sides separate when the mesh deforms, a broken mesh cannot be used with a displaced mesh: set `use_displaced_mesh = false` in the `[Mesh]` block. Finite deformation cohesive zone models can use the Lagrangian solid mechanics kernels (`new_system = true`), which work on the reference mesh, or the mortar-based cohesive zone model, which does not rely on pairing elements through the disjoint neighbor machinery.
 
@@ -35,7 +35,7 @@ these roles.
 
 ### block_pairs option
 
-The `block_pairs` option restricts splitting to the specified block pairs. Nodes shared by more than two blocks are left connected at junctions. In the example below, three different cases are shown, where one, two and three new nodes are created, respectively.
+The [!param](/Mesh/BreakMeshByBlockGenerator/block_pairs) option restricts splitting to the specified block pairs. Nodes shared by more than two blocks are left connected at junctions. In the example below, three different cases are shown, where one, two and three new nodes are created, respectively.
 
 !media media/meshgenerators/3_blocks_example.png style=width:100%;
        alt=Illustration of the effect of using different values for the block_pairs parameter.
