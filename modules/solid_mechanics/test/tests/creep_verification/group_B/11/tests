@@ -1,0 +1,14 @@
+[Tests]
+  parallel_scheduling = True
+  [11]
+    issues = '#33413'
+    design = 'PowerLawCreepStressUpdate.md'
+    type = CSVDiff
+    csvdiff = '11_out.csv'
+    input = '11.i'
+    requirement = 'The system shall compute 3-D, triaxial primary creep in accordance with the NAFEMS reference solution.'
+    heavy = true
+    recover = false
+    max_parallel = 1
+  []
+[]

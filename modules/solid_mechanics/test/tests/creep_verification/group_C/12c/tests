@@ -1,0 +1,13 @@
+[Tests]
+  [12c]
+    issues = '#33413'
+    design = 'PowerLawCreepStressUpdate.md'
+    type = CSVDiff
+    csvdiff = '12c_out.csv'
+    input = '12c.i'
+    requirement = 'The system shall compute 2-D, plane stress, uniaxial stepped load combined primary and secondary creep in accordance with the NAFEMS reference solution.'
+    heavy = true
+    recover = false
+    max_parallel = 1
+  []
+[]
