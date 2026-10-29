@@ -12,11 +12,13 @@
     type = CSVDiff
     input = 'rayleigh-bernard-two-phase-physics.i'
     csvdiff = 'rayleigh-bernard-two-phase-physics_out.csv'
-    requirement = 'The system shall be able to model a lid-driven cavity with Rayleigh Benard convection with a two phase mixture using the linear finite volume discretization.'
+    # Four steps of the early transient, at a step of 0.1 s. Marched to steady state this
+    # configuration has at least three steady states, and which one a solver reaches depends on its
+    # time step: the nonlinear counterpart returns a peak vertical velocity of 0.213, 0.325 or
+    # 0.122 for a step of 0.1, 0.2 and 0.5 s respectively. That is why the nonlinear test is a
+    # RunApp, and why this one compares the transient rather than a steady state.
+    requirement = 'The system shall be able to solve two phase Rayleigh Benard convection with the mixture model using the linear finite volume discretization.'
     max_threads = 1 # see libmesh issue #3808
-    # Times out
-    heavy = True
-    capabilities = 'method=opt'
   []
   [rayleigh-benard_heated]
     type = CSVDiff
@@ -24,6 +26,11 @@
     csvdiff = 'rayleigh-bernard-two-phase-physics_heated_out.csv'
     requirement = 'The system shall be able to model a lid-driven cavity with Rayleigh Benard convection with a heated two phase mixture using the linear finite volume discretization.'
     max_threads = 1 # see libmesh issue #3808
+    # Marched to steady state this configuration has more than one attractor, and which one it
+    # reaches depends on the path the solver takes to get there. Partitioning changes that path:
+    # the peak velocity agrees to 4e-5 on two processes and lands on a different state entirely
+    # on four. The golded answer is the serial one, so the comparison is pinned to it.
+    max_parallel = 1
     # Times out
     heavy = True
     capabilities = 'method=opt'
@@ -42,15 +49,277 @@
     requirement = 'The system shall be able to model channel flow using a two phase mixture using the linear finite volume discretization and a shorthand physics syntax.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [channel_physics_harmonic]
+    type = CSVDiff
+    input = 'channel-drift-flux-physics.i'
+    cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/density_interp_method=harmonic Outputs/file_base=channel-drift-flux-physics-harmonic"
+    # The gold is a link to the average interpolation's gold. The coefficient of the diffusion
+    # stress varies little across a face in this channel, so the two means agree to eight digits;
+    # what the test guards is that the harmonic branch assembles and converges.
+    csvdiff = 'channel-drift-flux-physics-harmonic.csv'
+    design = 'LinearWCNSFV2PMomentumDriftFlux.md'
+    requirement = 'The system shall interpolate the coefficient of the diffusion stress to the faces with a harmonic mean when asked to, reproducing the arithmetic mean result where the coefficient is nearly uniform.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [slip_closure_verification]
+    type = CSVDiff
+    input = 'slip-closure-verification.i'
+    csvdiff = 'slip-closure-verification_out.csv'
+    design = 'LinearWCNSFV2PSlipVelocityFunctorMaterial.md'
+    requirement = 'The system shall compute the algebraic slip velocity of a two phase mixture, the diffusion velocity derived from it, and the slip velocity obtained by solving the drag correlation together with the force balance, in agreement with their analytic values. It shall do so on every branch of the drag model: the rigid sphere law solved iteratively, the deformed bubble law whose terminal velocity is independent of the particle size, which is checked by instantiating it at two diameters a factor of two apart and requiring the same speed exactly, and the automatic selection, which shall return the more resistive of the two and is checked against the rigid sphere result it must reproduce at these conditions. It shall also evaluate the Ishii and Zuber multi-bubble relation, which predicts the relative velocity directly, in agreement with its closed form at zero frictional pressure gradient.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [interface_area_hibiki_ishii]
+    type = CSVDiff
+    input = 'interface-area-verification.i'
+    csvdiff = 'interface-area-verification_out.csv'
+    design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md'
+    requirement = 'The system shall reproduce the analytic steady state of the Hibiki and Ishii interfacial area closure, at which coalescence balances breakage.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [interface_area_ishii_kim]
+    type = CSVDiff
+    input = 'interface-area-verification.i'
+    cli_args = "model=ishii-kim Outputs/file_base=interface-area-verification-ik"
+    csvdiff = 'interface-area-verification-ik.csv'
+    design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md'
+    requirement = 'The system shall reproduce the analytic steady state of the Ishii and Kim interfacial area closure, at which random collision and wake entrainment balance turbulent impact.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [interface_area_hibiki_ishii_coefficients]
+    type = CSVDiff
+    input = 'interface-area-verification.i'
+    cli_args = "shape_factor=4 LinearFVKernels/sources/gamma_c=0.15 LinearFVKernels/sources/k_c=0.2 LinearFVKernels/sources/gamma_b=0.3 LinearFVKernels/sources/k_b=1.0 Outputs/file_base=interface-area-verification-hi-coefficients"
+    csvdiff = 'interface-area-verification-hi-coefficients.csv'
+    design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md'
+    requirement = 'The system shall reproduce the analytic steady state of the Hibiki and Ishii closure when every one of its coefficients and the shape factor of the particle size are changed from their defaults, the root moving to the value the changed coefficients imply.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [interface_area_ishii_kim_coefficients]
+    type = CSVDiff
+    input = 'interface-area-verification.i'
+    cli_args = "model=ishii-kim LinearFVKernels/sources/c_rc=0.006 LinearFVKernels/sources/c_we=0.004 LinearFVKernels/sources/c_ti=0.1 LinearFVKernels/sources/c=2 LinearFVKernels/sources/we_cr=4 LinearFVKernels/sources/fd_max=0.7 Outputs/file_base=interface-area-verification-ik-coefficients"
+    csvdiff = 'interface-area-verification-ik-coefficients.csv'
+    design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md'
+    requirement = 'The system shall reproduce the analytic steady state of the Ishii and Kim closure when every one of its coefficients, its critical Weber number and its packing limit are changed from their defaults, the root moving to the value the changed coefficients imply.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [momentum_drift_flux_verification]
+    type = CSVDiff
+    input = 'momentum-drift-flux-verification.i'
+    csvdiff = 'momentum-drift-flux-verification_out.csv'
+    design = 'LinearWCNSFV2PMomentumDriftFlux.md'
+    requirement = 'The system shall assemble the diffusion stress of the mixture momentum equation with the sign and the coefficient beta_d beta_c / rho_m of its derivation, reproducing a solution worked out by hand to within the discretization error.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [active_scalars_before_flow]
+    type = CSVDiff
+    input = 'channel-drift-flux-physics.i'
+    cli_args = "Executioner/solve_active_scalars_before_flow=true Outputs/file_base=active-scalars-before-flow"
+    # The gold is a link to the default ordering's gold: moving the scalars ahead of the flow
+    # changes the path to the fixed point, not the fixed point
+    csvdiff = 'active-scalars-before-flow.csv'
+    design = 'SIMPLE.md'
+    requirement = 'The system shall reach the same converged solution when the active scalar equations are solved ahead of the flow within each outer iteration as when they are solved after it.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [active_scalar_subcycling]
+    type = CSVDiff
+    input = 'channel-drift-flux-physics.i'
+    cli_args = "Executioner/solve_active_scalars_before_flow=true Executioner/active_scalar_subcycles=4 Outputs/file_base=active-scalar-subcycling"
+    csvdiff = 'active-scalar-subcycling.csv'
+    design = 'SIMPLE.md'
+    requirement = 'The system shall reach the same converged solution when the active scalar equations are subcycled within each outer iteration as when they are not.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [phase_slip_wall_conservation]
+    type = CSVDiff
+    input = 'phase-slip-wall-conservation.i'
+    csvdiff = 'phase-slip-wall-conservation_out.csv'
+    abs_zero = 1e-6
+    design = 'LinearFVScalarAdvection.md'
+    requirement = 'The system shall conserve the dispersed phase in a closed cavity when a slip velocity is present, by not transporting the phase across impermeable boundaries, even when those boundaries constrain the phase fraction.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [energy_slip_wall_conservation]
+    type = CSVDiff
+    input = 'energy-slip-wall-conservation.i'
+    csvdiff = 'energy-slip-wall-conservation_out.csv'
+    # The enthalpy integral is 1515, and the imbalance left by the segregated solve is 6e-5 of it.
+    # Declaring the walls permeable, which is the defect this guards against, moves the integral by
+    # 1.07, so this tolerance separates the two by four orders of magnitude.
+    abs_zero = 1e-3
+    design = 'LinearWCNSFV2PEnergyDriftFlux.md'
+    requirement = 'The system shall conserve the mixture enthalpy in a closed cavity when the phases move relative to one another, by not carrying enthalpy across impermeable boundaries, even when those boundaries constrain the temperature.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [energy_slip_wall_conservation_harmonic]
+    type = CSVDiff
+    input = 'energy-slip-wall-conservation.i'
+    # Three bands of phase fraction rather than two, so that the harmonic mean is exercised where
+    # the coefficient jumps between 0.7 and 0.3, and the fall back to the arithmetic mean where the
+    # phase is absent and the harmonic mean is undefined, at the 0.3 to 0 interface
+    cli_args = "LinearFVKernels/T_drift_flux/coeff_interp_method=harmonic Functions/stratified/expression='if(y>0.0625,0.7,if(y>0.025,0.3,0))' Outputs/file_base=energy-slip-wall-conservation-harmonic"
+    csvdiff = 'energy-slip-wall-conservation-harmonic.csv'
+    abs_zero = 1e-3
+    design = 'LinearWCNSFV2PEnergyDriftFlux.md'
+    requirement = 'The system shall conserve the mixture enthalpy in a closed cavity when the coefficient of the enthalpy drift flux is interpolated to the faces with a harmonic mean, including across faces on one side of which the dispersed phase is absent, where the harmonic mean is undefined and the arithmetic mean shall be used instead.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [mass_density_transient]
+    type = CSVDiff
+    input = 'mass-balance-transient.i'
+    csvdiff = 'mass-balance-transient_out.csv'
+    # A restarted run rejoins the fixed point iteration on a slightly different path, which moves
+    # the imbalance by 1.2e-6 absolute and the stored mass by 4e-5 relative. Both tolerances sit
+    # above that. The assertion is unaffected: dropping the density transient takes the imbalance
+    # from 1.5e-5 to 3.5e-2, three orders of magnitude outside either one.
+    rel_err = 1e-3
+    abs_zero = 5e-6
+    design = 'WCNSLinearFVTwoPhaseMixturePhysics.md'
+    requirement = 'The system shall close the mixture mass balance in a transient in which the domain gains or loses mass, by carrying the density transient of the mixture continuity equation into the pressure equation. Without that term the pressure equation forces the mass flow in to equal the mass flow out at every instant, and the whole of the storage rate is unaccounted for; the imbalance in this case is then three per cent of the inlet mass flow rather than the six significant figures the term recovers. The test is also sensitive to the sign of the term, which doubles the imbalance rather than closing it when reversed.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [conservative_transient_energy]
+    type = CSVDiff
+    input = 'conservative-transient-energy.i'
+    csvdiff = 'conservative-transient-energy_out.csv'
+    abs_zero = 1e-6
+    design = 'WCNSLinearFVTwoPhaseMixturePhysics.md LinearFVTimeDerivative.md'
+    requirement = 'The system shall conserve the mixture enthalpy of a closed quiescent cavity whose dispersed phase density varies in time, by assembling the energy transient in conservative form: a factor of rho_m cp_m gives d(rho_m cp_m T)/dt, whose discrete sum telescopes, so the integral of rho_m cp_m T holds to round-off over a tripling of the dispersed phase density. Holding the multiplier outside the derivative instead gives rho_m cp_m dT/dt, and the temperature does not move at all and the integral rises by a factor of two and two thirds, so the assertion fails by nine orders of magnitude rather than by a margin comparable to the tolerance.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [conservative_transient_interfacial_area]
+    type = CSVDiff
+    input = 'conservative-transient-interfacial-area.i'
+    csvdiff = 'conservative-transient-interfacial-area_out.csv'
+    abs_zero = 1e-6
+    design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md LinearFVTimeDerivative.md'
+    requirement = 'The system shall conserve the interfacial area of a closed quiescent cavity whose dispersed phase density varies in time, by assembling the transient of its conservative transport equation as d(rho_d xi)/dt, whose discrete sum telescopes, so the integral of rho_d xi holds to round-off over a tripling of the dispersed phase density. Holding the multiplier outside the derivative instead gives rho_d d(xi)/dt, and the interfacial area does not move at all and the integral triples, so the assertion fails by nine orders of magnitude rather than by a margin comparable to the tolerance.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [conservative_transient_interfacial_area_compression]
+    type = CSVDiff
+    # The same case with the density falling rather than rising, which is one parameter, so the
+    # input is reused rather than copied
+    input = 'conservative-transient-interfacial-area.i'
+    cli_args = "rho_d_final_factor=0.3333333333333333 Outputs/file_base=conservative-transient-interfacial-area-compression_out"
+    csvdiff = 'conservative-transient-interfacial-area-compression_out.csv'
+    abs_zero = 1e-6
+    design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md LinearFVTimeDerivative.md'
+    requirement = 'The system shall conserve the interfacial area of a closed quiescent cavity whose dispersed phase density falls in time. The integral of rho_d xi shall hold to round-off over a fall to a third of the initial density, as it does over a tripling, which is the property of the conservative form of the transient term this case is built on. The sources of the interfacial area equation are not assembled here, so this says nothing about them.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [interfacial_mass_transfer_closed_on_area]
+    type = CSVDiff
+    input = 'interfacial-mass-transfer-verification.i'
+    csvdiff = 'interfacial-mass-transfer-verification_out.csv'
+    abs_zero = 1e-8
+    design = 'WCNSFV2PInterfacialMassTransferFunctorMaterial.md LinearWCNSFV2PInterfaceAreaSourceSink.md'
+    requirement = 'The system shall close the interfacial mass transfer rate on the transported interfacial area concentration and drive the phase, energy and interfacial area equations with that one rate. In a closed quiescent cavity whose phases have equal densities and specific heats, the transfer grows the particles present without changing their number, so xi / alpha^(2/3) is invariant. It shall hold over a sixfold growth of the phase fraction to the order of the time integrator: the drift is 4.7 per cent of the initial value at a step of 0.2 and falls to 2.4, 1.2 and 0.6 per cent as that step is halved, which is the first order rate of the implicit Euler default. The rate the Physics builds shall agree exactly with the same closure declared by hand from the same inputs.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [interfacial_mass_transfer_prescribed]
+    type = CSVDiff
+    input = 'interfacial-mass-transfer-prescribed.i'
+    csvdiff = 'interfacial-mass-transfer-prescribed_out.csv'
+    abs_zero = 1e-8
+    design = 'WCNSLinearFVTwoPhaseMixturePhysics.md'
+    requirement = 'The system shall drive the phase, energy and interfacial area equations with a prescribed interfacial mass transfer rate. In a closed quiescent cavity with a constant rate the phase fraction and the temperature are linear in time, which the implicit Euler step reproduces exactly: the phase fraction shall follow alpha_0 + Gamma t / rho_d and the temperature T_0 - Gamma h t / (rho cp) to round-off, over a fivefold growth of the phase fraction.'
+    max_threads = 1 # see libmesh issue #3808
+  []
 
   [errors]
     requirement = "The system shall return an error if"
+    [active_scalar_subcycles_without_reordering]
+      type = RunException
+      input = 'channel-drift-flux-physics.i'
+      cli_args = "Executioner/active_scalar_subcycles=4"
+      expect_err = 'Subcycling the active scalar equations requires them to be solved ahead of the flow'
+      detail = 'the active scalar equations are subcycled without being moved ahead of the flow, since the flux transporting them would then change between subcycles.'
+      max_threads = 1 # see libmesh issue #3808
+    []
     [skewness]
       type = RunException
       input = 'lid-driven-two-phase-physics.i'
       cli_args = "Mesh/gen/elem_type=TRI3 Mesh/inactive='' Physics/NavierStokes/FlowSegregated/flow/gravity='1 0 1'"
       expect_err = 'We currently do not support mixture flow with buoyancy and mesh skewness.'
       detail = 'a mixture model is used with buoyancy and a skewed mesh, as buoyancy forces reconstruction has not yet been implemented.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [mass_transfer_prescribed_and_closed]
+      type = RunException
+      input = 'interfacial-mass-transfer-verification.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/interfacial_mass_transfer=1"
+      expect_err = 'The transfer rate cannot be both prescribed and closed on the interfacial area'
+      detail = 'the interfacial mass transfer rate is both prescribed and closed on the interfacial area, since the phase equation can only be driven by one rate.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [mass_transfer_closed_without_saturation]
+      type = RunException
+      input = 'channel-drift-flux-physics.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/interfacial_area=phase_2 Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/interfacial_latent_heat=1"
+      expect_err = 'needs a saturation temperature for the transfer to be driven by'
+      detail = 'the interfacial mass transfer is closed on the interfacial area without a saturation temperature, since the closure is driven by the departure from saturation.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [mass_transfer_closed_without_latent_heat]
+      type = RunException
+      input = 'channel-drift-flux-physics.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/interfacial_area=phase_2 Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/T_saturation=1"
+      expect_err = 'needs the latent heat of the transition'
+      detail = 'the interfacial mass transfer is closed on the interfacial area without a latent heat, since that is what converts the heat crossing the interface into mass.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [mass_transfer_closed_without_energy_equation]
+      type = RunException
+      input = 'channel-drift-flux-physics.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/interfacial_area=phase_2 Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/T_saturation=1 Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/interfacial_latent_heat=1"
+      expect_err = 'needs an energy equation, since the transfer is driven by the departure of the mixture temperature from saturation'
+      detail = 'the interfacial mass transfer is closed on the interfacial area without an energy equation to supply the mixture temperature.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [phase_change_energy_with_exchange_coefficient]
+      type = RunException
+      input = 'channel-drift-flux-physics.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/add_phase_change_energy_term=true"
+      expect_err = 'A phase exchange coefficient cannot be specified if the phase change is handled with a phase change heat loss model'
+      detail = 'a phase exchange coefficient is given together with the phase change energy term, as the two describe the phase change inconsistently.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [phase_change_energy_with_enthalpy]
+      type = RunException
+      input = 'rayleigh-bernard-two-phase-physics_heated.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/add_phase_change_energy_term=true"
+      expect_err = 'The phase change energy term is currently only implemented for an energy equation solved for the temperature'
+      detail = 'the phase change energy term is requested with an energy equation solved for the specific enthalpy, since the term multiplies the time derivative of the temperature.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [energy_drift_flux_with_enthalpy]
+      type = RunException
+      input = 'rayleigh-bernard-two-phase-physics_heated.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/add_drift_flux_momentum_terms=true"
+      expect_err = 'The enthalpy carried by the relative motion of the phases is currently only implemented for an energy equation solved for the temperature'
+      detail = 'the drift flux terms are requested with an energy equation solved for the specific enthalpy, since the enthalpy drift flux is assembled against the temperature.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [drag_model_with_prescribed_drag]
+      type = RunException
+      input = 'slip-closure-verification.i'
+      cli_args = "FunctorMaterials/slip_drag_x/linear_coef_name=1"
+      expect_err = "A prescribed drag function cannot be combined with 'use_dispersed_phase_drag_model'"
+      detail = 'a drag function is prescribed on the slip closure while the drag model is also asked to compute one, since a drag function formed from the slip velocity cannot also be an input to it.'
       max_threads = 1 # see libmesh issue #3808
     []
   []

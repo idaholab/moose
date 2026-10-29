@@ -50,7 +50,12 @@ protected:
 
   /// The constant specific heat value. Only needed for temperature advection, with
   /// the assumption of constant cp.
-  const Real _cp;
+  /// Specific heat functor, only used when advecting the temperature. Null when advecting the
+  /// enthalpy, in which case no specific heat multiplier is applied.
+  const Moose::Functor<Real> * const _cp;
+
+  /// Specific heat evaluated on the current face, cached by setupFaceData
+  Real _face_cp;
 
   /// The Rhie-Chow user object that provides us with the face velocity
   const RhieChowMassFlux & _mass_flux_provider;

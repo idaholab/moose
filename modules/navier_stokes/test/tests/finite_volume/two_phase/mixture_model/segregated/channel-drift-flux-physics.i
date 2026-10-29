@@ -89,8 +89,6 @@ k_d = 1
         # Drift flux parameters
         add_drift_flux_momentum_terms = true
         density_interp_method = 'average'
-        # This has to be consistent with the friction model
-        slip_linear_friction_name = 'Darcy_coefficient'
 
         # Base phase material properties
         phase_1_density_name = ${rho}
