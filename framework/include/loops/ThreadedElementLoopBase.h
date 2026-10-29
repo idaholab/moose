@@ -124,6 +124,15 @@ public:
   virtual void onExternalSide(const Elem * elem, unsigned int side);
 
   /**
+   * Called before evaluations on an element interface
+   *
+   * @param elem - Element we are on
+   * @param side - local side number of the element 'elem'
+   * @param bnd_id - ID of the interface we are at
+   */
+  virtual void preInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id);
+
+  /**
    * Called when doing interface assembling
    *
    * @param elem - Element we are on
@@ -291,7 +300,10 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
               onInternalSide(elem, side);
 
             for (const auto bnd_id : boundary_ids)
+            {
+              preInterface(elem, side, bnd_id);
               onInterface(elem, side, bnd_id);
+            }
 
             postInternalSide(elem, side);
           }
@@ -396,6 +408,14 @@ ThreadedElementLoopBase<RangeType>::onInternalSide(const Elem * /*elem*/, unsign
 template <typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::onExternalSide(const Elem * /*elem*/, unsigned int /*side*/)
+{
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoopBase<RangeType>::preInterface(const Elem * /*elem*/,
+                                                 unsigned int /*side*/,
+                                                 BoundaryID /*bnd_id*/)
 {
 }
 

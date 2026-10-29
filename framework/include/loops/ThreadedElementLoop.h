@@ -54,6 +54,8 @@ public:
                            BoundaryID bnd_id,
                            const Elem * lower_d_elem = nullptr) override;
 
+  virtual void preInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
+
   virtual void neighborSubdomainChanged() override;
 
 protected:
@@ -137,6 +139,15 @@ ThreadedElementLoop<RangeType>::preBoundary(const Elem * /*elem*/,
                                             unsigned int /*side*/,
                                             BoundaryID bnd_id,
                                             const Elem * /*=nullptr*/)
+{
+  _fe_problem.setCurrentBoundaryID(bnd_id, ThreadedElementLoopBase<RangeType>::_tid);
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoop<RangeType>::preInterface(const Elem * /*elem*/,
+                                             unsigned int /*side*/,
+                                             BoundaryID bnd_id)
 {
   _fe_problem.setCurrentBoundaryID(bnd_id, ThreadedElementLoopBase<RangeType>::_tid);
 }
