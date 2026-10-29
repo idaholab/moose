@@ -174,21 +174,19 @@ protected:
   /// a trial variable of this system. Essential BCs and constraints do not create
   /// an equation for the variable they act on; they rely on one already existing,
   /// and are only ever applied while iterating the trial variables, so a variable
-  /// missing from that set would have them silently dropped. @p description names
-  /// the kind of object for the error message.
+  /// missing from that set would have them silently dropped.
   template <typename T>
   void CheckConstrainedVariablesAreTrialVariables(
-      const Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<T>>> & map,
-      const std::string & description) const
+      const Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<T>>> & map) const
   {
-    for (const auto & [var_name, _] : map)
+    for (const auto & [var_name, objects] : map)
       if (!VectorContainsName(_trial_var_names, var_name))
         mooseError("MFEM variable '",
                    var_name,
-                   "' has ",
-                   description,
-                   " applied to it, but it is not a trial variable of the equation system, so "
-                   "nothing would apply it. Add a kernel acting on '",
+                   "' has an object of type '",
+                   MooseUtils::prettyCppType(objects->front().get()),
+                   "' applied to it, but it is not a trial variable of the equation system. "
+                   "Add a kernel acting on '",
                    var_name,
                    "', or remove it.");
   }
@@ -336,7 +334,7 @@ protected:
   /// Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
   std::vector<mfem::Array<int>> _ess_tdof_lists;
-  std::vector<mfem::Array<int>> _ess_markers;
+  std::vector<mfem::Array<int>> _ess_bdr_markers;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks, _jacobian_blocks;
   /// Arrays to store kernels to act on each component of weak form.

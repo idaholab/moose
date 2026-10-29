@@ -28,6 +28,11 @@ MFEMTreeCotreeGaugeEssentialConstraint::validParams()
       "'block' to the subdomains to gauge; the complement is treated as already gauged and only "
       "seeds the spanning forest. Leaving 'block' empty gauges the whole mesh. Requires a FIRST "
       "order space.");
+    params.setDocString(
+      "boundary",
+      "The boundaries (names or ids) on which a tangential Dirichlet condition is already "
+      "applied to the variable. These boundaries seed the spanning forest so the gauge stays "
+      "compatible with the condition. Defaults to no boundaries.");
   return params;
 }
 

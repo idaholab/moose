@@ -12,8 +12,6 @@
 #include "MFEMConstraintUtils.h"
 #include "libmesh/int_range.h"
 
-#include <vector>
-
 namespace
 {
 
@@ -58,7 +56,7 @@ accumulateSubdomainProjection(mfem::ParGridFunction & gf,
   mfem::DofTransformation doftrans;
   for (const auto e : libMesh::make_range(fes.GetNE()))
   {
-    if (!wanted[fes.GetAttribute(e)])
+    if (!marked[fes.GetAttribute(e) - 1])
       continue;
     fes.GetElementVDofs(e, vdofs, doftrans);
     vals.SetSize(vdofs.Size());
@@ -91,13 +89,13 @@ distributeSubdomainProjection(mfem::ParGridFunction & gf,
   // used by mfem::ParGridFunction::ProjectBdrCoefficientTangent.
   mfem::GroupCommunicator & gcomm = gf.ParFESpace()->GroupComm();
   gcomm.Reduce<int>(counter.HostReadWrite(), mfem::GroupCommunicator::Sum);
-  gcomm.Bcast<int>(counter.HostReadWrite());
   gcomm.Reduce<mfem::real_t>(values.HostReadWrite(), mfem::GroupCommunicator::Sum);
-  gcomm.Bcast<mfem::real_t>(values.HostReadWrite());
 
   for (const auto i : libMesh::make_range(gf.Size()))
     if (counter[i])
       gf(i) = values(i) / counter[i];
+
+  gcomm.Bcast<mfem::real_t>(gf.HostReadWrite());
 }
 
 /// Shared body of the scalar and vector subdomain projections.
@@ -107,6 +105,8 @@ projectOnSubdomains(mfem::ParGridFunction & gf,
                     CoefficientType & coef,
                     const mfem::Array<int> & subdomain_attrs)
 {
+  if (coef.GetVDim() != gf.VectorDim())
+    mooseError("coef vdim != VectorDim()");
   const std::vector<char> wanted = wantedAttributes(*gf.FESpace()->GetMesh(), subdomain_attrs);
 
   mfem::Vector values;
@@ -124,8 +124,6 @@ subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
                   const mfem::Array<int> & subdomain_attrs,
                   mfem::Array<int> & tdofs)
 {
-  tdofs.DeleteAll();
-
   mfem::ParMesh & pmesh = *pfes.GetParMesh();
   const std::vector<char> wanted = wantedAttributes(pmesh, subdomain_attrs);
 
@@ -164,7 +162,6 @@ projectCoefficientOnSubdomains(mfem::ParGridFunction & gf,
                                mfem::VectorCoefficient & coef,
                                const mfem::Array<int> & subdomain_attrs)
 {
-  MFEM_VERIFY(gf.VectorDim() == coef.GetVDim(), "coef vdim != VectorDim()");
   projectOnSubdomains(gf, coef, subdomain_attrs);
 }
 
@@ -174,9 +171,7 @@ zeroTrueDofs(mfem::ParGridFunction & gf, const mfem::Array<int> & tdofs)
   // Go through the true vector so the local vector is left consistent across the
   // ranks sharing a dof.
   gf.SetTrueVector();
-  mfem::Vector & true_dofs = gf.GetTrueVector();
-  for (const auto tdof : tdofs)
-    true_dofs(tdof) = 0.0;
+  gf.GetTrueVector().SetSubVector(tdofs, 0.);
   gf.SetFromTrueVector();
 }
 }
