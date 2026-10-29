@@ -48,6 +48,16 @@ ADIncompressibleEnergySPScalarKernel::validParams()
   params.addRequiredParam<MooseFunctorName>("length", "Segment/Component length [m]");
   params.addRequiredParam<MooseFunctorName>("heat_transfer_coefficient",
                                             "Heat transfer coefficient of the fluid [W/(m^2-K)]");
+  MooseEnum bulk_T("segment_average node", "segment_average");
+  params.addParam<MooseEnum>(
+      "heat_transfer_bulk_temperature",
+      bulk_T,
+      "Fluid temperature used for wall heat transfer (and fluid properties). "
+      "'segment_average': (T + T_in)/2 with T_in the upwinded neighbour (legacy). Not monotone "
+      "for NTU > 2 and, at zero flow, blind to an odd/even mode of the node temperatures, which "
+      "can then grow without bound. 'node': the node temperature T (well-mixed node); "
+      "monotone for any NTU and any flow rate. Must match the setting of the coupled "
+      "ADPipeInnerWallTemperatureScalarKernel so wall and fluid exchange the same heat.");
   params.addParam<Point>("functor_evaluation_point",
                          Point(),
                          "Point at which spatially varying functors (functions, field variables, "
@@ -98,13 +108,15 @@ ADIncompressibleEnergySPScalarKernel::computeQpResidual()
   // start by getting fluid properties
   const auto in = 1.0 / 2.0 * (1 - _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tdown[i] +
                   1.0 / 2.0 * (1 + _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tup[i];
-  const auto Tm = (Base::_u[i] + in) / 2;
+  // Bulk temperature seen by the wall: segment average (legacy) or node temperature
+  const bool node_bulk = getParam<MooseEnum>("heat_transfer_bulk_temperature") == "node";
+  const auto Tm = node_bulk ? ADReal(Base::_u[i]) : ADReal((Base::_u[i] + in) / 2);
   const auto rho = _fp.rho_from_p_T(_Pref(qp, state), Tm);
   const auto cp = _fp.cp_from_p_T(_Pref(qp, state), Tm);
   const auto rho_ref = _fp_ref ? _fp_ref->rho_from_p_T(_Pref(qp, state), Tm) : rho;
 
   // Heat transfer to fluid (Dittus-Boelter)
-  const auto q = _h(qp, state) * _perimeter(qp, state) / 2.0 * (2.0 * _Tw[i] - Base::_u[i] - in);
+  const auto q = _h(qp, state) * _perimeter(qp, state) * (_Tw[i] - Tm);
   // Advection component
   energy_residual += (_m[i] / 2.0 * (1 - _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tdown[i] -
                       _m[i] / 2.0 * (1 + _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tup[i] +
