@@ -106,3 +106,30 @@ The above equations are valid for 1D flow paths only; for a flow junction, the m
 \dot{m}_{in} = \dot{m}_{out} \,
 
 Typically, it is sufficient to assume that negligible momentum and energy transfer occurs at a junction.
+
+## Magnetohydrodynamic losses
+
+A [functor material](/FunctorMaterials/index.md) is provided to compute additional momentum losses occurring from magnetohydrodynamic (MHD) effects, [ADMHDFormLossFunctorMaterial](/FunctorMaterials/ADMHDFormLossFunctorMaterial.md). The formulation is based on the ATHENA/RELAP MHD loss model [!citep](tolli1993) as implemented by McCarthy [!citep](mccarthy1991):
+
+!equation id=mhd_loss
+K_{MHD} = \frac{2 L \sigma_f B^2}{G} \left( \frac{1}{M-1} + \frac{\phi}{1 + \phi} \right)
+
+where
+
+- $\sigma_f$ is the fluid electrical conductivity, and
+- $B$ is the magnetic field strength.
+
+The nondimensional parameter $M$ is the Hartmann number, defined as:
+
+!equation id=hartmann_number
+M = \frac{B D_h}{2} \sqrt{\frac{\sigma_f}{\mu_f}}
+
+The nondimensional parameter $\phi$ is the conductance ratio, defined as:
+
+!equation id=conductance_ratio
+\phi = \frac{2 \sigma_w t_w}{\sigma_f D_h}
+
+where
+
+- $\sigma_w$ is the wall electrical conductivity, and
+- $t_w$ is the wall thickness.
