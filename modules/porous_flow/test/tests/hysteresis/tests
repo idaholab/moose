@@ -28,7 +28,7 @@
     input = 'except04.i'
     expect_err = 'Each previous_turning_point must lie in the range [0.0, 1.0]'
     match_literal = true
-    requirement = 'An error shall be thrown if the hysteretic turning points do not lie in the range \[0, 1\]'
+    requirement = 'An error shall be thrown if the hysteretic turning points do not lie in the range \[0, 1\], such as a negative turning point'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
   [../]
@@ -37,7 +37,7 @@
     input = 'except05.i'
     expect_err = 'Each previous_turning_point must lie in the range [0.0, 1.0]'
     match_literal = true
-    requirement = 'An error shall be thrown if the hysteretic turning points do not lie in the range \[0, 1\]'
+    requirement = 'An error shall be thrown if the hysteretic turning points do not lie in the range \[0, 1\], such as a turning point greater than 1'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
   [../]
@@ -46,7 +46,7 @@
     input = 'except06.i'
     expect_err = 'The previous_turning_points vector, {a, b, c, ...}, must be obey the following order: a < 1; b > a; a < c < b, etc'
     match_literal = true
-    requirement = 'An error shall be thrown if the turning points are incorrectly ordered'
+    requirement = 'An error shall be thrown if the turning points are incorrectly ordered, with the third turning point greater than the second'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
   [../]
@@ -55,7 +55,7 @@
     input = 'except07.i'
     expect_err = 'The previous_turning_points vector, {a, b, c, ...}, must be obey the following order: a < 1; b > a; a < c < b, etc'
     match_literal = true
-    requirement = 'An error shall be thrown if the turning points are incorrectly ordered'
+    requirement = 'An error shall be thrown if the turning points are incorrectly ordered, with the second turning point smaller than the first'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
   [../]
@@ -64,7 +64,7 @@
     input = 'except08.i'
     expect_err = 'The previous_turning_points vector, {a, b, c, ...}, must be obey the following order: a < 1; b > a; a < c < b, etc'
     match_literal = true
-    requirement = 'An error shall be thrown if the turning points are incorrectly ordered'
+    requirement = 'An error shall be thrown if the turning points are incorrectly ordered, with the third turning point smaller than the first'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
   [../]
@@ -144,7 +144,7 @@
     type = CSVDiff
     input = 'hys_order_01.i'
     csvdiff = 'hys_order_01_csv.csv'
-    requirement = 'PorousFlow shall be able to calculate the hysteresis order'
+    requirement = 'PorousFlow shall be able to calculate the hysteresis order when drying, wetting, then drying past the first turning point'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
   [../]
@@ -152,7 +152,7 @@
     type = CSVDiff
     input = 'hys_order_02.i'
     csvdiff = 'hys_order_02_csv.csv'
-    requirement = 'PorousFlow shall be able to calculate the hysteresis order'
+    requirement = 'PorousFlow shall be able to calculate the hysteresis order when drying and wetting up to third order, then wetting to full saturation'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
   [../]
@@ -160,7 +160,7 @@
     type = CSVDiff
     input = 'hys_order_03.i'
     csvdiff = 'hys_order_03_csv.csv'
-    requirement = 'PorousFlow shall be able to calculate the hysteresis order'
+    requirement = 'PorousFlow shall be able to calculate the hysteresis order and limit it to the maximum order during repeated drying and wetting'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
   [../]
@@ -168,7 +168,7 @@
     type = CSVDiff
     input = 'hys_order_04.i'
     csvdiff = 'hys_order_04_csv.csv'
-    requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value'
+    requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value, with drying from third order back to zero order'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
   [../]
@@ -176,7 +176,7 @@
     type = CSVDiff
     input = 'hys_order_05.i'
     csvdiff = 'hys_order_05_csv.csv'
-    requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value'
+    requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value, with drying from second order to zero order, then wetting and drying'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
   [../]
@@ -184,7 +184,7 @@
     type = CSVDiff
     input = 'hys_order_06.i'
     csvdiff = 'hys_order_06_csv.csv'
-    requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value'
+    requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value, with wetting from second order to third order, then to full saturation'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
   [../]
@@ -192,7 +192,7 @@
     type = CSVDiff
     input = 'hys_order_07.i'
     csvdiff = 'hys_order_07_csv.csv'
-    requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value'
+    requirement = 'PorousFlow shall be able to calculate the hysteresis order and hysteresis order shall be able to be initialized to a nonzero value, with drying from third order to second order, then wetting to full saturation'
     design = 'PorousFlowHysteresisOrder.md'
     issues = '#16021'
   [../]

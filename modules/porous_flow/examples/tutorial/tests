@@ -89,7 +89,7 @@
     # Uses a ParsedGenerateSideset
     mesh_mode = 'replicated'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md tutorial_06.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for unsaturated single-phase flow, and users shall be able to activate it using the PorousFlow Action system'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for fully-saturated single-phase flow with a tracer, and users shall be able to activate it using the PorousFlow Action system'
   [../]
   [./07]
     type = Exodiff

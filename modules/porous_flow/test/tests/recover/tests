@@ -4,7 +4,7 @@
     input = 'theis.i'
     csvdiff = 'theis_out_line_0004.csv'
     ignore_columns = 'id' # Distributed mesh + adaptivity results in inconsistent node ids
-    requirement = "PorousFlow shall be able to recover from a checkpoint save"
+    requirement = "PorousFlow shall run a simulation with stateful material properties, adaptivity and integrated boundary conditions with nodal-sized materials, to provide a reference for recovery"
     issues = '#12927'
     design = 'porous_flow/restart.md'
   []
@@ -16,7 +16,7 @@
     cli_args = '--test-checkpoint-half-transient Outputs/checkpoint=true'
     prereq = 'theis_full'
     restep = false # Restep is not compatible with recover
-    requirement = "PorousFlow shall be able to recover from a checkpoint save"
+    requirement = "PorousFlow shall write a checkpoint halfway through a simulation with stateful material properties, adaptivity and integrated boundary conditions with nodal-sized materials"
     issues = '#12927'
     design = 'porous_flow/restart.md'
   []
@@ -27,7 +27,7 @@
     ignore_columns = 'id' # Distributed mesh + adaptivity results in inconsistent node ids
     cli_args = '--recover'
     prereq = 'theis_part1'
-    requirement = "PorousFlow shall be able to recover from a checkpoint save"
+    requirement = "PorousFlow shall be able to recover from a checkpoint save in a simulation with stateful material properties, adaptivity and integrated boundary conditions with nodal-sized materials"
     issues = '#12927'
     design = 'porous_flow/restart.md'
   []
@@ -36,7 +36,7 @@
     input = 'pffltvd.i'
     csvdiff = 'pffltvd_out_tracer_0004.csv'
     ignore_columns = 'id' # Distributed mesh + adaptivity results in inconsistent node ids
-    requirement = "PorousFlow shall be able to recover from a checkpoint save"
+    requirement = "PorousFlow shall run a simulation with stateful material properties, adaptivity, integrated boundary conditions with nodal-sized materials, and TVD flux limiting, to provide a reference for recovery"
     issues = '#12927'
     design = 'porous_flow/restart.md'
   []
@@ -48,7 +48,7 @@
     cli_args = '--test-checkpoint-half-transient Outputs/checkpoint=true'
     prereq = 'pffltvd_full'
     restep = false # Restep is not compatible with recover
-    requirement = "PorousFlow shall be able to recover from a checkpoint save"
+    requirement = "PorousFlow shall write a checkpoint halfway through a simulation with stateful material properties, adaptivity, integrated boundary conditions with nodal-sized materials, and TVD flux limiting"
     issues = '#12927'
     design = 'porous_flow/restart.md'
   []
@@ -59,7 +59,7 @@
     ignore_columns = 'id' # Distributed mesh + adaptivity results in inconsistent node ids
     cli_args = '--recover'
     prereq = 'pffltvd_part1'
-    requirement = "PorousFlow shall be able to recover from a checkpoint save"
+    requirement = "PorousFlow shall be able to recover from a checkpoint save in a simulation with stateful material properties, adaptivity, integrated boundary conditions with nodal-sized materials, and TVD flux limiting"
     issues = '#12927'
     design = 'porous_flow/restart.md'
   []

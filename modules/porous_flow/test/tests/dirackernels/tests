@@ -27,7 +27,7 @@
     type = 'CSVDiff'
     input = 'theis1.i'
     csvdiff = 'theis1_pressure_0006.csv'
-    requirement = 'PorousFlowSquarePulsePointSource shall provide a constant mass point sink between two specified times'
+    requirement = 'PorousFlowSquarePulsePointSource shall provide a constant mass point sink between two specified times, starting at the beginning of the simulation'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource.md'
     issues = '#6990'
   []
@@ -43,7 +43,7 @@
     type = 'CSVDiff'
     input = 'theis2.i'
     csvdiff = 'theis2_pressure_0006.csv'
-    requirement = 'PorousFlowSquarePulsePointSource shall provide a constant mass point sink between two specified times'
+    requirement = 'PorousFlowSquarePulsePointSource shall provide a constant mass point sink between two specified times, starting after the beginning of the simulation'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource.md'
     issues = '#6990'
   []
@@ -100,7 +100,7 @@
     type = 'RunException'
     input = 'bh_except06.i'
     expect_err = 'PorousFlowLineSink: You have set use_mobility=true, but do not have nodal density, relative permeability or viscosity material'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by mobility but no nodal fluid density material exists'
+    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by mobility but no fluid density material exists'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -116,7 +116,7 @@
     type = 'RunException'
     input = 'bh_except08.i'
     expect_err = 'PorousFlowLineSink: You have set use_mobility=true, but do not have nodal density, relative permeability or viscosity material'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by mobility but no nodal fluid density material exists'
+    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by mobility but the fluid density is only computed at quadrature points'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -234,7 +234,7 @@
     input = 'pls01.i'
     cli_args = 'DiracKernels/pls/point_file=pls01_00.bh Outputs/file_base=pls01_00'
     csvdiff = 'pls01_00.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate from the node at (0, 0) when the sink is located there'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -265,7 +265,7 @@
     prereq = 'pls01_line_base_bounds'
     cli_args = 'DiracKernels/pls/point_file=pls01_01.bh Outputs/file_base=pls01_01'
     csvdiff = 'pls01_01.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate from the node at (0, 1) when the sink is located there'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -275,7 +275,7 @@
     prereq = 'pls01_01'
     cli_args = 'DiracKernels/pls/point_file=pls01_20.bh Outputs/file_base=pls01_20'
     csvdiff = 'pls01_20.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate from the node at (2, 0) when the sink is located there'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -285,7 +285,7 @@
     prereq = 'pls01_20'
     cli_args = 'DiracKernels/pls/point_file=pls01_21.bh Outputs/file_base=pls01_21'
     csvdiff = 'pls01_21.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate from the node at (2, 1) when the sink is located there'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -293,7 +293,7 @@
     type = 'CSVDiff'
     input = 'pls02.i'
     csvdiff = 'pls02.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate when the rate depends on porepressure and is multiplied by the fluid mobility'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -327,7 +327,7 @@
     input = 'pls03.i'
     cli_args = 'ICs/pp/function="if((x<1)&(y<0.5),1E7,-1E7)" Outputs/file_base=pls03_00'
     csvdiff = 'pls03_00.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate, upwinded so that only the node at (0, 0), which has nonzero relative permeability, loses fluid'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -337,7 +337,7 @@
     prereq = 'pls03_00'
     cli_args = 'ICs/pp/function="if((x<1)&(y>0.5),1E7,-1E7)" Outputs/file_base=pls03_01'
     csvdiff = 'pls03_01.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate, upwinded so that only the node at (0, 1), which has nonzero relative permeability, loses fluid'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -347,7 +347,7 @@
     prereq = 'pls03_01'
     cli_args = 'ICs/pp/function="if((x>1)&(y<0.5),1E7,-1E7)" Outputs/file_base=pls03_20'
     csvdiff = 'pls03_20.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate, upwinded so that only the node at (2, 0), which has nonzero relative permeability, loses fluid'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -357,7 +357,7 @@
     prereq = 'pls03_20'
     cli_args = 'ICs/pp/function="if((x>1)&(y>0.5),1E7,-1E7)" Outputs/file_base=pls03_21'
     csvdiff = 'pls03_21.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate, upwinded so that only the node at (2, 1), which has nonzero relative permeability, loses fluid'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -393,7 +393,7 @@
     type = 'CSVDiff'
     input = 'bh02.i'
     csvdiff = 'bh02.csv'
-    requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a fully-saturated system'
+    requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a fully-saturated system with zero bottomhole pressure'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -409,7 +409,7 @@
     type = 'CSVDiff'
     input = 'bh04.i'
     csvdiff = 'bh04.csv'
-    requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a fully-saturated system'
+    requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a fully-saturated system with negative bottomhole pressure'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -458,7 +458,7 @@
     input = 'bh07.i'
     cli_args = 'Outputs/file_base=bh07_csv'
     csvdiff = 'bh07_csv_pp_0003.csv'
-    requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a cylindrical model'
+    requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a cylindrical model, as measured by postprocessors'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -466,7 +466,7 @@
     type = 'Exodiff'
     input = 'bh07.i'
     exodiff = 'bh07.e'
-    requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a cylindrical model'
+    requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a cylindrical model, as measured by the porepressure field'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
