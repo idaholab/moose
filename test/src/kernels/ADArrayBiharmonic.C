@@ -26,12 +26,14 @@ ADArrayBiharmonic::ADArrayBiharmonic(const InputParameters & parameters)
     _second_v(isCoupled("v") ? adCoupledArraySecond("v") : _var.adSecondSln()),
     _second_test(secondTest())
 {
+  if (isCoupled("v") && getArrayVar("v", 0)->count() != _count)
+    paramError("v", "Must have the same number of components as 'variable'");
 }
 
 void
 ADArrayBiharmonic::computeQpResidual(ADRealEigenVector & residual)
 {
-  // the Laplacian is the trace of the Hessian, whose entry (d, d) is column 3 * d + d
+  // the Laplacian is the trace of the Hessian, whose entry (d, d) is column Moose::dim * d + d
   ADRealEigenVector laplacian = _second_v[_qp].col(0);
   for (const auto d : make_range(1u, unsigned(Moose::dim)))
     laplacian += _second_v[_qp].col(Moose::dim * d + d);

@@ -886,7 +886,9 @@ protected:
 
   /**
    * Returns second derivatives of a coupled array variable for use in Automatic Differentiation.
-   * Column 3 * d1 + d2 of an entry holds the derivative with respect to x_d1 and x_d2.
+   * Each entry is a matrix with one row per array component and LIBMESH_DIM * LIBMESH_DIM
+   * columns, the row-major flattened Hessian: column LIBMESH_DIM * d1 + d2 holds the derivative
+   * with respect to x_d1 and x_d2.
    * @param var_name Name of coupled array variable
    * @param comp Component number for vector of coupled array variables
    * @return Reference to the second derivatives of the coupled array variable
