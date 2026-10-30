@@ -47,7 +47,7 @@ protected:
   /// Whether to perform relaxation for each solve system, indexed over solve system
   std::vector<bool> _perform_multi_sys_fp_relaxation;
   /// Systems that should save their previous multi-system fixed point solutions
-  std::set<SystemBase *> _systems_to_copy_back_multi_sys_fp;
+  std::set<SystemBase *, SystemNumberLess> _systems_to_copy_back_multi_sys_fp;
 
 private:
   /// Initializes/expands the multi-system fixed point relaxation factors
