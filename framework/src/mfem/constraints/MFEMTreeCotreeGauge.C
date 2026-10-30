@@ -491,7 +491,8 @@ TreeCotreeGauge::trueDofs(const MFEMConstraint & constraint,
   // the gradient modes carried by its remaining dofs and stay singular. Checked
   // before anything below relies on the space being order 1.
   if (pfes.GetMaxElementOrder() > 1)
-    constraint.mooseError(
+    constraint.paramError(
+        "variable",
         "The tree-cotree gauge fixes the lowest-order edge degrees of freedom only, so it "
         "requires a FIRST order H(curl) space; the space of variable '",
         constraint.getTrialVariableName(),
@@ -503,7 +504,7 @@ TreeCotreeGauge::trueDofs(const MFEMConstraint & constraint,
   // The gauge is a property of the mesh and the space alone, so it only has to be
   // rebuilt when one of them is refined. Rebuilding it every time the linear forms
   // are assembled would repeat a global graph computation on every time step.
-  if (_mesh_sequence == pmesh.GetSequence() && _fespace_sequence == pfes.GetSequence())
+  if (_fespace_sequence == pfes.GetSequence())
     return _tdofs;
 
   // Boundary attribute marker for an essential (tangential Dirichlet) condition
@@ -522,7 +523,6 @@ TreeCotreeGauge::trueDofs(const MFEMConstraint & constraint,
 
   _tdofs = buildTreeCotreeGaugeTDofs(pfes, ess_bdr, essential_tdofs, edge_excluded);
 
-  _mesh_sequence = pmesh.GetSequence();
   _fespace_sequence = pfes.GetSequence();
   return _tdofs;
 }
