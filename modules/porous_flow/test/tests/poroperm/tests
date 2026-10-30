@@ -14,7 +14,7 @@
     csvdiff = 'PermFromPoro01_out.csv'
     rel_err = 1.0E-5
     prereq = 'PermFromPoro01'
-    requirement = 'The system shall be able to calculate permeability as a Kozeny-Carman function of porosity, where permeability is defined via setting a grain size.'
+    requirement = 'The system shall be able to calculate permeability as a Kozeny-Carman function of porosity, where permeability is defined via setting a grain size, using a finite volume discretization.'
     issues = '#7632 #21275'
     design = 'porous_flow/permeability.md PorousFlowPermeabilityKozenyCarman.md'
   []
@@ -81,7 +81,7 @@
     csvdiff = 'PermFromPoro03_out.csv'
     rel_err = 1.0E-5
     prereq = 'PermFromPoro03'
-    requirement = 'The system shall be able to calculate permeability as an exponential function of porosity, where an anisotropy is specified, and k is defined through an exponential function.'
+    requirement = 'The system shall be able to calculate permeability as an exponential function of porosity, where an anisotropy is specified, and k is defined through an exponential function, using a finite volume discretization.'
     issues = '#7632 #21275'
     design = 'porous_flow/permeability.md PorousFlowPermeabilityExponential.md'
   []
@@ -169,7 +169,7 @@
     csvdiff = 'PermTensorFromVar01_out.csv'
     prereq = 'PermTensorFromVar01'
     rel_err = 1.0E-5
-    requirement = 'The system shall be able to calculate permeability as a product of an anisotropic tensor and a constant term.'
+    requirement = 'The system shall be able to calculate permeability as a product of an anisotropic tensor and a constant term, using a finite volume discretization.'
     issues = '#8061 #21275'
     design = 'porous_flow/permeability.md PorousFlowPermeabilityConstFromVar.md'
   []
