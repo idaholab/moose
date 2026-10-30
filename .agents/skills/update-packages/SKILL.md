@@ -25,9 +25,9 @@ skill is the operational expansion of it, including the parts the wiki leaves im
 (where upstream versions are pinned, what the newsletter and PR body must contain, and
 how to recover when `--verify` fails).
 
-A package update is a *large, iterative, externally visible* change. It routinely takes
-dozens of commits and several Civet cycles. Do not treat it as a one-shot task, and do
-not push or amend without approval — see `pr-create` for the git/publication approval
+A package update is often a *large, iterative, externally visible* change. It routinely
+takes dozens of commits and several Civet cycles. Do not treat it as a one-shot task, and
+do not push or amend without approval — see `pr-create` for the git/publication approval
 rules, which apply here too.
 
 ## Ground rules
@@ -40,14 +40,13 @@ rules, which apply here too.
 2. **Version each thing in exactly one place.** Several versions are mirrored
    (conda ↔ apptainer ↔ `requirements.txt`). `references/version-sources.md` lists every
    pin, its single source of truth, and its required mirrors.
-3. **The versioner-hash commit is always last, and the branch only carries it when it is
-   ready to merge.** Its block is keyed on a commit SHA, so an amend or a rebase that
-   orphans that SHA leaves `test_versioner.py` unable to resolve it — the single most
-   common way a package-update PR fails CI. A commit added *on top* is a different case:
-   the keyed commit is immutable and still reachable, so the block stays correct, merely
-   incomplete as a record of the branch tip. Rather than regenerate it every cycle, drop
-   it at the first Step 10 fix and re-add it once the branch is green; Step 10 has the
-   recipe.
+3. **The versioner-hash commit is always last.** Its block is keyed on a commit SHA, so an
+   amend or a rebase that orphans that SHA leaves `test_versioner.py` unable to resolve
+   it — the single most common way a package-update PR fails CI. A commit added *on top* is
+   a different case: the keyed commit is immutable and still reachable, so the block stays
+   correct, merely incomplete as a record of the branch tip. Rather than regenerate it
+   every cycle, drop it at the first Step 10 fix and re-add it once the branch is green;
+   Step 10 has the recipe.
 4. **`--verify` clean is the gate**, not "it looks right". Run it against `upstream/devel`
    — the same ref every step of this task uses, and the one the published packages
    correspond to — not against the PR's base branch `next`, which already contains `devel`
@@ -56,16 +55,8 @@ rules, which apply here too.
    changes the hash of everything downstream. `scripts/versioner.yaml` records
    `# dependers: ...` in a comment above each package — trust the comment as a map, but
    let `--verify` be the authority on what still needs a bump.
-6. **Every commit references the PR or issue.** End the message body with
-   `refs idaholab#<pr/issue>`, above any `Co-Authored-By:` line. A package update is dozens
-   of commits across several Civet cycles, so the trailer is what ties a late compiler fix
-   back to the update it belongs to. Add it when writing the commit; going back to amend a
-   pushed history for a missing trailer costs a force-push and a full CI restart.
-
-   The number is not known until Step 9 creates the PR. Either open the PR early — a draft
-   is enough to get a number — or reference the tracking issue for the update if one
-   exists. Most of the upstream history carries the bare `refs #<n>` form; `idaholab#<n>`
-   resolves the same on GitHub and stays unambiguous when the branch lives on a fork.
+6. **At least one commit references an issue**, as `pr-create` requires and Civet checks.
+   Commits do not reference the update's own PR.
 
 ## Step 0 — Establish the working state
 
@@ -162,18 +153,8 @@ list in `scripts/versioner.yaml`. Fix the dependency list, not the template.
 ./scripts/versioner.py --verify upstream/devel
 ```
 
-Three tables come back: templates, influential files, versions. Read
-`references/versioner.md#interpreting---verify` for every status value. The short form:
-
-- Template `BEHIND` → redo Step 4.
-- Version `NEED BUMP` → a package's hash changed but its full version did not; bump it.
-- `DATE DECREASE` / `FUTURE DATE` / `BUILD NONZERO` → the version string itself is wrong.
-- Influential `NEW`/`REMOVED` are informational, but a `NEW` influential file that you
-  did not intend to add means `versioner.yaml`'s `influential:` list is now wrong.
-
-Iterate Steps 3–5 until it prints `Verification succeeded.` with no red. A
-`WARNING: You have changes not yet committed` line means the output is untrustworthy —
-commit first, then re-verify.
+Read `references/versioner.md#interpreting---verify` for every status value, and iterate
+Steps 3–5 until it prints `Verification succeeded.`
 
 ## Step 6 — Write the newsletter entries
 
@@ -184,13 +165,7 @@ Fill in the existing `## libMesh-level Changes`, `## PETSc-level Changes`,
 
 Exact structure, heading levels, and bullet phrasing conventions (including the
 "Trigger rebuild; no package changes" idiom and the compare-link format) are in
-`references/newsletter-and-pr.md`. Two rules worth stating up front:
-
-- There is **one `###` block per package per update**, titled with the *new full
-  version* exactly as `versioner.py <pkg>` reports it. A second update in the same month
-  appends a second set of blocks rather than editing the first.
-- Every package whose version was bumped gets a block, including ones that only moved
-  because a dependency did.
+`references/newsletter-and-pr.md`.
 
 Commit as `Update newsletter with package changes`, before the final version bump so that
 the bump and the hash commit remain the last two commits. The block titles must carry the
@@ -277,14 +252,12 @@ Package updates routinely require regolding, tolerance changes, and small source
 new compiler or library behavior — those belong in this same PR, as their own commits, and
 often need a newsletter mention too.
 
-`references/troubleshooting.md` is the playbook for this phase: reducing a list of red jobs
-to a list of causes, reading a job page without being misled by a truncated fetch,
-classifying each failure (outage, hang, crash, numerical diff, compile error), telling your
-diff apart from a channel that moved underneath the PR, tracing the dependency versions a
-PETSc bump drags in, checking whether `next` already has the fix, what a toolchain bump
-predictably breaks, reproducing a failure in the PR's own container, isolating a hang with
-an environment matrix, a backtrace and a library swap, and the git recipes for landing a
-fix without invalidating the hash commit.
+Use `civet-ci-failures` to read the failures. `references/troubleshooting.md` is the
+playbook for fixing them: telling your diff apart from a channel that moved underneath the
+PR, tracing the dependency versions a PETSc bump drags in, checking whether `next` already
+has the fix, what a toolchain bump predictably breaks, reproducing a failure in the PR's own
+container, isolating a hang with an environment matrix, a backtrace and a library swap, and
+the git recipes for landing a fix without invalidating the hash commit.
 
 Run the branch without the hash commit for the whole of this phase. Drop it at the first
 fix, along with the fix's own push:
