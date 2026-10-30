@@ -12,7 +12,7 @@
     input = gas_injection.i
     check_input = true
     prereq = gravity_eq
-    requirement = "PorousFlow shall be able to restart using a previous result"
+    requirement = "PorousFlow shall be able to restart using a previous result on the same mesh"
     issues = '#13071'
     design = 'porous_flow/restart.md'
   [../]
@@ -21,7 +21,7 @@
     input = gas_injection_new_mesh.i
     check_input = true
     prereq = gravity_eq
-    requirement = "PorousFlow shall be able to restart using a previous result"
+    requirement = "PorousFlow shall be able to restart using a previous result interpolated onto a different mesh"
     issues = '#13071'
     design = 'porous_flow/restart.md'
   [../]

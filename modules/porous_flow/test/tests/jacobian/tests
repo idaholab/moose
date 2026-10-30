@@ -1127,7 +1127,7 @@
     ratio_tol = 1E-6
     difference_tol = 1E10
     cli_args = 'Executioner/num_steps=1'
-    requirement = 'The system shall compute all Jacobian entries of physics kernels for the chemical precipitation not depending on temperature.'
+    requirement = 'The system shall compute all Jacobian entries of physics kernels for the chemical precipitation depending on temperature.'
     issues = '#6845'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []

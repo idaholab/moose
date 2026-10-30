@@ -238,7 +238,7 @@
     abs_zero = 1.0E-5
     issues = '#10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D for PorousFlow simulations'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 3D for PorousFlow simulations'
   [../]
   [./pffltvd_2D_angle]
     type = Exodiff
