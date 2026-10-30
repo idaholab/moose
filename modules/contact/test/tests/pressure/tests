@@ -9,16 +9,49 @@
     max_parallel = 1
     requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Augmented Lagrangian formulation.'
   [../]
-  [./pressureAugLag_num_al]
+  [pressureAugLag_num_al]
     type = 'CSVDiff'
     input = 'pressureAugLag.i'
     csvdiff = 'pressureAugLag_num_al.csv'
     cli_args = 'Postprocessors/num_al/type=NumAugmentedLagrangeIterations Outputs/exodus=false '
-               'Outputs/csv=true Outputs/file_base=pressureAugLag_num_al'
+               'Outputs/csv=true Outputs/file_base=pressureAugLag_num_al '
+               'Problem/maximum_lagrangian_update_iterations=2'
     max_parallel = 1
     requirement = 'The contact system shall report the number of augmented Lagrangian iterations '
-                  'taken in a time step.'
-  [../]
+                  'taken in a time step and accept a time step whose last allowed augmented '
+                  'Lagrangian update meets the contact constraints.'
+    issues = '#3418 #34216'
+    design = 'MechanicalContactConstraint.md AugmentedLagrangianContactProblem.md'
+  []
+
+  [pressureAugLag_reuse_preconditioner]
+    type = 'CSVDiff'
+    input = 'pressureAugLag.i'
+    csvdiff = 'pressureAugLag_reuse_pc.csv'
+    cli_args = 'Postprocessors/nl_its/type=NumNonlinearIterations Outputs/exodus=false '
+               'Outputs/csv=true Outputs/file_base=pressureAugLag_reuse_pc Executioner/num_steps=2 '
+               'Executioner/nl_abs_tol=5e-2 Executioner/reuse_preconditioner=true '
+               'Executioner/solve_type=NEWTON'
+    max_parallel = 1
+    requirement = 'The contact system shall not force nonlinear iterations in a time step that '
+                  'needs no augmented Lagrangian update when the preconditioner is reused.'
+    issues = '#34078'
+    design = 'AugmentedLagrangianContactProblem.md'
+  []
+
+  [pressureAugLag_penalty_pair]
+    type = 'RunApp'
+    input = 'pressureAugLag.i'
+    cli_args = 'Outputs/exodus=false Contact/m10_s20/primary=10 Contact/m10_s20/secondary=20 '
+               'Contact/m10_s20/penalty=1e7 Contact/m10_s20/formulation=penalty '
+               'Contact/m10_s20/tangential_tolerance=1e-3'
+    expect_out = 'Augmented Lagrangian contact constraint enforcement is satisfied'
+    max_parallel = 1
+    requirement = 'The contact system shall apply augmented Lagrangian updates only to the contact '
+                  'pairs that use the augmented Lagrangian formulation.'
+    issues = '#34078'
+    design = 'AugmentedLagrangianContactProblem.md'
+  []
 
   [./pressurePenalty]
     type = 'Exodiff'

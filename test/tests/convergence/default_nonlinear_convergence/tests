@@ -19,11 +19,11 @@
   [petsc_tolerance_mismatch]
     type = RunApp
     input = 'default_nonlinear_convergence.i'
-    cli_args = "Executioner/petsc_options_iname='-pc_type -snes_rtol' Executioner/petsc_options_value='hypre 1e-6'"
+    cli_args = "Executioner/petsc_options_iname='-pc_type -snes_rtol -snes_force_iteration' Executioner/petsc_options_value='hypre 1e-6 1'"
     allow_warnings = true
-    expect_out = "PETSc SNES option\(s\) were set to a value different from what this Convergence object enforces"
-    requirement = 'The system shall warn if a PETSc SNES tolerance or iteration count option is set to a value that differs from what the default nonlinear convergence object enforces, since such options are otherwise silently ignored.'
-    issues = '#33799'
+    expect_out = "PETSc SNES option\(s\) were set to a value different from what this Convergence object enforces.*-snes_rtol.*-snes_force_iteration"
+    requirement = 'The system shall warn if a PETSc SNES tolerance, iteration count, or forced iteration option is set to a value that differs from what the default nonlinear convergence object enforces, since such options are otherwise silently ignored.'
+    issues = '#33799 #34078'
   []
   [error_reporting]
     requirement = 'The system shall report an error for the default nonlinear convergence class'

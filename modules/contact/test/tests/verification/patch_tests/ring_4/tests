@@ -72,8 +72,11 @@
     input = 'ring4_template2.i'
     csvdiff = 'ring4_mu_0_2_aug_check.csv ring4_mu_0_2_aug_check_cont_press_0001.csv ring4_mu_0_2_aug_check_x_disp_0001.csv'
     cli_args = 'Contact/leftright/model=coulomb Contact/leftright/formulation=augmented_lagrange Contact/leftright/friction_coefficient=0.2 Contact/leftright/al_incremental_slip_tolerance=1e-6 Contact/leftright/al_frictional_force_tolerance=5e-2 Outputs/file_base=ring4_mu_0_2_aug_out Outputs/chkfile/file_base=ring4_mu_0_2_aug_check'
+    # The x reactions are zero by symmetry. The nonlinear residual of the last augmented Lagrangian
+    # solve cannot be reduced much below ~1e-6 on some builds, so the x reactions carry
+    # platform-dependent noise of up to ~8e-8, far below the ~1e3 y reactions.
     rel_err = 1e-5
-    abs_zero = 1e-8
+    abs_zero = 1e-7
     max_parallel = 1
     mesh_mode = REPLICATED
     capabilities = 'superlu'
