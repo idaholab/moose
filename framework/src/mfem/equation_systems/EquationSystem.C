@@ -240,15 +240,14 @@ EquationSystem::ApplyEssentialConstraint(const std::string & var_name,
     }
   trial_gf.ParFESpace()->GetEssentialTrueDofs(global_bdr_markers, global_ess_tdofs);
 
+  // Set constrained DoF values and append the constrained tdofs. Constraints that
+  // must see the dofs fixed by every other constraint, such as the tree-cotree
+  // gauge, are applied after the rest.
   if (_essential_constraint_map.Has(var_name))
-    for (auto & constraint : _essential_constraint_map.GetRef(var_name))
-    {
-      // Set constrained DoFs values
-      mfem::Array<int> ess_tdofs;
-      constraint->ApplyConstraint(trial_gf, ess_tdofs);
-      // Add these constrained tdofs to the set of all tdofs
-      global_ess_tdofs.Append(ess_tdofs);
-    }
+    for (const bool applied_last : {false, true})
+      for (auto & constraint : _essential_constraint_map.GetRef(var_name))
+        if (constraint->appliedAfterOtherConstraints() == applied_last)
+          constraint->ApplyConstraint(trial_gf, global_ess_tdofs);
   // Deduplicate. mfem::Array::Unique only drops *consecutive* duplicates, so the
   // list must be sorted first; a constraint whose block touches an essential
   // boundary reports tdofs already present from GetEssentialTrueDofs.
@@ -776,6 +775,22 @@ EquationSystem::GetEssentialBoundaryMarkers(const std::string & var_name)
       return _ess_bdr_markers.at(i);
 
   mooseError("No essential boundary markers found for variable '", var_name, "'.");
+}
+
+const mfem::Array<int> &
+EquationSystem::GetEssentialTrueDofs(const std::string & var_name) const
+{
+  for (const auto i : index_range(_trial_var_names))
+    if (_trial_var_names.at(i) == var_name)
+      return _ess_tdof_lists.at(i);
+
+  mooseError("No essential true dofs found for variable '", var_name, "'.");
+}
+
+bool
+EquationSystem::HasEssentialConstraints(const std::string & var_name) const
+{
+  return _essential_constraint_map.Has(var_name);
 }
 
 } // namespace Moose::MFEM

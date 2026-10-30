@@ -133,7 +133,9 @@ LORLinearSolverBase<MFEMSolverType>::SetupLOR()
   _a = &_equation_system->GetBilinearForm(test_var_name);
   CheckSpectralEquivalence(*_a);
   _ess_bdr_markers = _equation_system->GetEssentialBoundaryMarkers(test_var_name);
-  _a->ParFESpace()->GetEssentialTrueDofs(_ess_bdr_markers, _ess_tdofs);
+  // Unlike the boundary markers, this includes the true dofs set by essential
+  // constraints within subdomains.
+  _ess_tdofs = _equation_system->GetEssentialTrueDofs(test_var_name);
 }
 
 template <class MFEMSolverType>

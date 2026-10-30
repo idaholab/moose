@@ -48,7 +48,6 @@
   [tree_cotree_gauge]
     type = MFEMTreeCotreeGaugeEssentialConstraint
     variable = a_field
-    boundary = '1'
   []
 []
 

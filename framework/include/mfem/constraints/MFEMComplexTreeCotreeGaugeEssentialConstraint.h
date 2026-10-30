@@ -12,7 +12,6 @@
 #pragma once
 
 #include "MFEMComplexEssentialConstraint.h"
-#include "MFEMBoundaryRestrictable.h"
 #include "MFEMTreeCotreeGauge.h"
 
 /**
@@ -21,8 +20,7 @@
  * (shared via Moose::MFEM::TreeCotreeGauge); here the real and imaginary
  * components of the gauged edge dofs are both strongly set to zero.
  */
-class MFEMComplexTreeCotreeGaugeEssentialConstraint : public MFEMComplexEssentialConstraint,
-                                                      public MFEMBoundaryRestrictable
+class MFEMComplexTreeCotreeGaugeEssentialConstraint : public MFEMComplexEssentialConstraint
 {
 public:
   static InputParameters validParams();
@@ -31,6 +29,10 @@ public:
 
   void ApplyConstraint(mfem::ParComplexGridFunction & gridfunc,
                        mfem::Array<int> & ess_tdof_list) override;
+
+  /// The gauge seeds its spanning forest with every edge already fixed, so it must
+  /// see the dofs fixed by all other essential conditions on the variable.
+  bool appliedAfterOtherConstraints() const override { return true; }
 
 protected:
   /// Selects and caches the gauged true dofs.

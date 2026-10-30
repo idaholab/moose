@@ -81,7 +81,6 @@ omega_sigma = 1.0 # angular frequency * conductivity
     type = MFEMComplexTreeCotreeGaugeEssentialConstraint
     variable = a_field
     block = ${insulator_block}
-    boundary = 'front back curved_surface'
   []
 []
 

@@ -71,6 +71,8 @@ public:
   /// Add complex essential (volumetric) constraints
   void AddComplexEssentialConstraint(std::shared_ptr<MFEMComplexEssentialConstraint> constraint);
 
+  bool HasEssentialConstraints(const std::string & var_name) const override;
+
   /// Perform trivial eliminations of coupled variables lacking corresponding test variables
   void EliminateCoupledVariables() override;
 

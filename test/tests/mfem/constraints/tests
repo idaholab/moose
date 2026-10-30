@@ -120,4 +120,108 @@
     requirement = 'The system shall report an error if an MFEM weak form names a constraint that has not been added to the problem'
     capabilities = 'mfem'
   []
+  [MFEMTreeCotreeGaugeNonNedelec]
+    type = RunException
+    input = ../periodic/periodic.i
+    cli_args = 'Constraints/gauge/type=MFEMTreeCotreeGaugeEssentialConstraint '
+               'Constraints/gauge/variable=u'
+    expect_err = "requires an H\(curl\) \(Nedelec\) variable"
+    design = 'MFEMTreeCotreeGaugeEssentialConstraint.md'
+    requirement = 'The system shall report an error if a tree-cotree gauge is applied to a variable that is not an H(curl) (Nedelec) variable'
+    capabilities = 'mfem'
+  []
+  [MFEMTreeCotreeGaugePeriodic]
+    type = RunException
+    input = tree_cotree_gauge_periodic.i
+    expect_err = "not possible on a mesh with discontinuous nodes"
+    design = 'MFEMTreeCotreeGaugeEssentialConstraint.md'
+    requirement = 'The system shall report an error if a tree-cotree gauge is applied on a mesh with discontinuous nodes, such as a periodic mesh, whose vertices cannot be identified by their coordinates'
+    capabilities = 'mfem'
+  []
+  [MFEMVectorConstraintCoefficientMismatch]
+    design = 'MFEMVectorEssentialConstraint.md'
+    requirement = 'The system shall report an error if the coefficient of an essential constraint in an MFEM problem cannot be projected onto the space of the constrained variable, when the coefficient has'
+    [too_few_components]
+      type = RunException
+      input = vector_subdomain_constraint_source.i
+      cli_args = "Constraints/circle_interior/vector_coefficient='2.0'"
+      expect_err = "The vector coefficient has 1 components, which does not fit the 2-component space"
+      detail = 'fewer components than the space dimension, or'
+      capabilities = 'mfem'
+    []
+    [too_many_components]
+      type = RunException
+      input = vector_subdomain_constraint_source.i
+      cli_args = "Constraints/circle_interior/vector_coefficient='2.0 3.0 0.0 0.0'"
+      expect_err = "The vector coefficient has 4 components, which does not fit the 2-component space"
+      detail = 'more components than an H(curl) projection can evaluate.'
+      capabilities = 'mfem'
+    []
+  []
+  [MFEMConstraintInEigenproblem]
+    type = RunException
+    input = ../kernels/diffusion_eigenproblem.i
+    cli_args = 'Constraints/fixed/type=MFEMScalarEssentialConstraint Constraints/fixed/variable=u'
+    expect_err = "cannot be used in an MFEM eigenproblem"
+    design = 'MFEMEigenproblem.md'
+    requirement = 'The system shall report an error if an essential constraint is applied in an MFEM eigenproblem'
+    capabilities = 'mfem'
+  []
+  [MFEMEssentialBCOnNonTrialVariable]
+    type = RunException
+    input = constraint_on_non_trial_variable.i
+    cli_args = 'BCs/orphan_bc/type=MFEMScalarDirichletBC BCs/orphan_bc/variable=orphan '
+               'BCs/orphan_bc/boundary=outer'
+    expect_err = "MFEMScalarDirichletBC' applied to it, but it is not a trial variable"
+    design = 'MFEMEssentialBC.md'
+    requirement = 'The system shall report an error if an essential boundary condition in an MFEM problem is applied to a variable that no equation is solved for, since the boundary condition would otherwise never be applied'
+    capabilities = 'mfem'
+  []
+  [MFEMConstraintWithGeometricMultigrid]
+    type = RunException
+    input = ../solvers/pmg_diffusion.i
+    cli_args = 'Constraints/fixed/type=MFEMScalarEssentialConstraint '
+               'Constraints/fixed/variable=concentration'
+    expect_err = "geometric multigrid cannot account for"
+    design = 'MFEMGeometricMultigridSolver.md'
+    requirement = 'The system shall report an error if geometric multigrid is used to solve for an MFEM variable with essential constraints within subdomains, which it cannot eliminate'
+    capabilities = 'mfem'
+  []
+  [MFEMConstraintWithMatrixFreeAMS]
+    type = RunException
+    input = ../kernels/curlcurl.i
+    cli_args = 'Solvers/active="cg matrix_free_ams" Executioner/assembly_level=partial '
+               'FESpaces/HCurlFESpace/closed_basis=GaussLobatto '
+               'FESpaces/HCurlFESpace/open_basis=IntegratedGLL '
+               'Constraints/fixed/type=MFEMVectorEssentialConstraint '
+               'Constraints/fixed/variable=e_field'
+    expect_err = "which this solver cannot account for"
+    design = 'MFEMMatrixFreeAMS.md'
+    requirement = 'The system shall report an error if matrix-free AMS is used to solve for an MFEM variable with essential constraints within subdomains, which it cannot eliminate'
+    capabilities = 'mfem'
+  []
+  [MFEMTreeCotreeGaugeWithConstraint]
+    design = 'MFEMTreeCotreeGaugeEssentialConstraint.md'
+    requirement = 'The system shall seed the tree-cotree gauge of an H(curl) variable with the degrees of freedom fixed by other essential constraints on the variable, giving the same solution'
+    [whole_mesh]
+      type = CSVDiff
+      input = tree_cotree_gauge_with_constraint.i
+      csvdiff = tree_cotree_gauge_with_constraint_out.csv
+      detail = 'when the gauge spans the whole mesh, including the constrained subdomain, as'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+    []
+    [excluded_block]
+      type = CSVDiff
+      input = tree_cotree_gauge_with_constraint.i
+      cli_args = 'Constraints/tree_cotree_gauge/block=1 '
+                 'Outputs/file_base=tree_cotree_gauge_with_constraint_excluded_out'
+      csvdiff = tree_cotree_gauge_with_constraint_excluded_out.csv
+      detail = 'when the constrained subdomain is excluded from the gauge.'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+    []
+  []
 []

@@ -108,9 +108,6 @@ conductivity = 1.0
     # Gauge only the non-conducting region, where the sigma*dA/dt term is absent.
     # Conductor edges seed the spanning forest but are not gauged.
     block = ${insulator_block}
-    # Boundaries where a tangential Dirichlet condition is applied to a_field, so
-    # the interior gauge is seeded consistently with that boundary condition.
-    boundary = 'front back curved_surface'
   []
 []
 

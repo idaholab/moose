@@ -13,7 +13,6 @@
 #include "MFEMIntegratedBC.h"
 #include "MFEMEssentialBC.h"
 #include "MFEMEssentialConstraint.h"
-#include "MFEMComplexEssentialConstraint.h"
 
 registerMooseObject("MooseApp", MFEMWeakForm);
 

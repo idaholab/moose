@@ -11,6 +11,7 @@
 
 #include "MFEMConstraint.h"
 #include "MFEMProblem.h"
+#include "MFEMConstraintUtils.h"
 
 InputParameters
 MFEMConstraint::validParams()
@@ -32,6 +33,19 @@ MFEMConstraint::MFEMConstraint(const InputParameters & parameters)
                           getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable"))),
     _trial_var_name(getParam<VariableName>("variable"))
 {
+}
+
+const mfem::Array<int> &
+MFEMConstraint::getSubdomainTrueDofs(mfem::ParFiniteElementSpace & pfes)
+{
+  // MFEM bumps the sequence number whenever the space is updated, including after
+  // refinement of the mesh, so it invalidates the cache exactly when needed.
+  if (_subdomain_tdofs_sequence != pfes.GetSequence())
+  {
+    Moose::MFEM::subdomainTrueDofs(pfes, getSubdomainMarkers(), _subdomain_tdofs);
+    _subdomain_tdofs_sequence = pfes.GetSequence();
+  }
+  return _subdomain_tdofs;
 }
 
 #endif

@@ -43,11 +43,30 @@ void
 MFEMComplexVectorEssentialConstraint::ApplyConstraint(mfem::ParComplexGridFunction & gridfunc,
                                                       mfem::Array<int> & ess_tdof_list)
 {
+  mfem::ParFiniteElementSpace & pfes = *gridfunc.ParFESpace();
+  auto check_fits = [&](const std::string & param, mfem::VectorCoefficient & coef)
+  {
+    if (!Moose::MFEM::coefficientFitsSpace(pfes, coef))
+      paramError(param,
+                 "The vector coefficient has ",
+                 coef.GetVDim(),
+                 " components, which does not fit the ",
+                 pfes.GetVectorDim(),
+                 "-component space of variable '",
+                 _trial_var_name,
+                 "'.");
+  };
+  check_fits("vector_coefficient_real", _vec_coef_real);
+  check_fits("vector_coefficient_imag", _vec_coef_imag);
+
+  // Bring the real and imaginary views up to date with the complex vector before
+  // writing through them, and hand their state back afterwards.
   const mfem::Array<int> & markers = getSubdomainMarkers();
+  gridfunc.Sync();
   Moose::MFEM::projectCoefficientOnSubdomains(gridfunc.real(), _vec_coef_real, markers);
   Moose::MFEM::projectCoefficientOnSubdomains(gridfunc.imag(), _vec_coef_imag, markers);
-  gridfunc.Sync();
-  Moose::MFEM::subdomainTrueDofs(*gridfunc.ParFESpace(), markers, ess_tdof_list);
+  gridfunc.SyncAlias();
+  ess_tdof_list.Append(getSubdomainTrueDofs(pfes));
 }
 
 #endif

@@ -23,9 +23,8 @@ any curl, so the gauged system is non-singular while the physical solution
 $\vec\nabla\times\vec u$ is unchanged.
 
 The forest is grown by a distributed Boruvka pass in which no rank ever holds more than its
-own share of the mesh graph. Each edge is keyed on its two endpoint coordinates; vertex
-coordinates are copied verbatim from the serial mesh when it is partitioned, so they are
-bit-identical on every rank. A distributed sort turns those coordinates into dense global
+own share of the mesh graph. Each edge is keyed on its two endpoint coordinates, read from
+the mesh nodes, which are bit-identical on every rank sharing a vertex. A distributed sort turns those coordinates into dense global
 vertex ids in canonical (lexicographic) order, which gives every edge a weight that depends
 only on the geometry and not on the partitioning.
 
@@ -34,12 +33,13 @@ is the same as a serial Kruskal pass over the globally sorted edge list. The gau
 hence the solution - is therefore independent of the number of MPI ranks and of how the mesh
 was partitioned, without the construction ever being replicated.
 
-### Seeding the forest with `boundary`
+### Seeding the forest from essential conditions
 
-The `boundary` parameter should list the boundaries on which a tangential Dirichlet
-condition is applied to the variable. Edges on those boundaries are already fixed by the
-boundary condition; they are used to seed the spanning forest so that the interior gauge
-stays compatible with the boundary condition instead of over-constraining it.
+Edges whose degree of freedom is already fixed, by an essential (tangential Dirichlet)
+boundary condition or by another essential constraint on the variable, seed the spanning
+forest, so that the gauge stays compatible with those conditions instead of
+over-constraining them. The constraint takes these degrees of freedom from the equation
+system, which applies the gauge after every other essential constraint on the variable.
 
 ### Restricting the gauge with `block`
 
@@ -64,7 +64,9 @@ and imaginary parts.
 
 - The gauge acts on the lowest-order (edge) DOFs only. For `fec_order` greater than
   `FIRST` the higher-order gradient modes are not removed.
-- Conforming and non-periodic meshes only.
+- The variable must be an $H(\mathrm{curl})$ (Nedelec) variable.
+- Conforming meshes only. Meshes with discontinuous nodes, such as periodic meshes, are
+  rejected, because their vertices cannot be identified by coordinates.
 - Construction is fully distributed in memory, but it is a global graph computation: for
   a mesh with `V` vertices, it costs `O(log V)` communication rounds and is rebuilt whenever the mesh or the finite
   element space is refined. The result is cached between solves, so a transient pays for it
@@ -76,9 +78,9 @@ The parameters above are formulation-independent; this is one concrete case. For
 vector potential $\vec A$ in an eddy-current A-formulation, the conducting region carries a
 $\sigma\,\partial_t\vec A$ term that removes the null space, but a surrounding non-conducting
 region has no such term and is singular. Setting `block` to the non-conducting subdomain(s)
-gauges exactly the region that needs it, and `boundary` lists the boundaries carrying the
-tangential Dirichlet condition on $\vec A$ (a perfect electric conductor, or "PEC", boundary
-in that terminology).
+gauges exactly the region that needs it, while the boundaries carrying the tangential
+Dirichlet condition on $\vec A$ (a perfect electric conductor, or "PEC", boundary in that
+terminology) seed the forest.
 
 ## Example Input File Syntax
 

@@ -75,11 +75,14 @@ distributeSubdomainProjection(mfem::ParGridFunction & gf,
   gcomm.Reduce<int>(counter.HostReadWrite(), mfem::GroupCommunicator::Sum);
   gcomm.Reduce<mfem::real_t>(values.HostReadWrite(), mfem::GroupCommunicator::Sum);
 
+  // Write through the host pointer obtained first, so a valid device copy of gf is
+  // brought to the host before it is overwritten rather than after.
+  mfem::real_t * const gf_data = gf.HostReadWrite();
   for (const auto i : libMesh::make_range(gf.Size()))
     if (counter[i])
-      gf(i) = values(i) / counter[i];
+      gf_data[i] = values(i) / counter[i];
 
-  gcomm.Bcast<mfem::real_t>(gf.HostReadWrite());
+  gcomm.Bcast<mfem::real_t>(gf_data);
 }
 
 /// Shared body of the scalar and vector subdomain projections.
@@ -89,8 +92,9 @@ projectOnSubdomains(mfem::ParGridFunction & gf,
                     CoefficientType & coef,
                     const mfem::Array<int> & subdomain_markers)
 {
-  if (coef.GetVDim() != gf.VectorDim())
-    mooseError("coef vdim != VectorDim()");
+  mooseAssert(Moose::MFEM::coefficientFitsSpace(*gf.FESpace(), coef),
+              "The coefficient cannot be projected onto the grid function's space; callers "
+              "check this with coefficientFitsSpace");
 
   mfem::Vector values;
   mfem::Array<int> counter;
@@ -129,6 +133,34 @@ subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
   mfem::Array<int> tdof_marker;
   pfes.GetRestrictionMatrix()->BooleanMult(dof_marker, tdof_marker);
   mfem::FiniteElementSpace::MarkerToList(tdof_marker, tdofs);
+}
+
+bool
+coefficientFitsSpace(const mfem::FiniteElementSpace & fes, mfem::Coefficient & /*coef*/)
+{
+  return fes.GetVectorDim() == 1;
+}
+
+bool
+coefficientFitsSpace(const mfem::FiniteElementSpace & fes, mfem::VectorCoefficient & coef)
+{
+  const int dim = fes.GetMesh()->Dimension();
+  const int vdim = coef.GetVDim();
+
+  // A scalar basis (vector H1 or L2) is projected one coefficient component per
+  // space component.
+  if (fes.FEColl()->GetRangeType(dim) == mfem::FiniteElement::SCALAR)
+    return vdim == fes.GetVDim();
+
+  // An H(curl) projection evaluates the coefficient into a buffer of
+  // Geometry::MaxDim entries and contracts it with the element Jacobian, reading
+  // only its first space-dimension components; trailing components are ignored.
+  if (fes.FEColl()->GetMapType(dim) == mfem::FiniteElement::H_CURL)
+    return vdim >= fes.GetVectorDim() && vdim <= mfem::Geometry::MaxDim;
+
+  // An H(div) projection evaluates the coefficient into a buffer of exactly the
+  // space dimension.
+  return vdim == fes.GetVectorDim();
 }
 
 void

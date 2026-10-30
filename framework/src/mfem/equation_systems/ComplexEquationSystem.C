@@ -177,14 +177,14 @@ ComplexEquationSystem::ApplyComplexEssentialConstraint(const std::string & var_n
     }
   trial_gf.ParFESpace()->GetEssentialTrueDofs(global_bdr_markers, global_ess_tdofs);
 
+  // Set strongly constrained DoF values on real and imaginary components and append
+  // the constrained tdofs. Constraints that must see the dofs fixed by every other
+  // constraint, such as the tree-cotree gauge, are applied after the rest.
   if (_cmplx_essential_constraint_map.Has(var_name))
-    for (auto & constraint : _cmplx_essential_constraint_map.GetRef(var_name))
-    {
-      // Set strongly constrained DoF values on real and imaginary components
-      mfem::Array<int> ess_tdofs;
-      constraint->ApplyConstraint(trial_gf, ess_tdofs);
-      global_ess_tdofs.Append(ess_tdofs);
-    }
+    for (const bool applied_last : {false, true})
+      for (auto & constraint : _cmplx_essential_constraint_map.GetRef(var_name))
+        if (constraint->appliedAfterOtherConstraints() == applied_last)
+          constraint->ApplyConstraint(trial_gf, global_ess_tdofs);
   // Deduplicate. mfem::Array::Unique only drops *consecutive* duplicates, so the
   // list must be sorted first; a constraint whose block touches an essential
   // boundary reports tdofs already present from GetEssentialTrueDofs.
@@ -290,6 +290,12 @@ ComplexEquationSystem::AddComplexEssentialConstraint(
     _cmplx_essential_constraint_map.Register(trial_var_name, std::move(constraints));
   }
   _cmplx_essential_constraint_map.GetRef(trial_var_name).push_back(std::move(constraint));
+}
+
+bool
+ComplexEquationSystem::HasEssentialConstraints(const std::string & var_name) const
+{
+  return _cmplx_essential_constraint_map.Has(var_name);
 }
 
 void
