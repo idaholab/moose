@@ -12,7 +12,10 @@
 #include "KokkosDispatcher.h"
 #include "KokkosFESystem.h"
 #include "KokkosVariableValue.h"
+#include "KokkosADAssembly.h"
 #include "KokkosMaterialPropertyValue.h"
+#include "KokkosConfiguration.h"
+#include "KokkosPrecomputeHooks.h"
 
 #include "MooseVariableBase.h"
 #include "ResidualObject.h"
@@ -31,11 +34,14 @@ class ResidualObject : public ::ResidualObject,
 public:
   static InputParameters validParams();
 
-  /// Whether this object's hooks factor out the test function
+  /// Whether this object assembles the products of precompute hooks with the test functions
   static constexpr bool uses_precompute_hooks = false;
 
-  /// Whether this object has computeQpOffDiagJacobianScalar() hook
+  /// Whether this object assembles off-diagonal Jacobian contributions of scalar variables
   static constexpr bool supports_scalar_jacobian = false;
+
+  /// Whether this object dispatches its residual computation with one team per element or side
+  static constexpr bool uses_team_dispatch = false;
 
   /**
    * Constructor
@@ -66,6 +72,11 @@ public:
   struct OffDiagJacobianScalarLoop
   {
   };
+  /// Jacobian with respect to one displacement component of an object posed on the current
+  /// configuration, dispatched with one team per element or side
+  struct DisplacementJacobianLoop
+  {
+  };
   ///@}
 
   virtual const MooseVariableBase & variable() const override { return _var; }
@@ -90,6 +101,10 @@ protected:
    */
   Variable _kokkos_var;
   /**
+   * Configuration on which the weak form is posed
+   */
+  Configuration _configuration;
+  /**
    * Kokkos thread object
    */
   Thread<> _thread;
@@ -101,6 +116,11 @@ protected:
   std::unique_ptr<DispatcherBase> _jacobian_dispatcher;
   std::unique_ptr<DispatcherBase> _offdiag_jacobian_dispatcher;
   std::unique_ptr<DispatcherBase> _offdiag_jacobian_scalar_dispatcher;
+  /// Dispatcher of the residual and Jacobian of a pointwise AD object on the current configuration
+  std::unique_ptr<DispatcherBase> _displaced_residual_dispatcher;
+  /// Dispatcher of the Jacobian with respect to the displacements of a precompute object on the
+  /// current configuration
+  std::unique_ptr<DispatcherBase> _displacement_jacobian_dispatcher;
   ///@}
 
   /**
@@ -183,18 +203,6 @@ protected:
                                                        const unsigned int jvar,
                                                        const unsigned int comp = 0) const;
   /**
-   * Accumulate local elemental Jacobian contribution to tagged matrices using automatic
-   * differentiation (AD)
-   * @param local_ke The local elemental Jacobian contribution
-   * @param datum The AssemblyDatum object of the current thread
-   * @param i The test function DOF index
-   * @param comp The variable component
-   */
-  KOKKOS_FUNCTION void accumulateTaggedElementalMatrix(const DNDerivativeType & local_ke,
-                                                       const AssemblyDatum & datum,
-                                                       const unsigned int i,
-                                                       const unsigned int comp = 0) const;
-  /**
    * Accumulate or set local nodal Jacobian contribution to tagged matrices
    * @param add Whether to add or set the local Jacobian
    * @param local_ke The local nodal Jacobian contribution
@@ -222,18 +230,6 @@ protected:
                                                          const unsigned int i,
                                                          const unsigned int j,
                                                          const unsigned int jvar) const;
-  /**
-   * Accumulate or set local nodal Jacobian contribution to tagged matrices using automatic
-   * differentiation (AD)
-   * @param add Whether to add or set the local Jacobian
-   * @param local_ke The local elemental Jacobian contribution
-   * @param node The contiguous node ID
-   * @param comp The variable component
-   */
-  KOKKOS_FUNCTION void accumulateTaggedNodalMatrix(const bool add,
-                                                   const DNDerivativeType & local_ke,
-                                                   const ContiguousNodeID node,
-                                                   const unsigned int comp = 0) const;
 
   /**
    * The common loop structure template for computing elemental residual
@@ -249,6 +245,45 @@ protected:
    */
   template <typename function>
   KOKKOS_FUNCTION void computeJacobianInternal(AssemblyDatum & datum, function body) const;
+
+  /**
+   * Assemble the residual and Jacobian of a pointwise AD residual object on one element or side
+   * with one team. The team evaluates the residual hooks once per quadrature point into scratch,
+   * then contracts the stored coefficients with the shape functions:
+   *
+   *   R_i    = sum_qp (f_v psi_i + f_g . grad_xi psi_i)
+   *   J_ij^b = sum_qp (df_v/ds psi_i + df_g/ds . grad_xi psi_i) dq_s/dU_j
+   *
+   * where f_g is the gradient coefficient pulled back to the reference element, slot block b of a
+   * variable holds its value (dq/dU_j = phi_j) or its gradient components on the reference
+   * configuration (dq_k/dU_j = d phi_j / d X_k), and column j indexes the DOFs of that variable.
+   * @tparam slots The number of derivative slots of the instantiation
+   * @param object The residual object of the final derived type
+   * @param team The team handle
+   * @param datum The AssemblyDatum object of the element or side
+   * @param table The slot table of the residual object
+   * @param computing_residual Whether to assemble the residual
+   * @param computing_jacobian Whether to assemble the Jacobian
+   */
+  template <unsigned int slots, typename Object, typename Team>
+  KOKKOS_FUNCTION void assembleADTerms(const Object & object,
+                                       const Team & team,
+                                       const AssemblyDatum & datum,
+                                       const ADSlotTable & table,
+                                       bool computing_residual,
+                                       bool computing_jacobian) const;
+
+  /**
+   * Displacement component assembled by the current dispatch of DisplacementJacobianLoop
+   */
+  unsigned int _displacement_component = 0;
+
+  /**
+   * Dispatch the Jacobian with respect to each displacement component of a precompute object posed
+   * on the current configuration, one team per element or side
+   * @param league_size The number of elements or sides
+   */
+  void dispatchDisplacementJacobian(ThreadID league_size, bool vector);
 
 private:
   /**
@@ -363,32 +398,6 @@ ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
 }
 
 KOKKOS_FUNCTION inline void
-ResidualObject::accumulateTaggedElementalMatrix(const DNDerivativeType & local_ke,
-                                                const AssemblyDatum & datum,
-                                                const unsigned int i,
-                                                const unsigned int comp) const
-{
-  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
-  const auto ivar = _kokkos_var.var(comp);
-  auto row = sys.getElemLocalDofIndex(datum.elem().id, i, ivar);
-  const auto scaling_factor = sys.getVariableScalingFactor(ivar);
-
-  for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
-  {
-    auto tag = _matrix_tags[t];
-
-    if (sys.isMatrixTagActive(tag) && !sys.hasNodalBCMatrixTag(row, tag))
-      for (unsigned int j = 0; j < local_ke.size(); ++j)
-      {
-        auto col = local_ke.raw_index(j);
-
-        ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag),
-                             local_ke.raw_at(j) * scaling_factor);
-      }
-  }
-}
-
-KOKKOS_FUNCTION inline void
 ResidualObject::accumulateTaggedNodalMatrix(const bool add,
                                             const Real local_ke,
                                             const ContiguousNodeID node,
@@ -450,38 +459,6 @@ ResidualObject::accumulateTaggedVectorNodalMatrix(const bool add,
       {
         matrix.zero(row);
         matrix(row, col) = local_ke;
-      }
-    }
-  }
-}
-
-KOKKOS_FUNCTION inline void
-ResidualObject::accumulateTaggedNodalMatrix(const bool add,
-                                            const DNDerivativeType & local_ke,
-                                            const ContiguousNodeID node,
-                                            const unsigned int comp) const
-{
-  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
-  auto row = sys.getNodeLocalDofIndex(node, 0, _kokkos_var.var(comp));
-
-  for (unsigned int t = 0; t < _matrix_tags.size(); ++t)
-  {
-    auto tag = _matrix_tags[t];
-    auto & matrix = sys.getMatrix(tag);
-
-    if (sys.isMatrixTagActive(tag))
-    {
-      if (!add)
-        matrix.zero(row);
-
-      for (unsigned int j = 0; j < local_ke.size(); ++j)
-      {
-        auto col = local_ke.raw_index(j);
-
-        if (add)
-          matrix(row, col) += local_ke.raw_at(j);
-        else
-          matrix(row, col) = local_ke.raw_at(j);
       }
     }
   }
@@ -550,6 +527,116 @@ ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) co
         accumulateTaggedElementalMatrix(local_ke[i - ib], datum.elem().id, i, j, datum.jvar());
     }
   }
+}
+
+template <unsigned int slots, typename Object, typename Team>
+KOKKOS_FUNCTION void
+ResidualObject::assembleADTerms(const Object & object,
+                                const Team & team,
+                                const AssemblyDatum & datum,
+                                const ADSlotTable & table,
+                                const bool computing_residual,
+                                const bool computing_jacobian) const
+{
+  constexpr auto qp_size = ADScratchLayout::qpSize(slots);
+  constexpr auto term_size = ADScratchLayout::term_size;
+  constexpr auto map_offset = ADScratchLayout::mapOffset(slots);
+
+  const auto n_qps = datum.n_qps();
+  ADScratchView scratch(team.team_scratch(0), n_qps * qp_size);
+
+  // Each thread evaluates its quadrature points with its own datum, whose geometry cache is
+  // thread-private
+  ::Kokkos::parallel_for(::Kokkos::TeamThreadRange(team, n_qps),
+                         [&](const unsigned int qp)
+                         {
+                           ADAssemblyDatum<slots> qp_datum(datum, table);
+                           evaluateADTerms(object, qp_datum, qp, &scratch(qp * qp_size));
+                         });
+  team.team_barrier();
+
+  const auto & assembly = datum.assembly();
+  const auto & elem = datum.elem();
+  const auto side = datum.side();
+  const auto ife = datum.ife();
+  const auto n_idofs = datum.n_idofs();
+  const auto & sys = kokkosSystem(datum.sys());
+
+  // Shape function value and reference gradient of an FE type at a quadrature point
+  auto shape = [&](const unsigned int fe, const unsigned int i, const unsigned int qp)
+  {
+    const Real phi = side == libMesh::invalid_uint
+                         ? assembly.getPhi(elem.subdomain, elem.type, fe)(i, qp)
+                         : assembly.getPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+    const Real3 ref = side == libMesh::invalid_uint
+                          ? assembly.getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
+                          : assembly.getGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+    return ::Kokkos::pair<Real, Real3>(phi, ref);
+  };
+
+  // Gradient of a shape function on the reference configuration from its reference gradient
+  auto referenceGradient = [&](const Real3 & ref, const unsigned int qp)
+  {
+    const Real * map = &scratch(qp * qp_size + map_offset);
+    return Real3(map[0] * ref(0) + map[1] * ref(1) + map[2] * ref(2),
+                 map[3] * ref(0) + map[4] * ref(1) + map[5] * ref(2),
+                 map[6] * ref(0) + map[7] * ref(1) + map[8] * ref(2));
+  };
+
+  if (computing_residual)
+    ::Kokkos::parallel_for(::Kokkos::TeamThreadRange(team, n_idofs),
+                           [&](const unsigned int i)
+                           {
+                             Real local_re = 0;
+                             for (unsigned int qp = 0; qp < n_qps; ++qp)
+                             {
+                               const auto psi = shape(ife, i, qp);
+                               local_re +=
+                                   contractADTerms(&scratch(qp * qp_size), psi.first, psi.second);
+                             }
+                             accumulateTaggedElementalResidual(local_re, elem.id, i);
+                           });
+
+  if constexpr (slots > 0)
+    if (computing_jacobian)
+      for (unsigned int b = 0; b < table.numBlocks(); ++b)
+      {
+        const auto & block = table.block(b);
+        const auto jfe = sys.getFETypeID(block.var);
+        const auto n_jdofs = assembly.getNumDofs(elem.type, jfe);
+
+        ::Kokkos::parallel_for(
+            ::Kokkos::TeamThreadRange(team, n_idofs * n_jdofs),
+            [&](const unsigned int ij)
+            {
+              const auto i = ij / n_jdofs;
+              const auto j = ij % n_jdofs;
+              Real local_ke = 0;
+
+              for (unsigned int qp = 0; qp < n_qps; ++qp)
+              {
+                const auto test = shape(ife, i, qp);
+                const auto trial = shape(jfe, j, qp);
+                const Real * q = &scratch(qp * qp_size);
+
+                if (block.gradient)
+                {
+                  const auto grad_trial = referenceGradient(trial.second, qp);
+                  for (unsigned int k = 0; k < AD_GRADIENT_SLOTS; ++k)
+                    local_ke += contractADTerms(q + term_size * (1 + block.first + k),
+                                                test.first,
+                                                test.second) *
+                                grad_trial(k);
+                }
+                else
+                  local_ke +=
+                      contractADTerms(q + term_size * (1 + block.first), test.first, test.second) *
+                      trial.first;
+              }
+
+              accumulateTaggedElementalMatrix(local_ke, elem.id, i, j, block.var);
+            });
+      }
 }
 
 } // namespace Moose::Kokkos

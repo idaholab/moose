@@ -18,6 +18,12 @@ KokkosHeatConductionMaterial::validParams()
 
   params.addParam<Real>("thermal_conductivity", 0, "The thermal conductivity value");
   params.addParam<Real>("specific_heat", 0, "The specific heat value");
+  params.addParam<RealVectorValue>(
+      "thermal_conductivity_gradient",
+      "Gradient of a thermal conductivity varying linearly with the position, k = "
+      "thermal_conductivity + thermal_conductivity_gradient . x, where x is the quadrature point "
+      "on the configuration of the material. The gradient is declared as the property "
+      "d_thermal_conductivity_dx.");
 
   params.addClassDescription("General-purpose material model for heat conduction");
 
@@ -28,7 +34,14 @@ KokkosHeatConductionMaterial::KokkosHeatConductionMaterial(const InputParameters
   : Material(parameters),
     _my_thermal_conductivity(getParam<Real>("thermal_conductivity")),
     _my_specific_heat(getParam<Real>("specific_heat")),
+    _thermal_conductivity_gradient(isParamValid("thermal_conductivity_gradient")
+                                       ? getParam<RealVectorValue>("thermal_conductivity_gradient")
+                                       : RealVectorValue()),
+    _position_dependent(isParamValid("thermal_conductivity_gradient")),
     _thermal_conductivity(declareKokkosProperty<Real>("thermal_conductivity")),
     _specific_heat(declareKokkosProperty<Real>("specific_heat"))
 {
+  if (_position_dependent)
+    _d_thermal_conductivity_dx =
+        declareKokkosProperty<Moose::Kokkos::Real3>("d_thermal_conductivity_dx");
 }

@@ -14,11 +14,11 @@ registerKokkosResidualObject("MooseTestApp", KokkosDiffusionPrecompute);
 InputParameters
 KokkosDiffusionPrecompute::validParams()
 {
-  InputParameters p = KernelGrad::validParams();
+  InputParameters p = Moose::Kokkos::KernelGrad::validParams();
   return p;
 }
 
 KokkosDiffusionPrecompute::KokkosDiffusionPrecompute(const InputParameters & parameters)
-  : KernelGrad(parameters)
+  : Moose::Kokkos::KernelGrad(parameters)
 {
 }

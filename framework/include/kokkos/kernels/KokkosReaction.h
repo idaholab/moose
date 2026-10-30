@@ -22,14 +22,12 @@ public:
   KokkosReaction(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpJacobianValue(const unsigned int j,
+                                                 const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
 
 protected:
   /// Scalar coefficient representing the relative amount consumed per unit time
@@ -38,19 +36,16 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosReaction::computeQpResidual(const unsigned int i,
-                                  const unsigned int qp,
-                                  AssemblyDatum & datum) const
+KokkosReaction::precomputeQpResidualValue(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return _test(datum, i, qp) * _rate * _u(datum, qp);
+  return _rate * _u(datum, qp);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosReaction::computeQpJacobian(const unsigned int i,
-                                  const unsigned int j,
-                                  const unsigned int qp,
-                                  AssemblyDatum & datum) const
+KokkosReaction::precomputeQpJacobianValue(const unsigned int j,
+                                          const unsigned int qp,
+                                          AssemblyDatum & datum) const
 {
-  return _test(datum, i, qp) * _rate * _phi(datum, j, qp);
+  return _rate * _phi(datum, j, qp);
 }

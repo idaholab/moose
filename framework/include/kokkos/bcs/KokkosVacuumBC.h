@@ -25,11 +25,12 @@ public:
   KokkosVacuumBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int j,
-                                            const unsigned int qp,
-                                            AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpJacobianValue(const unsigned int j,
+                                                 const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
 
 private:
   /// Ratio of u to du/dn
@@ -38,16 +39,16 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosVacuumBC::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosVacuumBC::precomputeQpResidualValue(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _alpha * _u(datum, qp) / 2.;
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosVacuumBC::precomputeQpJacobian(const unsigned int j,
-                                     const unsigned int qp,
-                                     AssemblyDatum & datum) const
+KokkosVacuumBC::precomputeQpJacobianValue(const unsigned int j,
+                                          const unsigned int qp,
+                                          AssemblyDatum & datum) const
 {
   return _alpha * _phi(datum, j, qp) / 2.;
 }

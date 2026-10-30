@@ -5,29 +5,19 @@
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
 
-#include "KokkosVectorKernelValue.h"
+#include "KokkosVectorTimeKernel.h"
 
 namespace Moose::Kokkos
 {
 
 /**
- * The base class for Kokkos vector time kernels whose test function can be factored out
+ * Name for a Kokkos vector time kernel whose residual multiplies the test function value, defined
+ * through the precomputeQpResidualValue() family of hooks of VectorKernel
  */
-class VectorTimeKernelValue : public VectorKernelValue
-{
-public:
-  static InputParameters validParams();
-
-  VectorTimeKernelValue(const InputParameters & parameters);
-
-protected:
-  /// Time derivative of the current solution at quadrature points
-  const VectorVariableValue _u_dot;
-  /// Derivative of u_dot with respect to u
-  const Scalar<const Real> _du_dot_du;
-};
+using VectorTimeKernelValue = VectorTimeKernel;
 
 } // namespace Moose::Kokkos

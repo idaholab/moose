@@ -44,6 +44,7 @@ KernelBase::KernelBase(const InputParameters & parameters, Moose::VarFieldType f
     MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
     LocalParallelInterface(this)
 {
+  _configuration = Configuration(*this);
 }
 
 KernelBase::KernelBase(const KernelBase & object)

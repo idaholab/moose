@@ -26,6 +26,7 @@ Material::Material(const InputParameters & parameters)
     MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     _bnd(_material_data_type != Moose::BLOCK_MATERIAL_DATA),
     _neighbor(_material_data_type == Moose::NEIGHBOR_MATERIAL_DATA),
+    _configuration(*this),
     _qrule(_bnd ? (_neighbor ? _subproblem.assembly(_tid, 0).qRuleNeighbor()
                              : _subproblem.assembly(_tid, 0).qRuleFace())
                 : _subproblem.assembly(_tid, 0).qRule())
@@ -40,6 +41,7 @@ Material::Material(const Material & object)
     MaterialPropertyInterface(object, {}),
     _bnd(object._bnd),
     _neighbor(object._neighbor),
+    _configuration(object._configuration),
     _qrule(object._qrule)
 {
 }
