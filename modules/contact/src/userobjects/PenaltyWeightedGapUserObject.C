@@ -35,9 +35,9 @@ PenaltyWeightedGapUserObject::validParams()
   params.addParam<bool>(
       "use_physical_gap",
       false,
-      "Whether to use the physical normal gap (not scaled by mortar integration) and normalize the "
-      "penalty coefficient with a representative lower-dimensional volume assigned to the node in "
-      "the contacting boundary. This parameter is defaulted to 'true' in the contact action.");
+      "Whether to compute the normal pressure as (penalty / A) * (physical gap) instead of penalty "
+      "* (weighted gap), where A is the lower-dimensional area assigned to the node on the "
+      "contacting boundary. This parameter is defaulted to 'true' in the contact action.");
   params.addRangeCheckedParam<Real>(
       "penetration_tolerance",
       "penetration_tolerance > 0",
@@ -152,14 +152,11 @@ PenaltyWeightedGapUserObject::selfFinalize()
   {
     auto penalty = findValue(_dof_to_local_penalty, dof_object, _penalty);
 
-    // If _use_physical_gap is true we "normalize" the penalty parameter with the surrounding area.
-    auto gap = _use_physical_gap ? adPhysicalGap(wgap) / wgap.second : wgap.first;
-
     const auto lagrange_multiplier =
         _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[dof_object->id()] : 0.0;
 
     // keep the negative normal pressure (compressive per convention here)
-    auto normal_pressure = min(0.0, penalty * gap + lagrange_multiplier);
+    auto normal_pressure = min(0.0, penaltyPressure(wgap, penalty) + lagrange_multiplier);
 
     // we switch conventins here and consider positive normal pressure as compressive
     _dof_to_normal_pressure[dof_object] = -normal_pressure;
@@ -331,14 +328,14 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
     const auto gap = getNormalGap(static_cast<const Node *>(dof_object));
     auto & lagrange_multiplier = _dof_to_lagrange_multiplier[dof_object->id()];
 
-    const auto possible_normalization =
-        (_use_physical_gap ? libmesh_map_find(_dof_to_weighted_gap, dof_object).second : 1.0);
+    // Increment the multiplier by the penalty pressure computed in selfFinalize
+    const Real penalty_pressure = MetaPhysicL::raw_value(penaltyPressure(wgap, penalty));
 
     // Update penalty (the factor of 1/4 is suggested in the literature, the limit on AL iteration
     // caps the penalty increase)
     // Before we were updating the LM before adapting the penalty factor
-    if (lagrange_multiplier + gap * penalty / possible_normalization <= 0)
-      lagrange_multiplier += gap * penalty / possible_normalization;
+    if (lagrange_multiplier + penalty_pressure <= 0)
+      lagrange_multiplier += penalty_pressure;
     else
       lagrange_multiplier = 0.0;
 
