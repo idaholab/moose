@@ -53,11 +53,23 @@ createMooseApp(const std::string & default_app_type, int argc, char * argv[])
   auto command_line = std::make_unique<CommandLine>(argc, argv);
   command_line->parse();
 
+  // Gather every "--remove-param <path>" (the option is repeatable, one path each)
+  std::vector<std::string> remove_params;
+  for (auto & entry : command_line->getEntries())
+    if (!entry.subapp_name && entry.name == "--remove-param")
+    {
+      if (!entry.value)
+        mooseError("The command line option '--remove-param' requires a parameter path.");
+      remove_params.push_back(*entry.value);
+      entry.used = true;
+    }
+
   // Setup the parser with the input and the HIT parameters from the command line. The parse
   // will also look for "Application/type=" in input to specify the application type
   auto parser = std::make_unique<Parser>(input_filenames);
   parser->setAppType(default_app_type);
   parser->setCommandLineParams(command_line->buildHitParams());
+  parser->setRemoveParams(remove_params);
   parser->parse();
 
   // Search the command line for either --app or Application/type and let the last one win
