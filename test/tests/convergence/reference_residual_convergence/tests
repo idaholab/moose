@@ -172,6 +172,35 @@
     requirement = 'The system shall be able to use a reference residual to converge to and reverse variable scaling to output the actual residual, while allowing variable scaling.'
   []
 
+  [variable_abs_tol]
+    requirement = 'The system shall be able to check the convergence of individual variables against '
+                  'reference quantities with an absolute tolerance specific to each variable'
+    issues = '#34304'
+    [converge]
+      type = CSVDiff
+      input = 'variable_abs_tol.i'
+      csvdiff = 'variable_abs_tol_out.csv'
+      detail = 'so that a variable with a large round-off floor converges while the other '
+               'variables keep a tighter tolerance,'
+    []
+    [single_tol_fails]
+      type = RunException
+      input = 'variable_abs_tol.i'
+      cli_args = "Convergence/conv/variable_nl_abs_tol='' Outputs/csv=false"
+      expect_err = 'Solve Did NOT Converge'
+      detail = 'where the same problem does not converge with one absolute tolerance for all '
+               'variables,'
+    []
+    [acceptable]
+      type = RunApp
+      input = 'variable_abs_tol.i'
+      cli_args = "Convergence/conv/variable_nl_abs_tol='u 1e-8' Convergence/conv/acceptable_iterations=3 "
+                 "Convergence/conv/acceptable_multiplier=1e4 Outputs/csv=false"
+      expect_out = 'Converged due to ACCEPTABLE tolerances'
+      detail = 'and apply the acceptable multiplier to the per-variable tolerances.'
+    []
+  []
+
   [error]
     requirement = 'When using ReferenceResidualConvergence the system shall throw an error '
     [wrong_vector_tag_type]
@@ -200,7 +229,28 @@
       input = no_ref.i
       cli_args = "Problem/extra_tag_solutions=absref GlobalParams/absolute_value_vector_tags=absref"
       expect_err = "is not a residual vector tag"
-      detail = "if the reference vector is provided is not a residual vector tag."
+      detail = "if the reference vector is provided is not a residual vector tag,"
+    []
+    [variable_abs_tol_unknown_variable]
+      type = RunException
+      input = variable_abs_tol.i
+      cli_args = "Convergence/conv/variable_nl_abs_tol='w 1'"
+      expect_err = "Variable 'w' is not a variable of nonlinear system"
+      detail = "if a per-variable absolute tolerance names a variable that is not in the nonlinear system,"
+    []
+    [variable_abs_tol_negative]
+      type = RunException
+      input = variable_abs_tol.i
+      cli_args = "Convergence/conv/variable_nl_abs_tol='u -1'"
+      expect_err = "The absolute tolerance of variable 'u' must be non-negative"
+      detail = "if a per-variable absolute tolerance is negative,"
+    []
+    [variable_abs_tol_group_mismatch]
+      type = RunException
+      input = variable_abs_tol.i
+      cli_args = "Convergence/conv/variable_nl_abs_tol='u 1e-4' Convergence/conv/group_variables='u v'"
+      expect_err = "The variables in group \(u, v\) must all have the same absolute tolerance"
+      detail = "if the variables in a group do not all have the same per-variable absolute tolerance."
     []
   []
 []
