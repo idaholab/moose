@@ -17,6 +17,7 @@
 #include "MortarInterfaceWarehouse.h"
 #include "Assembly.h"
 #include "AutomaticMortarGeneration.h"
+#include "MooseVariableFieldBase.h"
 #include "libmesh/quadrature.h"
 
 #include <algorithm>
@@ -115,6 +116,13 @@ MortarConsumerInterface::validParams()
       mortar_3d_qp_mapping,
       "Method used to map quadrature points on 3D mortar segments to primary and secondary "
       "parent-face reference coordinates. This parameter has no effect for 2D mortar.");
+  params.addParam<bool>(
+      "split_segments_at_sub_elements",
+      false,
+      "Whether to split 2D mortar segments of EDGE3 secondary faces at the mid node, so that every "
+      "segment lies on one of the two linear sub-elements of its face, as 3D mortar segments do. "
+      "Required for exact integration with a Lagrange multiplier test basis that sets "
+      "'use_piecewise_linear_basis = true'. All objects on a mortar interface must agree.");
 
   params.addParam<bool>(
       "ghost_higher_d_neighbors",
@@ -225,7 +233,8 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
       moose_object->getParam<MooseEnum>("triangulation"),
       moose_object->getParam<bool>("triangulate_triangles"),
       moose_object->getParam<MooseEnum>("mortar_3d_qp_mapping")
-          .getEnum<Mortar3DQuadraturePointMapping>());
+          .getEnum<Mortar3DQuadraturePointMapping>(),
+      moose_object->getParam<bool>("split_segments_at_sub_elements"));
 
   _amg = &_mci_fe_problem.getMortarInterface(
       std::make_pair(_primary_id, _secondary_id),
@@ -250,6 +259,51 @@ MortarConsumerInterface::setNormals()
     _normals = amg().getNormals(*_lower_secondary_elem, _qrule_face->get_points());
   else
     _normals = amg().getNodalNormals(*_lower_secondary_elem);
+}
+
+void
+MortarConsumerInterface::checkPetrovGalerkinQuadraticFaces(
+    const MooseObject & moose_object, const MooseVariableFieldBase & lm_var) const
+{
+  if (!lm_var.useDual() || lm_var.feType().family != LAGRANGE || lm_var.feType().order != SECOND)
+    return;
+
+  bool quadratic_face = false;
+  for (const auto * const lower_elem :
+       _mci_mesh.getMesh().active_subdomain_elements_ptr_range(_secondary_subdomain_id))
+    if (lower_elem->type() == QUAD8 || lower_elem->type() == TRI6)
+    {
+      quadratic_face = true;
+      break;
+    }
+  moose_object.comm().max(quadratic_face);
+  if (quadratic_face)
+    moose_object.paramError(
+        "use_petrov_galerkin",
+        "The Petrov-Galerkin approach is not supported for a SECOND order dual Lagrange "
+        "multiplier on QUAD8 or TRI6 secondary faces. Use a FIRST order multiplier or disable "
+        "`use_petrov_galerkin`.");
+}
+
+void
+MortarConsumerInterface::checkPiecewiseLinearBasis(const MooseObject & moose_object,
+                                                   const bool use_petrov_galerkin,
+                                                   const MooseVariableFieldBase & lm_var,
+                                                   const MooseVariableFieldBase & aux_lm_var) const
+{
+  if (!use_petrov_galerkin)
+    moose_object.paramError(
+        "aux_lm",
+        "An auxiliary variable with the piecewise-linear basis requires `use_petrov_galerkin = "
+        "true`.");
+  if (!lm_var.useDual() || lm_var.feType() != aux_lm_var.feType())
+    moose_object.paramError("aux_lm",
+                            "An auxiliary variable with the piecewise-linear basis requires a "
+                            "dual Lagrange multiplier of the same finite element type.");
+  if (_mci_mesh.dimension() == 2 && !amg().splitsSegmentsAtSubElements())
+    moose_object.paramError("aux_lm",
+                            "An auxiliary variable with the piecewise-linear basis requires "
+                            "'split_segments_at_sub_elements = true' in two dimensions.");
 }
 
 void

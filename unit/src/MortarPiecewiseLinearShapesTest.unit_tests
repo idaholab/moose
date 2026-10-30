@@ -1,0 +1,11 @@
+[Tests]
+  design = 'Petrov-Galerkin_approach_for_Lagrange_multipliers.md'
+  issues = '#34265'
+  [interpolation_and_partition_of_unity]
+    type = GoogleTest
+    unit_test = MortarPiecewiseLinearShapesTest.InterpolatesNodesAndPartitionsUnity
+    requirement = 'The system shall provide a piecewise-linear basis on quadratic EDGE3, TRI6, QUAD8 '
+                  'and QUAD9 faces, built from the first-order basis of their linear sub-elements, '
+                  'that interpolates the face nodes, is non-negative and forms a partition of unity.'
+  []
+[]

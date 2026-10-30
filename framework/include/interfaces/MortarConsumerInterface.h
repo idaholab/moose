@@ -18,6 +18,7 @@ class MooseObject;
 class MooseMesh;
 class MortarInterfaceWarehouse;
 class AutomaticMortarGeneration;
+class MooseVariableFieldBase;
 class SubProblem;
 class Assembly;
 
@@ -80,6 +81,32 @@ protected:
    * the _normals member should be indexed with _i instead of _qp
    */
   bool interpolateNormals() const { return _interpolate_normals; }
+
+  /**
+   * Report an error if Petrov-Galerkin weights the gap of a SECOND order dual Lagrange multiplier
+   * with the standard basis on QUAD8 or TRI6 secondary faces. libMesh builds the dual basis on
+   * these faces against a transformed basis, and the nodal integrals of the standard basis are not
+   * positive there, so the combination does not converge.
+   * @param moose_object The object reporting the error
+   * @param lm_var The Lagrange multiplier
+   */
+  void checkPetrovGalerkinQuadraticFaces(const MooseObject & moose_object,
+                                         const MooseVariableFieldBase & lm_var) const;
+
+  /**
+   * Check a Petrov-Galerkin auxiliary variable that uses the piecewise-linear lower-dimensional
+   * basis: Petrov-Galerkin must be enabled, the Lagrange multiplier must be dual and of the same
+   * finite element type, and in two dimensions the mortar interface must split segments at the
+   * sub-elements of the secondary faces.
+   * @param moose_object The object reporting errors
+   * @param use_petrov_galerkin Whether the object uses the Petrov-Galerkin approach
+   * @param lm_var The Lagrange multiplier
+   * @param aux_lm_var The auxiliary variable weighting the gap
+   */
+  void checkPiecewiseLinearBasis(const MooseObject & moose_object,
+                                 bool use_petrov_galerkin,
+                                 const MooseVariableFieldBase & lm_var,
+                                 const MooseVariableFieldBase & aux_lm_var) const;
 
   /**
    * Get rid of AD derivative entries by dof index
