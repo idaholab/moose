@@ -151,4 +151,50 @@
                  "junction will behave as if there were no form loss."
     requirement = 'The system shall throw an error if the parameter "A_ref" is specifed and the paramter "K" is not specified.'
   []
+
+  [hydrostatic]
+    issues = '#34298'
+    requirement = 'The system shall keep a fluid at rest under gravity, within 0.1 Pa of the analytical hydrostatic pressure, when the hydrostatic correction of the volume junction is used and the junction connects:'
+    [column]
+      type = 'CSVDiff'
+      input = 'hydrostatic_column.i'
+      csvdiff = 'hydrostatic_column_out.csv'
+      abs_zero = 1e-1
+      rel_err = 0
+      detail = '2 vertical pipes with the junction faces at the junction center,'
+    []
+    [column_offset]
+      type = 'CSVDiff'
+      input = 'hydrostatic_column.i'
+      cli_args = 'jh=0.4 Outputs/file_base=hydrostatic_column_offset_out'
+      csvdiff = 'hydrostatic_column_offset_out.csv'
+      abs_zero = 1e-1
+      rel_err = 0
+      detail = '2 vertical pipes with the junction faces 0.2 m above and below the junction center,'
+    []
+    [tee]
+      type = 'CSVDiff'
+      input = 'hydrostatic_tee.i'
+      csvdiff = 'hydrostatic_tee_out.csv'
+      abs_zero = 1e-1
+      rel_err = 0
+      detail = '2 vertical pipes and a horizontal pipe closed by a wall.'
+    []
+  []
+  [hydrostatic_gravity_error]
+    type = 'RunException'
+    issues = '#34298'
+    input = 'hydrostatic_column.i'
+    cli_args = "Components/lower/gravity_vector='0 0 -9.8'"
+    expect_err = "The hydrostatic correction requires the same 'gravity_vector' in all connected flow channels"
+    requirement = 'The system shall report an error if the hydrostatic correction of the volume junction is used and the connected flow channels do not have the same gravity vector.'
+  []
+  [hydrostatic_scheme_error]
+    type = 'RunException'
+    issues = '#34298'
+    input = 'hydrostatic_column.i'
+    cli_args = 'Components/lower/rdg_slope_reconstruction=none'
+    expect_err = "The hydrostatic correction requires the same 'rdg_slope_reconstruction' in all connected flow channels"
+    requirement = 'The system shall report an error if the hydrostatic correction of the volume junction is used and the connected flow channels do not have the same slope reconstruction scheme.'
+  []
 []

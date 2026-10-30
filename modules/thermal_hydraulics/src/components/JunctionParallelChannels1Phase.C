@@ -59,6 +59,13 @@ JunctionParallelChannels1Phase::buildVolumeJunctionUserObject()
     params.set<Real>("A_ref") = _A_ref;
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<bool>("apply_velocity_scaling") = getParam<bool>("apply_velocity_scaling");
+    params.set<bool>("use_hydrostatic_correction") = _use_hydrostatic_correction;
+    if (_use_hydrostatic_correction)
+    {
+      params.set<MooseEnum>("scheme") = _slope_reconstruction;
+      params.set<RealVectorValue>("gravity_vector") = _gravity_vector;
+      params.set<Point>("position") = _position;
+    }
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, _junction_uo_name, params);
     connectObject(params, _junction_uo_name, "K");

@@ -9,7 +9,10 @@
 
 #include "VolumeJunction1Phase.h"
 #include "FlowModelSinglePhase.h"
+#include "FlowChannel1Phase.h"
+#include "SlopeReconstruction1DInterface.h"
 #include "THMMesh.h"
+#include "Numerics.h"
 
 registerMooseObject("ThermalHydraulicsApp", VolumeJunction1Phase);
 
@@ -19,6 +22,7 @@ InputParameters
 VolumeJunction1Phase::validParams()
 {
   InputParameters params = FlowJunction1Phase::validParams();
+  params += GravityInterface::validParams();
 
   params.addRequiredParam<Real>("volume", "Volume of the junction [m^3]");
   params.addRequiredParam<Point>("position", "Spatial position of the center of the junction [m]");
@@ -43,6 +47,14 @@ VolumeJunction1Phase::validParams()
                         "Set to true to apply the scaling to the normal velocity. See "
                         "documentation for more information.");
 
+  params.addParam<bool>("use_hydrostatic_correction",
+                        false,
+                        "Set to true to use the slope reconstruction of the flow channel "
+                        "solution at the junction faces, with the junction as the missing "
+                        "neighbor, and to move the junction solution hydrostatically to the "
+                        "faces, so that a fluid at rest stays at rest under gravity. This is an "
+                        "experimental feature. See documentation for more information.");
+
   params.declareControllable("K");
   params.addClassDescription("Junction between 1-phase flow channels that has a non-zero volume");
 
@@ -51,6 +63,7 @@ VolumeJunction1Phase::validParams()
 
 VolumeJunction1Phase::VolumeJunction1Phase(const InputParameters & params)
   : FlowJunction1Phase(params),
+    GravityInterface(params),
 
     _volume(getParam<Real>("volume")),
     _position(getParam<Point>("position")),
@@ -71,13 +84,45 @@ VolumeJunction1Phase::VolumeJunction1Phase(const InputParameters & params)
     _velocity_var_name(junctionVariableName("vel")),
 
     _K(getParam<Real>("K")),
-    _A_ref(isParamValid("A_ref") ? getParam<Real>("A_ref") : _zero)
+    _A_ref(isParamValid("A_ref") ? getParam<Real>("A_ref") : _zero),
+    _use_hydrostatic_correction(getParam<bool>("use_hydrostatic_correction")),
+    _slope_reconstruction(
+        SlopeReconstruction1DInterface<true>::getSlopeReconstructionMooseEnum("None"))
 {
   // Note: 'A_ref' can be required by child classes
   if (!params.isParamRequired("A_ref") && params.isParamSetByUser("A_ref") &&
       !params.isParamSetByUser("K"))
     logWarning("Parameter 'A_ref' is specified, but 'K' is not specified, so the junction will "
                "behave as if there were no form loss.");
+
+  if (_use_hydrostatic_correction && processor_id() == 0)
+    mooseInfo("The hydrostatic correction of the volume junctions ('use_hydrostatic_correction') "
+              "is an experimental feature.");
+}
+
+void
+VolumeJunction1Phase::init()
+{
+  FlowJunction1Phase::init();
+
+  // The hydrostatic correction uses the slope reconstruction scheme of the connected flow
+  // channels, so all of them must have the same one.
+  if (_use_hydrostatic_correction)
+    for (const auto i : index_range(_connections))
+    {
+      const std::string comp_name = _connections[i]._component_name;
+      if (hasComponentByName<FlowChannel1Phase>(comp_name))
+      {
+        const auto & comp = getComponentByName<FlowChannel1Phase>(comp_name);
+        if (i == 0)
+          _slope_reconstruction = comp.getSlopeReconstruction();
+        else if (comp.getSlopeReconstruction() != _slope_reconstruction)
+          logError("The hydrostatic correction requires the same 'rdg_slope_reconstruction' in "
+                   "all connected flow channels, but '",
+                   comp_name,
+                   "' has a different one.");
+      }
+    }
 }
 
 void
@@ -96,6 +141,25 @@ VolumeJunction1Phase::setupMesh()
   const auto & elem_ids = getConnectedElementIDs();
   for (unsigned int i = 0; i < elem_ids.size(); i++)
     getTHMProblem().augmentSparsity(elem_ids[i], elem->id());
+
+  // With the hydrostatic correction, the slope reconstruction at the junction faces also uses
+  // the neighbors of the end elements, so they are coupled to the NodeElem as well.
+  if (_use_hydrostatic_correction)
+    for (const auto & connection : getConnections())
+    {
+      const std::string & comp_name = connection._component_name;
+      if (hasComponentByName<Component1D>(comp_name))
+      {
+        const auto & comp_elem_ids = getComponentByName<Component1D>(comp_name).getElementIDs();
+        if (comp_elem_ids.size() > 1)
+        {
+          const auto neighbor_id = (connection._end_type == Component1DConnection::IN)
+                                       ? comp_elem_ids[1]
+                                       : comp_elem_ids[comp_elem_ids.size() - 2];
+          getTHMProblem().augmentSparsity(neighbor_id, elem->id());
+        }
+      }
+    }
 }
 
 void
@@ -128,6 +192,24 @@ VolumeJunction1Phase::check() const
                          28670,
                          "Using initial conditions from a file for VolumeJunction1Phase is "
                          "currently not tested for parallel threading.");
+
+  // The junction and the connected flow channels must share the gravity vector, which is
+  // usually set in GlobalParams.
+  if (_use_hydrostatic_correction)
+    for (const auto & connection : _connections)
+    {
+      const std::string comp_name = connection._component_name;
+      if (hasComponentByName<FlowChannelBase>(comp_name))
+      {
+        const auto & g =
+            getComponentByName<FlowChannelBase>(comp_name).getParam<RealVectorValue>("gravity_vector");
+        if (!THM::absoluteFuzzyEqualVectors(g, _gravity_vector))
+          logError("The hydrostatic correction requires the same 'gravity_vector' in all "
+                   "connected flow channels, but '",
+                   comp_name,
+                   "' has a different one.");
+      }
+    }
 }
 
 void
@@ -188,6 +270,13 @@ VolumeJunction1Phase::buildVolumeJunctionUserObject()
     params.set<Real>("A_ref") = _A_ref;
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<bool>("apply_velocity_scaling") = getParam<bool>("apply_velocity_scaling");
+    params.set<bool>("use_hydrostatic_correction") = _use_hydrostatic_correction;
+    if (_use_hydrostatic_correction)
+    {
+      params.set<MooseEnum>("scheme") = _slope_reconstruction;
+      params.set<RealVectorValue>("gravity_vector") = _gravity_vector;
+      params.set<Point>("position") = _position;
+    }
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     getTHMProblem().addUserObject(class_name, _junction_uo_name, params);
     connectObject(params, _junction_uo_name, "K");

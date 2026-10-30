@@ -12,6 +12,7 @@
 #include "THMIndicesVACE.h"
 #include "VolumeJunction1Phase.h"
 #include "ADNumericalFlux3EqnBase.h"
+#include "FlowModel1PhaseUtils.h"
 #include "Numerics.h"
 #include "THMUtils.h"
 #include "metaphysicl/parallel_numberarray.h"
@@ -49,6 +50,23 @@ ADVolumeJunction1PhaseUserObject::validParams()
                         "Set to true to apply the scaling to the normal velocity. See "
                         "documentation for more information.");
 
+  params.addParam<bool>("use_hydrostatic_correction",
+                        false,
+                        "Set to true to use the slope reconstruction of the flow channel "
+                        "solution at the junction faces, with the junction solution moved "
+                        "hydrostatically to the faces. See documentation for more information.");
+  params.addParam<MooseEnum>("scheme",
+                             SlopeReconstruction1DInterface<true>::getSlopeReconstructionMooseEnum(
+                                 "None"),
+                             "Slope reconstruction scheme of the connected flow channels, used "
+                             "when 'use_hydrostatic_correction' is true");
+  params.addParam<RealVectorValue>("gravity_vector",
+                                   "Gravitational acceleration vector [m/s^2]; required if "
+                                   "'use_hydrostatic_correction' is true");
+  params.addParam<Point>("position",
+                         "Spatial position of the center of the junction [m]; required if "
+                         "'use_hydrostatic_correction' is true");
+
   params.addClassDescription(
       "Computes and caches flux and residual vectors for a 1-phase volume junction");
 
@@ -58,6 +76,7 @@ ADVolumeJunction1PhaseUserObject::validParams()
 
 ADVolumeJunction1PhaseUserObject::ADVolumeJunction1PhaseUserObject(const InputParameters & params)
   : ADVolumeJunctionBaseUserObject(params),
+    SlopeReconstruction1DInterface<true>(this),
 
     _A(adCoupledValue("A")),
     _A_linear(adCoupledValue("A_linear")),
@@ -70,12 +89,23 @@ ADVolumeJunction1PhaseUserObject::ADVolumeJunction1PhaseUserObject(const InputPa
 
     _apply_velocity_scaling(getParam<bool>("apply_velocity_scaling")),
 
+    _use_hydrostatic_correction(getParam<bool>("use_hydrostatic_correction")),
+    _gravity_vector(isParamValid("gravity_vector") ? getParam<RealVectorValue>("gravity_vector")
+                                                   : RealVectorValue(0, 0, 0)),
+    _position(isParamValid("position") ? getParam<Point>("position") : Point(0, 0, 0)),
+
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
   _flow_variable_names.resize(THMVACE1D::N_FLUX_OUTPUTS);
   _flow_variable_names[THMVACE1D::RHOA] = "rhoA";
   _flow_variable_names[THMVACE1D::RHOUA] = "rhouA";
   _flow_variable_names[THMVACE1D::RHOEA] = "rhoEA";
+
+  _U_vars.resize(THMVACE1D::N_FLUX_INPUTS);
+  _U_vars[THMVACE1D::RHOA] = getVar("rhoA", 0);
+  _U_vars[THMVACE1D::RHOUA] = getVar("rhouA", 0);
+  _U_vars[THMVACE1D::RHOEA] = getVar("rhoEA", 0);
+  _U_vars[THMVACE1D::AREA] = getVar("A", 0);
 
   _scalar_variable_names.resize(VolumeJunction1Phase::N_EQ);
   _scalar_variable_names[VolumeJunction1Phase::RHOV_INDEX] = "rhoV";
@@ -94,6 +124,11 @@ ADVolumeJunction1PhaseUserObject::ADVolumeJunction1PhaseUserObject(const InputPa
   _numerical_flux_uo.resize(_n_connections);
   for (std::size_t i = 0; i < _n_connections; i++)
     _numerical_flux_uo[i] = &getUserObjectByName<ADNumericalFlux3EqnBase>(_numerical_flux_names[i]);
+
+  if (_use_hydrostatic_correction && (!isParamValid("gravity_vector") || !isParamValid("position")))
+    mooseError(name(),
+               ": 'gravity_vector' and 'position' are required when "
+               "'use_hydrostatic_correction' is true.");
 }
 
 void
@@ -104,18 +139,11 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
   const RealVectorValue ni = di * din;
   const Real nJi_dot_di = -din;
 
-  // The flow channel state is evaluated at the connection, where the area is A_linear, so that
-  // the junction and the flow channel exchange the same flux, as on flow channel interior faces.
-  const ADReal A_ratio = _A_linear[0] / _A[0];
-  std::vector<ADReal> Ui(THMVACE3D::N_FLUX_INPUTS, 0.);
-  Ui[THMVACE3D::RHOA] = _rhoA[0] * A_ratio;
-  Ui[THMVACE3D::RHOUA] = _rhouA[0] * A_ratio * di(0);
-  Ui[THMVACE3D::RHOVA] = _rhouA[0] * A_ratio * di(1);
-  Ui[THMVACE3D::RHOWA] = _rhouA[0] * A_ratio * di(2);
-  Ui[THMVACE3D::RHOEA] = _rhoEA[0] * A_ratio;
-  Ui[THMVACE3D::AREA] = _A_linear[0];
+  const auto Ui = computeFlowChannelFaceSolution();
+  const Real g_dot_dxJ =
+      _use_hydrostatic_correction ? _gravity_vector * (_q_point[0] - _position) : 0.0;
 
-  const auto flux_3d = compute3DFlux(*(_numerical_flux_uo[c]), Ui, ni);
+  const auto flux_3d = compute3DFlux(*(_numerical_flux_uo[c]), Ui, ni, g_dot_dxJ);
 
   _flux[c].resize(THMVACE1D::N_FLUX_OUTPUTS);
   _flux[c][THMVACE1D::MASS] = flux_3d[THMVACE3D::MASS] * nJi_dot_di;
@@ -123,16 +151,114 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
   _flux[c][THMVACE1D::ENERGY] = flux_3d[THMVACE3D::ENERGY] * nJi_dot_di;
 
   const bool is_primary_connection = (c == 0);
-  const auto residual = computeResidual(flux_3d, Ui, ni, is_primary_connection);
+  const auto residual = computeResidual(flux_3d, Ui, ni, is_primary_connection, g_dot_dxJ);
 
   for (const auto i : index_range(_residual))
     _residual[i] += residual[i];
 }
 
 std::vector<ADReal>
+ADVolumeJunction1PhaseUserObject::computeElementPrimitiveVariables(const Elem * elem) const
+{
+  const auto U =
+      FlowModel1PhaseUtils::getElementalSolutionVector<true>(elem, _U_vars, _is_implicit);
+  return FlowModel1PhaseUtils::computePrimitiveSolutionVector<true>(U, _fp);
+}
+
+std::vector<ADReal>
+ADVolumeJunction1PhaseUserObject::computeFlowChannelFaceSolution() const
+{
+  const RealVectorValue di = _dir[0];
+
+  // The flow channel state is evaluated at the connection, where the area is A_linear, so that
+  // the junction and the flow channel exchange the same flux, as on flow channel interior faces.
+  const ADReal A_ratio = _A_linear[0] / _A[0];
+  ADReal rhoA = _rhoA[0] * A_ratio;
+  ADReal rhouA = _rhouA[0] * A_ratio;
+  ADReal rhoEA = _rhoEA[0] * A_ratio;
+
+  if (_use_hydrostatic_correction)
+  {
+    // The element next to the junction has one neighbor only, so the junction is used as the
+    // other neighbor of the slope reconstruction. Notes:
+    // - the junction is placed at the mirror point of the cell center across the face, and its
+    // solution is moved to that point along the hydrostatic balance, so that the two one-sided
+    // slopes agree for a fluid at rest;
+    // - the limiter is the one of the connected flow channels ('scheme').
+    const Point x_elem = _current_elem->vertex_average();
+    const Point x_face = _q_point[0];
+    const Point x_ghost = 2.0 * x_face - x_elem;
+
+    const auto W_elem = computeElementPrimitiveVariables(_current_elem);
+
+    std::vector<std::vector<ADReal>> W_neighbor;
+    std::vector<Point> x_neighbor;
+    getNeighborPrimitiveVariables(_current_elem, W_neighbor, x_neighbor);
+
+    ADReal rhoJ, eJ, pJ;
+    ADRealVectorValue uvecJ;
+    computeJunctionSolution(_gravity_vector * (x_ghost - _position), rhoJ, uvecJ, eJ, pJ);
+    std::vector<ADReal> W_ghost(THMVACE1D::N_PRIM_VARS);
+    W_ghost[THMVACE1D::PRESSURE] = pJ;
+    W_ghost[THMVACE1D::VELOCITY] = uvecJ * di;
+    W_ghost[THMVACE1D::TEMPERATURE] = _fp.T_from_v_e(1.0 / rhoJ, eJ);
+    W_neighbor.push_back(W_ghost);
+    x_neighbor.push_back(x_ghost);
+
+    const auto slopes = getElementSlopes(W_elem, x_elem, di, W_neighbor, x_neighbor);
+    const Real delta_x = (x_face - x_elem) * di;
+    auto W_face = W_elem;
+    for (const auto m : make_range(THMVACE1D::N_PRIM_VARS))
+      W_face[m] += slopes[m] * delta_x;
+
+    const auto U_face =
+        FlowModel1PhaseUtils::computeConservativeSolutionVector<true>(W_face, _A_linear[0], _fp);
+    rhoA = U_face[THMVACE1D::RHOA];
+    rhouA = U_face[THMVACE1D::RHOUA];
+    rhoEA = U_face[THMVACE1D::RHOEA];
+  }
+
+  std::vector<ADReal> Ui(THMVACE3D::N_FLUX_INPUTS, 0.);
+  Ui[THMVACE3D::RHOA] = rhoA;
+  Ui[THMVACE3D::RHOUA] = rhouA * di(0);
+  Ui[THMVACE3D::RHOVA] = rhouA * di(1);
+  Ui[THMVACE3D::RHOWA] = rhouA * di(2);
+  Ui[THMVACE3D::RHOEA] = rhoEA;
+  Ui[THMVACE3D::AREA] = _A_linear[0];
+
+  return Ui;
+}
+
+void
+ADVolumeJunction1PhaseUserObject::computeJunctionSolution(const Real g_dot_dx,
+                                                          ADReal & rhoJ,
+                                                          ADRealVectorValue & uvecJ,
+                                                          ADReal & eJ,
+                                                          ADReal & pJ) const
+{
+  const auto & rhoV = _cached_junction_var_values[VolumeJunction1Phase::RHOV_INDEX];
+  const auto & rhouV = _cached_junction_var_values[VolumeJunction1Phase::RHOUV_INDEX];
+  const auto & rhovV = _cached_junction_var_values[VolumeJunction1Phase::RHOVV_INDEX];
+  const auto & rhowV = _cached_junction_var_values[VolumeJunction1Phase::RHOWV_INDEX];
+  const auto & rhoEV = _cached_junction_var_values[VolumeJunction1Phase::RHOEV_INDEX];
+
+  rhoJ = rhoV / _volume;
+  uvecJ = ADRealVectorValue(rhouV / rhoV, rhovV / rhoV, rhowV / rhoV);
+  eJ = rhoEV / rhoV - 0.5 * uvecJ * uvecJ;
+  pJ = _fp.p_from_v_e(1.0 / rhoJ, eJ);
+
+  if (_use_hydrostatic_correction)
+  {
+    pJ += rhoJ * g_dot_dx;
+    eJ = _fp.e_from_p_rho(pJ, rhoJ);
+  }
+}
+
+std::vector<ADReal>
 ADVolumeJunction1PhaseUserObject::compute3DFlux(const ADNumericalFlux3EqnBase & numerical_flux,
                                                 const std::vector<ADReal> & Ui,
-                                                const RealVectorValue & ni) const
+                                                const RealVectorValue & ni,
+                                                const Real g_dot_dxJ) const
 {
   using std::abs, std::max, std::min;
 
@@ -149,6 +275,10 @@ ADVolumeJunction1PhaseUserObject::compute3DFlux(const ADNumericalFlux3EqnBase & 
   const auto & rhowV = _cached_junction_var_values[VolumeJunction1Phase::RHOWV_INDEX];
   const auto & rhoEV = _cached_junction_var_values[VolumeJunction1Phase::RHOEV_INDEX];
 
+  ADReal rhoJ, eJ, pJ;
+  ADRealVectorValue uvecJ;
+  computeJunctionSolution(g_dot_dxJ, rhoJ, uvecJ, eJ, pJ);
+
   std::vector<ADReal> UJi(THMVACE3D::N_FLUX_INPUTS, 0.);
   UJi[THMVACE3D::RHOA] = rhoV / _volume * Ai;
   if (_apply_velocity_scaling)
@@ -162,10 +292,7 @@ ADVolumeJunction1PhaseUserObject::compute3DFlux(const ADNumericalFlux3EqnBase & 
     const ADRealVectorValue uveci(rhouAi / rhoAi, rhovAi / rhoAi, rhowAi / rhoAi);
     const ADReal uni = uveci * nJi;
 
-    const ADReal rhoJ = rhoV / _volume;
     const ADReal vJ = 1.0 / rhoJ;
-    const ADRealVectorValue uvecJ(rhouV / rhoV, rhovV / rhoV, rhowV / rhoV);
-    const ADReal eJ = rhoEV / rhoV - 0.5 * uvecJ * uvecJ;
 
     const ADReal unJ = uvecJ * nJi;
     const ADReal ut1J = uvecJ * t1;
@@ -191,6 +318,13 @@ ADVolumeJunction1PhaseUserObject::compute3DFlux(const ADNumericalFlux3EqnBase & 
     UJi[THMVACE3D::RHOWA] = rhoJ * uvecJ_mod(2) * Ai;
     UJi[THMVACE3D::RHOEA] = rhoJ * EJ_mod * Ai;
   }
+  else if (_use_hydrostatic_correction)
+  {
+    UJi[THMVACE3D::RHOUA] = rhoJ * uvecJ(0) * Ai;
+    UJi[THMVACE3D::RHOVA] = rhoJ * uvecJ(1) * Ai;
+    UJi[THMVACE3D::RHOWA] = rhoJ * uvecJ(2) * Ai;
+    UJi[THMVACE3D::RHOEA] = rhoJ * (eJ + 0.5 * uvecJ * uvecJ) * Ai;
+  }
   else
   {
     UJi[THMVACE3D::RHOUA] = rhouV / _volume * Ai;
@@ -210,7 +344,8 @@ std::vector<ADReal>
 ADVolumeJunction1PhaseUserObject::computeResidual(const std::vector<ADReal> & flux_3d,
                                                   const std::vector<ADReal> & Ui,
                                                   const RealVectorValue & ni,
-                                                  bool is_primary_connection) const
+                                                  bool is_primary_connection,
+                                                  const Real g_dot_dxJ) const
 {
   using std::abs;
 
@@ -221,17 +356,13 @@ ADVolumeJunction1PhaseUserObject::computeResidual(const std::vector<ADReal> & fl
 
   const auto & Ai = Ui[THMVACE3D::AREA];
 
-  const auto & rhoV = _cached_junction_var_values[VolumeJunction1Phase::RHOV_INDEX];
-  const auto & rhouV = _cached_junction_var_values[VolumeJunction1Phase::RHOUV_INDEX];
-  const auto & rhovV = _cached_junction_var_values[VolumeJunction1Phase::RHOVV_INDEX];
-  const auto & rhowV = _cached_junction_var_values[VolumeJunction1Phase::RHOWV_INDEX];
-  const auto & rhoEV = _cached_junction_var_values[VolumeJunction1Phase::RHOEV_INDEX];
-
-  const ADReal rhoJ = rhoV / _volume;
-  const ADReal vJ = 1.0 / rhoJ;
-  const ADRealVectorValue uvecJ(rhouV / rhoV, rhovV / rhoV, rhowV / rhoV);
-  const ADReal eJ = rhoEV / rhoV - 0.5 * uvecJ * uvecJ;
-  const ADReal pJ = _fp.p_from_v_e(vJ, eJ);
+  // The wall pressure term uses the junction pressure at the face. With the hydrostatic
+  // correction, this is the pressure moved from the junction center to the face. The gravity
+  // force on the junction volume is not added: with a hydrostatic pressure on the walls, it
+  // cancels with the wall term, and only the face pressures remain. See documentation.
+  ADReal rhoJ, eJ, pJ;
+  ADRealVectorValue uvecJ;
+  computeJunctionSolution(g_dot_dxJ, rhoJ, uvecJ, eJ, pJ);
 
   std::vector<ADReal> residual(_n_scalar_eq, 0.0);
 
