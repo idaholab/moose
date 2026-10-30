@@ -75,14 +75,14 @@ distributeSubdomainProjection(mfem::ParGridFunction & gf,
   gcomm.Reduce<int>(counter.HostReadWrite(), mfem::GroupCommunicator::Sum);
   gcomm.Reduce<mfem::real_t>(values.HostReadWrite(), mfem::GroupCommunicator::Sum);
 
-  // Write through the host pointer obtained first, so a valid device copy of gf is
-  // brought to the host before it is overwritten rather than after.
-  mfem::real_t * const gf_data = gf.HostReadWrite();
+  // Ensure host data is up-to-date before writing to it.
+  gf.HostReadWrite();
+
   for (const auto i : libMesh::make_range(gf.Size()))
     if (counter[i])
-      gf_data[i] = values(i) / counter[i];
+      gf(i) = values(i) / counter[i];
 
-  gcomm.Bcast<mfem::real_t>(gf_data);
+  gcomm.Bcast<mfem::real_t>(gf.HostReadWrite());
 }
 
 /// Shared body of the scalar and vector subdomain projections.

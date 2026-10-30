@@ -22,10 +22,8 @@
  * removing the gradients of the higher order H1 functions. This makes curl-curl
  * systems with no (or only partial) mass regularization solvable.
  *
- * The boundaries on which essential (tangential Dirichlet) conditions are
- * applied to the variable are taken from the equation system: their edges are
- * seeded into the spanning forest so the interior gauge stays compatible with
- * the boundary conditions rather than over-constraining them.
+ * Constrained edges are seeded into the spanning forest so the interior gauge
+ * stays compatible with the constraints rather than over-constraining them.
  *
  * The 'block' parameter restricts the gauge to the given subdomains, for the
  * case where another term of the weak form already removes the null space
