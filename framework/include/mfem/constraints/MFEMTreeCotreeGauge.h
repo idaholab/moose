@@ -70,10 +70,10 @@ public:
 private:
   /// Gauged true dofs of the most recent trueDofs() call.
   mfem::Array<int> _tdofs;
-  /// Mesh and FE space sequence numbers _tdofs was built for. Both counters are
-  /// bumped by MFEM on h- and p-refinement, so comparing them invalidates the
-  /// cache exactly when the gauge could have changed. -1 marks "never built".
-  long _mesh_sequence = -1;
+  /// FE space sequence number _tdofs was built for. MFEM bumps it whenever the
+  /// space is updated after h- or p-refinement, including refinement of the mesh,
+  /// so comparing it invalidates the cache exactly when the gauge could have
+  /// changed. -1 marks "never built".
   long _fespace_sequence = -1;
 };
 }
