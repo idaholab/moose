@@ -35,7 +35,7 @@ nx = 64
 [UserObjects]
   [TreeBuilder]
     type = SBMSurfaceMeshBuilder
-    surface_mesh = shift_boundary_mesh
+    interface_mesh = shift_boundary_mesh
   []
   [distance_to_surface]
     type = ShortestDistanceToSurface
@@ -44,9 +44,13 @@ nx = 64
 []
 
 [Functions]
+  inactive = 'constructor_test'
   [dist_star]
     type = UnsignedDistanceToSurfaceMesh
     builder = TreeBuilder
+  []
+  [constructor_test]
+    type = UnsignedDistanceToSurfaceMesh
   []
 []
 

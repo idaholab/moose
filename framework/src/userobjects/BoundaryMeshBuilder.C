@@ -18,12 +18,12 @@ BoundaryMeshBuilder::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription(
-      "Owns a saved surface (boundary) mesh and the SurfaceElement wrappers built from it, "
+      "Owns a saved boundary mesh and the SurfaceElement wrappers built from it, "
       "for use by point-containment and distance user objects.");
 
-  params.addRequiredParam<std::string>(
-      "surface_mesh",
-      "The name of the surface mesh saved via the MeshGenerator's `save_with_name` parameter.");
+  params.addRequiredParam<MeshGeneratorName>(
+      "boundary_mesh",
+      "The name of the boundary mesh saved via the MeshGenerator's `save_with_name` parameter.");
 
   params.addParam<bool>(
       "check_watertightness",
@@ -35,7 +35,7 @@ BoundaryMeshBuilder::validParams()
 
 BoundaryMeshBuilder::BoundaryMeshBuilder(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    _bnd_mesh_name(getParam<std::string>("surface_mesh")),
+    _bnd_mesh_name(getParam<MeshGeneratorName>("boundary_mesh")),
     _check_watertightness(getParam<bool>("check_watertightness")),
     _dim_embedding_mesh(_fe_problem.mesh().dimension() /*MooseMesh*/)
 {
@@ -56,8 +56,8 @@ BoundaryMeshBuilder::initialSetup()
   if (!_mesh->is_replicated())
     mooseError("BoundaryMeshBuilder '",
                name(),
-               "': the saved surface mesh is distributed. A serialized/replicated surface mesh is "
-               "required for point-containment queries.");
+               "': the saved boundary mesh is distributed. A serialized/replicated boundary mesh "
+               "is required for point-containment queries.");
 
   const auto expected_dim_embedding_mesh = _mesh->mesh_dimension() + 1;
   if (_dim_embedding_mesh != expected_dim_embedding_mesh)
@@ -65,7 +65,7 @@ BoundaryMeshBuilder::initialSetup()
                name(),
                "': the background mesh dimension (",
                _dim_embedding_mesh,
-               ") does not match the surface mesh dimension + 1 (",
+               ") does not match the boundary mesh dimension + 1 (",
                expected_dim_embedding_mesh,
                ").");
 

@@ -14,6 +14,7 @@
 #include "libmesh/enum_order.h"
 
 #include <functional>
+#include <optional>
 
 class Function;
 class FunctionInterface;
@@ -38,20 +39,61 @@ Real activeElementFraction(const Elem & elem,
 /// accepts a partially active element.
 bool isInactive(Real active_fraction, Real lambda);
 
-/// Measured activity state of a (possibly partial) element, used to classify it. All fields are
-/// raw measurements: the two node flags come from a nodal test and active_fraction from a
-/// quadrature test. They are complementary (neither implies the other): the node flags catch a
-/// surface that clips only a corner (fraction near one), and the fraction catches a surface
-/// enclosed in the interior (all nodes on one side).
-struct ElementActivity
+/// Measurements of how the retained domain occupies an element. The node flags and
+/// quadrature-based domain fraction are complementary: the node flags catch a surface that clips
+/// only a corner, while the fraction catches a surface enclosed within the element.
+struct ElementDomainOccupancy
 {
-  /// Whether all of the element's nodes are on the active (retained) side.
-  bool all_nodes_active;
-  /// Whether all of the element's nodes are on the inactive (removed) side.
-  bool all_nodes_inactive;
-  /// Fraction of the element's quadrature-weighted measure that is active, in [0, 1].
-  Real active_fraction;
+  /// Whether all element nodes lie in the retained domain.
+  bool all_nodes_in_domain;
+  /// Whether all element nodes lie outside the retained domain.
+  bool all_nodes_outside_domain;
+  /// Fraction of the element's quadrature-weighted measure occupied by the retained domain.
+  Real domain_fraction;
 };
+
+/// Measure how a domain occupies an element based on its nodes, quadrature points, and the
+/// in-domain policy.
+ElementDomainOccupancy
+elementDomainOccupancy(const Elem & elem,
+                       Order qrule_order,
+                       const std::function<bool(const libMesh::Point &)> & is_in_domain);
+
+/// Measure domain occupancy when boundary points are neither in nor outside the domain.
+ElementDomainOccupancy
+elementDomainOccupancy(const Elem & elem,
+                       Order qrule_order,
+                       const std::function<bool(const libMesh::Point &)> & is_in_domain,
+                       const std::function<bool(const libMesh::Point &)> & is_outside_domain);
+
+/// Policy for assigning partial elements to a dedicated intercepted subdomain.
+struct InterceptedSubdomainPolicy
+{
+  bool mark_intercepted;
+  SubdomainID subdomain_id;
+};
+
+/// A candidate subdomain and its occupancy of an element.
+struct SubdomainOccupancy
+{
+  SubdomainID subdomain_id;
+  ElementDomainOccupancy occupancy;
+};
+
+/// Select a subdomain based on how multiple candidate domains occupy an element.
+///
+/// A fully occupied candidate takes precedence. Otherwise, the candidate with the largest domain
+/// fraction is selected, with fuzzy ties resolved by the lowest subdomain ID. A partial candidate
+/// is accepted according to the intercepted-subdomain policy and lambda.
+///
+/// @param candidate_occupancies Candidate subdomain IDs and their measured element occupancies
+/// @param intercepted_policy Whether partial elements receive a dedicated subdomain ID, and that ID
+/// @param lambda Maximum fraction outside the selected domain for accepting a partial element
+/// @return The selected subdomain ID, or std::nullopt if no candidate subdomain is selected
+std::optional<SubdomainID>
+selectSubdomainFromOccupancies(const std::vector<SubdomainOccupancy> & candidate_occupancies,
+                               const InterceptedSubdomainPolicy & intercepted_policy,
+                               Real lambda);
 
 /// The subdomain IDs a (possibly partial) element can be labeled with.
 struct ClassificationSubdomains
@@ -61,16 +103,16 @@ struct ClassificationSubdomains
   SubdomainID intercepted;
 };
 
-/// Classify a (possibly partial) element into an inside/outside/intercepted subdomain.
+/// Classify an element from its retained-domain occupancy measurements.
 ///
-/// An element with all nodes active and a fully active measure is inside; one with all nodes
-/// inactive and a fully inactive measure is outside. A remaining (partial) element is assigned
+/// An element whose nodes and measure are entirely in the domain is inside; one whose nodes and
+/// measure are entirely outside the domain is outside. A remaining (partial) element is assigned
 /// the intercepted subdomain when mark_intercepted is true, and otherwise is resolved by the
 /// lambda threshold (see isInactive).
-SubdomainID classifyPartialElement(const ElementActivity & activity,
-                                   const ClassificationSubdomains & subdomains,
-                                   bool mark_intercepted,
-                                   Real lambda);
+SubdomainID classifySubdomainFromOccupancy(const ElementDomainOccupancy & occupancy,
+                                           const ClassificationSubdomains & subdomain_id_settings,
+                                           bool mark_intercepted,
+                                           Real lambda);
 
 /// Build a list of distance functions based on names specified in input.
 std::vector<const Function *>

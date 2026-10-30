@@ -32,7 +32,7 @@
 [UserObjects]
   [TreeBuilder]
     type = SBMSurfaceMeshBuilder
-    surface_mesh = boundary_mesh
+    interface_mesh = boundary_mesh
   []
   [distance_to_surface]
     type = ShortestDistanceToSurface
