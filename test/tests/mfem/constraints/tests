@@ -95,11 +95,38 @@
     capabilities = 'mfem'
   []
   [MFEMTreeCotreeGaugeHighOrder]
+    design = 'MFEMTreeCotreeGaugeEssentialConstraint.md'
+    requirement = 'The system shall be able to apply a tree-cotree gauge restricted to an unregularized subdomain that removes the gradient null space of a higher order H(curl) variable, including the gradients of the higher order H1 functions on edges, faces and elements, giving a partition-independent solution'
+    [tet_second_order]
+      type = CSVDiff
+      input = tree_cotree_gauge_high_order.i
+      csvdiff = tree_cotree_gauge_high_order_out.csv
+      detail = 'for a second order space on a tetrahedral mesh, and'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+    []
+    [hex_third_order]
+      type = CSVDiff
+      input = tree_cotree_gauge_high_order.i
+      cli_args = 'Mesh/file=../mesh/beam-hex.mesh '
+                 'FESpaces/HCurlFESpace/fec_order=THIRD '
+                 'FESpaces/HDivFESpace/fec_order=SECOND '
+                 'Outputs/file_base=tree_cotree_gauge_high_order_hex_out'
+      csvdiff = tree_cotree_gauge_high_order_hex_out.csv
+      detail = 'for a third order space on a hexahedral mesh.'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+    []
+  []
+  [MFEMTreeCotreeGaugeHighOrderTriangularFaces]
     type = RunException
     input = tree_cotree_gauge_high_order.i
-    expect_err = "requires a FIRST order H\(curl\) space"
+    cli_args = 'FESpaces/HCurlFESpace/fec_order=THIRD'
+    expect_err = "supports H\(curl\) spaces above SECOND order only on meshes without triangular faces"
     design = 'MFEMTreeCotreeGaugeEssentialConstraint.md'
-    requirement = 'The system shall report an error if a tree-cotree gauge is applied to an H(curl) variable whose finite element space is of higher than first order, since only the lowest-order edge degrees of freedom are gauged'
+    requirement = 'The system shall report an error if a tree-cotree gauge is applied to an H(curl) variable above second order on a mesh with triangular faces, on which the gauge could not be chosen independently of the mesh partitioning'
     capabilities = 'mfem'
   []
   [MFEMWeakFormConstraints]

@@ -38,6 +38,10 @@ public:
    * to zero, in addition to those already fixed by essential boundary conditions
    * or other essential constraints on the variable.
    *
+   * Every dof of each spanning forest edge is fixed. In a higher order space, each
+   * other gauged edge, face and element also has fixed a selection of its own dofs
+   * that removes the gradients of the H1 bubbles on it.
+   *
    * The seeded spanning forest is grown by a distributed Boruvka pass, so no
    * rank holds more than its own share of the mesh graph. Edges are weighted by
    * their canonical global endpoint ids, which are derived from the endpoint
@@ -49,8 +53,8 @@ public:
    *
    * @param constraint          the constraint requesting the gauge, used to report
    *                            errors against the right input block
-   * @param pfes                the ND space being solved on. Only the lowest-order
-   *                            (edge) dofs are gauged, so the space must be order 1
+   * @param pfes                the ND space being solved on. Above SECOND order the
+   *                            mesh must have no triangular faces
    * @param essential_tdofs     this rank's true dofs already fixed by essential
    *                            boundary conditions or other essential constraints
    *                            on the variable. Those edges seed the forest so the

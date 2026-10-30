@@ -20,12 +20,13 @@ MFEMTreeCotreeGaugeEssentialConstraint::validParams()
   InputParameters params = MFEMEssentialConstraint::validParams();
   params.addClassDescription(
       "Applies a tree-cotree gauge to an H(curl) (Nedelec) variable by strongly fixing the "
-      "lowest-order edge degrees of freedom on a spanning tree of the mesh to zero, removing the "
-      "gradient null space of a curl-curl operator. Edges on boundaries carrying an essential "
-      "condition on the variable seed the spanning forest so the gauge stays compatible with it. "
-      "Set 'block' to the subdomains to gauge; the complement is treated as already gauged and "
-      "only seeds the spanning forest. Leaving 'block' empty gauges the whole mesh. Requires a "
-      "FIRST order space.");
+      "edge degrees of freedom on a spanning tree of the mesh to zero, and in a higher order "
+      "space a selection of the degrees of freedom of every other edge, face and element, "
+      "removing the gradient null space of a curl-curl operator. Edges on boundaries carrying an "
+      "essential condition on the variable seed the spanning forest so the gauge stays "
+      "compatible with it. Set 'block' to the subdomains to gauge; the complement is treated as "
+      "already gauged and only seeds the spanning forest. Leaving 'block' empty gauges the "
+      "whole mesh. Above SECOND order, the mesh must have no triangular faces.");
   return params;
 }
 
