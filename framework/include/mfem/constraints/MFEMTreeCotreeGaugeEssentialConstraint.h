@@ -16,9 +16,11 @@
 
 /**
  * Removes the gradient null space of an H(curl) (Nedelec) variable by strongly
- * fixing the lowest-order edge degrees of freedom lying on a spanning tree of
- * the mesh graph to zero (a tree-cotree gauge). This makes curl-curl systems
- * with no (or only partial) mass regularization solvable.
+ * fixing the edge degrees of freedom lying on a spanning tree of the mesh graph
+ * to zero (a tree-cotree gauge). In a higher order space, a selection of the
+ * degrees of freedom of every other gauged edge, face and element is also fixed,
+ * removing the gradients of the higher order H1 functions. This makes curl-curl
+ * systems with no (or only partial) mass regularization solvable.
  *
  * The boundaries on which essential (tangential Dirichlet) conditions are
  * applied to the variable are taken from the equation system: their edges are
@@ -34,9 +36,8 @@
  * geometry-derived edge order, so the gauge is independent of the MPI
  * partitioning.
  *
- * Only the lowest-order edge dofs are gauged, so the variable's finite element
- * space must be order 1; a higher order space would keep the gradient modes
- * carried by its interior dofs and stay singular.
+ * Above SECOND order the mesh must have no triangular faces, on which the
+ * selection could not be made independently of the partitioning.
  */
 class MFEMTreeCotreeGaugeEssentialConstraint : public MFEMEssentialConstraint
 {

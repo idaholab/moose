@@ -9,11 +9,12 @@ It applies a *tree-cotree gauge* to a complex $H(\mathrm{curl})$ (first-kind Ned
 variable, removing the gradient null space of a frequency-domain curl-curl operator wherever
 no mass-like term is present to remove it.
 
-The set of edge degrees of freedom to fix is computed exactly as in the real case - a
+The set of degrees of freedom to fix is computed exactly as in the real case - a
 distributed Boruvka pass grows the unique minimum spanning forest of the mesh graph under a
 canonical, geometry-derived edge order, so the gauge is independent of the MPI partitioning
-(the implementation is shared through `Moose::MFEM::TreeCotreeGauge`). Here the
-**real and imaginary parts** of each gauged edge dof are both strongly set to zero.
+(the implementation is shared through `Moose::MFEM::TreeCotreeGauge`), and higher order
+spaces are handled as in [MFEMTreeCotreeGaugeEssentialConstraint.md]. Here the **real and imaginary parts** of each gauged
+dof are both strongly set to zero.
 
 Other essential conditions and the `block` parameter are handled as for the real
 constraint: edges already fixed by an essential boundary condition or another essential

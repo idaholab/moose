@@ -17,10 +17,26 @@ of the domain, that part of the operator retains the null space and the discrete
 cannot be solved without either an artificial regularization or a gauge.
 
 The constraint removes the null space by building a spanning tree of the mesh 1-skeleton
-(its vertices and edges) and strongly fixing the lowest-order edge degree of freedom on
-every tree edge to zero. The remaining "cotree" edge DOFs are exactly enough to represent
-any curl, so the gauged system is non-singular while the physical solution
+(its vertices and edges) and strongly fixing every edge degree of freedom on every tree
+edge to zero. The remaining "cotree" edge DOFs are exactly enough to represent any curl,
+so the gauged system is non-singular while the physical solution
 $\vec\nabla\times\vec u$ is unchanged.
+
+### Higher order spaces
+
+Above `FIRST` order, the null space also contains the gradients of the higher order
+$H^1$ "bubble" functions that vanish on the boundary of an edge, face or element. The
+gradient of such a bubble lives entirely in the $H(\mathrm{curl})$ DOFs of that edge, face or
+element, so the constraint additionally fixes, on every gauged edge, face and element, as
+many of its own DOFs as it carries bubbles. They are chosen on the reference element so that
+no nonzero bubble gradient vanishes on them. The selection on each edge and quadrilateral
+face is made in a frame fixed by the vertex coordinates, keeping the gauge independent of the
+partitioning.
+
+The DOFs of a triangular face are related between frames by a linear transformation rather
+than a permutation, so no selection on it is the same in every frame. Triangular faces only
+carry bubbles from `THIRD` order on, so above `SECOND` order the constraint rejects meshes with
+triangular faces (tetrahedra, prisms and pyramids).
 
 The forest is grown by a distributed Boruvka pass in which no rank ever holds more than its
 own share of the mesh graph. Each edge is keyed on its two endpoint coordinates, read from
@@ -35,7 +51,7 @@ was partitioned, without the construction ever being replicated.
 
 ### Seeding the forest from essential conditions
 
-Edges whose degree of freedom is already fixed, by an essential (tangential Dirichlet)
+Edges whose degrees of freedom are already fixed, by an essential (tangential Dirichlet)
 boundary condition or by another essential constraint on the variable, seed the spanning
 forest, so that the gauge stays compatible with those conditions instead of
 over-constraining them. The constraint takes these degrees of freedom from the equation
@@ -47,7 +63,8 @@ Where another term of the weak form already removes the null space, there is no 
 freedom left to fix and gauging anyway would over-constrain the solution. Set `block` to the
 subdomain(s) that do need gauging; all edges of the excluded elements, including those
 at the interface between gauged and non-gauged subdomains, then seed the spanning
-forest but are never gauged. Leaving `block` empty gauges the whole
+forest but are never gauged, and neither are the faces of the excluded elements. Leaving
+`block` empty gauges the whole
 mesh, which is correct only when the operator is genuinely unregularized everywhere.
 
 Getting this wrong is not a subtle effect: in the example below, gauging only the
@@ -62,8 +79,7 @@ and imaginary parts.
 
 ### Notes and limitations
 
-- The gauge acts on the lowest-order (edge) DOFs only. For `fec_order` greater than
-  `FIRST` the higher-order gradient modes are not removed.
+- Above `SECOND` order, the mesh must have no triangular faces.
 - The variable must be an $H(\mathrm{curl})$ (Nedelec) variable.
 - Conforming meshes only. Meshes with discontinuous nodes, such as periodic meshes, are
   rejected, because their vertices cannot be identified by coordinates.
