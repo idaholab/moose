@@ -205,10 +205,10 @@ RBE3Constraint::addExactConstraints(libMesh::DofMap & dof_map) const
     moment_inverse = moment.inverse();
   }
 
-  // Only the ranks with the reference node add its constraints
-  const auto local_reference_nodes = localNodes(_reference_boundary);
-  if (std::find(local_reference_nodes.begin(), local_reference_nodes.end(), reference.id) ==
-      local_reference_nodes.end())
+  // Only the owner of the reference node adds its constraints
+  const auto owned_reference_nodes = ownedNodes(_reference_boundary);
+  if (std::find(owned_reference_nodes.begin(), owned_reference_nodes.end(), reference.id) ==
+      owned_reference_nodes.end())
     return;
 
   const RankTwoTensor skew_d = skew(d);

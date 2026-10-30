@@ -120,10 +120,11 @@ TestMultiPointConstraint::gatherNodeDofs() const
 void
 TestMultiPointConstraint::addExactConstraints(libMesh::DofMap & dof_map) const
 {
-  // Collective, so every rank gathers before the ranks without the dependent node return
+  // Collective, so every rank gathers before the ranks that do not own the dependent node return
   const auto dofs = gatherNodeDofs();
 
-  if (!_mesh.queryNodePtr(_secondary_node))
+  const Node * const secondary_node = _mesh.queryNodePtr(_secondary_node);
+  if (!secondary_node || secondary_node->processor_id() != processor_id())
     return;
 
   libMesh::DofConstraintRow row;

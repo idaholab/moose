@@ -52,9 +52,9 @@ protected:
 
   /**
    * @param boundary The node set or side set holding the nodes
-   * @return The ids of the nodes of the boundary that are present on this rank
+   * @return The ids of the nodes of the boundary that this rank owns
    */
-  std::vector<dof_id_type> localNodes(const BoundaryName & boundary) const;
+  std::vector<dof_id_type> ownedNodes(const BoundaryName & boundary) const;
 
   /**
    * Gather every node of a boundary on every rank, sorted by id. Every rank must call this.
