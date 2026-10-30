@@ -69,6 +69,8 @@ protected:
 
   /// test function values (in QPs)
   const ADTemplateVariableTestValue<T> & _test;
+  /// test function values (in QPs) without possible displacement derivatives
+  const typename OutputTools<T>::VariableTestValue & _regular_test;
   /// gradients of test functions  (in QPs)
   const ADTemplateVariableTestGradient<T> & _grad_test;
 

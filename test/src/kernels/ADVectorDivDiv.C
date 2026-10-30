@@ -24,7 +24,7 @@ ADVectorDivDiv::validParams()
 
 ADVectorDivDiv::ADVectorDivDiv(const InputParameters & parameters)
   : ADVectorKernel(parameters),
-    _div_test(_var.divPhi()),
+    _div_test(_var.adDivPhi()),
     _div_v(isCoupled("v") ? adCoupledDiv("v") : _var.adDivSln()),
     _coeff(getParam<Real>("coeff"))
 {

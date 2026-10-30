@@ -23,7 +23,7 @@ public:
 
 protected:
   /// curl of the test function
-  const VectorVariableTestCurl & _curl_test;
+  const ADVectorVariableTestCurl & _curl_test;
 
   /**
    *  curl of the shape function

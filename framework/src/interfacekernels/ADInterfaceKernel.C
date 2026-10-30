@@ -78,7 +78,7 @@ ADInterfaceKernelTempl<T>::computeElemNeighResidual(Moose::DGResidualType type)
   else
     is_elem = false;
 
-  const ADTemplateVariableTestValue<T> & test_space = is_elem ? _test : _test_neighbor;
+  const typename OutputTools<T>::VariableTestValue & test_space = is_elem ? _test : _test_neighbor;
 
   if (is_elem)
     prepareVectorTag(_assembly, _var.number());
@@ -130,7 +130,7 @@ ADInterfaceKernelTempl<T>::computeElemNeighJacobian(Moose::DGJacobianType type)
   mooseAssert(type == Moose::ElementElement || type == Moose::NeighborNeighbor,
               "With AD you should need one call per side");
 
-  const ADTemplateVariableTestValue<T> & test_space =
+  const typename OutputTools<T>::VariableTestValue & test_space =
       (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
 
   std::vector<ADReal> residuals(test_space.size(), 0);
@@ -199,7 +199,7 @@ ADInterfaceKernelTempl<T>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
   mooseAssert(type == Moose::ElementElement || type == Moose::NeighborNeighbor,
               "With AD you should need one call per side");
 
-  const ADTemplateVariableTestValue<T> & test_space =
+  const typename OutputTools<T>::VariableTestValue & test_space =
       type == Moose::ElementElement ? _test : _test_neighbor;
 
   if (type == Moose::ElementElement)
