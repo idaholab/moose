@@ -123,7 +123,6 @@ omega_sigma = 1.0 # angular frequency * conductivity
 [Executioner]
   type = MFEMSteady
   device = cpu
-  assembly_level = legacy
 []
 
 [Postprocessors]

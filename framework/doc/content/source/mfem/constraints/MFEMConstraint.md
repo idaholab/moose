@@ -18,7 +18,7 @@ other's interface. They therefore derive from this class as *siblings*, each dec
 `ApplyConstraint`:
 
 - [MFEMEssentialConstraint.md] for real problems
-- [MFEMComplexEssentialConstraint.md] for complex (time-harmonic) problems
+- [MFEMComplexEssentialConstraint.md] for complex problems
 
 This mirrors the way [MFEMEssentialBC.md] and [MFEMComplexEssentialBC.md] both derive from
 `MFEMBoundaryCondition`. Applying a constraint of the wrong kind to a problem is reported as

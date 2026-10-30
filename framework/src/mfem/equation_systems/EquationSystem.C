@@ -174,8 +174,8 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
 
   // Extract which coupled variables are to be trivially eliminated and which are trial variables
   SetTrialVariableNames();
-  CheckConstrainedVariablesAreTrialVariables(_essential_bc_map, "an essential boundary condition");
-  CheckConstrainedVariablesAreTrialVariables(_essential_constraint_map, "an essential constraint");
+  CheckConstrainedVariablesAreTrialVariables(_essential_bc_map);
+  CheckConstrainedVariablesAreTrialVariables(_essential_constraint_map);
 
   for (auto & test_var_name : _test_var_names)
   {
@@ -260,7 +260,7 @@ void
 EquationSystem::ApplyEssentialConstraints()
 {
   _ess_tdof_lists.resize(_trial_var_names.size());
-  _ess_markers.resize(_trial_var_names.size());
+  _ess_bdr_markers.resize(_trial_var_names.size());
   for (const auto i : index_range(_trial_var_names))
   {
     const auto & trial_var_name = _trial_var_names.at(i);
@@ -273,7 +273,8 @@ EquationSystem::ApplyEssentialConstraints()
     trial_gf = _gfuncs->GetRef(trial_var_name);
 
     // Set strongly constrained DoFs of trial_gf and set essential bdr markers
-    ApplyEssentialConstraint(trial_var_name, trial_gf, _ess_markers.at(i), _ess_tdof_lists.at(i));
+    ApplyEssentialConstraint(
+        trial_var_name, trial_gf, _ess_bdr_markers.at(i), _ess_tdof_lists.at(i));
   }
 }
 
@@ -772,7 +773,7 @@ EquationSystem::GetEssentialBoundaryMarkers(const std::string & var_name)
 {
   for (const auto i : index_range(_trial_var_names))
     if (_trial_var_names.at(i) == var_name)
-      return _ess_markers.at(i);
+      return _ess_bdr_markers.at(i);
 
   mooseError("No essential boundary markers found for variable '", var_name, "'.");
 }

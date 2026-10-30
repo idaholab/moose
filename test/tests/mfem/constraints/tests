@@ -27,7 +27,7 @@
     input = tree_cotree_gauge_time_harmonic.i
     csvdiff = tree_cotree_gauge_time_harmonic_out.csv
     design = 'MFEMComplexTreeCotreeGaugeEssentialConstraint.md'
-    requirement = 'The system shall be able to apply a tree-cotree gauge to a complex (time-harmonic) H(curl) variable, removing the gradient null space of the curl-curl operator in an otherwise singular frequency-domain MFEM problem'
+    requirement = 'The system shall be able to apply a tree-cotree gauge to a complex H(curl) variable, removing the gradient null space of the curl-curl operator in an otherwise singular frequency-domain MFEM problem'
     capabilities = 'mfem'
     compute_devices = 'cpu'
     recover = false
@@ -73,7 +73,7 @@
   [MFEMComplexConstraintInRealProblem]
     type = RunException
     input = complex_constraint_in_real_problem.i
-    expect_err = "there is no corresponding complex equation system"
+    expect_err = "Unsupported constraint of name 'circle_interior' detected"
     design = 'MFEMComplexScalarEssentialConstraint.md'
     requirement = 'The system shall report an error if a complex essential constraint is applied in a real MFEM problem'
     capabilities = 'mfem'
@@ -81,7 +81,7 @@
   [MFEMRealConstraintInComplexProblem]
     type = RunException
     input = real_constraint_in_complex_problem.i
-    expect_err = "acts on a real variable and cannot be used in a complex"
+    expect_err = "Unsupported constraint of name 'circle_interior' detected"
     design = 'MFEMScalarEssentialConstraint.md'
     requirement = 'The system shall report an error if a real essential constraint is applied in a complex MFEM problem'
     capabilities = 'mfem'

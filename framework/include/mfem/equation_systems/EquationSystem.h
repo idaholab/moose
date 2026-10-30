@@ -204,13 +204,13 @@ protected:
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
 
-  /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
-  /// markers of all essential boundaries
+  /// Apply essential constraints associated with var_name to set true DoFs of trial_gf and update
+  /// markers
   virtual void ApplyEssentialConstraint(const std::string & var_name,
                                         mfem::ParGridFunction & trial_gf,
                                         mfem::Array<int> & global_bdr_markers,
                                         mfem::Array<int> & global_ess_tdofs);
-  /// Update all essentially constrained true DoF markers and values on boundaries
+  /// Update all essentially constrained true DoF markers and values
   virtual void ApplyEssentialConstraints();
   /// Perform trivial eliminations of coupled variables lacking corresponding test variables
   virtual void EliminateCoupledVariables();

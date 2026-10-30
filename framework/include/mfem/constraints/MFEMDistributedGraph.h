@@ -41,9 +41,8 @@ public:
 
 private:
   std::int64_t _n;
-  /// Ids per rank, rounded up so that _chunk times the constructor's nprocs is at
-  /// least _n. At least 1.
-  std::int64_t _chunk;
+  /// Number of ranks the ids are distributed over
+  int _nprocs;
 };
 
 /**

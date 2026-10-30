@@ -4,7 +4,7 @@
 
 ## Overview
 
-Complex (time-harmonic) counterpart of [MFEMTreeCotreeGaugeEssentialConstraint.md].
+Complex counterpart of [MFEMTreeCotreeGaugeEssentialConstraint.md].
 It applies a *tree-cotree gauge* to a complex $H(\mathrm{curl})$ (first-kind Nedelec)
 variable, removing the gradient null space of a frequency-domain curl-curl operator wherever
 no mass-like term is present to remove it.

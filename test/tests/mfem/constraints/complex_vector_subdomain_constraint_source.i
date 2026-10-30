@@ -1,4 +1,4 @@
-# Complex (time-harmonic) analogue of vector_subdomain_constraint_source.i. A
+# Complex analogue of vector_subdomain_constraint_source.i. A
 # complex first-kind Nedelec field E on the 2D hinomaru mesh is governed by
 # curl(curl E) + E = 0 with its tangential trace pinned to zero on the outer
 # boundary. An MFEMComplexVectorEssentialConstraint strongly constrains the real
@@ -77,7 +77,6 @@
 [Executioner]
   type = MFEMSteady
   device = cpu
-  assembly_level = legacy
 []
 
 [VectorPostprocessors]

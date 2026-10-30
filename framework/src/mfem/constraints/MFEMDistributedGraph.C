@@ -41,9 +41,7 @@ struct LabelQuery
 namespace Moose::MFEM
 {
 
-BlockDistribution::BlockDistribution(std::int64_t n, int nprocs) : _n(n), _nprocs(nprocs)
-{
-}
+BlockDistribution::BlockDistribution(std::int64_t n, int nprocs) : _n(n), _nprocs(nprocs) {}
 
 int
 BlockDistribution::owner(std::int64_t g) const

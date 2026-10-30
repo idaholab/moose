@@ -4,14 +4,14 @@
 
 ## Overview
 
-Strongly constrains a scalar variable within the subdomain(s) given by `block`, projecting
-it onto the `coefficient` coefficient. The true degrees of freedom in the constrained
-subdomain are added to the essential-DOF list, so the corresponding rows of the discrete
-system are eliminated in favour of the projected values. This is the volumetric analogue of
-an [MFEMScalarDirichletBC.md] and is useful for imposing a known interior value (for
-example fixing a field inside a solid region of the mesh).
+Strongly constrains a scalar variable within the subdomain(s) given by `block` to the
+projection of `coefficient` onto the variable's finite element space. The true degrees of
+freedom in the constrained subdomain are added to the essential-DOF list, so the corresponding
+rows of the discrete system are eliminated in favor of the projected values. This is the
+volumetric analogue of an [MFEMScalarDirichletBC.md] and is useful for imposing a known
+interior value (for example fixing a field inside a solid region of the mesh).
 
-For a complex (time-harmonic) variable use [MFEMComplexScalarEssentialConstraint.md].
+For a complex variable use [MFEMComplexScalarEssentialConstraint.md].
 
 ## Example Input File Syntax
 

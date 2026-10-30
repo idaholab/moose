@@ -21,13 +21,18 @@ MFEMComplexTreeCotreeGaugeEssentialConstraint::validParams()
   InputParameters params = MFEMComplexEssentialConstraint::validParams();
   params += MFEMBoundaryRestrictable::validParams();
   params.addClassDescription(
-      "Applies a tree-cotree gauge to a complex (time-harmonic) H(curl) (Nedelec) variable by "
+      "Applies a tree-cotree gauge to a complex H(curl) (Nedelec) variable by "
       "strongly fixing the real and imaginary parts of the lowest-order edge degrees of freedom on "
       "a spanning tree of the mesh to zero, removing the gradient null space of a curl-curl "
       "operator. List in 'boundary' the boundaries carrying a tangential Dirichlet condition on "
       "the variable. Set 'block' to the subdomains to gauge; the complement seeds the spanning "
       "forest but is not gauged. Leaving 'block' empty gauges the whole mesh. Requires a FIRST "
       "order space.");
+  params.setDocString(
+      "boundary",
+      "The boundaries (names or ids) on which a tangential Dirichlet condition is already "
+      "applied to the variable. These boundaries seed the spanning forest so the gauge stays "
+      "compatible with the condition. Defaults to no boundaries.");
   return params;
 }
 

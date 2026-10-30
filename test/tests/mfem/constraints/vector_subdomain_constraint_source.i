@@ -70,7 +70,6 @@
 [Executioner]
   type = MFEMSteady
   device = cpu
-  assembly_level = legacy
 []
 
 [VectorPostprocessors]
