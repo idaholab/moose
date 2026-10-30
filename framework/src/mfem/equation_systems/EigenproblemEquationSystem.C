@@ -71,20 +71,11 @@ EigenproblemEquationSystem::FormMassMatrix(EigenRHSCoefficient rhs_coefficient)
 
   if (fespace->GetTypicalFE()->GetRangeType() == mfem::FiniteElement::SCALAR)
   {
-    if (std::holds_alternative<mfem::MatrixCoefficient *>(rhs_coefficient))
-      mooseError("A matrix rhs_coefficient cannot be used with an H1 or L2 finite element space.");
-    auto & coef = *std::get<mfem::Coefficient *>(rhs_coefficient);
-    if (fespace->GetVDim() > 1)
-    {
-      // A vector space of scalar elements (e.g. vector H1) needs a mass block for each component,
-      // which MassIntegrator does not assemble.
-      auto * const integ = new mfem::VectorMassIntegrator(coef);
-      // Otherwise VectorMassIntegrator assumes as many components as there are space dimensions.
-      integ->SetVDim(fespace->GetVDim());
-      m->AddDomainIntegrator(integ);
-    }
-    else
-      m->AddDomainIntegrator(new mfem::MassIntegrator(coef));
+    auto * const integ = std::visit(
+        [](auto * coef) { return new mfem::VectorMassIntegrator(*coef); }, rhs_coefficient);
+    // Otherwise VectorMassIntegrator assumes as many components as there are space dimensions.
+    integ->SetVDim(fespace->GetVDim());
+    m->AddDomainIntegrator(integ);
   }
   else
     m->AddDomainIntegrator(std::visit(
