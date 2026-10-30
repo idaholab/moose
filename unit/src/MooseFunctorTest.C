@@ -41,6 +41,7 @@ public:
   bool supportsElemSideQpArg() const override { return true; }
 
 private:
+  using FunctorBase<T>::evaluate;
   ValueType evaluate(const ElemArg &, const StateArg &) const override final { return 0; }
   ValueType evaluate(const FaceArg &, const StateArg &) const override final { return 0; }
   ValueType evaluate(const ElemQpArg &, const StateArg &) const override final { return 0; }

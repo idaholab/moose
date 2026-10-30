@@ -186,6 +186,7 @@ public:
   ValueType operator()(const ElemSideQpArg & qp, const StateArg & state) const;
   ValueType operator()(const ElemPointArg & elem_point, const StateArg & state) const;
   ValueType operator()(const NodeArg & node, const StateArg & state) const;
+  ValueType operator()(const PointArg & point, const StateArg & state) const;
   ///@}
 
   ///@{
@@ -199,6 +200,7 @@ public:
   GradientType gradient(const ElemSideQpArg & qp, const StateArg & state) const;
   GradientType gradient(const ElemPointArg & elem_point, const StateArg & state) const;
   GradientType gradient(const NodeArg & node, const StateArg & state) const;
+  GradientType gradient(const PointArg & point, const StateArg & state) const;
   ///@}
 
   ///@{
@@ -212,6 +214,7 @@ public:
   DotType dot(const ElemSideQpArg & qp, const StateArg & state) const;
   DotType dot(const ElemPointArg & elem_point, const StateArg & state) const;
   DotType dot(const NodeArg & node, const StateArg & state) const;
+  DotType dot(const PointArg & point, const StateArg & state) const;
   ///@}
 
   ///@{
@@ -225,6 +228,7 @@ public:
   GradientType gradDot(const ElemSideQpArg & qp, const StateArg & state) const;
   GradientType gradDot(const ElemPointArg & elem_point, const StateArg & state) const;
   GradientType gradDot(const NodeArg & node, const StateArg & state) const;
+  GradientType gradDot(const PointArg & point, const StateArg & state) const;
   ///@}
 
   virtual void residualSetup() override;
@@ -332,6 +336,15 @@ protected:
   virtual ValueType evaluate(const NodeArg & node, const StateArg & state) const = 0;
 
   /**
+   * Evaluate the functor at a physical point without any mesh information. Functors that need mesh
+   * information, e.g. field variables, do not support this
+   */
+  virtual ValueType evaluate(const PointArg &, const StateArg &) const
+  {
+    mooseError("Evaluation at a point is not supported for functor " + functorName());
+  }
+
+  /**
    * Evaluate the functor gradient with a given element. Some example implementations of this
    * method could compute an element-average or evaluate at the element centroid
    */
@@ -382,6 +395,11 @@ protected:
   virtual GradientType evaluateGradient(const NodeArg &, const StateArg &) const
   {
     mooseError("Gradient at node not implemented for functor " + functorName());
+  }
+
+  virtual GradientType evaluateGradient(const PointArg &, const StateArg &) const
+  {
+    mooseError("Gradient at point not implemented for functor " + functorName());
   }
 
   /**
@@ -438,6 +456,11 @@ protected:
     mooseError("Time derivative at node not implemented for functor " + functorName());
   }
 
+  virtual DotType evaluateDot(const PointArg &, const StateArg &) const
+  {
+    mooseError("Time derivative at point not implemented for functor " + functorName());
+  }
+
   /**
    * Evaluate the functor gradient-dot with a given element. Some example implementations of this
    * method could compute an element-average or evaluate at the element centroid
@@ -490,6 +513,11 @@ protected:
   virtual GradientType evaluateGradDot(const NodeArg &, const StateArg &) const
   {
     mooseError("Gradient-dot at node not implemented for functor " + functorName());
+  }
+
+  virtual GradientType evaluateGradDot(const PointArg &, const StateArg &) const
+  {
+    mooseError("Gradient-dot at point not implemented for functor " + functorName());
   }
   ///@}
 
@@ -734,6 +762,13 @@ FunctorBase<T>::operator()(const NodeArg & node, const StateArg & state) const
 }
 
 template <typename T>
+typename FunctorBase<T>::ValueType
+FunctorBase<T>::operator()(const PointArg & point, const StateArg & state) const
+{
+  return evaluate(point, state);
+}
+
+template <typename T>
 void
 FunctorBase<T>::checkFace(const Moose::FaceArg &
 #if DEBUG
@@ -892,6 +927,13 @@ FunctorBase<T>::gradient(const NodeArg & node, const StateArg & state) const
 }
 
 template <typename T>
+typename FunctorBase<T>::GradientType
+FunctorBase<T>::gradient(const PointArg & point, const StateArg & state) const
+{
+  return evaluateGradient(point, state);
+}
+
+template <typename T>
 typename FunctorBase<T>::DotType
 FunctorBase<T>::dot(const ElemArg & elem, const StateArg & state) const
 {
@@ -935,6 +977,13 @@ FunctorBase<T>::dot(const NodeArg & node, const StateArg & state) const
 }
 
 template <typename T>
+typename FunctorBase<T>::DotType
+FunctorBase<T>::dot(const PointArg & point, const StateArg & state) const
+{
+  return evaluateDot(point, state);
+}
+
+template <typename T>
 typename FunctorBase<T>::GradientType
 FunctorBase<T>::gradDot(const ElemArg & elem, const StateArg & state) const
 {
@@ -975,6 +1024,13 @@ typename FunctorBase<T>::GradientType
 FunctorBase<T>::gradDot(const NodeArg & node, const StateArg & state) const
 {
   return evaluateGradDot(node, state);
+}
+
+template <typename T>
+typename FunctorBase<T>::GradientType
+FunctorBase<T>::gradDot(const PointArg & point, const StateArg & state) const
+{
+  return evaluateGradDot(point, state);
 }
 
 template <typename T>
@@ -1176,6 +1232,10 @@ protected:
   {
     return _wrapped->operator()(node, state);
   }
+  virtual ValueType evaluate(const PointArg & point, const StateArg & state) const override
+  {
+    return _wrapped->operator()(point, state);
+  }
 
   virtual GradientType evaluateGradient(const ElemArg & elem, const StateArg & state) const override
   {
@@ -1203,6 +1263,11 @@ protected:
   {
     return _wrapped->gradient(node, state);
   }
+  virtual GradientType evaluateGradient(const PointArg & point,
+                                        const StateArg & state) const override
+  {
+    return _wrapped->gradient(point, state);
+  }
 
   virtual DotType evaluateDot(const ElemArg & elem, const StateArg & state) const override
   {
@@ -1228,6 +1293,10 @@ protected:
   virtual DotType evaluateDot(const NodeArg & node, const StateArg & state) const override
   {
     return _wrapped->dot(node, state);
+  }
+  virtual DotType evaluateDot(const PointArg & point, const StateArg & state) const override
+  {
+    return _wrapped->dot(point, state);
   }
 
   virtual GradientType evaluateGradDot(const ElemArg & elem, const StateArg & state) const override
@@ -1255,6 +1324,11 @@ protected:
   virtual GradientType evaluateGradDot(const NodeArg & node, const StateArg & state) const override
   {
     return _wrapped->gradDot(node, state);
+  }
+  virtual GradientType evaluateGradDot(const PointArg & point,
+                                       const StateArg & state) const override
+  {
+    return _wrapped->gradDot(point, state);
   }
   ///@}
 
@@ -1301,6 +1375,7 @@ private:
   ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override { return _value; }
   ValueType evaluate(const ElemPointArg &, const StateArg &) const override { return _value; }
   ValueType evaluate(const NodeArg &, const StateArg &) const override { return _value; }
+  ValueType evaluate(const PointArg &, const StateArg &) const override { return _value; }
 
   GradientType evaluateGradient(const ElemArg &, const StateArg &) const override { return 0; }
   GradientType evaluateGradient(const FaceArg &, const StateArg &) const override { return 0; }
@@ -1311,6 +1386,7 @@ private:
   }
   GradientType evaluateGradient(const ElemPointArg &, const StateArg &) const override { return 0; }
   GradientType evaluateGradient(const NodeArg &, const StateArg &) const override { return 0; }
+  GradientType evaluateGradient(const PointArg &, const StateArg &) const override { return 0; }
 
   DotType evaluateDot(const ElemArg &, const StateArg &) const override { return 0; }
   DotType evaluateDot(const FaceArg &, const StateArg &) const override { return 0; }
@@ -1318,6 +1394,7 @@ private:
   DotType evaluateDot(const ElemSideQpArg &, const StateArg &) const override { return 0; }
   DotType evaluateDot(const ElemPointArg &, const StateArg &) const override { return 0; }
   DotType evaluateDot(const NodeArg &, const StateArg &) const override { return 0; }
+  DotType evaluateDot(const PointArg &, const StateArg &) const override { return 0; }
 
   GradientType evaluateGradDot(const ElemArg &, const StateArg &) const override { return 0; }
   GradientType evaluateGradDot(const FaceArg &, const StateArg &) const override { return 0; }
@@ -1325,6 +1402,7 @@ private:
   GradientType evaluateGradDot(const ElemSideQpArg &, const StateArg &) const override { return 0; }
   GradientType evaluateGradDot(const ElemPointArg &, const StateArg &) const override { return 0; }
   GradientType evaluateGradDot(const NodeArg &, const StateArg &) const override { return 0; }
+  GradientType evaluateGradDot(const PointArg &, const StateArg &) const override { return 0; }
 
 private:
   ValueType _value;
@@ -1352,6 +1430,7 @@ public:
   bool supportsElemSideQpArg() const override final { return false; }
 
 private:
+  using FunctorBase<T>::evaluate;
   ValueType evaluate(const ElemArg &, const StateArg &) const override
   {
     mooseError("We should never get here. If you have, contact a MOOSE developer and tell them "
