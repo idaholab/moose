@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMConstraintUtils.h"
+#include "MooseError.h"
 #include "libmesh/int_range.h"
 
 namespace
