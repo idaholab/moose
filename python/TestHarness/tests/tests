@@ -238,6 +238,13 @@
     requirement = "The system shall keep output that is not valid UTF-8 as escapes and describe the location of each invalid sequence."
     issues = '#34111'
   []
+  [null_output]
+    type = PythonUnitTest
+    input = test_NullOutput.py
+    min_slots = 2 # calls TestHarness, which could use threads
+    requirement = "The system shall flag NULL characters in the output of executed commands as invalid output characters with a caveat, and determine the test result from the test's own checks."
+    issues = '#34111'
+  []
   [failed_tests]
     type = PythonUnitTest
     input = test_FailedTests.py

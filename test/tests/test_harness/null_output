@@ -1,0 +1,6 @@
+[Tests]
+  [null_output]
+    type = RunCommand
+    command = "printf 'before\000after\n'"
+  []
+[]
