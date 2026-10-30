@@ -64,7 +64,8 @@
   []
   [MFEMInvalidConstraintBlock]
     type = RunException
-    input = invalid_constraint_block.i
+    input = subdomain_constraint_source.i
+    cli_args = 'Constraints/circle_interior/block=99'
     expect_err = "the mesh has no block with ID 99"
     design = 'MFEMScalarEssentialConstraint.md'
     requirement = 'The system shall report an error if an essential constraint in an MFEM problem is restricted to a subdomain that the mesh does not contain'
@@ -103,7 +104,7 @@
       csvdiff = tree_cotree_gauge_high_order_out.csv
       detail = 'for a second order space on a tetrahedral mesh, and'
       capabilities = 'mfem'
-      compute_devices = 'cpu'
+      compute_devices = 'cpu cuda'
       recover = false
     []
     [hex_third_order]
@@ -236,18 +237,17 @@
       csvdiff = tree_cotree_gauge_with_constraint_out.csv
       detail = 'when the gauge spans the whole mesh, including the constrained subdomain, as'
       capabilities = 'mfem'
-      compute_devices = 'cpu'
+      compute_devices = 'cpu cuda'
       recover = false
     []
     [excluded_block]
       type = CSVDiff
       input = tree_cotree_gauge_with_constraint.i
-      cli_args = 'Constraints/tree_cotree_gauge/block=1 '
-                 'Outputs/file_base=tree_cotree_gauge_with_constraint_excluded_out'
-      csvdiff = tree_cotree_gauge_with_constraint_excluded_out.csv
+      cli_args = 'Constraints/tree_cotree_gauge/block=1'
+      csvdiff = tree_cotree_gauge_with_constraint_out.csv
       detail = 'when the constrained subdomain is excluded from the gauge.'
       capabilities = 'mfem'
-      compute_devices = 'cpu'
+      compute_devices = 'cpu cuda'
       recover = false
     []
   []
