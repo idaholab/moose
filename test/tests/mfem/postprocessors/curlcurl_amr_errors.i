@@ -19,6 +19,18 @@
     fec_type = ND
     fec_order = SECOND
   []
+  # The curl of a Nedelec field is a scalar in 2D, so the Zienkiewicz-Zhu flux spaces are scalar
+  [FluxFESpace]
+    type = MFEMScalarFESpace
+    fec_type = L2
+    fec_order = SECOND
+    basis = GaussLegendre
+  []
+  [SmoothFluxFESpace]
+    type = MFEMScalarFESpace
+    fec_type = H1
+    fec_order = SECOND
+  []
 []
 
 [Variables]
@@ -76,6 +88,8 @@
       type = MFEML2ZienkiewiczZhuIndicator
       variable = e_field
       kernel = curlcurl
+      flux_fespace = FluxFESpace
+      smooth_flux_fespace = SmoothFluxFESpace
     []
   []
   [Markers]
