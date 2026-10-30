@@ -13,6 +13,7 @@
 #include "FEProblem.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
+#include "MooseVariableDependencyInterface.h"
 #include "PetscSupport.h"
 #include "Factory.h"
 #include "ParallelUniqueId.h"
@@ -314,6 +315,7 @@ NonlinearSystemBase::initialSetup()
     _kokkos_kernels.initialSetup();
     _kokkos_nodal_kernels.initialSetup();
     _kokkos_integrated_bcs.initialSetup();
+    _kokkos_constraints.initialSetup();
     _kokkos_nodal_bcs.initialSetup();
 #endif
   }
@@ -397,6 +399,7 @@ NonlinearSystemBase::timestepSetup()
   _kokkos_kernels.timestepSetup();
   _kokkos_nodal_kernels.timestepSetup();
   _kokkos_integrated_bcs.timestepSetup();
+  _kokkos_constraints.timestepSetup();
   _kokkos_nodal_bcs.timestepSetup();
 #endif
 }
@@ -433,6 +436,7 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
   _kokkos_kernels.customSetup(exec_type);
   _kokkos_nodal_kernels.customSetup(exec_type);
   _kokkos_integrated_bcs.customSetup(exec_type);
+  _kokkos_constraints.customSetup(exec_type);
   _kokkos_nodal_bcs.customSetup(exec_type);
 #endif
 }
@@ -1735,6 +1739,7 @@ NonlinearSystemBase::residualSetup()
   _kokkos_kernels.residualSetup();
   _kokkos_nodal_kernels.residualSetup();
   _kokkos_integrated_bcs.residualSetup();
+  _kokkos_constraints.residualSetup();
   _kokkos_nodal_bcs.residualSetup();
 #endif
 
@@ -2997,6 +3002,7 @@ NonlinearSystemBase::jacobianSetup()
   _kokkos_kernels.jacobianSetup();
   _kokkos_nodal_kernels.jacobianSetup();
   _kokkos_integrated_bcs.jacobianSetup();
+  _kokkos_constraints.jacobianSetup();
   _kokkos_nodal_bcs.jacobianSetup();
 #endif
 
@@ -3450,6 +3456,7 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
     _kokkos_kernels.updateActive();
     _kokkos_nodal_kernels.updateActive();
     _kokkos_integrated_bcs.updateActive();
+    _kokkos_constraints.updateActive();
     _kokkos_nodal_bcs.updateActive();
     _kokkos_preset_nodal_bcs.updateActive();
 #endif
@@ -3771,6 +3778,21 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
 #ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _kokkos_nodal_kernels.subdomainsCovered(input_subdomains, kernel_variables);
+  // Kokkos mortar constraints cover their lower-dimensional primary and secondary subdomains and
+  // their Lagrange multipliers, the variables they depend on that live on the secondary subdomain,
+  // as mortar constraints do
+  for (const auto & constraint : _kokkos_constraints.getActiveObjects())
+  {
+    kernel_variables.insert(constraint->variable().name());
+    const auto secondary =
+        _mesh.getSubdomainID(constraint->getParam<SubdomainName>("secondary_subdomain"));
+    if (const auto deps = dynamic_cast<const MooseVariableDependencyInterface *>(constraint.get()))
+      for (const auto var : deps->getMooseVariableDependencies())
+        if (var->activeSubdomains().count(secondary))
+          kernel_variables.insert(var->name());
+    for (const auto param : {"primary_subdomain", "secondary_subdomain"})
+      input_subdomains.insert(_mesh.getSubdomainID(constraint->getParam<SubdomainName>(param)));
+  }
 #endif
 
   if (_fe_problem.haveFV())

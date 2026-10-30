@@ -1,0 +1,1 @@
+../../../mortar_cartesian_lms/gold/frictionless-mortar-3d-friction_out.e

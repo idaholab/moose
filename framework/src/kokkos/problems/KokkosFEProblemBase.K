@@ -7,8 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "KokkosMortarInterfaceData.h"
 #include "KokkosTypes.h"
 #include "KokkosFunction.h"
+#include "KokkosADMaterial.h"
 #include "KokkosUserObject.h"
 #include "KokkosPostprocessor.h"
 #include "KokkosVectorPostprocessor.h"
@@ -16,6 +18,7 @@
 
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
+#include "AutomaticMortarGeneration.h"
 #include "LinearSystem.h"
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
@@ -129,6 +132,33 @@ FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
       bc_name, name, parameters, nl_sys_num, "KokkosBoundaryCondition", _reinit_displaced_face);
 
   _nl[nl_sys_num]->addKokkosBoundaryCondition(bc_name, name, parameters);
+
+  _has_kokkos_objects = true;
+  _has_kokkos_residual_objects = true;
+}
+
+void
+FEProblemBase::addKokkosConstraint(const std::string & c_name,
+                                   const std::string & name,
+                                   InputParameters & parameters)
+{
+  checkKokkosObject("addKokkosConstraint", c_name, name, parameters);
+
+  parallel_object_only();
+
+  _has_constraints = true;
+
+  // The Lagrange multiplier is the variable of a Kokkos mortar constraint
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError("You are trying to add a Constraint to a linear variable/system, which is not "
+               "supported at the moment!");
+
+  bool reinit_displaced = false;
+  setResidualObjectParamsAndLog(
+      c_name, name, parameters, nl_sys_num, "KokkosConstraint", reinit_displaced);
+
+  _nl[nl_sys_num]->addKokkosConstraint(c_name, name, parameters);
 
   _has_kokkos_objects = true;
   _has_kokkos_residual_objects = true;
@@ -368,6 +398,24 @@ FEProblemBase::getKokkosMaterialPropertyStorageConsumers(Moose::MaterialDataType
       type);
 }
 
+Moose::Kokkos::MortarInterfaceData &
+FEProblemBase::getKokkosMortarInterfaceData(const AutomaticMortarGeneration & amg)
+{
+  auto & data = _kokkos_mortar_interface_data[&amg];
+  if (!data)
+    data = std::make_unique<Moose::Kokkos::MortarInterfaceData>(*this, amg);
+  return *data;
+}
+
+void
+FEProblemBase::updateKokkosSparsity()
+{
+  for (auto & system : _kokkos_systems.constructedEntries())
+    system.updateSparsity();
+  for (auto & system : _kokkos_fe_systems.constructedEntries())
+    system.updateSparsity();
+}
+
 void
 FEProblemBase::initKokkos()
 {
@@ -375,11 +423,48 @@ FEProblemBase::initKokkos()
 
   // Error on unsupported options
 
-  if (haveDisplaced())
-    mooseError("Kokkos does not support displaced mesh yet.");
-
   if (adaptivity().isOn())
     mooseError("Kokkos does not support adaptivity yet.");
+
+  // Kokkos objects on a mortar interface read the elements coupled across it, which the mortar
+  // relationship managers ghost. The pairing of an interface on the displaced mesh changes as the
+  // mesh moves, so every element of that interface is ghosted, as the relationship managers do.
+  if (_has_mortar)
+    _mesh.getKokkosMesh()->addGhostElementProvider(
+        [this](std::unordered_set<const Elem *> & elems)
+        {
+          for (const auto & [_, config] : getMortarInterfaces(false))
+            for (const auto & [elem_id, coupled_ids] : config.amg->mortarInterfaceCoupling())
+            {
+              if (const auto elem = _mesh.queryElemPtr(elem_id))
+                elems.insert(elem);
+
+              for (const auto coupled_id : coupled_ids)
+                if (const auto coupled = _mesh.queryElemPtr(coupled_id))
+                  elems.insert(coupled);
+            }
+
+          // The interface elements are the elements with a side on the primary or secondary
+          // boundary and the lower-dimensional elements on those sides
+          const auto & binfo = _mesh.getMesh().get_boundary_info();
+          const auto on_boundary =
+              [&binfo](const Elem & elem, const BoundaryID primary, const BoundaryID secondary)
+          {
+            for (const auto side : elem.side_index_range())
+              if (binfo.has_boundary_id(&elem, side, primary) ||
+                  binfo.has_boundary_id(&elem, side, secondary))
+                return true;
+            return false;
+          };
+          for (const auto & [boundaries, _] : getMortarInterfaces(true))
+            for (const auto elem : _mesh.getMesh().active_element_ptr_range())
+            {
+              const auto * const parent = elem->interior_parent();
+              if (on_boundary(*elem, boundaries.first, boundaries.second) ||
+                  (parent && on_boundary(*parent, boundaries.first, boundaries.second)))
+                elems.insert(elem);
+            }
+        });
 
   // Initialize Kokkos mesh
   _mesh.getKokkosMesh()->update();
@@ -463,6 +548,17 @@ FEProblemBase::initKokkos()
   for (unsigned int s = 0; s < numLinearSystems(); ++s)
     allocate_system(getLinearSystem(s));
   allocate_system(getAuxiliarySystem());
+
+  // Resolve the slots of AD materials, which fix the sizes of the derivatives of their properties
+
+  for (const auto & material : _kokkos_materials.getObjects())
+    if (auto * ad_material = dynamic_cast<Moose::Kokkos::ADMaterial *>(material.get()))
+      ad_material->resolveADSlots();
+
+  for (const auto type : {Moose::FACE_MATERIAL_DATA, Moose::NEIGHBOR_MATERIAL_DATA})
+    for (const auto & material : _kokkos_materials[type].getObjects())
+      if (auto * ad_material = dynamic_cast<Moose::Kokkos::ADMaterial *>(material.get()))
+        ad_material->resolveADSlots();
 
   // Initialize Kokkos material properties
 

@@ -1,0 +1,60 @@
+[Tests]
+  issues = '#33860'
+  design = 'Constraints/index.md'
+
+  [segment_integral]
+    requirement = 'The Kokkos system shall evaluate variables and the coefficients of their dual basis on the device at the quadrature points of mortar segments on both sides of a nonconforming interface, including on primary elements owned by other processes, matching the evaluation through libMesh on the host,'
+    [2d]
+      type = CSVDiff
+      input = 'segment_integral.i'
+      csvdiff = 'segment_integral_out.csv'
+      detail = 'for first order edges,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [2d_second_order]
+      type = CSVDiff
+      input = 'segment_integral.i'
+      cli_args = 'Mesh/second_order=true Mesh/left/elem_type=QUAD9 Mesh/right/elem_type=QUAD8 AuxVariables/u/order=SECOND Outputs/file_base=segment_integral_second_order_out'
+      csvdiff = 'segment_integral_second_order_out.csv'
+      detail = 'for second order edges,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [3d]
+      type = CSVDiff
+      input = 'segment_integral_3d.i'
+      csvdiff = 'segment_integral_3d_out.csv'
+      detail = 'for first order faces, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [3d_second_order]
+      type = CSVDiff
+      input = 'segment_integral_3d.i'
+      cli_args = 'Mesh/second_order=true Mesh/left/elem_type=HEX27 Mesh/right/elem_type=HEX20 AuxVariables/u/order=SECOND Outputs/file_base=segment_integral_3d_second_order_out'
+      csvdiff = 'segment_integral_3d_second_order_out.csv'
+      detail = 'for second order faces,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [3d_serendipity]
+      type = CSVDiff
+      input = 'segment_integral_3d.i'
+      cli_args = 'Mesh/left/elem_type=HEX20 Mesh/right/elem_type=HEX27 AuxVariables/u/order=SECOND Outputs/file_base=segment_integral_3d_serendipity_out'
+      csvdiff = 'segment_integral_3d_serendipity_out.csv'
+      detail = 'for serendipity secondary faces, whose dual basis is biorthogonal to a transformed basis, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [3d_triangle]
+      type = CSVDiff
+      input = 'segment_integral_3d.i'
+      cli_args = 'Mesh/left/elem_type=TET14 Mesh/right/elem_type=TET10 AuxVariables/u/order=SECOND Outputs/file_base=segment_integral_3d_triangle_out'
+      csvdiff = 'segment_integral_3d_triangle_out.csv'
+      detail = 'for quadratic triangular secondary faces, whose dual basis is biorthogonal to a transformed basis.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+  []
+[]

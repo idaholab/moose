@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "KokkosConfiguration.h"
+
 #include "KokkosDispatcher.h"
 #include "KokkosVariableValue.h"
 #include "KokkosMaterialPropertyValue.h"
@@ -194,6 +196,11 @@ protected:
   Scalar<Real> _dt_old;
   ///@}
 
+  /**
+   * Configuration of the geometry, which is the reference configuration
+   */
+  const Configuration _configuration;
+
 private:
   /**
    * Override of the MaterialPropertyInterface function to throw on material property request for
@@ -214,7 +221,8 @@ AuxKernel::operator()(ElementLoop, const ThreadID tid, const Derived & auxkernel
                       kokkosAssembly(),
                       kokkosSystems(),
                       _kokkos_var,
-                      _kokkos_var.var());
+                      _kokkos_var.var(),
+                      _configuration);
 
   auxkernel.computeElementInternal(auxkernel, datum);
 }
@@ -229,7 +237,8 @@ AuxKernel::operator()(NodeLoop, const ThreadID tid, const Derived & auxkernel) c
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(
+      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(), _configuration);
 
   auxkernel.computeNodeInternal(auxkernel, datum);
 }

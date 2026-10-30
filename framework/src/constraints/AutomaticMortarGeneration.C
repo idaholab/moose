@@ -297,6 +297,7 @@ AutomaticMortarGeneration::initOutput()
 void
 AutomaticMortarGeneration::clear()
 {
+  ++_build_count;
   _msm_elem_to_reference_points.clear();
   _mortar_segment_mesh->clear();
   _nodes_to_secondary_elem_map.clear();
@@ -1600,6 +1601,27 @@ AutomaticMortarGeneration::buildCouplingInformation()
     // PrimarySecondary
     coupling_info[primary_elem->interior_parent()->processor_id()].emplace_back(
         primary_elem->interior_parent()->id(), secondary_elem->interior_parent()->id());
+  }
+
+  // The sparsity of a displaced interface is padded with the couplings of the point neighbors on
+  // the interface of each element (see AugmentSparsityOnInterface), so the owners of those
+  // neighbors also need the couplings of the element
+  if (_on_displaced)
+  {
+    std::unordered_map<processor_id_type, std::vector<std::pair<dof_id_type, dof_id_type>>>
+        neighbor_info;
+    for (const auto & [processor, couplings] : coupling_info)
+      for (const auto & [i, j] : couplings)
+      {
+        std::set<const Elem *> neighbors;
+        _mesh.elem_ref(i).find_point_neighbors(neighbors);
+        for (const auto * const neighbor : neighbors)
+          if (neighbor->processor_id() != processor)
+            neighbor_info[neighbor->processor_id()].emplace_back(i, j);
+      }
+    for (auto & [processor, couplings] : neighbor_info)
+      coupling_info[processor].insert(
+          coupling_info[processor].end(), couplings.begin(), couplings.end());
   }
 
   // A face pair may produce several mortar segments. Remove repeated entries before communication.

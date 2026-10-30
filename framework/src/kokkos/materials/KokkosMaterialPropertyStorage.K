@@ -165,6 +165,22 @@ MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
   return addKokkosProperty(prop_name, type, 0, declarer, shell);
 }
 
+void
+MaterialPropertyStorage::setKokkosADInputs(const std::string & prop_name,
+                                           const ::MaterialBase * declarer,
+                                           const std::vector<ADSlotBlock> & inputs,
+                                           const unsigned int width)
+{
+  auto & record = libmesh_map_find(_kokkos_prop_records, prop_name);
+  auto & blocks = declarer->boundaryRestricted() ? declarer->meshBlockIDs() : declarer->blockIDs();
+
+  for (const auto block : blocks)
+  {
+    record.ad_inputs[block] = inputs;
+    record.dims[block] = {width};
+  }
+}
+
 MaterialPropertyBase &
 MaterialPropertyStorage::getKokkosProperty(std::string prop_name, unsigned int state)
 {

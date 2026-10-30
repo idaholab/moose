@@ -11,6 +11,7 @@
 
 #include "KokkosHeader.h"
 #include "KokkosThread.h"
+#include "KokkosPrecomputeHookTraits.h"
 
 #include <typeindex>
 #include <type_traits>
@@ -19,6 +20,32 @@ namespace Moose::Kokkos
 {
 
 using Policy = ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>>;
+
+/**
+ * The team policy of an operation, whose teams share per-team scratch memory and synchronize
+ * with barriers
+ */
+template <typename Operation>
+using TeamPolicy = ::Kokkos::TeamPolicy<ExecSpace, Operation, ::Kokkos::IndexType<ThreadID>>;
+
+/**
+ * The team handle passed to the team operations of a functor
+ */
+template <typename Operation>
+using TeamMember = typename TeamPolicy<Operation>::member_type;
+
+/**
+ * Untyped team policy description, from which a team dispatcher builds the policy of its operation
+ */
+struct TeamLaunch
+{
+  /// Number of teams
+  ThreadID league_size = 0;
+  /// Number of threads per team, or zero for the backend default
+  unsigned int team_size = 0;
+  /// Per-team level-0 scratch memory in bytes
+  std::size_t scratch_bytes = 0;
+};
 
 /**
  * Base class for Kokkos functor dispatcher.
@@ -47,6 +74,10 @@ public:
                               ::Kokkos::View<Real *, ::Kokkos::HostSpace> & /* result */)
   {
     mooseError("parallelReduce() called for an instance that is not a reducer.");
+  }
+  virtual void parallelForTeams(const TeamLaunch & /* launch */)
+  {
+    mooseError("parallelForTeams() called for an instance that is not a team dispatcher.");
   }
 };
 
@@ -109,6 +140,48 @@ private:
  * @tparam Operation The function tag of operator() to be dispatched
  * @tparam Object The functor class type
  */
+/**
+ * Dispatcher of a team operation of a functor. Each team calls
+ * operator()(Operation, const TeamMember<Operation> &, const Object &) of the functor.
+ * @tparam Operation The function tag of the team operator()
+ * @tparam Object The functor class type
+ */
+template <typename Operation, typename Object>
+class TeamDispatcher : public DispatcherBase
+{
+public:
+  TeamDispatcher(const void * object)
+    : _functor_host(*static_cast<const Object *>(object)), _functor_device(_functor_host)
+  {
+  }
+  TeamDispatcher(const TeamDispatcher & functor)
+    : _functor_host(functor._functor_host), _functor_device(functor._functor_host)
+  {
+  }
+
+  void parallelForTeams(const TeamLaunch & launch) override final
+  {
+    auto policy = launch.team_size ? TeamPolicy<Operation>(launch.league_size, launch.team_size)
+                                   : TeamPolicy<Operation>(launch.league_size, ::Kokkos::AUTO);
+
+    if (launch.scratch_bytes)
+      policy.set_scratch_size(0, ::Kokkos::PerTeam(launch.scratch_bytes));
+
+    ::Kokkos::parallel_for(policy, *this);
+    ::Kokkos::fence();
+  }
+
+  KOKKOS_FUNCTION void operator()(const Operation & operation,
+                                  const TeamMember<Operation> & team) const
+  {
+    _functor_device(operation, team, _functor_device);
+  }
+
+private:
+  const Object & _functor_host;
+  const Object _functor_device;
+};
+
 template <typename Operation, typename Object>
 class Reducer : public DispatcherBase
 {
@@ -235,6 +308,16 @@ public:
 };
 
 template <typename Operation, typename Object>
+class TeamDispatcherRegistryEntry : public DispatcherRegistryEntryBase
+{
+public:
+  std::unique_ptr<DispatcherBase> build(const void * object) const override final
+  {
+    return std::make_unique<TeamDispatcher<Operation, Object>>(object);
+  }
+};
+
+template <typename Operation, typename Object>
 class ReducerRegistryEntry : public DispatcherRegistryEntryBase
 {
 public:
@@ -281,6 +364,13 @@ public:
    * @param name The registered object type name
    */
   template <typename Operation, typename Object>
+  static void addTeamDispatcher(const std::string & name)
+  {
+    auto operation = std::type_index(typeid(Operation));
+    getRegistry()._dispatchers[std::make_pair(operation, name)] =
+        std::make_unique<TeamDispatcherRegistryEntry<Operation, Object>>();
+  }
+  template <typename Operation, typename Object>
   static void addReducer(const std::string & name)
   {
     auto operation = std::type_index(typeid(Operation));
@@ -320,6 +410,36 @@ public:
    * @param name The registered object type name
    * @returns The dispatcher
    */
+  /**
+   * Record a compile-time property of a registered object type
+   * @param property The property name
+   * @param name The registered object type name
+   * @param value The property value
+   */
+  static void
+  setProperty(const std::string & property, const std::string & name, unsigned int value)
+  {
+    getRegistry()._properties[std::make_pair(property, name)] = value;
+  }
+
+  /**
+   * Get a compile-time property of a registered object type
+   * @param property The property name
+   * @param name The registered object type name
+   * @returns The property value
+   */
+  static unsigned int getProperty(const std::string & property, const std::string & name)
+  {
+    auto it = getRegistry()._properties.find(std::make_pair(property, name));
+    if (it == getRegistry()._properties.end())
+      mooseError("Kokkos object property '",
+                 property,
+                 "' not registered for object type '",
+                 name,
+                 "'. Double check that you used Kokkos-specific registration macro.");
+    return it->second;
+  }
+
   template <typename Operation>
   static std::unique_ptr<DispatcherBase> build(const void * object, const std::string & name)
   {
@@ -359,6 +479,10 @@ private:
    */
   std::map<std::pair<std::type_index, std::string>, std::unique_ptr<DispatcherRegistryEntryBase>>
       _dispatchers;
+  /**
+   * Compile-time properties of registered object types, keyed by property and object type name
+   */
+  std::map<std::pair<std::string, std::string>, unsigned int> _properties;
 };
 
 template <typename T, typename = void>
@@ -451,14 +575,18 @@ registerResidualObjectDispatchers(const std::string & objectname)
 
   if constexpr (Object::uses_precompute_hooks)
   {
-    DispatcherRegistry::hasUserMethod<typename Object::JacobianLoop>(
-        objectname,
-        &Object::template precomputeQpJacobian<Object> !=
-            Object::template defaultJacobian<Object>());
+    static_assert(has_residual_hook<Object>,
+                  "A Kokkos kernel or integrated BC must define at least one of "
+                  "precomputeQpResidualValue(), precomputeQpResidualGrad(), or "
+                  "precomputeQpResidualCurl() with the signature documented in "
+                  "KokkosPrecomputeHookTraits.h.");
+
+    DispatcherRegistry::hasUserMethod<typename Object::JacobianLoop>(objectname,
+                                                                     has_jacobian_hook<Object>);
     DispatcherRegistry::hasUserMethod<typename Object::OffDiagJacobianLoop>(
-        objectname,
-        &Object::template precomputeQpOffDiagJacobian<Object> !=
-            Object::template defaultOffDiagJacobian<Object>());
+        objectname, has_offdiag_jacobian_hook<Object>);
+    DispatcherRegistry::addTeamDispatcher<typename Object::DisplacementJacobianLoop, Object>(
+        objectname);
   }
   else
   {
@@ -476,9 +604,7 @@ registerResidualObjectDispatchers(const std::string & objectname)
     DispatcherRegistry::addDispatcher<typename Object::OffDiagJacobianScalarLoop, Object>(
         objectname);
     DispatcherRegistry::hasUserMethod<typename Object::OffDiagJacobianScalarLoop>(
-        objectname,
-        &Object::template computeQpOffDiagJacobianScalar<Object> !=
-            Object::template defaultOffDiagJacobianScalar<Object>());
+        objectname, has_offdiag_jacobian_scalar_hook<Object>);
   }
 }
 
@@ -506,14 +632,72 @@ registerResidualObjectDispatchers(const std::string & objectname)
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosResidualObjectFunction(classname, alias)
 
+// Mortar constraints, dispatched with one team per secondary element
+
+#define registerKokkosMortarConstraint(app, classname)                                             \
+  registerMooseObject(app, classname);                                                             \
+  static char registerKokkosMortarConstraint##classname()                                          \
+  {                                                                                                \
+    Moose::Kokkos::DispatcherRegistry::addTeamDispatcher<classname::MortarLoop, classname>(        \
+        #classname);                                                                               \
+    Moose::Kokkos::DispatcherRegistry::addDispatcher<classname::InactiveLoop, classname>(          \
+        #classname);                                                                               \
+                                                                                                   \
+    return 0;                                                                                      \
+  }                                                                                                \
+                                                                                                   \
+  [[maybe_unused]] static char combineNames(kokkos_dispatcher_mortar_constraint_##classname,       \
+                                            __COUNTER__) =                                         \
+      registerKokkosMortarConstraint##classname()
+
 // AD Kernel, NodalKernel, BC
+
+namespace Moose::Kokkos
+{
+
+/**
+ * Whether a residual object declares the number of derivative slots of its pointwise AD residual
+ */
+///@{
+template <typename Object, typename = void>
+struct HasMaxADSlots : std::false_type
+{
+};
+template <typename Object>
+struct HasMaxADSlots<Object, std::void_t<decltype(Object::max_ad_slots)>> : std::true_type
+{
+};
+///@}
+
+template <typename Object>
+void
+registerADResidualObjectDispatchers(const std::string & objectname)
+{
+  static_assert(HasMaxADSlots<Object>::value,
+                "A Kokkos AD residual object must declare 'static constexpr unsigned int "
+                "max_ad_slots', the number of derivative directions its residual reads: one for "
+                "each coupled value and three for each coupled gradient.");
+
+  // Team AD objects are also compiled with the displacement slots of the current configuration,
+  // and dispatch the instantiation matching their configuration
+  if constexpr (Object::uses_team_dispatch)
+  {
+    DispatcherRegistry::addTeamDispatcher<typename Object::ResidualLoop, Object>(objectname);
+    DispatcherRegistry::addTeamDispatcher<typename Object::DisplacedResidualLoop, Object>(
+        objectname);
+  }
+  else
+    DispatcherRegistry::addDispatcher<typename Object::ResidualLoop, Object>(objectname);
+
+  DispatcherRegistry::setProperty("max_ad_slots", objectname, Object::max_ad_slots);
+}
+
+} // namespace Moose::Kokkos
 
 #define callRegisterKokkosADResidualObjectFunction(classname, objectname)                          \
   static char registerKokkosADResidualObject##classname()                                          \
   {                                                                                                \
-    using namespace Moose::Kokkos;                                                                 \
-                                                                                                   \
-    DispatcherRegistry::addDispatcher<classname::ResidualLoop, classname>(objectname);             \
+    Moose::Kokkos::registerADResidualObjectDispatchers<classname>(objectname);                     \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \
@@ -623,6 +807,33 @@ registerResidualObjectDispatchers(const std::string & objectname)
 #define registerKokkosMaterialAliased(app, classname, alias)                                       \
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosMaterialFunction(classname, alias)
+
+// AD Material
+
+#define callRegisterKokkosADMaterialFunction(classname, objectname)                                \
+  static char registerKokkosADMaterial##classname()                                                \
+  {                                                                                                \
+    static_assert(Moose::Kokkos::HasMaxADSlots<classname>::value,                                  \
+                  "A Kokkos AD material must declare 'static constexpr unsigned int "              \
+                  "max_ad_slots', the number of derivative directions its properties read: one "   \
+                  "for each coupled value and three for each coupled gradient.");                  \
+                                                                                                   \
+    Moose::Kokkos::DispatcherRegistry::setProperty(                                                \
+        "max_ad_slots", objectname, classname::max_ad_slots);                                      \
+                                                                                                   \
+    return 0;                                                                                      \
+  }                                                                                                \
+                                                                                                   \
+  [[maybe_unused]] static char combineNames(kokkos_dispatcher_ad_material_##classname,             \
+                                            __COUNTER__) = registerKokkosADMaterial##classname()
+
+#define registerKokkosADMaterial(app, classname)                                                   \
+  registerKokkosMaterial(app, classname);                                                          \
+  callRegisterKokkosADMaterialFunction(classname, #classname)
+
+#define registerKokkosADMaterialAliased(app, classname, alias)                                     \
+  registerKokkosMaterialAliased(app, classname, alias);                                            \
+  callRegisterKokkosADMaterialFunction(classname, alias)
 
 // AuxKernel
 

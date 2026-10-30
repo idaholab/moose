@@ -10,6 +10,8 @@
 #include "MortarUtils.h"
 #include "MooseLagrangeHelpers.h"
 #include "MooseUtils.h"
+#include "AutomaticMortarGeneration.h"
+#include "ADReal.h"
 
 #include "libmesh/enum_to_string.h"
 #include "libmesh/fe_interface.h"
@@ -752,6 +754,48 @@ projectQPoints3d(const Elem * const msm_elem,
     projectionFailure(
         *msm_elem, *primal_elem, sub_elem, qp, "the Newton result is outside the parent face");
   }
+}
+
+std::unordered_map<dof_id_type, NodalNormalSensitivities>
+computeNodalNormalSensitivities(const AutomaticMortarGeneration & amg)
+{
+  const auto dim = amg.dim();
+
+  // Each coordinate of each node is an independent variable with derivative index
+  // dim * (node ID) + component
+  const auto coordinate = [dim](const Node & node)
+  {
+    ADPoint point = node;
+    for (const auto c : make_range(dim))
+      Moose::derivInsert(point(c).derivatives(), dim * node.id() + c, 1);
+    return point;
+  };
+
+  mooseAssert(ADReal::do_derivatives,
+              "Nodal normal sensitivities are computed only while derivatives are recorded.");
+  std::unordered_map<const Node *, ADRealVectorValue> ad_normals;
+  amg.computeADNodalNormals(coordinate, ad_normals);
+
+  std::unordered_map<dof_id_type, NodalNormalSensitivities> normals;
+  for (const auto & [node, ad_normal] : ad_normals)
+  {
+    auto & entry = normals[node->id()];
+    std::map<dof_id_type, RealTensorValue> by_node;
+    for (const auto i : make_range(Moose::dim))
+    {
+      entry.normal(i) = MetaPhysicL::raw_value(ad_normal(i));
+      const auto & derivatives = ad_normal(i).derivatives();
+      for (const auto k : index_range(derivatives.nude_indices()))
+      {
+        const auto index = derivatives.nude_indices()[k];
+        by_node[index / dim](i, index % dim) += derivatives.nude_data()[k];
+      }
+    }
+
+    entry.sensitivities.assign(by_node.begin(), by_node.end());
+  }
+
+  return normals;
 }
 }
 }

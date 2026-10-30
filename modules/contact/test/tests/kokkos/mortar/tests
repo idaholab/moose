@@ -1,0 +1,64 @@
+[Tests]
+  issues = '#33860'
+  design = 'KokkosMortarContactKinematicsUserObject.md KokkosComputeWeightedGapLMMechanicalContact.md KokkosNormalMortarMechanicalContact.md'
+
+  [frictionless]
+    requirement = 'The Kokkos system shall enforce frictionless mortar mechanical contact with a Lagrange multiplier at the secondary nodes on the current configuration'
+    [weighted_gap]
+      type = Exodiff
+      input = 'frictionless_weighted_gap.i'
+      exodiff = 'frictionless_weighted_gap_out.e'
+      detail = 'in two dimensions, matching the solution of the non-Kokkos weighted gap contact objects,'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [jacobian]
+      type = PetscJacobianTester
+      input = 'frictionless_weighted_gap.i'
+      cli_args = 'Executioner/end_time=20 Outputs/exodus=false'
+      detail = 'with an exact Jacobian, including the derivatives of the nodal normals, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [3d_dual]
+      type = Exodiff
+      input = 'frictionless_mortar_3d.i'
+      exodiff = 'frictionless_mortar_3d_out.e'
+      custom_cmp = 'frictionless_mortar_3d.cmp'
+      detail = 'in three dimensions with a dual Lagrange multiplier basis, matching the solution of the non-Kokkos objects.'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+  []
+  [frictional]
+    requirement = 'The Kokkos system shall enforce Coulomb frictional mortar mechanical contact with a Cartesian Lagrange multiplier on the current configuration, matching the solution of the non-Kokkos frictional Cartesian contact objects,'
+    design = 'KokkosComputeCartesianLMMechanicalContact.md KokkosCartesianMortarMechanicalContact.md'
+    [reference]
+      type = Exodiff
+      input = 'frictional_cartesian_reference.i'
+      exodiff = 'frictional_cartesian_reference_out.e'
+      detail = 'with the non-Kokkos objects and'
+      capabilities = 'ad_size>=50'
+    []
+    [kokkos]
+      type = Exodiff
+      input = 'frictional_cartesian.i'
+      exodiff = 'frictional_cartesian_out.e'
+      detail = 'with the Kokkos objects in two dimensions, and'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [3d]
+      type = Exodiff
+      input = 'frictional_cartesian_3d.i'
+      exodiff = 'frictional_cartesian_3d_out.e'
+      rel_err = 1e-6
+      # The tangential multipliers of the symmetric problem vanish in exact arithmetic and settle at
+      # the nonlinear tolerance, well below the contact pressure
+      abs_zero = 1e-7
+      detail = 'with the Kokkos objects in three dimensions with a dual multiplier basis.'
+      capabilities = 'kokkos & mumps'
+      compute_devices = 'cpu cuda xpu'
+    []
+  []
+[]

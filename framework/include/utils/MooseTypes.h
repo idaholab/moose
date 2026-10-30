@@ -1341,6 +1341,7 @@ class FunctorCopy
   friend class LinearFVKernel;
   friend class LinearFVBoundaryCondition;
   friend class IntegratedBCBase;
+  friend class MortarConstraintBase;
   friend class NodalBCBase;
   friend class MaterialBase;
   friend class Material;

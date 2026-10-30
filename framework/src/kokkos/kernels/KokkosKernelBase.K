@@ -44,6 +44,14 @@ KernelBase::KernelBase(const InputParameters & parameters, Moose::VarFieldType f
     MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
     LocalParallelInterface(this)
 {
+  _configuration = Configuration(*this);
+
+  // The current configuration composes a square deformation gradient into the volume map, which
+  // does not describe the deformation of a lower-dimensional element embedded in the mesh
+  if (_configuration.displaced() && blocksMaxDimension() < _mesh.dimension())
+    paramError("use_displaced_mesh",
+               "Kokkos kernels on lower-dimensional blocks cannot be posed on the current "
+               "configuration.");
 }
 
 KernelBase::KernelBase(const KernelBase & object)

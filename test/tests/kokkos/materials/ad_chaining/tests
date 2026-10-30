@@ -1,0 +1,60 @@
+[Tests]
+  issues = '#33860'
+  design = 'syntax/Materials/index.md'
+
+  [jacobian]
+    requirement = 'The Kokkos system shall assemble exact Jacobians by automatic differentiation of kernels and boundary conditions reading a material property computed by a chain of materials, each computing its property by automatic differentiation from a property of the previous one, composing the derivatives with respect to coupled variables and to the displacements through the chain,'
+    [cartesian]
+      type = PetscJacobianTester
+      input = 'kokkos_ad_material_chaining.i'
+      detail = 'in Cartesian coordinates,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [rz]
+      type = PetscJacobianTester
+      input = 'kokkos_ad_material_chaining.i'
+      cli_args = 'Mesh/coord_type=RZ'
+      detail = 'in axisymmetric coordinates,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [reference]
+      type = PetscJacobianTester
+      input = 'kokkos_ad_material_chaining.i'
+      cli_args = 'Materials/k/use_displaced_mesh=false'
+      detail = 'with every material of the chain on the reference configuration, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [input_list]
+      type = PetscJacobianTester
+      input = 'kokkos_ad_material_chaining.i'
+      cli_args = "Materials/q/listed_inputs='v p' Materials/r/listed_inputs=p Materials/k/listed_inputs='S T'"
+      detail = 'with the declarations of the properties listing their inputs, including the properties they read.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+  [input_list_error]
+    type = RunException
+    input = 'kokkos_ad_material_chaining.i'
+    cli_args = 'Materials/q/listed_inputs=p'
+    expect_err = 'A Kokkos AD material property has a derivative with respect to a quadrature point quantity missing from the input list of its declaration'
+    # Kokkos::abort() raises SIGABRT, which the TestHarness reports as exit code -6 for a serial
+    # run; mpiexec reports the signal differently, so the exit code is checked in serial only
+    expect_exit_code = -6
+    max_parallel = 1
+    requirement = 'The Kokkos system shall report an error in debug builds when a material property computed by automatic differentiation from the property of another material has a nonzero derivative with respect to an input missing from the input list of its declaration.'
+    capabilities = 'kokkos & method=dbg'
+    compute_devices = 'cpu'
+  []
+  [cycle_error]
+    type = RunException
+    input = 'kokkos_ad_material_chaining.i'
+    cli_args = 'Materials/q/p=r'
+    expect_err = "The Kokkos AD materials reading each other's AD properties form a cycle."
+    requirement = 'The Kokkos system shall report an error when materials computing their properties by automatic differentiation read each other\'s properties in a cycle.'
+    capabilities = 'kokkos'
+  []
+[]

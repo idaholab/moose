@@ -27,7 +27,8 @@ KokkosDirichletBCTempl<is_ad>::validParams()
 template <bool is_ad>
 KokkosDirichletBCTempl<is_ad>::KokkosDirichletBCTempl(const InputParameters & parameters)
   : Moose::Kokkos::DirichletBCBaseTempl<is_ad>(parameters),
-    _value(this->template getParam<Real>("value"))
+    _value(this->template getParam<Real>("value")),
+    _nodal_value(makeNodalValue())
 {
 }
 

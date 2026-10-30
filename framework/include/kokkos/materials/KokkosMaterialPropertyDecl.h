@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosArray.h"
+#include "KokkosADSlotBlock.h"
 
 #include "MoosePassKey.h"
 
@@ -81,6 +82,12 @@ struct PropRecord
    * Whether this property is constant over element or subdomain in each subdomain
    */
   std::unordered_map<SubdomainID, PropertyConstantOption> constant_option;
+  /**
+   * For the derivatives of a pointwise AD property, the quadrature point quantity of each block of
+   * stored derivatives in each subdomain, as declared by the material of that subdomain. Stored
+   * derivatives outside every block are zero.
+   */
+  std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> ad_inputs;
 };
 
 using PropertyStore = std::function<void(std::ostream &, void *)>;
@@ -128,6 +135,15 @@ public:
    * @returns The size of the dimension
    */
   unsigned int dimSize(SubdomainID subdomain, unsigned int i) const;
+  /**
+   * Get the quadrature point quantities of the stored derivatives of a pointwise AD property
+   * @returns The slot blocks of the stored derivatives in each subdomain
+   */
+  const std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> & adInputs() const;
+  /**
+   * Get the materials declaring this property
+   */
+  const std::set<const ::MaterialBase *> & declarers() const;
 
   /**
    * Get the property type index for load/store functions
@@ -225,6 +241,24 @@ MaterialPropertyBase::dimSize(SubdomainID subdomain, unsigned int i) const
                "'.");
 
   return libmesh_map_find(_record->dims, subdomain)[i];
+}
+
+inline const std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> &
+MaterialPropertyBase::adInputs() const
+{
+  if (!_record)
+    mooseError("Cannot get the AD inputs of an uninitialized or default material property.");
+
+  return _record->ad_inputs;
+}
+
+inline const std::set<const ::MaterialBase *> &
+MaterialPropertyBase::declarers() const
+{
+  if (!_record)
+    mooseError("Cannot get the declarers of an uninitialized or default material property.");
+
+  return _record->declarers;
 }
 
 template <typename T, unsigned int dimension>
