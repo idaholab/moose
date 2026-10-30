@@ -4,7 +4,7 @@
 # sigma * dA/dt term removes it, but the surrounding insulator has no such term
 # and the discrete operator is singular there. A tree-cotree gauge fixes the edge
 # DOFs on a spanning tree of the insulator to zero, removing the residual null
-# space and making the system solvable without an artificial mass regularisation.
+# space and making the system solvable without an artificial mass regularization.
 #
 # The mesh is a cylinder split into a conducting core (r <= 0.5) and an insulating
 # shell (0.5 <= r <= 1). The shell is multiply connected - a loop encircling the

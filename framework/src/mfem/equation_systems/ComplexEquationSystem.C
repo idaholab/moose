@@ -48,10 +48,8 @@ ComplexEquationSystem::Init(GridFunctions & gridfunctions,
 
   // Extract which coupled variables are to be trivially eliminated and which are trial variables
   SetTrialVariableNames();
-  CheckConstrainedVariablesAreTrialVariables(_cmplx_essential_bc_map,
-                                             "an essential boundary condition");
-  CheckConstrainedVariablesAreTrialVariables(_cmplx_essential_constraint_map,
-                                             "an essential constraint");
+  CheckConstrainedVariablesAreTrialVariables(_cmplx_essential_bc_map);
+  CheckConstrainedVariablesAreTrialVariables(_cmplx_essential_constraint_map);
 
   // Store pointers to coupled variable ComplexGridFunctions that are to be eliminated prior to
   // forming the jacobian
@@ -198,7 +196,7 @@ void
 ComplexEquationSystem::ApplyEssentialConstraints()
 {
   _ess_tdof_lists.resize(_trial_var_names.size());
-  _ess_markers.resize(_trial_var_names.size());
+  _ess_bdr_markers.resize(_trial_var_names.size());
   for (const auto i : index_range(_trial_var_names))
   {
     const auto & trial_var_name = _trial_var_names.at(i);
@@ -212,7 +210,7 @@ ComplexEquationSystem::ApplyEssentialConstraints()
 
     // Set strongly constrained DoFs of trial_gf and set essential bdr markers
     ApplyComplexEssentialConstraint(
-        trial_var_name, trial_gf, _ess_markers.at(i), _ess_tdof_lists.at(i));
+        trial_var_name, trial_gf, _ess_bdr_markers.at(i), _ess_tdof_lists.at(i));
   }
 }
 

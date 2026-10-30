@@ -52,10 +52,10 @@ mesh, which is correct only when the operator is genuinely unregularised everywh
 
 Getting this wrong is not a subtle effect: in the example below, gauging only the
 unregularised subdomain reproduces the solution obtained from a vanishing artificial
-regularisation to six significant figures, whereas a whole-mesh gauge perturbs it by several
+regularization to six significant figures, whereas a whole-mesh gauge perturbs it by several
 percent.
 
-For a complex (time-harmonic) variable use
+For a complex variable use
 [MFEMComplexTreeCotreeGaugeEssentialConstraint.md], which selects the same degrees of
 freedom (the selection is shared via `Moose::MFEM::TreeCotreeGauge`) and fixes both their real
 and imaginary parts.

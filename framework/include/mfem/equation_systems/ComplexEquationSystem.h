@@ -50,7 +50,7 @@ public:
   /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
   virtual void BuildMixedBilinearForms() override;
 
-  /// Update all essentially constrained true DoF markers and values on boundaries
+  /// Update all essentially constrained true DoF markers and values
   virtual void ApplyEssentialConstraints() override;
 
   /// Applies complex BCs to a single trial variable

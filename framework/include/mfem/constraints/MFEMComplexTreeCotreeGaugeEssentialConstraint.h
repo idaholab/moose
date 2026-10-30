@@ -16,7 +16,7 @@
 #include "MFEMTreeCotreeGauge.h"
 
 /**
- * Complex (time-harmonic) counterpart of MFEMTreeCotreeGaugeEssentialConstraint.
+ * Complex counterpart of MFEMTreeCotreeGaugeEssentialConstraint.
  * The tree-cotree degrees of freedom are chosen exactly as in the real case
  * (shared via Moose::MFEM::TreeCotreeGauge); here the real and imaginary
  * components of the gauged edge dofs are both strongly set to zero.

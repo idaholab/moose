@@ -15,7 +15,7 @@
 
 /**
  * Base class for applying essential volumetric constraints to the trial
- * ParComplexGridFunction of a complex (time-harmonic) MFEM problem. The
+ * ParComplexGridFunction of a complex MFEM problem. The
  * constraint acts on the real and imaginary components together.
  *
  * A sibling of MFEMEssentialConstraint rather than a derived class: the two act

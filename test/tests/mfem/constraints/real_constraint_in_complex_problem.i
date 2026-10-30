@@ -1,4 +1,4 @@
-# Error case: a real constraint used in a complex (time-harmonic) problem. The
+# Error case: a real constraint used in a complex problem. The
 # complex equation system keeps its constraints in a separate map, so registering
 # a real constraint would leave it silently unapplied.
 
@@ -55,5 +55,4 @@
 [Executioner]
   type = MFEMSteady
   device = cpu
-  assembly_level = legacy
 []

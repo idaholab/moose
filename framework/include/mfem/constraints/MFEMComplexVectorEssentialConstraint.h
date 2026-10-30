@@ -14,7 +14,7 @@
 #include "MFEMComplexEssentialConstraint.h"
 
 /**
- * Complex (time-harmonic) counterpart of MFEMVectorEssentialConstraint. Strongly
+ * Complex counterpart of MFEMVectorEssentialConstraint. Strongly
  * constrains the real and imaginary parts of a complex vector variable in the
  * specified subdomain(s) to separate vector coefficients.
  */

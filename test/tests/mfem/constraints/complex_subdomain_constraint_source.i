@@ -1,4 +1,4 @@
-# Complex (time-harmonic) analogue of subdomain_constraint_source.i. A complex
+# Complex analogue of subdomain_constraint_source.i. A complex
 # scalar field is driven by a Dirichlet condition on the outer boundary and
 # strongly constrained inside the "wire" subdomain to (2 + 3i) by an
 # MFEMComplexScalarEssentialConstraint. With a purely real diffusion operator the

@@ -16,24 +16,25 @@ namespace
 {
 
 /**
- * Table mapping a mesh element attribute to whether the constraint acts there.
- * An empty @p subdomain_attrs marks every attribute, which is what an empty
- * 'block' parameter means (see MFEMBlockRestrictable::validParams). Attributes
- * are validated against the mesh by MFEMConstraint's constructor, so
- * out-of-range entries cannot reach here.
+ * 0-indexed marker array, in the MFEM convention, of the mesh element attributes
+ * the constraint acts on. An empty @p subdomain_attrs marks every attribute, which
+ * is what an empty 'block' parameter means (see MFEMBlockRestrictable::validParams).
+ * Attributes are validated against the mesh by
+ * MFEMBlockRestrictable::subdomainsToAttributes, so out-of-range entries cannot
+ * reach here.
  */
-std::vector<char>
-wantedAttributes(const mfem::Mesh & mesh, const mfem::Array<int> & subdomain_attrs)
+mfem::Array<int>
+markedAttributes(const mfem::Mesh & mesh, const mfem::Array<int> & subdomain_attrs)
 {
-  const int max_attr = mesh.attributes.Size() ? mesh.attributes.Max() : 0;
-  std::vector<char> wanted(max_attr + 1, subdomain_attrs.Size() ? 0 : 1);
+  mfem::Array<int> marked(mesh.attributes.Size() ? mesh.attributes.Max() : 0);
+  marked = subdomain_attrs.Size() ? 0 : 1;
   for (const auto a : subdomain_attrs)
-    wanted[a] = 1;
-  return wanted;
+    marked[a - 1] = 1;
+  return marked;
 }
 
 /**
- * Accumulate the local projection of @p coef over every element carrying a wanted
+ * Accumulate the local projection of @p coef over every element carrying a marked
  * attribute into @p values, counting the contributions made to each dof in
  * @p counter. Both are sized and zeroed here.
  */
@@ -41,7 +42,7 @@ template <typename CoefficientType>
 void
 accumulateSubdomainProjection(mfem::ParGridFunction & gf,
                               CoefficientType & coef,
-                              const std::vector<char> & wanted,
+                              const mfem::Array<int> & marked,
                               mfem::Vector & values,
                               mfem::Array<int> & counter)
 {
@@ -107,11 +108,11 @@ projectOnSubdomains(mfem::ParGridFunction & gf,
 {
   if (coef.GetVDim() != gf.VectorDim())
     mooseError("coef vdim != VectorDim()");
-  const std::vector<char> wanted = wantedAttributes(*gf.FESpace()->GetMesh(), subdomain_attrs);
+  const mfem::Array<int> marked = markedAttributes(*gf.FESpace()->GetMesh(), subdomain_attrs);
 
   mfem::Vector values;
   mfem::Array<int> counter;
-  accumulateSubdomainProjection(gf, coef, wanted, values, counter);
+  accumulateSubdomainProjection(gf, coef, marked, values, counter);
   distributeSubdomainProjection(gf, values, counter);
 }
 }
@@ -125,7 +126,7 @@ subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
                   mfem::Array<int> & tdofs)
 {
   mfem::ParMesh & pmesh = *pfes.GetParMesh();
-  const std::vector<char> wanted = wantedAttributes(pmesh, subdomain_attrs);
+  const mfem::Array<int> marked = markedAttributes(pmesh, subdomain_attrs);
 
   // Local L-dof marker: 1 if the dof touches a local element carrying one of the
   // requested attributes. All requested attributes are marked in a single pass so
@@ -134,7 +135,7 @@ subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
   dof_marker = 0;
   mfem::Array<int> vdofs;
   for (const auto e : libMesh::make_range(pmesh.GetNE()))
-    if (wanted[pmesh.GetAttribute(e)])
+    if (marked[pmesh.GetAttribute(e) - 1])
     {
       pfes.GetElementVDofs(e, vdofs);
       for (const auto d : vdofs)
