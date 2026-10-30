@@ -11,6 +11,8 @@
 #include "FEProblemBase.h"
 #include "Assembly.h"
 #include "MooseVariableFE.h"
+#include "NonlinearSystemBase.h"
+#include "NodalBCBase.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -230,7 +232,8 @@ MortarConstraintBase::computeJacobian()
     computeJacobian(Moose::MortarType::Secondary);
 
     // Compute the jacobian for the primary interior primal dofs.
-    computeJacobian(Moose::MortarType::Primary);
+    if (!skipPrimaryJacobian())
+      computeJacobian(Moose::MortarType::Primary);
   }
 
   if (_compute_lm_residuals)
@@ -306,4 +309,30 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
       }
     }
   }
+}
+
+bool
+MortarConstraintBase::skipPrimaryJacobian()
+{
+  // Residual and Jacobian computed together would also skip the primary residual
+  if (_fe_problem.currentlyComputingResidualAndJacobian())
+    return false;
+
+  if (!_skip_primary_jacobian)
+  {
+    bool skip = !_lower_primary_elem->interior_parent();
+    if (skip)
+    {
+      const auto & nodal_bcs =
+          _fe_problem.getNonlinearSystemBase(_sys.number()).getNodalBCWarehouse();
+      bool prescribed = false;
+      if (nodal_bcs.hasActiveBoundaryObjects(_primary_id))
+        for (const auto & bc : nodal_bcs.getActiveBoundaryObjects(_primary_id))
+          if (bc->variable().number() == _primary_var.number())
+            prescribed = true;
+      skip = prescribed;
+    }
+    _skip_primary_jacobian = skip;
+  }
+  return *_skip_primary_jacobian;
 }
