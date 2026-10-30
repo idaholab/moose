@@ -75,8 +75,8 @@
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-vec_type -nl0_mat_type'
-  petsc_options_value = 'kokkos hypre'
+  petsc_options_iname = '-nl0_mat_type'
+  petsc_options_value = 'hypre'
 []
 
 [Outputs]

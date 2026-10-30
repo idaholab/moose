@@ -7329,6 +7329,18 @@ FEProblemBase::init()
     updateMortarMesh();
 
   {
+    // Vectors and matrices read their PETSc type options once, at creation. Each system prefixes
+    // these options with its name, e.g. '-nl0_vec_type', '-nl0_ghost_vec_type' and
+    // '-nl0_mat_type'. The prefix persists when libMesh rebuilds the objects, e.g. after
+    // adaptivity.
+    for (auto & sys : _solver_systems)
+      sys->system().set_options_prefix(sys->name() + "_");
+    _aux->system().set_options_prefix(_aux->name() + "_");
+
+    // The first solve inserts the complete set of options
+    Moose::PetscSupport::PetscOptionsScope petsc_options_scope(*this);
+    Moose::PetscSupport::petscSetTypeOptions(_petsc_options, *this);
+
     TIME_SECTION("EquationSystems::Init", 2, "Initializing Equation Systems");
     es().init();
   }

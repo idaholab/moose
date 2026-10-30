@@ -104,6 +104,13 @@ void petscSetOptions(const PetscOptions & po,
                      FEProblemBase * problem);
 
 /**
+ * Inserts the PETSc options that vectors and matrices read at creation: the system-prefixed type
+ * options from \p po and the command line, and the type defaults that --compute-device selects.
+ * Call this before the systems create their vectors and matrices.
+ */
+void petscSetTypeOptions(const PetscOptions & po, FEProblemBase & problem);
+
+/**
  * Set the default options for a KSP
  */
 void petscSetKSPDefaults(FEProblemBase & problem, KSP ksp);
@@ -283,12 +290,8 @@ void registerPetscCitation(const std::string & bibtex);
 
 /**
  * Insert command-line PETSc options into the active PETSc options database.
- *
- * When \p problem is provided, this also reapplies vector and matrix type options that may have
- * been consumed before the options database was rebuilt, which preserves PETSc's used-option
- * bookkeeping for command-line '-vec_type' and '*mat_type' options.
  */
-void addPetscOptionsFromCommandline(FEProblemBase * const problem = nullptr);
+void addPetscOptionsFromCommandline();
 
 /**
  * Setup which side we want to apply preconditioner
