@@ -26,22 +26,22 @@ namespace Moose::MFEM
  * per-component grid-function bookkeeping differs between the two; the choice of
  * degrees of freedom to fix is identical and lives here.
  *
- * The gauge depends only on the mesh and the finite element space, so the result
- * is cached and only rebuilt when either is refined. Held by value as a member of
- * the constraint that uses it.
+ * The gauge depends only on the mesh, the finite element space and the dofs
+ * already fixed, so the result is cached and only rebuilt when one of them changes.
+ * Held by value as a member of the constraint that uses it.
  */
 class TreeCotreeGauge
 {
 public:
   /**
    * This rank's ND true-dof indices that the tree-cotree gauge must strongly set
-   * to zero, in addition to those already fixed by an essential (tangential
-   * Dirichlet) boundary condition on the variable.
+   * to zero, in addition to those already fixed by essential boundary conditions
+   * or other essential constraints on the variable.
    *
    * The seeded spanning forest is grown by a distributed Boruvka pass, so no
    * rank holds more than its own share of the mesh graph. Edges are weighted by
-   * their canonical global endpoint ids, which are derived from the (bit-identical
-   * across ranks) endpoint coordinates; because those weights are distinct the
+   * their canonical global endpoint ids, which are derived from the endpoint
+   * coordinates held in the mesh nodes; because those weights are distinct the
    * minimum spanning forest is unique and the result is independent of the MPI
    * partitioning.
    *
@@ -51,11 +51,10 @@ public:
    *                            errors against the right input block
    * @param pfes                the ND space being solved on. Only the lowest-order
    *                            (edge) dofs are gauged, so the space must be order 1
-   * @param essential_bdr_markers boundary attribute marker for an essential
-   *                            condition already applied to the variable, or
-   *                            nullptr when there is no such boundary. Those edges
-   *                            seed the forest so the interior gauge stays
-   *                            compatible with the boundary condition
+   * @param constrained_tdofs   this rank's true dofs already fixed by essential
+   *                            boundary conditions or other essential constraints
+   *                            on the variable. Those edges seed the forest so the
+   *                            gauge stays compatible with them
    * @param gauge_block_markers subdomain attribute marker array of the subdomains
    *                            to gauge, as returned by
    *                            MFEMBlockRestrictable::getSubdomainMarkers; edges of
@@ -64,7 +63,7 @@ public:
    */
   const mfem::Array<int> & trueDofs(const MFEMConstraint & constraint,
                                     mfem::ParFiniteElementSpace & pfes,
-                                    const mfem::Array<int> * essential_bdr_markers,
+                                    const mfem::Array<int> & constrained_tdofs,
                                     const mfem::Array<int> & gauge_block_markers);
 
 private:
@@ -75,6 +74,8 @@ private:
   /// so comparing it invalidates the cache exactly when the gauge could have
   /// changed. -1 marks "never built".
   long _fespace_sequence = -1;
+  /// Already-fixed true dofs _tdofs was built for.
+  mfem::Array<int> _constrained_tdofs;
 };
 }
 

@@ -10,7 +10,6 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMComplexTreeCotreeGaugeEssentialConstraint.h"
-#include "MFEMProblem.h"
 #include "MFEMConstraintUtils.h"
 
 registerMooseObject("MooseApp", MFEMComplexTreeCotreeGaugeEssentialConstraint);
@@ -19,28 +18,20 @@ InputParameters
 MFEMComplexTreeCotreeGaugeEssentialConstraint::validParams()
 {
   InputParameters params = MFEMComplexEssentialConstraint::validParams();
-  params += MFEMBoundaryRestrictable::validParams();
   params.addClassDescription(
       "Applies a tree-cotree gauge to a complex H(curl) (Nedelec) variable by "
       "strongly fixing the real and imaginary parts of the lowest-order edge degrees of freedom on "
       "a spanning tree of the mesh to zero, removing the gradient null space of a curl-curl "
-      "operator. List in 'boundary' the boundaries carrying a tangential Dirichlet condition on "
-      "the variable. Set 'block' to the subdomains to gauge; the complement seeds the spanning "
+      "operator. Edges on boundaries carrying an essential condition on the variable seed the "
+      "spanning forest. Set 'block' to the subdomains to gauge; the complement seeds the spanning "
       "forest but is not gauged. Leaving 'block' empty gauges the whole mesh. Requires a FIRST "
       "order space.");
-  params.setDocString(
-      "boundary",
-      "The boundaries (names or ids) on which a tangential Dirichlet condition is already "
-      "applied to the variable. These boundaries seed the spanning forest so the gauge stays "
-      "compatible with the condition. Defaults to no boundaries.");
   return params;
 }
 
 MFEMComplexTreeCotreeGaugeEssentialConstraint::MFEMComplexTreeCotreeGaugeEssentialConstraint(
     const InputParameters & parameters)
-  : MFEMComplexEssentialConstraint(parameters),
-    MFEMBoundaryRestrictable(
-        parameters, getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable")))
+  : MFEMComplexEssentialConstraint(parameters)
 {
 }
 
@@ -49,16 +40,16 @@ MFEMComplexTreeCotreeGaugeEssentialConstraint::ApplyConstraint(
     mfem::ParComplexGridFunction & gridfunc, mfem::Array<int> & ess_tdof_list)
 {
   const mfem::Array<int> & tree_tdofs =
-      _gauge.trueDofs(*this,
-                      *gridfunc.ParFESpace(),
-                      isBoundaryRestricted() ? &getBoundaryMarkers() : nullptr,
-                      getSubdomainMarkers());
+      _gauge.trueDofs(*this, *gridfunc.ParFESpace(), ess_tdof_list, getSubdomainMarkers());
 
   // The gauge fixes the tree dofs to zero in both components so the lifted
-  // right-hand side stays consistent.
+  // right-hand side stays consistent. The real and imaginary views are brought up
+  // to date with the complex vector before being written, and hand their state
+  // back afterwards.
+  gridfunc.Sync();
   Moose::MFEM::zeroTrueDofs(gridfunc.real(), tree_tdofs);
   Moose::MFEM::zeroTrueDofs(gridfunc.imag(), tree_tdofs);
-  gridfunc.Sync();
+  gridfunc.SyncAlias();
 
   ess_tdof_list.Append(tree_tdofs);
 }

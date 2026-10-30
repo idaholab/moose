@@ -38,9 +38,24 @@ public:
   /// Name of the trial variable (gridfunction) the constraint acts on.
   virtual const std::string & getTrialVariableName() const { return _trial_var_name; }
 
+  /// Whether the constraint must see the true dofs fixed by every other essential
+  /// condition on its variable. Such constraints are applied after all others.
+  virtual bool appliedAfterOtherConstraints() const { return false; }
+
 protected:
+  /// True dofs of @p pfes lying in the constrained subdomains (see
+  /// Moose::MFEM::subdomainTrueDofs). They depend only on the mesh and the space, so
+  /// they are cached and only recomputed when the space is updated.
+  const mfem::Array<int> & getSubdomainTrueDofs(mfem::ParFiniteElementSpace & pfes);
+
   /// Name of the trial variable the constraint is applied to.
   const VariableName & _trial_var_name;
+
+private:
+  /// Subdomain true dofs of the most recent getSubdomainTrueDofs() call.
+  mfem::Array<int> _subdomain_tdofs;
+  /// FE space sequence number _subdomain_tdofs was built for; -1 marks "never built".
+  long _subdomain_tdofs_sequence = -1;
 };
 
 #endif

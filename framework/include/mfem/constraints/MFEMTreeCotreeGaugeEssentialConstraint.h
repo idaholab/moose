@@ -12,7 +12,6 @@
 #pragma once
 
 #include "MFEMEssentialConstraint.h"
-#include "MFEMBoundaryRestrictable.h"
 #include "MFEMTreeCotreeGauge.h"
 
 /**
@@ -21,10 +20,10 @@
  * the mesh graph to zero (a tree-cotree gauge). This makes curl-curl systems
  * with no (or only partial) mass regularization solvable.
  *
- * The 'boundary' parameter should list exactly the boundaries on which a
- * tangential Dirichlet condition is applied to the variable: those edges are
+ * The boundaries on which essential (tangential Dirichlet) conditions are
+ * applied to the variable are taken from the equation system: their edges are
  * seeded into the spanning forest so the interior gauge stays compatible with
- * the boundary condition rather than over-constraining it.
+ * the boundary conditions rather than over-constraining them.
  *
  * The 'block' parameter restricts the gauge to the given subdomains, for the
  * case where another term of the weak form already removes the null space
@@ -39,8 +38,7 @@
  * space must be order 1; a higher order space would keep the gradient modes
  * carried by its interior dofs and stay singular.
  */
-class MFEMTreeCotreeGaugeEssentialConstraint : public MFEMEssentialConstraint,
-                                               public MFEMBoundaryRestrictable
+class MFEMTreeCotreeGaugeEssentialConstraint : public MFEMEssentialConstraint
 {
 public:
   static InputParameters validParams();
@@ -48,6 +46,10 @@ public:
   MFEMTreeCotreeGaugeEssentialConstraint(const InputParameters & parameters);
 
   void ApplyConstraint(mfem::ParGridFunction & gridfunc, mfem::Array<int> & ess_tdof_list) override;
+
+  /// The gauge seeds its spanning forest with every edge already fixed, so it must
+  /// see the dofs fixed by all other essential conditions on the variable.
+  bool appliedAfterOtherConstraints() const override { return true; }
 
 protected:
   /// Selects and caches the gauged true dofs.

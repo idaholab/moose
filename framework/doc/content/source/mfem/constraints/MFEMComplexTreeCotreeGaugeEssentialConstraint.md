@@ -15,10 +15,11 @@ canonical, geometry-derived edge order, so the gauge is independent of the MPI p
 (the implementation is shared through `Moose::MFEM::TreeCotreeGauge`). Here the
 **real and imaginary parts** of each gauged edge dof are both strongly set to zero.
 
-The `boundary` and `block` parameters behave as for the real constraint: `boundary` lists
-the boundaries carrying a tangential Dirichlet condition on the variable, and `block`
-restricts the gauge to the subdomains that need it, with the complementary subdomains
-seeding the forest but never being gauged.
+Other essential conditions and the `block` parameter are handled as for the real
+constraint: edges already fixed by an essential boundary condition or another essential
+constraint on the variable seed the forest, and `block` restricts the gauge to the
+subdomains that need it, with the complementary subdomains seeding the forest but never
+being gauged.
 
 ## Example: a time-harmonic A-formulation
 

@@ -146,6 +146,15 @@ public:
    */
   mfem::Array<int> & GetEssentialBoundaryMarkers(const std::string & var_name);
 
+  /**
+   * Return the essentially constrained true dofs of a given trial variable: those on
+   * essential boundaries and those set by essential constraints within subdomains.
+   */
+  const mfem::Array<int> & GetEssentialTrueDofs(const std::string & var_name) const;
+
+  /// @returns Whether any essential constraint acts on trial variable @p var_name
+  virtual bool HasEssentialConstraints(const std::string & var_name) const;
+
   /// @returns Whether this EquationSystem includes complex components
   virtual bool IsComplex() const { return false; }
   /// @returns Whether this EquationSystem represents an eigenproblem
@@ -177,19 +186,7 @@ protected:
   /// missing from that set would have them silently dropped.
   template <typename T>
   void CheckConstrainedVariablesAreTrialVariables(
-      const Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<T>>> & map) const
-  {
-    for (const auto & [var_name, objects] : map)
-      if (!VectorContainsName(_trial_var_names, var_name))
-        mooseError("MFEM variable '",
-                   var_name,
-                   "' has an object of type '",
-                   MooseUtils::prettyCppType(objects->front().get()),
-                   "' applied to it, but it is not a trial variable of the equation system. "
-                   "Add a kernel acting on '",
-                   var_name,
-                   "', or remove it.");
-  }
+      const Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<T>>> & map) const;
 
   /// Deletes the HypreParMatrix associated with any pointer stored in _h_blocks,
   /// and then proceeds to delete all dynamically allocated memory for _h_blocks
@@ -374,6 +371,23 @@ private:
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
 };
+
+template <typename T>
+void
+EquationSystem::CheckConstrainedVariablesAreTrialVariables(
+    const Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<T>>> & map) const
+{
+  for (const auto & [var_name, objects] : map)
+    if (!VectorContainsName(_trial_var_names, var_name))
+      mooseError("MFEM variable '",
+                 var_name,
+                 "' has an object of type '",
+                 MooseUtils::prettyCppType(objects->front().get()),
+                 "' applied to it, but it is not a trial variable of the equation system. "
+                 "Add a kernel acting on '",
+                 var_name,
+                 "', or remove it.");
+}
 
 template <class FormType>
 void

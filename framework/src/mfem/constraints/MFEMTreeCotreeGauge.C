@@ -30,41 +30,48 @@ namespace
 class UnionFind
 {
 public:
-  explicit UnionFind(int n) : _parent(n), _rank(n, 0)
-  {
-    for (const auto i : libMesh::make_range(n))
-      _parent[i] = i;
-  }
+  explicit UnionFind(int n);
 
-  int find(int x)
-  {
-    while (_parent[x] != x)
-    {
-      _parent[x] = _parent[_parent[x]];
-      x = _parent[x];
-    }
-    return x;
-  }
+  int find(int x);
 
   // Returns true if a and b were in different components, i.e. the edge
   // between them closes no cycle and can join the spanning forest.
-  bool join(int a, int b)
-  {
-    a = find(a);
-    b = find(b);
-    if (a == b)
-      return false;
-    if (_rank[a] < _rank[b])
-      std::swap(a, b);
-    _parent[b] = a;
-    if (_rank[a] == _rank[b])
-      _rank[a]++;
-    return true;
-  }
+  bool join(int a, int b);
 
 private:
   std::vector<int> _parent, _rank;
 };
+
+UnionFind::UnionFind(int n) : _parent(n), _rank(n, 0)
+{
+  std::iota(_parent.begin(), _parent.end(), 0);
+}
+
+int
+UnionFind::find(int x)
+{
+  while (_parent[x] != x)
+  {
+    _parent[x] = _parent[_parent[x]];
+    x = _parent[x];
+  }
+  return x;
+}
+
+bool
+UnionFind::join(int a, int b)
+{
+  a = find(a);
+  b = find(b);
+  if (a == b)
+    return false;
+  if (_rank[a] < _rank[b])
+    std::swap(a, b);
+  _parent[b] = a;
+  if (_rank[a] == _rank[b])
+    _rank[a]++;
+  return true;
+}
 
 // A vertex location, used as a partition-independent vertex identity.
 using Coord3 = std::array<mfem::real_t, 3>;
@@ -88,8 +95,10 @@ vertexCoord(const mfem::ParMesh & pmesh, int v)
   // bit-identical between ranks that share a vertex. Keying on it there would give
   // one vertex several identities and a partition-dependent forest. GetNode reads
   // the Nodes grid function when the mesh is curved and falls back to the vertices
-  // array when it is not. Only spaceDim components are written, so the unused
-  // trailing components keep the zero they are initialised with.
+  // array when it is not. Indexing Nodes by vertex number relies on the vertex dofs
+  // of a continuous (H1) nodal space being numbered first; TreeCotreeGauge::trueDofs
+  // rejects discontinuous nodal spaces. Only spaceDim components are written, so the
+  // unused trailing components keep the zero they are initialised with.
   Coord3 p{0.0, 0.0, 0.0};
   pmesh.GetNode(v, p.data());
   return p;
@@ -177,8 +186,8 @@ struct VertexNumbering
 // spanning forest built from them - are the same however the mesh is
 // partitioned, without any rank ever holding the whole set.
 //
-// Vertex coordinates are copied verbatim from the serial mesh when it is
-// partitioned, so they are bit-identical on every rank and give a
+// The coordinates come from the mesh nodes (see vertexCoord), which are
+// bit-identical on every rank sharing a vertex and so give a
 // partition-independent vertex identity.
 // ---------------------------------------------------------------------
 VertexNumbering
@@ -213,7 +222,10 @@ canonicalVertexIds(const std::vector<Coord3> & coords, MPI_Comm comm)
   // Splitters that cut the globally sorted coordinate order into one bucket per
   // rank. Every rank derives them from the same gathered sample, so they agree.
   // Their exact placement only affects load balance: the ids below come from the
-  // global sorted position, which no choice of splitters can change.
+  // global sorted position, which no choice of splitters can change. The number
+  // of samples per rank trades bucket balance against the size of the sample every
+  // rank gathers (oversample * nprocs coordinates); 32 keeps that gather small
+  // while giving each splitter a few dozen candidates to be chosen from.
   constexpr std::size_t oversample = 32;
   const std::size_t num_samples = std::min(oversample, distinct.size());
   std::vector<Coord3> sample;
@@ -327,7 +339,7 @@ filterLocalCycles(std::vector<CandidateEdge> candidates, int num_local)
 // ---------------------------------------------------------------------
 // Build the interior tree-cotree gauge as a list of this rank's ND true
 // dofs that must be strongly set to zero, in addition to those already
-// fixed by an essential (tangential Dirichlet) boundary condition.
+// fixed by essential boundary conditions or other essential constraints.
 //
 // The forest is grown with a distributed Boruvka pass over the mesh
 // 1-skeleton: no rank ever holds more than its own share of the edges. Edges
@@ -337,16 +349,15 @@ filterLocalCycles(std::vector<CandidateEdge> candidates, int num_local)
 // of MPI ranks or on how the mesh was partitioned.
 //
 //   pfes           - the order 1 ND space being solved on
-//   ess_bdr        - boundary attribute marker for the essential condition
-//   essential_tdofs - true dofs already made essential by ess_bdr
+//   constrained_tdofs - true dofs already fixed by other essential conditions;
+//                    their edges seed the forest and are never gauged
 //   edge_excluded  - per-local-edge marker of edges the gauge must not touch;
-//                    they seed the forest like the essential boundary but are
-//                    never gauged
+//                    they seed the forest like the fixed edges but are never
+//                    gauged
 // ---------------------------------------------------------------------
 mfem::Array<int>
 buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
-                          const mfem::Array<int> & ess_bdr,
-                          const mfem::Array<int> & essential_tdofs,
+                          const mfem::Array<int> & constrained_tdofs,
                           const mfem::Array<int> & edge_excluded)
 {
   mfem::ParMesh & pmesh = *pfes.GetParMesh();
@@ -355,9 +366,13 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
   MPI_Comm_size(comm, &nprocs);
   MPI_Comm_rank(comm, &rank);
 
-  // Lowest-order edge dofs fixed by the essential boundary condition.
-  mfem::Array<int> ess_vdof_marker;
-  pfes.GetEssentialVDofs(ess_bdr, ess_vdof_marker);
+  // Lowest-order edge dofs already fixed by other essential conditions. They are
+  // seeds, so they never reach the free edges below and are never fixed twice.
+  // Only owned edges are considered below, so marking this rank's true dofs is
+  // enough.
+  std::vector<char> is_constrained_tdof(pfes.GetTrueVSize(), 0);
+  for (const auto tdof : constrained_tdofs)
+    is_constrained_tdof[tdof] = 1;
 
   // 1. This rank's owned edges. Each mesh edge is owned by exactly one rank, so
   //    the union over ranks is the mesh 1-skeleton with no duplicates.
@@ -365,15 +380,15 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
   mfem::Array<int> ev, edge_dofs;
   for (const auto e : libMesh::make_range(pmesh.GetNEdges()))
   {
-    const int ldof = edgeLDof(pfes, e, edge_dofs);
-    if (pfes.GetLocalTDofNumber(ldof) < 0)
+    const int ltdof = pfes.GetLocalTDofNumber(edgeLDof(pfes, e, edge_dofs));
+    if (ltdof < 0)
       continue; // owned by another rank; it will contribute this edge
 
     pmesh.GetEdgeVertices(e, ev);
     owned_edges.push_back({vertexCoord(pmesh, ev[0]),
                            vertexCoord(pmesh, ev[1]),
                            e,
-                           ess_vdof_marker[ldof] != 0 || edge_excluded[e] != 0});
+                           is_constrained_tdof[ltdof] != 0 || edge_excluded[e] != 0});
   }
 
   // 2. Canonical global vertex ids for both endpoints of every owned edge.
@@ -449,25 +464,17 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
   std::vector<int> selected;
   Moose::MFEM::distributedSpanningForest(free_graph, num_vertices, comm, &selected);
 
-  // 6. Map the selected edges back onto this rank's ND true dofs.
-  std::vector<char> is_essential_tdof(pfes.GetTrueVSize(), 0);
-  for (const auto i : libMesh::make_range(essential_tdofs.Size()))
-    is_essential_tdof[essential_tdofs[i]] = 1;
-
-  // An edge chosen by the components at both of its ends is reported twice.
+  // 6. Map the selected edges back onto this rank's ND true dofs. Every selected
+  //    edge is owned by this rank, so it has a local true dof. An edge chosen by
+  //    the components at both of its ends is reported twice.
   std::sort(selected.begin(), selected.end());
   selected.erase(std::unique(selected.begin(), selected.end()), selected.end());
 
   mfem::Array<int> tree_tdofs;
   tree_tdofs.Reserve(static_cast<int>(selected.size()));
   for (const auto index : selected)
-  {
-    const int ltdof =
-        pfes.GetLocalTDofNumber(edgeLDof(pfes, free_edges[index].mesh_edge, edge_dofs));
-    if (ltdof < 0 || is_essential_tdof[ltdof])
-      continue; // already essential via the boundary condition
-    tree_tdofs.Append(ltdof);
-  }
+    tree_tdofs.Append(
+        pfes.GetLocalTDofNumber(edgeLDof(pfes, free_edges[index].mesh_edge, edge_dofs)));
   // Keep the ascending tdof order the caller's elimination path expects.
   tree_tdofs.Sort();
 
@@ -482,10 +489,21 @@ namespace Moose::MFEM
 const mfem::Array<int> &
 TreeCotreeGauge::trueDofs(const MFEMConstraint & constraint,
                           mfem::ParFiniteElementSpace & pfes,
-                          const mfem::Array<int> * essential_bdr_markers,
+                          const mfem::Array<int> & constrained_tdofs,
                           const mfem::Array<int> & gauge_block_markers)
 {
   mfem::ParMesh & pmesh = *pfes.GetParMesh();
+
+  // The graph is built from the mesh edges and the lowest-order dof on each, which
+  // is only meaningful for a Nedelec space: an H1 space would hand back vertex dofs
+  // and an RT space none at all.
+  if (!dynamic_cast<const mfem::ND_FECollection *>(pfes.FEColl()))
+    constraint.paramError("variable",
+                          "The tree-cotree gauge requires an H(curl) (Nedelec) variable, but '",
+                          constraint.getTrialVariableName(),
+                          "' uses the finite element collection '",
+                          pfes.FEColl()->Name(),
+                          "'.");
 
   // Only the lowest-order edge dofs are gauged, so a higher order space would keep
   // the gradient modes carried by its remaining dofs and stay singular. Checked
@@ -501,29 +519,28 @@ TreeCotreeGauge::trueDofs(const MFEMConstraint & constraint,
         ". The gradient modes carried by the higher-order degrees of freedom would be left "
         "in place and the system would stay singular.");
 
-  // The gauge is a property of the mesh and the space alone, so it only has to be
-  // rebuilt when one of them is refined. Rebuilding it every time the linear forms
-  // are assembled would repeat a global graph computation on every time step.
-  if (_fespace_sequence == pfes.GetSequence())
+  // Vertices are identified by their coordinates, read from the mesh nodes. A
+  // discontinuous nodal space, as carried by a periodic mesh, has no single node per
+  // vertex, and periodically identified vertices have no single coordinate.
+  if (pmesh.GetNodes() && pmesh.GetNodalFESpace()->IsDGSpace())
+    constraint.mooseError("The tree-cotree gauge identifies mesh vertices by their coordinates, "
+                          "which is not possible on a mesh with discontinuous nodes, such as a "
+                          "periodic mesh.");
+
+  // The gauge is a property of the mesh, the space and the dofs already fixed
+  // alone, so it only has to be rebuilt when one of them changes. Rebuilding it
+  // every time the linear forms are assembled would repeat a global graph
+  // computation on every time step.
+  if (_fespace_sequence == pfes.GetSequence() && _constrained_tdofs == constrained_tdofs)
     return _tdofs;
-
-  // Boundary attribute marker for an essential (tangential Dirichlet) condition
-  // already applied to this variable; all-zero when no such boundary is given.
-  mfem::Array<int> ess_bdr(pmesh.bdr_attributes.Size() ? pmesh.bdr_attributes.Max() : 0);
-  ess_bdr = 0;
-  if (essential_bdr_markers)
-    ess_bdr = *essential_bdr_markers;
-
-  // True dofs of the solve space already fixed by that boundary condition.
-  mfem::Array<int> essential_tdofs;
-  pfes.GetEssentialTrueDofs(ess_bdr, essential_tdofs);
 
   // Edges of subdomains that are not gauged.
   mfem::Array<int> edge_excluded = excludedEdgeMarker(pfes, gauge_block_markers);
 
-  _tdofs = buildTreeCotreeGaugeTDofs(pfes, ess_bdr, essential_tdofs, edge_excluded);
+  _tdofs = buildTreeCotreeGaugeTDofs(pfes, constrained_tdofs, edge_excluded);
 
   _fespace_sequence = pfes.GetSequence();
+  _constrained_tdofs = constrained_tdofs;
   return _tdofs;
 }
 }
