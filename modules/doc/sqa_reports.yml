@@ -332,13 +332,10 @@ Requirements:
     combined:
         directories:
             - modules/combined
-        log_missing: WARNING
-        log_missing_requirement: WARNING
 
     chemical_reactions:
         directories:
             - modules/chemical_reactions
-        log_missing: WARNING
 
     contact:
         directories:
@@ -395,15 +392,13 @@ Requirements:
     phase_field:
         directories:
             - modules/phase_field
-        log_duplicate_requirement: WARNING
-        log_missing: WARNING
-        log_empty_issues: WARNING
 
     porous_flow:
         directories:
             - modules/porous_flow
         log_duplicate_requirement: WARNING
         log_missing: WARNING
+        log_empty_issues: WARNING
 
     ray_tracing:
         directories:
@@ -424,7 +419,6 @@ Requirements:
     shifted_boundary_method:
         directories:
             - modules/shifted_boundary_method
-        log_missing: WARNING
 
     solid_mechanics:
         directories:
