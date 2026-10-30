@@ -970,9 +970,9 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto mu_in = (*_mu_soln)(node_in);
           auto mu_out = (*_mu_soln)(node_out);
           auto mu_interp = this->computeInterpolatedValue(mu_out, mu_in, 0.5);
-          auto Dh_i = 4.0 * S_interp / w_perim_interp;
+          auto Dh_c = 4.0 * S_interp / w_perim_interp;
           // Compute friction factor
-          auto Re = ((std::abs(mdot_loc) / S_interp) * Dh_i / mu_interp);
+          auto Re = ((std::abs(mdot_loc) / S_interp) * Dh_c / mu_interp);
           _friction_args = FrictionStruct(i_ch, Re, S_interp, w_perim_interp);
           Real ff = _friction_closure->computeFrictionFactor(_friction_args);
           if (_ff_soln)
@@ -983,7 +983,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
             ki = k_grid[i_ch][iz - 1];
           else
             ki = k_grid[i_ch][iz];
-          Pe = 1.0 / ((ff * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
+          Pe = 1.0 / ((ff * dz / Dh_c + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
         }
         auto alpha = computeInterpolationCoefficients(Pe);
 
@@ -1007,8 +1007,8 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         auto w_perim_out = (*_w_perim_soln)(node_out);
         auto w_perim_interp = computeInterpolatedValue(w_perim_out, w_perim_in, Pe);
 
-        // hydraulic diameter in the i direction
-        auto Dh_i = 4.0 * S_interp / w_perim_interp;
+        // cell-center hydraulic diameter
+        auto Dh_c = 4.0 * S_interp / w_perim_interp;
 
         // Keep temporal storage independent of the spatial interpolation scheme. Applying the
         // upwind coefficient to this term puts the storage on the upstream node and leaves the
@@ -1192,7 +1192,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         /// Friction term
         PetscScalar mdot_interp =
             computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), Pe);
-        auto Re = ((std::abs(mdot_interp) / S_interp) * Dh_i / mu_interp);
+        auto Re = ((std::abs(mdot_interp) / S_interp) * Dh_c / mu_interp);
         _friction_args = FrictionStruct(i_ch, Re, S_interp, w_perim_interp);
         Real ff = _friction_closure->computeFrictionFactor(_friction_args);
         if (_ff_soln)
@@ -1203,7 +1203,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           ki = k_grid[i_ch][iz - 1];
         else
           ki = k_grid[i_ch][iz];
-        auto coef = (ff * dz / Dh_i + ki) * 0.5 * std::abs(mdot_interp) / (S_interp * rho_interp);
+        auto coef = (ff * dz / Dh_c + ki) * 0.5 * std::abs(mdot_interp) / (S_interp * rho_interp);
         if (iz == first_node)
         {
           PetscScalar value_vec = -1.0 * alpha * coef * (*_mdot_soln)(node_in);
