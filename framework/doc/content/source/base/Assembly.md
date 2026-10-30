@@ -17,6 +17,11 @@ system, such as the ones listed below. In the non-exhaustive list below, we refe
 - the local values of current variable, its spatial derivatives at first and second order,
   its curl on the element
 
+- the automatic differentiation (AD) shape function gradients and, for vector variables, the AD
+  shape function values, curls and divergences. On a displaced mesh these carry derivatives with
+  respect to the displacements. For `NEDELEC_ONE` and `RAVIART_THOMAS` variables, the Piola maps
+  make even the values depend on the displacements, so AD vector objects use AD test functions.
+
 
 It also contains these quantities for the mortar cases, on quadrature points.
 

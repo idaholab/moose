@@ -157,6 +157,9 @@ MooseVariableData<OutputType>::setGeometry(Moose::GeometryType gm_type)
       _current_curl_phi = _curl_phi;
       _current_div_phi = _div_phi;
       _current_ad_grad_phi = _ad_grad_phi;
+      _current_ad_vector_phi = _ad_vector_phi;
+      _current_ad_curl_phi = _ad_curl_phi;
+      _current_ad_div_phi = _ad_div_phi;
       break;
     }
     case Moose::Face:
@@ -168,6 +171,9 @@ MooseVariableData<OutputType>::setGeometry(Moose::GeometryType gm_type)
       _current_curl_phi = _curl_phi_face;
       _current_div_phi = _div_phi_face;
       _current_ad_grad_phi = _ad_grad_phi_face;
+      _current_ad_vector_phi = _ad_vector_phi_face;
+      _current_ad_curl_phi = _ad_curl_phi_face;
+      _current_ad_div_phi = _ad_div_phi_face;
       break;
     }
   }
@@ -408,6 +414,76 @@ MooseVariableData<OutputType>::divPhiFace() const
 {
   _div_phi_face = &_div_phi_face_assembly_method(_assembly, _fe_type);
   return *_div_phi_face;
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::checkADVectorPhi() const
+{
+  if constexpr (!std::is_same_v<OutputType, RealVectorValue>)
+    mooseError("AD vector shape functions are only available for vector variables");
+  if (_element_type != Moose::ElementType::Element)
+    mooseError("Unsupported element type: ", Moose::stringify(_element_type));
+}
+
+template <typename OutputType>
+const ADVectorVariablePhiValue &
+MooseVariableData<OutputType>::adVectorPhi() const
+{
+  checkADVectorPhi();
+  _ad_vector_phi = &_assembly.feADVectorPhi(_fe_type);
+  return *_ad_vector_phi;
+}
+
+template <typename OutputType>
+const ADVectorVariablePhiValue &
+MooseVariableData<OutputType>::adVectorPhiFace() const
+{
+  checkADVectorPhi();
+  _ad_vector_phi_face = &_assembly.feADVectorPhiFace(_fe_type);
+  return *_ad_vector_phi_face;
+}
+
+template <typename OutputType>
+const ADVectorVariablePhiCurl &
+MooseVariableData<OutputType>::adCurlPhi() const
+{
+  checkADVectorPhi();
+  // the AD curl is built from the regular one
+  curlPhi();
+  _ad_curl_phi = &_assembly.feADVectorCurlPhi(_fe_type);
+  return *_ad_curl_phi;
+}
+
+template <typename OutputType>
+const ADVectorVariablePhiCurl &
+MooseVariableData<OutputType>::adCurlPhiFace() const
+{
+  checkADVectorPhi();
+  curlPhiFace();
+  _ad_curl_phi_face = &_assembly.feADVectorCurlPhiFace(_fe_type);
+  return *_ad_curl_phi_face;
+}
+
+template <typename OutputType>
+const ADVectorVariablePhiDivergence &
+MooseVariableData<OutputType>::adDivPhi() const
+{
+  checkADVectorPhi();
+  // the AD divergence is built from the regular one
+  divPhi();
+  _ad_div_phi = &_assembly.feADVectorDivPhi(_fe_type);
+  return *_ad_div_phi;
+}
+
+template <typename OutputType>
+const ADVectorVariablePhiDivergence &
+MooseVariableData<OutputType>::adDivPhiFace() const
+{
+  checkADVectorPhi();
+  divPhiFace();
+  _ad_div_phi_face = &_assembly.feADVectorDivPhiFace(_fe_type);
+  return *_ad_div_phi_face;
 }
 
 template <typename OutputType>
@@ -842,9 +918,28 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
   fetchADDofValues();
   const auto n_test = num_dofs / _count;
 
+  // The AD shape function values, curls and divergences of vector variables carry the
+  // displacement derivatives of the Piola maps on a displaced mesh
+  constexpr bool is_vector = std::is_same_v<OutputType, RealVectorValue>;
+  const bool ad_vector_phi = is_vector && _displaced && _current_ad_vector_phi;
+  // Fills dest from the AD vector shape data; only instantiated for vector variables
+  const auto fill_ad_vector =
+      [this, nqp, n_test](auto & dest, const auto * const ad_phi, const auto & dof_values)
+  {
+    if constexpr (is_vector)
+      fill<constant_monomial>(dest, *ad_phi, dof_values, nqp, n_test);
+    else
+      libmesh_ignore(this, dest, ad_phi, dof_values, nqp, n_test);
+  };
+
   // Values
   if (_need_ad_u)
-    fill<constant_monomial>(_ad_u, *_current_phi, _ad_dof_values, nqp, n_test);
+  {
+    if (ad_vector_phi)
+      fill_ad_vector(_ad_u, _current_ad_vector_phi, _ad_dof_values);
+    else
+      fill<constant_monomial>(_ad_u, *_current_phi, _ad_dof_values, nqp, n_test);
+  }
   // Grad. On an element face, only fill the gradient when a face object requested it. Otherwise it
   // stays empty so that a face object that read it through the volume accessor adGradSln() fails
   // the bounds assertion instead of silently using gradients built without the AD face shape
@@ -869,14 +964,29 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       fill<constant_monomial>(_ad_second_u, *_current_second_phi, _ad_dof_values, nqp, n_test);
   // Curl
   if (_need_ad_curl_u)
-    fill<constant_monomial>(_ad_curl_u, *_current_curl_phi, _ad_dof_values, nqp, n_test);
+  {
+    if (is_vector && _displaced && _current_ad_curl_phi)
+      fill_ad_vector(_ad_curl_u, _current_ad_curl_phi, _ad_dof_values);
+    else
+      fill<constant_monomial>(_ad_curl_u, *_current_curl_phi, _ad_dof_values, nqp, n_test);
+  }
+  // Div
+  if (_need_ad_div_u)
+  {
+    if (is_vector && _displaced && _current_ad_div_phi)
+      fill_ad_vector(_ad_div_u, _current_ad_div_phi, _ad_dof_values);
+    else
+      fill<constant_monomial>(_ad_div_u, *_current_div_phi, _ad_dof_values, nqp, n_test);
+  }
 
   const bool is_transient = _subproblem.isTransient();
   if (is_transient)
   {
     if (_need_ad_u_dot)
     {
-      if (_time_integrator)
+      if (_time_integrator && ad_vector_phi)
+        fill_ad_vector(_ad_u_dot, _current_ad_vector_phi, _ad_dofs_dot);
+      else if (_time_integrator)
         fill<constant_monomial>(_ad_u_dot, *_current_phi, _ad_dofs_dot, nqp, n_test);
       // We are too early in the setup to have a time integrator, so we are not really using the
       // AD-derivatives. We set the AD value of the derivatives to the nonAD value
@@ -890,7 +1000,9 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
     if (_need_ad_u_dotdot)
     {
-      if (_time_integrator)
+      if (_time_integrator && ad_vector_phi)
+        fill_ad_vector(_ad_u_dotdot, _current_ad_vector_phi, _ad_dofs_dotdot);
+      else if (_time_integrator)
         fill<constant_monomial>(_ad_u_dotdot, *_current_phi, _ad_dofs_dotdot, nqp, n_test);
       else
       {

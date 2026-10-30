@@ -957,6 +957,20 @@ MooseLinearVariableFV<OutputType>::adCurlSlnNeighbor() const
 }
 
 template <typename OutputType>
+const ADTemplateVariableDivergence<OutputType> &
+MooseLinearVariableFV<OutputType>::adDivSln() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableDivergence<OutputType> &
+MooseLinearVariableFV<OutputType>::adDivSlnNeighbor() const
+{
+  adError();
+}
+
+template <typename OutputType>
 const typename MooseLinearVariableFV<OutputType>::ADDofValues &
 MooseLinearVariableFV<OutputType>::adDofValues() const
 {
