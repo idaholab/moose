@@ -181,71 +181,6 @@ private:
 };
 
 /**
- * Base class for dispatcher registry entry.
- * Used for type erasure so that the registry can hold dispatchers for different functor types in a
- * single container.
- */
-class DispatcherRegistryEntryBase
-{
-public:
-  virtual ~DispatcherRegistryEntryBase() {}
-
-  /**
-   * Build a dispatcher for this operation and functor
-   * @param object The pointer to the functor
-   */
-  virtual std::unique_ptr<DispatcherBase> build(const void * object) const = 0;
-
-  /**
-   * Set whether the user has overriden the hook method associated with this operation
-   * @param flag Whether the user has overriden the hook method
-   */
-  void hasUserMethod(bool flag) { _has_user_method = flag; }
-  /**
-   * Get whether the user has overriden the hook method associated with this operation
-   * @returns Whether the user has overriden the hook method
-   */
-  bool hasUserMethod() const { return _has_user_method; }
-
-private:
-  /**
-   * Flag whether the user has overriden the hook method associated with this operation
-   */
-  bool _has_user_method = false;
-};
-
-/**
- * Class that stores the information of a dispatcher and builds it.
- * This shell class is the entry of the dispatcher registry instead of the dispatcher itself.
- * The reason this class does not dispatch the functor directly is to let the dispatcher hold
- * the reference of the functor so that the functor does not need to be copied twice at each
- * dispatch. Namely, dispatchers are to be built and held by the functors, not the registry.
- * @tparam Operation The function tag of operator() to be dispatched
- * @tparam Object The functor class type
- */
-///@{
-template <typename Operation, typename Object>
-class DispatcherRegistryEntry : public DispatcherRegistryEntryBase
-{
-public:
-  std::unique_ptr<DispatcherBase> build(const void * object) const override final
-  {
-    return std::make_unique<Dispatcher<Operation, Object>>(object);
-  }
-};
-
-template <typename Operation, typename Object>
-class ReducerRegistryEntry : public DispatcherRegistryEntryBase
-{
-public:
-  std::unique_ptr<DispatcherBase> build(const void * object) const override final
-  {
-    return std::make_unique<Reducer<Operation, Object>>(object);
-  }
-};
-///@}
-
-/**
  * Class that registers dispatchers of all Kokkos functors
  */
 class DispatcherRegistry
@@ -271,7 +206,7 @@ public:
     auto operation = std::type_index(typeid(Operation));
 
     getRegistry()._dispatchers[std::make_pair(operation, name)] =
-        std::make_unique<DispatcherRegistryEntry<Operation, Object>>();
+        Entry{&builder<Dispatcher<Operation, Object>>};
   }
 
   /**
@@ -286,7 +221,7 @@ public:
     auto operation = std::type_index(typeid(Operation));
 
     getRegistry()._dispatchers[std::make_pair(operation, name)] =
-        std::make_unique<ReducerRegistryEntry<Operation, Object>>();
+        Entry{&builder<Reducer<Operation, Object>>};
   }
 
   /**
@@ -298,7 +233,7 @@ public:
   template <typename Operation>
   static void hasUserMethod(const std::string & name, const bool flag)
   {
-    getDispatcher<Operation>(name)->hasUserMethod(flag);
+    getDispatcher<Operation>(name).has_user_method = flag;
   }
 
   /**
@@ -310,7 +245,7 @@ public:
   template <typename Operation>
   static bool hasUserMethod(const std::string & name)
   {
-    return getDispatcher<Operation>(name)->hasUserMethod();
+    return getDispatcher<Operation>(name).has_user_method;
   }
 
   /**
@@ -323,7 +258,7 @@ public:
   template <typename Operation>
   static std::unique_ptr<DispatcherBase> build(const void * object, const std::string & name)
   {
-    return getDispatcher<Operation>(name)->build(object);
+    return getDispatcher<Operation>(name).builder(object);
   }
 
 private:
@@ -333,11 +268,33 @@ private:
    */
   static DispatcherRegistry & getRegistry();
 
+  using Builder = std::unique_ptr<DispatcherBase> (*)(const void * object);
+
+  struct Entry
+  {
+    Builder builder;
+    /**
+     * Flag whether the user has overriden the hook method associated with this operation
+     */
+    bool has_user_method = false;
+  };
+
   /**
-   * Get the dispatcher shell of an operation of a functor
+   * Build a type-erased dispatcher from a registered concrete dispatcher type
+   * @tparam DispatcherType Concrete dispatcher or reducer type
+   * @param object The pointer to the functor
+   */
+  template <typename DispatcherType>
+  static std::unique_ptr<DispatcherBase> builder(const void * object)
+  {
+    return std::make_unique<DispatcherType>(object);
+  }
+
+  /**
+   * Get the dispatcher entry of an operation of a functor
    * @tparam Operation The function tag of operator()
    * @param name The registered object type name
-   * @returns The dispatcher shell
+   * @returns The dispatcher entry
    */
   template <typename Operation>
   static auto & getDispatcher(const std::string & name)
@@ -354,11 +311,10 @@ private:
   }
 
   /**
-   * Map containing the dispatcher shells with the key being the pair of function tag type index and
-   * registered object type name
+   * Map containing dispatcher entries keyed by function tag type index and registered object type
+   * name
    */
-  std::map<std::pair<std::type_index, std::string>, std::unique_ptr<DispatcherRegistryEntryBase>>
-      _dispatchers;
+  std::map<std::pair<std::type_index, std::string>, Entry> _dispatchers;
 };
 
 template <typename T, typename = void>
