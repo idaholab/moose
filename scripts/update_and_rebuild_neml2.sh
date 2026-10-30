@@ -22,14 +22,22 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo "provides both the C++ libraries MOOSE links against and the Python package"
   echo "(e.g. neml2-compile, used by the cpp-aoti runtime). The script performs:"
   echo "  1. Update the NEML2 submodule (unless skipped)"
-  echo "  2. Check prerequisites (torch, cmake) -- see below"
+  echo "  2. Check prerequisites (torch, cmake), bootstrapping torch if absent -- see below"
   echo "  3. Build NEML2 from source and pip-install it into the active environment"
   echo
   echo "Prerequisites in the ACTIVE Python environment. This script CHECKS these but"
-  echo "never installs them:"
+  echo "never installs them, except for the PyTorch bootstrap described below:"
   echo "  * A neml2-compatible PyTorch (e.g. 'pip install torch'). NEML2 links against"
-  echo "    the torch found here; it is deliberately left untouched (your pinned build"
-  echo "    is preserved)."
+  echo "    the torch found here. An existing torch -- even one that fails to import --"
+  echo "    is deliberately left untouched (your pinned build is preserved)."
+  echo "    If torch is entirely absent, it is built from the LibTorch build directory"
+  echo "    left by update_and_rebuild_libtorch.sh (<LIBTORCH_SRC_DIR>/build) and installed"
+  echo "    into the active environment, together with PyTorch's requirements.txt. That"
+  echo "    can replace the environment's cmake and ninja with their PyPI builds and"
+  echo "    downgrade packages it pins (e.g. setuptools). The existing CMake build is"
+  echo "    reconfigured and built incrementally rather than from scratch. Without that"
+  echo "    build directory the script stops with an error."
+  echo "    Set NEML2_AUTO_INSTALL_TORCH=0 to disable the bootstrap."
   echo "  * cmake. The minimum version is defined by NEML2 and enforced by its build"
   echo "    backend, so it is not hardcoded here -- only cmake's presence is checked."
   echo "    ninja is recommended but optional."
@@ -44,6 +52,15 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo "                 --skip-submodule-update is assumed. Default:"
   echo "                 <MOOSE_DIR>/framework/contrib/neml2."
   echo "  NEML2_JOBS     Number of parallel build jobs. Default: <MOOSE_JOBS>, else 1."
+  echo "  NEML2_AUTO_INSTALL_TORCH"
+  echo "                 1 (default) to bootstrap PyTorch when torch is absent; any other"
+  echo "                 value (e.g. 0) disables the bootstrap."
+  echo "  LIBTORCH_SRC_DIR"
+  echo "                 PyTorch source directory whose build/ is reused by the bootstrap."
+  echo "                 Default: <MOOSE_DIR>/framework/contrib/pytorch."
+  echo "  LIBTORCH_JOBS  Number of parallel jobs for the PyTorch bootstrap. Default: <NEML2_JOBS>."
+  echo "  PETSC_DIR      PETSc used by the PyTorch bootstrap for BLAS/LAPACK. Default:"
+  echo "                 env:PETSC_DIR, else <MOOSE_DIR>/petsc/arch-moose."
   echo
   echo "Command-line arguments:"
   echo "  --help                   Display this message and exit"
@@ -96,14 +113,74 @@ echo "  python3:                   $(command -v python3)"
 echo "  Extra pip arguments:       ${EXTRA_ARGS[*]}"
 echo "****************************************************************************************************"
 
-# Step 2: Check prerequisites (never installed here). NEML2 v3 links against the torch
-# found in the active Python environment, and is built with CMake.
-if ! python3 -c 'import torch' >/dev/null 2>&1; then
+# Step 2: Check prerequisites. NEML2 v3 links against the torch found in the active Python
+# environment, and is built with CMake.
+
+# Bootstrap Python PyTorch only if the module is completely absent.
+# Never overwrite an existing but broken torch installation.
+if [[ "${NEML2_AUTO_INSTALL_TORCH:-1}" == "1" ]] &&
+   python3 -c 'import importlib.util, sys; sys.exit(0 if importlib.util.find_spec("torch") is None else 1)'; then
+
+  TORCH_SRC_DIR=${LIBTORCH_SRC_DIR:-${MOOSE_DIR}/framework/contrib/pytorch}
+
+  if [[ ! -f "${TORCH_SRC_DIR}/setup.py" ||
+        ! -f "${TORCH_SRC_DIR}/build/CMakeCache.txt" ]]; then
+    echo "Error: Python torch is missing and no reusable LibTorch build exists."
+    echo "Run update_and_rebuild_libtorch.sh first, or install torch into the active environment."
+    exit 1
+  fi
+
+  # Install with exactly the interpreter the 'import torch' check below uses. Unlike
+  # 'command -v python3', sys.executable is absolute, which matters because the install runs
+  # from the PyTorch source directory.
+  TORCH_PYTHON=$(python3 -c 'import sys; print(sys.executable)') || exit 1
+
+  # install_libtorch_python falls back to the 'pip' on PATH when the interpreter has no pip
+  # module (the uv-created apptainer venv, whose pip wrapper targets its own venv). Only accept
+  # that fallback when it belongs to the same environment.
+  if ! "${TORCH_PYTHON}" -m pip --version &> /dev/null &&
+     [[ "$(dirname "$(command -v pip)")" != "$(dirname "${TORCH_PYTHON}")" ]]; then
+    echo "Error: ${TORCH_PYTHON} has no pip module and the 'pip' on PATH belongs to another"
+    echo "environment; refusing to install PyTorch there."
+    exit 1
+  fi
+
+  export PETSC_DIR=${PETSC_DIR:-${MOOSE_DIR}/petsc/arch-moose}
+
+  echo
+  echo "****************************************************************************************************"
+  echo "Python torch is missing; installing PyTorch from ${TORCH_SRC_DIR}/build into ${TORCH_PYTHON}"
+  echo "****************************************************************************************************"
+  echo
+
+  # Reuse the existing PyTorch installation helper.
+  # shellcheck disable=SC1091
+  source "${SCRIPT_DIR}/configure_libtorch.sh"
+
+  # PIP_USER=0 stops pip from silently falling back to a user-site install (outside the active
+  # environment) when the environment's site-packages is not writable.
+  if ! PIP_USER=0 install_libtorch_python \
+      "${TORCH_SRC_DIR}" \
+      "${TORCH_PYTHON}" \
+      "${LIBTORCH_JOBS:-${NEML2_JOBS}}"; then
+    echo "Error: Failed to install Python PyTorch."
+    exit 1
+  fi
+fi
+
+if ! python3 -c 'import torch'; then
   echo "Error: 'import torch' failed in the active Python environment."
   echo "NEML2 v3 links against the PyTorch installed in the active environment. Activate an"
   echo "environment that has a compatible torch (e.g. 'pip install torch') and re-run."
   exit 1
 fi
+
+# Report the torch NEML2 will build against; cmake_prefix_path is where NEML2's CMake finds Torch.
+python3 -c 'import sys, torch, torch.utils
+print(f"PyTorch used by NEML2:\n  python3:                   {sys.executable}")
+print(f"  torch.__file__:            {torch.__file__}")
+print(f"  torch.__version__:         {torch.__version__}")
+print(f"  torch cmake_prefix_path:   {torch.utils.cmake_prefix_path}")'
 
 # Only cmake's presence is checked -- the minimum version lives in NEML2's pyproject
 # (cmake.version) and is enforced by its build backend, so nothing is hardcoded here.

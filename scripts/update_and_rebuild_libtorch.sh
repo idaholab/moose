@@ -208,7 +208,7 @@ if [[ "${INSTALL_PYTHON_PACKAGE}" == true ]]; then
     exit 1
   fi
 
-  if ! "${PYTHON_EXECUTABLE}" -c 'import torch' 2>/dev/null; then
+  if ! "${PYTHON_EXECUTABLE}" -c 'import torch'; then
     echo "Error: PyTorch was installed, but 'import torch' failed in ${PYTHON_EXECUTABLE}"
     exit 1
   fi
