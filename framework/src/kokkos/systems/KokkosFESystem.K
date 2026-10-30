@@ -155,6 +155,33 @@ FESystem::setupDofs()
   }
 
   _local_node_dof_index.copyToDeviceNested();
+
+  if (_dof_map.n_constrained_dofs())
+  {
+    _local_constraints.create(_num_local_dofs + _num_ghost_dofs);
+
+    for (auto it = _dof_map.constraint_rows_begin(); it != _dof_map.constraint_rows_end(); ++it)
+      if (_dof_map.semilocal_index(it->first))
+      {
+        auto local_dof = solution->map_global_to_local_index(it->first);
+
+        _local_constraints.reserve({local_dof}, {it->second.size()});
+      }
+
+    _local_constraints.finalize();
+
+    for (auto it = _dof_map.constraint_rows_begin(); it != _dof_map.constraint_rows_end(); ++it)
+      if (_dof_map.semilocal_index(it->first))
+      {
+        auto local_dof = solution->map_global_to_local_index(it->first);
+
+        unsigned int i = 0;
+        for (auto [dof, weight] : it->second)
+          _local_constraints[local_dof][i++] = {solution->map_global_to_local_index(dof), weight};
+      }
+
+    _local_constraints.copyToDevice();
+  }
 }
 
 void

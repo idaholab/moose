@@ -41,6 +41,9 @@ KokkosVectorTimeDerivative::computeJacobianInternal(const Derived & kernel,
 
   Real local_ke[MAX_CACHED_DOF];
 
+  const auto scaling_factor =
+      kokkosSystem(_kokkos_var.sys()).getVariableScalingFactor(_kokkos_var.var());
+
   for (unsigned int j = datum.local_thread_id(); j < datum.n_jdofs();
        j += datum.num_local_threads())
   {
@@ -68,7 +71,7 @@ KokkosVectorTimeDerivative::computeJacobianInternal(const Derived & kernel,
 
       for (unsigned int i = ib; i < ie; ++i)
         accumulateTaggedElementalMatrix(
-            local_ke[i - ib], datum.elem().id, i, _lumping ? i : j, datum.jvar());
+            local_ke[i - ib] * scaling_factor, datum.elem().id, i, _lumping ? i : j, datum.jvar());
     }
   }
 }
