@@ -24,4 +24,14 @@
       detail = 'with exact derivatives with respect to the degrees of freedom.'
     []
   []
+  [count_mismatch]
+    type = RunException
+    input = 'biharmonic_ad_array.i'
+    cli_args = 'Variables/w/order=THIRD Variables/w/family=HERMITE Variables/w/components=3 '
+               'Kernels/biharmonic/v=w'
+    expect_err = 'Must have the same number of components as \'variable\''
+    requirement = 'The system shall report an error when the second derivatives of a coupled array '
+                  'variable with a different number of components are requested by the AD array '
+                  'biharmonic test kernel.'
+  []
 []
