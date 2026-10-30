@@ -1,0 +1,9 @@
+[Tests]
+  design = 'Constraints/index.md'
+  issues = '#34219'
+  [delaunay_flips_are_scale_independent]
+    type = GoogleTest
+    unit_test = MortarSegmentHelperTest.delaunayFlipsAreScaleIndependent
+    requirement = 'The system shall triangulate three-dimensional mortar segments with the ear-clipping and Delaunay modes independently of the mesh length scale, selecting the same diagonal of a kite-shaped overlap at every scale and covering a rectangular overlap, whose vertices are cocircular, on a large-coordinate mesh.'
+  []
+[]

@@ -243,6 +243,80 @@ TEST_F(MortarSegmentHelperTest, mappingDataDoesNotChangeSegmentGeometry)
   }
 }
 
+TEST_F(MortarSegmentHelperTest, delaunayFlipsAreScaleIndependent)
+{
+  const std::vector<Point> secondary = {
+      Point(-1., -1.), Point(1., -1.), Point(1., 1.), Point(-1., 1.)};
+  const std::vector<MortarSegmentTriangulationMode> modes = {
+      MortarSegmentTriangulationMode::EarClipping,
+#if defined(LIBMESH_HAVE_TRIANGLE) || defined(LIBMESH_HAVE_POLY2TRI)
+      MortarSegmentTriangulationMode::Delaunay,
+#endif
+  };
+
+  const auto segments = [&secondary](const MortarSegmentTriangulationMode mode,
+                                     const std::vector<Point> & primary,
+                                     const Real scale,
+                                     std::vector<Point> & nodes)
+  {
+    std::vector<Point> scaled_secondary;
+    std::vector<Point> scaled_primary;
+    for (const auto & node : secondary)
+      scaled_secondary.push_back(scale * node);
+    for (const auto & node : primary)
+      scaled_primary.push_back(scale * node);
+
+    auto segment_helper = helper(scaled_secondary, mode);
+    std::vector<std::vector<unsigned int>> elements;
+    Moose::out << "delaunayFlipsAreScaleIndependent: mode " << static_cast<int>(mode) << " scale "
+               << scale << " primary " << primary[0] << std::endl;
+    segment_helper.getMortarSegments(scaled_primary, nodes, elements);
+    Moose::out << "delaunayFlipsAreScaleIndependent: done" << std::endl;
+    return elements;
+  };
+
+  // A primary kite inside the secondary face has a unique Delaunay triangulation, across its short
+  // diagonal, at every mesh scale
+  const std::vector<Point> kite = {
+      Point(-0.8, 0.), Point(0., -0.3), Point(0.8, 0.), Point(0., 0.3)};
+  for (const auto mode : modes)
+    for (const Real scale : {1e-4, 1., 1e4})
+    {
+      std::vector<Point> nodes;
+      const auto elements = segments(mode, kite, scale, nodes);
+      ASSERT_EQ(elements.size(), 2) << "scale " << scale;
+      for (const auto & elem : elements)
+        for (const auto & diagonal_end : {kite[1], kite[3]})
+          EXPECT_TRUE(
+              std::any_of(elem.begin(),
+                          elem.end(),
+                          [&](const unsigned int node)
+                          { return (nodes[node] - scale * diagonal_end).norm() < 1e-12 * scale; }))
+              << "scale " << scale;
+    }
+
+  // Shifted squares overlap in rectangles, whose vertices lie on one circle, so either diagonal is
+  // Delaunay. At a large scale the segments must still be found and cover the overlap.
+  constexpr Real scale = 1e4;
+  for (const auto mode : modes)
+    for (const auto i : make_range(1, 20))
+    {
+      const Point shift(0.05 * i, 0.03 * (20 - i));
+      std::vector<Point> primary;
+      for (const auto & node : secondary)
+        primary.push_back(node + shift);
+
+      std::vector<Point> nodes;
+      const auto elements = segments(mode, primary, scale, nodes);
+      Real area = 0;
+      for (const auto & elem : elements)
+        area +=
+            0.5 * (nodes[elem[1]] - nodes[elem[0]]).cross(nodes[elem[2]] - nodes[elem[0]]).norm();
+      EXPECT_NEAR(area, (2. - shift(0)) * (2. - shift(1)) * scale * scale, 1e-12 * scale * scale)
+          << "shift " << shift;
+    }
+}
+
 TEST_F(MortarSegmentHelperTest, referenceInterpolationMapsParallelSurfaceQuadraturePoints)
 {
   const std::vector<Point> master = {
