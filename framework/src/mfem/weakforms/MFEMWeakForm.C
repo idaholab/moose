@@ -12,6 +12,7 @@
 #include "MFEMWeakForm.h"
 #include "MFEMIntegratedBC.h"
 #include "MFEMEssentialBC.h"
+#include "MFEMEssentialConstraint.h"
 
 registerMooseObject("MooseApp", MFEMWeakForm);
 
@@ -42,6 +43,15 @@ void
 MFEMWeakForm::addKernel(const std::string & /*name*/, std::shared_ptr<MFEMKernel> kernel)
 {
   _equation_system->AddKernel(std::move(kernel));
+}
+
+void
+MFEMWeakForm::addConstraint(const std::string & name, std::shared_ptr<MFEMConstraint> constraint)
+{
+  if (auto essential_constraint = std::dynamic_pointer_cast<MFEMEssentialConstraint>(constraint))
+    _equation_system->AddEssentialConstraint(std::move(essential_constraint));
+  else
+    mooseError("Unsupported constraint of name '", name, "' detected.");
 }
 
 std::shared_ptr<Moose::MFEM::EquationSystem>

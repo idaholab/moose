@@ -17,19 +17,26 @@ namespace Moose::MFEM
 {
 
 void
-EigenproblemEquationSystem::ApplyEssentialBCs()
+EigenproblemEquationSystem::AddEssentialConstraint(
+    std::shared_ptr<MFEMEssentialConstraint> constraint)
+{
+  mooseError("Constraint '",
+             constraint->name(),
+             "' cannot be used in an MFEM eigenproblem: essential constraints on interior "
+             "degrees of freedom are not supported by the eigenproblem equation system.");
+}
+
+void
+EigenproblemEquationSystem::ApplyEssentialConstraints()
 {
   _ess_tdof_lists.resize(1);
-  _ess_markers.resize(1);
+  _ess_bdr_markers.resize(1);
   mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(0));
   trial_gf.Update();
   trial_gf = _gfuncs->GetRef(_trial_var_names.at(0));
-  // A mesh without boundary elements, such as a periodic one, has no boundary attributes
-  const auto & bdr_attributes = trial_gf.ParFESpace()->GetParMesh()->bdr_attributes;
-  _ess_markers.at(0).SetSize(bdr_attributes.Size() ? bdr_attributes.Max() : 0, 0);
   // Set constrained DoF values on user-declared essential boundaries and collect their markers
-  ApplyEssentialBC(_trial_var_names.at(0), trial_gf, _ess_markers.at(0));
-  trial_gf.FESpace()->GetEssentialTrueDofs(_ess_markers.at(0), _ess_tdof_lists.at(0));
+  ApplyEssentialConstraint(
+      _trial_var_names.at(0), trial_gf, _ess_bdr_markers.at(0), _ess_tdof_lists.at(0));
   CheckProblemIsHomogeneous();
 }
 
@@ -58,7 +65,7 @@ EigenproblemEquationSystem::FormEigenproblemMatrix()
   auto & test_var_name = _test_var_names.at(0);
   auto blf = _blfs.Get(test_var_name);
 
-  blf->EliminateEssentialBCDiag(_ess_markers.at(0), 1.0);
+  blf->EliminateEssentialBCDiag(_ess_bdr_markers.at(0), 1.0);
   blf->Finalize();
   _jacobian.Reset(blf->ParallelAssemble());
 }
@@ -84,7 +91,7 @@ EigenproblemEquationSystem::FormMassMatrix(EigenRHSCoefficient rhs_coefficient)
   // Shift the eigenvalue corresponding to eliminated dofs to a large value. The BC DoFs on the
   // stiffness matrix are set to 1 and the mass matrix BC DoFs are set to a small value eps, such
   // that the eigenvalues associate with these DOFs are ~1/eps.
-  m->EliminateEssentialBCDiag(_ess_markers.at(0), std::numeric_limits<mfem::real_t>::min());
+  m->EliminateEssentialBCDiag(_ess_bdr_markers.at(0), std::numeric_limits<mfem::real_t>::min());
   m->Finalize();
   _mass_rhs.Reset(m->ParallelAssemble());
 }
@@ -99,7 +106,7 @@ EigenproblemEquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX,
 
   height = trueX.Size();
   width = trueX.Size();
-  ApplyEssentialBCs();
+  ApplyEssentialConstraints();
   FormEigenproblemMatrix();
   FormMassMatrix(rhs_coefficient);
 }

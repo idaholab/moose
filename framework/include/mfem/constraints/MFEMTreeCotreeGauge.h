@@ -1,0 +1,86 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifdef MOOSE_MFEM_ENABLED
+
+#pragma once
+
+#include "libmesh/ignore_warnings.h"
+#include "mfem/miniapps/common/mfem-common.hpp"
+#include "libmesh/restore_warnings.h"
+
+class MFEMConstraint;
+
+namespace Moose::MFEM
+{
+/**
+ * Shared implementation of the tree-cotree gauge for an H(curl) (Nedelec)
+ * variable, used by both the real (MFEMTreeCotreeGaugeEssentialConstraint) and
+ * complex (MFEMComplexTreeCotreeGaugeEssentialConstraint) constraints. Only the
+ * per-component grid-function bookkeeping differs between the two; the choice of
+ * degrees of freedom to fix is identical and lives here.
+ *
+ * The gauge depends only on the mesh, the finite element space and the dofs
+ * already fixed, so the result is cached and only rebuilt when one of them changes.
+ * Held by value as a member of the constraint that uses it.
+ */
+class TreeCotreeGauge
+{
+public:
+  /**
+   * This rank's ND true-dof indices that the tree-cotree gauge must strongly set
+   * to zero, in addition to those already fixed by essential boundary conditions
+   * or other essential constraints on the variable.
+   *
+   * Every dof of each spanning forest edge is fixed. In a higher order space, each
+   * other gauged edge, face and element also has fixed a selection of its own dofs
+   * that removes the gradients of the H1 bubbles on it.
+   *
+   * The seeded spanning forest is grown by a distributed Boruvka pass, so no
+   * rank holds more than its own share of the mesh graph. Edges are weighted by
+   * their canonical global endpoint ids, which are derived from the endpoint
+   * coordinates held in the mesh nodes; because those weights are distinct the
+   * minimum spanning forest is unique and the result is independent of the MPI
+   * partitioning.
+   *
+   * The returned reference stays valid until the next call on this object.
+   *
+   * @param constraint          the constraint requesting the gauge, used to report
+   *                            errors against the right input block
+   * @param pfes                the ND space being solved on. Above SECOND order the
+   *                            mesh must have no triangular faces
+   * @param essential_tdofs     this rank's true dofs already fixed by essential
+   *                            boundary conditions or other essential constraints
+   *                            on the variable. Those edges seed the forest so the
+   *                            gauge stays compatible with them
+   * @param gauge_block_markers subdomain attribute marker array of the subdomains
+   *                            to gauge, as returned by
+   *                            MFEMBlockRestrictable::getSubdomainMarkers; edges of
+   *                            the complementary subdomains seed the forest but are
+   *                            never gauged
+   */
+  const mfem::Array<int> & trueDofs(const MFEMConstraint & constraint,
+                                    mfem::ParFiniteElementSpace & pfes,
+                                    const mfem::Array<int> & essential_tdofs,
+                                    const mfem::Array<int> & gauge_block_markers);
+
+private:
+  /// Gauged true dofs of the most recent trueDofs() call.
+  mfem::Array<int> _tdofs;
+  /// FE space sequence number _tdofs was built for. MFEM bumps it whenever the
+  /// space is updated after h- or p-refinement, including refinement of the mesh,
+  /// so comparing it invalidates the cache exactly when the gauge could have
+  /// changed. -1 marks "never built".
+  long _fespace_sequence = -1;
+  /// Already-fixed true dofs _tdofs was built for.
+  mfem::Array<int> _essential_tdofs;
+};
+}
+
+#endif

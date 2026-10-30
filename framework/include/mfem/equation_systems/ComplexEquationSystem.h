@@ -18,6 +18,7 @@
 #include "MFEMComplexKernel.h"
 #include "MFEMComplexIntegratedBC.h"
 #include "MFEMComplexEssentialBC.h"
+#include "MFEMComplexEssentialConstraint.h"
 #include "MFEMMixedBilinearFormKernel.h"
 
 namespace Moose::MFEM
@@ -49,13 +50,15 @@ public:
   /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
   virtual void BuildMixedBilinearForms() override;
 
-  /// Update all essentially constrained true DoF markers and values on boundaries
-  virtual void ApplyEssentialBCs() override;
+  /// Update essential boundary markers and all constrained true DoF lists and values
+  virtual void ApplyEssentialConstraints() override;
 
-  /// Applies complex BCs to a single trial variable
-  virtual void ApplyComplexEssentialBC(const std::string & var_name,
-                                       mfem::ParComplexGridFunction & trial_gf,
-                                       mfem::Array<int> & global_ess_markers);
+  /// Apply essential constraints associated with var_name to set true DoFs of trial_gf, and update
+  /// markers of all essential boundaries
+  virtual void ApplyComplexEssentialConstraint(const std::string & var_name,
+                                               mfem::ParComplexGridFunction & trial_gf,
+                                               mfem::Array<int> & global_bdr_markers,
+                                               mfem::Array<int> & global_ess_tdofs);
 
   /// Add complex kernels
   void AddComplexKernel(std::shared_ptr<MFEMComplexKernel> kernel);
@@ -65,6 +68,11 @@ public:
 
   /// Add complex essential BCs
   void AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc);
+
+  /// Add complex essential (volumetric) constraints
+  void AddComplexEssentialConstraint(std::shared_ptr<MFEMComplexEssentialConstraint> constraint);
+
+  bool HasEssentialConstraints(const std::string & var_name) const override;
 
   /// Perform trivial eliminations of coupled variables lacking corresponding test variables
   void EliminateCoupledVariables() override;
@@ -132,6 +140,10 @@ protected:
 
   // Complex essential BCs
   NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>> _cmplx_essential_bc_map;
+
+  // Complex essential (volumetric) constraints
+  NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexEssentialConstraint>>>
+      _cmplx_essential_constraint_map;
 
   /// Pointers to coupled variables not part of the reduced ComplexEquationSystem.
   ComplexGridFunctions _cmplx_eliminated_variables;

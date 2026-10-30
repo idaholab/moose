@@ -165,6 +165,17 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
     return problem.getMFEMObject<Moose::MFEM::LinearSolverBase>("Moose::MFEM::SolverBase", sname);
   };
 
+  // mfem::GeometricMultigrid eliminates essential dofs by boundary attribute on every
+  // level, so it would precondition an operator in which constrained subdomain dofs
+  // are still free.
+  if (_equation_system->HasEssentialConstraints(_var_name))
+    mooseError("GeometricMultigridSolver '",
+               name(),
+               "': variable '",
+               _var_name,
+               "' has essential constraints within subdomains, which geometric multigrid "
+               "cannot account for: it eliminates essential degrees of freedom by boundary only.");
+
   // Obtain essential boundary attribute markers from the equation system.
   mfem::Array<int> & ess_bdr = _equation_system->GetEssentialBoundaryMarkers(_var_name);
 
