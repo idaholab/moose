@@ -1,7 +1,10 @@
 [Tests]
-  [./calcium_bicarbonite]
+  issues = '#9769'
+  design = 'AqueousEquilibriumReactions/index.md SolidKineticReactions/index.md'
+  [calcium_bicarbonite]
     type = RunApp
     input = 'calcium_bicarbonate.i'
     check_input = true
-  [../]
+    requirement = 'The system shall be able to model reactive transport model with precipitation and dissolution, specifically of calcium (ca2) and bicarbonate (hco3) reaction to form calcite (CaCO3).'
+  []
 []
