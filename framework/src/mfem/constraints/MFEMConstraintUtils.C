@@ -16,24 +16,6 @@ namespace
 {
 
 /**
- * 0-indexed marker array, in the MFEM convention, of the mesh element attributes
- * the constraint acts on. An empty @p subdomain_attrs marks every attribute, which
- * is what an empty 'block' parameter means (see MFEMBlockRestrictable::validParams).
- * Attributes are validated against the mesh by
- * MFEMBlockRestrictable::subdomainsToAttributes, so out-of-range entries cannot
- * reach here.
- */
-mfem::Array<int>
-markedAttributes(const mfem::Mesh & mesh, const mfem::Array<int> & subdomain_attrs)
-{
-  mfem::Array<int> marked(mesh.attributes.Size() ? mesh.attributes.Max() : 0);
-  marked = subdomain_attrs.Size() ? 0 : 1;
-  for (const auto a : subdomain_attrs)
-    marked[a - 1] = 1;
-  return marked;
-}
-
-/**
  * Accumulate the local projection of @p coef over every element carrying a marked
  * attribute into @p values, counting the contributions made to each dof in
  * @p counter. Both are sized and zeroed here.
@@ -104,15 +86,14 @@ template <typename CoefficientType>
 void
 projectOnSubdomains(mfem::ParGridFunction & gf,
                     CoefficientType & coef,
-                    const mfem::Array<int> & subdomain_attrs)
+                    const mfem::Array<int> & subdomain_markers)
 {
   if (coef.GetVDim() != gf.VectorDim())
     mooseError("coef vdim != VectorDim()");
-  const mfem::Array<int> marked = markedAttributes(*gf.FESpace()->GetMesh(), subdomain_attrs);
 
   mfem::Vector values;
   mfem::Array<int> counter;
-  accumulateSubdomainProjection(gf, coef, marked, values, counter);
+  accumulateSubdomainProjection(gf, coef, subdomain_markers, values, counter);
   distributeSubdomainProjection(gf, values, counter);
 }
 }
@@ -122,11 +103,10 @@ namespace Moose::MFEM
 
 void
 subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
-                  const mfem::Array<int> & subdomain_attrs,
+                  const mfem::Array<int> & subdomain_markers,
                   mfem::Array<int> & tdofs)
 {
   mfem::ParMesh & pmesh = *pfes.GetParMesh();
-  const mfem::Array<int> marked = markedAttributes(pmesh, subdomain_attrs);
 
   // Local L-dof marker: 1 if the dof touches a local element carrying one of the
   // requested attributes. All requested attributes are marked in a single pass so
@@ -135,7 +115,7 @@ subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
   dof_marker = 0;
   mfem::Array<int> vdofs;
   for (const auto e : libMesh::make_range(pmesh.GetNE()))
-    if (marked[pmesh.GetAttribute(e) - 1])
+    if (subdomain_markers[pmesh.GetAttribute(e) - 1])
     {
       pfes.GetElementVDofs(e, vdofs);
       for (const auto d : vdofs)
@@ -153,17 +133,17 @@ subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
 void
 projectCoefficientOnSubdomains(mfem::ParGridFunction & gf,
                                mfem::Coefficient & coef,
-                               const mfem::Array<int> & subdomain_attrs)
+                               const mfem::Array<int> & subdomain_markers)
 {
-  projectOnSubdomains(gf, coef, subdomain_attrs);
+  projectOnSubdomains(gf, coef, subdomain_markers);
 }
 
 void
 projectCoefficientOnSubdomains(mfem::ParGridFunction & gf,
                                mfem::VectorCoefficient & coef,
-                               const mfem::Array<int> & subdomain_attrs)
+                               const mfem::Array<int> & subdomain_markers)
 {
-  projectOnSubdomains(gf, coef, subdomain_attrs);
+  projectOnSubdomains(gf, coef, subdomain_markers);
 }
 
 void

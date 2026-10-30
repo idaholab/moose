@@ -96,36 +96,27 @@ vertexCoord(const mfem::ParMesh & pmesh, int v)
 }
 
 // Per-local-edge marker: 1 if the edge belongs to an element whose attribute is
-// NOT among gauge_attrs, i.e. an edge of a region the gauge must not reach because
-// some other term of the weak form already removes the gradient null space there.
-// These edges seed the spanning forest but are never gauged. Edges of a gauged
-// region that merely touch such a region are NOT flagged, so the gauge still
-// reaches the vertices next to it. Consistent across ranks for shared edges. An
-// empty gauge_attrs gauges the whole mesh and flags nothing.
+// NOT set in the attribute marker array gauge_markers, i.e. an edge of a region the
+// gauge must not reach because some other term of the weak form already removes the
+// gradient null space there. These edges seed the spanning forest but are never
+// gauged. Edges of a gauged region that merely touch such a region are NOT flagged,
+// so the gauge still reaches the vertices next to it. Consistent across ranks for
+// shared edges.
 //
 // The solve space is required to be order 1, so its own dofs are exactly the mesh
 // edges and it can supply both the element/edge adjacency and the group
 // communicator; no auxiliary space is needed.
 mfem::Array<int>
-excludedEdgeMarker(mfem::ParFiniteElementSpace & pfes, const mfem::Array<int> & gauge_attrs)
+excludedEdgeMarker(mfem::ParFiniteElementSpace & pfes, const mfem::Array<int> & gauge_markers)
 {
   mfem::ParMesh & pmesh = *pfes.GetParMesh();
   mfem::Array<int> excluded(pmesh.GetNEdges());
-  excluded = 0;
-  if (gauge_attrs.Size() == 0)
-    return excluded;
-
-  const int max_attr = pmesh.attributes.Size() ? pmesh.attributes.Max() : 0;
-  std::vector<char> is_gauge_attr(max_attr + 1, 0);
-  for (const auto a : gauge_attrs)
-    if (a >= 1 && a <= max_attr)
-      is_gauge_attr[a] = 1;
 
   mfem::Array<int> marker(pfes.GetVSize());
   marker = 0;
   mfem::Array<int> edofs;
   for (const auto el : libMesh::make_range(pmesh.GetNE()))
-    if (!is_gauge_attr[pmesh.GetAttribute(el)])
+    if (!gauge_markers[pmesh.GetAttribute(el) - 1])
     {
       pfes.GetElementDofs(el, edofs);
       for (const auto d : edofs)
@@ -492,7 +483,7 @@ const mfem::Array<int> &
 TreeCotreeGauge::trueDofs(const MFEMConstraint & constraint,
                           mfem::ParFiniteElementSpace & pfes,
                           const mfem::Array<int> * essential_bdr_markers,
-                          const mfem::Array<int> & gauge_block_attrs)
+                          const mfem::Array<int> & gauge_block_markers)
 {
   mfem::ParMesh & pmesh = *pfes.GetParMesh();
 
@@ -526,8 +517,8 @@ TreeCotreeGauge::trueDofs(const MFEMConstraint & constraint,
   mfem::Array<int> essential_tdofs;
   pfes.GetEssentialTrueDofs(ess_bdr, essential_tdofs);
 
-  // Edges of subdomains that are not gauged (empty gauge_block_attrs -> none).
-  mfem::Array<int> edge_excluded = excludedEdgeMarker(pfes, gauge_block_attrs);
+  // Edges of subdomains that are not gauged.
+  mfem::Array<int> edge_excluded = excludedEdgeMarker(pfes, gauge_block_markers);
 
   _tdofs = buildTreeCotreeGaugeTDofs(pfes, ess_bdr, essential_tdofs, edge_excluded);
 
