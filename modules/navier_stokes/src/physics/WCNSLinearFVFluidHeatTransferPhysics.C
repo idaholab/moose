@@ -139,14 +139,16 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
     if (!_solve_for_enthalpy)
     {
       params.set<LinearVariableName>("variable") = _fluid_temperature_name;
-      params.set<MooseFunctorName>("diffusion_coeff") =
-          _thermal_conductivity_name[block_i] + (_has_turbulence_model ? "_plus_kt" : "");
+      if (!_has_turbulence_model)
+        params.set<MooseFunctorName>("diffusion_coeff") = _thermal_conductivity_name[block_i];
+      else
+        params.set<MooseFunctorName>("diffusion_coeff") = NS::k_eff_t;
     }
     else
     {
       params.set<LinearVariableName>("variable") = _fluid_enthalpy_name;
       const auto th_cond_name =
-          _thermal_conductivity_name[block_i] + (_has_turbulence_model ? "_plus_kt" : "");
+          _has_turbulence_model ? NS::k_eff_t : _thermal_conductivity_name[block_i];
       params.set<MooseFunctorName>("diffusion_coeff") = th_cond_name + "_by_cp";
     }
     std::vector<SubdomainName> block_names =

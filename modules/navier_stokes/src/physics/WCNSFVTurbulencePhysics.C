@@ -327,7 +327,7 @@ WCNSFVTurbulencePhysics::addFluidEnergyTurbulenceKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = T_fluid_name;
-    params.set<MooseFunctorName>("coeff") = NS::k_t;
+    params.set<MooseFunctorName>("coeff") = NS::k_eff_t;
     getProblem().addFVKernel(kernel_type, prefix() + T_fluid_name + "_turbulent_diffusion", params);
   }
 }
