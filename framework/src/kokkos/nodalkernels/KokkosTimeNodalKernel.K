@@ -24,10 +24,20 @@ TimeNodalKernel::validParams()
 }
 
 TimeNodalKernel::TimeNodalKernel(const InputParameters & parameters)
-  : NodalKernel(parameters),
-    _u_dot(_var, Moose::SOLUTION_DOT_TAG, true),
-    _du_dot_du(_var.sys().duDotDu(_var.number()))
+  : NodalKernel(parameters), _u_dot(_vars, Moose::SOLUTION_DOT_TAG, true), _du_dot_du(_vars.size())
 {
+}
+
+TimeNodalKernel::TimeNodalKernel(const TimeNodalKernel & object)
+  : NodalKernel(object), _u_dot(object._u_dot), _du_dot_du(object._du_dot_du)
+{
+  // TODO: We want to use Array<Scalar<const Real>> for _du_dot_du so that it is automatically
+  // synchronized, but currently there is an NVCC bug preventing it
+
+  for (unsigned int i = 0; i < _vars.size(); ++i)
+    _du_dot_du[i] = _vars[i]->sys().duDotDu(_vars[i]->number());
+
+  _du_dot_du.copyToDevice();
 }
 
 } // namespace Moose::Kokkos

@@ -180,22 +180,25 @@ FESystem::setupNodalBCDofs()
 void
 FESystem::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
 {
-  auto var = nbc->variable().number();
-  auto num_dofs = _var_is_vector[var] ? kokkosAssembly().getDimension() : 1;
-
   if (!dofs.isAlloc())
   {
     dofs.create(_num_local_dofs + _num_ghost_dofs);
     dofs = false;
   }
 
-  for (auto node : nbc->getContiguousNodes())
+  for (const auto variable : nbc->variables())
   {
-    auto dof = _local_node_dof_index[var][node];
+    auto var = variable->number();
+    auto num_dofs = _var_is_vector[var] ? kokkosAssembly().getDimension() : 1;
 
-    if (dof != libMesh::DofObject::invalid_id)
-      for (const auto i : make_range(num_dofs))
-        dofs[dof + i] = true;
+    for (auto node : nbc->getContiguousNodes())
+    {
+      auto dof = _local_node_dof_index[var][node];
+
+      if (dof != libMesh::DofObject::invalid_id)
+        for (const auto i : make_range(num_dofs))
+          dofs[dof + i] = true;
+    }
   }
 
   // Let remote processes know about ghost DOFs associated with nodal BCs not to contribute on them

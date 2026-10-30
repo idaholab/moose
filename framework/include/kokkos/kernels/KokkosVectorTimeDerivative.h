@@ -68,7 +68,7 @@ KokkosVectorTimeDerivative::computeJacobianInternal(const Derived & kernel,
 
       for (unsigned int i = ib; i < ie; ++i)
         accumulateTaggedElementalMatrix(
-            local_ke[i - ib], datum.elem().id, i, _lumping ? i : j, datum.jvar());
+            local_ke[i - ib], datum.elem().id, i, _lumping ? i : j, datum.jvar(), datum.comp());
     }
   }
 }

@@ -68,7 +68,19 @@ public:
   };
   ///@}
 
-  virtual const MooseVariableBase & variable() const override { return _var; }
+  virtual const MooseVariableBase & variable() const override
+  {
+    if (_vars.size() > 1)
+      mooseError("variable() was called for a multi-variable Kokkos residual object. Use "
+                 "variables() instead.");
+
+    return *_vars[0];
+  }
+
+  virtual std::vector<const MooseVariableBase *> variables() const override
+  {
+    return {_vars.begin(), _vars.end()};
+  }
 
   virtual void computeOffDiagJacobian(unsigned int) override final
   {
@@ -82,9 +94,9 @@ public:
 
 protected:
   /**
-   * Reference of the MOOSE variable
+   * MOOSE variables
    */
-  MooseVariableFieldBase & _var;
+  const std::vector<MooseVariableFieldBase *> _vars;
   /**
    * Kokkos variable
    */
@@ -144,7 +156,7 @@ protected:
   KOKKOS_FUNCTION void accumulateTaggedElementalResidual(const Real local_re,
                                                          const ContiguousElementID elem,
                                                          const unsigned int i,
-                                                         const unsigned int comp = 0) const;
+                                                         const unsigned int comp) const;
   /**
    * Accumulate or set local nodal residual contribution to tagged vectors
    * @param add Whether to add or set the local residual
@@ -155,7 +167,7 @@ protected:
   KOKKOS_FUNCTION void accumulateTaggedNodalResidual(const bool add,
                                                      const Real local_re,
                                                      const ContiguousNodeID node,
-                                                     const unsigned int comp = 0) const;
+                                                     const unsigned int comp) const;
   /**
    * Accumulate or set local nodal residual contribution to tagged vectors for vector FE variables
    * @param add Whether to add or set the local residual
@@ -181,7 +193,7 @@ protected:
                                                        const unsigned int i,
                                                        const unsigned int j,
                                                        const unsigned int jvar,
-                                                       const unsigned int comp = 0) const;
+                                                       const unsigned int comp) const;
   /**
    * Accumulate local elemental Jacobian contribution to tagged matrices using automatic
    * differentiation (AD)
@@ -193,7 +205,7 @@ protected:
   KOKKOS_FUNCTION void accumulateTaggedElementalMatrix(const DNDerivativeType & local_ke,
                                                        const AssemblyDatum & datum,
                                                        const unsigned int i,
-                                                       const unsigned int comp = 0) const;
+                                                       const unsigned int comp) const;
   /**
    * Accumulate or set local nodal Jacobian contribution to tagged matrices
    * @param add Whether to add or set the local Jacobian
@@ -206,7 +218,7 @@ protected:
                                                    const Real local_ke,
                                                    const ContiguousNodeID node,
                                                    const unsigned int jvar,
-                                                   const unsigned int comp = 0) const;
+                                                   const unsigned int comp) const;
   /**
    * Accumulate or set local nodal Jacobian contribution to tagged matrices for vector FE variables
    * @param add Whether to add or set the local Jacobian
@@ -233,7 +245,7 @@ protected:
   KOKKOS_FUNCTION void accumulateTaggedNodalMatrix(const bool add,
                                                    const DNDerivativeType & local_ke,
                                                    const ContiguousNodeID node,
-                                                   const unsigned int comp = 0) const;
+                                                   const unsigned int comp) const;
 
   /**
    * The common loop structure template for computing elemental residual
@@ -251,6 +263,13 @@ protected:
   KOKKOS_FUNCTION void computeJacobianInternal(AssemblyDatum & datum, function body) const;
 
 private:
+  /**
+   * Get the MOOSE variables from the 'variable' or 'variables' parameter
+   * @param field_type The expected field type of the variables
+   * @returns The MOOSE variables
+   */
+  std::vector<MooseVariableFieldBase *> getMooseVariables(Moose::VarFieldType field_type);
+
   /**
    * Tags this object operates on
    */
@@ -518,7 +537,7 @@ ResidualObject::computeResidualInternal(AssemblyDatum & datum, function body) co
     body(local_re - ib, ib, ie);
 
     for (unsigned int i = ib; i < ie; ++i)
-      accumulateTaggedElementalResidual(local_re[i - ib], datum.elem().id, i);
+      accumulateTaggedElementalResidual(local_re[i - ib], datum.elem().id, i, datum.comp());
   }
 }
 
@@ -547,7 +566,8 @@ ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) co
       body(local_ke - ib, ib, ie, j);
 
       for (unsigned int i = ib; i < ie; ++i)
-        accumulateTaggedElementalMatrix(local_ke[i - ib], datum.elem().id, i, j, datum.jvar());
+        accumulateTaggedElementalMatrix(
+            local_ke[i - ib], datum.elem().id, i, j, datum.jvar(), datum.comp());
     }
   }
 }
