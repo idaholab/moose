@@ -175,13 +175,11 @@ findYplusThermal(const T & Pr, const T & Pr_t)
 
   auto f = [&](const T y)
   {
-    return Pr * y - Pr_t * (1.0 / NS::von_karman_constant * log(NS::E_turb_constant * y) + jayatilleke_P);
+    return Pr * y -
+           Pr_t * (1.0 / NS::von_karman_constant * log(NS::E_turb_constant * y) + jayatilleke_P);
   };
 
-  auto df = [&](const T y)
-  {
-    return Pr - Pr_t * (1.0 / NS::von_karman_constant / y);
-  };
+  auto df = [&](const T y) { return Pr - Pr_t * (1.0 / NS::von_karman_constant / y); };
 
   // Location of the minimum of f(y); the larger root is to the right of this.
   const auto y_plus_min = Pr_t / (Pr * NS::von_karman_constant);
@@ -205,7 +203,12 @@ findYplusThermal(const T & Pr, const T & Pr_t)
 
     // Avoid division by nearly zero derivative
     if (abs(df_val) < DERIV_TOLERANCE)
-      break;
+      mooseException("Derivative vanished while finding the thermal matching non-dimensional wall "
+                     "distance (Pr: ",
+                     Pr,
+                     " Pr_t: ",
+                     Pr_t,
+                     ")");
 
     auto y_new = y_plus - f_val / df_val;
 
@@ -216,13 +219,17 @@ findYplusThermal(const T & Pr, const T & Pr_t)
     y_plus = max(y_new, NS::min_y_plus);
   } while (abs((y_plus - y_plus_last) / y_plus_last) > REL_TOLERANCE && ++iters < MAX_ITERS);
 
+  if (iters >= MAX_ITERS && abs(f(y_plus)) > REL_TOLERANCE * Pr_t)
+    mooseException("Could not find the thermal matching non-dimensional wall distance (Pr: ",
+                   Pr,
+                   " Pr_t: ",
+                   Pr_t,
+                   ")");
+
   return T(max(y_plus, NS::min_y_plus));
 }
 
-template Real
-findYplusThermal<Real>(const Real & Pr, const Real & Pr_t);
-template ADReal
-findYplusThermal<ADReal>(const ADReal & Pr, const ADReal & Pr_t);
+template Real findYplusThermal<Real>(const Real & Pr, const Real & Pr_t);
 
 template <typename T>
 T

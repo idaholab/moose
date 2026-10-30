@@ -39,8 +39,9 @@ public:
 
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
-  virtual bool useBoundaryGradientExtrapolation() const override { return true; }
+  virtual bool needsBoundaryNonorthogonalCorrection() const override { return true; }
 
+  /// Compute the turbulent thermal conductivity
   Real computeTurbulentThermalConductivity() const;
 
 protected:

@@ -117,9 +117,11 @@ WCNSFVTurbulencePhysicsBase::validParams()
                         "Whether to use an auxiliary variable instead of a functor material "
                         "property for the turbulent viscosity");
   params.addParam<bool>("output_mu_t", true, "Whether to add mu_t to the field outputs");
-  params.addParam<bool>("k_eff_t_as_aux_variable",
-                        false,
-                        "Whether to use an auxiliary variable for the effective turbulent conductivity");
+  params.addParam<bool>(
+      "k_t_as_aux_variable",
+      false,
+      "Whether to use an auxiliary variable for the effective turbulent conductivity");
+  params.renameParam("k_t_as_aux_variable", "k_eff_t_as_aux_variable", "");
 
   // Add the coupled physics
   // TODO Remove the defaults once NavierStokesFV action is removed
@@ -174,7 +176,7 @@ WCNSFVTurbulencePhysicsBase::WCNSFVTurbulencePhysicsBase(const InputParameters &
     if (getParam<bool>("mu_t_as_aux_variable"))
       saveAuxVariableName(_turbulent_viscosity_name);
     if (getParam<bool>("k_eff_t_as_aux_variable"))
-      saveAuxVariableName(NS::k_t);
+      saveAuxVariableName(NS::k_eff_t);
   }
 
   // Parameter checks
@@ -415,8 +417,8 @@ WCNSFVTurbulencePhysicsBase::addAuxiliaryKernels()
     const auto & k_names = _fluid_energy_physics->getThermalConductivityName();
     if (k_names.size() != 1)
       paramError("thermal_conductivity_name",
-                "Thermal conductivity vector is not currently supported for obtaining "
-                "the effective thermal conductivity");
+                 "Thermal conductivity vector is not currently supported for obtaining "
+                 "the effective thermal conductivity");
 
     params.set<MooseFunctorName>(NS::k) = k_names[0];
 
@@ -470,8 +472,9 @@ WCNSFVTurbulencePhysicsBase::addMaterials()
       const auto & k_names = _fluid_energy_physics->getThermalConductivityName();
       if (k_names.size() != 1)
         _fluid_energy_physics->paramError("thermal_conductivity_name",
-                  "Specifying multiple block-restricted thermal conductivities is not currently supported for obtaining "
-                  "the effective thermal conductivity");
+                                          "Specifying multiple block-restricted thermal "
+                                          "conductivities is not currently supported for obtaining "
+                                          "the effective thermal conductivity");
       const auto & k_name = k_names[0];
 
       const auto & Pr_t_name = getParam<MooseFunctorName>("Pr_t");
@@ -486,7 +489,8 @@ WCNSFVTurbulencePhysicsBase::addMaterials()
       else
         params.set<std::vector<std::string>>("functor_names") = {mu_t_name};
 
-      params.set<std::string>("expression") = k_name + "+" + mu_t_name + "*" + cp_name + "/" + Pr_t_name;
+      params.set<std::string>("expression") =
+          k_name + "+" + mu_t_name + "*" + cp_name + "/" + Pr_t_name;
       params.set<std::string>("property_name") = NS::k_eff_t;
       params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
       params.set<std::vector<OutputName>>("outputs") = {"all"};

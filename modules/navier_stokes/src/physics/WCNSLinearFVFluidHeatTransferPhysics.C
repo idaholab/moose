@@ -33,7 +33,7 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
   // We could split between discretization and solver here.
   params.addParamNamesToGroup("use_nonorthogonal_correction", "Numerical scheme");
 
-  // Not implementede
+  // Not implemented
   params.suppressParameter<bool>("effective_conductivity");
   // Not needed
   params.suppressParameter<bool>("add_energy_equation");
@@ -140,8 +140,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
     {
       params.set<LinearVariableName>("variable") = _fluid_temperature_name;
       if (!_has_turbulence_model)
-        params.set<MooseFunctorName>("diffusion_coeff") =
-            _thermal_conductivity_name[block_i];
+        params.set<MooseFunctorName>("diffusion_coeff") = _thermal_conductivity_name[block_i];
       else
         params.set<MooseFunctorName>("diffusion_coeff") = NS::k_eff_t;
     }
@@ -149,7 +148,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
     {
       params.set<LinearVariableName>("variable") = _fluid_enthalpy_name;
       const auto th_cond_name =
-          _thermal_conductivity_name[block_i] + (_has_turbulence_model ? "_plus_kt" : "");
+          _has_turbulence_model ? NS::k_eff_t : _thermal_conductivity_name[block_i];
       params.set<MooseFunctorName>("diffusion_coeff") = th_cond_name + "_by_cp";
     }
     std::vector<SubdomainName> block_names =

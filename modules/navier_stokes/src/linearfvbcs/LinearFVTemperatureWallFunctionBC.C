@@ -16,7 +16,8 @@ InputParameters
 LinearFVTemperatureWallFunctionBC::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
-  params.addClassDescription("Computes the wall value of the turbulent thermal conductivity based on turbulent temperature wall functions.");
+  params.addClassDescription("Computes the wall value of the turbulent thermal conductivity based "
+                             "on turbulent temperature wall functions.");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
@@ -34,8 +35,7 @@ LinearFVTemperatureWallFunctionBC::validParams()
   return params;
 }
 
-LinearFVTemperatureWallFunctionBC::LinearFVTemperatureWallFunctionBC(
-    const InputParameters & params)
+LinearFVTemperatureWallFunctionBC::LinearFVTemperatureWallFunctionBC(const InputParameters & params)
   : LinearFVAdvectionDiffusionBC(params),
     _dim(_subproblem.mesh().dimension()),
     _u_var(getFunctor<Real>("u")),
@@ -63,20 +63,20 @@ LinearFVTemperatureWallFunctionBC::computeTurbulentThermalConductivity() const
                           ? _current_face_info->neighborPtr()
                           : _current_face_info->elemPtr();
   const auto re = makeElemArg(elem);
-  const auto old_state = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
-  const auto mu = _mu(re, old_state);
-  const auto rho = _rho(re, old_state);
-  const auto cp = _cp(re, old_state);
-  const auto k = _k(re, old_state);
-  const auto Pr_t = _Pr_t(re,old_state);
+  const auto state = determineState();
+  const auto mu = _mu(re, state);
+  const auto rho = _rho(re, state);
+  const auto cp = _cp(re, state);
+  const auto k = _k(re, state);
+  const auto Pr_t = _Pr_t(re, state);
   const auto Pr = cp * mu / k;
 
   // Get the velocity vector
-  RealVectorValue velocity(_u_var(re, old_state));
+  RealVectorValue velocity(_u_var(re, state));
   if (_v_var)
-    velocity(1) = (*_v_var)(re, old_state);
+    velocity(1) = (*_v_var)(re, state);
   if (_w_var)
-    velocity(2) = (*_w_var)(re, old_state);
+    velocity(2) = (*_w_var)(re, state);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
   const auto parallel_speed = NS::computeSpeed<Real>(
@@ -114,7 +114,7 @@ LinearFVTemperatureWallFunctionBC::computeTurbulentThermalConductivity() const
   else if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
   {
     // Assign non-equilibrium wall function value
-    y_plus = std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_tke(re, old_state)) * rho / mu;
+    y_plus = std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_tke(re, state)) * rho / mu;
     u_tau = parallel_speed /
             (log(max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)) / NS::von_karman_constant);
   }
@@ -126,7 +126,7 @@ LinearFVTemperatureWallFunctionBC::computeTurbulentThermalConductivity() const
   Real y_plus_thermal = 0.0;
 
   // Compute thermal viscous layer thickness
-  y_plus_thermal = NS::findYplusThermal<Real>(Pr,Pr_t);
+  y_plus_thermal = NS::findYplusThermal<Real>(Pr, Pr_t);
 
   if (y_plus <= y_plus_thermal) // sub-laminar layer
   {
@@ -158,7 +158,8 @@ LinearFVTemperatureWallFunctionBC::computeBoundaryNormalGradient() const
                                         ? _current_face_info->elemPtr()
                                         : _current_face_info->neighborPtr());
   const Real distance = computeCellToFaceDistance();
-  return (this->computeTurbulentThermalConductivity() - raw_value(_var(elem_arg, determineState()))) /
+  return (this->computeTurbulentThermalConductivity() -
+          raw_value(_var(elem_arg, determineState()))) /
          distance;
 }
 
