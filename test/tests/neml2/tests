@@ -18,9 +18,10 @@
   [aoti_compile]
     requirement = 'The framework shall compile a NEML2 model to ahead-of-time (AOTI) artifacts.'
     type = RunCommand
-    command = 'env -u CXX neml2-compile --model model models/custom_model.i --device cpu --output-dir aoti_artifacts --load models/test_models.py -d product:A'
+    command = 'cxx="${CXX:-c++}"; if host_cxx=$("$cxx" --showme:command 2>/dev/null); then CXX="$host_cxx"; elif show=$("$cxx" -show 2>/dev/null); then CXX="${show%% *}"; else CXX="$cxx"; fi; export CXX; neml2-compile --model model models/custom_model.i --device cpu --output-dir aoti_artifacts --load models/test_models.py -d product:A'
     capabilities = 'libtorch & neml2'
     valgrind = none
+    min_slots = 2
   []
   [aoti_run]
     requirement = 'The framework shall evaluate a NEML2 model through the cpp-aoti runtime, reproducing the cpp-eager result.'
