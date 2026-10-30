@@ -96,7 +96,7 @@ protected:
 
   /**
    * Tie the secondary variable at each secondary node to the weighted sum of the primary variable
-   * at the primary nodes. Every rank must call this. Nodes this rank does not have, and primary
+   * at the primary nodes. Every rank must call this. Nodes this rank does not own, and primary
    * nodes, are skipped.
    * @param dof_map The DofMap that receives the exact constraints
    * @param secondary_nodes The IDs of the secondary nodes to constrain

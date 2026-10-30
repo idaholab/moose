@@ -384,8 +384,9 @@ NodalConstraint::addTieConstraints(libMesh::DofMap & dof_map,
 
   for (const auto secondary_id : secondary_nodes)
   {
+    // The owner adds the row, and libMesh sends it to the other ranks that need it
     const Node * const secondary_node = mesh.queryNodePtr(secondary_id);
-    if (!secondary_node)
+    if (!secondary_node || secondary_node->processor_id() != processor_id())
       continue;
 
     // A primary node already satisfies the tie
