@@ -48,5 +48,6 @@ template <bool is_ad>
 Real
 VectorFEWaveTempl<is_ad>::computeQpJacobian()
 {
-  return _curl_test[_i][_qp] * _curl_phi[_j][_qp] + _test[_i][_qp] * _phi[_j][_qp];
+  return MetaPhysicL::raw_value(_curl_test[_i][_qp] * _curl_phi[_j][_qp] +
+                                _test[_i][_qp] * _phi[_j][_qp]);
 }

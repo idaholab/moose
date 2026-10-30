@@ -20,7 +20,7 @@ ADKernelCurl::validParams()
 
 ADKernelCurl::ADKernelCurl(const InputParameters & parameters)
   : ADVectorKernel(parameters),
-    _curl_test(_var.curlPhi()),
+    _curl_test(_var.adCurlPhi()),
     _curl_phi(_assembly.curlPhi(_var)),
     _curl_u(_var.adCurlSln())
 {

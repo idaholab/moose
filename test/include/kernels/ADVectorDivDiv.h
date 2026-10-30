@@ -25,7 +25,7 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   /// div of the test function
-  const VectorVariableTestDivergence & _div_test;
+  const ADVectorVariableTestDivergence & _div_test;
   /// div of the variable or of the coupled variable
   const ADVectorVariableDivergence & _div_v;
   /// scalar coefficient

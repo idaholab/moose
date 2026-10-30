@@ -671,12 +671,23 @@ typedef VectorVariableTestValue ADVectorVariableTestValue;
 typedef VectorVariableTestGradient ADVectorVariableTestGradient;
 typedef VectorVariableTestSecond ADVectorVariableTestSecond;
 
-// We can  use the non-ad version for test values because these don't depend on the mesh
+// We can  use the non-ad version for scalar test values because these don't depend on the mesh
 // displacements  (unless the location of the quadrature points depend on the mesh displacements...)
+// Vector test values use the AD version because the Piola maps of H(curl) and H(div) families
+// depend on the element map
 template <typename T>
-using ADTemplateVariableTestValue = typename OutputTools<T>::VariableTestValue;
+using ADTemplateVariableTestValue = typename OutputTools<
+    std::conditional_t<std::is_same_v<T, RealVectorValue>, ADRealVectorValue, T>>::
+    VariableTestValue;
 template <typename T>
 using ADTemplateVariablePhiValue = typename OutputTools<T>::VariablePhiValue;
+// AD vector shape function values, curls and divergences, which depend on the mesh displacements
+// for Piola-mapped families
+using ADVectorVariablePhiValue = OutputTools<ADRealVectorValue>::VariablePhiValue;
+using ADVectorVariablePhiCurl = OutputTools<ADRealVectorValue>::VariablePhiCurl;
+using ADVectorVariablePhiDivergence = OutputTools<ADRealVectorValue>::VariablePhiDivergence;
+using ADVectorVariableTestCurl = OutputTools<ADRealVectorValue>::VariableTestCurl;
+using ADVectorVariableTestDivergence = OutputTools<ADRealVectorValue>::VariableTestDivergence;
 
 // We need to use the AD version for test gradients and seconds because these *do* depend on the
 // mesh displacements

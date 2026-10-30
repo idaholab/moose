@@ -47,9 +47,9 @@ ADKernelValueTempl<T>::computeResidual()
   else
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
-      const auto value = precomputeQpResidual() * _JxW[_qp] * _coord[_qp];
+      const auto value = raw_value(precomputeQpResidual()) * _JxW[_qp] * _coord[_qp];
       for (_i = 0; _i < n_test; _i++) // target for auto vectorization
-        _local_re(_i) += raw_value(value * _test[_i][_qp]);
+        _local_re(_i) += value * _regular_test[_i][_qp];
     }
 
   accumulateTaggedLocalResidual();
@@ -82,7 +82,7 @@ ADKernelValueTempl<T>::computeResidualsForJacobian()
     {
       const auto value = precomputeQpResidual() * _JxW[_qp] * _coord[_qp];
       for (_i = 0; _i < _test.size(); _i++)
-        _residuals[_i] += value * _test[_i][_qp];
+        _residuals[_i] += value * _regular_test[_i][_qp];
     }
 }
 
