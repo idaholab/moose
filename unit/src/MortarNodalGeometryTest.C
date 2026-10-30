@@ -112,3 +112,54 @@ TEST(MortarNodalGeometryTest, weightedNormalAndHouseholderTangents)
               0.0,
               orthogonality_tolerance);
 }
+
+TEST(MortarNodalGeometryTest, twoDimensionalTangentsAcrossNegativeX)
+{
+  constexpr dof_id_type derivative_index = 0;
+  // Same finite-difference step and tolerances as weightedNormalAndHouseholderTangents.
+  constexpr Real epsilon = 1e-7;
+  constexpr Real finite_difference_tolerance = 1e-8;
+  constexpr Real orthogonality_tolerance = 1e-14;
+  // 2e-3 rad from (-1, 0, 0) is outside the Householder pole branch and 1e-4 rad is inside it.
+  constexpr std::array<Real, 2> offsets{{2e-3, 1e-4}};
+
+  // In-plane unit normal at angle theta from (-1, 0, 0)
+  const auto tangents_at = [](const auto & theta)
+  {
+    using T = std::decay_t<decltype(theta)>;
+    const libMesh::VectorValue<T> normal(-cos(theta), -sin(theta), T(0.0));
+    return std::make_pair(normal, Moose::Mortar::nodalTangents(normal, 2));
+  };
+
+  for (const auto offset : offsets)
+    for (const Real theta : {-offset, offset})
+    {
+      ADReal ad_theta = theta;
+      Moose::derivInsert(ad_theta.derivatives(), derivative_index, 1.0);
+      const auto [ad_normal, ad_tangents] = tangents_at(ad_theta);
+      const auto [plus_normal, plus_tangents] = tangents_at(theta + epsilon);
+      const auto [minus_normal, minus_tangents] = tangents_at(theta - epsilon);
+
+      for (const auto direction : make_range(2))
+      {
+        EXPECT_NEAR(MetaPhysicL::raw_value(ad_normal * ad_tangents[direction]),
+                    0.0,
+                    orthogonality_tolerance);
+        EXPECT_NEAR(
+            MetaPhysicL::raw_value(ad_tangents[direction].norm()), 1.0, orthogonality_tolerance);
+
+        const auto finite_difference =
+            (plus_tangents[direction] - minus_tangents[direction]) / (2 * epsilon);
+        for (const auto component : make_range(Moose::dim))
+          EXPECT_NEAR(ad_tangents[direction](component).derivatives()[derivative_index],
+                      finite_difference(component),
+                      finite_difference_tolerance);
+      }
+
+      // The first tangent turns continuously with the normal through (-1, 0, 0) and stays
+      // e_z x n, so it is (sin(theta), -cos(theta), 0) on both sides.
+      EXPECT_NEAR(MetaPhysicL::raw_value(ad_tangents[0](0)), sin(theta), orthogonality_tolerance);
+      EXPECT_NEAR(MetaPhysicL::raw_value(ad_tangents[0](1)), -cos(theta), orthogonality_tolerance);
+      EXPECT_NEAR(MetaPhysicL::raw_value(ad_tangents[1](2)), 1.0, orthogonality_tolerance);
+    }
+}
