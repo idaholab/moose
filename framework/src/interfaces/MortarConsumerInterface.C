@@ -17,6 +17,7 @@
 #include "MortarInterfaceWarehouse.h"
 #include "Assembly.h"
 #include "AutomaticMortarGeneration.h"
+#include "MooseVariableFieldBase.h"
 #include "libmesh/quadrature.h"
 
 #include <algorithm>
@@ -250,6 +251,30 @@ MortarConsumerInterface::setNormals()
     _normals = amg().getNormals(*_lower_secondary_elem, _qrule_face->get_points());
   else
     _normals = amg().getNodalNormals(*_lower_secondary_elem);
+}
+
+void
+MortarConsumerInterface::checkPetrovGalerkinQuadraticFaces(
+    const MooseObject & moose_object, const MooseVariableFieldBase & lm_var) const
+{
+  if (!lm_var.useDual() || lm_var.feType().family != LAGRANGE || lm_var.feType().order != SECOND)
+    return;
+
+  bool quadratic_face = false;
+  for (const auto * const lower_elem :
+       _mci_mesh.getMesh().active_subdomain_elements_ptr_range(_secondary_subdomain_id))
+    if (lower_elem->type() == QUAD8 || lower_elem->type() == TRI6)
+    {
+      quadratic_face = true;
+      break;
+    }
+  moose_object.comm().max(quadratic_face);
+  if (quadratic_face)
+    moose_object.paramError(
+        "use_petrov_galerkin",
+        "The Petrov-Galerkin approach is not supported for a SECOND order dual Lagrange "
+        "multiplier on QUAD8 or TRI6 secondary faces. Use a FIRST order multiplier or disable "
+        "`use_petrov_galerkin`.");
 }
 
 void

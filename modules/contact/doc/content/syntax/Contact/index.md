@@ -30,6 +30,10 @@ For 3D mortar contact, the triangulation of clipped overlap polygons can be sele
 `triangulation` parameter. The `triangulate_triangles` parameter controls whether polygons that
 are already triangles are left intact or centroid-subdivided again.
 
+On HEX20 and TET10 meshes, dual mortar contact with a SECOND order Lagrange multiplier uses the
+transformed dual basis of [!cite](popp2012dual) (see
+[Transformed_dual_basis_for_higher_order_mortar.md]).
+
 ## Constructed Objects
 
 The primary task performed by this action is creating the Constraint classes that perform the contact enforcement.
