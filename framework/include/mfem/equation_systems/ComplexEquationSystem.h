@@ -53,7 +53,8 @@ public:
   /// Update essential boundary markers and all constrained true DoF lists and values
   virtual void ApplyEssentialConstraints() override;
 
-  /// Applies complex BCs to a single trial variable
+  /// Apply essential constraints associated with var_name to set true DoFs of trial_gf, and update
+  /// markers of all essential boundaries
   virtual void ApplyComplexEssentialConstraint(const std::string & var_name,
                                                mfem::ParComplexGridFunction & trial_gf,
                                                mfem::Array<int> & global_bdr_markers,

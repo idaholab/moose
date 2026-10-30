@@ -201,8 +201,8 @@ protected:
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
 
-  /// Apply essential constraints associated with var_name to set true DoFs of trial_gf and update
-  /// markers
+  /// Apply essential constraints associated with var_name to set true DoFs of trial_gf, and update
+  /// markers of all essential boundaries
   virtual void ApplyEssentialConstraint(const std::string & var_name,
                                         mfem::ParGridFunction & trial_gf,
                                         mfem::Array<int> & global_bdr_markers,
