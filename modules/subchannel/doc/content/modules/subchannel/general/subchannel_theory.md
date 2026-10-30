@@ -197,6 +197,28 @@ The collocated discretization of the variables is presented in [fig:dis] . $i,j$
     id=fig:dis
     caption=Subchannel collocated discretization.
 
+All variables are stored on the axial nodes, which are the faces of the axial cells: cell $k$ of
+subchannel $i$ spans nodes $k-1$ and $k$. The mass flow rate, pressure, enthalpy, temperature,
+density, viscosity, flow area, and wetted perimeter are face values. The diversion and turbulent
+crossflows $w_{ij,k}$ and $w'_{ij,k}$, the net crossflow `SumWij`, the pressure drop `DP`, and the
+friction factor `ff` are cell-center quantities of cell $k$, stored at its top node $k$.
+
+Axial fluxes are evaluated directly from face values, for example $\dot{m}_{i,k} h_{i,k}$ in the
+enthalpy equation and $\dot{m}_{i,k}^2 / (S_{i,k} \rho_{i,k})$ in the axial momentum equation.
+Terms that act over a cell, such as diversion crossflow, turbulent mixing, sweep flow, friction,
+and gravity, use face quantities interpolated to the cell center,
+
+\begin{equation}
+\phi_{i,k-1/2} = \alpha \phi_{i,k-1} + (1 - \alpha) \phi_{i,k},
+\end{equation}
+
+where $\alpha$ is set by [!param](/Problem/TriSubChannel1PhaseProblem/interpolation_scheme):
+$\alpha = 1$ for `upwind`, $\alpha = 0.5$ for `central_difference`, $\alpha = 0$ for `downwind`,
+and a cell Peclet number dependent value for `exponential`. The same weight interpolates the
+cell-center crossflow to the faces in the axial transport of lateral momentum. The interpolation
+scheme does not change the axial mass and enthalpy fluxes. Radial heat conduction is evaluated
+with the enthalpies of the top face, which keeps it implicit in the axial direction.
+
 - Conservation of mass:
 
 \begin{equation}

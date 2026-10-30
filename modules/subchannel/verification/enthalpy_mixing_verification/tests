@@ -1,5 +1,5 @@
 [Tests]
-  design = 'QuadSubChannel1PhaseProblem.md'
+  design = 'enthalpy.md'
   issues = '#29196'
   [enthalpy_mixing_verification]
     type = CSVDiff

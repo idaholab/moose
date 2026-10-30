@@ -6,36 +6,36 @@
 
 This class implements a MeshGenerator to split a monolithic mesh by blocks similar to what is proposed by VP Nguyen [!cite](Nguyen2014).
 
-To split the mesh, nodes shared by multiple blocks are duplicated N-1 times (where N is the number of blocks sharing a particular node). Each duplicated nodes is assigned to one block and all the elements sharing that node are updated. A new sideset identifying the new interface is added, and it is always linked to elements belonging to blocks with the lower ID.
+To split the mesh, nodes shared by multiple blocks are duplicated N-1 times (where N is the number of blocks sharing a particular node). Each duplicated node is assigned to one block and all the elements sharing that node are updated. Separate directional sidesets are always created on both sides of each cut. Their names are formed from the adjacent block names, and each direction has its own boundary ID. These boundary pairs allow libMesh to reconstruct disjoint neighbors on distributed meshes.
 
-As an option, the interface can be split into $Q$ different sidesets, where $Q$ is the number of adjacent block pairs. This is achieved by setting `split_interface=true` and is useful when modeling interfaces with different parameters.
-
-Two types of block restricted option are provided, namely `surrounding_blocks` and `block_pairs`. The `surrounding_blocks` will create interfaces surrounding specified block. When `surrounding_blocks` is provided, the additional boundary `interface_transition` can be added by setting `add_transition_interface=true`. The `interface_transition` boundary identifies the interface between the provided blocks and the rest of the mesh. The `block_pairs` option will create interfaces  only \emph{between} the specified block pairs. Multiple block pairs can be provided, and they are separated by semicolon (`;`). The `block_pairs` option does not work with `add_transition_interface`. By default when no block restricted option is used, interfaces will be generated between all blocks. In addition, the `add_interface_on_two_sides` parameter allows to generate interface boundaries on both sides of the interface which can be used to enforce thermal and mechanical contact at the interface.
+Two block restriction options are provided: [!param](/Mesh/BreakMeshByBlockGenerator/surrounding_blocks) and [!param](/Mesh/BreakMeshByBlockGenerator/block_pairs). The [!param](/Mesh/BreakMeshByBlockGenerator/surrounding_blocks) option creates interfaces both between the listed blocks and between the listed blocks and the rest of the mesh. The [!param](/Mesh/BreakMeshByBlockGenerator/block_pairs) option creates interfaces only between the specified block pairs. Multiple block pairs are separated by semicolons (`;`). These two options cannot be used together. When neither is specified, interfaces are generated between all adjacent blocks.
 
 Elements on the two sides of a generated interface are connected as disjoint neighbors, which libMesh matches by the position of their sides. Because the two sides separate when the mesh deforms, a broken mesh cannot be used with a displaced mesh: set `use_displaced_mesh = false` in the `[Mesh]` block. Finite deformation cohesive zone models can use the Lagrangian solid mechanics kernels (`new_system = true`), which work on the reference mesh, or the mortar-based cohesive zone model, which does not rely on pairing elements through the disjoint neighbor machinery.
 
 ## Example Input File Syntax
 
-### Single Interface
+### Mesh Splitting
 
 !listing test/tests/meshgenerators/break_mesh_by_block_generator/break_mesh_2DJunction_auto.i block=Mesh
 
-### Multiple Interfaces
+### Interface Naming
 
-When `split_interface=true`, the new generated interface is split by block pairs
-and named by joining the block names. For instance if one has two neighboring
-blocks - one named `wood` and named `steel` with `blockID` equal to `1` and `2`,
-respectively - the new interface will be named `wood_steel`. The naming order
-follows the block ID order. For this simple example, the new sideset will be on
-the block named `wood`. If one block is not named, its name will default to
-`Block` plus the `blockID`. For instance, if block 2 is not named the new
-interface will be named `wood_Block2`.
+Each interface is named by joining the block names in the order of the side's
+block followed by its neighbor's block. For neighboring blocks named `wood`
+and `steel`, `wood_steel` contains sides on `wood` and `steel_wood` contains
+sides on `steel`. If a block is unnamed, its name defaults to `Block` plus its
+block ID; for example, `wood_Block2` and `Block2_wood`.
 
-!listing test/tests/meshgenerators/break_mesh_by_block_generator/break_mesh_2DJunction_splittrue.i block=Mesh
+Specify the desired directional block-pair names in the `boundary` parameter of
+interface kernels and cohesive zone models. For example, `boundary = wood_steel`
+selects the sides on `wood` facing `steel`. An interface kernel integrates its
+weak form on these selected sides, treating the elements in `wood` as the element
+side and those in `steel` as the neighbor side. Selecting `steel_wood` reverses
+these roles.
 
-### block_pair option
+### block_pairs option
 
-For `block_pair` option, only the nodes that are shared by specific block pairs will be newly created. In the example below, three different cases are shown, where one, two and three new nodes are created, respectively.
+The [!param](/Mesh/BreakMeshByBlockGenerator/block_pairs) option restricts splitting to the specified block pairs. Nodes shared by more than two blocks are left connected at junctions. In the example below, three different cases are shown, where one, two and three new nodes are created, respectively.
 
 !media media/meshgenerators/3_blocks_example.png style=width:100%;
        alt=Illustration of the effect of using different values for the block_pairs parameter.

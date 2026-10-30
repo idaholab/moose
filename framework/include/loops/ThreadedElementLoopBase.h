@@ -291,7 +291,10 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
               onInternalSide(elem, side);
 
             for (const auto bnd_id : boundary_ids)
+            {
+              preBoundary(elem, side, bnd_id);
               onInterface(elem, side, bnd_id);
+            }
 
             postInternalSide(elem, side);
           }

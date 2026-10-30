@@ -87,6 +87,22 @@ PorousFlowFluidStateBaseMaterialTempl<true>::genericValue(const ADReal & value)
 
 template <bool is_ad>
 void
+PorousFlowFluidStateBaseMaterialTempl<is_ad>::residualSetup()
+{
+  PorousFlowVariableBaseTempl<is_ad>::residualSetup();
+
+  // The gradients of saturation, porepressure and mass fraction at the qps are built from the
+  // derivatives of the fluid state properties (computed using AD), and they can enter the residual.
+  // MOOSE turns AD derivatives off when it computes the residual alone, which would leave these
+  // derivatives stale, so we must turn them back on for the rest of this residual evaluation.
+  // The flag is shared by all threads, so it is set here (before the threaded loops), rather than
+  // around each flash; MOOSE turns derivatives on again once the residual has been computed
+  if (!is_ad && !_nodal_material)
+    ADReal::do_derivatives = true;
+}
+
+template <bool is_ad>
+void
 PorousFlowFluidStateBaseMaterialTempl<is_ad>::initQpStatefulProperties()
 {
   _is_initqp = true;

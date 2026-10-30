@@ -122,6 +122,37 @@
     issues = '#34103'
     requirement = 'The system shall provide the second time derivatives of coupled array variables, equal to those of the same field on standard variables.'
   []
+  [ad_time_derivatives]
+    issues = '#34286'
+    requirement = 'The system shall provide automatic differentiation time derivatives of array variables'
+    [transient]
+      type = 'Exodiff'
+      input = 'ad_array_diffusion_reaction_transient.i'
+      exodiff = 'array_diffusion_reaction_transient_out.e'
+      prereq = 'test_diffusion_reaction_transient'
+      detail = 'that reproduce the solution of the non-AD array time derivative kernel,'
+    []
+    [jacobian]
+      type = 'PetscJacobianTester'
+      input = 'ad_array_diffusion_reaction_transient.i'
+      cli_args = 'Executioner/num_steps=2'
+      run_sim = True
+      detail = 'with exact derivatives with respect to the variable degrees of freedom,'
+    []
+    [second]
+      type = 'PetscJacobianTester'
+      input = 'ad_array_second_time_derivative.i'
+      run_sim = True
+      detail = 'of second time derivatives of a coupled array variable with exact derivatives, and'
+    []
+    [second_only]
+      type = 'PetscJacobianTester'
+      input = 'ad_array_second_time_derivative.i'
+      cli_args = 'Variables/active=v Kernels/active="v_inertia v_diff" BCs/active=v'
+      run_sim = True
+      detail = 'of second time derivatives requested without the first time derivative.'
+    []
+  []
   [test_body_force]
     type = 'Exodiff'
     input = 'array_body_force.i'

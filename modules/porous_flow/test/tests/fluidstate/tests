@@ -205,4 +205,23 @@
     issues = '#13108'
     rel_err = 4e-5
   []
+  [residual_gradients]
+    requirement = 'The system shall compute the gradients of saturation, porepressure and mass fraction in a two-phase fluid state from up-to-date derivatives of the fluid properties, so that the solution is the same'
+    design = 'PorousFlowFluidState.md'
+    issues = '#34252'
+    [residual_only]
+      type = 'CSVDiff'
+      input = 'residual_gradients.i'
+      csvdiff = 'residual_gradients_out.csv'
+      detail = 'when the residual is computed separately from the Jacobian, and'
+    []
+    [residual_and_jacobian_together]
+      type = 'CSVDiff'
+      input = 'residual_gradients.i'
+      csvdiff = 'residual_gradients_out.csv'
+      cli_args = 'Executioner/residual_and_jacobian_together=true'
+      prereq = 'residual_gradients/residual_only'
+      detail = 'when the residual and Jacobian are computed together.'
+    []
+  []
 []

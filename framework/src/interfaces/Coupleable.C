@@ -1451,6 +1451,38 @@ Coupleable::coupledArrayDotDot(const std::string & var_name, unsigned int comp) 
   }
 }
 
+const ADArrayVariableValue &
+Coupleable::adCoupledArrayDot(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getArrayVar(var_name, comp);
+  if (!var)
+    return getADDefaultArrayValueZero(var_name);
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adUDot();
+  return var->adUDotNeighbor();
+}
+
+const ADArrayVariableValue &
+Coupleable::adCoupledArrayDotDot(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getArrayVar(var_name, comp);
+  if (!var)
+    return getADDefaultArrayValueZero(var_name);
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adUDotDot();
+  return var->adUDotDotNeighbor();
+}
+
 const ArrayVariableValue &
 Coupleable::coupledArrayDotOld(const std::string & var_name, unsigned int comp) const
 {
@@ -2522,6 +2554,22 @@ Coupleable::getADDefaultArraySecond(const std::string & var_name) const
   }
 
   return *default_second_it->second;
+}
+
+const ADArrayVariableValue &
+Coupleable::getADDefaultArrayValueZero(const std::string & var_name) const
+{
+  auto default_value_it = _ad_default_array_value_zero.find(var_name);
+  if (default_value_it == _ad_default_array_value_zero.end())
+  {
+    const auto n = _c_parameters.numberDefaultCoupledValues(var_name);
+    const ADRealEigenVector zero = ADRealEigenVector::Zero(n);
+    auto value = std::make_unique<ADArrayVariableValue>(_coupleable_max_qps, zero);
+    default_value_it =
+        _ad_default_array_value_zero.insert(std::make_pair(var_name, std::move(value))).first;
+  }
+
+  return *default_value_it->second;
 }
 
 const ADVariableGradient &

@@ -29,8 +29,8 @@ The following tables summarize the methods it provides.
 | :--- | :--- |
 `coupledArrayValue`‡§ | Value of a coupled array variable at q-points
 `coupledArrayGradient`‡§ | Gradient of a coupled array variable at q-points
-`coupledArrayDot`† | Time derivative of a coupled array variable at q-points
-`coupledArrayDotDot`† | Second time derivative of a coupled array variable at q-points
+`coupledArrayDot`†§ | Time derivative of a coupled array variable at q-points
+`coupledArrayDotDot`†§ | Second time derivative of a coupled array variable at q-points
 `coupledArrayDotDu` | Derivative with regards to the variable of the time derivative of a coupled array variable at q-points
 `coupledArrayGradientDot` | Time derivative of the gradient of a coupled array variable at q-points
 
