@@ -287,6 +287,51 @@ ReferenceResidualConvergence::initialSetup()
       _group_names[i] += ")";
     }
   }
+
+  const auto & var_abs_tol = getParam<std::map<std::string, Real>>("variable_nl_abs_tol");
+  for (const auto & [var_name, abs_tol] : var_abs_tol)
+  {
+    if (std::find(_soln_var_names.begin(), _soln_var_names.end(), var_name) ==
+        _soln_var_names.end())
+      paramError("variable_nl_abs_tol",
+                 "Variable '",
+                 var_name,
+                 "' is not a variable of nonlinear system '",
+                 s.name(),
+                 "'.");
+    if (abs_tol < 0)
+      paramError("variable_nl_abs_tol",
+                 "The absolute tolerance of variable '",
+                 var_name,
+                 "' must be non-negative.");
+  }
+
+  // A group is checked against one residual norm, so its variables must share one tolerance:
+  // either all of them have the same variable_nl_abs_tol entry, or none has an entry
+  _group_abs_tol.assign(n_groups, std::nullopt);
+  std::vector<bool> group_seen(n_groups, false);
+  for (const auto i : index_range(_soln_var_names))
+  {
+    const auto group = _group_index[i];
+    const auto it = var_abs_tol.find(_soln_var_names[i]);
+    const auto var_tol = it == var_abs_tol.end() ? std::nullopt : std::optional<Real>(it->second);
+    if (!group_seen[group])
+    {
+      _group_abs_tol[group] = var_tol;
+      group_seen[group] = true;
+    }
+    else if (var_tol != _group_abs_tol[group])
+      paramError("variable_nl_abs_tol",
+                 "The variables in group ",
+                 _group_names[group],
+                 " must all have the same absolute tolerance.");
+  }
+}
+
+Real
+ReferenceResidualConvergence::groupAbsTol(const std::size_t group, const Real abs_tol) const
+{
+  return _group_abs_tol[group] ? *_group_abs_tol[group] : abs_tol;
 }
 
 void
@@ -409,8 +454,8 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
       {
         // Print residual
         out << "   " << std::setw(var_space + 8) << std::right << _group_names[i] + "-> res: "
-            << (_group_resid[i] < _nl_abs_tol ? COLOR_YELLOW : COLOR_DEFAULT) << std::setw(8)
-            << _group_resid[i] << COLOR_DEFAULT;
+            << (_group_resid[i] < groupAbsTol(i, _nl_abs_tol) ? COLOR_YELLOW : COLOR_DEFAULT)
+            << std::setw(8) << _group_resid[i] << COLOR_DEFAULT;
 
         // Print res/ref ratio
         if (_local_norm)
@@ -438,13 +483,15 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
 bool
 ReferenceResidualConvergence::checkConvergenceIndividVars(
     const Real /*fnorm*/,
-    const Real abs_tol,
-    const Real rel_tol,
-    const Real /*initial_residual_before_preset_bcs*/)
+    const Real default_abs_tol,
+    const Real default_rel_tol,
+    const Real /*initial_residual_before_preset_bcs*/,
+    const Real multiplier)
 {
   // Convergence is checked via:
   // 1) Ratio of group residual to reference is less than relative tolerance
-  // 2) if group residual is less than absolute tolerance
+  // 2) if group residual is less than absolute tolerance, from variable_nl_abs_tol if given, else
+  //    the generic absolute tolerance
   // 3) if group reference residual is zero and:
   //   3.1) Convergence type is ZERO_TOLERANCE and group residual is zero (rare, but possible, and
   //        historically implemented that way)
@@ -452,8 +499,11 @@ ReferenceResidualConvergence::checkConvergenceIndividVars(
   //        is less than relative tolerance. (i.e., using the relative tolerance to check group
   //        convergence in an absolute way)
 
+  const Real rel_tol = default_rel_tol * multiplier;
   bool convergedRelative = true;
   for (const auto i : index_range(_group_resid))
+  {
+    const Real abs_tol = groupAbsTol(i, default_abs_tol) * multiplier;
     convergedRelative &=
         ((!_local_norm && _group_resid[i] < _group_ref_resid[i] * rel_tol) ||
          (_local_norm && _group_ref_resid[i] < rel_tol) || _group_resid[i] < abs_tol ||
@@ -461,6 +511,7 @@ ReferenceResidualConvergence::checkConvergenceIndividVars(
           ((_zero_ref_type == ZeroReferenceType::ZERO_TOLERANCE && !_group_resid[i]) ||
            (_zero_ref_type == ZeroReferenceType::RELATIVE_TOLERANCE &&
             _group_resid[i] <= rel_tol))));
+  }
   return convergedRelative;
 }
 
@@ -483,8 +534,7 @@ ReferenceResidualConvergence::checkResidualConvergence(const unsigned int n_iter
     return true;
   }
   else if (n_iter >= _accept_iters &&
-           checkConvergenceIndividVars(
-               fnorm, abs_tol * _accept_mult, rel_tol * _accept_mult, ref_norm))
+           checkConvergenceIndividVars(fnorm, abs_tol, rel_tol, ref_norm, _accept_mult))
   {
     oss << "  Converged due a larger acceptable tolerance due to `acceptible_multiplier` after "
            "`acceptible_iterations`.";

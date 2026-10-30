@@ -12,6 +12,8 @@
 #include "DefaultNonlinearConvergence.h"
 #include "ReferenceResidualInterface.h"
 
+#include <optional>
+
 // PETSc includes
 #include <petsc.h>
 #include <petscmat.h>
@@ -62,16 +64,23 @@ protected:
    * variables are converged individually using either a relative or absolute
    * criterion.
    * @param fnorm Function norm (norm of full residual vector)
-   * @param abs_tol Absolute convergence tolerance
-   * @param rel_tol Relative convergence tolerance
+   * @param default_abs_tol Absolute convergence tolerance of groups without a variable_nl_abs_tol
+   *                        entry
+   * @param default_rel_tol Relative convergence tolerance
    * @param initial_residual_before_preset_bcs Initial norm of full residual vector
    *                                           before applying preset bcs
+   * @param multiplier Factor applied to all tolerances
    * @return true if all variables are converged
    */
   bool checkConvergenceIndividVars(const Real fnorm,
-                                   const Real abs_tol,
-                                   const Real rel_tol,
-                                   const Real initial_residual_before_preset_bcs);
+                                   const Real default_abs_tol,
+                                   const Real default_rel_tol,
+                                   const Real initial_residual_before_preset_bcs,
+                                   const Real multiplier = 1);
+
+  /// The absolute tolerance of group \p group, where \p abs_tol applies to groups without a
+  /// variable_nl_abs_tol entry
+  Real groupAbsTol(const std::size_t group, const Real abs_tol) const;
 
   /// Enum holding the normalization type
   const MooseEnum _norm_type_enum;
@@ -116,6 +125,10 @@ protected:
 
   /// Group number index for each variable
   std::vector<unsigned int> _group_index;
+
+  /// Absolute tolerance of each group from variable_nl_abs_tol, unset for groups that use the
+  /// default absolute tolerance
+  std::vector<std::optional<Real>> _group_abs_tol;
 
   /// Local storage for the scaling factors applied to each of the variables to apply to _ref_resid_vars.
   std::vector<Real> _scaling_factors;
