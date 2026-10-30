@@ -77,9 +77,10 @@ A exact constraint whose coefficients depend on a controllable parameter overrid
 emitted, refreshes its copy, and answers true. Once per solve, before the first residual evaluation
 (the pre-SMO residual included), `NonlinearSystemBase::updateExactConstraints()` asks every active exact
 constraint object that question. It takes the maximum of the answers across the ranks so that they all agree,
-and it rebuilds the exact constraints of the system when any provider reports a change. The object never calls the hub itself. A caller that knows the exact constraints
-are stale, a `Control` or a `UserObject` for instance, may instead call the public
-`NonlinearSystemBase::reinitExactConstraints()`.
+and it rebuilds the exact constraints of the system when any provider reports a change. The start of
+a solve is the only place that rebuilds them, so every residual and Jacobian of a solve sees the
+same constraints. A coefficient that changes during a solve, through a `Control` for instance,
+takes effect at the next solve.
 
 The rebuild covers the coefficients of an existing set of exact constraints. The sparsity pattern and the send
 list are built once, from the exact constraints of the first build, so a provider may change the weight of a tie

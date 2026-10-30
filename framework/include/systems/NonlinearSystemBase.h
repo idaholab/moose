@@ -656,19 +656,6 @@ public:
   const ConstraintWarehouse & getConstraintWarehouse() const { return _constraints; }
 
   /**
-   * Rebuild the exact constraints of this system and of its displaced copy. Only coefficients may
-   * change: the sparsity pattern is not rebuilt.
-   */
-  void reinitExactConstraints();
-
-  /**
-   * Rebuild the exact constraints when a constraint reports changed coefficients, for instance
-   * through a Control. The solve calls this before any residual evaluation, the pre-SMO residual
-   * included, so that every residual of the solve sees the same constraints.
-   */
-  void updateExactConstraints();
-
-  /**
    * Return the NodalBCBase warehouse
    */
   const MooseObjectTagWarehouse<NodalBCBase> & getNodalBCWarehouse() const { return _nodal_bcs; }
@@ -798,6 +785,14 @@ public:
   Convergence & convergence();
 
 protected:
+  /**
+   * Rebuild the exact constraints when a constraint reports changed coefficients, for instance
+   * through a Control. Only the start of a solve calls this, before any residual evaluation, the
+   * pre-SMO residual included, so that every residual and Jacobian of a solve sees the same
+   * constraints.
+   */
+  void updateExactConstraints();
+
   /**
    * Compute the residual for a given tag
    * @param tags The tags of kernels for which the residual is to be computed.
@@ -1109,6 +1104,12 @@ protected:
   std::unique_ptr<libMesh::DiagonalMatrix<Number>> _scaling_matrix;
 
 private:
+  /**
+   * Rebuild the exact constraints of this system and of its displaced copy. Only coefficients may
+   * change: the sparsity pattern is not rebuilt.
+   */
+  void reinitExactConstraints();
+
   /**
    * Retrieve every finite volume object belonging to this system on thread \p tid, as
    * SetupInterfaces, so that the setup methods can be dispatched to all finite volume families
