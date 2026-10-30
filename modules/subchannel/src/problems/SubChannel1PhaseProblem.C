@@ -900,25 +900,42 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           counter++;
         }
         turbulent_term *= _CT;
-        // The friction factor and the friction force are cell-center quantities
-        const auto S_c = computeInterpolatedValue((*_S_flow_soln)(node_out), S, 0.5);
-        const auto w_perim_c = computeInterpolatedValue((*_w_perim_soln)(node_out), w_perim, 0.5);
-        const auto mu_c = computeInterpolatedValue((*_mu_soln)(node_out), mu_in, 0.5);
-        const auto rho_c = computeInterpolatedValue(rho_out, rho_in, 0.5);
-        const auto mdot_c =
-            computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), 0.5);
-        const auto Dh_c = 4.0 * S_c / w_perim_c;
-        auto Re = std::abs(mdot_c) / S_c * Dh_c / mu_c;
-        _friction_args = FrictionStruct(i_ch, Re, S_c, w_perim_c);
-        Real ff = _friction_closure->computeFrictionFactor(_friction_args);
-        if (_ff_soln)
-          _ff_soln->set(node_out, ff);
         /// Upwind local form loss
         auto ki = 0.0;
         if ((*_mdot_soln)(node_out) >= 0)
           ki = k_grid[i_ch][iz - 1];
         else
           ki = k_grid[i_ch][iz];
+        // Cell Peclet number of the exponential scheme, from the friction of the cell evaluated at
+        // the arithmetic midpoint, as in the implicit branch
+        PetscScalar Pe = 0.5;
+        if (_interpolation_scheme == 3)
+        {
+          const auto S_mid = computeInterpolatedValue((*_S_flow_soln)(node_out), S, 0.5);
+          const auto w_perim_mid =
+              computeInterpolatedValue((*_w_perim_soln)(node_out), w_perim, 0.5);
+          const auto mdot_mid =
+              computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), 0.5);
+          const auto mu_mid = computeInterpolatedValue((*_mu_soln)(node_out), mu_in, 0.5);
+          const auto Dh_mid = 4.0 * S_mid / w_perim_mid;
+          _friction_args = FrictionStruct(
+              i_ch, std::abs(mdot_mid) / S_mid * Dh_mid / mu_mid, S_mid, w_perim_mid);
+          const Real ff_mid = _friction_closure->computeFrictionFactor(_friction_args);
+          Pe = 1.0 / ((ff_mid * dz / Dh_mid + ki) * 0.5) * mdot_mid / std::abs(mdot_mid);
+        }
+        // The friction factor and the friction force are cell-center quantities
+        const auto S_c = computeInterpolatedValue((*_S_flow_soln)(node_out), S, Pe);
+        const auto w_perim_c = computeInterpolatedValue((*_w_perim_soln)(node_out), w_perim, Pe);
+        const auto mu_c = computeInterpolatedValue((*_mu_soln)(node_out), mu_in, Pe);
+        const auto rho_c = computeInterpolatedValue(rho_out, rho_in, Pe);
+        const auto mdot_c =
+            computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), Pe);
+        const auto Dh_c = 4.0 * S_c / w_perim_c;
+        auto Re = std::abs(mdot_c) / S_c * Dh_c / mu_c;
+        _friction_args = FrictionStruct(i_ch, Re, S_c, w_perim_c);
+        Real ff = _friction_closure->computeFrictionFactor(_friction_args);
+        if (_ff_soln)
+          _ff_soln->set(node_out, ff);
         auto friction_term =
             (ff * dz / Dh_c + ki) * 0.5 * mdot_c * std::abs(mdot_c) / (S_c * rho_c);
         auto gravity_term = _dir_grav * _g_grav * (*_rho_soln)(node_out)*dz * S;
