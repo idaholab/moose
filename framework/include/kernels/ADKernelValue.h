@@ -58,6 +58,7 @@ protected:
   using ADKernelTempl<T>::_JxW;
   using ADKernelTempl<T>::_coord;
   using ADKernelTempl<T>::_regular_grad_test;
+  using ADKernelTempl<T>::_regular_test;
   using ADKernelTempl<T>::accumulateTaggedLocalResidual;
   using ADKernelTempl<T>::_has_save_in;
   using ADKernelTempl<T>::_save_in;

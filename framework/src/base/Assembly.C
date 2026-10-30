@@ -911,6 +911,15 @@ Assembly::reinitFE(const Elem * elem)
           for (unsigned qp = 0; qp < n_qp; ++qp)
             grad_phi[i][qp] = regular_grad_phi[i][qp];
       }
+
+      if (_need_ad_vector_phi.count(fe_type))
+        computeADVectorPhi(elem,
+                           n_qp,
+                           fe,
+                           *_vector_fe_shape_data[fe_type],
+                           _ad_vector_phi_data[fe_type],
+                           _need_curl.count(fe_type) ? &_ad_vector_curl_phi_data[fe_type] : nullptr,
+                           _need_div.count(fe_type) ? &_ad_vector_div_phi_data[fe_type] : nullptr);
     }
   }
 
@@ -1002,6 +1011,147 @@ Assembly::computeGradPhiAD(const Elem * elem,
       break;
     }
   }
+}
+
+void
+Assembly::computeADVectorPhi(const Elem * elem,
+                             unsigned int n_qp,
+                             const FEVectorBase & fe,
+                             const VectorFEShapeData & fesd,
+                             ADVectorVariablePhiValue & phi,
+                             ADVectorVariablePhiCurl * curl_phi,
+                             ADVectorVariablePhiDivergence * div_phi) const
+{
+  // The reference shape functions do not depend on the displacements. They are recovered from the
+  // regular mapped shape functions with the regular element map of fe, and mapped again with the
+  // AD element map computed by computeSinglePointMapAD at the same points. The maps follow
+  // HCurlFETransformation and HDivFETransformation in libMesh.
+  const auto family = fe.get_fe_type().family;
+  const bool covariant = family == NEDELEC_ONE;
+  const bool contravariant = family == RAVIART_THOMAS || family == L2_RAVIART_THOMAS;
+  const auto dim = elem->dim();
+  const auto num_shapes = fesd._phi.size();
+
+  phi.resize(num_shapes);
+  if (curl_phi)
+    curl_phi->resize(num_shapes);
+  if (div_phi)
+    div_phi->resize(num_shapes);
+  for (const auto i : make_range(num_shapes))
+  {
+    phi[i].resize(n_qp);
+    if (curl_phi)
+      (*curl_phi)[i].resize(n_qp);
+    if (div_phi)
+      (*div_phi)[i].resize(n_qp);
+  }
+
+  // Families mapped like H1 (and lower dimensional elements) have no map in their values, and on
+  // an undisplaced mesh the map carries no derivatives (the AD map is not computed there)
+  if ((!covariant && !contravariant) || dim < 2 || !_displaced)
+  {
+    for (const auto i : make_range(num_shapes))
+      for (const auto qp : make_range(n_qp))
+      {
+        phi[i][qp] = fesd._phi[i][qp];
+        if (curl_phi)
+          (*curl_phi)[i][qp] = fesd._curl_phi[i][qp];
+        if (div_phi)
+          (*div_phi)[i][qp] = fesd._div_phi[i][qp];
+      }
+    return;
+  }
+
+  const auto & map = fe.get_fe_map();
+  const auto & jac = map.get_jacobian();
+  const auto & dxidx = map.get_dxidx();
+  const auto & dxidy = map.get_dxidy();
+  const auto & dxidz = map.get_dxidz();
+  const auto & detadx = map.get_detadx();
+  const auto & detady = map.get_detady();
+  const auto & detadz = map.get_detadz();
+  const auto & dxyzdxi = map.get_dxyzdxi();
+  const auto & dxyzdeta = map.get_dxyzdeta();
+
+  for (const auto qp : make_range(n_qp))
+  {
+    // rows of the inverse map dxi_k/dx and columns of the map dx/dxi_k, regular and AD
+    std::array<RealVectorValue, 3> xi_x, x_xi;
+    std::array<ADRealVectorValue, 3> ad_xi_x, ad_x_xi;
+    xi_x[0] = RealVectorValue(dxidx[qp], dxidy[qp], dxidz[qp]);
+    xi_x[1] = RealVectorValue(detadx[qp], detady[qp], detadz[qp]);
+    x_xi[0] = dxyzdxi[qp];
+    x_xi[1] = dxyzdeta[qp];
+    ad_xi_x[0] = ADRealVectorValue(_ad_dxidx_map[qp], _ad_dxidy_map[qp], _ad_dxidz_map[qp]);
+    ad_xi_x[1] = ADRealVectorValue(_ad_detadx_map[qp], _ad_detady_map[qp], _ad_detadz_map[qp]);
+    ad_x_xi[0] = _ad_dxyzdxi_map[qp];
+    ad_x_xi[1] = _ad_dxyzdeta_map[qp];
+    if (dim == 3)
+    {
+      xi_x[2] =
+          RealVectorValue(map.get_dzetadx()[qp], map.get_dzetady()[qp], map.get_dzetadz()[qp]);
+      x_xi[2] = map.get_dxyzdzeta()[qp];
+      ad_xi_x[2] = ADRealVectorValue(_ad_dzetadx_map[qp], _ad_dzetady_map[qp], _ad_dzetadz_map[qp]);
+      ad_x_xi[2] = _ad_dxyzdzeta_map[qp];
+    }
+
+    // In 2D the curl is a scalar in reference coordinates times the cofactor vector
+    // (dxi/dx) x (deta/dx) of the inverse map
+    const RealVectorValue cofactor = dim == 2 ? xi_x[0].cross(xi_x[1]) : RealVectorValue();
+    const ADRealVectorValue ad_cofactor =
+        dim == 2 ? ad_xi_x[0].cross(ad_xi_x[1]) : ADRealVectorValue();
+
+    for (const auto i : make_range(num_shapes))
+    {
+      const auto & regular = fesd._phi[i][qp];
+      ADRealVectorValue & ad_phi = phi[i][qp];
+      ad_phi.zero();
+      if (covariant)
+      {
+        // phi = (dx/dxi)^-T phi_ref, so phi_ref_k = (dx/dxi_k) . phi
+        for (const auto k : make_range(dim))
+          ad_phi += (x_xi[k] * regular) * ad_xi_x[k];
+
+        if (curl_phi)
+        {
+          const auto & curl = fesd._curl_phi[i][qp];
+          ADRealVectorValue & ad_curl = (*curl_phi)[i][qp];
+          if (dim == 2)
+            // curl phi = curl_ref * cofactor
+            ad_curl = (curl * cofactor) / cofactor.norm_sq() * ad_cofactor;
+          else
+          {
+            // curl phi = (1/J) (dx/dxi) curl_ref, so curl_ref_k = J (dxi_k/dx) . curl phi
+            ad_curl.zero();
+            for (const auto k : make_range(dim))
+              ad_curl += (jac[qp] * (xi_x[k] * curl)) * ad_x_xi[k];
+            ad_curl /= _ad_jac[qp];
+          }
+        }
+      }
+      else
+      {
+        // phi = (1/J) (dx/dxi) phi_ref, so phi_ref_k = J (dxi_k/dx) . phi
+        for (const auto k : make_range(dim))
+          ad_phi += (jac[qp] * (xi_x[k] * regular)) * ad_x_xi[k];
+        ad_phi /= _ad_jac[qp];
+
+        // div phi = (1/J) div_ref
+        if (div_phi)
+          (*div_phi)[i][qp] = jac[qp] * fesd._div_phi[i][qp] / _ad_jac[qp];
+      }
+    }
+  }
+
+  // The curl of an H(div) and the divergence of an H(curl) family carry no Piola map
+  if (curl_phi && !covariant)
+    for (const auto i : make_range(num_shapes))
+      for (const auto qp : make_range(n_qp))
+        (*curl_phi)[i][qp] = fesd._curl_phi[i][qp];
+  if (div_phi && !contravariant)
+    for (const auto i : make_range(num_shapes))
+      for (const auto qp : make_range(n_qp))
+        (*div_phi)[i][qp] = fesd._div_phi[i][qp];
 }
 
 void
@@ -2237,6 +2387,22 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
             for (unsigned qp = 0; qp < n_qp; ++qp)
               grad_phi[i][qp] = regular_grad_phi[i][qp];
       }
+    }
+
+    // The values, curls and divergences only need the AD element map, which is computed on every
+    // displaced face above, not the AD face shape function gradients
+    for (const auto & it : _vector_fe_face[dim])
+    {
+      const auto & fe_type = it.first;
+      if (_need_ad_vector_phi.count(fe_type))
+        computeADVectorPhi(
+            &elem,
+            n_qp,
+            *it.second,
+            *_vector_fe_shape_data_face[fe_type],
+            _ad_vector_phi_data_face[fe_type],
+            _need_curl.count(fe_type) ? &_ad_vector_curl_phi_data_face[fe_type] : nullptr,
+            _need_face_div.count(fe_type) ? &_ad_vector_div_phi_data_face[fe_type] : nullptr);
     }
   }
 }
@@ -4837,6 +5003,54 @@ Assembly::feDivPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
   _need_face_neighbor_div.insert(type);
   buildVectorFaceNeighborFE(type);
   return _vector_fe_shape_data_face_neighbor[type]->_div_phi;
+}
+
+const ADVectorVariablePhiValue &
+Assembly::feADVectorPhi(FEType type) const
+{
+  _need_ad_vector_phi.insert(type);
+  buildVectorFE(type);
+  return _ad_vector_phi_data[type];
+}
+
+const ADVectorVariablePhiValue &
+Assembly::feADVectorPhiFace(FEType type) const
+{
+  _need_ad_vector_phi.insert(type);
+  buildVectorFaceFE(type);
+  return _ad_vector_phi_data_face[type];
+}
+
+const ADVectorVariablePhiCurl &
+Assembly::feADVectorCurlPhi(FEType type) const
+{
+  _need_ad_vector_phi.insert(type);
+  feCurlPhi<VectorValue<Real>>(type);
+  return _ad_vector_curl_phi_data[type];
+}
+
+const ADVectorVariablePhiCurl &
+Assembly::feADVectorCurlPhiFace(FEType type) const
+{
+  _need_ad_vector_phi.insert(type);
+  feCurlPhiFace<VectorValue<Real>>(type);
+  return _ad_vector_curl_phi_data_face[type];
+}
+
+const ADVectorVariablePhiDivergence &
+Assembly::feADVectorDivPhi(FEType type) const
+{
+  _need_ad_vector_phi.insert(type);
+  feDivPhi<VectorValue<Real>>(type);
+  return _ad_vector_div_phi_data[type];
+}
+
+const ADVectorVariablePhiDivergence &
+Assembly::feADVectorDivPhiFace(FEType type) const
+{
+  _need_ad_vector_phi.insert(type);
+  feDivPhiFace<VectorValue<Real>>(type);
+  return _ad_vector_div_phi_data_face[type];
 }
 
 const MooseArray<ADReal> &

@@ -40,5 +40,5 @@ template <bool is_ad>
 Real
 CurlCurlFieldTempl<is_ad>::computeQpJacobian()
 {
-  return _coeff * _curl_phi[_j][_qp] * _curl_test[_i][_qp];
+  return _coeff * MetaPhysicL::raw_value(_curl_phi[_j][_qp] * _curl_test[_i][_qp]);
 }

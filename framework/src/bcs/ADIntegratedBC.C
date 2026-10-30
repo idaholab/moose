@@ -41,7 +41,15 @@ ADIntegratedBCTempl<T>::ADIntegratedBCTempl(const InputParameters & parameters)
     _var(*this->mooseVariable()),
     _normals(_assembly.adNormals()),
     _ad_q_points(_assembly.adQPointsFace()),
-    _test(_var.phiFace()),
+    _test(
+        [this]() -> const ADTemplateVariableTestValue<T> &
+        {
+          if constexpr (std::is_same_v<T, RealVectorValue>)
+            return _var.adVectorPhiFace();
+          else
+            return _var.phiFace();
+        }()),
+    _regular_test(_var.phiFace()),
     _grad_test(_var.adGradPhiFace()),
     _u(_var.adSlnFace()),
     _grad_u(_var.adGradSlnFace()),

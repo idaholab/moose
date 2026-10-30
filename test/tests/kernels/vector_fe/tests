@@ -471,4 +471,31 @@
       detail = 'with an exact Jacobian.'
     []
   []
+
+  [ad_piola_displaced]
+    design = 'Assembly.md'
+    issues = '#34302'
+    requirement = 'The system shall compute exact Jacobians with respect to the mesh displacements for '
+                  'automatic differentiation objects on displaced meshes that use the values, curls '
+                  'and divergences of Nedelec and Raviart-Thomas variables and their test functions'
+    [2d]
+      type = PetscJacobianTester
+      input = ad_piola_displaced.i
+      # As in kernels/jxw_grad_test_dep_on_displacements: the finite difference error of the first
+      # iteration (1.2e-7) is just above the default ratio_tol of 1e-7; without the AD shape data
+      # the ratio is of order 1
+      ratio_tol = 2e-7
+      run_sim = true
+      detail = 'on QUAD9 elements and boundary faces for both families, and'
+    []
+    [3d]
+      type = PetscJacobianTester
+      input = ad_piola_displaced_3d.i
+      # The finite difference error of the first iteration is 2.4e-7, later ones stay below 1e-7;
+      # without the AD shape data the ratio is of order 1
+      ratio_tol = 5e-7
+      run_sim = true
+      detail = 'on TET10 elements and boundary faces for Nedelec variables.'
+    []
+  []
 []

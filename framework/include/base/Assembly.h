@@ -1669,6 +1669,18 @@ public:
   }
 
   /**
+   * AD vector shape function values, curls and divergences, with derivatives with respect to the
+   * nonlinear displacement variables for Piola-mapped families on a displaced mesh. Requesting the
+   * curl or divergence also requests the regular data they are built from.
+   */
+  const ADVectorVariablePhiValue & feADVectorPhi(FEType type) const;
+  const ADVectorVariablePhiValue & feADVectorPhiFace(FEType type) const;
+  const ADVectorVariablePhiCurl & feADVectorCurlPhi(FEType type) const;
+  const ADVectorVariablePhiCurl & feADVectorCurlPhiFace(FEType type) const;
+  const ADVectorVariablePhiDivergence & feADVectorDivPhi(FEType type) const;
+  const ADVectorVariablePhiDivergence & feADVectorDivPhiFace(FEType type) const;
+
+  /**
    * Request that face reinitialization compute the AD shape function gradients. Variables call this
    * when an object needs their AD gradient or their AD face test function gradients.
    */
@@ -1963,6 +1975,9 @@ public:
    */
   void setCurrentLowerDElem(const Elem * const lower_d_elem);
 
+protected:
+  class VectorFEShapeData;
+
 private:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -2021,6 +2036,20 @@ private:
                         unsigned int n_qp,
                         ADTemplateVariablePhiGradient<OutputType> & grad_phi,
                         libMesh::FEGenericBase<OutputType> * fe);
+
+  /**
+   * Compute the vector shape function values, curls and divergences of \p fe with derivatives with
+   * respect to the nonlinear displacement variables, applying the covariant (H(curl)) or
+   * contravariant (H(div)) Piola map with the AD element map. Families mapped like H1 have no
+   * displacement dependence in these quantities and are copied from the regular shape data.
+   */
+  void computeADVectorPhi(const Elem * elem,
+                          unsigned int n_qp,
+                          const FEVectorBase & fe,
+                          const VectorFEShapeData & fesd,
+                          ADVectorVariablePhiValue & phi,
+                          ADVectorVariablePhiCurl * curl_phi,
+                          ADVectorVariablePhiDivergence * div_phi) const;
 
   /**
    * resize any objects that contribute to automatic differentiation-related mapping calculations
@@ -2770,6 +2799,17 @@ protected:
   mutable std::map<FEType, ADTemplateVariablePhiGradient<Real>> _ad_grad_phi_data_face;
   mutable std::map<FEType, ADTemplateVariablePhiGradient<RealVectorValue>>
       _ad_vector_grad_phi_data_face;
+  /// AD vector shape function values, curls and divergences. On a displaced mesh the Piola maps of
+  /// H(curl) and H(div) families carry the displacement derivatives of the element map; for the
+  /// other families and on undisplaced meshes they equal the regular shape data.
+  mutable std::map<FEType, ADVectorVariablePhiValue> _ad_vector_phi_data;
+  mutable std::map<FEType, ADVectorVariablePhiValue> _ad_vector_phi_data_face;
+  mutable std::map<FEType, ADVectorVariablePhiCurl> _ad_vector_curl_phi_data;
+  mutable std::map<FEType, ADVectorVariablePhiCurl> _ad_vector_curl_phi_data_face;
+  mutable std::map<FEType, ADVectorVariablePhiDivergence> _ad_vector_div_phi_data;
+  mutable std::map<FEType, ADVectorVariablePhiDivergence> _ad_vector_div_phi_data_face;
+  /// Vector FE types whose AD shape function values (and curls or divergences) were requested
+  mutable std::set<FEType> _need_ad_vector_phi;
   /// Whether any object needs the AD face shape function gradients. Computing them on a displaced
   /// mesh propagates the displacement derivatives of the face map into every shape function
   /// gradient, which is expensive and unnecessary when only values and normals are used.
