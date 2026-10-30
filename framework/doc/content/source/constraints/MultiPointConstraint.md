@@ -116,12 +116,13 @@ A derived class implements one method,
 `dof_map.add_constraint_row(dependent_dof, row, /*forbid_constraint_overwrite=*/true)`.
 
 `addExactConstraints()` is collective. Every rank runs it each time libMesh rebuilds the constraints,
-and every rank adds the exact constraints of the dependent nodes it has. The class supplies three protected
+and every rank adds the exact constraints of the dependent nodes it owns. libMesh then sends each
+constraint to the other ranks that need it. The class supplies three protected
 helpers, and all three are collective as well, so every rank must call each of them the same number
 of times and in the same order:
 
-- `localNodes(boundary)` returns the ids of the nodes of a node set or side set that are present on
-  this rank. These are the nodes whose exact constraints this rank adds.
+- `ownedNodes(boundary)` returns the ids of the nodes of a node set or side set that this rank
+  owns. These are the nodes whose exact constraints this rank adds.
 - `gatherBoundaryNodes(boundary, var_numbers)` returns the id, the undisplaced coordinates and the
   degree of freedom index of each requested variable for every node of the boundary. The owning
   rank contributes each node, the result is broadcast, and it is sorted by node id, so every rank

@@ -47,14 +47,17 @@ MultiPointConstraint::MultiPointConstraint(const InputParameters & parameters)
 }
 
 std::vector<dof_id_type>
-MultiPointConstraint::localNodes(const BoundaryName & boundary) const
+MultiPointConstraint::ownedNodes(const BoundaryName & boundary) const
 {
-  std::vector<dof_id_type> local_nodes;
+  std::vector<dof_id_type> owned_nodes;
   for (const auto node_id : _mesh.getNodeList(_mesh.getBoundaryID(boundary)))
-    if (_mesh.queryNodePtr(node_id))
-      local_nodes.push_back(node_id);
+  {
+    const Node * const node = _mesh.queryNodePtr(node_id);
+    if (node && node->processor_id() == processor_id())
+      owned_nodes.push_back(node_id);
+  }
 
-  return local_nodes;
+  return owned_nodes;
 }
 
 std::vector<MultiPointConstraint::ConstraintNode>
@@ -68,12 +71,9 @@ MultiPointConstraint::gatherBoundaryNodes(const BoundaryName & boundary,
   std::vector<dof_id_type> ids;
   std::vector<Real> coordinates;
   std::vector<dof_id_type> dofs;
-  for (const auto node_id : localNodes(boundary))
+  for (const auto node_id : ownedNodes(boundary))
   {
     const Node & node = _mesh.nodeRef(node_id);
-    if (node.processor_id() != processor_id())
-      continue;
-
     ids.push_back(node_id);
     for (const auto d : make_range(Moose::dim))
       coordinates.push_back(node(d));
