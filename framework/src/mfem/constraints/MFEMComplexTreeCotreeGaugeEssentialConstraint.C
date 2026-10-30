@@ -52,7 +52,7 @@ MFEMComplexTreeCotreeGaugeEssentialConstraint::ApplyConstraint(
       _gauge.trueDofs(*this,
                       *gridfunc.ParFESpace(),
                       isBoundaryRestricted() ? &getBoundaryMarkers() : nullptr,
-                      getSubdomainAttributes());
+                      getSubdomainMarkers());
 
   // The gauge fixes the tree dofs to zero in both components so the lifted
   // right-hand side stays consistent.

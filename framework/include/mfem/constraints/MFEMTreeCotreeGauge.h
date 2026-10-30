@@ -56,14 +56,16 @@ public:
    *                            nullptr when there is no such boundary. Those edges
    *                            seed the forest so the interior gauge stays
    *                            compatible with the boundary condition
-   * @param gauge_block_attrs   subdomain attributes to gauge; edges of the
-   *                            complementary subdomains seed the forest but are
-   *                            never gauged. Empty gauges the whole mesh.
+   * @param gauge_block_markers subdomain attribute marker array of the subdomains
+   *                            to gauge, as returned by
+   *                            MFEMBlockRestrictable::getSubdomainMarkers; edges of
+   *                            the complementary subdomains seed the forest but are
+   *                            never gauged
    */
   const mfem::Array<int> & trueDofs(const MFEMConstraint & constraint,
                                     mfem::ParFiniteElementSpace & pfes,
                                     const mfem::Array<int> * essential_bdr_markers,
-                                    const mfem::Array<int> & gauge_block_attrs);
+                                    const mfem::Array<int> & gauge_block_markers);
 
 private:
   /// Gauged true dofs of the most recent trueDofs() call.
