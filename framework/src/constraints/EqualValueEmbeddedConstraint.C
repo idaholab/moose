@@ -128,9 +128,10 @@ EqualValueEmbeddedConstraintTempl<is_ad>::addExactConstraints(libMesh::DofMap & 
   std::vector<dof_id_type> primary_dofs;
   for (const auto & [secondary_id, primary_id] : _secondary_to_primary_map)
   {
+    // The owner adds the row, and libMesh sends it to the other ranks that need it
     const Node * const secondary_node = _mesh.queryNodePtr(secondary_id);
     const Elem * const primary_elem = _mesh.queryElemPtr(primary_id);
-    if (!secondary_node || !primary_elem)
+    if (!secondary_node || secondary_node->processor_id() != this->processor_id() || !primary_elem)
       continue;
 
     if (pinned_nodes.count(secondary_id))

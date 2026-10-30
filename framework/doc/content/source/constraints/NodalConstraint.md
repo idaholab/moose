@@ -97,7 +97,8 @@ that is not a constraint or that contradicts another one:
   an exact constraint after the nodal boundary conditions, so the exact constraint would override the boundary
   condition; leaving the node alone lets the boundary condition win, which is what `penalty` and
   `kinematic` do.
-- The node is not present on this rank.
+- This rank does not own the node. The owning rank adds the exact constraint, and libMesh sends it
+  to the other ranks that need it.
 
 Exact constraints are added with `forbid_constraint_overwrite = true`, so a secondary degree of freedom that
 libMesh already constrains, a hanging node of an adapted mesh for instance, raises an error instead
@@ -111,9 +112,9 @@ refinement adds to that boundary is tied in the same rebuild that created it.
 ### Parallel and displaced mesh
 
 `addExactConstraints()` is collective: libMesh calls it on every rank each time it rebuilds the
-constraints of the system, and each rank adds the exact constraints of the secondary nodes it holds. A rank that
-holds a secondary node needs every primary node of the tie, so a tie whose primary and secondary
-nodes are far apart needs a replicated mesh. A rank that cannot build an exact constraint records the reason, the
+constraints of the system, and each rank adds the exact constraints of the secondary nodes it owns. A rank that
+owns a secondary node needs every primary node of the tie, and `ghostPrimaryNodes()` keeps the
+primary nodes on every rank. A rank that cannot build an exact constraint records the reason, the
 ranks exchange their messages, and they all raise the same error, so the run stops rather than
 hanging.
 
