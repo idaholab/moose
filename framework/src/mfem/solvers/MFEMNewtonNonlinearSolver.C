@@ -109,6 +109,34 @@ MFEMNewtonNonlinearSolver::validParams()
       "line_search_sufficient_decrease >= 0 & line_search_sufficient_decrease < 1",
       "Coefficient of the sufficient decrease condition the backtracking line search requires "
       "of the residual norm.");
+  // The values are MFEM's, which follow the numbering of Eisenstat and Walker's choices
+  MooseEnum adaptive_l_tol("none=0 eisenstat_walker_1=1 eisenstat_walker_2=2", "none");
+  params.addParam<MooseEnum>(
+      "adaptive_l_tol",
+      adaptive_l_tol,
+      "Method setting the relative tolerance of the linear solver on each Newton iteration from "
+      "the reduction of the residual norm: choice 1 or 2 of Eisenstat and Walker, or 'none' to "
+      "keep the linear solver's own tolerance.");
+  params.addRangeCheckedParam<mfem::real_t>(
+      "adaptive_l_tol_initial",
+      0.5,
+      "adaptive_l_tol_initial > 0 & adaptive_l_tol_initial < 1",
+      "Relative tolerance of the linear solve on the first Newton iteration.");
+  params.addRangeCheckedParam<mfem::real_t>("adaptive_l_tol_max",
+                                            0.9,
+                                            "adaptive_l_tol_max > 0 & adaptive_l_tol_max < 1",
+                                            "Largest relative tolerance set for the linear solve.");
+  params.addRangeCheckedParam<mfem::real_t>(
+      "adaptive_l_tol_alpha",
+      0.5 * (1.0 + std::sqrt(5.0)),
+      "adaptive_l_tol_alpha > 1 & adaptive_l_tol_alpha <= 2",
+      "Exponent alpha of the residual norm ratio in 'eisenstat_walker_2', and of the previous "
+      "relative tolerance in the safeguard of both choices.");
+  params.addRangeCheckedParam<mfem::real_t>(
+      "adaptive_l_tol_gamma",
+      1.0,
+      "adaptive_l_tol_gamma > 0 & adaptive_l_tol_gamma <= 1",
+      "Factor gamma scaling the relative tolerance, and the safeguard, of both choices.");
   return params;
 }
 
@@ -140,12 +168,33 @@ MFEMNewtonNonlinearSolver::ConstructSolver()
       if (isParamSetByUser(param))
         paramError(param, "Only used when 'line_search' is set to 'backtracking'.");
 
+  if (const int adaptive_l_tol = getParam<MooseEnum>("adaptive_l_tol"))
+    solver->SetAdaptiveLinRtol(adaptive_l_tol,
+                               getParam<mfem::real_t>("adaptive_l_tol_initial"),
+                               getParam<mfem::real_t>("adaptive_l_tol_max"),
+                               getParam<mfem::real_t>("adaptive_l_tol_alpha"),
+                               getParam<mfem::real_t>("adaptive_l_tol_gamma"));
+  else
+    for (const auto & param : {"adaptive_l_tol_initial",
+                               "adaptive_l_tol_max",
+                               "adaptive_l_tol_alpha",
+                               "adaptive_l_tol_gamma"})
+      if (isParamSetByUser(param))
+        paramError(param, "Only used when 'adaptive_l_tol' is not 'none'.");
+
   _solver = std::move(solver);
 }
 
 void
 MFEMNewtonNonlinearSolver::SetLinearSolver(mfem::Solver & solver)
 {
+  // MFEM sets the adaptive tolerance on the linear solver assuming it is an mfem::IterativeSolver
+  if (getParam<MooseEnum>("adaptive_l_tol") != "none" &&
+      !dynamic_cast<mfem::IterativeSolver *>(&solver))
+    paramError("adaptive_l_tol",
+               "requires a linear solver whose relative tolerance can be set: MFEMCGSolver, "
+               "MFEMGMRESSolver or MFEMMINRESSolver, without 'low_order_refined'.");
+
   cast_ref<mfem::NewtonSolver &>(GetSolver()).SetSolver(solver);
 }
 #endif
