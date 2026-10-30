@@ -1,0 +1,33 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "KokkosDarcyFluxPressure.h"
+
+registerKokkosResidualObject("ChemicalReactionsApp", KokkosDarcyFluxPressure);
+
+InputParameters
+KokkosDarcyFluxPressure::validParams()
+{
+  InputParameters params = KernelGrad::validParams();
+  RealVectorValue g(0, 0, 0);
+  params.addParam<RealVectorValue>("gravity", g, "Gravity vector (default is (0, 0, 0))");
+  params.addClassDescription(
+      "Darcy flux: - cond * (Grad P - rho * g) where cond is the hydraulic conductivity, P is "
+      "fluid pressure, rho is fluid density and g is gravity");
+  return params;
+}
+
+KokkosDarcyFluxPressure::KokkosDarcyFluxPressure(const InputParameters & parameters)
+  : KernelGrad(parameters),
+    _cond(getKokkosMaterialProperty<Real>("conductivity")),
+    _gravity(getParam<RealVectorValue>("gravity")),
+    _density(hasKokkosMaterialProperty<Real>("density") ? getKokkosMaterialProperty<Real>("density")
+                                                        : Moose::Kokkos::MaterialProperty<Real>(0))
+{
+}
