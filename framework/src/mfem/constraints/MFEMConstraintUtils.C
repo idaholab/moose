@@ -25,7 +25,7 @@ template <typename CoefficientType>
 void
 accumulateSubdomainProjection(mfem::ParGridFunction & gf,
                               CoefficientType & coef,
-                              const mfem::Array<int> & marked,
+                              const mfem::Array<int> & subdomain_markers,
                               mfem::Vector & values,
                               mfem::Array<int> & counter)
 {
@@ -40,7 +40,7 @@ accumulateSubdomainProjection(mfem::ParGridFunction & gf,
   mfem::DofTransformation doftrans;
   for (const auto e : libMesh::make_range(fes.GetNE()))
   {
-    if (!marked[fes.GetAttribute(e) - 1])
+    if (!subdomain_markers[fes.GetAttribute(e) - 1])
       continue;
     fes.GetElementVDofs(e, vdofs, doftrans);
     vals.SetSize(vdofs.Size());

@@ -48,10 +48,10 @@ freedom left to fix and gauging anyway would over-constrain the solution. Set `b
 subdomain(s) that do need gauging; all edges of the excluded elements, including those
 at the interface between gauged and non-gauged subdomains, then seed the spanning
 forest but are never gauged. Leaving `block` empty gauges the whole
-mesh, which is correct only when the operator is genuinely unregularised everywhere.
+mesh, which is correct only when the operator is genuinely unregularized everywhere.
 
 Getting this wrong is not a subtle effect: in the example below, gauging only the
-unregularised subdomain reproduces the solution obtained from a vanishing artificial
+unregularized subdomain reproduces the solution obtained from a vanishing artificial
 regularization to six significant figures, whereas a whole-mesh gauge perturbs it by several
 percent.
 

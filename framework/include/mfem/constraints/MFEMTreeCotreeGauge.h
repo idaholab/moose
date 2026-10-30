@@ -51,7 +51,7 @@ public:
    *                            errors against the right input block
    * @param pfes                the ND space being solved on. Only the lowest-order
    *                            (edge) dofs are gauged, so the space must be order 1
-   * @param constrained_tdofs   this rank's true dofs already fixed by essential
+   * @param essential_tdofs     this rank's true dofs already fixed by essential
    *                            boundary conditions or other essential constraints
    *                            on the variable. Those edges seed the forest so the
    *                            gauge stays compatible with them
@@ -63,7 +63,7 @@ public:
    */
   const mfem::Array<int> & trueDofs(const MFEMConstraint & constraint,
                                     mfem::ParFiniteElementSpace & pfes,
-                                    const mfem::Array<int> & constrained_tdofs,
+                                    const mfem::Array<int> & essential_tdofs,
                                     const mfem::Array<int> & gauge_block_markers);
 
 private:
@@ -75,7 +75,7 @@ private:
   /// changed. -1 marks "never built".
   long _fespace_sequence = -1;
   /// Already-fixed true dofs _tdofs was built for.
-  mfem::Array<int> _constrained_tdofs;
+  mfem::Array<int> _essential_tdofs;
 };
 }
 

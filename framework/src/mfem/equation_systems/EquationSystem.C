@@ -523,7 +523,7 @@ EquationSystem::BuildLinearForms()
     lf->Assemble();
   }
 
-  // Apply essential boundary conditions
+  // Apply essential constraints on strongly constrained DoFs
   ApplyEssentialConstraints();
 
   // Eliminate trivially eliminated variables by subtracting contributions from linear forms

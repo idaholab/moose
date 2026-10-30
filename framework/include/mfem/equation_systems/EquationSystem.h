@@ -207,7 +207,7 @@ protected:
                                         mfem::ParGridFunction & trial_gf,
                                         mfem::Array<int> & global_bdr_markers,
                                         mfem::Array<int> & global_ess_tdofs);
-  /// Update all essentially constrained true DoF markers and values
+  /// Update essential boundary markers and all constrained true DoF lists and values
   virtual void ApplyEssentialConstraints();
   /// Perform trivial eliminations of coupled variables lacking corresponding test variables
   virtual void EliminateCoupledVariables();
