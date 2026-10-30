@@ -2200,6 +2200,23 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   LibmeshPetscCall(VecRestoreArray(x, &xx));
 
   LibmeshPetscCall(SNESSolve(snes, NULL, x));
+  // A diverged solve leaves x at its initial guess, which is then used as the crossflow of this
+  // iteration. Report it rather than stopping, since the unpreconditioned linear solve can break
+  // down near convergence
+  SNESConvergedReason reason;
+  LibmeshPetscCall(SNESGetConvergedReason(snes, &reason));
+  if (reason < 0)
+  {
+    PetscInt iterations;
+    PetscReal residual_norm;
+    LibmeshPetscCall(SNESGetIterationNumber(snes, &iterations));
+    LibmeshPetscCall(SNESGetFunctionNorm(snes, &residual_norm));
+    _console << COLOR_YELLOW << name()
+             << ": crossflow nonlinear solve did not converge: " << SNESConvergedReasons[reason]
+             << " (" << static_cast<int>(reason) << ") after " << iterations
+             << " iterations; residual norm = " << residual_norm
+             << ". The crossflow of this iteration is not updated." << COLOR_DEFAULT << std::endl;
+  }
   LibmeshPetscCall(VecGetArray(x, &xx));
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
     root(i) = xx[i];
