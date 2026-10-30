@@ -1168,6 +1168,15 @@ setOperationsForShellMat(EigenProblem & eigen_problem, Mat mat, bool eigen)
                                          MATOP_MULT,
                                          eigen ? (void (*)(void))mooseMatMult_Eigen
                                                : (void (*)(void))mooseMatMult_NonEigen));
+
+  // SLEPc creates its work vectors, including the SNES solution and right-hand side, from the
+  // operator. A shell matrix creates the default vector type unless told otherwise, so match the
+  // system solution type, which honors '-vec_type' (e.g. device vectors required by GPU solvers).
+  const auto & solution = cast_ref<const PetscVector<Number> &>(
+      *eigen_problem.getCurrentNonlinearEigenSystem().sys().solution);
+  VecType vec_type;
+  LibmeshPetscCallA(eigen_problem.comm().get(), VecGetType(solution.vec(), &vec_type));
+  LibmeshPetscCallA(eigen_problem.comm().get(), MatShellSetVecType(mat, vec_type));
 }
 
 PETSC_EXTERN PetscErrorCode
