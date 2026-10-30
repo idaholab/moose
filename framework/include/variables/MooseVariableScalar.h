@@ -150,6 +150,7 @@ private:
   using FaceArg = Moose::FaceArg;
   using ElemPointArg = Moose::ElemPointArg;
   using NodeArg = Moose::NodeArg;
+  using PointArg = Moose::PointArg;
 
   ValueType evaluate(const ElemArg & elem, const Moose::StateArg & state) const override final;
   ValueType evaluate(const FaceArg & face, const Moose::StateArg & state) const override final;
@@ -159,6 +160,7 @@ private:
   ValueType evaluate(const ElemPointArg & elem_point,
                      const Moose::StateArg & state) const override final;
   ValueType evaluate(const NodeArg & node, const Moose::StateArg & state) const override final;
+  ValueType evaluate(const PointArg & point, const Moose::StateArg & state) const override final;
   ValueType evaluate(const Moose::StateArg & state) const;
 
   GradientType evaluateGradient(const ElemArg & elem,
@@ -172,6 +174,8 @@ private:
   GradientType evaluateGradient(const ElemPointArg & elem_point,
                                 const Moose::StateArg & state) const override final;
   GradientType evaluateGradient(const NodeArg & node,
+                                const Moose::StateArg & state) const override final;
+  GradientType evaluateGradient(const PointArg & point,
                                 const Moose::StateArg & state) const override final;
 
   /**
