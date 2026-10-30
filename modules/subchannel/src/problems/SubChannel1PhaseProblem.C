@@ -126,7 +126,8 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<MooseEnum>(
       "interpolation_scheme",
       schemes,
-      "Interpolation scheme used for the method. Default is central_difference");
+      "Interpolation scheme used to evaluate values at the cell center. Default is "
+      "central_difference");
   params.addParam<MooseEnum>(
       "gravity", gravity_direction, "Direction of gravity. Default is counter_flow");
   params.addParam<bool>(
@@ -861,8 +862,6 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         auto mu_in = (*_mu_soln)(node_in);
         auto S = (*_S_flow_soln)(node_in);
         auto w_perim = (*_w_perim_soln)(node_in);
-        // hydraulic diameter in the i direction
-        auto Dh_i = 4.0 * S / w_perim;
         auto time_term = _TR * ((*_mdot_soln)(node_out)-_mdot_soln->old(node_out)) * dz / _dt -
                          dz * 2.0 * (*_mdot_soln)(node_out) * (rho_out - _rho_soln->old(node_out)) /
                              rho_in / _dt;
@@ -901,20 +900,44 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           counter++;
         }
         turbulent_term *= _CT;
-        auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / mu_in);
-        _friction_args = FrictionStruct(i_ch, Re, S, w_perim);
-        Real ff = _friction_closure->computeFrictionFactor(_friction_args);
-        if (_ff_soln)
-          _ff_soln->set(node_out, ff);
         /// Upwind local form loss
         auto ki = 0.0;
         if ((*_mdot_soln)(node_out) >= 0)
           ki = k_grid[i_ch][iz - 1];
         else
           ki = k_grid[i_ch][iz];
-        auto friction_term = (ff * dz / Dh_i + ki) * 0.5 *
-                             (*_mdot_soln)(node_out)*std::abs((*_mdot_soln)(node_out)) /
-                             (S * (*_rho_soln)(node_out));
+        // Cell Peclet number of the exponential scheme, from the friction of the cell evaluated at
+        // the arithmetic midpoint, as in the implicit branch
+        PetscScalar Pe = 0.5;
+        if (_interpolation_scheme == 3)
+        {
+          const auto S_mid = computeInterpolatedValue((*_S_flow_soln)(node_out), S, 0.5);
+          const auto w_perim_mid =
+              computeInterpolatedValue((*_w_perim_soln)(node_out), w_perim, 0.5);
+          const auto mdot_mid =
+              computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), 0.5);
+          const auto mu_mid = computeInterpolatedValue((*_mu_soln)(node_out), mu_in, 0.5);
+          const auto Dh_mid = 4.0 * S_mid / w_perim_mid;
+          _friction_args = FrictionStruct(
+              i_ch, std::abs(mdot_mid) / S_mid * Dh_mid / mu_mid, S_mid, w_perim_mid);
+          const Real ff_mid = _friction_closure->computeFrictionFactor(_friction_args);
+          Pe = 1.0 / ((ff_mid * dz / Dh_mid + ki) * 0.5) * mdot_mid / std::abs(mdot_mid);
+        }
+        // The friction factor and the friction force are cell-center quantities
+        const auto S_c = computeInterpolatedValue((*_S_flow_soln)(node_out), S, Pe);
+        const auto w_perim_c = computeInterpolatedValue((*_w_perim_soln)(node_out), w_perim, Pe);
+        const auto mu_c = computeInterpolatedValue((*_mu_soln)(node_out), mu_in, Pe);
+        const auto rho_c = computeInterpolatedValue(rho_out, rho_in, Pe);
+        const auto mdot_c =
+            computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), Pe);
+        const auto Dh_c = 4.0 * S_c / w_perim_c;
+        auto Re = std::abs(mdot_c) / S_c * Dh_c / mu_c;
+        _friction_args = FrictionStruct(i_ch, Re, S_c, w_perim_c);
+        Real ff = _friction_closure->computeFrictionFactor(_friction_args);
+        if (_ff_soln)
+          _ff_soln->set(node_out, ff);
+        auto friction_term =
+            (ff * dz / Dh_c + ki) * 0.5 * mdot_c * std::abs(mdot_c) / (S_c * rho_c);
         auto gravity_term = _dir_grav * _g_grav * (*_rho_soln)(node_out)*dz * S;
         auto DP = (1 / S) * (time_term + mass_term1 + mass_term2 + crossflow_term + turbulent_term +
                              friction_term + gravity_term); // Pa
@@ -964,9 +987,9 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto mu_in = (*_mu_soln)(node_in);
           auto mu_out = (*_mu_soln)(node_out);
           auto mu_interp = this->computeInterpolatedValue(mu_out, mu_in, 0.5);
-          auto Dh_i = 4.0 * S_interp / w_perim_interp;
+          auto Dh_c = 4.0 * S_interp / w_perim_interp;
           // Compute friction factor
-          auto Re = ((mdot_loc / S_interp) * Dh_i / mu_interp);
+          auto Re = ((std::abs(mdot_loc) / S_interp) * Dh_c / mu_interp);
           _friction_args = FrictionStruct(i_ch, Re, S_interp, w_perim_interp);
           Real ff = _friction_closure->computeFrictionFactor(_friction_args);
           if (_ff_soln)
@@ -977,7 +1000,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
             ki = k_grid[i_ch][iz - 1];
           else
             ki = k_grid[i_ch][iz];
-          Pe = 1.0 / ((ff * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
+          Pe = 1.0 / ((ff * dz / Dh_c + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
         }
         auto alpha = computeInterpolationCoefficients(Pe);
 
@@ -1001,8 +1024,8 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         auto w_perim_out = (*_w_perim_soln)(node_out);
         auto w_perim_interp = computeInterpolatedValue(w_perim_out, w_perim_in, Pe);
 
-        // hydraulic diameter in the i direction
-        auto Dh_i = 4.0 * S_interp / w_perim_interp;
+        // cell-center hydraulic diameter
+        auto Dh_c = 4.0 * S_interp / w_perim_interp;
 
         // Keep temporal storage independent of the spatial interpolation scheme. Applying the
         // upwind coefficient to this term puts the storage on the upstream node and leaves the
@@ -1018,7 +1041,8 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         LibmeshPetscCall(
             VecSetValues(_amc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES));
 
-        /// Advective derivative term
+        /// Advective derivative term. The momentum flux mdot^2 / (S rho) is linearized as
+        /// mdot_lagged * mdot, which keeps it positive for either flow direction
         if (iz == first_node)
         {
           PetscScalar value_vec_at = Utility::pow<2>((*_mdot_soln)(node_in)) / (S_in * rho_in);
@@ -1030,7 +1054,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         {
           PetscInt row_at = i_ch + _n_channels * iz_ind;
           PetscInt col_at = i_ch + _n_channels * (iz_ind - 1);
-          PetscScalar value_at = -1.0 * std::abs((*_mdot_soln)(node_in)) / (S_in * rho_in);
+          PetscScalar value_at = -1.0 * (*_mdot_soln)(node_in) / (S_in * rho_in);
           LibmeshPetscCall(MatSetValues(
               _amc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES));
         }
@@ -1038,7 +1062,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         // Adding diagonal elements
         PetscInt row_at = i_ch + _n_channels * iz_ind;
         PetscInt col_at = i_ch + _n_channels * iz_ind;
-        PetscScalar value_at = std::abs((*_mdot_soln)(node_out)) / (S_out * rho_out);
+        PetscScalar value_at = (*_mdot_soln)(node_out) / (S_out * rho_out);
         LibmeshPetscCall(MatSetValues(
             _amc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES));
 
@@ -1185,7 +1209,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         /// Friction term
         PetscScalar mdot_interp =
             computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), Pe);
-        auto Re = ((mdot_interp / S_interp) * Dh_i / mu_interp);
+        auto Re = ((std::abs(mdot_interp) / S_interp) * Dh_c / mu_interp);
         _friction_args = FrictionStruct(i_ch, Re, S_interp, w_perim_interp);
         Real ff = _friction_closure->computeFrictionFactor(_friction_args);
         if (_ff_soln)
@@ -1196,8 +1220,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           ki = k_grid[i_ch][iz - 1];
         else
           ki = k_grid[i_ch][iz];
-        auto coef = (ff * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
-                    (S_interp * rho_interp);
+        auto coef = (ff * dz / Dh_c + ki) * 0.5 * std::abs(mdot_interp) / (S_interp * rho_interp);
         if (iz == first_node)
         {
           PetscScalar value_vec = -1.0 * alpha * coef * (*_mdot_soln)(node_in);
@@ -2177,6 +2200,27 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   LibmeshPetscCall(VecRestoreArray(x, &xx));
 
   LibmeshPetscCall(SNESSolve(snes, NULL, x));
+  // A diverged solve leaves x at its initial guess, which is then used as the crossflow of this
+  // iteration. Report it rather than stopping, since the unpreconditioned linear solve can break
+  // down near convergence
+  SNESConvergedReason reason;
+  LibmeshPetscCall(SNESGetConvergedReason(snes, &reason));
+  if (reason < 0)
+  {
+    PetscInt iterations;
+    PetscReal residual_norm;
+    LibmeshPetscCall(SNESGetIterationNumber(snes, &iterations));
+    LibmeshPetscCall(SNESGetFunctionNorm(snes, &residual_norm));
+    mooseWarning("Crossflow nonlinear solve did not converge: ",
+                 SNESConvergedReasons[reason],
+                 " (",
+                 static_cast<int>(reason),
+                 ") after ",
+                 iterations,
+                 " iterations; residual norm = ",
+                 residual_norm,
+                 ". The crossflow of this iteration is not updated.");
+  }
   LibmeshPetscCall(VecGetArray(x, &xx));
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
     root(i) = xx[i];
@@ -2970,7 +3014,7 @@ SubChannel1PhaseProblem::externalSolve()
         auto S = (*_S_flow_soln)(node);
         auto w_perim = (*_w_perim_soln)(node);
         auto Dh_i = 4.0 * S / w_perim;
-        auto Re = (((*_mdot_soln)(node) / S) * Dh_i / mu);
+        auto Re = ((std::abs((*_mdot_soln)(node)) / S) * Dh_i / mu);
         auto k = _fp->k_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
         auto cp = _fp->cp_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
         auto Pr = (*_mu_soln)(node)*cp / k;
@@ -3008,7 +3052,7 @@ SubChannel1PhaseProblem::externalSolve()
           auto S = (*_S_flow_soln)(node);
           auto w_perim = (*_w_perim_soln)(node);
           auto Dh_i = 4.0 * S / w_perim;
-          auto Re = (((*_mdot_soln)(node) / S) * Dh_i / mu);
+          auto Re = ((std::abs((*_mdot_soln)(node)) / S) * Dh_i / mu);
           auto k = _fp->k_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
           auto cp = _fp->cp_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
           auto Pr = (*_mu_soln)(node)*cp / k;
@@ -3042,7 +3086,7 @@ SubChannel1PhaseProblem::externalSolve()
       auto S = (*_S_flow_soln)(node_chan);
       auto w_perim = (*_w_perim_soln)(node_chan);
       auto Dh_i = 4.0 * S / w_perim;
-      auto Re = (((*_mdot_soln)(node_chan) / S) * Dh_i / mu);
+      auto Re = ((std::abs((*_mdot_soln)(node_chan)) / S) * Dh_i / mu);
       auto k = _fp->k_from_p_T((*_P_soln)(node_chan) + _P_out, (*_T_soln)(node_chan));
       auto cp = _fp->cp_from_p_T((*_P_soln)(node_chan) + _P_out, (*_T_soln)(node_chan));
       auto Pr = (*_mu_soln)(node_chan)*cp / k;

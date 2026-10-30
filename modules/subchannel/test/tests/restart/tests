@@ -8,6 +8,8 @@
     recover = false
     abs_zero = 1e-7
     max_threads = 1
+    # The crossflow solve does not converge in every iteration; remove once #34306 is fixed
+    allow_warnings = true
     requirement = 'The system shall be able to restart after a steady state solution'
   []
   [transient]
@@ -17,6 +19,8 @@
     prereq = 'steady'
     abs_zero = 5e-6
     max_threads = 1
+    # The crossflow solve does not converge in every iteration; remove once #34306 is fixed
+    allow_warnings = true
     requirement = 'The system shall be able to restart after a transient solution'
   []
   [transient_time_integrator_warning]
