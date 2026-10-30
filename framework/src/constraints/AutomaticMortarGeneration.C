@@ -1618,6 +1618,74 @@ AutomaticMortarGeneration::buildCouplingInformation()
       _mortar_interface_coupling[i].insert(j);
   };
   TIMPI::push_parallel_vector_data(_mesh.comm(), coupling_info, action_functor);
+
+  if (!_nonlocal_secondary_couplings)
+    return;
+
+  // The push above sends a secondary lower-dimensional element's couplings only to the processes
+  // owning it, its nodes, or its segments' volume parents. Some consumers (e.g. penalty contact)
+  // apply a secondary node's constraint on every process that contributes to it, not only on the
+  // node's owner. The weighted gap at a node shared by a local element E and a nonlocal element F
+  // carries the derivatives of the primary elements coupled to F, and the process owning E (or a
+  // volume parent coupled to E) applies that gap to its own rows. When AugmentSparsityOnInterface
+  // ghosts point neighbors, it reads the couplings of F to add those primary columns to the rows.
+  // For a local element, it reads the couplings of the point neighbors of the element's own
+  // secondary lower-dimensional elements and of the secondary elements coupled to it (e.g. those
+  // paired with a local primary element), so pull the couplings of those point neighbors from
+  // their owners, which hold the complete sets after the push
+  const auto is_secondary = [this](const Elem * const elem)
+  { return _secondary_boundary_subdomain_ids.count(elem->subdomain_id()); };
+  const auto pid = _mesh.processor_id();
+  std::set<const Elem *> secondary_elems_read;
+  for (const auto secondary_subdomain_id : _secondary_boundary_subdomain_ids)
+    for (const Elem * const secondary_elem :
+         as_range(_mesh.active_subdomain_elements_begin(secondary_subdomain_id),
+                  _mesh.active_subdomain_elements_end(secondary_subdomain_id)))
+      if (secondary_elem->processor_id() == pid ||
+          secondary_elem->interior_parent()->processor_id() == pid)
+        secondary_elems_read.insert(secondary_elem);
+  for (const auto & [elem_id, coupled_elem_ids] : _mortar_interface_coupling)
+    if (const Elem * const elem = _mesh.query_elem_ptr(elem_id);
+        elem && elem->processor_id() == pid)
+      for (const auto coupled_elem_id : coupled_elem_ids)
+        if (const Elem * const coupled_elem = _mesh.query_elem_ptr(coupled_elem_id);
+            coupled_elem && is_secondary(coupled_elem))
+          secondary_elems_read.insert(coupled_elem);
+
+  std::set<const Elem *> secondary_elems_queried;
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> secondary_elems_to_query;
+  for (const Elem * const secondary_elem : secondary_elems_read)
+  {
+    std::set<const Elem *> point_neighbors;
+    secondary_elem->find_point_neighbors(point_neighbors);
+    point_neighbors.insert(secondary_elem);
+    for (const Elem * const neigh : point_neighbors)
+      if (neigh->active() && is_secondary(neigh) && neigh->processor_id() != pid &&
+          secondary_elems_queried.insert(neigh).second)
+        secondary_elems_to_query[neigh->processor_id()].push_back(neigh->id());
+  }
+
+  auto gather_functor = [this](processor_id_type,
+                               const std::vector<dof_id_type> & secondary_elem_ids,
+                               std::vector<std::vector<dof_id_type>> & coupled_elem_ids)
+  {
+    coupled_elem_ids.resize(secondary_elem_ids.size());
+    for (const auto i : index_range(secondary_elem_ids))
+      if (const auto it = _mortar_interface_coupling.find(secondary_elem_ids[i]);
+          it != _mortar_interface_coupling.end())
+        coupled_elem_ids[i].assign(it->second.begin(), it->second.end());
+  };
+  auto act_on_data_functor = [this](processor_id_type,
+                                    const std::vector<dof_id_type> & secondary_elem_ids,
+                                    const std::vector<std::vector<dof_id_type>> & coupled_elem_ids)
+  {
+    for (const auto i : index_range(secondary_elem_ids))
+      _mortar_interface_coupling[secondary_elem_ids[i]].insert(coupled_elem_ids[i].begin(),
+                                                               coupled_elem_ids[i].end());
+  };
+  std::vector<dof_id_type> * example = nullptr;
+  TIMPI::pull_parallel_vector_data(
+      _mesh.comm(), secondary_elems_to_query, gather_functor, act_on_data_functor, example);
 }
 
 std::vector<AutomaticMortarGeneration::MsmSubdomainStats>
