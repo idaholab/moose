@@ -71,6 +71,21 @@ EigenproblemEquationSystem::FormMassMatrix(EigenRHSCoefficient rhs_coefficient)
 
   if (fespace->GetTypicalFE()->GetRangeType() == mfem::FiniteElement::SCALAR)
   {
+    // VectorMassIntegrator reads vdim x vdim entries of the evaluated matrix without bounds checks.
+    if (std::holds_alternative<mfem::MatrixCoefficient *>(rhs_coefficient))
+    {
+      const auto & mat_coef = *std::get<mfem::MatrixCoefficient *>(rhs_coefficient);
+      if (mat_coef.GetHeight() != fespace->GetVDim() || mat_coef.GetWidth() != fespace->GetVDim())
+        mooseError("A matrix rhs_coefficient on an H1 or L2 finite element space must be ",
+                   fespace->GetVDim(),
+                   "x",
+                   fespace->GetVDim(),
+                   " to match the number of components of the space, but it is ",
+                   mat_coef.GetHeight(),
+                   "x",
+                   mat_coef.GetWidth(),
+                   ".");
+    }
     auto * const integ = std::visit(
         [](auto * coef) { return new mfem::VectorMassIntegrator(*coef); }, rhs_coefficient);
     // Otherwise VectorMassIntegrator assumes as many components as there are space dimensions.
