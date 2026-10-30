@@ -283,7 +283,9 @@ InclinedNoDisplacementConstraint::addExactConstraints(libMesh::DofMap & dof_map)
   {
     const auto & [dofs, node_normals] = node;
 
-    if (!_mesh.queryNodePtr(node_id))
+    // The owner adds the rows, and libMesh sends them to the other ranks that need them
+    const Node * const mesh_node = _mesh.queryNodePtr(node_id);
+    if (!mesh_node || mesh_node->processor_id() != processor_id())
       continue;
 
     bool node_is_usable = true;
