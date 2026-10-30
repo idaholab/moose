@@ -2211,11 +2211,15 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
     PetscReal residual_norm;
     LibmeshPetscCall(SNESGetIterationNumber(snes, &iterations));
     LibmeshPetscCall(SNESGetFunctionNorm(snes, &residual_norm));
-    _console << COLOR_YELLOW << name()
-             << ": crossflow nonlinear solve did not converge: " << SNESConvergedReasons[reason]
-             << " (" << static_cast<int>(reason) << ") after " << iterations
-             << " iterations; residual norm = " << residual_norm
-             << ". The crossflow of this iteration is not updated." << COLOR_DEFAULT << std::endl;
+    mooseWarning("Crossflow nonlinear solve did not converge: ",
+                 SNESConvergedReasons[reason],
+                 " (",
+                 static_cast<int>(reason),
+                 ") after ",
+                 iterations,
+                 " iterations; residual norm = ",
+                 residual_norm,
+                 ". The crossflow of this iteration is not updated.");
   }
   LibmeshPetscCall(VecGetArray(x, &xx));
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)

@@ -10,6 +10,8 @@
     recover = false
     abs_zero = 1e-6
     max_threads = 1
+    # The crossflow solve does not converge in every iteration; remove once #34306 is fixed
+    allow_warnings = true
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using an explicit algorithm.'
   []
   [psbt_regression_test_explicit_friction2]
@@ -21,6 +23,8 @@
     recover = false
     abs_zero = 1e-6
     max_threads = 1
+    # The crossflow solve does not converge in every iteration; remove once #34306 is fixed
+    allow_warnings = true
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using the non-default friction/mixing model.'
   []
   [psbt_regression_test_explicit_staggered]
@@ -32,6 +36,8 @@
     recover = false
     abs_zero = 1e-6
     max_threads = 1
+    # The crossflow solve does not converge in every iteration; remove once #34306 is fixed
+    allow_warnings = true
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using an explicit algorithm and a staggered pressure formulation.'
   []
   [psbt_regression_test_implicit]
@@ -43,6 +49,8 @@
     recover = false
     abs_zero = 1e-6
     max_threads = 1
+    # The crossflow solve does not converge in every iteration; remove once #34306 is fixed
+    allow_warnings = true
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using an implicit algorithm.'
   []
   [psbt_pressure_iteration_exhaustion]
