@@ -408,4 +408,27 @@
       detail = 'or a boundary ID.'
     []
   []
+  [MFEMElastodynamics]
+    type = CSVDiff
+    input = elastodynamics.i
+    csvdiff = 'OutputData/Elastodynamics.csv'
+    design = 'MFEMVectorMassKernel.md MFEMTimeDerivativeVectorMassKernel.md'
+    requirement = 'The system shall have the ability to solve a transient elastodynamics problem with '
+                  'inertia, written as a first order system in displacement and velocity, using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+    restep = false
+  []
+  [MFEMCurlCurlLFCurl]
+    type = CSVDiff
+    input = curlcurl_lfcurl.i
+    csvdiff = 'OutputData/CurlCurlLFCurl.csv'
+    design = 'MFEMVectorFEDomainLFCurlKernel.md'
+    requirement = 'The system shall have the ability to apply a forcing term in the weak form of a '
+                  'curl, (f, curl(v)), to a definite Maxwell problem using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
 []
