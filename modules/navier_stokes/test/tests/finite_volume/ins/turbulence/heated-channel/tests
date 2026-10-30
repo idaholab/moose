@@ -1,5 +1,5 @@
 [Tests]
-  design = 'LinearFVTemperatureWallFunctionBC.md FunctorEffectiveTurbulentThermalConductivity.md'
+  design = 'LinearFVTemperatureWallFunctionBC.md EffectiveTurbulentThermalConductivityAux.md'
   issues = '#32476'
   [channel_ERCOFTAC_heated]
     type = 'Exodiff'

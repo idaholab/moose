@@ -22,19 +22,20 @@ EffectiveTurbulentThermalConductivityAux::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::mu_t, "The turbulent viscosity.");
   params.addRequiredParam<MooseFunctorName>(NS::k, "The thermal conductivity.");
   params.addParam<MooseFunctorName>("Pr_t", 0.9, "Turbulent Prandtl number functor.");
-  params.addParam<bool>(
-      "turbulent_thermal_conductivity", false, "Whether to compute the turbulent thermal conductivity in the expression");
+  params.addParam<bool>("turbulent_thermal_conductivity",
+                        false,
+                        "Whether to compute the turbulent thermal conductivity in the expression");
   return params;
 }
 
-EffectiveTurbulentThermalConductivityAux::EffectiveTurbulentThermalConductivityAux(const InputParameters & params)
+EffectiveTurbulentThermalConductivityAux::EffectiveTurbulentThermalConductivityAux(
+    const InputParameters & params)
   : AuxKernel(params),
     _cp(getFunctor<Real>(NS::cp)),
     _mu_t(getFunctor<Real>(NS::mu_t)),
     _k(getFunctor<Real>(NS::k)),
     _Pr_t(getFunctor<Real>("Pr_t")),
     _turbulent_thermal_conductivity(getParam<bool>("turbulent_thermal_conductivity"))
-
 {
 }
 
@@ -46,9 +47,9 @@ EffectiveTurbulentThermalConductivityAux::computeValue()
 
   if (_turbulent_thermal_conductivity)
     return _cp(current_argument, state) * _mu_t(current_argument, state) /
-          _Pr_t(current_argument, state);
+           _Pr_t(current_argument, state);
   else
     return _cp(current_argument, state) * _mu_t(current_argument, state) /
-          _Pr_t(current_argument, state) + _k(current_argument, state);
-
+               _Pr_t(current_argument, state) +
+           _k(current_argument, state);
 }

@@ -22,7 +22,7 @@ where:
 
 - $q_w$ is the wall heat flux,
 - $k_{t,w}$ is the effective wall thermal conductivity returned by this boundary condition,
-- $T_p$ is the temperature at the centroid of the near-wall cell,
+- $T_p$ is the temperature at the centroid of the fluid near-wall cell,
 - $T_w$ is the wall temperature,
 - $y_p$ is the wall-normal distance from the wall face to the centroid of the near-wall cell.
 
@@ -97,6 +97,14 @@ The returned boundary value is then
 \begin{equation}
     k_{eff,w} = \frac{\rho c_p u_{\tau} y_p}{T^+}.
 \end{equation}
+
+!alert note
+This wall function is formulated for molecular Prandtl numbers of order 1 or greater, as is
+typical for gases and most liquids. For low-Prandtl-number fluids, such as liquid metals,
+$y^+_{t}$ can grow well past the validity range of the underlying equilibrium velocity wall
+function (i.e. into or beyond the logarithmic layer), making the sub-laminar/logarithmic
+switch and the resulting $k_{eff,w}$ unreliable. A dedicated low-Prandtl-number thermal wall
+treatment is recommended for such fluids.
 
 !syntax parameters /LinearFVBCs/LinearFVTemperatureWallFunctionBC
 
