@@ -40,7 +40,8 @@ public:
 
   /**
    * Add the exact constraints of this constraint. Every rank must call this, and each adds the
-   * constraints of the dependent nodes it has.
+   * constraints of the dependent nodes it owns. libMesh sends each constraint to the other ranks
+   * that need it.
    * @param dof_map The DofMap that receives the exact constraints
    */
   virtual void addExactConstraints(libMesh::DofMap & /*dof_map*/) const {}

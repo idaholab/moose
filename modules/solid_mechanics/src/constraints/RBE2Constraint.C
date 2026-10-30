@@ -134,7 +134,7 @@ RBE2Constraint::addExactConstraints(libMesh::DofMap & dof_map) const
 
   CollectiveError error(*this);
 
-  for (const auto node_id : localNodes(_dependent_boundary))
+  for (const auto node_id : ownedNodes(_dependent_boundary))
   {
     const Node & node = _mesh.nodeRef(node_id);
 
