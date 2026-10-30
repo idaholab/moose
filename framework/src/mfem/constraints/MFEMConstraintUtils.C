@@ -92,9 +92,8 @@ projectOnSubdomains(mfem::ParGridFunction & gf,
                     CoefficientType & coef,
                     const mfem::Array<int> & subdomain_markers)
 {
-  mooseAssert(Moose::MFEM::coefficientFitsSpace(*gf.FESpace(), coef),
-              "The coefficient cannot be projected onto the grid function's space; callers "
-              "check this with coefficientFitsSpace");
+  mooseAssert(gf.FESpace()->GetVectorDim() == coef.GetVDim(),
+              "The coefficient must have one component per space component");
 
   mfem::Vector values;
   mfem::Array<int> counter;
@@ -133,34 +132,6 @@ subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
   mfem::Array<int> tdof_marker;
   pfes.GetRestrictionMatrix()->BooleanMult(dof_marker, tdof_marker);
   mfem::FiniteElementSpace::MarkerToList(tdof_marker, tdofs);
-}
-
-bool
-coefficientFitsSpace(const mfem::FiniteElementSpace & fes, mfem::Coefficient & /*coef*/)
-{
-  return fes.GetVectorDim() == 1;
-}
-
-bool
-coefficientFitsSpace(const mfem::FiniteElementSpace & fes, mfem::VectorCoefficient & coef)
-{
-  const int dim = fes.GetMesh()->Dimension();
-  const int vdim = coef.GetVDim();
-
-  // A scalar basis (vector H1 or L2) is projected one coefficient component per
-  // space component.
-  if (fes.FEColl()->GetRangeType(dim) == mfem::FiniteElement::SCALAR)
-    return vdim == fes.GetVDim();
-
-  // An H(curl) projection evaluates the coefficient into a buffer of
-  // Geometry::MaxDim entries and contracts it with the element Jacobian, reading
-  // only its first space-dimension components; trailing components are ignored.
-  if (fes.FEColl()->GetMapType(dim) == mfem::FiniteElement::H_CURL)
-    return vdim >= fes.GetVectorDim() && vdim <= mfem::Geometry::MaxDim;
-
-  // An H(div) projection evaluates the coefficient into a buffer of exactly the
-  // space dimension.
-  return vdim == fes.GetVectorDim();
 }
 
 void

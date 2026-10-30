@@ -172,16 +172,16 @@
       type = RunException
       input = vector_subdomain_constraint_source.i
       cli_args = "Constraints/circle_interior/vector_coefficient='2.0'"
-      expect_err = "The vector coefficient has 1 components, which does not fit the 2-component space"
+      expect_err = "dimension does not match the variable's"
       detail = 'fewer components than the space dimension, or'
       capabilities = 'mfem'
     []
     [too_many_components]
       type = RunException
       input = vector_subdomain_constraint_source.i
-      cli_args = "Constraints/circle_interior/vector_coefficient='2.0 3.0 0.0 0.0'"
-      expect_err = "The vector coefficient has 4 components, which does not fit the 2-component space"
-      detail = 'more components than an H(curl) projection can evaluate.'
+      cli_args = "Constraints/circle_interior/vector_coefficient='2.0 3.0 0.0'"
+      expect_err = "dimension does not match the variable's"
+      detail = 'more components than the space dimension.'
       capabilities = 'mfem'
     []
   []

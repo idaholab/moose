@@ -30,23 +30,12 @@ void subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
                        mfem::Array<int> & tdofs);
 
 /**
- * Whether coefficient @p coef can be projected onto space @p fes by
- * projectCoefficientOnSubdomains. A scalar coefficient needs a scalar space. A
- * vector coefficient needs exactly one component per component of a vector H1 or
- * L2 space or of an H(div) space. An H(curl) projection reads only the first
- * space-dimension components, so it accepts any number from the space dimension
- * up to 3.
- */
-bool coefficientFitsSpace(const mfem::FiniteElementSpace & fes, mfem::Coefficient & coef);
-bool coefficientFitsSpace(const mfem::FiniteElementSpace & fes, mfem::VectorCoefficient & coef);
-
-/**
  * Overwrite the degrees of freedom of grid function @p gf that lie in elements
  * whose mesh attribute is set in the attribute marker array @p subdomain_markers
  * with the projection of coefficient @p coef. The projected values are averaged
  * across all ranks contributing to a shared dof, so they agree on every rank
- * including the one that owns the dof. @p coef must fit the space of @p gf (see
- * coefficientFitsSpace).
+ * including the one that owns the dof. @p coef must have the same number of
+ * components as the space of @p gf.
  *
  * The vector overload works for vector H1 as well as H(curl)/H(div) spaces.
  */

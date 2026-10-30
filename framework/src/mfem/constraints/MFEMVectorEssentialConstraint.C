@@ -34,19 +34,11 @@ void
 MFEMVectorEssentialConstraint::ApplyConstraint(mfem::ParGridFunction & gridfunc,
                                                mfem::Array<int> & ess_tdof_list)
 {
-  mfem::ParFiniteElementSpace & pfes = *gridfunc.ParFESpace();
-  if (!Moose::MFEM::coefficientFitsSpace(pfes, _vec_coef))
-    paramError("vector_coefficient",
-               "The vector coefficient has ",
-               _vec_coef.GetVDim(),
-               " components, which does not fit the ",
-               pfes.GetVectorDim(),
-               "-component space of variable '",
-               _trial_var_name,
-               "'.");
+  if (gridfunc.ParFESpace()->GetVectorDim() != _vec_coef.GetVDim())
+    paramError("vector_coefficient", "dimension does not match the variable's.");
 
   Moose::MFEM::projectCoefficientOnSubdomains(gridfunc, _vec_coef, getSubdomainMarkers());
-  ess_tdof_list.Append(getSubdomainTrueDofs(pfes));
+  ess_tdof_list.Append(getSubdomainTrueDofs(*gridfunc.ParFESpace()));
 }
 
 #endif
