@@ -58,9 +58,18 @@
   [test_command_line_vec_type_not_left]
     type = RunApp
     input = '2d_diffusion_petsc_option.i'
+    cli_args = '-nl0_vec_type standard -nl0_ghost_vec_type standard -aux0_vec_type standard'
+    absent_out = 'Option left.*vec_type'
+    requirement = 'The system shall not warn about system vector type options that were already consumed before the PETSc options database is rebuilt.'
+    issues = '#28053 #33875'
+  []
+
+  [test_command_line_system_vec_type_error]
+    type = RunException
+    input = '2d_diffusion_petsc_option.i'
     cli_args = '-vec_type standard'
-    absent_out = 'Option left.*-vec_type'
-    requirement = 'The system shall not warn about a vector type option that was already consumed before the PETSc options database is rebuilt.'
-    issues = '#28053'
+    expect_err = "Setting option '-vec_type' is not supported without a system prefix"
+    requirement = 'The system shall reject non-prefixed vector type options because each system reads vector type options with its own prefix.'
+    issues = '#33875'
   []
 []
