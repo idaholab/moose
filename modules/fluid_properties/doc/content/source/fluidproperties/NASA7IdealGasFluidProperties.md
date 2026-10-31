@@ -59,8 +59,16 @@ described by
 
 ## Viscosity and thermal conductivity
 
-The viscosity and thermal conductivity are those of the dilute gas, which depend on temperature
-only, and are evaluated with the
+The viscosity and thermal conductivity are those of the dilute gas. A gas is dilute when its
+density is low enough that its molecules interact only through binary collisions, as kinetic theory
+assumes, so that these properties depend on temperature only. According to the reference
+correlations of CoolProp [!citep](bell2014coolprop), density changes the viscosity and thermal
+conductivity of these gases by less than 1% at 1 bar from 300 K (500 K for H$_2$O) to 1000 K, and
+by less than 2% at 10 bar, except for CO$_2$ near room temperature and H$_2$O near saturation,
+whose thermal conductivities change by up to 4% and 8%. The effect grows quickly as the gas
+approaches its critical point.
+
+These properties are evaluated with the
 [gas transport utilities](utils/FluidPropertiesUtils.md#gas-transport). For all species except
 H$_2$O, the viscosity follows from Chapman-Enskog kinetic theory with the Lennard-Jones parameters
 of GRI-Mech 3.0, and the thermal conductivity from the modified Eucken correlation
