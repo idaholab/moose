@@ -22,7 +22,7 @@
  * modified Eucken thermal conductivity, and the low-density viscosity and thermal conductivity of
  * steam. The functions are templated so that they accept automatic differentiation types.
  */
-namespace GasTransport
+namespace GasTransportUtils
 {
 /// Parameters of the Lennard-Jones (12-6) potential of a species
 struct LennardJonesParameters

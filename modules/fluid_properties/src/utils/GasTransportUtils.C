@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GasTransport.h"
+#include "GasTransportUtils.h"
 #include "MooseError.h"
 
 #include <array>
@@ -18,7 +18,7 @@ namespace
 // GRI-Mech 3.0 transport data as distributed with Cantera 3.2.0 (gri30.yaml), the same source as
 // the NASA 7-coefficient data. The parameters of H2O are meant for a Stockmayer potential with a
 // dipole correction, which the Lennard-Jones collision integrals here do not apply.
-const std::array<std::pair<std::string, GasTransport::LennardJonesParameters>, 7>
+const std::array<std::pair<std::string, GasTransportUtils::LennardJonesParameters>, 7>
     lennard_jones_data = {{{"H2", {2.920e-10, 38.00}},
                            {"O2", {3.458e-10, 107.40}},
                            {"H2O", {2.605e-10, 572.40}},
@@ -28,7 +28,7 @@ const std::array<std::pair<std::string, GasTransport::LennardJonesParameters>, 7
                            {"N2", {3.621e-10, 97.53}}}};
 }
 
-namespace GasTransport
+namespace GasTransportUtils
 {
 const LennardJonesParameters &
 lennardJonesParameters(const std::string & name)

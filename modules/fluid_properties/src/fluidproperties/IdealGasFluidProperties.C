@@ -63,7 +63,7 @@ IdealGasFluidProperties::fluidName() const
   return "ideal_gas";
 }
 
-const GasTransport::LennardJonesParameters *
+const GasTransportUtils::LennardJonesParameters *
 IdealGasFluidProperties::lennardJonesParameters() const
 {
   return nullptr;

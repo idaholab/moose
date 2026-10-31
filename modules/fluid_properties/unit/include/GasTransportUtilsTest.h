@@ -12,17 +12,17 @@
 #include "MooseObjectUnitTest.h"
 #include "Water97FluidProperties.h"
 
-class GasTransportTest : public MooseObjectUnitTest
+class GasTransportUtilsTest : public MooseObjectUnitTest
 {
 public:
-  GasTransportTest();
+  GasTransportUtilsTest();
 
 protected:
   /// Water and steam properties, the reference for the low-density properties of steam
   const Water97FluidProperties * _water;
 };
 
-inline GasTransportTest::GasTransportTest() : MooseObjectUnitTest("FluidPropertiesApp")
+inline GasTransportUtilsTest::GasTransportUtilsTest() : MooseObjectUnitTest("FluidPropertiesApp")
 {
   InputParameters params = _factory.getValidParams("Water97FluidProperties");
   _fe_problem->addUserObject("Water97FluidProperties", "water", params);

@@ -11,7 +11,7 @@
 
 #include "VaporMixtureFluidProperties.h"
 #include "NaNInterface.h"
-#include "GasTransport.h"
+#include "GasTransportUtils.h"
 
 class SinglePhaseFluidProperties;
 
@@ -137,7 +137,7 @@ protected:
   /// Component fluid properties objects
   std::vector<const SinglePhaseFluidProperties *> _component_fps;
   /// Lennard-Jones parameters of the components, or nullptr for components without them
-  std::vector<const GasTransport::LennardJonesParameters *> _lennard_jones;
+  std::vector<const GasTransportUtils::LennardJonesParameters *> _lennard_jones;
 
   /// Whether all components have constant specific heats, so that the internal energy is linear
   /// in temperature and the temperature follows explicitly from it

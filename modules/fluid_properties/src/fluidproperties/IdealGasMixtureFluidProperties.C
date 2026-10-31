@@ -626,12 +626,12 @@ IdealGasMixtureFluidProperties::binaryDiffusionCoefficient_templ(const CppType &
   if (!_lennard_jones[i] || !_lennard_jones[j])
     mooseError("Binary diffusion coefficients require components with Lennard-Jones parameters, "
                "such as 'NASA7IdealGasFluidProperties'.");
-  return GasTransport::binaryDiffusionCoefficient(p,
-                                                  T,
-                                                  _component_fps[i]->molarMass(),
-                                                  _component_fps[j]->molarMass(),
-                                                  *_lennard_jones[i],
-                                                  *_lennard_jones[j]);
+  return GasTransportUtils::binaryDiffusionCoefficient(p,
+                                                       T,
+                                                       _component_fps[i]->molarMass(),
+                                                       _component_fps[j]->molarMass(),
+                                                       *_lennard_jones[i],
+                                                       *_lennard_jones[j]);
 }
 
 Real

@@ -11,7 +11,7 @@
 
 #include "MooseTypes.h"
 
-namespace GasTransport
+namespace GasTransportUtils
 {
 struct LennardJonesParameters;
 }
@@ -42,5 +42,5 @@ public:
    * Lennard-Jones parameters of the gas, from which a mixture computes binary diffusion
    * coefficients, or nullptr for a gas without them
    */
-  virtual const GasTransport::LennardJonesParameters * lennardJonesParameters() const = 0;
+  virtual const GasTransportUtils::LennardJonesParameters * lennardJonesParameters() const = 0;
 };

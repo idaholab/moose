@@ -34,7 +34,7 @@ NASA7IdealGasFluidProperties::NASA7IdealGasFluidProperties(const InputParameters
   : SinglePhaseFluidProperties(parameters),
     _data(NASA7::speciesData(getParam<MooseEnum>("species"))),
     _R_specific(_R / _data.molar_mass),
-    _lennard_jones(GasTransport::lennardJonesParameters(_data.name)),
+    _lennard_jones(GasTransportUtils::lennardJonesParameters(_data.name)),
     _is_steam(_data.name == "H2O")
 {
 }
@@ -59,7 +59,7 @@ NASA7IdealGasFluidProperties::newtonStartTemperature() const
   return _data.T_max;
 }
 
-const GasTransport::LennardJonesParameters *
+const GasTransportUtils::LennardJonesParameters *
 NASA7IdealGasFluidProperties::lennardJonesParameters() const
 {
   return &_lennard_jones;
@@ -137,8 +137,8 @@ NASA7IdealGasFluidProperties::mu_from_T(const CppType & T) const
 {
   checkTransportTemperature(T);
   if (_is_steam)
-    return GasTransport::steamViscosityZeroDensity(T);
-  return GasTransport::viscosity(T, _data.molar_mass, _lennard_jones);
+    return GasTransportUtils::steamViscosityZeroDensity(T);
+  return GasTransportUtils::viscosity(T, _data.molar_mass, _lennard_jones);
 }
 
 template <typename CppType>
@@ -149,9 +149,9 @@ NASA7IdealGasFluidProperties::k_from_T(const CppType & T) const
   // The modified Eucken correlation overestimates the conductivity of polar gases, that of steam
   // by 20% to 40%
   if (_is_steam)
-    return GasTransport::steamConductivityZeroDensity(T);
-  return GasTransport::modifiedEuckenConductivity(
-      GasTransport::viscosity(T, _data.molar_mass, _lennard_jones),
+    return GasTransportUtils::steamConductivityZeroDensity(T);
+  return GasTransportUtils::modifiedEuckenConductivity(
+      GasTransportUtils::viscosity(T, _data.molar_mass, _lennard_jones),
       NASA7::cpOverR(_data, T),
       _R_specific);
 }

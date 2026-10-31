@@ -12,7 +12,7 @@
 #include "SinglePhaseFluidProperties.h"
 #include "NASA7Polynomials.h"
 #include "IdealGasMixtureInterface.h"
-#include "GasTransport.h"
+#include "GasTransportUtils.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
@@ -70,7 +70,7 @@ public:
   /// The upper end of the temperature range of the NASA 7-coefficient data [K]
   virtual Real newtonStartTemperature() const override;
 
-  virtual const GasTransport::LennardJonesParameters * lennardJonesParameters() const override;
+  virtual const GasTransportUtils::LennardJonesParameters * lennardJonesParameters() const override;
 
 private:
   /// NASA 7-coefficient data of the species
@@ -78,7 +78,7 @@ private:
   /// Specific gas constant [J/(kg K)]
   const Real _R_specific;
   /// Lennard-Jones parameters of the species
-  const GasTransport::LennardJonesParameters _lennard_jones;
+  const GasTransportUtils::LennardJonesParameters _lennard_jones;
   /// Whether the species is steam, whose viscosity and thermal conductivity come from IAPWS
   const bool _is_steam;
 

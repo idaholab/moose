@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GasTransportTest.h"
-#include "GasTransport.h"
+#include "GasTransportUtilsTest.h"
+#include "GasTransportUtils.h"
 #include "NASA7Polynomials.h"
 #include "SinglePhaseFluidPropertiesTestUtils.h"
 
@@ -22,7 +22,7 @@ molarMass(const std::string & species)
 }
 }
 
-TEST_F(GasTransportTest, canteraViscosity)
+TEST_F(GasTransportUtilsTest, canteraViscosity)
 {
   // Viscosities at 1e5 Pa computed with Cantera 3.2.0 from gri30.yaml for the species without a
   // dipole moment. Cantera evaluates the collision integrals and fits the viscosity differently,
@@ -53,13 +53,13 @@ TEST_F(GasTransportTest, canteraViscosity)
 
   for (const auto & [T, values] : references)
     for (const auto & [species, mu] : values)
-      REL_TEST(GasTransport::viscosity(
-                   T, molarMass(species), GasTransport::lennardJonesParameters(species)),
+      REL_TEST(GasTransportUtils::viscosity(
+                   T, molarMass(species), GasTransportUtils::lennardJonesParameters(species)),
                mu,
                tol);
 }
 
-TEST_F(GasTransportTest, canteraDiffusion)
+TEST_F(GasTransportUtilsTest, canteraDiffusion)
 {
   // Binary diffusion coefficients at 1e5 Pa computed with Cantera 3.2.0 from gri30.yaml. For pairs
   // without a dipole moment the two agree within 0.1% from 300 K to 3000 K. Cantera adds a dipole
@@ -96,45 +96,45 @@ TEST_F(GasTransportTest, canteraDiffusion)
 
   for (const auto & ref : references)
   {
-    const Real D = GasTransport::binaryDiffusionCoefficient(
+    const Real D = GasTransportUtils::binaryDiffusionCoefficient(
         p,
         ref.T,
         molarMass(ref.species_i),
         molarMass(ref.species_j),
-        GasTransport::lennardJonesParameters(ref.species_i),
-        GasTransport::lennardJonesParameters(ref.species_j));
+        GasTransportUtils::lennardJonesParameters(ref.species_i),
+        GasTransportUtils::lennardJonesParameters(ref.species_j));
     REL_TEST(D, ref.D, ref.species_i == "H2O" ? tol_H2O : tol);
   }
 }
 
-TEST_F(GasTransportTest, polingExample)
+TEST_F(GasTransportUtilsTest, polingExample)
 {
   // Example 11-1 of Poling et al. (2001): N2 and CO2 at 590 K and 1 bar, with the Lennard-Jones
   // parameters and molar masses of that example. It reports 0.52 cm^2/s after rounding.
-  const GasTransport::LennardJonesParameters n2{3.798e-10, 71.4};
-  const GasTransport::LennardJonesParameters co2{3.941e-10, 195.2};
+  const GasTransportUtils::LennardJonesParameters n2{3.798e-10, 71.4};
+  const GasTransportUtils::LennardJonesParameters co2{3.941e-10, 195.2};
   const Real p = 1e5;
   const Real T = 590;
-  ABS_TEST(GasTransport::binaryDiffusionCoefficient(p, T, 28.014e-3, 44.010e-3, n2, co2),
+  ABS_TEST(GasTransportUtils::binaryDiffusionCoefficient(p, T, 28.014e-3, 44.010e-3, n2, co2),
            0.52e-4,
            0.005e-4);
 }
 
-TEST_F(GasTransportTest, steamZeroDensity)
+TEST_F(GasTransportUtilsTest, steamZeroDensity)
 {
   // Water97FluidProperties evaluates the same low-density viscosity times a factor that tends to
   // one with the density. At 1e-10 kg/m^3 that factor differs from one by about 4e-12.
   const Real rho = 1e-10;
   for (const Real T : {300.0, 600.0, 900.0, 1200.0})
-    REL_TEST(GasTransport::steamViscosityZeroDensity(T), _water->mu_from_rho_T(rho, T), 1e-10);
+    REL_TEST(GasTransportUtils::steamViscosityZeroDensity(T), _water->mu_from_rho_T(rho, T), 1e-10);
 
   // Verification values of the thermal conductivity at zero density from the IAPWS 2011 release,
   // given to nine significant digits in mW/(m K)
-  REL_TEST(GasTransport::steamConductivityZeroDensity(298.15), 18.4341883e-3, 1e-8);
-  REL_TEST(GasTransport::steamConductivityZeroDensity(873.15), 79.1034659e-3, 1e-8);
+  REL_TEST(GasTransportUtils::steamConductivityZeroDensity(298.15), 18.4341883e-3, 1e-8);
+  REL_TEST(GasTransportUtils::steamConductivityZeroDensity(873.15), 79.1034659e-3, 1e-8);
 }
 
-TEST_F(GasTransportTest, derivatives)
+TEST_F(GasTransportUtilsTest, derivatives)
 {
   // Derivatives from automatic differentiation with respect to temperature (index 0) and pressure
   // (index 1) agree with central differences
@@ -147,13 +147,13 @@ TEST_F(GasTransportTest, derivatives)
   const ADReal p_ad(p, dp_dp);
   const Real h = REL_PERTURBATION * T;
 
-  const auto lj_H2 = GasTransport::lennardJonesParameters("H2");
-  const auto lj_N2 = GasTransport::lennardJonesParameters("N2");
+  const auto lj_H2 = GasTransportUtils::lennardJonesParameters("H2");
+  const auto lj_N2 = GasTransportUtils::lennardJonesParameters("N2");
   const auto mu = [&lj_N2](const auto & T)
-  { return GasTransport::viscosity(T, molarMass("N2"), lj_N2); };
+  { return GasTransportUtils::viscosity(T, molarMass("N2"), lj_N2); };
   const auto D = [&lj_H2, &lj_N2](const auto & p, const auto & T)
   {
-    return GasTransport::binaryDiffusionCoefficient(
+    return GasTransportUtils::binaryDiffusionCoefficient(
         p, T, molarMass("H2"), molarMass("N2"), lj_H2, lj_N2);
   };
 
@@ -162,14 +162,14 @@ TEST_F(GasTransportTest, derivatives)
       D(p_ad, T_ad).derivatives()[0], (D(p, T + h) - D(p, T - h)) / (2 * h), REL_TOL_DERIVATIVE);
   // The diffusion coefficient is inversely proportional to pressure
   REL_TEST(D(p_ad, T_ad).derivatives()[1], -D(p, T) / p, REL_TOL_CONSISTENCY);
-  REL_TEST(GasTransport::steamViscosityZeroDensity(T_ad).derivatives()[0],
-           (GasTransport::steamViscosityZeroDensity(T + h) -
-            GasTransport::steamViscosityZeroDensity(T - h)) /
+  REL_TEST(GasTransportUtils::steamViscosityZeroDensity(T_ad).derivatives()[0],
+           (GasTransportUtils::steamViscosityZeroDensity(T + h) -
+            GasTransportUtils::steamViscosityZeroDensity(T - h)) /
                (2 * h),
            REL_TOL_DERIVATIVE);
-  REL_TEST(GasTransport::steamConductivityZeroDensity(T_ad).derivatives()[0],
-           (GasTransport::steamConductivityZeroDensity(T + h) -
-            GasTransport::steamConductivityZeroDensity(T - h)) /
+  REL_TEST(GasTransportUtils::steamConductivityZeroDensity(T_ad).derivatives()[0],
+           (GasTransportUtils::steamConductivityZeroDensity(T + h) -
+            GasTransportUtils::steamConductivityZeroDensity(T - h)) /
                (2 * h),
            REL_TOL_DERIVATIVE);
 }
