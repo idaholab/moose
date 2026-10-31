@@ -27,7 +27,8 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo "  3. Install nmhit, pyzag and pyro-ppl from their submodules"
   echo "     (framework/contrib/{neml2-hit,pyzag,pyro}) without network access, unless"
   echo "     the versions in the submodules are already installed. A package whose"
-  echo "     submodule is not checked out is used as installed."
+  echo "     submodule is not checked out is used as installed, or, if not installed,"
+  echo "     is installed at its pinned version from PyPI."
   echo "  4. Build NEML2 from source and pip-install it into the active environment"
   echo
   echo "Prerequisites in the ACTIVE Python environment. This script CHECKS these but"
@@ -102,11 +103,12 @@ else
 fi
 
 # NEML2 Python dependencies installed from submodules, as
-# <distribution>:<module>:<submodule> (see pip_install_neml2_dependencies)
+# <distribution>:<module>:<version>:<submodule> (see pip_install_neml2_dependencies). The
+# versions are those the submodules are pinned to, installed from PyPI without a checkout.
 NEML2_DEPENDENCIES=(
-  "nmhit:nmhit:${MOOSE_DIR}/framework/contrib/neml2-hit"
-  "pyro-ppl:pyro:${MOOSE_DIR}/framework/contrib/pyro"
-  "pyzag:pyzag:${MOOSE_DIR}/framework/contrib/pyzag"
+  "nmhit:nmhit:0.3.6:${MOOSE_DIR}/framework/contrib/neml2-hit"
+  "pyro-ppl:pyro:1.9.2:${MOOSE_DIR}/framework/contrib/pyro"
+  "pyzag:pyzag:2.0.0:${MOOSE_DIR}/framework/contrib/pyzag"
 )
 
 if [[ -z "$NEML2_JOBS" ]]; then
@@ -142,12 +144,17 @@ if [[ "$SKIP_SUBMODULE_UPDATE" != true ]]; then
   fi
 
   # The dependency submodules are siblings of the NEML2 submodule, so the recursive update above
-  # does not reach them
+  # does not reach them. Only submodules that this MOOSE revision tracks are updated; step 3
+  # installs a dependency without a checkout from the environment or PyPI instead.
   NEML2_DEPENDENCY_DIRS=()
   for DEPENDENCY in "${NEML2_DEPENDENCIES[@]}"; do
-    NEML2_DEPENDENCY_DIRS+=("${DEPENDENCY#*:*:}")
+    DEPENDENCY_DIR="${DEPENDENCY#*:*:*:}"
+    if [[ -n "$(git ls-files -- "${DEPENDENCY_DIR}")" ]]; then
+      NEML2_DEPENDENCY_DIRS+=("${DEPENDENCY_DIR}")
+    fi
   done
-  if ! git submodule update --init --checkout "${NEML2_DEPENDENCY_DIRS[@]}"; then
+  if [[ ${#NEML2_DEPENDENCY_DIRS[@]} -gt 0 ]] &&
+     ! git submodule update --init --checkout "${NEML2_DEPENDENCY_DIRS[@]}"; then
     echo "Error: Failed to update the NEML2 dependency submodules with command"
     echo "  git submodule update --init --checkout ${NEML2_DEPENDENCY_DIRS[*]}"
     exit 1
@@ -231,7 +238,7 @@ if ! command -v cmake >/dev/null 2>&1; then
   exit 1
 fi
 
-# Step 3: Install the NEML2 Python dependencies from their submodules
+# Step 3: Install the NEML2 Python dependencies from their submodules, or from PyPI without them
 echo
 echo "****************************************************************************************************"
 echo "Installing NEML2 Python dependencies into the active Python environment"

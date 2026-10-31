@@ -87,10 +87,11 @@ function pip_install_neml2()
 # untouched. Only the pip module can read the version of a checkout, so with the
 # uv pip wrapper every checkout is reinstalled. A package whose checkout is
 # missing is used as installed, e.g. when it was installed from PyPI instead; if
-# it is not installed either, this fails.
+# it is not installed either, the given version is installed from PyPI, which
+# needs network access.
 #
 # Arguments:
-#   Any number of <distribution>:<module>:<checkout> triples
+#   Any number of <distribution>:<module>:<version>:<checkout> tuples
 function pip_install_neml2_dependencies()
 {
   set_pip_exe || return 1
@@ -98,7 +99,8 @@ function pip_install_neml2_dependencies()
   local pip_report=false
   [[ "${PIP_EXE[*]}" == "python3 -m pip" ]] && pip_report=true
 
-  # Print the checkouts that need to be installed, one per line
+  # Print the packages that need to be installed, one per line, as "checkout <path>" or
+  # "pypi <requirement>"
   local plan
   plan=$(python3 -c '
 import importlib, importlib.metadata as md, json, os, re, subprocess, sys
@@ -106,16 +108,17 @@ import importlib, importlib.metadata as md, json, os, re, subprocess, sys
 pip_report = sys.argv[1] == "true"
 checkouts = {}
 for arg in sys.argv[2:]:
-    dist, module, path = arg.split(":", 2)
+    dist, module, pinned, path = arg.split(":", 3)
     if os.path.isfile(os.path.join(path, "pyproject.toml")):
         checkouts[path] = (dist, module)
         continue
     try:
         version = md.version(dist)
     except md.PackageNotFoundError:
-        sys.exit(f"Error: {dist} is not installed and its source checkout {path} is missing.\n"
-                 f"Initialize it (requires network access) with\n"
-                 f"  git submodule update --init --checkout {path}")
+        print(f"{dist}: not installed and no source checkout at {path}; installing {pinned} "
+              "from PyPI", file=sys.stderr)
+        print(f"pypi {dist}=={pinned}")
+        continue
     print(f"{dist}: no source checkout at {path}; using the installed {version}",
           file=sys.stderr)
 
@@ -123,7 +126,7 @@ if checkouts and not pip_report:
     for path, (dist, _) in checkouts.items():
         print(f"{dist}: the checkout version is unknown without the pip module; reinstalling",
               file=sys.stderr)
-        print(path)
+        print("checkout", path)
 elif checkouts:
     # Read the name and version of each checkout from its build backend
     report = subprocess.run([sys.executable, "-m", "pip", "install", "--dry-run", "--quiet",
@@ -152,21 +155,33 @@ elif checkouts:
                       file=sys.stderr)
         elif installed is not None:
             print(f"{dist}: replacing the installed {installed} with {version}", file=sys.stderr)
-        print(path)
+        print("checkout", path)
 ' "$pip_report" "$@") || return
   [[ -z "$plan" ]] && return 0
 
-  local install_dirs=() dir
-  while IFS= read -r dir; do
-    install_dirs+=("$dir")
+  local install_dirs=() requirements=() source target
+  while read -r source target; do
+    if [[ "$source" == checkout ]]; then
+      install_dirs+=("$target")
+    else
+      requirements+=("$target")
+    fi
   done <<< "$plan"
 
   # PIP_USER=0: never fall back to a user-site install outside the environment
-  PIP_USER=0 "${PIP_EXE[@]}" install "${install_dirs[@]}" \
-    --no-index \
-    --no-deps \
-    --no-build-isolation \
-    --no-cache-dir
+  if [[ ${#install_dirs[@]} -gt 0 ]]; then
+    PIP_USER=0 "${PIP_EXE[@]}" install "${install_dirs[@]}" \
+      --no-index \
+      --no-deps \
+      --no-build-isolation \
+      --no-cache-dir || return
+  fi
+  if [[ ${#requirements[@]} -gt 0 ]]; then
+    PIP_USER=0 "${PIP_EXE[@]}" install "${requirements[@]}" \
+      --no-deps \
+      --no-build-isolation \
+      --no-cache-dir
+  fi
 }
 
 # Check that the Python environment satisfies the runtime dependencies of NEML2

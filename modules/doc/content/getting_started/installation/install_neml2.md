@@ -96,7 +96,9 @@ release compatible with the NEML2 submodule. A plain `git submodule update --ini
 these submodules; the script initializes them, which needs network access the first time.
 
 The script then installs nmhit, pyzag, and pyro-ppl from these checkouts without network access,
-skipping any already installed at the checked-out version, builds NEML2 from source, and installs it
+skipping any already installed at the checked-out version. A package without a checkout is used as
+installed, or, if it is not installed, is installed at its pinned version from PyPI. The script
+then builds NEML2 from source and installs it
 (non-editable) into the active environment's site-packages, next to PyTorch. Because every install
 uses `--no-deps` to leave your pinned PyTorch untouched, the remaining Python dependencies (the
 build tools `scikit-build-core` and `nanobind`, and the runtime dependencies of NEML2 and of these
