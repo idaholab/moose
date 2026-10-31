@@ -8,6 +8,33 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+# Set PIP_EXE to the pip command of the active Python environment.
+function set_pip_exe()
+{
+  # Detect which pip is available. In a standard Python environment (e.g. conda)
+  # `python3 -m pip` works; in the uv-created apptainer venv there is no pip module,
+  # so fall back to the `pip` wrapper that forwards to `uv pip`. That wrapper sits
+  # next to the venv's python3; a pip elsewhere on PATH would install into another
+  # environment.
+  if python3 -m pip --version &> /dev/null; then
+    PIP_EXE=(python3 -m pip)
+  elif command -v pip &> /dev/null; then
+    local python_dir
+    python_dir=$(dirname "$(python3 -c 'import sys; print(sys.executable)')") || return 1
+    # -ef compares the directories themselves, so symlinked paths (e.g. /var and
+    # /private/var on macOS) still match
+    if ! [[ "$(dirname "$(command -v pip)")" -ef "$python_dir" ]]; then
+      echo "ERROR: python3 has no pip module and the 'pip' on PATH belongs to another"
+      echo "environment; refusing to install packages there."
+      return 1
+    fi
+    PIP_EXE=(pip)
+  else
+    echo "ERROR: pip not found"
+    return 1
+  fi
+}
+
 # Build NEML2 from source and install it (non-editable) into the ACTIVE Python
 # environment's site-packages -- the same environment that provides PyTorch. A
 # single pip install yields BOTH the C++ artifacts MOOSE links against
@@ -38,17 +65,7 @@ function pip_install_neml2()
   #                        wheel cache would otherwise serve a stale build).
   # NEML2_MPI=ON is the one build option MOOSE requires; any additional cmake
   # options are forwarded by the caller as further --config-settings arguments.
-  # Detect which pip is available. In a standard Python environment (e.g. conda)
-  # `python3 -m pip` works; in the uv-created apptainer venv there is no pip module,
-  # so fall back to the `pip` wrapper that forwards to `uv pip`.
-  if python3 -m pip --version &> /dev/null; then
-    PIP_EXE=(python3 -m pip)
-  elif command -v pip &> /dev/null; then
-    PIP_EXE=(pip)
-  else
-    echo "ERROR: pip not found"
-    exit 1
-  fi
+  set_pip_exe || exit 1
 
   "${PIP_EXE[@]}" install "$src_dir" \
     --no-build-isolation \
@@ -67,20 +84,28 @@ function pip_install_neml2()
 # The packages are built without network access and without their
 # dependencies, which the environment must already provide (moose-dev does). A
 # package whose installed version matches its checkout and that imports is left
-# untouched. A package whose checkout is missing is used as installed, e.g. when
-# it was installed from PyPI instead; if it is not installed either, this fails.
+# untouched. Only the pip module can read the version of a checkout, so with the
+# uv pip wrapper every checkout is reinstalled. A package whose checkout is
+# missing is used as installed, e.g. when it was installed from PyPI instead; if
+# it is not installed either, this fails.
 #
 # Arguments:
 #   Any number of <distribution>:<module>:<checkout> triples
 function pip_install_neml2_dependencies()
 {
+  set_pip_exe || return 1
+  # uv pip does not support pip install --report, which reads checkout versions
+  local pip_report=false
+  [[ "${PIP_EXE[*]}" == "python3 -m pip" ]] && pip_report=true
+
   # Print the checkouts that need to be installed, one per line
   local plan
   plan=$(python3 -c '
 import importlib, importlib.metadata as md, json, os, re, subprocess, sys
 
+pip_report = sys.argv[1] == "true"
 checkouts = {}
-for arg in sys.argv[1:]:
+for arg in sys.argv[2:]:
     dist, module, path = arg.split(":", 2)
     if os.path.isfile(os.path.join(path, "pyproject.toml")):
         checkouts[path] = (dist, module)
@@ -94,7 +119,12 @@ for arg in sys.argv[1:]:
     print(f"{dist}: no source checkout at {path}; using the installed {version}",
           file=sys.stderr)
 
-if checkouts:
+if checkouts and not pip_report:
+    for path, (dist, _) in checkouts.items():
+        print(f"{dist}: the checkout version is unknown without the pip module; reinstalling",
+              file=sys.stderr)
+        print(path)
+elif checkouts:
     # Read the name and version of each checkout from its build backend
     report = subprocess.run([sys.executable, "-m", "pip", "install", "--dry-run", "--quiet",
                              "--no-index", "--no-deps", "--no-build-isolation", "--report", "-",
@@ -123,7 +153,7 @@ if checkouts:
         elif installed is not None:
             print(f"{dist}: replacing the installed {installed} with {version}", file=sys.stderr)
         print(path)
-' "$@") || return
+' "$pip_report" "$@") || return
   [[ -z "$plan" ]] && return 0
 
   local install_dirs=() dir
@@ -132,7 +162,7 @@ if checkouts:
   done <<< "$plan"
 
   # PIP_USER=0: never fall back to a user-site install outside the environment
-  PIP_USER=0 python3 -m pip install "${install_dirs[@]}" \
+  PIP_USER=0 "${PIP_EXE[@]}" install "${install_dirs[@]}" \
     --no-index \
     --no-deps \
     --no-build-isolation \

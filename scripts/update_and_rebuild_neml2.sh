@@ -130,6 +130,9 @@ echo "  python3:                   $(command -v python3)"
 echo "  Extra pip arguments:       ${EXTRA_ARGS[*]}"
 echo "****************************************************************************************************"
 
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/configure_neml2.sh"
+
 # Step 2: Check prerequisites. NEML2 v3 links against the torch found in the active Python
 # environment, and is built with CMake.
 
@@ -153,14 +156,10 @@ if [[ "${NEML2_AUTO_INSTALL_TORCH:-1}" == "1" ]] &&
   TORCH_PYTHON=$(python3 -c 'import sys; print(sys.executable)') || exit 1
 
   # install_libtorch_python falls back to the 'pip' on PATH when the interpreter has no pip
-  # module (the uv-created apptainer venv, whose pip wrapper targets its own venv). Only accept
-  # that fallback when it belongs to the same environment.
-  if ! "${TORCH_PYTHON}" -m pip --version &> /dev/null &&
-     [[ "$(dirname "$(command -v pip)")" != "$(dirname "${TORCH_PYTHON}")" ]]; then
-    echo "Error: ${TORCH_PYTHON} has no pip module and the 'pip' on PATH belongs to another"
-    echo "environment; refusing to install PyTorch there."
-    exit 1
-  fi
+  # module (the uv-created apptainer venv, whose pip wrapper targets its own venv). set_pip_exe
+  # applies the same fallback for python3, whose sys.executable is TORCH_PYTHON, and fails when
+  # that pip belongs to another environment.
+  set_pip_exe || exit 1
 
   export PETSC_DIR=${PETSC_DIR:-${MOOSE_DIR}/petsc/arch-moose}
 
@@ -230,9 +229,6 @@ if [[ "$SKIP_SUBMODULE_UPDATE" != true ]]; then
     exit 1
   fi
 fi
-
-# shellcheck disable=SC1091
-source "$SCRIPT_DIR/configure_neml2.sh"
 
 # Step 3: Install the NEML2 Python dependencies from their submodules
 echo

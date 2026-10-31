@@ -87,10 +87,33 @@ cd ~/projects/moose
 ./scripts/update_and_rebuild_neml2.sh
 ```
 
-The script updates the NEML2 submodule, builds it from source, and installs it (non-editable) into
-the active environment's site-packages, next to PyTorch. It *checks* — but never installs — its
-prerequisites (an importable PyTorch and `cmake`), leaves your pinned PyTorch untouched, and on
-success prints the exact `./configure` command to run next.
+The script updates the NEML2 submodule together with the submodules of three NEML2 Python
+dependencies that conda-forge either does not ship or ships only against its own PyTorch:
+[nmhit](https://github.com/applied-material-modeling/neml2-hit) (`framework/contrib/neml2-hit`),
+[pyzag](https://github.com/applied-material-modeling/pyzag) (`framework/contrib/pyzag`), and
+[pyro-ppl](https://github.com/pyro-ppl/pyro) (`framework/contrib/pyro`). Each is pinned to a
+release compatible with the NEML2 submodule. A plain `git submodule update --init` does not fetch
+these submodules; the script initializes them, which needs network access the first time.
+
+The script then installs nmhit, pyzag, and pyro-ppl from these checkouts without network access,
+skipping any already installed at the checked-out version, builds NEML2 from source, and installs it
+(non-editable) into the active environment's site-packages, next to PyTorch. Because every install
+uses `--no-deps` to leave your pinned PyTorch untouched, the remaining Python dependencies (the
+build tools `scikit-build-core` and `nanobind`, and the runtime dependencies of NEML2 and of these
+three packages) must already be in the environment. The `moose-dev` conda package provides them,
+and the script lists any that are missing before building NEML2. It also checks for an importable
+PyTorch and `cmake`, and on success prints the exact `./configure` command to run next.
+
+To use the submodules as they are currently checked out, e.g. without network access, pass
+`--skip-submodule-update`:
+
+```bash
+./scripts/update_and_rebuild_neml2.sh --skip-submodule-update
+```
+
+A dependency whose submodule is then not checked out is used as already installed in the
+environment (e.g. from PyPI); if it is not installed either, the script stops and prints the
+`git submodule update` command that fetches it.
 
 !alert tip
 The script is customizable. Use the `--help` argument to print a detailed help message listing all
