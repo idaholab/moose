@@ -12,6 +12,6 @@
     check_files = 'out.xyz'
     prereq = 'prepare'
     input = 'raster.i'
-    requirement = 'The system shall be able to map a solution field onto an xyz atom coordinate file using the SolutionRasterizer user object.'
+    requirement = 'The system shall be able to map a solution field onto an xyz atom coordinate file.'
   []
 []

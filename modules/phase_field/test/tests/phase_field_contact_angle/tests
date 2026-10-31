@@ -11,7 +11,7 @@
     min_parallel = 8
     capabilities = 'mumps'
     max_time = 600
-    requirement = "The ADPhaseFieldContactAngleBC kernel correctly implements a prescribed contact angle of 150 degrees."
+    requirement = "The system shall include a boundary condition that correctly implements a prescribed contact angle of 150 degrees."
   []
   [contactangle_30]
     type = CSVDiff
@@ -23,7 +23,7 @@
     min_parallel = 8
     capabilities = 'mumps'
     max_time = 600
-    requirement = "The ADPhaseFieldContactAngleBC kernel correctly implements a prescribed contact angle of 30 degrees."
+    requirement = "The system shall include a boundary condition that correctly implements a prescribed contact angle of 30 degrees."
   []
   [contactangle_60]
     type = CSVDiff
@@ -35,6 +35,6 @@
     min_parallel = 8
     capabilities = 'mumps'
     max_time = 600
-    requirement = "The ADPhaseFieldContactAngleBC kernel correctly implements a prescribed contact angle of 60 degrees."
+    requirement = "The system shall include a boundary condition that correctly implements a prescribed contact angle of 60 degrees."
   []
 []

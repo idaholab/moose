@@ -5,7 +5,7 @@
     exodiff = 'coupledmatdiffusion_out.e'
     issues = '#7400'
     design = 'MatDiffusion.md'
-    requirement = 'The system shall allow MatDiffusion to couple its diffusivity to another variable.'
+    requirement = 'The system shall be able to set the diffusivity of a diffusion kernel to another variable.'
   [../]
   [./matdiffusion]
     type = 'Exodiff'

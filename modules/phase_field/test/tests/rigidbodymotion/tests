@@ -9,7 +9,7 @@
     mesh_mode = REPLICATED
     issues = '#5279'
     design = 'MultiGrainRigidBodyMotion.md SingleGrainRigidBodyMotion.md ConstantGrainForceAndTorque.md'
-    requirement = 'The system shall be able to move grains according to a constant applied force and torque, tracked by the GrainTracker.'
+    requirement = 'The system shall be able to move grains according to a constant applied force and torque, while tracking grains.'
   [../]
 
   [./grain_forcedensity]
@@ -19,7 +19,7 @@
     allow_warnings = true
     issues = '#5279'
     design = 'ComputeGrainForceAndTorque.md ForceDensityMaterial.md'
-    requirement = 'The system shall be able to compute a grain force and torque from the interaction between grains, tracked by the GrainTracker.'
+    requirement = 'The system shall be able to compute a grain force and torque from the interaction between grains, while tracking grains.'
   [../]
 
   [./grain_motion2]
@@ -31,7 +31,7 @@
     mesh_mode = REPLICATED
     issues = '#7233'
     design = 'MultiGrainRigidBodyMotion.md FauxGrainTracker.md'
-    requirement = 'The system shall be able to move grains according to a constant applied force and torque, tracked by the FauxGrainTracker.'
+    requirement = 'The system shall be able to move grains according to a constant applied force and torque, while simply using as many grains as order parameters.'
   [../]
 
   [./grain_motion_faux]
@@ -43,7 +43,7 @@
     mesh_mode = REPLICATED
     issues = '#7233'
     design = 'ComputeGrainForceAndTorque.md ForceDensityMaterial.md FauxGrainTracker.md'
-    requirement = 'The system shall be able to compute a grain force and torque from the interaction between grains, tracked by the FauxGrainTracker.'
+    requirement = 'The system shall be able to compute a grain force and torque from the interaction between grains, while simply using as many grains as order parameters.'
   [../]
 
   [./grain_appliedforcedensity]

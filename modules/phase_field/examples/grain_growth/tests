@@ -7,7 +7,7 @@
     capabilities = 'method!=dbg'
     check_input = True
     design = 'GrainGrowthAction.md GrainTracker.md'
-    requirement = 'The system shall be able to syntax check a 2D grain growth example that uses the GrainGrowth action and tracks grains with the GrainTracker.'
+    requirement = 'The system shall be able to syntax check a 2D grain growth example that uses the GrainGrowth action and tracks grains.'
   [../]
   [./grain_growth_2D_random]
     type = RunApp
@@ -47,7 +47,7 @@
 
     cli_args = 'Mesh/uniform_refine=0'
     design = 'GrainGrowthAction.md GrainTracker.md'
-    requirement = 'The system shall be able to syntax check a 3D grain growth example that uses the GrainGrowth action and tracks grains with the GrainTracker.'
+    requirement = 'The system shall be able to syntax check a 3D grain growth example that uses the GrainGrowth action and tracks grains.'
   [../]
   [./grain_growth_3D_large]
     type = RunApp

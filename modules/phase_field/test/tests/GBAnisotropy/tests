@@ -5,7 +5,7 @@
     exodiff = 'test1_out.e'
     issues = '#4580'
     design = 'GBAnisotropy.md'
-    requirement = 'A material shall be provided to compute anisotropic grain boundary energies and mobilities, for a tricrystal with sharp-interface circular grains set up using the Tricrystal2CircleGrainsIC initial condition.'
+    requirement = 'A material shall be provided to compute anisotropic grain boundary energies and mobilities, for a tricrystal with sharp-interface circular grains set up using a single initial condition.'
   [../]
   [./test2]
     type = 'Exodiff'
