@@ -99,4 +99,14 @@
     max_parallel = 1
     requirement = 'The system shall be able to compute a numerically accurate Jacobian when connecting parallel single phase channels.'
   []
+
+  [hydrostatic_column]
+    type = 'CSVDiff'
+    issues = '#34298'
+    input = 'hydrostatic_column.i'
+    csvdiff = 'hydrostatic_column_out.csv'
+    abs_zero = 1e-1
+    rel_err = 0
+    requirement = 'The system shall keep a fluid at rest under gravity, within 0.1 Pa of the analytical hydrostatic pressure, when the hydrostatic correction of the junction of parallel channels is used and the connected channels have different flow areas.'
+  []
 []
