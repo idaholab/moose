@@ -99,12 +99,17 @@ def _unwrap_mpi_compiler(cxx_spec: str) -> str | None:
 
 
 def resolve_cxx() -> str:
-    """Return a validated host C++ compiler unwrapped from CXX or PATH."""
+    """Return a validated host C++ compiler from CXX, or from PATH if CXX is unset."""
     raw_cxx = os.environ.get("CXX", "").strip()
     if raw_cxx:
         resolved = _unwrap_mpi_compiler(raw_cxx)
         if resolved:
             return resolved
+        # Falling back to another compiler could silently select a toolchain other
+        # than the one that built MOOSE
+        raise RuntimeError(
+            f"CXX={raw_cxx!r} does not resolve to a working C++ compiler."
+        )
 
     for fallback in ("c++", "g++", "clang++"):
         resolved = _validate_compiler(fallback)
@@ -112,7 +117,7 @@ def resolve_cxx() -> str:
             return resolved
 
     raise RuntimeError(
-        f"Unable to locate a working C++ host compiler (CXX={raw_cxx!r})."
+        "CXX is not set and no working C++ compiler (c++, g++, clang++) is on PATH."
     )
 
 
