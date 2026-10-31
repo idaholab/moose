@@ -69,12 +69,15 @@ InputParameters IdealGasMixtureFluidProperties::validParams()
       "component.");
 
   MooseEnum transport_mixing_rule("mole_fraction_average wilke", "mole_fraction_average");
+  transport_mixing_rule.addDocumentation("mole_fraction_average",
+                                         "Uses the average weighted by molar fraction");
+  transport_mixing_rule.addDocumentation("wilke",
+                                         "Uses the rule of Wilke for the viscosity and that of "
+                                         "Mason and Saxena for the thermal conductivity");
   params.addParam<MooseEnum>(
       "transport_mixing_rule",
       transport_mixing_rule,
-      "Rule that combines the viscosities and thermal conductivities of the components: their "
-      "average weighted by molar fraction, or the rule of Wilke for the viscosity and that of "
-      "Mason and Saxena for the thermal conductivity");
+      "Rule that combines the viscosities and thermal conductivities of the components");
 
   return params;
 }
