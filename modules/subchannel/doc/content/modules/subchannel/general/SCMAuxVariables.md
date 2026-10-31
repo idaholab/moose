@@ -1,6 +1,6 @@
 # SCMAuxVariables
 
-Depending on the mesh type defined in the SCM input file, SCM automatically creates and populates the following auxiliary variables on the mesh. These variables are defined at equally spaced nodes from the inlet to the outlet. A subchannel cell spans the distance between two consecutive nodes.
+Depending on the mesh type defined in the SCM input file, SCM automatically creates and populates the following auxiliary variables on the mesh. These variables are defined at equally spaced nodes from the inlet to the outlet. A subchannel cell spans the distance between two consecutive nodes. The nodes are the faces of the cells, and the variables are face values unless noted otherwise. Cell-center quantities, such as the crossflow, are stored at the top node of their cell. See the spatial discretization section of [subchannel_theory.md] for how the solver evaluates face values at the cell center.
 
 ## SubChannel mesh
 

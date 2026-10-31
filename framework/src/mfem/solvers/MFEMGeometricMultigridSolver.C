@@ -41,7 +41,7 @@ MFEMGeometricMultigridSolver::MGProxy::SetOperator(const mfem::Operator & op)
 void
 MFEMGeometricMultigridSolver::MGProxy::Mult(const mfem::Vector & x, mfem::Vector & y) const
 {
-  MFEM_VERIFY(_mg, "MGProxy: GeometricMultigrid not yet built");
+  mooseAssert(_mg, "MGProxy: GeometricMultigrid not yet built");
   _mg->Mult(x, y);
 }
 

@@ -7,5 +7,9 @@
     use_old_floor = True
     valgrind = 'HEAVY'
     max_time = 500
+    requirement = 'The system shall couple a hyperelastic viscoplastic stress model with '
+                  'isotropic phase-field damage to propagate a crack.'
+    design = 'HyperElasticPhaseFieldIsoDamage.md'
+    issues = '#6049'
   [../]
 [../]

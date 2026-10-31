@@ -18,9 +18,9 @@ MFEMBoundaryRestrictable::validParams()
   InputParameters params = emptyInputParameters();
   params.addParam<std::vector<BoundaryName>>(
       "boundary",
-      {"-1"},
-      "The list of boundaries (ids or names) from the mesh where this object applies. "
-      "Defaults to all boundaries.");
+      {},
+      "The list of boundaries (names or ids) that this object will be restricted to. "
+      "Leave empty to apply to all boundaries.");
   return params;
 }
 
@@ -28,45 +28,43 @@ MFEMBoundaryRestrictable::MFEMBoundaryRestrictable(const InputParameters & param
                                                    const mfem::ParMesh & mfem_mesh)
   : _mfem_mesh(mfem_mesh),
     _boundary_names(parameters.get<std::vector<BoundaryName>>("boundary")),
-    _boundary_attributes(boundariesToAttributes(parameters))
+    _boundary_attributes(boundariesToAttributes(parameters)),
+    _boundary_markers(_mfem_mesh.bdr_attributes.IsEmpty()
+                          ? mfem::Array<int>()
+                          : mfem::AttributeSets::AttrToMarker(_mfem_mesh.bdr_attributes.Max(),
+                                                              _boundary_attributes.IsEmpty()
+                                                                  ? _mfem_mesh.bdr_attributes
+                                                                  : _boundary_attributes))
 {
-  if (!_boundary_attributes.IsEmpty())
-    mfem::common::AttrToMarker(
-        _mfem_mesh.bdr_attributes.Max(), _boundary_attributes, _boundary_markers);
 }
 
 mfem::Array<int>
 MFEMBoundaryRestrictable::boundariesToAttributes(const InputParameters & parameters)
 {
-  mfem::Array<int> attributes(_boundary_names.size());
+  mfem::Array<int> attributes;
   auto & mesh = getMesh();
-  std::transform(
-      _boundary_names.begin(),
-      _boundary_names.end(),
-      attributes.begin(),
-      [&mesh, &parameters](const BoundaryName & boundary) -> int
-      {
-        try
-        {
-          // Is this a sideset ID?
-          return std::stoi(boundary);
-        }
-        catch (...)
-        {
-          // It was not
-          if (!mesh.bdr_attribute_sets.AttributeSetExists(boundary))
-            parameters.paramError("boundary", "the mesh has no boundary named '", boundary, "'.");
-          auto & boundary_ids = mesh.bdr_attribute_sets.GetAttributeSet(boundary);
-          if (boundary_ids.Size() != 1)
-            mooseError(
-                "There should be a 1-to-1 correspondence between boundary name and boundary ID");
-          return boundary_ids[0];
-        }
-      });
 
-  // The ID -1 stands for every boundary
+  for (const BoundaryName & boundary_name : _boundary_names)
+  {
+    try
+    {
+      // Is this a boundary ID?
+      const int attribute_id = std::stoi(boundary_name);
+      attributes.Append(attribute_id);
+    }
+    catch (...)
+    {
+      // It was not
+      if (!mesh.bdr_attribute_sets.AttributeSetExists(boundary_name))
+        parameters.paramError("boundary", "the mesh has no boundary named '", boundary_name, "'.");
+      auto & subdomain_ids = mesh.bdr_attribute_sets.GetAttributeSet(boundary_name);
+      for (const auto & subdomain_id : subdomain_ids)
+        attributes.Append(subdomain_id);
+    }
+  }
+
   for (const auto attribute : attributes)
-    if (attribute != -1 && mesh.bdr_attributes.Find(attribute) == -1)
+    if (mesh.bdr_attributes.Find(attribute) == -1)
       parameters.paramError("boundary", "the mesh has no boundary with ID ", attribute, ".");
   return attributes;
 }
