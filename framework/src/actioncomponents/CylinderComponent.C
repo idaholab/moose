@@ -130,13 +130,26 @@ CylinderComponent::addMeshGenerators()
     }
     params.set<bool>("output") = _verbose;
     // Set boundary names to keep them consistent between 1D, 2D and 3D
+    // The names are assigned by increasing boundary ID: 'left right' in 1D and
+    // 'bottom right top left' in 2D. The cylinder axis is along x.
     params.set<std::string>("boundary_name_prefix") = name();
+    const bool use_rz = getParam<bool>("use_RZ_coordinates");
     if (_dimension == 1)
       params.set<std::vector<BoundaryName>>("boundary_names") = {"bottom_boundary", "top_boundary"};
     else
       params.set<std::vector<BoundaryName>>("boundary_names") = {
-          "bottom_boundary", "outer", "top_boundary", "center"};
+          use_rz ? "center" : "outer_lower", "top_boundary", "outer", "bottom_boundary"};
     addMeshGenerator("GeneratedMeshGenerator", "base", params);
+
+    // In XY, both sides at y = +/- radius are the lateral surface of the cylinder
+    if (_dimension == 2 && !use_rz)
+    {
+      InputParameters rename_params = _factory.getValidParams("RenameBoundaryGenerator");
+      rename_params.set<MeshGeneratorName>("input") = _mg_names.back();
+      rename_params.set<std::vector<BoundaryName>>("old_boundary") = {name() + "_outer_lower"};
+      rename_params.set<std::vector<BoundaryName>>("new_boundary") = {name() + "_outer"};
+      addMeshGenerator("RenameBoundaryGenerator", "merge_outer", rename_params);
+    }
   }
   else if (_dimension == 3)
   {
