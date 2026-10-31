@@ -11,7 +11,7 @@ The turbulent viscosity is then computed with a [kEpsilonViscosityAux.md].
 
 The k (turbulent kinetic energy, TKE) equation is created with:
 
-- a [LinearFVTimeDerivative.md] for the time derivative if simulating a transient
+- a [LinearFVTurbulentTimeDerivative.md] for the time derivative if simulating a transient
 - a [LinearFVTurbulentAdvection.md] for the turbulent kinetic energy advection term
 - a [LinearFVTurbulentDiffusion.md] for the turbulent kinetic energy diffusion term
 - a [LinearFVTKESourceSink.md] for the turbulent kinetic energy source and dissipation (sink) terms
@@ -19,7 +19,7 @@ The k (turbulent kinetic energy, TKE) equation is created with:
 
 The epsilon (turbulent kinetic energy dissipation, TKED) equation is created with:
 
-- a [LinearFVTimeDerivative.md] for the time derivative if simulating a transient
+- a [LinearFVTurbulentTimeDerivative.md] for the time derivative if simulating a transient
 - a [LinearFVTurbulentAdvection.md] for the turbulent kinetic energy dissipation rate advection term
 - a [LinearFVTurbulentDiffusion.md] for the turbulent kinetic energy dissipation rate diffusion term
 - a [LinearFVTKEDSourceSink.md] for the turbulent kinetic energy dissipation rate source and removal (sink) terms
