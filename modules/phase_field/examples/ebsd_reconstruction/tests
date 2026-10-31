@@ -5,7 +5,7 @@
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
     capabilities = 'method!=dbg'
     check_input = True
-    issues = '#7319'
+    issues = '#5067 #7319'
     design = 'PolycrystalEBSD.md'
     requirement = 'The system shall be able to syntax check an example reconstructing a polycrystal grain structure from an EBSD scan.'
   [../]

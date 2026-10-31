@@ -1,8 +1,8 @@
 [Tests]
-  issues = '#7319'
   [./AC_CH_Multigrain]
     type = RunApp
     input = 'AC_CH_Multigrain.i'
+    issues = '#6725 #7319'
     cli_args = 'Mesh/uniform_refine=0 Executioner/Adaptivity/initial_adaptivity=0'
 
     # This example uses ShapeElementUserObject which contains a
@@ -17,6 +17,7 @@
   [./AC_CH_advection_constforce_rect]
     type = RunApp
     input = 'AC_CH_advection_constforce_rect.i'
+    issues = '#5279 #7319'
 
     # This example uses NonlocalKernel which contains a
     # mooseWarning()
@@ -31,6 +32,7 @@
   [./grain_forcedensity_ext]
     type = RunApp
     input = 'grain_forcedensity_ext.i'
+    issues = '#5279 #7319'
 
     # This example uses ShapeElementUserObject which contains a
     # mooseWarning()

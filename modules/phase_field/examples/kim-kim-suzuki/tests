@@ -1,21 +1,23 @@
 [Tests]
-  issues = '#7319'
   design = 'KKSACBulkC.md KKSACBulkF.md KKSSplitCHCRes.md'
   [./kks_example_dirichlet]
     type = RunApp
     input = 'kks_example_dirichlet.i'
+    issues = '#5924 #7319'
     check_input = True
     requirement = 'The system shall be able to syntax check a two-phase Kim-Kim-Suzuki example with Dirichlet boundary conditions.'
   [../]
   [./kks_example_noflux]
     type = RunApp
     input = 'kks_example_noflux.i'
+    issues = '#5924 #7319'
     check_input = True
     requirement = 'The system shall be able to syntax check a two-phase Kim-Kim-Suzuki example with no-flux boundary conditions.'
   [../]
   [./kks_example_ternary]
     type = RunApp
     input = 'kks_example_ternary.i'
+    issues = '#6244 #7319'
     # Note: we use a smaller mesh, as this does not affect the
     # --check-input results in any way other than the amount of time
     # it takes to run.

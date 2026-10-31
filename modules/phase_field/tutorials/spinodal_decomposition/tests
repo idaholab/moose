@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#9646'
+  issues = '#5414 #9646'
   design = 'SplitCHParsed.md SplitCHWRes.md'
   [./s1_testmodel]
     type = RunApp

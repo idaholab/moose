@@ -1,8 +1,8 @@
 [Tests]
-  issues = '#7319'
   [./grain_growth_2D_graintracker]
     type = RunApp
     input = 'grain_growth_2D_graintracker.i'
+    issues = '#4827 #7319'
     # Only run in opt mode to avoid timeouts in dbg.
     capabilities = 'method!=dbg'
     check_input = True
@@ -12,6 +12,7 @@
   [./grain_growth_2D_random]
     type = RunApp
     input = 'grain_growth_2D_random.i'
+    issues = '#3834 #7319'
     capabilities = 'method!=dbg'
     check_input = True
     design = 'GrainGrowthAction.md PolycrystalRandomIC.md'
@@ -20,6 +21,7 @@
   [./grain_growth_2D_voronoi]
     type = RunApp
     input = 'grain_growth_2D_voronoi.i'
+    issues = '#3834 #7319'
     capabilities = 'method!=dbg'
     check_input = True
     design = 'GBEvolution.md PolycrystalVoronoi.md'
@@ -28,6 +30,7 @@
   [./grain_growth_2D_voronoi_newadapt]
     type = RunApp
     input = 'grain_growth_2D_voronoi_newadapt.i'
+    issues = '#3834 #7319'
     cli_args = 'Adaptivity/max_h_level=0'
     capabilities = 'method!=dbg'
     check_input = True
@@ -37,6 +40,7 @@
   [./grain_growth_3D]
     type = RunApp
     input = 'grain_growth_3D.i'
+    issues = '#7200 #7319'
     # Only run in opt mode to avoid timeouts in dbg.
     capabilities = 'method!=dbg'
     check_input = True

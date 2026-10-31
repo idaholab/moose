@@ -1,8 +1,8 @@
 [Tests]
-  issues = '#7319'
   [./Math_CH]
     type = RunApp
     input = 'Math_CH.i'
+    issues = '#3834 #7319'
     check_input = True
     design = 'CHMath.md'
     requirement = 'The system shall be able to syntax check a Cahn-Hilliard example using a hard-coded polynomial free energy expression.'
@@ -10,6 +10,7 @@
   [./Parsed_CH]
     type = RunApp
     input = 'Parsed_CH.i'
+    issues = '#4406 #7319'
     check_input = True
     capabilities = 'fparser=jit'
     design = 'DerivativeParsedMaterial.md'
@@ -18,6 +19,7 @@
   [./Parsed_SplitCH]
     type = RunApp
     input = 'Parsed_SplitCH.i'
+    issues = '#4406 #7319'
     check_input = True
     capabilities = 'fparser=jit'
     design = 'DerivativeParsedMaterial.md'
