@@ -8,4 +8,12 @@
     exodiff = 'flow_channel_gasmix.e'
     requirement = 'The system shall provide a flow channel component that simulates a gas mixture.'
   []
+  [nasa7]
+    type = Exodiff
+    input = 'flow_channel_gasmix_nasa7.i'
+    exodiff = 'flow_channel_gasmix_nasa7.e'
+    design = 'FlowChannelGasMix.md MassDiffusionEnergyGasMixDGKernel.md FluidPropertiesBinaryDiffusionCoefMaterial.md'
+    issues = '#34223'
+    requirement = 'The system shall simulate a gas mixture in a flow channel with gases whose properties come from NASA 7-coefficient polynomials and with the mass diffusion coefficient computed from the fluid properties.'
+  []
 []

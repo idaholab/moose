@@ -1,0 +1,17 @@
+[Tests]
+  design = 'FluidPropertiesBinaryDiffusionCoefMaterial.md'
+  issues = '#34223'
+  [test]
+    type = CSVDiff
+    input = 'fluid_properties_binary_diffusion_coef.i'
+    csvdiff = 'fluid_properties_binary_diffusion_coef_out.csv'
+    requirement = 'The system shall compute the binary mass diffusion coefficient of a gas mixture from its fluid properties.'
+  []
+  [not_binary]
+    type = RunException
+    input = 'fluid_properties_binary_diffusion_coef.i'
+    cli_args = "FluidProperties/mixture_fp/component_fluid_properties='n2 o2 n2'"
+    expect_err = 'The gas mixture must have exactly two components.'
+    requirement = 'The system shall report an error when the binary mass diffusion coefficient is computed from the fluid properties of a gas mixture that does not have exactly two components.'
+  []
+[]

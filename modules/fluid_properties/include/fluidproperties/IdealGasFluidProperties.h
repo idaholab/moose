@@ -133,6 +133,7 @@ public:
   virtual bool hasConstantSpecificHeats() const override { return true; }
   /// The internal energy is linear in temperature, so Newton's method converges from any start
   virtual Real newtonStartTemperature() const override { return _T_initial_guess; }
+  virtual const GasTransportUtils::LennardJonesParameters * lennardJonesParameters() const override;
   virtual Real criticalTemperature() const override;
   virtual Real criticalDensity() const override;
   virtual Real criticalInternalEnergy() const override;

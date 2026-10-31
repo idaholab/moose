@@ -160,6 +160,8 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, derivatives)
     DERIV_TEST(fp->cv_from_p_T, p, T, REL_TOL_DERIVATIVE);
     DERIV_TEST(fp->c_from_p_T, p, T, REL_TOL_DERIVATIVE);
     DERIV_TEST(fp->gamma_from_p_T, p, T, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->mu_from_p_T, p, T, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->k_from_p_T, p, T, REL_TOL_DERIVATIVE);
     DERIV_TEST(fp->p_from_T_v, T, v, REL_TOL_DERIVATIVE);
     DERIV_TEST(fp->e_from_T_v, T, v, REL_TOL_DERIVATIVE);
     DERIV_TEST(fp->h_from_T_v, T, v, REL_TOL_DERIVATIVE);
@@ -181,6 +183,8 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, derivatives)
     AD_DERIV_TEST(fp->cv_from_p_T, p_ad, T_ad, REL_TOL_DERIVATIVE);
     AD_DERIV_TEST(fp->c_from_p_T, p_ad, T_ad, REL_TOL_DERIVATIVE);
     AD_DERIV_TEST(fp->gamma_from_p_T, p_ad, T_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->mu_from_p_T, p_ad, T_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->k_from_p_T, p_ad, T_ad, REL_TOL_DERIVATIVE);
     AD_DERIV_TEST(fp->p_from_T_v, T_ad, v_ad, REL_TOL_DERIVATIVE);
     AD_DERIV_TEST(fp->e_from_T_v, T_ad, v_ad, REL_TOL_DERIVATIVE);
     AD_DERIV_TEST(fp->h_from_T_v, T_ad, v_ad, REL_TOL_DERIVATIVE);
@@ -314,6 +318,8 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, inverseDerivatives)
     DERIV_TEST(fp->gamma_from_v_e, v, e, REL_TOL_DERIVATIVE);
     DERIV_TEST(fp->s_from_v_e, v, e, REL_TOL_DERIVATIVE);
     DERIV_TEST(fp->g_from_v_e, v, e, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->mu_from_v_e, v, e, REL_TOL_DERIVATIVE);
+    DERIV_TEST(fp->k_from_v_e, v, e, REL_TOL_DERIVATIVE);
     DERIV_TEST(fp->T_from_p_h, p, h, REL_TOL_DERIVATIVE);
     DERIV_TEST(fp->s_from_h_p, h, p, REL_TOL_DERIVATIVE);
     DERIV_TEST(fp->p_from_h_s, h, s, REL_TOL_DERIVATIVE);
@@ -333,6 +339,8 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, inverseDerivatives)
     AD_DERIV_TEST(fp->gamma_from_v_e, v_ad, e_ad, REL_TOL_DERIVATIVE);
     AD_DERIV_TEST(fp->s_from_v_e, v_ad, e_ad, REL_TOL_DERIVATIVE);
     AD_DERIV_TEST(fp->g_from_v_e, v_ad, e_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->mu_from_v_e, v_ad, e_ad, REL_TOL_DERIVATIVE);
+    AD_DERIV_TEST(fp->k_from_v_e, v_ad, e_ad, REL_TOL_DERIVATIVE);
     AD_DERIV_TEST(fp->T_from_p_h, p_ad, h_ad, REL_TOL_DERIVATIVE);
     AD_DERIV_TEST(fp->s_from_h_p, h_ad, p_ad, REL_TOL_DERIVATIVE);
     AD_DERIV_TEST(fp->p_from_h_s, h_ad, s_ad, REL_TOL_DERIVATIVE);
@@ -371,5 +379,110 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, inverseRange)
       REL_TEST(fp.T_from_v_e(v, fp.e_from_T_v(T, v)), T, REL_TOL_CONSISTENCY);
       REL_TEST(fp.T_from_p_h(p, fp.h_from_p_T(p, T)), T, REL_TOL_CONSISTENCY);
     }
+  }
+}
+
+TEST_F(NASA7IdealGasFluidPropertiesTest, transport)
+{
+  // Viscosity and thermal conductivity at 1e5 Pa compared with the fluid properties of the real
+  // fluids, which include the small effect of density at this pressure. The tolerances bound the
+  // deviations at these states. The Chapman-Enskog viscosity is within 2.5% for N2, CH4, and CO2,
+  // but the Lennard-Jones parameters of H2 give a viscosity up to 6% low at 900 K. The modified
+  // Eucken conductivity is within 9%. For steam, both objects evaluate the IAPWS low-density
+  // viscosity, whereas Water97FluidProperties evaluates the IAPS 1985 conductivity.
+  const Real p = 1e5;
+  struct Reference
+  {
+    std::string species;
+    std::string type;
+    std::vector<Real> temperatures;
+    Real mu_tol;
+    Real k_tol;
+  };
+  const std::vector<Reference> references = {
+      {"N2", "NitrogenFluidProperties", {300, 600, 900}, 0.015, 0.06},
+      {"H2", "HydrogenFluidProperties", {300, 600, 900}, 0.06, 0.07},
+      {"CH4", "MethaneFluidProperties", {300, 600, 900}, 0.03, 0.08},
+      {"CO2", "CO2FluidProperties", {300, 600, 900}, 0.01, 0.09},
+      {"H2O", "Water97FluidProperties", {400, 700, 1100}, 0.01, 0.02}};
+
+  for (const auto & ref : references)
+  {
+    const auto & fp = buildFluidProperties(ref.species, "transport_" + ref.species);
+    InputParameters params = _factory.getValidParams(ref.type);
+    _fe_problem->addUserObject(ref.type, "reference_" + ref.species, params);
+    const auto & reference =
+        _fe_problem->getUserObject<SinglePhaseFluidProperties>("reference_" + ref.species);
+    for (const auto T : ref.temperatures)
+    {
+      const Real mu = fp.mu_from_p_T(p, T);
+      const Real k = fp.k_from_p_T(p, T);
+      REL_TEST(mu, reference.mu_from_p_T(p, T), ref.mu_tol);
+      REL_TEST(k, reference.k_from_p_T(p, T), ref.k_tol);
+
+      // The (specific volume, internal energy) variable set gives the same values
+      const Real v = fp.v_from_p_T(p, T);
+      const Real e = fp.e_from_p_T(p, T);
+      REL_TEST(fp.mu_from_v_e(v, e), mu, REL_TOL_CONSISTENCY);
+      REL_TEST(fp.k_from_v_e(v, e), k, REL_TOL_CONSISTENCY);
+    }
+  }
+}
+
+TEST_F(NASA7IdealGasFluidPropertiesTest, steamTransportRange)
+{
+  // 1500 K lies inside the range of the H2O data, 200 K to 3500 K, but above that of the IAPWS
+  // transport formulations, 273.16 K to 1173.15 K. The viscosity and thermal conductivity of other
+  // species are not limited to that range.
+  const Real p = 1e5;
+  const auto warnings = flagCount(*_app, true);
+  _fp_h2o->mu_from_p_T(p, 1000);
+  _fp_h2o->k_from_p_T(p, 1000);
+  _fp_n2->mu_from_p_T(p, 1500);
+  _fp_n2->k_from_p_T(p, 1500);
+  EXPECT_EQ(flagCount(*_app, true), warnings);
+  _fp_h2o->mu_from_p_T(p, 1500);
+  EXPECT_EQ(flagCount(*_app, true), warnings + 1);
+  _fp_h2o->k_from_p_T(p, 1500);
+  EXPECT_EQ(flagCount(*_app, true), warnings + 2);
+}
+
+TEST_F(NASA7IdealGasFluidPropertiesTest, densityFromEntropy)
+{
+  // Invert the entropy of every built-in species at two pressures and at temperatures spread
+  // geometrically from half the lower end of the range of its data to 1.5 times the upper end
+  // 60 geometric intervals place consecutive temperatures about 7% apart
+  const unsigned int n = 60;
+  for (const std::string species : {"H2", "O2", "H2O", "CH4", "CO", "CO2", "N2"})
+  {
+    const auto & fp = buildFluidProperties(species, "entropy_" + species);
+    const auto & data = NASA7::speciesData(species);
+    const Real T_low = data.T_min / 2;
+    const Real T_high = 1.5 * data.T_max;
+    for (const Real p : {1e3, 1e7})
+      for (const auto i : make_range(n + 1))
+      {
+        const Real T = T_low * std::pow(T_high / T_low, Real(i) / n);
+        REL_TEST(
+            fp.rho_from_p_s(p, fp.s_from_p_T(p, T)), fp.rho_from_p_T(p, T), REL_TOL_CONSISTENCY);
+      }
+  }
+
+  // Derivatives on each side of the midpoint temperature
+  for (const auto & [fp, T] : {std::pair<const NASA7IdealGasFluidProperties *, Real>(_fp_h2o, 700),
+                               std::pair<const NASA7IdealGasFluidProperties *, Real>(_fp_n2, 1500)})
+  {
+    const Real p = 2e5;
+    const Real s = fp->s_from_p_T(p, T);
+    DERIV_TEST(fp->rho_from_p_s, p, s, REL_TOL_DERIVATIVE);
+    const ADReal p_ad = p;
+    const ADReal s_ad = s;
+    AD_DERIV_TEST(fp->rho_from_p_s, p_ad, s_ad, REL_TOL_DERIVATIVE);
+
+    // At constant pressure, (dT/ds)_p = T / cp and, for an ideal gas, (drho/dT)_p = -rho / T, so
+    // (drho/ds)_p = -rho / cp
+    Real rho, drho_dp, drho_ds;
+    fp->rho_from_p_s(p, s, rho, drho_dp, drho_ds);
+    REL_TEST(drho_ds, -rho / fp->cp_from_p_T(p, T), REL_TOL_CONSISTENCY);
   }
 }

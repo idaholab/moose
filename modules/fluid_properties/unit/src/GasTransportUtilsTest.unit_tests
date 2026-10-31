@@ -1,0 +1,30 @@
+[Tests]
+  design = 'FluidPropertiesUtils.md'
+  issues = '#34223'
+
+  [cantera_viscosity]
+    type = GoogleTest
+    unit_test = GasTransportUtilsTest.canteraViscosity
+    requirement = 'The system shall compute the Chapman-Enskog viscosity of the built-in gas species without a dipole moment from the GRI-Mech 3.0 Lennard-Jones parameters, in agreement with Cantera.'
+  []
+  [cantera_diffusion]
+    type = GoogleTest
+    unit_test = GasTransportUtilsTest.canteraDiffusion
+    requirement = 'The system shall compute the Chapman-Enskog binary diffusion coefficients of pairs of the built-in gas species from the GRI-Mech 3.0 Lennard-Jones parameters, in agreement with Cantera, which additionally corrects pairs with water vapor for its dipole moment.'
+  []
+  [poling_example]
+    type = GoogleTest
+    unit_test = GasTransportUtilsTest.polingExample
+    requirement = 'The system shall reproduce the Chapman-Enskog binary diffusion coefficient of nitrogen and carbon dioxide of a worked example of Poling et al.'
+  []
+  [steam_zero_density]
+    type = GoogleTest
+    unit_test = GasTransportUtilsTest.steamZeroDensity
+    requirement = 'The system shall compute the viscosity of steam in the limit of zero density consistently with the IAPWS formulation of the water and steam properties, and its thermal conductivity in the limit of zero density in agreement with the verification values of the IAPWS 2011 formulation.'
+  []
+  [derivatives]
+    type = GoogleTest
+    unit_test = GasTransportUtilsTest.derivatives
+    requirement = 'The system shall compute the derivatives of the gas viscosity, binary diffusion coefficient, and low-density steam viscosity and thermal conductivity with respect to temperature and pressure with automatic differentiation, in agreement with finite differences.'
+  []
+[]

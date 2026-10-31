@@ -12,6 +12,7 @@
 #include "SinglePhaseFluidProperties.h"
 #include "NASA7Polynomials.h"
 #include "IdealGasMixtureInterface.h"
+#include "GasTransportUtils.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
@@ -38,6 +39,8 @@ public:
   propfuncWithDefinitionOverride(cv, p, T);
   propfuncWithDefinitionOverride(c, p, T);
   propfuncWithDefinitionOverride(gamma, p, T);
+  propfuncWithDefinitionOverride(mu, p, T);
+  propfuncWithDefinitionOverride(k, p, T);
   propfuncWithDefinitionOverride(p, T, v);
   propfuncWithDefinitionOverride(e, T, v);
   propfuncWithDefinitionOverride(h, T, v);
@@ -52,10 +55,13 @@ public:
   propfuncWithDefinitionOverride(gamma, v, e);
   propfuncWithDefinitionOverride(s, v, e);
   propfuncWithDefinitionOverride(g, v, e);
+  propfuncWithDefinitionOverride(mu, v, e);
+  propfuncWithDefinitionOverride(k, v, e);
   propfuncWithDefinitionOverride(T, p, h);
   propfuncWithDefinitionOverride(s, h, p);
   propfuncWithDefinitionOverride(p, h, s);
   propfuncWithDefinitionOverride(e, v, h);
+  propfuncWithDefinitionOverride(rho, p, s);
 
   std::string fluidName() const override;
   Real molarMass() const override;
@@ -64,11 +70,17 @@ public:
   /// The upper end of the temperature range of the NASA 7-coefficient data [K]
   virtual Real newtonStartTemperature() const override;
 
+  virtual const GasTransportUtils::LennardJonesParameters * lennardJonesParameters() const override;
+
 private:
   /// NASA 7-coefficient data of the species
   const NASA7::SpeciesData _data;
   /// Specific gas constant [J/(kg K)]
   const Real _R_specific;
+  /// Lennard-Jones parameters of the species
+  const GasTransportUtils::LennardJonesParameters _lennard_jones;
+  /// Whether the species is steam, whose viscosity and thermal conductivity come from IAPWS
+  const bool _is_steam;
 
   /**
    * Flags a temperature outside the range of the data as a solution warning, because the
@@ -77,6 +89,13 @@ private:
    */
   template <typename CppType>
   void checkTemperature(const CppType & T) const;
+
+  /**
+   * Checks the temperature as checkTemperature does and, for steam, also flags a temperature
+   * outside the range of validity of the IAPWS transport formulations as a solution warning
+   */
+  template <typename CppType>
+  void checkTransportTemperature(const CppType & T) const;
 
   ///@{ Properties that depend on temperature only
   template <typename CppType>
@@ -89,6 +108,10 @@ private:
   CppType cv_from_T(const CppType & T) const;
   template <typename CppType>
   CppType gamma_from_T(const CppType & T) const;
+  template <typename CppType>
+  CppType mu_from_T(const CppType & T) const;
+  template <typename CppType>
+  CppType k_from_T(const CppType & T) const;
   ///@}
 
   /**
@@ -97,6 +120,13 @@ private:
    */
   template <typename CppType>
   CppType T_from_energy(const CppType & y, const Real k) const;
+
+  /**
+   * Temperature at which the specific entropy at pressure p equals s, by Newton's method on the
+   * logarithm of temperature. The temperature range is not checked.
+   */
+  template <typename CppType>
+  CppType T_from_p_s(const CppType & p, const CppType & s) const;
 };
 
 #pragma GCC diagnostic pop

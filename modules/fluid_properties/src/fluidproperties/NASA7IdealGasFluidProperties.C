@@ -33,7 +33,9 @@ NASA7IdealGasFluidProperties::validParams()
 NASA7IdealGasFluidProperties::NASA7IdealGasFluidProperties(const InputParameters & parameters)
   : SinglePhaseFluidProperties(parameters),
     _data(NASA7::speciesData(getParam<MooseEnum>("species"))),
-    _R_specific(_R / _data.molar_mass)
+    _R_specific(_R / _data.molar_mass),
+    _lennard_jones(GasTransportUtils::lennardJonesParameters(_data.name)),
+    _is_steam(_data.name == "H2O")
 {
 }
 
@@ -57,6 +59,12 @@ NASA7IdealGasFluidProperties::newtonStartTemperature() const
   return _data.T_max;
 }
 
+const GasTransportUtils::LennardJonesParameters *
+NASA7IdealGasFluidProperties::lennardJonesParameters() const
+{
+  return &_lennard_jones;
+}
+
 template <typename CppType>
 void
 NASA7IdealGasFluidProperties::checkTemperature(const CppType & T) const
@@ -67,6 +75,19 @@ NASA7IdealGasFluidProperties::checkTemperature(const CppType & T) const
   else if (T_raw < _data.T_min || T_raw > _data.T_max)
     flagSolutionWarning(
         "Temperature outside the range of the NASA-7 data; the polynomials are extrapolated");
+}
+
+template <typename CppType>
+void
+NASA7IdealGasFluidProperties::checkTransportTemperature(const CppType & T) const
+{
+  checkTemperature(T);
+  // Range of validity of the IAPWS 2008 viscosity and IAPWS 2011 thermal conductivity
+  // formulations: from the triple point to 1173.15 K
+  const auto T_raw = MetaPhysicL::raw_value(T);
+  if (_is_steam && (T_raw < 273.16 || T_raw > 1173.15))
+    flagSolutionWarning("Temperature outside the range of validity of the IAPWS transport "
+                        "formulations for steam");
 }
 
 template <typename CppType>
@@ -108,6 +129,31 @@ NASA7IdealGasFluidProperties::gamma_from_T(const CppType & T) const
   checkTemperature(T);
   const auto cp_R = NASA7::cpOverR(_data, T);
   return cp_R / (cp_R - 1);
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::mu_from_T(const CppType & T) const
+{
+  checkTransportTemperature(T);
+  if (_is_steam)
+    return GasTransportUtils::steamViscosityZeroDensity(T);
+  return GasTransportUtils::viscosity(T, _data.molar_mass, _lennard_jones);
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::k_from_T(const CppType & T) const
+{
+  checkTransportTemperature(T);
+  // The modified Eucken correlation overestimates the conductivity of polar gases, that of steam
+  // by 20% to 40%
+  if (_is_steam)
+    return GasTransportUtils::steamConductivityZeroDensity(T);
+  return GasTransportUtils::modifiedEuckenConductivity(
+      GasTransportUtils::viscosity(T, _data.molar_mass, _lennard_jones),
+      NASA7::cpOverR(_data, T),
+      _R_specific);
 }
 
 template <typename CppType>
@@ -175,6 +221,20 @@ NASA7IdealGasFluidProperties::gamma_from_p_T_template(const CppType & /*p*/,
                                                       const CppType & T) const
 {
   return gamma_from_T(T);
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::mu_from_p_T_template(const CppType & /*p*/, const CppType & T) const
+{
+  return mu_from_T(T);
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::k_from_p_T_template(const CppType & /*p*/, const CppType & T) const
+{
+  return k_from_T(T);
 }
 
 template <typename CppType>
@@ -332,6 +392,20 @@ NASA7IdealGasFluidProperties::g_from_v_e_template(const CppType & v, const CppTy
 
 template <typename CppType>
 CppType
+NASA7IdealGasFluidProperties::mu_from_v_e_template(const CppType & /*v*/, const CppType & e) const
+{
+  return mu_from_T(T_from_energy(e, 1));
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::k_from_v_e_template(const CppType & /*v*/, const CppType & e) const
+{
+  return k_from_T(T_from_energy(e, 1));
+}
+
+template <typename CppType>
+CppType
 NASA7IdealGasFluidProperties::T_from_p_h_template(const CppType & /*p*/, const CppType & h) const
 {
   const auto T = T_from_energy(h, 0);
@@ -364,6 +438,50 @@ NASA7IdealGasFluidProperties::e_from_v_h_template(const CppType & /*v*/, const C
   const auto T = T_from_energy(h, 0);
   checkTemperature(T);
   return h - _R_specific * T;
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::T_from_p_s(const CppType & p, const CppType & s) const
+{
+  using std::exp, std::log;
+
+  // Solve s0(T)/R = s/R_s + ln(p/p_ref) for x = ln(T). The standard entropy s0/R increases with x,
+  // with slope cp/R, and is convex in x over nearly all of the range of the data, because the heat
+  // capacity increases with temperature, so Newton's method started at the upper end of the range
+  // approaches the solution from above. In T instead of ln(T), the first step from the upper end
+  // would overshoot to negative temperatures for solutions near the lower end.
+  const CppType target = s / _R_specific + log(p / NASA7::reference_pressure);
+  const auto s0_from_x = [this](const CppType & /*target*/,
+                                const CppType & x,
+                                CppType & s0_x,
+                                CppType & ds0_x_dtarget,
+                                CppType & ds0_x_dx)
+  {
+    const CppType T = exp(x);
+    s0_x = NASA7::sOverR(_data, T);
+    ds0_x_dtarget = 0;
+    ds0_x_dx = NASA7::cpOverR(_data, T);
+  };
+
+  return exp(FluidPropertiesUtils::NewtonSolve(target,
+                                               target,
+                                               std::log(_data.T_max),
+                                               _tolerance,
+                                               s0_from_x,
+                                               name() + "::T_from_p_s",
+                                               _max_newton_its,
+                                               _verbose_newton)
+                 .first);
+}
+
+template <typename CppType>
+CppType
+NASA7IdealGasFluidProperties::rho_from_p_s_template(const CppType & p, const CppType & s) const
+{
+  const auto T = T_from_p_s(p, s);
+  checkTemperature(T);
+  return p / (_R_specific * T);
 }
 
 /**
@@ -420,6 +538,8 @@ definePropertyFromTemplate(cp, p, T)
 definePropertyFromTemplate(cv, p, T)
 definePropertyFromTemplate(c, p, T)
 definePropertyFromTemplate(gamma, p, T)
+definePropertyFromTemplate(mu, p, T)
+definePropertyFromTemplate(k, p, T)
 definePropertyFromTemplate(p, T, v)
 definePropertyFromTemplate(e, T, v)
 definePropertyFromTemplate(h, T, v)
@@ -434,10 +554,13 @@ definePropertyFromTemplate(cv, v, e)
 definePropertyFromTemplate(gamma, v, e)
 definePropertyFromTemplate(s, v, e)
 definePropertyFromTemplate(g, v, e)
+definePropertyFromTemplate(mu, v, e)
+definePropertyFromTemplate(k, v, e)
 definePropertyFromTemplate(T, p, h)
 definePropertyFromTemplate(s, h, p)
 definePropertyFromTemplate(p, h, s)
 definePropertyFromTemplate(e, v, h)
+definePropertyFromTemplate(rho, p, s)
 // clang-format on
 
 #undef definePropertyFromTemplate
