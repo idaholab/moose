@@ -130,6 +130,30 @@ echo "  python3:                   $(command -v python3)"
 echo "  Extra pip arguments:       ${EXTRA_ARGS[*]}"
 echo "****************************************************************************************************"
 
+# Step 1: Update the NEML2 submodule. This runs before the PyTorch bootstrap of step 2 so that a
+# submodule that cannot be fetched fails the script before an expensive PyTorch build.
+if [[ "$SKIP_SUBMODULE_UPDATE" != true ]]; then
+  cd "$MOOSE_DIR" || exit 1
+  git submodule update --init --checkout --recursive "${NEML2_SRC_DIR}"
+  if [[ $? -ne 0 ]] ; then
+    echo "Error: Failed to update the NEML2 submodule with command"
+    echo "  git submodule update --init --checkout --recursive ${NEML2_SRC_DIR}"
+    exit 1
+  fi
+
+  # The dependency submodules are siblings of the NEML2 submodule, so the recursive update above
+  # does not reach them
+  NEML2_DEPENDENCY_DIRS=()
+  for DEPENDENCY in "${NEML2_DEPENDENCIES[@]}"; do
+    NEML2_DEPENDENCY_DIRS+=("${DEPENDENCY#*:*:}")
+  done
+  if ! git submodule update --init --checkout "${NEML2_DEPENDENCY_DIRS[@]}"; then
+    echo "Error: Failed to update the NEML2 dependency submodules with command"
+    echo "  git submodule update --init --checkout ${NEML2_DEPENDENCY_DIRS[*]}"
+    exit 1
+  fi
+fi
+
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/configure_neml2.sh"
 
@@ -205,29 +229,6 @@ if ! command -v cmake >/dev/null 2>&1; then
   echo "NEML2 is built with CMake. Install cmake (a recent version -- the required minimum is"
   echo "reported by the NEML2 build itself if the one found is too old) and re-run."
   exit 1
-fi
-
-# Step 1: Update the NEML2 submodule
-if [[ "$SKIP_SUBMODULE_UPDATE" != true ]]; then
-  cd "$MOOSE_DIR" || exit 1
-  git submodule update --init --checkout --recursive "${NEML2_SRC_DIR}"
-  if [[ $? -ne 0 ]] ; then
-    echo "Error: Failed to update the NEML2 submodule with command"
-    echo "  git submodule update --init --checkout --recursive ${NEML2_SRC_DIR}"
-    exit 1
-  fi
-
-  # The dependency submodules are siblings of the NEML2 submodule, so the recursive update above
-  # does not reach them
-  NEML2_DEPENDENCY_DIRS=()
-  for DEPENDENCY in "${NEML2_DEPENDENCIES[@]}"; do
-    NEML2_DEPENDENCY_DIRS+=("${DEPENDENCY#*:*:}")
-  done
-  if ! git submodule update --init --checkout "${NEML2_DEPENDENCY_DIRS[@]}"; then
-    echo "Error: Failed to update the NEML2 dependency submodules with command"
-    echo "  git submodule update --init --checkout ${NEML2_DEPENDENCY_DIRS[*]}"
-    exit 1
-  fi
 fi
 
 # Step 3: Install the NEML2 Python dependencies from their submodules
