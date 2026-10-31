@@ -60,6 +60,9 @@
       input = 'piecewise_constant_block_subdomain_material.i'
       exodiff = 'piecewise_constant_block_subdomain_material.e'
       cli_args = 'Outputs/file_base=piecewise_constant_block_subdomain_material'
+      # The single time step is limited to end_time = 0.1, but the first half of a recover test
+      # does not limit dt to end_time, so it would step to t = 1 instead
+      recover = false
       detail = 'with data sorted by blocks and read through a material held constant over each '
                'subdomain (computed during subdomain setup, before the element is reinitialized),'
     []
