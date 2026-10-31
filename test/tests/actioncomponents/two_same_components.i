@@ -2,6 +2,7 @@
   [cylinder_1]
     type = CylinderComponent
     dimension = 2
+    use_RZ_coordinates = true
     radius = 2
     length = 10
     n_axial = 1
@@ -15,6 +16,7 @@
   [cylinder_2]
     type = CylinderComponent
     dimension = 2
+    use_RZ_coordinates = true
     radius = 3
     length = 6
     n_axial = 1

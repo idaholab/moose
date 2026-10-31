@@ -3,6 +3,7 @@
   [cyl1]
     type = CylinderComponent
     dimension = 2
+    use_RZ_coordinates = true
     length = 1
     n_axial = 4
     radius = 1
@@ -15,6 +16,7 @@
   [cyl2]
     type = CylinderComponent
     dimension = 2
+    use_RZ_coordinates = true
     length = 1
     n_axial = 4
     radius = 1
@@ -28,8 +30,8 @@
     type = ComponentJunction
     first_component = cyl1
     second_component = cyl2
-    first_boundary = 'cyl1_right'
-    second_boundary = 'cyl2_left'
+    first_boundary = 'cyl1_top_boundary'
+    second_boundary = 'cyl2_bottom_boundary'
     junction_method = stitch_meshes
   []
 []
