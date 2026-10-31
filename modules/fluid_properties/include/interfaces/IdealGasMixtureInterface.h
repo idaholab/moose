@@ -10,11 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
-
-namespace GasTransportUtils
-{
-struct LennardJonesParameters;
-}
+#include "GasTransportUtils.h"
 
 /**
  * Interface of the fluid properties of ideal gases that can be components of
