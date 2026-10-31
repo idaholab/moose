@@ -18,7 +18,7 @@
       [block_specified]
         diffusivity_functor = 'diff'
         block = '2 cyl1'
-        dirichlet_boundaries = 'left cylinder_1_left'
+        dirichlet_boundaries = 'left cylinder_1_bottom_boundary'
         boundary_values = '1 3'
         source_functor = '1'
         source_coef = '1'
@@ -29,7 +29,7 @@
         diffusivity_functor = 'diff'
         source_functor = '2'
         source_coef = '1'
-        dirichlet_boundaries = 'cylinder_2_right'
+        dirichlet_boundaries = 'cylinder_2_top_boundary'
         boundary_values = '2'
       []
     []
@@ -40,6 +40,7 @@
   [cylinder_1]
     type = CylinderComponent
     dimension = 2
+    use_RZ_coordinates = true
     radius = 2
     length = 10
     n_axial = 1
@@ -54,6 +55,7 @@
   [cylinder_2]
     type = CylinderComponent
     dimension = 2
+    use_RZ_coordinates = true
     radius = 4
     length = 1
     n_axial = 1

@@ -28,8 +28,8 @@
     type = ComponentJunction
     first_component = cyl1
     second_component = cyl2
-    first_boundary = 'cyl1_right'
-    second_boundary = 'cyl2_left'
+    first_boundary = 'cyl1_top_boundary'
+    second_boundary = 'cyl2_bottom_boundary'
     junction_method = extrude_boundary
     n_elem_normal = 4
   []
@@ -49,8 +49,8 @@
     type = ComponentJunction
     first_component = cyl2
     second_component = cyl3
-    first_boundary = 'cyl2_right'
-    second_boundary = 'cyl3_left'
+    first_boundary = 'cyl2_top_boundary'
+    second_boundary = 'cyl3_bottom_boundary'
     junction_method = extrude_boundary
     n_elem_normal = 4
   []
@@ -70,8 +70,8 @@
     type = ComponentJunction
     first_component = cyl3
     second_component = cyl4
-    first_boundary = 'cyl3_right'
-    second_boundary = 'cyl4_left'
+    first_boundary = 'cyl3_top_boundary'
+    second_boundary = 'cyl4_bottom_boundary'
     junction_method = extrude_boundary
     n_elem_normal = 4
   []
@@ -79,8 +79,8 @@
     type = ComponentJunction
     first_component = cyl4
     second_component = cyl1
-    first_boundary = 'cyl4_right'
-    second_boundary = 'cyl1_left'
+    first_boundary = 'cyl4_top_boundary'
+    second_boundary = 'cyl1_bottom_boundary'
     junction_method = extrude_boundary
     n_elem_normal = 4
   []
