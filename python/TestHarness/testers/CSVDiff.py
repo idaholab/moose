@@ -19,9 +19,15 @@ class CSVDiff(FileTester):
         params = FileTester.validParams()
         params.addRequiredParam("csvdiff", [], "A list of files to run CSVDiff on.")
         params.addParam(
+            "abs_err", 0.0, "Absolute error tolerance used in value comparisons."
+        )
+        params.addParam(
             "override_columns",
             [],
             "A list of variable names to customize the CSVDiff tolerances.",
+        )
+        params.addParam(
+            "override_abs_err", [], "A list of customized absolute error tolerances."
         )
         params.addParam(
             "override_rel_err", [], "A list of customized relative error tolerances."
@@ -51,20 +57,34 @@ class CSVDiff(FileTester):
     def getOutputFiles(self, options):
         return super().getOutputFiles(options) + self.specs["csvdiff"]
 
-    # Check that override parameter lists are the same length
     def checkRunnable(self, options):
-        if (
-            (len(self.specs["override_columns"]) != len(self.specs["override_rel_err"]))
-            or (
-                len(self.specs["override_columns"])
-                != len(self.specs["override_abs_zero"])
+        # Fail if either of the following conditions are met:
+        # - 'override_columns' is provided but no other 'override_*' is provided
+        # - Length of an 'override_*' parameter does not match length of 'override_columns'
+        n_custom_columns = len(self.specs["override_columns"])
+        override_tol_params = [
+            "override_abs_zero",
+            "override_abs_err",
+            "override_rel_err",
+        ]
+        n_provided_tol_params = 0
+        for param in override_tol_params:
+            n_entries = len(self.specs[param])
+            if n_entries > 0:
+                n_provided_tol_params += 1
+                if n_entries != n_custom_columns:
+                    self.setStatus(
+                        self.fail,
+                        "'%s' must have the same number of entries as 'override_columns'"
+                        % param,
+                    )
+                    return False
+        if n_custom_columns > 0 and n_provided_tol_params == 0:
+            self.setStatus(
+                self.fail,
+                "'override_columns' requires at least one of: "
+                + ", ".join(override_tol_params),
             )
-            or (
-                len(self.specs["override_rel_err"])
-                != len(self.specs["override_abs_zero"])
-            )
-        ):
-            self.setStatus(self.fail, "Override inputs not the same length")
             return False
 
         if (
@@ -106,6 +126,9 @@ class CSVDiff(FileTester):
                 + os.path.join(self.getTestDir(), file)
             )
 
+            if self.specs.isValid("abs_err"):
+                csvdiff.append("--absolute-tolerance %s" % (self.specs["abs_err"]))
+
             if self.specs.isValid("rel_err"):
                 csvdiff.append("--relative-tolerance %s" % (self.specs["rel_err"]))
 
@@ -125,6 +148,11 @@ class CSVDiff(FileTester):
             if self.specs.isValid("override_columns"):
                 csvdiff.append(
                     "--custom-columns %s" % (" ".join(self.specs["override_columns"]))
+                )
+
+            if self.specs.isValid("override_abs_err"):
+                csvdiff.append(
+                    "--custom-abs-err %s" % (" ".join(self.specs["override_abs_err"]))
                 )
 
             if self.specs.isValid("override_rel_err"):
