@@ -166,6 +166,52 @@ function install_libtorch()
   cmake --install "$1" --prefix "$2"
 }
 
+# Verify that the Python build and runtime dependencies required to build and install
+# PyTorch from source (pyproject.toml build-system.requires and project.dependencies,
+# plus numpy for USE_NUMPY=1 and cmake on PATH) are satisfied in an environment.
+#
+# Arguments:
+#   1. Python executable to check
+function check_libtorch_python_dependencies()
+{
+  "$1" -c '
+import importlib.metadata as md, shutil, sys
+reqs = [
+    "filelock",
+    "fsspec>=0.8.5",
+    "jinja2",
+    "networkx>=2.5.1",
+    "numpy",
+    "packaging>=24.2",
+    "pyyaml",
+    "requests",
+    "setuptools>=77.0.3",
+    "sympy>=1.13.3",
+    "typing-extensions>=4.10.0",
+]
+missing = []
+if not shutil.which("cmake"):
+    missing.append("cmake (executable on PATH)")
+try:
+    from packaging.requirements import Requirement
+except Exception:
+    missing.append("packaging>=24.2")
+else:
+    for r in reqs:
+        req = Requirement(r)
+        try:
+            ver = md.version(req.name)
+        except md.PackageNotFoundError:
+            missing.append(r)
+            continue
+        if req.specifier and not req.specifier.contains(ver, prereleases=True):
+            missing.append(f"{r} (found {ver})")
+if missing:
+    print("Missing or incompatible PyTorch dependencies: " + ", ".join(missing), file=sys.stderr)
+    sys.exit(1)
+'
+}
+
 # Install the PyTorch package into a Python environment.
 #
 # Arguments:
@@ -192,7 +238,14 @@ function install_libtorch_python()
     exit 1
   fi
 
-  "${PIP_EXE[@]}" install --no-cache -r "$source_dir/requirements.txt" || return
+  # When the environment already satisfies PyTorch's build and runtime dependencies
+  # (e.g. the moose-dev conda environment in network-restricted CI jobs), skip installing
+  # requirements.txt from PyPI so offline builds succeed and existing conda packages
+  # (cmake, ninja, setuptools) are not replaced.
+  if ! check_libtorch_python_dependencies "$python_executable" 2>/dev/null; then
+    "${PIP_EXE[@]}" install --no-cache -r "$source_dir/requirements.txt" || return
+    check_libtorch_python_dependencies "$python_executable" || return
+  fi
 
   # PyTorch's setup.py always builds in <source>/build, which is also the build directory used by
   # the C++-only build. When that build directory already exists, reconfigure it in place and keep

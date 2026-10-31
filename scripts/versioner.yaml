@@ -112,7 +112,7 @@ packages:
       conda/pyhit/meta.yaml.template: conda/pyhit/meta.yaml
   # dependers: none
   moose-dev:
-    version: 2026.10.28
+    version: 2026.10.31
     conda: conda/moose-dev
     templates:
       conda/moose-dev/meta.yaml.template: conda/moose-dev/meta.yaml
@@ -142,6 +142,9 @@ packages:
       - scripts/update_and_rebuild_neml2.sh
       - framework/contrib/neml2
       - framework/contrib/neml2.mk
+      - framework/contrib/neml2-hit
+      - framework/contrib/pyro
+      - framework/contrib/pyzag
       # mfem
       - scripts/update_and_rebuild_conduit.sh
       - scripts/update_and_rebuild_mfem.sh

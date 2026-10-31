@@ -21,30 +21,39 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo "environment -- the same environment that provides PyTorch. A single install"
   echo "provides both the C++ libraries MOOSE links against and the Python package"
   echo "(e.g. neml2-compile, used by the cpp-aoti runtime). The script performs:"
-  echo "  1. Update the NEML2 submodule (unless skipped)"
+  echo "  1. Update the NEML2 submodule and the submodules of the NEML2 Python"
+  echo "     dependencies nmhit, pyzag and pyro-ppl (unless skipped)"
   echo "  2. Check prerequisites (torch, cmake), bootstrapping torch if absent -- see below"
-  echo "  3. Build NEML2 from source and pip-install it into the active environment"
+  echo "  3. Install nmhit, pyzag and pyro-ppl from their submodules"
+  echo "     (framework/contrib/{neml2-hit,pyzag,pyro}) without network access, unless"
+  echo "     the versions in the submodules are already installed. A package whose"
+  echo "     submodule is not checked out is used as installed."
+  echo "  4. Build NEML2 from source and pip-install it into the active environment"
   echo
   echo "Prerequisites in the ACTIVE Python environment. This script CHECKS these but"
-  echo "never installs them, except for the PyTorch bootstrap described below:"
+  echo "never installs them, except for the packages of step 3 and the PyTorch"
+  echo "bootstrap described below:"
   echo "  * A neml2-compatible PyTorch (e.g. 'pip install torch'). NEML2 links against"
   echo "    the torch found here. An existing torch -- even one that fails to import --"
   echo "    is deliberately left untouched (your pinned build is preserved)."
   echo "    If torch is entirely absent, it is built from the LibTorch build directory"
   echo "    left by update_and_rebuild_libtorch.sh (<LIBTORCH_SRC_DIR>/build) and installed"
-  echo "    into the active environment, together with PyTorch's requirements.txt. That"
-  echo "    can replace the environment's cmake and ninja with their PyPI builds and"
-  echo "    downgrade packages it pins (e.g. setuptools). The existing CMake build is"
-  echo "    reconfigured and built incrementally rather than from scratch. Without that"
-  echo "    build directory the script stops with an error."
+  echo "    into the active environment. When PyTorch's Python dependencies are already"
+  echo "    present in the environment, requirements.txt is not fetched from PyPI; otherwise"
+  echo "    PyTorch's requirements.txt is installed first (which can replace the"
+  echo "    environment's cmake and ninja with their PyPI builds and downgrade packages it"
+  echo "    pins, e.g. setuptools). The existing CMake build is reconfigured and built"
+  echo "    incrementally rather than from scratch. Without that build directory the script"
+  echo "    stops with an error."
   echo "    Set NEML2_AUTO_INSTALL_TORCH=0 to disable the bootstrap."
   echo "  * cmake. The minimum version is defined by NEML2 and enforced by its build"
   echo "    backend, so it is not hardcoded here -- only cmake's presence is checked."
   echo "    ninja is recommended but optional."
-  echo "  * The scikit-build-core build backend and NEML2's other Python runtime"
-  echo "    dependencies. Because the install runs with --no-deps (to protect your"
-  echo "    torch), these are not installed for you; if any are missing the script"
-  echo "    reports the specific missing module after the build."
+  echo "  * The scikit-build-core build backend, nanobind (to build nmhit) and the other"
+  echo "    Python runtime dependencies of NEML2 and of the packages of step 3, all of"
+  echo "    which moose-dev provides. Because the installs run with --no-deps (to protect"
+  echo "    your torch), these are not installed for you; if any are missing the script"
+  echo "    reports them before building NEML2."
   echo
   echo "Influential environment variables:"
   echo "  MOOSE_DIR      The path to the MOOSE directory. Default: the parent of this script."
@@ -64,7 +73,7 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo
   echo "Command-line arguments:"
   echo "  --help                   Display this message and exit"
-  echo "  --skip-submodule-update  Skip updating the NEML2 submodule (step 1)"
+  echo "  --skip-submodule-update  Skip updating the NEML2 and dependency submodules (step 1)"
   echo "  PIP_ARG                  Extra argument(s) forwarded to pip verbatim. Both"
   echo "                           '--config-settings=cmake.define.FOO=BAR' and the legacy"
   echo "                           '-DFOO=BAR' forms are accepted (the latter is translated)."
@@ -91,6 +100,14 @@ if [[ -n "$NEML2_SRC_DIR" ]]; then
 else
   NEML2_SRC_DIR=${MOOSE_DIR}/framework/contrib/neml2
 fi
+
+# NEML2 Python dependencies installed from submodules, as
+# <distribution>:<module>:<submodule> (see pip_install_neml2_dependencies)
+NEML2_DEPENDENCIES=(
+  "nmhit:nmhit:${MOOSE_DIR}/framework/contrib/neml2-hit"
+  "pyro-ppl:pyro:${MOOSE_DIR}/framework/contrib/pyro"
+  "pyzag:pyzag:${MOOSE_DIR}/framework/contrib/pyzag"
+)
 
 if [[ -z "$NEML2_JOBS" ]]; then
   if [[ -n "$MOOSE_JOBS" ]]; then
@@ -200,11 +217,38 @@ if [[ "$SKIP_SUBMODULE_UPDATE" != true ]]; then
     echo "  git submodule update --init --checkout --recursive ${NEML2_SRC_DIR}"
     exit 1
   fi
+
+  # The dependency submodules are siblings of the NEML2 submodule, so the recursive update above
+  # does not reach them
+  NEML2_DEPENDENCY_DIRS=()
+  for DEPENDENCY in "${NEML2_DEPENDENCIES[@]}"; do
+    NEML2_DEPENDENCY_DIRS+=("${DEPENDENCY#*:*:}")
+  done
+  if ! git submodule update --init --checkout "${NEML2_DEPENDENCY_DIRS[@]}"; then
+    echo "Error: Failed to update the NEML2 dependency submodules with command"
+    echo "  git submodule update --init --checkout ${NEML2_DEPENDENCY_DIRS[*]}"
+    exit 1
+  fi
 fi
 
-# Step 3: Build NEML2 from source and install it into the active environment
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/configure_neml2.sh"
+
+# Step 3: Install the NEML2 Python dependencies from their submodules
+echo
+echo "****************************************************************************************************"
+echo "Installing NEML2 Python dependencies into the active Python environment"
+echo "****************************************************************************************************"
+echo
+if ! pip_install_neml2_dependencies "${NEML2_DEPENDENCIES[@]}"; then
+  echo "Error: Failed to install the NEML2 Python dependencies"
+  exit 1
+fi
+if ! check_neml2_python_dependencies "${NEML2_SRC_DIR}"; then
+  exit 1
+fi
+
+# Step 4: Build NEML2 from source and install it into the active environment
 echo
 echo "****************************************************************************************************"
 echo "Building and installing NEML2 into the active Python environment"

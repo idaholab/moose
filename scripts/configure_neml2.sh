@@ -58,3 +58,132 @@ function pip_install_neml2()
     --config-settings=cmake.define.NEML2_MPI=ON \
     "$@"
 }
+
+# Install NEML2 Python dependencies from local source checkouts into the ACTIVE
+# Python environment. These are the dependencies that conda-forge either does
+# not ship (nmhit, pyzag) or ships only against its own pytorch (pyro-ppl),
+# which would replace the PyTorch built from framework/contrib/pytorch.
+#
+# The packages are built without network access and without their
+# dependencies, which the environment must already provide (moose-dev does). A
+# package whose installed version matches its checkout and that imports is left
+# untouched. A package whose checkout is missing is used as installed, e.g. when
+# it was installed from PyPI instead; if it is not installed either, this fails.
+#
+# Arguments:
+#   Any number of <distribution>:<module>:<checkout> triples
+function pip_install_neml2_dependencies()
+{
+  # Print the checkouts that need to be installed, one per line
+  local plan
+  plan=$(python3 -c '
+import importlib, importlib.metadata as md, json, os, re, subprocess, sys
+
+checkouts = {}
+for arg in sys.argv[1:]:
+    dist, module, path = arg.split(":", 2)
+    if os.path.isfile(os.path.join(path, "pyproject.toml")):
+        checkouts[path] = (dist, module)
+        continue
+    try:
+        version = md.version(dist)
+    except md.PackageNotFoundError:
+        sys.exit(f"Error: {dist} is not installed and its source checkout {path} is missing.\n"
+                 f"Initialize it (requires network access) with\n"
+                 f"  git submodule update --init --checkout {path}")
+    print(f"{dist}: no source checkout at {path}; using the installed {version}",
+          file=sys.stderr)
+
+if checkouts:
+    # Read the name and version of each checkout from its build backend
+    report = subprocess.run([sys.executable, "-m", "pip", "install", "--dry-run", "--quiet",
+                             "--no-index", "--no-deps", "--no-build-isolation", "--report", "-",
+                             *checkouts], stdout=subprocess.PIPE, text=True)
+    if report.returncode != 0:
+        sys.exit("Error: Failed to read the package metadata of " + " ".join(checkouts))
+    # Distribution names compared in their normalized form (PEP 503)
+    versions = {re.sub(r"[-_.]+", "-", item["metadata"]["name"]).lower():
+                item["metadata"]["version"] for item in json.loads(report.stdout)["install"]}
+    for path, (dist, module) in checkouts.items():
+        version = versions.get(re.sub(r"[-_.]+", "-", dist).lower())
+        if version is None:
+            sys.exit(f"Error: {path} does not contain {dist}")
+        try:
+            installed = md.version(dist)
+        except md.PackageNotFoundError:
+            installed = None
+        if installed == version:
+            try:
+                importlib.import_module(module)
+                print(f"{dist}: {version} is already installed", file=sys.stderr)
+                continue
+            except Exception as e:
+                print(f"{dist}: the installed {version} fails to import ({e}); reinstalling",
+                      file=sys.stderr)
+        elif installed is not None:
+            print(f"{dist}: replacing the installed {installed} with {version}", file=sys.stderr)
+        print(path)
+' "$@") || return
+  [[ -z "$plan" ]] && return 0
+
+  local install_dirs=() dir
+  while IFS= read -r dir; do
+    install_dirs+=("$dir")
+  done <<< "$plan"
+
+  # PIP_USER=0: never fall back to a user-site install outside the environment
+  PIP_USER=0 python3 -m pip install "${install_dirs[@]}" \
+    --no-index \
+    --no-deps \
+    --no-build-isolation \
+    --no-cache-dir
+}
+
+# Check that the Python environment satisfies the runtime dependencies of NEML2
+# and, recursively, of those dependencies, because NEML2 and the packages from
+# pip_install_neml2_dependencies are installed with --no-deps.
+#
+# Arguments:
+#   1. Path to the NEML2 source directory
+function check_neml2_python_dependencies()
+{
+  python3 -c '
+import importlib.metadata as md, os, re, sys
+try:
+    import tomllib
+except ImportError:
+    # Python < 3.11; tomli is a dependency of scikit-build-core there
+    import tomli as tomllib
+try:
+    from packaging.requirements import Requirement
+except ImportError:
+    from pip._vendor.packaging.requirements import Requirement
+
+with open(os.path.join(sys.argv[1], "pyproject.toml"), "rb") as f:
+    project = tomllib.load(f)["project"]
+
+pending = [(project["name"], r) for r in project.get("dependencies", [])]
+visited, problems = set(), []
+while pending:
+    parent, req = pending.pop()
+    req = Requirement(req)
+    # Extras are not installed, so requirements that only apply to an extra are skipped
+    if req.marker and not req.marker.evaluate({"extra": ""}):
+        continue
+    try:
+        version = md.version(req.name)
+    except md.PackageNotFoundError:
+        problems.append(f"{parent} requires {req}, which is not installed")
+        continue
+    if not req.specifier.contains(version, prereleases=True):
+        problems.append(f"{parent} requires {req}, but {version} is installed")
+    key = re.sub(r"[-_.]+", "-", req.name).lower()
+    if key not in visited:
+        visited.add(key)
+        pending += [(req.name, r) for r in md.requires(req.name) or []]
+if problems:
+    print("Error: The active Python environment does not satisfy the dependencies of NEML2:",
+          *problems, sep="\n  ", file=sys.stderr)
+    sys.exit(1)
+' "$1"
+}
