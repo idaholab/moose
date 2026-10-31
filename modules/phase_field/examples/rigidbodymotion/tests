@@ -2,6 +2,7 @@
   [./AC_CH_Multigrain]
     type = RunApp
     input = 'AC_CH_Multigrain.i'
+    issues = '#6725 #7319'
     cli_args = 'Mesh/uniform_refine=0 Executioner/Adaptivity/initial_adaptivity=0'
 
     # This example uses ShapeElementUserObject which contains a
@@ -10,10 +11,13 @@
     check_input = True
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
+    design = 'MultiGrainRigidBodyMotion.md'
+    requirement = 'The system shall be able to syntax check an example of rigid body motion for multiple grains coupled to Cahn-Hilliard and Allen-Cahn evolution.'
   [../]
   [./AC_CH_advection_constforce_rect]
     type = RunApp
     input = 'AC_CH_advection_constforce_rect.i'
+    issues = '#5279 #7319'
 
     # This example uses NonlocalKernel which contains a
     # mooseWarning()
@@ -22,10 +26,13 @@
 
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
+    design = 'SingleGrainRigidBodyMotion.md ConstantGrainForceAndTorque.md'
+    requirement = 'The system shall be able to syntax check an example of advection of a single grain under a constant applied force, coupled to Cahn-Hilliard and Allen-Cahn evolution.'
   [../]
   [./grain_forcedensity_ext]
     type = RunApp
     input = 'grain_forcedensity_ext.i'
+    issues = '#5279 #7319'
 
     # This example uses ShapeElementUserObject which contains a
     # mooseWarning()
@@ -33,5 +40,7 @@
     check_input = True
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
+    design = 'ComputeExternalGrainForceAndTorque.md ExternalForceDensityMaterial.md'
+    requirement = 'The system shall be able to syntax check an example of grain motion driven by an externally specified force density.'
   [../]
 []

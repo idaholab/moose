@@ -1,32 +1,40 @@
 [Tests]
+  issues = '#5076'
+  design = 'PolynomialFreeEnergy.md'
   [./split_order4]
     type = 'Exodiff'
     input = 'split_order4_test.i'
     exodiff = 'split_order4_test_out.e'
+    requirement = 'The system shall provide a 4th order polynomial free energy material for the split Cahn-Hilliard formulation.'
   [../]
   [./split_order6]
     type = 'Exodiff'
     input = 'split_order6_test.i'
     exodiff = 'split_order6_test_out.e'
+    requirement = 'The system shall provide a 6th order polynomial free energy material for the split Cahn-Hilliard formulation.'
   [../]
   [./split_order8]
     type = 'Exodiff'
     input = 'split_order8_test.i'
     exodiff = 'split_order8_test_out.e'
+    requirement = 'The system shall provide an 8th order polynomial free energy material for the split Cahn-Hilliard formulation.'
   [../]
   [./direct_order4]
     type = 'Exodiff'
     input = 'direct_order4_test.i'
     exodiff = 'direct_order4_test_out.e'
+    requirement = 'The system shall provide a 4th order polynomial free energy material for the direct (non-split) Cahn-Hilliard formulation.'
   [../]
   [./direct_order6]
     type = 'Exodiff'
     input = 'direct_order6_test.i'
     exodiff = 'direct_order6_test_out.e'
+    requirement = 'The system shall provide a 6th order polynomial free energy material for the direct (non-split) Cahn-Hilliard formulation.'
   [../]
   [./direct_order8]
     type = 'Exodiff'
     input = 'direct_order8_test.i'
     exodiff = 'direct_order8_test_out.e'
+    requirement = 'The system shall provide an 8th order polynomial free energy material for the direct (non-split) Cahn-Hilliard formulation.'
   [../]
 []

@@ -6,6 +6,9 @@
     abs_zero = 1e-09
     scale_refine = 1
     max_parallel = 1
+    issues = '#2460 #3341'
+    design = 'SplitCHMath.md SplitCHWRes.md'
+    requirement = 'The system shall be able to solve a Cahn-Hilliard problem using the split form with the residuals reversed between the concentration and chemical potential equations.'
   [../]
   [./forward_split]
     type = 'Exodiff'
@@ -13,5 +16,8 @@
     exodiff = 'forward_split_math_test_out.e'
     abs_zero = 1e-09
     scale_refine = 1
+    issues = '#9378'
+    design = 'CoupledMaterialDerivative.md'
+    requirement = 'The system shall be able to solve a Cahn-Hilliard problem using the split form without reversing the residuals between the concentration and chemical potential equations.'
   [../]
 []

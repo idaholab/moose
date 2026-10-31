@@ -17,7 +17,7 @@
 
     issues = "#11395"
     requirement = "The FeatureVolumeVectorPostprocessor shall output individual centroid locations "
-                  "when requested."
+                  "when requested, when running with multiple MPI processes."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2
@@ -44,7 +44,7 @@
     issues = "#13169"
     requirement = "The FeatureVolumeVectorPostprocessor shall output whether a percolated pathway "
                   "exists between specified primary_percolation_boundaries and "
-                  "secondary_percolation_boundaries."
+                  "secondary_percolation_boundaries, when running with multiple MPI processes."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2
@@ -72,7 +72,8 @@
 
     issues = "#13202"
     requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied "
-                  "boundary by each feature by calulating the area/length of boundary elements."
+                  "boundary by each feature by calculating the area/length of boundary elements, "
+                  "in a two-dimensional geometry."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2
@@ -99,7 +100,8 @@
 
     issues = "#13202"
     requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied "
-                  "boundary by each feature by calulating the area/length of boundary elements."
+                  "boundary by each feature by calculating the area/length of boundary elements, "
+                  "in a three-dimensional geometry."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2

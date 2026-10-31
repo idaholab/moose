@@ -3,5 +3,8 @@
     type = RunApp
     input = '1Dinterface_energy.i'
     check_input = True
+    issues = '#5867 #7319'
+    design = 'TotalFreeEnergy.md'
+    requirement = 'The system shall be able to syntax check an example that measures the interfacial free energy of a 1D Cahn-Hilliard interface.'
   [../]
 []

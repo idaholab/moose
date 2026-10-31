@@ -395,9 +395,6 @@ Requirements:
     phase_field:
         directories:
             - modules/phase_field
-        log_duplicate_requirement: WARNING
-        log_missing: WARNING
-        log_empty_issues: WARNING
 
     porous_flow:
         directories:
