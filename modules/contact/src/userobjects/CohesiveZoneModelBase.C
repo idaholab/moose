@@ -223,7 +223,7 @@ CohesiveZoneModelBase::timestepSetup()
   {
     auto & [damage, old_damage] = map_pr.second;
     old_damage = {MetaPhysicL::raw_value(damage)};
-    damage = {0.0};
+    damage = old_damage;
   }
 }
 
