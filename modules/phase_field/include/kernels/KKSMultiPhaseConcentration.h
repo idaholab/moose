@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "KernelValue.h"
+#include "GenericKernel.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
@@ -28,38 +28,59 @@
  *
  * \see KKSPhaseChemicalPotential
  */
-class KKSMultiPhaseConcentration
-  : public DerivativeMaterialInterface<JvarMapKernelInterface<KernelValue>>
+template <bool is_ad>
+class KKSMultiPhaseConcentrationTempl
+  : public DerivativeMaterialInterface<JvarMapKernelInterface<GenericKernel<is_ad>>>
 {
 public:
   static InputParameters validParams();
 
+  KKSMultiPhaseConcentrationTempl(const InputParameters & parameters);
+
+protected:
+  GenericReal<is_ad> computeQpResidual() override;
+
+  /// Number of phases/concentrations.
+  const unsigned int _num_j;
+
+  /// Phase concentrations c_j.
+  const std::vector<const GenericVariableValue<is_ad> *> _cj;
+
+  /// Position of this kernel's nonlinear variable in the c_j list.
+  int _k;
+
+  /// Physical concentration c.
+  const GenericVariableValue<is_ad> & _c;
+
+  /// Switching-function property names and values.
+  const std::vector<MaterialPropertyName> _hj_names;
+  std::vector<const GenericMaterialProperty<Real, is_ad> *> _prop_hj;
+
+  /// Order-parameter names, in the same order as the phases.
+  std::vector<VariableName> _eta_names;
+
+  usingGenericKernelMembers;
+};
+
+/**
+ * Non-AD implementation with hand-calculated Jacobian entries.
+ */
+class KKSMultiPhaseConcentration : public KKSMultiPhaseConcentrationTempl<false>
+{
+public:
   KKSMultiPhaseConcentration(const InputParameters & parameters);
 
 protected:
-  virtual Real precomputeQpResidual();
-  virtual Real precomputeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  Real computeQpJacobian() override;
+  Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-private:
-  const unsigned int _num_j;
-  const std::vector<const VariableValue *> _cj;
   const JvarMap & _cj_map;
-
-  /// Position of the nonlinear variable in the list of cj's
-  int _k;
-
-  const VariableValue & _c;
-  unsigned int _c_var;
-
-  /// Switching functions for each phase \f$ h_j \f$
-  std::vector<MaterialPropertyName> _hj_names;
-  std::vector<const MaterialProperty<Real> *> _prop_hj;
-
-  /// Order parameters for each phase \f$ \eta_j \f$
-  std::vector<VariableName> _eta_names;
+  const unsigned int _c_var;
   const JvarMap & _eta_map;
 
-  /// Derivative of the switching function \f$ \frac d{d\eta} h(\eta) \f$
+  /// dh_j/deta_i, indexed first by phase j and then order parameter i.
   std::vector<std::vector<const MaterialProperty<Real> *>> _prop_dhjdetai;
 };
+
+/// AD implementation; its Jacobian is generated from the shared AD residual.
+using ADKKSMultiPhaseConcentration = KKSMultiPhaseConcentrationTempl<true>;

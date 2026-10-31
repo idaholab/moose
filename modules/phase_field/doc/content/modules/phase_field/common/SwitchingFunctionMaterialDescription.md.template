@@ -1,0 +1,19 @@
+!syntax description /Materials/SwitchingFunctionMaterial
+
+## Definition
+
+Material to supply a function and it's derivatives that smoothly interpolates
+properties or free energy across a diffuse interface. The function is dependent on
+a single order parameter.
+
+With the `h_order` parameter set to `SIMPLE` the function is defined as
+
+\begin{equation}
+h(\eta) = 3\eta^2-2\eta^3
+\end{equation}
+
+and with the  `h_order` parameter set to `HIGH` it is defined as
+
+\begin{equation}
+h(\eta) = \eta^3(6\eta^2-15\eta+10)
+\end{equation}

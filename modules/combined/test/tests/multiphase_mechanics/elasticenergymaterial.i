@@ -55,6 +55,10 @@
     variable = c
     diffusivity = 0
   [../]
+  [c_dt]
+    type = TimeDerivative
+    variable = c
+  []
 []
 
 [Materials]
@@ -85,7 +89,12 @@
     prefactor = prefactor
     eigenstrain_name = eigenstrain
   [../]
-
+  #[eigenstrain]
+  #  type = ComputeEigenstrain
+  #  eigen_base = '1'
+  #  eigenstrain_name = eigenstrain
+  #  prefactor = prefactor
+  #[]
   [./elasticenergy]
     type = ElasticEnergyMaterial
     coupled_variables = 'c'
@@ -99,7 +108,7 @@
   nl_abs_tol = 1e-10
   num_steps = 1
 
-  petsc_options_iname = '-pc_factor_shift_type'
+  petsc_options_iname = '-pc_factor_shift_type '
   petsc_options_value = 'nonzero'
 []
 
