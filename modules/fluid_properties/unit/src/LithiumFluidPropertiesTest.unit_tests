@@ -1,0 +1,30 @@
+[Tests]
+  design = 'LithiumFluidProperties.md'
+  issues = '#34311'
+
+  [fluid_name]
+    type = GoogleTest
+    unit_test = LithiumFluidPropertiesTest.fluidName
+    requirement = 'The system shall report the name of the liquid lithium fluid.'
+  []
+  [molar_mass]
+    type = GoogleTest
+    unit_test = LithiumFluidPropertiesTest.molarMass
+    requirement = 'The system shall report the molar mass of lithium.'
+  []
+  [properties]
+    type = GoogleTest
+    unit_test = LithiumFluidPropertiesTest.properties
+    requirement = 'The system shall compute the density, specific volume, enthalpy, internal energy, temperature, thermal conductivity, specific heats and dynamic viscosity of liquid lithium from pressure and temperature, density or enthalpy.'
+  []
+  [melting_point]
+    type = GoogleTest
+    unit_test = LithiumFluidPropertiesTest.meltingPoint
+    requirement = 'The system shall compute liquid lithium properties at the melting point that agree with the tabulated values of the reference compilation.'
+  []
+  [derivatives]
+    type = GoogleTest
+    unit_test = LithiumFluidPropertiesTest.derivatives
+    requirement = 'The system shall compute the derivatives of the liquid lithium properties with respect to pressure and temperature.'
+  []
+[]
