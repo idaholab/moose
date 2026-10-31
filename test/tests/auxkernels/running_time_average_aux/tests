@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#34278'
+  design = 'RunningTimeAverageAux.md'
+
+  [running_time_average]
+    type = 'CSVDiff'
+    input = 'running_time_average.i'
+    csvdiff = 'running_time_average_out.csv'
+
+    requirement = 'The system shall have the ability to compute the running time-weighted average of a field, starting at a given simulation time.'
+  []
+  [nodal_error]
+    type = 'RunException'
+    input = 'running_time_average.i'
+    cli_args = 'AuxVariables/u_avg/family=LAGRANGE AuxVariables/u_avg/order=FIRST'
+    expect_err = 'The averaged variable must be elemental'
+
+    requirement = 'The system shall report an error if the running time average is requested for a nodal variable.'
+  []
+[]
