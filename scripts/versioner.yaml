@@ -142,9 +142,6 @@ packages:
       - scripts/update_and_rebuild_neml2.sh
       - framework/contrib/neml2
       - framework/contrib/neml2.mk
-      - framework/contrib/neml2-hit
-      - framework/contrib/pyro
-      - framework/contrib/pyzag
       # mfem
       - scripts/update_and_rebuild_conduit.sh
       - scripts/update_and_rebuild_mfem.sh
