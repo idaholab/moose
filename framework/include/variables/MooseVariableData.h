@@ -386,6 +386,14 @@ public:
     return _ad_curl_u;
   }
 
+  const ADTemplateVariableDivergence<OutputType> & adDivSln() const
+  {
+    _need_ad = _need_ad_volume = _need_ad_div_u = true;
+    divPhi();
+    divPhiFace();
+    return _ad_div_u;
+  }
+
   ///////////////////////// Nodal value getters ///////////////////////////////////////////
 
   const OutputType & nodalValueDot() const;
@@ -622,6 +630,7 @@ private:
   ADTemplateVariableValue<OutputType> _ad_u_dotdot;
   ADTemplateVariableGradient<OutputType> _ad_grad_u_dot;
   ADTemplateVariableCurl<OutputType> _ad_curl_u;
+  ADTemplateVariableDivergence<OutputType> _ad_div_u;
 
   // time derivatives
 

@@ -1888,6 +1888,23 @@ Coupleable::adCoupledCurl(const std::string & var_name, unsigned int comp) const
   return var->adCurlSlnNeighbor();
 }
 
+const ADVectorVariableDivergence &
+Coupleable::adCoupledDiv(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getVectorVar(var_name, comp);
+
+  if (!var)
+    return getADDefaultDiv();
+  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adDivSln();
+  return var->adDivSlnNeighbor();
+}
+
 const VectorVariableDivergence &
 Coupleable::coupledDiv(const std::string & var_name, unsigned int comp) const
 {
@@ -2565,6 +2582,13 @@ Coupleable::getADDefaultCurl() const
 {
   _ad_default_curl.resize(_coupleable_max_qps);
   return _ad_default_curl;
+}
+
+const ADVectorVariableDivergence &
+Coupleable::getADDefaultDiv() const
+{
+  _ad_default_div.resize(_coupleable_max_qps);
+  return _ad_default_div;
 }
 
 const ADVariableValue &
