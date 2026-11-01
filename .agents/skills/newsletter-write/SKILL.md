@@ -129,8 +129,8 @@ Leave out:
 - **Cosmetic web and tooling changes** a reader cannot act on, such as scrollbar behavior or a URL
   change in file headers.
 
-Most of what merges in a month does not earn an entry. A full month's 100-150 merges yield 80-95
-entries, so expect to set aside roughly one PR in six without writing anything for it.
+Most of what merges in a month does not earn an entry. A full month's 100-150 merges yield roughly
+60-90 entries, so expect to set aside close to two in five PRs without writing anything for it.
 
 Each distinct change earns one entry, and most pull requests contain exactly one. A PR does not
 earn more than one by touching several files; it earns a second entry only when it did a second
