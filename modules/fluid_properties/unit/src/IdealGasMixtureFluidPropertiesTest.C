@@ -297,9 +297,8 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, nasa7AdDerivatives)
 
 TEST_F(IdealGasMixtureFluidPropertiesTest, entropySingleComponent)
 {
-  // The contribution of a component to the entropy tends to zero with its mass fraction, so a
-  // mixture with a single component present has the entropy of that component, with its
-  // derivatives with respect to pressure (index 0) and temperature (index 1)
+  // A mixture with only one component present has the entropy of that component
+  // Derivative index 0 is pressure and index 1 is temperature
   const Real p = 1e5;
   const Real T = 400;
   DNDerivativeType dp_dp, dT_dT;
