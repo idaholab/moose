@@ -27,4 +27,10 @@
     unit_test = IdealGasMixtureFluidPropertiesTest.nasa7Inversion
     requirement = 'The system shall compute the temperature of mixtures of ideal gases from NASA 7-coefficient polynomials, alone or with an ideal gas of constant specific heats, from their specific volume and internal energy, from half the highest lower end to 1.5 times the lowest upper end of the temperature ranges of the data of their components, and where the internal energy is close to zero.'
   []
+  [entropy_single_component]
+    type = GoogleTest
+    unit_test = IdealGasMixtureFluidPropertiesTest.entropySingleComponent
+    issues = '#34221'
+    requirement = 'The system shall compute the specific entropy of an ideal gas mixture in which only one component has a nonzero mass fraction as the entropy of that component, with the same derivatives with respect to pressure and temperature.'
+  []
 []

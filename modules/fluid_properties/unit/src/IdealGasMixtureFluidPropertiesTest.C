@@ -294,3 +294,27 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, nasa7AdDerivatives)
   for (const Real T : {700.0, 1500.0})
     expectMixtureADDerivatives(air, 100000, T, 0.233);
 }
+
+TEST_F(IdealGasMixtureFluidPropertiesTest, entropySingleComponent)
+{
+  // The contribution of a component to the entropy tends to zero with its mass fraction, so a
+  // mixture with a single component present has the entropy of that component, with its
+  // derivatives with respect to pressure (index 0) and temperature (index 1)
+  const Real p = 1e5;
+  const Real T = 400;
+  DNDerivativeType dp_dp, dT_dT;
+  Moose::derivInsert(dp_dp, 0, 1);
+  Moose::derivInsert(dT_dT, 1, 1);
+  const ADReal p_ad(p, dp_dp);
+  const ADReal T_ad(T, dT_dT);
+  for (const auto & [x, fp] : {std::pair<Real, const IdealGasFluidProperties *>(0, _fp_steam),
+                               std::pair<Real, const IdealGasFluidProperties *>(1, _fp_nitrogen)})
+  {
+    Real s, ds_dp, ds_dT;
+    fp->s_from_p_T(p, T, s, ds_dp, ds_dT);
+    REL_TEST(_fp_mix->s_from_p_T(p, T, {x}), s, REL_TOL_CONSISTENCY);
+    const ADReal s_ad = _fp_mix->s_from_p_T(p_ad, T_ad, std::vector<ADReal>{ADReal(x)});
+    REL_TEST(s_ad.derivatives()[0], ds_dp, REL_TOL_CONSISTENCY);
+    REL_TEST(s_ad.derivatives()[1], ds_dT, REL_TOL_CONSISTENCY);
+  }
+}

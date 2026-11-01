@@ -56,6 +56,9 @@ with the Gibbs' theorem, which accounts for the entropy of mixing [!citep](cenge
 !equation
 s(p, T) = \sum\limits_k \xi_k s_k(p_k, T) \,.
 
+A component with a zero molar fraction contributes nothing to this sum, which is the limit of its
+contribution as its molar fraction vanishes.
+
 The temperature is computed from the specific volume $v$ and the specific internal energy $e$
 by solving
 

@@ -306,10 +306,14 @@ IdealGasMixtureFluidProperties::s_from_p_T_templ(const CppType & p,
   const auto psi = molarFractionsFromMassFractions(x);
   mooseAssert(x.size() == _n_components, "Size mismatch");
 
-  // Gibbs-Dalton: each component contributes its entropy at its partial pressure
+  // Gibbs-Dalton: each component contributes its entropy at its partial pressure. This
+  // contribution tends to zero with the molar fraction of the component, like psi ln(psi), so a
+  // component with a zero molar fraction contributes nothing; evaluating it would give zero times
+  // infinity.
   CppType s = 0;
   for (const auto i : make_range(_n_components))
-    s += x[i] * _component_fps[i]->s_from_p_T(psi[i] * p, T);
+    if (psi[i] > 0)
+      s += x[i] * _component_fps[i]->s_from_p_T(psi[i] * p, T);
 
   return s;
 }
