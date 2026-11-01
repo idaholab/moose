@@ -18,8 +18,10 @@
  * Liquid lithium fluid properties as a function of pressure (Pa) and temperature (K).
  *
  * Source for fluid properties:
- * H. W. Davison, Compilation of Thermophysical Properties of Liquid Lithium,
- * NASA TN D-4650, NASA Lewis Research Center, 1968
+ * R. W. Ohse (Ed.), Handbook of Thermodynamic and Transport Properties of Alkali Metals,
+ * IUPAC Chemical Data Series No. 30, Blackwell, 1985, as tabulated in
+ * S. J. Zinkle, Summary of Physical Properties for Lithium, Pb-17Li, and (LiF)n-BeF2 Coolants,
+ * APEX Study Meeting, 1998
  */
 class LithiumFluidProperties : public SinglePhaseFluidProperties
 {
@@ -68,14 +70,16 @@ protected:
   /// Flags an invalid solution if the temperature is outside of the range of the correlations
   void checkTemperature(Real temperature, const std::string & property) const;
 
-  /// Melting temperature of lithium (K)
-  static constexpr Real _T_melt = 453.7;
-  /// Upper temperature (K) to which the correlations were extrapolated
-  static constexpr Real _T_max = 1600.;
+  /// Antiderivative of the specific heat correlation (J/kg)
+  static Real cpIntegral(Real temperature);
+
+  /// Melting temperature of lithium (K), also the reference temperature for the enthalpy
+  static constexpr Real _T_melt = 454.;
+  /// Lower and upper temperatures (K) of the validity range of the correlations
+  static constexpr Real _T_min = 455.;
+  static constexpr Real _T_max = 1500.;
   /// Molar mass of lithium (kg/mol)
   static constexpr Real _M = 6.941e-3;
-  /// Constant isobaric specific heat (J/kg/K), eq. 5
-  static constexpr Real _cp = 4169.;
 };
 
 #pragma GCC diagnostic pop

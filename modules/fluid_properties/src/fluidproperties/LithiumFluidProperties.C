@@ -16,6 +16,8 @@ LithiumFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addClassDescription("Fluid properties for liquid lithium");
+  // The base class default (400 K) is below the melting point, outside the correlation range
+  params.set<Real>("T_initial_guess") = 800;
   return params;
 }
 
@@ -39,31 +41,67 @@ LithiumFluidProperties::molarMass() const
 void
 LithiumFluidProperties::checkTemperature(Real temperature, const std::string & property) const
 {
-  if (temperature < _T_melt || temperature > _T_max)
+  if (temperature < _T_min || temperature > _T_max)
     flagInvalidSolution("Lithium " + property +
-                        " evaluated outside of the correlation temperature range [453.7, 1600] K");
+                        " evaluated outside of the correlation temperature range [455, 1500] K");
 }
 
 Real
-LithiumFluidProperties::T_from_p_h(Real /*pressure*/, Real enthalpy) const
+LithiumFluidProperties::cpIntegral(Real temperature)
 {
-  // Inversion of eq. 3
-  return (enthalpy + 7.519e5) / _cp;
+  const Real T = temperature;
+  return 4754. * T - 0.925 / 2 * T * T + 2.91e-4 / 3 * T * T * T;
 }
 
 Real
-LithiumFluidProperties::T_from_p_rho(Real /*pressure*/, Real density) const
+LithiumFluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
 {
-  // Inversion of eq. 1
-  return (562. - density) / 0.1;
+  auto lambda = [&](Real p, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
+  { h_from_p_T(p, current_T, new_h, dh_dp, dh_dT); };
+  const Real T = FluidPropertiesUtils::NewtonSolve(pressure,
+                                                   enthalpy,
+                                                   _T_initial_guess,
+                                                   _tolerance,
+                                                   lambda,
+                                                   name() + "::T_from_p_h",
+                                                   _max_newton_its)
+                     .first;
+  if (std::isnan(T))
+    mooseError("Conversion from pressure (p = ",
+               pressure,
+               ") and enthalpy (h = ",
+               enthalpy,
+               ") to temperature failed to converge.");
+  return T;
+}
+
+Real
+LithiumFluidProperties::T_from_p_rho(Real pressure, Real density) const
+{
+  auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & drho_dp, Real & drho_dT)
+  { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
+  const Real T = FluidPropertiesUtils::NewtonSolve(pressure,
+                                                   density,
+                                                   _T_initial_guess,
+                                                   _tolerance,
+                                                   lambda,
+                                                   name() + "::T_from_p_rho",
+                                                   _max_newton_its)
+                     .first;
+  if (std::isnan(T))
+    mooseError("Conversion from pressure (p = ",
+               pressure,
+               ") and density (rho = ",
+               density,
+               ") to temperature failed to converge.");
+  return T;
 }
 
 Real
 LithiumFluidProperties::rho_from_p_T(Real /*pressure*/, Real temperature) const
 {
   checkTemperature(temperature, "density");
-  // Eq. 1
-  return 562. - 0.1 * temperature;
+  return 278.5 - 0.04657 * temperature + 274.6 * std::pow(1 - temperature / 3500., 0.467);
 }
 
 void
@@ -72,7 +110,7 @@ LithiumFluidProperties::rho_from_p_T(
 {
   rho = rho_from_p_T(pressure, temperature);
   drho_dp = 0;
-  drho_dT = -0.1;
+  drho_dT = -0.04657 - 274.6 * 0.467 / 3500. * std::pow(1 - temperature / 3500., 0.467 - 1);
 }
 
 Real
@@ -105,8 +143,7 @@ Real
 LithiumFluidProperties::cp_from_p_T(Real /*pressure*/, Real temperature) const
 {
   checkTemperature(temperature, "specific heat");
-  // Eq. 5, derivative of the linear enthalpy correlation (eq. 3)
-  return _cp;
+  return 4754. - 0.925 * temperature + 2.91e-4 * temperature * temperature;
 }
 
 void
@@ -115,7 +152,7 @@ LithiumFluidProperties::cp_from_p_T(
 {
   cp = cp_from_p_T(pressure, temperature);
   dcp_dp = 0;
-  dcp_dT = 0;
+  dcp_dT = -0.925 + 2 * 2.91e-4 * temperature;
 }
 
 Real
@@ -130,8 +167,7 @@ Real
 LithiumFluidProperties::mu_from_p_T(Real /*pressure*/, Real temperature) const
 {
   checkTemperature(temperature, "viscosity");
-  // Eq. 10, in N.s/m^2
-  return std::pow(10., -3.080 + 57.63 / temperature - 5.172e-4 * temperature);
+  return std::exp(-4.164 - 0.6374 * std::log(temperature) + 292.1 / temperature);
 }
 
 void
@@ -140,15 +176,14 @@ LithiumFluidProperties::mu_from_p_T(
 {
   mu = mu_from_p_T(pressure, temperature);
   dmu_dp = 0;
-  dmu_dT = mu * std::log(10.) * (-57.63 / temperature / temperature - 5.172e-4);
+  dmu_dT = mu * (-0.6374 / temperature - 292.1 / temperature / temperature);
 }
 
 Real
 LithiumFluidProperties::k_from_p_T(Real /*pressure*/, Real temperature) const
 {
   checkTemperature(temperature, "thermal conductivity");
-  // Polynomial fit of the modified Ewing correlation (eq. 8), page 11
-  return 21.874 + 0.056255 * temperature - 1.8325e-5 * temperature * temperature;
+  return 22.28 + 0.0500 * temperature - 1.243e-5 * temperature * temperature;
 }
 
 void
@@ -157,15 +192,15 @@ LithiumFluidProperties::k_from_p_T(
 {
   k = k_from_p_T(pressure, temperature);
   dk_dp = 0;
-  dk_dT = 0.056255 - 2 * 1.8325e-5 * temperature;
+  dk_dT = 0.0500 - 2 * 1.243e-5 * temperature;
 }
 
 Real
 LithiumFluidProperties::h_from_p_T(Real /*pressure*/, Real temperature) const
 {
   checkTemperature(temperature, "enthalpy");
-  // Eq. 3, relative to solid lithium at 273 K
-  return -7.519e5 + _cp * temperature;
+  // Integral of the specific heat, relative to the liquid at the melting temperature
+  return cpIntegral(temperature) - cpIntegral(_T_melt);
 }
 
 void
@@ -174,5 +209,5 @@ LithiumFluidProperties::h_from_p_T(
 {
   h = h_from_p_T(pressure, temperature);
   dh_dp = 0;
-  dh_dT = _cp;
+  dh_dT = cp_from_p_T(pressure, temperature);
 }

@@ -30,15 +30,16 @@ TEST_F(LithiumFluidPropertiesTest, properties)
 {
   const Real tol = REL_TOL_SAVED_VALUE;
   const std::vector<Real> pressures = {1e5, 1e6, 5e6};
-  const std::vector<Real> temperatures = {500, 1000, 1500};
+  const std::vector<Real> temperatures = {500, 1000, 1400};
 
-  // Solutions: obtained from the correlations in NASA TN D-4650
-  const std::vector<Real> rho_refs = {512.0, 462.0, 412.0};
-  const std::vector<Real> h_refs = {1332600.0, 3417100.0, 5501600.0};
-  const std::vector<Real> e_refs = {1332404.6875, 3414935.497835498, 5489464.077669903};
-  const std::vector<Real> k_refs = {45.42025, 59.804, 65.02525};
+  // Solutions: obtained from the correlations of Ohse (1985) as tabulated by Zinkle (1998)
+  const std::vector<Real> rho_refs = {510.7417563927444, 466.6006305350272, 429.6222453460765};
+  const std::vector<Real> h_refs = {201435.71359199984, 2316435.713592, 3943203.713592};
+  const std::vector<Real> e_refs = {201239.91992769035, 2314292.553179093, 3931565.5825264812};
+  const std::vector<Real> cp_refs = {4364.25, 4120.0, 4029.36};
+  const std::vector<Real> k_refs = {44.1725, 59.85, 67.9172};
   const std::vector<Real> mu_refs = {
-      5.979432945653252e-4, 2.886888430248677e-4, 1.5227198177923657e-4};
+      5.308711604055202e-4, 2.5483272337520357e-4, 1.8917694550102165e-4};
 
   for (auto i : make_range(pressures.size()))
   {
@@ -60,34 +61,20 @@ TEST_F(LithiumFluidPropertiesTest, properties)
     REL_TEST(_fp->e_from_p_T(p, T), e_refs[i], tol);
     REL_TEST(_fp->e_from_p_rho(p, rho), e_refs[i], tol);
 
-    // Temperature
+    // Temperature, through the Newton inversions of the density and enthalpy correlations
     REL_TEST(_fp->T_from_p_rho(p, rho), T, tol);
     REL_TEST(_fp->T_from_p_h(p, h), T, tol);
 
     // Thermal conductivity
     REL_TEST(_fp->k_from_p_T(p, T), k_refs[i], tol);
 
-    // Isobaric and isochoric specific heat, constant and equal for this incompressible model
-    REL_TEST(_fp->cp_from_p_T(p, T), 4169., tol);
-    REL_TEST(_fp->cv_from_p_T(p, T), 4169., tol);
+    // Isobaric and isochoric specific heat, equal for this incompressible model
+    REL_TEST(_fp->cp_from_p_T(p, T), cp_refs[i], tol);
+    REL_TEST(_fp->cv_from_p_T(p, T), cp_refs[i], tol);
 
     // Dynamic viscosity
     REL_TEST(_fp->mu_from_p_T(p, T), mu_refs[i], tol);
   }
-}
-
-/**
- * Verify the values at the melting point against Table I of NASA TN D-4650
- */
-TEST_F(LithiumFluidPropertiesTest, meltingPoint)
-{
-  const Real p = 1e5;
-  const Real T = 453.7;
-
-  REL_TEST(_fp->rho_from_p_T(p, T), 516., 2e-3);
-  REL_TEST(_fp->h_from_p_T(p, T), 1.140e6, 1e-3);
-  REL_TEST(_fp->k_from_p_T(p, T), 44.0, 1e-2);
-  REL_TEST(_fp->mu_from_p_T(p, T), 0.645e-3, 1e-2);
 }
 
 /**
@@ -103,9 +90,11 @@ TEST_F(LithiumFluidPropertiesTest, derivatives)
   const Real T2 = 1200.;
 
   DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->rho_from_p_T, p, T2, tol);
   DERIV_TEST(_fp->e_from_p_T, p, T, tol);
   DERIV_TEST(_fp->v_from_p_T, p, T, tol);
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->cp_from_p_T, p, T, tol);
   DERIV_TEST(_fp->k_from_p_T, p, T, tol);
   DERIV_TEST(_fp->k_from_p_T, p, T2, tol);
   DERIV_TEST(_fp->mu_from_p_T, p, T, tol);

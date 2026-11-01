@@ -17,11 +17,6 @@
     unit_test = LithiumFluidPropertiesTest.properties
     requirement = 'The system shall compute the density, specific volume, enthalpy, internal energy, temperature, thermal conductivity, specific heats and dynamic viscosity of liquid lithium from pressure and temperature, density or enthalpy.'
   []
-  [melting_point]
-    type = GoogleTest
-    unit_test = LithiumFluidPropertiesTest.meltingPoint
-    requirement = 'The system shall compute liquid lithium properties at the melting point that agree with the tabulated values of the reference compilation.'
-  []
   [derivatives]
     type = GoogleTest
     unit_test = LithiumFluidPropertiesTest.derivatives
