@@ -8,4 +8,15 @@
                   'material properties that are defined at quadrature points.'
     design = 'nodal_patch_recovery.md'
   []
+  [upstream_producers]
+    type = CSVDiff
+    input = 'patch_recovery_chain.i'
+    csvdiff = 'patch_recovery_chain_out.csv'
+    # nodal patch recovery in NodalPatchRecovery-based auxiliary kernels is serial only
+    max_parallel = 1
+    issues = '#33918'
+    requirement = 'The SolidMechanics module shall evaluate the materials producing the properties read '
+                  'by the material consumed by a nodal patch recovery auxiliary kernel.'
+    design = 'nodal_patch_recovery.md syntax/Materials/index.md'
+  []
 []

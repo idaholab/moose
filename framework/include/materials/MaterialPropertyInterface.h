@@ -332,10 +332,16 @@ public:
   const GenericMaterialProperty<T, is_ad> & getGenericZeroMaterialProperty();
 
   /// for backwards compatibility
-  template <typename T, typename... Ts>
-  const MaterialProperty<T> & getZeroMaterialProperty(Ts... args)
+  template <typename T>
+  const MaterialProperty<T> & getZeroMaterialProperty(const std::string & name)
   {
-    return getGenericZeroMaterialProperty<T, false>(args...);
+    return getGenericOrZeroMaterialProperty<T, false>(name);
+  }
+  /// for backwards compatibility
+  template <typename T>
+  const MaterialProperty<T> & getZeroMaterialProperty()
+  {
+    return getGenericZeroMaterialProperty<T, false>();
   }
 
   /**

@@ -141,6 +141,10 @@ private:
   DenseMatrix<Number> _A;
   DenseVector<Number> _B;
   DenseVector<Number> _coef;
+
+  /// The material properties needed on each subdomain, including the dependencies of their
+  /// producers. Resolved once per subdomain instead of for every patch element.
+  std::unordered_map<SubdomainID, std::unordered_set<unsigned int>> _needed_mat_props;
 };
 
 template <typename T>

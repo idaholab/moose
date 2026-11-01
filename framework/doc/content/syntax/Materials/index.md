@@ -131,6 +131,12 @@ reference is only finalized _after_ all materials have been constructed, so a
 validity check must _not_ be made in the constructor of a material class but
 either at time of first use in `computeQpProperties` or in `initialSetup`.
 
+Objects that should read zero when no material declares a property use
+`getGenericOrZeroMaterialProperty<TYPE, is_ad>("property_name")` instead (or
+`getGenericOrZeroMaterialPropertyByName`). The returned property holds the value declared by
+another material if one declares it, and zero otherwise, so no validity check is needed. This API
+used to be named `getGenericZeroMaterialProperty`; that name is deprecated.
+
 ## Property Names id=property-names
 
 When creating a Material object and declaring the properties that shall be computed, it is often
@@ -204,7 +210,7 @@ case. When it is computed the value is also stored for every quadrature point on
 such, stateful properties can become memory intensive, especially if the property being stored is a
 vector or tensor value.
 
-## Material Property Output
+## Material Property Output id=material-property-output
 
 Output of `Material` properties is enabled by setting the "outputs" parameter. The following example
 creates two additional variables called "mat1" and "mat2" that will show up in the output file. In this
@@ -240,6 +246,24 @@ e.g. the producer material will execute before the consumer material. If a
 cyclic dependency is detected between two materials, then MOOSE will produce an
 error.
 
+## Material evaluation id=material-evaluation
+
+MOOSE only evaluates a material when another object needs one of the properties it declares.
+Before looping over the elements, faces, or nodes of a subdomain, MOOSE gathers the properties
+retrieved by the objects executing in that loop (kernels, boundary conditions, auxiliary kernels,
+user objects, ...), adds the properties those producers retrieve, and so on until the chain is
+complete. Materials outside that chain are not evaluated.
+
+A material whose properties no object retrieves therefore never executes. Inputs must not rely on
+side effects of such a material, for example a warning or an error it reports from
+`computeQpProperties`, or a value it writes elsewhere. To have such a material execute, consume one
+of its properties, for example with a [MaterialRealAux.md] auxiliary kernel or an output of the
+property (see [#material-property-output]).
+
+A material that retrieves another material with `getMaterial` or `getMaterialByName` and computes it
+directly (see [#discrete-material-objects]) executes whenever a property of either material is
+needed, and the properties retrieved by both are evaluated before it.
+
 ## Functor Material Properties id=functor-props
 
 Functor materials are a special kind of materials used for on-the-fly material property evaluation.
@@ -263,7 +287,7 @@ Material properties declared in interface materials are available on both sides 
 Interface materials allows users to evaluate the properties on element faces based on quantities on both sides of the element face.
 Interface materials are often used along with [InterfaceKernel](syntax/InterfaceKernels/index.md).
 
-### Discrete Material Objects
+### Discrete Material Objects id=discrete-material-objects
 
 A "[Discrete](http://www.dictionary.com/browse/discrete)" `Material` is an object that may be
 detached from MOOSE and computed explicitly from other objects. An object inheriting from

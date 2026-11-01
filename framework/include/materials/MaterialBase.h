@@ -182,17 +182,23 @@ public:
   const GenericMaterialProperty<T, is_ad> & getGenericZeroMaterialProperty();
 
   /// for backwards compatibility
-  template <typename T, typename... Ts>
-  const MaterialProperty<T> & getZeroMaterialProperty(Ts... args)
+  template <typename T>
+  const MaterialProperty<T> & getZeroMaterialProperty(const std::string & name)
   {
-    return getGenericZeroMaterialProperty<T, false>(args...);
+    return getGenericOrZeroMaterialProperty<T, false>(name);
+  }
+  /// for backwards compatibility
+  template <typename T>
+  const MaterialProperty<T> & getZeroMaterialProperty()
+  {
+    return getGenericZeroMaterialProperty<T, false>();
   }
 
   /// for backwards compatibility
-  template <typename T, typename... Ts>
-  const MaterialProperty<T> & getZeroMaterialPropertyByName(Ts... args)
+  template <typename T>
+  const MaterialProperty<T> & getZeroMaterialPropertyByName(const std::string & prop_name)
   {
-    return getGenericZeroMaterialPropertyByName<T, false>(args...);
+    return getGenericOrZeroMaterialPropertyByName<T, false>(prop_name);
   }
 
   /**
@@ -240,13 +246,11 @@ public:
   virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const = 0;
 
   /**
-   * Record a dependency on the material property with the given ID. Called by
-   * getGenericOrZeroMaterialPropertyByName() when the "optional" property it looked up turns out to
-   * be supplied by another material, so that dependency is still reflected in
-   * getMatPropDependencies() even though this access went through the zero-default API. No-op by
-   * default; overridden where getMatPropDependencies() is backed by a real container.
+   * Record a dependency on the material property with the given ID, so that it is reflected in
+   * getMatPropDependencies() for accesses that do not go through MaterialPropertyInterface, such as
+   * getGenericOrZeroMaterialPropertyByName().
    */
-  virtual void addMatPropDependencyById(const unsigned int /*prop_id*/) {}
+  virtual void addMatPropDependencyById(const unsigned int prop_id) = 0;
 
   /**
    * @return Whether this material has stateful properties
@@ -287,6 +291,16 @@ public:
    * Whether this material has active properties
    */
   virtual bool hasActiveProperties() { return _active_prop_ids.size() > 0; }
+
+  /**
+   * Record that \p host retrieved this material with getMaterialByName() and may compute it
+   * directly. Whenever a property of this material is needed, \p host is the one that runs, so
+   * the inputs of \p host must be computed too.
+   */
+  void addHostMaterial(const MaterialBase & host) { _host_materials.push_back(&host); }
+
+  /// @return The materials that may compute this material directly, see addHostMaterial()
+  const std::vector<const MaterialBase *> & getHostMaterials() const { return _host_materials; }
 
   /**
    * @return Whether or not this material should forcefully call
@@ -368,11 +382,6 @@ protected:
   /// Set of properties declared
   std::set<std::string> _supplied_props;
 
-  /// Names requested through getGenericOrZeroMaterialPropertyByName(). The material declaring one
-  /// of these may be constructed after this object, so whether another material declares it is
-  /// only checked by resolveGetGenericOrZeroPropertyDependencies(), once every material exists.
-  std::set<std::string> _zero_optional_mat_prop_names;
-
   /// The ids of the supplied properties, i.e. the indices where they
   /// are stored in the _material_data->props().  Note: these ids ARE
   /// NOT IN THE SAME ORDER AS THE _supplied_props set, which is
@@ -384,6 +393,9 @@ protected:
 
   /// The ids of the current active supplied properties
   std::unordered_set<unsigned int> _active_prop_ids;
+
+  /// The materials that may compute this material directly, see addHostMaterial()
+  std::vector<const MaterialBase *> _host_materials;
 
   /// If False MOOSE does not compute this property
   const bool _compute;
@@ -401,14 +413,6 @@ protected:
 
   /// Small helper function to call store{Subdomain,Boundary}MatPropName
   void registerPropName(const std::string & prop_name, bool is_get, const unsigned int state);
-
-  /**
-   * Check each name recorded in _zero_optional_mat_prop_names and, for those that turned out to
-   * be supplied by another material, record the dependency via addMatPropDependencyById(). Must
-   * be called only after every material has been constructed, e.g. from
-   * resolveOptionalProperties().
-   */
-  void resolveGetGenericOrZeroPropertyDependencies();
 
   /// Check and throw an error if the execution has progressed past the construction stage
   void checkExecutionStage();
@@ -526,13 +530,12 @@ MaterialBase::getGenericOrZeroMaterialPropertyByName(const std::string & prop_na
 {
   checkExecutionStage();
 
-  // This "optional" property may be declared by another material (declareProperty and
-  // getProperty share the same registry), in which case this object depends on that material and
-  // it must be computed first. That material may not have been constructed yet, so the dependency
-  // is recorded by resolveGetGenericOrZeroPropertyDependencies() once every material exists.
-  _zero_optional_mat_prop_names.insert(prop_name);
-
   auto & preload_with_zero = materialData().getProperty<T, is_ad>(prop_name, 0, *this);
+
+  // Another material may declare this property (declareProperty and getProperty share the same
+  // storage), in which case it must be computed before this one. If none does, the dependency
+  // names a property no material supplies, which activates nothing.
+  addMatPropDependencyById(materialData().getPropertyId(prop_name));
 
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, 0);

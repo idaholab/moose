@@ -302,14 +302,6 @@ MaterialBase::markMatPropRequested(const std::string & name)
 }
 
 void
-MaterialBase::resolveGetGenericOrZeroPropertyDependencies()
-{
-  for (const auto & prop_name : _zero_optional_mat_prop_names)
-    if (materialData().hasProperty(prop_name))
-      addMatPropDependencyById(materialData().getPropertyId(prop_name));
-}
-
-void
 MaterialBase::storeSubdomainZeroMatProp(SubdomainID block_id, const MaterialPropertyName & name)
 {
   _fe_problem.storeSubdomainZeroMatProp(block_id, name);

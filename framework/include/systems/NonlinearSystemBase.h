@@ -994,6 +994,15 @@ protected:
   /// Constraints storage object
   ConstraintWarehouse _constraints;
 
+  /// The material properties needed by the node-face constraints on a secondary boundary (and
+  /// whether they act on the displaced mesh) when the primary element is on a given subdomain,
+  /// including the dependencies of their producers. Activated in reinitNodeFace() when this key
+  /// changes, instead of being resolved for every secondary node.
+  std::map<std::tuple<BoundaryID, bool, SubdomainID>, std::unordered_set<unsigned int>>
+      _node_face_needed_mat_props;
+  /// The key of _node_face_needed_mat_props whose properties are currently active
+  std::optional<std::tuple<BoundaryID, bool, SubdomainID>> _active_node_face_mat_props_key;
+
   /// increment vector
   NumericVector<Number> * _increment_vec;
   /// Preconditioner

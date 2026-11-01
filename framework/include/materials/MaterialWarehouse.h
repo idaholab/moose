@@ -67,6 +67,13 @@ protected:
   MooseObjectWarehouse<MaterialBase> _face_materials;
 
   /**
+   * Insert the material property dependencies of \p material, and of every material that may
+   * compute it directly (see MaterialBase::addHostMaterial()), into \p needed_mat_props
+   */
+  static void insertDependencies(const MaterialBase & material,
+                                 std::unordered_set<unsigned int> & needed_mat_props);
+
+  /**
    * Helper method for updating material property dependency vector
    */
   virtual void

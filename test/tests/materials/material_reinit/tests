@@ -43,4 +43,51 @@
     design = 'syntax/Materials/index.md'
     requirement = 'The system shall evaluate face materials required by boundary-material dependencies of user objects.'
   []
+  [upstream_producers]
+    requirement = 'The system shall evaluate the materials producing the properties read by other required materials'
+    issues = '#33918'
+    design = 'syntax/Materials/index.md'
+    [dirac]
+      type = 'CSVDiff'
+      input = 'dirac_chain.i'
+      csvdiff = 'dirac_chain_out.csv'
+      detail = 'for Dirac kernels,'
+    []
+    [neighbor_block]
+      type = 'CSVDiff'
+      input = 'neighbor_block_chain.i'
+      csvdiff = 'neighbor_block_chain_out.csv'
+      detail = 'on the neighboring block of an interface kernel,'
+    []
+    [uo_neighbor_block]
+      type = 'CSVDiff'
+      input = 'uo_neighbor_block_chain.i'
+      csvdiff = 'uo_neighbor_block_chain_out.csv'
+      detail = 'on the neighboring block of an interface user object,'
+    []
+    [aux_bc_interface]
+      type = 'CSVDiff'
+      input = 'aux_bc_interface_chain.i'
+      csvdiff = 'aux_bc_interface_chain_out.csv'
+      detail = 'on both sides of an interface material consumed by a boundary-restricted elemental auxiliary kernel,'
+    []
+    [line_sampler]
+      type = 'CSVDiff'
+      input = 'line_sampler_chain.i'
+      csvdiff = 'line_sampler_chain_out_sampler_0001.csv'
+      detail = 'for line material samplers,'
+    []
+    [mortar]
+      type = 'CSVDiff'
+      input = 'mortar_chain.i'
+      csvdiff = 'mortar_chain_out.csv'
+      detail = 'on both sides of a mortar constraint, and'
+    []
+    [or_zero_declared]
+      type = 'CSVDiff'
+      input = 'or_zero_declared_chain.i'
+      csvdiff = 'or_zero_declared_chain_out.csv'
+      detail = 'for properties retrieved with a zero default that another material declares.'
+    []
+  []
 []

@@ -123,13 +123,28 @@ loopOverMortarSegments(
   // The element Jacobian times weights
   const auto & JxW_msm = assembly.jxWMortar();
 
-  // Set required material properties
+  // Set required material properties. The material lists hold the producers of what the consumers
+  // need, so the properties those producers read must also be active, or the producers would be
+  // skipped when their own properties are not directly consumed
   std::unordered_set<unsigned int> needed_mat_props;
   for (const auto & consumer : consumers)
   {
     const auto & mp_deps = consumer->getMatPropDependencies();
     needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
   }
+  const auto add_material_dependencies = [&needed_mat_props](const auto & materials)
+  {
+    for (const auto * const material : materials)
+    {
+      const auto & mp_deps = material->getMatPropDependencies();
+      needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+    }
+  };
+  for (const auto & [_, materials] : secondary_ip_sub_to_mats)
+    add_material_dependencies(materials);
+  for (const auto & [_, materials] : primary_ip_sub_to_mats)
+    add_material_dependencies(materials);
+  add_material_dependencies(secondary_boundary_mats);
   fe_problem.setActiveMaterialProperties(needed_mat_props, /*tid=*/tid);
 
   // Loop through secondary elements, accumulating quadrature points for all corresponding mortar

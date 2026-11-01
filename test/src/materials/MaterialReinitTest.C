@@ -9,9 +9,11 @@
 #include "MaterialReinitTest.h"
 
 registerMooseObject("MooseTestApp", MaterialReinitTest);
+registerMooseObject("MooseTestApp", ADMaterialReinitTest);
 
+template <bool is_ad>
 InputParameters
-MaterialReinitTest::validParams()
+MaterialReinitTestTempl<is_ad>::validParams()
 {
   auto params = Material::validParams();
   params.addRequiredParam<MaterialPropertyName>("property",
@@ -19,6 +21,11 @@ MaterialReinitTest::validParams()
   params.addParam<Real>("value", 0.0, "A constant contribution to the supplied property.");
   params.addParam<MaterialPropertyName>(
       "coupled_property", "An optional material property to add to the supplied property.");
+  params.addParam<bool>("or_zero_coupled_property",
+                        false,
+                        "Whether to retrieve 'coupled_property' with "
+                        "getGenericOrZeroMaterialProperty, so it is zero if no material "
+                        "declares it.");
   params.addParam<bool>(
       "error_on_face", false, "Whether to error if the face copy of this material is computed.");
   params.addParam<bool>(
@@ -31,13 +38,15 @@ MaterialReinitTest::validParams()
   return params;
 }
 
-MaterialReinitTest::MaterialReinitTest(const InputParameters & parameters)
+template <bool is_ad>
+MaterialReinitTestTempl<is_ad>::MaterialReinitTestTempl(const InputParameters & parameters)
   : Material(parameters),
-    _property(declareProperty<Real>("property")),
+    _property(declareGenericProperty<Real, is_ad>("property")),
     _value(getParam<Real>("value")),
-    _coupled_property(isParamValid("coupled_property")
-                          ? &getMaterialProperty<Real>("coupled_property")
-                          : nullptr),
+    _coupled_property(!isParamValid("coupled_property") ? nullptr
+                      : getParam<bool>("or_zero_coupled_property")
+                          ? &getGenericOrZeroMaterialProperty<Real, is_ad>("coupled_property")
+                          : &getGenericMaterialProperty<Real, is_ad>("coupled_property")),
     _error_on_face(getParam<bool>("error_on_face")),
     _error_on_boundary(getParam<bool>("error_on_boundary")),
     _error_on_neighbor(getParam<bool>("error_on_neighbor")),
@@ -45,8 +54,9 @@ MaterialReinitTest::MaterialReinitTest(const InputParameters & parameters)
 {
 }
 
+template <bool is_ad>
 void
-MaterialReinitTest::computeQpProperties()
+MaterialReinitTestTempl<is_ad>::computeQpProperties()
 {
   if (_error_on_volume && materialDataType() == Moose::BLOCK_MATERIAL_DATA)
     mooseError("The block copy of ", name(), " should not have been computed.");
@@ -64,3 +74,6 @@ MaterialReinitTest::computeQpProperties()
   if (_coupled_property)
     _property[_qp] += (*_coupled_property)[_qp];
 }
+
+template class MaterialReinitTestTempl<false>;
+template class MaterialReinitTestTempl<true>;

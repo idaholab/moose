@@ -206,6 +206,12 @@ public:
   bool verifyMooseObjectTask(const std::string & base, const std::string & task) const;
 
   /**
+   * @return The tasks allowed to build objects from the MOOSE pluggable system \p base, including
+   * the tasks for which doing so is deprecated
+   */
+  std::set<std::string> getMooseObjectTasks(const std::string & base) const;
+
+  /**
    * Gets the file and line where the syntax/action/task combo was registered.
    * @param syntax Syntax name
    * @param action Action name

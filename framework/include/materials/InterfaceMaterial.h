@@ -164,6 +164,8 @@ public:
   }
   ///@}
 
+  using MaterialBase::getGenericOrZeroMaterialProperty;
+  using MaterialBase::getGenericOrZeroMaterialPropertyByName;
   using MaterialBase::getZeroMaterialProperty;
 
   virtual bool isBoundaryMaterial() const override { return true; }
@@ -171,6 +173,10 @@ public:
   virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override
   {
     return TwoMaterialPropertyInterface::getMatPropDependencies();
+  }
+  virtual void addMatPropDependencyById(const unsigned int prop_id) override
+  {
+    TwoMaterialPropertyInterface::addMatPropDependencyById(prop_id);
   }
 
 protected:

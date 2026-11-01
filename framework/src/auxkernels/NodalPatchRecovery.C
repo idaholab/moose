@@ -191,6 +191,7 @@ NodalPatchRecovery::compute()
                "polynomial order or using a higher-order quadrature scheme.");
 
   // general treatment for side nodes and internal nodes
+  SubdomainID active_subdomain = Moose::INVALID_BLOCK_ID;
   for (auto elem_id : elem_ids)
   {
     const Elem * elem = _mesh.elemPtr(elem_id);
@@ -201,12 +202,19 @@ NodalPatchRecovery::compute()
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
 
-    // Note: we only need to do this on a per-subdomain basis, not for every element
-    std::unordered_set<unsigned int> needed_mat_props;
-    const auto & mp_deps = getMatPropDependencies();
-    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
-    _fe_problem.resolveMaterialDependencies(needed_mat_props, elem->subdomain_id(), _tid);
-    _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
+    auto [it, inserted] = _needed_mat_props.try_emplace(elem->subdomain_id());
+    auto & needed_mat_props = it->second;
+    if (inserted)
+    {
+      const auto & mp_deps = getMatPropDependencies();
+      needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+      _fe_problem.resolveMaterialDependencies(needed_mat_props, elem->subdomain_id(), _tid);
+    }
+    if (elem->subdomain_id() != active_subdomain)
+    {
+      _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
+      active_subdomain = elem->subdomain_id();
+    }
 
     // Set up Sentinel class so that, even if reinitMaterials() throws, we
     // still remember to swap back during stack unwinding.

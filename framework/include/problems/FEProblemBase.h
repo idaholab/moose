@@ -1215,18 +1215,14 @@ public:
    * input
    * @param blk_id The subdomain ID for which we are preparing our list of needed vars and props
    * @param tid The thread ID we are preparing the requirements for
-   * @param producer_only Walk the producer chain transitively (true, the default) rather than
-   * widening to every active material's own dependencies regardless of relevance (false). Pass
-   * false for a loop that only runs once a solve has already converged (e.g. a Postprocessor
-   * loop), where a material invoking a compute=false sub-model via getMaterialByName must be
-   * re-run with the final, converged solution even if nothing in that loop directly needs the
-   * material's own declared properties.
+   * @param producer_only Only follow the producers of \p needed_mat_props (true, the default)
+   * rather than adding the dependencies of every material active on \p blk_id (false)
    */
   void resolveMaterialDependencies(std::set<MooseVariableFEBase *> & needed_moose_vars,
                                    std::unordered_set<unsigned int> & needed_mat_props,
                                    const SubdomainID blk_id,
                                    const THREAD_ID tid,
-                                   bool producer_only = true);
+                                   const bool producer_only = true);
 
   /**
    * Extend needed_mat_props, in place, with the material property dependencies of the materials
@@ -1260,6 +1256,20 @@ public:
                                             const THREAD_ID tid);
 
   /**
+   * Extend needed_mat_props, in place, with the material property dependencies of the materials
+   * active on the subdomains neighboring \p blk_id. Call this, in addition to
+   * resolveMaterialDependencies(), for a loop that reinits neighbor materials (i.e. calls
+   * reinitMaterialsNeighbor), so the producers on the neighbor side stay active too.
+   * @param needed_mat_props The set to extend; also the consumer objects' own needed properties on
+   * input
+   * @param blk_id The subdomain ID whose neighboring subdomains we are inspecting
+   * @param tid The thread ID we are preparing the requirements for
+   */
+  void resolveMaterialDependenciesNeighbor(std::unordered_set<unsigned int> & needed_mat_props,
+                                           const SubdomainID blk_id,
+                                           const THREAD_ID tid);
+
+  /**
    * Add the MooseVariables and the material properties that the current materials depend on to the
    * dependency list.
    * @param consumer_needed_mat_props The material properties needed by consumer objects (other than
@@ -1270,12 +1280,13 @@ public:
    * This MUST be done after the moose variable dependency list has been set for all the other
    * objects using the \p setActiveElementalMooseVariables API!
    *
+   * This activates the dependencies of every active material on \p blk_id, not just those of the
+   * producers of \p consumer_needed_mat_props, and activates them immediately.
+   *
    * \deprecated Use resolveMaterialDependencies(), resolveMaterialDependenciesInterface(), and
-   * setActiveElementalMooseVariables()/setActiveMaterialProperties() instead. Those let a loop
+   * setActiveElementalMooseVariables()/setActiveMaterialProperties() instead. They let a loop
    * extend the needed sets from multiple sources (e.g. InterfaceMaterials) before activating once,
-   * which this routine cannot do: it always widens needed_mat_props from every active material's
-   * own dependencies (not just producers of what is actually needed) and activates immediately,
-   * exactly as it did before that split.
+   * and they only follow the producers of what is needed.
    */
   void prepareMaterials(const std::unordered_set<unsigned int> & consumer_needed_mat_props,
                         const SubdomainID blk_id,

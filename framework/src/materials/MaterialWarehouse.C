@@ -135,6 +135,19 @@ MaterialWarehouse::sort(THREAD_ID tid /*=0*/, bool sort_all_objects /*=false*/)
 }
 
 void
+MaterialWarehouse::insertDependencies(const MaterialBase & material,
+                                      std::unordered_set<unsigned int> & needed_mat_props)
+{
+  const auto & mp_deps = material.getMatPropDependencies();
+  needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+
+  // A material computed directly by a host is only evaluated when its host runs, so the inputs of
+  // the host are needed too
+  for (const auto * const host : material.getHostMaterials())
+    insertDependencies(*host, needed_mat_props);
+}
+
+void
 MaterialWarehouse::updateMatPropDependencyHelper(
     std::unordered_set<unsigned int> & needed_mat_props,
     const std::vector<std::shared_ptr<MaterialBase>> & materials,
@@ -152,8 +165,8 @@ MaterialWarehouse::updateMatPropDependencyHelper(
         for (const auto prop : consumer_needed_mat_props)
           if (material->getSuppliedPropIDs().count(prop))
           {
-            auto & mp_deps = material->getMatPropDependencies();
-            needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+            insertDependencies(*material, needed_mat_props);
+            break;
           }
 
     } while (consumer_needed_mat_props.size() != needed_mat_props.size());

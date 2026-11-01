@@ -1179,15 +1179,24 @@ NonlinearSystemBase::reinitNodeFace(const Node & secondary_node,
   _fe_problem.reinitNeighborPhys(
       undisplaced_primary_elem, primary_side, {undisplaced_primary_physical_point}, 0);
 
-  std::unordered_set<unsigned int> needed_mat_props;
-  for (const auto & constraint :
-       _constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced))
+  const auto key = std::make_tuple(secondary_boundary, displaced, primary_elem->subdomain_id());
+  if (key != _active_node_face_mat_props_key)
   {
-    const auto & mp_deps = constraint->getMatPropDependencies();
-    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+    auto [it, inserted] = _node_face_needed_mat_props.try_emplace(key);
+    auto & needed_mat_props = it->second;
+    if (inserted)
+    {
+      for (const auto & constraint :
+           _constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced))
+      {
+        const auto & mp_deps = constraint->getMatPropDependencies();
+        needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+      }
+      _fe_problem.resolveMaterialDependencies(needed_mat_props, primary_elem->subdomain_id(), 0);
+    }
+    _fe_problem.setActiveMaterialProperties(needed_mat_props, 0);
+    _active_node_face_mat_props_key = key;
   }
-  _fe_problem.resolveMaterialDependencies(needed_mat_props, primary_elem->subdomain_id(), 0);
-  _fe_problem.setActiveMaterialProperties(needed_mat_props, 0);
 
   // Stateful material properties are only initialized for neighbor material data for internal faces
   // for discontinuous Galerkin methods or for conforming interfaces for interface kernels. We don't
@@ -1202,6 +1211,8 @@ NonlinearSystemBase::reinitNodeFace(const Node & secondary_node,
 void
 NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & solution, bool displaced)
 {
+  // Other loops may have changed the active material properties since the last pass
+  _active_node_face_mat_props_key.reset();
 
   if (displaced)
     mooseAssert(_fe_problem.getDisplacedProblem(),
@@ -1337,6 +1348,8 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
 void
 NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool displaced)
 {
+  // Other loops may have changed the active material properties since the last pass
+  _active_node_face_mat_props_key.reset();
   // Make sure the residual is in a good state
   residual.close();
 
@@ -2495,6 +2508,8 @@ void
 NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_to_view,
                                          bool displaced)
 {
+  // Other loops may have changed the active material properties since the last pass
+  _active_node_face_mat_props_key.reset();
   if (!hasMatrix(systemMatrixTag()))
     mooseError("A system matrix is required");
 

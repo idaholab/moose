@@ -267,13 +267,17 @@ MaterialPropertyInterface::checkExecutionStage()
 bool
 MaterialPropertyInterface::materialsAdded() const
 {
-  // Tasks that may add materials, in their execution order. A task with no registered action
-  // (e.g. no Physics in this app) cannot add materials, and isTaskComplete() rejects it
-  const auto & awh = _mi_feproblem.getMooseApp().actionWarehouse();
-  for (const auto & task : {"add_material",
-                            "add_master_action_material",
-                            "add_functor_material",
-                            "add_materials_physics"})
+  auto & awh = _mi_feproblem.getMooseApp().actionWarehouse();
+  auto tasks = awh.syntax().getMooseObjectTasks("MaterialBase");
+  const auto functor_tasks = awh.syntax().getMooseObjectTasks("FunctorMaterial");
+  tasks.insert(functor_tasks.begin(), functor_tasks.end());
+  // Not registered as a MaterialBase task, but actions use it to add materials that depend on
+  // materials added during add_material
+  tasks.insert("add_master_action_material");
+
+  // A task with no registered action (e.g. no Physics in this app) cannot add materials, and
+  // isTaskComplete() rejects it
+  for (const auto & task : tasks)
     if (awh.hasTask(task) && !awh.isTaskComplete(task))
       return false;
   return true;

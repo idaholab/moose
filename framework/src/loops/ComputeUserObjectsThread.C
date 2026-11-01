@@ -106,12 +106,13 @@ ComputeUserObjectsThread::subdomainChanged()
 
   _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
   _fe_problem.resolveMaterialDependenciesInterface(needed_mat_props, _subdomain, _tid);
-  // UserObjects (e.g. Postprocessors) run after the solve has already converged, often just once
-  // per timestep, so the extra breadth of a non-producer-only walk here is cheap. A material that
-  // invokes a compute=false sub-model via getMaterialByName (e.g.
-  // ComputeMultipleInelasticStressBase with a StressUpdateBase model) must still be re-run with the
-  // final, converged solution even when nothing in this loop directly needs the material's own
-  // declared properties, since that sub-model is otherwise never reinited on its own.
+  // Internal side and interface user objects also reinit materials on the neighboring subdomains
+  _fe_problem.resolveMaterialDependenciesNeighbor(needed_mat_props, _subdomain, _tid);
+  // UserObjects (e.g. Postprocessors) often run once the solve has converged, and may be the only
+  // loop evaluating materials with the converged solution before the end-of-step swap of stateful
+  // properties. A material whose stateful properties nothing in this loop consumes must still be
+  // re-run here, or the swap would store the state from the last residual evaluation, so this
+  // loop activates the dependencies of every material rather than only the producer chain.
   _fe_problem.resolveMaterialDependencies(
       needed_moose_vars, needed_mat_props, _subdomain, _tid, /*producer_only=*/false);
 

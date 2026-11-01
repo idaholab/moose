@@ -13,24 +13,26 @@
 /**
  * Test material for checking selective material reinitialization, on boundaries and blocks.
  */
-class MaterialReinitTest : public Material
+template <bool is_ad>
+class MaterialReinitTestTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  MaterialReinitTest(const InputParameters & parameters);
+  MaterialReinitTestTempl(const InputParameters & parameters);
 
 protected:
   void computeQpProperties() override;
 
   /// Property supplied by this material
-  MaterialProperty<Real> & _property;
+  GenericMaterialProperty<Real, is_ad> & _property;
 
   /// Constant contribution to the supplied property
   const Real _value;
 
-  /// Optional material property dependency
-  const MaterialProperty<Real> * const _coupled_property;
+  /// Optional material property dependency, retrieved with getGenericOrZeroMaterialProperty if
+  /// or_zero_coupled_property is set
+  const GenericMaterialProperty<Real, is_ad> * const _coupled_property;
 
   /// Whether computing the automatically-created face material is an error for this test
   const bool _error_on_face;
@@ -41,3 +43,6 @@ protected:
   /// Whether computing the block copy of this material is an error for this test
   const bool _error_on_volume;
 };
+
+typedef MaterialReinitTestTempl<false> MaterialReinitTest;
+typedef MaterialReinitTestTempl<true> ADMaterialReinitTest;

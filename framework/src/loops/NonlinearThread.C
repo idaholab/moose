@@ -121,6 +121,8 @@ NonlinearThread::subdomainChanged()
   _subdomain_has_hdg = _hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid);
 
   _fe_problem.resolveMaterialDependenciesInterface(needed_mat_props, _subdomain, _tid);
+  // DG kernels and interface kernels also reinit materials on the neighboring subdomains
+  _fe_problem.resolveMaterialDependenciesNeighbor(needed_mat_props, _subdomain, _tid);
   _fe_problem.resolveMaterialDependencies(needed_moose_vars, needed_mat_props, _subdomain, _tid);
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);

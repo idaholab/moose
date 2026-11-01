@@ -166,9 +166,32 @@ Material::getMaterialByName(const std::string & name, bool no_warn, bool no_dep)
     // retrieves this discrete material
     const auto & discrete_requested = discrete_mat.getRequestedItems();
     _requested_props.insert(discrete_requested.begin(), discrete_requested.end());
+
+    // This material computes the discrete material directly, so whatever the discrete material
+    // reads must be computed before this one runs
+    const auto & discrete_deps = discrete_mat.getMatPropDependencies();
+    _material_property_dependencies.insert(discrete_deps.begin(), discrete_deps.end());
+
+    if (std::find(_sub_materials.begin(), _sub_materials.end(), &discrete_mat) ==
+        _sub_materials.end())
+    {
+      _sub_materials.push_back(&discrete_mat);
+      discrete_mat.addHostMaterial(*this);
+    }
   }
 
   return discrete_mat;
+}
+
+bool
+Material::hasActiveProperties()
+{
+  if (MaterialBase::hasActiveProperties())
+    return true;
+  for (auto * const sub_material : _sub_materials)
+    if (sub_material->hasActiveProperties())
+      return true;
+  return false;
 }
 
 void
@@ -176,7 +199,6 @@ Material::resolveOptionalProperties()
 {
   for (auto & proxy : _optional_property_proxies)
     proxy->resolve(*this);
-  resolveGetGenericOrZeroPropertyDependencies();
 }
 
 void

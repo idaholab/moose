@@ -4297,7 +4297,7 @@ FEProblemBase::resolveMaterialDependencies(std::set<MooseVariableFEBase *> & nee
                                            std::unordered_set<unsigned int> & needed_mat_props,
                                            const SubdomainID blk_id,
                                            const THREAD_ID tid,
-                                           bool producer_only)
+                                           const bool producer_only)
 {
   if (_all_materials.hasActiveBlockObjects(blk_id, tid))
   {
@@ -4337,6 +4337,19 @@ FEProblemBase::resolveMaterialDependenciesInterface(
   for (const auto id : ids)
     _interface_materials.updateBoundaryMatPropDependency(
         id, needed_mat_props, tid, /*producer_only=*/true);
+}
+
+void
+FEProblemBase::resolveMaterialDependenciesNeighbor(
+    std::unordered_set<unsigned int> & needed_mat_props,
+    const SubdomainID blk_id,
+    const THREAD_ID tid)
+{
+  // Neighbor materials share the property IDs and dependencies of their block counterparts
+  for (const auto neighbor_id : _mesh.getBlockConnectedBlocks(blk_id))
+    if (_all_materials.hasActiveBlockObjects(neighbor_id, tid))
+      _all_materials.updateBlockMatPropDependency(
+          neighbor_id, needed_mat_props, tid, /*producer_only=*/true);
 }
 
 void

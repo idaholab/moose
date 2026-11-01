@@ -168,6 +168,13 @@ public:
   MaterialBase &
   getMaterialByName(const std::string & name, bool no_warn = false, bool no_dep = false);
 
+  /**
+   * Whether this material, or a material it computes directly after retrieving it with
+   * getMaterialByName(), has active properties. A directly-computed material is only ever
+   * evaluated through this one, so this one must run whenever any of its properties is needed.
+   */
+  virtual bool hasActiveProperties() override;
+
   ///@{ Optional material property getters
   template <typename T, bool is_ad>
   const GenericOptionalMaterialProperty<T, is_ad> &
@@ -255,6 +262,10 @@ private:
   /// context. If properties depend on finite element variables, then this material cannot be
   /// computed in a ghosted context
   bool _ghostable;
+
+  /// Materials retrieved with getMaterialByName() for dependency resolution, which this material
+  /// may compute directly
+  std::vector<MaterialBase *> _sub_materials;
 
   /// optional material properties
   std::vector<std::unique_ptr<OptionalMaterialPropertyProxyBase<Material>>>

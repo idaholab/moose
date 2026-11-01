@@ -331,6 +331,17 @@ Syntax::getActions(const std::string & syntax) const
   return _syntax_to_actions.equal_range(syntax);
 }
 
+std::set<std::string>
+Syntax::getMooseObjectTasks(const std::string & base) const
+{
+  std::set<std::string> tasks;
+  for (const auto * const map :
+       {&_moose_systems_to_tasks, &_deprecated_list_moose_systems_to_tasks})
+    for (const auto & [_, task] : as_range(map->equal_range(base)))
+      tasks.insert(task);
+  return tasks;
+}
+
 bool
 Syntax::verifyMooseObjectTask(const std::string & base, const std::string & task) const
 {

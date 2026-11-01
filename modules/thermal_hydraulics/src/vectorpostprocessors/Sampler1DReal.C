@@ -68,9 +68,10 @@ Sampler1DRealTempl<is_ad>::execute()
 {
   std::vector<Real> values(_material_properties.size());
 
+  // Material properties needed on the current subdomain, including the dependencies of their
+  // producers, activated only when the subdomain changes
   std::unordered_set<unsigned int> needed_mat_props;
-  const auto & mp_deps = getMatPropDependencies();
-  needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+  SubdomainID active_subdomain = Moose::INVALID_BLOCK_ID;
 
   const ConstElemRange & elem_range = *(_mesh.getActiveLocalElementRange());
   for (typename ConstElemRange::const_iterator el = elem_range.begin(); el != elem_range.end();
@@ -88,9 +89,15 @@ Sampler1DRealTempl<is_ad>::execute()
     _subproblem.prepare(elem, _tid);
     _subproblem.reinitElem(elem, _tid);
 
-    // TODO: this could be done only on a per-subdomain basis
-    _fe_problem.resolveMaterialDependencies(needed_mat_props, elem->subdomain_id(), _tid);
-    _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
+    if (elem->subdomain_id() != active_subdomain)
+    {
+      needed_mat_props.clear();
+      const auto & mp_deps = getMatPropDependencies();
+      needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+      _fe_problem.resolveMaterialDependencies(needed_mat_props, elem->subdomain_id(), _tid);
+      _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
+      active_subdomain = elem->subdomain_id();
+    }
 
     // Set up Sentinel class so that, even if reinitMaterials() throws, we
     // still remember to swap back during stack unwinding.

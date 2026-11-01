@@ -146,6 +146,10 @@ protected:
   {
     return MaterialPropertyInterface::getMatPropDependencies();
   }
+  virtual void addMatPropDependencyById(const unsigned int prop_id) override
+  {
+    MaterialPropertyInterface::addMatPropDependencyById(prop_id);
+  }
 
   virtual const MaterialData & materialData() const override { return _material_data; }
   virtual MaterialData & materialData() override { return _material_data; }
