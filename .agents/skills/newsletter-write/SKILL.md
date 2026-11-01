@@ -26,8 +26,8 @@ The month is the one piece of information this task cannot infer. Resolve it bef
 - Otherwise ask which month or date range to cover, and wait for the answer.
 
 Bound the range on the **first day of the month through the first day of the next month**. Do not
-widen it to catch merges from the preceding days; a change that merged in September belongs to
-September's newsletter even if it was reviewed in October.
+widen it to catch merges from the preceding days. The merge date decides the month, not the review:
+a pull request reviewed through late September but merged on October 2 belongs to October.
 
 ```bash
 git log --merges --first-parent --since=<YYYY>-<MM>-01 --until=<YYYY>-<MM+1>-01 \
@@ -36,6 +36,12 @@ git log --merges --first-parent --since=<YYYY>-<MM>-01 --until=<YYYY>-<MM+1>-01 
 
 `--first-parent` keeps this to the merges onto the release branch, one per pull request. Expect
 on the order of 100-150 for a full month.
+
+Fetch the base branch and work from it, rather than from a local copy that may be behind. A month's
+newsletter is written days after the month closes, and in that window other authors add entries to
+the target file and reviewers merge changes that affect what belongs in it. A stale base silently
+costs both: entries written by other people go missing when the branch is rebased, and the month's
+merge list is incomplete.
 
 ## Step 2 - Read the style authority
 
@@ -118,12 +124,19 @@ Leave out:
   worth one line.
 - **Pure SQA metadata backfills**, unless a module's coverage is the point of the entry.
 - **Investigation dead ends**, per `AGENTS.md` section 9.
+- **Documentation typo, link, and wording corrections**, and renames of internal classes or
+  methods that no input or application code names.
+- **Cosmetic web and tooling changes** a reader cannot act on, such as scrollbar behavior or a URL
+  change in file headers.
 
-Each distinct change earns one entry. Most pull requests contain exactly one, but before setting a
-PR aside as covered, check whether it also did something unrelated that a reader would want: the
-monthly package update that also adds a developer skill is one PR with two separate subjects, and
-placing the version bumps does not account for the skill. Each such subject goes in the section
-where it belongs.
+Most of what merges in a month does not earn an entry. A full month's 100-150 merges yield 80-95
+entries, so expect to set aside roughly one PR in six without writing anything for it.
+
+Each distinct change earns one entry, and most pull requests contain exactly one. A PR does not
+earn more than one by touching several files; it earns a second entry only when it did a second
+thing a reader would look for separately, as the monthly package update that also adds a developer
+skill did. Before setting a PR aside as covered, check for such a subject; each one goes in the
+section where it belongs.
 
 Never cite one PR twice for the same change, or split one change's detail across sections. A single
 change spanning two domains gets one entry that treats it in full, placed where most of its
@@ -149,7 +162,9 @@ the topic. A heading of this kind has a subject and a verb, and states what is n
 - `New <thing> for <purpose>` for a new object, when the purpose is what a reader is scanning for.
 
 Say which object, parameter, or subsystem changed, using the name a user would type. A heading that
-could sit unchanged over a different month's section is too vague to be worth the words.
+could sit unchanged over a different month's section is too vague to be worth the words. The point
+of the forms above is the specific name, not the sentence shape: a heading built from the shape
+alone, with the name left out, is worse than the bare noun phrase it replaced.
 
 Keep them under roughly 75 characters. If the summary runs longer, move the qualifying detail into
 the body's first sentence, where it is needed anyway.
@@ -158,10 +173,65 @@ A heading over a group of *unrelated* fixes cannot honestly summarize them. Name
 fixes share and mark it as a fix group, by appending a word such as "fixes" or "robustness" to the
 area name, which is how recent months title these sections.
 
+**Features come before fixes.** The file's two top-level sections, `MOOSE Improvements` and
+`MOOSE Bug Fixes`, already carry this split, so put a fix under the latter unless it belongs with a
+feature a reader would read alongside it. A subsystem section that must hold both, such as a
+backend whose month included new capability and corrections, orders its entries features first and
+fixes last rather than interleaving them. Do not add "Features" and "Fixes" subheadings to do this;
+ordering carries it, and the newsletters use no such headings.
+
+Judge a section by how a reader skimming it would rank what they find: when more than about a third
+of a feature section's entries describe something that used to be wrong, the fixes are in the wrong
+place.
+
 ## Step 6 - Write the entries
 
 Lead with what changed and why it matters, then the mechanism, then the consequence for a user.
 A good bug fix entry states the wrong behavior, the cause, and what results change.
+
+### Length
+
+**Budget about 40 words per entry across the framework and module sections**, and measure it rather
+than trusting the impression that each entry reads tightly; they do individually, and the total is
+still too long. Take the figure from the two months read in Step 2 instead of this number if they
+disagree:
+
+```bash
+python3 -I -c "
+import re,sys
+t=open(sys.argv[1]).read()
+i=t.find('## libMesh-level Changes')          # absent in some months
+b=t[:i] if i > 0 else t
+w=len(b.split()); n=len(set(re.findall(r'moose/(?:pull|issues)/([0-9]+)',b)))
+print(f'{w} words, {n} entries, {w/n:.0f} words/entry')
+" <newsletter>
+```
+
+The package and libMesh sections sit outside this measure; they are supplied, not written here.
+
+Most entries are one or two sentences. Spend four or five only on a change that reshapes how an
+input is written or what a result means, and expect two or three such items in a month, not twenty.
+When the budget is exceeded, cut in this order:
+
+1. **Drop entries that do not clear Step 4.** A shorter list of things that matter beats a complete
+   list of everything that merged.
+2. **Cut the mechanism from entries whose outcome stands alone.** A reader needs the internal call
+   path only when it tells them which of their inputs is affected.
+3. **Compress the remaining prose.** Do this last, and only on entries whose content has already
+   been judged worth keeping; tightening sentences cannot recover a 40% overrun on its own.
+
+### Register
+
+Write for a reader deciding whether a change affects their work, not for the reviewer of the pull
+request it came from:
+
+- **Name what a user can name.** Objects, parameters, input blocks, and command-line flags belong
+  in an entry because a reader can search for them. An internal class, a method, a member variable,
+  or a source file name usually does not, since it tells them nothing they can act on. Reach for
+  one only when the reader has no other handle on the change, as with an API an application
+  subclasses.
+- Vary the construction. A whole section of "X gained a parameter" reads as generated; prefer "X
+  takes a new `param`", "`param` selects ...", or stating what the parameter does.
 
 Cite every change, with the citation starting its own line rather than trailing the last sentence.
 This holds even when it would fit on the preceding line; inside a bullet, indent it to the bullet's
@@ -178,7 +248,7 @@ Conventions this file's prose follows:
 
 - Link objects as `[ClassName.md]`, syntax blocks as `[Name](syntax/Name/index.md)`, and
   parameters as `[!param](/Block/Type/param_name)`.
-- Serial (Oxford) comma; it dominates these files.
+- Serial (Oxford) comma, which these files use throughout.
 - ASCII only, per `AGENTS.md` section 4. Write "-" rather than an en dash.
 - State that results change where they do, in those words; avoid "bit-for-bit".
 - Say what a flag or parameter is called exactly as a user would type it.
@@ -194,14 +264,31 @@ grep -oE "\[[A-Za-z0-9_]+\.md\]" <newsletter> | tr -d '[]' | sort -u | while rea
 done
 ```
 
-Base classes, interfaces, and many AD template variants have no page; write those as inline code
-instead of a link. Also confirm that each `syntax/.../index.md` path exists under
+Base classes and interfaces have no page; write those as inline code. An AD variant usually has no
+page of its own either. Check for one anyway, because some do: where it exists, link it, and where
+it does not, link the non-AD object it mirrors and leave the AD class as inline code beside it.
+
+Also confirm that each `syntax/.../index.md` path exists under
 `framework/doc/content/`, and that each `[!param]` path names the block and type that really
 declares the parameter (`grep` the `addParam` call, or copy the path from the module's own
 documentation).
 
-Then re-check the heading structure, that no pre-existing entry changed, and that the file is
-pure ASCII (`LC_ALL=C grep -n '[^ -~]' <newsletter>`).
+Then re-check the heading structure and that the file is pure ASCII
+(`LC_ALL=C grep -n '[^ -~]' <newsletter>`).
+
+Measure the length against the budget in Step 6 and against the two months read in Step 2. Writing
+tight sentences is not the same as writing a newsletter of the right length, and the difference
+only shows up in the count.
+
+Finally, confirm that no entry anyone else wrote was changed or lost, by diffing against the base
+branch rather than against the file as it looked when the work started:
+
+```bash
+git fetch <remote> <base> && git diff <remote>/<base>...HEAD -- <newsletter> | grep '^-'
+```
+
+Every removed line should be one this work deliberately removed. A pre-existing entry appearing
+there means a rebase or a rewritten section dropped someone else's work.
 
 ## Grammar-edit mode
 
