@@ -286,8 +286,9 @@ function install_libtorch_python()
   if [[ "$(uname)" == Darwin ]]; then
     # Backport PyTorch's OpenMP RPATH fix only for the duration of packaging.
     # Restore the original script on exit so the submodule remains unchanged.
+    # Use the macOS system patch rather than an unrelated tool of the same name on PATH.
     local rpath_patch="$script_dir/pytorch-macos-openmp-rpath.patch"
-    if patch -d "$source_dir" -p1 -f --dry-run --silent < "$rpath_patch" > /dev/null 2>&1; then
+    if /usr/bin/patch -d "$source_dir" -p1 -f --dry-run --silent < "$rpath_patch" > /dev/null 2>&1; then
       local backup_dir embed_script
       embed_script="$(cd "$source_dir/tools" && pwd)/embed_libomp_macos.py" || return
       backup_dir=$(mktemp -d) || return
@@ -295,9 +296,9 @@ function install_libtorch_python()
       trap 'cp -p "$backup_dir/embed_libomp_macos.py" "$embed_script" && rm -rf "$backup_dir"' EXIT
       trap 'exit 130' INT
       trap 'exit 143' TERM
-      patch -d "$source_dir" -p1 -f -o "$backup_dir/patched.py" < "$rpath_patch" || return
+      /usr/bin/patch -d "$source_dir" -p1 -f -o "$backup_dir/patched.py" < "$rpath_patch" || return
       cp "$backup_dir/patched.py" "$embed_script" || return
-    elif ! patch -d "$source_dir" -p1 -f -R --dry-run --silent < "$rpath_patch" > /dev/null 2>&1; then
+    elif ! /usr/bin/patch -d "$source_dir" -p1 -f -R --dry-run --silent < "$rpath_patch" > /dev/null 2>&1; then
       >&2 echo "ERROR: Cannot apply the PyTorch macOS OpenMP RPATH fix"
       return 1
     fi
