@@ -260,21 +260,14 @@ MortarConsumerInterface::checkPetrovGalerkinQuadraticFaces(
   if (!lm_var.useDual() || lm_var.feType().family != LAGRANGE || lm_var.feType().order != SECOND)
     return;
 
-  bool quadratic_face = false;
   for (const auto * const lower_elem :
-       _mci_mesh.getMesh().active_subdomain_elements_ptr_range(_secondary_subdomain_id))
+       _mci_mesh.getMesh().active_local_subdomain_elements_ptr_range(_secondary_subdomain_id))
     if (lower_elem->type() == QUAD8 || lower_elem->type() == TRI6)
-    {
-      quadratic_face = true;
-      break;
-    }
-  moose_object.comm().max(quadratic_face);
-  if (quadratic_face)
-    moose_object.paramError(
-        "use_petrov_galerkin",
-        "The Petrov-Galerkin approach is not supported for a SECOND order dual Lagrange "
-        "multiplier on QUAD8 or TRI6 secondary faces. Use a FIRST order multiplier or disable "
-        "`use_petrov_galerkin`.");
+      moose_object.paramError(
+          "use_petrov_galerkin",
+          "The Petrov-Galerkin approach is not supported for a SECOND order dual Lagrange "
+          "multiplier on QUAD8 or TRI6 secondary faces. Use a FIRST order multiplier or disable "
+          "`use_petrov_galerkin`.");
 }
 
 void

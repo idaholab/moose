@@ -9,11 +9,12 @@ d_k = \int_{\gamma} N_k \, \mathrm{d}\gamma ,
 
 where $N$ is the standard basis on the secondary face $\gamma$. Mortar mechanical contact divides
 the weighted gap of node $j$ by $d_j$, so every $d_j$ must be positive. On QUAD8 and TRI6 faces,
-the faces of HEX20 and TET10 elements, it is not: $d_k = -1/3$ at QUAD8 corners and $d_k = 0$ at
+the faces of HEX20 and TET10 elements, it is not: $d_k = -1/3$ at QUAD8 vertices and $d_k = 0$ at
 TRI6 vertices, where the dual shape functions vanish ([!cite](popp2012dual), Eqs. (4.3) and (4.4)).
 
 libMesh therefore builds the dual basis of a SECOND order Lagrange multiplier on these faces against
-the locally quadratic transformed basis of [!cite](popp2012dual), Sec. 4.4.1,
+the locally quadratic transformed basis of [!cite](popp2012dual), Sec. 4.4.1, defined in terms of
+the standard basis $N$ as
 
 \begin{equation}
 \tilde{N}_v = N_v + \alpha \sum_{m \,\in\, \mathrm{adj}(v)} N_m , \qquad
