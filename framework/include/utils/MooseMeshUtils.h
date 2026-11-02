@@ -163,7 +163,8 @@ getAllSubdomainNamesAndIDs(const libMesh::MeshBase & mesh);
 
 /**
  * Calculates the centroid of a MeshBase.
- * @param mesh input mesh whose centroid needs to be calculated
+ * @param mesh input mesh whose centroid needs to be calculated. It must be partitioned, as
+ * the centroid is summed over the local elements
  * @return a Point corresponding to the mesh centroid
  */
 Point meshCentroidCalculator(const MeshBase & mesh);
