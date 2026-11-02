@@ -964,6 +964,18 @@ protected:
                                              unsigned int comp = 0) const;
 
   /**
+   * Returns divergence of a coupled variable for use in objects utilizing Automatic
+   * Differentiation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to an ADVectorVariableDivergence containing the divergence of the coupled
+   * variable
+   * @see Kernel::_div_u
+   */
+  const ADVectorVariableDivergence & adCoupledDiv(const std::string & var_name,
+                                                  unsigned int comp = 0) const;
+
+  /**
    * Returns divergence of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -1567,6 +1579,10 @@ protected:
   /// This will always be zero because the default values for optionally coupled vector variables is always constant
   mutable MooseArray<ADRealVectorValue> _ad_default_curl;
 
+  /// Will hold the default value for optional vector coupled variable divergences for automatic
+  /// differentiation.
+  mutable MooseArray<ADReal> _ad_default_div;
+
   /// Zero value of a variable
   const VariableValue & _zero;
   const VariablePhiValue & _phi_zero;
@@ -1858,6 +1874,13 @@ public:
    * @return Reference to a ADVectorVariableCurl containing zero entries for the default values
    */
   const ADVectorVariableCurl & getADDefaultCurl() const;
+
+  /**
+   * Helper method to return (and insert if necessary) the default divergence value for Automatic
+   * Differentiation for an uncoupled vector variable.
+   * @return the default divergence value for the vector variable
+   */
+  const ADVectorVariableDivergence & getADDefaultDiv() const;
 
   /**
    * Helper method to return (and insert if necessary) the default array value for Automatic
