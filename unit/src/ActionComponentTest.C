@@ -9,8 +9,11 @@
 
 #include "gtest_include.h"
 
+#include "Executioner.h"
+#include "FEProblemBase.h"
 #include "MooseAppTestUtils.h"
 #include "MooseMain.h"
+#include "MooseMesh.h"
 #include "MooseUnitUtils.h"
 
 #include <string>
@@ -49,6 +52,41 @@ TEST(ActionComponentTest, cylinder3DDiscretization)
 {
   EXPECT_MOOSEERROR_MSG_CONTAINS(runInput("cylinder.i", {"ActionComponents/cyl/dimension=3"}),
                                  "Should be provided in 3D");
+}
+
+TEST(ActionComponentTest, cylinderRZCoordinates)
+{
+  Args args({"-i", "files/ActionComponentTest/cylinder_rz.i"});
+  const auto app = Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv());
+  app->run();
+  const auto & mesh = app->getExecutioner()->feProblem().mesh();
+
+  // RZ is only applied to the cylinder, the other subdomains keep their coordinate system
+  const auto cyl_id = mesh.getSubdomainID("cyl");
+  EXPECT_EQ(mesh.getCoordSystem(cyl_id), Moose::COORD_RZ);
+  EXPECT_EQ(mesh.getCoordSystem(mesh.getSubdomainID("cyl_xy")), Moose::COORD_XYZ);
+
+  // The axis goes through the cylinder position, along its direction
+  const auto & [origin, direction] = mesh.getGeneralAxisymmetricCoordAxis(cyl_id);
+  EXPECT_EQ(origin, Point(5, 0, 0));
+  EXPECT_EQ(direction, RealVectorValue(0, 1, 0));
+}
+
+TEST(ActionComponentTest, cylinderRZBlock)
+{
+  // The RZ axis is set per subdomain, so the cylinder must have a named subdomain
+  EXPECT_MOOSEERROR_MSG_CONTAINS(
+      runInput("cylinder.i", {"ActionComponents/cyl/use_RZ_coordinates=true"}),
+      "Should be specified to use RZ coordinates");
+}
+
+TEST(ActionComponentTest, cylinderRotationRZ)
+{
+  EXPECT_MOOSEERROR_MSG_CONTAINS(runInput("cylinder.i",
+                                          {"ActionComponents/cyl/use_RZ_coordinates=true",
+                                           "ActionComponents/cyl/block=cyl",
+                                           "ActionComponents/cyl/rotation='0 0 90'"}),
+                                 "Rotation + 2D RZ cylinder not implemented");
 }
 
 TEST(ActionComponentTest, rotationAndDirection)
