@@ -231,7 +231,6 @@
                   'multipliers when the secondary surface normal is close to the negative x '
                   'direction.'
     issues = '#34145'
-    restep = false # Test is prescribed to abort on failed timestep
   []
   [split_secondary]
     type = 'Exodiff'

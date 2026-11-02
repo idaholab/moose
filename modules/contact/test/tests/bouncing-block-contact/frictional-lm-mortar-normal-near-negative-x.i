@@ -122,7 +122,7 @@ sin_angle = ${fparse sin(angle * pi / 180)}
   end_time = 15
   dt = 5
   # Any failed solve fails the test
-  dtmin = 5
+  abort_on_solve_fail = true
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       NONZERO               1e-15'
