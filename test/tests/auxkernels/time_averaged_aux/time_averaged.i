@@ -30,7 +30,7 @@
 
 [AuxKernels]
   [u_avg]
-    type = RunningTimeAverageAux
+    type = TimeAveragedAux
     variable = u_avg
     functor = u
     start_time = 2
