@@ -40,6 +40,9 @@ CombineComponentsMeshes::act()
     // Get the list of components meshes (from their last mesh generators)
     std::vector<MeshGeneratorName> all_components_mgs;
     std::vector<MeshGeneratorName> mgs_to_combine;
+    // Components stitched or joined together share a top-level mesh generator, which must only be
+    // combined once
+    std::set<MeshGeneratorName> added_mgs;
     std::vector<const ActionComponent *> components = _awh.getActions<ActionComponent>();
     for (const auto comp : components)
     {
@@ -47,7 +50,14 @@ CombineComponentsMeshes::act()
       for (const auto & mg_name : comp->meshGeneratorNames())
         all_components_mgs.push_back(mg_name);
       if (comp->meshGeneratorNames().size())
-        mgs_to_combine.push_back(comp->meshGeneratorNames().back());
+      {
+        // Not all components set a top-level mesh generator
+        const auto top_mg = comp->getCurrentTopLevelMeshGeneratorName().empty()
+                                ? comp->meshGeneratorNames().back()
+                                : comp->getCurrentTopLevelMeshGeneratorName();
+        if (added_mgs.insert(top_mg).second)
+          mgs_to_combine.push_back(top_mg);
+      }
     }
 
     // Do not create a CombinerGenerator if there are no mesh generators to combine
