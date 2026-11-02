@@ -50,38 +50,28 @@ ComputeLagrangianStressPK1::computeQpCauchyStress()
                              _fe_problem.currentlyComputingResidualAndJacobian();
   if (_large_kinematics)
   {
-    const RankTwoTensor F_ust_inv = _F_ust[_qp].inverse();
     const Real J_ust = _F_ust[_qp].det();
     _cauchy_stress[_qp] = _pk1_stress[_qp] * _F_ust[_qp].transpose() / J_ust;
 
     if (!need_jacobian)
       return;
 
-    usingTensorIndices(i_, j_, m_, n_);
-    const auto I = RankTwoTensor::Identity();
+    // sigma = (1/J(F_ust)) * PK1(F_stab) * F_ust^T. cauchy_jacobian = dsigma/d(dL) at fixed F_ust;
+    // the kernels supply d(dL) including the F-bar terms.
+    if (needCauchyJacobian())
+      _cauchy_jacobian[_qp] = _pk1_jacobian[_qp].singleProductJ(_F_ust[_qp]) / J_ust *
+                              _d_deformation_gradient_increment_d_F[_qp].inverse();
 
-    // dsigma/d(F_ust) via the constitutive PK1's F_stab chain plus the geometric F_ust pieces.
-    //   sigma = (1/J(F_ust)) * PK1(F_stab) * F_ust^T
-    //   dsigma/d(F_ust) = (1/J) * dPK1/d(F_stab) * d(F_stab)/d(F_ust) * F_ust^T
-    //               + (1/J) * PK1 * d(F_ust^T)/d(F_ust)
-    //               - sigma (x) F_ust^{-T}.
-    // The middle factor `_d_F_stab_d_F_ust` is IdentityFour when F-bar is off, so the
-    // first line collapses to the original PK1-jacobian chain.
-    // Common geometric pieces (independent of F-bar):
-    const RankFourTensor dsigma_dF_geom = _pk1_stress[_qp].times<i_, n_, j_, m_>(I) / J_ust -
-                                          _cauchy_stress[_qp].times<i_, j_, n_, m_>(F_ust_inv);
-    // dsigma_dF with the constitutive PK1 jacobian chained via F-bar (default path).
-    RankFourTensor dsigma_dF =
-        (_pk1_jacobian[_qp] * _d_F_stab_d_F_ust[_qp]).singleProductJ(_F_ust[_qp]) / J_ust;
-    dsigma_dF += dsigma_dF_geom;
-    _cauchy_jacobian[_qp] = dsigma_dF * _d_deformation_gradient_increment_d_F[_qp].inverse();
+    // dsigma/d(F_ust) at fixed PK1: (1/J) * PK1 * d(F_ust^T)/d(F_ust) - sigma (x) F_ust^{-T}
+    if (isPropertyActive(_d_cauchy_d_F_ust.id()))
+    {
+      usingTensorIndices(i_, j_, m_, n_);
+      const auto I = RankTwoTensor::Identity();
+      _d_cauchy_d_F_ust[_qp] = _pk1_stress[_qp].times<i_, n_, j_, m_>(I) / J_ust -
+                               _cauchy_stress[_qp].times<i_, j_, n_, m_>(_F_ust[_qp].inverse());
+    }
 
-    // Bypass-F-bar variant: sigma chain without the `_d_F_stab_d_F_ust` factor. Same
-    // geometric pieces; constitutive PK1 jacobian used directly.
-    RankFourTensor dsigma_dF_no_fbar = _pk1_jacobian[_qp].singleProductJ(_F_ust[_qp]) / J_ust;
-    dsigma_dF_no_fbar += dsigma_dF_geom;
-
-    // Update _pk1_jacobian and publish the bypass variant.
+    // Chain _pk1_jacobian to F_ust and publish the variant without the local F-bar factor
     const RankFourTensor pk1_jac_no_fbar = _pk1_jacobian[_qp];
     _pk1_jacobian[_qp] = _pk1_jacobian[_qp] * _d_F_stab_d_F_ust[_qp];
     _pk1_jacobian_bypass_fbar[_qp] = pk1_jac_no_fbar;
@@ -95,8 +85,20 @@ ComputeLagrangianStressPK1::computeQpCauchyStress()
     _cauchy_stress[_qp] = _pk1_stress[_qp];
     if (!need_jacobian)
       return;
-    _cauchy_jacobian[_qp] = _pk1_jacobian[_qp];
+    if (needCauchyJacobian())
+      _cauchy_jacobian[_qp] = _pk1_jacobian[_qp];
     _pk1_jacobian_bypass_fbar[_qp] = _pk1_jacobian[_qp];
     _pk1_jacobian[_qp] = _pk1_jacobian[_qp] * _d_F_stab_d_F_ust[_qp];
   }
+}
+
+RankFourTensor
+ComputeLagrangianStressPK1::pk2WrapDerivative(const RankTwoTensor & S) const
+{
+  // dsigma_ij/dF_mn = (delta_im (S F^T)_nj + (F S)_in delta_jm) / det(F) - sigma_ij F^-1_nm
+  usingTensorIndices(i_, j_, m_, n_);
+  const auto I = RankTwoTensor::Identity();
+  const RankTwoTensor & F = _F_ust[_qp];
+  return (I.times<i_, m_, n_, j_>(S * F.transpose()) + (F * S).times<i_, n_, j_, m_>(I)) / F.det() -
+         _cauchy_stress[_qp].times<i_, j_, n_, m_>(F.inverse());
 }

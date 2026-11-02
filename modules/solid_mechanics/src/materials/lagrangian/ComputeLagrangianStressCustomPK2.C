@@ -79,6 +79,11 @@ ComputeLagrangianStressCustomPK2::computeQpCauchyStress()
       !_fe_problem.currentlyComputingResidualAndJacobian())
     return;
 
+  if (isPropertyActive(_d_cauchy_d_F_ust.id()))
+    _d_cauchy_d_F_ust[_qp] = pk2WrapDerivative(_pk2[_qp]);
+  if (!needCauchyJacobian())
+    return;
+
   // cauchy_jacobian = dsigma/d(dL). sigma depends on dL only through PK2(F_stab(dL))
   // (F_ust is constant w.r.t. dL since dL is computed from F_stab via the kinematic helper).
   //   dPK2/d(dL) = dPK2/d(F_stab) * d(F_stab)/d(dL) = _dpk2_dF *

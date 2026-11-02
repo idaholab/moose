@@ -45,6 +45,8 @@ protected:
   virtual RankTwoTensor gradTest(unsigned int component) override;
   virtual RankTwoTensor gradTrial(unsigned int component) override;
   virtual void precalculateJacobianDisplacement(unsigned int component) override;
+  virtual void precalculateJacobian() override;
+  virtual void precalculateOffDiagJacobian(unsigned int jvar) override;
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobianDisplacement(unsigned int alpha, unsigned int beta) override;
   virtual Real computeQpJacobianTemperature(unsigned int cvar) override;
@@ -57,6 +59,9 @@ protected:
   // gradient
   const MaterialProperty<RankFourTensor> & _material_jacobian;
 
+  /// Derivative of the Cauchy stress wrt the unstabilized deformation gradient
+  const MaterialProperty<RankFourTensor> & _d_stress_d_F_ust;
+
   // @{
   // The assembly quantities in the reference frame for stabilization
   Assembly & _assembly_undisplaced;
@@ -67,6 +72,14 @@ protected:
   // @}
 
 private:
+  /// Fill _dstress_cache and _grad_trial_cache for trial component beta
+  void populateStressCache(unsigned int beta);
+
+  /// Stress change from trial function j at each qp (material plus direct F_ust dependence)
+  std::vector<std::vector<RankTwoTensor>> _dstress_cache;
+  /// Unstabilized spatial trial gradient per qp and trial function
+  std::vector<std::vector<RankTwoTensor>> _grad_trial_cache;
+
   /// The unstabilized trial function gradient. F-bar stabilization is handled explicitly in
   /// computeQpJacobianDisplacement via the strain-calculator F-bar partials, so the UL kernel
   /// does not need a separate gradTrialStabilized helper.
