@@ -173,8 +173,8 @@
   []
 
   [variable_abs_tol]
-    requirement = 'The system shall be able to check the convergence of individual variables against '
-                  'reference quantities with an absolute tolerance specific to each variable'
+    requirement = 'The system shall be able to check the convergence of individual equation residuals against '
+                  'reference quantities with an absolute tolerance specific to each equation'
     issues = '#34304'
     [converge]
       type = CSVDiff
