@@ -71,6 +71,19 @@
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using Petrov-Galerkin approach in contact action.'
   []
+  [frictionless-mortar-3d-pg-action-quadratic-faces]
+    type = RunException
+    input = 'frictionless-mortar-3d-action.i'
+    cli_args = 'Mesh/top_block/elem_type=HEX20 Mesh/bottom_block/elem_type=HEX20 '
+               'Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+               'Variables/disp_z/order=SECOND Contact/mortar/use_petrov_galerkin=true --check-input'
+    expect_err = 'The Petrov-Galerkin approach is not supported for a SECOND order dual Lagrange'
+    issues = '#33558'
+    design = 'Petrov-Galerkin_approach_for_Lagrange_multipliers.md'
+    requirement = 'The system shall report an error if the contact action is asked to use the '
+                  'Petrov-Galerkin approach with a second-order dual Lagrange multiplier on QUAD8 '
+                  'secondary faces.'
+  []
   [frictionless-mortar-3d-action-qp-mapping]
     design = 'ContactAction.md AutomaticMortarGeneration.md'
     issues = '#33367'
