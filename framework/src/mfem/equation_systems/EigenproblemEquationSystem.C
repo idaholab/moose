@@ -88,7 +88,7 @@ EigenproblemEquationSystem::FormMassMatrix(EigenRHSCoefficient rhs_coefficient)
     }
     auto * const integ = std::visit(
         [](auto * coef) { return new mfem::VectorMassIntegrator(*coef); }, rhs_coefficient);
-    // Otherwise VectorMassIntegrator assumes as many components as there are space dimensions.
+    // Otherwise, for scalar coefficients, VectorMassIntegrator defaults to the space dimension.
     integ->SetVDim(fespace->GetVDim());
     m->AddDomainIntegrator(integ);
   }
