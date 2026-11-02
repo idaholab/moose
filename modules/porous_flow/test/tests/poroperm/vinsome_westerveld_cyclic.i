@@ -1,8 +1,9 @@
 # Testing PorousFlowPorosityVinsomeWesterveld with matrix_thickness when the fracture-face
 # temperature changes sign repeatedly: theta = T - matrix_reference_temperature = t * sin(t).
 # With porosity_ref = 0.5 and thermal_opening_coeff = 0.01, heat_content = (0.5 - porosity) / 0.01 = I_L,
-# the heat content of the layer 0 <= z <= matrix_thickness = 0.5.  |I_L| must not exceed 0.5 * max|theta|.
-# The exact I_L, from Duhamel's theorem, is computed by vinsome_westerveld_cyclic_exact.py
+# the heat content of the insulated layer 0 <= z <= matrix_thickness = 0.5.  |I_L| must not
+# exceed 0.5 * max|theta|.  The exact I_L, from the slab series solution and Duhamel's theorem,
+# is computed by vinsome_westerveld_cyclic_exact.py
 [GlobalParams]
   PorousFlowDictator = dictator
 []

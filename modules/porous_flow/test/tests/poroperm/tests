@@ -339,7 +339,7 @@
     input = vinsome_westerveld.i
     cli_args = 'Materials/porosity_VW/matrix_thickness=0.01 Outputs/file_base=vinsome_westerveld_small_thickness_out'
     csvdiff = vinsome_westerveld_small_thickness_out.csv
-    requirement = 'The system shall limit the Vinsome-Westerveld thermal opening to that of a fully cooled matrix layer when the matrix thickness is small compared with the diffusion length.'
+    requirement = 'The system shall limit the Vinsome-Westerveld thermal opening to that of a fully cooled, insulated matrix layer when the matrix thickness is small compared with the diffusion length.'
     issues = '#33944'
     design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
   []
