@@ -83,7 +83,6 @@
   type = Transient
   dt = 1.0
   end_time = 1.0
-
   solve_type = 'NEWTON'
 []
 

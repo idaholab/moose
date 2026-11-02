@@ -107,12 +107,12 @@ KokkosDiffusion::computeQpJacobian(const unsigned int i,
 
 ## Multi-variable Kernels
 
-Unlike the original MOOSE kernels which can only operate on a single variable, Kokkos-MOOSE kernels can operate on multiple variables in parallel.
+Kokkos-MOOSE kernels can operate on multiple variables in parallel.
 Instead of the `variable` parameter, you can specify the `variables` parameter with arbitrarily many variables you want the kernel to operate on.
 In the code, you can obtain which component of the variables you are currently operating on using `datum.comp()`.
-This provides additional parallelism over the variables and potentially enhances performance by providing higher chance of memory coalescing.
+This provides additional parallelism over the variables and potentially enhances performance by providing a higher chance of memory coalescence.
 The restrictions are that all variables should reside in the same system and have the same finite element shape function family and order.
-Also, all variables should have the same number of off-diagonal coupling.
+Also, all variables should have the same number of off-diagonal columns (the number of coupled variables).
 
 Multi-variable kernels can be useful in certain applications where the same kernel applies to multiple variables but using array variables is not desired.
 One example is neutronics, where there are multiple flux variables representing different energy groups that use the same kernel.

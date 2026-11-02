@@ -54,7 +54,7 @@ NonlinearSystemBase::addKokkosBoundaryCondition(const std::string & bc_name,
   // Active BoundaryIDs for the object
   const std::set<BoundaryID> & boundary_ids = bc->boundaryIDs();
   for (const auto var : bc->variables())
-    _vars[0].addBoundaryVar(boundary_ids, dynamic_cast<const MooseVariableFieldBase *>(var));
+    _vars[0].addBoundaryVar(boundary_ids, cast_ptr<const MooseVariableFieldBase *>(var));
 
   // Cast to the various types of BCs
   std::shared_ptr<Moose::Kokkos::NodalBCBase> nbc =

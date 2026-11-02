@@ -33,7 +33,7 @@ TimeKernelValue::TimeKernelValue(const TimeKernelValue & object)
   // TODO: We want to use Array<Scalar<const Real>> for _du_dot_du so that it is automatically
   // synchronized, but currently there is an NVCC bug preventing it
 
-  for (unsigned int i = 0; i < _vars.size(); ++i)
+  for (const auto i : index_range(_vars))
     _du_dot_du[i] = _vars[i]->sys().duDotDu(_vars[i]->number());
 
   _du_dot_du.copyToDevice();

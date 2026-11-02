@@ -58,7 +58,6 @@
   type = Transient
   dt = 0.1
   num_steps = 2
-
   solve_type = NEWTON
 []
 

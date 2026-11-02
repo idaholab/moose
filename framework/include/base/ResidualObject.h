@@ -105,7 +105,7 @@ public:
 
   /**
    * Returns all the variables that this object operates on. Most objects operate on a single
-   * variable, but some (e.g. Kokkos residual objects) can operate on multiple variables.
+   * variable
    */
   virtual std::vector<const MooseVariableBase *> variables() const { return {&variable()}; }
 
