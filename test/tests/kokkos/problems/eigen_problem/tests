@@ -1,6 +1,6 @@
 [Tests]
   design = 'EigenProblem.md'
-  issues = '#30655'
+  issues = '#30655 #34262 #34264'
 
   [test]
     type = 'CSVDiff'
@@ -9,5 +9,16 @@
     requirement = 'The Kokkos system shall support eigenvalue calculations.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
+  []
+  [petsc_gpu]
+    type = 'CSVDiff'
+    input = 'kokkos_eigenvalue_test.i'
+    cli_args = "Executioner/petsc_options_iname='-vec_type -nl0_mat_type -pc_type -pc_hypre_type' "
+               "Executioner/petsc_options_value='kokkos hypre hypre boomeramg'"
+    csvdiff = 'kokkos_eigenvalue_test_out_eigenvalues_0001.csv'
+    requirement = 'The Kokkos system shall support matrix-free eigenvalue calculations using PETSc GPU '
+                  'vectors and a GPU preconditioner.'
+    capabilities = 'kokkos'
+    compute_devices = 'cuda xpu'
   []
 []

@@ -790,6 +790,48 @@ MooseVariableData<RealEigenVector>::fetchADDofValues()
         Moose::derivInsert(dual_number.derivatives(), global_dof_index, 1.);
     }
   }
+
+  const bool is_transient = _subproblem.isTransient();
+  if (is_transient && _need_ad_u_dot)
+  {
+    _ad_dofs_dot.resize(n_test);
+    if (_need_ad_u_dotdot)
+      _ad_dofs_dotdot.resize(n_test);
+
+    for (const auto i : make_range(n_test))
+    {
+      _ad_dofs_dot[i].resize(_count);
+      if (_need_ad_u_dotdot)
+        _ad_dofs_dotdot[i].resize(_count);
+      for (const auto j : make_range(_count))
+      {
+        auto & dot = _ad_dofs_dot[i](j);
+        auto & dotdot = _need_ad_u_dotdot ? _ad_dofs_dotdot[i](j) : _ad_real_dummy;
+        if (_time_integrator)
+        {
+          if (_time_integrator->dt())
+          {
+            dot = _ad_dof_values[i](j);
+            _time_integrator->computeADTimeDerivatives(dot, _dof_indices[j * n_test + i], dotdot);
+          }
+          else
+          {
+            // Executing something with a time derivative at initial should not put a NaN
+            dot = 0;
+            dotdot = 0;
+          }
+        }
+        // We are too early in the setup to have a time integrator, so we are not really using
+        // the AD-derivatives. We set the AD value of the derivatives to the nonAD value
+        else
+        {
+          dot = _dof_values_dot[i](j);
+          if (_need_ad_u_dotdot)
+            dotdot = _dof_values_dotdot[i](j);
+        }
+      }
+    }
+  }
 }
 
 template <typename OutputType>

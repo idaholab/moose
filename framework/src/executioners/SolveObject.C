@@ -33,3 +33,9 @@ SolveObject::SolveObject(Executioner & ex)
 {
   ex.registerSolveObject(*this);
 }
+
+bool
+SystemNumberLess::operator()(const SystemBase * a, const SystemBase * b) const
+{
+  return a->number() < b->number();
+}
