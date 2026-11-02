@@ -21,6 +21,8 @@
                   "distributed generated displaced mesh."
     capabilities = 'method!=dbg' # periodic timeout
     valgrind = 'NONE'
+    # Recovery repartitions the mesh during adaptivity, which fails until libMesh/libmesh#4642
+    recover = false
   []
 
   [pbc]

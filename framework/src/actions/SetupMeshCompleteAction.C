@@ -14,8 +14,6 @@
 #include "MooseApp.h"
 #include "FEProblemBase.h"
 
-#include "libmesh/periodic_boundaries.h"
-
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "prepare_mesh");
 
 registerMooseAction("MooseApp",
@@ -140,18 +138,6 @@ SetupMeshCompleteAction::act()
     else if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
     {
       TIME_SECTION("constructDisplacedMesh", 2, "Constructing Displaced Mesh");
-
-      // libMesh finds the neighbor across a disjoint neighbor boundary pair by matching side
-      // positions, which fails on a displaced mesh once the two sides have moved apart
-      if (const auto * pairs = _mesh->getMesh().get_disjoint_neighbor_boundary_pairs();
-          pairs && !pairs->empty())
-        paramError("displacements",
-                   "A displaced mesh cannot be used with a mesh that has disjoint neighbor "
-                   "boundary pairs, such as those created by BreakMeshByBlockGenerator. Set "
-                   "'use_displaced_mesh = false' in the [Mesh] block and use the Lagrangian "
-                   "solid mechanics kernels ('new_system = true'), or use the mortar-based "
-                   "cohesive zone model, which does not rely on pairing elements through the "
-                   "disjoint neighbor machinery.");
 
       mooseAssert(_mesh->prepared(), "The reference mesh should already be fully prepared here");
       _displaced_mesh = _mesh->safeClone();
