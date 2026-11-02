@@ -606,6 +606,25 @@ MooseVariableData<OutputType>::fill(DestinationType & dest,
 }
 
 template <typename OutputType>
+template <bool constant_monomial,
+          typename DestinationType,
+          typename ShapeType,
+          typename DofValuesType>
+void
+MooseVariableData<OutputType>::fillADVector(DestinationType & dest,
+                                            const ShapeType * const ad_phi,
+                                            const DofValuesType & dof_values,
+                                            const unsigned int nqp,
+                                            const std::size_t num_shapes)
+{
+  // The AD vector shape data only exists for vector variables, so this is only instantiated there
+  if constexpr (std::is_same_v<OutputType, RealVectorValue>)
+    fill<constant_monomial>(dest, *ad_phi, dof_values, nqp, num_shapes);
+  else
+    libmesh_ignore(dest, ad_phi, dof_values, nqp, num_shapes);
+}
+
+template <typename OutputType>
 template <bool constant_monomial>
 void
 MooseVariableData<OutputType>::computeValuesInternal()
@@ -920,23 +939,13 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
   // The AD shape function values, curls and divergences of vector variables carry the
   // displacement derivatives of the Piola maps on a displaced mesh
-  constexpr bool is_vector = std::is_same_v<OutputType, RealVectorValue>;
-  const bool ad_vector_phi = is_vector && _displaced && _current_ad_vector_phi;
-  // Fills dest from the AD vector shape data; only instantiated for vector variables
-  const auto fill_ad_vector =
-      [this, nqp, n_test](auto & dest, const auto * const ad_phi, const auto & dof_values)
-  {
-    if constexpr (is_vector)
-      fill<constant_monomial>(dest, *ad_phi, dof_values, nqp, n_test);
-    else
-      libmesh_ignore(this, dest, ad_phi, dof_values, nqp, n_test);
-  };
+  const bool ad_vector_phi = _displaced && _current_ad_vector_phi;
 
   // Values
   if (_need_ad_u)
   {
     if (ad_vector_phi)
-      fill_ad_vector(_ad_u, _current_ad_vector_phi, _ad_dof_values);
+      fillADVector<constant_monomial>(_ad_u, _current_ad_vector_phi, _ad_dof_values, nqp, n_test);
     else
       fill<constant_monomial>(_ad_u, *_current_phi, _ad_dof_values, nqp, n_test);
   }
@@ -965,16 +974,17 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
   // Curl
   if (_need_ad_curl_u)
   {
-    if (is_vector && _displaced && _current_ad_curl_phi)
-      fill_ad_vector(_ad_curl_u, _current_ad_curl_phi, _ad_dof_values);
+    if (_displaced && _current_ad_curl_phi)
+      fillADVector<constant_monomial>(
+          _ad_curl_u, _current_ad_curl_phi, _ad_dof_values, nqp, n_test);
     else
       fill<constant_monomial>(_ad_curl_u, *_current_curl_phi, _ad_dof_values, nqp, n_test);
   }
   // Div
   if (_need_ad_div_u)
   {
-    if (is_vector && _displaced && _current_ad_div_phi)
-      fill_ad_vector(_ad_div_u, _current_ad_div_phi, _ad_dof_values);
+    if (_displaced && _current_ad_div_phi)
+      fillADVector<constant_monomial>(_ad_div_u, _current_ad_div_phi, _ad_dof_values, nqp, n_test);
     else
       fill<constant_monomial>(_ad_div_u, *_current_div_phi, _ad_dof_values, nqp, n_test);
   }
@@ -985,7 +995,8 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     if (_need_ad_u_dot)
     {
       if (_time_integrator && ad_vector_phi)
-        fill_ad_vector(_ad_u_dot, _current_ad_vector_phi, _ad_dofs_dot);
+        fillADVector<constant_monomial>(
+            _ad_u_dot, _current_ad_vector_phi, _ad_dofs_dot, nqp, n_test);
       else if (_time_integrator)
         fill<constant_monomial>(_ad_u_dot, *_current_phi, _ad_dofs_dot, nqp, n_test);
       // We are too early in the setup to have a time integrator, so we are not really using the
@@ -1001,7 +1012,8 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     if (_need_ad_u_dotdot)
     {
       if (_time_integrator && ad_vector_phi)
-        fill_ad_vector(_ad_u_dotdot, _current_ad_vector_phi, _ad_dofs_dotdot);
+        fillADVector<constant_monomial>(
+            _ad_u_dotdot, _current_ad_vector_phi, _ad_dofs_dotdot, nqp, n_test);
       else if (_time_integrator)
         fill<constant_monomial>(_ad_u_dotdot, *_current_phi, _ad_dofs_dotdot, nqp, n_test);
       else

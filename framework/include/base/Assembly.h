@@ -2040,13 +2040,15 @@ private:
   /**
    * Compute the vector shape function values, curls and divergences of \p fe with derivatives with
    * respect to the nonlinear displacement variables, applying the covariant (H(curl)) or
-   * contravariant (H(div)) Piola map with the AD element map. Families mapped like H1 have no
-   * displacement dependence in these quantities and are copied from the regular shape data.
+   * contravariant (H(div)) Piola map with the AD element map. Families mapped like H1 copy their
+   * values from the regular shape data and build their curl and divergence from \p ad_grad_phi,
+   * which must be given for them on a displaced mesh.
    */
   void computeADVectorPhi(const Elem * elem,
                           unsigned int n_qp,
                           const FEVectorBase & fe,
                           const VectorFEShapeData & fesd,
+                          const ADTemplateVariablePhiGradient<RealVectorValue> * ad_grad_phi,
                           ADVectorVariablePhiValue & phi,
                           ADVectorVariablePhiCurl * curl_phi,
                           ADVectorVariablePhiDivergence * div_phi) const;

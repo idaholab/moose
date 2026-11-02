@@ -917,6 +917,7 @@ Assembly::reinitFE(const Elem * elem)
                            n_qp,
                            fe,
                            *_vector_fe_shape_data[fe_type],
+                           &grad_phi,
                            _ad_vector_phi_data[fe_type],
                            _need_curl.count(fe_type) ? &_ad_vector_curl_phi_data[fe_type] : nullptr,
                            _need_div.count(fe_type) ? &_ad_vector_div_phi_data[fe_type] : nullptr);
@@ -1018,6 +1019,7 @@ Assembly::computeADVectorPhi(const Elem * elem,
                              unsigned int n_qp,
                              const FEVectorBase & fe,
                              const VectorFEShapeData & fesd,
+                             const ADTemplateVariablePhiGradient<RealVectorValue> * ad_grad_phi,
                              ADVectorVariablePhiValue & phi,
                              ADVectorVariablePhiCurl * curl_phi,
                              ADVectorVariablePhiDivergence * div_phi) const
@@ -1046,9 +1048,8 @@ Assembly::computeADVectorPhi(const Elem * elem,
       (*div_phi)[i].resize(n_qp);
   }
 
-  // Families mapped like H1 (and lower dimensional elements) have no map in their values, and on
-  // an undisplaced mesh the map carries no derivatives (the AD map is not computed there)
-  if ((!covariant && !contravariant) || dim < 2 || !_displaced)
+  // On an undisplaced mesh the map carries no derivatives (the AD map is not computed there)
+  if (!_displaced || dim < 2)
   {
     for (const auto i : make_range(num_shapes))
       for (const auto qp : make_range(n_qp))
@@ -1058,6 +1059,25 @@ Assembly::computeADVectorPhi(const Elem * elem,
           (*curl_phi)[i][qp] = fesd._curl_phi[i][qp];
         if (div_phi)
           (*div_phi)[i][qp] = fesd._div_phi[i][qp];
+      }
+    return;
+  }
+
+  // Families mapped like H1 have no map in their values; their curl and divergence follow from the
+  // AD shape function gradients, entry (k, l) of which is d phi_k / d x_l
+  if (!covariant && !contravariant)
+  {
+    mooseAssert(ad_grad_phi, "H1 vector families need the AD shape function gradients");
+    for (const auto i : make_range(num_shapes))
+      for (const auto qp : make_range(n_qp))
+      {
+        phi[i][qp] = fesd._phi[i][qp];
+        const auto & g = (*ad_grad_phi)[i][qp];
+        if (curl_phi)
+          (*curl_phi)[i][qp] =
+              ADRealVectorValue(g(2, 1) - g(1, 2), g(0, 2) - g(2, 0), g(1, 0) - g(0, 1));
+        if (div_phi)
+          (*div_phi)[i][qp] = g.tr();
       }
     return;
   }
@@ -2400,6 +2420,7 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
             n_qp,
             *it.second,
             *_vector_fe_shape_data_face[fe_type],
+            _need_ad_grad_phi_face ? &_ad_vector_grad_phi_data_face[fe_type] : nullptr,
             _ad_vector_phi_data_face[fe_type],
             _need_curl.count(fe_type) ? &_ad_vector_curl_phi_data_face[fe_type] : nullptr,
             _need_face_div.count(fe_type) ? &_ad_vector_div_phi_data_face[fe_type] : nullptr);
@@ -5033,6 +5054,8 @@ const ADVectorVariablePhiCurl &
 Assembly::feADVectorCurlPhiFace(FEType type) const
 {
   _need_ad_vector_phi.insert(type);
+  // H1 vector families build the AD face curl and divergence from the AD face gradients
+  _need_ad_grad_phi_face = true;
   feCurlPhiFace<VectorValue<Real>>(type);
   return _ad_vector_curl_phi_data_face[type];
 }
@@ -5049,6 +5072,8 @@ const ADVectorVariablePhiDivergence &
 Assembly::feADVectorDivPhiFace(FEType type) const
 {
   _need_ad_vector_phi.insert(type);
+  // H1 vector families build the AD face curl and divergence from the AD face gradients
+  _need_ad_grad_phi_face = true;
   feDivPhiFace<VectorValue<Real>>(type);
   return _ad_vector_div_phi_data_face[type];
 }

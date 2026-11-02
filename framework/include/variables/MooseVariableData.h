@@ -570,6 +570,18 @@ private:
             unsigned int nqp,
             std::size_t num_shapes);
 
+  /// Calls fill() with AD vector shape data for vector variables; a no-op for other variables,
+  /// which have no AD vector shape data
+  template <bool constant_monomial,
+            typename DestinationType,
+            typename ShapeType,
+            typename DofValuesType>
+  void fillADVector(DestinationType & dest,
+                    const ShapeType * ad_phi,
+                    const DofValuesType & dof_values,
+                    unsigned int nqp,
+                    std::size_t num_shapes);
+
   /// Ask the assembly to compute the AD face shape function gradients, which this variable's AD
   /// gradient and AD face test function gradients are built from
   void needADGradPhiFace() const;
@@ -899,6 +911,7 @@ const ADTemplateVariableValue<OutputType> &
 MooseVariableData<OutputType>::adUDot() const
 {
   _need_ad = _need_ad_volume = _need_ad_u_dot = true;
+  requestADVectorPhi();
 
   if (!_time_integrator)
     // If we don't have a time integrator (this will be the case for variables that are a part of
@@ -916,6 +929,7 @@ MooseVariableData<OutputType>::adUDotDot() const
 {
   // the time integrator computes the second time derivative together with the first one
   _need_ad = _need_ad_volume = _need_ad_u_dot = _need_ad_u_dotdot = true;
+  requestADVectorPhi();
 
   // If we don't have a time integrator (this will be the case for variables that are a part
   // of the AuxiliarySystem) then we have no way to calculate _ad_u_dotdot and we are just
