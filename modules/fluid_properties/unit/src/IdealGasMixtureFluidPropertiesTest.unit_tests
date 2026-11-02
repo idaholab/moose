@@ -51,4 +51,10 @@
     issues = '#34223'
     requirement = 'The system shall compute the binary diffusion coefficients of the pairs of components of a mixture of ideal gases from NASA 7-coefficient polynomials and their derivatives with respect to pressure and temperature, reproducing Cantera values, and shall report an error for components without Lennard-Jones parameters.'
   []
+  [entropy_single_component]
+    type = GoogleTest
+    unit_test = IdealGasMixtureFluidPropertiesTest.entropySingleComponent
+    issues = '#34221'
+    requirement = 'The system shall compute the specific entropy of an ideal gas mixture in which only one component has a nonzero mass fraction as the entropy of that component, with the same derivatives with respect to pressure and temperature.'
+  []
 []

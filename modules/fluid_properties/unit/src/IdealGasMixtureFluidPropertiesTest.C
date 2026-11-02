@@ -443,3 +443,26 @@ TEST_F(IdealGasMixtureFluidPropertiesTest, binaryDiffusion)
   // IdealGasFluidProperties components have no Lennard-Jones parameters
   EXPECT_THROW(_fp_mix->binaryDiffusionCoefficient(p, T, 0, 1), std::exception);
 }
+
+TEST_F(IdealGasMixtureFluidPropertiesTest, entropySingleComponent)
+{
+  // A mixture with only one component present has the entropy of that component
+  // Derivative index 0 is pressure and index 1 is temperature
+  const Real p = 1e5;
+  const Real T = 400;
+  DNDerivativeType dp_dp, dT_dT;
+  Moose::derivInsert(dp_dp, 0, 1);
+  Moose::derivInsert(dT_dT, 1, 1);
+  const ADReal p_ad(p, dp_dp);
+  const ADReal T_ad(T, dT_dT);
+  for (const auto & [x, fp] : {std::pair<Real, const IdealGasFluidProperties *>(0, _fp_steam),
+                               std::pair<Real, const IdealGasFluidProperties *>(1, _fp_nitrogen)})
+  {
+    Real s, ds_dp, ds_dT;
+    fp->s_from_p_T(p, T, s, ds_dp, ds_dT);
+    REL_TEST(_fp_mix->s_from_p_T(p, T, {x}), s, REL_TOL_CONSISTENCY);
+    const ADReal s_ad = _fp_mix->s_from_p_T(p_ad, T_ad, std::vector<ADReal>{ADReal(x)});
+    REL_TEST(s_ad.derivatives()[0], ds_dp, REL_TOL_CONSISTENCY);
+    REL_TEST(s_ad.derivatives()[1], ds_dT, REL_TOL_CONSISTENCY);
+  }
+}
