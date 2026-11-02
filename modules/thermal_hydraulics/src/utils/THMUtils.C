@@ -10,6 +10,12 @@
 #include "THMUtils.h"
 #include "MooseUtils.h"
 #include "MooseTypes.h"
+#include "MooseApp.h"
+#include "InputParameterWarehouse.h"
+#include "MooseObjectParameterName.h"
+#include "MooseBase.h"
+#include "TransientBase.h"
+#include <set>
 #include "libmesh/vector_value.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_numberarray.h"
@@ -71,5 +77,74 @@ allGatherADVectorMapSum(const Parallel::Communicator & comm,
         for (const auto i : index_range(existing))
           existing[i] += it.second[i];
       }
+}
+
+std::string
+parseConnectedComponentName(const BoundaryName & connection)
+{
+  const auto colon_pos = connection.rfind(':');
+  if (colon_pos == std::string::npos)
+    mooseError("Invalid connection '",
+               connection,
+               "'. Valid connection format is 'component_name:in' or 'component_name:out'.");
+  return connection.substr(0, colon_pos);
+}
+
+Real
+parseConnectionNormal(const BoundaryName & connection)
+{
+  const auto colon_pos = connection.rfind(':');
+  const auto end_type =
+      colon_pos == std::string::npos ? std::string() : connection.substr(colon_pos + 1);
+  if (end_type == "in")
+    return -1.0;
+  else if (end_type == "out")
+    return 1.0;
+  else
+    mooseError("Invalid connection '",
+               connection,
+               "'. The end type ('",
+               end_type,
+               "') must be 'in' or 'out'.");
+}
+
+bool
+implicitTimeIntegrationFlag(MooseApp & app)
+{
+  const auto trex = dynamic_cast<TransientBase *>(app.getExecutioner());
+  if (!trex)
+    return true;
+
+  const auto ti_type = trex->getTimeScheme();
+  return !(ti_type == Moose::TI_EXPLICIT_TVD_RK_2 || ti_type == Moose::TI_EXPLICIT_MIDPOINT ||
+           ti_type == Moose::TI_EXPLICIT_EULER);
+}
+
+void
+informExperimental(const MooseBase & moose_base)
+{
+  // Only give info once per type
+  static std::set<std::string> informed_types;
+  if (informed_types.insert(moose_base.type()).second)
+    moose::internal::mooseInfoStreamRepeated(
+        moose_base._console,
+        moose_base.messagePrefix(true),
+        "This class is experimental: its input syntax and behavior are subject to change.");
+}
+
+void
+connectComponentControllableParam(const MooseBase & component,
+                                  const std::string & param,
+                                  const std::string & object_type,
+                                  const std::string & object_name,
+                                  const std::string & object_param)
+{
+  const std::string & target = object_param.empty() ? param : object_param;
+  component.connectControllableParams(param, object_type, object_name, target);
+
+  const auto base_type = component.getMooseApp().getFactory().getValidParams(object_type).getBase();
+  component.getMooseApp().getInputParameterWarehouse().addControllableParameterAlias(
+      MooseObjectParameterName("component", component.name(), param, "::"),
+      MooseObjectParameterName(base_type, object_name, target));
 }
 }

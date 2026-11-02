@@ -8,7 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FunctorClosures.h"
-#include "FlowChannelBase.h"
+#include "FlowChannelClosuresInterface.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("ThermalHydraulicsApp", FunctorClosures);
 
@@ -32,7 +33,7 @@ FunctorClosures::validParams()
 FunctorClosures::FunctorClosures(const InputParameters & params) : ClosuresBase(params) {}
 
 void
-FunctorClosures::addMooseObjectsFlowChannel(const FlowChannelBase & flow_channel)
+FunctorClosures::addMooseObjectsFlowChannel(const FlowChannelClosuresInterface & flow_channel)
 {
   const auto & functor_names = getParam<std::vector<MooseFunctorName>>("functors");
   const auto & property_names = getParam<std::vector<MaterialPropertyName>>("properties");
@@ -42,14 +43,15 @@ FunctorClosures::addMooseObjectsFlowChannel(const FlowChannelBase & flow_channel
 
   const std::string class_name = "MaterialFunctorConverter";
   InputParameters params = _factory.getValidParams(class_name);
-  params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+  params.set<std::vector<SubdomainName>>("block") = flow_channel.getClosuresBlocks();
   params.set<std::vector<MooseFunctorName>>("functors_in") = functor_names;
   params.set<std::vector<MaterialPropertyName>>("ad_props_out") = property_names;
-  _sim.addMaterial(class_name, genName(flow_channel.name(), name()), params);
+  _problem.addMaterial(class_name, genName(flow_channel.getClosuresName(), name()), params);
 }
 
 void
-FunctorClosures::addMooseObjectsHeatTransfer(const HeatTransferBase & /*heat_transfer*/,
-                                             const FlowChannelBase & /*flow_channel*/)
+FunctorClosures::addMooseObjectsHeatTransfer(
+    const HeatTransferClosuresInterface & /*heat_transfer*/,
+    const FlowChannelClosuresInterface & /*flow_channel*/)
 {
 }

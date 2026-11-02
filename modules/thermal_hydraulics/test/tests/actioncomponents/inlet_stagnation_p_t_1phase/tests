@@ -1,0 +1,62 @@
+[Tests]
+  issues = '#19830 #32558'
+  design = 'InletStagnationPressureTemperature1PhaseAC.md'
+
+  [phy]
+    requirement = 'The system shall be able to specify an inlet boundary condition from the '
+                  'stagnation pressure and temperature for a single-phase flow channel '
+                  'ActionComponent, using the same inputs and reference results as the classic '
+                  'InletStagnationPressureTemperature1Phase Component,'
+
+    [stagnation_p_T_steady_3eqn]
+      type = 'Exodiff'
+      input = 'phy.stagnation_p_T_steady_3eqn.i'
+      exodiff = 'phy.stagnation_p_T_steady_3eqn_out.e'
+      gold_dir = '../../components/inlet_stagnation_p_t_1phase/gold'
+      custom_cmp = 'no_P_hf.exodiff'
+      restep = false # Test is prescribed to abort on failed timestep
+      detail = 'at steady state,'
+    []
+    [stagnation_p_T_transient_3eqn]
+      type = 'Exodiff'
+      input = 'phy.stagnation_p_T_transient_3eqn.i'
+      exodiff = 'phy.stagnation_p_T_transient_3eqn_out.e'
+      gold_dir = '../../components/inlet_stagnation_p_t_1phase/gold'
+      custom_cmp = 'no_P_hf.exodiff'
+      restep = false # Test is prescribed to abort on failed timestep
+      detail = 'in a transient, and'
+    []
+    [p0T0_3eqn]
+      type = 'Exodiff'
+      input = 'phy.p0T0_3eqn.i'
+      exodiff = 'phy.p0T0_3eqn.e'
+      gold_dir = '../../components/inlet_stagnation_p_t_1phase/gold'
+      custom_cmp = 'no_P_hf.exodiff'
+      max_time = 500
+      max_parallel = 11 # https://github.com/idaholab/moose/issues/24537
+      restep = false # Test is prescribed to abort on failed timestep
+      detail = 'in a longer transient.'
+    []
+  []
+
+  [clg]
+    requirement = 'The system shall be able to control the stagnation pressure and temperature in a 1D single phase flow inlet specified using the stagnation pressure and temperature, for a flow channel ActionComponent, using the same inputs and reference results as the classic InletStagnationPressureTemperature1Phase Component,'
+
+    [ctrl_p0_3eqn]
+      type = 'CSVDiff'
+      input = 'clg.ctrl_p0_3eqn.i'
+      csvdiff = 'clg.ctrl_p0_3eqn_out.csv'
+      gold_dir = '../../components/inlet_stagnation_p_t_1phase/gold'
+      restep = false # Test is prescribed to abort on failed timestep
+      detail = 'for the stagnation pressure and'
+    []
+    [ctrl_T0_3eqn]
+      type = 'CSVDiff'
+      input = 'clg.ctrl_T0_3eqn.i'
+      csvdiff = 'clg.ctrl_T0_3eqn_out.csv'
+      gold_dir = '../../components/inlet_stagnation_p_t_1phase/gold'
+      restep = false # Test is prescribed to abort on failed timestep
+      detail = 'for the stagnation temperature.'
+    []
+  []
+[]

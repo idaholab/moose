@@ -28,6 +28,11 @@ public:
    */
   std::vector<MaterialPropertyName> getWallHTCNames1Phase() const { return _Hw_1phase_names; }
 
+  virtual std::vector<MaterialPropertyName> getClosuresWallHTCNames() const override
+  {
+    return getWallHTCNames1Phase();
+  }
+
   /**
    * Gets the numerical flux user object name
    */

@@ -10,11 +10,12 @@
 #pragma once
 
 #include "HeatTransferBase.h"
+#include "HeatTransferClosuresInterface.h"
 
 /**
  * Base class for heat transfer connections to 1-phase flow channels
  */
-class HeatTransfer1PhaseBase : public HeatTransferBase
+class HeatTransfer1PhaseBase : public HeatTransferBase, public HeatTransferClosuresInterface
 {
 public:
   HeatTransfer1PhaseBase(const InputParameters & parameters);
@@ -27,6 +28,22 @@ public:
    * @return The name of the 1-phase wall heat transfer coefficient variable
    */
   const MaterialPropertyName & getWallHeatTransferCoefficient1PhaseName() const;
+
+  // HeatTransferClosuresInterface implementation ----
+  virtual const std::string & getClosuresName() const override { return name(); }
+  virtual bool hasClosuresWallHeatTransferCoefficientFunction() const override
+  {
+    return isParamValid("Hw");
+  }
+  virtual const FunctionName & getClosuresWallHeatTransferCoefficientFunction() const override
+  {
+    return getParam<FunctionName>("Hw");
+  }
+  virtual const MaterialPropertyName &
+  getClosuresWallHeatTransferCoefficient1PhaseName() const override
+  {
+    return getWallHeatTransferCoefficient1PhaseName();
+  }
 
 protected:
   virtual void init() override;

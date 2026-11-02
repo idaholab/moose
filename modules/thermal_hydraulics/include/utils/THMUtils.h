@@ -7,9 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
+
 #include "MooseTypes.h"
 
 #include "libmesh/parallel.h"
+
+class MooseApp;
+class MooseBase;
 
 namespace THM
 {
@@ -48,4 +53,59 @@ void allGatherADVectorMap(const Parallel::Communicator & comm,
  */
 void allGatherADVectorMapSum(const Parallel::Communicator & comm,
                              std::map<dof_id_type, std::vector<ADReal>> & this_map);
+
+/**
+ * Parses the component name out of a flow channel boundary connection string of the form
+ * 'component_name:in' or 'component_name:out', used by ActionComponents connecting to a
+ * FlowChannel1PhaseAC boundary (e.g. FlowBoundary1PhaseAC's 'input' parameter, or a junction's
+ * 'connections' parameter). Errors if the string does not have a recognized 'component_name:end'
+ * format.
+ */
+std::string parseConnectedComponentName(const BoundaryName & connection);
+
+/**
+ * Parses the outward normal direction implied by a flow channel boundary connection string of the
+ * form 'component_name:in' or 'component_name:out' (see parseConnectedComponentName): -1 at the
+ * ':in' end, +1 at the ':out' end. Errors if the end type is not 'in' or 'out'.
+ */
+Real parseConnectionNormal(const BoundaryName & connection);
+
+/**
+ * Whether an implicit time integration scheme is being used by the given app's executioner (see
+ * e.g. ADRDG3EqnMaterial/ADNumericalFlux3EqnDGKernel/ADBoundaryFlux3EqnBC's 'implicit' parameter).
+ * True if there is no transient executioner (e.g. Steady) or its time scheme is not one of the
+ * legacy explicit integrators that need this flag set.
+ */
+bool implicitTimeIntegrationFlag(MooseApp & app);
+
+/**
+ * Informs the user that a class is experimental, once per registered type.
+ *
+ * @param[in] moose_base  The MooseBase being constructed
+ */
+void informExperimental(const MooseBase & moose_base);
+
+/**
+ * Makes a controllable parameter of an ActionComponent controllable the way classic THM
+ * Components are, and passes the control on to the MOOSE object that uses it
+ *
+ * The parameter is connected to the object's parameter (see
+ * MooseBase::connectControllableParams()), which makes it controllable by the name the framework
+ * gives an Action's parameters. It is also given the classic name, 'component/<name>/<param>'
+ * (see Component::connectObject()), so that the controls and postprocessors written for classic
+ * Components work unchanged.
+ *
+ * The parameter must have been declared controllable in the component's validParams().
+ *
+ * @param[in] component  The ActionComponent
+ * @param[in] param  Name of the component's controllable parameter
+ * @param[in] object_type  Type of the object, added by the component, that uses the parameter
+ * @param[in] object_name  Name of the object
+ * @param[in] object_param  Name of the object's parameter; defaults to \p param
+ */
+void connectComponentControllableParam(const MooseBase & component,
+                                       const std::string & param,
+                                       const std::string & object_type,
+                                       const std::string & object_name,
+                                       const std::string & object_param = "");
 }

@@ -23,6 +23,17 @@
       # mesh generation test
       recover = false
     []
+    [fill_declared_first]
+      type = Exodiff
+      input = 'junction_1D_fill_declared_first.i'
+      exodiff = 'junction_1D_fill_in.e'
+      cli_args = '--mesh-only junction_1D_fill_in.e'
+      detail = 'regardless of whether the junction is declared before the components it connects.'
+      # mesh generation test
+      recover = false
+      # ConvertBlockToMesh does not support distributed meshes
+      mesh_mode = replicated
+    []
   []
   [2D]
     requirement = "The system shall be able to connect two 2D component's meshes"

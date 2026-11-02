@@ -44,6 +44,12 @@ public:
 
   const std::vector<ADReal> & getFlux(const unsigned int & connection_index) const override;
 
+  // Coupling to the junction variables is intentionally across blocks: this object is restricted
+  // to the connected flow channels' boundaries, but the junction variables it couples to live on
+  // the junction's own block, not any connected flow channel's block. Skip the check that would
+  // otherwise flag this as a missing variable (see e.g. HeatFluxBaseBC for the same pattern).
+  bool checkVariableBoundaryIntegrity() const override { return false; }
+
 protected:
   /**
    * Stores data (connection index, face shape functions, DoFs associated with flow channel

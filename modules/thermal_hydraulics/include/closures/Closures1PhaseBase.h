@@ -11,8 +11,6 @@
 
 #include "ClosuresBase.h"
 
-class FlowChannel1Phase;
-
 /**
  * Base class for 1-phase closures
  */
@@ -25,19 +23,19 @@ protected:
   /**
    * Adds material that computes wall friction factor from a specified function
    *
-   * This function assumes that the flow channel component has the parameter
-   * 'f' as a valid parameter, so this function should be guarded appropriately.
+   * This function assumes that the flow channel has a wall friction factor function ('f'), so
+   * this function should be guarded appropriately.
    *
-   * @param[in] flow_channel   Flow channel component
+   * @param[in] flow_channel   Flow channel
    */
-  void addWallFrictionFunctionMaterial(const FlowChannel1Phase & flow_channel) const;
+  void addWallFrictionFunctionMaterial(const FlowChannelClosuresInterface & flow_channel) const;
 
   /**
    * Adds average wall temperature material
    *
-   * @param[in] flow_channel   Flow channel component
+   * @param[in] flow_channel   Flow channel
    */
-  void addAverageWallTemperatureMaterial(const FlowChannel1Phase & flow_channel) const;
+  void addAverageWallTemperatureMaterial(const FlowChannelClosuresInterface & flow_channel) const;
 
 public:
   static InputParameters validParams();

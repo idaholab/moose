@@ -1,0 +1,40 @@
+[Tests]
+  issues = '#19830 #32558'
+  design = 'InletDensityVelocity1PhaseAC.md'
+
+  [phy:densityvelocity_3eqn]
+    type = 'Exodiff'
+    input = 'phy.densityvelocity_3eqn.i'
+    exodiff = 'phy.densityvelocity_3eqn_out.e'
+    gold_dir = '../../components/inlet_density_velocity_1phase/gold'
+    recover = false
+    restep = false # Test is prescribed to abort on failed timestep
+    requirement = 'The system shall be able to set an inlet boundary condition for a single-phase '
+                  'flow channel ActionComponent by setting the fluid density and its velocity at '
+                  'the boundary, using the same input and reference results as the classic '
+                  'InletDensityVelocity1Phase Component.'
+  []
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 1e-7
+    difference_tol = 15
+    max_parallel = 1
+    max_threads = 1
+    cli_args = 'Debug/check_jacobian=true'
+    requirement = 'The system shall be able to compute numerically accurate Jacobians for an inlet '
+                  'boundary condition that sets the fluid density and velocity of a single-phase '
+                  'flow channel ActionComponent, using the same input as the classic '
+                  'InletDensityVelocity1Phase Component.'
+  []
+
+  [clg:densityvelocity_3eqn]
+    type = 'CSVDiff'
+    input = 'clg.densityvelocity_3eqn.i'
+    csvdiff = 'clg.densityvelocity_3eqn_out.csv'
+    gold_dir = '../../components/inlet_density_velocity_1phase/gold'
+    rel_err = 1e-5
+    restep = false # Test is prescribed to abort on failed timestep
+    requirement = 'The system shall be able to control both the density and the velocity at an inlet of a single phase flow channel ActionComponent, using the same input and reference results as the classic InletDensityVelocity1Phase Component.'
+  []
+[]

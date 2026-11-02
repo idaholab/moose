@@ -21,7 +21,11 @@ ActionFactory::~ActionFactory() {}
 void
 ActionFactory::reg(std::shared_ptr<RegistryEntryBase> obj)
 {
-  const std::string & name = obj->_classname;
+  // Note: for an Action registration, _name holds the task (see registerMooseAction), not a
+  // preferred display name as it does for a MooseObject registration - so RegistryEntryBase::
+  // name()'s generic _name->_alias->_classname resolution does not apply here. _alias (set by
+  // registerMooseActionAliased) is consulted directly instead, falling back to _classname.
+  const std::string & name = obj->_alias.empty() ? obj->_classname : obj->_alias;
   const std::string & task = obj->_name;
 
   auto key = std::make_pair(name, task);

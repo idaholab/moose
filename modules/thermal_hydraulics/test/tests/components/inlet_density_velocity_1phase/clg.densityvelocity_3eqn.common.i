@@ -1,0 +1,108 @@
+[GlobalParams]
+  gravity_vector = '0 0 0'
+
+  initial_p = 0.1e6
+  initial_vel = 0
+  initial_T = 300
+
+  scaling_factor_1phase = '1. 1. 1.'
+
+  closures = simple_closures
+[]
+
+[FluidProperties]
+  [eos]
+    type = StiffenedGasFluidProperties
+    gamma = 2.35
+    cv = 1816.0
+    q = -1.167e6
+    p_inf = 1.0e9
+    q_prime = 0
+    k = 0.5
+    mu = 281.8e-6
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
+  []
+[]
+
+[Functions]
+  [inlet_rho_fn]
+    type = PiecewiseLinear
+    x = '0   1 '
+    y = '996 997'
+  []
+
+  [inlet_vel_fn]
+    type = PiecewiseLinear
+    x = '1 2'
+    y = '1 2'
+  []
+[]
+
+[ChainControls]
+  [inlet_rho_ctrl_fn]
+    type = GetFunctionValueChainControl
+    function = inlet_rho_fn
+  []
+  [inlet_rho_ctrl]
+    type = SetRealValueChainControl
+    parameter = component::inlet/rho
+    value = inlet_rho_ctrl_fn:value
+  []
+
+  [inlet_vel_ctrl_fn]
+    type = GetFunctionValueChainControl
+    function = inlet_vel_fn
+  []
+  [inlet_vel_ctrl]
+    type = SetRealValueChainControl
+    parameter = component::inlet/vel
+    value = inlet_vel_ctrl_fn:value
+  []
+[]
+
+[Preconditioning]
+  [SMP_PJFNK]
+    type = SMP
+    full = true
+  []
+[]
+
+[Executioner]
+  type = Transient
+  scheme = 'bdf2'
+
+  start_time = 0
+  dt = 0.1
+  num_steps = 20
+  abort_on_solve_fail = true
+
+  solve_type = NEWTON
+  nl_rel_tol = 1e-9
+  nl_abs_tol = 1e-8
+  nl_max_its = 30
+
+  l_tol = 1e-3
+  l_max_its = 100
+[]
+
+[Postprocessors]
+  [rho_inlet]
+    type = RealComponentParameterValuePostprocessor
+    component = inlet
+    parameter = rho
+  []
+  [vel_inlet]
+    type = RealComponentParameterValuePostprocessor
+    component = inlet
+    parameter = vel
+  []
+[]
+
+[Outputs]
+  csv = true
+[]

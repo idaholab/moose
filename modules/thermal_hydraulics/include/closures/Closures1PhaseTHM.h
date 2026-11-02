@@ -40,28 +40,30 @@ public:
     COLEBROOK_WHITE
   };
 
-  virtual void checkFlowChannel(const FlowChannelBase & flow_channel) const override;
-  virtual void checkHeatTransfer(const HeatTransferBase & heat_transfer,
-                                 const FlowChannelBase & flow_channel) const override;
-  virtual void addMooseObjectsFlowChannel(const FlowChannelBase & flow_channel) override;
-  virtual void addMooseObjectsHeatTransfer(const HeatTransferBase & /*heat_transfer*/,
-                                           const FlowChannelBase & /*flow_channel*/) override {};
+  virtual void checkFlowChannel(const FlowChannelClosuresInterface & flow_channel) const override;
+  virtual void checkHeatTransfer(const HeatTransferClosuresInterface & heat_transfer,
+                                 const FlowChannelClosuresInterface & flow_channel) const override;
+  virtual void
+  addMooseObjectsFlowChannel(const FlowChannelClosuresInterface & flow_channel) override;
+  virtual void
+  addMooseObjectsHeatTransfer(const HeatTransferClosuresInterface & /*heat_transfer*/,
+                              const FlowChannelClosuresInterface & /*flow_channel*/) override {};
 
 protected:
   /**
    * Adds material that computes wall friction factor
    *
-   * @param[in] flow_channel   Flow channel component
+   * @param[in] flow_channel   Flow channel
    */
-  void addWallFFMaterial(const FlowChannel1Phase & flow_channel) const;
+  void addWallFFMaterial(const FlowChannelClosuresInterface & flow_channel) const;
 
   /**
    * Adds wall heat transfer coefficient material
    *
-   * @param[in] flow_channel   Flow channel component
+   * @param[in] flow_channel   Flow channel
    * @param[in] i   Heat transfer index
    */
-  void addWallHTCMaterial(const FlowChannel1Phase & flow_channel, unsigned int i) const;
+  void addWallHTCMaterial(const FlowChannelClosuresInterface & flow_channel, unsigned int i) const;
 
   /// Wall heat transfer coefficient closure
   const WallHTCClosureType _wall_htc_closure;

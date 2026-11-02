@@ -1,0 +1,69 @@
+[Tests]
+  issues = '#19830 #32558'
+  design = 'InletMassFlowRateTemperature1PhaseAC.md'
+
+  [phy]
+    requirement = 'The system shall be able to model an inlet boundary condition for 1D single '
+                  'phase flow in a flow channel ActionComponent with a specified mass flow rate '
+                  'and temperature at the inlet, using the same inputs and reference results as '
+                  'the classic InletMassFlowRateTemperature1Phase Component,'
+
+    [massflowrate_3eqn]
+      type = 'Exodiff'
+      input = 'phy.massflowrate_3eqn.i'
+      exodiff = 'phy.massflowrate_3eqn.e'
+      gold_dir = '../../components/inlet_mass_flow_rate_1phase/gold'
+      max_time = 1000
+      restep = false # Test is prescribed to abort on failed timestep
+      detail = 'and'
+    []
+    [reversed_flow]
+      type = 'Exodiff'
+      input = 'phy.reversed_flow.i'
+      exodiff = 'phy.reversed_flow.e'
+      gold_dir = '../../components/inlet_mass_flow_rate_1phase/gold'
+      restep = false # Test is prescribed to abort on failed timestep
+      detail = 'handle flow reversal.'
+    []
+  []
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 1e-7
+    difference_tol = 15
+    cli_args = 'Debug/check_jacobian=true'
+    max_parallel = 1
+    requirement = 'The system shall compute numerically accurate Jacobians when using an inlet '
+                  'with specified mass flow rate and temperature in a flow channel '
+                  'ActionComponent.'
+  []
+  [run_water97]
+    type = RunApp
+    input = run_water97.i
+    capabilities = 'method!=dbg'
+    requirement = 'The system shall be able to use IAPWS-97 water fluid properties when using an '
+                  'inlet with specified mass flow rate and temperature in a flow channel '
+                  'ActionComponent.'
+  []
+
+  [clg]
+    requirement = 'The system shall be able to control the mass flow rate and the fluid temperature at a 1D single phase flow inlet of a flow channel ActionComponent defined by a temperature and a mass flow rate, using the same inputs and reference results as the classic InletMassFlowRateTemperature1Phase Component,'
+
+    [ctrl_m_dot_3eqn_rdg]
+      type = 'CSVDiff'
+      input = 'clg.ctrl_m_dot_3eqn_rdg.i'
+      csvdiff = 'clg.ctrl_m_dot_3eqn_rdg_out.csv'
+      gold_dir = '../../components/inlet_mass_flow_rate_1phase/gold'
+      restep = false # Test is prescribed to abort on failed timestep
+      detail = 'for the mass flow rate and'
+    []
+    [ctrl_T_3eqn_rdg]
+      type = 'CSVDiff'
+      input = 'clg.ctrl_T_3eqn_rdg.i'
+      csvdiff = 'clg.ctrl_T_3eqn_rdg_out.csv'
+      gold_dir = '../../components/inlet_mass_flow_rate_1phase/gold'
+      restep = false # Test is prescribed to abort on failed timestep
+      detail = 'for the temperature.'
+    []
+  []
+[]
