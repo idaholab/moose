@@ -434,7 +434,7 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
 
   print_fields = false
   continue_on_max_its = true
-  num_steps = 35
+  num_steps = 70
   # Ramp up the time step to march to steady state
   [TimeStepper]
     type = FunctionDT
