@@ -1,10 +1,10 @@
 [Tests]
   design = 'QuadSubChannel1PhaseProblem.md'
-  issues = '#28497'
+  issues = '#28497 #34303'
   [steady]
-    type = Exodiff
+    type = CSVDiff
     input = steady.i
-    exodiff = steady_out.e
+    csvdiff = steady_out.csv
     recover = false
     abs_zero = 1e-7
     max_threads = 1
@@ -13,15 +13,16 @@
     requirement = 'The system shall be able to restart after a steady state solution'
   []
   [transient]
-    type = Exodiff
+    type = CSVDiff
     input = transient.i
-    exodiff = transient_out.e
+    csvdiff = transient_out.csv
     prereq = 'steady'
     abs_zero = 5e-6
     max_threads = 1
     # The crossflow solve does not converge in every iteration; remove once #34306 is fixed
     allow_warnings = true
-    requirement = 'The system shall be able to restart after a transient solution'
+    # The time = 0 row must match the final row of steady_out.csv
+    requirement = 'The system shall be able to restart a transient from a steady state solution'
   []
   [transient_time_integrator_warning]
     type = RunApp
