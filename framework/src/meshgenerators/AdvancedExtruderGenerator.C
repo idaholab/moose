@@ -157,7 +157,6 @@ AdvancedExtruderGenerator::validParams()
                         "Pitch for helicoidal extrusion around an axis going through the origin "
                         "following the direction vector");
   params.addParam<Real>("start_radial_extent",
-                        0,
                         "If modifying the radial extent of the extruded geometry, radial "
                         "extent at the beginning of the extrusion process. This can be "
                         "specified manually to avoid computing it from the surface, which can "
