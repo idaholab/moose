@@ -3,6 +3,10 @@
 # is x times the mean of the sampled times since t = 2:
 #   x = 0.5 : 0.5, 1, 1.25, 1.5, 1.75, 2
 #   x = 1.5 : 1.5, 3, 3.75, 4.5, 5.25, 6
+# The trapezoidal rule is exact for u linear in t, so the trapezoidal average is x times the
+# exact mean of t over [1, t], (1 + t) / 2:
+#   x = 0.5 : 0.5, 0.75, 1, 1.25, 1.5, 1.75
+#   x = 1.5 : 1.5, 2.25, 3, 3.75, 4.5, 5.25
 [Mesh]
   type = GeneratedMesh
   dim = 1

@@ -9,6 +9,37 @@
 
     requirement = 'The system shall have the ability to compute the running time-weighted average of a field, starting at a given simulation time.'
   []
+  [trapezoidal]
+    type = 'CSVDiff'
+    input = 'time_averaged.i'
+    cli_args = 'AuxKernels/u_avg/time_integration_scheme=trapezoidal-rule '
+               'Outputs/file_base=time_averaged_trapezoidal_out'
+    csvdiff = 'time_averaged_trapezoidal_out.csv'
+
+    requirement = 'The system shall have the ability to compute the running time-weighted average of a field with the trapezoidal rule.'
+  []
+  [time_integrator_second_order]
+    type = 'CSVDiff'
+    input = 'time_averaged.i'
+    cli_args = 'AuxKernels/u_avg/time_integration_scheme=time-integrator '
+               'Executioner/TimeIntegrator/type=CrankNicolson '
+               'Outputs/file_base=time_averaged_trapezoidal_out'
+    csvdiff = 'time_averaged_trapezoidal_out.csv'
+    # Writes the same output file as the trapezoidal test
+    prereq = 'trapezoidal'
+
+    requirement = 'The system shall use the trapezoidal rule for the running time average of a field when requested to follow a second order time integrator.'
+  []
+  [time_integrator_first_order]
+    type = 'CSVDiff'
+    input = 'time_averaged.i'
+    cli_args = 'AuxKernels/u_avg/time_integration_scheme=time-integrator'
+    csvdiff = 'time_averaged_out.csv'
+    # Writes the same output file as the default test
+    prereq = 'time_averaged'
+
+    requirement = 'The system shall use the rectangle rule for the running time average of a field when requested to follow a first order time integrator.'
+  []
   [nodal_error]
     type = 'RunException'
     input = 'time_averaged.i'

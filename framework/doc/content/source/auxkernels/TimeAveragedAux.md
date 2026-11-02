@@ -23,6 +23,17 @@ This is equivalent to the time-weighted mean of all values since averaging start
 [!param](/AuxKernels/TimeAveragedAux/start_time) is reached, the variable holds the current
 value of the functor.
 
+By default, the functor is integrated over each time step with the rectangle rule using its
+current value $u^n$, the same quadrature as the implicit Euler time integrator. This is first
+order accurate in $\Delta t$, and for statistically stationary signals averaged over many time
+steps the quadrature error is much smaller than the sampling error of the average. For more
+accuracy, setting [!param](/AuxKernels/TimeAveragedAux/time_integration_scheme) to
+`trapezoidal-rule` replaces $u^n$ with the trapezoidal rule over the time step,
+$\left( u^n + u^{n-1} \right) / 2$, which is second order accurate. The `time-integrator` option
+uses the trapezoidal rule when every time integrator of the executioner is at least second
+order, for example [CrankNicolson.md] or [BDF2.md], and the rectangle rule otherwise. The
+trapezoidal rule requires the functor to support evaluation at the previous time step.
+
 The update only depends on the average from the previous time step, so executing the auxiliary
 kernel several times in a time step gives the same result.
 
