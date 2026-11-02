@@ -120,8 +120,11 @@ SurfaceExtrusionComponent::addMeshGenerators()
     InputParameters lowD_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
     // use the own mesh generator to get the smallest mesh suitable
     lowD_params.set<MeshGeneratorName>("input") = connected_comp.getOwnMeshMeshGeneratorName();
-    const auto lowD_block_name = name() + "lowD_for_extrusion";
+    // The extruded elements keep the subdomain of the lower-dimensional elements they come from
+    const auto lowD_block_name =
+        isParamValid("block") ? getParam<SubdomainName>("block") : SubdomainName(name());
     lowD_params.set<SubdomainName>("new_block_name") = lowD_block_name;
+    _blocks.push_back(lowD_block_name);
     lowD_params.set<std::vector<BoundaryName>>("sidesets") = {
         getParam<BoundaryName>("source_surface")};
     addMeshGenerator("LowerDBlockFromSidesetGenerator", "create_lowerD", lowD_params);
