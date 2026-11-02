@@ -670,7 +670,12 @@ AdvancedExtruderGenerator::generate()
     // Backwards compatibility: we were twisting along an axis going through the origin
     reference_point = Point(0, 0, 0);
   else
+  {
+    // The centroid is summed over local elements, which requires valid processor ids
+    if (!input->preparation().is_partitioned)
+      input->partition();
     reference_point = MooseMeshUtils::meshCentroidCalculator(*input);
+  }
 
   if (_end_radial_extent)
   {

@@ -308,6 +308,10 @@ changeSubdomainId(MeshBase & mesh, const subdomain_id_type old_id, const subdoma
 Point
 meshCentroidCalculator(const MeshBase & mesh)
 {
+  // The is_partitioned flag is not checked, as unset_is_prepared() clears it even when every
+  // element keeps a valid processor id
+  mooseAssert(!mesh.n_unpartitioned_elem(),
+              "Mesh must be partitioned: the centroid is summed over local elements");
   Point centroid_pt = Point(0.0, 0.0, 0.0);
   Real vol_tmp = 0.0;
   for (const auto & elem : mesh.active_local_element_ptr_range())
