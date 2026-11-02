@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CZMPressureSidesetUpdater.h"
+#include "MortarCZMDebondedBoundaryUpdater.h"
 #include "MooseMesh.h"
 #include "DisplacedProblem.h"
 #include "AutomaticMortarGeneration.h"
 
-registerMooseObject("ContactApp", CZMPressureSidesetUpdater);
+registerMooseObject("ContactApp", MortarCZMDebondedBoundaryUpdater);
 
 InputParameters
-CZMPressureSidesetUpdater::validParams()
+MortarCZMDebondedBoundaryUpdater::validParams()
 {
   InputParameters params = DomainUserObject::validParams();
   params.addClassDescription("Promotes fully-damaged CZM interface segments into new sidesets.");
@@ -24,7 +24,7 @@ CZMPressureSidesetUpdater::validParams()
                                "CZM damage AuxVariable (0 = intact, 1 = fully broken), valid on "
                                "the secondary lower-dimensional mortar block.");
   params.addParam<Real>(
-      "threshold", 1.0 - 1e-10, "Damage at or above which a segment is fully separated.");
+      "threshold", 1.0 - 1e-10, "Damage at or above which a face considered is fully separated.");
   params.addRequiredParam<UserObjectName>(
       "cohesive_zone_userobject", "The mortar cohesive-zone UserObject for this interface.");
   params.addRequiredParam<BoundaryName>("primary_boundary",
@@ -35,16 +35,17 @@ CZMPressureSidesetUpdater::validParams()
                                          "Primary lower-dimensional mortar block.");
   params.addRequiredParam<SubdomainName>("secondary_subdomain",
                                          "Secondary lower-dimensional mortar block.");
-  params.addRequiredParam<BoundaryName>("pressure_boundary_primary",
+  params.addRequiredParam<BoundaryName>("debonded_boundary_primary",
                                         "Boundary to populate with fully-damaged primary faces.");
-  params.addRequiredParam<BoundaryName>("pressure_boundary_secondary",
+  params.addRequiredParam<BoundaryName>("debonded_boundary_secondary",
                                         "Boundary to populate with fully-damaged secondary faces.");
   params.set<bool>("use_displaced_mesh") = true;
   params.registerBase("MeshModifier");
   return params;
 }
 
-CZMPressureSidesetUpdater::CZMPressureSidesetUpdater(const InputParameters & parameters)
+MortarCZMDebondedBoundaryUpdater::MortarCZMDebondedBoundaryUpdater(
+    const InputParameters & parameters)
   : DomainUserObject(parameters),
     _damage(coupledValue("damage_variable")),
     _threshold(getParam<Real>("threshold")),
@@ -54,43 +55,44 @@ CZMPressureSidesetUpdater::CZMPressureSidesetUpdater(const InputParameters & par
     _primary_subdomain_id(_mesh.getSubdomainID(getParam<SubdomainName>("primary_subdomain"))),
     _secondary_subdomain_id(_mesh.getSubdomainID(getParam<SubdomainName>("secondary_subdomain"))),
     _displaced_problem(_fe_problem.getDisplacedProblem().get()),
-    _pressure_name_primary(getParam<BoundaryName>("pressure_boundary_primary")),
-    _pressure_name_secondary(getParam<BoundaryName>("pressure_boundary_secondary")),
-    _pressure_bid_primary(_mesh.getBoundaryID(_pressure_name_primary)),
-    _pressure_bid_secondary(_mesh.getBoundaryID(_pressure_name_secondary)),
-    _boundary_info(_fe_problem.mesh().getMesh().get_boundary_info()),
-    _displaced_boundary_info(
-        _displaced_problem ? &_displaced_problem->mesh().getMesh().get_boundary_info() : nullptr)
+    _debonded_name_primary(getParam<BoundaryName>("debonded_boundary_primary")),
+    _debonded_name_secondary(getParam<BoundaryName>("debonded_boundary_secondary")),
+    _debonded_bid_primary(_mesh.getBoundaryID(_debonded_name_primary)),
+    _debonded_bid_secondary(_mesh.getBoundaryID(_debonded_name_secondary)),
+    _undisplaced_mesh(_fe_problem.mesh().getMesh()),
+    _displaced_mesh(_displaced_problem ? &_displaced_problem->mesh().getMesh() : nullptr),
+    _boundary_info(_undisplaced_mesh.get_boundary_info()),
+    _displaced_boundary_info(_displaced_mesh ? &_displaced_mesh->get_boundary_info() : nullptr)
 {
   // Mortar machinery lives on the displaced mesh, so this object must execute there.
   if (!_displaced_problem)
-    mooseError("CZMPressureSidesetUpdater requires a displaced mesh.");
+    mooseError("MortarCZMDebondedBoundaryUpdater requires a displaced mesh.");
 
   // Persist boundary names on both undisplaced and displaced meshes.
-  _boundary_info.sideset_name(_pressure_bid_primary) = _pressure_name_primary;
-  _boundary_info.nodeset_name(_pressure_bid_primary) = _pressure_name_primary;
-  _boundary_info.sideset_name(_pressure_bid_secondary) = _pressure_name_secondary;
-  _boundary_info.nodeset_name(_pressure_bid_secondary) = _pressure_name_secondary;
+  _boundary_info.sideset_name(_debonded_bid_primary) = _debonded_name_primary;
+  _boundary_info.nodeset_name(_debonded_bid_primary) = _debonded_name_primary;
+  _boundary_info.sideset_name(_debonded_bid_secondary) = _debonded_name_secondary;
+  _boundary_info.nodeset_name(_debonded_bid_secondary) = _debonded_name_secondary;
 
-  _displaced_boundary_info->sideset_name(_pressure_bid_primary) = _pressure_name_primary;
-  _displaced_boundary_info->nodeset_name(_pressure_bid_primary) = _pressure_name_primary;
-  _displaced_boundary_info->sideset_name(_pressure_bid_secondary) = _pressure_name_secondary;
-  _displaced_boundary_info->nodeset_name(_pressure_bid_secondary) = _pressure_name_secondary;
+  _displaced_boundary_info->sideset_name(_debonded_bid_primary) = _debonded_name_primary;
+  _displaced_boundary_info->nodeset_name(_debonded_bid_primary) = _debonded_name_primary;
+  _displaced_boundary_info->sideset_name(_debonded_bid_secondary) = _debonded_name_secondary;
+  _displaced_boundary_info->nodeset_name(_debonded_bid_secondary) = _debonded_name_secondary;
 }
 
 void
-CZMPressureSidesetUpdater::initialSetup()
+MortarCZMDebondedBoundaryUpdater::initialSetup()
 {
   if (_tid == 0)
     buildReferencePrimaryFaceMap();
 }
 
 void
-CZMPressureSidesetUpdater::buildReferencePrimaryFaceMap()
+MortarCZMDebondedBoundaryUpdater::buildReferencePrimaryFaceMap()
 {
 
   AutomaticMortarGeneration amg(_app,
-                                _fe_problem.mesh().getMesh(),
+                                _undisplaced_mesh,
                                 std::make_pair(_primary_boundary_id, _secondary_boundary_id),
                                 std::make_pair(_primary_subdomain_id, _secondary_subdomain_id),
                                 /*on_displaced=*/false,
@@ -136,13 +138,13 @@ CZMPressureSidesetUpdater::buildReferencePrimaryFaceMap()
 }
 
 void
-CZMPressureSidesetUpdater::initialize()
+MortarCZMDebondedBoundaryUpdater::initialize()
 {
   _separated_lowerd.clear();
 }
 
 bool
-CZMPressureSidesetUpdater::currentElemFullySeparated() const
+MortarCZMDebondedBoundaryUpdater::currentElemFullySeparated() const
 {
   for (unsigned int qp = 0; qp < qRule().n_points(); ++qp)
     if (_damage[qp] < _threshold)
@@ -151,46 +153,44 @@ CZMPressureSidesetUpdater::currentElemFullySeparated() const
 }
 
 void
-CZMPressureSidesetUpdater::executeOnElement()
+MortarCZMDebondedBoundaryUpdater::executeOnElement()
 {
   if (currentElemFullySeparated())
     _separated_lowerd.push_back(_current_elem->id());
 }
 
 void
-CZMPressureSidesetUpdater::threadJoin(const UserObject & y)
+MortarCZMDebondedBoundaryUpdater::threadJoin(const UserObject & y)
 {
-  const auto & uo = static_cast<const CZMPressureSidesetUpdater &>(y);
+  const auto & uo = static_cast<const MortarCZMDebondedBoundaryUpdater &>(y);
   _separated_lowerd.insert(
       _separated_lowerd.end(), uo._separated_lowerd.begin(), uo._separated_lowerd.end());
 }
 
 void
-CZMPressureSidesetUpdater::finalize()
+MortarCZMDebondedBoundaryUpdater::finalize()
 {
-  const auto & mesh = _fe_problem.mesh().getMesh();
-  const auto & displaced_mesh = _displaced_problem->mesh().getMesh();
-
   // Sides not yet in their sideset, gathered on every rank so that all ranks add the same sides and
   // the boundary info of the replicated mesh stays consistent without a parallel sync. Only sides
-  // that are actually new are collected, so that the mesh (and the Exodus output) is changed only
-  // on the steps where a segment is first promoted.
+  // that are actually new are collected, so that the mesh is changed only on the steps where a
+  // segment is first promoted.
+
   std::set<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> new_sides;
   for (const auto lowerd_id : _separated_lowerd)
   {
-    const Elem * const lowerd = mesh.elem_ptr(lowerd_id);
+    const Elem * const lowerd = _undisplaced_mesh.elem_ptr(lowerd_id);
     const Elem * const secondary_ip = lowerd->interior_parent();
     mooseAssert(secondary_ip, "Lower-d mortar element has no interior parent.");
     const auto secondary_side = secondary_ip->which_side_am_i(lowerd);
-    if (!_boundary_info.has_boundary_id(secondary_ip, secondary_side, _pressure_bid_secondary))
-      new_sides.emplace(secondary_ip->id(), secondary_side, _pressure_bid_secondary);
+    if (!_boundary_info.has_boundary_id(secondary_ip, secondary_side, _debonded_bid_secondary))
+      new_sides.emplace(secondary_ip->id(), secondary_side, _debonded_bid_secondary);
 
     const auto it = _secondary_to_primary_faces.find(lowerd_id);
     if (it != _secondary_to_primary_faces.end())
       for (const auto & [primary_id, primary_side] : it->second)
         if (!_boundary_info.has_boundary_id(
-                mesh.elem_ptr(primary_id), primary_side, _pressure_bid_primary))
-          new_sides.emplace(primary_id, primary_side, _pressure_bid_primary);
+                _undisplaced_mesh.elem_ptr(primary_id), primary_side, _debonded_bid_primary))
+          new_sides.emplace(primary_id, primary_side, _debonded_bid_primary);
   }
   _communicator.set_union(new_sides);
 
@@ -199,8 +199,8 @@ CZMPressureSidesetUpdater::finalize()
 
   for (const auto & [elem_id, side, bid] : new_sides)
   {
-    _boundary_info.add_side(mesh.elem_ptr(elem_id), side, bid);
-    _displaced_boundary_info->add_side(displaced_mesh.elem_ptr(elem_id), side, bid);
+    _boundary_info.add_side(_undisplaced_mesh.elem_ptr(elem_id), side, bid);
+    _displaced_boundary_info->add_side(_displaced_mesh->elem_ptr(elem_id), side, bid);
   }
 
   // Update both undisplaced and displaced meshes

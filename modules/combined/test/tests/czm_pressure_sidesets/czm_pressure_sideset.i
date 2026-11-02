@@ -1,9 +1,9 @@
 # Two blocks bonded by a mortar cohesive zone are peeled apart from x = 0, so the debonded region
-# grows from left to right. The lower (secondary) block has 4 interface faces and the upper
-# (primary) block 3, so each secondary face overlaps one or two primary faces.
+# grows from left to right. Due to the model configuration, each secondary face overlaps one or two
+# primary faces.
 #
 # As each secondary face fully separates, it must be added to czm_pressure_secondary, and every
-# primary face it overlapped in the undisplaced configuration must be added to
+# primary face it fully overlaps in the undisplaced configuration must be added to
 # czm_pressure_primary. The length and first moment (integral of x) of each sideset record which
 # faces it holds: a sideset holding the first k faces of width h from x = 0 has length k h and
 # first moment (k h)^2 / 2. Once the whole interface has failed the blocks carry no load, so the
@@ -222,7 +222,7 @@ opening = 0.1
 
 [MeshModifiers]
   [pressure_sideset_updater]
-    type = CZMPressureSidesetUpdater
+    type = MortarCZMDebondedBoundaryUpdater
     block = secondary_lower
     damage_variable = damage
     cohesive_zone_userobject = czm_uo
@@ -230,8 +230,8 @@ opening = 0.1
     secondary_boundary = lower_top
     primary_subdomain = primary_lower
     secondary_subdomain = secondary_lower
-    pressure_boundary_primary = czm_pressure_primary
-    pressure_boundary_secondary = czm_pressure_secondary
+    debonded_boundary_primary = czm_pressure_primary
+    debonded_boundary_secondary = czm_pressure_secondary
     execute_on = TIMESTEP_END
     # Run before the default group so that the postprocessors see faces promoted this step
     execution_order_group = -1

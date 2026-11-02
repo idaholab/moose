@@ -1,5 +1,5 @@
 [Tests]
-  design = 'CZMPressureSidesetUpdater.md'
+  design = 'MortarCZMDebondedBoundaryUpdater.md'
   issues = '#34029'
   [czm_sidesets]
     type = CSVDiff

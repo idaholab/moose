@@ -1,4 +1,4 @@
-# Pressurization of the sidesets built by CZMPressureSidesetUpdater. The
+# Pressurization of the sidesets built by MortarCZMDebondedBoundaryUpdater. The
 # czm_pressure_sideset.i test is repeated here while the  upper block also
 # slides tangentially, so the faces paired in the undisplaced configuration are no
 # longer aligned. Once the whole interface has failed the blocks carry no load, so the void between
@@ -284,7 +284,7 @@ gas_rate = 2700
 
 [MeshModifiers]
   [pressure_sideset_updater]
-    type = CZMPressureSidesetUpdater
+    type = MortarCZMDebondedBoundaryUpdater
     block = secondary_lower
     damage_variable = damage
     cohesive_zone_userobject = czm_uo
@@ -292,8 +292,8 @@ gas_rate = 2700
     secondary_boundary = lower_top
     primary_subdomain = primary_lower
     secondary_subdomain = secondary_lower
-    pressure_boundary_primary = czm_pressure_primary
-    pressure_boundary_secondary = czm_pressure_secondary
+    debonded_boundary_primary = czm_pressure_primary
+    debonded_boundary_secondary = czm_pressure_secondary
     execute_on = TIMESTEP_END
     # Run before the default group so that the postprocessors see faces promoted this step
     execution_order_group = -1

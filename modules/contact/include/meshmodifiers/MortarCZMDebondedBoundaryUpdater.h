@@ -14,13 +14,15 @@
 class DisplacedProblem;
 
 /**
- * Promotes fully-damaged CZM interface segments into pressure sidesets at runtime
+ * Dynamically adds fully-damaged CZM interface segments to sidesets at runtime.
+ * These sidesets are primarily intended for use with pressure BCs, but could be used
+ * for other purposes as well.
  */
-class CZMPressureSidesetUpdater : public DomainUserObject
+class MortarCZMDebondedBoundaryUpdater : public DomainUserObject
 {
 public:
   static InputParameters validParams();
-  CZMPressureSidesetUpdater(const InputParameters & parameters);
+  MortarCZMDebondedBoundaryUpdater(const InputParameters & parameters);
 
   virtual void initialSetup() override;
   virtual void initialize() override;
@@ -40,7 +42,7 @@ protected:
   /// CZM damage (0 = intact, 1 = broken), valid on the secondary lower-d block.
   const VariableValue & _damage;
 
-  /// Damage at/above which a segment is fully separated (effectively 1.0).
+  /// Damage at/above which a face is considered fully separated.
   const Real _threshold;
 
   /// The mortar UO name (to retrieve the interface's AutomaticMortarGeneration).
@@ -57,12 +59,17 @@ protected:
   /// Displaced problem
   DisplacedProblem * _displaced_problem;
 
-  ///@{ Destination pressure boundaries.
-  BoundaryName _pressure_name_primary;
-  BoundaryName _pressure_name_secondary;
-  BoundaryID _pressure_bid_primary;
-  BoundaryID _pressure_bid_secondary;
+  ///@{Boundaries to which damaged faces are added
+  BoundaryName _debonded_name_primary;
+  BoundaryName _debonded_name_secondary;
+  BoundaryID _debonded_bid_primary;
+  BoundaryID _debonded_bid_secondary;
   ///@}
+
+  /// Undisplaced mesh
+  MeshBase & _undisplaced_mesh;
+  /// Displaced mesh
+  MeshBase * const _displaced_mesh;
 
   BoundaryInfo & _boundary_info;
   BoundaryInfo * _displaced_boundary_info;
