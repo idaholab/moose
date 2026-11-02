@@ -709,6 +709,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("SetupDebugAction", "Debug");
   registerSyntax("SetupResidualDebugAction", "Debug");
 
+  registerSyntax("CSGAction", "CSG");
+
   /// Variable/AuxVariable Actions
   registerSyntax("AddVariableAction", "Variables/*");
   syntax.registerSyntaxType("Variables/*", "VariableName");
