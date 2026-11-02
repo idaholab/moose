@@ -12,6 +12,8 @@
 #include "RotationMatrix.h"
 
 registerMooseAction("MooseApp", CylinderComponent, "add_mesh_generator");
+// Sets the RZ coordinate system on the cylinder blocks
+registerMooseAction("MooseApp", CylinderComponent, "setup_component");
 // CylinderComponent is an example of ComponentPhysicsInterface
 registerMooseAction("MooseApp", CylinderComponent, "init_component_physics");
 // CylinderComponent is an example of ComponentMaterialPropertyInterface
@@ -223,13 +225,46 @@ CylinderComponent::setupComponent()
 {
   if (_dimension == 2 && getParam<bool>("use_RZ_coordinates"))
   {
-    _awh.getMesh()->setCoordSystem(_blocks, MultiMooseEnum("COORD_RZ"));
-    if (_direction)
-      _awh.getMesh()->setGeneralAxisymmetricCoordAxes(
-          {getParam<SubdomainName>("block")},
-          {std::make_pair(translation(), _direction ? *_direction : RealVectorValue(0, 1, 0))});
     if (_rotation)
       paramError("rotation", "Rotation + 2D RZ cylinder not implemented");
+    if (_blocks.empty())
+      paramError("block", "Should be specified to use RZ coordinates");
+
+    auto & mesh = *_awh.getMesh();
+
+    // setCoordSystem() applies a single coordinate system to every subdomain, so we pass the
+    // coordinate system of every subdomain, keeping the current one outside of the cylinder
+    std::vector<SubdomainName> blocks;
+    MultiMooseEnum coord_types("XYZ RZ RSPHERICAL");
+    const auto cylinder_ids_vec = mesh.getSubdomainIDs(_blocks);
+    const std::set<SubdomainID> cylinder_ids(cylinder_ids_vec.begin(), cylinder_ids_vec.end());
+    for (const auto sid : mesh.meshSubdomains())
+    {
+      blocks.push_back(std::to_string(sid));
+      if (cylinder_ids.count(sid))
+        coord_types.setAdditionalValue("RZ");
+      else
+        switch (mesh.getCoordSystem(sid))
+        {
+          case Moose::COORD_XYZ:
+            coord_types.setAdditionalValue("XYZ");
+            break;
+          case Moose::COORD_RZ:
+            coord_types.setAdditionalValue("RZ");
+            break;
+          case Moose::COORD_RSPHERICAL:
+            coord_types.setAdditionalValue("RSPHERICAL");
+            break;
+        }
+    }
+    mesh.setCoordSystem(blocks, coord_types);
+
+    // The axis goes through the position of the cylinder, along its direction. Without a
+    // direction, the cylinder mesh is generated along the x-axis
+    const RealVectorValue axis = _direction ? *_direction : RealVectorValue(1, 0, 0);
+    mesh.setGeneralAxisymmetricCoordAxes(
+        _blocks,
+        std::vector<std::pair<Point, RealVectorValue>>(_blocks.size(), {translation(), axis}));
   }
 }
 

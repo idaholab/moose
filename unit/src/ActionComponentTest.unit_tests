@@ -22,8 +22,24 @@
     [rotation_and_direction]
       type = GoogleTest
       unit_test = ActionComponentTest.rotationAndDirection
-      detail = 'or specifies both a rotation and a direction to orient its mesh.'
+      detail = 'specifies both a rotation and a direction to orient its mesh,'
     []
+    [rz_block]
+      type = GoogleTest
+      unit_test = ActionComponentTest.cylinderRZBlock
+      detail = 'uses RZ coordinates without a named subdomain,'
+    []
+    [rotation_rz]
+      type = GoogleTest
+      unit_test = ActionComponentTest.cylinderRotationRZ
+      detail = 'or uses RZ coordinates with a rotation.'
+    []
+  []
+  [cylinder_rz_coordinates]
+    type = GoogleTest
+    unit_test = ActionComponentTest.cylinderRZCoordinates
+    design = 'CylinderComponent.md'
+    requirement = 'The system shall apply RZ coordinates only to the subdomains of a 2D cylinder component, with an axis through the cylinder position along its direction.'
   []
 
   [cavity]
