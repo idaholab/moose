@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include "InputParameters.h"
-
 /**
  *  Interface of the augmented Lagrangian contact problems that gives the contact constraints,
  *  user objects and postprocessors access to the augmented Lagrangian iteration number.
@@ -18,20 +16,8 @@
 class AugmentedLagrangianContactProblemInterface
 {
 public:
-  static InputParameters validParams();
-
-  AugmentedLagrangianContactProblemInterface(const InputParameters & params);
+  virtual ~AugmentedLagrangianContactProblemInterface() = default;
 
   /// @return the current augmented Lagrangian iteration number
-  virtual const unsigned int & getLagrangianIterationNumber() const
-  {
-    return _lagrangian_iteration_number;
-  }
-
-protected:
-  /// maximum number of augmented Lagrangian iterations
-  const unsigned int _maximum_number_lagrangian_iterations;
-
-  /// current augmented Lagrangian iteration number
-  unsigned int _lagrangian_iteration_number;
+  virtual const unsigned int & getLagrangianIterationNumber() const = 0;
 };

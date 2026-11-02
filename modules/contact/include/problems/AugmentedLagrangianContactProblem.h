@@ -48,6 +48,11 @@ public:
   /// @return the total number of linear iterations of all solves in the augmented Lagrangian loop
   virtual unsigned int nLinearIterations(const unsigned int nl_sys_num) const override;
 
+  virtual const unsigned int & getLagrangianIterationNumber() const override
+  {
+    return _lagrangian_iteration_number;
+  }
+
 private:
   /**
    * Checks the augmented Lagrangian constraints and, if they are not met, updates the Lagrange
@@ -55,6 +60,12 @@ private:
    * @return Whether the constraints are met
    */
   bool updateAugmentedLagrangianMultipliers();
+
+  /// Maximum number of augmented Lagrangian multiplier updates per time step
+  const unsigned int _maximum_number_lagrangian_iterations;
+
+  /// Number of augmented Lagrangian multiplier updates in the current time step
+  unsigned int _lagrangian_iteration_number;
 
   /// Whether the augmented Lagrangian loop reached its maximum number of iterations
   bool _augmented_lagrangian_failed;

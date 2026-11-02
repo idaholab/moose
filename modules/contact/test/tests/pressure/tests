@@ -32,7 +32,6 @@
                'Outputs/csv=true Outputs/file_base=pressureAugLag_reuse_pc Executioner/num_steps=2 '
                'Executioner/nl_abs_tol=5e-2 Executioner/reuse_preconditioner=true '
                'Executioner/solve_type=NEWTON'
-    max_parallel = 1
     requirement = 'The contact system shall not force nonlinear iterations in a time step that '
                   'needs no augmented Lagrangian update when the preconditioner is reused.'
     issues = '#34078'
@@ -46,7 +45,6 @@
                'Contact/m10_s20/penalty=1e7 Contact/m10_s20/formulation=penalty '
                'Contact/m10_s20/tangential_tolerance=1e-3'
     expect_out = 'Augmented Lagrangian contact constraint enforcement is satisfied'
-    max_parallel = 1
     requirement = 'The contact system shall apply augmented Lagrangian updates only to the contact '
                   'pairs that use the augmented Lagrangian formulation.'
     issues = '#34078'

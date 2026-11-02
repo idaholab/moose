@@ -37,7 +37,9 @@ InputParameters
 AugmentedLagrangianContactProblemTempl<T>::validParams()
 {
   InputParameters params = T::validParams();
-  params += AugmentedLagrangianContactProblemInterface::validParams();
+  params.addParam<int>("maximum_lagrangian_update_iterations",
+                       100,
+                       "Maximum number of update Lagrangian Multiplier iterations per step");
   params.addClassDescription("Manages nested solution for augmented Lagrange contact");
   return params;
 }
@@ -46,7 +48,8 @@ template <class T>
 AugmentedLagrangianContactProblemTempl<T>::AugmentedLagrangianContactProblemTempl(
     const InputParameters & params)
   : T(params),
-    AugmentedLagrangianContactProblemInterface(params),
+    _maximum_number_lagrangian_iterations(params.get<int>("maximum_lagrangian_update_iterations")),
+    _lagrangian_iteration_number(0),
     _augmented_lagrangian_failed(false),
     _n_nonlinear_iterations(0),
     _n_linear_iterations(0)
@@ -68,7 +71,9 @@ AugmentedLagrangianContactProblemTempl<T>::solve(const unsigned int nl_sys_num)
   auto & nl = this->getNonlinearSystemBase(nl_sys_num);
 
   // The solves after a multiplier update start from the converged solution of the previous
-  // solve, so the predictor and a per-step scaling computation only apply to the first one
+  // solve. The predictor would move that solution further along the time step, and a per-step
+  // scaling computation would rescale the problem in the middle of the step, so both only apply
+  // to the first solve of the step.
   Predictor * const predictor = nl.getPredictor();
   const auto predictor_ptr =
       predictor ? std::static_pointer_cast<Predictor>(predictor->getSharedPtr()) : nullptr;
@@ -82,6 +87,7 @@ AugmentedLagrangianContactProblemTempl<T>::solve(const unsigned int nl_sys_num)
       this->getConvergence(this->getNonlinearConvergenceNames()[nl_sys_num]));
   const auto forced_its = convergence.getForcedIterations();
 
+  // Resets the settings that the loop changes to the values saved above
   const auto restore = [&]()
   {
     nl.setPredictor(predictor_ptr);
@@ -103,6 +109,8 @@ AugmentedLagrangianContactProblemTempl<T>::solve(const unsigned int nl_sys_num)
       if (updateAugmentedLagrangianMultipliers() || _augmented_lagrangian_failed)
         break;
 
+      // Change the settings saved above for the solves that follow the first multiplier update;
+      // restore() resets them once the loop ends or throws
       if (_lagrangian_iteration_number == 1)
       {
         nl.setPredictor(nullptr);

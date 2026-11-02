@@ -172,17 +172,19 @@ DefaultNonlinearConvergence::checkPetscToleranceOverrides()
   if (max_funcs != static_cast<PetscInt>(_nl_max_funcs))
     oss << "  -snes_max_funcs = " << max_funcs << " (nl_max_funcs = " << _nl_max_funcs << ")\n";
 
-  PetscBool force_iteration;
-  LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetForceIteration(snes, &force_iteration));
-  if (force_iteration)
-    oss << "  -snes_force_iteration (nl_forced_its = " << _nl_forced_its << ")\n";
-
   if (!oss.str().empty())
     mooseWarning("The following PETSc SNES option(s) were set to a value different from what "
                  "this Convergence object enforces. Because this object performs its own "
                  "convergence check using its own cached tolerances, these PETSc-level settings "
                  "have no effect:\n",
                  oss.str());
+
+  PetscBool force_iteration;
+  LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetForceIteration(snes, &force_iteration));
+  if (force_iteration)
+    mooseWarning("The PETSc option -snes_force_iteration is set, but this Convergence object "
+                 "performs its own convergence check and does not read it, so it has no effect. "
+                 "Use the 'nl_forced_its' parameter to force a number of nonlinear iterations.");
 }
 
 Convergence::MooseConvergenceStatus
