@@ -36,7 +36,7 @@ struct LennardJonesParameters
 /**
  * Lennard-Jones parameters of a built-in species
  *
- * @param[in] name   species name: H2, O2, H2O, CH4, CO, CO2, or N2
+ * @param[in] name   species name: H2, O2, H2O, CH4, CO, CO2, N2, He, Ar, Kr, or Xe
  */
 const LennardJonesParameters & lennardJonesParameters(const std::string & name);
 

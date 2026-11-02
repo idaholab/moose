@@ -102,10 +102,12 @@ $\epsilon_{ij} = \sqrt{\epsilon_i \epsilon_j}$. The reduced collision integrals
 $\Omega^{(1,1)*}$ and $\Omega^{(2,2)*}$ of the Lennard-Jones (12-6) potential follow the fits of
 [!citet](neufeld1972), valid for $0.3 \le T^* \le 100$.
 
-The Lennard-Jones parameters of the built-in species, H$_2$, O$_2$, H$_2$O, CH$_4$, CO, CO$_2$, and
-N$_2$, are those of GRI-Mech 3.0 [!citep](smith_grimech30) as distributed with Cantera 3.2.0
-[!citep](cantera320), the same source as the NASA 7-coefficient data. Their reduced temperatures
-remain within the range of the fits over the temperature ranges of the NASA 7-coefficient data.
+The Lennard-Jones parameters of the built-in species, H$_2$, O$_2$, H$_2$O, CH$_4$, CO, CO$_2$,
+N$_2$, He, and Ar, are those of GRI-Mech 3.0 [!citep](smith_grimech30) as distributed with
+Cantera 3.2.0 [!citep](cantera320), the same source as most of the NASA 7-coefficient data. Those
+of Kr and Xe, which GRI-Mech 3.0 does not include, are those of [!citet](svehla1962). Except for
+He, their reduced temperatures remain within the range of the fits over the temperature ranges of
+the NASA 7-coefficient data. That of He exceeds it above about 1000 K.
 The viscosities of the species other than H$_2$O agree with those of Cantera within 0.5%. The
 GRI-Mech parameters of H$_2$O assume a correction for its dipole moment, which is not applied here,
 so the binary diffusion coefficients of pairs with H$_2$O differ from those of Cantera by up to 4%.
