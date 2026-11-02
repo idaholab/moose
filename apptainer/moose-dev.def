@@ -637,6 +637,7 @@ EOF
 {% if not WITHOUT_PYTORCH | to_bool %}
     # libtorch
     {{ MOOSE_DIR }}/scripts/configure_libtorch.sh {{ ROOT_BUILD_DIR }}/configure_libtorch.sh
+    {{ MOOSE_DIR }}/scripts/pytorch-macos-openmp-rpath.patch {{ ROOT_BUILD_DIR }}/pytorch-macos-openmp-rpath.patch
     # neml2
     {{ MOOSE_DIR }}/scripts/configure_neml2.sh {{ ROOT_BUILD_DIR }}/configure_neml2.sh
     {{ MOOSE_DIR }}/scripts/{{ NEML2_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ NEML2_BUILD_SCRIPT }}
