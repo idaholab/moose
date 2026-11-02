@@ -6,6 +6,7 @@
     input = 'channel_ERCOFTAC_heated.i'
     exodiff = 'channel_ERCOFTAC_heated_out.e'
     abs_zero = 1e-6
+    max_threads = 1 # see libmesh issue #3808
     requirement = 'The system shall be able to turbulent fluid flow problems with k-epsilon turbulence model and with temperature wall functions in a heated channel.'
   []
 []
