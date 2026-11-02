@@ -116,7 +116,7 @@ VolumeJunction1Phase::init()
         const auto & comp = getComponentByName<FlowChannel1Phase>(comp_name);
         if (i == 0)
           _slope_reconstruction = comp.getSlopeReconstruction();
-        else if (comp.getSlopeReconstruction() != _slope_reconstruction)
+        else if (!comp.getSlopeReconstruction().compareCurrent(_slope_reconstruction))
           logError("The hydrostatic correction requires the same 'rdg_slope_reconstruction' in "
                    "all connected flow channels, but '",
                    comp_name,
