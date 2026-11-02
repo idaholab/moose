@@ -27,4 +27,28 @@
     unit_test = IdealGasMixtureFluidPropertiesTest.nasa7Inversion
     requirement = 'The system shall compute the temperature of mixtures of ideal gases from NASA 7-coefficient polynomials, alone or with an ideal gas of constant specific heats, from their specific volume and internal energy, from half the highest lower end to 1.5 times the lowest upper end of the temperature ranges of the data of their components, and where the internal energy is close to zero.'
   []
+  [wilke_cantera]
+    type = GoogleTest
+    unit_test = IdealGasMixtureFluidPropertiesTest.wilkeCantera
+    issues = '#34223'
+    requirement = 'The system shall optionally compute the viscosity of an ideal gas mixture with the rule of Wilke, reproducing the mixture-averaged viscosity of Cantera for the same component viscosities and the viscosity of a single component.'
+  []
+  [mason_saxena]
+    type = GoogleTest
+    unit_test = IdealGasMixtureFluidPropertiesTest.masonSaxena
+    issues = '#34223'
+    requirement = 'The system shall optionally compute the thermal conductivity of an ideal gas mixture with the rule of Mason and Saxena, whose interaction factors are those of the rule of Wilke for the viscosity.'
+  []
+  [wilke_ad_derivatives]
+    type = GoogleTest
+    unit_test = IdealGasMixtureFluidPropertiesTest.wilkeAdDerivatives
+    issues = '#34223'
+    requirement = 'The system shall compute the derivatives of the viscosity and thermal conductivity of a mixture of ideal gases from NASA 7-coefficient polynomials, combined with the rules of Wilke and of Mason and Saxena, with respect to pressure, temperature, and the mass fractions with automatic differentiation, in agreement with finite differences.'
+  []
+  [binary_diffusion]
+    type = GoogleTest
+    unit_test = IdealGasMixtureFluidPropertiesTest.binaryDiffusion
+    issues = '#34223'
+    requirement = 'The system shall compute the binary diffusion coefficients of the pairs of components of a mixture of ideal gases from NASA 7-coefficient polynomials and their derivatives with respect to pressure and temperature, reproducing Cantera values, and shall report an error for components without Lennard-Jones parameters.'
+  []
 []
