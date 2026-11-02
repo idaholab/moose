@@ -415,10 +415,12 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   pressure_variable_relaxation = 0.3
   turbulence_equation_relaxation = '0.5 0.5'
   # Only partially converge each time step, we are marching to steady state
-  num_iterations = 30
-  pressure_absolute_tolerance = 1e-6
-  momentum_absolute_tolerance = 1e-6
-  turbulence_absolute_tolerance = '1e-6 1e-6'
+  num_iterations = 20
+  # Tight enough that late time steps keep iterating instead of stopping at the
+  # first iteration while the solution is still drifting toward steady state
+  pressure_absolute_tolerance = 1e-10
+  momentum_absolute_tolerance = 1e-10
+  turbulence_absolute_tolerance = '1e-10 1e-10'
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -428,7 +430,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
   print_fields = false
   continue_on_max_its = true
-  num_steps = 10
+  num_steps = 12
   # Ramp up the time step to march to steady state
   [TimeStepper]
     type = FunctionDT
