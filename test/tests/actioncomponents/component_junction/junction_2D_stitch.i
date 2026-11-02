@@ -4,6 +4,7 @@
     type = CylinderComponent
     dimension = 2
     use_RZ_coordinates = true
+    block = 'cyl1'
     length = 1
     n_axial = 4
     radius = 1
@@ -17,6 +18,7 @@
     type = CylinderComponent
     dimension = 2
     use_RZ_coordinates = true
+    block = 'cyl2'
     length = 1
     n_axial = 4
     radius = 1
