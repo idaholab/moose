@@ -833,7 +833,7 @@ AdvancedExtruderGenerator::generate()
               // Both result in a slight deformation of the shape during extrusion.
               else
               {
-                // v = axis * sin(theta), unnormalized — avoids dividing by sin_th
+                // v = axis * sin(theta), unnormalized, this avoids dividing by sin_th
                 const auto v =
                     prev_intersecting_plane_normal_vec.cross(intersecting_plane_normal_vec);
                 const Real cos_th =
