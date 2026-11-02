@@ -7,7 +7,7 @@
     capabilities = 'method!=dbg'
     check_input = True
     design = 'GrainGrowthAction.md GrainTracker.md'
-    requirement = 'The system shall be able to syntax check a 2D grain growth example that uses the GrainGrowth action and tracks grains.'
+    requirement = 'The system shall syntax check a 2D grain growth example that uses the GrainGrowth action and tracks grains.'
   [../]
   [./grain_growth_2D_random]
     type = RunApp
@@ -16,7 +16,7 @@
     capabilities = 'method!=dbg'
     check_input = True
     design = 'GrainGrowthAction.md PolycrystalRandomIC.md'
-    requirement = 'The system shall be able to syntax check a 2D grain growth example that uses the GrainGrowth action with a randomly seeded polycrystal initial condition.'
+    requirement = 'The system shall syntax check a 2D grain growth example that uses the GrainGrowth action with a randomly seeded polycrystal initial condition.'
   [../]
   [./grain_growth_2D_voronoi]
     type = RunApp
@@ -25,7 +25,7 @@
     capabilities = 'method!=dbg'
     check_input = True
     design = 'GBEvolution.md PolycrystalVoronoi.md'
-    requirement = 'The system shall be able to syntax check a 2D grain growth example built explicitly from a Voronoi tessellation polycrystal initial condition.'
+    requirement = 'The system shall syntax check a 2D grain growth example built explicitly from a Voronoi tessellation polycrystal initial condition.'
   [../]
   [./grain_growth_2D_voronoi_newadapt]
     type = RunApp
@@ -35,7 +35,7 @@
     capabilities = 'method!=dbg'
     check_input = True
     design = 'GBEvolution.md PolycrystalVoronoi.md'
-    requirement = 'The system shall be able to syntax check a 2D grain growth example built from a Voronoi tessellation polycrystal initial condition with mesh adaptivity.'
+    requirement = 'The system shall syntax check a 2D grain growth example built from a Voronoi tessellation polycrystal initial condition with mesh adaptivity.'
   [../]
   [./grain_growth_3D]
     type = RunApp
@@ -47,7 +47,7 @@
 
     cli_args = 'Mesh/uniform_refine=0'
     design = 'GrainGrowthAction.md GrainTracker.md'
-    requirement = 'The system shall be able to syntax check a 3D grain growth example that uses the GrainGrowth action and tracks grains.'
+    requirement = 'The system shall syntax check a 3D grain growth example that uses the GrainGrowth action and tracks grains.'
   [../]
   [./grain_growth_3D_large]
     type = RunApp
@@ -59,6 +59,6 @@
     cli_args = 'Mesh/nx=10 Mesh/ny=10 Mesh/ny=10 UserObjects/voronoi/grain_num=10 GlobalParams/op_num=10'
     issues = '#7319 #11804'
     design = 'GBEvolution.md PolycrystalVoronoi.md GrainTracker.md'
-    requirement = 'The system shall be able to syntax check a large-scale 3D grain growth example with many grains, built explicitly from a Voronoi tessellation polycrystal initial condition.'
+    requirement = 'The system shall syntax check a large-scale 3D grain growth example with many grains, built explicitly from a Voronoi tessellation polycrystal initial condition.'
   [../]
 []

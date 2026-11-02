@@ -129,7 +129,7 @@
     ratio_tol = 5e-8
     difference_tol = 5e-5
     run_sim = True
-    requirement = 'The AD version of the grain growth problem set up by the action shall have an accurate Jacobian'
+    requirement = 'The system shall produce an accurate Jacobian contribution when using an action to construct an AD version of the grain growth problem.'
     cli_args = 'Modules/PhaseField/GrainGrowth/use_automatic_differentiation=true Materials/Copper/type=ADGBEvolution Executioner/num_steps=1 Mesh/nx=10 Mesh/ny=10'
     prereq = 'ad_grain_growth'
   [../]

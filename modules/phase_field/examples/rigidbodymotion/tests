@@ -12,7 +12,7 @@
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
     design = 'MultiGrainRigidBodyMotion.md'
-    requirement = 'The system shall be able to syntax check an example of rigid body motion for multiple grains coupled to Cahn-Hilliard and Allen-Cahn evolution.'
+    requirement = 'The system shall syntax check an example of rigid body motion for multiple grains coupled to Cahn-Hilliard and Allen-Cahn evolution.'
   [../]
   [./AC_CH_advection_constforce_rect]
     type = RunApp
@@ -27,7 +27,7 @@
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
     design = 'SingleGrainRigidBodyMotion.md ConstantGrainForceAndTorque.md'
-    requirement = 'The system shall be able to syntax check an example of advection of a single grain under a constant applied force, coupled to Cahn-Hilliard and Allen-Cahn evolution.'
+    requirement = 'The system shall syntax check an example of advection of a single grain under a constant applied force, coupled to Cahn-Hilliard and Allen-Cahn evolution.'
   [../]
   [./grain_forcedensity_ext]
     type = RunApp
@@ -41,6 +41,6 @@
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
     design = 'ComputeExternalGrainForceAndTorque.md ExternalForceDensityMaterial.md'
-    requirement = 'The system shall be able to syntax check an example of grain motion driven by an externally specified force density.'
+    requirement = 'The system shall syntax check an example of grain motion driven by an externally specified force density.'
   [../]
 []

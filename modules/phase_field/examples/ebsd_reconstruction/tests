@@ -7,6 +7,6 @@
     check_input = True
     issues = '#5067 #7319'
     design = 'PolycrystalEBSD.md'
-    requirement = 'The system shall be able to syntax check an example reconstructing a polycrystal grain structure from an EBSD scan.'
+    requirement = 'The system shall syntax check an example reconstructing a polycrystal grain structure from an EBSD scan.'
   [../]
 []

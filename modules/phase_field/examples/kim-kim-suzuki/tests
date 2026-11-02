@@ -5,14 +5,14 @@
     input = 'kks_example_dirichlet.i'
     issues = '#5924 #7319'
     check_input = True
-    requirement = 'The system shall be able to syntax check a two-phase Kim-Kim-Suzuki example with Dirichlet boundary conditions.'
+    requirement = 'The system shall syntax check a two-phase Kim-Kim-Suzuki example with Dirichlet boundary conditions.'
   [../]
   [./kks_example_noflux]
     type = RunApp
     input = 'kks_example_noflux.i'
     issues = '#5924 #7319'
     check_input = True
-    requirement = 'The system shall be able to syntax check a two-phase Kim-Kim-Suzuki example with no-flux boundary conditions.'
+    requirement = 'The system shall syntax check a two-phase Kim-Kim-Suzuki example with no-flux boundary conditions.'
   [../]
   [./kks_example_ternary]
     type = RunApp
@@ -23,6 +23,6 @@
     # it takes to run.
     check_input = True
     cli_args = 'Mesh/nx=2 Mesh/ny=2'
-    requirement = 'The system shall be able to syntax check a Kim-Kim-Suzuki example for a ternary (three-component) system.'
+    requirement = 'The system shall syntax check a Kim-Kim-Suzuki example for a ternary (three-component) system.'
   [../]
 []
