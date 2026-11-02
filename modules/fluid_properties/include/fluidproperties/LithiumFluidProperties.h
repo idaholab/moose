@@ -18,10 +18,10 @@
  * Liquid lithium fluid properties as a function of pressure (Pa) and temperature (K).
  *
  * Source for fluid properties:
- * R. W. Ohse (Ed.), Handbook of Thermodynamic and Transport Properties of Alkali Metals,
- * IUPAC Chemical Data Series No. 30, Blackwell, 1985, as tabulated in
  * S. J. Zinkle, Summary of Physical Properties for Lithium, Pb-17Li, and (LiF)n-BeF2 Coolants,
- * APEX Study Meeting, 1998
+ * APEX Study Meeting, 1998, who attributes them to
+ * R. W. Ohse (Ed.), Handbook of Thermodynamic and Transport Properties of Alkali Metals,
+ * IUPAC Chemical Data Series No. 30, Blackwell, 1985
  */
 class LithiumFluidProperties : public SinglePhaseFluidProperties
 {

@@ -2,11 +2,11 @@
 
 !syntax description /FluidProperties/LithiumFluidProperties
 
-These properties are the recommended correlations for liquid lithium of the IUPAC critical evaluation of alkali metal properties [!citep](Ohse1985), as tabulated by [!citet](Zinkle1998), the same compilation used by [LeadLithiumFluidProperties.md].
+These properties are the correlations for liquid lithium tabulated by [!citet](Zinkle1998), who attributes them to the IUPAC critical evaluation of alkali metal properties [!citep](Ohse1985). The same compilation is used by [LeadLithiumFluidProperties.md].
 All properties only depend on temperature; the fluid is considered incompressible.
 The fluid properties are summarized in [tab:lithium]. The temperature $T$ is in K.
 
-!table id=tab:lithium caption=Liquid lithium properties from [!citep](Ohse1985), as tabulated by [!citet](Zinkle1998).
+!table id=tab:lithium caption=Liquid lithium properties as tabulated by [!citet](Zinkle1998).
 | Properties | Equation |
 | :--------- | :------- |
 | Density, $\rho$ (kg/m^3) | $278.5 - 0.04657\,T + 274.6\,(1 - T/3500)^{0.467}$ |
@@ -27,6 +27,7 @@ The correlations are given for 455 K to 1500 K [!citep](Zinkle1998). An invalid 
 The NASA compilation of [!citet](Davison1968) and the evaluation of experimental data published from 1950 to 2020 by [!citet](Chusov2022) were compared with these correlations between 500 K and 1000 K.
 Density, specific heat and thermal conductivity agree within about 5% among the three.
 For the dynamic viscosity, [!citet](Chusov2022) agrees with the correlation used here within 4% from 500 K to 1500 K, while [!citet](Davison1968) is 13% to 20% higher between 500 K and 1000 K; its fit includes a data set it reports as about 25% above the others.
+The density correlation used here also differs in form from the polynomial given by [!citet](IAEA2008), which lists [!citet](Ohse1985) among its sources, by up to 1.5% between 455 K and 1500 K.
 
 !syntax parameters /FluidProperties/LithiumFluidProperties
 

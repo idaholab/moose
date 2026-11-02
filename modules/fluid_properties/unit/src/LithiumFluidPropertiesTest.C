@@ -32,7 +32,7 @@ TEST_F(LithiumFluidPropertiesTest, properties)
   const std::vector<Real> pressures = {1e5, 1e6, 5e6};
   const std::vector<Real> temperatures = {500, 1000, 1400};
 
-  // Solutions: obtained from the correlations of Ohse (1985) as tabulated by Zinkle (1998)
+  // Solutions: obtained from the correlations tabulated by Zinkle (1998)
   const std::vector<Real> rho_refs = {510.7417563927444, 466.6006305350272, 429.6222453460765};
   const std::vector<Real> h_refs = {201435.71359199984, 2316435.713592, 3943203.713592};
   const std::vector<Real> e_refs = {201239.91992769035, 2314292.553179093, 3931565.5825264812};
