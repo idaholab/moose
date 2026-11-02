@@ -165,4 +165,28 @@ steamConductivityZeroDensity(const CppType & T)
   // The formulation gives the conductivity in milliwatts per meter and kelvin
   return 1e-3 * sqrt(Tbar) / sum;
 }
+
+/**
+ * Viscosity of helium [Pa s], from the correlation of Petersen (1970), as in
+ * HeliumFluidProperties. It is independent of pressure.
+ */
+template <typename CppType>
+CppType
+heliumViscosity(const CppType & T)
+{
+  using std::pow;
+  return 3.674e-7 * pow(T, 0.7);
+}
+
+/**
+ * Thermal conductivity of helium in the limit of zero pressure [W/(m K)], from the correlation of
+ * Petersen (1970), which HeliumFluidProperties evaluates with its pressure dependence
+ */
+template <typename CppType>
+CppType
+heliumConductivityZeroPressure(const CppType & T)
+{
+  using std::pow;
+  return 2.682e-3 * pow(T, 0.71);
+}
 }
