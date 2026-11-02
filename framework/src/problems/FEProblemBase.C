@@ -1606,15 +1606,24 @@ FEProblemBase::initialSetup()
     // Interface kernels skip any face where 'variable' is not active on the primary (element)
     // side or 'neighbor_var' is not active on the secondary (neighbor) side, so a kernel whose
     // variables do not match the sideset orientation silently contributes nothing.
-    // A boundary may join several block pairs, so both variables must be active on the two
-    // sides of the same pair rather than anywhere on each side.
-    std::set<std::tuple<BoundaryID, SubdomainID, SubdomainID>> face_block_pairs;
+    // A boundary may join several block pairs, and the kernel is skipped on the faces of every
+    // pair that does not carry both variables, so each pair is checked. A face that is also on
+    // the boundary from its neighbor's side (e.g. sidesets read from Gmsh lower-dimensional
+    // elements) is visited in both orientations, and is covered if either orientation is valid.
+    // Each entry is (boundary, element block, neighbor block, whether the face is two-sided),
+    // with the flag stored as an integer because TIMPI cannot communicate bool.
+    std::set<std::tuple<BoundaryID, SubdomainID, SubdomainID, unsigned short>> face_block_pairs;
+    const auto & boundary_info = _mesh.getMesh().get_boundary_info();
     for (const auto & bnd_elem : *_mesh.getBoundaryElementRange())
       // A remote neighbor is paired by the processor that holds both elements
       if (const auto * const neighbor = bnd_elem->_elem->neighbor_ptr(bnd_elem->_side);
           neighbor && neighbor != libMesh::remote_elem)
         face_block_pairs.emplace(
-            bnd_elem->_bnd_id, bnd_elem->_elem->subdomain_id(), neighbor->subdomain_id());
+            bnd_elem->_bnd_id,
+            bnd_elem->_elem->subdomain_id(),
+            neighbor->subdomain_id(),
+            boundary_info.has_boundary_id(
+                neighbor, neighbor->which_neighbor_am_i(bnd_elem->_elem), bnd_elem->_bnd_id));
     _communicator.set_union(face_block_pairs);
 
     for (const auto & nl : _nl)
@@ -1623,48 +1632,53 @@ FEProblemBase::initialSetup()
         {
           const auto & var = ik->variable();
           const auto & neighbor_var = ik->neighborVariable();
-          // Whether any face of the boundary has 'elem_var' on its element side and
-          // 'neigh_var' on its neighbor side
-          const auto active_on_pair =
-              [&face_block_pairs, bnd_id](const auto & elem_var, const auto & neigh_var)
+          const auto block_name = [this](const SubdomainID blk)
           {
-            return std::any_of(face_block_pairs.begin(),
-                               face_block_pairs.end(),
-                               [&](const auto & pair)
-                               {
-                                 const auto & [bid, elem_blk, neighbor_blk] = pair;
-                                 return bid == bnd_id && elem_var.activeOnSubdomain(elem_blk) &&
-                                        neigh_var.activeOnSubdomain(neighbor_blk);
-                               });
+            const auto & name = _mesh.getSubdomainName(blk);
+            return name.empty() ? std::to_string(blk) : name;
           };
-          const auto primary_blocks = _mesh.getBoundaryConnectedBlocks(bnd_id);
-          const auto secondary_blocks = _mesh.getBoundaryConnectedSecondaryBlocks(bnd_id);
-          // A boundary without neighbors is reported as an external side during assembly
-          if (secondary_blocks.empty() || active_on_pair(var, neighbor_var))
+
+          // Whether the kernel executes on faces with 'elem_var' on the element side and
+          // 'neigh_var' on the neighbor side
+          const auto valid = [](const auto & elem_var,
+                                const auto & neigh_var,
+                                const SubdomainID elem_blk,
+                                const SubdomainID neighbor_blk)
+          {
+            return elem_var.activeOnSubdomain(elem_blk) &&
+                   neigh_var.activeOnSubdomain(neighbor_blk);
+          };
+
+          // Block pairs of the boundary on whose faces the kernel never executes, and whether
+          // swapping the variables would make every face of the boundary covered. A boundary
+          // without neighbors has no pairs; it is reported as an external side during assembly.
+          std::vector<std::string> failing_pairs;
+          bool flipped = true;
+          for (const auto & [bid, elem_blk, neighbor_blk, two_sided] : face_block_pairs)
+            if (bid == bnd_id)
+            {
+              if (!valid(var, neighbor_var, elem_blk, neighbor_blk) &&
+                  !(two_sided && valid(var, neighbor_var, neighbor_blk, elem_blk)))
+                failing_pairs.push_back(block_name(elem_blk) + " -> " + block_name(neighbor_blk));
+              if (!valid(neighbor_var, var, elem_blk, neighbor_blk) &&
+                  !(two_sided && valid(neighbor_var, var, neighbor_blk, elem_blk)))
+                flipped = false;
+            }
+          if (failing_pairs.empty())
             continue;
 
-          const auto block_names = [this](const std::set<SubdomainID> & blocks)
-          {
-            std::vector<std::string> names;
-            for (const auto blk : blocks)
-              names.push_back(_mesh.getSubdomainName(blk).empty() ? std::to_string(blk)
-                                                                  : _mesh.getSubdomainName(blk));
-            return MooseUtils::join(names, ", ");
-          };
-          const bool flipped = active_on_pair(neighbor_var, var);
           ik->paramError(
               "boundary",
               "The interface kernel will not contribute on all or part of boundary '",
               _mesh.getBoundaryName(bnd_id),
               "': 'variable' (",
               var.name(),
-              ") must be defined on the primary side of the boundary (block(s) ",
-              block_names(primary_blocks),
-              ") and 'neighbor_var' (",
+              ") must be defined on the primary (element) side and 'neighbor_var' (",
               neighbor_var.name(),
-              ") on the secondary side (block(s) ",
-              block_names(secondary_blocks),
-              ").",
+              ") on the secondary (neighbor) side of each face. Failing block pair(s) (primary -> "
+              "secondary): ",
+              MooseUtils::join(failing_pairs, ", "),
+              ".",
               flipped
                   ? "\nThe variables appear to be flipped relative to the boundary orientation; "
                     "swap 'variable' and 'neighbor_var', or reverse the orientation of the "

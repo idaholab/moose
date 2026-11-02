@@ -20,13 +20,13 @@
 
 [Variables]
   [u]
-    block = 0
+    block = '0 2'
   []
   [v]
-    block = 3
+    block = 1
   []
   [w]
-    block = '1 2'
+    block = 3
   []
 []
 
@@ -48,8 +48,8 @@
 [InterfaceKernels]
   [penalty]
     type = PenaltyInterfaceDiffusion
-    # 'variable' is on a primary block and 'neighbor_var' on a secondary block, but no face of
-    # the boundary joins block 0 to block 3
+    # Valid on the pairs 0 -> 1 and 2 -> 1, but 'neighbor_var' is not defined on block 3, so
+    # the kernel would be skipped on the faces of the pair 2 -> 3
     variable = u
     neighbor_var = v
     penalty = 1
