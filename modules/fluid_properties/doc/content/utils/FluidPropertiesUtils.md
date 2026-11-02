@@ -77,6 +77,13 @@ $T_\text{mid} = 1000$ K. The fits cover 200 K to 3500 K, except for N$_2$, which
 5000 K. The utilities do not check these ranges. The molar masses are those Cantera computes from
 its atomic weights.
 
+The built-in noble gases, He, Ar, Kr, and Xe, are not in GRI-Mech 3.0 except for Ar. Their data
+are those of [!citet](mcbride1993) as distributed with Cantera 3.2.0 in `nasa_gas.yaml`, which
+cover 200 K to 6000 K. Their heat capacity is $c_p^\circ/R = 5/2$, apart from corrections below
+$10^{-5}$ for Xe. The reference pressure of these data is 1 bar, so their entropy constants $a_6$
+are reduced by $\ln(101325/10^5)$ to refer them to 101325 Pa. Their standard entropies at
+298.15 K then agree with the JANAF tables [!citep](chase1998janaf) within 0.001 J/(mol K).
+
 At $T_\text{mid}$ the low-temperature polynomial applies, as in Cantera. The two polynomials of
 a species do not match exactly at $T_\text{mid}$: for the built-in species, the mismatch is below
 $4 \times 10^{-7}$ relative in $c_p^\circ$, $6 \times 10^{-3}$ J/mol in $h^\circ$, and

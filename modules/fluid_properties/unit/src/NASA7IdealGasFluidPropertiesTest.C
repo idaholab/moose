@@ -366,7 +366,8 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, inverseRange)
   const Real v = 1;
   // 60 geometric intervals place consecutive temperatures about 7% apart
   const unsigned int n = 60;
-  for (const std::string species : {"H2", "O2", "H2O", "CH4", "CO", "CO2", "N2"})
+  for (const std::string species :
+       {"H2", "O2", "H2O", "CH4", "CO", "CO2", "N2", "He", "Ar", "Kr", "Xe"})
   {
     const std::string name = "sweep_" + species;
     const auto & fp = buildFluidProperties(species, name);
@@ -453,7 +454,8 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, densityFromEntropy)
   // geometrically from half the lower end of the range of its data to 1.5 times the upper end
   // 60 geometric intervals place consecutive temperatures about 7% apart
   const unsigned int n = 60;
-  for (const std::string species : {"H2", "O2", "H2O", "CH4", "CO", "CO2", "N2"})
+  for (const std::string species :
+       {"H2", "O2", "H2O", "CH4", "CO", "CO2", "N2", "He", "Ar", "Kr", "Xe"})
   {
     const auto & fp = buildFluidProperties(species, "entropy_" + species);
     const auto & data = NASA7::speciesData(species);

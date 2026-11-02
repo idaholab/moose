@@ -5,8 +5,9 @@
 This class implements an ideal gas whose heat capacity, enthalpy, and entropy depend on
 temperature through the NASA 7-coefficient polynomials [!citep](mcbride1993) of a built-in
 species. The species is selected with [!param](/FluidProperties/NASA7IdealGasFluidProperties/species):
-H$_2$, O$_2$, H$_2$O, CH$_4$, CO, CO$_2$, or N$_2$. The data are those of GRI-Mech 3.0
-[!citep](smith_grimech30) as distributed with Cantera 3.2.0 [!citep](cantera320); the polynomials,
+H$_2$, O$_2$, H$_2$O, CH$_4$, CO, CO$_2$, N$_2$, He, Ar, Kr, or Xe. The data are those of
+GRI-Mech 3.0 [!citep](smith_grimech30) and, for the noble gases, of [!citet](mcbride1993), as
+distributed with Cantera 3.2.0 [!citep](cantera320); the polynomials,
 the data, and their temperature ranges are described with the
 [NASA 7-coefficient polynomial utilities](utils/FluidPropertiesUtils.md#nasa7-polynomials).
 
@@ -71,8 +72,8 @@ approaches its critical point.
 These properties are evaluated with the
 [gas transport utilities](utils/FluidPropertiesUtils.md#gas-transport). For all species except
 H$_2$O, the viscosity follows from Chapman-Enskog kinetic theory with the Lennard-Jones parameters
-of GRI-Mech 3.0, and the thermal conductivity from the modified Eucken correlation
-[!citep](poling2001) with the heat capacity of the polynomials:
+of GRI-Mech 3.0, or of [!citet](svehla1962) for Kr and Xe, and the thermal conductivity from the
+modified Eucken correlation [!citep](poling2001) with the heat capacity of the polynomials:
 
 !equation
 k = \mu R_s \left( 1.32 \, \frac{c_p^\circ}{R} + 0.45 \right) .
