@@ -363,10 +363,12 @@ public:
   }
 
   /**
-   * Request that every process receive the mortar interface couplings of all nonlocal secondary
-   * lower-dimensional elements it can see. Consumers that apply a node's constraint on every
-   * process contributing to it, rather than only on the node's owner, need these couplings to
-   * preallocate the rows of their local elements.
+   * Request that every process receive the mortar interface couplings of the nonlocal secondary
+   * lower-dimensional elements that point-neighbor ghosting reads for its local elements: the
+   * point neighbors of its local secondary elements and of the secondary elements coupled to its
+   * local elements. Consumers that apply a node's constraint on every process contributing to it,
+   * rather than only on the node's owner, need these couplings to preallocate the rows of their
+   * local elements.
    */
   void requestNonlocalSecondaryCouplings() { _nonlocal_secondary_couplings = true; }
 

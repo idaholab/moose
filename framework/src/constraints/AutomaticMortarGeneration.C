@@ -1804,7 +1804,7 @@ AutomaticMortarGeneration::buildCouplingInformation()
   const auto is_secondary = [this](const Elem * const elem)
   { return _secondary_boundary_subdomain_ids.count(elem->subdomain_id()); };
   const auto pid = _mesh.processor_id();
-  std::set<const Elem *> secondary_elems_read;
+  std::unordered_set<const Elem *> secondary_elems_read;
   for (const auto secondary_subdomain_id : _secondary_boundary_subdomain_ids)
     for (const Elem * const secondary_elem :
          as_range(_mesh.active_subdomain_elements_begin(secondary_subdomain_id),
@@ -1820,7 +1820,7 @@ AutomaticMortarGeneration::buildCouplingInformation()
             coupled_elem && is_secondary(coupled_elem))
           secondary_elems_read.insert(coupled_elem);
 
-  std::set<const Elem *> secondary_elems_queried;
+  std::unordered_set<const Elem *> secondary_elems_queried;
   std::unordered_map<processor_id_type, std::vector<dof_id_type>> secondary_elems_to_query;
   for (const Elem * const secondary_elem : secondary_elems_read)
   {
