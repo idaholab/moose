@@ -73,6 +73,7 @@ protected:
   using ElemSideQpFn = std::function<T(const Moose::ElemSideQpArg &, const Moose::StateArg &)>;
   using ElemPointFn = std::function<T(const Moose::ElemPointArg &, const Moose::StateArg &)>;
   using NodeFn = std::function<T(const Moose::NodeArg &, const Moose::StateArg &)>;
+  using PointFn = std::function<T(const Moose::PointArg &, const Moose::StateArg &)>;
 
   ValueType evaluate(const Moose::ElemArg & elem_arg, const Moose::StateArg & time) const override;
   ValueType evaluate(const Moose::FaceArg & face, const Moose::StateArg & time) const override;
@@ -127,6 +128,9 @@ private:
   /// Functors that return nodal values
   std::unordered_map<SubdomainID, NodeFn> _node_functor;
 
+  /// Functors that return evaluations at an arbitrary physical point without mesh information
+  std::unordered_map<SubdomainID, PointFn> _point_functor;
+
   /// The mesh that this functor operates on
   const MooseMesh & _mesh;
 };
@@ -169,6 +173,7 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & mesh,
     _elem_side_qp_functor.emplace(block_id, my_lammy);
     _elem_point_functor.emplace(block_id, my_lammy);
     _node_functor.emplace(block_id, my_lammy);
+    _point_functor.emplace(block_id, my_lammy);
   };
 
   for (const auto block_id : block_ids)
@@ -346,8 +351,11 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::PointArg & point_arg,
                                            const Moose::StateArg & time) const
 {
   // A point has no subdomain, so this is only available for functors defined on all blocks
-  const Node node(point_arg.point);
-  return evaluate(Moose::NodeArg{&node, &Moose::NodeArg::undefined_subdomain_connection}, time);
+  auto it = _point_functor.find(Moose::INVALID_BLOCK_ID);
+  if (it == _point_functor.end())
+    subdomainErrorMessage(Moose::INVALID_BLOCK_ID, _point_functor);
+
+  return it->second(point_arg, time);
 }
 
 template <typename T>
