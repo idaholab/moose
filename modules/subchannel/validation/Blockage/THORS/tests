@@ -6,6 +6,9 @@
     input = 'FFM-5B_low.i'
     csvdiff  = 'FFM-5B_low_out.csv'
     capabilities = 'method!=dbg'
+    # The outer iterations stop at the loose P_tol = 1e-4, which leaves differences of up to 1.6e-5
+    # between Linux and macOS
+    rel_err = 5e-5
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
@@ -16,6 +19,9 @@
     input = 'FFM-5B_high.i'
     csvdiff  = 'FFM-5B_high_out.csv'
     capabilities = 'method!=dbg'
+    # The outer iterations stop at the loose P_tol = 1e-4, which leaves differences of up to 1.6e-5
+    # between Linux and macOS
+    rel_err = 5e-5
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
