@@ -2186,8 +2186,13 @@ SubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz
 }
 
 PetscErrorCode
-SubChannel1PhaseProblem::addCrossflowDamping(
-    Mat M_ww, Mat M_wp, Vec b_w, Vec w_iter, int iblock, PetscScalar & max_K, PetscScalar & added_K)
+SubChannel1PhaseProblem::addCrossflowDamping(Mat M_ww,
+                                             Mat M_wp,
+                                             Vec b_w,
+                                             Vec Wij_iter,
+                                             int iblock,
+                                             PetscScalar & max_K,
+                                             PetscScalar & added_K)
 {
   PetscFunctionBegin;
   const unsigned int first_node = iblock * _block_size + 1;
@@ -2199,8 +2204,8 @@ SubChannel1PhaseProblem::addCrossflowDamping(
   LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
       _prodp, *_P_soln, first_node - 1, last_node - 1, _n_channels));
 
-  // residual = M_ww W + M_wp P - b_w at the current iterate
-  LibmeshPetscCall(MatMult(M_ww, w_iter, residual));
+  // residual = M_ww Wij_iter + M_wp P - b_w at the current iterate
+  LibmeshPetscCall(MatMult(M_ww, Wij_iter, residual));
   LibmeshPetscCall(MatMult(M_wp, _prodp, pressure_term));
   LibmeshPetscCall(VecAXPY(residual, 1.0, pressure_term));
   LibmeshPetscCall(VecAXPY(residual, -1.0, b_w));
@@ -2237,7 +2242,7 @@ SubChannel1PhaseProblem::addCrossflowDamping(
   }
 
   LibmeshPetscCall(MatShift(M_ww, added_K));
-  LibmeshPetscCall(VecAXPY(b_w, added_K, w_iter));
+  LibmeshPetscCall(VecAXPY(b_w, added_K, Wij_iter));
 
   LibmeshPetscCall(VecDestroy(&residual));
   LibmeshPetscCall(VecDestroy(&pressure_term));
@@ -2387,12 +2392,12 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // ===================== Crossflow damping ====================
   PetscScalar max_K = 0.0;
   PetscScalar added_K = 0.0;
-  Vec w_iter;
-  LibmeshPetscCall(createPetscVector(w_iter, _block_size * _n_gaps));
+  Vec Wij_iter;
+  LibmeshPetscCall(createPetscVector(Wij_iter, _block_size * _n_gaps));
   LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-      w_iter, _Wij, first_node, last_node, _n_gaps));
+      Wij_iter, _Wij, first_node, last_node, _n_gaps));
   LibmeshPetscCall(addCrossflowDamping(
-      mat_array[Idx(2, 2)], mat_array[Idx(2, 1)], vec_array[2], w_iter, iblock, max_K, added_K));
+      mat_array[Idx(2, 2)], mat_array[Idx(2, 1)], vec_array[2], Wij_iter, iblock, max_K, added_K));
 
   V("Relax mdot: " + std::to_string(_mass_flow_equation_relaxation));
   V("Relax P: " + std::to_string(_pressure_equation_relaxation));
@@ -2509,7 +2514,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
         x_sub[0], *_mdot_soln, first_node, last_node, _n_channels));
     LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
         x_sub[1], *_P_soln, first_node - 1, last_node - 1, _n_channels));
-    LibmeshPetscCall(VecCopy(w_iter, x_sub[2]));
+    LibmeshPetscCall(VecCopy(Wij_iter, x_sub[2]));
     for (const auto f : make_range(Q))
       LibmeshPetscCall(VecRestoreSubVector(x_vec, field_is[f], &x_sub[f]));
   };
@@ -2537,12 +2542,12 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(MatShift(mat_array[Idx(2, 2)], delta_K));
     Vec b_w;
     LibmeshPetscCall(VecGetSubVector(b_vec, field_is[2], &b_w));
-    LibmeshPetscCall(VecAXPY(b_w, delta_K, w_iter));
+    LibmeshPetscCall(VecAXPY(b_w, delta_K, Wij_iter));
     LibmeshPetscCall(VecRestoreSubVector(b_vec, field_is[2], &b_w));
     // Rebuild the preconditioner for the modified cross-momentum block
     LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));
   }
-  LibmeshPetscCall(VecDestroy(&w_iter));
+  LibmeshPetscCall(VecDestroy(&Wij_iter));
   if (reason < 0)
   {
     PetscInt iterations;
@@ -2761,8 +2766,6 @@ SubChannel1PhaseProblem::externalSolve()
       int last_level = (iblock + 1) * _block_size;
       int first_level = iblock * _block_size + 1;
       Real T_block_error = 1.0;
-      // Temperature error of the previous iteration; infinity until the first one completes
-      Real T_block_error_old = std::numeric_limits<Real>::infinity();
       auto T_it = 0;
       _console << "Solving Block: " << iblock << " From first level: " << first_level
                << " to last level: " << last_level << std::endl;
@@ -2825,18 +2828,6 @@ SubChannel1PhaseProblem::externalSolve()
 
           // All processes must have the same iteration count
           comm().max(T_block_error);
-
-          // The crossflow damping decays with the cross-momentum residual, which can lag behind a
-          // diverging outer iteration. Doubling the damping when the temperature error grows
-          // beyond a factor of two between iterations, an increase larger than the iteration noise
-          // near convergence, damps the next coupled solve before the iteration diverges.
-          if (!_segregated_bool && T_block_error > 2.0 * T_block_error_old)
-          {
-            auto & boost = _crossflow_damping_boost[iblock];
-            boost = std::min(_max_crossflow_damping_boost, 2.0 * boost);
-            V("Temperature error grew; crossflow damping boost: " + std::to_string(boost));
-          }
-          T_block_error_old = T_block_error;
         }
       }
       const bool block_converged = T_block_error <= _T_tol;
