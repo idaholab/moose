@@ -11,27 +11,29 @@
 
 #include "KokkosADIntegratedBC.h"
 
+/**
+ * The integrated boundary condition $\partial u / \partial n = h$ with a constant h. Its residual
+ * depends on no solution quantity, so it contributes no Jacobian.
+ */
 class KokkosADNeumannBC : public Moose::Kokkos::ADIntegratedBC
 {
 public:
+  /// The residual depends on no solution quantity
+  static constexpr unsigned int max_ad_slots = 0;
+
   static InputParameters validParams();
 
   KokkosADNeumannBC(const InputParameters & parameters);
 
-  template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::ADReal
-  computeQpResidual(const unsigned int i, const unsigned int qp, AssemblyDatum & datum) const;
+  template <typename Derived, unsigned int slots>
+  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal<slots>
+  precomputeQpResidualValue(const unsigned int /* qp */,
+                            Moose::Kokkos::ADAssemblyDatum<slots> & /* datum */) const
+  {
+    return -_value;
+  }
 
 private:
   /// Value of grad(u) on the boundary.
   const Real _value;
 };
-
-template <typename Derived>
-KOKKOS_FUNCTION Moose::Kokkos::ADReal
-KokkosADNeumannBC::computeQpResidual(const unsigned int i,
-                                     const unsigned int qp,
-                                     AssemblyDatum & datum) const
-{
-  return -_test(datum, i, qp) * _value;
-}

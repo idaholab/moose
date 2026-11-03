@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "KokkosConfiguration.h"
+
 // initQpStatefulProperties() and computeQpProperties() are intentionally hidden
 // but some compilers generate ugly warnings
 
@@ -160,6 +162,11 @@ protected:
    */
   const bool _neighbor;
 
+  /**
+   * Configuration on which the properties are evaluated
+   */
+  const Configuration _configuration;
+
 private:
   /**
    * Dummy members unused for Kokkos materials
@@ -178,7 +185,7 @@ Material::operator()(ElementInit, const ThreadID tid, const Derived & material) 
   // datum is invalid
   auto elem = kokkosElementID(tid);
 
-  Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems());
+  Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems(), _configuration);
 
   const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
 
@@ -192,7 +199,7 @@ Material::operator()(SideInit, const ThreadID tid, const Derived & material) con
 {
   auto [elem, side] = kokkosElementSideID(tid);
 
-  Datum datum(elem, side, kokkosAssembly(), kokkosSystems());
+  Datum datum(elem, side, kokkosAssembly(), kokkosSystems(), _configuration);
 
   const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
 
@@ -206,7 +213,7 @@ Material::operator()(NeighborInit, const ThreadID tid, const Derived & material)
 {
   auto [elem, side] = kokkosElementSideID(tid);
 
-  Datum datum(elem, side, kokkosAssembly(), kokkosSystems());
+  Datum datum(elem, side, kokkosAssembly(), kokkosSystems(), _configuration);
 
   const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
 
@@ -222,7 +229,7 @@ Material::operator()(ElementCompute, const ThreadID tid, const Derived & materia
   // datum is invalid
   auto elem = kokkosElementID(tid);
 
-  Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems());
+  Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems(), _configuration);
 
   const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
 
@@ -236,7 +243,7 @@ Material::operator()(SideCompute, const ThreadID tid, const Derived & material) 
 {
   auto [elem, side] = kokkosElementSideID(tid);
 
-  Datum datum(elem, side, kokkosAssembly(), kokkosSystems());
+  Datum datum(elem, side, kokkosAssembly(), kokkosSystems(), _configuration);
 
   const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
 
@@ -250,7 +257,7 @@ Material::operator()(NeighborCompute, const ThreadID tid, const Derived & materi
 {
   auto [elem, side] = kokkosElementSideID(tid);
 
-  Datum datum(elem, side, kokkosAssembly(), kokkosSystems());
+  Datum datum(elem, side, kokkosAssembly(), kokkosSystems(), _configuration);
 
   const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
 

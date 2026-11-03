@@ -74,6 +74,11 @@ VectorIntegratedBC::computeJacobian()
 
     _offdiag_jacobian_dispatcher->parallelFor(policy);
   }
+
+  // An object posed on the current configuration assembles its Jacobian with respect to the
+  // displacements from its own hooks
+  if (_configuration.displaced())
+    dispatchDisplacementJacobian(numKokkosBoundarySides(), true);
 }
 
 } // namespace Moose::Kokkos

@@ -14,7 +14,7 @@ registerKokkosResidualObject("MooseApp", KokkosCoupledForce);
 InputParameters
 KokkosCoupledForce::validParams()
 {
-  InputParameters params = KernelValue::validParams();
+  InputParameters params = Moose::Kokkos::KernelValue::validParams();
 
   params.addClassDescription("Implements a source term proportional to the value of a coupled "
                              "variable. Weak form: $(\\psi_i, -\\sigma v)$.");
@@ -26,7 +26,7 @@ KokkosCoupledForce::validParams()
 }
 
 KokkosCoupledForce::KokkosCoupledForce(const InputParameters & parameters)
-  : KernelValue(parameters),
+  : Moose::Kokkos::KernelValue(parameters),
     _v_var(coupled("v")),
     _v(kokkosCoupledValue("v")),
     _coef(getParam<Real>("coef"))

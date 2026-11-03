@@ -5,7 +5,7 @@
 This is the Kokkos version of [HeatConduction](HeatConduction.md). See the original document for details.
 
 !alert note
-Kokkos-MOOSE does not support displaced meshes yet. Therefore, the Kokkos version sets [!param](/Kernels/KokkosHeatConduction/use_displaced_mesh) to false in contrast to the original version which sets [!param](/Kernels/HeatConduction/use_displaced_mesh) to true by default.
+The Kokkos version defaults [!param](/Kernels/KokkosHeatConduction/use_displaced_mesh) to false, whereas the original version integrates over the displaced mesh by default. With `use_displaced_mesh = true` the term is posed on the current configuration: the kernel integrates on the reference mesh with the deformation gradient composed into its geometry, and the framework assembles its Jacobian with respect to the displacements.
 
 ## Example Input Syntax
 

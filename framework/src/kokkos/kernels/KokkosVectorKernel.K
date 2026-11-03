@@ -27,7 +27,10 @@ VectorKernel::VectorKernel(const InputParameters & parameters)
     _phi(),
     _grad_phi(),
     _u(_var),
-    _grad_u(_var)
+    _grad_u(_var),
+    _curl_test(),
+    _curl_phi(),
+    _curl_u(_var)
 {
   addMooseVariableDependency(&_var);
 }
@@ -75,6 +78,11 @@ VectorKernel::computeJacobian()
 
     _offdiag_jacobian_dispatcher->parallelFor(policy);
   }
+
+  // An object posed on the current configuration assembles its Jacobian with respect to the
+  // displacements from its own hooks
+  if (_configuration.displaced())
+    dispatchDisplacementJacobian(numKokkosBlockElements(), true);
 }
 
 } // namespace Moose::Kokkos

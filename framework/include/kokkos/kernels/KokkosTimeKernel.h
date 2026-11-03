@@ -27,27 +27,6 @@ public:
    */
   TimeKernel(const InputParameters & parameters);
 
-  /**
-   * Hook for additional computation for residual after the standard calls
-   * @param ib The beginning element-local DOF index
-   * @param ie The end element-local DOF index
-   * @param datum The AssemblyDatum object of the current thread
-   * @param local_re The temporary storage storing the residual contribution of each DOF
-   */
-  KOKKOS_FUNCTION void computeResidualAdditional(const unsigned int /* ib */,
-                                                 const unsigned int /* ie */,
-                                                 AssemblyDatum & /* datum */,
-                                                 Real * /* local_re */) const
-  {
-  }
-
-  /**
-   * The parallel computation body that hides the base class method to allow additional computation
-   * for residual through computeResidualAdditional()
-   */
-  template <typename Derived>
-  KOKKOS_FUNCTION void computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const;
-
 protected:
   /**
    * Time derivative of the current solution at quadrature points
@@ -58,21 +37,5 @@ protected:
    */
   const Scalar<const Real> _du_dot_du;
 };
-
-template <typename Derived>
-KOKKOS_FUNCTION void
-TimeKernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const
-{
-  ResidualObject::computeResidualInternal(
-      datum,
-      [&](Real * local_re, const unsigned int ib, const unsigned int ie)
-      {
-        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-          for (unsigned int i = ib; i < ie; ++i)
-            local_re[i] += datum.JxW(qp) * kernel.template computeQpResidual<Derived>(i, qp, datum);
-
-        kernel.computeResidualAdditional(ib, ie, datum, local_re);
-      });
-}
 
 } // namespace Moose::Kokkos

@@ -253,9 +253,9 @@ public:
    * @param qp The local quadrature point index
    * @returns The inverse of Jacobian matrix
    */
-  KOKKOS_FUNCTION Real33 getJacobian(ElementInfo info, unsigned int qp) const
+  KOKKOS_FUNCTION Real33 getDxiDx(ElementInfo info, unsigned int qp) const
   {
-    return _jacobian[info.subdomain][getQpOffset(info) + qp];
+    return _dxi_dx[info.subdomain][getQpOffset(info) + qp];
   }
   /**
    * Get the transformed Jacobian weight of an element quadrature point
@@ -287,16 +287,24 @@ public:
   KOKKOS_FUNCTION Real coordTransformFactor(const ContiguousSubdomainID subdomain,
                                             const Real3 point) const;
   /**
+   * Get the gradient of the coordinate transform factor with respect to the point coordinate
+   * @param subdomain The contiguous subdomain ID
+   * @param point The point coordinate
+   * @returns The gradient of the coordinate transform factor
+   */
+  KOKKOS_FUNCTION Real3 coordTransformFactorGradient(const ContiguousSubdomainID subdomain,
+                                                     const Real3 point) const;
+  /**
    * Compute physical transformation data for an element
    * @param info The element information object
    * @param qp The local quadrature point index
-   * @param jacobian The pointer to store the inverse of Jacobian matrix
+   * @param dxi_dx The pointer to store the inverse of Jacobian matrix
    * @param JxW The pointer to store transformed Jacobian weight
    * @param q_points The pointer to store physical quadrature point coordinate
    */
   KOKKOS_FUNCTION void computePhysicalMap(const ElementInfo info,
                                           const unsigned int qp,
-                                          Real33 * const jacobian,
+                                          Real33 * const dxi_dx,
                                           Real * const JxW,
                                           Real3 * const q_points) const;
   /**
@@ -304,7 +312,7 @@ public:
    * @param info The element information object
    * @param side The side index
    * @param qp The local quadrature point index
-   * @param jacobian The pointer to store the inverse of Jacobian matrix
+   * @param dxi_dx The pointer to store the inverse of Jacobian matrix
    * @param JxW The pointer to store transformed Jacobian weight
    * @param q_points The pointer to store physical quadrature point coordinate
    * @param normal The pointer to store normal vector
@@ -312,7 +320,7 @@ public:
   KOKKOS_FUNCTION void computePhysicalMap(const ElementInfo info,
                                           const unsigned int side,
                                           const unsigned int qp,
-                                          Real33 * const jacobian,
+                                          Real33 * const dxi_dx,
                                           Real * const JxW,
                                           Real3 * const q_points,
                                           Real3 * const normal) const;
@@ -446,7 +454,7 @@ private:
    * Cached physical maps on element quadrature points
    */
   ///@{
-  Array<Array<Real33>> _jacobian;
+  Array<Array<Real33>> _dxi_dx;
   Array<Array<Real>> _jxw;
   Array<Array<Real3>> _xyz;
   ///@}
@@ -478,10 +486,40 @@ Assembly::coordTransformFactor(const ContiguousSubdomainID subdomain, const Real
   }
 }
 
+KOKKOS_FUNCTION inline Real3
+Assembly::coordTransformFactorGradient(const ContiguousSubdomainID subdomain,
+                                       const Real3 point) const
+{
+  Real3 gradient(0);
+
+  switch (_coord_type[subdomain])
+  {
+    case Moose::COORD_RZ:
+      if (_rz_radial_coord == libMesh::invalid_uint)
+      {
+        // The factor is 2 pi times the distance to the axis, whose gradient is 2 pi times the unit
+        // vector normal to the axis pointing toward the point
+        auto radial = point - _rz_axis[subdomain].first;
+        radial -= (radial * _rz_axis[subdomain].second) * _rz_axis[subdomain].second;
+        gradient = (2 * M_PI / radial.norm()) * radial;
+      }
+      else
+        gradient(_rz_radial_coord) = 2 * M_PI;
+      break;
+    case Moose::COORD_RSPHERICAL:
+      gradient(0) = 8 * M_PI * point(0);
+      break;
+    default:
+      break;
+  }
+
+  return gradient;
+}
+
 KOKKOS_FUNCTION inline void
 Assembly::computePhysicalMap(const ElementInfo info,
                              const unsigned int qp,
-                             Real33 * const jacobian,
+                             Real33 * const dxi_dx,
                              Real * const JxW,
                              Real3 * const q_points) const
 {
@@ -500,14 +538,14 @@ Assembly::computePhysicalMap(const ElementInfo info,
   {
     auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(eid, node));
 
-    if (jacobian || JxW)
+    if (dxi_dx || JxW)
       J += grad_phi(node, qp).cartesian_product(points);
 
     xyz += phi(node, qp) * points;
   }
 
-  if (jacobian)
-    *jacobian = J.inverse(_dimension);
+  if (dxi_dx)
+    *dxi_dx = J.inverse(_dimension);
 
   if (JxW)
     *JxW =
@@ -521,7 +559,7 @@ KOKKOS_FUNCTION inline void
 Assembly::computePhysicalMap(const ElementInfo info,
                              const unsigned int side,
                              const unsigned int qp,
-                             Real33 * const jacobian,
+                             Real33 * const dxi_dx,
                              Real * const JxW,
                              Real3 * const q_points,
                              Real3 * const normal) const
@@ -548,7 +586,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
   {
     auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(eid, node));
 
-    if (jacobian)
+    if (dxi_dx)
       J += grad_phi(node, qp).cartesian_product(points);
 
     if (JxW || q_points)
@@ -563,8 +601,8 @@ Assembly::computePhysicalMap(const ElementInfo info,
     }
   }
 
-  if (jacobian)
-    *jacobian = J.inverse(_dimension);
+  if (dxi_dx)
+    *dxi_dx = J.inverse(_dimension);
 
   if (q_points)
     *q_points = xyz;

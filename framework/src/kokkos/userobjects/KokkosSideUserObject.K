@@ -31,6 +31,8 @@ SideUserObject::SideUserObject(const InputParameters & parameters)
     ::TransientInterface(this),
     ::ElementIDInterface(this)
 {
+  _configuration = Configuration(*this);
+
   // Kokkos user objects currently only consume variable information through finite element bases
   // and quadrature points
 }

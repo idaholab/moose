@@ -1,0 +1,3 @@
+time,difference,kokkos_integral,reference_integral
+0,0,0,0
+1,1.3588023815172e-15,38.219718472011,38.219718472011

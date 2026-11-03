@@ -12,28 +12,28 @@
 #include "KokkosADKernel.h"
 
 /**
- * This calculates the time derivative for a coupled variable
- **/
+ * The time derivative of a coupled variable $(\psi_i, \partial v_h / \partial t)$ with its
+ * Jacobian computed by pointwise automatic differentiation
+ */
 class KokkosADCoupledTimeDerivative : public Moose::Kokkos::ADKernel
 {
 public:
+  /// The residual depends on the time derivative of v
+  static constexpr unsigned int max_ad_slots = 1;
+
   static InputParameters validParams();
 
   KokkosADCoupledTimeDerivative(const InputParameters & parameters);
 
-  template <typename Derived>
-  KOKKOS_FUNCTION Moose::Kokkos::ADReal
-  computeQpResidual(const unsigned int i, const unsigned int qp, AssemblyDatum & datum) const;
+  template <typename Derived, unsigned int slots>
+  KOKKOS_FUNCTION Moose::Kokkos::DenseADReal<slots>
+  precomputeQpResidualValue(const unsigned int qp,
+                            Moose::Kokkos::ADAssemblyDatum<slots> & datum) const
+  {
+    return _v_dot(datum, qp);
+  }
 
-protected:
+private:
+  /// Time derivative of the coupled variable
   const Moose::Kokkos::ADVariableValue _v_dot;
 };
-
-template <typename Derived>
-KOKKOS_FUNCTION Moose::Kokkos::ADReal
-KokkosADCoupledTimeDerivative::computeQpResidual(const unsigned int i,
-                                                 const unsigned int qp,
-                                                 AssemblyDatum & datum) const
-{
-  return _test(datum, i, qp) * _v_dot(datum, qp);
-}

@@ -148,7 +148,8 @@ NodalKernel::operator()(ResidualLoop, const ThreadID tid, const Derived & kernel
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(
+      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(), _configuration);
 
   Real local_re = kernel.template computeQpResidual<Derived>(0, datum);
 
@@ -166,7 +167,8 @@ NodalKernel::operator()(JacobianLoop, const ThreadID tid, const Derived & kernel
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(
+      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(), _configuration);
 
   Real local_ke = kernel.template computeQpJacobian<Derived>(0, datum);
 
@@ -186,7 +188,7 @@ NodalKernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived &
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
+  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar, _configuration);
 
   Real local_ke = kernel.template computeQpOffDiagJacobian<Derived>(jvar, 0, datum);
 

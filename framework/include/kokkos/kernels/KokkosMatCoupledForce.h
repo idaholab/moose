@@ -26,12 +26,13 @@ public:
   KokkosMatCoupledForce(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpOffDiagJacobian(const unsigned int j,
-                                                   const unsigned int jvar,
-                                                   const unsigned int qp,
-                                                   AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpOffDiagJacobianValue(const unsigned int j,
+                                                        const unsigned int jvar,
+                                                        const unsigned int qp,
+                                                        AssemblyDatum & datum) const;
 
 private:
   const unsigned int _n_coupled;
@@ -45,7 +46,7 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosMatCoupledForce::precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+KokkosMatCoupledForce::precomputeQpResidualValue(const unsigned int qp, AssemblyDatum & datum) const
 {
   Real r = 0;
   if (_coupled_props)
@@ -59,10 +60,10 @@ KokkosMatCoupledForce::precomputeQpResidual(const unsigned int qp, AssemblyDatum
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosMatCoupledForce::precomputeQpOffDiagJacobian(const unsigned int j,
-                                                   const unsigned int jvar,
-                                                   const unsigned int qp,
-                                                   AssemblyDatum & datum) const
+KokkosMatCoupledForce::precomputeQpOffDiagJacobianValue(const unsigned int j,
+                                                        const unsigned int jvar,
+                                                        const unsigned int qp,
+                                                        AssemblyDatum & datum) const
 {
   if (!_v_var_to_index.exists(jvar))
     return 0;

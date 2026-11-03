@@ -14,7 +14,7 @@ registerKokkosResidualObject("HeatTransferApp", KokkosHeatConduction);
 InputParameters
 KokkosHeatConduction::validParams()
 {
-  InputParameters params = KernelGrad::validParams();
+  InputParameters params = Moose::Kokkos::KernelGrad::validParams();
   params.addClassDescription("Diffusive heat conduction term $-\\nabla\\cdot(k\\nabla T)$ of the "
                              "thermal energy conservation equation");
   params.addParam<MaterialPropertyName>(
@@ -24,14 +24,23 @@ KokkosHeatConduction::validParams()
       "d_thermal_conductivity_dT",
       "Property name of the derivative of the thermal conductivity with respect "
       "to the variable");
+  params.addParam<MaterialPropertyName>(
+      "d_thermal_conductivity_dx",
+      "d_thermal_conductivity_dx",
+      "Property name of the gradient of the thermal conductivity with respect to the position, "
+      "used in the Jacobian with respect to the displacements when the term is posed on the "
+      "current configuration");
   return params;
 }
 
 KokkosHeatConduction::KokkosHeatConduction(const InputParameters & parameters)
-  : KernelGrad(parameters)
+  : Moose::Kokkos::KernelGrad(parameters)
 {
   _thermal_conductivity = getKokkosMaterialProperty<Real>("thermal_conductivity");
 
   if (hasKokkosMaterialProperty<Real>("d_thermal_conductivity_dT"))
     _d_thermal_conductivity_dT = getKokkosMaterialProperty<Real>("d_thermal_conductivity_dT");
+
+  if (hasKokkosMaterialProperty<Real3>("d_thermal_conductivity_dx"))
+    _d_thermal_conductivity_dx = getKokkosMaterialProperty<Real3>("d_thermal_conductivity_dx");
 }

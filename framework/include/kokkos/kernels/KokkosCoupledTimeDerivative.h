@@ -22,12 +22,13 @@ public:
   KokkosCoupledTimeDerivative(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real precomputeQpOffDiagJacobian(const unsigned int j,
-                                                   const unsigned int jvar,
-                                                   const unsigned int qp,
-                                                   AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpOffDiagJacobianValue(const unsigned int j,
+                                                        const unsigned int jvar,
+                                                        const unsigned int qp,
+                                                        AssemblyDatum & datum) const;
 
 protected:
   const Moose::Kokkos::VariableValue _v_dot;
@@ -37,18 +38,18 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosCoupledTimeDerivative::precomputeQpResidual(const unsigned int qp,
-                                                  AssemblyDatum & datum) const
+KokkosCoupledTimeDerivative::precomputeQpResidualValue(const unsigned int qp,
+                                                       AssemblyDatum & datum) const
 {
   return _v_dot(datum, qp);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosCoupledTimeDerivative::precomputeQpOffDiagJacobian(const unsigned int j,
-                                                         const unsigned int jvar,
-                                                         const unsigned int qp,
-                                                         AssemblyDatum & datum) const
+KokkosCoupledTimeDerivative::precomputeQpOffDiagJacobianValue(const unsigned int j,
+                                                              const unsigned int jvar,
+                                                              const unsigned int qp,
+                                                              AssemblyDatum & datum) const
 {
   if (jvar == _v_var)
     return _phi(datum, j, qp) * _dv_dot;

@@ -14,7 +14,7 @@ registerKokkosResidualObject("MooseApp", KokkosPostprocessorNeumannBC);
 InputParameters
 KokkosPostprocessorNeumannBC::validParams()
 {
-  InputParameters params = IntegratedBCValue::validParams();
+  InputParameters params = Moose::Kokkos::IntegratedBCValue::validParams();
   params.addClassDescription(
       "Neumann boundary condition with value prescribed by a Postprocessor value.");
   params.addParam<PostprocessorName>(
@@ -23,6 +23,6 @@ KokkosPostprocessorNeumannBC::validParams()
 }
 
 KokkosPostprocessorNeumannBC::KokkosPostprocessorNeumannBC(const InputParameters & parameters)
-  : IntegratedBCValue(parameters), _value(getPostprocessorValue("postprocessor"))
+  : Moose::Kokkos::IntegratedBCValue(parameters), _value(getPostprocessorValue("postprocessor"))
 {
 }

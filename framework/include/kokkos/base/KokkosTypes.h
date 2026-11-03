@@ -14,7 +14,7 @@
 #include "KokkosJaggedArray.h"
 
 #ifdef MOOSE_KOKKOS_SCOPE
-#include "KokkosADReal.h"
+#include "KokkosDenseADReal.h"
 #endif
 
 #include "MooseError.h"
@@ -30,7 +30,11 @@ template <typename T>
 struct Vector3;
 
 using Real3 = Vector3<Real>;
-using ADReal3 = Vector3<ADReal>;
+#ifdef MOOSE_KOKKOS_SCOPE
+/// Vector of dense dual numbers with the given number of derivative slots
+template <unsigned int slots>
+using DenseADReal3 = Vector3<DenseADReal<slots>>;
+#endif
 
 struct Real33;
 
@@ -476,16 +480,18 @@ operator*(const Real33 left, const Real3 right)
           left(2, 0) * right.v[0] + left(2, 1) * right.v[1] + left(2, 2) * right.v[2]};
 }
 
-KOKKOS_INLINE_FUNCTION ADReal3
-operator*(const Real33 left, const ADReal3 & right)
+template <typename T, typename = std::enable_if_t<!std::is_same_v<T, Real>>>
+KOKKOS_INLINE_FUNCTION Vector3<T>
+operator*(const Real33 left, const Vector3<T> & right)
 {
   return {left(0, 0) * right(0) + left(0, 1) * right(1) + left(0, 2) * right(2),
           left(1, 0) * right(0) + left(1, 1) * right(1) + left(1, 2) * right(2),
           left(2, 0) * right(0) + left(2, 1) * right(1) + left(2, 2) * right(2)};
 }
 
-KOKKOS_INLINE_FUNCTION ADReal3
-operator*(const ADReal3 & left, const Real33 right)
+template <typename T, typename = std::enable_if_t<!std::is_same_v<T, Real>>>
+KOKKOS_INLINE_FUNCTION Vector3<T>
+operator*(const Vector3<T> & left, const Real33 right)
 {
   return {left(0) * right(0, 0) + left(1) * right(1, 0) + left(2) * right(2, 0),
           left(0) * right(0, 1) + left(1) * right(1, 1) + left(2) * right(2, 1),
@@ -557,35 +563,38 @@ operator*(const Real3 left, const Real right)
   return {left.v[0] * right, left.v[1] * right, left.v[2] * right};
 }
 
-template <typename T,
-          typename = typename std::enable_if<
-              std::is_same<typename std::decay<T>::type, ADReal>::value>::type>
-KOKKOS_INLINE_FUNCTION ADReal3
+/**
+ * Products mixing real vectors with dual numbers, for every dual number type
+ */
+///@{
+template <typename T, typename = std::enable_if_t<is_dual_number<T>>>
+KOKKOS_INLINE_FUNCTION Vector3<T>
 operator*(const Real3 left, const T & right)
 {
   return {left(0) * right, left(1) * right, left(2) * right};
 }
 
-template <typename T,
-          typename = typename std::enable_if<
-              std::is_same<typename std::decay<T>::type, ADReal>::value>::type>
-KOKKOS_INLINE_FUNCTION ADReal3
+template <typename T, typename = std::enable_if_t<is_dual_number<T>>>
+KOKKOS_INLINE_FUNCTION Vector3<T>
 operator*(const T & left, const Real3 right)
 {
   return {left * right(0), left * right(1), left * right(2)};
 }
 
-KOKKOS_INLINE_FUNCTION ADReal
-operator*(const Real3 left, const ADReal3 & right)
+template <typename T, typename = std::enable_if_t<!std::is_same_v<T, Real>>>
+KOKKOS_INLINE_FUNCTION T
+operator*(const Real3 left, const Vector3<T> & right)
 {
   return left(0) * right(0) + left(1) * right(1) + left(2) * right(2);
 }
 
-KOKKOS_INLINE_FUNCTION ADReal
-operator*(const ADReal3 & left, const Real3 right)
+template <typename T, typename = std::enable_if_t<!std::is_same_v<T, Real>>>
+KOKKOS_INLINE_FUNCTION T
+operator*(const Vector3<T> & left, const Real3 right)
 {
   return left(0) * right(0) + left(1) * right(1) + left(2) * right(2);
 }
+///@}
 
 KOKKOS_INLINE_FUNCTION Real3
 curlFromVectorGradient(const Real33 grad, const unsigned int dim)

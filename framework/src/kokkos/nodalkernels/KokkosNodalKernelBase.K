@@ -30,6 +30,7 @@ NodalKernelBase::NodalKernelBase(const InputParameters & parameters, Moose::VarF
     BoundaryRestrictable(this, true), // true for applying to nodesets
     CoupleableMooseVariableDependencyIntermediateInterface(this, true)
 {
+  _configuration = Configuration(*this);
 }
 
 NodalKernelBase::NodalKernelBase(const NodalKernelBase & object)
