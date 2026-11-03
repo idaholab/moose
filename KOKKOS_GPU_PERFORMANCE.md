@@ -237,6 +237,296 @@ mechanism table in that header routes to the plain kernel-argument path for anyt
 `KernelArgumentLimit`; `sizeof` on the functors decides which of the two is open. Separately, about one
 device-wide fence per launch means no two kernels can overlap and the host never runs ahead.
 
+How the two paths differ, from `Kokkos_Cuda_KernelLaunch.hpp`. A CUDA kernel's arguments are
+themselves placed in a small constant bank by the driver at launch, up to 4 KB. Kokkos's
+`LocalMemory` path uses exactly that: the functor is passed by value as the kernel argument, so a
+launch is one `<<<>>>` call that the host enqueues and walks away from. The `ConstantMemory` path
+instead keeps one 32 KB `__constant__` buffer per device that every such kernel reads its functor
+from. Because the buffer is shared, a launch takes a host mutex, `cudaEventSynchronize`s on the event
+the previous constant-memory launch recorded, `memcpy`s the functor into pinned staging, issues
+`cudaMemcpyToSymbolAsync` into the buffer, launches, and records a new event. The host therefore
+cannot enqueue the next constant-memory kernel until the previous one has finished on the device,
+which is a hidden full serialization on top of whatever fences the code asks for. Kokkos's default
+picks `LocalMemory` below 512 bytes and `ConstantMemory` from 512 bytes to 32 KB, on the reasoning
+that a large functor read through the constant cache beats one read as a large parameter block.
+`HintLightWeight` overrides that choice in favour of `LocalMemory` up to the 4 KB argument limit, and
+`HintHeavyWeight` forces `ConstantMemory`; the property travels on the execution policy, e.g.
+`Kokkos::Experimental::require(policy, Kokkos::Experimental::WorkItemProperty::HintLightWeight)`.
+What the hint does not change is the device-side read: an argument-bank read and a constant-buffer
+read go through the same constant cache, so a kernel's own speed should not move, while its launch
+stops blocking.
+
+### Where the tiny kernels come from
+
+`nsys_pmg_20261006.nsys-rep`, the modal hierarchic basis with the entity-block smoother and a
+BoomerAMG coarse cycle on the device, 30 linear iterations, converged residual 1.869062e-09, taken
+from `274fc0fd44`. This is the input's own configuration, not the nodal GLL and point Jacobi one
+the benchmark table's 0.66 s row measures, so its absolute times compare with the 4.21 s row. The
+capture runs 37.9 s, `SNESSolve` 5.20 s, the main `KSPSolve` 3.88 s. Counts
+from bounded SQL over `CUPTI_ACTIVITY_KIND_KERNEL`, `CUPTI_ACTIVITY_KIND_RUNTIME` and `NVTX_EVENTS`
+through `/scratch/$USER/tmp/nsys_q.sh`; a kernel is attributed to the innermost NVTX range enclosing
+its launch call on the same thread, excluding PETSc's `VecCUDACopyTo` and `VecCUDACopyFrom`.
+
+The question this answers is what the run's many short kernels are and whether they are where the
+timeline's whitespace is. 9752 of the 12730 kernels run under 20 us and together occupy the GPU for
+56 ms. By source:
+
+| source | kernels | under 20 us | busy |
+| --- | --- | --- | --- |
+| cuSPARSE | 3688 | 3681 | 17 ms |
+| MOOSE's Kokkos functors, and Kokkos's own fills | 4041 | 2715 | 4383 ms |
+| cuBLAS | 2254 | 1091 | 80 ms |
+| cub and thrust | 1339 | 1079 | 14 ms |
+| hypre | 1117 | 1106 | 2 ms |
+| PETSc's own CUPM kernels | 281 | 72 | 131 ms |
+
+Whitespace by region, gaps between consecutive kernels:
+
+| region | GPU busy | gaps < 1 ms | gaps 1-100 ms | gaps >= 100 ms |
+| --- | --- | --- | --- | --- |
+| before `SNESSolve` | 13 ms | 4 ms | 448 ms | 19.0 s |
+| first-solve `PCSetUp`, 1.13 s | 831 ms | 44 ms | 252 ms | 0 |
+| main `KSPSolve`, 3.88 s | 3660 ms | 250 ms | 41 ms | 0 |
+
+**The main solve is 94% kernel-resident**, so launch overhead and short gaps bound it at roughly 7.5%.
+Inside it, ranked by the idle that follows each kernel family:
+
+| family | launches | busy | idle after | median gap | launched from |
+| --- | --- | --- | --- | --- | --- |
+| cuBLAS | 2108 | 77 ms | 98 ms | 1.5 us | `VecAYPX` 1116, `VecAXPBYCZ` 557, `VecAXPY` 341, `VecNorm`, `VecScale` |
+| MOOSE launch-size reductions | 1608 | 19 ms | 38 ms | 23.5 us | every `QpJacobianOperator::apply()` |
+| cuSPARSE | 3472 | 16 ms | 27 ms | 1.2 us | `PCApply` on the coarsest level |
+| Dirichlet BC `JacobianVectorProductLoop` | 308 | 1 ms | 23 ms | 94 us | fine-level Jacobian-vector product |
+| PETSc CUPM | 176 | 113 ms | 17 ms | 1.5 us | `VecMDot` 100, `VecMAXPY` 76 |
+| `BlockIdentityLoop` | 372 | 14 ms | 10 ms | 12 us | after every `BlockApplyLoop` |
+| Kokkos `StdFillFunctor<bool>` | 278 | 0.2 ms | 13 ms | 42 us | |
+| hypre | 930 | 1 ms | 7 ms | 5 us | `PCApply` on the coarsest level |
+
+Read against each other:
+
+- **The four launch-size reductions were recomputed on every application.** `ApplyFlopLoop`,
+  `ApplyTensorFlopLoop`, `ApplyTensorSizeLoop` and `ApplyScratchLoop` each ran 433 times, though
+  `QpJacobianOperator::apply()` guards them to run once. Every call site constructs a fresh
+  operator on the stack (`KokkosPLevelSpace.K` and `KokkosFESystem.K`), so the guard's state died
+  with each one. Fixed under landed changes.
+- **The coarsest-level BoomerAMG cycle is small.** Its 30 applications take 0.82 to 1.04 ms each
+  and launch 142 kernels apiece, 16 ms of GPU work over about 30 ms of wall clock. Even a perfect
+  coarse cycle removes under 1% of the solve. Where hypre does cost something is setup, below.
+- **cuBLAS axpy-family kernels are the largest share of short whitespace.** Each runs about 6 us and
+  is followed by a 1.5 us median gap, which is the plain launch cost of the host enqueueing back to
+  back; the 98 ms total is that cost times 2108. `VecAYPX` alone is 1116 of them. Fusing the
+  Chebyshev or Richardson update chain into fewer vector operations, or a `VecMAXPY`-style multi-vector
+  update, is the PETSc-side remedy; the count per iteration is set by the smoother's KSP, not by
+  MOOSE.
+- **`VecMDot` is 93 ms of PETSc's own kernels**, 100 launches of a GMRES orthogonalization against
+  up to 30 basis vectors, and is the one PETSc kernel family with real duration. Its cost scales with
+  the restart length, so `-ksp_gmres_restart` or a pipelined or CGS-reduced orthogonalization is the
+  lever if the outer iteration count grows.
+- **The Dirichlet BC JVP is a host round trip, not a kernel.** 3.7 us of work followed by a 94 us
+  median gap, every time. Something on the host runs between it and the next launch on every
+  fine-level product; not traced yet.
+
+**The first-solve `PCSetUp` is where the dense runs of tiny kernels are, and they are not launch
+bound.** Of its 1.13 s, `setupKokkosEntityBlockSmoother` is 509 ms, almost all of it the three
+`BlockLoop` launches. The coarsest level's BoomerAMG setup is the 186 ms `PCSetUp` at its end: 1289
+kernels doing 5.0 ms of GPU work, with the five largest gaps between them 49, 21, 19, 16 and 13 ms.
+Those are **`cuLibraryLoadData`, 109 ms over 12 calls in that window**, 146 ms over 18 in the run:
+the CUDA driver loading a fat binary's module, lazily, the first time a kernel in it is launched. It is
+a one-off first-touch cost per library and per process, hypre's and thrust's modules being the ones
+that land inside the solve here. `CUDA_MODULE_LOADING=EAGER` would move it to startup and out of
+`SNESSolve`; it does not remove it. The rest of that window is hypre's setup on the host between
+launches.
+
+**The same reading over the fast configuration.** `nsys_gll_jacobi_20261008.nsys-rep`,
+`Variables/u/family=LAGRANGE_GLL Preconditioning/pmg/smoother=point_jacobi`, the benchmark table's
+0.66 s row, on `arco-c12` with the launch-size fix in. 10 linear iterations, converged residual
+8.564967e-09. The capture runs 27.7 s, `SNESSolve` 1.368 s, its first `PCSetUp` 0.535 s and the main
+`KSPSolve` 0.670 s, which matches the unprofiled 0.662 s.
+
+| region | kernels | under 20 us | GPU busy | gaps < 1 ms | gaps 1-100 ms |
+| --- | --- | --- | --- | --- | --- |
+| first-solve `PCSetUp`, 0.535 s | 1664 | 1479 | 246 ms | 36 ms | 251 ms |
+| main `KSPSolve`, 0.670 s | 3052 | 2250 | 596 ms | 50 ms | 26 ms |
+
+**The main solve is 89% kernel-resident, and its 77 ms of idle is diffuse.** No gap reaches 7 ms.
+Ranked by the idle that follows each family: cuBLAS 746 launches, 23 ms; `ApplyTensorLoop` 142, 14 ms;
+cuSPARSE 1232, 11 ms; the Dirichlet BC JVP 108, 8 ms at a 75 us median gap; hypre 330, 6 ms;
+`RestrictLoop` 33, 5 ms. The kernels themselves are `ApplyTensorLoop` 293 ms, `ProlongLoop` 158 ms
+and `RestrictLoop` 89 ms, 540 of the 596 ms. Launch overhead and short gaps therefore bound this
+solve at about 11%, and no single PETSc, hypre or MOOSE family is more than a third of that.
+
+**`PCSetUp` is now the larger target, at 0.535 s against the solve's 0.670 s, and half of it is an
+idle GPU.** Its 287 ms of whitespace breaks down into three host-side causes:
+
+- **Pinned host allocation, 97 ms over six `cudaMallocHost` calls, two of them 42 and 33 ms.** They
+  are the two largest GPU gaps in `PCSetUp`, 61 and 57 ms, each in a `KSPSetUp` of a smoothed
+  level. `cudaMallocHost` page-locks memory through the driver, cost growing with size, and PETSc
+  calls it for a CUPM vector's host array whenever the array exceeds
+  `-vec_pinned_memory_min`, default 0, so every host array of a CUDA vector is pinned
+  (`HostAllocateCheck_` in `petsc/include/petsc/private/veccupmimpl.h`). The fine-level work
+  vectors are 134 MB each, which would make these calls expensive. That these six calls are those
+  host arrays is inferred from where they fall and from that being PETSc's only unconditional
+  `cudaMallocHost` path on a CUDA vector; the capture traced no host call stacks, so a rerun with
+  `-vec_pinned_memory_min` set high, or with `--backtrace` sampling, is what confirms it. The lever
+  is PETSc's:
+  `-vec_pinned_memory_min` set above the vector size leaves the host array pageable, at the cost
+  of slower transfers for a vector that never transfers in a device-resident solve, or the host
+  array not allocated at all until something asks for it.
+- **`computeKokkosJacobianDiagonal`, 114 ms**, of which `QpJacobianOperator::DiagonalLoop` is 158 ms
+  over its three launches in the run. It contracts the full element basis, which is recorded under
+  still on the dense contraction.
+- **`cuLibraryLoadData`, 56 ms over 12 calls in the coarsest level's `PCSetUp`**, hypre's and thrust's
+  modules loading lazily, as above.
+
+**The setup's host/device traffic, attributed copy by copy.** `kokkos_pa_jacobi_copies.sh` runs the
+GLL point Jacobi benchmark twice in one allocation, so on one node (`arco-c16`), once as configured
+and once with `-mg_levels_pc_jacobi_fixdiagonal false`, under Nsight Systems and `-log_view` together.
+Every copy over 1 MB in the first `PCSetUp` is listed with its full NVTX stack. Both runs converge to
+8.564967e-09 in 10 iterations. Per smoothed level, at 8.4, 33.6 and 134 MB a vector for p = 2, 4, 8:
+
+| copy, under `KSPSetUp > KSPSolve` | as configured | `fixdiagonal false` |
+| --- | --- | --- |
+| `VecCopy`, H2D | every level | every level |
+| `PCApply > VecAXPY > VecCUDACopyTo`, H2D | p = 2 and 4 | p = 2 and 4 |
+| `PCApply > VecCUDACopyFrom`, D2H | every level | **gone** |
+| `PCApply > VecPointwiseMult > VecCUDACopyTo`, H2D | two per level | **one** per level |
+
+| | as configured | `fixdiagonal false` |
+| --- | --- | --- |
+| first `PCSetUp` | 541 ms | 401 ms |
+| `cudaMallocHost` in it | 93 ms | 43 ms |
+| `cuLibraryLoadData` in it | 57 ms | 31 ms |
+| `SNESSolve`, `-log_view` | 1.378 s | 1.207 s |
+| `KSPSolve`, `-log_view` | 0.678 s | 0.659 s |
+
+**The diagonal's round trip is PCJACOBI's zero-diagonal scan, not anything MOOSE does to the
+diagonal.** PCJACOBI builds its inverse diagonal lazily on its first apply
+(`PCSetUp_Jacobi_NonSymmetric` from `PCApply_Jacobi`): `MatGetDiagonal`, then `VecReciprocal` on the
+device, then, with `fixdiag` set and the matrix not known SPD, a `VecGetArray` loop replacing zeros
+by one (`jacobi.c:255`). That `VecGetArray` pulls the inverted diagonal to the host and marks it host
+current, and the next `VecPointwiseMult` sends it back. The scan is redundant for these operators on
+two counts: the device `VecReciprocal` already maps zero to zero (`vecseqcupm_impl.hpp:668`), and a
+level operator carries the identity on every row it holds fixed. The fine level, whose diagonal comes
+from `FESystem` rather than from `PLevelSpace::dispatch`, shows the same round trip, which is what
+ruled out the earlier reading that `dispatch`'s libMesh epilogue caused it.
+
+**Removing the host access also removes the pinned allocations it was paying for.** `cudaMallocHost`
+in `PCSetUp` fell from 93 ms to 43 ms with no change to `-vec_pinned_memory_min`: a CUDA vector's
+host array is allocated, pinned, only when something first touches the host, so the diagonal's host
+arrays are never created. That is the case against raising `-vec_pinned_memory_min`: pinning is a
+cost of host access, and the access is what to remove. The `cuLibraryLoadData` difference is variance
+between the two runs in one allocation, about 26 ms of the 140 ms `PCSetUp` difference, so the scan
+itself is worth about 115 ms here.
+
+Remaining, all still present with the scan off:
+
+- **`VecCopy` H2D, 176 MB over three levels.** Inside the Chebyshev eigenvalue estimate's
+  `KSPSolve`. Chebyshev defaults to a noisy right-hand side for the estimate (`usenoisy = PETSC_TRUE`,
+  `cheby.c:929`), and `KSPSetNoisy_Private` (`kspimpl.h:263`) fills it on the host through
+  `VecGetArrayWrite`, from a hash of each entry's global index, which a device kernel computes as
+  easily. The copy is consistent with uploading that vector but has not been tied to it beyond the
+  stack.
+- **One `VecPointwiseMult` H2D per level, 176 MB.** Not attributed yet: the diagonal is device
+  resident in this run, so the uploaded operand is the other input or the output of Jacobi's first
+  apply.
+- **`VecAXPY` H2D on the two coarse smoothed levels, 42 MB.** Not attributed yet; absent on the fine
+  level, which separates the coarse-level `PLevelSpace` path from the fine-level `FESystem` one.
+
+**Both PETSc fixes landed on a PETSc built from the tree, and the setup's traffic is gone but for 42
+MB.** The `petsc` submodule is on `lindad/device-jacobi-fixdiag`, branched from `origin/main` at
+`669b419381c`, and built as `PETSC_ARCH=arch-kokkos-pa` with the container's own configure options
+and Kokkos pinned at 4.7.04; libMesh and MOOSE are rebuilt against it. Two changes:
+
+- `PCSetUp_Jacobi()` replaces zero entries of the inverted diagonal with vector operations:
+  `VecPointwiseDivide()` of a zero vector by the diagonal is one exactly where the diagonal is zero,
+  since `VecReciprocal()` leaves a zero entry zero and the division defines 0/0 as 1 and x/0 as 0,
+  and `VecAXPY()` adds it. The check keeps its meaning and its `PetscInfo()` report, so an operator
+  that does carry a zero diagonal is still repaired.
+- `KSPSetNoisy_Private()` fills its vector through a new `VecSetNoisy_Private()`, which dispatches to
+  a `setnoisy` vector op. CUPM vectors implement it on the device with a `thrust::transform` over a
+  counting iterator, modelled on `SetStdBasisAsync()`; every other type keeps the host loop. The hash
+  moved to `vecimpl.h` as a host and device function, so both paths produce the same entries.
+
+`src/ksp/pc/tests/ex15.c` checks the repair on a diagonal matrix with zeros, with the repair on and
+off, on 1 and 2 processes, over AIJ, `aijcusparse` and `aijkokkos`, and with `aijcusparse` checks that
+Jacobi leaves its result as device data alone. The PETSc tests that exercise the noisy right-hand
+side all pass, `ksp_ksp_tutorials-ex56_*` and `snes_tutorials-ex56_*` among them; one
+`rap_bs_cuda` case needed a longer harness timeout at 8 processes. `ksp_ksp_tutorials-ex2_sell_mumps`
+fails, with MUMPS reporting `INFOG(1)=-6`, structurally singular, at analysis; `MATSELL`'s product is
+right and the same solve over AIJ and BAIJ passes, so the fault is in the SELL-to-MUMPS conversion,
+which neither change touches. That has not been checked against an unpatched build.
+
+Same benchmark, three runs, first `PCSetUp`, copies over 1 MB:
+
+| | `/opt/petsc` | `/opt/petsc`, `fixdiagonal false` | tree PETSc, both fixes |
+| --- | --- | --- | --- |
+| node | `arco-c16` | `arco-c16` | `arco-c15` |
+| H2D `VecPointwiseMult` | 353 MB, 6 | 176 MB, 3 | **0** |
+| D2H `VecCUDACopyFrom` | 176 MB, 3 | 0 | 0 |
+| H2D `VecCopy` | 176 MB, 3 | 176 MB, 3 | **0** |
+| H2D `VecAXPY` | 42 MB, 2 | 42 MB, 2 | 42 MB, 2 |
+| `cudaMallocHost` | 93 ms | 43 ms | **none** |
+| first `PCSetUp` | 541 ms | 401 ms | 331 ms |
+| `SNESSolve`, `-log_view` | 1.378 s | 1.207 s | 1.149 s |
+| `KSPSolve`, `-log_view` | 0.678 s | 0.659 s | 0.659 s |
+
+The `VecCopy` and the remaining `VecPointwiseMult` upload were the noisy right-hand side: it was built
+on the host and uploaded once by the copy into the eigenvalue estimate's work vector and once again
+by Jacobi's first application, and both go with a device fill. **With no host array ever touched,
+PETSc pins none, so all of `cudaMallocHost` is gone too**, which settles the pinning question: it was
+a cost of host access. The p-multigrid tests pass at one and four processes and the whole Kokkos
+suite passes, 185 passed, 42 skipped, 0 failed, on the new stack.
+
+The `KSPSolve` is unchanged, as expected, since everything removed was setup. `SNESSolve` is 0.229 s
+faster than the configured run on `/opt/petsc`, across two nodes, so read the comparison as the
+traffic and allocation rows rather than the wall clock.
+
+**What is left is the coarse levels' `VecAXPY` upload, 42 MB over p = 2 and 4, and it is the
+constrained-rows vector, whose values are written on the host.** It is the last host-to-device copy
+over 1 MB anywhere inside `SNESSolve`; the rest of the run's large copies are in `nlInitialSetup` and
+output. One per coarse smoothed level, the level's full size, 8.4 MB at p = 2 and 33.6 MB at p = 4,
+each inside `PCApply > VecAXPY` immediately after a `VecAssemblyEnd` and a star-forest reduction,
+which is the epilogue of `PLevelSpace::dispatch()`: `y.close()` reduces the operator's ghost
+contributions, then `y.add(1.0, *_constrained_rows)` places the identity on the rows the level holds
+fixed. The upload is that second operand.
+
+`_constrained_rows` is `_sys.add_vector("constrained rows")` on the level's private
+`libMesh::System`, and it already has the device type: printing the PETSc type of every level vector
+at `setupSolver()` shows `seqcuda` for all of them before anything there runs. **What makes it upload
+is where its values were written.** `setupConstrainedDofs()` fills it once in `init()` with `zero()`,
+`set()` and `close()`, which is `VecSetValues()` and assembly on the host, and leaves its offload mask
+`PETSC_OFFLOAD_CPU`, where the operator input `_x`, written by device code, is `PETSC_OFFLOAD_GPU`.
+The first device operation to read it, the `VecAXPY()` that places the identity, uploads it, and the
+device copy stays valid after that, so the cost is once per level per run rather than per setup or
+per application. The fine level has no such vector, since `FESystem::finalizeConstrainedDiagonal()`
+writes the identity on the device, which is why p = 8 shows nothing.
+
+A hypothesis tested and refuted: that the vector is a third instance of the bug class below, a host
+`VECMPI` the problem-level typing never reaches. Typing every vector of the level's system with
+`VecSetFromOptions()` in `PLevelSpace::applyShellVecTypeOptions()` left the run's traffic unchanged
+to the byte, 49.76 MB host to device and 0.06 MB device to host inside `SNESSolve`, because the
+vectors were already device typed. The change was reverted, and the bug class's third bullet below is
+wrong about these two vectors.
+
+**Fixed by writing the vector where its data lives.** `Kokkos::Vector::setFromDofIndex()` sets every
+owned entry from a functor of its local and global DOF indices, in a kernel on the device array for a
+device vector. `setupConstrainedDofs()` fills the mask from `_constrained_dof`, which the operator loops
+already read, and the two verification fills that wrote device vectors with `NumericVector::set()`,
+the unit vectors of `PMultigrid::verifyLevelOperators()` and `LevelTransfer::fillVerificationPattern()`,
+use it too. `nsys_devicefill.nsys-rep`, GLL point Jacobi on `arco-c14`, same 10 iterations and residual:
+**no copy over 1 MB remains anywhere inside `SNESSolve`.** Host to device fell from 49.76 MB to 7.77 MB
+over the same 1930 or so copies, the largest now 25.6 kB; device to host is unchanged at 0.06 MB. What is
+left is small per-application copies, 5.5 MB in 1312 copies of about 4 kB inside
+`computeKokkosJacobianVectorProduct` and 1.5 MB in 290 inside `MatMult`, recorded under open items as
+the many small copies of the Jacobian-vector product. The p-multigrid tests pass serially and at `-p4`,
+20 of 20 each, and the Kokkos suite passes, 185 passed, 42 skipped, 0 failed.
+
+The underlying hazard is general. libMesh's `PetscVector::set()`, `add()` and `insert()` are
+`VecSetValues()`, which PETSc implements on the host alone for every vector type, CUDA and Kokkos
+included, so any entry-by-entry write to a device vector leaves it current on the host and costs a
+host-to-device copy at its next device use. Code that fills a vector a device solve reads should go
+through `setFromDofIndex()` or another device kernel.
+
 ### The kernel budget is not where the effort went
 
 From the after capture. MOOSE's own loops are unchanged, since the arithmetic is the same.
@@ -391,7 +681,15 @@ verdict holds either way.
    functors, then either shrink them below 512 bytes or tag the policies `HintLightWeight`.
 6. **3600 small host-to-device copies per iteration phase inside
    `computeKokkosJacobianVectorProduct`**, 0.019 GB in total. Irrelevant as bandwidth, but that many
-   synchronization points is worth a look once the above are done.
+   synchronization points is worth a look once the above are done. The 94 us gap after every Dirichlet
+   BC `JacobianVectorProductLoop`, under where the tiny kernels come from, is likely the same thing.
+7. **PETSc and hypre are in scope as much as MOOSE is.** From where the tiny kernels come from: cuBLAS
+   axpy-family launches after the smoother's vector updates are 98 ms of idle in a 3.88 s solve,
+   `VecMDot` is 93 ms of kernel time, and lazy CUDA module loading puts 109 ms of
+   `cuLibraryLoadData` inside the first `PCSetUp`. Each is a change in PETSc, hypre or the
+   environment, not in MOOSE. Over the fast GLL and point Jacobi configuration the largest of these
+   is PETSc pinning every CUDA vector's host array, 97 ms of `cudaMallocHost` in a 0.535 s
+   `PCSetUp`, which `-vec_pinned_memory_min` controls.
 
 `ApplyTensorLoop` at 0.867 s is deliberately not on this list; four rounds of counter evidence below
 say it is not where the time is. `BlockLoop` has come off it: at 0.525 s and 68.3% compute throughput
@@ -415,6 +713,34 @@ coordinate rather than applying a sign, so a per-direction reversal of the quadr
 carried through; the 2D path is guarded on the element type being a quadrilateral.
 
 ## Landed changes and what each bought
+
+**The operator's launch sizes are measured once per level.** `QpJacobianOperator::apply()` and
+`assembleBlocks()` size their launches with device reductions over the (element, variable) pairs,
+four for an application and one for the block assembly, and guard them to run on first use. Every
+caller constructs a fresh operator per application, so the guard never held and each application
+re-ran the four reductions and their fence. The sizes now live in a `QpJacobianLaunchSizes` owned by
+whoever owns the level, `FESystem` for the fine level and each `PLevelSpace` for its own, and every
+operator built for that level reads and fills the same one. Nothing the sizes depend on changes
+during a run: the mesh, the level's FE types and which pairs the cache couples are all fixed at setup,
+and Kokkos refuses adaptivity.
+
+Measured on `nsys_pmg_20261008_sizes.nsys-rep` against `nsys_pmg_20261006.nsys-rep`, same input, same
+30 iterations, residual 1.869064e-09 against 1.869062e-09. Launch-size reductions fell from 1735 to
+15, which is one set per level, and total launches from 12730 to 11010. Inside the main `KSPSolve`
+the 1608 reductions and the 38 ms of idle that followed them are gone, and `cudaEventSynchronize`
+calls fell from 3402 to 1794 at the same total time, as expected when the removed launches were
+short. The p-multigrid directory passes serially and at `-p4`, 20 of 20 each, and the whole Kokkos
+suite passes, 185 passed, 42 skipped, 0 failed.
+
+**The wall-clock comparison is confounded by the node, and only the kernel figures should be read
+from this pair.** The after capture ran on `arco-c12`, the before on `arco-c19`. The after capture's
+main `KSPSolve` is 3.949 s against 3.885 s, but ten `cudaMalloc` calls inside `VecSet` stalled for
+136 ms between them on `arco-c12`, the largest 52 ms, where no `cudaMalloc` in the before capture
+took over 1 ms. Every one of those stalls opens a gap of the same length on the GPU and they account
+for the whole difference. Nothing in the change allocates, so this reads as node or driver state, but
+the before binary was not rerun on `arco-c12` to confirm it. Removing those stalls puts the after
+solve at about 3.81 s, which is the 57 ms the reductions and their idle cost plus a little noise. A
+clean figure wants repeated unprofiled runs of both binaries on one node.
 
 **BoomerAMG ran on the host because the matrix it was handed was a host matrix.** The mechanism is
 sharper than the conversion per setup this was first ranked as. `MatConvert_AIJ_HYPRE` reads the
@@ -803,7 +1129,10 @@ instances so far, and a fourth should be expected rather than discovered:
   matrix and the work vectors PCMG builds from it, and does so at creation rather than through the
   options database. That makes it the one instance of this class whose fix does not run into the
   ordering trap below.
-- The level work vector `_x` and the constrained-rows vector, both `add_vector` on the level's system.
+- The level work vector `_x` and the constrained-rows vector, both `add_vector` on the level's system. Measured
+  since, this one is not an instance: both are already device typed by the time `setupSolver()`
+  runs, and the constrained-rows vector uploads because it is filled on the host, as recorded under
+  where the tiny kernels come from.
 
 **The ordering is the trap, not the typing.** The type only reaches the options database when
 `FEProblemBase::solve()` applies the system's PETSc options, which is after `initialSetup()` builds
