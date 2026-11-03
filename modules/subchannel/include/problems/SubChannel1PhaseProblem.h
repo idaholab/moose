@@ -156,24 +156,27 @@ protected:
   PetscErrorCode implicitPetscSolve(int iblock);
 
   /**
-   * Add proximal damping K (W - W_iter) to the cross-momentum equation of the coupled solve,
-   * M_ww W + M_wp P + K (W - W_iter) = b_w, which keeps the coupled linear solve well conditioned
-   * without changing the converged solution. K is scaled by the mean magnitude of the
-   * cross-momentum coefficients so it is consistent across meshes, and by the ratio of the current
-   * to the initial cross-momentum residual (switched evolution relaxation), so K itself vanishes as
-   * the outer iteration converges.
-   * @param M_ww     cross-momentum block acting on the crossflow; K is added to its diagonal
-   * @param M_wp     cross-momentum block acting on the pressure
-   * @param b_w      cross-momentum right-hand side; K W_iter is added to it
-   * @param w_iter   crossflow at the current outer iterate
-   * @param iblock   axial block
-   * @param max_K    the damping applied far from convergence, which bounds K
-   * @param added_K  the damping applied
+   * Add the damping K (Wij - Wij_iter) to the cross-momentum equation of the coupled solve,
+   * M_ww Wij + M_wp P + K (Wij - Wij_iter) = b_w, where Wij is the crossflow the coupled solve
+   * computes and Wij_iter the crossflow of the current outer iterate. This is a diagonal shift K of
+   * M_ww with K Wij_iter added to b_w, which makes each coupled solve a proximal-point step in the
+   * crossflow: it keeps the coupled linear solve well conditioned, and the term vanishes at the
+   * fixed point Wij = Wij_iter, so it does not change the converged solution. K is scaled by the
+   * mean magnitude of the cross-momentum coefficients so it is consistent across meshes, and by the
+   * ratio of the current to the largest cross-momentum residual of the solve (switched evolution
+   * relaxation), so K itself vanishes as the outer iteration converges.
+   * @param M_ww      cross-momentum block acting on the crossflow; K is added to its diagonal
+   * @param M_wp      cross-momentum block acting on the pressure
+   * @param b_w       cross-momentum right-hand side; K Wij_iter is added to it
+   * @param Wij_iter  crossflow at the current outer iterate
+   * @param iblock    axial block
+   * @param max_K     the damping applied far from convergence, which bounds K
+   * @param added_K   the damping applied
    */
   PetscErrorCode addCrossflowDamping(Mat M_ww,
                                      Mat M_wp,
                                      Vec b_w,
-                                     Vec w_iter,
+                                     Vec Wij_iter,
                                      int iblock,
                                      PetscScalar & max_K,
                                      PetscScalar & added_K);
@@ -582,6 +585,9 @@ SubChannel1PhaseProblem::populateSolutionChan(const Vec & x,
       loc_solution.set(loc_node, xx[iz_ind * cross_dimension + i_l]);
     }
   }
+  // Every VecGetArray needs a matching VecRestoreArray, which advances the object state of x so
+  // that cached values such as norms are recomputed, and for device vector types marks the host
+  // array as the current copy
   LibmeshPetscCall(VecRestoreArray(x, &xx));
   PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
