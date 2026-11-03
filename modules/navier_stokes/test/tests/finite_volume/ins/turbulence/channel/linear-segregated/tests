@@ -132,5 +132,6 @@
     cli_args = "LinearFVKernels/TKE_advection/walls='bottom top'"
     expect_err = 'Walls should not be specified for turbulent kernels acting on the turbulent kinetic energy variable'
     requirement = 'The system shall report an error if wall boundaries are specified on a turbulent transport kernel acting on the turbulent kinetic energy variable in a linear finite volume k-epsilon model.'
+    max_threads = 1
   []
 []
