@@ -25,6 +25,7 @@
 #include "FEProblemBase.h"
 #include "PiecewiseBase.h"
 #include "PiecewiseTabularBase.h"
+#include "PiecewiseConstant.h"
 #include "Distribution.h"
 #include "ActionWarehouse.h"
 #include "MaterialPropertyRegistry.h"
@@ -1997,6 +1998,17 @@ MooseServer::buildFuncPlotResponse(wasp::DataArray & plotting_responses,
   std::string y_axis_label = "ordinate values";
   wasp::CustomPlot plot_object;
   buildLineGraphPlot(plot_object, plot_title, x_axis_label, y_axis_label, graph_keys, graph_vals);
+
+  // use constant function directions to select left or right step geometry
+  if (const auto * constant_func = dynamic_cast<const PiecewiseConstant *>(pw_func))
+  {
+    const std::string step_direction = constant_func->getParam<MooseEnum>("direction");
+    auto line_graph =
+        std::static_pointer_cast<wasp::CustomPlot::Graph>(plot_object.series().front());
+    line_graph->lineStyle(step_direction == "LEFT" || step_direction == "LEFT_INCLUSIVE"
+                              ? wasp::CustomPlot::lsStepLeft
+                              : wasp::CustomPlot::lsStepRight);
+  }
   plotting_responses.push_back(wasp::serializeCustomPlot(plot_object));
 }
 

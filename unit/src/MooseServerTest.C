@@ -2876,6 +2876,56 @@ TEST_F(MooseServerTest, PlottingFunctionScaleFactors)
   }
 }
 
+TEST_F(MooseServerTest, PlottingFunctionStepDirections)
+{
+  // provide piecewise constant inputs with every configured step direction
+  std::string doc_text_template = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Functions]
+  [test_func]
+    type = PiecewiseConstant
+    xy_data = '0 2 1 5 2 3'
+    direction = STEP_DIRECTION
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // check all four directions and validate that tabular values stay intact
+  auto step_directions =
+      std::vector<std::string>{"LEFT", "LEFT_INCLUSIVE", "RIGHT", "RIGHT_INCLUSIVE"};
+  auto expect_styles = std::vector<wasp::CustomPlot::LineStyle>{wasp::CustomPlot::lsStepLeft,
+                                                                wasp::CustomPlot::lsStepLeft,
+                                                                wasp::CustomPlot::lsStepRight,
+                                                                wasp::CustomPlot::lsStepRight};
+  auto expect_keys = std::vector<double>{0, 1, 2};
+  auto expect_vals = std::vector<double>{2, 5, 3};
+  for (std::size_t i = 0; i < step_directions.size(); i++)
+  {
+    std::string doc_text_open = doc_text_template;
+    pcrecpp::RE("STEP_DIRECTION").Replace(step_directions[i], &doc_text_open);
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 1);
+    ASSERT_EQ(1u, ext_array.size());
+    auto check_plot = wasp::deserializeCustomPlot(*ext_array[0].to_object());
+    ASSERT_EQ(1u, check_plot->series().size());
+    auto line_graph = std::dynamic_pointer_cast<wasp::CustomPlot::Graph>(check_plot->series()[0]);
+    ASSERT_TRUE(line_graph);
+    EXPECT_EQ(expect_styles[i], line_graph->lineStyle());
+    EXPECT_EQ(expect_keys, line_graph->keys());
+    EXPECT_EQ(expect_vals, line_graph->values());
+  }
+}
+
 TEST_F(MooseServerTest, WorkspaceResourceFileChanges)
 {
   // write resource files to disk which will be used by base input document

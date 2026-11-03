@@ -43,4 +43,10 @@
     unit_test = MooseServerTest.PlottingFunctionScaleFactors
     requirement = 'The system shall apply tabular function scale factors to function preview values.'
   []
+
+  [function_step_directions]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingFunctionStepDirections
+    requirement = 'The system shall plot piecewise constant functions using their configured step direction.'
+  []
 []
