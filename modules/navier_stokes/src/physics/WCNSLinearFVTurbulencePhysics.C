@@ -133,10 +133,8 @@ WCNSLinearFVTurbulencePhysics::addSolverVariables()
       std::string variable_type = "MooseLinearVariableFVReal";
 
       auto params = getFactory().getValidParams(variable_type);
-      assignBlocks(params, _blocks);
-      params.set<SolverSystemName>("solver_sys") = getSolverSystem(_tke_name);
 
-      getProblem().addVariable(variable_type, _tke_name, params);
+      addSharedSolverVariable(variable_type, _tke_name, params);
     }
     else
       paramError("turbulence_kinetic_energy_variable",
@@ -151,10 +149,8 @@ WCNSLinearFVTurbulencePhysics::addSolverVariables()
       std::string variable_type = "MooseLinearVariableFVReal";
 
       auto params = getFactory().getValidParams(variable_type);
-      assignBlocks(params, _blocks);
-      params.set<SolverSystemName>("solver_sys") = getSolverSystem(_tked_name);
 
-      getProblem().addVariable(variable_type, _tked_name, params);
+      addSharedSolverVariable(variable_type, _tked_name, params);
     }
     else
       paramError("turbulence_kinetic_energy_dissipation_variable",

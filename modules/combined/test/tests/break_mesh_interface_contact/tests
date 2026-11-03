@@ -1,0 +1,12 @@
+[Tests]
+  [break_mesh_interface_contact]
+    type = 'Exodiff'
+    input = 'break_mesh_interface_contact.i'
+    exodiff = 'break_mesh_interface_contact_out.e'
+    design = 'BreakMeshByBlockGenerator.md'
+    issues = '#17749'
+    abs_zero = 1e-9
+    rel_err = 5e-4
+    requirement = 'The system shall be able to create separate blocks in a mesh and generate two sides interface boundaries to be used in thermal and mechanical contact.'
+  []
+[]

@@ -72,7 +72,6 @@ WCNSLinearFVScalarTransportPhysics::addSolverVariables()
     return;
 
   auto params = getFactory().getValidParams("MooseLinearVariableFVReal");
-  assignBlocks(params, _blocks);
 
   for (const auto name_i : index_range(_passive_scalar_names))
   {
@@ -84,12 +83,11 @@ WCNSLinearFVScalarTransportPhysics::addSolverVariables()
       continue;
     }
 
-    params.set<SolverSystemName>("solver_sys") = getSolverSystem(name_i);
     if (isParamValid("passive_scalar_scaling"))
       params.set<std::vector<Real>>("scaling") = {
           getParam<std::vector<Real>>("passive_scalar_scaling")[name_i]};
 
-    getProblem().addVariable("MooseLinearVariableFVReal", _passive_scalar_names[name_i], params);
+    addSharedSolverVariable("MooseLinearVariableFVReal", _passive_scalar_names[name_i], params);
   }
 }
 

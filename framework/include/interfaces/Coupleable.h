@@ -964,6 +964,18 @@ protected:
                                              unsigned int comp = 0) const;
 
   /**
+   * Returns divergence of a coupled variable for use in objects utilizing Automatic
+   * Differentiation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to an ADVectorVariableDivergence containing the divergence of the coupled
+   * variable
+   * @see Kernel::_div_u
+   */
+  const ADVectorVariableDivergence & adCoupledDiv(const std::string & var_name,
+                                                  unsigned int comp = 0) const;
+
+  /**
    * Returns divergence of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -1198,6 +1210,26 @@ protected:
    */
   virtual const ArrayVariableValue & coupledArrayDotDot(const std::string & var_name,
                                                         unsigned int comp = 0) const;
+
+  /**
+   * Time derivative of a coupled array variable for use in Automatic Differentiation
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a ADArrayVariableValue containing the time derivative of the coupled
+   * variable
+   */
+  const ADArrayVariableValue & adCoupledArrayDot(const std::string & var_name,
+                                                 unsigned int comp = 0) const;
+
+  /**
+   * Second time derivative of a coupled array variable for use in Automatic Differentiation
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a ADArrayVariableValue containing the second time derivative of the
+   * coupled variable
+   */
+  const ADArrayVariableValue & adCoupledArrayDotDot(const std::string & var_name,
+                                                    unsigned int comp = 0) const;
 
   /**
    * Old time derivative of a coupled array variable
@@ -1514,6 +1546,11 @@ protected:
   mutable std::unordered_map<std::string, std::unique_ptr<ADArrayVariableGradient>>
       _ad_default_array_gradient;
 
+  /// Will hold the zero default time derivative for optional array coupled variables for
+  /// automatic differentiation. The number of array components depends on the variable.
+  mutable std::unordered_map<std::string, std::unique_ptr<ADArrayVariableValue>>
+      _ad_default_array_value_zero;
+
   /// Will hold the default value for optional vector coupled variables for automatic differentiation.
   mutable std::unordered_map<std::string, std::unique_ptr<MooseArray<ADRealVectorValue>>>
       _ad_default_vector_value;
@@ -1541,6 +1578,10 @@ protected:
 
   /// This will always be zero because the default values for optionally coupled vector variables is always constant
   mutable MooseArray<ADRealVectorValue> _ad_default_curl;
+
+  /// Will hold the default value for optional vector coupled variable divergences for automatic
+  /// differentiation.
+  mutable MooseArray<ADReal> _ad_default_div;
 
   /// Zero value of a variable
   const VariableValue & _zero;
@@ -1835,6 +1876,13 @@ public:
   const ADVectorVariableCurl & getADDefaultCurl() const;
 
   /**
+   * Helper method to return (and insert if necessary) the default divergence value for Automatic
+   * Differentiation for an uncoupled vector variable.
+   * @return the default divergence value for the vector variable
+   */
+  const ADVectorVariableDivergence & getADDefaultDiv() const;
+
+  /**
    * Helper method to return (and insert if necessary) the default array value for Automatic
    * Differentiation for an uncoupled array variable.
    * @param var_name the name of the array variable for which to retrieve a default value
@@ -1849,6 +1897,14 @@ public:
    * @return Reference to a ADArrayVariableGradient containing zero entries for the default values
    */
   const ADArrayVariableGradient & getADDefaultArrayGradient(const std::string & var_name) const;
+
+  /**
+   * Helper method to return (and insert if necessary) the zero default time derivative for
+   * Automatic Differentiation for an uncoupled array variable.
+   * @param var_name the name of the array variable for which to retrieve a default
+   * @return Reference to a ADArrayVariableValue containing zero entries
+   */
+  const ADArrayVariableValue & getADDefaultArrayValueZero(const std::string & var_name) const;
 
 private:
   /**

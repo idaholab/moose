@@ -4,5 +4,9 @@
     input = 'j2_hard1_mod.i'
     csvdiff = 'j2_hard1_mod_out.csv'
     heavy = true
+    requirement = 'The system shall compute J2 plasticity with constant hardening using the '
+                  'return-mapping plasticity user object formulation.'
+    design = 'SolidMechanicsPlasticJ2.md'
+    issues = '#5628'
   [../]
 []

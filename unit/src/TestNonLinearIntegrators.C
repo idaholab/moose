@@ -254,7 +254,7 @@ TEST(CheckData, NonlinearIntegratorTest)
 
   // nlf_test.Mult(lf_tdofs, gf_tdofs);
   newton_solver.Mult(lf_tdofs, gf_tdofs);
-  MFEM_VERIFY(newton_solver.GetConverged(), "Newton Solver did not converge.");
+  ASSERT_TRUE(newton_solver.GetConverged()) << "Newton Solver did not converge.";
   Moose::out << "Finished on rank:" << my_rank << std::endl;
   gf.Distribute(gf_tdofs);
 }

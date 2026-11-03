@@ -11,6 +11,7 @@
 
 #include "VaporMixtureFluidProperties.h"
 #include "NaNInterface.h"
+#include "GasTransportUtils.h"
 
 class SinglePhaseFluidProperties;
 
@@ -114,6 +115,17 @@ public:
 
 #undef override_property
 
+  /**
+   * Computes the Chapman-Enskog binary diffusion coefficient of a pair of components, which must
+   * both have Lennard-Jones parameters (see IdealGasMixtureInterface) [m^2/s]
+   */
+  virtual Real
+  binaryDiffusionCoefficient(Real p, Real T, unsigned int i, unsigned int j) const override;
+  virtual ADReal binaryDiffusionCoefficient(const ADReal & p,
+                                            const ADReal & T,
+                                            unsigned int i,
+                                            unsigned int j) const override;
+
 protected:
   /// Names of component fluid properties
   const std::vector<UserObjectName> _component_fp_names;
@@ -124,6 +136,8 @@ protected:
 
   /// Component fluid properties objects
   std::vector<const SinglePhaseFluidProperties *> _component_fps;
+  /// Lennard-Jones parameters of the components, or nullptr for components without them
+  std::vector<const GasTransportUtils::LennardJonesParameters *> _lennard_jones;
 
   /// Whether all components have constant specific heats, so that the internal energy is linear
   /// in temperature and the temperature follows explicitly from it
@@ -132,7 +146,43 @@ protected:
   /// energy when some components have temperature-dependent specific heats [K]
   Real _T_newton_start;
 
+  /// Rules that combine the viscosities and thermal conductivities of the components
+  enum class TransportMixingRule
+  {
+    MOLE_FRACTION_AVERAGE,
+    WILKE
+  };
+  /// Rule that combines the viscosities and thermal conductivities of the components
+  const TransportMixingRule _transport_mixing_rule;
+  ///@{ Factors (M_j / M_i)^(1/4) and [8 (1 + M_i / M_j)]^(-1/2) of the interaction factors of
+  /// Wilke, which depend on the molar masses M_i and M_j of components i and j only
+  std::vector<std::vector<Real>> _wilke_molar_mass_factor;
+  std::vector<std::vector<Real>> _wilke_normalization;
+  ///@}
+
 private:
+  /**
+   * Combines a transport property of the components with the transport mixing rule. The option
+   * wilke weights the component values with the interaction factors of Wilke, computed from the
+   * component viscosities and molar masses, which gives the rule of Wilke for the viscosity and
+   * that of Mason and Saxena for the thermal conductivity.
+   *
+   * @param[in] psi   Molar fractions of the components
+   * @param[in] y     Transport property of the components
+   * @param[in] mu    Viscosities of the components, used by the rule of Wilke only
+   */
+  template <typename CppType>
+  CppType mixTransportProperty(const std::vector<CppType> & psi,
+                               const std::vector<CppType> & y,
+                               const std::vector<CppType> & mu) const;
+
+  /// Implements binaryDiffusionCoefficient for Real and AD arguments
+  template <typename CppType>
+  CppType binaryDiffusionCoefficient_templ(const CppType & p,
+                                           const CppType & T,
+                                           unsigned int i,
+                                           unsigned int j) const;
+
   /// Implements the deprecated mixtureSpecificHeatRatio(x)
   template <typename CppType>
   CppType constantSpecificHeatRatio(const std::vector<CppType> & x) const;

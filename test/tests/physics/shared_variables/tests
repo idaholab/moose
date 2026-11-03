@@ -1,0 +1,49 @@
+[Tests]
+  design = 'Physics/index.md'
+  issues = '#30533'
+  [shared]
+    requirement = 'The system shall allow multiple physics to share variables across their blocks, creating a single variable on the union of the blocks that is available to the objects the physics add,'
+    [fe]
+      type = CSVDiff
+      input = 'shared_variables.i'
+      csvdiff = 'shared_variables_out.csv'
+      detail = 'for a solver variable and an auxiliary variable,'
+    []
+    [diffusion_cg]
+      type = CSVDiff
+      input = 'diffusion_two_physics.i'
+      csvdiff = 'diffusion_two_physics_out.csv'
+      detail = 'for the variable of multiple continuous Galerkin diffusion physics,'
+    []
+    [diffusion_fv]
+      type = CSVDiff
+      input = 'diffusion_two_physics_fv.i'
+      csvdiff = 'diffusion_two_physics_fv_out.csv'
+      detail = 'and for the variable of multiple finite volume diffusion physics.'
+    []
+  []
+  [errors]
+    requirement = 'The system shall return an error if multiple physics share a variable'
+    [inconsistent_fe]
+      type = RunException
+      input = 'diffusion_two_physics.i'
+      cli_args = 'right_order=SECOND'
+      expect_err = "Physics 'right' requests the shared variable 'u' with different values for parameter\(s\) .*order.* than Physics 'left' did"
+      detail = 'with different finite element definitions,'
+    []
+    [inconsistent_scaling]
+      type = RunException
+      input = 'shared_variables.i'
+      cli_args = 'right_scaling=2'
+      expect_err = "Physics 'right' requests the shared variable 'u' with different values for parameter\(s\) .*scaling.* than Physics 'left' did"
+      detail = 'with different scaling factors,'
+    []
+    [diffusion_fv_adjacent]
+      type = RunException
+      input = 'diffusion_two_physics_fv.i'
+      cli_args = 'right_block=2'
+      expect_err = "Physics 'left' and 'right' share the finite volume variable 'u' on the adjacent subdomains '0' and '2', but neither is defined on both"
+      detail = 'for a finite volume variable on adjacent subdomains that no single physics is defined on.'
+    []
+  []
+[]

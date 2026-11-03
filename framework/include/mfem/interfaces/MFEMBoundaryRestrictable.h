@@ -31,11 +31,8 @@ public:
   mfem::Array<int> boundariesToAttributes(const InputParameters & parameters);
   std::vector<std::string> boundariesToStrings();
 
-  /// Returns a bool indicating if the object is restricted to a subset of boundaries
-  bool isBoundaryRestricted() const
-  {
-    return !(_boundary_attributes.Size() == 1 && _boundary_attributes[0] == -1);
-  }
+  /// Returns a bool indicating if the object is restricted to a subset of boundaries.
+  bool isBoundaryRestricted() const { return _boundary_names.size(); }
 
   const mfem::Array<int> & getBoundaryAttributes() { return _boundary_attributes; }
   mfem::Array<int> & getBoundaryMarkers() { return _boundary_markers; }
