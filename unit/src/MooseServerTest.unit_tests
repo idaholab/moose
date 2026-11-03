@@ -25,4 +25,10 @@
     unit_test = MooseServerTest.PlottingInputSections
     requirement = 'The system shall select function and distribution previews according to the input section containing the plotting request.'
   []
+
+  [distribution_quantiles]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingDistributionQuantiles
+    requirement = 'The system shall sample distribution previews on a bounded probability grid containing the median and reject invalid interior quantiles.'
+  []
 []

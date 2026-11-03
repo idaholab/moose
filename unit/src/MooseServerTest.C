@@ -50,6 +50,8 @@ public:
     params.addRequiredParam<Real>("shape", "Shape of the distribution (beta or s)");
     params.addParam<std::string>("pdf_case", "valid", "PDF evaluation used for plotting checks");
     params.addParam<std::string>("cdf_case", "valid", "CDF evaluation used for plotting checks");
+    params.addParam<std::string>(
+        "quantile_case", "valid", "Quantile evaluation used for plotting checks");
     return params;
   }
   TestDistribution(const InputParameters & parameters)
@@ -57,7 +59,8 @@ public:
       _mean(getParam<Real>("mean")),
       _shape(getParam<Real>("shape")),
       _pdf_case(getParam<std::string>("pdf_case")),
-      _cdf_case(getParam<std::string>("cdf_case"))
+      _cdf_case(getParam<std::string>("cdf_case")),
+      _quantile_case(getParam<std::string>("quantile_case"))
   {
   }
   virtual Real pdf(const Real & x) const override
@@ -94,6 +97,10 @@ public:
   }
   virtual Real quantile(const Real & y) const override
   {
+    if (y == 0.5 && _quantile_case == "nonfinite")
+      return std::numeric_limits<Real>::quiet_NaN();
+    if (y == 0.5 && _quantile_case == "decreasing")
+      return -std::numeric_limits<Real>::max();
     return _mean - _shape * std::log(1.0 / y - 1.0);
   }
 
@@ -102,6 +109,7 @@ protected:
   const Real & _shape;
   const std::string & _pdf_case;
   const std::string & _cdf_case;
+  const std::string & _quantile_case;
 };
 
 registerMooseObject("MooseUnitApp", TestDistribution);
@@ -2423,17 +2431,17 @@ time, 501, 502, 503, 504 # ignored comment
   std::size_t expect_num_plots = 2;
   std::size_t check_plot_index = 0;
   // clang-format off
-  expect_keys = std::vector<double>{-58.4482379024, -55.0576491928, -51.6670604833, -48.2764717738,
-                                    -44.8858830643, -41.4952943548, -38.1047056452, -34.7141169357,
-                                    -31.3235282262, -27.9329395167, -24.5423508072, -21.1517620976};
-  expect_vals = std::vector<double>{0.000370000000, 0.001292407178, 0.004458329863, 0.014735771635,
-                                    0.042427104442, 0.084034413176, 0.084034413176, 0.042427104442,
-                                    0.014735771635, 0.004458329863, 0.001292407178, 0.000370000000};
+  expect_keys = std::vector<double>{-58.448237902351, -45.990357355224, -43.849474653219, -42.442054701407,
+                                    -41.307780995534, -40.291278219832, -39.800000000000, -38.292219004466,
+                                    -37.157945298593, -35.750525346781, -33.609642644776, -21.151762097649};
+  expect_vals = std::vector<double>{0.000370000000, 0.030856807469, 0.055246253444, 0.073538337925,
+                                    0.085733060912, 0.091830422406, 0.092592592593, 0.085733060912,
+                                    0.073538337925, 0.055246253444, 0.030856807469, 0.000370000000};
   // clang-format on
   expect_xaxis_range_min = -58.4482379024 - ((-21.1517620976 - -58.4482379024) * pad_factor);
   expect_xaxis_range_max = -21.1517620976 + ((-21.1517620976 - -58.4482379024) * pad_factor);
-  expect_yaxis_range_min = 0.000370000000 - ((0.084034413176 - 0.000370000000) * pad_factor);
-  expect_yaxis_range_max = 0.084034413176 + ((0.084034413176 - 0.000370000000) * pad_factor);
+  expect_yaxis_range_min = 0.000370000000 - ((0.092592592593 - 0.000370000000) * pad_factor);
+  expect_yaxis_range_max = 0.092592592593 + ((0.092592592593 - 0.000370000000) * pad_factor);
   check_plotting(request_id,
                  doc_uri,
                  request_line,
@@ -2456,12 +2464,12 @@ time, 501, 502, 503, 504 # ignored comment
   expect_num_plots = 2;
   check_plot_index = 1;
   // clang-format off
-  expect_keys = std::vector<double>{-58.4482379024, -55.0576491928, -51.6670604833, -48.2764717738,
-                                    -44.8858830643, -41.4952943548, -38.1047056452, -34.7141169357,
-                                    -31.3235282262, -27.9329395167, -24.5423508072, -21.1517620976};
-  expect_vals = std::vector<double>{0.001000000000, 0.003501761716, 0.012185988958, 0.041509633051,
-                                    0.131968998581, 0.347989854209, 0.652010145791, 0.868031001419,
-                                    0.958490366949, 0.987814011042, 0.996498238284, 0.999000000000};
+  expect_keys = std::vector<double>{-58.448237902351, -45.990357355224, -43.849474653219, -42.442054701407,
+                                    -41.307780995534, -40.291278219832, -39.800000000000, -38.292219004466,
+                                    -37.157945298593, -35.750525346781, -33.609642644776, -21.151762097649};
+  expect_vals = std::vector<double>{0.001000000000, 0.091727272727, 0.182454545455, 0.273181818182,
+                                    0.363909090909, 0.454636363636, 0.500000000000, 0.636090909091,
+                                    0.726818181818, 0.817545454545, 0.908272727273, 0.999000000000};
   // clang-format on
   expect_xaxis_range_min = -58.4482379024 - ((-21.1517620976 - -58.4482379024) * pad_factor);
   expect_xaxis_range_max = -21.1517620976 + ((-21.1517620976 - -58.4482379024) * pad_factor);
@@ -2690,6 +2698,72 @@ TEST_F(MooseServerTest, PlottingInputSections)
   // return no plots for a section heading or a location outside this input
   EXPECT_TRUE(check_plotting_request(plot_server, 8, 1, 0).empty());
   EXPECT_TRUE(check_plotting_request(plot_server, 1000, 0, 0).empty());
+}
+
+TEST_F(MooseServerTest, PlottingDistributionQuantiles)
+{
+  // provide a symmetric distribution with its known median and inverse CDF
+  std::string doc_text_template = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Distributions]
+  [test_dist]
+    type = TestDistribution
+    mean = 0
+    shape = 1
+    quantile_case = QUANTILE_CASE
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // check odd and even probability grids that include their median samples
+  for (const std::size_t num_points : {5u, 6u})
+  {
+    std::string doc_text_open = doc_text_template;
+    pcrecpp::RE("QUANTILE_CASE").Replace("valid", &doc_text_open);
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    plot_server.setDistPlotNumPoints(num_points);
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 2);
+    ASSERT_EQ(2u, ext_array.size());
+    auto check_plot = wasp::deserializeCustomPlot(*ext_array[1].to_object());
+    ASSERT_EQ(1u, check_plot->series().size());
+    const auto & actual_keys = check_plot->series()[0]->keys();
+    const auto & actual_vals = check_plot->series()[0]->values();
+    ASSERT_EQ(num_points, actual_keys.size());
+    ASSERT_EQ(num_points, actual_vals.size());
+
+    // use the existing plot tolerance for roundoff in CDF inversion checks
+    const double test_tolerance = 1e-9;
+    EXPECT_NEAR(0.001, actual_vals.front(), test_tolerance);
+    EXPECT_NEAR(0.999, actual_vals.back(), test_tolerance);
+    EXPECT_NEAR(0.5, actual_vals[num_points / 2], test_tolerance);
+    EXPECT_NEAR(0, actual_keys[num_points / 2], test_tolerance);
+    EXPECT_NEAR(0.001 + 0.998 / (num_points - 1), actual_vals[1], test_tolerance);
+    for (std::size_t i = 1; i < actual_keys.size(); i++)
+      EXPECT_LE(actual_keys[i - 1], actual_keys[i]);
+  }
+
+  // reject invalid interior quantiles without publishing partial plot data
+  for (const std::string data_case : {"nonfinite", "decreasing"})
+  {
+    std::string doc_text_open = doc_text_template;
+    pcrecpp::RE("QUANTILE_CASE").Replace(data_case, &doc_text_open);
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    plot_server.setDistPlotNumPoints(6);
+    auto ext_array = check_plotting_request(
+        plot_server, 10, 16, 0, "Invalid distribution preview quantiles", false);
+    EXPECT_TRUE(ext_array.empty());
+  }
 }
 
 TEST_F(MooseServerTest, WorkspaceResourceFileChanges)
@@ -3265,7 +3339,7 @@ label: OtherMooseUnitApp text: OtherMooseUnitApp desc: OtherMooseUnitApp... pos:
   // check for location of AppTypeTestDistribution register in current file
   std::size_t definition_size_expect = 1;
   std::string definition_list_expect = R"INPUT(
-document_uri: "file://...absolute.../unit/src/MooseServerTest.C"    location_start: [122.0]    location_end: [122.1000]
+document_uri: "file://...absolute.../unit/src/MooseServerTest.C"    location_start: [130.0]    location_end: [130.1000]
 )INPUT";
   EXPECT_EQ(definition_size_expect, definition_array.size());
   EXPECT_EQ(definition_list_expect, "\n" + definition_list_actual.str());

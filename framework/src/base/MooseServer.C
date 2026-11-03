@@ -2013,13 +2013,14 @@ MooseServer::buildDistPlotResponses(wasp::DataArray & plotting_responses,
   // pick plot x-range using quantiles to be generic for distribution types
   const double min_x = dist.quantile(_dist_plot_quantile_bound);
   const double max_x = dist.quantile(1.0 - _dist_plot_quantile_bound);
-  const double del_x = (max_x - min_x) / (_dist_plot_num_points - 1);
 
   // return without any plots added if any calculated values are not finite
-  if (!std::isfinite(min_x) || !std::isfinite(max_x) || max_x <= min_x || !std::isfinite(del_x))
+  if (!std::isfinite(min_x) || !std::isfinite(max_x) || max_x <= min_x ||
+      !std::isfinite(max_x - min_x))
     return;
 
-  // use uniform grid of x-axis graph keys to sample plot values for y-axis
+  // use bounded probability steps to resolve curves within very long tails
+  const double del_p = (1.0 - 2 * _dist_plot_quantile_bound) / (_dist_plot_num_points - 1);
   std::vector<double> graph_keys(_dist_plot_num_points);
   std::vector<double> pdf_values(_dist_plot_num_points);
   std::vector<double> cdf_values(_dist_plot_num_points);
@@ -2031,7 +2032,14 @@ MooseServer::buildDistPlotResponses(wasp::DataArray & plotting_responses,
   // calculate PDF values and CDF values for each key within range of graph
   for (std::size_t i = 0; i < _dist_plot_num_points; i++)
   {
-    graph_keys[i] = min_x + (i * del_x);
+    double probability = _dist_plot_quantile_bound + (i * del_p);
+    if (_dist_plot_num_points > 2 && i == _dist_plot_num_points / 2)
+      probability = 0.5;
+    graph_keys[i] = i == 0                           ? min_x
+                    : i + 1 == _dist_plot_num_points ? max_x
+                                                     : dist.quantile(probability);
+    if (!std::isfinite(graph_keys[i]) || (i > 0 && graph_keys[i] < graph_keys[i - 1]))
+      throw std::invalid_argument("Invalid distribution preview quantiles");
     try
     {
       if (pdf_valid)
