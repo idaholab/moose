@@ -1902,7 +1902,11 @@ MooseServer::gatherExtensionResponses(wasp::DataArray & extensionResponses,
   // use appropriate method to fill response based on extension method name
   bool pass = true;
   if (extensionMethod == "plotting")
+  {
+    // convert model evaluation errors into exceptions while building plots
+    Moose::ScopedThrowOnError scoped_throw_on_error;
     pass = gatherPlottingResponses(extensionResponses, line, character);
+  }
   return pass;
 }
 
@@ -2005,17 +2009,47 @@ MooseServer::buildDistPlotResponses(wasp::DataArray & plotting_responses,
   std::vector<double> pdf_values(_dist_plot_num_points);
   std::vector<double> cdf_values(_dist_plot_num_points);
 
+  // track valid PDF and CDF curves separately to keep useful curve results
+  bool pdf_valid = true;
+  bool cdf_valid = true;
+
   // calculate PDF values and CDF values for each key within range of graph
   for (std::size_t i = 0; i < _dist_plot_num_points; i++)
   {
     graph_keys[i] = min_x + (i * del_x);
-    pdf_values[i] = dist.pdf(graph_keys[i]);
-    cdf_values[i] = dist.cdf(graph_keys[i]);
-
-    // return without any plots added if any PDF or CDF value is not finite
-    if (!std::isfinite(pdf_values[i]) || !std::isfinite(cdf_values[i]))
-      return;
+    try
+    {
+      if (pdf_valid)
+      {
+        pdf_values[i] = dist.pdf(graph_keys[i]);
+        pdf_valid = std::isfinite(pdf_values[i]);
+      }
+    }
+    catch (const std::exception & e)
+    {
+      errors << "PDF preview: " << e.what() << '\n';
+      pdf_valid = false;
+    }
+    try
+    {
+      if (cdf_valid)
+      {
+        cdf_values[i] = dist.cdf(graph_keys[i]);
+        cdf_valid = std::isfinite(cdf_values[i]);
+      }
+    }
+    catch (const std::exception & e)
+    {
+      errors << "CDF preview: " << e.what() << '\n';
+      cdf_valid = false;
+    }
   }
+
+  // record invalid curves without removing other usable distribution plots
+  if (!pdf_valid)
+    errors << "PDF preview unavailable: invalid or unsupported evaluation\n";
+  if (!cdf_valid)
+    errors << "CDF preview unavailable: invalid or unsupported evaluation\n";
 
   // lambda to build CustomPlot object for distribution and add to response
   auto add_dist_to_plot = [&](const std::string & dist_type, const std::vector<double> & graph_vals)
@@ -2029,10 +2063,12 @@ MooseServer::buildDistPlotResponses(wasp::DataArray & plotting_responses,
   };
 
   // build CustomPlot object for PDF values, serialize, and add to response
-  add_dist_to_plot("PDF", pdf_values);
+  if (pdf_valid)
+    add_dist_to_plot("PDF", pdf_values);
 
   // build CustomPlot object for CDF values, serialize, and add to response
-  add_dist_to_plot("CDF", cdf_values);
+  if (cdf_valid)
+    add_dist_to_plot("CDF", cdf_values);
 }
 
 void

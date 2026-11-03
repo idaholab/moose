@@ -1,0 +1,10 @@
+[Tests]
+  design = 'syntax/Functions/index.md syntax/Distributions/index.md'
+  issues = '#22766'
+
+  [distribution_evaluation_errors]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingDistributionEvaluationErrors
+    requirement = 'The system shall provide a valid distribution preview when evaluation of the other distribution curve fails.'
+  []
+[]
