@@ -1649,23 +1649,42 @@ FEProblemBase::initialSetup()
                    neigh_var.activeOnSubdomain(neighbor_blk);
           };
 
-          // Block pairs of the boundary on whose faces the kernel never executes, and whether
-          // swapping the variables would make every face of the boundary covered. A boundary
-          // without neighbors has no pairs; it is reported as an external side during assembly.
+          // Block pairs of the boundary on whose faces the kernel never executes, the subset of
+          // those that swapping the variables would cover, and whether swapping the variables
+          // would cover every face of the boundary. A boundary without neighbors has no pairs; it
+          // is reported as an external side during assembly.
           std::vector<std::string> failing_pairs;
-          bool flipped = true;
+          std::vector<std::string> flipped_pairs;
+          bool all_flipped = true;
           for (const auto & [bid, elem_blk, neighbor_blk, two_sided] : face_block_pairs)
             if (bid == bnd_id)
             {
+              const bool flipped_valid =
+                  valid(neighbor_var, var, elem_blk, neighbor_blk) ||
+                  (two_sided && valid(neighbor_var, var, neighbor_blk, elem_blk));
+              if (!flipped_valid)
+                all_flipped = false;
               if (!valid(var, neighbor_var, elem_blk, neighbor_blk) &&
                   !(two_sided && valid(var, neighbor_var, neighbor_blk, elem_blk)))
-                failing_pairs.push_back(block_name(elem_blk) + " -> " + block_name(neighbor_blk));
-              if (!valid(neighbor_var, var, elem_blk, neighbor_blk) &&
-                  !(two_sided && valid(neighbor_var, var, neighbor_blk, elem_blk)))
-                flipped = false;
+              {
+                const auto pair_name = block_name(elem_blk) + " -> " + block_name(neighbor_blk);
+                failing_pairs.push_back(pair_name);
+                if (flipped_valid)
+                  flipped_pairs.push_back(pair_name);
+              }
             }
           if (failing_pairs.empty())
             continue;
+
+          std::string flipped_hint;
+          if (!flipped_pairs.empty())
+            flipped_hint =
+                "\nThe variables appear to be flipped relative to the boundary "
+                "orientation on block pair(s) " +
+                MooseUtils::join(flipped_pairs, ", ") +
+                (all_flipped ? "; swap 'variable' and 'neighbor_var', or reverse the "
+                               "orientation of the boundary."
+                             : "; reverse the orientation of the boundary on those pairs.");
 
           ik->paramError(
               "boundary",
@@ -1679,11 +1698,7 @@ FEProblemBase::initialSetup()
               "secondary): ",
               MooseUtils::join(failing_pairs, ", "),
               ".",
-              flipped
-                  ? "\nThe variables appear to be flipped relative to the boundary orientation; "
-                    "swap 'variable' and 'neighbor_var', or reverse the orientation of the "
-                    "boundary."
-                  : "");
+              flipped_hint);
         }
   }
 

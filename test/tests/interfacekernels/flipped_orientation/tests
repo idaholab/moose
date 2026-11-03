@@ -6,8 +6,15 @@
     [flipped]
       type = RunException
       input = 'flipped.i'
-      expect_err = "The variables appear to be flipped relative to the boundary orientation"
+      expect_err = "The variables appear to be flipped relative to the boundary orientation on block pair\(s\) 0 -> 1; swap .variable. and .neighbor_var."
       detail = "its variable and neighbor variable are swapped relative to the boundary orientation, or"
+    []
+    [partially_flipped]
+      type = RunException
+      input = 'multi_pair.i'
+      cli_args = "Variables/u/block='0 3' Variables/v/block='1 2'"
+      expect_err = "Failing block pair\(s\) \(primary -> secondary\): 2 -> 1, 2 -> 3.\nThe variables appear to be flipped relative to the boundary orientation on block pair\(s\) 2 -> 3; reverse the orientation of the boundary on those pairs."
+      detail = "its variable and neighbor variable are swapped relative to the boundary orientation on some of the block pairs that the boundary joins, or"
     []
     [undefined]
       type = RunException
