@@ -2514,6 +2514,54 @@ TEST_F(MooseServerTest, PlottingDistributionEvaluationErrors)
   }
 }
 
+TEST_F(MooseServerTest, PlottingDistributionSettings)
+{
+  // provide unchanged distribution inputs before changing preview settings
+  std::string doc_text_open = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Distributions]
+  [test_dist]
+    type = TestDistribution
+    mean = 0
+    shape = 1
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // reject zero, singleton and counts above the 10,000 point preview limit
+  for (const std::size_t num_points : {0u, 1u, 10001u})
+  {
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    plot_server.setDistPlotNumPoints(num_points);
+    auto ext_array = check_plotting_request(
+        plot_server, 10, 16, 0, "Invalid distribution preview point count", false);
+    EXPECT_TRUE(ext_array.empty());
+  }
+
+  // accept the smallest and largest counts allowed under the preview limit
+  for (const std::size_t num_points : {2u, 10000u})
+  {
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    plot_server.setDistPlotNumPoints(num_points);
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 2);
+    ASSERT_EQ(2u, ext_array.size());
+    auto check_plot = wasp::deserializeCustomPlot(*ext_array[0].to_object());
+    ASSERT_EQ(1u, check_plot->series().size());
+    EXPECT_EQ(num_points, check_plot->series()[0]->keys().size());
+  }
+}
+
 TEST_F(MooseServerTest, WorkspaceResourceFileChanges)
 {
   // write resource files to disk which will be used by base input document

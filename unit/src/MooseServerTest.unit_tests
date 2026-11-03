@@ -7,4 +7,10 @@
     unit_test = MooseServerTest.PlottingDistributionEvaluationErrors
     requirement = 'The system shall provide a valid distribution preview when evaluation of the other distribution curve fails.'
   []
+
+  [distribution_settings]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingDistributionSettings
+    requirement = 'The system shall reject invalid distribution preview sampling settings and accept supported point counts.'
+  []
 []

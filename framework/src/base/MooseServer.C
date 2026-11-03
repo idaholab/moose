@@ -47,6 +47,7 @@
 #include <iostream>
 #include <functional>
 #include <filesystem>
+#include <stdexcept>
 
 MooseServer::MooseServer(MooseApp & moose_app)
   : _moose_app(moose_app),
@@ -1994,6 +1995,12 @@ MooseServer::buildDistPlotResponses(wasp::DataArray & plotting_responses,
 {
   // get distribution from problem that is registered for given object name
   const Distribution & dist = problem.getDistribution(object_name);
+
+  // bound server work to ten thousand points and reject unsafe tail limits
+  if (_dist_plot_num_points < 2 || _dist_plot_num_points > 10000 ||
+      !std::isfinite(_dist_plot_quantile_bound) || _dist_plot_quantile_bound <= 0 ||
+      _dist_plot_quantile_bound >= 0.5)
+    throw std::invalid_argument("Invalid distribution preview point count or tail probability");
 
   // pick plot x-range using quantiles to be generic for distribution types
   const double min_x = dist.quantile(_dist_plot_quantile_bound);
