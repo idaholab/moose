@@ -408,4 +408,42 @@
       detail = 'or a boundary ID.'
     []
   []
+  [MFEMElasticityEigenproblem]
+    type = CSVDiff
+    input = elasticity_eigenproblem.i
+    csvdiff = 'OutputData/ElasticityEigenproblem_eigenvalues_0001.csv'
+    requirement = 'The system shall have the ability to solve a linear elasticity eigenproblem on a vector H1 space with Dirichlet BCs using MFEM.'
+    design = 'MFEMEigenproblem.md'
+    issues = '#34193'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMElasticityEigenproblemMatrixRHS]
+    type = CSVDiff
+    input = elasticity_eigenproblem.i
+    cli_args = "Problem/rhs_matrix_coefficient='1 0 0;0 1 0;0 0 1'"
+    csvdiff = 'OutputData/ElasticityEigenproblem_eigenvalues_0001.csv'
+    # Writes the same output file as the scalar-coefficient test
+    prereq = MFEMElasticityEigenproblem
+    requirement = 'The system shall reproduce the eigenvalues of a scalar unit right-hand-side coefficient when an identity matrix right-hand-side coefficient is used on a vector H1 space in an MFEM eigenproblem.'
+    design = 'MFEMEigenproblem.md'
+    issues = '#34193'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMEigenproblemMatrixRHSWrongSize]
+    type = RunException
+    input = elasticity_eigenproblem.i
+    cli_args = "Problem/rhs_matrix_coefficient='1 0;0 1'"
+    expect_err = 'A matrix rhs_coefficient on an H1 or L2 finite element space must be 3x3 to match '
+                 'the number of components of the space, but it is 2x2.'
+    requirement = 'The system shall report an error if the size of a matrix right-hand-side coefficient does not match the number of components of an H1 or L2 space in an MFEM eigenproblem.'
+    design = 'MFEMEigenproblem.md'
+    issues = '#34193'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
 []
