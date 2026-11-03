@@ -1394,6 +1394,10 @@ SubChannel1PhaseProblem::computeP(int iblock)
         LibmeshPetscCall(
             MatSetValues(_amc_pressure_force_mat, 1, &row, 1, &col, &value, INSERT_VALUES));
 
+        // Row iz_ind is the pressure force on cell iz, S_c * (P(iz) - P(iz - 1)), and its unknown
+        // is the inlet pressure P(iz - 1). The outlet pressure of the top cell of the block is
+        // known (the outlet boundary condition or the block above), so it goes to the right-hand
+        // side. For the other cells, P(iz) is the unknown of the next row.
         if (iz == last_node)
         {
           PetscScalar value = -1.0 * (*_P_soln)(node_out)*S_interp;
@@ -1409,6 +1413,10 @@ SubChannel1PhaseProblem::computeP(int iblock)
               MatSetValues(_amc_pressure_force_mat, 1, &row, 1, &col, &value, INSERT_VALUES));
         }
 
+        // The segregated solver takes the cell pressure drop DP from the axial momentum solve
+        // (computeDP), so each row reduces to P(iz - 1) = P(iz) + DP(iz). The monolithic solver
+        // omits this term because the same matrix is the pressure force in its axial momentum
+        // equation, which determines P directly.
         if (_segregated_bool)
         {
           auto dp_out = _DP(i_ch, iz);
