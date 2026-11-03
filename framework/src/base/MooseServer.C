@@ -1926,10 +1926,17 @@ MooseServer::gatherPlottingResponses(wasp::DataArray & plotting_responses, int l
   wasp::HITNodeView request_context =
       wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
 
+  if (request_context.is_null())
+    return true;
+
   // get object context and value of type parameter for request if provided
   wasp::HITNodeView object_context = request_context;
   while (object_context.type() != wasp::OBJECT && object_context.has_parent())
     object_context = object_context.parent();
+  if (object_context.type() != wasp::OBJECT || !object_context.has_parent() ||
+      !object_context.parent().has_parent() || object_context.parent().parent() != view_root)
+    return true;
+  const std::string & object_section = object_context.parent().name();
   const std::string & object_name = object_context.name();
   wasp::HITNodeView type_node = object_context.first_child_by_name("type");
   const std::string & object_type =
@@ -1946,11 +1953,11 @@ MooseServer::gatherPlottingResponses(wasp::DataArray & plotting_responses, int l
     return true;
 
   // check problem to build function plot if request is from function block
-  if (problem->hasFunction(object_name))
+  if (object_section == "Functions" && problem->hasFunction(object_name))
     buildFuncPlotResponse(plotting_responses, *problem, object_name, object_type);
 
   // check problem to build PDF and CDF plots if request is in distribution
-  else if (problem->hasDistribution(object_name))
+  else if (object_section == "Distributions" && problem->hasDistribution(object_name))
     buildDistPlotResponses(plotting_responses, *problem, object_name, object_type);
 
   return true;

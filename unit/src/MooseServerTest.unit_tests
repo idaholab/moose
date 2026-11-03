@@ -19,4 +19,10 @@
     unit_test = MooseServerTest.PlottingDistributionValues
     requirement = 'The system shall reject invalid probability densities and cumulative probabilities while permitting small floating-point roundoff.'
   []
+
+  [input_sections]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingInputSections
+    requirement = 'The system shall select function and distribution previews according to the input section containing the plotting request.'
+  []
 []

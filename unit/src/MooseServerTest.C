@@ -2640,6 +2640,58 @@ TEST_F(MooseServerTest, PlottingDistributionValues)
   EXPECT_EQ(2u, ext_array.size());
 }
 
+TEST_F(MooseServerTest, PlottingInputSections)
+{
+  // use the same name for function, distribution and variable input blocks
+  std::string doc_text_open = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Functions]
+  [shared]
+    type = PiecewiseLinear
+    xy_data = '0 1 1 2'
+  []
+[]
+[Distributions]
+  [shared]
+    type = TestDistribution
+    mean = 0
+    shape = 1
+  []
+[]
+[Variables]
+  [shared]
+    order = FIRST
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+  MooseServer plot_server(*moose_unit_app);
+  check_plotting_input(plot_server, doc_text_open);
+
+  // check that every requested syntax section selects only its own objects
+  auto ext_array = check_plotting_request(plot_server, 10, 16, 1);
+  ASSERT_EQ(1u, ext_array.size());
+  auto check_plot = wasp::deserializeCustomPlot(*ext_array[0].to_object());
+  EXPECT_EQ("shared PiecewiseLinear Function", check_plot->title().text());
+  auto dist_array = check_plotting_request(plot_server, 16, 16, 2);
+  ASSERT_EQ(2u, dist_array.size());
+  check_plot = wasp::deserializeCustomPlot(*dist_array[0].to_object());
+  EXPECT_EQ("shared TestDistribution PDF Distribution", check_plot->title().text());
+  EXPECT_TRUE(check_plotting_request(plot_server, 23, 12, 0).empty());
+
+  // return no plots for a section heading or a location outside this input
+  EXPECT_TRUE(check_plotting_request(plot_server, 8, 1, 0).empty());
+  EXPECT_TRUE(check_plotting_request(plot_server, 1000, 0, 0).empty());
+}
+
 TEST_F(MooseServerTest, WorkspaceResourceFileChanges)
 {
   // write resource files to disk which will be used by base input document
