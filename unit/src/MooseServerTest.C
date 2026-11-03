@@ -2835,6 +2835,47 @@ TEST_F(MooseServerTest, PlottingDistributionPresentation)
   }
 }
 
+TEST_F(MooseServerTest, PlottingFunctionScaleFactors)
+{
+  // provide scaled tabular input for linear and constant function previews
+  std::string doc_text_template = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Functions]
+  [test_func]
+    type = FUNCTION_TYPE
+    xy_data = '0 2 1 -4'
+    scale_factor = -2.5
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // check ordinate scaling while not changing the supplied abscissa values
+  auto expect_keys = std::vector<double>{0, 1};
+  auto expect_vals = std::vector<double>{-5, 10};
+  for (const std::string function_type : {"PiecewiseLinear", "PiecewiseConstant"})
+  {
+    std::string doc_text_open = doc_text_template;
+    pcrecpp::RE("FUNCTION_TYPE").Replace(function_type, &doc_text_open);
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 1);
+    ASSERT_EQ(1u, ext_array.size());
+    auto check_plot = wasp::deserializeCustomPlot(*ext_array[0].to_object());
+    ASSERT_EQ(1u, check_plot->series().size());
+    EXPECT_EQ(expect_keys, check_plot->series()[0]->keys());
+    EXPECT_EQ(expect_vals, check_plot->series()[0]->values());
+  }
+}
+
 TEST_F(MooseServerTest, WorkspaceResourceFileChanges)
 {
   // write resource files to disk which will be used by base input document

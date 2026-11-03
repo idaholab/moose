@@ -37,4 +37,10 @@
     unit_test = MooseServerTest.PlottingDistributionPresentation
     requirement = 'The system shall label probability density and cumulative probability previews appropriately and preserve visible ranges for constant densities.'
   []
+
+  [function_scale_factors]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingFunctionScaleFactors
+    requirement = 'The system shall apply tabular function scale factors to function preview values.'
+  []
 []

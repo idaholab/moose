@@ -24,6 +24,7 @@
 #include "Parser.h"
 #include "FEProblemBase.h"
 #include "PiecewiseBase.h"
+#include "PiecewiseTabularBase.h"
 #include "Distribution.h"
 #include "ActionWarehouse.h"
 #include "MaterialPropertyRegistry.h"
@@ -1978,12 +1979,16 @@ MooseServer::buildFuncPlotResponse(wasp::DataArray & plotting_responses,
   if (pw_func->functionSize() == 0)
     return;
 
+  // read each tabular scale factor before gathering the function ordinates
+  const auto * tabular_func = dynamic_cast<const PiecewiseTabularBase *>(pw_func);
+  const double scale_factor = tabular_func ? tabular_func->getParam<Real>("scale_factor") : 1.0;
+
   // walk over piecewise function and gather keys and values for line graph
   std::vector<double> graph_keys, graph_vals;
   for (std::size_t i = 0; i < pw_func->functionSize(); i++)
   {
     graph_keys.push_back(pw_func->domain(i));
-    graph_vals.push_back(pw_func->range(i));
+    graph_vals.push_back(scale_factor * pw_func->range(i));
   }
 
   // build CustomPlot object from function data then serialize for response
