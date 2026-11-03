@@ -2083,9 +2083,21 @@ MooseServer::buildDistPlotResponses(wasp::DataArray & plotting_responses,
   {
     std::string plot_title = object_name + " " + object_type + " " + dist_type + " Distribution";
     std::string x_axis_label = "x values";
-    std::string y_axis_label = dist_type + " values";
+    std::string y_axis_label =
+        dist_type == "CDF" ? "cumulative probability" : "probability density";
     wasp::CustomPlot plot_object;
     buildLineGraphPlot(plot_object, plot_title, x_axis_label, y_axis_label, graph_keys, graph_vals);
+
+    // bound only cumulative probabilities and retain padded density ranges
+    if (dist_type == "CDF")
+    {
+      plot_object.y1Axis().rangeMin(0);
+      plot_object.y1Axis().rangeMax(1);
+    }
+    auto line_graph =
+        std::static_pointer_cast<wasp::CustomPlot::Graph>(plot_object.series().front());
+    line_graph->name(dist_type);
+    line_graph->scatterShape(wasp::CustomPlot::ssNone);
     plotting_responses.push_back(wasp::serializeCustomPlot(plot_object));
   };
 
@@ -2128,6 +2140,8 @@ MooseServer::buildLineGraphPlot(wasp::CustomPlot & plot_object,
   plot_object.title().font().pointsize(18);
   plot_object.title().visible(true);
   plot_object.legend().visible(false);
+  plot_object.x2Axis().visible(false);
+  plot_object.y2Axis().visible(false);
 
   // plot x-axis
   plot_object.x1Axis().label(x_axis_label);

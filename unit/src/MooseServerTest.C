@@ -67,6 +67,8 @@ public:
   {
     if (_pdf_case == "exception")
       mooseError("test PDF evaluation is unavailable");
+    if (_pdf_case == "constant")
+      return 0.5;
     if (_pdf_case == "negative")
       return -1;
     if (_pdf_case == "nonfinite")
@@ -2473,8 +2475,8 @@ time, 501, 502, 503, 504 # ignored comment
   // clang-format on
   expect_xaxis_range_min = -58.4482379024 - ((-21.1517620976 - -58.4482379024) * pad_factor);
   expect_xaxis_range_max = -21.1517620976 + ((-21.1517620976 - -58.4482379024) * pad_factor);
-  expect_yaxis_range_min = 0.001000000000 - ((0.999000000000 - 0.001000000000) * pad_factor);
-  expect_yaxis_range_max = 0.999000000000 + ((0.999000000000 - 0.001000000000) * pad_factor);
+  expect_yaxis_range_min = 0;
+  expect_yaxis_range_max = 1;
   check_plotting(request_id,
                  doc_uri,
                  request_line,
@@ -2763,6 +2765,73 @@ TEST_F(MooseServerTest, PlottingDistributionQuantiles)
     auto ext_array = check_plotting_request(
         plot_server, 10, 16, 0, "Invalid distribution preview quantiles", false);
     EXPECT_TRUE(ext_array.empty());
+  }
+}
+
+TEST_F(MooseServerTest, PlottingDistributionPresentation)
+{
+  // provide distribution inputs for axis labels and ordinary curve styling
+  std::string doc_text_template = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Distributions]
+  [test_dist]
+    type = TestDistribution
+    mean = 0
+    shape = 1
+    pdf_case = PDF_CASE
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // check probability bounds while keeping PDF values inside expanded axes
+  for (const std::string data_case : {"valid", "constant"})
+  {
+    std::string doc_text_open = doc_text_template;
+    pcrecpp::RE("PDF_CASE").Replace(data_case, &doc_text_open);
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 2);
+    ASSERT_EQ(2u, ext_array.size());
+    for (std::size_t i = 0; i < ext_array.size(); i++)
+    {
+      auto check_plot = wasp::deserializeCustomPlot(*ext_array[i].to_object());
+      EXPECT_FALSE(check_plot->x2Axis().visible());
+      EXPECT_FALSE(check_plot->y2Axis().visible());
+      ASSERT_EQ(1u, check_plot->series().size());
+      auto line_graph = std::dynamic_pointer_cast<wasp::CustomPlot::Graph>(check_plot->series()[0]);
+      ASSERT_TRUE(line_graph);
+      EXPECT_EQ(wasp::CustomPlot::ssNone, line_graph->scatterShape());
+      EXPECT_EQ(i == 0 ? "PDF" : "CDF", line_graph->name());
+      EXPECT_EQ(i == 0 ? "probability density" : "cumulative probability",
+                check_plot->y1Axis().label());
+      if (i == 1)
+      {
+        EXPECT_DOUBLE_EQ(0, check_plot->y1Axis().rangeMin());
+        EXPECT_DOUBLE_EQ(1, check_plot->y1Axis().rangeMax());
+      }
+      else
+      {
+        for (double value : line_graph->values())
+        {
+          EXPECT_LT(check_plot->y1Axis().rangeMin(), value);
+          EXPECT_GT(check_plot->y1Axis().rangeMax(), value);
+        }
+        if (data_case == "constant")
+        {
+          EXPECT_DOUBLE_EQ(0.45, check_plot->y1Axis().rangeMin());
+          EXPECT_DOUBLE_EQ(0.55, check_plot->y1Axis().rangeMax());
+        }
+      }
+    }
   }
 }
 
@@ -3339,7 +3408,7 @@ label: OtherMooseUnitApp text: OtherMooseUnitApp desc: OtherMooseUnitApp... pos:
   // check for location of AppTypeTestDistribution register in current file
   std::size_t definition_size_expect = 1;
   std::string definition_list_expect = R"INPUT(
-document_uri: "file://...absolute.../unit/src/MooseServerTest.C"    location_start: [130.0]    location_end: [130.1000]
+document_uri: "file://...absolute.../unit/src/MooseServerTest.C"    location_start: [132.0]    location_end: [132.1000]
 )INPUT";
   EXPECT_EQ(definition_size_expect, definition_array.size());
   EXPECT_EQ(definition_list_expect, "\n" + definition_list_actual.str());
