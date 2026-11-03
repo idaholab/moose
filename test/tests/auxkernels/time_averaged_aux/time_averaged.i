@@ -1,12 +1,12 @@
 # The averaged functor is u = t * x, evaluated at the element centroids x = 0.5 and 1.5
-# at t = 1, 2, ..., 6 with dt = 1. Averaging starts at start_time = 2, so the average
-# is x times the mean of the sampled times since t = 2:
-#   x = 0.5 : 0.5, 1, 1.25, 1.5, 1.75, 2
-#   x = 1.5 : 1.5, 3, 3.75, 4.5, 5.25, 6
+# at t = 1, 2, ..., 6 with dt = 1. Averaging is over [start_time, t] with start_time = 2.5,
+# which falls inside a time step, so the sample at t = 3 only has weight 0.5. Before that the
+# variable holds u. The rectangle rule average is x times
+#   1, 2, 3, (0.5 * 3 + 4) / 1.5, (0.5 * 3 + 4 + 5) / 2.5, (0.5 * 3 + 4 + 5 + 6) / 3.5
+#   = 1, 2, 3, 11/3, 4.2, 33/7
 # The trapezoidal rule is exact for u linear in t, so the trapezoidal average is x times the
-# exact mean of t over [1, t], (1 + t) / 2:
-#   x = 0.5 : 0.5, 0.75, 1, 1.25, 1.5, 1.75
-#   x = 1.5 : 1.5, 2.25, 3, 3.75, 4.5, 5.25
+# exact mean of t over [2.5, t], (2.5 + t) / 2:
+#   1, 2, 2.75, 3.25, 3.75, 4.25
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -37,7 +37,7 @@
     type = TimeAveragedAux
     variable = u_avg
     functor = u
-    start_time = 2
+    start_time = 2.5
   []
 []
 

@@ -28,7 +28,7 @@ TimeWindowedStatisticsPostProcessor::validParams()
   params.addRangeCheckedParam<unsigned int>(
       "window", 100, "window > 1", "Number of time steps in one window.");
 
-  MooseEnum stats("mean std cumulative_mean averaging_time", "mean");
+  MooseEnum stats(getStatisticOptions(), "mean");
   params.addParam<MooseEnum>("statistic", stats, "Which statistic to report.");
 
   params.addParam<Real>("reference_value",
@@ -43,7 +43,7 @@ TimeWindowedStatisticsPostProcessor::TimeWindowedStatisticsPostProcessor(
   : GeneralPostprocessor(parameters),
     _pp(getPostprocessorValue("postprocessor")),
     _window(getParam<unsigned int>("window")),
-    _statistic(getParam<MooseEnum>("statistic")),
+    _statistic(getParam<MooseEnum>("statistic").getEnum<Statistic>()),
     _start_time(getParam<Real>("start_time")),
     _reference(getParam<Real>("reference_value")),
     _history(declareRestartableData<std::vector<Real>>("history")),
@@ -73,9 +73,9 @@ TimeWindowedStatisticsPostProcessor::execute()
   // Before start_time: no statistics yet
   if (!_averaging)
   {
-    if (_statistic == "mean" || _statistic == "cumulative_mean")
+    if (_statistic == Statistic::MEAN || _statistic == Statistic::TIME_INTEGRATED_MEAN)
       _value = _pp;
-    else // std, averaging_time
+    else // STD, STATISTICS_TIME
       _value = 0.0;
     return;
   }
@@ -89,28 +89,39 @@ TimeWindowedStatisticsPostProcessor::execute()
     if (_history.size() > 2 * _window)
       _history.erase(_history.begin());
 
-    _sum += _pp * _dt;
-    _avg_time += _dt;
+    // Time integral for time_integrated_mean and statistics_time only. The time step is clipped
+    // to start at start_time, so that no time before start_time is included.
+    const Real dt = _t - std::max(_t - _dt, _start_time);
+    _sum += _pp * dt;
+    _avg_time += dt;
   }
 
   const std::size_t n = _history.size();
   const std::size_t nw = std::min<std::size_t>(n, _window);
 
-  if (_statistic == "mean")
-    _value = windowMean(n - nw, n);
-
-  else if (_statistic == "std")
+  switch (_statistic)
   {
-    const Real m = windowMean(n - nw, n);
-    Real s = 0.0;
-    for (std::size_t i = n - nw; i < n; ++i)
-      s += (_history[i] - m) * (_history[i] - m);
-    _value = nw > 1 ? std::sqrt(s / (nw - 1)) : 0.0;
+    case Statistic::MEAN:
+      _value = windowMean(n - nw, n);
+      break;
+
+    case Statistic::STD:
+    {
+      const Real m = windowMean(n - nw, n);
+      Real s = 0.0;
+      for (std::size_t i = n - nw; i < n; ++i)
+        s += (_history[i] - m) * (_history[i] - m);
+      _value = nw > 1 ? std::sqrt(s / (nw - 1)) : 0.0;
+      break;
+    }
+
+    case Statistic::TIME_INTEGRATED_MEAN:
+      // The integration interval is empty at t = start_time
+      _value = _avg_time > 0 ? _sum / _avg_time : _pp;
+      break;
+
+    case Statistic::STATISTICS_TIME:
+      _value = _avg_time;
+      break;
   }
-
-  else if (_statistic == "cumulative_mean")
-    _value = _sum / _avg_time;
-
-  else // averaging_time
-    _value = _avg_time;
 }
