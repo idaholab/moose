@@ -2135,6 +2135,15 @@ MooseServer::buildLineGraphPlot(wasp::CustomPlot & plot_object,
                                 const std::vector<double> & graph_keys,
                                 const std::vector<double> & graph_vals)
 {
+  // reject empty, mismatched or nonfinite data before using sample extents
+  if (graph_keys.empty() || graph_keys.size() != graph_vals.size() ||
+      !std::all_of(graph_keys.begin(),
+                   graph_keys.end(),
+                   [](double value) { return std::isfinite(value); }) ||
+      !std::all_of(
+          graph_vals.begin(), graph_vals.end(), [](double value) { return std::isfinite(value); }))
+    throw std::invalid_argument("Invalid line preview data");
+
   // axis ranges
   double min_key = *std::min_element(graph_keys.begin(), graph_keys.end());
   double max_key = *std::max_element(graph_keys.begin(), graph_keys.end());
@@ -2145,12 +2154,19 @@ MooseServer::buildLineGraphPlot(wasp::CustomPlot & plot_object,
   double pad_factor = 0.05;
   double pad_x_axis = (max_key - min_key) * pad_factor;
   double pad_y_axis = (max_val - min_val) * pad_factor;
+  if (pad_x_axis == 0)
+    pad_x_axis = pad_factor * std::max(1.0, std::abs(min_key));
   if (pad_y_axis == 0)
     pad_y_axis = pad_factor;
   min_key -= pad_x_axis;
   max_key += pad_x_axis;
   min_val -= pad_y_axis;
   max_val += pad_y_axis;
+
+  // reject nonfinite or collapsed ranges after applying the series padding
+  if (!std::isfinite(min_key) || !std::isfinite(max_key) || min_key >= max_key ||
+      !std::isfinite(min_val) || !std::isfinite(max_val) || min_val >= max_val)
+    throw std::invalid_argument("Invalid line preview axis range");
 
   // plot setup
   plot_object.title().text(plot_title);

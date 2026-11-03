@@ -49,4 +49,16 @@
     unit_test = MooseServerTest.PlottingFunctionStepDirections
     requirement = 'The system shall plot piecewise constant functions using their configured step direction.'
   []
+
+  [function_single_point]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingFunctionSinglePoint
+    requirement = 'The system shall provide finite, nonzero axis ranges for a function preview containing a single data point.'
+  []
+
+  [function_data]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingFunctionData
+    requirement = 'The system shall return no preview for empty function data and reject nonfinite data or invalid axis ranges.'
+  []
 []

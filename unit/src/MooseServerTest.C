@@ -21,6 +21,7 @@
 #include "FEProblemBase.h"
 #include "InputParameters.h"
 #include "Distribution.h"
+#include "PiecewiseBase.h"
 #include "Parser.h"
 #include "pcrecpp.h"
 #include "waspcore/Object.h"
@@ -2926,6 +2927,93 @@ TEST_F(MooseServerTest, PlottingFunctionStepDirections)
   }
 }
 
+TEST_F(MooseServerTest, PlottingFunctionSinglePoint)
+{
+  // prepare correct function input before setting one tabular sample point
+  std::string doc_text_open = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Functions]
+  [test_func]
+    type = PiecewiseConstant
+    xy_data = '0 2 1 3'
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+  MooseServer plot_server(*moose_unit_app);
+  check_plotting_input(plot_server, doc_text_open);
+  auto & check_problem = *plot_server.getCheckApp().actionWarehouse().problemBase();
+  auto & check_func = dynamic_cast<PiecewiseBase &>(check_problem.getFunction("test_func"));
+  check_func.setData({5}, {7});
+
+  // check finite, padded axes around the single abscissa and ordinate pair
+  auto ext_array = check_plotting_request(plot_server, 10, 16, 1);
+  ASSERT_EQ(1u, ext_array.size());
+  auto check_plot = wasp::deserializeCustomPlot(*ext_array[0].to_object());
+  EXPECT_DOUBLE_EQ(4.75, check_plot->x1Axis().rangeMin());
+  EXPECT_DOUBLE_EQ(5.25, check_plot->x1Axis().rangeMax());
+  EXPECT_DOUBLE_EQ(6.95, check_plot->y1Axis().rangeMin());
+  EXPECT_DOUBLE_EQ(7.05, check_plot->y1Axis().rangeMax());
+  ASSERT_EQ(1u, check_plot->series().size());
+  auto expect_keys = std::vector<double>{5};
+  auto expect_vals = std::vector<double>{7};
+  EXPECT_EQ(expect_keys, check_plot->series()[0]->keys());
+  EXPECT_EQ(expect_vals, check_plot->series()[0]->values());
+}
+
+TEST_F(MooseServerTest, PlottingFunctionData)
+{
+  // prepare valid inputs before exercising raw tabular data error handling
+  std::string doc_text_open = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Functions]
+  [test_func]
+    type = PiecewiseConstant
+    xy_data = '0 2 1 3'
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // test empty, nonfinite and overflowing data through the existing setter
+  double nonfinite_value = std::numeric_limits<double>::quiet_NaN();
+  double infinite_value = std::numeric_limits<double>::infinity();
+  double maximum_value = std::numeric_limits<double>::max();
+  auto test_keys = std::vector<std::vector<double>>{
+      {}, {nonfinite_value}, {5}, {5}, {-maximum_value, maximum_value}};
+  auto test_vals =
+      std::vector<std::vector<double>>{{}, {7}, {nonfinite_value}, {infinite_value}, {7, 8}};
+  for (std::size_t i = 0; i < test_keys.size(); i++)
+  {
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    auto & check_problem = *plot_server.getCheckApp().actionWarehouse().problemBase();
+    auto & check_func = dynamic_cast<PiecewiseBase &>(check_problem.getFunction("test_func"));
+    check_func.setData(test_keys[i], test_vals[i]);
+    std::string expect_errors = i == 0   ? ""
+                                : i == 4 ? "Invalid line preview axis range"
+                                         : "Invalid line preview data";
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 0, expect_errors, i == 0);
+    EXPECT_TRUE(ext_array.empty());
+  }
+}
+
 TEST_F(MooseServerTest, WorkspaceResourceFileChanges)
 {
   // write resource files to disk which will be used by base input document
@@ -3499,7 +3587,7 @@ label: OtherMooseUnitApp text: OtherMooseUnitApp desc: OtherMooseUnitApp... pos:
   // check for location of AppTypeTestDistribution register in current file
   std::size_t definition_size_expect = 1;
   std::string definition_list_expect = R"INPUT(
-document_uri: "file://...absolute.../unit/src/MooseServerTest.C"    location_start: [132.0]    location_end: [132.1000]
+document_uri: "file://...absolute.../unit/src/MooseServerTest.C"    location_start: [133.0]    location_end: [133.1000]
 )INPUT";
   EXPECT_EQ(definition_size_expect, definition_array.size());
   EXPECT_EQ(definition_list_expect, "\n" + definition_list_actual.str());
