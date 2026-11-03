@@ -207,13 +207,16 @@ VectorIntegratedBC::operator()(DisplacementJacobianLoop,
   AssemblyDatum datum(
       elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar, _configuration);
 
+  const auto scaling_factor =
+      kokkosSystem(_kokkos_var.sys()).getVariableScalingFactor(_kokkos_var.var());
+
   assembleDisplacementJacobian<true>(
       bc,
       team,
       datum,
       c,
       [&](const Real local_ke, const unsigned int i, const unsigned int j)
-      { accumulateTaggedElementalMatrix(local_ke, datum.elem().id, i, j, jvar); });
+      { accumulateTaggedElementalMatrix(local_ke * scaling_factor, datum.elem().id, i, j, jvar); });
 }
 
 } // namespace Moose::Kokkos

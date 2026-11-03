@@ -624,18 +624,18 @@ ResidualObject::assembleADTerms(const Object & object,
   };
 
   if (computing_residual)
-    ::Kokkos::parallel_for(::Kokkos::TeamThreadRange(team, n_idofs),
-                           [&](const unsigned int i)
-                           {
-                             Real local_re = 0;
-                             for (unsigned int qp = 0; qp < n_qps; ++qp)
-                             {
-                               const auto psi = shape(ife, i, qp);
-                               local_re +=
-                                   contractADTerms(&scratch(qp * qp_size), psi.first, psi.second);
-                             }
-                             accumulateTaggedElementalResidual(local_re * scaling_factor, elem.id, i);
-                           });
+    ::Kokkos::parallel_for(
+        ::Kokkos::TeamThreadRange(team, n_idofs),
+        [&](const unsigned int i)
+        {
+          Real local_re = 0;
+          for (unsigned int qp = 0; qp < n_qps; ++qp)
+          {
+            const auto psi = shape(ife, i, qp);
+            local_re += contractADTerms(&scratch(qp * qp_size), psi.first, psi.second);
+          }
+          accumulateTaggedElementalResidual(local_re * scaling_factor, elem.id, i);
+        });
 
   if constexpr (slots > 0)
     if (computing_jacobian)
