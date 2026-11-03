@@ -15,6 +15,7 @@
 #include "SCM.h"
 #include <limits> // for std::numeric_limits
 #include <cmath>  // for std::isnan
+#include <unordered_map>
 #include "SCMMixingClosureBase.h"
 
 registerMooseObject("SubChannelApp", TriSubChannel1PhaseProblem);
@@ -540,22 +541,23 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
 
     // Thermal conductivity and specific heat are needed at every node many times during the
     // assembly; evaluate each node once. Pressure and temperature do not change during assembly.
-    const auto n_nodes = _subchannel_mesh.getMesh().max_node_id();
-    std::vector<Real> k_cache(n_nodes, std::numeric_limits<Real>::quiet_NaN());
-    std::vector<Real> cp_cache(n_nodes, std::numeric_limits<Real>::quiet_NaN());
+    // The caches are keyed by node id, so they hold only the subchannel nodes of the block whatever
+    // the numbering of the mesh nodes.
+    std::unordered_map<dof_id_type, Real> k_cache;
+    std::unordered_map<dof_id_type, Real> cp_cache;
     auto thermalConductivity = [&](const Node * node)
     {
-      auto & k = k_cache[node->id()];
-      if (std::isnan(k))
-        k = _fp->k_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
-      return k;
+      const auto [it, inserted] = k_cache.try_emplace(node->id());
+      if (inserted)
+        it->second = _fp->k_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
+      return it->second;
     };
     auto specificHeat = [&](const Node * node)
     {
-      auto & cp = cp_cache[node->id()];
-      if (std::isnan(cp))
-        cp = _fp->cp_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
-      return cp;
+      const auto [it, inserted] = cp_cache.try_emplace(node->id());
+      if (inserted)
+        it->second = _fp->cp_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
+      return it->second;
     };
 
     LibmeshPetscCall(MatZeroEntries(_hc_sys_h_mat));

@@ -419,7 +419,7 @@ The main unknown variable in this non linear residual is the crossflow $w_{ij}$.
 For each outer pressure iteration, blocks are visited sequentially from the assembly inlet to the
 outlet. Within a block, SCM first refreshes the flow solution and then solves the enthalpy equation,
 recovers temperature from pressure and enthalpy, and updates density and viscosity. The
-`enthalpy_subcycles` parameter controls how many enthalpy, temperature, and property updates are
+[!param](/Problem/TriSubChannel1PhaseProblem/enthalpy_subcycles) parameter controls how many enthalpy, temperature, and property updates are
 performed before the next flow solve. Its default value of one preserves the original
 flow-then-enthalpy ordering. Values greater than one opt into thermal subcycling with a lagged flow
 field.
@@ -432,7 +432,7 @@ The temperature recovered from the equation of state can be relaxed independentl
 \alpha_T\left[\vec{T}(\vec{p},\vec{h})-\vec{T}^{\,\ell}\right],
 \end{equation}
 
-where $\alpha_T$ is set by `T_relaxation` and defaults to one. The temperature convergence measure
+where $\alpha_T$ is set by [!param](/Problem/TriSubChannel1PhaseProblem/T_relaxation) and defaults to one. The temperature convergence measure
 uses the unrelaxed equation-of-state update,
 
 \begin{equation}
@@ -441,7 +441,7 @@ uses the unrelaxed equation-of-state update,
 {\left\|\vec{T}^{\,\ell}\right\|_2 + 10^{-14}},
 \end{equation}
 
-so changing `T_relaxation` does not redefine `T_tol`.
+so changing [!param](/Problem/TriSubChannel1PhaseProblem/T_relaxation) does not redefine [!param](/Problem/TriSubChannel1PhaseProblem/T_tol).
 
 After all blocks have been processed, SCM checks pressure convergence. The segregated algorithms
 use the relative field change
@@ -453,11 +453,11 @@ use the relative field change
 \end{equation}
 
 whereas the monolithic algorithm uses the largest unrelaxed pressure fixed-point update among the
-blocks. Measuring the monolithic update before post-solve relaxation keeps the meaning of `P_tol`
-independent of `pressure_relaxation`. The maximum errors are synchronized across processes. If the
+blocks. Measuring the monolithic update before post-solve relaxation keeps the meaning of [!param](/Problem/TriSubChannel1PhaseProblem/P_tol)
+independent of [!param](/Problem/TriSubChannel1PhaseProblem/pressure_relaxation). The maximum errors are synchronized across processes. If the
 pressure field has not converged, the block sweep starts again at the inlet; pressure information
 therefore requires multiple outer iterations to propagate upstream when several blocks are used.
-`P_maxit` and `T_maxit` limit the outer and thermal iterations, respectively; `P_maxit = 0` selects
+[!param](/Problem/TriSubChannel1PhaseProblem/P_maxit) and [!param](/Problem/TriSubChannel1PhaseProblem/T_maxit) limit the outer and thermal iterations, respectively; `P_maxit = 0` selects
 the solver's automatic outer-iteration limit.
 
 ### Algorithm variations
@@ -468,15 +468,19 @@ There are three variations [!cite](kyriakopoulos2026numerical) of the algorithm 
 
 !! Intentional comment to provide extra spacing
 
-This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations. The variables are updated sequantially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet.
+This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations. The variables are updated sequantially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet. Of the stabilization
+methods, only the temperature relaxation [!param](/Problem/TriSubChannel1PhaseProblem/T_relaxation) applies; the crossflow damping and the
+equation and solution relaxations described under [#monolithic] are specific to the monolithic
+algorithm.
 
 #### Implicit-Segregated
 
 !! Intentional comment to provide extra spacing
 
-In this case, the governing mass, axial momentum and crossflow momentum, equations are recast in matrix form and the flow variables are calculated by solving the corresponding system. This means that variables are retrieved concurrently for the whole block. Otherwise, the solution algorithm is the same as in the default explicit method.
+In this case, the governing mass, axial momentum and crossflow momentum, equations are recast in matrix form and the flow variables are calculated by solving the corresponding system. This means that variables are retrieved concurrently for the whole block. Otherwise, the solution algorithm is the same as in the default explicit method, including which
+stabilization methods apply.
 
-#### Monolithic
+#### Monolithic id=monolithic
 
 !! Intentional comment to provide extra spacing
 
@@ -511,14 +515,9 @@ the flow equations through the fluid-property update), enthalpy is lagged and so
 The flow system retrieves $\vec{\dot{m}}$, $\vec{P}$, and $\vec{w}$ concurrently at every node in a
 block; $\vec{\Delta P}$ is not explicitly calculated. The coupled flow system is solved with PETSc
 FGMRES and a multiplicative field-split preconditioner with one split per field. The FGMRES restart
-length is set by `coupled_gmres_restart`, which defaults to the PETSc value of 30. With tight `P_tol`
-and `T_tol`, once the crossflow damping described below has decayed, a restart of 30 discards the
-Krylov space before it resolves the coupled crossflow-pressure modes, and the coupled solves
-stagnate; a restart of 100 to 300 avoids this. A longer restart also removes the linear-solve
-failures that raise the damping, which can destabilize the outer iteration of flow blockage cases,
-so it is not the default. Other options of the coupled solve can be changed with the `scm_coupled_`
-PETSc prefix. SCM
-checks the PETSc convergence reason for both the coupled flow and enthalpy linear solves and reports
+length is set by [!param](/Problem/TriSubChannel1PhaseProblem/coupled_gmres_restart), and other options of the coupled solve can be changed with the
+`scm_coupled_` PETSc prefix; see [Troubleshooting failed solves](user_notes.md#troubleshooting) for choosing them. SCM checks the
+PETSc convergence reason for both the coupled flow and enthalpy linear solves and reports
 the reason, iteration count, and residual norm instead of accepting a diverged solution.
 
 Before the coupled system is solved, SCM adds a damping term to the crossflow equation and then
@@ -526,13 +525,16 @@ applies the optional equation and solution relaxation described below. These ste
 iteration on the coupled $mass flow: (\dot{\mathbf{m}})$, $pressure: (\mathbf{P})$, and
 $crossflow:(\mathbf{w}_{ij})$ fields in a $Q{=}3$ block-nested linear system with matrix blocks
 $M_{ij}$ and right-hand-side blocks $\mathbf{b}_i$ that represent the individual governing
-equations. None of them changes the converged solution.
+equations. These methods do not change the converged solution. Additional iterations may be required to reach the converged solution.
+They apply to the monolithic algorithm only; the temperature relaxation [!param](/Problem/TriSubChannel1PhaseProblem/T_relaxation) described
+above applies to all algorithms.
 
 #### 1. Crossflow damping
 
 !! Intentional comment to provide extra spacing
 
-The crossflow equation is replaced by its proximal form
+A diagonal damping term is added to the crossflow equation, which makes each coupled solve a
+proximal-point step in the crossflow:
 
 \begin{equation}
 M_{wp}\,\mathbf P^{\ell+1} + M_{ww}\,\mathbf W^{\ell+1} +
@@ -565,8 +567,8 @@ the diagonal it does not vanish for central differencing of uniform axial flow. 
 gives the strong damping that the first outer iterations need when they start far from the
 solution. Scaling by the residual ratio, a switched evolution relaxation strategy for
 pseudo-transient continuation, makes $K$ tend to zero as the outer iteration converges, so the
-iteration approaches the convergence rate of the undamped system. The coupled linear solve starts
-from the current iterate, which keeps it short as the damping decreases. Its convergence tolerance
+iteration approaches the convergence rate of the undamped system. The coupled crossflow linear solve starts
+from the current iterate. Its convergence tolerance
 `rtol` is applied to the residual of that initial iterate rather than to the right-hand side.
 
 The block factor $\gamma$ starts at one in every solve, is capped at $2^8$, and is doubled in two
@@ -574,8 +576,9 @@ situations:
 
 - +Linear-solve failure.+ As $K$ decreases, the coupled system can become too poorly conditioned
   for the field-split preconditioner. Each coupled solve is therefore attempted with at most 1000
-  Krylov iterations; if it does not converge, $K$ is doubled (by at least $0.05\,K_{\max}$) and the
-  solve is repeated, up to eight times, the last attempt with the full `maxit`. Each retry also
+  Krylov iterations; if it does not converge, $K$ is increased by $\max(K,\,0.05\,K_{\max})$, which
+  doubles it unless it is below $0.05\,K_{\max}$, and the solve is repeated, up to eight times,
+  the last attempt with the full [!param](/Problem/TriSubChannel1PhaseProblem/maxit). Each retry also
   doubles $\gamma$, which keeps the damping at the level the preconditioner needs for the remaining
   outer iterations.
 - +Outer-iteration growth.+ The crossflow residual reacts to a diverging outer iteration only after
@@ -585,7 +588,7 @@ situations:
   by more than a factor of two since the previous update. The factor of two is larger than the
   iteration-to-iteration variation of $\epsilon_T$ near convergence, so the safeguard reacts to
   divergence rather than to noise. It does not replace the damping that linear-solve failures
-  provide with the default `coupled_gmres_restart`: flow blockage cases can still diverge with a
+  provide with the default [!param](/Problem/TriSubChannel1PhaseProblem/coupled_gmres_restart): flow blockage cases can still diverge with a
   longer restart.
 
 Because $\gamma$ is bounded, $K$ still tends to zero with the residual. Where the preconditioner
@@ -598,8 +601,8 @@ converged solution is unaffected because the damping term vanishes at the fixed 
 
 Classical linear under-relaxation is applied separately to each equation
 $f\in\{\mathbf m,\mathbf p,\mathbf W\}$. The factors are user-selectable through
-`mass_flow_equation_relaxation`, `pressure_equation_relaxation`, and
-`crossflow_equation_relaxation`; their defaults are
+[!param](/Problem/TriSubChannel1PhaseProblem/mass_flow_equation_relaxation), [!param](/Problem/TriSubChannel1PhaseProblem/pressure_equation_relaxation), and
+[!param](/Problem/TriSubChannel1PhaseProblem/crossflow_equation_relaxation); their defaults are
 \begin{equation}
 \alpha_m=1.0,\qquad \alpha_p=1.0,\qquad \alpha_W=0.1.
 \end{equation}
@@ -629,7 +632,7 @@ After the coupled system is solved, each solution field can be relaxed independe
 \end{equation}
 
 where $\mathbf x_f^\star$ is the raw linear solution. The factors are set with
-`mass_flow_relaxation`, `pressure_relaxation`, and `crossflow_relaxation`; all three default to
+[!param](/Problem/TriSubChannel1PhaseProblem/mass_flow_relaxation), [!param](/Problem/TriSubChannel1PhaseProblem/pressure_relaxation), and [!param](/Problem/TriSubChannel1PhaseProblem/crossflow_relaxation); all three default to
 one. Equation relaxation and post-solve relaxation are independent and may be used together. Both
 preserve the fixed point: equation relaxation modifies the matrix and right-hand side before the
 linear solve, while post-solve relaxation damps the fixed-point update after that solve.
@@ -643,4 +646,4 @@ or the outer iteration diverges and (ii) independently configurable equation and
 improves robustness of the nested solve during rapid crossflow changes. Crossflow damping and equation relaxation both increase entries on the crossflow diagonal,
 but neither guarantees strict diagonal dominance for every geometry and flow state. Post-solve
 relaxation does not alter matrix conditioning. Because all three preserve the fixed point, the
-converged solution is independent of them up to the outer-iteration tolerance `P_tol`.
+converged solution is independent of them up to the outer-iteration tolerance [!param](/Problem/TriSubChannel1PhaseProblem/P_tol).
