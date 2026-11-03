@@ -1,6 +1,6 @@
 [Tests]
   issues = '#34278'
-  design = 'TimeAveragedAux.md'
+  design = 'CumulativeTimeAverageFunctorAux.md'
 
   [time_averaged]
     type = 'CSVDiff'

@@ -30,12 +30,12 @@
  *
  * This could be later expanded to also compute standard deviations and higher order stats.
  */
-class TimeAveragedAux : public AuxKernel
+class CumulativeTimeAverageFunctorAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  TimeAveragedAux(const InputParameters & parameters);
+  CumulativeTimeAverageFunctorAux(const InputParameters & parameters);
 
   virtual void timestepSetup() override;
 

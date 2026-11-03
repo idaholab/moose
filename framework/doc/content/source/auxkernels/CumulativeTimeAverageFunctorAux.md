@@ -1,17 +1,17 @@
-# TimeAveragedAux
+# CumulativeTimeAverageFunctorAux
 
-!syntax description /AuxKernels/TimeAveragedAux
+!syntax description /AuxKernels/CumulativeTimeAverageFunctorAux
 
 ## Description
 
-The `TimeAveragedAux` computes the running time-weighted mean of a functor, which may be a
+The `CumulativeTimeAverageFunctorAux` computes the running time-weighted mean of a functor, which may be a
 finite element or finite volume variable, a function, or a functor material property, selected
-with [!param](/AuxKernels/TimeAveragedAux/functor). It can be used, for example, to compute
+with [!param](/AuxKernels/CumulativeTimeAverageFunctorAux/functor). It can be used, for example, to compute
 the mean field of a turbulent or otherwise unsteady simulation.
 
 Averaging starts at the first time step with $t \geq$
-[!param](/AuxKernels/TimeAveragedAux/start_time). With $t_0$ the later of
-[!param](/AuxKernels/TimeAveragedAux/start_time) and the beginning of that first time step, the
+[!param](/AuxKernels/CumulativeTimeAverageFunctorAux/start_time). With $t_0$ the later of
+[!param](/AuxKernels/CumulativeTimeAverageFunctorAux/start_time) and the beginning of that first time step, the
 average $\bar{u}$ is updated at each time step $n$ as
 
 \begin{equation}
@@ -28,7 +28,7 @@ By default, the functor is integrated over each time step with the rectangle rul
 current value $u^n$, the same quadrature as the implicit Euler time integrator. This is first
 order accurate in $\Delta t$, but for statistically stationary signals averaged over many time
 steps the quadrature error is generally considered much smaller than the sampling error of the average. For more
-accuracy, setting [!param](/AuxKernels/TimeAveragedAux/time_integration_scheme) to
+accuracy, setting [!param](/AuxKernels/CumulativeTimeAverageFunctorAux/time_integration_scheme) to
 `trapezoidal-rule` replaces $u^n$ with the trapezoidal rule over the time step,
 $\left( u^n + u^{n-1} \right) / 2$, which is second order accurate. This only improves the
 accuracy if the functor is itself computed with a second order (or higher) time integrator, for
@@ -41,20 +41,20 @@ kernel several times in a time step gives the same result.
 
 !alert note
 The functor is evaluated once per element, so the auxiliary
-[!param](/AuxKernels/TimeAveragedAux/variable) must be elemental and should be of
+[!param](/AuxKernels/CumulativeTimeAverageFunctorAux/variable) must be elemental and should be of
 `CONSTANT MONOMIAL` type. Nodal variables are rejected.
 
 ## Example Input Syntax
 
 In this example, the function `u` equals $t x$ and the simulation time advances by 1 each time
-step. The `TimeAveragedAux` stores the time average of `u` in the `CONSTANT MONOMIAL`
+step. The `CumulativeTimeAverageFunctorAux` stores the time average of `u` in the `CONSTANT MONOMIAL`
 variable `u_avg`, starting at $t = 2.5$. In each element, the average is the element centroid
 coordinate times the time-weighted mean of the times sampled since averaging started.
 
-!listing test/tests/auxkernels/time_averaged_aux/time_averaged.i block=AuxKernels
+!listing test/tests/auxkernels/cumulative_time_average_functor_aux/time_averaged.i block=AuxKernels
 
-!syntax parameters /AuxKernels/TimeAveragedAux
+!syntax parameters /AuxKernels/CumulativeTimeAverageFunctorAux
 
-!syntax inputs /AuxKernels/TimeAveragedAux
+!syntax inputs /AuxKernels/CumulativeTimeAverageFunctorAux
 
-!syntax children /AuxKernels/TimeAveragedAux
+!syntax children /AuxKernels/CumulativeTimeAverageFunctorAux

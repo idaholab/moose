@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TimeAveragedAux.h"
+#include "CumulativeTimeAverageFunctorAux.h"
 
 #include <algorithm>
 
-registerMooseObject("MooseApp", TimeAveragedAux);
+registerMooseObject("MooseApp", CumulativeTimeAverageFunctorAux);
 
 InputParameters
-TimeAveragedAux::validParams()
+CumulativeTimeAverageFunctorAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
@@ -31,7 +31,7 @@ TimeAveragedAux::validParams()
   return params;
 }
 
-TimeAveragedAux::TimeAveragedAux(const InputParameters & parameters)
+CumulativeTimeAverageFunctorAux::CumulativeTimeAverageFunctorAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _functor(getFunctor<Real>("functor")),
     _mean_old(uOld()),
@@ -45,7 +45,7 @@ TimeAveragedAux::TimeAveragedAux(const InputParameters & parameters)
 }
 
 void
-TimeAveragedAux::timestepSetup()
+CumulativeTimeAverageFunctorAux::timestepSetup()
 {
   // Called once per time step, after time has advanced
   if (!_averaging && _t >= _start_time)
@@ -57,7 +57,7 @@ TimeAveragedAux::timestepSetup()
 }
 
 Real
-TimeAveragedAux::computeValue()
+CumulativeTimeAverageFunctorAux::computeValue()
 {
   const Moose::ElemArg elem_arg{_current_elem, false};
   const Real u = _functor(elem_arg, Moose::currentState());

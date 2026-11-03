@@ -34,7 +34,7 @@
 
 [AuxKernels]
   [u_avg]
-    type = TimeAveragedAux
+    type = CumulativeTimeAverageFunctorAux
     variable = u_avg
     functor = u
     start_time = 2.5
