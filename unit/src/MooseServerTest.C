@@ -37,6 +37,7 @@
 #include <cstdio>
 #include <filesystem>
 #include <cmath>
+#include <limits>
 
 // implementation derived from Distribution to register for plotting checks
 class TestDistribution : public Distribution
@@ -63,6 +64,12 @@ public:
   {
     if (_pdf_case == "exception")
       mooseError("test PDF evaluation is unavailable");
+    if (_pdf_case == "negative")
+      return -1;
+    if (_pdf_case == "nonfinite")
+      return std::numeric_limits<Real>::quiet_NaN();
+    if (_pdf_case == "infinite")
+      return std::numeric_limits<Real>::infinity();
     Real z = std::exp(-(x - _mean) / _shape);
     return z / (_shape * std::pow(1.0 + z, 2));
   }
@@ -70,6 +77,19 @@ public:
   {
     if (_cdf_case == "exception")
       mooseError("test CDF evaluation is unavailable");
+    if (_cdf_case == "negative")
+      return -0.1;
+    if (_cdf_case == "above_one")
+      return 1.1;
+    if (_cdf_case == "decreasing")
+      return 1.0 / (1.0 + std::exp((x - _mean) / _shape));
+    if (_cdf_case == "nonfinite")
+      return std::numeric_limits<Real>::quiet_NaN();
+    if (_cdf_case == "infinite")
+      return std::numeric_limits<Real>::infinity();
+    if (_cdf_case == "roundoff")
+      return x < _mean ? -std::numeric_limits<Real>::epsilon()
+                       : 1 + std::numeric_limits<Real>::epsilon();
     return 1.0 / (1.0 + std::exp(-(x - _mean) / _shape));
   }
   virtual Real quantile(const Real & y) const override
@@ -2562,6 +2582,64 @@ TEST_F(MooseServerTest, PlottingDistributionSettings)
   }
 }
 
+TEST_F(MooseServerTest, PlottingDistributionValues)
+{
+  // provide distribution inputs with controlled invalid PDF and CDF values
+  std::string doc_text_template = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Distributions]
+  [test_dist]
+    type = TestDistribution
+    mean = 0
+    shape = 1
+    pdf_case = PDF_CASE
+    cdf_case = CDF_CASE
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // retain each valid curve when the other has invalid mathematical values
+  for (const std::string data_case : {"pdf_negative",
+                                      "pdf_nonfinite",
+                                      "pdf_infinite",
+                                      "cdf_negative",
+                                      "cdf_above_one",
+                                      "cdf_decreasing",
+                                      "cdf_nonfinite",
+                                      "cdf_infinite"})
+  {
+    bool invalid_pdf = data_case.find("pdf_") == 0;
+    std::string doc_text_open = doc_text_template;
+    pcrecpp::RE("PDF_CASE").Replace(invalid_pdf ? data_case.substr(4) : "valid", &doc_text_open);
+    pcrecpp::RE("CDF_CASE").Replace(invalid_pdf ? "valid" : data_case.substr(4), &doc_text_open);
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 1, "invalid or unsupported");
+    ASSERT_EQ(1u, ext_array.size());
+    auto check_plot = wasp::deserializeCustomPlot(*ext_array[0].to_object());
+    std::string expect_type = invalid_pdf ? "CDF" : "PDF";
+    EXPECT_EQ("test_dist TestDistribution " + expect_type + " Distribution",
+              check_plot->title().text());
+  }
+
+  // permit modest rounding errors close to zero and one probability limits
+  pcrecpp::RE("PDF_CASE").Replace("valid", &doc_text_template);
+  pcrecpp::RE("CDF_CASE").Replace("roundoff", &doc_text_template);
+  MooseServer plot_server(*moose_unit_app);
+  check_plotting_input(plot_server, doc_text_template);
+  auto ext_array = check_plotting_request(plot_server, 10, 16, 2);
+  EXPECT_EQ(2u, ext_array.size());
+}
+
 TEST_F(MooseServerTest, WorkspaceResourceFileChanges)
 {
   // write resource files to disk which will be used by base input document
@@ -3135,7 +3213,7 @@ label: OtherMooseUnitApp text: OtherMooseUnitApp desc: OtherMooseUnitApp... pos:
   // check for location of AppTypeTestDistribution register in current file
   std::size_t definition_size_expect = 1;
   std::string definition_list_expect = R"INPUT(
-document_uri: "file://...absolute.../unit/src/MooseServerTest.C"    location_start: [102.0]    location_end: [102.1000]
+document_uri: "file://...absolute.../unit/src/MooseServerTest.C"    location_start: [122.0]    location_end: [122.1000]
 )INPUT";
   EXPECT_EQ(definition_size_expect, definition_array.size());
   EXPECT_EQ(definition_list_expect, "\n" + definition_list_actual.str());

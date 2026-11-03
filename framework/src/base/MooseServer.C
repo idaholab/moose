@@ -48,6 +48,7 @@
 #include <functional>
 #include <filesystem>
 #include <stdexcept>
+#include <limits>
 
 MooseServer::MooseServer(MooseApp & moose_app)
   : _moose_app(moose_app),
@@ -2029,7 +2030,7 @@ MooseServer::buildDistPlotResponses(wasp::DataArray & plotting_responses,
       if (pdf_valid)
       {
         pdf_values[i] = dist.pdf(graph_keys[i]);
-        pdf_valid = std::isfinite(pdf_values[i]);
+        pdf_valid = std::isfinite(pdf_values[i]) && pdf_values[i] >= 0;
       }
     }
     catch (const std::exception & e)
@@ -2042,7 +2043,11 @@ MooseServer::buildDistPlotResponses(wasp::DataArray & plotting_responses,
       if (cdf_valid)
       {
         cdf_values[i] = dist.cdf(graph_keys[i]);
-        cdf_valid = std::isfinite(cdf_values[i]);
+        // allow roundoff of a few machine epsilons near probability bounds
+        const double cdf_tolerance = 64 * std::numeric_limits<double>::epsilon();
+        cdf_valid = std::isfinite(cdf_values[i]) && cdf_values[i] >= -cdf_tolerance &&
+                    cdf_values[i] <= 1 + cdf_tolerance &&
+                    (i == 0 || cdf_values[i] + cdf_tolerance >= cdf_values[i - 1]);
       }
     }
     catch (const std::exception & e)

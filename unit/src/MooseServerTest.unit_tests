@@ -13,4 +13,10 @@
     unit_test = MooseServerTest.PlottingDistributionSettings
     requirement = 'The system shall reject invalid distribution preview sampling settings and accept supported point counts.'
   []
+
+  [distribution_values]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingDistributionValues
+    requirement = 'The system shall reject invalid probability densities and cumulative probabilities while permitting small floating-point roundoff.'
+  []
 []
