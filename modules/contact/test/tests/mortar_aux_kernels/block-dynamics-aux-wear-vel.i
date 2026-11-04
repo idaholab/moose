@@ -137,7 +137,7 @@ offset = -0.05
     disp_y = disp_y
   []
   [worn_depth]
-    type = MortarArchardsLawAux
+    type = MortarFrictionalWorkWearAux
     variable = worn_depth
     primary_boundary = 20
     secondary_boundary = 10
