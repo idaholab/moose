@@ -11,6 +11,8 @@
 
 #include "KokkosArray.h"
 
+#include "libmesh/compare_types.h"
+
 #define usingKokkosMaterialPropertyValueBaseMembers(T, dimension)                                  \
   using MaterialPropertyValueBase<T, dimension>::_idx;                                             \
   using MaterialPropertyValueBase<T, dimension>::_data;                                            \
@@ -146,3 +148,45 @@ public:
 ///@}
 
 } // namespace Moose::Kokkos
+
+namespace libMesh
+{
+/**
+ * A dimension-0 material property value converts to the scalar it holds, so the libMesh scalar
+ * operators of TypeVector and TypeTensor accept it as that scalar
+ */
+///@{
+template <typename T>
+struct ScalarTraits<Moose::Kokkos::MaterialPropertyValue<T, 0>>
+{
+  static const bool value = ScalarTraits<T>::value;
+};
+
+template <typename T, typename T2>
+struct CompareTypes<T, Moose::Kokkos::MaterialPropertyValue<T2, 0>>
+{
+  typedef typename CompareTypes<T, T2>::supertype supertype;
+};
+
+template <typename T, typename T2>
+struct CompareTypes<Moose::Kokkos::MaterialPropertyValue<T, 0>, T2>
+{
+  typedef typename CompareTypes<T, T2>::supertype supertype;
+};
+
+#ifdef LIBMESH_HAVE_METAPHYSICL
+// Disambiguate against the libMesh specializations for MetaPhysicL::DualNumber
+template <typename T, typename D, bool asd, typename T2>
+struct CompareTypes<MetaPhysicL::DualNumber<T, D, asd>, Moose::Kokkos::MaterialPropertyValue<T2, 0>>
+{
+  typedef typename CompareTypes<MetaPhysicL::DualNumber<T, D, asd>, T2>::supertype supertype;
+};
+
+template <typename T, typename T2, typename D, bool asd>
+struct CompareTypes<Moose::Kokkos::MaterialPropertyValue<T, 0>, MetaPhysicL::DualNumber<T2, D, asd>>
+{
+  typedef typename CompareTypes<T, MetaPhysicL::DualNumber<T2, D, asd>>::supertype supertype;
+};
+#endif
+///@}
+} // namespace libMesh

@@ -37,6 +37,10 @@ public:
    */
   ReferenceWrapper(T & reference) : _reference(reference), _copy(reference) {}
   /**
+   * Binding a temporary is rejected
+   */
+  ReferenceWrapper(std::remove_const_t<T> && reference) = delete;
+  /**
    * Copy constructor
    */
   ReferenceWrapper(const ReferenceWrapper<T> & object)

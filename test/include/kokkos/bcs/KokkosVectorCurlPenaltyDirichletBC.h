@@ -54,8 +54,8 @@ KokkosVectorCurlPenaltyDirichletBC::computeQpResidual(const unsigned int i,
                                      _has_function_y ? function_y.value(_t, p) : 0,
                                      _has_function_z ? function_z.value(_t, p) : 0);
 
-  const auto ncu = (_u(datum, qp) - u_exact).cross_product(normal);
-  return _penalty * (ncu * _test(datum, i, qp).cross_product(normal));
+  const auto ncu = (_u(datum, qp) - u_exact).cross(normal);
+  return _penalty * (ncu * _test(datum, i, qp).cross(normal));
 }
 
 template <typename Derived>
@@ -66,6 +66,5 @@ KokkosVectorCurlPenaltyDirichletBC::computeQpJacobian(const unsigned int i,
                                                       AssemblyDatum & datum) const
 {
   const auto normal = datum.normals(qp);
-  return _penalty *
-         (_phi(datum, j, qp).cross_product(normal) * _test(datum, i, qp).cross_product(normal));
+  return _penalty * (_phi(datum, j, qp).cross(normal) * _test(datum, i, qp).cross(normal));
 }

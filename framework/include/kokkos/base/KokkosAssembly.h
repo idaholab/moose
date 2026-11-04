@@ -468,7 +468,7 @@ Assembly::coordTransformFactor(const ContiguousSubdomainID subdomain, const Real
     case Moose::COORD_RZ:
       if (_rz_radial_coord == libMesh::invalid_uint)
         return 2 * M_PI *
-               (point - _rz_axis[subdomain].first).cross_product(_rz_axis[subdomain].second).norm();
+               (point - _rz_axis[subdomain].first).cross(_rz_axis[subdomain].second).norm();
       else
         return 2 * M_PI * point(_rz_radial_coord);
     case Moose::COORD_RSPHERICAL:
@@ -501,7 +501,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
     auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(eid, node));
 
     if (jacobian || JxW)
-      J += grad_phi(node, qp).cartesian_product(points);
+      J += outer_product(grad_phi(node, qp), points);
 
     xyz += phi(node, qp) * points;
   }
@@ -549,7 +549,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
     auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(eid, node));
 
     if (jacobian)
-      J += grad_phi(node, qp).cartesian_product(points);
+      J += outer_product(grad_phi(node, qp), points);
 
     if (JxW || q_points)
       xyz += phi(node, qp) * points;
@@ -579,20 +579,20 @@ Assembly::computePhysicalMap(const ElementInfo info,
     {
       auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(info, side, node));
 
-      J += grad_psi(node, qp).cartesian_product(points);
+      J += outer_product(grad_psi(node, qp), points);
     }
   }
 
   if (JxW)
-    *JxW = ::Kokkos::sqrt((J * J.transpose()).determinant(_dimension - 1)) *
+    *JxW = ::Kokkos::sqrt(Real33(J * J.transpose()).determinant(_dimension - 1)) *
            _weights_face(sid, elem_type)[side][qp] * coordTransformFactor(sid, xyz);
 
   if (normal)
   {
     if (_dimension == 3)
-      *normal = J.row(0).cross_product(J.row(1));
+      *normal = J.row(0).cross(J.row(1));
     else if (_dimension == 2)
-      *normal = J.row(0).cross_product(dxyz_dxi.cross_product(dxyz_deta));
+      *normal = J.row(0).cross(dxyz_dxi.cross(dxyz_deta));
     else
       *normal = side ? dxyz_dxi : -dxyz_dxi;
 
