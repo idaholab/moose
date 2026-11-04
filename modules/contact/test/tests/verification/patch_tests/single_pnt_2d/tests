@@ -13,7 +13,7 @@
     mesh_mode = REPLICATED
     capabilities = 'superlu'
     allow_warnings = true
-    requirement = "The Contact system shall enforce glued, kinematic contact
+    requirement = "The system shall enforce glued, kinematic contact
     for 2D plane strain "
                   "single point contact model."
   []
@@ -31,7 +31,7 @@
     mesh_mode = REPLICATED
     capabilities = 'superlu'
     allow_warnings = true
-    requirement = "The Contact system shall enforce glued, penalty contact
+    requirement = "The system shall enforce glued, penalty contact
     for 2D plane strain "
                   "single point contact model."
   []
@@ -48,7 +48,7 @@
     mesh_mode = REPLICATED
     capabilities = 'superlu'
     allow_warnings = true
-    requirement = "The Contact system shall enforce frictionless, kinematic contact
+    requirement = "The system shall enforce frictionless, kinematic contact
     for 2D plane "
                   "strain single point contact model."
   []
@@ -66,7 +66,7 @@
     mesh_mode = REPLICATED
     capabilities = 'superlu'
     allow_warnings = true
-    requirement = "The Contact system shall enforce frictionless, penalty contact
+    requirement = "The system shall enforce frictionless, penalty contact
     for 2D plane "
                   "strain single point contact model."
   []
@@ -78,7 +78,7 @@
     abs_zero = 1e-8
     rel_err = 5e-4
     mesh_mode = REPLICATED
-    requirement = "The Contact system shall enforce frictionless, penalty contact
+    requirement = "The system shall enforce frictionless, penalty contact
     for 2D plane "
                   "strain single point contact model using the contact line
     search solver "
@@ -98,7 +98,7 @@
     mesh_mode = REPLICATED
     capabilities = 'superlu'
     allow_warnings = true
-    requirement = "The Contact system shall enforce frictional, kinematic contact
+    requirement = "The system shall enforce frictional, kinematic contact
     for 2D plane "
                   "strain single point contact model."
   []
@@ -116,7 +116,7 @@
     mesh_mode = REPLICATED
     capabilities = 'superlu'
     allow_warnings = true
-    requirement = "The Contact system shall enforce frictional, penalty contact
+    requirement = "The system shall enforce frictional, penalty contact
     for 2D plane "
                   "strain single point contact model."
   []
@@ -133,7 +133,7 @@
     mesh_mode = REPLICATED
     capabilities = 'superlu'
     allow_warnings = true
-    requirement = "The Contact system shall enforce frictional, kinematic contact
+    requirement = "The system shall enforce frictional, kinematic contact
     for 2D plane "
                   "strain single point contact model with a non-zero friction
     coefficient."
@@ -153,7 +153,7 @@
     mesh_mode = REPLICATED
     capabilities = 'superlu'
     allow_warnings = true
-    requirement = "The Contact system shall enforce frictional, penalty contact
+    requirement = "The system shall enforce frictional, penalty contact
     for 2D plane "
                   "strain single point contact model with a non-zero friction
     coefficient."

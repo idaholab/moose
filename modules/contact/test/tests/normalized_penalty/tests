@@ -6,13 +6,13 @@
     input = 'normalized_penalty.i'
     exodiff = 'normalized_penalty_out.e'
     abs_zero = 1e-7
-    requirement = 'The contact system shall yield repeatable results for 2D contact with elements of various aspect ratios. Penalty contact.'
+    requirement = 'The system shall yield repeatable results for 2D contact with elements of various aspect ratios. Penalty contact.'
   [../]
   [./normalized_penalty_Q8]
     type = Exodiff
     input = 'normalized_penalty_Q8.i'
     exodiff = 'normalized_penalty_Q8_out.e'
-    requirement = 'The contact system shall yield repeatable results for 2D contact with Q8 elements of various aspect ratios. Penalty contact.'
+    requirement = 'The system shall yield repeatable results for 2D contact with Q8 elements of various aspect ratios. Penalty contact.'
     custom_cmp = normalized_penalty_Q8.cmp
   [../]
   [./normalized_penalty_kin]
@@ -20,13 +20,13 @@
     input = 'normalized_penalty_kin.i'
     exodiff = 'normalized_penalty_kin_out.e'
     abs_zero = 1e-7
-    requirement = 'The contact system shall yield repeatable results for 2D contact with elements of various aspect ratios. Kinematic contact.'
+    requirement = 'The system shall yield repeatable results for 2D contact with elements of various aspect ratios. Kinematic contact.'
   [../]
   [./normalized_penalty_kin_Q8]
     type = Exodiff
     input = 'normalized_penalty_kin_Q8.i'
     exodiff = 'normalized_penalty_kin_Q8_out.e'
     abs_zero = 2e-6
-    requirement = 'The contact system shall yield repeatable results for 2D contact with Q8 elements of various aspect ratios. Kinematic contact.'
+    requirement = 'The system shall yield repeatable results for 2D contact with Q8 elements of various aspect ratios. Kinematic contact.'
   [../]
 []

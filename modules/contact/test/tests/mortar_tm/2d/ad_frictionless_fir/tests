@@ -3,7 +3,7 @@
   issues = '#13080 #20773 #30020'
   [soft]
     requirement = 'The system shall be able to use automatic differentiation to compute a soft block '
-                  'bouncing on a soft plank problem on a first order 2D mesh using tensor mechanics '
+                  'bouncing on a soft plank problem on a first order 2D mesh using solid mechanics '
                   'and mortar contact'
     [small]
       detail = 'using the small strain formulation.'
@@ -71,7 +71,7 @@
   []
   [stiff]
     requirement = 'The system shall be able to use automatic differntiation to compute a block '
-                  'bouncing on a plank problem on a first order 2D mesh using tensor mechanics and '
+                  'bouncing on a plank problem on a first order 2D mesh using solid mechanics and '
                   'mortar contact and finite strain'
     [stiff_stiff]
       detail = 'using with a stiff block and a stiff plank.'

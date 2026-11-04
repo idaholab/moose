@@ -6,7 +6,7 @@
     input = 'frictionless_kinematic.i'
     exodiff = 'frictionless_kinematic_out.e'
     max_parallel = 1                                    # -pc_type lu
-    requirement = "The contact system shall enforce a frictionless mechanical contact condition
+    requirement = "The system shall enforce a frictionless mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a kinematic enforcement with the Constraint system."
   [../]
@@ -15,7 +15,7 @@
     input = 'frictionless_kinematic_gap_offsets.i'
     exodiff = 'frictionless_kinematic_gap_offsets_out.e'
     max_parallel = 1                                    # -pc_type lu
-    requirement = "The contact system shall enforce a frictionless mechanical contact condition
+    requirement = "The system shall enforce a frictionless mechanical contact condition
                    between two blocks with gap offsets on both primary and secondary blocks using
                    a kinematic enforcement with the DiracKernel system."
     issues = '#14089'
@@ -25,7 +25,7 @@
     input = 'frictionless_penalty.i'
     exodiff = 'frictionless_penalty_out.e'
     max_parallel = 1                                    # -pc_type lu
-    requirement = "The contact system shall enforce a frictionless mechanical contact condition
+    requirement = "The system shall enforce a frictionless mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a penalty enforcement with the Constraint system."
   [../]
@@ -34,7 +34,7 @@
     input = 'glued_kinematic.i'
     exodiff = 'glued_kinematic_out.e'
     max_parallel = 1                                    # -pc_type lu
-    requirement = "The contact system shall enforce a glued mechanical contact condition
+    requirement = "The system shall enforce a glued mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a kinematic enforcement with the Constraint system."
   [../]
@@ -43,7 +43,7 @@
     input = 'glued_penalty.i'
     exodiff = 'glued_penalty_out.e'
     max_parallel = 1                                    # -pc_type lu
-    requirement = "The contact system shall enforce a glued mechanical contact condition
+    requirement = "The system shall enforce a glued mechanical contact condition
                    between two blocks with a combination of normal and tangential motion using
                    a penalty enforcement with the Constraint system."
   [../]

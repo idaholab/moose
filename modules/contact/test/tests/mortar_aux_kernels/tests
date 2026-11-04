@@ -10,7 +10,7 @@
     abs_zero = 1.0e-5
     max_parallel = 4
     capabilities = 'ad_size>=50'
-    requirement = 'The contact module shall be able to compute nodal weighted gap distance velocity values via a '
+    requirement = 'The system shall be able to compute nodal weighted gap distance velocity values via a '
                   'mortar auxiliary kernel.'
     # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
     recover = false
@@ -24,7 +24,7 @@
     max_parallel = 4
     capabilities = 'ad_size>=50 & method!=dbg'
     valgrind = 'none'
-    requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
+    requirement = 'The system shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation via a mortar auxiliary kernel.'
     # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
     recover = false
@@ -39,7 +39,7 @@
     capabilities = 'ad_size>=50 & method=opt'
     heavy = true
     valgrind = 'none'
-    requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
+    requirement = 'The system shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation and the mortar gap velocity via mortar auxiliary kernels in the same '
                   'input file.'
   []
@@ -51,7 +51,7 @@
     abs_zero = 1.0e-4
     capabilities = 'ad_size>=100'
     cli_args = 'AuxKernels/frictional_state/tangent_two=mortar_tangential_3d_lm'
-    requirement = 'Contact module shall compute nodal frictional status of mortar surfaces for a '
+    requirement = 'The system shall compute nodal frictional status of mortar surfaces for a '
                   'simple problem in which nodes are in stick and slip states.'
   []
   [frictional-mortar-3d-status-error]
@@ -61,7 +61,7 @@
                  'Lagrange multiplier for three-dimensional problems'
     max_parallel = 2
     capabilities = 'ad_size>=100'
-    requirement = 'The contact module shall be able to generate an informative error if the nodal frictional status '
+    requirement = 'The system shall be able to generate an informative error if the nodal frictional status '
                   'auxiliary kernel is not provided a second frictional Lagrange multiplier for a '
                   'three-dimensional problem.'
   []
@@ -75,7 +75,7 @@
     capabilities = 'ad_size>=50'
     cli_args = 'Executioner/end_time=0.2 '
                'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick_out'
-    requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
+    requirement = 'The system shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation and the mortar gap velocity via mortar auxiliary kernels while including '
                   'these computations in the definition of mortar normal contact constraints in an '
                   'asymmetric problem for a short simulation.'
@@ -94,7 +94,7 @@
     cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-multiple-projections.e '
                'Executioner/end_time=0.2 '
                'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick-multiple-projections_out'
-    requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
+    requirement = 'The system shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation and the mortar gap velocity via mortar auxiliary kernels while including '
                   'these computations in the definition of mortar normal contact constraints in an '
                   'asymmetric problem for a short simulation where secondary elements/nodes may '
@@ -128,7 +128,7 @@
                'AuxKernels/worn_depth/debug_mesh=true '
                'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick-multiple-projections-lo'
                'werd_out'
-    requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
+    requirement = 'The system shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation and the mortar gap velocity via mortar auxiliary kernels while including '
                   'these computations in the definition of mortar normal contact constraints in an '
                   'asymmetric problem for a short simulation where secondary elements/nodes may '
@@ -151,7 +151,7 @@
     partial = True
     cli_args = 'Executioner/end_time=0.15 '
                'Outputs/file_base=block-dynamics-aux-fretting-wear-test-action-quick_out'
-    requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
+    requirement = 'The system shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation and the mortar gap velocity via mortar auxiliary kernels while including '
                   'these computations in the definition of mortar normal contact constraints in an '
                   'asymmetric problem for a short simulation using the contact action.'

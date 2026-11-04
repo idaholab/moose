@@ -7,7 +7,7 @@
     cli_args = 'Constraints/normal_lm/interpolate_normals=true'
     expect_err = 'cannot be combined with quadrature-point normal interpolation'
     design = 'ComputeWeightedGapLMMechanicalContact.md'
-    requirement = 'Mechanical mortar contact shall reject interpolated quadrature-point normals.'
+    requirement = 'The system shall reject interpolated quadrature-point normals for mechanical mortar contact.'
   []
 
   [unsupported_weighted_gap_uo]
@@ -16,7 +16,7 @@
     cli_args = 'Outputs/exodus=false'
     expect_err = "Nodal-normal derivatives are not supported by user object 'czm_uo'."
     design = 'ComputeWeightedGapLMMechanicalContact.md'
-    requirement = 'Mechanical mortar contact shall reject a weighted-gap user object that does not '
+    requirement = 'The system shall reject, for mechanical mortar contact, a weighted-gap user object that does not '
                   'support nodal-normal derivatives.'
   []
 
@@ -28,7 +28,7 @@
                "BCs/active='boty botz topy topz'"
     expect_err = 'Nodal-normal derivatives require a nodal displacement variable.'
     design = 'ComputeWeightedGapLMMechanicalContact.md'
-    requirement = 'Mechanical mortar contact shall require nodal displacement variables when '
+    requirement = 'The system shall require, for mechanical mortar contact, nodal displacement variables when '
                   'constructing nodal-normal derivatives.'
   []
 
@@ -41,7 +41,7 @@
     expect_err = 'Nodal-normal derivatives require displacement variables in the nonlinear system '
                  'assembled by this contact object.'
     design = 'ComputeWeightedGapLMMechanicalContact.md'
-    requirement = 'Mechanical mortar contact shall reject displacement variables from a different '
+    requirement = 'The system shall reject, for mechanical mortar contact, displacement variables from a different '
                   'nonlinear system when constructing nodal-normal derivatives.'
   []
 
@@ -53,7 +53,7 @@
     expect_err = "'weighted_gap_uo' must be defined on the same secondary/primary subdomain pair as "
                  "this constraint when nodal-normal derivatives are enabled."
     design = 'ComputeWeightedGapLMMechanicalContact.md'
-    requirement = 'Mechanical mortar contact shall reject a weighted-gap user object that is defined '
+    requirement = 'The system shall reject, for mechanical mortar contact, a weighted-gap user object that is defined '
                   'on a different secondary/primary subdomain pair than the consuming constraint.'
   []
 
@@ -63,7 +63,7 @@
     expect_err = "'weighted_gap_uo' must be defined on the same secondary/primary subdomain pair as "
                  "this constraint when nodal-normal derivatives are enabled."
     design = 'ComputeWeightedGapLMMechanicalContact.md'
-    requirement = 'Mechanical mortar contact shall validate user-object compatibility independent '
+    requirement = 'The system shall validate, for mechanical mortar contact, user-object compatibility independent '
                   'of constraint input order.'
   []
 
@@ -74,7 +74,7 @@
     expect_err = "'lm_variable_tangential_one' must use the same dual/standard basis setting as "
                  "'lm_variable_normal'."
     design = 'LMWeightedVelocitiesUserObject.md'
-    requirement = 'Mechanical mortar contact shall reject a tangential Lagrange multiplier variable '
+    requirement = 'The system shall reject, for mechanical mortar contact, a tangential Lagrange multiplier variable '
                   'whose dual/standard basis setting does not match the normal Lagrange multiplier '
                   'variable.'
   []
@@ -95,7 +95,7 @@
     mesh_mode = DISTRIBUTED
     # One time step exercises partitioned assembly on the curved interface.
     design = 'ContactAction.md PenaltyFrictionUserObject.md AutomaticMortarGeneration.md'
-    requirement = 'Distributed three-dimensional mortar-penalty friction shall assemble and solve '
+    requirement = 'The system shall assemble and solve, with distributed three-dimensional mortar-penalty friction, '
                   'one time step on a fully overlapping, partitioned QUAD4 interface.'
   []
 
@@ -115,7 +115,7 @@
     expect_out = 'Solve Converged!'
     design = 'ContactAction.md PenaltyFrictionUserObject.md '
              'ComputeWeightedGapLMMechanicalContact.md'
-    requirement = 'Three-dimensional augmented-Lagrange mortar-penalty friction shall solve with '
+    requirement = 'The system shall solve three-dimensional augmented-Lagrange mortar-penalty friction with '
                   'nodal traction-vector interpolation and displacement derivatives of the normal '
                   'and tangent directions.'
   []
@@ -134,8 +134,8 @@
     ratio_tol = 2e-5
     difference_tol = 1e-4
     design = 'ContactAction.md PenaltyFrictionUserObject.md'
-    requirement = 'Three-dimensional mortar-penalty friction with first-order TET4 elements and TRI3 '
-                  'interface faces shall compute a Jacobian that agrees with a finite-difference '
+    requirement = 'The system shall compute, for three-dimensional mortar-penalty friction with first-order TET4 elements and TRI3 '
+                  'interface faces, a Jacobian that agrees with a finite-difference '
                   'approximation, without allocating new matrix nonzeros.'
   []
 
@@ -167,7 +167,7 @@
     # Finite-difference Jacobian testing requires one residual evaluation per degree of freedom.
     max_time = 600
     design = 'ContactAction.md AutomaticMortarGeneration.md'
-    requirement = 'Three-dimensional mortar-penalty contact shall compute a Jacobian that agrees '
+    requirement = 'The system shall compute, for three-dimensional mortar-penalty contact, a Jacobian that agrees '
                   'with a finite-difference approximation on a second-order TET10 mesh with TRI6 '
                   'interface faces.'
   []
@@ -195,7 +195,7 @@
     max_time = 600
     capabilities = 'ad_size>=200'
     design = 'ContactAction.md AutomaticMortarGeneration.md'
-    requirement = 'Three-dimensional mortar-penalty contact shall compute a Jacobian that agrees '
+    requirement = 'The system shall compute, for three-dimensional mortar-penalty contact, a Jacobian that agrees '
                   'with a finite-difference approximation on an enriched TET14 mesh whose TRI7 '
                   'interface faces carry more mapping nodes than the displacement basis.'
   []
@@ -210,7 +210,7 @@
     expect_out = 'Solve Converged!'
     design = 'ContactAction.md ComputeWeightedGapLMMechanicalContact.md '
              'AutomaticMortarGeneration.md'
-    requirement = 'Three-dimensional mortar contact shall support residual-only determination of '
+    requirement = 'The system shall support, for three-dimensional mortar contact, residual-only determination of '
                   'Jacobian operator-vector products and creation of an explicit preconditioning '
                   'matrix with nodal-normal derivatives.'
   []
@@ -228,7 +228,7 @@
     expect_out = 'Solve Converged!'
     capabilities = 'ad_size>=200'
     design = 'ContactAction.md AutomaticMortarGeneration.md'
-    requirement = 'Quasistatic mortar contact shall assemble and solve with active TET10 elements '
+    requirement = 'The system shall assemble and solve quasistatic mortar contact with active TET10 elements '
                   'and TRI6 interface faces when sufficient AD storage is available.'
   []
 
@@ -246,7 +246,7 @@
     expect_out = 'Solve Converged!'
     capabilities = 'ad_size>=200'
     design = 'ContactAction.md AutomaticMortarGeneration.md'
-    requirement = 'Quasistatic mortar contact shall execute with active TET14 elements and TRI7 '
+    requirement = 'The system shall execute quasistatic mortar contact with active TET14 elements and TRI7 '
                   'interface faces when sufficient AD storage is available.'
   []
 
@@ -261,7 +261,7 @@
     ratio_tol = 2.1e-2
     difference_tol = 4.0e-1
     design = 'ComputeFrictionalForceLMMechanicalContact.md LMWeightedVelocitiesUserObject.md'
-    requirement = 'Two-dimensional mortar frictional contact with Lagrange multipliers shall '
+    requirement = 'The system shall, for two-dimensional mortar frictional contact with Lagrange multipliers, '
                   'compute a Jacobian that agrees with a finite-difference approximation at a '
                   'settled active contact and friction state.'
   []
@@ -278,7 +278,7 @@
     capabilities = 'ad_size>=200'
     expect_out = 'The number of nodes in contact is [1-9][0-9]*'
     design = 'ContactAction.md AutomaticMortarGeneration.md'
-    requirement = 'Quasistatic mortar contact shall execute with active HEX27 elements and QUAD9 '
+    requirement = 'The system shall execute quasistatic mortar contact with active HEX27 elements and QUAD9 '
                   'interface faces when sufficient AD storage is available.'
   []
 []
