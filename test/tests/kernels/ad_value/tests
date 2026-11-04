@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'ad_value.i'
     exodiff = 'ad_value_out.e'
-    requirement = "Jacobian entries generated with AD shall match hand-coded Jacobian entries as measured through save-in values"
+    requirement = "The system shall generate Jacobian entries with AD that match hand-coded Jacobian entries as measured through save-in values"
     design = "syntax/Kernels/index.md"
     issues = "#5658"
   [../]

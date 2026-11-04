@@ -166,7 +166,7 @@
     type = 'RunException'
     input = 'no_add_scalar.i'
 
-    requirement = "When using periodic boundary detection, the system shall not attempt to add periodic boundary conditions to scalar variables."
+    requirement = "The system shall not attempt to add periodic boundary conditions to scalar variables when using periodic boundary detection."
     design = 'source/actions/AddPeriodicBCAction.md'
     issues = '#11417'
     expect_err = "Variable 'scalar' is a scalar variable and does not support a periodic boundary condition"

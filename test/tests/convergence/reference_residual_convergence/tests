@@ -173,7 +173,7 @@
   []
 
   [error]
-    requirement = 'When using ReferenceResidualConvergence the system shall throw an error '
+    requirement = 'The system shall, when using ReferenceResidualConvergence, throw an error '
     [wrong_vector_tag_type]
       type = RunException
       input = abs_ref.i

@@ -3,7 +3,7 @@
   issues = '#30655'
 
   [elemental_extreme]
-    requirement = 'The Kokkos system shall compute the value of an elemental field variable at the point where'
+    requirement = 'The system shall, using Kokkos, compute the value of an elemental field variable at the point where'
     [value]
       type = 'Exodiff'
       input = 'kokkos_element_extreme_value.i'

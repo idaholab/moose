@@ -2,14 +2,14 @@
   [testbodyforce-jac]
     type = 'PetscJacobianTester'
     input = 'test.i'
-    requirement = 'Jacobians calculated by ADTimeDerivative and ADBodyForce shall be perfect.'
+    requirement = 'The system shall calculate perfect Jacobians with ADTimeDerivative and ADBodyForce.'
     issues = '#13260'
     design = '/ADTimeDerivative.md'
   []
   [testbodyforce-adfunction-jac]
     type = 'PetscJacobianTester'
     input = 'adfunction.i'
-    requirement = 'The Jacobian of ADBodyForce with a force function shall be perfect.'
+    requirement = 'The system shall compute a perfect Jacobian for ADBodyForce with a force function.'
     issues = '#13260'
     design = '/BodyForce.md'
     ratio_tol = 3e-8

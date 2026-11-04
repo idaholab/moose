@@ -6,7 +6,7 @@
     expect_out = "\(0,0\) On-diagonal Jacobian is slightly off \(by 0.500132 %\).*\(1,1\) On-diagonal Jacobian is wrong \(off by 100.0 %\).*\(2,2\) On-diagonal Jacobian needs to be implemented.*\(3,3\) On-diagonal Jacobian should just return  zero"
     recover = false
     issues = '#4182'
-    requirement = 'We shall be able the scrape the DOFMapOutput and determine when the Jacobian is slightly off'
+    requirement = 'The system shall be able the scrape the DOFMapOutput and determine when the Jacobian is slightly off'
   [../]
 
   [./med]
@@ -16,7 +16,7 @@
     recover = false
     # Skip petsc-3.9.{0,1,2,3} since they have different APIs
     issues = '#4182'
-    requirement = 'We shall be able the scrape the DOFMapOutput and determine when the Jacobian is questionable'
+    requirement = 'The system shall be able the scrape the DOFMapOutput and determine when the Jacobian is questionable'
   [../]
 
   # this test only has a wrong off-diagonal Jacobian, but we switch of testing
@@ -28,14 +28,14 @@
     expect_out = "No errors detected. :-\)"
     recover = false
     issues = '#6624'
-    requirement = 'We shall throw no errors if the off-diagonal Jacobian is wrong if we are only testing the on-diagonal Jacobian'
+    requirement = 'The system shall throw no errors if the off-diagonal Jacobian is wrong if we are only testing the on-diagonal Jacobian'
   [../]
 
   [./no_negative_jacobian]
     type = RunApp
     input = no_negative_jacobian.i
     issues = '#9740'
-    requirement = 'If use_displaced_mesh = false then MOOSE will not throw an exception if elements are inverted to produce a negative element Jacobian, in 3D simulations'
+    requirement = 'The system shall not throw an exception when use_displaced_mesh = false and elements are inverted to produce a negative element Jacobian, in 3D simulations'
   [../]
   [./jacobian_zero]
     type = RunException
@@ -45,7 +45,7 @@
     expect_err = 'Jacobian 0[\w\s]*at point \(x,y,z\)=\( *0, *0\.211325\d*, *0\.211325\d*\)'
     expect_exit_code = 0
     issues = '#9740'
-    requirement = 'A 3D simulation shall throw an exception if there is a zero element Jacobian, when use_displaced_mesh = true'
+    requirement = 'The system shall throw an exception in a 3D simulation if there is a zero element Jacobian, when use_displaced_mesh = true'
   [../]
   [./jacobian_negative]
     type = RunException
@@ -56,14 +56,14 @@
     expect_err = 'Jacobian -0\.0625[\w\s]*at point \(x,y,z\)=\( *-0\.105662\d*, *0\.211325\d*, *0\.211325\d*\)'
     expect_exit_code = 0
     issues = '#9740'
-    requirement = 'A 3D simulation shall throw an exception if there is a negative element Jacobian, when use_displaced_mesh = true'
+    requirement = 'The system shall throw an exception in a 3D simulation if there is a negative element Jacobian, when use_displaced_mesh = true'
   [../]
 
   [./no_negative_jacobian_2D]
     type = RunApp
     input = no_negative_jacobian_2D.i
     issues = '#9740 #10229'
-    requirement = 'If use_displaced_mesh = false then MOOSE will not throw an exception if elements are inverted to produce a negative element Jacobian, in 2D simulations'
+    requirement = 'The system shall not throw an exception when use_displaced_mesh = false and elements are inverted to produce a negative element Jacobian, in 2D simulations'
   [../]
   [./zero_jacobian_2D_ok]
     type = RunApp
@@ -71,7 +71,7 @@
     prereq = no_negative_jacobian_2D
     cli_args = 'Executioner/dt=0.5'
     issues = '#9740 #10229'
-    requirement = 'If use_displaced_mesh = false then MOOSE will not throw an exception if elements are distored to produce a zero element Jacobian, in 2D simulations'
+    requirement = 'The system shall not throw an exception when use_displaced_mesh = false and elements are distored to produce a zero element Jacobian, in 2D simulations'
   [../]
   [./jacobian_zero_2D]
     type = RunException
@@ -81,7 +81,7 @@
     expect_err = 'Jacobian 0[\w\s]*at point \(x,y,z\)=\( *0, *0\.211325\d*, *0\)'
     expect_exit_code = 0
     issues = '#9740 #10229'
-    requirement = 'A 2D simulation shall throw an exception if there is a zero element Jacobian, when use_displaced_mesh = true'
+    requirement = 'The system shall throw an exception in a 2D simulation if there is a zero element Jacobian, when use_displaced_mesh = true'
   [../]
 
   [./inf_nan]
@@ -93,6 +93,6 @@
     cli_args = '--no-trap-fpe'
     capabilities = 'petsc<3.19.3'
     issues = '#10788'
-    requirement = 'The PETSc Jacobian test shall reveal nans if there are nans in the matrix'
+    requirement = 'The system shall reveal, through the PETSc Jacobian test, nans if there are nans in the matrix'
   [../]
 []

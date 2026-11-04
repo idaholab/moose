@@ -5,6 +5,6 @@
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
-    requirement = "The Control system shall support explicitly defined dependencies."
+    requirement = "The system shall, through the Control system, support explicitly defined dependencies."
   [../]
 []

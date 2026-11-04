@@ -9,10 +9,10 @@
 
     issues = '#10623 #27240'
     design = 'Mesh/splitting.md'
-    requirement = 'A mesh can be split into a specified number of files using command line options.'
+    requirement = 'The system shall be able to split a mesh into a specified number of files using command line options.'
   []
   [use_split]
-    requirement = 'A mesh can be pre-split properly and used to generate equivalent results to '
+    requirement = 'The system shall be able to properly pre-split a mesh and use it to generate equivalent results to '
                   'running a simulation with the unsplit mesh when'
     issues = '#10623 #17318'
     design = 'Mesh/splitting.md'
@@ -54,7 +54,7 @@
   [check]
     issues = '#11825'
     design = 'Mesh/splitting.md'
-    requirement = 'Console output should include an indicator that a pre-split mesh is being used '
+    requirement = 'The system shall include in console output an indicator that a pre-split mesh is being used '
                   'when using --split-mesh in distributed = auto mode'
 
     [pre_split]
@@ -93,7 +93,7 @@
 
     issues = '#11434'
     design = 'Mesh/splitting.md'
-    requirement = 'The mesh splitter will throw an error when an attempt is made to split a '
+    requirement = 'The system shall throw an error in the mesh splitter when an attempt is made to split a '
                   '"DistributedMesh".'
   []
 
@@ -108,7 +108,7 @@
 
     issues = '#11434 #27240'
     design = 'Mesh/splitting.md'
-    requirement = 'The mesh splitter capability will honor geometric RelationshipManager objects.'
+    requirement = 'The system shall honor, in the mesh splitter capability, geometric RelationshipManager objects.'
   []
 
   [split_with_RM_part2]
@@ -126,7 +126,7 @@
 
     issues = '#11434'
     design = 'Mesh/splitting.md'
-    requirement = 'Meshes that are pre-split with active RelationshipManager objects work the same '
+    requirement = 'The system shall treat meshes that are pre-split with active RelationshipManager objects the same '
                   'as if using an online DistributedMesh.'
   []
 
@@ -140,7 +140,7 @@
     max_parallel = 2
     issues = "#11944"
     design = 'Mesh/splitting.md'
-    requirement = 'Splitting meshes from file should work with custom partitioners.'
+    requirement = 'The system shall support splitting meshes from file with custom partitioners.'
     mesh_mode = REPLICATED
   []
 
@@ -154,7 +154,7 @@
     max_parallel = 2
     issues = "#11944"
     design = 'Mesh/splitting.md'
-    requirement = 'Splitting meshes from a generated mesh should work with custom partitioners.'
+    requirement = 'The system shall support splitting meshes from a generated mesh with custom partitioners.'
     mesh_mode = REPLICATED
   []
 
@@ -172,6 +172,6 @@
 
     issues = '#18635 #27240'
     design = 'Mesh/splitting.md FileMeshGenerator.md'
-    requirement = 'The system should be able to load a pre-split mesh and perform additional mesh generation on it.'
+    requirement = 'The system shall be able to load a pre-split mesh and perform additional mesh generation on it.'
   []
 []

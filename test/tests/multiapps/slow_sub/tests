@@ -6,6 +6,6 @@
 
     issues = '#19662'
     design = 'PerfGraph.md'
-    requirement = 'MultiApps shall be properly identified in the PerfGraph'
+    requirement = 'The system shall properly identify MultiApps in the PerfGraph'
   []
 []

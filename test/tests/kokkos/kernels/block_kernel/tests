@@ -3,7 +3,7 @@
   design = '/BlockRestrictable.md'
 
   [block_restriction]
-    requirement = 'The Kokkos system shall support the ability to apply a kernel to a subset of the domain'
+    requirement = 'The system shall, using Kokkos, support the ability to apply a kernel to a subset of the domain'
 
     [kernel]
       type = 'Exodiff'

@@ -7,7 +7,7 @@
     input = 'point_marker_test.i'
     exodiff = 'point_marker_test_out.e'
     scale_refine = 2
-    requirement = "The adaptivity system shall create an auxiliary field variable that marks "
+    requirement = "The system shall, through the adaptivity system, create an auxiliary field variable that marks "
                   "elements containing the points from the reporter for refinement."
   []
   [wrong_size_error]
@@ -15,13 +15,13 @@
     input = 'point_marker_test.i'
     cli_args = 'Adaptivity/Markers/active=bad_coord'
     expect_err = "x_coord size = 3;  y_coord size = 8;  z_coord size = 10"
-    requirement = "The marker shall create an error if the coordinate vectors are not all the same size"
+    requirement = "The system shall create an error if the marker coordinate vectors are not all the same size"
   []
   [adaptivity]
     type = 'CSVDiff'
     input = 'reporter_marker_adapt_test.i'
     csvdiff = 'reporter_marker_adapt_test_out.csv'
-    requirement = "The marker shall be used for adaptivity for a moving point, "
+    requirement = "The system shall support using the marker for adaptivity for a moving point, "
      "being able to coarsen elements the point moves out of but not coarsen elements if it contains point."
   []
 []

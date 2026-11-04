@@ -16,6 +16,6 @@
     expect_err = "The specified VectorPostprocessor does not have any declared vectors."
     issues = '#18459'
     design = 'HistogramVectorPostprocessor.md'
-    requirement = 'The histogram vector postprocessor shall generate an error if the vector postprocessor that it operates on does not have any declared vectors'
+    requirement = 'The system shall generate an error in the histogram vector postprocessor if the vector postprocessor that it operates on does not have any declared vectors'
   [../]
 []

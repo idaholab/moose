@@ -5,6 +5,6 @@
     type = Exodiff
     input = parent.i
     exodiff = 'parent_final.e parent_out.e parent_out_sub0_final.e'
-    requirement = "The Transfer system shall support execution with the EXEC_FINAL flag."
+    requirement = "The system shall support Transfer execution with the EXEC_FINAL flag."
   []
 []

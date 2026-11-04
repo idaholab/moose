@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'ad_coupled_convection.i'
     exodiff = 'ad_coupled_convection_out.e'
-    requirement = "Coupled variable gradient Jacobian entries generated with AD shall be accurate"
+    requirement = "The system shall generate accurate coupled variable gradient Jacobian entries with AD"
     design = "Coupleable.md"
     issues = "#5658"
   [../]

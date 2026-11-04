@@ -273,7 +273,7 @@
   []
 
   [param_errors]
-    requirement = 'The system that supports controlling parameters via a REST API should report a reasonable error when'
+    requirement = 'The system shall, when controlling parameters via a REST API, report a reasonable error when'
     [no_port_and_socket]
       type = RunException
       input = 'wait_initial.i'
