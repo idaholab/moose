@@ -478,8 +478,8 @@ protected:
   /// Per-block largest cross-momentum residual norm of the solve, which scales the crossflow
   /// damping in the coupled solve
   std::vector<Real> _crossflow_residual_ref;
-  /// Per-block factor, raised after coupled linear-solve failures and after outer iterations whose
-  /// temperature error grows, that delays the decay of the crossflow damping
+  /// Per-block factor, raised after coupled linear-solve failures, that delays the decay of the
+  /// crossflow damping
   std::vector<Real> _crossflow_damping_boost;
   /// Number of coupled linear-solve retries, each doubling the crossflow damping
   static constexpr unsigned int _max_crossflow_retries = 8;

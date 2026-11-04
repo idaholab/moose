@@ -2766,8 +2766,6 @@ SubChannel1PhaseProblem::externalSolve()
       int last_level = (iblock + 1) * _block_size;
       int first_level = iblock * _block_size + 1;
       Real T_block_error = 1.0;
-      // Temperature error of the previous iteration; infinity until the first one completes
-      Real T_block_error_old = std::numeric_limits<Real>::infinity();
       auto T_it = 0;
       _console << "Solving Block: " << iblock << " From first level: " << first_level
                << " to last level: " << last_level << std::endl;
@@ -2830,18 +2828,6 @@ SubChannel1PhaseProblem::externalSolve()
 
           // All processes must have the same iteration count
           comm().max(T_block_error);
-
-          // The crossflow damping decays with the cross-momentum residual, which can lag behind a
-          // diverging outer iteration. Doubling the damping when the temperature error grows
-          // beyond a factor of two between iterations, an increase larger than the iteration noise
-          // near convergence, damps the next coupled solve before the iteration diverges.
-          if (!_segregated_bool && T_block_error > 2.0 * T_block_error_old)
-          {
-            auto & boost = _crossflow_damping_boost[iblock];
-            boost = std::min(_max_crossflow_damping_boost, 2.0 * boost);
-            V("Temperature error grew; crossflow damping boost: " + std::to_string(boost));
-          }
-          T_block_error_old = T_block_error;
         }
       }
       const bool block_converged = T_block_error <= _T_tol;

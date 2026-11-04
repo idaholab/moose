@@ -542,9 +542,26 @@ K^{\ell}\left(\mathbf W^{\ell+1}-\mathbf W^{\ell}\right) = \mathbf b_w,
 \end{equation}
 
 i.e. $K^{\ell}$ is added to the diagonal of $M_{ww}$ and $K^{\ell}\,\mathbf W^{\ell}$ to
-$\mathbf b_w$. The damping improves the conditioning of the coupled linear system, and the
-additional term vanishes when $\mathbf W^{\ell+1}=\mathbf W^{\ell}$, so it does not alter the
-converged crossflow. The coefficient is
+$\mathbf b_w$. The damping improves the conditioning of the coupled linear system. The two parts
+of the term play different roles:
+
+- +The right-hand-side compensation+ $K^{\ell}\,\mathbf W^{\ell}$ makes the converged solution
+  independent of $K$: the term vanishes when $\mathbf W^{\ell+1}=\mathbf W^{\ell}$, for any $K$.
+  Without it, the added resistance $K\,\mathbf W$ remains at convergence and pulls the crossflow
+  toward zero. Because it acts in every axial cell, the resulting error grows with axial
+  refinement instead of vanishing.
+- +The decay of $K$+ described below keeps the iteration fast. A large $K$ keeps the coupled
+  solves well conditioned far from the solution, but near convergence it slows the outer iteration;
+  letting $K$ tend to zero recovers the convergence rate of the undamped system.
+
+Both are needed. A $K$ that decays without the compensation still biases the solution wherever it
+has not fully vanished when the outer iteration stops. A fixed $K$ with the compensation is
+unbiased in principle, but converges slowly and can stop at the outer tolerance before it reaches
+the converged solution. On the EBR-II SHRT-17 case with 160 axial cells, for example, a fixed $K$
+with the compensation needs about four times as many temperature iterations as the decaying $K$,
+and the uncompensated, non-decaying resistance changes the pressure drop by 0.5%.
+
+The coefficient is
 
 \begin{equation}
 K^{\ell} = \min\left(K_{\max},\;K_{\max}\,
@@ -571,25 +588,13 @@ iteration approaches the convergence rate of the undamped system. The coupled cr
 from the current iterate. Its convergence tolerance
 `rtol` is applied to the residual of that initial iterate rather than to the right-hand side.
 
-The block factor $\gamma$ starts at one in every solve, is capped at $2^8$, and is doubled in two
-situations:
-
-- +Linear-solve failure.+ As $K$ decreases, the coupled system can become too poorly conditioned
-  for the field-split preconditioner. Each coupled solve is therefore attempted with at most 1000
-  Krylov iterations; if it does not converge, $K$ is increased by $\max(K,\,0.05\,K_{\max})$, which
-  doubles it unless it is below $0.05\,K_{\max}$, and the solve is repeated, up to eight times,
-  the last attempt with the full [!param](/Problem/TriSubChannel1PhaseProblem/maxit). Each retry also
-  doubles $\gamma$, which keeps the damping at the level the preconditioner needs for the remaining
-  outer iterations.
-- +Outer-iteration growth.+ The crossflow residual reacts to a diverging outer iteration only after
-  the temperature and fluid properties have already moved, so $K$ can decay faster than the outer
-  iteration tolerates; this happens, for instance, near flow blockages. After every temperature
-  update of a block, $\gamma$ is therefore doubled if the temperature error $\epsilon_T$ has grown
-  by more than a factor of two since the previous update. The factor of two is larger than the
-  iteration-to-iteration variation of $\epsilon_T$ near convergence, so the safeguard reacts to
-  divergence rather than to noise. It does not replace the damping that linear-solve failures
-  provide with the default [!param](/Problem/TriSubChannel1PhaseProblem/coupled_gmres_restart): flow blockage cases can still diverge with a
-  longer restart.
+The block factor $\gamma$ starts at one in every solve and is capped at $2^8$. As $K$ decreases,
+the coupled system can become too poorly conditioned for the field-split preconditioner. Each
+coupled solve is therefore attempted with at most 1000 Krylov iterations; if it does not converge,
+$K$ is increased by $\max(K,\,0.05\,K_{\max})$, which doubles it unless it is below
+$0.05\,K_{\max}$, and the solve is repeated, up to eight times, the last attempt with the full
+[!param](/Problem/TriSubChannel1PhaseProblem/maxit). Each retry also doubles $\gamma$, which keeps
+the damping at the level the preconditioner needs for the remaining outer iterations.
 
 Because $\gamma$ is bounded, $K$ still tends to zero with the residual. Where the preconditioner
 cannot solve the undamped system, $K$ instead settles at the smallest value it can handle; the
@@ -641,8 +646,8 @@ linear solve, while post-solve relaxation damps the fixed-point update after tha
 
 !! Intentional comment to provide extra spacing
 
-The combination of (i) residual-scaled crossflow damping that backs off when the linear solve fails
-or the outer iteration diverges and (ii) independently configurable equation and solution relaxation
+The combination of (i) residual-scaled crossflow damping that is raised when the linear solve fails
+and (ii) independently configurable equation and solution relaxation
 improves robustness of the nested solve during rapid crossflow changes. Crossflow damping and equation relaxation both increase entries on the crossflow diagonal,
 but neither guarantees strict diagonal dominance for every geometry and flow state. Post-solve
 relaxation does not alter matrix conditioning. Because all three preserve the fixed point, the
