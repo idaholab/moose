@@ -851,7 +851,9 @@ Assembly::reinitFE(const Elem * elem)
       const_cast<std::vector<Point> &>(_holder_fe_helper[dim]->get_xyz()));
   _current_JxW.shallowCopy(const_cast<std::vector<Real> &>(_holder_fe_helper[dim]->get_JxW()));
 
-  if (_subproblem.haveADObjects())
+  // The AD map is needed for the AD JxW, quadrature points and coordinate transformation and for
+  // the AD shape function gradients, which use its inverse
+  if (_subproblem.haveADObjects() && (_need_ad_volume_map || _need_ad_grad_phi))
   {
     auto n_qp = _current_qrule->n_points();
     resizeADMappingObjects(n_qp, dim);
@@ -872,6 +874,8 @@ Assembly::reinitFE(const Elem * elem)
 
     for (const auto & it : _fe[dim])
     {
+      if (!_need_ad_grad_phi)
+        break;
       FEBase & fe = *it.second;
       auto fe_type = it.first;
       auto num_shapes = FEInterface::n_shape_functions(fe_type, elem);
@@ -893,6 +897,8 @@ Assembly::reinitFE(const Elem * elem)
     }
     for (const auto & it : _vector_fe[dim])
     {
+      if (!_need_ad_grad_phi)
+        break;
       FEVectorBase & fe = *it.second;
       auto fe_type = it.first;
       auto num_shapes = FEInterface::n_shape_functions(fe_type, elem);
