@@ -109,6 +109,11 @@ merged: names shift as a design is revised, and a body is rarely updated to matc
 name against its `registerMooseObject` call or its documentation page, and confirm a count or
 measurement against the diff.
 
+A PR's comments can supersede its body - a reviewer or the author may have narrowed a claim after
+the description was written, for instance by establishing that a stated benefit only partially
+applies. Skim the thread (`gh pr view <N> --json comments`) for this kind of correction before
+citing the body's framing, especially for a performance or capability claim.
+
 ## Step 4 - Decide what earns an entry
 
 A reader wants changes that affect their inputs, results, or workflow. Include new objects and
@@ -128,6 +133,16 @@ Leave out:
   methods that no input or application code names.
 - **Cosmetic web and tooling changes** a reader cannot act on, such as scrollbar behavior or a URL
   change in file headers.
+
+An entry belongs in `MOOSE Bug Fixes` only when a user's existing, documented-as-working input or
+workflow produced a wrong result. A new capability that happens to close an issue, such as adding
+support for a case that was never claimed to work, or a change to test or CI infrastructure rather
+than framework behavior, belongs in `MOOSE Improvements` even if its issue or PR title says "fix".
+
+Before writing an entry that frames something as completed or backfilled, check for an open PR or
+issue referencing the same tracking issue as the merged work. If the completion claim depends on
+unmerged work, such as a follow-up enforcing a convention the merged PRs only backfilled, wait for
+it to merge or drop the entry rather than overstating what is actually done.
 
 Most of what merges in a month does not earn an entry. A full month's 100-150 merges yield roughly
 60-90 entries, so expect to set aside close to two in five PRs without writing anything for it.
@@ -168,6 +183,11 @@ alone, with the name left out, is worse than the bare noun phrase it replaced.
 
 Keep them under roughly 75 characters. If the summary runs longer, move the qualifying detail into
 the body's first sentence, where it is needed anyway.
+
+Check that the heading's claim is no broader than its constituent PRs. Rolling two narrow fixes
+under one heading can drift the claim from "what these PRs did" to a general property of the
+system they did not actually establish; name the specific systems or objects they touched instead
+of a system-wide claim neither PR earns.
 
 A heading over a group of *unrelated* fixes cannot honestly summarize them. Name the area the
 fixes share and mark it as a fix group, by appending a word such as "fixes" or "robustness" to the
@@ -232,6 +252,9 @@ request it came from:
   subclasses.
 - Vary the construction. A whole section of "X gained a parameter" reads as generated; prefer "X
   takes a new `param`", "`param` selects ...", or stating what the parameter does.
+- Expand an abbreviation or internal term on first use if a reader outside the PR's discussion
+  would not recognize it, such as "COOrdinate-format" rather than bare "COO". This is distinct
+  from naming objects and parameters - it is about not assuming the reader was in the review.
 
 Cite every change, with the citation starting its own line rather than trailing the last sentence.
 This holds even when it would fit on the preceding line; inside a bullet, indent it to the bullet's
@@ -250,7 +273,9 @@ Conventions this file's prose follows:
   parameters as `[!param](/Block/Type/param_name)`.
 - Serial (Oxford) comma, which these files use throughout.
 - ASCII only, per `AGENTS.md` section 4. Write "-" rather than an en dash.
-- State that results change where they do, in those words; avoid "bit-for-bit".
+- State that results change where they do, in those words; avoid "bit-for-bit". A Jacobian-only fix
+  changes convergence behavior and iteration count, not the converged answer - do not say "results
+  change" unless the fix is in the residual or in a value a user reads out.
 - Say what a flag or parameter is called exactly as a user would type it.
 
 ## Step 7 - Verify before reporting done
@@ -279,6 +304,10 @@ Then re-check the heading structure and that the file is pure ASCII
 Measure the length against the budget in Step 6 and against the two months read in Step 2. Writing
 tight sentences is not the same as writing a newsletter of the right length, and the difference
 only shows up in the count.
+
+Prefer claims the PR's own diff or body establishes. A true fact learned by exploring adjacent
+code the PR did not change is usually not worth the length or the extra verification burden it
+adds - drop it unless a reader cannot understand the entry's scope without it.
 
 Finally, confirm that no entry anyone else wrote was changed or lost, by diffing against the base
 branch rather than against the file as it looked when the work started:
