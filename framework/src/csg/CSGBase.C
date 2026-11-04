@@ -10,6 +10,7 @@
 #include "CSGBase.h"
 #include "CSGUtils.h"
 #include "JsonIO.h"
+#include "MooseUtils.h"
 
 namespace CSG
 {
@@ -1232,6 +1233,25 @@ CSGBase::checkUniverseLinking() const
       mooseWarning("Surface with name ", surf.getName(), " is not linked to root universe.");
 }
 
+void
+CSGBase::checkCellUniverseMembership() const
+{
+  // Ordered containers so the reported cell and universe names do not depend on the
+  // unordered universe list iteration order
+  std::map<std::string, std::set<std::string>> cell_to_universe_names;
+  for (const CSGUniverse & univ : getAllUniverses())
+    for (const CSGCell & cell : univ.getAllCells())
+      cell_to_universe_names[cell.getName()].insert(univ.getName());
+
+  for (const auto & [cell_name, univ_names] : cell_to_universe_names)
+    if (univ_names.size() > 1)
+      mooseError("Cell with name ",
+                 cell_name,
+                 " belongs to more than one universe (",
+                 MooseUtils::join(univ_names, ", "),
+                 "). Each cell must belong to exactly one universe.");
+}
+
 bool
 CSGBase::areCSGObjectsLinked() const
 {
@@ -1594,6 +1614,8 @@ CSGBase::generateOutput() const
 {
   // Check that orphaned universes do not exist in universe list of CSGBase object
   checkUniverseLinking();
+  // Check that no cell is shared between universes, which downstream codes cannot represent
+  checkCellUniverseMembership();
 
   nlohmann::json csg_json;
 
