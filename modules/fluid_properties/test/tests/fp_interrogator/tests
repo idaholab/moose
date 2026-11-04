@@ -21,7 +21,7 @@ Specific heat at constant volume:                716.75  J/\(kg-K\)
 Thermal conductivity:                           0.02568  W/\(m-K\)
 Volumetric expansion coefficient:        0.003333333333  1/K'
 
-    requirement = "The fluid properties interrogator shall output static-state "
+    requirement = "The system shall use the fluid properties interrogator to output static-state "
       "fluid properties for (p, T) input."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
@@ -38,7 +38,7 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
                  '"k":0.[0-9]+,"mu":1.823e-05,"p":100000.0,"rho":1.[0-9]+,'
                  '"s":2422.[0-9]+,"v":0.86[0-9]+}}'
 
-    requirement = "The fluid properties interrogator shall output static-state "
+    requirement = "The system shall use the fluid properties interrogator to output static-state "
       "fluid properties for (p, T) input in JSON format."
     issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
@@ -66,7 +66,7 @@ Specific heat at constant volume:                716.75  J/\(kg-K\)
 Thermal conductivity:                           0.02568  W/\(m-K\)
 Volumetric expansion coefficient:        0.003333333333  1/K'
 
-    requirement = "The fluid properties interrogator shall output static-state "
+    requirement = "The system shall use the fluid properties interrogator to output static-state "
       "fluid properties for (rho, e) input."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
@@ -82,7 +82,7 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
                  '"cp":1003.45,"cv":716.[0-9]+,"e":215025.0,"h":301034.[0-9]+,"k":0.[0-9]+,'
                  '"mu":1.823e-05,"p":86009.[0-9]+,"rho":1.0,"s":2465.[0-9]+,"v":1.0}}'
 
-    requirement = "The fluid properties interrogator shall output static-state "
+    requirement = "The system shall use the fluid properties interrogator to output static-state "
       "fluid properties for (rho, e) input in JSON format."
     issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
@@ -110,7 +110,7 @@ Specific heat at constant volume:                716.75  J/\(kg-K\)
 Thermal conductivity:                           0.02568  W/\(m-K\)
 Volumetric expansion coefficient:              0.002867  1/K'
 
-    requirement = "The fluid properties interrogator shall output static-state "
+    requirement = "The system shall use the fluid properties interrogator to output static-state "
       "fluid properties for (rho, p) input."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
@@ -126,7 +126,7 @@ Volumetric expansion coefficient:              0.002867  1/K'
                  '"cv":716.[0-9]+,"e":250000.[0-9]+,"h":350000.[0-9]+,"k":0.[0-9]+,'
                  '"mu":1.823e-05,"p":100000.0,"rho":1.0,"s":2573.[0-9]+,"v":1.0}}'
 
-    requirement = "The fluid properties interrogator shall output static-state "
+    requirement = "The system shall use the fluid properties interrogator to output static-state "
       "fluid properties for (rho, p) input in JSON format."
     issues = '#13741'
     design = 'FluidPropertiesInterrogator.md'
@@ -173,7 +173,7 @@ Specific heat at constant volume:           1.785714286  J/\(kg-K\)
 Thermal conductivity:                           0.02568  W/\(m-K\)
 Volumetric expansion coefficient:          0.3333333333  1/K'
 
-    requirement = "The fluid properties interrogator shall output static-state "
+    requirement = "The system shall use the fluid properties interrogator to output static-state "
       "and stagnation-state fluid properties for (rho, rhou, rhoE) input with a single-phase fluid properties object."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
@@ -192,7 +192,7 @@ Volumetric expansion coefficient:          0.3333333333  1/K'
                  '"e":5.0,"h":6.[0-9]+,"k":0.[0-9]+,"mu":1.823e-05,"p":0.[0-9]+,"rho":0.5,'
                  '"s":2.[0-9]+,"v":2.0}}'
 
-    requirement = "The fluid properties interrogator shall output static-state "
+    requirement = "The system shall use the fluid properties interrogator to output static-state "
       "and stagnation-state fluid properties for (rho, rhou, rhoE) input with "
       "a single-phase fluid properties object in JSON format."
     issues = '#13741'
@@ -248,7 +248,7 @@ Specific heat at constant volume:                  3000  J/\(kg-K\)
 Thermal conductivity:                              0.05  W/\(m-K\)
 Volumetric expansion coefficient:        0.003333333333  1/K'
 
-    requirement = "The fluid properties interrogator shall output two-phase and static-state, "
+    requirement = "The system shall use the fluid properties interrogator to output two-phase and static-state, "
       "single-phase fluid properties for (p, T) input with a two-phase fluid properties object."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
@@ -269,7 +269,7 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
                  '"cv":2999.[0-9]+,"e":899999.[0-9]+,"h":989999.[0-9]+,"k":0.[0-9]+,"mu":1.7e-05,'
                  '"p":100000.0,"rho":1.[0-9]+,"s":15368.[0-9]+,"v":0.[0-9]+}}}'
 
-    requirement = "The fluid properties interrogator shall output two-phase and "
+    requirement = "The system shall use the fluid properties interrogator to output two-phase and "
       "static-state, single-phase fluid properties for (p, T) input with a "
       "two-phase fluid properties object in JSON format."
     issues = '#13741'
@@ -326,7 +326,7 @@ Specific heat at constant pressure:              3071.5  J/\(kg-K\)
 Specific heat at constant volume:                2772.5  J/\(kg-K\)
 Thermal conductivity:                           0.02568  W/\(m-K\)'
 
-    requirement = "The fluid properties interrogator shall output two-phase and static-state, "
+    requirement = "The system shall use the fluid properties interrogator to output two-phase and static-state, "
       "single-phase fluid properties for (p, T) input with a two-phase NCG fluid properties object when the NCG mass fraction is provided."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
@@ -338,7 +338,7 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     allow_test_objects = true
     capabilities = 'method=opt'
     expect_out = 'Mass fraction 0:\s+0.9930237384'
-    requirement = "The fluid properties interrogator shall output two-phase and static-state, "
+    requirement = "The system shall use the fluid properties interrogator to output two-phase and static-state, "
       "single-phase fluid properties for (p, T) input with a two-phase NCG fluid properties object when the NCG mass fraction is not provided."
     issues = '#28335'
     design = 'FluidPropertiesInterrogator.md'
@@ -359,7 +359,7 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
                  '"cp":3071.[0-9]+,"cv":2772.[0-9]+,"e":1033465.[0-9]+,"h":1144919.[0-9]+,'
                  '"k":0.[0-9]+,"mu":1.[0-9]+e-05,"p":100000.0,"rho":0.[0-9]+,"s":14838.[0-9]+,"v":1.[0-9]+}}}'
 
-    requirement = "The fluid properties interrogator shall output two-phase "
+    requirement = "The system shall use the fluid properties interrogator to output two-phase "
       "and static-state, single-phase fluid properties for (p, T) input with "
       "a two-phase NCG fluid properties object in JSON format."
     issues = '#13741'
@@ -389,7 +389,7 @@ Specific heat at constant pressure:              1271.5  J/\(kg-K\)
 Specific heat at constant volume:                 972.5  J/\(kg-K\)
 Thermal conductivity:                           0.02568  W/\(m-K\)'
 
-    requirement = "The fluid properties interrogator shall output static-state, "
+    requirement = "The system shall use the fluid properties interrogator to output static-state, "
       "single-phase fluid properties for (rho, e) input with a vapor mixture fluid properties object."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
@@ -406,7 +406,7 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
                  '"cv":972.[0-9]+,"e":2477165.[0-9]+,"h":3238782.[0-9]+,"k":0.[0-9]+,'
                  '"mu":1.[0-9]+e-05,"p":904043.[0-9]+,"rho":1.[0-9]+,"s":5966.[0-9]+,"v":0.[0-9]+}}'
 
-    requirement = "The fluid properties interrogator shall output static-state, "
+    requirement = "The system shall use the fluid properties interrogator to output static-state, "
       "single-phase fluid properties for (rho, e) input with a vapor mixture "
       "fluid properties object in JSON format."
     issues = '#13741'
@@ -425,7 +425,7 @@ Critical pressure:                                   25  Pa
 Saturation temperature:                2.0000000000e\+05  K
 Latent heat of vaporization:           4.5931000000e\+08  J/kg'
 
-    requirement = "The fluid properties interrogator shall output two-phase "
+    requirement = "The system shall use the fluid properties interrogator to output two-phase "
       "fluid properties for (p) input with a two-phase fluid properties object."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
@@ -440,7 +440,7 @@ Latent heat of vaporization:           4.5931000000e\+08  J/kg'
     capabilities = 'method=opt'
     expect_out = '{"2-phase":{"T_sat":200000.0,"h_lat":459309999.[0-9]+,"p_critical":25.0}}'
 
-    requirement = "The fluid properties interrogator shall output two-phase "
+    requirement = "The system shall use the fluid properties interrogator to output two-phase "
       "fluid properties for (p) input with a two-phase fluid properties "
       "object in JSON format."
     issues = '#13741'
@@ -460,7 +460,7 @@ Saturation pressure:                                900  Pa
 Latent heat of vaporization:           6.8896500000e\+05  J/kg
 Surface tension:                                   1500  N/m'
 
-    requirement = "The fluid properties interrogator shall output two-phase "
+    requirement = "The system shall use the fluid properties interrogator to output two-phase "
       "fluid properties for (T) input with a two-phase fluid properties object."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
@@ -476,7 +476,7 @@ Surface tension:                                   1500  N/m'
     expect_out = '{"2-phase":{"h_lat":688964.[0-9]+,"p_critical":25.0,"p_sat":900.0,'
                  '"sigma":1500.0}}'
 
-    requirement = "The fluid properties interrogator shall output two-phase "
+    requirement = "The system shall use the fluid properties interrogator to output two-phase "
       "fluid properties for (T) input with a two-phase fluid properties "
       "object in JSON format."
     issues = '#13741'
@@ -490,7 +490,7 @@ Surface tension:                                   1500  N/m'
     capabilities = 'method=opt'
     expect_err = "The type of the parameter 'fp' must be derived from type 'SinglePhaseFluidProperties', 'VaporMixtureFluidProperties', or 'TwoPhaseFluidProperties'"
 
-    requirement = "The fluid properties interrogator shall throw an error if an
+    requirement = "The system shall throw an error from the fluid properties interrogator if an
       incompatible fluid properties object is supplied."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
@@ -504,7 +504,7 @@ Surface tension:                                   1500  N/m'
     expect_err = "\(rho\,e\) has been specified\; T cannot be specified\."
     cli_args = "FluidPropertiesInterrogator/T=300"
 
-    requirement = "The fluid properties interrogator shall throw an error if an
+    requirement = "The system shall throw an error from the fluid properties interrogator if
       extraneous parameter(s) are supplied."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
@@ -518,7 +518,7 @@ Surface tension:                                   1500  N/m'
     expect_err = "For one-phase fluid properties\, you must provide one of the following
 combinations of thermodynamic properties:"
 
-    requirement = "The fluid properties interrogator shall throw an error if an
+    requirement = "The system shall throw an error from the fluid properties interrogator if
       no valid input sets were supplied."
     issues = '#12995'
     design = 'FluidPropertiesInterrogator.md'
