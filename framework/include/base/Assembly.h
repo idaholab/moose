@@ -269,7 +269,11 @@ public:
 
   const MooseArray<ADReal> & adJxW() const { return _ad_JxW; }
 
-  const MooseArray<ADReal> & adJxWFace() const { return _ad_JxW_face; }
+  const MooseArray<ADReal> & adJxWFace() const
+  {
+    _need_ad_face_map = true;
+    return _ad_JxW_face;
+  }
 
   const MooseArray<ADReal> & adCurvatures() const;
 
@@ -296,6 +300,7 @@ public:
     // from a volumetric or face object so we should set both volumetric and face xyz to true
     _calculate_xyz = true;
     _calculate_face_xyz = true;
+    _need_ad_face_map = true;
 
     _calculate_ad_coord = true;
     return _ad_coord;
@@ -382,7 +387,11 @@ public:
     return _neighbor_extra_elem_ids[id];
   }
 
-  const MooseArray<ADPoint> & adNormals() const { return _ad_normals; }
+  const MooseArray<ADPoint> & adNormals() const
+  {
+    _need_ad_face_map = true;
+    return _ad_normals;
+  }
 
   const MooseArray<ADPoint> & adQPoints() const
   {
@@ -393,6 +402,7 @@ public:
   const MooseArray<ADPoint> & adQPointsFace() const
   {
     _calculate_face_xyz = true;
+    _need_ad_face_map = true;
     return _ad_q_points_face;
   }
 
@@ -2774,6 +2784,9 @@ protected:
   /// mesh propagates the displacement derivatives of the face map into every shape function
   /// gradient, which is expensive and unnecessary when only values and normals are used.
   mutable bool _need_ad_grad_phi_face = false;
+  /// Whether any object needs the AD face JxW, normals, quadrature points, curvatures or coordinate
+  /// transformation, which computeFaceMap provides on displaced meshes
+  mutable bool _need_ad_face_map = false;
 
   /**
    * The residual vector tags that Assembly could possibly contribute to.
