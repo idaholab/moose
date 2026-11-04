@@ -45,7 +45,7 @@ protected:
   /// The id of the node holding the dependent degree of freedom
   const dof_id_type _secondary_node;
 
-  /// The ids of the nodes holding the degrees of freedom the dependent one is tied to
+  /// The ids of the nodes whose degrees of freedom the dependent degree of freedom depends on
   const std::vector<dof_id_type> & _primary_nodes;
 
   /// The coefficient of each entry of _primary_nodes in the exact constraint

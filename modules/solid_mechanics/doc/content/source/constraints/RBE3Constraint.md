@@ -4,25 +4,24 @@
 
 ## Description
 
-`RBE3Constraint` is an interpolation element. A single
-reference node is made dependent on a set of independent nodes: it moves as the weighted
-least-squares rigid-body fit of their translations. By the transpose of that same relation, a load
-applied at the reference node is distributed over the independent nodes.
+`RBE3Constraint` is an interpolation element. One reference node depends on a set of independent
+nodes. The reference node moves as the weighted least-squares rigid-body fit of their translations.
+The transpose of this relation distributes a load on the reference node to the independent nodes.
 
-Only the translations of the independent nodes enter the fit. Their rotations are never used.
+The fit uses only the translations of the independent nodes. It does not use their rotations.
 
-The constraint is kinematic: it adds [MultiPointConstraint.md] exact constraints to the `DofMap`. It therefore
-stiffens nothing. Use it to introduce a load or a mass at a point without making the region under it
-rigid, which is what [RBE2Constraint.md] would do.
+The constraint adds [MultiPointConstraint.md] exact constraints to the `DofMap`, so it adds no
+stiffness. Use it to apply a load or a mass at a point. Unlike [RBE2Constraint.md], it does not make
+the region below the point rigid.
 
 ### Least-squares fit
 
-Let node $i$ of the independent set carry the weight $w_i$, sit at $\mathbf{x}_i$ and translate by
-$\mathbf{u}_i$. Write $W = \sum_i w_i$ for the total weight,
-$\mathbf{x}_c = \sum_i w_i \mathbf{x}_i / W$ for the weighted centroid,
-$\mathbf{r}_i = \mathbf{x}_i - \mathbf{x}_c$, and
-$\mathbf{d} = \mathbf{x}_{\mathrm{ref}} - \mathbf{x}_c$ for the offset of the reference node from
-that centroid. All positions come from the undisplaced mesh.
+Node $i$ of the independent set has the weight $w_i$, the position $\mathbf{x}_i$, and the
+translation $\mathbf{u}_i$. The total weight is $W = \sum_i w_i$, and the weighted centroid is
+$\mathbf{x}_c = \sum_i w_i \mathbf{x}_i / W$. Let $\mathbf{r}_i = \mathbf{x}_i - \mathbf{x}_c$.
+The offset of the reference node from the centroid is
+$\mathbf{d} = \mathbf{x}_{\mathrm{ref}} - \mathbf{x}_c$. All positions are on the undisplaced
+mesh.
 
 The fit is the rigid-body motion that minimizes the weighted residual
 $\sum_i w_i \lvert \mathbf{u}_i - (\bar{\mathbf{u}} + \boldsymbol{\theta} \times \mathbf{r}_i)
@@ -35,17 +34,17 @@ J = \sum_i w_i \left( \lvert \mathbf{r}_i \rvert^{2} I
     - \mathbf{r}_i \mathbf{r}_i^{\top} \right),
 \end{equation}
 
-where $J$ is the weighted second-moment tensor of the independent set. The reference node is
-constrained to that motion, evaluated at its own position:
+where $J$ is the weighted second-moment tensor of the independent set. The reference node gets
+this motion at its own position:
 
 \begin{equation}
 \mathbf{u}_{\mathrm{ref}} = \bar{\mathbf{u}} + \boldsymbol{\theta} \times \mathbf{d}, \qquad
 \boldsymbol{\theta}_{\mathrm{ref}} = \boldsymbol{\theta} .
 \end{equation}
 
-The rotation exact constraints are added only when [!param](/Constraints/RBE3Constraint/rotations) is given. The
-three translation exact constraints are always added. Reading the coefficients off the two relations, the
-$3\times3$ blocks that node $i$ contributes are
+The object always adds the three translation exact constraints. It adds the rotation exact
+constraints only when you set [!param](/Constraints/RBE3Constraint/rotations). The coefficients of
+node $i$ are the $3\times3$ blocks
 
 \begin{equation}
 \frac{\partial \mathbf{u}_{\mathrm{ref}}}{\partial \mathbf{u}_i}
@@ -55,80 +54,84 @@ $3\times3$ blocks that node $i$ contributes are
   = w_i\, J^{-1} [\mathbf{r}_i]_\times ,
 \end{equation}
 
-with $[\mathbf{a}]_\times$ the skew matrix satisfying
-$[\mathbf{a}]_\times \mathbf{b} = \mathbf{a} \times \mathbf{b}$. The weights are relative, not
-absolute: scaling every weight by the same factor changes nothing.
+where $[\mathbf{a}]_\times$ is the skew matrix with
+$[\mathbf{a}]_\times \mathbf{b} = \mathbf{a} \times \mathbf{b}$. The weights are relative. If
+you multiply all weights by the same factor, the result does not change.
 
 ### Load distribution
 
-Because an exact constraint reduces the load vector by $C^{\top}$, a force $\mathbf{F}$ applied at the
-reference node reaches node $i$ as
+libMesh reduces the load vector with $C^{\top}$. A force $\mathbf{F}$ on the reference node gives
+this force on node $i$:
 
 \begin{equation}
 \mathbf{F}_i = \frac{w_i}{W}\,\mathbf{F}
   + w_i \left( J^{-1}(\mathbf{d} \times \mathbf{F}) \right) \times \mathbf{r}_i .
 \end{equation}
 
-The first term is the weighted share of the resultant. The second term is the couple that carries
-the moment of $\mathbf{F}$ about the centroid, and it vanishes when the reference node sits at the
-weighted centroid. The distributed forces sum to $\mathbf{F}$ and produce no net moment about the
-reference node.
+The first term is the weighted part of the resultant. The second term is a couple that carries
+the moment of $\mathbf{F}$ about the centroid. This term is zero when the reference node is at the
+weighted centroid. The sum of the distributed forces is $\mathbf{F}$, and their net moment about
+the reference node is zero.
 
-For the unit square patch with corners $(0,0)$, $(1,0)$, $(1,1)$, $(0,1)$, a reference node at the
-patch center $(0.5, 0.5)$ and a unit force along $z$, the table gives the two cases the regression
-tests measure. The measured columns come from the truss reactions of
-`rbe3_force_split_equal.i`, which the `rbe3_force_split_weighted` test reruns with the weighted
-weight set; both agree with the closed form to better than 1e-12.
+The table gives the two cases that the regression tests measure. The patch is the unit square with
+corners $(0,0)$, $(1,0)$, $(1,1)$, and $(0,1)$. The reference node is at the center $(0.5, 0.5)$,
+and a unit force acts along $z$. The measured values are the truss reactions of
+`rbe3_force_split_equal.i`. The `rbe3_force_split_weighted` test runs the same input with the
+second set of weights. In both cases, the difference from the closed form is less than 1e-12.
 
 | weights | $\mathbf{x}_c$ | $\mathbf{d}$ | $F_z$ closed form | $F_z$ measured |
 |---|---|---|---|---|
 | 1, 1, 1, 1 | $(0.5, 0.5)$ | $(0, 0)$ | $1/4$ at each corner | 0.24999999999942 at each corner |
 | 2, 1, 1, 1 | $(0.4, 0.4)$ | $(0.1, 0.1)$ | $2/7,\; 3/14,\; 2/7,\; 3/14$ | 0.28571428571489, 0.21428571428617, 0.28571428571489, 0.21428571428617 |
 
-In the weighted case $W = 5$ and $J^{-1}(\mathbf{d} \times \mathbf{F}) = (1/14, -1/14, 0)$. Dropping
-the $\mathbf{d}$ term would give $0.4,\ 0.2,\ 0.2,\ 0.2$ instead.
+In the weighted case, $W = 5$ and $J^{-1}(\mathbf{d} \times \mathbf{F}) = (1/14, -1/14, 0)$.
+Without the $\mathbf{d}$ term, the forces are $0.4,\ 0.2,\ 0.2,\ 0.2$.
 
 ### Operating envelope
 
-The constraint adds no stiffness, because the reduced stiffness matrix is the original one with the
-reference degrees of freedom eliminated, and the reference node carries no element of its own. The
-lowest eigenvalue of a clamped plate shifts by only 1.4e-5 relative when an RBE3 constraint over four
-interior nodes is added. That residual shift is proportional to the Young's modulus of the soft stub
-element that carries the reference node, so it belongs to the stub and not to the constraint.
+The constraint adds no element. libMesh moves the stiffness at the reference node to the
+independent nodes through $C^{\top} K C$. A soft stub element at the reference node is then the
+only source of extra stiffness. An RBE3 constraint on four interior nodes of a clamped plate changes
+the lowest eigenvalue by 1.4e-5 (relative). This change is proportional to the Young's modulus of
+the stub.
 
 The object is three-dimensional. [!param](/Constraints/RBE3Constraint/displacements) takes exactly
-three variables, and [!param](/Constraints/RBE3Constraint/rotations), when given, takes three as
-well.
+three variables. [!param](/Constraints/RBE3Constraint/rotations) is optional, and it also takes
+exactly three variables.
 
-[!param](/Constraints/RBE3Constraint/reference_boundary) must resolve to exactly one node, and that
-node must solve every variable that is constrained on it. A continuum block does not solve
-rotations, so a reference node with [!param](/Constraints/RBE3Constraint/rotations) must sit on a
-block that does, such as a beam block.
+[!param](/Constraints/RBE3Constraint/reference_boundary) must contain exactly one node. This node
+must have a degree of freedom for each variable that the constraint ties at it. A continuum block
+has no rotations. When you set [!param](/Constraints/RBE3Constraint/rotations), put the reference
+node on a block that has rotations, for example a beam block.
 
-[!param](/Constraints/RBE3Constraint/weights) holds one weight per entry of
-[!param](/Constraints/RBE3Constraint/independent_boundaries), and that weight applies to every node
-of that node set. Give each node its own node set to give it its own weight. Every weight must be
-positive. A size mismatch between the two parameters is an error, and so is a node that appears in
-more than one of the listed node sets, because it could then carry two weights.
+[!param](/Constraints/RBE3Constraint/weights) has one weight for each entry of
+[!param](/Constraints/RBE3Constraint/independent_boundaries). The weight applies to all nodes of
+that node set. To give a node its own weight, put it in its own node set. Each weight must be
+positive. The two parameters must have the same size. A node must not be in more than one of the
+node sets, because it would then have two weights.
 
-The rotation of the fit enters the exact constraints only when [!param](/Constraints/RBE3Constraint/rotations) is
-given, or when the offset of the reference node from the weighted centroid exceeds a round-off
-fraction of the radius of gyration of the independent set. Only then is $J$ inverted, and only then
-do independent nodes that are collinear, or a single independent node, raise an error, because $J$
-is singular in those cases. A single independent node coincident with the reference node, with
-[!param](/Constraints/RBE3Constraint/rotations) unset, therefore remains valid.
+The object uses the rotation of the fit, and inverts $J$, only in two cases. The first case is
+when you set [!param](/Constraints/RBE3Constraint/rotations). The second case is when the reference
+node is farther from the weighted centroid than `libMesh::TOLERANCE` times the radius of gyration
+of the independent set. $J$ is singular when the independent nodes are collinear or when there is
+only one independent node. If the object must invert a singular $J$, it raises an error. One
+independent node at the position of the reference node is valid when you do not set
+[!param](/Constraints/RBE3Constraint/rotations).
 
-Further errors: the reference node listed among the independent nodes, an independent node that
-does not solve one of the three displacements, and node sets that hold no nodes at all.
+The constraint also raises an error in these conditions:
 
-The coefficients are built once from the undisplaced mesh, so the constraint describes small
-motions about the reference configuration, and `use_displaced_mesh = true` raises an error.
+- The reference node is one of the independent nodes.
+- An independent node has no degree of freedom for one of the three displacements.
+- The node sets contain no nodes.
+
+The object computes the coefficients from the undisplaced mesh, so the constraint describes small
+motions about the reference configuration. `use_displaced_mesh = true` raises an error.
 
 ## Example input syntax
 
-The reference node at the center of a four-truss patch is tied to the four corner nodes with equal
-weights. The load is applied to the stub that carries the reference node, and the constraint splits
-it onto the corners.
+This input ties the reference node at the center of a four-truss patch to the four corner nodes,
+with equal weights. The load acts on the stub at the reference node. The constraint distributes the
+load to the corners.
 
 !listing modules/solid_mechanics/test/tests/multipoint_constraints/rbe3/rbe3_force_split_equal.i block=Constraints
 

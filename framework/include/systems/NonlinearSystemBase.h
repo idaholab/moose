@@ -786,10 +786,10 @@ public:
 
 protected:
   /**
-   * Rebuild the exact constraints when a constraint reports changed coefficients, for instance
-   * through a Control. Only the start of a solve calls this, before any residual evaluation, the
-   * pre-SMO residual included, so that every residual and Jacobian of a solve sees the same
-   * constraints.
+   * Rebuild the exact constraints when a constraint reports changed coefficients, for example from
+   * a Control. Only NonlinearSystem::solve() and NonlinearEigenSystem::solve() call this. They
+   * call it before the first residual evaluation of the solve, the pre-SMO residual included. All
+   * residuals and Jacobians of a solve then use the same constraints.
    */
   void updateExactConstraints();
 
@@ -1007,7 +1007,8 @@ protected:
   /// Constraints storage object
   ConstraintWarehouse _constraints;
 
-  /// Applies the exact constraints to this system; built when the first exact constraint is added
+  /// Applies the exact constraints to this system. The system builds it when it adds the first
+  /// constraint that uses exact constraints.
   std::unique_ptr<ExactConstraintFunctor> _exact_constraint_functor;
 
   /// Applies the same exact constraints to the displaced copy of this system
@@ -1111,8 +1112,8 @@ protected:
 
 private:
   /**
-   * Rebuild the exact constraints of this system and of its displaced copy. Only coefficients may
-   * change: the sparsity pattern is not rebuilt.
+   * Rebuild the exact constraints of this system and of its displaced copy. This does not rebuild
+   * the sparsity pattern, so only the coefficients of the rows can change.
    */
   void reinitExactConstraints();
 
