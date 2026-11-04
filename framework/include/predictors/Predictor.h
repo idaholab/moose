@@ -40,6 +40,9 @@ public:
 
   virtual NumericVector<Number> & solutionPredictor() { return _solution_predictor; }
 
+  /// Whether the prediction is skipped in a repeated time step after a failed time step
+  bool skipAfterFailedTimestep() const { return _skip_after_failed_timetep; }
+
 protected:
   FEProblemBase & _fe_problem;
   NonlinearSystemBase & _nl;

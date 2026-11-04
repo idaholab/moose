@@ -186,6 +186,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _n_linear_iters(0),
     _n_residual_evaluations(0),
     _final_residual(0.),
+    _predictor_applied(false),
     _computing_pre_smo_residual(false),
     _pre_smo_residual(0),
     _initial_residual(0),
@@ -942,10 +943,12 @@ NonlinearSystemBase::setInitialSolution()
   deactivateAllMatrixTags();
 
   NumericVector<Number> & initial_solution(solution());
+  _predictor_applied = false;
   if (_predictor.get())
   {
     if (_predictor->shouldApply())
     {
+      _predictor_applied = true;
       TIME_SECTION("applyPredictor", 2, "Applying Predictor");
 
       _predictor->apply(initial_solution);

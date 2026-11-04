@@ -29,7 +29,8 @@ Predictor::validParams()
       "Skip the predictor if the previous solution time is in this list of times");
   params.addParam<bool>("skip_after_failed_timestep",
                         false,
-                        "Skip prediction in a repeated time step after a failed time step");
+                        "Skip prediction in a repeated time step after a failed time step. A time "
+                        "step that fails at dtmin is then repeated once without prediction.");
   params.addParam<NonlinearSystemName>(
       "nl_sys", "nl0", "The nonlinear system that this predictor should be applied to.");
 

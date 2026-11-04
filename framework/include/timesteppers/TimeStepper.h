@@ -80,6 +80,12 @@ public:
   virtual bool converged() const;
 
   /**
+   * Whether a solve that failed at dtmin is repeated with the same dt: true if a predictor was
+   * applied in that solve and is skipped after a failed time step (skip_after_failed_timestep)
+   */
+  bool retryWithoutPredictor() const;
+
+  /**
    * Get the current_dt
    */
   Real getCurrentDT() { return _current_dt; }

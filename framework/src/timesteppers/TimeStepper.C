@@ -11,6 +11,8 @@
 #include "FEProblem.h"
 #include "TransientBase.h"
 #include "MooseApp.h"
+#include "NonlinearSystemBase.h"
+#include "Predictor.h"
 
 InputParameters
 TimeStepper::validParams()
@@ -84,6 +86,11 @@ TimeStepper::computeStep()
 
     if (converged())
       _current_dt = computeInitialDT();
+    else if (retryWithoutPredictor())
+    {
+      _console << "\nSolve failed at dtmin, retrying without predictor." << std::endl;
+      _current_dt = _dt;
+    }
     else
       _current_dt = computeFailedDT();
   }
@@ -91,6 +98,11 @@ TimeStepper::computeStep()
   {
     if (converged())
       _current_dt = computeDT();
+    else if (retryWithoutPredictor())
+    {
+      _console << "\nSolve failed at dtmin, retrying without predictor." << std::endl;
+      _current_dt = _dt;
+    }
     else
       _current_dt = computeFailedDT();
   }
@@ -202,6 +214,22 @@ bool
 TimeStepper::converged() const
 {
   return _converged;
+}
+
+bool
+TimeStepper::retryWithoutPredictor() const
+{
+  if (converged() || _dt > _dt_min)
+    return false;
+
+  for (const auto i : make_range(_fe_problem.numNonlinearSystems()))
+  {
+    auto & nl = _fe_problem.getNonlinearSystemBase(i);
+    const auto predictor = nl.getPredictor();
+    if (predictor && nl.predictorApplied() && predictor->skipAfterFailedTimestep())
+      return true;
+  }
+  return false;
 }
 
 Real
