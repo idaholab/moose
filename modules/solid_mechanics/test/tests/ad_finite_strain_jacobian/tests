@@ -5,8 +5,8 @@
     input = 'bending_jacobian.i'
     exodiff = 'bending_jacobian_out.e'
     issues = '#7228 #13260'
-    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
-                   bar bending simulation in 2D using AD and match non-AD methods'
+    requirement = 'The system shall adequately simulate a
+                   bar bending simulation in 2D using finite strain methods in Solid Mechanics with AD and match non-AD methods'
   []
   [bending_Bbar]
     type = Exodiff
@@ -15,8 +15,8 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true Outputs/file_base=bending_jacobian_bbar_out'
     prereq = 'bending'
     issues = '#7228 #13260'
-    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
-                   bar bending simulation in 2D using a volumetric locking correction using AD and
+    requirement = 'The system shall adequately simulate a
+                   bar bending simulation in 2D using finite strain methods in Solid Mechanics with a volumetric locking correction using AD and
                    match non-AD methods'
   []
   [3d_bar]
@@ -24,8 +24,8 @@
     input = '3d_bar.i'
     exodiff = '3d_bar_out.e'
     issues = '#7228 #13260'
-    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
-                   tensile test simulation in 3D using AD and match non-AD methods'
+    requirement = 'The system shall adequately simulate a
+                   tensile test simulation in 3D using finite strain methods in Solid Mechanics with AD and match non-AD methods'
     capabilities = 'method!=dbg'
   []
   [3d_bar_Bbar]
@@ -35,8 +35,8 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = '3d_bar'
     issues = '#7228 #13260'
-    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
-                   tensile test simulation in 3D using a volumetric locking correction using AD and
+    requirement = 'The system shall adequately simulate a
+                   tensile test simulation in 3D using finite strain methods in Solid Mechanics with a volumetric locking correction using AD and
                    match non-AD methods'
     capabilities = 'method!=dbg'
   []
@@ -46,7 +46,7 @@
     input = 'eigen_sol.i'
     exodiff = 'eigen_sol_out.e'
     issues = '#30233'
-    requirement = 'Finite strain methods with AD shall work with the EigenSolution option for polar decomposition.'
+    requirement = 'The system shall support the EigenSolution option for polar decomposition in finite strain methods with AD.'
   []
 
   [bending-jac]
@@ -57,8 +57,8 @@
     ratio_tol = 5e-8
     difference_tol = 1
     issues = '#12650 #13260'
-    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
-                   bar bending simulation in 2D using AD and calculate perfect Jacobians'
+    requirement = 'The system shall adequately simulate a
+                   bar bending simulation in 2D using finite strain methods in Solid Mechanics with AD and calculate perfect Jacobians'
   []
   [bending_Bbar-jac]
     type = PetscJacobianTester
@@ -69,8 +69,8 @@
     ratio_tol = 5e-8
     difference_tol = 1
     issues = '#12650 #13260'
-    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
-                   bar bending simulation in 2D using a volumetric locking correction using AD and
+    requirement = 'The system shall adequately simulate a
+                   bar bending simulation in 2D using finite strain methods in Solid Mechanics with a volumetric locking correction using AD and
                    calculate perfect Jacobians'
   []
   [3d_bar-jac]
@@ -81,8 +81,8 @@
     ratio_tol = 5e-8
     difference_tol = 1
     issues = '#12650 #13260'
-    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
-                   tensile test simulation in 3D using AD and calculate perfect Jacobians'
+    requirement = 'The system shall adequately simulate a
+                   tensile test simulation in 3D using finite strain methods in Solid Mechanics with AD and calculate perfect Jacobians'
     valgrind = 'none' # too slow especially after #14547
     cli_args = 'Executioner/num_steps=1'
   []
@@ -95,8 +95,8 @@
     ratio_tol = 5e-8
     difference_tol = 1
     issues = '#12650 #13260'
-    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
-                   tensile test simulation in 3D using a volumetric locking correction using AD and
+    requirement = 'The system shall adequately simulate a
+                   tensile test simulation in 3D using finite strain methods in Solid Mechanics with a volumetric locking correction using AD and
                    calculate perfect Jacobians'
     valgrind = 'none' # too slow especially after #14547
   []
@@ -110,8 +110,8 @@
                  'approximation for the rotation tensor. This zero or '
                  'negative number may occur when elements become heavily distorted.'
     issues = '#19067'
-    requirement = 'Finite strain methods in Tensor Mechanics, using the auto '
-                  'differentiation capabilities, shall cut the timestep through '
+    requirement = 'The system shall, in finite strain methods in Solid Mechanics using the auto '
+                  'differentiation capabilities, cut the timestep through '
                   ' a mooseException when the loading conditions deform the '
                   'elements so much as to produce a negative number under the '
                   'square root term in the Rashid approximation for the '

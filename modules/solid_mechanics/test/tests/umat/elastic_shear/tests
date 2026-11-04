@@ -9,8 +9,8 @@
     # installation_type=in_tree: see #25279
     capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
-    requirement = 'The Abaqus UMAT interface shall produce the correct stresses for the hyperelastic'
-                  'Neo-Hookean model under shear loading. The results shall not depend on the time step size.'
+    requirement = 'The system shall, through the Abaqus UMAT interface, produce the correct stresses for the hyperelastic '
+                  'Neo-Hookean model under shear loading. The results shall not depend on the time step size. '
                   'Reference computation with fine time stepping.'
   []
   [elastic_shear]
@@ -21,8 +21,8 @@
     # installation_type=in_tree: see #25279
     capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
-    requirement = 'The Abaqus UMAT interface shall produce the correct stresses for the hyperelastic'
-                  'Neo-Hookean model under shear loading. The results shall not depend on the time step size.'
+    requirement = 'The system shall, through the Abaqus UMAT interface, produce the correct stresses for the hyperelastic '
+                  'Neo-Hookean model under shear loading. The results shall not depend on the time step size. '
                   'Comparison with coarse time stepping.'
   []
 []

@@ -19,7 +19,7 @@
     input = 'elastic_temperature.i'
     cli_args = "Materials/active='elastic stress'"
     exodiff = 'elastic_temperature_out.e'
-    requirement = 'The Abaqus UMAT interface shall produce the same results as the built-in MOOSE '
+    requirement = 'The system shall, through the Abaqus UMAT interface, produce the same results as the built-in MOOSE '
                   'material models for finite strain elasticity and temperature dependence'
   []
 
@@ -40,7 +40,7 @@
     input = 'elastic_dtemperature.i'
     cli_args = "Materials/active='elastic stress'"
     exodiff = 'elastic_dtemperature_out.e'
-    requirement = 'The Abaqus UMAT interface shall produce the same results as the built-in MOOSE '
+    requirement = 'The system shall, through the Abaqus UMAT interface, produce the same results as the built-in MOOSE '
                   'material models for finite strain elasticity and temperature dependence, '
                   'including the temperature step increment'
   []

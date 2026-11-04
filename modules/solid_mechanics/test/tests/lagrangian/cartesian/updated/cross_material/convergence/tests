@@ -9,7 +9,7 @@
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false "
                "Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false "
                "Kernels/sdz/use_displaced_mesh=false"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, without stabilization, and an elastic material with the updated Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for small displacements, without stabilization, and an elastic material with the updated Lagrangian formulation'
   []
   [elastic_large_neither]
     type = PetscJacobianTester
@@ -19,7 +19,7 @@
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
                "Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true "
                "Kernels/sdz/use_displaced_mesh=true"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, without stabilization, and an elastic material with the updated Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, without stabilization, and an elastic material with the updated Lagrangian formulation'
   []
   [elastic_small_right]
     type = PetscJacobianTester
@@ -29,7 +29,7 @@
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true "
                "Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false "
                "Kernels/sdz/use_displaced_mesh=false"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, with stabilization, and an elastic material with the updated Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for small displacements, with stabilization, and an elastic material with the updated Lagrangian formulation'
   []
   [elastic_large_right]
     type = PetscJacobianTester
@@ -39,7 +39,7 @@
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
                "Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true "
                "Kernels/sdz/use_displaced_mesh=true"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, and an elastic material with the updated Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, with stabilization, and an elastic material with the updated Lagrangian formulation'
   []
 
   [plastic_j2_small_neither]
@@ -50,7 +50,7 @@
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false "
                "Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false "
                "Kernels/sdz/use_displaced_mesh=false"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, without stabilization, and an plastic_j2 material with the updated Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for small displacements, without stabilization, and an plastic_j2 material with the updated Lagrangian formulation'
   []
   [plastic_j2_large_neither]
     type = PetscJacobianTester
@@ -60,7 +60,7 @@
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
                "Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true "
                "Kernels/sdz/use_displaced_mesh=true"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, without stabilization, and an plastic_j2 material with the updated Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, without stabilization, and an plastic_j2 material with the updated Lagrangian formulation'
   []
   [plastic_j2_small_right]
     type = PetscJacobianTester
@@ -70,7 +70,7 @@
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true "
                "Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false "
                "Kernels/sdz/use_displaced_mesh=false"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, with stabilization, and an plastic_j2 material with the updated Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for small displacements, with stabilization, and an plastic_j2 material with the updated Lagrangian formulation'
   []
   [plastic_j2_large_right]
     type = PetscJacobianTester
@@ -80,6 +80,6 @@
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
                "Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true "
                "Kernels/sdz/use_displaced_mesh=true"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, and an plastic_j2 material with the updated Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, with stabilization, and an plastic_j2 material with the updated Lagrangian formulation'
   []
 []

@@ -6,7 +6,7 @@
     input = 'shear.i'
     cli_args = 'Materials/compute_stress/objective_rate=truesdell Outputs/file_base=truesdell_shear_out'
     csvdiff = 'truesdell_shear_out.csv'
-    requirement = "Classical Truesdell response to pure shear matches known solution"
+    requirement = "The system shall produce a classical Truesdell response to pure shear that matches the known solution"
     abs_zero = 1e-6
     capabilities = 'method!=dbg'
   []
@@ -15,7 +15,7 @@
     input = 'shear.i'
     cli_args = 'Materials/compute_stress/objective_rate=jaumann Outputs/file_base=jaumann_shear_out'
     csvdiff = 'jaumann_shear_out.csv'
-    requirement = "Classical Jaumann response to pure shear matches known solution"
+    requirement = "The system shall produce a classical Jaumann response to pure shear that matches the known solution"
     abs_zero = 1e-6
     capabilities = 'method!=dbg'
   []
@@ -24,7 +24,7 @@
     input = 'shear.i'
     cli_args = 'Materials/compute_stress/objective_rate=green_naghdi Outputs/file_base=green_naghdi_shear_out'
     csvdiff = 'green_naghdi_shear_out.csv'
-    requirement = "Classical Green-Naghdi response to pure shear matches known solution"
+    requirement = "The system shall produce a classical Green-Naghdi response to pure shear that matches the known solution"
     abs_zero = 1e-6
     capabilities = 'method!=dbg'
   []
@@ -33,7 +33,7 @@
     input = 'rotation.i'
     cli_args = 'Materials/stress/objective_rate=truesdell Outputs/file_base=truesdell_rotation_out'
     csvdiff = 'truesdell_rotation_out.csv'
-    requirement = "Classical Truesdell response to pure rotation matches known solution"
+    requirement = "The system shall produce a classical Truesdell response to pure rotation that matches the known solution"
     abs_zero = 1e-6
   []
   [jaumann_rotation]
@@ -41,7 +41,7 @@
     input = 'rotation.i'
     cli_args = 'Materials/stress/objective_rate=jaumann Outputs/file_base=jaumann_rotation_out'
     csvdiff = 'jaumann_rotation_out.csv'
-    requirement = "Classical Jaumann response to pure rotation matches known solution"
+    requirement = "The system shall produce a classical Jaumann response to pure rotation that matches the known solution"
     abs_zero = 1e-6
   []
   [green_naghdi_rotation]
@@ -49,7 +49,7 @@
     input = 'rotation.i'
     cli_args = 'Materials/stress/objective_rate=green_naghdi Outputs/file_base=green_naghdi_rotation_out'
     csvdiff = 'green_naghdi_rotation_out.csv'
-    requirement = "Classical Green-Naghdi response to pure rotation matches known solution"
+    requirement = "The system shall produce a classical Green-Naghdi response to pure rotation that matches the known solution"
     abs_zero = 1e-6
   []
   [truesdell_jacobian]
@@ -58,7 +58,7 @@
     cli_args = 'Materials/compute_stress/objective_rate=truesdell'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Treusdell tangent is exact within rtol of 1e-7"
+    requirement = "The system shall compute an exact Truesdell tangent within rtol of 1e-7"
   []
   [jaumann_jacobian]
     type = PetscJacobianTester
@@ -66,7 +66,7 @@
     cli_args = 'Materials/compute_stress/objective_rate=jaumann'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Jaumann tangent is exact within rtol of 1e-7"
+    requirement = "The system shall compute an exact Jaumann tangent within rtol of 1e-7"
   []
   [green_naghdi_jacobian]
     type = PetscJacobianTester
@@ -74,7 +74,7 @@
     cli_args = 'Materials/compute_stress/objective_rate=green_naghdi'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7"
+    requirement = "The system shall compute an exact Green-Naghdi tangent within rtol of 1e-7"
   []
   [truesdell_jacobian_alpha05]
     issues = '#33005'
@@ -83,7 +83,7 @@
     cli_args = 'Materials/compute_stress/objective_rate=truesdell GlobalParams/alpha=0.5'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Truesdell tangent is exact within rtol of 1e-7 with the generalized midpoint "
+    requirement = "The system shall compute an exact Truesdell tangent within rtol of 1e-7 with the generalized midpoint "
                   "rule (alpha=0.5)"
   []
   [jaumann_jacobian_alpha05]
@@ -93,7 +93,7 @@
     cli_args = 'Materials/compute_stress/objective_rate=jaumann GlobalParams/alpha=0.5'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Jaumann tangent is exact within rtol of 1e-7 with the generalized midpoint "
+    requirement = "The system shall compute an exact Jaumann tangent within rtol of 1e-7 with the generalized midpoint "
                   "rule (alpha=0.5)"
   []
   [green_naghdi_jacobian_alpha05]
@@ -104,7 +104,7 @@
                'GlobalParams/alpha=0.5'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the generalized "
+    requirement = "The system shall compute an exact Green-Naghdi tangent within rtol of 1e-7 with the generalized "
                   "midpoint rule (alpha=0.5)"
   []
   [truesdell_jacobian_quadratic]
@@ -115,7 +115,7 @@
                'GlobalParams/kinematic_approximation=quadratic'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Truesdell tangent is exact within rtol of 1e-7 with the quadratic kinematic "
+    requirement = "The system shall compute an exact Truesdell tangent within rtol of 1e-7 with the quadratic kinematic "
                   "approximation."
   []
   [truesdell_jacobian_rashid_approximate]
@@ -126,7 +126,7 @@
                'GlobalParams/kinematic_approximation=rashid_approximate'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Truesdell tangent is exact within rtol of 1e-7 with the Rashid approximate "
+    requirement = "The system shall compute an exact Truesdell tangent within rtol of 1e-7 with the Rashid approximate "
                   "kinematic formulas."
   []
   [truesdell_jacobian_rashid_eigen]
@@ -137,7 +137,7 @@
                'GlobalParams/kinematic_approximation=rashid_eigen'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Truesdell tangent is exact within rtol of 1e-7 with the Rashid eigen "
+    requirement = "The system shall compute an exact Truesdell tangent within rtol of 1e-7 with the Rashid eigen "
                   "(polar-decomposition + matrix log) kinematic approximation."
   []
   [truesdell_jacobian_alpha05_quadratic]
@@ -148,7 +148,7 @@
                'GlobalParams/kinematic_approximation=quadratic'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Truesdell tangent is exact within rtol of 1e-7 with the generalized midpoint "
+    requirement = "The system shall compute an exact Truesdell tangent within rtol of 1e-7 with the generalized midpoint "
                   "rule (alpha=0.5) and the quadratic kinematic approximation."
   []
   [truesdell_jacobian_alpha05_rashid_approximate]
@@ -159,7 +159,7 @@
                'GlobalParams/kinematic_approximation=rashid_approximate'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Truesdell tangent is exact within rtol of 1e-7 with the generalized midpoint "
+    requirement = "The system shall compute an exact Truesdell tangent within rtol of 1e-7 with the generalized midpoint "
                   "rule (alpha=0.5) and the Rashid approximate kinematic formulas."
   []
   [truesdell_jacobian_alpha05_rashid_eigen]
@@ -170,7 +170,7 @@
                'GlobalParams/kinematic_approximation=rashid_eigen'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Truesdell tangent is exact within rtol of 1e-7 with the generalized midpoint "
+    requirement = "The system shall compute an exact Truesdell tangent within rtol of 1e-7 with the generalized midpoint "
                   "rule (alpha=0.5) and the Rashid eigen kinematic approximation."
   []
   [jaumann_jacobian_quadratic]
@@ -181,7 +181,7 @@
                'GlobalParams/kinematic_approximation=quadratic'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Jaumann tangent is exact within rtol of 1e-7 with the quadratic kinematic "
+    requirement = "The system shall compute an exact Jaumann tangent within rtol of 1e-7 with the quadratic kinematic "
                   "approximation, by consuming the vorticity increment and its derivative from "
                   "the strain calculator."
   []
@@ -193,7 +193,7 @@
                'GlobalParams/kinematic_approximation=rashid_approximate'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Jaumann tangent is exact within rtol of 1e-7 with the Rashid approximate "
+    requirement = "The system shall compute an exact Jaumann tangent within rtol of 1e-7 with the Rashid approximate "
                   "kinematic formulas."
   []
   [jaumann_jacobian_rashid_eigen]
@@ -204,7 +204,7 @@
                'GlobalParams/kinematic_approximation=rashid_eigen'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Jaumann tangent is exact within rtol of 1e-7 with the Rashid eigen kinematic "
+    requirement = "The system shall compute an exact Jaumann tangent within rtol of 1e-7 with the Rashid eigen kinematic "
                   "approximation."
   []
   [jaumann_jacobian_alpha05_quadratic]
@@ -215,7 +215,7 @@
                'GlobalParams/kinematic_approximation=quadratic'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Jaumann tangent is exact within rtol of 1e-7 with the generalized midpoint "
+    requirement = "The system shall compute an exact Jaumann tangent within rtol of 1e-7 with the generalized midpoint "
                   "rule (alpha=0.5) and the quadratic kinematic approximation."
   []
   [jaumann_jacobian_alpha05_rashid_approximate]
@@ -226,7 +226,7 @@
                'GlobalParams/kinematic_approximation=rashid_approximate'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Jaumann tangent is exact within rtol of 1e-7 with the generalized midpoint "
+    requirement = "The system shall compute an exact Jaumann tangent within rtol of 1e-7 with the generalized midpoint "
                   "rule (alpha=0.5) and the Rashid approximate kinematic formulas."
   []
   [jaumann_jacobian_alpha05_rashid_eigen]
@@ -237,7 +237,7 @@
                'GlobalParams/kinematic_approximation=rashid_eigen'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Jaumann tangent is exact within rtol of 1e-7 with the generalized midpoint "
+    requirement = "The system shall compute an exact Jaumann tangent within rtol of 1e-7 with the generalized midpoint "
                   "rule (alpha=0.5) and the Rashid eigen kinematic approximation."
   []
   [green_naghdi_jacobian_quadratic]
@@ -248,7 +248,7 @@
                'GlobalParams/kinematic_approximation=quadratic'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the quadratic kinematic "
+    requirement = "The system shall compute an exact Green-Naghdi tangent within rtol of 1e-7 with the quadratic kinematic "
                   "approximation. The rotation R and dR/dF are now published by the strain "
                   "calculator, so this variant exercises the new strain-calc-published "
                   "polar-decomposition path."
@@ -261,7 +261,7 @@
                'GlobalParams/kinematic_approximation=rashid_approximate'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the Rashid approximate "
+    requirement = "The system shall compute an exact Green-Naghdi tangent within rtol of 1e-7 with the Rashid approximate "
                   "kinematic formulas."
   []
   [green_naghdi_jacobian_rashid_eigen]
@@ -272,7 +272,7 @@
                'GlobalParams/kinematic_approximation=rashid_eigen'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the Rashid eigen "
+    requirement = "The system shall compute an exact Green-Naghdi tangent within rtol of 1e-7 with the Rashid eigen "
                   "kinematic approximation."
   []
   [green_naghdi_jacobian_alpha05_quadratic]
@@ -283,7 +283,7 @@
                'GlobalParams/kinematic_approximation=quadratic'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the generalized "
+    requirement = "The system shall compute an exact Green-Naghdi tangent within rtol of 1e-7 with the generalized "
                   "midpoint rule (alpha=0.5) and the quadratic kinematic approximation."
   []
   [green_naghdi_jacobian_alpha05_rashid_approximate]
@@ -294,7 +294,7 @@
                'GlobalParams/kinematic_approximation=rashid_approximate'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the generalized "
+    requirement = "The system shall compute an exact Green-Naghdi tangent within rtol of 1e-7 with the generalized "
                   "midpoint rule (alpha=0.5) and the Rashid approximate kinematic formulas."
   []
   [green_naghdi_jacobian_alpha05_rashid_eigen]
@@ -305,7 +305,7 @@
                'GlobalParams/kinematic_approximation=rashid_eigen'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7 with the generalized "
+    requirement = "The system shall compute an exact Green-Naghdi tangent within rtol of 1e-7 with the generalized "
                   "midpoint rule (alpha=0.5) and the Rashid eigen kinematic approximation."
   []
   [rashid_shear]
@@ -314,7 +314,7 @@
     input = 'shear.i'
     cli_args = 'Materials/compute_stress/objective_rate=rashid Outputs/file_base=rashid_shear_out'
     csvdiff = 'rashid_shear_out.csv'
-    requirement = "Rashid response to pure shear matches the gold trajectory generated by the "
+    requirement = "The system shall produce a Rashid response to pure shear that matches the gold trajectory generated by the "
                   "matrix-exponential rotation update from the strain-calc-published vorticity."
     abs_zero = 1e-6
     capabilities = 'method!=dbg'
@@ -325,7 +325,7 @@
     input = 'rotation.i'
     cli_args = 'Materials/stress/objective_rate=rashid Outputs/file_base=rashid_rotation_out'
     csvdiff = 'rashid_rotation_out.csv'
-    requirement = "Rashid response to pure rotation matches the gold (deviatoric Cauchy stress "
+    requirement = "The system shall produce a Rashid response to pure rotation that matches the gold (deviatoric Cauchy stress "
                   "preserved by the exact incremental rotation r_hat = exp(Deltaw))."
     abs_zero = 1e-6
   []
@@ -336,7 +336,7 @@
     cli_args = 'Materials/compute_stress/objective_rate=rashid'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Rashid tangent is exact within rtol of 1e-7 with the default linear "
+    requirement = "The system shall compute an exact Rashid tangent within rtol of 1e-7 with the default linear "
                   "kinematic approximation."
   []
   [rashid_jacobian_alpha05]
@@ -346,7 +346,7 @@
     cli_args = 'Materials/compute_stress/objective_rate=rashid GlobalParams/alpha=0.5'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Rashid tangent is exact within rtol of 1e-7 with the generalized midpoint "
+    requirement = "The system shall compute an exact Rashid tangent within rtol of 1e-7 with the generalized midpoint "
                   "rule (alpha=0.5)."
   []
   [rashid_jacobian_quadratic]
@@ -357,7 +357,7 @@
                'GlobalParams/kinematic_approximation=quadratic'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Rashid tangent is exact within rtol of 1e-7 with the quadratic kinematic "
+    requirement = "The system shall compute an exact Rashid tangent within rtol of 1e-7 with the quadratic kinematic "
                   "approximation."
   []
   [rashid_jacobian_rashid_approximate]
@@ -368,7 +368,7 @@
                'GlobalParams/kinematic_approximation=rashid_approximate'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Rashid tangent is exact within rtol of 1e-7 with the Rashid approximate "
+    requirement = "The system shall compute an exact Rashid tangent within rtol of 1e-7 with the Rashid approximate "
                   "kinematic formulas."
   []
   [rashid_jacobian_rashid_eigen]
@@ -379,7 +379,7 @@
                'GlobalParams/kinematic_approximation=rashid_eigen'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Rashid tangent is exact within rtol of 1e-7 with the Rashid eigen "
+    requirement = "The system shall compute an exact Rashid tangent within rtol of 1e-7 with the Rashid eigen "
                   "(polar-decomposition + matrix log) kinematic approximation."
   []
   [rashid_jacobian_alpha05_quadratic]
@@ -390,7 +390,7 @@
                'GlobalParams/kinematic_approximation=quadratic'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Rashid tangent is exact within rtol of 1e-7 with the generalized midpoint "
+    requirement = "The system shall compute an exact Rashid tangent within rtol of 1e-7 with the generalized midpoint "
                   "rule (alpha=0.5) and the quadratic kinematic approximation."
   []
   [rashid_jacobian_alpha05_rashid_approximate]
@@ -401,7 +401,7 @@
                'GlobalParams/kinematic_approximation=rashid_approximate'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Rashid tangent is exact within rtol of 1e-7 with the generalized midpoint "
+    requirement = "The system shall compute an exact Rashid tangent within rtol of 1e-7 with the generalized midpoint "
                   "rule (alpha=0.5) and the Rashid approximate kinematic formulas."
   []
   [rashid_jacobian_alpha05_rashid_eigen]
@@ -412,7 +412,7 @@
                'GlobalParams/kinematic_approximation=rashid_eigen'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = "Rashid tangent is exact within rtol of 1e-7 with the generalized midpoint "
+    requirement = "The system shall compute an exact Rashid tangent within rtol of 1e-7 with the generalized midpoint "
                   "rule (alpha=0.5) and the Rashid eigen kinematic approximation."
   []
 []

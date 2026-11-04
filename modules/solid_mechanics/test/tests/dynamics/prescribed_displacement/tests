@@ -6,7 +6,7 @@
     custom_cmp = 'displacement.cmp'
     use_old_floor = true
 
-    requirement = "The PresetDisplacement class shall accurately prescribe the"
+    requirement = "The system shall accurately prescribe, using the PresetDisplacement class, the"
                   " displacement at the given boundary."
     design = "Dynamics.md PresetDisplacement.md"
     issues = "#7642"
@@ -18,7 +18,7 @@
     custom_cmp = 'displacement.cmp'
     use_old_floor = true
 
-    requirement = "The PresetDisplacement class shall accurately prescribe the"
+    requirement = "The system shall accurately prescribe, using the PresetDisplacement class, the"
                   " displacement at the given boundary using the velocity and"
                   " and acceleration computed using the Newmark-Beta time integrator."
     design = "Dynamics.md PresetDisplacement.md"
@@ -32,7 +32,7 @@
     custom_cmp = 'displacement.cmp'
     use_old_floor = true
 
-    requirement = "The mechanics system shall accurately conduct a static analysis in"
+    requirement = "The system shall accurately conduct a static analysis in"
                   " a small number of time steps to equilibrate the system under gravity"
                   " before starting the dynamic analysis."
     design = "Dynamics.md"

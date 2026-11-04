@@ -26,8 +26,8 @@
     type = 'CSVDiff'
     input = 'volumetric_mechanical.i'
     csvdiff = 'volumetric_mechanical_out.csv'
-    requirement = "The volumetric strain computed using RankTwoScalarAux for a unit cube with "
-                  "imposed displacements shall be identical to that obtained by imposing an "
+    requirement = "The system shall compute the volumetric strain using RankTwoScalarAux for a unit cube with "
+                  "imposed displacements identical to that obtained by imposing an "
                   "eigenstrain that causes the same deformation of that model."
     design = "source/materials/ComputeVolumetricEigenstrain.md RankTwoScalarAux.md"
     issues = "#8615 #11743"

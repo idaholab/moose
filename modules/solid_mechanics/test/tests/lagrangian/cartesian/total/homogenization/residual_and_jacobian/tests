@@ -9,7 +9,7 @@
     cli_args = "Outputs/file_base=3d-strain_out constraint_types='strain strain strain strain strain "
                "strain strain strain strain' targets='strain11 strain21 strain31 strain12 strain22 "
                "strain32 strain13 strain23 strain33'"
-    requirement = "Homogenization system gives same answers with residual_and_jacobian_together in "
+    requirement = "The system shall give the same homogenization answers with residual_and_jacobian_together in "
                   "3D with strain constraints"
     capabilities = 'method!=dbg'
   []
@@ -20,7 +20,7 @@
     cli_args = "Outputs/file_base=3d-stress_out constraint_types='stress strain strain stress stress "
                "strain stress stress stress' targets='stress11 0 0 stress12 stress22 0 stress13 "
                "stress23 stress33'"
-    requirement = "Homogenization system gives same answers with residual_and_jacobian_together in "
+    requirement = "The system shall give the same homogenization answers with residual_and_jacobian_together in "
                   "3D with stress constraints"
     capabilities = 'method!=dbg'
   []
