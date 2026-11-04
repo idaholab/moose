@@ -71,7 +71,7 @@
                "VectorPostprocessors/solution/variable=ordinary_pressure_gradient_x "
                "Outputs/exodus=false Outputs/csv=true"
     allow_test_objects = true
-    requirement = "The SIMPLE solve shall refresh an additional ordinary pressure-gradient reader "
+    requirement = "The system shall refresh, in the SIMPLE solve, an additional ordinary pressure-gradient reader "
                   "during initialization and after installing the relaxed pressure solution when "
                   "the momentum coupling uses reconstructed pressure gradients."
     recover = false # we don't support recovery for SIMPLE yet
@@ -201,7 +201,7 @@
                "LinearFVKernels/p_diffusion/block='0 1' "
                "LinearFVKernels/HbyA_divergence/block='0 1'"
     expect_err = "requires pressure variable 'pressure' and RhieChowMassFlux 'rc' to have identical block restrictions"
-    requirement = "The reconstructed pressure-gradient method shall reject a pressure variable "
+    requirement = "The system shall reject, for the reconstructed pressure-gradient method, a pressure variable "
                   "defined on blocks outside those handled by its Rhie-Chow object."
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
@@ -221,7 +221,7 @@
                "LinearFVKernels/p_diffusion/block='0 1' "
                "LinearFVKernels/HbyA_divergence/block='0 1'"
     expect_err = "requires velocity variable 'vel_x' and RhieChowMassFlux 'rc' to have identical block restrictions"
-    requirement = "The reconstructed pressure-gradient method shall reject a velocity variable "
+    requirement = "The system shall reject, for the reconstructed pressure-gradient method, a velocity variable "
                   "defined on blocks outside those handled by its Rhie-Chow object."
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
@@ -420,7 +420,7 @@
     input = reconstructed-force-channel.i
     csvdiff = reconstructed-force-channel-standard.csv
     cli_args = 'pressure_gradient_method=green-gauss Outputs/file_base=reconstructed-force-channel-standard Outputs/exodus=false'
-    requirement = "The standard pressure-gradient method shall exhibit nonuniform block-average "
+    requirement = "The system shall exhibit, with the standard pressure-gradient method, nonuniform block-average "
                   "streamwise velocities when a large momentum body force is applied only in the "
                   "middle section of a three-section channel."
     recover = false # we don't support recovery for SIMPLE yet
@@ -435,7 +435,7 @@
     cli_args = 'pressure_gradient_method=reconstructed Outputs/file_base=reconstructed-force-channel-reconstructed Outputs/exodus=false'
     # The exact block averages are one; this tolerance covers only the iterative solver error.
     rel_err = 1e-6
-    requirement = "The reconstructed pressure-gradient method shall preserve the initial uniform "
+    requirement = "The system shall preserve, with the reconstructed pressure-gradient method, the initial uniform "
                   "streamwise velocity in all three channel sections when a large momentum body "
                   "force is applied only in the middle section."
     recover = false # we don't support recovery for SIMPLE yet
