@@ -25,7 +25,7 @@
       rel_err = 1e-4
       # steady solve
       recover = false
-      detail = "the measurement data defined on the main app and transferred to the"
+      detail = "the measurement data defined on the main app and transferred to the "
       "forward_and_adjoint app while maintaining the correct preconditioning on the adjoint system;"
     []
     [separate_multiapps]
