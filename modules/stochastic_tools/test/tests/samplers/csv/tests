@@ -3,7 +3,7 @@
   design = 'CSVSampler.md'
 
   [csv_sampler]
-    requirement = 'The CSV Sampler shall read samples from a CSV file '
+    requirement = 'The system shall read samples from a CSV file with the CSV Sampler '
                   'while the sample data is '
 
     [sampling_test]
@@ -36,7 +36,7 @@
   []
 
   [csv_sampler_indices]
-    requirement = "The CSV Sampler shall sample from a CSV file when column indices are provided."
+    requirement = "The system shall sample from a CSV file with the CSV Sampler when column indices are provided."
 
     type = 'CSVDiff'
     input = 'csv_sampler_indices.i'
@@ -44,7 +44,7 @@
   []
 
   [csv_sampler_names]
-    requirement = "The CSV Sampler shall sample from a CSV file when column names are provided."
+    requirement = "The system shall sample from a CSV file with the CSV Sampler when column names are provided."
 
     type = 'CSVDiff'
     input = 'csv_sampler_names.i'
