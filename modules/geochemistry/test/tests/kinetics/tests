@@ -5,7 +5,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'quartz_dissolution.i'
     csvdiff = 'quartz_dissolution_out.csv'
-    requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions such as dissolution"
+    requirement = "The system shall be able to solve kinetically-controlled reactions such as dissolution"
     issues = '#15330'
     design = 'kinetic_quartz.md'
   []
@@ -15,7 +15,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'kinetic_albite.i'
     csvdiff = 'kinetic_albite_out.csv'
-    requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions with promoting species"
+    requirement = "The system shall be able to solve kinetically-controlled reactions with promoting species"
     issues = '#15330'
     design = 'kinetic_albite.md'
   []
@@ -41,7 +41,7 @@ Equilibrium Species:
 SiO2(aq);  molality = 0.009723mol/kg(solvent water);  free_conc = 583.9mg/kg(soln);  act_coeff = 1;  log10(a) = -2.012;  SiO2(aq) = 1*Quartz;  log10K = 2.012
 NaCl;  molality = 1.808e-20mol/kg(solvent water);  free_conc = 1.056e-15mg/kg(soln);  act_coeff = 1;  log10(a) = -19.74;  NaCl = 1*Na+ + 1*Cl-;  log10K = -0.3487'
     match_literal = true
-    requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions with a temperature-dependent rate"
+    requirement = "The system shall be able to solve kinetically-controlled reactions with a temperature-dependent rate"
     issues = '#15330'
     design = 'kinetic_quartz_arrhenius.md'
   []
@@ -51,7 +51,7 @@ NaCl;  molality = 1.808e-20mol/kg(solvent water);  free_conc = 1.056e-15mg/kg(so
     capabilities = 'installation_type=in_tree'
     input = 'quartz_deposition.i'
     csvdiff = 'quartz_deposition_out.csv'
-    requirement = "The geochemistry module shall be able to solve kinetically-controlled deposition reactions with a temperature-dependent rate"
+    requirement = "The system shall be able to solve kinetically-controlled deposition reactions with a temperature-dependent rate"
     issues = '#15330'
     design = 'kinetic_quartz_arrhenius.md'
   []
@@ -62,7 +62,7 @@ NaCl;  molality = 1.808e-20mol/kg(solvent water);  free_conc = 1.056e-15mg/kg(so
     input = 'bio_death.i'
     csvdiff = 'bio_death_out.csv'
     cli_args = 'Executioner/dt=2 Outputs/time_step_interval=1'
-    requirement = "The geochemistry module shall be able to solve mortality of microbes using a constant-rate model"
+    requirement = "The system shall be able to solve mortality of microbes using a constant-rate model"
     issues = '#21559'
     design = 'biogeochemistry.md bio_death.md'
   []
@@ -73,7 +73,7 @@ NaCl;  molality = 1.808e-20mol/kg(solvent water);  free_conc = 1.056e-15mg/kg(so
     input = 'bio_sulfate_1.i'
     csvdiff = 'bio_sulfate_1_out.csv'
     cli_args = 'Executioner/end_time=1 Executioner/TimeStepper/function=1'
-    requirement = "The geochemistry module shall be able to solve sulfate reduction catalysed by microbes, when the microbes are treated as basis species and acetate as a kinetic species"
+    requirement = "The system shall be able to solve sulfate reduction catalysed by microbes, when the microbes are treated as basis species and acetate as a kinetic species"
     issues = '#21559'
     design = 'biogeochemistry.md bio_sulfate.md'
   []
@@ -84,7 +84,7 @@ NaCl;  molality = 1.808e-20mol/kg(solvent water);  free_conc = 1.056e-15mg/kg(so
     input = 'bio_sulfate_2.i'
     csvdiff = 'bio_sulfate_2_out.csv'
     cli_args = 'Executioner/end_time=1 Executioner/TimeStepper/function=1'
-    requirement = "The geochemistry module shall be able to solve sulfate reduction catalysed by microbes, when the microbes are treated as kinetic species"
+    requirement = "The system shall be able to solve sulfate reduction catalysed by microbes, when the microbes are treated as kinetic species"
     issues = '#21559'
     design = 'biogeochemistry.md bio_sulfate.md'
   []
@@ -95,7 +95,7 @@ NaCl;  molality = 1.808e-20mol/kg(solvent water);  free_conc = 1.056e-15mg/kg(so
     input = 'bio_sulfate_0.i'
     expect_out = 'CH3COO- = -1*H2O + 1*HCO3- + 1*CH4(aq)  .  log10(K) = 4.789'
     match_literal = true
-    requirement = "The geochemistry module shall be produce equilibrium constants for methane production from acetate, catalysized by microbes"
+    requirement = "The system shall be produce equilibrium constants for methane production from acetate, catalysized by microbes"
     issues = '#21559'
     design = 'biogeochemistry.md bio_sulfate.md'
   []
@@ -106,7 +106,7 @@ NaCl;  molality = 1.808e-20mol/kg(solvent water);  free_conc = 1.056e-15mg/kg(so
     input = 'bio_arsenate0.i'
     expect_out = 'Lactate- = -2*H2O + 1*CO3-- + 1*CH3COO- - 2*HAsO4-- + 2*As(OH)4-  .  log10(K) = 26.75'
     match_literal = true
-    requirement = "The geochemistry module shall be produce equilibrium constants for lactate reduction catalysis by microbes"
+    requirement = "The system shall be produce equilibrium constants for lactate reduction catalysis by microbes"
     issues = '#21559'
     design = 'biogeochemistry.md bio_arsenate.md'
   []
@@ -117,7 +117,7 @@ NaCl;  molality = 1.808e-20mol/kg(solvent water);  free_conc = 1.056e-15mg/kg(so
     input = 'bio_arsenate1.i'
     csvdiff = 'bio_arsenate1_out.csv'
     cli_args = 'Executioner/dt=0.2'
-    requirement = "The geochemistry module shall be able to solve arsenate reduction catalysed by microbes"
+    requirement = "The system shall be able to solve arsenate reduction catalysed by microbes"
     issues = '#21559'
     design = 'biogeochemistry.md bio_arsenate.md'
   []
@@ -129,7 +129,7 @@ NaCl;  molality = 1.808e-20mol/kg(solvent water);  free_conc = 1.056e-15mg/kg(so
     exodiff = 'bio_zoning_flow_out_react0.e'
     cli_args = 'Mesh/gen/nx=50 Executioner/end_time=0.1'
     heavy = true
-    requirement = "The geochemistry module shall be able to solve reactive-transport models that include biogeochemistry"
+    requirement = "The system shall be able to solve reactive-transport models that include biogeochemistry"
     issues = '#21559'
     design = 'biogeochemistry.md bio_zoning.md'
   []
