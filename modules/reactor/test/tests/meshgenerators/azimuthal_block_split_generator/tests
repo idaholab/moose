@@ -2,7 +2,7 @@
   design = 'meshgenerators/AzimuthalBlockSplitGenerator.md'
   issues = '#19100'
   [test]
-    requirement = 'The system should modify the azimuthal blocks '
+    requirement = 'The system shall modify the azimuthal blocks '
     [block_id_in]
       type = 'Exodiff'
       input = 'azi_block_id_mod.i'
