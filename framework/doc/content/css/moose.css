@@ -833,6 +833,135 @@ footer.page-footer {
     text-shadow: 1px 1px 9px rgba(0, 0, 0, 1);
 }
 
+/* Size each slide to its content rather than Materialize's 100% of the carousel, so that
+   carousel.js can set the carousel height from the tallest slide (measuring a 100%-height
+   slide would just return the carousel height). The column layout centers the image
+   horizontally with any caption and block content beneath it. */
+.carousel.carousel-slider.moose-slideshow .carousel-item {
+    height: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+/* Materialize leaves the inactive slides fully visible beside the carousel, so at some window
+   widths and display scalings anti-aliasing leaks a one-pixel column of a neighboring slide's
+   image into the active slide. Hide them while the carousel is at rest; Materialize adds the
+   'scrolling' class for the duration of a transition, so slides still slide in and out. The
+   !important overrides the inline visibility that Materialize sets on every slide. */
+.moose-slideshow:not(.scrolling) .carousel-item:not(.active) {
+    visibility: hidden !important;
+}
+/* Box as wide as the slide image, so an overlay is bounded by the image. */
+.moose-slide {
+    position: relative;
+    max-width: 100%;
+}
+/* MOOSE wraps a slide image in a <picture>, so Materialize's '.carousel-item>img' rule
+   (which targets a direct <img> child) never sizes it. 'display: block' removes the inline
+   baseline gap beneath the image, which would otherwise show under an overlay. */
+.moose-slideshow .carousel-item img {
+    display: block;
+    max-width: 100%;
+}
+.moose-slide-content {
+    width: 100%;
+    text-align: center;
+}
+/* The drop shadow above is for text over an image; beneath the image it only blurs. */
+.moose-slide-content .carousel-caption {
+    text-shadow: none;
+}
+/* Optional overlay of the caption and block content on the bottom of the slide image. */
+.moose-slide-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 2rem 1rem 1rem;
+    color: #fff;
+    /* Darken the bottom of the image so the text stays legible over a busy image. */
+    background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
+}
+.moose-slide-overlay .carousel-caption {
+    text-shadow: 1px 1px 9px rgba(0, 0, 0, 1);
+}
+/* Previous/next arrow buttons (added by carousel.js): optionally one on each side of the slide
+   and a pair beneath the indicator dots. The strip at the bottom of the carousel holds the dots
+   (56px: 8px dots with 24px margins) and, with the 'moose-slideshow-bottom-arrows' class, the
+   pair (40px) beneath them; carousel.js sizes the carousel to include it. */
+.moose-slideshow-bottom-arrows .indicators {
+    bottom: 40px;
+}
+.moose-slideshow-nav {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+.moose-slideshow-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #fff;
+    /* --gray, translucent; keeps the white icon readable on both light and dark pages */
+    background: rgba(117, 117, 117, 0.75);
+}
+.moose-slideshow-arrow:hover {
+    background: rgba(117, 117, 117, 1);
+}
+.moose-slideshow-arrow .material-icons {
+    float: none;
+    margin: 0;
+    height: auto;
+    line-height: 1;
+}
+/* The side arrows sit in a gutter on each side of the slide. The gutter is the arrow's 10px
+   offset from the carousel edge, its 36px width, and a 6px gap, so a slide image never
+   reaches an arrow. carousel.js sets 'top' to the middle of the tallest image, and centers
+   every other image on the same height. */
+.moose-slideshow-side-arrows .carousel-item {
+    padding: 0 52px;
+}
+.moose-slideshow-side {
+    position: absolute;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+.moose-slideshow-prev { left: 10px; }
+.moose-slideshow-next { right: 10px; }
+/* Materialbox puts the zoomed image and its dimming overlay (z-index 1000) inside the slide,
+   which is its own stacking context, so they cannot rise above the arrows, which are siblings of
+   the slides, or above page content after the slideshow. While a zoom is open (Materialbox
+   inserts '#materialbox-overlay' into the slide for its whole open-and-closing window), lift the
+   slideshow and its active slide above the rest of the page. The !important overrides the inline
+   z-index that Materialize sets on every slide. */
+.moose-slideshow:has(#materialbox-overlay) {
+    z-index: 1000;
+}
+.moose-slideshow:has(#materialbox-overlay) .carousel-item.active {
+    z-index: 1000 !important;
+}
+/* The indicator dots sit beneath the slides, on the page background rather than over an
+   image, so Materialize's white dots would be invisible on a light page. */
+.moose-slideshow .indicators .indicator-item {
+    background-color: var(--gray);
+}
+.moose-slideshow .indicators .indicator-item.active {
+    background-color: var(--inl-blue);
+}
+
 
 li p {
   margin-top: 0;

@@ -17,7 +17,7 @@ class TestHarnessTester(TestHarnessTestCase):
         """
 
         out = self.runTests("-i", "non_unicode", "-v").output
-        self.assertRegex(out, r"non_unicode.*INVALID UTF-8 IN STDOUT.*OK")
+        self.assertRegex(out, r"non_unicode.*INVALID OUTPUT CHARACTERS IN STDOUT.*OK")
         # Invalid bytes are kept in the output as escapes
         self.assertIn("before\\xff\\xfeafter", out)
         # Each invalid sequence is reported with its location

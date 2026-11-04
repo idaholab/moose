@@ -3506,6 +3506,9 @@ protected:
   /// e.g. whether the variable dependencies are defined on the selected boundaries
   const bool _boundary_restricted_elem_integrity_check;
 
+  /// Whether to check that interface kernel variables match the orientation of their boundaries
+  const bool _interface_kernel_integrity_check;
+
   /// Whether to check that side user objects do not consume interface material properties
   const bool _side_uo_interface_mat_prop_integrity_check;
 

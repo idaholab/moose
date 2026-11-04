@@ -58,13 +58,11 @@ WCNSFVFluidHeatTransferPhysics::addSolverVariables()
   else if (_define_variables)
   {
     auto params = getFactory().getValidParams("INSFVEnergyVariable");
-    assignBlocks(params, _blocks);
     params.set<std::vector<Real>>("scaling") = {getParam<Real>("energy_scaling")};
     params.set<MooseEnum>("face_interp_method") = getParam<MooseEnum>("energy_face_interpolation");
     params.set<bool>("two_term_boundary_expansion") =
         getParam<bool>("energy_two_term_bc_expansion");
-    params.set<SolverSystemName>("solver_sys") = getSolverSystem(solver_variable_name);
-    getProblem().addVariable("INSFVEnergyVariable", solver_variable_name, params);
+    addSharedSolverVariable("INSFVEnergyVariable", solver_variable_name, params);
   }
   else
     // we don't let the user select the enthalpy variable name at this time

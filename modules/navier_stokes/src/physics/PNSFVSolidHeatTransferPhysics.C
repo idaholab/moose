@@ -164,14 +164,12 @@ PNSFVSolidHeatTransferPhysics::addSolverVariables()
   else
   {
     auto params = getFactory().getValidParams("INSFVEnergyVariable");
-    assignBlocks(params, _blocks);
-    params.set<SolverSystemName>("solver_sys") = getSolverSystem(_solid_temperature_name);
     params.set<std::vector<Real>>("scaling") = {getParam<Real>("temperature_scaling")};
     params.set<MooseEnum>("face_interp_method") =
         getParam<MooseEnum>("solid_temperature_face_interpolation");
     params.set<bool>("two_term_boundary_expansion") =
         getParam<bool>("solid_temperature_two_term_bc_expansion");
-    getProblem().addVariable("INSFVEnergyVariable", _solid_temperature_name, params);
+    addSharedSolverVariable("INSFVEnergyVariable", _solid_temperature_name, params);
   }
 }
 
