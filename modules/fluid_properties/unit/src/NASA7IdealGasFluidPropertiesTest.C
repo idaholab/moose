@@ -463,12 +463,15 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, nobleGases)
   for (const auto & ref : references)
   {
     const auto & fp = buildFluidProperties(
-        ref.species, "noble_" + ref.species + "_" + std::to_string(int(ref.T)));
+        ref.species, "noble_" + ref.species + "_" + std::to_string(static_cast<int>(ref.T)));
     const Real M = fp.molarMass();
     EXPECT_NEAR(fp.s_from_p_T(p_ref, T_ref) * M, ref.s, tol_s) << ref.species;
 
-    // A monatomic ideal gas has cp = 5/2 R / M at all temperatures
-    REL_TEST(fp.cp_from_p_T(p_ref, ref.T), 2.5 * FluidProperties::_R / M, 1e-6);
+    // A monatomic ideal gas has cp = 5/2 R / M at all temperatures. The tolerance bounds the
+    // roundoff of the exact 5/2 of He, Ar, and Kr and the polynomial corrections of Xe, which are
+    // about 5e-12 relative at the temperatures tested here and grow to order 1e-6 above 1000 K,
+    // where its high-temperature polynomial applies.
+    REL_TEST(fp.cp_from_p_T(p_ref, ref.T), 2.5 * FluidProperties::_R / M, 1e-10);
 
     REL_TEST(fp.mu_from_p_T(p_ref, ref.T), ref.mu, tol_transport);
     REL_TEST(fp.k_from_p_T(p_ref, ref.T), ref.k, tol_transport);
