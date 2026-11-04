@@ -1412,6 +1412,7 @@ MooseApp::setupOptions()
     bool csg_only_from_input =
         !csg_actions.empty() && (*csg_actions.begin())->getParam<bool>("csg_only");
     if (csg_only_from_input)
+    {
       for (const auto & param : final_task_params)
         if (isParamSetByUser(param))
         {
@@ -1422,6 +1423,10 @@ MooseApp::setupOptions()
           csg_only_from_input = false;
           break;
         }
+    }
+    else if (!csg_actions.empty() && isParamSetByUser("csg_only"))
+      mooseInfo(
+          "[CSG] csg_only = false is ignored because --csg-only was passed on the command line");
 
     if (isExclusiveParamSetByUser(final_task_params, "csg_only") || csg_only_from_input)
     {

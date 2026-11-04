@@ -80,7 +80,7 @@ All [engineering units](#engineering-units) are expanded into standard [!ac](CSG
 ```
 
 Command line options take precedence over the `[CSG]` block: an output file name passed to `--csg-only` overrides `output_file`, and `--mesh-only`, `--split-mesh`, or `--parse-neml2-only` disable [!ac](CSG)-only mode with a warning.
-The `output_file` and `expand_units` parameters also apply when `--csg-only` is used with `csg_only = false`.
+When `--csg-only` is used with `csg_only = false`, CSG-only mode is enabled with a message noting that the command line takes precedence, and the `output_file` and `expand_units` parameters still apply.
 
 !syntax parameters /CSG/CSGAction
 
