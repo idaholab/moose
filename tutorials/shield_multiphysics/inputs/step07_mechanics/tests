@@ -5,7 +5,7 @@
     type = RunApp
     input = '../step03_boundary_conditions/mesh.i step7.i'
     cli_args = "Mesh/inactive='fmg'"
-    requirement = "The shield multiphysics tutorial shall include a demonstration of solving a solid "
+    requirement = "The system shall include, as part of the shield multiphysics tutorial, a demonstration of solving a solid "
                   "mechanics problem using stress divergence and thermal expansion."
     # Pretty heavy test
     min_parallel = 4
