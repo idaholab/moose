@@ -138,9 +138,10 @@
       input = 'csg_only_chained.i'
       cli_args = 'Mesh/final_generator=inf_square CSG/csg_only=false CSG/output_file=csg_only_inf_planes_out_csg.json --csg-only'
       jsondiff = 'csg_only_inf_planes_out_csg.json'
+      expect_out = 'csg_only = false is ignored because --csg-only was passed on the command line'
       recover = false
       mesh_mode = REPLICATED
-      detail = 'with the output options applied when CSG-only mode is disabled in the input file but enabled from the command line,'
+      detail = 'with a note that the command line takes precedence and the output options applied when CSG-only mode is disabled in the input file but enabled from the command line,'
     []
     [expand_units]
       type = 'JSONDiff'
