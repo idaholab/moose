@@ -950,6 +950,9 @@ private:
   /// Check universes linked to root universe match universes defined in _universe_list
   void checkUniverseLinking() const;
 
+  /// Check that each cell belongs to at most one universe
+  void checkCellUniverseMembership() const;
+
   /**
    * @brief Recursive method to retrieve all universes, cells, and surfaces linked to current
    * universe
@@ -1279,6 +1282,7 @@ private:
   FRIEND_TEST(CSGBaseTest, testAddGetSurface);
   FRIEND_TEST(CSGBaseTest, testUniverseLinking);
   FRIEND_TEST(CSGBaseTest, testEngUnitLinking);
+  FRIEND_TEST(CSGBaseTest, testCellUniverseMembership);
   FRIEND_TEST(CSGBaseTest, testCellEngUnitAddErrors);
   FRIEND_TEST(CSGBaseTest, testUnivEngUnitAddErrors);
   ///@}
