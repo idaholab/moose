@@ -1,6 +1,6 @@
 [Tests]
   [find_hung_process]
-    requirement = "The find_hung_process.py script shall be able to correctly "
+    requirement = "The system shall, with the find_hung_process.py script, be able to correctly "
                   "identify diverged stacks of a hung process, where"
     design = 'Debug/index.md'
     issues = '#7507 #24420'
@@ -23,7 +23,7 @@
   []
 
   [ignore_param_tests]
-    requirement = "The find_hung_process.py script shall be able to identify "
+    requirement = "The system shall, with the find_hung_process.py script, be able to identify "
                   "diverged stacks, where"
     design = 'Debug/index.md'
     issues = '#25870'
