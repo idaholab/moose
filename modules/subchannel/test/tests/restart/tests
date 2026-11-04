@@ -4,7 +4,7 @@
   [steady]
     type = CSVDiff
     input = steady.i
-    csvdiff = steady_out.csv
+    csvdiff = 'steady_out.csv steady_out_fluid_0001.csv steady_out_pins_0001.csv'
     recover = false
     abs_zero = 1e-7
     max_threads = 1
@@ -15,13 +15,16 @@
   [transient]
     type = CSVDiff
     input = transient.i
-    csvdiff = transient_out.csv
+    csvdiff = 'transient_out.csv transient_out_fluid_0000.csv transient_out_fluid_0001.csv
+               transient_out_fluid_0002.csv transient_out_pins_0000.csv transient_out_pins_0001.csv
+               transient_out_pins_0002.csv'
     prereq = 'steady'
     abs_zero = 5e-6
     max_threads = 1
     # The crossflow solve does not converge in every iteration; remove once #34306 is fixed
     allow_warnings = true
-    # The time = 0 row must match the final row of steady_out.csv
+    # The time = 0 outputs (row 0 of transient_out.csv and the *_0000.csv files)
+    # must match the final steady outputs
     requirement = 'The system shall be able to restart a transient from a steady state solution'
   []
   [transient_time_integrator_warning]

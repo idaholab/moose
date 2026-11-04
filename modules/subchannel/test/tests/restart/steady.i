@@ -173,6 +173,25 @@ P_out = 4.923e6 # Pa
   []
 []
 
+[VectorPostprocessors]
+  # Every nodal value of the subchannel variables, so a variable that is not
+  # restored from the checkpoint shows up in the time = 0 transient output
+  [fluid]
+    type = NodalValueSampler
+    block = subchannel
+    variable = 'mdot SumWij P DP h T rho mu S w_perim displacement ff HTC'
+    sort_by = id
+    execute_on = 'timestep_end'
+  []
+  [pins]
+    type = NodalValueSampler
+    block = fuel_pins
+    variable = 'q_prime Tpin Dpin'
+    sort_by = id
+    execute_on = 'timestep_end'
+  []
+[]
+
 [Outputs]
   csv = true
   checkpoint = true
