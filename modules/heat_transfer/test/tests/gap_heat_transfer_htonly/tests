@@ -13,7 +13,7 @@
     input = 'gap_heat_transfer_htonly_test.i'
     exodiff = 'gap_heat_transfer_htonly_test_out.e'
     abs_zero = 1e-6
-    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
+    requirement = "The system shall use thermal contact to solve plate heat transfer for a constant conductivity gap "
                   "in 3D"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#1609'
@@ -23,7 +23,7 @@
     input = 'gap_heat_transfer_htonly_syntax.i'
     exodiff = 'gap_heat_transfer_htonly_syntax_out.e'
     abs_zero = 1e-6
-    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
+    requirement = "The system shall use thermal contact to solve plate heat transfer for a constant conductivity gap "
                   "in 3D using the ThermalContact syntax."
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#1609'
@@ -34,7 +34,7 @@
     exodiff = 'out_it_plot.e'
     custom_cmp = 'gap_heat_transfer_htonly_it_plot_test.cmp'
     restep = false # Output on nonlinear does not support consistency with restep
-    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
+    requirement = "The system shall use thermal contact to solve plate heat transfer for a constant conductivity gap "
                   "in 3D at each iteration"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#1609'
@@ -45,7 +45,7 @@
     exodiff = 'gap_heat_transfer_htonly_rz_test_out.e'
     abs_zero = 1e-9
     rel_err = 5e-3
-    requirement = "Thermal contact shall solve cylindrical and plate heat transfer for a constant "
+    requirement = "The system shall use thermal contact to solve cylindrical and plate heat transfer for a constant "
                   "conductivity gap in 2D axisymmetric coordinates"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#5104'
@@ -56,7 +56,7 @@
     exodiff = 'gap_heat_transfer_htonly_zr_test_out.e'
     abs_zero = 1e-9
     rel_err = 5e-3
-    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
+    requirement = "The system shall use thermal contact to solve cylindrical heat transfer for a constant conductivity "
                   "gap in 2D axisymmetric coordinates where the axial axis is along the x-direction"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#12071'
@@ -68,7 +68,7 @@
     input = 'gap_heat_transfer_htonly_rspherical.i'
     exodiff = 'gap_heat_transfer_htonly_rspherical_out.e'
     custom_cmp = 'gap_heat_transfer_htonly_rspherical.exodiff'
-    requirement = "Thermal contact shall solve spherical heat transfer for a constant conductivity "
+    requirement = "The system shall use thermal contact to solve spherical heat transfer for a constant conductivity "
                   "gap in 1D spherically symmetric coordinates"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#1609 #5104'
@@ -78,7 +78,7 @@
     input = 'cyl3D.i'
     exodiff = 'cyl3D_out.e'
     capabilities = 'superlu'
-    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
+    requirement = "The system shall use thermal contact to solve cylindrical heat transfer for a constant conductivity "
                   "gap in 3D"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#6161'
@@ -88,7 +88,7 @@
     input = 'cyl2D.i'
     exodiff = 'cyl2D_out.e'
     capabilities = 'superlu'
-    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
+    requirement = "The system shall use thermal contact to solve cylindrical heat transfer for a constant conductivity "
                   "gap in the x-y plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#6161'
@@ -98,7 +98,7 @@
     input = 'sphere3D.i'
     exodiff = 'sphere3D_out.e'
     capabilities = 'superlu'
-    requirement = "Thermal contact shall solve spherical heat transfer for a constant conductivity "
+    requirement = "The system shall use thermal contact to solve spherical heat transfer for a constant conductivity "
                   "gap in 3D"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#6161'
@@ -108,7 +108,7 @@
     input = 'sphere2DRZ.i'
     exodiff = 'sphere2DRZ_out.e'
     capabilities = 'superlu'
-    requirement = "Thermal contact shall solve spherical heat transfer for a constant conductivity "
+    requirement = "The system shall use thermal contact to solve spherical heat transfer for a constant conductivity "
                   "gap in 2D axisymmetric coordinates"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#6161'
@@ -118,7 +118,7 @@
     input = 'cyl2D_xz.i'
     exodiff = 'cyl2D_xz_out.e'
     capabilities = 'superlu'
-    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
+    requirement = "The system shall use thermal contact to solve cylindrical heat transfer for a constant conductivity "
                   "gap in the x-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
@@ -128,7 +128,7 @@
     input = 'cyl2D_yz.i'
     exodiff = 'cyl2D_yz_out.e'
     capabilities = 'superlu'
-    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
+    requirement = "The system shall use thermal contact to solve cylindrical heat transfer for a constant conductivity "
                   "gap in the y-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
@@ -139,7 +139,7 @@
     exodiff = 'planar_xy_out.e'
     custom_cmp = 'planar.cmp'
     capabilities = 'superlu'
-    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
+    requirement = "The system shall use thermal contact to solve plate heat transfer for a constant conductivity gap "
                   "in the x-y plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
@@ -150,7 +150,7 @@
     exodiff = 'planar_xz_out.e'
     custom_cmp = 'planar.cmp'
     capabilities = 'superlu'
-    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
+    requirement = "The system shall use thermal contact to solve plate heat transfer for a constant conductivity gap "
                   "in the x-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
@@ -161,7 +161,7 @@
     exodiff = 'planar_yz_out.e'
     custom_cmp = 'planar.cmp'
     capabilities = 'superlu'
-    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
+    requirement = "The system shall use thermal contact to solve plate heat transfer for a constant conductivity gap "
                   "in the y-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
@@ -170,8 +170,8 @@
     type = Exodiff
     input = 'corner_wrap.i'
     exodiff = 'corner_wrap_out.e'
-    requirement = "When the 'check_boundary_restricted' option is set to false, the thermal contact "
-                  "system shall solve problems in which multiple faces of an element are in one of "
+    requirement = "The system shall, when the 'check_boundary_restricted' option is set to false, use the thermal contact "
+                  "system to solve problems in which multiple faces of an element are in one of "
                   "the contact surfaces, but provide an information message that contact variables "
                   "may have issues in those areas."
     expect_out = "This parameter is set to 'false'. Although thermal contact will be correctly "
@@ -186,8 +186,8 @@
     type = RunException
     input = 'corner_wrap.i'
     cli_args = ThermalContact/thermal_contact/check_boundary_restricted=true
-    requirement = "When the 'check_boundary_restricted' option is set to true, the AuxKernels set up "
-                  "by the ThermalContact system shall generate an error when multiple faces of an "
+    requirement = "The system shall, when the 'check_boundary_restricted' option is set to true, generate an error from the AuxKernels set up "
+                  "by the ThermalContact system when multiple faces of an "
                   "element are in one of the contact surfaces."
     expect_err = "Boundary restricted auxiliary kernel 'gap_value_thermal_contact_0' has element "
     design = 'source/bcs/GapHeatTransfer.md'
@@ -198,7 +198,7 @@
     type = RunException
     input = 'corner_wrap.i'
     cli_args = ThermalContact/thermal_contact/quadrature=false
-    requirement = "If 'quadrature=false' the thermal contact system shall generate an error if the "
+    requirement = "The system shall generate an error in the thermal contact system if 'quadrature=false' and the "
                   "user also sets 'check_boundary_restricted=true'."
     expect_err = "This parameter cannot be 'false' when 'quadrature=false'"
     design = 'source/bcs/GapHeatTransfer.md'
