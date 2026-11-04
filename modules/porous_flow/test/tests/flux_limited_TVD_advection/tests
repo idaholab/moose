@@ -5,7 +5,7 @@
     expect_err = "The AdvectiveFluxCalculator UserObject fluo execute_on parameter must include, at least, 'linear'.  This is to ensure that this UserObject computes all necessary quantities just before the Kernels evaluate their Residuals"
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall error-out if the flux-limiting computations are not evaluated on linear'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization, and shall error-out if the flux-limiting computations are not evaluated on linear'
   [../]
   [./jacobian_01]
     type = 'PetscJacobianTester'
@@ -15,7 +15,7 @@
     heavy = true
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when there is no antidiffusion'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when there is no antidiffusion'
   [../]
   [./jacobian_02_minmod]
     type = 'PetscJacobianTester'
@@ -25,7 +25,7 @@
     difference_tol = 1E10
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is minmod'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is minmod'
   [../]
   [./jacobian_02_vanleer]
     type = 'PetscJacobianTester'
@@ -35,7 +35,7 @@
     difference_tol = 1E10
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is vanleer'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is vanleer'
   [../]
   [./jacobian_02_mc]
     type = 'PetscJacobianTester'
@@ -45,7 +45,7 @@
     difference_tol = 1E10
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is mc'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is mc'
   [../]
   [./jacobian_02_superbee]
     type = 'PetscJacobianTester'
@@ -55,7 +55,7 @@
     difference_tol = 1E10
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is superbee'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is superbee'
   [../]
   [./jacobian_02_vanleer_threads]
     type = 'PetscJacobianTester'
@@ -68,7 +68,7 @@
     prereq = jacobian_02_vanleer
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries, for more than 1 thread'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries, for more than 1 thread'
   [../]
   [./jacobian_03_vanleer]
     type = 'PetscJacobianTester'
@@ -78,7 +78,7 @@
     difference_tol = 1E10
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is vanleer, when the variable is such that the flux limiter is 1'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is vanleer, when the variable is such that the flux limiter is 1'
   [../]
   [./jacobian_03_mc]
     type = 'PetscJacobianTester'
@@ -88,7 +88,7 @@
     difference_tol = 1E10
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is mc, when the variable is such that the flux limiter is 1'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when the flux limiter is mc, when the variable is such that the flux limiter is 1'
   [../]
   [./fltvd_1D]
     type = 'CSVDiff'
@@ -97,7 +97,7 @@
     abs_zero = 1.0E-5
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 1D'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization in 1D'
   [../]
   [./fltvd_1D_threads]
     type = 'CSVDiff'
@@ -109,7 +109,7 @@
     prereq = fltvd_1D
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 1D with more than 1 thread'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization in 1D with more than 1 thread'
   [../]
   [./fltvd_2D]
     type = 'CSVDiff'
@@ -118,7 +118,7 @@
     abs_zero = 1.0E-5
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization in 2D'
   [../]
   [./fltvd_2D_threads]
     type = 'CSVDiff'
@@ -130,7 +130,7 @@
     prereq = 'fltvd_1D_threads fltvd_2D'
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D with more than 1 thread'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization in 2D with more than 1 thread'
   [../]
   [./fltvd_3D]
     type = 'CSVDiff'
@@ -140,7 +140,7 @@
     heavy = true
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 3D'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization in 3D'
   [../]
   [./fltvd_2D_angle]
     type = Exodiff
@@ -150,7 +150,7 @@
     rel_err = 1e-5
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D when the velocity is not aligned with the mesh'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization in 2D when the velocity is not aligned with the mesh'
   [../]
   [./fltvd_2D_trimesh]
     type = 'CSVDiff'
@@ -161,7 +161,7 @@
     max_time = 1000
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D when using triangular mesh elements'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization in 2D when using triangular mesh elements'
   [../]
   [./fltvd_2D_trimesh_threads]
     type = 'CSVDiff'
@@ -175,7 +175,7 @@
     abs_zero = 1.0E-5
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D when using triangular mesh elements and with more than 1 thread'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization in 2D when using triangular mesh elements and with more than 1 thread'
   [../]
   [./fltvd_2D_blocks]
     type = 'CSVDiff'
@@ -184,7 +184,7 @@
     abs_zero = 1.0E-5
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D when the advection is block limited'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization in 2D when the advection is block limited'
   [../]
   [./fltvd_2D_blocks_threads]
     type = 'CSVDiff'
@@ -196,7 +196,7 @@
     prereq = 'fltvd_1D_threads fltvd_2D_blocks'
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D when the advection is block limited, and when more than 1 thread is used'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization in 2D when the advection is block limited, and when more than 1 thread is used'
   [../]
   [./fltvd_1D_adaptivity]
     type = 'CSVDiff'
@@ -205,7 +205,7 @@
     abs_zero = 1.0E-5
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 1D when mesh adaptivity is used'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization in 1D when mesh adaptivity is used'
   [../]
   [./fltvd_1D_adaptivity_threads]
     type = 'CSVDiff'
@@ -217,6 +217,6 @@
     prereq = 'fltvd_1D_threads fltvd_1D_adaptivity'
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 1D when mesh adaptivity is used, and when more than 1 thread is used'
+    requirement = 'The system shall implement Kuzmin-Turek stabilization in 1D when mesh adaptivity is used, and when more than 1 thread is used'
   [../]
 []

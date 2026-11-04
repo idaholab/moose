@@ -19,7 +19,7 @@
     type = 'RunException'
     input = 'except03.i'
     expect_err = 'A strain base_name incorrect_base_name_ does not exist'
-    requirement = 'If the user enters a base_name strain that does not exist, the system should produce an error.'
+    requirement = 'The system shall produce an error if the user enters a base_name strain that does not exist.'
     design = 'PorousFlowHeatEnergy.md'
     issues = '#25673'
   []
@@ -111,6 +111,6 @@
     csvdiff = 'heat05.csv'
     issues = '#8123'
     design = 'PorousFlowHeatEnergy.md PorousFlowHeatVolumetricExpansion.md PorousFlowEnergyTimeDerivative.md PorousFlowFullySaturatedHeatAdvection.md PorousFlowHeatAdvection.md PorousFlowHeatConduction.md PorousFlowPlasticHeatEnergy.md'
-    requirement = 'In fully-coupled THM situations, the system shall correctly initialize the porosity when it depends on all Variables.'
+    requirement = 'The system shall correctly initialize the porosity in fully-coupled THM situations when it depends on all Variables.'
   []
 []

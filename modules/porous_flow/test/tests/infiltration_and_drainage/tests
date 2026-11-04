@@ -7,7 +7,7 @@
     use_old_floor = True
     heavy = true
     max_time = 1000
-    requirement = 'PorousFlow shall be able to model 2-phase infiltration and agree with the analytic solution'
+    requirement = 'The system shall be able to model 2-phase infiltration and agree with the analytic solution'
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   [../]
@@ -17,7 +17,7 @@
     exodiff = 'bw02.e'
     rel_err = 1E-5
     use_old_floor = True
-    requirement = 'PorousFlow shall be able to model 2-phase infiltration on a coarse mesh and agree with the analytic solution'
+    requirement = 'The system shall be able to model 2-phase infiltration on a coarse mesh and agree with the analytic solution'
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   [../]
@@ -29,7 +29,7 @@
     use_old_floor = True
     heavy = true
     max_time = 2000
-    requirement = 'PorousFlow shall be able to model 2-phase drainage and agree with the analytic solution'
+    requirement = 'The system shall be able to model 2-phase drainage and agree with the analytic solution'
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   [../]
@@ -39,7 +39,7 @@
     exodiff = 'wli02.e'
     rel_err = 1E-5
     use_old_floor = True
-    requirement = 'PorousFlow shall be able to model 2-phase drainage on a coarse mesh and agree with the analytic solution'
+    requirement = 'The system shall be able to model 2-phase drainage on a coarse mesh and agree with the analytic solution'
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   [../]
@@ -51,7 +51,7 @@
     use_old_floor = True
     heavy = true
     max_time = 1000
-    requirement = 'PorousFlow shall be able to model single-phase infiltration and agree with the analytic solution'
+    requirement = 'The system shall be able to model single-phase infiltration and agree with the analytic solution'
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   [../]
@@ -62,7 +62,7 @@
     rel_err = 1E-4
     heavy = true
     use_old_floor = True
-    requirement = 'PorousFlow shall be able to model single-phase short-term drainage and agree with the analytic solution'
+    requirement = 'The system shall be able to model single-phase short-term drainage and agree with the analytic solution'
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   [../]
@@ -72,7 +72,7 @@
     exodiff = 'rd03.e'
     rel_err = 1E-4
     use_old_floor = True
-    requirement = 'PorousFlow shall be able to model single-phase long-term drainage and agree with the analytic solution'
+    requirement = 'The system shall be able to model single-phase long-term drainage and agree with the analytic solution'
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   [../]
@@ -84,7 +84,7 @@
     use_old_floor = True
     heavy = true
     max_time = 1000
-    requirement = 'PorousFlow shall be able to model water infiltration into a 2-phase and agree with the analytic solution'
+    requirement = 'The system shall be able to model water infiltration into a 2-phase and agree with the analytic solution'
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   [../]
@@ -94,7 +94,7 @@
     exodiff = 'rsc02.e'
     rel_err = 1E-5
     use_old_floor = True
-    requirement = 'PorousFlow shall be able to model water infiltration into a 2-phase and agree with the analytic solution in a high-resolution test'
+    requirement = 'The system shall be able to model water infiltration into a 2-phase and agree with the analytic solution in a high-resolution test'
     issues = '#13155'
     design = 'porous_flow/tests/infiltration_and_drainage/infiltration_and_drainage_tests.md'
   [../]
