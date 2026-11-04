@@ -48,7 +48,7 @@ class ResidualObject;
 class PenetrationInfo;
 class FieldSplitPreconditionerBase;
 class Convergence;
-class MultiPointConstraintHub;
+class ExactConstraintFunctor;
 
 // libMesh forward declarations
 namespace libMesh
@@ -1008,10 +1008,10 @@ protected:
   ConstraintWarehouse _constraints;
 
   /// Applies the exact constraints to this system; built when the first exact constraint is added
-  std::unique_ptr<MultiPointConstraintHub> _mpc_hub;
+  std::unique_ptr<ExactConstraintFunctor> _exact_constraint_functor;
 
   /// Applies the same exact constraints to the displaced copy of this system
-  std::unique_ptr<MultiPointConstraintHub> _displaced_mpc_hub;
+  std::unique_ptr<ExactConstraintFunctor> _displaced_exact_constraint_functor;
 
   /// increment vector
   NumericVector<Number> * _increment_vec;

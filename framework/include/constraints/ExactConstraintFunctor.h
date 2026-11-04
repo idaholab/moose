@@ -17,16 +17,16 @@ class SystemBase;
 /**
  * The libMesh constraint object of a system. It adds the exact constraints of every active
  * Constraint of a nonlinear system each time libMesh rebuilds the constraints. A displaced problem
- * gets a second hub for the displaced copy of the system.
+ * gets a second functor for the displaced copy of the system.
  */
-class MultiPointConstraintHub : public libMesh::System::Constraint
+class ExactConstraintFunctor : public libMesh::System::Constraint
 {
 public:
   /**
    * @param sys The nonlinear system holding the constraints to apply
    * @param constrained_system \p sys or its displaced copy, whose DofMap receives the constraints
    */
-  MultiPointConstraintHub(NonlinearSystemBase & sys, SystemBase & constrained_system);
+  ExactConstraintFunctor(NonlinearSystemBase & sys, SystemBase & constrained_system);
 
   virtual void constrain() override;
 
@@ -37,7 +37,7 @@ public:
   void reinit();
 
 private:
-  /// The nonlinear system whose constraints this hub applies
+  /// The nonlinear system whose constraints this functor applies
   NonlinearSystemBase & _sys;
 
   /// The system whose DofMap receives the exact constraints
