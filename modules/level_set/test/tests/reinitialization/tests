@@ -8,7 +8,7 @@
     cli_args = 'Executioner/num_steps=2 Outputs/file_base=parent_original'
     capabilities = 'method!=dbg' # complete reinitilization solve, debug is slow and not needed
     valgrind = HEAVY
-    requirement = "The level set module shall be capable of solving the level set equation with original reinitialization."
+    requirement = "The system shall be capable of solving the level set equation with original reinitialization."
     issues = '#14849'
   [../]
   [./full_modified_reinitialization]
@@ -19,7 +19,7 @@
     cli_args = 'Executioner/num_steps=2 Outputs/file_base=parent_modified reinit:Kernels/reinit/use_modified_reinitilization_formulation=true'
     capabilities = 'method!=dbg' # complete reinitilization solve, debug is slow and not needed
     valgrind = HEAVY
-    requirement = "The level set module shall be capable of solving the level set equation with modified reinitialization."
+    requirement = "The system shall be capable of solving the level set equation with modified reinitialization."
     issues = '#8465'
   [../]
 []
