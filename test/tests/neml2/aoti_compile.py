@@ -23,6 +23,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 
 LAUNCHERS = {"ccache", "sccache", "distcc"}
 
@@ -151,7 +152,7 @@ def find_neml2_compile() -> str:
 
 
 def main() -> int:
-    """Resolve CXX and exec neml2-compile with forwarded command-line arguments."""
+    """Resolve CXX and run neml2-compile with forwarded command-line arguments."""
     try:
         host_cxx = resolve_cxx()
         neml2_compile = find_neml2_compile()
@@ -159,16 +160,24 @@ def main() -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
-    env = os.environ.copy()
-    env["CXX"] = host_cxx
-    # conda-forge's Clang driver config (*.cfg next to the compiler) adds
-    # link-only -Wl,... flags, which Clang also applies to TorchInductor's
-    # -x c++-header precompiled-header compilation because it runs without -c.
-    # Disable the config only for a compiler that reports loading one.
-    if _uses_clang_config(host_cxx):
-        env.setdefault("CLANG_NO_DEFAULT_CONFIG", "1")
+    with tempfile.TemporaryDirectory(prefix="neml2-aoti-") as tmp:
+        env = os.environ.copy()
+        env["CXX"] = host_cxx
+        env["TMPDIR"] = tmp
+        env["TORCHINDUCTOR_CACHE_DIR"] = os.path.join(tmp, "inductor")
+        # conda-forge's Clang driver config (*.cfg next to the compiler) adds
+        # link-only -Wl,... flags, which Clang also applies to TorchInductor's
+        # -x c++-header precompiled-header compilation because it runs without -c.
+        # Disable the config only for a compiler that reports loading one.
+        if _uses_clang_config(host_cxx):
+            env.setdefault("CLANG_NO_DEFAULT_CONFIG", "1")
 
-    os.execvpe(neml2_compile, [neml2_compile, *sys.argv[1:]], env)
+        proc = subprocess.run(
+            [neml2_compile, *sys.argv[1:]],
+            env=env,
+            check=False,
+        )
+        return proc.returncode
 
 
 if __name__ == "__main__":
