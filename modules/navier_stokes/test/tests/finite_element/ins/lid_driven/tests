@@ -6,14 +6,14 @@
     exodiff = 'lid_driven_out.e'
     custom_cmp = 'lid_driven.cmp'
     issues = '#000'
-    requirement = 'We shall be able to solve a canonical lid-driven problem without stabilization, using mixed order \
+    requirement = 'The system shall be able to solve a canonical lid-driven problem without stabilization, using mixed order \
 finite elements for velocity and pressure.'
   []
   [transient_lid_driven_fsp_low_Re]
     type = 'Exodiff'
     input = 'transient_fsp.i'
     issues = '#24548'
-    requirement = 'Least squares commutator (LSC) preconditioning shall require only a small number of linear iterations to converge when using Newton with a Reynolds number of unity, performing a transient march to steady-state.'
+    requirement = 'The system shall require only a small number of linear iterations to converge with least squares commutator (LSC) preconditioning when using Newton with a Reynolds number of unity, performing a transient march to steady-state.'
     cli_args = "n=8 mu=1 Outputs/exo/file_base=fsp_transient_low_Re"
     absent_out = 'iterations 14'
     exodiff = 'fsp_transient_low_Re.e'
@@ -24,7 +24,7 @@ finite elements for velocity and pressure.'
     type = 'RunApp'
     input = 'transient_fsp.i'
     issues = '#24548'
-    requirement = 'Least squares commutator (LSC) preconditioning shall require only a small number of linear iterations to converge when using Picard with a Reynolds number of 500, performing a few timesteps in a transient.'
+    requirement = 'The system shall require only a small number of linear iterations to converge with least squares commutator (LSC) preconditioning when using Picard with a Reynolds number of 500, performing a few timesteps in a transient.'
     cli_args = "n=8 GlobalParams/picard=true -snes_linesearch_damping 0.4 Executioner/TimeStepper/optimal_iterations=50 -fieldsplit_others_fieldsplit_u_pc_type lu Executioner/num_steps=3 Outputs/active=''"
     absent_out = '4 iterations'
     capabilities = 'petsc>=3.20.0'
@@ -33,7 +33,7 @@ finite elements for velocity and pressure.'
     type = 'Exodiff'
     input = 'transient_fsp.i'
     issues = '#24548'
-    requirement = 'Least Squares Commutator (LSC) preconditioning shall require only a small number of linear iterations to converge when using Newton with a Reynolds number of 500, performing a transient march to steady-state.'
+    requirement = 'The system shall require only a small number of linear iterations to converge with Least Squares Commutator (LSC) preconditioning when using Newton with a Reynolds number of 500, performing a transient march to steady-state.'
     cli_args = "n=8 -fieldsplit_others_fieldsplit_u_pc_type lu Outputs/exo/file_base=fsp_transient_high_Re"
     absent_out = 'iterations\s*([4-9]\d|[1-9]\d{2,})(?!\d)'
     exodiff = 'fsp_transient_high_Re.e'
@@ -124,7 +124,7 @@ finite elements for velocity and pressure.'
     cli_args = 'Outputs/file_base=lid_driven_out'
     capabilities = 'method=opt'
     issues = '#13025'
-    requirement = 'We shall be able to reproduce the results from the hand-coded lid-driven simulation using automatic differentiation objects.'
+    requirement = 'The system shall be able to reproduce the results from the hand-coded lid-driven simulation using automatic differentiation objects.'
     recover = false # Same output as lid_driven
   []
   [ad_lid_driven_mean_zero_pressure]
@@ -133,7 +133,7 @@ finite elements for velocity and pressure.'
     exodiff = 'ad_lid_driven_mean_zero_pressure_out.e'
     capabilities = 'method=opt'
     issues = '#15549'
-    requirement = 'We shall be able to run lid-dirven simulation using a global mean-zero pressure constraint approach.'
+    requirement = 'The system shall be able to run lid-dirven simulation using a global mean-zero pressure constraint approach.'
   []
   [ad_lid_driven_jacobian]
     type = 'PetscJacobianTester'
@@ -142,7 +142,7 @@ finite elements for velocity and pressure.'
     run_sim = True
     difference_tol = 1e-7
     issues = '#13025'
-    requirement = 'The Jacobian for the mixed-order INS problem shall be perfect when provided through automatic differentiation.'
+    requirement = 'The system shall compute a perfect Jacobian for the mixed-order INS problem when provided through automatic differentiation.'
   []
   [lid_driven_stabilized]
     type = 'Exodiff'
@@ -150,7 +150,7 @@ finite elements for velocity and pressure.'
     exodiff = 'lid_driven_stabilized_out.e'
     custom_cmp = 'lid_driven_stabilized.cmp'
     issues = '#9687'
-    requirement = 'We shall be able to solve the lid-driven problem using equal order shape functions with pressure-stabilized petrov-galerkin stabilization. We shall also demonstrate SUPG stabilization.'
+    requirement = 'The system shall be able to solve the lid-driven problem using equal order shape functions with pressure-stabilized petrov-galerkin stabilization. We shall also demonstrate SUPG stabilization.'
   []
   [ad_lid_driven_stabilized]
     type = 'Exodiff'
@@ -159,7 +159,7 @@ finite elements for velocity and pressure.'
     custom_cmp = 'lid_driven_stabilized.cmp'
     prereq = 'lid_driven_stabilized'
     issues = '#13025'
-    requirement = 'We shall be able to reproduce the hand-coded stabilized results with automatic differentiation objects.'
+    requirement = 'The system shall be able to reproduce the hand-coded stabilized results with automatic differentiation objects.'
     recover = false # Same output as lid_driven_stabilized
     valgrind = HEAVY
   []
@@ -170,7 +170,7 @@ finite elements for velocity and pressure.'
     cli_args = 'Outputs/exodus=false Mesh/gen/nx=3 Mesh/gen/ny=3'
     difference_tol = 1e-7
     issues = '#13025'
-    requirement = 'The Jacobian for the automatic differentiation stabilized lid-driven problem shall be perfect.'
+    requirement = 'The system shall compute a perfect Jacobian for the automatic differentiation stabilized lid-driven problem.'
   []
   [still_unstable]
     type = 'RunApp'
@@ -180,14 +180,14 @@ finite elements for velocity and pressure.'
     cli_args = 'GlobalParams/alpha=0 Outputs/exodus=false'
     capabilities = 'method=opt'
     issues = '#9687'
-    requirement = 'Simulation with equal-order shape functions without pressure stabilization shall be unstable.'
+    requirement = 'The system shall produce an unstable simulation with equal-order shape functions without pressure stabilization.'
   []
   [lid_driven_chorin]
     type = 'Exodiff'
     input = 'lid_driven_chorin.i'
     exodiff = 'lid_driven_chorin_out.e'
     issues = '#000'
-    requirement = 'We shall be able to solve the INS equations using the classical Chorin splitting algorithm.'
+    requirement = 'The system shall be able to solve the INS equations using the classical Chorin splitting algorithm.'
   []
 
   [lid_driven_action]

@@ -18,7 +18,7 @@
   [open_boundary_mass_flux_penalty]
     issues = '#31399'
     design = 'MassFluxPenaltyIPHDG.md MassFluxPenaltyBC.md'
-    requirement = 'The interior penalty hybridizable discontinuous Galerkin discretization shall solve a channel problem with an open boundary when mass flux jump penalization is'
+    requirement = 'The system shall solve a channel problem with an open boundary, using the interior penalty hybridizable discontinuous Galerkin discretization, when mass flux jump penalization is'
     [without_penalty]
       type = CSVDiff
       input = mms-channel.i
