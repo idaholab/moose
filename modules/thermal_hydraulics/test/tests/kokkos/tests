@@ -9,7 +9,7 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
-    requirement = 'The Kokkos system shall be able to compute numerically accurate Jacobians when specifying a radiative boundary condition.'
+    requirement = 'The system shall be able to compute numerically accurate Jacobians using Kokkos when specifying a radiative boundary condition.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
   []
