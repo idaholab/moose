@@ -4,7 +4,7 @@
 
   [print-p2]
     type = JSONDiff
-    requirement = 'The system should be able to print serialized snapshots in a distributed fashion in a json format.'
+    requirement = 'The system shall be able to print serialized snapshots in a distributed fashion in a json format.'
     input = parallel_storage_main.i
     jsondiff = 'parallel_storage_main_out.json parallel_storage_main_out.json.1'
 

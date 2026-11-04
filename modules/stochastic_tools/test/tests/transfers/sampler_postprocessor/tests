@@ -25,7 +25,7 @@
   []
 
   [solve_not_converge]
-    requirement = "When sub-application solve does not converge, the system shall either "
+    requirement = "The system shall, when sub-application solve does not converge, either "
     [abort]
       type = RunException
       input = cartesian_diverge.i

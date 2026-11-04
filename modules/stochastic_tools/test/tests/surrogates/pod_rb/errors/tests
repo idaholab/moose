@@ -1,7 +1,7 @@
 [Tests]
   issues = "#15538"
   [multiapp]
-    requirement = 'PODFullSolveMultiapp shall throw an error when '
+    requirement = 'The system shall throw an error from PODFullSolveMultiApp when '
     design = "PODFullSolveMultiApp.md"
     [trainer_name]
       type = RunException
@@ -31,7 +31,7 @@
     []
   []
   [solution_transfer]
-    requirement = 'PODSamplerSolutionTransfer shall throw an error when '
+    requirement = 'The system shall throw an error from PODSamplerSolutionTransfer when '
     design = "PODSamplerSolutionTransfer.md"
     [trainer_name]
       type = RunException
@@ -44,7 +44,7 @@
     []
   []
   [trainer]
-    requirement = 'PODReducedBasisTrainer shall throw an error when '
+    requirement = 'The system shall throw an error from PODReducedBasisTrainer when '
     design = "PODReducedBasisTrainer.md PODResidualTransfer.md PODSamplerSolutionTransfer.md"
     [var_names]
       type = RunException
@@ -98,7 +98,7 @@
     []
   []
   [surrogate]
-    requirement = 'PODReducedBasisSurrogate shall throw an error when '
+    requirement = 'The system shall throw an error from PODReducedBasisSurrogate when '
     design = "PODReducedBasisSurrogate.md"
     [var_name]
       type = RunException
