@@ -7,7 +7,7 @@
     allow_test_objects = True
     capabilities = 'method=dbg'
 
-    requirement = 'The system should produce a warning when a scalar NaN is produced and user required that the execution would not terminate'
+    requirement = 'The system shall produce a warning when a scalar NaN is produced and user required that the execution would not terminate'
     expect_err = "fp: A NaN was produced."
     issues = '#12234 #12350'
   []
@@ -18,7 +18,7 @@
     allow_test_objects = True
     capabilities = 'method=dbg'
 
-    requirement = 'The system should produce a warning when a vector NaN is produced and user required that the execution would not terminate'
+    requirement = 'The system shall produce a warning when a vector NaN is produced and user required that the execution would not terminate'
     expect_err = "fp: A NaN was produced."
     issues = '#12234 #12350'
   []
@@ -28,7 +28,7 @@
     allow_test_objects = True
     capabilities = 'method=dbg'
 
-    requirement = 'The system should report an error when a NaN is produced by a computation in DEBUG mode, by default'
+    requirement = 'The system shall report an error when a NaN is produced by a computation in DEBUG mode, by default'
     expect_err = "fp: A NaN was produced."
     issues = '#12234 #12350'
   []
@@ -39,7 +39,7 @@
     capabilities = 'method=opt'
     expect_err = 'Aborting as solve did not converge'
 
-    requirement = 'The system should not report an error when a NaN is produced by a computation in OPT mode, by default'
+    requirement = 'The system shall not report an error when a NaN is produced by a computation in OPT mode, by default'
     issues = '#12234 #12350'
 
     # Make sure this test does not run in --recover mode because the default
@@ -59,7 +59,7 @@
     allow_warnings = true
     expect_out = 'fp: A NaN was produced.'
 
-    requirement = 'The system should be able to return a warning when a fluid property evaluation encounters a NaN.'
+    requirement = 'The system shall be able to return a warning when a fluid property evaluation encounters a NaN.'
     issues = '#12234 #12350'
     recover = False
   []
@@ -71,7 +71,7 @@
     allow_warnings = true
     expect_err = 'Solve failed and timestep already at or below dtmin'
 
-    requirement = 'The system should be able to throw an exception when a fluid property evaluation encounters a NaN.'
+    requirement = 'The system shall be able to throw an exception when a fluid property evaluation encounters a NaN.'
     issues = '#12234 #12350'
     recover = False
   []
