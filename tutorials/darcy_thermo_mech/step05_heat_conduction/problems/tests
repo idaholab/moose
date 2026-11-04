@@ -4,16 +4,16 @@
   [step_a]
     type = RunApp
     input = 'step5a_steady.i'
-    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of solving the steady-state heat equation."
+    requirement = "The system shall include, as part of the Darcy-Thermomechanics tutorial, a demonstration of solving the steady-state heat equation."
   []
   [step_b]
     type = RunApp
     input = 'step5b_transient.i'
-    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of solving the transient heat equation."
+    requirement = "The system shall include, as part of the Darcy-Thermomechanics tutorial, a demonstration of solving the transient heat equation."
   []
   [step_c]
     type = RunApp
     input = 'step5c_outflow.i'
-    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of solving the transient heat equation with an outflow boundary condition."
+    requirement = "The system shall include, as part of the Darcy-Thermomechanics tutorial, a demonstration of solving the transient heat equation with an outflow boundary condition."
   []
 []
