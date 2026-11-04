@@ -84,6 +84,15 @@
       mesh_mode = REPLICATED
       detail = 'includes an engineering unit.'
     []
+    [csg_only_poly_unit_cli_expand]
+      type = 'JSONDiff'
+      input = 'csg_only_poly_unit.i'
+      cli_args = 'inactive=CSG --csg-only csg_only_poly_unit_expand_out_csg.json'
+      jsondiff = 'csg_only_poly_unit_expand_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'includes an engineering unit that is expanded by default when generated from the command line without a CSG block.'
+    []
     [csg_only_poly_unit_expand]
       type = 'JSONDiff'
       input = 'csg_only_poly_unit_expand.i'
@@ -135,8 +144,7 @@
     []
     [expand_units]
       type = 'JSONDiff'
-      input = 'csg_only_poly_unit.i'
-      cli_args = 'CSG/output_file=csg_only_poly_unit_expand_out_csg.json'
+      input = 'csg_only_poly_unit_expand.i'
       jsondiff = 'csg_only_poly_unit_expand_out_csg.json'
       recover = false
       mesh_mode = REPLICATED
@@ -145,7 +153,6 @@
     [retain_units]
       type = 'JSONDiff'
       input = 'csg_only_poly_unit.i'
-      cli_args = 'CSG/expand_units=false'
       jsondiff = 'csg_only_poly_unit_out_csg.json'
       recover = false
       mesh_mode = REPLICATED

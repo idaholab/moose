@@ -69,7 +69,8 @@ CSGOnlyAction::act()
     const auto csg_actions = _awh.getActions<CSGAction>();
     const CSGAction * const csg_block = csg_actions.empty() ? nullptr : *csg_actions.begin();
 
-    if (csg_block && csg_block->getParam<bool>("expand_units"))
+    // Engineering units are expanded unless [CSG]/expand_units = false
+    if (!csg_block || csg_block->getParam<bool>("expand_units"))
       _csg_obj->expandAllEngUnits();
 
     Moose::out << "Outputting CSGBase object for " + final_mg_name + "\n";

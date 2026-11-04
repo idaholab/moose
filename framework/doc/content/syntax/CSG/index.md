@@ -70,8 +70,7 @@ An optional output file name can be provided on the command line (`--csg-only <o
 The [!ac](CSG) model generation can also be invoked from the input file with a top-level `[CSG]` block.
 The presence of the block enables [!ac](CSG)-only mode; setting `csg_only = false` keeps the block in the input file while running the input normally.
 The output file name is set with `output_file`.
-All [engineering units](#engineering-units) are expanded into standard [!ac](CSG) components before output by default; setting `expand_units = false` retains them as engineering units.
-When `--csg-only` is used without a `[CSG]` block, engineering units are retained.
+All [engineering units](#engineering-units) are expanded into standard [!ac](CSG) components before output by default, including when `--csg-only` is used without a `[CSG]` block; setting `expand_units = false` retains them as engineering units.
 
 ```
 [CSG]
