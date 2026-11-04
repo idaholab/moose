@@ -794,8 +794,5 @@ PinMeshGenerator::generateCSG()
   // of the pin
   csg_obj->createCell(_name + "_root_cell", pin_unit, pin_region);
 
-  if (getReactorParam<bool>(RGMB::expand_units))
-    csg_obj->expandAllEngUnits();
-
   return csg_obj;
 }
