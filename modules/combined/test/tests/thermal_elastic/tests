@@ -24,7 +24,7 @@
     capabilities = 'method=opt'
     difference_tol = 1e1 # Higher tolerance due to non-AD linear interpolation material
     run_sim = True
-    requirement = 'ADComputeVariableIsotropicElasticityTensor shall calculate a good jacobian'
+    requirement = 'The system shall calculate a good Jacobian for ADComputeVariableIsotropicElasticityTensor'
     design = "jacobian_definition.md"
     issues = "#12633"
   [../]

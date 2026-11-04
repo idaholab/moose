@@ -6,7 +6,7 @@
     capabilities = 'fparser=jit'
     issues = '#5194'
     design = 'ComputeVariableEigenstrain.md'
-    requirement = "The ComputeVariableEigenstrain material shall correctly compute an eigenstrain that is a function of a variable."
+    requirement = "The system shall correctly compute an eigenstrain that is a function of a variable using the ComputeVariableEigenstrain material."
   [../]
   [./variable_finite]
     type = 'Exodiff'
@@ -15,7 +15,7 @@
     capabilities = 'fparser=jit'
     issues = '#5194'
     design = 'ComputeVariableEigenstrain.md'
-    requirement = "The ComputeVariableEigenstrain material shall correctly compute an eigenstrain that is a function of a variable in a finite strain calculation."
+    requirement = "The system shall correctly compute an eigenstrain that is a function of a variable in a finite strain calculation using the ComputeVariableEigenstrain material."
   [../]
   [./variable_cahnhilliard]
     type = 'Exodiff'
@@ -24,7 +24,7 @@
     capabilities = 'fparser=jit'
     issues = '#6066'
     design = 'ComputeVariableEigenstrain.md'
-    requirement = "The ComputeVariableEigenstrain material shall correctly compute the derivative of an eigenstrain that is a function of a variable with respect to that variable."
+    requirement = "The system shall correctly compute, using the ComputeVariableEigenstrain material, the derivative of an eigenstrain that is a function of a variable with respect to that variable."
   [../]
   [./composite]
     type = 'Exodiff'
@@ -32,7 +32,7 @@
     exodiff = 'composite_out.e'
     issues = '#6205'
     design = 'CompositeEigenstrain.md'
-    requirement = "The CompositeEigenstrain material shall correctly apply an eigenstrain computed as the weighted sum of two base Eigenstrain tensors"
+    requirement = "The system shall correctly apply, using the CompositeEigenstrain material, an eigenstrain computed as the weighted sum of two base Eigenstrain tensors"
   [../]
   [./inclusion]
     type = 'Exodiff'
@@ -42,6 +42,6 @@
     abs_zero = 1e-8
     issues = '#7452'
     design = 'ComputeVariableEigenstrain.md InclusionProperties.md'
-    requirement = "The InclusionProperties material, in conjunction with the ComputeVariableEigenstrain material, shall correctly compute the in-plane dilitational eigenstrains resulting from an ellipsoidal inclusion."
+    requirement = "The system shall correctly compute, using the InclusionProperties material in conjunction with the ComputeVariableEigenstrain material, the in-plane dilatational eigenstrains resulting from an ellipsoidal inclusion."
   [../]
 []
