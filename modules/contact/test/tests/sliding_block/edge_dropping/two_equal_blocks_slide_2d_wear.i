@@ -1,4 +1,4 @@
-# Archard wear on a partially covered (edge-dropping) interface with node-based Lagrange multiplier
+# Frictional-work wear on a partially covered (edge-dropping) interface with node-based Lagrange multiplier
 # scaling. The scaling factor differs from one at the partially covered nodes, so the wear depth
 # depends on whether the wear kernel reads the physical pressure or the scaled multiplier.
 
@@ -16,7 +16,7 @@
 
 [AuxKernels]
   [worn_depth]
-    type = MortarArchardsLawAux
+    type = MortarFrictionalWorkWearAux
     variable = worn_depth
     primary_boundary = '23'
     secondary_boundary = '11'

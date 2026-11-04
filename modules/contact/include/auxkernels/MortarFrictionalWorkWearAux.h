@@ -14,9 +14,11 @@
 class MortarContactPressureProvider;
 
 /**
- * Compute worn-out depth based on Archard's wear law
+ * Compute the nodal worn-out depth from Reye's wear law (Reye 1860, col. 239): the normal wear of
+ * a surface element is proportional to its frictional work, i.e. to normal pressure times sliding
+ * velocity. The pressure-velocity form is commonly called Archard's law.
  */
-class MortarArchardsLawAux : public MortarNodalAuxKernel
+class MortarFrictionalWorkWearAux : public MortarNodalAuxKernel
 {
 public:
   static InputParameters validParams();
@@ -24,7 +26,7 @@ public:
   /**
    * Constructor of mortar auxiliary kernel to compute nodal worn-out depth.
    */
-  MortarArchardsLawAux(const InputParameters & parameters);
+  MortarFrictionalWorkWearAux(const InputParameters & parameters);
 
 protected:
   Real computeValue() override;
@@ -43,10 +45,10 @@ protected:
   /// user object provider
   const VariableValue * const _normal_pressure;
 
-  /// Friction coefficient used to compute Archard's law
+  /// Coulomb friction coefficient used to compute the frictional dissipation rate
   const Real _friction_coefficient;
 
-  /// Typically a constant used to characterize wear behavior of a material surface
+  /// Worn-out depth per unit dissipated frictional energy density (Reye's wear coefficient)
   const Real _energy_wear_coefficient;
 
   /// Displacement variables
@@ -76,7 +78,7 @@ protected:
   /// The normal contact pressure at the current node
   Real _nodal_normal_pressure;
 
-  /// The worn-out depth due to Archard's law (Aux Kernel computed value)
+  /// The worn-out depth (Aux Kernel computed value)
   Real _worn_depth;
 
   /// The gap velocity vector at the current quadrature point, used when we are not interpolating the normal
