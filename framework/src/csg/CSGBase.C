@@ -1392,21 +1392,36 @@ CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
                " contains either cells or universes (beyond the root universe) after expansion, "
                "but should only contain surfaces.");
 
-  // Join the unit's base object into this; transfers surfaces (and any other objects) during merge.
-  joinOtherBase(mutable_unit.releaseBase(), false);
+  // Take ownership of the unit's base object so its surfaces can be updated before the join
+  auto unit_base_ptr = mutable_unit.releaseBase();
 
   // Derived class provides the expanded region formed by the expanded surfaces
   CSGRegion expanded_region = mutable_unit.getExpandedRegion();
 
-  // Propagate any stored transformations from the EngUnit to all new expanded surfaces
+  // Propagate any stored transformations from the EngUnit to all new expanded surfaces. This is
+  // done before the join so that the identical-surface comparison during the join includes them.
   const auto & trans = cast_ref<const CSGSurface &>(mutable_unit).getTransformations();
   if (!trans.empty())
     for (const auto & surf_ref : expanded_region.getSurfaces())
     {
-      CSGSurface & mutable_surf = _surface_list.getSurface(surf_ref.get().getName());
+      CSGSurface & mutable_surf =
+          unit_base_ptr->_surface_list.getSurface(surf_ref.get().getName());
       for (const auto & [trans_type, values] : trans)
         mutable_surf.addTransformation(trans_type, values);
     }
+
+  // The join discards an incoming surface that is identical to an existing one, so point the
+  // expanded region at the existing surface while the incoming one still exists. A same-name
+  // surface that is not identical makes the join error instead.
+  std::map<std::string, std::reference_wrapper<const CSGSurface>> existing_surface_refs;
+  for (const CSGSurface & surf : expanded_region.getSurfaces())
+    if (hasSurface(surf.getName()))
+      existing_surface_refs.emplace(surf.getName(), getSurfaceByName(surf.getName()));
+  expanded_region.updateSurfaceReferences(existing_surface_refs);
+
+  // Join the unit's base object into this; transfers surfaces (and any other objects) during merge,
+  // reusing existing surfaces that are identical to incoming ones
+  joinOtherBase(std::move(unit_base_ptr), true);
 
   // Replace every CSGSurfaceEngUnit reference in regions of CSGCells with the expanded sub-region
   replaceSurfaceRefsWithRegion(cast_ref<const CSGSurface &>(mutable_unit), expanded_region);
@@ -1429,26 +1444,34 @@ CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
   // root) and any supports
   mutable_unit.expandUnit();
 
-  // Capture a reference to the expanded cell before the join. joinOtherBase transfers ownership
-  // of the cell's unique_ptr but does not relocate the object, so the reference stays valid.
-  // getExpandedCell also validates that root has exactly 1 cell.
-  const CSGCell & expanded_cell = mutable_unit.getExpandedCell();
+  // getExpandedCell validates that root has exactly 1 cell. Keep only its name: if an identical
+  // cell already exists in this base, the join discards the incoming cell.
+  const auto expanded_cell_name = mutable_unit.getExpandedCell().getName();
 
-  // Join the unit's base object: 1-param merges root cells into this root
-  joinOtherBase(mutable_unit.releaseBase(), false);
+  // Take ownership of the unit's base object so the expanded cell can be updated before the join
+  auto unit_base_ptr = mutable_unit.releaseBase();
 
-  // Propagate any stored transformations from the EngUnit to the expanded cell
+  // Propagate any stored transformations from the EngUnit to the expanded cell. This is done
+  // before the join so that the identical-cell comparison during the join includes them.
   const auto & trans = cast_ref<const CSGCell &>(mutable_unit).getTransformations();
   if (!trans.empty())
   {
-    CSGCell & mutable_cell = _cell_list.getCell(expanded_cell.getName());
+    CSGCell & mutable_cell = unit_base_ptr->_cell_list.getCell(expanded_cell_name);
     for (const auto & [trans_type, values] : trans)
       mutable_cell.addTransformation(trans_type, values);
   }
 
+  // Whether this root already holds the expanded cell, in which case the join did not add it
+  const bool root_had_expanded_cell = getRootUniverse().hasCell(expanded_cell_name);
+
+  // Join the unit's base object: 1-param merges root cells into this root, reusing existing
+  // components that are identical to incoming ones
+  joinOtherBase(std::move(unit_base_ptr), true);
+  const CSGCell & expanded_cell = getCellByName(expanded_cell_name);
+
   // The join added the expanded cell to this root via root-merge; remove it so
   // replaceCellRefs() can place it in the correct universe(s)
-  if (getRootUniverse().hasCell(expanded_cell.getName()))
+  if (!root_had_expanded_cell && getRootUniverse().hasCell(expanded_cell_name))
     removeCellFromUniverse(getRootUniverse(), expanded_cell);
 
   // Replace all references to the CSGCellEngUnit in universes with the new expanded CSGCell
@@ -1504,9 +1527,11 @@ CSGBase::expandEngUnit(const CSGUniverseEngUnit & unit)
   }
 
   // Join the unit's base into this: all objects are transferred and the incoming root is added as
-  // a named non-root universe (expanded_name). If the root universe's name is not unique (i.e. it
-  // was left named ROOT_UNIVERSE), this will throw an error.
-  joinOtherBase(std::move(unit_base), false, expanded_name);
+  // a named non-root universe (expanded_name). Incoming components identical to existing ones
+  // (e.g. axial planes shared by several units) are reused rather than duplicated; a component
+  // with an existing name but a different definition still throws an error, as does a root
+  // universe name that is not unique (i.e. it was left named ROOT_UNIVERSE).
+  joinOtherBase(std::move(unit_base), true, expanded_name);
 
   // must get this by name after joining because the join method rebuilds the universe and the
   // previous reference from getExpandedUniverse is not valid anymore.
