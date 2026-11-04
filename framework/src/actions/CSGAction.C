@@ -30,7 +30,7 @@ CSGAction::validParams()
                                "\"<file_base>_csg.json\"). Overridden by --csg-only <path>.");
   params.addParam<bool>(
       "expand_units",
-      false,
+      true,
       "Whether to expand all engineering units into basic CSG components before output.");
   return params;
 }

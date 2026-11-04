@@ -136,11 +136,20 @@
     [expand_units]
       type = 'JSONDiff'
       input = 'csg_only_poly_unit.i'
-      cli_args = 'CSG/expand_units=true CSG/output_file=csg_only_poly_unit_expand_out_csg.json'
+      cli_args = 'CSG/output_file=csg_only_poly_unit_expand_out_csg.json'
       jsondiff = 'csg_only_poly_unit_expand_out_csg.json'
       recover = false
       mesh_mode = REPLICATED
-      detail = 'with all engineering units expanded before output, and'
+      detail = 'with all engineering units expanded before output by default,'
+    []
+    [retain_units]
+      type = 'JSONDiff'
+      input = 'csg_only_poly_unit.i'
+      cli_args = 'CSG/expand_units=false'
+      jsondiff = 'csg_only_poly_unit_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'with engineering units retained when requested, and'
     []
     [mesh_only_precedence]
       type = 'RunApp'
