@@ -33,7 +33,7 @@ protected:
   /// The node set or side set holding the dependent nodes
   const BoundaryName & _dependent_boundary;
 
-  /// Whether the rotations of the dependent nodes are tied to the rotations of the independent node
+  /// Whether the dependent nodes also get the rotations of the independent node
   const bool _tie_rotations;
 
   /// The three displacement variables, in the x, y, z order of the input
@@ -42,6 +42,6 @@ protected:
   /// The three rotation variables of the independent node, in the x, y, z order of the input
   std::vector<const MooseVariableFieldBase *> _rotations;
 
-  /// The displacement then rotation variables, the gather order of the independent node
+  /// The displacement then rotation variables, in the gather order of the independent node
   std::vector<const MooseVariableFieldBase *> _variables;
 };

@@ -15,7 +15,7 @@
 
 /**
  * Attaches a libMesh constraint object that adds no constraints to the nonlinear system on
- * construction, to test that exact constraints refuse to replace one.
+ * construction. A test uses it to check that exact constraints do not replace this object.
  */
 class AttachDummySystemConstraint : public GeneralUserObject
 {

@@ -4,21 +4,19 @@
 
 ## Description
 
-`RBE2Constraint` is a rigid element. One independent node
-carries three translations and three rotations, and every node of a dependent boundary follows it
-as if a rigid body joined them. The constraint is kinematic: it adds
-[MultiPointConstraint.md] exact constraints to the `DofMap`, so it adds no stiffness, no mass and no penalty
-parameter of its own.
+`RBE2Constraint` is a rigid element. One independent node has three translations and three
+rotations. Each node of a dependent boundary moves with the independent node, as if a rigid body
+connects them. The constraint adds [MultiPointConstraint.md] exact constraints to the `DofMap`. It
+adds no stiffness, no mass, and no penalty parameter.
 
-Use it to attach a face, an edge or a set of nodes to a single node that carries the six degrees of
-freedom of a bolt head, a bearing, a lumped mass, or a beam end.
+Use it to attach a face, an edge, or a set of nodes to one node with six degrees of freedom. This
+node can represent a bolt head, a bearing, a lumped mass, or a beam end.
 
 ### Kinematics
 
 Let $\mathbf{x}_0$ be the position of the independent node, $\mathbf{u}_0$ its translation and
-$\boldsymbol{\theta}_0$ its rotation. For a dependent node $k$ at $\mathbf{x}_k$, write the lever
-arm $\mathbf{r}_k = \mathbf{x}_k - \mathbf{x}_0$, taken once from the undisplaced mesh. Small
-rotations give
+$\boldsymbol{\theta}_0$ its rotation. For a dependent node $k$ at $\mathbf{x}_k$, the lever arm is
+$\mathbf{r}_k = \mathbf{x}_k - \mathbf{x}_0$ on the undisplaced mesh. For small rotations,
 
 \begin{equation}
 \mathbf{u}_k = \mathbf{u}_0 + \boldsymbol{\theta}_0 \times \mathbf{r}_k
@@ -26,83 +24,88 @@ rotations give
 \end{equation}
 
 where $[\mathbf{a}]_\times$ is the skew matrix with
-$[\mathbf{a}]_\times \mathbf{b} = \mathbf{a} \times \mathbf{b}$. Written out, the exact constraint of the $x$
-translation of node $k$ holds three coefficients, all of them on the independent node,
+$[\mathbf{a}]_\times \mathbf{b} = \mathbf{a} \times \mathbf{b}$. The exact constraint of the $x$
+translation of node $k$ has three coefficients, all on the independent node:
 
 \begin{equation}
-u_{k,x} = u_{0,x} + r_{k,z}\,\theta_{0,y} - r_{k,y}\,\theta_{0,z},
+u_{k,x} = u_{0,x} + r_{k,z}\,\theta_{0,y} - r_{k,y}\,\theta_{0,z} .
 \end{equation}
 
-and the $y$ and $z$ exact constraints follow by cyclic permutation. The translations come from
-[!param](/Constraints/RBE2Constraint/displacements) and the rotations from
+A cyclic permutation gives the $y$ and $z$ exact constraints. The translations are the variables
+in [!param](/Constraints/RBE2Constraint/displacements). The rotations are the variables in
 [!param](/Constraints/RBE2Constraint/rotations).
 
 When [!param](/Constraints/RBE2Constraint/dependent_dofs) is `translations_and_rotations`, each
-dependent node also receives three rotation exact constraints,
+dependent node also gets three rotation exact constraints:
 
 \begin{equation}
-\boldsymbol{\theta}_k = \boldsymbol{\theta}_0 ,
+\boldsymbol{\theta}_k = \boldsymbol{\theta}_0 .
 \end{equation}
 
-which is the small-rotation statement that the two nodes share an orientation. Use this setting
-when the dependent nodes carry rotations, as beam and shell nodes do. Leave the default,
-`translations`, for continuum nodes, which solve translations only.
+For small rotations, this means that the two nodes have the same orientation. Use this setting
+when the dependent nodes have rotations, for example beam and shell nodes. Keep the default,
+`translations`, for continuum nodes, which have translations only.
 
-A dependent node at the position of the independent node has $\mathbf{r}_k = \mathbf{0}$, and its
-exact constraints reduce to $\mathbf{u}_k = \mathbf{u}_0$. That is the splice of two coincident but distinct
-nodes.
+A dependent node at the position of the independent node has $\mathbf{r}_k = \mathbf{0}$. Its
+exact constraints become $\mathbf{u}_k = \mathbf{u}_0$. This splices two different nodes at the
+same position.
 
 ### Operating envelope
 
-The coefficients are constant, built once from the undisplaced mesh, so the constraint describes
-small motions about the reference configuration. It is not a large-rotation rigid body, and
-`use_displaced_mesh = true` raises an error.
+The coefficients are constant, and the object computes them from the undisplaced mesh, so the
+constraint describes small motions about the reference configuration. It is not a large-rotation
+rigid body. `use_displaced_mesh = true` raises an error.
 
 The object is three-dimensional. [!param](/Constraints/RBE2Constraint/displacements) and
-[!param](/Constraints/RBE2Constraint/rotations) each take exactly three variables, and any other
-count is an error.
+[!param](/Constraints/RBE2Constraint/rotations) each take exactly three variables. A different
+number raises an error.
 
-[!param](/Constraints/RBE2Constraint/independent_boundary) must resolve to exactly one node, and
-that node must solve all six variables. A continuum block does not solve rotations, so place the
-independent node on a block that does, such as a beam block or a stub element. The constraint
-reports an error naming the missing variable when a rotation has no degree of freedom there.
+[!param](/Constraints/RBE2Constraint/independent_boundary) must contain exactly one node. This
+node must have a degree of freedom for all six variables. A continuum block has no rotations, so put
+the independent node on a block that has them, for example a beam block or a stub element. When a
+variable has no degree of freedom at the independent node, the error gives the name of the
+variable.
 
-Errors also arise when a node of [!param](/Constraints/RBE2Constraint/dependent_boundary) is the
-independent node itself, when a dependent node does not solve one of the three displacements, and
-when [!param](/Constraints/RBE2Constraint/dependent_dofs) is `translations_and_rotations` but a
-dependent node carries no rotation degree of freedom.
+The constraint also raises an error in these conditions:
+
+- A node of [!param](/Constraints/RBE2Constraint/dependent_boundary) is the independent node.
+- A dependent node has no degree of freedom for one of the three displacements.
+- [!param](/Constraints/RBE2Constraint/dependent_dofs) is `translations_and_rotations`, and a
+  dependent node has no rotation degree of freedom.
 
 [!param](/Constraints/RBE2Constraint/dependent_boundary) accepts a node set or a side set, because
-MOOSE builds a node list for both.
+MOOSE makes a node list for both.
 
-Because the exact constraints are rebuilt whenever libMesh rebuilds the constraints of the system, the nodes
-that mesh refinement creates on the dependent boundary receive their exact constraints automatically.
+libMesh calls `ExactConstraintFunctor` each time it rebuilds the constraints of the system. The
+new nodes that mesh refinement adds to the dependent boundary then get their exact constraints.
 
 ### Verification
 
-The regression tests measure three properties of the exact constraints. A prescribed rotation of the independent
-node reproduces the exact rigid field over the whole dependent body, to a largest nodal L2 error of
-9.2e-14. Two beam segments spliced with `dependent_dofs = translations_and_rotations` deflect as one
-continuous cantilever, with a tip deflection of 7.2262e-3 against $PL^{3}/3EI = 7.2265e-3$, a
-relative agreement of 3.3e-5 that the Timoshenko shear term of 5.9e-6 and the discretization error
-account for. A tip mass carried on the independent node of a spider gives a first bending
-eigenvalue of 999.27, within 0.5 percent of the 994.31 of the same cantilever with the mass lumped
-on the face nodes.
+The regression tests measure three properties of the exact constraints:
+
+- A prescribed rotation of the independent node gives the exact rigid field on all of the dependent
+  body. The largest nodal L2 error is 9.2e-14.
+- Two beam segments spliced with `dependent_dofs = translations_and_rotations` deflect as one
+  cantilever. The tip deflection is 7.2262e-3, and $PL^{3}/3EI = 7.2265e-3$. The relative
+  difference of 3.3e-5 comes from the Timoshenko shear term of 5.9e-6 and the discretization error.
+- A tip mass on the independent node of a spider gives a first bending eigenvalue of 999.27. The
+  same cantilever with the mass lumped on the face nodes gives 994.31, a difference below 0.5
+  percent.
 
 ## Example input syntax
 
-The spider ties the free face of a cantilever, `tie_face`, to the first node of a short stub that
-carries the six degrees of freedom. The dependent nodes are continuum nodes, so
-[!param](/Constraints/RBE2Constraint/dependent_dofs) stays on `translations`, while
-[!param](/Constraints/RBE2Constraint/rotations) names the rotation variables of the independent
+The spider ties the free face of a cantilever, `tie_face`, to the first node of a short stub. This
+node has the six degrees of freedom. The dependent nodes are continuum nodes, so
+[!param](/Constraints/RBE2Constraint/dependent_dofs) keeps the value `translations`.
+[!param](/Constraints/RBE2Constraint/rotations) gives the rotation variables of the independent
 node.
 
 !listing modules/solid_mechanics/test/tests/multipoint_constraints/rbe2/rbe2_tip_mass_eigen.i block=Constraints
 
-That input runs under [EigenProblem.md]. A constrained `DofMap` reaches the eigen matrices only
-through the nonlinear eigen solve, so the executioner sets `solve_type = NEWTON` and
-`n_eigen_pairs = 1`.
-[The eigen tag section of the Constraints syntax page](syntax/Constraints/index.md#eigen-tag) explains why.
+This input uses [EigenProblem.md]. Exact constraints in an eigenvalue problem need a nonlinear
+eigen solve, so the executioner sets `solve_type = NEWTON` and `n_eigen_pairs = 1`.
+[The eigen tag section of the Constraints syntax page](syntax/Constraints/index.md#eigen-tag) gives
+more information.
 
 !syntax parameters /Constraints/RBE2Constraint
 

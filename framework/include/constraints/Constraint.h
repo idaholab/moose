@@ -34,27 +34,27 @@ public:
   Constraint(const InputParameters & parameters);
 
   /**
-   * @return Whether this constraint is enforced with exact constraints instead of a residual
+   * @return Whether this constraint adds exact constraints instead of a residual
    */
   virtual bool usesExactConstraints() const { return false; }
 
   /**
-   * Add the exact constraints of this constraint. Every rank must call this, and each adds the
-   * constraints of the dependent nodes it owns. libMesh sends each constraint to the other ranks
-   * that need it.
+   * Add the exact constraints of this object. Every rank must call this. Each rank adds the rows
+   * of the dependent nodes that it owns, and libMesh sends each row to the other ranks that need
+   * it.
    * @param dof_map The DofMap that receives the exact constraints
    */
   virtual void addExactConstraints(libMesh::DofMap & /*dof_map*/) const {}
 
   /**
-   * @return Whether the exact constraints changed since they were last added. Not const: an
-   * implementation may record the coefficients it reports on.
+   * @return Whether the coefficients of the exact constraints changed since the last call. This
+   * method is not const, because an implementation can record the coefficients that it compares.
    */
   virtual bool exactConstraintsChanged() { return false; }
 
   /**
    * @return Whether to add the coupling entries of this constraint to the Jacobian sparsity. Exact
-   * constraints need none: libMesh adds them.
+   * constraints return false, because libMesh adds their entries.
    */
   virtual bool addCouplingEntriesToJacobian() { return !usesExactConstraints(); }
 
@@ -67,8 +67,9 @@ public:
 
 protected:
   /**
-   * Collects the first error a rank finds in a collective method and raises it on every rank, so
-   * that one rank erroring alone cannot leave the others waiting.
+   * Records the first error that a rank finds in a collective method, and raises it on every rank.
+   * Use it for an error that only some ranks find, because an error on only some ranks leaves the
+   * other ranks waiting.
    */
   class CollectiveError
   {
@@ -76,14 +77,14 @@ protected:
     CollectiveError(const Constraint & constraint) : _constraint(constraint) {}
 
     /**
-     * Record a problem found on this rank, unless one is already recorded
+     * Record an error message from this rank, unless this rank already recorded one
      * @param message The error message
      * @param param_name The parameter to attribute the error to, or empty for none
      */
     void record(const std::string & message, const std::string & param_name = "");
 
     /**
-     * Raise the first message any rank recorded on every rank. Every rank must call this.
+     * Raise the first recorded message of any rank on every rank. Every rank must call this.
      */
     void raise() const;
 
@@ -91,10 +92,10 @@ protected:
     /// The constraint that raises the error
     const Constraint & _constraint;
 
-    /// The first problem this rank found
+    /// The first error message that this rank recorded
     std::string _message;
 
-    /// The parameter the first problem is attributed to, if any
+    /// The parameter that the first error names, or empty for none
     std::string _param_name;
   };
 
@@ -105,8 +106,6 @@ protected:
   NonlinearSystemBase & referenceSystem(const std::string & var_name) const;
 
   /**
-   * Exact constraints skip the nodes this returns, so the boundary condition wins, as it does in
-   * the residual formulations.
    * @param var_name The name of the variable
    * @return The IDs of the nodes where an enabled nodal boundary condition pins the variable
    */

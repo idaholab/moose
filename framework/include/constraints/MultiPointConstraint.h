@@ -17,7 +17,8 @@ class MooseVariableFieldBase;
 
 /**
  * Base class for constraints that tie a dependent degree of freedom to a linear combination of
- * other degrees of freedom with exact constraints in the DofMap. Assembles no residual or Jacobian.
+ * other degrees of freedom with exact constraints in the DofMap. It assembles no residual and no
+ * Jacobian.
  */
 class MultiPointConstraint : public Constraint, public Coupleable
 {
@@ -59,7 +60,7 @@ protected:
   /**
    * Gather every node of a boundary on every rank, sorted by id. Every rank must call this.
    * @param boundary The node set or side set holding the nodes
-   * @param var_numbers The system numbers of the variables whose dofs are gathered
+   * @param var_numbers The system numbers of the variables to gather the dofs of
    * @return The gathered nodes
    */
   std::vector<ConstraintNode>
@@ -69,7 +70,7 @@ protected:
   /**
    * Gather the single node of a boundary on every rank. Every rank must call this.
    * @param boundary The node set or side set holding the node
-   * @param var_numbers The system numbers of the variables whose dofs are gathered
+   * @param var_numbers The system numbers of the variables to gather the dofs of
    * @return The gathered node
    */
   ConstraintNode gatherSingleNode(const BoundaryName & boundary,
@@ -79,7 +80,7 @@ protected:
    * Gather the single node of a boundary on every rank and check that every variable has a dof
    * there. Every rank must call this.
    * @param boundary The node set or side set holding the node
-   * @param variables The variables whose dofs are gathered
+   * @param variables The variables to gather the dofs of
    * @return The gathered node
    */
   ConstraintNode

@@ -15,13 +15,13 @@ class MooseVariableBase;
 
 /**
  * Constrains the displacements, and optionally the rotations, of a reference node to the
- * weighted least-squares rigid-body fit of the displacements of a set of independent nodes. With
+ * weighted least-squares rigid-body fit of the translations of a set of independent nodes. With
  * centroid \f$ \mathbf{x}_c \f$, \f$ \mathbf{r}_i = \mathbf{x}_i - \mathbf{x}_c \f$,
  * \f$ \mathbf{d} = \mathbf{x}_{ref} - \mathbf{x}_c \f$ and
  * \f$ J = \sum_i w_i (|\mathbf{r}_i|^2 I - \mathbf{r}_i \mathbf{r}_i^T) \f$:
  * \f$ \boldsymbol{\theta} = J^{-1} \sum_i w_i (\mathbf{r}_i \times \mathbf{u}_i) \f$ and
  * \f$ \mathbf{u}_{ref} = \sum_i w_i \mathbf{u}_i / W + \boldsymbol{\theta} \times \mathbf{d} \f$.
- * Only the translations of the independent nodes are used.
+ * The fit uses only the translations of the independent nodes.
  */
 class RBE3Constraint : public MultiPointConstraint
 {
@@ -47,7 +47,7 @@ protected:
   /// The three displacement variables
   std::vector<const MooseVariableFieldBase *> _displacement_vars;
 
-  /// The three rotation variables of the reference node, empty when 'rotations' is not given
+  /// The three rotation variables of the reference node, empty when the input does not set 'rotations'
   std::vector<const MooseVariableFieldBase *> _rotation_vars;
 
   /// The system numbers of the displacement variables

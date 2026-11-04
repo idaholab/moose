@@ -81,14 +81,14 @@ Specialized capabilities for particular problem classes:
 
 ## Multipoint Constraints
 
-Rigid and interpolation elements, which tie degrees of freedom to each other through
-exact constraints of the degree of freedom map rather than through a penalty or a Lagrange multiplier:
+Rigid and interpolation elements tie degrees of freedom together with exact constraints in the
+`DofMap`. They use no penalty and no Lagrange multiplier.
 
-- [RBE2 rigid element](/RBE2Constraint.md), which moves a set of dependent nodes rigidly with one
-  independent node that carries six degrees of freedom.
-- [RBE3 interpolation element](/RBE3Constraint.md), which ties a reference node to the weighted
-  least-squares fit of a set of independent nodes and distributes a load over them without adding
-  stiffness.
+- [RBE2 rigid element](/RBE2Constraint.md): a set of dependent nodes moves rigidly with one
+  independent node that has six degrees of freedom.
+- [RBE3 interpolation element](/RBE3Constraint.md): a reference node moves as the weighted
+  least-squares fit of a set of independent nodes. A load on the reference node goes to the
+  independent nodes, and the element adds no stiffness.
 
 ## Examples and Tutorials
 

@@ -2,145 +2,162 @@
 
 `MultiPointConstraint` is the base class of the constraints that tie a degree of freedom to a
 linear combination of other degrees of freedom. It is a [Constraint](syntax/Constraints/index.md)
-that assembles neither a residual nor a Jacobian. Instead it adds exact constraints to the `libMesh::DofMap` of
-the nonlinear system, and libMesh applies those exact constraints to everything MOOSE assembles.
+that assembles no residual and no Jacobian. It adds exact constraints to the `libMesh::DofMap` of
+the nonlinear system. libMesh applies them to the element matrices and element vectors that MOOSE
+assembles.
 
-This class is not registered, so it does not appear in an input file. The objects built on it are
+This class is not registered, so you cannot use it in an input file. The Solid Mechanics module
+builds two objects on it:
 [RBE2Constraint](source/constraints/RBE2Constraint.md optional=True) and
-[RBE3Constraint](source/constraints/RBE3Constraint.md optional=True), both in the Solid Mechanics
-module.
+[RBE3Constraint](source/constraints/RBE3Constraint.md optional=True).
 
 ## Exact constraints
 
-An exact constraint makes one dependent degree of freedom $u_{d}$ an exact linear function of a set of
-independent degrees of freedom $u_{j}$, with coefficients $c_{dj}$ that this class computes once
-from the undisplaced mesh:
+An exact constraint makes one dependent degree of freedom $u_{d}$ a linear function of a set of
+independent degrees of freedom $u_{j}$:
 
 \begin{equation}
-u_{d} = \sum_{j} c_{dj}\, u_{j} .
+u_{d} = \sum_{j} c_{dj}\, u_{j} + h_{d} .
 \end{equation}
 
-Collect the exact constraints of a system into the rectangular matrix $C$, which maps the vector of the
-remaining, unconstrained degrees of freedom $\mathbf{u}_{r}$ to the full vector
-$\mathbf{u} = C\,\mathbf{u}_{r}$. libMesh reduces every element matrix and every element vector
-with $C$ in `constrain_element_matrix` and `constrain_element_vector`, which MOOSE calls for every
-tagged matrix and vector it assembles. One set of exact constraints therefore reduces the stiffness matrix, the
-mass matrix and the load vector alike:
+The derived class computes the coefficients $c_{dj}$ from the undisplaced mesh.
+
+Put the exact constraints of a system together as the rectangular matrix $C$ and the vector
+$\mathbf{h}$. They map the vector of unconstrained degrees of freedom $\mathbf{u}_{r}$ to the full
+vector:
+
+\begin{equation}
+\mathbf{u} = C\,\mathbf{u}_{r} + \mathbf{h} .
+\end{equation}
+
+Each exact constraint is one row of $C$.
+
+libMesh reduces each element matrix and each element vector with $C$ in
+`constrain_element_matrix` and `constrain_element_vector`. MOOSE calls these functions for each
+tagged matrix and vector that it assembles. One set of exact constraints reduces the stiffness
+matrix, the mass matrix, and the residual:
 
 \begin{equation}
 \tilde K = C^{\top} K C, \qquad \tilde M = C^{\top} M C, \qquad
-\tilde{\mathbf{f}} = C^{\top} \mathbf{f} .
+\tilde{\mathbf{R}} = C^{\top} \mathbf{R} .
 \end{equation}
 
-The transpose is what makes an exact constraint a work-conjugate relation and not only a kinematic one. A force
-applied to a dependent degree of freedom arrives on the independent degrees of freedom weighted by
-the same coefficients. A multipoint constraint therefore adds no stiffness and no mass of its own,
-and it introduces no penalty parameter and no Lagrange multiplier.
+The reduction uses only $C$. libMesh applies $\mathbf{h}$ when it sets the dependent degrees of
+freedom of the solution.
 
-The right-hand side of an exact constraint is always zero, so a multipoint constraint expresses a homogeneous
-relation. Prescribe a motion with a [DirichletBC.md] on the independent degrees of freedom.
+The transpose $C^{\top}$ moves a force on a dependent degree of freedom to the independent degrees
+of freedom, with the same coefficients. A multipoint constraint adds no stiffness and no mass. It
+uses no penalty parameter and no Lagrange multiplier.
 
-A dependent degree of freedom carries exactly one exact constraint. A degree of freedom that libMesh already
-constrains, such as a hanging node of an adapted mesh, raises an error rather than losing its
-existing exact constraint.
+libMesh accepts a non-zero right-hand side $\mathbf{h}$ in `DofMap::add_constraint_row()`. The
+current objects built on this class all use $\mathbf{h} = \mathbf{0}$. To prescribe a
+motion with these objects, apply a [DirichletBC.md] to the independent degrees of freedom.
 
-`use_displaced_mesh = true` raises an error, because the coefficients of an exact constraint are built once from
-the undisplaced mesh and therefore describe small motions about the reference configuration.
+Each dependent degree of freedom has one exact constraint. If libMesh already constrains a degree
+of freedom, for example a hanging node of an adapted mesh, libMesh raises an error. The objects
+request this error: they call `add_constraint_row()` with `forbid_constraint_overwrite = true`.
 
-## The constraint hub
+The coefficients describe small motions about the undisplaced mesh, so
+`use_displaced_mesh = true` raises an error.
 
-libMesh admits one `libMesh::System::Constraint` object per `System` and calls it through
-`System::user_constrain()` every time it rebuilds the constraints of that system.
-`ExactConstraintFunctor` is that single object. It holds the nonlinear system and asks every
-active constraint of that system whose `usesExactConstraints()` is true for its exact constraints. Every
-`MultiPointConstraint` answers true, and any other constraint that enforces its relation exactly is
-served by the same hub.
+## The exact constraint functor
 
-`NonlinearSystemBase` builds a hub and attaches it when the first exact constraint is
-added, which happens before libMesh distributes the degrees of freedom. The attachment fails with
-an error when another constraint object already occupies that slot on the libMesh system.
+libMesh accepts one `libMesh::System::Constraint` object for each `System`. libMesh calls this
+object through `System::user_constrain()` each time it rebuilds the constraints of the system.
+`ExactConstraintFunctor` is this object for a nonlinear system. It adds the exact constraints of
+each active constraint whose `usesExactConstraints()` is true. Each `MultiPointConstraint` is such a
+constraint, but other constraint families can also use exact constraints.
 
-A problem with `displacements` carries a displaced copy of the nonlinear system, and MOOSE
-assembles every object with `use_displaced_mesh = true` through the `Assembly` of that copy. The
-copy reduces its element matrices and vectors with the constraints of its own `DofMap`, so a second
-hub is attached to it. The two systems share their degree of freedom numbering, so both hubs add
+`NonlinearSystemBase` builds and attaches the functor when it adds the first constraint that uses
+exact constraints. This occurs before libMesh distributes the degrees of freedom. If the libMesh
+system already has a different constraint object, MOOSE raises an error.
+
+A problem with `displacements` has a displaced copy of the nonlinear system. MOOSE assembles each
+object with `use_displaced_mesh = true` through the `Assembly` of this copy. The copy reduces its
+element matrices and vectors with the constraints of its own `DofMap`, so MOOSE attaches a second
+functor to it. The two systems have the same degree of freedom numbering, so the two functors add
 the same exact constraints.
 
-Because the exact constraints are rebuilt from `user_constrain()`, they come back by themselves after mesh
-refinement, coarsening, or repartitioning. No object in MOOSE re-adds an exact constraint by hand, and the nodes
-that a refinement creates on a dependent boundary receive their exact constraints at the next rebuild.
+libMesh calls the functor after mesh refinement, coarsening, and repartitioning, and the functor
+adds the exact constraints again. The new nodes that refinement adds to a dependent boundary
+get their exact constraints at the same time.
 
-## Rebuilding exact constraints that a parameter changed
+## Coefficients that change
 
-A exact constraint whose coefficients depend on a controllable parameter overrides
-`virtual bool exactConstraintsChanged()`, compares the current parameter against the values it last
-emitted, refreshes its copy, and answers true. Once per solve, before the first residual evaluation
-(the pre-SMO residual included), `NonlinearSystemBase::updateExactConstraints()` asks every active exact
-constraint object that question. It takes the maximum of the answers across the ranks so that they all agree,
-and it rebuilds the exact constraints of the system when any provider reports a change. The start of
-a solve is the only place that rebuilds them, so every residual and Jacobian of a solve sees the
-same constraints. A coefficient that changes during a solve, through a `Control` for instance,
-takes effect at the next solve.
+An exact constraint can have coefficients that depend on a controllable parameter. Such an object
+overrides `virtual bool exactConstraintsChanged()`. The override compares the parameter with the
+value that the object last used, records the new value, and returns true when they differ.
 
-The rebuild covers the coefficients of an existing set of exact constraints. The sparsity pattern and the send
-list are built once, from the exact constraints of the first build, so a provider may change the weight of a tie
-between solves but not which degrees of freedom the tie connects. Changing that is a mesh change.
+At the start of each solve, before the first residual evaluation (the pre-SMO residual included),
+MOOSE asks each active constraint that uses exact constraints if its coefficients changed. When an
+object on any rank reports a change, MOOSE rebuilds the exact constraints on all ranks. MOOSE checks
+for a coefficient change only at the start of a solve, so all residuals and Jacobians of a solve use
+the same constraints. A coefficient change during a solve, for example from a `Control`, takes
+effect at the next solve.
 
-## Behavior under an eigenvalue solve
+Rebuilding the exact constraints does not rebuild the sparsity pattern. A rebuild can change the
+coefficients of an exact constraint. It cannot change the degrees of freedom that the exact
+constraint connects, because that change needs a sparsity rebuild.
 
-Under [EigenProblem.md], every degree of freedom that the `DofMap` constrains is exact out of
-both the stiffness matrix and the mass matrix, so the solve sees the exact reduced problem
-$\tilde K \mathbf{v} = \lambda \tilde M \mathbf{v}$, with no spurious eigenvalue and no shift from a
-penalty.
-[The eigen tag section of the Constraints syntax page](syntax/Constraints/index.md#eigen-tag)
-gives the executioner settings that a constrained `DofMap` requires.
+## Behavior in an eigenvalue solve
+
+In an [EigenProblem.md], libMesh removes each degree of freedom that the `DofMap` constrains from
+the stiffness matrix and from the mass matrix. The solve gets the reduced problem
+$\tilde K \mathbf{v} = \lambda \tilde M \mathbf{v}$. This problem has no spurious eigenvalues and no
+shift from a penalty.
+[The eigen tag section of the Constraints syntax page](syntax/Constraints/index.md#eigen-tag) gives
+the executioner settings that a constrained `DofMap` needs.
 
 ## Deriving a multipoint constraint
 
-The exact-constraint contract lives on `Constraint`, so any constraint family can fulfil it:
+`Constraint` declares the exact constraint interface, so any constraint family can use it:
 
-- `usesExactConstraints()` tells the hub and the assembly loops that this object is enforced with
-  exact constraints. `MultiPointConstraint` answers true for every object built on it; a family that offers exact constraints
-  as one of several formulations answers according to its own `formulation` parameter.
-- `addExactConstraints(libMesh::DofMap &) const` adds the exact constraints. It is pure on
+- `usesExactConstraints()` tells the functor and the assembly loops that the object uses exact
+  constraints. `MultiPointConstraint` returns true. A family that has exact constraints as one of
+  several formulations can return a value that depends on its own parameters.
+- `addExactConstraints(libMesh::DofMap &) const` adds the exact constraints. It is pure virtual on
   `MultiPointConstraint`.
-- `exactConstraintsChanged()` reports a coefficient change, as described above.
-- `addCouplingEntriesToJacobian()` returns the negation of `usesExactConstraints()`, because libMesh
-  already expands the sparsity pattern of a constrained degree of freedom to the degrees of freedom
-  that constrain it.
+- `exactConstraintsChanged()` reports a coefficient change, as the section above describes.
+- By default, `addCouplingEntriesToJacobian()` returns the opposite of `usesExactConstraints()`.
+  MOOSE does not add coupling entries for an exact constraint. libMesh adds the sparsity entries
+  that connect a dependent degree of freedom to its independent degrees of freedom.
 
-`MultiPointConstraint` also derives from `Coupleable` as a nodal object, so a derived class reaches
-its coupled variables without deriving from `Coupleable` itself.
+`MultiPointConstraint` also derives from `Coupleable` as a nodal object, so a derived class can
+get its coupled variables directly.
 
-A derived class implements one method,
-`virtual void addExactConstraints(libMesh::DofMap & dof_map) const`, and adds its exact constraints with
+A derived class must implement `addExactConstraints(libMesh::DofMap & dof_map) const` and
+`variable()`. `addExactConstraints()` adds each exact constraint with
 `dof_map.add_constraint_row(dependent_dof, row, /*forbid_constraint_overwrite=*/true)`.
 
-`addExactConstraints()` is collective. Every rank runs it each time libMesh rebuilds the constraints,
-and every rank adds the exact constraints of the dependent nodes it owns. libMesh then sends each
-constraint to the other ranks that need it. The class supplies three protected
-helpers, and all three are collective as well, so every rank must call each of them the same number
-of times and in the same order:
+`addExactConstraints()` is collective. Each rank calls it each time libMesh rebuilds the
+constraints. Each rank adds the exact constraints of the dependent nodes that it owns. libMesh then
+sends each exact constraint to the other ranks that need it.
 
-- `ownedNodes(boundary)` returns the ids of the nodes of a node set or side set that this rank
-  owns. These are the nodes whose exact constraints this rank adds.
-- `gatherBoundaryNodes(boundary, var_numbers)` returns the id, the undisplaced coordinates and the
-  degree of freedom index of each requested variable for every node of the boundary. The owning
-  rank contributes each node, the result is broadcast, and it is sorted by node id, so every rank
-  builds the same coefficients in the same order. An entry is `libMesh::DofObject::invalid_id` when
-  the variable has no degree of freedom at that node.
-- `gatherSingleNode(boundary, var_numbers)` is the same gather for a boundary that must hold exactly
-  one node, and it errors when the boundary holds any other number.
+The class has three protected helpers. `gatherBoundaryNodes` and `gatherSingleNode` are
+collective, so each rank must call them the same number of times and in the same order.
+`ownedNodes` is local.
 
-Raise an error that only some ranks can detect, such as a missing degree of freedom at a dependent
-node, after every rank agrees on the message. An error raised on a subset of the ranks inside a
-collective method leaves the other ranks waiting.
-[RBE2Constraint](source/constraints/RBE2Constraint.md optional=True) shows this pattern: it
-collects a local message, gathers the messages of every rank, and then raises the first one that is
-not empty.
+- `ownedNodes(boundary)` returns the IDs of the nodes of a node set or side set that this rank
+  owns. This rank adds the exact constraints of these nodes.
+- `gatherBoundaryNodes(boundary, var_numbers)` returns three items for each node of the boundary:
+  the ID, the undisplaced coordinates, and the degree of freedom of each requested variable. The
+  rank that owns a node sends it, and all ranks get the full result, sorted by node ID. All ranks
+  then compute the same coefficients in the same order. An entry is
+  `libMesh::DofObject::invalid_id` when the variable has no degree of freedom at the node.
+- `gatherSingleNode(boundary, var_numbers)` does the same gather for a boundary with exactly one
+  node. It raises an error when the boundary has a different number of nodes.
+- `gatherSingleNode(boundary, variables)` takes variables instead of variable numbers. It also
+  raises an error when a variable has no degree of freedom at the node.
 
-`MultiPointConstraint::validParams()` suppresses `variable` and the tagging parameters
-`vector_tags`, `matrix_tags`, `extra_vector_tags`, `extra_matrix_tags` and
-`absolute_value_vector_tags`, because the object assembles nothing and does not act on a single
-variable. A derived class declares the variables it constrains itself, with
-`addRequiredCoupledVar` or `addCoupledVar`, and overrides `variable()` to return one of them.
+An error that only some ranks find in a collective method must go through
+`Constraint::CollectiveError`. A rank that finds an error records the message with `record()`.
+Each rank then calls `raise()`, and `raise()` raises the first recorded message on all ranks. If
+only some ranks raise an error, the other ranks wait forever.
+[RBE2Constraint](source/constraints/RBE2Constraint.md optional=True) uses `CollectiveError` for the
+errors that it finds at the dependent nodes.
+
+`MultiPointConstraint::validParams()` suppresses `variable` and the tag parameters `vector_tags`,
+`matrix_tags`, `extra_vector_tags`, `extra_matrix_tags`, and `absolute_value_vector_tags`. The
+object assembles nothing, and it does not necessarily act on a single variable. A derived class
+declares its constrained variables with `addRequiredCoupledVar` or `addCoupledVar`. Its
+`variable()` returns one of them.

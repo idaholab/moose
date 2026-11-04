@@ -15,9 +15,9 @@ class NonlinearSystemBase;
 class SystemBase;
 
 /**
- * The libMesh constraint object of a system. It adds the exact constraints of every active
- * Constraint of a nonlinear system each time libMesh rebuilds the constraints. A displaced problem
- * gets a second functor for the displaced copy of the system.
+ * The libMesh constraint object of a nonlinear system. Each time libMesh rebuilds the constraints,
+ * this functor adds the exact constraints of each active Constraint whose usesExactConstraints()
+ * is true. A displaced problem has a second functor for the displaced copy of the system.
  */
 class ExactConstraintFunctor : public libMesh::System::Constraint
 {
@@ -31,8 +31,8 @@ public:
   virtual void constrain() override;
 
   /**
-   * Rebuild the constraints of the constrained system. Only coefficients may change: the sparsity
-   * pattern is not rebuilt.
+   * Rebuild the constraints of the constrained system. This does not rebuild the sparsity pattern,
+   * so only the coefficients of the rows can change.
    */
   void reinit();
 

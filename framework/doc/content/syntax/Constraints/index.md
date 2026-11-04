@@ -140,8 +140,10 @@ scalar variables in the residual and Jacobian. Additional discussion can be foun
 
 ## Constraints in Eigenvalue Problems id=eigen-tag
 
-A constraint enforced with exact constraints, such as a [MultiPointConstraint.md], is removed
-from both eigen matrices, and the constrained values are restored on the eigenvector.
+libMesh removes the dependent degrees of freedom of each exact constraint, for example of a
+[MultiPointConstraint.md], from both eigen matrices. libMesh then computes the values of these
+degrees of freedom on the eigenvector. Other constraints act on degrees of freedom that stay in
+the eigen matrices.
 
 Exact constraints in an eigenvalue problem need a nonlinear eigen solve, such as
 `solve_type = newton`. This solve returns one eigenpair, so set `n_eigen_pairs = 1`.
