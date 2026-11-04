@@ -143,7 +143,7 @@
     exodiff = 'GrandPotentialMultiphase_out.e'
     issues = '#15573'
     design = '/ACSwitching.md /CoupledSwitchingTimeDerivative.md'
-    requirement = 'MOOSE shall provide a Grand Potential based multiphase model with AD option'
+    requirement = 'The system shall provide a Grand Potential based multiphase model with AD option'
   []
 
   [ADGrandPotentialMultiphase_jac]
@@ -154,6 +154,6 @@
     ratio_tol = 1e-7
     issues = '#15573'
     design = '/ACSwitching.md /CoupledSwitchingTimeDerivative.md'
-    requirement = 'The jacobian for the AD Allen-Cahn problem with a variable dependent coeffecients shall be perfect'
+    requirement = 'The system shall compute a perfect Jacobian for the AD Allen-Cahn problem with variable dependent coefficients'
   []
 []

@@ -5,7 +5,7 @@
     csvdiff = 'feature_volume_vpp_test_out_features_0000.csv'
 
     issues = "#11395"
-    requirement = "The FeatureVolumeVectorPostprocessor shall output individual centroid locations "
+    requirement = "The system shall output individual centroid locations using the FeatureVolumeVectorPostprocessor "
                   "when requested."
     design = "/FeatureVolumeVectorPostprocessor.md"
   []
@@ -16,7 +16,7 @@
     csvdiff = 'feature_volume_vpp_test_out_features_0000.csv'
 
     issues = "#11395"
-    requirement = "The FeatureVolumeVectorPostprocessor shall output individual centroid locations "
+    requirement = "The system shall output individual centroid locations using the FeatureVolumeVectorPostprocessor "
                   "when requested."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
@@ -30,7 +30,7 @@
     csvdiff = 'percolation_test_out_features_0000.csv'
 
     issues = "#13169"
-    requirement = "The FeatureVolumeVectorPostprocessor shall output whether a percolated pathway "
+    requirement = "The system shall output, using the FeatureVolumeVectorPostprocessor, whether a percolated pathway "
                   "exists between specified primary_percolation_boundaries and "
                   "secondary_percolation_boundaries."
     design = "/FeatureVolumeVectorPostprocessor.md"
@@ -42,7 +42,7 @@
     csvdiff = 'percolation_test_out_features_0000.csv'
 
     issues = "#13169"
-    requirement = "The FeatureVolumeVectorPostprocessor shall output whether a percolated pathway "
+    requirement = "The system shall output, using the FeatureVolumeVectorPostprocessor, whether a percolated pathway "
                   "exists between specified primary_percolation_boundaries and "
                   "secondary_percolation_boundaries."
     design = "/FeatureVolumeVectorPostprocessor.md"
@@ -57,7 +57,7 @@
     csvdiff = 'boundary_area_2D_out_features_0000.csv'
 
     issues = "#13202"
-    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied "
+    requirement = "The system shall calculate, using the FeatureVolumeVectorPostprocessor, coverage of a supplied "
                   "boundary  by each feature by integrating the corresponding order parameter on the "
                   "boundary."
     design = "/FeatureVolumeVectorPostprocessor.md"
@@ -71,8 +71,8 @@
     csvdiff = 'boundary_area_2D_single_out_features_0000.csv'
 
     issues = "#13202"
-    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied "
-                  "boundary by each feature by calulating the area/length of boundary elements."
+    requirement = "The system shall calculate, using the FeatureVolumeVectorPostprocessor, coverage of a supplied "
+                  "boundary by each feature by calculating the area/length of boundary elements."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2
@@ -84,7 +84,7 @@
     csvdiff = 'boundary_area_3D_out_features_0000.csv'
 
     issues = "#13202"
-    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied "
+    requirement = "The system shall calculate, using the FeatureVolumeVectorPostprocessor, coverage of a supplied "
                   "boundary by each feature by integrating the corresponding order parameter on the "
                   "boundary."
     design = "/FeatureVolumeVectorPostprocessor.md"
@@ -98,8 +98,8 @@
     csvdiff = 'boundary_area_3D_single_out_features_0000.csv'
 
     issues = "#13202"
-    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied "
-                  "boundary by each feature by calulating the area/length of boundary elements."
+    requirement = "The system shall calculate, using the FeatureVolumeVectorPostprocessor, coverage of a supplied "
+                  "boundary by each feature by calculating the area/length of boundary elements."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2
@@ -111,7 +111,7 @@
     csvdiff = 'centroid_out_grain_volumes_0004.csv'
 
     issues = "#13202"
-    requirement = "The FeatureVolumeVectorPostprocessor shall output grain centroid locations over "
+    requirement = "The system shall output, using the FeatureVolumeVectorPostprocessor, grain centroid locations over "
                   "multiple time steps"
     design = "/FeatureVolumeVectorPostprocessor.md"
   []

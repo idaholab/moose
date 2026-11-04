@@ -13,7 +13,7 @@
     type = 'Exodiff'
     input = 'temperature_gradient.i'
     exodiff = 'temperature_gradient_out.e'
-    requirement = 'A flat grain boundary shall not move along a temperature gradient'
+    requirement = 'The system shall not move a flat grain boundary along a temperature gradient'
     design = 'PolycrystalKernelAction.md'
     issues = '#9507'
     # needed in parallel
@@ -26,7 +26,7 @@
     input = 'thumb.i'
     exodiff = 'thumb_out.e-s006'
     group = 'adaptive'
-    requirement = 'A thumb shaped grain IC shall be provided for direct comparison to grain boundary mobility experiments'
+    requirement = 'The system shall provide a thumb shaped grain IC for direct comparison to grain boundary mobility experiments'
     design = 'ThumbIC.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
@@ -35,7 +35,7 @@
     type = 'Exodiff'
     input = 'hex.i'
     exodiff = 'hex_out.e'
-    requirement = 'A hexagonal grain structure IC shall be provided'
+    requirement = 'The system shall provide a hexagonal grain structure IC'
     design = 'PolycrystalHex.md'
     issues = '#8810'
   [../]
@@ -45,7 +45,7 @@
     input = 'hex.i'
     exodiff = 'hex_out.e'
     cli_args = 'UserObjects/hex_ic/use_kdtree=true UserObjects/hex_ic/point_patch_size=4'
-    requirement = 'A hexagonal grain structure IC shall be provided using KDTree'
+    requirement = 'The system shall provide a hexagonal grain structure IC using KDTree'
     design = 'PolycrystalHex.md'
     issues = '#8810'
   [../]
@@ -54,7 +54,7 @@
     type = 'Exodiff'
     input = 'boundingbox.i'
     exodiff = 'boundingbox_out.e-s003'
-    requirement = 'A bicrystal grain IC shall be provided to set up a rectangular grain in a matrix'
+    requirement = 'The system shall provide a bicrystal grain IC to set up a rectangular grain in a matrix'
     design = 'BicrystalBoundingBoxICAction.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
@@ -63,7 +63,7 @@
     type = 'Exodiff'
     input = 'evolution.i'
     exodiff = 'evolution_out.e'
-    requirement = 'The grain boundary evolution model shall be able to compute the grain boundary mobility based on an activation energy'
+    requirement = 'The system shall be able to compute, in the grain boundary evolution model, the grain boundary mobility based on an activation energy'
     design = 'GBEvolution.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
@@ -72,7 +72,7 @@
     type = 'Exodiff'
     input = 'constant_mobility.i'
     exodiff = 'constant_mobility_out.e'
-    requirement = 'The grain boundary evolution model shall permit specifying a constant mobility'
+    requirement = 'The system shall permit specifying a constant mobility in the grain boundary evolution model'
     design = 'GBEvolution.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
@@ -82,7 +82,7 @@
     input = 'off-diagonal.i'
     exodiff = 'off-diagonal_out.e-s002'
     group = 'adaptive'
-    requirement = 'The grain boundary evolution model shall provide off-diagonal Jacobians'
+    requirement = 'The system shall provide off-diagonal Jacobians for the grain boundary evolution model'
     design = 'PolycrystalKernelAction.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
@@ -91,7 +91,7 @@
     type = 'Exodiff'
     input = 'explicit.i'
     exodiff = 'explicit_out.e'
-    requirement = 'The grain growth model shall work with explicit time integration'
+    requirement = 'The system shall support explicit time integration for the grain growth model'
     design = 'PolycrystalKernelAction.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
@@ -100,7 +100,7 @@
     type = 'Exodiff'
     input = 'voronoi.i'
     exodiff = 'voronoi_out.e'
-    requirement = 'A voronoi tesselation grain structure IC shall be provided'
+    requirement = 'The system shall provide a voronoi tessellation grain structure IC'
     design = 'PolycrystalVoronoi.md'
     issues = '#8810'
   [../]
@@ -168,7 +168,7 @@
     type = 'Exodiff'
     input = 'voronoi_columnar_3D.i'
     exodiff = 'voronoi_columnar_3D_out.e'
-    requirement = 'A columnar grain IC shall be provided based on a 2D voronoi tesselation'
+    requirement = 'The system shall provide a columnar grain IC based on a 2D voronoi tessellation'
     design = 'PolycrystalVoronoi.md'
     issues = '#8810'
   [../]
@@ -178,7 +178,7 @@
     input = 'particle.i'
     exodiff = 'particle_out.e-s005'
     custom_cmp = 'particle_out.cmp'
-    requirement = 'The grain boundary evolution model shall provide coupling to conserved order parameters'
+    requirement = 'The system shall provide coupling of the grain boundary evolution model to conserved order parameters'
     design = 'ACGBPoly.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]
