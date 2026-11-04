@@ -10,7 +10,7 @@
     max_parallel = 4
     capabilities = 'ad_size>=50'
     valgrind = 'heavy'
-    requirement = 'The contact module shall be able to solve a two-dimensional frictionless problem with Cartesian Lagrange multipliers.'
+    requirement = 'The system shall be able to solve a two-dimensional frictionless problem with Cartesian Lagrange multipliers.'
   []
   [frictionless-mortar-3d]
     type = 'Exodiff'
@@ -20,7 +20,7 @@
     max_parallel = 4
     capabilities = 'ad_size>=150'
     mesh_mode = 'REPLICATED'
-    requirement = 'The contact module shall be able to solve a three-dimensional frictionless problem with Cartesian Lagrange multipliers.'
+    requirement = 'The system shall be able to solve a three-dimensional frictionless problem with Cartesian Lagrange multipliers.'
   []
   [friction-mortar-3d]
     type = 'Exodiff'
@@ -30,7 +30,7 @@
     max_parallel = 4
     capabilities = 'ad_size>=150'
     mesh_mode = 'REPLICATED'
-    requirement = 'Contact module shall solve a three-dimensional frictional problem with Cartesian Lagrange multipliers.'
+    requirement = 'The system shall solve a three-dimensional frictional problem with Cartesian Lagrange multipliers.'
   []
   [two_block_1st_order_constraint_lm_xy_friction]
     type = 'Exodiff'
@@ -39,7 +39,7 @@
     rel_err = 5.0e-4
     max_parallel = 4
     capabilities = 'ad_size>=50'
-    requirement = 'The contact module shall be able to solve a flat surface-flat surface frictional problem with Cartesian Lagrange multipliers.'
+    requirement = 'The system shall be able to solve a flat surface-flat surface frictional problem with Cartesian Lagrange multipliers.'
   []
   [cylinder_friction_cartesian]
     type = 'Exodiff'
@@ -49,7 +49,7 @@
     abs_zero = 1.0e-4
     max_parallel = 4
     capabilities = 'ad_size>=50 & method=opt'
-    requirement = 'The contact module shall be able to solve a cylinder-on-plane plane strain frictional problem with Cartesian Lagrange multipliers.'
+    requirement = 'The system shall be able to solve a cylinder-on-plane plane strain frictional problem with Cartesian Lagrange multipliers.'
   []
   [two_block_1st_order_constraint_lm_xy_friction_vcp]
     type = 'Exodiff'
@@ -59,7 +59,7 @@
     rel_err = 5.0e-4
     capabilities = 'ad_size>=50'
     mesh_mode = 'REPLICATED'
-    requirement = 'The contact module shall be able to solve a flat surface-flat surface frictional problem with Cartesian Lagrange multipliers using VCP.'
+    requirement = 'The system shall be able to solve a flat surface-flat surface frictional problem with Cartesian Lagrange multipliers using VCP.'
   []
   [cylinder_friction_cartesian_vcp]
     type = 'Exodiff'
@@ -70,6 +70,6 @@
     max_parallel = 4
     capabilities = 'ad_size>=50 & method=opt'
     mesh_mode = 'REPLICATED'
-    requirement = 'The contact module shall be able to solve a cylinder-on-plane plane strain frictional problem with Cartesian Lagrange multipliers using VCP.'
+    requirement = 'The system shall be able to solve a cylinder-on-plane plane strain frictional problem with Cartesian Lagrange multipliers using VCP.'
   []
 []

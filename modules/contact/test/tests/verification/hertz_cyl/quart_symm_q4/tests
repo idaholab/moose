@@ -11,7 +11,7 @@
     max_parallel = 1
     heavy = true
     capabilities = 'superlu'
-    requirement = "The Contact system shall enforce glued, kinematic contact
+    requirement = "The system shall enforce glued, kinematic contact
     for 2D Hertz quarter-symmetry cylindrical contact problem."
   [../]
   [./glued_pen]
@@ -24,7 +24,7 @@
     max_parallel = 1
     heavy = true
     capabilities = 'superlu'
-    requirement = "The Contact system shall enforce glued, penalty contact
+    requirement = "The system shall enforce glued, penalty contact
     for 2D Hertz quarter-symmetry cylindrical contact problem."
   [../]
   [./frictionless_kin]
@@ -37,7 +37,7 @@
     max_parallel = 1
     heavy = true
     capabilities = 'superlu'
-    requirement = "The Contact system shall enforce frictionless, kinematic contact
+    requirement = "The system shall enforce frictionless, kinematic contact
     for 2D Hertz quarter-symmetry cylindrical contact problem."
   [../]
   [./frictionless_pen]
@@ -50,7 +50,7 @@
     max_parallel = 1
     heavy = true
     capabilities = 'superlu'
-    requirement = "The Contact system shall enforce frictionless, penalty contact
+    requirement = "The system shall enforce frictionless, penalty contact
     for 2D Hertz quarter-symmetry cylindrical contact problem."
   [../]
   [./frictionless_aug]
@@ -65,7 +65,7 @@
     max_parallel = 1
     heavy = true
     capabilities = 'superlu'
-    requirement = "The Contact system shall enforce frictionless, Augmented
+    requirement = "The system shall enforce frictionless, Augmented
     Lagrange contact for 2D Hertz quarter-symmetry cylindrical contact problem."
   [../]
 []

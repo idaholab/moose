@@ -131,7 +131,7 @@
   []
   [frictionless-mortar-3d-action-subpatch-plane-forwarding]
     issues = '#33282 #24255'
-    requirement = 'The contact action shall correctly forward the selected 3D mortar subpatch '
+    requirement = 'The system shall correctly forward, via the contact action, the selected 3D mortar subpatch '
                   'plane mode by'
     [mortar]
       type = 'Exodiff'

@@ -13,7 +13,7 @@
     max_parallel = 1
     mesh_mode = REPLICATED
     capabilities = 'superlu'
-    requirement = "The Contact system shall enforce glued, kinematic contact
+    requirement = "The system shall enforce glued, kinematic contact
     for 2D QUAD8 axisymmetric geometry (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
   [./glued_pen]
@@ -30,7 +30,7 @@
     max_parallel = 1
     mesh_mode = REPLICATED
     capabilities = 'superlu'
-    requirement = "The Contact system shall enforce glued, penalty contact
+    requirement = "The system shall enforce glued, penalty contact
     for 2D QUAD8 axisymmetric geometry (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
   [./frictionless_kin]
@@ -46,7 +46,7 @@
     max_parallel = 1
     mesh_mode = REPLICATED
     capabilities = 'superlu'
-    requirement = "The Contact system shall enforce frictionless, kinematic contact
+    requirement = "The system shall enforce frictionless, kinematic contact
     for 2D QUAD8 axisymmetric geometry (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
   [./frictionless_pen]
@@ -62,7 +62,7 @@
     max_parallel = 1
     mesh_mode = REPLICATED
     capabilities = 'superlu'
-    requirement = "The Contact system shall enforce frictionless, penalty contact
+    requirement = "The system shall enforce frictionless, penalty contact
     for 2D QUAD8 axisymmetric geometry (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
   [./frictionless_aug]
@@ -77,7 +77,7 @@
     max_parallel = 1
     mesh_mode = REPLICATED
     capabilities = 'superlu'
-    requirement = "The Contact system shall enforce frictionless, Augmented
+    requirement = "The system shall enforce frictionless, Augmented
     Lagrange contact for 2D QUAD8 axisymmetric geometry (NAFEMS CGS1 contact
     patch test with matched nodes)."
   [../]
@@ -92,7 +92,7 @@
     mesh_mode = REPLICATED
     capabilities = 'superlu'
     skip = 'bad contact pressure'
-    requirement = "The Contact system shall enforce frictional, Augmented
+    requirement = "The system shall enforce frictional, Augmented
     Lagrange contact for 2D QUAD8 axisymmetric geometry (NAFEMS CGS1 contact
     patch test with matched nodes)."
   [../]
@@ -105,7 +105,7 @@
     max_parallel = 1
     mesh_mode = REPLICATED
     capabilities = 'superlu'
-    requirement = "The Contact system shall enforce frictional, penalty
+    requirement = "The system shall enforce frictional, penalty
     contact for 2D QUAD8 axisymmetric geometry (NAFEMS CGS1 contact
     patch test with matched nodes)."
   [../]

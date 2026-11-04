@@ -73,8 +73,8 @@
     []
   []
   [tied_node]
-    requirement = 'Using a RANFS scheme with Lagrange multipliers corresponding to equality '
-                  'constraints the system shall be able to '
+    requirement = 'The system shall, using a RANFS scheme with Lagrange multipliers corresponding to equality '
+                  'constraints, be able to '
     [physics]
       type = 'Exodiff'
       input = tied-nodes.i

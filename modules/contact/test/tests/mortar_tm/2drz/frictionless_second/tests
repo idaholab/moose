@@ -4,7 +4,7 @@
   [soft]
     no_error_deprecated = true
     requirement = 'The system shall be able to compute a soft block bouncing on a soft plank problem '
-                  'on a second order 2DRz mesh using tensor mechanics and mortar contact'
+                  'on a second order 2DRz mesh using solid mechanics and mortar contact'
     [small]
       detail = 'using the small strain formulation.'
       type = 'CSVDiff'
@@ -38,7 +38,7 @@
   []
   [stiff]
     requirement = 'The system shall be able to compute a block bouncing on a plank problem on a '
-                  'second order 2DRz mesh using tensor mechanics and mortar contact and finite '
+                  'second order 2DRz mesh using solid mechanics and mortar contact and finite '
                   'strain'
     [stiff_stiff]
       detail = 'using with a stiff block and a stiff plank.'
