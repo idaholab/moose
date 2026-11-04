@@ -51,7 +51,7 @@ the undisplaced mesh and therefore describe small motions about the reference co
 
 libMesh admits one `libMesh::System::Constraint` object per `System` and calls it through
 `System::user_constrain()` every time it rebuilds the constraints of that system.
-`MultiPointConstraintHub` is that single object. It holds the nonlinear system and asks every
+`ExactConstraintFunctor` is that single object. It holds the nonlinear system and asks every
 active constraint of that system whose `usesExactConstraints()` is true for its exact constraints. Every
 `MultiPointConstraint` answers true, and any other constraint that enforces its relation exactly is
 served by the same hub.

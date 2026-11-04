@@ -7,19 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MultiPointConstraintHub.h"
+#include "ExactConstraintFunctor.h"
 
 #include "Constraint.h"
 #include "NonlinearSystemBase.h"
 
-MultiPointConstraintHub::MultiPointConstraintHub(NonlinearSystemBase & sys,
-                                                 SystemBase & constrained_system)
+ExactConstraintFunctor::ExactConstraintFunctor(NonlinearSystemBase & sys,
+                                               SystemBase & constrained_system)
   : _sys(sys), _constrained_sys(constrained_system)
 {
 }
 
 void
-MultiPointConstraintHub::constrain()
+ExactConstraintFunctor::constrain()
 {
   libMesh::DofMap & dof_map = _constrained_sys.dofMap();
   for (const auto & constraint : _sys.getConstraintWarehouse().getActiveObjects())
@@ -28,7 +28,7 @@ MultiPointConstraintHub::constrain()
 }
 
 void
-MultiPointConstraintHub::reinit()
+ExactConstraintFunctor::reinit()
 {
   _constrained_sys.system().reinit_constraints();
 }

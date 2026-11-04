@@ -51,7 +51,7 @@
 #include "MortarConstraint.h"
 #include "ElemElemConstraint.h"
 #include "MultiPointConstraint.h"
-#include "MultiPointConstraintHub.h"
+#include "ExactConstraintFunctor.h"
 #include "ScalarKernelBase.h"
 #include "Parser.h"
 #include "Split.h"
@@ -623,10 +623,10 @@ NonlinearSystemBase::addConstraint(const std::string & c_name,
   postAddResidualObject(*constraint);
 
   // Exact constraints are applied by the DofMap through one libMesh constraint object per system
-  if (constraint->usesExactConstraints() && !_mpc_hub)
+  if (constraint->usesExactConstraints() && !_exact_constraint_functor)
   {
-    auto attach_hub =
-        [this, &name](SystemBase & constrained_sys, std::unique_ptr<MultiPointConstraintHub> & hub)
+    auto attach_functor = [this, &name](SystemBase & constrained_sys,
+                                        std::unique_ptr<ExactConstraintFunctor> & functor)
     {
       if (constrained_sys.system().has_constraint_object())
         mooseError("Another constraint object is already attached to the libMesh system '",
@@ -635,17 +635,17 @@ NonlinearSystemBase::addConstraint(const std::string & c_name,
                    name,
                    "' cannot be applied.");
 
-      hub = std::make_unique<MultiPointConstraintHub>(*this, constrained_sys);
-      constrained_sys.system().attach_constraint_object(*hub);
+      functor = std::make_unique<ExactConstraintFunctor>(*this, constrained_sys);
+      constrained_sys.system().attach_constraint_object(*functor);
     };
 
-    attach_hub(*this, _mpc_hub);
+    attach_functor(*this, _exact_constraint_functor);
 
     // The displaced DofMap reduces the element matrices of objects on the displaced mesh. It shares
     // the dof numbering of this system, so it gets the same exact constraints
     if (auto displaced_problem = _fe_problem.getDisplacedProblem())
-      attach_hub(displaced_problem->solverSys(_fe_problem.nlSysNum(this->name())),
-                 _displaced_mpc_hub);
+      attach_functor(displaced_problem->solverSys(_fe_problem.nlSysNum(this->name())),
+                     _displaced_exact_constraint_functor);
   }
 
   if (!_fe_problem.useHashTableMatrixAssembly())
@@ -4318,16 +4318,16 @@ NonlinearSystemBase::computeScaling()
 void
 NonlinearSystemBase::reinitExactConstraints()
 {
-  if (_mpc_hub)
-    _mpc_hub->reinit();
-  if (_displaced_mpc_hub)
-    _displaced_mpc_hub->reinit();
+  if (_exact_constraint_functor)
+    _exact_constraint_functor->reinit();
+  if (_displaced_exact_constraint_functor)
+    _displaced_exact_constraint_functor->reinit();
 }
 
 void
 NonlinearSystemBase::updateExactConstraints()
 {
-  if (!_mpc_hub)
+  if (!_exact_constraint_functor)
     return;
 
   // Every constraint is asked, because asking is how it records the coefficients it emitted
