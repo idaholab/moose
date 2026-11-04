@@ -1404,8 +1404,7 @@ CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
   if (!trans.empty())
     for (const auto & surf_ref : expanded_region.getSurfaces())
     {
-      CSGSurface & mutable_surf =
-          unit_base_ptr->_surface_list.getSurface(surf_ref.get().getName());
+      CSGSurface & mutable_surf = unit_base_ptr->_surface_list.getSurface(surf_ref.get().getName());
       for (const auto & [trans_type, values] : trans)
         mutable_surf.addTransformation(trans_type, values);
     }
