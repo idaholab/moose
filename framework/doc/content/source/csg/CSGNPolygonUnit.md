@@ -80,12 +80,13 @@ When the unit is expanded within a `CSGBase` instance, the unit is replaced by t
 
 ## Example Use Case
 
-The following is an end-to-end example of a mesh generator that produces an N-sided polygon unit, with the option to expand it into its rudimentary components.
-Within the `generateCSG` method, the polygon unit is created and added to the `CSGBase` instance, used as the region of a material cell, and optionally expanded based on the `expand_unit` input parameter.
+The following is an end-to-end example of a mesh generator that produces an N-sided polygon unit.
+Within the `generateCSG` method, the polygon unit is created, added to the `CSGBase` instance, and used as the region of a material cell.
+Whether the unit is expanded into its rudimentary components in the output is controlled by `expand_units` in the [`[CSG]`](syntax/CSG/index.md#how-to-generate-a-csg-model) input block.
 
 !listing TestPolygonUnitMeshGenerator.C start=// name of the current mesh generator end=return csg_obj include-end=true
 
-When run without expansion, the engineering unit itself is the final output.
+When `expand_units = false`, the engineering unit itself is the final output.
 For example, the following input creates an infinite triangular prism (a 3-sided polygon with an apothem of 4):
 
 !listing csg_only_poly_unit.i
@@ -94,7 +95,7 @@ This produces the [!ac](CSG) [!ac](JSON) output below, where the polygon unit is
 
 !listing csg_only_poly_unit_out_csg.json
 
-When `expand_unit = true`, the polygon unit is removed from the output and replaced with the corresponding plane surfaces and the interior region:
+When `expand_units = true` (the default), the polygon unit is removed from the output and replaced with the corresponding plane surfaces and the interior region:
 
 !listing csg_only_poly_unit_expand.i
 
