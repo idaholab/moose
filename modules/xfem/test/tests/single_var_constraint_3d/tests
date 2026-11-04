@@ -6,7 +6,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
-    requirement = 'The XFEM module shall provide an ability to apply a zero-jump, zero-flux-jump constraint across a stationary XFEM interface for one variable in 3D.'
+    requirement = 'The system shall provide an ability to apply a zero-jump, zero-flux-jump constraint across a stationary XFEM interface for one variable in 3D.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   [../]
@@ -17,7 +17,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
-    requirement = 'The XFEM module shall provide an ability to apply a zero-jump, nonzero-flux-jump constraint across a stationary XFEM interface for one variable in 3D.'
+    requirement = 'The system shall provide an ability to apply a zero-jump, nonzero-flux-jump constraint across a stationary XFEM interface for one variable in 3D.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   [../]
@@ -28,7 +28,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
-    requirement = 'The XFEM module shall provide an ability to apply a nonzero-jump, zero-flux-jump constraint across a stationary XFEM interface for one variable in 3D.'
+    requirement = 'The system shall provide an ability to apply a nonzero-jump, zero-flux-jump constraint across a stationary XFEM interface for one variable in 3D.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   [../]
@@ -40,7 +40,7 @@
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
     abs_zero = 1e-8
-    requirement = 'The XFEM module shall provide an ability to apply a nonzero-jump, nonzero-flux-jump constraint across a stationary XFEM interface for one variable in 3D.'
+    requirement = 'The system shall provide an ability to apply a nonzero-jump, nonzero-flux-jump constraint across a stationary XFEM interface for one variable in 3D.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   [../]
