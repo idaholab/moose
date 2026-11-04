@@ -3163,7 +3163,7 @@ TEST(CSGBaseTest, testEngUnitLinking)
   ASSERT_NO_THROW(csg_obj->checkUniverseLinking());
 }
 
-/// test CSGBase::checkCellUniverseMembership, including through generateOutput
+/// test CSGBase::checkCellUniverseMembership, including through checkGeometry and generateOutput
 TEST(CSGBaseTest, testCellUniverseMembership)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
@@ -3174,6 +3174,7 @@ TEST(CSGBaseTest, testCellUniverseMembership)
   csg_obj->createCell("c1", univ1, -s1);
   const auto & c2 = csg_obj->createCell("c2", "mat1", -s1, &univ1);
   ASSERT_NO_THROW(csg_obj->checkCellUniverseMembership());
+  ASSERT_NO_THROW(csg_obj->checkGeometry());
   ASSERT_NO_THROW(csg_obj->generateOutput());
 
   // add c2 to the root universe as well so that it belongs to two universes
@@ -3181,6 +3182,7 @@ TEST(CSGBaseTest, testCellUniverseMembership)
   const std::string msg = "Cell with name c2 belongs to more than one universe (ROOT_UNIVERSE, "
                           "univ1). Each cell must belong to exactly one universe.";
   Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkCellUniverseMembership(); }, msg);
+  Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkGeometry(); }, msg);
   Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->generateOutput(); }, msg);
 
   // removing c2 from univ1 leaves it in a single universe again

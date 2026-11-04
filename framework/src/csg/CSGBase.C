@@ -1252,6 +1252,15 @@ CSGBase::checkCellUniverseMembership() const
                  "). Each cell must belong to exactly one universe.");
 }
 
+void
+CSGBase::checkGeometry() const
+{
+  // Check that orphaned universes do not exist in universe list of CSGBase object
+  checkUniverseLinking();
+  // Check that no cell is shared between universes, which downstream codes cannot represent
+  checkCellUniverseMembership();
+}
+
 bool
 CSGBase::areCSGObjectsLinked() const
 {
@@ -1612,10 +1621,7 @@ CSGBase::replaceSurfaceRefsWithRegion(const CSGSurface & old_surf, const CSGRegi
 nlohmann::json
 CSGBase::generateOutput() const
 {
-  // Check that orphaned universes do not exist in universe list of CSGBase object
-  checkUniverseLinking();
-  // Check that no cell is shared between universes, which downstream codes cannot represent
-  checkCellUniverseMembership();
+  checkGeometry();
 
   nlohmann::json csg_json;
 
