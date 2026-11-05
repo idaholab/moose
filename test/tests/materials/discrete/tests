@@ -93,4 +93,24 @@
     input='block_restricted.i'
     requirement = 'The system shall allow block-restricted discrete material without producing a false positive cyclic dependency error.'
   []
+
+  [stateful_init]
+    requirement = 'The system shall initialize the stateful properties of discrete materials'
+    [boundary]
+      type = CSVDiff
+      input = 'stateful_boundary.i'
+      csvdiff = 'stateful_boundary_out.csv'
+      # SpatialStatefulMaterial does not override resetQpProperties()
+      allow_warnings = true
+      detail = 'on boundaries and'
+    []
+    [neighbor]
+      type = CSVDiff
+      input = 'stateful_neighbor.i'
+      csvdiff = 'stateful_neighbor_out.csv'
+      # SpatialStatefulMaterial does not override resetQpProperties()
+      allow_warnings = true
+      detail = 'on the neighbor side of internal sides.'
+    []
+  []
 []
