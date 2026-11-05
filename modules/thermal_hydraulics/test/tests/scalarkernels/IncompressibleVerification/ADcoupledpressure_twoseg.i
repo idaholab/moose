@@ -10,8 +10,8 @@ dP = -10130
 Tin = 293.15
 rho = 998.2
 mu = 0.001002
-alpha1 = 0.0
-alpha2 = '${fparse 3.14159/2}'
+dH1 = 0.0
+dH2 = '${fparse length2*sin(3.14159/2)}'
 epsilon1 = 0.0001
 epsilon2 = 0.0002
 forms1 = 0.0
@@ -53,7 +53,7 @@ area2 = '${fparse 3.14159* ${R2}^2}'
 
 [ScalarKernels]
   [pipe1_mom]
-    type = CoupledPressureIncompressibleMomentumSPScalarKernel
+    type = ADCoupledPressureIncompressibleMomentumSPScalarKernel
     variable = 'dPc'
     coupled_mass_flow_rate = 'm1'
     temperatures = 'T1 T1'
@@ -62,7 +62,7 @@ area2 = '${fparse 3.14159* ${R2}^2}'
     areas = '${area1} ${area2}'
     perimeters = '${fparse 2*3.14159* ${R1}} ${fparse 2*3.14159* ${R2}}'
     lengths = '${length1} ${length2}'
-    alphas = '${alpha1} ${alpha2}'
+    height_changes = '${dH1} ${dH2}'
     forms_losses = '${forms1} ${forms2}'
     pump_pressures = '${pump1} ${pump2}'
     roughnesses = '${epsilon1} ${epsilon2}'
@@ -128,8 +128,8 @@ area2 = '${fparse 3.14159* ${R2}^2}'
                   + f2 * ${length2} * mdot^2 / 4 / ${R2} / ${rho} / ${area2}^2
                   + ${forms1} * mdot^2 / 2 / ${rho} / ${area1}^2
                   + ${forms2} * mdot^2 / 2 / ${rho} / ${area2}^2
-                  + ${rho} * ${gravity} * ${length1} * sin(${alpha1})
-                  + ${rho} * ${gravity} * ${length2} * sin(${alpha2})'
+                  + ${rho} * ${gravity} * ${dH1}
+                  + ${rho} * ${gravity} * ${dH2}'
     pp_names = 'f1 f2 mdot'
     execute_on = 'TIMESTEP_END'
   []

@@ -12,8 +12,8 @@ Tout = 343.15
 mu = 0.001002
 cp = 4185.0
 k = 0.598
-alpha1 = 0.0
-alpha2 = '${fparse 3.14159/2}'
+dH1 = 0.0
+dH2 = '${fparse length2*sin(3.14159/2)}'
 epsilon1 = 0.0001
 epsilon2 = 0.0002
 forms1 = 0.0
@@ -75,7 +75,7 @@ area2 = '${fparse 3.14159* ${R2}^2}'
 
 [ScalarKernels]
   [pipe1_mom]
-    type = IncompressibleMomentumSPScalarKernel
+    type = ADIncompressibleMomentumSPScalarKernel
     variable = 'm1'
     reference_pressure_drop = 'dPc'
     temperatures = 'T1 T2'
@@ -84,7 +84,7 @@ area2 = '${fparse 3.14159* ${R2}^2}'
     areas = '${area1} ${area2}'
     perimeters = '${fparse 2*3.14159* ${R1}} ${fparse 2*3.14159* ${R2}}'
     lengths = '${length1} ${length2}'
-    alphas = '${alpha1} ${alpha2}'
+    height_changes = '${dH1} ${dH2}'
     forms_losses = '${forms1} ${forms2}'
     pump_pressures = '${pump1} ${pump2}'
     roughnesses = '${epsilon1} ${epsilon2}'
@@ -92,11 +92,11 @@ area2 = '${fparse 3.14159* ${R2}^2}'
     is_implicit = True
   []
   [pipe1_DT]
-    type = ODETimeDerivative
+    type = ADScalarTimeDerivative
     variable = 'm1'
   []
   [temp1]
-    type = IncompressibleEnergySPScalarKernel
+    type = ADIncompressibleEnergySPScalarKernel
     mass_flow_rate = 'm1'
     inlet_temperature = 'T0'
     outlet_temperature = 'T2'
@@ -108,9 +108,10 @@ area2 = '${fparse 3.14159* ${R2}^2}'
     reference_pressure = ${Pin}
     variable = T1
     is_implicit = True
+    heat_transfer_coefficient = h1
   []
   [temp1_DT]
-    type = ODETimeDerivative
+    type = ADScalarTimeDerivative
     variable = 'T1'
   []
   [temp0]
@@ -119,7 +120,7 @@ area2 = '${fparse 3.14159* ${R2}^2}'
     variable = T0
   []
   [temp2]
-    type = IncompressibleEnergySPScalarKernel
+    type = ADIncompressibleEnergySPScalarKernel
     mass_flow_rate = 'm1'
     inlet_temperature = 'T1'
     outlet_temperature = 'T3'
@@ -131,9 +132,10 @@ area2 = '${fparse 3.14159* ${R2}^2}'
     reference_pressure = ${Pin}
     variable = T2
     is_implicit = True
+    heat_transfer_coefficient = h2
   []
   [temp2_DT]
-    type = ODETimeDerivative
+    type = ADScalarTimeDerivative
     variable = 'T2'
   []
   [temp3]
@@ -155,6 +157,31 @@ area2 = '${fparse 3.14159* ${R2}^2}'
     type = ParsedODEKernel
     expression = 'dPc - ${dP}'
     variable = dPc
+  []
+[]
+
+[FunctorMaterials]
+  [h1]
+    type = ADDittusBoelterHTCFunctorMaterial
+    mass_flow_rate = m1
+    fluid_properties = water
+    T_fluid = T1
+    T_fluid_inlet = T0
+    T_fluid_outlet = T2
+    reference_pressure = ${Pin}
+    flow_area = ${area1}
+    wetted_perimeter = '${fparse 2*3.14159* ${R1}}'
+  []
+  [h2]
+    type = ADDittusBoelterHTCFunctorMaterial
+    mass_flow_rate = m1
+    fluid_properties = water
+    T_fluid = T2
+    T_fluid_inlet = T1
+    T_fluid_outlet = T3
+    reference_pressure = ${Pin}
+    flow_area = ${area2}
+    wetted_perimeter = '${fparse 2*3.14159* ${R2}}'
   []
 []
 
