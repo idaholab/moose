@@ -9,6 +9,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import sys
+import tempfile
 import unittest
 import mock
 import logging
@@ -29,6 +30,9 @@ class TestCheckSyntax(unittest.TestCase):
         cls.file_is_stub = getattr(sys.modules["moosesqa.check_syntax"], "file_is_stub")
         cls.find_md_file = getattr(sys.modules["moosesqa.check_syntax"], "find_md_file")
         cls._check_node = getattr(sys.modules["moosesqa.check_syntax"], "_check_node")
+        cls._has_deprecated_stub_marker = getattr(
+            sys.modules["moosesqa.check_syntax"], "_has_deprecated_stub_marker"
+        )
 
     def setUp(self):
         # I was unable to get mock.patch command to work for the find_md_file and is_stub
@@ -154,6 +158,84 @@ class TestCheckSyntax(unittest.TestCase):
                 allow_hidden=True,
             )
         self.assertIn("is a stub file", cm.output[0])
+
+    def _writeTmpMarkdown(self, content):
+        """Helper for writing a temporary markdown fixture file for file_is_stub tests"""
+        fid = tempfile.NamedTemporaryFile(
+            mode="w", suffix=".md", dir=self.MOOSE_DIR, delete=False
+        )
+        fid.write(content)
+        fid.close()
+        self.addCleanup(os.remove, fid.name)
+        return fid.name
+
+    def testFileIsStubEmpty(self):
+        path = self._writeTmpMarkdown("")
+        self.assertTrue(TestCheckSyntax.file_is_stub(path))
+
+    def testFileIsStubWholePageTemplateLoad(self):
+        # Whole page is just a load of a canonical stub template.
+        path = self._writeTmpMarkdown(
+            "!template load file=stubs/moose_object.md.template name=Foo syntax=/Kernels/Foo"
+        )
+        self.assertTrue(TestCheckSyntax.file_is_stub(path))
+
+    def testFileIsStubWholePageNonStubTemplateLoad(self):
+        # Template not under "stubs/" is not a stub.
+        path = self._writeTmpMarkdown(
+            "!template load file=srs.md.template project=Framework"
+        )
+        self.assertFalse(TestCheckSyntax.file_is_stub(path))
+
+    def testFileIsStubTemplateWithOtherContent(self):
+        # Real content plus a stub !template load must not be considered a stub.
+        content = (
+            "# Foo\n\n"
+            "Some real documentation here.\n\n"
+            "!template load file=stubs/moose_object.md.template name=Foo\n"
+        )
+        path = self._writeTmpMarkdown(content)
+        self.assertFalse(TestCheckSyntax.file_is_stub(path))
+
+    def testFileIsStubGeneratedAlertContent(self):
+        # Full, unedited stub content, per
+        # framework/doc/content/templates/stubs/moose_object.md.template.
+        content = (
+            "# Foo\n\n"
+            "!alert construction title=Undocumented Class\n"
+            "The Foo has not been documented.\n\n"
+            "!syntax description /Kernels/Foo\n\n"
+            "## Overview\n\n"
+            "!! Replace these lines with information regarding the Foo object.\n\n"
+            "!syntax parameters /Kernels/Foo\n\n"
+            "!syntax inputs /Kernels/Foo\n\n"
+            "!syntax children /Kernels/Foo\n"
+        )
+        path = self._writeTmpMarkdown(content)
+        self.assertTrue(TestCheckSyntax.file_is_stub(path))
+
+    def testFileIsStubAlertMarkerInCodeFence(self):
+        # Alert marker shown as an example inside a fenced code block, alongside real
+        # content, must not be considered a stub.
+        content = (
+            "# Foo\n\n"
+            "Real documentation about the stub-generation feature.\n\n"
+            "```markdown\n"
+            "!alert construction title=Undocumented Class\n"
+            "```\n\n"
+            "More real documentation.\n"
+        )
+        path = self._writeTmpMarkdown(content)
+        self.assertFalse(TestCheckSyntax.file_is_stub(path))
+
+    def testHasDeprecatedStubMarker(self):
+        path = self._writeTmpMarkdown(
+            "!! MOOSE Documentation Stub: Remove this line when content is added.\n\n# Foo\n"
+        )
+        self.assertTrue(TestCheckSyntax._has_deprecated_stub_marker(path))
+
+        path = self._writeTmpMarkdown("# Foo\n\nReal content.\n")
+        self.assertFalse(TestCheckSyntax._has_deprecated_stub_marker(path))
 
     def testDuplicateFiles(self):
 
