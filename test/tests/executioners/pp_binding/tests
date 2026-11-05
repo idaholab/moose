@@ -5,6 +5,6 @@
     type = RunApp
     input = 'pp_binding_check.i'
     expect_out = 'Postprocessor binding is OK'
-    requirement = "Executioner objects shall be capable of coupling to Postprocessor values."
+    requirement = "The system shall allow Executioner objects to couple to Postprocessor values."
   [../]
 []

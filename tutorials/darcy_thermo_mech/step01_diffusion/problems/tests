@@ -4,6 +4,6 @@
   [step]
     type = RunApp
     input = 'step1.i'
-    requirement = "The Darcy-Thermomechanics tutorial shall include a step that solves a pure diffusion problem."
+    requirement = "The system shall include, as part of the Darcy-Thermomechanics tutorial, a step that solves a pure diffusion problem."
   []
 []

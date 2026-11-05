@@ -5,7 +5,7 @@
     type = 'CSVDiff'
     input = 'kokkos_general_uo_dependency_test.i'
     csvdiff = 'kokkos_general_uo_dependency_test_out.csv'
-    requirement = 'The Kokkos user objects shall be able to resolve dependencies with other Kokkos user objects implicitly.'
+    requirement = 'The system shall allow Kokkos user objects to resolve dependencies with other Kokkos user objects implicitly.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
@@ -15,7 +15,7 @@
     input = 'kokkos_general_uo_dependency_test.i'
     csvdiff = 'kokkos_general_uo_dependency_test_wrong.csv'
     cli_args = "Postprocessors/kokkos_sum/values='average1 average2' Outputs/file_base=kokkos_general_uo_dependency_test_wrong"
-    requirement = 'The Kokkos user objects shall execute prior to original user objects in the same execution group.'
+    requirement = 'The system shall execute Kokkos user objects prior to original user objects in the same execution group.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
@@ -24,7 +24,7 @@
     input = 'kokkos_general_uo_dependency_test.i'
     csvdiff = 'kokkos_general_uo_dependency_test_out.csv'
     cli_args = "Postprocessors/kokkos_sum/values='average1 average2' Postprocessors/kokkos_sum/execution_order_group=1"
-    requirement = 'The Kokkos user objects shall be able to specify execution order groups to resolve dependencies manually with original user objects.'
+    requirement = 'The system shall allow Kokkos user objects to specify execution order groups to resolve dependencies manually with original user objects.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []

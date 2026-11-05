@@ -7,6 +7,6 @@
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
     mesh_mode = REPLICATED
-    requirement = "The DGCoupledDiffusion object shall compute the correct Jacobian."
+    requirement = "The system shall compute the correct Jacobian for the DGCoupledDiffusion object."
   [../]
 []

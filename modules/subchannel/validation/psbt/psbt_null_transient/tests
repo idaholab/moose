@@ -5,6 +5,6 @@
     type = 'RunApp'
     input = 'psbt_ss.i'
     check_input = true
-    requirement = 'The system will examine the subchannel solver for the psbt case (null transient)'
+    requirement = 'The system shall examine the subchannel solver for the psbt case (null transient)'
   []
 []

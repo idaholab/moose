@@ -3,7 +3,7 @@
   design = "sqa/non_functional.md"
   collections = USABILITY
   [command-line]
-    requirement = "The system will be operated using a command-line interface that"
+    requirement = "The system shall be operated using a command-line interface that"
     [empty]
       type = RunException
       no_additional_cli_args = True
@@ -23,7 +23,7 @@
     []
   []
   [input]
-    requirement = "The system will be operated using"
+    requirement = "The system shall be operated using"
     [input_file]
       type = RunApp
       input = 'input.i'
@@ -62,6 +62,6 @@
     expect_out = "Framework Information"
     max_parallel = 1
 
-    requirement = "The system will provide on screen information about the simulation characteristics of the solves under normal operating conditions."
+    requirement = "The system shall provide on screen information about the simulation characteristics of the solves under normal operating conditions."
   []
 []

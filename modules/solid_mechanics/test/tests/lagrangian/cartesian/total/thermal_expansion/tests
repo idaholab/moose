@@ -5,7 +5,7 @@
     type = Exodiff
     input = 'free.i'
     exodiff = 'free_out.e'
-    requirement = "Strains are as-expected (0.1 total, 0 mechanical) for a free expansion with the "
+    requirement = "The system shall compute strains as expected (0.1 total, 0 mechanical) for a free expansion with the "
                   "total Lagrangian formulation"
     abs_zero = 1e-6
   []
@@ -13,7 +13,7 @@
     type = Exodiff
     input = 'constrained.i'
     exodiff = 'constrained_out.e'
-    requirement = "Stresses and strain as expected for thermal expansion constrained in one "
+    requirement = "The system shall compute stresses and strain as expected for thermal expansion constrained in one "
                   "direction with the total Lagrangian formulation"
     abs_zero = 1e-6
   []
@@ -23,7 +23,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, no stabilization, including cross-terms with the total Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for small displacements, no stabilization, including cross-terms with the total Lagrangian formulation'
   []
   [jacobian_large_no_stab]
     type = PetscJacobianTester
@@ -31,7 +31,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the total Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, no stabilization, including cross-terms with the total Lagrangian formulation'
   []
   [jacobian_small_with_stab]
     type = PetscJacobianTester
@@ -39,7 +39,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, with stabilization, including cross-terms with the total Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for small displacements, with stabilization, including cross-terms with the total Lagrangian formulation'
   []
   [jacobian_large_with_stab]
     type = PetscJacobianTester
@@ -47,7 +47,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the total Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, with stabilization, including cross-terms with the total Lagrangian formulation'
   []
   [jacobian_large_no_stab_alpha05]
     issues = '#33005'
@@ -57,7 +57,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
                "GlobalParams/alpha=0.5"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-5 for large displacements, '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-5, for large displacements, '
                   'without stabilization, including cross-terms with the total Lagrangian '
                   'formulation, using the generalized midpoint rule (alpha=0.5)'
   []
@@ -70,7 +70,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
                "GlobalParams/alpha=0.5"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-5 for large displacements, '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-5, for large displacements, '
                   'with stabilization, including cross-terms with the total Lagrangian '
                   'formulation, using the generalized midpoint rule (alpha=0.5)'
   []
@@ -81,7 +81,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=quadratic"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the total Lagrangian formulation, using the quadratic kinematic approximation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, no stabilization, including cross-terms with the total Lagrangian formulation, using the quadratic kinematic approximation'
   []
   [jacobian_large_no_stab_rashid_approximate]
     issues = '#33005'
@@ -90,7 +90,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=rashid_approximate"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the total Lagrangian formulation, using the rashid_approximate kinematic approximation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, no stabilization, including cross-terms with the total Lagrangian formulation, using the rashid_approximate kinematic approximation'
   []
   [jacobian_large_no_stab_rashid_eigen]
     issues = '#33005'
@@ -99,7 +99,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=rashid_eigen"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, no stabilization, including cross-terms with the total Lagrangian formulation, using the rashid_eigen kinematic approximation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, no stabilization, including cross-terms with the total Lagrangian formulation, using the rashid_eigen kinematic approximation'
   []
   [jacobian_large_with_stab_quadratic]
     issues = '#33005'
@@ -109,7 +109,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=quadratic"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the total Lagrangian formulation, using the quadratic kinematic approximation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, with stabilization, including cross-terms with the total Lagrangian formulation, using the quadratic kinematic approximation'
   []
   [jacobian_large_with_stab_rashid_approximate]
     issues = '#33005'
@@ -119,7 +119,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=rashid_approximate"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the total Lagrangian formulation, using the rashid_approximate kinematic approximation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, with stabilization, including cross-terms with the total Lagrangian formulation, using the rashid_approximate kinematic approximation'
   []
   [jacobian_large_with_stab_rashid_eigen]
     issues = '#33005'
@@ -128,7 +128,7 @@
     ratio_tol = 1E-5
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=rashid_eigen"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, including cross-terms with the total Lagrangian formulation, using the rashid_eigen kinematic approximation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, with stabilization, including cross-terms with the total Lagrangian formulation, using the rashid_eigen kinematic approximation'
   []
   [jacobian_large_no_stab_alpha05_quadratic]
     issues = '#33005'
@@ -138,7 +138,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=quadratic"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-5 for large displacements, '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-5, for large displacements, '
                   'without stabilization, including cross-terms with the total Lagrangian '
                   'formulation, using the generalized midpoint rule (alpha=0.5), using the quadratic kinematic approximation'
   []
@@ -150,7 +150,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_approximate"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-5 for large displacements, '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-5, for large displacements, '
                   'without stabilization, including cross-terms with the total Lagrangian '
                   'formulation, using the generalized midpoint rule (alpha=0.5), using the rashid_approximate kinematic approximation'
   []
@@ -162,7 +162,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_eigen"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-5 for large displacements, '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-5, for large displacements, '
                   'without stabilization, including cross-terms with the total Lagrangian '
                   'formulation, using the generalized midpoint rule (alpha=0.5), using the rashid_eigen kinematic approximation'
   []
@@ -175,7 +175,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=quadratic"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-5 for large displacements, '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-5, for large displacements, '
                   'with stabilization, including cross-terms with the total Lagrangian '
                   'formulation, using the generalized midpoint rule (alpha=0.5), using the quadratic kinematic approximation'
   []
@@ -188,7 +188,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_approximate"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-5 for large displacements, '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-5, for large displacements, '
                   'with stabilization, including cross-terms with the total Lagrangian '
                   'formulation, using the generalized midpoint rule (alpha=0.5), using the rashid_approximate kinematic approximation'
   []
@@ -200,7 +200,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_eigen"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-5 for large displacements, '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-5, for large displacements, '
                   'with stabilization, including cross-terms with the total Lagrangian '
                   'formulation, using the generalized midpoint rule (alpha=0.5), using the rashid_eigen kinematic approximation'
   []

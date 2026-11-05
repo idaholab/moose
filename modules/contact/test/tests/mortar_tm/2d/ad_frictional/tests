@@ -4,7 +4,7 @@
   parallel_scheduling = true
   [soft]
     requirement = 'The system shall be able to compute a soft block bouncing on a soft plank problem '
-                  'on a first order 2D mesh using tensor mechanics and frictional mortar contact'
+                  'on a first order 2D mesh using solid mechanics and frictional mortar contact'
     [finite]
       detail = 'using the finite strain formulation.'
       type = 'CSVDiff'
@@ -45,7 +45,7 @@
   []
   [stiff]
     requirement = 'The system shall be able to compute a block bouncing on a plank problem on a '
-                  'first order 2D mesh using tensor mechanics and frictional mortar contact and '
+                  'first order 2D mesh using solid mechanics and frictional mortar contact and '
                   'finite strain'
     [stiff_stiff]
       detail = 'using with a stiff block and a stiff plank.'
@@ -67,7 +67,7 @@
 
   [soft_second]
     requirement = 'The system shall be able to compute a soft block bouncing on a soft plank problem '
-                  'on a first order 2D mesh using tensor mechanics with second order elements and '
+                  'on a first order 2D mesh using solid mechanics with second order elements and '
                   'frictional mortar contact'
     [finite]
       detail = 'using the finite strain formulation.'
@@ -88,7 +88,7 @@
   []
   [stiff_second]
     requirement = 'The system shall be able to compute a block bouncing on a plank problem on a '
-                  'first order 2D mesh using tensor mechanics with second order elements and '
+                  'first order 2D mesh using solid mechanics with second order elements and '
                   'frictional mortar contact and finite strain'
     [stiff_stiff]
       detail = 'using with a stiff block and a stiff plank.'

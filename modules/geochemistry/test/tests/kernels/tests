@@ -4,7 +4,7 @@
     input = time_deriv_1.i
     csvdiff = time_deriv_1_out.csv
     abs_zero = 1.0E-10
-    requirement = 'The geochemistry module shall simulate simple transport problems, such as adding a spatially-uniform source and observing a uniform concentration increase'
+    requirement = 'The system shall simulate simple transport problems, such as adding a spatially-uniform source and observing a uniform concentration increase'
     issues = '#15668'
     design = 'modules/geochemistry/theory/index.md GeochemistryTimeDerivative.md'
   [../]
@@ -13,14 +13,14 @@
     input = time_deriv_2.i
     csvdiff = time_deriv_2_out.csv
     abs_zero = 1.0E-10
-    requirement = 'The geochemistry module shall simulate simple transport problems, such as adding a spatially-varying source and observing a spatially-inhomogeneous rise in concentration'
+    requirement = 'The system shall simulate simple transport problems, such as adding a spatially-varying source and observing a spatially-inhomogeneous rise in concentration'
     issues = '#15668'
     design = 'modules/geochemistry/theory/index.md GeochemistryTimeDerivative.md'
   [../]
   [./time_deriv_jac]
     type = PetscJacobianTester
     input = time_deriv_jac.i
-    requirement = "The geochemistry module shall compute all Jacobian entries of the time-derivative Kernel"
+    requirement = "The system shall compute all Jacobian entries of the time-derivative Kernel"
     issues = '#15668'
     design = 'modules/geochemistry/theory/index.md GeochemistryTimeDerivative.md'
   [../]
@@ -28,14 +28,14 @@
     type = CSVDiff
     input = advection_1.i
     csvdiff = advection_1_out.csv
-    requirement = 'The geochemistry module shall simulate simple transport problems involving advection'
+    requirement = 'The system shall simulate simple transport problems involving advection'
     issues = '#15668'
     design = 'modules/geochemistry/theory/index.md ConservativeAdvection.md'
   [../]
   [./dispersion_jac]
     type = 'PetscJacobianTester'
     input = dispersion_jac.i
-    requirement = "The geochemistry module shall compute all Jacobian entries of the dispersion Kernel"
+    requirement = "The system shall compute all Jacobian entries of the dispersion Kernel"
     issues = '#15668'
     design = 'modules/geochemistry/theory/index.md GeochemistryDispersion.md'
   [../]
@@ -43,7 +43,7 @@
     type = Exodiff
     input = dispersion_1.i
     exodiff = dispersion_1_out.e
-    requirement = 'The geochemistry module shall simulate simple transport problems involving hydrodynamic dispersion'
+    requirement = 'The system shall simulate simple transport problems involving hydrodynamic dispersion'
     issues = '#15668'
     design = 'modules/geochemistry/theory/index.md GeochemistryDispersion.md'
   [../]

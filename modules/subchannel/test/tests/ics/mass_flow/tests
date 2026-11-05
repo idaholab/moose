@@ -10,6 +10,6 @@
     abs_zero = 1e-6
     max_threads = 1
     input = 'test.i'
-    requirement = 'The system will apply initial massflow rate'
+    requirement = 'The system shall apply initial massflow rate'
   []
 []

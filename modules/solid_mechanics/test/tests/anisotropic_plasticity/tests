@@ -6,7 +6,7 @@
     type = 'CSVDiff'
     input = 'anis_plasticity_test.i'
     csvdiff = 'anis_plasticity_test_out.csv'
-    requirement = 'Anisotropic plasticity must yield same results as finite strain elasticity if '
+    requirement = 'The system shall yield the same results with anisotropic plasticity as with finite strain elasticity if '
                   'yield condition is never met'
     capabilities = 'method!=dbg'
   []
@@ -15,7 +15,7 @@
     type = 'CSVDiff'
     input = 'anis_elasticity_test.i'
     csvdiff = 'anis_elasticity_test_out.csv'
-    requirement = 'Anisotropic plasticity must yield same results as finite strain elasticity if '
+    requirement = 'The system shall yield the same results with anisotropic plasticity as with finite strain elasticity if '
                   'yield condition is never met --elasticity'
     capabilities = 'method!=dbg'
   []
@@ -27,7 +27,7 @@
     heavy = true
     input = 'ad_aniso_plasticity_x.i'
     csvdiff = 'ad_aniso_plasticity_x_out.csv'
-    requirement = 'Anisotropic plasticity with isotropic elasticity must reproduce simplified '
+    requirement = 'The system shall reproduce, with anisotropic plasticity with isotropic elasticity, a simplified '
                   'verification problem along x axis'
   []
 
@@ -38,7 +38,7 @@
     heavy = true
     input = 'ad_aniso_plasticity_x_rotate.i'
     csvdiff = 'ad_aniso_plasticity_x_rotate_out.csv'
-    requirement = 'Anisotropic plasticity with hill tensor rotation must produce simplified '
+    requirement = 'The system shall produce, with anisotropic plasticity with hill tensor rotation, a simplified '
                   'verification problem along x axis'
   []
 
@@ -49,7 +49,7 @@
     heavy = true
     input = 'ad_aniso_plasticity_y.i'
     csvdiff = 'ad_aniso_plasticity_y_out.csv'
-    requirement = 'Anisotropic plasticity with isotropic elasticity must reproduce simplified '
+    requirement = 'The system shall reproduce, with anisotropic plasticity with isotropic elasticity, a simplified '
                   'verification problem along y axis'
   []
 []

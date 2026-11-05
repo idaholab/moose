@@ -10,7 +10,7 @@
     rel_err = 5.0e-4
     min_parallel = 4
     heavy = true
-    requirement = 'The contact module shall be able to solve frictional contact between a cylinder '
+    requirement = 'The system shall be able to solve frictional contact between a cylinder '
                   'and a plane.'
   []
   [cylinder_friction_penalty]
@@ -23,7 +23,7 @@
     rel_err = 7.5e-4
     abs_zero = 1.0e-4
     heavy = true
-    requirement = "The contact module shall be able to approximate frictional contact solution "
+    requirement = "The system shall be able to approximate frictional contact solution "
                   "between a cylinder and a plane using penalty mortar contact."
   []
   [cylinder_friction_penalty_adaptivity]
@@ -34,7 +34,7 @@
     abs_zero = 1.0e-2
     valgrind = none
     heavy = true
-    requirement = "The contact module shall be able to approximate frictional contact solution "
+    requirement = "The system shall be able to approximate frictional contact solution "
                   "between a cylinder and a plane using penalty mortar contact after performing "
                   "initial adaptivity around the contact area."
   []
@@ -47,7 +47,7 @@
     heavy = true
     capabilities = 'method=opt'
     valgrind = none
-    requirement = "The contact module shall be able to approximate normal contact in a "
+    requirement = "The system shall be able to approximate normal contact in a "
                   "two-dimensional cylinder via an augmented Lagrange approach to constraint "
                   "enforcement."
   []
@@ -69,7 +69,7 @@
     valgrind = none
     recover = false # Only doing one timestep
     issues = '#34217'
-    requirement = "The contact module shall update the augmented Lagrange multipliers of penalty "
+    requirement = "The system shall update the augmented Lagrange multipliers of penalty "
                   "mortar contact with the same weighted gap that defines the penalty contact "
                   "pressure."
   []
@@ -79,7 +79,7 @@
     expect_err = "Augmented Lagrange parameter was specified, but the selected problem type does not "
                  "support Augmented Lagrange iterations."
     cli_args = 'Problem/type=FEProblem'
-    requirement = "The contact action shall be alert the user if Augmented Lagrage parameters are "
+    requirement = "The system shall alert the user, through the contact action, if Augmented Lagrage parameters are "
                   "supplied, but the selected Problem class does not support AL."
   []
   [cylinder_friction_penalty_al_frictional]
@@ -91,7 +91,7 @@
     heavy = true
     valgrind = none
     capabilities = 'method=opt'
-    requirement = "The contact module shall be able to approximate frictional contact in a "
+    requirement = "The system shall be able to approximate frictional contact in a "
                   "two-dimensional cylinder via an augmented Lagrange approach to constraint "
                   "enforcement."
   []
@@ -104,7 +104,7 @@
     heavy = true
     valgrind = none
     capabilities = 'method=opt'
-    requirement = "The contact module shall be able to approximate frictional contact in a "
+    requirement = "The system shall be able to approximate frictional contact in a "
                   "two-dimensional cylinder via an augmented Lagrange approach to constraint "
                   "enforcement with a tight slip distance tolerance."
   []
@@ -117,7 +117,7 @@
     heavy = true
     valgrind = none
     capabilities = 'method=opt'
-    requirement = "The contact module shall be able to approximate frictional contact in a "
+    requirement = "The system shall be able to approximate frictional contact in a "
                   "two-dimensional cylinder via an augmented Lagrange approach to constraint "
                   "enforcement using the contact action."
   []
@@ -127,7 +127,7 @@
     input = 'cylinder_friction_penalty_frictional_al_action_amg.i'
     rel_err = 1.0e-4
     abs_zero = 1.0e-2
-    requirement = "The contact module shall be able to approximate frictional contact in a "
+    requirement = "The system shall be able to approximate frictional contact in a "
                   "two-dimensional cylinder via an augmented Lagrange approach to constraint "
                   "enforcement using the contact action and use the hypre algebraic multigrid "
                   "preconditioner since the augmented Lagrange (Uzawa) constraint enfrocement "
@@ -143,7 +143,7 @@
     abs_zero = 1.0e-2
     capabilities = 'method=opt'
     valgrind = none
-    requirement = "The contact module shall be able to approximate frictional contact in a "
+    requirement = "The system shall be able to approximate frictional contact in a "
                   "two-dimensional cylinder via an augmented Lagrange approach to constraint "
                   "enforcement using the contact action and use the hypre algebraic multigrid "
                   "preconditioner since the augmented Lagrange (Uzawa) constraint enfrocement "
@@ -159,7 +159,7 @@
     input = 'cylinder_friction_penalty_frictional_al_action_amg_bussetta_simple.i'
     rel_err = 1.0e-4
     abs_zero = 1.0e-2
-    requirement = "The contact module shall be able to approximate frictional contact in a "
+    requirement = "The system shall be able to approximate frictional contact in a "
                   "two-dimensional cylinder via an augmented Lagrange approach to constraint "
                   "enforcement using the contact action and use the hypre algebraic multigrid "
                   "preconditioner since the augmented Lagrange (Uzawa) constraint enfrocement "
@@ -178,7 +178,7 @@
     heavy = true
     valgrind = none
     capabilities = 'method=opt'
-    requirement = "The contact module shall be able to approximate normal contact in a "
+    requirement = "The system shall be able to approximate normal contact in a "
                   "two-dimensional cylinder via an augmented Lagrange approach to constraint "
                   "enforcement and allow for separation."
   []
@@ -190,7 +190,7 @@
     min_parallel = 4
     heavy = true
     capabilities = 'ad_size>=200'
-    requirement = 'The contact module shall be able to solve frictional contact between a '
+    requirement = 'The system shall be able to solve frictional contact between a '
                   'semicircular tool and flexible base material.'
   []
   [ironing_penalty]
@@ -201,7 +201,7 @@
     abs_zero = 1.0e-4
     capabilities = 'ad_size>=200'
     cli_args = 'Executioner/end_time=0.15'
-    requirement = "The contact module shall be able to solve frictional contact between a "
+    requirement = "The system shall be able to solve frictional contact between a "
                   "semicircular tool and flexible base material using a penalty approach to mortar "
                   "contact."
   []
@@ -213,7 +213,7 @@
     abs_zero = 1.0e-4
     capabilities = 'ad_size>=200'
     cli_args = 'Executioner/end_time=0.15'
-    requirement = "The contact module shall be able to solve frictional contact between a "
+    requirement = "The system shall be able to solve frictional contact between a "
                   "semicircular tool and flexible base material using a penalty approach to mortar "
                   "contact through the contact action."
   []
@@ -224,7 +224,7 @@
     input = 'frictional_bouncing_block.i'
     rel_err = 1.0e-4
     heavy = true
-    requirement = 'The contact module shall be able to solve frictional contact between a bouncing '
+    requirement = 'The system shall be able to solve frictional contact between a bouncing '
                   'block and flexible base material.'
   []
   [frictional_bouncing_block_action]
@@ -234,7 +234,7 @@
     input = 'frictional_bouncing_block_action.i'
     rel_err = 1.0e-4
     heavy = true
-    requirement = "The contact module shall be able to solve frictional contact between a bouncing "
+    requirement = "The system shall be able to solve frictional contact between a bouncing "
                   "block and flexible base material verifying setup in the contact action."
   []
   [frictional_bouncing_block_edge_dropping]
@@ -248,7 +248,7 @@
     cli_args = "Constraints/weighted_gap_lm/correct_edge_dropping=true "
                "UserObjects/weighted_vel_uo/correct_edge_dropping=true Executioner/end_time=5.5 "
                "Outputs/file_base=frictional_bouncing_block_edge_dropping"
-    requirement = "The contact module shall be able to solve frictional contact between a bouncing "
+    requirement = "The system shall be able to solve frictional contact between a bouncing "
                   "block and a flexible substrate when correct edge dropping is enabled. An "
                   "additional requirement is that the correct edge dropping treatment must yield "
                   "same results as an incorrect edge dropping treatment when there is not edge "

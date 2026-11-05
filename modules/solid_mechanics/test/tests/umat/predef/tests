@@ -9,7 +9,7 @@
     # installation_type=in_tree: see #25279
     capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
-    requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
+    requirement = 'The system shall, through the Abaqus UMAT interface, produce the same results (stress, strain, '
                   'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
                   'an external field (not temperature) affecting material behavior '
   []
@@ -32,7 +32,7 @@
     # installation_type=in_tree: see #25279
     capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
-    requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
+    requirement = 'The system shall, through the Abaqus UMAT interface, produce the same results (stress, strain, '
                   'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
                   'an external field (not temperature) step increment affecting material behavior '
     rel_err = 5.0e-5
@@ -54,7 +54,7 @@
     cli_args = "Materials/active='umat'"
     exodiff = 'predef_multiple_out.e'
     valgrind = 'NONE'
-    requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
+    requirement = 'The system shall, through the Abaqus UMAT interface, produce the same results (stress, strain, '
                   'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
                   'two external fields (not temperature) affecting material behavior '
     # installation_type=in_tree: see #25279
@@ -77,7 +77,7 @@
     cli_args = "Materials/active='umat strain_xx strain_yy'"
     exodiff = 'predef_multiple_mat_out.e'
     valgrind = 'NONE'
-    requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
+    requirement = 'The system shall, through the Abaqus UMAT interface, produce the same results (stress, strain, '
                   'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
                   'two external material properties affecting material behavior '
     # installation_type=in_tree: see #25279

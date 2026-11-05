@@ -4,7 +4,7 @@
     type = RunApp
     input = 'simple_test.i'
     design = 'source/actions/TensorMechanicsAction.md'
-    requirement = "Can run second order problem without stabilization"
+    requirement = "The system shall run a second order problem without stabilization"
     cli_args = "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false"
     capabilities = 'method!=dbg'
   [../]
@@ -13,7 +13,7 @@
     type = RunException
     input = 'simple_test.i'
     design = 'source/actions/TensorMechanicsAction.md'
-    requirement = "Cannot run second order problem with stabilization"
+    requirement = "The system shall report an error when attempting to run a second order problem with stabilization"
     cli_args = "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true"
     expect_err = "Volumetric locking correction should not be used for higher-order elements."
   [../]
@@ -22,6 +22,6 @@
     type = RunApp
     input = 'homogenization_block.i'
     design = 'source/actions/TensorMechanicsAction.md'
-    requirement = "Homogenization system can be block restricted"
+    requirement = "The system shall allow the homogenization system to be block restricted"
   [../]
 []

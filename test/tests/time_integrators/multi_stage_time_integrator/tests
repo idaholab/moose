@@ -6,7 +6,7 @@
     absent_out = '2nd stage'
     expect_err = 'Aborting as solve did not converge and input selected to abort'
 
-    requirement = "Multi-stage time integrators shall check convergence for all stages"
+    requirement = "The system shall check convergence for all stages of multi-stage time integrators"
     design = "TimeIntegrator/index.md"
     issues = '#11719'
   [../]

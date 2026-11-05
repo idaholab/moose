@@ -5,7 +5,7 @@
     exodiff = 'Nonconserved_1var_out.e'
     issues = '#9336'
     design = 'actions/NonconservedAction.md'
-    requirement = 'The phase field module shall provide an action to set up an Allen-Cahn problem'
+    requirement = 'The system shall provide an action to set up an Allen-Cahn problem'
   [../]
   [./Nonconserved_highorder]
     type = Exodiff
@@ -13,7 +13,7 @@
     exodiff = 'Nonconserved_highorder_out.e'
     issues = '#9336'
     design = 'actions/NonconservedAction.md'
-    requirement = 'The NonconservedAction shall correctly set up Allen-Cahn problems with higher order elements'
+    requirement = 'The system shall correctly set up Allen-Cahn problems with higher order elements using the NonconservedAction'
   [../]
   [./Nonconserved_variableL]
     type = Exodiff
@@ -21,7 +21,7 @@
     exodiff = 'Nonconserved_variableL_out.e'
     issues = '#9336'
     design = 'actions/NonconservedAction.md'
-    requirement = 'The NonconservedAction shall correctly set up Allen-Cahn problems with variable dependent mobilities'
+    requirement = 'The system shall correctly set up Allen-Cahn problems with variable dependent mobilities using the NonconservedAction'
   [../]
   [./Nonconserved_2vars]
     type = Exodiff
@@ -29,7 +29,7 @@
     exodiff = 'Nonconserved_2vars_out.e'
     issues = '#9336'
     design = 'actions/NonconservedAction.md'
-    requirement = 'The NonconservedAction shall correctly set up Allen-Cahn problems with multiple order parameters'
+    requirement = 'The system shall correctly set up Allen-Cahn problems with multiple order parameters using the NonconservedAction'
   [../]
   [./conserved_direct_1var]
     type = Exodiff
@@ -37,7 +37,7 @@
     exodiff = 'conserved_direct_1var_out.e'
     issues = '#9336'
     design = 'actions/ConservedAction.md'
-    requirement = 'The phase field module shall provide an action to set up a non-split Cahn-Hilliard problem'
+    requirement = 'The system shall provide an action to set up a non-split Cahn-Hilliard problem'
     # uses exodus oversampling see #2295
     recover = false
   [../]
@@ -47,7 +47,7 @@
     exodiff = 'conserved_split_1var_out.e'
     issues = '#9336'
     design = 'actions/ConservedAction.md'
-    requirement = 'The phase field module shall provide an action to set up a reverse split Cahn-Hilliard problem'
+    requirement = 'The system shall provide an action to set up a reverse split Cahn-Hilliard problem'
   [../]
   [./conserved_split_1var_high_order]
     type = Exodiff
@@ -55,7 +55,7 @@
     exodiff = 'conserved_split_1var_high_order_out.e'
     issues = '#9336'
     design = 'actions/ConservedAction.md'
-    requirement = 'The phase field module shall provide an action to set up a reverse split Cahn-Hilliard problem with higher order elements'
+    requirement = 'The system shall provide an action to set up a reverse split Cahn-Hilliard problem with higher order elements'
   [../]
   [./conserved_direct_1var_variable_mob]
     type = Exodiff
@@ -63,7 +63,7 @@
     exodiff = 'conserved_direct_1var_variable_mob_out.e'
     issues = '#9336'
     design = 'actions/ConservedAction.md'
-    requirement = 'The phase field module shall provide an action to set up a non-split Cahn-Hilliard problem with variable dependent mobilities'
+    requirement = 'The system shall provide an action to set up a non-split Cahn-Hilliard problem with variable dependent mobilities'
     # uses exodus oversampling see #2295
     recover = false
   [../]
@@ -74,7 +74,7 @@
     abs_zero = 1e-9
     issues = '#9336'
     design = 'actions/ConservedAction.md'
-    requirement = 'The phase field module shall provide an action to set up a reverse split Cahn-Hilliard problem with variable dependent mobilities'
+    requirement = 'The system shall provide an action to set up a reverse split Cahn-Hilliard problem with variable dependent mobilities'
   [../]
   [./both_split_2vars]
     type = Exodiff
@@ -82,7 +82,7 @@
     exodiff = 'both_split_2vars_out.e'
     issues = '#9336'
     design = 'actions/ConservedAction.md actions/NonconservedAction.md'
-    requirement = 'The phase field module NonconservedAction and ConservedAction can be combined to construct a coupled Allen-Chan and split Cahn-Hilliard problem'
+    requirement = 'The system shall allow the phase field module NonconservedAction and ConservedAction to be combined to construct a coupled Allen-Cahn and split Cahn-Hilliard problem'
   [../]
   [./both_direct_2vars]
     type = Exodiff
@@ -90,7 +90,7 @@
     exodiff = 'both_direct_2vars_out.e'
     issues = '#9336'
     design = 'actions/ConservedAction.md actions/NonconservedAction.md'
-    requirement = 'The phase field module NonconservedAction and ConservedAction can be combined to construct a coupled Allen-Chan and non-split Cahn-Hilliard problem'
+    requirement = 'The system shall allow the phase field module NonconservedAction and ConservedAction to be combined to construct a coupled Allen-Cahn and non-split Cahn-Hilliard problem'
     # uses exodus oversampling see #2295
     recover = false
     [../]
@@ -100,7 +100,7 @@
     exodiff = 'conserved_forward_split_1var_out.e'
     issues = '#9378'
     design = 'actions/ConservedAction.md'
-    requirement = 'The phase field module shall provide an action to set up a forward split Cahn-Hilliard problem'
+    requirement = 'The system shall provide an action to set up a forward split Cahn-Hilliard problem'
   [../]
   [./grain_growth]
     type = Exodiff
@@ -108,7 +108,7 @@
     exodiff = 'grain_growth_out.e'
     issues = '#9485'
     design = 'actions/GrainGrowthAction.md'
-    requirement = 'The phase field module shall provide an action to set up grain growth problems'
+    requirement = 'The system shall provide an action to set up grain growth problems'
   [../]
   [./ad_grain_growth]
     type = Exodiff
@@ -116,7 +116,7 @@
     exodiff = 'grain_growth_out.e'
     issues = '#13539'
     design = 'actions/GrainGrowthAction.md'
-    requirement = 'The action to set up grain growth problems shall be able to set up an AD version of the problem which yields the same results as the non-AD version'
+    requirement = 'The system shall be able to set up, using the grain growth action, an AD version of the problem which yields the same results as the non-AD version'
     cli_args = 'Modules/PhaseField/GrainGrowth/use_automatic_differentiation=true Materials/Copper/type=ADGBEvolution'
     prereq = 'grain_growth'
   [../]
@@ -129,7 +129,7 @@
     ratio_tol = 5e-8
     difference_tol = 5e-5
     run_sim = True
-    requirement = 'The action to set up grain growth problems shall be able to set up an AD version of the problem which yields the same results as the non-AD version'
+    requirement = 'The system shall be able to set up, using the grain growth action, an AD version of the problem which yields the same results as the non-AD version'
     cli_args = 'Modules/PhaseField/GrainGrowth/use_automatic_differentiation=true Materials/Copper/type=ADGBEvolution Executioner/num_steps=1 Mesh/nx=10 Mesh/ny=10'
     prereq = 'ad_grain_growth'
   [../]
@@ -139,7 +139,7 @@
     exodiff = 'grain_growth_with_c_out.e'
     issues = '#9485'
     design = 'actions/GrainGrowthAction.md'
-    requirement = 'The grain growth action shall have the ability to set up problems with a pinning particle'
+    requirement = 'The system shall have the ability to set up problems with a pinning particle using the grain growth action'
   [../]
   [./grain_growth_with_T_grad]
     type = Exodiff
@@ -147,7 +147,7 @@
     exodiff = 'grain_growth_with_T_grad_out.e'
     issues = '#9485'
     design = 'actions/GrainGrowthAction.md'
-    requirement = 'The grain growth action shall have the ability to set up problems with a temperature gradient'
+    requirement = 'The system shall have the ability to set up problems with a temperature gradient using the grain growth action'
     # needed in parallel
     abs_zero = 1e-9
     rel_err = 3e-5
@@ -159,6 +159,6 @@
     exodiff = 'gpm_kernel_out.e'
     issues = '#11386'
     design = 'actions/GrandPotentialKernelAction.md'
-    requirement = 'The GrandPotentialAction shall have the ability to generate kernels'
+    requirement = 'The system shall have the ability to generate kernels using the GrandPotentialAction'
   [../]
 []

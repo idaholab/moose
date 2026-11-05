@@ -41,7 +41,7 @@
   []
 
   [errors]
-    requirement = 'The block-weighted partitioner shall report a reasonable error when'
+    requirement = 'The system shall report, in the block-weighted partitioner, a reasonable error when'
 
     [size_mismatch]
       type = RunException

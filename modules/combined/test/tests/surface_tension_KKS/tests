@@ -6,7 +6,7 @@
     design = 'source/materials/ComputeSurfaceTensionKKS.md'
     issues = '#12705'
     abs_zero = 1e-9
-    requirement = 'The ComputeSurfaceTensionKKS material shall produce a hydrostatic stress state inside a precipitate'
+    requirement = 'The system shall produce a hydrostatic stress state inside a precipitate using the ComputeSurfaceTensionKKS material'
   [../]
   [./surface_tension_VDWgas]
     type = 'Exodiff'
@@ -16,6 +16,6 @@
     abs_zero = 1e-7
     rel_err = 1e-5
     issues = '#12915'
-    requirement = 'The ComputeExtraStressVDWGas material shall produce a stress that counterbalances surface tension'
+    requirement = 'The system shall produce a stress that counterbalances surface tension using the ComputeExtraStressVDWGas material'
   [../]
 []

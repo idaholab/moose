@@ -3,7 +3,7 @@
   design = 'DataIO.md Restartable.md'
 
   [kernel]
-    requirement = 'The Kokkos system shall support the ability to'
+    requirement = 'The system shall, using Kokkos, support the ability to'
     [test]
       type = 'Exodiff'
       input = 'kokkos_kernel_restartable.i'

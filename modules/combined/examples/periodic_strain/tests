@@ -9,7 +9,7 @@
     cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2'
     check_input = True
     capabilities = 'fparser=jit'
-    requirement = "This shall correctly compute the deformation behavior using
+    requirement = "The system shall correctly compute the deformation behavior using
                    the globalstrain system for a multiphysics problem in 2D."
   [../]
   [./strain_3D]
@@ -19,7 +19,7 @@
     cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2 Mesh/gen/nz=2'
     check_input = True
     capabilities = 'fparser=jit'
-    requirement = "This shall correctly compute the deformation behavior using
+    requirement = "The system shall correctly compute the deformation behavior using
                    the globalstrain system for a multiphysics problem in 3D."
   [../]
 []

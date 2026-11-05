@@ -6,7 +6,7 @@
     input = except1.i
     expect_err = 'source_species_names: must have the same size as source_species_rates'
     match_literal = true
-    requirement = 'An error will be thrown source species are incorrectly sized'
+    requirement = 'The system shall report an error if source species are incorrectly sized'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -17,7 +17,7 @@
     input = except2.i
     expect_err = 'SpatialReactionSolver/source_species_names: The name Ca++ does not appear in the basis, equilibrium or kinetic species list'
     match_literal = true
-    requirement = 'An error will be thrown if the name of source species does not exist in the system'
+    requirement = 'The system shall report an error if the name of source species does not exist in the system'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -28,7 +28,7 @@
     input = except3.i
     expect_err = 'The species OH- is not in the basis, so cannot have its activity or fugacity constraint removed'
     match_literal = true
-    requirement = 'An error will be thrown if the activity of a non-basis species is fixed'
+    requirement = 'The system shall report an error if the activity of a non-basis species is fixed'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -39,7 +39,7 @@
     input = except4.i
     expect_err = 'The species H+ is does not have an activity or fugacity constraint so cannot have such a constraint removed'
     match_literal = true
-    requirement = 'An error will be thrown if the fixed-activity is removed from a basis species whose activity was never fixed'
+    requirement = 'The system shall report an error if the fixed-activity is removed from a basis species whose activity was never fixed'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -50,7 +50,7 @@
     input = except5.i
     expect_err = 'remove_fixed_activity_name: must be of the same size as remove_fixed_activity_time'
     match_literal = true
-    requirement = 'An error will be thrown if the remove fixed activity and times inputs are not of the same size'
+    requirement = 'The system shall report an error if the remove fixed activity and times inputs are not of the same size'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -61,7 +61,7 @@
     input = except6.i
     expect_err = 'controlled_activity_name: must have the same size as controlled_activity_value'
     match_literal = true
-    requirement = 'An error will be thrown if the controlled activity names and values do not have the same size'
+    requirement = 'The system shall report an error if the controlled activity names and values do not have the same size'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -71,7 +71,7 @@
     capabilities = 'installation_type=in_tree'
     input = spatial_1.i
     csvdiff = spatial_1_out_pH_0002.csv
-    requirement = 'Species activity may be set to a spatial-varying function'
+    requirement = 'The system shall allow species activity to be set to a spatial-varying function'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -83,7 +83,7 @@
     max_parallel = 1
     expect_out = 'pH = 4.2'
     match_literal = true
-    requirement = 'It should be able output, to the console, detailed information from any node including molalities, bulk compositions, etc'
+    requirement = 'The system shall be able output, to the console, detailed information from any node including molalities, bulk compositions, etc'
     issues = '#15693'
     design = 'GeochemistryConsoleOutput.md'
   [../]
@@ -97,7 +97,7 @@
     cli_args = '--keep-cout'
     expect_out = 'pH = 4.2'
     match_literal = true
-    requirement = 'It should be able output, to the console, detailed information from any node including molalities, bulk compositions, etc, even for simulations involving multiprocessors'
+    requirement = 'The system shall be able output, to the console, detailed information from any node including molalities, bulk compositions, etc, even for simulations involving multiprocessors'
     issues = '#15693'
     design = 'GeochemistryConsoleOutput.md'
   [../]
@@ -107,7 +107,7 @@
     capabilities = 'installation_type=in_tree'
     input = spatial_2.i
     csvdiff = spatial_2_out_pH_0002.csv
-    requirement = 'Species activity may be set to a spatial-varying function, and adding sources of such species leaves the system unchanged'
+    requirement = 'The system shall allow species activity to be set to a spatial-varying function, and adding sources of such species shall leave the system unchanged'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -117,7 +117,7 @@
     capabilities = 'installation_type=in_tree'
     input = spatial_3.i
     csvdiff = spatial_3_out.csv
-    requirement = 'Adding sources of species with free-type constraints makes no difference to the system before the system is closed'
+    requirement = 'The system shall be unchanged by adding sources of species with free-type constraints before the system is closed'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -127,7 +127,7 @@
     capabilities = 'installation_type=in_tree'
     input = spatial_4.i
     csvdiff = 'spatial_4_out_bulk_Cl_0001.csv spatial_4_out_bulk_Cl_0002.csv'
-    requirement = 'Sources of species may be spatially-dependent'
+    requirement = 'The system shall allow sources of species to be spatially-dependent'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -139,7 +139,7 @@
     csvdiff = 'spatial_4_out_bulk_Cl_0001.csv spatial_4_out_bulk_Cl_0002.csv'
     min_threads = 2
     prereq = spatial_4
-    requirement = 'Spatially-dependent reaction systems may be multi-threaded'
+    requirement = 'The system shall allow spatially-dependent reaction systems to be multi-threaded'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -151,7 +151,7 @@
     csvdiff = 'spatial_4_out_bulk_Cl_0001.csv spatial_4_out_bulk_Cl_0002.csv'
     min_parallel = 2
     prereq = spatial_4_threads
-    requirement = 'Spatially-dependent reaction systems may use MPI'
+    requirement = 'The system shall allow spatially-dependent reaction systems to use MPI'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -164,7 +164,7 @@
     min_threads = 2
     min_parallel = 2
     prereq = spatial_4_mpi
-    requirement = 'Spatially-dependent reaction systems may use MPI and threads'
+    requirement = 'The system shall allow spatially-dependent reaction systems to use MPI and threads'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -174,7 +174,7 @@
     capabilities = 'installation_type=in_tree'
     input = spatial_5.i
     csvdiff = 'spatial_5_out_bulk_Cl_0001.csv spatial_5_out_bulk_Cl_0002.csv'
-    requirement = 'Sources of species may be spatially-dependent, but adding sources of fixed-activity species makes no difference to the system'
+    requirement = 'The system shall allow sources of species to be spatially-dependent, but adding sources of fixed-activity species shall make no difference to the system'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -184,7 +184,7 @@
     capabilities = 'installation_type=in_tree'
     input = spatial_6.i
     csvdiff = 'spatial_6_out_temperature_0001.csv spatial_6_out_temperature_0002.csv'
-    requirement = 'Temperature may be spatially-dependent'
+    requirement = 'The system shall allow temperature to be spatially-dependent'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -195,7 +195,7 @@
     input = spatial_7.i
     cli_args = 'SpatialReactionSolver/adaptive_timestepping=false'
     expect_err = 'Geochemistry solve failed'
-    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis, and shall exit if the solve fails and the time-step becomes too small.'
+    requirement = 'The system shall be able to perform adaptive time-stepping on a node-by-node basis for spatially-dependent systems, and shall exit if the solve fails and the time-step becomes too small.'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -206,7 +206,7 @@
     input = spatial_7.i
     cli_args = 'SpatialReactionSolver/dt_min=1'
     expect_err = 'Geochemistry solve failed'
-    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis, and shall exit if the time-step becomes smaller than a user-defined quantity and the solve fails'
+    requirement = 'The system shall be able to perform adaptive time-stepping on a node-by-node basis for spatially-dependent systems, and shall exit if the time-step becomes smaller than a user-defined quantity and the solve fails'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -216,7 +216,7 @@
     capabilities = 'installation_type=in_tree'
     input = spatial_7.i
     csvdiff = 'spatial_7_out_temperature_0001.csv spatial_7_out_temperature_0002.csv'
-    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis'
+    requirement = 'The system shall be able to perform adaptive time-stepping on a node-by-node basis for spatially-dependent systems'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]
@@ -226,7 +226,7 @@
     capabilities = 'installation_type=in_tree'
     input = spatial_8.i
     csvdiff = 'spatial_8_out_bulk_Cl_0001.csv'
-    requirement = 'Spatially-dependent systems shall be able to perform adaptive time-stepping on a node-by-node basis, including the case where sources are spatially-dependent'
+    requirement = 'The system shall be able to perform adaptive time-stepping on a node-by-node basis for spatially-dependent systems, including the case where sources are spatially-dependent'
     issues = '#15693'
     design = 'GeochemistrySpatialReactor.md'
   [../]

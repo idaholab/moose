@@ -5,12 +5,12 @@
     type = RunApp
     input = 'mesh2d_coarse.i'
     cli_args = '--mesh-only'
-    requirement = "The shield multiphysics tutorial shall include a mesh generation step before the multiscale simulation example."
+    requirement = "The system shall include, as part of the shield multiphysics tutorial, a mesh generation step before the multiscale simulation example."
   []
   [local]
     type = RunApp
     input = 'step11_local.i'
-    requirement = "The shield multiphysics tutorial shall include a demonstration of performing a "
+    requirement = "The system shall include, as part of the shield multiphysics tutorial, a demonstration of performing a "
                   "lower-scale simulation individually."
   []
   [fluid]
@@ -18,7 +18,7 @@
     input = 'step11_2d_fluid.i'
     cli_args = 'Executioner/end_time=1000'
     prereq = generate_2d_coarse_mesh
-    requirement = "The shield multiphysics tutorial shall include a demonstration of performing a "
+    requirement = "The system shall include, as part of the shield multiphysics tutorial, a demonstration of performing a "
                   "fluid flow simulation meant for coupling individually."
   []
   [heat_conduction]
@@ -26,7 +26,7 @@
     input = 'step11_2d_heat_conduction.i'
     cli_args = "MultiApps/active='' Transfers/active=''"
     prereq = generate_2d_coarse_mesh
-    requirement = "The shield multiphysics tutorial shall include a demonstration of performing a "
+    requirement = "The system shall include, as part of the shield multiphysics tutorial, a demonstration of performing a "
                   "heat conduction simulation meant for coupling individually."
   []
   [coupled]
@@ -34,7 +34,7 @@
     input = 'step11_2d_heat_conduction.i'
     cli_args = 'Executioner/end_time=1000'
     min_parallel = 4
-    requirement = "The shield multiphysics tutorial shall include a demonstration of performing a "
+    requirement = "The system shall include, as part of the shield multiphysics tutorial, a demonstration of performing a "
                   "coupled multi-scale simulation."
   []
 []

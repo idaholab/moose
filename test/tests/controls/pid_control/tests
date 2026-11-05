@@ -1,6 +1,6 @@
 [Tests]
   [pid]
-    requirement = "The Control system shall be able to control an input parameter to make a postprocessor match a target value,"
+    requirement = "The system shall, through the Control system, be able to control an input parameter to make a postprocessor match a target value,"
     issues = '#17271 #31842'
     design = 'syntax/Controls/index.md source/controls/PIDTransientControl.md'
     [basic]

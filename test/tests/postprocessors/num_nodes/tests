@@ -4,7 +4,7 @@
     input = 'num_nodes.i'
     csvdiff = 'num_nodes_out.csv'
 
-    requirement = 'The NumNodes Postprocessor shall report the number of nodes
+    requirement = 'The system shall report, using the NumNodes Postprocessor, the number of nodes
                    (replicated or distributed) in the simulation.'
     design = '/NumNodes.md'
     issues = '#2094'
@@ -20,7 +20,7 @@
 
     csvdiff = 'num_nodes_split_out.csv'
 
-    requirement = 'The NumNodes Postprocessor shall report the number of nodes
+    requirement = 'The system shall report, using the NumNodes Postprocessor, the number of nodes
                    in the simulation when using distributed (pre-split) mesh.'
     design = '/NumNodes.md'
     issues = '#2094 #8421'

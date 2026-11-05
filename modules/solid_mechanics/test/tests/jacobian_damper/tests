@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'cube_load.i'
     exodiff = 'cube_load_out.e'
-    requirement = "The module shall be able to apply a damper on the displaced mesh to limit the "
+    requirement = "The system shall be able to apply a damper on the displaced mesh to limit the "
                   "element Jacobian change over nonlinear iterations."
   []
   [damper_verify]
@@ -13,20 +13,20 @@
     input = 'cube_load.i'
     expect_out = '9 Nonlinear'
     prereq = 'damper_exodus'
-    requirement = "The element Jacobian damper shall be able to apply a partial nonlinear update."
+    requirement = "The system shall, using the element Jacobian damper, be able to apply a partial nonlinear update."
   []
   [ref_damper]
     type = 'Exodiff'
     input = 'cube_load_undisplaced.i'
     exodiff = 'cube_load_undisplaced_out.e'
-    requirement = "The module shall be able to apply a damper on the undisplaced mesh to limit the "
+    requirement = "The system shall be able to apply a damper on the undisplaced mesh to limit the "
                   "element Jacobian change over nonlinear iterations."
   []
   [ref_damper_block_restricted]
     type = 'Exodiff'
     input = 'block_restriction.i'
     exodiff = 'block_restriction_out.e'
-    requirement = "The module shall be able to apply a damper on certain blocks of the undisplaced "
+    requirement = "The system shall be able to apply a damper on certain blocks of the undisplaced "
                   "mesh to limit the element Jacobian change over nonlinear iterations."
   []
   [survive_negative_jacobian]
@@ -44,6 +44,6 @@
     cli_args = 'Dampers/jac/use_backtracking=true'
     max_parallel = 1
     expect_out = 'Damping factor:'
-    requirement = "The element Jacobian damper shall optionally backtrack a trial nonlinear update to avoid generating a degenerate element map."
+    requirement = "The system shall, using the element Jacobian damper, optionally backtrack a trial nonlinear update to avoid generating a degenerate element map."
   []
 []

@@ -29,7 +29,7 @@
     cli_args = Outputs/file_base=2d_nodalmass_explicit_out
     csvdiff = '2d_nodalmass_explicit_out.csv'
     prereq = explicit_nodalmass
-    requirement = "The system syall include central difference time integration that when used with "
+    requirement = "The system shall include central difference time integration that when used with "
                   "the lumped mass option shall correctly calculate the response of a 2D mesh and "
                   "produce results that are identical to those calculated using equivalent nodal "
                   "masses."
@@ -43,7 +43,7 @@
                'Executioner/TimeIntegrator/use_constant_mass=true'
     csvdiff = '2d_nodalmass_explicit_out.csv'
     prereq = explicit_nodalmass
-    requirement = "The system syall include central difference time integration that when used with "
+    requirement = "The system shall include central difference time integration that when used with "
                   "the constant mass option shall correctly calculate the response of a 2D mesh and "
                   "produce results that are identical to those calculated using equivalent nodal "
                   "masses."

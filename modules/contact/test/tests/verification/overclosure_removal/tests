@@ -8,7 +8,7 @@
     rel_err = 1e-5
     abs_zero = 1e-6
     capabilities = 'superlu'
-    requirement = "The Contact system shall enforce eliminating initial
+    requirement = "The system shall enforce eliminating initial
                    overclosure between the primary and secondary surfaces."
   [../]
 []

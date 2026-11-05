@@ -6,7 +6,7 @@
     type = Exodiff
     input = base_object_param.i
     exodiff = base_object_param_out.e
-    requirement = "The Control system shall support the modification of a single parameter using the objects base class name, object name, and parameter name."
+    requirement = "The system shall, through the Control system, support the modification of a single parameter using the objects base class name, object name, and parameter name."
   [../]
 
   [./base_param]
@@ -14,6 +14,6 @@
     type = Exodiff
     input = base_param.i
     exodiff = base_param_out.e
-    requirement = "The Control system shall support the modification of multiple parameters using the objects base class and the parameter name."
+    requirement = "The system shall, through the Control system, support the modification of multiple parameters using the objects base class and the parameter name."
   [../]
 []

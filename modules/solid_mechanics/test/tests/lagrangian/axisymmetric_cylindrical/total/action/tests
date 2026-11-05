@@ -6,7 +6,7 @@
     input = 'action.i'
     exodiff = 'small_unstabilized.e'
     abs_zero = 1e-6
-    requirement = "Action produces identical results for small deformations/without stabilization in "
+    requirement = "The system shall produce identical results using the action for small deformations/without stabilization in "
                   "axisymmetric RZ coordinates"
     cli_args = "Outputs/file_base=small_unstabilized Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
                "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false"
@@ -16,7 +16,7 @@
     input = 'action.i'
     exodiff = 'small_stabilized.e'
     abs_zero = 1e-6
-    requirement = "Action produces identical results for small deformations/with stabilization in "
+    requirement = "The system shall produce identical results using the action for small deformations/with stabilization in "
                   "axisymmetric RZ coordinates"
     cli_args = "Outputs/file_base=small_stabilized Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
                "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true"
@@ -26,7 +26,7 @@
     input = 'action.i'
     exodiff = 'large_unstabilized.e'
     abs_zero = 1e-6
-    requirement = "Action produces identical results for large deformations/without stabilization in "
+    requirement = "The system shall produce identical results using the action for large deformations/without stabilization in "
                   "axisymmetric RZ coordinates"
     cli_args = "Outputs/file_base=large_unstabilized "
                "Physics/SolidMechanics/QuasiStatic/all/strain=FINITE "
@@ -37,7 +37,7 @@
     input = 'action.i'
     exodiff = 'large_stabilized.e'
     abs_zero = 1e-6
-    requirement = "Action produces identical results for large deformations/with stabilization in "
+    requirement = "The system shall produce identical results using the action for large deformations/with stabilization in "
                   "axisymmetric RZ coordinates"
     cli_args = "Outputs/file_base=large_stabilized Physics/SolidMechanics/QuasiStatic/all/strain=FINITE "
                "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true"

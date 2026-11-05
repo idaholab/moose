@@ -62,7 +62,7 @@
   []
   [stiff]
     requirement = 'The system shall be able to use automatic differntiation to compute a block '
-                  'bouncing on a plank problem on a second order 2DRz mesh using tensor mechanics '
+                  'bouncing on a plank problem on a second order 2DRz mesh using solid mechanics '
                   'and mortar contact and finite strain'
     [stiff_stiff]
       detail = 'using with a stiff block and a stiff plank.'

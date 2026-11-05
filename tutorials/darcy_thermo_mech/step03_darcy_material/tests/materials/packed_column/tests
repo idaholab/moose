@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'packed_column.i'
     exodiff = 'packed_column_out.e'
-    requirement = "The Darcy-Thermomechanics tutorial shall include an implementation of a material properties for use in coupling the heat and the Darcy equations."
+    requirement = "The system shall include, as part of the Darcy-Thermomechanics tutorial, an implementation of a material properties for use in coupling the heat and the Darcy equations."
   []
 []

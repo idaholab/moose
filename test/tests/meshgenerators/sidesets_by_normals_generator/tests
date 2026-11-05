@@ -20,7 +20,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
 
-    requirement = 'The system must be able to replace the side sets when applying side sets during mesh generation.'
+    requirement = 'The system shall be able to replace the side sets when applying side sets during mesh generation.'
     design = 'meshgenerators/SideSetsFromAllNormalsGenerator.md'
     issues = '#14460'
   []

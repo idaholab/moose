@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'kokkos_ad_time_derivative_test.i'
     exodiff = 'kokkos_ad_time_derivative_test_out.e'
-    requirement = 'The Kokkos system shall provide a time derivative kernel using automatic differentation.'
+    requirement = 'The system shall, using Kokkos, provide a time derivative kernel using automatic differentation.'
     design = 'KokkosADTimeDerivative.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
@@ -17,7 +17,7 @@
     run_sim = True
     ratio_tol = 1e-7
     difference_tol = 1e-6
-    requirement = 'The Jacobian from a Kokkos-based time derivative kernel shall be perfect.'
+    requirement = 'The system shall compute a perfect Jacobian for a Kokkos-based time derivative kernel.'
     design = 'KokkosADTimeDerivative.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
@@ -27,7 +27,7 @@
     type = 'Exodiff'
     input = 'kokkos_ad_coupled_time_derivative_test.i'
     exodiff = 'kokkos_ad_coupled_time_derivative_test_out.e'
-    requirement = 'The Kokkos system shall provide a coupled time derivative kernel using automatic differentation.'
+    requirement = 'The system shall, using Kokkos, provide a coupled time derivative kernel using automatic differentation.'
     design = 'KokkosADCoupledTimeDerivative.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
@@ -39,7 +39,7 @@
     run_sim = True
     ratio_tol = 1e-7
     difference_tol = 1e-6
-    requirement = 'The Jacobian from a Kokkos-based coupled variable time derivative kernel shall be perfect.'
+    requirement = 'The system shall compute a perfect Jacobian for a Kokkos-based coupled variable time derivative kernel.'
     design = 'KokkosADCoupledTimeDerivative.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
@@ -50,7 +50,7 @@
     input = 'kokkos_ad_coupled_time_derivative_test.i'
     exodiff = 'kokkos_ad_coupled_time_derivative_test_out.e'
     cli_args = 'Executioner/residual_and_jacobian_together=false'
-    requirement = 'The Kokkos system shall be able to compute residual and Jacobian separately with AD kernels.'
+    requirement = 'The system shall, using Kokkos, be able to compute residual and Jacobian separately with AD kernels.'
     design = 'Executioner.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'

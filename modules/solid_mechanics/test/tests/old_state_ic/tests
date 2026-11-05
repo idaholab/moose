@@ -13,7 +13,7 @@
     input = 'current_state_ic.i'
     csvdiff = 'current_state_ic_out.csv'
     restep = false # Not actually doing any timesteps
-    requirement = 'When only current state is specified with an initial condition, the old state should equal the current state.'
+    requirement = 'The system shall set the old state equal to the current state when only the current state is specified with an initial condition.'
   []
   [velocity_ic]
     type = CSVDiff
@@ -25,6 +25,6 @@
     type = RunException
     input = 'error_same_ic.i'
     expect_err = "The initial condition 'old' is being defined on a block that already has an initial condition defined with the same variable and state."
-    requirement = 'Should throw error for same IC.'
+    requirement = 'The system shall throw an error for the same IC.'
   []
 []

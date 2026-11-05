@@ -7,7 +7,7 @@
     exodiff = 'pressureAugLag_out.e'
     custom_cmp = 'pressure.exodiff'
     max_parallel = 1
-    requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Augmented Lagrangian formulation.'
+    requirement = 'The system shall reproduce contact pressure results among various formulation types. Augmented Lagrangian formulation.'
   [../]
   [./pressureAugLag_num_al]
     type = 'CSVDiff'
@@ -16,7 +16,7 @@
     cli_args = 'Postprocessors/num_al/type=NumAugmentedLagrangeIterations Outputs/exodus=false '
                'Outputs/csv=true Outputs/file_base=pressureAugLag_num_al'
     max_parallel = 1
-    requirement = 'The contact system shall report the number of augmented Lagrangian iterations '
+    requirement = 'The system shall report the number of augmented Lagrangian iterations '
                   'taken in a time step.'
   [../]
 
@@ -26,7 +26,7 @@
     exodiff = 'pressurePenalty_out.e'
     custom_cmp = 'pressure.exodiff'
     max_parallel = 1
-    requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Penalty.'
+    requirement = 'The system shall reproduce contact pressure results among various formulation types. Penalty.'
   [../]
 
   [./pressurePenalty_mechanical_constraint]
@@ -35,6 +35,6 @@
     exodiff = 'pressurePenalty_mechanical_constraint_out.e'
     custom_cmp = 'pressure.exodiff'
     max_parallel = 1
-   requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Mechanical constraint.'
+   requirement = 'The system shall reproduce contact pressure results among various formulation types. Mechanical constraint.'
   [../]
 []

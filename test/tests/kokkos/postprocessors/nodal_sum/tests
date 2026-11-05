@@ -3,7 +3,7 @@
   issues = '#30655'
 
   [nodal_sum]
-    requirement = 'The Kokkos system shall compute the sum of nodal values of a variable'
+    requirement = 'The system shall, using Kokkos, compute the sum of nodal values of a variable'
 
     [all]
       # Tests non-block restricted NodalUserObject (only visit nodes once on block boundary)

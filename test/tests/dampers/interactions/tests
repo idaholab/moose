@@ -6,7 +6,7 @@
     input = 'interacting_node_elem_dampers.i'
     expect_out = 'Damping factor: 0.1415'
     expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
-    requirement = "The Damper system shall use the minimum of NodalDamper and ElementDamper, when the later computes the minimum."
+    requirement = "The system shall, through the Damper system, use the minimum of NodalDamper and ElementDamper, when the later computes the minimum."
   [../]
   [./interacting_node_elem2]
     type = 'RunException'
@@ -14,6 +14,6 @@
     expect_out = 'Damping factor: 0.3333'
     expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
     cli_args = "Dampers/active='nodal2 elem2'"
-    requirement = "The Damper system shall use the minimum of NodalDamper and ElementDamper, when the former computes the minimum."
+    requirement = "The system shall, through the Damper system, use the minimum of NodalDamper and ElementDamper, when the former computes the minimum."
   [../]
 []

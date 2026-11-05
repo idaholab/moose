@@ -45,7 +45,7 @@
 
     design = "ParsedODEKernel.md"
     issues = "#14034"
-    requirement = "The system support coupling of postprocessor values in the parsed expression ODE "
+    requirement = "The system shall support coupling of postprocessor values in the parsed expression ODE "
                   "kernel."
   []
 

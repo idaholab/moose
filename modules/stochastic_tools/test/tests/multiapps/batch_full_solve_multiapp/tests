@@ -19,7 +19,7 @@
   []
 
   [batch_csv]
-    requirement = "The stochastic tools module shall support pulling postprocessor data from a "
+    requirement = "The system shall support pulling postprocessor data from a "
                   "single sub-application running a batch of sampled data"
 
     [n1]

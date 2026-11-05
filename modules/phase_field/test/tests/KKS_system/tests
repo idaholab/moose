@@ -5,7 +5,7 @@
     exodiff = 'derivative_parsed_material.e'
     issues = '#4835'
     design = 'DerivativeParsedMaterial.md'
-    requirement = 'The Kim-Kim-Suzuki model implementation shall use free energy densities provided '
+    requirement = 'The system shall implement the Kim-Kim-Suzuki model using free energy densities provided '
                   'by DerivativeParsedMaterials'
   []
 
@@ -15,7 +15,7 @@
     exodiff = 'kks_example.e'
     issues = '#4835'
     design = 'KKSCHBulk.md'
-    requirement = 'A non-split version of the Kim-Kim-Suzuki shall be provided'
+    requirement = 'The system shall provide a non-split version of the Kim-Kim-Suzuki model'
     # uses exodus oversampling see #2295
     recover = false
   []
@@ -26,7 +26,7 @@
     exodiff = 'kks_example_split.e'
     issues = '#4835'
     design = 'KKSSplitCHCRes.md'
-    requirement = 'A split version of the Kim-Kim-Suzuki shall be provided'
+    requirement = 'The system shall provide a split version of the Kim-Kim-Suzuki model'
   []
 
   [kks_example_offset]
@@ -35,7 +35,7 @@
     exodiff = 'kks_example_offset.e'
     issues = '#10315'
     design = 'KKSSplitCHCRes.md'
-    requirement = 'The split version of the Kim-Kim-Suzuki shall be yield the correct results with '
+    requirement = 'The system shall yield the correct results using the split Kim-Kim-Suzuki model with '
                   'asymmetric free energies'
   []
 
@@ -45,7 +45,7 @@
     exodiff = 'kks_xevac.e'
     design = 'KKSSplitCHCRes.md'
     issues = '#4879'
-    requirement = 'A multi component Kim-Kim-Suzuki model shall be implemented'
+    requirement = 'The system shall implement a multi component Kim-Kim-Suzuki model'
   []
 
   [kks_multiphase]
@@ -54,7 +54,7 @@
     exodiff = 'kks_multiphase_out.e'
     issues = '#7007'
     design = 'KKSMultiACBulkC.md'
-    requirement = 'A multi component Kim-Kim-Suzuki model shall be implemented'
+    requirement = 'The system shall implement a multi component Kim-Kim-Suzuki model'
   []
 
   [two_phase_lagrange_multiplier]
@@ -97,7 +97,7 @@
     exodiff = 'kks_example_nested.e'
     issues = '#26263'
     design = 'KKSPhaseConcentrationMaterial.md KKSPhaseConcentrationDerivatives.md NestedKKSACBulkC.md NestedKKSACBulkF.md NestedKKSSplitCHCRes.md'
-    requirement = 'The nested solve of multiphase Kim-Kim-Suzuki models shall yield the correct results with non-linear phase free energies'
+    requirement = 'The system shall yield, using the nested solve of multiphase Kim-Kim-Suzuki models, the correct results with non-linear phase free energies'
   []
   [kks_example_two_phase_nested_damped]
     type = 'Exodiff'
@@ -105,7 +105,7 @@
     exodiff = 'kks_example_nested_damped.e'
     issues = '#26263'
     design = 'KKSPhaseConcentrationMaterial.md KKSPhaseConcentrationDerivatives.md NestedKKSACBulkC.md NestedKKSACBulkF.md NestedKKSSplitCHCRes.md'
-    requirement = 'The nested solve of multiphase Kim-Kim-Suzuki models shall yield the correct results with non-linear phase free energies'
+    requirement = 'The system shall yield, using the nested solve of multiphase Kim-Kim-Suzuki models, the correct results with non-linear phase free energies'
   []
 
   [kks_example_multiphase_nested]
@@ -114,7 +114,7 @@
     exodiff = 'kks_example_multiphase_nested.e'
     issues = '#26263'
     design = 'KKSPhaseConcentrationMultiPhaseMaterial.md KKSPhaseConcentrationMultiPhaseDerivatives.md NestedKKSMultiACBulkC.md NestedKKSMultiACBulkF.md NestedKKSMultiSplitCHCRes.md'
-    requirement = 'The nested solve of multiphase Kim-Kim-Suzuki models shall yield the correct results with non-linear phase free energies'
+    requirement = 'The system shall yield, using the nested solve of multiphase Kim-Kim-Suzuki models, the correct results with non-linear phase free energies'
   []
 
   [kks_example_multiphase_nested_damped]
@@ -123,6 +123,6 @@
     exodiff = 'kks_example_multiphase_nested_damped.e'
     issues = '#26263'
     design = 'KKSPhaseConcentrationMultiPhaseMaterial.md KKSPhaseConcentrationMultiPhaseDerivatives.md NestedKKSMultiACBulkC.md NestedKKSMultiACBulkF.md NestedKKSMultiSplitCHCRes.md'
-    requirement = 'The damped nested solve of multiphase Kim-Kim-Suzuki models shall yield the correct results with log-based phase free energies'
+    requirement = 'The system shall yield, using the damped nested solve of multiphase Kim-Kim-Suzuki models, the correct results with log-based phase free energies'
   []
 []

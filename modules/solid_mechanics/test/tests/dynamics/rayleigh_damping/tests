@@ -5,7 +5,7 @@
     exodiff = 'rayleigh_hht_out.e'
     abs_zero = 1e-09
 
-    requirement = "The mechanics system shall accurately predict the dynamic response"
+    requirement = "The system shall accurately predict the dynamic response"
                   " of a linear elastic system with both Rayleigh damping and numerical"
                   " damping resulting from Hilber-Hughes-Taylor (HHT) time integration."
     design = "Dynamics.md"
@@ -17,7 +17,7 @@
     exodiff = 'rayleigh_hht_out.e'
     abs_zero = 1e-09
 
-    requirement = "The mechanics system shall accurately predict the dynamic response"
+    requirement = "The system shall accurately predict the dynamic response"
                   " of a linear elastic system with both Rayleigh damping and numerical"
                   " damping resulting from Hilber-Hughes-Taylor (HHT) time integration"
                   " when using the velocity and acceleration computed using the Newmark-Beta"
@@ -32,7 +32,7 @@
     exodiff = 'rayleigh_newmark_out.e'
     abs_zero = 1e-09
 
-    requirement = "The mechanics system shall accurately predict the dynamic response"
+    requirement = "The system shall accurately predict the dynamic response"
                   " of a linear elastic system with a constant Rayleigh damping."
     design = "Dynamics.md"
     issues = "#5559"
@@ -44,7 +44,7 @@
     abs_zero = 1e-09
     prereq = 'newmark'
 
-    requirement = "The mechanics system shall accurately predict the dynamic response"
+    requirement = "The system shall accurately predict the dynamic response"
                   " of a linear elastic system with Rayleigh damping provided as a"
                   " material property."
     design = "Dynamics.md"
@@ -56,7 +56,7 @@
     csvdiff = explicit_out.csv
     restep = false # Currently, ExplicitMixedOrder assumes the time step will never be cut
 
-    requirement = "Rayleigh mass damping shall be available when using explicit time"
+    requirement = "The system shall make Rayleigh mass damping available when using explicit time "
                   "integration in solid-mechanics problems."
     design = "ExplicitMassDamping.md"
     issues = "#32030"

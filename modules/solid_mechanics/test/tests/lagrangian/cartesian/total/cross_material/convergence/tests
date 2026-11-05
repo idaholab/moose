@@ -7,7 +7,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, without stabilization, and an elastic material with the total Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for small displacements, without stabilization, and an elastic material with the total Lagrangian formulation'
   []
   [elastic_large_neither]
     type = PetscJacobianTester
@@ -15,7 +15,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, without stabilization, and an elastic material with the total Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, without stabilization, and an elastic material with the total Lagrangian formulation'
   []
   [elastic_small_right]
     type = PetscJacobianTester
@@ -23,7 +23,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, with stabilization, and an elastic material with the total Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for small displacements, with stabilization, and an elastic material with the total Lagrangian formulation'
   []
   [elastic_large_right]
     type = PetscJacobianTester
@@ -31,7 +31,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, and an elastic material with the total Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, with stabilization, and an elastic material with the total Lagrangian formulation'
   []
 
   [plastic_j2_small_neither]
@@ -40,7 +40,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, without stabilization, and an plastic_j2 material with the total Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for small displacements, without stabilization, and an plastic_j2 material with the total Lagrangian formulation'
   []
   [plastic_j2_large_neither]
     type = PetscJacobianTester
@@ -48,7 +48,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, without stabilization, and an plastic_j2 material with the total Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, without stabilization, and an plastic_j2 material with the total Lagrangian formulation'
   []
   [plastic_j2_small_right]
     type = PetscJacobianTester
@@ -56,7 +56,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, with stabilization, and an plastic_j2 material with the total Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for small displacements, with stabilization, and an plastic_j2 material with the total Lagrangian formulation'
   []
   [plastic_j2_large_right]
     type = PetscJacobianTester
@@ -64,7 +64,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, and an plastic_j2 material with the total Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, with stabilization, and an plastic_j2 material with the total Lagrangian formulation'
   []
 
   [elastic_large_right_incremental]
@@ -74,7 +74,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with incremental F-bar stabilization (OLD compatibility mode), and an elastic material with the total Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, with incremental F-bar stabilization (OLD compatibility mode), and an elastic material with the total Lagrangian formulation'
   []
   [plastic_j2_large_right_incremental]
     issues = '#33005'
@@ -83,6 +83,6 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/F_bar_mode=incremental"
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with incremental F-bar stabilization (OLD compatibility mode), and a plastic_j2 material with the total Lagrangian formulation'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, for large displacements, with incremental F-bar stabilization (OLD compatibility mode), and a plastic_j2 material with the total Lagrangian formulation'
   []
 []

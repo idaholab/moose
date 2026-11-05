@@ -5,7 +5,7 @@
   parallel_scheduling = true
 
   [tests]
-    requirement = 'The RayTracingStudy shall return a useful error when'
+    requirement = 'The system shall return a useful error from the RayTracingStudy when'
     [duplicate_ray]
       type = 'RunException'
       input = 'errors.i'

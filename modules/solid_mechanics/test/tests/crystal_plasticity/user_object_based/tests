@@ -12,7 +12,7 @@
     input = 'user_object_011orientation.i'
     csvdiff = 'user_object_011orientation_out.csv'
     issues = '#16064'
-    requirement = 'The user-object-based crystal plasticity model shall compute the lagrangian stress, PK2 stress, and slip for an orientation not aligned with the Cartesian coordinate system.'
+    requirement = 'The system shall compute, using the user-object-based crystal plasticity model, the lagrangian stress, PK2 stress, and slip for an orientation not aligned with the Cartesian coordinate system.'
     design = '/FiniteStrainUObasedCP.md'
   []
   [exception]
@@ -21,7 +21,7 @@
     exodiff = 'exception_out.e'
     allow_warnings = true
     issues = '#10133'
-    requirement = 'A constitutive failure shall trigger an exception leading to a cut time step rather than a failed solve'
+    requirement = 'The system shall trigger an exception on a constitutive failure leading to a cut time step rather than a failed solve'
     design = '/FiniteStrainUObasedCP.md'
   []
   [fileread]
@@ -29,7 +29,7 @@
     input = 'fileread.i'
     exodiff = 'fileread_out.e'
     issues = '#6097'
-    requirement = 'The crystal plasticity system shall provide a function to read slip system parameters from files'
+    requirement = 'The system shall provide, in the crystal plasticity system, a function to read slip system parameters from files'
     design = '/FiniteStrainUObasedCP.md'
   []
   [user_object]
@@ -37,7 +37,7 @@
     input = 'user_object.i'
     exodiff = 'user_object_out.e'
     issues = '#6097'
-    requirement = 'The crystal plasticity system shall use pluggable user objects to determine the plasticity state variable evolution'
+    requirement = 'The system shall use, in the crystal plasticity system, pluggable user objects to determine the plasticity state variable evolution'
     design = '/FiniteStrainUObasedCP.md'
     capabilities = 'method!=dbg'
   []
@@ -46,7 +46,7 @@
     input = 'save_euler.i'
     exodiff = 'save_euler_out.e'
     issues = '#6097'
-    requirement = 'The crystal plasticity system shall make local Euler angles at material points available for output'
+    requirement = 'The system shall make, in the crystal plasticity system, local Euler angles at material points available for output'
     design = '/FiniteStrainUObasedCP.md'
     capabilities = 'method!=dbg'
   []
@@ -56,7 +56,7 @@
     exodiff = 'substep_out.e'
     allow_warnings = true
     issues = '#6097'
-    requirement = 'The crystal plasticity system shall provide a substepping capability for improved convergence'
+    requirement = 'The system shall provide, in the crystal plasticity system, a substepping capability for improved convergence'
     design = '/FiniteStrainUObasedCP.md'
     capabilities = 'method!=dbg'
   []
@@ -65,7 +65,7 @@
     input = 'linesearch.i'
     exodiff = 'linesearch_out.e'
     issues = '#6097'
-    requirement = 'The crystal plasticity system shall implement a line search capability for accellerated internal Newton solves'
+    requirement = 'The system shall implement, in the crystal plasticity system, a line search capability for accellerated internal Newton solves'
     design = '/FiniteStrainUObasedCP.md'
   []
   [orthotropic_rotation_Cijkl]
@@ -73,7 +73,7 @@
     input = 'orthotropic_rotation_Cijkl.i'
     csvdiff = 'orthotropic_rotation_Cijkl_out.csv'
     issues = '#10629'
-    requirement = 'The crystal plasticity rotations shall correctly rotate the elasticity tensors at each material point'
+    requirement = 'The system shall correctly rotate, using the crystal plasticity rotations, the elasticity tensors at each material point'
     design = '/ComputeElasticityTensorCP.md'
     capabilities = 'method!=dbg'
   []
@@ -82,7 +82,7 @@
     input = 'user_object_Voce_BCC.i'
     exodiff = 'user_object_Voce_BCC_out.e'
     issues = '#11307'
-    requirement = 'The crystal plasticity system shall provide a plugin user object implementing the Voce hardening law'
+    requirement = 'The system shall provide, in the crystal plasticity system, a plugin user object implementing the Voce hardening law'
     design = '/CrystalPlasticityStateVarRateComponentVoce.md'
     capabilities = 'method!=dbg'
   []
@@ -92,7 +92,7 @@
     exodiff = 'patch_recovery_out.e'
     abs_zero = 1e-8
     mesh_mode = replicated
-    requirement = "The Zienkiewicz-Zhu patch shall calculate the stress components at the nodes, "
+    requirement = "The system shall calculate, using the Zienkiewicz-Zhu patch, the stress components at the nodes, "
                   "with equivalent results in both serial and parallel simulations, in a crystal "
                   "plasticity finite strain application."
     design = 'nodal_patch_recovery.md'

@@ -4,12 +4,12 @@
       type = 'Exodiff'
       input = 'interface_value_user_object_QP.i'
       exodiff = 'interface_value_user_object_QP_out.e'
-      requirement = "Testing the implementation of the InterfaceQpValueUserObject."
+      requirement = "The system shall correctly compute interface values with the InterfaceQpValueUserObject."
                  " This test also shows the use of "
                  "InterfaceValueUserObjectAux AuxKernel. InterfaceValueUserObjectAux "
                  "use interface values computed and stored at each qp from the "
-                 "InterfaceQpValueUserObject and output them into an auxvaraible."
-                 "Values on the interface are then computed via SideAverageValue PP."
+                 "InterfaceQpValueUserObject and output them into an auxvaraible. "
+                 "Values on the interface are then computed via SideAverageValue PP. "
                  "By design at the end of the first step we should observe: "
                  "an average material property of 7, "
                  "an average material property absolute jump fo 6, "
@@ -24,11 +24,11 @@
       type = 'RunApp'
       input = 'interface_userobject_material_value.i'
       expect_out = ' Solve Converged!'
-      requirement = "The InterfaceUserObject system shall be able to "
-                    "get updated bulk, boundary and interface material property values."
+      requirement = "The system shall, through the InterfaceUserObject system, be able to "
+                    "get updated bulk, boundary and interface material property values. "
                     "This test uses two specific test materials "
                     "(e.g. LinearNonLinearIterationMaterial and LinearNonLinearIterationInterfaceMaterial)"
-                    " and one test userobject (e.g. InterfaceUserObjectTestGetMaterialProperty)."
+                    " and one test userobject (e.g. InterfaceUserObjectTestGetMaterialProperty). "
                     "This test will produce an error if the computed an retrived material property are not the same."
       issues = '#14680'
       max_threads = 1
@@ -37,7 +37,7 @@
       type = 'Exodiff'
       input = 'interface_value_rate_increment_user_object_QP.i'
       exodiff = 'interface_value_rate_increment_user_object_QP_out.e'
-      requirement = "Testing the implementation of the InterfaceQpValueUserObject"
+      requirement = "The system shall correctly compute values with the InterfaceQpValueUserObject"
                     " when computing the variable rate or increment."
       issues = '#14680'
       max_threads = 1
@@ -46,7 +46,7 @@
       type = 'Exodiff'
       input = 'interface_mp_real_user_object_QP.i'
       exodiff = 'interface_mp_real_user_object_QP_out.e'
-      requirement = "Testing the implementation of the InterfaceQpMaterialPropertyRealUO."
+      requirement = "The system shall correctly compute values with the InterfaceQpMaterialPropertyRealUO."
       issues = '#14680'
       max_threads = 1
     [../]

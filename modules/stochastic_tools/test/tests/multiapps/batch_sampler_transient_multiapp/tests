@@ -31,8 +31,8 @@
     input = parent_transient.i
     cli_args = MultiApps/runner/mode=batch-reset
     expect_err = "The supplied mode, 'batch-reset', currently"
-    requirement = "The SamplerTransientMultiApp object shall error if the 'batch-reset' mode is "
-                  "supplied."
+    requirement = "The system shall error if the 'batch-reset' mode is supplied to "
+                  "the SamplerTransientMultiApp object."
   []
 
   [file_output]

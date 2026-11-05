@@ -2,7 +2,7 @@
   issues = '#30335'
   design = 'ExplicitMixedOrder.md'
   [exp_time_int]
-    requirement = "The mechanics system shall predict solutions for explicit"
+    requirement = "The system shall predict solutions for explicit "
     "time integration for"
     [thermo_mech]
       type = Exodiff
@@ -20,7 +20,7 @@
     []
   []
   [failures]
-    requirement = "The explicit time integrator will error when not all"
+    requirement = "The system shall report an error in the explicit time integrator when not all "
     "nonlinear variables are specified because "
     [forgot_vars_second]
         type = RunException

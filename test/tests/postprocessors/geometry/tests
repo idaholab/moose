@@ -11,8 +11,8 @@
     type = CSVDiff
     input = 2d_geometry.i
     csvdiff = 2d_geometry_out.csv
-    requirement = 'The system shall be able to correctly compute the area of blocks and the perimeter'
-                  'of sidesets in 2D and appropriately handle boundary conditions applied to sidesets'
+    requirement = 'The system shall be able to correctly compute the area of blocks and the perimeter '
+                  'of sidesets in 2D and appropriately handle boundary conditions applied to sidesets '
                   'created with respect to different bodies.'
   [../]
 []
