@@ -1,0 +1,62 @@
+# MooseConfig.cmake (installed) -- relocatable find_package(Moose) entry point.
+#
+# Installed layout (relative to this file at <prefix>/lib/cmake/moose):
+#   <prefix>/lib/moose/lib{moose,hit}-<method>.<so|dylib>
+#   <prefix>/include/moose/**            (framework + contrib + generated headers)
+#   <prefix>/lib/cmake/moose/modules/    (the Moose* cmake helpers)
+#
+# The consuming project must set the libMesh toolchain before its project() call:
+#   list(PREPEND CMAKE_MODULE_PATH "<prefix>/lib/cmake/moose/modules")
+#   include(MooseMethods); include(MooseLibMesh); moose_libmesh_set_compilers()
+
+set(_moose_prefix "${CMAKE_CURRENT_LIST_DIR}/../../..")
+get_filename_component(_moose_prefix "${_moose_prefix}" ABSOLUTE)
+
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/modules")
+if(NOT DEFINED MOOSE_METHOD)
+  set(MOOSE_METHOD "@MOOSE_METHOD@")
+endif()
+set(MOOSE_FRAMEWORK_SCRIPTS "@MOOSE_FRAMEWORK_SCRIPTS@")
+
+include(MooseMethods)
+include(MooseUtils)
+include(MooseLibMesh)
+include(MooseWasp)
+include(MooseApp)
+
+if(NOT TARGET MOOSE::libmesh)
+  moose_libmesh_create_target()
+endif()
+if(NOT TARGET MOOSE::wasp)
+  moose_create_wasp_target()
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/MooseTargets-${MOOSE_METHOD}.cmake")
+
+# Re-add the header search paths from the installed tree (every subdir, since MOOSE headers
+# are included by bare name) plus the force-included MooseConfig.h -- the install-stripped
+# equivalents of the build-tree usage requirements.
+set(_moose_inc "${_moose_prefix}/include/moose")
+moose_collect_subdirs(_moose_inc_dirs "${_moose_inc}")
+set_property(TARGET Moose::moose APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${_moose_inc_dirs})
+set_property(TARGET Moose::moose APPEND PROPERTY INTERFACE_COMPILE_OPTIONS
+  "$<$<COMPILE_LANGUAGE:CXX>:SHELL:-include ${_moose_inc}/MooseConfig.h>")
+
+# Physics module components: each Moose::<module> carries its own installed headers; its
+# module dependencies' headers come transitively. find_package(Moose COMPONENTS <m>) works.
+set(_moose_modules @MOOSE_INSTALLED_MODULES@)
+foreach(_m IN LISTS _moose_modules)
+  if(TARGET Moose::${_m})
+    moose_collect_subdirs(_md "${_moose_inc}/modules/${_m}")
+    set_property(TARGET Moose::${_m} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${_md})
+    set(Moose_${_m}_FOUND TRUE)
+  endif()
+endforeach()
+
+# Honor requested COMPONENTS (CMake also auto-checks *_FOUND when REQUIRED).
+foreach(_c IN LISTS Moose_FIND_COMPONENTS)
+  if(NOT Moose_${_c}_FOUND)
+    set(Moose_FOUND FALSE)
+    set(Moose_NOT_FOUND_MESSAGE "MOOSE component '${_c}' is not available in this install")
+  endif()
+endforeach()
