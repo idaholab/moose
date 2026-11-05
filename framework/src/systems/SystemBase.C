@@ -50,6 +50,8 @@ extraSparsity(libMesh::SparsityPattern::Graph & sparsity,
 {
   SystemBase * sys = static_cast<SystemBase *>(context);
   sys->augmentSparsity(sparsity, n_nz, n_oz);
+  for (const auto & cb : sys->extraSparsityCallbacks())
+    cb(sparsity, n_nz, n_oz);
 }
 
 SystemBase::SystemBase(SubProblem & subproblem,

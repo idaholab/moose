@@ -42,6 +42,7 @@ ContactApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 
   registerSyntax("ContactAction", "Contact/*");
   registerSyntax("ExplicitDynamicsContactAction", "ExplicitDynamicsContact/*");
+  registerSyntax("RigidContactAction", "RigidContact/*");
 
   registerTask("output_penetration_info_vars", false);
   registerTask("add_contact_aux_variable", false);

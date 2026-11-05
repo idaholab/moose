@@ -106,7 +106,8 @@ FEProblem::addLineSearch(const InputParameters & parameters)
 {
   MooseEnum line_search = parameters.get<MooseEnum>("line_search");
   Moose::LineSearchType enum_line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
-  if (enum_line_search == Moose::LS_CONTACT || enum_line_search == Moose::LS_PROJECT)
+  if (enum_line_search == Moose::LS_CONTACT || enum_line_search == Moose::LS_PROJECT ||
+      enum_line_search == Moose::LS_SEMISMOOTH)
   {
     if (enum_line_search == Moose::LS_CONTACT)
     {
@@ -124,13 +125,34 @@ FEProblem::addLineSearch(const InputParameters & parameters)
       _line_search =
           _factory.create<LineSearch>("PetscContactLineSearch", "contact_line_search", ls_params);
     }
-    else
+    else if (enum_line_search == Moose::LS_PROJECT)
     {
       InputParameters ls_params = _factory.getValidParams("PetscProjectSolutionOntoBounds");
       ls_params.set<FEProblem *>("_fe_problem") = this;
 
       _line_search = _factory.create<LineSearch>(
           "PetscProjectSolutionOntoBounds", "project_solution_onto_bounds_line_search", ls_params);
+    }
+    else // LS_SEMISMOOTH
+    {
+      InputParameters ls_params = _factory.getValidParams("SemismoothContactLineSearch");
+      // Optional per-Executioner overrides (all defaulted in validParams).
+      if (parameters.isParamValid("semismooth_line_search_armijo_constant"))
+        ls_params.set<Real>("armijo_constant") =
+            parameters.get<Real>("semismooth_line_search_armijo_constant");
+      if (parameters.isParamValid("semismooth_line_search_backtrack_factor"))
+        ls_params.set<Real>("backtrack_factor") =
+            parameters.get<Real>("semismooth_line_search_backtrack_factor");
+      if (parameters.isParamValid("semismooth_line_search_max_cuts"))
+        ls_params.set<unsigned int>("max_cuts") =
+            parameters.get<unsigned int>("semismooth_line_search_max_cuts");
+      if (parameters.isParamValid("semismooth_line_search_nonmonotone_window"))
+        ls_params.set<unsigned int>("nonmonotone_window") =
+            parameters.get<unsigned int>("semismooth_line_search_nonmonotone_window");
+      ls_params.set<FEProblem *>("_fe_problem") = this;
+
+      _line_search = _factory.create<LineSearch>(
+          "SemismoothContactLineSearch", "semismooth_contact_line_search", ls_params);
     }
   }
   else
