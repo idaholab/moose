@@ -1431,4 +1431,16 @@
     issues = '#33992'
     design = 'PorousFlowAdvectiveFlux.md'
   []
+
+  [fluidstate_multicomponent]
+    type = 'PetscJacobianTester'
+    input = 'fluidstate_multicomponent.i'
+    ratio_tol = 1e-6 # Lots of chain rule derivatives
+    difference_tol = 1e10
+    cli_args = '-mat_fd_type ds'
+    allow_test_objects = true
+    requirement = 'The system shall compute all Jacobian entries of physics kernels for a two-phase fluid state with three fluid components and hence two independent total mass fractions.'
+    issues = '#34233'
+    design = 'PorousFlowFluidState.md'
+  []
 []
