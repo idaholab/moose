@@ -20,15 +20,14 @@ InputParameters
 MortarContactForce::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
-  params.addClassDescription(
-      "Total normal contact force that one mortar contact pair transmits to its secondary "
-      "surface, summed from the nodal contact pressures, nodal normals and mortar weights of the "
-      "pair's weighted gap user object.");
+  params.addClassDescription("Normal contact force that one mortar contact pair transmits to its "
+                             "secondary surface.");
   params.addRequiredParam<UserObjectName>(
       "weighted_gap_uo",
       "The weighted gap user object of the contact pair. The Contact action names it "
-      "lm_weightedgap_object_<block name> for a single pair and adds the pair suffix "
-      "_p_<primary>_s_<secondary> when the block has several pairs.");
+      "lm_weightedgap_object_<block name> (mortar) or penalty_weightedgap_object_<block name> "
+      "(mortar_penalty), with the suffix _p_<primary>_s_<secondary> when the block has several "
+      "pairs.");
   MooseEnum component("x y z magnitude", "magnitude");
   params.addParam<MooseEnum>(
       "component", component, "The force component to report, or its magnitude.");
@@ -52,41 +51,25 @@ void
 MortarContactForce::execute()
 {
   const auto & uo_params = _weighted_gap_uo.parameters();
-  const bool displaced = uo_params.get<bool>("use_displaced_mesh");
-  const MooseMesh & mesh =
-      displaced ? _fe_problem.getDisplacedProblem()->mesh() : _fe_problem.mesh();
+  const MooseMesh & mesh = _fe_problem.getDisplacedProblem()->mesh();
   const auto & amg = _fe_problem.getMortarInterface(
       {mesh.getBoundaryID(uo_params.get<BoundaryName>("primary_boundary")),
        mesh.getBoundaryID(uo_params.get<BoundaryName>("secondary_boundary"))},
       {_weighted_gap_uo.primarySubdomain(), _weighted_gap_uo.secondarySubdomain()},
-      displaced);
+      /*on_displaced=*/true);
+  const auto & node_to_elems = amg.nodesToSecondaryElem();
 
-  // Nodal normals of the secondary surface, by node id
-  std::unordered_map<dof_id_type, Point> normals;
-  const auto & lm_mesh = mesh.getMesh();
-  for (const auto * const elem :
-       as_range(lm_mesh.active_subdomain_elements_begin(_weighted_gap_uo.secondarySubdomain()),
-                lm_mesh.active_subdomain_elements_end(_weighted_gap_uo.secondarySubdomain())))
-  {
-    const auto elem_normals = amg.getNodalNormals(*elem);
-    for (const auto n : make_range(elem->n_nodes()))
-      normals.emplace(elem->node_id(n), elem_normals[n]);
-  }
-
-  // The traction on the secondary surface is sum_j Phi_j p_j n_j, so its integral is
-  // sum_j p_j n_j int Phi_j. The weighted gap user object holds int Phi_j over the mortar segments
-  // as the normalization of each secondary node, complete on the node's owner.
-  const auto rank = processor_id();
+  // F = sum_j p_j n_j int N_j, with the normalization int N_j over the mortar segments (a dual
+  // basis function has the same integral as N_j)
   for (const auto & [dof_object, gap_and_normalization] : _weighted_gap_uo.dofToWeightedGap())
   {
-    if (dof_object->processor_id() != rank)
+    if (dof_object->processor_id() != processor_id())
       continue;
-    const auto normal_it = normals.find(dof_object->id());
-    if (normal_it == normals.end())
-      mooseError("MortarContactForce requires a contact pressure at the secondary surface nodes.");
-    const Node * const node = lm_mesh.node_ptr(dof_object->id());
-    _force += _weighted_gap_uo.getNormalContactPressure(node) * gap_and_normalization.second *
-              normal_it->second;
+    const Node * const node = mesh.nodePtr(dof_object->id());
+    const Elem & elem = *libmesh_map_find(node_to_elems, node->id()).front();
+    const auto normal = amg.getNodalNormals(elem)[elem.get_node_index(node)];
+    _force +=
+        _weighted_gap_uo.getNormalContactPressure(node) * gap_and_normalization.second * normal;
   }
 }
 

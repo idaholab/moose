@@ -14,8 +14,7 @@
 class WeightedGapUserObject;
 
 /**
- * Total normal contact force that one mortar contact pair transmits to its secondary surface,
- * computed from the pair's weighted gap user object
+ * Normal contact force of one mortar contact pair, from its weighted gap user object
  */
 class MortarContactForce : public GeneralPostprocessor
 {
@@ -30,12 +29,12 @@ public:
   virtual PostprocessorValue getValue() const override;
 
 protected:
-  /// The weighted gap user object of the contact pair
+  /// Weighted gap user object of the pair
   const WeightedGapUserObject & _weighted_gap_uo;
 
-  /// The force component to report (0, 1, 2), or 3 for the magnitude
+  /// Component to report (0, 1, 2), or 3 for the magnitude
   const unsigned int _component;
 
-  /// The total contact force vector
+  /// Contact force
   RealVectorValue _force;
 };

@@ -1,9 +1,6 @@
-# Two tall blocks side by side on a wider bottom block, with all three mortar contact pairs in one
-# Contact block. The top blocks are compressed downward and confined laterally. MortarContactForce
-# reports the force of each pair, which is compared with the nodal sum of the contact residual on
-# the pair's secondary surface. Each top block contacts the bottom block only through its own
-# bottom surface, so these nodal sums hold one pair each. The two bottom pairs share their primary
-# surface base_top.
+# Two tall blocks on a wider bottom block, with all three contact pairs in one Contact block. The
+# force of each bottom pair is compared with the nodal sum of the contact residual on its secondary
+# surface. The two bottom pairs share the primary surface base_top.
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
@@ -78,13 +75,21 @@
 []
 
 [Contact]
+  active = 'mortar'
   [mortar]
     primary = 'base_top base_top right_left'
     secondary = 'left_bottom right_bottom left_right'
     model = frictionless
     formulation = mortar
-    c_normal = 1e6
     correct_edge_dropping = true
+    extra_vector_tags = 'contact_force'
+  []
+  [penalty]
+    primary = 'base_top base_top right_left'
+    secondary = 'left_bottom right_bottom left_right'
+    model = frictionless
+    formulation = mortar_penalty
+    penalty = 1e7
     extra_vector_tags = 'contact_force'
   []
 []
