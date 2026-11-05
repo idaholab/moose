@@ -264,6 +264,20 @@ public:
     return _neighbor_data->adGradPhiFace();
   }
 
+  /// AD test function values, curls and divergences of a vector variable
+  const ADVectorVariablePhiValue & adVectorPhi() const { return _element_data->adVectorPhi(); }
+  const ADVectorVariablePhiValue & adVectorPhiFace() const
+  {
+    return _element_data->adVectorPhiFace();
+  }
+  const ADVectorVariableTestCurl & adCurlPhi() const { return _element_data->adCurlPhi(); }
+  const ADVectorVariableTestCurl & adCurlPhiFace() const { return _element_data->adCurlPhiFace(); }
+  const ADVectorVariableTestDivergence & adDivPhi() const { return _element_data->adDivPhi(); }
+  const ADVectorVariableTestDivergence & adDivPhiFace() const
+  {
+    return _element_data->adDivPhiFace();
+  }
+
   // damping
   const FieldVariableValue & increment() const { return _element_data->increment(); }
 

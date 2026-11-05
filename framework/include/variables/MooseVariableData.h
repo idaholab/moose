@@ -213,6 +213,34 @@ public:
   const ADTemplateVariablePhiGradient<OutputShape> & adGradPhiFace() const;
 
   /**
+   * AD shape function values, curls and divergences of a vector variable, which carry the
+   * displacement derivatives of the Piola maps of H(curl) and H(div) families on displaced meshes
+   */
+  const ADVectorVariablePhiValue & adVectorPhi() const;
+  const ADVectorVariablePhiValue & adVectorPhiFace() const;
+  const ADVectorVariablePhiCurl & adCurlPhi() const;
+  const ADVectorVariablePhiCurl & adCurlPhiFace() const;
+  const ADVectorVariablePhiDivergence & adDivPhi() const;
+  const ADVectorVariablePhiDivergence & adDivPhiFace() const;
+
+private:
+  /// Error unless this is the element data of a vector variable
+  void checkADVectorPhi() const;
+
+  /// Request the AD shape function values of a vector variable on a displaced mesh, whose Piola
+  /// maps depend on the displacements
+  void requestADVectorPhi() const
+  {
+    if constexpr (std::is_same_v<OutputType, RealVectorValue>)
+      if (_displaced && _element_type == Moose::ElementType::Element)
+      {
+        adVectorPhi();
+        adVectorPhiFace();
+      }
+  }
+
+public:
+  /**
    * Return phi size
    */
   std::size_t phiSize() const { return _phi->size(); }
@@ -297,6 +325,7 @@ public:
   const ADTemplateVariableValue<OutputType> & adSln() const
   {
     _need_ad = _need_ad_volume = _need_ad_u = true;
+    requestADVectorPhi();
     return _ad_u;
   }
 
@@ -314,6 +343,7 @@ public:
   const ADTemplateVariableValue<OutputType> & adSlnFace() const
   {
     _need_ad = _need_ad_u = true;
+    requestADVectorPhi();
     return _ad_u;
   }
 
@@ -383,6 +413,12 @@ public:
     _need_ad = _need_ad_volume = _need_ad_curl_u = true;
     curlPhi();
     curlPhiFace();
+    if constexpr (std::is_same_v<OutputType, RealVectorValue>)
+      if (_displaced && _element_type == Moose::ElementType::Element)
+      {
+        adCurlPhi();
+        adCurlPhiFace();
+      }
     return _ad_curl_u;
   }
 
@@ -391,6 +427,12 @@ public:
     _need_ad = _need_ad_volume = _need_ad_div_u = true;
     divPhi();
     divPhiFace();
+    if constexpr (std::is_same_v<OutputType, RealVectorValue>)
+      if (_displaced && _element_type == Moose::ElementType::Element)
+      {
+        adDivPhi();
+        adDivPhiFace();
+      }
     return _ad_div_u;
   }
 
@@ -527,6 +569,18 @@ private:
             const DofValuesType & dof_values,
             unsigned int nqp,
             std::size_t num_shapes);
+
+  /// Calls fill() with AD vector shape data for vector variables; a no-op for other variables,
+  /// which have no AD vector shape data
+  template <bool constant_monomial,
+            typename DestinationType,
+            typename ShapeType,
+            typename DofValuesType>
+  void fillADVector(DestinationType & dest,
+                    const ShapeType * ad_phi,
+                    const DofValuesType & dof_values,
+                    unsigned int nqp,
+                    std::size_t num_shapes);
 
   /// Ask the assembly to compute the AD face shape function gradients, which this variable's AD
   /// gradient and AD face test function gradients are built from
@@ -681,6 +735,15 @@ private:
   const ADTemplateVariablePhiGradient<OutputShape> * _ad_grad_phi;
   const ADTemplateVariablePhiGradient<OutputShape> * _ad_grad_phi_face;
 
+  /// AD values, curls and divergences of the shape functions of a vector variable on an element
+  /// and its faces; null for other variables and until requested
+  mutable const ADVectorVariablePhiValue * _ad_vector_phi = nullptr;
+  mutable const ADVectorVariablePhiValue * _ad_vector_phi_face = nullptr;
+  mutable const ADVectorVariablePhiCurl * _ad_curl_phi = nullptr;
+  mutable const ADVectorVariablePhiCurl * _ad_curl_phi_face = nullptr;
+  mutable const ADVectorVariablePhiDivergence * _ad_div_phi = nullptr;
+  mutable const ADVectorVariablePhiDivergence * _ad_div_phi_face = nullptr;
+
   const QBase * _current_qrule;
   const FieldVariablePhiValue * _current_phi;
   const FieldVariablePhiGradient * _current_grad_phi;
@@ -688,6 +751,9 @@ private:
   const FieldVariablePhiCurl * _current_curl_phi;
   const FieldVariablePhiDivergence * _current_div_phi;
   const ADTemplateVariablePhiGradient<OutputShape> * _current_ad_grad_phi;
+  const ADVectorVariablePhiValue * _current_ad_vector_phi = nullptr;
+  const ADVectorVariablePhiCurl * _current_ad_curl_phi = nullptr;
+  const ADVectorVariablePhiDivergence * _current_ad_div_phi = nullptr;
 
   // dual mortar
   const bool _use_dual;
@@ -845,6 +911,7 @@ const ADTemplateVariableValue<OutputType> &
 MooseVariableData<OutputType>::adUDot() const
 {
   _need_ad = _need_ad_volume = _need_ad_u_dot = true;
+  requestADVectorPhi();
 
   if (!_time_integrator)
     // If we don't have a time integrator (this will be the case for variables that are a part of
@@ -862,6 +929,7 @@ MooseVariableData<OutputType>::adUDotDot() const
 {
   // the time integrator computes the second time derivative together with the first one
   _need_ad = _need_ad_volume = _need_ad_u_dot = _need_ad_u_dotdot = true;
+  requestADVectorPhi();
 
   // If we don't have a time integrator (this will be the case for variables that are a part
   // of the AuxiliarySystem) then we have no way to calculate _ad_u_dotdot and we are just

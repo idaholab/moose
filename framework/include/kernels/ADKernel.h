@@ -82,6 +82,9 @@ protected:
   /// the current test function
   const ADTemplateVariableTestValue<T> & _test;
 
+  /// the current test function without possible displacement derivatives
+  const typename OutputTools<T>::VariableTestValue & _regular_test;
+
   /// gradient of the test function
   const ADTemplateVariableTestGradient<T> & _grad_test;
 
