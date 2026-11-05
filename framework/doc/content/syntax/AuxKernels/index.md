@@ -90,6 +90,35 @@ execution of a simulation. In this case, the `EXEC_LINEAR` flag should be remove
 `EXEC_INITIAL` flag should be added to perform the auxiliary variable calculation during the initial
 setup phase as well.
 
+### Execution ordering within auxiliary kernels
+
+Scalar auxiliary kernels, that set scalar (global) variables, are always executed first.
+Field auxiliary kernels can be ordered by groups using the `execution_order_group`. Groups execute in
+ascending order, with group `0` being the default group assigned. Negative groups can be used
+to execute before the default group.
+Within a group, auxiliary kernels are executed in the following order:
+
+- nodal auxiliary kernels, which set a single-component field nodal variable
+- nodal vector auxiliary kernels, which set a vector (# of components = dimension of the mesh) field nodal variable
+- nodal array auxiliary kernels, which set an array (# of components can be set as needed) field nodal variable
+- mortar nodal auxiliary kernels, which set a single-component field nodal variable defined on a mortar mesh
+- elemental auxiliary kernels, which set a single-component field elemental variable
+- elemental vector auxiliary kernels, which set a vector (# of components = dimension of the mesh) field elemental variable
+- elemental array auxiliary kernels, which set an array (# of components can be set as needed) field elemental variable
+
+
+The distinction between a nodal and elemental variable is essentially that a nodal variable should have all its degrees of
+freedom both conceptually and practically attached to the node `DofObject` in libMesh.
+
+!alert note
+Setup operations are called on auxiliary kernels in dependency order, so a kernel is set up after the kernels it depends on. They do not follow the `execution_order_group` parameter or the execution order of the kernel categories (nodal, elemental, mortar, etc.).
+
+
+!alert note title=When in doubt...
+When you want to check in which order the auxiliary kernels and/or other objects are being executed, the
+[!param](/Debug/SetupDebugAction/show_execution_order) parameter may be set to `ALWAYS` to have console output
+of the ordering of execution.
+
 ## Populating lower-dimensional auxiliary variables
 
 Lower-dimensional auxiliary variables may be populated using boundary restricted
