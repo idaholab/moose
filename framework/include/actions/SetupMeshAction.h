@@ -26,6 +26,12 @@ private:
   void setupMesh(MooseMesh * mesh);
 
   /**
+   * Gets the restart file base if the Problem block requests reading the mesh from the restart
+   * checkpoint (restart_use_checkpoint_mesh), or an empty string otherwise.
+   */
+  std::string checkpointMeshRestartFileBase() const;
+
+  /**
    * Modifies the MooseObject's parameters to build the right type of Mesh when using splits.
    * @return The new type of object that will be built.
    */
