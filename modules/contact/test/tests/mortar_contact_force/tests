@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#34357'
+  design = 'MortarContactForce.md'
+  [mortar_contact_force]
+    type = CSVDiff
+    input = 'mortar_contact_force.i'
+    csvdiff = 'mortar_contact_force_out.csv'
+    requirement = 'The system shall report the normal contact force of each mortar contact pair in a '
+                  'Contact block with several pairs, equal to the nodal sum of the contact residual on '
+                  'the pair secondary surface.'
+  []
+[]
