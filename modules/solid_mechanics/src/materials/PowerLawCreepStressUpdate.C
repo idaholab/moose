@@ -72,6 +72,15 @@ PowerLawCreepStressUpdateTempl<is_ad>::computeStressInitialize(
 }
 
 template <bool is_ad>
+GenericReal<is_ad>
+PowerLawCreepStressUpdateTempl<is_ad>::computeCreepStrainRate(const GenericReal<is_ad> & stress_eq)
+{
+  using std::pow;
+
+  return _coefficient * pow(stress_eq, _n_exponent) * _exponential * _exp_time;
+}
+
+template <bool is_ad>
 template <typename ScalarType>
 ScalarType
 PowerLawCreepStressUpdateTempl<is_ad>::computeResidualInternal(

@@ -43,6 +43,10 @@ protected:
     return _initial_guess;
   }
 
+  virtual Real computeStrainEnergyRateDensity(
+      const GenericMaterialProperty<RankTwoTensor, is_ad> & stress,
+      const GenericMaterialProperty<RankTwoTensor, is_ad> & strain_rate) override;
+
   const int _failure_step;
   const Real _initial_guess;
 
