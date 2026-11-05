@@ -343,6 +343,22 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMDarcyQuadratureOrder]
+    type = CSVDiff
+    input = darcy.i
+    csvdiff = 'OutputData/DarcyQuadratureOrder.csv'
+    cli_args = 'Postprocessors/velocity_error/quadrature_order=5 '
+               'Postprocessors/pressure_error/quadrature_order=5 '
+               'Outputs/active=DarcyErrorCSV '
+               'Outputs/DarcyErrorCSV/file_base=OutputData/DarcyQuadratureOrder'
+    requirement = 'The system shall compute the L2 errors of scalar and vector MFEM variables with '
+                  'quadrature rules of a given order.'
+    design = 'MFEMNormPostprocessor.md MFEML2Error.md MFEMVectorL2Error.md'
+    issues = '#34206'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
   [MFEMDiffusionEigenproblem]
     type = CSVDiff
     input = diffusion_eigenproblem.i
