@@ -11,6 +11,7 @@
 
 #pragma once
 #include "MFEMVectorMagnitudeCoefficient.h"
+#include "MooseError.h"
 
 namespace Moose::MFEM
 {
@@ -20,7 +21,7 @@ namespace Moose::MFEM
  * Produces the matrix
  *   k(|curl u|) I + |curl u| dk/d|curl u| (curl u_hat \otimes curl u_hat)
  */
-class NLCurlCurlJacMatrixCoefficient : public mfem::MatrixCoefficient
+class NLCurlCurlJacMatrixCoefficient : public mfem::SymmetricMatrixCoefficient
 {
 public:
   NLCurlCurlJacMatrixCoefficient(mfem::Coefficient & k,
@@ -28,7 +29,8 @@ public:
                                  mfem::VectorCoefficient & curlu_vec,
                                  mfem::real_t curlu_zero_tol);
 
-  void Eval(mfem::DenseMatrix & K,
+  using mfem::SymmetricMatrixCoefficient::Eval;
+  void Eval(mfem::DenseSymmetricMatrix & K,
             mfem::ElementTransformation & T,
             const mfem::IntegrationPoint & ip) override;
   void SetTime(mfem::real_t t) override;
@@ -63,10 +65,56 @@ public:
                                    const mfem::Vector & elfun,
                                    mfem::DenseMatrix & elmat) override;
 
+  using mfem::NonlinearFormIntegrator::AssemblePA;
+  void AssemblePA(const mfem::FiniteElementSpace & fes) override;
+  void AssembleGradPA(const mfem::Vector & x, const mfem::FiniteElementSpace & fes) override;
+  void AddMultPA(const mfem::Vector & x, mfem::Vector & y) const override;
+  void AddMultGradPA(const mfem::Vector & x, mfem::Vector & y) const override;
+  void AssembleGradDiagonalPA(mfem::Vector & diag) const override;
+
+  /// Performs the setup for both AssemblePA and AssembleGradPA, then returns
+  /// the integration rule we need for projecting coefficients. This also
+  /// ensures that _qspace_ir is set correctly.
+  void PreAssemblySetup(const mfem::FiniteElementSpace & fes);
+
 protected:
   mfem::CurlCurlIntegrator _curlcurl_res_integ; // (k(|curl u|) curl u, curl phi_j)
   NLCurlCurlJacMatrixCoefficient _curlcurl_jac_matrix_coef;
   mfem::CurlCurlIntegrator _curlcurl_jac_integ;
+
+  // Extra stuff we need for the PA extension
+  mfem::Vector _pa_res_data, _pa_grad_data;
+  const mfem::DofToQuad * _mapsO;       ///< Not owned. DOF-to-quad map, open.
+  const mfem::DofToQuad * _mapsC;       ///< Not owned. DOF-to-quad map, closed.
+  const mfem::GeometricFactors * _geom; ///< Not owned
+  int _dim, _ne, _nq, _dofs1D, _quad1D;
+
+  /// Since k() is a scalar function, the matrices we form will always be symmetric,
+  /// since the two matrices we form are k(s) J^TJ and k'(s)/s * J^T * (curl u) * (curl u)^T J,
+  /// both of which are symmetric.
+  const bool _symmetric = true; ///< False if using a nonsymmetric matrix coefficient
+  /// Number of matrix elements to store per quadpoint. Since we only support 3D matrices
+  /// with scalar k, we can set this to 6 (the no. of distinct entries for a 3x3 symmetric matrix)
+  const int _ndata = 6;
+
+  /// Coefficient for k(s)
+  mfem::Coefficient & _k_coef;
+  /// Coefficient for s*k'(s), with s = |curl u|
+  mfem::Coefficient & _curlu_dk_dcurlu_coef;
+  /// Coefficient for the curl of u
+  mfem::VectorCoefficient & _curlu_coef;
+
+  /// Tolerance for zero-ing out 1.0 / |curl u| when forming jacobian operator
+  mfem::real_t _curlu_zero_tol;
+
+  /// Quadrature space the solution-dependent coefficients are projected onto. Owned, and
+  /// rebuilt whenever the mesh or integration rule it was built from changes.
+  std::unique_ptr<mfem::QuadratureSpace> _qspace;
+  /// What _qspace was built from, used to detect that it has gone stale. The sequence counter
+  /// catches in-place refinement, which leaves the mesh pointer unchanged.
+  const mfem::Mesh * _qspace_mesh = nullptr;
+  long _qspace_mesh_sequence = -1;
+  const mfem::IntegrationRule * _qspace_ir = nullptr;
 };
 }
 

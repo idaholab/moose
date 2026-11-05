@@ -21,6 +21,7 @@
 #include "MFEMMixedBilinearFormKernel.h"
 #include "ScaleIntegrator.h"
 #include "NLScaleIntegrator.h"
+#include "JacobianSumOperator.h"
 
 namespace Moose::MFEM
 {
@@ -109,6 +110,22 @@ public:
   }
 
   /**
+   * @returns a reference to the MFEM ParMixedBilinearForm corresponding to test_var_name and
+   * trial_var_name
+   */
+  mfem::ParMixedBilinearForm & GetMixedBilinearForm(const std::string & test_var_name,
+                                                    const std::string & trial_var_name)
+  {
+    if (!_mblfs.Has(test_var_name) || !_mblfs.Get(test_var_name)->Has(trial_var_name))
+      mooseError("No mixed bilinear form couples variable '",
+                 trial_var_name,
+                 "' into the equation for '",
+                 test_var_name,
+                 "'.");
+    return _mblfs.Get(test_var_name)->GetRef(trial_var_name);
+  }
+
+  /**
    * @returns a reference to the MFEM ParGridFunction corresponding to trial_var_name
    */
   mfem::ParGridFunction & GetGridFunction(const std::string & trial_var_name)
@@ -153,6 +170,8 @@ public:
   bool IsMultivariate() const { return _test_var_names.size() > 1; }
   /// @returns Whether nonlinear integrators are present in the equation system
   bool IsNonlinear() const { return _non_linear; }
+  /// @returns The assembly level used in the equation system
+  mfem::AssemblyLevel GetAssemblyLevel() const { return _assembly_level; }
 
   /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem();
@@ -214,6 +233,8 @@ protected:
   virtual void FormSystemMatrix(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS);
+  /// Get partially-assembled Jacobian
+  void FormJacobianOperator(const mfem::Vector & u) const;
   /// Compute Jacobian matrix at the provided vector of true DoFs of trial variables
   void FormJacobianMatrix(const mfem::Vector & u);
 
@@ -312,6 +333,8 @@ protected:
   std::vector<mfem::Array<int>> _ess_markers;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks, _jacobian_blocks;
+  mfem::Array2D<mfem::Operator *> _h_blocks_pa, _jacobian_blocks_pa;
+
   /// Arrays to store kernels to act on each component of weak form.
   /// Named according to test and trial variables.
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> _kernels_map;

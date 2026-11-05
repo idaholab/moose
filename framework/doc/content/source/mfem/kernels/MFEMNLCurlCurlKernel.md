@@ -18,6 +18,8 @@ This term arises from the weak form of the curl curl operator
 !equation
 \vec\nabla \times \left(k(|\vec\nabla \times \vec u|) \vec\nabla \times \vec u\right)
 
+Partial assembly is now supported for 3D problems and on CPU only.
+
 ## Example Input File Syntax
 
 !listing mfem/submeshes/nl_hphi_magnetodynamic.i block=/Kernels
