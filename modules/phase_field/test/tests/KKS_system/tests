@@ -44,7 +44,7 @@
     input = 'kks_xevac.i'
     exodiff = 'kks_xevac.e'
     design = 'KKSSplitCHCRes.md'
-    issues = '#4879'
+    issues = '#4835'
     requirement = 'The system shall implement a two-component (gas and vacancy) split Cahn-Hilliard Kim-Kim-Suzuki model.'
   []
 
