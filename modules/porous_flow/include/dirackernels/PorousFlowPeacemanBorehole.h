@@ -142,6 +142,14 @@ protected:
                     const Elem * ele,
                     const Real & rad) const;
 
+  /**
+   * The nominated phase's mobility for fluid leaving the porespace.  Fluid entering it is weighted
+   * instead by the density of the nominated phase multiplied by the total mobility of all phases,
+   * rho*sum_p(k_r_p/mu_p)
+   */
+  Real mobility(bool injecting) const override;
+  Real dmobility(unsigned pvar, bool injecting) const override;
+
   Real computeQpBaseOutflow(unsigned current_dirac_ptid) const override;
   void computeQpBaseOutflowJacobian(unsigned jvar,
                                     unsigned current_dirac_ptid,
