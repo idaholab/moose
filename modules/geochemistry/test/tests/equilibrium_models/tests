@@ -486,7 +486,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_solvent_kg=false'
     expect_err = 'Unknown variable kg_solvent_H2O'
-    requirement = 'The system shall be possible to record solvent mass in time-indpendent problems'
+    requirement = 'The system shall be able to record solvent mass in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   [../]
@@ -498,7 +498,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_pH=false'
     expect_err = 'Unknown variable pH'
-    requirement = 'The system shall be possible to record pH in time-indpendent problems'
+    requirement = 'The system shall be able to record pH in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   [../]
@@ -510,7 +510,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_molal=false'
     expect_err = 'Unknown variable molal_Cl-'
-    requirement = 'The system shall be possible to record molality in time-indpendent problems'
+    requirement = 'The system shall be able to record molality in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   [../]
@@ -522,7 +522,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_mg_per_kg=false'
     expect_err = 'Unknown variable mg_per_kg_HCl'
-    requirement = 'The system shall be possible to record mg/kg in time-indpendent problems'
+    requirement = 'The system shall be able to record mg/kg in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   [../]
@@ -534,7 +534,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_activity=false'
     expect_err = 'Unknown variable activity_OH-'
-    requirement = 'The system shall be possible to record activity in time-indpendent problems'
+    requirement = 'The system shall be able to record activity in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   [../]
@@ -546,7 +546,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_bulk_moles=false'
     expect_err = 'Unknown variable bulk_moles_H\+'
-    requirement = 'The system shall be possible to record bulk moles in time-indpendent problems'
+    requirement = 'The system shall be able to record bulk moles in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   [../]
@@ -558,7 +558,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_temperature=false'
     expect_err = 'Unknown variable solution_temperature'
-    requirement = 'The system shall be possible to record aqueous solution temperature in time-indpendent problems'
+    requirement = 'The system shall be able to record aqueous solution temperature in time-indpendent problems'
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md'
   [../]

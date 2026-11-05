@@ -498,7 +498,7 @@
     input = 'injection_with_plasticity.i'
     exodiff = 'injection_with_plasticity_out.e'
     abs_zero = 1E-5
-    requirement = 'The system shall be possible to use PorousFlow DiracKernels in simulations involving plastic deformation'
+    requirement = 'The system shall be able to use PorousFlow DiracKernels in simulations involving plastic deformation'
     design = 'porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#12962'
   []

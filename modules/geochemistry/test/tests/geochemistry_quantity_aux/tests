@@ -192,7 +192,7 @@
     input = 'surface_charge.i'
     csvdiff = 'surface_charge_out.csv'
     rel_err = 1.0E-5
-    requirement = 'The system shall be possible to set an AuxVariable corresponding to surface charge'
+    requirement = 'The system shall be able to set an AuxVariable corresponding to surface charge'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -203,7 +203,7 @@
     input = 'surface_potential.i'
     csvdiff = 'surface_potential_out.csv'
     rel_err = 1.0E-5
-    requirement = 'The system shall be possible to set an AuxVariable corresponding to surface potential'
+    requirement = 'The system shall be able to set an AuxVariable corresponding to surface potential'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -213,7 +213,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'free_cm3.i'
     csvdiff = 'free_cm3_out.csv'
-    requirement = 'The system shall be possible to set an AuxVariable corresponding to free-cm3'
+    requirement = 'The system shall be able to set an AuxVariable corresponding to free-cm3'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -223,7 +223,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'free_mg.i'
     csvdiff = 'free_mg_out.csv'
-    requirement = 'The system shall be possible to set an AuxVariable corresponding to free-mg'
+    requirement = 'The system shall be able to set an AuxVariable corresponding to free-mg'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -233,7 +233,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'molal.i'
     csvdiff = 'molal_out.csv'
-    requirement = 'The system shall be possible to set an AuxVariable corresponding to molality'
+    requirement = 'The system shall be able to set an AuxVariable corresponding to molality'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -243,7 +243,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'mg_per_kg.i'
     csvdiff = 'mg_per_kg_out.csv'
-    requirement = 'The system shall be possible to set an AuxVariable corresponding to mg/kg'
+    requirement = 'The system shall be able to set an AuxVariable corresponding to mg/kg'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -253,7 +253,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'neglog10a.i'
     csvdiff = 'neglog10a_out.csv'
-    requirement = 'The system shall be possible to set an AuxVariable corresponding to -log10(activity)'
+    requirement = 'The system shall be able to set an AuxVariable corresponding to -log10(activity)'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -263,7 +263,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'activity.i'
     csvdiff = 'activity_out.csv'
-    requirement = 'The system shall be possible to set an AuxVariable corresponding to activity'
+    requirement = 'The system shall be able to set an AuxVariable corresponding to activity'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -273,7 +273,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'bulk_moles.i'
     csvdiff = 'bulk_moles_out.csv'
-    requirement = 'The system shall be possible to set an AuxVariable corresponding to bulk mole number'
+    requirement = 'The system shall be able to set an AuxVariable corresponding to bulk mole number'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -283,7 +283,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'temperature.i'
     csvdiff = 'temperature_out.csv'
-    requirement = 'The system shall be possible to set an AuxVariable corresponding to aqueous-solution temperature'
+    requirement = 'The system shall be able to set an AuxVariable corresponding to aqueous-solution temperature'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -293,7 +293,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'kinetic_moles.i'
     csvdiff = 'kinetic_moles_out.csv'
-    requirement = 'The system shall be possible to set an AuxVariable corresponding to kinetic mole number'
+    requirement = 'The system shall be able to set an AuxVariable corresponding to kinetic mole number'
     issues = '#15489'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -304,7 +304,7 @@
     input = 'kinetic_moles.i'
     cli_args = 'AuxKernels/the_aux/quantity=free_mg Outputs/file_base=kinetic_free_mg_out Postprocessors/value_from_action/variable="free_mg_Fe(OH)3(ppd)"'
     csvdiff = 'kinetic_free_mg_out.csv'
-    requirement = 'The system shall be possible to set an AuxVariable corresponding to free mg for kinetic species'
+    requirement = 'The system shall be able to set an AuxVariable corresponding to free mg for kinetic species'
     issues = '#15489'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -315,7 +315,7 @@
     input = 'kinetic_moles.i'
     cli_args = 'AuxKernels/the_aux/quantity=free_cm3 Outputs/file_base=kinetic_free_cm3_out Postprocessors/value_from_action/variable="free_cm3_Fe(OH)3(ppd)"'
     csvdiff = 'kinetic_free_cm3_out.csv'
-    requirement = 'The system shall be possible to set an AuxVariable corresponding to free cm3 for kinetic species'
+    requirement = 'The system shall be able to set an AuxVariable corresponding to free cm3 for kinetic species'
     issues = '#15489'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -325,7 +325,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'kinetic_rate.i'
     csvdiff = 'kinetic_rate_out.csv'
-    requirement = 'The system shall be possible to set an AuxVariable corresponding to the kinetic-rate for kinetic species'
+    requirement = 'The system shall be able to set an AuxVariable corresponding to the kinetic-rate for kinetic species'
     issues = '#15489'
     design = 'GeochemistryQuantityAux.md'
   [../]

@@ -20,7 +20,7 @@
     input = 'aquifer_geochemistry.i'
     csvdiff = 'aquifer_geochemistry_out.csv'
     cli_args = 'Outputs/exodus=false Executioner/end_time=1E5'
-    requirement = "The system shall be able to model spatially-dependent aquifer geochemical models."
+    requirement = "The system shall be able to model spatially-dependent aquifer geochemical models in 2D."
     issues = '#15693'
     design = 'geotes_2D.md'
   [../]
