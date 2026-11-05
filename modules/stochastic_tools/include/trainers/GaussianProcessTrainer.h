@@ -19,6 +19,7 @@
 #include "CovarianceInterface.h"
 
 #include "GaussianProcess.h"
+#include "GPLinkFunction.h"
 
 #include "LibtorchUtils.h"
 
