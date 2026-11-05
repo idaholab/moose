@@ -35,7 +35,15 @@ public:
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
 
 protected:
-  // Mortar
+  MortarGapHeatTransferAction(const InputParameters & params, bool mortar_enabled);
+
+  static void addMortarParameters(InputParameters & params);
+
+  virtual std::vector<VariableName> temperatureVariables() const;
+  virtual BoundaryName primaryBoundary() const;
+  virtual BoundaryName secondaryBoundary() const;
+  virtual std::vector<BoundaryName> gapFluxBoundaries() const;
+
   virtual void coreMortarMesh();
   virtual void addConstraints();
   virtual void addMortarMesh();
@@ -43,8 +51,12 @@ protected:
   virtual void addUserObjects();
 
 private:
-  void checkForExistingSubdomains();
-  bool _user_provided_mortar_meshes;
+  void resolveMortarSubdomains();
+
+  const bool _mortar_enabled;
+  bool _use_external_mortar_meshes;
+  SubdomainName _primary_subdomain;
+  SubdomainName _secondary_subdomain;
   const bool _user_provided_gap_flux_models;
   std::vector<MortarGapHeatTransfer::UserObjectToBuild> _gap_flux_models;
 };
