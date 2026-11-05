@@ -72,6 +72,9 @@ public:
   /// Returns whether verbose mode has been enabled
   bool verbose() const { return _verbose; }
 
+  /// Disables verbose output unless it was requested through this object's own 'verbose' parameter
+  void disableInheritedVerbosity();
+
 protected:
   /**
    * Outputs the stream to the console if verbose output is enabled
@@ -86,5 +89,5 @@ protected:
 
 private:
   /// Verbose mode enabled
-  const bool _verbose;
+  bool _verbose;
 };
