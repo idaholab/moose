@@ -10,6 +10,25 @@
     requirement = 'Mechanical mortar contact shall reject interpolated quadrature-point normals.'
   []
 
+  [interpolated_normals_rejected_cartesian]
+    type = RunException
+    input = ../mortar_cartesian_lms/two_block_1st_order_constraint_lm_xy_friction.i
+    cli_args = 'Constraints/weighted_gap_lm/interpolate_normals=true'
+    expect_err = 'cannot be combined with quadrature-point normal interpolation'
+    design = 'ComputeWeightedGapCartesianLMMechanicalContact.md'
+    requirement = 'Cartesian Lagrange multiplier mortar contact shall reject interpolated '
+                  'quadrature-point normals.'
+  []
+
+  [interpolated_normals_rejected_dynamics]
+    type = RunException
+    input = ../mortar_dynamics/block-dynamics.i
+    cli_args = 'Constraints/weighted_gap_lm/interpolate_normals=true'
+    expect_err = 'cannot be combined with quadrature-point normal interpolation'
+    design = 'ComputeDynamicWeightedGapLMMechanicalContact.md'
+    requirement = 'Dynamic mortar contact shall reject interpolated quadrature-point normals.'
+  []
+
   [unsupported_weighted_gap_uo]
     type = RunException
     input = unsupported_weighted_gap_uo.i

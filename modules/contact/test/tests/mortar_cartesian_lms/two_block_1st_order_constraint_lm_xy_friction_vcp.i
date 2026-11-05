@@ -276,7 +276,8 @@ refine = 3
   petsc_options_iname = '-mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = ' 1e-8          NONZERO               1e-15'
 
-  line_search = none
+  # With mu = 1 and c_t = 1e5, undamped Newton diverges in the sixth time step
+  line_search = bt
 
   dt = 0.1
   dtmin = 0.1
