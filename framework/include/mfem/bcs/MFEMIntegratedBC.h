@@ -37,7 +37,8 @@ public:
   /// Method to disambiguate whether we have a regular BC or a DG BC.
   /// DG BCs are added to (Bi)linear forms with a different method, so
   /// we first perform this check to see what we are dealing with.
-  virtual bool isDGBC() const { return false; }
+  /// Defaults to whether the test variable's space is discontinuous.
+  virtual bool isDGBC() const;
 };
 
 #endif

@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMIntegratedBC.h"
+#include "MFEMProblem.h"
 
 InputParameters
 MFEMIntegratedBC::validParams()
@@ -21,6 +22,16 @@ MFEMIntegratedBC::validParams()
 MFEMIntegratedBC::MFEMIntegratedBC(const InputParameters & parameters)
   : MFEMBoundaryCondition(parameters)
 {
+}
+
+bool
+MFEMIntegratedBC::isDGBC() const
+{
+  // A discontinuous space has no degrees of freedom on boundary elements, so a BC acting on one
+  // is integrated over the boundary faces of the elements instead.
+  const auto & test_gf = getMFEMProblem().getProblemData().gridfunctions.GetRef(_test_var_name);
+  return test_gf.ParFESpace()->FEColl()->GetContType() ==
+         mfem::FiniteElementCollection::DISCONTINUOUS;
 }
 
 #endif
