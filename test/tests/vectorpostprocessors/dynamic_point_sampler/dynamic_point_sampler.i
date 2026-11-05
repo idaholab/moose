@@ -20,7 +20,7 @@
 
   [u_func]
     type = ParsedGradFunction
-    value = sin(alpha*pi*x)
+    expression = sin(alpha*pi*x)
     grad_x   = alpha*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
     symbol_values = '4'

@@ -18,10 +18,7 @@ MooseParsedGradFunction::validParams()
   InputParameters params = Function::validParams();
   params.addClassDescription("Defines a function and its gradient using input file parameters.");
   params += MooseParsedFunctionBase::validParams();
-  params.addDeprecatedParam<std::string>(
-      "value", "User defined function.", "Use 'expression' instead.");
-  // TODO Make required once deprecation is handled + add 0 default, see #19119
-  params.addParam<std::string>("expression", "User defined function.");
+  params.addRequiredParam<std::string>("expression", "User defined function.");
   params.addParam<std::string>("grad_x", "0", "Partial derivative with respect to x.");
   params.addParam<std::string>("grad_y", "0", "Partial derivative with respect to y.");
   params.addParam<std::string>("grad_z", "0", "Partial derivative with respect to z.");
@@ -31,7 +28,7 @@ MooseParsedGradFunction::validParams()
 MooseParsedGradFunction::MooseParsedGradFunction(const InputParameters & parameters)
   : Function(parameters),
     MooseParsedFunctionBase(parameters),
-    _value(verifyFunction(getRenamedParam<std::string>("value", "expression"))),
+    _value(verifyFunction(getParam<std::string>("expression"))),
     _grad_value(verifyFunction(std::string("{") + getParam<std::string>("grad_x") + "}{" +
                                getParam<std::string>("grad_y") + "}{" +
                                getParam<std::string>("grad_z") + "}"))

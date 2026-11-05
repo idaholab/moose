@@ -113,12 +113,12 @@
 [Materials]
   [gr0]
     type = LinearizedInterfaceFunction
-    f_name = gr0
+    property_name = gr0
     phi = phi0
   []
   [gr1]
     type = LinearizedInterfaceFunction
-    f_name = gr1
+    property_name = gr1
     phi = phi1
   []
   [GBEovlution]

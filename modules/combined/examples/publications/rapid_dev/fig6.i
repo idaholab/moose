@@ -142,7 +142,7 @@
     eta_i = eta1
     eta_j = eta2
     eta_k = eta3
-    f_name = h1
+    property_name = h1
   [../]
   # h2(eta1, eta2, eta3)
   [./h2]
@@ -150,7 +150,7 @@
     eta_i = eta2
     eta_j = eta3
     eta_k = eta1
-    f_name = h2
+    property_name = h2
   [../]
   # h3(eta1, eta2, eta3)
   [./h3]
@@ -158,7 +158,7 @@
     eta_i = eta3
     eta_j = eta1
     eta_k = eta2
-    f_name = h3
+    property_name = h3
   [../]
 
   # Coefficients for diffusion equation

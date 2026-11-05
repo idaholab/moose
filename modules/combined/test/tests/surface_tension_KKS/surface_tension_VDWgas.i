@@ -258,7 +258,7 @@
   [./elastic_free_energy_m]
     type = ElasticEnergyMaterial
     base_name = matrix
-    f_name = fe_m
+    property_name = fe_m
     coupled_variables = ' '
   [../]
 # Total free energy of the matrix
@@ -282,7 +282,7 @@
   [./elastic_free_energy_p]
     type = ElasticEnergyMaterial
     base_name = bub
-    f_name = fe_b
+    property_name = fe_b
     coupled_variables = ' '
   [../]
 
