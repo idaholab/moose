@@ -20,16 +20,20 @@
  * \see KKSPhaseChemicalPotential
  * \see KKSCHBulk
  */
-class SwitchingFunctionMaterial : public OrderParameterFunctionMaterial
+template <bool is_ad>
+class SwitchingFunctionMaterialTempl : public OrderParameterFunctionMaterialTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  SwitchingFunctionMaterial(const InputParameters & parameters);
+  SwitchingFunctionMaterialTempl(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
   /// Polynomial order of the switching function \f$ h(\eta) \f$
   MooseEnum _h_order;
 };
+
+typedef SwitchingFunctionMaterialTempl<false> SwitchingFunctionMaterial;
+typedef SwitchingFunctionMaterialTempl<true> ADSwitchingFunctionMaterial;
