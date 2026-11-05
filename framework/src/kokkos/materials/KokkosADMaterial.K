@@ -111,16 +111,16 @@ ADMaterial::resolveADSlots()
       };
 
       for (const auto & input : declaration.inputs)
-        if (const auto * slot = input.slot())
-          add_block(slot->first, input.gradient());
-        else
+        if (input.isAccessor())
+          add_block(_ad_slots.hostAccessorFirst(input.index()), input.gradient());
+        else if (const auto * property_inputs = input.propertyInputs())
         {
-          const auto & property_map = input.property()->slotMap();
           const auto & mesh = kokkosMesh();
 
-          for (const auto & [subdomain, inputs] : input.property()->derivatives().adInputs())
+          for (const auto & [subdomain, inputs] : *property_inputs)
           {
-            const auto & slots = property_map.slots[mesh.getContiguousSubdomainID(subdomain)];
+            const auto & slots = _ad_slots.hostPropertySlots(
+                input.index(), mesh.getContiguousSubdomainID(subdomain));
 
             for (const auto & block : inputs)
               if (block.displacement_component == libMesh::invalid_uint &&

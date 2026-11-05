@@ -78,7 +78,7 @@ inline ADVariableValue
 ADNodalBC::adCoupledNodalValue(const std::string & var_name, const unsigned int comp)
 {
   ADVariableValue value(kokkosCoupledNodalValue(var_name, comp));
-  _ad_setup.add(value.slot(), value.variable(), false);
+  value.setRegistration(_ad_setup.add(value.variable(), false));
   return value;
 }
 
@@ -86,7 +86,7 @@ inline ADVariableValue
 ADNodalBC::adNodalValue()
 {
   ADVariableValue value{VariableValue(_var, Moose::SOLUTION_TAG, true)};
-  _ad_setup.add(value.slot(), value.variable(), false);
+  value.setRegistration(_ad_setup.add(value.variable(), false));
   return value;
 }
 

@@ -135,7 +135,7 @@ inline ADVariableValue
 ADKernel::adCoupledValue(const std::string & var_name, const unsigned int comp)
 {
   ADVariableValue value(kokkosCoupledValue(var_name, comp));
-  _ad_setup.add(value.slot(), value.variable(), false);
+  value.setRegistration(_ad_setup.add(value.variable(), false));
   return value;
 }
 
@@ -143,7 +143,7 @@ inline ADVariableGradient
 ADKernel::adCoupledGradient(const std::string & var_name, const unsigned int comp)
 {
   ADVariableGradient gradient(kokkosCoupledGradient(var_name, comp));
-  _ad_setup.add(gradient.slot(), gradient.variable(), true);
+  gradient.setRegistration(_ad_setup.add(gradient.variable(), true));
   return gradient;
 }
 
@@ -151,7 +151,7 @@ inline ADVariableValue
 ADKernel::adCoupledDot(const std::string & var_name, const unsigned int comp)
 {
   ADVariableValue value(kokkosCoupledDot(var_name, comp));
-  _ad_setup.add(value.slot(), value.variable(), false);
+  value.setRegistration(_ad_setup.add(value.variable(), false));
   return value;
 }
 
@@ -159,7 +159,7 @@ inline ADVariableValue
 ADKernel::adValue()
 {
   ADVariableValue value{VariableValue(_var)};
-  _ad_setup.add(value.slot(), value.variable(), false);
+  value.setRegistration(_ad_setup.add(value.variable(), false));
   return value;
 }
 
@@ -167,7 +167,7 @@ inline ADVariableGradient
 ADKernel::adGradient()
 {
   ADVariableGradient gradient{VariableGradient(_var)};
-  _ad_setup.add(gradient.slot(), gradient.variable(), true);
+  gradient.setRegistration(_ad_setup.add(gradient.variable(), true));
   return gradient;
 }
 
@@ -175,7 +175,7 @@ inline ADVariableValue
 ADKernel::adDot()
 {
   ADVariableValue value{VariableValue(_var, Moose::SOLUTION_DOT_TAG)};
-  _ad_setup.add(value.slot(), value.variable(), false);
+  value.setRegistration(_ad_setup.add(value.variable(), false));
   return value;
 }
 
@@ -192,7 +192,7 @@ ADKernel::getKokkosADMaterialProperty(const std::string & name)
   ADMaterialPropertyReader reader(
       getKokkosMaterialPropertyByName<Real>(prop_name),
       getKokkosMaterialPropertyByName<Real, 1>(adDerivativesPropertyName(prop_name)));
-  _ad_setup.addProperty(reader.slotMap(), reader.derivatives().adInputs());
+  reader.setRegistration(_ad_setup.addProperty(reader.derivatives().adInputs()));
   return reader;
 }
 

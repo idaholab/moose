@@ -14,6 +14,8 @@
 #include "KokkosADGeometry.h"
 #include "KokkosADSlotBlock.h"
 
+#include "libmesh/utility.h"
+
 namespace Moose::Kokkos
 {
 
@@ -35,9 +37,50 @@ public:
    */
   unsigned int add(unsigned int sys, unsigned int var, bool gradient);
   /**
-   * Copy the registered slot blocks to the device
+   * Set the first slot of a registered accessor
+   * @param accessor The registration index of the accessor
+   * @param first The first slot of its quantity, or libMesh::invalid_uint if it carries no
+   * derivatives
+   */
+  void setAccessorFirst(unsigned int accessor, unsigned int first);
+  /**
+   * Set the slot map of a registered AD material property reader in a subdomain
+   * @param property The registration index of the reader
+   * @param num_subdomains The number of contiguous subdomains
+   * @param subdomain The contiguous subdomain ID
+   * @param slots The slot of the reader for each stored derivative, or libMesh::invalid_uint
+   */
+  void setPropertySlots(unsigned int property,
+                        unsigned int num_subdomains,
+                        unsigned int subdomain,
+                        const std::vector<unsigned int> & slots);
+  /**
+   * Copy the registered slot blocks, the first slots of the accessors, and the slot maps of the
+   * property readers to the device
    */
   void finalize();
+  /**
+   * Get the first slot of a registered accessor, or libMesh::invalid_uint if it carries no
+   * derivatives
+   * @param accessor The registration index of the accessor
+   */
+  KOKKOS_FUNCTION unsigned int accessorFirst(const unsigned int accessor) const
+  {
+    KOKKOS_ASSERT(accessor < _accessor_first.size());
+    return _accessor_first[accessor];
+  }
+  /**
+   * Get the slot map of a registered AD material property reader in a subdomain
+   * @param property The registration index of the reader
+   * @param subdomain The contiguous subdomain ID
+   * @returns The slot of the reader for each stored derivative, or libMesh::invalid_uint
+   */
+  KOKKOS_FUNCTION const Array<unsigned int> & propertySlots(const unsigned int property,
+                                                           const unsigned int subdomain) const
+  {
+    KOKKOS_ASSERT(property < _property_slots.size());
+    return _property_slots[property][subdomain];
+  }
   /**
    * Get the number of slots used by the registered quantities
    */
@@ -54,6 +97,25 @@ public:
    * Get the slot blocks on host
    */
   const std::vector<ADSlotBlock> & hostBlocks() const { return _host_blocks; }
+  /**
+   * Get the first slot of a registered accessor on host, or libMesh::invalid_uint if it carries no
+   * derivatives
+   * @param accessor The registration index of the accessor
+   */
+  unsigned int hostAccessorFirst(const unsigned int accessor) const
+  {
+    return libmesh_vector_at(_host_accessor_first, accessor);
+  }
+  /**
+   * Get the slot map of a registered AD material property reader in a subdomain on host
+   * @param property The registration index of the reader
+   * @param subdomain The contiguous subdomain ID
+   */
+  const std::vector<unsigned int> & hostPropertySlots(const unsigned int property,
+                                                      const unsigned int subdomain) const
+  {
+    return libmesh_vector_at(libmesh_vector_at(_host_property_slots, property), subdomain);
+  }
 
   /**
    * Leave unused slots so that the next registered quantity starts at a given slot
@@ -98,6 +160,15 @@ private:
   std::vector<ADSlotBlock> _host_blocks;
   /// Slot blocks on device
   Array<ADSlotBlock> _blocks;
+  /// First slot of each registered accessor
+  std::vector<unsigned int> _host_accessor_first;
+  /// First slot of each registered accessor, available on device
+  Array<unsigned int> _accessor_first;
+  /// Slot map of each registered property reader in each contiguous subdomain
+  std::vector<std::vector<std::vector<unsigned int>>> _host_property_slots;
+  /// Slot map of each registered property reader in each contiguous subdomain, available on
+  /// device
+  Array<Array<Array<unsigned int>>> _property_slots;
   /// Number of slot blocks, available on device
   unsigned int _num_blocks = 0;
   /// Number of slots
@@ -110,44 +181,79 @@ private:
 };
 
 /**
- * Slot assignment of an AD accessor, written by its residual object during initial setup. An
- * accessor whose variable is not a nonlinear variable coupled to the residual variable keeps no
- * slot, so its derivatives are zero.
+ * Registration of an AD accessor with the slot setup of its object. The accessor keeps the index,
+ * by which it finds its first slot in the slot table of the object, so that copies of the accessor
+ * stay valid.
  */
-struct ADSlotAssignment
+struct ADAccessorRegistration
 {
-  /// First slot of the quantity, or libMesh::invalid_uint when the quantity carries no derivatives
-  unsigned int first = libMesh::invalid_uint;
-  /// Derivative of the quantity with respect to its first slot
-  Real seed = 1;
+  /// Registration index of the accessor
+  unsigned int index = libMesh::invalid_uint;
   /// Host source of the seed of a time derivative, the derivative of the time derivative with
-  /// respect to the solution, which the time integrator updates between dispatches
+  /// respect to the solution, which the time integrator updates between dispatches, or nullptr
   const Real * seed_source = nullptr;
-  /// Whether the residual object has assigned the slot
-  bool finalized = false;
-
-  /**
-   * Refresh the seed from its source, before the slot assignment is copied to the device
-   */
-  void refresh()
-  {
-    if (seed_source)
-      seed = *seed_source;
-  }
 };
 
 /**
- * Map from the stored derivatives of a pointwise AD material property to the slots of an object
- * reading it. Each stored derivative of the declaring material is a derivative with respect to a
- * quadrature point quantity, which maps to the slot of the reader for the same quantity, or to
- * libMesh::invalid_uint when the reader carries no derivatives with respect to it.
+ * Registration index and derivative seed of an AD accessor
  */
-struct ADPropertySlotMap
+class ADAccessorSlot
 {
-  /// Slot of the reader for each stored derivative, indexed by contiguous subdomain ID
-  Array<Array<unsigned int>> slots;
-  /// Whether the reader has assigned the map
-  bool finalized = false;
+public:
+  ADAccessorSlot() = default;
+  /**
+   * Copy constructor for parallel dispatch, which refreshes the seed of a time derivative
+   */
+  ADAccessorSlot(const ADAccessorSlot & object)
+    : _index(object._index), _seed_source(object._seed_source), _seed(object._seed)
+  {
+    refresh();
+  }
+  ADAccessorSlot & operator=(const ADAccessorSlot & object) = default;
+
+  /**
+   * Set the registration of the accessor
+   * @param registration The registration returned by the slot setup of the object
+   */
+  void set(const ADAccessorRegistration & registration)
+  {
+    _index = registration.index;
+    _seed_source = registration.seed_source;
+    refresh();
+  }
+  /**
+   * Get the registration index
+   */
+  unsigned int index() const { return _index; }
+  /**
+   * Get the first slot of the quantity, or libMesh::invalid_uint if it carries no derivatives
+   * @param table The slot table of the object
+   */
+  KOKKOS_FUNCTION unsigned int first(const ADSlotTable & table) const
+  {
+    return table.accessorFirst(_index);
+  }
+  /**
+   * Get the derivative of the quantity with respect to its first slot
+   */
+  KOKKOS_FUNCTION Real seed() const { return _seed; }
+
+private:
+  /**
+   * Refresh the seed from its source, before the accessor is copied to the device
+   */
+  void refresh()
+  {
+    if (_seed_source)
+      _seed = *_seed_source;
+  }
+
+  /// Registration index of the accessor
+  unsigned int _index = libMesh::invalid_uint;
+  /// Host source of the seed of a time derivative, or nullptr
+  const Real * _seed_source = nullptr;
+  /// Derivative of the quantity with respect to its first slot
+  Real _seed = 1;
 };
 
 /**
@@ -380,14 +486,6 @@ class ADVariableValue
 public:
   ADVariableValue() = default;
   /**
-   * Copy constructor for parallel dispatch, which refreshes the seed of a time derivative
-   */
-  ADVariableValue(const ADVariableValue & object) : _value(object._value), _slot(object._slot)
-  {
-    _slot.refresh();
-  }
-  ADVariableValue & operator=(const ADVariableValue & object) = default;
-  /**
    * Constructor
    * @param value The plain value accessor of the variable
    */
@@ -405,23 +503,25 @@ public:
   KOKKOS_FUNCTION DenseADReal<slots> operator()(ADDatumBase<Base, slots> & datum,
                                                 unsigned int qp) const
   {
-    KOKKOS_ASSERT(_slot.finalized);
-
-    return seededDenseADReal<slots>(_value(datum, qp), _slot.first, _slot.seed);
+    return seededDenseADReal<slots>(_value(datum, qp), _slot.first(datum.table()), _slot.seed());
   }
 
   KOKKOS_FUNCTION const Variable & variable() const { return _value.variable(); }
 
   /**
-   * Get the slot assignment, written by the residual object during initial setup
+   * Set the registration of the accessor with the slot setup of its object
    */
-  ADSlotAssignment & slot() { return _slot; }
+  void setRegistration(const ADAccessorRegistration & registration) { _slot.set(registration); }
+  /**
+   * Get the registration index of the accessor
+   */
+  unsigned int registrationIndex() const { return _slot.index(); }
 
 private:
   /// Plain value accessor
   VariableValue _value;
-  /// Slot assignment of the value
-  ADSlotAssignment _slot;
+  /// Registration and seed of the value
+  ADAccessorSlot _slot;
 };
 
 /**
@@ -435,15 +535,6 @@ class ADVariableGradient
 {
 public:
   ADVariableGradient() = default;
-  /**
-   * Copy constructor for parallel dispatch, which refreshes the seed of a time derivative
-   */
-  ADVariableGradient(const ADVariableGradient & object)
-    : _gradient(object._gradient), _slot(object._slot)
-  {
-    _slot.refresh();
-  }
-  ADVariableGradient & operator=(const ADVariableGradient & object) = default;
   /**
    * Constructor
    * @param gradient The plain gradient accessor of the variable
@@ -462,16 +553,16 @@ public:
   KOKKOS_FUNCTION DenseADReal3<slots> operator()(ADDatumBase<Base, slots> & datum,
                                                  unsigned int qp) const
   {
-    KOKKOS_ASSERT(_slot.finalized);
-
-    const auto first = _slot.first;
+    const auto first = _slot.first(datum.table());
     const auto displaced = datum.configuration().displaced();
     const Real3 grad = displaced ? _gradient.reference(datum, qp) : _gradient(datum, qp);
 
     DenseADReal3<slots> result;
     for (unsigned int k = 0; k < AD_GRADIENT_SLOTS; ++k)
-      result(k) = seededDenseADReal<slots>(
-          grad(k), first == libMesh::invalid_uint ? libMesh::invalid_uint : first + k, _slot.seed);
+      result(k) = seededDenseADReal<slots>(grad(k),
+                                           first == libMesh::invalid_uint ? libMesh::invalid_uint
+                                                                          : first + k,
+                                           _slot.seed());
 
     return displaced ? datum.adPushForward(result, qp) : result;
   }
@@ -479,15 +570,19 @@ public:
   KOKKOS_FUNCTION const Variable & variable() const { return _gradient.variable(); }
 
   /**
-   * Get the slot assignment, written by the residual object during initial setup
+   * Set the registration of the accessor with the slot setup of its object
    */
-  ADSlotAssignment & slot() { return _slot; }
+  void setRegistration(const ADAccessorRegistration & registration) { _slot.set(registration); }
+  /**
+   * Get the registration index of the accessor
+   */
+  unsigned int registrationIndex() const { return _slot.index(); }
 
 private:
   /// Plain gradient accessor
   VariableGradient _gradient;
-  /// Slot assignment of the gradient
-  ADSlotAssignment _slot;
+  /// Registration and seed of the gradient
+  ADAccessorSlot _slot;
 };
 
 } // namespace Moose::Kokkos

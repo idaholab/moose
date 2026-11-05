@@ -56,10 +56,44 @@ ADSlotTable::addDisplacements(const std::vector<std::pair<unsigned int, unsigned
 }
 
 void
+ADSlotTable::setAccessorFirst(const unsigned int accessor, const unsigned int first)
+{
+  if (_host_accessor_first.size() <= accessor)
+    _host_accessor_first.resize(accessor + 1, libMesh::invalid_uint);
+
+  _host_accessor_first[accessor] = first;
+}
+
+void
+ADSlotTable::setPropertySlots(const unsigned int property,
+                              const unsigned int num_subdomains,
+                              const unsigned int subdomain,
+                              const std::vector<unsigned int> & slots)
+{
+  if (_host_property_slots.size() <= property)
+    _host_property_slots.resize(property + 1);
+
+  auto & maps = _host_property_slots[property];
+  maps.resize(num_subdomains);
+  maps[subdomain] = slots;
+}
+
+void
 ADSlotTable::finalize()
 {
   _num_blocks = _host_blocks.size();
   _blocks = _host_blocks;
+  _accessor_first = _host_accessor_first;
+
+  _property_slots.create(_host_property_slots.size());
+  for (const auto p : index_range(_host_property_slots))
+  {
+    const auto & maps = _host_property_slots[p];
+    _property_slots[p].create(maps.size());
+    for (const auto sub : index_range(maps))
+      _property_slots[p][sub] = maps[sub];
+  }
+  _property_slots.copyToDeviceNested();
 }
 
 } // namespace Moose::Kokkos

@@ -20,17 +20,25 @@
 namespace Moose::Kokkos
 {
 
-void
-ADSlotSetup::add(ADSlotAssignment & slot, const Variable & var, const bool gradient)
+ADAccessorRegistration
+ADSlotSetup::add(const Variable & var, const bool gradient)
 {
-  _requests.push_back({&slot, var, gradient});
+  _requests.push_back({var, gradient});
+
+  // The seed of a time derivative is the derivative of the time derivative with respect to the
+  // solution, which the time integrator owns
+  const Real * seed_source = nullptr;
+  if (var.dot())
+    seed_source = &const_cast<Variable &>(var).mooseVar()->sys().duDotDu(var.var());
+
+  return {static_cast<unsigned int>(_requests.size() - 1), seed_source};
 }
 
-void
-ADSlotSetup::addProperty(ADPropertySlotMap & map,
-                         const std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> & inputs)
+unsigned int
+ADSlotSetup::addProperty(const std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> & inputs)
 {
-  _property_requests.push_back({&map, &inputs});
+  _property_requests.push_back({&inputs});
+  return _property_requests.size() - 1;
 }
 
 bool
@@ -112,27 +120,14 @@ ADSlotSetup::assignSlots(const MooseObject & object,
 {
   _table = ADSlotTable();
 
-  for (auto & request : _requests)
+  for (const auto r : index_range(_requests))
   {
-    auto & slot = *request.slot;
-    auto & var = request.var;
+    const auto & request = _requests[r];
+    const auto & var = request.var;
 
-    slot.first = libMesh::invalid_uint;
-    slot.seed = 1;
-    slot.seed_source = nullptr;
-    slot.finalized = true;
-
-    if (!seeded(ivar, var))
-      continue;
-
-    const auto * moose_var = var.mooseVar();
-    slot.first = _table.add(var.sys(), var.var(), request.gradient);
-
-    if (var.dot())
-    {
-      slot.seed_source = &moose_var->sys().duDotDu(var.var());
-      slot.refresh();
-    }
+    _table.setAccessorFirst(r,
+                            seeded(ivar, var) ? _table.add(var.sys(), var.var(), request.gradient)
+                                              : libMesh::invalid_uint);
   }
 
   // Inputs of the AD material properties that the object reads, other than displacements, share
@@ -205,20 +200,24 @@ ADSlotSetup::assignSlots(const MooseObject & object,
     _table.addDisplacements(displacement_components, seeded_components);
   }
 
-  _table.finalize();
-
   if (mesh)
     assignProperties(ivar, *mesh);
+
+  _table.finalize();
 }
 
 void
 ADSlotSetup::assignProperties(const Variable * ivar, const Mesh & mesh)
 {
-  for (const auto & request : _property_requests)
-  {
-    auto & map = *request.map;
+  const auto num_subdomains = mesh.getNumSubdomains();
 
-    map.slots.create(mesh.getNumSubdomains());
+  for (const auto p : index_range(_property_requests))
+  {
+    const auto & request = _property_requests[p];
+
+    // A subdomain where the property has no inputs keeps an empty map
+    for (const auto sub : make_range(num_subdomains))
+      _table.setPropertySlots(p, num_subdomains, sub, {});
 
     for (const auto & [subdomain, inputs] : *request.inputs)
     {
@@ -252,11 +251,8 @@ ADSlotSetup::assignProperties(const Variable * ivar, const Mesh & mesh)
           slots[input.first + k] = first + k;
       }
 
-      map.slots[mesh.getContiguousSubdomainID(subdomain)] = slots;
+      _table.setPropertySlots(p, num_subdomains, mesh.getContiguousSubdomainID(subdomain), slots);
     }
-
-    map.slots.copyToDeviceNested();
-    map.finalized = true;
   }
 }
 

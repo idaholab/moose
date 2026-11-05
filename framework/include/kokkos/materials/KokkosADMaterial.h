@@ -197,7 +197,7 @@ ADMaterial::getKokkosADMaterialProperty(const std::string & name)
   ADMaterialPropertyReader reader(
       getKokkosMaterialPropertyByName<Real>(prop_name),
       getKokkosMaterialPropertyByName<Real, 1>(adDerivativesPropertyName(prop_name)));
-  _ad_setup.addProperty(reader.slotMap(), reader.derivatives().adInputs());
+  reader.setRegistration(_ad_setup.addProperty(reader.derivatives().adInputs()));
   _ad_read_derivatives.push_back(reader.derivatives());
   return reader;
 }
@@ -206,7 +206,7 @@ inline ADVariableValue
 ADMaterial::adCoupledValue(const std::string & var_name, const unsigned int comp)
 {
   ADVariableValue value(kokkosCoupledValue(var_name, comp));
-  _ad_setup.add(value.slot(), value.variable(), false);
+  value.setRegistration(_ad_setup.add(value.variable(), false));
   return value;
 }
 
@@ -214,7 +214,7 @@ inline ADVariableGradient
 ADMaterial::adCoupledGradient(const std::string & var_name, const unsigned int comp)
 {
   ADVariableGradient gradient(kokkosCoupledGradient(var_name, comp));
-  _ad_setup.add(gradient.slot(), gradient.variable(), true);
+  gradient.setRegistration(_ad_setup.add(gradient.variable(), true));
   return gradient;
 }
 

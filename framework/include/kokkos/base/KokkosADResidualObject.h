@@ -30,19 +30,19 @@ class ADSlotSetup
 public:
   /**
    * Register an AD accessor
-   * @param slot The slot assignment of the accessor
    * @param var The variable read by the accessor
    * @param gradient Whether the accessor reads the gradient
+   * @returns The registration, which the accessor keeps to find its slot in the slot table
    */
-  void add(ADSlotAssignment & slot, const Variable & var, bool gradient);
+  ADAccessorRegistration add(const Variable & var, bool gradient);
   /**
    * Register an AD material property read by the object, whose stored derivatives are mapped to
    * the slots of the object
-   * @param map The slot map of the reader
    * @param inputs The slot blocks of the stored derivatives in each subdomain
+   * @returns The registration index, which the reader keeps to find its slot map in the slot table
    */
-  void addProperty(ADPropertySlotMap & map,
-                   const std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> & inputs);
+  unsigned int
+  addProperty(const std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> & inputs);
 
   /**
    * Assign the slots of all registered accessors
@@ -104,8 +104,6 @@ private:
   /// A registered accessor
   struct Request
   {
-    /// Slot assignment written into the accessor
-    ADSlotAssignment * slot;
     /// Variable read by the accessor
     Variable var;
     /// Whether the accessor reads the gradient
@@ -136,8 +134,6 @@ private:
   /// A registered AD material property
   struct PropertyRequest
   {
-    /// Slot map written into the reader
-    ADPropertySlotMap * map;
     /// Slot blocks of the stored derivatives in each subdomain
     const std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> * inputs;
   };

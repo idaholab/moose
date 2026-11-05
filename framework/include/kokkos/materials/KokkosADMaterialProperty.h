@@ -61,7 +61,7 @@ public:
    * @param value The AD accessor of a variable value
    */
   ADPropertyInput(const ADVariableValue & value)
-    : _slot(&const_cast<ADVariableValue &>(value).slot()), _gradient(false)
+    : _accessor(value.registrationIndex()), _gradient(false)
   {
   }
   /**
@@ -69,35 +69,45 @@ public:
    * @param gradient The AD accessor of a variable gradient
    */
   ADPropertyInput(const ADVariableGradient & gradient)
-    : _slot(&const_cast<ADVariableGradient &>(gradient).slot()), _gradient(true)
+    : _accessor(gradient.registrationIndex()), _gradient(true)
   {
   }
   /**
    * Constructor
    * @param property The reader of an AD material property
    */
-  ADPropertyInput(const ADMaterialPropertyReader & property) : _property(&property) {}
+  ADPropertyInput(const ADMaterialPropertyReader & property);
 
   /**
-   * Get the slot assignment of the accessor, or nullptr for a property
+   * Get whether the input is an AD accessor
    */
-  const ADSlotAssignment * slot() const { return _slot; }
+  bool isAccessor() const { return _accessor != libMesh::invalid_uint; }
+  /**
+   * Get the registration index of the accessor, or of the property reader
+   */
+  unsigned int index() const { return isAccessor() ? _accessor : _property; }
   /**
    * Get whether the accessor reads a gradient
    */
   bool gradient() const { return _gradient; }
   /**
-   * Get the reader of the property, or nullptr for an accessor
+   * Get the slot blocks of the stored derivatives of the property in each subdomain, or nullptr for
+   * an accessor or a constant property, which carries no derivatives
    */
-  const ADMaterialPropertyReader * property() const { return _property; }
+  const std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> * propertyInputs() const
+  {
+    return _property_inputs;
+  }
 
 private:
-  /// Slot assignment of the accessor
-  const ADSlotAssignment * _slot = nullptr;
+  /// Registration index of the accessor, or libMesh::invalid_uint for a property
+  unsigned int _accessor = libMesh::invalid_uint;
   /// Whether the accessor reads a gradient
   bool _gradient = false;
-  /// Reader of the property
-  const ADMaterialPropertyReader * _property = nullptr;
+  /// Registration index of the property reader, or libMesh::invalid_uint for an accessor
+  unsigned int _property = libMesh::invalid_uint;
+  /// Slot blocks of the stored derivatives of the property, owned by its property record
+  const std::unordered_map<SubdomainID, std::vector<ADSlotBlock>> * _property_inputs = nullptr;
 };
 
 /**
@@ -241,20 +251,20 @@ public:
    * Constructor for a constant property, which carries no derivatives
    * @param value The constant value
    */
-  ADMaterialPropertyReader(const Real value) : _value(value) { _map.finalized = true; }
+  ADMaterialPropertyReader(const Real value) : _value(value) {}
 
   /**
    * Get the property holding the derivatives
    */
   const MaterialProperty<Real, 1> & derivatives() const { return _derivatives; }
   /**
-   * Get the slot map, written by the reader during initial setup
+   * Set the registration index of the reader with the slot setup of its object
    */
-  ADPropertySlotMap & slotMap() { return _map; }
+  void setRegistration(const unsigned int index) { _index = index; }
   /**
-   * Get the slot map
+   * Get the registration index of the reader, or libMesh::invalid_uint for a constant property
    */
-  const ADPropertySlotMap & slotMap() const { return _map; }
+  unsigned int registrationIndex() const { return _index; }
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -267,8 +277,6 @@ public:
   KOKKOS_FUNCTION DenseADReal<slots> operator()(ADDatumBase<Base, slots> & datum,
                                                 const unsigned int qp) const
   {
-    KOKKOS_ASSERT(_map.finalized);
-
     DenseADReal<slots> result = Real(_value(datum, qp));
 
     if constexpr (slots > 0)
@@ -278,7 +286,7 @@ public:
       if (!_derivatives)
         return result;
 
-      const auto & map = _map.slots[datum.subdomain()];
+      const auto & map = datum.table().propertySlots(_index, datum.subdomain());
       const auto derivatives = _derivatives(datum, qp);
 
       for (unsigned int s = 0; s < map.size(); ++s)
@@ -295,8 +303,16 @@ private:
   MaterialProperty<Real> _value;
   /// Property holding the derivatives
   MaterialProperty<Real, 1> _derivatives;
-  /// Slot of the reader for each stored derivative in each subdomain
-  ADPropertySlotMap _map;
+  /// Registration index of the reader with the slot setup of its object, by which it finds its
+  /// slot map in the slot table
+  unsigned int _index = libMesh::invalid_uint;
 };
+
+inline ADPropertyInput::ADPropertyInput(const ADMaterialPropertyReader & property)
+  : _property(property.registrationIndex()),
+    _property_inputs(_property == libMesh::invalid_uint ? nullptr
+                                                        : &property.derivatives().adInputs())
+{
+}
 
 } // namespace Moose::Kokkos
