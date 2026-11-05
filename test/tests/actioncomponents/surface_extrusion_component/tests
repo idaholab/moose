@@ -1,0 +1,31 @@
+[Tests]
+  issues = '#31158'
+  design = 'SurfaceExtrusionComponent.md'
+  [extrusion]
+    requirement = "The system shall be able to create a component mesh by extruding a boundary of another component and stitching it to that component"
+    [2D]
+      type = Exodiff
+      input = 'extrusion_2D.i'
+      exodiff = 'extrusion_2D_in.e'
+      cli_args = '--mesh-only extrusion_2D_in.e'
+      exodiff_opts = '-pedantic'
+      detail = 'in 2D, with a user-specified block name,'
+      # mesh generation test
+      recover = false
+      # ConvertBlockToMesh does not support distributed meshes
+      mesh_mode = replicated
+    []
+    [3D]
+      type = Exodiff
+      input = 'extrusion_3D.i'
+      exodiff = 'extrusion_3D_in.e'
+      cli_args = '--mesh-only extrusion_3D_in.e'
+      exodiff_opts = '-pedantic'
+      detail = 'and in 3D, with the block named after the component.'
+      # mesh generation test
+      recover = false
+      # ConvertBlockToMesh does not support distributed meshes
+      mesh_mode = replicated
+    []
+  []
+[]

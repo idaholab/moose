@@ -18,7 +18,7 @@
         diffusivity_functor = 'diff'
         # we make this physics defined everywhere to have a vector input of initial conditions
         block = '2'
-        dirichlet_boundaries = 'left cylinder_1_left cylinder_2_right'
+        dirichlet_boundaries = 'left cylinder_1_bottom_boundary cylinder_2_top_boundary'
         boundary_values = '1 3 2'
         source_functor = '1'
         source_coef = '1'
@@ -28,7 +28,7 @@
         diffusivity_functor = 'diff'
         source_functor = '2'
         source_coef = '1'
-        dirichlet_boundaries = 'cylinder_2_right'
+        dirichlet_boundaries = 'cylinder_2_top_boundary'
         boundary_values = '2'
       []
     []
