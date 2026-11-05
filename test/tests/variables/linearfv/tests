@@ -23,6 +23,25 @@
     requirement = 'The system shall preserve gradients for multiple linear finite volume variables sharing one named gradient method.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [time_derivative_bdf2]
+    type = CSVDiff
+    input = 'time-derivative.i'
+    csvdiff = 'time-derivative_out.csv'
+    design = 'MooseLinearVariableFV.md LinearFVTimeDerivative.md'
+    issues = '#25722'
+    requirement = 'The system shall report, through the functor time derivative of a linear finite volume variable, the same discrete operator the linear finite volume time derivative kernel assembles, under the BDF2 time integrator.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [time_derivative_implicit_euler]
+    type = CSVDiff
+    input = 'time-derivative.i'
+    cli_args = 'Executioner/scheme=implicit-euler Outputs/file_base=time-derivative-ie'
+    csvdiff = 'time-derivative-ie.csv'
+    design = 'MooseLinearVariableFV.md LinearFVTimeDerivative.md'
+    issues = '#25722'
+    requirement = 'The system shall report, through the functor time derivative of a linear finite volume variable, the same discrete operator the linear finite volume time derivative kernel assembles, under the implicit Euler time integrator.'
+    max_threads = 1 # see libmesh issue #3808
+  []
   [gradient_time_states]
     type = CSVDiff
     input = 'gradient-time-states.i'

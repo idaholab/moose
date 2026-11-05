@@ -10,16 +10,37 @@
 #pragma once
 
 #include "MathFVUtils.h"
-#include "LinearFVFluxKernel.h"
+#include "LinearWCNSFV2PDriftFluxBase.h"
 
-class RhieChowMassFlux;
 class LinearFVBoundaryCondition;
 
 /**
- * Adds drift flux kernel coming for two-phase mixture model for the linear finite volume
- * discretization
+ * Diffusion (drift) stress of the two-phase mixture model for the linear finite volume
+ * discretization.
+ *
+ * Summing the phase momentum equations and substituting \f$ u_k = u_m + u_{Mk} \f$, where
+ * \f$ u_{Mk} = u_k - u_m \f$ is the diffusion velocity of phase \f$ k \f$, leaves one term
+ * beyond the single phase equation,
+ *
+ * \f[
+ *   \nabla \cdot \tau_{Dm}, \qquad \tau_{Dm} = -\sum_k \alpha_k \rho_k u_{Mk} u_{Mk}
+ * \f]
+ *
+ * on the right hand side, i.e. \f$ +\nabla \cdot \left( \sum_k \alpha_k \rho_k u_{Mk}
+ * u_{Mk} \right) \f$ on the left hand side, which is the form this kernel assembles. For a
+ * single dispersed phase the sum collapses onto the slip velocity \f$ u_s = u_d - u_c \f$,
+ *
+ * \f[
+ *   \sum_k \alpha_k \rho_k u_{Mk} u_{Mk}
+ *     = \frac{\beta_d \beta_c}{\rho_m} \, u_s \otimes u_s,
+ *   \qquad \beta_d = \alpha \rho_d, \quad \beta_c = (1 - \alpha) \rho_c
+ * \f]
+ *
+ * The coefficient is exact, not the dilute limit \f$ \beta_d \f$ obtained by letting
+ * \f$ \beta_c / \rho_m \to 1 \f$. See Manninen, Taivassalo and Kallio, VTT Publications 288
+ * (1996), equations (18), (21) and (76).
  */
-class LinearWCNSFV2PMomentumDriftFlux : public LinearFVFluxKernel
+class LinearWCNSFV2PMomentumDriftFlux : public LinearWCNSFV2PDriftFluxBase
 {
 public:
   static InputParameters validParams();
@@ -59,24 +80,13 @@ protected:
   /// Compute the face flux
   void computeFlux();
 
-  /// The dimension of the simulation
-  const unsigned int _dim;
+  /// The deferred correction added to the right hand side of the element row. It is the difference
+  /// between the implicit surrogate the matrix carries and the exact flux, so that the two cancel
+  /// once the fixed point iteration converges.
+  Real deferredCorrection() const;
 
-  /// The Rhie-Chow user object that provides us with the face velocity
-  const RhieChowMassFlux & _mass_flux_provider;
-
-  /// Dispersed phase density
-  const Moose::Functor<Real> & _rho_d;
-
-  /// Dispersed phase fraction
-  const Moose::Functor<Real> & _f_d;
-
-  /// slip velocity in direction x
-  const Moose::Functor<Real> & _u_slip;
-  /// slip velocity in direction y
-  const Moose::Functor<Real> * const _v_slip;
-  /// slip velocity in direction z
-  const Moose::Functor<Real> * const _w_slip;
+  /// Continuous phase density
+  const Moose::Functor<Real> & _rho_c;
 
   /// The index of the momentum component
   const unsigned int _index;
@@ -86,6 +96,19 @@ protected:
 
   /// Face flux
   Real _face_flux;
-  /// Advected coefficients
-  std::pair<Real, Real> _velocity_interp_coeffs;
+
+  /// The face flux divided by the slip velocity component this kernel acts on, i.e. the diffusion
+  /// stress coefficient times the normal slip velocity. Used as the scale of the implicit surrogate
+  Real _slip_mass_flux;
+
+  /// The exact coefficient of the diffusion stress, beta_d beta_c / rho_m, at the given argument
+  template <typename SpaceArg>
+  Real diffusionStressCoefficient(const SpaceArg & arg, const Moose::StateArg & state) const
+  {
+    return NS::diffusionStressCoefficient(_f_d(arg, state), _rho_d(arg, state), _rho_c(arg, state));
+  }
+
+  /// Coefficient of the implicit surrogate used for the deferred correction. Chosen for
+  /// convergence only, see setupFaceData; the converged solution does not depend on it.
+  Real _gamma;
 };

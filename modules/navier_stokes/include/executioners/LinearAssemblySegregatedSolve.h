@@ -195,6 +195,31 @@ protected:
   const bool _should_solve_turbulence;
   const bool _should_solve_passive_scalars;
   const bool _should_solve_active_scalars;
+
+  /**
+   * Solve every active scalar system over the current time step, optionally split into subcycles.
+   *
+   * The transporting flux is not recomputed between subcycles, so each subcycle advances the
+   * scalars over a fraction of the step against the same flux. That is the arrangement an explicit
+   * bounded correction needs: the correction is applied once per subcycle, against a Courant number
+   * reduced by the number of subcycles, rather than once per time step.
+   *
+   * @param solver_params solver parameters forwarded to the individual solves
+   * @return the residual of each active scalar system, summed over the subcycles
+   */
+  std::vector<std::pair<unsigned int, Real>>
+  solveActiveScalarSystems(const SolverParams & solver_params);
+
+  /// Advance the old state of a system between subcycles, so the next subcycle integrates from the
+  /// state the previous one produced rather than from the state at the start of the time step
+  void advanceSubcycleOldState(LinearSystem & system) const;
+
+  /// Whether the active scalar equations are solved ahead of the momentum predictor, which is what
+  /// permits them to be subcycled against a frozen transporting flux
+  const bool _solve_active_scalars_before_flow;
+
+  /// Number of subcycles for the active scalar equations within one time step
+  const unsigned int _active_scalar_subcycles;
   const bool _should_solve_pm_radiation;
 
   // ************************ Active Scalar Variables ************************ //

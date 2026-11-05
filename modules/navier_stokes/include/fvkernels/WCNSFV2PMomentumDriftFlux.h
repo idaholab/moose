@@ -11,6 +11,7 @@
 
 #include "MathFVUtils.h"
 #include "INSFVFluxKernel.h"
+#include "NavierStokesMethods.h"
 #include "INSFVMomentumResidualObject.h"
 
 /**
@@ -39,8 +40,18 @@ protected:
   /// Dispersed phase density
   const Moose::Functor<ADReal> & _rho_d;
 
+  /// Continuous phase density
+  const Moose::Functor<ADReal> & _rho_c;
+
   /// Dispersed phase fraction
   const Moose::Functor<ADReal> & _f_d;
+
+  /// The exact coefficient of the diffusion stress, beta_d beta_c / rho_m, at the given argument
+  template <typename SpaceArg>
+  ADReal diffusionStressCoefficient(const SpaceArg & arg, const Moose::StateArg & state) const
+  {
+    return NS::diffusionStressCoefficient(_f_d(arg, state), _rho_d(arg, state), _rho_c(arg, state));
+  }
 
   /// slip velocity in direction x
   const Moose::Functor<ADReal> & _u_slip;

@@ -1,0 +1,3 @@
+time,auto_over_drag,dist_size_ratio,drag_function,drift_over_slip_y,drift_y,driftdrag_y,driftiz_y,mu_mixture,rho_mixture,slip_times_drag,slip_x,slip_y,slipauto_y,slipdist_half_y,slipdist_y,slipdrag_y,slipiz_y
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1,1,1,1.0665815117782,0.9375,0.03065625,0.028742528968921,0.16254706351768,0.775,800,-0.0327,0,0.0327,0.030658697566849,0.18882891696325,0.18882891696325,0.030658697566849,0.17338353441885

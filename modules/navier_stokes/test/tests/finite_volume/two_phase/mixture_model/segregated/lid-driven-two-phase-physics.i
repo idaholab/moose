@@ -1,9 +1,10 @@
 mu = 1.0
 rho = 1.0e3
 mu_d = 0.3
-rho_d = 5e2
+rho_d = 1.0
 dp = 0.01
 U_lid = 0.1
+g = -9.81
 advected_interp_method = 'upwind'
 
 k = 1
@@ -20,8 +21,8 @@ cp_d = 1
     xmax = .1
     ymin = 0
     ymax = .1
-    nx = 10
-    ny = 10
+    nx = 5
+    ny = 5
   []
   [make_skew]
     type = MoveNodeGenerator
@@ -45,8 +46,10 @@ cp_d = 1
         dynamic_viscosity = 'mu_mixture'
 
         # Initial conditions
-        initial_velocity = '1e-12 1e-12 0'
-        initial_pressure = 0.2
+        initial_velocity = '0 0 0'
+        initial_pressure = 0
+
+        gravity = '0 ${g} 0'
 
         wall_boundaries = 'top left right bottom'
         momentum_wall_types = 'noslip noslip noslip noslip'
@@ -86,7 +89,6 @@ cp_d = 1
         # Friction model, not actually used!
         use_dispersed_phase_drag_model = true
         particle_diameter = ${dp}
-        add_advection_slip_term = false
       []
     []
   []
@@ -97,21 +99,28 @@ cp_d = 1
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'bottom'
     variable = phase_2
-    functor = '0'
+    functor = '1'
   []
   [top-phase-2]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'top'
     variable = phase_2
-    functor = '1'
+    functor = '0'
   []
 []
 
 [Executioner]
   type = PIMPLE
   rhie_chow_user_object = 'ins_rhie_chow_interpolator'
-  dt = 1
-  end_time = 10
+  end_time = 1e8
+  [TimeStepper]
+    type = IterationAdaptiveDT
+    optimal_iterations = 7
+    iteration_window = 2
+    growth_factor = 2.0
+    cutback_factor = 0.5
+    dt = 1e-3
+  []
 
   # Systems
   momentum_systems = 'u_system v_system'
@@ -143,11 +152,11 @@ cp_d = 1
 
   pin_pressure = true
   pressure_pin_value = 0.0
-  pressure_pin_point = '0.05 0.05 0.0'
+  pressure_pin_point = '0 0 0'
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
   [out]
     type = CSV
     execute_on = 'FINAL'
