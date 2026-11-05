@@ -75,20 +75,9 @@ NewtonSNESExecutor::NewtonSNESExecutor(const InputParameters & params) : SNESExe
   // Setup matrices
   //
 
+  // Need full Jacobian in order to actually compute cross-system coupling
   if (_nl_sys_nums.size() > 1)
-  {
-    // Need full Jacobian in order to actually compute cross-system coupling
     _fe_problem.setCoupling(Moose::COUPLING_FULL);
-    for (const auto i : index_range(_nl_sys_nums))
-      for (const auto j : index_range(_nl_sys_nums))
-      {
-        if (i == j)
-          continue;
-        const TagID tag =
-            _fe_problem.addMatrixTag("NPC_J_" + std::to_string(i) + "_" + std::to_string(j));
-        _off_diag_mats[{i, j}] = {nullptr, tag};
-      }
-  }
 
   //
   // Setup convergence objects
@@ -273,9 +262,7 @@ NewtonSNESExecutor::allocateOffDiagMats()
       LibmeshPetscCallA(_fe_problem.comm().get(),
                         MatSetOption(mat->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE));
 
-      const std::pair<unsigned int, unsigned int> key{i, j};
-      auto & [our_mat, tag] = libmesh_map_find(_off_diag_mats, key);
-      our_mat = std::move(mat);
+      _off_diag_mats[{i, j}] = std::move(mat);
     }
   }
 }
@@ -304,7 +291,7 @@ NewtonSNESExecutor::buildMatNest()
       if (i == j)
         continue;
       const std::pair<unsigned int, unsigned int> key{i, j};
-      sub_mats[i * n_sys + j] = libmesh_map_find(_off_diag_mats, key).mat->mat();
+      sub_mats[i * n_sys + j] = libmesh_map_find(_off_diag_mats, key)->mat();
     }
   }
 
@@ -328,11 +315,13 @@ NewtonSNESExecutor::assembleOffDiagJacobian()
         // We already computed and will re-use the sub-SNES diagonal Jacobian blocks
         continue;
 
-      const auto nl_sys_j_num = _nl_sys_nums[j];
-      _fe_problem.setJacobianBlockContext(nl_sys_i_num, nl_sys_j_num);
+      // Assemble every residual object of system i into J_ij through the system matrix tag. The
+      // (i, j) block context restricts the derivatives to the dofs of system j.
       const std::pair<unsigned int, unsigned int> key{i, j};
-      auto & [J_ij, tag] = libmesh_map_find(_off_diag_mats, key);
-      _fe_problem.computeJacobianTag(*sys_i.system().current_local_solution, *J_ij, tag);
+      _fe_problem.computeJacobian(*sys_i.system().current_local_solution,
+                                  *libmesh_map_find(_off_diag_mats, key),
+                                  nl_sys_i_num,
+                                  _nl_sys_nums[j]);
     }
   }
 }

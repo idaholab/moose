@@ -22,7 +22,6 @@
     variable = u
     v = v
     coef = -1
-    matrix_tags = 'NPC_J_0_1'
   []
   [u_force]
     type = UserForcingFunctorNodalKernel
@@ -34,7 +33,6 @@
     v = u
     variable = v
     coef = 1
-    matrix_tags = 'NPC_J_1_0'
   []
   [vv]
     type = ADReactionNodalKernel

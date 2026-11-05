@@ -15,24 +15,6 @@
   []
 []
 
-[Kernels]
-  [u_diff]
-    extra_matrix_tags = 'NPC_J_0_1'
-  []
-  [v_offdiag]
-    extra_matrix_tags = 'NPC_J_1_0'
-  []
-[]
-
-[BCs]
-  [left]
-    extra_matrix_tags = 'NPC_J_0_1'
-  []
-  [right]
-    extra_matrix_tags = 'NPC_J_0_1'
-  []
-[]
-
 [Executors]
   [newton]
     type = NewtonSNESExecutor

@@ -13,10 +13,10 @@ nonlinear preconditioner to that solver before each solve.
 For multiple nonlinear systems, the executor builds an outer PETSc SNES on the combined solution
 and residual. This path requires [!param](/Executors/NewtonSNESExecutor/nl_preconditioning). The
 outer solve uses left nonlinear preconditioning, so it drives the preconditioner correction to
-zero. The Jacobian blocks that couple two systems are assembled into matrices tagged
-`NPC_J_<i>_<j>`, where `i` and `j` are the positions of the systems in
-[!param](/Executors/NewtonSNESExecutor/nonlinear_system_names). Residual objects must add these
-tags to contribute to the coupling blocks. See [NMSMExecutor.md] for the preconditioned Jacobian.
+zero. The executor assembles the Jacobian block that couples system $i$ to system $j$ from all
+residual objects of system $i$, keeping only the derivatives with respect to the dofs of system
+$j$. Residual objects need no extra configuration. See [NMSMExecutor.md] for the preconditioned
+Jacobian.
 
 PETSc options for the multi-system outer solve use the executor name followed by an underscore
 as their prefix, for example `-outer_snes_monitor` for an executor named `outer`.

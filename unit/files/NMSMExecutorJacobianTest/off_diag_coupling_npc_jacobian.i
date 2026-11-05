@@ -32,13 +32,11 @@
     type = ADCoupledForce
     variable = u
     v = v
-    matrix_tags = 'NPC_J_0_1'
   []
   [coupled_vu]
     type = ADCoupledForce
     variable = v
     v = u
-    matrix_tags = 'NPC_J_1_0'
   []
 []
 
@@ -48,28 +46,24 @@
     variable = u
     boundary = left
     value = 0
-    extra_matrix_tags = 'NPC_J_0_1'
   []
   [right_u]
     type = ADDirichletBC
     variable = u
     boundary = right
     value = 1
-    extra_matrix_tags = 'NPC_J_0_1'
   []
   [left_v]
     type = ADDirichletBC
     variable = v
     boundary = left
     value = 0
-    extra_matrix_tags = 'NPC_J_1_0'
   []
   [right_v]
     type = ADDirichletBC
     variable = v
     boundary = right
     value = 1
-    extra_matrix_tags = 'NPC_J_1_0'
   []
 []
 

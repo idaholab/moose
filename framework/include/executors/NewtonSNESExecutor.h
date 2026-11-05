@@ -52,14 +52,10 @@ private:
   /// PETSc MatNest holding all (i,j) Jacobian sub-blocks.
   Mat _mat_nest = nullptr;
 
-  struct MatData
-  {
-    std::unique_ptr<libMesh::PetscMatrix<libMesh::Number>> mat;
-    TagID tag;
-  };
-
-  /// Off-diagonal Jacobian blocks J_ij (i != j).
-  std::map<std::pair<unsigned int, unsigned int>, MatData> _off_diag_mats;
+  /// Off-diagonal Jacobian blocks J_ij (i != j), keyed by positions in _nl_sys_nums
+  std::map<std::pair<unsigned int, unsigned int>,
+           std::unique_ptr<libMesh::PetscMatrix<libMesh::Number>>>
+      _off_diag_mats;
 
   // Multi-system helpers -----------------------------------------------------------
 
