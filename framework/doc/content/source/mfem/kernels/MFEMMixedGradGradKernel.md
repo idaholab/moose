@@ -10,7 +10,7 @@ Adds the domain integrator for integrating the mixed bilinear form
 (k\vec\nabla u, \vec\nabla v)_\Omega \,\,\, \forall v \in V
 
 where $u$ and $v$ are both $\in H^1$, and
-$k$ is a scalar coefficient.
+$k$ is a scalar or matrix coefficient.
 
 This term arises from the weak form of the Laplacian operator
 

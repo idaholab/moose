@@ -382,7 +382,6 @@
     issues = '#34193'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
-    recover = false
   []
   [MFEMAnisotropicDiffusion]
     type = XMLDiff
@@ -402,6 +401,17 @@
     requirement = 'The system shall error given a user specifies a scalar and matrix coefficient in an MFEM kernel.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMVariableAnisotropicDiffusion]
+    type = XMLDiff
+    input = variable_anisotropic_diffusion.i
+    xmldiff = 'OutputData/VariableAnisotropicDiffusion/Run0/Cycle000001/data.pvtu
+               OutputData/VariableAnisotropicDiffusion/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall solve anisotropic diffusion on an embedded surface using a matrix assembled from spatially varying scalar functions and numeric literals.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
 []

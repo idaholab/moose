@@ -9,7 +9,7 @@ Adds the domain integrator for integrating the bilinear form
 !equation
 (k\vec\nabla u, \vec\nabla v)_\Omega \,\,\, \forall v \in V
 
-where $u, v \in H^1$ and $k$ is a scalar diffusivity coefficient.
+where $u, v \in H^1$ and $k$ is a scalar or matrix diffusivity coefficient.
 
 This term arises from the weak form of the Laplacian operator
 
