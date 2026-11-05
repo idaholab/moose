@@ -14,9 +14,9 @@ These quantities are used by downstream objects—such as interface kernels and 
 
 Distance and normal data can be supplied through two modes:
 1. **Analytical Distance Functions**: Through the [!param](/UserObjects/BoundaryShortestDistanceToSurface/surfaces) parameter, specifying parsed functions or distance functions corresponding to each surrogate boundary in [!param](/UserObjects/BoundaryShortestDistanceToSurface/boundary).
-2. **Mesh-Based Interfaces via Manager**: Through the [!param](/UserObjects/BoundaryShortestDistanceToSurface/manager) parameter, referencing an [`SBMInterfaceManager`](SBMInterfaceManager.md) and specifying the subdomain pairs ([!param](/UserObjects/BoundaryShortestDistanceToSurface/boundary_subdomain_pairs)) that correspond to each boundary.
+2. **Mesh-Based Interfaces via Manager**: Through the [!param](/UserObjects/BoundaryShortestDistanceToSurface/manager) parameter, referencing an [`SBMInterfaceManager`](SBMInterfaceManager.md) and specifying the subdomain pairs ([!param](/UserObjects/BoundaryShortestDistanceToSurface/interface_subdomain_pairs)) that correspond to each boundary.
 
-The [`ShiftedCohesiveZoneAction`](actions/ShiftedCohesiveZoneAction.md) can configure and instantiate this object automatically.
+The [Shifted Cohesive Zone Physics](syntax/Physics/SolidMechanics/ShiftedCohesiveZone/index.md) can configure and instantiate this object automatically.
 
 ## Element Scale Validation and Warnings
 
