@@ -157,11 +157,11 @@
       input = mfem_main_between_multiapp.i
       cli_args = "MultiApps/mfem_recv/positions_objects='mfem_recv_locs'"
       xmldiff = 'OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv0_ParaViewDataCollection/Run0/Run0.pvd
-                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv0_ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu
+                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv0_ParaViewDataCollection/Run0/Cycle000002/proc000000.vtu
                   OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv1_ParaViewDataCollection/Run0/Run0.pvd
-                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv1_ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu
+                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv1_ParaViewDataCollection/Run0/Cycle000002/proc000000.vtu
                   OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv2_ParaViewDataCollection/Run0/Run0.pvd
-                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv2_ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu'
+                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv2_ParaViewDataCollection/Run0/Cycle000002/proc000000.vtu'
       capabilities = 'mfem'
       compute_devices = 'cpu'
       max_parallel = 1 # XML schemadiff with multiple ranks
