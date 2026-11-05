@@ -90,57 +90,72 @@ FullSolveMultiApp::initialSetup()
 
     // Grab Executioner from each app
     for (unsigned int i = 0; i < _my_num_apps; i++)
-    {
-      auto & app = _apps[i];
-      Executioner * ex = app->getExecutioner();
-
-      if (!ex)
-        mooseError("Executioner does not exist!");
-
-      if (_ignore_diverge)
-      {
-        TransientBase * tex = dynamic_cast<TransientBase *>(ex);
-        if (tex && tex->parameters().get<bool>("error_on_dtmin"))
-          mooseError("Requesting to ignore failed solutions, but 'Executioner/error_on_dtmin' is "
-                     "true in sub-application. Set this parameter to false in sub-application to "
-                     "avoid an error if Transient solve fails.");
-      }
-
-      ex->init();
-
-      if (_keep_solution_during_restore && _update_old_state_when_keeping_solution_during_restore &&
-          (appProblemBase(_first_local_app + i).getMaterialPropertyStorage().hasStatefulProperties()
-#ifdef KOKKOS_ENABLED
-           || appProblemBase(_first_local_app + i)
-                  .getKokkosMaterialPropertyStorage()
-                  .hasStatefulProperties()
-#endif
-               ))
-        paramError(
-            "update_old_solution_when_keeping_solution_during_restore",
-            "While we are updating old solutions using the solution from the previous fixed "
-            "point iteration, we are not updating the old stateful material properties as "
-            "well. This is not consistent. We recommend you consider using the 'no_restore' "
-            "parameter instead of 'keep_solution_during_restore', or stop using the latter.");
-      if (_keep_solution_during_restore &&
-          appProblemBase(_first_local_app + i)
-              .hasSolutionState(2, Moose::SolutionIterationType::Time))
-        mooseDoOnce(paramWarning(
-            "keep_solution_during_restore",
-            "This FullSolveMultiApp simulation(s) uses older time step variable states (notably "
-            "from two time steps prior in transients). Due to 'keep_solution_during_restore' "
-            "parameter being true, which is an optimization for fixed point iterations, the "
-            "unrestored solution will be kept as the starting solution. It would normally be "
-            "copied onto the 'old' state at the beginning of the first time step. This copy can be "
-            "skipped using 'update_old_solution_when_keeping_solution_during_restore', while the "
-            "copy of the old state onto the 'older' state and the stateful material properties "
-            "state updates do not have such an option at this time. This warning relates to this "
-            "inconsistency. If you suspect this is a problem, please set "
-            "'keep_solution_during_restore' to false"));
-
-      _executioners[i] = ex;
-    }
+      setupApp(i);
   }
+}
+
+void
+FullSolveMultiApp::resetApp(unsigned int global_app, Real time)
+{
+  MultiApp::resetApp(global_app, time);
+
+  // The reset destroyed the app and its executioner, so set up the new one
+  if (hasLocalApp(global_app))
+  {
+    Moose::ScopedCommSwapper swapper(_my_comm);
+    setupApp(globalAppToLocal(global_app));
+  }
+}
+
+void
+FullSolveMultiApp::setupApp(unsigned int i)
+{
+  auto & app = _apps[i];
+  Executioner * ex = app->getExecutioner();
+
+  if (!ex)
+    mooseError("Executioner does not exist!");
+
+  if (_ignore_diverge)
+  {
+    TransientBase * tex = dynamic_cast<TransientBase *>(ex);
+    if (tex && tex->parameters().get<bool>("error_on_dtmin"))
+      mooseError("Requesting to ignore failed solutions, but 'Executioner/error_on_dtmin' is "
+                 "true in sub-application. Set this parameter to false in sub-application to "
+                 "avoid an error if Transient solve fails.");
+  }
+
+  ex->init();
+
+  if (_keep_solution_during_restore && _update_old_state_when_keeping_solution_during_restore &&
+      (appProblemBase(_first_local_app + i).getMaterialPropertyStorage().hasStatefulProperties()
+#ifdef KOKKOS_ENABLED
+       || appProblemBase(_first_local_app + i)
+              .getKokkosMaterialPropertyStorage()
+              .hasStatefulProperties()
+#endif
+           ))
+    paramError("update_old_solution_when_keeping_solution_during_restore",
+               "While we are updating old solutions using the solution from the previous fixed "
+               "point iteration, we are not updating the old stateful material properties as "
+               "well. This is not consistent. We recommend you consider using the 'no_restore' "
+               "parameter instead of 'keep_solution_during_restore', or stop using the latter.");
+  if (_keep_solution_during_restore &&
+      appProblemBase(_first_local_app + i).hasSolutionState(2, Moose::SolutionIterationType::Time))
+    mooseDoOnce(paramWarning(
+        "keep_solution_during_restore",
+        "This FullSolveMultiApp simulation(s) uses older time step variable states (notably "
+        "from two time steps prior in transients). Due to 'keep_solution_during_restore' "
+        "parameter being true, which is an optimization for fixed point iterations, the "
+        "unrestored solution will be kept as the starting solution. It would normally be "
+        "copied onto the 'old' state at the beginning of the first time step. This copy can be "
+        "skipped using 'update_old_solution_when_keeping_solution_during_restore', while the "
+        "copy of the old state onto the 'older' state and the stateful material properties "
+        "state updates do not have such an option at this time. This warning relates to this "
+        "inconsistency. If you suspect this is a problem, please set "
+        "'keep_solution_during_restore' to false"));
+
+  _executioners[i] = ex;
 }
 
 bool
