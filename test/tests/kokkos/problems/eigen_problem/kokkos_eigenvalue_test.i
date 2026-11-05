@@ -50,7 +50,9 @@
 
 [Executioner]
   type = Eigenvalue
-  solve_type = PJFNK
+  solve_type = NEWTON
+  petsc_options_iname = '-vec_type -nl0_mat_type -pc_type -pc_hypre_type'
+  petsc_options_value = 'kokkos hypre hypre boomeramg'
 []
 
 [Outputs]
