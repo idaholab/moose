@@ -107,8 +107,11 @@ std::string replaceAll(std::string str, const std::string & from, const std::str
 
 /**
  * Replaces "LATEST" placeholders with the latest checkpoint file name.
+ * @param orig The path, whose final component may be the literal "LATEST"
+ * @param context A short description of what is being looked for (e.g. "restart",
+ *                "recovery"), used in the error message if no checkpoint is found
  */
-std::string convertLatestCheckpoint(std::string orig);
+std::string convertLatestCheckpoint(std::string orig, const std::string & context = "checkpoint");
 
 /// Computes and returns the Levenshtein distance between strings s1 and s2.
 int levenshteinDist(const std::string & s1, const std::string & s2);
