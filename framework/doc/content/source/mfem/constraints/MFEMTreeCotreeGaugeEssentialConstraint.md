@@ -38,6 +38,8 @@ than a permutation, so no selection on it is the same in every frame. Triangular
 carry bubbles from `THIRD` order on, so above `SECOND` order the constraint rejects meshes with
 triangular faces (tetrahedra, prisms and pyramids).
 
+### Partition-independent construction
+
 The forest is grown by a distributed Boruvka pass in which no rank ever holds more than its
 own share of the mesh graph. Each edge is keyed on its two endpoint coordinates, read from
 the mesh nodes, which are bit-identical on every rank sharing a vertex. A distributed sort turns those coordinates into dense global

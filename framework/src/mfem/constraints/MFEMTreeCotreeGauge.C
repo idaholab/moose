@@ -182,7 +182,7 @@ referenceGaugedDofs(const mfem::FiniteElementCollection & nd_fec,
   // arithmetic. Treating residuals within this relative tolerance as tied, and
   // taking the first of them, keeps the selection from depending on roundoff; it
   // is far above the roundoff of the few Gram-Schmidt steps involved and far below
-  // any genuine difference between residuals.
+  // any genuine difference between residuals. (residuals = Gram-Schmidt remainders)
   constexpr mfem::real_t tie_tolerance = 1e-8;
   std::vector<bool> available(num_rows, true);
   while (static_cast<int>(selected.size()) < num_bubbles)
