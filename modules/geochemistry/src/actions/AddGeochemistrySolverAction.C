@@ -13,7 +13,6 @@
 #include "NearestNodeNumber.h"
 #include "GeochemistryConsoleOutput.h"
 #include "BlockRestrictable.h"
-#include "BoundaryRestrictable.h"
 
 registerMooseAction("GeochemistryApp", AddGeochemistrySolverAction, "add_output");
 registerMooseAction("GeochemistryApp", AddGeochemistrySolverAction, "add_user_object");
@@ -41,7 +40,6 @@ AddGeochemistrySolverAction::validParams()
   params += GeochemistryReactorBase::sharedParams();
 
   params += BlockRestrictable::validParams();
-  params += BoundaryRestrictable::validParams();
 
   params.addRangeCheckedParam<Real>(
       "stoichiometry_tolerance",
@@ -147,9 +145,6 @@ AddGeochemistrySolverAction::act()
     if (isParamValid("block"))
       params.set<std::vector<SubdomainName>>("block") =
           getParam<std::vector<SubdomainName>>("block");
-    if (isParamValid("boundary"))
-      params.set<std::vector<BoundaryName>>("boundary") =
-          getParam<std::vector<BoundaryName>>("boundary");
     params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL; // NOTE: adaptivity not active yet
     _problem->addUserObject(class_name, "geochemistry_nearest_node_number", params);
   }
@@ -256,8 +251,12 @@ AddGeochemistrySolverAction::addAuxSpecies(const std::string & var_name,
                                            const std::string & species_name,
                                            const std::string & quantity)
 {
-  // add AuxVariable
+  // add AuxVariable.  The block restriction must match the reactor's: the reactor only knows about
+  // the nodes it visits, so an unrestricted AuxKernel querying it elsewhere is a hard error
   auto var_params = _factory.getValidParams("MooseVariable");
+  if (isParamValid("block"))
+    var_params.set<std::vector<SubdomainName>>("block") =
+        getParam<std::vector<SubdomainName>>("block");
   _problem->addAuxVariable("MooseVariable", var_name, var_params);
   // add AuxKernel
   const std::string class_name = "GeochemistryQuantityAux";
@@ -267,5 +266,7 @@ AddGeochemistrySolverAction::addAuxSpecies(const std::string & var_name,
   params.set<UserObjectName>("reactor") = getParam<UserObjectName>("geochemistry_reactor_name");
   params.set<AuxVariableName>("variable") = var_name;
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+  if (isParamValid("block"))
+    params.set<std::vector<SubdomainName>>("block") = getParam<std::vector<SubdomainName>>("block");
   _problem->addAuxKernel(class_name, var_name, params);
 }

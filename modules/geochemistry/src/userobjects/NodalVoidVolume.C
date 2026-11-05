@@ -216,6 +216,8 @@ NodalVoidVolume::getNodalVoidVolume(const Node * node) const
     return find->second;
   mooseError("nodal id ",
              node->id(),
-             " not in NodalVoidVolume's data structures.  Perhaps the execute_on parameter of "
+             " not in NodalVoidVolume's data structures.  Either this NodalVoidVolume is block "
+             "restricted and the node lies outside its blocks, in which case whatever queries it "
+             "must carry the same block restriction, or the execute_on parameter of "
              "NodalVoidVolume needs to be set differently");
 }
