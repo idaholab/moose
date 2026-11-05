@@ -150,6 +150,9 @@
     temperature_input_window_low_failure = ERROR
     environment_input_window_high_failure = ERROR
     environment_input_window_low_failure = ERROR
+
+    absolute_tolerance = 1e-20
+    relative_tolerance = 1e-20
   []
 []
 
