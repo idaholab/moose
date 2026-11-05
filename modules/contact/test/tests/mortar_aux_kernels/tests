@@ -24,8 +24,8 @@
     max_parallel = 4
     capabilities = 'ad_size>=50 & method!=dbg'
     valgrind = 'none'
-    requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
-                  'equation via a mortar auxiliary kernel.'
+    requirement = 'The contact module shall be able to compute nodal wear depth values from the dissipated frictional '
+                  'work via a mortar auxiliary kernel.'
     # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
     recover = false
   []
@@ -39,8 +39,8 @@
     capabilities = 'ad_size>=50 & method=opt'
     heavy = true
     valgrind = 'none'
-    requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
-                  'equation and the mortar gap velocity via mortar auxiliary kernels in the same '
+    requirement = 'The contact module shall be able to compute nodal wear depth values from the dissipated frictional '
+                  'work and the mortar gap velocity via mortar auxiliary kernels in the same '
                   'input file.'
   []
   [frictional-mortar-3d-status]
@@ -75,8 +75,8 @@
     capabilities = 'ad_size>=50'
     cli_args = 'Executioner/end_time=0.2 '
                'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick_out'
-    requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
-                  'equation and the mortar gap velocity via mortar auxiliary kernels while including '
+    requirement = 'The contact module shall be able to compute nodal wear depth values from the dissipated frictional '
+                  'work and the mortar gap velocity via mortar auxiliary kernels while including '
                   'these computations in the definition of mortar normal contact constraints in an '
                   'asymmetric problem for a short simulation.'
     # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
@@ -94,8 +94,8 @@
     cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-multiple-projections.e '
                'Executioner/end_time=0.2 '
                'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick-multiple-projections_out'
-    requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
-                  'equation and the mortar gap velocity via mortar auxiliary kernels while including '
+    requirement = 'The contact module shall be able to compute nodal wear depth values from the dissipated frictional '
+                  'work and the mortar gap velocity via mortar auxiliary kernels while including '
                   'these computations in the definition of mortar normal contact constraints in an '
                   'asymmetric problem for a short simulation where secondary elements/nodes may '
                   'project in an oblique manner and where sidesets only span the possible contact '
@@ -128,8 +128,8 @@
                'AuxKernels/worn_depth/debug_mesh=true '
                'Outputs/file_base=block-dynamics-aux-fretting-wear-test-quick-multiple-projections-lo'
                'werd_out'
-    requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
-                  'equation and the mortar gap velocity via mortar auxiliary kernels while including '
+    requirement = 'The contact module shall be able to compute nodal wear depth values from the dissipated frictional '
+                  'work and the mortar gap velocity via mortar auxiliary kernels while including '
                   'these computations in the definition of mortar normal contact constraints in an '
                   'asymmetric problem for a short simulation where secondary elements/nodes may '
                   'project in an oblique manner due to wrap-around lower-dimensional domains and '
@@ -151,8 +151,8 @@
     partial = True
     cli_args = 'Executioner/end_time=0.15 '
                'Outputs/file_base=block-dynamics-aux-fretting-wear-test-action-quick_out'
-    requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
-                  'equation and the mortar gap velocity via mortar auxiliary kernels while including '
+    requirement = 'The contact module shall be able to compute nodal wear depth values from the dissipated frictional '
+                  'work and the mortar gap velocity via mortar auxiliary kernels while including '
                   'these computations in the definition of mortar normal contact constraints in an '
                   'asymmetric problem for a short simulation using the contact action.'
     # ComputeDynamicFrictionalForceLMMechanicalContact created by action does not support recover
