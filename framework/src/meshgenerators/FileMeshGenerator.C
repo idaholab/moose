@@ -150,12 +150,24 @@ FileMeshGenerator::generate()
     const auto file_name = deduceCheckpointPath(*this, _file_name);
     MooseUtils::checkFileReadable(file_name);
 
-    mesh->skip_partitioning(_skip_partitioning);
-    mesh->allow_renumbering(_allow_renumbering);
+    // Variables request an initial condition from a checkpoint file. We must keep the mesh
+    // numbering and partitioning identical to the file so that the stored solution lines up with
+    // the mesh when it is copied in after the equation systems are initialized.
+    const bool restart_vars_from_checkpoint =
+        _app.getExodusFileRestart() && file_name.rfind(".cpa.gz") < file_name.size();
+
+    mesh->skip_partitioning(restart_vars_from_checkpoint ? true : _skip_partitioning);
+    mesh->allow_renumbering(restart_vars_from_checkpoint ? false : _allow_renumbering);
     mesh->read(file_name);
 
     // Load the meta data if it is available
     _app.possiblyLoadRestartableMetaData(MooseApp::MESH_META_DATA, (std::string)file_name);
+
+    if (restart_vars_from_checkpoint)
+    {
+      eventually_allow_renumbering = false;
+      _app.setCheckpointFileBaseForRestart(deduceCheckpointBase(_app, file_name));
+    }
   }
 
   if (!_matrix_file_name.empty())
@@ -189,4 +201,14 @@ FileMeshGenerator::deduceCheckpointPath(const MooseObject & object, const std::s
 
   // LATEST
   return MooseUtils::convertLatestCheckpoint(file_name) + object.getMooseApp().checkpointSuffix();
+}
+
+std::string
+FileMeshGenerator::deduceCheckpointBase(const MooseApp & app, const std::string & checkpoint_file)
+{
+  const auto & suffix = app.checkpointSuffix();
+  if (checkpoint_file.size() >= suffix.size() &&
+      checkpoint_file.compare(checkpoint_file.size() - suffix.size(), suffix.size(), suffix) == 0)
+    return checkpoint_file.substr(0, checkpoint_file.size() - suffix.size());
+  return checkpoint_file;
 }

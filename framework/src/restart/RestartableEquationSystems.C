@@ -15,6 +15,9 @@
 #include "libmesh/dof_object.h"
 #include "libmesh/elem.h"
 #include "libmesh/node.h"
+#include "libmesh/system.h"
+#include "libmesh/numeric_vector.h"
+#include "libmesh/utility.h"
 
 const std::string RestartableEquationSystems::SystemHeader::system_solution_name =
     "SYSTEM_SOLUTION";
@@ -314,8 +317,120 @@ RestartableEquationSystems::load(std::istream & stream)
       sys.update();
   }
 
+  // Copy any requested variables directly into their (live) targets. This does not touch this
+  // object's own EquationSystems; it uses the loaded header and stream to write source variable
+  // data into vectors owned by other systems (used to seed initial conditions from a checkpoint).
+  performVariableCopies(stream);
+
   // Move the stream to the end of our data so that we make RestartableDataReader happy
   stream.seekg(_loaded_stream_data_begin + _loaded_header.data_size);
+}
+
+void
+RestartableEquationSystems::addVariableCopy(const std::string & source_variable,
+                                            const libMesh::System & to_system,
+                                            libMesh::NumericVector<libMesh::Number> & to_vector,
+                                            const libMesh::Variable & to_variable)
+{
+  _variable_copies.push_back({source_variable, &to_system, &to_vector, &to_variable});
+}
+
+bool
+RestartableEquationSystems::wasVariableCopied(const std::string & to_system_name,
+                                              const std::string & to_variable_name) const
+{
+  return _completed_variable_copies.count({to_system_name, to_variable_name});
+}
+
+void
+RestartableEquationSystems::performVariableCopies(std::istream & stream)
+{
+  _completed_variable_copies.clear();
+
+  for (const auto & copy : _variable_copies)
+  {
+    mooseAssert(copy.to_system && copy.to_vector && copy.to_variable,
+                "Null target in a variable copy request");
+
+    // Locate the source variable by name in the loaded header. Prefer the system whose name
+    // matches the target system; otherwise accept a unique match across all systems.
+    const SystemHeader * from_sys_header = nullptr;
+    const VariableHeader * from_var_header = nullptr;
+    unsigned int num_matches = 0;
+    for (const auto & [sys_name, sys_header] : _loaded_header.systems)
+    {
+      const auto var_it = sys_header.variables.find(copy.source_variable);
+      if (var_it == sys_header.variables.end())
+        continue;
+
+      ++num_matches;
+      // An exact system-name match is unambiguous
+      if (sys_name == copy.to_system->name())
+      {
+        from_sys_header = &sys_header;
+        from_var_header = &var_it->second;
+        num_matches = 1;
+        break;
+      }
+      if (!from_sys_header)
+      {
+        from_sys_header = &sys_header;
+        from_var_header = &var_it->second;
+      }
+    }
+
+    if (!from_sys_header)
+      mooseError("Cannot restart variable '",
+                 copy.to_variable->name(),
+                 "' in system '",
+                 copy.to_system->name(),
+                 "' from the checkpoint: no variable named '",
+                 copy.source_variable,
+                 "' was found in the checkpoint's stored solution.");
+
+    if (num_matches > 1)
+      mooseError("Cannot restart variable '",
+                 copy.to_variable->name(),
+                 "' in system '",
+                 copy.to_system->name(),
+                 "' from the checkpoint: the source variable name '",
+                 copy.source_variable,
+                 "' exists in multiple systems in the checkpoint, none of which matches the "
+                 "target system name '",
+                 copy.to_system->name(),
+                 "'.");
+
+    if (from_var_header->type != copy.to_variable->type())
+      mooseError("Cannot restart variable '",
+                 copy.to_variable->name(),
+                 "' in system '",
+                 copy.to_system->name(),
+                 "' from the checkpoint variable '",
+                 copy.source_variable,
+                 "': the finite element types differ.");
+
+    // The solution is stored under the special solution vector name
+    const auto & from_vec_header =
+        libmesh_map_find(from_sys_header->vectors, SystemHeader::system_solution_name);
+
+    // If the same source variable was already restored, drop the record so the restore() sanity
+    // check (which forbids restoring the same source twice) still passes when a source is copied
+    // into more than one target.
+    _loaded_variables.erase(std::tuple<std::string, std::string, std::string>(
+        from_sys_header->name, from_vec_header.name, from_var_header->name));
+
+    restore(*from_sys_header,
+            from_vec_header,
+            *from_var_header,
+            *copy.to_system,
+            *copy.to_vector,
+            *copy.to_variable,
+            stream);
+
+    _completed_variable_copies.emplace(copy.to_system->name(), copy.to_variable->name());
+  }
+
+  // Note: the modified target vectors are closed/updated by the caller, which owns them.
 }
 
 bool
