@@ -19,4 +19,14 @@
     max_threads = 1
     requirement = 'The system will examine the subchannel solver for the EBR-II case'
   []
+  [pseudo_time_segregated_error]
+    type = RunException
+    input = XX09_SS_SHRT17.i
+    cli_args = 'SubChannel/segregated=true SubChannel/crossflow_pseudo_time_step=5e-4'
+    expect_err = "The 'crossflow_pseudo_time_step' parameter is only used by the implicit "
+                 "non-segregated solve"
+    issues = '#33723'
+    requirement = 'The system shall report an error when the crossflow pseudo-time step is set '
+                  'for the segregated solve, which does not use it.'
+  []
 []

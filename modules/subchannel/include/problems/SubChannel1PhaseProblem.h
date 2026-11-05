@@ -156,30 +156,37 @@ protected:
   PetscErrorCode implicitPetscSolve(int iblock);
 
   /**
-   * Add the damping K (Wij - Wij_iter) to the cross-momentum equation of the coupled solve,
-   * M_ww Wij + M_wp P + K (Wij - Wij_iter) = b_w, where Wij is the crossflow the coupled solve
-   * computes and Wij_iter the crossflow of the current outer iterate. This is a diagonal shift K of
-   * M_ww with K Wij_iter added to b_w, which makes each coupled solve a proximal-point step in the
-   * crossflow: it keeps the coupled linear solve well conditioned, and the term vanishes at the
-   * fixed point Wij = Wij_iter, so it does not change the converged solution. K is scaled by the
-   * mean magnitude of the cross-momentum coefficients so it is consistent across meshes, and by the
-   * ratio of the current to the largest cross-momentum residual of the solve (switched evolution
-   * relaxation), so K itself vanishes as the outer iteration converges.
-   * @param M_ww      cross-momentum block acting on the crossflow; K is added to its diagonal
-   * @param M_wp      cross-momentum block acting on the pressure
-   * @param b_w       cross-momentum right-hand side; K Wij_iter is added to it
-   * @param Wij_iter  crossflow at the current outer iterate
-   * @param iblock    axial block
-   * @param max_K     the damping applied far from convergence, which bounds K
-   * @param added_K   the damping applied
+   * Add the pseudo-time damping K_ij (Wij - Wij_iter) to the cross-momentum equation of the coupled
+   * solve, M_ww Wij + M_wp P + K_ij (Wij - Wij_iter) = b_w, where Wij is the crossflow the coupled
+   * solve computes and Wij_iter the crossflow of the current outer iterate. Each gap is damped by
+   * its crossflow inertia over a pseudo-time step, K_ij = L_ij S_ij rho* / dtau, which makes each
+   * coupled solve a step of pseudo-transient continuation: it keeps the coupled linear solve well
+   * conditioned, and the term vanishes at the fixed point Wij = Wij_iter, so it does not change the
+   * converged solution. The step grows from crossflow_pseudo_time_step as the cross-momentum
+   * residual decreases (switched evolution relaxation), so the damping vanishes as the outer
+   * iteration converges.
+   * @param M_ww          cross-momentum block acting on the crossflow; K_ij is added to its
+   *                      diagonal
+   * @param M_wp          cross-momentum block acting on the pressure
+   * @param b_w           cross-momentum right-hand side; K_ij Wij_iter is added to it
+   * @param Wij_iter      crossflow at the current outer iterate
+   * @param iblock        axial block
+   * @param max_inv_dtau  inverse of the initial pseudo-time step, which bounds inv_dtau
+   * @param inv_dtau      inverse of the pseudo-time step applied
    */
   PetscErrorCode addCrossflowDamping(Mat M_ww,
                                      Mat M_wp,
                                      Vec b_w,
                                      Vec Wij_iter,
                                      int iblock,
-                                     PetscScalar & max_K,
-                                     PetscScalar & added_K);
+                                     PetscScalar & max_inv_dtau,
+                                     PetscScalar & inv_dtau);
+
+  /**
+   * Add the damping of the inverse pseudo-time step inv_dtau to the cross-momentum equation:
+   * inv_dtau L_ij S_ij rho* on the diagonal of M_ww and inv_dtau L_ij S_ij rho* Wij_iter on b_w
+   */
+  PetscErrorCode shiftCrossflowDamping(Mat M_ww, Vec b_w, Vec Wij_iter, PetscScalar inv_dtau);
 
   /// Function to initialize the solution & geometry fields
   virtual void initializeSolution() = 0;
@@ -309,6 +316,8 @@ protected:
   const PetscInt & _maxit;
   /// Restart length of the FGMRES solver of the coupled monolithic flow system
   const PetscInt & _coupled_gmres_restart;
+  /// Initial pseudo-time step of the crossflow damping
+  const Real & _crossflow_pseudo_time_step;
   /// The interpolation method used in constructing the systems
   const MooseEnum _interpolation_scheme;
   /// The direction of gravity
@@ -443,6 +452,9 @@ protected:
   /// Cross momentum conservation - advective (Eulerian) derivative
   Mat _cmc_advective_derivative_mat;
   Vec _cmc_advective_derivative_rhs;
+  /// Crossflow inertia L_ij S_ij rho* of each gap of the block, the coefficient of the
+  /// pseudo-time derivative of the crossflow damping
+  Vec _cmc_pseudo_time_inertia;
   /// Cross momentum conservation - friction force
   Mat _cmc_friction_force_mat;
   Vec _cmc_friction_force_rhs;
@@ -481,7 +493,7 @@ protected:
   /// Per-block factor, raised after coupled linear-solve failures, that delays the decay of the
   /// crossflow damping
   std::vector<Real> _crossflow_damping_boost;
-  /// Number of coupled linear-solve retries, each doubling the crossflow damping
+  /// Number of coupled linear-solve retries, each halving the crossflow pseudo-time step
   static constexpr unsigned int _max_crossflow_retries = 8;
   /// Cap on the damping boost: the increase one fully retried coupled solve provides
   static constexpr Real _max_crossflow_damping_boost = 1 << _max_crossflow_retries;

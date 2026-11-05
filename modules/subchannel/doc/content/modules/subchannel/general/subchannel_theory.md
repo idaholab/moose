@@ -533,72 +533,81 @@ above applies to all algorithms.
 
 !! Intentional comment to provide extra spacing
 
-A diagonal damping term is added to the crossflow equation, which makes each coupled solve a
-proximal-point step in the crossflow:
+A pseudo-time derivative is added to the crossflow equation, which makes each coupled solve a step
+of pseudo-transient continuation [!cite](kelley1998convergence) in the crossflow:
 
 \begin{equation}
 M_{wp}\,\mathbf P^{\ell+1} + M_{ww}\,\mathbf W^{\ell+1} +
-K^{\ell}\left(\mathbf W^{\ell+1}-\mathbf W^{\ell}\right) = \mathbf b_w,
+\mathbf K^{\ell}\left(\mathbf W^{\ell+1}-\mathbf W^{\ell}\right) = \mathbf b_w,
+\qquad
+K_{ij}^{\ell} = \frac{L_{ij}\,S_{ij}\,\rho^{*}}{\Delta\tau^{\ell}},
 \end{equation}
 
-i.e. $K^{\ell}$ is added to the diagonal of $M_{ww}$ and $K^{\ell}\,\mathbf W^{\ell}$ to
-$\mathbf b_w$. The damping improves the conditioning of the coupled linear system. The two parts
-of the term play different roles:
+i.e. the diagonal matrix $\mathbf K^{\ell}$ is added to $M_{ww}$ and $\mathbf K^{\ell}\,\mathbf W^{\ell}$
+to $\mathbf b_w$. Each gap is damped by its crossflow inertia $L_{ij}\,S_{ij}\,\rho^{*}$, the
+coefficient of the time derivative of the crossflow equation, over the pseudo-time step
+$\Delta\tau^{\ell}$, so the damping has the physical scale of the transient term of each gap. The
+damping improves the conditioning of the coupled linear system. The two parts of the term play
+different roles:
 
-- +The right-hand-side compensation+ $K^{\ell}\,\mathbf W^{\ell}$ makes the converged solution
-  independent of $K$: the term vanishes when $\mathbf W^{\ell+1}=\mathbf W^{\ell}$, for any $K$.
-  Without it, the added resistance $K\,\mathbf W$ remains at convergence and pulls the crossflow
-  toward zero. Because it acts in every axial cell, the resulting error grows with axial
-  refinement instead of vanishing.
-- +The decay of $K$+ described below keeps the iteration fast. A large $K$ keeps the coupled
-  solves well conditioned far from the solution, but near convergence it slows the outer iteration;
-  letting $K$ tend to zero recovers the convergence rate of the undamped system.
+- +The right-hand-side compensation+ $\mathbf K^{\ell}\,\mathbf W^{\ell}$ makes the converged
+  solution independent of the damping: the term vanishes when $\mathbf W^{\ell+1}=\mathbf W^{\ell}$,
+  for any $\mathbf K$. Without it, the added resistance $\mathbf K\,\mathbf W$ remains at
+  convergence and pulls the crossflow toward zero. Because it acts in every axial cell, the
+  resulting error grows with axial refinement instead of vanishing.
+- +The growth of the pseudo-time step+ described below keeps the iteration fast. A small step keeps
+  the coupled solves well conditioned far from the solution, but near convergence it slows the outer
+  iteration; letting the step grow, so that $\mathbf K$ tends to zero, recovers the convergence rate
+  of the undamped system.
 
-Both are needed. A $K$ that decays without the compensation still biases the solution wherever it
-has not fully vanished when the outer iteration stops. A fixed $K$ with the compensation is
+Both are needed. A damping that decays without the compensation still biases the solution wherever
+it has not fully vanished when the outer iteration stops. A fixed damping with the compensation is
 unbiased in principle, but converges slowly and can stop at the outer tolerance before it reaches
-the converged solution. On the EBR-II SHRT-17 case with 160 axial cells, for example, a fixed $K$
-with the compensation needs about four times as many temperature iterations as the decaying $K$,
-and the uncompensated, non-decaying resistance changes the pressure drop by 0.5%.
+the converged solution. On the EBR-II SHRT-17 case with 160 axial cells, for example, a fixed
+damping with the compensation needs about four times as many temperature iterations as a decaying
+one, and an uncompensated, non-decaying resistance changes the pressure drop by 0.5%.
 
-The coefficient is
+The pseudo-time step follows the switched evolution relaxation [!cite](mulder1985experiments),
 
 \begin{equation}
-K^{\ell} = \min\left(K_{\max},\;K_{\max}\,
-\frac{\left\|\mathbf r_w^{\ell}\right\|_2}{\left\|\mathbf r_w^{0}\right\|_2}\,\gamma\right),
-\qquad
-K_{\max} = c_K\,\overline{\max_j\left|(M_{ww})_{ij}\right|},
+\Delta\tau^{\ell} = \max\left(\Delta\tau_0,\;\Delta\tau_0\,
+\frac{\left\|\mathbf r_w^{0}\right\|_2}{\left\|\mathbf r_w^{\ell}\right\|_2}\,\frac{1}{\gamma}\right),
 \qquad
 \mathbf r_w^{\ell} = M_{wp}\,\mathbf P^{\ell} + M_{ww}\,\mathbf W^{\ell} - \mathbf b_w,
 \end{equation}
 
-where the overbar denotes the mean over the crossflow unknowns of the block, $c_K = 50$, and
-$\mathbf r_w^{\ell}$ is the residual of the crossflow equation at the current iterate, before the
-damping is added. The reference $\left\|\mathbf r_w^{0}\right\|_2$ is the largest crossflow
-residual norm of the block in the current solve so far, so the ratio never exceeds one. The uniform
-initial state has a crossflow residual that is zero up to round-off, depending on the input; using
-the first residual as the reference would then hold $K$ at $K_{\max}$ for the whole solve. The
-largest entry of each row of $M_{ww}$ measures the axial transport of crossflow; it keeps
-$K_{\max}$ consistent with the other terms of the crossflow equation on any axial mesh, and unlike
-the diagonal it does not vanish for central differencing of uniform axial flow. The factor $c_K$
-gives the strong damping that the first outer iterations need when they start far from the
-solution. Scaling by the residual ratio, a switched evolution relaxation strategy for
-pseudo-transient continuation, makes $K$ tend to zero as the outer iteration converges, so the
-iteration approaches the convergence rate of the undamped system. The coupled crossflow linear solve starts
-from the current iterate. Its convergence tolerance
-`rtol` is applied to the residual of that initial iterate rather than to the right-hand side.
+where $\Delta\tau_0$ is set by [!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_time_step)
+and $\mathbf r_w^{\ell}$ is the residual of the crossflow equation at the current iterate, before the
+damping is added. The reference $\left\|\mathbf r_w^{0}\right\|_2$ is the largest crossflow residual
+norm of the block in the current solve so far, so the step never falls below $\Delta\tau_0$. The
+uniform initial state has a crossflow residual that is zero up to round-off, depending on the input;
+using the first residual as the reference would then hold the step at $\Delta\tau_0$ for the whole
+solve. The step grows as the outer iteration converges, so the iteration approaches the convergence
+rate of the undamped system. The coupled crossflow linear solve starts from the current iterate. Its
+convergence tolerance `rtol` is applied to the residual of that initial iterate rather than to the
+right-hand side.
 
-The block factor $\gamma$ starts at one in every solve and is capped at $2^8$. As $K$ decreases,
+The block factor $\gamma$ starts at one in every solve and is capped at $2^8$. As the step grows,
 the coupled system can become too poorly conditioned for the field-split preconditioner. Each
 coupled solve is therefore attempted with at most 1000 Krylov iterations; if it does not converge,
-$K$ is increased by $\max(K,\,0.05\,K_{\max})$, which doubles it unless it is below
-$0.05\,K_{\max}$, and the solve is repeated, up to eight times, the last attempt with the full
-[!param](/Problem/TriSubChannel1PhaseProblem/maxit). Each retry also doubles $\gamma$, which keeps
-the damping at the level the preconditioner needs for the remaining outer iterations.
+the inverse step $1/\Delta\tau$ is increased by $\max(1/\Delta\tau,\,0.05/\Delta\tau_0)$, which
+halves the step unless it is above $20\,\Delta\tau_0$, and the solve is repeated, up to eight times,
+the last attempt with the full [!param](/Problem/TriSubChannel1PhaseProblem/maxit). This is the step
+rejection of pseudo-transient continuation. Each retry also doubles $\gamma$, which keeps the step
+at the size the preconditioner needs for the remaining outer iterations.
 
-Because $\gamma$ is bounded, $K$ still tends to zero with the residual. Where the preconditioner
-cannot solve the undamped system, $K$ instead settles at the smallest value it can handle; the
-converged solution is unaffected because the damping term vanishes at the fixed point.
+Because $\gamma$ is bounded, the step still grows as the residual decreases. Where the
+preconditioner cannot solve the undamped system, the step instead settles at the largest value it
+can handle; the converged solution is unaffected because the damping term vanishes at the fixed
+point.
+
+On the EBR-II SHRT-17 steady state with 40 to 160 axial cells, $\Delta\tau_0$ from
+$5\times10^{-6}$ to $10$ s leaves the pressure drop unchanged to $0.2$ Pa out of 36 kPa. Larger
+initial steps reduce the number of temperature iterations, a gain that levels off above about
+$10^{-3}$ s, while too small a step over-damps the iteration. The default of $5\times10^{-4}$ s
+gives about the same initial damping as a resistance scaled by the cross-momentum coefficients. The
+THORS FFM-5B high-flow case is sensitive to the initial step and reaches the outer-iteration limit
+for some values between $2\times10^{-4}$ and $2\times10^{-3}$ s.
 
 #### 2. Equation under-relaxation
 
@@ -646,7 +655,7 @@ linear solve, while post-solve relaxation damps the fixed-point update after tha
 
 !! Intentional comment to provide extra spacing
 
-The combination of (i) residual-scaled crossflow damping that is raised when the linear solve fails
+The combination of (i) pseudo-time crossflow damping whose step shrinks when the linear solve fails
 and (ii) independently configurable equation and solution relaxation
 improves robustness of the nested solve during rapid crossflow changes. Crossflow damping and equation relaxation both increase entries on the crossflow diagonal,
 but neither guarantees strict diagonal dominance for every geometry and flow state. Post-solve

@@ -130,6 +130,14 @@ SubChannel1PhaseProblem::validParams()
       "Restart length of the FGMRES solver of the coupled monolithic flow system. Values of 100 to "
       "300 speed up solves with tight P_tol and T_tol, where the default stagnates once the "
       "crossflow damping is small, but can destabilize the outer iteration of flow blockage cases");
+  params.addRangeCheckedParam<Real>(
+      "crossflow_pseudo_time_step",
+      5e-4,
+      "crossflow_pseudo_time_step > 0",
+      "Initial pseudo-time step of the crossflow damping of the coupled monolithic flow system "
+      "[s]. Each gap is damped by its crossflow inertia over a pseudo-time step that grows from "
+      "this value as the cross-momentum residual decreases. Smaller values damp more strongly "
+      "and need more outer iterations; the converged solution does not depend on it.");
   params.addParam<MooseEnum>(
       "interpolation_scheme",
       schemes,
@@ -185,7 +193,7 @@ SubChannel1PhaseProblem::validParams()
       "P_tol P_maxit T_tol T_maxit T_relaxation enthalpy_subcycles "
       "mass_flow_equation_relaxation pressure_equation_relaxation crossflow_equation_relaxation "
       "mass_flow_relaxation pressure_relaxation crossflow_relaxation rtol atol dtol maxit "
-      "coupled_gmres_restart",
+      "coupled_gmres_restart crossflow_pseudo_time_step",
       "Solver tolerances and iterations");
   params.addParamNamesToGroup("implicit segregated interpolation_scheme", "Solution method");
   params.addParamNamesToGroup("fp friction_closure mixing_closure pin_HTC_closure duct_HTC_closure",
@@ -236,6 +244,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _dtol(getParam<PetscReal>("dtol")),
     _maxit(getParam<PetscInt>("maxit")),
     _coupled_gmres_restart(getParam<PetscInt>("coupled_gmres_restart")),
+    _crossflow_pseudo_time_step(getParam<Real>("crossflow_pseudo_time_step")),
     _interpolation_scheme(getParam<MooseEnum>("interpolation_scheme")),
     _gravity_direction(getParam<MooseEnum>("gravity")),
     _dir_grav(computeGravityDir(_gravity_direction)),
@@ -266,7 +275,8 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
                                           "crossflow_equation_relaxation",
                                           "mass_flow_relaxation",
                                           "pressure_relaxation",
-                                          "crossflow_relaxation"})
+                                          "crossflow_relaxation",
+                                          "crossflow_pseudo_time_step"})
       if (params.isParamSetByUser(relaxation_param))
         paramError(relaxation_param,
                    "The '",
@@ -339,6 +349,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   LibmeshPetscCall(
       createPetscMatrix(_cmc_time_derivative_mat, _block_size * _n_gaps, _block_size * _n_gaps));
   LibmeshPetscCall(createPetscVector(_cmc_time_derivative_rhs, _block_size * _n_gaps));
+  LibmeshPetscCall(createPetscVector(_cmc_pseudo_time_inertia, _block_size * _n_gaps));
   LibmeshPetscCall(createPetscMatrix(
       _cmc_advective_derivative_mat, _block_size * _n_gaps, _block_size * _n_gaps));
   LibmeshPetscCall(createPetscVector(_cmc_advective_derivative_rhs, _block_size * _n_gaps));
@@ -564,6 +575,7 @@ SubChannel1PhaseProblem::cleanUp()
   // Lateral momentum conservation components
   LibmeshPetscCall(MatDestroy(&_cmc_time_derivative_mat));
   LibmeshPetscCall(VecDestroy(&_cmc_time_derivative_rhs));
+  LibmeshPetscCall(VecDestroy(&_cmc_pseudo_time_inertia));
   LibmeshPetscCall(MatDestroy(&_cmc_advective_derivative_mat));
   LibmeshPetscCall(VecDestroy(&_cmc_advective_derivative_rhs));
   LibmeshPetscCall(MatDestroy(&_cmc_friction_force_mat));
@@ -1670,6 +1682,9 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         PetscScalar value_td_rhs = time_factor * _Wij_old(i_gap, iz);
         LibmeshPetscCall(
             VecSetValues(_cmc_time_derivative_rhs, 1, &row_td, &value_td_rhs, INSERT_VALUES));
+        const PetscScalar inertia = Lij * Sij * rho_star;
+        LibmeshPetscCall(
+            VecSetValues(_cmc_pseudo_time_inertia, 1, &row_td, &inertia, INSERT_VALUES));
 
         // Assembling inertial term
         PetscScalar Pe = 0.5;
@@ -1790,6 +1805,8 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
     LibmeshPetscCall(MatAssemblyEnd(_cmc_pressure_force_mat, MAT_FINAL_ASSEMBLY));
     LibmeshPetscCall(MatAssemblyBegin(_cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY));
     LibmeshPetscCall(MatAssemblyEnd(_cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(VecAssemblyBegin(_cmc_pseudo_time_inertia));
+    LibmeshPetscCall(VecAssemblyEnd(_cmc_pseudo_time_inertia));
     // Matrix
     LibmeshPetscCall(addTermMatrices(
         _cmc_sys_Wij_mat,
@@ -2186,21 +2203,40 @@ SubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz
 }
 
 PetscErrorCode
+SubChannel1PhaseProblem::shiftCrossflowDamping(Mat M_ww,
+                                               Vec b_w,
+                                               Vec Wij_iter,
+                                               PetscScalar inv_dtau)
+{
+  PetscFunctionBegin;
+  Vec damping, damping_rhs;
+  LibmeshPetscCall(VecDuplicate(_cmc_pseudo_time_inertia, &damping));
+  LibmeshPetscCall(VecCopy(_cmc_pseudo_time_inertia, damping));
+  LibmeshPetscCall(VecScale(damping, inv_dtau));
+  LibmeshPetscCall(MatDiagonalSet(M_ww, damping, ADD_VALUES));
+  LibmeshPetscCall(VecDuplicate(damping, &damping_rhs));
+  LibmeshPetscCall(VecPointwiseMult(damping_rhs, damping, Wij_iter));
+  LibmeshPetscCall(VecAXPY(b_w, 1.0, damping_rhs));
+  LibmeshPetscCall(VecDestroy(&damping));
+  LibmeshPetscCall(VecDestroy(&damping_rhs));
+  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
+}
+
+PetscErrorCode
 SubChannel1PhaseProblem::addCrossflowDamping(Mat M_ww,
                                              Mat M_wp,
                                              Vec b_w,
                                              Vec Wij_iter,
                                              int iblock,
-                                             PetscScalar & max_K,
-                                             PetscScalar & added_K)
+                                             PetscScalar & max_inv_dtau,
+                                             PetscScalar & inv_dtau)
 {
   PetscFunctionBegin;
   const unsigned int first_node = iblock * _block_size + 1;
   const unsigned int last_node = (iblock + 1) * _block_size;
-  Vec residual, pressure_term, row_scale;
+  Vec residual, pressure_term;
   LibmeshPetscCall(createPetscVector(residual, _block_size * _n_gaps));
   LibmeshPetscCall(createPetscVector(pressure_term, _block_size * _n_gaps));
-  LibmeshPetscCall(createPetscVector(row_scale, _block_size * _n_gaps));
   LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
       _prodp, *_P_soln, first_node - 1, last_node - 1, _n_channels));
 
@@ -2214,39 +2250,29 @@ SubChannel1PhaseProblem::addCrossflowDamping(Mat M_ww,
 
   // The largest residual of this solve so far sets the reference. The uniform initial state has a
   // residual that is zero up to round-off, depending on the input; taking the first residual as the
-  // reference would then hold K at its maximum for the whole solve. A zero reference applies the
-  // full damping.
+  // reference would then hold the pseudo-time step at its initial value for the whole solve. A zero
+  // reference applies the full damping.
   auto & residual_ref = _crossflow_residual_ref[iblock];
   residual_ref = std::max(residual_ref, residual_norm);
   const Real residual_ratio = residual_ref > 0.0 ? residual_norm / residual_ref : 1.0;
 
-  // The largest entry of each row measures the axial transport of crossflow. The diagonal alone
-  // is not a usable scale because, with central differencing, its inflow and outflow
-  // contributions cancel for uniform axial flow and it vanishes before any crossflow develops.
-  PetscScalar row_scale_sum;
-  LibmeshPetscCall(MatGetRowMaxAbs(M_ww, row_scale, NULL));
-  LibmeshPetscCall(VecSum(row_scale, &row_scale_sum));
-  // The first outer iterations start far from the solution and need strong damping: below about
-  // 20 times the mean row scale, the first update can reverse the axial flow and drive the
-  // closures out of range, while much larger factors only add outer iterations on fine axial
-  // meshes. The converged solution does not depend on this factor.
-  const PetscScalar damping_factor = 50.0;
-  max_K = _n_gaps > 0 ? damping_factor * row_scale_sum / (_block_size * _n_gaps) : 0.0;
-  // The boost raised by failed coupled linear solves delays, but does not prevent, the decay of K
-  // with the residual.
-  added_K = std::min(max_K, max_K * residual_ratio * _crossflow_damping_boost[iblock]);
+  // Pseudo-transient continuation with switched evolution relaxation: the pseudo-time step grows
+  // from its initial value as the residual decreases, dtau = dtau_0 / (residual ratio * boost), and
+  // each gap is damped by its crossflow inertia over it, K_ij = L_ij S_ij rho* / dtau. The boost
+  // raised by failed coupled linear solves delays, but does not prevent, the growth of the step.
+  max_inv_dtau = 1.0 / _crossflow_pseudo_time_step;
+  inv_dtau =
+      std::min(max_inv_dtau, max_inv_dtau * residual_ratio * _crossflow_damping_boost[iblock]);
   if (_verbose_subchannel)
   {
     _console << "Crossflow residual ratio: " + std::to_string(residual_ratio) << std::endl;
-    _console << "Added cross resistance: " + std::to_string(added_K) << std::endl;
+    _console << "Crossflow pseudo-time step: " + std::to_string(1.0 / inv_dtau) << std::endl;
   }
 
-  LibmeshPetscCall(MatShift(M_ww, added_K));
-  LibmeshPetscCall(VecAXPY(b_w, added_K, Wij_iter));
+  LibmeshPetscCall(shiftCrossflowDamping(M_ww, b_w, Wij_iter, inv_dtau));
 
   LibmeshPetscCall(VecDestroy(&residual));
   LibmeshPetscCall(VecDestroy(&pressure_term));
-  LibmeshPetscCall(VecDestroy(&row_scale));
   PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
@@ -2390,14 +2416,19 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
                    /*label=*/"Cross mom");
 
   // ===================== Crossflow damping ====================
-  PetscScalar max_K = 0.0;
-  PetscScalar added_K = 0.0;
+  PetscScalar max_inv_dtau = 0.0;
+  PetscScalar inv_dtau = 0.0;
   Vec Wij_iter;
   LibmeshPetscCall(createPetscVector(Wij_iter, _block_size * _n_gaps));
   LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
       Wij_iter, _Wij, first_node, last_node, _n_gaps));
-  LibmeshPetscCall(addCrossflowDamping(
-      mat_array[Idx(2, 2)], mat_array[Idx(2, 1)], vec_array[2], Wij_iter, iblock, max_K, added_K));
+  LibmeshPetscCall(addCrossflowDamping(mat_array[Idx(2, 2)],
+                                       mat_array[Idx(2, 1)],
+                                       vec_array[2],
+                                       Wij_iter,
+                                       iblock,
+                                       max_inv_dtau,
+                                       inv_dtau));
 
   V("Relax mdot: " + std::to_string(_mass_flow_equation_relaxation));
   V("Relax P: " + std::to_string(_pressure_equation_relaxation));
@@ -2494,16 +2525,16 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   PetscInt maxit;
   LibmeshPetscCall(KSPGetTolerances(ksp, &rtol, &atol, &dtol, &maxit));
 
-  // As K decreases, the coupled system can become too poorly conditioned for the field-split
-  // preconditioner. A solve that has not converged within a limited number of iterations is then
-  // repeated with stronger damping. Doubling K per retry with eight retries spans the range between
-  // the residual-scaled K and the damping that the initial iterations need. A per-attempt cap of
-  // 1000 iterations lets slowly converging solves finish; lower caps abandon them and raise K far
-  // more than necessary.
+  // As the pseudo-time step grows, the coupled system can become too poorly conditioned for the
+  // field-split preconditioner. A solve that has not converged within a limited number of
+  // iterations is then repeated with a smaller step. Halving the step per retry with eight retries
+  // spans the range between the residual-scaled step and the initial step. A per-attempt cap of
+  // 1000 iterations lets slowly converging solves finish; lower caps abandon them and shrink the
+  // step far more than necessary.
   const PetscInt retry_maxit = 1000;
   // The boost is kept for the remaining outer iterations of this solve so that a failure is not
-  // repeated every iteration. Capping it at the increase one fully retried solve provides keeps K
-  // bounded by a multiple of the residual ratio, so it still vanishes at convergence.
+  // repeated every iteration. Capping it at the increase one fully retried solve provides keeps the
+  // damping bounded by a multiple of the residual ratio, so it still vanishes at convergence.
   // Every attempt starts from the current outer iterate
   auto setInitialGuess = [&]()
   {
@@ -2530,19 +2561,19 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     if (reason >= 0 || last_attempt)
       break;
 
-    // Double the damping and re-solve; the proximal right-hand side keeps the fixed point. The
-    // minimum increment guarantees progress when the residual-scaled K is close to zero.
-    const PetscScalar delta_K = std::max(added_K, 0.05 * max_K);
-    added_K += delta_K;
+    // Halve the pseudo-time step and re-solve, the step rejection of pseudo-transient continuation;
+    // the right-hand-side compensation keeps the fixed point. The minimum increment of the inverse
+    // step guarantees progress when the residual-scaled damping is close to zero.
+    const PetscScalar delta_inv_dtau = std::max(inv_dtau, 0.05 * max_inv_dtau);
+    inv_dtau += delta_inv_dtau;
     auto & boost = _crossflow_damping_boost[iblock];
     boost = std::min(_max_crossflow_damping_boost, 2.0 * boost);
-    V("Coupled linear solve did not converge; retrying with added cross resistance: " +
-      std::to_string(added_K));
+    V("Coupled linear solve did not converge; retrying with crossflow pseudo-time step: " +
+      std::to_string(1.0 / inv_dtau));
 
-    LibmeshPetscCall(MatShift(mat_array[Idx(2, 2)], delta_K));
     Vec b_w;
     LibmeshPetscCall(VecGetSubVector(b_vec, field_is[2], &b_w));
-    LibmeshPetscCall(VecAXPY(b_w, delta_K, Wij_iter));
+    LibmeshPetscCall(shiftCrossflowDamping(mat_array[Idx(2, 2)], b_w, Wij_iter, delta_inv_dtau));
     LibmeshPetscCall(VecRestoreSubVector(b_vec, field_is[2], &b_w));
     // Rebuild the preconditioner for the modified cross-momentum block
     LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));

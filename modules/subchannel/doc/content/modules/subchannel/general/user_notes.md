@@ -56,6 +56,15 @@ slowly:
   [!param](/Problem/TriSubChannel1PhaseProblem/coupled_gmres_restart) to 100 to 300 avoids this. A
   longer restart also removes the linear-solve failures that raise the damping, which can
   destabilize the outer iteration of flow blockage cases, so it is not the default.
+- +Choosing the crossflow pseudo-time step.+ The crossflow damping is a pseudo-time derivative
+  whose initial step is set by
+  [!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_time_step). The converged solution
+  does not depend on it; only the cost and the robustness of the iteration do. The default of
+  $5\times10^{-4}$ s works for the SCM tests. A larger step needs fewer outer iterations when the
+  iteration is well behaved; a smaller one damps more strongly, which can help when the outer
+  iteration diverges or reaches its iteration limit, at the cost of more iterations. Because the
+  convergence can be sensitive to it, as in flow blockage cases, try values a factor of two to five
+  either side of the default rather than a single value.
 - +The outer iteration diverges on a coarse axial mesh.+ With the
   `upwind` or `exponential` [!param](/Problem/TriSubChannel1PhaseProblem/interpolation_scheme),
   the discrete flow equations of a coarse axial mesh can have no solution close to the
