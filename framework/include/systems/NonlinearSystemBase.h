@@ -598,8 +598,6 @@ public:
 
   void setPredictor(std::shared_ptr<Predictor> predictor);
   Predictor * getPredictor() { return _predictor.get(); }
-  /// Whether the predictor was applied to the initial solution of the last solve
-  bool predictorApplied() const { return _predictor_applied; }
 
   /**
    * Indicated whether this system needs material properties on boundaries.
@@ -1040,7 +1038,6 @@ protected:
 
   /// If predictor is active, this is non-NULL
   std::shared_ptr<Predictor> _predictor;
-  bool _predictor_applied;
 
   bool _computing_pre_smo_residual;
 

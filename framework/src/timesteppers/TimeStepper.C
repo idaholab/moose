@@ -11,8 +11,6 @@
 #include "FEProblem.h"
 #include "TransientBase.h"
 #include "MooseApp.h"
-#include "NonlinearSystemBase.h"
-#include "Predictor.h"
 
 InputParameters
 TimeStepper::validParams()
@@ -23,10 +21,11 @@ TimeStepper::validParams()
   params.addRangeCheckedParam<Real>(
       "cutback_factor_at_failure",
       0.5,
-      "cutback_factor_at_failure>0 & cutback_factor_at_failure<1",
-      "Factor to apply to timestep if a time step fails to converge.");
+      "cutback_factor_at_failure>0 & cutback_factor_at_failure<=1",
+      "Factor to apply to timestep if a time step fails to converge. A factor of 1 repeats the "
+      "time step with the same size; at dtmin this is done once per time step.");
   params.addParam<bool>("enable", true, "whether or not to enable the time stepper");
-  params.declareControllable("enable");
+  params.declareControllable("enable cutback_factor_at_failure");
 
   params.registerBase("TimeStepper");
   params.registerSystemAttributeName("TimeStepper");
@@ -54,6 +53,7 @@ TimeStepper::TimeStepper(const InputParameters & parameters)
     _verbose(_executioner.verbose()),
     _converged(true),
     _cutback_factor_at_failure(getParam<Real>("cutback_factor_at_failure")),
+    _repeated_at_dt_min(false),
     _reset_dt(getParam<bool>("reset_dt")),
     _has_reset_dt(false),
     _currently_restepping(false),
@@ -80,17 +80,15 @@ TimeStepper::preExecute()
 void
 TimeStepper::computeStep()
 {
+  if (converged())
+    _repeated_at_dt_min = false;
+
   if (_t_step < 2 || (_reset_dt && !_has_reset_dt))
   {
     _has_reset_dt = true;
 
     if (converged())
       _current_dt = computeInitialDT();
-    else if (retryWithoutPredictor())
-    {
-      _console << "\nSolve failed at dtmin, retrying without predictor." << std::endl;
-      _current_dt = _dt;
-    }
     else
       _current_dt = computeFailedDT();
   }
@@ -98,11 +96,6 @@ TimeStepper::computeStep()
   {
     if (converged())
       _current_dt = computeDT();
-    else if (retryWithoutPredictor())
-    {
-      _console << "\nSolve failed at dtmin, retrying without predictor." << std::endl;
-      _current_dt = _dt;
-    }
     else
       _current_dt = computeFailedDT();
   }
@@ -216,27 +209,15 @@ TimeStepper::converged() const
   return _converged;
 }
 
-bool
-TimeStepper::retryWithoutPredictor() const
-{
-  if (converged() || _dt > _dt_min)
-    return false;
-
-  for (const auto i : make_range(_fe_problem.numNonlinearSystems()))
-  {
-    auto & nl = _fe_problem.getNonlinearSystemBase(i);
-    const auto predictor = nl.getPredictor();
-    if (predictor && nl.predictorApplied() && predictor->skipAfterFailedTimestep())
-      return true;
-  }
-  return false;
-}
-
 Real
 TimeStepper::computeFailedDT()
 {
   if (_dt <= _dt_min)
-    mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
+  {
+    if (!canRepeatAtDtMin())
+      mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
+    _repeated_at_dt_min = true;
+  }
 
   // cut the time step
   if (_cutback_factor_at_failure * _dt >= _dt_min)

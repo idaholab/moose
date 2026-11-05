@@ -338,7 +338,11 @@ IterationAdaptiveDT::computeFailedDT()
 
   // Can't cut back any more
   if (_dt <= _dt_min)
-    mooseError("Solve failed and timestep already at dtmin, cannot continue!");
+  {
+    if (!canRepeatAtDtMin())
+      mooseError("Solve failed and timestep already at dtmin, cannot continue!");
+    _repeated_at_dt_min = true;
+  }
 
   if (_verbose)
   {

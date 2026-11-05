@@ -40,9 +40,6 @@ public:
 
   virtual NumericVector<Number> & solutionPredictor() { return _solution_predictor; }
 
-  /// Whether the prediction is skipped in a repeated time step after a failed time step
-  bool skipAfterFailedTimestep() const { return _skip_after_failed_timetep; }
-
 protected:
   FEProblemBase & _fe_problem;
   NonlinearSystemBase & _nl;
@@ -56,6 +53,9 @@ protected:
   NumericVector<Number> & _solution_predictor;
   int & _t_step_old;
   bool & _is_repeated_timestep;
+
+  /// Whether to apply the prediction (controllable)
+  const bool & _apply;
 
   /// Amount by which to scale the predicted value.  Must be in [0,1].
   Real _scale;
