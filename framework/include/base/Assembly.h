@@ -253,7 +253,11 @@ public:
    * Returns the reference to the mortar segment element quadrature points
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const std::vector<Point> & qPointsMortar() const { return _fe_msm->get_xyz(); }
+  const std::vector<Point> & qPointsMortar() const
+  {
+    mooseAssert(_fe_msm, "Mortar FE object is not built on a 0-D mesh");
+    return _fe_msm->get_xyz();
+  }
 
   /**
    * The current points in physical space where we have reinited through reinitAtPhysical()
@@ -696,7 +700,11 @@ public:
   /**
    * Returns a reference to JxW for mortar segment elements
    */
-  const std::vector<Real> & jxWMortar() const { return *_JxW_msm; }
+  const std::vector<Real> & jxWMortar() const
+  {
+    mooseAssert(_JxW_msm, "Mortar JxW is not available on a 0-D mesh");
+    return *_JxW_msm;
+  }
 
   /**
    * Returns a reference to the quadrature rule for the mortar segments

@@ -1,0 +1,114 @@
+*Heading
+** Job name: Patch Model name: Model-1
+*Preprint, echo=NO, model=NO, history=NO, contact=NO
+**
+*Node
+      1,          0.0,           0.0
+      2,          1.0,           0.0
+      3,          2.0,           0.0
+      4,          0.0,           1.0
+      5,          1.2,           0.6
+      6,          2.0,           1.0
+      7,          0.0,           2.0
+      8,          1.0,           2.0
+      9,          2.0,           2.0
+     10,          0.5,           0.0
+     11,          1.5,           0.0
+     12,          0.6,           0.8
+     13,          1.6,           0.8
+     14,          0.5,           2.0
+     15,          1.5,           2.0
+     16,          0.0,           0.5
+     17,          1.1,           0.3
+     18,          2.0,           0.5
+     19,          0.0,           1.5
+     20,          1.1,           1.3
+     21,          2.0,           1.5
+     22,          0.1,           0.1
+*User Element, Nodes=9, Type=U1, Properties=9, Iproperties=0, Coordinates=2, Variables=90, Unsymm
+1, 2, 8
+2, 1, 2, 8
+3, 1, 2, 8
+4, 1, 2, 8
+5, 1, 2
+6, 1, 2
+7, 1, 2
+8, 1, 2
+9, 4
+*Element, Type=U1, elset=CUBE
+1, 1, 2, 5, 4, 10, 17, 12, 16, 22
+2, 2, 3, 6 ,5, 11, 18, 13, 17, 22
+3, 5, 6, 9, 8, 13, 21, 15, 20, 22
+4, 4, 5, 8, 7, 12, 20, 14, 19, 22
+*Uel Property, elset=CUBE
+1.0E+06, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0
+1.0
+**
+*Nset, nset=ALL
+ 1, 2, 3, 4, 5, 6, 7, 8
+ 9,10,11,12,13,14,15,16
+17,18,19,20,21
+**
+**
+*Initial Conditions, type=FIELD, variable=1
+ALL, 70.0
+*Initial Conditions, type=FIELD, variable=2
+ALL, 0.0
+** ----------------------------------------------------------------
+**
+** STEP: Step-1
+**
+*Step, name=Step-1, nlgeom=NO, unsymm=YES
+*Static
+0.1, 1., 1e-05, 0.1
+**
+** BOUNDARY CONDITIONS
+*Boundary
+22, 4, 4, 0.0
+*Boundary
+ 1, 1, 1, 0.0
+ 2, 1, 1, 0.1
+ 3, 1, 1, 0.2
+ 4, 1, 1, 0.05
+ 6, 1, 1, 0.25
+ 7, 1, 1, 0.1
+ 8, 1, 1, 0.2
+ 9, 1, 1, 0.3
+10, 1, 1, 0.05
+11, 1, 1, 0.15
+14, 1, 1, 0.15
+15, 1, 1, 0.25
+16, 1, 1, 0.025
+18, 1, 1, 0.225
+19, 1, 1, 0.075
+21, 1, 1, 0.275
+*Boundary
+ 1, 2, 2, 0.0
+ 2, 2, 2, 0.05
+ 3, 2, 2, 0.1
+ 4, 2, 2, 0.1
+ 6, 2, 2, 0.2
+ 7, 2, 2, 0.2
+ 8, 2, 2, 0.25
+ 9, 2, 2, 0.3
+10, 2, 2, 0.025
+11, 2, 2, 0.075
+14, 2, 2, 0.225
+15, 2, 2, 0.275
+16, 2, 2, 0.05
+18, 2, 2, 0.15
+19, 2, 2, 0.15
+21, 2, 2, 0.25
+**
+** OUTPUT REQUESTS
+**
+*Restart, write, frequency=0
+**
+** FIELD OUTPUT: F-Output-1
+**
+*Output, field, variable=PRESELECT
+**
+** HISTORY OUTPUT: H-Output-1
+**
+*Output, history, variable=PRESELECT
+*End Step
