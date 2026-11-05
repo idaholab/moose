@@ -269,6 +269,14 @@ MooseApp::addInputParam(InputParameters & params)
 {
   params.addCommandLineParam<std::vector<std::string>>(
       "input_file", "-i <input file(s)>", "Specify input file(s); multiple files are merged");
+  // Only registered here so that the option is known and shows up in the usage; the (repeatable)
+  // values are gathered from the command line entries in createMooseApp()
+  params.addCommandLineParam<std::string>(
+      "remove_param",
+      "--remove-param <param path>",
+      "Remove a single parameter or block (given as a HIT path, e.g. Functions/myfunc/paramC) "
+      "from the parsed input. May be repeated. It is an error to also set the same path on the "
+      "command line.");
 }
 
 InputParameters
