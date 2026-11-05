@@ -1,0 +1,53 @@
+[Tests]
+  design = 'MFEMNURBSFESpace.md'
+  issues = '#33631'
+  [MFEMIGADiffusion]
+    type = CSVDiff
+    input = iga_diffusion.i
+    csvdiff = OutputData/IGADiffusion.csv
+    requirement = 'The system shall have the ability to solve a diffusion problem using MFEM with '
+                  'NURBS basis functions on a mesh whose geometry is described by NURBS patches.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMIGADiffusionSuperparametric]
+    type = CSVDiff
+    input = iga_diffusion.i
+    cli_args = 'FESpaces/NURBSFESpace/fec_order=THIRD Outputs/file_base=OutputData/IGADiffusionSuperparametric'
+    csvdiff = OutputData/IGADiffusionSuperparametric.csv
+    requirement = 'The system shall have the ability to solve a diffusion problem using MFEM with '
+                  'NURBS basis functions of higher order than the NURBS geometry of the mesh.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMIGASubparametricError]
+    type = RunException
+    input = iga_diffusion.i
+    cli_args = 'FESpaces/NURBSFESpace/fec_order=FIRST'
+    expect_err = 'is lower than the order 2 of the NURBS geometry of the mesh'
+    requirement = 'The system shall report an error if a NURBS finite element space of lower order '
+                  'than the NURBS geometry of the mesh it is defined on is requested.'
+    capabilities = 'mfem'
+  []
+  [MFEMNURBSFESpaceOnNonNURBSMeshError]
+    type = RunException
+    input = iga_diffusion.i
+    cli_args = 'Mesh/file=../mesh/star.mesh'
+    expect_err = 'A NURBS finite element space can only be built on a NURBS mesh'
+    requirement = 'The system shall report an error if a NURBS finite element space is requested on '
+                  'a mesh that has no NURBS geometry.'
+    capabilities = 'mfem'
+  []
+  [MFEMNURBSParallelRefineError]
+    type = RunException
+    input = iga_diffusion.i
+    design = 'MFEMMesh.md'
+    cli_args = 'Mesh/parallel_refine=1'
+    expect_err = 'MFEM does not support parallel refinement of NURBS meshes'
+    requirement = 'The system shall report an error if parallel refinement of a NURBS mesh is '
+                  'requested, as MFEM is unable to perform it.'
+    capabilities = 'mfem'
+  []
+[]
