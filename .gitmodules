@@ -62,3 +62,8 @@
     url = ../../pytorch/pytorch.git
     update = none
     ignore = untracked
+[submodule "framework/contrib/desul"]
+    path = framework/contrib/desul
+    url = https://github.com/NamjaeChoi/desul.git
+    branch = lock_table_registry
+    update = none
