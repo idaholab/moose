@@ -292,11 +292,11 @@ public:
   KOKKOS_FUNCTION const ADSlotTable & table() const { return _table; }
 
   /**
-   * Get the geometry of a quadrature point as dual numbers
+   * Get the geometry of a quadrature point of the current configuration
    * @param qp The local quadrature point index
    * @returns The geometry
    */
-  KOKKOS_FUNCTION const ADGeometry<slots> & adGeometry(const unsigned int qp);
+  KOKKOS_FUNCTION const ADGeometry & adGeometry(const unsigned int qp);
 
   /**
    * Get the transformed Jacobian weight as a dual number
@@ -305,7 +305,32 @@ public:
   {
     if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
       if (this->_configuration.displaced())
-        return adGeometry(qp).JxW;
+      {
+        const auto & g = adGeometry(qp);
+        DenseADReal<slots> JxW = g.JxW;
+
+        for (unsigned int c = 0; c < this->_configuration.displacements().components(); ++c)
+        {
+          if (const auto vs = _table.displacementValueSlot(c); vs != libMesh::invalid_uint)
+            JxW.derivatives()[vs] += g.JxW * g.grad_log_coord(c);
+
+          if (const auto gs = _table.displacementGradientSlot(c); gs != libMesh::invalid_uint)
+            for (unsigned int d = 0; d < 3; ++d)
+            {
+              Real dlog = g.F_inv_T(c, d);
+              if (this->isSide())
+              {
+                Real n_col = 0;
+                for (unsigned int k = 0; k < 3; ++k)
+                  n_col += g.normal(k) * g.F_inv_T(k, d);
+                dlog -= g.normal(c) * n_col;
+              }
+              JxW.derivatives()[gs + d] += g.JxW * dlog;
+            }
+        }
+
+        return JxW;
+      }
 
     return this->JxW(qp);
   }
@@ -318,7 +343,16 @@ public:
   {
     if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
       if (this->_configuration.displaced())
-        return adGeometry(qp).q_point;
+      {
+        const auto & g = adGeometry(qp);
+        DenseADReal3<slots> x(g.q_point(0), g.q_point(1), g.q_point(2));
+
+        for (unsigned int c = 0; c < this->_configuration.displacements().components(); ++c)
+          if (const auto vs = _table.displacementValueSlot(c); vs != libMesh::invalid_uint)
+            x(c).derivatives()[vs] = 1;
+
+        return x;
+      }
 
     const Real3 x = this->q_point(qp);
     return DenseADReal3<slots>(x(0), x(1), x(2));
@@ -335,24 +369,56 @@ public:
   {
     if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
       if (this->_configuration.displaced())
-        return adGeometry(qp).F_inv.transpose() * grad_X;
+      {
+        const auto & g = adGeometry(qp);
+        DenseADReal3<slots> grad = g.F_inv_T * grad_X;
+
+        for (unsigned int c = 0; c < this->_configuration.displacements().components(); ++c)
+          if (const auto gs = _table.displacementGradientSlot(c); gs != libMesh::invalid_uint)
+          {
+            const Real grad_c = denseADValue(grad(c));
+            for (unsigned int d = 0; d < 3; ++d)
+              for (unsigned int i = 0; i < 3; ++i)
+                grad(i).derivatives()[gs + d] -= grad_c * g.F_inv_T(i, d);
+          }
+
+        return grad;
+      }
 
     return this->F_inv(qp).transpose() * grad_X;
   }
 
   /**
-   * Pull a gradient coefficient back to the reference element, so that its product with the
-   * reference test function gradient equals its product with the gradient on the configuration,
-   * with the derivatives of the map on the configuration
+   * Map a gradient coefficient to the reference element, so that its product with the reference
+   * test function gradient equals its product with the gradient on the configuration, with the
+   * derivatives of the map on the configuration
    * @param grad The gradient coefficient
    * @param qp The local quadrature point index
    */
-  KOKKOS_FUNCTION DenseADReal3<slots> adPullBack(const DenseADReal3<slots> & grad,
-                                                 const unsigned int qp)
+  KOKKOS_FUNCTION DenseADReal3<slots> adToReferenceElement(const DenseADReal3<slots> & grad,
+                                                           const unsigned int qp)
   {
     if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
       if (this->_configuration.displaced())
-        return adGeometry(qp).dxi_dx.transpose() * grad;
+      {
+        const auto & g = adGeometry(qp);
+        DenseADReal3<slots> mapped = g.dxi_dx.transpose() * grad;
+
+        for (unsigned int c = 0; c < this->_configuration.displacements().components(); ++c)
+          if (const auto gs = _table.displacementGradientSlot(c); gs != libMesh::invalid_uint)
+            for (unsigned int d = 0; d < 3; ++d)
+            {
+              // Component d of F^{-1} applied to the value of the coefficient
+              Real F_inv_grad_d = 0;
+              for (unsigned int k = 0; k < 3; ++k)
+                F_inv_grad_d += g.F_inv_T(k, d) * denseADValue(grad(k));
+
+              for (unsigned int i = 0; i < 3; ++i)
+                mapped(i).derivatives()[gs + d] -= g.dxi_dx(c, i) * F_inv_grad_d;
+            }
+
+        return mapped;
+      }
 
     return this->dxi_dx(qp).transpose() * grad;
   }
@@ -362,12 +428,12 @@ private:
   const ADSlotTable & _table;
   /// Quadrature point of the cached dual geometry
   unsigned int _ad_cached_qp = libMesh::invalid_uint;
-  /// Cached dual geometry
-  ADGeometry<slots> _ad_geometry;
+  /// Cached geometry of the current configuration
+  ADGeometry _ad_geometry;
 };
 
 template <typename Base, unsigned int slots>
-KOKKOS_FUNCTION const ADGeometry<slots> &
+KOKKOS_FUNCTION const ADGeometry &
 ADDatumBase<Base, slots>::adGeometry(const unsigned int qp)
 {
   KOKKOS_ASSERT(!this->isNodal());
@@ -375,87 +441,31 @@ ADDatumBase<Base, slots>::adGeometry(const unsigned int qp)
   if (_ad_cached_qp == qp)
     return _ad_geometry;
 
+  auto & g = _ad_geometry;
+
+  // The plain datum composes the deformation gradient into its geometry on the current
+  // configuration
+  g.F_inv_T = this->F_inv(qp).transpose();
+  g.dxi_dx = this->dxi_dx(qp);
+  g.JxW = this->JxW(qp);
+  g.grad_log_coord = this->grad_log_coord(qp);
+  g.normal = this->isSide() ? this->normals(qp) : Real3(0);
+
+  // The plain datum withholds the position of an AD object on the current configuration, so that
+  // objects read it with its derivatives through adQPoint()
   const auto & disp = this->_configuration.displacements();
-  const auto & X = this->reference_q_point(qp);
-  const auto & ref_dxi_dx = this->reference_dxi_dx(qp);
-
-  // Deformation gradient F = I + grad_X u and position x = X + u, seeded in the displacement
-  // slots
-  DenseADReal33<slots> F;
-  DenseADReal3<slots> x;
-
-  for (unsigned int d = 0; d < 3; ++d)
-  {
-    F(d, d) = 1;
-    x(d) = X(d);
-  }
+  g.q_point = this->reference_q_point(qp);
 
   for (unsigned int c = 0; c < disp.components(); ++c)
   {
     const auto & sys = this->system(disp.sys(c));
     const auto var = disp.var(c);
     const auto tag = disp.tag();
-    const auto value_slot = _table.displacementValueSlot(c);
-    const auto gradient_slot = _table.displacementGradientSlot(c);
 
-    const auto & elem = this->_elem;
-    const auto side = this->_side;
-    const auto qp_offset = this->_qp_offset;
-    const Real u = !this->isSide() ? sys.getVectorQpValue(elem, qp_offset + qp, var, tag)
-                                   : sys.getVectorQpValueFace(elem, side, qp, var, tag);
-    const Real3 grad_u = !this->isSide()
-                             ? sys.getVectorQpGrad(elem, qp_offset + qp, var, tag)
-                             : sys.getVectorQpGradFace(elem, side, ref_dxi_dx, qp, var, tag);
-
-    x(c) = X(c) + seededDenseADReal<slots>(u, value_slot, 1);
-
-    for (unsigned int d = 0; d < 3; ++d)
-      F(c, d) += seededDenseADReal<slots>(
-          grad_u(d),
-          gradient_slot == libMesh::invalid_uint ? libMesh::invalid_uint : gradient_slot + d,
-          1);
+    g.q_point(c) += !this->isSide()
+                        ? sys.getVectorQpValue(this->_elem, this->_qp_offset + qp, var, tag)
+                        : sys.getVectorQpValueFace(this->_elem, this->_side, qp, var, tag);
   }
-
-  const auto & assembly = this->_assembly;
-  const auto dim = assembly.getDimension();
-  const auto subdomain = this->_elem.subdomain;
-
-  auto & g = _ad_geometry;
-  g.F_inv = F.inverse(dim);
-
-  const auto F_inv_T = g.F_inv.transpose();
-
-  // Coordinate transform factor at the current position, with its derivative through the chain
-  // rule on the displacement values
-  const Real3 x_value(denseADValue(x(0)), denseADValue(x(1)), denseADValue(x(2)));
-  const Real coord_value = assembly.coordTransformFactor(subdomain, x_value);
-  const Real3 coord_gradient = assembly.coordTransformFactorGradient(subdomain, x_value);
-
-  DenseADReal<slots> coord = coord_value;
-  for (unsigned int d = 0; d < 3; ++d)
-    coord += coord_gradient(d) * (x(d) - x_value(d));
-
-  DenseADReal<slots> ratio =
-      F.determinant(dim) * coord / assembly.coordTransformFactor(subdomain, X);
-
-  if (this->isSide())
-  {
-    const auto n = F_inv_T * this->reference_normal(qp);
-    const auto norm = sqrt(n * n);
-
-    ratio *= norm;
-    g.normal = (1 / norm) * n;
-  }
-
-  DenseADReal33<slots> composed;
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
-      for (unsigned int k = 0; k < 3; ++k)
-        composed(i, j) += F_inv_T(i, k) * ref_dxi_dx(k, j);
-
-  g.dxi_dx = composed;
-  g.JxW = this->reference_JxW(qp) * ratio;
-  g.q_point = x;
 
   _ad_cached_qp = qp;
 

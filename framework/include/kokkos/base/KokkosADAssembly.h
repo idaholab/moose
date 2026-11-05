@@ -23,14 +23,14 @@ namespace Moose::Kokkos
  * and then the inverse of the reference map Jacobian:
  *
  *   [qp][0]                 f_value
- *   [qp][1 .. 3]            f_grad, pulled back to the reference element
+ *   [qp][1 .. 3]            f_grad, mapped to the reference element
  *   [qp][4 (1 + s)]         d f_value / d slot s
  *   [qp][4 (1 + s) + 1 .. 3] d f_grad / d slot s
  *   [qp][4 (1 + slots) ..]  dxi/dx of the reference configuration, row major
  *
  * The gradient coefficient is contracted with the reference test function gradient, so that the
  * variation of the test function gradient with the displacements is carried by the derivatives of
- * the pulled back coefficient. The trial functions of the slot blocks are taken on the reference
+ * the mapped coefficient. The trial functions of the slot blocks are taken on the reference
  * configuration, where the gradient slots are defined.
  */
 struct ADScratchLayout
@@ -152,7 +152,7 @@ evaluateADTerms(const Object & object,
 
   if constexpr (HasADResidualGrad<Object, slots>::value)
   {
-    const DenseADReal3<slots> grad = datum.adPullBack(
+    const DenseADReal3<slots> grad = datum.adToReferenceElement(
         JxW * object.template precomputeQpResidualGrad<Object, slots>(qp, datum), qp);
     for (unsigned int k = 0; k < 3; ++k)
       storeADCoefficient<slots>(scratch, 1 + k, grad(k));
