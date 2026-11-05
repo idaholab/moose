@@ -11,11 +11,20 @@
 import unittest
 from MooseDocs import common
 from MooseDocs.common import exceptions
+from MooseDocs.common import setting_validation as validation
+
+
+def validation_do_nothing(setting: str) -> str:
+    return setting
 
 
 class TestParseSettings(unittest.TestCase):
     def testBasic(self):
-        defaults = dict(year=(1980, "doc"), month=("june", "doc"), day=(24, "doc"))
+        defaults = dict(
+            year=(1980, "doc", validation.unsigned_integer),
+            month=("june", "doc", validation_do_nothing),
+            day=(24, "doc", validation.unsigned_integer),
+        )
         raw = "year=2003"
         known, unknown = common.parse_settings(defaults, raw)
         self.assertEqual(known["year"], 2003)
@@ -24,19 +33,19 @@ class TestParseSettings(unittest.TestCase):
         self.assertEqual(unknown, dict())
 
     def testSpace(self):
-        defaults = dict(year=(1980, "doc"), month=("june", "doc"), day=(24, "doc"))
-        raw = "year=the year I was born"
+        defaults = dict(phrase=("", "doc", validation_do_nothing))
+        raw = "phrase=the year I was born"
         known, _ = common.parse_settings(defaults, raw)
-        self.assertEqual(known["year"], "the year I was born")
+        self.assertEqual(known["phrase"], "the year I was born")
 
     def testFloat(self):
-        defaults = dict(year=(1980, "doc"))
-        raw = "year=2003"
+        defaults = dict(value=(1980, "doc", validation.floating_point))
+        raw = "value=2003"
         known, _ = common.parse_settings(defaults, raw)
-        self.assertIsInstance(known["year"], float)
+        self.assertIsInstance(known["value"], float)
 
     def testUnknown(self):
-        defaults = dict(year=(1980, "doc"))
+        defaults = dict(year=(1980, "doc", validation.unsigned_integer))
         raw = "year=2003 month=june"
         known, unknown = common.parse_settings(defaults, raw, error_on_unknown=False)
         self.assertEqual(known["year"], 2003)
@@ -45,7 +54,7 @@ class TestParseSettings(unittest.TestCase):
         self.assertEqual(unknown["month"], "june")
 
     def testUnknownException(self):
-        defaults = dict(year=(1980, "doc"))
+        defaults = dict(year=(1980, "doc", validation.unsigned_integer))
         raw = "year=2003 month=june"
         with self.assertRaises(exceptions.MooseDocsException) as e:
             known, unknown = common.parse_settings(defaults, raw)
@@ -56,7 +65,7 @@ class TestParseSettings(unittest.TestCase):
         self.assertIn("month", str(e.exception))
 
     def testChangeException(self):
-        defaults = dict(year=(1980, "doc"))
+        defaults = dict(year=(1980, "doc", validation.unsigned_integer))
         raw = "year=2003 month=june"
         with self.assertRaises(exceptions.MooseDocsException) as e:
             known, unknown = common.parse_settings(defaults, raw)
