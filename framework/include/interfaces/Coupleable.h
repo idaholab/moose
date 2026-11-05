@@ -885,6 +885,18 @@ protected:
                                                          unsigned int comp = 0) const;
 
   /**
+   * Returns second derivatives of a coupled array variable for use in Automatic Differentiation.
+   * Each entry is a matrix with one row per array component and LIBMESH_DIM * LIBMESH_DIM
+   * columns, the row-major flattened Hessian: column LIBMESH_DIM * d1 + d2 holds the derivative
+   * with respect to x_d1 and x_d2.
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to the second derivatives of the coupled array variable
+   */
+  const ADArrayVariableSecond & adCoupledArraySecond(const std::string & var_name,
+                                                     unsigned int comp = 0) const;
+
+  /**
    * Returns the gradients for all of a coupled array variable's components for use in Automatic
    * Differentiation
    * @param var_name Name of coupled array variable
@@ -1551,6 +1563,11 @@ protected:
   mutable std::unordered_map<std::string, std::unique_ptr<ADArrayVariableValue>>
       _ad_default_array_value_zero;
 
+  /// Will hold the zero default second derivatives for optional array coupled variables for
+  /// automatic differentiation. The number of array components depends on the variable.
+  mutable std::unordered_map<std::string, std::unique_ptr<ADArrayVariableSecond>>
+      _ad_default_array_second;
+
   /// Will hold the default value for optional vector coupled variables for automatic differentiation.
   mutable std::unordered_map<std::string, std::unique_ptr<MooseArray<ADRealVectorValue>>>
       _ad_default_vector_value;
@@ -1905,6 +1922,14 @@ public:
    * @return Reference to a ADArrayVariableValue containing zero entries
    */
   const ADArrayVariableValue & getADDefaultArrayValueZero(const std::string & var_name) const;
+
+  /**
+   * Helper method to return (and insert if necessary) the zero default second derivatives for
+   * Automatic Differentiation for an uncoupled array variable.
+   * @param var_name the name of the array variable for which to retrieve a default
+   * @return Reference to the zero second derivatives
+   */
+  const ADArrayVariableSecond & getADDefaultArraySecond(const std::string & var_name) const;
 
 private:
   /**

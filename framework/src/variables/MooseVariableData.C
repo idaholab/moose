@@ -864,7 +864,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       fill<constant_monomial>(_ad_grad_u, *_current_grad_phi, _ad_dof_values, nqp, n_test);
   }
   // Second
-  if constexpr (std::is_same_v<OutputType, Real>)
+  if constexpr (std::is_same_v<OutputType, Real> || std::is_same_v<OutputType, RealEigenVector>)
     if (_need_ad_second_u)
       fill<constant_monomial>(_ad_second_u, *_current_second_phi, _ad_dof_values, nqp, n_test);
   // Curl
