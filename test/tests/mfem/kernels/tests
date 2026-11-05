@@ -76,6 +76,46 @@
       detail = 'and p-refinement.'
     []
   []
+  [MFEML2ZZDefaultFluxSpaces]
+    design = 'MFEML2ZienkiewiczZhuIndicator.md'
+    issues = '#34195'
+    requirement = 'The system shall refine an MFEM mesh with the L2 Zienkiewicz-Zhu indicator using '
+                  'default flux spaces with one component per component of the flux, for'
+    [elasticity]
+      type = CSVDiff
+      input = elasticity_amr.i
+      csvdiff = 'OutputData/ElasticityAMR.csv'
+      capabilities = 'mfem'
+      compute_devices = 'cpu cuda'
+      recover = false
+      detail = 'the stress of a linear elasticity kernel in 3D,'
+    []
+    [curlcurl]
+      type = CSVDiff
+      input = curlcurl_amr.i
+      csvdiff = 'OutputData/CurlCurlAMR.csv'
+      capabilities = 'mfem'
+      compute_devices = 'cpu cuda'
+      recover = false
+      detail = 'and the curl of a curl-curl kernel in 2D.'
+    []
+  []
+  [MFEML2ZZCurlCurl3DRequiresFluxSpace]
+    type = RunException
+    input = curlcurl.i
+    cli_args = 'Adaptivity/Indicators/l2zz/type=MFEML2ZienkiewiczZhuIndicator '
+               'Adaptivity/Indicators/l2zz/variable=e_field '
+               'Adaptivity/Indicators/l2zz/kernel=curlcurl '
+               'Adaptivity/Markers/ref/type=MFEMRefinementMarker '
+               'Adaptivity/Markers/ref/indicator=l2zz '
+               'Adaptivity/Markers/ref/max_h_level=1'
+    expect_err = 'must be given for a curl-curl kernel in 3D'
+    requirement = 'The system shall require a flux space for the L2 Zienkiewicz-Zhu indicator of a '
+                  'curl-curl kernel in 3D using MFEM.'
+    design = 'MFEML2ZienkiewiczZhuIndicator.md'
+    issues = '#34195'
+    capabilities = 'mfem'
+  []
   [MFEMDiffusionPartial]
     type = CSVDiff
     input = diffusion.i
