@@ -124,6 +124,16 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
         _grad_phi_face_assembly_method = &Assembly::feGradPhiLower<OutputType>; // Place holder
       }
 
+      // MooseVariableBase only allows the piecewise-linear basis for scalar Lagrange variables
+      if constexpr (std::is_same_v<OutputType, Real>)
+        if (var.usePiecewiseLinearBasis())
+        {
+          _phi_assembly_method = &Assembly::fePiecewiseLinearPhiLower;
+          _phi_face_assembly_method = &Assembly::fePiecewiseLinearPhiLower; // Place holder
+          _grad_phi_assembly_method = &Assembly::feGradPiecewiseLinearPhiLower;
+          _grad_phi_face_assembly_method = &Assembly::feGradPiecewiseLinearPhiLower; // Place holder
+        }
+
       _ad_grad_phi = nullptr;
       _ad_grad_phi_face = nullptr;
       break;

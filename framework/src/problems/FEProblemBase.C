@@ -9086,7 +9086,8 @@ FEProblemBase::createMortarInterface(
     const Mortar3DSubpatchPlane mortar_3d_subpatch_plane,
     const MooseEnum & triangulation,
     const bool triangulate_triangles,
-    const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping)
+    const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping,
+    const bool split_segments_at_sub_elements)
 {
   _has_mortar = true;
 
@@ -9102,7 +9103,8 @@ FEProblemBase::createMortarInterface(
                                                mortar_3d_subpatch_plane,
                                                triangulation,
                                                triangulate_triangles,
-                                               mortar_3d_qp_mapping);
+                                               mortar_3d_qp_mapping,
+                                               split_segments_at_sub_elements);
   else
     return _mortar_data->createMortarInterface(primary_secondary_boundary_pair,
                                                primary_secondary_subdomain_pair,
@@ -9115,7 +9117,8 @@ FEProblemBase::createMortarInterface(
                                                mortar_3d_subpatch_plane,
                                                triangulation,
                                                triangulate_triangles,
-                                               mortar_3d_qp_mapping);
+                                               mortar_3d_qp_mapping,
+                                               split_segments_at_sub_elements);
 }
 
 const AutomaticMortarGeneration &

@@ -24,6 +24,7 @@ CreateMooseEnumClass(ContactFormulation,
                      MORTAR_PENALTY);
 CreateMooseEnumClass(ProximityMethod, NODE, CENTROID);
 CreateMooseEnumClass(ContactLMSpace, MATCH_DISPLACEMENT, LINEAR);
+CreateMooseEnumClass(PetrovGalerkinTest, STANDARD, PIECEWISE_LINEAR);
 
 /**
  * Action class for creating constraints, kernels, and user objects necessary for mechanical
