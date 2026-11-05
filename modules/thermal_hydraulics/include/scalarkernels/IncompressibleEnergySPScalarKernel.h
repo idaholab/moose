@@ -11,14 +11,15 @@
 
 #include "ADScalarKernel.h"
 #include "ScalarKernel.h"
-#include "FunctorInterface.h"
 
 class SinglePhaseFluidProperties;
 
+/**
+ * Path-integrated incompressible energy kernel
+ */
 template <bool is_ad>
 class IncompressibleEnergySPScalarKernelTempl
-  : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type,
-    public FunctorInterface
+  : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type
 {
   using Base = typename std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type;
 

@@ -96,7 +96,12 @@ f = \max\left(\frac{f_{turb} - f_{lam}}{1700} f_{turb} + f_{lam}, \max(f_{turb},
 The heat transfer coefficient is computed using the Dittus-Boelter correlation [!citep](dittus1930heat):
 
 !equation id=dittus_boelter
-h = 0.023 Re^{0.8} Pr^{0.4} \,
+h = 0.023 Re^{0.8} Pr^{0.4} \frac{k_f}{D_h} \,
+
+where the fluid properties entering $Re$ and $Pr$ are evaluated at the segment's bulk film
+temperature, the mean of the segment fluid temperature and its upwinded inlet value. For
+the conjugate heat transfer kernels below, this coefficient is supplied by
+[ADDittusBoelterHTCFunctorMaterial.md].
 
 ## Junctions
 
@@ -106,3 +111,80 @@ The above equations are valid for 1D flow paths only; for a flow junction, the m
 \dot{m}_{in} = \dot{m}_{out} \,
 
 Typically, it is sufficient to assume that negligible momentum and energy transfer occurs at a junction.
+
+## Conjugate Heat Transfer
+
+The flow energy equation above is designed to couple to a variable segment wall temperature. For convenience and modularity, additional conjugate heat transfer kernels are added to close the heat transfer through the solid bounding wall. The area-averaged governing equation for which is:
+
+!equation id=pipe_CHT_conservation
+A_w \rho_w c_{p,w} \pd{T_w}{t} = \nabla \cdot \left (k_w \nabla T_w \right ) + q_{i,w}^{''} P_{i,w} - q_{o,w}^{''} P_{o,w}
+
+where
+
+- $A_w$ is the cross-sectional area of the wall,
+- $\rho_w$ is the density of the wall,
+- $c_{p,w}$ is the specific isobaric heat capacity of the wall,
+- $T_w$ is the temperature of the wall,
+- $k_w$ is the thermal conductivity of the wall,
+- $q_{i,w}^{''}$ is the heat flux entering the inner surface of the wall,
+- $q_{o,w}^{''}$ is the heat flux exiting the outer surface of the wall,
+- $P_{i,w}$ is the perimeter of the inner surface of the cross-section, and
+- $P_{o,w}$ is the perimeter of the outer surface of the cross-section.
+
+This equation is discretized on a per-segment basis to match what is done in [!eqref](discretized_energy). Furthermore, the wall is discretized into two nodes through the thickness to capture the inner wall temperature and the outer wall temperature, as shown in [fig:pipe_CHT_discretization].
+
+!media modules/thermal_hydraulics/media/conjugate-heat-transfer_pipe_cross_section.png
+       id=fig:pipe_CHT_discretization
+       caption=Conjugate heat transfer illustration for a simple pipe.
+       style=width:50%;display:block;margin-left:auto;margin-right:auto;text-align:center;
+
+Thus, the discretized energy equation for the inner wall temperature is:
+
+!equation id=discretized_inner_pipe_temperature
+A_{i,w} \rho_w c_{p,w} \pd{T_{i,w}}{t} = \frac{k_w P_{m,w} \left( T_{o,w} - T_{i,w} \right)}{\delta} +
+\frac{G_{i,u} \left( T_{i,u} - T_{i,w} \right) + G_{i,d} \left( T_{i,d} - T_{i,w} \right)}{L} +
+h \frac{P_{i,w}}{2} \left( T_f + T_{in} - 2T_{i,w} \right)
+
+where
+
+- $A_{i,w}$ is the cross-sectional area of the inner layer of the wall,
+- $T_{i,w}$ is the temperature of the inner surface of the wall,
+- $T_{o,w}$ is the temperature of the outer surface of the wall,
+- $P_{m,w}$ is the perimeter of the mid-thickness dividing line that represents the boundary between the inner layer and the outer layer of the wall,
+- $\delta$ is the thickness of the wall,
+- $L$ is the segment length,
+- $h$ is the heat transfer coefficient of the fluid,
+- $T_f$ is the fluid temperature of the segment (defined at the outlet of the segment, as mentioned before), and
+- $T_{in}$ is the fluid temperature at the inlet of the segment.
+
+$G_{i,u}$ and $G_{i,d}$ are the axial face conductances to the upstream and downstream inner wall nodes. Each is the harmonic mean of two half-length conduction resistances in series across the face, accounting for the upstream/downstream node potentially having a different cross-section than this node:
+
+!equation id=upstream_axial_conductance
+G_{i,u} = \left( \frac{\Delta x_u}{2 k_w A_{i,w}} + \frac{\Delta x_u}{2 k_u A_{i,u}} \right)^{-1}
+
+!equation id=downstream_axial_conductance
+G_{i,d} = \left( \frac{\Delta x_d}{2 k_w A_{i,w}} + \frac{\Delta x_d}{2 k_d A_{i,d}} \right)^{-1}
+
+where
+
+- $\Delta x_u$ and $\Delta x_d$ are the axial spacings to the upstream and downstream nodes, related to lengths via $\Delta x_u = L/2 + L_u/2$,
+- $k_u$ and $k_d$ are the wall conductivity evaluated at the upstream and downstream node's own temperature, and
+- $A_{i,u}$ and $A_{i,d}$ are the layer area evaluated at the upstream and downstream node's own cross-section.
+
+Similarly, the discretized energy equation for the outer wall temperature is:
+
+!equation id=discretized_outer_pipe_temperature
+A_{o,w} \rho_w c_{p,w} \pd{T_{o,w}}{t} = \frac{k_w P_{m,w} \left( T_{i,w} - T_{o,w} \right)}{\delta} +
+\frac{G_{o,u} \left( T_{o,u} - T_{o,w} \right) + G_{o,d} \left( T_{o,d} - T_{o,w} \right)}{L} + q_o^{'}
+
+where
+
+- $q_o^{'}$ is the per-length heat transfer term through the outer boundary.
+
+Since the outer boundary of the wall may be subject to a number of boundary conditions, a number of kernels are provided for flexibility in modeling the per-length heat transfer term. The base kernels include:
+
+- Ambient convection: [ADPipeOuterWallAmbientTemperatureScalarKernel.md]
+- Coupled secondary-side convection: [ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel.md]
+- Applied heat flux: [ADPipeOuterWallHeatFluxScalarKernel.md]
+
+An optional standalone term for radiative heat transfer [ADPipeOuterWallRadiationScalarKernel.md] may also be added to any of the base outer wall temperature kernels (but it really only makes sense for the ambient and coupled convection kernels).

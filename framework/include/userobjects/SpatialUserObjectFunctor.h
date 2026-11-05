@@ -33,6 +33,7 @@ protected:
   using ElemPointArg = Moose::ElemPointArg;
   using NodeArg = Moose::NodeArg;
 
+  using Moose::FunctorBase<Real>::evaluate;
   virtual Real evaluate(const ElemArg & elem, const Moose::StateArg & state) const override;
   virtual Real evaluate(const FaceArg & face, const Moose::StateArg & state) const override final;
   virtual Real evaluate(const ElemQpArg & qp, const Moose::StateArg & state) const override;

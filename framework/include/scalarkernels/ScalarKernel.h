@@ -10,8 +10,9 @@
 #pragma once
 
 #include "ScalarKernelBase.h"
+#include "NonADFunctorInterface.h"
 
-class ScalarKernel : public ScalarKernelBase
+class ScalarKernel : public ScalarKernelBase, public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
