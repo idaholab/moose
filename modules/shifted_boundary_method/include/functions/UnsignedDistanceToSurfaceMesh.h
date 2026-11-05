@@ -33,7 +33,7 @@ public:
 
   UnsignedDistanceToSurfaceMesh(const InputParameters & parameters);
 
-  /// find closest boundary element using KDTree
+  /// find closest boundary element using k-d tree
   const SurfaceElement & closestBoundaryElem(const Point & p) const;
 
   /// find closest boundary element and return its distance vector

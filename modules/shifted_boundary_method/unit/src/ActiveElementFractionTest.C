@@ -52,17 +52,17 @@ TEST(ActiveElementFractionTest, UnitSquare)
   const auto fully_occupied = SBMUtils::elementDomainOccupancy(*elem, SECOND, all_active);
   EXPECT_TRUE(fully_occupied.all_nodes_in_domain);
   EXPECT_FALSE(fully_occupied.all_nodes_outside_domain);
-  EXPECT_NEAR(fully_occupied.domain_fraction, 1.0, 1e-12);
+  EXPECT_NEAR(fully_occupied.fraction_of_element_in_domain, 1.0, 1e-12);
 
   const auto unoccupied = SBMUtils::elementDomainOccupancy(*elem, SECOND, none_active);
   EXPECT_FALSE(unoccupied.all_nodes_in_domain);
   EXPECT_TRUE(unoccupied.all_nodes_outside_domain);
-  EXPECT_NEAR(unoccupied.domain_fraction, 0.0, 1e-12);
+  EXPECT_NEAR(unoccupied.fraction_of_element_in_domain, 0.0, 1e-12);
 
   const auto partially_occupied = SBMUtils::elementDomainOccupancy(*elem, SECOND, left_half);
   EXPECT_FALSE(partially_occupied.all_nodes_in_domain);
   EXPECT_FALSE(partially_occupied.all_nodes_outside_domain);
-  EXPECT_NEAR(partially_occupied.domain_fraction, 0.5, 1e-12);
+  EXPECT_NEAR(partially_occupied.fraction_of_element_in_domain, 0.5, 1e-12);
 }
 
 // Nodal and quadrature occupancy are independent measurements. This predicate excludes every
@@ -95,7 +95,7 @@ TEST(ElementDomainOccupancyTest, DomainEnclosedWithinElement)
   const auto occupancy = SBMUtils::elementDomainOccupancy(*elem, SECOND, centered_domain);
   EXPECT_FALSE(occupancy.all_nodes_in_domain);
   EXPECT_TRUE(occupancy.all_nodes_outside_domain);
-  EXPECT_NEAR(occupancy.domain_fraction, 1.0, 1e-12);
+  EXPECT_NEAR(occupancy.fraction_of_element_in_domain, 1.0, 1e-12);
 
   const auto signed_value = [](const Point & p)
   { return p(0) * (1.0 - p(0)) * p(1) * (1.0 - p(1)); };
@@ -106,5 +106,5 @@ TEST(ElementDomainOccupancyTest, DomainEnclosedWithinElement)
       SBMUtils::elementDomainOccupancy(*elem, SECOND, is_in_domain, is_outside_domain);
   EXPECT_FALSE(boundary_occupancy.all_nodes_in_domain);
   EXPECT_FALSE(boundary_occupancy.all_nodes_outside_domain);
-  EXPECT_NEAR(boundary_occupancy.domain_fraction, 1.0, 1e-12);
+  EXPECT_NEAR(boundary_occupancy.fraction_of_element_in_domain, 1.0, 1e-12);
 }

@@ -28,7 +28,7 @@ UnsignedDistanceToSurfaceMesh::validParams()
   params.addParam<SubdomainID>("subdomain_id_2", "Second subdomain defining the interface.");
 
   params.addClassDescription(
-      "Returns unsigned distance to a surface mesh using KDTree nearest neighbor search. "
+      "Returns unsigned distance to a surface mesh using k-d tree nearest neighbor search. "
       "The gradient returns the unit vector pointing from boundary to query point.");
   return params;
 }
@@ -81,7 +81,7 @@ UnsignedDistanceToSurfaceMesh::initialSetup()
 const SurfaceElement &
 UnsignedDistanceToSurfaceMesh::closestBoundaryElem(const Point & p) const
 {
-  // KDTree nearest neighbor search
+  // k-d tree nearest neighbor search
   std::vector<std::size_t> ret_index(1);
   _kd_tree->neighborSearch(p, 1, ret_index);
 

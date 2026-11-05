@@ -27,7 +27,7 @@ SBMInterfaceManager::validParams()
       "complete_interface_mesh",
       "The saved mesh containing the complete boundary of each interface subdomain.");
   params.addRangeCheckedParam<unsigned int>(
-      "leaf_max_size", 10, "leaf_max_size > 0", "Maximum number of points in a KDTree leaf.");
+      "leaf_max_size", 10, "leaf_max_size > 0", "Maximum number of points in a k-d tree leaf.");
   params.addRangeCheckedParam<Real>(
       "tolerance",
       libMesh::TOLERANCE,
@@ -38,8 +38,9 @@ SBMInterfaceManager::validParams()
                                     "normal_tolerance >= 0",
                                     "Tolerance for comparing unit face normals.");
   params.addClassDescription(
-      "Detects interfaces between subdomains in one per-subdomain surface mesh and provides "
-      "distance and normal queries for each interface.");
+      "Detects shared interfaces between subdomains in a single surface mesh that contains the "
+      "complete boundary of each subdomain, and provides distance and normal queries for each "
+      "interface.");
   return params;
 }
 

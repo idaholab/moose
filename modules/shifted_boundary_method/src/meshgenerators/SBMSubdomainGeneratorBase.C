@@ -15,7 +15,7 @@ SBMSubdomainGeneratorBase::validParams()
   InputParameters params = MeshGenerator::validParams();
   params += SBMElementClassificationInterface::validParams();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
+  params.addRequiredParam<MeshGeneratorName>("input", "The mesh to modify");
 
   return params;
 }

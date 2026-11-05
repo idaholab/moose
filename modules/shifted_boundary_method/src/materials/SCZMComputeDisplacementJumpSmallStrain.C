@@ -17,8 +17,8 @@ InputParameters
 SCZMComputeDisplacementJumpSmallStrainTempl<is_ad>::validParams()
 {
   InputParameters params = SCZMComputeDisplacementJumpBase<is_ad>::validParams();
-  params.addClassDescription("Compute the total displacement jump across a czm interface in local "
-                             "coordinates for the Small Strain kinematic formulation");
+  params.addClassDescription("Compute the total displacement jump across a true interface in local "
+                             "coordinates for the small strain kinematic formulation");
 
   return params;
 }

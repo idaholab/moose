@@ -16,6 +16,10 @@
 class Function;
 class SBMInterfaceManager;
 
+/**
+ * Computes and stores the distance vectors and true surface normals from surrogate boundary
+ * quadrature points to the true interface, for use in shifted boundary / interface methods.
+ */
 class BoundaryShortestDistanceToSurface : public SideUserObject
 {
 public:
@@ -39,13 +43,13 @@ protected:
   /// Local distance functions when no external distance user object is supplied.
   std::vector<const Function *> _distance_functions;
 
-  /// distance
+  /// Distance vectors to the true interface at each quadrature point on an element side
   std::map<ElemSide, std::vector<RealVectorValue>> _distance_vectors;
 
-  /// normal
+  /// True interface normals at projected quadrature points on an element side
   mutable std::map<ElemSide, std::vector<RealVectorValue>> _normal_vectors;
 
-  /// side id to index map
+  /// Map from boundary ID to internal distance function index
   std::map<BoundaryID, unsigned int> _side_id_index;
 
   /// Optional manager supplying geometry for interfaces in a single surface mesh.

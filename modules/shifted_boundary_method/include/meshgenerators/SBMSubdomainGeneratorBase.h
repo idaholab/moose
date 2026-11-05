@@ -23,6 +23,6 @@ public:
   SBMSubdomainGeneratorBase(const InputParameters & parameters);
 
 protected:
-  /// The input mesh we want to modify
+  /// The input mesh to modify
   std::unique_ptr<libMesh::MeshBase> & _input;
 };

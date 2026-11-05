@@ -100,14 +100,15 @@ selectSubdomainFromOccupancies(const std::vector<SubdomainOccupancy> & candidate
   for (const auto & candidate : candidate_occupancies)
   {
     const auto & occupancy = candidate.occupancy;
-    if (occupancy.all_nodes_in_domain && occupancy.domain_fraction == 1.0)
+    if (occupancy.all_nodes_in_domain && occupancy.fraction_of_element_in_domain == 1.0)
     {
       if (!fully_inside_subdomain || candidate.subdomain_id < *fully_inside_subdomain)
         fully_inside_subdomain = candidate.subdomain_id;
     }
-    else if ((!occupancy.all_nodes_outside_domain || occupancy.domain_fraction > 0.0) &&
-             occupancy.domain_fraction >= max_fraction)
-      max_fraction = occupancy.domain_fraction;
+    else if ((!occupancy.all_nodes_outside_domain ||
+              occupancy.fraction_of_element_in_domain > 0.0) &&
+             occupancy.fraction_of_element_in_domain >= max_fraction)
+      max_fraction = occupancy.fraction_of_element_in_domain;
   }
 
   if (fully_inside_subdomain)
@@ -115,8 +116,9 @@ selectSubdomainFromOccupancies(const std::vector<SubdomainOccupancy> & candidate
 
   for (const auto & candidate : candidate_occupancies)
     if ((!candidate.occupancy.all_nodes_outside_domain ||
-         candidate.occupancy.domain_fraction > 0.0) &&
-        MooseUtils::absoluteFuzzyEqual(candidate.occupancy.domain_fraction, max_fraction) &&
+         candidate.occupancy.fraction_of_element_in_domain > 0.0) &&
+        MooseUtils::absoluteFuzzyEqual(candidate.occupancy.fraction_of_element_in_domain,
+                                       max_fraction) &&
         (!best_partial_subdomain || candidate.subdomain_id < *best_partial_subdomain))
       best_partial_subdomain = candidate.subdomain_id;
 
@@ -142,17 +144,17 @@ classifySubdomainFromOccupancy(const ElementDomainOccupancy & occupancy,
   // within it. Quadrature sampling detects most such cases, but may miss very small regions.
   // Exact endpoint comparisons are intentional: activeElementFraction returns exactly zero
   // or one when no or all quadrature points are in the retained domain, respectively.
-  if (occupancy.all_nodes_in_domain && occupancy.domain_fraction == 1.0)
+  if (occupancy.all_nodes_in_domain && occupancy.fraction_of_element_in_domain == 1.0)
     return subdomain_id_settings.inside;
 
-  if (occupancy.all_nodes_outside_domain && occupancy.domain_fraction == 0.0)
+  if (occupancy.all_nodes_outside_domain && occupancy.fraction_of_element_in_domain == 0.0)
     return subdomain_id_settings.outside;
 
   if (mark_intercepted)
     return subdomain_id_settings.intercepted;
 
-  return isInactive(occupancy.domain_fraction, lambda) ? subdomain_id_settings.outside
-                                                       : subdomain_id_settings.inside;
+  return isInactive(occupancy.fraction_of_element_in_domain, lambda) ? subdomain_id_settings.outside
+                                                                     : subdomain_id_settings.inside;
 }
 
 bool

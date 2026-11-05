@@ -39,27 +39,29 @@ Real activeElementFraction(const Elem & elem,
 /// accepts a partially active element.
 bool isInactive(Real active_fraction, Real lambda);
 
-/// Measurements of how the retained domain occupies an element. The node flags and
-/// quadrature-based domain fraction are complementary: the node flags catch a surface that clips
-/// only a corner, while the fraction catches a surface enclosed within the element.
+/// Results of testing an element against a domain. Node checks can detect a surface crossing
+/// a corner, while quadrature points can detect a domain enclosed within the element.
 struct ElementDomainOccupancy
 {
   /// Whether all element nodes lie in the retained domain.
   bool all_nodes_in_domain;
   /// Whether all element nodes lie outside the retained domain.
   bool all_nodes_outside_domain;
-  /// Fraction of the element's quadrature-weighted measure occupied by the retained domain.
-  Real domain_fraction;
+  /// Quadrature-based estimate of the fraction of this element inside the domain.
+  Real fraction_of_element_in_domain;
 };
 
-/// Measure how a domain occupies an element based on its nodes, quadrature points, and the
-/// in-domain policy.
+/// Test an element against the domain defined by is_in_domain.
+/// The result says whether all nodes are in or out of the domain and estimates the fraction of
+/// the element inside it using quadrature points. is_in_domain decides if a point belongs to the
+/// domain.
 ElementDomainOccupancy
 elementDomainOccupancy(const Elem & elem,
                        Order qrule_order,
                        const std::function<bool(const libMesh::Point &)> & is_in_domain);
 
-/// Measure domain occupancy when boundary points are neither in nor outside the domain.
+/// As above, but use is_outside_domain to test nodes separately. This allows boundary nodes to
+/// be neither inside nor outside the domain.
 ElementDomainOccupancy
 elementDomainOccupancy(const Elem & elem,
                        Order qrule_order,

@@ -16,6 +16,10 @@
 #include "SurfaceTri3.h"
 #include "AdaptiveRayContainmentCheck.h"
 
+/**
+ * Assigns grain subdomain IDs to a volume mesh based on watertight closed boundaries
+ * in an external boundary mesh, using ray casting accelerated by a k-d tree.
+ */
 class SubdomainGrainIDGenerator : public SBMSubdomainGeneratorBase
 {
 public:
@@ -25,13 +29,18 @@ public:
   std::unique_ptr<libMesh::MeshBase> generate() override;
 
 protected:
+  /// Cache of bounding box and checker pointers for fast spatial queries
   struct SubdomainCheckerEntry
   {
+    /// Subdomain ID associated with this checker
     SubdomainID subdomain_id;
+    /// Bounding box enclosing the surface elements of this subdomain
     BoundingBox bbox;
+    /// Pointer to the ray-casting containment checker for this subdomain
     AdaptiveRayContainmentCheck * checker;
   };
 
+  /// Reference to the external boundary mesh defining grain boundaries
   std::unique_ptr<libMesh::MeshBase> & _boundary_mesh;
 
 protected:
@@ -54,7 +63,7 @@ protected:
 
   /// eps for intersection or on surface checking
   Real _eps;
-  /// Maximum number of elements in a leaf node of the KD-tree
+  /// Maximum number of boundary-element centroids in a leaf node of the k-d tree
   unsigned int _leaf_max_size;
 
   /// The boundary mesh to use for identifying grain IDs

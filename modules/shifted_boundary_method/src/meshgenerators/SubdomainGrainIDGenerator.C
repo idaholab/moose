@@ -35,7 +35,9 @@ SubdomainGrainIDGenerator::validParams()
       "leaf_max_size",
       10,
       "leaf_max_size > 0",
-      "Maximum number of elements in a leaf node of the KD-tree.");
+      "Maximum number of boundary-element centroids per leaf node in the k-d tree "
+      "used to accelerate ray-casting point-in-grain checks. Tuning this parameter "
+      "only affects search performance, not the assigned subdomain IDs.");
 
   params.addClassDescription(
       "Based on the boundary_mesh, which contains distinct grain boundaries as separate "

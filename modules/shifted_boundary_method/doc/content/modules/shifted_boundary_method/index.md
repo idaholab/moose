@@ -28,9 +28,15 @@ Each surrogate domain or grain consists of complete background-mesh elements. Th
 [`PointInSubdomainCheckUO`](source/userobjects/PointInSubdomainCheckUO.md) performs
 point-in-polyhedron tests against closed surface meshes, and the
 [`SubdomainElementModifier`](source/meshmodifiers/SubdomainElementModifier.md) uses
-those tests to assign elements to surrogate subdomains. Faces separating active and
-inactive elements form a surrogate boundary. For polycrystalline finite element models,
-faces separating elements assigned to different grains form surrogate grain interfaces.
+those tests to assign elements to surrogate subdomains. Alternatively, surrogate domains
+can be constructed directly in the `[Mesh]` block using dedicated mesh generators:
+[`SubdomainInterceptedGenerator`](source/meshgenerators/SubdomainInterceptedGenerator.md)
+classifies elements based on analytical signed distance functions, while
+[`SubdomainGrainIDGenerator`](source/meshgenerators/SubdomainGrainIDGenerator.md)
+assigns grain subdomain IDs from closed surface boundary meshes.
+Faces separating active and inactive elements form a surrogate boundary. For polycrystalline
+finite element models, faces separating elements assigned to different grains form surrogate
+grain interfaces.
 
 ## Distance vectors and true normals
 

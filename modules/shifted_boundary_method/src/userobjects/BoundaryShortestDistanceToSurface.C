@@ -40,7 +40,11 @@ BoundaryShortestDistanceToSurface::validParams()
 
   params.addParam<bool>("debug_output", false, "If true, debug output will be enabled.");
 
-  params.addClassDescription("Provides surrogateDistance and trueNormal via function or KDTree.");
+  params.addClassDescription(
+      "Provides, at each quadrature point on a (surrogate) boundary, the vector from that point "
+      "to its projection on the true surface, together with the true surface normal there. The "
+      "true surface may be described by level-set/distance functions or a mesh-based "
+      "representation.");
   return params;
 }
 
@@ -235,18 +239,27 @@ BoundaryShortestDistanceToSurface::surrogateDistance(const ElemSide & elem_side,
                elem_side.second,
                ".");
 
-  // Warn if the distance is larger than the element size
+  // Characteristic element length from volume, and maximum diagonal span across the element
+  const auto & distance = distance_it->second.at(qp);
   const auto dim = _mesh.dimension();
   const auto * elem = _mesh.elemPtr(elem_side.first);
-  Real h = std::pow(elem->volume(), 1.0 / dim);
+  const Real h = std::pow(elem->volume(), 1.0 / dim);
+  const Real element_diagonal = std::sqrt(dim) * h;
 
-  if (distance_it->second.at(qp).norm() > std::sqrt(dim) * h && !_suppress_distance_warning)
-    mooseWarning(
-        "Distance exceeds the estimated element scale. "
-        "This may indicate an inaccurate distance function or an incorrect surface selection. "
-        "Please verify the provided surface and distance function.");
+  if (distance.norm() > element_diagonal && !_suppress_distance_warning)
+    mooseWarning("Distance exceeds the estimated element scale on element ",
+                 elem_side.first,
+                 ", side ",
+                 elem_side.second,
+                 ": the distance from the surrogate boundary quadrature point to the true "
+                 "interface (",
+                 distance.norm(),
+                 ") is larger than the estimated element diagonal (",
+                 element_diagonal,
+                 "). This may indicate an incorrect interface selection or distance function. "
+                 "Please verify the interface geometry.");
 
-  return distance_it->second.at(qp);
+  return distance;
 }
 
 const RealVectorValue &

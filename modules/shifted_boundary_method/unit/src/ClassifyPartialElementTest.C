@@ -22,12 +22,12 @@ constexpr SBMUtils::InterceptedSubdomainPolicy DO_NOT_MARK_INTERCEPTED{false, IN
 SubdomainID
 classify(const bool all_nodes_in_domain,
          const bool all_nodes_outside_domain,
-         const Real domain_fraction,
+         const Real fraction_of_element_in_domain,
          const Real lambda,
          const bool mark_intercepted)
 {
   const SBMUtils::ElementDomainOccupancy occupancy{
-      all_nodes_in_domain, all_nodes_outside_domain, domain_fraction};
+      all_nodes_in_domain, all_nodes_outside_domain, fraction_of_element_in_domain};
   const SBMUtils::ClassificationSubdomains subdomain_id_settings{INSIDE, OUTSIDE, INTERCEPTED};
   return SBMUtils::classifySubdomainFromOccupancy(
       occupancy, subdomain_id_settings, mark_intercepted, lambda);

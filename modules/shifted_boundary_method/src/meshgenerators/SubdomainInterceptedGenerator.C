@@ -19,25 +19,53 @@ SubdomainInterceptedGenerator::validParams()
   params += FunctionParserUtils<false>::validParams();
 
   params.addRequiredParam<std::string>("signed_dist_function",
-                                       "Signed Distance Function to evaluate");
+                                       "Parsed function expression (in terms of x, y, and z) "
+                                       "defining the signed distance function to "
+                                       "the interface.");
 
-  params.addRequiredParam<SubdomainID>("subdomain_id_inside", "ID for inside elements.");
-  params.addRequiredParam<SubdomainID>("subdomain_id_outside", "ID for outside elements.");
+  params.addRequiredParam<SubdomainID>(
+      "subdomain_id_inside", "Subdomain ID to assign to elements categorized inside the domain.");
+  params.addRequiredParam<SubdomainID>(
+      "subdomain_id_outside", "Subdomain ID to assign to elements categorized outside the domain.");
 
-  params.addParam<Real>("threshold", 0.0, "Threshold for inside/outside classification.");
+  params.addParam<Real>(
+      "threshold", 0.0, "Level-set threshold value defining the interface boundary (default 0.0).");
   params.addRequiredParam<bool>(
       "is_domain_inside_surface",
-      "If true, the inside subdomain is the region enclosed by the surface (negative signed "
-      "distance side); if false, the inside subdomain is the exterior (positive side).");
-  params.addParam<bool>("multi_geo", false, "Do you have multiple geometries to do in-out test?");
-  params.addParam<bool>("keep_inside_as_inside", false, "Keep inside as inside.");
-  params.addParam<bool>("keep_outside_as_outside", false, "Keep outside as outside.");
+      "Whether the inside domain corresponds to the negative signed distance region (< threshold). "
+      "If true, points with signed distance < threshold are categorized as inside and > threshold "
+      "as outside. If false, points with signed distance > threshold are categorized as inside.");
+  params.addParam<bool>(
+      "multi_geo",
+      false,
+      "Whether to enable multi-geometry handling when chaining generators, allowing elements with "
+      "specific existing subdomain IDs to be preserved without reclassification (see "
+      "'keep_inside_as_inside' and 'keep_outside_as_outside').");
+  params.addParam<bool>("keep_inside_as_inside",
+                        false,
+                        "When 'multi_geo' is true, elements whose existing subdomain ID matches "
+                        "'subdomain_id_inside' "
+                        "are skipped, preserving their existing subdomain assignment.");
+  params.addParam<bool>(
+      "keep_outside_as_outside",
+      false,
+      "When 'multi_geo' is true, elements whose existing subdomain ID matches "
+      "'subdomain_id_outside' are skipped, preserving their existing subdomain assignment.");
 
-  params.addParam<bool>("modify_outside_only", false, "Only modify outside elements.");
-  params.addParam<bool>("modify_inside_only", false, "Only modify inside elements.");
+  params.addParam<bool>(
+      "modify_outside_only",
+      false,
+      "If true, only elements categorized as outside are updated to 'subdomain_id_outside'; "
+      "elements categorized as inside retain their existing subdomain IDs.");
+  params.addParam<bool>(
+      "modify_inside_only",
+      false,
+      "If true, only elements categorized as inside are updated to 'subdomain_id_inside'; elements "
+      "categorized as outside retain their existing subdomain IDs.");
 
-  params.addClassDescription("Base on the signed distance function to classify elements IN and OUT "
-                             "elements as different subdomains.");
+  params.addClassDescription("Classifies mesh elements into inside, outside, and optionally "
+                             "intercepted subdomains based on an analytical signed distance "
+                             "function expression.");
 
   return params;
 }

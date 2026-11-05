@@ -71,7 +71,7 @@
       cli_args = 'Mesh/grains/leaf_max_size=0'
       expect_err = 'Range check failed for parameter Mesh/grains/leaf_max_size'
       mesh_mode = REPLICATED
-      detail = 'if the maximum KD-tree leaf size is nonpositive.'
+      detail = 'if the maximum k-d tree leaf size is nonpositive.'
     []
     [surface_mesh_count_mismatch]
       type = RunException

@@ -14,7 +14,7 @@
 class PointInSurfaceCheckInterface;
 
 /**
- * Computes the signed distance to a surface mesh using KDTree nearest
+ * Computes the signed distance to a surface mesh using k-d tree nearest
  * neighbor lookup from SBMSurfaceMeshBuilder. The gradient returns the
  * unit vector pointing from the boundary element to the query point.
  */

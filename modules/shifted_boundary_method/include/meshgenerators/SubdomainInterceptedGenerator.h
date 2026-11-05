@@ -12,6 +12,10 @@
 #include "SBMSubdomainGeneratorBase.h"
 #include "FunctionParserUtils.h"
 
+/**
+ * Classifies mesh elements into inside, outside, and optionally intercepted subdomains
+ * based on an analytical signed distance function expression.
+ */
 class SubdomainInterceptedGenerator : public SBMSubdomainGeneratorBase,
                                       public FunctionParserUtils<false>
 {
@@ -26,23 +30,27 @@ protected:
   SymFunctionPtr _parsed_function;
 
 protected:
-  /// IDs for subdomain classification
+  /// Subdomain ID assigned to elements categorized inside the domain
   SubdomainID _subdomain_id_inside;
+  /// Subdomain ID assigned to elements categorized outside the domain
   SubdomainID _subdomain_id_outside;
 
-  /// Threshold value for classification
+  /// Level-set threshold value defining the interface boundary
   Real _threshold;
 
-  /// If true, the inside subdomain is the region enclosed by the surface (negative side)
+  /// Whether the inside domain corresponds to the negative signed distance region (< threshold)
   bool _is_domain_inside_surface;
 
-  /// for multi-geometry handling
+  /// Whether multi-geometry handling is enabled to skip previously assigned elements
   bool _multi_geo;
+  /// If multi_geo is true, whether to keep elements already matching subdomain_id_inside
   bool _keep_inside_as_inside;
+  /// If multi_geo is true, whether to keep elements already matching subdomain_id_outside
   bool _keep_outside_as_outside;
 
-  // Only modify outside elements (for multi-geometry handling)
+  /// If true, only modify outside elements; inside elements retain their existing subdomain IDs
   bool _modify_outside_only;
+  /// If true, only modify inside elements; outside elements retain their existing subdomain IDs
   bool _modify_inside_only;
 
   usingFunctionParserUtilsMembers(false);

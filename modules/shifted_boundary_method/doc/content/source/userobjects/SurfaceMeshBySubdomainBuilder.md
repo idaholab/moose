@@ -9,7 +9,7 @@ The per-subdomain sets are exposed for reuse by other objects in the simulation.
 As a subclass of [`BoundaryMeshBuilder`](userobjects/BoundaryMeshBuilder.md), it retrieves
 and validates the saved surface mesh: the mesh must be replicated (serial), and its
 dimension must be one less than the embedding mesh (e.g., a 2-D surface within a 3-D mesh).
-The KDTree used for nearest-neighbor queries is not built here; it is constructed by the
+The k-d tree used for nearest-neighbor queries is not built here; it is constructed by the
 consuming in-out tester ([`PointInSubdomainCheckUO`](userobjects/PointInSubdomainCheckUO.md))
 from these sets.
 
