@@ -70,19 +70,22 @@ GrandPotentialKernelAction::validParams()
   parameters.addRequiredParam<MultiMooseEnum>(
       "anisotropic", anisotropy, "Whether or not each mobility is anisotropic");
   parameters.addParam<std::vector<NonlinearVariableName>>(
-      "concentrations", "List of concentration variables for strict mass conservation");
+      "concentrations",
+      "List of concentration variables for strict mass conservation, one for each entry in "
+      "chemical_potentials");
   parameters.addParam<std::vector<MaterialPropertyName>>(
       "hj_c_min",
       {},
       "List of body forces coefficients for strict mass conservation formulation that indicates "
-      "the minima in concentration free energy."
-      "Place in same order as switching_function_names.");
+      "the minima in concentration free energy. Give one entry per phase for each chemical "
+      "potential: all phases of the first chemical potential in the order of "
+      "switching_function_names, then all phases of the second, and so on.");
   parameters.addParam<std::vector<MaterialPropertyName>>(
       "hj_over_kVa",
       {},
       "List of MatReaction coefficients for strict mass conservation formulation that relates "
-      "chemical potential with switching functionj between phases"
-      "Place in same order as switching_function_names.");
+      "chemical potential with switching functions between phases. Give one entry per phase for "
+      "each chemical potential, in the same order as hj_c_min.");
   return parameters;
 }
 
@@ -140,6 +143,21 @@ GrandPotentialKernelAction::act()
     mooseError("M and chemical_potentials should be vectors of the same length.");
   if (aniso.size() != n_w)
     paramError("anisotropic", "Provide as many values as entries in 'chemical_potentials'.");
+  if (mass_conservation)
+  {
+    c_names = getParam<std::vector<NonlinearVariableName>>("concentrations");
+    if (c_names.size() != n_w)
+      paramError("concentrations",
+                 "Provide as many concentrations as entries in 'chemical_potentials'.");
+    if (hj_c_min.size() != n_w * n_hj)
+      paramError("hj_c_min",
+                 "Provide length of 'chemical_potentials' * length of 'switching_function_names' "
+                 "values.");
+    if (hj_over_kVa.size() != n_w * n_hj)
+      paramError("hj_over_kVa",
+                 "Provide length of 'chemical_potentials' * length of 'switching_function_names' "
+                 "values.");
+  }
 
   // Define additional vectors
   std::vector<std::string> grs; // vector of all grain variable names
@@ -270,19 +288,7 @@ GrandPotentialKernelAction::act()
 
   if (mass_conservation) // mass conservation kernels with conc and chempot coupling
   {
-    c_names = getParam<std::vector<NonlinearVariableName>>("concentrations");
-    std::vector<VariableName> v3;
-    v3.resize(n_w);
-    for (unsigned int i = 0; i < n_w; ++i)
-      v3[i] = w_names[i];
-
-    std::vector<VariableName> v4;
-    unsigned int n_c = c_names.size();
-    v4.resize(n_c);
-    for (unsigned int i = 0; i < n_c; ++i)
-      v4[i] = c_names[i];
-
-    for (unsigned int i = 0; i < n_c; ++i)
+    for (const auto i : make_range(n_w))
     {
       // TimeDerivative concentration Kernel
       InputParameters params = _factory.getValidParams("TimeDerivative");
@@ -295,7 +301,7 @@ GrandPotentialKernelAction::act()
       // MatDiffusion concentration (coupled with chempot)
       params = _factory.getValidParams("PolycrystalMatDiffusion");
       params.set<NonlinearVariableName>("variable") = c_names[i];
-      params.set<std::vector<VariableName>>("v") = v3;
+      params.set<std::vector<VariableName>>("v") = {w_names[i]};
       params.set<bool>("implicit") = implicity;
       params.set<bool>("use_displaced_mesh") = displaced_mesh;
       params.set<MaterialPropertyName>("diffusivity") = M[i];
@@ -314,12 +320,12 @@ GrandPotentialKernelAction::act()
     }
 
     // Chemical Potentials
-    for (unsigned int i = 0; i < n_w; ++i)
+    for (const auto i : make_range(n_w))
     {
       // coupling of c and w
       InputParameters params = _factory.getValidParams("MatReaction");
       params.set<NonlinearVariableName>("variable") = w_names[i];
-      params.set<std::vector<VariableName>>("v") = v4;
+      params.set<std::vector<VariableName>>("v") = {c_names[i]};
       params.set<MaterialPropertyName>("reaction_rate") = "-1";
       kernel_name = "MR_c" + w_names[i];
       _problem->addKernel("MatReaction", kernel_name, params);
@@ -327,13 +333,13 @@ GrandPotentialKernelAction::act()
       // contribution between chempot and each grains to concentration
       // Summations of MatReaction and MaskedBodyForce
 
-      for (unsigned int j = 0; j < n_hj; ++j)
+      for (const auto j : make_range(n_hj))
       {
         // MatReaction
         params = _factory.getValidParams("MatReaction");
         params.set<NonlinearVariableName>("variable") = w_names[i];
         params.set<std::vector<VariableName>>("args") = v1;
-        params.set<MaterialPropertyName>("reaction_rate") = hj_over_kVa[j];
+        params.set<MaterialPropertyName>("reaction_rate") = hj_over_kVa[i * n_hj + j];
         params.set<bool>("implicit") = implicity;
         params.set<bool>("use_displaced_mesh") = displaced_mesh;
         kernel_name = "MR_" + w_names[i] + "_" + all_etas[j];
@@ -343,7 +349,7 @@ GrandPotentialKernelAction::act()
         InputParameters params = _factory.getValidParams("MaskedBodyForce");
         params.set<NonlinearVariableName>("variable") = w_names[i];
         params.set<std::vector<VariableName>>("coupled_variables") = v1;
-        params.set<MaterialPropertyName>("mask") = hj_c_min[j];
+        params.set<MaterialPropertyName>("mask") = hj_c_min[i * n_hj + j];
         params.set<bool>("implicit") = implicity;
         params.set<bool>("use_displaced_mesh") = displaced_mesh;
         kernel_name = "MBD_" + w_names[i] + "_" + all_etas[j];
