@@ -366,7 +366,8 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, inverseRange)
   const Real v = 1;
   // 60 geometric intervals place consecutive temperatures about 7% apart
   const unsigned int n = 60;
-  for (const std::string species : {"H2", "O2", "H2O", "CH4", "CO", "CO2", "N2"})
+  for (const std::string species :
+       {"H2", "O2", "H2O", "CH4", "CO", "CO2", "N2", "He", "Ar", "Kr", "Xe"})
   {
     const std::string name = "sweep_" + species;
     const auto & fp = buildFluidProperties(species, name);
@@ -429,6 +430,77 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, transport)
   }
 }
 
+TEST_F(NASA7IdealGasFluidPropertiesTest, nobleGases)
+{
+  // Standard molar entropies at 298.15 K and 1 bar from the NIST-JANAF tables [J/(mol K)], which
+  // are given to 0.001 J/(mol K). The data of McBride et al. reproduce them to that resolution once
+  // referred to 1 bar.
+  const Real T_ref = 298.15;
+  const Real p_ref = 1e5;
+  const Real tol_s = 2e-3;
+  // Viscosities [Pa s] and thermal conductivities [W/(m K)] at 1e5 Pa from the NIST Chemistry
+  // WebBook, which include the small effect of density at this pressure, at the highest
+  // temperatures the WebBook provides up to 1500 K. The tolerance bounds the deviations at these
+  // states.
+  const Real tol_transport = 0.025;
+  struct Reference
+  {
+    std::string species;
+    Real s;
+    Real T;
+    Real mu;
+    Real k;
+  };
+  const std::vector<Reference> references = {{"He", 126.152, 300, 19.930e-6, 0.15597},
+                                             {"He", 126.152, 1500, 61.547e-6, 0.47900},
+                                             {"Ar", 154.845, 300, 22.741e-6, 0.017837},
+                                             {"Ar", 154.845, 1500, 72.755e-6, 0.056824},
+                                             {"Kr", 164.084, 300, 25.480e-6, 0.0094914},
+                                             {"Kr", 164.084, 600, 44.740e-6, 0.016653},
+                                             {"Xe", 169.684, 300, 23.194e-6, 0.0055193},
+                                             {"Xe", 169.684, 600, 43.295e-6, 0.010288}};
+
+  for (const auto & ref : references)
+  {
+    const auto & fp = buildFluidProperties(
+        ref.species, "noble_" + ref.species + "_" + std::to_string(static_cast<int>(ref.T)));
+    const Real M = fp.molarMass();
+    EXPECT_NEAR(fp.s_from_p_T(p_ref, T_ref) * M, ref.s, tol_s) << ref.species;
+
+    // A monatomic ideal gas has cp = 5/2 R / M at all temperatures. The tolerance bounds the
+    // roundoff of the exact 5/2 of He, Ar, and Kr and the polynomial corrections of Xe, which are
+    // about 5e-12 relative at the temperatures tested here and grow to order 1e-6 above 1000 K,
+    // where its high-temperature polynomial applies.
+    REL_TEST(fp.cp_from_p_T(p_ref, ref.T), 2.5 * FluidProperties::_R / M, 1e-10);
+
+    REL_TEST(fp.mu_from_p_T(p_ref, ref.T), ref.mu, tol_transport);
+    REL_TEST(fp.k_from_p_T(p_ref, ref.T), ref.k, tol_transport);
+  }
+
+  // The viscosity of He is that of HeliumFluidProperties, and its thermal conductivity is that
+  // of HeliumFluidProperties in the limit of zero pressure
+  InputParameters params = _factory.getValidParams("HeliumFluidProperties");
+  _fe_problem->addUserObject("HeliumFluidProperties", "helium", params);
+  const auto & helium = _fe_problem->getUserObject<SinglePhaseFluidProperties>("helium");
+  const auto & fp_he = buildFluidProperties("He", "he");
+  for (const Real T : {300.0, 900.0, 1500.0})
+  {
+    REL_TEST(fp_he.mu_from_p_T(1e5, T), helium.mu_from_p_T(1e5, T), REL_TOL_CONSISTENCY);
+    REL_TEST(fp_he.k_from_p_T(1e5, T), helium.k_from_p_T(0, T), REL_TOL_CONSISTENCY);
+  }
+
+  // The helium transport correlations are fitted from 273.15 K to 1800 K, and evaluations outside
+  // that range are counted as solution warnings
+  const auto warnings = flagCount(*_app, true);
+  fp_he.mu_from_p_T(1e5, 1500);
+  fp_he.k_from_p_T(1e5, 1500);
+  EXPECT_EQ(flagCount(*_app, true), warnings);
+  fp_he.mu_from_p_T(1e5, 2000);
+  EXPECT_EQ(flagCount(*_app, true), warnings + 1);
+  fp_he.k_from_p_T(1e5, 2000);
+  EXPECT_EQ(flagCount(*_app, true), warnings + 2);
+}
+
 TEST_F(NASA7IdealGasFluidPropertiesTest, steamTransportRange)
 {
   // 1500 K lies inside the range of the H2O data, 200 K to 3500 K, but above that of the IAPWS
@@ -453,7 +525,8 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, densityFromEntropy)
   // geometrically from half the lower end of the range of its data to 1.5 times the upper end
   // 60 geometric intervals place consecutive temperatures about 7% apart
   const unsigned int n = 60;
-  for (const std::string species : {"H2", "O2", "H2O", "CH4", "CO", "CO2", "N2"})
+  for (const std::string species :
+       {"H2", "O2", "H2O", "CH4", "CO", "CO2", "N2", "He", "Ar", "Kr", "Xe"})
   {
     const auto & fp = buildFluidProperties(species, "entropy_" + species);
     const auto & data = NASA7::speciesData(species);

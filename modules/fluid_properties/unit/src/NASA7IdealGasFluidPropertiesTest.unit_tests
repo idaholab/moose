@@ -48,6 +48,12 @@
     issues = '#34223'
     requirement = 'The system shall compute the viscosity and thermal conductivity of an ideal gas from NASA 7-coefficient polynomials, from kinetic theory for nitrogen, hydrogen, methane, and carbon dioxide and from the IAPWS low-density formulations for steam, in agreement with the fluid properties of the real fluids at low pressure, and with the same values from the (pressure, temperature) and (specific volume, internal energy) variable sets.'
   []
+  [noble_gases]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.nobleGases
+    issues = '#34322'
+    requirement = 'The system shall compute the properties of helium, argon, krypton, and xenon as ideal gases from NASA 7-coefficient polynomials, with a constant isobaric specific heat of 5/2 times the gas constant, standard entropies matching the NIST-JANAF tables, viscosities and thermal conductivities at low pressure matching the NIST Chemistry WebBook, and for helium the viscosity and zero-pressure thermal conductivity of HeliumFluidProperties, and shall count each evaluation of the helium viscosity or thermal conductivity outside the range of validity of its correlations as a solution warning.'
+  []
   [steam_transport_range]
     type = GoogleTest
     unit_test = NASA7IdealGasFluidPropertiesTest.steamTransportRange

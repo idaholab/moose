@@ -81,6 +81,8 @@ private:
   const GasTransportUtils::LennardJonesParameters _lennard_jones;
   /// Whether the species is steam, whose viscosity and thermal conductivity come from IAPWS
   const bool _is_steam;
+  /// Whether the species is helium, whose viscosity and thermal conductivity come from Petersen
+  const bool _is_helium;
 
   /**
    * Flags a temperature outside the range of the data as a solution warning, because the

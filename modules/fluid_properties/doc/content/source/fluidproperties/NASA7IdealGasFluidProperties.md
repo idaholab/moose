@@ -5,8 +5,9 @@
 This class implements an ideal gas whose heat capacity, enthalpy, and entropy depend on
 temperature through the NASA 7-coefficient polynomials [!citep](mcbride1993) of a built-in
 species. The species is selected with [!param](/FluidProperties/NASA7IdealGasFluidProperties/species):
-H$_2$, O$_2$, H$_2$O, CH$_4$, CO, CO$_2$, or N$_2$. The data are those of GRI-Mech 3.0
-[!citep](smith_grimech30) as distributed with Cantera 3.2.0 [!citep](cantera320); the polynomials,
+H$_2$, O$_2$, H$_2$O, CH$_4$, CO, CO$_2$, N$_2$, He, Ar, Kr, or Xe. The data are those of
+GRI-Mech 3.0 [!citep](smith_grimech30) and, for the noble gases, of [!citet](mcbride1993), as
+distributed with Cantera 3.2.0 [!citep](cantera320); the polynomials,
 the data, and their temperature ranges are described with the
 [NASA 7-coefficient polynomial utilities](utils/FluidPropertiesUtils.md#nasa7-polynomials).
 
@@ -71,15 +72,25 @@ approaches its critical point.
 These properties are evaluated with the
 [gas transport utilities](utils/FluidPropertiesUtils.md#gas-transport). For all species except
 H$_2$O, the viscosity follows from Chapman-Enskog kinetic theory with the Lennard-Jones parameters
-of GRI-Mech 3.0, and the thermal conductivity from the modified Eucken correlation
-[!citep](poling2001) with the heat capacity of the polynomials:
+of GRI-Mech 3.0, or of [!citet](svehla1962) for Kr and Xe, and the thermal conductivity from the
+modified Eucken correlation [!citep](poling2001) with the heat capacity of the polynomials:
 
 !equation
 k = \mu R_s \left( 1.32 \, \frac{c_p^\circ}{R} + 0.45 \right) .
 
 Compared with the fluid properties of the real fluids at 1 bar from 300 K to 900 K, the viscosities
 of N$_2$, CH$_4$, and CO$_2$ agree within 2.5%, that of H$_2$ is up to 6% low at 900 K, and the
-thermal conductivities agree within 9%.
+thermal conductivities agree within 9%. For the noble gases the modified Eucken correlation
+reduces to the exact kinetic theory result for monatomic gases, $k = 15 \mu R_s / 4$. Compared
+with the NIST Chemistry WebBook at 1 bar, the viscosities and thermal conductivities of Ar from
+300 K to 1500 K and of Kr and Xe from 300 K to 600 K agree within 2.5%.
+
+The reduced temperature of He exceeds the range of the collision integral fits above about
+1000 K, where the Chapman-Enskog viscosity of He is up to 8% low. For He, the viscosity and
+thermal conductivity therefore follow the correlations of [!citet](petersen), as in
+[HeliumFluidProperties.md], with the thermal conductivity in the limit of zero pressure. They
+agree with the NIST Chemistry WebBook within 1.5% at 1 bar from 300 K to 1500 K. They are fitted
+from 273.15 K to 1800 K, and each evaluation outside that range is counted as a solution warning.
 
 The modified Eucken correlation overestimates the thermal conductivity of polar gases, that of
 steam by about 40% at 400 K and 20% at 1000 K. For H$_2$O, the viscosity and thermal conductivity
