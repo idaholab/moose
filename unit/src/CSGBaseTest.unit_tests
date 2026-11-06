@@ -1,0 +1,503 @@
+[Tests]
+  design = 'CSGBase.md'
+  issues = '#29095'
+
+  # Surfaces
+  [add_get_surface]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testAddGetSurface
+    requirement = 'The system shall add a surface to a constructive solid geometry (CSG) object and retrieve it by name, and shall report an error if a surface of the same name already exists or if the requested surface does not exist.'
+  []
+  [get_all_surfaces]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testGetAllSurfaces
+    requirement = 'The system shall return all surfaces of a CSG object.'
+  []
+  [rename_surface]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testRenameSurface
+    requirement = 'The system shall rename a surface of a CSG object and report an error if the new name is already used by another surface or if the surface is not in the CSG object.'
+  []
+  [check_region_surfaces]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testCheckRegionSurfaces
+    requirement = 'The system shall report an error when a region references a surface that differs from the surface of the same name in the CSG object.'
+  []
+  [delete_surface]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testDeleteSurface
+    requirement = 'The system shall delete a surface from a CSG object and report an error if the surface is used in the region of a cell.'
+  []
+
+  # Cells
+  [create_cell]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testCreateCell
+    requirement = 'The system shall create void, material, universe, and lattice filled cells in a CSG object and add each to the root universe or to a specified universe, and shall report an error if the cell name already exists or if the cell fill contains the universe to which the cell is added.'
+  []
+  [get_all_cells]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testGetAllCells
+    requirement = 'The system shall return all cells of a CSG object.'
+  []
+  [get_cell_by_name]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testGetCellByName
+    requirement = 'The system shall retrieve a cell of a CSG object by name and report an error if the cell does not exist.'
+  []
+  [rename_cell]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testRenameCell
+    requirement = 'The system shall rename a cell of a CSG object and report an error if the new name is already used by another cell or if the cell is not in the CSG object.'
+  []
+  [update_cell_region]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testUpdateCellRegion
+    requirement = 'The system shall replace the region of a cell of a CSG object and report an error if the cell differs from the cell of the same name in the CSG object.'
+  []
+  [update_cell_fill]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testUpdateCellFill
+    requirement = 'The system shall change the fill of a cell of a CSG object to a material, a universe, or a lattice and reset it to void.'
+  []
+  [delete_cell]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testDeleteCell
+    requirement = 'The system shall delete a cell from a CSG object and warn when the cell is removed from a universe that contains it.'
+  []
+
+  # Universes
+  [create_universe]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testCreateUniverse
+    requirement = 'The system shall create an empty universe or a universe from a list of cells in a CSG object and report an error if the universe name already exists.'
+  []
+  [rename_universe]
+    type = GoogleTest
+    unit_test = CSGBaseTest.renameUniverse
+    requirement = 'The system shall rename a universe of a CSG object, including the root universe, and report an error if the new name is already used by another universe or if the universe is not in the CSG object.'
+  []
+  [add_cell_to_universe]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testAddCellToUniverse
+    requirement = 'The system shall add a cell or a list of cells to a universe of a CSG object and report an error if the cell or universe differs from the object of the same name in the CSG object.'
+  []
+  [remove_cell_from_universe]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testRemoveCellFromUniverse
+    requirement = 'The system shall remove a cell or a list of cells from a universe of a CSG object and report an error if the cell or universe differs from the object of the same name in the CSG object.'
+  []
+  [get_universe]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testGetUniverse
+    requirement = 'The system shall return the root universe, a universe by name, and all universes of a CSG object, and report an error if a universe of the requested name does not exist.'
+  []
+  [delete_universe]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testDeleteUniverse
+    requirement = 'The system shall delete a universe from a CSG object and report an error if the universe is the root universe, the fill of a cell, the outer universe of a lattice, or an element of a lattice.'
+  []
+
+  # Lattices
+  [lattice_outer]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testLatticeOuter
+    issues = '#29095 #31889'
+    requirement = 'The system shall set the outer fill of a lattice of a CSG object to a material or universe and reset it to void, and report an error if the outer universe is not in the CSG object.'
+  []
+  [add_lattice]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testAddLattice
+    issues = '#29095 #31889'
+    requirement = 'The system shall add a lattice to a CSG object and report an error if an element or outer universe of the lattice is not in the CSG object.'
+  []
+  [add_lattice_eng_unit_error]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testAddLatticeEngUnitError
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104 #31889'
+    requirement = 'The system shall report an error when a lattice is added to a CSG object with universe engineering units that have not been added to the CSG object.'
+  []
+  [set_universe_at_lattice_index]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testSetUniverseAtLatticeIndex
+    issues = '#29095 #31889'
+    requirement = 'The system shall replace the universe at an index of a lattice of a CSG object and report an error if the universe is not in the CSG object.'
+  []
+  [set_lattice_universes]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testSetLatticeUniverses
+    issues = '#29095 #31889'
+    requirement = 'The system shall set the universe map of a lattice of a CSG object and report an error if a universe of the map is not in the CSG object.'
+  []
+  [rename_lattice]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testRenameLattice
+    issues = '#29095 #31889'
+    requirement = 'The system shall rename a lattice of a CSG object and report an error if the new name is already used by another lattice or if the lattice is not in the CSG object.'
+  []
+  [get_lattice_methods]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testGetLatticeMethods
+    issues = '#29095 #31889'
+    requirement = 'The system shall return a lattice of a CSG object by name, optionally as a specific lattice type, and return all lattices of the CSG object, and shall report an error if the lattice does not exist or is not of the requested type.'
+  []
+  [delete_lattice]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testDeleteLattice
+    issues = '#29095 #31889'
+    requirement = 'The system shall delete a lattice from a CSG object and report an error if the lattice is the fill of a cell.'
+  []
+
+  # Surface engineering units
+  [surface_eng_unit_add]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testSurfEngUnitAdd
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall add a surface-type engineering unit to a CSG object and make it retrievable by name as both a surface and an engineering unit.'
+  []
+  [surface_eng_unit_rename]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testSurfEngUnitRename
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall rename a surface-type engineering unit either as a surface or as an engineering unit.'
+  []
+  [surface_eng_unit_rename_errors]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testSurfEngUnitRenameErrors
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall report an error when a surface or a surface-type engineering unit is renamed to the name of an existing surface or engineering unit.'
+  []
+  [surface_eng_unit_add_errors]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testSurfEngUnitAddErrors
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall report an error when a surface-type engineering unit is added to a CSG object as a surface.'
+  []
+  [surface_eng_unit_delete]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testSurfEngUnitDelete
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall delete a surface-type engineering unit from a CSG object either as a surface or as an engineering unit.'
+  []
+  [surface_eng_unit_expand]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testSurfEngUnitExpand
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall expand a surface-type engineering unit into surfaces of the CSG object, remove the unit, and apply the transformations of the unit to the generated surfaces.'
+  []
+  [surface_eng_unit_use]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testUseSurfEngUnit
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall replace a negative half-space of a surface-type engineering unit in a cell region with the intersection of the negative half-spaces of the expanded surfaces.'
+  []
+  [surface_eng_unit_use_positive]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testUseSurfEngUnitAsPos
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall replace a positive half-space of a surface-type engineering unit in a cell region with the complement of the intersection of the negative half-spaces of the expanded surfaces.'
+  []
+  [surface_eng_unit_use_complex]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testUseSurfEngUnitComplex
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall replace only the surface-type engineering unit in a cell region that also contains regular surfaces when the unit is expanded.'
+  []
+
+  # Cell engineering units
+  [cell_eng_unit_add]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testCellEngUnitAdd
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall add a cell-type engineering unit to the root universe of a CSG object and make it retrievable by name as both a cell and an engineering unit.'
+  []
+  [cell_eng_unit_add_to_universe]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testCellEngUnitAddToUniv
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall add a cell-type engineering unit to a specified universe instead of the root universe.'
+  []
+  [cell_eng_unit_rename]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testCellEngUnitRename
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall rename a cell-type engineering unit either as a cell or as an engineering unit.'
+  []
+  [cell_eng_unit_rename_errors]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testCellEngUnitRenameErrors
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall report an error when a cell or a cell-type engineering unit is renamed to the name of an existing cell or engineering unit.'
+  []
+  [cell_eng_unit_add_errors]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testCellEngUnitAddErrors
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall report an error when a cell-type engineering unit is added to a CSG object as a cell.'
+  []
+  [cell_eng_unit_delete]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testCellEngUnitDelete
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall delete a cell-type engineering unit from a CSG object either as a cell or as an engineering unit.'
+  []
+  [cell_eng_unit_expand]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testCellEngUnitExpand
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall expand a cell-type engineering unit into a cell in each universe that contained the unit, retain any engineering units created by the expansion, remove the unit, and apply the transformations of the unit to the generated cell.'
+  []
+
+  # Universe engineering units
+  [universe_eng_unit_add]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testUniverseEngUnitAdd
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall add a universe-type engineering unit to a CSG object and make it retrievable by name as both a universe and an engineering unit.'
+  []
+  [universe_eng_unit_rename]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testUniverseEngUnitRename
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall rename a universe-type engineering unit either as a universe or as an engineering unit.'
+  []
+  [universe_eng_unit_rename_errors]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testUnivEngUnitRenameErrors
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall report an error when a universe or a universe-type engineering unit is renamed to the name of an existing universe or engineering unit.'
+  []
+  [universe_eng_unit_add_errors]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testUnivEngUnitAddErrors
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall report an error when a universe-type engineering unit is added to a CSG object as a universe.'
+  []
+  [universe_eng_unit_delete]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testUnivEngUnitDelete
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall delete a universe-type engineering unit from a CSG object either as a universe or as an engineering unit.'
+  []
+  [universe_eng_unit_expand]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testUnivEngUnitExpand
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall expand a universe-type engineering unit into a named universe that replaces the unit as the fill of cells, remove the unit, and apply the transformations of the unit to the generated universe.'
+  []
+  [universe_eng_unit_expand_lattice]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testUnivEngUnitExpandLattice
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104 #31889'
+    requirement = 'The system shall replace universe-type engineering units used as the elements or outer universe of a lattice with the expanded universes when the units are expanded.'
+  []
+
+  # Expansion of all engineering units
+  [expand_all_units]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testExpandAllUnits
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall expand all engineering units of a CSG object.'
+  []
+  [expand_all_recursive]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testExpandAllRecursive
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall expand all engineering units of a CSG object recursively when the expansion of a unit creates additional engineering units.'
+  []
+  [expand_all_cyclic_error]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testExpandAllCyclicError
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall report an error when expanding all engineering units of a CSG object encounters a circular dependency between units.'
+  []
+  [expand_all_multi]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testExpandAllMulti
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall expand all engineering units of a CSG object without error when the expansion creates multiple units of one type that do not depend on each other cyclically.'
+  []
+  [surface_bad_expansion]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testSurfBadExpansion
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall report an error when the expansion of a surface-type engineering unit creates cells or universes.'
+  []
+  [cell_bad_expansion_multi]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testCellBadExpansionMulti
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall report an error when the expansion of a cell-type engineering unit does not create exactly one cell in the root universe of its internal geometry.'
+  []
+  [cell_bad_expansion_unlinked]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testCellBadExpansionUnlinked
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall report an error when the expansion of a cell-type engineering unit creates universes or cells that are not linked to the generated cell.'
+  []
+  [universe_bad_expansion]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testUnivBadExpansion
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall report an error when the expansion of a universe-type engineering unit creates universes or cells that are not linked to the root universe of its internal geometry.'
+  []
+  [get_eng_unit]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testGetEngUnit
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall return an engineering unit of a CSG object by name, optionally as a specific unit type, and report an error if the unit does not exist or is not of the requested type.'
+  []
+  [add_eng_unit_error]
+    type = GoogleTest
+    unit_test = CSGBaseTest.addEngUnitError
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall report an error when an engineering unit is added to a CSG object with the name of an existing engineering unit or of an existing object of the same base type.'
+  []
+  [add_obj_unit_errors]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testAddObjUnitErrors
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall report an error when a surface, cell, or universe is created with the name of an existing engineering unit of the same base type, and shall allow the name when the engineering unit is of a different base type.'
+  []
+
+  # Transformations
+  [apply_rotation]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testApplyRotation
+    issues = '#29095 #32308'
+    requirement = 'The system shall apply rotations about the x-, y-, or z-axis or by Euler angles to surfaces, cells, universes, lattices, and regions of a CSG object, applying the rotation of a region to the surfaces of the region.'
+  []
+  [apply_translation]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testApplyTranslation
+    issues = '#29095 #32308'
+    requirement = 'The system shall apply translations to surfaces, cells, universes, lattices, and regions of a CSG object, applying the translation of a region to the surfaces of the region.'
+  []
+  [apply_scaling]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testApplyScaling
+    issues = '#29095 #32308'
+    requirement = 'The system shall apply scaling to surfaces, cells, universes, lattices, and regions of a CSG object, applying the scaling of a region to the surfaces of the region.'
+  []
+  [add_transformation_errors]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testAddTransformationErrors
+    issues = '#29095 #32308'
+    requirement = 'The system shall report an error when a transformation is applied to a surface, region, cell, universe, or lattice that is not in the CSG object or when the transformation values are invalid.'
+  []
+
+  # Joining CSG objects
+  [join_root]
+    type = GoogleTest
+    unit_test = CSGBaseTest.joinOtherBaseJoinRoot
+    requirement = 'The system shall join another CSG object into a CSG object by merging the cells of the root universes and retaining the surfaces, lattices, and other universes of both objects.'
+  []
+  [join_root_eng_unit]
+    type = GoogleTest
+    unit_test = CSGBaseTest.joinOtherBaseJoinRootEngUnit
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall join another CSG object into a CSG object by merging the cells of the root universes while retaining engineering units.'
+  []
+  [join_one_new_root]
+    type = GoogleTest
+    unit_test = CSGBaseTest.joinOtherBaseOneNewRoot
+    requirement = 'The system shall join another CSG object into a CSG object by converting the root universe of the other object into a new universe with a specified name.'
+  []
+  [join_one_new_root_eng_unit]
+    type = GoogleTest
+    unit_test = CSGBaseTest.joinOtherBaseOneNewRootEngUnit
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall join another CSG object into a CSG object by converting the root universe of the other object into a new universe with a specified name while retaining engineering units.'
+  []
+  [join_two_new_roots]
+    type = GoogleTest
+    unit_test = CSGBaseTest.joinOtherBaseTwoNewRoot
+    requirement = 'The system shall join another CSG object into a CSG object by converting the root universes of both objects into new universes with specified names.'
+  []
+  [join_two_new_roots_eng_unit]
+    type = GoogleTest
+    unit_test = CSGBaseTest.joinOtherBaseTwoNewRootEngUnit
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall join another CSG object into a CSG object by converting the root universes of both objects into new universes with specified names while retaining engineering units.'
+  []
+  [join_ignore_identical_surface]
+    type = GoogleTest
+    unit_test = CSGBaseTest.joinOtherBaseIgnoreIdenticalSurface
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall discard identical surfaces and surface-type engineering units of another CSG object when joining it into a CSG object if requested, and shall otherwise report an error if a surface of the same name exists or if a surface of the same name is not identical.'
+  []
+  [join_ignore_identical_cells_universe_fill]
+    type = GoogleTest
+    unit_test = CSGBaseTest.joinOtherBaseIgnoreIdenticalCellsUniverseFill
+    requirement = 'The system shall discard identical universe-filled cells of another CSG object when joining it into a CSG object if requested, and shall otherwise report an error if a cell of the same name exists or if a cell of the same name is not identical.'
+  []
+  [join_ignore_identical_cells_lattice_fill]
+    type = GoogleTest
+    unit_test = CSGBaseTest.joinOtherBaseIgnoreIdenticalCellsLatticeFill
+    issues = '#29095 #31889'
+    requirement = 'The system shall discard identical lattice-filled cells of another CSG object when joining it into a CSG object if requested, and shall otherwise report an error if a cell of the same name exists or if the lattice elements or outer universe of a cell of the same name differ.'
+  []
+  [join_ignore_identical_universes]
+    type = GoogleTest
+    unit_test = CSGBaseTest.joinOtherBaseIgnoreIdenticalUniverses
+    requirement = 'The system shall discard identical universes of another CSG object when joining it into a CSG object if requested, and shall otherwise report an error if a universe of the same name exists or if a universe of the same name is not identical.'
+  []
+
+  # Linking and cloning
+  [universe_linking]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testUniverseLinking
+    requirement = 'The system shall warn when a universe or cell of a CSG object is not linked to the root universe through cell fills, lattice elements, or lattice outer universes.'
+  []
+  [eng_unit_linking]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testEngUnitLinking
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104'
+    requirement = 'The system shall warn when a universe-type or cell-type engineering unit is not linked to the root universe, and shall not warn when it is linked.'
+  []
+  [clone]
+    type = GoogleTest
+    unit_test = CSGBaseTest.testCSGBaseClone
+    requirement = 'The system shall create a copy of a CSG object, including its surfaces, cells, universes, lattices, and engineering units, and shall compare CSG objects for equality.'
+  []
+[]
