@@ -25,6 +25,7 @@
 #include "BoundaryRestrictable.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
+#include "MeshDisplacedInterface.h"
 #include "VectorPostprocessorInterface.h"
 #include "ElementIDInterface.h"
 #include "UserObjectBase.h"
@@ -54,6 +55,7 @@ class AuxKernelBase : public MooseObject,
                       public GeometricSearchInterface,
                       public Restartable,
                       public MeshChangedInterface,
+                      public MeshDisplacedInterface,
                       protected VectorPostprocessorInterface,
                       public ElementIDInterface,
                       protected NonADFunctorInterface

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosDispatcher.h"
+#include "KokkosJaggedArray.h"
 #include "KokkosVariableValue.h"
 #include "KokkosMaterialPropertyValue.h"
 #include "KokkosAssembly.h"
@@ -56,6 +57,10 @@ public:
   // Unused for Kokkos auxiliary kernels because all elements are computed in parallel
   virtual void subdomainSetup() override final {}
 
+  virtual void initialSetup() override;
+  virtual void meshChanged() override;
+  virtual void meshDisplaced() override;
+
   /**
    * Dispatch calculation
    */
@@ -77,6 +82,9 @@ public:
   struct NodeLoop
   {
   };
+  struct MassMatrixLoop
+  {
+  };
   ///@}
 
   /**
@@ -87,6 +95,9 @@ public:
   KOKKOS_FUNCTION void operator()(ElementLoop, const ThreadID tid, const Derived & auxkernel) const;
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(NodeLoop, const ThreadID tid, const Derived & auxkernel) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(MassMatrixLoop, const ThreadID tid, const Derived & auxkernel) const;
   ///@}
 
   /**
@@ -123,6 +134,17 @@ protected:
    * @returns The older variable value object
    */
   VariableValue uOlder() const;
+
+  /**
+   * Compute the Cholesky factors of the element mass matrices and allocate the right-hand side and
+   * solution storage used by computeElementInternal().
+   * Called from initialSetup(), meshChanged(), and meshDisplaced(). A derived class whose
+   * computeElementInternal() does not use them can override this to skip the computation.
+   * @param rebuild Whether to rebuild the storage, which is needed when the elements or their
+   * numbers of DOFs may have changed. Mesh displacement only moves nodes, so it keeps the storage
+   * and only recomputes the factors.
+   */
+  virtual void setupMassFactors(const bool rebuild);
 
   /**
    * Set element values to the auxiliary solution vector
@@ -201,6 +223,24 @@ private:
    */
   void getKokkosMaterialPropertyHook(const std::string & prop_name_in,
                                      const unsigned int state) override final;
+
+  /**
+   * Kokkos FE type ID of the variable
+   */
+  unsigned int _fe_type = libMesh::invalid_uint;
+  /**
+   * Cholesky factors of the element mass matrices of the L2 projection, indexed by the contiguous
+   * element ID, each packed as the row-major lower triangle (n(n+1)/2 entries for n element DOFs)
+   */
+  JaggedArray<Real, 1, 1> _mass_factors;
+  /**
+   * Right-hand side and solution of the L2 projection of each element, indexed by the contiguous
+   * element ID (n entries for n element DOFs)
+   */
+  ///@{
+  JaggedArray<Real, 1, 1> _rhs;
+  JaggedArray<Real, 1, 1> _solution;
+  ///@}
 };
 
 template <typename Derived>
@@ -236,42 +276,68 @@ AuxKernel::operator()(NodeLoop, const ThreadID tid, const Derived & auxkernel) c
 
 template <typename Derived>
 KOKKOS_FUNCTION void
+AuxKernel::operator()(MassMatrixLoop, const ThreadID tid, const Derived & /* auxkernel */) const
+{
+  const auto & assembly = kokkosAssembly();
+  const auto info = kokkosMesh().getElementInfo(kokkosBlockElementID(tid));
+  const auto n = assembly.getNumDofs(info.type, _fe_type);
+  const auto & phi = assembly.getPhi(info.subdomain, info.type, _fe_type);
+
+  auto factor = _mass_factors[info.id];
+  auto L = &factor[0];
+
+  for (unsigned int i = 0; i < n; ++i)
+    for (unsigned int j = 0; j <= i; ++j)
+      L[Utils::packedLowerIndex(i, j)] = 0;
+
+  for (unsigned int qp = 0; qp < assembly.getNumQps(info); ++qp)
+  {
+    const auto JxW = assembly.getJxW(info, qp);
+
+    for (unsigned int i = 0; i < n; ++i)
+    {
+      const auto t = JxW * phi(i, qp);
+
+      for (unsigned int j = 0; j <= i; ++j)
+        L[Utils::packedLowerIndex(i, j)] += t * phi(j, qp);
+    }
+  }
+
+  if (n > 1)
+    Utils::choleskyFactor(L, n);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
 AuxKernel::computeElementInternal(const Derived & auxkernel, AssemblyDatum & datum) const
 {
-  Real x[MAX_CACHED_DOF];
-  Real b[MAX_CACHED_DOF];
-  Real A[MAX_CACHED_DOF * MAX_CACHED_DOF];
+  auto b = _rhs[datum.elemID()];
+  auto x = _solution[datum.elemID()];
 
-  for (unsigned int i = 0; i < datum.n_dofs(); ++i)
+  const auto n = datum.n_dofs();
+
+  for (unsigned int i = 0; i < n; ++i)
   {
     x[i] = 0;
     b[i] = 0;
-
-    for (unsigned int j = 0; j < datum.n_dofs(); ++j)
-      A[j + datum.n_dofs() * i] = 0;
   }
 
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
     const auto value = auxkernel.template computeValue<Derived>(qp, datum);
 
-    for (unsigned int i = 0; i < datum.n_dofs(); ++i)
-    {
-      const auto t = datum.JxW(qp) * _test(datum, i, qp);
-
-      b[i] += t * value;
-
-      for (unsigned int j = 0; j < datum.n_dofs(); ++j)
-        A[j + datum.n_dofs() * i] += t * _test(datum, j, qp);
-    }
+    for (unsigned int i = 0; i < n; ++i)
+      b[i] += datum.JxW(qp) * _test(datum, i, qp) * value;
   }
 
-  if (datum.n_dofs() == 1)
-    x[0] = b[0] / A[0];
-  else
-    Utils::choleskySolve(A, x, b, datum.n_dofs());
+  auto factor = _mass_factors[datum.elemID()];
 
-  setElementSolution(x, datum);
+  if (n == 1)
+    x[0] = b[0] / factor[0];
+  else
+    Utils::choleskySubstitute(&factor[0], &x[0], &b[0], n);
+
+  setElementSolution(&x[0], datum);
 }
 
 template <typename Derived>

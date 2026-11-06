@@ -24,6 +24,7 @@ AuxKernelBase::validParams()
   params += BoundaryRestrictable::validParams();
   params += RandomInterface::validParams();
   params += MeshChangedInterface::validParams();
+  params += MeshDisplacedInterface::validParams();
   params += MaterialPropertyInterface::validParams();
   params += FunctorInterface::validParams();
   params += GeometricSearchInterface::validParams();
@@ -86,6 +87,7 @@ AuxKernelBase::AuxKernelBase(const InputParameters & parameters)
     GeometricSearchInterface(this),
     Restartable(this, "AuxKernels"),
     MeshChangedInterface(parameters),
+    MeshDisplacedInterface(parameters),
     VectorPostprocessorInterface(this),
     ElementIDInterface(this),
     NonADFunctorInterface(this),
@@ -139,6 +141,7 @@ AuxKernelBase::AuxKernelBase(const AuxKernelBase & object, const Moose::Kokkos::
     GeometricSearchInterface(object, key),
     Restartable(object, key),
     MeshChangedInterface(object, key),
+    MeshDisplacedInterface(object, key),
     VectorPostprocessorInterface(object, key),
     ElementIDInterface(object, key),
     NonADFunctorInterface(object, key),
