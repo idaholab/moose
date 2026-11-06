@@ -79,6 +79,17 @@ Specialized capabilities for particular problem classes:
 - [Frequency Domain Dynamics](/1d_elastic_waves.md)
 - [Isogeometric Analysis](solid_mechanics/examples/cframe_iga.md)
 
+## Multipoint Constraints
+
+Rigid and interpolation elements tie degrees of freedom together with exact constraints in the
+`DofMap`. They use no penalty and no Lagrange multiplier.
+
+- [RBE2 rigid element](/RBE2Constraint.md): a set of dependent nodes moves rigidly with one
+  independent node that has six degrees of freedom.
+- [RBE3 interpolation element](/RBE3Constraint.md): a reference node moves as the weighted
+  least-squares fit of a set of independent nodes. A load on the reference node goes to the
+  independent nodes, and the element adds no stiffness.
+
 ## Examples and Tutorials
 
 Get started with introductory tutorials and examples:
