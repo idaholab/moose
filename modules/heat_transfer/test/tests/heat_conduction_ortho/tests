@@ -8,4 +8,13 @@
     issues = '#2674'
     requirement = 'The system shall allow the use of an anisotropic heat conduction material set by postprocessors.'
   [../]
+  [ad_boundary_qpoints]
+    type = CSVDiff
+    input = 'ad_aniso_boundary_qpoints.i'
+    csvdiff = 'ad_aniso_boundary_qpoints_out.csv'
+    design = 'AnisoHeatConductionMaterial.md'
+    issues = '#34334'
+    requirement = 'The system shall evaluate the specific heat of an AD anisotropic heat conduction '
+                  'material at the boundary quadrature points of a displaced mesh.'
+  []
 []
