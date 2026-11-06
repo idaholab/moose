@@ -60,6 +60,9 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;
 
+  virtual GenericReal<is_ad>
+  initialGuess(const GenericReal<is_ad> & effective_trial_stress) override;
+
   virtual void iterationFinalize(const GenericReal<is_ad> & scalar) override;
 
   virtual GenericReal<is_ad> computeHardeningValue(const GenericReal<is_ad> & scalar);
