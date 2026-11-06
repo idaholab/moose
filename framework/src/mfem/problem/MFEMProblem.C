@@ -20,6 +20,7 @@
 #include "Postprocessor.h"
 #include "VectorPostprocessor.h"
 #include "MFEMNonlinearSolverBase.h"
+#include "MFEMConstraint.h"
 #include "DependencyResolver.h"
 #include "MooseUtils.h"
 #include "DataIO.h"
@@ -385,6 +386,15 @@ MFEMProblem::addAuxKernel(const std::string & kernel_name,
                           InputParameters & parameters)
 {
   addObject<MFEMExecutedObject>(kernel_name, name, parameters);
+}
+
+void
+MFEMProblem::addConstraint(const std::string & constraint_name,
+                           const std::string & name,
+                           InputParameters & parameters)
+{
+  auto constraint = addObject<MFEMConstraint>(constraint_name, name, parameters).front();
+  _problem_data.constraints.Register(name, constraint);
 }
 
 void
