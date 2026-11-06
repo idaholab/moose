@@ -22,6 +22,17 @@
     requirement = "The system shall be able to connect an arbitrary number of single phase parallel channels with different flow areas to another flow component."
   []
 
+  [phy:expansion]
+    type = 'CSVDiff'
+    input = 'phy.expansion.i'
+    csvdiff = 'phy.expansion_out.csv'
+    # The difference is relative; at the inlet Mach number of 0.47 compressibility gives about 2e-4
+    abs_zero = 1e-3
+    restep = false # Test is prescribed to abort on failed timestep
+    issues = '#34247'
+    requirement = "The system shall compute the pressure rise across an abrupt flow area expansion in a junction between parallel channels consistent with the Borda-Carnot sudden-expansion model."
+  []
+
   [phy:shower_syntax]
     type = 'RunApp'
     input = 'phy.shower.i'
