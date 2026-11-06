@@ -136,8 +136,8 @@ def get_process_memory(process: psutil.Process) -> Optional[int]:
 class MemorySample(NamedTuple):
     """The memory of a child process and all of its descendants."""
 
-    cpu: int
-    """The CPU memory in bytes."""
+    cpu: Optional[int]
+    """The CPU memory in bytes, if any process's could be read."""
     gpu: Optional[int]
     """The NVIDIA GPU memory in bytes, if GPU memory is tracked."""
 
@@ -231,22 +231,26 @@ class MemoryMonitor:
                 return pid
 
             # Accumulate the memory of each direct child and all of its descendants
-            cpu_result = defaultdict(int)
-            gpu_result = defaultdict(int)
+            cpu_result: dict[int, int] = defaultdict(int)
+            gpu_result: dict[int, int] = defaultdict(int)
             for pid, p in all_processes.items():
-                if (child := top_level_child(pid)) is not None and (
-                    memory := get_process_memory(p)
-                ) is not None:
+                if (child := top_level_child(pid)) is None:
+                    continue
+                # Counted separately, so that a process whose CPU memory cannot be
+                # read (e.g. while exiting) still contributes its GPU memory
+                if (memory := get_process_memory(p)) is not None:
                     cpu_result[child] += memory
-                    gpu_result[child] += gpu_samples.get(pid, 0)
+                if (pid_gpu_memory := gpu_samples.get(pid)) is not None:
+                    gpu_result[child] += pid_gpu_memory
 
             # And update the shared state; a single assignment, so a reader never
             # sees a partially updated set of samples
             shared.samples = {
                 child: MemorySample(
-                    cpu, gpu_result[child] if gpu_memory is not None else None
+                    cpu_result.get(child),
+                    gpu_result.get(child, 0) if gpu_memory is not None else None,
                 )
-                for child, cpu in cpu_result.items()
+                for child in cpu_result.keys() | gpu_result.keys()
             }
 
             # Wait out the rest of the interval, so that a slow pass (many or

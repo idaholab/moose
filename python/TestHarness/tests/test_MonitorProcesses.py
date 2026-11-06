@@ -328,13 +328,24 @@ class TestMemoryMonitor(unittest.TestCase):
             def close(self):
                 pass
 
+        # The forked process's CPU memory cannot be read, which must not drop
+        # its GPU memory
+        unreadable = manager.list()
+
+        def process_memory(process):
+            return None if process.pid in unreadable else measure(process.pid)
+
         monitor = MemoryMonitor(os.getpid(), interval=0.05, gpu=True)
-        with patch(
-            "TestHarness.utils.monitor_processes.NvidiaGPUMemory", FakeGPUMemory
+        with (
+            patch("TestHarness.utils.monitor_processes.NvidiaGPUMemory", FakeGPUMemory),
+            patch(
+                "TestHarness.utils.monitor_processes.get_process_memory", process_memory
+            ),
         ):
             monitor.start()
         try:
             with run_child("tree", SIZE) as (pid, forked_pid):
+                unreadable.append(forked_pid)
                 gpu_pids.extend([pid, forked_pid])
                 deadline = time.monotonic() + 10
                 while not ((sample := monitor.get_samples().get(pid)) and sample.gpu):
@@ -346,7 +357,9 @@ class TestMemoryMonitor(unittest.TestCase):
             manager.shutdown()
 
         # 1 MiB for the child and 2 MiB for its forked process
-        self.assertEqual(sample, MemorySample(sample.cpu, 3 * MIB))
+        self.assertEqual(sample.gpu, 3 * MIB)
+        # Only the child's CPU memory, as the forked process's cannot be read
+        self.assertLess(sample.cpu, SIZE)
         self.assertIsNone(gpu_error)
 
     def testGPUError(self):

@@ -79,6 +79,15 @@ class TestRunLocalMonitorJobProcesses(unittest.TestCase):
         self.assertEqual(job.getRunner().max_gpu_memory, 30 * MIB)
         job.killProcess.assert_not_called()
 
+    def testUnknownCPU(self):
+        """Test that a sample with unknown CPU memory still updates the GPU peak."""
+        job = build_job()
+        monitor({1: job}, {1: MemorySample(10 * MIB, 20 * MIB)})
+        monitor({1: job}, {1: MemorySample(None, 30 * MIB)}, max_memory=1)
+        self.assertEqual(job.getRunner().max_memory, 10 * MIB)
+        self.assertEqual(job.getRunner().max_gpu_memory, 30 * MIB)
+        job.killProcess.assert_not_called()
+
     def testNoGPU(self):
         """Test that the GPU peak is not set when GPU memory is not tracked."""
         job = build_job()

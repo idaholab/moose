@@ -84,14 +84,14 @@ class Runner(OutputInterface):
             return self._max_gpu_memory
 
     def updateMaxMemory(
-        self, value: int, gpu_value: Optional[int] = None
+        self, value: Optional[int], gpu_value: Optional[int] = None
     ) -> tuple[bool, bool]:
         """
         Update the max memory and GPU memory in bytes for the process, if greater.
 
         Should be used by derived runners to set the memory
-        as it is running if available. The GPU memory is
-        only updated if gpu_value is not None.
+        as it is running if available. Each is only updated
+        if its value is not None.
 
         Is thread safe so that a running job can update its memory
         usage while being read by the long running job printer.
@@ -101,7 +101,9 @@ class Runner(OutputInterface):
         current max).
         """
         with self._max_memory_lock:
-            updated = self._max_memory is None or value > self._max_memory
+            updated = value is not None and (
+                self._max_memory is None or value > self._max_memory
+            )
             if updated:
                 self._max_memory = value
             gpu_updated = gpu_value is not None and (
