@@ -28,6 +28,7 @@ class RunLocal(Scheduler):
     CAN_OPENMPI_OVERSUBSCRIBE = True
     MONITOR_JOB_CPU = True
     MONITOR_JOB_MEMORY = _MONITOR_JOB_MEMORY
+    MONITOR_JOB_GPU_MEMORY = _MONITOR_JOB_MEMORY
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -43,7 +44,9 @@ class RunLocal(Scheduler):
         # Start the memory monitor if enabled
         if self.scheduler_options.monitor_job_memory:
             self._memory_monitor = MemoryMonitor(
-                os.getpid(), interval=self.scheduler_options.memory_tracking_interval
+                os.getpid(),
+                interval=self.scheduler_options.memory_tracking_interval,
+                gpu=self.scheduler_options.monitor_job_gpu_memory,
             )
             self._memory_monitor.start()
 
@@ -66,35 +69,44 @@ class RunLocal(Scheduler):
 
         # Update job memory and kill jobs over memory
         max_memory_per_slot_mb = self.options.max_memory_per_slot
+        max_gpu_memory_per_slot_mb = self.options.max_gpu_memory_per_slot
         for pid, job in pid_to_job.items():
             sample = samples.get(pid)
 
             # Didn't get samples for this Job's process
             if sample is None:
                 continue
-            job_memory_bytes = sample.cpu
 
             # If the job is already an error (we may have killed it), nothing to do
             if job.getStatus() == job.error:
                 continue
 
-            # Update max memory, if greater; this is True if greater
-            updated, _ = job.getRunner().updateMaxMemory(job_memory_bytes)
+            # Update max memory, if greater; each is True if greater
+            updated, gpu_updated = job.getRunner().updateMaxMemory(
+                sample.cpu, sample.gpu
+            )
 
             # Check memory usage if needed
-            if (
-                updated
-                and max_memory_per_slot_mb
-                and (
-                    job_memory_per_slot_mb := (
-                        job_memory_bytes / job.getSlots() * 2**-20
+            for name, prefix, check, memory_bytes, max_per_slot_mb in [
+                ("MEMORY", "Memory", updated, sample.cpu, max_memory_per_slot_mb),
+                (
+                    "GPU MEMORY",
+                    "GPU memory",
+                    gpu_updated,
+                    sample.gpu,
+                    max_gpu_memory_per_slot_mb,
+                ),
+            ]:
+                if (
+                    check
+                    and max_per_slot_mb
+                    and (per_slot_mb := memory_bytes / job.getSlots() * 2**-20)
+                    > max_per_slot_mb
+                ):
+                    message = (
+                        f"JOB KILLED (OVER {name}): "
+                        f"{prefix}/slot {per_slot_mb:.2f} "
+                        f"MB > allowed {max_per_slot_mb:.2f} MB"
                     )
-                )
-                > max_memory_per_slot_mb
-            ):
-                message = (
-                    "JOB KILLED (OVER MEMORY): "
-                    f"Memory/slot {job_memory_per_slot_mb:.2f} "
-                    f"MB > allowed {max_memory_per_slot_mb:.2f} MB"
-                )
-                job.killProcess(job.error, "KILLED: OVER MEMORY", message)
+                    job.killProcess(job.error, f"KILLED: OVER {name}", message)
+                    break

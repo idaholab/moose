@@ -1970,6 +1970,12 @@ class TestHarness:
             help="The maximum memory to allow for a job in MB, per slot",
         )
         resourcesgroup.add_argument(
+            "--max-gpu-memory-per-slot",
+            nargs=1,
+            type=positive_float,
+            help="The maximum NVIDIA GPU memory to allow for a job in MB, per slot",
+        )
+        resourcesgroup.add_argument(
             "--no-cpu-tracking",
             action="store_true",
             help="Disable all CPU tracking of jobs",
@@ -1978,6 +1984,11 @@ class TestHarness:
             "--no-memory-tracking",
             action="store_true",
             help="Disable all memory tracking of jobs",
+        )
+        resourcesgroup.add_argument(
+            "--no-gpu-memory-tracking",
+            action="store_true",
+            help="Disable NVIDIA GPU memory tracking of jobs",
         )
         resourcesgroup.add_argument(
             "--memory-tracking-interval",
@@ -2202,21 +2213,19 @@ class TestHarness:
             )
             opts.minimal_capabilities = True
 
-        # Set --max-memory-per-slot from MOOSE_MAX_MEMORY_PER_SLOT
-        # if --max-memory-per-slot is not not set
-        if (
-            opts.max_memory_per_slot is None
-            and (
-                MOOSE_MAX_MEMORY_PER_SLOT := os.environ.get("MOOSE_MAX_MEMORY_PER_SLOT")
-            )
-            is not None
-        ):
-            value = float(MOOSE_MAX_MEMORY_PER_SLOT)
-            print_info(
-                f"Setting --max-memory-per-slot={value} MB from "
-                "MOOSE_MAX_MEMORY_PER_SLOT",
-            )
-            opts.max_memory_per_slot = value
+        # Set --max-[gpu-]memory-per-slot from MOOSE_MAX_[GPU_]MEMORY_PER_SLOT
+        # if --max-[gpu-]memory-per-slot is not not set
+        for option in ["max_memory_per_slot", "max_gpu_memory_per_slot"]:
+            env_name = f"MOOSE_{option.upper()}"
+            if (
+                getattr(opts, option) is None
+                and (env_value := os.environ.get(env_name)) is not None
+            ):
+                value = float(env_value)
+                print_info(
+                    f"Setting --{option.replace('_', '-')}={value} MB from {env_name}",
+                )
+                setattr(opts, option, value)
 
         # Convert extend action params to lists if they have a single value
         for name in ["ignore_capability"]:
