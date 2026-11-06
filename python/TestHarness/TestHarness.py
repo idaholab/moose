@@ -45,6 +45,20 @@ from TestHarness.capability_util import (
 testharness_dir = os.path.dirname(os.path.realpath(__file__))
 
 
+def appendPythonPath(path):
+    """
+    Makes path importable by the TestHarness and by the processes it launches.
+
+    sys.path only affects this process; PYTHONPATH is what tests that run in a
+    subprocess (e.g., PythonUnitTest and RunCommand) inherit.
+    """
+    if path not in sys.path:
+        sys.path.append(path)
+    pythonpath = [p for p in os.environ.get("PYTHONPATH", "").split(":") if p]
+    if path not in pythonpath:
+        os.environ["PYTHONPATH"] = ":".join(pythonpath + [path])
+
+
 def readTestRoot(fname):
 
     root = pyhit.load(fname)
@@ -328,8 +342,7 @@ class TestHarness:
         # Append PYTHONPATH paths specified from testroot
         if test_root:
             for path in test_root.extra_pythonpath:
-                if path not in sys.path:  # Prevents duplication
-                    sys.path.append(path)
+                appendPythonPath(path)
 
         # Failed to find a test root
         if test_root is None:
@@ -450,8 +463,8 @@ class TestHarness:
             exe_python_dir = os.path.join(
                 os.path.dirname(os.path.abspath(self.executable)), "python"
             )
-            if os.path.isdir(exe_python_dir) and exe_python_dir not in sys.path:
-                sys.path.append(exe_python_dir)
+            if os.path.isdir(exe_python_dir):
+                appendPythonPath(exe_python_dir)
 
         # Load capabilities if they're needed
         (
