@@ -67,11 +67,12 @@ class RunLocal(Scheduler):
         # Update job memory and kill jobs over memory
         max_memory_per_slot_mb = self.options.max_memory_per_slot
         for pid, job in pid_to_job.items():
-            job_memory_bytes = samples.get(pid)
+            sample = samples.get(pid)
 
             # Didn't get samples for this Job's process
-            if job_memory_bytes is None:
+            if sample is None:
                 continue
+            job_memory_bytes = sample.cpu
 
             # If the job is already an error (we may have killed it), nothing to do
             if job.getStatus() == job.error:

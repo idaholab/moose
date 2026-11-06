@@ -16,9 +16,11 @@ from collections import defaultdict
 from multiprocessing import get_context
 from multiprocessing.context import ForkProcess
 from multiprocessing.managers import NamespaceProxy, SyncManager
-from typing import Optional
+from typing import NamedTuple, Optional
 
 import psutil
+
+from TestHarness.utils.nvidia_gpu_memory import NvidiaGPUMemory
 
 MEMORY_PSS = sys.platform.startswith("linux") and os.path.exists(
     f"/proc/{os.getpid()}/smaps_rollup"
@@ -131,16 +133,28 @@ def get_process_memory(process: psutil.Process) -> Optional[int]:
     return _rollup_memory(fields, MEMORY_PSS_EXCLUDE_FILE)
 
 
+class MemorySample(NamedTuple):
+    """The memory of a child process and all of its descendants."""
+
+    cpu: int
+    """The CPU memory in bytes."""
+    gpu: Optional[int]
+    """The NVIDIA GPU memory in bytes, if GPU memory is tracked."""
+
+
 class MemoryMonitor:
     """Monitor that runs in a separate process to track children memory usage."""
 
-    def __init__(self, parent_pid: int, interval: float = 0.1):
+    def __init__(self, parent_pid: int, interval: float = 0.1, gpu: bool = False):
         """Initialize state."""
         self._parent_pid: int = parent_pid
         """PID of the parent process to sample the children of."""
 
         self._interval: float = interval
         """How often to sample in seconds."""
+
+        self._gpu: bool = gpu
+        """Whether or not to also sample NVIDIA GPU memory."""
 
         self._process: Optional[ForkProcess] = None
         """The Multiprocessing process."""
@@ -151,15 +165,15 @@ class MemoryMonitor:
         self._shared: Optional[NamespaceProxy] = None
         """
         Shared state whose "samples" attribute is the latest samples (child pid ->
-        memory in bytes), once started.
+        MemorySample), once started.
         """
 
         self._stop_event = None
         """Event to stop the Multiprocessing process, once started."""
 
-    def get_samples(self) -> dict[int, int]:
+    def get_samples(self) -> dict[int, MemorySample]:
         """
-        Get the last samples; child PID to cumulative memory usage in bytes.
+        Get the last samples; child PID to cumulative memory usage.
 
         Each call fetches a copy from the sampler process, so you should get
         it once and then use it many times as needed.
@@ -168,10 +182,19 @@ class MemoryMonitor:
         return self._shared.samples
 
     @staticmethod
-    def _sampler(parent_pid: int, interval: float, stop_event, shared: NamespaceProxy):
+    def _sampler(
+        parent_pid: int, interval: float, gpu: bool, stop_event, shared: NamespaceProxy
+    ):
         """Run the sampler process; internal method called by start()."""
+        # Initialized after the fork, as NVML state cannot be shared across one
+        gpu_memory = NvidiaGPUMemory() if gpu else None
+
         while not stop_event.is_set():
             start = time.monotonic()
+
+            # Sample GPU memory before walking the process tree, so that a process
+            # that NVML reports is normally also in the tree
+            gpu_samples = gpu_memory.sample() if gpu_memory is not None else {}
 
             # Get the entire flattened process tree, removing process 0 as
             # it's the exit condition when walking up parents (on macOS, it
@@ -191,21 +214,31 @@ class MemoryMonitor:
                 return pid
 
             # Accumulate the memory of each direct child and all of its descendants
-            result = defaultdict(int)
+            cpu_result = defaultdict(int)
+            gpu_result = defaultdict(int)
             for pid, p in all_processes.items():
                 if (child := top_level_child(pid)) is not None and (
                     memory := get_process_memory(p)
                 ) is not None:
-                    result[child] += memory
+                    cpu_result[child] += memory
+                    gpu_result[child] += gpu_samples.get(pid, 0)
 
             # And update the shared state; a single assignment, so a reader never
             # sees a partially updated set of samples
-            shared.samples = dict(result)
+            shared.samples = {
+                child: MemorySample(
+                    cpu, gpu_result[child] if gpu_memory is not None else None
+                )
+                for child, cpu in cpu_result.items()
+            }
 
             # Wait out the rest of the interval, so that a slow pass (many or
             # large processes) does not lengthen the sampling period; wake early
             # if stop_event is set
             stop_event.wait(max(0.0, interval - (time.monotonic() - start)))
+
+        if gpu_memory is not None:
+            gpu_memory.close()
 
     def start(self):
         """Start the sampler process."""
@@ -220,6 +253,7 @@ class MemoryMonitor:
             args=(
                 self._parent_pid,
                 self._interval,
+                self._gpu,
                 self._stop_event,
                 self._shared,
             ),
