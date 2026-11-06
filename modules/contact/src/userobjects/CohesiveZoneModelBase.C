@@ -12,10 +12,8 @@
 #include "SystemBase.h"
 #include "MortarUtils.h"
 #include "MooseUtils.h"
-#include "MathUtils.h"
 
 #include "MortarContactUtils.h"
-#include "FactorizedRankTwoTensor.h"
 
 #include "ADReal.h"
 
@@ -83,19 +81,6 @@ CohesiveZoneModelBase::CohesiveZoneModelBase(const InputParameters & parameters)
 {
   _czm_interpolated_traction.resize(_ndisp);
 
-  for (unsigned int i = 0; i < _ndisp; ++i)
-  {
-    _grad_disp.push_back(&adCoupledGradient("displacements", i));
-    _grad_disp_neighbor.push_back(&adCoupledNeighborGradient("displacements", i));
-  }
-
-  // Set non-intervening components to zero
-  for ([[maybe_unused]] const auto i : make_range(_ndisp, 3u))
-  {
-    _grad_disp.push_back(&_ad_grad_zero);
-    _grad_disp_neighbor.push_back(&_ad_grad_zero);
-  }
-
   if (_augmented_lagrange_problem)
     mooseError("CohesiveZoneModelBase constraints cannot be enforced with an augmented "
                "Lagrange approach.");
@@ -108,25 +93,6 @@ CohesiveZoneModelBase::test() const
 }
 
 void
-CohesiveZoneModelBase::computeQpProperties()
-{
-  WeightedVelocitiesUserObject::computeQpProperties();
-
-  // Compute F and R.
-  const auto F = (ADRankTwoTensor::Identity() +
-                  ADRankTwoTensor::initializeFromRows(
-                      (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]));
-  const auto F_neighbor = (ADRankTwoTensor::Identity() +
-                           ADRankTwoTensor::initializeFromRows((*_grad_disp_neighbor[0])[_qp],
-                                                               (*_grad_disp_neighbor[1])[_qp],
-                                                               (*_grad_disp_neighbor[2])[_qp]));
-
-  // TODO in follow-on PRs: Trim interior node variable derivatives
-  _F_interpolation = F * (_JxW_msm[_qp] * _coord[_qp]);
-  _F_neighbor_interpolation = F_neighbor * (_JxW_msm[_qp] * _coord[_qp]);
-}
-
-void
 CohesiveZoneModelBase::computeQpIProperties()
 {
   WeightedVelocitiesUserObject::computeQpIProperties();
@@ -134,48 +100,19 @@ CohesiveZoneModelBase::computeQpIProperties()
   const auto * const dof = cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
   _dof_to_weighted_displacements[dof] += (*_test)[_i][_qp] * _qp_displacement_nodal;
-
-  // TODO: Probably better to interpolate the deformation gradients.
-  _dof_to_F[dof] += (*_test)[_i][_qp] * _F_interpolation;
-  _dof_to_F_neighbor[dof] += (*_test)[_i][_qp] * _F_neighbor_interpolation;
 }
 
 void
-CohesiveZoneModelBase::computeFandR(const Node * const node)
+CohesiveZoneModelBase::computeLocalDisplacementJump(const Node * const node)
 {
   // First call does not have maps available
-  const bool return_boolean = _dof_to_F.find(node) == _dof_to_F.end();
-  if (return_boolean)
+  const auto it = _dof_to_interface_displacement_jump.find(node);
+  if (it == _dof_to_interface_displacement_jump.end())
     return;
 
-  const auto normalized_F = normalizeQuantity(_dof_to_F, node);
-  const auto normalized_F_neighbor = normalizeQuantity(_dof_to_F_neighbor, node);
-
-  // This 'averaging' assumption below can probably be improved upon.
-  _dof_to_interface_F[node] = 0.5 * (normalized_F + normalized_F_neighbor);
-
-  for (const auto i : make_range(Moose::dim))
-    for (const auto j : make_range(Moose::dim))
-    {
-      if (!std::isfinite(MetaPhysicL::raw_value(normalized_F(i, j))))
-        throw MooseException("The deformation gradient on the secondary surface is not finite in "
-                             "CohesiveZoneModelBase. MOOSE needs to cut the time step size.");
-      if (!std::isfinite(MetaPhysicL::raw_value(normalized_F_neighbor(i, j))))
-        throw MooseException("The deformation gradient on the primary surface is not finite in "
-                             "CohesiveZoneModelBase. MOOSE needs to cut the time step size.");
-    }
-
-  const auto dof_to_interface_F_node = libmesh_map_find(_dof_to_interface_F, node);
-
-  const ADFactorizedRankTwoTensor C = dof_to_interface_F_node.transpose() * dof_to_interface_F_node;
-  const auto Uinv = MathUtils::sqrt(C).inverse().get();
-  _dof_to_interface_R[node] = dof_to_interface_F_node * Uinv;
-
-  // Transform interface jump according to two rotation matrices
-  const auto global_interface_displacement = _dof_to_interface_displacement_jump[node];
-  _dof_to_interface_displacement_jump[node] =
-      (_dof_to_interface_R[node] * _dof_to_rotation_matrix[node]).transpose() *
-      global_interface_displacement;
+  // The user object runs on the displaced mesh, so the rotation matrix built from the nodal
+  // normals already follows the current orientation of the interface.
+  it->second = libmesh_map_find(_dof_to_rotation_matrix, node).transpose() * it->second;
 }
 
 void
@@ -236,11 +173,7 @@ CohesiveZoneModelBase::initialize()
 
   // instead we call it explicitly here
   WeightedGapUserObject::initialize();
-  _dof_to_F.clear();
-  _dof_to_F_neighbor.clear();
   _dof_to_interface_displacement_jump.clear();
-  _dof_to_interface_F.clear();
-  _dof_to_interface_R.clear();
   _dof_to_czm_traction.clear();
   for (auto & map_pr : _dof_to_rotation_matrix)
     map_pr.second.setToIdentity();
@@ -282,8 +215,8 @@ CohesiveZoneModelBase::reinit()
     // current node
     const Node * const node = _lower_secondary_elem->node_ptr(i);
 
-    // Compute the weighted nodal deformation gradient and rotation tensors.
-    computeFandR(node);
+    // Rotate the displacement jump into the local interface frame.
+    computeLocalDisplacementJump(node);
 
     // The call below is a 'macro' call. Create a utility function or user object for it.
     computeCZMTraction(node);
@@ -434,12 +367,6 @@ CohesiveZoneModelBase::finalize()
   PenaltyWeightedGapUserObject::selfFinalize();
 
   const bool send_data_back = !constrainedByOwner();
-
-  Moose::Mortar::Contact::communicateR2T(
-      _dof_to_F, _subproblem.mesh(), _nodal, _communicator, send_data_back);
-
-  Moose::Mortar::Contact::communicateR2T(
-      _dof_to_F_neighbor, _subproblem.mesh(), _nodal, _communicator, send_data_back);
 
   Moose::Mortar::Contact::communicateRealObject(
       _dof_to_weighted_displacements, _subproblem.mesh(), _nodal, _communicator, send_data_back);

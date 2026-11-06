@@ -14,6 +14,26 @@ those presented in previous technical reports ([!cite](martin2022implement,recue
 which are in turn based on existing discretization approaches ([!cite](wohlmuth2011variationally,
 puso2008segment)).
 
+### Local interface frame
+
+The weighted displacement jump at node $j$, $\tilde{\boldsymbol{\delta}}_{j}$, is computed in global
+coordinates on the displaced mesh and rotated into the local frame of the interface:
+\begin{equation}
+  \tilde{\boldsymbol{\delta}}_{\text{local},j} = \mathbf{Q}_{j}^{T} \tilde{\boldsymbol{\delta}}_{j},
+  \label{eq:local_jump}
+\end{equation}
+where the first column of $\mathbf{Q}_{j}$ is the nodal normal of the secondary surface in the
+current configuration and the remaining columns are the tangent directions. The local traction is
+mapped back to global coordinates with the same rotation, $\mathbf{t}_{j} = \mathbf{Q}_{j}
+\boldsymbol{\tau}_{j}$. Because the frame follows the current orientation of the interface, a
+rigid rotation of the bonded bodies does not change the local jump or the traction, as required of
+cohesive models at finite displacements [!citep](ottosen2015fundamental,mosler2011thermodynamically).
+This matters, for example, when delaminated layers buckle [!citep](qiu2001interface). Measuring
+opening and sliding in the frame of the current interface is the usual choice for finite
+deformation cohesive elements [!citep](ortiz1999finite,vandenbosch2008development,reinoso2014consistent),
+and is the same frame in which mortar contact measures the normal gap and the tangential slip
+[!citep](puso2004mortar,popp2009finite).
+
 ### Quadratic failure criterion
 
 The softening of the interface in the bilinear mixed mode traction separation law is given by a quadratic failure criterion. The onset of softening of the interface takes place when the traction state reaches the following equality:

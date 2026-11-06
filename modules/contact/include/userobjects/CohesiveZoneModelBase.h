@@ -37,7 +37,6 @@ public:
   virtual const ADVariableValue & czmGlobalTraction(unsigned int i) const;
 
 protected:
-  virtual void computeQpProperties() override;
   virtual void computeQpIProperties() override;
 
   virtual const VariableTestValue & test() const override;
@@ -45,7 +44,7 @@ protected:
 
   // Compute CZM kinematics.
   virtual void prepareJumpKinematicQuantities();
-  virtual void computeFandR(const Node * const node);
+  virtual void computeLocalDisplacementJump(const Node * const node);
 
   /// Encapsulate the CZM constitutive behavior.
   virtual void computeCZMTraction(const Node * const /*node*/) = 0;
@@ -65,36 +64,12 @@ protected:
   /// Number of displacement components
   const unsigned int _ndisp;
 
-  /// Coupled displacement gradients
-  std::vector<const GenericVariableGradient<true> *> _grad_disp;
-
-  /// Coupled displacement and neighbor displacement gradient
-  std::vector<const GenericVariableGradient<true> *> _grad_disp_neighbor;
-
   /// *** Kinematics/displacement jump quantities ***
   /// Map from degree of freedom to rotation matrix
   std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_rotation_matrix;
 
   /// Map from degree of freedom to local displacement jump
   std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_interface_displacement_jump;
-
-  /// Deformation gradient for interpolation
-  ADRankTwoTensor _F_interpolation;
-
-  /// Deformation gradient for interpolation of the neighbor projection
-  ADRankTwoTensor _F_neighbor_interpolation;
-
-  /// Map from degree of freedom to secondary, interpolated deformation gradient tensor
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_F;
-
-  /// Map from degree of freedom to neighbor, interpolated deformation gradient tensor
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_F_neighbor;
-
-  /// Map from degree of freedom to interface deformation gradient tensor
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_interface_F;
-
-  /// Map from degree of freedom to interface rotation tensor
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_interface_R;
 
   /// The global traction
   std::vector<ADVariableValue> _czm_interpolated_traction;
