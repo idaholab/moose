@@ -32,6 +32,16 @@
  * I = I_old + a (theta / d - p)
  *
  * so I is linear in the current temperature, and dI/dT is a scalar.
+ *
+ * If matrix_thickness = L is given, the matrix is a layer 0 <= z <= L with an insulated end at
+ * z = L (for instance the rock between parallel fractures 2L apart), and the profile becomes
+ *
+ * T(z, t) - T_ref = P(z) exp(-z / d) + P(2L - z) exp(-(2L - z) / d),   P(z) = A + B z + C z^2
+ *
+ * which is symmetric about z = L.  A, B, C and the heat content I = int_0^L (T - T_ref) dz follow
+ * from the surface value, the heat-conduction equation at z = 0 and the energy balance, a linear
+ * system whose solution reduces to the expressions above as L -> infinity.  I is again linear in
+ * the current temperature.
  */
 class PorousFlowPorosityVinsomeWesterveld : public PorousFlowPorosityLinear
 {
@@ -58,6 +68,12 @@ protected:
 
   /// Time at which the matrix temperature profile is undisturbed
   const Real _start_time;
+
+  /// Whether only a layer of finite thickness next to the fracture contributes to the opening
+  const bool _finite_thickness;
+
+  /// Thickness of the matrix layer that contributes to the opening (used if _finite_thickness)
+  const Real _matrix_thickness;
 
   /// Temperature change at the fracture face, theta = T - T_matrix_ref
   MaterialProperty<Real> & _theta;

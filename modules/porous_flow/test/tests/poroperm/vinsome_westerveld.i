@@ -21,6 +21,20 @@
 #     = (4 - 1/4) * theta / 7 = 15 * theta / 28 = -80.357142857
 #   I = I_old + a * (theta / d - p) = 4 * (theta - 15 * theta / 28) = 13 * theta / 7 = -278.57142857
 #   porosity = 0.1 - 1E-5 * I = 0.10278571429
+#
+# The same step with matrix_thickness = L = 1 (vinsome_westerveld_thickness_one_step test):
+#   s = 2 L / d = 2,  e = exp(-s) = 0.135335283,  ap = kappa dt / d^2 = 4
+#   mu0 = 1 - e = 0.864664717,  mu1 = 1 - e (1 + s) = 0.593994150,
+#   mu2 = 2 - e (s^2 + 2 s + 2) = 0.646647168
+#   Unknowns (A, b, c) = (A, B d, C d^2) satisfy
+#     [ 1.135335283  0.270670566   0.541341133 ] [A]   [ theta = -150             ]
+#     [ 1.135335283 -2.000000000   1.729329434 ] [b] = [ theta / ap = -37.5       ]
+#     [-2.593994150  5.135335283   0.646647168 ] [c]   [ I_old / d = 0            ]
+#   so (A, b, c) = (-113.2216751, -55.7079362, -11.7798897), and
+#   I = d (mu0 A + mu1 b + mu2 c) = -138.6064081,  porosity = 0.1 - 1E-5 * I = 0.1013860641
+# With matrix_thickness = 1E6 (vinsome_westerveld_large_thickness) the results equal those without
+# it, and with matrix_thickness = 0.01 (vinsome_westerveld_small_thickness) the thin layer reaches
+# the fracture-face temperature at once, so I = theta * L = -1.5.
 [GlobalParams]
   PorousFlowDictator = dictator
 []

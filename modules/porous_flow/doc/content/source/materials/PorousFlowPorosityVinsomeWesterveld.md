@@ -49,6 +49,28 @@ where the superscript "old" denotes values at the previous time step.  $\theta$ 
 
 Because $I^{\mathrm{old}}$ and $\theta^{\mathrm{old}}$ are fixed during a time step, [eq:vw_update] shows that $I$ is a linear function of the current temperature.  The derivative $\mathrm{d}I/\mathrm{d}T$ is therefore a single number at each node, and the Jacobian contribution of the thermal-opening term is as simple to compute as that of the temperature term in [PorousFlowPorosityLinear](PorousFlowPorosityLinear.md).  [!cite](vinsome1980) note that this linearity makes the method easy to couple implicitly to the temperature, which they found to be stable at large time steps, whereas explicit coupling was not.
 
+## Finite matrix thickness
+
+By default the matrix is semi-infinite, so $|I|$ keeps growing (as $\sqrt{t}$ for a constant fracture-face temperature).  If [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/matrix_thickness) $L$ is given, the matrix is a layer $0 \le z \le L$ whose far side is insulated, which represents the rock between parallel fractures a distance $2L$ apart.  The profile [eq:vw_profile] is then replaced by
+
+\begin{equation}
+\label{eq:vw_finite}
+T(z, t) - T_{\mathrm{ref}} = P(z)\, e^{-z/d} + P(2L - z)\, e^{-(2L - z)/d}, \qquad P(z) = A + Bz + Cz^{2} \ ,
+\end{equation}
+
+which is symmetric about $z = L$, so $\partial T / \partial z = 0$ there.  At each time step, $A$, $B$, $C$ and the heat content of the layer, $I = \int_{0}^{L} (T - T_{\mathrm{ref}})\, \mathrm{d}z = \int_{0}^{2L} P(z)\, e^{-z/d}\, \mathrm{d}z$, are found from the fracture-face temperature, the heat-conduction equation at $z = 0$ and the energy balance $\mathrm{d}I/\mathrm{d}t = -\kappa\, \partial T / \partial z |_{z=0}$, as in [eq:vw_update].  These conditions are linear, so $I$ is again a linear function of the current temperature.  As $L \to \infty$ the image term vanishes and the method reduces exactly to [eq:vw_update].  Because the layer is insulated, heat entering through the fracture face stays in the layer, and $I \to \theta L$ once the whole layer has reached the fracture-face temperature, so the opening is bounded.
+
+To check positive and negative temperature changes and reversals, the fracture-face temperature is set to $\theta = t \sin t$, with $\kappa = 1$, $L = 0.5$ and $\Delta t = 0.1$.  [vw_cyclic] compares $I$ with the exact heat content of an insulated layer, obtained from the series solution for a slab and Duhamel's theorem.  $I$ changes sign with $\theta$, stays within the bound $L \max|\theta|$, and differs from the exact value by less than $1\%$ of that bound.
+
+!table id=vw_cyclic caption=Heat content of an insulated matrix layer of thickness L = 0.5 when the fracture-face temperature change is t sin(t)
+| $t$ | $\theta$ | $I$ (Vinsome-Westerveld) | $I$ (exact) | $L \max \vert\theta\vert$ |
+| --- | --- | --- | --- | --- |
+| 2 | 1.82 | 0.892 | 0.896 | 0.91 |
+| 6 | -1.68 | -1.041 | -1.050 | 2.41 |
+| 10 | -5.44 | -2.333 | -2.336 | 3.96 |
+| 16 | -4.61 | -1.650 | -1.649 | 7.09 |
+| 20 | 18.26 | 8.654 | 8.684 | 9.13 |
+
 ## Choosing the thermal-opening coefficient
 
 If the matrix on both sides of the fracture contracts freely with linear thermal expansion coefficient $\alpha_{T}$, each fracture face moves by $\alpha_{T} I$, so
@@ -67,7 +89,7 @@ These values assume the fracture opening is not resisted by the in-situ stress, 
 
 ## Assumptions and limitations
 
-- Heat conduction in the matrix is one-dimensional, normal to the fracture, and the matrix is semi-infinite.  The thermal diffusivity is the value in the direction normal to the fracture (or the matrix is assumed isotropic), and it is constant: it does not depend on temperature or saturation.
+- Heat conduction in the matrix is one-dimensional, normal to the fracture, and the matrix is semi-infinite.  Alternatively, [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/matrix_thickness) makes the matrix a layer of finite thickness with an insulated far side (see [eq:vw_finite]).  The thermal diffusivity is the value in the direction normal to the fracture (or the matrix is assumed isotropic), and it is constant: it does not depend on temperature or saturation.
 - Only conductive heat transfer between the fracture and the matrix is considered.  Fluid flow between the fracture and the matrix is not included in the calculation of $I$.  When the cooled zones of neighbouring fractures overlap, $I$ will be overestimated in magnitude.
 - The matrix is at [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/matrix_reference_temperature) at [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time).  Before [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time) the thermal-opening term is zero, and any difference between the fracture-face temperature and [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/matrix_reference_temperature) at [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time) is treated as a step change at that time.  Because the diffusion length $d$ is measured from [!param](/Materials/PorousFlowPorosityVinsomeWesterveld/vw_start_time), this should be the time at which the fracture-face temperature first starts to change (for instance, when injection begins), as in [!cite](vinsome1980).
 - The profile [eq:vw_profile] is an approximation.  In the example below, for a step change in the fracture-face temperature, the computed $I$ is $3.3\%$ smaller in magnitude than the exact value once the time step is small compared with the elapsed time, and the error is larger when the time step is comparable to the elapsed time (see below).
