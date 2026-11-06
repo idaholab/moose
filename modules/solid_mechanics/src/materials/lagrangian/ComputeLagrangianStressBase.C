@@ -36,6 +36,8 @@ ComputeLagrangianStressBase::ComputeLagrangianStressBase(const InputParameters &
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _cauchy_stress(declareProperty<RankTwoTensor>(_base_name + "cauchy_stress")),
     _cauchy_jacobian(declareProperty<RankFourTensor>(_base_name + "cauchy_jacobian")),
+    _d_cauchy_d_F_ust(
+        declareProperty<RankFourTensor>(_base_name + "d_cauchy_stress_d_F_unstabilized")),
     _pk1_stress(declareProperty<RankTwoTensor>(_base_name + "pk1_stress")),
     _pk1_jacobian(declareProperty<RankFourTensor>(_base_name + "pk1_jacobian")),
     _pk1_jacobian_bypass_fbar(
@@ -83,9 +85,18 @@ ComputeLagrangianStressBase::initQpStatefulProperties()
   // Actually no need to zero out the stresses as they aren't stateful (yet)
 }
 
+bool
+ComputeLagrangianStressBase::needCauchyJacobian() const
+{
+  return isPropertyActive(_cauchy_jacobian.id()) || isPropertyActive(_d_nl_fbar.id());
+}
+
 void
 ComputeLagrangianStressBase::computeQpProperties()
 {
+  // Cleared because only Piola-Kirchhoff materials with large kinematics set it
+  if (isPropertyActive(_d_cauchy_d_F_ust.id()))
+    _d_cauchy_d_F_ust[_qp].zero();
   computeQpStressUpdate();
   // Chain the kinematic policy into the PK1 Jacobian so the TL kernel consumes a single
   // d(PK1)/d(grad u) property and doesn't need to know about the generalized-alpha weighting.

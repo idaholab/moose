@@ -33,7 +33,8 @@
 ///   1) "stress" -- the cauchy stress
 ///   2) "cauchy_jacobian" -- the derivative of the increment in the
 ///                           cauchy stress with respect to the increment
-///                           in the spatial velocity gradient
+///                           in the spatial velocity gradient, plus
+///      "d_cauchy_stress_d_F_unstabilized" -- its direct dependence on F_ust
 ///   3) "pk1_stress" -- the first Piola-Kirchhoff stress
 ///   4) "pk1_jacobian" -- the derivative of the first PK stress with respect
 ///                           to the deformation gradient
@@ -65,6 +66,8 @@ protected:
   virtual void initQpStatefulProperties() override;
   /// Update all properties (here just the stress/derivatives)
   virtual void computeQpProperties() override;
+  /// Whether a kernel or the non-local F-bar operator reads _cauchy_jacobian
+  bool needCauchyJacobian() const;
   /// Provide for the actual stress updates
   virtual void computeQpStressUpdate() = 0;
 
@@ -80,8 +83,11 @@ protected:
   /// The Cauchy stress
   MaterialProperty<RankTwoTensor> & _cauchy_stress;
   /// The derivative of the Cauchy stress wrt the increment in the spatial
-  /// velocity gradient
+  /// velocity gradient, at fixed unstabilized deformation gradient
   MaterialProperty<RankFourTensor> & _cauchy_jacobian;
+  /// The derivative of the Cauchy stress wrt the unstabilized deformation gradient at fixed
+  /// Piola-Kirchhoff stress (zero unless a PK stress is converted with large kinematics)
+  MaterialProperty<RankFourTensor> & _d_cauchy_d_F_ust;
 
   /// The 1st Piola-Kirchhoff stress
   MaterialProperty<RankTwoTensor> & _pk1_stress;
@@ -115,8 +121,7 @@ protected:
   const MaterialProperty<RankFourTensor> & _d_deformation_gradient_increment_d_F;
 
   /// d(F_stab)/d(F_ust). Multiplied into the sigma chain so pk1_jacobian = dPK1/d(F_ust)
-  /// (and cauchy_jacobian = dsigma/d(dL)) gets the local F-bar contribution. Equals
-  /// IdentityFour when F-bar is off.
+  /// gets the local F-bar contribution. Equals IdentityFour when F-bar is off.
   const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_ust;
 
   /// d(F_stab)/d(F_avg), the non-local F-bar partial. Read to compose `_d_nl_fbar`.

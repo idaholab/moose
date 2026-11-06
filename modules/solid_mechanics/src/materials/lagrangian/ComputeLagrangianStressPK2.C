@@ -43,6 +43,11 @@ ComputeLagrangianStressPK2::computeQpCauchyStress()
     if (!need_jacobian)
       return;
 
+    if (isPropertyActive(_d_cauchy_d_F_ust.id()))
+      _d_cauchy_d_F_ust[_qp] = pk2WrapDerivative(_S[_qp]);
+    if (!needCauchyJacobian())
+      return;
+
     // cauchy_jacobian = dsigma/d(dL). sigma depends on dL only through S(E(F_stab(dL))); the
     // F_ust factors in the wrap are CONSTANT w.r.t. dL (F_ust does not depend on dL --
     // dL is computed from F_stab via the kinematic helper, and F-bar relates F_stab to
@@ -60,7 +65,7 @@ ComputeLagrangianStressPK2::computeQpCauchyStress()
   else
   {
     _cauchy_stress[_qp] = _S[_qp];
-    if (need_jacobian)
+    if (need_jacobian && needCauchyJacobian())
       _cauchy_jacobian[_qp] = _C[_qp];
   }
 }
