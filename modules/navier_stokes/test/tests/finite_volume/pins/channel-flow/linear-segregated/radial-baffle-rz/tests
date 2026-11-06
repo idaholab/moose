@@ -1,0 +1,17 @@
+[Tests]
+  issues = '#31995'
+  design = 'PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md LinearFVMomentumFriction.md '
+           'FVReconstructedPressureGradient.md SIMPLE.md'
+
+  [radial-baffle-rz]
+    type = MMSTest
+    input = test.py
+    test_case = TestRadialBaffleRZ
+    min_parallel = 2
+    max_threads = 1 # see libmesh issue #3808
+    requirement = 'The system shall converge, at second order for the velocity and first order for '
+                  'the pressure, to the exact solution of inviscid radial flow in RZ coordinates '
+                  'from a porous annulus with Darcy and Forchheimer friction through a cylindrical '
+                  'pressure baffle with a porosity jump and form loss.'
+  []
+[]

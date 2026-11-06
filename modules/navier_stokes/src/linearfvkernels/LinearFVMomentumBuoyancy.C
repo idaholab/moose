@@ -25,6 +25,10 @@ LinearFVMomentumBuoyancy::validParams()
   params.addRequiredParam<RealVectorValue>("gravity", "Gravitational acceleration vector.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The value for the density");
   params.addRequiredParam<Real>("reference_rho", "The value for the reference density");
+  params.addParam<MooseFunctorName>(NS::porosity,
+                                    "1",
+                                    "The porosity. With superficial velocity variables the "
+                                    "buoyancy force is eps (rho - rho_0) g.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -39,7 +43,8 @@ LinearFVMomentumBuoyancy::LinearFVMomentumBuoyancy(const InputParameters & param
     _index(getParam<MooseEnum>("momentum_component")),
     _rho(getFunctor<Real>(NS::density)),
     _rho_0(getParam<Real>("reference_rho")),
-    _gravity(getParam<RealVectorValue>("gravity"))
+    _gravity(getParam<RealVectorValue>("gravity")),
+    _eps(getFunctor<Real>(NS::porosity))
 {
 }
 
@@ -54,5 +59,5 @@ LinearFVMomentumBuoyancy::computeRightHandSideContribution()
 {
   const auto elem = makeElemArg(_current_elem_info->elem());
   const auto state = determineState();
-  return (_rho(elem, state) - _rho_0) * _gravity(_index) * _current_elem_volume;
+  return _eps(elem, state) * (_rho(elem, state) - _rho_0) * _gravity(_index) * _current_elem_volume;
 }

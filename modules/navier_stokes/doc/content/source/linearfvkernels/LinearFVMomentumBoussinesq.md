@@ -5,6 +5,8 @@ This kernel adds the contributions of the Boussinesq buoyancy treatment for dens
 This term is described by $-\rho_{ref}\alpha\vec{g}(T - T_{ref})$ present in the momentum equation conservation when describing an incompressible fluid, where $\rho_{ref}$ is the reference density, $\alpha$ is the thermal expansion coefficient, $\vec{g}$ is the gravity vector, $T$ is the temperature, and $T_{ref}$ is a reference temperature. The Boussinesq buoyancy model assumes the changes in density as a function of temperature are linear and relevant only in the buoyant force term of the equation system. The Boussinesq kernel allows for modeling natural convection.
 
 This term deals only with the force due to the variation in density $\Delta \rho \vec{g}$, with the fluid density being $\rho = \rho_{ref}+\Delta\rho$. Thus, with no extra added terms to the conventional incompressible Navier Stokes equations, the system will solve for the total pressure minus the hydrostatic pressure.
+In a porous medium solved for the superficial velocity, set [!param](/LinearFVKernels/LinearFVMomentumBoussinesq/porosity) so the force is $-\epsilon \rho_{ref}\alpha\vec{g}(T - T_{ref})$, consistent with the porosity-weighted pressure gradient $\epsilon \nabla p$ of [LinearPWCNSFVMomentumPressure.md].
+
 For natural convection simulations, it is advisable to compute relevant dimensionless numbers such as the Rayleigh number or the Richardson number to decide on the need for turbulence models, mesh refinement and stability considerations.
 
 !syntax parameters /LinearFVKernels/LinearFVMomentumBoussinesq

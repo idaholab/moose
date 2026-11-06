@@ -1,0 +1,300 @@
+# LinearPWCNSFVMomentumFlux
+
+!syntax description /LinearFVKernels/LinearPWCNSFVMomentumFlux
+
+## Description
+
+`LinearPWCNSFVMomentumFlux` specializes
+[LinearWCNSFVMomentumFlux](LinearWCNSFVMomentumFlux.md) for momentum equations whose unknown is
+superficial velocity. The [PorousRhieChowMassFlux](PorousRhieChowMassFlux.md) user object provides
+the face mass flux and the porosity on each side of the face. The advection contribution assembled
+into a cell row is scaled by that cell's inverse porosity, so the mass flux transports interstitial
+velocity.
+
+At a pressure baffle the superficial velocity jumps, so the advection operator does not use the
+state interpolated across the baffle. Both sides advect the upstream interstitial tangential
+velocity, and each side advects its own normal velocity. The
+[BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) model supplies the reversible
+Bernoulli pressure jump and any irreversible form loss, as described below.
+
+The stress discretization does not add another baffle loss. Away from baffles it is the
+face-interpolated stress of [LinearWCNSFVMomentumFlux](LinearWCNSFVMomentumFlux.md); on a baffle it
+transmits only the shear traction described in [#baffle-stress]. Density and viscosity must vary
+continuously: they are interpolated to faces, so a step in either property is treated as a steep
+continuous variation rather than as an interface. Porosity must be positive on every active face.
+
+## Advection treatment across a porosity jump
+
+Let $\boldsymbol{U}=\epsilon\boldsymbol{v}$ be superficial velocity and
+$\boldsymbol{v}$ be interstitial velocity. For momentum component $i$, the conservative porous
+advection term is
+
+\begin{equation}
+  \mathcal{A}_i = \nabla\mathbin{\cdot}
+  \left(\frac{\rho}{\epsilon}\boldsymbol{U}U_i\right).
+\label{eq:pw-momentum-conservative-advection}
+\end{equation}
+
+Applying the product rule separates this term into
+
+\begin{equation}
+  \mathcal{A}_i =
+  \frac{1}{\epsilon}\nabla\mathbin{\cdot}
+  \left(\rho\boldsymbol{U}U_i\right)
+  + \rho U_i\boldsymbol{U}\mathbin{\cdot}\nabla\left(\frac{1}{\epsilon}\right).
+\label{eq:pw-momentum-advection-product-rule}
+\end{equation}
+
+`LinearPWCNSFVMomentumFlux` uses the approximation
+
+\begin{equation}
+  \mathcal{A}_i \approx \widetilde{\mathcal{A}}_i =
+  \frac{1}{\epsilon}\nabla\mathbin{\cdot}
+  \left(\rho\boldsymbol{U}U_i\right),
+\label{eq:pw-momentum-pulled-porosity-advection}
+\end{equation}
+
+so $1/\epsilon$ is pulled outside the divergence cell by cell. This approximation is exact where
+porosity is constant. It does not directly discretize the second term in
+[eq:pw-momentum-advection-product-rule], which contains the porosity gradient and becomes singular
+at a sharp porosity interface.
+
+For an internal face $f$ between cells $P$ and $N$, let
+$\phi_f=(\rho\boldsymbol{U}\mathbin{\cdot}\boldsymbol{n}_f)_f$, with
+$\boldsymbol{n}_f$ directed from $P$ to $N$. The ordinary internal-face contributions are
+
+\begin{equation}
+\begin{aligned}
+  R_{P,i,f}^{\mathrm{adv}} &= |S_f|\frac{\phi_f}{\epsilon_P}\widetilde{U}_{i,f}, \\
+  R_{N,i,f}^{\mathrm{adv}} &= -|S_f|\frac{\phi_f}{\epsilon_N}\widetilde{U}_{i,f},
+\end{aligned}
+\label{eq:pw-momentum-face-advection}
+\end{equation}
+
+where $\widetilde{U}_{i,f}$ is supplied by the interpolation method selected with
+[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/advected_interp_method_name).
+
+On a face that is not a pressure baffle, nothing replaces the omitted porosity-gradient term.
+[#baffle-advection] describes the interface closure used on baffles.
+
+## Advection treatment on a pressure baffle id=baffle-advection
+
+A pressure baffle is an internal face on a boundary of one of the pressure jump models listed in
+[!param](/UserObjects/PorousRhieChowMassFlux/pressure_jump_models). A baffle usually coincides with
+a porosity discontinuity, across which the tangential superficial velocity jumps, as described in
+[#baffle-stress]. With equal porosity on both sides, the reversible jump below vanishes and the
+baffle carries only its form loss.
+
+On a baffle, the shared interpolated state is replaced by a baffle face state built from the face
+velocities extrapolated from each row's cell with its own velocity gradient,
+
+\begin{equation}
+  \boldsymbol{V}_P = \boldsymbol{U}_P+\nabla\boldsymbol{U}_P\,\boldsymbol{r}_P, \qquad
+  \boldsymbol{V}_N = \boldsymbol{U}_N-\nabla\boldsymbol{U}_N\,\boldsymbol{r}_N,
+\end{equation}
+
+with $\boldsymbol{r}_P=\boldsymbol{x}_f-\boldsymbol{x}_P$ and
+$\boldsymbol{r}_N=\boldsymbol{x}_N-\boldsymbol{x}_f$. The gradients come from
+[FVVelocityJumpGreenGaussGradient](FVVelocityJumpGreenGaussGradient.md), so they do not see the
+jump. Both rows advect the interstitial tangential velocity of the upstream side $u$ ($P$ if
+$\phi_f\ge0$, otherwise $N$),
+
+\begin{equation}
+  \boldsymbol{w}_{t,f} = \frac{1}{\epsilon_u}
+    \left(\mathbf{I}-\boldsymbol{n}_f\boldsymbol{n}_f\right)\boldsymbol{V}_u,
+\end{equation}
+
+and each row its own normal velocity:
+
+\begin{equation}
+\begin{aligned}
+  R_{P,i,f}^{\mathrm{adv}} &= |S_f|\frac{\phi_f}{\epsilon_P}V^{*}_{i,P}, \qquad
+  R_{N,i,f}^{\mathrm{adv}} = -|S_f|\frac{\phi_f}{\epsilon_N}V^{*}_{i,N}, \\
+  \boldsymbol{V}^{*}_s &= \epsilon_s\boldsymbol{w}_{t,f}
+    + \left(\boldsymbol{V}_s\mathbin{\cdot}\boldsymbol{n}_f\right)\boldsymbol{n}_f,
+    \qquad s\in\{P,N\}.
+\end{aligned}
+\label{eq:pw-momentum-one-sided-advection}
+\end{equation}
+
+The tangential momentum flux $\phi_f\boldsymbol{w}_{t,f}$ is then the same on both sides, so the
+baffle is no source of tangential momentum, and an inviscid stream crossing the baffle keeps its
+interstitial tangential velocity. If each side advected its own extrapolated state instead, the
+face would act as the source $\phi_f(\boldsymbol{w}_{t,P}-\boldsymbol{w}_{t,N})$, and an inviscid
+solution would keep whatever tangential jump the iteration produced. The normal momentum fluxes
+still differ between the sides; the pressure jump below balances them. The face states are exact
+for a velocity that is linear on each side with a continuous interstitial tangential velocity. The
+implicit stencil keeps the shared interpolation weights and the difference is deferred to the
+right-hand side.
+
+On a baffle, the [BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) model replaces
+the omitted porosity-gradient term with the reversible Bernoulli pressure jump. With $o$ and $n$ the
+owner and non-owner sides, chosen from the mesh as described on that page, the jump is
+
+\begin{equation}
+\begin{aligned}
+  p_n-p_o &= \frac{1}{2}\rho_f\left(v_{n,o}^2-v_{n,n}^2\right), \\
+  v_{n,s} &= \frac{\phi_f}{\rho_f\epsilon_s}, \qquad s\in\{o,n\},
+\end{aligned}
+\label{eq:pw-momentum-bernoulli-replacement}
+\end{equation}
+
+where $\rho_f$ is the face-interpolated density. This closure recovers the steady one-dimensional
+inviscid Bernoulli balance, but it does not reproduce the omitted term in general multidimensional
+flow. Any configured irreversible form loss is
+added to this reversible jump.
+
+## Stress treatment across a porosity jump
+
+Let $\boldsymbol{U}=\epsilon\boldsymbol{v}$ denote superficial velocity, where
+$\boldsymbol{v}$ is interstitial velocity. The porous viscous stress is
+
+\begin{equation}
+  \boldsymbol{\tau} = \epsilon\mu\left[
+  \nabla\boldsymbol{v} + \left(\nabla\boldsymbol{v}\right)^T
+  - \frac{2}{3}\left(\nabla\mathbin{\cdot}\boldsymbol{v}\right)\boldsymbol{I}\right].
+\label{eq:pw-momentum-porous-stress}
+\end{equation}
+
+Porosity is taken to be constant within each cell adjacent to a sharp interface. Consequently, on
+either side $s$,
+
+\begin{equation}
+  \epsilon_s\nabla\left(\frac{\boldsymbol{U}_s}{\epsilon_s}\right)
+  = \nabla\boldsymbol{U}_s,
+\label{eq:pw-momentum-porosity-cancellation}
+\end{equation}
+
+and the corresponding transpose and divergence terms simplify in the same way. Away from pressure
+baffles, the stress is therefore the standard stress of
+[LinearWCNSFVMomentumFlux](LinearWCNSFVMomentumFlux.md), evaluated with gradients of superficial
+velocity and the face viscosity $\mu_f$. One common superficial face velocity is used, so the
+interstitial velocity jumps with porosity.
+
+The baffle stress in [#baffle-stress] is built from half-cell quantities. Consider an internal face
+$f$ between cells $P$ and $N$, with unit normal $\boldsymbol{n}_f$ directed from $P$ to $N$. Define
+the two half-cell vectors and distances as
+
+\begin{equation}
+\begin{aligned}
+  \boldsymbol{r}_P &= \boldsymbol{x}_f - \boldsymbol{x}_P,
+  &d_P &= \left|\boldsymbol{r}_P \mathbin{\cdot} \boldsymbol{n}_f\right|, \\
+  \boldsymbol{r}_N &= \boldsymbol{x}_N - \boldsymbol{x}_f,
+  &d_N &= \left|\boldsymbol{r}_N \mathbin{\cdot} \boldsymbol{n}_f\right|.
+\end{aligned}
+\label{eq:pw-momentum-half-cell-distances}
+\end{equation}
+
+These projected distances are used when
+[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/use_nonorthogonal_correction) is enabled.
+Otherwise, $d_P=\lVert\boldsymbol{r}_P\rVert$ and
+$d_N=\lVert\boldsymbol{r}_N\rVert$. For momentum component $i$, the side-local nonorthogonal
+corrections expressed using superficial velocity are
+
+\begin{equation}
+\begin{aligned}
+  c_{P,i}^{\mathrm{no}} &= \nabla U_{i,P} \mathbin{\cdot}
+    \left(\boldsymbol{n}_f - \frac{\boldsymbol{r}_P}{d_P}\right), \\
+  c_{N,i}^{\mathrm{no}} &= \nabla U_{i,N} \mathbin{\cdot}
+    \left(\boldsymbol{n}_f - \frac{\boldsymbol{r}_N}{d_N}\right).
+\end{aligned}
+\label{eq:pw-momentum-nonorthogonal-corrections}
+\end{equation}
+
+When [!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/use_nonorthogonal_correction) is
+disabled, both corrections in [eq:pw-momentum-nonorthogonal-corrections] are zero. When
+[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/use_deviatoric_terms) is enabled, each side
+also contributes
+
+\begin{equation}
+  c_{s,i}^{\mathrm{dev}} =
+  \left\{\left[\left(\nabla\boldsymbol{U}_s\right)^T
+  - \frac{2}{3}\left(\nabla\mathbin{\cdot}\boldsymbol{U}_s\right)\boldsymbol{I}\right]
+  \boldsymbol{n}_f\right\}_i, \qquad s \in \{P,N\}.
+\label{eq:pw-momentum-deviatoric-correction}
+\end{equation}
+
+For axisymmetric coordinates, the divergence in
+[eq:pw-momentum-deviatoric-correction] includes the cylindrical $U_r/r$ contribution.
+
+This treatment assumes that porosity is piecewise constant and that its discontinuity is handled
+as an interface. For porosity that varies smoothly within a cell,
+
+\begin{equation}
+  \epsilon\mu\nabla\left(\frac{U_i}{\epsilon}\right)
+  = \mu\nabla U_i - \mu U_i\nabla\ln\epsilon,
+\label{eq:pw-momentum-smooth-porosity-stress}
+\end{equation}
+
+so the additional porosity-gradient term requires a separate volumetric treatment. Likewise, a
+baffle model that includes an independent viscous or tangential surface force requires a
+corresponding traction-jump condition instead of the continuous-viscous-traction assumption used
+here.
+
+## Stress treatment on a pressure baffle id=baffle-stress
+
+On a pressure baffle the superficial velocity itself jumps: mass conservation keeps
+$\rho\boldsymbol{U}\mathbin{\cdot}\boldsymbol{n}_f$ continuous, so with continuous density the
+normal superficial velocity is continuous, but the tangential superficial velocity jumps with
+porosity. A common superficial face velocity would read this jump as a gradient. A baffle represents an interface that is sharp on the mesh scale, and the viscous
+(Brinkman) layer on the porous side of such an interface is of the order of the square root of the
+permeability, much thinner than the adjacent cells. The baffle stress is therefore a shear traction
+that depends on the kind of fluid on each side. A side of unit porosity is clear fluid; any other
+side is a porous medium.
+
+- Between two porous sides, the shear in the Brinkman layers is negligible against the drag, and no
+  traction is transmitted.
+- A clear side shears against the porous side as against a rough wall that moves with the
+  superficial velocity of the porous medium at the interface.
+- Between two clear sides, the traction is the ordinary two-point traction.
+
+Porosity serves here only as an indicator that drag dominates shear on a side. The model holds when
+the square root of the permeability is much smaller than the cell size, as in packed beds. It does
+not suit a side of unit porosity that carries a drag term, such as a screen, nor a sparse medium
+whose Brinkman layer spans the adjacent cells.
+
+With $C$ the set of clear sides, the traction is
+
+\begin{equation}
+\begin{aligned}
+  \boldsymbol{t}_f &= T_f^{b}\,(\boldsymbol{I}-\boldsymbol{n}_f\boldsymbol{n}_f)
+    \left(\boldsymbol{W}_N-\boldsymbol{W}_P\right), \\
+  T_f^{b} &= \mu_f\left(\sum_{s\in C}d_s\right)^{-1},
+\end{aligned}
+\label{eq:pw-momentum-baffle-shear}
+\end{equation}
+
+where the traction is zero if neither side is clear. The face velocity $\boldsymbol{W}_s$ of a
+clear side is the two-point value $\boldsymbol{W}_P=\boldsymbol{U}_P-d_P\boldsymbol{c}_P$ or
+$\boldsymbol{W}_N=\boldsymbol{U}_N+d_N\boldsymbol{c}_N$, in which $\boldsymbol{c}_s$ collects the
+nonorthogonal corrections of [eq:pw-momentum-nonorthogonal-corrections] for all velocity
+components. The face velocity of a porous side is the extrapolated face state
+$\boldsymbol{W}_s=\boldsymbol{V}_s$ of [#baffle-advection], which the baffle advection also uses.
+It approximates the porous velocity at the interface to second order; the cell value would leave
+a traction error of order $\mu_f\lVert\nabla\boldsymbol{U}_s\rVert$ that does not vanish under
+refinement, because the velocity difference is divided by the clear half-cell distance. For two
+clear sides, $T_f^{b}=\mu_f/(d_P+d_N)$ is the ordinary two-point transmissibility.
+
+No normal viscous stress acts on a baffle face. The
+[BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) carries the normal momentum
+balance, and a normal stress of the interstitial velocity would read the jump of
+$\phi_f/(\rho_f\epsilon_s)$ as a gradient.
+The element row adds $-\boldsymbol{t}_f$ and the neighbor row $+\boldsymbol{t}_f$, so momentum is
+conserved; on a porous side the drag absorbs the traction. The part proportional to $U_i$ is
+assembled implicitly with the coefficient $T_f^{b}(1-n_{f,i}^2)$; the remainder, including the
+coupling to the other velocity components, is lagged on the right-hand side. With
+[!param](/LinearFVKernels/LinearPWCNSFVMomentumFlux/use_deviatoric_terms) enabled, each clear side
+adds its own deviatoric correction $\mu_f c_{s,i}^{\mathrm{dev}}$ explicitly.
+
+## Example Input Syntax
+
+In this example, `LinearPWCNSFVMomentumFlux` assembles the x-momentum equation for superficial
+velocity in a channel containing porous interfaces.
+
+!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/linear-segregated/2d-diagonal-baffle/porous-baffle-straight-diagonal.i block=LinearFVKernels/u_advection
+
+!syntax parameters /LinearFVKernels/LinearPWCNSFVMomentumFlux
+
+!syntax inputs /LinearFVKernels/LinearPWCNSFVMomentumFlux
+
+!syntax children /LinearFVKernels/LinearPWCNSFVMomentumFlux

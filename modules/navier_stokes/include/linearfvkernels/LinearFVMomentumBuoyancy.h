@@ -40,4 +40,6 @@ protected:
   const Real _rho_0;
   /// The gravity vector
   const RealVectorValue _gravity;
+  /// The porosity
+  const Moose::Functor<Real> & _eps;
 };

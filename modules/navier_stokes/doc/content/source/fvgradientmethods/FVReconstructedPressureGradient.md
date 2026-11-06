@@ -30,7 +30,9 @@ volumetric flux through $f$, signed positive out of $P$. The reconstruction proc
    the pressure gradient used before a reconstructed coupling gradient exists. At an internal face,
    the lagged gradients of the two neighboring cells are averaged to a face value
    $(\nabla\mathbf{u})^{\text{lag}}_f$; at a domain boundary, or at the edge of this method's block
-   restriction, the owning cell's lagged gradient is used directly.
+   restriction, the owning cell's lagged gradient is used directly. The velocity jumps across a
+   pressure baffle of a [PorousRhieChowMassFlux.md], so a baffle face also uses the owning cell's
+   gradient, which [FVVelocityJumpGreenGaussGradient.md] computes without the jump.
 
 2. Turn each corrected face flux into a face equation for the cell velocity. A first-order Taylor
    expansion of the velocity from the cell centroid to the face centroid gives
@@ -41,7 +43,8 @@ volumetric flux through $f$, signed positive out of $P$. The reconstruction proc
    \end{equation}
 
    Replacing $\mathbf{u}_f\cdot\mathbf{n}_f$ with the corrected face-normal velocity
-   $q_f/|\mathbf{S}_f|$ and moving the already-known Taylor term to the right-hand side gives, for
+   $q_f/|\mathbf{S}_f|$, which is continuous across a pressure baffle because density varies
+   continuously, and moving the already-known Taylor term to the right-hand side gives, for
    every face of $P$, one linear equation for the unknown cell velocity,
 
    \begin{equation}
@@ -179,10 +182,13 @@ $\alpha<1$, does not by itself reproduce the current reconstructed cell velocity
 
 Before the first pressure correction, no reconstructed gradient exists, so the momentum predictor
 uses [!param](/FVGradientMethods/FVReconstructedPressureGradient/base_gradient_method), which
-defaults to [FVGreenGaussGradient.md]. After a time step is accepted, its relaxed reconstructed
-gradient becomes the starting point for the next time step. A rejected time-step attempt restores
-the last accepted gradient, and restart data preserves the same accepted state. This avoids creating
-an artificial momentum imbalance merely by advancing, retrying, or restarting a converged solution.
+defaults to [FVGreenGaussGradient](FVGreenGaussGradient.md). For pressure-baffle problems, set it to
+[FVPressureJumpGreenGaussGradient](FVPressureJumpGreenGaussGradient.md) so initialization cannot
+interpret the pressure jump as a resolved gradient. After a time step is accepted, the relaxed
+reconstructed gradient becomes the starting point for the next time step. A rejected time-step
+attempt restores the last accepted gradient, and restart data preserves the same accepted state.
+This avoids creating an artificial momentum imbalance merely by advancing, retrying, or restarting
+a converged solution.
 
 The relaxation and initialization choices are described in
 [RhieChowMassFlux.md#reconstructed-pressure-gradient].
@@ -190,9 +196,11 @@ The relaxation and initialization choices are described in
 ## Intended Use
 
 This method is intended specifically for momentum-pressure coupling. Diffusion corrections,
-diagnostics, and unrelated equations should continue to use an ordinary gradient method. Use the
-same reconstructed pressure-gradient definition for every momentum component coupled to one
-pressure equation; independent flow systems should use separate definitions.
+diagnostics, and unrelated equations should use the pressure variable's solution-gradient method.
+For pressure-baffle problems, that method must be
+[FVPressureJumpGreenGaussGradient](FVPressureJumpGreenGaussGradient.md). Use the same reconstructed
+pressure-gradient definition for every momentum component coupled to one pressure equation;
+independent flow systems should use separate definitions.
 
 The pressure and velocity variables and their `RhieChowMassFlux` object must have identical block
 restrictions. Fields on independent flow regions should use separate variables and Rhie-Chow
