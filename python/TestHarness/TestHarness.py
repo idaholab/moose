@@ -2246,7 +2246,7 @@ class TestHarness:
             opts.minimal_capabilities = True
 
         # Set --max-[gpu-]memory-per-slot from MOOSE_MAX_[GPU_]MEMORY_PER_SLOT
-        # if --max-[gpu-]memory-per-slot is not not set
+        # if --max-[gpu-]memory-per-slot is not set
         for option in ["max_memory_per_slot", "max_gpu_memory_per_slot"]:
             env_name = f"MOOSE_{option.upper()}"
             if (
