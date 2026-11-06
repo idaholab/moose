@@ -170,6 +170,8 @@
     []
   []
   [errors]
+    design = 'CSGBase.md CSGAction.md'
+    issues = '#29095 #34321'
     requirement = 'The system shall report an error when generating a mesh in CSG-only mode when'
     [csg_only_chained_not_moved]
       type = 'RunException'
@@ -189,8 +191,6 @@
     [distributed_mesh_input_block]
       type = RunException
       input = 'csg_only_inf_planes.i'
-      design = 'CSGAction.md'
-      issues = '#34321'
       detail = ' enabled from the input file and used in conjunction with distributed mesh command line option'
       cli_args = 'CSG/csg_only=true --distributed-mesh'
       expect_err = "--csg-only cannot be used in conjunction with --distributed-mesh"
