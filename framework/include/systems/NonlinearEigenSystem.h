@@ -128,6 +128,27 @@ public:
   std::pair<Real, Real> getConvergedEigenpair(dof_id_type n) const;
 
   /**
+   * Copy the Nth converged eigenvector into the provided vector, which is filled in the full degree
+   * of freedom layout of this system. When the eigen problem is condensed, the entries of the
+   * condensed degrees of freedom are zero. The system solution is not touched, unless the caller
+   * passes it in as \p vec.
+   *
+   * @return The Nth converged eigenvalue as a complex number, i.e. the first and the second number
+   * is the real and the imaginary part of
+   * the eigenvalue, respectively.
+   */
+  std::pair<Real, Real> getConvergedEigenvector(dof_id_type n, NumericVector<Number> & vec);
+
+  /**
+   * Whether the eigen operators, and therefore the vectors the eigen solver works with, are
+   * condensed. When this is true, the eigen problem is posed on the non-condensed degrees of
+   * freedom only, so a vector in the full degree of freedom layout of this system must be viewed
+   * through \p sys().local_non_condensed_dofs_vector before it is handed to, or read from, the
+   * eigen solver.
+   */
+  bool eigenOperatorsCondensed() const { return _num_constrained_dofs != 0; }
+
+  /**
    * Get the number of converged eigenvalues
    *
    * @return all converged eigenvalues as complex numbers
