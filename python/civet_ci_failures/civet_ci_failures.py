@@ -131,7 +131,7 @@ INVOCATION_RE = re.compile(r"^\[[\d:]+\]\s+(\S+):\s+(\./run_tests\b.*)$")
 
 # Arguments that describe the CI machine rather than the test mode, and so are
 # dropped from a reproduce command. Everything else is kept, including
-# --compute-device and --max-memory-per-slot, which change whether tests pass.
+# --compute-device and --max-[gpu-]memory-per-slot, which change whether tests pass.
 STRIP_EXACT_ARGS = {"-t", "--timing"}
 STRIP_PREFIX_ARGS = ("--longest-jobs=",)
 STRIP_VALUED_ARGS = {"-j", "-l"}
@@ -139,7 +139,7 @@ STRIP_VALUED_ARGS = {"-j", "-l"}
 # Arguments kept in a reproduce command but ignored when deciding whether two
 # runs were the same test mode. Memory limits are tuned per job and would
 # otherwise make one mode look like several.
-MODE_EXCLUDE_PREFIXES = ("--max-memory-per-slot=",)
+MODE_EXCLUDE_PREFIXES = ("--max-memory-per-slot=", "--max-gpu-memory-per-slot=")
 
 # A MOOSE error block opens with this marker and carries boilerplate before
 # the message that identifies the failure
