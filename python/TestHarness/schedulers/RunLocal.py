@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Optional
 
 from TestHarness.runners.SubprocessRunner import Runner, SubprocessRunner
 from TestHarness.schedulers.Scheduler import Scheduler
+from TestHarness.util import printPrefixed
 
 _MONITOR_JOB_MEMORY = platform.system() != "Windows" and find_spec("psutil") is not None
 if _MONITOR_JOB_MEMORY or TYPE_CHECKING:
@@ -35,6 +36,9 @@ class RunLocal(Scheduler):
 
         self._memory_monitor: Optional[MemoryMonitor] = None
         """The MemoryMonitor for sampling child process memory, if any."""
+
+        self._checked_gpu_error: bool = False
+        """Whether or not the monitor has been checked for a GPU sampling failure."""
 
     def buildRunner(self, job, options) -> Runner:
         """Build a SubprocessRunner."""
@@ -66,6 +70,21 @@ class RunLocal(Scheduler):
 
         # Get latest samples from the monitor
         samples = self._memory_monitor.get_samples()
+
+        # Report once if GPU memory sampling failed to start, which the sampler
+        # records before it publishes the first samples
+        if (
+            samples
+            and not self._checked_gpu_error
+            and self.scheduler_options.monitor_job_gpu_memory
+        ):
+            self._checked_gpu_error = True
+            if (gpu_error := self._memory_monitor.get_gpu_error()) is not None:
+                printPrefixed(
+                    "WARNING",
+                    f"GPU memory is not tracked; sampling failed to start: {gpu_error}",
+                    color="YELLOW" if self.options.colored else None,
+                )
 
         # Update job memory and kill jobs over memory
         max_memory_per_slot_mb = self.options.max_memory_per_slot

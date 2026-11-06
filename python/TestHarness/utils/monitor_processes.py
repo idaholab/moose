@@ -165,7 +165,8 @@ class MemoryMonitor:
         self._shared: Optional[NamespaceProxy] = None
         """
         Shared state whose "samples" attribute is the latest samples (child pid ->
-        MemorySample), once started.
+        MemorySample) and whose "gpu_error" attribute is the reason GPU memory
+        sampling failed to start, if it did, once started.
         """
 
         self._stop_event = None
@@ -181,13 +182,29 @@ class MemoryMonitor:
         assert self._shared is not None
         return self._shared.samples
 
+    def get_gpu_error(self) -> Optional[str]:
+        """
+        Get the reason that GPU memory sampling failed to start in the sampler, if any.
+
+        It is set before the first samples are published, after which GPU memory
+        is reported as not tracked (None).
+        """
+        assert self._shared is not None
+        return self._shared.gpu_error
+
     @staticmethod
     def _sampler(
         parent_pid: int, interval: float, gpu: bool, stop_event, shared: NamespaceProxy
     ):
         """Run the sampler process; internal method called by start()."""
-        # Initialized after the fork, as NVML state cannot be shared across one
-        gpu_memory = NvidiaGPUMemory() if gpu else None
+        # Initialized after the fork, as NVML state cannot be shared across one.
+        # On failure, keep sampling CPU memory and report why GPU memory is not
+        gpu_memory = None
+        if gpu:
+            try:
+                gpu_memory = NvidiaGPUMemory()
+            except Exception as e:
+                shared.gpu_error = str(e)
 
         while not stop_event.is_set():
             start = time.monotonic()
@@ -246,7 +263,7 @@ class MemoryMonitor:
 
         ctx = get_context("fork")
         self._manager = ctx.Manager()
-        self._shared = self._manager.Namespace(samples={})
+        self._shared = self._manager.Namespace(samples={}, gpu_error=None)
         self._stop_event = ctx.Event()
         self._process = ctx.Process(
             target=self._sampler,

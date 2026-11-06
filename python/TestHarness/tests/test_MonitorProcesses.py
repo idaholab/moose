@@ -340,12 +340,37 @@ class TestMemoryMonitor(unittest.TestCase):
                 while not ((sample := monitor.get_samples().get(pid)) and sample.gpu):
                     self.assertLess(time.monotonic(), deadline)
                     time.sleep(0.05)
+            gpu_error = monitor.get_gpu_error()
         finally:
             monitor.stop()
             manager.shutdown()
 
         # 1 MiB for the child and 2 MiB for its forked process
         self.assertEqual(sample, MemorySample(sample.cpu, 3 * MIB))
+        self.assertIsNone(gpu_error)
+
+    def testGPUError(self):
+        """Test that CPU memory is still sampled if GPU sampling fails to start."""
+
+        def fail():
+            raise RuntimeError("NVML failed")
+
+        monitor = MemoryMonitor(os.getpid(), interval=0.05, gpu=True)
+        with patch("TestHarness.utils.monitor_processes.NvidiaGPUMemory", fail):
+            monitor.start()
+        try:
+            with run_child("none") as (pid,):
+                deadline = time.monotonic() + 10
+                while (sample := monitor.get_samples().get(pid)) is None:
+                    self.assertLess(time.monotonic(), deadline)
+                    time.sleep(0.05)
+                gpu_error = monitor.get_gpu_error()
+        finally:
+            monitor.stop()
+
+        self.assertGreater(sample.cpu, 0)
+        self.assertIsNone(sample.gpu)
+        self.assertEqual(gpu_error, "NVML failed")
 
 
 class FakeNVMLError(Exception):

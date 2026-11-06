@@ -31,18 +31,38 @@ def build_job(slots: int = 1) -> Mock:
     return job
 
 
+def build_scheduler(
+    max_memory: Optional[float] = None,
+    max_gpu_memory: Optional[float] = None,
+    gpu_error: Optional[str] = None,
+) -> RunLocal:
+    """Build a RunLocal with a fake monitor, without running its constructor."""
+    scheduler = RunLocal.__new__(RunLocal)
+    scheduler.options = SimpleNamespace(
+        max_memory_per_slot=max_memory,
+        max_gpu_memory_per_slot=max_gpu_memory,
+        colored=False,
+    )
+    scheduler.scheduler_options = SimpleNamespace(monitor_job_gpu_memory=True)
+    scheduler._checked_gpu_error = False
+    scheduler._memory_monitor = Mock(get_gpu_error=Mock(return_value=gpu_error))
+    return scheduler
+
+
 def monitor(
     jobs: dict[int, Mock],
     samples: dict[int, MemorySample],
-    max_memory: Optional[float] = None,
-    max_gpu_memory: Optional[float] = None,
+    scheduler: Optional[RunLocal] = None,
+    **kwargs,
 ):
-    """Run RunLocal.monitorJobProcesses() for the given jobs and samples."""
-    scheduler = RunLocal.__new__(RunLocal)
-    scheduler.options = SimpleNamespace(
-        max_memory_per_slot=max_memory, max_gpu_memory_per_slot=max_gpu_memory
-    )
-    scheduler._memory_monitor = Mock(get_samples=Mock(return_value=samples))
+    """
+    Run RunLocal.monitorJobProcesses() for the given jobs and samples.
+
+    The scheduler is built with build_scheduler(**kwargs) if not given.
+    """
+    if scheduler is None:
+        scheduler = build_scheduler(**kwargs)
+    scheduler._memory_monitor.get_samples.return_value = samples
     with patch.object(RunLocal, "getActiveJobPIDMap", return_value=jobs):
         scheduler.monitorJobProcesses()
 
@@ -117,6 +137,25 @@ class TestRunLocalMonitorJobProcesses(unittest.TestCase):
         monitor({1: job}, {1: MemorySample(30 * MIB, 30 * MIB)}, max_gpu_memory=1)
         self.assertIsNone(job.getRunner().max_memory)
         job.killProcess.assert_not_called()
+
+    def testGPUError(self):
+        """Test that a GPU sampling failure is reported once."""
+        scheduler = build_scheduler(gpu_error="NVML failed")
+        job = build_job()
+        sample = {1: MemorySample(10 * MIB, None)}
+        with patch("TestHarness.schedulers.RunLocal.printPrefixed") as printed:
+            # Not checked until samples are available
+            monitor({1: job}, {}, scheduler)
+            printed.assert_not_called()
+
+            monitor({1: job}, sample, scheduler)
+            monitor({1: job}, sample, scheduler)
+        printed.assert_called_once_with(
+            "WARNING",
+            "GPU memory is not tracked; sampling failed to start: NVML failed",
+            color=None,
+        )
+        scheduler._memory_monitor.get_gpu_error.assert_called_once()
 
 
 if __name__ == "__main__":
