@@ -10,8 +10,13 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMMatrixCoefficientFunction.h"
-#include "MooseError.h"
 #include "MFEMProblem.h"
+#include "MooseError.h"
+#include "MooseUtils.h"
+
+#include <algorithm>
+#include <string>
+#include <vector>
 
 registerMooseObject("MooseApp", MFEMMatrixCoefficientFunction);
 
@@ -67,18 +72,19 @@ MFEMMatrixCoefficientFunction::raise_on_invalid_matrix(
   {
     if (mat[i].empty())
     {
-      paramError("matrix", "Row ", i + 1, " is empty (row indices are one-based).");
+      paramError("matrix", "Row ", i + 1, " has 0 entries (row indices are one-based).");
     }
     if (mat[i].size() != mat.front().size())
     {
+      std::vector<std::string> row_sizes;
+      std::transform(mat.begin(),
+                     mat.end(),
+                     std::back_inserter(row_sizes),
+                     [](const auto & x) { return std::to_string(x.size()); });
       paramError("matrix",
-                 "Row ",
-                 i + 1,
-                 " has ",
-                 mat[i].size(),
-                 " entries, expected ",
-                 mat.front().size(),
-                 " (row indices are one-based).");
+                 "Not all rows have equal size; found row sizes {",
+                 MooseUtils::join(row_sizes.begin(), row_sizes.end(), ", "),
+                 "}");
     }
   }
   if (mat.size() != mat.front().size())
