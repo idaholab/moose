@@ -10,12 +10,15 @@
 #include "NEML2ModelExecutor.h"
 #include "MOOSEToNEML2.h"
 #include "NEML2Utils.h"
-#include <string>
+
+#include <algorithm>
 #include <sstream>
+#include <string>
 
 #ifdef NEML2_ENABLED
 #include <ATen/ATen.h>
 #include "libmesh/id_types.h"
+#include "neml2/tensors/R2.h"
 #include "neml2/tensors/functions/jacrev.h"
 #include "neml2/dispatchers/ValueMapLoader.h"
 #include "neml2/misc/string_utils.h"
@@ -39,6 +42,12 @@ NEML2ModelExecutor::actionParams()
       false,
       "When a NEML2 solve fails, append a detailed dump of input tensors (defined/missing, "
       "shapes, and devices) to the error message.");
+  params.addParam<std::vector<std::string>>(
+      "identity_seeded_state",
+      {},
+      "State variables (e.g. 'state/Fp') whose uncached history is seeded with the second-order "
+      "identity tensor instead of zero under manage_state_advance. Required for multiplicative "
+      "quantities such as a plastic deformation gradient, for which zero is singular.");
   return params;
 }
 
@@ -77,6 +86,7 @@ NEML2ModelExecutor::NEML2ModelExecutor(const InputParameters & params)
     ,
     _batch_index_generator(getUserObject<NEML2BatchIndexGenerator>("batch_index_generator")),
     _manage_state_advance(getParam<bool>("manage_state_advance")),
+    _identity_seeded_state(getParam<std::vector<std::string>>("identity_seeded_state")),
     _debug_inputs_on_failure(getParam<bool>("debug_inputs_on_failure")),
     _output_ready(false),
     _error_message("")
@@ -240,9 +250,7 @@ NEML2ModelExecutor::fillInputs()
       uo->insertInto(_model_params);
 
     if (_manage_state_advance && _t_step > 0)
-      for (const auto & [name, val] : _state_vars)
-        if (val.defined())
-          _in[name] = val;
+      seedUncachedHistory();
 
     // Send input variables and parameters to device
     for (auto & [var, val] : _in)
@@ -268,6 +276,69 @@ NEML2ModelExecutor::fillInputs()
 }
 
 void
+NEML2ModelExecutor::seedUncachedHistory()
+{
+  std::vector<neml2::Tensor> gathered;
+  for (const auto & [name, val] : _in)
+    if (val.defined())
+      gathered.push_back(val);
+  if (gathered.empty())
+    mooseError("Cannot seed managed NEML2 history for executor '",
+               name(),
+               "' because no gathered input has a defined tensor.");
+  const auto batch = neml2::utils::broadcast_dynamic_sizes(gathered);
+  const auto opts = gathered.front().options();
+  const auto sep = model().settings().history_separator();
+
+  // catch typos: every identity-seeded name must be the base of a model state variable
+  for (const auto & requested : _identity_seeded_state)
+  {
+    bool found = false;
+    for (const auto & [name, val] : _state_vars)
+      if (neml2::parse_history(name, sep).first == requested)
+      {
+        found = true;
+        break;
+      }
+    if (!found)
+      paramError("identity_seeded_state",
+                 "'",
+                 requested,
+                 "' does not match the base name of any state variable of the NEML2 model.");
+  }
+
+  for (const auto & [name, val] : _state_vars)
+    if (val.defined())
+      _in[name] = val;
+    else
+    {
+      const auto base = neml2::parse_history(name, sep).first;
+      const auto & var = model().input_variable(name);
+
+      // Multiplicative state (e.g. a plastic deformation gradient) must start at the
+      // second-order identity: zero is singular.
+      if (std::find(_identity_seeded_state.begin(), _identity_seeded_state.end(), base) !=
+          _identity_seeded_state.end())
+      {
+        if (var.base_sizes() != neml2::TensorShapeRef{3, 3} || !var.intmd_sizes().empty())
+          paramError("identity_seeded_state",
+                     "variable ",
+                     base,
+                     " does not have base shape (3, 3); only full second-order tensors can be "
+                     "identity-seeded.");
+        _in[name] = neml2::R2::identity(opts).batch_expand(batch);
+      }
+      else
+      {
+        // Seed time `t` with the previous time so dt > 0 on step 1; other history starts at
+        // zero.
+        const auto seed = base == "t" ? _t - _dt : 0.0;
+        _in[name] = neml2::Tensor::full(batch, var.intmd_sizes(), var.base_sizes(), seed, opts);
+      }
+    }
+}
+
+void
 NEML2ModelExecutor::expandInputs()
 {
   // Figure out what our batch size is
@@ -287,6 +358,18 @@ NEML2ModelExecutor::advanceState()
 {
   if (!_manage_state_advance || _t_step == 0)
     return;
+
+  // The cached old time lags the gathered time by one step, so the constitutive time
+  // interval would silently be the PREVIOUS step size if dt changed between steps.
+  if (_dt_prev > 0 && !MooseUtils::absoluteFuzzyEqual(_dt, _dt_prev))
+    mooseError("manage_state_advance = true requires a constant time step size: the cached old "
+               "time lags the gathered time by one step, so a changing dt would make the "
+               "constitutive time interval inconsistent with the mechanical update. dt changed "
+               "from ",
+               _dt_prev,
+               " to ",
+               _dt);
+  _dt_prev = _dt;
 
   for (const auto & [name, val] : _state_vars)
   {
