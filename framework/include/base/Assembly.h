@@ -293,18 +293,7 @@ public:
    * Returns the reference to the AD version of the coordinate transformation coefficients
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<ADReal> & adCoordTransformation() const
-  {
-    // Coord values for non-cartesian coordinate systems are functions of the locations of the
-    // quadrature points in physical space. We also have no way of knowing whether this was called
-    // from a volumetric or face object so we should set both volumetric and face xyz to true
-    _calculate_xyz = true;
-    _calculate_face_xyz = true;
-    _need_ad_volume_map = true;
-
-    _calculate_ad_coord = true;
-    return _ad_coord;
-  }
+  const MooseArray<ADReal> & adCoordTransformation() const;
 
   /**
    * Get the coordinate system type
@@ -2790,8 +2779,9 @@ protected:
   /// Whether any object needs the AD element shape function gradients
   mutable bool _need_ad_grad_phi = false;
   /// Whether any object needs the AD element JxW, quadrature points or coordinate transformation.
-  /// On a displaced mesh their map gives every element node displacement derivatives, which
-  /// exceeds the AD derivative size on high-order elements even when no object reads them.
+  /// On a displaced mesh their map carries derivatives for every element node displacement. That
+  /// costs time even when no object reads them, and it needs an AD derivative size of at least the
+  /// element's displacement dofs (81 on a HEX27).
   mutable bool _need_ad_volume_map = false;
 
   /**
@@ -2911,6 +2901,20 @@ protected:
   /// The current reference points on the neighbor element
   std::vector<Point> _current_neighbor_ref_points;
 };
+
+inline const MooseArray<ADReal> &
+Assembly::adCoordTransformation() const
+{
+  // Coord values for non-cartesian coordinate systems are functions of the locations of the
+  // quadrature points in physical space. We also have no way of knowing whether this was called
+  // from a volumetric or face object so we should set both volumetric and face xyz to true
+  _calculate_xyz = true;
+  _calculate_face_xyz = true;
+  _need_ad_volume_map = true;
+
+  _calculate_ad_coord = true;
+  return _ad_coord;
+}
 
 template <typename OutputType>
 const typename OutputTools<OutputType>::VariablePhiValue &

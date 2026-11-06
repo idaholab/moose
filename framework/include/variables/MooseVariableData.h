@@ -531,11 +531,11 @@ private:
             std::size_t num_shapes);
 
   /// Ask the assembly to compute the AD face shape function gradients, which this variable's AD
-  /// gradient and AD face test function gradients are built from
+  /// face gradients are built from and adGradPhiFace() returns
   void needADGradPhiFace() const;
 
   /// Ask the assembly to compute the AD element shape function gradients, which this variable's AD
-  /// gradient and AD test function gradients are built from
+  /// gradients are built from and adGradPhi() returns
   void needADGradPhi() const;
 
   /// A const reference to the owning MooseVariableFE object
