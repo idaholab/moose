@@ -8187,8 +8187,6 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
       for (unsigned int tid = 0; tid < n_threads; tid++)
         reinitScalars(tid);
 
-      computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
-
       _aux->residualSetup();
 
       if (_displaced_problem)
@@ -8208,6 +8206,8 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 #ifdef MOOSE_KOKKOS_ENABLED
       _kokkos_functions.residualSetup();
 #endif
+
+      computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
 
       computeSystems(EXEC_LINEAR);
 
@@ -8455,8 +8455,6 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
       for (unsigned int tid = 0; tid < n_threads; tid++)
         reinitScalars(tid);
 
-      computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
-
       _aux->residualSetup();
 
       if (_displaced_problem)
@@ -8476,6 +8474,8 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 #ifdef MOOSE_KOKKOS_ENABLED
       _kokkos_functions.residualSetup();
 #endif
+
+      computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
 
       computeSystems(EXEC_LINEAR);
 
@@ -8608,8 +8608,6 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
         for (unsigned int tid = 0; tid < n_threads; tid++)
           reinitScalars(tid);
 
-        computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
-
         _aux->jacobianSetup();
 
         if (_displaced_problem)
@@ -8634,6 +8632,8 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 #ifdef MOOSE_KOKKOS_ENABLED
         _kokkos_functions.jacobianSetup();
 #endif
+
+        computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
 
         computeSystems(EXEC_NONLINEAR);
 

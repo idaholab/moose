@@ -96,7 +96,7 @@
   [weighted_gap]
     requirement = 'The system shall support a variationally consistent weighted gap implementation '
                   'of the zero-penetration contact constraint'
-    issues = '#16961'
+    issues = '#16961 #32856'
     [equal_order]
       type = 'Exodiff'
       input = frictionless-weighted-gap.i
@@ -145,8 +145,19 @@
                'the physical normal contact pressure to the mortar Archard wear auxiliary kernel.'
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active='max_worn_depth total_worn_depth'"
-      issues = '#32856'
-      design = 'MortarArchardsLawAux.md'
+    []
+    [penalty_wear_linear]
+      type = 'CSVDiff'
+      input = frictionless-penalty-weighted-gap-wear.i
+      csvdiff = 'frictionless-penalty-weighted-gap-wear_out.csv'
+      restep = false # Test is prescribed to abort on failed timestep
+      prereq = 'weighted_gap/penalty_wear'
+      detail = 'using a first order basis for displacements and penalty contact, and shall compute '
+               'the same wear when the mortar Archard wear auxiliary kernel also executes on every '
+               'residual evaluation.'
+      cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
+                 "Postprocessors/active='max_worn_depth total_worn_depth' "
+                 "AuxKernels/worn_depth/execute_on='linear timestep_end'"
     []
     [penalty_action]
       type = 'Exodiff'
