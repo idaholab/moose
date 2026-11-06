@@ -105,6 +105,13 @@ public:
   Point _incremental_slip_prev_iter;
   bool _slip_reversed;
   Real _slip_tol;
+
+  /**
+   * Build the contact face for side \p side_num of a primary element, or copy \p elem directly
+   * when the element itself is the contact face (see MooseMesh::isSurfaceElemOnNodeset).
+   */
+  static std::unique_ptr<const Elem>
+  buildSide(const Elem & elem, unsigned int side_num, bool surface_elem);
 };
 
 // Used for Restart

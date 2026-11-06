@@ -244,9 +244,13 @@ loopOverMortarSegments(
       // Get a reference to the MortarSegmentInfo for this Elem.
       const MortarSegmentInfo & msinfo = amg.mortarSegmentMeshElemToInfo().at(msm_elem);
 
-      // Set the primary interior parent and side ids
+      // Set the primary interior parent and side ids, or the element itself if it has no parent
       const Elem * primary_ip = msinfo.primary_elem->interior_parent();
-      unsigned int primary_side_id = primary_ip->which_side_am_i(msinfo.primary_elem);
+      unsigned int primary_side_id = libMesh::invalid_uint;
+      if (primary_ip)
+        primary_side_id = primary_ip->which_side_am_i(msinfo.primary_elem);
+      else
+        primary_ip = msinfo.primary_elem;
       const auto & primary_ip_mats =
           libmesh_map_find(primary_ip_sub_to_mats, primary_ip->subdomain_id());
 
