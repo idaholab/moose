@@ -1972,19 +1972,54 @@ private:
   const Real _kokkos_default_value_zero = 0;
 
 #ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Request the computations and solution states that coupling the field variables of a coupled
+   * variable parameter with a vector tag requires, and register the vector tag
+   * @param var_name The coupled variable parameter name
+   * @param tag_name The vector tag name
+   * @param vars The coupled field variables
+   * @returns The vector tag ID
+   */
+  TagID kokkosRequestCoupledVectorTag(const std::string & var_name,
+                                      const std::string & tag_name,
+                                      const std::vector<MooseVariableFieldBase *> & vars) const;
+  /**
+   * Get the vector tag name stored in a parameter
+   * @param tag_param_name The name of the parameter holding the vector tag name
+   * @returns The vector tag name
+   */
+  const TagName & kokkosTagName(const std::string & tag_param_name) const;
+
+  /**
+   * Build the Kokkos variable of a coupled standard, vector, or array variable parameter
+   * @param var_name The coupled variable parameter name
+   * @param tag_name The vector tag name
+   * @param comp The component of the coupled variable parameter
+   * @param zero_default Whether an uncoupled variable takes zero instead of its default value, so
+   * that it does not require a default value, as is done for gradients. An uncoupled variable
+   * always takes zero for a time derivative tag.
+   * @returns The Kokkos variable
+   */
+  ///@{
   Moose::Kokkos::Variable kokkosCoupledVectorTagVariable(const std::string & var_name,
                                                          const std::string & tag_name,
-                                                         unsigned int comp) const;
+                                                         unsigned int comp,
+                                                         bool zero_default = false) const;
   Moose::Kokkos::Variable kokkosCoupledVectorTagVariables(const std::string & var_name,
-                                                          const std::string & tag_name) const;
+                                                          const std::string & tag_name,
+                                                          bool zero_default = false) const;
   Moose::Kokkos::Variable kokkosCoupledVectorTagVectorVariable(const std::string & var_name,
                                                                const std::string & tag_name,
-                                                               unsigned int comp) const;
+                                                               unsigned int comp,
+                                                               bool zero_default = false) const;
   Moose::Kokkos::Variable kokkosCoupledVectorTagVectorVariables(const std::string & var_name,
-                                                                const std::string & tag_name) const;
+                                                                const std::string & tag_name,
+                                                                bool zero_default = false) const;
   Moose::Kokkos::Variable kokkosCoupledVectorTagArrayVariable(const std::string & var_name,
                                                               const std::string & tag_name,
-                                                              unsigned int comp) const;
+                                                              unsigned int comp,
+                                                              bool zero_default = false) const;
+  ///@}
   Moose::Kokkos::Variable kokkosZeroVariable() const;
 
 public:
