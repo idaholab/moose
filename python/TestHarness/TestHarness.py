@@ -269,7 +269,8 @@ class TestHarness:
     # 10 - tests/*/tests/*/max_memory on Linux 5.3+ no longer counts file-backed memory
     #      (executable/library pages), which was split across however many other
     #      processes happened to be running at the same time
-    RESULTS_VERSION = 10
+    # 11 - Store tests/*/tests/*/max_gpu_memory if available
+    RESULTS_VERSION = 11
 
     # Validation version history:
     # 1 - Initial tracking of version

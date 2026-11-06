@@ -79,7 +79,7 @@ class RunLocal(Scheduler):
                 continue
 
             # Update max memory, if greater; this is True if greater
-            updated = job.getRunner().updateMaxMemory(job_memory_bytes)
+            updated, _ = job.getRunner().updateMaxMemory(job_memory_bytes)
 
             # Check memory usage if needed
             if (
