@@ -193,7 +193,7 @@ parameter `allow_data_driven_mesh_generation` on your application can be set to 
 
 The system optionally supports the generation of base data for a [!ac](CSG).
 In this execution setting, a `CSGBase` object is created, which contains the surfaces, cells, and universes needed to define the equivalent MOOSE geometry as a CSG model for use with downstream Monte Carlo codes.
-[!ac](CSG) generation is triggered using the `--csg-only` command line option, and a `generateCSG()` method is overridden for each generator that is defined within the mesh input file.
+[!ac](CSG) generation is triggered using the `--csg-only` command line option or a [`[CSG]`](syntax/CSG/index.md) input block, and a `generateCSG()` method is overridden for each generator that is defined within the mesh input file.
 In order to indicate to the mesh generation system that [!ac](CSG) generation is supported, the following call for `setHasGenerateCSG` is made within the parameters of the generator:
 
 !listing ExampleCSGInfiniteSquareMeshGenerator.C start=Declare that this generator end=setHasGenerateCSG include-end=true

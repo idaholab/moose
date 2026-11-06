@@ -5,3 +5,7 @@
     num_sides = 3
   []
 []
+
+[CSG]
+  expand_units = false
+[]

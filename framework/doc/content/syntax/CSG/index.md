@@ -67,6 +67,23 @@ The [!ac](CSG) model generation can be invoked on the command line using the `--
 The [!ac](JSON) file that is generated will be called the name of the input file with `_csg` appended by default.
 An optional output file name can be provided on the command line (`--csg-only <output_file_name.json>`).
 
+The [!ac](CSG) model generation can also be invoked from the input file with a top-level `[CSG]` block.
+The presence of the block enables [!ac](CSG)-only mode; setting `csg_only = false` keeps the block in the input file while running the input normally.
+The output file name is set with `output_file`.
+All [engineering units](#engineering-units) are expanded into standard [!ac](CSG) components before output by default, including when `--csg-only` is used without a `[CSG]` block; setting `expand_units = false` retains them as engineering units.
+
+```
+[CSG]
+  output_file = 'my_model_csg.json'
+  expand_units = false
+[]
+```
+
+Command line options take precedence over the `[CSG]` block: an output file name passed to `--csg-only` overrides `output_file`, and `--mesh-only`, `--split-mesh`, or `--parse-neml2-only` disable [!ac](CSG)-only mode with a warning.
+When `--csg-only` is used with `csg_only = false`, CSG-only mode is enabled with a message noting that the command line takes precedence, and the `output_file` and `expand_units` parameters still apply.
+
+!syntax parameters /CSG/CSGAction
+
 !alert note title=Code requirements
 A [!ac](CSG) [!ac](JSON) file will be produced if and only if all mesh generators in the input file have the `generateCSG` method implemented.
 If any mesh generators do not have the `generateCSG` method implemented, an error will be returned explaining as such.
@@ -74,7 +91,7 @@ This process is run as a [data-only mode](source/meshgenerators/MeshGenerator.md
 
 ## Output
 
-Calling `--csg-only` will produce a [!ac](JSON) file containing the complete geometric description of the mesh generator input.
+Calling `--csg-only` or inclusion of the `csg_only=true` in the `[CSG]` input block will produce a [!ac](JSON) file containing the complete geometric description of the mesh generator input.
 There are four main sections in the file:
 
 - [`surfaces`](#surfaces)

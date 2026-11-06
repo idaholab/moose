@@ -45,6 +45,7 @@
 #include "Attributes.h"
 #include "MooseApp.h"
 #include "CommonOutputAction.h"
+#include "CSGAction.h"
 #include "CastUniquePointer.h"
 #include "NullExecutor.h"
 #include "ExecFlagRegistry.h"
@@ -1403,7 +1404,31 @@ MooseApp::setupOptions()
     // The following parameters set the final task and so are mutually exclusive.
     const std::vector<std::string> final_task_params = {
         "csg_only", "mesh_only", "split_mesh", "parse_neml2_only"};
-    if (isExclusiveParamSetByUser(final_task_params, "csg_only"))
+
+    // CSG-only mode can also be requested in the input file through [CSG], but any final task
+    // option on the command line takes precedence
+    const auto csg_actions = _action_warehouse.getActions<CSGAction>();
+    mooseAssert(csg_actions.size() <= 1, "Should not be more than one CSGAction");
+    bool csg_only_from_input =
+        !csg_actions.empty() && (*csg_actions.begin())->getParam<bool>("csg_only");
+    if (csg_only_from_input)
+    {
+      for (const auto & param : final_task_params)
+        if (isParamSetByUser(param))
+        {
+          if (param != "csg_only")
+            mooseWarning("[CSG] csg_only = true is ignored because ",
+                         parameters().getCommandLineMetadata(param).switches.front(),
+                         " was passed on the command line");
+          csg_only_from_input = false;
+          break;
+        }
+    }
+    else if (!csg_actions.empty() && isParamSetByUser("csg_only"))
+      mooseInfo(
+          "[CSG] csg_only = false is ignored because --csg-only was passed on the command line");
+
+    if (isExclusiveParamSetByUser(final_task_params, "csg_only") || csg_only_from_input)
     {
       // Error checking on incompatible command line options
       if (_distributed_mesh_on_command_line)
@@ -1573,7 +1598,8 @@ MooseApp::runInputFile()
 
   _action_warehouse.executeAllActions();
 
-  if (isParamSetByUser("csg_only"))
+  // Set from either --csg-only or [CSG]
+  if (getMeshGeneratorSystem().getCSGOnly())
   {
     _early_exit_param = "--csg-only";
     _ready_to_exit = true;
