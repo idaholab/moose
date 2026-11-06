@@ -1,0 +1,64 @@
+[Tests]
+  design = 'syntax/Functions/index.md syntax/Distributions/index.md'
+  issues = '#22766'
+
+  [distribution_evaluation_errors]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingDistributionEvaluationErrors
+    requirement = 'The system shall provide a valid distribution preview when evaluation of the other distribution curve fails.'
+  []
+
+  [distribution_settings]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingDistributionSettings
+    requirement = 'The system shall reject invalid distribution preview sampling settings and accept supported point counts.'
+  []
+
+  [distribution_values]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingDistributionValues
+    requirement = 'The system shall reject invalid probability densities and cumulative probabilities while permitting small floating-point roundoff.'
+  []
+
+  [input_sections]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingInputSections
+    requirement = 'The system shall select function and distribution previews according to the input section containing the plotting request.'
+  []
+
+  [distribution_quantiles]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingDistributionQuantiles
+    requirement = 'The system shall sample distribution previews on a bounded probability grid containing the median and reject invalid interior quantiles.'
+  []
+
+  [distribution_presentation]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingDistributionPresentation
+    requirement = 'The system shall label probability density and cumulative probability previews appropriately and preserve visible ranges for constant densities.'
+  []
+
+  [function_scale_factors]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingFunctionScaleFactors
+    requirement = 'The system shall apply tabular function scale factors to function preview values.'
+  []
+
+  [function_step_directions]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingFunctionStepDirections
+    requirement = 'The system shall plot piecewise constant functions using their configured step direction.'
+  []
+
+  [function_single_point]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingFunctionSinglePoint
+    requirement = 'The system shall provide finite, nonzero axis ranges for a function preview containing a single data point.'
+  []
+
+  [function_data]
+    type = GoogleTest
+    unit_test = MooseServerTest.PlottingFunctionData
+    requirement = 'The system shall return no preview for empty function data and reject nonfinite data or invalid axis ranges.'
+  []
+[]
