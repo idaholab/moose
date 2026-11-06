@@ -1460,6 +1460,20 @@ class TestHarness:
         if term_format == "tpnsc":
             term_format = "tmpnsc"
 
+        # Helper for requiring a positive integer argument
+        def positive_int(value):
+            value = int(value)
+            if value <= 0:
+                raise argparse.ArgumentTypeError(f"must be positive, got {value}")
+            return value
+
+        # Helper for requiring a positive float argument
+        def positive_float(value):
+            value = float(value)
+            if value <= 0:
+                raise argparse.ArgumentTypeError(f"must be positive, got {value}")
+            return value
+
         parser = argparse.ArgumentParser(
             description="A tool used to test MOOSE-based applications"
         )
@@ -1534,7 +1548,7 @@ class TestHarness:
             "--jobs",
             nargs="?",
             action="store",
-            type=int,
+            type=positive_int,
             dest="jobs",
             const=1,
             help="Set the number of parallel jobs for tests",
@@ -1543,7 +1557,7 @@ class TestHarness:
             "-l",
             "--load-average",
             action="store",
-            type=float,
+            type=positive_float,
             dest="load",
             help="Do not run additional tests if the load average is at least LOAD",
         )
@@ -1552,7 +1566,7 @@ class TestHarness:
             "--parallel",
             nargs="?",
             action="store",
-            type=int,
+            type=positive_int,
             dest="parallel",
             const=1,
             help="Number of MPI processes to use for each job",
@@ -1561,10 +1575,10 @@ class TestHarness:
             "--n-threads",
             nargs=1,
             action="store",
-            type=int,
+            type=positive_int,
             dest="nthreads",
             default=1,
-            help="Number of threads to use when running mpiexec",
+            help="Number of threads to use when running mpiexec (default: %(default)s)",
         )
 
         filtergroup = parser.add_argument_group(
@@ -1577,7 +1591,7 @@ class TestHarness:
             type=str,
             dest="group",
             default="ALL",
-            help="Run only tests in the named group",
+            help="Run only tests in the named group (default: %(default)s)",
         )
         filtergroup.add_argument(
             "-s",
@@ -1620,13 +1634,13 @@ class TestHarness:
         filtergroup.add_argument(
             "--min-parallel",
             dest="min_parallel",
-            type=int,
+            type=positive_int,
             help="Skip tests that cannot run with at least this many MPI procs",
         )
         filtergroup.add_argument(
             "--min-threads",
             dest="min_threads",
-            type=int,
+            type=positive_int,
             help="Skip tests that cannot run with at least this many threads",
         )
         filtergroup.add_argument(
@@ -1737,7 +1751,7 @@ class TestHarness:
             type=str,
             choices=TestHarness.validComputeDevices(),
             default="cpu",
-            help="Run tests that support this compute device; (passes --compute-device=...)",
+            help="Run tests that support this compute device; (passes --compute-device=...) (default: %(default)s)",
         )
         appgroup.add_argument(
             "--distributed-mesh",
@@ -1764,7 +1778,7 @@ class TestHarness:
             action="store",
             type=str,
             default="cpr",
-            help="Set the file suffix for recover mode (pass --recoversuffix)",
+            help="Set the file suffix for recover mode (pass --recoversuffix) (default: %(default)s)",
         )
         appgroup.add_argument(
             "--append-runapp-cliarg",
@@ -1858,9 +1872,9 @@ class TestHarness:
         screengroup.add_argument(
             "--longest-jobs",
             action="store",
-            type=int,
+            type=positive_int,
             default=0,
-            help="Print the longest running jobs upon completion",
+            help="Print the LONGEST_JOBS longest running jobs upon completion",
         )
         screengroup.add_argument(
             "--no-report",
@@ -1879,16 +1893,16 @@ class TestHarness:
         screengroup.add_argument(
             "--term-cols",
             action="store",
-            type=int,
+            type=positive_int,
             default=term_cols,
-            help="The number columns to use in output",
+            help="The number columns to use in output (default: %(default)s)",
         )
         screengroup.add_argument(
             "--term-format",
             action="store",
             type=str,
             default=term_format,
-            help="The formatting to use when outputting job status",
+            help="The formatting to use when outputting job status (default: %(default)s)",
         )
 
         outputgroup = parser.add_argument_group("Output", "Control the file output")
@@ -1921,16 +1935,22 @@ class TestHarness:
         failgroup.add_argument(
             "--max-fails",
             nargs=1,
-            type=int,
+            type=positive_int,
             default=50,
-            help="The number of tests allowed to fail before any additional tests will run",
+            help=(
+                "The number of tests allowed to fail before any additional tests "
+                "will run (default: %(default)s)"
+            ),
         )
         failgroup.add_argument(
             "--valgrind-max-fails",
             nargs=1,
-            type=int,
+            type=positive_int,
             default=5,
-            help="The number of valgrind tests allowed to fail before any additional valgrind tests will run",
+            help=(
+                "The number of valgrind tests allowed to fail before any additional "
+                "valgrind tests will run (default: %(default)s)"
+            ),
         )
 
         resourcesgroup = parser.add_argument_group(
@@ -1939,13 +1959,13 @@ class TestHarness:
         resourcesgroup.add_argument(
             "--max-cpu-per-slot",
             nargs=1,
-            type=float,
+            type=positive_float,
             help=("The maximum percent CPU to allow for a job, per slot"),
         )
         resourcesgroup.add_argument(
             "--max-memory-per-slot",
             nargs=1,
-            type=float,
+            type=positive_float,
             help="The maximum memory to allow for a job in MB, per slot",
         )
         resourcesgroup.add_argument(
@@ -1982,10 +2002,10 @@ class TestHarness:
         hpcgroup.add_argument(
             "--hpc-file-timeout",
             nargs=1,
-            type=int,
+            type=positive_int,
             action="store",
             default=300,
-            help="The time in seconds to wait for HPC output",
+            help="The time in seconds to wait for HPC output (default: %(default)s)",
         )
         hpcgroup.add_argument(
             "--hpc-host",
@@ -2026,7 +2046,7 @@ class TestHarness:
         hpcgroup.add_argument(
             "--hpc-scatter-procs",
             nargs=1,
-            type=int,
+            type=positive_int,
             action="store",
             dest="hpc_scatter_procs",
             default=None,
