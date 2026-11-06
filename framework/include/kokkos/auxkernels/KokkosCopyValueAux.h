@@ -28,6 +28,9 @@ public:
   KOKKOS_FUNCTION void computeNodeInternal(const Derived & auxkernel, AssemblyDatum & datum) const;
 
 protected:
+  // Values are copied DOF by DOF without an L2 projection, so no mass matrix factors are needed
+  virtual void setupMassFactors(const bool) override {}
+
   /// Variable used to specify state being copied
   unsigned short _state;
 

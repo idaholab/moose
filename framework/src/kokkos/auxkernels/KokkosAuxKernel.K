@@ -15,7 +15,7 @@ namespace Moose::Kokkos
 InputParameters
 AuxKernel::validParams()
 {
-  InputParameters params = AuxKernelBase::validParams();
+  InputParameters params = ::AuxKernelBase::validParams();
   params.addPrivateParam<bool>(MooseBase::kokkos_object_param, true);
   // Kokkos aux kernels are not yet migrated to TheWarehouse-based execution_order_group
   // filtering, so this parameter would have no effect; suppress it rather than silently
@@ -65,14 +65,78 @@ AuxKernel::AuxKernel(const AuxKernel & object)
     _t_old(object._t_old),
     _t_step(object._t_step),
     _dt(object._dt),
-    _dt_old(object._dt_old)
+    _dt_old(object._dt_old),
+    _fe_type(object._fe_type),
+    _mass_factors(object._mass_factors),
+    _rhs(object._rhs),
+    _solution(object._solution)
 {
+}
+
+void
+AuxKernel::initialSetup()
+{
+  ::AuxKernelBase::initialSetup();
+
+  setupMassFactors(true);
+}
+
+void
+AuxKernel::meshChanged()
+{
+  ::AuxKernelBase::meshChanged();
+
+  setupMassFactors(true);
+}
+
+void
+AuxKernel::meshDisplaced()
+{
+  ::AuxKernelBase::meshDisplaced();
+
+  setupMassFactors(false);
+}
+
+void
+AuxKernel::setupMassFactors(const bool rebuild)
+{
+  if (_nodal)
+    return;
+
+  if (rebuild)
+  {
+    _fe_type = kokkosAssembly().getFETypeID(_var.feType());
+
+    const auto num_elems = kokkosMesh().getNumLocalElements();
+
+    _mass_factors.create(num_elems);
+    _rhs.create(num_elems);
+    _solution.create(num_elems);
+
+    for (const auto tid : make_range(numKokkosBlockElements()))
+    {
+      const auto & info = kokkosMesh().getElementInfo(kokkosBlockElementID(tid));
+      const auto n = kokkosAssembly().getNumDofs(info.type, _fe_type);
+
+      _mass_factors.reserve({info.id}, {n * (n + 1) / 2});
+      _rhs.reserve({info.id}, {n});
+      _solution.reserve({info.id}, {n});
+    }
+
+    _mass_factors.finalize();
+    _rhs.finalize();
+    _solution.finalize();
+  }
+
+  Policy policy(0, numKokkosBlockElements());
+
+  DispatcherRegistry::build<MassMatrixLoop>(this, type())->parallelFor(policy);
 }
 
 void
 AuxKernel::compute()
 {
-  if (_var.isNodal())
+  if (_nodal)
   {
     Policy policy = _bnd ? Policy(0, numKokkosBoundaryNodes()) : Policy(0, numKokkosBlockNodes());
 
