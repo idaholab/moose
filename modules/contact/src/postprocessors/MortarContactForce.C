@@ -14,6 +14,8 @@
 #include "DisplacedProblem.h"
 #include "MooseMesh.h"
 
+#include "libmesh/parallel_algebra.h"
+
 registerMooseObject("ContactApp", MortarContactForce);
 
 InputParameters
@@ -37,7 +39,16 @@ MortarContactForce::validParams()
 MortarContactForce::MortarContactForce(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _weighted_gap_uo(getUserObject<WeightedGapUserObject>("weighted_gap_uo")),
-    _component(getParam<MooseEnum>("component"))
+    _component(getParam<MooseEnum>("component")),
+    _displaced_mesh(_fe_problem.getDisplacedProblem()->mesh()),
+    _amg(_fe_problem.getMortarInterface(
+        {_displaced_mesh.getBoundaryID(
+             _weighted_gap_uo.parameters().get<BoundaryName>("primary_boundary")),
+         _displaced_mesh.getBoundaryID(
+             _weighted_gap_uo.parameters().get<BoundaryName>("secondary_boundary"))},
+        {_weighted_gap_uo.primarySubdomain(), _weighted_gap_uo.secondarySubdomain()},
+        /*on_displaced=*/true)),
+    _node_to_elems(_amg.nodesToSecondaryElem())
 {
 }
 
@@ -50,34 +61,31 @@ MortarContactForce::initialize()
 void
 MortarContactForce::execute()
 {
-  const auto & uo_params = _weighted_gap_uo.parameters();
-  const MooseMesh & mesh = _fe_problem.getDisplacedProblem()->mesh();
-  const auto & amg = _fe_problem.getMortarInterface(
-      {mesh.getBoundaryID(uo_params.get<BoundaryName>("primary_boundary")),
-       mesh.getBoundaryID(uo_params.get<BoundaryName>("secondary_boundary"))},
-      {_weighted_gap_uo.primarySubdomain(), _weighted_gap_uo.secondarySubdomain()},
-      /*on_displaced=*/true);
-  const auto & node_to_elems = amg.nodesToSecondaryElem();
-
   // F = sum_j p_j n_j int N_j, with the normalization int N_j over the mortar segments (a dual
   // basis function has the same integral as N_j)
   for (const auto & [dof_object, gap_and_normalization] : _weighted_gap_uo.dofToWeightedGap())
   {
     if (dof_object->processor_id() != processor_id())
       continue;
-    const Node * const node = mesh.nodePtr(dof_object->id());
-    const Elem & elem = *libmesh_map_find(node_to_elems, node->id()).front();
-    const auto normal = amg.getNodalNormals(elem)[elem.get_node_index(node)];
-    _force +=
-        _weighted_gap_uo.getNormalContactPressure(node) * gap_and_normalization.second * normal;
+    const Node * const node = _displaced_mesh.nodePtr(dof_object->id());
+    const Elem & elem = *libmesh_map_find(_node_to_elems, node->id()).front();
+    const auto normal = _amg.getNodalNormals(elem)[elem.get_node_index(node)];
+    const auto weighted_pressure =
+        _weighted_gap_uo.getNormalContactPressure(node) * gap_and_normalization.second;
+    if (_component < 3)
+      _force(_component) += weighted_pressure * normal(_component);
+    else
+      _force += weighted_pressure * normal;
   }
 }
 
 void
 MortarContactForce::finalize()
 {
-  for (const auto i : make_range(Moose::dim))
-    gatherSum(_force(i));
+  if (_component < 3)
+    gatherSum(_force(_component));
+  else
+    gatherSum(_force);
 }
 
 PostprocessorValue

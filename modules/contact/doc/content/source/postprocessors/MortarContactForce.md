@@ -1,7 +1,5 @@
 # MortarContactForce
 
-!syntax description /Postprocessors/MortarContactForce
-
 ## Overview
 
 `MortarContactForce` reports the normal contact force that one mortar contact pair transmits to its

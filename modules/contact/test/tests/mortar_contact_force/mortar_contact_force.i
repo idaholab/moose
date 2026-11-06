@@ -154,6 +154,10 @@
     weighted_gap_uo = lm_weightedgap_object_mortar_p_base_top_s_right_bottom
     component = y
   []
+  [left_bottom_force_magnitude]
+    type = MortarContactForce
+    weighted_gap_uo = lm_weightedgap_object_mortar_p_base_top_s_left_bottom
+  []
   [left_bottom_nodal_sum]
     type = NodalSum
     variable = contact_force_y
