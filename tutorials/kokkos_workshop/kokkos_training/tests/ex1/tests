@@ -1,0 +1,34 @@
+[Tests]
+  issues = '#30655'
+  design = 'syntax/Kokkos/index.md'
+
+  [ex1]
+    requirement = 'The Kokkos-MOOSE workshop solutions shall solve a transient diffusion problem with a volumetric source and Dirichlet and Neumann boundary conditions'
+    [host]
+      type = CSVDiff
+      input = 'ex1.i'
+      csvdiff = 'ex1_out.csv'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'using host MOOSE objects,'
+    []
+    [kokkos]
+      type = CSVDiff
+      input = 'ex1_kokkos.i'
+      cli_args = 'Outputs/file_base=ex1_out'
+      csvdiff = 'ex1_out.csv'
+      prereq = 'ex1/host'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'using the equivalent Kokkos-MOOSE objects, reproducing the host results, and'
+    []
+    [compare]
+      type = CSVDiff
+      input = 'ex1_compare.i'
+      csvdiff = 'ex1_compare_out.csv'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'using both in separate solver systems of one simulation, with matching results.'
+    []
+  []
+[]

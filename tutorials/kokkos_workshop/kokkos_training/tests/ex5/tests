@@ -1,0 +1,43 @@
+[Tests]
+  issues = '#30655'
+  design = 'syntax/KokkosMaterials/index.md'
+
+  [ex5]
+    requirement = 'The Kokkos-MOOSE workshop solutions shall provide Kokkos materials that'
+    [steady]
+      type = CSVDiff
+      input = 'ex5_steady.i'
+      csvdiff = 'ex5_steady_out.csv'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'compute a solution-dependent conductivity consumed by a kernel, matching the exact solution,'
+    []
+    [no_derivative]
+      type = CSVDiff
+      input = 'ex5_steady.i'
+      cli_args = 'Kernels/diff/conductivity_derivative=none'
+      csvdiff = 'ex5_steady_out.csv'
+      prereq = 'ex5/steady'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'converge to the same solution when the on-demand conductivity derivative is not requested,'
+    []
+    [jacobian]
+      type = PetscJacobianTester
+      input = 'ex5_steady.i'
+      cli_args = 'Mesh/gen/nx=3 Mesh/gen/ny=3 Outputs/csv=false'
+      recover = false
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'provide an exact Jacobian through the on-demand conductivity derivative, and'
+    []
+    [running_max]
+      type = CSVDiff
+      input = 'ex5_running_max.i'
+      csvdiff = 'ex5_running_max_out.csv'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'track the running maximum of a variable over time with a stateful property.'
+    []
+  []
+[]
