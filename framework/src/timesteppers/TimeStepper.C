@@ -21,10 +21,11 @@ TimeStepper::validParams()
   params.addRangeCheckedParam<Real>(
       "cutback_factor_at_failure",
       0.5,
-      "cutback_factor_at_failure>0 & cutback_factor_at_failure<1",
-      "Factor to apply to timestep if a time step fails to converge.");
+      "cutback_factor_at_failure>0 & cutback_factor_at_failure<=1",
+      "Factor to apply to timestep if a time step fails to converge. A factor of 1 repeats the "
+      "time step with the same size, so it should be set back below 1 after a repeat.");
   params.addParam<bool>("enable", true, "whether or not to enable the time stepper");
-  params.declareControllable("enable");
+  params.declareControllable("enable cutback_factor_at_failure");
 
   params.registerBase("TimeStepper");
   params.registerSystemAttributeName("TimeStepper");

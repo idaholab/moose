@@ -54,6 +54,9 @@ protected:
   int & _t_step_old;
   bool & _is_repeated_timestep;
 
+  /// Whether to apply the prediction (controllable)
+  const bool & _apply;
+
   /// Amount by which to scale the predicted value.  Must be in [0,1].
   Real _scale;
 
