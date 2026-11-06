@@ -54,7 +54,10 @@ ResidualObject::ResidualObject(const InputParameters & parameters,
     _dt(TransientInterface::_dt),
     _dt_old(TransientInterface::_dt_old)
 {
-  _kokkos_var.init(_vars);
+  if (_vars.size() == 1)
+    _kokkos_var.init(*_vars[0]);
+  else
+    _kokkos_var.init(_vars);
 }
 
 std::vector<MooseVariableFieldBase *>
@@ -85,9 +88,21 @@ ResidualObject::getMooseVariables(Moose::VarFieldType field_type)
                  "and order.");
   }
 
+  std::string expected;
+
+  if (field_type == Moose::VarFieldType::VAR_FIELD_STANDARD)
+    expected = "standard";
+  else if (field_type == Moose::VarFieldType::VAR_FIELD_VECTOR)
+    expected = "vector";
+  else if (field_type == Moose::VarFieldType::VAR_FIELD_ARRAY)
+    expected = "array";
+
   for (const auto var : vars)
-    if (var->isVector() && field_type != Moose::VarFieldType::VAR_FIELD_VECTOR)
-      paramError(var_param_name, "Vector variable specified to a scalar Kokkos residual object.");
+    if (var->fieldType() != field_type)
+      paramError(var_param_name, type(), " expects ", expected, " variables.");
+
+  if (field_type != Moose::VarFieldType::VAR_FIELD_STANDARD && vars.size() > 1)
+    paramError(var_param_name, type(), " does not support multiple ", expected, " variables.");
 
   return vars;
 }
