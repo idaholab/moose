@@ -31,19 +31,19 @@ MortarContactPressureIntegral::MortarContactPressureIntegral(const InputParamete
     _provider(getUserObject<MortarContactPressureProvider>("contact_pressure_uo")),
     _coord(_assembly.mortarCoordTransformation())
 {
+  _provider.checkConsumer(*this,
+                          "contact_pressure_uo",
+                          primarySubdomain(),
+                          secondarySubdomain(),
+                          getParam<bool>("use_displaced_mesh"));
 }
 
 void
 MortarContactPressureIntegral::execute()
 {
-  const auto & basis = _provider.tractionBasis();
   for (const auto qp : make_range(_qrule_msm->n_points()))
-  {
-    ADReal pressure = 0;
-    for (const auto j : index_range(basis))
-      pressure += basis[j][qp] * _provider.nodalContactPressure(_lower_secondary_elem->node_ref(j));
-    _integral += _JxW_msm[qp] * _coord[qp] * MetaPhysicL::raw_value(pressure);
-  }
+    _integral += _JxW_msm[qp] * _coord[qp] *
+                 MetaPhysicL::raw_value(_provider.qpContactPressure(*_lower_secondary_elem, qp));
 }
 
 void

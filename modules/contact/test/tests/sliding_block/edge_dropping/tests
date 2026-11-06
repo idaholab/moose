@@ -65,6 +65,19 @@
     allow_test_objects = true
     capabilities = 'ad_size>=100'
   []
+  [frictionless-slide-2d-nodal-scaling-wear]
+    type = 'CSVDiff'
+    input = 'two_equal_blocks_slide_2d_wear.i'
+    csvdiff = 'two_equal_blocks_slide_2d_wear_out.csv'
+    requirement = 'The system shall provide the physical normal contact pressure to the mortar '
+                  'Archard wear auxiliary kernel on a partially covered (edge-dropping) mortar '
+                  'contact interface with node-based Lagrange multiplier scaling in 2D.'
+    design = 'MortarArchardsLawAux.md userobjects/LMWeightedGapUserObject.md'
+    issues = '#32856'
+    mesh_mode = 'REPLICATED'
+    allow_test_objects = true
+    capabilities = 'ad_size>=100'
+  []
   [frictionless-rz]
     type = 'CSVDiff'
     input = 'nodal_scaling_rz.i'

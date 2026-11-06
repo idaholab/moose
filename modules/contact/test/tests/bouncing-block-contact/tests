@@ -136,6 +136,18 @@
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
     []
+    [penalty_wear]
+      type = 'CSVDiff'
+      input = frictionless-penalty-weighted-gap-wear.i
+      csvdiff = 'frictionless-penalty-weighted-gap-wear_out.csv'
+      restep = false # Test is prescribed to abort on failed timestep
+      detail = 'using a first order basis for displacements and penalty contact, and shall provide '
+               'the physical normal contact pressure to the mortar Archard wear auxiliary kernel.'
+      cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
+                 "Postprocessors/active='max_worn_depth total_worn_depth'"
+      issues = '#32856'
+      design = 'MortarArchardsLawAux.md'
+    []
     [penalty_action]
       type = 'Exodiff'
       input = frictionless-penalty-weighted-gap-action.i

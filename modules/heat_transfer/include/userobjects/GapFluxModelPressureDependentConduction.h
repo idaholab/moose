@@ -29,6 +29,8 @@ public:
 
   ADReal computeFlux() const override;
 
+  void checkConstraint(const ModularGapConductanceConstraint & mortar_constraint) const override;
+
 protected:
   ///@{Temperatures from the primary and secondary surfaces at the interface
   const ADVariableValue & _primary_T;

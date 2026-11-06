@@ -71,4 +71,17 @@
                'the blocks move out of contact.'
     []
   []
+  [pressure_provider_mismatched_mesh]
+    type = RunException
+    input = 'closed_gap_pressure_dependent_thermal_contact.i'
+    cli_args = 'Constraints/thermal_contact/use_displaced_mesh=false '
+               'UserObjects/closed/use_displaced_mesh=false'
+    expect_err = "must use the same 'use_displaced_mesh' setting"
+    # The undisplaced gap width evaluation warns before the provider check runs
+    allow_warnings = true
+    design = 'GapFluxModelPressureDependentConduction.md'
+    issues = '#32856'
+    requirement = 'The system shall report an error when the pressure-dependent gap conductance '
+                  'reads the contact pressure from a contact user object on another mesh.'
+  []
 []
