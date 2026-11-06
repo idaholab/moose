@@ -11,7 +11,7 @@
 
 #include "KokkosTypes.h"
 #include "KokkosFunctionWrapper.h"
-#include "KokkosFunctorRegistry.h"
+#include "KokkosFunctorWrapperRegistry.h"
 
 #include "FunctionBase.h"
 
