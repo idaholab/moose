@@ -84,6 +84,7 @@ Predictor::timestepSetup()
 bool
 Predictor::shouldApply()
 {
+  // 'apply' is controllable, so that Controls can turn the prediction off
   bool should_apply = _apply;
 
   // if no prediction in a repeated timestep should be made
