@@ -19,9 +19,8 @@ public:
   KokkosGaussContForcing(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidualValue(const unsigned int qp,
+                                                 AssemblyDatum & datum) const;
 
 protected:
   const Real _amplitude;
@@ -43,16 +42,15 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosGaussContForcing::computeQpResidual(const unsigned int i,
-                                          const unsigned int qp,
-                                          AssemblyDatum & datum) const
+KokkosGaussContForcing::precomputeQpResidualValue(const unsigned int qp,
+                                                  AssemblyDatum & datum) const
 {
   Real x = datum.q_point(qp)(0);
   Real y = datum.q_point(qp)(1);
   Real z = datum.q_point(qp)(2);
 
   if (x >= _x_min && x <= _x_max && y >= _y_min && y <= _y_max && z >= _z_min && z <= _z_max)
-    return -_test(datum, i, qp) * _amplitude *
+    return -_amplitude *
            Kokkos::exp(-(((x - _x_center) * (x - _x_center)) / (2.0 * _x_spread * _x_spread) +
                          ((y - _y_center) * (y - _y_center)) / (2.0 * _y_spread * _y_spread) +
                          ((z - _z_center) * (z - _z_center)) / (2.0 * _z_spread * _z_spread)));

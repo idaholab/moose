@@ -38,7 +38,7 @@ public:
   }
 
   /// Get the AD accessor of the nodal value of the BC variable
-  const auto & nodalValue() const { return _nodal_value; }
+  KOKKOS_FUNCTION const auto & nodalValue() const { return _nodal_value; }
 
 protected:
   /// Placeholder for the AD nodal value accessor, which the non-AD BC replaces with _u
