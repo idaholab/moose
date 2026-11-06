@@ -67,8 +67,8 @@ Pr_t = 0.7
     stitch_boundaries_pairs = 'bottom top'
     merge_boundaries_with_same_name = true
   []
-  # Prevent test diffing on distributed parallel element numbering
-  allow_renumbering = true
+  # Prevent sampling diffing on distributed parallel element numbering
+  allow_renumbering = false
 []
 
 [Problem]
@@ -503,4 +503,41 @@ Pr_t = 0.7
 
 [Outputs]
   exodus = true
+  csv = true
+[]
+
+# sample along walls and in the bulk
+[VectorPostprocessors]
+  [side_bottom]
+    type = SideValueSampler
+    boundary = 'bottom'
+    variable = 'vel_x vel_y pressure temperature TKE TKED mu_t yplus mu_eff k_eff k_t'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [side_top]
+    type = SideValueSampler
+    boundary = 'top'
+    variable = 'vel_x vel_y pressure temperature TKE TKED mu_t yplus mu_eff k_eff k_t'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [line_center_channel]
+    type = LineValueSampler
+    start_point = '${fparse 0.125 * L} ${fparse 0.0001} 0'
+    end_point = '${fparse 0.875 * L} ${fparse 0.0001} 0'
+    num_points = ${Mesh/block_1/ix}
+    variable = 'vel_x vel_y pressure temperature TKE TKED mu_t yplus mu_eff k_eff k_t'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [line_quarter_radius_channel]
+    type = LineValueSampler
+    start_point = '${fparse 0.125 * L} ${fparse 0.4999 * H} 0'
+    end_point = '${fparse 0.875 * L} ${fparse 0.4999 * H} 0'
+    num_points =  ${Mesh/block_1/ix}
+    variable = 'vel_x vel_y pressure temperature TKE TKED mu_t yplus mu_eff k_eff k_t'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
 []
