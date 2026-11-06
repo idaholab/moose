@@ -100,13 +100,15 @@ choleskyFactor(Real * const L, const unsigned int n)
 /**
  * Solve a linear system with a Cholesky factor from choleskyFactor()
  * The right-hand-side vector is modified after this call
+ * @tparam Vector A pointer or a vector view whose operator[] returns a modifiable entry
  * @param L The Cholesky factor packed row by row
  * @param x The solution vector
  * @param b The right-hand-side vector
  * @param n The system size
  */
+template <typename Vector>
 KOKKOS_INLINE_FUNCTION void
-choleskySubstitute(const Real * const L, Real * const x, Real * const b, const unsigned int n)
+choleskySubstitute(const Real * const L, Vector x, Vector b, const unsigned int n)
 {
   for (unsigned int i = 0; i < n; ++i)
   {
