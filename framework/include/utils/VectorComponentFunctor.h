@@ -80,6 +80,11 @@ private:
     return _vector(node, state)(_component);
   }
 
+  ValueType evaluate(const PointArg & point, const StateArg & state) const override final
+  {
+    return _vector(point, state)(_component);
+  }
+
   using FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const ElemArg & elem_arg,
                                 const StateArg & state) const override final
