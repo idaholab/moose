@@ -30,6 +30,25 @@ requirements:
     - moose-libmesh __VERSIONER_LIBMESH_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_BUILD_NUMBER__
     - moose-wasp __VERSIONER_WASP_VERSION__ build___VERSIONER_WASP_BUILD_NUMBER__
     - moose-tools __VERSIONER_TOOLS_VERSION__
+    # Python dependencies of the optional NEML2 build (update_and_rebuild_neml2.sh)
+    # that moose-tools does not provide. nmhit, pyzag and pyro-ppl are built from
+    # the framework/contrib submodules instead, because conda-forge does not ship
+    # nmhit or pyzag and its pyro-ppl requires its pytorch, which would replace the
+    # PyTorch built from framework/contrib/pytorch.
+    # NEML2 build backend; NEML2 is built with --no-build-isolation
+    - scikit-build-core >=0.10
+    # nmhit build; nmhit 0.3.6 binds nullptr defaults without .none(), which
+    # nanobind 3 rejects at call time
+    - nanobind >=2,<3
+    # PyTorch
+    - filelock
+    - fsspec >=0.8.5
+    # pyzag
+    - scipy
+    - tqdm
+    # pyro-ppl
+    - opt_einsum >=2.3.2
+    - pyro-api >=0.1.1
   run_constrained:
     - {{ moose_python_constrained }}
 
