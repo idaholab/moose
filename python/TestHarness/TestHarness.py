@@ -901,6 +901,10 @@ class TestHarness:
         """Whether or not memory should be output in the Job status."""
         return self.scheduler.MONITOR_JOB_MEMORY and not self.options.no_memory_tracking
 
+    def shouldOutputGPUMemory(self) -> bool:
+        """Whether or not GPU memory should be output in the Job status."""
+        return self.scheduler.scheduler_options.monitor_job_gpu_memory
+
     def handleJobStatus(self, job, caveats=None):
         """
         The Scheduler is calling back the TestHarness to inform us of a status change.
@@ -910,6 +914,7 @@ class TestHarness:
             return
         elif not job.isSilent():
             memory = None if self.shouldOutputMemory() else False
+            gpu_memory = self.shouldOutputGPUMemory()
 
             # Print results and perform any desired post job processing
             if job.isFinished():
@@ -925,7 +930,11 @@ class TestHarness:
                 caveats = True if caveats is None else caveats
                 print(
                     util.formatJobResult(
-                        job, self.options, caveats=caveats, memory=memory
+                        job,
+                        self.options,
+                        caveats=caveats,
+                        memory=memory,
+                        gpu_memory=gpu_memory,
                     ),
                     flush=True,
                 )
@@ -951,6 +960,7 @@ class TestHarness:
                         status_message=False,
                         caveats=caveats,
                         memory=memory,
+                        gpu_memory=gpu_memory,
                     ),
                     flush=True,
                 )
@@ -991,14 +1001,15 @@ class TestHarness:
         jobs = sorted(jobs, key=lambda job: job.getTiming(), reverse=True)
         return jobs[0:num]
 
-    def getHeaviestJobs(self, num: int) -> list:
+    def getHeaviestJobs(self, num: int, gpu: bool = False) -> list:
         """
-        Get the heaviest jobs by memory, if available
+        Get the heaviest jobs by memory (or GPU memory if gpu), if available
         """
-        jobs = [j for j in self.finished_jobs if (not j.isSkip() and j.getMaxMemory())]
+        get_memory = lambda job: job.getMaxGPUMemory() if gpu else job.getMaxMemory()
+        jobs = [j for j in self.finished_jobs if (not j.isSkip() and get_memory(j))]
         jobs = sorted(
             jobs,
-            key=lambda job: job.getMaxMemory() / job.getSlots(),
+            key=lambda job: get_memory(job) / job.getSlots(),
             reverse=True,
         )
         return jobs[0:num]
@@ -1070,15 +1081,21 @@ class TestHarness:
                             caveats=True,
                             timing=True,
                             memory=None if self.shouldOutputMemory() else False,
+                            gpu_memory=self.shouldOutputGPUMemory(),
                         )
                     )
 
-            # Heaviest jobs by memory
-            if self.shouldOutputMemory() and (
-                heaviest_jobs := self.getHeaviestJobs(self.options.longest_jobs)
-            ):
+            # Heaviest jobs by memory and by GPU memory
+            for gpu, label in [(False, "memory"), (True, "GPU memory")]:
+                if not (
+                    self.shouldOutputGPUMemory() if gpu else self.shouldOutputMemory()
+                ):
+                    continue
+                heaviest_jobs = self.getHeaviestJobs(self.options.longest_jobs, gpu)
+                if not heaviest_jobs:
+                    continue
                 print(
-                    header(f"{self.options.longest_jobs} Heaviest Jobs (memory/slot)")
+                    header(f"{self.options.longest_jobs} Heaviest Jobs ({label}/slot)")
                 )
                 for job in heaviest_jobs:
                     print(
@@ -1088,6 +1105,7 @@ class TestHarness:
                             caveats=True,
                             timing=True,
                             memory=True,
+                            gpu_memory=self.shouldOutputGPUMemory(),
                             memory_per_slot=True,
                         )
                     )
@@ -1119,7 +1137,14 @@ class TestHarness:
         if failed_jobs := [j for j in self.finished_jobs if j.isFail()]:
             print(header("Failed Tests"))
             for job in failed_jobs:
-                print((util.formatJobResult(job, self.options, caveats=True)))
+                print(
+                    util.formatJobResult(
+                        job,
+                        self.options,
+                        caveats=True,
+                        gpu_memory=self.shouldOutputGPUMemory(),
+                    )
+                )
 
         time_total = (datetime.datetime.now() - self.start_time).total_seconds()
         stats = self.getStats(time_total)
