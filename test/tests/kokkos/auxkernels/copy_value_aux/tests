@@ -1,6 +1,7 @@
 [Tests]
-  issues = '#30655'
+  issues = '#30655 #34293'
   design = 'KokkosCopyValueAux.md'
+
   [copy]
     type = 'CSVDiff'
     input = 'kokkos_copy_aux.i'
@@ -16,5 +17,26 @@
     requirement = 'The Kokkos system shall be able to copy from the old and older state of a variable to an auxiliary variable.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
+  []
+
+  [multi_variable]
+    requirement = 'The Kokkos system shall be able to copy multiple variables to auxiliary variables of the same finite element family and order with a single auxiliary kernel'
+    [copy]
+      type = 'CSVDiff'
+      input = 'kokkos_copy_multi_aux.i'
+      csvdiff = 'kokkos_copy_multi_aux_out.csv'
+      detail = 'for nodal and elemental variables, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [mismatched_count]
+      type = 'RunException'
+      input = 'kokkos_copy_multi_aux.i'
+      cli_args = "AuxKernels/copy_nodal/source='u'"
+      expect_err = 'The number of source variables \(1\) should match the number of auxiliary variables \(2\).'
+      detail = 'shall error if the number of source variables does not match the number of auxiliary variables.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
   []
 []
