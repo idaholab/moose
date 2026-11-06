@@ -156,10 +156,8 @@ WCNSLinearFVFlowPhysics::addSolverVariables()
       std::string variable_type = "MooseLinearVariableFVReal";
 
       auto params = getFactory().getValidParams(variable_type);
-      assignBlocks(params, _blocks);
-      params.set<SolverSystemName>("solver_sys") = getSolverSystem(_velocity_names[d]);
 
-      getProblem().addVariable(variable_type, _velocity_names[d], params);
+      addSharedSolverVariable(variable_type, _velocity_names[d], params);
     }
     else
       paramError("velocity_variable",
@@ -175,10 +173,8 @@ WCNSLinearFVFlowPhysics::addSolverVariables()
     const auto pressure_type = "MooseLinearVariableFVReal";
 
     auto params = getFactory().getValidParams(pressure_type);
-    assignBlocks(params, _blocks);
-    params.set<SolverSystemName>("solver_sys") = getSolverSystem(_pressure_name);
 
-    getProblem().addVariable(pressure_type, _pressure_name, params);
+    addSharedSolverVariable(pressure_type, _pressure_name, params);
   }
   else
     paramError("pressure_variable",

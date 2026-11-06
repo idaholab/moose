@@ -118,8 +118,9 @@ MooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object,
     // for field variables). These objects *do* inherit from ResidualObject which has this more
     // generic variable() API
     else if (auto ro = std::dynamic_pointer_cast<ResidualObject>(object); ro)
-      _variable_objects.try_emplace(ro->variable().number(), this->_num_threads)
-          .first->second.addObject(object, tid, false);
+      for (const auto var : ro->variables())
+        _variable_objects.try_emplace(var->number(), this->_num_threads)
+            .first->second.addObject(object, tid, false);
   }
 }
 

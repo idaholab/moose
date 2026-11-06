@@ -42,4 +42,22 @@
     unit_test = NASA7IdealGasFluidPropertiesTest.inverseDerivatives
     requirement = 'The system shall compute the derivatives of the properties of an ideal gas from NASA 7-coefficient polynomials from the (specific volume, internal energy), (pressure, enthalpy), (enthalpy, entropy), and (specific volume, enthalpy) variable sets, with real and automatic differentiation arguments, in agreement with finite differences.'
   []
+  [transport]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.transport
+    issues = '#34223'
+    requirement = 'The system shall compute the viscosity and thermal conductivity of an ideal gas from NASA 7-coefficient polynomials, from kinetic theory for nitrogen, hydrogen, methane, and carbon dioxide and from the IAPWS low-density formulations for steam, in agreement with the fluid properties of the real fluids at low pressure, and with the same values from the (pressure, temperature) and (specific volume, internal energy) variable sets.'
+  []
+  [steam_transport_range]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.steamTransportRange
+    issues = '#34223'
+    requirement = 'The system shall count each evaluation of the viscosity or thermal conductivity of steam from NASA 7-coefficient polynomials at a temperature outside the range of validity of the IAPWS transport formulations as a solution warning.'
+  []
+  [density_from_entropy]
+    type = GoogleTest
+    unit_test = NASA7IdealGasFluidPropertiesTest.densityFromEntropy
+    issues = '#34223'
+    requirement = 'The system shall compute the density of each built-in ideal gas from NASA 7-coefficient polynomials from its pressure and specific entropy, consistently with the density from pressure and temperature, from half the lower end to 1.5 times the upper end of the temperature range of its data, together with derivatives with respect to pressure and entropy, with real and automatic differentiation arguments, in agreement with finite differences and with the isobaric relation between density, entropy, and specific heat.'
+  []
 []

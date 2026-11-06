@@ -125,8 +125,6 @@ public:
     return covered_normalization;
   }
 
-  ADReal adPhysicalGap(const std::pair<ADReal, Real> & gap) const { return gap.first / gap.second; }
-
   /**
    * @param node Node pointer
    * @param component Component of the frictional pressure vector

@@ -100,6 +100,11 @@ public:
   void preExecuteOnInterface();
 
   /**
+   * Return whether this object should run \p executeOnBoundary
+   */
+  bool shouldExecuteOnBoundary() const;
+
+  /**
    * Return whether this object should run \p executeOnInterface
    */
   bool shouldExecuteOnInterface() const;
@@ -249,6 +254,12 @@ DomainUserObject::setFaceData()
   _current_q_point = &_q_point_face;
   _current_q_rule = _qrule_face;
   _current_JxW = &_JxW_face;
+}
+
+inline bool
+DomainUserObject::shouldExecuteOnBoundary() const
+{
+  return !_interface_bnd_ids.count(_current_boundary_id);
 }
 
 inline bool

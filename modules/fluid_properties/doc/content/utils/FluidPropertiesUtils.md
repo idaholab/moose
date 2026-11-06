@@ -82,4 +82,46 @@ a species do not match exactly at $T_\text{mid}$: for the built-in species, the 
 $4 \times 10^{-7}$ relative in $c_p^\circ$, $6 \times 10^{-3}$ J/mol in $h^\circ$, and
 $2 \times 10^{-5}$ J/(mol K) in $s^\circ$.
 
+## Gas transport properties id=gas-transport
+
+The `GasTransportUtils` functions, as used in [NASA7IdealGasFluidProperties.md] and
+[IdealGasMixtureFluidProperties.md], evaluate transport properties of dilute gases from kinetic
+theory [!citep](poling2001). The Chapman-Enskog viscosity of a species and binary diffusion
+coefficient of a pair of species $i$ and $j$ are
+
+!equation
+\mu = \frac{5}{16} \frac{\sqrt{\pi m k_B T}}{\pi \sigma^2 \Omega^{(2,2)*}(T^*)} \,, \qquad
+D_{ij} = \frac{3}{16} \sqrt{\frac{2 \pi k_B T}{m_{ij}}} \,
+  \frac{k_B T}{p \pi \sigma_{ij}^2 \Omega^{(1,1)*}(T^*_{ij})} \,,
+
+where $m$ is the molecular mass, $m_{ij} = m_i m_j / (m_i + m_j)$ is the reduced mass of the pair,
+$k_B$ is the Boltzmann constant, $\sigma$ is the collision diameter, $T^* = k_B T / \epsilon$ is the
+reduced temperature with the depth $\epsilon$ of the Lennard-Jones potential, and the pair parameters
+follow the combining rules $\sigma_{ij} = (\sigma_i + \sigma_j)/2$ and
+$\epsilon_{ij} = \sqrt{\epsilon_i \epsilon_j}$. The reduced collision integrals
+$\Omega^{(1,1)*}$ and $\Omega^{(2,2)*}$ of the Lennard-Jones (12-6) potential follow the fits of
+[!citet](neufeld1972), valid for $0.3 \le T^* \le 100$.
+
+The Lennard-Jones parameters of the built-in species, H$_2$, O$_2$, H$_2$O, CH$_4$, CO, CO$_2$, and
+N$_2$, are those of GRI-Mech 3.0 [!citep](smith_grimech30) as distributed with Cantera 3.2.0
+[!citep](cantera320), the same source as the NASA 7-coefficient data. Their reduced temperatures
+remain within the range of the fits over the temperature ranges of the NASA 7-coefficient data.
+The viscosities of the species other than H$_2$O agree with those of Cantera within 0.5%. The
+GRI-Mech parameters of H$_2$O assume a correction for its dipole moment, which is not applied here,
+so the binary diffusion coefficients of pairs with H$_2$O differ from those of Cantera by up to 4%.
+
+The thermal conductivity of a nonpolar gas follows from its viscosity $\mu$ and molar heat capacity
+$c_p$ with the modified Eucken correlation [!citep](poling2001),
+
+!equation
+k = \mu R_s \left( 1.32 \, \frac{c_p}{R} + 0.45 \right) ,
+
+where $R_s$ is the specific gas constant and $R$ the universal gas constant.
+
+The viscosity of steam in the limit of zero density follows the formulation of [!citet](iapws2008),
+as in [Water97FluidProperties.md], and its thermal conductivity in the limit of zero density that of
+[!citet](iapws2011). [Water97FluidProperties.md] uses the formulation of [!citet](iaps1985) for the
+thermal conductivity, whose zero-density term agrees within 2% below 1500 K but decreases above
+about 2200 K and becomes negative near 3300 K. Both formulations are fitted up to about 1173 K.
+
 !bibtex bibliography

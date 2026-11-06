@@ -13,7 +13,6 @@
   [./split]
     type = BreakMeshByBlockGenerator
     input = msh
-    split_interface = true
   []
   [add_side_sets]
     input = split

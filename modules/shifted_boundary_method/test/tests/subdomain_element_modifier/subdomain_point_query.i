@@ -40,7 +40,7 @@
 [UserObjects]
   [surface_builder]
     type = SurfaceMeshBySubdomainBuilder
-    surface_mesh = boundary_mesh
+    complete_boundary_mesh = boundary_mesh
   []
   [subdomain_tester]
     type = PointInSubdomainCheckUO

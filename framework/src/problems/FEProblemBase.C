@@ -114,6 +114,7 @@
 #include "FVFluxBC.h"
 #include "LinearFVBoundaryCondition.h"
 #include "FVInterfaceKernel.h"
+#include "InterfaceKernelBase.h"
 #include "Reporter.h"
 #include "ADUtils.h"
 #include "Executioner.h"
@@ -138,6 +139,7 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/enum_norm_type.h"
 #include "libmesh/petsc_solver_exception.h"
+#include "libmesh/remote_elem.h"
 
 #include "metaphysicl/dualnumber.h"
 
@@ -300,6 +302,11 @@ FEProblemBase::validParams()
                         "Set to false to disable checking of boundary restricted elemental object "
                         "variable dependencies, e.g. are the variable dependencies defined on the "
                         "selected boundaries?");
+  params.addParam<bool>("interface_kernel_integrity_check",
+                        true,
+                        "Set to false to disable checking that each interface kernel's 'variable' "
+                        "is defined on the primary side and 'neighbor_var' on the secondary side "
+                        "of each of its boundaries");
   params.addParam<bool>(
       "side_uo_interface_mat_prop_integrity_check",
       true,
@@ -447,7 +454,7 @@ FEProblemBase::validParams()
   params.addParamNamesToGroup(
       "skip_nl_system_check kernel_coverage_check kernel_coverage_block_list "
       "boundary_restricted_node_integrity_check "
-      "boundary_restricted_elem_integrity_check "
+      "boundary_restricted_elem_integrity_check interface_kernel_integrity_check "
       "side_uo_interface_mat_prop_integrity_check material_coverage_check "
       "material_coverage_block_list fv_bcs_integrity_check fv_face_integrity_check "
       "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
@@ -587,6 +594,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         getParam<bool>("boundary_restricted_node_integrity_check")),
     _boundary_restricted_elem_integrity_check(
         getParam<bool>("boundary_restricted_elem_integrity_check")),
+    _interface_kernel_integrity_check(getParam<bool>("interface_kernel_integrity_check")),
     _side_uo_interface_mat_prop_integrity_check(
         getParam<bool>("side_uo_interface_mat_prop_integrity_check")),
     _material_coverage_check(
@@ -1589,6 +1597,109 @@ FEProblemBase::initialSetup()
     ConstBndElemRange & bnd_elems = *mesh().getBoundaryElementRange();
     BoundaryElemIntegrityCheckThread beict(*this, uo_query);
     Threads::parallel_reduce(bnd_elems, beict, numThreads());
+  }
+
+  if (_interface_kernel_integrity_check)
+  {
+    TIME_SECTION("InterfaceKernelIntegrityCheck", 5);
+
+    // Interface kernels skip any face where 'variable' is not active on the primary (element)
+    // side or 'neighbor_var' is not active on the secondary (neighbor) side, so a kernel whose
+    // variables do not match the sideset orientation silently contributes nothing.
+    // A boundary may join several block pairs, and the kernel is skipped on the faces of every
+    // pair that does not carry both variables, so each pair is checked. A face that is also on
+    // the boundary from its neighbor's side (e.g. sidesets read from Gmsh lower-dimensional
+    // elements) is visited in both orientations, and is covered if either orientation is valid.
+    // Each entry is (boundary, element block, neighbor block, whether the face is two-sided),
+    // with the flag stored as an integer because TIMPI cannot communicate bool.
+    std::set<std::tuple<BoundaryID, SubdomainID, SubdomainID, unsigned short>> face_block_pairs;
+    const auto & boundary_info = _mesh.getMesh().get_boundary_info();
+    for (const auto & bnd_elem : *_mesh.getBoundaryElementRange())
+      // A remote neighbor is paired by the processor that holds both elements
+      if (const auto * const neighbor = bnd_elem->_elem->neighbor_ptr(bnd_elem->_side);
+          neighbor && neighbor != libMesh::remote_elem)
+        face_block_pairs.emplace(
+            bnd_elem->_bnd_id,
+            bnd_elem->_elem->subdomain_id(),
+            neighbor->subdomain_id(),
+            boundary_info.has_boundary_id(
+                neighbor, neighbor->which_neighbor_am_i(bnd_elem->_elem), bnd_elem->_bnd_id));
+    _communicator.set_union(face_block_pairs);
+
+    for (const auto & nl : _nl)
+      for (const auto & ik : nl->getInterfaceKernelWarehouse().getObjects())
+        for (const auto bnd_id : ik->boundaryIDs())
+        {
+          const auto & var = ik->variable();
+          const auto & neighbor_var = ik->neighborVariable();
+          const auto block_name = [this](const SubdomainID blk)
+          {
+            const auto & name = _mesh.getSubdomainName(blk);
+            return name.empty() ? std::to_string(blk) : name;
+          };
+
+          // Whether the kernel executes on faces with 'elem_var' on the element side and
+          // 'neigh_var' on the neighbor side
+          const auto valid = [](const auto & elem_var,
+                                const auto & neigh_var,
+                                const SubdomainID elem_blk,
+                                const SubdomainID neighbor_blk)
+          {
+            return elem_var.activeOnSubdomain(elem_blk) &&
+                   neigh_var.activeOnSubdomain(neighbor_blk);
+          };
+
+          // Block pairs of the boundary on whose faces the kernel never executes, the subset of
+          // those that swapping the variables would cover, and whether swapping the variables
+          // would cover every face of the boundary. A boundary without neighbors has no pairs; it
+          // is reported as an external side during assembly.
+          std::vector<std::string> failing_pairs;
+          std::vector<std::string> flipped_pairs;
+          bool all_flipped = true;
+          for (const auto & [bid, elem_blk, neighbor_blk, two_sided] : face_block_pairs)
+            if (bid == bnd_id)
+            {
+              const bool flipped_valid =
+                  valid(neighbor_var, var, elem_blk, neighbor_blk) ||
+                  (two_sided && valid(neighbor_var, var, neighbor_blk, elem_blk));
+              if (!flipped_valid)
+                all_flipped = false;
+              if (!valid(var, neighbor_var, elem_blk, neighbor_blk) &&
+                  !(two_sided && valid(var, neighbor_var, neighbor_blk, elem_blk)))
+              {
+                const auto pair_name = block_name(elem_blk) + " -> " + block_name(neighbor_blk);
+                failing_pairs.push_back(pair_name);
+                if (flipped_valid)
+                  flipped_pairs.push_back(pair_name);
+              }
+            }
+          if (failing_pairs.empty())
+            continue;
+
+          std::string flipped_hint;
+          if (!flipped_pairs.empty())
+            flipped_hint =
+                "\nThe variables appear to be flipped relative to the boundary "
+                "orientation on block pair(s) " +
+                MooseUtils::join(flipped_pairs, ", ") +
+                (all_flipped ? "; swap 'variable' and 'neighbor_var', or reverse the "
+                               "orientation of the boundary."
+                             : "; reverse the orientation of the boundary on those pairs.");
+
+          ik->paramError(
+              "boundary",
+              "The interface kernel will not contribute on all or part of boundary '",
+              _mesh.getBoundaryName(bnd_id),
+              "': 'variable' (",
+              var.name(),
+              ") must be defined on the primary (element) side and 'neighbor_var' (",
+              neighbor_var.name(),
+              ") on the secondary (neighbor) side of each face. Failing block pair(s) (primary -> "
+              "secondary): ",
+              MooseUtils::join(failing_pairs, ", "),
+              ".",
+              flipped_hint);
+        }
   }
 
   if (_fv_face_integrity_check)

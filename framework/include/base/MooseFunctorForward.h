@@ -23,6 +23,7 @@ struct ElemArg;
 struct FaceArg;
 struct ElemQpArg;
 struct ElemSideQpArg;
+struct PointArg;
 struct StateArg;
 template <typename T>
 class FunctorBase;

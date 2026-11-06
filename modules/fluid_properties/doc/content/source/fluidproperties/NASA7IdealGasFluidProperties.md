@@ -52,10 +52,42 @@ expressions above, so they are exact.
 
 This class provides the properties from pressure and temperature, from temperature and specific
 volume, from specific volume and internal energy, and from pressure and enthalpy, as well as the
-pressure from enthalpy and entropy and the internal energy from pressure and density and from
-specific volume and enthalpy. It does not provide viscosity or thermal conductivity, so it cannot
-yet be used in flow models that need them, such as the gas-mixture flow channels of the thermal
-hydraulics module. Mixtures of these gases are described by [IdealGasMixtureFluidProperties.md].
+pressure from enthalpy and entropy, the density from pressure and entropy, and the internal energy
+from pressure and density and from specific volume and enthalpy. Mixtures of these gases are
+described by
+[IdealGasMixtureFluidProperties.md].
+
+## Viscosity and thermal conductivity
+
+The viscosity and thermal conductivity are those of the dilute gas. A gas is dilute when its
+density is low enough that its molecules interact only through binary collisions, as kinetic theory
+assumes, so that these properties depend on temperature only. According to the reference
+correlations of CoolProp [!citep](bell2014coolprop), density changes the viscosity and thermal
+conductivity of these gases by less than 1% at 1 bar from 300 K (500 K for H$_2$O) to 1000 K, and
+by less than 2% at 10 bar, except for CO$_2$ near room temperature and H$_2$O near saturation,
+whose thermal conductivities change by up to 4% and 8%. The effect grows quickly as the gas
+approaches its critical point.
+
+These properties are evaluated with the
+[gas transport utilities](utils/FluidPropertiesUtils.md#gas-transport). For all species except
+H$_2$O, the viscosity follows from Chapman-Enskog kinetic theory with the Lennard-Jones parameters
+of GRI-Mech 3.0, and the thermal conductivity from the modified Eucken correlation
+[!citep](poling2001) with the heat capacity of the polynomials:
+
+!equation
+k = \mu R_s \left( 1.32 \, \frac{c_p^\circ}{R} + 0.45 \right) .
+
+Compared with the fluid properties of the real fluids at 1 bar from 300 K to 900 K, the viscosities
+of N$_2$, CH$_4$, and CO$_2$ agree within 2.5%, that of H$_2$ is up to 6% low at 900 K, and the
+thermal conductivities agree within 9%.
+
+The modified Eucken correlation overestimates the thermal conductivity of polar gases, that of
+steam by about 40% at 400 K and 20% at 1000 K. For H$_2$O, the viscosity and thermal conductivity
+therefore follow the IAPWS formulations in the limit of zero density, [!citet](iapws2008) and
+[!citet](iapws2011). These
+formulations are fitted from 273.16 K to 1173.15 K, and each evaluation outside that range is
+counted as a solution warning. At low pressure, where steam is close to an ideal gas, they agree
+with [Water97FluidProperties.md] within 2%.
 
 ## Comparison with IdealGasFluidProperties
 
@@ -67,10 +99,10 @@ Both classes describe ideal gases, but they differ as follows:
 | Specific heats | Constant | Functions of temperature |
 | Internal energy | $c_v T$ plus a user-supplied reference value | Includes the enthalpy of formation |
 | Entropy | Relative to an arbitrary reference | Absolute |
-| Temperature from internal energy or enthalpy | Explicit | Newton iteration |
+| Temperature from internal energy, enthalpy, or entropy | Explicit | Newton iteration |
 | Temperature range | Unlimited | That of the data, with a solution warning outside it |
-| Viscosity and thermal conductivity | Constant, user-supplied | Not provided |
-| Density from pressure and entropy, critical-point properties | Provided | Not provided |
+| Viscosity and thermal conductivity | Constant, user-supplied | Kinetic theory, or IAPWS formulations for steam |
+| Critical-point properties | User-supplied | Not provided |
 
 ## Temperature from internal energy or enthalpy
 
@@ -99,6 +131,14 @@ inversion robust:
 At the midpoint temperature of the data, where the two polynomials do not match exactly, the same
 internal energy or enthalpy is also reached slightly above the midpoint temperature, by less than
 $3 \times 10^{-4}$ K for the built-in species. The inversion may return either temperature.
+
+The density from pressure and entropy requires the temperature at which
+$s^\circ / R = s / R_s + \ln (p / p^\circ)$. Newton's method solves this equation for $\ln T$,
+again from the upper end of the temperature range of the data. As a function of $\ln T$, the
+standard entropy increases with slope $c_p^\circ / R$ and is convex wherever the heat capacity
+increases with temperature, which holds over nearly all of the range of each species, so the
+iterates approach the solution from above. Newton's method on $T$ itself would overshoot to negative
+temperatures in its first step for solutions near the lower end of the range.
 
 ## Temperature range
 

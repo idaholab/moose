@@ -13,7 +13,7 @@
 #include "KDTree.h"
 
 /**
- * BoundaryMeshBuilder specialization that additionally builds a centroid KD-tree
+ * BoundaryMeshBuilder specialization that additionally builds a centroid k-d tree
  * over the whole-mesh SurfaceElementSet, used by UnsignedDistanceToSurfaceMesh
  * for nearest-boundary-element lookups.
  */
@@ -32,16 +32,16 @@ public:
   /// Callers must check hasKDTree() first; this is asserted in debug builds.
   KDTree & getKDTree() const;
 
-  /// Whether the centroid KDTree was built and is available for use.
+  /// Whether the centroid k-d tree was built and is available for use.
   bool hasKDTree() const { return _kd_tree != nullptr; }
 
 protected:
-  /// The KDTree is constructed using the centroids of the elements in the boundary mesh.
+  /// The k-d tree is constructed using the centroids of the elements in the boundary mesh.
   std::unique_ptr<KDTree> _kd_tree;
 
-  /// Configures KDTree leaf node size for performance tuning.
+  /// Configures k-d tree leaf node size for performance tuning.
   const int _leaf_max_size;
 
-  /// Whether to build the centroid KD-tree.
+  /// Whether to build the centroid k-d tree.
   const bool _build_kd_tree;
 };

@@ -10,6 +10,7 @@
     gamma_names = 'gbb gab'
     sigma = '0.4714  0.6161' # Ratio of 1:1.307 to obtain dihedral angle of 135deg
     width = 2.8284
+    sigma_index = 0 # gbb = 1.5 as in GrandPotentialMultiphase.i
   []
 []
 

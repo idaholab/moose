@@ -1,6 +1,6 @@
 [Tests]
   design = 'EqualGradientConstraint.md'
-  issues = '#7319'
+  issues = '#6807'
   [./eigenstrain]
     type = RunApp
     input = 'eigenstrain.i'

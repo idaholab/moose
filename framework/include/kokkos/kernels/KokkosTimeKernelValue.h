@@ -23,11 +23,16 @@ public:
 
   TimeKernelValue(const InputParameters & parameters);
 
+  /**
+   * Copy constructor for parallel dispatch
+   */
+  TimeKernelValue(const TimeKernelValue & object);
+
 protected:
   /// Time derivative of the current solution at quadrature points
   const VariableValue _u_dot;
   /// Derivative of u_dot with respect to u
-  const Scalar<const Real> _du_dot_du;
+  Array<Real> _du_dot_du;
 };
 
 } // namespace Moose::Kokkos

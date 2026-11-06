@@ -22,7 +22,7 @@ KernelCurl::validParams()
 }
 
 KernelCurl::KernelCurl(const InputParameters & parameters)
-  : VectorKernel(parameters), _curl_test(), _curl_phi(), _curl_u(_var)
+  : VectorKernel(parameters), _curl_test(), _curl_phi(), _curl_u(*_vars[0])
 {
 }
 

@@ -143,8 +143,57 @@ P_out = 4.923e6 # Pa
   []
 []
 
+[Postprocessors]
+  [T_out]
+    type = SCMPlanarMean
+    variable = T
+    height = 1
+    execute_on = 'timestep_end'
+  []
+  [DP]
+    type = SubChannelDelta
+    variable = P
+    execute_on = 'timestep_end'
+  []
+  # Center subchannel of the 3x3 array
+  [T_center_mid]
+    type = SubChannelPointValue
+    variable = T
+    index = 4
+    height = 0.5
+    execute_on = 'timestep_end'
+  []
+  # Corner subchannel of the 3x3 array
+  [mdot_corner_out]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 0
+    height = 1
+    execute_on = 'timestep_end'
+  []
+[]
+
+[VectorPostprocessors]
+  # Every nodal value of the subchannel variables, so a variable that is not
+  # restored from the checkpoint shows up in the time = 0 transient output
+  [fluid]
+    type = NodalValueSampler
+    block = subchannel
+    variable = 'mdot SumWij P DP h T rho mu S w_perim displacement ff HTC'
+    sort_by = id
+    execute_on = 'timestep_end'
+  []
+  [pins]
+    type = NodalValueSampler
+    block = fuel_pins
+    variable = 'q_prime Tpin Dpin'
+    sort_by = id
+    execute_on = 'timestep_end'
+  []
+[]
+
 [Outputs]
-  exodus = true
+  csv = true
   checkpoint = true
   hide = 'ff'
 []

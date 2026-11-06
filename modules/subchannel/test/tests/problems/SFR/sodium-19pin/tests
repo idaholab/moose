@@ -23,6 +23,15 @@
     allow_warnings = true
     requirement = 'The system will examine the subchannel implicit solver for a 19pin liquid sodium cooled assembly'
   []
+  [test_radial_conduction]
+    type = CSVDiff
+    input = test19_radial_conduction.i
+    csvdiff = test19_radial_conduction_out.csv
+    valgrind = NONE
+    recover = false
+    issues = '#33956'
+    requirement = 'The system shall spread heat from a heated center pin to the outer subchannels of a 19-pin liquid sodium cooled assembly through radial heat conduction when turbulent mixing is disabled.'
+  []
   [invalid_segregated_relaxation]
     type = RunException
     input = test19_implicit.i

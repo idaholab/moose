@@ -3,5 +3,8 @@
     type = 'Exodiff'
     input = 'auxkernel.i'
     exodiff = 'auxkernel_out.e'
+    issues = '#5336'
+    design = 'PFCEnergyDensity.md PFCRFFEnergyDensity.md'
+    requirement = 'The system shall be able to compute the energy density of a phase field crystal model, for both the traditional and rational-function-fit formulations.'
   [../]
 []

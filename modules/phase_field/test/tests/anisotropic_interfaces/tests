@@ -1,8 +1,11 @@
 [Tests]
+  design = 'ACInterfaceKobayashi1.md ACInterfaceKobayashi2.md'
   [./kobayashi]
     type = 'Exodiff'
     input = 'kobayashi.i'
     exodiff = 'kobayashi_out.e'
+    issues = '#5669'
+    requirement = 'The system shall be able to solve the Kobayashi dendritic solidification model with an anisotropic interface energy.'
   [../]
   [./adkobayashi]
     type = 'Exodiff'
@@ -10,5 +13,17 @@
     exodiff = 'adkobayashi_out.e'
     custom_cmp = 'adkobayashi.exodiff'
     valgrind = HEAVY
+    issues = '#15508'
+    requirement = 'The system shall be able to solve the Kobayashi dendritic solidification model with an anisotropic interface energy using automatic differentiation.'
   [../]
+
+  [kobayashi_variable_mobility_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'kobayashi_variable_mobility_jacobian.i'
+    run_sim = 'True'
+    ratio_tol = 1e-7
+    issues = '#34180'
+    design = '/ACInterfaceKobayashi1.md /ACInterfaceKobayashi2.md'
+    requirement = 'The system shall compute a correct Jacobian for the anisotropic Kobayashi Allen-Cahn interface kernels with a mobility that depends on the order parameter and on a coupled variable.'
+  []
 []

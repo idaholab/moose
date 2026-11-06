@@ -23,6 +23,13 @@
     paired_block = '1'
     new_boundary = 'primary0_interface'
   []
+  [interface_flipped]
+    input = interface
+    type = SideSetsBetweenSubdomainsGenerator
+    primary_block = '1'
+    paired_block = '0'
+    new_boundary = 'primary1_interface'
+  []
 []
 
 [Problem]
@@ -71,7 +78,7 @@
     type = ADPenaltyInterfaceDiffusion
     variable = v
     neighbor_var = u
-    boundary = primary0_interface
+    boundary = primary1_interface
     penalty = 1e3
   []
 []

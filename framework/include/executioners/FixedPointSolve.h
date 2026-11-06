@@ -223,7 +223,7 @@ protected:
   /// System holding the transformed variables
   SystemBase * _transformed_sys;
   /// All the systems that should save their previous solutions
-  std::set<SystemBase *> _systems_to_copy_previous_solutions_for;
+  std::set<SystemBase *, SystemNumberLess> _systems_to_copy_previous_solutions_for;
 
   /// Relaxation factor outside of fixed point iteration (used as a subapp)
   Real _secondary_relaxation_factor;

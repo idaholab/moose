@@ -386,6 +386,14 @@ public:
     return _ad_curl_u;
   }
 
+  const ADTemplateVariableDivergence<OutputType> & adDivSln() const
+  {
+    _need_ad = _need_ad_volume = _need_ad_div_u = true;
+    divPhi();
+    divPhiFace();
+    return _ad_div_u;
+  }
+
   ///////////////////////// Nodal value getters ///////////////////////////////////////////
 
   const OutputType & nodalValueDot() const;
@@ -622,6 +630,7 @@ private:
   ADTemplateVariableValue<OutputType> _ad_u_dotdot;
   ADTemplateVariableGradient<OutputType> _ad_grad_u_dot;
   ADTemplateVariableCurl<OutputType> _ad_curl_u;
+  ADTemplateVariableDivergence<OutputType> _ad_div_u;
 
   // time derivatives
 
@@ -851,14 +860,18 @@ template <typename OutputType>
 const ADTemplateVariableValue<OutputType> &
 MooseVariableData<OutputType>::adUDotDot() const
 {
-  _need_ad = _need_ad_volume = _need_ad_u_dotdot = true;
+  // the time integrator computes the second time derivative together with the first one
+  _need_ad = _need_ad_volume = _need_ad_u_dot = _need_ad_u_dotdot = true;
 
+  // If we don't have a time integrator (this will be the case for variables that are a part
+  // of the AuxiliarySystem) then we have no way to calculate _ad_u_dotdot and we are just
+  // going to copy the values from _u_dotdot. Of course in order to be able to do that we need
+  // to calculate _u_dotdot, and _u_dot for the first time derivative copied alongside
   if (!_time_integrator)
-    // If we don't have a time integrator (this will be the case for variables that are a part
-    // of the AuxiliarySystem) then we have no way to calculate _ad_u_dotdot and we are just
-    // going to copy the values from _u_dotdot. Of course in order to be able to do that we need
-    // to calculate _u_dotdot
+  {
+    _need_u_dot = true;
     _need_u_dotdot = true;
+  }
 
   return _ad_u_dotdot;
 }

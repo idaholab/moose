@@ -3,11 +3,17 @@
     type = 'Exodiff'
     input = 'SimpleACInterface.i'
     exodiff = 'SimpleACInterface_out.e'
+    issues = '#6910'
+    design = 'SimpleACInterface.md'
+    requirement = 'The system shall provide a simplified Allen-Cahn interface energy kernel with constant mobility and interfacial parameter, for novice users.'
   [../]
 
   [./SimpleCoupledACInterface]
     type = 'Exodiff'
     input = 'SimpleCoupledACInterface.i'
     exodiff = 'SimpleCoupledACInterface_out.e'
+    issues = '#6194'
+    design = 'SimpleCoupledACInterface.md'
+    requirement = 'The system shall provide a simplified Allen-Cahn interface energy kernel coupled to a second order parameter, for novice users.'
   [../]
 []

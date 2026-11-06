@@ -130,6 +130,9 @@
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
+  # The default nl_rel_tol = 1e-8 leaves processor-count dependent differences in the order
+  # parameter tails above the 1e-10 exodiff floor
+  nl_rel_tol = 1e-12
   dt = 0.2
   num_steps = 3
 []

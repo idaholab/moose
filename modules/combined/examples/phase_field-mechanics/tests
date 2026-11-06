@@ -4,17 +4,33 @@
     input = 'Conserved.i'
     check_input = True
     capabilities = 'fparser=jit'
+    requirement = 'The system shall provide an example demonstrating the coupling between a '
+                   'conserved (Cahn-Hilliard) phase field model and an elastic driving force, '
+                   'in which an oversized precipitate deforms under uniaxial compressive stress.'
+    design = 'SplitCHParsed.md ElasticEnergyMaterial.md ComputeVariableEigenstrain.md'
+    issues = '#4502'
   [../]
   [./EBSD_reconstruction_grain_growth_mech]
     type = RunApp
     input = 'EBSD_reconstruction_grain_growth_mech.i'
     check_input = True
     skip = 'Broken!'
+    requirement = 'The system shall provide an example that reconstructs a polycrystal grain '
+                   'structure from an EBSD data file and couples its grain growth with linear '
+                   'elasticity using an anisotropic elasticity tensor derived from the measured '
+                   'grain orientations.'
+    design = 'EBSDReader.md ComputePolycrystalElasticityTensor.md'
+    issues = '#5519'
   [../]
   [./Nonconserved]
     type = RunApp
     input = 'Nonconserved.i'
     check_input = True
+    requirement = 'The system shall provide an example demonstrating the coupling between a '
+                   'non-conserved (Allen-Cahn) phase field model and an elastic driving force, '
+                   'in which an oversized phase inclusion grows under uniaxial tensile stress.'
+    design = 'AllenCahn.md TwoPhaseStressMaterial.md ElasticEnergyMaterial.md'
+    issues = '#4502'
   [../]
   [./Pattern1]
     type = RunApp
@@ -25,12 +41,23 @@
     cli_args = 'Mesh/nx=2 Mesh/ny=2'
     check_input = True
     capabilities = 'fparser=jit'
+    requirement = 'The system shall provide an example of a three-phase field model, combining '
+                   'chemical and elastic driving forces, in which a matrix phase and an '
+                   'oversized and an undersized precipitate phase compete to balance lattice '
+                   'expansion and contraction.'
+    design = 'DerivativeMultiPhaseMaterial.md MultiPhaseStressMaterial.md'
+    issues = '#4886'
   [../]
   [./grain_texture]
     type = RunApp
     input = 'grain_texture.i'
     capabilities = 'method!=dbg'
     check_input = True
+    issues = '#6952'
+    requirement = 'The system shall provide an example that reports the crystallographic '
+                   'texture (Euler angles) of each tracked grain during polycrystalline grain '
+                   'growth.'
+    design = 'GrainTextureVectorPostprocessor.md'
   [../]
   [./hex_grain_growth_2D_eldrforce]
     type = RunApp
@@ -38,6 +65,11 @@
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
     capabilities = 'method!=dbg'
     check_input = True
+    requirement = 'The system shall provide an example of grain growth driven by both grain '
+                   'boundary energy and an elastic driving force in a hexagonal polycrystal '
+                   'microstructure under applied compression.'
+    design = 'PolycrystalElasticDrivingForceAction.md PolycrystalHex.md'
+    issues = '#5335'
   [../]
   [./poly_grain_growth_2D_eldrforce]
     type = RunApp
@@ -45,5 +77,10 @@
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
     capabilities = 'method!=dbg'
     check_input = True
+    requirement = 'The system shall provide an example of grain growth driven by both grain '
+                   'boundary energy and an elastic driving force in a Voronoi-tessellated '
+                   'polycrystal microstructure under applied compression.'
+    design = 'PolycrystalElasticDrivingForceAction.md PolycrystalVoronoi.md'
+    issues = '#5335'
   [../]
 []
