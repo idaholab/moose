@@ -50,6 +50,8 @@
 #include "NodeElemConstraintBase.h"
 #include "MortarConstraint.h"
 #include "ElemElemConstraint.h"
+#include "MultiPointConstraint.h"
+#include "ExactConstraintFunctor.h"
 #include "ScalarKernelBase.h"
 #include "Parser.h"
 #include "Split.h"
@@ -104,6 +106,7 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/petsc_solver_exception.h"
 
+#include <algorithm>
 #include <ios>
 #include <type_traits>
 
@@ -620,6 +623,32 @@ NonlinearSystemBase::addConstraint(const std::string & c_name,
   _constraints.addObject(constraint);
   postAddResidualObject(*constraint);
 
+  // Exact constraints are applied by the DofMap through one libMesh constraint object per system
+  if (constraint->usesExactConstraints() && !_exact_constraint_functor)
+  {
+    auto attach_functor = [this, &name](SystemBase & constrained_sys,
+                                        std::unique_ptr<ExactConstraintFunctor> & functor)
+    {
+      if (constrained_sys.system().has_constraint_object())
+        mooseError("Another constraint object is already attached to the libMesh system '",
+                   constrained_sys.system().name(),
+                   "', so the exact constraints of '",
+                   name,
+                   "' cannot be applied.");
+
+      functor = std::make_unique<ExactConstraintFunctor>(*this, constrained_sys);
+      constrained_sys.system().attach_constraint_object(*functor);
+    };
+
+    attach_functor(*this, _exact_constraint_functor);
+
+    // The displaced DofMap reduces the element matrices of objects on the displaced mesh. It shares
+    // the dof numbering of this system, so it gets the same exact constraints
+    if (auto displaced_problem = _fe_problem.getDisplacedProblem())
+      attach_functor(displaced_problem->solverSys(_fe_problem.nlSysNum(this->name())),
+                     _displaced_exact_constraint_functor);
+  }
+
   if (!_fe_problem.useHashTableMatrixAssembly())
     if (constraint && constraint->addCouplingEntriesToJacobian())
       addImplicitGeometricCouplingEntriesToJacobian(true);
@@ -1095,6 +1124,9 @@ NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & res
     const auto & ncs = _constraints.getActiveNodalConstraints();
     for (const auto & nc : ncs)
     {
+      if (nc->usesExactConstraints())
+        continue;
+
       std::vector<dof_id_type> & secondary_node_ids = nc->getSecondaryNodeId();
       std::vector<dof_id_type> & primary_node_ids = nc->getPrimaryNodeId();
 
@@ -1122,6 +1154,9 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian(const SparseMatrix<Number> 
     const auto & ncs = _constraints.getActiveNodalConstraints();
     for (const auto & nc : ncs)
     {
+      if (nc->usesExactConstraints())
+        continue;
+
       std::vector<dof_id_type> & secondary_node_ids = nc->getSecondaryNodeId();
       std::vector<dof_id_type> & primary_node_ids = nc->getPrimaryNodeId();
 
@@ -1321,6 +1356,9 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
 
             for (const auto & nec : constraints)
             {
+              if (nec->usesExactConstraints())
+                continue;
+
               if (nec->shouldApply())
               {
                 constraints_applied = true;
@@ -1596,6 +1634,9 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
             for (const auto & nec : constraints)
             {
+              if (nec->usesExactConstraints())
+                continue;
+
               if (nec->shouldApply())
               {
                 constraints_applied = true;
@@ -1990,12 +2031,16 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
                          "contributions would be silently dropped. Please use "
                          "residual_and_jacobian_together = false");
   if (_constraints.hasActiveNodalConstraints())
-    mooseDocumentedError(
-        "moose",
-        33531,
-        "residual_and_jacobian_together does not yet support nodal constraints. Their "
-        "contributions would be silently dropped. Please use "
-        "residual_and_jacobian_together = false");
+  {
+    const auto & ncs = _constraints.getActiveNodalConstraints();
+    if (std::any_of(
+            ncs.begin(), ncs.end(), [](const auto & nc) { return !nc->usesExactConstraints(); }))
+      mooseDocumentedError("moose",
+                           33531,
+                           "residual_and_jacobian_together does not yet support nodal constraints. "
+                           "Their contributions would be silently dropped. Please use "
+                           "residual_and_jacobian_together = false");
+  }
 
   // Make matrix ready to use
   activateAllMatrixTags();
@@ -2817,6 +2862,9 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
 
             for (const auto & nec : constraints)
             {
+              if (nec->usesExactConstraints())
+                continue;
+
               if (nec->shouldApply())
               {
                 constraints_applied = true;
@@ -4270,6 +4318,34 @@ NonlinearSystemBase::computeScaling()
 
   _computed_scaling = true;
   return true;
+}
+
+void
+NonlinearSystemBase::reinitExactConstraints()
+{
+  if (_exact_constraint_functor)
+    _exact_constraint_functor->reinit();
+  if (_displaced_exact_constraint_functor)
+    _displaced_exact_constraint_functor->reinit();
+}
+
+void
+NonlinearSystemBase::updateExactConstraints()
+{
+  if (!_exact_constraint_functor)
+    return;
+
+  // Every constraint is asked, because asking is how it records the coefficients it emitted
+  bool changed = false;
+  for (const auto & constraint : _constraints.getActiveObjects())
+    if (constraint->usesExactConstraints() && constraint->exactConstraintsChanged())
+      changed = true;
+
+  // The rebuild is collective
+  _communicator.max(changed);
+
+  if (changed)
+    reinitExactConstraints();
 }
 
 bool

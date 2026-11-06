@@ -12,4 +12,15 @@
     allow_test_objects = true
     requirement = "The system shall be able to compute numerically accurate Jacobians when constraining the momentum equation on selected nodes."
   []
+
+  [exact_formulation_error]
+    type = RunException
+    input = 'mass_free_constraint.i'
+    cli_args = 'Constraints/mass/formulation=exact'
+    expect_err = "The exact formulation is not supported: this constraint is a flux balance"
+    allow_test_objects = true
+    issues = '#33821'
+    requirement = 'The system shall report an error when a mass free constraint is given the '
+                  'exact formulation.'
+  []
 []

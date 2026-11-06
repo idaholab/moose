@@ -42,4 +42,16 @@
     issues = '#33564'
     requirement = "The mechanics system shall retain elements needed by a nodal frictional constraint."
   []
+
+  [exact_formulation_error]
+    type = RunException
+    input = 'glued_constraint.i'
+    cli_args = 'Constraints/tie_y_fuel/formulation=exact'
+    expect_err = "The exact formulation is not supported: a stick constraint pairs its nodes by "
+                 "proximity"
+    issues = '#33821'
+    design = 'NodalStickConstraint.md'
+    requirement = 'The system shall report an error when a nodal stick constraint is given the '
+                  'exact formulation.'
+  []
 []

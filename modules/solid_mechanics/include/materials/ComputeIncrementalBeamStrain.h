@@ -31,6 +31,9 @@ public:
 protected:
   virtual void initQpStatefulProperties() override;
 
+  /// Rotation matrix from the global frame to the beam's original local configuration
+  void computeOriginalLocalConfig();
+
   /// Computes the displacement and rotation strain increments
   void computeQpStrain();
 
