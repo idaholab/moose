@@ -26,6 +26,7 @@ class TestCIVETStore(TestCase):
         """Test TestDataFilter."""
         self.assertEqual(TestDataFilter.ALL.value, "all")
         self.assertEqual(TestDataFilter.HPC.value, "hpc")
+        self.assertEqual(TestDataFilter.MAX_GPU_MEMORY.value, "max_gpu_memory")
         self.assertEqual(TestDataFilter.MAX_MEMORY.value, "max_memory")
         self.assertEqual(TestDataFilter.STATUS.value, "status")
         self.assertEqual(TestDataFilter.TESTER.value, "tester")

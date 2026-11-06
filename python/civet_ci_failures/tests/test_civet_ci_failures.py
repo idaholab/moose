@@ -147,6 +147,8 @@ class TestReproduceCommandAndModeIdentity(unittest.TestCase):
     def testModeIdentityDropsMemoryLimitButKeepsRest(self):
         invocation = ("test", ["-p", "4", "--max-memory-per-slot=1024"])
         self.assertEqual(ccf.mode_identity(invocation), "-p 4")
+        invocation = ("test", ["-p", "4", "--max-gpu-memory-per-slot=1024"])
+        self.assertEqual(ccf.mode_identity(invocation), "-p 4")
 
     def testModeIdentityNoneInvocation(self):
         self.assertEqual(ccf.mode_identity(None), "")
