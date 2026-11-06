@@ -10,8 +10,12 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMMatrixCoefficientFunction.h"
-#include "MooseError.h"
 #include "MFEMProblem.h"
+#include "MooseUtils.h"
+
+#include <algorithm>
+#include <string>
+#include <vector>
 
 registerMooseObject("MooseApp", MFEMMatrixCoefficientFunction);
 
@@ -46,12 +50,8 @@ MFEMMatrixCoefficientFunction::initialSetup()
   auto & manager = _mfem_problem.getCoefficients();
   auto & matrix = cast_ref<mfem::MatrixArrayCoefficient &>(manager.getMatrixCoefficient(name()));
   for (const auto i : index_range(_entries))
-  {
     for (const auto j : index_range(_entries[i]))
-    { // The manager owns the entries, which may be shared within or across matrices.
       matrix.Set(i, j, &manager.getScalarCoefficient(_entries[i][j]), false);
-    }
-  }
 }
 
 void
@@ -59,26 +59,23 @@ MFEMMatrixCoefficientFunction::raise_on_invalid_matrix(
     const std::vector<std::vector<MFEMScalarCoefficientName>> & mat)
 {
   if (mat.empty())
-  {
     paramError("matrix", "Matrix must not be empty.");
-  }
 
   for (const auto i : index_range(mat))
   {
     if (mat[i].empty())
-    {
-      paramError("matrix", "Row ", i + 1, " is empty (row indices are one-based).");
-    }
+      paramError("matrix", "Row ", i + 1, " has 0 entries (row indices are one-based).");
     if (mat[i].size() != mat.front().size())
     {
+      std::vector<std::string> row_sizes;
+      std::transform(mat.begin(),
+                     mat.end(),
+                     std::back_inserter(row_sizes),
+                     [](const auto & x) { return std::to_string(x.size()); });
       paramError("matrix",
-                 "Row ",
-                 i + 1,
-                 " has ",
-                 mat[i].size(),
-                 " entries, expected ",
-                 mat.front().size(),
-                 " (row indices are one-based).");
+                 "Not all rows have equal size; found row sizes {",
+                 MooseUtils::join(row_sizes.begin(), row_sizes.end(), ", "),
+                 "}");
     }
   }
   if (mat.size() != mat.front().size())
