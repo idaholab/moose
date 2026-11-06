@@ -19,7 +19,7 @@ Interface kernels can be used to provide any general flux condition at an interf
 - `type`: The type of interface kernel to be used
 - `variable`: This is the "primary" variable. Note that the primary variable must exist on the same subdomain as the sideset specified in the `boundary` parameter. The existence of a "primary" and "secondary" or "neighbor" variable ensures that the interface kernel residual and jacobian functions get called the correct number of times. `variable` could be $c_0$ from our example above.
 - `neighbor_var`: The "secondary" variable. This could be $c_1$ from our example above.
-- `boundary`: The interfacial boundary between the subdomains. Note that this must be a sideset and again must exist on the same subdomain as the primary variable. The fact that this boundary is a sideset allows access to variable gradients.
+- `boundary`: The interfacial boundary between the subdomains. Note that this must be a sideset and again must exist on the same subdomain as the primary variable. The fact that this boundary is a sideset allows access to variable gradients. The neighbor element across the boundary may also be a [disjoint neighbor](syntax/Mesh/index.md#disjoint-neighbors) that shares no nodes with the element, as on the interfaces created by [BreakMeshByBlockGenerator.md].
 
 For additional information about the interface kernel system, don't hesitate to contact the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).
 
