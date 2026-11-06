@@ -82,7 +82,7 @@ ACInterfaceKobayashi1::precomputeQpJacobian()
   RealGradient jac2 = _deps[_qp] * depsdop_i * v;
   RealGradient jac3 = _eps[_qp] * ddepsdop_i * v;
 
-  return _L[_qp] * (jac1 + jac2 + jac3);
+  return _L[_qp] * (jac1 + jac2 + jac3) + _dLdop[_qp] * _phi[_j][_qp] * _eps[_qp] * _deps[_qp] * v;
 }
 
 Real

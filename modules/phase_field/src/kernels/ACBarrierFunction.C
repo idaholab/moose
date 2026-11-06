@@ -76,10 +76,10 @@ ADReal
 ADACBarrierFunction::computeDFDOP()
 {
   ADReal f0 = 0.25 + 0.25 * _u[_qp] * _u[_qp] * _u[_qp] * _u[_qp] - 0.5 * _u[_qp] * _u[_qp];
-  ADReal sum_etaj = _u[_qp] * _u[_qp];
 
   for (unsigned int i = 0; i < _op_num; ++i)
   {
+    ADReal sum_etaj = _u[_qp] * _u[_qp];
     for (unsigned int j = i + 1; j < _op_num; ++j)
       sum_etaj += (*_vals[j])[_qp] * (*_vals[j])[_qp];
 
