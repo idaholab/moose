@@ -51,11 +51,11 @@
 [UserObjects]
   [builder1]
     type = BoundaryMeshBuilder
-    surface_mesh = circle1
+    boundary_mesh = circle1
   []
   [builder2]
     type = BoundaryMeshBuilder
-    surface_mesh = lshape
+    boundary_mesh = lshape
   []
   [check1]
     type = PointInPolyhedronCheckUO
