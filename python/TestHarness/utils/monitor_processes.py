@@ -19,7 +19,6 @@ from multiprocessing.managers import NamespaceProxy, SyncManager
 from typing import NamedTuple, Optional
 
 import psutil
-
 from TestHarness.utils.nvidia_gpu_memory import NvidiaGPUMemory
 
 MEMORY_PSS = sys.platform.startswith("linux") and os.path.exists(
