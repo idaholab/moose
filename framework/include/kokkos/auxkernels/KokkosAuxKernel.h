@@ -148,21 +148,20 @@ protected:
 
   /**
    * Set element values to the auxiliary solution vector
-   * @param values The array containing the solution values of the element
-   * @param datum The AssemblyDatum object of the current thread
-   * @param comp The variable component
+   * @tparam Values A pointer or a view whose operator[] returns the value of an element-local DOF
+   * @param values The solution values of the element, indexed by the element-local DOF index
+   * @param datum The AssemblyDatum object of the current thread, which selects the variable
+   * component
    */
-  KOKKOS_FUNCTION void setElementSolution(const Real * const values,
-                                          const AssemblyDatum & datum,
-                                          const unsigned int comp = 0) const;
+  template <typename Values>
+  KOKKOS_FUNCTION void setElementSolution(const Values & values, const AssemblyDatum & datum) const;
   /**
    * Set node value to the auxiliary solution vector
    * @param values The node solution value
-   * @param datum The AssemblyDatum object of the current thread
-   * @param comp The variable component
+   * @param datum The AssemblyDatum object of the current thread, which selects the variable
+   * component
    */
-  KOKKOS_FUNCTION void
-  setNodeSolution(const Real value, const AssemblyDatum & datum, const unsigned int comp = 0) const;
+  KOKKOS_FUNCTION void setNodeSolution(const Real value, const AssemblyDatum & datum) const;
 
   /**
    * Flag whether this kernel is nodal
@@ -170,9 +169,17 @@ protected:
   const bool _nodal;
 
   /**
+   * MOOSE variables, whose first entry is _var
+   */
+  const std::vector<MooseVariableFieldBase *> _vars;
+  /**
    * Kokkos variable
    */
   Variable _kokkos_var;
+  /**
+   * Kokkos thread object, indexed by the variable component and the element or node
+   */
+  Thread<> _thread;
   /**
    * Kokkos functor dispatchers
    */
@@ -225,7 +232,13 @@ private:
                                      const unsigned int state) override final;
 
   /**
-   * Kokkos FE type ID of the variable
+   * Get the MOOSE variables from the 'variable' or 'variables' parameter
+   * @returns The MOOSE variables
+   */
+  std::vector<MooseVariableFieldBase *> getMooseVariables();
+
+  /**
+   * Kokkos FE type ID of the variables, which all have the same FE type
    */
   unsigned int _fe_type = libMesh::invalid_uint;
   /**
@@ -234,12 +247,12 @@ private:
    */
   JaggedArray<Real, 1, 1> _mass_factors;
   /**
-   * Right-hand side and solution of the L2 projection of each element, indexed by the contiguous
-   * element ID (n entries for n element DOFs)
+   * Right-hand side and solution of the L2 projection, indexed by the contiguous element ID, each
+   * holding (variable component, element-local DOF) entries
    */
   ///@{
-  JaggedArray<Real, 1, 1> _rhs;
-  JaggedArray<Real, 1, 1> _solution;
+  JaggedArray<Real, 2, 1> _rhs;
+  JaggedArray<Real, 2, 1> _solution;
   ///@}
 };
 
@@ -247,14 +260,16 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 AuxKernel::operator()(ElementLoop, const ThreadID tid, const Derived & auxkernel) const
 {
-  auto elem = kokkosBlockElementID(tid);
+  auto comp = _thread(tid, 0);
+  auto elem = kokkosBlockElementID(_thread(tid, 1));
 
   AssemblyDatum datum(elem,
                       libMesh::invalid_uint,
                       kokkosAssembly(),
                       kokkosSystems(),
                       _kokkos_var,
-                      _kokkos_var.var());
+                      _kokkos_var.var(comp),
+                      comp);
 
   auxkernel.computeElementInternal(auxkernel, datum);
 }
@@ -263,13 +278,15 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 AuxKernel::operator()(NodeLoop, const ThreadID tid, const Derived & auxkernel) const
 {
-  auto node = _bnd ? kokkosBoundaryNodeID(tid) : kokkosBlockNodeID(tid);
-  auto & sys = kokkosSystem(_kokkos_var.sys());
+  auto comp = _thread(tid, 0);
+  auto node = _bnd ? kokkosBoundaryNodeID(_thread(tid, 1)) : kokkosBlockNodeID(_thread(tid, 1));
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
 
-  if (!sys.isNodalDefined(node, _kokkos_var.var()))
+  if (!sys.isNodalDefined(node, _kokkos_var.var(comp)))
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(
+      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(comp), comp);
 
   auxkernel.computeNodeInternal(auxkernel, datum);
 }
@@ -311,8 +328,8 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 AuxKernel::computeElementInternal(const Derived & auxkernel, AssemblyDatum & datum) const
 {
-  auto b = _rhs[datum.elemID()];
-  auto x = _solution[datum.elemID()];
+  auto b = _rhs[datum.elemID()].slice<1>(datum.comp());
+  auto x = _solution[datum.elemID()].slice<1>(datum.comp());
 
   const auto n = datum.n_dofs();
 
@@ -335,9 +352,9 @@ AuxKernel::computeElementInternal(const Derived & auxkernel, AssemblyDatum & dat
   if (n == 1)
     x[0] = b[0] / factor[0];
   else
-    Utils::choleskySubstitute(&factor[0], &x[0], &b[0], n);
+    Utils::choleskySubstitute(&factor[0], x, b, n);
 
-  setElementSolution(&x[0], datum);
+  setElementSolution(x, datum);
 }
 
 template <typename Derived>
@@ -349,11 +366,11 @@ AuxKernel::computeNodeInternal(const Derived & auxkernel, AssemblyDatum & datum)
   setNodeSolution(value, datum);
 }
 
-KOKKOS_FUNCTION inline void
-AuxKernel::setElementSolution(const Real * const values,
-                              const AssemblyDatum & datum,
-                              const unsigned int comp) const
+template <typename Values>
+KOKKOS_FUNCTION void
+AuxKernel::setElementSolution(const Values & values, const AssemblyDatum & datum) const
 {
+  auto comp = datum.comp();
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto var_num = _kokkos_var.var(comp);
   auto tag = _kokkos_var.tag();
@@ -364,10 +381,9 @@ AuxKernel::setElementSolution(const Real * const values,
 }
 
 KOKKOS_FUNCTION inline void
-AuxKernel::setNodeSolution(const Real value,
-                           const AssemblyDatum & datum,
-                           const unsigned int comp) const
+AuxKernel::setNodeSolution(const Real value, const AssemblyDatum & datum) const
 {
+  auto comp = datum.comp();
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto var_num = _kokkos_var.var(comp);
   auto tag = _kokkos_var.tag();
