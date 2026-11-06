@@ -1978,6 +1978,12 @@ class TestHarness:
             action="store_true",
             help="Disable all memory tracking of jobs",
         )
+        resourcesgroup.add_argument(
+            "--memory-tracking-interval",
+            type=positive_float,
+            default=0.2,
+            help="The interval in seconds at which to sample job memory (default: %(default)s)",
+        )
 
         hpcgroup = parser.add_argument_group("HPC", "Enable and control HPC execution")
         hpcgroup.add_argument(

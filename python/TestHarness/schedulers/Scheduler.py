@@ -59,6 +59,8 @@ class SchedulerOptions:
     """Whether or not to monitor Job CPU usage."""
     monitor_job_memory: bool
     """Whether or not to monitor Job memory usage."""
+    memory_tracking_interval: float
+    """The interval in seconds at which to sample Job memory usage."""
 
     time_utility_path: Optional[str]
     """The path to the time utility found, if any."""
@@ -254,6 +256,7 @@ class Scheduler(MooseObject):
             mpi_config=mpi_config,
             monitor_job_cpu=monitor_job_cpu,
             monitor_job_memory=monitor_job_memory,
+            memory_tracking_interval=options.memory_tracking_interval,
             time_utility_path=time_utility_path,
             time_utility_type=time_utility_type,
         )
