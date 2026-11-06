@@ -2180,7 +2180,9 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
         computeFaceMap(elem, side, qw);
       if (_need_ad_grad_phi_face)
       {
-        const std::vector<Real> dummy_qw(n_qp, 1.);
+        // Faces can have different numbers of quadrature points, so grow the weights as needed
+        static thread_local std::vector<Real> dummy_qw;
+        dummy_qw.resize(n_qp, 1.);
 
         for (unsigned int qp = 0; qp != n_qp; qp++)
           computeSinglePointMapAD(&elem, dummy_qw, qp, _holder_fe_face_helper[dim]);
