@@ -1,0 +1,20 @@
+[Tests]
+  design = 'CSGBase.md'
+  issues = '#29095'
+
+  [operators]
+    type = GoogleTest
+    unit_test = CSGRegionTest.testRegionOperators
+    requirement = 'The system shall construct constructive solid geometry (CSG) regions as the positive or negative half-space of a surface, as the intersection, union, or complement of regions, or as an empty region, and shall represent each region as an infix JSON object and as a postfix list of strings.'
+  []
+  [errors]
+    type = GoogleTest
+    unit_test = CSGRegionTest.testRegionErrors
+    requirement = 'The system shall report an error when a CSG region union or intersection includes an empty region or when a region type is requested with an unsupported number of regions.'
+  []
+  [equality]
+    type = GoogleTest
+    unit_test = CSGRegionTest.testEquality
+    requirement = 'The system shall compare CSG regions for equality using their type and definition.'
+  []
+[]
