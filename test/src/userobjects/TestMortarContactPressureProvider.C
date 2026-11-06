@@ -28,7 +28,7 @@ TestMortarContactPressureProvider::validParams()
 TestMortarContactPressureProvider::TestMortarContactPressureProvider(
     const InputParameters & parameters)
   : MortarUserObject(parameters),
-    MortarContactPressureProvider(),
+    MortarContactPressureProvider(static_cast<const MortarUserObject &>(*this)),
     _var(*getVar("scaled_pressure", 0)),
     _scaling(getParam<Real>("scaling"))
 {

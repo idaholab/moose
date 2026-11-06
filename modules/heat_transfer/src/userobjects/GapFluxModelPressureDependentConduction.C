@@ -53,8 +53,9 @@ GapFluxModelPressureDependentConduction::GapFluxModelPressureDependentConduction
         isParamValid("contact_pressure_uo")
             ? &getUserObject<MortarContactPressureProvider>("contact_pressure_uo")
             : nullptr),
-    _contact_pressure(isCoupled("contact_pressure") ? &adCoupledLowerValue("contact_pressure")
-                                                    : nullptr),
+    _contact_pressure(isCoupled("contact_pressure") || isCoupledConstant("contact_pressure")
+                          ? &adCoupledLowerValue("contact_pressure")
+                          : nullptr),
     _scaling(getParam<Real>("scaling_coefficient")),
     _primary_conductivity(getNeighborADMaterialProperty<Real>("primary_conductivity")),
     _secondary_conductivity(getADMaterialProperty<Real>("secondary_conductivity")),
@@ -70,19 +71,25 @@ GapFluxModelPressureDependentConduction::GapFluxModelPressureDependentConduction
                "Provide the contact pressure through 'contact_pressure_uo' or 'contact_pressure'.");
 }
 
+void
+GapFluxModelPressureDependentConduction::checkConstraint(
+    const ModularGapConductanceConstraint & mortar_constraint) const
+{
+  if (_contact_pressure_provider)
+    _contact_pressure_provider->checkConsumer(*this,
+                                              "contact_pressure_uo",
+                                              mortar_constraint.primarySubdomain(),
+                                              mortar_constraint.secondarySubdomain(),
+                                              getParam<bool>("use_displaced_mesh"));
+}
+
 ADReal
 GapFluxModelPressureDependentConduction::contactPressure() const
 {
   if (_contact_pressure)
     return (*_contact_pressure)[_qp];
 
-  // Interpolate the nodal physical pressures of the secondary face with the contact basis
-  const auto & basis = _contact_pressure_provider->tractionBasis();
-  ADReal pressure = 0;
-  for (const auto j : index_range(basis))
-    pressure += basis[j][_qp] * _contact_pressure_provider->nodalContactPressure(
-                                    _lower_secondary_elem->node_ref(j));
-  return pressure;
+  return _contact_pressure_provider->qpContactPressure(*_lower_secondary_elem, _qp);
 }
 
 ADReal

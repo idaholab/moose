@@ -59,8 +59,9 @@ MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
         isParamValid("weighted_gap_uo")
             ? &getUserObject<MortarContactPressureProvider>("weighted_gap_uo")
             : nullptr),
-    _normal_pressure(isCoupled("normal_pressure") ? &coupledValueLower("normal_pressure")
-                                                  : nullptr),
+    _normal_pressure(isCoupled("normal_pressure") || isCoupledConstant("normal_pressure")
+                         ? &coupledValueLower("normal_pressure")
+                         : nullptr),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _energy_wear_coefficient(getParam<Real>("energy_wear_coefficient")),
     _displacements(
@@ -88,6 +89,9 @@ MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
     paramError("weighted_gap_uo",
                "Provide the normal contact pressure through 'weighted_gap_uo' or "
                "'normal_pressure'.");
+  if (_contact_pressure_provider)
+    _contact_pressure_provider->checkConsumer(
+        *this, "weighted_gap_uo", primarySubdomain(), secondarySubdomain(), _displaced);
 }
 
 Real
@@ -104,6 +108,7 @@ MortarArchardsLawAux::computeValue()
   mooseAssert(_normals.size() == _test_lower.size(),
               "Normals and test_lower must be the same size");
   _worn_depth = 0;
+  _nodal_normal_pressure = normalPressure();
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
     computeQpProperties();
@@ -137,8 +142,8 @@ MortarArchardsLawAux::computeQpIProperties()
   const auto norm_tangential_vel = gap_velocity_vec.norm();
 
   const auto worn_out_depth_dt = norm_tangential_vel * _energy_wear_coefficient *
-                                 _friction_coefficient * normalPressure() * _dt * _JxW_msm[_qp] *
-                                 _coord_msm[_qp];
+                                 _friction_coefficient * _nodal_normal_pressure * _dt *
+                                 _JxW_msm[_qp] * _coord_msm[_qp];
 
   // Accumulate worn-out depth over time.
   _worn_depth += _test_lower[_i][_qp] * worn_out_depth_dt;

@@ -34,6 +34,13 @@ public:
    */
   virtual ADReal computeFlux() const = 0;
 
+  /**
+   * Report an error if this model cannot operate with the mortar constraint that calls it
+   */
+  virtual void checkConstraint(const ModularGapConductanceConstraint & /*mortar_constraint*/) const
+  {
+  }
+
   virtual void finalize() final {};
   virtual void threadJoin(const UserObject &) final {};
 

@@ -73,6 +73,9 @@ protected:
   /// z-velocity on the primary face
   const ADVariableValue * const _primary_z_dot;
 
+  /// The normal contact pressure at the current node
+  Real _nodal_normal_pressure;
+
   /// The worn-out depth due to Archard's law (Aux Kernel computed value)
   Real _worn_depth;
 
