@@ -1,5 +1,5 @@
-# Time step 3 fails at dtmin. Controls executed on FAILED turn the predictor off and keep the time
-# step size, so the step is repeated once with the same dt and without the prediction.
+# Time step 3 fails. Controls executed on FAILED turn the predictor off and keep the time step size,
+# so the step is repeated once with the same dt and without the prediction.
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -40,7 +40,7 @@
   type = Transient
   num_steps = 4
   dt = 0.1
-  dtmin = 0.1
+  dtmin = 0.01
   [Predictor]
     type = SimplePredictor
     scale = 1

@@ -84,13 +84,6 @@ public:
    */
   Real getCurrentDT() { return _current_dt; }
 
-  /**
-   * Whether a time step that fails at dtmin is repeated with the same size instead of stopping the
-   * run: cutback_factor_at_failure is 1 and the current time step has not been repeated at dtmin
-   * yet
-   */
-  bool canRepeatAtDtMin() const { return _cutback_factor_at_failure >= 1 && !_repeated_at_dt_min; }
-
   virtual void forceTimeStep(Real dt);
 
   /**
@@ -152,9 +145,6 @@ protected:
 
   /// Cutback factor if a time step fails to converge
   const Real & _cutback_factor_at_failure;
-
-  /// Whether the current time step was already repeated at dtmin
-  bool _repeated_at_dt_min;
 
   /// If true then the next dt will be computed by computeInitialDT()
   bool _reset_dt;

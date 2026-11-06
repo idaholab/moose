@@ -23,7 +23,7 @@ TimeStepper::validParams()
       0.5,
       "cutback_factor_at_failure>0 & cutback_factor_at_failure<=1",
       "Factor to apply to timestep if a time step fails to converge. A factor of 1 repeats the "
-      "time step with the same size; at dtmin this is done once per time step.");
+      "time step with the same size, so it should be set back below 1 after a repeat.");
   params.addParam<bool>("enable", true, "whether or not to enable the time stepper");
   params.declareControllable("enable cutback_factor_at_failure");
 
@@ -53,7 +53,6 @@ TimeStepper::TimeStepper(const InputParameters & parameters)
     _verbose(_executioner.verbose()),
     _converged(true),
     _cutback_factor_at_failure(getParam<Real>("cutback_factor_at_failure")),
-    _repeated_at_dt_min(false),
     _reset_dt(getParam<bool>("reset_dt")),
     _has_reset_dt(false),
     _currently_restepping(false),
@@ -80,9 +79,6 @@ TimeStepper::preExecute()
 void
 TimeStepper::computeStep()
 {
-  if (converged())
-    _repeated_at_dt_min = false;
-
   if (_t_step < 2 || (_reset_dt && !_has_reset_dt))
   {
     _has_reset_dt = true;
@@ -213,11 +209,7 @@ Real
 TimeStepper::computeFailedDT()
 {
   if (_dt <= _dt_min)
-  {
-    if (!canRepeatAtDtMin())
-      mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
-    _repeated_at_dt_min = true;
-  }
+    mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
 
   // cut the time step
   if (_cutback_factor_at_failure * _dt >= _dt_min)

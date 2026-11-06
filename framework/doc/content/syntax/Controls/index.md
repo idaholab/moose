@@ -164,8 +164,7 @@ size of the repeated time step. [retry_controls] repeats a failed time step once
 and without the predictor, using the controllable `apply` parameter of the
 [Predictor](syntax/Executioner/Predictor/index.md), the controllable `cutback_factor_at_failure` of
 the time stepper to adjust the cutback time step size, and also a [NumFailedTimeSteps.md]
-postprocessor with `current_time_step_only = true` to detect a failed time step. A factor of 1
-also repeats a time step that failed at `dtmin`, once per time step.
+postprocessor with `current_time_step_only = true` to detect a failed time step.
 
 !listing test/tests/controls/failed_retry/retry_without_predictor.i
          block=Postprocessors Functions Controls

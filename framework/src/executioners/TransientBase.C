@@ -689,7 +689,7 @@ TransientBase::keepGoing()
     _console << "Aborting as solve did not converge and input selected to abort" << std::endl;
     keep_going = false;
   }
-  else if (!_error_on_dtmin && _dt <= _dtmin && !_time_stepper->canRepeatAtDtMin())
+  else if (!_error_on_dtmin && _dt <= _dtmin)
   {
     _console << "Aborting as timestep already at or below dtmin" << std::endl;
     keep_going = false;

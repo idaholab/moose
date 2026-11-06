@@ -8,17 +8,16 @@
       input = 'retry_without_predictor.i'
       csvdiff = 'retry_without_predictor_out.csv'
       restep = false # the controls act on the failed time step
-      detail = 'These controls can repeat a time step that failed at the minimum time step size '
-               'once with the same size and without the predictor.'
+      detail = 'These controls can repeat a failed time step once with the same size and without '
+               'the predictor.'
     []
-    [stop_on_second_failure]
-      type = RunException
+    [cut_dt_on_second_failure]
+      type = CSVDiff
       input = 'retry_without_predictor.i'
-      cli_args = "Problem/fail_steps='3 3' Controls/keep_dt/function=1"
-      expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
+      cli_args = "Problem/fail_steps='3 3' Outputs/file_base=cut_dt_on_second_failure_out"
+      csvdiff = 'cut_dt_on_second_failure_out.csv'
       restep = false # the controls act on the failed time step
-      detail = 'The simulation stops if the repeated time step fails again at the minimum time '
-               'step size.'
+      detail = 'These controls can cut the time step size if the repeated time step fails again.'
     []
   []
 []
