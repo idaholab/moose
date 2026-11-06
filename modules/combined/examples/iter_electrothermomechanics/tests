@@ -1,0 +1,29 @@
+[Tests]
+  design = 'iter_cable.md'
+  issues = '#TBD'
+
+  # Lightweight RunApp tests - verify simulations run to completion
+  [copper_cylinder_runapp]
+    type = 'RunApp'
+    input = 'copper_cylinder.i'
+    requirement = 'The system shall simulate a solid copper cylinder with finite strain mechanics, thermal expansion, and Lorentz forces'
+  []
+
+  [cylinder_runapp]
+    type = 'RunApp'
+    input = 'cylinder.i'
+    requirement = 'The system shall simulate a Cu-Nb3Sn effective material cylinder with finite strain mechanics'
+  []
+
+  [annulus_runapp]
+    type = 'RunApp'
+    input = 'annulus.i'
+    requirement = 'The system shall simulate a Cu-Nb3Sn annulus geometry'
+  []
+
+  [iter_cable_runapp]
+    type = 'RunApp'
+    input = 'iter_cable.i'
+    requirement = 'The system shall simulate the full ITER cable with steel jacket'
+  []
+[]
