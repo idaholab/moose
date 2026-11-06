@@ -587,10 +587,10 @@ IterationAdaptiveDT::acceptStep()
 
   // Use the total number of iterations for multi-system
   for (const auto i : make_range(_fe_problem.numNonlinearSystems()))
-    _outer_its += _fe_problem.getNonlinearSystemBase(/*nl_sys=*/i).nNonlinearIterations();
+    _outer_its += _fe_problem.nNonlinearIterations(/*nl_sys=*/i);
   // Add linear iterations for both nonlinear and linear systems for multi-system
   for (const auto i : make_range(_fe_problem.numNonlinearSystems()))
-    _l_its += _fe_problem.getNonlinearSystemBase(/*nl_sys=*/i).nLinearIterations();
+    _l_its += _fe_problem.nLinearIterations(/*nl_sys=*/i);
   for (const auto i : make_range(_fe_problem.numLinearSystems()))
   {
     _l_its += _fe_problem.getLinearSystem(/*nl_sys=*/i).nLinearIterations();

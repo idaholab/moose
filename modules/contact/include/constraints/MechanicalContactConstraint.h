@@ -35,6 +35,9 @@ public:
   virtual void jacobianSetup() override;
   virtual void residualEnd() override;
 
+  /// @return Whether this constraint uses the augmented Lagrangian formulation
+  bool isAugmentedLagrangian() const;
+
   virtual bool AugmentedLagrangianContactConverged();
 
   virtual void updateAugmentedLagrangianMultiplier(bool beginning_of_step);
