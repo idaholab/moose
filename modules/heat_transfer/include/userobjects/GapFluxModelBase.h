@@ -44,6 +44,9 @@ protected:
   mutable ADReal _adjusted_length;
   mutable ADReal _normal_pressure;
 
+  /// The secondary lower-dimensional element of the current mortar segment
+  mutable const Elem * _lower_secondary_elem = nullptr;
+
   /// The secondary quadrature point location
   mutable Moose::ElemPointArg _secondary_point;
   /// The primary quadrature point location
