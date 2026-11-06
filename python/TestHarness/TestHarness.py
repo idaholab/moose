@@ -1493,6 +1493,13 @@ class TestHarness:
                 raise argparse.ArgumentTypeError(f"must be positive, got {value}")
             return value
 
+        # Helper for requiring a non-negative integer argument
+        def non_negative_int(value):
+            value = int(value)
+            if value < 0:
+                raise argparse.ArgumentTypeError(f"must be non-negative, got {value}")
+            return value
+
         # Helper for requiring a positive float argument
         def positive_float(value):
             value = float(value)
@@ -1961,7 +1968,7 @@ class TestHarness:
         failgroup.add_argument(
             "--max-fails",
             nargs=1,
-            type=positive_int,
+            type=non_negative_int,
             default=50,
             help=(
                 "The number of tests allowed to fail before any additional tests "
@@ -1971,7 +1978,7 @@ class TestHarness:
         failgroup.add_argument(
             "--valgrind-max-fails",
             nargs=1,
-            type=positive_int,
+            type=non_negative_int,
             default=5,
             help=(
                 "The number of valgrind tests allowed to fail before any additional "
