@@ -508,7 +508,7 @@ SIMPLESolveNonlinearAssembly::solve()
     // We set the preconditioner/controllable parameters through petsc options. Linear
     // tolerances will be overridden within the solver. In case of a segregated momentum
     // solver, we assume that every velocity component uses the same preconditioner
-    Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params);
+    Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params, &_problem);
 
     // Solve the momentum predictor step
     auto momentum_residual = solveMomentumPredictor();
@@ -520,7 +520,7 @@ SIMPLESolveNonlinearAssembly::solve()
 
     // We set the preconditioner/controllable parameters for the pressure equations through
     // petsc options. Linear tolerances will be overridden within the solver.
-    Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
+    Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params, &_problem);
 
     // Solve the pressure corrector
     ns_its_residuals[momentum_residual.size()] = solvePressureCorrector();
@@ -557,7 +557,7 @@ SIMPLESolveNonlinearAssembly::solve()
     {
       // We set the preconditioner/controllable parameters through petsc options. Linear
       // tolerances will be overridden within the solver.
-      Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
+      Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params, &_problem);
       residual_index += 1;
       ns_its_residuals[residual_index] = solveAdvectedSystem(_energy_sys_number,
                                                              *_energy_system,
@@ -569,7 +569,7 @@ SIMPLESolveNonlinearAssembly::solve()
       {
         // We set the preconditioner/controllable parameters through petsc options. Linear
         // tolerances will be overridden within the solver.
-        Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
+        Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params, &_problem);
         residual_index += 1;
         ns_its_residuals[residual_index] = solveSolidEnergySystem();
       }
@@ -579,7 +579,7 @@ SIMPLESolveNonlinearAssembly::solve()
     // momentum-pressure loop because it affects the turbulent viscosity
     if (_has_turbulence_systems)
     {
-      Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
+      Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params, &_problem);
 
       for (auto system_i : index_range(_turbulence_systems))
       {
@@ -663,7 +663,7 @@ SIMPLESolveNonlinearAssembly::solve()
 
     // We set the options used by Petsc (preconditioners etc). We assume that every passive
     // scalar equation uses the same options for now.
-    Moose::PetscSupport::petscSetOptions(_passive_scalar_petsc_options, solver_params);
+    Moose::PetscSupport::petscSetOptions(_passive_scalar_petsc_options, solver_params, &_problem);
 
     iteration_counter = 0;
     std::vector<std::pair<unsigned int, Real>> passive_scalar_residuals(

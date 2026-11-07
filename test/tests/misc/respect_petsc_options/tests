@@ -1,11 +1,25 @@
 [Tests]
-  issues = '#28380 #28354'
+  issues = '#28380 #28354 #33875'
   design = 'Executioner.md'
   [take_vec_mat_types]
-    requirement = 'The system shall set vector and matrix types from the PETSc command line option parameters within an input file.'
-    input = test.i
-    csvdiff = test_out.csv
-    type = CSVDiff
-    absent_out = 'Option left'
+    requirement = 'The system shall set vector and matrix types from system-prefixed PETSc options'
+    [input]
+      input = test.i
+      csvdiff = test_out.csv
+      type = CSVDiff
+      absent_out = 'Option left'
+      detail = 'within an input file, and'
+    []
+    [command_line]
+      input = test.i
+      type = RunApp
+      cli_args = '-nl0_vec_type kokkos -nl0_ghost_vec_type kokkos -nl0_mat_type aijkokkos '
+                 'Postprocessors/nl0_types/vec_type=kokkos '
+                 'Postprocessors/nl0_types/ghost_vec_type=kokkos '
+                 'Postprocessors/nl0_types/mat_type=aijkokkos'
+      absent_out = 'Option left'
+      capabilities = 'petsc_kokkos'
+      detail = 'on the command line, without changing the types of other systems.'
+    []
   []
 []
