@@ -56,7 +56,10 @@ P_out = 2.0e5 # Pa
   implicit = true
   segregated = false
   verbose_subchannel = true
-  interpolation_scheme = exponential
+  # The monolithic solve diverges for this case with the exponential and upwind schemes, while
+  # central differencing converges. Against the measured thermocouple temperatures, the RMS error is
+  # 5.8 K, compared with 5.0 K for the earlier exponential result with the added crossflow resistance
+  interpolation_scheme = central_difference
   pin_HTC_closure = 'Dittus-Boelter'
   # friction model
   friction_closure = 'Chen'
