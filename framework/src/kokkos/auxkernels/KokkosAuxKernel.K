@@ -15,8 +15,13 @@ namespace Moose::Kokkos
 InputParameters
 AuxKernel::validParams()
 {
-  InputParameters params = AuxKernelBase::validParams();
+  InputParameters params = ::AuxKernelBase::validParams();
   params.addPrivateParam<bool>(MooseBase::kokkos_object_param, true);
+  params.makeParamNotRequired<AuxVariableName>("variable");
+  params.addParam<std::vector<AuxVariableName>>(
+      "variables",
+      "The names of the variables that this object applies to, as an alternative to 'variable'. "
+      "All variables must have the same FE family and order.");
   return params;
 }
 
@@ -26,8 +31,9 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
     AssemblyHolder(_sys.feProblem().kokkosAssembly()),
     FESystemHolder(_sys.feProblem().getKokkosFESystems()),
     _nodal(_var.isNodal()),
+    _vars(getMooseVariables()),
     _test(),
-    _u(_var, Moose::SOLUTION_TAG, _var.isNodal()),
+    _u(_vars, Moose::SOLUTION_TAG, _nodal),
     _t(TransientInterface::_t),
     _t_old(TransientInterface::_t_old),
     _t_step(TransientInterface::_t_step),
@@ -39,7 +45,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
 
   auto tag = _sys.feProblem().addVectorTag("parallel_solution", Moose::VECTOR_TAG_SOLUTION);
 
-  _kokkos_var.init(_var, tag);
+  _kokkos_var.init(_vars, tag);
 
   // Kokkos aux kernels currently only consume variable information through finite element bases and
   // quadrature points
@@ -53,23 +59,109 @@ AuxKernel::AuxKernel(const AuxKernel & object)
     AssemblyHolder(object),
     FESystemHolder(object),
     _nodal(object._nodal),
+    _vars(object._vars),
     _kokkos_var(object._kokkos_var),
+    _thread(object._thread),
     _test(object._test),
     _u(object._u),
     _t(object._t),
     _t_old(object._t_old),
     _t_step(object._t_step),
     _dt(object._dt),
-    _dt_old(object._dt_old)
+    _dt_old(object._dt_old),
+    _fe_type(object._fe_type),
+    _mass_factors(object._mass_factors),
+    _rhs(object._rhs),
+    _solution(object._solution)
 {
+}
+
+std::vector<MooseVariableFieldBase *>
+AuxKernel::getMooseVariables()
+{
+  std::vector<MooseVariableFieldBase *> vars;
+
+  for (const auto & name : getVariableNamesHelper(parameters()))
+    vars.push_back(&_sys.getVariable(_tid, name));
+
+  for (const auto i : make_range(std::size_t(1), vars.size()))
+    if (vars[0]->feType() != vars[i]->feType())
+      paramError(parameters().varParamName(),
+                 "For multi-variable Kokkos auxiliary kernels, all variables should have the same "
+                 "FE family and order.");
+
+  return vars;
+}
+
+void
+AuxKernel::initialSetup()
+{
+  ::AuxKernelBase::initialSetup();
+
+  setupMassFactors(true);
+}
+
+void
+AuxKernel::meshChanged()
+{
+  ::AuxKernelBase::meshChanged();
+
+  setupMassFactors(true);
+}
+
+void
+AuxKernel::meshDisplaced()
+{
+  ::AuxKernelBase::meshDisplaced();
+
+  setupMassFactors(false);
+}
+
+void
+AuxKernel::setupMassFactors(const bool rebuild)
+{
+  if (_nodal)
+    return;
+
+  if (rebuild)
+  {
+    _fe_type = kokkosAssembly().getFETypeID(_var.feType());
+
+    const auto num_elems = kokkosMesh().getNumLocalElements();
+    const auto num_comps = _vars.size();
+
+    _mass_factors.create(num_elems);
+    _rhs.create(num_elems);
+    _solution.create(num_elems);
+
+    for (const auto tid : make_range(numKokkosBlockElements()))
+    {
+      const auto & info = kokkosMesh().getElementInfo(kokkosBlockElementID(tid));
+      const auto n = kokkosAssembly().getNumDofs(info.type, _fe_type);
+
+      _mass_factors.reserve({info.id}, {n * (n + 1) / 2});
+      _rhs.reserve({info.id}, {num_comps, n});
+      _solution.reserve({info.id}, {num_comps, n});
+    }
+
+    _mass_factors.finalize();
+    _rhs.finalize();
+    _solution.finalize();
+  }
+
+  Policy policy(0, numKokkosBlockElements());
+
+  DispatcherRegistry::build<MassMatrixLoop>(this, type())->parallelFor(policy);
 }
 
 void
 AuxKernel::compute()
 {
-  if (_var.isNodal())
+  if (_nodal)
   {
-    Policy policy = _bnd ? Policy(0, numKokkosBoundaryNodes()) : Policy(0, numKokkosBlockNodes());
+    _thread.resize(_vars.size(), _bnd ? numKokkosBoundaryNodes() : numKokkosBlockNodes());
+
+    Policy policy(0, _thread.size());
 
     if (!_node_dispatcher)
       _node_dispatcher = DispatcherRegistry::build<NodeLoop>(this, type());
@@ -78,7 +170,9 @@ AuxKernel::compute()
   }
   else
   {
-    Policy policy = Policy(0, numKokkosBlockElements());
+    _thread.resize(_vars.size(), numKokkosBlockElements());
+
+    Policy policy(0, _thread.size());
 
     if (!_element_dispatcher)
       _element_dispatcher = DispatcherRegistry::build<ElementLoop>(this, type());
@@ -92,7 +186,7 @@ AuxKernel::uOld() const
 {
   _var.sys().needSolutionState(1);
 
-  return VariableValue(_var, Moose::OLD_SOLUTION_TAG, isNodal());
+  return VariableValue(_vars, Moose::OLD_SOLUTION_TAG, isNodal());
 }
 
 VariableValue
@@ -100,7 +194,7 @@ AuxKernel::uOlder() const
 {
   _var.sys().needSolutionState(2);
 
-  return VariableValue(_var, Moose::OLDER_SOLUTION_TAG, isNodal());
+  return VariableValue(_vars, Moose::OLDER_SOLUTION_TAG, isNodal());
 }
 
 void

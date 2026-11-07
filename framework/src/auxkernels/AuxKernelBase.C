@@ -24,6 +24,7 @@ AuxKernelBase::validParams()
   params += BoundaryRestrictable::validParams();
   params += RandomInterface::validParams();
   params += MeshChangedInterface::validParams();
+  params += MeshDisplacedInterface::validParams();
   params += MaterialPropertyInterface::validParams();
   params += FunctorInterface::validParams();
   params += GeometricSearchInterface::validParams();
@@ -86,6 +87,7 @@ AuxKernelBase::AuxKernelBase(const InputParameters & parameters)
     GeometricSearchInterface(this),
     Restartable(this, "AuxKernels"),
     MeshChangedInterface(parameters),
+    MeshDisplacedInterface(parameters),
     VectorPostprocessorInterface(this),
     ElementIDInterface(this),
     NonADFunctorInterface(this),
@@ -105,10 +107,14 @@ AuxKernelBase::AuxKernelBase(const InputParameters & parameters)
   // MooseArray that is only properfly sized for FV variables if we're doing "qp" calculations. I'm
   // quoting "qp" because it's a briefer metaphorical representation (perhaps not a good one) of the
   // more precise requirement that variable data be pre-sized/operator[] indexable
-  _var.requireQpComputations();
+  for (const auto & name : getVariableNamesHelper(parameters))
+  {
+    auto & var = _sys.getVariable(_tid, name);
 
-  addMooseVariableDependency(&_var);
-  _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
+    var.requireQpComputations();
+    addMooseVariableDependency(&var);
+    _supplied_vars.insert(name);
+  }
 
   // Check for supported variable types
   // Any 'nodal' family that actually has DoFs outside of nodes, or gradient dofs at nodes is
@@ -139,6 +145,7 @@ AuxKernelBase::AuxKernelBase(const AuxKernelBase & object, const Moose::Kokkos::
     GeometricSearchInterface(object, key),
     Restartable(object, key),
     MeshChangedInterface(object, key),
+    MeshDisplacedInterface(object, key),
     VectorPostprocessorInterface(object, key),
     ElementIDInterface(object, key),
     NonADFunctorInterface(object, key),
@@ -234,5 +241,19 @@ MooseVariableFieldBase &
 AuxKernelBase::getVariableHelper(const InputParameters & parameters)
 {
   return parameters.getCheckedPointerParam<SystemBase *>("_sys")->getVariable(
-      parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable"));
+      parameters.get<THREAD_ID>("_tid"), getVariableNamesHelper(parameters)[0]);
+}
+
+std::vector<AuxVariableName>
+AuxKernelBase::getVariableNamesHelper(const InputParameters & parameters)
+{
+  if (parameters.varParamName() == "variable")
+    return {parameters.get<AuxVariableName>("variable")};
+
+  const auto & names = parameters.get<std::vector<AuxVariableName>>("variables");
+
+  if (names.empty())
+    ::mooseError("'variables' should not be empty.");
+
+  return names;
 }

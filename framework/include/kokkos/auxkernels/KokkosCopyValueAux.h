@@ -12,7 +12,8 @@
 #include "KokkosAuxKernel.h"
 
 /**
- * Copies one variable onto an auxiliary variable
+ * Copies variables onto auxiliary variables, each source onto the auxiliary variable of the same
+ * component
  */
 class KokkosCopyValueAux : public Moose::Kokkos::AuxKernel
 {
@@ -28,14 +29,14 @@ public:
   KOKKOS_FUNCTION void computeNodeInternal(const Derived & auxkernel, AssemblyDatum & datum) const;
 
 protected:
+  // Values are copied DOF by DOF without an L2 projection, so no mass matrix factors are needed
+  virtual void setupMassFactors(const bool) override {}
+
   /// Variable used to specify state being copied
   unsigned short _state;
 
-  /// The variable value to copy from
+  /// The variable values to copy from
   const Moose::Kokkos::VariableValue _v;
-
-  /// A reference to the variable to copy from
-  const MooseVariableBase & _source_variable;
 };
 
 template <typename Derived>
@@ -43,8 +44,8 @@ KOKKOS_FUNCTION void
 KokkosCopyValueAux::computeElementInternal(const Derived & /* auxkernel */,
                                            AssemblyDatum & datum) const
 {
-  auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto var = _kokkos_var.var();
+  auto & sys = kokkosSystem(_kokkos_var.sys(datum.comp()));
+  auto var = _kokkos_var.var(datum.comp());
   auto tag = _kokkos_var.tag();
   auto elem = datum.elem().id;
 
@@ -57,8 +58,8 @@ KOKKOS_FUNCTION void
 KokkosCopyValueAux::computeNodeInternal(const Derived & /* auxkernel */,
                                         AssemblyDatum & datum) const
 {
-  auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto var = _kokkos_var.var();
+  auto & sys = kokkosSystem(_kokkos_var.sys(datum.comp()));
+  auto var = _kokkos_var.var(datum.comp());
   auto tag = _kokkos_var.tag();
   auto node = datum.node();
 
