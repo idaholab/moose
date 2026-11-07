@@ -9,6 +9,13 @@
     expect_out = 'Converged due to absolute residual'
     requirement = 'The system shall be able to determine convergence of the nonlinear solve using default criteria through an object.'
   []
+  [no_converged_reason]
+    type = RunApp
+    input = 'default_nonlinear_convergence.i'
+    cli_args = 'Outputs/print_nonlinear_converged_reason=false'
+    absent_out = 'Converged due to'
+    requirement = 'The system shall not print the nonlinear convergence reason from a verbose executioner if printing of nonlinear convergence reasons is disabled in the outputs.'
+  []
   [multi_system]
     type = RunApp
     input = 'multi_system.i'

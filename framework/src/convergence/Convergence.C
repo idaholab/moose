@@ -48,6 +48,16 @@ Convergence::Convergence(const InputParameters & parameters)
 }
 
 void
+Convergence::disableInheritedVerbosity()
+{
+  // Default Convergence objects receive 'verbose' from the executioner parameters, so for them it
+  // never reflects a request made on the Convergence object itself
+  const bool added_as_default =
+      isParamValid("added_as_default") && getParam<bool>("added_as_default");
+  _verbose = !added_as_default && isParamSetByUser("verbose") && getParam<bool>("verbose");
+}
+
+void
 Convergence::verboseOutput(std::ostringstream & oss)
 {
   const auto str = oss.str();

@@ -143,8 +143,9 @@ CommonOutputAction::validParams()
   params.addParam<bool>("print_nonlinear_converged_reason",
                         true,
                         "Enable/disable printing of the nonlinear solver convergence reason to the "
-                        "screen. This parameter only affects the output of the third-party solver "
-                        "(e.g. PETSc), not MOOSE itself.");
+                        "screen. This affects the output of the third-party solver (e.g. PETSc) "
+                        "and of nonlinear Convergence objects whose verbosity is inherited from "
+                        "the executioner.");
   params.addParam<bool>("print_linear_converged_reason",
                         true,
                         "Enable/disable printing of the linear solver convergence reason to the "
