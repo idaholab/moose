@@ -17,7 +17,7 @@ namespace Moose::Kokkos
 {
 
 /**
- * Layout of the per-team scratch memory of a pointwise AD element or side assembly. At each
+ * Layout of the scratch memory of a pointwise AD element or side assembly. At each
  * quadrature point the scratch holds the JxW-weighted residual coefficients of the test function
  * value and of its reference gradient, followed by their derivatives with respect to each slot,
  * and then the inverse of the reference map Jacobian:
@@ -64,15 +64,107 @@ struct ADScratchLayout
   static constexpr unsigned int map_size = 9;
 
   /**
-   * Get the number of bytes of scratch memory per team
+   * Get the number of bytes of scratch memory per team, whose groups each hold the layout of one
+   * element or side
    * @param max_qps The maximum number of quadrature points of an element or side
    * @param slots The number of derivative slots
+   * @param groups The number of groups of the team, each assembling one element or side
    */
-  static std::size_t bytes(unsigned int max_qps, unsigned int slots)
+  static std::size_t bytes(unsigned int max_qps, unsigned int slots, unsigned int groups = 1)
   {
     return ::Kokkos::View<Real *, ::Kokkos::DefaultExecutionSpace::scratch_memory_space>::
-        shmem_size(max_qps * qpSize(slots));
+        shmem_size(groups * max_qps * qpSize(slots));
   }
+};
+
+/**
+ * Partition of a team of a pointwise AD assembly into groups of threads. Each group assembles one
+ * element or side, so that a team of short quadrature point loops keeps its threads busy. A group
+ * holds one thread per quadrature point, up to the team size.
+ */
+class ADTeamGroup
+{
+public:
+  /// Number of threads per team that a dispatch aims for, which the backend limits may lower
+  static constexpr unsigned int target_team_size = 128;
+
+  /**
+   * Get the number of threads per group
+   * @param max_qps The maximum number of quadrature points of an element or side
+   * @param team_size The number of threads per team
+   */
+  KOKKOS_FUNCTION static unsigned int groupSize(const unsigned int max_qps,
+                                                const unsigned int team_size)
+  {
+    return ::Kokkos::max(1u, ::Kokkos::min(max_qps, team_size));
+  }
+
+  /**
+   * Constructor
+   * @param team The team handle
+   * @param max_qps The maximum number of quadrature points of an element or side
+   * @param n_items The number of elements or sides of the dispatch
+   */
+  template <typename Team>
+  KOKKOS_FUNCTION ADTeamGroup(const Team & team, const unsigned int max_qps, const ThreadID n_items)
+    : _max_qps(max_qps),
+      _size(groupSize(max_qps, team.team_size())),
+      _count(team.team_size() / _size),
+      _index(team.team_rank() / _size),
+      _rank(team.team_rank() % _size),
+      _item(ThreadID(team.league_rank()) * _count + _index),
+      _active(_item < n_items)
+  {
+    // A thread without an element or side still reaches the team barriers, and reads a valid one
+    if (!_active)
+      _item = n_items - 1;
+  }
+
+  /**
+   * Get the index of the element or side of the group within the dispatch
+   */
+  KOKKOS_FUNCTION ThreadID item() const { return _item; }
+  /**
+   * Get whether the group assembles its element or side
+   */
+  KOKKOS_FUNCTION bool active() const { return _active; }
+  /**
+   * Get the number of groups of the team
+   */
+  KOKKOS_FUNCTION unsigned int count() const { return _count; }
+  /**
+   * Get the index of the group within the team
+   */
+  KOKKOS_FUNCTION unsigned int index() const { return _index; }
+  /**
+   * Get the rank of the thread within the group
+   */
+  KOKKOS_FUNCTION unsigned int rank() const { return _rank; }
+  /**
+   * Get the number of threads of the group
+   */
+  KOKKOS_FUNCTION unsigned int size() const { return _size; }
+  /**
+   * Get the maximum number of quadrature points of an element or side, which strides the scratch
+   * of the groups
+   */
+  KOKKOS_FUNCTION unsigned int maxQps() const { return _max_qps; }
+
+private:
+  /// Maximum number of quadrature points of an element or side
+  const unsigned int _max_qps;
+  /// Number of threads per group
+  const unsigned int _size;
+  /// Number of groups per team
+  const unsigned int _count;
+  /// Index of the group within the team
+  const unsigned int _index;
+  /// Rank of the thread within the group
+  const unsigned int _rank;
+  /// Index of the element or side of the group within the dispatch
+  ThreadID _item;
+  /// Whether the group assembles its element or side
+  const bool _active;
 };
 
 /**

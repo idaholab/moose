@@ -49,7 +49,8 @@ class ADKernel : public KernelBase
 public:
   static InputParameters validParams();
 
-  /// AD kernels dispatch one team per element, whose threads share the quadrature point terms
+  /// AD kernels dispatch teams of elements, whose threads share the quadrature point terms of
+  /// each element
   static constexpr bool uses_team_dispatch = true;
 
   /**
@@ -74,21 +75,22 @@ public:
   virtual void computeResidualAndJacobian() override;
 
   /**
-   * The team operation called by Kokkos for each element
+   * The team operation called by Kokkos for each team of elements
    */
   template <typename Derived>
   KOKKOS_FUNCTION void
   operator()(ResidualLoop, const TeamMember<ResidualLoop> & team, const Derived & kernel) const;
   /**
-   * The team operation called by Kokkos for each element of an object posed on the current
-   * configuration, whose dual numbers carry the displacement slots
+   * The team operation called by Kokkos for each team of elements of an object posed on the
+   * current configuration, whose dual numbers carry the displacement slots
    */
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(DisplacedResidualLoop,
                                   const TeamMember<DisplacedResidualLoop> & team,
                                   const Derived & kernel) const;
   /**
-   * The team operation called by Kokkos for each element when only the residual is computed
+   * The team operation called by Kokkos for each team of elements when only the residual is
+   * computed
    */
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(ResidualOnlyLoop,
@@ -217,7 +219,8 @@ ADKernel::operator()(ResidualLoop,
                      const TeamMember<ResidualLoop> & team,
                      const Derived & kernel) const
 {
-  auto elem = kokkosBlockElementID(team.league_rank());
+  const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerElem(), numKokkosBlockElements());
+  const auto elem = kokkosBlockElementID(group.item());
 
   AssemblyDatum datum(elem,
                       libMesh::invalid_uint,
@@ -228,7 +231,7 @@ ADKernel::operator()(ResidualLoop,
                       _configuration);
 
   assembleADTerms<Derived::max_ad_slots>(
-      kernel, team, datum, _ad_slots, _computing_residual, _computing_jacobian);
+      kernel, team, group, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }
 
 template <typename Derived>
@@ -237,7 +240,8 @@ ADKernel::operator()(DisplacedResidualLoop,
                      const TeamMember<DisplacedResidualLoop> & team,
                      const Derived & kernel) const
 {
-  auto elem = kokkosBlockElementID(team.league_rank());
+  const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerElem(), numKokkosBlockElements());
+  const auto elem = kokkosBlockElementID(group.item());
 
   AssemblyDatum datum(elem,
                       libMesh::invalid_uint,
@@ -248,7 +252,7 @@ ADKernel::operator()(DisplacedResidualLoop,
                       _configuration);
 
   assembleADTerms<Derived::max_ad_slots + AD_DISPLACEMENT_SLOTS>(
-      kernel, team, datum, _ad_slots, _computing_residual, _computing_jacobian);
+      kernel, team, group, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }
 
 template <typename Derived>
@@ -257,7 +261,8 @@ ADKernel::operator()(ResidualOnlyLoop,
                      const TeamMember<ResidualOnlyLoop> & team,
                      const Derived & kernel) const
 {
-  auto elem = kokkosBlockElementID(team.league_rank());
+  const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerElem(), numKokkosBlockElements());
+  const auto elem = kokkosBlockElementID(group.item());
 
   AssemblyDatum datum(elem,
                       libMesh::invalid_uint,
@@ -267,7 +272,7 @@ ADKernel::operator()(ResidualOnlyLoop,
                       _kokkos_var.var(),
                       _configuration);
 
-  assembleADTerms<0>(kernel, team, datum, _ad_slots, true, false);
+  assembleADTerms<0>(kernel, team, group, datum, _ad_slots, true, false);
 }
 
 } // namespace Moose::Kokkos

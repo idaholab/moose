@@ -40,7 +40,7 @@ public:
   /// Whether this object assembles off-diagonal Jacobian contributions of scalar variables
   static constexpr bool supports_scalar_jacobian = false;
 
-  /// Whether this object dispatches its residual computation with one team per element or side
+  /// Whether this object dispatches its residual computation with teams of elements or sides
   static constexpr bool uses_team_dispatch = false;
 
   /**
@@ -250,8 +250,8 @@ protected:
 
   /**
    * Assemble the residual and Jacobian of a pointwise AD residual object on one element or side
-   * with one team. The team evaluates the residual hooks once per quadrature point into scratch,
-   * then contracts the stored coefficients with the shape functions:
+   * with one group of a team. The group evaluates the residual hooks once per quadrature point into
+   * its scratch, then contracts the stored coefficients with the shape functions:
    *
    *   R_i    = sum_qp (f_v psi_i + f_g . grad_xi psi_i)
    *   J_ij^b = sum_qp (df_v/ds psi_i + df_g/ds . grad_xi psi_i) dq_s/dU_j
@@ -262,6 +262,7 @@ protected:
    * @tparam slots The number of derivative slots of the instantiation
    * @param object The residual object of the final derived type
    * @param team The team handle
+   * @param group The group of the team that assembles the element or side
    * @param datum The AssemblyDatum object of the element or side
    * @param table The slot table of the residual object
    * @param computing_residual Whether to assemble the residual
@@ -270,10 +271,24 @@ protected:
   template <unsigned int slots, typename Object, typename Team>
   KOKKOS_FUNCTION void assembleADTerms(const Object & object,
                                        const Team & team,
+                                       const ADTeamGroup & group,
                                        const AssemblyDatum & datum,
                                        const ADSlotTable & table,
                                        bool computing_residual,
                                        bool computing_jacobian) const;
+
+  /**
+   * Dispatch a team operation of a pointwise AD residual object, whose teams hold groups of
+   * threads that each assemble one element or side
+   * @param dispatcher The team dispatcher
+   * @param n_items The number of elements or sides
+   * @param max_qps The maximum number of quadrature points of an element or side
+   * @param slots The number of derivative slots of the instantiation
+   */
+  void dispatchADTeams(DispatcherBase & dispatcher,
+                       ThreadID n_items,
+                       unsigned int max_qps,
+                       unsigned int slots) const;
 
   /**
    * Displacement component assembled by the current dispatch of DisplacementJacobianLoop
@@ -573,6 +588,7 @@ template <unsigned int slots, typename Object, typename Team>
 KOKKOS_FUNCTION void
 ResidualObject::assembleADTerms(const Object & object,
                                 const Team & team,
+                                const ADTeamGroup & group,
                                 const AssemblyDatum & datum,
                                 const ADSlotTable & table,
                                 const bool computing_residual,
@@ -583,16 +599,27 @@ ResidualObject::assembleADTerms(const Object & object,
   constexpr auto map_offset = ADScratchLayout::mapOffset(slots);
 
   const auto n_qps = datum.n_qps();
-  ADScratchView scratch(team.team_scratch(0), n_qps * qp_size);
+  const auto group_scratch_size = group.maxQps() * qp_size;
+  const ADScratchView team_scratch(team.team_scratch(0), group.count() * group_scratch_size);
+  const ADScratchView scratch(&team_scratch(group.index() * group_scratch_size),
+                              group_scratch_size);
+
+  // The threads of the group stride over a range, which a group without an element or side skips
+  auto group_for = [&](const unsigned int n, auto && body)
+  {
+    if (group.active())
+      for (unsigned int k = group.rank(); k < n; k += group.size())
+        body(k);
+  };
 
   // Each thread evaluates its quadrature points with its own datum, whose geometry cache is
   // thread-private
-  ::Kokkos::parallel_for(::Kokkos::TeamThreadRange(team, n_qps),
-                         [&](const unsigned int qp)
-                         {
-                           ADAssemblyDatum<slots> qp_datum(datum, table);
-                           evaluateADTerms(object, qp_datum, qp, &scratch(qp * qp_size));
-                         });
+  group_for(n_qps,
+            [&](const unsigned int qp)
+            {
+              ADAssemblyDatum<slots> qp_datum(datum, table);
+              evaluateADTerms(object, qp_datum, qp, &scratch(qp * qp_size));
+            });
   team.team_barrier();
 
   const auto & assembly = datum.assembly();
@@ -626,18 +653,17 @@ ResidualObject::assembleADTerms(const Object & object,
   };
 
   if (computing_residual)
-    ::Kokkos::parallel_for(
-        ::Kokkos::TeamThreadRange(team, n_idofs),
-        [&](const unsigned int i)
-        {
-          Real local_re = 0;
-          for (unsigned int qp = 0; qp < n_qps; ++qp)
-          {
-            const auto psi = shape(ife, i, qp);
-            local_re += contractADTerms(&scratch(qp * qp_size), psi.first, psi.second);
-          }
-          accumulateTaggedElementalResidual(local_re * scaling_factor, elem.id, i);
-        });
+    group_for(n_idofs,
+              [&](const unsigned int i)
+              {
+                Real local_re = 0;
+                for (unsigned int qp = 0; qp < n_qps; ++qp)
+                {
+                  const auto psi = shape(ife, i, qp);
+                  local_re += contractADTerms(&scratch(qp * qp_size), psi.first, psi.second);
+                }
+                accumulateTaggedElementalResidual(local_re * scaling_factor, elem.id, i);
+              });
 
   if constexpr (slots > 0)
     if (computing_jacobian)
@@ -647,8 +673,8 @@ ResidualObject::assembleADTerms(const Object & object,
         const auto jfe = sys.getFETypeID(block.var);
         const auto n_jdofs = assembly.getNumDofs(elem.type, jfe);
 
-        ::Kokkos::parallel_for(
-            ::Kokkos::TeamThreadRange(team, n_idofs * n_jdofs),
+        group_for(
+            n_idofs * n_jdofs,
             [&](const unsigned int ij)
             {
               const auto i = ij / n_jdofs;

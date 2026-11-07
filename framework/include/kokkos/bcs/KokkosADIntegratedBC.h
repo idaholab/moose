@@ -50,8 +50,8 @@ class ADIntegratedBC : public IntegratedBCBase
 public:
   static InputParameters validParams();
 
-  /// AD integrated BCs dispatch one team per boundary side, whose threads share the quadrature
-  /// point terms
+  /// AD integrated BCs dispatch teams of boundary sides, whose threads share the quadrature
+  /// point terms of each side
   static constexpr bool uses_team_dispatch = true;
 
   /**
@@ -76,21 +76,22 @@ public:
   virtual void computeResidualAndJacobian() override;
 
   /**
-   * The team operation called by Kokkos for each boundary side
+   * The team operation called by Kokkos for each team of boundary sides
    */
   template <typename Derived>
   KOKKOS_FUNCTION void
   operator()(ResidualLoop, const TeamMember<ResidualLoop> & team, const Derived & bc) const;
   /**
-   * The team operation called by Kokkos for each boundary side of an object posed on the current
-   * configuration, whose dual numbers carry the displacement slots
+   * The team operation called by Kokkos for each team of boundary sides of an object posed on the
+   * current configuration, whose dual numbers carry the displacement slots
    */
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(DisplacedResidualLoop,
                                   const TeamMember<DisplacedResidualLoop> & team,
                                   const Derived & bc) const;
   /**
-   * The team operation called by Kokkos for each boundary side when only the residual is computed
+   * The team operation called by Kokkos for each team of boundary sides when only the residual is
+   * computed
    */
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(ResidualOnlyLoop,
@@ -219,7 +220,8 @@ ADIntegratedBC::operator()(ResidualLoop,
                            const TeamMember<ResidualLoop> & team,
                            const Derived & bc) const
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(team.league_rank());
+  const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerSide(), numKokkosBoundarySides());
+  const auto [elem, side] = kokkosBoundaryElementSideID(group.item());
 
   AssemblyDatum datum(elem,
                       side,
@@ -230,7 +232,7 @@ ADIntegratedBC::operator()(ResidualLoop,
                       _configuration);
 
   assembleADTerms<Derived::max_ad_slots>(
-      bc, team, datum, _ad_slots, _computing_residual, _computing_jacobian);
+      bc, team, group, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }
 
 template <typename Derived>
@@ -239,7 +241,8 @@ ADIntegratedBC::operator()(DisplacedResidualLoop,
                            const TeamMember<DisplacedResidualLoop> & team,
                            const Derived & bc) const
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(team.league_rank());
+  const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerSide(), numKokkosBoundarySides());
+  const auto [elem, side] = kokkosBoundaryElementSideID(group.item());
 
   AssemblyDatum datum(elem,
                       side,
@@ -250,7 +253,7 @@ ADIntegratedBC::operator()(DisplacedResidualLoop,
                       _configuration);
 
   assembleADTerms<Derived::max_ad_slots + AD_DISPLACEMENT_SLOTS>(
-      bc, team, datum, _ad_slots, _computing_residual, _computing_jacobian);
+      bc, team, group, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }
 
 template <typename Derived>
@@ -259,7 +262,8 @@ ADIntegratedBC::operator()(ResidualOnlyLoop,
                            const TeamMember<ResidualOnlyLoop> & team,
                            const Derived & bc) const
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(team.league_rank());
+  const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerSide(), numKokkosBoundarySides());
+  const auto [elem, side] = kokkosBoundaryElementSideID(group.item());
 
   AssemblyDatum datum(elem,
                       side,
@@ -269,7 +273,7 @@ ADIntegratedBC::operator()(ResidualOnlyLoop,
                       _kokkos_var.var(),
                       _configuration);
 
-  assembleADTerms<0>(bc, team, datum, _ad_slots, true, false);
+  assembleADTerms<0>(bc, team, group, datum, _ad_slots, true, false);
 }
 
 } // namespace Moose::Kokkos

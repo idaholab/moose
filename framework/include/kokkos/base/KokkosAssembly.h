@@ -56,6 +56,11 @@ public:
    */
   KOKKOS_FUNCTION unsigned int getMaxQpsPerElem() const { return _max_qps_per_elem; }
   /**
+   * Get the maximum number of quadrature points per side in the current partition
+   * @returns The maximum number of quadrature points per side
+   */
+  KOKKOS_FUNCTION unsigned int getMaxQpsPerSide() const { return _max_qps_per_side; }
+  /**
    * Get the total number of elemental quadrature points in a subdomain
    * @param subdomain The contiguous subdomain ID
    * @returns The number of quadrature points
@@ -397,6 +402,7 @@ private:
   Array2D<unsigned int> _n_qps_face;
 
   unsigned int _max_qps_per_elem = 0;
+  unsigned int _max_qps_per_side = 0;
 
   Array<dof_id_type> _n_subdomain_qps;
   Array<dof_id_type> _n_subdomain_qps_face;

@@ -65,8 +65,8 @@ ADIntegratedBC::computeResidualAndJacobian()
 void
 ADIntegratedBC::dispatch()
 {
-  TeamLaunch launch;
-  launch.league_size = numKokkosBoundarySides();
+  const auto n_items = numKokkosBoundarySides();
+  const auto max_qps = kokkosAssembly().getMaxQpsPerSide();
 
   // A residual alone needs no derivatives, so it evaluates the hooks with plain reals
   if (!_computing_jacobian)
@@ -74,8 +74,7 @@ ADIntegratedBC::dispatch()
     if (!_residual_only_dispatcher)
       _residual_only_dispatcher = DispatcherRegistry::build<ResidualOnlyLoop>(this, type());
 
-    launch.scratch_bytes = ADScratchLayout::bytes(kokkosAssembly().getMaxQpsPerElem(), 0);
-    _residual_only_dispatcher->parallelForTeams(launch);
+    dispatchADTeams(*_residual_only_dispatcher, n_items, max_qps, 0);
   }
   // An object posed on the current configuration, or reading a property that depends on the
   // displacements, dispatches the instantiation whose dual numbers also carry the displacement
@@ -86,18 +85,15 @@ ADIntegratedBC::dispatch()
       _displaced_residual_dispatcher =
           DispatcherRegistry::build<DisplacedResidualLoop>(this, type());
 
-    launch.scratch_bytes = ADScratchLayout::bytes(kokkosAssembly().getMaxQpsPerElem(),
-                                                  _max_ad_slots + AD_DISPLACEMENT_SLOTS);
-    _displaced_residual_dispatcher->parallelForTeams(launch);
+    dispatchADTeams(
+        *_displaced_residual_dispatcher, n_items, max_qps, _max_ad_slots + AD_DISPLACEMENT_SLOTS);
   }
   else
   {
     if (!_residual_dispatcher)
       _residual_dispatcher = DispatcherRegistry::build<ResidualLoop>(this, type());
 
-    launch.scratch_bytes =
-        ADScratchLayout::bytes(kokkosAssembly().getMaxQpsPerElem(), _max_ad_slots);
-    _residual_dispatcher->parallelForTeams(launch);
+    dispatchADTeams(*_residual_dispatcher, n_items, max_qps, _max_ad_slots);
   }
 }
 

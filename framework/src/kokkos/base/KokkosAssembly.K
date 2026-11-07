@@ -95,6 +95,7 @@ Assembly::initQuadrature()
   // Cache quadrature data
 
   _max_qps_per_elem = 0;
+  _max_qps_per_side = 0;
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
@@ -139,6 +140,8 @@ Assembly::initQuadrature()
           _q_points_face(sid, elem_type_id)[side][qp] = qrule_face->qp(qp);
           _weights_face(sid, elem_type_id)[side][qp] = qrule_face->w(qp);
         }
+
+        _max_qps_per_side = std::max(_max_qps_per_side, qrule_face->n_points());
       }
 
       _max_qps_per_elem = std::max(_max_qps_per_elem, qrule->n_points());

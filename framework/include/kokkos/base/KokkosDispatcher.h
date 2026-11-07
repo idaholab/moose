@@ -79,6 +79,14 @@ public:
   {
     mooseError("parallelForTeams() called for an instance that is not a team dispatcher.");
   }
+  /**
+   * Get the largest team size with which this functor can be dispatched
+   * @param launch The team launch, whose scratch size limits the team size
+   */
+  virtual unsigned int teamSizeMax(const TeamLaunch & /* launch */) const
+  {
+    mooseError("teamSizeMax() called for an instance that is not a team dispatcher.");
+  }
 };
 
 /**
@@ -161,14 +169,18 @@ public:
 
   void parallelForTeams(const TeamLaunch & launch) override final
   {
-    auto policy = launch.team_size ? TeamPolicy<Operation>(launch.league_size, launch.team_size)
-                                   : TeamPolicy<Operation>(launch.league_size, ::Kokkos::AUTO);
-
-    if (launch.scratch_bytes)
-      policy.set_scratch_size(0, ::Kokkos::PerTeam(launch.scratch_bytes));
-
-    ::Kokkos::parallel_for(policy, *this);
+    ::Kokkos::parallel_for(policy(launch), *this);
     ::Kokkos::fence();
+  }
+
+  unsigned int teamSizeMax(const TeamLaunch & launch) const override final
+  {
+    // A host backend rejects a policy whose team size exceeds its maximum, so the query policy
+    // leaves the team size to the backend
+    auto query = launch;
+    query.team_size = 0;
+
+    return policy(query).team_size_max(*this, ::Kokkos::ParallelForTag());
   }
 
   KOKKOS_FUNCTION void operator()(const Operation & operation,
@@ -178,6 +190,20 @@ public:
   }
 
 private:
+  /**
+   * Build the team policy of a launch
+   */
+  static TeamPolicy<Operation> policy(const TeamLaunch & launch)
+  {
+    auto policy = launch.team_size ? TeamPolicy<Operation>(launch.league_size, launch.team_size)
+                                   : TeamPolicy<Operation>(launch.league_size, ::Kokkos::AUTO);
+
+    if (launch.scratch_bytes)
+      policy.set_scratch_size(0, ::Kokkos::PerTeam(launch.scratch_bytes));
+
+    return policy;
+  }
+
   const Object & _functor_host;
   const Object _functor_device;
 };

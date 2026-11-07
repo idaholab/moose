@@ -78,6 +78,40 @@ ResidualObject::ResidualObject(const ResidualObject & object)
 }
 
 void
+ResidualObject::dispatchADTeams(DispatcherBase & dispatcher,
+                                const ThreadID n_items,
+                                const unsigned int max_qps,
+                                const unsigned int slots) const
+{
+  if (!n_items)
+    return;
+
+  TeamLaunch launch;
+  const auto max_groups_scratch = std::max<std::size_t>(
+      1, TeamPolicy<ResidualLoop>::scratch_size_max(0) / ADScratchLayout::bytes(max_qps, slots));
+
+  // Fill a team of the target size with groups, within the scratch limit and the item count
+  auto shape = [&](const unsigned int team_size)
+  {
+    const auto group_size = ADTeamGroup::groupSize(max_qps, team_size);
+    const auto groups = static_cast<unsigned int>(std::min<std::size_t>(
+        {std::max(1u, team_size / group_size), max_groups_scratch, n_items}));
+
+    launch.team_size = group_size * groups;
+    launch.league_size = (n_items + groups - 1) / groups;
+    launch.scratch_bytes = ADScratchLayout::bytes(max_qps, slots, groups);
+  };
+
+  shape(ADTeamGroup::target_team_size);
+
+  // Registers and scratch may cap the team size below the target
+  if (const auto team_size_max = dispatcher.teamSizeMax(launch); launch.team_size > team_size_max)
+    shape(team_size_max);
+
+  dispatcher.parallelForTeams(launch);
+}
+
+void
 ResidualObject::dispatchDisplacementJacobian(const ThreadID league_size, const bool vector)
 {
   if (!_displacement_jacobian_dispatcher)
