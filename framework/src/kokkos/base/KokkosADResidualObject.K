@@ -133,7 +133,7 @@ ADSlotSetup::assignSlots(const MooseObject & object,
   // Inputs of the AD material properties that the object reads, other than displacements, share
   // the slot blocks of the accessors reading the same quantity. Displacement inputs map to the
   // displacement slots, which the object carries when it is displaced or when a property it reads
-  // depends on the displacements.
+  // depends on the displacements, provided that a displacement component is seeded.
   std::vector<std::pair<unsigned int, unsigned int>> displacement_components;
 
   if (displacements.coupled())
@@ -180,10 +180,6 @@ ADSlotSetup::assignSlots(const MooseObject & object,
 
   if (!displacement_components.empty())
   {
-    // The displacement slots follow the max_ad_slots of the accessors, so that their position is
-    // the same for every object of a class
-    _table.reserve(max_slots);
-
     std::vector<bool> seeded_components(displacement_components.size());
     for (const auto c : index_range(displacement_components))
     {
@@ -197,7 +193,17 @@ ADSlotSetup::assignSlots(const MooseObject & object,
         seeded_components[c] = !ivar || seeded(*ivar, sys, var);
     }
 
-    _table.addDisplacements(displacement_components, seeded_components);
+    // Unseeded displacements carry no derivatives. Without displacement slots the object
+    // dispatches the narrower instantiation, whose plain geometry already includes the
+    // displacements.
+    if (std::find(seeded_components.begin(), seeded_components.end(), true) !=
+        seeded_components.end())
+    {
+      // The displacement slots follow the max_ad_slots of the accessors, so that their position is
+      // the same for every object of a class
+      _table.reserve(max_slots);
+      _table.addDisplacements(displacement_components, seeded_components);
+    }
   }
 
   if (mesh)

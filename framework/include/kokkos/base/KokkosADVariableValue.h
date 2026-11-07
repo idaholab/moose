@@ -124,7 +124,8 @@ public:
   void reserve(const unsigned int first) { _num_slots = std::max(_num_slots, first); }
   /**
    * Register the displacements of the current configuration, whose values and reference gradients
-   * occupy the AD_DISPLACEMENT_SLOTS slots following those of the accessors
+   * occupy the AD_DISPLACEMENT_SLOTS slots following those of the accessors. Register them only
+   * when at least one component is seeded.
    * @param components The system and variable numbers of each displacement component
    * @param seeded Whether each component carries derivatives, which holds for the nonlinear
    * displacements of the residual system that the coupling matrix couples to the residual variable
@@ -258,9 +259,9 @@ private:
 
 /**
  * The datum of a pointwise AD object, which fixes the number of derivative slots of its dual
- * numbers. On the current configuration it also carries the geometry as dual numbers whose
- * derivatives with respect to the displacement slots give the variation of the geometry, so that
- * every quantity computed from it carries its displacement derivatives.
+ * numbers. On the current configuration with displacement slots it also carries the geometry as
+ * dual numbers whose derivatives with respect to the displacement slots give the variation of the
+ * geometry, so that every quantity computed from it carries its displacement derivatives.
  * @tparam Base The plain datum: AssemblyDatum for residual objects, which assemble against test
  * and trial functions, and Datum for materials
  * @tparam slots The number of derivative slots

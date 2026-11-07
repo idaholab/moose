@@ -70,7 +70,7 @@ ADIntegratedBC::dispatch()
 
   // An object posed on the current configuration, or reading a property that depends on the
   // displacements, dispatches the instantiation whose dual numbers also carry the displacement
-  // slots
+  // slots, provided that a displacement component is seeded
   if (_ad_slots.hasDisplacements())
   {
     if (!_displaced_residual_dispatcher)

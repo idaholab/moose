@@ -236,7 +236,8 @@ KOKKOS_FUNCTION void
 ADMaterial::dispatchADProperties(const Datum & datum, const Derived & material) const
 {
   // A material on the current configuration, or reading a property that depends on the
-  // displacements, evaluates the instantiation whose dual numbers also carry the displacement slots
+  // displacements, evaluates the instantiation whose dual numbers also carry the displacement
+  // slots, provided that a displacement component is seeded
   if (_ad_slots.hasDisplacements())
     computeADProperties<Derived, Derived::max_ad_slots + AD_DISPLACEMENT_SLOTS>(datum, material);
   else

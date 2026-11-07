@@ -60,6 +60,26 @@
       compute_devices = 'cpu cuda'
     []
   []
+  [ad_auxiliary]
+    requirement = 'The Kokkos system shall assemble by automatic differentiation the residuals and Jacobians of kernels, boundary conditions, and materials posed on the current configuration of auxiliary displacements,'
+    design = 'KokkosADMatDiffusion.md KokkosADCoupledVarNeumannBC.md'
+    [solution]
+      type = CSVDiff
+      input = 'kokkos_current_configuration_ad_auxiliary.i'
+      csvdiff = 'kokkos_current_configuration_ad_auxiliary_out.csv'
+      detail = 'matching the solution of hand-coded objects, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [jacobian]
+      type = PetscJacobianTester
+      input = 'kokkos_current_configuration_ad_auxiliary.i'
+      cli_args = 'Materials/k/b=0.5 BCs/u_flux/v=u Outputs/csv=false'
+      detail = 'with exact Jacobians.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
   [vector_jacobian]
     requirement = 'The Kokkos system shall assemble exact Jacobians, including the derivatives with respect to the displacements, of vector kernels and boundary conditions posed on the current configuration, covering gradient, curl, coupled vector, and value terms'
     design = 'KokkosVectorDiffusion.md KokkosVectorNeumannBC.md'
