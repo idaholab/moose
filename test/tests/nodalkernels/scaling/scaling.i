@@ -1,3 +1,5 @@
+AD = ''
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -15,7 +17,7 @@
     coeff = 2
   []
   [reaction]
-    type = ReactionNodalKernel
+    type = ${AD}ReactionNodalKernel
     variable = u
     coeff = 2
   []

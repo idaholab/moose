@@ -198,8 +198,8 @@ NavierStokesProblem::setupLSCMatrices(PC schur_pc)
   Mat global_Q = nullptr;
   if (_have_mass_matrix)
   {
-    auto & sparse_mass_mat = _current_nl_sys->getMatrix(massMatrixTagID());
-    if (_current_nl_sys->system().has_static_condensation())
+    auto & sparse_mass_mat = currentNonlinearSystem().getMatrix(massMatrixTagID());
+    if (currentNonlinearSystem().system().has_static_condensation())
       global_Q = cast_ref<const libMesh::PetscMatrixBase<Number> &>(
                      cast_ref<libMesh::StaticCondensation &>(sparse_mass_mat).get_condensed_mat())
                      .mat();
@@ -211,9 +211,9 @@ NavierStokesProblem::setupLSCMatrices(PC schur_pc)
   // and is required for Olshanskii LSC preconditioning
   Mat global_L = nullptr;
   if (_have_L_matrix)
-    global_L =
-        cast_ref<libMesh::PetscMatrixBase<Number> &>(_current_nl_sys->getMatrix(LMatrixTagID()))
-            .mat();
+    global_L = cast_ref<libMesh::PetscMatrixBase<Number> &>(
+                   currentNonlinearSystem().getMatrix(LMatrixTagID()))
+                   .mat();
 
   //
   // Process down from our system matrices to the sub-matrix containing the velocity-pressure dofs

@@ -54,6 +54,11 @@ public:
   virtual bool computesJacobian() const { return true; }
 
 protected:
+  /**
+   * User Jacobian interface
+   */
+  virtual Real computeQpJacobian() { mooseError(type(), " must implement 'computeQpJacobian'"); }
+
   /// Scalar variable
   MooseVariableScalar & _var;
 
