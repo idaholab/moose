@@ -24,8 +24,8 @@ VectorTimeKernelValue::validParams()
 
 VectorTimeKernelValue::VectorTimeKernelValue(const InputParameters & parameters)
   : VectorKernelValue(parameters),
-    _u_dot(_var, Moose::SOLUTION_DOT_TAG),
-    _du_dot_du(_var.sys().duDotDu(_var.number()))
+    _u_dot(*_vars[0], Moose::SOLUTION_DOT_TAG),
+    _du_dot_du(_vars[0]->sys().duDotDu(_vars[0]->number()))
 {
 }
 

@@ -24,7 +24,7 @@ ADTimeKernel::validParams()
 }
 
 ADTimeKernel::ADTimeKernel(const InputParameters & parameters)
-  : ADKernel(parameters), _u_dot(_var, Moose::SOLUTION_DOT_TAG)
+  : ADKernel(parameters), _u_dot(_vars, Moose::SOLUTION_DOT_TAG)
 {
 }
 

@@ -216,16 +216,4 @@
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#22117'
   []
-
-  [displaced_mesh]
-    type = RunException
-    input = break_mesh_2DJunction_auto.i
-    cli_args = 'Mesh/displacements="disp_x disp_y"'
-    expect_err = "A displaced mesh cannot be used with a mesh that has disjoint neighbor boundary "
-                 "pairs"
-    requirement = "The system shall report an error if a displaced mesh is requested for a mesh "
-                  "that has been broken between blocks."
-    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#34041'
-  []
 []

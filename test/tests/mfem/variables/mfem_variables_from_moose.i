@@ -57,42 +57,42 @@
 [VectorPostprocessors]
   [point_sample_h1]
     type = MFEMVariablePointValueSampler
-    variable = 'h1'
+    variables = 'h1'
     points = '2.12 0.01 0.125'
   []
   [point_sample_h1_3]
     type = MFEMVariablePointValueSampler
-    variable = 'h1_3'
+    variables = 'h1_3'
     points = '2.12 0.01 0.125'
   []
   [point_sample_hcurl]
     type = MFEMVariablePointValueSampler
-    variable = 'hcurl'
+    variables = 'hcurl'
     points = '2.12 0.01 0.125'
   []
   [point_sample_hdiv]
     type = MFEMVariablePointValueSampler
-    variable = 'hdiv'
+    variables = 'hdiv'
     points = '2.12 0.01 0.125'
   []
   [point_sample_l2]
     type = MFEMVariablePointValueSampler
-    variable = 'l2'
+    variables = 'l2'
     points = '2.12 0.01 0.125'
   []
   [point_sample_l2_3]
     type = MFEMVariablePointValueSampler
-    variable = 'l2_3'
+    variables = 'l2_3'
     points = '2.12 0.01 0.125'
   []
   [point_sample_l2_aux]
     type = MFEMVariablePointValueSampler
-    variable = 'l2_aux'
+    variables = 'l2_aux'
     points = '2.12 0.01 0.125'
   []
   [point_sample_l2_3_aux]
     type = MFEMVariablePointValueSampler
-    variable = 'l2_3_aux'
+    variables = 'l2_3_aux'
     points = '2.12 0.01 0.125'
   []
 []

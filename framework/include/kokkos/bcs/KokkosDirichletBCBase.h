@@ -64,7 +64,9 @@ public:
 
 protected:
   using Base::_kokkos_var;
+  using Base::_thread;
   using Base::_u;
+  using Base::_vars;
   using Base::kokkosAssembly;
   using Base::kokkosBoundaryNodeID;
   using Base::kokkosSystem;
@@ -87,14 +89,16 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 DirichletBCBaseTempl<is_ad>::operator()(PresetLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto node = kokkosBoundaryNodeID(tid);
-  auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto dof = sys.getNodeLocalDofIndex(node, 0, _kokkos_var.var());
+  auto comp = _thread(tid, 0);
+  auto node = kokkosBoundaryNodeID(_thread(tid, 1));
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
+  auto dof = sys.getNodeLocalDofIndex(node, 0, _kokkos_var.var(comp));
 
   if (dof == libMesh::DofObject::invalid_id)
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(
+      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(comp), comp);
 
   sys.getVectorDofValue(dof, _solution_tag) = bc.computeValue(0, datum);
 }

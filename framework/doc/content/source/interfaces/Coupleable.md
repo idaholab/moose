@@ -40,8 +40,8 @@ The following tables summarize the methods it provides.
 | :--- | :--- |
 `coupledVectorValue`‡§ | Value of a coupled vector variable at q-points
 `coupledVectorGradient`‡§ | Gradient of a coupled vector variable at q-points
-`coupledCurl`‡ | Curl of a coupled vector variable at q-points
-`coupledDiv`‡ | Divergence of a coupled vector variable at q-points
+`coupledCurl`‡§ | Curl of a coupled vector variable at q-points
+`coupledDiv`‡§ | Divergence of a coupled vector variable at q-points
 `coupledVectorDot`†§ | Time derivative of a coupled vector variable at q-points
 `coupledVectorDotDot`† | Second time derivative of a coupled vector variable at q-points
 `coupledVectorDotDu` | Derivative with regards to the variable of the time derivative of a coupled vector variable at q-points

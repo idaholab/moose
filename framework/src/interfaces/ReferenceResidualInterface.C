@@ -39,6 +39,11 @@ ReferenceResidualInterface::validParams()
       "converge_on",
       {},
       "If supplied, use only these variables in the individual variable convergence check");
+  params.addParam<std::map<std::string, Real>>(
+      "variable_nl_abs_tol",
+      {},
+      "Pairs of a variable name and the absolute tolerance that replaces nl_abs_tol in that "
+      "variable's convergence check. Variables in a group must have the same tolerance.");
   params.addParam<bool>("unscale_the_residual",
                         false,
                         "If set to true, utilize the variable specific residual scalar to unscale "
@@ -82,7 +87,8 @@ ReferenceResidualInterface::validParams()
   params.addParamNamesToGroup("acceptable_iterations acceptable_multiplier",
                               "Acceptable convergence");
   params.addParamNamesToGroup("reference_vector", "Reference residual");
-  params.addParamNamesToGroup("group_variables", "Variables to check for convergence");
+  params.addParamNamesToGroup("group_variables variable_nl_abs_tol",
+                              "Variables to check for convergence");
 
   return params;
 }
