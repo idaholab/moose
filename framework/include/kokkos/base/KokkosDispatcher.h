@@ -661,12 +661,14 @@ registerADResidualObjectDispatchers(const std::string & objectname)
                 "each coupled value and three for each coupled gradient.");
 
   // Team AD objects are also compiled with the displacement slots of the current configuration,
-  // and dispatch the instantiation matching their configuration
+  // and dispatch the instantiation matching their configuration. A residual alone is compiled
+  // without slots, in a kernel of its own.
   if constexpr (Object::uses_team_dispatch)
   {
     DispatcherRegistry::addTeamDispatcher<typename Object::ResidualLoop, Object>(objectname);
     DispatcherRegistry::addTeamDispatcher<typename Object::DisplacedResidualLoop, Object>(
         objectname);
+    DispatcherRegistry::addTeamDispatcher<typename Object::ResidualOnlyLoop, Object>(objectname);
   }
   else
     DispatcherRegistry::addDispatcher<typename Object::ResidualLoop, Object>(objectname);

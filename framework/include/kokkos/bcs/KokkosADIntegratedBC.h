@@ -41,7 +41,9 @@ namespace Moose::Kokkos
  * getKokkosADMaterialProperty(), carries the derivatives with respect to the inputs of its
  * declaring material: those coupled to the BC variable share the slots of the accessors reading
  * the same quantities and count toward max_ad_slots, and a dependence on the displacements selects
- * the instantiation carrying the displacement slots even on the reference configuration.
+ * the instantiation carrying the displacement slots even on the reference configuration. A residual
+ * computed without the Jacobian instantiates the hooks with zero slots, where DenseADReal<0> is
+ * Real.
  */
 class ADIntegratedBC : public IntegratedBCBase
 {
@@ -57,6 +59,12 @@ public:
    * configuration
    */
   struct DisplacedResidualLoop
+  {
+  };
+  /**
+   * Kokkos function tag of the residual alone, whose hooks are evaluated with plain reals
+   */
+  struct ResidualOnlyLoop
   {
   };
 
@@ -80,6 +88,13 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(DisplacedResidualLoop,
                                   const TeamMember<DisplacedResidualLoop> & team,
+                                  const Derived & bc) const;
+  /**
+   * The team operation called by Kokkos for each boundary side when only the residual is computed
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(ResidualOnlyLoop,
+                                  const TeamMember<ResidualOnlyLoop> & team,
                                   const Derived & bc) const;
 
   /**
@@ -236,6 +251,25 @@ ADIntegratedBC::operator()(DisplacedResidualLoop,
 
   assembleADTerms<Derived::max_ad_slots + AD_DISPLACEMENT_SLOTS>(
       bc, team, datum, _ad_slots, _computing_residual, _computing_jacobian);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+ADIntegratedBC::operator()(ResidualOnlyLoop,
+                           const TeamMember<ResidualOnlyLoop> & team,
+                           const Derived & bc) const
+{
+  auto [elem, side] = kokkosBoundaryElementSideID(team.league_rank());
+
+  AssemblyDatum datum(elem,
+                      side,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      _kokkos_var.var(),
+                      _configuration);
+
+  assembleADTerms<0>(bc, team, datum, _ad_slots, true, false);
 }
 
 } // namespace Moose::Kokkos

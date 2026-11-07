@@ -194,6 +194,7 @@ The accessors are created in the constructor with `adValue()`, `adGradient()`, a
 During initial setup, each accessor of a nonlinear variable that the coupling matrix couples to the kernel variable receives its derivative directions; every other accessor, such as one reading an auxiliary variable, a constant, or a variable whose coupling the preconditioner omits, returns its value without derivatives.
 The Jacobian therefore contains exactly the blocks the coupling matrix requests.
 An object whose accessors receive more directions than its `max_ad_slots` errors during setup.
+A residual computed without the Jacobian instantiates the hooks with zero slots, where `DenseADReal<0>` is `Real`, so the hooks must also compile for `slots = 0`.
 
 An AD kernel or integrated boundary condition with `use_displaced_mesh = true` is posed on the current configuration.
 Its hooks are then instantiated with `max_ad_slots` plus the directions of the displacements, the value and reference gradient of each component, and the geometry of the current configuration, which the accessors and the base class compose from the dual deformation gradient, carries the derivatives with respect to the displacements.

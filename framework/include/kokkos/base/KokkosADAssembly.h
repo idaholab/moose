@@ -32,6 +32,9 @@ namespace Moose::Kokkos
  * variation of the test function gradient with the displacements is carried by the derivatives of
  * the mapped coefficient. The trial functions of the slot blocks are taken on the reference
  * configuration, where the gradient slots are defined.
+ *
+ * Without slots only the residual is assembled, which does not read the map. The map is then
+ * omitted, and one padding real follows the term set.
  */
 struct ADScratchLayout
 {
@@ -39,12 +42,13 @@ struct ADScratchLayout
   static constexpr unsigned int term_size = 4;
 
   /**
-   * Get the number of reals stored per quadrature point
+   * Get the number of reals stored per quadrature point. The count is odd, so that the stores of
+   * the quadrature points of a warp fall in distinct shared memory banks.
    * @param slots The number of derivative slots
    */
   KOKKOS_FUNCTION static constexpr unsigned int qpSize(unsigned int slots)
   {
-    return term_size * (1 + slots) + map_size;
+    return slots ? term_size * (1 + slots) + map_size : term_size + 1;
   }
   /**
    * Get the offset of the inverse of the reference map Jacobian within the entries of a
@@ -158,10 +162,13 @@ evaluateADTerms(const Object & object,
       storeADCoefficient<slots>(scratch, 1 + k, grad(k));
   }
 
-  const auto & dxi_dx = datum.reference_dxi_dx(qp);
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
-      scratch[ADScratchLayout::mapOffset(slots) + 3 * i + j] = dxi_dx(i, j);
+  if constexpr (slots > 0)
+  {
+    const auto & dxi_dx = datum.reference_dxi_dx(qp);
+    for (unsigned int i = 0; i < 3; ++i)
+      for (unsigned int j = 0; j < 3; ++j)
+        scratch[ADScratchLayout::mapOffset(slots) + 3 * i + j] = dxi_dx(i, j);
+  }
 }
 
 /**

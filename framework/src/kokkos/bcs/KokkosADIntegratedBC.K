@@ -68,10 +68,19 @@ ADIntegratedBC::dispatch()
   TeamLaunch launch;
   launch.league_size = numKokkosBoundarySides();
 
+  // A residual alone needs no derivatives, so it evaluates the hooks with plain reals
+  if (!_computing_jacobian)
+  {
+    if (!_residual_only_dispatcher)
+      _residual_only_dispatcher = DispatcherRegistry::build<ResidualOnlyLoop>(this, type());
+
+    launch.scratch_bytes = ADScratchLayout::bytes(kokkosAssembly().getMaxQpsPerElem(), 0);
+    _residual_only_dispatcher->parallelForTeams(launch);
+  }
   // An object posed on the current configuration, or reading a property that depends on the
   // displacements, dispatches the instantiation whose dual numbers also carry the displacement
   // slots, provided that a displacement component is seeded
-  if (_ad_slots.hasDisplacements())
+  else if (_ad_slots.hasDisplacements())
   {
     if (!_displaced_residual_dispatcher)
       _displaced_residual_dispatcher =
