@@ -70,9 +70,7 @@
   [LOBPCG]
     type = MFEMHypreLOBPCG
     preconditioner = boomeramg
-    print_level = 0
-    l_tol = 1e-8
-    l_max_its = 100
+    print_level = 1
     random_seed = 77 # decent reproducibility across runtime configs
   []
 []
