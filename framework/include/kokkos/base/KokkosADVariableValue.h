@@ -425,12 +425,23 @@ public:
   }
 
 private:
+  /// Geometry of the current configuration at the quadrature point evaluated last
+  struct GeometryCache
+  {
+    /// Quadrature point of the cached geometry
+    unsigned int qp = libMesh::invalid_uint;
+    /// Cached geometry
+    ADGeometry geometry;
+  };
+  /// Placeholder of the cache in an instantiation without the displacement slots
+  struct NoGeometryCache
+  {
+  };
+
   /// Slot table of the object
   const ADSlotTable & _table;
-  /// Quadrature point of the cached dual geometry
-  unsigned int _ad_cached_qp = libMesh::invalid_uint;
-  /// Cached geometry of the current configuration
-  ADGeometry _ad_geometry;
+  /// Cached geometry, which only the instantiation carrying the displacement slots reads
+  std::conditional_t<(slots >= AD_DISPLACEMENT_SLOTS), GeometryCache, NoGeometryCache> _ad_cache;
 };
 
 template <typename Base, unsigned int slots>
@@ -439,10 +450,10 @@ ADDatumBase<Base, slots>::adGeometry(const unsigned int qp)
 {
   KOKKOS_ASSERT(!this->isNodal());
 
-  if (_ad_cached_qp == qp)
-    return _ad_geometry;
+  if (_ad_cache.qp == qp)
+    return _ad_cache.geometry;
 
-  auto & g = _ad_geometry;
+  auto & g = _ad_cache.geometry;
 
   // The plain datum composes the deformation gradient into its geometry on the current
   // configuration
@@ -468,7 +479,7 @@ ADDatumBase<Base, slots>::adGeometry(const unsigned int qp)
                         : sys.getVectorQpValueFace(this->_elem, this->_side, qp, var, tag);
   }
 
-  _ad_cached_qp = qp;
+  _ad_cache.qp = qp;
 
   return g;
 }
