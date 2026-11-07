@@ -68,17 +68,13 @@ ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(const unsi
   const Point di = _dir[0];
   const Point ni = di * din;
 
-  const auto & rhoV = _cached_junction_var_values[VolumeJunction1Phase::RHOV_INDEX];
-  const auto & rhouV = _cached_junction_var_values[VolumeJunction1Phase::RHOUV_INDEX];
-  const auto & rhovV = _cached_junction_var_values[VolumeJunction1Phase::RHOVV_INDEX];
-  const auto & rhowV = _cached_junction_var_values[VolumeJunction1Phase::RHOWV_INDEX];
-  const auto & rhoEV = _cached_junction_var_values[VolumeJunction1Phase::RHOEV_INDEX];
-
-  const ADReal vJ = THM::v_from_rhoA_A(rhoV, _volume);
-  const ADRealVectorValue rhouV_vec(rhouV, rhovV, rhowV);
-  const ADReal rhouV2 = rhouV_vec * rhouV_vec;
-  const ADReal eJ = rhoEV / rhoV - 0.5 * rhouV2 / (rhoV * rhoV);
-  const ADReal pJ = _fp.p_from_v_e(vJ, eJ);
+  // The wall pressure term of VolumeJunction1Phase is removed here and replaced by the one of
+  // finalize(). The junction pressure at the face is the same one used in computeResidual().
+  const Real g_dot_dxJ =
+      _use_hydrostatic_correction ? _gravity_vector * (_q_point[0] - _position) : 0.0;
+  ADReal rhoJ, eJ, pJ;
+  ADRealVectorValue uvecJ;
+  computeJunctionSolution(g_dot_dxJ, rhoJ, uvecJ, eJ, pJ);
 
   _residual[VolumeJunction1Phase::RHOUV_INDEX] -= pJ * ni(0) * _A_linear[0];
   _residual[VolumeJunction1Phase::RHOVV_INDEX] -= pJ * ni(1) * _A_linear[0];
@@ -86,7 +82,11 @@ ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(const unsi
 
   if (c == 0)
   {
-    if (MooseUtils::absoluteFuzzyEqual(_rhouA[0], 0))
+    if (_use_hydrostatic_correction)
+      // The inlet and outlet groups are formed by the side of the junction, see below, so the
+      // flow direction of the wall term is the direction of the first connection.
+      _d_flow = _dir_c0;
+    else if (MooseUtils::absoluteFuzzyEqual(_rhouA[0], 0))
       _d_flow = _dir[0];
     else
       // FIXME: _d_flow should be again ADRealVectorValue when we have parallel comm on
@@ -101,8 +101,31 @@ ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(const unsi
                "component instead.");
 
   _areas[c] = _A_linear[0];
-  _is_inlet[c] = THM::isOutlet(_rhouA[0], _normal[c]);
-  _stored_pA[c] = _p[0] * _A_linear[0];
+  if (_use_hydrostatic_correction)
+  {
+    // With the hydrostatic correction:
+    // - a connection is an inlet when its flow channel ends on the side of the junction opposite
+    // to the direction of the first connection, whatever the sign of its mass flow rate. The wall
+    // term is the same as before when all channels flow in the same direction, and a fluid at rest
+    // cannot be seen as entering through all connections;
+    // - the wall pressure is the flow channel pressure at the face, from the slope
+    // reconstruction, not the pressure at the cell center.
+    _is_inlet[c] = (ni * _dir_c0) > 0;
+
+    const auto Ui = computeFlowChannelFaceSolution();
+    const ADReal rho = Ui[THMVACE3D::RHOA] / Ui[THMVACE3D::AREA];
+    const ADRealVectorValue rhouA_vec(
+        Ui[THMVACE3D::RHOUA], Ui[THMVACE3D::RHOVA], Ui[THMVACE3D::RHOWA]);
+    const ADReal vel2 = rhouA_vec * rhouA_vec / (Ui[THMVACE3D::RHOA] * Ui[THMVACE3D::RHOA]);
+    const ADReal e = Ui[THMVACE3D::RHOEA] / Ui[THMVACE3D::RHOA] - 0.5 * vel2;
+    const ADReal p_face = _fp.p_from_v_e(1.0 / rho, e);
+    _stored_pA[c] = p_face * _A_linear[0];
+  }
+  else
+  {
+    _is_inlet[c] = THM::isOutlet(_rhouA[0], _normal[c]);
+    _stored_pA[c] = _p[0] * _A_linear[0];
+  }
 }
 
 void
