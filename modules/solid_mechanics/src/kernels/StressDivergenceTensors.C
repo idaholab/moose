@@ -107,6 +107,9 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     _deformation_gradient_old =
         &getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient");
     _rotation_increment = &getMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment");
+    // Provided only on blocks whose strain material applies the volumetric locking correction
+    std::tie(_unlocked_Fhat, _unlocked_Fhat_blocks) = getBlockMaterialProperty<RankTwoTensor>(
+        _base_name + "unlocked_incremental_deformation_gradient");
   }
 
   // Error if volumetric locking correction is turned on for 1D problems
@@ -187,8 +190,13 @@ StressDivergenceTensors::computeJacobian()
   {
     _finite_deform_Jacobian_mult.resize(_qrule->n_points());
 
-    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-      computeFiniteDeformJacobian();
+    _material_lock = _unlocked_Fhat_blocks.count(_current_elem->subdomain_id());
+    _use_locked_jacobian = _volumetric_locking_correction || _material_lock;
+    if (_use_locked_jacobian)
+      computeLockedFiniteDeformJacobian(_component);
+    else
+      for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+        computeFiniteDeformJacobian();
 
     ALEKernel::computeJacobian();
   }
@@ -199,6 +207,12 @@ StressDivergenceTensors::computeJacobian()
 void
 StressDivergenceTensors::computeOffDiagJacobian(const unsigned int jvar)
 {
+  if (jvar == _var.number())
+  {
+    computeJacobian();
+    return;
+  }
+
   if (_volumetric_locking_correction)
   {
     computeAverageGradientPhi();
@@ -209,8 +223,22 @@ StressDivergenceTensors::computeOffDiagJacobian(const unsigned int jvar)
   {
     _finite_deform_Jacobian_mult.resize(_qrule->n_points());
 
-    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-      computeFiniteDeformJacobian();
+    _material_lock = _unlocked_Fhat_blocks.count(_current_elem->subdomain_id());
+    _use_locked_jacobian = false;
+    if (_volumetric_locking_correction || _material_lock)
+    {
+      // Only couplings to the displacements carry the locked finite deformation Jacobian
+      for (const auto c : make_range(_ndisp))
+        if (jvar == _disp_var[c] && !(_out_of_plane_direction != 2 && c == _out_of_plane_direction))
+        {
+          computeLockedFiniteDeformJacobian(c);
+          _use_locked_jacobian = true;
+          break;
+        }
+    }
+    else
+      for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+        computeFiniteDeformJacobian();
 
     ALEKernel::computeOffDiagJacobian(jvar);
   }
@@ -221,6 +249,9 @@ StressDivergenceTensors::computeOffDiagJacobian(const unsigned int jvar)
 Real
 StressDivergenceTensors::computeQpJacobian()
 {
+  if (_use_locked_jacobian)
+    return _locked_jacobian[_j][_qp].row(_component) * _grad_test[_i][_qp];
+
   if (_use_finite_deform_jacobian)
     return ElasticityTensorTools::elasticJacobian(_finite_deform_Jacobian_mult[_qp],
                                                   _component,
@@ -299,6 +330,9 @@ StressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
           continue;
       }
 
+      if (_use_locked_jacobian)
+        return _locked_jacobian[_j][_qp].row(_component) * _grad_test[_i][_qp];
+
       if (_use_finite_deform_jacobian)
         return ElasticityTensorTools::elasticJacobian(_finite_deform_Jacobian_mult[_qp],
                                                       _component,
@@ -369,6 +403,31 @@ void
 StressDivergenceTensors::computeFiniteDeformJacobian()
 {
   usingTensorIndices(i_, j_, k_, l_);
+
+  // Incremental deformation gradient Fhat
+  const RankTwoTensor Fhat =
+      (*_deformation_gradient)[_qp] * (*_deformation_gradient_old)[_qp].inverse();
+  const RankTwoTensor Fhatinv = Fhat.inverse();
+
+  _finite_deform_Jacobian_mult[_qp] = finiteDeformStressDerivative(Fhat);
+  _finite_deform_Jacobian_mult[_qp] += Fhat.times<j_, k_, i_, l_>(_stress[_qp]);
+
+  const RankFourTensor dFhat_dFhatinv = -Fhat.times<i_, k_, j_, l_>(Fhat.transpose());
+  const RankTwoTensor dJ_dFhatinv = dFhat_dFhatinv.innerProductTranspose(Fhat.ddet());
+
+  // Component from Jacobian derivative
+  _finite_deform_Jacobian_mult[_qp] += _stress[_qp].times<i_, j_, k_, l_>(dJ_dFhatinv);
+
+  // Derivative of Fhatinv w.r.t. undisplaced coordinates
+  const RankTwoTensor Finv = (*_deformation_gradient)[_qp].inverse();
+  const RankFourTensor dFhatinv_dGradu = -Fhatinv.times<i_, k_, j_, l_>(Finv.transpose());
+  _finite_deform_Jacobian_mult[_qp] = _finite_deform_Jacobian_mult[_qp] * dFhatinv_dGradu;
+}
+
+RankFourTensor
+StressDivergenceTensors::finiteDeformStressDerivative(const RankTwoTensor & Fhat) const
+{
+  usingTensorIndices(i_, j_, k_, l_);
   const auto I = RankTwoTensor::Identity();
   const RankFourTensor I2 = I.times<i_, k_, j_, l_>(I);
 
@@ -376,9 +435,6 @@ StressDivergenceTensors::computeFiniteDeformJacobian()
   const RankTwoTensor unrotated_stress =
       (*_rotation_increment)[_qp].transpose() * _stress[_qp] * (*_rotation_increment)[_qp];
 
-  // Incremental deformation gradient Fhat
-  const RankTwoTensor Fhat =
-      (*_deformation_gradient)[_qp] * (*_deformation_gradient_old)[_qp].inverse();
   const RankTwoTensor Fhatinv = Fhat.inverse();
 
   const RankTwoTensor rot_times_stress = (*_rotation_increment)[_qp] * unrotated_stress;
@@ -403,24 +459,109 @@ StressDivergenceTensors::computeFiniteDeformJacobian()
   RankFourTensor drot_dFhatinv = drot_dUhatinv * dUhatinv_dCtilde * dCtilde_dFhatinv;
 
   drot_dFhatinv -= Fhat.times<i_, k_, j_, l_>((*_rotation_increment)[_qp].transpose());
-  _finite_deform_Jacobian_mult[_qp] = dstress_drot * drot_dFhatinv;
+  RankFourTensor dstress_dFhatinv = dstress_drot * drot_dFhatinv;
 
   const RankFourTensor dstrain_increment_dCtilde =
       -0.5 * I2 + 0.25 * (I.times<i_, k_, j_, l_>(Ctilde) + Ctilde.times<i_, k_, j_, l_>(I));
-  _finite_deform_Jacobian_mult[_qp] +=
+  dstress_dFhatinv +=
       rot_rank_four * _Jacobian_mult[_qp] * dstrain_increment_dCtilde * dCtilde_dFhatinv;
-  _finite_deform_Jacobian_mult[_qp] += Fhat.times<j_, k_, i_, l_>(_stress[_qp]);
+  return dstress_dFhatinv;
+}
 
-  const RankFourTensor dFhat_dFhatinv = -Fhat.times<i_, k_, j_, l_>(Fhat.transpose());
-  const RankTwoTensor dJ_dFhatinv = dFhat_dFhatinv.innerProductTranspose(Fhat.ddet());
+void
+StressDivergenceTensors::computeLockedFiniteDeformJacobian(const unsigned int coupled_component)
+{
+  // With G = e_k (x) grad(phi) (current configuration) and dFhat = G Fhat, the material's
+  // rescale Fhat_l = cbrt(det(Fhat_avg) / det(Fhat)) Fhat gives
+  //   dFhat_l = (G + (s - tr(G)) / 3 I) Fhat_l,  s = tr(Fhat_avg^-1 avg(G Fhat)).
+  // The kernel's correction integrates stress_tilde = stress + (p_avg - p) I, with p_avg the
+  // pressure averaged over the current element, so the Jacobian integrand is
+  //   (dstress_tilde - stress_tilde G^T + stress_tilde tr(G)) grad(test).
+  const auto k = coupled_component;
+  const auto nqp = _qrule->n_points();
+  const auto & JxW_undisplaced = _assembly_undisplaced.JxW();
+  const auto & coord_undisplaced = _assembly_undisplaced.coordTransformation();
 
-  // Component from Jacobian derivative
-  _finite_deform_Jacobian_mult[_qp] += _stress[_qp].times<i_, j_, k_, l_>(dJ_dFhatinv);
+  // Unlocked incremental deformation gradient and its element average
+  std::vector<RankTwoTensor> Fhat(nqp);
+  RankTwoTensor Fhat_avg;
+  Real volume_undisplaced = 0.0;
+  for (_qp = 0; _qp < nqp; ++_qp)
+  {
+    Fhat[_qp] = _material_lock
+                    ? (*_unlocked_Fhat)[_qp]
+                    : (*_deformation_gradient)[_qp] * (*_deformation_gradient_old)[_qp].inverse();
+    Fhat_avg += Fhat[_qp] * JxW_undisplaced[_qp] * coord_undisplaced[_qp];
+    volume_undisplaced += JxW_undisplaced[_qp] * coord_undisplaced[_qp];
+  }
+  Fhat_avg /= volume_undisplaced;
+  const RankTwoTensor Fhat_avg_invT = Fhat_avg.inverse().transpose();
 
-  // Derivative of Fhatinv w.r.t. undisplaced coordinates
-  const RankTwoTensor Finv = (*_deformation_gradient)[_qp].inverse();
-  const RankFourTensor dFhatinv_dGradu = -Fhatinv.times<i_, k_, j_, l_>(Finv.transpose());
-  _finite_deform_Jacobian_mult[_qp] = _finite_deform_Jacobian_mult[_qp] * dFhatinv_dGradu;
+  // Locked Fhat^-1, dstress/dFhat^-1 (in _finite_deform_Jacobian_mult), pressure and stress_tilde
+  std::vector<RankTwoTensor> Fhat_l_inv(nqp), stress_tilde(nqp);
+  std::vector<Real> pressure(nqp);
+  Real pressure_avg = 0.0;
+  for (_qp = 0; _qp < nqp; ++_qp)
+  {
+    RankTwoTensor Fhat_l = Fhat[_qp];
+    if (_material_lock)
+      Fhat_l *= std::cbrt(Fhat_avg.det() / Fhat[_qp].det());
+    Fhat_l_inv[_qp] = Fhat_l.inverse();
+    _finite_deform_Jacobian_mult[_qp] = finiteDeformStressDerivative(Fhat_l);
+    pressure[_qp] = _stress[_qp].trace() / 3.0;
+    pressure_avg += pressure[_qp] * _JxW[_qp] * _coord[_qp];
+    stress_tilde[_qp] = _stress[_qp];
+  }
+  pressure_avg /= _current_elem_volume;
+  if (_volumetric_locking_correction)
+    for (_qp = 0; _qp < nqp; ++_qp)
+      stress_tilde[_qp].addIa(pressure_avg - pressure[_qp]);
+
+  std::vector<RankTwoTensor> dstress(nqp), G(nqp);
+  _locked_jacobian.resize(_phi.size());
+  for (_j = 0; _j < _phi.size(); ++_j)
+  {
+    _locked_jacobian[_j].resize(nqp);
+
+    Real s = 0.0;
+    if (_material_lock)
+    {
+      RealVectorValue avg_Fhat_T_grad_phi;
+      for (_qp = 0; _qp < nqp; ++_qp)
+        avg_Fhat_T_grad_phi += Fhat[_qp].transpose() * _grad_phi[_j][_qp] * JxW_undisplaced[_qp] *
+                               coord_undisplaced[_qp];
+      s = (Fhat_avg_invT * avg_Fhat_T_grad_phi)(k) / volume_undisplaced;
+    }
+
+    Real dpressure_avg = 0.0;
+    for (_qp = 0; _qp < nqp; ++_qp)
+    {
+      const RealGradient & grad_phi = _grad_phi[_j][_qp];
+      G[_qp].zero();
+      for (const auto b : make_range(Moose::dim))
+        G[_qp](k, b) = grad_phi(b);
+
+      // dFhat_l^-1 = -Fhat_l^-1 dFhat_l Fhat_l^-1
+      RankTwoTensor dFhat_l_inv = -Fhat_l_inv[_qp] * G[_qp];
+      if (_material_lock)
+        dFhat_l_inv -= (s - grad_phi(k)) / 3.0 * Fhat_l_inv[_qp];
+      dstress[_qp] = _finite_deform_Jacobian_mult[_qp] * dFhat_l_inv;
+
+      dpressure_avg += (dstress[_qp].trace() / 3.0 + (pressure[_qp] - pressure_avg) * grad_phi(k)) *
+                       _JxW[_qp] * _coord[_qp];
+    }
+    dpressure_avg /= _current_elem_volume;
+
+    for (_qp = 0; _qp < nqp; ++_qp)
+    {
+      RankTwoTensor dstress_tilde = dstress[_qp];
+      if (_volumetric_locking_correction)
+        dstress_tilde.addIa(dpressure_avg - dstress[_qp].trace() / 3.0);
+
+      _locked_jacobian[_j][_qp] = dstress_tilde - stress_tilde[_qp] * G[_qp].transpose() +
+                                  stress_tilde[_qp] * G[_qp].trace();
+    }
+  }
 }
 
 void

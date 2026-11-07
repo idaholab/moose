@@ -43,6 +43,11 @@ protected:
   virtual void computeAverageGradientTest();
   virtual void computeAverageGradientPhi();
 
+  /// Derivative of the stress wrt the inverse incremental deformation gradient at the current qp
+  RankFourTensor finiteDeformStressDerivative(const RankTwoTensor & Fhat) const;
+  /// Fill _locked_jacobian for the trial functions of displacement component coupled_component
+  void computeLockedFiniteDeformJacobian(unsigned int coupled_component);
+
   /// Base name of the material system that this kernel applies to
   const std::string _base_name;
 
@@ -52,10 +57,22 @@ protected:
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<RankFourTensor> & _Jacobian_mult;
 
+  /// Per qp: the finite deformation Jacobian multiplier, or dstress/dFhat^-1 for _locked_jacobian
   std::vector<RankFourTensor> _finite_deform_Jacobian_mult;
   const MaterialProperty<RankTwoTensor> * _deformation_gradient;
   const MaterialProperty<RankTwoTensor> * _deformation_gradient_old;
   const MaterialProperty<RankTwoTensor> * _rotation_increment;
+  /// Incremental deformation gradient before the strain material's volumetric locking correction
+  const MaterialProperty<RankTwoTensor> * _unlocked_Fhat = nullptr;
+  /// Blocks on which the strain material provides _unlocked_Fhat
+  std::set<SubdomainID> _unlocked_Fhat_blocks;
+  /// Whether the strain material of the current element applies the volumetric locking correction
+  bool _material_lock = false;
+  /// Whether the current Jacobian uses _locked_jacobian
+  bool _use_locked_jacobian = false;
+  /// Finite deformation Jacobian with volumetric locking per trial function and qp; row
+  /// _component dotted with grad(test) gives the Jacobian entry
+  std::vector<std::vector<RankTwoTensor>> _locked_jacobian;
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
 
   /// An integer corresponding to the direction this kernel acts in
