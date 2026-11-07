@@ -1,0 +1,14 @@
+[Tests]
+  parallel_scheduling = True
+  [5a]
+    issues = '#33413'
+    design = 'PowerLawCreepStressUpdate.md'
+    type = CSVDiff
+    csvdiff = '5a_out.csv'
+    input = '5a.i'
+    requirement = 'The system shall compute 2-D, plane strain, biaxial secondary creep in accordance with the NAFEMS reference solution.'
+    heavy = true
+    recover = false
+    max_parallel = 1
+  []
+[]

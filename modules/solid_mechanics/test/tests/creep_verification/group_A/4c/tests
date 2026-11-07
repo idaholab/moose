@@ -1,0 +1,14 @@
+[Tests]
+  parallel_scheduling = True
+  [4c]
+    issues = '#33413'
+    design = 'PowerLawCreepStressUpdate.md'
+    type = CSVDiff
+    csvdiff = '4c_out.csv'
+    input = '4c.i'
+    requirement = 'The system shall compute 2-D, plane stress, double shear load secondary creep in accordance with the NAFEMS reference solution.'
+    heavy = true
+    recover = false
+    max_parallel = 1
+  []
+[]

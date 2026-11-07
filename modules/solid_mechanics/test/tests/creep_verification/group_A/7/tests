@@ -1,0 +1,25 @@
+[Tests]
+  parallel_scheduling = True
+  [7_elastic]
+    issues = '#33413'
+    design = 'PowerLawCreepStressUpdate.md'
+    type = CSVDiff
+    csvdiff = '7_elastic_points_stress_points_FINAL.csv'
+    input = '7_elastic.i'
+    requirement = 'The system shall compute axisymmetric elastic response under internal pressure in accordance with the NAFEMS reference solution.'
+    heavy = true
+    recover = false
+    max_parallel = 1
+  []
+  [7_inelastic]
+    issues = '#33413'
+    design = 'PowerLawCreepStressUpdate.md'
+    type = CSVDiff
+    csvdiff = '7_inelastic_points_stress_points_FINAL.csv'
+    input = '7_inelastic.i'
+    requirement = 'The system shall compute axisymmetric secondary creep under internal pressure in accordance with the NAFEMS reference solution.'
+    heavy = true
+    recover = false
+    max_parallel = 1
+  []
+[]
