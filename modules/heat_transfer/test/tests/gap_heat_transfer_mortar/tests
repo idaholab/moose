@@ -292,6 +292,32 @@
                "analytical solution for the temperatures at the interface."
     []
   []
+  [pressure_dependent_conductance_errors]
+    design = 'GapFluxModelPressureDependentConduction.md'
+    issues = '#32856'
+    requirement = "The system shall report an error when the pressure-dependent gap conductance is "
+                  "given"
+    [solution_variable_pressure]
+      type = RunException
+      input = 'closed_gap_prescribed_pressure.i'
+      cli_args = "Mesh/allow_renumbering=false AuxVariables/inactive=interface_normal_lm "
+                 "Variables/interface_normal_lm/block=interface_secondary_subdomain "
+                 "Kernels/interface_normal_lm_null/type=NullKernel "
+                 "Kernels/interface_normal_lm_null/variable=interface_normal_lm "
+                 "Kernels/interface_normal_lm_null/block=interface_secondary_subdomain"
+      expect_err = "'contact_pressure' couples the solution variable 'interface_normal_lm'"
+      detail = "a solution variable as the contact pressure, since a contact Lagrange multiplier "
+               "can store a scaled pressure,"
+    []
+    [no_pressure]
+      type = RunException
+      input = 'closed_gap_prescribed_pressure.i'
+      cli_args = "Mesh/allow_renumbering=false UserObjects/closed/contact_pressure=''"
+      expect_err = "Provide the contact pressure through 'contact_pressure_uo' or "
+                   "'contact_pressure'"
+      detail = "or no contact pressure."
+    []
+  []
   [fv]
     requirement = "The system shall be able to incorporate gap heat transfer fluxes from radiation "
                   "and conduction, into a finite volume discretization, via the mortar method"
