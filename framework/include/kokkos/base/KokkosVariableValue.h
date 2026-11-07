@@ -306,7 +306,7 @@ public:
   KOKKOS_FUNCTION auto operator()(AssemblyDatum & datum, unsigned int idx, unsigned int comp) const;
   KOKKOS_FUNCTION auto operator()(AssemblyDatum & datum, unsigned int idx) const
   {
-    return this->operator()(datum, idx, datum.comp());
+    return this->operator()(datum, idx, _var.components() > 1 ? datum.comp() : 0);
   }
   ///@}
 
@@ -400,6 +400,8 @@ VariableValueTempl<is_ad>::get(Datum & datum,
 
   if (_var.coupled())
   {
+    KOKKOS_ASSERT(comp < _var.components());
+
     auto & sys = datum.system(_var.sys(comp));
     auto var = _var.var(comp);
     auto tag = _var.tag();
@@ -534,7 +536,7 @@ public:
   KOKKOS_FUNCTION auto operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp) const;
   KOKKOS_FUNCTION auto operator()(AssemblyDatum & datum, unsigned int qp) const
   {
-    return this->operator()(datum, qp, datum.comp());
+    return this->operator()(datum, qp, _var.components() > 1 ? datum.comp() : 0);
   }
   ///@}
 
@@ -627,6 +629,8 @@ VariableGradientTempl<is_ad>::get(Datum & datum,
 
     auto & elem = datum.elem();
     auto side = datum.side();
+
+    KOKKOS_ASSERT(comp < _var.components());
 
     if constexpr (is_ad)
       grad =
