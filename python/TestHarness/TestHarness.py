@@ -336,8 +336,12 @@ class TestHarness:
             # app_name was specified so without a testroot, we don't
             # know what application to run
             if app_name is None:
-                raise RuntimeError(
-                    f"Failed to find testroot by traversing upwards from {os.getcwd()}"
+                search_dir = os.path.abspath(test_root_dir or os.getcwd())
+                util.errorExit(
+                    f"Failed to find a testroot file in {search_dir} or any directory above it."
+                    "\n\nRun the tests from within an application directory that contains a"
+                    " testroot file, or select one with --test-root/-C.",
+                    colored="--no-color" not in argv,
                 )
             # app_name was specified so just run from this directory
             # without any additional parameters
