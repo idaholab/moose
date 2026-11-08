@@ -160,17 +160,17 @@ CombinerGenerator::generate()
       if (!other_mesh)
         paramError("inputs", _input_names[i], " is not a valid unstructured mesh");
 
-      // We'll be using cached subdomain sets in copyIntoMesh, so our
-      // const inputs need caches ready.
-      if (!other_mesh->preparation().has_cached_elem_data)
-        other_mesh->cache_elem_data();
-
       // Move It
       if (_positions.size())
       {
         MeshTools::Modification::translate(
             *other_mesh, _positions[i](0), _positions[i](1), _positions[i](2));
       }
+
+      // We'll be using cached subdomain sets in copyIntoMesh, so our
+      // const inputs need caches ready.
+      if (!other_mesh->preparation().has_cached_elem_data)
+        other_mesh->cache_elem_data();
 
       MooseMeshUtils::copyIntoMesh(*this,
                                    *mesh,
