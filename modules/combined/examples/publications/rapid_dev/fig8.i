@@ -351,7 +351,7 @@ PR=2
   # global chemical free energy
   [./chemical_free_energy]
     type = DerivativeMultiPhaseMaterial
-    f_name = Fc
+    property_name = Fc
     fi_names = 'Fc1  Fc2  Fc3'
     hi_names = 'h1  h2  h3'
     etas     = 'eta1 eta2 eta3'
@@ -362,7 +362,7 @@ PR=2
   # global elastic free energy
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    f_name = Fe
+    property_name = Fe
     coupled_variables = 'eta2 eta3'
     outputs = exodus
     output_properties = Fe

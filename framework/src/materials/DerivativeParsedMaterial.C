@@ -27,7 +27,7 @@ DerivativeParsedMaterialTempl<is_ad>::DerivativeParsedMaterialTempl(
     const InputParameters & parameters)
   : ParsedMaterialBase(parameters),
     DerivativeParsedMaterialHelperTempl<is_ad>(
-        parameters, VariableNameMappingMode::USE_MOOSE_NAMES, _function_param)
+        parameters, VariableNameMappingMode::USE_MOOSE_NAMES, "expression")
 {
   // Build function, take derivatives, optimize
   functionParse(_function,

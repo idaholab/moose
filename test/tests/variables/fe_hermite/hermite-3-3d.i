@@ -50,7 +50,7 @@
 
   [./solution]
     type = ParsedGradFunction
-    value = (x*x*x)+(y*y*y)+(z*z*z)
+    expression = (x*x*x)+(y*y*y)+(z*z*z)
     grad_x = 3*x*x
     grad_y = 3*y*y
     grad_z = 3*z*z

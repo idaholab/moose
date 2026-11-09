@@ -16,7 +16,7 @@
 [Functions]
   [./bc_fn]
     type = ParsedGradFunction
-    value = -sin(pi*x)*sin(pi*y)
+    expression = -sin(pi*x)*sin(pi*y)
     grad_x = -pi*cos(pi*x)*sin(pi*y)
     grad_y = -pi*sin(pi*x)*cos(pi*y)
   [../]

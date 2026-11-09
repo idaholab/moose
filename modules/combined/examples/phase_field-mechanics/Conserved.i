@@ -149,7 +149,7 @@
     #  0.1 will result in an oversized precipitate
     expression = 0.1*c
     coupled_variables = c
-    f_name = var_dep
+    property_name = var_dep
     enable_jit = true
     derivative_order = 2
   [../]
@@ -170,7 +170,7 @@
   [../]
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    f_name = Fe
+    property_name = Fe
     block = 0
     coupled_variables = 'c'
     derivative_order = 2
