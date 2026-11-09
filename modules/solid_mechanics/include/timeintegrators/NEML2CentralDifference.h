@@ -37,7 +37,8 @@ protected:
   NEML2FEInterpolation * _fe = nullptr;
 
 private:
-  /// Empty element vector to help zero out the algebraic range
+  /// Local elements adjacent to IntegratedBC boundaries; installed as the algebraic
+  /// element range once the NEML2 caches are warm (empty when no IntegratedBCs exist)
   std::vector<const Elem *> _boundary_elems = {};
 
   /// Empty node vector to help zero out the algebraic range
