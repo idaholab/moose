@@ -197,19 +197,18 @@ MFEMProblem::resolveMFEMSolvers()
     if (definition.referenced)
       continue;
 
-    if (auto lin_solver = std::dynamic_pointer_cast<Moose::MFEM::LinearSolverBase>(solver))
+    if (auto linear_solver = std::dynamic_pointer_cast<Moose::MFEM::LinearSolverBase>(solver))
     {
       if (problem_data.jacobian_solver)
         mooseError("Multiple MFEM linear solver drivers provided. '",
                    problem_data.jacobian_solver->name(),
                    "' and '",
-                   lin_solver->name(),
+                   linear_solver->name(),
                    "' are not referenced by another MFEM solver.");
-      problem_data.jacobian_solver = lin_solver;
+      problem_data.jacobian_solver = linear_solver;
     }
     else if (auto nonlinear_solver =
-                 std::dynamic_pointer_cast<Moose::MFEM::NonlinearSolverBase>(solver);
-             nonlinear_solver)
+                 std::dynamic_pointer_cast<Moose::MFEM::NonlinearSolverBase>(solver))
     {
       if (problem_data.nonlinear_solver)
         mooseError("Multiple MFEM nonlinear solver drivers provided. '",
