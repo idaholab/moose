@@ -4,7 +4,7 @@
     input = 'num_dofs.i'
     csvdiff = 'num_dofs_out.csv'
 
-    requirement = 'The NumDOFs Postprocessor shall report the number of degrees of freedom
+    requirement = 'The system shall report, using the NumDOFs Postprocessor, the number of degrees of freedom
                    (DOFS) from one or more equations systems in the simulation.'
     design = '/NumDOFs.md'
     issues = '#2094 #6872'

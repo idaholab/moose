@@ -6,7 +6,7 @@
     type = CSVDiff
     input = 'control.i'
     csvdiff = 'control_out.csv'
-    requirement = "The Control system shall be capable of activating or deactivating AuxScalarKernel objects with time, given identical start end times."
+    requirement = "The system shall, through the Control system, be capable of activating or deactivating AuxScalarKernel objects with time, given identical start end times."
   [../]
 
   [./multi_different_times]
@@ -14,6 +14,6 @@
     type = CSVDiff
     input = 'control_different.i'
     csvdiff = 'control_different_out.csv'
-    requirement = "The Control system shall be capable of activating or deactivating AuxScalarKernel objects with time, given differing start end times."
+    requirement = "The system shall, through the Control system, be capable of activating or deactivating AuxScalarKernel objects with time, given differing start end times."
   [../]
 []

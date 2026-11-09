@@ -5,6 +5,6 @@
     type = RunException
     input = exec_flag_error.i
     expect_err = "The controllable parameter \(MultiApps/sub/cli_args\) is not allowed to execute on 'INITIAL', it is only allowed to execute on 'PRE_MULTIAPP_SETUP'"
-    requirement = "The MOOSE control system shall be capable of restricting parameters to be controlled for specific execution flags."
+    requirement = "The system shall, through the Control system, be capable of restricting parameters to be controlled for specific execution flags."
   []
 []

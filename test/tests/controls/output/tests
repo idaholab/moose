@@ -5,7 +5,7 @@
     type = RunApp
     input = controllable.i
     expect_out = "Controls:.*Active Controls:.*Active Controls:"
-    requirement = "The Control system shall include a means to output information regarding the controlled parameters."
+    requirement = "The system shall, through the Control system, include a means to output information regarding the controlled parameters."
   [../]
   [debug_syntax]
     type = RunApp
@@ -19,7 +19,7 @@
     input = controllable_clear.i
     expect_out = "Controls:.*Active Controls:"
     absent_out = "Controls:.*Active Controls:.*Active Controls:"
-    requirement = "The Control system shall include a means to output information regarding the controlled parameters, including only showing information regarding a parameter if it has changed since the last output."
+    requirement = "The system shall, through the Control system, include a means to output information regarding the controlled parameters, including only showing information regarding a parameter if it has changed since the last output."
   [../]
   [./cli_args]
     type = RunApp
@@ -33,6 +33,6 @@
     type = RunApp
     input = controllable.i
     expect_out = "Active\sObjects:.*Problem::"
-    requirement = "The Control system shall include a means to output information regarding the objects with controllable parameters."
+    requirement = "The system shall, through the Control system, include a means to output information regarding the objects with controllable parameters."
   [../]
 []
