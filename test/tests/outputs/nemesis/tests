@@ -6,7 +6,7 @@
     check_files = 'nemesis_out.n.1.0'
     max_parallel = 1
 
-    requirement = "The Nemesis Output object shall output separate files per process for visualization purposes."
+    requirement = "The system shall output, using the Nemesis Output object, separate files per process for visualization purposes."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
   [../]
@@ -24,7 +24,7 @@
     max_parallel = 4
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
     capabilities = 'petsc>=3.8.0'
-    requirement = "The Nemesis Output object shall support writing elemental variables."
+    requirement = "The system shall support writing, with the Nemesis Output object, elemental variables."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
   [../]
@@ -38,7 +38,7 @@
     max_parallel = 4
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
     capabilities = 'petsc>=3.8.0'
-    requirement = "The Nemesis Output object shall support writing elemental variables with the same numbering on DistributedMesh."
+    requirement = "The system shall support writing, with the Nemesis Output object, elemental variables with the same numbering on DistributedMesh."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
   [../]
@@ -56,7 +56,7 @@
     max_parallel = 4
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
     capabilities = 'petsc>=3.8.0'
-    requirement = "The Nemesis Ouput object shall support writing scalar variables."
+    requirement = "The system shall support writing, with the Nemesis Output object, scalar variables."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
     recover = false
@@ -71,7 +71,7 @@
     max_parallel = 4
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
     capabilities = 'petsc>=3.8.0'
-    requirement = "The Nemesis Ouput object shall support writing scalar variables when using DistributedMesh."
+    requirement = "The system shall support writing, with the Nemesis Output object, scalar variables when using DistributedMesh."
     design = 'syntax/Outputs/index.md'
     issues = '#2122'
     recover = false

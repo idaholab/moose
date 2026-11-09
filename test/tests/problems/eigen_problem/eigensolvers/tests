@@ -7,7 +7,7 @@
     input = 'ipm.i'
     csvdiff = 'ipm_out_eigenvalues_0001.csv'
     capabilities = 'slepc'
-    requirement = "Eigenvalue system should support standard eigenvalue problems"
+    requirement = "The system shall, through the Eigenvalue system, support standard eigenvalue problems"
   [../]
 
   [./gipm_test]
@@ -15,7 +15,7 @@
     input = 'gipm.i'
     csvdiff = 'gipm_out_eigenvalues_0001.csv'
     capabilities = 'slepc'
-    requirement = "Eigenvalue system should support generalized eigenvalue problems"
+    requirement = "The system shall, through the Eigenvalue system, support generalized eigenvalue problems"
   [../]
 
   [./gipm_ibc]
@@ -23,7 +23,7 @@
     input = 'gipm_ibc.i'
     csvdiff = 'gipm_ibc_out_eigenvalues_0001.csv'
     capabilities = 'slepc'
-    requirement = "Eigenvalue system should support IntegratedBC"
+    requirement = "The system shall, through the Eigenvalue system, support IntegratedBC"
   [../]
 
   [./wrong_dirichlet_value_eigen]
@@ -32,7 +32,7 @@
     cli_args = 'BCs/homogeneous/value=1'
     expect_err = "Can.t set an inhomogeneous Dirichlet boundary condition for eigenvalue problems."
     capabilities = 'slepc'
-    requirement = "Eigenvalue system should not allow users to use inhomogeneous nodal boundary conditions"
+    requirement = "The system shall not allow users to use, in the Eigenvalue system, inhomogeneous nodal boundary conditions"
   [../]
 
   [./wrong_NodalBC_type_eigen]
@@ -41,7 +41,7 @@
     cli_args = 'BCs/homogeneous/type=FunctionDirichletBC BCs/homogeneous/function=0'
     expect_err = 'Invalid NodalBC for eigenvalue problems, please use homogeneous \(array\) Dirichlet.'
     capabilities = 'slepc'
-    requirement = "Eigenvalue system should use homogeneous boundary conditions only"
+    requirement = "The system shall, through the Eigenvalue system, use homogeneous boundary conditions only"
   [../]
 
   [./no_slepc]
@@ -50,7 +50,7 @@
     cli_args = 'Executioner/solve_type=NEWTON'
     expect_err = "Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh."
     capabilities = '!slepc'
-    requirement = "Eigenvalue system requires SLEPc installed"
+    requirement = "The system shall require SLEPc to be installed for the Eigenvalue system"
   [../]
 
   [./nonlinear_power]
@@ -59,7 +59,7 @@
     cli_args = 'Executioner/solve_type=NONLINEAR_POWER Executioner/matrix_free=true Outputs/file_base=nonlinear_power'
     csvdiff = 'nonlinear_power_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.8.0'
-    requirement = "Eigenvalue system should be able to solve a nonlinear eigenvalue problem"
+    requirement = "The system shall, through the Eigenvalue system, be able to solve a nonlinear eigenvalue problem"
   [../]
 
   [./monolith_newton]
@@ -68,7 +68,7 @@
     cli_args = 'Executioner/solve_type=NEWTON Executioner/matrix_free=true Outputs/file_base=monolith_newton'
     csvdiff = 'monolith_newton_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.8.0'
-    requirement = "Eigenvalue system should be able to solve a nonlinear eigenvalue problem using Newton"
+    requirement = "The system shall, through the Eigenvalue system, be able to solve a nonlinear eigenvalue problem using Newton"
   [../]
 
   [nonlinear_hanging_nodes]
@@ -85,7 +85,7 @@
     input = 'ne_deficient_b.i'
     csvdiff = 'ne_deficient_b_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.8.0'
-    requirement = "Eigenvalue system should be able to solve a deficient eigenvalue problem"
+    requirement = "The system shall, through the Eigenvalue system, be able to solve a deficient eigenvalue problem"
   [../]
 
   [./nonlinear_laplace]
@@ -93,7 +93,7 @@
     input = 'ane.i'
     csvdiff = 'ane_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.8.0'
-    requirement = "Eigenvalue system should be able to compute a nonlinear eigenvalue problem"
+    requirement = "The system shall, through the Eigenvalue system, be able to compute a nonlinear eigenvalue problem"
   [../]
 
   [./coupled_system]
@@ -101,7 +101,7 @@
     input = 'ne_coupled.i'
     csvdiff = 'ne_coupled_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.8.0'
-    requirement = "Eigenvalue system should be able to compute a coupled nonlinear eigenvalue problem"
+    requirement = "The system shall, through the Eigenvalue system, be able to compute a coupled nonlinear eigenvalue problem"
   [../]
 
   [./eigen_scalar_kernel]
@@ -109,7 +109,7 @@
     input = 'scalar.i'
     csvdiff = 'scalar_out_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.8.0'
-    requirement = "Eigenvalue system should be able to handle scalar kernels"
+    requirement = "The system shall, through the Eigenvalue system, be able to handle scalar kernels"
   [../]
 
   [./dg_krylovschur]
@@ -117,7 +117,7 @@
     input = 'dg_krylovschur.i'
     csvdiff = 'dg_krylovschur_out_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.8.0'
-    requirement = "Eigenvalue system should be able to handle DG kernels"
+    requirement = "The system shall, through the Eigenvalue system, be able to handle DG kernels"
   []
 
   [./eigen_as_parent]
@@ -126,7 +126,7 @@
     csvdiff = 'ne_coupled_picard_out_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.12.0'
     issues = "#15513"
-    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a parent."
+    requirement = "The system shall, through the Eigenvalue system, support Picard iteration using eigenvalue executioner as a parent."
   []
 
   [./eigen_as_parent_exodus]
@@ -136,7 +136,7 @@
     prereq = 'eigen_as_parent'
     capabilities = 'slepc>=3.12.0'
     issues = "#15513"
-    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a parent and output eigen vectors as an exodus file."
+    requirement = "The system shall, through the Eigenvalue system, support Picard iteration using eigenvalue executioner as a parent and output eigen vectors as an exodus file."
   []
 
   [./eigen_as_sub]
@@ -145,7 +145,7 @@
     csvdiff = 'ne_coupled_picard_subT_out_sub0_eigenvalues_0001.csv'
     capabilities = 'slepc>=3.12.0'
     issues = "#15513"
-    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a sub app."
+    requirement = "The system shall, through the Eigenvalue system, support Picard iteration using eigenvalue executioner as a sub app."
   []
 
   [./eigen_as_sub_exodus]
@@ -155,7 +155,7 @@
     capabilities = 'slepc>=3.12.0'
     issues = "#15513"
     prereq = 'eigen_as_sub'
-    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a sub app and output eigen vectors as an exodus file."
+    requirement = "The system shall, through the Eigenvalue system, support Picard iteration using eigenvalue executioner as a sub app and output eigen vectors as an exodus file."
   []
 
   [./scaled_eigenvector]
@@ -169,7 +169,7 @@
     # Without this, the above regex will not work. Do not know how to match a colored number
     cli_args = '--color off'
     issues = '#14500'
-    requirement = "Eigenvalue system should be able scale eigenvector such that postprocessor is a certain value"
+    requirement = "The system shall, through the Eigenvalue system, be able to scale eigenvector such that postprocessor is a certain value"
   []
 
   [coupled-system-auto-scaling]

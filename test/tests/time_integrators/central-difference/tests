@@ -6,7 +6,7 @@
     input = 'central_difference.i'
     csvdiff = 'central_difference_out.csv'
 
-    requirement = "The CentralDifference time integrator shall correctly compute the first"
+    requirement = "The system shall correctly compute, using the CentralDifference time integrator, the first"
                   " and second time derivatives."
   [../]
   [./central_difference_constant_mass]
@@ -15,7 +15,7 @@
     csvdiff = 'central_difference_constant_mass_out.csv'
     issues = '#20728'
 
-    requirement = "The central difference time integrator shall correctly compute the first"
+    requirement = "The system shall correctly compute, using the central difference time integrator, the first"
                   " and second time derivatives when using a constant mass matrix, including"
                   " after the simulation has been recovered from a checkpoint."
   [../]
@@ -24,7 +24,7 @@
     input = 'ad_central_difference_dotdot.i'
     csvdiff = 'ad_central_difference_dotdot_out.csv'
 
-    requirement = "A central differencing time integrator shall correctly compute the second"
+    requirement = "The system shall correctly compute, using a central differencing time integrator, the second"
                   " time derivative of an automatic differentiation variable."
   [../]
 []

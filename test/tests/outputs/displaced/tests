@@ -16,7 +16,7 @@
     type = 'RunException'
     input = 'non_displaced_fallback.i'
     expect_err = "Parameter 'use_displaced' ignored, there is no displaced problem in your simulation."
-    requirement = "If the user requested the output of a displaced problem and there is none present, the system shall fallback to using the non-displaced problem."
+    requirement = "The system shall fallback to using the non-displaced problem if the user requested the output of a displaced problem and there is none present."
     design = "syntax/Outputs/index.md"
     issues = "#11309"
   [../]
@@ -27,7 +27,7 @@
     input = 'non_displaced_fallback.i'
     cli_args = 'Mesh/displacements=a Mesh/use_displaced_mesh=false'
     expect_err = "Parameter 'use_displaced' ignored, there is no displaced problem in your simulation."
-    requirement = "If the user asks for no displaced mesh to be created, even though displacements are provided in the mesh block, the system shall not create a displaced mesh"
+    requirement = "The system shall not create a displaced mesh if the user asks for no displaced mesh to be created, even though displacements are provided in the mesh block"
     design = "syntax/Mesh/index.md"
     issues = "#12580"
   [../]

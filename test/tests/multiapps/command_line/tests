@@ -5,7 +5,7 @@
     type = Exodiff
     input = parent.i
     exodiff = 'parent_out_sub0.e parent_out_sub1.e'
-    requirement = "The MultiApp system shall include the ability to set command line parameters for "
+    requirement = "The system shall, through the MultiApp system, include the ability to set command line parameters for "
                   "each sub application from the input file."
   []
 
@@ -13,7 +13,7 @@
     type = Exodiff
     input = parent_common.i
     exodiff = 'parent_common_out_sub0.e parent_common_out_sub1.e'
-    requirement = "The MultiApp system shall include the ability to set common command line "
+    requirement = "The system shall, through the MultiApp system, include the ability to set common command line "
                   "parameters for all sub applications from the input file."
   []
 
@@ -21,7 +21,7 @@
     type = Exodiff
     input = parent_common_vector.i
     exodiff = 'parent_common_vector_out_sub_10.e parent_common_vector_out_sub_11.e'
-    requirement = "The MultiApp system shall include the ability to set common command line vector "
+    requirement = "The system shall, through the MultiApp system, include the ability to set common command line vector "
                   "parameters, using double quotes, for all sub applications from the input file."
   []
 
@@ -30,7 +30,7 @@
     input = parent_common_vector.i
     cli_args = 'MultiApps/active=sub_2'
     exodiff = 'parent_common_vector_out_sub_20.e parent_common_vector_out_sub_21.e'
-    requirement = "The MultiApp system shall include the ability to set common command line vector "
+    requirement = "The system shall, through the MultiApp system, include the ability to set common command line vector "
                   "parameters, using single quotes, for all sub applications from the input file."
     prereq = 'common_vector'
   []
@@ -40,7 +40,7 @@
     input = parent_common_vector.i
     cli_args = 'MultiApps/active=sub_1_split'
     exodiff = 'parent_common_vector_out_sub_1_split0.e parent_common_vector_out_sub_1_split1.e'
-    requirement = "The MultiApp system shall include the ability to set command line vector parameters, "
+    requirement = "The system shall, through the MultiApp system, include the ability to set command line vector parameters, "
                   "using double quotes, distributed among all sub applications from the input "
                   "file."
     prereq = 'common_vector_single'
@@ -51,7 +51,7 @@
     input = parent_common_vector.i
     cli_args = 'MultiApps/active=sub_2_split'
     exodiff = 'parent_common_vector_out_sub_2_split0.e parent_common_vector_out_sub_2_split1.e'
-    requirement = "The MultiApp system shall include the ability to set command line vector parameters, "
+    requirement = "The system shall, through the MultiApp system, include the ability to set command line vector parameters, "
                   "using single quotes, distributed among all sub applications from the input "
                   "file."
     prereq = 'split_with_vector_single'
@@ -61,7 +61,7 @@
     type = RunException
     input = parent_wrong_size.i
     expect_err = 'The number of items supplied must be 1 or equal to the number of sub apps'
-    requirement = "The MultiApp system shall error when the number of command line arguments "
-                  "supplied in the input file differs from the number if sub apps."
+    requirement = "The system shall, through the MultiApp system, error when the number of command line arguments "
+                  "supplied in the input file differs from the number of sub apps."
   []
 []

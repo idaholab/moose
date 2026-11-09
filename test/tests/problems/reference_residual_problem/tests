@@ -125,7 +125,7 @@
     requirement = 'The system shall treat convergence with a zero reference residual value as converged if the residual is below the relative tolerance.'
   []
   [error]
-    requirement = 'When using ReferenceResidualProblem the system shall throw an error '
+    requirement = 'The system shall, when using ReferenceResidualProblem, throw an error '
     [wrong_vector_tag_type]
       type = RunException
       input = abs_ref.i
