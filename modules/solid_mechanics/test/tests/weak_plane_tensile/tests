@@ -8,8 +8,8 @@
     requirement = 'The system shall not allow a negative tensile strength value.'
   []
   [small_deformation]
-    requirement = 'With a single element stretched by 1e-6m, for small '
-                  'deformation, the system shall'
+    requirement = 'The system shall, with a single element stretched by 1e-6m, for small '
+                  'deformation,'
     [small1]
       type = 'CSVDiff'
       input = 'small_deform1.i'
@@ -36,7 +36,7 @@
   []
 
   [large_deformation]
-    requirement = 'Under large deformation loading the system shall'
+    requirement = 'The system shall, under large deformation loading,'
     [large1]
       type = 'Exodiff'
       input = 'large_deform1.i'
@@ -58,8 +58,8 @@
   []
 
   [small_deformation_hardening]
-    requirement = 'Under small deformation loading selected to induce '
-                  'hardening the system shall'
+    requirement = 'The system shall, under small deformation loading selected to induce '
+                  'hardening,'
     [small_hard1]
       type = 'CSVDiff'
       input = 'small_deform_hard1.i'

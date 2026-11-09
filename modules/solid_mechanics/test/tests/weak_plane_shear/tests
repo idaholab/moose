@@ -31,7 +31,7 @@
   []
 
   [small_deformations]
-    requirement = 'For the case of small deformations the system shall '
+    requirement = 'The system shall, for the case of small deformations, '
     [small1]
       type = 'CSVDiff'
       input = 'small_deform1.i'
@@ -74,7 +74,7 @@
   []
 
   [large_deformation]
-    requirement = 'For large deformation cases the system shall '
+    requirement = 'The system shall, for large deformation cases, '
     [large1]
       type = 'Exodiff'
       input = 'large_deform1.i'
@@ -114,8 +114,8 @@
   []
 
   [small_deformation_hardening]
-    requirement = 'Under small deformation loading selected to induce cohesion '
-                  'hardening the system shall'
+    requirement = 'The system shall, under small deformation loading selected to induce cohesion '
+                  'hardening,'
     [small_harden1]
       type = 'CSVDiff'
       input = 'small_deform_harden1.i'

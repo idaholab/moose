@@ -8,7 +8,7 @@
               'j_int_surfbreak_ellip_crack_sym_mm_out_J_2_0001.csv '
               'j_int_surfbreak_ellip_crack_sym_mm_out_J_3_0001.csv'
     max_parallel = 1
-    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
+    requirement = 'The system shall compute, using the Domain Integral Action, all of the fracture domain integrals '
                   'including the J integral for surface breaking elliptical cracks.'
     capabilities = 'method!=dbg'
   []
@@ -19,7 +19,7 @@
               'j_int_surfbreak_ellip_crack_sym_mm_cm_out_J_2_0001.csv '
               'j_int_surfbreak_ellip_crack_sym_mm_cm_out_J_3_0001.csv'
     max_parallel = 1
-    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
+    requirement = 'The system shall compute, using the Domain Integral Action, all of the fracture domain integrals '
                   'including the J integral for surface breaking elliptical cracks using the crack '
                   'mouth specification.'
     capabilities = 'method!=dbg'
@@ -32,7 +32,7 @@
               'j_int_surfbreak_ellip_crack_sym_mm_cm_ad_out_J_3_0001.csv'
     max_parallel = 1
     valgrind = 'none'
-    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
+    requirement = 'The system shall compute, using the Domain Integral Action, all of the fracture domain integrals '
                   'including the J integral for surface breaking elliptical cracks using the crack '
                   'mouth specification computing the system Jacobian via automatic differentiation.'
     capabilities = 'method!=dbg'
@@ -44,7 +44,7 @@
               'j_int_surfbreak_ellip_crack_sym_mm_cfp_out_J_2_0001.csv '
               'j_int_surfbreak_ellip_crack_sym_mm_cfp_out_J_3_0001.csv'
     max_parallel = 1
-    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
+    requirement = 'The system shall compute, using the Domain Integral Action, all of the fracture domain integrals '
                   'including the J integral for surface breaking elliptical cracks with crack face '
                   'pressure.'
     capabilities = 'method!=dbg'
@@ -56,7 +56,7 @@
               'j_int_surfbreak_ellip_crack_sym_mm_cfp_cm_out_J_2_0001.csv '
               'j_int_surfbreak_ellip_crack_sym_mm_cfp_cm_out_J_3_0001.csv'
     max_parallel = 1
-    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
+    requirement = 'The system shall compute, using the Domain Integral Action, all of the fracture domain integrals '
                   'including the J integral for surface breaking elliptical cracks with crack face '
                   'pressure and crack mouth boundary specified.'
     capabilities = 'method!=dbg'
@@ -70,7 +70,7 @@
               'c_int_surfbreak_ellip_crack_sym_mm_out_C_3_0002.csv'
     max_parallel = 1
     heavy = true
-    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
+    requirement = 'The system shall compute, using the Domain Integral Action, all of the fracture domain integrals '
                   'including the C integral for surface breaking elliptical cracks.'
     rel_err = 2.0e-5
     capabilities = 'method!=dbg'
@@ -85,7 +85,7 @@
               'c_int_surfbreak_ellip_crack_sym_mm_ad_out_C_3_0002.csv'
     max_parallel = 1
     heavy = true
-    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
+    requirement = 'The system shall compute, using the Domain Integral Action, all of the fracture domain integrals '
                   'including the C integral for surface breaking elliptical cracks using automatic '
                   'differentiation.'
     rel_err = 1.0e-4
@@ -97,7 +97,7 @@
     input = 'j_int_fgm_sif.i'
     csvdiff = 'j_int_fgm_sif_out.csv'
     cli_args = 'DomainIntegral/functionally_graded_youngs_modulus_crack_dir_gradient=elastic_mod_material_der_mat'
-    requirement = 'The Domain Integral Action shall compute stress intensity factors from the '
+    requirement = 'The system shall compute, using the Domain Integral Action, stress intensity factors from the '
                   'interaction integral for a crack perpendicular to a bi-material interface, '
                   'treating the interface as a functionally-graded material.'
     capabilities = 'method!=dbg'
@@ -106,7 +106,7 @@
     type = 'RunException'
     input = 'j_int_fgm_sif.i'
     expect_err = 'You have selected to compute the interaction integral for a crack in FGM'
-    requirement = "The Domain Integral shall error out if the user input does not consistently "
+    requirement = "The system shall error out in the Domain Integral if the user input does not consistently "
                   "define the required material properties to consider extra interaction integral "
                   "terms for functionally graded materials."
     capabilities = 'method!=dbg'
@@ -116,7 +116,7 @@
     type = 'CSVDiff'
     input = 'fgm_5.i'
     csvdiff = 'fgm_5_out.csv'
-    requirement = 'The Domain Integral Action shall compute stress intensity factors from the '
+    requirement = 'The system shall compute, using the Domain Integral Action, stress intensity factors from the '
                   'interaction integral, with an added term stemming for spatially varying '
                   'properties, that accounts for the crack perpendicularity to the property grading '
                   'and yield verified results.'
@@ -127,7 +127,7 @@
     type = 'CSVDiff'
     input = 'axisymmetric_solution_tran.i'
     csvdiff = 'axisymmetric_solution_tran_out.csv'
-    requirement = 'The Domain Integral Action shall compute verified stress intensity factors from the '
+    requirement = 'The system shall compute, using the Domain Integral Action, verified stress intensity factors from the '
                   'interaction integral for axisymmetric geometries and circumferential cracks.'
     capabilities = 'method!=dbg'
   []
