@@ -53,8 +53,8 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     _elemental_array_aux_storage(_app.getExecuteOnEnum(), numThreads())
 #ifdef MOOSE_KOKKOS_ENABLED
     ,
-    _kokkos_nodal_aux_storage(_app.getExecuteOnEnum(), numThreads()),
-    _kokkos_elemental_aux_storage(_app.getExecuteOnEnum(), numThreads())
+    _kokkos_nodal_aux_storage(_app.getExecuteOnEnum(), 1),
+    _kokkos_elemental_aux_storage(_app.getExecuteOnEnum(), 1)
 #endif
 {
   _nodal_vars.resize(this->numThreads());
@@ -119,6 +119,8 @@ AuxiliarySystem::initialSetup()
 
   _kokkos_elemental_aux_storage.sort(/*tid=*/0);
   _kokkos_elemental_aux_storage.initialSetup(/*tid=*/0);
+
+  buildKokkosAuxStages();
 #endif
 }
 
@@ -270,6 +272,8 @@ AuxiliarySystem::updateActive(THREAD_ID tid)
   {
     _kokkos_nodal_aux_storage.updateActive(/*tid=*/0);
     _kokkos_elemental_aux_storage.updateActive(/*tid=*/0);
+
+    buildKokkosAuxStages();
   }
 #endif
 }

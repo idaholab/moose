@@ -33,6 +33,9 @@ Coupleable::kokkosCoupledVectorTagVariable(const std::string & var_name,
     else if (tag_name == Moose::OLDER_SOLUTION_TAG)
       var->sys().needSolutionState(2);
 
+    coupledCallback(var_name,
+                    tag_name == Moose::OLD_SOLUTION_TAG || tag_name == Moose::OLDER_SOLUTION_TAG);
+
     const auto tag = _c_fe_problem.getVectorTagID(tag_name);
 
     const_cast<Coupleable *>(this)->addFEVariableCoupleableVectorTag(tag);
@@ -75,6 +78,9 @@ Coupleable::kokkosCoupledVectorTagVariables(const std::string & var_name,
       vars.push_back(var);
     }
 
+    coupledCallback(var_name,
+                    tag_name == Moose::OLD_SOLUTION_TAG || tag_name == Moose::OLDER_SOLUTION_TAG);
+
     const auto tag = _c_fe_problem.getVectorTagID(tag_name);
 
     const_cast<Coupleable *>(this)->addFEVariableCoupleableVectorTag(tag);
@@ -111,6 +117,9 @@ Coupleable::kokkosCoupledVectorTagVectorVariable(const std::string & var_name,
       var->sys().needSolutionState(1);
     else if (tag_name == Moose::OLDER_SOLUTION_TAG)
       var->sys().needSolutionState(2);
+
+    coupledCallback(var_name,
+                    tag_name == Moose::OLD_SOLUTION_TAG || tag_name == Moose::OLDER_SOLUTION_TAG);
 
     const auto tag = _c_fe_problem.getVectorTagID(tag_name);
 
@@ -153,6 +162,9 @@ Coupleable::kokkosCoupledVectorTagVectorVariables(const std::string & var_name,
 
       vars.push_back(var);
     }
+
+    coupledCallback(var_name,
+                    tag_name == Moose::OLD_SOLUTION_TAG || tag_name == Moose::OLDER_SOLUTION_TAG);
 
     const auto tag = _c_fe_problem.getVectorTagID(tag_name);
 

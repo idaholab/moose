@@ -541,7 +541,8 @@ class Job(OutputInterface):
             finalize()
             return
 
-        # Exit if we have bad output in the runner before running the tester
+        # Sanitize the runner output before the tester processes it, and exit
+        # if the runner already failed
         self.sanitizeAllOutput()
         if self.isError():
             finalize()
@@ -723,14 +724,13 @@ class Job(OutputInterface):
         If output is retreived from these objects via getOutput() and
         it contains bad output, it will throw an error. Instead of
         throwing an error, we will sanitize it before hand and then
-        set a Job error so that we can still continue in a failed state.
+        flag it with a caveat. A test's result is determined by its own
+        checks, and launchers such as mpiexec can write NULL characters
+        that are unrelated to the application.
         """
-        all_failures = []
         for name, object in self.getOutputObjects().items():
             failures = object.sanitizeOutput()
-            all_failures.extend([s + f" in {name}" for s in failures])
-        if all_failures:
-            self.setStatus(self.error, ", ".join(all_failures))
+            self.addCaveats([s + f" in {name}" for s in failures])
 
     def getOutputForScreen(self):
         """Gets the output for printing on screen"""

@@ -196,6 +196,23 @@ getBoundaryIDSet(const MeshBase & mesh,
   return std::set<BoundaryID>(boundaries.begin(), boundaries.end());
 }
 
+std::set<std::pair<BoundaryName, BoundaryID>>
+getAllBoundaryNamesAndIDs(const MeshBase & mesh)
+{
+  std::set<std::pair<BoundaryName, BoundaryID>> boundaries;
+  const auto & binfo = mesh.get_boundary_info();
+  const auto & boundary_ids = binfo.get_boundary_ids();
+  for (const auto id : boundary_ids)
+  {
+    // if neither a sideset or nodeset, then empty
+    if (binfo.get_sideset_name(id).size())
+      boundaries.insert(std::make_pair(binfo.get_sideset_name(id), id));
+    else
+      boundaries.insert(std::make_pair(binfo.get_nodeset_name(id), id));
+  }
+  return boundaries;
+}
+
 std::vector<subdomain_id_type>
 getSubdomainIDs(const MeshBase & mesh, const std::vector<SubdomainName> & subdomain_names)
 {
@@ -231,6 +248,17 @@ getSubdomainIDs(const MeshBase & mesh, const std::set<SubdomainName> & subdomain
   const auto blk_ids = getSubdomainIDs(
       mesh, std::vector<SubdomainName>(subdomain_names.begin(), subdomain_names.end()));
   return {blk_ids.begin(), blk_ids.end()};
+}
+
+std::set<std::pair<SubdomainName, SubdomainID>>
+getAllSubdomainNamesAndIDs(const MeshBase & mesh)
+{
+  std::set<std::pair<SubdomainName, SubdomainID>> subdomains;
+  std::set<subdomain_id_type> subdomain_ids;
+  mesh.subdomain_ids(subdomain_ids, /*global*/ true);
+  for (const auto id : subdomain_ids)
+    subdomains.insert(std::make_pair(mesh.subdomain_name(id), id));
+  return subdomains;
 }
 
 BoundaryID
@@ -324,6 +352,11 @@ boundaryCentroidCalculator(const BoundaryName & boundary, MeshBase & mesh)
   mesh.comm().sum(volume_weighted_centroid_sum);
   mesh.comm().sum(volume_sum);
 
+  if (volume_sum == 0)
+  {
+    mooseWarning("Boundary centroid was requested but boundary '" + boundary + "' is empty.");
+    return Point(0.);
+  }
   return volume_weighted_centroid_sum / volume_sum;
 }
 
@@ -1518,5 +1551,161 @@ addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_ext
         has_external_bid = true;
         binfo.add_side(elem, i_side, extern_bid);
       }
+}
+
+std::vector<unsigned int>
+nodalQuadraturePointToNodeMap(const Elem & elem, const std::vector<Point> & q_points)
+{
+  const auto n_nodes = elem.n_nodes();
+  if (q_points.size() != n_nodes)
+    mooseError("Nodal quadrature produced ",
+               q_points.size(),
+               " points for element ",
+               elem.id(),
+               " of type ",
+               libMesh::Utility::enum_to_string<ElemType>(elem.type()),
+               ", but the element has ",
+               n_nodes,
+               " nodes.");
+
+  const auto invalid_node = std::numeric_limits<unsigned int>::max();
+  std::vector<unsigned int> qpoint_to_node(n_nodes, invalid_node);
+  std::vector<bool> node_used(n_nodes, false);
+
+  const Real element_size = elem.hmax();
+  mooseAssert(
+      element_size > 0,
+      "Element " << elem.id() << " of type "
+                 << libMesh::Utility::enum_to_string<ElemType>(elem.type())
+                 << " has a non-positive hmax and cannot be used for nodal quadrature point "
+                    "matching.");
+
+  // The nodal quadrature locations and the generated nodes are two floating-point
+  // reconstructions of the same physical points. Scale the tolerance by element size so the
+  // matching is insensitive to coordinate magnitude; the 100*TOLERANCE factor allows roundoff
+  // from FE reinitialization and mesh generation while remaining far below a valid node spacing.
+  const Real matching_tol = 100 * TOLERANCE * element_size;
+  const Real matching_tol_sq = matching_tol * matching_tol;
+
+  // Each nodal quadrature point should coincide with exactly one still-unused
+  // node. The unused-node search makes the mapping one-to-one and
+  // avoids silently assigning two quadrature entries to the same node.
+  for (const auto qp : make_range(q_points.size()))
+  {
+    unsigned int closest_node = invalid_node;
+    Real closest_dist_sq = std::numeric_limits<Real>::max();
+    Real second_closest_dist_sq = std::numeric_limits<Real>::max();
+
+    for (const auto n : make_range(n_nodes))
+    {
+      if (node_used[n])
+        continue;
+
+      const Real dist_sq = (q_points[qp] - elem.point(n)).norm_sq();
+      if (dist_sq < closest_dist_sq)
+      {
+        second_closest_dist_sq = closest_dist_sq;
+        closest_dist_sq = dist_sq;
+        closest_node = n;
+      }
+      else if (dist_sq < second_closest_dist_sq)
+        second_closest_dist_sq = dist_sq;
+    }
+
+    if (closest_node == invalid_node || closest_dist_sq > matching_tol_sq)
+      mooseError("Could not match nodal quadrature point ",
+                 qp,
+                 " at ",
+                 q_points[qp],
+                 " to a node on element ",
+                 elem.id(),
+                 " of type ",
+                 libMesh::Utility::enum_to_string<ElemType>(elem.type()),
+                 ". The nearest unmatched node distance is ",
+                 std::sqrt(closest_dist_sq),
+                 ", which exceeds the tolerance ",
+                 matching_tol,
+                 ".");
+
+    if (second_closest_dist_sq <= matching_tol_sq)
+      mooseError("Nodal quadrature point ",
+                 qp,
+                 " at ",
+                 q_points[qp],
+                 " does not map uniquely to element ",
+                 elem.id(),
+                 " of type ",
+                 libMesh::Utility::enum_to_string<ElemType>(elem.type()),
+                 ". Two unmatched nodes are within the matching tolerance ",
+                 matching_tol,
+                 ".");
+
+    qpoint_to_node[qp] = closest_node;
+    node_used[closest_node] = true;
+  }
+
+#ifdef DEBUG
+  // In optimized builds the mapping above skips already matched nodes for speed. In debug builds,
+  // audit the full candidate set to catch ambiguous geometry or accidental many-to-one matches.
+  std::vector<unsigned int> node_to_qpoint(n_nodes, invalid_node);
+  for (const auto qp : make_range(q_points.size()))
+  {
+    const auto mapped_node = qpoint_to_node[qp];
+    mooseAssert(mapped_node != invalid_node && mapped_node < n_nodes,
+                "Invalid node mapping for nodal quadrature point " << qp << ".");
+    mooseAssert(node_to_qpoint[mapped_node] == invalid_node,
+                "Node " << mapped_node << " on element " << elem.id()
+                        << " was matched to both nodal quadrature point "
+                        << node_to_qpoint[mapped_node] << " and " << qp << ".");
+    node_to_qpoint[mapped_node] = qp;
+
+    // Check the qp -> node direction without excluding nodes already matched by previous qps.
+    unsigned int candidate_count = 0;
+    unsigned int candidate_node = invalid_node;
+    for (const auto n : make_range(n_nodes))
+      if ((q_points[qp] - elem.point(n)).norm_sq() <= matching_tol_sq)
+      {
+        ++candidate_count;
+        candidate_node = n;
+      }
+
+    mooseAssert(candidate_count == 1,
+                "Nodal quadrature point " << qp << " on element " << elem.id() << " has "
+                                          << candidate_count << " node candidates within tolerance "
+                                          << matching_tol << ".");
+    mooseAssert(candidate_node == mapped_node,
+                "Nodal quadrature point "
+                    << qp << " on element " << elem.id() << " was matched to node " << mapped_node
+                    << ", but the full candidate search found node " << candidate_node << ".");
+  }
+
+  for (const auto n : make_range(n_nodes))
+  {
+    mooseAssert(node_to_qpoint[n] != invalid_node,
+                "Node " << n << " on element " << elem.id()
+                        << " was not matched to a nodal quadrature point.");
+
+    // Check the node -> qp direction so every node is also uniquely represented.
+    unsigned int candidate_count = 0;
+    unsigned int candidate_qp = invalid_node;
+    for (const auto qp : make_range(q_points.size()))
+      if ((q_points[qp] - elem.point(n)).norm_sq() <= matching_tol_sq)
+      {
+        ++candidate_count;
+        candidate_qp = qp;
+      }
+
+    mooseAssert(candidate_count == 1,
+                "Node " << n << " on element " << elem.id() << " has " << candidate_count
+                        << " nodal quadrature point candidates within tolerance " << matching_tol
+                        << ".");
+    mooseAssert(candidate_qp == node_to_qpoint[n],
+                "Node " << n << " on element " << elem.id()
+                        << " was matched to nodal quadrature point " << node_to_qpoint[n]
+                        << ", but the full candidate search found point " << candidate_qp << ".");
+  }
+#endif
+
+  return qpoint_to_node;
 }
 }

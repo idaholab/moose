@@ -1,0 +1,15 @@
+[Tests]
+  design = 'IdealGasFluidProperties.md'
+  issues = '#34070'
+
+  [gibbs_free_energy]
+    type = GoogleTest
+    unit_test = IdealGasFluidPropertiesTest.gibbsFreeEnergy
+    requirement = 'The system shall compute the Gibbs free energy of an ideal gas consistently with its enthalpy and entropy, including a nonzero reference internal energy.'
+  []
+  [sound_speed_nonphysical_state]
+    type = GoogleTest
+    unit_test = IdealGasFluidPropertiesTest.soundSpeedNonphysicalState
+    requirement = 'The system shall return a finite speed of sound and finite derivatives of it for an ideal gas state with negative temperature, consistently between the methods with and without derivatives.'
+  []
+[]

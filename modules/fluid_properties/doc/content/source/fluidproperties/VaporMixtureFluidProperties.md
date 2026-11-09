@@ -65,6 +65,7 @@ Additionally, the following interfaces are available:
 - `primaryMassFraction(x_secondary)`: Computes $x_1$ from $\{x_2, \ldots, x_n\}$
 - `mixtureMolarMass(molar_fractions, molar_masses)`: Computes the mixture molar mass from the molar fractions and molar masses of all components
 - `massFractionsFromMolarFractions(molar_fractions, molar_masses)`: Converts molar fractions to mass fractions
+- `binaryDiffusionCoefficient(p, T, i, j)`: Computes the binary diffusion coefficient of components $i$ and $j$ from pressure and temperature, where index 0 is the primary component; not every derived class implements it
 
 The full list of available methods can be found in either the source code or the
 [Modules Doxygen](https://mooseframework.inl.gov/docs/doxygen/modules/classes.html) page for each

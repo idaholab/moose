@@ -10,8 +10,12 @@
       type = 'CSVDiff'
       input = 'num_iterations.i'
       csvdiff = 'a_stable_dirk4.csv'
+      # Newton with the exact Jacobian; with the default PJFNK, finite differencing noise in the
+      # stage residuals that converge near nl_abs_tol changes the iteration counts between
+      # platforms
       cli_args = 'Executioner/TimeIntegrator/type=AStableDirk4 '
-                 'Executioner/TimeIntegrator/safe_start=true Outputs/file_base=a_stable_dirk4'
+                 'Executioner/TimeIntegrator/safe_start=true Executioner/solve_type=NEWTON '
+                 'Outputs/file_base=a_stable_dirk4'
       max_parallel = 1
       restep = false # Explicitly needs to abort on solve failed
 
@@ -131,7 +135,10 @@
       type = 'CSVDiff'
       input = 'num_iterations.i'
       csvdiff = 'implicit_midpoint.csv'
-      cli_args = 'Executioner/TimeIntegrator/type=ImplicitMidpoint '
+      # Newton with the exact Jacobian; with the default PJFNK, finite differencing noise in the
+      # stage residuals that converge near nl_abs_tol changes the iteration counts between
+      # platforms
+      cli_args = 'Executioner/TimeIntegrator/type=ImplicitMidpoint Executioner/solve_type=NEWTON '
                  'Outputs/file_base=implicit_midpoint'
       max_parallel = 1
       restep = false # Explicitly needs to abort on solve failed
@@ -142,7 +149,11 @@
       type = 'CSVDiff'
       input = 'num_iterations.i'
       csvdiff = 'l_stable_dirk2.csv'
-      cli_args = 'Executioner/TimeIntegrator/type=LStableDirk2 Outputs/file_base=l_stable_dirk2'
+      # Newton with the exact Jacobian; with the default PJFNK, finite differencing noise in the
+      # stage residuals that converge near nl_abs_tol changes the iteration counts between
+      # platforms
+      cli_args = 'Executioner/TimeIntegrator/type=LStableDirk2 Executioner/solve_type=NEWTON '
+                 'Outputs/file_base=l_stable_dirk2'
       max_parallel = 1
       restep = false # Explicitly needs to abort on solve failed
 
@@ -153,7 +164,11 @@
       type = 'CSVDiff'
       input = 'num_iterations.i'
       csvdiff = 'l_stable_dirk3.csv'
-      cli_args = 'Executioner/TimeIntegrator/type=LStableDirk3 Outputs/file_base=l_stable_dirk3'
+      # Newton with the exact Jacobian; with the default PJFNK, finite differencing noise in the
+      # stage residuals that converge near nl_abs_tol changes the iteration counts between
+      # platforms
+      cli_args = 'Executioner/TimeIntegrator/type=LStableDirk3 Executioner/solve_type=NEWTON '
+                 'Outputs/file_base=l_stable_dirk3'
       max_parallel = 1
       restep = false # Explicitly needs to abort on solve failed
 
@@ -163,7 +178,11 @@
       type = 'CSVDiff'
       input = 'num_iterations.i'
       csvdiff = 'l_stable_dirk4.csv'
-      cli_args = 'Executioner/TimeIntegrator/type=LStableDirk4 Outputs/file_base=l_stable_dirk4'
+      # Newton with the exact Jacobian; with the default PJFNK, finite differencing noise in the
+      # stage residuals that converge near nl_abs_tol changes the iteration counts between
+      # platforms
+      cli_args = 'Executioner/TimeIntegrator/type=LStableDirk4 Executioner/solve_type=NEWTON '
+                 'Outputs/file_base=l_stable_dirk4'
       max_parallel = 1
       restep = false # Explicitly needs to abort on solve failed
 

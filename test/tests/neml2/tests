@@ -10,6 +10,18 @@
     capabilities = 'libtorch & neml2'
     valgrind = heavy
   []
+  [variable_dependency]
+    requirement = 'The framework shall gather variable dependencies of a NEML2 model to perform selective variable computations in user object loops.'
+    type = Exodiff
+    input = 'custom_model.i'
+    exodiff = 'custom_model_out.e'
+    # the presence of this postprocessor declaring a variable dependency triggers the restriction of element reinitialization to the variables that the user objects declare as dependencies. If no dependencies are declared, all variables would be computed by default.
+    cli_args = 'Postprocessors/u_avg/type=ElementAverageValue Postprocessors/u_avg/variable=u '
+               'Postprocessors/u_avg/execute_on=LINEAR Postprocessors/u_avg/outputs=none'
+    prereq = 'custom_model'
+    issues = '#34186'
+    capabilities = 'libtorch & neml2'
+  []
   [neml2_error]
     requirement = 'The framework shall be capable of capturing errors that occur during the evaluation of a NEML2 model.'
     type = RunException

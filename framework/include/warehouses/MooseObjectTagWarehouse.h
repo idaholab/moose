@@ -130,7 +130,7 @@ MooseObjectTagWarehouse<T>::getVectorTagObjectWarehouse(TagID tag_id, THREAD_ID 
   if (tag_warehouse != house_end)
     return tag_warehouse->second;
   else
-    vector_tag_to_object_warehouse[tag_id];
+    vector_tag_to_object_warehouse.try_emplace(tag_id, _num_threads);
 
   // Now add actual moose objects into warehouse
   const auto & objects = MooseObjectWarehouse<T>::getObjects(tid);
@@ -163,7 +163,7 @@ MooseObjectTagWarehouse<T>::getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID 
   if (tag_warehouse != house_end)
     return tag_warehouse->second;
   else
-    matrix_tag_to_object_warehouse[tag_id];
+    matrix_tag_to_object_warehouse.try_emplace(tag_id, _num_threads);
 
   // Add moose objects to matrix-tag warehouse
   const auto & objects = MooseObjectWarehouse<T>::getObjects(tid);
@@ -206,7 +206,7 @@ MooseObjectTagWarehouse<T>::getVectorTagsObjectWarehouse(const std::set<TagID> &
   if (tags_warehouse != house_end)
     return tags_warehouse->second;
   else
-    vector_tags_to_object_warehouse[v_tags];
+    vector_tags_to_object_warehouse.try_emplace(v_tags, _num_threads);
 
   // Add moose objects to vector-tags warehouse
   const auto & objects = MooseObjectWarehouse<T>::getObjects(tid);
@@ -244,7 +244,7 @@ MooseObjectTagWarehouse<T>::getMatrixTagsObjectWarehouse(const std::set<TagID> &
   if (tags_warehouse != house_end)
     return tags_warehouse->second;
   else
-    matrix_tags_to_object_warehouse[m_tags];
+    matrix_tags_to_object_warehouse.try_emplace(m_tags, _num_threads);
 
   const auto & objects = MooseObjectWarehouse<T>::getObjects(tid);
   for (auto & object : objects)

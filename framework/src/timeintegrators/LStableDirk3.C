@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LStableDirk3.h"
+#include "libmesh/sparse_matrix.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "PetscSupport.h"
@@ -28,6 +29,7 @@ LStableDirk3::LStableDirk3(const InputParameters & parameters)
     _gamma(-std::sqrt(2.) * std::cos(std::atan(std::sqrt(2.) / 4.) / 3.) / 2. +
            std::sqrt(6.) * std::sin(std::atan(std::sqrt(2.) / 4.) / 3.) / 2. + 1.)
 {
+  requestTimeJacobian();
   mooseInfo("LStableDirk3 and other multistage TimeIntegrators are known not to work with "
             "Materials/AuxKernels that accumulate 'state' and should be used with caution.");
 
@@ -152,4 +154,12 @@ LStableDirk3::postResidual(NumericVector<Number> & residual)
   for (unsigned int j = 0; j < _stage; ++j)
     residual.add(_a[_stage - 1][j], *_stage_residuals[j]);
   residual.close();
+}
+
+void
+LStableDirk3::postJacobian(SparseMatrix<Number> & jacobian)
+{
+  // the current stage solution enters the stage residual through the time residual and the
+  // diagonal coefficient times the non-time residual of the stage, see postResidual()
+  weightNonTimeJacobian(jacobian, _a[_stage - 1][_stage - 1]);
 }

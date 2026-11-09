@@ -1,5 +1,6 @@
 [Tests]
-  issues = ''
+  # old SVN issue r9197
+  issues = '#3503'
   [./multi_test]
     type = 'Exodiff'
     input = 'multismoothcircleIC_test.i'

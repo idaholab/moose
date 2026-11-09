@@ -1,0 +1,10 @@
+[Tests]
+  design = 'ADWallFrictionChengMaterial.md'
+  issues = '#34254'
+
+  [fanning_friction_factor_cheng]
+    type = GoogleTest
+    unit_test = WallFrictionModelsTest.fanning_friction_factor_cheng
+    requirement = 'The system shall compute the Fanning friction factor of a rod bundle subchannel from the Cheng-Todreas correlation, whose constants give the Darcy friction factor, so that its Darcy friction factor reproduces the correlation.'
+  []
+[]

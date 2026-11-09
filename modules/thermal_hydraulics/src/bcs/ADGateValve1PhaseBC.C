@@ -22,9 +22,6 @@ ADGateValve1PhaseBC::validParams()
   params.addRequiredParam<unsigned int>("connection_index", "Index of the connected flow channel");
   params.addRequiredParam<UserObjectName>("gate_valve_uo", "1-phase gate valve user object");
 
-  params.addRequiredCoupledVar("A_elem", "Cross-sectional area, elemental");
-  params.addRequiredCoupledVar("A_linear", "Cross-sectional area, linear");
-
   params.addRequiredCoupledVar("rhoA", "Flow channel variable: rho*A");
   params.addRequiredCoupledVar("rhouA", "Flow channel variable: rho*u*A");
   params.addRequiredCoupledVar("rhoEA", "Flow channel variable: rho*E*A");
@@ -41,9 +38,6 @@ ADGateValve1PhaseBC::ADGateValve1PhaseBC(const InputParameters & params)
     _connection_index(getParam<unsigned int>("connection_index")),
     _gate_valve_uo(getUserObject<ADGateValve1PhaseUserObject>("gate_valve_uo")),
 
-    _A_elem(adCoupledValue("A_elem")),
-    _A_linear(adCoupledValue("A_linear")),
-
     _rhoA_jvar(coupled("rhoA")),
     _rhouA_jvar(coupled("rhouA")),
     _rhoEA_jvar(coupled("rhoEA")),
@@ -58,9 +52,7 @@ ADGateValve1PhaseBC::computeQpResidual()
 {
   const auto & flux = _gate_valve_uo.getFlux(_connection_index);
 
-  // Note that the ratio A_linear / A_elem is necessary because A_elem is passed
-  // to the flux function, but A_linear is to be used on the boundary.
-  return flux[_equation_index] * _A_linear[_qp] / _A_elem[_qp] * _normal * _test[_i][_qp];
+  return flux[_equation_index] * _normal * _test[_i][_qp];
 }
 
 std::map<unsigned int, unsigned int>

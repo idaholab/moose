@@ -1,0 +1,65 @@
+[Tests]
+  issues = '#34105'
+  design = 'ADArrayRobinBC.md'
+  [ad_array_integrated_bc]
+    requirement = 'The system shall provide integrated boundary conditions on array variables whose Jacobians are computed with automatic differentiation'
+    [reference]
+      type = CSVDiff
+      input = 'robin_reference.i'
+      csvdiff = 'robin_out.csv'
+      detail = 'and reproduce the solution of the same problem written with standard variables,'
+    []
+    [robin]
+      type = CSVDiff
+      input = 'ad_array_robin.i'
+      csvdiff = 'robin_out.csv'
+      prereq = 'ad_array_integrated_bc/reference'
+      detail = 'for a Robin condition on every component,'
+    []
+    [jacobian]
+      type = PetscJacobianTester
+      input = 'ad_array_robin.i'
+      cli_args = 'Outputs/csv=false'
+      run_sim = true
+      detail = 'with an exact Jacobian,'
+    []
+    [together]
+      type = CSVDiff
+      input = 'ad_array_robin.i'
+      csvdiff = 'robin_out.csv'
+      cli_args = 'Executioner/residual_and_jacobian_together=true'
+      prereq = 'ad_array_integrated_bc/robin'
+      detail = 'when the residual and Jacobian are computed together,'
+    []
+    [together_jacobian]
+      type = PetscJacobianTester
+      input = 'ad_array_robin.i'
+      cli_args = 'Outputs/csv=false Executioner/residual_and_jacobian_together=true'
+      run_sim = true
+      detail = 'with an exact Jacobian when computed together with the residual, and'
+    []
+    [displaced]
+      type = PetscJacobianTester
+      input = 'ad_array_robin_displaced.i'
+      run_sim = true
+      detail = 'with an exact Jacobian including the derivatives of the face measure on a displaced mesh.'
+    []
+  []
+  [errors]
+    requirement = 'The system shall report an error if the number of prescribed fluxes or Robin coefficients of an array Robin boundary condition differs from the number of components of the variable for'
+    [value]
+      type = RunException
+      input = 'ad_array_robin.i'
+      cli_args = "BCs/right/value='0.5'"
+      expect_err = 'Must have as many entries as the variable has components'
+      detail = 'the prescribed fluxes, and'
+    []
+    [alpha]
+      type = RunException
+      input = 'ad_array_robin.i'
+      cli_args = "BCs/right/alpha='2 0 1'"
+      expect_err = 'Must have as many entries as the variable has components'
+      detail = 'the Robin coefficients.'
+    []
+  []
+[]

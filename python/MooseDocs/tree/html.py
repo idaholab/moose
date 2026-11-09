@@ -88,10 +88,10 @@ class Tag(NodeBase):
         Convert String objects into a single string.
         """
         strings = []
-        for node in moosetree.iterate(self):
+        for node in moosetree.iterate(self, method=moosetree.IterMethod.PRE_ORDER):
             if node.name == "String":
                 strings.append(node["content"])
-        return re.sub(r" {2,}", " ", " ".join(strings))
+        return re.sub(r" {2,}", " ", "".join(strings))
 
     def copy(self, _parent=None):
         """Copy the tree from this node."""

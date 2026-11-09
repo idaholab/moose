@@ -56,12 +56,37 @@
     [extrapolation_error]
       type = GoogleTest
       unit_test = TabulatedPVTFluidPropertiesTest.extrapolationError
-      detail = 'throwing an exception if extrapolation gives a non-positive formation volume factor; and'
+      detail = 'throwing an exception if extrapolation gives a non-positive formation volume factor;'
     []
-    [invalid_tables]
+    [non_increasing_pressure]
       type = GoogleTest
-      unit_test = TabulatedPVTFluidPropertiesTest.invalidTables
-      detail = 'reporting an error for tables with too few entries, mismatched lengths, non-increasing pressures or non-positive values.'
+      unit_test = TabulatedPVTFluidPropertiesTest.nonIncreasingPressure
+      detail = 'reporting an error if the tabulated pressures are not strictly increasing;'
+    []
+    [too_few_pressures]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.tooFewPressures
+      detail = 'reporting an error if fewer than two pressures are tabulated;'
+    []
+    [wrong_size_formation_volume_factor]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.wrongSizeFormationVolumeFactor
+      detail = 'reporting an error if the number of formation volume factors differs from the number of pressures;'
+    []
+    [wrong_size_viscosity]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.wrongSizeViscosity
+      detail = 'reporting an error if the number of viscosities differs from the number of pressures;'
+    []
+    [non_positive_formation_volume_factor]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.nonPositiveFormationVolumeFactor
+      detail = 'reporting an error if a formation volume factor is not positive; and'
+    []
+    [non_positive_viscosity]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.nonPositiveViscosity
+      detail = 'reporting an error if a viscosity is not positive.'
     []
   []
 []

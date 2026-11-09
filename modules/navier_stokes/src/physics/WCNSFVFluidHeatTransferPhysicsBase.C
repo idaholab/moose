@@ -310,6 +310,10 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
 void
 WCNSFVFluidHeatTransferPhysicsBase::defineEffectiveThermalDiffusionCoeffFunctors(const bool use_ad)
 {
+  // Only needed when solving for enthalpy; the temperature-solve and turbulence-only
+  // paths set up their diffusion coefficient functor directly at the call site.
+  if (!_solve_for_enthalpy)
+    return;
   // Define alpha, the diffusion coefficient when solving for enthalpy, on each block
   for (unsigned int i = 0; i < _thermal_conductivity_name.size(); ++i)
   {
@@ -317,22 +321,24 @@ WCNSFVFluidHeatTransferPhysicsBase::defineEffectiveThermalDiffusionCoeffFunctors
     InputParameters params = getFactory().getValidParams(object_type);
     assignBlocks(params, _blocks);
     std::vector<std::string> f_names;
-    if (!MooseUtils::parsesToReal(_thermal_conductivity_name[i]))
-      f_names.push_back(_thermal_conductivity_name[i]);
     if (_solve_for_enthalpy && !MooseUtils::parsesToReal(getSpecificHeatName()))
       f_names.push_back(getSpecificHeatName());
-    const auto th_cond_name =
-        _thermal_conductivity_name[i] + (_has_turbulence_model ? "_plus_kt" : "");
+    const auto th_cond_name = _has_turbulence_model ? NS::k_eff_t : _thermal_conductivity_name[i];
     if (!_has_turbulence_model)
+    {
+      if (!MooseUtils::parsesToReal(_thermal_conductivity_name[i]))
+        f_names.push_back(_thermal_conductivity_name[i]);
       params.set<std::string>("expression") =
           _thermal_conductivity_name[i] +
           (_solve_for_enthalpy ? ("/" + getSpecificHeatName()) : "");
+    }
     else
     {
-      f_names.push_back("k_t");
+      // k_eff_t already includes the molecular thermal conductivity, see
+      // EffectiveTurbulentThermalConductivityAux and WCNSFVTurbulencePhysicsBase.
+      f_names.push_back(NS::k_eff_t);
       params.set<std::string>("expression") =
-          "(" + _thermal_conductivity_name[i] + " + k_t) " +
-          (_solve_for_enthalpy ? ("/" + getSpecificHeatName()) : "");
+          NS::k_eff_t + (_solve_for_enthalpy ? ("/" + getSpecificHeatName()) : "");
     }
     params.set<std::vector<std::string>>("functor_names") = f_names;
     params.set<std::string>("property_name") = th_cond_name + (_solve_for_enthalpy ? "_by_cp" : "");

@@ -339,6 +339,9 @@ protected:
   /// whether the object is initialized, eg, the functions have been retrieved from the problem
   bool _initialized;
 
+  /// Finite-difference step for argument x that does not vanish when x is zero
+  static Real fdStep(Real x, Real rel_step);
+
   /// function defining thermal conductivity as a function of temperature and pressure
   const Function * _k_function;
 

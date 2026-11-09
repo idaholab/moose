@@ -16,8 +16,8 @@ source:
   - path: ../functions/retry_build.sh
 
 build:
-  number: 1
-  string: build_1
+  number: 2
+  string: build_2
   script_env:
     - MOOSE_JOBS
     - REQUESTS_CA_BUNDLE

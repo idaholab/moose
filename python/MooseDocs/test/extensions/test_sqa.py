@@ -14,6 +14,8 @@ import logging
 import collections
 import itertools
 import moosesqa
+import moosetree
+from mooseutils import civet_results
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import (
     core,
@@ -182,6 +184,54 @@ class TestSQARequirementsAST(MooseDocsTestCase):
             self.assertToken(ast(i + 5)(0)(2), "Word", size=0, content="Group")
             self.assertToken(ast(i + 5)(0)(3), "Space", size=0, count=1)
             self.assertToken(ast(i + 5)(0)(4), "Word", size=0, content=s)
+
+
+class TestSQARequirementsCivetBadges(MooseDocsTestCase):
+    """
+    Regression test for "!sqa requirements ... link-results=True", which relies on
+    civet.CivetTestBadges(item, prefix=req.prefix, tests=req.names) to render civet test
+    badges. Uses an injected, in-memory result database instead of a real CIVET site so
+    this needs no network access (refs #33744).
+    """
+
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table, modal]
+
+    def setupExtension(self, ext):
+        if ext == sqa:
+            return dict(
+                active=True,
+                categories=dict(
+                    Demo=dict(directories=["python/MooseDocs/test"], specs=["demo"])
+                ),
+            )
+
+    def testLinkResults(self):
+        text = "!sqa requirements category=Demo link=True link-results=True link-spec=False link-design=False link-issues=False link-prerequisites=False link-collections=False link-types=False link-verification=False link-validation=False"
+
+        # Setup and tokenize in one call so the CivetExtension instance patched below is
+        # the same one used by render() (a later tokenize/render call with args/kwargs would
+        # rebuild the translator, and the extensions with it, from scratch).
+        ast = self.tokenize(text, renderer=base.MaterializeRenderer())
+        self.assertToken(
+            ast(0, 1, 1), "CivetTestBadges", size=0, prefix="common", tests={"r0"}
+        )
+
+        # "r0" is defined in python/MooseDocs/test/common/demo, so its result lookup
+        # key is "common.r0" (prefix="common", derived from that file's directory).
+        ext = next(e for e in self.translator.extensions if e.name == "civet")
+        fake_test = civet_results.Test(
+            "01_Common", "OK", None, "", 0.1, "https://civet.inl.gov"
+        )
+        ext.results = lambda name: (
+            {12345: [fake_test]} if name == "common.r0" else None
+        )
+
+        res = self.render(ast)
+        badges = list(
+            moosetree.findall(res, func=lambda n: n.get("class", None) == "new badge")
+        )
+        self.assertEqual(len(badges), 1)
+        self.assertEqual(badges[0]["data-badge-caption"], "OK")
 
 
 class TestSQAVerificationAndValidation(MooseDocsTestCase):

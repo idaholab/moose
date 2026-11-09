@@ -114,6 +114,7 @@
 #include "FVFluxBC.h"
 #include "LinearFVBoundaryCondition.h"
 #include "FVInterfaceKernel.h"
+#include "InterfaceKernelBase.h"
 #include "Reporter.h"
 #include "ADUtils.h"
 #include "Executioner.h"
@@ -138,6 +139,7 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/enum_norm_type.h"
 #include "libmesh/petsc_solver_exception.h"
+#include "libmesh/remote_elem.h"
 
 #include "metaphysicl/dualnumber.h"
 
@@ -300,6 +302,11 @@ FEProblemBase::validParams()
                         "Set to false to disable checking of boundary restricted elemental object "
                         "variable dependencies, e.g. are the variable dependencies defined on the "
                         "selected boundaries?");
+  params.addParam<bool>("interface_kernel_integrity_check",
+                        true,
+                        "Set to false to disable checking that each interface kernel's 'variable' "
+                        "is defined on the primary side and 'neighbor_var' on the secondary side "
+                        "of each of its boundaries");
   params.addParam<bool>(
       "side_uo_interface_mat_prop_integrity_check",
       true,
@@ -447,7 +454,7 @@ FEProblemBase::validParams()
   params.addParamNamesToGroup(
       "skip_nl_system_check kernel_coverage_check kernel_coverage_block_list "
       "boundary_restricted_node_integrity_check "
-      "boundary_restricted_elem_integrity_check "
+      "boundary_restricted_elem_integrity_check interface_kernel_integrity_check "
       "side_uo_interface_mat_prop_integrity_check material_coverage_check "
       "material_coverage_block_list fv_bcs_integrity_check fv_face_integrity_check "
       "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
@@ -511,7 +518,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _mesh_divisions(numThreads()),
     _functions(numThreads()),
 #ifdef MOOSE_KOKKOS_ENABLED
-    _kokkos_functions(numThreads()),
+    _kokkos_functions(/*num_threads=*/1),
 #endif
     _convergences(numThreads()),
     _nonlocal_kernels(numThreads()),
@@ -540,7 +547,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _discrete_materials(numThreads()),
     _all_materials(numThreads()),
 #ifdef MOOSE_KOKKOS_ENABLED
-    _kokkos_materials(numThreads()),
+    _kokkos_materials(/*num_threads=*/1),
 #endif
     _indicators(numThreads()),
     _internal_side_indicators(numThreads()),
@@ -587,6 +594,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         getParam<bool>("boundary_restricted_node_integrity_check")),
     _boundary_restricted_elem_integrity_check(
         getParam<bool>("boundary_restricted_elem_integrity_check")),
+    _interface_kernel_integrity_check(getParam<bool>("interface_kernel_integrity_check")),
     _side_uo_interface_mat_prop_integrity_check(
         getParam<bool>("side_uo_interface_mat_prop_integrity_check")),
     _material_coverage_check(
@@ -1589,6 +1597,109 @@ FEProblemBase::initialSetup()
     ConstBndElemRange & bnd_elems = *mesh().getBoundaryElementRange();
     BoundaryElemIntegrityCheckThread beict(*this, uo_query);
     Threads::parallel_reduce(bnd_elems, beict, numThreads());
+  }
+
+  if (_interface_kernel_integrity_check)
+  {
+    TIME_SECTION("InterfaceKernelIntegrityCheck", 5);
+
+    // Interface kernels skip any face where 'variable' is not active on the primary (element)
+    // side or 'neighbor_var' is not active on the secondary (neighbor) side, so a kernel whose
+    // variables do not match the sideset orientation silently contributes nothing.
+    // A boundary may join several block pairs, and the kernel is skipped on the faces of every
+    // pair that does not carry both variables, so each pair is checked. A face that is also on
+    // the boundary from its neighbor's side (e.g. sidesets read from Gmsh lower-dimensional
+    // elements) is visited in both orientations, and is covered if either orientation is valid.
+    // Each entry is (boundary, element block, neighbor block, whether the face is two-sided),
+    // with the flag stored as an integer because TIMPI cannot communicate bool.
+    std::set<std::tuple<BoundaryID, SubdomainID, SubdomainID, unsigned short>> face_block_pairs;
+    const auto & boundary_info = _mesh.getMesh().get_boundary_info();
+    for (const auto & bnd_elem : *_mesh.getBoundaryElementRange())
+      // A remote neighbor is paired by the processor that holds both elements
+      if (const auto * const neighbor = bnd_elem->_elem->neighbor_ptr(bnd_elem->_side);
+          neighbor && neighbor != libMesh::remote_elem)
+        face_block_pairs.emplace(
+            bnd_elem->_bnd_id,
+            bnd_elem->_elem->subdomain_id(),
+            neighbor->subdomain_id(),
+            boundary_info.has_boundary_id(
+                neighbor, neighbor->which_neighbor_am_i(bnd_elem->_elem), bnd_elem->_bnd_id));
+    _communicator.set_union(face_block_pairs);
+
+    for (const auto & nl : _nl)
+      for (const auto & ik : nl->getInterfaceKernelWarehouse().getObjects())
+        for (const auto bnd_id : ik->boundaryIDs())
+        {
+          const auto & var = ik->variable();
+          const auto & neighbor_var = ik->neighborVariable();
+          const auto block_name = [this](const SubdomainID blk)
+          {
+            const auto & name = _mesh.getSubdomainName(blk);
+            return name.empty() ? std::to_string(blk) : name;
+          };
+
+          // Whether the kernel executes on faces with 'elem_var' on the element side and
+          // 'neigh_var' on the neighbor side
+          const auto valid = [](const auto & elem_var,
+                                const auto & neigh_var,
+                                const SubdomainID elem_blk,
+                                const SubdomainID neighbor_blk)
+          {
+            return elem_var.activeOnSubdomain(elem_blk) &&
+                   neigh_var.activeOnSubdomain(neighbor_blk);
+          };
+
+          // Block pairs of the boundary on whose faces the kernel never executes, the subset of
+          // those that swapping the variables would cover, and whether swapping the variables
+          // would cover every face of the boundary. A boundary without neighbors has no pairs; it
+          // is reported as an external side during assembly.
+          std::vector<std::string> failing_pairs;
+          std::vector<std::string> flipped_pairs;
+          bool all_flipped = true;
+          for (const auto & [bid, elem_blk, neighbor_blk, two_sided] : face_block_pairs)
+            if (bid == bnd_id)
+            {
+              const bool flipped_valid =
+                  valid(neighbor_var, var, elem_blk, neighbor_blk) ||
+                  (two_sided && valid(neighbor_var, var, neighbor_blk, elem_blk));
+              if (!flipped_valid)
+                all_flipped = false;
+              if (!valid(var, neighbor_var, elem_blk, neighbor_blk) &&
+                  !(two_sided && valid(var, neighbor_var, neighbor_blk, elem_blk)))
+              {
+                const auto pair_name = block_name(elem_blk) + " -> " + block_name(neighbor_blk);
+                failing_pairs.push_back(pair_name);
+                if (flipped_valid)
+                  flipped_pairs.push_back(pair_name);
+              }
+            }
+          if (failing_pairs.empty())
+            continue;
+
+          std::string flipped_hint;
+          if (!flipped_pairs.empty())
+            flipped_hint =
+                "\nThe variables appear to be flipped relative to the boundary "
+                "orientation on block pair(s) " +
+                MooseUtils::join(flipped_pairs, ", ") +
+                (all_flipped ? "; swap 'variable' and 'neighbor_var', or reverse the "
+                               "orientation of the boundary."
+                             : "; reverse the orientation of the boundary on those pairs.");
+
+          ik->paramError(
+              "boundary",
+              "The interface kernel will not contribute on all or part of boundary '",
+              _mesh.getBoundaryName(bnd_id),
+              "': 'variable' (",
+              var.name(),
+              ") must be defined on the primary (element) side and 'neighbor_var' (",
+              neighbor_var.name(),
+              ") on the secondary (neighbor) side of each face. Failing block pair(s) (primary -> "
+              "secondary): ",
+              MooseUtils::join(failing_pairs, ", "),
+              ".",
+              flipped_hint);
+        }
   }
 
   if (_fv_face_integrity_check)
@@ -5464,13 +5575,22 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
 {
   std::vector<UserObject *> objs;
   query.queryInto(objs);
+  // The same user objects exist on every process, so every process returns here or none does
+  if (objs.empty())
+    return;
+
   if (!isgen)
   {
     // join all threaded user objects (i.e. not regular general user objects) to the primary
     // thread
-    for (auto obj : objs)
-      if (obj->primaryThreadCopy())
-        obj->primaryThreadCopy()->threadJoin(*obj);
+    translateUserObjectExceptions(
+        [&objs]()
+        {
+          for (auto obj : objs)
+            if (obj->primaryThreadCopy())
+              obj->primaryThreadCopy()->threadJoin(*obj);
+        });
+    checkExceptionAndStopSolve();
   }
 
   query.condition<AttribThread>(0).queryInto(objs);
@@ -5486,11 +5606,19 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
       if (shouldPrintExecution(0))
         _console << "[DBG] Initializing, executing & finalizing general UO '" << obj->name()
                  << "' on " << _current_execute_on_flag.name() << std::endl;
-      obj->initialize();
-      obj->execute();
+      translateUserObjectExceptions(
+          [obj]()
+          {
+            obj->initialize();
+            obj->execute();
+          });
+      checkExceptionAndStopSolve();
     }
 
-    obj->finalize();
+    // An exception raised by finalize() is communicated once all objects have been finalized, so
+    // that a process raising one does not skip the communication in the finalize() of the
+    // remaining objects
+    translateUserObjectExceptions([obj]() { obj->finalize(); });
 
     // These have to be stored piecemeal (with every call to this function) because general
     // postprocessors (which run last after other userobjects have been completed) might depend on
@@ -5513,6 +5641,8 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
     if (reporter)
       _reporter_data.finalize(obj->name());
   }
+
+  checkExceptionAndStopSolve();
 }
 
 TheWarehouse::Query
@@ -5611,193 +5741,226 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
 void
 FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehouse::Query & query)
 {
-  try
-  {
-    TIME_SECTION("computeUserObjects", 1, "Computing User Objects");
+  TIME_SECTION("computeUserObjects", 1, "Computing User Objects");
 
-    std::vector<GeneralUserObject *> genobjs;
-    query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject).queryInto(genobjs);
+  std::vector<GeneralUserObject *> genobjs;
+  query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject).queryInto(genobjs);
 
-    std::vector<UserObject *> userobjs;
-    query.clone()
-        .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
-                                     Interfaces::InternalSideUserObject |
-                                     Interfaces::InterfaceUserObject | Interfaces::DomainUserObject)
-        .queryInto(userobjs);
+  std::vector<UserObject *> userobjs;
+  query.clone()
+      .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
+                                   Interfaces::InternalSideUserObject |
+                                   Interfaces::InterfaceUserObject | Interfaces::DomainUserObject)
+      .queryInto(userobjs);
 
-    std::vector<UserObject *> tgobjs;
-    query.clone()
-        .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
-        .queryInto(tgobjs);
+  std::vector<UserObject *> tgobjs;
+  query.clone()
+      .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
+      .queryInto(tgobjs);
 
-    std::vector<UserObject *> nodal;
-    query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).queryInto(nodal);
+  std::vector<UserObject *> nodal;
+  query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).queryInto(nodal);
 
-    std::vector<MortarUserObject *> mortar;
-    query.clone().condition<AttribInterfaces>(Interfaces::MortarUserObject).queryInto(mortar);
+  std::vector<MortarUserObject *> mortar;
+  query.clone().condition<AttribInterfaces>(Interfaces::MortarUserObject).queryInto(mortar);
 
-    if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty() && mortar.empty())
-      return;
+  if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty() && mortar.empty())
+    return;
 
-    // Start the timer here since we have at least one active user object
-    std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
+  // Start the timer here since we have at least one active user object
+  std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
 
-    // Perform Residual/Jacobian setups
-    if (type == EXEC_LINEAR)
-    {
-      for (auto obj : userobjs)
-        obj->residualSetup();
-      for (auto obj : nodal)
-        obj->residualSetup();
-      for (auto obj : mortar)
-        obj->residualSetup();
-      for (auto obj : tgobjs)
-        obj->residualSetup();
-      for (auto obj : genobjs)
-        obj->residualSetup();
-    }
-    else if (type == EXEC_NONLINEAR)
-    {
-      for (auto obj : userobjs)
-        obj->jacobianSetup();
-      for (auto obj : nodal)
-        obj->jacobianSetup();
-      for (auto obj : mortar)
-        obj->jacobianSetup();
-      for (auto obj : tgobjs)
-        obj->jacobianSetup();
-      for (auto obj : genobjs)
-        obj->jacobianSetup();
-    }
-
-    for (auto obj : userobjs)
-      obj->initialize();
-
-    // Execute Side/InternalSide/Interface/Elemental/DomainUserObjects
-    if (!userobjs.empty())
-    {
-      // non-nodal user objects have to be run separately before the nodal user objects run
-      // because some nodal user objects (NodalNormal related) depend on elemental user objects
-      // :-(
-      ComputeUserObjectsThread cppt(*this, query);
-      Threads::parallel_reduce(getCurrentAlgebraicElementRange(), cppt, numThreads());
-
-      // There is one instance in rattlesnake where an elemental user object's finalize depends
-      // on a side user object having been finalized first :-(
-      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::SideUserObject));
-      joinAndFinalize(
-          query.clone().condition<AttribInterfaces>(Interfaces::InternalSideUserObject));
-      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InterfaceUserObject));
-      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::ElementUserObject));
-      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::DomainUserObject));
-    }
-
-    // if any elemental user object may have written to variables we need to close the aux solution
-    for (const auto & uo : userobjs)
-      if (auto euo = dynamic_cast<const ElementUserObject *>(uo);
-          euo && euo->hasWritableCoupledVariables())
+  // Each phase of process-local work below is followed by a check for an exception on any process
+  // before the phase's user objects are finalized, because finalization communicates. An exception
+  // stops the execution of user objects on all processes, so that none is finalized with partial
+  // data
+  translateUserObjectExceptions(
+      [&]()
       {
-        _aux->solution().close();
-        _aux->system().update();
-        break;
-      }
-
-    // Execute NodalUserObjects
-    // BISON has an axial reloc elemental user object that has a finalize func that depends on a
-    // nodal user object's prev value. So we can't initialize this until after elemental objects
-    // have been finalized :-(
-    for (auto obj : nodal)
-      obj->initialize();
-    if (query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).count() > 0)
-    {
-      ComputeNodalUserObjectsThread cnppt(*this, query);
-      Threads::parallel_reduce(getCurrentAlgebraicNodeRange(), cnppt, numThreads());
-      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject));
-    }
-
-    // if any nodal user object may have written to variables we need to close the aux solution
-    for (const auto & uo : nodal)
-      if (auto nuo = dynamic_cast<const NodalUserObject *>(uo);
-          nuo && nuo->hasWritableCoupledVariables())
-      {
-        _aux->solution().close();
-        _aux->system().update();
-        break;
-      }
-
-    // Execute MortarUserObjects
-    {
-      for (auto obj : mortar)
-        obj->initialize();
-      if (!mortar.empty())
-      {
-        auto create_and_run_mortar_functors = [this, type, &mortar](const bool displaced)
+        // Perform Residual/Jacobian setups
+        if (type == EXEC_LINEAR)
         {
-          // go over mortar interfaces and construct functors
-          const auto & mortar_interfaces = getMortarInterfaces(displaced);
-          for (const auto & [primary_secondary_boundary_pair, interface_config] : mortar_interfaces)
-          {
-            auto mortar_uos_to_execute =
-                getMortarUserObjects(primary_secondary_boundary_pair.first,
-                                     primary_secondary_boundary_pair.second,
-                                     displaced,
-                                     mortar);
+          for (auto obj : userobjs)
+            obj->residualSetup();
+          for (auto obj : nodal)
+            obj->residualSetup();
+          for (auto obj : mortar)
+            obj->residualSetup();
+          for (auto obj : tgobjs)
+            obj->residualSetup();
+          for (auto obj : genobjs)
+            obj->residualSetup();
+        }
+        else if (type == EXEC_NONLINEAR)
+        {
+          for (auto obj : userobjs)
+            obj->jacobianSetup();
+          for (auto obj : nodal)
+            obj->jacobianSetup();
+          for (auto obj : mortar)
+            obj->jacobianSetup();
+          for (auto obj : tgobjs)
+            obj->jacobianSetup();
+          for (auto obj : genobjs)
+            obj->jacobianSetup();
+        }
 
-            auto * const subproblem = displaced ? cast_ptr<SubProblem *>(_displaced_problem.get())
-                                                : cast_ptr<SubProblem *>(this);
-            MortarUserObjectThread muot(mortar_uos_to_execute,
-                                        *interface_config.amg,
-                                        *subproblem,
-                                        *this,
-                                        displaced,
-                                        subproblem->assembly(0, 0));
+        for (auto obj : userobjs)
+          obj->initialize();
 
-            muot();
-          }
-        };
+        // Execute Side/InternalSide/Interface/Elemental/DomainUserObjects
+        if (!userobjs.empty())
+        {
+          // non-nodal user objects have to be run separately before the nodal user objects run
+          // because some nodal user objects (NodalNormal related) depend on elemental user objects
+          // :-(
+          ComputeUserObjectsThread cppt(*this, query);
+          Threads::parallel_reduce(getCurrentAlgebraicElementRange(), cppt, numThreads());
+        }
+      });
+  checkExceptionAndStopSolve();
 
-        create_and_run_mortar_functors(false);
-        if (_displaced_problem)
-          create_and_run_mortar_functors(true);
-      }
-      for (auto obj : mortar)
-        obj->finalize();
-    }
-
-    // Execute threaded general user objects
-    for (auto obj : tgobjs)
-      obj->initialize();
-    std::vector<GeneralUserObject *> tguos_zero;
-    query.clone()
-        .condition<AttribThread>(0)
-        .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
-        .queryInto(tguos_zero);
-    for (auto obj : tguos_zero)
-    {
-      std::vector<GeneralUserObject *> tguos;
-      auto q = query.clone()
-                   .condition<AttribName>(obj->name())
-                   .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject);
-      q.queryInto(tguos);
-
-      ComputeThreadedGeneralUserObjectsThread ctguot(*this);
-
-      // Force one thread per ThreadedGeneralUserObject via grainsize
-      Threads::parallel_reduce(GeneralUserObjectRange(tguos.begin(),
-                                                      tguos.end(),
-                                                      /*grainsize=*/1),
-                               ctguot,
-                               numThreads());
-      joinAndFinalize(q);
-    }
-
-    // Execute general user objects
-    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject), true);
-  }
-  catch (...)
+  if (!userobjs.empty())
   {
-    handleException("computeUserObjectsInternal");
+    // There is one instance in rattlesnake where an elemental user object's finalize depends
+    // on a side user object having been finalized first :-(
+    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::SideUserObject));
+    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InternalSideUserObject));
+    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InterfaceUserObject));
+    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::ElementUserObject));
+    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::DomainUserObject));
   }
+
+  // if any elemental user object may have written to variables we need to close the aux solution
+  for (const auto & uo : userobjs)
+    if (auto euo = dynamic_cast<const ElementUserObject *>(uo);
+        euo && euo->hasWritableCoupledVariables())
+    {
+      _aux->solution().close();
+      _aux->system().update();
+      break;
+    }
+
+  // Execute NodalUserObjects
+  // BISON has an axial reloc elemental user object that has a finalize func that depends on a
+  // nodal user object's prev value. So we can't initialize this until after elemental objects
+  // have been finalized :-(
+  if (!nodal.empty())
+  {
+    translateUserObjectExceptions(
+        [&]()
+        {
+          for (auto obj : nodal)
+            obj->initialize();
+          ComputeNodalUserObjectsThread cnppt(*this, query);
+          Threads::parallel_reduce(getCurrentAlgebraicNodeRange(), cnppt, numThreads());
+        });
+    checkExceptionAndStopSolve();
+    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject));
+  }
+
+  // if any nodal user object may have written to variables we need to close the aux solution
+  for (const auto & uo : nodal)
+    if (auto nuo = dynamic_cast<const NodalUserObject *>(uo);
+        nuo && nuo->hasWritableCoupledVariables())
+    {
+      _aux->solution().close();
+      _aux->system().update();
+      break;
+    }
+
+  // Execute MortarUserObjects
+  if (!mortar.empty())
+  {
+    translateUserObjectExceptions(
+        [this, type, &mortar]()
+        {
+          for (auto obj : mortar)
+            obj->initialize();
+
+          auto create_and_run_mortar_functors = [this, type, &mortar](const bool displaced)
+          {
+            // go over mortar interfaces and construct functors
+            const auto & mortar_interfaces = getMortarInterfaces(displaced);
+            for (const auto & [primary_secondary_boundary_pair, interface_config] :
+                 mortar_interfaces)
+            {
+              auto mortar_uos_to_execute =
+                  getMortarUserObjects(primary_secondary_boundary_pair.first,
+                                       primary_secondary_boundary_pair.second,
+                                       displaced,
+                                       mortar);
+
+              auto * const subproblem = displaced ? cast_ptr<SubProblem *>(_displaced_problem.get())
+                                                  : cast_ptr<SubProblem *>(this);
+              MortarUserObjectThread muot(mortar_uos_to_execute,
+                                          *interface_config.amg,
+                                          *subproblem,
+                                          *this,
+                                          displaced,
+                                          subproblem->assembly(0, 0));
+
+              muot();
+            }
+          };
+
+          create_and_run_mortar_functors(false);
+          if (_displaced_problem)
+            create_and_run_mortar_functors(true);
+        });
+    checkExceptionAndStopSolve();
+
+    translateUserObjectExceptions(
+        [&mortar]()
+        {
+          for (auto obj : mortar)
+            obj->finalize();
+        });
+    checkExceptionAndStopSolve();
+  }
+
+  // Execute threaded general user objects
+  if (!tgobjs.empty())
+  {
+    translateUserObjectExceptions(
+        [&tgobjs]()
+        {
+          for (auto obj : tgobjs)
+            obj->initialize();
+        });
+    checkExceptionAndStopSolve();
+  }
+  std::vector<GeneralUserObject *> tguos_zero;
+  query.clone()
+      .condition<AttribThread>(0)
+      .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
+      .queryInto(tguos_zero);
+  for (auto obj : tguos_zero)
+  {
+    std::vector<GeneralUserObject *> tguos;
+    auto q = query.clone()
+                 .condition<AttribName>(obj->name())
+                 .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject);
+    q.queryInto(tguos);
+
+    translateUserObjectExceptions(
+        [this, &tguos]()
+        {
+          ComputeThreadedGeneralUserObjectsThread ctguot(*this);
+
+          // Force one thread per ThreadedGeneralUserObject via grainsize
+          Threads::parallel_reduce(GeneralUserObjectRange(tguos.begin(),
+                                                          tguos.end(),
+                                                          /*grainsize=*/1),
+                                   ctguot,
+                                   numThreads());
+        });
+    checkExceptionAndStopSolve();
+    joinAndFinalize(q);
+  }
+
+  // Execute general user objects
+  joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject), true);
 }
 
 void
@@ -7494,7 +7657,7 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 
       // Repropagate the exception, so it can be caught at a higher level, typically
       // this is NonlinearSystem::computeResidual().
-      throw MooseException(_exception_message);
+      throw MooseHandledException(_exception_message);
     }
     else
       mooseError("The following parallel-communicated exception was detected during " +
@@ -8177,7 +8340,7 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
 }
 
 void
-FEProblemBase::handleException(const std::string & calling_method)
+FEProblemBase::translateCaughtException(const std::string & calling_method)
 {
   auto create_exception_message =
       [&calling_method](const std::string & exception_type, const auto & exception)
@@ -8188,6 +8351,11 @@ FEProblemBase::handleException(const std::string & calling_method)
 
   try
   {
+    throw;
+  }
+  catch (const MooseHandledException &)
+  {
+    // Already communicated to all processes and the solve has been stopped
     throw;
   }
   catch (const MooseException & e)
@@ -8227,8 +8395,26 @@ FEProblemBase::handleException(const std::string & calling_method)
         setException(message);
     }
   }
+}
 
+void
+FEProblemBase::handleException(const std::string & calling_method)
+{
+  translateCaughtException(calling_method);
   checkExceptionAndStopSolve();
+}
+
+void
+FEProblemBase::translateUserObjectExceptions(const std::function<void()> & work)
+{
+  try
+  {
+    work();
+  }
+  catch (...)
+  {
+    translateCaughtException("computeUserObjectsInternal");
+  }
 }
 
 void

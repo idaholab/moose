@@ -1,0 +1,10 @@
+[Tests]
+  design = 'NaClFluidProperties.md'
+  issues = '#34070'
+
+  [cv]
+    type = GoogleTest
+    unit_test = NaClFluidPropertiesTest.cv
+    requirement = 'The system shall compute the isochoric heat capacity of halite from its isobaric heat capacity, thermal expansion coefficient and isothermal compressibility.'
+  []
+[]

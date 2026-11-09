@@ -84,6 +84,13 @@ MOOSEQuantityToNEML2<T, state>::MOOSEQuantityToNEML2(const InputParameters & par
     _batched(_type != NEML2Utils::MOOSEIOType::TIME && _type != NEML2Utils::MOOSEIOType::SCALAR)
 #endif
 {
+#ifdef NEML2_ENABLED
+  // The variable is accessed directly rather than through the Coupleable interface, so the
+  // dependency must be declared explicitly for the variable to be reinitialized on each element.
+  if (_type == NEML2Utils::MOOSEIOType::VARIABLE)
+    addMooseVariableDependency(
+        &this->_fe_problem.getStandardVariable(_tid, getParam<std::string>("from_moose")));
+#endif
 }
 
 #ifdef NEML2_ENABLED

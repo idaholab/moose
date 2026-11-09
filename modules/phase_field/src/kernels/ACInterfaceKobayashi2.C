@@ -56,8 +56,9 @@ ACInterfaceKobayashi2::precomputeQpJacobian()
   Real depsdop_i = _depsdgrad_op[_qp] * _grad_phi[_j][_qp];
 
   // Set Jacobian using product rule
-  return _L[_qp] *
-         (_eps[_qp] * _eps[_qp] * _grad_phi[_j][_qp] + 2.0 * _eps[_qp] * depsdop_i * _grad_u[_qp]);
+  return _L[_qp] * (_eps[_qp] * _eps[_qp] * _grad_phi[_j][_qp] +
+                    2.0 * _eps[_qp] * depsdop_i * _grad_u[_qp]) +
+         _eps[_qp] * _eps[_qp] * _dLdop[_qp] * _phi[_j][_qp] * _grad_u[_qp];
 }
 
 Real

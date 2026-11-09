@@ -282,7 +282,7 @@ MethaneFluidProperties::dalpha_dtau(Real delta, Real tau) const
     dalphar += _N3[i] * MathUtils::pow(delta, _d3[i]) * std::pow(tau, _t3[i]) *
                std::exp(-_alpha3[i] * Utility::pow<2>(delta - _D3[i]) -
                         _beta3[i] * Utility::pow<2>(tau - _gamma3[i])) *
-               (_t3[i] + tau * (2.0 * _beta3[i] * (tau - _gamma3[i])));
+               (_t3[i] - tau * (2.0 * _beta3[i] * (tau - _gamma3[i])));
 
   // The Helmholtz free energy is the sum of these two
   return dalpha0 + dalphar / tau;
@@ -349,8 +349,8 @@ MethaneFluidProperties::d2alpha_dtau2(Real delta, Real tau) const
     dalphar += _N3[i] * MathUtils::pow(delta, _d3[i]) * std::pow(tau, _t3[i]) *
                std::exp(-_alpha3[i] * Utility::pow<2>(delta - _D3[i]) -
                         _beta3[i] * Utility::pow<2>(tau - _gamma3[i])) *
-               (tau * _t3[i] - _beta3[i] * tau * tau * MathUtils::pow(tau - _gamma3[i], 2) -
-                _t3[i] - 2.0 * tau * tau * _beta3[i]);
+               (Utility::pow<2>(_t3[i] - 2.0 * _beta3[i] * tau * (tau - _gamma3[i])) - _t3[i] -
+                2.0 * tau * tau * _beta3[i]);
 
   // The Helmholtz free energy is the sum of these two
   return dalpha0 + dalphar / tau / tau;
@@ -374,8 +374,8 @@ MethaneFluidProperties::d2alpha_ddeltatau(Real delta, Real tau) const
     dalphar += _N3[i] * std::pow(delta, _d3[i]) * std::pow(tau, _t3[i]) *
                std::exp(-_alpha3[i] * Utility::pow<2>(delta - _D3[i]) -
                         _beta3[i] * Utility::pow<2>(tau - _gamma3[i])) *
-               (_d3[i] - 2.0 * _alpha3[i] * delta * (delta - _D3[i]) *
-                             (_t3[i] - 2.0 * _beta3[i] * tau * (tau - _gamma3[i])));
+               (_d3[i] - 2.0 * _alpha3[i] * delta * (delta - _D3[i])) *
+               (_t3[i] - 2.0 * _beta3[i] * tau * (tau - _gamma3[i]));
 
   // The Helmholtz free energy is the sum of these two
   return dalphar / delta / tau;

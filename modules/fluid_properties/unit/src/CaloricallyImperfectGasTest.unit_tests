@@ -1,0 +1,20 @@
+[Tests]
+  design = 'CaloricallyImperfectGas.md'
+  issues = '#34070'
+
+  [sound_speed_varying_gamma]
+    type = GoogleTest
+    unit_test = CaloricallyImperfectGasTest.soundSpeedVaryingGamma
+    requirement = 'The system shall compute the derivatives of the speed of sound of a calorically imperfect gas with respect to specific volume and internal energy when the specific heat ratio varies with temperature.'
+  []
+  [lookup_table_bounds]
+    type = GoogleTest
+    unit_test = CaloricallyImperfectGasTest.lookupTableBounds
+    requirement = 'The system shall evaluate the temperature and entropy of a calorically imperfect gas at the bounds of its tabulated temperature range, and return values clamped to those bounds outside of it when out-of-bounds errors are disabled.'
+  []
+  [derivatives_at_edge_states]
+    type = GoogleTest
+    unit_test = CaloricallyImperfectGasTest.derivativesAtEdgeStates
+    requirement = 'The system shall compute finite derivatives of the pressure from enthalpy and entropy of a calorically imperfect gas at zero entropy, and of its isobaric heat capacity and viscosity at the maximum tabulated temperature.'
+  []
+[]

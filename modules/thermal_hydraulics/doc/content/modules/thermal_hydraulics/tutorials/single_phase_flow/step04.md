@@ -35,22 +35,25 @@ Because the system is now closed, we add a simple pressurizer to maintain the sy
 
 ## Control Logic
 
-Control logic is a system that allows users to monitor the simulation and change its parameters
-while it is running.
+The [ChainControls](syntax/ChainControls/index.md) system allows users to monitor the simulation
+and change its parameters while it is running.
 
 The system consists of 3 layers:
 
-1. +input layer:+ which brings values from the simulation inside the control logic system
+1. +input layer:+ which brings values from the simulation inside the control data system
 2. +execution layer:+ which performs the prescribed operations
 3. +output layer:+ that feeds the values back into simulation
 
-All control logic blocks should be included in the top-level `[ControlLogic]` block.
+All control blocks should be included in the top-level `[ChainControls]` block.
+Here, each control sets `execute_on = 'INITIAL TIMESTEP_BEGIN'` so that the controlled
+parameters are updated before each time step is solved; by default, controls execute at the
+end of the time step.
 
 ## Setup PID
 
 A PID control requires several values as an input: set point `set_point`, input value `input`,
-initial value `initial_value`, and three constants `K_p`, `K_i`, and `K_d`, which are the coefficients
-for the proportional, integral, and derivative terms, respectively.
+initial integral `initial_integral`, and three constants `K_p`, `K_i`, and `K_d`, which are the
+coefficients for the proportional, integral, and derivative terms, respectively.
 
 For the input value, we set up a postprocessor `m_dot_pump` with type `ADFlowJunctionFlux1Phase`
 which will be measuring the outlet mass flow rate from the pump.
@@ -59,35 +62,45 @@ which will be measuring the outlet mass flow rate from the pump.
          block=Postprocessors/m_dot_pump
          link=False
 
-A set point will be our desired mass flow rate specified by the global parameter `m_dot_in`.
-To bring this value into the control logic system, we need to use `GetFunctionValueControl` block
-like so:
+To bring this value into the control data system, we use a [GetPostprocessorChainControl.md]
+block. Setting `name_data_same_as_postprocessor = true` makes the control data available under
+the name of the postprocessor, `m_dot_pump`:
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/04_loop.i
-         block=ControlLogic/set_point
+         block=ChainControls/get_m_dot_pump
          link=False
 
-This value will be available in the control logic system as `set_point:value` (in general
+A set point will be our desired mass flow rate specified by the global parameter `m_dot_in`.
+To bring this value into the control data system, we need to use a
+[GetFunctionValueChainControl.md] block like so:
+
+!listing thermal_hydraulics/tutorials/single_phase_flow/04_loop.i
+         block=ChainControls/set_point
+         link=False
+
+This value will be available in the control data system as `set_point:value` (in general
 `control_block_name:value`).
 
-Then, we add the PID control block as follows:
+Then, we add the PID control block, [PIDChainControl.md], as follows:
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/04_loop.i
-         block=ControlLogic/pid
+         block=ChainControls/pid
          link=False
 
-The value computed by the PID control is available in the control logic system under the name
-`pid:output`, where `pid` is the name of the block.
+The value computed by the PID control is available in the control data system under the name
+`pid:value`, where `pid` is the name of the block.
 
 As a last step, we need to feed this value back into the system.
-That can be done via `SetComponentRealValueControl` block.
+That can be done via a [SetValueChainControl.md] block.
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/04_loop.i
-         block=ControlLogic/set_pump_head
+         block=ChainControls/set_pump_head
          link=False
 
-The parameter to control is specified via a `component` and `parameter` parameters, which are
-the component name and the parameter name of that component we want to modify.
+The parameter to control is specified via the `parameter` parameter. For a component parameter,
+it has the form `component::<component_name>/<parameter_name>`, where `<component_name>` and
+`<parameter_name>` are the component name and the parameter name of that component we want to
+modify.
 
 
 !content pagination previous=tutorials/single_phase_flow/step03.md

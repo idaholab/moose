@@ -27,7 +27,8 @@ public:
 
   MFEMBlockRestrictable(const InputParameters & parameters, const mfem::ParMesh & mfem_mesh);
 
-  mfem::Array<int> subdomainsToAttributes();
+  /// Converts the block names and IDs to mesh attributes, checking that the mesh has them.
+  mfem::Array<int> subdomainsToAttributes(const InputParameters & parameters);
   std::vector<std::string> subdomainsToStrings();
 
   /// Returns a bool indicating if the object is restricted to a subset of subdomains.

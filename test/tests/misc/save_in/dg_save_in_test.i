@@ -55,6 +55,7 @@
     type = RobinBC
     boundary = 'left right top bottom'
     variable = u
+    coefficient = 2
     save_in = 'tot_resid'
   [../]
 []

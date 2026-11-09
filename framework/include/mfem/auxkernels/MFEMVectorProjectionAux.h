@@ -14,7 +14,8 @@
 #include "MFEMAuxKernel.h"
 
 /**
- * Projects a vector coefficient onto a vector-valued auxvariable.
+ * Projects a vector coefficient, optionally scaled by a scalar coefficient, onto a vector-valued
+ * auxvariable.
  */
 class MFEMVectorProjectionAux : public MFEMAuxKernel
 {
@@ -28,8 +29,8 @@ public:
   virtual void execute() override;
 
 protected:
-  /// Reference to source coefficient.
-  mfem::VectorCoefficient & _vec_coef;
+  /// Product of the scalar and vector source coefficients.
+  mfem::ScalarVectorProductCoefficient _vec_coef;
 };
 
 #endif

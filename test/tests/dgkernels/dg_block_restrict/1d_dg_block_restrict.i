@@ -109,6 +109,7 @@
     type = RobinBC
     variable = u
     boundary = 'primary0_interface'
+    coefficient = 2
   []
   [primary1_interface]
     type = InflowBC
@@ -121,6 +122,7 @@
     type = RobinBC
     variable = v
     boundary = 'right'
+    coefficient = 2
   []
 []
 

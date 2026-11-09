@@ -153,6 +153,7 @@
                   Outputs/file_base=subdomain_elem_qualities_out'
       skip_keys = 'part number_of_parts'
       # has been observed at >350MB usage
+      min_slots = 2
 
       detail = "includes selected element quality metrics on subdomains"
     []

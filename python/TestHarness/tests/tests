@@ -73,6 +73,16 @@
     requirement = "The system shall report a failure if a test is missing its gold file"
     collections = 'FAILURE_ANALYSIS'
   []
+  [missing_output]
+    type = PythonUnitTest
+    input = test_MissingOutput.py
+    min_slots = 2 # calls TestHarness, which could use threads
+    # diff and write_results run the diffs fixture, which writes the same exodiff_out.e
+    prereq = 'diff write_results'
+    requirement = "The system shall report a failure if a test does not produce the file it is to compare against its gold file"
+    issues = '#21309'
+    collections = 'FAILURE_ANALYSIS'
+  []
   [expect]
     type = PythonUnitTest
     input = test_Expect.py
@@ -228,12 +238,19 @@
     requirement = "The system shall keep output that is not valid UTF-8 as escapes and describe the location of each invalid sequence."
     issues = '#34111'
   []
+  [null_output]
+    type = PythonUnitTest
+    input = test_NullOutput.py
+    min_slots = 2 # calls TestHarness, which could use threads
+    requirement = "The system shall flag NULL characters in the output of executed commands as invalid output characters with a caveat, and determine the test result from the test's own checks."
+    issues = '#34111'
+  []
   [failed_tests]
     type = PythonUnitTest
     input = test_FailedTests.py
     min_slots = 2 # calls TestHarness, which could use threads
-    requirement = "The system shall run only tests which previously have failed"
-    issues = '#14512'
+    requirement = "The system shall run only tests which previously have failed and mark those that now pass as passing in the previous results, unless all of them now pass or it is requested to leave the previous results unchanged"
+    issues = '#14512 #33905'
   []
   [python_version]
     type = PythonUnitTest

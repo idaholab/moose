@@ -18,19 +18,26 @@ MFEMComplexVectorProjectionAux::validParams()
 {
   InputParameters params = MFEMComplexAuxKernel::validParams();
   params.addClassDescription(
-      "Projects a a real and imaginary vector coefficient onto a complex vector MFEM auxvariable.");
+      "Projects a real and imaginary vector coefficient, optionally scaled by a real scalar "
+      "coefficient, onto a complex vector MFEM auxvariable.");
   params.addRequiredParam<MFEMVectorCoefficientName>(
       "vector_coefficient_real", "Name of the real part of the vector coefficient to project.");
   params.addRequiredParam<MFEMVectorCoefficientName>(
       "vector_coefficient_imag",
       "Name of the imaginary part of the vector coefficient to project.");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient",
+      "1.",
+      "Name of the real scalar coefficient k to scale both parts of the vector coefficient by.");
   return params;
 }
 
 MFEMComplexVectorProjectionAux::MFEMComplexVectorProjectionAux(const InputParameters & parameters)
   : MFEMComplexAuxKernel(parameters),
-    _vec_coef_real(getVectorCoefficient("vector_coefficient_real")),
-    _vec_coef_imag(getVectorCoefficient("vector_coefficient_imag"))
+    _vec_coef_real(getScalarCoefficient("coefficient"),
+                   getVectorCoefficient("vector_coefficient_real")),
+    _vec_coef_imag(getScalarCoefficient("coefficient"),
+                   getVectorCoefficient("vector_coefficient_imag"))
 {
 }
 

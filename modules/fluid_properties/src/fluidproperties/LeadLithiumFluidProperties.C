@@ -230,7 +230,7 @@ LeadLithiumFluidProperties::k_from_v_e(Real v, Real e) const
 {
   Real T = T_from_v_e(v, e);
   if (T < _T_mo || T > 873)
-    flagInvalidSolution("Temperature out of bounds for the PbLi dynamic viscosity computation");
+    flagInvalidSolution("Temperature out of bounds for the PbLi thermal conductivity computation");
   return 14.51 + 1.9631e-2 * (T - 273.15);
 }
 
@@ -393,7 +393,7 @@ Real
 LeadLithiumFluidProperties::k_from_p_T(Real /*p*/, Real T) const
 {
   if (T < _T_mo || T > 873)
-    flagInvalidSolution("Temperature out of bounds for the PbLi dynamic viscosity computation");
+    flagInvalidSolution("Temperature out of bounds for the PbLi thermal conductivity computation");
   return 14.51 + 1.9631e-2 * (T - 273.15);
 }
 

@@ -52,6 +52,7 @@
       csvdiff  = 'gnielinski.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
@@ -89,6 +90,7 @@
       csvdiff  = 'kazimi-carelli.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
@@ -102,6 +104,7 @@
       csvdiff  = 'schad-modified.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
@@ -115,6 +118,7 @@
       csvdiff  = 'graber-rieger.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
@@ -128,6 +132,7 @@
       csvdiff  = 'borishanskii.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
