@@ -6,6 +6,6 @@
     input = 'max_h_level.i'
     exodiff = 'max_h_level_out.e-s003'
     recover = false
-    requirement = "The Adaptivity system shall be capable of restricting the element refinement level."
+    requirement = "The system shall, through the Adaptivity system, be capable of restricting the element refinement level."
   [../]
 []

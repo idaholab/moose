@@ -2,7 +2,7 @@
   issues = '#15795 #17100 #17239 #21383 #27486 #30275 #28132'
   design = 'CoupledVarThresholdElementSubdomainModifier.md VariableValueElementSubdomainModifier.md'
   [group]
-    requirement = 'The framework shall include the ability to change element subdomain during simulation'
+    requirement = 'The system shall include the ability to change element subdomain during simulation'
 
     [reversible]
       type = 'Exodiff'
@@ -49,7 +49,7 @@
   []
 
   [boundary]
-    requirement = 'The framework shall update the boundary over elements that change subdomain, with the ability to'
+    requirement = 'The system shall update the boundary over elements that change subdomain, with the ability to'
 
     [moving_boundary]
       type = 'Exodiff'
@@ -97,7 +97,7 @@
   []
 
   [reinitialization]
-    requirement = 'The framework shall include the ability to change element subdomain during simulation with reinitialization of'
+    requirement = 'The system shall include the ability to change element subdomain during simulation with reinitialization of'
 
     [all]
       type = 'Exodiff'
@@ -132,7 +132,7 @@
     type = 'Exodiff'
     input = 'steady.i'
     exodiff = 'steady_out.e'
-    requirement = 'The framework shall include the ability to change element subdomain for a steady state simulation'
+    requirement = 'The system shall include the ability to change element subdomain for a steady state simulation'
   []
 
   [subdomain_caching]
@@ -151,7 +151,7 @@
     exodiff = 'adaptivity_moving_boundary_out.e
     adaptivity_moving_boundary_out.e-s002 adaptivity_moving_boundary_out.e-s003 adaptivity_moving_boundary_out.e-s004 adaptivity_moving_boundary_out.e-s005'
     mesh_mode = 'REPLICATED'
-    requirement = 'The framework shall support adaptive mesh refinement in the element subdomain modifier'
+    requirement = 'The system shall support adaptive mesh refinement in the element subdomain modifier'
   []
 
   [amr_moving_boundary_3d]
@@ -160,7 +160,7 @@
     exodiff = 'adaptivity_moving_boundary_3d_out.e
     adaptivity_moving_boundary_3d_out.e-s002 adaptivity_moving_boundary_3d_out.e-s003 adaptivity_moving_boundary_3d_out.e-s004 adaptivity_moving_boundary_3d_out.e-s005'
     mesh_mode = 'REPLICATED'
-    requirement = 'The framework shall support adaptive mesh refinement in the element subdomain modifier for 3D problems'
+    requirement = 'The system shall support adaptive mesh refinement in the element subdomain modifier for 3D problems'
   []
 
   [amr_bc]
@@ -168,7 +168,7 @@
     input = 'amr_bc.i'
     exodiff = 'amr_bc_out.e amr_bc_out.e-s002 amr_bc_out.e-s003 amr_bc_out.e-s004 amr_bc_out.e-s005'
     mesh_mode = 'REPLICATED'
-    requirement = 'The framework shall support applying nodal BCs on the moving boundary with AMR in the element subdomain modifier'
+    requirement = 'The system shall support applying nodal BCs on the moving boundary with AMR in the element subdomain modifier'
   []
 
   [amr_nbc]
@@ -178,7 +178,7 @@
     exodiff = 'amr_integral_bc_out.e amr_integral_bc_out.e-s002
     amr_integral_bc_out.e-s003 amr_integral_bc_out.e-s004 amr_integral_bc_out.e-s005'
     mesh_mode = 'REPLICATED'
-    requirement = 'The framework shall support applying integral BCs on the moving boundary with AMR in the element subdomain modifier'
+    requirement = 'The system shall support applying integral BCs on the moving boundary with AMR in the element subdomain modifier'
   []
 
   [error-distributed]
@@ -204,7 +204,7 @@
     cli_args = "Functions/fcn/expression='100' Executioner/num_steps=1 "
                "Outputs/file_base='var_block_id_warning_out'"
     exodiff = 'var_block_id_warning_out.e'
-    requirement = 'When the desired value is not present in the subdomain ID list, the closest existing subdomain ID value will be assigned to the element with a warning.'
+    requirement = 'The system shall assign, with a warning, the closest existing subdomain ID value to the element when the desired value is not present in the subdomain ID list.'
     allow_warnings = true
     recover = false # some blocks may become empty during the simulation therefore recover would fail in such cases
   []

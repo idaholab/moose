@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'cycles_per_step.i'
     exodiff = 'cycles_per_step_out.e-s004'
-    requirement = "The Adaptivity system shall allow for multiple mesh adaptivity steps per timestep."
+    requirement = "The system shall, through the Adaptivity system, allow for multiple mesh adaptivity steps per timestep."
   [../]
 []

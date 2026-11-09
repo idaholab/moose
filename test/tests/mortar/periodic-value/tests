@@ -5,7 +5,7 @@
     type = Exodiff
     input = periodic.i
     exodiff = periodic_out.e
-    requirement = 'We shall be able to enforce periodic boundary conditions on a non-uniform mesh using the mortar method'
+    requirement = 'The system shall be able to enforce periodic boundary conditions on a non-uniform mesh using the mortar method'
   []
   [jac]
     type = PetscJacobianTester
@@ -13,6 +13,6 @@
     run_sim = True
     difference_tol = 1e-7
     cli_args = 'Mesh/file/file=square_coarse.msh'
-    requirement = 'The Jacobian for mortar enforcement of periodic boundary conditions shall be perfect'
+    requirement = 'The system shall compute a perfect Jacobian for mortar enforcement of periodic boundary conditions'
   []
 []

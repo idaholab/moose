@@ -3,7 +3,7 @@
   design = 'source/auxkernels/PenetrationAux.md'
 
   [disjoint]
-    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential "
+    requirement = "The system shall provide a PenetrationAux object capable of computing the distance, tangential "
                   "distance, normal, closest point, side id, and element id between two disjoint "
                   "surfaces:"
 
@@ -80,7 +80,7 @@
   []
 
   [overlapping]
-    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential "
+    requirement = "The system shall provide a PenetrationAux object capable of computing the distance, tangential "
                   "distance, normal, closest point, side id, and element id between two overlapping "
                   "surfaces:"
 

@@ -5,14 +5,14 @@
     input = 'quadrature_nearest_node_locator.i'
     exodiff = 'quadrature_nearest_node_locator_out.e'
     group = 'geometric'
-    requirement = "The NearestNodeDistanceAux object shall compute the shortest distance between nodes on two overlapping boundaries using a constant monomial auxiliary variable."
+    requirement = "The system shall compute, using the NearestNodeDistanceAux object, the shortest distance between nodes on two overlapping boundaries using a constant monomial auxiliary variable."
     issues = '#1462'
   [../]
   [qnnl_ad]
     type = 'Exodiff'
     input = 'qnnl_ad.i'
     exodiff = 'qnnl_ad.e'
-    requirement = 'Volumetric AD assembly data shall be properly sized when reinitializing faces'
+    requirement = 'The system shall properly size volumetric AD assembly data when reinitializing faces'
     group = 'geometric'
     issues = '#5658'
     custom_cmp = 'qnnl_ad.cmp'
