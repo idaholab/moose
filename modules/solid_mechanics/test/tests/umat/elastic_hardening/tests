@@ -67,7 +67,7 @@
     input = 'elastic.i'
     cli_args = "Materials/active='elastic stress'"
     exodiff = 'elastic_out.e'
-    requirement = 'The Abaqus UMAT interface shall produce the same results as the built-in MOOSE '
+    requirement = 'The system shall, through the Abaqus UMAT interface, produce the same results as the built-in MOOSE '
                   'material models for finite strain elasticity'
   []
 
@@ -76,7 +76,7 @@
     input = 'elastic.i'
     cli_args = "Materials/active='elastic stress' Materials/stress/type=ComputeLinearElasticStress Physics/SolidMechanics/QuasiStatic/all/strain=SMALL Outputs/file_base=elastic_small"
     exodiff = 'elastic_small.e'
-    requirement = 'The Abaqus UMAT interface shall produce the same results as the built-in MOOSE '
+    requirement = 'The system shall, through the Abaqus UMAT interface, produce the same results as the built-in MOOSE '
                   'material models for small strain elasticity'
   []
 

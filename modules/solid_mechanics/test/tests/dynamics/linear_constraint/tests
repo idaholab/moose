@@ -5,7 +5,7 @@
     exodiff = 'disp_mid_out.e'
     abs_zero = 1e-09
 
-    requirement = "The LinearNodalConstraint class shall constrain the secondary nodes"
+    requirement = "The system shall constrain, using the LinearNodalConstraint class, the secondary nodes"
                   " to move as a linear combination of the primary nodes."
     design = "LinearNodalConstraint.md"
     issues = "#5783"

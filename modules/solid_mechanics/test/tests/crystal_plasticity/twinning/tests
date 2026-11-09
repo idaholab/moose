@@ -2,8 +2,8 @@
   [constiutive_model]
     issues = '#18846'
     design = '/CrystalPlasticityTwinningKalidindiUpdate.md'
-    requirement = 'The crystal plasticity model for twin propagation in FCC materials, '
-                   'using the Kalidindi (2001) constiutive model, shall:'
+    requirement = 'The system shall, in the crystal plasticity model for twin propagation in FCC materials '
+                   'using the Kalidindi (2001) constitutive model:'
     [only_twinning_fcc]
       type = 'CSVDiff'
       input = 'only_twinning_fcc.i'
@@ -73,9 +73,9 @@
   [combined_twinning_slip_models]
     issues = '#18846'
     design = '/CrystalPlasticityTwinningKalidindiUpdate.md /CrystalPlasticityKalidindiUpdate.md'
-    requirement = 'When combined with a dislocation slip constitutive model in a '
-                  'simulation of an FCC material, the Kalidindi (2001) twin '
-                  'propagation model shall:'
+    requirement = 'The system shall, when combining a dislocation slip constitutive model in a '
+                  'simulation of an FCC material with the Kalidindi (2001) twin '
+                  'propagation model:'
     [combined_twinning_slip_111tension]
       type = CSVDiff
       input = 'combined_twinning_slip_111tension.i'
@@ -115,7 +115,7 @@
   [restart_capabilities]
     issues = '#26458'
     design = '/CrystalPlasticityTwinningKalidindiUpdate.md /CrystalPlasticityKalidindiUpdate.md /ComputeMultipleCrystalPlasticityStress.md'
-    requirement = 'Upon simulation restart, the crystal plasticity capability shall:'
+    requirement = 'The system shall, upon simulation restart, in the crystal plasticity capability:'
     [only_twinning_fcc_restart]
       type = 'CSVDiff'
       input = 'only_twinning_fcc.i'

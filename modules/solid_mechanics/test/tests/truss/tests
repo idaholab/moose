@@ -6,7 +6,7 @@
     input = 'truss_3d.i'
     exodiff = 'truss_3d_out.e'
     abs_zero = 1e-7
-    requirement = "The mechanics system shall accurately model the axial response"
+    requirement = "The system shall accurately model the axial response"
                   " of 3D truss elements."
   [../]
   [./truss_hex]
@@ -14,7 +14,7 @@
     input = 'truss_hex.i'
     exodiff = 'truss_hex_out.e'
     abs_zero = 1e-7
-    requirement = "The truss element shall work correctly when hex elements are also"
+    requirement = "The system shall correctly use the truss element when hex elements are also"
                   " included in the same input or mesh file."
   [../]
   [./truss_2d]
@@ -23,7 +23,7 @@
     exodiff = 'truss_2d_out.e'
     abs_zero = 1e-7
     max_parallel = 1
-    requirement = "The mechanics system shall accurately model the static response of"
+    requirement = "The system shall accurately model the static response of"
                   " a 2D frame modeled using truss elements."
   [../]
   [./truss_3d_action]
@@ -32,7 +32,7 @@
     exodiff = 'truss_3d_out.e'
     abs_zero = 1e-7
     prereq = 'truss_3d'
-    requirement = "The LineElementAction shall correctly create the objects required for"
+    requirement = "The system shall use the LineElementAction to correctly create the objects required for"
                   " modeling the response of a mechanics system using 3D truss elements."
   [../]
   [./truss_hex_action]
@@ -41,7 +41,7 @@
     exodiff = 'truss_hex_out.e'
     abs_zero = 1e-7
     prereq = 'truss_hex'
-    requirement = "The LineElementAction shall correctly create the objects required for"
+    requirement = "The system shall use the LineElementAction to correctly create the objects required for"
                   " modeling the response of a mechanics system using truss and hex elements."
   [../]
   [./truss_2d_action]
@@ -52,7 +52,7 @@
     max_parallel = 1
     cli_args='Physics/SolidMechanics/LineElement/QuasiStatic/block/area=area'
     prereq = 'truss_2d'
-    requirement = "The LineElementAction shall correctly create the objects required for"
+    requirement = "The system shall use the LineElementAction to correctly create the objects required for"
                   " modeling the response of a mechanics system using 2D truss elements."
   [../]
   [./action_error_1]
@@ -60,7 +60,7 @@
     input = 'truss_2d_action.i'
     cli_args='Outputs/exodus=false Outputs/csv=false'
     expect_err='LineElementAction: `area` should be provided as input for'
-    requirement = "The LineElementAction shall produce an error if `area` is not provided"
+    requirement = "The system shall produce an error in the LineElementAction if `area` is not provided"
                   " as input for truss elements."
   [../]
   [./action_error_2]
@@ -68,7 +68,7 @@
     input = 'truss_2d_action.i'
     cli_args='Outputs/exodus=false Outputs/csv=false Physics/SolidMechanics/LineElement/QuasiStatic/block/area=area Physics/SolidMechanics/LineElement/QuasiStatic/block/rotations="rot_x"'
     expect_err='LineElementAction: Rotational variables cannot be set for truss elements.'
-    requirement = "The LineElementAction shall produce an error if rotational variables are"
+    requirement = "The system shall produce an error in the LineElementAction if rotational variables are"
                   " provided as input for truss elements."
   [../]
   [./tensile]
@@ -133,7 +133,7 @@
     cli_args = 'Outputs/exodus=false Outputs/csv=false'
     expect_err='PlasticTruss: Either hardening_constant or hardening_function must be defined'
     design = "source/materials/PlasticTruss.md"
-    requirement = "PlasticTruss material should produce error if neither the hardening"
+    requirement = "The system shall produce an error in the PlasticTruss material if neither the hardening"
                   " constant nor a hardening function is provided."
 
   [../]
@@ -143,7 +143,7 @@
     cli_args = 'Outputs/exodus=false Outputs/csv=false Materials/truss/hardening_function=hf Materials/truss/hardening_constant=0.0'
     expect_err='PlasticTruss: Only the hardening_constant or only the hardening_function can be defined but not both'
     design = "source/materials/PlasticTruss.md"
-    requirement = "PlasticTruss material should produce error if both hardening"
+    requirement = "The system shall produce an error in the PlasticTruss material if both hardening"
                   " constant and hardening function are provided."
 
   [../]
