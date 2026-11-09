@@ -82,7 +82,7 @@
 [VectorPostprocessors]
   [point_sample]
     type = MFEMComplexVariablePointValueSampler
-    variable = 'E'
+    variables = 'E'
     points = '0.0 0.0 0.0  1.5 0.0 0.0  2.5 0.0 0.0'
   []
 []
