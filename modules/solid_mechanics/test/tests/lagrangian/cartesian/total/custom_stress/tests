@@ -9,7 +9,7 @@
     difference_tol = 1E10
     allow_test_objects = true
     cli_args = 'GlobalParams/stabilize_strain=false'
-    requirement = 'The TL Jacobian is exact (relative tolerance 1e-7) for the '
+    requirement = 'The system shall compute an exact TL Jacobian (relative tolerance 1e-7) for the '
                   'ComputeLagrangianStressCustomPK2 wrap path without F-bar stabilization, '
                   'exercising PK1 = F_ust * PK2 and dPK1/dF_ust = del_ik PK2_lj + F_ust * '
                   'dPK2/dF.'
@@ -22,7 +22,7 @@
     difference_tol = 1E10
     allow_test_objects = true
     cli_args = 'GlobalParams/stabilize_strain=true'
-    requirement = 'The TL Jacobian is exact (relative tolerance 1e-7) for the '
+    requirement = 'The system shall compute an exact TL Jacobian (relative tolerance 1e-7) for the '
                   'ComputeLagrangianStressCustomPK2 wrap path with F-bar stabilization, '
                   'exercising the d(F_stab)/d(F_ust) chain in the constitutive term.'
   []
@@ -33,7 +33,7 @@
     difference_tol = 1E10
     allow_test_objects = true
     cli_args = 'GlobalParams/stabilize_strain=false'
-    requirement = 'The TL Jacobian is exact (relative tolerance 1e-7) for the '
+    requirement = 'The system shall compute an exact TL Jacobian (relative tolerance 1e-7) for the '
                   'ComputeLagrangianCauchyCustomStress wrap path without F-bar stabilization, '
                   'exercising the dsigma/d(spatial_deformation_gradient_increment) chain.'
   []
@@ -45,7 +45,7 @@
     difference_tol = 1E10
     allow_test_objects = true
     cli_args = 'GlobalParams/stabilize_strain=true'
-    requirement = 'The TL Jacobian is exact (relative tolerance 1e-7) for the '
+    requirement = 'The system shall compute an exact TL Jacobian (relative tolerance 1e-7) for the '
                   'ComputeLagrangianCauchyCustomStress wrap path with F-bar stabilization, '
                   'exercising the d(F_stab)/d(F_ust) chain in the sigma chain.'
   []

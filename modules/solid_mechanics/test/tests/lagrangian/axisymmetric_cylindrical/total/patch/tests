@@ -6,14 +6,14 @@
     type = Exodiff
     input = 'small.i'
     exodiff = 'small_out.e'
-    requirement = "Small strain uniaxial patch test in 2D axisymmetric RZ coordinates passes"
+    requirement = "The system shall pass the small strain uniaxial patch test in 2D axisymmetric RZ coordinates"
     abs_zero = 1e-6
   []
   [large]
     type = Exodiff
     input = 'large.i'
     exodiff = 'large_out.e'
-    requirement = "Large strain uniaxial patch test in 2D axisymmetric RZ coordinates passes"
+    requirement = "The system shall pass the large strain uniaxial patch test in 2D axisymmetric RZ coordinates"
     abs_zero = 1e-6
   []
 []
