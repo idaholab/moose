@@ -24,6 +24,8 @@
 #include "Parser.h"
 #include "FEProblemBase.h"
 #include "PiecewiseBase.h"
+#include "PiecewiseTabularBase.h"
+#include "PiecewiseConstant.h"
 #include "Distribution.h"
 #include "ActionWarehouse.h"
 #include "MaterialPropertyRegistry.h"
@@ -47,6 +49,8 @@
 #include <iostream>
 #include <functional>
 #include <filesystem>
+#include <stdexcept>
+#include <limits>
 
 MooseServer::MooseServer(MooseApp & moose_app)
   : _moose_app(moose_app),
@@ -1902,7 +1906,11 @@ MooseServer::gatherExtensionResponses(wasp::DataArray & extensionResponses,
   // use appropriate method to fill response based on extension method name
   bool pass = true;
   if (extensionMethod == "plotting")
+  {
+    // convert model evaluation errors into exceptions while building plots
+    Moose::ScopedThrowOnError scoped_throw_on_error;
     pass = gatherPlottingResponses(extensionResponses, line, character);
+  }
   return pass;
 }
 
@@ -1920,10 +1928,17 @@ MooseServer::gatherPlottingResponses(wasp::DataArray & plotting_responses, int l
   wasp::HITNodeView request_context =
       wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
 
+  if (request_context.is_null())
+    return true;
+
   // get object context and value of type parameter for request if provided
   wasp::HITNodeView object_context = request_context;
   while (object_context.type() != wasp::OBJECT && object_context.has_parent())
     object_context = object_context.parent();
+  if (object_context.type() != wasp::OBJECT || !object_context.has_parent() ||
+      !object_context.parent().has_parent() || object_context.parent().parent() != view_root)
+    return true;
+  const std::string & object_section = object_context.parent().name();
   const std::string & object_name = object_context.name();
   wasp::HITNodeView type_node = object_context.first_child_by_name("type");
   const std::string & object_type =
@@ -1940,11 +1955,11 @@ MooseServer::gatherPlottingResponses(wasp::DataArray & plotting_responses, int l
     return true;
 
   // check problem to build function plot if request is from function block
-  if (problem->hasFunction(object_name))
+  if (object_section == "Functions" && problem->hasFunction(object_name))
     buildFuncPlotResponse(plotting_responses, *problem, object_name, object_type);
 
   // check problem to build PDF and CDF plots if request is in distribution
-  else if (problem->hasDistribution(object_name))
+  else if (object_section == "Distributions" && problem->hasDistribution(object_name))
     buildDistPlotResponses(plotting_responses, *problem, object_name, object_type);
 
   return true;
@@ -1965,12 +1980,16 @@ MooseServer::buildFuncPlotResponse(wasp::DataArray & plotting_responses,
   if (pw_func->functionSize() == 0)
     return;
 
+  // read each tabular scale factor before gathering the function ordinates
+  const auto * tabular_func = dynamic_cast<const PiecewiseTabularBase *>(pw_func);
+  const double scale_factor = tabular_func ? tabular_func->getParam<Real>("scale_factor") : 1.0;
+
   // walk over piecewise function and gather keys and values for line graph
   std::vector<double> graph_keys, graph_vals;
   for (std::size_t i = 0; i < pw_func->functionSize(); i++)
   {
     graph_keys.push_back(pw_func->domain(i));
-    graph_vals.push_back(pw_func->range(i));
+    graph_vals.push_back(scale_factor * pw_func->range(i));
   }
 
   // build CustomPlot object from function data then serialize for response
@@ -1979,6 +1998,17 @@ MooseServer::buildFuncPlotResponse(wasp::DataArray & plotting_responses,
   std::string y_axis_label = "ordinate values";
   wasp::CustomPlot plot_object;
   buildLineGraphPlot(plot_object, plot_title, x_axis_label, y_axis_label, graph_keys, graph_vals);
+
+  // use constant function directions to select left or right step geometry
+  if (const auto * constant_func = dynamic_cast<const PiecewiseConstant *>(pw_func))
+  {
+    const std::string step_direction = constant_func->getParam<MooseEnum>("direction");
+    auto line_graph =
+        std::static_pointer_cast<wasp::CustomPlot::Graph>(plot_object.series().front());
+    line_graph->lineStyle(step_direction == "LEFT" || step_direction == "LEFT_INCLUSIVE"
+                              ? wasp::CustomPlot::lsStepLeft
+                              : wasp::CustomPlot::lsStepRight);
+  }
   plotting_responses.push_back(wasp::serializeCustomPlot(plot_object));
 }
 
@@ -1991,48 +2021,110 @@ MooseServer::buildDistPlotResponses(wasp::DataArray & plotting_responses,
   // get distribution from problem that is registered for given object name
   const Distribution & dist = problem.getDistribution(object_name);
 
+  // bound server work to ten thousand points and reject unsafe tail limits
+  if (_dist_plot_num_points < 2 || _dist_plot_num_points > 10000 ||
+      !std::isfinite(_dist_plot_quantile_bound) || _dist_plot_quantile_bound <= 0 ||
+      _dist_plot_quantile_bound >= 0.5)
+    throw std::invalid_argument("Invalid distribution preview point count or tail probability");
+
   // pick plot x-range using quantiles to be generic for distribution types
   const double min_x = dist.quantile(_dist_plot_quantile_bound);
   const double max_x = dist.quantile(1.0 - _dist_plot_quantile_bound);
-  const double del_x = (max_x - min_x) / (_dist_plot_num_points - 1);
 
   // return without any plots added if any calculated values are not finite
-  if (!std::isfinite(min_x) || !std::isfinite(max_x) || max_x <= min_x || !std::isfinite(del_x))
+  if (!std::isfinite(min_x) || !std::isfinite(max_x) || max_x <= min_x ||
+      !std::isfinite(max_x - min_x))
     return;
 
-  // use uniform grid of x-axis graph keys to sample plot values for y-axis
+  // use bounded probability steps to resolve curves within very long tails
+  const double del_p = (1.0 - 2 * _dist_plot_quantile_bound) / (_dist_plot_num_points - 1);
   std::vector<double> graph_keys(_dist_plot_num_points);
   std::vector<double> pdf_values(_dist_plot_num_points);
   std::vector<double> cdf_values(_dist_plot_num_points);
 
+  // track valid PDF and CDF curves separately to keep useful curve results
+  bool pdf_valid = true;
+  bool cdf_valid = true;
+
   // calculate PDF values and CDF values for each key within range of graph
   for (std::size_t i = 0; i < _dist_plot_num_points; i++)
   {
-    graph_keys[i] = min_x + (i * del_x);
-    pdf_values[i] = dist.pdf(graph_keys[i]);
-    cdf_values[i] = dist.cdf(graph_keys[i]);
-
-    // return without any plots added if any PDF or CDF value is not finite
-    if (!std::isfinite(pdf_values[i]) || !std::isfinite(cdf_values[i]))
-      return;
+    double probability = _dist_plot_quantile_bound + (i * del_p);
+    if (_dist_plot_num_points > 2 && i == _dist_plot_num_points / 2)
+      probability = 0.5;
+    graph_keys[i] = i == 0                           ? min_x
+                    : i + 1 == _dist_plot_num_points ? max_x
+                                                     : dist.quantile(probability);
+    if (!std::isfinite(graph_keys[i]) || (i > 0 && graph_keys[i] < graph_keys[i - 1]))
+      throw std::invalid_argument("Invalid distribution preview quantiles");
+    try
+    {
+      if (pdf_valid)
+      {
+        pdf_values[i] = dist.pdf(graph_keys[i]);
+        pdf_valid = std::isfinite(pdf_values[i]) && pdf_values[i] >= 0;
+      }
+    }
+    catch (const std::exception & e)
+    {
+      errors << "PDF preview: " << e.what() << '\n';
+      pdf_valid = false;
+    }
+    try
+    {
+      if (cdf_valid)
+      {
+        cdf_values[i] = dist.cdf(graph_keys[i]);
+        // allow roundoff of a few machine epsilons near probability bounds
+        const double cdf_tolerance = 64 * std::numeric_limits<double>::epsilon();
+        cdf_valid = std::isfinite(cdf_values[i]) && cdf_values[i] >= -cdf_tolerance &&
+                    cdf_values[i] <= 1 + cdf_tolerance &&
+                    (i == 0 || cdf_values[i] + cdf_tolerance >= cdf_values[i - 1]);
+      }
+    }
+    catch (const std::exception & e)
+    {
+      errors << "CDF preview: " << e.what() << '\n';
+      cdf_valid = false;
+    }
   }
+
+  // record invalid curves without removing other usable distribution plots
+  if (!pdf_valid)
+    errors << "PDF preview unavailable: invalid or unsupported evaluation\n";
+  if (!cdf_valid)
+    errors << "CDF preview unavailable: invalid or unsupported evaluation\n";
 
   // lambda to build CustomPlot object for distribution and add to response
   auto add_dist_to_plot = [&](const std::string & dist_type, const std::vector<double> & graph_vals)
   {
     std::string plot_title = object_name + " " + object_type + " " + dist_type + " Distribution";
     std::string x_axis_label = "x values";
-    std::string y_axis_label = dist_type + " values";
+    std::string y_axis_label =
+        dist_type == "CDF" ? "cumulative probability" : "probability density";
     wasp::CustomPlot plot_object;
     buildLineGraphPlot(plot_object, plot_title, x_axis_label, y_axis_label, graph_keys, graph_vals);
+
+    // bound only cumulative probabilities and retain padded density ranges
+    if (dist_type == "CDF")
+    {
+      plot_object.y1Axis().rangeMin(0);
+      plot_object.y1Axis().rangeMax(1);
+    }
+    auto line_graph =
+        std::static_pointer_cast<wasp::CustomPlot::Graph>(plot_object.series().front());
+    line_graph->name(dist_type);
+    line_graph->scatterShape(wasp::CustomPlot::ssNone);
     plotting_responses.push_back(wasp::serializeCustomPlot(plot_object));
   };
 
   // build CustomPlot object for PDF values, serialize, and add to response
-  add_dist_to_plot("PDF", pdf_values);
+  if (pdf_valid)
+    add_dist_to_plot("PDF", pdf_values);
 
   // build CustomPlot object for CDF values, serialize, and add to response
-  add_dist_to_plot("CDF", cdf_values);
+  if (cdf_valid)
+    add_dist_to_plot("CDF", cdf_values);
 }
 
 void
@@ -2043,6 +2135,15 @@ MooseServer::buildLineGraphPlot(wasp::CustomPlot & plot_object,
                                 const std::vector<double> & graph_keys,
                                 const std::vector<double> & graph_vals)
 {
+  // reject empty, mismatched or nonfinite data before using sample extents
+  if (graph_keys.empty() || graph_keys.size() != graph_vals.size() ||
+      !std::all_of(graph_keys.begin(),
+                   graph_keys.end(),
+                   [](double value) { return std::isfinite(value); }) ||
+      !std::all_of(
+          graph_vals.begin(), graph_vals.end(), [](double value) { return std::isfinite(value); }))
+    throw std::invalid_argument("Invalid line preview data");
+
   // axis ranges
   double min_key = *std::min_element(graph_keys.begin(), graph_keys.end());
   double max_key = *std::max_element(graph_keys.begin(), graph_keys.end());
@@ -2053,6 +2154,8 @@ MooseServer::buildLineGraphPlot(wasp::CustomPlot & plot_object,
   double pad_factor = 0.05;
   double pad_x_axis = (max_key - min_key) * pad_factor;
   double pad_y_axis = (max_val - min_val) * pad_factor;
+  if (pad_x_axis == 0)
+    pad_x_axis = pad_factor * std::max(1.0, std::abs(min_key));
   if (pad_y_axis == 0)
     pad_y_axis = pad_factor;
   min_key -= pad_x_axis;
@@ -2060,11 +2163,18 @@ MooseServer::buildLineGraphPlot(wasp::CustomPlot & plot_object,
   min_val -= pad_y_axis;
   max_val += pad_y_axis;
 
+  // reject nonfinite or collapsed ranges after applying the series padding
+  if (!std::isfinite(min_key) || !std::isfinite(max_key) || min_key >= max_key ||
+      !std::isfinite(min_val) || !std::isfinite(max_val) || min_val >= max_val)
+    throw std::invalid_argument("Invalid line preview axis range");
+
   // plot setup
   plot_object.title().text(plot_title);
   plot_object.title().font().pointsize(18);
   plot_object.title().visible(true);
   plot_object.legend().visible(false);
+  plot_object.x2Axis().visible(false);
+  plot_object.y2Axis().visible(false);
 
   // plot x-axis
   plot_object.x1Axis().label(x_axis_label);

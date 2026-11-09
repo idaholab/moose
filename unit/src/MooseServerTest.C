@@ -21,6 +21,7 @@
 #include "FEProblemBase.h"
 #include "InputParameters.h"
 #include "Distribution.h"
+#include "PiecewiseBase.h"
 #include "Parser.h"
 #include "pcrecpp.h"
 #include "waspcore/Object.h"
@@ -37,6 +38,7 @@
 #include <cstdio>
 #include <filesystem>
 #include <cmath>
+#include <limits>
 
 // implementation derived from Distribution to register for plotting checks
 class TestDistribution : public Distribution
@@ -47,29 +49,70 @@ public:
     InputParameters params = Distribution::validParams();
     params.addRequiredParam<Real>("mean", "Mean of the distribution (alpha or mu)");
     params.addRequiredParam<Real>("shape", "Shape of the distribution (beta or s)");
+    params.addParam<std::string>("pdf_case", "valid", "PDF evaluation used for plotting checks");
+    params.addParam<std::string>("cdf_case", "valid", "CDF evaluation used for plotting checks");
+    params.addParam<std::string>(
+        "quantile_case", "valid", "Quantile evaluation used for plotting checks");
     return params;
   }
   TestDistribution(const InputParameters & parameters)
-    : Distribution(parameters), _mean(getParam<Real>("mean")), _shape(getParam<Real>("shape"))
+    : Distribution(parameters),
+      _mean(getParam<Real>("mean")),
+      _shape(getParam<Real>("shape")),
+      _pdf_case(getParam<std::string>("pdf_case")),
+      _cdf_case(getParam<std::string>("cdf_case")),
+      _quantile_case(getParam<std::string>("quantile_case"))
   {
   }
   virtual Real pdf(const Real & x) const override
   {
+    if (_pdf_case == "exception")
+      mooseError("test PDF evaluation is unavailable");
+    if (_pdf_case == "constant")
+      return 0.5;
+    if (_pdf_case == "negative")
+      return -1;
+    if (_pdf_case == "nonfinite")
+      return std::numeric_limits<Real>::quiet_NaN();
+    if (_pdf_case == "infinite")
+      return std::numeric_limits<Real>::infinity();
     Real z = std::exp(-(x - _mean) / _shape);
     return z / (_shape * std::pow(1.0 + z, 2));
   }
   virtual Real cdf(const Real & x) const override
   {
+    if (_cdf_case == "exception")
+      mooseError("test CDF evaluation is unavailable");
+    if (_cdf_case == "negative")
+      return -0.1;
+    if (_cdf_case == "above_one")
+      return 1.1;
+    if (_cdf_case == "decreasing")
+      return 1.0 / (1.0 + std::exp((x - _mean) / _shape));
+    if (_cdf_case == "nonfinite")
+      return std::numeric_limits<Real>::quiet_NaN();
+    if (_cdf_case == "infinite")
+      return std::numeric_limits<Real>::infinity();
+    if (_cdf_case == "roundoff")
+      return x < _mean ? -std::numeric_limits<Real>::epsilon()
+                       : 1 + std::numeric_limits<Real>::epsilon();
     return 1.0 / (1.0 + std::exp(-(x - _mean) / _shape));
   }
   virtual Real quantile(const Real & y) const override
   {
+    if (y == 0.5 && _quantile_case == "nonfinite")
+      return std::numeric_limits<Real>::quiet_NaN();
+    if (y == 0.5 && _quantile_case == "decreasing")
+      return -std::numeric_limits<Real>::max();
     return _mean - _shape * std::log(1.0 / y - 1.0);
   }
 
 protected:
   const Real & _mean;
   const Real & _shape;
+  const std::string & _pdf_case;
+  const std::string & _cdf_case;
+  const std::string & _quantile_case;
 };
 
 registerMooseObject("MooseUnitApp", TestDistribution);
@@ -457,6 +500,79 @@ protected:
     EXPECT_EQ(1u, check_plot->series().size());
     check_vecs(expect_keys, check_plot->series()[0]->keys(), test_tolerance);
     check_vecs(expect_vals, check_plot->series()[0]->values(), test_tolerance);
+  }
+
+  // initialize plotting server and open document using provided input text
+  void check_plotting_input(MooseServer & plot_server, const std::string & doc_text_open) const
+  {
+    // build initialize request to enable plotting with the provided server
+    wasp::DataObject client_caps;
+    client_caps[wasp::lsp::m_extensions] = wasp::DataObject();
+    client_caps[wasp::lsp::m_extensions]["plotting"] = true;
+    wasp::DataObject initialize_request, initialize_response;
+    std::stringstream errors;
+    ASSERT_TRUE(
+        wasp::lsp::buildInitializeRequest(initialize_request, errors, 1, -1, "", client_caps));
+    ASSERT_TRUE(plot_server.handleInitializeRequest(initialize_request, initialize_response));
+
+    // build initialized notification and handle it using given plot server
+    wasp::DataObject initialized_notification;
+    ASSERT_TRUE(wasp::lsp::buildInitializedNotification(initialized_notification, errors));
+    ASSERT_TRUE(plot_server.handleInitializedNotification(initialized_notification));
+
+    // build didopen notification and pass provided text to the plot server
+    std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
+    wasp::DataObject didopen_notification, diagnostics_notification;
+    ASSERT_TRUE(wasp::lsp::buildDidOpenNotification(
+        didopen_notification, errors, doc_uri, "moose", 1, doc_text_open));
+    ASSERT_TRUE(
+        plot_server.handleDidOpenNotification(didopen_notification, diagnostics_notification));
+
+    // dissect diagnostics notification and confirm that the input is valid
+    std::string response_uri;
+    wasp::DataArray diagnostics_array;
+    ASSERT_TRUE(wasp::lsp::dissectPublishDiagnosticsNotification(
+        diagnostics_notification, errors, response_uri, diagnostics_array));
+    EXPECT_EQ(doc_uri, response_uri);
+    EXPECT_TRUE(diagnostics_array.empty());
+    EXPECT_TRUE(errors.str().empty());
+    EXPECT_TRUE(plot_server.getErrors().empty());
+  }
+
+  // request plots from chosen server and check expected response or errors
+  wasp::DataArray check_plotting_request(MooseServer & plot_server,
+                                         int request_line,
+                                         int request_char,
+                                         std::size_t expect_num_plots,
+                                         const std::string & expect_errors = "",
+                                         bool expect_pass = true) const
+  {
+    // build plotting extension request for server with provided parameters
+    std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
+    wasp::DataObject ext_request, ext_response;
+    std::stringstream errors;
+    EXPECT_TRUE(wasp::lsp::buildExtensionRequest(
+        ext_request, errors, "plotting", 2, doc_uri, request_line, request_char));
+    EXPECT_TRUE(errors.str().empty());
+
+    // handle plotting request and check their expected evaluation failures
+    EXPECT_EQ(expect_pass,
+              plot_server.handleExtensionRequest("plotting", ext_request, ext_response));
+    if (expect_errors.empty())
+      EXPECT_TRUE(plot_server.getErrors().empty());
+    else
+      EXPECT_NE(plot_server.getErrors().find(expect_errors), std::string::npos);
+    wasp::DataArray ext_array;
+    if (!expect_pass)
+      return ext_array;
+
+    // dissect plotting response and check its identifier and plot quantity
+    int response_id;
+    EXPECT_TRUE(wasp::lsp::dissectExtensionResponse(ext_response, errors, response_id, ext_array));
+    EXPECT_TRUE(errors.str().empty());
+    EXPECT_EQ(2, response_id);
+    EXPECT_EQ(expect_num_plots, ext_array.size());
+    return ext_array;
   }
 
   // build watch files notification, handle using server, check diagnostics
@@ -2318,17 +2434,17 @@ time, 501, 502, 503, 504 # ignored comment
   std::size_t expect_num_plots = 2;
   std::size_t check_plot_index = 0;
   // clang-format off
-  expect_keys = std::vector<double>{-58.4482379024, -55.0576491928, -51.6670604833, -48.2764717738,
-                                    -44.8858830643, -41.4952943548, -38.1047056452, -34.7141169357,
-                                    -31.3235282262, -27.9329395167, -24.5423508072, -21.1517620976};
-  expect_vals = std::vector<double>{0.000370000000, 0.001292407178, 0.004458329863, 0.014735771635,
-                                    0.042427104442, 0.084034413176, 0.084034413176, 0.042427104442,
-                                    0.014735771635, 0.004458329863, 0.001292407178, 0.000370000000};
+  expect_keys = std::vector<double>{-58.448237902351, -45.990357355224, -43.849474653219, -42.442054701407,
+                                    -41.307780995534, -40.291278219832, -39.800000000000, -38.292219004466,
+                                    -37.157945298593, -35.750525346781, -33.609642644776, -21.151762097649};
+  expect_vals = std::vector<double>{0.000370000000, 0.030856807469, 0.055246253444, 0.073538337925,
+                                    0.085733060912, 0.091830422406, 0.092592592593, 0.085733060912,
+                                    0.073538337925, 0.055246253444, 0.030856807469, 0.000370000000};
   // clang-format on
   expect_xaxis_range_min = -58.4482379024 - ((-21.1517620976 - -58.4482379024) * pad_factor);
   expect_xaxis_range_max = -21.1517620976 + ((-21.1517620976 - -58.4482379024) * pad_factor);
-  expect_yaxis_range_min = 0.000370000000 - ((0.084034413176 - 0.000370000000) * pad_factor);
-  expect_yaxis_range_max = 0.084034413176 + ((0.084034413176 - 0.000370000000) * pad_factor);
+  expect_yaxis_range_min = 0.000370000000 - ((0.092592592593 - 0.000370000000) * pad_factor);
+  expect_yaxis_range_max = 0.092592592593 + ((0.092592592593 - 0.000370000000) * pad_factor);
   check_plotting(request_id,
                  doc_uri,
                  request_line,
@@ -2351,17 +2467,17 @@ time, 501, 502, 503, 504 # ignored comment
   expect_num_plots = 2;
   check_plot_index = 1;
   // clang-format off
-  expect_keys = std::vector<double>{-58.4482379024, -55.0576491928, -51.6670604833, -48.2764717738,
-                                    -44.8858830643, -41.4952943548, -38.1047056452, -34.7141169357,
-                                    -31.3235282262, -27.9329395167, -24.5423508072, -21.1517620976};
-  expect_vals = std::vector<double>{0.001000000000, 0.003501761716, 0.012185988958, 0.041509633051,
-                                    0.131968998581, 0.347989854209, 0.652010145791, 0.868031001419,
-                                    0.958490366949, 0.987814011042, 0.996498238284, 0.999000000000};
+  expect_keys = std::vector<double>{-58.448237902351, -45.990357355224, -43.849474653219, -42.442054701407,
+                                    -41.307780995534, -40.291278219832, -39.800000000000, -38.292219004466,
+                                    -37.157945298593, -35.750525346781, -33.609642644776, -21.151762097649};
+  expect_vals = std::vector<double>{0.001000000000, 0.091727272727, 0.182454545455, 0.273181818182,
+                                    0.363909090909, 0.454636363636, 0.500000000000, 0.636090909091,
+                                    0.726818181818, 0.817545454545, 0.908272727273, 0.999000000000};
   // clang-format on
   expect_xaxis_range_min = -58.4482379024 - ((-21.1517620976 - -58.4482379024) * pad_factor);
   expect_xaxis_range_max = -21.1517620976 + ((-21.1517620976 - -58.4482379024) * pad_factor);
-  expect_yaxis_range_min = 0.001000000000 - ((0.999000000000 - 0.001000000000) * pad_factor);
-  expect_yaxis_range_max = 0.999000000000 + ((0.999000000000 - 0.001000000000) * pad_factor);
+  expect_yaxis_range_min = 0;
+  expect_yaxis_range_max = 1;
   check_plotting(request_id,
                  doc_uri,
                  request_line,
@@ -2381,6 +2497,521 @@ time, 501, 502, 503, 504 # ignored comment
   std::remove("csv_col_basic.csv");
   std::remove("csv_row_title.csv");
   std::remove("csv_col_index.csv");
+}
+
+TEST_F(MooseServerTest, PlottingDistributionEvaluationErrors)
+{
+  // provide valid input with independently selected PDF and CDF exceptions
+  std::string doc_text_template = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Distributions]
+  [test_dist]
+    type = TestDistribution
+    mean = 0
+    shape = 1
+    pdf_case = PDF_CASE
+    cdf_case = CDF_CASE
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // check that an unavailable curve does not discard the other valid curve
+  for (const std::string dist_type : {"PDF", "CDF"})
+  {
+    std::string doc_text_open = doc_text_template;
+    pcrecpp::RE("PDF_CASE").Replace(dist_type == "PDF" ? "exception" : "valid", &doc_text_open);
+    pcrecpp::RE("CDF_CASE").Replace(dist_type == "CDF" ? "exception" : "valid", &doc_text_open);
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    Moose::ScopedThrowOnError scoped_throw_on_error(false);
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 1, dist_type + " preview:");
+    EXPECT_FALSE(Moose::_throw_on_error);
+    ASSERT_EQ(1u, ext_array.size());
+    auto check_plot = wasp::deserializeCustomPlot(*ext_array[0].to_object());
+    std::string expect_type = dist_type == "PDF" ? "CDF" : "PDF";
+    EXPECT_EQ("test_dist TestDistribution " + expect_type + " Distribution",
+              check_plot->title().text());
+    ASSERT_EQ(1u, check_plot->series().size());
+    EXPECT_EQ(200u, check_plot->series()[0]->values().size());
+  }
+}
+
+TEST_F(MooseServerTest, PlottingDistributionSettings)
+{
+  // provide unchanged distribution inputs before changing preview settings
+  std::string doc_text_open = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Distributions]
+  [test_dist]
+    type = TestDistribution
+    mean = 0
+    shape = 1
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // reject zero, singleton and counts above the 10,000 point preview limit
+  for (const std::size_t num_points : {0u, 1u, 10001u})
+  {
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    plot_server.setDistPlotNumPoints(num_points);
+    auto ext_array = check_plotting_request(
+        plot_server, 10, 16, 0, "Invalid distribution preview point count", false);
+    EXPECT_TRUE(ext_array.empty());
+  }
+
+  // accept the smallest and largest counts allowed under the preview limit
+  for (const std::size_t num_points : {2u, 10000u})
+  {
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    plot_server.setDistPlotNumPoints(num_points);
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 2);
+    ASSERT_EQ(2u, ext_array.size());
+    auto check_plot = wasp::deserializeCustomPlot(*ext_array[0].to_object());
+    ASSERT_EQ(1u, check_plot->series().size());
+    EXPECT_EQ(num_points, check_plot->series()[0]->keys().size());
+  }
+}
+
+TEST_F(MooseServerTest, PlottingDistributionValues)
+{
+  // provide distribution inputs with controlled invalid PDF and CDF values
+  std::string doc_text_template = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Distributions]
+  [test_dist]
+    type = TestDistribution
+    mean = 0
+    shape = 1
+    pdf_case = PDF_CASE
+    cdf_case = CDF_CASE
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // retain each valid curve when the other has invalid mathematical values
+  for (const std::string data_case : {"pdf_negative",
+                                      "pdf_nonfinite",
+                                      "pdf_infinite",
+                                      "cdf_negative",
+                                      "cdf_above_one",
+                                      "cdf_decreasing",
+                                      "cdf_nonfinite",
+                                      "cdf_infinite"})
+  {
+    bool invalid_pdf = data_case.find("pdf_") == 0;
+    std::string doc_text_open = doc_text_template;
+    pcrecpp::RE("PDF_CASE").Replace(invalid_pdf ? data_case.substr(4) : "valid", &doc_text_open);
+    pcrecpp::RE("CDF_CASE").Replace(invalid_pdf ? "valid" : data_case.substr(4), &doc_text_open);
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 1, "invalid or unsupported");
+    ASSERT_EQ(1u, ext_array.size());
+    auto check_plot = wasp::deserializeCustomPlot(*ext_array[0].to_object());
+    std::string expect_type = invalid_pdf ? "CDF" : "PDF";
+    EXPECT_EQ("test_dist TestDistribution " + expect_type + " Distribution",
+              check_plot->title().text());
+  }
+
+  // permit modest rounding errors close to zero and one probability limits
+  pcrecpp::RE("PDF_CASE").Replace("valid", &doc_text_template);
+  pcrecpp::RE("CDF_CASE").Replace("roundoff", &doc_text_template);
+  MooseServer plot_server(*moose_unit_app);
+  check_plotting_input(plot_server, doc_text_template);
+  auto ext_array = check_plotting_request(plot_server, 10, 16, 2);
+  EXPECT_EQ(2u, ext_array.size());
+}
+
+TEST_F(MooseServerTest, PlottingInputSections)
+{
+  // use the same name for function, distribution and variable input blocks
+  std::string doc_text_open = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Functions]
+  [shared]
+    type = PiecewiseLinear
+    xy_data = '0 1 1 2'
+  []
+[]
+[Distributions]
+  [shared]
+    type = TestDistribution
+    mean = 0
+    shape = 1
+  []
+[]
+[Variables]
+  [shared]
+    order = FIRST
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+  MooseServer plot_server(*moose_unit_app);
+  check_plotting_input(plot_server, doc_text_open);
+
+  // check that every requested syntax section selects only its own objects
+  auto ext_array = check_plotting_request(plot_server, 10, 16, 1);
+  ASSERT_EQ(1u, ext_array.size());
+  auto check_plot = wasp::deserializeCustomPlot(*ext_array[0].to_object());
+  EXPECT_EQ("shared PiecewiseLinear Function", check_plot->title().text());
+  auto dist_array = check_plotting_request(plot_server, 16, 16, 2);
+  ASSERT_EQ(2u, dist_array.size());
+  check_plot = wasp::deserializeCustomPlot(*dist_array[0].to_object());
+  EXPECT_EQ("shared TestDistribution PDF Distribution", check_plot->title().text());
+  EXPECT_TRUE(check_plotting_request(plot_server, 23, 12, 0).empty());
+
+  // return no plots for a section heading or a location outside this input
+  EXPECT_TRUE(check_plotting_request(plot_server, 8, 1, 0).empty());
+  EXPECT_TRUE(check_plotting_request(plot_server, 1000, 0, 0).empty());
+}
+
+TEST_F(MooseServerTest, PlottingDistributionQuantiles)
+{
+  // provide a symmetric distribution with its known median and inverse CDF
+  std::string doc_text_template = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Distributions]
+  [test_dist]
+    type = TestDistribution
+    mean = 0
+    shape = 1
+    quantile_case = QUANTILE_CASE
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // check odd and even probability grids that include their median samples
+  for (const std::size_t num_points : {5u, 6u})
+  {
+    std::string doc_text_open = doc_text_template;
+    pcrecpp::RE("QUANTILE_CASE").Replace("valid", &doc_text_open);
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    plot_server.setDistPlotNumPoints(num_points);
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 2);
+    ASSERT_EQ(2u, ext_array.size());
+    auto check_plot = wasp::deserializeCustomPlot(*ext_array[1].to_object());
+    ASSERT_EQ(1u, check_plot->series().size());
+    const auto & actual_keys = check_plot->series()[0]->keys();
+    const auto & actual_vals = check_plot->series()[0]->values();
+    ASSERT_EQ(num_points, actual_keys.size());
+    ASSERT_EQ(num_points, actual_vals.size());
+
+    // use the existing plot tolerance for roundoff in CDF inversion checks
+    const double test_tolerance = 1e-9;
+    EXPECT_NEAR(0.001, actual_vals.front(), test_tolerance);
+    EXPECT_NEAR(0.999, actual_vals.back(), test_tolerance);
+    EXPECT_NEAR(0.5, actual_vals[num_points / 2], test_tolerance);
+    EXPECT_NEAR(0, actual_keys[num_points / 2], test_tolerance);
+    EXPECT_NEAR(0.001 + 0.998 / (num_points - 1), actual_vals[1], test_tolerance);
+    for (std::size_t i = 1; i < actual_keys.size(); i++)
+      EXPECT_LE(actual_keys[i - 1], actual_keys[i]);
+  }
+
+  // reject invalid interior quantiles without publishing partial plot data
+  for (const std::string data_case : {"nonfinite", "decreasing"})
+  {
+    std::string doc_text_open = doc_text_template;
+    pcrecpp::RE("QUANTILE_CASE").Replace(data_case, &doc_text_open);
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    plot_server.setDistPlotNumPoints(6);
+    auto ext_array = check_plotting_request(
+        plot_server, 10, 16, 0, "Invalid distribution preview quantiles", false);
+    EXPECT_TRUE(ext_array.empty());
+  }
+}
+
+TEST_F(MooseServerTest, PlottingDistributionPresentation)
+{
+  // provide distribution inputs for axis labels and ordinary curve styling
+  std::string doc_text_template = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Distributions]
+  [test_dist]
+    type = TestDistribution
+    mean = 0
+    shape = 1
+    pdf_case = PDF_CASE
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // check probability bounds while keeping PDF values inside expanded axes
+  for (const std::string data_case : {"valid", "constant"})
+  {
+    std::string doc_text_open = doc_text_template;
+    pcrecpp::RE("PDF_CASE").Replace(data_case, &doc_text_open);
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 2);
+    ASSERT_EQ(2u, ext_array.size());
+    for (std::size_t i = 0; i < ext_array.size(); i++)
+    {
+      auto check_plot = wasp::deserializeCustomPlot(*ext_array[i].to_object());
+      EXPECT_FALSE(check_plot->x2Axis().visible());
+      EXPECT_FALSE(check_plot->y2Axis().visible());
+      ASSERT_EQ(1u, check_plot->series().size());
+      auto line_graph = std::dynamic_pointer_cast<wasp::CustomPlot::Graph>(check_plot->series()[0]);
+      ASSERT_TRUE(line_graph);
+      EXPECT_EQ(wasp::CustomPlot::ssNone, line_graph->scatterShape());
+      EXPECT_EQ(i == 0 ? "PDF" : "CDF", line_graph->name());
+      EXPECT_EQ(i == 0 ? "probability density" : "cumulative probability",
+                check_plot->y1Axis().label());
+      if (i == 1)
+      {
+        EXPECT_DOUBLE_EQ(0, check_plot->y1Axis().rangeMin());
+        EXPECT_DOUBLE_EQ(1, check_plot->y1Axis().rangeMax());
+      }
+      else
+      {
+        for (double value : line_graph->values())
+        {
+          EXPECT_LT(check_plot->y1Axis().rangeMin(), value);
+          EXPECT_GT(check_plot->y1Axis().rangeMax(), value);
+        }
+        if (data_case == "constant")
+        {
+          EXPECT_DOUBLE_EQ(0.45, check_plot->y1Axis().rangeMin());
+          EXPECT_DOUBLE_EQ(0.55, check_plot->y1Axis().rangeMax());
+        }
+      }
+    }
+  }
+}
+
+TEST_F(MooseServerTest, PlottingFunctionScaleFactors)
+{
+  // provide scaled tabular input for linear and constant function previews
+  std::string doc_text_template = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Functions]
+  [test_func]
+    type = FUNCTION_TYPE
+    xy_data = '0 2 1 -4'
+    scale_factor = -2.5
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // check ordinate scaling while not changing the supplied abscissa values
+  auto expect_keys = std::vector<double>{0, 1};
+  auto expect_vals = std::vector<double>{-5, 10};
+  for (const std::string function_type : {"PiecewiseLinear", "PiecewiseConstant"})
+  {
+    std::string doc_text_open = doc_text_template;
+    pcrecpp::RE("FUNCTION_TYPE").Replace(function_type, &doc_text_open);
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 1);
+    ASSERT_EQ(1u, ext_array.size());
+    auto check_plot = wasp::deserializeCustomPlot(*ext_array[0].to_object());
+    ASSERT_EQ(1u, check_plot->series().size());
+    EXPECT_EQ(expect_keys, check_plot->series()[0]->keys());
+    EXPECT_EQ(expect_vals, check_plot->series()[0]->values());
+  }
+}
+
+TEST_F(MooseServerTest, PlottingFunctionStepDirections)
+{
+  // provide piecewise constant inputs with every configured step direction
+  std::string doc_text_template = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Functions]
+  [test_func]
+    type = PiecewiseConstant
+    xy_data = '0 2 1 5 2 3'
+    direction = STEP_DIRECTION
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // check all four directions and validate that tabular values stay intact
+  auto step_directions =
+      std::vector<std::string>{"LEFT", "LEFT_INCLUSIVE", "RIGHT", "RIGHT_INCLUSIVE"};
+  auto expect_styles = std::vector<wasp::CustomPlot::LineStyle>{wasp::CustomPlot::lsStepLeft,
+                                                                wasp::CustomPlot::lsStepLeft,
+                                                                wasp::CustomPlot::lsStepRight,
+                                                                wasp::CustomPlot::lsStepRight};
+  auto expect_keys = std::vector<double>{0, 1, 2};
+  auto expect_vals = std::vector<double>{2, 5, 3};
+  for (std::size_t i = 0; i < step_directions.size(); i++)
+  {
+    std::string doc_text_open = doc_text_template;
+    pcrecpp::RE("STEP_DIRECTION").Replace(step_directions[i], &doc_text_open);
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 1);
+    ASSERT_EQ(1u, ext_array.size());
+    auto check_plot = wasp::deserializeCustomPlot(*ext_array[0].to_object());
+    ASSERT_EQ(1u, check_plot->series().size());
+    auto line_graph = std::dynamic_pointer_cast<wasp::CustomPlot::Graph>(check_plot->series()[0]);
+    ASSERT_TRUE(line_graph);
+    EXPECT_EQ(expect_styles[i], line_graph->lineStyle());
+    EXPECT_EQ(expect_keys, line_graph->keys());
+    EXPECT_EQ(expect_vals, line_graph->values());
+  }
+}
+
+TEST_F(MooseServerTest, PlottingFunctionSinglePoint)
+{
+  // prepare correct function input before setting one tabular sample point
+  std::string doc_text_open = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Functions]
+  [test_func]
+    type = PiecewiseConstant
+    xy_data = '0 2 1 3'
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+  MooseServer plot_server(*moose_unit_app);
+  check_plotting_input(plot_server, doc_text_open);
+  auto & check_problem = *plot_server.getCheckApp().actionWarehouse().problemBase();
+  auto & check_func = dynamic_cast<PiecewiseBase &>(check_problem.getFunction("test_func"));
+  check_func.setData({5}, {7});
+
+  // check finite, padded axes around the single abscissa and ordinate pair
+  auto ext_array = check_plotting_request(plot_server, 10, 16, 1);
+  ASSERT_EQ(1u, ext_array.size());
+  auto check_plot = wasp::deserializeCustomPlot(*ext_array[0].to_object());
+  EXPECT_DOUBLE_EQ(4.75, check_plot->x1Axis().rangeMin());
+  EXPECT_DOUBLE_EQ(5.25, check_plot->x1Axis().rangeMax());
+  EXPECT_DOUBLE_EQ(6.95, check_plot->y1Axis().rangeMin());
+  EXPECT_DOUBLE_EQ(7.05, check_plot->y1Axis().rangeMax());
+  ASSERT_EQ(1u, check_plot->series().size());
+  auto expect_keys = std::vector<double>{5};
+  auto expect_vals = std::vector<double>{7};
+  EXPECT_EQ(expect_keys, check_plot->series()[0]->keys());
+  EXPECT_EQ(expect_vals, check_plot->series()[0]->values());
+}
+
+TEST_F(MooseServerTest, PlottingFunctionData)
+{
+  // prepare valid inputs before exercising raw tabular data error handling
+  std::string doc_text_open = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Problem]
+  solve = false
+[]
+[Functions]
+  [test_func]
+    type = PiecewiseConstant
+    xy_data = '0 2 1 3'
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+)INPUT";
+
+  // test empty, nonfinite and overflowing data through the existing setter
+  double nonfinite_value = std::numeric_limits<double>::quiet_NaN();
+  double infinite_value = std::numeric_limits<double>::infinity();
+  double maximum_value = std::numeric_limits<double>::max();
+  auto test_keys = std::vector<std::vector<double>>{
+      {}, {nonfinite_value}, {5}, {5}, {-maximum_value, maximum_value}};
+  auto test_vals =
+      std::vector<std::vector<double>>{{}, {7}, {nonfinite_value}, {infinite_value}, {7, 8}};
+  for (std::size_t i = 0; i < test_keys.size(); i++)
+  {
+    MooseServer plot_server(*moose_unit_app);
+    check_plotting_input(plot_server, doc_text_open);
+    auto & check_problem = *plot_server.getCheckApp().actionWarehouse().problemBase();
+    auto & check_func = dynamic_cast<PiecewiseBase &>(check_problem.getFunction("test_func"));
+    check_func.setData(test_keys[i], test_vals[i]);
+    std::string expect_errors = i == 0   ? ""
+                                : i == 4 ? "Invalid line preview axis range"
+                                         : "Invalid line preview data";
+    auto ext_array = check_plotting_request(plot_server, 10, 16, 0, expect_errors, i == 0);
+    EXPECT_TRUE(ext_array.empty());
+  }
 }
 
 TEST_F(MooseServerTest, WorkspaceResourceFileChanges)
@@ -2956,7 +3587,7 @@ label: OtherMooseUnitApp text: OtherMooseUnitApp desc: OtherMooseUnitApp... pos:
   // check for location of AppTypeTestDistribution register in current file
   std::size_t definition_size_expect = 1;
   std::string definition_list_expect = R"INPUT(
-document_uri: "file://...absolute.../unit/src/MooseServerTest.C"    location_start: [90.0]    location_end: [90.1000]
+document_uri: "file://...absolute.../unit/src/MooseServerTest.C"    location_start: [133.0]    location_end: [133.1000]
 )INPUT";
   EXPECT_EQ(definition_size_expect, definition_array.size());
   EXPECT_EQ(definition_list_expect, "\n" + definition_list_actual.str());
