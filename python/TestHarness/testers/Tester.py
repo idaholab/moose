@@ -240,7 +240,7 @@ class Tester(MooseObject, OutputInterface):
         device_list_str = "', '".join(
             d.upper() for d in TestHarness.validComputeDevices()
         )
-        device_param_doc = f"The devices to use for this libtorch or MFEM test ('{device_list_str}'); device availability depends on library support and compilation settings; default ('CPU')"
+        device_param_doc = f"The compute devices to use for this test ('{device_list_str}'); default ('CPU')"
         params.addParam("compute_devices", ["CPU"], device_param_doc)
 
         params.addParam(
