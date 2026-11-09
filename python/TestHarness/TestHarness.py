@@ -2254,9 +2254,10 @@ class TestHarness:
                 and (env_value := os.environ.get(env_name)) is not None
             ):
                 value = float(env_value)
-                print_info(
-                    f"Setting --{option.replace('_', '-')}={value} MB from {env_name}",
-                )
+                cli_option = f"--{option.replace('_', '-')}"
+                if value <= 0:
+                    self.errorExit(f"{cli_option}: Must be positive")
+                print_info(f"Setting {cli_option}={value} MB from {env_name}")
                 setattr(opts, option, value)
 
         # Convert extend action params to lists if they have a single value
