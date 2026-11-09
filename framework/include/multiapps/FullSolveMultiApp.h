@@ -38,6 +38,8 @@ public:
 
   virtual void restore(bool force = true) override;
 
+  virtual void resetApp(unsigned int global_app, Real time) override;
+
 protected:
   /**
    * FullSolveMultiApp always performs a complete fresh solve on every execution,
@@ -55,6 +57,12 @@ protected:
   virtual void showStatusMessage(unsigned int i) const;
 
 private:
+  /**
+   * Grab and initialize the executioner of a local sub-application
+   * @param i Local sub-application index
+   */
+  void setupApp(unsigned int i);
+
   /// Switch to tell executioner to keep going despite app solve not converging
   const bool _ignore_diverge;
   /// Switch to tell the systems or not to update the old solution using the unrestored solution (the one we 'kept during restore')
