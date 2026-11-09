@@ -3,7 +3,7 @@
   design = 'KokkosDiffusion.md'
 
   [coord]
-    requirement = 'The Kokkos system shall provide an ability to change the coordinate type to'
+    requirement = 'The system shall, using Kokkos, provide an ability to change the coordinate type to'
     [rz]
       type = 'Exodiff'
       input = 'kokkos_diffusion_rz.i'

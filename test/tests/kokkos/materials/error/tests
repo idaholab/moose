@@ -3,7 +3,7 @@
   design = 'KokkosMaterials/index.md'
 
   [error]
-    requirement = 'The Kokkos material system shall issue an error when '
+    requirement = 'The system shall, in the Kokkos material system, issue an error when '
     [block_overlap]
       type = RunException
       input = 'kokkos_overlap.i'
@@ -82,7 +82,7 @@
   [stateful_cyclic]
     type = RunApp
     input = 'kokkos_dependency.i'
-    requirement = 'The Kokkos material system shall not create a dependency when old versions of material properties are retrieved and used in calculations.'
+    requirement = 'The system shall, in the Kokkos material system, not create a dependency when old versions of material properties are retrieved and used in calculations.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
@@ -90,7 +90,7 @@
     type = RunApp
     input = 'kokkos_multid.i'
     cli_args = 'Materials/active=\'left_real_1D right_real_1D_correct\''
-    requirement = 'The Kokkos material system shall not error when the same material property was declared by different non-overlapping materials with consistent type and dimension.'
+    requirement = 'The system shall, in the Kokkos material system, not error when the same material property was declared by different non-overlapping materials with consistent type and dimension.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
@@ -98,7 +98,7 @@
     type = RunApp
     input = 'kokkos_multid.i'
     cli_args = 'Materials/active=\'left_real_1D right_real_1D\''
-    requirement = 'The Kokkos material system shall not error when the same material property was declared by different non-overlapping materials with different size of dimensions.'
+    requirement = 'The system shall, in the Kokkos material system, not error when the same material property was declared by different non-overlapping materials with different size of dimensions.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []

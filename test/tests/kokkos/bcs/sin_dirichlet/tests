@@ -5,7 +5,7 @@
     type = Exodiff
     input = 'kokkos_sin_dirichlet.i'
     exodiff = 'kokkos_sin_dirichlet_out.e'
-    requirement = 'The Kokkos system shall impose a Dirichlet boundary condition varying sinusoidally in time.'
+    requirement = 'The system shall, using Kokkos, impose a Dirichlet boundary condition varying sinusoidally in time.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []

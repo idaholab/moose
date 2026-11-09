@@ -6,7 +6,7 @@
     type = 'Exodiff'
     input = 'kokkos_extra_element_integer_aux.i'
     exodiff = 'kokkos_extra_element_integer_aux_out.e'
-    requirement = 'The Kokkos system shall have the capability of visualizing element integers in an auxiliary variable.'
+    requirement = 'The system shall, using Kokkos, have the capability of visualizing element integers in an auxiliary variable.'
     recover = false
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'

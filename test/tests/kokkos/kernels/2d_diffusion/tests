@@ -5,7 +5,7 @@
     type = Exodiff
     input = 'kokkos_2d_diffusion_test.i'
     exodiff = 'kokkos_2d_diffusion_test_out.e'
-    requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions.'
+    requirement = 'The system shall, using Kokkos, provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions.'
     design = 'KokkosDiffusion.md KokkosDirichletBC.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
@@ -15,7 +15,7 @@
     type = Exodiff
     input = 'kokkos_2d_diffusion_neumannbc_test.i'
     exodiff = 'kokkos_2d_diffusion_neumannbc_test_out.e'
-    requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem with Neumann boundary conditions.'
+    requirement = 'The system shall, using Kokkos, provide an ability to solve a 2D diffusion problem with Neumann boundary conditions.'
     design = 'KokkosDiffusion.md KokkosNeumannBC.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
@@ -25,7 +25,7 @@
     type = Exodiff
     input = 'kokkos_2d_diffusion_bodyforce_test.i'
     exodiff = 'kokkos_2d_diffusion_bodyforce_test_out.e'
-    requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem including a volumetric source term.'
+    requirement = 'The system shall, using Kokkos, provide an ability to solve a 2D diffusion problem including a volumetric source term.'
     design = 'KokkosDiffusion.md KokkosBodyForce.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
@@ -36,7 +36,7 @@
     input = 'kokkos_2d_diffusion_test.i'
     cli_args = 'Outputs/exodus=false'
     recover = false
-    requirement = 'The Kokkos system shall provide a tester that checks hand-coded Jacobian against finite difference Jacobian using -snes_type=test option.'
+    requirement = 'The system shall, using Kokkos, provide a tester that checks hand-coded Jacobian against finite difference Jacobian using -snes_type=test option.'
     design = 'framework_stp.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
@@ -48,7 +48,7 @@
     exodiff = 'kokkos_2d_diffusion_test_out.e'
     cli_args = 'Executioner/nl_abs_tol=1e+1 Executioner/petsc_options_iname=-snes_force_iteration Executioner/petsc_options_value=1'
     prereq = testdirichlet
-    requirement = 'The Kokkos system shall force the solver to take at least one iteration regardless of the initial residual norm when the snes_force_iteration option is specified.'
+    requirement = 'The system shall, using Kokkos, force the solver to take at least one iteration regardless of the initial residual norm when the snes_force_iteration option is specified.'
     design = 'Transient.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
@@ -59,7 +59,7 @@
     input = 'kokkos_2d_diffusion_test.i'
     cli_args = 'Executioner/solve_type=linear Outputs/exodus=false'
     absent_out = 'Nonlinear \|R\|'
-    requirement = 'The Kokkos system shall not compute an extra residual if the linear solver is used.'
+    requirement = 'The system shall, using Kokkos, not compute an extra residual if the linear solver is used.'
     design = 'FEProblem.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'

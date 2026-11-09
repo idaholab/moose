@@ -3,7 +3,7 @@
   issues = '#30655'
 
   [side_extreme]
-    requirement = 'The Kokkos system shall compute the extreme (min/max) values over a side'
+    requirement = 'The system shall, using Kokkos, compute the extreme (min/max) values over a side'
     [nonlinear_variable]
       type = 'CSVDiff'
       input = 'kokkos_nonlinear_variable.i'

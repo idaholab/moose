@@ -6,7 +6,7 @@
     type = 'Exodiff'
     input = 'kokkos_kernel_precompute_test.i'
     exodiff = 'kokkos_kernel_precompute_test_out.e'
-    requirement = 'The Kokkos system shall provide optimized kernels for residuals with the test function or its gradient factored out.'
+    requirement = 'The system shall, using Kokkos, provide optimized kernels for residuals with the test function or its gradient factored out.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []

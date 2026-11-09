@@ -3,7 +3,7 @@
   issues = '#30655'
 
   [test]
-    requirement = 'The Kokkos system shall be capable of computing parsed expressions to set an auxiliary variable'
+    requirement = 'The system shall, using Kokkos, be capable of computing parsed expressions to set an auxiliary variable'
     [variable]
       type = 'Exodiff'
       input = 'kokkos_parsed_aux_test.i'

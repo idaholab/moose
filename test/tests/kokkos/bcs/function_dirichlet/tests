@@ -2,7 +2,7 @@
   issues = '#33594'
   design = 'KokkosFunctionDirichletBC.md KokkosADFunctionDirichletBC.md'
   [test]
-    requirement = 'The Kokkos system shall impose a Dirichlet boundary condition with a value given by a function'
+    requirement = 'The system shall, using Kokkos, impose a Dirichlet boundary condition with a value given by a function'
     [regular]
       type = Exodiff
       input = 'kokkos_function_dirichlet.i'

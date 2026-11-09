@@ -3,7 +3,7 @@
   design = 'KokkosMaterials/index.md'
 
   [stateful]
-    requirement = 'The Kokkos material system shall be able to generate current, old, and older states of material properties and '
+    requirement = 'The system shall, in the Kokkos material system, be able to generate current, old, and older states of material properties and '
     [current]
       type = Exodiff
       input = 'kokkos_stateful_prop_test.i'
@@ -37,7 +37,7 @@
   []
 
   [storage]
-    requirement = 'The Kokkos system shall store stateful properties that vary at every quadrature point '
+    requirement = 'The system shall, using Kokkos, store stateful properties that vary at every quadrature point '
     [spatial_test]
       type = Exodiff
       input = 'kokkos_stateful_prop_spatial_test.i'
