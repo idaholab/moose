@@ -2209,41 +2209,32 @@ SubChannel1PhaseProblem::shiftCrossflowDamping(Mat M_ww,
                                                PetscScalar inv_dtau)
 {
   PetscFunctionBegin;
-  Vec damping, damping_rhs;
+  Vec damping;
   LibmeshPetscCall(VecDuplicate(_cmc_pseudo_time_inertia, &damping));
   LibmeshPetscCall(VecCopy(_cmc_pseudo_time_inertia, damping));
   LibmeshPetscCall(VecScale(damping, inv_dtau));
   LibmeshPetscCall(MatDiagonalSet(M_ww, damping, ADD_VALUES));
-  LibmeshPetscCall(VecDuplicate(damping, &damping_rhs));
-  LibmeshPetscCall(VecPointwiseMult(damping_rhs, damping, Wij_iter));
-  LibmeshPetscCall(VecAXPY(b_w, 1.0, damping_rhs));
+  LibmeshPetscCall(VecPointwiseMult(damping, damping, Wij_iter));
+  LibmeshPetscCall(VecAXPY(b_w, 1.0, damping));
   LibmeshPetscCall(VecDestroy(&damping));
-  LibmeshPetscCall(VecDestroy(&damping_rhs));
   PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
 PetscErrorCode
-SubChannel1PhaseProblem::addCrossflowDamping(Mat M_ww,
-                                             Mat M_wp,
-                                             Vec b_w,
-                                             Vec Wij_iter,
-                                             int iblock,
-                                             PetscScalar & max_inv_dtau,
-                                             PetscScalar & inv_dtau)
+SubChannel1PhaseProblem::addCrossflowDamping(
+    Mat M_ww, Mat M_wp, Vec b_w, Vec Wij_iter, int iblock, PetscScalar & inv_dtau)
 {
   PetscFunctionBegin;
   const unsigned int first_node = iblock * _block_size + 1;
   const unsigned int last_node = (iblock + 1) * _block_size;
-  Vec residual, pressure_term;
+  Vec residual;
   LibmeshPetscCall(createPetscVector(residual, _block_size * _n_gaps));
-  LibmeshPetscCall(createPetscVector(pressure_term, _block_size * _n_gaps));
   LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
       _prodp, *_P_soln, first_node - 1, last_node - 1, _n_channels));
 
   // residual = M_ww Wij_iter + M_wp P - b_w at the current iterate
   LibmeshPetscCall(MatMult(M_ww, Wij_iter, residual));
-  LibmeshPetscCall(MatMult(M_wp, _prodp, pressure_term));
-  LibmeshPetscCall(VecAXPY(residual, 1.0, pressure_term));
+  LibmeshPetscCall(MatMultAdd(M_wp, _prodp, residual, residual));
   LibmeshPetscCall(VecAXPY(residual, -1.0, b_w));
   PetscReal residual_norm;
   LibmeshPetscCall(VecNorm(residual, NORM_2, &residual_norm));
@@ -2257,12 +2248,13 @@ SubChannel1PhaseProblem::addCrossflowDamping(Mat M_ww,
   const Real residual_ratio = residual_ref > 0.0 ? residual_norm / residual_ref : 1.0;
 
   // Pseudo-transient continuation with switched evolution relaxation: the pseudo-time step grows
-  // from its initial value as the residual decreases, dtau = dtau_0 / (residual ratio * boost), and
-  // each gap is damped by its crossflow inertia over it, K_ij = L_ij S_ij rho* / dtau. The boost
-  // raised by failed coupled linear solves delays, but does not prevent, the growth of the step.
-  max_inv_dtau = 1.0 / _crossflow_pseudo_time_step;
-  inv_dtau =
-      std::min(max_inv_dtau, max_inv_dtau * residual_ratio * _crossflow_damping_boost[iblock]);
+  // from its initial value as the residual decreases, dtau = dtau_0 / (residual ratio * reduction),
+  // and each gap is damped by its crossflow inertia over it, K_ij = L_ij S_ij rho* / dtau. The
+  // reduction raised by failed coupled linear solves delays, but does not prevent, the growth of
+  // the step.
+  const PetscScalar max_inv_dtau = 1.0 / _crossflow_pseudo_time_step;
+  inv_dtau = std::min(
+      max_inv_dtau, max_inv_dtau * residual_ratio * _crossflow_pseudo_time_step_reduction[iblock]);
   if (_verbose_subchannel)
   {
     _console << "Crossflow residual ratio: " + std::to_string(residual_ratio) << std::endl;
@@ -2272,7 +2264,6 @@ SubChannel1PhaseProblem::addCrossflowDamping(Mat M_ww,
   LibmeshPetscCall(shiftCrossflowDamping(M_ww, b_w, Wij_iter, inv_dtau));
 
   LibmeshPetscCall(VecDestroy(&residual));
-  LibmeshPetscCall(VecDestroy(&pressure_term));
   PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
@@ -2416,19 +2407,13 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
                    /*label=*/"Cross mom");
 
   // ===================== Crossflow damping ====================
-  PetscScalar max_inv_dtau = 0.0;
   PetscScalar inv_dtau = 0.0;
   Vec Wij_iter;
   LibmeshPetscCall(createPetscVector(Wij_iter, _block_size * _n_gaps));
   LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
       Wij_iter, _Wij, first_node, last_node, _n_gaps));
-  LibmeshPetscCall(addCrossflowDamping(mat_array[Idx(2, 2)],
-                                       mat_array[Idx(2, 1)],
-                                       vec_array[2],
-                                       Wij_iter,
-                                       iblock,
-                                       max_inv_dtau,
-                                       inv_dtau));
+  LibmeshPetscCall(addCrossflowDamping(
+      mat_array[Idx(2, 2)], mat_array[Idx(2, 1)], vec_array[2], Wij_iter, iblock, inv_dtau));
 
   V("Relax mdot: " + std::to_string(_mass_flow_equation_relaxation));
   V("Relax P: " + std::to_string(_pressure_equation_relaxation));
@@ -2530,11 +2515,14 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // iterations is then repeated with a smaller step. Halving the step per retry with eight retries
   // spans the range between the residual-scaled step and the initial step. A per-attempt cap of
   // 1000 iterations lets slowly converging solves finish; lower caps abandon them and shrink the
-  // step far more than necessary.
+  // step far more than necessary. The crossflow equation relaxation has scaled the damping of the
+  // first attempt by 1/crossflow_equation_relaxation but does not scale the retry increments, so
+  // with relaxation a retry raises the damping by less than a halving of the step would. The
+  // reduction applies in the next outer iteration before the relaxation and takes full effect.
   const PetscInt retry_maxit = 1000;
-  // The boost is kept for the remaining outer iterations of this solve so that a failure is not
-  // repeated every iteration. Capping it at the increase one fully retried solve provides keeps the
-  // damping bounded by a multiple of the residual ratio, so it still vanishes at convergence.
+  // The reduction is kept for the remaining outer iterations of this solve so that a failure is not
+  // repeated every iteration. Capping it at the reduction one fully retried solve provides keeps
+  // the damping bounded by a multiple of the residual ratio, so it still vanishes at convergence.
   // Every attempt starts from the current outer iterate
   auto setInitialGuess = [&]()
   {
@@ -2564,18 +2552,22 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     // Halve the pseudo-time step and re-solve, the step rejection of pseudo-transient continuation;
     // the right-hand-side compensation keeps the fixed point. The minimum increment of the inverse
     // step guarantees progress when the residual-scaled damping is close to zero.
-    const PetscScalar delta_inv_dtau = std::max(inv_dtau, 0.05 * max_inv_dtau);
+    const PetscScalar delta_inv_dtau = std::max(inv_dtau, 0.05 / _crossflow_pseudo_time_step);
     inv_dtau += delta_inv_dtau;
-    auto & boost = _crossflow_damping_boost[iblock];
-    boost = std::min(_max_crossflow_damping_boost, 2.0 * boost);
-    V("Coupled linear solve did not converge; retrying with crossflow pseudo-time step: " +
+    auto & reduction = _crossflow_pseudo_time_step_reduction[iblock];
+    reduction = std::min(_max_crossflow_pseudo_time_step_reduction, 2.0 * reduction);
+    V("Coupled linear solve did not converge; retrying with nominal crossflow pseudo-time step "
+      "(before crossflow equation relaxation): " +
       std::to_string(1.0 / inv_dtau));
 
     Vec b_w;
     LibmeshPetscCall(VecGetSubVector(b_vec, field_is[2], &b_w));
     LibmeshPetscCall(shiftCrossflowDamping(mat_array[Idx(2, 2)], b_w, Wij_iter, delta_inv_dtau));
     LibmeshPetscCall(VecRestoreSubVector(b_vec, field_is[2], &b_w));
-    // Rebuild the preconditioner for the modified cross-momentum block
+    // The shift changes the cross-momentum block in place. The field split uses that block itself
+    // as its sub-operator, so the increased object state of the block makes the next solve
+    // rebuild the split preconditioner; resetting the operators also marks the coupled solver for
+    // a new setup.
     LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));
   }
   LibmeshPetscCall(VecDestroy(&Wij_iter));
@@ -2730,7 +2722,7 @@ SubChannel1PhaseProblem::externalSolve()
   initializeSolution();
   computeBulkReynoldsNumber();
   _crossflow_residual_ref.assign(_n_blocks, 0.0);
-  _crossflow_damping_boost.assign(_n_blocks, 1.0);
+  _crossflow_pseudo_time_step_reduction.assign(_n_blocks, 1.0);
   // Small helper functions to reduce repetition
   // Verbose print helper (no-op unless _verbose_subchannel is true)
   auto V = [&](const std::string & s)

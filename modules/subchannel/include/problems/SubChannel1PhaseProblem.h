@@ -171,16 +171,10 @@ protected:
    * @param b_w           cross-momentum right-hand side; K_ij Wij_iter is added to it
    * @param Wij_iter      crossflow at the current outer iterate
    * @param iblock        axial block
-   * @param max_inv_dtau  inverse of the initial pseudo-time step, which bounds inv_dtau
    * @param inv_dtau      inverse of the pseudo-time step applied
    */
-  PetscErrorCode addCrossflowDamping(Mat M_ww,
-                                     Mat M_wp,
-                                     Vec b_w,
-                                     Vec Wij_iter,
-                                     int iblock,
-                                     PetscScalar & max_inv_dtau,
-                                     PetscScalar & inv_dtau);
+  PetscErrorCode addCrossflowDamping(
+      Mat M_ww, Mat M_wp, Vec b_w, Vec Wij_iter, int iblock, PetscScalar & inv_dtau);
 
   /**
    * Add the damping of the inverse pseudo-time step inv_dtau to the cross-momentum equation:
@@ -490,13 +484,13 @@ protected:
   /// Per-block largest cross-momentum residual norm of the solve, which scales the crossflow
   /// damping in the coupled solve
   std::vector<Real> _crossflow_residual_ref;
-  /// Per-block factor, raised after coupled linear-solve failures, that delays the decay of the
-  /// crossflow damping
-  std::vector<Real> _crossflow_damping_boost;
+  /// Per-block factor, raised after coupled linear-solve failures, that divides the crossflow
+  /// pseudo-time step and so delays its growth
+  std::vector<Real> _crossflow_pseudo_time_step_reduction;
   /// Number of coupled linear-solve retries, each halving the crossflow pseudo-time step
   static constexpr unsigned int _max_crossflow_retries = 8;
-  /// Cap on the damping boost: the increase one fully retried coupled solve provides
-  static constexpr Real _max_crossflow_damping_boost = 1 << _max_crossflow_retries;
+  /// Cap on the pseudo-time step reduction: the reduction one fully retried coupled solve provides
+  static constexpr Real _max_crossflow_pseudo_time_step_reduction = 1 << _max_crossflow_retries;
 
 public:
   static InputParameters validParams();

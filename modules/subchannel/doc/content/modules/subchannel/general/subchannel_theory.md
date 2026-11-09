@@ -596,6 +596,16 @@ the last attempt with the full [!param](/Problem/TriSubChannel1PhaseProblem/maxi
 rejection of pseudo-transient continuation. Each retry also doubles $\gamma$, which keeps the step
 at the size the preconditioner needs for the remaining outer iterations.
 
+The crossflow equation relaxation described below is applied after the damping is added, so the
+first attempt of a solve is damped by $\mathbf K^{\ell}/\alpha_W$, while the increment of a retry is
+added to the already relaxed equation and is not scaled by $1/\alpha_W$. When each increment is
+$1/\Delta\tau$, the damping of the solve after $n$ retries is therefore
+$\left(1/\alpha_W + 2^n - 1\right)\mathbf K^{\ell}$, compared with $2^n\,\mathbf K^{\ell}/\alpha_W$ for a true halving of the step on every retry. The two agree
+only without crossflow equation relaxation, $\alpha_W = 1$. With the default $\alpha_W = 0.1$, the
+first retry raises the damping by 10% and eight retries by a factor of about 26 rather than $2^8$.
+The doubled $\gamma$ enters the damping before the relaxation, so from the next outer iteration of
+the solve on, the damping is raised by the full factor $\gamma$.
+
 Because $\gamma$ is bounded, the step still grows as the residual decreases. Where the
 preconditioner cannot solve the undamped system, the step instead settles at the largest value it
 can handle; the converged solution is unaffected because the damping term vanishes at the fixed
@@ -632,7 +642,9 @@ M_{ff} &\leftarrow M_{ff} +
 \end{equation}
 The off-diagonal entries are unchanged. A factor of one bypasses relaxation, while a factor below
 one increases the diagonal magnitude and damps the update toward the previous iterate without
-changing the fixed point. With the defaults, only the crossflow equation is under-relaxed.
+changing the fixed point. With the defaults, only the crossflow equation is under-relaxed. Because
+$D_W$ includes the crossflow damping added before it, the crossflow equation relaxation also scales
+that damping by $1/\alpha_W$.
 
 #### 3. Post-solve solution relaxation
 

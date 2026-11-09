@@ -33,7 +33,10 @@
     csvdiff  = 'FFM-3A_out.csv'
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
-    rel_err = 3e-5
+    # The coupled solves of this case are retried with a smaller crossflow pseudo-time step, and
+    # which attempts fail depends on the PETSc and libMesh versions. The 2026.11.09 packages change
+    # the result by up to 2.8e-4 compared with the 2026.10.19 packages.
+    rel_err = 5e-4
     valgrind = NONE
     recover = false
     requirement = 'The system will examine the subchannel solver for the FFM-3A case'
