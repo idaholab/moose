@@ -64,14 +64,14 @@
   []
   [PressureGrad]
     type = MFEMVectorFEDivergenceKernel
-    trial_variable = pressure
+    coupled_variable = pressure
     variable = velocity
     coefficient = -1
     transpose = true
   []
   [VelocityDiv]
     type = MFEMVectorFEDivergenceKernel
-    trial_variable = velocity
+    coupled_variable = velocity
     variable = pressure
     coefficient = -1
   []

@@ -18,9 +18,9 @@ MFEMMixedBilinearFormKernel::validParams()
   params.addClassDescription(
       "Base class for mixed bilinear form kernels, allowing different trial and test variables.");
   params.addParam<VariableName>(
-      "trial_variable",
-      "The trial variable this kernel is acting on and which will be solved for. If empty "
-      "(default), it will be the same as the test variable.");
+      "coupled_variable",
+      "The variable coupled to the test variable by this kernel. It may be eliminated and need not "
+      "be solved for by this weak form's equation system. Defaults to the test variable.");
   params.addParam<bool>(
       "transpose", false, "If true, adds the transpose of the integrator to the system instead.");
   return params;
@@ -28,8 +28,8 @@ MFEMMixedBilinearFormKernel::validParams()
 
 MFEMMixedBilinearFormKernel::MFEMMixedBilinearFormKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
-    _trial_var_name(isParamValid("trial_variable") ? getParam<VariableName>("trial_variable")
-                                                   : _test_var_name),
+    _trial_var_name(isParamValid("coupled_variable") ? getParam<VariableName>("coupled_variable")
+                                                     : _test_var_name),
     _transpose(getParam<bool>("transpose"))
 {
 }

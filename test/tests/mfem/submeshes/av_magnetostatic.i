@@ -117,7 +117,7 @@
   [source]
     type = MFEMMixedVectorMassKernel
     variable = a_field
-    trial_variable = e_field
+    coupled_variable = e_field
     coefficient = conductivity
     block = 'TorusCore TorusSheath'
   []

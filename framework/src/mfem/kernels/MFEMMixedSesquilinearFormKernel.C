@@ -22,16 +22,16 @@ MFEMMixedSesquilinearFormKernel::validParams()
       "variables. Transposition of each component is controlled individually via the `transpose` "
       "parameter on each `RealComponent`/`ImagComponent` sub-block.");
   params.addParam<VariableName>(
-      "trial_variable",
-      "The trial variable this kernel is acting on and which will be solved for. If empty "
-      "(default), it will be the same as the test variable.");
+      "coupled_variable",
+      "The variable coupled to the test variable by this kernel. It may be eliminated and need not "
+      "be solved for by this weak form's equation system. Defaults to the test variable.");
   return params;
 }
 
 MFEMMixedSesquilinearFormKernel::MFEMMixedSesquilinearFormKernel(const InputParameters & parameters)
   : MFEMComplexKernel(parameters),
-    _trial_var_name(isParamValid("trial_variable") ? getParam<VariableName>("trial_variable")
-                                                   : _test_var_name)
+    _trial_var_name(isParamValid("coupled_variable") ? getParam<VariableName>("coupled_variable")
+                                                     : _test_var_name)
 {
 }
 

@@ -43,7 +43,7 @@
   []
   [divh,T']
     type = MFEMVectorFEDivergenceKernel
-    trial_variable = heat_flux
+    coupled_variable = heat_flux
     variable = temperature
   []
   [h,h']
@@ -52,7 +52,7 @@
   []
   [-T,div.h']
     type = MFEMVectorFEDivergenceKernel
-    trial_variable = temperature
+    coupled_variable = temperature
     variable = time_integrated_heat_flux
     coefficient = -1.0
     transpose = true
