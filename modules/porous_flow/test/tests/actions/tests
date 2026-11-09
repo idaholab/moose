@@ -173,14 +173,14 @@
     type = 'CSVDiff'
     input = multiblock.i
     csvdiff = 'multiblock_out.csv'
-    requirement = "PorousFlow shall be able to be block-restricted, specifically so that a model's physics is governed by PorousFlow only on part of the mesh"
+    requirement = "The system shall allow PorousFlow to be block-restricted, specifically so that a model's physics is governed by PorousFlow only on part of the mesh"
     issues = '#20260'
     design = 'actions/PorousFlowAddMaterialJoiner.md'
   []
   [block_restricted_and_not]
     type = RunApp
     input = block_restricted_and_not.i
-    requirement = "PorousFlow shall be able to be block-restricted, and Joiners shall work even when one PorousFlow material is block-restricted for one phase and non block-restricted for another"
+    requirement = "The system shall allow PorousFlow to be block-restricted, and Joiners shall work even when one PorousFlow material is block-restricted for one phase and non block-restricted for another"
     issues = '#20260'
     design = 'actions/PorousFlowAddMaterialJoiner.md'
   []
