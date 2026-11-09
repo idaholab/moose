@@ -66,8 +66,13 @@ BLOCKED_DESCRIPTION = "Won't run due to failed dependencies"
 # without asking CIVET for per-step status
 STEP_RETURN_CODE_RE = re.compile(r"completed with return code (\d+)")
 
-# Leading timestamp and memory annotations on TestHarness output lines
-LINE_PREFIX_RE = re.compile(r"^\[[\d.]+s\]\s*\[\s*\d+MB\]\s*")
+# Leading timestamp and memory annotations on TestHarness output lines. The
+# memory is CPU memory and optionally GPU memory, each in MB or GB, or "?" if
+# unknown, e.g., "[ 123MB]" or "[ 123MB   12GB GPU]".
+_MEMORY = r"(?:\d+|\?)[MG]B"
+LINE_PREFIX_RE = re.compile(
+    rf"^\[[\d.]+s\]\s*\[\s*{_MEMORY}(?:\s+{_MEMORY} GPU)?\]\s*"
+)
 
 # The TestHarness prefixes each line of a test's output with the test name.
 # It has to come off before output lines can be compared, or every line looks
