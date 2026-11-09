@@ -85,7 +85,7 @@
     type = 'Exodiff'
     input = 'solution_aux_exodus.i'
     exodiff = 'solution_aux_exodus_out.e'
-    requirement = "The SolutionAux object shall be capable of populating an auxiliary variable from "
+    requirement = "The system shall provide a SolutionAux object capable of populating an auxiliary variable from "
                   "an ExodusII file."
   []
 
@@ -93,7 +93,7 @@
     type = 'Exodiff'
     input = 'solution_aux_exodus_file_extension.i'
     exodiff = 'solution_aux_exodus_file_extension_out.e'
-    requirement = "The SolutionAux object shall be capable of populating an auxiliary variable from "
+    requirement = "The system shall provide a SolutionAux object capable of populating an auxiliary variable from "
                   "an ExodusII file with a custom extension (e.g., *.e-s003)."
   []
 
@@ -101,7 +101,7 @@
     type = 'Exodiff'
     input = 'solution_aux_exodus_elem_map.i'
     exodiff = 'solution_aux_exodus_elem_map_out.e'
-    requirement = "The SolutionAux object shall be capable of reading elemental data for the largest "
+    requirement = "The system shall provide a SolutionAux object capable of reading elemental data for the largest "
                   "timestep."
   []
 
@@ -109,7 +109,7 @@
     type = 'Exodiff'
     input = 'solution_aux_exodus_elemental.i'
     exodiff = 'solution_aux_exodus_elemental_out.e'
-    requirement = "The SolutionAux object shall be capable of reading elemental data for a specific "
+    requirement = "The system shall provide a SolutionAux object capable of reading elemental data for a specific "
                   "timestep."
   []
 
@@ -118,7 +118,7 @@
     type = 'Exodiff'
     input = 'solution_aux_exodus_elemental_only.i'
     exodiff = 'solution_aux_exodus_elemental_only_out.e'
-    requirement = "The SolutionAux object shall be capable of restricting reading to a single "
+    requirement = "The system shall provide a SolutionAux object capable of restricting reading to a single "
                   "elemental variable."
   []
 
@@ -126,7 +126,7 @@
     type = 'Exodiff'
     input = 'solution_aux_exodus_direct.i'
     exodiff = 'solution_aux_exodus_direct_out.e'
-    requirement = "The SolutionAux object shall be capable of initializing an auxiliary variable "
+    requirement = "The system shall provide a SolutionAux object capable of initializing an auxiliary variable "
                   "from an existing ExodusII file using a direct degree-of-freedom copy for "
                   "identical meshes."
   []
@@ -135,7 +135,7 @@
     type = 'Exodiff'
     input = 'solution_aux_exodus_interp.i'
     exodiff = 'solution_aux_exodus_interp_out.e'
-    requirement = "The SolutionAux object shall be capable of setting an auxiliary variable with "
+    requirement = "The system shall provide a SolutionAux object capable of setting an auxiliary variable with "
                   "temporal interpolation."
   []
 
@@ -144,7 +144,7 @@
     input = 'solution_aux_exodus_interp.i'
     exodiff = 'solution_aux_exodus_interp_out2.e'
     cli_args = 'UserObjects/soln/time_transformation=t/2 Outputs/file_base=solution_aux_exodus_interp_out2'
-    requirement = "The SolutionAux object shall be capable of setting an auxiliary variable with "
+    requirement = "The system shall provide a SolutionAux object capable of setting an auxiliary variable with "
                   "temporal interpolation and a time transformation function."
   []
 
@@ -175,7 +175,7 @@
     type = 'Exodiff'
     input = 'solution_aux_exodus_interp_direct.i'
     exodiff = 'solution_aux_exodus_interp_direct_out.e'
-    requirement = "The SolutionAux object shall be capable of setting an auxiliary variable with "
+    requirement = "The system shall provide a SolutionAux object capable of setting an auxiliary variable with "
                   "temporal interpolation using a direct degree-of-freedom copy for identical "
                   "meshes."
   []
@@ -184,7 +184,7 @@
     type = 'Exodiff'
     input = 'solution_aux_multi_var.i'
     exodiff = 'solution_aux_multi_var_out.e'
-    requirement = "The SolutionAux object shall be capable of accessing specific variables from a "
+    requirement = "The system shall provide a SolutionAux object capable of accessing specific variables from a "
                   "SolutionUserObject."
   []
 
@@ -192,13 +192,13 @@
     type = 'RunException'
     input = 'solution_aux_multi_err.i'
     expect_err = 'The SolutionUserObject contains multiple variables, \w+'
-    requirement = "The SolutionAux object shall produce an error if the 'from_variable' parameter is "
+    requirement = "The system shall produce an error if the SolutionAux object 'from_variable' parameter is "
                   "not set and the supplied UserObject has multiple variables."
 
   []
 
   [aux_nonlinear_solution]
-    requirement = "The systems object shall be capable of setting values using an auxiliary variable"
+    requirement = "The system shall be capable of setting values using an auxiliary variable, without mesh adaptivity,"
 
     [build]
       # This builds the XDA and XDR files for the 'aux_nonlinear_solution_from_xda/r' tests below

@@ -3,13 +3,13 @@
     type = 'Exodiff'
     input = 'coupled_value_coupled_flux.i'
     exodiff = 'coupled_value_coupled_flux_out.e'
-    requirement = "Interface kernels shall provide integrated conditions between subdomains,"
+    requirement = "The system shall provide interface kernels that provide integrated conditions between subdomains,"
                   " and shall work with boundary restricted materials with stateful properties."
     issues = '#11258 #869'
     design = 'InterfaceKernels/index.md'
   []
   [interface_diffusion_penalty]
-    requirement = "The interface diffusion penalty method should reproduce the analytic solution"
+    requirement = "The system shall reproduce, with the interface diffusion penalty method, the analytic solution"
     design = 'InterfaceKernels/index.md'
     issues = '#11765'
     [hand-coded]
@@ -33,7 +33,7 @@
     exodiff = 'coupled_value_coupled_flux_with_jump_material_out.e'
     design = 'InterfaceKernels/index.md'
     issues = '#12066'
-    requirement = "The InterfaceKernel system shall use with interface material in 1D."
+    requirement = "The system shall support InterfaceKernel objects used with interface material in 1D."
     prereq = 'interface_diffusion'
   []
   # This test ensures that shape functions for the NEIGHBORING variable are used in test_neighbor
@@ -85,7 +85,7 @@
     input = 'ik_save_in_test.i'
     exodiff = 'ik_save_in_test_out.e'
     issues = '#9854'
-    requirement = "Save-in shall record the correct residuals and Jacobians representing the interface kernel. "
+    requirement = "The system shall record, with save-in, the correct residuals and Jacobians representing the interface kernel. "
                   "This applies the DirichletBC to side a (block 0) of the interface."
     design = 'InterfaceKernels/index.md'
   []
@@ -95,7 +95,7 @@
     exodiff = 'ik_save_in_other_side_out.e'
     cli_args = 'BCs/middle/variable=u BCs/middle/v=v BCs/middle/save_in=primary_resid Outputs/file_base=ik_save_in_other_side_out'
     issues = '#13232'
-    requirement = "Save-in shall record the correct residuals and Jacobians representing the interface kernel. "
+    requirement = "The system shall record, with save-in, the correct residuals and Jacobians representing the interface kernel. "
                   "This applies the DirichletBC to side b (block 1) of the interface."
     design = 'InterfaceKernels/index.md'
   []
@@ -105,7 +105,7 @@
     input = 'reaction_1D_steady.i'
     csvdiff = 'reaction_1D_steady_out.csv'
     issues = '#13365'
-    requirement = "The interface reaction kernel should reproduce the analytic solution"
+    requirement = "The system shall reproduce the analytic solution using the interface reaction kernel"
     design = 'InterfaceReaction.md'
   []
   [reaction_1D_steady_ExoDiff]
@@ -113,7 +113,7 @@
     input = 'reaction_1D_steady.i'
     exodiff = 'reaction_1D_steady_out.e'
     issues = '#13365'
-    requirement = "The interface reaction kernel should work with interface diffusion kernel"
+    requirement = "The system shall support the interface reaction kernel working with the interface diffusion kernel"
     design = 'InterfaceReaction.md'
 
     # Checking both Exodus and CSVDiff from this single input
@@ -126,7 +126,7 @@
     input = 'ADMatreaction_1D_steady.i'
     csvdiff = 'ADMatreaction_1D_steady_out.csv'
     issues = '#27736'
-    requirement = "The result of an interface reaction kernel computed using automatic differentiation shall match the analytic solution in a steady-state simulation"
+    requirement = "The system shall compute an interface reaction kernel result using automatic differentiation that matches the analytic solution in a steady-state simulation"
     design = 'ADMatInterfaceReaction.md'
   []
   [matreaction_1D_transient_CSVDiff]
@@ -134,7 +134,7 @@
     input = 'ADMatreaction_1D_transient.i'
     exodiff = 'ADMatreaction_1D_transient_out.e'
     issues = '#27736'
-    requirement = "The result of an interface reaction kernel computed using automatic differentiation shall be consistent with the results of the non-AD transient interface reaction test."
+    requirement = "The system shall compute an interface reaction kernel result using automatic differentiation that is consistent with the results of the non-AD transient interface reaction test."
     design = 'ADMatInterfaceReaction.md'
   []
   [reaction_1D_transient]
@@ -142,7 +142,7 @@
     input = 'reaction_1D_transient.i'
     exodiff = 'reaction_1D_transient_out.e'
     issues = '#13365'
-    requirement = "The solution should be discontinued at the interface due to the reaction taking place"
+    requirement = "The system shall produce a solution that is discontinuous at the interface due to the reaction taking place"
     design = 'InterfaceReaction.md'
   []
   [reaction_1D_transient_Jac]
@@ -153,7 +153,7 @@
     ratio_tol = 1e-8
     difference_tol = 1e-6
     issues = '#13365'
-    requirement = "The Jacobian from InterfaceReaction shall be perfect"
+    requirement = "The system shall compute a perfect Jacobian for InterfaceReaction"
     design = 'InterfaceReaction.md'
   []
 

@@ -5,6 +5,6 @@
     csvdiff = 'test_out.csv'
     issues = '#24872'
     design = 'CompileTimeDerivativesMaterial.md'
-    requirement = 'The system to construct compile time derivative materials shall correctly evaluate all derivatives of a given expression.'
+    requirement = 'The system shall correctly evaluate, when constructing compile time derivative materials, all derivatives of a given expression.'
   []
 []

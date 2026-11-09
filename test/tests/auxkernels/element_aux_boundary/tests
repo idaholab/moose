@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'element_aux_boundary.i'
     exodiff = 'element_aux_boundary_out.e'
-    requirement = "The variable data created by a MaterialRealAux object shall support being limited to boundaries."
+    requirement = "The system shall support limiting the variable data created by a MaterialRealAux object to boundaries."
     issues = '#3114'
     design = 'source/auxkernels/MaterialRealAux.md'
   [../]

@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'vectorpostprocessor.i'
     exodiff = 'vectorpostprocessor_out.e'
-    requirement = "AuxKernel objects shall be capable of coupling to VectorPostprocessor objects."
+    requirement = "The system shall allow AuxKernel objects to couple to VectorPostprocessor objects."
   [../]
 []

@@ -6,7 +6,7 @@
     mesh_mode = REPLICATED
     issues = "#7885"
     design = "InterfaceKernels/index.md"
-    requirement = "The InterfaceKernel system shall operate with coupled variables in 3D. "
+    requirement = "The system shall support InterfaceKernel objects operating with coupled variables in 3D. "
                   "This uses a penalty implementation that is optimally convergent."
   [../]
   [./vector_3d]
@@ -16,7 +16,7 @@
     mesh_mode = REPLICATED
     issues = "#13354"
     design = "InterfaceKernels/index.md"
-    requirement = "The InterfaceKernel system shall support Vector Finite Elements in 3D."
+    requirement = "The system shall support Vector Finite Elements in 3D for InterfaceKernel objects."
   [../]
   [./test_jump_material]
     type = 'Exodiff'
@@ -25,6 +25,6 @@
     mesh_mode = REPLICATED
     issues = "#12066"
     design = "InterfaceKernels/index.md"
-    requirement = "The InterfaceKernel system shall use with interface material in 3D."
+    requirement = "The system shall support InterfaceKernel objects used with interface material in 3D."
   [../]
 []

@@ -3,7 +3,7 @@
   issues = '#8444'
 
   [errors]
-    requirement = 'The material data system shall report a reasonable error when requesting'
+    requirement = 'The system shall report, in the material data system, a reasonable error when requesting'
 
     [get_different_types]
       type = RunException
