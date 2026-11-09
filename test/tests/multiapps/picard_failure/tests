@@ -10,7 +10,7 @@
     restep = false # Test is already testing failed timesteps
 
     design = '/MultiApps/index.md'
-    requirement = 'Multiapps shall be able to be restored when a subapp encounters a solve failure.'
+    requirement = 'The system shall be able to restore Multiapps when a subapp encounters a solve failure.'
     issues = '#5126'
   [../]
 
@@ -28,7 +28,7 @@
     cli_args = 'Outputs/csv=true Outputs/exodus=false :Outputs/csv=true :Outputs/exodus=false'
 
     design = '/MultiApps/index.md'
-    requirement = 'CSV file writing should remain unaffected when a subapp encounters a solve failure.'
+    requirement = 'The system shall leave CSV file writing unaffected when a subapp encounters a solve failure.'
     issues = '#11178'
   [../]
 
@@ -45,7 +45,7 @@
     cli_args = 'MultiApps/active="sub sub_no_fail" Outputs/file_base=picard_parent_2subapps_out sub:Outputs/file_base=picard_parent_2subapps_out_sub sub_no_fail:Outputs/file_base=picard_parent_2subapps_out_sub_no_fail'
 
     design = '/MultiApps/index.md'
-    requirement = 'Multiapps shall be able to cut the parent app time step when any subapp encounters a solve failure.'
+    requirement = 'The system shall allow Multiapps to cut the parent app time step when any subapp encounters a solve failure.'
     issues = '#12477'
   [../]
 []

@@ -1,7 +1,7 @@
 [Tests]
   design = 'Problem/index.md'
   [coupled_system]
-    requirement = 'The software shall be able to solve a system of equations in which one variable depends on another by'
+    requirement = 'The system shall be able to solve a system of equations in which one variable depends on another by'
     issues = '#8780 #24690 #29063'
     [segregated]
       type = Exodiff
@@ -49,7 +49,7 @@
     cli_args = '-u_snes_test_jacobian -v_snes_test_jacobian'
   []
   [different_num_vars_per_system]
-    requirement = 'The software shall allow having a different number of variables in nonlinear systems within the same problem when the action of the Jacobian is provided by'
+    requirement = 'The system shall allow having a different number of variables in nonlinear systems within the same problem when the action of the Jacobian is provided by'
     issues = '#8780'
     [newton]
       type = Exodiff

@@ -140,7 +140,7 @@
     cli_args = 'VectorPostprocessors/point_sample/side_interpolation_type=NONE '
                'Outputs/csv=true '
                'Outputs/file_base=OutputData/point_value_sampler_avgtype_none'
-    requirement = 'The system has the ability to use no average near non-continuous boundaries'
+    requirement = 'The system shall have the ability to use no average near non-continuous boundaries'
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
@@ -154,7 +154,7 @@
     cli_args = 'VectorPostprocessors/point_sample/side_interpolation_type=ARITHMETIC '
                'Outputs/csv=true '
                'Outputs/file_base=OutputData/point_value_sampler_avgtype_arithmetic'
-    requirement = 'The system has the ability to use arithmetic average near non-continuous boundaries'
+    requirement = 'The system shall have the ability to use arithmetic average near non-continuous boundaries'
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
@@ -168,7 +168,7 @@
     cli_args = 'VectorPostprocessors/point_sample/side_interpolation_type=HARMONIC '
                'Outputs/csv=true '
                'Outputs/file_base=OutputData/point_value_sampler_avgtype_harmonic'
-    requirement = 'The system has the ability to use harmonic average near non-continuous boundaries'
+    requirement = 'The system shall have the ability to use harmonic average near non-continuous boundaries'
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
