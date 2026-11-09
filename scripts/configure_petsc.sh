@@ -50,6 +50,14 @@ function configure_petsc()
       exit 1
   fi
 
+  # Have Kokkos use desul if it was installed by scripts/update_and_rebuild_desul.sh, honoring
+  # DESUL_DIR as that script does
+  local FOUND_DESUL_DIR="${DESUL_DIR:-$PATCH_DIR/../framework/contrib/desul/installed}"
+  if [ -d "$FOUND_DESUL_DIR" ]; then
+    echo "INFO: Building Kokkos with the desul installation at $FOUND_DESUL_DIR"
+    EXTRA_CONFIGURE_OPTIONS+=("--download-kokkos-desul-dir=${FOUND_DESUL_DIR}")
+  fi
+
   # Check to see if HDF5 exists using environment variables and expected locations.
   # If it does, use it.
   echo 'INFO: Checking for HDF5...'
