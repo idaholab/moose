@@ -612,7 +612,7 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool recompute_face_mass_fl
 
   // We set the preconditioner/controllable parameters for the pressure equations through
   // petsc options. Linear tolerances will be overridden within the solver.
-  Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
+  Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params, &_problem);
 
   // Solve the pressure corrector
   const auto residuals = solvePressureCorrector();
@@ -792,7 +792,7 @@ LinearAssemblySegregatedSolve::solve()
     // tolerances will be overridden within the solver. In case of a segregated momentum
     // solver, we assume that every velocity component uses the same preconditioner
     if (_should_solve_momentum)
-      Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params);
+      Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params, &_problem);
 
     // Initialize base and coupling pressure gradients. After this we reuse the last gradients
     // until the pressure corrector finalizes a new coupling field.
@@ -832,7 +832,7 @@ LinearAssemblySegregatedSolve::solve()
 
         // We set the preconditioner/controllable parameters through petsc options. Linear
         // tolerances will be overridden within the solver.
-        Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
+        Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params, &_problem);
         ns_residuals[energy_index] =
             solveAdvectedSystem(_energy_sys_number,
                                 *_energy_system,
@@ -846,7 +846,8 @@ LinearAssemblySegregatedSolve::solve()
         {
           // We set the preconditioner/controllable parameters through petsc options. Linear
           // tolerances will be overridden within the solver.
-          Moose::PetscSupport::petscSetOptions(_pm_radiation_petsc_options, solver_params);
+          Moose::PetscSupport::petscSetOptions(
+              _pm_radiation_petsc_options, solver_params, &_problem);
           for (const auto i : index_range(_pm_radiation_system_names))
           {
             ns_residuals[pm_radiation_indices[i]] =
@@ -870,7 +871,8 @@ LinearAssemblySegregatedSolve::solve()
 
           // We set the preconditioner/controllable parameters through petsc options. Linear
           // tolerances will be overridden within the solver.
-          Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
+          Moose::PetscSupport::petscSetOptions(
+              _solid_energy_petsc_options, solver_params, &_problem);
           ns_residuals[solid_energy_index] = solveSolidEnergy();
 
           // For now we only update gradients if cht is needed, might change in the future
@@ -899,7 +901,7 @@ LinearAssemblySegregatedSolve::solve()
 
       // We set the preconditioner/controllable parameters through petsc options. Linear
       // tolerances will be overridden within the solver.
-      Moose::PetscSupport::petscSetOptions(_active_scalar_petsc_options, solver_params);
+      Moose::PetscSupport::petscSetOptions(_active_scalar_petsc_options, solver_params, &_problem);
       for (const auto i : index_range(_active_scalar_system_names))
         ns_residuals[active_scalar_indices[i]] = solveAdvectedSystem(
             _active_scalar_system_numbers[i],
@@ -917,7 +919,7 @@ LinearAssemblySegregatedSolve::solve()
     {
       // We set the preconditioner/controllable parameters through petsc options. Linear
       // tolerances will be overridden within the solver.
-      Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
+      Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params, &_problem);
       for (const auto i : index_range(_turbulence_system_names))
       {
         ns_residuals[turbulence_indices[i]] = solveAdvectedSystem(
@@ -963,7 +965,7 @@ LinearAssemblySegregatedSolve::solve()
 
       // We set the preconditioner/controllable parameters through petsc options. Linear
       // tolerances will be overridden within the solver.
-      Moose::PetscSupport::petscSetOptions(_passive_scalar_petsc_options, solver_params);
+      Moose::PetscSupport::petscSetOptions(_passive_scalar_petsc_options, solver_params, &_problem);
       for (const auto i : index_range(_passive_scalar_system_names))
         scalar_residuals[i] = solveAdvectedSystem(
             _passive_scalar_system_numbers[i],
