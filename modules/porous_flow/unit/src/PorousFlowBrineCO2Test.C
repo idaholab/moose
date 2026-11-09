@@ -27,6 +27,14 @@ TEST_F(PorousFlowBrineCO2Test, indices)
   EXPECT_EQ((unsigned int)0, _fs->aqueousComponentIndex());
   EXPECT_EQ((unsigned int)1, _fs->gasComponentIndex());
   EXPECT_EQ((unsigned int)2, _fs->saltComponentIndex());
+
+  // AD derivative layout: pressure, temperature, the single total mass fraction, then salt
+  EXPECT_EQ((unsigned int)0, _fs->getPressureIndex());
+  EXPECT_EQ((unsigned int)1, _fs->getTemperatureIndex());
+  EXPECT_EQ((unsigned int)2, _fs->getZIndex());
+  EXPECT_EQ((unsigned int)3, _fs->getXIndex());
+  EXPECT_TRUE(_fs->hasSalt());
+  EXPECT_EQ((unsigned int)1, _fs->numTotalMassFractions());
 }
 
 /*

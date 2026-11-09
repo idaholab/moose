@@ -15,6 +15,14 @@ energy of each phase to be skipped. This is useful in isothermal simulations wit
 equation, where these properties are not needed but would otherwise be computed at every
 residual and Jacobian evaluation.
 
+## Phase and component numbering
+
+The phase and component numbering is fixed by this class and is no longer user-configurable. The
+liquid phase is phase 0 and the gas phase is phase 1; water is component 0, CO$_2$ is component 1
+and salt (NaCl) is component 2. The `liquid_phase_number`, `liquid_fluid_component` and
+`salt_component` parameters are deprecated, and any value other than the fixed numbering above
+is an error.
+
 !syntax parameters /UserObjects/PorousFlowBrineCO2
 
 !syntax inputs /UserObjects/PorousFlowBrineCO2

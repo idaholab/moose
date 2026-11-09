@@ -4,7 +4,9 @@
 # only the residual is computed. The salt mass fraction and temperature vary in space and are held
 # fixed by TimeDerivative kernels, so the gas saturation and hence the liquid porepressure vary
 # along the column. The solution must not depend on whether the residual and Jacobian are computed
-# together or separately, nor on the number of processors
+# together or separately, nor on the number of processors. When the salt mass fraction and
+# temperature are omitted from porous_flow_vars, they are treated in the same way as AuxVariables,
+# and the solution must again be the same
 
 [Mesh]
   [mesh]

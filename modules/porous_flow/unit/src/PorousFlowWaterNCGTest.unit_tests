@@ -1,0 +1,82 @@
+[Tests]
+  design = 'PorousFlowWaterNCG.md'
+
+  [waterncg]
+    requirement = 'The system shall compute the phase equilibrium and phase properties of a water and non-condensable gas system,'
+    issues = '#10480'
+    [name]
+      type = GoogleTest
+      unit_test = PorousFlowWaterNCGTest.name
+      detail = 'returning the fluid state name;'
+    []
+    [equilibrium_mass_fraction]
+      type = GoogleTest
+      unit_test = PorousFlowWaterNCGTest.equilibriumMassFraction
+      detail = 'computing the equilibrium mass fractions of gas in the liquid and water in the gas, with pressure and temperature derivatives that match finite differences;'
+    []
+    [mass_fraction]
+      type = GoogleTest
+      unit_test = PorousFlowWaterNCGTest.MassFraction
+      detail = 'computing the phase mass fractions and their derivatives from the total mass fraction in the liquid, gas and two-phase regions;'
+    []
+    [gas_properties]
+      type = GoogleTest
+      unit_test = PorousFlowWaterNCGTest.gasProperties
+      detail = 'computing the gas density, viscosity and enthalpy, with derivatives that match finite differences in the gas and two-phase regions; and'
+    []
+    [liquid_properties]
+      type = GoogleTest
+      unit_test = PorousFlowWaterNCGTest.liquidProperties
+      detail = 'computing the liquid density, viscosity and enthalpy, with derivatives that match finite differences in the liquid and two-phase regions.'
+    []
+  []
+
+  [waterncg_saturation]
+    requirement = 'The system shall compute the gas saturation of a water and non-condensable gas system,'
+    issues = '#9377'
+    [saturation]
+      type = GoogleTest
+      unit_test = PorousFlowWaterNCGTest.saturation
+      detail = 'in the two-phase region, with derivatives that match finite differences; and'
+    []
+    [total_mass_fraction]
+      type = GoogleTest
+      unit_test = PorousFlowWaterNCGTest.totalMassFraction
+      detail = 'inverted to give the total mass fraction for a specified gas saturation, for use as an initial condition.'
+    []
+  []
+
+  [waterncg_ad]
+    requirement = 'The system shall compute the properties of a water and non-condensable gas system using automatic differentiation,'
+    issues = '#13853'
+    [gas_density]
+      type = GoogleTest
+      unit_test = PorousFlowWaterNCGTest.gasDensity
+      detail = 'including the gas density;'
+    []
+    [liquid_density]
+      type = GoogleTest
+      unit_test = PorousFlowWaterNCGTest.liquidDensity
+      detail = 'including the liquid density; and'
+    []
+    [two_phase]
+      type = GoogleTest
+      unit_test = PorousFlowWaterNCGTest.twoPhase
+      detail = 'giving two-phase properties consistent with the separate gas, liquid and saturation calculations.'
+    []
+  []
+
+  [waterncg_enthalpy_of_dissolution]
+    type = GoogleTest
+    unit_test = PorousFlowWaterNCGTest.enthalpyOfDissolution
+    requirement = 'The system shall compute the enthalpy change on dissolution of the gas in water in a water and non-condensable gas system, with a temperature derivative that matches finite differences.'
+    issues = '#10167'
+  []
+
+  [waterncg_indices]
+    type = GoogleTest
+    unit_test = PorousFlowWaterNCGTest.indices
+    requirement = 'The system shall number the phases and fluid components of a water and non-condensable gas system with the aqueous phase and water component first and no salt component, and order the derivatives of its fluid properties as pressure, temperature and total mass fraction.'
+    issues = '#34233'
+  []
+[]
