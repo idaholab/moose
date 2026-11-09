@@ -13,12 +13,15 @@ from collections import defaultdict
 from contextlib import suppress
 from typing import Optional
 
-# Import rather than find_spec(), so that a broken install is also unavailable
+# Import rather than find_spec(), so that a broken install is also unavailable.
+# Bind pynvml to None on failure (rather than leaving it unset) so the name is
+# always patchable, e.g. by tests on a machine without pynvml installed.
 try:
     import pynvml
 
     HAS_PYNVML = True
 except ImportError:
+    pynvml = None
     HAS_PYNVML = False
 """Whether or not the pynvml package (from nvidia-ml-py) is available."""
 

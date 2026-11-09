@@ -420,11 +420,22 @@ class TestNvidiaGPUMemory(unittest.TestCase):
         """Test summing over devices and skipping unavailable values."""
         devices = [[(1, 10), (2, None)], None, [(1, 5), (3, 7)]]
         nvml = fake_pynvml(devices)
-        with patch(self.MODULE, nvml):
+        with self.patchHasPynvml(), patch(self.MODULE, nvml):
             gpu_memory = NvidiaGPUMemory()
             self.assertEqual(gpu_memory.sample(), {1: 15, 3: 7})
             gpu_memory.close()
         nvml.nvmlShutdown.assert_called_once()
+
+    @staticmethod
+    def patchHasPynvml():
+        """
+        Patch HAS_PYNVML to True.
+
+        Needed alongside patching pynvml itself, so that these tests also
+        exercise the NVML-failure paths on a machine without pynvml installed
+        (where HAS_PYNVML is already False and pynvml is None).
+        """
+        return patch("TestHarness.utils.nvidia_gpu_memory.HAS_PYNVML", True)
 
     def testUnavailable(self):
         """Test the reasons that GPU memory cannot be sampled."""
@@ -432,7 +443,7 @@ class TestNvidiaGPUMemory(unittest.TestCase):
             self.assertIn("pynvml", nvidia_gpu_memory_unavailable())
 
         nvml = fake_pynvml([])
-        with patch(self.MODULE, nvml):
+        with self.patchHasPynvml(), patch(self.MODULE, nvml):
             self.assertEqual(
                 nvidia_gpu_memory_unavailable(), "NVML: no NVIDIA GPUs found"
             )
@@ -440,10 +451,10 @@ class TestNvidiaGPUMemory(unittest.TestCase):
 
         nvml = fake_pynvml([])
         nvml.nvmlInit.side_effect = FakeNVMLError("driver not loaded")
-        with patch(self.MODULE, nvml):
+        with self.patchHasPynvml(), patch(self.MODULE, nvml):
             self.assertEqual(nvidia_gpu_memory_unavailable(), "NVML: driver not loaded")
 
-        with patch(self.MODULE, fake_pynvml([[]])):
+        with self.patchHasPynvml(), patch(self.MODULE, fake_pynvml([[]])):
             self.assertIsNone(nvidia_gpu_memory_unavailable())
 
 
