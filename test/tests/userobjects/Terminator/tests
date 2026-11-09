@@ -54,7 +54,7 @@
     expect_err = "This is an error!"
     input = 'terminator_message.i'
     issues = '#17000'
-    requirement = "The terminator system shall output a custom info, warning, or error message."
+    requirement = "The system shall, through the terminator system, output a custom info, warning, or error message."
   []
   [terminator_message_2]
     type = 'RunException'
@@ -63,7 +63,7 @@
     input = 'terminator_soft.i'
     cli_args = 'UserObjects/arnold/error_level=ERROR'
     issues = '#17000'
-    requirement = "The terminator system shall check the compatibility of the suplied parameters."
+    requirement = "The system shall, through the terminator system, check the compatibility of the supplied parameters."
   []
   [terminator_message_3]
     type = 'RunException'
@@ -71,7 +71,7 @@
     input = 'terminator_soft.i'
     cli_args = 'UserObjects/arnold/error_level=NONE UserObjects/arnold/message=dummy'
     issues = '#17000'
-    requirement = "The terminator system shall check that if a message is supplied, an appropriate "
+    requirement = "The system shall, through the terminator system, check that if a message is supplied, an appropriate "
                   "error level for reporting that message is also used."
   []
   [terminator_pass]

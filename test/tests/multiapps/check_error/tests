@@ -26,7 +26,7 @@
     cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i"'
 
     issues = "#1845 #3556 #5784"
-    requirement = "The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions."
+    requirement = "The system shall show an error when the number of input files is greater than one and doesn't match the number of provided sub app positions."
   [../]
 
   [./not_enough_positions]
@@ -36,7 +36,7 @@
     cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i" MultiApps/multi/positions="0 1 0"'
 
     issues = "#1845 #3556 #5784"
-    requirement = "The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions when using CLI overrides."
+    requirement = "The system shall show an error when the number of input files is greater than one and doesn't match the number of provided sub app positions when using CLI overrides."
   [../]
 
   [./not_enough_position_files]

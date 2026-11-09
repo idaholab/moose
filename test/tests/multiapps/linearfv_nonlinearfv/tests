@@ -2,7 +2,7 @@
   issues = '#28819'
   design = 'linear_fv_design.md'
   [linearfv]
-    requirement = 'The system should br able to do fixed point iterations between systems with linear and nonlinear finite volume routines '
+    requirement = 'The system shall br able to do fixed point iterations between systems with linear and nonlinear finite volume routines '
     [linearfv_mainapp]
       type = 'Exodiff'
       input = 'linearfv.i'

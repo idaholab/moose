@@ -6,7 +6,7 @@
     type = 'RunApp'
     input = 'should_execute.i'
 
-    requirement = 'The test system shall have the ability to execute a specific input file.'
+    requirement = 'The system shall have, in the test system, the ability to execute a specific input file.'
   [../]
   [./dont]
     type = 'Exodiff'
@@ -26,7 +26,7 @@
     # means the output file will not be present for postProcessing
     # (which is any 'should_execute = false' tests)
 
-    requirement = 'The test system shall have the ability to run a test that neither clears expected outputs or runs '
-                  'the expected executeable for multiple output testing.'
+    requirement = 'The system shall have, in the test system, the ability to run a test that neither clears expected outputs or runs '
+                  'the expected executable for multiple output testing.'
   [../]
 []

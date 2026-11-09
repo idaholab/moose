@@ -73,7 +73,7 @@
     expect_err = 'MultiAppUserObjectTransfer: Parent app element with centroid at'
     prereq = transfer/3d_1d
 
-    requirement = "MultiAppUserObjectTransfer shall generate an error if a parent node/element is "
+    requirement = "The system shall generate an error in MultiAppUserObjectTransfer if a parent node/element is "
                   "not contained within any sub application domains."
   []
 
@@ -81,7 +81,7 @@
     type = 'Exodiff'
     input = 'two_pipe_parent.i'
     exodiff = 'two_pipe_parent_out.e'
-    requirement = "MultiAppUserObjectTransfer shall allow skipping the bounding box test."
+    requirement = "The system shall allow MultiAppUserObjectTransfer to skip the bounding box test."
     mesh_mode = replicated
     issues = "#13701"
     recover = false

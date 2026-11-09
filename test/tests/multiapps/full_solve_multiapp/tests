@@ -102,7 +102,7 @@
   []
 
   [solve_not_converge]
-    requirement = "When sub-application solve does not converge, the system shall be able to either "
+    requirement = "The system shall, when sub-application solve does not converge, be able to either "
     [abort]
       type = RunException
       input = parent.i

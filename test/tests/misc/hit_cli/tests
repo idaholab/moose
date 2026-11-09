@@ -3,7 +3,7 @@
   design = 'hit.md'
 
   [find]
-    requirement = 'The `hit find` command shall be able to find'
+    requirement = 'The system shall be able to find, using the `hit find` command,'
     [parameter_exists]
       type = RunCommand
       command = './hit_wrapper.py gold/parameter_exists find Kernels/\*/variable input1.i input2.i'
@@ -41,11 +41,11 @@
   [merge]
     type = RunCommand
     command = './hit_wrapper.py gold/merge merge -output - input1.i input2.i'
-    requirement = 'The `hit merge` command shall be able to combine input files.'
+    requirement = 'The system shall be able to combine input files using the `hit merge` command.'
   []
 
   [diff]
-    requirement = 'The `hit diff` command shall be able to'
+    requirement = 'The system shall, using the `hit diff` command, be able to'
     [vanilla]
       type = RunCommand
       command = './hit_wrapper.py gold/diff_vanilla diff input1.i input2.i'

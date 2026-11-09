@@ -5,6 +5,6 @@
     type = Exodiff
     input = primary.i
     exodiff = 'primary_out_sub0.e'
-    requirement = "The MultiApp system shall allow overriding the cliArgs function to provide parameters to the subapp programmatically."
+    requirement = "The system shall, through the MultiApp system, allow overriding the cliArgs function to provide parameters to the subapp programmatically."
   []
 []
