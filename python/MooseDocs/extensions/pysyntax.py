@@ -14,6 +14,7 @@ from MooseDocs.base import components
 from MooseDocs.common import exceptions
 from MooseDocs.tree import tokens, html
 from . import core, command
+from ..common import setting_validation as validation
 
 LOG = logging.getLogger(__name__)
 
@@ -150,17 +151,35 @@ class PySyntaxCommandBase(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_name(setting: str) -> str:
+            return setting
+
         settings["name"] = (
             None,
             "The name python object/function to extract documentation.",
+            validation_name,
         )
         settings["heading-level"] = (
             2,
             "The heading level to use for class documentation.",
+            validation.unsigned_integer,
         )
-        settings["show-internal"] = (True, "Whether or not to show internal methods")
-        settings["show-private"] = (True, "Whether or not to show private methods")
-        settings["show-protected"] = (True, "Whether or not to show protected methods")
+        settings["show-internal"] = (
+            True,
+            "Whether or not to show internal methods",
+            validation.boolean,
+        )
+        settings["show-private"] = (
+            True,
+            "Whether or not to show private methods",
+            validation.boolean,
+        )
+        settings["show-protected"] = (
+            True,
+            "Whether or not to show protected methods",
+            validation.boolean,
+        )
         return settings
 
     def _addDocumentation(self, parent, page, doc, settings, h_level, **kwargs):
@@ -236,7 +255,11 @@ class PySyntaxFunctionCommand(PySyntaxCommandBase):
     @staticmethod
     def defaultSettings():
         settings = PySyntaxCommandBase.defaultSettings()
-        settings["heading-level"] = (2, settings["heading-level"][1])
+        settings["heading-level"] = (
+            2,
+            settings["heading-level"][1],
+            validation.unsigned_integer,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):

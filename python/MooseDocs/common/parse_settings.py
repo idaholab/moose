@@ -30,7 +30,7 @@ def get_settings_as_dict(settings):
     return output
 
 
-def match_settings(known, raw):
+def match_settings(known, raw, validators):
     """
     Parses a raw string for key, value pairs separated by an equal sign.
 
@@ -48,17 +48,14 @@ def match_settings(known, raw):
         key = match.group("key").strip()
         value = match.group("value").strip().replace(r"\=", "=")
 
-        if value.lower() == "true":
-            value = True
-        elif value.lower() == "false":
-            value = False
-        elif value.lower() == "none":
+        if value.lower() == "none":
             value = None
-        elif value and all([v.isdigit() for v in value]):
-            value = float(value)
 
         if key in known:
-            known[key] = value
+            try:
+                known[key] = validators[key](value)
+            except Exception as e:
+                raise MooseDocsException(f"\nFailed to parse parameter '{key}'\n{e}")
         else:
             unknown[key] = value
 
@@ -76,8 +73,16 @@ def parse_settings(defaults, local, error_on_unknown=True):
         error_on_unknown[bool]: If True through an exception if values are provided that are not
                                 in the default list.
     """
-    known = dict((k, v[0]) for k, v in copy.deepcopy(defaults).items())
-    settings, unknown = match_settings(known, local)
+    known = dict((k, copy.deepcopy(v[0])) for k, v in defaults.items())
+    # TODO: This needs to be removed once the tests are passing
+    for k, v in defaults.items():
+        try:
+            v[2]
+        except Exception:
+            raise MooseDocsException(f"Setting '{k}' is missing a validator!")
+
+    validators = dict((k, v[2]) for k, v in defaults.items())
+    settings, unknown = match_settings(known, local, validators)
     if error_on_unknown and unknown:
         msg = "The following key, value settings are unknown:"
         for key, value in unknown.items():

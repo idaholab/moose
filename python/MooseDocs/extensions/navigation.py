@@ -1,4 +1,4 @@
-# This file is part of the MOOSE framework
+# This file is part of the MOOSE frameworkSetting
 # https://mooseframework.inl.gov
 #
 # All rights reserved, see COPYRIGHT for full restrictions

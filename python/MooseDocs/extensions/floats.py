@@ -66,10 +66,23 @@ def create_float(
 def caption_settings():
     """Return settings necessary for captions."""
     settings = dict()
-    settings["caption"] = (None, "The caption text for the float object.")
+
+    def validation_caption(setting: str) -> str:
+        return setting
+
+    settings["caption"] = (
+        None,
+        "The caption text for the float object.",
+        validation_caption,
+    )
+
+    def validation_prefix(setting: str) -> str:
+        return setting
+
     settings["prefix"] = (
         None,
         "The numbered caption label to include prior to the caption text.",
+        validation_prefix,
     )
     return settings
 

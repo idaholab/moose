@@ -24,6 +24,7 @@ from ..common import exceptions, report_error
 from ..base import components, LatexRenderer, MarkdownReader
 from ..tree import html, tokens, latex
 from . import command, core, floats, table, autolink, materialicon, modal, alert
+from ..common import setting_validation as validation
 
 LOG = logging.getLogger(__name__)
 
@@ -346,11 +347,16 @@ class SyntaxCommandBase(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_syntax(setting: str) -> str:
+            return setting
+
         settings["syntax"] = (
             None,
             "The name of the syntax to extract. If the name of the syntax "
             "is the first item in the settings the 'syntax=' may be "
             "omitted, e.g., `!syntax parameters /Kernels/Diffusion`.",
+            validation_syntax,
         )
         return settings
 
@@ -382,12 +388,21 @@ class SyntaxCommandHeadingBase(SyntaxCommandBase):
     @staticmethod
     def defaultSettings():
         settings = SyntaxCommandBase.defaultSettings()
+
+        def validation_heading(setting: str) -> str:
+            return setting
+
         settings["heading"] = (
             "Input Parameters",
             "The heading title for the input parameters table, use 'None' to "
             "remove the heading.",
+            validation_heading,
         )
-        settings["heading-level"] = (2, "Heading level for section title.")
+        settings["heading-level"] = (
+            2,
+            "Heading level for section title.",
+            validation.unsigned_integer,
+        )
         return settings
 
     def createHeading(self, parent, page, settings):
@@ -427,22 +442,42 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
     @staticmethod
     def defaultSettings():
         settings = SyntaxCommandHeadingBase.defaultSettings()
+
+        def validation_groups(setting: str) -> str:
+            return setting
+
         settings["groups"] = (
             None,
             "Space separated list of groups, in desired order, to output.",
+            validation_groups,
         )
+
+        def validation_hide(setting: str) -> str:
+            return setting
+
         settings["hide"] = (
             None,
             "Space separated list of parameters to remove from output.",
+            validation_hide,
         )
+
+        def validation_show(setting: str) -> str:
+            return setting
+
         settings["show"] = (
             None,
             "Space separated list of parameters to display in output.",
+            validation_show,
         )
+
+        def validation_visible(setting: str) -> str:
+            return setting
+
         settings["visible"] = (
             None,
             "Space separated list of parameter groups to display with "
             "un-collapsed sections.",
+            validation_visible,
         )
         return settings
 
@@ -558,9 +593,14 @@ class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
     @staticmethod
     def defaultSettings():
         settings = SyntaxCommandHeadingBase.defaultSettings()
+
+        def validation_heading(setting: str) -> str:
+            return setting
+
         settings["heading"] = (
             "Child Objects",
             "Heading to include for sections, use 'None' to remove the title.",
+            validation_heading,
         )
         return settings
 
@@ -590,7 +630,15 @@ class SyntaxInputsCommand(SyntaxChildrenCommand):
     @staticmethod
     def defaultSettings():
         settings = SyntaxChildrenCommand.defaultSettings()
-        settings["heading"] = ("Input Files", settings["heading"][1])
+
+        def validation_heading(setting: str) -> str:
+            return setting
+
+        settings["heading"] = (
+            "Input Files",
+            settings["heading"][1],
+            validation_heading,
+        )
         return settings
 
 
@@ -601,23 +649,47 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
     @staticmethod
     def defaultSettings():
         settings = SyntaxCommandHeadingBase.defaultSettings()
+
+        def validation_heading(setting: str) -> str:
+            return setting
+
         settings["heading"] = (
             "AUTO",
             "The heading title for the input parameters table, use 'None' to "
             "remove the heading.",
+            validation_heading,
         )
-        settings["group-headings"] = (True, "Display group headings.")
+        settings["group-headings"] = (
+            True,
+            "Display group headings.",
+            validation.boolean,
+        )
+
+        def validation_groups(setting: str) -> str:
+            return setting
 
         settings["groups"] = (
             None,
             "List of groups (apps) to include in the complete syntax list.",
+            validation_groups,
         )
-        settings["actions"] = (True, "Include a list of Action objects in syntax.")
-        settings["objects"] = (True, "Include a list of MooseObject objects in syntax.")
+
+        settings["actions"] = (
+            True,
+            "Include a list of Action objects in syntax.",
+            validation.boolean,
+        )
+        settings["objects"] = (
+            True,
+            "Include a list of MooseObject objects in syntax.",
+            validation.boolean,
+        )
         settings["subsystems"] = (
             True,
             "Include a list of sub system syntax in the output.",
+            validation.boolean,
         )
+
         return settings
 
     def createTokenFromSyntax(self, parent, info, page, obj, settings):
@@ -722,8 +794,12 @@ class SyntaxCompleteCommand(SyntaxListCommand):
     @staticmethod
     def defaultSettings():
         settings = SyntaxListCommand.defaultSettings()
-        settings["level"] = (2, "Beginning heading level.")
-        settings["heading"] = (None, settings["heading"][1])
+        settings["level"] = (2, "Beginning heading level.", validation.unsigned_integer)
+
+        def validation_heading(setting: str) -> str:
+            return setting
+
+        settings["heading"] = (None, settings["heading"][1], validation_heading)
         return settings
 
     def createTokenFromSyntax(self, parent, info, page, obj, settings):
