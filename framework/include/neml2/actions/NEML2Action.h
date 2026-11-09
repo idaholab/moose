@@ -77,6 +77,13 @@ protected:
   /// Set up MOOSE-NEML2 parameter derivative mappings
   void setupParameterDerivativeMappings(const neml2::Model &);
 
+  /**
+   * Set up MOOSE-NEML2 parameter derivative vector-Jacobian product mappings, i.e. the contraction
+   * of the gathered cotangent of a NEML2 output variable with the derivative of that output
+   * variable with respect to each requested NEML2 model parameter
+   */
+  void setupParameterVJPMappings(const neml2::Model &);
+
   /// Infer the MOOSE IO type from the variable name and type
   NEML2Utils::MOOSEIOType inferMOOSEIOType(const neml2::VariableName & name,
                                            const neml2::TensorType & type) const;
@@ -104,6 +111,9 @@ protected:
 
   /// MOOSE-NEML2 parameter derivative mappings
   std::vector<DerivativeMapping> _param_derivs;
+
+  /// MOOSE-NEML2 parameter derivative vector-Jacobian product mappings
+  std::vector<DerivativeMapping> _param_vjps;
 
 #endif
   /// Name of the NEML2Executor user object
