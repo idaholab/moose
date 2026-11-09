@@ -62,7 +62,7 @@ If the outlet flow area is +greater+ than the inlet flow area, the wall pressure
 
 At an abrupt expansion the flow separates at the area step. Taking the pressure on the
 step equal to the inlet pressure is the assumption of the Borda-Carnot model of a sudden
-expansion [!cite](massey2006mechanics). With $p_{\text{wall}} = p_{\text{in}}$, the steady
+expansion [!citep](massey2006mechanics). With $p_{\text{wall}} = p_{\text{in}}$, the steady
 momentum balance over the junction in the flow direction,
 
 !equation id=momentum_expansion
@@ -78,7 +78,7 @@ For constant density, the change in total pressure $p + \frac{1}{2} \rho u^2$ ac
 !equation id=dp0_expansion
 \Delta p_0 = - \frac{1}{2} \rho \left(u_{\text{in}} - u_{\text{out}}\right)^2 = - \frac{1}{2} \rho u_{\text{in}}^2 \left(1 - \frac{A_{\text{in}}}{A_{\text{out}}}\right)^2,
 
-which is the Borda-Carnot loss, with the loss coefficient $\left(1 - A_{\text{in}} / A_{\text{out}}\right)^2$ referred to the inlet velocity [!cite](idelchik2007handbook).
+which is the Borda-Carnot loss, with the loss coefficient $\left(1 - A_{\text{in}} / A_{\text{out}}\right)^2$ referred to the inlet velocity [!citep](idelchik2007handbook).
 
 It follows from [!eqref](dp0_expansion) that $\Delta p_0$ is never positive, so total pressure does not increase across the junction, which has no energy source. If the wall pressure were instead taken equal to the outlet pressure, the same momentum balance would give [!eqref](dp_expansion) with $A_{\text{out}}$ replaced by $A_{\text{in}}$ in the denominator. The pressure rise would then be larger by the factor $A_{\text{out}} / A_{\text{in}}$, and $\Delta p_0$ would be positive.
 
