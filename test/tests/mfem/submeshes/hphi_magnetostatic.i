@@ -155,7 +155,7 @@ vacuum_permeability = 1.0
   []
   [source]
     type = MFEMMixedGradGradKernel
-    trial_variable = vacuum_cut_potential
+    coupled_variable = vacuum_cut_potential
     variable = vacuum_magnetic_potential
     coefficient = permeability
     block = 'transition_dom'

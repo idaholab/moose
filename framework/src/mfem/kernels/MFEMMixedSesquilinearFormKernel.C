@@ -23,8 +23,9 @@ MFEMMixedSesquilinearFormKernel::validParams()
       "parameter on each `RealComponent`/`ImagComponent` sub-block.");
   params.addParam<VariableName>(
       "trial_variable",
-      "The trial variable this kernel is acting on and which will be solved for. If empty "
-      "(default), it will be the same as the test variable.");
+      "The variable coupled to the test variable by this kernel. It may be eliminated and need not "
+      "be solved for by this weak form's equation system. Defaults to the test variable.");
+  params.renameParam("trial_variable", "coupled_variable", "");
   return params;
 }
 
