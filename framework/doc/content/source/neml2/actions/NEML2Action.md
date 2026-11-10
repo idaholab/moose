@@ -65,6 +65,19 @@ Next, a [NEML2BatchIndexGenerator](NEML2BatchIndexGenerator.md) and a [NEML2Mode
 
 The last step is creating the `NEML2ToMOOSE` retrievers to retrieve NEML2 model outputs (and their derivatives) back to MOOSE. This step is similar to [creating MOOSEToNEML2 gatherers](NEML2Action.md#gatherer).
 
+The action passes three independent domain selectors to every gatherer and the index generator:
+`volume`, `boundary` (as `DomainUserObject::external_boundaries`), and `interface` (as
+`DomainUserObject::interface_boundaries`). Volume locations are keyed by element ID. Side locations
+are keyed by `(element ID, side)` and internal interfaces add one entry for each side of the pair.
+These key spaces are intentionally distinct; a retriever never maps between them using the current
+quadrature-point index.
+
+When `volume` is enabled, an output retriever is a block material and can be reinitialized in volume
+or selected side contexts. Without volume, the action creates one boundary material on the
+deduplicated union of `boundary` and `interface`. In both cases, an attempted read at a location that
+was not selected produces an error. Retrievers also verify that each span size matches the current
+quadrature rule before indexing a NEML2 output tensor.
+
 ## Debugging a failed constitutive update id=dump
 
 A NEML2 constitutive update can fail to converge for some elements -- a *recoverable* return-map failure (a Newton divergence or max-iterations in the material solve). MOOSE then cuts the time step and retries, so the exact inputs that triggered the failure are normally lost by the time the run ends. Set [!param](/NEML2/dump_inputs_on_failure) to `true` to capture them: on each failed update the executor serializes the whole local batch of NEML2 input tensors (strains, temperature, old state, model parameters, ...) to a per-rank TorchScript file `<model>_count<c>_rank<r>.pt`.

@@ -135,10 +135,16 @@ protected:
   /// Blocks this sub-block action applies to
   const std::vector<SubdomainName> _block;
 
-  /// Interfaces this sub-block action applies to
+  /// Whether this sub-block action evaluates element-interior quadrature points
+  const bool _volume;
+
+  /// External boundaries this sub-block action applies to
+  const std::vector<BoundaryName> _boundary;
+
+  /// Internal interfaces this sub-block action applies to
   const std::vector<BoundaryName> _interface;
 
-  /// If true, only create the boundary (interface) material and batch interface side data
+  /// Deprecated selector retained for input migration
   const bool _interface_only;
 
   /// MATERIAL inputs supplied by a true InterfaceMaterial (read from INTERFACE_MATERIAL_DATA)

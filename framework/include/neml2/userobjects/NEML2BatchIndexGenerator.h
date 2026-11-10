@@ -35,24 +35,33 @@ public:
 
   using ElemSide = std::tuple<dof_id_type, unsigned int>;
 
+  struct BatchSpan
+  {
+    std::size_t begin;
+    std::size_t size;
+  };
+
   /// Get the current batch index (in almost all cases this is the total batch size)
   std::size_t getBatchIndex() const { return _batch_index; }
 
-  /// Get the batch index for the given element ID
-  std::size_t getBatchIndex(dof_id_type elem_id) const;
+  /// Whether a batch span exists for the given element ID
+  bool hasBatchSpan(dof_id_type elem_id) const;
 
-  /// Get the batch index for the given element side
-  std::size_t getSideBatchIndex(const ElemSide & elem_side) const;
+  /// Whether a batch span exists for the given element side
+  bool hasSideBatchSpan(const ElemSide & elem_side) const;
 
-  /// Check if a batch index exists for the given element side
-  bool isSideBatchIndexExist(const ElemSide & elem_side) const;
+  /// Get the batch span for the given element ID
+  BatchSpan getBatchSpan(dof_id_type elem_id) const;
+
+  /// Get the batch span for the given element side
+  BatchSpan getSideBatchSpan(const ElemSide & elem_side) const;
 
   /// Whether the batch is empty
   bool isEmpty() const { return _batch_index == 0; }
 
 protected:
-  /// When true, skip volume-element indexing and assign batch indices for interface side QPs only.
-  const bool _interface_only;
+  /// Whether element-interior quadrature points contribute to the batch
+  const bool _volume;
 
   /// Whether the batch index map is outdated
   bool _outdated;
@@ -61,14 +70,8 @@ protected:
   std::size_t _batch_index;
 
   /// Map from element IDs to batch indices
-  std::map<dof_id_type, std::size_t> _elem_to_batch_index;
+  std::map<dof_id_type, BatchSpan> _elem_to_batch_index;
 
-  /// Map from element sides to batch indices
-  std::map<ElemSide, std::size_t> _elemside_to_batch_index;
-
-  /// cache the index for the current element
-  mutable std::pair<dof_id_type, std::size_t> _elem_to_batch_index_cache;
-
-  /// cache the index for the current element side
-  mutable std::pair<ElemSide, std::size_t> _elemside_to_batch_index_cache;
+  /// Map from element sides to batch spans
+  std::map<ElemSide, BatchSpan> _elemside_to_batch_index;
 };

@@ -42,14 +42,18 @@ public:
 
   void initialSetup() override;
 
-  /// Get the batch index for the given element ID
-  std::size_t getBatchIndex(dof_id_type elem_id) const;
+  /// Whether a batch span exists for the given element ID
+  bool hasBatchSpan(dof_id_type elem_id) const;
 
-  /// Get the batch index for the given element side
-  std::size_t getSideBatchIndex(const NEML2BatchIndexGenerator::ElemSide & elem_side) const;
+  /// Whether a batch span exists for the given element side
+  bool hasSideBatchSpan(const NEML2BatchIndexGenerator::ElemSide & elem_side) const;
 
-  /// Check if a batch index exists for the given element side
-  bool isSideBatchIndexExist(const NEML2BatchIndexGenerator::ElemSide & elem_side) const;
+  /// Get the batch span for the given element ID
+  NEML2BatchIndexGenerator::BatchSpan getBatchSpan(dof_id_type elem_id) const;
+
+  /// Get the batch span for the given element side
+  NEML2BatchIndexGenerator::BatchSpan
+  getSideBatchSpan(const NEML2BatchIndexGenerator::ElemSide & elem_side) const;
 
   /// Get a reference(!) to the requested output view
   const at::Tensor & getOutput(const std::string & output_name) const;

@@ -91,6 +91,36 @@ NEML2ToMOOSEMaterialProperty<T>::computeProperties()
   if (!_execute_neml2_model.outputReady())
     return;
 
+  const auto elem_side = NEML2BatchIndexGenerator::ElemSide(_current_elem->id(), _current_side);
+  if ((_bnd && !_execute_neml2_model.hasSideBatchSpan(elem_side)) ||
+      (!_bnd && !_execute_neml2_model.hasBatchSpan(_current_elem->id())))
+    mooseError("NEML2 material property '",
+               getParam<MaterialPropertyName>("to_moose"),
+               "' was requested at ",
+               _bnd ? "side" : "volume",
+               " quadrature points on element ",
+               _current_elem->id(),
+               _bnd ? ", side " + std::to_string(_current_side) : std::string(),
+               ", but that location was not evaluated. Configure the side with NEML2 'boundary' "
+               "or 'interface', or enable NEML2 'volume' for an element-interior consumer. Volume "
+               "and side quadrature points are not interchangeable.");
+
+  const auto span = _bnd ? _execute_neml2_model.getSideBatchSpan(elem_side)
+                         : _execute_neml2_model.getBatchSpan(_current_elem->id());
+  if (span.size != _qrule->n_points())
+    mooseError("NEML2 material property '",
+               getParam<MaterialPropertyName>("to_moose"),
+               "' has a ",
+               _bnd ? "side" : "volume",
+               " batch span of ",
+               span.size,
+               " quadrature points for element ",
+               _current_elem->id(),
+               _bnd ? ", side " + std::to_string(_current_side) : std::string(),
+               ", but the current quadrature rule has ",
+               _qrule->n_points(),
+               ".");
+
   // A derivative retriever's tensor is produced only on passes that compute the derivative (see
   // NEML2ModelExecutor::solve). If it has not been computed (e.g. an input derivative on a step
   // where no Jacobian was assembled), report the derivative as zero.
@@ -101,14 +131,7 @@ NEML2ToMOOSEMaterialProperty<T>::computeProperties()
     return;
   }
 
-  if (_bnd && !_execute_neml2_model.isSideBatchIndexExist(
-                  NEML2BatchIndexGenerator::ElemSide(_current_elem->id(), _current_side)))
-    return;
-
-  // look up start index for current element
-  const auto i = _bnd ? _execute_neml2_model.getSideBatchIndex(
-                            NEML2BatchIndexGenerator::ElemSide(_current_elem->id(), _current_side))
-                      : _execute_neml2_model.getBatchIndex(_current_elem->id());
+  const auto i = span.begin;
   // The NEML2 output/derivative tensor is (batch, *base_shape) when batched; a leading batch
   // axis is present iff the tensor has more dims than the base shape of the MOOSE type T.
   const auto base_ndim = static_cast<int64_t>(NEML2Utils::Layout<T>::shape.size());

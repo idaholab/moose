@@ -18,10 +18,8 @@ NEML2BatchIndexGenerator::validParams()
   params.addClassDescription("Generates the element to batch index map for MOOSEToNEML2 gatherers, "
                              "NEML2ToMOOSE retrievers, and the NEML2 executor");
 
-  params.addParam<bool>("interface_only",
-                        false,
-                        "When true, skip volume-element index generation and only assign batch "
-                        "indices for interface quadrature points.");
+  params.addParam<bool>(
+      "volume", true, "Whether element-interior quadrature points contribute to the NEML2 batch");
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
@@ -34,7 +32,7 @@ NEML2BatchIndexGenerator::validParams()
 }
 
 NEML2BatchIndexGenerator::NEML2BatchIndexGenerator(const InputParameters & params)
-  : DomainUserObject(params), _interface_only(getParam<bool>("interface_only")), _outdated(true)
+  : DomainUserObject(params), _volume(getParam<bool>("volume")), _outdated(true)
 {
 }
 
@@ -51,9 +49,7 @@ NEML2BatchIndexGenerator::initialize()
     return;
 
   _elem_to_batch_index.clear();
-  _elem_to_batch_index_cache = {libMesh::invalid_uint, 0};
   _elemside_to_batch_index.clear();
-  _elemside_to_batch_index_cache = {ElemSide(libMesh::invalid_uint, libMesh::invalid_uint), 0};
   _batch_index = 0;
 }
 
@@ -63,12 +59,12 @@ NEML2BatchIndexGenerator::executeOnElement()
   if (!_outdated)
     return;
 
-  // In interface_only mode there is no volume material; index interface side QPs only.
-  if (_interface_only)
+  if (!_volume)
     return;
 
-  _elem_to_batch_index[_current_elem->id()] = _batch_index;
-  _batch_index += qPoints().size();
+  const auto n_qp = qPoints().size();
+  _elem_to_batch_index[_current_elem->id()] = {_batch_index, n_qp};
+  _batch_index += n_qp;
 }
 
 void
@@ -77,24 +73,12 @@ NEML2BatchIndexGenerator::executeOnBoundary()
   if (!_outdated)
     return;
 
-  // Only interface setups index side data; volume-only setups index in executeOnElement only.
-  // In interface_only mode, interface sides are indexed in executeOnInterface; external boundary
-  // sides do not contribute, so skip them here to stay aligned with the gatherers.
-  if (_interface_bnd_ids.empty() || _interface_only)
-    return;
-
-  // Sides on interfaces can appear in both boundary and internal-side callbacks.
-  // Let internal/interface callbacks own those entries to avoid double counting.
-  // _current_elem->neighbor_ptr(_current_side) seems to be more robust than _neighbor_elem for
-  // checking if the side has a neighbor (especially in loop other than executeOnInterface).
-  if (_current_elem->neighbor_ptr(_current_side))
-    return;
-
   const auto elem_side = ElemSide(_current_elem->id(), _current_side);
-
-  const auto [it, inserted] = _elemside_to_batch_index.emplace(elem_side, _batch_index);
+  const auto n_qp = qPoints().size();
+  const auto [it, inserted] =
+      _elemside_to_batch_index.emplace(elem_side, BatchSpan{_batch_index, n_qp});
   if (inserted)
-    _batch_index += qPoints().size();
+    _batch_index += n_qp;
 }
 
 void
@@ -103,22 +87,20 @@ NEML2BatchIndexGenerator::executeOnInterface()
   if (!_outdated)
     return;
 
-  const auto elem_side = ElemSide(_current_elem->id(), _current_side);
-  const auto [it, inserted] = _elemside_to_batch_index.emplace(elem_side, _batch_index);
-  if (inserted)
-    _batch_index += qPoints().size();
-
   const auto * neighbor_elem = _current_elem->neighbor_ptr(_current_side);
+  const auto n_qp = qPoints().size();
+  const auto elem_side = ElemSide(_current_elem->id(), _current_side);
+  const auto [it, inserted] =
+      _elemside_to_batch_index.emplace(elem_side, BatchSpan{_batch_index, n_qp});
+  if (inserted)
+    _batch_index += n_qp;
 
-  if (neighbor_elem)
-  {
-    const auto neighbor_side = neighbor_elem->which_neighbor_am_i(_current_elem);
-    const auto neighbor_elem_side = ElemSide(neighbor_elem->id(), neighbor_side);
-    const auto [neighbor_it, neighbor_inserted] =
-        _elemside_to_batch_index.emplace(neighbor_elem_side, _batch_index);
-    if (neighbor_inserted)
-      _batch_index += qPoints().size();
-  }
+  const auto neighbor_side = neighbor_elem->which_neighbor_am_i(_current_elem);
+  const auto neighbor_elem_side = ElemSide(neighbor_elem->id(), neighbor_side);
+  const auto [neighbor_it, neighbor_inserted] =
+      _elemside_to_batch_index.emplace(neighbor_elem_side, BatchSpan{_batch_index, n_qp});
+  if (neighbor_inserted)
+    _batch_index += n_qp;
 }
 
 void
@@ -130,11 +112,11 @@ NEML2BatchIndexGenerator::threadJoin(const UserObject & uo)
   const auto & m2n = cast_ref<const NEML2BatchIndexGenerator &>(uo);
 
   // append and renumber maps
-  for (const auto & [elem_id, batch_index] : m2n._elem_to_batch_index)
-    _elem_to_batch_index[elem_id] = _batch_index + batch_index;
+  for (const auto & [elem_id, span] : m2n._elem_to_batch_index)
+    _elem_to_batch_index[elem_id] = {_batch_index + span.begin, span.size};
 
-  for (const auto & [elem_side, batch_index] : m2n._elemside_to_batch_index)
-    _elemside_to_batch_index[elem_side] = _batch_index + batch_index;
+  for (const auto & [elem_side, span] : m2n._elemside_to_batch_index)
+    _elemside_to_batch_index[elem_side] = {_batch_index + span.begin, span.size};
 
   _batch_index += m2n._batch_index;
 }
@@ -145,42 +127,38 @@ NEML2BatchIndexGenerator::finalize()
   _outdated = false;
 }
 
-std::size_t
-NEML2BatchIndexGenerator::getBatchIndex(dof_id_type elem_id) const
+bool
+NEML2BatchIndexGenerator::hasBatchSpan(dof_id_type elem_id) const
 {
-  // return cached map lookup if applicable
-  if (_elem_to_batch_index_cache.first == elem_id)
-    return _elem_to_batch_index_cache.second;
-
-  // else, search the map
-  const auto it = _elem_to_batch_index.find(elem_id);
-  if (it == _elem_to_batch_index.end())
-    mooseError("No batch index found for element id ", elem_id);
-  _elem_to_batch_index_cache = *it;
-  return it->second;
-}
-
-std::size_t
-NEML2BatchIndexGenerator::getSideBatchIndex(const ElemSide & elem_side) const
-{
-  // return cached map lookup if applicable
-  if (_elemside_to_batch_index_cache.first == elem_side)
-    return _elemside_to_batch_index_cache.second;
-
-  // else, search the map
-  const auto it = _elemside_to_batch_index.find(elem_side);
-  if (it == _elemside_to_batch_index.end())
-    mooseError("No batch index found for element side (elem id, side) = (",
-               std::get<0>(elem_side),
-               ", ",
-               std::get<1>(elem_side),
-               ")");
-  _elemside_to_batch_index_cache = *it;
-  return it->second;
+  return _elem_to_batch_index.count(elem_id);
 }
 
 bool
-NEML2BatchIndexGenerator::isSideBatchIndexExist(const ElemSide & elem_side) const
+NEML2BatchIndexGenerator::hasSideBatchSpan(const ElemSide & elem_side) const
 {
-  return _elemside_to_batch_index.find(elem_side) != _elemside_to_batch_index.end();
+  return _elemside_to_batch_index.count(elem_side);
+}
+
+NEML2BatchIndexGenerator::BatchSpan
+NEML2BatchIndexGenerator::getBatchSpan(dof_id_type elem_id) const
+{
+  const auto it = _elem_to_batch_index.find(elem_id);
+  if (it == _elem_to_batch_index.end())
+    mooseError("No volume batch span found for element id ", elem_id);
+  return it->second;
+}
+
+NEML2BatchIndexGenerator::BatchSpan
+NEML2BatchIndexGenerator::getSideBatchSpan(const ElemSide & elem_side) const
+{
+  const auto it = _elemside_to_batch_index.find(elem_side);
+  if (it == _elemside_to_batch_index.end())
+    mooseError("No side batch span found for element side (elem id, side) = (",
+               std::get<0>(elem_side),
+               ", ",
+               std::get<1>(elem_side),
+               "). Configure this external side with NEML2 'boundary' or this internal side with "
+               "NEML2 'interface'. Volume quadrature-point data cannot be used for side "
+               "quadrature points.");
+  return it->second;
 }

@@ -197,23 +197,28 @@ NEML2ModelExecutor::initialSetup()
   }
 }
 
-std::size_t
-NEML2ModelExecutor::getBatchIndex(dof_id_type elem_id) const
+bool
+NEML2ModelExecutor::hasBatchSpan(dof_id_type elem_id) const
 {
-  return _batch_index_generator.getBatchIndex(elem_id);
-}
-
-std::size_t
-NEML2ModelExecutor::getSideBatchIndex(const NEML2BatchIndexGenerator::ElemSide & elem_side) const
-{
-  return _batch_index_generator.getSideBatchIndex(elem_side);
+  return _batch_index_generator.hasBatchSpan(elem_id);
 }
 
 bool
-NEML2ModelExecutor::isSideBatchIndexExist(
-    const NEML2BatchIndexGenerator::ElemSide & elem_side) const
+NEML2ModelExecutor::hasSideBatchSpan(const NEML2BatchIndexGenerator::ElemSide & elem_side) const
 {
-  return _batch_index_generator.isSideBatchIndexExist(elem_side);
+  return _batch_index_generator.hasSideBatchSpan(elem_side);
+}
+
+NEML2BatchIndexGenerator::BatchSpan
+NEML2ModelExecutor::getBatchSpan(dof_id_type elem_id) const
+{
+  return _batch_index_generator.getBatchSpan(elem_id);
+}
+
+NEML2BatchIndexGenerator::BatchSpan
+NEML2ModelExecutor::getSideBatchSpan(const NEML2BatchIndexGenerator::ElemSide & elem_side) const
+{
+  return _batch_index_generator.getSideBatchSpan(elem_side);
 }
 
 void

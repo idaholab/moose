@@ -95,8 +95,8 @@
 
   [cohesive]
     model = 'mixed_cohesive'
+    volume = false
     interface = 'A_B'
-    interface_only = true
     # Only 'jump' is from a true InterfaceMaterial.
     interface_material_inputs = 'jump'
   []

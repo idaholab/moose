@@ -78,8 +78,8 @@
   [source]
     model = 'interface_source'
     block = 'A B'
+    volume = false
     interface = 'A_B'
-    interface_only = true
   []
 []
 

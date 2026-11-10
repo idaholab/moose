@@ -78,13 +78,19 @@ NEML2Action::validParams()
       "<block-name> is this action sub-block's name.");
   params.addParam<std::vector<SubdomainName>>(
       "block", {}, "List of blocks (subdomains) where the material model is defined");
+  params.addParam<bool>(
+      "volume",
+      true,
+      "Whether to evaluate the material model at element-interior quadrature points");
   params.addParam<std::vector<BoundaryName>>(
-      "interface", {}, "List of interfaces where the material model is defined");
-  params.addParam<bool>("interface_only",
-                        false,
-                        "If true, only create the interface material on the boundaries listed in "
-                        "'interface' and skip "
-                        "creating any volume material. Requires 'interface' to be set.");
+      "boundary", {}, "External boundaries where the material model is evaluated");
+  params.addParam<std::vector<BoundaryName>>(
+      "interface", {}, "Internal interfaces where the material model is evaluated on both sides");
+  params.addDeprecatedParam<bool>(
+      "interface_only",
+      false,
+      "If true, evaluate only on the internal interfaces listed in 'interface'.",
+      "Use 'volume = false' with 'interface' instead.");
   // Block materials need no hint: the same material is reinit'd as BLOCK/FACE/NEIGHBOR data and the
   // gatherer reads the store for where it is. A true InterfaceMaterial instead lives in the
   // separate INTERFACE_MATERIAL_DATA store, which the native block/face/neighbor selection never
@@ -109,6 +115,8 @@ NEML2Action::NEML2Action(const InputParameters & params)
                             ? getParam<std::string>("batch_index_generator_name")
                             : "neml2_index_" + getParam<std::string>("model") + "_" + name()),
     _block(getParam<std::vector<SubdomainName>>("block")),
+    _volume(getParam<bool>("interface_only") ? false : getParam<bool>("volume")),
+    _boundary(getParam<std::vector<BoundaryName>>("boundary")),
     _interface(getParam<std::vector<BoundaryName>>("interface")),
     _interface_only(getParam<bool>("interface_only")),
     _interface_material_inputs(
@@ -238,17 +246,23 @@ NEML2Action::act()
     printSummary();
   }
 
-  // Whether this action is block/interface restricted
   const bool is_blk = !_block.empty();
+  const bool is_boundary = !_boundary.empty();
   const bool is_interface = !_interface.empty();
 
-  if (_interface_only)
-  {
-    if (!is_interface)
-      paramError("interface_only",
-                 "'interface_only' is true, but 'interface' is unset. When 'interface_only' is "
-                 "true, 'interface' must list the boundaries on which to create the material.");
-  }
+  if (isParamSetByUser("interface_only") &&
+      (isParamSetByUser("volume") || isParamSetByUser("boundary")))
+    paramError("interface_only",
+               "The deprecated 'interface_only' parameter cannot be combined with 'volume' or "
+               "'boundary'. Remove it and use the independent domain selectors instead.");
+  if (_interface_only && !is_interface)
+    paramError("interface_only",
+               "'interface_only' is true, but 'interface' is unset. Use 'volume = false' and list "
+               "the internal sidesets in 'interface'.");
+  if (!_volume && !is_boundary && !is_interface)
+    paramError("volume",
+               "At least one NEML2 evaluation domain must be enabled with 'volume = true', a "
+               "nonempty 'boundary', or a nonempty 'interface'.");
 
   if (_current_task == "add_user_object")
   {
@@ -259,6 +273,17 @@ NEML2Action::act()
     setupParameterDerivativeMappings(*_model);
 
     checkStatefulConsistency(*_model);
+
+    // Interface material data exists only in the internal-interface callback and therefore cannot
+    // populate volume or external-boundary entries in the shared batch.
+    if (!_interface_material_inputs.empty() && (_volume || is_boundary))
+      paramError("interface_material_inputs",
+                 "Interface material inputs require an interface-only evaluation domain. Disable "
+                 "'volume' and leave 'boundary' empty, or use block/face material inputs that are "
+                 "available in every selected domain.");
+    if (!_interface_material_inputs.empty() && !is_interface)
+      paramError("interface_material_inputs",
+                 "Interface material inputs require at least one internal sideset in 'interface'.");
 
     // Every interface_material_inputs entry must be a real MATERIAL input. Otherwise a typo or a
     // non-MATERIAL name would be silently dropped in addGatherer and revert to the default
@@ -297,10 +322,10 @@ NEML2Action::act()
       obj_params.set<MooseEnum>("quantity_type").assign(static_cast<int>(moose_type));
       if (is_blk)
         obj_params.set<std::vector<SubdomainName>>("block") = _block;
+      obj_params.set<bool>("volume") = _volume;
+      obj_params.set<std::vector<BoundaryName>>("external_boundaries") = _boundary;
       if (is_interface)
         obj_params.set<std::vector<BoundaryName>>("interface_boundaries") = _interface;
-      if (_interface_only)
-        obj_params.set<bool>("interface_only") = true;
       // Only a MATERIAL input listed in 'interface_material_inputs' reads from interface material
       // data; every other input keeps the default volume/side (block/face-neighbor) source.
       if (moose_type == NEML2Utils::MOOSEIOType::MATERIAL &&
@@ -350,9 +375,10 @@ NEML2Action::act()
       params.applyParameters(parameters());
       if (is_blk)
         params.set<std::vector<SubdomainName>>("block") = _block;
+      params.set<bool>("volume") = _volume;
+      params.set<std::vector<BoundaryName>>("external_boundaries") = _boundary;
       if (is_interface)
         params.set<std::vector<BoundaryName>>("interface_boundaries") = _interface;
-      params.set<bool>("interface_only") = _interface_only;
       _problem->addUserObject(type, _idx_generator_name, params);
     }
 
@@ -383,12 +409,19 @@ NEML2Action::act()
       obj_params.set<UserObjectName>("neml2_executor") = _executor_name;
       obj_params.set<MaterialPropertyName>("to_moose") = moose_name;
       obj_params.set<std::string>("from_neml2") = neml2_var;
-      // In interface_only mode the model is only evaluated at interface QPs (no volume batch
-      // indices), so the retriever must be boundary-restricted to look up side batch indices.
-      if (_interface_only)
-        obj_params.set<std::vector<BoundaryName>>("boundary") = _interface;
-      else
+      // A volume retriever is a block material and MOOSE reinitializes it in volume and face
+      // contexts. Without volume evaluation, register one boundary material over the selected
+      // external boundaries and internal interfaces instead of creating duplicate property owners.
+      if (_volume)
         obj_params.set<std::vector<SubdomainName>>("block") = _block;
+      else
+      {
+        auto sides = _boundary;
+        sides.insert(sides.end(), _interface.begin(), _interface.end());
+        std::sort(sides.begin(), sides.end());
+        sides.erase(std::unique(sides.begin(), sides.end()), sides.end());
+        obj_params.set<std::vector<BoundaryName>>("boundary") = sides;
+      }
       if (_export_output_targets.count(moose_name))
         obj_params.set<std::vector<OutputName>>("outputs") = _export_output_targets[moose_name];
       extra(obj_params);

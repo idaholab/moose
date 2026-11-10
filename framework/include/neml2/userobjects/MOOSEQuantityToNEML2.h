@@ -69,13 +69,16 @@ protected:
   /// MOOSE quantity type to read from
   const NEML2Utils::MOOSEIOType _type;
 
-  /// When true, skip element-interior gathering and gather interface sides only.
-  const bool _interface_only;
+  /// Whether element-interior quadrature points contribute to the batch.
+  const bool _volume;
 
   /// When true, read material properties from Moose::INTERFACE_MATERIAL_DATA.
   const bool _from_interface_material;
 
-  /// Whether this object gathers data from interface boundaries.
+  /// Whether this object gathers data from any side domain.
+  const bool _has_side;
+
+  /// Whether this object gathers data from internal interfaces.
   const bool _has_interface;
 
   ///@{

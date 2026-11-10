@@ -213,7 +213,7 @@
     type = RunException
     issues = '#32413'
     input = 'interface_material.i'
-    cli_args = 'NEML2/source/interface_material_inputs=typo'
+    cli_args = 'NEML2/source/interface_material_inputs=typo NEML2/source/volume=false'
     expect_err = "'typo' is not a NEML2 input"
     capabilities = 'libtorch & neml2'
     valgrind = none
@@ -224,8 +224,19 @@
     type = RunException
     issues = '#32413'
     input = 'interface_material.i'
-    cli_args = 'NEML2/source/interface_material_inputs=u'
+    cli_args = 'NEML2/source/interface_material_inputs=u NEML2/source/volume=false'
     expect_err = "'u' is mapped as .*not MATERIAL"
+    capabilities = 'libtorch & neml2'
+    valgrind = none
+    collections = 'SYSTEM'
+  []
+  [interface_material_input_requires_interface_only]
+    requirement = 'The framework shall throw an error when interface_material_inputs is used with volume or external-boundary evaluation enabled.'
+    type = RunException
+    issues = '#32413'
+    input = 'mixed_source_interface.i'
+    cli_args = "NEML2/cohesive/volume=true"
+    expect_err = "Interface material inputs require an interface-only evaluation domain"
     capabilities = 'libtorch & neml2'
     valgrind = none
     collections = 'SYSTEM'
@@ -269,6 +280,151 @@
     capabilities = 'libtorch & neml2'
     valgrind = heavy
     collections = 'SYSTEM'
+  []
+  [evaluation_domains]
+    issues = '#32413'
+    collections = 'SYSTEM'
+    requirement = 'The framework shall evaluate a NEML2 model at independently selected volume, external-boundary, and internal-interface quadrature points while preserving spatially varying quadrature-point data for '
+    [volume]
+      detail = 'volume only.'
+      type = RunApp
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/boundary= NEML2/domains/interface= Postprocessors/active=volume'
+      expect_out = '1\.000000e\+00 \|   2\.000000e\+00'
+      capabilities = 'libtorch & neml2'
+    []
+    [boundary]
+      detail = 'external boundaries only.'
+      type = RunApp
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/volume=false NEML2/domains/interface= Postprocessors/active=boundary'
+      expect_out = '1\.000000e\+00 \|   1\.500000e\+00'
+      capabilities = 'libtorch & neml2'
+    []
+    [interface]
+      detail = 'internal interfaces only.'
+      type = RunApp
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/volume=false NEML2/domains/boundary= Postprocessors/active=interface'
+      expect_out = '1\.000000e\+00 \|   2\.000000e\+00'
+      capabilities = 'libtorch & neml2'
+    []
+    [volume_boundary]
+      detail = 'volume and external boundaries.'
+      type = RunApp
+      input = 'evaluation_domains.i'
+      cli_args = "NEML2/domains/interface= Postprocessors/active='volume boundary'"
+      expect_out = '1\.000000e\+00 \|   1\.500000e\+00 \|   2\.000000e\+00'
+      capabilities = 'libtorch & neml2'
+    []
+    [volume_interface]
+      detail = 'volume and internal interfaces.'
+      type = RunApp
+      input = 'evaluation_domains.i'
+      cli_args = "NEML2/domains/boundary= Postprocessors/active='volume interface'"
+      expect_out = '1\.000000e\+00 \|   2\.000000e\+00 \|   2\.000000e\+00'
+      capabilities = 'libtorch & neml2'
+    []
+    [boundary_interface]
+      detail = 'external boundaries and internal interfaces.'
+      type = RunApp
+      input = 'evaluation_domains.i'
+      cli_args = "NEML2/domains/volume=false Postprocessors/active='boundary interface'"
+      expect_out = '1\.000000e\+00 \|   1\.500000e\+00 \|   2\.000000e\+00'
+      capabilities = 'libtorch & neml2'
+    []
+    [volume_boundary_interface]
+      detail = 'volume, external boundaries, and internal interfaces together.'
+      type = RunApp
+      input = 'evaluation_domains.i'
+      cli_args = "Postprocessors/active='volume boundary interface'"
+      expect_out = '1\.000000e\+00 \|   1\.500000e\+00 \|   2\.000000e\+00 \|   2\.000000e\+00'
+      capabilities = 'libtorch & neml2'
+    []
+    [volume_boundary_interface_parallel]
+      detail = 'all three domains with matching batch layout and gathered-data ordering under MPI and threading.'
+      type = RunApp
+      input = 'evaluation_domains.i'
+      cli_args = "Postprocessors/active='volume boundary interface'"
+      expect_out = '1\.000000e\+00 \|   1\.500000e\+00 \|   2\.000000e\+00 \|   2\.000000e\+00'
+      capabilities = 'libtorch & neml2'
+      min_parallel = 2
+      max_parallel = 2
+      min_threads = 2
+      max_threads = 2
+    []
+  []
+  [evaluation_domain_errors]
+    issues = '#32413'
+    collections = 'SYSTEM'
+    requirement = 'The framework shall reject invalid NEML2 evaluation-domain configurations when '
+    [none]
+      detail = 'all domains are disabled.'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/volume=false NEML2/domains/boundary= NEML2/domains/interface='
+      expect_err = 'At least one NEML2 evaluation domain must be enabled'
+      capabilities = 'libtorch & neml2'
+    []
+    [internal_as_boundary]
+      detail = 'an internal sideset is selected as an external boundary.'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/volume=false NEML2/domains/boundary=left_block_right_block NEML2/domains/interface= Postprocessors/active='
+      expect_err = 'contains an internal side, but external boundaries must not contain neighbors'
+      capabilities = 'libtorch & neml2'
+    []
+    [external_as_interface]
+      detail = 'an external sideset is selected as an internal interface.'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/volume=false NEML2/domains/boundary= NEML2/domains/interface=left Postprocessors/active='
+      expect_err = 'interface boundaries must contain neighbors'
+      capabilities = 'libtorch & neml2'
+    []
+    [legacy_conflict]
+      detail = 'the deprecated interface_only selector is explicitly combined with a new selector.'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/interface_only=false'
+      expect_err = "deprecated 'interface_only' parameter cannot be combined"
+      capabilities = 'libtorch & neml2'
+    []
+    [unselected_side_access]
+      detail = 'a side consumer requests an output from a volume-only evaluation.'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/boundary= NEML2/domains/interface= Postprocessors/active=boundary'
+      expect_err = 'requested at side quadrature points.*location was not evaluated'
+      capabilities = 'libtorch & neml2'
+    []
+    [mixed_topology_as_boundary]
+      detail = 'a sideset containing both external and internal sides is selected as an external boundary.'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/volume=false NEML2/domains/boundary=mixed_topology NEML2/domains/interface= Postprocessors/active='
+      expect_err = 'contains an internal side, but external boundaries must not contain neighbors'
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [mixed_topology_as_interface]
+      detail = 'a sideset containing both external and internal sides is selected as an internal interface.'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/volume=false NEML2/domains/boundary= NEML2/domains/interface=mixed_topology Postprocessors/active='
+      expect_err = 'contains an external side, but interface boundaries must contain neighbors'
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [boundary_interface_overlap]
+      detail = 'the same boundary is selected as both an external boundary and an internal interface.'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/volume=false NEML2/domains/boundary=left NEML2/domains/interface=left Postprocessors/active='
+      expect_err = 'cannot be selected as both external boundaries and internal interfaces'
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
   []
   [empty]
     requirement = "The framework shall be capable of running custom NEML2 models and handling empty "
