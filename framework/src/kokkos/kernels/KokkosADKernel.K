@@ -74,7 +74,7 @@ ADKernel::dispatch()
     if (!_residual_only_dispatcher)
       _residual_only_dispatcher = DispatcherRegistry::build<ResidualOnlyLoop>(this, type());
 
-    dispatchADTeams(*_residual_only_dispatcher, n_items, max_qps, 0);
+    dispatchADTeams(*_residual_only_dispatcher, n_items, max_qps, 0, _ad_slots);
   }
   // An object posed on the current configuration, or reading a property that depends on the
   // displacements, dispatches the instantiation whose dual numbers also carry the displacement
@@ -85,15 +85,18 @@ ADKernel::dispatch()
       _displaced_residual_dispatcher =
           DispatcherRegistry::build<DisplacedResidualLoop>(this, type());
 
-    dispatchADTeams(
-        *_displaced_residual_dispatcher, n_items, max_qps, _max_ad_slots + AD_DISPLACEMENT_SLOTS);
+    dispatchADTeams(*_displaced_residual_dispatcher,
+                    n_items,
+                    max_qps,
+                    _max_ad_slots + AD_DISPLACEMENT_SLOTS,
+                    _ad_slots);
   }
   else
   {
     if (!_residual_dispatcher)
       _residual_dispatcher = DispatcherRegistry::build<ResidualLoop>(this, type());
 
-    dispatchADTeams(*_residual_dispatcher, n_items, max_qps, _max_ad_slots);
+    dispatchADTeams(*_residual_dispatcher, n_items, max_qps, _max_ad_slots, _ad_slots);
   }
 }
 

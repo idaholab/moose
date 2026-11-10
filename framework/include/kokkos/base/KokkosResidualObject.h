@@ -253,12 +253,18 @@ protected:
    * with one group of a team. The group evaluates the residual hooks once per quadrature point into
    * its scratch, then contracts the stored coefficients with the shape functions:
    *
-   *   R_i    = sum_qp (f_v psi_i + f_g . grad_xi psi_i)
-   *   J_ij^b = sum_qp (df_v/ds psi_i + df_g/ds . grad_xi psi_i) dq_s/dU_j
+   *   R_i = sum_qp (f_v psi_i + f_g . grad_xi psi_i)
    *
-   * where f_g is the gradient coefficient pulled back to the reference element, slot block b of a
-   * variable holds its value (dq/dU_j = phi_j) or its gradient components on the reference
-   * configuration (dq_k/dU_j = d phi_j / d X_k), and column j indexes the DOFs of that variable.
+   * where f_g is the gradient coefficient pulled back to the reference element. The Jacobian with
+   * respect to the DOFs j of a column variable contracts in two stages:
+   *
+   *   C_t(qp, j) = sum_s df_t/ds dq_s/dU_j
+   *   J_ij       = sum_qp (C_v(qp, j) psi_i + C_g(qp, j) . grad_xi psi_i)
+   *
+   * where the slots s of the variable hold its value (dq/dU_j = phi_j) or its gradient on the
+   * reference configuration, whose derivatives the scratch stores mapped to the reference element
+   * (dq_k/dU_j = d phi_j / d xi_k). Each entry of a column accumulates once per chunk of quadrature
+   * points.
    * @tparam slots The number of derivative slots of the instantiation
    * @param object The residual object of the final derived type
    * @param team The team handle
@@ -284,11 +290,19 @@ protected:
    * @param n_items The number of elements or sides
    * @param max_qps The maximum number of quadrature points of an element or side
    * @param slots The number of derivative slots of the instantiation
+   * @param table The slot table of the object, whose column variables size the Jacobian
+   * contraction
    */
   void dispatchADTeams(DispatcherBase & dispatcher,
                        ThreadID n_items,
                        unsigned int max_qps,
-                       unsigned int slots) const;
+                       unsigned int slots,
+                       const ADSlotTable & table);
+
+  /**
+   * Scratch layout of the current dispatch of a pointwise AD residual object
+   */
+  ADScratchLayout _ad_layout;
 
   /**
    * Displacement component assembled by the current dispatch of DisplacementJacobianLoop
@@ -596,10 +610,12 @@ ResidualObject::assembleADTerms(const Object & object,
 {
   constexpr auto qp_size = ADScratchLayout::qpSize(slots);
   constexpr auto term_size = ADScratchLayout::term_size;
-  constexpr auto map_offset = ADScratchLayout::mapOffset(slots);
+
+  const auto & layout = _ad_layout;
+  KOKKOS_ASSERT(layout.slots == slots);
 
   const auto n_qps = datum.n_qps();
-  const auto group_scratch_size = group.maxQps() * qp_size;
+  const auto group_scratch_size = layout.groupSize();
   const ADScratchView team_scratch(team.team_scratch(0), group.count() * group_scratch_size);
   const ADScratchView scratch(&team_scratch(group.index() * group_scratch_size),
                               group_scratch_size);
@@ -643,15 +659,6 @@ ResidualObject::assembleADTerms(const Object & object,
     return ::Kokkos::pair<Real, Real3>(phi, ref);
   };
 
-  // Gradient of a shape function on the reference configuration from its reference gradient
-  auto referenceGradient = [&](const Real3 & ref, const unsigned int qp)
-  {
-    const Real * map = &scratch(qp * qp_size + map_offset);
-    return Real3(map[0] * ref(0) + map[1] * ref(1) + map[2] * ref(2),
-                 map[3] * ref(0) + map[4] * ref(1) + map[5] * ref(2),
-                 map[6] * ref(0) + map[7] * ref(1) + map[8] * ref(2));
-  };
-
   if (computing_residual)
     group_for(n_idofs,
               [&](const unsigned int i)
@@ -667,44 +674,89 @@ ResidualObject::assembleADTerms(const Object & object,
 
   if constexpr (slots > 0)
     if (computing_jacobian)
+    {
+      Real * const planes = &scratch(layout.jacobianOffset());
+      const auto plane = layout.jacobianPlane();
+      const auto chunk = layout.qp_chunk;
+      KOKKOS_ASSERT(chunk > 0);
+      // Every group runs the same number of chunks, so that the team barriers match
+      const auto n_chunks = (layout.max_qps + chunk - 1) / chunk;
+
       for (unsigned int b = 0; b < table.numBlocks(); ++b)
       {
-        const auto & block = table.block(b);
-        const auto jfe = sys.getFETypeID(block.var);
+        // The first block of a variable leads its column
+        const auto & lead = table.block(b);
+        bool leads = true;
+        for (unsigned int c = 0; c < b; ++c)
+          if (table.block(c).var == lead.var)
+            leads = false;
+        if (!leads)
+          continue;
+
+        const auto jfe = sys.getFETypeID(lead.var);
         const auto n_jdofs = assembly.getNumDofs(elem.type, jfe);
 
-        group_for(
-            n_idofs * n_jdofs,
-            [&](const unsigned int ij)
-            {
-              const auto i = ij / n_jdofs;
-              const auto j = ij % n_jdofs;
-              Real local_ke = 0;
+        for (unsigned int ch = 0; ch < n_chunks; ++ch)
+        {
+          const auto qp_begin = ch * chunk;
+          const auto n_chunk_qps = qp_begin < n_qps ? ::Kokkos::min(chunk, n_qps - qp_begin) : 0u;
 
-              for (unsigned int qp = 0; qp < n_qps; ++qp)
-              {
-                const auto test = shape(ife, i, qp);
-                const auto trial = shape(jfe, j, qp);
-                const Real * q = &scratch(qp * qp_size);
+          // Stage 1: contract the slot derivatives of the column with the trial functions
+          group_for(n_chunk_qps * n_jdofs,
+                    [&](const unsigned int qj)
+                    {
+                      const auto q = qj / n_jdofs;
+                      const auto j = qj % n_jdofs;
+                      const auto trial = shape(jfe, j, qp_begin + q);
+                      const Real * const derivatives = &scratch((qp_begin + q) * qp_size);
+                      Real c[term_size] = {0, 0, 0, 0};
 
-                if (block.gradient)
-                {
-                  const auto grad_trial = referenceGradient(trial.second, qp);
-                  for (unsigned int k = 0; k < AD_GRADIENT_SLOTS; ++k)
-                    local_ke += contractADTerms(q + term_size * (1 + block.first + k),
-                                                test.first,
-                                                test.second) *
-                                grad_trial(k);
-                }
-                else
-                  local_ke +=
-                      contractADTerms(q + term_size * (1 + block.first), test.first, test.second) *
-                      trial.first;
-              }
+                      for (unsigned int s = b; s < table.numBlocks(); ++s)
+                      {
+                        const auto & block = table.block(s);
+                        if (block.var != lead.var)
+                          continue;
 
-              accumulateTaggedElementalMatrix(local_ke * scaling_factor, elem.id, i, j, block.var);
-            });
+                        const Real * const d = derivatives + term_size * (1 + block.first);
+                        if (block.gradient)
+                          for (unsigned int k = 0; k < AD_GRADIENT_SLOTS; ++k)
+                            for (unsigned int t = 0; t < term_size; ++t)
+                              c[t] += d[term_size * k + t] * trial.second(k);
+                        else
+                          for (unsigned int t = 0; t < term_size; ++t)
+                            c[t] += d[t] * trial.first;
+                      }
+
+                      for (unsigned int t = 0; t < term_size; ++t)
+                        planes[t * plane + qj] = c[t];
+                    });
+          team.team_barrier();
+
+          // Stage 2: contract with the test functions
+          if (n_chunk_qps)
+            group_for(n_idofs * n_jdofs,
+                      [&](const unsigned int ij)
+                      {
+                        const auto i = ij / n_jdofs;
+                        const auto j = ij % n_jdofs;
+                        Real local_ke = 0;
+
+                        for (unsigned int q = 0; q < n_chunk_qps; ++q)
+                        {
+                          const auto test = shape(ife, i, qp_begin + q);
+                          const Real * const cq = planes + q * n_jdofs + j;
+                          local_ke += cq[0] * test.first + cq[plane] * test.second(0) +
+                                      cq[2 * plane] * test.second(1) +
+                                      cq[3 * plane] * test.second(2);
+                        }
+
+                        accumulateTaggedElementalMatrix(
+                            local_ke * scaling_factor, elem.id, i, j, lead.var);
+                      });
+          team.team_barrier();
+        }
       }
+    }
 }
 
 } // namespace Moose::Kokkos

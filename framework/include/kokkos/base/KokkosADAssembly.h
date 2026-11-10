@@ -17,24 +17,23 @@ namespace Moose::Kokkos
 {
 
 /**
- * Layout of the scratch memory of a pointwise AD element or side assembly. At each
+ * Layout of the scratch memory of one group of a pointwise AD element or side assembly. At each
  * quadrature point the scratch holds the JxW-weighted residual coefficients of the test function
- * value and of its reference gradient, followed by their derivatives with respect to each slot,
- * and then the inverse of the reference map Jacobian:
+ * value and of its reference gradient, followed by their derivatives with respect to each slot:
  *
- *   [qp][0]                 f_value
- *   [qp][1 .. 3]            f_grad, mapped to the reference element
- *   [qp][4 (1 + s)]         d f_value / d slot s
+ *   [qp][0]                  f_value
+ *   [qp][1 .. 3]             f_grad, mapped to the reference element
+ *   [qp][4 (1 + s)]          d f_value / d slot s
  *   [qp][4 (1 + s) + 1 .. 3] d f_grad / d slot s
- *   [qp][4 (1 + slots) ..]  dxi/dx of the reference configuration, row major
  *
  * The gradient coefficient is contracted with the reference test function gradient, so that the
  * variation of the test function gradient with the displacements is carried by the derivatives of
- * the mapped coefficient. The trial functions of the slot blocks are taken on the reference
- * configuration, where the gradient slots are defined.
+ * the mapped coefficient. The derivatives with respect to a gradient slot block are mapped to the
+ * reference element as well, so that they contract with the reference trial function gradient.
  *
- * Without slots only the residual is assembled, which does not read the map. The map is then
- * omitted, and one padding real follows the term set.
+ * The Jacobian contraction follows, in four planes, one per entry of a term set. For a chunk of
+ * quadrature points and one column variable, plane t holds at [qp][j] the derivatives of entry t
+ * contracted with the slot quantities of trial function j.
  */
 struct ADScratchLayout
 {
@@ -48,33 +47,42 @@ struct ADScratchLayout
    */
   KOKKOS_FUNCTION static constexpr unsigned int qpSize(unsigned int slots)
   {
-    return slots ? term_size * (1 + slots) + map_size : term_size + 1;
+    return term_size * (1 + slots) + 1;
   }
+
   /**
-   * Get the offset of the inverse of the reference map Jacobian within the entries of a
-   * quadrature point
-   * @param slots The number of derivative slots
+   * Get the offset of the Jacobian contraction planes within the scratch of a group
    */
-  KOKKOS_FUNCTION static constexpr unsigned int mapOffset(unsigned int slots)
-  {
-    return term_size * (1 + slots);
-  }
-
-  /// Number of reals of the inverse of the reference map Jacobian
-  static constexpr unsigned int map_size = 9;
-
+  KOKKOS_FUNCTION unsigned int jacobianOffset() const { return max_qps * qpSize(slots); }
   /**
-   * Get the number of bytes of scratch memory per team, whose groups each hold the layout of one
-   * element or side
-   * @param max_qps The maximum number of quadrature points of an element or side
-   * @param slots The number of derivative slots
+   * Get the number of reals of one Jacobian contraction plane
+   */
+  KOKKOS_FUNCTION unsigned int jacobianPlane() const { return qp_chunk * max_jdofs; }
+  /**
+   * Get the number of reals of the scratch of a group
+   */
+  KOKKOS_FUNCTION unsigned int groupSize() const
+  {
+    return jacobianOffset() + term_size * jacobianPlane();
+  }
+  /**
+   * Get the number of bytes of scratch memory per team
    * @param groups The number of groups of the team, each assembling one element or side
    */
-  static std::size_t bytes(unsigned int max_qps, unsigned int slots, unsigned int groups = 1)
+  std::size_t bytes(unsigned int groups) const
   {
     return ::Kokkos::View<Real *, ::Kokkos::DefaultExecutionSpace::scratch_memory_space>::
-        shmem_size(groups * max_qps * qpSize(slots));
+        shmem_size(groups * groupSize());
   }
+
+  /// Maximum number of quadrature points of an element or side
+  unsigned int max_qps = 0;
+  /// Number of derivative slots
+  unsigned int slots = 0;
+  /// Maximum number of DOFs of a column variable, or zero without a Jacobian contraction
+  unsigned int max_jdofs = 0;
+  /// Number of quadrature points per chunk of the Jacobian contraction
+  unsigned int qp_chunk = 0;
 };
 
 /**
@@ -239,12 +247,12 @@ evaluateADTerms(const Object & object,
 {
   const auto JxW = datum.adJxW(qp);
 
-  for (unsigned int k = 0; k < ADScratchLayout::qpSize(slots); ++k)
-    scratch[k] = 0;
-
+  // An absent hook contributes zero coefficients
   if constexpr (HasADResidualValue<Object, slots>::value)
     storeADCoefficient<slots>(
         scratch, 0, JxW * object.template precomputeQpResidualValue<Object, slots>(qp, datum));
+  else
+    storeADCoefficient<slots>(scratch, 0, DenseADReal<slots>(0));
 
   if constexpr (HasADResidualGrad<Object, slots>::value)
   {
@@ -253,13 +261,32 @@ evaluateADTerms(const Object & object,
     for (unsigned int k = 0; k < 3; ++k)
       storeADCoefficient<slots>(scratch, 1 + k, grad(k));
   }
+  else
+    for (unsigned int k = 0; k < 3; ++k)
+      storeADCoefficient<slots>(scratch, 1 + k, DenseADReal<slots>(0));
 
+  // A gradient slot holds a component of the gradient on the reference configuration, whose
+  // variation with a DOF is the reference trial function gradient mapped by dxi/dx. Applying the
+  // map to the derivatives once per quadrature point lets them contract with the reference trial
+  // function gradient directly.
   if constexpr (slots > 0)
   {
+    constexpr auto term_size = ADScratchLayout::term_size;
     const auto & dxi_dx = datum.reference_dxi_dx(qp);
-    for (unsigned int i = 0; i < 3; ++i)
-      for (unsigned int j = 0; j < 3; ++j)
-        scratch[ADScratchLayout::mapOffset(slots) + 3 * i + j] = dxi_dx(i, j);
+    const auto & table = datum.table();
+
+    for (unsigned int b = 0; b < table.numBlocks(); ++b)
+      if (const auto & block = table.block(b); block.gradient)
+        for (unsigned int t = 0; t < term_size; ++t)
+        {
+          Real * d = scratch + term_size * (1 + block.first) + t;
+          const Real d0 = d[0];
+          const Real d1 = d[term_size];
+          const Real d2 = d[2 * term_size];
+
+          for (unsigned int m = 0; m < 3; ++m)
+            d[m * term_size] = d0 * dxi_dx(0, m) + d1 * dxi_dx(1, m) + d2 * dxi_dx(2, m);
+        }
   }
 }
 

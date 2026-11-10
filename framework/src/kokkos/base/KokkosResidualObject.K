@@ -65,6 +65,7 @@ ResidualObject::ResidualObject(const ResidualObject & object)
     _t_step(object._t_step),
     _dt(object._dt),
     _dt_old(object._dt_old),
+    _ad_layout(object._ad_layout),
     _displacement_component(object._displacement_component),
     _vector_tags(object._vector_tags),
     _matrix_tags(object._matrix_tags)
@@ -81,14 +82,47 @@ void
 ResidualObject::dispatchADTeams(DispatcherBase & dispatcher,
                                 const ThreadID n_items,
                                 const unsigned int max_qps,
-                                const unsigned int slots) const
+                                const unsigned int slots,
+                                const ADSlotTable & table)
 {
   if (!n_items)
     return;
 
+  const auto scratch_max = TeamPolicy<ResidualLoop>::scratch_size_max(0);
+
+  // The Jacobian contraction planes hold the trial functions of the widest column variable
+  auto & layout = _ad_layout;
+  layout = ADScratchLayout();
+  layout.max_qps = max_qps;
+  layout.slots = slots;
+
+  if (slots)
+  {
+    const auto & assembly = kokkosAssembly();
+    const auto n_elem_types = kokkosMesh().getNumLocalElementTypes();
+
+    for (const auto & block : table.hostBlocks())
+    {
+      const auto jfe = kokkosSystem(block.sys).getFETypeID(block.var);
+      for (const auto type : make_range(n_elem_types))
+        layout.max_jdofs = std::max(layout.max_jdofs, assembly.getNumDofs(type, jfe));
+    }
+
+    // Chunk the quadrature points of the contraction only when one group does not fit
+    layout.qp_chunk = max_qps;
+    while (layout.qp_chunk > 1 && layout.bytes(1) > scratch_max)
+      layout.qp_chunk = (layout.qp_chunk + 1) / 2;
+  }
+
+  if (layout.bytes(1) > scratch_max)
+    mooseError("The pointwise AD assembly needs ",
+               layout.bytes(1),
+               " bytes of scratch memory per element or side, more than the limit of ",
+               scratch_max,
+               " bytes.");
+
   TeamLaunch launch;
-  const auto max_groups_scratch = std::max<std::size_t>(
-      1, TeamPolicy<ResidualLoop>::scratch_size_max(0) / ADScratchLayout::bytes(max_qps, slots));
+  const auto max_groups_scratch = std::max<std::size_t>(1, scratch_max / layout.bytes(1));
 
   // Fill a team of the target size with groups, within the scratch limit and the item count
   auto shape = [&](const unsigned int team_size)
@@ -99,7 +133,7 @@ ResidualObject::dispatchADTeams(DispatcherBase & dispatcher,
 
     launch.team_size = group_size * groups;
     launch.league_size = (n_items + groups - 1) / groups;
-    launch.scratch_bytes = ADScratchLayout::bytes(max_qps, slots, groups);
+    launch.scratch_bytes = layout.bytes(groups);
   };
 
   shape(ADTeamGroup::target_team_size);
