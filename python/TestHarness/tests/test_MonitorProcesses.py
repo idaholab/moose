@@ -335,7 +335,7 @@ class TestMemoryMonitor(unittest.TestCase):
         def process_memory(process):
             return None if process.pid in unreadable else measure(process.pid)
 
-        monitor = MemoryMonitor(os.getpid(), interval=0.05, gpu=True)
+        monitor = MemoryMonitor(os.getpid(), interval=0.05, track_gpu=True)
         with (
             patch("TestHarness.utils.monitor_processes.NvidiaGPUMemory", FakeGPUMemory),
             patch(
@@ -368,7 +368,7 @@ class TestMemoryMonitor(unittest.TestCase):
         def fail():
             raise RuntimeError("NVML failed")
 
-        monitor = MemoryMonitor(os.getpid(), interval=0.05, gpu=True)
+        monitor = MemoryMonitor(os.getpid(), interval=0.05, track_gpu=True)
         with patch("TestHarness.utils.monitor_processes.NvidiaGPUMemory", fail):
             monitor.start()
         try:

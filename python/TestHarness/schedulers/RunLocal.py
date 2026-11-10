@@ -50,7 +50,7 @@ class RunLocal(Scheduler):
             self._memory_monitor = MemoryMonitor(
                 os.getpid(),
                 interval=self.scheduler_options.memory_tracking_interval,
-                gpu=self.scheduler_options.monitor_job_gpu_memory,
+                track_gpu=self.scheduler_options.monitor_job_gpu_memory,
             )
             self._memory_monitor.start()
 

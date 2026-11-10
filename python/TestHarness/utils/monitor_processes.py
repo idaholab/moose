@@ -144,7 +144,7 @@ class MemorySample(NamedTuple):
 class MemoryMonitor:
     """Monitor that runs in a separate process to track children memory usage."""
 
-    def __init__(self, parent_pid: int, interval: float = 0.1, gpu: bool = False):
+    def __init__(self, parent_pid: int, interval: float = 0.1, track_gpu: bool = False):
         """Initialize state."""
         self._parent_pid: int = parent_pid
         """PID of the parent process to sample the children of."""
@@ -152,7 +152,7 @@ class MemoryMonitor:
         self._interval: float = interval
         """How often to sample in seconds."""
 
-        self._track_gpu: bool = gpu
+        self._track_gpu: bool = track_gpu
         """Whether or not to also sample NVIDIA GPU memory."""
 
         self._process: Optional[ForkProcess] = None
@@ -193,13 +193,17 @@ class MemoryMonitor:
 
     @staticmethod
     def _sampler(
-        parent_pid: int, interval: float, gpu: bool, stop_event, shared: NamespaceProxy
+        parent_pid: int,
+        interval: float,
+        track_gpu: bool,
+        stop_event,
+        shared: NamespaceProxy,
     ):
         """Run the sampler process; internal method called by start()."""
         # Initialized after the fork, as NVML state cannot be shared across one.
         # On failure, keep sampling CPU memory and report why GPU memory is not
         gpu_memory = None
-        if gpu:
+        if track_gpu:
             try:
                 gpu_memory = NvidiaGPUMemory()
             except Exception as e:
