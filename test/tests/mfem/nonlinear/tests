@@ -56,6 +56,7 @@
       type = CSVDiff
       input = nldiffusion_newton.i
       cli_args = 'Functions/initial/expression=0.01 '
+                 'Solvers/lin/type=MFEMHypreGMRES Solvers/lin/l_tol=1e-6 '
                  'Solvers/native_mfem_nl/line_search=backtracking '
                  'Solvers/native_mfem_nl/max_its=8 '
                  'VectorPostprocessors/active=point_sample Outputs/active=csv'
@@ -68,6 +69,7 @@
       type = RunApp
       input = nldiffusion_newton.i
       cli_args = "Functions/initial/expression=0.01 Solvers/native_mfem_nl/max_its=8 "
+                 "Solvers/lin/type=MFEMHypreGMRES Solvers/lin/l_tol=1e-6 "
                  "Outputs/active=''"
       expect_out = 'Newton: No convergence!'
       capabilities = 'mfem'
