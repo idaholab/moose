@@ -77,7 +77,7 @@ ADKernel::dispatch()
   if (!_computing_jacobian)
   {
     if (!_residual_only_dispatcher)
-      _residual_only_dispatcher = DispatcherRegistry::build<ResidualOnlyLoop>(this, type());
+      _residual_only_dispatcher = buildConfigurationDispatcher<ResidualOnlyLoop>(this);
 
     dispatchADTeams(*_residual_only_dispatcher, n_items, max_qps, 0, _ad_slots);
   }
@@ -87,8 +87,7 @@ ADKernel::dispatch()
   else if (_ad_slots.hasDisplacements())
   {
     if (!_displaced_residual_dispatcher)
-      _displaced_residual_dispatcher =
-          DispatcherRegistry::build<DisplacedResidualLoop>(this, type());
+      _displaced_residual_dispatcher = buildConfigurationDispatcher<DisplacedResidualLoop>(this);
 
     dispatchADTeams(*_displaced_residual_dispatcher,
                     n_items,
@@ -99,7 +98,7 @@ ADKernel::dispatch()
   else
   {
     if (!_residual_dispatcher)
-      _residual_dispatcher = DispatcherRegistry::build<ResidualLoop>(this, type());
+      _residual_dispatcher = buildConfigurationDispatcher<ResidualLoop>(this);
 
     dispatchADTeams(*_residual_dispatcher, n_items, max_qps, _max_ad_slots, _ad_slots);
   }

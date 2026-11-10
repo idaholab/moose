@@ -79,8 +79,8 @@ public:
   };
   ///@}
   /**
-   * Kokkos function tag of a loop of a precompute object compiled for one configuration. The
-   * reference instantiation compiles out the displaced geometry of its Datum.
+   * Kokkos function tag of a loop of a precompute or AD object compiled for one configuration.
+   * The reference instantiation compiles out the displaced geometry of its Datum.
    * @tparam Loop The function tag of the loop
    * @tparam displaced Whether the loop runs on the current configuration
    */
@@ -329,7 +329,7 @@ protected:
   void dispatchDisplacementJacobian(ThreadID league_size, bool vector);
 
   /**
-   * Build the dispatcher of a loop of a precompute object compiled for its configuration
+   * Build the dispatcher of a loop of a precompute or AD object compiled for its configuration
    * @tparam Loop The function tag of the loop
    * @param object The pointer to the functor of the final derived type
    * @returns The dispatcher

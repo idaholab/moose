@@ -716,6 +716,23 @@ template <typename Object>
 inline constexpr unsigned int ad_displaced_slots = ADDisplacedSlots<Object>::value;
 ///@}
 
+/**
+ * Register the team dispatchers of a loop of an AD object on the reference and on the current
+ * configuration
+ * @tparam Loop The function tag of the loop
+ * @tparam Object The functor class type
+ * @param objectname The registered object type name
+ */
+template <typename Loop, typename Object>
+void
+registerConfigurationTeamDispatchers(const std::string & objectname)
+{
+  DispatcherRegistry::addTeamDispatcher<typename Object::template ConfigurationLoop<Loop, false>,
+                                        Object>(objectname);
+  DispatcherRegistry::addTeamDispatcher<typename Object::template ConfigurationLoop<Loop, true>,
+                                        Object>(objectname);
+}
+
 template <typename Object>
 void
 registerADResidualObjectDispatchers(const std::string & objectname)
@@ -727,13 +744,13 @@ registerADResidualObjectDispatchers(const std::string & objectname)
 
   // Team AD objects are also compiled with the displacement slots of the current configuration,
   // and dispatch the instantiation matching their configuration. A residual alone is compiled
-  // without slots, in a kernel of its own.
+  // without slots, in a kernel of its own. Each loop is compiled once per configuration.
   if constexpr (Object::uses_team_dispatch)
   {
-    DispatcherRegistry::addTeamDispatcher<typename Object::ResidualLoop, Object>(objectname);
-    DispatcherRegistry::addTeamDispatcher<typename Object::DisplacedResidualLoop, Object>(
+    registerConfigurationTeamDispatchers<typename Object::ResidualLoop, Object>(objectname);
+    registerConfigurationTeamDispatchers<typename Object::DisplacedResidualLoop, Object>(
         objectname);
-    DispatcherRegistry::addTeamDispatcher<typename Object::ResidualOnlyLoop, Object>(objectname);
+    registerConfigurationTeamDispatchers<typename Object::ResidualOnlyLoop, Object>(objectname);
   }
   else
     DispatcherRegistry::addDispatcher<typename Object::ResidualLoop, Object>(objectname);

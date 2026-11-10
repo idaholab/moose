@@ -78,25 +78,29 @@ public:
   /**
    * The team operation called by Kokkos for each team of boundary sides
    */
-  template <typename Derived>
+  template <typename Derived, bool displaced>
   KOKKOS_FUNCTION void
-  operator()(ResidualLoop, const TeamMember<ResidualLoop> & team, const Derived & bc) const;
+  operator()(ConfigurationLoop<ResidualLoop, displaced>,
+             const TeamMember<ConfigurationLoop<ResidualLoop, displaced>> & team,
+             const Derived & bc) const;
   /**
    * The team operation called by Kokkos for each team of boundary sides of an object posed on the
    * current configuration, whose dual numbers carry the displacement slots
    */
-  template <typename Derived>
-  KOKKOS_FUNCTION void operator()(DisplacedResidualLoop,
-                                  const TeamMember<DisplacedResidualLoop> & team,
-                                  const Derived & bc) const;
+  template <typename Derived, bool displaced>
+  KOKKOS_FUNCTION void
+  operator()(ConfigurationLoop<DisplacedResidualLoop, displaced>,
+             const TeamMember<ConfigurationLoop<DisplacedResidualLoop, displaced>> & team,
+             const Derived & bc) const;
   /**
    * The team operation called by Kokkos for each team of boundary sides when only the residual is
    * computed
    */
-  template <typename Derived>
-  KOKKOS_FUNCTION void operator()(ResidualOnlyLoop,
-                                  const TeamMember<ResidualOnlyLoop> & team,
-                                  const Derived & bc) const;
+  template <typename Derived, bool displaced>
+  KOKKOS_FUNCTION void
+  operator()(ConfigurationLoop<ResidualOnlyLoop, displaced>,
+             const TeamMember<ConfigurationLoop<ResidualOnlyLoop, displaced>> & team,
+             const Derived & bc) const;
 
   /**
    * Get the slot table of the AD accessors
@@ -214,10 +218,10 @@ ADIntegratedBC::getKokkosADMaterialProperty(const std::string & name)
   return reader;
 }
 
-template <typename Derived>
+template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-ADIntegratedBC::operator()(ResidualLoop,
-                           const TeamMember<ResidualLoop> & team,
+ADIntegratedBC::operator()(ConfigurationLoop<ResidualLoop, displaced>,
+                           const TeamMember<ConfigurationLoop<ResidualLoop, displaced>> & team,
                            const Derived & bc) const
 {
   const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerSide(), numKokkosBoundarySides());
@@ -229,17 +233,19 @@ ADIntegratedBC::operator()(ResidualLoop,
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration);
+                      _configuration,
+                      std::bool_constant<displaced>{});
 
   assembleADTerms<Derived::max_ad_slots, false>(
       bc, team, group, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }
 
-template <typename Derived>
+template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-ADIntegratedBC::operator()(DisplacedResidualLoop,
-                           const TeamMember<DisplacedResidualLoop> & team,
-                           const Derived & bc) const
+ADIntegratedBC::operator()(
+    ConfigurationLoop<DisplacedResidualLoop, displaced>,
+    const TeamMember<ConfigurationLoop<DisplacedResidualLoop, displaced>> & team,
+    const Derived & bc) const
 {
   const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerSide(), numKokkosBoundarySides());
   const auto [elem, side] = kokkosBoundaryElementSideID(group.item());
@@ -250,16 +256,17 @@ ADIntegratedBC::operator()(DisplacedResidualLoop,
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration);
+                      _configuration,
+                      std::bool_constant<displaced>{});
 
   assembleADTerms<ad_displaced_slots<Derived>, true>(
       bc, team, group, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }
 
-template <typename Derived>
+template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-ADIntegratedBC::operator()(ResidualOnlyLoop,
-                           const TeamMember<ResidualOnlyLoop> & team,
+ADIntegratedBC::operator()(ConfigurationLoop<ResidualOnlyLoop, displaced>,
+                           const TeamMember<ConfigurationLoop<ResidualOnlyLoop, displaced>> & team,
                            const Derived & bc) const
 {
   const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerSide(), numKokkosBoundarySides());
@@ -271,7 +278,8 @@ ADIntegratedBC::operator()(ResidualOnlyLoop,
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration);
+                      _configuration,
+                      std::bool_constant<displaced>{});
 
   assembleADTerms<0, false>(bc, team, group, datum, _ad_slots, true, false);
 }

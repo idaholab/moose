@@ -77,25 +77,29 @@ public:
   /**
    * The team operation called by Kokkos for each team of elements
    */
-  template <typename Derived>
+  template <typename Derived, bool displaced>
   KOKKOS_FUNCTION void
-  operator()(ResidualLoop, const TeamMember<ResidualLoop> & team, const Derived & kernel) const;
+  operator()(ConfigurationLoop<ResidualLoop, displaced>,
+             const TeamMember<ConfigurationLoop<ResidualLoop, displaced>> & team,
+             const Derived & kernel) const;
   /**
    * The team operation called by Kokkos for each team of elements of an object posed on the
    * current configuration, whose dual numbers carry the displacement slots
    */
-  template <typename Derived>
-  KOKKOS_FUNCTION void operator()(DisplacedResidualLoop,
-                                  const TeamMember<DisplacedResidualLoop> & team,
-                                  const Derived & kernel) const;
+  template <typename Derived, bool displaced>
+  KOKKOS_FUNCTION void
+  operator()(ConfigurationLoop<DisplacedResidualLoop, displaced>,
+             const TeamMember<ConfigurationLoop<DisplacedResidualLoop, displaced>> & team,
+             const Derived & kernel) const;
   /**
    * The team operation called by Kokkos for each team of elements when only the residual is
    * computed
    */
-  template <typename Derived>
-  KOKKOS_FUNCTION void operator()(ResidualOnlyLoop,
-                                  const TeamMember<ResidualOnlyLoop> & team,
-                                  const Derived & kernel) const;
+  template <typename Derived, bool displaced>
+  KOKKOS_FUNCTION void
+  operator()(ConfigurationLoop<ResidualOnlyLoop, displaced>,
+             const TeamMember<ConfigurationLoop<ResidualOnlyLoop, displaced>> & team,
+             const Derived & kernel) const;
 
   /**
    * Get the slot table of the AD accessors
@@ -213,10 +217,10 @@ ADKernel::getKokkosADMaterialProperty(const std::string & name)
   return reader;
 }
 
-template <typename Derived>
+template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-ADKernel::operator()(ResidualLoop,
-                     const TeamMember<ResidualLoop> & team,
+ADKernel::operator()(ConfigurationLoop<ResidualLoop, displaced>,
+                     const TeamMember<ConfigurationLoop<ResidualLoop, displaced>> & team,
                      const Derived & kernel) const
 {
   const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerElem(), numKokkosBlockElements());
@@ -228,16 +232,17 @@ ADKernel::operator()(ResidualLoop,
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration);
+                      _configuration,
+                      std::bool_constant<displaced>{});
 
   assembleADTerms<Derived::max_ad_slots, false>(
       kernel, team, group, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }
 
-template <typename Derived>
+template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-ADKernel::operator()(DisplacedResidualLoop,
-                     const TeamMember<DisplacedResidualLoop> & team,
+ADKernel::operator()(ConfigurationLoop<DisplacedResidualLoop, displaced>,
+                     const TeamMember<ConfigurationLoop<DisplacedResidualLoop, displaced>> & team,
                      const Derived & kernel) const
 {
   const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerElem(), numKokkosBlockElements());
@@ -249,16 +254,17 @@ ADKernel::operator()(DisplacedResidualLoop,
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration);
+                      _configuration,
+                      std::bool_constant<displaced>{});
 
   assembleADTerms<ad_displaced_slots<Derived>, true>(
       kernel, team, group, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }
 
-template <typename Derived>
+template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-ADKernel::operator()(ResidualOnlyLoop,
-                     const TeamMember<ResidualOnlyLoop> & team,
+ADKernel::operator()(ConfigurationLoop<ResidualOnlyLoop, displaced>,
+                     const TeamMember<ConfigurationLoop<ResidualOnlyLoop, displaced>> & team,
                      const Derived & kernel) const
 {
   const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerElem(), numKokkosBlockElements());
@@ -270,7 +276,8 @@ ADKernel::operator()(ResidualOnlyLoop,
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration);
+                      _configuration,
+                      std::bool_constant<displaced>{});
 
   assembleADTerms<0, false>(kernel, team, group, datum, _ad_slots, true, false);
 }
