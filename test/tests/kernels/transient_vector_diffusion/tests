@@ -14,7 +14,7 @@
     run_sim = True
     ratio_tol = 1e-7
     difference_tol = 1e-6
-    requirement = 'The Jacobian from VectorTimeDerivative shall be perfect'
+    requirement = 'The system shall compute a perfect Jacobian for VectorTimeDerivative'
     issues = '#13913'
     design = 'VectorTimeDerivative.md'
   [../]

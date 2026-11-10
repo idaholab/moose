@@ -11,7 +11,7 @@
   []
 
   [check_errors]
-    requirement = "DiracKernel objects shall report an error if a material property from a previous "
+    requirement = "The system shall report an error if, in DiracKernel objects, a material property from a previous "
                   "time step is requested:"
     [old]
       type = 'RunException'

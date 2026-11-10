@@ -29,7 +29,7 @@
     input = 'multi_update_var_test.i'
     exodiff = 'out_multi_var.e'
     issues = '#2099'
-    requirement = "Auxiliary kernel objects shall be capable of writing to multiple coupled variables."
+    requirement = "The system shall allow auxiliary kernel objects to write to multiple coupled variables."
   []
   [multi_update_error]
     type = RunException
@@ -38,7 +38,7 @@
                  "NodalUserObjects, NodeFaceConstraints, NodeElemConstraints or Materials\. 'all' is none of those\."
     issues = '#22563'
     allow_deprecated = true
-    requirement = "Writing to auxiliary variables shall be limited to use from AuxKernels, "
+    requirement = "The system shall limit writing to auxiliary variables to use from AuxKernels, "
                   "ElementUserObjects, or NodalUserObjects."
   []
 
@@ -48,7 +48,7 @@
     exodiff = 'out_multi_var.e'
     issues = '#2099'
     allow_deprecated = true
-    requirement = "Auxiliary kernel objects shall be capable of writing to to multiple coupled "
+    requirement = "The system shall allow auxiliary kernel objects to write to multiple coupled "
                   "variables using the deprecated writeCoupledValue method."
   []
   [multi_update_deprecated_error]
@@ -59,7 +59,7 @@
                  "AuxKernel\."
     issues = '#22563'
     allow_deprecated = true
-    requirement = "Writing to auxiliary variables shall be limited to use from AuxKernels, "
+    requirement = "The system shall limit writing to auxiliary variables to use from AuxKernels, "
                   "ElementUserObjects, or NodalUserObjects using variable values."
   []
   [multi_update_deprecated_error2]
@@ -69,7 +69,7 @@
     expect_err = "The elemental AuxKernel 'all' cannot obtain a writable reference to the nodal variable 'ten'\."
     issues = '#22563'
     allow_deprecated = true
-    requirement = "The writing to auxiliary variables shall enforce nodal/elemental consistency between "
+    requirement = "The system shall enforce, when writing to auxiliary variables, nodal/elemental consistency between "
                   "the kernel variable and the writable variables."
   []
   [multi_update_deprecated_error3]
@@ -79,7 +79,7 @@
     expect_err = "'ten2' must be an auxiliary variable in Coupleable::writableCoupledValue"
     issues = '#22563'
     allow_deprecated = true
-    requirement = "The writableCoupledValue API can only act on AuxVariables."
+    requirement = "The system shall only allow the writableCoupledValue API to act on AuxVariables."
   []
   [multi_update_deprecated_error4]
     type = RunException
@@ -88,7 +88,7 @@
     expect_err = "Unable to create a writable reference for 'var1', is it a constant expression\?"
     issues = '#22563'
     allow_deprecated = true
-    requirement = "The writing to auxiliary variables shall error out if a constant value is passed in as variable name."
+    requirement = "The system shall error out when writing to auxiliary variables if a constant value is passed in as variable name."
   []
 
   [multi_update_fv_test]
@@ -96,14 +96,14 @@
     input = 'multi_update_fv_test.i'
     exodiff = 'out_multi_var_fv.e'
     issues = '#25661'
-    requirement = "Auxiliary kernel objects shall be capable of writing to finite volume coupled variables."
+    requirement = "The system shall allow auxiliary kernel objects to write to finite volume coupled variables."
   []
 
   [multi_update_elem_test]
     type = 'Exodiff'
     input = 'multi_update_elem_var_test.i'
     exodiff = 'out_multi_elem_var.e'
-    requirement = "The MOOSE auxiliary system shall be capable of updating multiple elemental "
+    requirement = "The system shall, through the auxiliary system, be capable of updating multiple elemental "
                   "auxiliary variables within a single AuxKernel object, including the kernel "
                   "variable itsef using the setNodalValue method."
   []
@@ -112,7 +112,7 @@
     input = 'multi_update_elem_var_test.i'
     cli_args = 'AuxKernels/all/use_compute_value=true'
     exodiff = 'out_multi_elem_var.e'
-    requirement = "The MOOSE auxiliary system shall be capable of updating multiple elemental "
+    requirement = "The system shall, through the auxiliary system, be capable of updating multiple elemental "
                   "auxiliary variables within a single AuxKernel object."
     issues = '#22563'
   []
@@ -122,7 +122,7 @@
     input = 'multi_update_elem_var_test.i'
     cli_args = 'AuxVariables/ten/order=FIRST AuxVariables/ten/family=LAGRANGE'
     expect_err = "The elemental AuxKernel 'all' cannot obtain a writable reference to the nodal variable 'ten'\."
-    requirement = "The MOOSE auxiliary system shall check compatibility between primary and writable "
+    requirement = "The system shall, through the auxiliary system, check compatibility between primary and writable "
                   "coupled variables."
     issues = '#22563'
   []
@@ -131,7 +131,7 @@
     type = 'Exodiff'
     input = 'nodal_aux_ts_test.i'
     exodiff = 'out_ts.e'
-    requirement = "The MOOSE auxiliary system shall be capable of coupling to nonlinear variables at "
+    requirement = "The system shall, through the auxiliary system, be capable of coupling to nonlinear variables at "
                   "the end of a timestep."
   []
 []

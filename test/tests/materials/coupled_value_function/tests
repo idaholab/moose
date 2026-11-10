@@ -6,14 +6,14 @@
     type = Exodiff
     input = order.i
     exodiff = order_out.e
-    requirement = "By default coupled variables shall map to the x,y,z, and t function parameters."
+    requirement = "The system shall, by default, map coupled variables to the x,y,z, and t function parameters."
   []
   [order_shuffled]
     type = Exodiff
     input = order.i
     cli_args = 'Materials/cvf/v="d c b a" Materials/cvf/parameter_order="T Z Y X"'
     exodiff = order_out.e
-    requirement = "The user shall be able to provide a custom mapping of coupled variables to "
+    requirement = "The system shall allow the user to provide a custom mapping of coupled variables to "
                   "function parameters."
   []
 
@@ -22,8 +22,8 @@
     input = order.i
     cli_args = 'Materials/cvf/parameter_order="Y Z Z T"'
     expect_err = 'You must not repeat any positions.'
-    requirement = "Duplicate positions in the coupled variable mapping to function parameters shall "
-                  "raise an error."
+    requirement = "The system shall raise an error for duplicate positions in the coupled variable "
+                  "mapping to function parameters."
   []
   [order_count_error]
     type = RunException
@@ -31,8 +31,8 @@
     cli_args = 'Materials/cvf/parameter_order="Y Z X"'
     expect_err = 'Specify either as many items as coupled variables, or none at all for the default '
                  'order of x,y,z,t.'
-    requirement = "A number of positions in mapping to function parameters that does not match the "
-                  "number of coupled variable shall raise an error."
+    requirement = "The system shall raise an error if a number of positions in mapping to function parameters that does not match the "
+                  "number of coupled variable is provided."
   []
 
   [adjac]
@@ -41,7 +41,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-7
     issues = '#20193'
-    requirement = "The ADCoupledValueFunctionMaterial shall return correct derivatives for coupled "
+    requirement = "The system shall return, using the ADCoupledValueFunctionMaterial, correct derivatives for coupled "
                   "AD variables."
   []
 []
