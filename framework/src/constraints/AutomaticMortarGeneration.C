@@ -502,12 +502,19 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
         std::distance(_mesh.bid_nodes_begin(primary_bnd_id), _mesh.bid_nodes_end(primary_bnd_id));
     const auto num_secondary_nodes = std::distance(_mesh.bid_nodes_begin(secondary_bnd_id),
                                                    _mesh.bid_nodes_end(secondary_bnd_id));
-    mooseAssert(num_primary_nodes,
+#ifndef NDEBUG
+    // A process of a distributed mesh may hold no node of either boundary, so count them globally
+    std::size_t num_global_primary_nodes = num_primary_nodes;
+    std::size_t num_global_secondary_nodes = num_secondary_nodes;
+    _mesh.comm().sum(num_global_primary_nodes);
+    _mesh.comm().sum(num_global_secondary_nodes);
+    mooseAssert(num_global_primary_nodes,
                 "There are no primary nodes on boundary ID "
                     << primary_bnd_id << ". Does that bondary ID even exist on the mesh?");
-    mooseAssert(num_secondary_nodes,
+    mooseAssert(num_global_secondary_nodes,
                 "There are no secondary nodes on boundary ID "
                     << secondary_bnd_id << ". Does that bondary ID even exist on the mesh?");
+#endif
 
     node_unique_id_offset += num_primary_nodes + 2 * num_secondary_nodes;
   }
