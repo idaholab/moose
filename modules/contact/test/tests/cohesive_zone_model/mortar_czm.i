@@ -184,12 +184,6 @@
 
     disp_x = disp_x
     disp_y = disp_y
-    friction_coefficient = 0.1 # with 2.0 works
-    secondary_variable = disp_x
-
-    penalty = 0e6
-    penalty_friction = 1e4
-    use_physical_gap = true
 
     correct_edge_dropping = true
     normal_strength = N
@@ -200,37 +194,10 @@
     power_law_parameter = 2.2
     GI_c = 1e3
     GII_c = 1e2
-    displacements = 'disp_x disp_y'
   []
 []
 
 [Constraints]
-  [x]
-    type = NormalMortarMechanicalContact
-    primary_boundary = 'top_bottom'
-    secondary_boundary = 'bottom_top'
-    primary_subdomain = 10000
-    secondary_subdomain = 10001
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    weighted_gap_uo = czm_uo
-    correct_edge_dropping = true
-  []
-  [y]
-    type = NormalMortarMechanicalContact
-    primary_boundary = 'top_bottom'
-    secondary_boundary = 'bottom_top'
-    primary_subdomain = 10000
-    secondary_subdomain = 10001
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    weighted_gap_uo = czm_uo
-    correct_edge_dropping = true
-  []
   [c_x]
     type = MortarGenericTraction
     primary_boundary = 'top_bottom'
@@ -239,7 +206,6 @@
     secondary_subdomain = 10001
     secondary_variable = disp_x
     component = x
-    use_displaced_mesh = true
     compute_lm_residuals = false
     cohesive_zone_uo = czm_uo
     correct_edge_dropping = true
@@ -252,7 +218,6 @@
     secondary_subdomain = 10001
     secondary_variable = disp_y
     component = y
-    use_displaced_mesh = true
     compute_lm_residuals = false
     cohesive_zone_uo = czm_uo
     correct_edge_dropping = true

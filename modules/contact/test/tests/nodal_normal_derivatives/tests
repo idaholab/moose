@@ -10,16 +10,6 @@
     requirement = 'Mechanical mortar contact shall reject interpolated quadrature-point normals.'
   []
 
-  [unsupported_weighted_gap_uo]
-    type = RunException
-    input = unsupported_weighted_gap_uo.i
-    cli_args = 'Outputs/exodus=false'
-    expect_err = "Nodal-normal derivatives are not supported by user object 'czm_uo'."
-    design = 'ComputeWeightedGapLMMechanicalContact.md'
-    requirement = 'Mechanical mortar contact shall reject a weighted-gap user object that does not '
-                  'support nodal-normal derivatives.'
-  []
-
   [nonnodal_displacement]
     type = RunException
     input = ../3d-mortar-contact/frictionless-mortar-3d.i

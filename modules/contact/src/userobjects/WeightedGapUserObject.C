@@ -178,14 +178,6 @@ WeightedGapUserObject::computeQpProperties()
   // Compute gap vector
   ADRealVectorValue gap_vec = _phys_points_primary[_qp] - _phys_points_secondary[_qp];
 
-  // Generic displacement for interface problems
-  _qp_displacement_nodal(0) = prim_x - sec_x;
-  _qp_displacement_nodal(1) = prim_y - sec_y;
-  if (_has_disp_z)
-    _qp_displacement_nodal(2) = *prim_z - *sec_z;
-
-  _qp_displacement_nodal *= _JxW_msm[_qp] * _coord[_qp];
-
   gap_vec(0).derivatives() = prim_x.derivatives() - sec_x.derivatives();
   gap_vec(1).derivatives() = prim_y.derivatives() - sec_y.derivatives();
   if (_has_disp_z)
@@ -271,7 +263,6 @@ WeightedGapUserObject::initialize()
 {
   _ad_nodal_normals.clear();
   _dof_to_weighted_gap.clear();
-  _dof_to_weighted_displacements.clear();
 }
 
 void

@@ -10,12 +10,11 @@
 #pragma once
 
 #include "CohesiveZoneModelBase.h"
-#include "TwoVector.h"
 
 /**
  * User object that computes bilinear mixed mode traction separation law.
  */
-class BilinearMixedModeCohesiveZoneModel : virtual public CohesiveZoneModelBase
+class BilinearMixedModeCohesiveZoneModel : public CohesiveZoneModelBase
 {
 public:
   static InputParameters validParams();
@@ -42,8 +41,6 @@ public:
 protected:
   virtual void computeQpProperties() override;
   virtual void computeQpIProperties() override;
-
-  virtual bool constrainedByOwner() const override { return false; }
 
   // @{
   // Compute CZM bilinear traction law.
