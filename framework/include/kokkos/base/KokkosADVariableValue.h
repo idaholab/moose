@@ -391,7 +391,7 @@ public:
     // On the current configuration the position carries displacement derivatives only as a dual
     // number
     if (chain)
-      this->adDisplaced(this->_configuration.displaced());
+      this->adDisplaced(this->displaced());
   }
 
   /**
@@ -410,7 +410,7 @@ public:
    */
   KOKKOS_FUNCTION DenseADReal3<slots> adQPoint(const unsigned int qp)
   {
-    if (_chain && this->_configuration.displaced())
+    if (_chain && this->displaced())
     {
       const auto first = _table.positionDual();
       if (first == libMesh::invalid_uint)
@@ -484,7 +484,7 @@ ADDatumBase<Base, slots>::chainDerivatives(const unsigned int qp,
 
   if constexpr (slots > 0)
   {
-    const auto displaced = this->_configuration.displaced();
+    const auto displaced = this->displaced();
     const auto & disp = this->_configuration.displacements();
     const auto & F_inv = this->F_inv(qp);
 
@@ -568,7 +568,7 @@ ADDatumBase<Base, slots>::geometryDerivatives(const unsigned int qp,
                                               const Real3 & grad,
                                               Accumulate && add)
 {
-  if (!this->_configuration.displaced())
+  if (!this->displaced())
     return;
 
   const auto & disp = this->_configuration.displacements();
@@ -731,7 +731,7 @@ public:
     }
 
     const auto first = _slot.first(datum.table());
-    const auto displaced = datum.configuration().displaced();
+    const auto displaced = datum.displaced();
     const Real3 grad = displaced ? _gradient.reference(datum, qp) : _gradient(datum, qp);
 
     for (unsigned int k = 0; k < AD_GRADIENT_SLOTS; ++k)

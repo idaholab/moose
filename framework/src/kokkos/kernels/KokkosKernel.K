@@ -39,7 +39,7 @@ Kernel::computeResidual()
   Policy policy(0, _thread.size());
 
   if (!_residual_dispatcher)
-    _residual_dispatcher = DispatcherRegistry::build<ResidualLoop>(this, type());
+    _residual_dispatcher = buildConfigurationDispatcher<ResidualLoop>(this);
 
   _residual_dispatcher->parallelFor(policy);
 }
@@ -47,19 +47,19 @@ Kernel::computeResidual()
 void
 Kernel::computeJacobian()
 {
-  if (DispatcherRegistry::hasUserMethod<JacobianLoop>(type()))
+  if (hasConfigurationUserMethod<JacobianLoop>())
   {
     _thread.resize(_num_local_jacobian_threads, numKokkosBlockElements());
 
     Policy policy(0, _thread.size());
 
     if (!_jacobian_dispatcher)
-      _jacobian_dispatcher = DispatcherRegistry::build<JacobianLoop>(this, type());
+      _jacobian_dispatcher = buildConfigurationDispatcher<JacobianLoop>(this);
 
     _jacobian_dispatcher->parallelFor(policy);
   }
 
-  if (DispatcherRegistry::hasUserMethod<OffDiagJacobianLoop>(type()))
+  if (hasConfigurationUserMethod<OffDiagJacobianLoop>())
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
@@ -70,12 +70,12 @@ Kernel::computeJacobian()
     Policy policy(0, _thread.size());
 
     if (!_offdiag_jacobian_dispatcher)
-      _offdiag_jacobian_dispatcher = DispatcherRegistry::build<OffDiagJacobianLoop>(this, type());
+      _offdiag_jacobian_dispatcher = buildConfigurationDispatcher<OffDiagJacobianLoop>(this);
 
     _offdiag_jacobian_dispatcher->parallelFor(policy);
   }
 
-  if (DispatcherRegistry::hasUserMethod<OffDiagJacobianScalarLoop>(type()))
+  if (hasConfigurationUserMethod<OffDiagJacobianScalarLoop>())
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
@@ -85,7 +85,7 @@ Kernel::computeJacobian()
 
     if (!_offdiag_jacobian_scalar_dispatcher)
       _offdiag_jacobian_scalar_dispatcher =
-          DispatcherRegistry::build<OffDiagJacobianScalarLoop>(this, type());
+          buildConfigurationDispatcher<OffDiagJacobianScalarLoop>(this);
 
     _offdiag_jacobian_scalar_dispatcher->parallelFor(policy);
   }

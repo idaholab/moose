@@ -590,15 +590,32 @@ registerLinearFVKernelDispatchers(const std::string & objectname)
 namespace Moose::Kokkos
 {
 
+/**
+ * Register the dispatchers of a loop of a precompute object on the reference and on the current
+ * configuration
+ * @tparam Loop The function tag of the loop
+ * @tparam Object The functor class type
+ * @param objectname The registered object type name
+ * @param has_user_method Whether the object defines the hooks that the loop assembles
+ */
+template <typename Loop, typename Object>
+void
+registerConfigurationDispatchers(const std::string & objectname, const bool has_user_method)
+{
+  using Reference = typename Object::template ConfigurationLoop<Loop, false>;
+  using Displaced = typename Object::template ConfigurationLoop<Loop, true>;
+
+  DispatcherRegistry::addDispatcher<Reference, Object>(objectname);
+  DispatcherRegistry::addDispatcher<Displaced, Object>(objectname);
+  DispatcherRegistry::hasUserMethod<Reference>(objectname, has_user_method);
+  DispatcherRegistry::hasUserMethod<Displaced>(objectname, has_user_method);
+}
+
 template <typename Object>
 void
 registerResidualObjectDispatchers(const std::string & objectname)
 {
   using namespace Moose::Kokkos;
-
-  DispatcherRegistry::addDispatcher<typename Object::ResidualLoop, Object>(objectname);
-  DispatcherRegistry::addDispatcher<typename Object::JacobianLoop, Object>(objectname);
-  DispatcherRegistry::addDispatcher<typename Object::OffDiagJacobianLoop, Object>(objectname);
 
   if constexpr (Object::uses_precompute_hooks)
   {
@@ -608,15 +625,21 @@ registerResidualObjectDispatchers(const std::string & objectname)
                   "precomputeQpResidualCurl() with the signature documented in "
                   "KokkosPrecomputeHookTraits.h.");
 
-    DispatcherRegistry::hasUserMethod<typename Object::JacobianLoop>(objectname,
-                                                                     has_jacobian_hook<Object>);
-    DispatcherRegistry::hasUserMethod<typename Object::OffDiagJacobianLoop>(
+    // Precompute objects compile each loop once per configuration
+    registerConfigurationDispatchers<typename Object::ResidualLoop, Object>(objectname, true);
+    registerConfigurationDispatchers<typename Object::JacobianLoop, Object>(
+        objectname, has_jacobian_hook<Object>);
+    registerConfigurationDispatchers<typename Object::OffDiagJacobianLoop, Object>(
         objectname, has_offdiag_jacobian_hook<Object>);
+
     DispatcherRegistry::addTeamDispatcher<typename Object::DisplacementJacobianLoop, Object>(
         objectname);
   }
   else
   {
+    DispatcherRegistry::addDispatcher<typename Object::ResidualLoop, Object>(objectname);
+    DispatcherRegistry::addDispatcher<typename Object::JacobianLoop, Object>(objectname);
+    DispatcherRegistry::addDispatcher<typename Object::OffDiagJacobianLoop, Object>(objectname);
     DispatcherRegistry::hasUserMethod<typename Object::JacobianLoop>(
         objectname,
         &Object::template computeQpJacobian<Object> != Object::template defaultJacobian<Object>());
@@ -627,12 +650,8 @@ registerResidualObjectDispatchers(const std::string & objectname)
   }
 
   if constexpr (Object::supports_scalar_jacobian)
-  {
-    DispatcherRegistry::addDispatcher<typename Object::OffDiagJacobianScalarLoop, Object>(
-        objectname);
-    DispatcherRegistry::hasUserMethod<typename Object::OffDiagJacobianScalarLoop>(
+    registerConfigurationDispatchers<typename Object::OffDiagJacobianScalarLoop, Object>(
         objectname, has_offdiag_jacobian_scalar_hook<Object>);
-  }
 }
 
 } // namespace Moose::Kokkos

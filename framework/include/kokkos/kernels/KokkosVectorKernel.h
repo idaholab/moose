@@ -55,13 +55,18 @@ public:
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
-  template <typename Derived>
-  KOKKOS_FUNCTION void operator()(ResidualLoop, const ThreadID tid, const Derived & kernel) const;
-  template <typename Derived>
-  KOKKOS_FUNCTION void operator()(JacobianLoop, const ThreadID tid, const Derived & kernel) const;
-  template <typename Derived>
-  KOKKOS_FUNCTION void
-  operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kernel) const;
+  template <typename Derived, bool displaced>
+  KOKKOS_FUNCTION void operator()(ConfigurationLoop<ResidualLoop, displaced>,
+                                  const ThreadID tid,
+                                  const Derived & kernel) const;
+  template <typename Derived, bool displaced>
+  KOKKOS_FUNCTION void operator()(ConfigurationLoop<JacobianLoop, displaced>,
+                                  const ThreadID tid,
+                                  const Derived & kernel) const;
+  template <typename Derived, bool displaced>
+  KOKKOS_FUNCTION void operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>,
+                                  const ThreadID tid,
+                                  const Derived & kernel) const;
   /**
    * The team operation called by Kokkos for each element, assembling the Jacobian with respect to a
    * displacement component of an object posed on the current configuration
@@ -140,9 +145,11 @@ protected:
   const VectorVariableCurl _curl_u;
 };
 
-template <typename Derived>
+template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-VectorKernel::operator()(ResidualLoop, const ThreadID tid, const Derived & kernel) const
+VectorKernel::operator()(ConfigurationLoop<ResidualLoop, displaced>,
+                         const ThreadID tid,
+                         const Derived & kernel) const
 {
   auto elem = kokkosBlockElementID(_thread(tid, 1));
 
@@ -152,16 +159,19 @@ VectorKernel::operator()(ResidualLoop, const ThreadID tid, const Derived & kerne
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration);
+                      _configuration,
+                      std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
   kernel.computeResidualInternal(kernel, datum);
 }
 
-template <typename Derived>
+template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-VectorKernel::operator()(JacobianLoop, const ThreadID tid, const Derived & kernel) const
+VectorKernel::operator()(ConfigurationLoop<JacobianLoop, displaced>,
+                         const ThreadID tid,
+                         const Derived & kernel) const
 {
   auto elem = kokkosBlockElementID(_thread(tid, 1));
 
@@ -171,16 +181,19 @@ VectorKernel::operator()(JacobianLoop, const ThreadID tid, const Derived & kerne
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration);
+                      _configuration,
+                      std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
   kernel.computeJacobianInternal(kernel, datum);
 }
 
-template <typename Derived>
+template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-VectorKernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kernel) const
+VectorKernel::operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>,
+                         const ThreadID tid,
+                         const Derived & kernel) const
 {
   auto elem = kokkosBlockElementID(_thread(tid, 2));
 
@@ -196,7 +209,8 @@ VectorKernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived 
                       kokkosSystems(),
                       _kokkos_var,
                       jvar,
-                      _configuration);
+                      _configuration,
+                      std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
@@ -242,8 +256,14 @@ VectorKernel::operator()(DisplacementJacobianLoop,
            .isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;
 
-  AssemblyDatum datum(
-      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar, _configuration);
+  AssemblyDatum datum(elem,
+                      side,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      jvar,
+                      _configuration,
+                      std::true_type{});
 
   const auto scaling_factor =
       kokkosSystem(_kokkos_var.sys()).getVariableScalingFactor(_kokkos_var.var());

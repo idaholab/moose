@@ -260,6 +260,28 @@ public:
         const Assembly & assembly,
         const Array<FESystem> & systems,
         const Configuration & configuration);
+  /**
+   * Constructor for element and side data of a loop compiled for one configuration. The
+   * instantiation on the reference configuration compiles out the composition of the deformation
+   * gradient into the geometry.
+   * @param elem The contiguous element ID of the current thread
+   * @param side The side index of the current thread
+   * @param assembly The Kokkos assembly
+   * @param systems The Kokkos systems
+   * @param configuration The configuration on which the geometry is posed
+   * @tparam displaced Whether the configuration is the current configuration
+   */
+  template <bool displaced>
+  KOKKOS_FUNCTION Datum(const ContiguousElementID elem,
+                        const unsigned int side,
+                        const Assembly & assembly,
+                        const Array<FESystem> & systems,
+                        const Configuration & configuration,
+                        std::bool_constant<displaced>)
+    : Datum(elem, side, assembly, systems, configuration, displaced)
+  {
+    KOKKOS_ASSERT(displaced == configuration.displaced());
+  }
 
   /**
    * Constructor for node data
@@ -342,6 +364,11 @@ public:
    * @returns The configuration
    */
   KOKKOS_FUNCTION const Configuration & configuration() const { return _configuration; }
+  /**
+   * Get whether the geometry is posed on the current configuration
+   * @returns Whether the geometry is posed on the current configuration
+   */
+  KOKKOS_FUNCTION bool displaced() const { return _displaced; }
 
   /**
    * Get the inverse of Jacobian matrix of the map from the reference element to the configuration
@@ -498,6 +525,23 @@ public:
 
 protected:
   /**
+   * Constructor for element and side data
+   * @param elem The contiguous element ID of the current thread
+   * @param side The side index of the current thread
+   * @param assembly The Kokkos assembly
+   * @param systems The Kokkos systems
+   * @param configuration The configuration on which the geometry is posed
+   * @param displaced Whether the configuration is the current configuration
+   */
+  KOKKOS_FUNCTION
+  Datum(const ContiguousElementID elem,
+        const unsigned int side,
+        const Assembly & assembly,
+        const Array<FESystem> & systems,
+        const Configuration & configuration,
+        const bool displaced);
+
+  /**
    * Get the quadrature point coordinate on the configuration, which the pointwise AD datum reads
    * on the current configuration to seed its position slots
    * @param qp The local quadrature point index
@@ -550,6 +594,12 @@ protected:
   const Configuration & _configuration;
 
 private:
+  /**
+   * Whether the configuration is the current configuration. A loop compiled for one configuration
+   * sets it to a constant, so that its reference instantiation compiles out the displaced geometry.
+   */
+  const bool _displaced;
+
   /**
    * Compute and cache the physical transformation data
    * @param qp The local quadrature point index
@@ -613,6 +663,16 @@ KOKKOS_FUNCTION inline Datum::Datum(const ContiguousElementID elem,
                                     const Assembly & assembly,
                                     const Array<FESystem> & systems,
                                     const Configuration & configuration)
+  : Datum(elem, side, assembly, systems, configuration, configuration.displaced())
+{
+}
+
+KOKKOS_FUNCTION inline Datum::Datum(const ContiguousElementID elem,
+                                    const unsigned int side,
+                                    const Assembly & assembly,
+                                    const Array<FESystem> & systems,
+                                    const Configuration & configuration,
+                                    const bool displaced)
   : MeshDatum(elem, side, assembly.kokkosMesh()),
     _assembly(assembly),
     _systems(systems),
@@ -620,7 +680,8 @@ KOKKOS_FUNCTION inline Datum::Datum(const ContiguousElementID elem,
     _qp_offset(!isSide() ? assembly.getQpOffset(_elem) : assembly.getQpFaceOffset(_elem, side)),
     _elem_property_idx(!isSide() ? _elem.id - _mesh.getStartingContiguousElementID(_elem.subdomain)
                                  : assembly.getElemFacePropertyIndex(_elem, _side)),
-    _configuration(configuration)
+    _configuration(configuration),
+    _displaced(displaced)
 {
 }
 
@@ -632,7 +693,8 @@ KOKKOS_FUNCTION inline Datum::Datum(const ContiguousNodeID node,
     _assembly(assembly),
     _systems(systems),
     _node(node),
-    _configuration(configuration)
+    _configuration(configuration),
+    _displaced(configuration.displaced())
 {
 }
 
@@ -700,7 +762,7 @@ Datum::q_point(const unsigned int qp)
   {
     _xyz = _assembly.kokkosMesh().getNodePoint(_node);
 
-    if (_configuration.displaced())
+    if (_displaced)
     {
       const auto & disp = _configuration.displacements();
 
@@ -834,13 +896,13 @@ Datum::vectorGradient(const unsigned int sys,
 KOKKOS_FUNCTION inline Real3
 Datum::pushForward(const Real3 & grad_X, const unsigned int qp)
 {
-  return _configuration.displaced() ? F_inv(qp).transpose() * grad_X : grad_X;
+  return _displaced ? F_inv(qp).transpose() * grad_X : grad_X;
 }
 
 KOKKOS_FUNCTION inline Real33
 Datum::pushForward(const Real33 & grad_X, const unsigned int qp)
 {
-  return _configuration.displaced() ? grad_X * F_inv(qp) : grad_X;
+  return _displaced ? grad_X * F_inv(qp) : grad_X;
 }
 
 KOKKOS_FUNCTION inline Real3
@@ -883,7 +945,7 @@ Datum::reinitTransform(const unsigned int qp)
   _F_inv.identity();
   _grad_log_coord = 0;
 
-  if (_configuration.displaced())
+  if (_displaced)
   {
     // Compose the deformation gradient F = I + grad_X u, evaluated from the reference map, into
     // the map of the reference element to the current configuration
@@ -998,17 +1060,37 @@ public:
                 const unsigned int jvar,
                 const Configuration & configuration,
                 const unsigned int comp = 0)
-    : Datum(elem, side, assembly, systems, configuration),
-      _tag(ivar.tag()),
-      _sys(ivar.sys(comp)),
-      _ivar(ivar.var(comp)),
-      _jvar(jvar),
-      _ife(systems[_sys].getFETypeID(_ivar)),
-      _jfe(systems[_sys].getFETypeID(_jvar)),
-      _n_idofs(assembly.getNumDofs(_elem.type, _ife)),
-      _n_jdofs(systems[_sys].isScalarVariable(_jvar) ? systems[_sys].getNumScalarDofs(_jvar)
-                                                     : assembly.getNumDofs(_elem.type, _jfe))
+    : AssemblyDatum(
+          elem, side, assembly, systems, ivar, jvar, configuration, configuration.displaced(), comp)
   {
+  }
+  /**
+   * Constructor for element and side data of a loop compiled for one configuration. The
+   * instantiation on the reference configuration compiles out the composition of the deformation
+   * gradient into the geometry.
+   * @param elem The contiguous element ID of the current thread
+   * @param side The side index of the current thread
+   * @param assembly The Kokkos assembly
+   * @param systems The Kokkos systems
+   * @param ivar The Kokkos variable
+   * @param jvar The coupled variable number
+   * @param configuration The configuration on which the geometry is posed
+   * @param comp The variable component
+   * @tparam displaced Whether the configuration is the current configuration
+   */
+  template <bool displaced>
+  KOKKOS_FUNCTION AssemblyDatum(const ContiguousElementID elem,
+                                const unsigned int side,
+                                const Assembly & assembly,
+                                const Array<FESystem> & systems,
+                                const Variable & ivar,
+                                const unsigned int jvar,
+                                const Configuration & configuration,
+                                std::bool_constant<displaced>,
+                                const unsigned int comp = 0)
+    : AssemblyDatum(elem, side, assembly, systems, ivar, jvar, configuration, displaced, comp)
+  {
+    KOKKOS_ASSERT(displaced == configuration.displaced());
   }
   /**
    * Constructor for node data
@@ -1115,6 +1197,40 @@ public:
   KOKKOS_FUNCTION const TrialOverride * trialOverride() const { return _trial_override; }
 
 protected:
+  /**
+   * Constructor for element and side data
+   * @param elem The contiguous element ID of the current thread
+   * @param side The side index of the current thread
+   * @param assembly The Kokkos assembly
+   * @param systems The Kokkos systems
+   * @param ivar The Kokkos variable
+   * @param jvar The coupled variable number
+   * @param configuration The configuration on which the geometry is posed
+   * @param displaced Whether the configuration is the current configuration
+   * @param comp The variable component
+   */
+  KOKKOS_FUNCTION
+  AssemblyDatum(const ContiguousElementID elem,
+                const unsigned int side,
+                const Assembly & assembly,
+                const Array<FESystem> & systems,
+                const Variable & ivar,
+                const unsigned int jvar,
+                const Configuration & configuration,
+                const bool displaced,
+                const unsigned int comp)
+    : Datum(elem, side, assembly, systems, configuration, displaced),
+      _tag(ivar.tag()),
+      _sys(ivar.sys(comp)),
+      _ivar(ivar.var(comp)),
+      _jvar(jvar),
+      _ife(systems[_sys].getFETypeID(_ivar)),
+      _jfe(systems[_sys].getFETypeID(_jvar)),
+      _n_idofs(assembly.getNumDofs(_elem.type, _ife)),
+      _n_jdofs(systems[_sys].isScalarVariable(_jvar) ? systems[_sys].getNumScalarDofs(_jvar)
+                                                     : assembly.getNumDofs(_elem.type, _jfe))
+  {
+  }
   /**
    * Solution tag ID
    */

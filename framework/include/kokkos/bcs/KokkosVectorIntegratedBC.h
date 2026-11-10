@@ -51,13 +51,18 @@ public:
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
-  template <typename Derived>
-  KOKKOS_FUNCTION void operator()(ResidualLoop, const ThreadID tid, const Derived & bc) const;
-  template <typename Derived>
-  KOKKOS_FUNCTION void operator()(JacobianLoop, const ThreadID tid, const Derived & bc) const;
-  template <typename Derived>
-  KOKKOS_FUNCTION void
-  operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc) const;
+  template <typename Derived, bool displaced>
+  KOKKOS_FUNCTION void operator()(ConfigurationLoop<ResidualLoop, displaced>,
+                                  const ThreadID tid,
+                                  const Derived & bc) const;
+  template <typename Derived, bool displaced>
+  KOKKOS_FUNCTION void operator()(ConfigurationLoop<JacobianLoop, displaced>,
+                                  const ThreadID tid,
+                                  const Derived & bc) const;
+  template <typename Derived, bool displaced>
+  KOKKOS_FUNCTION void operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>,
+                                  const ThreadID tid,
+                                  const Derived & bc) const;
   /**
    * The team operation called by Kokkos for each boundary side, assembling the Jacobian with
    * respect to a displacement component of an object posed on the current configuration
@@ -109,9 +114,11 @@ protected:
   const VectorVariableGradient _grad_u;
 };
 
-template <typename Derived>
+template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-VectorIntegratedBC::operator()(ResidualLoop, const ThreadID tid, const Derived & bc) const
+VectorIntegratedBC::operator()(ConfigurationLoop<ResidualLoop, displaced>,
+                               const ThreadID tid,
+                               const Derived & bc) const
 {
   auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
 
@@ -121,16 +128,19 @@ VectorIntegratedBC::operator()(ResidualLoop, const ThreadID tid, const Derived &
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration);
+                      _configuration,
+                      std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
   bc.computeResidualInternal(bc, datum);
 }
 
-template <typename Derived>
+template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-VectorIntegratedBC::operator()(JacobianLoop, const ThreadID tid, const Derived & bc) const
+VectorIntegratedBC::operator()(ConfigurationLoop<JacobianLoop, displaced>,
+                               const ThreadID tid,
+                               const Derived & bc) const
 {
   auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
 
@@ -140,16 +150,19 @@ VectorIntegratedBC::operator()(JacobianLoop, const ThreadID tid, const Derived &
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration);
+                      _configuration,
+                      std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
   bc.computeJacobianInternal(bc, datum);
 }
 
-template <typename Derived>
+template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-VectorIntegratedBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc) const
+VectorIntegratedBC::operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>,
+                               const ThreadID tid,
+                               const Derived & bc) const
 {
   auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 2));
 
@@ -159,8 +172,14 @@ VectorIntegratedBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const De
   if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;
 
-  AssemblyDatum datum(
-      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar, _configuration);
+  AssemblyDatum datum(elem,
+                      side,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      jvar,
+                      _configuration,
+                      std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
@@ -204,8 +223,14 @@ VectorIntegratedBC::operator()(DisplacementJacobianLoop,
            .isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;
 
-  AssemblyDatum datum(
-      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar, _configuration);
+  AssemblyDatum datum(elem,
+                      side,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      jvar,
+                      _configuration,
+                      std::true_type{});
 
   const auto scaling_factor =
       kokkosSystem(_kokkos_var.sys()).getVariableScalingFactor(_kokkos_var.var());

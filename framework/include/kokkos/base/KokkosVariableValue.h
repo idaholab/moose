@@ -698,7 +698,7 @@ VectorVariableCurl::operator()(AssemblyDatum & datum, unsigned int qp, unsigned 
 
     // The cached element curls are taken on the reference configuration, so the curl on the
     // current configuration is formed from the shape function gradients
-    if (side == libMesh::invalid_uint && !datum.configuration().displaced())
+    if (side == libMesh::invalid_uint && !datum.displaced())
       curl = sys.getVectorQpVectorCurl(elem, datum.qpOffset() + qp, var, tag);
     else
     {
