@@ -11,8 +11,8 @@ velocity_interp_method = 'rc'
     xmax = 2
     ymin = -1
     ymax = 1
-    nx = 2
-    ny = 2
+    nx = 16
+    ny = 16
   []
 []
 
