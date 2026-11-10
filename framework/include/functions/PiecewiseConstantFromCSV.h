@@ -47,4 +47,7 @@ protected:
 
   /// The point locator is used when values are sorted by elements or blocks in the CSV
   std::unique_ptr<libMesh::PointLocatorBase> _point_locator;
+
+  /// Thread id, used to query the current element/subdomain for block-sorted data
+  const THREAD_ID _tid;
 };

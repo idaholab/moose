@@ -100,7 +100,7 @@ EigenproblemEquationSystem::FormMassMatrix(EigenRHSCoefficient rhs_coefficient)
   // Shift the eigenvalue corresponding to eliminated dofs to a large value. The BC DoFs on the
   // stiffness matrix are set to 1 and the mass matrix BC DoFs are set to a small value eps, such
   // that the eigenvalues associate with these DOFs are ~1/eps.
-  m->EliminateEssentialBCDiag(_ess_markers.at(0), std::numeric_limits<mfem::real_t>::min());
+  m->EliminateEssentialBCDiag(_ess_markers.at(0), std::numeric_limits<mfem::real_t>::epsilon());
   m->Finalize();
   _mass_rhs.Reset(m->ParallelAssemble());
 }

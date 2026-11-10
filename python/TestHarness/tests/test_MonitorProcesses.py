@@ -16,6 +16,7 @@ import tempfile
 import time
 import unittest
 from contextlib import contextmanager
+from multiprocessing import get_context
 from typing import Iterator, Optional
 from unittest.mock import Mock, mock_open, patch
 
@@ -25,10 +26,15 @@ from TestHarness.utils.monitor_processes import (
     MEMORY_PSS,
     MEMORY_PSS_EXCLUDE_FILE,
     MemoryMonitor,
+    MemorySample,
     _parse_kb_fields,
     _read_rollup,
     _rollup_memory,
     get_process_memory,
+)
+from TestHarness.utils.nvidia_gpu_memory import (
+    NvidiaGPUMemory,
+    nvidia_gpu_memory_unavailable,
 )
 
 MIB = 1024 * 1024
@@ -293,7 +299,9 @@ class TestMemoryMonitor(unittest.TestCase):
                 # Wait for a sample taken after the forked process allocated;
                 # sampling takes well under a second, so 10 s is generous
                 deadline = time.monotonic() + 10
-                while (samples := monitor.get_samples()).get(pid, 0) < SIZE:
+                while (samples := monitor.get_samples()).get(
+                    pid, MemorySample(0, None)
+                ).cpu < SIZE:
                     self.assertLess(time.monotonic(), deadline)
                     time.sleep(0.05)
         finally:
@@ -302,7 +310,152 @@ class TestMemoryMonitor(unittest.TestCase):
         # Samples are keyed by direct children of the monitored process only, so
         # the forked process is not sampled on its own
         self.assertNotIn(forked_pid, samples)
-        self.assertAlmostEqual(samples[pid], expected, delta=TOLERANCE)
+        self.assertAlmostEqual(samples[pid].cpu, expected, delta=TOLERANCE)
+        # GPU memory is not sampled unless requested
+        self.assertIsNone(samples[pid].gpu)
+
+    def testTreeGPU(self):
+        """Test that the GPU memory of a child's descendants is added to the child."""
+        # The PIDs to report GPU memory for, filled once the children start;
+        # shared so that the forked sampler process sees them
+        manager = get_context("fork").Manager()
+        gpu_pids = manager.list()
+
+        class FakeGPUMemory:
+            def sample(self):
+                return {pid: (i + 1) * MIB for i, pid in enumerate(gpu_pids)}
+
+            def close(self):
+                pass
+
+        # The forked process's CPU memory cannot be read, which must not drop
+        # its GPU memory
+        unreadable = manager.list()
+
+        def process_memory(process):
+            return None if process.pid in unreadable else measure(process.pid)
+
+        monitor = MemoryMonitor(os.getpid(), interval=0.05, track_gpu=True)
+        with (
+            patch("TestHarness.utils.monitor_processes.NvidiaGPUMemory", FakeGPUMemory),
+            patch(
+                "TestHarness.utils.monitor_processes.get_process_memory", process_memory
+            ),
+        ):
+            monitor.start()
+        try:
+            with run_child("tree", SIZE) as (pid, forked_pid):
+                unreadable.append(forked_pid)
+                gpu_pids.extend([pid, forked_pid])
+                deadline = time.monotonic() + 10
+                while not ((sample := monitor.get_samples().get(pid)) and sample.gpu):
+                    self.assertLess(time.monotonic(), deadline)
+                    time.sleep(0.05)
+            gpu_error = monitor.get_gpu_error()
+        finally:
+            monitor.stop()
+            manager.shutdown()
+
+        # 1 MiB for the child and 2 MiB for its forked process
+        self.assertEqual(sample.gpu, 3 * MIB)
+        # Only the child's CPU memory, as the forked process's cannot be read
+        self.assertLess(sample.cpu, SIZE)
+        self.assertIsNone(gpu_error)
+
+    def testGPUError(self):
+        """Test that CPU memory is still sampled if GPU sampling fails to start."""
+
+        def fail():
+            raise RuntimeError("NVML failed")
+
+        monitor = MemoryMonitor(os.getpid(), interval=0.05, track_gpu=True)
+        with patch("TestHarness.utils.monitor_processes.NvidiaGPUMemory", fail):
+            monitor.start()
+        try:
+            with run_child("none") as (pid,):
+                deadline = time.monotonic() + 10
+                while (sample := monitor.get_samples().get(pid)) is None:
+                    self.assertLess(time.monotonic(), deadline)
+                    time.sleep(0.05)
+                gpu_error = monitor.get_gpu_error()
+        finally:
+            monitor.stop()
+
+        self.assertGreater(sample.cpu, 0)
+        self.assertIsNone(sample.gpu)
+        self.assertEqual(gpu_error, "NVML failed")
+
+
+class FakeNVMLError(Exception):
+    """Stand-in for pynvml.NVMLError."""
+
+
+def fake_pynvml(devices: list) -> Mock:
+    """
+    Build a fake pynvml module.
+
+    Each entry of devices is a list of (pid, usedGpuMemory) for the processes on
+    that device, or None for a device that fails to report.
+    """
+    nvml = Mock()
+    nvml.NVMLError = FakeNVMLError
+    nvml.nvmlDeviceGetCount.return_value = len(devices)
+    nvml.nvmlDeviceGetHandleByIndex.side_effect = lambda i: i
+
+    def processes(handle):
+        if devices[handle] is None:
+            raise FakeNVMLError("device failed")
+        return [Mock(pid=pid, usedGpuMemory=used) for pid, used in devices[handle]]
+
+    nvml.nvmlDeviceGetComputeRunningProcesses.side_effect = processes
+    return nvml
+
+
+class TestNvidiaGPUMemory(unittest.TestCase):
+    """Test NvidiaGPUMemory and nvidia_gpu_memory_unavailable() with a fake pynvml."""
+
+    MODULE = "TestHarness.utils.nvidia_gpu_memory.pynvml"
+
+    def testSample(self):
+        """Test summing over devices and skipping unavailable values."""
+        devices = [[(1, 10), (2, None)], None, [(1, 5), (3, 7)]]
+        nvml = fake_pynvml(devices)
+        with self.patchHasPynvml(), patch(self.MODULE, nvml):
+            gpu_memory = NvidiaGPUMemory()
+            self.assertEqual(gpu_memory.sample(), {1: 15, 3: 7})
+            gpu_memory.close()
+        nvml.nvmlShutdown.assert_called_once()
+
+    @staticmethod
+    def patchHasPynvml():
+        """
+        Patch HAS_PYNVML to True.
+
+        Needed alongside patching pynvml itself, so that these tests also
+        exercise the NVML-failure paths on a machine without pynvml installed
+        (where HAS_PYNVML is already False and pynvml is None).
+        """
+        return patch("TestHarness.utils.nvidia_gpu_memory.HAS_PYNVML", True)
+
+    def testUnavailable(self):
+        """Test the reasons that GPU memory cannot be sampled."""
+        with patch("TestHarness.utils.nvidia_gpu_memory.HAS_PYNVML", False):
+            self.assertIn("pynvml", nvidia_gpu_memory_unavailable())
+
+        nvml = fake_pynvml([])
+        with self.patchHasPynvml(), patch(self.MODULE, nvml):
+            self.assertEqual(
+                nvidia_gpu_memory_unavailable(), "NVML: no NVIDIA GPUs found"
+            )
+        nvml.nvmlShutdown.assert_called_once()
+
+        nvml = fake_pynvml([])
+        nvml.nvmlInit.side_effect = FakeNVMLError("driver not loaded")
+        with self.patchHasPynvml(), patch(self.MODULE, nvml):
+            self.assertEqual(nvidia_gpu_memory_unavailable(), "NVML: driver not loaded")
+
+        with self.patchHasPynvml(), patch(self.MODULE, fake_pynvml([[]])):
+            self.assertIsNone(nvidia_gpu_memory_unavailable())
 
 
 if __name__ == "__main__":

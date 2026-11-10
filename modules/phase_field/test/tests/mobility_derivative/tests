@@ -3,42 +3,59 @@
     type = 'Exodiff'
     input = 'coupledmatdiffusion.i'
     exodiff = 'coupledmatdiffusion_out.e'
+    issues = '#7400'
+    design = 'MatDiffusion.md'
+    requirement = 'The system shall be able to set the diffusivity of a diffusion kernel to another variable.'
   [../]
   [./matdiffusion]
     type = 'Exodiff'
     input = 'matdiffusion.i'
     exodiff = 'matdiffusion_out.e'
+    issues = '#5841'
+    design = 'MatDiffusion.md'
+    requirement = 'The system shall provide a diffusion kernel with a material property diffusivity.'
   [../]
-  [./mobility_derivative_test]
-    type = 'Exodiff'
-    input = 'mobility_derivative_test.i'
-    exodiff = 'mobility_derivative_test_out.e'
-  [../]
-  [./mobility_derivative_split_coupled_test]
+  [./mobility_derivative]
+    issues = '#5167'
+    design = 'SplitCHWRes.md CHInterface.md CHMath.md CahnHilliard.md ACInterface.md AllenCahn.md MatDiffusion.md'
+    requirement = 'The system shall include the derivative of a variable-dependent mobility in the Jacobian of'
+    [./mobility_derivative_test]
+      type = 'Exodiff'
+      input = 'mobility_derivative_test.i'
+      exodiff = 'mobility_derivative_test_out.e'
+      detail = 'the split Cahn-Hilliard chemical-potential-residual kernel,'
+    [../]
+    [./mobility_derivative_split_coupled_test]
       type = 'Exodiff'
       input = 'mobility_derivative_split_coupled_test.i'
       exodiff = 'mobility_derivative_split_coupled_test_out.e'
-  [../]
-  [./mobility_derivative_direct_test]
-    type = 'Exodiff'
-    input = 'mobility_derivative_direct_test.i'
-    exodiff = 'mobility_derivative_direct_test_out.e'
-  [../]
-  [./mobility_derivative_direct_coupled_test]
-    type = 'Exodiff'
-    input = 'mobility_derivative_direct_coupled_test.i'
-    exodiff = 'mobility_derivative_direct_coupled_test_oversample.e'
-    # uses exodus oversampling see #2295
-    recover = false
-  [../]
-  [./AC_mobility_derivative_test]
-    type = 'Exodiff'
-    input = 'AC_mobility_derivative_test.i'
-    exodiff = 'AC_mobility_derivative_test_out.e'
-  [../]
-  [./AC_mobility_derivative_coupled_test]
-    type = 'Exodiff'
-    input = 'AC_mobility_derivative_coupled_test.i'
-    exodiff = 'AC_mobility_derivative_coupled_test_out.e'
+      detail = 'the split Cahn-Hilliard chemical-potential-residual kernel when that mobility also depends on a coupled variable,'
+    [../]
+    [./mobility_derivative_direct_test]
+      type = 'Exodiff'
+      input = 'mobility_derivative_direct_test.i'
+      exodiff = 'mobility_derivative_direct_test_out.e'
+      detail = 'the direct (non-split) Cahn-Hilliard interface and bulk kernels,'
+    [../]
+    [./mobility_derivative_direct_coupled_test]
+      type = 'Exodiff'
+      input = 'mobility_derivative_direct_coupled_test.i'
+      exodiff = 'mobility_derivative_direct_coupled_test_oversample.e'
+      # uses exodus oversampling see #2295
+      recover = false
+      detail = 'the direct (non-split) Cahn-Hilliard interface and bulk kernels when that mobility also depends on a coupled variable,'
+    [../]
+    [./AC_mobility_derivative_test]
+      type = 'Exodiff'
+      input = 'AC_mobility_derivative_test.i'
+      exodiff = 'AC_mobility_derivative_test_out.e'
+      detail = 'the Allen-Cahn interface and bulk kernels, and'
+    [../]
+    [./AC_mobility_derivative_coupled_test]
+      type = 'Exodiff'
+      input = 'AC_mobility_derivative_coupled_test.i'
+      exodiff = 'AC_mobility_derivative_coupled_test_out.e'
+      detail = 'the Allen-Cahn interface and bulk kernels when that mobility also depends on a coupled variable.'
+    [../]
   [../]
 []

@@ -78,6 +78,11 @@ private:
     return _array(node, state)[_component];
   }
 
+  ValueType evaluate(const PointArg & point, const StateArg & state) const override final
+  {
+    return _array(point, state)[_component];
+  }
+
   using FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const ElemArg & elem, const StateArg & state) const override final
   {
@@ -86,6 +91,10 @@ private:
   GradientType evaluateGradient(const NodeArg & node, const StateArg & state) const override final
   {
     return _array.gradient(node, state)[_component];
+  }
+  GradientType evaluateGradient(const PointArg & point, const StateArg & state) const override final
+  {
+    return _array.gradient(point, state)[_component];
   }
 };
 

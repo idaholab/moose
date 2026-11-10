@@ -61,6 +61,8 @@ private:
   /// on all subdomains
   const std::set<SubdomainID> _sub_ids;
 
+  // Keep the public evaluate(const FaceInfo *) from hiding the base class overloads
+  using Moose::FunctorBase<T>::evaluate;
   ValueType evaluate(const ElemArg &, const StateArg &) const override final;
   ValueType evaluate(const FaceArg &, const StateArg &) const override final;
   ValueType evaluate(const ElemPointArg &, const StateArg &) const override;

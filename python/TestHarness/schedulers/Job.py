@@ -898,6 +898,12 @@ class Job(OutputInterface):
             return value
         return None
 
+    def getMaxGPUMemory(self) -> Optional[int]:
+        """Get the Job's max NVIDIA GPU memory usage in bytes, if tracked."""
+        if self._runner is not None:
+            return self._runner.max_gpu_memory
+        return None
+
     def getStatus(self):
         return self.job_status.getStatus()
 
@@ -1025,6 +1031,8 @@ class Job(OutputInterface):
             job_data["output"] = self.getAllOutput()
         if (max_memory := self.getMaxMemory()) is not None:
             job_data["max_memory"] = max_memory
+        if (max_gpu_memory := self.getMaxGPUMemory()) is not None:
+            job_data["max_gpu_memory"] = max_gpu_memory
 
         unique_test_id = self.getTester().getUniqueTestID()
         if unique_test_id is not None:

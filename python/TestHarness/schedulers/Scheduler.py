@@ -28,6 +28,7 @@ from TestHarness.mpi_config import (
 )
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.util import findBSDTime, findGNUTime, outputHeader
+from TestHarness.utils.nvidia_gpu_memory import nvidia_gpu_memory_unavailable
 
 if TYPE_CHECKING:
     from TestHarness.schedulers.Job import Job
@@ -59,6 +60,10 @@ class SchedulerOptions:
     """Whether or not to monitor Job CPU usage."""
     monitor_job_memory: bool
     """Whether or not to monitor Job memory usage."""
+    monitor_job_gpu_memory: bool
+    """Whether or not to monitor Job NVIDIA GPU memory usage."""
+    memory_tracking_interval: float
+    """The interval in seconds at which to sample Job memory usage."""
 
     time_utility_path: Optional[str]
     """The path to the time utility found, if any."""
@@ -110,6 +115,11 @@ class Scheduler(MooseObject):
     """Whether or not this Scheduler should monitor Job process CPU usage."""
     MONITOR_JOB_MEMORY = False
     """Whether or not this Scheduler should monitor Job process memory usage."""
+    MONITOR_JOB_GPU_MEMORY = False
+    """
+    Whether or not this Scheduler should monitor (and can limit) Job process
+    NVIDIA GPU memory usage.
+    """
 
     def __init__(self, harness, params):
         MooseObject.__init__(self, harness, params)
@@ -202,6 +212,18 @@ class Scheduler(MooseObject):
             self.MONITOR_JOB_MEMORY is True and not options.no_memory_tracking
         )
 
+        # Whether or not to monitor Job GPU memory, and if not, why
+        no_gpu_memory_reason: Optional[str] = None
+        if not self.MONITOR_JOB_GPU_MEMORY:
+            no_gpu_memory_reason = "not supported by this scheduler"
+        elif not monitor_job_memory:
+            no_gpu_memory_reason = "memory tracking is not available"
+        elif options.no_gpu_memory_tracking:
+            no_gpu_memory_reason = "--no-gpu-memory-tracking is set"
+        else:
+            no_gpu_memory_reason = nvidia_gpu_memory_unavailable()
+        monitor_job_gpu_memory = no_gpu_memory_reason is None
+
         # Find the time utility if needed, disabling CPU tracking
         # if enabled but no time utility available
         time_utility_type = TimeUtilityType.NONE
@@ -237,6 +259,11 @@ class Scheduler(MooseObject):
             self.harness.errorExit(
                 "Cannot specify --max-memory-per-slot; memory tracking is not available"
             )
+        if self.options.max_gpu_memory_per_slot and not monitor_job_gpu_memory:
+            self.harness.errorExit(
+                "Cannot specify --max-gpu-memory-per-slot; GPU memory tracking is "
+                f"not available: {no_gpu_memory_reason}"
+            )
         # Can't disable hwloc topology
         if options.no_hwloc_topology and not self.CAN_SET_HWLOC_TOPOLOGY:
             self.harness.errorExit(
@@ -254,6 +281,8 @@ class Scheduler(MooseObject):
             mpi_config=mpi_config,
             monitor_job_cpu=monitor_job_cpu,
             monitor_job_memory=monitor_job_memory,
+            monitor_job_gpu_memory=monitor_job_gpu_memory,
+            memory_tracking_interval=options.memory_tracking_interval,
             time_utility_path=time_utility_path,
             time_utility_type=time_utility_type,
         )

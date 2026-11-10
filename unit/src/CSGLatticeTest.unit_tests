@@ -1,0 +1,115 @@
+[Tests]
+  design = 'CSGBase.md CSGLattice.md'
+  issues = '#29095 #31889'
+
+  [create_cartesian]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testCreateCartLatticeValid
+    requirement = 'The system shall create a Cartesian constructive solid geometry (CSG) lattice from a pitch, with an optional universe map and an optional outer fill that is a universe or a material, and shall otherwise use a void outer fill.'
+  []
+  [create_cartesian_invalid]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testCreateCartLatticeInvalid
+    requirement = 'The system shall report an error when a Cartesian CSG lattice is created with a negative pitch or with a universe map whose rows differ in length.'
+  []
+  [create_hexagonal]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testCreateHexLatticeValid
+    requirement = 'The system shall create a hexagonal CSG lattice from a pitch, with an optional universe map and an optional outer fill that is a universe or a material, and shall otherwise use a void outer fill, calculating the number of rows from the number of rings of the universe map.'
+  []
+  [create_hexagonal_invalid]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testCreateHexLatticeInvalid
+    requirement = 'The system shall report an error when a hexagonal CSG lattice is created with a negative pitch or with a universe map that has an even number of rows or a row with the wrong number of elements.'
+  []
+  [get_attributes]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testGetAttributes
+    requirement = 'The system shall return the dimensions and pitch of Cartesian and hexagonal CSG lattices as lattice attributes.'
+  []
+  [cartesian_set_universes]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testCartSetUniverses
+    requirement = 'The system shall replace the universe map of a Cartesian CSG lattice and update the dimensions of the lattice.'
+  []
+  [hexagonal_set_universes]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testHexSetUniverses
+    requirement = 'The system shall replace the universe map of a hexagonal CSG lattice and update the dimensions of the lattice.'
+  []
+  [universe_name_map]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testGetUniverseNameMap
+    requirement = 'The system shall return the universe map of a CSG lattice as a map of universe names.'
+  []
+  [has_universe]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testHasUniverse
+    requirement = 'The system shall report whether a CSG lattice contains a universe of a given name.'
+  []
+  [cartesian_valid_index]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testCartIsValidIndex
+    requirement = 'The system shall identify whether a row and column index is within the bounds of a Cartesian CSG lattice.'
+  []
+  [hexagonal_valid_index]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testHexIsValidIndex
+    requirement = 'The system shall identify whether a row and column index is within the bounds of a hexagonal CSG lattice.'
+  []
+  [cartesian_set_universe_at_index]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testCartSetUniverseAtIndex
+    requirement = 'The system shall replace the universe at a single index of a Cartesian CSG lattice and report an error if the index is invalid or the universe map has not been set.'
+  []
+  [get_methods]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testGetMethods
+    requirement = 'The system shall return the indices of the universes of a given name and the universe at a given index of a CSG lattice, and report an error if the universe name does not exist or the index is invalid.'
+  []
+  [set_name]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testSetName
+    requirement = 'The system shall rename a CSG lattice.'
+  []
+  [cartesian_equality]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testCartLatticeEquality
+    requirement = 'The system shall compare Cartesian CSG lattices for equality using their name, pitch, universe map, outer fill, and transformations.'
+  []
+  [hexagonal_equality]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testHexLatticeEquality
+    requirement = 'The system shall compare hexagonal CSG lattices for equality using their name, pitch, and universe map.'
+  []
+  [unique_universes]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testGetUniqueUniverses
+    requirement = 'The system shall return the list of unique universes contained in a CSG lattice.'
+  []
+  [set_pitch]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testSetPitch
+    requirement = 'The system shall change the pitch of Cartesian and hexagonal CSG lattices and report an error if the new pitch is negative.'
+  []
+  [hexagonal_row_ring_conversion]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testHexConvertRowsRings
+    requirement = 'The system shall convert between row-column indices and ring-position indices of a hexagonal CSG lattice and report an error if the index is invalid.'
+  []
+  [empty_to_filled]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testEmptyToFilled
+    requirement = 'The system shall allow a CSG lattice that was created without a universe map and used to fill a cell to receive its universe map afterward.'
+  []
+  [update_outer]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testUpdateOuter
+    requirement = 'The system shall change the outer fill of a CSG lattice to a universe or a material, reset it to void, and report an error if the outer fill is requested as a type that differs from its current type.'
+  []
+  [type_through_base]
+    type = GoogleTest
+    unit_test = CSGLatticeTest.testGetTypeThroughBase
+    requirement = 'The system shall return the derived lattice type of a CSG lattice that is accessed through a base class reference.'
+  []
+[]

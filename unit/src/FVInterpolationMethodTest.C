@@ -63,6 +63,7 @@ public:
   bool supportsElemSideQpArg() const override { return false; }
 
 private:
+  using Moose::FunctorBase<Real>::evaluate;
   ValueType evaluate(const Moose::ElemArg & elem_arg, const Moose::StateArg &) const override final
   {
     return valueFor(elem_arg.elem);

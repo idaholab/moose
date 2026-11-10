@@ -1,0 +1,12 @@
+[Tests]
+  [displaced_hex27]
+    type = CSVDiff
+    input = displaced_hex27.i
+    csvdiff = displaced_hex27_out.csv
+    design = 'Assembly.md'
+    issues = '#34348'
+    requirement = 'The system shall solve on a displaced mesh of elements with more displacement '
+                  'degrees of freedom than the automatic differentiation derivative size when no '
+                  'object needs the automatic differentiation element geometry.'
+  []
+[]
