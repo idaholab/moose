@@ -498,6 +498,13 @@ public:
 
 protected:
   /**
+   * Get the quadrature point coordinate on the configuration, which the pointwise AD datum reads
+   * on the current configuration to seed its position slots
+   * @param qp The local quadrature point index
+   * @returns The quadrature point coordinate
+   */
+  KOKKOS_FUNCTION const Real3 & current_q_point(const unsigned int qp);
+  /**
    * Get the outward unit normal vector on the configuration, which only framework classes provide
    * to the objects they assemble
    * @param qp The local quadrature point index
@@ -705,6 +712,16 @@ Datum::q_point(const unsigned int qp)
       }
     }
   }
+
+  return _xyz;
+}
+
+KOKKOS_FUNCTION inline const Real3 &
+Datum::current_q_point(const unsigned int qp)
+{
+  KOKKOS_ASSERT(!isNodal());
+
+  reinitTransform(qp);
 
   return _xyz;
 }

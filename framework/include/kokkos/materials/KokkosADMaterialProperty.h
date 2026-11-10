@@ -112,10 +112,11 @@ private:
 
 /**
  * Writeable access to a pointwise AD property at a quadrature point, which stores the value and
- * the derivatives of a dual number of the declaring material
+ * the derivatives of a dual number of the declaring material with respect to its true slots
+ * @tparam Base The plain datum of the AD datum
  * @tparam slots The number of derivative slots of the declaring material
  */
-template <unsigned int slots>
+template <typename Base, unsigned int slots>
 class ADMaterialPropertyValue
 {
 public:
@@ -123,16 +124,20 @@ public:
    * Constructor
    * @param value The property holding the value
    * @param derivatives The property holding the derivatives
-   * @param map The storage index of the derivative with respect to each slot of the material
-   * @param datum The Datum object of the current thread
+   * @param map The storage index of the derivative with respect to each true slot of the material
+   * @param datum The AD datum object of the current thread
    * @param qp The local quadrature point index
    */
   KOKKOS_FUNCTION ADMaterialPropertyValue(const MaterialProperty<Real> & value,
                                           const MaterialProperty<Real, 1> & derivatives,
                                           const Array<unsigned int> & map,
-                                          const Datum & datum,
+                                          ADDatumBase<Base, slots> & datum,
                                           const unsigned int qp)
-    : _value(value, datum, qp), _derivatives(derivatives, datum, qp), _map(map)
+    : _value(value, datum, qp),
+      _derivatives(derivatives, datum, qp),
+      _map(map),
+      _datum(datum),
+      _qp(qp)
   {
   }
 
@@ -142,33 +147,65 @@ public:
    */
   KOKKOS_FUNCTION void operator=(const DenseADReal<slots> & dual)
   {
-    KOKKOS_ASSERT(_map.size() >= slots);
-
     _value = denseADValue(dual);
 
-    for (unsigned int s = 0; s < slots; ++s)
+    // The dual slots of the displaced instantiation map to the true slots. One dual slot may
+    // contribute to several true slots.
+    if (_datum.chain())
     {
-      const auto d = denseADDerivative(dual, s);
+      for (unsigned int m = 0; m < _derivatives.n(0); ++m)
+        _derivatives(m) = 0;
 
-      if (_map[s] != libMesh::invalid_uint)
-        _derivatives(_map[s]) = d;
-#ifndef NDEBUG
-      else if (d != 0)
-        ::Kokkos::abort("A Kokkos AD material property has a derivative with respect to a "
-                        "quadrature point quantity missing from the input list of its "
-                        "declaration. Add the accessor of the quantity to the input list.");
-#endif
+      const DenseADReal<slots> f[1] = {dual};
+      _datum.chainDerivatives(_qp,
+                              f,
+                              [&](unsigned int, const unsigned int slot, const Real d)
+                              { store(slot, d, true); });
+    }
+    else
+    {
+      KOKKOS_ASSERT(_map.size() >= slots);
+
+      for (unsigned int s = 0; s < slots; ++s)
+        store(s, denseADDerivative(dual, s), false);
     }
   }
 
 private:
+  /**
+   * Store the derivative with respect to a true slot
+   * @param slot The true slot
+   * @param d The derivative
+   * @param add Whether to add the derivative to the stored one
+   */
+  KOKKOS_FUNCTION void store(const unsigned int slot, const Real d, const bool add)
+  {
+    if (_map[slot] != libMesh::invalid_uint)
+    {
+      if (add)
+        _derivatives(_map[slot]) += d;
+      else
+        _derivatives(_map[slot]) = d;
+    }
+#ifndef NDEBUG
+    else if (d != 0)
+      ::Kokkos::abort("A Kokkos AD material property has a derivative with respect to a "
+                      "quadrature point quantity missing from the input list of its "
+                      "declaration. Add the accessor of the quantity to the input list.");
+#endif
+  }
+
   /// Value of the property
   MaterialPropertyValue<Real, 0> _value;
   /// Derivatives of the property
   MaterialPropertyValue<Real, 1> _derivatives;
-  /// Storage index of the derivative with respect to each slot of the material, or
+  /// Storage index of the derivative with respect to each true slot of the material, or
   /// libMesh::invalid_uint for a slot outside the input list
   const Array<unsigned int> & _map;
+  /// AD datum object of the current thread
+  ADDatumBase<Base, slots> & _datum;
+  /// Local quadrature point index
+  const unsigned int _qp;
 };
 
 /**
@@ -210,11 +247,11 @@ public:
    * @param datum The AD datum object of the current thread
    * @param qp The local quadrature point index
    */
-  template <typename DatumType, unsigned int slots = DatumType::ad_slots>
-  KOKKOS_FUNCTION ADMaterialPropertyValue<slots> operator()(const DatumType & datum,
-                                                            const unsigned int qp) const
+  template <typename Base, unsigned int slots>
+  KOKKOS_FUNCTION ADMaterialPropertyValue<Base, slots> operator()(ADDatumBase<Base, slots> & datum,
+                                                                  const unsigned int qp) const
   {
-    return ADMaterialPropertyValue<slots>(_value, _derivatives, _map, datum, qp);
+    return ADMaterialPropertyValue<Base, slots>(_value, _derivatives, _map, datum, qp);
   }
 #endif
 
@@ -231,7 +268,9 @@ private:
 /**
  * Read access to a pointwise AD material property by a pointwise AD object, which assembles the
  * stored value and derivatives into a dual number of the slots of the reader through the slot map
- * of the subdomain
+ * of the subdomain. In the displaced instantiation, the property holds a dual slot of its own. The
+ * reader records the stored derivatives, which the chain rule after the hooks maps to the true
+ * slots.
  */
 class ADMaterialPropertyReader
 {
@@ -287,6 +326,17 @@ public:
         return result;
 
       const auto & map = datum.table().propertySlots(_index, datum.subdomain());
+
+      if (auto * const chain = datum.chain())
+      {
+        const auto slot = datum.table().propertyDual(_index);
+        result.derivatives()[slot] = 1;
+        if (map.size())
+          chain->derivatives[slot] = &_derivatives(datum, qp)(0);
+
+        return result;
+      }
+
       const auto derivatives = _derivatives(datum, qp);
 
       for (unsigned int s = 0; s < map.size(); ++s)

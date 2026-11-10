@@ -230,7 +230,7 @@ ADKernel::operator()(ResidualLoop,
                       _kokkos_var.var(),
                       _configuration);
 
-  assembleADTerms<Derived::max_ad_slots>(
+  assembleADTerms<Derived::max_ad_slots, false>(
       kernel, team, group, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }
 
@@ -251,7 +251,7 @@ ADKernel::operator()(DisplacedResidualLoop,
                       _kokkos_var.var(),
                       _configuration);
 
-  assembleADTerms<Derived::max_ad_slots + AD_DISPLACEMENT_SLOTS>(
+  assembleADTerms<ad_displaced_slots<Derived>, true>(
       kernel, team, group, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }
 
@@ -272,7 +272,7 @@ ADKernel::operator()(ResidualOnlyLoop,
                       _kokkos_var.var(),
                       _configuration);
 
-  assembleADTerms<0>(kernel, team, group, datum, _ad_slots, true, false);
+  assembleADTerms<0, false>(kernel, team, group, datum, _ad_slots, true, false);
 }
 
 } // namespace Moose::Kokkos

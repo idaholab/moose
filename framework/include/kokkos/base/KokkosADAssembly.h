@@ -232,38 +232,84 @@ struct HasADResidualGrad<
 
 /**
  * Evaluate the residual hooks of a pointwise AD residual object at one quadrature point and store
- * the JxW-weighted coefficients and their slot derivatives into scratch
+ * the JxW-weighted coefficients and their derivatives with respect to the true slots into scratch.
+ * The instantiation carrying the displacement derivatives evaluates the hooks with intermediate
+ * dual slots and maps their derivatives to the true slots with the chain rule.
+ * @tparam displaced Whether the instantiation carries the displacement derivatives
  * @param object The residual object of the final derived type
- * @param datum The ADAssemblyDatum object of the quadrature point
+ * @param datum The plain datum of the element or side
+ * @param table The slot table of the object
+ * @param true_slots The number of true slots of the scratch layout
  * @param qp The local quadrature point index
  * @param scratch The scratch entries of the quadrature point
+ * @tparam slots The number of dual slots
  */
-template <typename Object, unsigned int slots>
+template <bool displaced, unsigned int slots, typename Object>
 KOKKOS_FUNCTION void
 evaluateADTerms(const Object & object,
-                ADAssemblyDatum<slots> & datum,
+                const AssemblyDatum & datum,
+                const ADSlotTable & table,
+                const unsigned int true_slots,
                 const unsigned int qp,
                 Real * scratch)
 {
-  const auto JxW = datum.adJxW(qp);
+  constexpr auto term_size = ADScratchLayout::term_size;
+
+  // The chain record holds the plain values of the intermediate slots at this quadrature point
+  [[maybe_unused]] std::conditional_t<displaced, ADChainRecord<slots>, char> chain{};
+  ADChainRecord<slots> * chain_ptr = nullptr;
+  if constexpr (displaced)
+    chain_ptr = &chain;
+
+  ADAssemblyDatum<slots> ad_datum(datum, table, chain_ptr);
+
+  // The coefficients are linear in JxW and in the map to the reference element, whose variation
+  // with the displacements the displaced instantiation adds after the hooks
+  const Real JxW = ad_datum.JxW(qp);
+  const auto & dxi_dx = ad_datum.dxi_dx(qp);
 
   // An absent hook contributes zero coefficients
+  DenseADReal<slots> f[term_size] = {0, 0, 0, 0};
+  [[maybe_unused]] Real3 grad;
+
   if constexpr (HasADResidualValue<Object, slots>::value)
-    storeADCoefficient<slots>(
-        scratch, 0, JxW * object.template precomputeQpResidualValue<Object, slots>(qp, datum));
-  else
-    storeADCoefficient<slots>(scratch, 0, DenseADReal<slots>(0));
+    f[0] = JxW * object.template precomputeQpResidualValue<Object, slots>(qp, ad_datum);
 
   if constexpr (HasADResidualGrad<Object, slots>::value)
   {
-    const DenseADReal3<slots> grad = datum.adToReferenceElement(
-        JxW * object.template precomputeQpResidualGrad<Object, slots>(qp, datum), qp);
+    DenseADReal3<slots> g = object.template precomputeQpResidualGrad<Object, slots>(qp, ad_datum);
     for (unsigned int k = 0; k < 3; ++k)
-      storeADCoefficient<slots>(scratch, 1 + k, grad(k));
+      g(k) = JxW * g(k);
+    const DenseADReal3<slots> mapped = dxi_dx.transpose() * g;
+
+    for (unsigned int k = 0; k < 3; ++k)
+    {
+      f[1 + k] = mapped(k);
+      grad(k) = denseADValue(g(k));
+    }
   }
+
+  if constexpr (!displaced)
+    for (unsigned int t = 0; t < term_size; ++t)
+      storeADCoefficient<slots>(scratch, t, f[t]);
   else
-    for (unsigned int k = 0; k < 3; ++k)
-      storeADCoefficient<slots>(scratch, 1 + k, DenseADReal<slots>(0));
+  {
+    Real coef[term_size];
+    for (unsigned int t = 0; t < term_size; ++t)
+    {
+      coef[t] = denseADValue(f[t]);
+      scratch[t] = coef[t];
+    }
+
+    for (unsigned int i = term_size; i < term_size * (1 + true_slots); ++i)
+      scratch[i] = 0;
+
+    auto add = [&](const unsigned int t, const unsigned int slot, const Real d)
+    { scratch[term_size * (1 + slot) + t] += d; };
+
+    ad_datum.chainDerivatives(qp, f, add);
+    ad_datum.geometryDerivatives(qp, coef, grad, add);
+  }
 
   // A gradient slot holds a component of the gradient on the reference configuration, whose
   // variation with a DOF is the reference trial function gradient mapped by dxi/dx. Applying the
@@ -271,9 +317,7 @@ evaluateADTerms(const Object & object,
   // function gradient directly.
   if constexpr (slots > 0)
   {
-    constexpr auto term_size = ADScratchLayout::term_size;
-    const auto & dxi_dx = datum.reference_dxi_dx(qp);
-    const auto & table = datum.table();
+    const auto & reference_dxi_dx = ad_datum.reference_dxi_dx(qp);
 
     for (unsigned int b = 0; b < table.numBlocks(); ++b)
       if (const auto & block = table.block(b); block.gradient)
@@ -285,7 +329,8 @@ evaluateADTerms(const Object & object,
           const Real d2 = d[2 * term_size];
 
           for (unsigned int m = 0; m < 3; ++m)
-            d[m * term_size] = d0 * dxi_dx(0, m) + d1 * dxi_dx(1, m) + d2 * dxi_dx(2, m);
+            d[m * term_size] = d0 * reference_dxi_dx(0, m) + d1 * reference_dxi_dx(1, m) +
+                               d2 * reference_dxi_dx(2, m);
         }
   }
 }

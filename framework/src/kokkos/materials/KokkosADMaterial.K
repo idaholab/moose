@@ -52,7 +52,11 @@ ADMaterial::resolveADSlots()
 
   const unsigned int max_slots = DispatcherRegistry::getProperty("max_ad_slots", type());
 
-  _ad_setup.assign(*this, max_slots, _configuration.displacements(), kokkosMesh());
+  _ad_setup.assign(*this,
+                   max_slots,
+                   DispatcherRegistry::getProperty("max_ad_displaced_slots", type()),
+                   _configuration.displacements(),
+                   kokkosMesh());
   _ad_slots = _ad_setup.table();
 
   const unsigned int displacement_slots = _ad_slots.hasDisplacements() ? AD_DISPLACEMENT_SLOTS : 0;

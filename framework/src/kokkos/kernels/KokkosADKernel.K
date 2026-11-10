@@ -31,7 +31,12 @@ ADKernel::initialSetup()
   KernelBase::initialSetup();
 
   _max_ad_slots = DispatcherRegistry::getProperty("max_ad_slots", type());
-  _ad_setup.assign(*this, _kokkos_var, _max_ad_slots, _configuration.displacements(), kokkosMesh());
+  _ad_setup.assign(*this,
+                   _kokkos_var,
+                   _max_ad_slots,
+                   DispatcherRegistry::getProperty("max_ad_displaced_slots", type()),
+                   _configuration.displacements(),
+                   kokkosMesh());
   _ad_slots = _ad_setup.table();
 }
 

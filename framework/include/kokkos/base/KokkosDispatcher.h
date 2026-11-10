@@ -12,6 +12,7 @@
 #include "KokkosHeader.h"
 #include "KokkosThread.h"
 #include "KokkosPrecomputeHookTraits.h"
+#include "KokkosDenseADReal.h"
 
 #include <typeindex>
 #include <type_traits>
@@ -677,6 +678,25 @@ struct HasMaxADSlots<Object, std::void_t<decltype(Object::max_ad_slots)>> : std:
 };
 ///@}
 
+/**
+ * Number of dual slots of the displaced instantiation of a pointwise AD object. It is the optional
+ * max_ad_displaced_slots of the object. The default leaves room for the quadrature point position.
+ */
+///@{
+template <typename Object, typename = void>
+struct ADDisplacedSlots
+{
+  static constexpr unsigned int value = Object::max_ad_slots + AD_POSITION_SLOTS;
+};
+template <typename Object>
+struct ADDisplacedSlots<Object, std::void_t<decltype(Object::max_ad_displaced_slots)>>
+{
+  static constexpr unsigned int value = Object::max_ad_displaced_slots;
+};
+template <typename Object>
+inline constexpr unsigned int ad_displaced_slots = ADDisplacedSlots<Object>::value;
+///@}
+
 template <typename Object>
 void
 registerADResidualObjectDispatchers(const std::string & objectname)
@@ -700,6 +720,8 @@ registerADResidualObjectDispatchers(const std::string & objectname)
     DispatcherRegistry::addDispatcher<typename Object::ResidualLoop, Object>(objectname);
 
   DispatcherRegistry::setProperty("max_ad_slots", objectname, Object::max_ad_slots);
+  DispatcherRegistry::setProperty(
+      "max_ad_displaced_slots", objectname, ad_displaced_slots<Object>);
 }
 
 } // namespace Moose::Kokkos
@@ -830,6 +852,8 @@ registerADResidualObjectDispatchers(const std::string & objectname)
                                                                                                    \
     Moose::Kokkos::DispatcherRegistry::setProperty(                                                \
         "max_ad_slots", objectname, classname::max_ad_slots);                                      \
+    Moose::Kokkos::DispatcherRegistry::setProperty(                                                \
+        "max_ad_displaced_slots", objectname, Moose::Kokkos::ad_displaced_slots<classname>);       \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \

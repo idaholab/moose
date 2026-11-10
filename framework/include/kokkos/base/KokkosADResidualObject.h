@@ -52,46 +52,40 @@ public:
    */
   void assign(const MooseObject & object, const Variable & ivar, unsigned int max_slots);
   /**
-   * Assign the slots of all registered accessors, followed by the displacement slots of the
-   * current configuration
-   * @param object The residual object, for error messages
-   * @param ivar The Kokkos residual variable
-   * @param max_slots The number of derivative slots declared by the residual object, which the
-   * accessors may occupy ahead of the displacement slots
-   * @param displacements The displacement variable of the current configuration
-   */
-  void assign(const MooseObject & object,
-              const Variable & ivar,
-              unsigned int max_slots,
-              const Variable & displacements);
-  /**
    * Assign the slots of all registered accessors and the slot maps of all registered AD material
-   * properties, followed by the displacement slots of the current configuration or of the
-   * properties that depend on the displacements
+   * properties. Then assign the displacement slots, of the current configuration or of the
+   * properties that depend on the displacements, and the dual slots of the displaced
+   * instantiation.
    * @param object The residual object, for error messages
    * @param ivar The Kokkos residual variable
    * @param max_slots The number of derivative slots declared by the residual object, which the
    * accessors and the property inputs may occupy ahead of the displacement slots
+   * @param max_displaced_slots The number of dual slots of the instantiation carrying the
+   * displacement derivatives
    * @param displacements The displacement variable of the current configuration
    * @param mesh The Kokkos mesh, which numbers the subdomains of the slot maps
    */
   void assign(const MooseObject & object,
               const Variable & ivar,
               unsigned int max_slots,
+              unsigned int max_displaced_slots,
               const Variable & displacements,
               const Mesh & mesh);
   /**
    * Assign the slots of all registered accessors of a material and the slot maps of the AD
-   * material properties it reads, followed by the displacement slots of the current configuration
-   * or of the properties that depend on the displacements
+   * material properties it reads. Then assign the displacement slots and the dual slots of the
+   * displaced instantiation.
    * @param object The material, for error messages
    * @param max_slots The number of derivative slots declared by the material, which the accessors
    * and the property inputs may occupy ahead of the displacement slots
+   * @param max_displaced_slots The number of dual slots of the instantiation carrying the
+   * displacement derivatives
    * @param displacements The displacement variable of the current configuration
    * @param mesh The Kokkos mesh, which numbers the subdomains of the slot maps
    */
   void assign(const MooseObject & object,
               unsigned int max_slots,
+              unsigned int max_displaced_slots,
               const Variable & displacements,
               const Mesh & mesh);
 
@@ -115,13 +109,27 @@ private:
    * @param object The object, for error messages
    * @param ivar The Kokkos residual variable, or nullptr for a material
    * @param max_slots The number of derivative slots declared by the object
+   * @param max_displaced_slots The number of dual slots of the instantiation carrying the
+   * displacement derivatives
    * @param displacements The displacement variable of the current configuration
+   * @param mesh The Kokkos mesh, or nullptr for an object that reads no AD material properties
    */
   void assignSlots(const MooseObject & object,
                    const Variable * ivar,
                    unsigned int max_slots,
+                   unsigned int max_displaced_slots,
                    const Variable & displacements,
                    const Mesh * mesh = nullptr);
+  /**
+   * Assign the dual slots of the instantiation carrying the displacement derivatives, once the
+   * true slots are assigned
+   * @param object The object, for error messages
+   * @param max_displaced_slots The number of dual slots of the instantiation
+   * @param displaced Whether the object is posed on the current configuration
+   */
+  void assignDualSlots(const MooseObject & object,
+                       unsigned int max_displaced_slots,
+                       bool displaced);
 
   /**
    * Whether a variable carries derivatives: a nonlinear variable at its current state, which for a

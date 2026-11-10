@@ -37,6 +37,12 @@
       function = '0.2 * x * x + 0.5 * y'
     []
   []
+  [disp_z]
+    [InitialCondition]
+      type = FunctionIC
+      function = '0.1 * x * z + 0.3 * y * z'
+    []
+  []
 []
 
 [Kernels]
@@ -58,6 +64,10 @@
   [disp_y]
     type = KokkosDiffusion
     variable = disp_y
+  []
+  [disp_z]
+    type = KokkosDiffusion
+    variable = disp_z
   []
 []
 

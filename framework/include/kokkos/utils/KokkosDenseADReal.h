@@ -14,6 +14,7 @@
 #include "metaphysicl/dualnumberarray.h"
 
 #include <type_traits>
+#include <utility>
 
 namespace Moose::Kokkos
 {
@@ -62,6 +63,38 @@ inline constexpr bool is_dual_number = IsDualNumber<std::decay_t<T>>::value;
 ///@{
 constexpr unsigned int AD_VALUE_SLOTS = 1;
 constexpr unsigned int AD_GRADIENT_SLOTS = 3;
+///@}
+
+/**
+ * Number of derivative slots of the displacements of the current configuration: the value and the
+ * reference gradient of each of the three components
+ */
+constexpr unsigned int AD_DISPLACEMENT_SLOTS = 3 * (AD_VALUE_SLOTS + AD_GRADIENT_SLOTS);
+
+/**
+ * Number of dual slots of the quadrature point position on the current configuration
+ */
+constexpr unsigned int AD_POSITION_SLOTS = 3;
+
+/**
+ * Call a function with each index below a bound, passed as a std::integral_constant. Derivatives
+ * of dual numbers indexed by it then stay in registers.
+ * @tparam n The bound
+ * @param f The function
+ */
+///@{
+template <typename F, unsigned int... i>
+KOKKOS_INLINE_FUNCTION void
+constexprFor(std::integer_sequence<unsigned int, i...>, F && f)
+{
+  (f(std::integral_constant<unsigned int, i>{}), ...);
+}
+template <unsigned int n, typename F>
+KOKKOS_INLINE_FUNCTION void
+constexprFor(F && f)
+{
+  constexprFor(std::make_integer_sequence<unsigned int, n>{}, f);
+}
 ///@}
 
 /**

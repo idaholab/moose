@@ -11,13 +11,44 @@
 
 #include "KokkosVariableValue.h"
 #include "KokkosDenseADReal.h"
-#include "KokkosADGeometry.h"
 #include "KokkosADSlotBlock.h"
 
 #include "libmesh/utility.h"
 
 namespace Moose::Kokkos
 {
+
+/**
+ * A dual slot of the instantiation of a pointwise AD object that carries the displacement
+ * derivatives. Its dual numbers hold intermediate quantities, whose derivatives map to the true
+ * slots of the slot table after the hooks are evaluated.
+ */
+struct ADDualSlot
+{
+  /// Quantity held by a dual slot
+  enum class Kind : unsigned char
+  {
+    /// No quantity, for the slots beyond those assigned
+    NONE,
+    /// The value of a variable, whose derivative is that of its true slot
+    VALUE,
+    /// A component of the gradient of a variable on the configuration
+    GRADIENT,
+    /// A component of the quadrature point position on the configuration
+    POSITION,
+    /// An AD material property, whose stored derivatives map to the true slots
+    PROPERTY
+  };
+
+  /// Quantity held by the slot
+  Kind kind = Kind::NONE;
+  /// For VALUE, the true slot. For GRADIENT, the first true slot of the reference gradient, or
+  /// libMesh::invalid_uint if it carries no derivatives. For POSITION, the displacement component.
+  /// For PROPERTY, the registration index of the property reader.
+  unsigned int target = libMesh::invalid_uint;
+  /// For GRADIENT, the component of the gradient
+  unsigned int component = 0;
+};
 
 /**
  * Slot table of a pointwise AD residual object. The AD accessors of the object register the
@@ -156,6 +187,51 @@ public:
                : _displacement_first[c] + AD_VALUE_SLOTS;
   }
 
+  /**
+   * Set the dual slots of the instantiation carrying the displacement derivatives
+   * @param slots The quantity of each dual slot, padded to the number of dual slots
+   * @param accessor_dual The first dual slot of each registered accessor, or libMesh::invalid_uint
+   * @param property_dual The dual slot of each registered property reader
+   * @param position_dual The first dual slot of the position, or libMesh::invalid_uint
+   */
+  void setDualSlots(const std::vector<ADDualSlot> & slots,
+                    const std::vector<unsigned int> & accessor_dual,
+                    const std::vector<unsigned int> & property_dual,
+                    unsigned int position_dual);
+  /**
+   * Get the quantity of a dual slot of the instantiation carrying the displacement derivatives
+   */
+  KOKKOS_FUNCTION const ADDualSlot & dual(const unsigned int s) const
+  {
+    KOKKOS_ASSERT(s < _dual.size());
+    return _dual[s];
+  }
+  /**
+   * Get the first dual slot of a registered accessor in the instantiation carrying the
+   * displacement derivatives, or libMesh::invalid_uint if it carries no derivatives
+   * @param accessor The registration index of the accessor
+   */
+  KOKKOS_FUNCTION unsigned int accessorDual(const unsigned int accessor) const
+  {
+    KOKKOS_ASSERT(accessor < _accessor_dual.size());
+    return _accessor_dual[accessor];
+  }
+  /**
+   * Get the dual slot of a registered property reader in the instantiation carrying the
+   * displacement derivatives
+   * @param property The registration index of the reader
+   */
+  KOKKOS_FUNCTION unsigned int propertyDual(const unsigned int property) const
+  {
+    KOKKOS_ASSERT(property < _property_dual.size());
+    return _property_dual[property];
+  }
+  /**
+   * Get the first dual slot of the position in the instantiation carrying the displacement
+   * derivatives, or libMesh::invalid_uint if the instantiation has no position slots
+   */
+  KOKKOS_FUNCTION unsigned int positionDual() const { return _position_dual; }
+
 private:
   /// Registered slot blocks
   std::vector<ADSlotBlock> _host_blocks;
@@ -179,6 +255,14 @@ private:
       libMesh::invalid_uint, libMesh::invalid_uint, libMesh::invalid_uint};
   /// Whether the displacement slots are registered
   bool _has_displacements = false;
+  /// Quantity of each dual slot of the instantiation carrying the displacement derivatives
+  Array<ADDualSlot> _dual;
+  /// First dual slot of each registered accessor
+  Array<unsigned int> _accessor_dual;
+  /// Dual slot of each registered property reader
+  Array<unsigned int> _property_dual;
+  /// First dual slot of the position, or libMesh::invalid_uint
+  unsigned int _position_dual = libMesh::invalid_uint;
 };
 
 /**
@@ -225,7 +309,7 @@ public:
   /**
    * Get the registration index
    */
-  unsigned int index() const { return _index; }
+  KOKKOS_FUNCTION unsigned int index() const { return _index; }
   /**
    * Get the first slot of the quantity, or libMesh::invalid_uint if it carries no derivatives
    * @param table The slot table of the object
@@ -258,10 +342,30 @@ private:
 };
 
 /**
+ * Plain values that a pointwise AD object records at a quadrature point while its hooks are
+ * evaluated with the dual slots of the displaced instantiation. The chain rule after the hooks reads
+ * them to map the derivatives with respect to the dual slots to the true slots.
+ * @tparam slots The number of dual slots
+ */
+template <unsigned int slots>
+struct ADChainRecord
+{
+  /// Value of each gradient dual slot on the configuration, zero for other slots
+  Real value[slots > 0 ? slots : 1] = {};
+  /// Stored derivatives of the property of each property dual slot at the quadrature point, or
+  /// nullptr. They are contiguous in the property storage.
+  const Real * derivatives[slots > 0 ? slots : 1] = {};
+};
+
+/**
  * The datum of a pointwise AD object, which fixes the number of derivative slots of its dual
- * numbers. On the current configuration with displacement slots it also carries the geometry as
- * dual numbers whose derivatives with respect to the displacement slots give the variation of the
- * geometry, so that every quantity computed from it carries its displacement derivatives.
+ * numbers. The instantiation carrying the displacement derivatives has intermediate dual slots:
+ * - the value of each variable,
+ * - the gradient of each gradient accessor on the configuration,
+ * - the position,
+ * - each AD material property.
+ * The datum then holds a chain record. The accessors seed the dual slots and record their plain
+ * values in it. Otherwise the dual slots are the true slots, and the geometry is plain.
  * @tparam Base The plain datum: AssemblyDatum for residual objects, which assemble against test
  * and trial functions, and Datum for materials
  * @tparam slots The number of derivative slots
@@ -277,13 +381,16 @@ public:
    * Constructor
    * @param datum The plain datum of the element, side, or node
    * @param table The slot table of the object
+   * @param chain The chain record of the displaced instantiation, or nullptr
    */
-  KOKKOS_FUNCTION ADDatumBase(const Base & datum, const ADSlotTable & table)
-    : Base(datum), _table(table)
+  KOKKOS_FUNCTION ADDatumBase(const Base & datum,
+                              const ADSlotTable & table,
+                              ADChainRecord<slots> * chain = nullptr)
+    : Base(datum), _table(table), _chain(chain)
   {
     // On the current configuration the position carries displacement derivatives only as a dual
     // number
-    if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
+    if (chain)
       this->adDisplaced(this->_configuration.displaced());
   }
 
@@ -291,197 +398,219 @@ public:
    * Get the slot table of the object
    */
   KOKKOS_FUNCTION const ADSlotTable & table() const { return _table; }
+  /**
+   * Get the chain record, or nullptr if the dual slots are the true slots
+   */
+  KOKKOS_FUNCTION ADChainRecord<slots> * chain() const { return _chain; }
 
   /**
-   * Get the geometry of a quadrature point of the current configuration
+   * Get the quadrature point coordinates on the configuration as dual numbers. In the instantiation
+   * carrying the displacement derivatives, the position slots carry their derivatives.
    * @param qp The local quadrature point index
-   * @returns The geometry
-   */
-  KOKKOS_FUNCTION const ADGeometry & adGeometry(const unsigned int qp);
-
-  /**
-   * Get the transformed Jacobian weight as a dual number
-   */
-  KOKKOS_FUNCTION DenseADReal<slots> adJxW(const unsigned int qp)
-  {
-    if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
-      if (this->_configuration.displaced())
-      {
-        const auto & g = adGeometry(qp);
-        DenseADReal<slots> JxW = g.JxW;
-
-        for (unsigned int c = 0; c < this->_configuration.displacements().components(); ++c)
-        {
-          if (const auto vs = _table.displacementValueSlot(c); vs != libMesh::invalid_uint)
-            JxW.derivatives()[vs] += g.JxW * g.grad_log_coord(c);
-
-          if (const auto gs = _table.displacementGradientSlot(c); gs != libMesh::invalid_uint)
-            for (unsigned int d = 0; d < 3; ++d)
-            {
-              Real dlog = g.F_inv_T(c, d);
-              if (this->isSide())
-              {
-                Real n_col = 0;
-                for (unsigned int k = 0; k < 3; ++k)
-                  n_col += g.normal(k) * g.F_inv_T(k, d);
-                dlog -= g.normal(c) * n_col;
-              }
-              JxW.derivatives()[gs + d] += g.JxW * dlog;
-            }
-        }
-
-        return JxW;
-      }
-
-    return this->JxW(qp);
-  }
-
-  /**
-   * Get the quadrature point coordinates on the configuration as dual numbers, whose derivatives on
-   * the current configuration are those of x = X + u with respect to the displacement values
    */
   KOKKOS_FUNCTION DenseADReal3<slots> adQPoint(const unsigned int qp)
   {
-    if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
-      if (this->_configuration.displaced())
-      {
-        const auto & g = adGeometry(qp);
-        DenseADReal3<slots> x(g.q_point(0), g.q_point(1), g.q_point(2));
+    if (_chain && this->_configuration.displaced())
+    {
+      const auto first = _table.positionDual();
+      if (first == libMesh::invalid_uint)
+        ::Kokkos::abort("A pointwise AD Kokkos object read the quadrature point position on the "
+                        "current configuration, but its max_ad_displaced_slots leaves no slots for "
+                        "the position. Remove max_ad_displaced_slots from the class, or increase "
+                        "it by 3.");
 
-        for (unsigned int c = 0; c < this->_configuration.displacements().components(); ++c)
-          if (const auto vs = _table.displacementValueSlot(c); vs != libMesh::invalid_uint)
-            x(c).derivatives()[vs] = 1;
+      const Real3 x = this->current_q_point(qp);
+      DenseADReal3<slots> result;
+      for (unsigned int c = 0; c < AD_POSITION_SLOTS; ++c)
+        result(c) = seededDenseADReal<slots>(x(c), first + c, 1);
 
-        return x;
-      }
+      return result;
+    }
 
     const Real3 x = this->q_point(qp);
     return DenseADReal3<slots>(x(0), x(1), x(2));
   }
 
   /**
-   * Push a gradient with respect to the reference position forward to the configuration, with the
-   * derivatives of the deformation gradient
-   * @param grad_X The gradient with respect to the reference position
+   * Map the derivatives of dual numbers with respect to the dual slots of the displaced
+   * instantiation to the true slots of the slot table. Let g = F^{-T} G be the gradient of an
+   * accessor on the configuration, with reference gradient G and F = I + grad_X u. Then
+   *
+   *   df/dG_k            = sum_i df/dg_i (F^{-1})_{ki}
+   *   df/d(grad_X u_c)_d = -g_c sum_i df/dg_i (F^{-1})_{di}
+   *
+   * The position x = X + u gives df/du_c = df/dx_c. The stored derivatives of a property give
+   * the derivatives with respect to its inputs.
    * @param qp The local quadrature point index
+   * @param f The dual numbers
+   * @param add The function that adds a derivative with respect to a true slot, called as
+   * add(index of the dual number, slot, derivative)
    */
-  KOKKOS_FUNCTION DenseADReal3<slots> adPushForward(const DenseADReal3<slots> & grad_X,
-                                                    const unsigned int qp)
-  {
-    if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
-      if (this->_configuration.displaced())
-      {
-        const auto & g = adGeometry(qp);
-        DenseADReal3<slots> grad = g.F_inv_T * grad_X;
-
-        for (unsigned int c = 0; c < this->_configuration.displacements().components(); ++c)
-          if (const auto gs = _table.displacementGradientSlot(c); gs != libMesh::invalid_uint)
-          {
-            const Real grad_c = denseADValue(grad(c));
-            for (unsigned int d = 0; d < 3; ++d)
-              for (unsigned int i = 0; i < 3; ++i)
-                grad(i).derivatives()[gs + d] -= grad_c * g.F_inv_T(i, d);
-          }
-
-        return grad;
-      }
-
-    return this->F_inv(qp).transpose() * grad_X;
-  }
+  template <unsigned int n, typename Accumulate>
+  KOKKOS_FUNCTION void
+  chainDerivatives(const unsigned int qp, const DenseADReal<slots> (&f)[n], Accumulate && add);
 
   /**
-   * Map a gradient coefficient to the reference element, so that its product with the reference
-   * test function gradient equals its product with the gradient on the configuration, with the
-   * derivatives of the map on the configuration
-   * @param grad The gradient coefficient
+   * Add the derivatives of the JxW weight and of the map to the reference element with respect to
+   * the displacement slots to the derivatives of the residual coefficients
    * @param qp The local quadrature point index
+   * @param coef The JxW-weighted coefficients: the value coefficient followed by the gradient
+   * coefficient mapped to the reference element
+   * @param grad The JxW-weighted gradient coefficient before the map
+   * @param add The function adding a derivative of a coefficient with respect to a true slot,
+   * called as add(coefficient, slot, derivative)
    */
-  KOKKOS_FUNCTION DenseADReal3<slots> adToReferenceElement(const DenseADReal3<slots> & grad,
-                                                           const unsigned int qp)
-  {
-    if constexpr (slots >= AD_DISPLACEMENT_SLOTS)
-      if (this->_configuration.displaced())
-      {
-        const auto & g = adGeometry(qp);
-        DenseADReal3<slots> mapped = g.dxi_dx.transpose() * grad;
-
-        for (unsigned int c = 0; c < this->_configuration.displacements().components(); ++c)
-          if (const auto gs = _table.displacementGradientSlot(c); gs != libMesh::invalid_uint)
-            for (unsigned int d = 0; d < 3; ++d)
-            {
-              // Component d of F^{-1} applied to the value of the coefficient
-              Real F_inv_grad_d = 0;
-              for (unsigned int k = 0; k < 3; ++k)
-                F_inv_grad_d += g.F_inv_T(k, d) * denseADValue(grad(k));
-
-              for (unsigned int i = 0; i < 3; ++i)
-                mapped(i).derivatives()[gs + d] -= g.dxi_dx(c, i) * F_inv_grad_d;
-            }
-
-        return mapped;
-      }
-
-    return this->dxi_dx(qp).transpose() * grad;
-  }
+  template <typename Accumulate>
+  KOKKOS_FUNCTION void geometryDerivatives(const unsigned int qp,
+                                           const Real (&coef)[4],
+                                           const Real3 & grad,
+                                           Accumulate && add);
 
 private:
-  /// Geometry of the current configuration at the quadrature point evaluated last
-  struct GeometryCache
-  {
-    /// Quadrature point of the cached geometry
-    unsigned int qp = libMesh::invalid_uint;
-    /// Cached geometry
-    ADGeometry geometry;
-  };
-  /// Placeholder of the cache in an instantiation without the displacement slots
-  struct NoGeometryCache
-  {
-  };
-
   /// Slot table of the object
   const ADSlotTable & _table;
-  /// Cached geometry, which only the instantiation carrying the displacement slots reads
-  std::conditional_t<(slots >= AD_DISPLACEMENT_SLOTS), GeometryCache, NoGeometryCache> _ad_cache;
+  /// Chain record of the instantiation carrying the displacement derivatives, or nullptr
+  ADChainRecord<slots> * const _chain;
 };
 
 template <typename Base, unsigned int slots>
-KOKKOS_FUNCTION const ADGeometry &
-ADDatumBase<Base, slots>::adGeometry(const unsigned int qp)
+template <unsigned int n, typename Accumulate>
+KOKKOS_FUNCTION void
+ADDatumBase<Base, slots>::chainDerivatives(const unsigned int qp,
+                                           const DenseADReal<slots> (&f)[n],
+                                           Accumulate && add)
 {
-  KOKKOS_ASSERT(!this->isNodal());
+  KOKKOS_ASSERT(_chain);
 
-  if (_ad_cache.qp == qp)
-    return _ad_cache.geometry;
+  if constexpr (slots > 0)
+  {
+    const auto displaced = this->_configuration.displaced();
+    const auto & disp = this->_configuration.displacements();
+    const auto & F_inv = this->F_inv(qp);
 
-  auto & g = _ad_cache.geometry;
+    // F^{-1} applied to the derivatives with respect to the gradient of the current accessor. Its
+    // three dual slots are consecutive.
+    Real h[n][3] = {};
 
-  // The plain datum composes the deformation gradient into its geometry on the current
-  // configuration
-  g.F_inv_T = this->F_inv(qp).transpose();
-  g.dxi_dx = this->dxi_dx(qp);
-  g.JxW = this->JxW(qp);
-  g.grad_log_coord = this->grad_log_coord(qp);
-  g.normal = this->isSide() ? this->normals(qp) : Real3(0);
+    constexprFor<slots>(
+        [&](auto slot)
+        {
+          constexpr unsigned int s = decltype(slot)::value;
+          const auto & dual = _table.dual(s);
 
-  // The plain datum withholds the position of an AD object on the current configuration, so that
-  // objects read it with its derivatives through adQPoint()
+          switch (dual.kind)
+          {
+            case ADDualSlot::Kind::VALUE:
+              for (unsigned int t = 0; t < n; ++t)
+                add(t, dual.target, f[t].derivatives()[s]);
+              break;
+
+            case ADDualSlot::Kind::POSITION:
+              if (const auto vs = _table.displacementValueSlot(dual.target);
+                  vs != libMesh::invalid_uint)
+                for (unsigned int t = 0; t < n; ++t)
+                  add(t, vs, f[t].derivatives()[s]);
+              break;
+
+            case ADDualSlot::Kind::PROPERTY:
+              if (const Real * const stored = _chain->derivatives[s])
+              {
+                const auto & map = _table.propertySlots(dual.target, this->subdomain());
+                for (unsigned int m = 0; m < map.size(); ++m)
+                  if (map[m] != libMesh::invalid_uint)
+                    for (unsigned int t = 0; t < n; ++t)
+                      add(t, map[m], f[t].derivatives()[s] * stored[m]);
+              }
+              break;
+
+            case ADDualSlot::Kind::GRADIENT:
+              for (unsigned int t = 0; t < n; ++t)
+                for (unsigned int k = 0; k < 3; ++k)
+                  h[t][k] += F_inv(k, dual.component) * f[t].derivatives()[s];
+
+              // The last component of the accessor flushes its reference and deformation terms
+              if (dual.component == AD_GRADIENT_SLOTS - 1)
+              {
+                if (dual.target != libMesh::invalid_uint)
+                  for (unsigned int t = 0; t < n; ++t)
+                    for (unsigned int k = 0; k < 3; ++k)
+                      add(t, dual.target + k, h[t][k]);
+
+                if (displaced)
+                  for (unsigned int c = 0; c < disp.components(); ++c)
+                    if (const auto gs = _table.displacementGradientSlot(c);
+                        gs != libMesh::invalid_uint)
+                    {
+                      const Real g_c = _chain->value[s - (AD_GRADIENT_SLOTS - 1) + c];
+                      for (unsigned int t = 0; t < n; ++t)
+                        for (unsigned int k = 0; k < 3; ++k)
+                          add(t, gs + k, -g_c * h[t][k]);
+                    }
+
+                for (unsigned int t = 0; t < n; ++t)
+                  for (unsigned int k = 0; k < 3; ++k)
+                    h[t][k] = 0;
+              }
+              break;
+
+            case ADDualSlot::Kind::NONE:
+              break;
+          }
+        });
+  }
+}
+
+template <typename Base, unsigned int slots>
+template <typename Accumulate>
+KOKKOS_FUNCTION void
+ADDatumBase<Base, slots>::geometryDerivatives(const unsigned int qp,
+                                              const Real (&coef)[4],
+                                              const Real3 & grad,
+                                              Accumulate && add)
+{
+  if (!this->_configuration.displaced())
+    return;
+
   const auto & disp = this->_configuration.displacements();
-  g.q_point = this->reference_q_point(qp);
+  const auto & F_inv = this->F_inv(qp);
+  const auto & dxi_dx = this->dxi_dx(qp);
+  const auto & grad_log_coord = this->grad_log_coord(qp);
+  const Real3 normal = this->isSide() ? this->normals(qp) : Real3(0);
 
+  // The coefficients are linear in JxW, whose logarithm has the derivatives
+  //
+  //   d(ln JxW)/du_c             = (grad ln coord)_c
+  //   d(ln JxW)/d(grad_X u_c)_d  = (F^{-1})_{dc} - n_c (n . (F^{-T})_{:,d})
+  //
+  // where the normal term applies on sides only. The map to the reference element, dxi/dx =
+  // F^{-T} dxi/dX, has d(dxi/dx)_{ci}/d(grad_X u_c)_d = -(dxi/dx)_{ci} (F^{-1})_{d:}.
   for (unsigned int c = 0; c < disp.components(); ++c)
   {
-    const auto & sys = this->system(disp.sys(c));
-    const auto var = disp.var(c);
-    const auto tag = disp.tag();
+    if (const auto vs = _table.displacementValueSlot(c); vs != libMesh::invalid_uint)
+      for (unsigned int t = 0; t < 4; ++t)
+        add(t, vs, coef[t] * grad_log_coord(c));
 
-    g.q_point(c) += !this->isSide()
-                        ? sys.getVectorQpValue(this->_elem, this->_qp_offset + qp, var, tag)
-                        : sys.getVectorQpValueFace(this->_elem, this->_side, qp, var, tag);
+    if (const auto gs = _table.displacementGradientSlot(c); gs != libMesh::invalid_uint)
+      for (unsigned int d = 0; d < 3; ++d)
+      {
+        Real dlog = F_inv(d, c);
+        if (this->isSide())
+        {
+          Real n_col = 0;
+          for (unsigned int k = 0; k < 3; ++k)
+            n_col += normal(k) * F_inv(d, k);
+          dlog -= normal(c) * n_col;
+        }
+
+        Real F_inv_grad_d = 0;
+        for (unsigned int k = 0; k < 3; ++k)
+          F_inv_grad_d += F_inv(d, k) * grad(k);
+
+        add(0, gs + d, coef[0] * dlog);
+        for (unsigned int i = 0; i < 3; ++i)
+          add(1 + i, gs + d, coef[1 + i] * dlog - dxi_dx(c, i) * F_inv_grad_d);
+      }
   }
-
-  _ad_cache.qp = qp;
-
-  return g;
 }
 
 /**
@@ -525,7 +654,11 @@ public:
   KOKKOS_FUNCTION DenseADReal<slots> operator()(ADDatumBase<Base, slots> & datum,
                                                 unsigned int qp) const
   {
-    return seededDenseADReal<slots>(_value(datum, qp), _slot.first(datum.table()), _slot.seed());
+    // A value slot needs no chain rule, so the dual slot carries the seed
+    const auto & table = datum.table();
+    const auto slot = datum.chain() ? table.accessorDual(_slot.index()) : _slot.first(table);
+
+    return seededDenseADReal<slots>(_value(datum, qp), slot, _slot.seed());
   }
 
   KOKKOS_FUNCTION const Variable & variable() const { return _value.variable(); }
@@ -548,10 +681,11 @@ private:
 
 /**
  * Accessor of the quadrature point gradient of a variable as a vector of dense dual numbers. The
- * gradient slots hold the gradient with respect to the reference position, whose component k is
- * seeded in slot k of the slot block of the gradient; on the current configuration the accessor
- * pushes it forward with the dual deformation gradient, which carries the derivatives with respect
- * to the displacements.
+ * true gradient slots hold the gradient with respect to the reference position. Slot k of the
+ * block holds component k. The accessor pushes it forward with the plain deformation gradient. In
+ * the displaced instantiation, the dual slots hold the gradient on the configuration instead. The
+ * accessor records that value. The chain rule after the hooks uses it to recover the derivatives
+ * with respect to the reference gradient and the displacements.
  */
 class ADVariableGradient
 {
@@ -575,18 +709,38 @@ public:
   KOKKOS_FUNCTION DenseADReal3<slots> operator()(ADDatumBase<Base, slots> & datum,
                                                  unsigned int qp) const
   {
+    DenseADReal3<slots> result;
+
+    if (auto * const chain = datum.chain())
+    {
+      const Real3 grad = _gradient(datum, qp);
+      const auto first = datum.table().accessorDual(_slot.index());
+
+      for (unsigned int k = 0; k < AD_GRADIENT_SLOTS; ++k)
+        result(k) = seededDenseADReal<slots>(
+            grad(k), first == libMesh::invalid_uint ? libMesh::invalid_uint : first + k, 1);
+
+      // A gradient accessor reads no time derivative, so its seed is one
+      KOKKOS_ASSERT(_slot.seed() == 1);
+
+      if (first != libMesh::invalid_uint)
+        for (unsigned int k = 0; k < AD_GRADIENT_SLOTS; ++k)
+          chain->value[first + k] = grad(k);
+
+      return result;
+    }
+
     const auto first = _slot.first(datum.table());
     const auto displaced = datum.configuration().displaced();
     const Real3 grad = displaced ? _gradient.reference(datum, qp) : _gradient(datum, qp);
 
-    DenseADReal3<slots> result;
     for (unsigned int k = 0; k < AD_GRADIENT_SLOTS; ++k)
       result(k) = seededDenseADReal<slots>(grad(k),
                                            first == libMesh::invalid_uint ? libMesh::invalid_uint
                                                                           : first + k,
                                            _slot.seed());
 
-    return displaced ? datum.adPushForward(result, qp) : result;
+    return displaced ? datum.F_inv(qp).transpose() * result : result;
   }
 
   KOKKOS_FUNCTION const Variable & variable() const { return _gradient.variable(); }

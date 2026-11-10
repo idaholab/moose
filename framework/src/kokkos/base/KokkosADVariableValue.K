@@ -79,6 +79,18 @@ ADSlotTable::setPropertySlots(const unsigned int property,
 }
 
 void
+ADSlotTable::setDualSlots(const std::vector<ADDualSlot> & slots,
+                          const std::vector<unsigned int> & accessor_dual,
+                          const std::vector<unsigned int> & property_dual,
+                          const unsigned int position_dual)
+{
+  _dual = slots;
+  _accessor_dual = accessor_dual;
+  _property_dual = property_dual;
+  _position_dual = position_dual;
+}
+
+void
 ADSlotTable::finalize()
 {
   _num_blocks = _host_blocks.size();

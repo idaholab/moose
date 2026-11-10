@@ -80,41 +80,35 @@ ADSlotSetup::seeded(const Variable * ivar, const Variable & var, const unsigned 
 void
 ADSlotSetup::assign(const MooseObject & object, const Variable & ivar, const unsigned int max_slots)
 {
-  assign(object, ivar, max_slots, Variable());
+  assignSlots(object, &ivar, max_slots, max_slots, Variable());
+}
+
+void
+ADSlotSetup::assign(const MooseObject & object,
+                    const unsigned int max_slots,
+                    const unsigned int max_displaced_slots,
+                    const Variable & displacements,
+                    const Mesh & mesh)
+{
+  assignSlots(object, nullptr, max_slots, max_displaced_slots, displacements, &mesh);
 }
 
 void
 ADSlotSetup::assign(const MooseObject & object,
                     const Variable & ivar,
                     const unsigned int max_slots,
-                    const Variable & displacements)
-{
-  assignSlots(object, &ivar, max_slots, displacements);
-}
-
-void
-ADSlotSetup::assign(const MooseObject & object,
-                    const unsigned int max_slots,
+                    const unsigned int max_displaced_slots,
                     const Variable & displacements,
                     const Mesh & mesh)
 {
-  assignSlots(object, nullptr, max_slots, displacements, &mesh);
-}
-
-void
-ADSlotSetup::assign(const MooseObject & object,
-                    const Variable & ivar,
-                    const unsigned int max_slots,
-                    const Variable & displacements,
-                    const Mesh & mesh)
-{
-  assignSlots(object, &ivar, max_slots, displacements, &mesh);
+  assignSlots(object, &ivar, max_slots, max_displaced_slots, displacements, &mesh);
 }
 
 void
 ADSlotSetup::assignSlots(const MooseObject & object,
                          const Variable * ivar,
                          const unsigned int max_slots,
+                         const unsigned int max_displaced_slots,
                          const Variable & displacements,
                          const Mesh * mesh)
 {
@@ -209,7 +203,78 @@ ADSlotSetup::assignSlots(const MooseObject & object,
   if (mesh)
     assignProperties(ivar, *mesh);
 
+  if (_table.hasDisplacements())
+    assignDualSlots(object, max_displaced_slots, displacements.coupled());
+
   _table.finalize();
+}
+
+void
+ADSlotSetup::assignDualSlots(const MooseObject & object,
+                             const unsigned int max_displaced_slots,
+                             const bool displaced)
+{
+  std::vector<ADDualSlot> slots;
+  std::vector<unsigned int> accessor_dual(_requests.size(), libMesh::invalid_uint);
+  std::vector<unsigned int> property_dual(_property_requests.size(), libMesh::invalid_uint);
+  unsigned int position_dual = libMesh::invalid_uint;
+
+  for (const auto r : index_range(_requests))
+  {
+    const auto first = _table.hostAccessorFirst(r);
+
+    if (_requests[r].gradient)
+    {
+      // The gradient on the configuration varies with the displacements. On the current
+      // configuration, a gradient accessor without derivatives of its own also holds dual slots.
+      if (first == libMesh::invalid_uint && !displaced)
+        continue;
+
+      accessor_dual[r] = slots.size();
+      for (const auto k : make_range(AD_GRADIENT_SLOTS))
+        slots.push_back({ADDualSlot::Kind::GRADIENT, first, k});
+    }
+    else if (first != libMesh::invalid_uint)
+    {
+      // Value accessors of one true slot share its dual slot, with their own seeds
+      for (const auto s : index_range(slots))
+        if (slots[s].kind == ADDualSlot::Kind::VALUE && slots[s].target == first)
+          accessor_dual[r] = s;
+
+      if (accessor_dual[r] == libMesh::invalid_uint)
+      {
+        accessor_dual[r] = slots.size();
+        slots.push_back({ADDualSlot::Kind::VALUE, first});
+      }
+    }
+  }
+
+  for (const auto p : index_range(_property_requests))
+  {
+    property_dual[p] = slots.size();
+    slots.push_back({ADDualSlot::Kind::PROPERTY, static_cast<unsigned int>(p)});
+  }
+
+  if (slots.size() > max_displaced_slots)
+    object.mooseError("The pointwise AD computation of this object on the current configuration "
+                      "reads ",
+                      slots.size(),
+                      " intermediate slots, more than its max_ad_displaced_slots of ",
+                      max_displaced_slots,
+                      ". Increase max_ad_displaced_slots in the class to three for each gradient "
+                      "accessor, one for each value accessor and each AD material property, and "
+                      "three for the position, or remove it to take the default.");
+
+  // The position slots follow when they fit, which the default bound provides for
+  if (displaced && slots.size() + AD_POSITION_SLOTS <= max_displaced_slots)
+  {
+    position_dual = slots.size();
+    for (const auto c : make_range(AD_POSITION_SLOTS))
+      slots.push_back({ADDualSlot::Kind::POSITION, c});
+  }
+
+  slots.resize(max_displaced_slots);
+  _table.setDualSlots(slots, accessor_dual, property_dual, position_dual);
 }
 
 void

@@ -20,6 +20,8 @@ class KokkosADDiffusion : public Moose::Kokkos::ADKernel
 public:
   /// The residual depends on grad u
   static constexpr unsigned int max_ad_slots = 3;
+  /// On the current configuration the residual depends on grad u on the configuration only
+  static constexpr unsigned int max_ad_displaced_slots = 3;
 
   static InputParameters validParams();
 

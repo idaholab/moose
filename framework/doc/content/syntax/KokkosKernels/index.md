@@ -197,8 +197,11 @@ An object whose accessors receive more directions than its `max_ad_slots` errors
 A residual computed without the Jacobian instantiates the hooks with zero slots, where `DenseADReal<0>` is `Real`, so the hooks must also compile for `slots = 0`.
 
 An AD kernel or integrated boundary condition with `use_displaced_mesh = true` is posed on the current configuration.
-Its hooks are then instantiated with `max_ad_slots` plus the directions of the displacements, the value and reference gradient of each component, and the geometry of the current configuration, which the accessors and the base class compose from the dual deformation gradient, carries the derivatives with respect to the displacements.
+When a displacement component carries derivatives, the hooks are instantiated with intermediate directions: one for each coupled value, three for each gradient on the current configuration, one for each AD material property, and three for the quadrature point position.
+After the hooks, the base class maps these directions to the values, the reference gradients, and the displacements with the chain rule through the deformation gradient, and adds the variation of the quadrature weight and of the element map.
 The Jacobian with respect to the displacements is therefore assembled with no change to the kernel.
+The number of intermediate directions defaults to `max_ad_slots + 3`.
+A kernel that reads fewer, for example one that never calls `adQPoint()`, may declare the exact number as `static constexpr unsigned int max_ad_displaced_slots`, which narrows its dual numbers.
 When no displacement component carries derivatives, for example when the displacements are auxiliary variables, the hooks are instantiated with `max_ad_slots` only and read the geometry of the current configuration as plain values.
 
 !syntax list /Kernels objects=True actions=False subsystems=False

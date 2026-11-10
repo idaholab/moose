@@ -22,6 +22,9 @@ public:
   /// grad u, followed by the inputs of the diffusivity coupled to u: one coupled field value and
   /// gradient besides the value of u
   static constexpr unsigned int max_ad_slots = 8;
+  /// On the current configuration the residual depends on grad u on the configuration and on the
+  /// diffusivity, whose stored derivatives carry those with respect to its inputs
+  static constexpr unsigned int max_ad_displaced_slots = 4;
 
   static InputParameters validParams();
 

@@ -265,7 +265,9 @@ protected:
    * reference configuration, whose derivatives the scratch stores mapped to the reference element
    * (dq_k/dU_j = d phi_j / d xi_k). Each entry of a column accumulates once per chunk of quadrature
    * points.
-   * @tparam slots The number of derivative slots of the instantiation
+   * @tparam slots The number of dual slots of the instantiation
+   * @tparam displaced Whether the instantiation carries the displacement derivatives. Its dual
+   * slots then hold intermediate quantities, which the chain rule maps to the true slots.
    * @param object The residual object of the final derived type
    * @param team The team handle
    * @param group The group of the team that assembles the element or side
@@ -274,7 +276,7 @@ protected:
    * @param computing_residual Whether to assemble the residual
    * @param computing_jacobian Whether to assemble the Jacobian
    */
-  template <unsigned int slots, typename Object, typename Team>
+  template <unsigned int slots, bool displaced, typename Object, typename Team>
   KOKKOS_FUNCTION void assembleADTerms(const Object & object,
                                        const Team & team,
                                        const ADTeamGroup & group,
@@ -289,7 +291,7 @@ protected:
    * @param dispatcher The team dispatcher
    * @param n_items The number of elements or sides
    * @param max_qps The maximum number of quadrature points of an element or side
-   * @param slots The number of derivative slots of the instantiation
+   * @param slots The number of true slots of the scratch layout
    * @param table The slot table of the object, whose column variables size the Jacobian
    * contraction
    */
@@ -598,7 +600,7 @@ ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) co
   }
 }
 
-template <unsigned int slots, typename Object, typename Team>
+template <unsigned int slots, bool displaced, typename Object, typename Team>
 KOKKOS_FUNCTION void
 ResidualObject::assembleADTerms(const Object & object,
                                 const Team & team,
@@ -608,11 +610,13 @@ ResidualObject::assembleADTerms(const Object & object,
                                 const bool computing_residual,
                                 const bool computing_jacobian) const
 {
-  constexpr auto qp_size = ADScratchLayout::qpSize(slots);
   constexpr auto term_size = ADScratchLayout::term_size;
 
+  // The scratch holds the derivatives with respect to the true slots. Outside the displaced
+  // instantiation, the dual slots are the true slots.
   const auto & layout = _ad_layout;
-  KOKKOS_ASSERT(layout.slots == slots);
+  KOKKOS_ASSERT(displaced || layout.slots == slots);
+  const auto qp_size = ADScratchLayout::qpSize(displaced ? layout.slots : slots);
 
   const auto n_qps = datum.n_qps();
   const auto group_scratch_size = layout.groupSize();
@@ -631,10 +635,9 @@ ResidualObject::assembleADTerms(const Object & object,
   // Each thread evaluates its quadrature points with its own datum, whose geometry cache is
   // thread-private
   group_for(n_qps,
-            [&](const unsigned int qp)
-            {
-              ADAssemblyDatum<slots> qp_datum(datum, table);
-              evaluateADTerms(object, qp_datum, qp, &scratch(qp * qp_size));
+            [&](const unsigned int qp) {
+              evaluateADTerms<displaced, slots>(
+                  object, datum, table, layout.slots, qp, &scratch(qp * qp_size));
             });
   team.team_barrier();
 

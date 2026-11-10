@@ -47,7 +47,7 @@
     [cartesian]
       type = PetscJacobianTester
       input = 'kokkos_current_configuration_ad_jacobian.i'
-      detail = 'in Cartesian coordinates and'
+      detail = 'in Cartesian coordinates,'
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
     []
@@ -55,7 +55,15 @@
       type = PetscJacobianTester
       input = 'kokkos_current_configuration_ad_jacobian.i'
       cli_args = 'Mesh/coord_type=RZ'
-      detail = 'in axisymmetric coordinates.'
+      detail = 'in axisymmetric coordinates, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [three_dimensional]
+      type = PetscJacobianTester
+      input = 'kokkos_current_configuration_ad_jacobian.i'
+      cli_args = "Mesh/dim=3 Mesh/nz=2 Mesh/displacements='disp_x disp_y disp_z'"
+      detail = 'in three dimensions.'
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
     []
