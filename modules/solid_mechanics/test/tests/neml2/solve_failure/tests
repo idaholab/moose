@@ -9,5 +9,10 @@
     allow_warnings = true
     capabilities = 'libtorch & neml2'
     valgrind = heavy
+    # NEML2 Newton::solve keeps iterating converged batch rows until the whole batch converges,
+    # so the converged state and tangent of a quadrature point depend on which other points share
+    # its batch. The nonlinear path at the load reversal, and thus the number of cutbacks, then
+    # depends on the domain partitioning.
+    max_parallel = 1
   []
 []
