@@ -72,4 +72,53 @@
     design = 'UserObjects/index.md'
     issues = '#34282'
   []
+
+  [external_boundary_selection]
+    requirement = 'The system shall invoke DomainUserObject boundary callbacks'
+    design = 'UserObjects/index.md'
+    issues = '#32413'
+    [unset]
+      detail = 'on all boundaries not selected as interfaces when external_boundaries is unset,'
+      type = RunApp
+      mesh_mode = REPLICATED
+      input = overlapping-interface.i
+      cli_args = 'UserObjects/conservation/expected_boundary_calls=6 Outputs/exodus=false'
+    []
+    [selected]
+      detail = 'only on selected external boundaries when external_boundaries lists them, and'
+      type = RunApp
+      mesh_mode = REPLICATED
+      input = overlapping-interface.i
+      cli_args = 'UserObjects/conservation/external_boundaries=bottom UserObjects/conservation/expected_boundary_calls=2 Outputs/exodus=false'
+    []
+    [empty]
+      detail = 'on no boundaries when external_boundaries is explicitly empty.'
+      type = RunApp
+      mesh_mode = REPLICATED
+      input = overlapping-interface.i
+      cli_args = 'UserObjects/conservation/external_boundaries= UserObjects/conservation/expected_boundary_calls=0 UserObjects/conservation/check_conservation=false Outputs/exodus=false'
+    []
+  []
+
+  [external_boundary_rejects_internal_side]
+    requirement = 'The system shall reject a DomainUserObject external boundary selection containing an internal side.'
+    design = 'UserObjects/index.md'
+    issues = '#32413'
+    type = RunException
+    mesh_mode = REPLICATED
+    input = overlapping-interface.i
+    cli_args = 'UserObjects/conservation/external_boundaries=crack Outputs/exodus=false'
+    expect_err = 'contains an internal side, but external boundaries must not contain neighbors'
+  []
+
+  [external_boundary_interface_overlap]
+    requirement = 'The system shall reject a DomainUserObject boundary ID selected as both an external boundary and an interface.'
+    design = 'UserObjects/index.md'
+    issues = '#32413'
+    type = RunException
+    mesh_mode = REPLICATED
+    input = overlapping-interface.i
+    cli_args = 'UserObjects/conservation/external_boundaries=new Outputs/exodus=false'
+    expect_err = 'cannot be selected as both external boundaries and internal interfaces'
+  []
 []

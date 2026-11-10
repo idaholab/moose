@@ -30,8 +30,9 @@ class QBase;
 /**
  * This user object allows related evaluations on elements, boundaries, internal sides,
  * interfaces in one single place. DomainUserObject is still block restrictable.
- * While evaluations on elements, boundaries and internal sides always happen,
- * a parameter 'interface_boundaries' needs to be set to invoke evaluations on interfaces.
+ * By default, evaluations on elements, boundaries and internal sides happen, while
+ * 'interface_boundaries' must be set to invoke evaluations on interfaces. When
+ * 'external_boundaries' is set, boundary evaluations are restricted to its external sides.
  * We require this parameter for interface evaluations because we want to enforce sanity
  * checks on coupling variables that are not defined on the domain this user object works on
  * but only are available on the other side of the interfaces. All sides of an interface must
@@ -100,9 +101,9 @@ public:
   void preExecuteOnInterface();
 
   /**
-   * Return whether this object should run \p executeOnBoundary
+   * Return whether this object should run \p executeOnBoundary on the given side topology
    */
-  bool shouldExecuteOnBoundary() const;
+  bool shouldExecuteOnBoundary(bool is_external_side) const;
 
   /**
    * Return whether this object should run \p executeOnInterface
@@ -171,6 +172,12 @@ protected:
 
   /// The set of boundary IDs on which this object should perform \p executeOnInterface
   std::set<BoundaryID> _interface_bnd_ids;
+
+  /// The external boundary IDs on which this object should perform \p executeOnBoundary
+  std::set<BoundaryID> _external_bnd_ids;
+
+  /// Whether execution is restricted to explicitly selected external boundaries
+  const bool _external_bnd_restricted;
 
   /// The set of blocks connected to our blocks through boundaries of the \p _interface_bnd_ids data member
   std::map<BoundaryID, std::set<SubdomainID>> _interface_connected_blocks;
@@ -257,9 +264,21 @@ DomainUserObject::setFaceData()
 }
 
 inline bool
-DomainUserObject::shouldExecuteOnBoundary() const
+DomainUserObject::shouldExecuteOnBoundary(const bool is_external_side) const
 {
-  return !_interface_bnd_ids.count(_current_boundary_id);
+  if (!_external_bnd_restricted)
+    return !_interface_bnd_ids.count(_current_boundary_id);
+
+  if (!_external_bnd_ids.count(_current_boundary_id))
+    return false;
+
+  if (!is_external_side)
+    paramError("external_boundaries",
+               "Boundary ",
+               _current_boundary_id,
+               " contains an internal side, but external boundaries must not contain neighbors.");
+
+  return true;
 }
 
 inline bool
