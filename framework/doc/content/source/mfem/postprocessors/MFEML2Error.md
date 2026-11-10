@@ -12,6 +12,9 @@ conforming source variable compared to a scalar function.
 
 where $u_{h} \in H^1 \lor L^2$ and $u_{ex}$ is a scalar function.
 
+The quadrature rule is set by [!param](/Postprocessors/MFEML2Error/quadrature_order), as described
+in [MFEMNormPostprocessor.md].
+
 ## Example Input File Syntax
 
 !listing mfem/kernels/irrotational.i block=Postprocessors
