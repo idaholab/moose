@@ -5,7 +5,7 @@
     type = Exodiff
     input = 'kokkos_pp_dirichlet.i'
     exodiff = 'kokkos_pp_dirichlet_out.e'
-    requirement = 'The Kokkos system shall impose a Dirichlet boundary condition with a value given by a postprocessor.'
+    requirement = 'The system shall, using Kokkos, impose a Dirichlet boundary condition with a value given by a postprocessor.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []

@@ -3,7 +3,7 @@
   design = 'interfaces/TaggingInterface.md'
 
   [petsc_gpu]
-    requirement = 'The Kokkos system shall support the ability to leverage PETSc GPU computing capabilities with'
+    requirement = 'The system shall, using Kokkos, support the ability to leverage PETSc GPU computing capabilities with'
     [tag_vector_pjfnk]
       type = 'Exodiff'
       input = 'kokkos_2d_diffusion_tag_vector.i'

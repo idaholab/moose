@@ -6,13 +6,13 @@
     type = 'Exodiff'
     input = 'kokkos_ad_coupled_var_neumann.i'
     exodiff = 'kokkos_ad_coupled_var_neumann_out.e'
-    requirement = 'The Kokkos system shall support coupled Neumann type boundary conditions using automatic differentiation.'
+    requirement = 'The system shall, using Kokkos, support coupled Neumann type boundary conditions using automatic differentiation.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
 
   [nonlinear]
-    requirement = 'When coupling nonlinear variables into a Neumann type boundary condition using automatic differentiation, the Kokkos system shall'
+    requirement = 'The system shall, when coupling nonlinear variables into a Neumann type boundary condition using automatic differentiation with Kokkos,'
     [exo]
       type = Exodiff
       input = 'kokkos_ad_coupled_var_neumann_nl.i'

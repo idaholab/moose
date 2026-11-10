@@ -8,7 +8,7 @@
     exodiff = 'kokkos_reaction_out.e'
     rel_err = 1e-05
     abs_zero = 1e-08
-    requirement = 'The Kokkos system shall include ability to include reaction contributions to the residual nodes of a finite element mesh.'
+    requirement = 'The system shall, using Kokkos, include ability to include reaction contributions to the residual nodes of a finite element mesh.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []

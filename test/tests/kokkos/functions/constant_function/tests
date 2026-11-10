@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'kokkos_constant_function.i'
     exodiff = 'kokkos_constant_function_out.e'
-    requirement = 'The Kokkos function system shall include a constant function and the ability to retrieve it as an abstract type.'
+    requirement = 'The system shall, in the Kokkos function system, include a constant function and the ability to retrieve it as an abstract type.'
     capabilities = 'kokkos & !cuda'
     compute_devices = 'cpu'
   []
