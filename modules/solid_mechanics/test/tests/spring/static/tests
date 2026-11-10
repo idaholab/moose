@@ -1,0 +1,306 @@
+[Tests]
+  design = "SpringElements.md"
+  issues = "#34418"
+
+  [linear_spring]
+    type = CSVDiff
+    input = linear_spring.i
+    csvdiff = linear_spring_out.csv
+    design = 'SpringElements.md ComputeSpringDeformation.md LinearSpring.md StressDivergenceSpring.md'
+    requirement = "The mechanics system shall compute the deformation of a linear spring element along the global X axis under three loads, the stiffness of each local axis acting along its global axis."
+  []
+  [linear_spring_rotated]
+    type = CSVDiff
+    input = linear_spring.i
+    cli_args = "Mesh/spring/nodal_positions='0 0 0 3 0 4' NodalKernels/load_x/rate=3.6 NodalKernels/load_y/rate=4 NodalKernels/load_z/rate=9.8 Outputs/file_base=linear_spring_rotated_out"
+    csvdiff = linear_spring_rotated_out.csv
+    design = 'ComputeSpringDeformation.md'
+    requirement = "The mechanics system shall compute the deformation of a linear spring element inclined in space, with the local frame built from the element direction and the projection of the global Y axis, giving the same local deformations and forces as the aligned spring under the rotated loads."
+  []
+  [linear_spring_ground]
+    type = CSVDiff
+    input = linear_spring.i
+    cli_args = "Mesh/fixed_end/nodes=1 Mesh/free_end/nodes=0 NodalKernels/load_y/rate=0 NodalKernels/load_z/rate=0 Postprocessors/disp_x/nodeid=0 Postprocessors/disp_y/nodeid=0 Postprocessors/disp_z/nodeid=0 Outputs/file_base=linear_spring_ground_out"
+    csvdiff = linear_spring_ground_out.csv
+    design = 'StressDivergenceSpring.md'
+    requirement = "The mechanics system shall model a ground spring as a spring element whose second node is held, the first node pushed toward it compressing the spring with a negative force."
+  []
+  [linear_spring_jacobian]
+    type = PetscJacobianTester
+    input = linear_spring.i
+    cli_args = 'Outputs/csv=false'
+    design = 'StressDivergenceSpring.md'
+    requirement = "The mechanics system shall compute the exact Jacobian of a linear spring element."
+  []
+  [six_dof]
+    type = CSVDiff
+    input = six_dof.i
+    csvdiff = six_dof_out.csv
+    design = 'LinearSpring.md StressDivergenceSpring.md'
+    requirement = "The mechanics system shall combine a translational and a rotational spring law on one element into a spring with six degrees of freedom, each law acting on its own relative motion."
+  []
+  [six_dof_jacobian]
+    type = PetscJacobianTester
+    input = six_dof.i
+    cli_args = 'Outputs/csv=false'
+    design = 'StressDivergenceSpring.md'
+    requirement = "The mechanics system shall compute the exact Jacobian of a spring element with six degrees of freedom."
+  []
+  [kelvin_voigt]
+    type = CSVDiff
+    input = kelvin_voigt.i
+    csvdiff = kelvin_voigt_out.csv
+    design = 'ComputeSpringDeformation.md ViscousSpring.md'
+    requirement = "The mechanics system shall put a spring and a dashpot in parallel on one element through the base name of their properties, the displacement under a constant load following the implicit Euler recursion of the Kelvin-Voigt element."
+  []
+  [nonlinear_elastic]
+    type = CSVDiff
+    input = nonlinear_elastic.i
+    csvdiff = nonlinear_elastic_out.csv
+    design = 'NonlinearElasticSpring.md'
+    requirement = "The mechanics system shall compute the force of a nonlinear elastic spring from a bilinear backbone, a compression-only backbone and a tension-only backbone under a prescribed deformation."
+  []
+  [nonlinear_elastic_load]
+    type = CSVDiff
+    input = nonlinear_elastic_load.i
+    csvdiff = nonlinear_elastic_load_out.csv
+    design = 'NonlinearElasticSpring.md'
+    requirement = "The mechanics system shall compute the deformation of a nonlinear elastic spring under loads beyond the kink of its bilinear backbone."
+  []
+  [nonlinear_elastic_jacobian]
+    type = PetscJacobianTester
+    input = nonlinear_elastic_load.i
+    cli_args = 'Outputs/csv=false'
+    design = 'NonlinearElasticSpring.md'
+    requirement = "The mechanics system shall compute the exact Jacobian of a nonlinear elastic spring element away from the kinks of its backbone."
+  []
+  [hysteretic]
+    type = CSVDiff
+    input = hysteretic.i
+    csvdiff = hysteretic_out.csv
+    design = 'MasingHystereticSpring.md'
+    requirement = "The mechanics system shall compute the force of a hysteretic spring under a prescribed deformation cycle, the first loading on the backbone and every unloading and reloading branch following the Masing rule until it meets the backbone."
+  []
+  [hysteretic_inner_loop]
+    type = CSVDiff
+    input = hysteretic_inner_loop.i
+    csvdiff = hysteretic_inner_loop_out.csv
+    design = 'MasingHystereticSpring.md'
+    requirement = "The mechanics system shall start a new Masing branch at a reversal inside a loop and return that branch to the backbone where it meets it, the law keeping the last reversal only."
+  []
+  [hysteretic_load]
+    type = CSVDiff
+    input = hysteretic_load.i
+    csvdiff = hysteretic_load_out.csv
+    design = 'MasingHystereticSpring.md'
+    requirement = "The mechanics system shall compute the deformation of a hysteretic spring under a load history with reversals, the elastic unloading spanning twice the yield force."
+  []
+  [hysteretic_jacobian]
+    type = PetscJacobianTester
+    input = hysteretic_load.i
+    cli_args = 'Executioner/num_steps=1 Outputs/csv=false'
+    design = 'MasingHystereticSpring.md'
+    requirement = "The mechanics system shall compute the exact Jacobian of a hysteretic spring element on its backbone."
+  []
+  [mohr_coulomb]
+    type = CSVDiff
+    input = mohr_coulomb.i
+    csvdiff = mohr_coulomb_out.csv
+    design = 'MohrCoulombSpring.md'
+    requirement = "The mechanics system shall compute the forces of a Mohr-Coulomb interface spring under a prescribed closure, shear and opening: compression only along the normal, a shear resultant capped by the cohesion plus the normal stress times the tangent of the friction angle, and no force after separation."
+  []
+  [mohr_coulomb_initial_stress]
+    type = CSVDiff
+    input = mohr_coulomb_initial_stress.i
+    csvdiff = mohr_coulomb_initial_stress_out.csv
+    design = 'MohrCoulombSpring.md'
+    requirement = "The mechanics system shall take the initial normal stress of a Mohr-Coulomb interface spring into the Coulomb limit only, the spring carrying no normal force without a closure, the limit relaxing with an opening down to separation."
+  []
+  [mohr_coulomb_cohesion_only]
+    type = CSVDiff
+    input = mohr_coulomb_cohesion_only.i
+    csvdiff = mohr_coulomb_cohesion_only_out.csv
+    design = 'MohrCoulombSpring.md'
+    requirement = "The mechanics system shall carry the cohesion of a Mohr-Coulomb interface spring at rest, with no initial normal stress and no closure, and lose it on an opening."
+  []
+  [mohr_coulomb_initial_stress_jacobian]
+    type = PetscJacobianTester
+    input = mohr_coulomb_initial_stress.i
+    cli_args = 'Executioner/end_time=2 Outputs/csv=false'
+    run_sim = true
+    only_final_jacobian = true
+    ratio_tol = 1e-6
+    design = 'MohrCoulombSpring.md StressDivergenceSpring.md'
+    requirement = "The mechanics system shall compute the consistent Jacobian of a Mohr-Coulomb interface spring sliding under an initial normal stress with an opening, where the shear couples to the normal deformation while the normal stiffness is zero."
+  []
+  [mohr_coulomb_tension]
+    type = CSVDiff
+    input = mohr_coulomb_tension.i
+    csvdiff = mohr_coulomb_tension_out.csv
+    design = 'MohrCoulombSpring.md'
+    requirement = "The mechanics system shall carry the tension of a bonded Mohr-Coulomb interface spring up to its tensile strength with a shear limit falling linearly from the cohesion to zero there, separate the interface beyond it, and give the bond back once it closes again."
+  []
+  [mohr_coulomb_tension_permanent]
+    type = CSVDiff
+    input = mohr_coulomb_tension.i
+    cli_args = 'Materials/law/permanent_breakage=true Materials/law/residual_cohesion=1 Materials/law/residual_friction_angle=10 Outputs/file_base=mohr_coulomb_tension_permanent_out'
+    csvdiff = mohr_coulomb_tension_permanent_out.csv
+    design = 'MohrCoulombSpring.md'
+    requirement = "The mechanics system shall leave a Mohr-Coulomb interface spring with permanent breakage frictional after a separation, with the residual cohesion and friction angle and no tensile strength, once it closes again."
+  []
+  [mohr_coulomb_tension_jacobian]
+    type = PetscJacobianTester
+    input = mohr_coulomb_tension.i
+    cli_args = 'Executioner/end_time=1 Outputs/csv=false'
+    run_sim = true
+    only_final_jacobian = true
+    ratio_tol = 1e-6
+    design = 'MohrCoulombSpring.md StressDivergenceSpring.md'
+    requirement = "The mechanics system shall compute the consistent Jacobian of a bonded Mohr-Coulomb interface spring sliding in tension, where the shear couples to the normal deformation through the slope of the falling limit."
+  []
+  [mohr_coulomb_load]
+    type = CSVDiff
+    input = mohr_coulomb_load.i
+    csvdiff = mohr_coulomb_load_out.csv
+    design = 'MohrCoulombSpring.md'
+    requirement = "The mechanics system shall compute the sliding of a Mohr-Coulomb interface spring under a shear load, the shear resultant staying on the Coulomb limit."
+  []
+  [mohr_coulomb_jacobian]
+    type = PetscJacobianTester
+    input = mohr_coulomb_load.i
+    cli_args = 'Outputs/csv=false'
+    run_sim = true
+    only_final_jacobian = true
+    # The sliding tangent is exact; the finite-difference Jacobian of the radial return carries
+    # the curvature of the return map, which keeps the ratio at the 1e-7 level.
+    ratio_tol = 1e-6
+    design = 'MohrCoulombSpring.md StressDivergenceSpring.md'
+    requirement = "The mechanics system shall compute the consistent, non-symmetric Jacobian of a Mohr-Coulomb interface spring at its converged sliding state."
+  []
+  [viscous]
+    type = CSVDiff
+    input = viscous.i
+    csvdiff = viscous_out.csv
+    design = 'ViscousSpring.md'
+    requirement = "The mechanics system shall compute the force of a viscous spring from the rate of its deformation under a prescribed velocity."
+  []
+  [viscous_load]
+    type = CSVDiff
+    input = viscous_load.i
+    csvdiff = viscous_load_out.csv
+    design = 'ViscousSpring.md'
+    requirement = "The mechanics system shall compute the velocity of a viscous spring under a constant load."
+  []
+  [viscous_jacobian]
+    type = PetscJacobianTester
+    input = viscous_load.i
+    cli_args = 'Outputs/csv=false'
+    design = 'ViscousSpring.md'
+    requirement = "The mechanics system shall compute the exact Jacobian of a viscous spring element, including the derivative of the velocity with respect to the displacement of the time integrator."
+  []
+
+  [two_displacements]
+    type = RunException
+    input = linear_spring.i
+    cli_args = "Materials/deformation/displacements='disp_x disp_y' Outputs/csv=false"
+    expect_err = 'Three displacement variables are needed'
+    design = 'ComputeSpringDeformation.md'
+    requirement = "The spring deformation material shall report an error when it is not given three displacement variables."
+  []
+  [zero_length_refused]
+    type = RunException
+    input = linear_spring.i
+    cli_args = "Mesh/spring/nodal_positions='0 0 0 0 0 0' Outputs/csv=false"
+    expect_err = 'has zero length'
+    design = 'ComputeSpringDeformation.md'
+    requirement = "The spring deformation material shall report an element of zero length, which the finite element map of the mesh cannot take."
+  []
+  [parallel_axes]
+    type = RunException
+    input = linear_spring.i
+    cli_args = "Materials/deformation/local_axis_1='1 0 0' Materials/deformation/local_axis_2='2 0 0' Outputs/csv=false"
+    expect_err = 'parallel to local axis 1'
+    design = 'ComputeSpringDeformation.md'
+    requirement = "The spring deformation material shall report an error when the direction given for local axis 2 is parallel to local axis 1."
+  []
+  [rotational_law_without_rotations]
+    type = RunException
+    input = linear_spring.i
+    cli_args = "Materials/law/mode=rotational Outputs/csv=false"
+    expect_err = "Material property 'spring_rotation', requested by 'law' is not defined"
+    design = 'SpringElements.md'
+    requirement = "A rotational spring law shall report a missing property when the deformation material of its block is not given the rotation variables."
+  []
+  [rates_without_transient]
+    type = RunException
+    input = viscous_load.i
+    cli_args = "Executioner/type=Steady Outputs/csv=false"
+    expect_err = 'need a transient executioner'
+    design = 'ComputeSpringDeformation.md'
+    requirement = "The spring deformation material shall report an error when the deformation rates are requested under a steady executioner."
+  []
+  [refined_spring]
+    type = RunException
+    input = linear_spring.i
+    cli_args = 'Mesh/uniform_refine=1 Outputs/csv=false'
+    expect_err = 'is a refined spring element'
+    design = 'ComputeSpringDeformation.md'
+    requirement = "The spring deformation material shall report a spring element split by mesh refinement."
+  []
+  [zero_axis]
+    type = RunException
+    input = linear_spring.i
+    cli_args = "Materials/deformation/local_axis_1='0 0 0' Outputs/csv=false"
+    expect_err = 'The direction must not be zero'
+    design = 'ComputeSpringDeformation.md'
+    requirement = "The spring deformation material shall report a zero direction given for a local axis."
+  []
+  [residual_without_permanent_breakage]
+    type = RunException
+    input = mohr_coulomb_tension.i
+    cli_args = 'Materials/law/residual_friction_angle=10 Outputs/csv=false'
+    expect_err = 'needs permanent_breakage'
+    design = 'MohrCoulombSpring.md'
+    requirement = "The mechanics system shall refuse a residual strength parameter of a Mohr-Coulomb interface spring without permanent breakage."
+  []
+  [negative_damping]
+    type = RunException
+    input = viscous.i
+    cli_args = "Materials/law/damping='-1 0 0' Outputs/csv=false"
+    expect_err = 'must be zero or positive'
+    design = 'ViscousSpring.md'
+    requirement = "The viscous spring law shall report an error for a negative damping coefficient."
+  []
+  [wrong_component]
+    type = RunException
+    input = linear_spring.i
+    cli_args = 'Kernels/spring_x/component=1 Outputs/csv=false'
+    expect_err = 'The variable must be entry'
+    design = 'StressDivergenceSpring.md'
+    requirement = "The spring kernel shall report an error when its variable is not the displacement or rotation of its component."
+  []
+  [negative_stiffness]
+    type = RunException
+    input = linear_spring.i
+    cli_args = "Materials/law/stiffness='100 -1 300' Outputs/csv=false"
+    expect_err = 'must be zero or positive'
+    design = 'LinearSpring.md'
+    requirement = "The linear spring law shall report an error for a negative stiffness."
+  []
+  [two_backbones]
+    type = RunException
+    input = nonlinear_elastic.i
+    cli_args = "Materials/law/backbone_functions='bilinear bilinear' Outputs/csv=false"
+    expect_err = 'Three functions are needed'
+    design = 'NonlinearElasticSpring.md'
+    requirement = "The nonlinear elastic spring law shall report an error when it is not given one backbone function per local axis."
+  []
+  [viscous_without_rates]
+    type = RunException
+    input = viscous.i
+    cli_args = 'Materials/deformation/compute_rates=false Outputs/csv=false'
+    expect_err = 'spring_deformation_rate'
+    design = 'ViscousSpring.md'
+    requirement = "The viscous spring law shall report an error when the deformation material does not compute the rates."
+  []
+[]
