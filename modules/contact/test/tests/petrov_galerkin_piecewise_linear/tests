@@ -29,13 +29,15 @@
     []
   []
   [dynamics]
-    type = RunApp
+    type = CSVDiff
     input = 'tilted_gap_3d.i'
+    csvdiff = 'tilted_gap_3d_dynamics.csv'
     cli_args = 'Contact/mortar/mortar_dynamics=true Executioner/type=Transient '
                'Executioner/num_steps=2 Executioner/dt=0.1 '
                'Executioner/TimeIntegrator/type=NewmarkBeta BCs/fix_z/boundary=bottom_back '
                'BCs/push/type=FunctionDirichletBC BCs/push/variable=disp_z '
-               'BCs/push/boundary=top_front BCs/push/function=-0.2*t Outputs/csv=false'
+               'BCs/push/boundary=top_front BCs/push/function=-0.2*t '
+               'Outputs/file_base=tilted_gap_3d_dynamics'
     capabilities = 'ad_size>=150'
     requirement = 'The system shall weight the gap of dynamic mortar contact with the piecewise-linear '
                   'basis of second-order secondary faces when requested in the contact action.'
@@ -75,6 +77,22 @@
       expect_err = "requires 'split_segments_at_sub_elements = true' in two dimensions"
       detail = 'The piecewise-linear basis requires two-dimensional mortar segments to be split at '
                'the sub-elements of the secondary faces.'
+    []
+    [no_lm_variable]
+      type = RunException
+      input = 'tilted_gap.i'
+      cli_args = 'Constraints/missing_lm/type=NormalMortarMechanicalContact '
+                 'Constraints/missing_lm/primary_boundary=bottom_top '
+                 'Constraints/missing_lm/secondary_boundary=top_bottom '
+                 'Constraints/missing_lm/primary_subdomain=mortar_primary_subdomain '
+                 'Constraints/missing_lm/secondary_subdomain=mortar_secondary_subdomain '
+                 'Constraints/missing_lm/secondary_variable=disp_x Constraints/missing_lm/component=x '
+                 'Constraints/missing_lm/use_displaced_mesh=true '
+                 'Constraints/missing_lm/weighted_gap_uo=lm_weightedgap_object_mortar '
+                 'Constraints/missing_lm/aux_lm=mortar_aux_lm '
+                 'Constraints/missing_lm/split_segments_at_sub_elements=true --check-input'
+      expect_err = "piecewise-linear basis requires a Lagrange multiplier 'variable'"
+      detail = 'The piecewise-linear basis requires a Lagrange multiplier variable.'
     []
   []
 []
