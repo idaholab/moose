@@ -423,7 +423,10 @@ advected_interp_method = 'average'
   pressure_variable_relaxation = 0.2
   num_iterations = 500
   pressure_absolute_tolerance = 1e-10
-  momentum_absolute_tolerance = 1e-10
+  # The exact transverse velocity is zero, so the y-momentum system has a vanishing normalization
+  # factor and its normalized residual converges slowly without changing the solution. Its
+  # tolerance is therefore not used as a convergence criterion.
+  momentum_absolute_tolerance = '1e-10 1'
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'

@@ -88,7 +88,30 @@ Gradients and stresses, which would otherwise read the jump as a slope:
 With these, a velocity field that is linear on each side of a baffle, together with its
 piecewise-constant pressure, is reproduced to round-off on uniform meshes, and a fluid at rest
 under a porosity-weighted buoyancy force keeps zero velocity and the hydrostatic pressure across
-porosity and density jumps.
+porosity and density jumps. The rest state is exact when the baffle is parallel or normal to
+gravity on an orthogonal mesh. On a nonorthogonal mesh with a stratified density, the quadratic
+hydrostatic pressure enters the Green-Gauss gradient through one-sided face values, and the
+nonorthogonal correction turns that gradient error into a small spurious velocity. This velocity
+has the same size with and without the baffle and converges at second order with mesh refinement.
+
+## Postprocessing on a baffle
+
+The two postprocessors usually evaluated on a baffle sideset behave differently:
+
+- [VolumetricFlowRate.md] with
+  [!param](/Postprocessors/VolumetricFlowRate/rhie_chow_user_object) integrates the corrected
+  Rhie-Chow face flux. This flux is shared by both sides of a baffle, so the flow rate through the
+  baffle is conservative and does not depend on the side it is evaluated from.
+- [PressureDrop.md] evaluates the pressure variable on its faces. On a baffle face the variable
+  interpolates the two cell pressures across the baffle, so the value lies between the two sides
+  and is neither one-sided face pressure. To measure the pressure change across a baffle, place
+  the upstream and downstream sidesets away from the baffle, on faces where the pressure is
+  continuous, so the jump falls between them.
+
+The same rule holds inside the solver: the face value of the pressure variable is valid only where
+the pressure is continuous. An object that needs the face pressure of one side of a baffle must
+recover it from the half-cell flux relation, as
+[FVPressureJumpGreenGaussGradient.md] does for the surface sum of each cell.
 
 ## Pressure jump
 

@@ -143,7 +143,13 @@ pressureJumpFlux(const PressureJumpInterfaceData & data,
          data.correction;
 }
 
-/** Recover one side's face pressure from the common oriented face mass flux. */
+/**
+ * Recover one side's face pressure from the common oriented face mass flux.
+ *
+ * The face value of the pressure variable interpolates the two cell pressures, which is valid only
+ * where the pressure is continuous. On a baffle face, any consumer that needs the face pressure of
+ * one side, such as the surface sum of a Green-Gauss gradient, must use this value instead.
+ */
 inline Real
 pressureJumpOneSidedFaceValue(const PressureJumpInterfaceData & data,
                               const Real cell_pressure,

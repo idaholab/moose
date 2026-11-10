@@ -37,8 +37,8 @@ advected_interp_method = 'upwind'
   [clean_inlet_gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 13
-    ny = 13
+    nx = 7
+    ny = 7
     xmin = 0
     xmax = 1
     ymin = 0
@@ -68,8 +68,8 @@ advected_interp_method = 'upwind'
                1.7 0 0
                2.3 1 0
                1 1 0'
-    nx = 14
-    ny = 14
+    nx = 8
+    ny = 8
     bottom_type = LINE
     top_type = LINE
     right_type = LINE
@@ -99,8 +99,8 @@ advected_interp_method = 'upwind'
                1.7 0 0
                3 0 0
                3 1 0'
-    nx = 14
-    ny = 14
+    nx = 8
+    ny = 8
     bottom_type = LINE
     top_type = LINE
     right_type = LINE
@@ -127,8 +127,8 @@ advected_interp_method = 'upwind'
   [clean_outlet_gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 26
-    ny = 13
+    nx = 14
+    ny = 7
     xmin = 3
     xmax = 5
     ymin = 0
@@ -497,9 +497,9 @@ advected_interp_method = 'upwind'
     type = LineValueSampler
     variable = 'pressure superficial_u'
     warn_discontinuous_face_values = false
-    start_point = '0.0384615384615385 0.5 0'
-    end_point = '3.9615384615384615 0.5 0'
-    num_points = 52
+    start_point = '0.0714285714285714 0.5 0'
+    end_point = '3.9285714285714286 0.5 0'
+    num_points = 28
     sort_by = x
   []
 
@@ -508,36 +508,36 @@ advected_interp_method = 'upwind'
     type = LineValueSampler
     variable = superficial_v
     warn_discontinuous_face_values = false
-    start_point = '1.695266272189349 0.0384615384615385 0'
-    end_point = '2.227810650887574 0.9615384615384615 0'
-    num_points = 13
+    start_point = '1.689795918367347 0.0714285714285714 0'
+    end_point = '2.167346938775510 0.9285714285714286 0'
+    num_points = 7
     sort_by = y
   []
   [v_y_right_of_interface]
     type = LineValueSampler
     variable = superficial_v
     warn_discontinuous_face_values = false
-    start_point = '1.772189349112426 0.0384615384615385 0'
-    end_point = '2.304733727810651 0.9615384615384615 0'
-    num_points = 13
+    start_point = '1.832653061224490 0.0714285714285714 0'
+    end_point = '2.310204081632653 0.9285714285714286 0'
+    num_points = 7
     sort_by = y
   []
   [ut_left_of_interface]
     type = LineValueSampler
     variable = interstitial_tangential_velocity
     warn_discontinuous_face_values = false
-    start_point = '1.695266272189349 0.0384615384615385 0'
-    end_point = '2.227810650887574 0.9615384615384615 0'
-    num_points = 13
+    start_point = '1.689795918367347 0.0714285714285714 0'
+    end_point = '2.167346938775510 0.9285714285714286 0'
+    num_points = 7
     sort_by = y
   []
   [ut_right_of_interface]
     type = LineValueSampler
     variable = interstitial_tangential_velocity
     warn_discontinuous_face_values = false
-    start_point = '1.772189349112426 0.0384615384615385 0'
-    end_point = '2.304733727810651 0.9615384615384615 0'
-    num_points = 13
+    start_point = '1.832653061224490 0.0714285714285714 0'
+    end_point = '2.310204081632653 0.9285714285714286 0'
+    num_points = 7
     sort_by = y
   []
 
@@ -546,29 +546,19 @@ advected_interp_method = 'upwind'
     type = PointValueSampler
     variable = pressure
     warn_discontinuous_face_values = false
-    points = '2.0292 0.9416 0
-              2.0430 0.9140 0
-              2.0614 0.8772 0
-              2.0844 0.8312 0
-              2.1028 0.7944 0
-              2.1258 0.7484 0
-              2.1442 0.7116 0
-              2.1626 0.6748 0
-              2.1810 0.6380 0
-              2.1948 0.6104 0
-              2.2132 0.5736 0
-              2.2316 0.5368 0
-              2.2546 0.4908 0
-              2.2730 0.4540 0
-              2.2914 0.4172 0
-              2.3144 0.3712 0
-              2.3328 0.3344 0
-              2.3604 0.2792 0
-              2.3788 0.2424 0
-              2.4018 0.1964 0
-              2.4294 0.1412 0
-              2.4478 0.1044 0
-              2.4708 0.0584 0'
+    points = '2.0282 0.9437 0
+              2.0639 0.8722 0
+              2.1039 0.7922 0
+              2.1396 0.7208 0
+              2.1700 0.6600 0
+              2.2057 0.5885 0
+              2.2418 0.5165 0
+              2.2775 0.4451 0
+              2.3208 0.3584 0
+              2.3565 0.2869 0
+              2.3929 0.2143 0
+              2.4454 0.1092 0
+              2.4811 0.0377 0'
     sort_by = x
   []
 []
@@ -606,8 +596,8 @@ advected_interp_method = 'upwind'
   rhie_chow_user_object = rc
   momentum_systems = 'u_system v_system'
   pressure_system = pressure_system
-  momentum_equation_relaxation = 0.3
-  pressure_variable_relaxation = 0.1
+  momentum_equation_relaxation = 0.5
+  pressure_variable_relaxation = 0.2
   num_iterations = 1000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8

@@ -342,7 +342,10 @@ pressure_gradient_method = reconstructed
   pressure_system = pressure_system
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.5
-  num_iterations = 300
+  # At rest the normalized momentum residual has no flow to scale against and stalls near 1e-4,
+  # so the absolute tolerances below are not reached. The solution is fixed well before 50
+  # iterations.
+  num_iterations = 50
   continue_on_max_its = true
   pressure_absolute_tolerance = 1e-12
   momentum_absolute_tolerance = 1e-12

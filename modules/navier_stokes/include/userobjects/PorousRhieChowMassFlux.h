@@ -70,7 +70,8 @@ public:
    *
    * The velocity is extrapolated from the side's cell center with that side's velocity gradient,
    * which is exact for a velocity that is linear on each side and needs no data from across the
-   * baffle. Before the velocity gradients are linked, the cell velocity is returned.
+   * baffle. Before linkMomentumPressureSystems() collects the FVVelocityJumpGreenGaussGradient
+   * velocity gradients, no gradient is available and the cell velocity is returned.
    * @param fi The baffle face
    * @param elem_side Whether to return the element-side state
    */
