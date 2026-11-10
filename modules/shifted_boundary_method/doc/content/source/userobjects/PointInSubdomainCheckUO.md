@@ -17,7 +17,7 @@ background-mesh elements to subdomains.
 
 Set the `builder` parameter to the name of a `SurfaceMeshBySubdomainBuilder` user object.
 The `tolerance` parameter controls how close to a surface a point is treated as on it, and
-`leaf_max_size` tunes the per-subdomain KDTree. Because the in-out test requires closed,
+`leaf_max_size` tunes the per-subdomain k-d tree. Because the in-out test requires closed,
 replicated surface meshes, run these tests with `mesh_mode = REPLICATED`.
 
 !syntax description /UserObjects/PointInSubdomainCheckUO

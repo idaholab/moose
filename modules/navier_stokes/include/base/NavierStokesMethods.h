@@ -103,6 +103,17 @@ template <typename T>
 T findUStar(const T & mu, const T & rho, const T & u, Real dist);
 
 /**
+ * Finds the thermal non-dimensional wall distance at which the laminar and logarithmic
+ * temperature wall functions intersect. If multiple intersections exist, this is intended
+ * to recover the largest one.
+ * @param Pr the molecular Prandtl number
+ * @param Pr_t the turbulent Prandtl number
+ * @return the thermal matching non-dimensional wall distance
+ */
+template <typename T>
+T findYplusThermal(const T & Pr, const T & Pr_t);
+
+/**
  * Finds the non-dimensional wall distance normalized with the friction velocity
  * Implements a fixed-point iteration in the wall function to get this velocity
  * @param mu the dynamic viscosity

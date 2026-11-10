@@ -347,7 +347,7 @@ class LinkInline(components.ReaderComponent):
     """
 
     RE = re.compile(
-        r"\[(?!\S+?\][ .,])"  # start of link, see note above
+        r"\[(?!\S+?\][\s.,;:)])"  # start of link, see note above
         r"(?P<inline>.*?)\]"  # link text
         r"\((?P<url>.*?)"  # link url
         r"(?:\s+(?P<settings>.*?))?\)",  # settings

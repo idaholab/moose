@@ -17,24 +17,26 @@ InputParameters
 SBMSurfaceMeshBuilder::validParams()
 {
   InputParameters params = BoundaryMeshBuilder::validParams();
+  params.renameParam(
+      "boundary_mesh", "interface_mesh", "The saved mesh representing one interface surface.");
   params.addClassDescription(
-      "Constructs boundary elements and a centroid KDTree from a pre-existing surface mesh. "
+      "Constructs boundary elements and a centroid k-d tree from a pre-existing surface mesh. "
       "The surface mesh is specified in the Mesh block via `save_with_name`.");
 
   /// Add a parameter for leaf_max_size for nanoflann
   params.addParam<int>(
       "leaf_max_size",
       10,
-      "Maximum number of points allowed in a leaf node of the KDTree. "
+      "Maximum number of points allowed in a leaf node of the k-d tree. "
       "Smaller values yield deeper trees with faster queries but slower build times; "
       "larger values result in shallower trees with faster builds but slower queries. "
       "Benchmarking is recommended to find an optimal tradeoff for your use case.");
 
-  /// Add a parameter to control whether to build a kd-tree or not
+  /// Add a parameter to control whether to build a k-d tree or not
   params.addParam<bool>(
       "build_kd_tree",
       true,
-      "Whether to build a kd-tree or not. If false, the kd-tree will not be built, "
+      "Whether to build a k-d tree or not. If false, the k-d tree will not be built, "
       "and the mesh will be used directly for queries.");
 
   return params;
@@ -53,7 +55,7 @@ SBMSurfaceMeshBuilder::initialSetup()
   // Build the mesh + whole-mesh SurfaceElementSet (and run shared validation).
   BoundaryMeshBuilder::initialSetup();
 
-  // The centroid KD-tree is aligned index-for-index with surfaceElementSet().elements().
+  // The centroid k-d tree is aligned index-for-index with surfaceElementSet().elements().
   if (_build_kd_tree)
     _kd_tree = std::make_unique<KDTree>(surfaceElementSet().centroids(), _leaf_max_size);
 }

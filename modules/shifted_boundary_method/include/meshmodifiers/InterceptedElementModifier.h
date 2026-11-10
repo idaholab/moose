@@ -14,6 +14,10 @@
 class Function;
 class PointInSurfaceCheckInterface;
 
+/**
+ * Modifies element subdomains dynamically based on an analytical signed distance function
+ * or a point-in-surface check user object.
+ */
 class InterceptedElementModifier : public SBMElementSubdomainModifierBase
 {
 public:
