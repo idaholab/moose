@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MeshGenerator.h"
+#include "SCMCoreMeshGeneratorBase.h"
 
 /**
  * Places triangular-lattice SCM assembly meshes on a hexagonal core lattice and merges them into
@@ -17,24 +17,17 @@
  * assembly index, and is tagged with the "assembly_id" extra element integer. Assemblies are not
  * connected to each other.
  */
-class SCMTriCoreMeshGenerator : public MeshGenerator
+class SCMTriCoreMeshGenerator : public SCMCoreMeshGeneratorBase
 {
 public:
   static InputParameters validParams();
 
   SCMTriCoreMeshGenerator(const InputParameters & parameters);
 
-  std::unique_ptr<MeshBase> generate() override;
-
 protected:
-  /// Names of the input SCM assembly (or duct) mesh generators
-  const std::vector<MeshGeneratorName> & _input_names;
-  /// Input meshes
-  const std::vector<std::unique_ptr<MeshBase> *> _meshes;
-  /// Hexagonal core pattern of indices into the inputs; -1 marks an empty position
-  const std::vector<std::vector<int>> & _pattern;
-  /// Center-to-center distance between neighboring assembly positions [m]
-  const Real _assembly_pitch;
-  /// Placed assemblies in pattern order: (index into the inputs, x-y center of the assembly)
-  std::vector<std::pair<unsigned int, Point>> _assemblies;
+  void readAssemblySizes() override;
+  bool overlap(unsigned int input_a, unsigned int input_b, const Point & offset) const override;
+
+  /// Flat-to-flat duct size of each input [m]
+  std::vector<Real> _flat_to_flat;
 };

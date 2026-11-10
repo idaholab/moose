@@ -58,6 +58,11 @@ SCMQuadDuctMeshGenerator::SCMQuadDuctMeshGenerator(const InputParameters & param
 {
   SubChannelMesh::generateZGrid(
       _unheated_length_entry, _heated_length, _unheated_length_exit, _n_cells, _z_grid);
+
+  // Outer duct size, read by SCMQuadCoreMeshGenerator to check that assemblies placed in a core
+  // do not overlap. The duct wall is pitch / 2 + side_gap from the outer subchannel centroids.
+  declareMeshProperty<Real>("duct_size_x", (_nx - 1) * _pitch + 2.0 * _side_gap);
+  declareMeshProperty<Real>("duct_size_y", (_ny - 1) * _pitch + 2.0 * _side_gap);
 }
 
 std::unique_ptr<MeshBase>

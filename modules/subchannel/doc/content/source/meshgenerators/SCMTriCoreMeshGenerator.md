@@ -8,7 +8,7 @@
 
 This mesh generator places triangular-lattice subchannel assemblies on a hexagonal core lattice and
 merges them into one mesh. The assemblies are not connected: there are no inter-assembly gaps and no
-crossflow between assemblies.
+crossflow between assemblies. [SCMQuadCoreMeshGenerator.md] is the square-lattice counterpart.
 
 Each entry of [!param](/Mesh/SCMTriCoreMeshGenerator/inputs) is an
 [SCMTriAssemblyMeshGenerator.md] or an [SCMTriDuctMeshGenerator.md] for a subchannel core mesh, or
