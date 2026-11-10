@@ -110,6 +110,7 @@ pressureJumpInterfaceData(const RealVectorValue & normal,
 
   data.elem_hbya_flux = face_area * (elem_rho_hbya * normal);
   data.neighbor_hbya_flux = face_area * (neighbor_rho_hbya * normal);
+  // conductance in series
   data.transmissibility = 1.0 / (1.0 / data.elem_conductance + 1.0 / data.neighbor_conductance);
   data.correction = data.transmissibility * (data.elem_correction / data.elem_conductance +
                                              data.neighbor_correction / data.neighbor_conductance);

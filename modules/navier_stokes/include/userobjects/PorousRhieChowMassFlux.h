@@ -76,6 +76,14 @@ public:
    */
   RealVectorValue baffleFaceVelocity(const FaceInfo & fi, bool elem_side) const;
 
+  /**
+   * Return the normal superficial velocity at a baffle face, recovered from the shared face mass
+   * flux and the face-interpolated density. Density is assumed to vary smoothly across the
+   * baffle, so both sides share this value.
+   * @param fi The baffle face
+   */
+  Real baffleNormalVelocity(const FaceInfo & fi) const;
+
   /// Cell coefficient whose face interpolation forms the pressure-diffusion tensor.
   Real cellPressureDiffusionCoefficient(const ElemInfo & elem_info, unsigned int component) const;
 

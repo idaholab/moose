@@ -27,6 +27,7 @@ public:
                       const LinearFVGradientReader & pressure_gradient);
 
 private:
+  // computes without limiter which also means without removing the prescribed jumps
   void computeGradientWithoutLimiter(
       SystemBase & system,
       GradientContainer & gradient,

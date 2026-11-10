@@ -41,8 +41,9 @@ only the orientation in which $J$ is stored.
 
 Each entry of [!param](/UserObjects/BernoulliFormLossPressureJump/form_loss) adds the irreversible
 term $-\operatorname{sign}(\phi_{o\rightarrow n})K\rho_f u_{ref}^2/2$ on the corresponding
-[!param](/UserObjects/BernoulliFormLossPressureJump/boundary). The side used for $u_{ref}$ is
-selected by [!param](/UserObjects/BernoulliFormLossPressureJump/reference_velocity_side), which
+[!param](/UserObjects/BernoulliFormLossPressureJump/boundary), where $K$ is the form-loss
+coefficient and $u_{ref}=u_{n,s}$ is the interstitial normal velocity of the reference side $s$.
+The reference side is selected by [!param](/UserObjects/BernoulliFormLossPressureJump/reference_velocity_side), which
 defaults to the lower-porosity side. The stored jump $J$ is pressure on the non-owner
 side minus pressure on the owner side, and $\phi_{o\rightarrow n}$ is the mass flux from
 the owner toward the non-owner.

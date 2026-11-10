@@ -8,8 +8,12 @@ R_i = \left(\mu D_i + \frac{\rho}{2}F_i
 \left|\frac{\mathbf{U}}{\epsilon}\right|\right)U_i,
 \end{equation}
 
-where $D_i$ and $F_i$ are the componentwise Darcy and Forchheimer coefficients. Either term may be
-omitted. [!param](/LinearFVKernels/LinearFVMomentumFriction/mu) is required with
+where $\mu$ is the dynamic viscosity, $\rho$ the density, $\epsilon$ the porosity, and $D_i$ and
+$F_i$ the componentwise Darcy and Forchheimer coefficients, which may be anisotropic. The
+resistance opposes the flow and is added to the momentum equation as $+R_i$ on the left-hand side.
+The Darcy term represents viscous drag and is linear in velocity; the Forchheimer term represents
+inertial drag and grows quadratically with speed. Either term may be omitted.
+[!param](/LinearFVKernels/LinearFVMomentumFriction/mu) is required with
 [!param](/LinearFVKernels/LinearFVMomentumFriction/Darcy_name), while density and all velocity
 components present in the mesh dimension are required with
 [!param](/LinearFVKernels/LinearFVMomentumFriction/Forchheimer_name).
@@ -18,6 +22,11 @@ The Forchheimer speed is evaluated from interstitial velocity $\mathbf{U}/\epsil
 the linear solve. Porosity must be positive wherever the Forchheimer term is active.
 
 !listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/linear-segregated/1d-simple-channel/porous-baffle-1d.i block=LinearFVKernels/u_friction
+
+## Computation of friction factors and pre-factors
+
+See [PINSFVMomentumFriction.md] for how the Darcy and Forchheimer coefficients relate to common
+correlations.
 
 !syntax parameters /LinearFVKernels/LinearFVMomentumFriction
 

@@ -351,6 +351,27 @@ PorousRhieChowMassFlux::baffleFaceVelocity(const FaceInfo & fi, const bool elem_
 }
 
 Real
+PorousRhieChowMassFlux::baffleNormalVelocity(const FaceInfo & fi) const
+{
+  mooseAssert(fi.neighborPtr() && faceIsBaffle(fi), "Baffle face states require a baffle face.");
+
+  const auto state = Moose::currentState();
+  const Real elem_rho = _rho(makeElemArg(fi.elemPtr()), state);
+  const Real neighbor_rho = _rho(makeElemArg(fi.neighborPtr()), state);
+  if (elem_rho <= 0.0 || neighbor_rho <= 0.0)
+    mooseError("density must be positive on pressure-jump face ", fi.id(), ".");
+
+  // Mass conservation makes rho U.n continuous. Density is assumed to vary smoothly across the
+  // baffle, as in BernoulliFormLossPressureJump, so the same face-interpolated density recovers
+  // one normal velocity for both sides. Dividing by the cell-center density instead would make
+  // the normal velocity first-order accurate wherever density varies within the cell.
+  Real face_rho = 0.0;
+  Moose::FV::interpolate(
+      Moose::FV::InterpMethod::Average, face_rho, elem_rho, neighbor_rho, fi, true);
+  return _face_mass_flux.evaluate(&fi) / face_rho;
+}
+
+Real
 PorousRhieChowMassFlux::cellPressureDiffusionCoefficient(const ElemInfo & elem_info,
                                                          const unsigned int component) const
 {

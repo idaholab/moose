@@ -16,8 +16,12 @@ The momentum advection operator transports interstitial velocity. Its contributi
 is therefore
 
 \begin{equation}
-\sum_f \frac{\phi_f}{\epsilon_P} U_{i,f} |S_f|.
+\sum_f \frac{\phi_f}{\epsilon_P} U_{i,f} |S_f|,
 \end{equation}
+
+where $U_{i,f}$ is component $i$ of the superficial velocity interpolated to face $f$ by the
+advection scheme, and $|S_f|$ is the face area. On a baffle face, $U_{i,f}$ is replaced by the
+one-sided state described in the velocity jump section below.
 
 [LinearPWCNSFVMomentumFlux.md] applies the $1/\epsilon_P$
 factor to each cell row.
@@ -32,12 +36,25 @@ interpolate velocity across the baffle uses one-sided states instead.
 Face values, which would otherwise be interpolated between the two cells:
 
 - Momentum advection in [LinearPWCNSFVMomentumFlux.md] uses the same tangential velocity on both
-  sides, the interstitial value of the upstream side, while each side keeps its own normal
-  velocity.
+  sides, namely the interstitial value from the upstream side. The superficial normal velocity
+  $\phi_f/\rho_f$ is recovered from the shared face mass flux and the face-interpolated density, so
+  it is the same on both sides and satisfies mass conservation exactly. This assumes that density
+  varies smoothly across the baffle, the same assumption made by the pressure jump below.
 - The Rhie-Chow face flux combines the one-sided fluxes $\rho_s(\mathbf{H}/\mathbf{A})_s\cdot\mathbf{n}$
   with the half-cell conductance weights of the pressure operator
   ([LinearFVPressureCorrectionDiffusionJump.md]) rather than interpolating
-  $\mathbf{H}/\mathbf{A}$, which also carries the body forces, to the face.
+  $\mathbf{H}/\mathbf{A}$, which also carries the body forces, to the face. On side
+  $s\in\{P,N\}$, with $\mathbf{h}_s$ the half-cell vector between the cell center and the face
+  centroid and $\mathbf{D}_s=\rho_s\operatorname{diag}(\mathbf{A}_s^{-1})$ the cell pressure
+  mobility, the half-cell pressure conductance and the face transmissibility are
+
+  \begin{equation}
+  \tau_s=\frac{|S_f|\,\mathbf{n}^T\mathbf{D}_s\mathbf{n}}{\mathbf{h}_s\cdot\mathbf{n}},
+  \qquad
+  T_f=\left(\frac{1}{\tau_P}+\frac{1}{\tau_N}\right)^{-1},
+  \end{equation}
+
+  and each side's one-sided flux is weighted by $T_f/\tau_s$.
 
 Gradients and stresses, which would otherwise read the jump as a slope:
 
@@ -46,7 +63,18 @@ Gradients and stresses, which would otherwise read the jump as a slope:
   variable.
 - The viscous stress in [LinearPWCNSFVMomentumFlux.md] is reduced to a tangential shear, set by the
   porosity of the two sides (see
-  [the baffle stress treatment](LinearPWCNSFVMomentumFlux.md#baffle-stress)):
+  [the baffle stress treatment](LinearPWCNSFVMomentumFlux.md#baffle-stress)). With $C$ the set of
+  clear sides (porosity of one) and $d_s$ the distance from the center of cell $s$ to the face, the
+  viscous momentum-diffusion conductance and the resulting shear traction are
+
+  \begin{equation}
+  T_f^{b}=\mu_f\left(\sum_{s\in C}d_s\right)^{-1},
+  \qquad
+  \mathbf{t}_f=T_f^{b}\,(\mathbf{I}-\mathbf{n}\mathbf{n})\left(\mathbf{W}_N-\mathbf{W}_P\right),
+  \end{equation}
+
+  where $\mathbf{W}_s$ is the face velocity of side $s$, and $\mathbf{t}_f=\mathbf{0}$ when neither
+  side is clear:
 
   - Clear fluid on both sides (porosity of one): ordinary viscous shear between the two cells.
   - Clear fluid against a porous medium: the clear fluid shears against the porous side as
@@ -55,7 +83,7 @@ Gradients and stresses, which would otherwise read the jump as a slope:
   - Porous media on both sides: no shear, because drag in the beds dominates it.
 - [FVReconstructedPressureGradient.md] reconstructs the cell pressure gradient from each side's
   face normal velocity, recovered from the shared mass flux and that side's density, and uses the
-  owning cell's velocity gradient at a baffle face instead of a face average.
+  velocity gradient of the cell being reconstructed at a baffle face instead of a face average.
 
 With these, a velocity field that is linear on each side of a baffle, together with its
 piecewise-constant pressure, is reproduced to round-off on uniform meshes, and a fluid at rest
@@ -64,7 +92,9 @@ porosity and density jumps.
 
 ## Pressure jump
 
-A sideset listed in
+The pressure jump across a baffle is supplied by the pressure-jump models listed in
+[!param](/UserObjects/PorousRhieChowMassFlux/pressure_jump_models).
+[BernoulliFormLossPressureJump.md] is one such model: a sideset listed in its
 [!param](/UserObjects/BernoulliFormLossPressureJump/boundary) carries the reversible Bernoulli jump
 
 \begin{equation}

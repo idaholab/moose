@@ -11,20 +11,24 @@ two one-sided face pressures from the same conservative half-cell flux relation 
 [LinearFVPressureCorrectionDiffusionJump](LinearFVPressureCorrectionDiffusionJump.md).
 
 For an interface between cells $P$ and $N$, let $J_P=p_f^P-p_f^N$ be the pressure jump oriented
-from $P$ to $N$. With the half-cell conductances $G_P$ and $G_N$, explicit corrections $r_P$ and
-$r_N$, one-sided $\boldsymbol H/\boldsymbol A$ mass fluxes $h_P$ and $h_N$, and common oriented
-face mass flux $Q_f$, the two face pressures are
+from $P$ to $N$. With the half-cell conductances $\tau_s=|S_f|\alpha_s/\delta_s$ and explicit
+corrections $r_s=|S_f|\boldsymbol c_s\mathbin{\cdot}\boldsymbol g^s$ on side $s\in\{P,N\}$,
+defined with the half-cell distance $\delta_s$, normal mobility $\alpha_s$, and correction
+vector $\boldsymbol c_s$ in
+[LinearFVPressureCorrectionDiffusionJump](LinearFVPressureCorrectionDiffusionJump.md), the
+one-sided $\boldsymbol H/\boldsymbol A$ mass fluxes $Q_P^H$ and $Q_N^H$, and common oriented face
+mass flux $Q_f$, the two face pressures are
 
 \begin{equation}
 \begin{aligned}
-  p_f^P &= p_P-\frac{Q_f+h_P+r_P}{G_P},\\
-  p_f^N &= p_N+\frac{Q_f+h_N+r_N}{G_N}.
+  p_f^P &= p_P-\frac{Q_f+Q_P^H+r_P}{\tau_P},\\
+  p_f^N &= p_N+\frac{Q_f+Q_N^H+r_N}{\tau_N}.
 \end{aligned}
 \end{equation}
 
 The flux $Q_f$ and the series-weighted $\boldsymbol H/\boldsymbol A$ flux are derived in
 [LinearFVPressureCorrectionDiffusionJump](LinearFVPressureCorrectionDiffusionJump.md). The terms
-$h_s$ make each face pressure follow the body-force pressure slope of its own side, so a fluid at
+$Q_s^H$ make each face pressure follow the body-force pressure slope of its own side, so a fluid at
 rest across a porosity or density jump has the hydrostatic face pressures.
 
 The explicit corrections use the previously published geometric pressure gradient, matching the

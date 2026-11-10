@@ -13,7 +13,8 @@ velocity.
 
 At a pressure baffle the superficial velocity jumps, so the advection operator does not use the
 state interpolated across the baffle. Both sides advect the upstream interstitial tangential
-velocity, and each side advects its own normal velocity. The
+velocity, and both sides advect the normal velocity recovered from the shared mass flux and the
+face density. The
 [BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md) model supplies the reversible
 Bernoulli pressure jump and any irreversible form loss, as described below.
 
@@ -104,14 +105,15 @@ $\phi_f\ge0$, otherwise $N$),
     \left(\mathbf{I}-\boldsymbol{n}_f\boldsymbol{n}_f\right)\boldsymbol{V}_u,
 \end{equation}
 
-and each row its own normal velocity:
+and both rows the normal superficial velocity recovered from the shared mass flux and the
+face-interpolated density $\rho_f$:
 
 \begin{equation}
 \begin{aligned}
   R_{P,i,f}^{\mathrm{adv}} &= |S_f|\frac{\phi_f}{\epsilon_P}V^{*}_{i,P}, \qquad
   R_{N,i,f}^{\mathrm{adv}} = -|S_f|\frac{\phi_f}{\epsilon_N}V^{*}_{i,N}, \\
   \boldsymbol{V}^{*}_s &= \epsilon_s\boldsymbol{w}_{t,f}
-    + \left(\boldsymbol{V}_s\mathbin{\cdot}\boldsymbol{n}_f\right)\boldsymbol{n}_f,
+    + \frac{\phi_f}{\rho_f}\boldsymbol{n}_f,
     \qquad s\in\{P,N\}.
 \end{aligned}
 \label{eq:pw-momentum-one-sided-advection}
@@ -122,8 +124,13 @@ baffle is no source of tangential momentum, and an inviscid stream crossing the 
 interstitial tangential velocity. If each side advected its own extrapolated state instead, the
 face would act as the source $\phi_f(\boldsymbol{w}_{t,P}-\boldsymbol{w}_{t,N})$, and an inviscid
 solution would keep whatever tangential jump the iteration produced. The normal momentum fluxes
-still differ between the sides; the pressure jump below balances them. The face states are exact
-for a velocity that is linear on each side with a continuous interstitial tangential velocity. The
+still differ between the sides through the porosity; the pressure jump below balances them. The
+normal part satisfies mass conservation exactly and is the same on both rows. Density is assumed
+to vary smoothly across the baffle, as in
+[BernoulliFormLossPressureJump](BernoulliFormLossPressureJump.md), so one face density stands in
+for both sides; a density discontinuity at the baffle is not represented. The
+tangential face state is exact for a velocity that is linear on each side with a continuous
+interstitial tangential velocity. The
 implicit stencil keeps the shared interpolation weights and the difference is deferred to the
 right-hand side.
 

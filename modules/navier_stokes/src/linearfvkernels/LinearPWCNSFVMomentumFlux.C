@@ -33,6 +33,7 @@ LinearPWCNSFVMomentumFlux::LinearPWCNSFVMomentumFlux(const InputParameters & par
 void
 LinearPWCNSFVMomentumFlux::addMatrixContribution()
 {
+  // porosity jumps are always internal to the domain
   if (_current_face_type != FaceInfo::VarFaceNeighbors::BOTH)
   {
     LinearFVFluxKernel::addMatrixContribution();
@@ -57,20 +58,16 @@ LinearPWCNSFVMomentumFlux::addMatrixContribution()
   const Real scale_elem = inversePorosity(/*elem_side=*/true);
   const Real scale_neighbor = inversePorosity(/*elem_side=*/false);
 
-  if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()))
-  {
-    _matrix_contribution(0, 0) = (adv_elem * scale_elem + stress.elem_elem) * _current_face_area;
-    _matrix_contribution(0, 1) =
-        (adv_neighbor * scale_elem + stress.elem_neighbor) * _current_face_area;
-  }
-
-  if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()))
-  {
-    _matrix_contribution(1, 0) =
-        (-adv_elem * scale_neighbor + stress.neighbor_elem) * _current_face_area;
-    _matrix_contribution(1, 1) =
-        (-adv_neighbor * scale_neighbor + stress.neighbor_neighbor) * _current_face_area;
-  }
+  // No per-side block check is needed: the base class requires the kernel and the variable to
+  // share a block restriction, so on a face with the variable on both sides both cells are in
+  // this kernel's blocks.
+  _matrix_contribution(0, 0) = (adv_elem * scale_elem + stress.elem_elem) * _current_face_area;
+  _matrix_contribution(0, 1) =
+      (adv_neighbor * scale_elem + stress.elem_neighbor) * _current_face_area;
+  _matrix_contribution(1, 0) =
+      (-adv_elem * scale_neighbor + stress.neighbor_elem) * _current_face_area;
+  _matrix_contribution(1, 1) =
+      (-adv_neighbor * scale_neighbor + stress.neighbor_neighbor) * _current_face_area;
 
   for (auto & matrix : _matrices)
     (*matrix).add_matrix(_matrix_contribution, _dof_indices.get_values());
@@ -133,18 +130,21 @@ LinearPWCNSFVMomentumFlux::computeBaffleAdvectionExplicitCorrection(bool elem_si
   const auto & fi = *_current_face_info;
   const Real u_elem = _var.getElemValue(*fi.elemInfo(), state_arg);
   const Real u_neighbor = _var.getElemValue(*fi.neighborInfo(), state_arg);
-  // Keep the shared internal-face stencil, then explicitly replace the interpolated state on
-  // baffle faces. Interpolating across the baffle would mix the two sides of the velocity jump,
-  // and the cell value alone would miss the variation between the cell center and the face.
-  const Real shared_advected_state = _adv_interp_result.weights_matrix.first * u_elem +
-                                     _adv_interp_result.weights_matrix.second * u_neighbor;
+  // Keep the shared internal-face stencil, then explicitly replace the interpolated superficial
+  // velocity on baffle faces. Interpolating across the baffle would mix the two sides of the
+  // velocity jump, and the cell value alone would miss the variation between the cell center and
+  // the face.
+  const Real shared_advected_velocity = _adv_interp_result.weights_matrix.first * u_elem +
+                                        _adv_interp_result.weights_matrix.second * u_neighbor;
 
   // With V_s the velocity of side s extrapolated to the face, both sides advect the interstitial
   // tangential velocity u_t,f = (I - n n) V_up / eps_up of the upstream side, so the tangential
   // momentum flux mdot u_t,f leaving one side enters the other and the face is no source of
-  // tangential momentum. Each side keeps its own normal velocity V_s . n, and the pressure jump
+  // tangential momentum. Mass conservation fixes the normal superficial velocity from the shared
+  // face mass flux, U_n = mdot / rho_f, with the face-interpolated density rho_f standing in for
+  // both sides because density is assumed to vary smoothly across the baffle. The pressure jump
   // balances the normal momentum difference. Side s therefore advects
-  //   V*_s = eps_s u_t,f + (V_s . n) n.
+  //   V*_s = eps_s u_t,f + U_n n.
   const auto & normal = fi.normal();
   const bool upstream_elem_side = _face_mass_flux >= 0.0;
   const auto upstream_velocity =
@@ -152,15 +152,14 @@ LinearPWCNSFVMomentumFlux::computeBaffleAdvectionExplicitCorrection(bool elem_si
   const auto interstitial_tangential_velocity =
       (upstream_velocity - (upstream_velocity * normal) * normal) *
       inversePorosity(upstream_elem_side);
-  const Real own_normal_velocity =
-      _porous_mass_flux_provider.baffleFaceVelocity(fi, elem_side) * normal;
-  const Real baffle_advected_state =
+  const Real normal_velocity = _porous_mass_flux_provider.baffleNormalVelocity(fi);
+  const Real baffle_advected_velocity =
       interstitial_tangential_velocity(_index) / inversePorosity(elem_side) +
-      own_normal_velocity * normal(_index);
+      normal_velocity * normal(_index);
   const Real factor = elem_side ? 1.0 : -1.0;
 
   return factor * _face_mass_flux * inversePorosity(elem_side) *
-         (shared_advected_state - baffle_advected_state) * _current_face_area;
+         (shared_advected_velocity - baffle_advected_velocity) * _current_face_area;
 }
 
 LinearPWCNSFVMomentumFlux::BaffleStressData
