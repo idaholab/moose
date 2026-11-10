@@ -280,7 +280,8 @@ other than Linux, the measured memory includes those pages, so the same limit ma
 reached sooner.
 
 Memory is sampled every `--memory-tracking-interval` seconds (default 0.2), so a job that
-finishes between samples reports no memory, and a short spike between samples is missed.
+starts and finishes between two consecutive samples reports no memory, and a short
+spike between samples is missed.
 
 #### MOOSE_MAX_GPU_MEMORY_PER_SLOT
 
@@ -296,8 +297,8 @@ still create CUDA contexts, for example through Kokkos or PETSc built with CUDA.
 NVML attributes to its processes, summed over all GPUs. It includes the CUDA context of each
 process, so a job is charged once per MPI rank that uses a GPU.
 
-Jobs that share a GPU run at most `-j` slots at a time, so a limit of the GPU memory less some
-headroom, divided by the `-j` value, keeps the jobs from running the GPU out of memory. The
+Jobs that share a GPU run at most `-j` slots at a time, so setting the limit to the available GPU memory minus some
+headroom, divided by the `-j` value, reduces the risk of running out of GPU memory. The
 headroom is needed because memory is sampled: an allocation made between samples can exceed
 the limit before the job is killed.
 

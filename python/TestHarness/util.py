@@ -72,7 +72,8 @@ class FormatResultEntry:
 
 def _formatMemory(memory: Optional[int], timing: float) -> str:
     """
-    Format memory in bytes for formatResult(), right justified to six characters.
+    Format memory in bytes for formatResult(), right justified to six characters
+    (four numerical characters plus two unit-specifying characters).
 
     Unknown memory is shown as "?MB" unless the entry has not run (zero timing),
     for which it is zero.
