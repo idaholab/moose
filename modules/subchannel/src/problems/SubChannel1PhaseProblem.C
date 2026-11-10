@@ -29,6 +29,16 @@ struct Ctx
   SubChannel1PhaseProblem * schp;
 };
 
+namespace
+{
+/// Crossflow [kg/s] below which the donor-cell density of the lateral momentum residual is
+/// averaged instead of taken from the upwind channel. The donor switch at Wij = 0 makes the
+/// residual discontinuous, and the finite-difference step of the matrix-free Jacobian of the
+/// crossflow solve is comparable to the many crossflows that are nearly zero, so it would
+/// otherwise cross the switch. The value is well below the smallest crossflows of interest.
+constexpr Real donor_cell_deadband = 1e-6;
+}
+
 PetscErrorCode
 formFunction(SNES, Vec x, Vec f, void * ctx)
 {
@@ -1575,9 +1585,9 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         auto DPij = (*_P_soln)(node_in_i) - (*_P_soln)(node_in_j);
         // Figure out donor cell density
         auto rho_star = 0.0;
-        if (_Wij(i_gap, iz) > 0.0)
+        if (_Wij(i_gap, iz) > donor_cell_deadband)
           rho_star = rho_i;
-        else if (_Wij(i_gap, iz) < 0.0)
+        else if (_Wij(i_gap, iz) < -donor_cell_deadband)
           rho_star = rho_j;
         else
           rho_star = (rho_i + rho_j) / 2.0;
@@ -1646,9 +1656,9 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
 
         // Figure out donor cell density
         auto rho_star = 0.0;
-        if (_Wij(i_gap, iz) > 0.0)
+        if (_Wij(i_gap, iz) > donor_cell_deadband)
           rho_star = rho_i_interp;
-        else if (_Wij(i_gap, iz) < 0.0)
+        else if (_Wij(i_gap, iz) < -donor_cell_deadband)
           rho_star = rho_j_interp;
         else
           rho_star = (rho_i_interp + rho_j_interp) / 2.0;
@@ -2054,6 +2064,13 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   LibmeshPetscCall(KSPGetPC(ksp, &pc));
   LibmeshPetscCall(PCSetType(pc, PCNONE));
   LibmeshPetscCall(KSPSetTolerances(ksp, _rtol, _atol, _dtol, _maxit));
+  // Large restart because the crossflow Krylov history stagnates at the PETSc default of 30
+  LibmeshPetscCall(KSPSetType(ksp, KSPGMRES));
+  LibmeshPetscCall(KSPGMRESSetRestart(ksp, 1000));
+  // Absolute tolerance so that an already-converged crossflow is not reported as a failed line
+  // search; the PETSc default of 1e-50 is never reached and the line search fails at round-off
+  LibmeshPetscCall(
+      SNESSetTolerances(snes, 1e-10, PETSC_CURRENT, PETSC_CURRENT, PETSC_CURRENT, PETSC_CURRENT));
   LibmeshPetscCall(SNESSetFromOptions(snes));
   LibmeshPetscCall(VecGetArray(x, &xx));
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
@@ -2063,9 +2080,6 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   LibmeshPetscCall(VecRestoreArray(x, &xx));
 
   LibmeshPetscCall(SNESSolve(snes, NULL, x));
-  // A diverged solve leaves x at its initial guess, which is then used as the crossflow of this
-  // iteration. Report it rather than stopping, since the unpreconditioned linear solve can break
-  // down near convergence
   SNESConvergedReason reason;
   LibmeshPetscCall(SNESGetConvergedReason(snes, &reason));
   if (reason < 0)
@@ -2074,15 +2088,16 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
     PetscReal residual_norm;
     LibmeshPetscCall(SNESGetIterationNumber(snes, &iterations));
     LibmeshPetscCall(SNESGetFunctionNorm(snes, &residual_norm));
-    mooseWarning("Crossflow nonlinear solve did not converge: ",
-                 SNESConvergedReasons[reason],
-                 " (",
-                 static_cast<int>(reason),
-                 ") after ",
-                 iterations,
-                 " iterations; residual norm = ",
-                 residual_norm,
-                 ". The crossflow of this iteration is not updated.");
+    mooseError(name(),
+               ": Crossflow nonlinear solve did not converge: ",
+               SNESConvergedReasons[reason],
+               " (",
+               static_cast<int>(reason),
+               ") after ",
+               iterations,
+               " iterations; residual norm = ",
+               residual_norm,
+               ".");
   }
   LibmeshPetscCall(VecGetArray(x, &xx));
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
