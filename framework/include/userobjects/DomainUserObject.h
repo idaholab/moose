@@ -266,8 +266,19 @@ DomainUserObject::setFaceData()
 inline bool
 DomainUserObject::shouldExecuteOnBoundary(const bool is_external_side) const
 {
+  if (_interface_bnd_ids.count(_current_boundary_id))
+  {
+    if (is_external_side)
+      paramError("interface_boundaries",
+                 "Boundary ",
+                 _current_boundary_id,
+                 " contains an external side, but interface boundaries must contain neighbors.");
+
+    return false;
+  }
+
   if (!_external_bnd_restricted)
-    return !_interface_bnd_ids.count(_current_boundary_id);
+    return true;
 
   if (!_external_bnd_ids.count(_current_boundary_id))
     return false;

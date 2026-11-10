@@ -82,6 +82,9 @@
       type = RunApp
       mesh_mode = REPLICATED
       input = overlapping-interface.i
+      # Without an external boundary restriction, boundary callbacks retain the legacy routing.
+      # 6 calls: block 0 has 4 outer sides (2 bottom, 1 left, 1 right) plus the primary side of
+      # 2 internal sides on crack (y = 0); the overlapping 'new' interface boundary is excluded.
       cli_args = 'UserObjects/conservation/expected_boundary_calls=6 Outputs/exodus=false'
     []
     [selected]
@@ -89,6 +92,8 @@
       type = RunApp
       mesh_mode = REPLICATED
       input = overlapping-interface.i
+      # An explicit selection excludes internal sides that are not interfaces.
+      # 2 calls: block 0 has 2 element sides along the 'bottom' boundary (nx = 2).
       cli_args = 'UserObjects/conservation/external_boundaries=bottom UserObjects/conservation/expected_boundary_calls=2 Outputs/exodus=false'
     []
     [empty]
@@ -96,6 +101,8 @@
       type = RunApp
       mesh_mode = REPLICATED
       input = overlapping-interface.i
+      # An explicitly empty list disables all boundary callbacks without disabling independently
+      # selected interface callbacks.
       cli_args = 'UserObjects/conservation/external_boundaries= UserObjects/conservation/expected_boundary_calls=0 UserObjects/conservation/check_conservation=false Outputs/exodus=false'
     []
   []
@@ -109,6 +116,17 @@
     input = overlapping-interface.i
     cli_args = 'UserObjects/conservation/external_boundaries=crack Outputs/exodus=false'
     expect_err = 'contains an internal side, but external boundaries must not contain neighbors'
+  []
+
+  [interface_boundary_rejects_external_side]
+    requirement = 'The system shall reject a DomainUserObject interface boundary selection containing an external side.'
+    design = 'UserObjects/index.md'
+    issues = '#32413'
+    type = RunException
+    mesh_mode = REPLICATED
+    input = overlapping-interface.i
+    cli_args = 'UserObjects/conservation/interface_boundaries=bottom Outputs/exodus=false'
+    expect_err = 'contains an external side, but interface boundaries must contain neighbors'
   []
 
   [external_boundary_interface_overlap]
