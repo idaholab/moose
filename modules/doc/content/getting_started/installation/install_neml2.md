@@ -8,43 +8,135 @@ NEML2 extends the key philosophy of its predecessor, i.e., material models are f
 
 ## Installation
 
-NEML2 depends on libtorch. See the [libtorch installation guide](getting_started/installation/install_libtorch.md optional=True) for instructions on obtaining libtorch.
+NEML2 is built from source and installed as a Python package that lives in the *same Python
+environment as PyTorch* (a conda environment or a virtual environment). A single install provides
+both the C++ libraries MOOSE links against and the Python tooling (e.g. `neml2-compile`, used by
+the ahead-of-time compilation runtime). The workflow is: provide PyTorch, build and install NEML2,
+then configure MOOSE.
 
-!alert! tip
-If libtorch was downloaded/installed to a non-default location, it is a good idea to set the environment variable `LIBTORCH_DIR` to make sure the same libtorch installation is consistently used throughout the build process.
-
-```bash
-export LIBTORCH_DIR=/path/to/libtorch
-```
-
+!alert! note title=NEML2 uses the PyTorch in your Python environment
+The blessed way to enable NEML2 is a PyTorch installed in the active Python environment (a pip
+wheel, or a from-source build installed into that environment). MOOSE's
+[libtorch](install_libtorch.md optional=True) setup script builds PyTorch from source and, with the
+`--install-python-package` option, can install the Python package needed by NEML2 into that
+environment. The `--with-libtorch` path given at configure time (below) points at the C++ libraries
+that ship inside the environment's PyTorch.
 !alert-end!
 
-To install NEML2, simply run the following script
+### 1. Provide PyTorch
+
+NEML2 links against the PyTorch found in your active Python environment. Activate that environment
+first (so `python3` and `pip` resolve to it), then make PyTorch available.
+
+**Recommended: install a PyTorch wheel with pip.** Choose a version compatible with NEML2 and matching your CUDA toolkit:
+
+```bash
+pip install torch
+```
+
+See [PyTorch download instructions](https://pytorch.org/get-started/locally/) for more details.
+
+**Alternative: build PyTorch from source.** Only necessary when a suitable PyTorch is not already
+installed in the environment and a prebuilt wheel does not fit your needs — for example a specific
+CUDA architecture, a custom BLAS, or an unsupported platform. Activate the target conda environment,
+then use MOOSE's libtorch setup script with `--install-python-package`; without this option, the
+script installs only the C++ libraries and does not provide the Python package required by NEML2.
+
+```bash
+cd ~/projects/moose
+./scripts/update_and_rebuild_libtorch.sh --install-python-package
+python -c "import torch; print(torch.__version__)"
+./scripts/update_and_rebuild_neml2.sh
+```
+
+This builds PyTorch against the same OpenBLAS used by MOOSE's PETSc, avoiding the BLAS/LAPACK
+conflict described below. If the active environment already has a suitable PyTorch installation,
+do not rebuild it; proceed directly to the NEML2 build in step 2.
+
+!alert! warning title=BLAS/LAPACK ABI conflict between the PyTorch wheel and PETSc
+PyTorch wheels bundle their own BLAS/LAPACK inside `libtorch_cpu.so` (it exports the standard LP64
+symbols `dgemm_`, `dgeev_`, ... as well as ILP64 `*_64_` variants). MOOSE's PETSc links its own
+OpenBLAS (e.g., `petsc/arch-moose/lib/libopenblas.so.0`), which exports the *same* LP64 symbol names. When
+a single MOOSE executable loads both libraries, the dynamic linker can interpose one library's
+BLAS/LAPACK onto the other's calls.
+
+Is this harmful? It is configuration-dependent. Both are standard LP64 BLAS, so in many environments
+everything runs correctly (the bundled MOOSE-NEML2 test suite passes with no workaround). But if the
+two implementations disagree on an ABI detail — integer width, threading, or corner-case numerics —
+the interposition can produce *wrong results or crashes* in linear algebra, coming from either PETSc
+solves or PyTorch operators, and often silently.
+
+If you observe such problems, force a single, consistent BLAS/LAPACK across the process with
+`LD_PRELOAD`, preloading the OpenBLAS that MOOSE/PETSc is built against so that PyTorch uses it too:
+
+```bash
+export LD_PRELOAD=$HOME/projects/moose/petsc/arch-moose/lib/libopenblas.so.0
+```
+
+This is safe because PyTorch works with any standard LP64 BLAS, while PETSc requires the specific
+OpenBLAS it was built with. Building PyTorch from source against the same OpenBLAS avoids the
+conflict entirely.
+!alert-end!
+
+### 2. Build and install NEML2
+
+With PyTorch available in the active environment, run:
 
 ```bash
 cd ~/projects/moose
 ./scripts/update_and_rebuild_neml2.sh
 ```
 
+The script updates the NEML2 submodule together with the submodules of three NEML2 Python
+dependencies that conda-forge either does not ship or ships only against its own PyTorch:
+[nmhit](https://github.com/applied-material-modeling/neml2-hit) (`framework/contrib/neml2-hit`),
+[pyzag](https://github.com/applied-material-modeling/pyzag) (`framework/contrib/pyzag`), and
+[pyro-ppl](https://github.com/pyro-ppl/pyro) (`framework/contrib/pyro`). Each is pinned to a
+release compatible with the NEML2 submodule. A plain `git submodule update --init` does not fetch
+these submodules; the script initializes them, which needs network access the first time.
+
+The script then installs nmhit, pyzag, and pyro-ppl from these checkouts without network access,
+skipping any already installed at the checked-out version. A package without a checkout is used as
+installed, or, if it is not installed, is installed at its pinned version from PyPI. The script
+then builds NEML2 from source and installs it
+(non-editable) into the active environment's site-packages, next to PyTorch. Because every install
+uses `--no-deps` to leave your pinned PyTorch untouched, the remaining Python dependencies (the
+build tools `scikit-build-core` and `nanobind`, and the runtime dependencies of NEML2 and of these
+three packages) must already be in the environment. The `moose-dev` conda package provides them,
+and the script lists any that are missing before building NEML2. It also checks for an importable
+PyTorch and `cmake`, and on success prints the exact `./configure` command to run next.
+
+To use the submodules as they are currently checked out, e.g. without network access, pass
+`--skip-submodule-update`:
+
+```bash
+./scripts/update_and_rebuild_neml2.sh --skip-submodule-update
+```
+
+A dependency whose submodule is then not checked out is used as already installed in the
+environment (e.g. from PyPI); if it is not installed either, the script stops and prints the
+`git submodule update` command that fetches it.
+
 !alert tip
-The setup script uses sensible defaults that work out-of-the-box. The script is also extensively customizable. Use the `--help` argument to print out a detailed help message.
+The script is customizable. Use the `--help` argument to print a detailed help message listing all
+options and influential environment variables.
 
-Once NEML2 is successfully installed, you can configure MOOSE to use NEML2 by
-
-```bash
-./configure --with-neml2 --with-libtorch
-```
-
-!alert! tip
-The `--with-neml2` configure option accepts an optional path argument, which could be useful if NEML2 was installed to a non-default location, i.e.
+### 3. Configure MOOSE
 
 ```bash
-./configure --with-neml2=/path/to/neml2 --with-libtorch
+./configure --with-neml2 --with-libtorch=$(python3 -c 'import torch, os; print(os.path.dirname(torch.__file__))')
 ```
 
-!alert-end!
+Given without a path, `--with-neml2` automatically locates the NEML2 installed in the active Python
+environment. To override, pass an explicit path or set the `NEML2_DIR` environment variable:
 
-After that, you can follow the [getting started](getting_started/installation/index_content.md optional=True) instructions to build MOOSE as usual. The `make check_neml2` command can be used to check whether NEML2 is successfully enabled within MOOSE and inspect additional compile/link flags.
+```bash
+./configure --with-neml2=/path/to/neml2 --with-libtorch=/path/to/torch
+```
+
+After that, follow the [getting started](getting_started/installation/index_content.md optional=True)
+instructions to build MOOSE as usual. The `make check_neml2` command can be used to check whether
+NEML2 is successfully enabled within MOOSE and to inspect the additional compile/link flags.
 
 ## Using NEML2 in a MOOSE simulation
 

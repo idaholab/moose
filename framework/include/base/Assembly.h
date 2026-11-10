@@ -267,7 +267,11 @@ public:
    */
   const MooseArray<Real> & JxW() const { return _current_JxW; }
 
-  const MooseArray<ADReal> & adJxW() const { return _ad_JxW; }
+  const MooseArray<ADReal> & adJxW() const
+  {
+    _need_ad_volume_map = true;
+    return _ad_JxW;
+  }
 
   const MooseArray<ADReal> & adJxWFace() const { return _ad_JxW_face; }
 
@@ -289,17 +293,7 @@ public:
    * Returns the reference to the AD version of the coordinate transformation coefficients
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<ADReal> & adCoordTransformation() const
-  {
-    // Coord values for non-cartesian coordinate systems are functions of the locations of the
-    // quadrature points in physical space. We also have no way of knowing whether this was called
-    // from a volumetric or face object so we should set both volumetric and face xyz to true
-    _calculate_xyz = true;
-    _calculate_face_xyz = true;
-
-    _calculate_ad_coord = true;
-    return _ad_coord;
-  }
+  const MooseArray<ADReal> & adCoordTransformation() const;
 
   /**
    * Get the coordinate system type
@@ -387,6 +381,7 @@ public:
   const MooseArray<ADPoint> & adQPoints() const
   {
     _calculate_xyz = true;
+    _need_ad_volume_map = true;
     return _ad_q_points;
   }
 
@@ -1313,6 +1308,7 @@ public:
   template <typename T>
   const ADTemplateVariablePhiGradient<T> & adGradPhi(const MooseVariableFE<T> & v) const
   {
+    _need_ad_grad_phi = true;
     return _ad_grad_phi_data.at(v.feType());
   }
   const VariablePhiValue & phi(const MooseVariableField<Real> &) const { return _phi; }
@@ -1673,6 +1669,12 @@ public:
    * when an object needs their AD gradient or their AD face test function gradients.
    */
   void needADGradPhiFace() const { _need_ad_grad_phi_face = true; }
+
+  /**
+   * Request that element reinitialization compute the AD shape function gradients. Variables call
+   * this when an object needs their AD gradient or their AD test function gradients.
+   */
+  void needADGradPhi() const { _need_ad_grad_phi = true; }
 
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiSecond & feSecondPhiFace(FEType type) const
@@ -2774,6 +2776,13 @@ protected:
   /// mesh propagates the displacement derivatives of the face map into every shape function
   /// gradient, which is expensive and unnecessary when only values and normals are used.
   mutable bool _need_ad_grad_phi_face = false;
+  /// Whether any object needs the AD element shape function gradients
+  mutable bool _need_ad_grad_phi = false;
+  /// Whether any object needs the AD element JxW, quadrature points or coordinate transformation.
+  /// On a displaced mesh their map carries derivatives for every element node displacement. That
+  /// costs time even when no object reads them, and it needs an AD derivative size of at least the
+  /// element's displacement dofs (81 on a HEX27).
+  mutable bool _need_ad_volume_map = false;
 
   /**
    * The residual vector tags that Assembly could possibly contribute to.
@@ -2892,6 +2901,20 @@ protected:
   /// The current reference points on the neighbor element
   std::vector<Point> _current_neighbor_ref_points;
 };
+
+inline const MooseArray<ADReal> &
+Assembly::adCoordTransformation() const
+{
+  // Coord values for non-cartesian coordinate systems are functions of the locations of the
+  // quadrature points in physical space. We also have no way of knowing whether this was called
+  // from a volumetric or face object so we should set both volumetric and face xyz to true
+  _calculate_xyz = true;
+  _calculate_face_xyz = true;
+  _need_ad_volume_map = true;
+
+  _calculate_ad_coord = true;
+  return _ad_coord;
+}
 
 template <typename OutputType>
 const typename OutputTools<OutputType>::VariablePhiValue &
@@ -3039,6 +3062,7 @@ template <>
 inline const ADTemplateVariablePhiGradient<RealVectorValue> &
 Assembly::adGradPhi<RealVectorValue>(const MooseVariableFE<RealVectorValue> & v) const
 {
+  _need_ad_grad_phi = true;
   return _ad_vector_grad_phi_data.at(v.feType());
 }
 

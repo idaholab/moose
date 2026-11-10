@@ -107,6 +107,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     )
 {%- endif %}
 
+    # Download bison to mitigate races under parallel make in PTSCOTCH
+    PETSC_OPTIONS+=("--download-bison")
+
     # Additional options with cuda
     if [ -n "${CUDA_DIR:-}" ]; then
         PETSC_OPTIONS+=(
