@@ -152,7 +152,7 @@ class MemoryMonitor:
         self._interval: float = interval
         """How often to sample in seconds."""
 
-        self._gpu: bool = gpu
+        self._track_gpu: bool = gpu
         """Whether or not to also sample NVIDIA GPU memory."""
 
         self._process: Optional[ForkProcess] = None
@@ -273,7 +273,7 @@ class MemoryMonitor:
             args=(
                 self._parent_pid,
                 self._interval,
-                self._gpu,
+                self._track_gpu,
                 self._stop_event,
                 self._shared,
             ),
