@@ -394,7 +394,8 @@
   []
   [MFEMConflictingCoefficientsError]
     type = RunException
-    input = conflicting_coefficients.i
+    cli_args = 'Kernels/bilinear_form/coefficient=10.0'
+    input = variable_anisotropic_diffusion.i
     expect_err = "You must specify only one of parameter \"coefficient\" and \"matrix_coefficient\""
     requirement = 'The system shall error given a user specifies a scalar and matrix coefficient in an MFEM kernel.'
     capabilities = 'mfem'
