@@ -28,10 +28,8 @@ MFEMRefinementMarker::validParams()
                                     "Elements above this percentage of the max error will "
                                     "be refined. Must be between 0 and 1!");
   params.addParam<bool>("rebalance", false, "Whether to rebalance the mesh after h-refinement");
-  params.addRangeCheckedParam<unsigned>(
-      "max_h_level", 0, "max_h_level>=0 & max_h_level<=10", "Max number of h-refinement steps");
-  params.addRangeCheckedParam<unsigned>(
-      "max_p_level", 0, "max_p_level>=0 & max_p_level<=10", "Max number of p-refinement steps");
+  params.addParam<unsigned>("max_h_level", 0, "Max number of h-refinement steps");
+  params.addParam<unsigned>("max_p_level", 0, "Max number of p-refinement steps");
   return params;
 }
 
