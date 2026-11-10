@@ -14,6 +14,8 @@ import logging
 import collections
 import itertools
 import moosesqa
+import moosetree
+from mooseutils import civet_results
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import (
     core,
@@ -25,8 +27,11 @@ from MooseDocs.extensions import (
     sqa,
     table,
     modal,
+    template,
+    alert,
+    materialicon,
 )
-from MooseDocs import base
+from MooseDocs import base, common
 from MooseDocs.tree import pages
 
 logging.basicConfig()
@@ -179,6 +184,54 @@ class TestSQARequirementsAST(MooseDocsTestCase):
             self.assertToken(ast(i + 5)(0)(2), "Word", size=0, content="Group")
             self.assertToken(ast(i + 5)(0)(3), "Space", size=0, count=1)
             self.assertToken(ast(i + 5)(0)(4), "Word", size=0, content=s)
+
+
+class TestSQARequirementsCivetBadges(MooseDocsTestCase):
+    """
+    Regression test for "!sqa requirements ... link-results=True", which relies on
+    civet.CivetTestBadges(item, prefix=req.prefix, tests=req.names) to render civet test
+    badges. Uses an injected, in-memory result database instead of a real CIVET site so
+    this needs no network access (refs #33744).
+    """
+
+    EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table, modal]
+
+    def setupExtension(self, ext):
+        if ext == sqa:
+            return dict(
+                active=True,
+                categories=dict(
+                    Demo=dict(directories=["python/MooseDocs/test"], specs=["demo"])
+                ),
+            )
+
+    def testLinkResults(self):
+        text = "!sqa requirements category=Demo link=True link-results=True link-spec=False link-design=False link-issues=False link-prerequisites=False link-collections=False link-types=False link-verification=False link-validation=False"
+
+        # Setup and tokenize in one call so the CivetExtension instance patched below is
+        # the same one used by render() (a later tokenize/render call with args/kwargs would
+        # rebuild the translator, and the extensions with it, from scratch).
+        ast = self.tokenize(text, renderer=base.MaterializeRenderer())
+        self.assertToken(
+            ast(0, 1, 1), "CivetTestBadges", size=0, prefix="common", tests={"r0"}
+        )
+
+        # "r0" is defined in python/MooseDocs/test/common/demo, so its result lookup
+        # key is "common.r0" (prefix="common", derived from that file's directory).
+        ext = next(e for e in self.translator.extensions if e.name == "civet")
+        fake_test = civet_results.Test(
+            "01_Common", "OK", None, "", 0.1, "https://civet.inl.gov"
+        )
+        ext.results = lambda name: (
+            {12345: [fake_test]} if name == "common.r0" else None
+        )
+
+        res = self.render(ast)
+        badges = list(
+            moosetree.findall(res, func=lambda n: n.get("class", None) == "new badge")
+        )
+        self.assertEqual(len(badges), 1)
+        self.assertEqual(badges[0]["data-badge-caption"], "OK")
 
 
 class TestSQAVerificationAndValidation(MooseDocsTestCase):
@@ -387,6 +440,79 @@ class TestSQADocument(MooseDocsTestCase):
         self.assertToken(
             ast(0), "AutoLink", page="sqa/Demo_foo.md", optional=True, warning=True
         )
+
+
+class TestSQARecordsTemplate(MooseDocsTestCase):
+    """
+    Regression test for framework/doc/content/templates/sqa/app_index.md.template: the
+    'sqa-records' field must default to the category passed to '!template load', not the
+    general/'_empty_' category (see idaholab/moose#23649).
+    """
+
+    EXTENSIONS = [
+        core,
+        command,
+        floats,
+        autolink,
+        heading,
+        civet,
+        sqa,
+        table,
+        modal,
+        template,
+        alert,
+        materialicon,
+    ]
+
+    def setupExtension(self, ext):
+        if ext == sqa:
+            return dict(
+                active=True,
+                categories=dict(
+                    Demo=dict(
+                        directories=["python/MooseDocs/test"],
+                        specs=["demo"],
+                        reports=dict(
+                            Documents=dict(
+                                software_requirements_specification="demo_srs.md"
+                            )
+                        ),
+                    )
+                ),
+                reports=dict(
+                    Documents=dict(software_requirements_specification="general_srs.md")
+                ),
+            )
+        elif ext == template:
+            return dict(active=True)
+
+    def setupContent(self):
+        config = [
+            dict(
+                root_dir="framework/doc/content",
+                content=["templates/sqa/app_index.md.template"],
+            )
+        ]
+        return common.get_content(config, ".md")
+
+    def testRecordsDefaultToLoadCategory(self):
+        text = (
+            "!template load file=sqa/app_index.md.template category=Demo app=Demo App"
+        )
+        ast = self.tokenize(text)
+
+        records = ast(0, 1)
+        self.assertToken(records, "TemplateField", key="sqa-records")
+        self.assertToken(records(0), "Heading", string="Software Quality Records")
+
+        ul = records(1)
+        self.assertToken(ul, "UnorderedList")
+        srs_items = [
+            li
+            for li in ul.children
+            if li(0).name == "AutoLink" and li(0)["page"] == "demo_srs.md"
+        ]
+        self.assertEqual(len(srs_items), 1)
 
 
 class TestSQARequirementsRender(MooseDocsTestCase):

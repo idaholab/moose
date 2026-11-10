@@ -1,0 +1,139 @@
+[Tests]
+  design = 'InputParameters.md'
+  issues = '#30168'
+
+  [at_most_one_none_set]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.atMostOneNoneSet
+    requirement = 'The system shall accept a group of mutually exclusive parameters when none of them is set by the user.'
+  []
+  [at_most_one_one_set]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.atMostOneOneSet
+    requirement = 'The system shall accept a group of mutually exclusive parameters when exactly one of them is set by the user.'
+  []
+  [at_most_one_two_set]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.atMostOneTwoSet
+    requirement = 'The system shall report an error naming the offending parameters when two of a group of mutually exclusive parameters are set by the user.'
+  []
+  [at_most_one_all_set]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.atMostOneAllSet
+    requirement = 'The system shall report an error when all of a group of mutually exclusive parameters are set by the user.'
+  []
+  [at_most_one_only_counts_listed]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.atMostOneOnlyCountsListedParams
+    requirement = 'The system shall consider only the parameters passed to the mutual exclusivity check when counting how many are set.'
+  []
+
+  [both_set_or_not_set]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.bothSetOrNotSet
+    requirement = 'The system shall require that two parameters are either both set or both unset.'
+  []
+  [second_param_set_only_if_first_true]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.secondParamSetOnlyIfFirstOneTrue
+    requirement = 'The system shall report an error when a parameter is set by the user while a controlling boolean parameter is false.'
+  []
+  [second_param_set_only_if_first_set]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.secondParamSetOnlyIfFirstOneSet
+    requirement = 'The system shall report an error when a parameter is set by the user while another parameter it depends on is not set.'
+  []
+  [second_param_not_set_if_first_set]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.secondParamNotSetIfFirstOneSet
+    requirement = 'The system shall report an error when two mutually exclusive parameters are both set by the user.'
+  []
+
+  [vector_params_same_length]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.vectorParamsSameLength
+    requirement = 'The system shall require two vector parameters to have the same length.'
+  []
+  [vector_param_and_multimooseenum_length]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.vectorParamAndMultiMooseEnumLength
+    requirement = 'The system shall require a vector parameter and a multi-enumeration parameter to have the same length.'
+  []
+  [twod_vector_params_same_length]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.twoDVectorParamsSameLength
+    requirement = 'The system shall require two two-dimensional vector parameters to have the same outer and inner lengths.'
+  []
+  [vector_params_no_overlap]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.vectorParamsNoOverlap
+    requirement = 'The system shall report an error when items overlap between, or are repeated within, vector parameters.'
+  []
+  [twod_vector_params_no_respective_overlap]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.twoDVectorParamsNoRespectiveOverlap
+    requirement = 'The system shall report an error when items are repeated within the inner vectors of a two-dimensional vector parameter.'
+  []
+  [twod_vector_param_inner_same_length_as_oned]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.twoDVectorParamInnerSameLengthAsOneDVector
+    requirement = 'The system shall require each inner vector of a two-dimensional vector parameter to match the length of a one-dimensional vector parameter.'
+  []
+  [twod_vector_param_multimooseenum_length]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.twoDVectorParamMultiMooseEnumSameLength
+    requirement = 'The system shall require the unrolled size of a two-dimensional vector parameter to match the size of a multi-enumeration parameter, attributing the error to either parameter as requested.'
+  []
+  [vector_param_not_empty]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.vectorParamNotEmpty
+    requirement = 'The system shall report an error when a vector parameter is set to an empty vector.'
+  []
+  [vector_params_same_length_if_set]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.vectorParamsSameLengthIfSet
+    requirement = 'The system shall require two vector parameters to have the same length when both are set, optionally ignoring an unset empty default.'
+  []
+  [vector_param_length_same_as_combined_others]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.vectorParamLengthSameAsCombinedOthers
+    requirement = 'The system shall require a vector parameter to have the same length as two other vector parameters combined.'
+  []
+
+  [blockwise_consistency_with_blocks]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.blockwiseConsistencyWithBlocks
+    requirement = 'The system shall verify per-block parameters against a set of block groups and against the object block restriction.'
+  []
+  [blockwise_consistency_without_blocks]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.blockwiseConsistencyWithoutBlocks
+    requirement = 'The system shall verify that per-block parameters are consistently sized when no block groups are provided.'
+  []
+
+  [parameter_consistent]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.parameterConsistent
+    requirement = 'The system shall report whether a parameter has a consistent value between two parameter sets.'
+  []
+  [warn_inconsistent]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.warnInconsistent
+    requirement = 'The system shall emit a warning when a parameter is inconsistent between two parameter sets.'
+  []
+  [error_dependent_parameter]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.errorDependentParameter
+    requirement = 'The system shall report an error when a dependent parameter is set by the user while its controlling parameter is not set to the required value.'
+  []
+  [error_inconsistent_dependent_parameter]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.errorInconsistentDependentParameter
+    requirement = 'The system shall report an error when a dependent parameter is set by the user while its controlling parameter has an incompatible value.'
+  []
+  [assert_param_defined]
+    type = GoogleTest
+    unit_test = InputParametersChecksUtilsTest.assertParamDefined
+    requirement = 'The system shall assert that a parameter queried by a parameter check has been declared with the expected type.'
+  []
+[]

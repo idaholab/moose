@@ -305,4 +305,11 @@
     capabilities = 'method!=dbg' # dbg has libMesh stuff show up
     deleted = "#5178" # tempararily disable this test for console refactoring
   [../]
+  [console_no_buffer_growth]
+    type = RunApp
+    input = console_no_buffer_growth.i
+    requirement = 'The system shall not accumulate console messages in memory when no console output exists.'
+    issues = '#34118'
+    design = 'Console.md'
+  []
 []

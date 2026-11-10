@@ -83,6 +83,10 @@ sudo apt install x11-apps libglu1-mesa libxcb-*
 
 ### Configure WSL to connect to Windows GUI
 
+!alert warning title=Windows 11
+Windows 11 users need not follow the GUI instructions below. The display-related environment variables
+are automatically set in WSLg, shipped with Windows 11.
+
 !style! halign=left
 Modify the bash profile to allow WSL to connect to the Windows GUI.
 !style-end!

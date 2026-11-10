@@ -327,6 +327,9 @@ void HttpServer::startListening(const std::variant<uint16_t, std::string> listen
     if (mSocket != -1)
         throw std::runtime_error("Server is already running");
 
+    // Cleared here so that a nonzero value always refers to the bind below
+    mBoundPort = 0;
+
     const auto listen_on_port = std::holds_alternative<uint16_t>(listen_on);
     mSocket = socket(listen_on_port ? AF_INET : AF_LOCAL, SOCK_STREAM, 0);
 
@@ -349,6 +352,14 @@ void HttpServer::startListening(const std::variant<uint16_t, std::string> listen
         const auto retval = bind(mSocket, reinterpret_cast<struct sockaddr*>(&remote), sizeof(remote));
         if (retval < 0)
             throw std::runtime_error("Failed to bind to socket on port " + std::to_string(port));
+
+        // With port 0 the operating system assigns the port, so the bound address
+        // is the only place the port actually being served can be read
+        struct sockaddr_in bound;
+        socklen_t bound_size = sizeof(bound);
+        if (getsockname(mSocket, reinterpret_cast<struct sockaddr*>(&bound), &bound_size) < 0)
+            throw std::runtime_error("getsockname() failed");
+        mBoundPort = ntohs(bound.sin_port);
     }
     else
     {

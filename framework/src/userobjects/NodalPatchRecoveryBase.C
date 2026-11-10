@@ -189,7 +189,7 @@ NodalPatchRecoveryBase::execute()
 void
 NodalPatchRecoveryBase::threadJoin(const UserObject & uo)
 {
-  const auto & npr = static_cast<const NodalPatchRecoveryBase &>(uo);
+  const auto & npr = cast_ref<const NodalPatchRecoveryBase &>(uo);
   _Ae.insert(npr._Ae.begin(), npr._Ae.end());
   _be.insert(npr._be.begin(), npr._be.end());
 }

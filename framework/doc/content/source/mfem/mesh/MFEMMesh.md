@@ -2,26 +2,22 @@
 
 !if! function=hasCapability('mfem')
 
+## Summary
+
+Abstract base class shared by the MFEM-backed mesh types.
+
 ## Overview
 
-`MFEMMesh` is responsible for building an `mfem::ParMesh` object from the provided mesh input file
-for use in an `MFEMProblem`. Exodus files are supported, along with other mesh formats listed
- [here](https://mfem.org/mesh-formats/).
+`MFEMMesh` holds the `mfem::ParMesh` used by an [MFEMProblem.md] and implements the operations
+common to all MFEM-backed meshes: refinement, reordering, partitioning, displacement, and
+recovery. It is not used directly; the concrete mesh types are [MFEMFileMesh.md], which reads a
+mesh from file, and [MFEMMeshGeneratorMesh.md], which receives the mesh produced by a chain of
+MFEM mesh generators.
 
-As MOOSE checks for the existence of a `libMesh` MOOSE mesh at various points during setup,
-`MFEMMesh` currently builds a dummy MOOSE mesh of a single point alongside the MFEM mesh. This dummy
-mesh should not be used in an `MFEMProblem`; all MFEM objects should access the `mfem::ParMesh` via
-the `getMFEMParMesh()` accessor as needed.
-
-## Example Input File Syntax
-
-!listing test/tests/mfem/kernels/diffusion.i block=Problem Mesh
-
-!syntax parameters /Mesh/MFEMMesh
-
-!syntax inputs /Mesh/MFEMMesh
-
-!syntax children /Mesh/MFEMMesh
+As MOOSE checks for the existence of a libMesh MOOSE mesh at various points during setup,
+`MFEMMesh` also builds a small libMesh placeholder mesh alongside the MFEM mesh. This placeholder
+is not the simulation mesh; all MFEM objects should access the `mfem::ParMesh` via the
+`getMFEMParMesh()` accessor as needed.
 
 !if-end!
 

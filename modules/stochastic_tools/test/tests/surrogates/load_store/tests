@@ -65,6 +65,7 @@
       input = train_and_evaluate.i
       cli_args = 'Outputs/file_base=evaluate_out'
       jsondiff = evaluate_out.json
+      prereq = surrogate/evaluate_two_ranks # Shares evaluate_out checkpoint files under recover
       allow_test_objects = true
 
       detail = "and be trained and evaluated in memory with a single input file."

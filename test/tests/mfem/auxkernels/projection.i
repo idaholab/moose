@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/hinomaru.e
 []
 
@@ -112,10 +112,40 @@
   type = MFEMSteady
 []
 
+[VectorPostprocessors]
+  [line_sample_Az]
+    type = MFEMVariableLineValueSampler
+    variables = 'Az'
+    start_point = '-3 -2 0'
+    end_point = '3 2 0'
+    num_points = 101
+  []
+  [line_sample_J]
+    type = MFEMVariableLineValueSampler
+    variables = 'J'
+    start_point = '-2.9 -1.9 0'
+    end_point = '2.9 1.9 0'
+    num_points = 101
+  []
+  [line_sample_GAz]
+    type = MFEMVariableLineValueSampler
+    variables = 'GAz'
+    start_point = '-2.9 -1.9 0'
+    end_point = '2.9 1.9 0'
+    num_points = 101
+  []
+  [line_sample_GAz_copy]
+    type = MFEMVariableLineValueSampler
+    variables = 'GAz(copy)'
+    start_point = '-2.9 -1.9 0'
+    end_point = '2.9 1.9 0'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/Projection
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    file_base = OutputData/Projection/projection
   []
 []

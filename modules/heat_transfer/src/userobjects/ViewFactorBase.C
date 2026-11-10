@@ -134,7 +134,7 @@ ViewFactorBase::finalize()
 void
 ViewFactorBase::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const ViewFactorBase &>(y);
+  const auto & pps = cast_ref<const ViewFactorBase &>(y);
   for (unsigned int i = 0; i < _n_sides; ++i)
     _areas[i] += pps._areas[i];
 

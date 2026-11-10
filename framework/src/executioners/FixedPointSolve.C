@@ -263,7 +263,7 @@ FixedPointSolve::solve()
     // Snag all of the local dof indices for all of these variables
     AllLocalDofIndicesThread aldit(_problem, _transformed_vars);
     const libMesh::ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
-    Threads::parallel_reduce(elem_range, aldit);
+    Threads::parallel_reduce(elem_range, aldit, _problem.numThreads());
 
     transformed_dofs = aldit.getDofIndices();
   }
@@ -277,7 +277,7 @@ FixedPointSolve::solve()
       // Snag all of the local dof indices for all of these variables
       AllLocalDofIndicesThread aldit(_problem, _secondary_transformed_variables);
       const libMesh::ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
-      Threads::parallel_reduce(elem_range, aldit);
+      Threads::parallel_reduce(elem_range, aldit, _problem.numThreads());
 
       secondary_transformed_dofs = aldit.getDofIndices();
     }
@@ -300,7 +300,7 @@ FixedPointSolve::solve()
   if (_has_fixed_point_its)
   {
     auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
-    convergence.initialize();
+    convergence.preLoop();
   }
 
   _fixed_point_it = 0;
@@ -369,7 +369,6 @@ FixedPointSolve::solve()
   {
     // Fixed point iteration loop ends right above
     _problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
-    _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
     if (!_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, autoAdvance()))
     {
       _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
@@ -419,12 +418,10 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
   _app.solutionInvalidity().resetTimeStepOccurences();
 
   _executioner.preSolve();
-  _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
 
   if (_fixed_point_it == 0)
   {
     _problem.execute(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
-    _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
     if (!_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN, autoAdvance()))
     {
       _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
@@ -455,7 +452,7 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
   if (_has_fixed_point_its)
   {
     auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
-    convergence.preExecute();
+    convergence.preIteration();
   }
 
   // Keep track of the solution warnings from the TIMESTEP_BEGIN phase before:
@@ -485,6 +482,9 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
 
     // Keep track of the solution warnings from the solve
     _app.solutionInvalidity().accumulateTimeStepIntoTotalOccurences(_problem.timeStep());
+
+    // Controls on FAILED may change how the step is repeated (e.g. the time step cutback)
+    _problem.executeControls(EXEC_FAILED);
 
     // Perform the output of the current, failed time step (this only occurs if desired)
     _problem.outputStep(EXEC_FAILED);
@@ -518,7 +518,6 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
     _problem.onTimestepEnd();
     _problem.execute(EXEC_TIMESTEP_END);
 
-    _problem.execTransfers(EXEC_TIMESTEP_END);
     if (!_problem.execMultiApps(EXEC_TIMESTEP_END, auto_advance))
       _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
 
@@ -533,6 +532,7 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
   if (_fail_step)
   {
     _fail_step = false;
+    _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_FIXEDPOINT;
     return false;
   }
 
@@ -598,6 +598,9 @@ FixedPointSolve::printFixedPointConvergenceReason()
       break;
     case MooseFixedPointConvergenceReason::DIVERGED_OBJECT:
       _console << "DIVERGED_OBJECT (see Convergence object)";
+      break;
+    case MooseFixedPointConvergenceReason::DIVERGED_FAILED_FIXEDPOINT:
+      _console << "Fixed point iteration marked as failed";
       break;
     default:
       // UNSOLVED and CONVERGED_NONLINEAR should not be hit when coupling

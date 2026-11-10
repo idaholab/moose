@@ -421,6 +421,7 @@ typedef MooseArray<ADRealVectorValue> ADVectorVariableValue;
 typedef MooseArray<ADRealTensorValue> ADVectorVariableGradient;
 typedef MooseArray<libMesh::TypeNTensor<3, ADReal>> ADVectorVariableSecond;
 typedef MooseArray<ADRealVectorValue> ADVectorVariableCurl;
+typedef MooseArray<ADReal> ADVectorVariableDivergence;
 
 namespace Moose
 {
@@ -659,6 +660,9 @@ using ADTemplateVariableSecond =
     typename OutputTools<typename Moose::ADType<T>::type>::VariableSecond;
 template <typename T>
 using ADTemplateVariableCurl = typename OutputTools<typename Moose::ADType<T>::type>::VariableCurl;
+template <typename T>
+using ADTemplateVariableDivergence =
+    typename OutputTools<typename Moose::ADType<T>::type>::VariableDivergence;
 
 typedef VariableTestValue ADVariableTestValue;
 typedef VariableTestGradient ADVariableTestGradient;
@@ -1218,6 +1222,9 @@ MooseDerivativeStringClass(UserObjectName);
 /// This type is used for referencing finite-volume interpolation methods
 MooseDerivativeStringClass(InterpolationMethodName);
 
+/// This type is used for referencing finite-volume gradient methods
+MooseDerivativeStringClass(GradientMethodName);
+
 /// This type is used for objects that expect an Indicator object name
 MooseDerivativeStringClass(IndicatorName);
 
@@ -1294,6 +1301,9 @@ MooseDerivativeStringClass(MFEMVectorCoefficientName);
 MooseDerivativeStringClass(MFEMMatrixCoefficientName);
 MooseDerivativeStringClass(MFEMFESpaceName);
 MooseDerivativeStringClass(MFEMSolverName);
+MooseDerivativeStringClass(MFEMKernelName);
+MooseDerivativeStringClass(MFEMBoundaryConditionName);
+MooseDerivativeStringClass(MFEMWeakFormName);
 ///@}
 #endif
 /**

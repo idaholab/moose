@@ -37,8 +37,6 @@
 #include <unordered_map>
 #include <utility>
 
-using namespace libMesh;
-
 namespace
 {
 
@@ -77,7 +75,7 @@ validateProjectedQuadrilateral(const std::vector<Point> & polygon, const char * 
 
   // Normalization makes the libMesh map checks relative to the local projected size. The value
   // matches other mortar projection and clipping decisions.
-  const Real scaled_jacobian = element.quality(SCALED_JACOBIAN);
+  const Real scaled_jacobian = element.quality(libMesh::SCALED_JACOBIAN);
   if (!element.has_invertible_map(mortar_reference_mapping_tolerance) ||
       !std::isfinite(scaled_jacobian) || scaled_jacobian <= mortar_reference_mapping_tolerance)
     mooseException("The projected ",

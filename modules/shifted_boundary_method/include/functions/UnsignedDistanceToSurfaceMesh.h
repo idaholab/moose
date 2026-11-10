@@ -14,12 +14,13 @@
 // Forward declarations
 class SBMSurfaceMeshBuilder;
 class KDTree;
-class SBMBndElementBase;
+class SurfaceElement;
+class SBMInterfaceManager;
 
 /**
- * Computes the unsigned distance to a surface mesh using KDTree nearest
- * neighbor lookup from SBMSurfaceMeshBuilder. The gradient returns the
- * unit vector pointing from the boundary element to the query point.
+ * Computes the unsigned distance to a surface mesh using geometry supplied by
+ * SBMSurfaceMeshBuilder or SBMInterfaceManager. The gradient returns the unit
+ * vector pointing from the boundary element to the query point.
  */
 class UnsignedDistanceToSurfaceMesh : public Function
 {
@@ -32,8 +33,8 @@ public:
 
   UnsignedDistanceToSurfaceMesh(const InputParameters & parameters);
 
-  /// find closest boundary element using KDTree
-  const SBMBndElementBase & closestBoundaryElem(const Point & p) const;
+  /// find closest boundary element using k-d tree
+  const SurfaceElement & closestBoundaryElem(const Point & p) const;
 
   /// find closest boundary element and return its distance vector
   RealVectorValue distanceVectorToSurface(const Point & p) const;
@@ -51,7 +52,11 @@ public:
   RealVectorValue surfaceNormal(const Point & p) const;
 
 protected:
-  /// Cached pointers for speed
-  KDTree * _kd_tree;
-  const std::vector<std::unique_ptr<SBMBndElementBase>> * _boundary_elements;
+  /// Optional single-mesh manager used instead of a per-interface builder.
+  const SBMInterfaceManager * _manager = nullptr;
+  std::pair<SubdomainID, SubdomainID> _subdomain_pair;
+
+  /// Cached pointers for per-interface builder mode.
+  KDTree * _kd_tree = nullptr;
+  const std::vector<std::unique_ptr<SurfaceElement>> * _boundary_elements = nullptr;
 };

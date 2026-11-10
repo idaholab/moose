@@ -269,6 +269,7 @@
     porosity_zero = 0.1
     biot_coefficient = 0.6
     solid_bulk = 1
+    porosity_min = -1 # the analytical solution of this linear poroelasticity benchmark has negative porosity at early times
   []
   [permeability]
     type = PorousFlowPermeabilityConst
@@ -377,8 +378,8 @@
   [andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_atol -snes_rtol -snes_max_it'
-    petsc_options_value = 'gmres asm lu 1E-14 1E-10 10000'
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type'
+    petsc_options_value = 'gmres asm lu'
   []
 []
 
@@ -392,6 +393,9 @@
     postprocessor = dt
     dt = 0.001
   []
+  nl_abs_tol = 1E-14
+  nl_rel_tol = 1E-10
+  nl_max_its = 10000
 []
 
 [Outputs]

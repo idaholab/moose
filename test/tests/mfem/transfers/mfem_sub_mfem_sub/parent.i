@@ -1,19 +1,11 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../../mesh/square.msh
 []
 
 [Problem]
   type = MFEMProblem
   solve = false
-[]
-
-[FESpaces]
-  [H1FESpace]
-    type = MFEMScalarFESpace
-    fec_type = H1
-    fec_order = FIRST
-  []
 []
 
 [MultiApps]
@@ -38,15 +30,15 @@
   active = 'copy_between_sub'
   [copy_between_sub]
     type = MultiAppMFEMCopyTransfer
-    source_variables = send
-    variables = recv
+    source_variables = transfer_var
+    variables = transfer_var
     from_multi_app = send_app
     to_multi_app = recv_app
   []
   [general_transfer_between_sub]
     type = MultiAppMFEMShapeEvaluationTransfer
-    source_variables = send
-    variables = recv
+    source_variables = transfer_var
+    variables = transfer_var
     from_multi_app = send_app
     to_multi_app = recv_app
   []

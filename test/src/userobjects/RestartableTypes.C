@@ -9,8 +9,6 @@
 
 #include "RestartableTypes.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseTestApp", RestartableTypes);
 
 InputParameters
@@ -35,7 +33,7 @@ RestartableTypes::RestartableTypes(const InputParameters & params)
     _map_data(declareRestartableData<std::map<unsigned int, Real>>("map_data")),
     _dense_vector_data(declareRestartableData<DenseVector<Real>>("dense_vector_data")),
     _dense_matrix_data(declareRestartableData<DenseMatrix<Real>>("dense_matrix_data")),
-    _raw_parameters(declareRestartableData<Parameters>("raw_parameters"))
+    _raw_parameters(declareRestartableData<libMesh::Parameters>("raw_parameters"))
 {
   _vector_data.resize(4, 1);
   _vector_vector_data.resize(4);

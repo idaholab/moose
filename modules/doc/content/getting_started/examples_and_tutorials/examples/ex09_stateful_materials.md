@@ -12,9 +12,9 @@
 
 ## Complete Source Files
 
-- [examples/ex09_stateful_materials/ex09.i]
-- [examples/ex09_stateful_materials/include/materials/ExampleMaterial.h]
-- [examples/ex09_stateful_materials/src/materials/ExampleMaterial.C]
+- [!file](examples/ex09_stateful_materials/ex09.i)
+- [!file](examples/ex09_stateful_materials/include/materials/ExampleMaterial.h)
+- [!file](examples/ex09_stateful_materials/src/materials/ExampleMaterial.C)
 
 !content pagination use_title=True
                     previous=examples/ex08_materials.md

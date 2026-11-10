@@ -27,7 +27,9 @@ MortarFrictionalStateAux::validParams()
                        "frictional pressure vector.");
   params.addRequiredCoupledVar(
       "contact_pressure",
-      "Normal contact pressure Lagrange multiplier from the mortar contact enforcement.");
+      "Normal contact pressure from the mortar contact enforcement, either the raw Lagrange "
+      "multiplier variable or a physical-pressure auxiliary variable populated by "
+      "MortarUserObjectAux.");
   params.addRequiredParam<Real>("mu", "Friction coefficient to compute nodal states");
   params.addParam<Real>("tolerance", 1.0e-3, "Tolerance value used to determine the states");
   params.addParam<bool>(

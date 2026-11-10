@@ -4,6 +4,7 @@
 
 [GlobalParams]
   initial_from_file = 'steady_state_out.e'
+  initial_from_file_weighting_type = average
 []
 
 [Executioner]

@@ -29,6 +29,7 @@ protected:
   void addRadiationObject() const;
   void addViewFactorObject() const;
   void addRadiationBCs() const;
+  void addFixedTemperatureBCs() const;
   void addRayStudyObject() const;
   void addRayBCs() const;
   void addHeatFluxAuxVariable() const;

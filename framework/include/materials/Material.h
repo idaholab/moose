@@ -215,6 +215,8 @@ public:
   virtual void resolveOptionalProperties() override;
 
 protected:
+  bool usesFaceCoupledValues() const override { return _bnd; }
+
   virtual void checkMaterialProperty(const std::string & name, const unsigned int state) override;
 
   virtual const MaterialData & materialData() const override { return _material_data; }

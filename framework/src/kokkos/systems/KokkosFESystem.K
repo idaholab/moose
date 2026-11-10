@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,6 +18,8 @@
 
 #include "libmesh/system.h"
 #include "libmesh/fe_interface.h"
+
+#include "timpi/parallel_sync.h"
 
 namespace Moose::Kokkos
 {
@@ -80,20 +82,31 @@ FESystem::setupCoupling()
 {
   if (auto * const nl_system = dynamic_cast<NonlinearSystemBase *>(&_system))
   {
-    _coupling.create(_num_vars);
+    _field_coupling.create(_num_vars);
+    _scalar_coupling.create(_num_vars);
 
-    std::map<unsigned int, std::vector<unsigned int>> coupling;
+    std::map<unsigned int, std::vector<unsigned int>> field_coupling;
+    std::map<unsigned int, std::vector<unsigned int>> scalar_coupling;
 
     auto & ce = _system.feProblem().couplingEntries(0, nl_system->number());
+    auto & fsce = _system.feProblem().fieldScalarCouplingEntries(0, nl_system->number());
 
     for (const auto & [ivar, jvar] : ce)
       if (ivar->number() != jvar->number())
-        coupling[ivar->number()].push_back(jvar->number());
+        field_coupling[ivar->number()].push_back(jvar->number());
+
+    for (const auto & [ivar, jvar] : fsce)
+      scalar_coupling[ivar->number()].push_back(jvar->number());
 
     for (const auto var : make_range(_num_vars))
-      _coupling[var] = coupling[var];
+      if (!_var_is_scalar[var])
+      {
+        _field_coupling[var] = field_coupling[var];
+        _scalar_coupling[var] = scalar_coupling[var];
+      }
 
-    _coupling.copyToDevice();
+    _field_coupling.copyToDevice();
+    _scalar_coupling.copyToDevice();
   }
 }
 
@@ -106,8 +119,7 @@ FESystem::setupDofs()
 
   _local_node_dof_index.create(_num_vars);
 
-  auto * const solution =
-      libMesh::cast_ptr<PetscVector<Number> *>(sys.current_local_solution.get());
+  auto * const solution = cast_ptr<PetscVector<Number> *>(sys.current_local_solution.get());
 
 #ifdef MOOSE_ENABLE_KOKKOS_GPU
   // Kokkos array thinks OpenMP clause is device code when using OpenMP backend
@@ -115,6 +127,9 @@ FESystem::setupDofs()
 #endif
   for (unsigned int var = 0; var < _num_vars; ++var)
   {
+    if (_var_is_scalar[var])
+      continue;
+
     std::vector<dof_id_type> dof_indices;
 
     _local_node_dof_index[var].create(num_nodes);
@@ -140,6 +155,33 @@ FESystem::setupDofs()
   }
 
   _local_node_dof_index.copyToDeviceNested();
+
+  if (_dof_map.n_constrained_dofs())
+  {
+    _local_constraints.create(_num_local_dofs + _num_ghost_dofs);
+
+    for (auto it = _dof_map.constraint_rows_begin(); it != _dof_map.constraint_rows_end(); ++it)
+      if (_dof_map.semilocal_index(it->first))
+      {
+        auto local_dof = solution->map_global_to_local_index(it->first);
+
+        _local_constraints.reserve({local_dof}, {it->second.size()});
+      }
+
+    _local_constraints.finalize();
+
+    for (auto it = _dof_map.constraint_rows_begin(); it != _dof_map.constraint_rows_end(); ++it)
+      if (_dof_map.semilocal_index(it->first))
+      {
+        auto local_dof = solution->map_global_to_local_index(it->first);
+
+        unsigned int i = 0;
+        for (auto [dof, weight] : it->second)
+          _local_constraints[local_dof][i++] = {solution->map_global_to_local_index(dof), weight};
+      }
+
+    _local_constraints.copyToDevice();
+  }
 }
 
 void
@@ -165,40 +207,46 @@ FESystem::setupNodalBCDofs()
 void
 FESystem::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
 {
-  auto var = nbc->variable().number();
-  auto num_dofs = _var_is_vector[var] ? kokkosAssembly().getDimension() : 1;
-
   if (!dofs.isAlloc())
   {
     dofs.create(_num_local_dofs + _num_ghost_dofs);
     dofs = false;
   }
 
-  for (auto node : nbc->getContiguousNodes())
+  for (const auto variable : nbc->variables())
   {
-    auto dof = _local_node_dof_index[var][node];
+    auto var = variable->number();
+    auto num_dofs = _var_is_vector[var] ? kokkosAssembly().getDimension() : 1;
 
-    if (dof != libMesh::DofObject::invalid_id)
-      for (const auto i : make_range(num_dofs))
-        dofs[dof + i] = true;
+    for (auto node : nbc->getContiguousNodes())
+    {
+      auto dof = _local_node_dof_index[var][node];
+
+      if (dof != libMesh::DofObject::invalid_id)
+        for (const auto i : make_range(num_dofs))
+          dofs[dof + i] = true;
+    }
   }
 
   // Let remote processes know about ghost DOFs associated with nodal BCs not to contribute on them
 
   auto num_procs = _comm.size();
 
-  std::vector<std::vector<char>> send(num_procs), recv(num_procs);
+  std::map<processor_id_type, std::vector<char>> send;
 
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
+  for (const auto proc : make_range(num_procs))
     for (auto dof : _local_comm_list[proc])
       send[proc].push_back(dofs[dof]);
 
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    _comm.scatter(send, recv[proc], proc);
+  auto receive = [this, &dofs](const processor_id_type pid, const std::vector<char> & recv)
+  {
+    const auto & ghost_dofs = _ghost_comm_list[pid];
 
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    for (dof_id_type i = 0; i < _ghost_comm_list[proc].size(); ++i)
-      dofs[_ghost_comm_list[proc][i]] = recv[proc][i];
+    for (const auto i : index_range(ghost_dofs))
+      dofs[ghost_dofs[i]] = recv[i];
+  };
+
+  TIMPI::push_parallel_vector_data(_comm, std::move(send), receive);
 }
 
 void
@@ -241,7 +289,7 @@ FESystem::reinit()
           if (!_qp_vector_solutions_curl[tag](sid, var).isAlloc())
             _qp_vector_solutions_curl[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
         }
-        else
+        else if (!_var_is_scalar[var])
         {
           if (!_qp_solutions[tag](sid, var).isAlloc())
             _qp_solutions[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
@@ -284,6 +332,9 @@ FESystem::operator()(const ThreadID tid) const
   auto elem = _thread(tid, 1);
   auto var = _active_variables(_thread(tid, 2));
   auto tag = _active_solution_tags(_thread(tid, 3));
+
+  if (_var_is_scalar[var])
+    return;
 
   auto info = kokkosMesh().getElementInfo(elem);
   auto sid = info.subdomain;

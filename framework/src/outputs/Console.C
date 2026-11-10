@@ -24,8 +24,6 @@
 // libMesh includes
 #include "libmesh/enum_norm_type.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", Console);
 
 InputParameters

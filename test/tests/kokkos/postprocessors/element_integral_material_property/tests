@@ -7,7 +7,7 @@
     requirement = 'The Kokkos system shall compute the integral quantity over an element of a scalar material property.'
     design = 'KokkosElementIntegralMaterialProperty.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
   [average]
     type = 'CSVDiff'
@@ -16,6 +16,6 @@
     requirement = 'The Kokkos system shall compute the average quantity over an element of a scalar material property.'
     design = 'KokkosElementAverageMaterialProperty.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

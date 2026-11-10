@@ -17,8 +17,6 @@
 #include "TaggingInterface.h"
 #include "TransientInterface.h"
 
-using namespace libMesh;
-
 InputParameters
 ElementAndTraceScalarHDGAssemblyHelper::validParams()
 {

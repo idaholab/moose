@@ -1086,6 +1086,10 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
     for (auto neighbor : neighbors)
       if (neighbor != Elem::invalid_id)
         row.push_back(neighbor);
+    // PETSc documentation requires that rows be sorted. We've seen this matter for
+    // ptscotch, e.g. it crashes when the rows are not sorted even though its developers say in
+    // theory this shouldn't matter but in practice they admit it might.
+    std::sort(row.begin(), row.end());
   }
 
   // Partition the distributed graph
@@ -1432,8 +1436,8 @@ DistributedRectilinearMeshGenerator::generate()
 
   // MeshOutput<MT>::write_equation_systems will automatically renumber node and element IDs.
   // So we have to make that consistent at the first place. Otherwise, the moose cached data such as
-  // _block_node_list will be inconsistent when we doing MooseMesh::getNodeBlockIds. That being
-  // said, moose will pass new ids to getNodeBlockIds while the cached _block_node_list still use
+  // _node_block will be inconsistent when we call MooseMesh::getNodeBlockIds. That being
+  // said, moose will pass new ids to getNodeBlockIds while the cached _node_block still use
   // the old node IDs. Yes, you could say: go ahead to do a mesh update, but I would say no. I do
   // not change mesh and there is no point to update anything.
   mesh->allow_renumbering(true);

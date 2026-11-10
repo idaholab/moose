@@ -180,6 +180,36 @@ MeshGenerator::checkGetMesh(const MeshGeneratorName & mesh_generator_name,
     else
       mooseError(error.str());
   }
+
+#ifdef MOOSE_MFEM_ENABLED
+  if (mg_sys.hasMeshGenerator(mesh_generator_name))
+  {
+    const auto is_mfem = [](const InputParameters & pars)
+    {
+      const auto * const flag = pars.queryParam<bool>("_mfem_mesh_generator");
+      return flag && *flag;
+    };
+    const auto & parent = mg_sys.getMeshGenerator(mesh_generator_name);
+    const bool parent_is_mfem = is_mfem(parent.parameters());
+    const bool this_is_mfem = is_mfem(parameters());
+    if (parent_is_mfem != this_is_mfem)
+    {
+      const auto & mfem_name = parent_is_mfem ? mesh_generator_name : name();
+      const auto & mfem_type = parent_is_mfem ? parent.type() : type();
+      const auto & libmesh_name = parent_is_mfem ? name() : mesh_generator_name;
+      const auto & libmesh_type = parent_is_mfem ? type() : parent.type();
+      const std::string msg = "Cannot chain MFEM-native mesh generator '" + mfem_name +
+                              "' of type '" + mfem_type + "' with libMesh-native mesh generator '" +
+                              libmesh_name + "' of type '" + libmesh_type +
+                              "'. MFEM and libMesh mesh generators cannot be mixed within the "
+                              "same generator chain.";
+      if (param_name.size())
+        paramError(param_name, msg);
+      else
+        mooseError(msg);
+    }
+  }
+#endif
 }
 
 std::unique_ptr<MeshBase> &

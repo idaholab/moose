@@ -191,8 +191,6 @@ mu=2e-3
 [Executioner]
   solve_type = NEWTON
   type = Transient
-  petsc_options_iname = '-snes_max_it'
-  petsc_options_value = '100'
   line_search = 'none'
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-9
@@ -204,6 +202,7 @@ mu=2e-3
     dt = 1e-2
   []
   steady_state_detection = true
+  nl_max_its = 100
 []
 
 [Outputs]

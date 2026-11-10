@@ -76,7 +76,7 @@ fvAdvectedInterpolationMethodType(const MooseEnum & interpolation_method)
   if (interpolation_method == "min_mod")
     return "FVAdvectedMinmodWeightBased";
   if (interpolation_method == "venkatakrishnan")
-    return "FVAdvectedVenkatakrishnanDeferredCorrection";
+    return "FVAdvectedMUSCLDeferredCorrection";
 
   mooseError("Unsupported linear FV advected interpolation method '", method_name, "'.");
 }

@@ -138,6 +138,52 @@ public:
                                       const SymbolName & c3 = "");
   ///@}
 
+#ifdef MOOSE_KOKKOS_SCOPE
+  ///@{
+  /**
+   * Methods for retrieving derivative Kokkos material properties. A constant zero property is
+   * returned if the base property is a default (constant) property or if the derivative property
+   * is not declared.
+   * @tparam U The material property type
+   * @tparam dimension The material property dimension
+   * @param base The name of the property to take the derivative of, or the parameter name
+   * containing it
+   * @param c The variable(s) to take the derivatives with respect to
+   */
+  template <typename U, unsigned int dimension = 0>
+  Moose::Kokkos::MaterialProperty<U, dimension>
+  getKokkosMaterialPropertyDerivative(const std::string & base, const std::vector<SymbolName> & c);
+
+  template <typename U, unsigned int dimension = 0>
+  Moose::Kokkos::MaterialProperty<U, dimension>
+  getKokkosMaterialPropertyDerivative(const std::string & base, const SymbolName & c1)
+  {
+    return getKokkosMaterialPropertyDerivative<U, dimension>(base, std::vector<SymbolName>{c1});
+  }
+
+  template <typename U, unsigned int dimension = 0>
+  Moose::Kokkos::MaterialProperty<U, dimension>
+  getKokkosMaterialPropertyDerivativeByName(const MaterialPropertyName & base,
+                                            const std::vector<SymbolName> & c);
+  ///@}
+
+  /**
+   * Declare a derivative Kokkos material property
+   * @tparam U The material property type
+   * @tparam dimension The material property dimension
+   * @param base The name of the property to take the derivative of
+   * @param c The variable(s) to take the derivatives with respect to
+   * @returns The declared Kokkos material property
+   */
+  template <typename U, unsigned int dimension = 0>
+  Moose::Kokkos::MaterialProperty<U, dimension>
+  declareKokkosPropertyDerivative(const std::string & base, const std::vector<SymbolName> & c)
+  {
+    return this->template declareKokkosPropertyByName<U, dimension>(
+        derivativePropertyName(base, c));
+  }
+#endif
+
   ///@{
   /**
    * check if derivatives of the passed in material property exist w.r.t a variable
@@ -395,6 +441,37 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivativeByName(
   return this->template getGenericZeroMaterialPropertyByName<U, is_ad>(
       derivativePropertyName(base, c));
 }
+
+#ifdef MOOSE_KOKKOS_SCOPE
+template <class T>
+template <typename U, unsigned int dimension>
+Moose::Kokkos::MaterialProperty<U, dimension>
+DerivativeMaterialInterface<T>::getKokkosMaterialPropertyDerivative(
+    const std::string & base, const std::vector<SymbolName> & c)
+{
+  const auto prop_name = this->getMaterialPropertyName(base);
+
+  // Derivatives of constants are zero
+  if (MooseUtils::parsesToReal(prop_name))
+    return Moose::Kokkos::MaterialProperty<U, dimension>(U(0));
+
+  return getKokkosMaterialPropertyDerivativeByName<U, dimension>(prop_name, c);
+}
+
+template <class T>
+template <typename U, unsigned int dimension>
+Moose::Kokkos::MaterialProperty<U, dimension>
+DerivativeMaterialInterface<T>::getKokkosMaterialPropertyDerivativeByName(
+    const MaterialPropertyName & base, const std::vector<SymbolName> & c)
+{
+  const auto prop_name = derivativePropertyName(base, c);
+
+  if (!this->template hasKokkosMaterialPropertyByName<U, dimension>(prop_name))
+    return Moose::Kokkos::MaterialProperty<U, dimension>(U(0));
+
+  return this->template getKokkosMaterialPropertyByName<U, dimension>(prop_name);
+}
+#endif
 
 template <class T>
 template <typename U, bool is_ad>

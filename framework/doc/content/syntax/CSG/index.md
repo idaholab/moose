@@ -59,7 +59,7 @@ An ["engineering unit"](source/csg/CSGBase.md#engineering-units) refers to a bro
 Each type of engineering unit is defined by a set of intuitive and domain-specific attributes that describe the geometry.
 The idea is that these attributes are much simpler for a user to define than all the necessary rudimentary CSG components, but comprehensive enough such that the unit can be automatically deconstructed into the standard [!ac](CSG) components if necessary.
 The "units" are then usable in place of a surface, cell, or universe, depending on its defined behavior.
-An example of this is defining an infinite regular [N-sided polygon](source/csg/CSGBase.md#n-sided-regular-polygon-unit) region.
+An example of this is defining an infinite regular [N-sided polygon](source/csg/CSGNPolygonUnit.md) region.
 
 ## How to Generate a CSG Model
 

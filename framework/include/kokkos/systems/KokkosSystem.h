@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -48,7 +48,6 @@ public:
   struct Sparsity
   {
     Array<PetscInt> col_idx;
-    Array<PetscInt> row_idx;
     Array<PetscInt> row_ptr;
   };
 
@@ -161,6 +160,35 @@ public:
   const Sparsity & getSparsity() const { return _sparsity; }
 
   /**
+   * Build the COO index arrays describing the sparsity pattern
+   *
+   * PETSc consumes these arrays destructively, so a fresh pair is needed for each matrix
+   * preallocated from this system.  The arrays are resized to the number of nonzeros and fully
+   * overwritten, which lets one allocation be reused across the matrices.
+   *
+   * @param coo_i The row index of each nonzero
+   * @param coo_j The column index of each nonzero
+   */
+  void buildCooIndices(std::vector<PetscInt> & coo_i, std::vector<PetscInt> & coo_j) const;
+
+  /**
+   * Check whether a variable is scalar
+   * @param var The variable number
+   * @returns Whether the variable is scalar
+   */
+  KOKKOS_FUNCTION bool isScalarVariable(unsigned int var) const { return _var_is_scalar[var]; }
+
+  /**
+   * Get the equation scaling factor of a variable
+   * @param var The variable number
+   * @returns The scaling factor
+   */
+  KOKKOS_FUNCTION Real getVariableScalingFactor(unsigned int var) const
+  {
+    return _var_scaling_factor[var];
+  }
+
+  /**
    * Check whether a variable is active on a subdomain
    * @param var The variable number
    * @param subdomain The contiguous subdomain ID
@@ -198,6 +226,16 @@ public:
   KOKKOS_FUNCTION dof_id_type getNumGhostDofs() const { return _num_ghost_dofs; }
 
   /**
+   * Get the number of DOFs of a scalar variable
+   * @param var The variable number
+   * @returns The number of scalar DOFs
+   */
+  KOKKOS_FUNCTION unsigned int getNumScalarDofs(unsigned int var) const
+  {
+    return _scalar_dof_index[var].size();
+  }
+
+  /**
    * Get the local DOF index of a variable for an element
    * @param elem The contiguous element ID
    * @param i The element-local DOF index
@@ -212,6 +250,17 @@ public:
   }
 
   /**
+   * Get the local DOF index of a scalar variable
+   * @param i The scalar DOF index
+   * @param var The variable number
+   * @returns The local DOF index
+   */
+  KOKKOS_FUNCTION dof_id_type getScalarLocalDofIndex(unsigned int i, unsigned int var) const
+  {
+    return _scalar_dof_index[var][i];
+  }
+
+  /**
    * Get the global DOF index of a variable for an element
    * @param elem The contiguous element ID
    * @param i The element-local DOF index
@@ -222,7 +271,18 @@ public:
                                                     unsigned int i,
                                                     unsigned int var) const
   {
-    return _local_to_global_dof_index[_local_elem_dof_index[var](i, elem)];
+    return _local_to_global_dof_index[getElemLocalDofIndex(elem, i, var)];
+  }
+
+  /**
+   * Get the global DOF index of a scalar variable
+   * @param i The scalar DOF index
+   * @param var The variable number
+   * @returns The global DOF index
+   */
+  KOKKOS_FUNCTION dof_id_type getScalarGlobalDofIndex(unsigned int i, unsigned int var) const
+  {
+    return _local_to_global_dof_index[getScalarLocalDofIndex(i, var)];
   }
 
   /**
@@ -286,14 +346,22 @@ protected:
   const MooseMesh & _mesh;
 
   /**
+   * Reference of the libMesh communicator
+   */
+  const Parallel::Communicator & _comm;
+
+  /**
    * Reference of the libMesh DOF map
    */
   const libMesh::DofMap & _dof_map;
 
   /**
-   * Reference of the libMesh communicator
+   * Local DOF ranges
    */
-  const Parallel::Communicator & _comm;
+  ///@{
+  const dof_id_type _first_dof;
+  const dof_id_type _end_dof;
+  ///@}
 
   /**
    * Number of variables
@@ -324,6 +392,11 @@ protected:
   Array<Array2D<dof_id_type>> _local_elem_dof_index;
 
   /**
+   * DOF indices of each scalar variable
+   */
+  Array<Array<dof_id_type>> _scalar_dof_index;
+
+  /**
    * Map from local DOF index to global DOF index
    */
   Array<dof_id_type> _local_to_global_dof_index;
@@ -332,6 +405,16 @@ protected:
    * Maximum number of DOFs per element for each variable
    */
   Array<unsigned int> _max_dofs_per_elem;
+
+  /**
+   * Whether each variable is scalar
+   */
+  Array<bool> _var_is_scalar;
+
+  /**
+   * Equation scaling factor of each variable
+   */
+  Array<Real> _var_scaling_factor;
 
   /**
    * Whether each variable is active on subdomains
@@ -373,6 +456,11 @@ private:
    * Setup variable data
    */
   void setupVariables();
+
+  /**
+   * Update variable scaling factors on device
+   */
+  void updateVariableScalingFactors();
 
   /**
    * Setup DOF data

@@ -66,7 +66,7 @@ MaterialTensorAverageTempl<is_ad>::threadJoin(const UserObject & y)
 {
   MaterialTensorIntegralTempl<is_ad>::threadJoin(y);
 
-  const auto & pps = static_cast<const MaterialTensorAverageTempl<is_ad> &>(y);
+  const auto & pps = cast_ref<const MaterialTensorAverageTempl<is_ad> &>(y);
   _volume += pps._volume;
 }
 

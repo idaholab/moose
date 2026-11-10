@@ -49,12 +49,12 @@ Here are solution snapshots from the beginning and end times from running `ex06-
 
 ## Complete Source Files
 
-- [examples/ex06_transient/ex06.i]
-- [framework/include/kernels/Diffusion.h]
-- [framework/src/kernels/Diffusion.C]
-- [examples/ex06_transient/include/kernels/ExampleTimeDerivative.h]
-- [examples/ex06_transient/src/kernels/ExampleTimeDerivative.C]
-- [examples/ex06_transient/src/base/ExampleApp.C]
+- [!file](examples/ex06_transient/ex06.i)
+- [!file](framework/include/kernels/Diffusion.h)
+- [!file](framework/src/kernels/Diffusion.C)
+- [!file](examples/ex06_transient/include/kernels/ExampleTimeDerivative.h)
+- [!file](examples/ex06_transient/src/kernels/ExampleTimeDerivative.C)
+- [!file](examples/ex06_transient/src/base/ExampleApp.C)
 
 !content pagination use_title=True
                     previous=examples/ex05_amr.md

@@ -19,8 +19,6 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/explicit_system.h"
 
-using namespace libMesh;
-
 InputParameters
 SampledOutput::validParams()
 {
@@ -146,7 +144,7 @@ SampledOutput::initSample()
   // Perform the mesh refinement
   if (_refinements > 0)
   {
-    MeshRefinement mesh_refinement(_mesh_ptr->getMesh());
+    libMesh::MeshRefinement mesh_refinement(_mesh_ptr->getMesh());
 
     // We want original and refined partitioning to match so we can
     // query from one to the other safely on distributed meshes.
@@ -268,7 +266,7 @@ SampledOutput::initSample()
         else
         {
           const auto & var_name = source_sys.variable_name(var_num);
-          if (fe_type != FEType(CONSTANT, MONOMIAL))
+          if (fe_type.order != CONSTANT || fe_type.family != MONOMIAL)
           {
             mooseInfoRepeated("Sampled output projects variable '" + var_name +
                               "' onto a constant monomial");
@@ -277,7 +275,8 @@ SampledOutput::initSample()
                            "Projection without serialization may fail with insufficient ghosting. "
                            "Consider setting 'serialize_sampling' to true.");
           }
-          dest_sys.add_variable(var_name, FEType(CONSTANT, MONOMIAL), subdomains);
+          dest_sys.add_variable(
+              var_name, FEType(CONSTANT, MONOMIAL).set_p_refinement(false), subdomains);
         }
         // Note: we could do more, using the generic projector. But exodus output of higher order
         // or more exotic variables is limited anyway
@@ -340,7 +339,7 @@ SampledOutput::updateSample()
         // it for re-initialization
         // TODO: inherit from MeshChangedInterface and rebuild mesh functions on meshChanged()
         if (!_mesh_functions[sys_num][var_num] || _sampling_mesh_changed)
-          _mesh_functions[sys_num][var_num] = std::make_unique<MeshFunction>(
+          _mesh_functions[sys_num][var_num] = std::make_unique<libMesh::MeshFunction>(
               source_es,
               _serialize ? *_serialized_solution : *source_sys.solution,
               source_sys.get_dof_map(),
@@ -503,7 +502,7 @@ SampledOutput::cloneMesh()
 
   // Prepare mesh, needed for the mesh functions
   if (_using_external_sampling_file)
-    _sampling_mesh_ptr->prepare(/*mesh to clone*/ nullptr);
+    _sampling_mesh_ptr->prepare();
   else if (_serialize && isParamValid("sampling_blocks"))
     // TODO: constraints have not been initialized?
     _sampling_mesh_ptr->getMesh().prepare_for_use();

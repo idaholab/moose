@@ -164,7 +164,7 @@ LowerDIntegratedBC::computeLowerDOffDiagJacobian(Moose::ConstraintJacobianType t
 
   if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
-    const auto & jv0 = static_cast<const MooseVariable &>(jvar);
+    const auto & jv0 = cast_ref<const MooseVariable &>(jvar);
     const auto & loc_phi =
         (type == Moose::LowerLower || type == Moose::PrimaryLower) ? jv0.phiLower() : jv0.phiFace();
 

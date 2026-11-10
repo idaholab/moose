@@ -12,20 +12,62 @@
 #include "MooseTypes.h"
 #include <map>
 #include <deque>
+#include <set>
 
 class FEProblemBase;
 class MortarInterfaceWarehouse;
 class MaterialBase;
+class AutomaticMortarGeneration;
 
 /**
- * Interface for notifications that the mortar mesh has been setup
+ * Interface for objects that need to be notified when the mortar segment mesh for an interface
+ * they consume has been (re)built. Notification is push-based: this interface registers itself
+ * with the owning \p FEProblemBase's \p MortarInterfaceWarehouse in its constructor, and \p
+ * mortarSetup() is called back whenever that warehouse rebuilds an \p
+ * AutomaticMortarGeneration and its segment coverage (interior-parent subdomains, boundary
+ * materials, etc.) has changed. This replaces re-deriving "has coverage changed" from outside the
+ * warehouse on every use.
  */
 class MortarExecutorInterface
 {
 public:
-  MortarExecutorInterface() = default;
+  /**
+   * @param fe_problem The problem that owns the \p MortarInterfaceWarehouse this object should
+   * register with
+   */
+  MortarExecutorInterface(FEProblemBase & fe_problem);
+
+  /**
+   * Re-registers the moved-to object in place of \p other with the warehouse. Required because
+   * consumers such as \p ComputeMortarFunctor are held by value in containers (e.g. \p
+   * std::unordered_map) that move-construct on insertion.
+   */
+  MortarExecutorInterface(MortarExecutorInterface && other);
+
+  /**
+   * This object does not deregister from the warehouse on destruction: \p FEProblemBase destroys
+   * its \p MortarInterfaceWarehouse (\p _mortar_data) before the solver/auxiliary systems that
+   * transitively own long-lived \p MortarExecutorInterface consumers (e.g. \p ComputeMortarFunctor,
+   * \p MortarNodalAuxKernelTempl), so deregistering here would touch an already-destroyed
+   * warehouse. This mirrors \p MeshChangedInterface, which has the same destruction-order
+   * constraint with respect to \p FEProblemBase::_notify_when_mesh_changes. A consumer that is
+   * instead stack-constructed fresh per use and destroyed well before \p FEProblemBase (e.g. \p
+   * MortarUserObjectThread) must deregister itself in its own destructor, since for such a
+   * consumer the warehouse is always still alive and skipping it would leave a dangling entry.
+   */
+  virtual ~MortarExecutorInterface() = default;
+
+  /**
+   * Called by the \p MortarInterfaceWarehouse whenever \p amg's mortar segment mesh coverage has
+   * changed, so that this object may refresh any state (e.g. material dependency lists) that
+   * depends on which subdomains/boundaries the mortar segment mesh currently touches.
+   */
+  virtual void mortarSetup(const AutomaticMortarGeneration & amg) = 0;
 
 protected:
+  /// The warehouse this object is registered with for mortar setup notifications
+  MortarInterfaceWarehouse & _mortar_warehouse;
+
   /**
    * @name Materials for Mortar
    * These containers hold the materials whose properties are required by a given set of consumers.

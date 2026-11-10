@@ -27,20 +27,20 @@ template <>
 void
 dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, void * context)
 {
-  storeHelper(stream, feature.boundary_intersection, context);
-  storeHelper(stream, feature.id, context);
-  storeHelper(stream, feature.centroid, context);
-  storeHelper(stream, feature.status, context);
+  dataStore(stream, feature.boundary_intersection, context);
+  dataStore(stream, feature.id, context);
+  dataStore(stream, feature.centroid, context);
+  dataStore(stream, feature.status, context);
 }
 
 template <>
 void
 dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void * context)
 {
-  loadHelper(stream, feature.boundary_intersection, context);
-  loadHelper(stream, feature.id, context);
-  loadHelper(stream, feature.centroid, context);
-  loadHelper(stream, feature.status, context);
+  dataLoad(stream, feature.boundary_intersection, context);
+  dataLoad(stream, feature.id, context);
+  dataLoad(stream, feature.centroid, context);
+  dataLoad(stream, feature.status, context);
 }
 
 registerMooseObject("PhaseFieldApp", GrainTracker);
@@ -1580,8 +1580,18 @@ GrainTracker::updateFieldInfo()
         entity_value = _vars[curr_var]->getNodalValue(*node_ptr);
       }
 
+      /**
+       * An entity on the interface between two grains can have equal values for both, e.g. an
+       * element straddling a sharp initial interface. The solve only resolves such ties to
+       * round-off, which differs with the number of processors, so treat values within
+       * libMesh::TOLERANCE as equal and give the entity to the grain with the lower id.
+       */
+      const auto existing = tmp_map.find(entity);
       if (entity_value != std::numeric_limits<Real>::lowest() &&
-          (tmp_map.find(entity) == tmp_map.end() || entity_value > tmp_map[entity]))
+          (existing == tmp_map.end() ||
+           MooseUtils::absoluteFuzzyGreaterThan(entity_value, existing->second, TOLERANCE) ||
+           (MooseUtils::absoluteFuzzyEqual(entity_value, existing->second, TOLERANCE) &&
+            grain._id < static_cast<unsigned int>(_feature_maps[map_index][entity]))))
       {
         mooseAssert(grain._id != invalid_id, "Missing Grain ID");
         _feature_maps[map_index][entity] = grain._id;

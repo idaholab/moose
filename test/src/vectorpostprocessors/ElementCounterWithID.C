@@ -65,7 +65,7 @@ ElementCounterWithID::finalize()
 void
 ElementCounterWithID::threadJoin(const UserObject & y)
 {
-  const ElementCounterWithID & uo = static_cast<const ElementCounterWithID &>(y);
+  const ElementCounterWithID & uo = cast_ref<const ElementCounterWithID &>(y);
   for (auto & id : _unique_ids)
     _counters[id] += uo._counters.at(id);
 }

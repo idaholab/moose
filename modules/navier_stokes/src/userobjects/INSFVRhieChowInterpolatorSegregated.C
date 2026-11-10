@@ -27,8 +27,6 @@
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/petsc_vector.h"
 
-using namespace libMesh;
-
 registerMooseObject("NavierStokesApp", INSFVRhieChowInterpolatorSegregated);
 
 InputParameters
@@ -76,7 +74,7 @@ INSFVRhieChowInterpolatorSegregated::INSFVRhieChowInterpolatorSegregated(
                "displaced mesh");
 
   // Register the elemental/face functors which will be queried in the pressure equation
-  for (const auto tid : make_range(libMesh::n_threads()))
+  for (const auto tid : make_range(UserObject::_subproblem.numThreads()))
   {
     UserObject::_subproblem.addFunctor("Ainv", _Ainv, tid);
     UserObject::_subproblem.addFunctor("HbyA", _HbyA, tid);

@@ -109,6 +109,27 @@ function of porepressure is measured.  The tests are
 
 Further commentary, and the results demonstrating that MOOSE is correct may be found in the page discussing the [theory behind Dirac Kernels in PorousFlow](sinks.md).
 
+## Wellbore pressure with gravity, and per-point flux reporting
+
+These tests check the gravity-head term in the wellbore pressure (see
+[the wellbore pressure](sinks.md) for the formula), both for a constant `unit_weight` and for
+the temperature-dependent-fluid-density alternative, and the per-point flux reporting via
+`PorousFlowPointFluxQuantity`/`PorousFlowPlotPointFluxQuantity`.  A vertical borehole with four
+points is placed through the centre of a stack of elements; `well_constant` is set explicitly so
+that the flux at each point reduces to a simple, hand-computable expression, allowing the
+expected wellbore pressure and per-point fluxes to be checked analytically.
+
+- A production borehole with a nonzero constant `unit_weight`.
+
+!listing modules/porous_flow/test/tests/dirackernels/bh_unit_weight.i
+
+- The same borehole, but with the wellbore pressure built from a temperature-dependent fluid
+  density (an imposed linear temperature gradient along the well) instead of a constant
+  `unit_weight`.  The expected wellbore pressure at each point is computed by hand-integrating
+  the same trapezoidal-rule formula used by the implementation.
+
+!listing modules/porous_flow/test/tests/dirackernels/bh_variable_unit_weight.i
+
 ## Comparison with a steady-state 2D analytic solution
 
 The test

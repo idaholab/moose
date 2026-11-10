@@ -36,12 +36,20 @@ Sub-apps are created when a MultiApp is added by MOOSE.
 A `MultiApp` can be executed at any point during the main solve by setting the
 [!param](/MultiApps/TransientMultiApp/execute_on) parameter.
 MultiApps at the same point are executed sequentially.
-Before the execution, data on the main app are transferred to sub-apps of all the MultiApps and data on sub-apps are transferred back after the execution.
-The execution order of all MultiApps at the same point is not determined.
-The order is also irrelevant because no data transfers directly among MultiApps.
-To enforce the ordering of execution, users can use multi-level MultiApps or set the MultiApps executed at different points.
-If a `MultiApp` is set to be executed on timestep_begin or timestep_end, the formed loosely-coupled systems of fully-coupled
-equations can be solved with [Fixed Point iterations](syntax/Executioner/index.md).
+Before the execution, data on the main app are transferred to sub-apps of all the `MultiApps` and
+data on sub-apps are transferred back after the execution.
+The execution order of all `MultiApps` within the same `execute_on` schedule is not determined
+unless the [!param](/MultiApps/TransientMultiApp/execution_order_group)
+parameter is passed to order the transfers.
+The order is only relevant for data transfers between applications, notably when data transfers are intermingled with `MultiApps` execution,
+see [Transfers execution](Transfers/index.md#execution).
+To enforce the ordering of execution, users can also use multi-level `MultiApps` or set the `MultiApps`
+to be executed at different points with the [!param](/MultiApps/TransientMultiApp/execute_on) parameter.
+
+If a `MultiApp` is set to be executed on `timestep_begin` or `timestep_end`, the coupled systems of
+equations can be solved with [Fixed Point iterations](syntax/Executioner/index.md), which we refer to
+as tight coupling. Tight coupling should converge to the same results as full coupling with the proper
+considerations on time integration and data transfers.
 
 !listing multiapps/transient_multiapp/dt_from_parent.i block=MultiApps
 
@@ -111,7 +119,7 @@ not automatically transfer the mesh modifications performed by [Adaptivity](synt
 on either the main or sub-app, though it does transfer initial mesh modification work such as uniform
 refinement.
 
-When using the same mesh between two applications, the [MultiAppCopyTransfer.md] may be
+When using the same mesh between two applications, with no modification, the [MultiAppCopyTransfer.md] may be
 utilized for more efficient transfers of field variables.
 
 ## Parallel Execution
@@ -122,6 +130,16 @@ among the sub-apps. If there are more sub-apps than processors, each processor w
 multiple sub-apps.  All sub-apps of a given `MultiApp` are run simultaneously in parallel. Multiple
 `MultiApps` will be executed one after another.
 
+### Concurrent execution
+
+Concurrent execution of child apps of each `MultiApp` is the default behavior. If also specifying in the
+`Problem` block that
+[!param](/Problem/FEProblem/num_concurrent_multiapps) `> 1` then several `MultiApps` will execute concurrently
+as well, meanining the child apps from both `MultiApps` will execute together. The groups of concurrent `MultiApps`
+are created from the [!param](/MultiApps/TransientMultiApp/execution_order_group) parameter of each `MultiApps`.
+
+Executing `MultiApps` concurrently is intended for achieving the maximum utilization of parallel resources when
+several simulations, executed as `MultiApps` do not require the entirety of the available resources.
 
 ## Dynamically Loading MultiApps
 
@@ -148,7 +166,7 @@ When restarting or recovering, the main app restores the restart data of all sub
 (a data structure holding all the current state including solution vectors, stateful material properties,
 post-processors, restartable quantities declared in objects and etc. of the sub-apps), which are used by
 sub-apps to restart/recover the calculations in their initial setups.
-The same backups are also used by multiapps for saving/restoring the current state during fixed point iterations.
+The same backups are also used by `MultiApps` for saving/restoring the current state during fixed point iterations.
 
 A sub-app may choose to use a restart file instead of the main backup file by setting [!param](/Problem/FEProblem/force_restart) to true.
 

@@ -266,7 +266,11 @@ class TestHarness:
     #     job output in test/*/tests/*/output_files
     # 8 - Store tests/*/tests/*/tester/json_metadata values a dict instead of a file path
     # 9 - Store tests/*/tests/*/max_memory if available
-    RESULTS_VERSION = 9
+    # 10 - tests/*/tests/*/max_memory on Linux 5.3+ no longer counts file-backed memory
+    #      (executable/library pages), which was split across however many other
+    #      processes happened to be running at the same time
+    # 11 - Store tests/*/tests/*/max_gpu_memory if available
+    RESULTS_VERSION = 11
 
     # Validation version history:
     # 1 - Initial tracking of version
@@ -897,6 +901,10 @@ class TestHarness:
         """Whether or not memory should be output in the Job status."""
         return self.scheduler.MONITOR_JOB_MEMORY and not self.options.no_memory_tracking
 
+    def shouldOutputGPUMemory(self) -> bool:
+        """Whether or not GPU memory should be output in the Job status."""
+        return self.scheduler.scheduler_options.monitor_job_gpu_memory
+
     def handleJobStatus(self, job, caveats=None):
         """
         The Scheduler is calling back the TestHarness to inform us of a status change.
@@ -906,6 +914,7 @@ class TestHarness:
             return
         elif not job.isSilent():
             memory = None if self.shouldOutputMemory() else False
+            gpu_memory = self.shouldOutputGPUMemory()
 
             # Print results and perform any desired post job processing
             if job.isFinished():
@@ -921,7 +930,11 @@ class TestHarness:
                 caveats = True if caveats is None else caveats
                 print(
                     util.formatJobResult(
-                        job, self.options, caveats=caveats, memory=memory
+                        job,
+                        self.options,
+                        caveats=caveats,
+                        memory=memory,
+                        gpu_memory=gpu_memory,
                     ),
                     flush=True,
                 )
@@ -947,6 +960,7 @@ class TestHarness:
                         status_message=False,
                         caveats=caveats,
                         memory=memory,
+                        gpu_memory=gpu_memory,
                     ),
                     flush=True,
                 )
@@ -987,14 +1001,15 @@ class TestHarness:
         jobs = sorted(jobs, key=lambda job: job.getTiming(), reverse=True)
         return jobs[0:num]
 
-    def getHeaviestJobs(self, num: int) -> list:
+    def getHeaviestJobs(self, num: int, gpu: bool = False) -> list:
         """
-        Get the heaviest jobs by memory, if available
+        Get the heaviest jobs by memory (or GPU memory if gpu), if available
         """
-        jobs = [j for j in self.finished_jobs if (not j.isSkip() and j.getMaxMemory())]
+        get_memory = lambda job: job.getMaxGPUMemory() if gpu else job.getMaxMemory()
+        jobs = [j for j in self.finished_jobs if (not j.isSkip() and get_memory(j))]
         jobs = sorted(
             jobs,
-            key=lambda job: job.getMaxMemory() / job.getSlots(),
+            key=lambda job: get_memory(job) / job.getSlots(),
             reverse=True,
         )
         return jobs[0:num]
@@ -1066,15 +1081,21 @@ class TestHarness:
                             caveats=True,
                             timing=True,
                             memory=None if self.shouldOutputMemory() else False,
+                            gpu_memory=self.shouldOutputGPUMemory(),
                         )
                     )
 
-            # Heaviest jobs by memory
-            if self.shouldOutputMemory() and (
-                heaviest_jobs := self.getHeaviestJobs(self.options.longest_jobs)
-            ):
+            # Heaviest jobs by memory and by GPU memory
+            for gpu, label in [(False, "memory"), (True, "GPU memory")]:
+                if not (
+                    self.shouldOutputGPUMemory() if gpu else self.shouldOutputMemory()
+                ):
+                    continue
+                heaviest_jobs = self.getHeaviestJobs(self.options.longest_jobs, gpu)
+                if not heaviest_jobs:
+                    continue
                 print(
-                    header(f"{self.options.longest_jobs} Heaviest Jobs (memory/slot)")
+                    header(f"{self.options.longest_jobs} Heaviest Jobs ({label}/slot)")
                 )
                 for job in heaviest_jobs:
                     print(
@@ -1084,6 +1105,7 @@ class TestHarness:
                             caveats=True,
                             timing=True,
                             memory=True,
+                            gpu_memory=self.shouldOutputGPUMemory(),
                             memory_per_slot=True,
                         )
                     )
@@ -1115,7 +1137,14 @@ class TestHarness:
         if failed_jobs := [j for j in self.finished_jobs if j.isFail()]:
             print(header("Failed Tests"))
             for job in failed_jobs:
-                print((util.formatJobResult(job, self.options, caveats=True)))
+                print(
+                    util.formatJobResult(
+                        job,
+                        self.options,
+                        caveats=True,
+                        gpu_memory=self.shouldOutputGPUMemory(),
+                    )
+                )
 
         time_total = (datetime.datetime.now() - self.start_time).total_seconds()
         stats = self.getStats(time_total)
@@ -1172,6 +1201,32 @@ class TestHarness:
 
                 # And write the results, including the stats
                 self.writeResults(complete=True, stats=stats)
+            elif self.options.failed_tests and not self.options.failed_tests_no_update:
+                # Replace only the entries of previously failing tests that now
+                # pass so that the next --failed-tests run is a smaller subset.
+                # Everything else in the previous results, including the stats
+                # of the original run, is kept.
+                fixed_jobs = [
+                    job
+                    for job_group in all_jobs
+                    for job in job_group
+                    if job.isPass()
+                    and job.previousTesterStatus()[0]
+                    in job.job_status.getFailingStatuses()
+                ]
+                storage = self.options.results_storage
+                num_failing = sum(
+                    test["status"]["fail"]
+                    for test_dir in storage["tests"].values()
+                    for test in test_dir["tests"].values()
+                )
+                # When every previously failing test now passes, keep the last
+                # set of failing tests so that the next --failed-tests run
+                # re-runs it instead of running nothing
+                if fixed_jobs and len(fixed_jobs) < num_failing:
+                    for job in fixed_jobs:
+                        job.storeResults(self.scheduler)
+                    self.writeResults(stats=storage.get("stats"))
 
     def determineScheduler(self):
         if self.options.hpc_host and not self.options.hpc:
@@ -1273,10 +1328,10 @@ class TestHarness:
     def writeResults(self, complete=False, stats=None):
         """Forcefully write the current results to file
 
-        Will not do anything if using existing storage.
+        Should not be called when displaying a previous run.
         """
         # Not writing results
-        if self.useExistingStorage():
+        if self.options.show_last_run:
             raise Exception("Should not write results")
 
         storage = self.options.results_storage
@@ -1431,6 +1486,27 @@ class TestHarness:
         if term_format == "tpnsc":
             term_format = "tmpnsc"
 
+        # Helper for requiring a positive integer argument
+        def positive_int(value):
+            value = int(value)
+            if value <= 0:
+                raise argparse.ArgumentTypeError(f"must be positive, got {value}")
+            return value
+
+        # Helper for requiring a non-negative integer argument
+        def non_negative_int(value):
+            value = int(value)
+            if value < 0:
+                raise argparse.ArgumentTypeError(f"must be non-negative, got {value}")
+            return value
+
+        # Helper for requiring a positive float argument
+        def positive_float(value):
+            value = float(value)
+            if value <= 0:
+                raise argparse.ArgumentTypeError(f"must be positive, got {value}")
+            return value
+
         parser = argparse.ArgumentParser(
             description="A tool used to test MOOSE-based applications"
         )
@@ -1438,7 +1514,14 @@ class TestHarness:
         parser.add_argument(
             "--failed-tests",
             action="store_true",
-            help="Run tests that previously failed",
+            help="Run tests that previously failed; tests that now pass are"
+            " marked as passing in the previous results unless all of them pass",
+        )
+        parser.add_argument(
+            "--failed-tests-no-update",
+            action="store_true",
+            help="Run tests that previously failed without updating the previous"
+            " results",
         )
         parser.add_argument(
             "--show-last-run",
@@ -1498,7 +1581,7 @@ class TestHarness:
             "--jobs",
             nargs="?",
             action="store",
-            type=int,
+            type=positive_int,
             dest="jobs",
             const=1,
             help="Set the number of parallel jobs for tests",
@@ -1507,7 +1590,7 @@ class TestHarness:
             "-l",
             "--load-average",
             action="store",
-            type=float,
+            type=positive_float,
             dest="load",
             help="Do not run additional tests if the load average is at least LOAD",
         )
@@ -1516,7 +1599,7 @@ class TestHarness:
             "--parallel",
             nargs="?",
             action="store",
-            type=int,
+            type=positive_int,
             dest="parallel",
             const=1,
             help="Number of MPI processes to use for each job",
@@ -1525,10 +1608,10 @@ class TestHarness:
             "--n-threads",
             nargs=1,
             action="store",
-            type=int,
+            type=positive_int,
             dest="nthreads",
             default=1,
-            help="Number of threads to use when running mpiexec",
+            help="Number of threads to use when running mpiexec (default: %(default)s)",
         )
 
         filtergroup = parser.add_argument_group(
@@ -1541,7 +1624,7 @@ class TestHarness:
             type=str,
             dest="group",
             default="ALL",
-            help="Run only tests in the named group",
+            help="Run only tests in the named group (default: %(default)s)",
         )
         filtergroup.add_argument(
             "-s",
@@ -1584,13 +1667,13 @@ class TestHarness:
         filtergroup.add_argument(
             "--min-parallel",
             dest="min_parallel",
-            type=int,
+            type=positive_int,
             help="Skip tests that cannot run with at least this many MPI procs",
         )
         filtergroup.add_argument(
             "--min-threads",
             dest="min_threads",
-            type=int,
+            type=positive_int,
             help="Skip tests that cannot run with at least this many threads",
         )
         filtergroup.add_argument(
@@ -1631,6 +1714,11 @@ class TestHarness:
             dest="valgrind_mode",
             const="HEAVY",
             help="Run heavy valgrind tests",
+        )
+        filtergroup.add_argument(
+            "--valgrind-track-origins",
+            action="store_true",
+            help="Enable --track-origins=yes when running valgrind",
         )
 
         capabilitygroup = parser.add_argument_group(
@@ -1696,7 +1784,7 @@ class TestHarness:
             type=str,
             choices=TestHarness.validComputeDevices(),
             default="cpu",
-            help="Run tests that support this compute device; (passes --compute-device=...)",
+            help="Run tests that support this compute device; (passes --compute-device=...) (default: %(default)s)",
         )
         appgroup.add_argument(
             "--distributed-mesh",
@@ -1723,7 +1811,7 @@ class TestHarness:
             action="store",
             type=str,
             default="cpr",
-            help="Set the file suffix for recover mode (pass --recoversuffix)",
+            help="Set the file suffix for recover mode (pass --recoversuffix) (default: %(default)s)",
         )
         appgroup.add_argument(
             "--append-runapp-cliarg",
@@ -1817,9 +1905,9 @@ class TestHarness:
         screengroup.add_argument(
             "--longest-jobs",
             action="store",
-            type=int,
+            type=positive_int,
             default=0,
-            help="Print the longest running jobs upon completion",
+            help="Print the LONGEST_JOBS longest running jobs upon completion",
         )
         screengroup.add_argument(
             "--no-report",
@@ -1838,16 +1926,16 @@ class TestHarness:
         screengroup.add_argument(
             "--term-cols",
             action="store",
-            type=int,
+            type=positive_int,
             default=term_cols,
-            help="The number columns to use in output",
+            help="The number columns to use in output (default: %(default)s)",
         )
         screengroup.add_argument(
             "--term-format",
             action="store",
             type=str,
             default=term_format,
-            help="The formatting to use when outputting job status",
+            help="The formatting to use when outputting job status (default: %(default)s)",
         )
 
         outputgroup = parser.add_argument_group("Output", "Control the file output")
@@ -1880,16 +1968,22 @@ class TestHarness:
         failgroup.add_argument(
             "--max-fails",
             nargs=1,
-            type=int,
+            type=non_negative_int,
             default=50,
-            help="The number of tests allowed to fail before any additional tests will run",
+            help=(
+                "The number of tests allowed to fail before any additional tests "
+                "will run (default: %(default)s)"
+            ),
         )
         failgroup.add_argument(
             "--valgrind-max-fails",
             nargs=1,
-            type=int,
+            type=non_negative_int,
             default=5,
-            help="The number of valgrind tests allowed to fail before any additional valgrind tests will run",
+            help=(
+                "The number of valgrind tests allowed to fail before any additional "
+                "valgrind tests will run (default: %(default)s)"
+            ),
         )
 
         resourcesgroup = parser.add_argument_group(
@@ -1898,14 +1992,20 @@ class TestHarness:
         resourcesgroup.add_argument(
             "--max-cpu-per-slot",
             nargs=1,
-            type=float,
+            type=positive_float,
             help=("The maximum percent CPU to allow for a job, per slot"),
         )
         resourcesgroup.add_argument(
             "--max-memory-per-slot",
             nargs=1,
-            type=float,
+            type=positive_float,
             help="The maximum memory to allow for a job in MB, per slot",
+        )
+        resourcesgroup.add_argument(
+            "--max-gpu-memory-per-slot",
+            nargs=1,
+            type=positive_float,
+            help="The maximum NVIDIA GPU memory to allow for a job in MB, per slot",
         )
         resourcesgroup.add_argument(
             "--no-cpu-tracking",
@@ -1916,6 +2016,17 @@ class TestHarness:
             "--no-memory-tracking",
             action="store_true",
             help="Disable all memory tracking of jobs",
+        )
+        resourcesgroup.add_argument(
+            "--no-gpu-memory-tracking",
+            action="store_true",
+            help="Disable NVIDIA GPU memory tracking of jobs",
+        )
+        resourcesgroup.add_argument(
+            "--memory-tracking-interval",
+            type=positive_float,
+            default=0.2,
+            help="The interval in seconds at which to sample job memory (default: %(default)s)",
         )
 
         hpcgroup = parser.add_argument_group("HPC", "Enable and control HPC execution")
@@ -1941,10 +2052,10 @@ class TestHarness:
         hpcgroup.add_argument(
             "--hpc-file-timeout",
             nargs=1,
-            type=int,
+            type=positive_int,
             action="store",
             default=300,
-            help="The time in seconds to wait for HPC output",
+            help="The time in seconds to wait for HPC output (default: %(default)s)",
         )
         hpcgroup.add_argument(
             "--hpc-host",
@@ -1985,7 +2096,7 @@ class TestHarness:
         hpcgroup.add_argument(
             "--hpc-scatter-procs",
             nargs=1,
-            type=int,
+            type=positive_int,
             action="store",
             dest="hpc_scatter_procs",
             default=None,
@@ -2104,6 +2215,9 @@ class TestHarness:
         else:
             opts.results_file = os.path.abspath(opts.results_file)
 
+        # Selects the same tests as --failed-tests; only the update is skipped
+        if opts.failed_tests_no_update:
+            opts.failed_tests = True
         if opts.failed_tests and not os.path.exists(opts.results_file):
             self.errorExit("--failed-tests could not detect a previous run")
 
@@ -2116,6 +2230,10 @@ class TestHarness:
 
         if not opts.valgrind_mode:
             opts.valgrind_mode = ""
+            if opts.valgrind_track_origins:
+                self.errorExit(
+                    "Cannot specify --valgrind-track-origins without --valgrind"
+                )
 
         # Set default
         if not opts.input_file_name:
@@ -2127,21 +2245,20 @@ class TestHarness:
             )
             opts.minimal_capabilities = True
 
-        # Set --max-memory-per-slot from MOOSE_MAX_MEMORY_PER_SLOT
-        # if --max-memory-per-slot is not not set
-        if (
-            opts.max_memory_per_slot is None
-            and (
-                MOOSE_MAX_MEMORY_PER_SLOT := os.environ.get("MOOSE_MAX_MEMORY_PER_SLOT")
-            )
-            is not None
-        ):
-            value = float(MOOSE_MAX_MEMORY_PER_SLOT)
-            print_info(
-                f"Setting --max-memory-per-slot={value} MB from "
-                "MOOSE_MAX_MEMORY_PER_SLOT",
-            )
-            opts.max_memory_per_slot = value
+        # Set --max-[gpu-]memory-per-slot from MOOSE_MAX_[GPU_]MEMORY_PER_SLOT
+        # if --max-[gpu-]memory-per-slot is not set
+        for option in ["max_memory_per_slot", "max_gpu_memory_per_slot"]:
+            env_name = f"MOOSE_{option.upper()}"
+            if (
+                getattr(opts, option) is None
+                and (env_value := os.environ.get(env_name)) is not None
+            ):
+                value = float(env_value)
+                cli_option = f"--{option.replace('_', '-')}"
+                if value <= 0:
+                    self.errorExit(f"{cli_option}: Must be positive")
+                print_info(f"Setting {cli_option}={value} MB from {env_name}")
+                setattr(opts, option, value)
 
         # Convert extend action params to lists if they have a single value
         for name in ["ignore_capability"]:
@@ -2204,7 +2321,10 @@ class TestHarness:
         """
         Helper for printing an error and exiting
         """
-        util.errorExit(*args, colored=self.options.colored is True)
+        colored = True
+        if options := getattr(self, "options", None):
+            colored = options.colored
+        util.errorExit(*args, colored=colored is True)
 
     def printInfo(self, *args):
         """Print the given message as information."""

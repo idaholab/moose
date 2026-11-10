@@ -13,7 +13,7 @@
   [MFEMScalarQuadratureFunction]
     type = CSVDiff
     input = quadrature_function_source.i
-    csvdiff = OutputData/QuadratureFunctionSource.csv
+    csvdiff = OutputData/ParsedFunctionSource.csv
     design = 'MFEMScalarQuadratureFunction.md'
     issues = '#33291'
     requirement = 'The system shall have the ability to precompute a coefficient at quadrature '
@@ -25,7 +25,7 @@
   [MFEMScalarQuadratureFunctionOrderMismatch]
     type = RunException
     input = quadrature_function_source.i
-    cli_args = 'QuadratureFunctions/qf_source/order=6'
+    cli_args = 'Functions/qf_source/order=6'
     expect_err = "Set 'order = 2'"
     design = 'MFEMScalarQuadratureFunction.md'
     issues = '#33291'
@@ -33,5 +33,16 @@
                   'quadrature function coefficient is evaluated by an integrator using a different '
                   'integration rule.'
     capabilities = 'mfem'
+  []
+  [CylindricalCoefficients]
+    type = CSVDiff
+    input = cylindrical_coefficients.i
+    csvdiff = OutputData/CylindricalCoefficients_LineSampler_0001.csv
+    design = 'MFEMCoordinateTransformations.md'
+    issues = '#32375'
+    requirement = 'The system shall have the ability to parse the cylindrical coefficients to functor materials'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
   []
 []

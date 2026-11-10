@@ -1,12 +1,12 @@
 [Tests]
-  issues = '#13918 #15843 #16954'
+  issues = '#13918 #15843 #16954 #33217'
   design = 'RadiationTransferAction.md'
 
   [radiative_transfer_action_analytical]
     type = 'Exodiff'
     input = 'radiative_transfer_action.i'
     exodiff = 'radiative_transfer_action_out.e'
-    requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method for cavities with unobstructed, planar faces.'
+    requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method for cavities with unobstructed, planar faces, including enforcement of specified fixed temperatures on designated boundaries.'
     mesh_mode = REPLICATED
     cli_args = 'GrayDiffuseRadiation/cavity/view_factor_calculator=analytical'
   []
@@ -73,5 +73,15 @@
     mesh_mode = REPLICATED # RadiationTransferAction does not allow distributed mesh
     requirement = 'The system shall provide a way to output the radiative heat flux from the radiation heat transfer action.'
     issues = '#33213'
+  []
+
+  [radiation_s2s_linearfv_noaction_steady]
+    type = Exodiff
+    input = 'radiative_transfer_no_action_linearfv_steady.i'
+    exodiff = 'radiative_transfer_no_action_linearfv_steady_out.e'
+    requirement = 'The system shall be able to solve a steady-state surface-to-surface radiation problem with linearfinite volume system.'
+    issues = '#33641'
+    max_threads=1
+    mesh_mode = REPLICATED
   []
 []

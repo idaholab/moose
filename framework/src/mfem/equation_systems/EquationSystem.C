@@ -234,7 +234,9 @@ EquationSystem::ApplyEssentialBCs()
     // Initial guess for iterative solvers (initial condition or the previous time step solution)
     trial_gf = _gfuncs->GetRef(trial_var_name);
 
-    _ess_markers.at(i).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
+    // A mesh without boundary elements, such as a periodic one, has no boundary attributes
+    const auto & bdr_attributes = trial_gf.ParFESpace()->GetParMesh()->bdr_attributes;
+    _ess_markers.at(i).SetSize(bdr_attributes.Size() ? bdr_attributes.Max() : 0, 0);
     // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
     // essential boundaries to the _ess_markers array
     ApplyEssentialBC(trial_var_name, trial_gf, _ess_markers.at(i));
@@ -343,7 +345,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
         mblf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
                                           _ess_tdof_lists.at(i),
                                           *_var_ess_constraints.at(j),
-                                          aux_lf = 0,
+                                          aux_lf = 0.,
                                           *aux_a,
                                           aux_x,
                                           aux_rhs);
@@ -381,26 +383,16 @@ EquationSystem::FormSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRH
 void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  if (_non_linear)
-  {
-    ComputeNonlinearResidual(sol, residual);
-    _linear_operator->AddMult(sol, residual);
-  }
-  else
-  {
-    residual = 0.0;
-    _linear_operator->Mult(sol, residual);
-  }
+  _linear_operator->Mult(sol, residual);
 
-  sol.HostRead();
-  residual.HostRead();
+  if (IsNonlinear())
+    ComputeNonlinearResidual(sol, residual);
 }
 
 void
 EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  mooseAssert(_non_linear, "Should not be calling this method if our forms are not nonlinear");
-  residual = 0.0;
+  mooseAssert(IsNonlinear(), "Should not be calling this method if our forms are not nonlinear");
 
   const mfem::BlockVector block_solution(const_cast<mfem::Vector &>(sol), _block_true_offsets);
   SetTrialVariablesFromTrueVectors(block_solution);
@@ -410,7 +402,7 @@ EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector 
   {
     auto & test_var_name = _test_var_names.at(i);
     auto nlf = _nlfs.GetShared(test_var_name);
-    nlf->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
+    nlf->AddMult(block_solution.GetBlock(i), block_residual.GetBlock(i));
     block_residual.GetBlock(i).SyncAliasMemory(block_residual);
   }
 }
@@ -451,7 +443,7 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
 {
   _linearization_point = &u;
 
-  if (_non_linear)
+  if (IsNonlinear())
   {
     if (_assembly_level != mfem::AssemblyLevel::LEGACY)
       mooseError("MFEM nonlinear solvers that require GetGradient() currently require legacy "
@@ -539,6 +531,7 @@ EquationSystem::BuildBilinearForms()
         test_var_name, test_var_name, blf, _kernels_map);
     // Assemble
     blf->Assemble();
+    blf->Finalize();
   }
 }
 
@@ -571,6 +564,7 @@ EquationSystem::BuildMixedBilinearForms()
             coupled_var_name, test_var_name, mblf, _kernels_map);
         // Assemble mixed bilinear forms
         mblf->Assemble();
+        mblf->Finalize();
         // Register mixed bilinear forms associated with a single trial variable
         // for the current test variable
         test_mblfs->Register(coupled_var_name, mblf);
@@ -725,6 +719,7 @@ EquationSystem::BuildBilinearFormForFESpace(const std::string & var_name,
   ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(var_name, var_name, blf, _integrated_bc_map);
   ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(var_name, var_name, blf, _kernels_map);
   blf->Assemble();
+  blf->Finalize();
   return blf;
 }
 

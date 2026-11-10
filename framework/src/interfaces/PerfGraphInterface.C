@@ -54,7 +54,7 @@ PerfGraphInterface::PerfGraphInterface(const PerfGraphInterface & object,
 std::string
 PerfGraphInterface::timedSectionName(const std::string & section_name) const
 {
-  return _prefix.empty() ? "" : (_prefix + "::") + section_name;
+  return _prefix.empty() ? section_name : _prefix + "::" + section_name;
 }
 
 PerfID

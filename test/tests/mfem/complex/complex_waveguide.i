@@ -7,7 +7,7 @@ elec_cond_mouse = 0.97
 elec_cond_air = 1e-323
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/waveguide.g
 []
 

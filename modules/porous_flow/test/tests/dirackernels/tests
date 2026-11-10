@@ -3,7 +3,7 @@
     type = 'CSVDiff'
     input = 'squarepulse1.i'
     csvdiff = 'squarepulse1.csv'
-    requirement = 'PorousFlowSquarePulsePointSource shall provide a constant mass point source/sink between two specified times'
+    requirement = 'The system shall be able to model a constant mass point source/sink between two specified times'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource.md'
     issues = '#6990'
   []
@@ -27,7 +27,7 @@
     type = 'CSVDiff'
     input = 'theis1.i'
     csvdiff = 'theis1_pressure_0006.csv'
-    requirement = 'PorousFlowSquarePulsePointSource shall provide a constant mass point sink between two specified times'
+    requirement = 'The system shall be able to model a constant mass point sink between two specified times, starting at the beginning of the simulation'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource.md'
     issues = '#6990'
   []
@@ -35,7 +35,7 @@
     type = 'CSVDiff'
     input = 'theis_rz.i'
     csvdiff = 'theis_rz_csv_pp_0006.csv'
-    requirement = 'PorousFlow shall be able to accurately simulate drawdown in 2D groundwater systems, to agree with the Theis solution'
+    requirement = 'The system shall be able to accurately simulate drawdown in 2D groundwater systems, to agree with the Theis solution'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource.md'
     issues = '#6990 #13155'
   []
@@ -43,7 +43,7 @@
     type = 'CSVDiff'
     input = 'theis2.i'
     csvdiff = 'theis2_pressure_0006.csv'
-    requirement = 'PorousFlowSquarePulsePointSource shall provide a constant mass point sink between two specified times'
+    requirement = 'The system shall be able to model a constant mass point sink between two specified times, starting after the beginning of the simulation'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource.md'
     issues = '#6990'
   []
@@ -51,7 +51,7 @@
     type = 'CSVDiff'
     input = 'theis3.i'
     csvdiff = 'theis3.csv'
-    requirement = 'PorousFlowSquarePulsePointSource shall provide a constant mass point source of a specified fluid phase'
+    requirement = 'The system shall be able to model a constant mass point source of a specified fluid phase'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource.md'
     issues = '#7677'
   []
@@ -60,7 +60,7 @@
     type = 'RunException'
     input = 'bh_except01.i'
     expect_err = 'The Dictator proclaims that the maximum phase index in this simulation is 0 whereas you have used 1. Remember that indexing starts at 0. You must try harder.'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if the fluid phase is larger than the number of phases in the system'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if the fluid phase is larger than the number of phases in the system'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -68,7 +68,7 @@
     type = 'RunException'
     input = 'bh_except02.i'
     expect_err = 'The Dictator proclaims that the maximum fluid component index in this simulation is 0 whereas you have used 1. Remember that indexing starts at 0. Please be assured that the Dictator has noted your error.'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if the fluid component is larger than the number of fluid components in the system'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if the fluid component is larger than the number of fluid components in the system'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -76,7 +76,7 @@
     type = 'RunException'
     input = 'bh_except03.i'
     expect_err = 'PorousFlowLineSink: You have specified function_of=porepressure, but you do not have a quadpoint porepressure material'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is a function of porepressure but no porepressure material exists'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if flux is a function of porepressure but no porepressure material exists'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -84,7 +84,7 @@
     type = 'RunException'
     input = 'bh_except04.i'
     expect_err = 'PorousFlowLineSink: You have specified function_of=temperature, but you do not have a quadpoint temperature material'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is a function of temperature but no temperature material exists'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if flux is a function of temperature but no temperature material exists'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -92,7 +92,7 @@
     type = 'RunException'
     input = 'bh_except05.i'
     expect_err = 'PorousFlowLineSink: You have specified a fluid component, but do not have a nodal mass-fraction material'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is restricted to a specific fluid component but no mass fraction material exists'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if flux is restricted to a specific fluid component but no mass fraction material exists'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -100,7 +100,7 @@
     type = 'RunException'
     input = 'bh_except06.i'
     expect_err = 'PorousFlowLineSink: You have set use_mobility=true, but do not have nodal density, relative permeability or viscosity material'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by mobility but no nodal fluid density material exists'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if flux is to be multiplied by mobility but no fluid density material exists'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -108,7 +108,7 @@
     type = 'RunException'
     input = 'bh_except07.i'
     expect_err = 'PorousFlowLineSink: You have set use_mobility=true, but do not have nodal density, relative permeability or viscosity material'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by mobility but no nodal relative permeability material exists'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if flux is to be multiplied by mobility but no nodal relative permeability material exists'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -116,7 +116,7 @@
     type = 'RunException'
     input = 'bh_except08.i'
     expect_err = 'PorousFlowLineSink: You have set use_mobility=true, but do not have nodal density, relative permeability or viscosity material'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by mobility but no nodal fluid density material exists'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if flux is to be multiplied by mobility but the fluid density is only computed at quadrature points'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -124,7 +124,7 @@
     type = 'RunException'
     input = 'bh_except09.i'
     expect_err = 'PorousFlowLineSink: You have set use_enthalpy=true, but do not have a nodal enthalpy material'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by enthalpy but no fluid enthalpy material exists'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if flux is to be multiplied by enthalpy but no fluid enthalpy material exists'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -132,7 +132,7 @@
     type = 'RunException'
     input = 'bh_except10.i'
     expect_err = 'PorousFlowLineSink: You have set use_internal_energy=true, but do not have a nodal internal-energy material'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by internal energy but no fluid internal energy material exists'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if flux is to be multiplied by internal energy but no fluid internal energy material exists'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -140,7 +140,7 @@
     type = 'RunException'
     input = 'bh_except11.i'
     expect_err = 'PorousFlowLineSink: You have set use_relative_permeability=true, but do not have a nodal relative permeability material'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is to be multiplied by relative permeability but no nodal relative permeability material exists'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if flux is to be multiplied by relative permeability but no nodal relative permeability material exists'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -148,7 +148,7 @@
     type = 'RunException'
     input = 'bh_except12.i'
     expect_err = 'PorousFlowLineGeometry: Error opening file does_not_exist'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if the given point file does not exist'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if the given point file does not exist'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -156,7 +156,7 @@
     type = 'RunException'
     input = 'bh_except13.i'
     expect_err = 'PorousFlowLineGeometry: zero-segment length detected at \(x,y,z\) = 0.1 0.2 0.3'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if two points in the point file are coincident'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if two points in the point file are coincident'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -164,7 +164,7 @@
     type = 'RunException'
     input = 'bh_except14.i'
     expect_err = 'The effective element size \(about 0.2-times-true-ele-size\) for an element containing a Peaceman-type borehole must be \(much\) larger than the borehole radius for the Peaceman formulation to be correct.  Your element has effective size 0.39598 and the borehole radius is 10'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if the element containing the dirac kernel is not larger than the specified borehole radius'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if the element containing the dirac kernel is not larger than the specified borehole radius'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -172,7 +172,7 @@
     type = 'RunException'
     input = 'bh_except15.i'
     expect_err = 'PorousFlowPeacemanBorehole: You have specified function_of=porepressure, but you do not have a quadpoint permeability material'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is a function of porepressure but no permeability material exists'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if flux is a function of porepressure but no permeability material exists'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -180,7 +180,7 @@
     type = 'RunException'
     input = 'bh_except16.i'
     expect_err = 'PorousFlowPeacemanBorehole: You have specified function_of=temperature, but you do not have a quadpoint thermal_conductivity material'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if flux is a function of temperature but no thermal conductivity material exists'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if flux is a function of temperature but no thermal conductivity material exists'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -189,9 +189,44 @@
     input = 'bh02.i'
     cli_args = 'DiracKernels/bh/point_file=bh02_error.bh'
     expect_err = 'PorousFlowPeacemanBorehole: The last entry in the point_file needs to be at the bottom of the well_bore because this is the point where the function bottom_p_or_t is evaluated.'
-    requirement = 'PorousFlowPeacemanBorehole shall throw an error if the last point in the point_file is not at the well bottom, ie has the lowest z coordinate value.'
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if the last point in the point_file is not at the well bottom, ie has the lowest z coordinate value.'
     design = 'PorousFlowPeacemanBorehole.md'
     issues = '#24639'
+  []
+  [bh_except18]
+    type = 'RunException'
+    input = 'bh_except18.i'
+    expect_err = "must specify at least one of 'unit_weight' or 'unit_weight_fp'"
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if neither unit_weight nor unit_weight_fp is supplied'
+    design = 'PorousFlowPeacemanBorehole.md'
+    issues = '#33700'
+  []
+  [bh_except19]
+    type = 'RunException'
+    input = 'bh_except18.i'
+    cli_args = 'DiracKernels/bh/unit_weight_fp=simple_fluid'
+    expect_err = "'unit_weight_temperature' must be supplied when 'unit_weight_fp' is supplied"
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if unit_weight_fp is supplied without unit_weight_temperature'
+    design = 'PorousFlowPeacemanBorehole.md'
+    issues = '#33700'
+  []
+  [bh_except20]
+    type = 'RunException'
+    input = 'bh_except18.i'
+    cli_args = "DiracKernels/bh/unit_weight_fp=simple_fluid DiracKernels/bh/unit_weight='0 0 0'"
+    expect_err = "must specify only one of 'unit_weight' .* or 'unit_weight_fp'"
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if both unit_weight and unit_weight_fp are supplied'
+    design = 'PorousFlowPeacemanBorehole.md'
+    issues = '#33700'
+  []
+  [bh_except21]
+    type = 'RunException'
+    input = 'bh_except18.i'
+    cli_args = "DiracKernels/bh/unit_weight_fp=simple_fluid DiracKernels/bh/unit_weight_temperature=300 DiracKernels/bh/unit_weight_gravity='0 0 -9.81'"
+    expect_err = "'unit_weight_temperature' must be a nonlinear or auxiliary variable, not a constant value"
+    requirement = 'The system shall throw an error when modeling a Peaceman borehole if unit_weight_temperature is supplied as a constant value rather than as a variable, since there is then no temperature profile to sample along the borehole'
+    design = 'PorousFlowPeacemanBorehole.md'
+    issues = '#33700'
   []
 
   [pls01_00]
@@ -199,7 +234,7 @@
     input = 'pls01.i'
     cli_args = 'DiracKernels/pls/point_file=pls01_00.bh Outputs/file_base=pls01_00'
     csvdiff = 'pls01_00.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'The system shall be able to model a sink along a multi-segment line to extract fluid at the specified rate from the node where the sink is located.'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -210,7 +245,7 @@
     cli_args = "DiracKernels/pls/point_file='' DiracKernels/pls/line_base='10 0 0' DiracKernels/pls/line_length=.02 DiracKernels/pls/line_direction='1 0 0' Outputs/file_base=pls01_line_base"
     csvdiff = 'pls01_line_base.csv'
     mesh_mode = replicated
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate when using the line_base parameter'
+    requirement = 'The system shall be able to model a sink along a multi-segment line to extract fluid at the specified rate when using the line_base parameter'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -220,7 +255,7 @@
     prereq = 'pls01_line_base'
     cli_args = "DiracKernels/pls/point_file='' DiracKernels/pls/line_base='.1 0 0' DiracKernels/pls/line_length=42 DiracKernels/pls/line_direction='0 0 1'"
     expect_err = 'length causes end point.*to lie outside the mesh'
-    requirement = 'PorousFlowPolyLineSink shall abort with an error if the line base, direction, and length cause the line to exit the mesh domain.'
+    requirement = 'The system shall abort with an error when modeling a sink along a multi-segment line if the line base, direction, and length cause the line to exit the mesh domain.'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -230,7 +265,7 @@
     prereq = 'pls01_line_base_bounds'
     cli_args = 'DiracKernels/pls/point_file=pls01_01.bh Outputs/file_base=pls01_01'
     csvdiff = 'pls01_01.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'The system shall be able to model a sink along a multi-segment line to extract fluid at the specified rate with the sink located at the top left part of the mesh.'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -240,7 +275,7 @@
     prereq = 'pls01_01'
     cli_args = 'DiracKernels/pls/point_file=pls01_20.bh Outputs/file_base=pls01_20'
     csvdiff = 'pls01_20.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'The system shall be able to model a sink along a multi-segment line to extract fluid at the specified rate from a node at the bottom right of the mesh when the sink is located there'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -250,7 +285,7 @@
     prereq = 'pls01_20'
     cli_args = 'DiracKernels/pls/point_file=pls01_21.bh Outputs/file_base=pls01_21'
     csvdiff = 'pls01_21.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'The system shall be able to model a sink along a multi-segment line to extract fluid at the specified rate from the node at the top right of the mesh where the sink is located.'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -258,7 +293,7 @@
     type = 'CSVDiff'
     input = 'pls02.i'
     csvdiff = 'pls02.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'The system shall be able to model a sink along a multi-segment line to extract fluid at the specified rate when the rate depends on porepressure and is multiplied by the fluid mobility'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -283,7 +318,7 @@
                " Adaptivity/Markers/box/inside=refine"
                " Adaptivity/Markers/box/outside=do_nothing"
                " Executioner/end_time=4"
-    requirement = 'PorousFlowPolyLineSink shall be able to dynamically create dirac points automatically in response to changing mesh geometry.'
+    requirement = 'The system shall be able to model a sink along a multi-segment line and dynamically create dirac points automatically in response to changing mesh geometry.'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#15528 #15547'
   []
@@ -292,7 +327,7 @@
     input = 'pls03.i'
     cli_args = 'ICs/pp/function="if((x<1)&(y<0.5),1E7,-1E7)" Outputs/file_base=pls03_00'
     csvdiff = 'pls03_00.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'The system shall be able to model a sink along a multi-segment line to extract fluid at the specified rate, upwinded so that only the node at (0, 0), which has nonzero relative permeability, loses fluid'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -302,7 +337,7 @@
     prereq = 'pls03_00'
     cli_args = 'ICs/pp/function="if((x<1)&(y>0.5),1E7,-1E7)" Outputs/file_base=pls03_01'
     csvdiff = 'pls03_01.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'The system shall be able to model a sink along a multi-segment line to extract fluid at the specified rate, upwinded so that only the node at (0, 1), which has nonzero relative permeability, loses fluid'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -312,7 +347,7 @@
     prereq = 'pls03_01'
     cli_args = 'ICs/pp/function="if((x>1)&(y<0.5),1E7,-1E7)" Outputs/file_base=pls03_20'
     csvdiff = 'pls03_20.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'The system shall be able to model a sink along a multi-segment line to extract fluid at the specified rate, upwinded so that only the node at (2, 0), which has nonzero relative permeability, loses fluid'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -322,7 +357,7 @@
     prereq = 'pls03_20'
     cli_args = 'ICs/pp/function="if((x>1)&(y>0.5),1E7,-1E7)" Outputs/file_base=pls03_21'
     csvdiff = 'pls03_21.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate'
+    requirement = 'The system shall be able to model a sink along a multi-segment line to extract fluid at the specified rate, upwinded so that only the node at (2, 1), which has nonzero relative permeability, loses fluid'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   []
@@ -330,7 +365,7 @@
     type = 'CSVDiff'
     input = 'pls02reporter.i'
     csvdiff = 'pls02reporter_out.csv'
-    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate getting the coordinates from a reporter'
+    requirement = 'The system shall be able to model a sink along a multi-segment line to extract fluid at the specified rate getting the coordinates from a reporter'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#20018'
   []
@@ -339,7 +374,7 @@
     input = 'pls02reporter.i'
     cli_args = "Reporters/pls02file/real_vector_values='0.10; 0 0; 0 0; -0.25 0.25'"
     expect_err = 'weight size = 1;  x_coord size = 2;  y_coord size = 2;  z_coord size = 2'
-    requirement = 'PorousFlowPolyLineSink shall abort with an error if the reporter containing the coordinates is not the same size as the reporter containing weights'
+    requirement = 'The system shall abort with an error when modeling a sink along a multi-segment line if the reporter containing the coordinates is not the same size as the reporter containing weights'
     design = 'PorousFlowPolyLineSink.md'
     issues = '#20506'
   []
@@ -349,7 +384,7 @@
     cli_args = "Reporters/pls02file/type=EmptyReporter"
     expect_err = 'PorousFlowLineGeometry: No points found in input.'
     allow_test_objects = true
-    requirement = 'PorousFlowPolyLineSink shall abort with an error if the coordinates reporter is empty'
+    requirement = 'The system shall abort with an error when modeling a sink along a multi-segment line if the coordinates reporter is empty'
     design = 'PorousFlowPolyLineSink.md'
     issues = '#20506'
   []
@@ -358,7 +393,7 @@
     type = 'CSVDiff'
     input = 'bh02.i'
     csvdiff = 'bh02.csv'
-    requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a fully-saturated system'
+    requirement = 'The system shall be able to model a Peaceman borehole to extract fluid at the specified rate in a fully-saturated system with zero bottomhole pressure'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -366,7 +401,7 @@
     type = 'CSVDiff'
     input = 'bh03.i'
     csvdiff = 'bh03.csv'
-    requirement = 'PorousFlowPeacemanBorehole shall inject fluid at the specified rate in a fully-saturated system'
+    requirement = 'The system shall be able to model a Peaceman borehole to inject fluid at the specified rate in a fully-saturated system'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139 #20452 #30237'
   []
@@ -374,7 +409,7 @@
     type = 'CSVDiff'
     input = 'bh04.i'
     csvdiff = 'bh04.csv'
-    requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a fully-saturated system'
+    requirement = 'The system shall be able to model a Peaceman borehole to extract fluid at the specified rate in a fully-saturated system with negative bottomhole pressure'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -388,16 +423,42 @@
     override_columns = 'p0'
     override_abs_zero = '1e-9'
     override_rel_err = '3e-5'
-    requirement = 'PorousFlowPeacemanBorehole shall inject fluid at the specified rate in an unsaturated system'
+    requirement = 'The system shall be able to model a Peaceman borehole to inject fluid at the specified rate in an unsaturated system'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
+  []
+  [bh_unit_weight]
+    type = 'CSVDiff'
+    input = 'bh_unit_weight.i'
+    csvdiff = 'bh_unit_weight.csv bh_unit_weight_point_fluxes_0001.csv'
+    requirement = 'The system shall be able to model a Peaceman borehole to compute the wellbore pressure from a constant fluid unit weight, producing the analytically-expected flux at each borehole point, recorded per point and reported in a vector postprocessor'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md PorousFlowPointFluxQuantity.md PorousFlowPlotPointFluxQuantity.md'
+    issues = '#33700'
+  []
+  [bh_variable_unit_weight]
+    type = 'CSVDiff'
+    input = 'bh_variable_unit_weight.i'
+    csvdiff = 'bh_variable_unit_weight.csv bh_variable_unit_weight_point_fluxes_0001.csv'
+    requirement = 'The system shall be able to model a Peaceman borehole to compute the wellbore pressure by integrating a fluid density evaluated from the temperature at each borehole point, agreeing with a hand-computed trapezoidal integration of the fluid unit weight'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
+    issues = '#33700'
+  []
+  [bh_variable_unit_weight_isothermal]
+    type = 'CSVDiff'
+    input = 'bh_variable_unit_weight.i'
+    prereq = 'bh_variable_unit_weight'
+    cli_args = "FluidProperties/simple_fluid/thermal_expansion=0 Outputs/file_base=bh_variable_unit_weight_isothermal"
+    csvdiff = 'bh_variable_unit_weight_isothermal.csv bh_variable_unit_weight_isothermal_point_fluxes_0001.csv'
+    requirement = 'The system shall, when modeling a Peaceman borehole, reproduce the constant-unit_weight wellbore pressure when the temperature-dependent fluid density is constant (thermal_expansion=0), since the trapezoidal density integral then telescopes to the constant-unit_weight formula'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
+    issues = '#33700'
   []
   [bh07]
     type = 'CSVDiff'
     input = 'bh07.i'
     cli_args = 'Outputs/file_base=bh07_csv'
     csvdiff = 'bh07_csv_pp_0003.csv'
-    requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a cylindrical model'
+    requirement = 'The system shall be able to model a Peaceman borehole to extract fluid at the specified rate in a cylindrical model, as measured by postprocessors'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -405,7 +466,7 @@
     type = 'Exodiff'
     input = 'bh07.i'
     exodiff = 'bh07.e'
-    requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a cylindrical model'
+    requirement = 'The system shall be able to model a Peaceman borehole to extract fluid at the specified rate in a cylindrical model, as measured by the porepressure field'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
@@ -413,7 +474,7 @@
     type = 'CSVDiff'
     input = 'bh02reporter.i'
     csvdiff = 'bh02reporter_out.csv'
-    requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a fully-saturated system using reporter for input'
+    requirement = 'The system shall be able to model a Peaceman borehole to extract fluid at the specified rate in a fully-saturated system using reporter for input'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#20018'
   []
@@ -421,14 +482,14 @@
     type = 'Exodiff'
     input = 'injection_production.i'
     exodiff = 'injection_production_out.e'
-    requirement = 'Multiple PorousFlowPeacemanBorehole objects shall be able to inject and extract fluid in different locations'
+    requirement = 'The system shall be able to model multiple Peaceman boreholes to inject and extract fluid in different locations'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   []
   [strain_at_nearest_qp]
     type = RunApp
     input = strain_at_nearest_qp.i
-    requirement = "If the strain at the nearest quadpoint is used when evaluating PorousFlowPorosity that is coupled to solid mechanics, all PorousFlow DiracKernels shall be usable"
+    requirement = "The system shall be able to model all point and line sources and sinks if the strain at the nearest quadrature point is used when evaluating a porosity coupled to solid mechanics"
     issues = "#12541"
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md'
   []
@@ -437,7 +498,7 @@
     input = 'injection_with_plasticity.i'
     exodiff = 'injection_with_plasticity_out.e'
     abs_zero = 1E-5
-    requirement = 'It shall be possible to use PorousFlow DiracKernels in simulations involving plastic deformation'
+    requirement = 'The system shall be able to model point and line sources and sinks in simulations involving plastic deformation'
     design = 'porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#12962'
   []

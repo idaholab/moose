@@ -71,7 +71,7 @@ have implication in the overall convergence of the optimization problem.
 
 This example makes use of the [TransientAndAdjoint](TransientAndAdjoint.md) executioner, which automatically computes the adjoint by transposing the forward problem's Jacobian.  This frees the user from having to derive and implement an adjoint input file based on the forward problem kernels.  This also solves the forward and adjoint problems in a single sub-application. An alternative method with two child applications corresponding to the forward and adjoint problems is given in [Multi-app executioner](materialInv_ConstK.md#sec:MultiAppExecutioner).
 
-The entire inverse optimization strategy is governed by the [OptimizationReporter](OptimizationReporter.md) object.
+The entire inverse optimization strategy is governed by the [GeneralOptimization.md] object.
 The forward and adjoint problems are set up in the main application input file to be solved as a `FullSolveMultiApp` type of
 `MultiApps` problem.  Controllable parameter data is transferred to the `to_forward` sub-app using the `MultiAppReporterTransfer` objects.  Objective and gradient information is then passed back to the optimization main application using another `MultiAppReporterTransfer`.
 

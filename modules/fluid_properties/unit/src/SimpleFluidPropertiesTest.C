@@ -75,7 +75,7 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   ABS_TEST(_fp->T_from_p_rho(p, 1. / v), T, tol);
   ABS_TEST(_fp->p_from_v_e(v, e),
            bulk_modulus * (thermal_exp * _fp->T_from_v_e(v, e) + std::log(1 / (v * density0))),
-           tol);
+           6.e-9); // fails at 4.5e-9 with -march=x86-64-v3
   ABS_TEST(_fp->mu_from_v_e(v, e), visc, tol);
 
   p = 1.06841E9;
@@ -112,7 +112,7 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   ABS_TEST(_fp->T_from_p_rho(p, 1. / v), T, tol);
   ABS_TEST(_fp->p_from_v_e(v, e),
            bulk_modulus * (thermal_exp * _fp->T_from_v_e(v, e) + std::log(1 / (v * density0))),
-           tol);
+           5.e-8); // fails at 3.7e-8 with -march=x86-64-v3
   ABS_TEST(_fp->mu_from_v_e(v, e), visc, tol);
 }
 
@@ -217,4 +217,24 @@ TEST_F(SimpleFluidPropertiesTest, combined)
   ABS_TEST(e, e2, tol);
   ABS_TEST(de_dp, de2_dp, tol);
   ABS_TEST(de_dT, de2_dT, tol);
+}
+
+/**
+ * Verify the derivatives of e(p, rho) when the product of the thermal expansion coefficient and
+ * the bulk modulus is small, so that a spurious cv / (beta K)^2 term in de/drho would not be
+ * negligible
+ */
+TEST_F(SimpleFluidPropertiesTest, energyDerivativesLowExpansionModulusProduct)
+{
+  InputParameters params = _factory.getValidParams("SimpleFluidProperties");
+  // thermal_expansion * bulk_modulus = 1 Pa/K
+  params.set<Real>("thermal_expansion") = 1e-3;
+  params.set<Real>("bulk_modulus") = 1e3;
+  _fe_problem->addUserObject("SimpleFluidProperties", "fp_soft", params);
+  const auto & fp = _fe_problem->getUserObject<SimpleFluidProperties>("fp_soft");
+
+  const Real p = 100.0;
+  const Real T = 300.0;
+  const Real rho = fp.rho_from_p_T(p, T);
+  DERIV_TEST(fp.e_from_p_rho, p, rho, REL_TOL_DERIVATIVE);
 }

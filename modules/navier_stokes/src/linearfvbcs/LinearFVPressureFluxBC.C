@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -61,7 +61,7 @@ LinearFVPressureFluxBC::LinearFVPressureFluxBC(const InputParameters & parameter
     paramError("w", "The 'w' boundary velocity functor is only valid in 3D problems.");
 
   if (_two_term_expansion)
-    _var.computeCellGradients();
+    _var.requestCellGradients();
 }
 
 Real

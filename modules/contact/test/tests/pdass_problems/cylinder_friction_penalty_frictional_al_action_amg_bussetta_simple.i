@@ -204,6 +204,14 @@
   []
 []
 
+# With the full Newton step, two contact nodes flip between stick and slip every iteration
+[Dampers]
+  [damping]
+    type = ConstantDamper
+    damping = 0.9
+  []
+[]
+
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'

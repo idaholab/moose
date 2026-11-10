@@ -30,8 +30,6 @@
 
 #include <regex>
 
-using namespace libMesh;
-
 InputParameters
 SubProblem::validParams()
 {
@@ -47,15 +45,6 @@ SubProblem::validParams()
   return params;
 }
 
-const std::unordered_set<FEFamily> SubProblem::_default_families_without_p_refinement = {
-    libMesh::LAGRANGE,
-    libMesh::NEDELEC_ONE,
-    libMesh::RAVIART_THOMAS,
-    libMesh::LAGRANGE_VEC,
-    libMesh::CLOUGH,
-    libMesh::BERNSTEIN,
-    libMesh::RATIONAL_BERNSTEIN};
-
 // SubProblem /////
 SubProblem::SubProblem(const InputParameters & parameters)
   : Problem(parameters),
@@ -70,10 +59,9 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _have_ad_objects(false),
     _show_functors(false),
     _show_chain_control_data(false),
-    _typed_vector_tags(2),
-    _have_p_refinement(false)
+    _typed_vector_tags(2)
 {
-  unsigned int n_threads = libMesh::n_threads();
+  unsigned int n_threads = numThreads();
   _active_elemental_moose_variables.resize(n_threads);
   _has_active_elemental_moose_variables.resize(n_threads);
 
@@ -88,6 +76,9 @@ SubProblem::SubProblem(const InputParameters & parameters)
 }
 
 SubProblem::~SubProblem() {}
+
+THREAD_ID
+SubProblem::numThreads() const { return getMooseApp().numThreads(); }
 
 TagID
 SubProblem::addVectorTag(const TagName & tag_name,
@@ -789,8 +780,8 @@ SubProblem::restrictionBoundaryCheckName(BoundaryID check_id)
 void
 SubProblem::setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid)
 {
-  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
-    assembly(tid, nl_sys_num).setCurrentBoundaryID(bid);
+  for (const auto sys_num : make_range(numSolverSystems()))
+    assembly(tid, sys_num).setCurrentBoundaryID(bid);
 }
 
 unsigned int
@@ -985,6 +976,22 @@ SubProblem::reinitLowerDElem(const Elem * elem,
 }
 
 void
+SubProblem::reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid)
+{
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+    systemBaseNonlinear(nl_sys_num).reinitNodes(nodes, tid);
+  systemBaseAuxiliary().reinitNodes(nodes, tid);
+}
+
+void
+SubProblem::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid)
+{
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+    systemBaseNonlinear(nl_sys_num).reinitNodesNeighbor(nodes, tid);
+  systemBaseAuxiliary().reinitNodesNeighbor(nodes, tid);
+}
+
+void
 SubProblem::reinitNeighborLowerDElem(const Elem * elem, const THREAD_ID tid)
 {
   for (const auto nl_sys_num : make_range(numNonlinearSystems()))
@@ -999,20 +1006,20 @@ SubProblem::reinitMortarElem(const Elem * elem, const THREAD_ID tid)
 }
 
 void
-SubProblem::cloneAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh)
+SubProblem::cloneAlgebraicGhostingFunctor(libMesh::GhostingFunctor & algebraic_gf, bool to_mesh)
 {
   EquationSystems & eq = es();
   const auto n_sys = eq.n_systems();
 
   auto pr = _root_alg_gf_to_sys_clones.emplace(
-      &algebraic_gf, std::vector<std::shared_ptr<GhostingFunctor>>(n_sys - 1));
+      &algebraic_gf, std::vector<std::shared_ptr<libMesh::GhostingFunctor>>(n_sys - 1));
   mooseAssert(pr.second, "We are adding a duplicate algebraic ghosting functor");
   auto & clones_vec = pr.first->second;
 
   for (MooseIndex(n_sys) i = 1; i < n_sys; ++i)
   {
     DofMap & dof_map = eq.get_system(i).get_dof_map();
-    std::shared_ptr<GhostingFunctor> clone_alg_gf = algebraic_gf.clone();
+    std::shared_ptr<libMesh::GhostingFunctor> clone_alg_gf = algebraic_gf.clone();
     std::dynamic_pointer_cast<RelationshipManager>(clone_alg_gf)
         ->init(mesh(), *algebraic_gf.get_mesh(), &dof_map);
     dof_map.add_algebraic_ghosting_functor(clone_alg_gf, to_mesh);
@@ -1021,7 +1028,7 @@ SubProblem::cloneAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool t
 }
 
 void
-SubProblem::addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh)
+SubProblem::addAlgebraicGhostingFunctor(libMesh::GhostingFunctor & algebraic_gf, bool to_mesh)
 {
   EquationSystems & eq = es();
   const auto n_sys = eq.n_systems();
@@ -1033,19 +1040,19 @@ SubProblem::addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_
 }
 
 void
-SubProblem::cloneCouplingGhostingFunctor(GhostingFunctor & coupling_gf, bool to_mesh)
+SubProblem::cloneCouplingGhostingFunctor(libMesh::GhostingFunctor & coupling_gf, bool to_mesh)
 {
   const std::size_t num_nl_sys = numNonlinearSystems();
 
   auto pr = _root_coupling_gf_to_sys_clones.emplace(
-      &coupling_gf, std::vector<std::shared_ptr<GhostingFunctor>>(num_nl_sys - 1));
+      &coupling_gf, std::vector<std::shared_ptr<libMesh::GhostingFunctor>>(num_nl_sys - 1));
   mooseAssert(pr.second, "We are adding a duplicate coupling functor");
   auto & clones_vec = pr.first->second;
 
   for (const auto i : make_range(std::size_t(1), num_nl_sys))
   {
     DofMap & dof_map = systemBaseNonlinear(i).system().get_dof_map();
-    std::shared_ptr<GhostingFunctor> clone_coupling_gf = coupling_gf.clone();
+    std::shared_ptr<libMesh::GhostingFunctor> clone_coupling_gf = coupling_gf.clone();
     std::dynamic_pointer_cast<RelationshipManager>(clone_coupling_gf)
         ->init(mesh(), *coupling_gf.get_mesh(), &dof_map);
     dof_map.add_coupling_functor(clone_coupling_gf, to_mesh);
@@ -1054,7 +1061,7 @@ SubProblem::cloneCouplingGhostingFunctor(GhostingFunctor & coupling_gf, bool to_
 }
 
 void
-SubProblem::addCouplingGhostingFunctor(GhostingFunctor & coupling_gf, bool to_mesh)
+SubProblem::addCouplingGhostingFunctor(libMesh::GhostingFunctor & coupling_gf, bool to_mesh)
 {
   const auto num_nl_sys = numNonlinearSystems();
   if (!num_nl_sys)
@@ -1065,7 +1072,7 @@ SubProblem::addCouplingGhostingFunctor(GhostingFunctor & coupling_gf, bool to_me
 }
 
 void
-SubProblem::removeAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf)
+SubProblem::removeAlgebraicGhostingFunctor(libMesh::GhostingFunctor & algebraic_gf)
 {
   EquationSystems & eq = es();
   const auto n_sys = eq.n_systems();
@@ -1108,7 +1115,7 @@ SubProblem::removeAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf)
 }
 
 void
-SubProblem::removeCouplingGhostingFunctor(GhostingFunctor & coupling_gf)
+SubProblem::removeCouplingGhostingFunctor(libMesh::GhostingFunctor & coupling_gf)
 {
   EquationSystems & eq = es();
   const auto num_nl_sys = numNonlinearSystems();
@@ -1165,13 +1172,6 @@ SubProblem::automaticScaling() const
   // Currently going to assume that we are applying or not applying automatic scaling consistently
   // across nonlinear systems
   return systemBaseNonlinear(0).automaticScaling();
-}
-
-void
-SubProblem::hasScalingVector(const unsigned int nl_sys_num)
-{
-  for (const THREAD_ID tid : make_range(libMesh::n_threads()))
-    assembly(tid, nl_sys_num).hasScalingVector();
 }
 
 void
@@ -1336,49 +1336,15 @@ SubProblem::addCachedJacobian(const THREAD_ID tid)
 void
 SubProblem::preparePRefinement()
 {
-  std::unordered_set<FEFamily> disable_families;
-  for (const auto & [family, flag] : _family_for_p_refinement)
-    if (flag)
-      disable_families.insert(family);
-
-  for (const auto tid : make_range(libMesh::n_threads()))
+  for (const auto tid : make_range(numThreads()))
     for (const auto s : make_range(numNonlinearSystems()))
-      assembly(tid, s).havePRefinement(disable_families);
-
-  auto & eq = es();
-  for (const auto family : disable_families)
-    for (const auto i : make_range(eq.n_systems()))
-    {
-      auto & system = eq.get_system(i);
-      auto & dof_map = system.get_dof_map();
-      for (const auto vg : make_range(system.n_variable_groups()))
-      {
-        const auto & var_group = system.variable_group(vg);
-        if (var_group.type().family == family)
-          dof_map.should_p_refine(vg, false);
-      }
-    }
-
-  _have_p_refinement = true;
+      assembly(tid, s).preparePRefinement();
 }
 
 bool
 SubProblem::doingPRefinement() const
 {
   return mesh().doingPRefinement();
-}
-
-void
-SubProblem::markFamilyPRefinement(const InputParameters & params)
-{
-  auto family = Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"));
-  bool flag = _default_families_without_p_refinement.count(family);
-  if (params.isParamValid("disable_p_refinement"))
-    flag = params.get<bool>("disable_p_refinement");
-
-  auto [it, inserted] = _family_for_p_refinement.emplace(family, flag);
-  if (!inserted && flag != it->second)
-    mooseError("'disable_p_refinement' not set consistently for variables in ", family);
 }
 
 void

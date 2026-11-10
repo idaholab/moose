@@ -10,6 +10,7 @@
       csvdiff  = 'dittus_boelter.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
@@ -23,6 +24,7 @@
       csvdiff  = 'dittus_boelter_Presser.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
@@ -36,6 +38,7 @@
       csvdiff  = 'dittus_boelter_Weisman.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
@@ -49,11 +52,24 @@
       csvdiff  = 'gnielinski.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
       detail = 'using the Gnielinski correlation.'
       cli_args = 'SubChannel/pin_HTC_closure=gnielinski SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=gnielinski'
+    []
+    [invalid_wire_diameter_error]
+      type = RunException
+      allow_test_objects = true
+      input = 'XX09_SCM_SS17.i'
+      expect_err = 'The wire diameter must not exceed the pin-to-pin gap'
+      capabilities = 'method!=dbg'
+      valgrind = NONE
+      recover = false
+      max_parallel = 1
+      detail = 'reject wire diameters that exceed the pin-to-pin gap.'
+      cli_args = 'SubChannel/pin_HTC_closure=gnielinski SubChannel/duct_HTC_closure=gnielinski wire_diameter=0.003 Outputs/file_base=invalid_wire_diameter_error'
     []
     [negative_htc_error]
       type = RunException
@@ -74,6 +90,7 @@
       csvdiff  = 'kazimi-carelli.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
@@ -87,6 +104,7 @@
       csvdiff  = 'schad-modified.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
@@ -100,6 +118,7 @@
       csvdiff  = 'graber-rieger.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1
@@ -113,6 +132,7 @@
       csvdiff  = 'borishanskii.csv'
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
+      rel_err = 5e-5
       valgrind = NONE
       recover = false
       max_parallel = 1

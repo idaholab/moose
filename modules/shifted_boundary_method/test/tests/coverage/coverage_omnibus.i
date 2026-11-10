@@ -38,7 +38,7 @@ nx = 16
 [UserObjects]
   [TreeBuilder]
     type = SBMSurfaceMeshBuilder
-    surface_mesh = shift_boundary_mesh
+    interface_mesh = shift_boundary_mesh
     check_watertightness = true # exercises watertight=true log branch
   []
   [distance_to_surface]
@@ -115,7 +115,7 @@ nx = 16
     method = true_normal
     component = x
     variable = true_normal_x
-    # Exercises SBMSurfaceMeshBuilder::getCentroids() (no production caller).
+    # Exercises SBMSurfaceMeshBuilder::surfaceElementSet().centroids().
     builder = TreeBuilder
     execute_on = 'INITIAL'
   []

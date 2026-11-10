@@ -44,8 +44,8 @@ A = (\alpha_{B} - \phi)\alpha_{T} + \phi\alpha_{f} \ .
 In these equations
 
 - $\phi$ is the porosity (dimensionless)
-- $K_{f}$ is the bulk modulus of the fluid (units Pa$^{-1}$)
-- $K$ is the bulk modulus of the drained porous skeleton (units Pa$^{-1}$)
+- $K_{f}$ is the bulk modulus of the fluid (units Pa)
+- $K$ is the bulk modulus of the drained porous skeleton (units Pa)
 - $\alpha_{T}$ is the volumetric thermal expansion coefficient of the drained porous skeleton (units K$^{-1}$)
 - $\alpha_{f}$ is the volumetric thermal expansion coefficient of the fluid (units K$^{-1}$)
 
@@ -61,7 +61,7 @@ $\dot{\epsilon}_{v}$ and $\dot{T}$ in Eq. [eq:basicthm] are ignored (set to zero
 
 Most PorousFlow simulations require fluid properties to be supplied.  In this instance, the [`SimpleFluidProperties`](SimpleFluidProperties.md) are used, which assume a constant fluid bulk modulus and viscosity:
 
-!listing modules/porous_flow/examples/tutorial/01.i start=[Modules] end=[Materials]
+!listing modules/porous_flow/examples/tutorial/01.i block=FluidProperties
 
 The DE of [eq:basicthm] is implemented in the following way
 
@@ -71,11 +71,11 @@ There is just one variable --- the porepressure --- and there is no coupling wit
 
 In this tutorial page, the only boundary condition is to fix the porepressure to 1$\,$MPa at the injection area (the other boundaries default to zero flux):
 
-!listing modules/porous_flow/examples/tutorial/01.i start=[BCs] end=[Modules]
+!listing modules/porous_flow/examples/tutorial/01.i block=BCs
 
 The porosity, Biot modulus and permeability are defined through the Materials block:
 
-!listing modules/porous_flow/examples/tutorial/01.i start=[Materials] end=[Preconditioning]
+!listing modules/porous_flow/examples/tutorial/01.i block=Materials
 
 The result is shown in [tut01_gif_fig]
 

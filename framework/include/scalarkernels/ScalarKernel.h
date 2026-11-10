@@ -10,13 +10,15 @@
 #pragma once
 
 #include "ScalarKernelBase.h"
+#include "NonADFunctorInterface.h"
 
-class ScalarKernel : public ScalarKernelBase
+class ScalarKernel : public ScalarKernelBase, public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();
 
   ScalarKernel(const InputParameters & parameters);
+  virtual void reinit() override;
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
 

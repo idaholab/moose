@@ -13,8 +13,6 @@
 #include "ConstantFunction.h"
 #include "THMNames.h"
 
-using namespace libMesh;
-
 InputParameters
 FlowModel::validParams()
 {

@@ -195,8 +195,8 @@
   [smp]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -snes_stol -snes_max_it'
-    petsc_options_value = 'bcgs bjacobi 1E-13 15'
+    petsc_options_iname = '-ksp_type -pc_type'
+    petsc_options_value = 'bcgs bjacobi'
   []
 []
 
@@ -208,6 +208,8 @@
     type = IterationAdaptiveDT
     dt = 1e4
   []
+  nl_rel_step_tol = 1E-13
+  nl_max_its = 15
 []
 
 [Outputs]

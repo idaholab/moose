@@ -54,6 +54,6 @@ NodalMaxValue::finalize()
 void
 NodalMaxValue::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const NodalMaxValue &>(y);
+  const auto & pps = cast_ref<const NodalMaxValue &>(y);
   _value = std::max(_value, pps._value);
 }

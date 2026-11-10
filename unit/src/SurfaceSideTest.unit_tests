@@ -1,0 +1,20 @@
+[Tests]
+  design = 'PointContainmentClassifier.md'
+  issues = '#33397'
+
+  [negative_inside]
+    type = GoogleTest
+    unit_test = SurfaceSideTest.SignedValueInsideIsNegative
+    requirement = 'The system shall classify negative signed values as inside and values within the inclusive tolerance band as on the surface.'
+  []
+  [positive_inside]
+    type = GoogleTest
+    unit_test = SurfaceSideTest.SignedValueInsideIsPositive
+    requirement = 'The system shall classify positive signed values as inside when the signed-value convention is reversed.'
+  []
+  [union]
+    type = GoogleTest
+    unit_test = SurfaceSideTest.Union
+    requirement = 'The system shall combine surface-side classifications for a union using "inside", "on", and "outside" precedence.'
+  []
+[]

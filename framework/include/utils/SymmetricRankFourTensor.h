@@ -31,7 +31,6 @@
 
 #include <array>
 
-using libMesh::Real;
 using libMesh::tuple_of;
 namespace libMesh
 {

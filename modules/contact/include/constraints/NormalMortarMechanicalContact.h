@@ -20,12 +20,18 @@ public:
 
   NormalMortarMechanicalContact(const InputParameters & parameters);
 
+  void initialSetup() override;
+
 protected:
+  void precomputeQpQuantities() override;
   ADReal computeQpResidual(Moose::MortarType type) final;
+
+  /// The interpolated normal traction component at the current quadrature point
+  ADReal _qp_traction_component;
 
   /// The displacement component that this object applies to
   const MooseEnum _component;
 
   /// The weighted gap user object which supplies the contact force
-  WeightedGapUserObject & _weighted_gap_uo;
+  const WeightedGapUserObject & _weighted_gap_uo;
 };

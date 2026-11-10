@@ -23,15 +23,6 @@
 SORRY THIS APPLICATION REQUIRES NANOFLANN
 #endif
 
-// Using statements. These are used so that the code below does not
-// need to be littered with libMesh:: disambiguations.
-using libMesh::Point;
-using libMesh::MeshBase;
-using libMesh::Real;
-using libMesh::subdomain_id_type;
-using libMesh::dof_id_type;
-using libMesh::Elem;
-
 /**
  * This allows us to adapt the MeshBase class for use with nanoflann.
  *
@@ -144,9 +135,10 @@ public:
   typedef Real coord_t;
 
   /**
-   * Must return the number of data points
+   * Must return the number of data points. Point indices are node ids, which need not be
+   * contiguous (e.g. with allow_renumbering = false), so cover every id below max_node_id().
    */
-  inline size_t kdtree_get_point_count() const { return _mesh.n_nodes(); }
+  inline size_t kdtree_get_point_count() const { return _mesh.max_node_id(); }
 
   /**
    * Returns the distance between the vector "p1[0:size-1]"
@@ -177,7 +169,7 @@ public:
   inline coord_t kdtree_get_pt(const size_t idx, int dim) const
   {
     libmesh_assert_less(dim, (int)Dim);
-    libmesh_assert_less(idx, _mesh.n_nodes());
+    libmesh_assert_less(idx, _mesh.max_node_id());
     libmesh_assert_less(dim, 3);
 
     // If this is not a valid point, then return a "large" distance.

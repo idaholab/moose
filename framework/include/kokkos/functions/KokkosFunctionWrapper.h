@@ -30,21 +30,59 @@ public:
   /**
    * Virtual destructor
    */
-  KOKKOS_VIRTUAL_FUNCTION ~FunctionWrapperDeviceBase() {}
+  KOKKOS_FUNCTION KOKKOS_VIRTUAL ~FunctionWrapperDeviceBase() {}
 
   /**
    * Virtual shims that calls the corresponding methods of the actual stored function
    */
   ///@{
-  KOKKOS_VIRTUAL_FUNCTION Real value(Real t, Real3 p) const = 0;
-  KOKKOS_VIRTUAL_FUNCTION Real3 vectorValue(Real t, Real3 p) const = 0;
-  KOKKOS_VIRTUAL_FUNCTION Real3 gradient(Real t, Real3 p) const = 0;
-  KOKKOS_VIRTUAL_FUNCTION Real3 curl(Real t, Real3 p) const = 0;
-  KOKKOS_VIRTUAL_FUNCTION Real div(Real t, Real3 p) const = 0;
-  KOKKOS_VIRTUAL_FUNCTION Real timeDerivative(Real t, Real3 p) const = 0;
-  KOKKOS_VIRTUAL_FUNCTION Real timeIntegral(Real t1, Real t2, Real3 p) const = 0;
-  KOKKOS_VIRTUAL_FUNCTION Real integral() const = 0;
-  KOKKOS_VIRTUAL_FUNCTION Real average() const = 0;
+  KOKKOS_FUNCTION KOKKOS_VIRTUAL Real value(Real /* t */, Real3 /* p */) const
+  {
+    KOKKOS_ASSERT(false);
+    return 0;
+  }
+  KOKKOS_FUNCTION KOKKOS_VIRTUAL Real3 vectorValue(Real /* t */, Real3 /* p */) const
+  {
+    KOKKOS_ASSERT(false);
+    return Real3(0);
+  }
+  KOKKOS_FUNCTION KOKKOS_VIRTUAL Real3 gradient(Real /* t */, Real3 /* p */) const
+  {
+    KOKKOS_ASSERT(false);
+    return Real3(0);
+  }
+  KOKKOS_FUNCTION KOKKOS_VIRTUAL Real3 curl(Real /* t */, Real3 /* p */) const
+  {
+    KOKKOS_ASSERT(false);
+    return Real3(0);
+  }
+  KOKKOS_FUNCTION KOKKOS_VIRTUAL Real div(Real /* t */, Real3 /* p */) const
+  {
+    KOKKOS_ASSERT(false);
+    return 0;
+  }
+  KOKKOS_FUNCTION KOKKOS_VIRTUAL Real timeDerivative(Real /* t */, Real3 /* p */) const
+  {
+    KOKKOS_ASSERT(false);
+    return 0;
+  }
+  KOKKOS_FUNCTION KOKKOS_VIRTUAL Real timeIntegral(Real /* t1 */,
+                                                   Real /* t2 */,
+                                                   Real3 /* p */) const
+  {
+    KOKKOS_ASSERT(false);
+    return 0;
+  }
+  KOKKOS_FUNCTION KOKKOS_VIRTUAL Real integral() const
+  {
+    KOKKOS_ASSERT(false);
+    return 0;
+  }
+  KOKKOS_FUNCTION KOKKOS_VIRTUAL Real average() const
+  {
+    KOKKOS_ASSERT(false);
+    return 0;
+  }
   ///@}
 };
 
@@ -65,30 +103,33 @@ public:
    */
   KOKKOS_FUNCTION FunctionWrapperDevice() {}
 
-  KOKKOS_FUNCTION Real value(Real t, Real3 p) const override final
+  KOKKOS_FUNCTION Real value(Real t, Real3 p) const KOKKOS_OVERRIDE
   {
     return _function->value(t, p);
   }
-  KOKKOS_FUNCTION Real3 vectorValue(Real t, Real3 p) const override final
+  KOKKOS_FUNCTION Real3 vectorValue(Real t, Real3 p) const KOKKOS_OVERRIDE
   {
     return _function->vectorValue(t, p);
   }
-  KOKKOS_FUNCTION Real3 gradient(Real t, Real3 p) const override final
+  KOKKOS_FUNCTION Real3 gradient(Real t, Real3 p) const KOKKOS_OVERRIDE
   {
     return _function->gradient(t, p);
   }
-  KOKKOS_FUNCTION Real3 curl(Real t, Real3 p) const override final { return _function->curl(t, p); }
-  KOKKOS_FUNCTION Real div(Real t, Real3 p) const override final { return _function->div(t, p); }
-  KOKKOS_FUNCTION Real timeDerivative(Real t, Real3 p) const override final
+  KOKKOS_FUNCTION Real3 curl(Real t, Real3 p) const KOKKOS_OVERRIDE
+  {
+    return _function->curl(t, p);
+  }
+  KOKKOS_FUNCTION Real div(Real t, Real3 p) const KOKKOS_OVERRIDE { return _function->div(t, p); }
+  KOKKOS_FUNCTION Real timeDerivative(Real t, Real3 p) const KOKKOS_OVERRIDE
   {
     return _function->timeDerivative(t, p);
   }
-  KOKKOS_FUNCTION Real timeIntegral(Real t1, Real t2, Real3 p) const override final
+  KOKKOS_FUNCTION Real timeIntegral(Real t1, Real t2, Real3 p) const KOKKOS_OVERRIDE
   {
     return _function->timeIntegral(t1, t2, p);
   }
-  KOKKOS_FUNCTION Real integral() const override final { return _function->integral(); }
-  KOKKOS_FUNCTION Real average() const override final { return _function->average(); }
+  KOKKOS_FUNCTION Real integral() const KOKKOS_OVERRIDE { return _function->integral(); }
+  KOKKOS_FUNCTION Real average() const KOKKOS_OVERRIDE { return _function->average(); }
 
 protected:
   /**

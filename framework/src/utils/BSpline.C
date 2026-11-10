@@ -13,8 +13,6 @@
 #include "SplineUtils.h"
 #include "Conversion.h"
 
-using namespace libMesh;
-
 namespace Moose
 {
 BSpline::BSpline(const unsigned int degree,
@@ -23,7 +21,8 @@ BSpline::BSpline(const unsigned int degree,
                  const libMesh::RealVectorValue & start_direction,
                  const libMesh::RealVectorValue & end_direction,
                  const unsigned int cps_per_half,
-                 const libMesh::Real sharpness)
+                 const libMesh::Real sharpness,
+                 const std::string & caller_name)
   : _degree(degree),
     _start_point(start_point),
     _end_point(end_point),
@@ -31,6 +30,7 @@ BSpline::BSpline(const unsigned int degree,
     _end_dir(end_direction),
     _cps_per_half(cps_per_half),
     _sharpness(sharpness),
+    _caller_name(caller_name),
     _control_points(createControlPoints()),
     _knot_vector(buildKnotVector())
 {
@@ -55,7 +55,7 @@ BSpline::createControlPoints() const
   std::vector<libMesh::Point> cps;
   /// call SplineUtils function
   cps = SplineUtils::bSplineControlPoints(
-      _start_point, _end_point, _start_dir, _end_dir, _cps_per_half, _sharpness);
+      _start_point, _end_point, _start_dir, _end_dir, _cps_per_half, _sharpness, _caller_name);
   return cps;
 }
 
@@ -66,7 +66,8 @@ BSpline::buildKnotVector() const
 
   const unsigned int num_points_left = _control_points.size() + 1 - _degree;
   if (_control_points.size() < _degree + 1)
-    mooseError("Number of control points must be greater than or equal to degree + 1!");
+    mooseError(_caller_name +
+               ": Number of control points must be greater than or equal to degree + 1!");
 
   for (const auto i : make_range(num_points_left))
   {

@@ -53,10 +53,12 @@ SolutionAuxMisorientationBoundary::computeValue()
   // _direct=false, extract the values using time and point
   else
   {
-    if (isNodal())
-      output_gb_type = _solution_object.pointValue(_t, *_current_node, _var_name);
+    const Point p = isNodal() ? Point(*_current_node) : _current_elem->vertex_average();
+
+    if (_weighting_type)
+      output_gb_type = _solution_object.pointValue(_t, p, _var_name, *_weighting_type);
     else
-      output_gb_type = _solution_object.pointValue(_t, _current_elem->vertex_average(), _var_name);
+      output_gb_type = _solution_object.pointValue(_t, p, _var_name);
   }
 
   // generate different GB boundary parameters

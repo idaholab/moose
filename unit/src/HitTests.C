@@ -779,7 +779,7 @@ tree_list(hit::Node * node, std::ostringstream & tree_stream)
   // capture node path and value of the parameter if current node is a field
   if (node->type() == hit::NodeType::Field)
   {
-    tree_stream << "/" << node->fullpath() << " (" << static_cast<hit::Field *>(node)->val() << ")"
+    tree_stream << "/" << node->fullpath() << " (" << cast_ptr<hit::Field *>(node)->val() << ")"
                 << " - fname: " << std::setw(31) << std::left << node->filename()
                 << " line: " << std::setw(2) << std::right << node->line()
                 << " column: " << std::setw(2) << std::right << node->column() << "\n";

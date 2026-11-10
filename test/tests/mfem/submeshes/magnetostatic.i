@@ -2,7 +2,7 @@
 # based on MFEM Example 3.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/cylinder-hex-q2.gen
 []
 
@@ -51,7 +51,6 @@
     type = MFEMCurlAux
     variable = b_field
     source = a_field
-    execute_on = TIMESTEP_END
   []
 []
 
@@ -124,5 +123,22 @@
     type = MFEMParaViewDataCollection
     file_base = OutputData/Magnetostatic
     vtk_format = ASCII
+  []
+[]
+
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMVariableLineValueSampler
+    variables = 'electric_potential'
+    start_point = '0 0.5 -0.5'
+    end_point = '0 0.5 0.5'
+    num_points = 101
+  []
+[]
+
+[Outputs]
+  [CSV]
+    type = CSV
+    file_base = OutputData/electric_potential
   []
 []

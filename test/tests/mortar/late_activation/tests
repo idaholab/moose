@@ -1,0 +1,29 @@
+# These two inputs share the geometry and prescribed motion of
+# modules/contact/test/tests/mortar_late_activation/mortar_late_activation.i: a mortar interface with
+# no surviving segments at t=0, brought into projection range by relative motion partway through the
+# solve. That test only covers ComputeMortarFunctor via the contact module's [Contact] action;
+# these cover the two other exposed consumers of the same stale-material-map invariant directly in the
+# framework.
+
+[Tests]
+  issues = '#33658'
+  [nodal_aux]
+    type = CSVDiff
+    input = 'nodal_aux_late_activation.i'
+    csvdiff = 'nodal_aux_late_activation_out.csv'
+    design = 'WeightedGapAux.md'
+    requirement = 'The system shall evaluate a mortar nodal auxiliary kernel on an interface that had '
+                  'no mortar segments at initialization, once relative motion brings the secondary and '
+                  'primary surfaces into projection range.'
+  []
+  [constraint]
+    type = CSVDiff
+    input = 'constraint_late_activation.i'
+    csvdiff = 'constraint_late_activation_out.csv'
+    design = 'EqualValueConstraint.md'
+    requirement = 'The system shall assemble a mortar constraint, added directly through the '
+                  '[Constraints] block rather than an action, on an interface that had no mortar '
+                  'segments at initialization, once relative motion brings the secondary and primary '
+                  'surfaces into projection range.'
+  []
+[]

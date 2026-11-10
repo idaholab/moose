@@ -3,5 +3,10 @@
     type = 'Exodiff'
     input = 'bicrystal.i'
     exodiff = 'bicrystal_out.e-s003'
+    requirement = 'The system shall compute an elastic driving force for grain growth in a '
+                   'bicrystal with an anisotropic elasticity tensor derived from each grain '
+                   'orientation.'
+    design = 'PolycrystalElasticDrivingForceAction.md ComputePolycrystalElasticityTensor.md'
+    issues = '#5335'
   [../]
 []

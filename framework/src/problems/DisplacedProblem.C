@@ -26,8 +26,6 @@
 #include "libmesh/transient_system.h"
 #include "libmesh/explicit_system.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", DisplacedProblem);
 
 InputParameters
@@ -58,7 +56,7 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
   _eq.disable_refine_in_reinit();
 
   // TODO: Move newAssemblyArray further up to SubProblem so that we can use it here
-  unsigned int n_threads = libMesh::n_threads();
+  unsigned int n_threads = this->numThreads();
 
   _assembly.resize(n_threads);
   for (const auto nl_sys_num : make_range(_mproblem.numNonlinearSystems()))
@@ -123,7 +121,7 @@ DisplacedProblem::createQRules(QuadratureType type,
                                SubdomainID block,
                                const bool allow_negative_qweights)
 {
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < this->numThreads(); ++tid)
     for (const auto sys_num : index_range(_assembly[tid]))
       _assembly[tid][sys_num]->createQRules(
           type, order, volume_order, face_order, block, allow_negative_qweights);
@@ -132,7 +130,7 @@ DisplacedProblem::createQRules(QuadratureType type,
 void
 DisplacedProblem::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 {
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < this->numThreads(); ++tid)
     for (const auto nl_sys_num : index_range(_assembly[tid]))
       _assembly[tid][nl_sys_num]->bumpVolumeQRuleOrder(order, block);
 }
@@ -140,7 +138,7 @@ DisplacedProblem::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 void
 DisplacedProblem::bumpAllQRuleOrder(Order order, SubdomainID block)
 {
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < this->numThreads(); ++tid)
     for (const auto nl_sys_num : index_range(_assembly[tid]))
       _assembly[tid][nl_sys_num]->bumpAllQRuleOrder(order, block);
 }
@@ -148,7 +146,7 @@ DisplacedProblem::bumpAllQRuleOrder(Order order, SubdomainID block)
 void
 DisplacedProblem::init()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); ++tid)
   {
     for (const auto nl_sys_num : index_range(_displaced_solver_systems))
       _assembly[tid][nl_sys_num]->init(_mproblem.couplingMatrix(nl_sys_num));
@@ -297,7 +295,9 @@ DisplacedProblem::updateMesh(bool mesh_changing)
                        _mesh.getMesh().nodes_end(),
                        /*grainsize=*/1);
 
-  Threads::parallel_reduce(node_range, udmt);
+  Threads::parallel_reduce(node_range, udmt, this->numThreads());
+  // Stop on all processes before any geometric operation sees a non-finite displaced mesh
+  _mproblem.checkExceptionAndStopSolve(/*print_message=*/false);
   // Displacement of the mesh has invalidated the point locator data (e.g. bounding boxes)
   _mesh.getMesh().clear_point_locator();
 
@@ -355,7 +355,9 @@ DisplacedProblem::updateMesh(const std::map<unsigned int, const NumericVector<Nu
                        _mesh.getMesh().nodes_end(),
                        /*grainsize=*/1);
 
-  Threads::parallel_reduce(node_range, udmt);
+  Threads::parallel_reduce(node_range, udmt, this->numThreads());
+  // Stop on all processes before any geometric operation sees a non-finite displaced mesh
+  _mproblem.checkExceptionAndStopSolve(/*print_message=*/false);
 
   // Update the geometric searches that depend on the displaced mesh. This call can end up running
   // NearestNodeThread::operator() which has a throw inside of it. We need to catch it and make sure
@@ -783,22 +785,6 @@ DisplacedProblem::reinitNodeFace(const Node * node, BoundaryID bnd_id, const THR
 }
 
 void
-DisplacedProblem::reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid)
-{
-  for (auto & nl : _displaced_solver_systems)
-    nl->reinitNodes(nodes, tid);
-  _displaced_aux->reinitNodes(nodes, tid);
-}
-
-void
-DisplacedProblem::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, const THREAD_ID tid)
-{
-  for (auto & nl : _displaced_solver_systems)
-    nl->reinitNodesNeighbor(nodes, tid);
-  _displaced_aux->reinitNodesNeighbor(nodes, tid);
-}
-
-void
 DisplacedProblem::reinitNeighbor(const Elem * elem, unsigned int side, const THREAD_ID tid)
 {
   reinitNeighbor(elem, side, tid, nullptr);
@@ -1141,7 +1127,7 @@ DisplacedProblem::meshChanged(const bool contract_mesh, const bool clean_refinem
   {
     // Finally clean refinement flags so that if someone tries to project vectors again without
     // an intervening mesh refinement to clean flags they won't run into trouble
-    MeshRefinement refinement(_mesh.getMesh());
+    libMesh::MeshRefinement refinement(_mesh.getMesh());
     refinement.clean_refinement_flags();
   }
 
@@ -1237,7 +1223,7 @@ DisplacedProblem::undisplaceMesh()
   ResetDisplacedMeshThread rdmt(_mproblem, *this);
 
   // Undisplace the mesh using threads.
-  Threads::parallel_reduce(node_range, rdmt);
+  Threads::parallel_reduce(node_range, rdmt, this->numThreads());
 }
 
 LineSearch *
@@ -1503,7 +1489,7 @@ DisplacedProblem::UpdateDisplacedMeshThread::init()
     auto & sys = es.get_system(sys_num);
     AllNodesSendListThread send_list(
         this->_fe_problem, _ref_mesh, var_num_and_direction.first, sys);
-    Threads::parallel_reduce(node_range, send_list);
+    Threads::parallel_reduce(node_range, send_list, this->_fe_problem.numThreads());
     send_list.unique();
     auto & [soln, ghost_soln] = libmesh_map_find(_sys_to_nonghost_and_ghost_soln, sys_num);
     ghost_soln->init(
@@ -1533,6 +1519,14 @@ DisplacedProblem::UpdateDisplacedMeshThread::onNode(NodeRange::const_iterator & 
         Real coord = reference_node(direction) +
                      (*libmesh_map_find(_sys_to_nonghost_and_ghost_soln, sys_num).second)(
                          reference_node.dof_number(sys_num, var_numbers[i], 0));
+        // A non-finite displacement (e.g. after a failed linear solve) would corrupt every
+        // downstream geometric operation. Throw so the solve can be stopped and the step cut.
+        if (!std::isfinite(coord))
+          throw MooseException("Non-finite displaced coordinate in direction ",
+                               direction,
+                               " at node ",
+                               displaced_node.id(),
+                               ".");
         if (displaced_node(direction) != coord)
         {
           displaced_node(direction) = coord;

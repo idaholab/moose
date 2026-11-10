@@ -31,6 +31,9 @@ public:
   virtual void timestepSetup() override;
 
   virtual const ADVariableValue & contactPressure() const override;
+  virtual ADReal nodalContactPressure(const Node & node) const override;
+  virtual bool usesNodalNormalDerivatives() const override { return true; }
+  virtual const VariableTestValue & tractionBasis() const override;
   virtual void initialize() override;
   virtual void finalize() override;
   virtual void reinit() override;
@@ -44,7 +47,8 @@ public:
   };
   virtual bool getActiveSetState(const Node * const node) const
   {
-    return _dof_to_normal_pressure.find(_subproblem.mesh().nodePtr(node->id()))->second > 0;
+    const auto it = _dof_to_normal_pressure.find(_subproblem.mesh().nodePtr(node->id()));
+    return it != _dof_to_normal_pressure.end() && it->second > 0;
   }
 
   virtual bool isAugmentedLagrangianConverged() override;
@@ -93,8 +97,17 @@ protected:
   const unsigned int & _lagrangian_iteration_number;
   ///@}
 
-  /// Map from degree of freedom to augmented lagrange multiplier
-  std::unordered_map<const DofObject *, Real> _dof_to_lagrange_multiplier;
+  /// Map from node id to augmented lagrange multiplier. Keyed by id so that it can be stored as
+  /// restartable data, since the multipliers are kept between timesteps.
+  std::unordered_map<dof_id_type, Real> & _dof_to_lagrange_multiplier;
+
+  /// Augmented lagrange multipliers at the start of the current timestep, restored when the
+  /// timestep is retried so the retry starts from the accepted state
+  std::unordered_map<dof_id_type, Real> _dof_to_lagrange_multiplier_start;
+
+  /// The timestep index at which _dof_to_lagrange_multiplier_start was last saved. Used to detect a
+  /// retried timestep, since timestepSetup() runs once per time step attempt.
+  int & _t_step_old_normal;
 
   /// Map from degree of freedom to local penalty value
   std::unordered_map<const DofObject *, Real> _dof_to_local_penalty;
@@ -110,6 +123,22 @@ protected:
 
   /// Use scaled or physical gap
   const bool _use_physical_gap;
+
+  /**
+   * Penalty normal pressure at a node, before the augmented Lagrange multiplier is added. Let
+   * g~ = int psi g be the weighted gap and A = int psi the nodal area. The pressure is:
+   * - penalty * g~ if not _use_physical_gap
+   * - (penalty / A) * (g~ / A) if _use_physical_gap. The second factor is the physical gap, and
+   *   dividing the penalty by A normalizes it with the area assigned to the node.
+   * The sign follows the gap, so the pressure is negative in penetration.
+   * @param wgap The (weighted gap, nodal area) pair of the node
+   * @param penalty The penalty factor of the node
+   */
+  ADReal penaltyPressure(const std::pair<ADReal, Real> & wgap, const Real penalty) const
+  {
+    const auto & [weighted_gap, area] = wgap;
+    return _use_physical_gap ? (penalty / area) * (weighted_gap / area) : penalty * weighted_gap;
+  }
 
   /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
   const MooseVariable * const _aux_lm_var;

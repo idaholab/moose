@@ -21,7 +21,8 @@ MooseEnum
 ElementQualityChecker::QualityMetricType()
 {
   return MooseEnum("ASPECT_RATIO SKEW SHEAR SHAPE MAX_ANGLE MIN_ANGLE CONDITION DISTORTION TAPER "
-                   "WARP STRETCH DIAGONAL ASPECT_RATIO_BETA ASPECT_RATIO_GAMMA SIZE JACOBIAN");
+                   "WARP STRETCH DIAGONAL ASPECT_RATIO_BETA ASPECT_RATIO_GAMMA SIZE JACOBIAN "
+                   "TWIST EDGE_LENGTH_RATIO MAX_DIHEDRAL_ANGLE MIN_DIHEDRAL_ANGLE SCALED_JACOBIAN");
 }
 
 MooseEnum
@@ -145,7 +146,7 @@ ElementQualityChecker::execute()
 void
 ElementQualityChecker::threadJoin(const UserObject & uo)
 {
-  const auto & eqc = static_cast<const ElementQualityChecker &>(uo);
+  const auto & eqc = cast_ref<const ElementQualityChecker &>(uo);
   _elem_ids.insert(eqc._elem_ids.begin(), eqc._elem_ids.end());
   _bypassed_elem_type.insert(eqc._bypassed_elem_type.begin(), eqc._bypassed_elem_type.end());
   _bypassed |= eqc._bypassed;

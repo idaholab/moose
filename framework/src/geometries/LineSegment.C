@@ -10,13 +10,10 @@
 #include "LineSegment.h"
 
 #include "JsonIO.h"
+#include "MooseError.h"
 
 #include "libmesh/plane.h"
 #include "libmesh/vector_value.h"
-
-using libMesh::Point;
-using libMesh::Real;
-using libMesh::RealVectorValue;
 
 LineSegment::LineSegment(const Point & p0, const Point & p1) : _p0(p0), _p1(p1) {}
 
@@ -294,9 +291,11 @@ LineSegment::normal() const
 
   // Rotate 90 degrees counter-clockwise (2D)
   Point n(-tangent(1), tangent(0), 0.0);
-  n /= n.norm();
+  const Real norm = n.norm();
+  if (norm == 0.0)
+    mooseError("LineSegment: cannot compute the normal of a zero-length line segment.");
 
-  return n;
+  return n / norm;
 }
 
 Ball

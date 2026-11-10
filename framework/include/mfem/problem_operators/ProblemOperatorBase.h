@@ -11,8 +11,14 @@
 
 #pragma once
 
-#include "MFEMProblem.h"
+#include "PerfGraphInterface.h"
+#include "libmesh/ignore_warnings.h"
+#include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
 #include <functional>
+
+class MFEMProblem;
+struct MFEMProblemData;
 
 namespace Moose::MFEM
 {
@@ -49,7 +55,7 @@ namespace Moose::MFEM
  *      3. Block-vector bookkeeping (trial/test true-DoF offsets and vectors) that
  *         bridges between the true-DoF algebraic world with the FE gridfunction world.
  */
-class ProblemOperatorBase
+class ProblemOperatorBase : public PerfGraphInterface
 {
 public:
   ProblemOperatorBase(MFEMProblem & problem);
@@ -57,13 +63,18 @@ public:
 
   virtual void SetGridFunctions();
   virtual void SetTrialVariablesFromTrueVectors();
-  virtual void Init(mfem::BlockVector & X);
+  virtual void Init();
   virtual void Solve() = 0;
 
   mfem::Array<int> _block_true_offsets_test;
   mfem::Array<int> _block_true_offsets_trial;
 
   mfem::BlockVector _true_x, _true_rhs;
+
+  /// Persistent true-DoF solution vector backing this operator's trial grid functions after
+  /// Init(). Each operator owns its own, because Init() aliases its trial grid functions into
+  /// this vector; sharing one across operators would make each alias the same storage.
+  mfem::BlockVector _true_solution;
 
 protected:
   /// Solve the current system operator using the configured nonlinear and linear solvers

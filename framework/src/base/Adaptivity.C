@@ -26,8 +26,6 @@
 #include "libmesh/error_vector.h"
 #include "libmesh/distributed_mesh.h"
 
-using namespace libMesh;
-
 #ifdef LIBMESH_ENABLE_AMR
 
 Adaptivity::Adaptivity(FEProblemBase & fe_problem)
@@ -46,6 +44,7 @@ Adaptivity::Adaptivity(FEProblemBase & fe_problem)
     _interval(1),
     _start_time(-std::numeric_limits<Real>::max()),
     _stop_time(std::numeric_limits<Real>::max()),
+    _controls_allow_adaptivity(nullptr),
     _cycles_per_step(1),
     _use_new_system(false),
     _adaptivity_type(AdaptivityType::H),
@@ -66,8 +65,8 @@ Adaptivity::init(const unsigned int steps,
   // does not exist at that point.
   _displaced_problem = _fe_problem.getDisplacedProblem();
 
-  _mesh_refinement = std::make_unique<MeshRefinement>(_mesh);
-  _error = std::make_unique<ErrorVector>();
+  _mesh_refinement = std::make_unique<libMesh::MeshRefinement>(_mesh);
+  _error = std::make_unique<libMesh::ErrorVector>();
 
   EquationSystems & es = _fe_problem.es();
   es.parameters.set<bool>("adaptivity") = true;
@@ -89,7 +88,7 @@ Adaptivity::init(const unsigned int steps,
                  "zeroth solver system solution is analyzed for determining whether to toggle "
                  "h-refinement flags to p-refinement flags");
 
-    _sibling_coupling = std::make_unique<SiblingCoupling>();
+    _sibling_coupling = std::make_unique<libMesh::SiblingCoupling>();
     _fe_problem.getSolverSystem(0).system().get_dof_map().add_algebraic_ghosting_functor(
         *_sibling_coupling);
   }
@@ -103,7 +102,8 @@ Adaptivity::init(const unsigned int steps,
     displaced_es.parameters.set<bool>("adaptivity") = true;
 
     if (!_displaced_mesh_refinement)
-      _displaced_mesh_refinement = std::make_unique<MeshRefinement>(_displaced_problem->mesh());
+      _displaced_mesh_refinement =
+          std::make_unique<libMesh::MeshRefinement>(_displaced_problem->mesh());
 
     // The periodic boundaries pointer allows the MeshRefinement
     // object to determine elements which are "topological" neighbors,
@@ -124,18 +124,18 @@ void
 Adaptivity::setErrorEstimator(const MooseEnum & error_estimator_name)
 {
   if (error_estimator_name == "KellyErrorEstimator")
-    _error_estimator = std::make_unique<KellyErrorEstimator>();
+    _error_estimator = std::make_unique<libMesh::KellyErrorEstimator>();
   else if (error_estimator_name == "LaplacianErrorEstimator")
-    _error_estimator = std::make_unique<LaplacianErrorEstimator>();
+    _error_estimator = std::make_unique<libMesh::LaplacianErrorEstimator>();
   else if (error_estimator_name == "PatchRecoveryErrorEstimator")
-    _error_estimator = std::make_unique<PatchRecoveryErrorEstimator>();
+    _error_estimator = std::make_unique<libMesh::PatchRecoveryErrorEstimator>();
   else
     mooseError(std::string("Unknown error_estimator selection: ") +
                std::string(error_estimator_name));
 }
 
 void
-Adaptivity::setErrorNorm(SystemNorm & sys_norm)
+Adaptivity::setErrorNorm(libMesh::SystemNorm & sys_norm)
 {
   mooseAssert(_error_estimator, "error_estimator not initialized. Did you call init_adaptivity()?");
   _error_estimator->error_norm = sys_norm;
@@ -210,7 +210,7 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 
       FlagElementsThread fet(
           _fe_problem, serialized_solution, _max_h_level, marker_name, !distributed_adaptivity);
-      Threads::parallel_reduce(*all_elems, fet);
+      Threads::parallel_reduce(*all_elems, fet, _fe_problem.numThreads());
       _fe_problem.getAuxiliarySystem().solution().close();
     }
   }
@@ -232,7 +232,7 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   // local smoothness and prior h & p error estimates
   if (_adaptivity_type == AdaptivityType::HP)
   {
-    _hp_coarsen_test = std::make_unique<HPCoarsenTest>();
+    _hp_coarsen_test = std::make_unique<libMesh::HPCoarsenTest>();
     _hp_coarsen_test->select_refinement(_fe_problem.getSolverSystem(/*nl_sys=*/0).system());
   }
 
@@ -304,7 +304,7 @@ Adaptivity::uniformRefine(MooseMesh * mesh, unsigned int level /*=libMesh::inval
 
   // NOTE: we are using a separate object here, since adaptivity may not be on, but we need to be
   // able to do refinements
-  MeshRefinement mesh_refinement(*mesh);
+  libMesh::MeshRefinement mesh_refinement(*mesh);
   if (level == libMesh::invalid_uint)
     level = mesh->uniformRefineLevel();
 
@@ -331,9 +331,10 @@ Adaptivity::uniformRefineWithProjection()
 
   // NOTE: we are using a separate object here, since adaptivity may not be on, but we need to be
   // able to do refinements
-  MeshRefinement mesh_refinement(_mesh);
+  libMesh::MeshRefinement mesh_refinement(_mesh);
   unsigned int level = _mesh.uniformRefineLevel();
-  MeshRefinement displaced_mesh_refinement(_displaced_problem ? _displaced_problem->mesh() : _mesh);
+  libMesh::MeshRefinement displaced_mesh_refinement(_displaced_problem ? _displaced_problem->mesh()
+                                                                       : _mesh);
 
   // we have to go step by step so EquationSystems::reinit() won't freak out
   for (unsigned int i = 0; i < level; i++)
@@ -369,6 +370,13 @@ Adaptivity::setTimeActive(Real start_time, Real stop_time)
 }
 
 void
+Adaptivity::setAdaptivityControlFlag(const bool * adapt_control_flag)
+{
+  mooseAssert(adapt_control_flag, "adapt_control_flag was null");
+  _controls_allow_adaptivity = adapt_control_flag;
+}
+
+void
 Adaptivity::setUseNewSystem()
 {
   _use_new_system = true;
@@ -386,12 +394,12 @@ Adaptivity::setInitialMarkerVariableName(std::string marker_field)
   _initial_marker_variable_name = marker_field;
 }
 
-ErrorVector &
+libMesh::ErrorVector &
 Adaptivity::getErrorVector(const std::string & indicator_field)
 {
   // Insert or retrieve error vector
   auto insert_pair = moose_try_emplace(
-      _indicator_field_to_error_vector, indicator_field, std::make_unique<ErrorVector>());
+      _indicator_field_to_error_vector, indicator_field, std::make_unique<libMesh::ErrorVector>());
   return *insert_pair.first->second;
 }
 
@@ -403,13 +411,13 @@ Adaptivity::updateErrorVectors()
   // Resize all of the ErrorVectors in case the mesh has changed
   for (const auto & it : _indicator_field_to_error_vector)
   {
-    ErrorVector & vec = *(it.second);
+    libMesh::ErrorVector & vec = *(it.second);
     vec.assign(_mesh.getMesh().max_elem_id(), 0);
   }
 
   // Fill the vectors with the local contributions
   UpdateErrorVectorsThread uevt(_fe_problem, _indicator_field_to_error_vector);
-  Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), uevt);
+  Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), uevt, _fe_problem.numThreads());
 
   // Now sum across all processors
   for (const auto & it : _indicator_field_to_error_vector)
@@ -419,7 +427,11 @@ Adaptivity::updateErrorVectors()
 bool
 Adaptivity::isAdaptivityDue()
 {
-  return _mesh_refinement_on && (_start_time <= _t && _t < _stop_time) && _step % _interval == 0;
+  bool adapt_due =
+      _mesh_refinement_on && (_start_time <= _t && _t < _stop_time) && _step % _interval == 0;
+  if (_controls_allow_adaptivity)
+    adapt_due &= *_controls_allow_adaptivity;
+  return adapt_due;
 }
 
 #endif // LIBMESH_ENABLE_AMR

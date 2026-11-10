@@ -67,6 +67,7 @@ DerivativeStringToJSON(DistributionName);
 DerivativeStringToJSON(SamplerName);
 DerivativeStringToJSON(UserObjectName);
 DerivativeStringToJSON(InterpolationMethodName);
+DerivativeStringToJSON(GradientMethodName);
 DerivativeStringToJSON(IndicatorName);
 DerivativeStringToJSON(MarkerName);
 DerivativeStringToJSON(MultiAppName);
@@ -92,4 +93,7 @@ DerivativeStringToJSON(MFEMVectorCoefficientName);
 DerivativeStringToJSON(MFEMMatrixCoefficientName);
 DerivativeStringToJSON(MFEMFESpaceName);
 DerivativeStringToJSON(MFEMSolverName);
+DerivativeStringToJSON(MFEMKernelName);
+DerivativeStringToJSON(MFEMBoundaryConditionName);
+DerivativeStringToJSON(MFEMWeakFormName);
 #endif

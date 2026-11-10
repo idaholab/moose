@@ -63,7 +63,7 @@ SideElementCounterWithID::finalize()
 void
 SideElementCounterWithID::threadJoin(const UserObject & y)
 {
-  const SideElementCounterWithID & uo = static_cast<const SideElementCounterWithID &>(y);
+  const SideElementCounterWithID & uo = cast_ref<const SideElementCounterWithID &>(y);
   for (auto & id : _unique_ids)
     _counters[id] += uo._counters.at(id);
 }

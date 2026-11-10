@@ -41,7 +41,6 @@ MFEMHyprePCG::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::HyprePCG>(getMFEMProblem().getComm());
   SetSolverParameters(*solver);
-  SetPreconditioner(*solver);
   _solver = std::move(solver);
 }
 
@@ -53,6 +52,15 @@ MFEMHyprePCG::SetSolverParameters(mfem::HyprePCG & solver)
   solver.SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver.SetMaxIter(getParam<int>("l_max_its"));
   solver.SetPrintLevel(getParam<int>("print_level"));
+}
+
+void
+MFEMHyprePCG::SetPreconditionerImpl()
+{
+  if (auto * prec = dynamic_cast<mfem::HypreSolver *>(&_preconditioner->GetSolver()))
+    cast_ref<mfem::HyprePCG &>(GetSolver()).SetPreconditioner(*prec);
+  else
+    paramError("preconditioner", "MFEMHyprePCG requires a hypre solver as its preconditioner");
 }
 
 #endif

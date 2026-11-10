@@ -137,6 +137,7 @@
   [./df01]
     type = MaterialStdVectorRealGradientAux
     variable = df01
+    index = 0
     component = 1
     property = force_density_ext
   [../]
@@ -150,12 +151,15 @@
   [./df00]
     type = MaterialStdVectorRealGradientAux
     variable = df00
+    index = 0
+    component = 0
     property = force_density_ext
   [../]
   [./df10]
     type = MaterialStdVectorRealGradientAux
     variable = df10
     index = 1
+    component = 0
     property = force_density_ext
   [../]
 []

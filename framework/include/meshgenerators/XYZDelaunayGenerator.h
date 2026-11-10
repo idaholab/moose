@@ -58,4 +58,7 @@ protected:
 
   /// Whether mesh stitching should have verbose output
   const bool _verbose_stitching;
+
+  /// Type of the tetrahedral elements to be generated (TET4, TET10, TET14, or DEFAULT)
+  const MooseEnum _tet_elem_type;
 };

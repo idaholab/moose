@@ -9,11 +9,9 @@
 
 #include "Triangle.h"
 #include "LineSegment.h"
+#include "MooseError.h"
 
 #include <cmath>
-
-using libMesh::Point;
-using libMesh::Real;
 
 Triangle::Triangle(const Point & p0, const Point & p1, const Point & p2) : _p0(p0), _p1(p1), _p2(p2)
 {
@@ -25,10 +23,12 @@ Triangle::normal() const
   const auto v1 = _p1 - _p0;
   const auto v2 = _p2 - _p0;
 
-  auto n = v1.cross(v2);
-  n /= n.norm();
+  const auto n = v1.cross(v2);
+  const Real norm = n.norm();
+  if (norm == 0.0)
+    mooseError("Triangle: cannot compute the normal of a degenerate triangle.");
 
-  return n;
+  return n / norm;
 }
 
 bool

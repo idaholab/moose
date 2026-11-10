@@ -314,6 +314,13 @@ NSFVBase::commonScalarFieldAdvectionParams()
       "Coupled variable multipliers for the sources used for the passive scalar fields. If multiple"
       " sources for each equation are specified, major (outer) ordering by equation.");
 
+  params.addParam<std::vector<std::vector<std::vector<SubdomainName>>>>(
+      "passive_scalar_coupled_source_blocks",
+      {},
+      "Block restrictions of the sources used for the passive scalar fields. If multiple"
+      " sources for each equation are specified, major (outer) ordering by equation. Innermost "
+      "ordering is subdomains (for each equation and term)");
+
   MultiMooseEnum ps_inlet_types("fixed-value flux-mass flux-velocity");
   params.addParam<MultiMooseEnum>(
       "passive_scalar_inlet_types",
@@ -616,7 +623,7 @@ NSFVBase::validParams()
       "inlet_boundaries momentum_inlet_types momentum_inlet_functors energy_inlet_types "
       "energy_inlet_functors wall_boundaries momentum_wall_types energy_wall_boundaries "
       "energy_wall_types energy_wall_functors outlet_boundaries momentum_outlet_types "
-      "pressure_functors passive_scalar_inlet_types flux_inlet_pps flux_inlet_directions",
+      "pressure_functors passive_scalar_inlet_types",
       "Boundary condition");
 
   params.addParamNamesToGroup(

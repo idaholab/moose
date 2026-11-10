@@ -138,6 +138,8 @@ advected_interp_method = 'upwind'
   pressure_petsc_options_value = 'hypre boomeramg'
   energy_petsc_options_iname = '-pc_type -pc_hypre_type'
   energy_petsc_options_value = 'hypre boomeramg'
+  # added to test PC reuse feature
+  energy_pc_recompute_frequency = 10
   print_fields = false
   continue_on_max_its = true
 []

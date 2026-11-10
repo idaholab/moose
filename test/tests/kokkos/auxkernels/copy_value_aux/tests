@@ -7,7 +7,7 @@
     csvdiff = 'kokkos_copy_aux_out_results_0001.csv'
     requirement = 'The Kokkos system shall be able to copy from a variable to another of the same finite element family and order.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
   [copy_old]
     type = 'CSVDiff'
@@ -15,6 +15,6 @@
     csvdiff = 'kokkos_copy_old_aux_out.csv'
     requirement = 'The Kokkos system shall be able to copy from the old and older state of a variable to an auxiliary variable.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

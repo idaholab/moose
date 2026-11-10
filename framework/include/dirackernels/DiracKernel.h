@@ -47,6 +47,11 @@ public:
   virtual void computeJacobian() override;
 
   /**
+   * Computes the residual and Jacobian together for the current element.
+   */
+  virtual void computeResidualAndJacobian() override;
+
+  /**
    * This gets called by computeOffDiagJacobian() at each quadrature point.
    */
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);

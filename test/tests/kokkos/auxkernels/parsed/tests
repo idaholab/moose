@@ -10,7 +10,7 @@
       exodiff = 'kokkos_parsed_aux_test_out.e'
       detail = 'using field variables,'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [matprop]
       type = 'Exodiff'
@@ -18,7 +18,7 @@
       exodiff = 'kokkos_parsed_aux_mat_test_out.e'
       detail = 'using material properties,'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [xyzt]
       type = 'Exodiff'
@@ -26,7 +26,7 @@
       exodiff = 'kokkos_xyzt_out.e'
       detail = 'using quadrature/nodal point coordinates and time.'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 []

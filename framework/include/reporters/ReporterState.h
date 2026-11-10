@@ -236,7 +236,7 @@ ReporterState<T>::storeInternal(std::ostream & stream)
 
   // Store each entry of the list directly into the storage
   for (auto & val : this->set())
-    storeHelper(stream, val, nullptr);
+    dataStore(stream, val, nullptr);
 }
 
 template <typename T>
@@ -257,5 +257,5 @@ ReporterState<T>::loadInternal(std::istream & stream)
   // Because we don't shrink the container if the stored size is smaller than
   // our declared size, we have the odd iterator combo you see below
   for (auto & val : as_range(values.begin(), std::next(values.begin(), size)))
-    loadHelper(stream, val, nullptr);
+    dataLoad(stream, val, nullptr);
 }

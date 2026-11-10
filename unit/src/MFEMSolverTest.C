@@ -40,7 +40,7 @@ public:
     const VariableName var_name("test_variable_name");
     _mfem_problem->getProblemData().gridfunctions.Register(var_name, _x);
     _equation_system = std::make_shared<Moose::MFEM::EquationSystem>();
-    _mfem_problem->getProblemData().eqn_system = _equation_system;
+    _mfem_problem->getProblemData().eqn_systems.Register("__DefaultWeakForm", _equation_system);
   }
 
   static mfem::real_t uexact(const mfem::Vector & x)
@@ -234,6 +234,7 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMG)
   // Build required solver inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreBoomerAMG");
   solver_params.set<mfem::real_t>("l_tol") = 1e-7; // HypreBoomerAMG cannot set absolute tolerance
+  solver_params.set<int>("l_max_its") = 30;
 
   // Construct solver
   MFEMHypreBoomerAMG & solver =

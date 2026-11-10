@@ -14,8 +14,6 @@
 #include "MooseMesh.h"
 #include "libmesh/mesh_modification.h"
 
-using namespace libMesh;
-
 MooseAppCoordTransform::Direction
 MooseAppCoordTransform::processZAxis(const Direction z_axis)
 {

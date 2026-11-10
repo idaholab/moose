@@ -496,7 +496,7 @@ public:
       T * cast_obj;
       // We've been using dynamic_cast plus an assert that it
       // succeeds, but if we know the correct type T then often we can
-      // use a much-cheaper static_cast.  libMesh::cast_ptr will still
+      // use a much-cheaper static_cast. cast_ptr will still
       // use a dynamic_cast + assertion in devel/dbg modes.
       if constexpr (std::is_convertible_v<MooseObject *, std::remove_cv_t<T> *> ||
                     std::is_convertible_v<std::remove_cv_t<T> *, MooseObject *>)

@@ -1,0 +1,50 @@
+[Tests]
+  design = 'AdaptiveRayContainmentCheck.md'
+  issues = '#33397'
+
+  [degenerate_elements]
+    type = GoogleTest
+    unit_test = SurfaceElementTest.DegenerateElements
+    requirement = 'The system shall reject zero-length first-order line elements and degenerate first-order triangular elements.'
+  []
+  [edge_normal]
+    type = GoogleTest
+    unit_test = SurfaceElementTest.Edge2Normal
+    requirement = 'The system shall compute a unit normal and line intersections for an axis-aligned first-order line element.'
+  []
+  [triangle_normal]
+    type = GoogleTest
+    unit_test = SurfaceElementTest.Tri3Normal
+    requirement = 'The system shall compute a unit normal and line intersections for an axis-aligned first-order triangular element.'
+  []
+  [tilted_edge_normal]
+    type = GoogleTest
+    unit_test = SurfaceElementTest.Edge2NormalTilted
+    requirement = 'The system shall compute a unit normal and line intersections for a tilted first-order line element.'
+  []
+  [tilted_triangle_normal]
+    type = GoogleTest
+    unit_test = SurfaceElementTest.Tri3NormalTilted
+    requirement = 'The system shall compute a unit normal and line intersections for a tilted first-order triangular element.'
+  []
+  [projected_diagonal]
+    type = GoogleTest
+    unit_test = SurfaceElementTest.ProjectedBoundingBoxDiagonal
+    requirement = 'The system shall compute the diameter of a surface element bounding box projected orthogonally to a supplied direction.'
+  []
+  [aligned_edge_projected_diagonal]
+    type = GoogleTest
+    unit_test = SurfaceElementTest.ProjectedBoundingBoxDiagonalAlignedEdge
+    requirement = 'The system shall retain the full projected bounding-box diameter when the main diagonal of a first-order line element is aligned with the projection direction.'
+  []
+  [tilted_3d_projected_diagonal]
+    type = GoogleTest
+    unit_test = SurfaceElementTest.ProjectedBoundingBoxDiagonalTilted3D
+    requirement = 'The system shall retain the full projected bounding-box diameter when a three-dimensional main diagonal is aligned with the projection direction.'
+  []
+  [base_dispatch]
+    type = GoogleTest
+    unit_test = SurfaceElementTest.BaseDynamicDispatcherIntersectAndBoundingBall
+    requirement = 'The system shall compute line intersections and enclosing balls for first-order line and triangular elements.'
+  []
+[]

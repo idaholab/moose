@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,9 +32,10 @@ BayesianActiveLearningSampler::BayesianActiveLearningSampler(const InputParamete
   : PMCMCBase(parameters),
     _sorted_indices(getReporterValue<std::vector<unsigned int>>("sorted_indices")),
     _num_tries(getParam<unsigned int>("num_tries")),
-    _inputs_test(_num_tries, std::vector<Real>(_priors.size())),
+    _inputs_test(declareRecoverableData<std::vector<std::vector<Real>>>("inputs_test")),
     _var_test(_num_tries)
 {
+  _inputs_test.resize(_num_tries, std::vector<Real>(_priors.size()));
 }
 
 const std::vector<std::vector<Real>> &

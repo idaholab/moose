@@ -26,7 +26,14 @@
       cli_args = 'Outputs/file_base=checker FunctorMaterials/smooth/smoothing_technique=remove_checkerboard'
       detail = "use a heuristic based on a functor's value on an element and the maximum values on "
                "the element's neighbors to compute a new element value that removes a checkerboard "
-               "pattern."
+               "pattern, and"
+    []
+    [nodal]
+      type = CSVDiff
+      input = node_smoother.i
+      csvdiff = 'node_smoother_out_line_0001.csv'
+      detail = "use the average of the values of a functor at a node's neighbors to compute the "
+               "nodal value, which can be smoother."
     []
   []
 []

@@ -21,6 +21,13 @@ CreateApplicationBlockAction::validParams()
   InputParameters params = Action::validParams();
   params.addParam<std::string>(
       "type", "", "The name of the application that should run this input file.");
+  // Declared here so the [Application] block accepts it; the value is read directly from the
+  // parser by MooseApp at construction (well before this action's task runs), so this action
+  // does not apply it. See MooseApp::n_threads().
+  params.addParam<unsigned int>(
+      "num_threads",
+      "Caps the number of threads this application uses (must be <= the process-wide --n-threads); "
+      "defaults to --n-threads.");
 
   params.addClassDescription("Adds application and application related parameters.");
 

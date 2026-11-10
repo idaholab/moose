@@ -8,7 +8,7 @@
     exodiff = 'kokkos_ad_coupled_var_neumann_out.e'
     requirement = 'The Kokkos system shall support coupled Neumann type boundary conditions using automatic differentiation.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 
   [nonlinear]
@@ -19,7 +19,7 @@
       exodiff = 'kokkos_ad_coupled_var_neumann_nl_out.e'
       detail = 'generate accurate results'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
     [jac]
       type = PetscJacobianTester
@@ -28,7 +28,7 @@
       difference_tol = 1e-6
       detail = 'generate a perfect Jacobian'
       capabilities = 'kokkos'
-      compute_devices = 'cpu cuda'
+      compute_devices = 'cpu cuda xpu'
     []
   []
 []

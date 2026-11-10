@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#6711'
+  design = 'FeatureFloodCount.md'
   [./spiral]
     type = CSVDiff
     input = parallel_feature_count.i
@@ -6,6 +8,7 @@
     # This test requires VTK because it uses the ImageFunction class
     capabilities = 'vtk'
     min_parallel = 4
+    requirement = 'The system shall correctly identify and count a single spiral-shaped feature read from an image.'
   [../]
 
   [./boxes]
@@ -16,6 +19,7 @@
     # This test requires VTK because it uses the ImageFunction class
     capabilities = 'vtk'
     min_parallel = 4
+    requirement = 'The system shall correctly identify and count multiple box-shaped features read from an image.'
   [../]
 
   [./l_shapes]
@@ -26,5 +30,6 @@
     # This test requires VTK because it uses the ImageFunction class
     capabilities = 'vtk'
     min_parallel = 4
+    requirement = 'The system shall correctly identify and count multiple L-shaped features read from an image.'
   [../]
 []

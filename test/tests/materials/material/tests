@@ -92,7 +92,12 @@
   [exception]
     requirement = "The system shall include that ability to handle C++ exceptions during material "
                   "property calculation routines:"
-
+    [timestep_end_exception]
+      type = 'RunException'
+      input = 'timestep_end_exception.i'
+      expect_err = 'The following parallel-communicated exception was detected during TIMESTEP_END evaluation'
+      detail = 'executed at the end of a timestep,'
+    []
     [serial]
       type = 'Exodiff'
       input = 'exception_material.i'
@@ -131,7 +136,6 @@
 
       detail = "from processor 0 during a parallel calculation with 4 processes."
     []
-
   []
 
   [test_constant_on_elem]

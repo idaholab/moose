@@ -1,5 +1,7 @@
 vel_x = -0.1
 two_term_bc=true
+gradient_method = 'green-gauss'
+advected_interp_method = 'average'
 
 [Mesh]
   [gmg]
@@ -23,12 +25,26 @@ two_term_bc=true
     type = MooseLinearVariableFVReal
     solver_sys = 'u_sys'
     initial_condition = 0.02
+    gradient_method = ${gradient_method}
+  []
+[]
+
+[FVGradientMethods]
+  [gg]
+    type = FVGreenGaussGradient
+  []
+  [gg_custom]
+    type = FVGreenGaussGradient
   []
 []
 
 [FVInterpolationMethods]
   [average]
     type = FVGeometricAverage
+  []
+  [muscl]
+    type = FVAdvectedMUSCLDeferredCorrection
+    gradient_method = gg_custom
   []
 []
 
@@ -48,7 +64,7 @@ two_term_bc=true
     type = LinearFVAdvection
     variable = u
     velocity = "${vel_x} 0 0"
-    advected_interp_method_name = average
+    advected_interp_method_name = ${advected_interp_method}
   []
   [source]
     type = LinearFVSource

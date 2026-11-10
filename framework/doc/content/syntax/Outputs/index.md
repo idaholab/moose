@@ -53,6 +53,58 @@ For example, if the input file (input.i) contained the following `[Outputs]` blo
 
 Note, the use of "file_base" anywhere in the `[Outputs]` block disables all default naming behavior.
 
+### Rules for the output file name
+
+For output objects that write an output file, each resolves its output file name from one of
+three sources, in order of priority:
+
+1. **Its own `file_base` parameter.** An output sub-block that sets `file_base` within its own block always
+   uses that value, regardless of anything set at the top level of `[Outputs]`.
+2. **The common `file_base`.** An output that does *not* set its own `file_base` inherits, verbatim,
+   the `file_base` set at the top level of the `[Outputs]` block, if one is set. Short-cut syntax
+   outputs (e.g. `exodus = true`) always fall into this case -- they have no block of their own to
+   set a `file_base` in, so they either use the common `file_base` verbatim or, if none is set, the
+   default described below. The object name is never appended to a short-cut syntax output's
+   filename.
+3. **The default naming scheme.** If neither the object's own block nor the top level of
+   `[Outputs]` sets `file_base`, the naming scheme described above applies: an "_out" suffix for
+   short-cut syntax, or the sub-block's own name as the suffix.
+
+A collision arises when two or more outputs that each fall into case 2 above -- i.e. that inherit
+the *same* common `file_base` rather than setting their own -- would resolve to the same
+(extension-inclusive) filename. This can only happen among outputs sharing a common `file_base`:
+an output that sets its own `file_base` (case 1) or that falls back to the default naming scheme
+because no `file_base` is set anywhere (case 3) already has the object name (or another
+disambiguating suffix) baked into its filename, so it cannot collide with another output this way.
+
+MOOSE does not silently rename an output to resolve such a collision
+(see [#4215](https://github.com/idaholab/moose/issues/4215)). Instead, MOOSE errors and requires the
+user to explicitly resolve the collision by one of:
+
+- Setting `append_object_name = true` on the colliding sub-block(s), which appends the sub-block's
+  own name to the common `file_base`, producing `<file_base>_<subblock_name>.<ext>`; or
+- Giving the colliding sub-block(s) their own distinct `file_base`, per case 1 above.
+
+An output that shares the common `file_base` but does not actually collide with anything (for
+example, a lone `CSV` output alongside two colliding `Exodus` outputs) keeps the common `file_base`
+verbatim and is unaffected.
+
+!listing id=output-common-file-base caption=Example of resolving common "file_base" collisions.
+[Outputs]
+  file_base = input
+  exodus = true  # short-cut syntax always keeps the common file_base: creates input.e
+  [exodus_a]
+    type = Exodus
+    append_object_name = true # would otherwise collide with 'exodus': creates input_exodus_a.e
+  []
+  [csv]
+    type = CSV    # no collision, so the common file_base is kept verbatim: creates input.csv
+  []
+[]
+
+Omitting `append_object_name = true` on `exodus_a` above would cause MOOSE to error, since it
+would then silently collide with `exodus`.
+
 ## Available Output Types
 
 [output-types] provides a list of the most common output types, including the short-cut syntax

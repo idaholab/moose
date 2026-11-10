@@ -14,8 +14,6 @@
 
 namespace Moose
 {
-using libMesh::Order;
-
 // Copy in libmesh's lagrange helper functions, but we template it
 template <typename T>
 T

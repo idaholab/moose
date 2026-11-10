@@ -44,6 +44,18 @@ public:
    */
   void reinit();
 
+  /**
+   * Serializes this locator's restartable penetration state (the same state used for
+   * restart/recover) into a string, for later restore() across a rejected timestep. See
+   * GeometricSearchData::backup()/restore().
+   */
+  std::string backup();
+
+  /**
+   * Restores penetration state previously captured by backup().
+   */
+  void restore(const std::string & data);
+
   Real penetrationDistance(dof_id_type node_id);
   RealVectorValue penetrationNormal(dof_id_type node_id);
 
@@ -129,7 +141,7 @@ dataLoad(std::istream & stream, std::map<dof_id_type, PenetrationInfo *> & m, vo
   for (unsigned int i = 0; i < size; i++)
   {
     dof_id_type key;
-    loadHelper(stream, key, context);
-    loadHelper(stream, m[key], context);
+    dataLoad(stream, key, context);
+    dataLoad(stream, m[key], context);
   }
 }

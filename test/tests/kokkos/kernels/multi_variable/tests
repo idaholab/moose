@@ -1,0 +1,34 @@
+[Tests]
+  issues = '#30655'
+  design = 'syntax/KokkosKernels/index.md'
+
+  [multi_variable]
+    requirement = 'The Kokkos system shall provide an ability to apply residual objects to multiple variables at once'
+
+    [standard]
+      type = Exodiff
+      input = 'kokkos_multi_variable_kernel_test.i'
+      exodiff = 'kokkos_multi_variable_kernel_test_out.e'
+      detail = 'with hand-coded Jacobians,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [ad]
+      type = Exodiff
+      input = 'kokkos_multi_variable_ad_kernel_test.i'
+      exodiff = 'kokkos_multi_variable_ad_kernel_test_out.e'
+      detail = 'with automatic differentiation,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [ad_jacobian]
+      type = PetscJacobianTester
+      input = 'kokkos_multi_variable_ad_kernel_test.i'
+      cli_args = 'Outputs/exodus=false Executioner/num_steps=1'
+      recover = false
+      detail = 'and provide an exact Jacobian with automatic differentiation.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+  []
+[]

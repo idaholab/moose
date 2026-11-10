@@ -513,15 +513,15 @@ velocity_interp_method = 'rc'
 
 [AuxVariables]
   [vel_x_aux]
-    type = MooseLinearVariableFVReal
+    type = MooseVariableFVReal
     initial_condition = 0.0
   []
   [vel_y_aux]
-    type = MooseLinearVariableFVReal
+    type = MooseVariableFVReal
     initial_condition = 0.0
   []
   [pressure_aux]
-    type = MooseLinearVariableFVReal
+    type = MooseVariableFVReal
     initial_condition = 0.0
   []
 []

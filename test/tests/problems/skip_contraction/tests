@@ -1,0 +1,11 @@
+[Tests]
+  [skip_contraction]
+    type = CSVDiff
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+
+    requirement = 'The system shall allow derived problems to skip mesh contraction.'
+    issues = '#33673'
+    design = '/Problem/index.md'
+  []
+[]

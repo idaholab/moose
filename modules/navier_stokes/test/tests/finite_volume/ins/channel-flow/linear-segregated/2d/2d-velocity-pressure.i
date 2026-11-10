@@ -1,8 +1,10 @@
 mu = 2.6
 rho = 1.0
 advected_interp_method = 'average'
+pressure_gradient_method = 'green-gauss'
 
 [Mesh]
+  allow_renumbering = false # Keep IDs stable for the ID-sorted ElementValueSampler output.
   [mesh]
     type = CartesianMeshGenerator
     dim = 2
@@ -44,6 +46,18 @@ advected_interp_method = 'average'
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
     initial_condition = 0.2
+    gradient_method = ${pressure_gradient_method}
+  []
+[]
+
+[FVGradientMethods]
+  [gg]
+    type = FVGreenGaussGradient
+  []
+  [reconstructed]
+    type = FVReconstructedPressureGradient
+    base_gradient_method = green-gauss
+    gradient_relaxation = 0.1
   []
 []
 
@@ -156,6 +170,15 @@ advected_interp_method = 'average'
     variable = vel_y
     use_two_term_expansion = false
     boundary = right
+  []
+[]
+
+[VectorPostprocessors]
+  [solution]
+    type = ElementValueSampler
+    variable = 'vel_x vel_y pressure'
+    sort_by = id
+    execute_on = TIMESTEP_END
   []
 []
 

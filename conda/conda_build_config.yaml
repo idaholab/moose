@@ -26,7 +26,7 @@ mpi:
   - openmpi                                                 # [linux or (osx and arm64)]
 
 mpi_version:
-  - 5.0.1
+  - 5.0.2
   - 5.0.10                                                  # [linux or (osx and arm64)]
 
 mpi_friendly_name:
@@ -41,7 +41,7 @@ zip_keys:
 # Should match the first zipped item in mpi_version above; used by the moose
 # and app conda install that just builds with mpich
 mpich_version:
-  - 5.0.1
+  - 5.0.2
 
 # libfabric 2.5.1 on linux has an undefined reference to
 # getrandom@GLIBC_2.25 during builds due to the 2.25 sysroot
@@ -60,20 +60,20 @@ c_compiler:
   - gcc                                                     # [linux]
   - clang                                                   # [osx]
 c_compiler_version:
-  - 14                                                      # [linux]
-  - 19                                                      # [osx]
+  - 15                                                      # [linux]
+  - 21                                                      # [osx]
 
 cxx_compiler:
   - gxx                                                     # [linux]
   - clangxx                                                 # [osx]
 cxx_compiler_version:
-  - 14                                                      # [linux]
-  - 19                                                      # [osx]
+  - 15                                                      # [linux]
+  - 21                                                      # [osx]
 
 fortran_compiler:
   - gfortran
 fortran_compiler_version:
-  - 14
+  - 15
 
 #
 # Packages from conda-forge-pinning that we use
@@ -93,7 +93,7 @@ krb5:
 libaec:
   - '1'
 libcap:
-  - '2.77'
+  - '2.78'
 libcurl:
   - 8
 libffi:
@@ -109,7 +109,7 @@ libuuid:
 libxcb:
   - '1'
 libxml2:
-  - '2.14'
+  - '2.15'
 ncurses:
   - 6
 openssl:
@@ -121,7 +121,7 @@ readline:
 ucc:
   - 1
 ucx:
-  - '1.20'
+  - '1.22'
 xz:
   - 5
 zlib:

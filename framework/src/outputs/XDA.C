@@ -16,8 +16,6 @@
 // libMesh includes
 #include "libmesh/enum_xdr_mode.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", XDA);
 registerMooseObjectAliased("MooseApp", XDA, "XDR");
 
@@ -58,7 +56,7 @@ XDA::output()
   mesh_name.insert(mesh_name.size() - 4, "_mesh");
 
   // Set the binary flag
-  XdrMODE mode = _binary ? ENCODE : WRITE;
+  libMesh::XdrMODE mode = _binary ? libMesh::ENCODE : libMesh::WRITE;
 
   // Write the files
   _mesh_ptr->getMesh().write(mesh_name);

@@ -44,6 +44,8 @@ public:
   /// Setup step for materials that needs to be re-done if subdomains change
   void setupMortarMaterials();
 
+  void mortarSetup(const AutomaticMortarGeneration & amg) override;
+
   /**
    * Loops over the mortar segment mesh and computes the residual/Jacobian
    */

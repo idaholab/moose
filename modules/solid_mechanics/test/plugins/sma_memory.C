@@ -15,8 +15,6 @@
 #include "SMAAspUserUtilities.h"
 #include "MooseError.h"
 
-using namespace libMesh;
-
 extern "C" void
 uexternaldb_(
     int * LOP, int * /* LRESTART */, Real /* TIME */[], Real * /* DTIME */, int * KSTEP, int * KINC)

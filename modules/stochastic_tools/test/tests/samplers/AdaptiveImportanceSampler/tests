@@ -7,6 +7,7 @@
     type = 'JSONDiff'
     skip_keys = 'number_of_parts part'
     input = 'ais.i'
+    cli_args = 'Executioner/num_steps=100' # This makes it so "recover" is performed during the simulation
     jsondiff = 'ais_out.json'
     valgrind = none
   []

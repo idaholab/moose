@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -582,10 +582,12 @@ public:
       _sys(ivar.sys(comp)),
       _ivar(ivar.var(comp)),
       _jvar(jvar),
-      _ife(systems[ivar.sys(comp)].getFETypeID(_ivar)),
-      _jfe(systems[ivar.sys(comp)].getFETypeID(_jvar)),
+      _ife(systems[_sys].getFETypeID(_ivar)),
+      _jfe(systems[_sys].getFETypeID(_jvar)),
       _n_idofs(assembly.getNumDofs(_elem.type, _ife)),
-      _n_jdofs(assembly.getNumDofs(_elem.type, _jfe))
+      _n_jdofs(systems[_sys].isScalarVariable(_jvar) ? systems[_sys].getNumScalarDofs(_jvar)
+                                                     : assembly.getNumDofs(_elem.type, _jfe)),
+      _comp(comp)
   {
   }
   /**
@@ -610,7 +612,8 @@ public:
       _ivar(ivar.var(comp)),
       _jvar(jvar),
       _ife(systems[ivar.sys(comp)].getFETypeID(_ivar)),
-      _jfe(systems[ivar.sys(comp)].getFETypeID(_jvar))
+      _jfe(systems[ivar.sys(comp)].getFETypeID(_jvar)),
+      _comp(comp)
   {
   }
 
@@ -674,6 +677,11 @@ public:
    * @returns Whether to compute derivatives
    */
   KOKKOS_FUNCTION bool do_derivatives() const { return _do_derivatives; }
+  /**
+   * Get the variable component
+   * @returns The variable component
+   */
+  KOKKOS_FUNCTION unsigned int comp() const { return _comp; }
 
 protected:
   /**
@@ -696,6 +704,10 @@ protected:
    * Number of local DOFs
    */
   const unsigned int _n_idofs = 1, _n_jdofs = 1;
+  /**
+   * Variable component
+   */
+  const unsigned int _comp;
   /**
    * Whether to compute derivatives for automatic differentiation (AD)
    */

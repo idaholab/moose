@@ -3,6 +3,7 @@
   design = 'Transient.md'
   [restep]
     requirement = 'The system shall be able to, when requested, repeat the'
+    issues = '#30126 #31054'
     [num_steps]
       type = RunApp
       input = transient.i
@@ -47,6 +48,15 @@
       restep = false
       recover = false
       detail = 'middle time if it is before the middle timestep,'
+    []
+    [abort_on_solve_fail]
+      type = RunApp
+      input = transient.i
+      cli_args = '--test-restep restep_step=3 Executioner/num_steps=5 Executioner/abort_on_solve_fail=true'
+      expect_out = 'Aborting and retrying solve for timestep 3 due to --test-restep'
+      restep = false
+      recover = false
+      detail = 'middle timestep when the simulation is set to abort on a failed solve,'
     []
     [pseudo_transient]
       type = RunApp

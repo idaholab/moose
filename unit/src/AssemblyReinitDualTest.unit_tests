@@ -1,0 +1,10 @@
+[Tests]
+  design = 'AutomaticMortarGeneration.md'
+  issues = '#33906'
+
+  [reinit_only_requested_types]
+    type = GoogleTest
+    unit_test = AssemblyReinitDualTest.ReinitOnlyRequestedTypes
+    requirement = 'The mortar assembly shall recompute dual coefficients only for finite element types that request dual shape functions.'
+  []
+[]

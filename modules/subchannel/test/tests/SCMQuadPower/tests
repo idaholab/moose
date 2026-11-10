@@ -18,4 +18,85 @@
     abs_zero = 1e-7
     requirement = 'The system will populate a sinusoidal linear heat rate on fuel pins in a quadrilateral lattice using an initial condition and auxiliary kernel in a mesh that has axial divisions that are not aligned with the heated region entrance and exit heights.'
   []
+  [SCMQuadPower_pin_dependent_axial_shape]
+    type = CSVDiff
+    input = 'two_pin_shapes.i'
+    csvdiff = 'two_pin_shapes_out.csv two_pin_shapes_out_q_prime_profiles_0001.csv'
+    recover = False
+    abs_zero = 1e-7
+    issues = '#34082'
+    requirement = 'The system will assign a different axial linear heat rate shape to each fuel pin in a quadrilateral lattice from a single function of the pin position, while conserving the power assigned to each pin by the radial power distribution, using an initial condition and auxiliary kernel.'
+  []
+  [SCMQuadPower_postprocessor_power]
+    type = CSVDiff
+    input = 'postprocessor_power.i'
+    csvdiff = 'postprocessor_power_out.csv'
+    recover = False
+    abs_zero = 1e-7
+    issues = '#34082'
+    requirement = 'The system will assign the fuel pin linear heat rate in a quadrilateral lattice using an initial condition when the total power is supplied by a postprocessor, so that the linear heat rate integrated over the pins equals that power.'
+  []
+  [SCMQuadPower_time_dependent_power]
+    type = CSVDiff
+    input = 'transient_power.i'
+    csvdiff = 'transient_power_out.csv'
+    recover = False
+    abs_zero = 1e-6
+    issues = '#34082'
+    requirement = 'The system will assign the current value of a time-dependent total power postprocessor to the fuel pins in a quadrilateral lattice using an auxiliary kernel, without lagging it by one time step.'
+  []
+  [SCMQuadPower_power_execute_on_warning]
+    type = RunException
+    input = 'transient_power.i'
+    cli_args = 'Postprocessors/power/execute_on=timestep_end Executioner/num_steps=1'
+    expect_err = 'The power postprocessor does not execute on every execute_on flag of this object, so q_prime may use a lagged power'
+    issues = '#34082'
+    requirement = 'The system will warn when the total power postprocessor of the quadrilateral lattice power auxiliary kernel does not execute on all of its execution flags.'
+  []
+  [SCMQuadPower_power_force_postaux_warning]
+    type = RunException
+    input = 'transient_power.i'
+    cli_args = 'Postprocessors/power/force_postaux=true Executioner/num_steps=1'
+    expect_err = 'The power postprocessor sets force_postaux, so it executes after this object and q_prime uses a lagged power'
+    issues = '#34082'
+    requirement = 'The system will warn when the total power postprocessor of the quadrilateral lattice power auxiliary kernel is forced to execute after auxiliary kernels.'
+  []
+  [SCMQuadPower_verbose]
+    type = RunApp
+    input = 'transient_power.i'
+    cli_args = 'AuxKernels/q_prime_AUX/verbose=true Executioner/num_steps=1 Outputs/csv=false'
+    expect_out = 'Aux Power correction vector'
+    issues = '#34082'
+    requirement = 'The system will report the per-pin power correction of the quadrilateral lattice power auxiliary kernel when requested.'
+  []
+  [SCMQuadPower_receiver_power_no_warning]
+    type = RunApp
+    input = 'transient_power.i'
+    # A Receiver with an execute_on and force_postaux that would otherwise trigger both warnings.
+    # Its value is set by a transfer, so neither check applies and warnings remain errors here.
+    cli_args = 'Postprocessors/received_power/type=Receiver Postprocessors/received_power/default=1e4 '
+               'Postprocessors/received_power/execute_on=timestep_end '
+               'Postprocessors/received_power/force_postaux=true '
+               'AuxKernels/q_prime_AUX/power=received_power Executioner/num_steps=1 Outputs/csv=false'
+    recover = False
+    issues = '#34082'
+    requirement = 'The system will not warn about the execution order of the total power postprocessor of the quadrilateral lattice power auxiliary kernel when that postprocessor is a Receiver filled by a transfer.'
+  []
+  [SCMQuadPower_ic_power_not_initial_error]
+    type = RunException
+    input = 'postprocessor_power.i'
+    cli_args = 'Postprocessors/power_pp/execute_on=timestep_end'
+    expect_err = "The 'execute_on' parameter of the power postprocessor must include 'initial'"
+    issues = '#34082'
+    requirement = 'The system will report an error when the total power postprocessor of the quadrilateral lattice power initial condition does not execute on initial, since it would not have been computed when the initial condition is set.'
+  []
+  [pin_power_on_initial]
+    type = RunApp
+    input = 'test_with_pins.i'
+    cli_args = "Postprocessors/Total_power_SCMPinPowerPostprocessor/execute_on='initial timestep_end' Outputs/file_base=pin_power_on_initial"
+    recover = False
+    issues = '#34154'
+    design = 'SCMPinPowerPostprocessor.md'
+    requirement = 'The system shall compute the heat rate from the fuel pins to the coolant before the first subchannel solve.'
+  []
 []

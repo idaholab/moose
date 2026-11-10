@@ -49,6 +49,13 @@ protected:
    */
   virtual ADReal computeQpResidual() = 0;
 
+  /**
+   * Compute this IntegratedBC's contribution to the Jacobian at the current quadrature point
+   * Note: This function is not needed by AD but added for non-AD BCs to override for evaluating
+   *       non-zero contributions to Jacobian.
+   */
+  virtual Real computeQpJacobian() { return 0; }
+
   /// The variable that this IntegratedBC operates on
   MooseVariableFE<T> & _var;
 

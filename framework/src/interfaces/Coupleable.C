@@ -58,7 +58,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
     _coupleable_max_qps(Moose::constMaxQpsPerElem),
     _is_fv(is_fv),
     _obj(moose_object),
-    _writable_coupled_variables(libMesh::n_threads())
+    _writable_coupled_variables(_c_fe_problem.numThreads())
 {
   SubProblem & problem = *_c_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
   _obj->getMooseApp().registerInterfaceObject(*this);
@@ -905,6 +905,31 @@ Coupleable::coupledArrayValues(const std::string & var_name) const
   return coupledVectorHelper<const ArrayVariableValue *>(var_name, func);
 }
 
+const ADArrayVariableValue &
+Coupleable::adCoupledArrayValue(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getArrayVar(var_name, comp);
+  if (!var)
+    return *getADDefaultArrayValue(var_name);
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adSln();
+  return var->adSlnNeighbor();
+}
+
+std::vector<const ADArrayVariableValue *>
+Coupleable::adCoupledArrayValues(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &adCoupledArrayValue(var_name, comp); };
+  return coupledVectorHelper<const ADArrayVariableValue *>(var_name, func);
+}
+
 MooseWritableVariable &
 Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
 {
@@ -1426,6 +1451,38 @@ Coupleable::coupledArrayDotDot(const std::string & var_name, unsigned int comp) 
   }
 }
 
+const ADArrayVariableValue &
+Coupleable::adCoupledArrayDot(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getArrayVar(var_name, comp);
+  if (!var)
+    return getADDefaultArrayValueZero(var_name);
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adUDot();
+  return var->adUDotNeighbor();
+}
+
+const ADArrayVariableValue &
+Coupleable::adCoupledArrayDotDot(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getArrayVar(var_name, comp);
+  if (!var)
+    return getADDefaultArrayValueZero(var_name);
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adUDotDot();
+  return var->adUDotDotNeighbor();
+}
+
 const ArrayVariableValue &
 Coupleable::coupledArrayDotOld(const std::string & var_name, unsigned int comp) const
 {
@@ -1703,6 +1760,30 @@ Coupleable::coupledArrayGradient(const std::string & var_name, unsigned int comp
   return (_c_is_implicit) ? var->gradSlnNeighbor() : var->gradSlnOldNeighbor();
 }
 
+const ADArrayVariableGradient &
+Coupleable::adCoupledArrayGradient(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getArrayVar(var_name, comp);
+  if (!var)
+    return getADDefaultArrayGradient(var_name);
+  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return usesFaceCoupledValues() ? var->adGradSlnFace() : var->adGradSln();
+  return var->adGradSlnNeighbor();
+}
+
+std::vector<const ADArrayVariableGradient *>
+Coupleable::adCoupledArrayGradients(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp)
+  { return &adCoupledArrayGradient(var_name, comp); };
+  return coupledVectorHelper<const ADArrayVariableGradient *>(var_name, func);
+}
+
 const ArrayVariableGradient &
 Coupleable::coupledArrayGradientOld(const std::string & var_name, unsigned int comp) const
 {
@@ -1805,6 +1886,23 @@ Coupleable::adCoupledCurl(const std::string & var_name, unsigned int comp) const
   if (!_coupleable_neighbor)
     return var->adCurlSln();
   return var->adCurlSlnNeighbor();
+}
+
+const ADVectorVariableDivergence &
+Coupleable::adCoupledDiv(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getVectorVar(var_name, comp);
+
+  if (!var)
+    return getADDefaultDiv();
+  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adDivSln();
+  return var->adDivSlnNeighbor();
 }
 
 const VectorVariableDivergence &
@@ -2238,7 +2336,7 @@ Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp) c
     mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
-    return var->adGradSln();
+    return usesFaceCoupledValues() ? var->adGradSlnFace() : var->adGradSln();
   return var->adGradSlnNeighbor();
 }
 
@@ -2253,6 +2351,8 @@ Coupleable::adCoupledGradientDot(const std::string & var_name, unsigned int comp
 
   if (!_c_is_implicit)
     mooseError("Not implemented");
+  mooseAssert(!usesFaceCoupledValues(),
+              "The AD gradient time derivative is not computed on element faces");
 
   if (!_coupleable_neighbor)
     return var->adGradSlnDot();
@@ -2370,7 +2470,7 @@ Coupleable::adCoupledVectorGradient(const std::string & var_name, unsigned int c
     mooseError("Not implemented");
 
   if (!_coupleable_neighbor)
-    return var->adGradSln();
+    return usesFaceCoupledValues() ? var->adGradSlnFace() : var->adGradSln();
   return var->adGradSlnNeighbor();
 }
 
@@ -2405,6 +2505,57 @@ Coupleable::getADDefaultVectorValue(const std::string & var_name) const
   return default_value_it->second.get();
 }
 
+const ADArrayVariableValue *
+Coupleable::getADDefaultArrayValue(const std::string & var_name) const
+{
+  auto default_value_it = _ad_default_array_value.find(var_name);
+  if (default_value_it == _ad_default_array_value.end())
+  {
+    const auto n = _c_parameters.numberDefaultCoupledValues(var_name);
+    ADRealEigenVector default_array(n);
+    for (const auto i : make_range(n))
+      default_array(i) = _c_parameters.defaultCoupledValue(var_name, i);
+    auto value = std::make_unique<ADArrayVariableValue>(_coupleable_max_qps, default_array);
+    default_value_it =
+        _ad_default_array_value.insert(std::make_pair(var_name, std::move(value))).first;
+  }
+
+  return default_value_it->second.get();
+}
+
+const ADArrayVariableGradient &
+Coupleable::getADDefaultArrayGradient(const std::string & var_name) const
+{
+  auto default_gradient_it = _ad_default_array_gradient.find(var_name);
+  if (default_gradient_it == _ad_default_array_gradient.end())
+  {
+    const auto n = _c_parameters.numberDefaultCoupledValues(var_name);
+    const ADArrayVariableGradient::value_type zero =
+        ADArrayVariableGradient::value_type::Zero(n, Moose::dim);
+    auto gradient = std::make_unique<ADArrayVariableGradient>(_coupleable_max_qps, zero);
+    default_gradient_it =
+        _ad_default_array_gradient.insert(std::make_pair(var_name, std::move(gradient))).first;
+  }
+
+  return *default_gradient_it->second;
+}
+
+const ADArrayVariableValue &
+Coupleable::getADDefaultArrayValueZero(const std::string & var_name) const
+{
+  auto default_value_it = _ad_default_array_value_zero.find(var_name);
+  if (default_value_it == _ad_default_array_value_zero.end())
+  {
+    const auto n = _c_parameters.numberDefaultCoupledValues(var_name);
+    const ADRealEigenVector zero = ADRealEigenVector::Zero(n);
+    auto value = std::make_unique<ADArrayVariableValue>(_coupleable_max_qps, zero);
+    default_value_it =
+        _ad_default_array_value_zero.insert(std::make_pair(var_name, std::move(value))).first;
+  }
+
+  return *default_value_it->second;
+}
+
 const ADVariableGradient &
 Coupleable::getADDefaultGradient() const
 {
@@ -2431,6 +2582,13 @@ Coupleable::getADDefaultCurl() const
 {
   _ad_default_curl.resize(_coupleable_max_qps);
   return _ad_default_curl;
+}
+
+const ADVectorVariableDivergence &
+Coupleable::getADDefaultDiv() const
+{
+  _ad_default_div.resize(_coupleable_max_qps);
+  return _ad_default_div;
 }
 
 const ADVariableValue &

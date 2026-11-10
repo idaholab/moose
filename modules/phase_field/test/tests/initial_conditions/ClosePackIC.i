@@ -58,7 +58,7 @@
 
 [ICs]
   [./close_pack]
-    radius = 0.07
+    radius = 0.071
     outvalue = 0
     variable = phi
     invalue = 1

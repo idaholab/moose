@@ -155,6 +155,7 @@ TransientBase::TransientBase(const InputParameters & parameters)
     _t_step(_problem.timeStep()),
     _time(_problem.time()),
     _time_old(_problem.timeOld()),
+    _time_older(_problem.timeOlder()),
     _dt(_problem.dt()),
     _dt_old(_problem.dtOld()),
     _unconstrained_dt(declareRecoverableData<Real>("unconstrained_dt", -1)),
@@ -189,7 +190,7 @@ TransientBase::TransientBase(const InputParameters & parameters)
   else if (parameters.isParamSetByUser("start_time"))
     _app.setStartTime(_start_time);
 
-  _time = _time_old = _start_time;
+  _time = _time_old = _time_older = _start_time;
   _problem.transient(true);
 
   setupTimeIntegrator();
@@ -281,7 +282,7 @@ TransientBase::preExecute()
     _dt = 0;
     _next_interval_output_time = 0.0;
     if (!_app.isRestarting())
-      _time = _time_old = _start_time;
+      _time = _time_old = _time_older = _start_time;
 
     _problem.outputStep(EXEC_INITIAL);
 
@@ -398,6 +399,7 @@ TransientBase::incrementStepOrReject()
         _problem.adaptMesh();
 #endif
 
+      _time_older = _time_old;
       _time_old = _time;
       _t_step++;
 
@@ -585,7 +587,7 @@ TransientBase::computeConstrainedDT()
   _unconstrained_dt = dt_cur;
 
   if (_verbose)
-    _console << diag.str();
+    _console << diag.str() << std::flush;
 
   diag.str("");
   diag.clear();
@@ -625,7 +627,7 @@ TransientBase::computeConstrainedDT()
   constrainDTFromMultiApp(dt_cur, diag, EXEC_MULTIAPP_FIXED_POINT_END);
 
   if (_verbose)
-    _console << diag.str();
+    _console << diag.str() << std::flush;
 
   return dt_cur;
 }
@@ -681,7 +683,8 @@ TransientBase::keepGoing()
         keep_going = false;
     }
   }
-  else if (_abort)
+  // The failure forced by --test-restep must be retried, not aborted on
+  else if (_abort && !_testing_restep)
   {
     _console << "Aborting as solve did not converge and input selected to abort" << std::endl;
     keep_going = false;

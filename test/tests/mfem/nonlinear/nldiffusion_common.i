@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/square.e
 []
 
@@ -70,11 +70,10 @@
   active = ''
   [point_sample]
     type = MFEMVariablePointValueSampler
-    variable = concentration
+    variables = concentration
     points = '0.5 0.25 0
               0.5 0.50 0
               0.5 0.75 0'
-    execute_on = 'timestep_end'
   []
 []
 
@@ -92,6 +91,5 @@
   []
   [csv]
     type = CSV
-    execute_on = 'timestep_end'
   []
 []

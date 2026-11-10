@@ -95,7 +95,7 @@ HomogenizedThermalConductivity::finalize()
 void
 HomogenizedThermalConductivity::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const HomogenizedThermalConductivity &>(y);
+  const auto & pps = cast_ref<const HomogenizedThermalConductivity &>(y);
 
   _integral_value += pps._integral_value;
   _volume += pps._volume;

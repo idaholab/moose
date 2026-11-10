@@ -74,7 +74,9 @@ BreakBoundaryOnSubdomainGenerator::generate()
   for (const auto & elem : mesh->active_element_ptr_range())
   {
     auto subdomain_id = elem->subdomain_id();
-    auto subdomain_name = mesh->subdomain_name(subdomain_id);
+    // subdomain_name now invalidates the mesh state, so we want to
+    // be sure we're not calling the non-const version
+    auto subdomain_name = std::as_const(mesh)->subdomain_name(subdomain_id);
     if (subdomain_name == "")
       subdomain_name = std::to_string(subdomain_id);
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
@@ -82,7 +84,7 @@ BreakBoundaryOnSubdomainGenerator::generate()
       boundary_info.boundary_ids(elem, side, side_boundary_ids);
       for (auto boundary_id : side_boundary_ids)
         if (breaking_boundary_ids.count(boundary_id) > 0)
-          new_boundary_name_set.emplace(boundary_info.sideset_name(boundary_id) + "_to_" +
+          new_boundary_name_set.emplace(boundary_info.get_sideset_name(boundary_id) + "_to_" +
                                         subdomain_name);
     }
   }
@@ -110,7 +112,7 @@ BreakBoundaryOnSubdomainGenerator::generate()
   for (const auto & elem : mesh->active_element_ptr_range())
   {
     auto subdomain_id = elem->subdomain_id();
-    auto subdomain_name = mesh->subdomain_name(subdomain_id);
+    auto subdomain_name = std::as_const(mesh)->subdomain_name(subdomain_id);
     if (subdomain_name == "")
       subdomain_name = std::to_string(subdomain_id);
     for (MooseIndex(elem->n_sides()) side = 0; side < elem->n_sides(); ++side)
@@ -121,7 +123,8 @@ BreakBoundaryOnSubdomainGenerator::generate()
       {
         if (breaking_boundary_ids.count(boundary_id) > 0)
         {
-          BoundaryName bname = boundary_info.sideset_name(boundary_id) + "_to_" + subdomain_name;
+          BoundaryName bname =
+              boundary_info.get_sideset_name(boundary_id) + "_to_" + subdomain_name;
           auto bid = boundary_info.get_id_by_name(bname);
           boundary_info.add_side(elem, side, bid);
         }

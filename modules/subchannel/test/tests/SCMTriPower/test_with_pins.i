@@ -51,33 +51,35 @@ num_cells = 40
   compute_power = true
   implicit = true
   segregated = false
+  P_tol = 1.0e-4
+  T_tol = 1.0e-5
+  # The enthalpy right-hand side carries the full enthalpy flux, so the default relative linear
+  # tolerance of 1e-6 leaves an energy imbalance of order 1 W out of 20 kW; this test checks the
+  # power balance, so the linear solves are converged tightly
+  rtol = 1.0e-10
+  atol = 1.0e-10
   verbose_subchannel = true
   interpolation_scheme = upwind
   pin_HTC_closure = 'gnielinski'
-  friction_closure = 'cheng'
+  friction_closure = 'Chen'
   full_output = true
-  mixing_closure = 'cheng_todreas'
-  P_tol = 1.0e-6
-  T_tol = 1.0e-5
+  mixing_closure = 'Chen_Todreas'
 []
 
 [SCMClosures]
-  [cheng]
-    type = SCMFrictionUpdatedChengTodreas
+  [Chen]
+    type = SCMFrictionChenTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
   []
-  [cheng_todreas]
-    type = SCMMixingChengTodreas
+  [Chen_Todreas]
+    type = SCMMixingChenTodreas
     CT = 2.6
   []
 []
 
 [ICs]
-
-
-
   [q_prime_ic]
     type = SCMTriPowerIC
     variable = q_prime

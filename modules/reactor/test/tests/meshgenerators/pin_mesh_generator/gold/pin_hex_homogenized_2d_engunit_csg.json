@@ -1,0 +1,47 @@
+{
+  "cells": {
+    "pin1_root_cell": {
+      "fill": "pin1_ducted_pin_unit",
+      "filltype": "UNIVERSE",
+      "region_infix": [
+        "-pin1_radial_boundary"
+      ],
+      "region_postfix": [
+        "pin1_radial_boundary",
+        "-"
+      ]
+    }
+  },
+  "units": {
+    "pin1_ducted_pin_unit": {
+      "attributes": {
+        "duct_apothems": [],
+        "geometry_type": "Hex",
+        "region_names": [
+          [
+            "rgmb_region_1"
+          ]
+        ],
+        "ring_radii": []
+      },
+      "behavior": "UNIVERSE",
+      "unit_type": "CSG::DuctedPinEngUnit"
+    },
+    "pin1_radial_boundary": {
+      "attributes": {
+        "apothem": 0.710315,
+        "num_sides": 6
+      },
+      "behavior": "SURFACE",
+      "unit_type": "CSG::CSGNPolygonUnit"
+    }
+  },
+  "universes": {
+    "ROOT_UNIVERSE": {
+      "cells": [
+        "pin1_root_cell"
+      ],
+      "root": true
+    }
+  }
+}

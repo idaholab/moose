@@ -36,9 +36,9 @@ INSFVMeshAdvection::INSFVMeshAdvection(const InputParameters & parameters)
     _disp_x(getFunctor<ADReal>("disp_x")),
     _disp_y(getFunctor<ADReal>("disp_y")),
     _disp_z(getFunctor<ADReal>("disp_z")),
-    _adv_quant(isParamValid("advected_quantity") ? static_cast<const Moose::FunctorBase<ADReal> &>(
+    _adv_quant(isParamValid("advected_quantity") ? cast_ref<const Moose::FunctorBase<ADReal> &>(
                                                        getFunctor<ADReal>("advected_quantity"))
-                                                 : static_cast<Moose::FunctorBase<ADReal> &>(_var))
+                                                 : cast_ref<Moose::FunctorBase<ADReal> &>(_var))
 {
 }
 

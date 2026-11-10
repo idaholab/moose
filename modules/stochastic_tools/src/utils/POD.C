@@ -1,4 +1,3 @@
-
 //* This file is part of the MOOSE framework
 //* https://mooseframework.inl.gov
 //*
@@ -10,8 +9,6 @@
 
 #include "MooseError.h"
 #include "POD.h"
-
-using namespace libMesh;
 
 namespace StochasticTools
 {
@@ -80,9 +77,10 @@ POD::computePOD(const VariableName & vname,
   // global indices
   dof_id_type local_beg = 0;
   dof_id_type local_end = 0;
-  LibmeshPetscCallA(
-      _communicator.get(),
-      MatGetOwnershipRange(mat, numeric_petsc_cast(&local_beg), numeric_petsc_cast(&local_end)));
+  LibmeshPetscCallA(_communicator.get(),
+                    MatGetOwnershipRange(mat,
+                                         libMesh::numeric_petsc_cast(&local_beg),
+                                         libMesh::numeric_petsc_cast(&local_end)));
 
   unsigned int counter = 0;
   if (local_rows)
@@ -158,7 +156,7 @@ POD::computePOD(const VariableName & vname,
   // Find the local size needed for u
   dof_id_type local_snapsize = 0;
   LibmeshPetscCallA(_communicator.get(),
-                    MatGetLocalSize(mat, NULL, numeric_petsc_cast(&local_snapsize)));
+                    MatGetLocalSize(mat, NULL, libMesh::numeric_petsc_cast(&local_snapsize)));
 
   PetscVector<Real> u(_communicator);
   u.init(snapshot_size, local_snapsize, false, PARALLEL);

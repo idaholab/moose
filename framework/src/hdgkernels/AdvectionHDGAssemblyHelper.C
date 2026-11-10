@@ -12,8 +12,6 @@
 #include "MooseObject.h"
 #include "TransientInterface.h"
 
-using namespace libMesh;
-
 InputParameters
 AdvectionHDGAssemblyHelper::validParams()
 {

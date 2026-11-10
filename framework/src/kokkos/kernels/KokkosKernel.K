@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,16 +25,16 @@ Kernel::Kernel(const InputParameters & parameters)
     _grad_test(),
     _phi(),
     _grad_phi(),
-    _u(_var),
-    _grad_u(_var)
+    _u(_kokkos_var),
+    _grad_u(_kokkos_var)
 {
-  addMooseVariableDependency(&_var);
+  addMooseVariableDependency(_vars);
 }
 
 void
 Kernel::computeResidual()
 {
-  _thread.resize(_num_local_residual_threads, numKokkosBlockElements());
+  _thread.resize(_num_local_residual_threads, _vars.size(), numKokkosBlockElements());
 
   Policy policy(0, _thread.size());
 
@@ -49,7 +49,7 @@ Kernel::computeJacobian()
 {
   if (DispatcherRegistry::hasUserMethod<JacobianLoop>(type()))
   {
-    _thread.resize(_num_local_jacobian_threads, numKokkosBlockElements());
+    _thread.resize(_num_local_jacobian_threads, _vars.size(), numKokkosBlockElements());
 
     Policy policy(0, _thread.size());
 
@@ -63,8 +63,15 @@ Kernel::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
+    for (unsigned int i = 1; i < _vars.size(); ++i)
+      if (sys.getFieldCoupling(_kokkos_var.var(0)).size() !=
+          sys.getFieldCoupling(_kokkos_var.var(i)).size())
+        mooseError("For multi-variable kernels/BCs, all variables should have the same number of "
+                   "off-diagonal coupling variables.");
+
     _thread.resize(_num_local_jacobian_threads,
-                   sys.getCoupling(_kokkos_var.var()).size(),
+                   _vars.size(),
+                   sys.getFieldCoupling(_kokkos_var.var()).size(),
                    numKokkosBlockElements());
 
     Policy policy(0, _thread.size());
@@ -73,6 +80,28 @@ Kernel::computeJacobian()
       _offdiag_jacobian_dispatcher = DispatcherRegistry::build<OffDiagJacobianLoop>(this, type());
 
     _offdiag_jacobian_dispatcher->parallelFor(policy);
+  }
+
+  if (DispatcherRegistry::hasUserMethod<OffDiagJacobianScalarLoop>(type()))
+  {
+    auto & sys = kokkosSystem(_kokkos_var.sys());
+
+    for (unsigned int i = 1; i < _vars.size(); ++i)
+      if (sys.getScalarCoupling(_kokkos_var.var(0)).size() !=
+          sys.getScalarCoupling(_kokkos_var.var(i)).size())
+        mooseError("For multi-variable kernels/BCs, all variables should have the same number of "
+                   "off-diagonal scalar coupling variables.");
+
+    _thread.resize(
+        _vars.size(), sys.getScalarCoupling(_kokkos_var.var()).size(), numKokkosBlockElements());
+
+    Policy policy(0, _thread.size());
+
+    if (!_offdiag_jacobian_scalar_dispatcher)
+      _offdiag_jacobian_scalar_dispatcher =
+          DispatcherRegistry::build<OffDiagJacobianScalarLoop>(this, type());
+
+    _offdiag_jacobian_scalar_dispatcher->parallelFor(policy);
   }
 }
 

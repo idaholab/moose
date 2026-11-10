@@ -364,10 +364,30 @@ private:
    */
   void stopServer();
 
-  /// Port to listen on, if any
+  /**
+   * Get the error the server failed with, if it has failed.
+   *
+   * The server runs on its own thread, which stores its failure here for this
+   * thread to observe.
+   */
+  std::optional<std::string> serverError() const;
+
+  /**
+   * Write the given port to the 'port_file' path.
+   *
+   * The value is written to a temporary sibling and renamed into place, so a
+   * client polling for the file either does not see it or reads it complete.
+   */
+  void writePortFile(const unsigned int port) const;
+
+  /// Port to listen on, if any. Zero means the operating system chooses a free
+  /// port, which is then reported in the output and in 'port_file'.
   const unsigned int * const _port;
   /// File socket to listen on, if any
   const FileName * const _file_socket;
+  /// File to write the bound port to once the server is listening, if any. This
+  /// is what lets a client that asked for port zero learn the chosen port.
+  const FileName * const _port_file;
   /// Time in seconds to allow the client to initially communicate before timing out
   const Real _initial_client_timeout;
   /// Time in seconds to allow the client to communicate after init before timing out
@@ -388,6 +408,11 @@ private:
   std::optional<ClientInfo> _client_info;
   /// Lock for _client_info as it is written by the server thread
   mutable std::mutex _client_info_lock;
+
+  /// The error the server failed with, if it has failed
+  std::optional<std::string> _server_error;
+  /// Lock for _server_error as it is written by the server thread
+  mutable std::mutex _server_error_lock;
 
   /// Weak pointer to the server; the server itself is owned by the server thread
   std::weak_ptr<HttpServer> _server_weak_ptr;

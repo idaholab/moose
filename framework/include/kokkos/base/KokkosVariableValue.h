@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -228,7 +228,7 @@ public:
    * @param var The Kokkos variable
    * @param dof Whether to get DOF values
    */
-  VariableValueTempl(Variable var, bool dof = false) : _var(var), _dof(dof)
+  VariableValueTempl(Variable var, bool dof = false) : _var(var), _dof(dof || _var.scalar())
   {
     checkVariable(_var, false, is_ad ? "ADVariableValue" : "VariableValue");
   }
@@ -238,10 +238,10 @@ public:
    * @param tag The vector tag name
    * @param dof Whether to get DOF values
    */
-  VariableValueTempl(const MooseVariableFieldBase & var,
+  VariableValueTempl(const MooseVariableBase & var,
                      const TagName & tag = Moose::SOLUTION_TAG,
                      bool dof = false)
-    : _var(var, tag), _dof(dof)
+    : _var(var, tag), _dof(dof || _var.scalar())
   {
     checkVariable(_var, false, is_ad ? "ADVariableValue" : "VariableValue");
   }
@@ -302,8 +302,13 @@ public:
    * @param comp The variable component
    * @returns The variable value
    */
-  KOKKOS_FUNCTION auto
-  operator()(AssemblyDatum & datum, unsigned int idx, unsigned int comp = 0) const;
+  ///@{
+  KOKKOS_FUNCTION auto operator()(AssemblyDatum & datum, unsigned int idx, unsigned int comp) const;
+  KOKKOS_FUNCTION auto operator()(AssemblyDatum & datum, unsigned int idx) const
+  {
+    return this->operator()(datum, idx, datum.comp());
+  }
+  ///@}
 
   /**
    * Get the Kokkos variable
@@ -403,7 +408,9 @@ VariableValueTempl<is_ad>::get(Datum & datum,
     {
       unsigned int dof;
 
-      if (datum.isNodal())
+      if (_var.scalar())
+        dof = sys.getScalarLocalDofIndex(idx, var);
+      else if (datum.isNodal())
       {
         auto node = datum.node();
         dof = sys.getNodeLocalDofIndex(node, 0, var);
@@ -435,7 +442,7 @@ VariableValueTempl<is_ad>::get(Datum & datum,
     }
   }
   else
-    value = _var.value(comp);
+    value = _var.value(_var.scalar() ? idx : comp);
 
   return value;
 }
@@ -523,8 +530,13 @@ public:
    * @param comp The variable component
    * @returns The variable gradient
    */
-  KOKKOS_FUNCTION auto
-  operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp = 0) const;
+  ///@{
+  KOKKOS_FUNCTION auto operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp) const;
+  KOKKOS_FUNCTION auto operator()(AssemblyDatum & datum, unsigned int qp) const
+  {
+    return this->operator()(datum, qp, datum.comp());
+  }
+  ///@}
 
   /**
    * Get the Kokkos variable

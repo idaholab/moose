@@ -11,7 +11,7 @@ The Cheng-Todreas correlation gives the friction factor for each subchannel type
        caption=Different subchannel types for a square and hexagonal array rod bundles.
        id=fig-sub
 
-The friction factor is given by:
+The Darcy friction factor is given by:
 
 \begin{equation}
       f_{i} = \frac{C_{i}}{(Re_{i})^n},

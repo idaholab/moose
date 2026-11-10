@@ -467,6 +467,15 @@ public:
   void addParamNamesToGroup(const std::string & space_delim_names, const std::string group_name);
 
   /**
+   * This method moves a single parameter to a different group than the one it is already
+   * assigned to (for example, in a derived class intentionally re-grouping a base class's
+   * parameter).
+   * @param name name of the parameter to move
+   * @param group_name name of the group to move the parameter to
+   */
+  void moveParamToGroup(const std::string & name, const std::string & group_name);
+
+  /**
    * This method renames a parameter group
    * @param old_name previous name of the parameter group
    * @param new_name new name of the parameter group
@@ -835,6 +844,18 @@ public:
    *   they were created, or were read from an input file or some other valid source
    */
   void checkParams(const std::string & parsing_syntax);
+
+  /**
+   * Return errors for missing required parameters.
+   *
+   * @param parsing_syntax The parsing syntax to use in the error if this object has no block
+   * @param skip_required_params Names of required parameters to skip the check for
+   * @param skip_private Whether to skip the check for private parameters
+   */
+  std::vector<std::string>
+  missingRequiredParamErrors(const std::string & parsing_syntax,
+                             const std::set<std::string> & skip_required_params = {},
+                             bool skip_private = false) const;
 
   /**
    * Performs a range check on the parameter (which must have a range check)
@@ -1244,6 +1265,14 @@ public:
    */
   std::string varName(const std::string & var_param_name,
                       const std::string & moose_object_with_var_param_name) const;
+
+  /**
+   * Determine which parameter specifies the variable(s) of an object. Kokkos objects can operate on
+   * either a single variable through 'variable' or multiple variables through 'variables', while
+   * all other objects always use 'variable'
+   * @returns The name of the variable parameter, which is either 'variable' or 'variables'
+   */
+  std::string varParamName() const;
 
   /**
    * Rename a parameter and provide a new documentation string
@@ -1798,7 +1827,7 @@ InputParameters::getCheckedPointerParam(const std::string & name_in,
   // template type to this method
   if (!param)
     mooseError("Parameter ", name, " is NULL.\n", error_string);
-  return this->get<T>(name);
+  return param;
 }
 
 template <typename T>

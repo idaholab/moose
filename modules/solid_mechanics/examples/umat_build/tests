@@ -5,11 +5,13 @@
   [build]
     type = 'RunCommand'
     command = 'make'
+    min_slots = 2 # memory heavy
     requirement = "The multi-file UMAT build system shall compile UMAT plugins."
   []
   [test]
     type = 'RunApp'
     input = 'test.i'
+    prereq = build
     valgrind = NONE
     requirement = "The compiled UMAT plugins shall be dynamically linked to enable their use in MOOSE simulations."
   []

@@ -52,13 +52,13 @@ private:
   const std::vector<bool> * _gp_flag;
 
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
-  int _check_step;
+  int & _check_step;
 
   /// Storage for the sequential sum of pf
-  Real _pf_sum;
+  Real & _pf_sum;
 
   /// Storage for the sequential sum of variance of pf
-  Real _var_sum;
+  Real & _var_sum;
 
   /// Storage for the distribution names
   std::vector<const Distribution *> _distributions_store;

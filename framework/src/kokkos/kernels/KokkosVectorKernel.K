@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,10 +26,13 @@ VectorKernel::VectorKernel(const InputParameters & parameters)
     _grad_test(),
     _phi(),
     _grad_phi(),
-    _u(_var),
-    _grad_u(_var)
+    _u(*_vars[0]),
+    _grad_u(*_vars[0])
 {
-  addMooseVariableDependency(&_var);
+  if (_vars.size() > 1)
+    paramError("variables", "Multiple variables are not supported by Kokkos VectorKernel.");
+
+  addMooseVariableDependency(_vars);
 }
 
 void
@@ -65,7 +68,7 @@ VectorKernel::computeJacobian()
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
     _thread.resize(_num_local_jacobian_threads,
-                   sys.getCoupling(_kokkos_var.var()).size(),
+                   sys.getFieldCoupling(_kokkos_var.var()).size(),
                    numKokkosBlockElements());
 
     Policy policy(0, _thread.size());

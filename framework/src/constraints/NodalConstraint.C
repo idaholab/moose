@@ -11,10 +11,19 @@
 
 // MOOSE includes
 #include "Assembly.h"
+#include "MooseMesh.h"
 #include "MooseVariableFE.h"
+#include "SubProblem.h"
 #include "SystemBase.h"
 
+#include "libmesh/compare_elems_by_level.h"
+#include "libmesh/distributed_mesh.h"
+#include "libmesh/null_output_iterator.h"
+#include "libmesh/parallel_elem.h"
+#include "libmesh/parallel_node.h"
 #include "libmesh/sparse_matrix.h"
+
+#include <algorithm>
 
 InputParameters
 NodalConstraint::validParams()
@@ -54,6 +63,112 @@ NodalConstraint::NodalConstraint(const InputParameters & parameters)
     _formulation = Moose::Kinematic;
   else
     mooseError("Formulation must be either Penalty or Kinematic");
+}
+
+std::vector<dof_id_type>
+NodalConstraint::gatherAndRetainConnectedElems(MooseMesh & mesh,
+                                               const std::vector<dof_id_type> & node_ids)
+{
+  const auto & node_to_elem_map = mesh.nodeToElemMap();
+  auto * const distributed_mesh = dynamic_cast<libMesh::DistributedMesh *>(&mesh.getMesh());
+
+  // local reference to the retained elements for this mesh, so we don't have to look it up in the
+  // map every time
+  auto & retained_elems = _retained_elems[&mesh];
+
+  // Elements connected to these nodes may already be remote on a distributed mesh, so gather
+  // gather one locally available connected element for each node before rebuilding the connectivity
+  // map.
+  if (distributed_mesh)
+  {
+    // Mesh adaptation may delete elements retained by a previous invocation. Remove their raw
+    // pointers from DistributedMesh before replacing them with the current connected elements.
+    distributed_mesh->clear_extra_ghost_elems(retained_elems);
+    retained_elems.clear();
+
+    std::set<Elem *, libMesh::CompareElemIdsByLevel> elems_to_ghost;
+    std::set<Node *> nodes_to_ghost;
+
+    // Loop over each node, and find one element connected to it.
+    for (const auto node_id : node_ids)
+    {
+      const auto node_to_elem_pair = node_to_elem_map.find(node_id);
+#ifndef NDEBUG
+      // Debugging check should be per node (inside the node loop)
+      bool someone_found_elem = false;
+#endif
+
+      if (node_to_elem_pair != node_to_elem_map.end())
+        for (const auto elem_id : node_to_elem_pair->second)
+          if (auto * const elem = mesh.queryElemPtr(elem_id))
+          {
+            elems_to_ghost.insert(elem);
+            for (const auto n : make_range(elem->n_nodes()))
+              nodes_to_ghost.insert(elem->node_ptr(n));
+#ifndef NDEBUG
+            someone_found_elem = true;
+#endif
+            break; // Only need one element to retain the node
+          }
+#ifndef NDEBUG
+      // gather through all processors to make sure at least one processor found an element for this
+      // node
+      mesh.getMesh().comm().max(someone_found_elem);
+      mooseAssert(someone_found_elem || node_ids.empty(), "Missing entry in node to elem map");
+#endif
+    }
+
+    // Send nodes first since elements need them.
+    mesh.getMesh().comm().allgather_packed_range(&mesh.getMesh(),
+                                                 nodes_to_ghost.begin(),
+                                                 nodes_to_ghost.end(),
+                                                 libMesh::null_output_iterator<Node>());
+    mesh.getMesh().comm().allgather_packed_range(&mesh.getMesh(),
+                                                 elems_to_ghost.begin(),
+                                                 elems_to_ghost.end(),
+                                                 libMesh::null_output_iterator<Elem>());
+
+    // Rebuild the node-to-element map after gathering the remote mesh entities.
+    mesh.update();
+  }
+
+  // After rebuilding connectivity, select one canonical element ID per node.
+  std::vector<dof_id_type> elem_ids;
+  for (const auto node_id : node_ids)
+  {
+    // Reacquire the iterator after mesh.update().
+    const auto node_to_elem_pair = node_to_elem_map.find(node_id);
+    if (node_to_elem_pair == node_to_elem_map.end() || node_to_elem_pair->second.empty())
+      mooseError("Couldn't find any elements connected to primary node");
+
+    const auto elem_id =
+        node_to_elem_pair->second.front(); // Just need one element to retain the node, like above,
+                                           // just need one element to be ghosted
+    elem_ids.push_back(elem_id);
+
+    // Keep gathered elements when libMesh later deletes unneeded remote elements.
+    if (distributed_mesh)
+    {
+      auto * const elem = mesh.elemPtr(elem_id);
+      distributed_mesh->add_extra_ghost_elem(elem);
+      retained_elems.insert(elem);
+    }
+  }
+
+  // We only need one element per node.
+  mooseAssert(node_ids.size() == elem_ids.size(),
+              "Mismatch between number of primary nodes and connected elements");
+
+  return elem_ids;
+}
+
+void
+NodalConstraint::reinitConstraintNodes()
+{
+  // _subproblem is the displaced problem when this constraint uses the displaced mesh, which is
+  // where its variables (and therefore the dof indices the assembly loops iterate over) live.
+  _subproblem.reinitNodes(_primary_node_vector, _tid);
+  _subproblem.reinitNodesNeighbor(_connected_nodes, _tid);
 }
 
 void

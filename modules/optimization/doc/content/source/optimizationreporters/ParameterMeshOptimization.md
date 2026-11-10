@@ -4,14 +4,14 @@
 
 ## Overview
 
-This optimization reporter performs the same type of optimization as [OptimizationReporter.md], except the parameters are defined by a mesh and is meant to be used in conjunction with [ParameterMeshFunction.md]. The idea is that the parameters are defined as variables on the inputted mesh and the resulting values on the problem being optimized is based on the finite-element shape functions of the variable. The parameter mesh does not need to conform to the physics mesh, but every point in the physics mesh must be contained in parameter mesh. The parameters are defined with [!param](/OptimizationReporter/ParameterMeshOptimization/parameter_names) and each name has the following options associated with it:
+This optimization reporter performs the same type of optimization as [GeneralOptimization.md], except the parameters are defined by a mesh and is meant to be used in conjunction with [ParameterMeshFunction.md]. The idea is that the parameters are defined as variables on the inputted mesh and the resulting values on the problem being optimized is based on the finite-element shape functions of the variable. The parameter mesh does not need to conform to the physics mesh, but every point in the physics mesh must be contained in parameter mesh. The parameters are defined with [!param](/OptimizationReporter/ParameterMeshOptimization/parameter_names) and each name has the following options associated with it:
 
 - mesh ([!param](/OptimizationReporter/ParameterMeshOptimization/parameter_meshes)) (+Required+),
 - finite-element family ([!param](/OptimizationReporter/ParameterMeshOptimization/parameter_families)) where a single value input is applied to all parameters,
 - finite-element order ([!param](/OptimizationReporter/ParameterMeshOptimization/parameter_orders)) where a single value input is applied to all parameters,
 - initial condition which can be set by the following inputs:
 
-  - from the input file using ([!param](/OptimizationReporter/OptimizationReporter/initial_condition)) where all values or one value per group can be specified
+  - from the input file using ([!param](/OptimizationReporter/GeneralOptimization/initial_condition)) where all values or one value per group can be specified
   - from the parameter mesh using ([!param](/OptimizationReporter/ParameterMeshOptimization/initial_condition_mesh_variable)) where each parameter in the group is initialized from data read from the parameter mesh exodus file,
   - default is zero
 
@@ -89,7 +89,7 @@ The mesh is also used in the [ParameterMeshFunction.md] objects in the forward a
 
 !listing mesh_source/adjoint.i block=Functions
 
-The transfer of parameters is the same as in other inverse optimization problems, see [OptimizationReporter.md].
+The transfer of parameters is the same as in other inverse optimization problems, see [GeneralOptimization.md].
 
 ## Example Input File Syntax For Restarting An Optimization Simulation
 
@@ -101,7 +101,7 @@ After the parameter mesh is initialized with parameter values, it can be used as
 
 !listing mesh_source/main_linearRestart.i block=OptimizationReporter
 
-This optimization simulation is restarted with the optimized parameter values from the first example and convergence occurs in a single step.  The `ParameterMeshOptimization` reporter also defined an `exodus_timesteps_for_parameter_mesh_variable` to identify which step to read from the exodus file.  Constant lower and upper bounds were also given by `lower_bounds` and `upper_bounds` but do not have an effect on the optimization algorithm because it was started from the exact solution for the parameter field.  To use bounds, the `tao_solver` in the `Executioner` block was changed to `taoblmvm` (bounded lmvm).  For difficult optimization problems, it is better to start with a good guess for the parameters than to tighten up their bounds.  Multi-resolution optimization strategies [!citet](eslaminia2022full) find better initial guesses for the parameters by starting with an easier to solve optimization problem containing a few controllable parameters and then reusing those optimized parameters as an initial guess for a more difficult optimization problem with more parameters.
+This optimization simulation is restarted with the optimized parameter values from the first example and convergence occurs in a single step.  The `ParameterMeshOptimization` reporter also defined an `exodus_timesteps_for_parameter_mesh_variable` to identify which step to read from the exodus file.  Constant lower and upper bounds were also given by `lower_bounds` and `upper_bounds` but do not have an effect on the optimization algorithm because it was started from the exact solution for the parameter field.  To use bounds, the `tao_solver` in the `Executioner` block must be a bound constrained algorithm such as `taobqnls`.  For difficult optimization problems, it is better to start with a good guess for the parameters than to tighten up their bounds.  Multi-resolution optimization strategies [!citet](eslaminia2022full) find better initial guesses for the parameters by starting with an easier to solve optimization problem containing a few controllable parameters and then reusing those optimized parameters as an initial guess for a more difficult optimization problem with more parameters.
 !syntax parameters /OptimizationReporter/ParameterMeshOptimization
 
 !syntax inputs /OptimizationReporter/ParameterMeshOptimization

@@ -19,34 +19,6 @@
 
 registerMooseObject("MooseApp", MFEMVariableLineValueSampler);
 
-namespace
-{
-std::vector<Point>
-generateLinePoints(const Point & start_point,
-                   const Point & end_point,
-                   unsigned int num_points,
-                   const std::string & object_name)
-{
-  if (num_points < 2)
-    mooseError("In MFEMVariableLineValueSampler \"",
-               object_name,
-               "\": line must have at least 2 points, "
-               "for single points use MFEMVariablePointValueSampler.");
-
-  // initialize and populate vector with linearly-spaced points along line
-  std::vector<Point> points;
-  points.reserve(num_points);
-  for (const auto i_point : make_range(num_points))
-  {
-    // fractional distance along line [0, 1]
-    Real t = static_cast<Real>(i_point) / static_cast<Real>(num_points - 1);
-    points.push_back(t * end_point + (1 - t) * start_point);
-  }
-
-  return points;
-}
-}
-
 InputParameters
 MFEMVariableLineValueSampler::validParams()
 {
@@ -58,20 +30,20 @@ MFEMVariableLineValueSampler::validParams()
   params.addRequiredParam<Point>("start_point", "The beginning of the line");
   params.addRequiredParam<Point>("end_point", "The ending of the line");
 
-  params.addRequiredParam<unsigned int>("num_points",
-                                        "The number of points to sample along the line");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "num_points", "num_points >= 2", "The number of points to sample along the line");
 
   return params;
 }
 
 MFEMVariableLineValueSampler::MFEMVariableLineValueSampler(const InputParameters & parameters)
-  : MFEMVariableValueSamplerBase(parameters,
-                                 // can't call getParam as that requires initialized base class
-                                 // so calling parameters.get directly
-                                 generateLinePoints(parameters.get<Point>("start_point"),
-                                                    parameters.get<Point>("end_point"),
-                                                    parameters.get<unsigned int>("num_points"),
-                                                    parameters.getObjectName()))
+  : MFEMVariableValueSamplerBase(
+        parameters,
+        // can't call getParam as that requires initialized base class
+        // so calling parameters.get directly
+        Moose::MFEM::generateLinePoints(parameters.get<Point>("start_point"),
+                                        parameters.get<Point>("end_point"),
+                                        parameters.get<unsigned int>("num_points")))
 {
 }
 

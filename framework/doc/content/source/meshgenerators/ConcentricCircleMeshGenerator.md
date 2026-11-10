@@ -7,7 +7,7 @@
 !style halign=left
 The `ConcentricCircleMeshGenerator` object is used to generate a 2D mesh for concentric circles.
 Users can refine the mesh by providing a high number of rings for each specified concentric circle
-region or a high number of sectors in each quadrant. The test, [concentric_circle_mesh_generator.i](test/tests/meshgenerators/concentric_circle_mesh_generator/concentric_circle_mesh_generator.i),
+region or a high number of sectors in each quadrant. The test, [!file text=concentric_circle_mesh_generator.i](test/tests/meshgenerators/concentric_circle_mesh_generator/concentric_circle_mesh_generator.i),
 explains the use of the `ConcentricCircleMeshGenerator` object. To execute the test, only generating
 a 2D mesh:
 
@@ -41,6 +41,11 @@ Users must provide the input parameters, such as:
 - inner mesh fraction: ratio of the length of the inner square to the radius of the innermost circle mesh
 - whether the volume for concentric circles should be preserved or not (true/false)
 - iteration number: number of iterations for Laplace smoothing
+
+Each circle, including all its rings, is assigned its own subdomain, as is the enclosing square
+when it is created. Subdomain IDs start at 1 for the innermost circle and increase outward, with the
+enclosing square having the highest ID. Subdomain names may be assigned to each of these subdomains,
+in the same order, using the [!param](/Mesh/ConcentricCircleMeshGenerator/subdomain_name) parameter.
 
 Users can choose if the mesh for the enclosing square is added to the concentric circle mesh or not.
 A portion can be specified, however, it is not required. The default setting generates the full

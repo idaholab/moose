@@ -13,7 +13,6 @@
 #include "libmesh/communicator.h"
 #include "libmesh/parallel_object.h"
 
-using namespace libMesh;
 using namespace StochasticTools;
 
 template <typename InType, typename OutType>
@@ -21,7 +20,7 @@ std::pair<std::vector<OutType>, std::vector<OutType>>
 calculate(const InType & x, const std::vector<std::string> & compute)
 {
   Parallel::Communicator comm;
-  ParallelObject po(comm);
+  libMesh::ParallelObject po(comm);
   std::vector<std::unique_ptr<StochasticTools::Calculator<InType, OutType>>> calcs;
   for (const auto & stat : compute)
     calcs.push_back(StochasticTools::makeCalculator<InType, OutType>(stat, po));

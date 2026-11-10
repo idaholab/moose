@@ -19,8 +19,6 @@
 #include "libmesh/static_condensation_dof_map.h"
 #include "libmesh/petsc_linear_solver.h"
 
-using namespace libMesh;
-
 registerMooseObjectAliased("MooseApp", StaticCondensationFieldSplitPreconditioner, "SCFSP");
 
 InputParameters
@@ -65,7 +63,8 @@ StaticCondensationFieldSplitPreconditioner::setupDM()
   // call would be in DMInitializePackage()
   LibmeshPetscCall(DMMooseRegisterAll());
   // Create and set up the DM that will consume the split options and deal with block matrices.
-  auto & petsc_solver = cast_ref<PetscLinearSolver<Number> &>(scSysMat().reduced_system_solver());
+  auto & petsc_solver =
+      cast_ref<libMesh::PetscLinearSolver<Number> &>(scSysMat().reduced_system_solver());
   auto ksp = petsc_solver.ksp();
   // if there exists a DMMoose object, then we do not need to recreate one
   LibmeshPetscCall(KSPGetDM(ksp, &dm));
@@ -89,6 +88,7 @@ StaticCondensationFieldSplitPreconditioner::setupDM()
 KSP
 StaticCondensationFieldSplitPreconditioner::getKSP()
 {
-  auto & petsc_solver = cast_ref<PetscLinearSolver<Number> &>(scSysMat().reduced_system_solver());
+  auto & petsc_solver =
+      cast_ref<libMesh::PetscLinearSolver<Number> &>(scSysMat().reduced_system_solver());
   return petsc_solver.ksp();
 }

@@ -12,12 +12,9 @@
 #pragma once
 
 #include "Executioner.h"
-#include "ProblemOperatorInterface.h"
 #include "MFEMProblemSolve.h"
-#include "EquationSystemProblemOperator.h"
-#include "ComplexEquationSystemProblemOperator.h"
 
-class MFEMSteady : public Executioner, public Moose::MFEM::ProblemOperatorInterface
+class MFEMSteady : public Executioner
 {
 public:
   static InputParameters validParams();
@@ -32,7 +29,6 @@ public:
 
 private:
   MFEMProblem & _mfem_problem;
-  MFEMProblemData & _mfem_problem_data;
   MFEMProblemSolve _mfem_problem_solve;
 
   // Time variables used for consistency with MOOSE, needed for outputs.

@@ -1,0 +1,9 @@
+[Tests]
+  [quantity_colors]
+    type = GoogleTest
+    unit_test = ReferenceResidualConvergenceTest.quantityColors
+    requirement = 'The system shall color the residual and the residual-to-reference ratio of each reference residual convergence quantity in the console output when color output is enabled.'
+    design = 'ReferenceResidualConvergence.md'
+    issues = '#33233'
+  []
+[]

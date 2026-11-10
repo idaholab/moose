@@ -10,9 +10,21 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "ComplexEquationSystemProblemOperator.h"
+#include "MFEMProblem.h"
 
 namespace Moose::MFEM
 {
+ComplexEquationSystemProblemOperator::ComplexEquationSystemProblemOperator(
+    MFEMProblem & problem, const std::string & weak_form_name)
+  : EquationSystemProblemOperator(problem, weak_form_name),
+    _equation_system{std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(
+        problem.getEquationSystem(weak_form_name))}
+{
+  if (!_equation_system)
+    mooseError("The weak form supplying this operator does not provide a ComplexEquationSystem, "
+               "which is required by ComplexEquationSystemProblemOperator.");
+}
+
 void
 ComplexEquationSystemProblemOperator::SetGridFunctions()
 {
@@ -52,10 +64,17 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
 void
 ComplexEquationSystemProblemOperator::Solve()
 {
-  FormEquationSystemOperator();
-
   auto * const es = GetEquationSystem();
-  SolveWithOperator(*es, _true_rhs, _true_x);
+
+  {
+    TIME_SECTION("ComplexEquationSystemProblemOperator::FormSystem", 2, "Assembling MFEM System");
+    FormEquationSystemOperator();
+  }
+
+  {
+    TIME_SECTION("ComplexEquationSystemProblemOperator::SolveSystem", 2, "Solving MFEM System");
+    SolveWithOperator(*es, _true_rhs, _true_x);
+  }
 
   es->SetTrialVariablesFromTrueVectors(_true_x);
 }

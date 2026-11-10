@@ -13,6 +13,12 @@
 
 #include "MFEMSamplerBase.h"
 
+namespace Moose::MFEM
+{
+std::vector<Point>
+generateLinePoints(const Point & start_point, const Point & end_point, unsigned int num_points);
+}
+
 /**
  * Base class for sampling real or complex MFEM variables at points.
  *
@@ -31,12 +37,12 @@ public:
 protected:
   MFEMVariableSamplerBase(const InputParameters & parameters, const std::vector<Point> & points);
 
-  /// Name of the variable being sampled.
-  const VariableName _var_name;
+  /// Names of the variables being sampled.
+  const std::vector<VariableName> _var_names;
 
 private:
-  /// Return the continuity type of the sampled variable's finite element collection.
-  virtual int getFESpaceContinuityType() const = 0;
+  /// Return the continuity type of the i-th sampled variable's finite element collection.
+  virtual int getFESpaceContinuityType(size_t i_var) const = 0;
 };
 
 #endif // MOOSE_MFEM_ENABLED

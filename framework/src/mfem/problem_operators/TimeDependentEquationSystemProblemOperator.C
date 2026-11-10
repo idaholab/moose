@@ -10,9 +10,22 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "TimeDependentEquationSystemProblemOperator.h"
+#include "MFEMProblem.h"
 
 namespace Moose::MFEM
 {
+TimeDependentEquationSystemProblemOperator::TimeDependentEquationSystemProblemOperator(
+    MFEMProblem & problem, const std::string & weak_form_name)
+  : TimeDependentProblemOperator(problem),
+    _equation_system(std::dynamic_pointer_cast<TimeDependentEquationSystem>(
+        problem.getEquationSystem(weak_form_name)))
+{
+  if (!_equation_system)
+    mooseError("The weak form supplying this operator does not provide a "
+               "TimeDependentEquationSystem, which is required by "
+               "TimeDependentEquationSystemProblemOperator.");
+}
+
 void
 TimeDependentEquationSystemProblemOperator::SetGridFunctions()
 {
@@ -22,9 +35,9 @@ TimeDependentEquationSystemProblemOperator::SetGridFunctions()
 }
 
 void
-TimeDependentEquationSystemProblemOperator::Init(mfem::BlockVector & X)
+TimeDependentEquationSystemProblemOperator::Init()
 {
-  TimeDependentProblemOperator::Init(X);
+  TimeDependentProblemOperator::Init();
   // Set timestepper
   auto & ode_solver = _problem_data.ode_solver;
   ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
@@ -62,10 +75,20 @@ TimeDependentEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
                                                           mfem::Vector & X_new)
 {
   _problem_data.coefficients.setTime(GetTime());
-  FormEquationSystemOperator(dt);
+
+  {
+    TIME_SECTION(
+        "TimeDependentEquationSystemProblemOperator::FormSystem", 2, "Assembling MFEM System");
+    FormEquationSystemOperator(dt);
+  }
 
   auto * const es = GetEquationSystem();
-  SolveWithOperator(*es, _true_rhs, _true_x);
+
+  {
+    TIME_SECTION(
+        "TimeDependentEquationSystemProblemOperator::SolveSystem", 2, "Solving MFEM System");
+    SolveWithOperator(*es, _true_rhs, _true_x);
+  }
 
   X_new.MakeRef(_true_x, 0);
 }

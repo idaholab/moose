@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/cylinder-hex-q2.gen
 []
 
@@ -74,11 +74,19 @@
   device = cpu
 []
 
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMVariableLineValueSampler
+    variables = 'submesh_potential'
+    start_point = '0 -0.5 -0.5'
+    end_point = '0 0.5 0.5'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/DomainPotential
-    vtk_format = ASCII
-    submesh = wire
+  [CSV]
+    type = CSV
+    file_base = OutputData/domain_potential
   []
 []

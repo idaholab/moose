@@ -23,7 +23,9 @@ NaKFluidProperties::validParams()
 }
 
 NaKFluidProperties::NaKFluidProperties(const InputParameters & parameters)
-  : SinglePhaseFluidProperties(parameters), _MNaK((39.102 + 22.9898) / 1000)
+  : SinglePhaseFluidProperties(parameters),
+    _MNaK(1 / (getParam<Real>("weight_fraction_K") / _MK +
+               (1 - getParam<Real>("weight_fraction_K")) / _MNa))
 {
   // We did not implement other weight fractions
   const Real Xk = getParam<Real>("weight_fraction_K");
@@ -32,9 +34,7 @@ NaKFluidProperties::NaKFluidProperties(const InputParameters & parameters)
                "Only 0.778 weight percent potassium (eutectic) is implemented");
 
   // Compute mole fractions from mass fractions
-  const Real AwK = 39.102;
-  const Real AwNa = 22.9898;
-  _Nk = Xk / AwK / (Xk / AwK + (1 - Xk) / AwNa);
+  _Nk = Xk / _MK / (Xk / _MK + (1 - Xk) / _MNa);
 }
 
 NaKFluidProperties::~NaKFluidProperties() {}
@@ -177,9 +177,9 @@ NaKFluidProperties::cp_from_p_T(
 Real
 NaKFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 {
-  Real e, de_dp, de_dT;
-  e_from_p_T(pressure, temperature, e, de_dp, de_dT);
-  return de_dT;
+  // The density correlation does not depend on pressure, so the fluid is incompressible and,
+  // as is conventional for an incompressible liquid, cv = cp
+  return cp_from_p_T(pressure, temperature);
 }
 
 Real
@@ -236,7 +236,7 @@ NaKFluidProperties::k_from_p_T(Real /*pressure*/, Real temperature) const
   // Converted from (W/cm-C)
   if (Tc < 150 || Tc > 680)
     flagInvalidSolution(
-        "NaK thermal diffusivity evaluated outside of temperature range [150, 680] C");
+        "NaK thermal conductivity evaluated outside of temperature range [150, 680] C");
   return 100 * (0.214 + 2.07e-4 * Tc - 2.2e-7 * Tc * Tc);
 }
 

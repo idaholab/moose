@@ -88,8 +88,17 @@ XYZDelaunayGenerator::validParams()
       "conversion_method",
       conversion_method,
       "The method to convert 3D hole meshes into compatible meshes. Options are "
-      "ALL: convert all elements into TET4; SURFACE: convert only the surface elements "
-      "that are stitched to the generated Delaunay mesh.");
+      "ALL: convert all elements into TET4; SURFACE: convert all exterior surface elements using a "
+      "mix of pyramids and tetrahedrals.");
+  params.addParam<SubdomainName>("converted_tet_element_subdomain_name_suffix",
+                                 "to_tet",
+                                 "The suffix to be added to the original subdomain name for the "
+                                 "subdomains containing the elements converted to TET4.");
+  params.addParam<SubdomainName>(
+      "converted_pyramid_element_subdomain_name_suffix",
+      "to_pyramid",
+      "The suffix to be added to the original subdomain name for the subdomains containing the "
+      "elements converted to PYRAMID5.");
 
   params.addRangeCheckedParam<Real>(
       "desired_volume",
@@ -110,6 +119,10 @@ XYZDelaunayGenerator::validParams()
   params.addParam<bool>(
       "verbose_stitching", false, "Whether mesh hole stitching should have verbose output.");
 
+  MooseEnum tet_elem_type("TET4 TET10 TET14 DEFAULT", "DEFAULT");
+  params.addParam<MooseEnum>(
+      "tet_element_type", tet_elem_type, "Type of the tetrahedral elements to be generated.");
+
   params.addClassDescription(
       "Creates tetrahedral 3D meshes within boundaries defined by input meshes.");
 
@@ -128,7 +141,8 @@ XYZDelaunayGenerator::XYZDelaunayGenerator(const InputParameters & parameters)
     _conversion_method(parameters.get<MooseEnum>("conversion_method")),
     _combined_stitching(parameters.get<bool>("combined_stitching")),
     _algorithm(parameters.get<MooseEnum>("algorithm")),
-    _verbose_stitching(parameters.get<bool>("verbose_stitching"))
+    _verbose_stitching(parameters.get<bool>("verbose_stitching")),
+    _tet_elem_type(parameters.get<MooseEnum>("tet_element_type"))
 {
   if (!_stitch_holes.empty() && _stitch_holes.size() != _hole_ptrs.size())
     paramError("stitch_holes", "Need one stitch_holes entry per hole, if specified.");
@@ -159,12 +173,23 @@ XYZDelaunayGenerator::generate()
   // We need to clear these nodeset info as they could overlap with upcoming boundary info
   mesh->get_boundary_info().clear_boundary_node_ids();
 
+  // Map the requested element type to a libMesh tet type. "DEFAULT" (and "TET4")
+  // keep the libMesh default of first-order TET4. "TET10"/"TET14" request
+  // second-/complete-order output; libMesh's NetGen interface then inherits any
+  // curved mid-edge nodes from a second-order (TRI6/TRI7) input surface.
+  const libMesh::ElemType tet_type = (_tet_elem_type == "TET10")   ? libMesh::TET10
+                                     : (_tet_elem_type == "TET14") ? libMesh::TET14
+                                                                   : libMesh::TET4;
+  const bool second_order_output = (tet_type != libMesh::TET4);
+
   // Get ready to triangulate its boundary
   libMesh::NetGenMeshInterface ngint(*mesh);
 
   ngint.smooth_after_generating() = _smooth_tri;
 
   ngint.desired_volume() = _desired_volume;
+
+  ngint.elem_type() = tet_type;
 
   // The hole meshes will be used for hole boundary identification and optionally for stitching.
   // if a hole mesh contains 3D volume elements but has non-TRI3 surface side elements, it cannot be
@@ -179,9 +204,15 @@ XYZDelaunayGenerator::generate()
     std::set<ElemType> hole_elem_types;
     std::set<unsigned short> hole_elem_dims;
     std::vector<std::pair<dof_id_type, unsigned int>> hole_elem_external_sides;
+    // Whether the hole mesh already carries mid-edge nodes (second order or higher).  We
+    // check the element order directly: side_ptr() returns a first-order side even for a
+    // second-order element, so surface side types cannot be used to detect order.
+    bool hole_has_midpoints = false;
     for (auto elem : hole_mesh.element_ptr_range())
     {
       hole_elem_dims.emplace(elem->dim());
+      if (elem->default_order() != libMesh::FIRST)
+        hole_has_midpoints = true;
 
       // For a 3D element, we need to check the surface side element type instead of the element
       // type. It is also a good opportunity to define the external boundary.
@@ -205,18 +236,36 @@ XYZDelaunayGenerator::generate()
           "All elements in a hole mesh must have the same dimension that is either 2D or 3D.");
     else if (*hole_elem_dims.begin() == 3)
     {
+      const bool stitching_this_hole = _stitch_holes.size() && _stitch_holes[hole_i];
+
+      // A stitched quadratic hole cannot conform to a first-order tetrahedralization.
+      if (!second_order_output && stitching_this_hole && hole_has_midpoints)
+        paramError(
+            "tet_element_type",
+            "Cannot use first order elements with stitched quadratic element holes. Please "
+            "specify a higher-order tet_element_type or reduce the order of the hole inputs.");
+
       // For 3D meshes, if there are non-TRI3 surface side elements
       // (1) if no stitching is needed, we can just convert the whole mesh into TET to facilitate
       // boundary identification (2) if stitching is needed, we can still convert and stitch, but
-      // that would modify the input hole mesh
+      // that would modify the input hole mesh.
+      // Note a TET10/TET14 hole reports first-order (TRI3) surface sides here, so it is not
+      // converted; NetGen strips and restores its curved mid-edge nodes internally.
       if (*hole_elem_types.begin() != ElemType::TRI3 || hole_elem_types.size() > 1)
       {
-        if (_stitch_holes.size() && _stitch_holes[hole_i] && !_convert_holes_for_stitching)
+        if (stitching_this_hole && !_convert_holes_for_stitching)
           paramError("holes",
                      "3D hole meshes with non-TRI3 surface elements cannot be stitched without "
                      "converting them to TET4. Consider setting convert_holes_for_stitching=true.");
-        else if (_stitch_holes.size() && _stitch_holes[hole_i] && _conversion_method == "SURFACE")
+        else if (stitching_this_hole && _conversion_method == "SURFACE")
         {
+          // collect the subdomain ids of the original mesh
+          std::set<subdomain_id_type> hole_mesh_original_subdomain_ids;
+          for (auto elem_it = hole_mesh.active_elements_begin();
+               elem_it != hole_mesh.active_elements_end();
+               elem_it++)
+            hole_mesh_original_subdomain_ids.emplace((*elem_it)->subdomain_id());
+
           // Create a transition layer with triangle sides on the external boundary of the hole
           BoundaryID temp_ext_bid = MooseMeshUtils::getNextFreeBoundaryID(hole_mesh);
           for (const auto & hees : hole_elem_external_sides)
@@ -224,6 +273,25 @@ XYZDelaunayGenerator::generate()
           MooseMeshElementConversionUtils::transitionLayerGenerator(
               hole_mesh, std::vector<BoundaryName>({std::to_string(temp_ext_bid)}), 1, false);
           hole_mesh.get_boundary_info().remove_id(temp_ext_bid);
+
+          // Set subdomain names on converted elements
+          try
+          {
+            MooseMeshElementConversionUtils::assignConvertedElementsSubdomainNameSuffix(
+                hole_mesh,
+                hole_mesh_original_subdomain_ids,
+                *hole_mesh_original_subdomain_ids.rbegin() + 1,
+                getParam<SubdomainName>("converted_tet_element_subdomain_name_suffix"),
+                getParam<SubdomainName>("converted_pyramid_element_subdomain_name_suffix"));
+          }
+          catch (const std::exception & e)
+          {
+            if (((std::string)e.what()).compare(26, 4, "TET4") == 0)
+              paramError("converted_tet_element_subdomain_name_suffix", e.what());
+            else // if (((std::string)e.what()).compare(26, 7, "PYRAMID5") == 0)
+              paramError("converted_pyramid_element_subdomain_name_suffix", e.what());
+          }
+
           // MeshSerializer's destructor calls delete_remote_elements()
           // For replicated meshes, we need to refresh the neighbor information
           // Also, not doing prepare_for_use() causes an error in DEBUG mode
@@ -232,6 +300,27 @@ XYZDelaunayGenerator::generate()
         }
         else
           MeshTools::Modification::all_tri(**_hole_ptrs[hole_i]);
+      }
+
+      // For second-order output, raise a stitched hole's order so its seam faces have
+      // matching mid-edge (and, for TET14, face-center) nodes.  A hole that already carries
+      // the needed nodes keeps its inherited curvature.  For TET14 output a TET10 hole must
+      // still be raised, because the added face-center node lies on the stitched face.
+      if (second_order_output && stitching_this_hole)
+      {
+        if (!hole_mesh.is_prepared())
+          hole_mesh.prepare_for_use();
+        // Re-read the current order; the hole may have been converted to TET4 above.
+        ElemType cur_type = libMesh::INVALID_ELEM;
+        for (const auto elem : hole_mesh.element_ptr_range())
+        {
+          cur_type = elem->type();
+          break;
+        }
+        if (tet_type == libMesh::TET10 && cur_type != libMesh::TET10 && cur_type != libMesh::TET14)
+          hole_mesh.all_second_order();
+        else if (tet_type == libMesh::TET14 && cur_type != libMesh::TET14)
+          hole_mesh.all_complete_order();
       }
     }
     else // if (*hole_elem_dims.begin() == 2)
@@ -255,6 +344,17 @@ XYZDelaunayGenerator::generate()
     // libMesh?
     const UnstructuredMesh & hole = dynamic_cast<UnstructuredMesh &>(**hole_ptr);
     ngholes->push_back(std::make_unique<ReplicatedMesh>(hole));
+
+#ifdef LIBMESH_ENABLE_UNIQUE_ID
+    // That constructor inherits the source mesh's next-unique-id counter, and a
+    // DistributedMesh deliberately keeps a different counter on every rank.  A
+    // ReplicatedMesh has to agree on it (see MeshBase::set_next_unique_id), or the
+    // elements libMesh's Netgen interface adds to this copy when it converts the hole
+    // to a surface mesh get different unique ids on different ranks -- which makes the
+    // Hilbert sort keys used by the partitioner's global-index lookup disagree.
+    UnstructuredMesh & hole_copy = *ngholes->back();
+    hole_copy.set_next_unique_id(hole_copy.parallel_max_unique_id());
+#endif
   }
 
   if (!_hole_ptrs.empty())
@@ -286,13 +386,15 @@ XYZDelaunayGenerator::generate()
             std::max(_output_subdomain_id, MooseMeshUtils::getNextFreeSubdomainID(**hole_ptr));
       }
 
-      mesh->subdomain_name(_output_subdomain_id) = output_subdomain_name;
+      mesh->set_subdomain_name(_output_subdomain_id, output_subdomain_name);
     }
   }
 
   if (_smooth_tri || _output_subdomain_id)
     for (auto elem : mesh->element_ptr_range())
     {
+      mooseAssert(elem->type() == tet_type, "Unexpected element type found in triangulation");
+
       elem->subdomain_id() = _output_subdomain_id;
 
       // I do not trust Laplacian mesh smoothing not to invert
@@ -309,6 +411,9 @@ XYZDelaunayGenerator::generate()
           mooseError("Unexplained inverted element found in triangulation.\n");
       }
     }
+
+  // Setting subdomain_id()s invalidates subdomain caches
+  mesh->unset_has_cached_elem_data();
 
   const bool use_binary_search = (_algorithm == "BINARY");
 
@@ -422,11 +527,16 @@ XYZDelaunayGenerator::generate()
 
   auto sorted_point_tuple = [](Elem & elem, unsigned int side)
   {
-    std::vector<unsigned int> nodes_on_side = elem.nodes_on_side(side);
-    libmesh_assert_equal_to(nodes_on_side.size(), 3);
-    std::vector<Point> p(3);
-    for (auto i : index_range(p))
-      p[i] = elem.point(nodes_on_side[i]);
+    // Key faces on their vertex corners only.  For second-order tets (TET10/TET14)
+    // nodes_on_side() also returns mid-edge/face nodes, so we filter to vertices to
+    // keep a 3-corner key.  For TET4 this filter is a no-op.
+    const std::vector<unsigned int> nodes_on_side = elem.nodes_on_side(side);
+    std::vector<Point> p;
+    p.reserve(3);
+    for (const auto n : nodes_on_side)
+      if (elem.is_vertex(n))
+        p.push_back(elem.point(n));
+    libmesh_assert_equal_to(p.size(), 3);
     if (p[0] < p[1])
     {
       if (p[1] < p[2])

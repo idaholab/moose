@@ -40,22 +40,21 @@ P_out = 1.0e5 # Pa
   T_tol = 1.0e-4
   implicit = true
   segregated = false
-  staggered_pressure = false
   verbose_multiapps = true
   verbose_subchannel = true
   interpolation_scheme = upwind
   pin_HTC_closure = 'Dittus-Boelter'
 
   # friction model
-  friction_closure = 'cheng'
+  friction_closure = 'Chen'
 
   full_output = true
   mixing_closure = 'Kim_and_Chung'
 []
 
 [SCMClosures]
-  [cheng]
-    type = SCMFrictionUpdatedChengTodreas
+  [Chen]
+    type = SCMFrictionChenTodreas
   []
   [Kim_and_Chung]
     type = SCMMixingKimAndChung

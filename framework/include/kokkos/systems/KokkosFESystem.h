@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -49,11 +49,35 @@ public:
   void reinit();
 
   /**
+   * Get the local-indexed constraint of a local DOF
+   * @param dof The local DOF index
+   * @returns The local-indexed constraint
+   */
+  KOKKOS_FUNCTION auto getLocalConstraints(dof_id_type dof) const
+  {
+    return _local_constraints.size() ? _local_constraints[dof]
+                                     : decltype(_local_constraints[dof])(nullptr, {});
+  }
+
+  /**
    * Get the list of off-diagonal coupled variable numbers of a variable
    * @param var The variable number
-   * @returns The list of off-diagonal coupled variable numbers
+   * @returns The list of off-diagonal coupled field variable numbers
    */
-  KOKKOS_FUNCTION const auto & getCoupling(unsigned int var) const { return _coupling[var]; }
+  KOKKOS_FUNCTION const Array<unsigned int> & getFieldCoupling(unsigned int var) const
+  {
+    return _field_coupling[var];
+  }
+
+  /**
+   * Get the list of off-diagonal coupled scalar variable numbers of a variable
+   * @param var The variable number
+   * @returns The list of off-diagonal coupled scalar variable numbers
+   */
+  KOKKOS_FUNCTION const Array<unsigned int> & getScalarCoupling(unsigned int var) const
+  {
+    return _scalar_coupling[var];
+  }
 
   /**
    * Check whether a local DOF index is associated with a nodal BC for an extra matrix tag
@@ -117,7 +141,7 @@ public:
    * @param dof The local DOF index
    * @param tag The vector tag
    * @param seed The derivative seed
-   * @returns The DOF AD value with optional seed derivative
+   * @returns The DOF AD value with optional seed derivative keyed by the local DOF index
    */
   KOKKOS_FUNCTION ADReal getVectorDofADValue(const dof_id_type dof,
                                              const TagID tag,
@@ -397,14 +421,22 @@ private:
   Array<bool> _var_is_vector;
 
   /**
-   * Off-diagonal coupled variable numbers of each variable
+   * Off-diagonal coupled field and scalar variable numbers of each variable
    */
-  Array<Array<unsigned int>> _coupling;
+  ///@{
+  Array<Array<unsigned int>> _field_coupling;
+  Array<Array<unsigned int>> _scalar_coupling;
+  ///@}
 
   /**
    * Per-matrix-tag local-plus-ghost DOF masks for nodal BC coverage
    */
   Array<Array<bool>> _nbc_matrix_tag_dof;
+
+  /**
+   * Constraining DOFs and weights of each constrained local or ghost DOF
+   */
+  JaggedArray<Pair<dof_id_type, Real>, 1, 1> _local_constraints;
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
@@ -415,7 +447,7 @@ FESystem::getVectorDofADValue(const dof_id_type dof, TagID tag, const Real seed)
   ADReal value = _vectors[tag][dof];
 
   if (seed != 0)
-    value.derivatives().insert(_local_to_global_dof_index[dof]) = seed;
+    value.derivatives().insert(dof) = seed;
 
   return value;
 }

@@ -24,8 +24,6 @@
 #include "petscsnes.h"
 #include "slepceps.h"
 
-using namespace libMesh;
-
 namespace Moose
 {
 namespace SlepcSupport
@@ -613,7 +611,7 @@ mooseEPSFormMatrices(EigenProblem & eigen_problem, EPS eps, Vec x, void * ctx)
 namespace
 {
 void
-updateCurrentLocalSolution(CondensedEigenSystem & sys, Vec x)
+updateCurrentLocalSolution(libMesh::CondensedEigenSystem & sys, Vec x)
 {
   auto & dof_map = sys.get_dof_map();
 
@@ -641,7 +639,7 @@ updateCurrentLocalSolution(CondensedEigenSystem & sys, Vec x)
 }
 
 std::unique_ptr<NumericVector<Number>>
-createWrappedResidual(CondensedEigenSystem & sys, Vec r)
+createWrappedResidual(libMesh::CondensedEigenSystem & sys, Vec r)
 {
   auto & dof_map = sys.get_dof_map();
 
@@ -1120,6 +1118,16 @@ attachCallbacksToMat(EigenProblem & eigen_problem, Mat mat, bool eigen)
                       PetscObjectCompose((PetscObject)mat, "formNormCtx", (PetscObject)container));
 
   LibmeshPetscCallA(eigen_problem.comm().get(), PetscContainerDestroy(&container));
+
+  // SLEPc creates its work vectors, including the SNES solution and right-hand side, from the
+  // operators. The vector type a matrix creates is chosen by its matrix type (VECSTANDARD for a
+  // shell matrix, VECCUDA or VECHIP for MATHYPRE built with device support), so match the system
+  // solution type, which honors '-vec_type' (e.g. device vectors required by GPU solvers).
+  const auto & solution = cast_ref<const PetscVector<Number> &>(
+      *eigen_problem.getCurrentNonlinearEigenSystem().sys().solution);
+  VecType vec_type;
+  LibmeshPetscCallA(eigen_problem.comm().get(), VecGetType(solution.vec(), &vec_type));
+  LibmeshPetscCallA(eigen_problem.comm().get(), MatSetVecType(mat, vec_type));
 }
 
 PetscErrorCode

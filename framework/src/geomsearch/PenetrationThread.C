@@ -21,8 +21,6 @@
 
 #include <algorithm>
 
-using namespace libMesh;
-
 // Anonymous namespace for helper functions that ought to be moved
 // into libMesh
 namespace
@@ -277,7 +275,7 @@ PenetrationThread::operator()(const NodeIdRange & range)
           mooseError("No proximate elements found at node ",
                      closest_node->id(),
                      " at ",
-                     static_cast<const Point &>(*closest_node),
+                     cast_ref<const Point &>(*closest_node),
                      " on boundary ",
                      _nearest_node._boundary1,
                      ".  This should never happen.");
@@ -296,7 +294,7 @@ PenetrationThread::operator()(const NodeIdRange & range)
           mooseError("No proximate elements found at node ",
                      closest_node->id(),
                      " at ",
-                     static_cast<const Point &>(*closest_node),
+                     cast_ref<const Point &>(*closest_node),
                      " on boundary ",
                      _nearest_node._boundary1,
                      " share that boundary.  This may happen if the mesh uses the same boundary id "

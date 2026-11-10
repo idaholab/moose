@@ -4,7 +4,7 @@
 
 ## Overview
 
-This class performs interpolation of complex scalar and vector quantities at a
+This class performs interpolation of complex scalar and vector variables at a
 set of specified points using MFEM's
 [`FindPointsGSLIB`](https://mfem.org/howto/findpts/) `gslib` interpolation.
 The real and imaginary parts of each sampled component are output as separate columns.

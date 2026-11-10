@@ -27,6 +27,22 @@ stiffness of the materials into contact. Also, to ensure solution stability, dua
 (i.e. `use_dual = true`) are employed by default to interpolate the contact traction
 when using the contact action.
 
+At a secondary node $j$ with test function $\psi_j$, let $\tilde{g}_j = \int \psi_j g$ be the
+weighted gap and $A_j = \int \psi_j$ the nodal area. With penalty factor $\varepsilon$, the penalty
+normal pressure is
+
+\begin{equation}
+p_j =
+\begin{cases}
+\varepsilon \tilde{g}_j & \text{if } \texttt{use\_physical\_gap = false} \\
+\dfrac{\varepsilon}{A_j} \dfrac{\tilde{g}_j}{A_j} & \text{if } \texttt{use\_physical\_gap = true}
+\end{cases}
+\end{equation}
+
+In the second case, $\tilde{g}_j / A_j$ is the physical gap and $\varepsilon / A_j$ is the
+area-normalized penalty factor. The augmented Lagrange update below adds the same $p_j$ to the
+multiplier.
+
 An augmented Lagrange (AL) approach can be used to enforce the contact constraints to a user-prescribed
 tolerance. That tolerance parameter is the normal gap distance (distance to exact enforcement if in contact)
 for normal contact. The AL approach solves the original MOOSE problem, in which contact is enforced using a pure penalty approach,

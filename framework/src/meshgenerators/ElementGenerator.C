@@ -133,8 +133,8 @@ ElementGenerator::generate()
   // Subdomain information
   elem->subdomain_id() = getParam<SubdomainID>("subdomain_id");
   if (isParamValid("subdomain_name"))
-    mesh->subdomain_name(getParam<SubdomainID>("subdomain_id")) =
-        getParam<SubdomainName>("subdomain_name");
+    mesh->set_subdomain_name(
+        getParam<SubdomainID>("subdomain_id"), getParam<SubdomainName>("subdomain_name"), true);
 
   mesh->set_mesh_dimension(std::max((unsigned int)elem->dim(), mesh->mesh_dimension()));
 

@@ -187,7 +187,7 @@ protected:
   const std::array<Real, 5> _D3{{1.506, 0.156, 1.736, 0.67, 1.662}};
 
   /// Coefficients for viscosity
-  const std::array<Real, 5> _amu{{2.09630e-1, -4.55274e-1, 1.423602e-1, -3.35325e-2, 2.76981e-3}};
+  const std::array<Real, 5> _amu{{2.09630e-1, -4.55274e-1, 1.43602e-1, -3.35325e-2, 2.76981e-3}};
   const std::array<Real, 7> _bmu{{-0.187, 2.4871, 3.7151, -11.0972, 9.0965, -3.8292, 0.5166}};
   const std::array<Real, 6> _cmu{
       {6.43449673, 4.56334068e-2, 2.32797868e-1, 9.5832612e-1, 1.27941189e-1, 3.63576595e-1}};

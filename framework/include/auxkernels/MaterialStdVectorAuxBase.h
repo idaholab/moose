@@ -35,7 +35,7 @@ InputParameters
 MaterialStdVectorAuxBaseTempl<T, is_ad>::validParams()
 {
   InputParameters params = MaterialAuxBaseTempl<T, is_ad>::validParams();
-  params.addParam<unsigned int>("index", 0, "The index to consider for this kernel");
+  params.addRequiredParam<unsigned int>("index", "The index to consider for this kernel");
   return params;
 }
 

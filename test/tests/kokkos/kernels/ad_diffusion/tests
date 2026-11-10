@@ -8,7 +8,7 @@
     requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions using automatic differentation.'
     design = 'KokkosADDiffusion.md KokkosADDirichletBC.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
   [neumann]
     type = Exodiff
@@ -17,7 +17,7 @@
     requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem with Neumann boundary conditions using automatic differentation.'
     design = 'KokkosADDiffusion.md KokkosADNeumannBC.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
   [jacobian]
     type = PetscJacobianTester
@@ -27,6 +27,6 @@
     requirement = 'The Kokkos system shall provide an exact Jacobian using automatic differentation.'
     design = 'framework_stp.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

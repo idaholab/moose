@@ -3,10 +3,16 @@
     type = 'CSVDiff'
     input = 'radioactive_decay01.i'
     csvdiff = 'radioactive_decay01.csv'
+    issues = '#8584'
+    design = 'PorousFlowMassRadioactiveDecay.md'
+    requirement = 'The system shall be able to simulate the radioactive decay of a fluid species in a single-phase, single-component porous medium.'
   [../]
   [./exponential_decay]
     type = 'CSVDiff'
     input = 'exponential_decay.i'
     csvdiff = 'exponential_decay_out.csv'
+    issues = '#10661'
+    design = 'PorousFlowExponentialDecay.md'
+    requirement = 'The system shall provide a kernel that exponentially decays a variable towards a reference value at a specified rate.'
   [../]
 []

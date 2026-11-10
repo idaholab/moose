@@ -47,6 +47,8 @@ InputParameters
 ComputeDynamicWeightedGapLMMechanicalContact::validParams()
 {
   InputParameters params = ADMortarConstraint::validParams();
+  // Mechanical contact residuals use only primal values and normals
+  params.set<bool>("_compute_primal_gradients") = false;
   params.addClassDescription(
       "Computes the normal contact mortar constraints for dynamic simulations");
   params.addRangeCheckedParam<Real>("capture_tolerance",
@@ -106,7 +108,9 @@ ComputeDynamicWeightedGapLMMechanicalContact::ComputeDynamicWeightedGapLMMechani
     _has_wear(isParamValid("wear_depth")),
     _wear_depth(_has_wear ? coupledValueLower("wear_depth") : _zero),
     _newmark_beta(getParam<Real>("newmark_beta")),
-    _newmark_gamma(getParam<Real>("newmark_gamma"))
+    _newmark_gamma(getParam<Real>("newmark_gamma")),
+    _t_step_old(declareRestartableData<int>("t_step_old", 0)),
+    _retried_timestep(false)
 {
   if (!useDual())
     mooseError("Dynamic mortar contact constraints requires the use of Lagrange multipliers dual "
@@ -203,8 +207,8 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpIProperties()
 
   // Get the _dof_to_weighted_gap map
   const DofObject * dof = _var->isNodal()
-                              ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
-                              : static_cast<const DofObject *>(_lower_secondary_elem);
+                              ? cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
+                              : cast_ptr<const DofObject *>(_lower_secondary_elem);
 
   // Regular normal contact constraint: Use before contact is established for contact detection
   _dof_to_weighted_gap[dof].first += _test[_i][_qp] * (_qp_gap_nodal * _normals[_i]);
@@ -215,8 +219,8 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpIProperties()
 
   _dof_to_nodal_wear_depth[dof] += _test[_i][_qp] * _wear_depth[_qp] * _JxW_msm[_qp] * _coord[_qp];
 
-  if (_normalize_c)
-    _dof_to_weighted_gap[dof].second += _test[_i][_qp] * _qp_factor;
+  // Always accumulated: also used to compute nodal slip rates for friction
+  _dof_to_weighted_gap[dof].second += _test[_i][_qp] * _qp_factor;
 }
 
 void
@@ -226,6 +230,14 @@ ComputeDynamicWeightedGapLMMechanicalContact::timestepSetup()
   // would be wrong. We would need to create a custom dataStore() and dataLoad()
   if (_app.isRecovering())
     mooseError("This object does not support recovering");
+
+  // timestepSetup() runs once per time step attempt, so on a retried timestep (e.g. --test-restep
+  // or a rejected step) the history below has already been advanced from the accepted state;
+  // advancing it again would overwrite that history with the discarded attempt's last values.
+  _retried_timestep = _t_step == _t_step_old;
+  _t_step_old = _t_step;
+  if (_retried_timestep)
+    return;
 
   _dof_to_old_weighted_gap.clear();
   _dof_to_old_velocity.clear();
@@ -256,7 +268,7 @@ void
 ComputeDynamicWeightedGapLMMechanicalContact::post()
 {
   Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, _mesh, _nodal, _normalize_c, _communicator, false);
+      _dof_to_weighted_gap, _mesh, _nodal, /*normalize_c*/ true, _communicator, false);
 
   if (_has_wear)
     communicateWear();
@@ -300,7 +312,7 @@ ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
   Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, _mesh, _nodal, _normalize_c, _communicator, false);
+      _dof_to_weighted_gap, _mesh, _nodal, /*normalize_c*/ true, _communicator, false);
 
   if (_has_wear)
     communicateWear();
@@ -367,9 +379,9 @@ ComputeDynamicWeightedGapLMMechanicalContact::communicateWear()
     for (auto & pr : sent_data)
     {
       const auto dof_id = pr.first;
-      const auto * const dof_object =
-          _nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
-                 : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
+      const auto * const dof_object = _nodal
+                                          ? cast_ptr<const DofObject *>(lm_mesh.node_ptr(dof_id))
+                                          : cast_ptr<const DofObject *>(lm_mesh.elem_ptr(dof_id));
       mooseAssert(dof_object, "This should be non-null");
       _dof_to_nodal_wear_depth[dof_object] += std::move(pr.second);
     }

@@ -15,8 +15,6 @@
 
 #include "libmesh/numeric_vector.h"
 
-using namespace libMesh;
-
 InputParameters
 Predictor::validParams()
 {
@@ -29,6 +27,8 @@ Predictor::validParams()
       "skip_times_old",
       {},
       "Skip the predictor if the previous solution time is in this list of times");
+  params.addParam<bool>("apply", true, "Whether to apply the prediction.");
+  params.declareControllable("apply");
   params.addParam<bool>("skip_after_failed_timestep",
                         false,
                         "Skip prediction in a repeated time step after a failed time step");
@@ -55,6 +55,7 @@ Predictor::Predictor(const InputParameters & parameters)
     _solution_predictor(_nl.addVector("predictor", true, GHOSTED)),
     _t_step_old(declareRestartableData<int>("t_step_old", 0)),
     _is_repeated_timestep(declareRestartableData<bool>("is_repeated_timestep", false)),
+    _apply(getParam<bool>("apply")),
     _scale(getParam<Real>("scale")),
     _skip_times(getParam<std::vector<Real>>("skip_times")),
     _skip_times_old(getParam<std::vector<Real>>("skip_times_old")),
@@ -83,7 +84,8 @@ Predictor::timestepSetup()
 bool
 Predictor::shouldApply()
 {
-  bool should_apply = true;
+  // 'apply' is controllable, so that Controls can turn the prediction off
+  bool should_apply = _apply;
 
   // if no prediction in a repeated timestep should be made
   if (_is_repeated_timestep && _skip_after_failed_timetep)

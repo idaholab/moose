@@ -41,7 +41,4 @@ private:
 
   /// The MCMC sampler
   Sampler & _sampler;
-
-  /// Communicator that was split based on samples that have rows
-  libMesh::Parallel::Communicator & _local_comm;
 };

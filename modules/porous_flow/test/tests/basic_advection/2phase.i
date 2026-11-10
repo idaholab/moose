@@ -147,8 +147,8 @@
   [basic]
     type = SMP
     full = true
-    petsc_options_iname = '-pc_type -snes_rtol'
-    petsc_options_value = ' lu       1E-10'
+    petsc_options_iname = '-pc_type'
+    petsc_options_value = 'lu'
   []
 []
 
@@ -157,6 +157,7 @@
   solve_type = Newton
   dt = 1
   end_time = 5
+  nl_rel_tol = 1E-10
 []
 
 [Outputs]

@@ -65,5 +65,5 @@ protected:
   std::vector<ReporterName> _reporter_names;
 
   /// Reporter value for whether or not sub app converged
-  std::vector<bool> * _converged;
+  std::vector<bool> * _converged = nullptr;
 };

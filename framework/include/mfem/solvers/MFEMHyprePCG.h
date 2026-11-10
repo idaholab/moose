@@ -28,6 +28,8 @@ public:
 protected:
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(mfem::HyprePCG & solver) override;
+
+  virtual void SetPreconditionerImpl() override;
 };
 
 #endif

@@ -100,17 +100,17 @@ MortarUserObjectAux::MortarUserObjectAux(const InputParameters & parameters)
 
         {ContactQuantityEnum::DELTA_TANGENTIAL_LM_ONE,
          {"PenaltyFrictionUserObject",
-          _wvuo,
+          _pfuo,
           [&]() { return _pfuo->getDeltaTangentialLagrangeMultiplier(_current_node, 0); }}},
 
         {ContactQuantityEnum::DELTA_TANGENTIAL_LM_TWO,
          {"PenaltyFrictionUserObject",
-          _wvuo,
+          _pfuo,
           [&]() { return _pfuo->getDeltaTangentialLagrangeMultiplier(_current_node, 1); }}},
 
         {ContactQuantityEnum::ACTIVE_SET,
          {"PenaltyWeightedGapUserObject",
-          _wvuo,
+          _pwguo,
           [&]() { return _pwguo->getActiveSetState(_current_node) ? 1.0 : 0.0; }}}
         // end outputs list
     })

@@ -18,8 +18,6 @@
 #include "libmesh/libmesh.h" // libMesh::invalid_uint
 #include "libmesh/elem.h"
 
-using namespace libMesh;
-
 class XFEM;
 
 namespace Xfem

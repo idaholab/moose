@@ -3,5 +3,8 @@
     type = 'Exodiff'
     input = 'arrhenius.i'
     exodiff = 'arrhenius_out.e'
+    issues = '#9773'
+    design = 'KineticDisPreRateAux.md KineticDisPreConcAux.md'
+    requirement = 'The system shall compute the kinetic rate constant of a mineral reaction so that it increases with increasing system temperature, as dictated by the Arrhenius equation.'
   [../]
 []

@@ -214,7 +214,7 @@
 
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
 
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'

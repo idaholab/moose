@@ -156,19 +156,28 @@ convert(const std::string & str, T & value, const bool throw_on_failure)
 /**
  *  tokenizeAndConvert splits a string using delimiter and then converts to type T.
  *  If the conversion fails tokenizeAndConvert returns false, otherwise true.
+ *  throw_on_unreadable can be used to throw an exception on failure instead.
  */
 template <typename T>
 bool
 tokenizeAndConvert(const std::string & str,
                    std::vector<T> & tokenized_vector,
-                   const std::string & delimiter = " \t\n\v\f\r")
+                   const std::string & delimiter = " \t\n\v\f\r",
+                   bool throw_on_unreadable = false)
 {
   std::vector<std::string> tokens;
   MooseUtils::tokenize(str, tokens, 1, delimiter);
   tokenized_vector.resize(tokens.size());
   for (std::size_t i = 0; i < tokens.size(); ++i)
+  {
     if (!convert<T>(tokens[i], tokenized_vector[i], false))
-      return false;
+    {
+      if (throw_on_unreadable)
+        throw std::invalid_argument("Failed to convert string: " + str);
+      else
+        return false;
+    }
+  }
   return true;
 }
 

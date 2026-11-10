@@ -113,6 +113,19 @@ Currently, this solver only respects the following `execute_on` flags: `INITAL`,
 
 !alert-end!
 
+!alert! note
+
+The pressure (Poisson-like) operator typically changes slowly between SIMPLE iterations, so building
+its preconditioner (often an algebraic multigrid hierarchy, whose setup can dominate the pressure
+solve) from scratch every iteration is wasteful. The `pressure_pc_recompute_frequency` parameter
+rebuilds the pressure preconditioner only once every N pressure solves and reuses it in between,
+which can substantially reduce the solve cost. The default of `1` rebuilds it on every solve. Use a
+larger value to amortize the setup cost; if the pressure operator changes quickly (e.g. strong
+transients or large property variation), prefer a smaller value to avoid a stale preconditioner that
+needs more Krylov iterations.
+
+!alert-end!
+
 ## Example Input Syntax
 
 The setup of a problem with the segregated solver in MOOSE is slightly different compared to

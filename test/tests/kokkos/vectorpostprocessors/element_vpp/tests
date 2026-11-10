@@ -8,6 +8,6 @@
     csvdiff = 'kokkos_element_vpp_test_out_block_solution_0001.csv'
     requirement = 'The Kokkos system shall be able to aggregate and output vector data by iterating over elements.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

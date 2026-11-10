@@ -77,9 +77,9 @@ void
 dataStore(std::ostream & stream, Foo & foo, void * context)
 {
   // Defined in terms of the simple types that MOOSE already knows how to store
-  storeHelper(stream, foo.bar, context);
-  storeHelper(stream, foo.baz, context);
-  storeHelper(stream, foo.qux, context);
+  dataStore(stream, foo.bar, context);
+  dataStore(stream, foo.baz, context);
+  dataStore(stream, foo.qux, context);
 }
 
 template <>
@@ -89,8 +89,8 @@ dataLoad(std::istream & stream, Foo & foo, void * context)
   // Defined in terms of the simple types that MOOSE already knows how to read.
   // Note the order of the calls, they should match the dataStore routine since each
   // type is being read from the stream.
-  loadHelper(stream, foo.bar, context);
-  loadHelper(stream, foo.baz, context);
-  loadHelper(stream, foo.qux, context);
+  dataLoad(stream, foo.bar, context);
+  dataLoad(stream, foo.baz, context);
+  dataLoad(stream, foo.qux, context);
 }
 ```

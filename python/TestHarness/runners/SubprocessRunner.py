@@ -159,7 +159,9 @@ class SubprocessRunner(Runner):
         # Load combined output
         for file in [self.outfile, self.errfile]:
             file.flush()
-            output = self.readOutput(file)
+            output = self.readOutput(
+                file, "stdout" if file == self.outfile else "stderr"
+            )
             file.close()
 
             # For some reason openmpi will append a null character at the end

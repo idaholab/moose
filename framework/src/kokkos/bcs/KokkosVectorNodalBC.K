@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,12 +23,15 @@ VectorNodalBC::validParams()
 
 VectorNodalBC::VectorNodalBC(const InputParameters & parameters)
   : NodalBCBase(parameters, Moose::VarFieldType::VAR_FIELD_VECTOR),
-    _u(_var, Moose::SOLUTION_TAG, true)
+    _u(*_vars[0], Moose::SOLUTION_TAG, true)
 {
-  if (_var.feType().family != libMesh::LAGRANGE_VEC)
+  if (_vars[0]->feType().family != libMesh::LAGRANGE_VEC)
     paramError("variable", "Vector nodal boundary conditions require LAGRANGE_VEC variables.");
 
-  addMooseVariableDependency(&_var);
+  if (_vars.size() > 1)
+    paramError("variables", "Multiple variables are not supported by Kokkos VectorNodalBC.");
+
+  addMooseVariableDependency(_vars);
 }
 
 void
@@ -56,7 +59,7 @@ VectorNodalBC::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
-    _thread.resize(sys.getCoupling(_kokkos_var.var()).size(), numKokkosBoundaryNodes());
+    _thread.resize(sys.getFieldCoupling(_kokkos_var.var()).size(), numKokkosBoundaryNodes());
 
     Policy policy(0, _thread.size());
 

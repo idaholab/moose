@@ -22,7 +22,7 @@ Here $N_{f}$ is the number of fluid components, $\chi^{i}$ is a fluid component,
 - For brine, whose fluid components are NaCl and H$_{2}$O, the variables are $\{\chi^{0}, P\} = \{\chi^{\mathrm{NaCl}}, P\}$
 - For an acidic brine, whose basis species are Na$^{+}$, Cl$^{-}$, H$^{+}$ and H$_{2}$O (with $N_{f} = 4$), the variables are $\{\chi^{0}, \chi^{1}, \chi^{2}, P\} = \{\chi^{\mathrm{Na+}}, \chi^{\mathrm{Cl-}}, \chi^{\mathrm{H+}}, P\}$
 
-Note that this `Action` associates the final mass-fraction with the porepressure variable.  Ordering your mass-fraction variables so that the final variable has the greatest mass-fraction will usually improve convergence speed because the Jacobian is more diagonally dominant.  For instance, for the brine situation, it is usually much more computationally efficient to choose $\chi^{0} = \chi^{\mathrm{NaCl}}$ rather than $\chi^{0} = \chi^{\mathrm{H2O}}$ even though the final answers will be identical.
+Note that this `Action` associates the final mass-fraction with the porepressure variable.  In most models, this final mass fraction represents pure H$_{2}$O, so the differential equation for H$_{2}$O will be associated with porepressure.  Ordering your mass-fraction variables so that the final variable has the greatest mass-fraction will usually improve convergence speed because the Jacobian is more diagonally dominant.  For instance, for the brine situation, it is usually much more computationally efficient to choose $\chi^{0} = \chi^{\mathrm{NaCl}}$ rather than $\chi^{0} = \chi^{\mathrm{H2O}}$ even though the final answers will be identical.
 
 Since the final mass-fraction, $1 - \sum_{\kappa = 0}^{N_{f} - 2}\chi^{\kappa}$, is associated with the porepressure variable, `BCs` and other objects associated with the porepressure variable will be "acting on" the final mass-fraction.  See [tutorial page 6](/tutorial_06.md) for examples.
 
@@ -65,7 +65,7 @@ The [heat equation](porous_flow/governing_equations.md) is associated with the t
 \begin{equation}
 \label{eq:heat_cons}
 0 = \frac{\partial}{\partial t}\left( (1 - \phi)\rho_{R}C_{R}T + \phi\rho\mathcal{E} \right) + \left( (1 - \phi)\rho_{R}C_{R}T + \phi\rho\mathcal{E} \right)\nabla\cdot{\mathbf
-  v}_{s} -\lambda \nabla^{2}T - \nabla_{i}\left(h\rho \frac{k_{ij}}{\mu} (\nabla_{j}P - \rho g_{j}) \right)
+  v}_{s} - \nabla_{i}\left(\lambda_{ij} \nabla_{j}T \right) - \nabla_{i}\left(h\rho \frac{k_{ij}}{\mu} (\nabla_{j}P - \rho g_{j}) \right)
 \end{equation}
 Note that multiplication by fluid density $\rho$ occurs, irrespective of the `multiply_by_density` flag.
 

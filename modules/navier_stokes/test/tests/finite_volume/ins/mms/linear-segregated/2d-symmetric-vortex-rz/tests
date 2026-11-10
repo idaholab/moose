@@ -8,6 +8,17 @@
     min_parallel = 2
     requirement = 'The system shall solve the Navier Stokes equations with symmetry boundary conditions in RZ coordinates using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order for pressure on an orthogonal grid.'
     max_threads = 1 # see libmesh issue #3808
+    heavy = true
+  []
+  [const_mat_reconstructed]
+    type = MMSTest
+    input = test.py
+    test_case = TestSymmetricVortexRZOrthogonalReconstructed
+    min_parallel = 2
+    requirement = 'The system shall solve the Navier Stokes equations with symmetry boundary conditions in RZ coordinates using the SIMPLE algorithm with reconstructed pressure gradients and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on an orthogonal grid.'
+    max_threads = 1 # see libmesh issue #3808
+    issues = '#32995'
+    heavy = true
   []
   [spacedependent_mat]
     type = MMSTest
@@ -16,5 +27,6 @@
     requirement = 'The system shall converge to the manufactured solution for an RZ geometry using a SIMPLE solver with spatially varying density and viscosity when the deviatoric stress terms are enabled.'
     min_parallel = 2
     max_threads = 1 # see libmesh issue #3808
+    heavy = true
   []
 []

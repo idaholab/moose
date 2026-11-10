@@ -305,8 +305,6 @@
       type = Exodiff
       input = ClosePackIC.i
       exodiff = ClosePackIC_out.e
-      # diffs on mac
-      capabilities = 'platform!=darwin'
       # steady solve
       recover = false
 

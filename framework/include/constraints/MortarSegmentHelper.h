@@ -19,9 +19,6 @@
 #include <string>
 #include <vector>
 
-using libMesh::Point;
-using libMesh::Real;
-
 #ifdef MOOSE_UNIT_TEST
 class MortarSegmentHelperTest;
 #endif

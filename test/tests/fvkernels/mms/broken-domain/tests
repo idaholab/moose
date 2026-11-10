@@ -3,8 +3,18 @@
     type = MMSTest
     input = 'test.py'
     test_case = BrokenDomain
-    requirement = 'The system shall display second order convergence when applying weakly enforced matching Dirichlet and flux conditions.'
+    requirement = 'The system shall display second order convergence when applying weakly enforced matching Dirichlet and flux conditions, including evaluating a functor defined only on the opposite side of the face from its producer.'
     design = 'FVInterfaceKernels/index.md FVBCs/index.md'
-    issues = '#16756'
+    issues = '#16756 #33435'
+  []
+
+  [invalid_functor_side]
+    type = RunException
+    input = diffusion.i
+    cli_args = 'FVInterfaceKernels/interface/coeff2=left'
+    expect_err = "The functor '.*left' is not defined on side 2 of FVInterfaceKernel 'interface'"
+    requirement = 'The system shall report an error when a finite volume interface kernel evaluates a functor on a logical interface side where that functor is not defined.'
+    design = 'FVInterfaceKernels/index.md'
+    issues = '#33435'
   []
 []

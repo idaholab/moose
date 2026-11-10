@@ -43,16 +43,11 @@ MFEMRefinementMarker::MFEMRefinementMarker(const InputParameters & params)
     _max_h_level(getParam<unsigned>("max_h_level")),
     _max_p_level(getParam<unsigned>("max_p_level"))
 {
-}
-
-void
-MFEMRefinementMarker::initialSetup()
-{
   // fetch const ref to the estimator
   _estimator = &getMFEMProblem().getMFEMObject<MFEMIndicator>("Indicator", _estimator_name);
 
   // Check if p-refinement is supported by the fespace supplied with the variable
-  if (_max_p_level and !_estimator->getFESpace().PRefinementSupported())
+  if (_max_p_level && !_estimator->getFESpace().PRefinementSupported())
   {
     mooseWarning("Specified p-refinement on an unsupported FESpace or geometry. Only H1 and L2 "
                  "spaces on quad/hex meshes are supported by mfem. Disabling p-refinement.");
@@ -60,7 +55,7 @@ MFEMRefinementMarker::initialSetup()
   }
 
   // For now, we only allow one level of p-refinement exclusively.
-  if ((_max_h_level and _max_p_level) or _max_p_level > 1)
+  if ((_max_h_level && _max_p_level) || _max_p_level > 1)
   {
     mooseWarning("At present, only either a) h-refinement or b) one level of p-refinement is "
                  "supported. Disabling p-refinement.");
@@ -69,7 +64,7 @@ MFEMRefinementMarker::initialSetup()
 
   // We do not want to allow rebalancing if p-refinement is enabled, because that mesh-only
   // operation has no notion of p-refinement and the computational imbalance that may result.
-  if (_max_p_level and _rebalance)
+  if (_max_p_level && _rebalance)
   {
     mooseWarning("Asked for rebalancing as well as p-refinement, which is not supported.");
     _rebalance = false;

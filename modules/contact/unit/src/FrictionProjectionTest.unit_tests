@@ -1,0 +1,35 @@
+[Tests]
+  design = 'ComputeFrictionalForceLMMechanicalContact.md ComputeFrictionalForceCartesianLMMechanicalContact.md ComputeDynamicFrictionalForceLMMechanicalContact.md'
+  issues = '#32856'
+
+  [stick_and_slip_roots]
+    type = GoogleTest
+    unit_test = FrictionProjectionTest.StickAndSlipRoots
+    requirement = 'The system shall return a vanishing Alart-Curnier and Hueber-Stadler-Wohlmuth friction residual when the tangential pressure is a self-consistent stick or slip solution of the frictional contact conditions.'
+  []
+  [separation_and_augmented_normal_sign]
+    type = GoogleTest
+    unit_test = FrictionProjectionTest.SeparationAndAugmentedNormalSign
+    requirement = 'The system shall clamp the Coulomb friction radius to zero when the augmented normal pressure is negative during separation, and shall return a vanishing friction residual at that zero radius.'
+  []
+  [three_dimensional_projection]
+    type = GoogleTest
+    unit_test = FrictionProjectionTest.ThreeDimensionalProjection
+    requirement = 'The system shall project a tangential pressure vector onto a closed sphere of a specified radius when the norm of that vector exceeds the radius.'
+  []
+  [homogeneity]
+    type = GoogleTest
+    unit_test = FrictionProjectionTest.Homogeneity
+    requirement = 'The system shall scale the Alart-Curnier friction residual linearly and the Hueber-Stadler-Wohlmuth friction residual quadratically when the tangential pressure, augmented tangential pressure, and radius are scaled by a common factor.'
+  []
+  [positive_weight_relationship]
+    type = GoogleTest
+    unit_test = FrictionProjectionTest.PositiveWeightRelationship
+    requirement = 'The system shall relate the Hueber-Stadler-Wohlmuth friction residual to the Alart-Curnier friction residual by the positive weight max(radius, norm of the augmented tangential pressure).'
+  []
+  [degree_two_degenerate_state]
+    type = GoogleTest
+    unit_test = FrictionProjectionTest.DegreeTwoDegenerateState
+    requirement = 'The system shall return the raw tangential pressure as both the Alart-Curnier and Hueber-Stadler-Wohlmuth friction residual when the radius and augmented tangential pressure vanish simultaneously.'
+  []
+[]

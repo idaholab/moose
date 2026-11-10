@@ -24,11 +24,27 @@ registerMooseAction("MooseApp", SetupMeshCompleteAction, "uniform_refine_mesh");
 
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "setup_mesh_complete");
 
+registerMooseAction("MooseApp", SetupMeshCompleteAction, "post_mesh_prepared");
+
 InputParameters
 SetupMeshCompleteAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription("Perform operations on the mesh in preparation for a simulation.");
+
+  params.addParam<std::vector<std::string>>(
+      "displacements",
+      "The variables corresponding to the x y z displacements of the mesh.  If "
+      "this is provided then the displacements will be taken into account during "
+      "the computation. Creation of the displaced mesh can be suppressed even if "
+      "this is set by setting 'use_displaced_mesh = false'.");
+  params.addParam<bool>(
+      "use_displaced_mesh",
+      true,
+      "Create the displaced mesh if the 'displacements' "
+      "parameter is set. If this is 'false', a displaced mesh will not be created, "
+      "regardless of whether 'displacements' is set.");
+
   return params;
 }
 
@@ -78,14 +94,6 @@ SetupMeshCompleteAction::act()
           // After refinement we need to make sure that all of our MOOSE-specific containers are
           // up-to-date
           _mesh->meshChanged();
-
-          if (_displaced_mesh)
-          {
-            Adaptivity::uniformRefine(_displaced_mesh.get());
-            // After refinement we need to make sure that all of our MOOSE-specific containers are
-            // up-to-date
-            _displaced_mesh->meshChanged();
-          }
         }
       }
     }
@@ -111,21 +119,39 @@ SetupMeshCompleteAction::act()
         _displaced_mesh->deleteRemoteElements();
     }
   }
+  else if (_current_task == "post_mesh_prepared")
+  {
+    // The reference mesh's geometry and topology are finalized by this point, so this is the single
+    // point where the displaced mesh is created: a clone of the finished reference mesh. The
+    // displaced mesh must be an exact copy of the reference mesh, and complete_preparation() (which
+    // may perform partitioning) run separately on two previously-identical meshes can produce
+    // different results (we've seen this even with Metis partitioning), so cloning is the only way
+    // to guarantee the meshes are identical. Mesh preparation, including partitioning, is deferred
+    // until the split_mesh task when splitting a mesh (--split-mesh), so the reference mesh may
+    // still be unprepared here in that case; that's fine because such runs have no displaced mesh
+    // to create either.
+    if (_app.useMasterMesh())
+    {
+      if (_app.masterDisplacedMesh())
+        _displaced_mesh = _app.masterDisplacedMesh()->safeClone();
+    }
+    else if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
+    {
+      TIME_SECTION("constructDisplacedMesh", 2, "Constructing Displaced Mesh");
+
+      mooseAssert(_mesh->prepared(), "The reference mesh should already be fully prepared here");
+      _displaced_mesh = _mesh->safeClone();
+      _displaced_mesh->isDisplaced(true);
+
+      const auto & displacements = getParam<std::vector<std::string>>("displacements");
+      if (displacements.size() < _mesh->dimension())
+        mooseError("Number of displacements must be greater than or equal to the dimension of "
+                   "the mesh!");
+    }
+  }
   else
   {
-    // Prepare the mesh (may occur multiple times)
-    bool prepare_for_use_called_on_undisplaced = false;
-    {
-      TIME_SECTION("completeSetupUndisplaced", 2, "Setting Up Undisplaced Mesh");
-      prepare_for_use_called_on_undisplaced = _mesh->prepare(/*mesh_to_clone=*/nullptr);
-    }
-
-    if (_displaced_mesh)
-    {
-      TIME_SECTION("completeSetupDisplaced", 2, "Setting Up Displaced Mesh");
-      // If the reference mesh was prepared, then we must prepare also
-      _displaced_mesh->prepare(
-          /*mesh_to_clone=*/prepare_for_use_called_on_undisplaced ? &_mesh->getMesh() : nullptr);
-    }
+    TIME_SECTION("completeSetupUndisplaced", 2, "Setting Up Undisplaced Mesh");
+    _mesh->prepare();
   }
 }

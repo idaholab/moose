@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/star.mesh
   serial_refine = 1
 []
@@ -28,7 +28,7 @@
   [all]
     type = MFEMScalarDirichletBC
     variable = u
-    coefficient = 1.0
+    coefficient = 0.0
   []
 []
 

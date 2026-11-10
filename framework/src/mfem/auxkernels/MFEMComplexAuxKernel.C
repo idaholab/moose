@@ -61,7 +61,7 @@ MFEMComplexAuxKernel::complexScale(mfem::ParComplexGridFunction & a,
   // a *= scale
 
   mfem::ParComplexGridFunction b(a.ParFESpace());
-  static_cast<mfem::Vector &>(b) = a;
+  cast_ref<mfem::Vector &>(b) = a;
 
   complexAdd(a, b, scale - 1);
 }

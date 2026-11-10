@@ -29,10 +29,13 @@ N = 2
 []
 
 [NEML2]
+  eager = true
   input = 'approx_kinematics_neml2.i'
+  # R2IncrementToRate is a NEML2 model shipped by solid_mechanics (data/neml2/); importing it
+  # registers the type with the embedded (cpp-eager) interpreter. Resolved on the data search path.
+  load = 'neml2/R2IncrementToRate.py'
   [all]
     model = 'model'
-    verbose = true
     device = 'cpu'
     derivatives = 'neml2_stress spatial_deformation_gradient_increment'
     initialize_outputs = 'orientation'

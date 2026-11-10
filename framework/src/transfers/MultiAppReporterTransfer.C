@@ -209,6 +209,24 @@ MultiAppReporterTransfer::executeFromMultiapp()
                                            : getFromMultiApp()->problemBase());
       }
 
+  // With no to_multi_app, only the ranks owning the sub-app wrote above; if some ranks of
+  // this app do not own it, share the value from the lowest owning rank.
+  if (!_distribute_reporter_vector && !hasToMultiApp())
+  {
+    mooseAssert(indices.size() == 1, "Expected a single sub-app index when not distributing");
+    const bool owns_app = getFromMultiApp()->hasLocalApp(indices[0]);
+    bool all_own_app = owns_app;
+    _communicator.min(all_own_app);
+    if (!all_own_app)
+    {
+      processor_id_type root =
+          owns_app ? processor_id() : std::numeric_limits<processor_id_type>::max();
+      _communicator.min(root);
+      for (const auto n : index_range(_to_reporter_names))
+        broadcastReporter(_to_reporter_names[n], getFromMultiApp()->problemBase(), root);
+    }
+  }
+
   if (_distribute_reporter_vector)
     for (const auto n : index_range(_to_reporter_names))
     {
@@ -244,7 +262,15 @@ MultiAppReporterTransfer::checkSiblingsTransferSupported() const
     for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
       if (getFromMultiApp()->hasLocalApp(i) + getToMultiApp()->hasLocalApp(i) == 1)
         mooseError("Child application allocation on parallel processes must be the same to support "
-                   "siblings reporter transfer");
+                   "siblings reporter transfer",
+                   ((getToMultiApp()->problemBase().numConcurrentMultiApps() == 1 ||
+                     getFromMultiApp()->getParam<unsigned int>("execution_order_group") !=
+                         getToMultiApp()->getParam<unsigned int>("execution_order_group"))
+                        ? ""
+                        : "\nConcurrent execution of the target and source multiapps is preventing "
+                          "rank assignments to match. You will have to separate the "
+                          "'execution_order_group' of the two applications, or have this feature "
+                          "implemented."));
   }
   else
     mooseError("Number of source and target child apps must match for siblings transfer");

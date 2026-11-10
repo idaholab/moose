@@ -63,8 +63,8 @@ PorousFlowHystereticInfo::PorousFlowHystereticInfo(const InputParameters & param
                         : declareProperty<Real>("PorousFlow_hysteretic_capillary_pressure_qp")),
     _info(_nodal_material ? declareProperty<Real>("PorousFlow_hysteretic_info_nodal")
                           : declareProperty<Real>("PorousFlow_hysteretic_info_qp")),
-    _pc_val(_nodal_material ? coupledDofValues("pc_var") : coupledValue("pc_var")),
-    _sat_val(_nodal_material ? coupledDofValues("sat_var") : coupledValue("sat_var")),
+    _pc_val(nodalOrQpValue("pc_var")),
+    _sat_val(nodalOrQpValue("sat_var")),
     _fd_eps(getParam<Real>("fd_eps")),
     _info_enum(getParam<MooseEnum>("info_required").getEnum<InfoTypeEnum>())
 {

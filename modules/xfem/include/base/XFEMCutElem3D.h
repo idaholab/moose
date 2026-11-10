@@ -12,15 +12,6 @@
 #include "XFEMCutElem.h"
 #include "EFAElement3D.h"
 
-using namespace libMesh;
-
-namespace libMesh
-{
-class MeshBase;
-class Elem;
-class Node;
-}
-
 class XFEMCutElem3D : public XFEMCutElem
 {
 public:

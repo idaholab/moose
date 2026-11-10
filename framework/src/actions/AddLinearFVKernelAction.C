@@ -29,10 +29,5 @@ AddLinearFVKernelAction::AddLinearFVKernelAction(const InputParameters & params)
 void
 AddLinearFVKernelAction::act()
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  if (_moose_object_pars.isKokkosObject())
-    _problem->addKokkosLinearFVKernel(_type, _name, _moose_object_pars);
-  else
-#endif
-    _problem->addLinearFVKernel(_type, _name, _moose_object_pars);
+  _problem->addLinearFVKernel(_type, _name, _moose_object_pars);
 }

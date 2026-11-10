@@ -20,6 +20,7 @@ LinearFVAdvectionDiffusionFunctorRobinBCBase::LinearFVAdvectionDiffusionFunctorR
     const InputParameters & parameters)
   : LinearFVAdvectionDiffusionBC(parameters)
 {
+  _var.requestCellGradients();
 }
 
 Real
@@ -54,6 +55,7 @@ LinearFVAdvectionDiffusionFunctorRobinBCBase::computeBoundaryNormalGradient() co
 {
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
+
   const auto alpha = getAlpha(face, state);
   mooseAssert(!MooseUtils::isZero(alpha), "Alpha should not be 0!");
   const auto beta = getBeta(face, state);
@@ -108,7 +110,6 @@ LinearFVAdvectionDiffusionFunctorRobinBCBase::computeBoundaryGradientMatrixContr
 {
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
-
   const auto alpha = getAlpha(face, state);
   const auto beta = getBeta(face, state);
 

@@ -25,11 +25,10 @@
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/petsc_matrix.h"
+#include "libmesh/petsc_vector.h"
 #include "libmesh/diagonal_matrix.h"
 #include "libmesh/default_coupling.h"
 #include "libmesh/petsc_solver_exception.h"
-
-using namespace libMesh;
 
 namespace Moose
 {
@@ -109,8 +108,8 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
   nonlinearSolver()->transpose_nullspace = Moose::compute_transpose_nullspace;
   nonlinearSolver()->nearnullspace = Moose::compute_nearnullspace;
 
-  PetscNonlinearSolver<Real> * petsc_solver =
-      static_cast<PetscNonlinearSolver<Real> *>(_nl_implicit_sys.nonlinear_solver.get());
+  libMesh::PetscNonlinearSolver<Real> * petsc_solver =
+      cast_ptr<libMesh::PetscNonlinearSolver<Real> *>(_nl_implicit_sys.nonlinear_solver.get());
   if (petsc_solver)
   {
     petsc_solver->set_residual_zero_out(false);
@@ -130,8 +129,8 @@ NonlinearSystem::potentiallySetupFiniteDifferencing()
     setupFiniteDifferencedPreconditioner();
   }
 
-  PetscNonlinearSolver<Real> & solver =
-      static_cast<PetscNonlinearSolver<Real> &>(*_nl_implicit_sys.nonlinear_solver);
+  libMesh::PetscNonlinearSolver<Real> & solver =
+      cast_ref<libMesh::PetscNonlinearSolver<Real> &>(*_nl_implicit_sys.nonlinear_solver);
   solver.mffd_residual_object = &_fd_residual_functor;
 
   solver.set_snesmf_reuse_base(_fe_problem.useSNESMFReuseBase());
@@ -213,8 +212,8 @@ void
 NonlinearSystem::stopSolve(const ExecFlagType & exec_flag,
                            const std::set<TagID> & vector_tags_to_close)
 {
-  PetscNonlinearSolver<Real> & solver =
-      static_cast<PetscNonlinearSolver<Real> &>(*sys().nonlinear_solver);
+  libMesh::PetscNonlinearSolver<Real> & solver =
+      cast_ref<libMesh::PetscNonlinearSolver<Real> &>(*sys().nonlinear_solver);
 
   if (exec_flag == EXEC_LINEAR || exec_flag == EXEC_POSTCHECK)
   {
@@ -260,11 +259,11 @@ NonlinearSystem::setupStandardFiniteDifferencedPreconditioner()
   // Make sure that libMesh isn't going to override our preconditioner
   _nl_implicit_sys.nonlinear_solver->jacobian = nullptr;
 
-  PetscNonlinearSolver<Number> * petsc_nonlinear_solver =
-      static_cast<PetscNonlinearSolver<Number> *>(_nl_implicit_sys.nonlinear_solver.get());
+  libMesh::PetscNonlinearSolver<Number> * petsc_nonlinear_solver =
+      cast_ptr<libMesh::PetscNonlinearSolver<Number> *>(_nl_implicit_sys.nonlinear_solver.get());
 
   PetscMatrix<Number> * petsc_mat =
-      static_cast<PetscMatrix<Number> *>(&_nl_implicit_sys.get_system_matrix());
+      cast_ptr<PetscMatrix<Number> *>(&_nl_implicit_sys.get_system_matrix());
 
   LibmeshPetscCall(SNESSetJacobian(petsc_nonlinear_solver->snes(),
                                    petsc_mat->mat(),
@@ -279,8 +278,8 @@ NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
   // Make sure that libMesh isn't going to override our preconditioner
   _nl_implicit_sys.nonlinear_solver->jacobian = nullptr;
 
-  PetscNonlinearSolver<Number> & petsc_nonlinear_solver =
-      dynamic_cast<PetscNonlinearSolver<Number> &>(*_nl_implicit_sys.nonlinear_solver);
+  libMesh::PetscNonlinearSolver<Number> & petsc_nonlinear_solver =
+      dynamic_cast<libMesh::PetscNonlinearSolver<Number> &>(*_nl_implicit_sys.nonlinear_solver);
 
   // Pointer to underlying PetscMatrix type
   PetscMatrix<Number> * petsc_mat =
@@ -359,6 +358,48 @@ NonlinearSystem::attachPreconditioner(Preconditioner<Number> * preconditioner)
 void
 NonlinearSystem::computeScalingJacobian()
 {
+#ifdef MOOSE_KOKKOS_ENABLED
+  // The Kokkos assembler writes Jacobian contributions directly into the underlying PETSc
+  // Mat (see Moose::Kokkos::Matrix::create), which requires the matrix to be a
+  // PetscMatrix rather than the DiagonalMatrix/LumpedMassMatrix used to store scaling
+  // factors.
+  if (_fe_problem.hasKokkosResidualObjects())
+  {
+    // Assemble the Jacobian into the system libMesh matrix, which is a PetscMatrix, so that the
+    // Kokkos kernels can write directly into its Mat.
+    auto & jacobian = _nl_implicit_sys.get_system_matrix();
+    _fe_problem.computeJacobianSys(_nl_implicit_sys, *_current_solution, jacobian);
+
+    auto & petsc_matrix = cast_ref<PetscMatrix<Number> &>(jacobian);
+
+    // Create the Petsc reduction vector with the layout of the matrix so that extracting the
+    // reduction values matches the matrix's vector type on device or host.
+    Vec scaling_vec = nullptr;
+    LibmeshPetscCall(MatCreateVecs(petsc_matrix.mat(), nullptr, &scaling_vec));
+
+    {
+      libMesh::PetscVector<Number> scaling_vector(scaling_vec, this->comm());
+
+      // For off-diagonal scaling, sum the absolute values of the assembled matrix entries.
+      // The host LumpedMassMatrix instead takes the absolute value of each element contribution
+      // before assembling it. The results differ if contributions from local element matrices to
+      // the same global matrix entry cancel because they have opposite signs. MatGetDiagonal runs
+      // on the device for Kokkos matrices, but MatGetRowSumAbs currently synchronizes the matrix
+      // data to the host.
+      if (_off_diagonals_in_auto_scaling)
+        LibmeshPetscCall(MatGetRowSumAbs(petsc_matrix.mat(), scaling_vec));
+      else
+        LibmeshPetscCall(MatGetDiagonal(petsc_matrix.mat(), scaling_vec));
+
+      *_scaling_matrix = scaling_vector;
+      _scaling_matrix->close();
+    }
+
+    LibmeshPetscCall(VecDestroy(&scaling_vec));
+    return;
+  }
+#endif
+
   _fe_problem.computeJacobianSys(_nl_implicit_sys, *_current_solution, *_scaling_matrix);
 }
 
@@ -371,8 +412,8 @@ NonlinearSystem::computeScalingResidual()
 SNES
 NonlinearSystem::getSNES()
 {
-  PetscNonlinearSolver<Number> * petsc_solver =
-      dynamic_cast<PetscNonlinearSolver<Number> *>(nonlinearSolver());
+  libMesh::PetscNonlinearSolver<Number> * petsc_solver =
+      dynamic_cast<libMesh::PetscNonlinearSolver<Number> *>(nonlinearSolver());
 
   if (petsc_solver)
   {

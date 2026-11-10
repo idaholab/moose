@@ -39,6 +39,7 @@
   petsc_options_iname = '-snes_max_it'
   petsc_options_value = '0'
   nl_abs_tol = 1e-10
+  nl_max_its = 0
 []
 
 [Outputs]

@@ -18,8 +18,6 @@
 #include "libmesh/edge_edge3.h"
 #include "libmesh/edge_edge4.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", BSplineCurveGenerator);
 
 InputParameters
@@ -178,11 +176,11 @@ BSplineCurveGenerator::generate()
 
   // generate points using BSpline functions/class
   std::vector<Point> control_points = SplineUtils::bSplineControlPoints(
-      start_point, end_point, start_dir, end_dir, half_cps, _sharpness);
+      start_point, end_point, start_dir, end_dir, half_cps, _sharpness, name());
 
   // initialize BSpline class
   Moose::BSpline b_spline(
-      _degree, start_point, end_point, start_dir, end_dir, half_cps, _sharpness);
+      _degree, start_point, end_point, start_dir, end_dir, half_cps, _sharpness, name());
 
   // discretize t and evaluate points, assemble into nodes inside loop
   const auto n_ts = _num_elements * _order + 1;
@@ -227,7 +225,8 @@ BSplineCurveGenerator::generate()
 
   // Add subdomain name if needed
   if (isParamValid("new_subdomain_name"))
-    mesh->subdomain_name(_new_subdomain_id) = getParam<SubdomainName>("new_subdomain_name");
+    mesh->set_subdomain_name(
+        _new_subdomain_id, getParam<SubdomainName>("new_subdomain_name"), true);
 
   if (_node_set_boundaries.size())
   {

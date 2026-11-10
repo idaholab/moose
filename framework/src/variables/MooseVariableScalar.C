@@ -541,6 +541,12 @@ MooseVariableScalar::evaluate(const NodeArg & /*node_arg*/, const Moose::StateAr
 }
 
 MooseVariableScalar::ValueType
+MooseVariableScalar::evaluate(const PointArg & /*point_arg*/, const Moose::StateArg & state) const
+{
+  return evaluate(state);
+}
+
+MooseVariableScalar::ValueType
 MooseVariableScalar::evaluate(const Moose::StateArg & state) const
 {
   mooseAssert(_dof_indices.size() == 1,
@@ -591,6 +597,13 @@ MooseVariableScalar::evaluateGradient(const ElemPointArg & /*elem_point_arg*/,
 
 MooseVariableScalar::GradientType
 MooseVariableScalar::evaluateGradient(const NodeArg & /*node_arg*/,
+                                      const Moose::StateArg & /*state*/) const
+{
+  return 0;
+}
+
+MooseVariableScalar::GradientType
+MooseVariableScalar::evaluateGradient(const PointArg & /*point_arg*/,
                                       const Moose::StateArg & /*state*/) const
 {
   return 0;

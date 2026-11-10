@@ -22,7 +22,7 @@ mfem::ParMesh &
 mainMesh(const InputParameters & parameters)
 {
   auto & problem =
-      static_cast<MFEMProblem &>(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem"));
+      cast_ref<MFEMProblem &>(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem"));
   return problem.mesh().getMFEMParMesh();
 }
 }
@@ -88,7 +88,7 @@ MFEMScalarCoefficientPointValueSampler::execute()
 }
 
 void
-MFEMScalarCoefficientPointValueSampler::finalizeValues()
+MFEMScalarCoefficientPointValueSampler::finalize()
 {
   const auto * const interp_vals = _interp_vals.HostRead();
   for (const auto i : index_range(_declared_vals))

@@ -288,7 +288,8 @@ protected:
 
   void expandUnit() override
   {
-    // need at least one cell in root so the "no cells" check passes and we reach areUniversesLinked
+    // need at least one cell in root so the "no cells" check passes and we reach
+    // areCSGObjectsLinked
     auto & s1 = getBase().addSurface(std::make_unique<CSGSphere>(getName() + "_s1", 3.0));
     getBase().createCell(getName() + "_cell", +s1);
     getBase().createUniverse("bad_univ"); // orphaned universe at same level as root (invalid)

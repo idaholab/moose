@@ -20,8 +20,6 @@
 
 registerMooseObject("MooseApp", GhostEverything);
 
-using namespace libMesh;
-
 InputParameters
 GhostEverything::validParams()
 {
@@ -62,7 +60,7 @@ GhostEverything::operator>=(const RelationshipManager & other) const
   return baseGreaterEqual(other);
 }
 
-std::unique_ptr<GhostingFunctor>
+std::unique_ptr<libMesh::GhostingFunctor>
 GhostEverything::clone() const
 {
   return _app.getFactory().copyConstruct(*this);

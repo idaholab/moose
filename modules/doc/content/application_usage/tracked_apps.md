@@ -80,6 +80,7 @@ The purpose of these lists is two fold:
 - [Ranger](https://github.com/idaholab/ranger) - Python-based auto-response bot that uses the GitHub API and LlamaIndex package to monitor and generate relevant responses for new discussions
 - [Virtual Test Bed](https://mooseframework.inl.gov/virtual_test_bed/) - An open repository of simulations of nuclear systems
 - [Isopod](https://github.com/idaholab/isopod) - Multiphysics PDE constrained optimization, mostly merged into MOOSE as the optimization module
+- [Tetra](https://github.com/licharlot/tetra) - ThermoElectric Transport and Response Analysis, solves the coupled current continuity and heat conduction equations in the presence of Seebeck, Peltier, and Thomson effects to evaluate the performance of thermoelectric devices
 
 
 ## Closed Source Applications

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -68,8 +68,13 @@ public:
    */
   ~CSGBase();
 
-  /// Create a deep copy of this CSGBase instance
-  std::unique_ptr<CSGBase> clone() const { return std::make_unique<CSGBase>(*this); }
+  /**
+   * Create a deep copy of this CSGBase instance. This method calls
+   * std::make_unique to create the deep copy. However, the surface references
+   * of all cloned cells are updated manually to make sure they point to the surfaces
+   * of the cloned object and not the original CSGBase instance.
+   */
+  std::unique_ptr<CSGBase> clone() const;
 
   /**
    * @brief add a unique surface pointer to this base instance
@@ -565,7 +570,7 @@ public:
       _universe_list.addUniverse(std::move(unit));
 
     // Register non-owning pointer in the CSGEngUnitList if no name conflicts identified above.
-    _eng_unit_list.addEngUnit(static_cast<CSGEngUnit &>(*raw));
+    _eng_unit_list.addEngUnit(cast_ref<CSGEngUnit &>(*raw));
     return *raw;
   }
 
@@ -710,12 +715,21 @@ public:
   void expandAllEngUnits();
 
   /**
-   * @brief Check whether all universes and cells in this CSGBase are reachable from the root
-   * universe through the cell/fill hierarchy.
+   * @brief Check whether all universes, cells, and surfaces in this CSGBase are reachable from the
+   * root universe through the cell/fill hierarchy.
    *
-   * @return true if all are linked, false if any universe or cell is orphaned
+   * @return true if all are linked, false if any universe, cell, or surface is orphaned
    */
-  bool areUniversesLinked() const;
+  bool areCSGObjectsLinked() const;
+
+  /**
+   * @brief Check that the geometry is valid for output and conversion to downstream codes.
+   *
+   * Warns about universes, cells, and surfaces that are not linked to the root universe, and
+   * errors if a cell belongs to more than one universe. Called by generateOutput(); codes that use
+   * the CSGBase directly, without writing output, can call it to apply the same checks.
+   */
+  void checkGeometry() const;
 
   /**
    * @brief Join another CSGBase object to this one. The cells of the root universe
@@ -945,16 +959,22 @@ private:
   /// Check universes linked to root universe match universes defined in _universe_list
   void checkUniverseLinking() const;
 
+  /// Check that each cell belongs to at most one universe
+  void checkCellUniverseMembership() const;
+
   /**
-   * @brief Recursive method to retrieve all universes and cells linked to current universe
+   * @brief Recursive method to retrieve all universes, cells, and surfaces linked to current
+   * universe
    *
    * @param univ Reference to universe under consideration
    * @param linked_universe_names List of universe names linked to current universe
    * @param linked_cell_names List of cell names linked to current universe
+   * @param linked_surface_names List of surface names linked to current universe
    */
-  void getLinkedUniverses(const CSGUniverse & univ,
-                          std::vector<std::string> & linked_universe_names,
-                          std::vector<std::string> & linked_cell_names) const;
+  void getLinkedCSGObjects(const CSGUniverse & univ,
+                           std::set<std::string> & linked_universe_names,
+                           std::set<std::string> & linked_cell_names,
+                           std::set<std::string> & linked_surface_names) const;
 
   /**
    * @brief Get a const reference to the CSGSurfaceList object
@@ -1271,6 +1291,7 @@ private:
   FRIEND_TEST(CSGBaseTest, testAddGetSurface);
   FRIEND_TEST(CSGBaseTest, testUniverseLinking);
   FRIEND_TEST(CSGBaseTest, testEngUnitLinking);
+  FRIEND_TEST(CSGBaseTest, testCellUniverseMembership);
   FRIEND_TEST(CSGBaseTest, testCellEngUnitAddErrors);
   FRIEND_TEST(CSGBaseTest, testUnivEngUnitAddErrors);
   ///@}

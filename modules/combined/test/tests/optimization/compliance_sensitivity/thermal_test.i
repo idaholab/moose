@@ -75,27 +75,27 @@ TC1 = 1.0
 [AuxVariables]
   [Dc]
     family = MONOMIAL
-    order = FIRST
+    order = CONSTANT
     initial_condition = -1.0
   []
   [Cc]
     family = MONOMIAL
-    order = FIRST
+    order = CONSTANT
     initial_condition = -1.0
   []
   [Tc]
     family = MONOMIAL
-    order = FIRST
+    order = CONSTANT
     initial_condition = -1.0
   []
   [Cost]
     family = MONOMIAL
-    order = FIRST
+    order = CONSTANT
     initial_condition = -1.0
   []
   [mat_den]
     family = MONOMIAL
-    order = FIRST
+    order = CONSTANT
     initial_condition = ${vol_frac}
   []
 []

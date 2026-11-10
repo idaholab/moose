@@ -3,5 +3,8 @@
     type = CSVDiff
     input = mineral.i
     csvdiff = mineral_out.csv
+    issues = '#10526'
+    design = 'TotalMineralVolumeFraction.md'
+    requirement = 'The system shall be able to compute the total volume fraction of a mineral species from its molar concentration.'
   [../]
 []

@@ -1,0 +1,41 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifdef MOOSE_MFEM_ENABLED
+
+#include "MFEMEigenWeakFormProblemComposer.h"
+#include "EigenproblemESProblemOperator.h"
+
+registerMooseObject("MooseApp", MFEMEigenWeakFormProblemComposer);
+
+InputParameters
+MFEMEigenWeakFormProblemComposer::validParams()
+{
+  InputParameters params = MFEMWeakFormProblemComposerBase::validParams();
+  params.addClassDescription("Creates an eigenproblem operator.");
+  return params;
+}
+
+MFEMEigenWeakFormProblemComposer::MFEMEigenWeakFormProblemComposer(
+    const InputParameters & parameters)
+  : MFEMWeakFormProblemComposerBase(parameters)
+{
+}
+
+std::shared_ptr<Moose::MFEM::ProblemOperatorBase>
+MFEMEigenWeakFormProblemComposer::createProblemOperator(MFEMProblem & mfem_problem)
+{
+  if (!dynamic_cast<MFEMEigenproblem *>(&mfem_problem))
+    mooseError("Not an eigenvalue problem.");
+
+  return std::make_shared<Moose::MFEM::EigenproblemESProblemOperator>(mfem_problem,
+                                                                      _weak_form_name);
+}
+
+#endif

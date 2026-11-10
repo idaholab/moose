@@ -223,6 +223,28 @@ TEST_F(CO2FluidPropertiesTest, propertiesSW)
  * Verify calculation of the derivatives of all properties by comparing with finite
  * differences
  */
+TEST_F(CO2FluidPropertiesTest, derivativesNearCritical)
+{
+  const Real tol = REL_TOL_DERIVATIVE;
+
+  // Slightly supercritical state (Tc = 304.1282 K, pc = 7.3773 MPa), where the nonanalytic
+  // terms of the residual Helmholtz free energy contribute significantly
+  const Real p = 7.5e6;
+  const Real T = 305.0;
+
+  // Properties vary steeply this close to the critical point, so the default relative
+  // perturbation of 1e-6 leaves a finite-difference truncation error just above the
+  // tolerance; 1e-7 brings it well below while staying above round-off
+  DERIV_TEST_CUSTOM_PERTURBATION(_fp->rho_from_p_T, p, T, tol, 1e-7);
+  DERIV_TEST_CUSTOM_PERTURBATION(_fp->e_from_p_T, p, T, tol, 1e-7);
+  DERIV_TEST_CUSTOM_PERTURBATION(_fp->h_from_p_T, p, T, tol, 1e-7);
+
+  // The isobaric heat capacity is the temperature derivative of the enthalpy
+  Real h, dh_dp, dh_dT;
+  _fp->h_from_p_T(p, T, h, dh_dp, dh_dT);
+  REL_TEST(_fp->cp_from_p_T(p, T), dh_dT, REL_TOL_CONSISTENCY);
+}
+
 TEST_F(CO2FluidPropertiesTest, derivatives)
 {
   const Real tol = REL_TOL_DERIVATIVE;
@@ -234,6 +256,7 @@ TEST_F(CO2FluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->mu_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e_from_p_T, p, T, tol);
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->s_from_p_T, p, T, tol);
   DERIV_TEST(_fp->k_from_p_T, p, T, tol);
 
   // Viscosity from density and temperature

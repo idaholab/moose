@@ -47,6 +47,8 @@ InputParameters
 ComputeWeightedGapLMMechanicalContact::validParams()
 {
   InputParameters params = ADMortarConstraint::validParams();
+  // Mechanical contact residuals use only primal values and normals
+  params.set<bool>("_compute_primal_gradients") = false;
   params.addClassDescription("Computes the weighted gap that will later be used to enforce the "
                              "zero-penetration mechanical contact conditions");
   params.suppressParameter<VariableName>("secondary_variable");
@@ -63,6 +65,9 @@ ComputeWeightedGapLMMechanicalContact::validParams()
       "the value of c effectively depends on element size since in the constraint we compare nodal "
       "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
       "element size, where integrated values are dependent on element size).");
+  // The nodal normal at a secondary node depends on every face incident to it, so the Jacobian
+  // needs the secondary face point-neighbor ghosted and coupled.
+  params.set<bool>("ghost_point_neighbors") = true;
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
   params.addRequiredParam<UserObjectName>("weighted_gap_uo", "The weighted gap user object");
@@ -87,10 +92,36 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr),
     _weighted_gap_uo(getUserObject<WeightedGapUserObject>("weighted_gap_uo"))
 {
+  if (!_weighted_gap_uo.usesNodalNormalDerivatives())
+    paramError("weighted_gap_uo",
+               "Nodal-normal derivatives are not supported by user object '",
+               _weighted_gap_uo.name(),
+               "'.");
+
+  // The user object and constraint must assemble the same interface and displacement variables.
+  if (secondarySubdomain() != _weighted_gap_uo.secondarySubdomain() ||
+      primarySubdomain() != _weighted_gap_uo.primarySubdomain())
+    paramError("weighted_gap_uo",
+               "'weighted_gap_uo' must be defined on the same secondary/primary subdomain pair as "
+               "this constraint when nodal-normal derivatives are enabled.");
+
+  const std::array<std::pair<const MooseVariable *, unsigned int>, 3> displacement_variables{
+      {{_disp_x_var, 0}, {_disp_y_var, 1}, {_disp_z_var, 2}}};
+  for (const auto & [variable, component] : displacement_variables)
+    if (variable != _weighted_gap_uo.dispVar(component))
+      paramError("weighted_gap_uo",
+                 "'weighted_gap_uo' must use the same displacement variables as this constraint "
+                 "when nodal-normal derivatives are enabled.");
+
   if (!getParam<bool>("use_displaced_mesh"))
     paramError(
         "use_displaced_mesh",
         "'use_displaced_mesh' must be true for the ComputeWeightedGapLMMechanicalContact object");
+
+  if (getParam<bool>("interpolate_normals"))
+    paramError("interpolate_normals",
+               "Mechanical mortar contact uses normalized secondary nodal normals and cannot be "
+               "combined with quadrature-point normal interpolation.");
 
   if (!_var->isNodal())
     if (_var->feType().order != static_cast<Order>(0))
@@ -185,13 +216,22 @@ void
 ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * const dof)
 {
   const auto & weighted_gap = *_weighted_gap_ptr;
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
+  // normalizeCDivisor() returns *_normalization_ptr unchanged unless node-based scaling is active,
+  // in which case it substitutes a coverage-independent (full-element) integral so the two
+  // mechanisms don't double-count coverage (PR review discussion; not from Popp 2013).
+  const Real c =
+      _normalize_c ? _c / _weighted_gap_uo.normalizeCDivisor(dof, *_normalization_ptr) : _c;
+
+  // Scaling factor kappa_j (Popp 2013 eq. 34; 1 when disabled/fully covered): dividing the gap by
+  // kappa_j gives g_bar/kappa_j, preserving the complementarity root with zhat_j = kappa_j
+  // lambda_j.
+  const Real kappa = _weighted_gap_uo.nodalScale(dof);
 
   const auto dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
   ADReal lm_value = (*_sys.currentSolution())(dof_index);
   Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
 
-  const ADReal dof_residual = std::min(lm_value, weighted_gap * c);
+  const ADReal dof_residual = std::min(lm_value, weighted_gap * c / kappa);
 
   addResidualsAndJacobian(_assembly,
                           std::array<ADReal, 1>{{dof_residual}},

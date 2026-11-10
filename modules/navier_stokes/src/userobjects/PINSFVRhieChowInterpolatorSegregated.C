@@ -10,8 +10,6 @@
 #include "PINSFVRhieChowInterpolatorSegregated.h"
 #include "NS.h"
 
-using namespace libMesh;
-
 registerMooseObject("NavierStokesApp", PINSFVRhieChowInterpolatorSegregated);
 
 InputParameters
@@ -31,9 +29,9 @@ PINSFVRhieChowInterpolatorSegregated::PINSFVRhieChowInterpolatorSegregated(
     const InputParameters & params)
   : INSFVRhieChowInterpolatorSegregated(params),
     _eps(getFunctor<ADReal>(NS::porosity)),
-    _epss(libMesh::n_threads(), nullptr)
+    _epss(UserObject::_subproblem.numThreads(), nullptr)
 {
   const auto porosity_name = deduceFunctorName(NS::porosity);
-  for (const auto tid : make_range(libMesh::n_threads()))
+  for (const auto tid : make_range(UserObject::_subproblem.numThreads()))
     _epss[tid] = &UserObject::_subproblem.getFunctor<ADReal>(porosity_name, tid, name(), true);
 }

@@ -28,18 +28,18 @@ public:
   /// Interpolate the real variable at all query points.
   void execute() override;
 
-protected:
-  void finalizeValues() override;
+  /// Copies interpolated values into the VPP vectors.
+  void finalize() override;
 
 private:
-  int getFESpaceContinuityType() const override;
+  int getFESpaceContinuityType(size_t i_var) const override;
 
   /// Grid function being sampled.
-  const mfem::GridFunction & _var;
+  std::vector<std::reference_wrapper<const mfem::GridFunction>> _vars;
   /// Values interpolated from the grid function.
-  mfem::Vector _interp_vals;
+  std::vector<mfem::Vector> _interp_vals;
   /// VectorPostprocessor output columns for the variable components.
-  std::vector<std::reference_wrapper<VectorPostprocessorValue>> _declared_vals;
+  std::vector<std::vector<std::reference_wrapper<VectorPostprocessorValue>>> _declared_vals;
 };
 
 #endif // MOOSE_MFEM_ENABLED

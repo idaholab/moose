@@ -67,13 +67,16 @@ LowerDBlockFromSidesetGenerator::generate()
                                                 new_block_id,
                                                 isParamValid("new_block_name")
                                                     ? getParam<SubdomainName>("new_block_name")
-                                                    : SubdomainName(),
-                                                type());
+                                                    : SubdomainName());
   }
   catch (MooseException & e)
   {
     if (((std::string)e.what()).compare(0, 12, "The sideset ") == 0)
-      paramError("sidesets", e.what());
+      paramError("sidesets",
+                 std::string(e.what()) + "\nBoundaries in the mesh: " +
+                     Moose::stringify(MooseMeshUtils::getAllBoundaryNamesAndIDs(*mesh)));
+    // NOTE: depending on the exception we actually hit, the mesh might the lowerD output and not
+    // have boundaries that can help track the error
     else
       mooseError(e.what());
   }

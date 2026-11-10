@@ -6,7 +6,7 @@ by an [ActionComponent.md]. It offers:
 - a [!param](/ActionComponents/CylinderComponent/physics) parameter in which the user lists the [Physics](Physics/index.md)
   active on the component.
 - a default implementation of `addPhysics()`, which simply adds the component to the `Physics`.
-  This implementation may be overriden in derived classes.
+  This implementation may be overridden in derived classes.
 
 An [ActionComponent.md] inheriting `ComponentPhysicsInterface` must be registered to the `init_component_physics`
 task. For example,

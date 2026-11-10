@@ -22,11 +22,20 @@ public:
 
   NumFailedTimeSteps(const InputParameters & parameters);
 
-  virtual void initialize() override {}
+  virtual void initialize() override;
   virtual void execute() override {}
   virtual Real getValue() const override;
 
 protected:
   /// Retrieves the current TimeStepper used by the executioner.
   const TimeStepper * _timestepper;
+
+  /// Whether to count only the failed solves of the current time step
+  const bool _current_time_step_only;
+
+  /// Number of failures before the current time step
+  unsigned int & _failures_before_step;
+
+  /// Time step number at which _failures_before_step was recorded
+  int & _t_step_counted;
 };

@@ -162,6 +162,18 @@ public:
 
 protected:
   /**
+   * Request the Jacobian of the time residual as a separate tagged matrix, which
+   * weightNonTimeJacobian() needs
+   */
+  void requestTimeJacobian();
+
+  /**
+   * Turn the system Jacobian J = J_time + J_non_time into J_time + weight * J_non_time, the
+   * Jacobian of a residual R_time + weight * R_non_time
+   */
+  void weightNonTimeJacobian(libMesh::SparseMatrix<Number> & jacobian, Real weight) const;
+
+  /**
    * Gets the number of nonlinear iterations in the most recent solve.
    */
   unsigned int getNumNonlinearIterationsLastSolve() const;
@@ -236,4 +248,7 @@ protected:
 
   /// A vector that is used for creating 'from' subvectors in the \p copyVector() method
   std::unique_ptr<NumericVector<Number>> _from_subvector;
+
+  /// Jacobian of the time residual, see requestTimeJacobian()
+  libMesh::SparseMatrix<Number> * _Ke_time = nullptr;
 };

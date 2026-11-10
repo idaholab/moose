@@ -3,7 +3,7 @@
 []
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/square.e
 []
 
@@ -109,7 +109,6 @@
 [Postprocessors]
   [timestep]
     type = TimePostprocessor
-    execute_on = 'timestep_end'
   []
 []
 

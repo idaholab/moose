@@ -37,7 +37,7 @@
 
 [Executioner]
   type = Optimize
-  tao_solver = taobqnls #taobncg #taoblmvm
+  tao_solver = taobqnls #taobncg
   petsc_options_iname = '-tao_gatol -tao_ls_type -tao_max_it'
   petsc_options_value = '1e-10 unit 1000'
 

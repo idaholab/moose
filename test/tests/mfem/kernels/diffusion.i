@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/mug.e
 []
 
@@ -39,7 +39,6 @@
     type = MFEMGradAux
     variable = concentration_gradient
     source = concentration
-    execute_on = TIMESTEP_END
   []
 []
 
@@ -94,11 +93,25 @@
   []
 []
 
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMVariableLineValueSampler
+    variables = 'concentration'
+    start_point = '2.125 0 -2.375'
+    end_point = '2.125 0 2.625'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  active = ParaViewDataCollection
+  active = CSV
+  [CSV]
+    type = CSV
+    file_base = OutputData/diffusion
+  []
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffusion
+    file_base = OutputData/ParaViewDataCollection
     vtk_format = ASCII
   []
   [VisItDataCollection]

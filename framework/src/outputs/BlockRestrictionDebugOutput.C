@@ -32,8 +32,6 @@
 #include <functional>
 #include <map>
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", BlockRestrictionDebugOutput);
 
 namespace
@@ -313,7 +311,7 @@ BlockRestrictionDebugOutput::printBlockRestrictionMap() const
       const auto & sys = auxSystem.system();
       for (unsigned int vg = 0; vg < sys.n_variable_groups(); vg++)
       {
-        const VariableGroup & vg_description(sys.variable_group(vg));
+        const libMesh::VariableGroup & vg_description(sys.variable_group(vg));
         for (unsigned int vn = 0; vn < vg_description.n_variables(); vn++)
         {
           if (vg_description.active_on_subdomain(subdomain_id))
@@ -474,7 +472,7 @@ BlockRestrictionDebugOutput::printBlockRestrictionGroups() const
   const auto & aux_system = _problem_ptr->getAuxiliarySystem().system();
   for (const auto vg : make_range(aux_system.n_variable_groups()))
   {
-    const VariableGroup & vg_description(aux_system.variable_group(vg));
+    const libMesh::VariableGroup & vg_description(aux_system.variable_group(vg));
     std::set<SubdomainID> blocks;
     for (const auto subdomain_id : mesh_subdomains)
       if (vg_description.active_on_subdomain(subdomain_id))

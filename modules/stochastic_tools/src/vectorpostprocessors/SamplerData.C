@@ -85,11 +85,8 @@ SamplerData::execute()
   else if (_sampler_method == "get_next_local_row")
   {
     for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
-    {
-      std::vector<Real> data = _sampler.getNextLocalRow();
-      for (std::size_t j = 0; j < data.size(); ++j)
-        (*_sample_vectors[j])[i - _sampler.getLocalRowBegin()] = data[j];
-    }
+      for (const auto j : make_range(_sampler.getNumberOfCols()))
+        (*_sample_vectors[j])[i - _sampler.getLocalRowBegin()] = _sampler.getSample(i, j);
   }
 }
 
@@ -110,7 +107,7 @@ SamplerData::threadJoin(const UserObject & /*uo*/)
   /*
   if (_use_local_samples)
   {
-    const SamplerData & obj = static_cast<const SamplerData &>(uo);
+    const SamplerData & obj = cast_ref<const SamplerData &>(uo);
     for (std::size_t i = 0; i < _sample_vectors.size(); ++i)
       (*_sample_vectors[i]).insert(_sample_vectors[i]->end(), obj._sample_vectors[i]->begin(),
                                    obj._sample_vectors[i]->end());

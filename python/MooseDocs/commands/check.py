@@ -48,8 +48,8 @@ def command_line_options(subparser, parent):
     parser.add_argument(
         "--reports",
         nargs="+",
-        default=["doc", "req", "app"],
-        choices=["doc", "req", "app"],
+        default=["doc", "req", "app", "unit"],
+        choices=["doc", "req", "app", "unit"],
         help="Select the reports to produce.",
     )
 
@@ -115,6 +115,9 @@ def main(opt):
     doc_reports, req_reports, app_reports = moosesqa.get_sqa_reports(
         opt.config, **kwargs
     )
+    unit_reports = (
+        moosesqa.get_sqa_unit_test_reports() if "unit" in opt.reports else None
+    )
 
     # Limit the reports
     if opt.app_reports and app_reports:
@@ -131,9 +134,11 @@ def main(opt):
         _enable_warnings(app_reports)
         _enable_warnings(doc_reports)
         _enable_warnings(req_reports)
+        _enable_warnings(unit_reports)
 
     # Execute and display reports
     status = _print_reports("MooseApp", app_reports, 0)
     status = _print_reports("Document", doc_reports, status)
     status = _print_reports("Requirement", req_reports, status)
+    status = _print_reports("Unit Test", unit_reports, status)
     return status > 1  # 0 - PASS; 1-WARNING; 2-ERROR (Only ERROR is a failure)

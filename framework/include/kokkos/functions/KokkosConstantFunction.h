@@ -23,11 +23,10 @@ public:
 
   using Real3 = Moose::Kokkos::Real3;
 
-  KOKKOS_FUNCTION Real value(Real /* t */, Real3 /* p */) const { return _value; }
-  KOKKOS_FUNCTION Real timeIntegral(Real t1, Real t2, Real3 /* p */) const
-  {
-    return _value * (t2 - t1);
-  }
+  KOKKOS_FUNCTION Real value(Real, Real3) const { return _value; }
+  KOKKOS_FUNCTION Real3 gradient(Real, Real3) const { return Real3(0); }
+  KOKKOS_FUNCTION Real timeDerivative(Real, Real3) const { return 0; }
+  KOKKOS_FUNCTION Real timeIntegral(Real t1, Real t2, Real3) const { return _value * (t2 - t1); }
 
 protected:
   Moose::Kokkos::Scalar<const Real> _value;

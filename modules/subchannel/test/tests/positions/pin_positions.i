@@ -136,7 +136,6 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   n_blocks = 10
   implicit = false
   segregated = true
-  staggered_pressure = false
 
   # Tolerances
   P_tol = 1.0e-4
@@ -150,31 +149,25 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   verbose_subchannel = false
 
   # friction model
-  friction_closure = 'cheng'
+  friction_closure = 'Chen'
 
   # HTC
   pin_HTC_closure = Dittus-Boelter
   duct_HTC_closure = Dittus-Boelter
 
   # mixing model (beta)
-  mixing_closure = 'cheng_todreas'
+  mixing_closure = 'Chen_Todreas'
 []
 
 [SCMClosures]
-  [Cheng]
-    type = SCMFrictionUpdatedChengTodreas
+  [Chen]
+    type = SCMFrictionChenTodreas
   []
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter
   []
-  [cheng_todreas]
-    type = SCMMixingChengTodreas
-  []
-[]
-
-[SCMClosures]
-  [cheng]
-    type = SCMFrictionUpdatedChengTodreas
+  [Chen_Todreas]
+    type = SCMMixingChenTodreas
   []
 []
 

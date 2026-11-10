@@ -1,0 +1,35 @@
+[Tests]
+  design = 'MooseRandomPerturbation.md'
+  issues = '#32194'
+  [permute]
+    type = GoogleTest
+    unit_test = MooseRandomPerturbation.permute
+    requirement = 'The system shall generate a bijective permutation of the integers [0, n), mapping every input to a unique output in that range.'
+  []
+  [invert]
+    type = GoogleTest
+    unit_test = MooseRandomPerturbation.invert
+    requirement = 'The system shall recover the original index from a permuted value, such that invert(permute(x)) == x for every x in [0, n).'
+  []
+  [bits]
+    type = GoogleTest
+    unit_test = MooseRandomPerturbation.bits
+    requirement = 'The system shall correctly permute and invert indices for domain sizes spanning a wide range of bit-widths.'
+  []
+  [unique]
+    type = GoogleTest
+    unit_test = MooseRandomPerturbation.unique
+    requirement = 'The system shall generate statistically independent permutations of the same domain for different seeds.'
+  []
+  [reproduce]
+    type = GoogleTest
+    unit_test = MooseRandomPerturbation.reproduce
+    requirement = 'The system shall reproduce the same permuted value for a given index every time permute is called on the same generator.'
+  []
+  [serialize]
+    type = GoogleTest
+    unit_test = MooseRandomPerturbation.serialize
+    requirement = 'The system shall reproduce identical permutation results after storing and loading a MooseRandomPerturbation generator as recoverable data.'
+    issues = '#32193'
+  []
+[]

@@ -1,5 +1,5 @@
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../../mesh/square.msh
 []
 
@@ -79,10 +79,19 @@
   []
 []
 
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMVariableLineValueSampler
+    variables = 'u'
+    start_point = '0 0 0'
+    end_point = '1 1 0.1'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/DiffusionSub
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    file_base = OutputData/sub
   []
 []

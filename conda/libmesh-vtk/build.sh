@@ -9,7 +9,9 @@ function do_build(){
     mkdir -p "${SRC_DIR:?}/build"; cd "${SRC_DIR:?}/build"
 
     # Settings guide: https://docs.vtk.org/en/latest/build_instructions/build_settings.html
-    cmake .. -G "Ninja" ${CMAKE_ARGS} \
+    # If updating, also update VTK build in apptainer/libmesh.def
+    cmake .. ${CMAKE_ARGS} \
+      -GNinja \
       -Wno-dev \
       -DCMAKE_CXX_COMPILER=mpicxx \
       -DCMAKE_BUILD_TYPE=Release \
@@ -29,6 +31,7 @@ function do_build(){
       -DVTK_GROUP_ENABLE_MPI:STRING=DONT_WANT \
       -DVTK_GROUP_ENABLE_Imaging:STRING=DONT_WANT \
       -DVTK_USE_MPI:BOOL=ON \
+      -DVTK_USE_CUDA:BOOL=OFF \
       -DVTK_MODULE_ENABLE_VTK_IOMPIParallel:STRING=YES \
       -DVTK_MODULE_ENABLE_VTK_IOParallelExodus:STRING=YES \
       -DVTK_MODULE_ENABLE_VTK_IOParallelNetCDF:STRING=YES \

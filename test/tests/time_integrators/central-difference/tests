@@ -9,6 +9,16 @@
     requirement = "The CentralDifference time integrator shall correctly compute the first"
                   " and second time derivatives."
   [../]
+  [./central_difference_constant_mass]
+    type = 'CSVDiff'
+    input = 'central_difference_constant_mass.i'
+    csvdiff = 'central_difference_constant_mass_out.csv'
+    issues = '#20728'
+
+    requirement = "The central difference time integrator shall correctly compute the first"
+                  " and second time derivatives when using a constant mass matrix, including"
+                  " after the simulation has been recovered from a checkpoint."
+  [../]
   [./ad_central_difference_dotdot]
     type = 'CSVDiff'
     input = 'ad_central_difference_dotdot.i'

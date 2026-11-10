@@ -41,4 +41,17 @@
       detail = 'run in parallel and apply 100s of dirac point sources in the adjoint problem.'
     []
   []
+
+  [self_adjoint_amr]
+    type = Exodiff
+    input = self_adjoint.i
+    exodiff = self_adjoint_amr_out.e
+    cli_args = "Mesh/refine/type=RefineSidesetGenerator Mesh/refine/input=gmg
+                Mesh/refine/boundaries='left top' Mesh/refine/refinement='2 2'
+                Mesh/refine/boundary_side='both both' Outputs/file_base=self_adjoint_amr_out"
+    issues = '#30377'
+    requirement = 'The system shall enforce the hanging node constraints on the adjoint solution '
+                  'when solving a steady-state problem on a mesh containing hanging nodes, '
+                  'including on a refined boundary that carries a nodal boundary condition.'
+  []
 []

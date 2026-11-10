@@ -1,0 +1,40 @@
+[Tests]
+  design = 'SignedDistanceToSurfaceMesh.md'
+
+  [plane_distance]
+    type = GoogleTest
+    issues = '#31937'
+    unit_test = SBMDistanceFunctionTest.DistanceVectorFromPlane
+    requirement = 'The system shall compute the vector from a point to the zero level set of a signed-distance function.'
+  []
+  [zero_gradient]
+    type = GoogleTest
+    issues = '#31937'
+    unit_test = SBMDistanceFunctionTest.DistanceVectorZeroGradient
+    requirement = 'The system shall return a zero distance vector for a function with zero gradient.'
+  []
+  [plane_normal]
+    type = GoogleTest
+    issues = '#31937'
+    unit_test = SBMDistanceFunctionTest.TrueNormalFromPlane
+    requirement = 'The system shall compute the unit gradient normal of a signed-distance function.'
+  []
+  [closest_surface]
+    type = GoogleTest
+    issues = '#31937'
+    unit_test = SBMDistanceFunctionTest.ClosestPicksNearestSurface
+    requirement = 'The system shall select the distance and normal vectors of the nearest surface from multiple functions.'
+  []
+  [union_distance]
+    type = GoogleTest
+    issues = '#33397'
+    unit_test = SBMDistanceFunctionTest.UnionSignedDistanceTakesMin
+    requirement = 'The system shall compute the signed distance to a union as the minimum signed distance of its component functions.'
+  []
+  [unsupported_union_function]
+    type = GoogleTest
+    issues = '#33397'
+    unit_test = SBMDistanceFunctionTest.UnionSignedDistanceRejectsUnsupportedType
+    requirement = 'The system shall reject unsupported function types when computing signed distance to a union.'
+  []
+[]

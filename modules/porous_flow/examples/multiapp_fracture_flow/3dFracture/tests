@@ -19,4 +19,13 @@
     issues = '#17928'
     design = 'porous_flow/multiapp_fracture_flow_PorousFlow_3D.md'
   []
+  [fracture_only_vw]
+    type = CSVDiff
+    input = fracture_only_aperture_changing.i
+    csvdiff = fracture_only_aperture_changing_vw_out.csv
+    cli_args = 'Executioner/end_time=1 Outputs/inactive=ex Outputs/file_base=fracture_only_aperture_changing_vw_out Materials/porosity/type=PorousFlowPorosityVinsomeWesterveld Materials/porosity/thermal_opening_coeff=1.6E-5 Materials/porosity/matrix_thermal_diffusivity=1E-6 Materials/porosity/matrix_reference_temperature=473'
+    requirement = 'PorousFlow shall be able to simulate flow and heat transport in a 2D fracture network when the fracture aperture depends on porepressure and on the thermal opening caused by cooling of the adjacent matrix, computed using the Vinsome-Westerveld method'
+    issues = '#33944'
+    design = 'porous_flow/multiapp_fracture_flow_PorousFlow_3D.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
 []

@@ -52,7 +52,8 @@ TEST(FunctionalExpansionsTest, legendreSeriesOrthonormalEvaluation)
   legendre.setLocation(Point(location));
   auto & answer = legendre.getAllGeneration();
   for (std::size_t i = 0; i < order; ++i)
-    EXPECT_NEAR(answer[i], truth[i], tol);
+    // loose tolerances due to diffs with -march=x86-64-v3
+    EXPECT_NEAR(answer[i], truth[i], 1.e-12);
 }
 
 TEST(FunctionalExpansionsTest, legendreSeriesSqrtMuEvaluation)
@@ -83,7 +84,8 @@ TEST(FunctionalExpansionsTest, legendreSeriesSqrtMuEvaluation)
   legendre.setLocation(Point(location));
   auto & answer = legendre.getAllGeneration();
   for (std::size_t i = 0; i < order; ++i)
-    EXPECT_NEAR(answer[i], truth[i] / std::sqrt(i + 0.5), tol);
+    // loose tolerances due to diffs with -march=x86-64-v3
+    EXPECT_NEAR(answer[i], truth[i] / std::sqrt(i + 0.5), 5.e-12);
 }
 
 TEST(FunctionalExpansionsTest, legendreSeriesStandardEvaluation)
@@ -168,8 +170,9 @@ TEST(FunctionalExpansionsTest, Cartesian3D)
   for (std::size_t i = 0; i < locations.size(); ++i)
   {
     legendre3D.setLocation(locations[i]);
-    EXPECT_NEAR(legendre3D.getExpansionSeriesSum(), standard_truth[i], tol);
-    EXPECT_NEAR(legendre3D.getGenerationSeriesSum(), orthogonal_truth[i], tol);
+    // loose tolerances due to diffs with -march=x86-64-v3
+    EXPECT_NEAR(legendre3D.getExpansionSeriesSum(), standard_truth[i], 5.e-12);
+    EXPECT_NEAR(legendre3D.getGenerationSeriesSum(), orthogonal_truth[i], 5.e-10);
   }
 }
 

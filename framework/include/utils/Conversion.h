@@ -25,6 +25,7 @@ class MultiMooseEnum;
 namespace libMesh
 {
 class Point;
+class FEType;
 }
 
 namespace Moose
@@ -138,6 +139,10 @@ std::string stringify(const std::string & s);
 
 /// Convert FEType from libMesh into string
 std::string stringify(libMesh::FEFamily f);
+
+/// Convert a libMesh FEType into a string reporting its family and order, along with whether its
+/// basis participates in p-refinement for the families where that has meaning
+std::string stringify(const libMesh::FEType & t);
 
 /// Convert SolutionIterationType into string
 std::string stringify(SolutionIterationType t);

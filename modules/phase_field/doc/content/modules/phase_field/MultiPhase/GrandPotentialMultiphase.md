@@ -115,20 +115,20 @@ For an interface between grain $i$ of phase $\alpha$ and grain $j$ of phase $\be
 \begin{equation}
 m = \frac{6 \sigma_{\alpha i \beta j}} {l_{\alpha i \beta j}}
 \end{equation}
-A convenient strategy for parameterization is to pick $\gamma_{\alpha i \beta j} = 1.5$ for one of the interfaces, preferably the one with the median interfacial energy of all the types of interface. The analytical relationships above can be used to calculate $\kappa$ and $m$. Once calculated, $\kappa$, $m$, and $\gamma_{\alpha i \beta j} = 1.5$ can be set, normally using a [`GenericConstantMaterial`](/GenericConstantMaterial.md). Once $\kappa$ and $m$ are set, the interfacial energy for other types of interface can be set using the other $\gamma_{\alpha i \beta j}$ parameters:
+A convenient strategy for parameterization is to pick $\gamma_{\alpha i \beta j} = 1.5$ for one of the interfaces, preferably the one with the highest interfacial energy of all the types of interface [!cite](Moelans2022). All other interfaces then have $\gamma_{\alpha i \beta j} < 1.5$ and are wider than the chosen one. The analytical relationships above can be used to calculate $\kappa$ and $m$. Once calculated, $\kappa$, $m$, and $\gamma_{\alpha i \beta j} = 1.5$ can be set, normally using a [`GenericConstantMaterial`](/GenericConstantMaterial.md). Once $\kappa$ and $m$ are set, the interfacial energy for other types of interface can be set using the other $\gamma_{\alpha i \beta j}$ parameters:
 \begin{equation}
 \sigma_{\alpha i \beta j} = g(\gamma_{\alpha i \beta j}) \sqrt{m \kappa}
 \end{equation}
-where $g$ is  a dimensionless function of $\gamma_{\alpha i \beta j}$ for the other types of interfaces and can be determined based on the known $\kappa$, $m$ and $\sigma_{\alpha i \beta j}$ for the other interfaces. The following polynomial approximation can be used to determine $\gamma_{\alpha i \beta j}$ as a function of $g$:
+where $g$ is  a dimensionless function of $\gamma_{\alpha i \beta j}$ for the other types of interfaces and can be determined based on the known $\kappa$, $m$ and $\sigma_{\alpha i \beta j}$ for the other interfaces. The following polynomial approximation [!cite](Moelans2022), valid for $0.53 \le \gamma_{\alpha i \beta j} \le 40$, can be used to determine $\gamma_{\alpha i \beta j}$ as a function of $g$:
 \begin{equation}
-\gamma_{\alpha i \beta j} = \left( -5.288 g^8 -0.09364 g^6 + 9.965 g^4 -8.183 g^2 + 2.007 \right)^{-1}
+\gamma_{\alpha i \beta j} = \left( -3.0944 g^8 -1.8169 g^6 + 10.323 g^4 -8.1819 g^2 + 2.0033 \right)^{-1}
 \end{equation}
 The values for $\gamma_{\alpha i \beta j}$ for the other interfaces can be specified using a [`GenericConstantMaterial`](/GenericConstantMaterial.md). Alternatively, rather than calculating and specifying these values by hand, the material [`GrandPotentialInterface`](/GrandPotentialInterface.md) can be used.
 
 ## Example input file
 
 An example input file can be found here:
-[GrandPotentialPFM/GrandPotentialMultiphase.i]
+[!file](GrandPotentialPFM/GrandPotentialMultiphase.i)
 
 ## Version with strict mass conservation
 
@@ -145,4 +145,4 @@ c_A = \sum_{\beta = 1}^N h_\beta \left(\frac{\mu_A}{V_a^2 k_A^\beta} + c_A^{\bet
 \end{equation}
 
 An example input file can be found here:
-[modules/phase_field/examples/multiphase/GrandPotential3Phase_masscons.i]
+[!file](modules/phase_field/examples/multiphase/GrandPotential3Phase_masscons.i)

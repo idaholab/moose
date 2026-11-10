@@ -7,7 +7,7 @@
     exodiff = 'kokkos_concrete_function_out.e'
     requirement = 'The Kokkos function system shall include the ability to explicitly retrieve a function in a concrete type to avoid virtual function calls.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
   [invalid_type]
     type = 'RunException'
@@ -16,6 +16,6 @@
     expect_err = 'Kokkos function \'piecewise_constant\' is not of type \'KokkosConstantFunction\''
     requirement = 'The Kokkos function system shall error when a provided function is not of the requested concrete type.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

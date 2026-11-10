@@ -11,6 +11,10 @@
 
 #include "MooseMesh.h"
 #include "MooseTypes.h"
+#include "libmesh/enum_order.h"
+
+#include <functional>
+#include <optional>
 
 class Function;
 class FunctionInterface;
@@ -24,6 +28,94 @@ namespace SBMUtils
 {
 bool checkWatertightnessFromRawElems(const std::vector<const Elem *> & bd_elements);
 
+/// Compute the fraction of an element's quadrature-weighted measure satisfying a predicate.
+Real activeElementFraction(const Elem & elem,
+                           Order qrule_order,
+                           const std::function<bool(const libMesh::Point &)> & is_active);
+
+/// Return whether a partial element is inactive, i.e. its inactive fraction exceeds lambda.
+///
+/// The endpoint handling preserves the convention that lambda zero rejects and lambda one
+/// accepts a partially active element.
+bool isInactive(Real active_fraction, Real lambda);
+
+/// Results of testing an element against a domain. Node checks can detect a surface crossing
+/// a corner, while quadrature points can detect a domain enclosed within the element.
+struct ElementDomainOccupancy
+{
+  /// Whether all element nodes lie in the retained domain.
+  bool all_nodes_in_domain;
+  /// Whether all element nodes lie outside the retained domain.
+  bool all_nodes_outside_domain;
+  /// Quadrature-based estimate of the fraction of this element inside the domain.
+  Real fraction_of_element_in_domain;
+};
+
+/// Test an element against the domain defined by is_in_domain.
+/// The result says whether all nodes are in or out of the domain and estimates the fraction of
+/// the element inside it using quadrature points. is_in_domain decides if a point belongs to the
+/// domain.
+ElementDomainOccupancy
+elementDomainOccupancy(const Elem & elem,
+                       Order qrule_order,
+                       const std::function<bool(const libMesh::Point &)> & is_in_domain);
+
+/// As above, but use is_outside_domain to test nodes separately. This allows boundary nodes to
+/// be neither inside nor outside the domain.
+ElementDomainOccupancy
+elementDomainOccupancy(const Elem & elem,
+                       Order qrule_order,
+                       const std::function<bool(const libMesh::Point &)> & is_in_domain,
+                       const std::function<bool(const libMesh::Point &)> & is_outside_domain);
+
+/// Policy for assigning partial elements to a dedicated intercepted subdomain.
+struct InterceptedSubdomainPolicy
+{
+  bool mark_intercepted;
+  SubdomainID subdomain_id;
+};
+
+/// A candidate subdomain and its occupancy of an element.
+struct SubdomainOccupancy
+{
+  SubdomainID subdomain_id;
+  ElementDomainOccupancy occupancy;
+};
+
+/// Select a subdomain based on how multiple candidate domains occupy an element.
+///
+/// A fully occupied candidate takes precedence. Otherwise, the candidate with the largest domain
+/// fraction is selected, with fuzzy ties resolved by the lowest subdomain ID. A partial candidate
+/// is accepted according to the intercepted-subdomain policy and lambda.
+///
+/// @param candidate_occupancies Candidate subdomain IDs and their measured element occupancies
+/// @param intercepted_policy Whether partial elements receive a dedicated subdomain ID, and that ID
+/// @param lambda Maximum fraction outside the selected domain for accepting a partial element
+/// @return The selected subdomain ID, or std::nullopt if no candidate subdomain is selected
+std::optional<SubdomainID>
+selectSubdomainFromOccupancies(const std::vector<SubdomainOccupancy> & candidate_occupancies,
+                               const InterceptedSubdomainPolicy & intercepted_policy,
+                               Real lambda);
+
+/// The subdomain IDs a (possibly partial) element can be labeled with.
+struct ClassificationSubdomains
+{
+  SubdomainID inside;
+  SubdomainID outside;
+  SubdomainID intercepted;
+};
+
+/// Classify an element from its retained-domain occupancy measurements.
+///
+/// An element whose nodes and measure are entirely in the domain is inside; one whose nodes and
+/// measure are entirely outside the domain is outside. A remaining (partial) element is assigned
+/// the intercepted subdomain when mark_intercepted is true, and otherwise is resolved by the
+/// lambda threshold (see isInactive).
+SubdomainID classifySubdomainFromOccupancy(const ElementDomainOccupancy & occupancy,
+                                           const ClassificationSubdomains & subdomain_id_settings,
+                                           bool mark_intercepted,
+                                           Real lambda);
+
 /// Build a list of distance functions based on names specified in input.
 std::vector<const Function *>
 buildDistanceFunctions(const std::vector<FunctionName> & function_names,
@@ -36,10 +128,7 @@ buildDistanceFunctions(const std::vector<FunctionName> & function_names,
 RealVectorValue
 distanceVectorFromFunction(const Function * func, const libMesh::Point & pt, Real t);
 
-/// Compute the true boundary surface normal using a distance function.
-/// The query point is first projected onto the true boundary, and the
-/// surface normal of the boundary is then evaluated at the projected
-/// (closest) point.
+/// Compute the true boundary surface normal at the point on the boundary closest to pt.
 RealVectorValue trueNormalFromFunction(const Function * func, const libMesh::Point & pt, Real t);
 
 /// Scan all distance functions and return the closest distance vector.
@@ -51,4 +140,9 @@ RealVectorValue closestDistanceVector(const std::vector<const Function *> & func
 RealVectorValue closestTrueNormalVector(const std::vector<const Function *> & funcs,
                                         const libMesh::Point & pt,
                                         Real t);
+
+/// Computes the union signed distance by taking the minimum of all
+/// signed distance functions. This definition is valid for overlapping
+/// geometries and preserves the correct union boundary.
+Real unionSignedDistance(const std::vector<const Function *> & funcs, Real t, const Point & p);
 }

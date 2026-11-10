@@ -23,7 +23,7 @@ FileInputStream::get() const
   std::shared_ptr<std::istream> stream = std::make_unique<std::ifstream>();
   addSharedStream(stream);
 
-  auto & in = *static_cast<std::ifstream *>(stream.get());
+  auto & in = *cast_ptr<std::ifstream *>(stream.get());
   in.open(_filename.c_str(), std::ios::in | std::ios::binary);
   if (in.fail())
     mooseError("Unable to open file ", std::filesystem::absolute(_filename));

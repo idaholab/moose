@@ -94,6 +94,7 @@ class IntegratedBCBase;
 class LineSearch;
 class UserObject;
 class UserObjectBase;
+class FVGradientMethod;
 class FVInterpolationMethod;
 class FVFaceInterpolationMethod;
 class FVAdvectedInterpolationMethod;
@@ -248,6 +249,8 @@ public:
   couplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
   std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
   nonlocalCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num);
+  const std::vector<std::pair<MooseVariableFieldBase *, MooseVariableScalar *>> &
+  fieldScalarCouplingEntries(const THREAD_ID tid, const unsigned int nl_sys_num) const;
 
   virtual bool hasVariable(const std::string & var_name) const override;
   // NOTE: hasAuxiliaryVariable defined in parent class
@@ -412,9 +415,6 @@ public:
                                 const std::vector<Real> * const weights = nullptr) override;
   virtual void reinitNode(const Node * node, const THREAD_ID tid) override;
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, const THREAD_ID tid) override;
-  virtual void reinitNodes(const std::vector<dof_id_type> & nodes, const THREAD_ID tid) override;
-  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes,
-                                   const THREAD_ID tid) override;
   virtual void reinitNeighbor(const Elem * elem, unsigned int side, const THREAD_ID tid) override;
   virtual void reinitNeighborPhys(const Elem * neighbor,
                                   unsigned int neighbor_side,
@@ -542,7 +542,7 @@ public:
    *  * The exception have be registered by calling setException() prior to calling this.
    *  * This is collective on MPI, and must be called simultaneously by all processors!
    *  * If called when the solve can be interruped, it will do so and also throw a
-   *    MooseException, which must be handled.
+   *    MooseHandledException, which must be handled.
    *  * If called at a stage in the execution when the solve cannot be interupted (i.e.,
    *    there is no solve active), it will generate an error and terminate the application.
    *  * DO NOT CALL THIS IN A THREADED REGION! This is meant to be called just after a
@@ -573,6 +573,13 @@ public:
 
   virtual Real & time() const { return _time; }
   virtual Real & timeOld() const { return _time_old; }
+  /**
+   * The time two steps back. The solution keeps this state, so a multi-step integrator can ask for
+   * it, and a functor evaluated alongside that solution has to be able to ask for the time it
+   * belongs to. Only meaningful once two steps have been taken; before that it holds the start
+   * time, which is what timeOld() does at the first step too.
+   */
+  virtual Real & timeOlder() const { return _time_older; }
   virtual int & timeStep() const { return _t_step; }
   virtual Real & dt() const { return _dt; }
   virtual Real & dtOld() const { return _dt_old; }
@@ -604,6 +611,21 @@ public:
   virtual void advanceState();
 
   virtual void restoreSolutions();
+
+  /**
+   * Snapshot geometric search state (both on the regular and, if present, the displaced mesh) so
+   * it can be restored with restoreGeometricSearchState() if this step is later rejected. Called
+   * from advanceState(), i.e. before this step's timestepSetup() has run.
+   */
+  void backupGeometricSearchState();
+
+  /**
+   * Restore geometric search state captured by the most recent backupGeometricSearchState().
+   * Called from TimeStepper::rejectStep(), which must call this before restoreSolutions() so that
+   * the geometric search re-projects from the restored, accepted-state seeds rather than from the
+   * discarded attempt's converged state.
+   */
+  void restoreGeometricSearchState();
 
   /**
    * Allocate vectors and save old solutions into them.
@@ -1482,6 +1504,36 @@ public:
                                         InputParameters & parameters);
 
   /**
+   * Add an FV gradient method
+   * @param method_type The type of the method.
+   * @param name The name of the method.
+   * @param parameters The input parameters of the method.
+   */
+  virtual void addFVGradientMethod(const std::string & method_type,
+                                   const std::string & name,
+                                   InputParameters & parameters);
+
+  /**
+   * Retrieve a writable FV gradient method owned by this problem
+   * @param name The name of the method.
+   * @param tid The thread ID.
+   */
+  FVGradientMethod & getFVGradientMethod(const GradientMethodName & name, const THREAD_ID tid = 0);
+
+  /**
+   * Retrieve a read-only FV gradient method owned by this problem
+   * @param name The name of the method.
+   * @param tid The thread ID.
+   */
+  const FVGradientMethod & getFVGradientMethod(const GradientMethodName & name,
+                                               const THREAD_ID tid = 0) const;
+
+  /**
+   * Check if an FV gradient method with a given name exists
+   */
+  bool hasFVGradientMethod(const GradientMethodName & name) const;
+
+  /**
    * Retrieve an FV interpolation method
    * @param name The name of the method.
    * @param tid The thread ID.
@@ -1662,13 +1714,32 @@ public:
    * Execute MultiAppTransfers associated with execution flag and direction.
    * @param type The execution flag to execute.
    * @param direction The direction (to or from) to transfer.
+   * @param source_app The source application to execute transfers from. Defaults to all sources
    */
-  void execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION direction);
+  void execMultiAppTransfers(ExecFlagType type,
+                             Transfer::DIRECTION direction,
+                             const MultiAppName & source_app = "");
 
   /**
    * Execute the MultiApps associated with the ExecFlagType
    */
   bool execMultiApps(ExecFlagType type, bool auto_advance = true);
+
+  /**
+   * @return the number set for concurrent multiapp execution; greater than 1 enables running the
+   * multiapps of an 'execution_order_group' concurrently, each on its own subset of ranks
+   */
+  unsigned int numConcurrentMultiApps() const { return _num_concurrent_multiapps; }
+
+  /**
+   * Assign each multiapp that shares an 'execution_order_group' with others a disjoint subset of
+   * the ranks so that they can be solved concurrently (at most one child app per rank at a time).
+   * Note that each MultiApp may have multiple child applications, and each child app may use more
+   * than one rank.
+   * - Only does anything when 'num_concurrent_multiapps' > 1.
+   * - Must be called before the sub-apps are created.
+   */
+  void partitionConcurrentMultiApps();
 
   void finalizeMultiApps();
 
@@ -1716,14 +1787,6 @@ public:
   virtual void addTransfer(const std::string & transfer_name,
                            const std::string & name,
                            InputParameters & parameters);
-
-  /**
-   * Execute the Transfers associated with the ExecFlagType
-   *
-   * Note: This does _not_ execute MultiApp Transfers!
-   * Those are executed automatically when MultiApps are executed.
-   */
-  void execTransfers(ExecFlagType type);
 
   /**
    * Computes the residual of a nonlinear system using whatever is sitting in the current
@@ -2149,6 +2212,13 @@ public:
   virtual bool updateMeshXFEM();
 
   /**
+   * Whether meshChanged() should allow the mesh to be contracted (deletes children of coarsened
+   * elements and renumbers nodes and elements). This should be overriden with care as disabling
+   * contraction may result in a substantial increase in the memory footprint of the mesh.
+   */
+  virtual bool allowMeshContractionAfterMeshChanged() const { return true; }
+
+  /**
    * Update data after a mesh change.
    * Iff intermediate_change is true, only perform updates as
    * necessary to prepare for another mesh change
@@ -2160,7 +2230,9 @@ public:
    * due to mesh refinement. \p contract_mesh deletes children of coarsened elements and renumbers
    * nodes and elements. \p clean_refinement_flags resets refinement flags such that any subsequent
    * calls to \p System::restrict_vectors or \p System::prolong_vectors before another AMR step do
-   * not mistakenly attempt to re-do the restriction/prolongation which occurred in this method
+   * not mistakenly attempt to re-do the restriction/prolongation which occurred in this method.
+   * The value of \p contract_mesh is ignored when
+   * \p FEProblemBase::allowMeshContractionAfterMeshChanged is set to false.
    */
   virtual void
   meshChanged(bool intermediate_change, bool contract_mesh, bool clean_refinement_flags);
@@ -3115,6 +3187,7 @@ protected:
   bool _transient;
   Real & _time;
   Real & _time_old;
+  Real & _time_older;
   int & _t_step;
   Real & _dt;
   Real & _dt_old;
@@ -3279,6 +3352,9 @@ protected:
   /// Transfers executed just before MultiApps to transfer data between them
   ExecuteMooseObjectWarehouse<Transfer> _between_multi_app_transfers;
 
+  /// Number of concurrent applications being solved at the same time
+  const unsigned int _num_concurrent_multiapps;
+
   /// A map of objects that consume random numbers
   std::map<std::string, std::unique_ptr<RandomData>> _random_data_objects;
 
@@ -3313,6 +3389,9 @@ protected:
   void checkDisplacementOrders();
 
   void checkUserObjects();
+
+  /// Let every FVGradientMethod resolve its dependencies on other gradient methods.
+  void checkGradientMethods();
 
   /**
    * Helper method for checking Material object dependency.
@@ -3427,6 +3506,9 @@ protected:
   /// e.g. whether the variable dependencies are defined on the selected boundaries
   const bool _boundary_restricted_elem_integrity_check;
 
+  /// Whether to check that interface kernel variables match the orientation of their boundaries
+  const bool _interface_kernel_integrity_check;
+
   /// Whether to check that side user objects do not consume interface material properties
   const bool _side_uo_interface_mat_prop_integrity_check;
 
@@ -3436,6 +3518,9 @@ protected:
 
   /// Whether to check overlapping Dirichlet and Flux BCs and/or multiple DirichletBCs per sideset
   bool _fv_bcs_integrity_check;
+
+  /// Whether to check FV boundary and interface objects against the faces on which they execute
+  const bool _fv_face_integrity_check;
 
   /// Determines whether a check to verify material dependencies on every subdomain
   const bool _material_dependency_check;
@@ -3513,10 +3598,26 @@ protected:
 
 private:
   /**
+   * Classify the exception currently being handled and register its message with setException(),
+   * or error if the exception cannot be recovered from. Must be called from within a catch block.
+   * This does not communicate, so every rank must subsequently call checkExceptionAndStopSolve().
+   * A MooseHandledException has already been communicated and is rethrown unchanged.
+   */
+  void translateCaughtException(const std::string & calling_method);
+
+  /**
    * Handle exceptions. Note that the result of this call will be a thrown MooseException. The
    * caller of this method must determine how to handle the thrown exception
    */
   void handleException(const std::string & calling_method);
+
+  /**
+   * Execute \p work, user object computations local to this process, and register any exception
+   * it raises with translateCaughtException() instead of letting it propagate, so that this
+   * process does not skip communication entered by the other processes. Every process must
+   * subsequently call checkExceptionAndStopSolve().
+   */
+  void translateUserObjectExceptions(const std::function<void()> & work);
 
   /**
    * Helper for getting mortar objects corresponding to primary boundary ID, secondary boundary ID,
@@ -3748,7 +3849,7 @@ FEProblemBase::addObject(const std::string & type,
   // Add the _subproblem and _sys parameters depending on use_displaced_mesh
   addObjectParamsHelper(parameters, name, var_param_name);
 
-  const auto n_threads = threaded ? libMesh::n_threads() : 1;
+  const auto n_threads = threaded ? this->numThreads() : 1;
   std::vector<std::shared_ptr<T>> objects(n_threads);
   for (THREAD_ID tid = 0; tid < n_threads; ++tid)
   {

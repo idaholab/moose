@@ -149,11 +149,6 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
   params.addParamNamesToGroup("num_sectors_per_side background_intervals duct_intervals "
                               "uniform_mesh_on_sides",
                               "General Mesh Density");
-  params.addParamNamesToGroup(
-      "ring_radial_biases ring_inner_boundary_layer_biases ring_inner_boundary_layer_widths "
-      "ring_inner_boundary_layer_intervals ring_outer_boundary_layer_biases "
-      "ring_outer_boundary_layer_widths ring_outer_boundary_layer_intervals",
-      "Mesh Boundary Layers and Biasing Options");
   params.addParamNamesToGroup("quad_center_elements center_quad_factor "
                               "replace_inner_ring_with_delaunay_mesh inner_ring_desired_area ",
                               "Inner ring");
@@ -1018,7 +1013,12 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     if (_tri_elem_type == TRI_ELEM_TYPE::TRI6)
       poly2tri.elem_type() = libMesh::ElemType::TRI6;
     else if (_tri_elem_type == TRI_ELEM_TYPE::TRI7)
+    {
       poly2tri.elem_type() = libMesh::ElemType::TRI7;
+      // Move the TRI7 interior node to the curved-mapping centroid after the
+      // boundary mid-edge nodes are snapped; see MeshTriangulationUtils.C.
+      poly2tri.set_fixup_tri7_center_nodes(true);
+    }
     // let us keep the center point
     poly_mesh->add_point(libMesh::Point());
     poly2tri.triangulate();

@@ -23,6 +23,8 @@
 #include "DependencyResolver.h"
 #include "MooseUtils.h"
 #include "DataIO.h"
+#include "ComplexEquationSystemProblemOperator.h"
+#include "TimeDependentEquationSystemProblemOperator.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -76,11 +78,6 @@ MFEMProblem::MFEMProblem(const InputParameters & params)
 {
   // Initialise Hypre for all MFEM problems.
   mfem::Hypre::Init();
-  // Disable multithreading for all MFEM problems (including any libMesh or MFEM subapps).
-  libMesh::libMeshPrivateData::_n_threads = 1;
-#ifdef LIBMESH_HAVE_OPENMP
-  omp_set_num_threads(1);
-#endif
   setMesh();
 }
 
@@ -97,13 +94,6 @@ MFEMProblem::initialSetup()
       .queryInto(objects);
   for (auto * const object : objects)
     object->initialSetup();
-
-  // MFEM indicators create their estimators during addIndicator(); markers still need an explicit
-  // setup pass because they are no longer initialized through the libMesh/MOOSE user-object path.
-  std::vector<MFEMRefinementMarker *> markers;
-  theWarehouse().query().condition<AttribSystem>("Marker").queryInto(markers);
-  for (auto marker : markers)
-    marker->initialSetup();
 }
 
 void
@@ -246,56 +236,7 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
                                   InputParameters & parameters)
 {
   auto bc = addObject<MFEMBoundaryCondition>(bc_name, name, parameters).front();
-  const auto & mfem_bc = *bc;
-
-  if (dynamic_cast<const MFEMIntegratedBC *>(&mfem_bc))
-  {
-    auto integrated_bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(bc);
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
-    if (eqsys)
-      eqsys->AddIntegratedBC(std::move(integrated_bc));
-    else
-      mooseError("Cannot add integrated BC with name '" + name +
-                 "' because there is no corresponding equation system.");
-  }
-  else if (dynamic_cast<const MFEMComplexIntegratedBC *>(&mfem_bc))
-  {
-    auto integrated_bc = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(bc);
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
-    if (eqsys)
-      eqsys->AddComplexIntegratedBC(std::move(integrated_bc));
-    else
-      mooseError("Cannot add complex integrated BC with name '" + name +
-                 "' because there is no corresponding equation system.");
-  }
-  else if (dynamic_cast<const MFEMComplexEssentialBC *>(&mfem_bc))
-  {
-    auto essential_bc = std::dynamic_pointer_cast<MFEMComplexEssentialBC>(bc);
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
-    if (eqsys)
-      eqsys->AddComplexEssentialBCs(std::move(essential_bc));
-    else
-      mooseError("Cannot add boundary condition with name '" + name +
-                 "' because there is no corresponding equation system.");
-  }
-  else if (dynamic_cast<const MFEMEssentialBC *>(&mfem_bc))
-  {
-    auto essential_bc = std::dynamic_pointer_cast<MFEMEssentialBC>(bc);
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
-    if (eqsys)
-      eqsys->AddEssentialBC(std::move(essential_bc));
-    else
-      mooseError("Cannot add boundary condition with name '" + name +
-                 "' because there is no corresponding equation system.");
-  }
-  else
-  {
-    mooseError("Unsupported bc of type '", bc_name, "' and name '", name, "' detected.");
-  }
+  _problem_data.bcs.Register(name, bc);
 }
 
 void
@@ -452,29 +393,7 @@ MFEMProblem::addKernel(const std::string & kernel_name,
                        InputParameters & parameters)
 {
   auto kernel = addObject<MFEMKernel>(kernel_name, name, parameters).front();
-  const auto & kernel_object = *kernel;
-
-  if (dynamic_cast<const MFEMComplexKernel *>(&kernel_object))
-  {
-    auto complex_kernel = std::dynamic_pointer_cast<MFEMComplexKernel>(kernel);
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
-    if (eqsys)
-      eqsys->AddComplexKernel(std::move(complex_kernel));
-    else
-      mooseError("Cannot add complex kernel with name '" + name +
-                 "' because there is no corresponding equation system.");
-  }
-  else
-  {
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
-    if (eqsys)
-      eqsys->AddKernel(std::move(kernel));
-    else
-      mooseError("Cannot add kernel with name '" + name +
-                 "' because there is no corresponding equation system.");
-  }
+  _problem_data.kernels.Register(name, kernel);
 }
 
 void
@@ -531,6 +450,119 @@ MFEMProblem::addImagComponentToBC(const std::string & kernel_name,
   parent_ptr->setImagBC(bc_ptr);
 }
 
+void
+MFEMProblem::addWeakForm(const std::string & weak_form_name,
+                         const std::string & name,
+                         InputParameters & parameters)
+{
+  addObject<MFEMWeakFormBase>(weak_form_name, name, parameters);
+}
+
+std::shared_ptr<MFEMWeakFormBase>
+MFEMProblem::addDefaultWeakForm()
+{
+  const std::string name("__DefaultWeakForm");
+  std::string type;
+  if (isTransient())
+    type = "MFEMTimeDependentWeakForm";
+  else if (getNumericType() == MFEMProblem::NumericType::REAL)
+    type = "MFEMWeakForm";
+  else if (getNumericType() == MFEMProblem::NumericType::COMPLEX)
+    type = "MFEMComplexWeakForm";
+  else
+    mooseError("Unknown numeric type. "
+               "Please set the Problem numeric type to either 'real' or 'complex'.");
+
+  InputParameters parameters = _factory.getValidParams(type);
+  return addObject<MFEMWeakFormBase>(type, name, parameters).front();
+}
+
+void
+MFEMProblem::setEquationSystems()
+{
+  std::vector<MFEMWeakFormBase *> weak_forms;
+  theWarehouse().query().condition<AttribSystem>("MFEMWeakFormBase").queryInto(weak_forms);
+
+  // Add a default MFEMWeakForm if none has been added by the user.
+  if (weak_forms.empty())
+    weak_forms.push_back(addDefaultWeakForm().get());
+
+  for (auto & weak_form : weak_forms)
+    _problem_data.eqn_systems.Register(weak_form->name(), weak_form->createEquationSystem());
+}
+
+std::shared_ptr<Moose::MFEM::EquationSystem>
+MFEMProblem::getEquationSystem(const std::string & weak_form_name) const
+{
+  const auto & eqn_systems = getProblemData().eqn_systems;
+
+  if (!weak_form_name.empty())
+    return eqn_systems.GetShared(weak_form_name);
+
+  mooseAssert(eqn_systems.size() != 0, "No equation systems have been built for this problem");
+
+  if (eqn_systems.size() > 1)
+    mooseError("This problem has ",
+               eqn_systems.size(),
+               " equation systems, so the one to use cannot be inferred. Set the 'weak_form' "
+               "parameter to name the weak form whose equation system should be used.");
+
+  return eqn_systems.begin()->second;
+}
+
+void
+MFEMProblem::addProblemComposer(const std::string & composer_type,
+                                const std::string & name,
+                                InputParameters & parameters)
+{
+  _problem_composer = addObject<MFEMProblemComposer>(composer_type, name, parameters).front();
+}
+
+std::shared_ptr<MFEMProblemComposer>
+MFEMProblem::addDefaultProblemComposer()
+{
+  const std::string name = "__DefaultWeakFormProblemComposer";
+  std::string type;
+  if (isTransient())
+    type = "MFEMTimeDependentWeakFormProblemComposer";
+  else if (getNumericType() == MFEMProblem::NumericType::REAL)
+    type = "MFEMWeakFormProblemComposer";
+  else if (getNumericType() == MFEMProblem::NumericType::COMPLEX)
+    type = "MFEMComplexWeakFormProblemComposer";
+  else
+    mooseError("Unknown numeric type. "
+               "Please set the Problem numeric type to either 'real' or 'complex'.");
+
+  InputParameters params = _factory.getValidParams(type);
+  return addObject<MFEMProblemComposer>(type, name, params).front();
+}
+
+void
+MFEMProblem::setProblemOperators()
+{
+  std::vector<MFEMProblemComposer *> problem_composers;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("MFEMProblemComposer")
+      .queryInto(problem_composers);
+
+  // Add a default MFEMProblemComposer if none has been added by the user.
+  if (problem_composers.empty())
+    problem_composers.push_back(addDefaultProblemComposer().get());
+
+  for (auto & problem_composer : problem_composers)
+    _problem_operators.push_back(problem_composer->createProblemOperator(*this));
+
+  for (const auto & problem_operator : getProblemOperators())
+    problem_operator->Init();
+}
+
+std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> &
+MFEMProblem::getProblemOperators()
+{
+  return _problem_operators;
+}
+
 int
 vectorFunctionDim(const std::string & type, const InputParameters & parameters)
 {
@@ -581,14 +613,28 @@ const std::vector<std::string> SCALAR_FUNCS = {"Axisymmetric2D3DSolutionFunction
                                                "GeneralizedCircumference",
                                                "PiecewiseFunction",
                                                "TimeRampFunction"},
-                               VECTOR_FUNCS = {"ParsedVectorFunction", "LevelSetOlssonVortex"};
+                               VECTOR_FUNCS = {"ParsedVectorFunction", "LevelSetOlssonVortex"},
+                               MFEM_FUNCS = {"MFEMParsedFunction",
+                                             "MFEMCoordinateTransformations",
+                                             "MFEMScalarQuadratureFunction",
+                                             "MFEMVectorQuadratureFunction"};
 
 void
 MFEMProblem::addFunction(const std::string & type,
                          const std::string & name,
                          InputParameters & parameters)
 {
-  ExternalProblem::addFunction(type, name, parameters);
+  // Add function to the warehouse, while avoiding the threading logic in FEProblemBase::addFunction
+  {
+    parallel_object_only();
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+
+    std::shared_ptr<Function> func = _factory.create<Function>(type, name, parameters);
+    logAdd("Function", name, type, parameters);
+    _functions.addObject(func);
+  }
+
   auto & func = getFunction(name);
   // FIXME: Do we want to have optimised versions for when functions
   // are only of space or only of time.
@@ -615,12 +661,11 @@ MFEMProblem::addFunction(const std::string & type,
           }
         });
   }
-  else if ("MFEMParsedFunction" != type)
+  else if (std::find(MFEM_FUNCS.begin(), MFEM_FUNCS.end(), type) != MFEM_FUNCS.end())
   {
-    mooseWarning("Could not identify whether function ",
-                 type,
-                 " is scalar or vector; no MFEM coefficient object created.");
   }
+  else
+    mooseWarning("Could not identify function ", type, "; no MFEM coefficient object created.");
 }
 
 void
@@ -632,12 +677,16 @@ MFEMProblem::addPostprocessor(const std::string & type,
   {
     checkUserObjectNameCollision(name, "Postprocessor");
     addObject<MFEMExecutedObject>(type, name, parameters);
-    const PostprocessorValue & val = getPostprocessorValueByName(name);
-    getCoefficients().declareScalar<mfem::FunctionCoefficient>(
-        name, [&val](const mfem::Vector &) -> mfem::real_t { return val; });
   }
   else
     ExternalProblem::addPostprocessor(type, name, parameters);
+
+  // Make the postprocessor value available as a spatially uniform scalar coefficient. This is done
+  // for postprocessors of all types so that values calculated elsewhere and transferred in, such
+  // as from a subapp, may also be used to build coefficients.
+  const PostprocessorValue & val = getPostprocessorValueByName(name);
+  getCoefficients().declareScalar<mfem::FunctionCoefficient>(
+      name, [&val](const mfem::Vector &) -> mfem::real_t { return val; });
 }
 
 void
@@ -722,24 +771,15 @@ MFEMProblem::displaceMesh()
   // Displace mesh
   if (mesh().shouldDisplace())
   {
-    mesh().displace(static_cast<mfem::GridFunction const &>(*getMeshDisplacementGridFunction()));
+    mesh().displace(cast_ref<mfem::GridFunction const &>(getMeshDisplacementGridFunction()));
     // TODO: update FESpaces GridFunctions etc for transient solves
   }
 }
 
-std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
+const mfem::ParGridFunction &
 MFEMProblem::getMeshDisplacementGridFunction()
 {
-  // If C++23 transform were available this would be easier
-  auto const displacement_variable = mesh().getMeshDisplacementVariable();
-  if (displacement_variable)
-  {
-    return *_problem_data.gridfunctions.Get(displacement_variable.value());
-  }
-  else
-  {
-    return std::nullopt;
-  }
+  return *getGridFunction(mesh().getMeshDisplacementVariable());
 }
 
 void
@@ -776,9 +816,10 @@ MFEMProblem::getAuxVariableNames()
 MFEMMesh &
 MFEMProblem::mesh()
 {
-  mooseAssert(ExternalProblem::mesh().type() == "MFEMMesh",
-              "Please choose the MFEMMesh mesh type for an MFEMProblem\n");
-  return static_cast<MFEMMesh &>(_mesh);
+  auto * mfem_mesh = dynamic_cast<MFEMMesh *>(&_mesh);
+  mooseAssert(mfem_mesh,
+              "The mesh for an MFEMProblem must be MFEMFileMesh or MFEMMeshGeneratorMesh.");
+  return *mfem_mesh;
 }
 
 const MFEMMesh &
@@ -795,15 +836,6 @@ MFEMProblem::addSubMesh(const std::string & var_type,
   auto & mfem_submesh = *addObject<MFEMSubMesh>(var_type, var_name, parameters).front();
   // Register submesh.
   getProblemData().submeshes.Register(var_name, mfem_submesh.getSubMesh());
-}
-
-void
-MFEMProblem::addQuadratureFunction(const std::string & type,
-                                   const std::string & name,
-                                   InputParameters & parameters)
-{
-  // The object declares its coefficient with the CoefficientManager on construction.
-  addObject<MFEMObject>(type, name, parameters);
 }
 
 void
@@ -873,18 +905,19 @@ MFEMProblem::executeMFEMObjects(const ExecFlagType & exec_type)
 std::string
 MFEMProblem::solverTypeString(const unsigned int libmesh_dbg_var(solver_sys_num))
 {
-  mooseAssert(solver_sys_num == 0, "No support for multi-system with MFEM right now");
+  mooseAssert(solver_sys_num == 0, "All mfem systems must use the same solver right now.");
 
   std::vector<std::string> solvers;
 
-  if (getProblemData().nonlinear_solver)
-    solvers.push_back(MooseUtils::prettyCppType(getProblemData().nonlinear_solver.get()));
+  if (const auto * ns = getProblemData().nonlinear_solver.get())
+    solvers.push_back(MooseUtils::prettyCppType(ns));
 
-  if (getProblemData().jacobian_solver)
+  if (const auto * js = getProblemData().jacobian_solver.get())
   {
-    solvers.push_back(MooseUtils::prettyCppType(getProblemData().jacobian_solver.get()));
-    if (const auto * prec = getProblemData().jacobian_solver->GetPreconditioner())
-      solvers.push_back(MooseUtils::prettyCppType(prec));
+    solvers.push_back(MooseUtils::prettyCppType(js));
+    if (const std::string * pc = js->queryParam<MFEMSolverName>("preconditioner"))
+      solvers.push_back(MooseUtils::prettyCppType(
+          &getMFEMObject<Moose::MFEM::LinearSolverBase>("Moose::MFEM::SolverBase", *pc)));
   }
 
   return solvers.empty() ? "None" : MooseUtils::stringJoin(solvers);

@@ -49,6 +49,15 @@
     requirement = "The system shall include the ability to compute a nodal field variable with a constant upper and lower bounds, even when using a displaced mesh."
   []
 
+  [reference_residual_active_bounds]
+    type = 'Exodiff'
+    input = 'reference_residual_active_bounds.i'
+    exodiff = 'reference_residual_active_bounds_out.e'
+    design = 'ConstantBounds.md ReferenceResidualConvergence.md'
+    issues = '#33833'
+    requirement = "The system shall converge a reference residual check with a variational inequality solver when bounds are active, excluding the residual at degrees of freedom held at a bound."
+  []
+
   [exceptions]
     requirement = "The system shall"
     issues = '#14946'

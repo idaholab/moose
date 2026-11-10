@@ -91,7 +91,7 @@ public:
 
   static InputParameters validParams();
 
-  virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) = 0;
+  virtual void setNodalValue(const OutputType & value) = 0;
 
   ///@{
   /**
@@ -116,6 +116,11 @@ public:
   virtual const ADTemplateVariableGradient<OutputType> & adGradSln() const = 0;
 
   /**
+   * AD grad solution getter for objects evaluating on element faces
+   */
+  virtual const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const = 0;
+
+  /**
    * AD grad of time derivative solution getter
    */
   virtual const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const = 0;
@@ -124,6 +129,11 @@ public:
    * AD curl solution getter
    */
   virtual const ADTemplateVariableCurl<OutputType> & adCurlSln() const = 0;
+
+  /**
+   * AD divergence solution getter
+   */
+  virtual const ADTemplateVariableDivergence<OutputType> & adDivSln() const = 0;
 
   /**
    * AD grad neighbor solution getter
@@ -139,6 +149,11 @@ public:
    * AD curl neighbor solution getter
    */
   virtual const ADTemplateVariableCurl<OutputType> & adCurlSlnNeighbor() const = 0;
+
+  /**
+   * AD divergence neighbor solution getter
+   */
+  virtual const ADTemplateVariableDivergence<OutputType> & adDivSlnNeighbor() const = 0;
 
   /**
    * AD second solution getter

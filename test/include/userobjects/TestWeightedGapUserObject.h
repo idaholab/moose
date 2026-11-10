@@ -51,6 +51,12 @@ protected:
 
   const VariableTestValue & _test;
 
+  /// The rank on which to throw from execute
+  const processor_id_type _throw_on_rank;
+
+  /// Whether the requested exception has already been thrown
+  bool _has_thrown = false;
+
   /// Quadrature point index for the mortar segments
   unsigned int _qp = 0;
 
@@ -62,6 +68,6 @@ inline Real
 TestWeightedGapUserObject::getValue(const Node & node) const
 {
   auto & [weighted_gap, volume] =
-      libmesh_map_find(_dof_to_weighted_gap, static_cast<const DofObject *>(&node));
+      libmesh_map_find(_dof_to_weighted_gap, cast_ptr<const DofObject *>(&node));
   return weighted_gap / volume;
 }

@@ -47,6 +47,23 @@ private:
 void to_json(nlohmann::json & json, const PolynomialChaos * const & pc);
 
 /**
+ * These methods are required since `PolynomialChaos *` is declared as a
+ * reporter value, but it doesn't make sense to try to restore, so it is empty.
+ */
+///@{
+template <>
+inline void
+dataStore(std::ostream &, const PolynomialChaos *&, void *)
+{
+}
+template <>
+inline void
+dataLoad(std::istream &, const PolynomialChaos *&, void *)
+{
+}
+//@}
+
+/**
  * PCStatisticsContext is almost identical to ReporterStatisticsContext with
  * InType == Outype. Unfortunately, we cannot derive from ReporterStatisticsContext
  * since that class relies on the construction of a Calculator object, something

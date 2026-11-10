@@ -15,8 +15,6 @@
 
 #include "libmesh/mesh_tools.h"
 
-using namespace libMesh;
-
 const std::string MeshGeneratorSystem::data_driven_generator_param = "data_driven_generator";
 const std::string MeshGeneratorSystem::allow_data_driven_param =
     "allow_data_driven_mesh_generation";
@@ -114,11 +112,11 @@ MeshGeneratorSystem::getMeshGeneratorParamDependencies(const InputParameters & p
 
   for (const auto & [name, param] : params)
     if (const auto dependency =
-            dynamic_cast<const Parameters::Parameter<MeshGeneratorName> *>(param.get()))
+            dynamic_cast<const libMesh::Parameters::Parameter<MeshGeneratorName> *>(param.get()))
       add_dependency(name, dependency->get());
-    else if (const auto dependencies =
-                 dynamic_cast<const Parameters::Parameter<std::vector<MeshGeneratorName>> *>(
-                     param.get()))
+    else if (const auto dependencies = dynamic_cast<
+                 const libMesh::Parameters::Parameter<std::vector<MeshGeneratorName>> *>(
+                 param.get()))
     {
       if (allow_empty && dependencies->get().empty())
         add_dependency(name, std::string());
@@ -413,12 +411,27 @@ MeshGeneratorSystem::executeMeshGenerators()
   {
     for (const auto & generator : generator_set)
     {
+      mooseAssert(comm().verify(generator->typeAndName().size()) &&
+                      comm().verify(generator->typeAndName()),
+                  "Mesh generator generation is parallel inconsistent; about to execute "
+                      << generator->typeAndName());
+
       const auto & name = generator->name();
       if (_verbose)
         _app._console << " [DBG] Executing mesh generator (" << COLOR_GREEN << std::setw(20) << name
                       << COLOR_DEFAULT << ") in type (" << COLOR_GREEN << generator->type()
                       << COLOR_DEFAULT << ")" << std::endl;
       auto current_mesh = generator->generateInternal();
+
+      if (!generator->isDataOnly())
+        mooseAssert(comm().verify(current_mesh->is_prepared()),
+                    "Mesh prepared state after " << generator->typeAndName()
+                                                 << " is parallel inconsistent");
+
+      mooseAssert(comm().verify(generator->typeAndName().size()) &&
+                      comm().verify(generator->typeAndName()),
+                  "Mesh generator generation is parallel inconsistent; just executed "
+                      << generator->typeAndName());
 
       // Only generating data for this generator
       if (generator->isDataOnly())

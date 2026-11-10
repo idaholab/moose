@@ -104,6 +104,9 @@ public:
   FEProblemBase & feProblem() { return _fe_problem; }
   const FEProblemBase & feProblem() const { return _fe_problem; }
 
+  /// @return the number of threads the associated application uses (see MooseApp::numThreads())
+  THREAD_ID numThreads() const;
+
   /**
    * Applies scaling factors to the system's variables
    * @param inverse_scaling_factors A vector containing the inverse of each variable's scaling
@@ -187,10 +190,19 @@ public:
    * Copy the solution back in time (older -> old, etc).
    */
   void copyOldSolutions();
+
   /**
-   * Copy a specific type of solution back in time (older -> old, etc).
+   * Advance solution vectors and additional system-owned state together.
+   */
+  void advanceStateHistory(Moose::SolutionIterationType iteration_type);
+
+  /**
+   * Copy a specific type of solution back in time (current -> old -> older, etc).
    */
   void copyPreviousSolutions(const Moose::SolutionIterationType iteration_type);
+
+  /// Restore solution vectors and additional system-owned state together.
+  void restoreStateHistory();
 
   virtual void restoreSolutions();
 
@@ -896,17 +908,17 @@ public:
    */
   virtual void copySolutionsBackwards();
 
+  /**
+   * Copy solution vectors and additional system-owned state into older states.
+   */
+  void copyStateHistoryBackwards();
+
   void addTimeIntegrator(const std::string & type,
                          const std::string & name,
                          InputParameters & parameters);
 
   /// Whether or not there are variables to be restarted from an Exodus mesh file
   bool hasVarCopy() const { return _var_to_copy.size() > 0; }
-
-  /**
-   * Add the scaling factor vector to the system
-   */
-  void addScalingVector();
 
   /**
    * Whether or not the solution states have been initialized via initSolutionState()
@@ -991,6 +1003,21 @@ public:
   void skipNextSolutionToOldCopy() { _skip_next_solution_to_old_copy = true; }
 
 protected:
+  /**
+   * Copy system-owned state not represented by solution vectors.
+   * The first argument selects the solution history being advanced. The second indicates that
+   * state 0 must not overwrite state 1 while deeper states still shift; additional state must
+   * honor this to remain aligned with the solution history.
+   * Default implementation does nothing.
+   */
+  virtual void copyAdditionalStateBackwards(Moose::SolutionIterationType, bool) {}
+
+  /**
+   * Restore system-owned state not represented by solution vectors.
+   * Default implementation does nothing.
+   */
+  virtual void restoreAdditionalStates() {}
+
   /**
    * Internal getter for solution owned by libMesh.
    */
@@ -1099,7 +1126,7 @@ private:
   getSolutionStates(const Moose::SolutionIterationType iteration_type)
   {
     return const_cast<std::vector<NumericVector<Number> *> &>(
-        static_cast<const SystemBase *>(this)->getSolutionStates(iteration_type));
+        cast_ptr<const SystemBase *>(this)->getSolutionStates(iteration_type));
   }
 
   /**

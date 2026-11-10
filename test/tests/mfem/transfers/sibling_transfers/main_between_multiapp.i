@@ -24,6 +24,11 @@
   []
 []
 
+[GlobalParams]
+  # the test relies on the child apps output, but the multiapps cannot both execute before transfers
+  execute_after_from_multiapp = false
+[]
+
 [Transfers]
   # Nodal to nodal variables
   [mfem_to_libmesh_nodal_nodal]

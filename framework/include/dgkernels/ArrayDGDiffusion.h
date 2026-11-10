@@ -21,6 +21,8 @@ public:
 
   ArrayDGDiffusion(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
   virtual void initQpResidual(Moose::DGResidualType type) override;
   virtual void computeQpResidual(Moose::DGResidualType type, RealEigenVector & residual) override;

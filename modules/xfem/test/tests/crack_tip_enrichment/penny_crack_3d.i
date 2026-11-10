@@ -22,10 +22,9 @@
   [crack_front]
     type = CrackFrontDefinition
     crack_direction_method = CurvedCrackFront
-    crack_front_points = '0.500000000000000                   0                   0
-                          0.000000000000000   0.500000000000000                   0
-                         -0.500000000000000   0.000000000000000                   0
-                         -0.000000000000000  -0.500000000000000                   0'
+    crack_front_points_provider = circle_cut_uo
+    # Eight points place the nearest-point boundaries between the mesh axes and diagonals.
+    number_points_from_provider = 8
   []
 []
 

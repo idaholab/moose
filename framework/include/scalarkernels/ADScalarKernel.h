@@ -10,11 +10,12 @@
 #pragma once
 
 #include "ScalarKernelBase.h"
+#include "ADFunctorInterface.h"
 
 /**
  * Base class for AD scalar kernels
  */
-class ADScalarKernel : public ScalarKernelBase
+class ADScalarKernel : public ScalarKernelBase, public ADFunctorInterface
 {
 public:
   static InputParameters validParams();
@@ -29,6 +30,7 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() = 0;
+  virtual Real computeQpJacobian() { mooseError("Should not be called for AD scalar kernels"); };
 
   /// The current solution
   const ADVariableValue & _u;

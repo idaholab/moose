@@ -247,14 +247,15 @@ offset = 0.00
     type = LMWeightedVelocitiesUserObject
     primary_boundary = 20
     secondary_boundary = 10
-    primary_subdomain = 4
-    secondary_subdomain = 3
+    primary_subdomain = primary_lower
+    secondary_subdomain = secondary_lower
     lm_variable_normal = mortar_normal_lm
     lm_variable_tangential_one = mortar_tangential_lm
     lm_variable_tangential_two = mortar_tangential_3d_lm
     secondary_variable = disp_x
     disp_x = disp_x
     disp_y = disp_y
+    disp_z = disp_z
   []
 []
 

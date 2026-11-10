@@ -1,0 +1,21 @@
+[Tests]
+  design = 'MooseUtils.md'
+  issues = '#34011'
+
+  [column_by_name]
+    type = GoogleTest
+    unit_test = 'MixedDataDelimitedFileReader.ColumnByName'
+    requirement = 'The system shall facilitate requesting a column of a csv file by column name.'
+  []
+  [column_by_index]
+    type = GoogleTest
+    unit_test = 'MixedDataDelimitedFileReader.ColumnByIndex'
+    requirement = 'The system shall facilitate requesting a column of a csv file by column index.'
+  []
+  [mixed_data_csv]
+    type = GoogleTest
+    unit_test = 'MixedDataDelimitedFileReader.MixedDataCSV'
+    requirement = 'The system shall facilitate requesting data from a csv containing multiple different types of data.'
+  []
+[]
+

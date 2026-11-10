@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -316,6 +316,8 @@ public:
    */
   KOKKOS_FUNCTION T & first() const
   {
+    KOKKOS_ASSERT(_size);
+
     KOKKOS_IF_ON_HOST(return _host_data[0];)
 
     return _device_data[0];
@@ -327,6 +329,8 @@ public:
    */
   KOKKOS_FUNCTION T & last() const
   {
+    KOKKOS_ASSERT(_size);
+
     KOKKOS_IF_ON_HOST(return _host_data[_size - 1];)
 
     return _device_data[_size - 1];
@@ -1427,7 +1431,7 @@ ArrayBase<T, dimension, index_type>::operator=(const T & scalar)
     std::fill_n(_host_data, _size, scalar);
 
   if (_is_device_alloc)
-    ::Kokkos::Experimental::fill_n(ExecSpace(), deviceView(), _size, scalar);
+    ::Kokkos::deep_copy(deviceView(), scalar);
 
   return *this;
 }

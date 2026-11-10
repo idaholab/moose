@@ -14,8 +14,6 @@
 #include "libmesh/elem.h"
 #include "libmesh/dof_map.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseApp", ProxyRelationshipManager);
 
 InputParameters
@@ -114,7 +112,7 @@ ProxyRelationshipManager::operator>=(const RelationshipManager & /*rhs*/) const
   return false;
 }
 
-std::unique_ptr<GhostingFunctor>
+std::unique_ptr<libMesh::GhostingFunctor>
 ProxyRelationshipManager::clone() const
 {
   return _app.getFactory().copyConstruct(*this);

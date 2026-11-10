@@ -23,14 +23,14 @@ public:
 
   MFEMScalarCoefficientPointValueSampler(const InputParameters & parameters);
 
-  /// Checks point locations and warns when GSLIB selects an element at a boundary.
+  /// Checks if not a quadrature-function-backed coefficient.
   void initialSetup() override;
 
   /// Evaluates the coefficient in each point's owning element.
   void execute() override;
 
-protected:
-  void finalizeValues() override;
+  /// Copies interpolated values into the VPP vectors.
+  void finalize() override;
 
 private:
   /// Scalar coefficient being sampled, resolved after all coefficient-declaring objects exist.

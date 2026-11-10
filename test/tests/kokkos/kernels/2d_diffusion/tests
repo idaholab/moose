@@ -8,7 +8,7 @@
     requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions.'
     design = 'KokkosDiffusion.md KokkosDirichletBC.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 
   [testneumann]
@@ -18,7 +18,7 @@
     requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem with Neumann boundary conditions.'
     design = 'KokkosDiffusion.md KokkosNeumannBC.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 
   [testbodyforce]
@@ -28,7 +28,7 @@
     requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem including a volumetric source term.'
     design = 'KokkosDiffusion.md KokkosBodyForce.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 
   [test_jacobian]
@@ -39,7 +39,7 @@
     requirement = 'The Kokkos system shall provide a tester that checks hand-coded Jacobian against finite difference Jacobian using -snes_type=test option.'
     design = 'framework_stp.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 
   [test_force_iteration]
@@ -51,7 +51,7 @@
     requirement = 'The Kokkos system shall force the solver to take at least one iteration regardless of the initial residual norm when the snes_force_iteration option is specified.'
     design = 'Transient.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 
   [actual_linear_solver]
@@ -62,6 +62,6 @@
     requirement = 'The Kokkos system shall not compute an extra residual if the linear solver is used.'
     design = 'FEProblem.md'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

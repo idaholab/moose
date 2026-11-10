@@ -18,15 +18,6 @@ P_out = 4.923e6 # Pa
   []
 []
 
-[UserObjects]
-  [steady_sln]
-    type = SolutionUserObject
-    mesh = steady_out.e
-    timestep = LATEST
-    system_variables = 'mdot SumWij P DP h T Tpin rho mu S w_perim q_prime'
-  []
-[]
-
 [FluidProperties]
   [water]
     type = Water97FluidProperties
@@ -80,50 +71,6 @@ P_out = 4.923e6 # Pa
   []
 []
 
-[Functions]
-  [mdot_ic_fn]
-    type = SolutionFunction
-    solution = steady_sln
-    from_variable = mdot
-  []
-
-  [P_ic_fn]
-    type = SolutionFunction
-    solution = steady_sln
-    from_variable = P
-  []
-
-  [DP_ic_fn]
-    type = SolutionFunction
-    solution = steady_sln
-    from_variable = DP
-  []
-
-  [h_ic_fn]
-    type = SolutionFunction
-    solution = steady_sln
-    from_variable = h
-  []
-
-  [T_ic_fn]
-    type = SolutionFunction
-    solution = steady_sln
-    from_variable = T
-  []
-
-  [rho_ic_fn]
-    type = SolutionFunction
-    solution = steady_sln
-    from_variable = rho
-  []
-
-  [mu_ic_fn]
-    type = SolutionFunction
-    solution = steady_sln
-    from_variable = mu
-  []
-[]
-
 [ICs]
 
 
@@ -134,47 +81,6 @@ P_out = 4.923e6 # Pa
     filename = "power_profile.txt"
   []
 
-  [T_ic]
-    type = FunctionIC
-    variable = T
-    function = T_ic_fn
-  []
-
-  [P_ic]
-    type = FunctionIC
-    variable = P
-    function = P_ic_fn
-  []
-
-  [DP_ic]
-    type = FunctionIC
-    variable = DP
-    function = DP_ic_fn
-  []
-
-  [viscosity_ic]
-    type = FunctionIC
-    variable = mu
-    function = mu_ic_fn
-  []
-
-  [rho_ic]
-    type = FunctionIC
-    variable = rho
-    function = rho_ic_fn
-  []
-
-  [h_ic]
-    type = FunctionIC
-    variable = h
-    function = h_ic_fn
-  []
-
-  [mdot_ic]
-    type = FunctionIC
-    variable = mdot
-    function = mdot_ic_fn
-  []
 []
 
 [AuxKernels]
@@ -195,8 +101,57 @@ P_out = 4.923e6 # Pa
   []
 []
 
+[Postprocessors]
+  [T_out]
+    type = SCMPlanarMean
+    variable = T
+    height = 1
+    execute_on = 'initial timestep_end'
+  []
+  [DP]
+    type = SubChannelDelta
+    variable = P
+    execute_on = 'initial timestep_end'
+  []
+  # Center subchannel of the 3x3 array
+  [T_center_mid]
+    type = SubChannelPointValue
+    variable = T
+    index = 4
+    height = 0.5
+    execute_on = 'initial timestep_end'
+  []
+  # Corner subchannel of the 3x3 array
+  [mdot_corner_out]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 0
+    height = 1
+    execute_on = 'initial timestep_end'
+  []
+[]
+
+[VectorPostprocessors]
+  # Every nodal value of the subchannel variables, so a variable that is not
+  # restored from the checkpoint shows up in the time = 0 transient output
+  [fluid]
+    type = NodalValueSampler
+    block = subchannel
+    variable = 'mdot SumWij P DP h T rho mu S w_perim displacement ff HTC'
+    sort_by = id
+    execute_on = 'initial timestep_end'
+  []
+  [pins]
+    type = NodalValueSampler
+    block = fuel_pins
+    variable = 'q_prime Tpin Dpin'
+    sort_by = id
+    execute_on = 'initial timestep_end'
+  []
+[]
+
 [Outputs]
-  exodus = true
+  csv = true
   hide = ff
 []
 

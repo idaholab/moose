@@ -79,6 +79,10 @@ GeneratedMeshGenerator::validParams()
                                "If provided, prefix the built in boundary names with this string");
   params.addParam<boundary_id_type>(
       "boundary_id_offset", 0, "This offset is added to the generated boundary IDs");
+  params.addParam<std::vector<BoundaryName>>(
+      "boundary_names",
+      "Names of the boundaries enclosing the domain. Defaults to:\n'left right' in 1D\n'bottom "
+      "right top left' in 2D\n'back bottom right top left front' in 3D");
 
   params.addParam<std::vector<ExtraElementIDName>>("extra_element_integers",
                                                    "Names of extra element integers");
@@ -119,6 +123,15 @@ GeneratedMeshGenerator::GeneratedMeshGenerator(const InputParameters & parameter
     paramError("ymax", "ymax must be larger than ymin.");
   if (_zmax < _zmin)
     paramError("zmax", "zmax must be larger than zmin.");
+  if (isParamValid("boundary_names"))
+  {
+    const auto & bdy_names = getParam<std::vector<BoundaryName>>("boundary_names");
+    if ((_dim == 1 && bdy_names.size() != 2) || (_dim == 2 && bdy_names.size() != 4) ||
+        (_dim == 3 && bdy_names.size() != 6))
+      paramError("boundary_names",
+                 "Should be of size '" + std::to_string(2 * _dim) +
+                     "', currently of size: " + std::to_string(bdy_names.size()));
+  }
 }
 
 std::unique_ptr<MeshBase>
@@ -160,15 +173,11 @@ GeneratedMeshGenerator::generate()
     // The build_XYZ mesh generation functions take an
     // UnstructuredMesh& as the first argument, hence the static_cast.
     case 1:
-      MeshTools::Generation::build_line(static_cast<UnstructuredMesh &>(*mesh),
-                                        _nx,
-                                        _xmin,
-                                        _xmax,
-                                        elem_type,
-                                        _gauss_lobatto_grid);
+      MeshTools::Generation::build_line(
+          cast_ref<UnstructuredMesh &>(*mesh), _nx, _xmin, _xmax, elem_type, _gauss_lobatto_grid);
       break;
     case 2:
-      MeshTools::Generation::build_square(static_cast<UnstructuredMesh &>(*mesh),
+      MeshTools::Generation::build_square(cast_ref<UnstructuredMesh &>(*mesh),
                                           _nx,
                                           _ny,
                                           _xmin,
@@ -179,7 +188,7 @@ GeneratedMeshGenerator::generate()
                                           _gauss_lobatto_grid);
       break;
     case 3:
-      MeshTools::Generation::build_cube(static_cast<UnstructuredMesh &>(*mesh),
+      MeshTools::Generation::build_cube(cast_ref<UnstructuredMesh &>(*mesh),
                                         _nx,
                                         _ny,
                                         _nz,
@@ -212,6 +221,11 @@ GeneratedMeshGenerator::generate()
       else
         elem->subdomain_id() = bids[i];
     }
+    // build_cube() cached the mesh subdomains and partitioned the mesh while every element was
+    // still in the default subdomain. The subdomain set must be recomputed, and the mesh must be
+    // repartitioned because a partitioner may weight or group elements by subdomain.
+    mesh->unset_has_cached_elem_data();
+    mesh->unset_is_partitioned();
   }
 
   if (isParamValid("subdomain_name"))
@@ -225,10 +239,10 @@ GeneratedMeshGenerator::generate()
             "subdomain_ids",
             "Specifying a subdomain_name is only supported for a single entry in subdomain_ids");
       else
-        mesh->subdomain_name(bids[0]) = subdomain_name;
+        mesh->set_subdomain_name(bids[0], subdomain_name, true);
     }
     else
-      mesh->subdomain_name(0) = subdomain_name;
+      mesh->set_subdomain_name(0, subdomain_name, true);
   }
 
   // rename and shift boundaries
@@ -243,10 +257,21 @@ GeneratedMeshGenerator::generate()
 
     MeshTools::Modification::change_boundary_id(*mesh, *rit, *rit + _boundary_id_offset);
 
-    boundary_info.sideset_name(*rit + _boundary_id_offset) =
-        _boundary_name_prefix + old_sideset_name;
-    boundary_info.nodeset_name(*rit + _boundary_id_offset) =
-        _boundary_name_prefix + old_nodeset_name;
+    if (!isParamValid("boundary_names"))
+    {
+      boundary_info.sideset_name(*rit + _boundary_id_offset) =
+          _boundary_name_prefix + old_sideset_name;
+      boundary_info.nodeset_name(*rit + _boundary_id_offset) =
+          _boundary_name_prefix + old_nodeset_name;
+    }
+    else
+    {
+      // The names are ordered by increasing boundary ID, while we are iterating in reverse
+      const auto & bdy_name = getParam<std::vector<BoundaryName>>(
+          "boundary_names")[std::distance(rit, mesh_boundary_ids.rend()) - 1];
+      boundary_info.sideset_name(*rit + _boundary_id_offset) = _boundary_name_prefix + bdy_name;
+      boundary_info.nodeset_name(*rit + _boundary_id_offset) = _boundary_name_prefix + bdy_name;
+    }
   }
 
   // FIXME: change_boundary_id() was *supposed* to leave the mesh in
@@ -345,6 +370,21 @@ GeneratedMeshGenerator::generate()
     }
   }
 
-  mesh->unset_is_prepared();
+  // Biasing moves node coordinates, which invalidates the point locator, the stored ranges and
+  // any ghosting functor that depends on element positions. It also invalidates the partition:
+  // build_cube() partitioned the unbiased geometry, and a geometric partitioner (e.g. centroid or
+  // space-filling-curve) applied to strongly biased elements would produce a poorly balanced
+  // partition. Element connectivity and the boundary id sets remain valid. Without a bias or
+  // subdomain ids, the only change to the mesh that build_cube() prepared is the boundary id
+  // offset handled above, so the existing partition is kept and MooseMesh::prepare() does not
+  // repeat the partitioning, which dominates mesh setup.
+  if (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0)
+  {
+    mesh->clear_point_locator();
+    mesh->clear_stored_ranges();
+    mesh->unset_has_reinit_ghosting_functors();
+    mesh->unset_is_partitioned();
+  }
+
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

@@ -21,8 +21,9 @@ PorousFlowLumpedKernelBaseTempl<is_ad>::PorousFlowLumpedKernelBaseTempl(
     mooseError("The variable '",
                _var.name(),
                "' is not a nodal (Lagrange) variable.  This kernel uses mass lumping, which "
-               "requires a nodal variable.  For non-nodal variables use the non-lumped "
-               "PorousFlowFullySaturated* kernels instead.");
+               "requires a nodal variable.  PorousFlow has no discontinuous-Galerkin "
+               "finite-element discretisation, so an element-local variable (eg CONSTANT "
+               "MONOMIAL) cannot be used as a PorousFlow variable.");
 }
 
 template <bool is_ad>

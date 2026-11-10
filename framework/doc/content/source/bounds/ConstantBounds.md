@@ -24,7 +24,7 @@ objects requires introduction of Lagrange multiplier variables that increase the
 size of the nonlinear system as well as render some preconditioning methods
 like algebraic multi-grid ineffective. The number of nonlinear iterations
 required to solve a constrained PDE defined by
-[this input file](/upper-and-lower-bound.i) with the various constraint
+[!file text=this input file](/upper-and-lower-bound.i) with the various constraint
 algorithms is summarized below:
 
 - `vinewtonrsls` and `ConstantBounds`:                      22

@@ -10,6 +10,9 @@
 #include "UnsignedDistanceToSurfaceMesh.h"
 #include "MooseError.h"
 #include "SBMSurfaceMeshBuilder.h"
+#include "SBMSurfaceDistance.h"
+#include "SurfaceElement.h"
+#include "SBMInterfaceManager.h"
 
 registerMooseObject("ShiftedBoundaryMethodApp", UnsignedDistanceToSurfaceMesh);
 
@@ -17,11 +20,15 @@ InputParameters
 UnsignedDistanceToSurfaceMesh::validParams()
 {
   InputParameters params = Function::validParams();
-  params.addRequiredParam<UserObjectName>(
-      "builder", "SBMSurfaceMeshBuilder that provides KDTree, elem_id_map, and boundary elements.");
+  params.addParam<UserObjectName>(
+      "builder", "SBMSurfaceMeshBuilder that provides the interface surface geometry.");
+  params.addParam<UserObjectName>(
+      "manager", "SBMInterfaceManager that provides geometry for multiple interfaces.");
+  params.addParam<SubdomainID>("subdomain_id_1", "First subdomain defining the interface.");
+  params.addParam<SubdomainID>("subdomain_id_2", "Second subdomain defining the interface.");
 
   params.addClassDescription(
-      "Returns unsigned distance to a surface mesh using KDTree nearest neighbor search. "
+      "Returns unsigned distance to a surface mesh using k-d tree nearest neighbor search. "
       "The gradient returns the unit vector pointing from boundary to query point.");
   return params;
 }
@@ -29,13 +36,37 @@ UnsignedDistanceToSurfaceMesh::validParams()
 UnsignedDistanceToSurfaceMesh::UnsignedDistanceToSurfaceMesh(const InputParameters & parameters)
   : Function(parameters)
 {
+  const bool has_builder = isParamValid("builder");
+  const bool has_manager = isParamValid("manager");
+  const bool has_first = isParamValid("subdomain_id_1");
+  const bool has_second = isParamValid("subdomain_id_2");
+  if (has_builder == has_manager)
+    paramError("builder", "Specify exactly one of 'builder' and 'manager'.");
+  if (has_manager && (!has_first || !has_second))
+    paramError("manager", "Manager mode requires subdomain_id_1 and subdomain_id_2.");
+  if (!has_manager && (has_first || has_second))
+    paramError("subdomain_id_1", "Subdomain IDs are only valid in manager mode.");
+  if (has_manager)
+  {
+    _subdomain_pair = {getParam<SubdomainID>("subdomain_id_1"),
+                       getParam<SubdomainID>("subdomain_id_2")};
+    if (_subdomain_pair.first == _subdomain_pair.second)
+      paramError("subdomain_id_2", "The interface subdomain IDs must be distinct.");
+  }
 }
 
 void
 UnsignedDistanceToSurfaceMesh::initialSetup()
 {
-  const auto builder = &getUserObject<SBMSurfaceMeshBuilder>("builder");
+  if (isParamValid("manager"))
+  {
+    _manager = &getUserObject<SBMInterfaceManager>("manager");
+    if (!_manager->hasInterface(_subdomain_pair.first, _subdomain_pair.second))
+      paramError("manager", "The requested interface was not detected by the manager.");
+    return;
+  }
 
+  const auto builder = &getUserObject<SBMSurfaceMeshBuilder>("builder");
   if (!builder->hasKDTree())
     mooseError("UnsignedDistanceToSurfaceMesh '",
                name(),
@@ -44,13 +75,13 @@ UnsignedDistanceToSurfaceMesh::initialSetup()
                "' to be configured with 'build_kd_tree = true'.");
 
   _kd_tree = &builder->getKDTree();
-  _boundary_elements = &builder->getBoundaryElements();
+  _boundary_elements = &builder->surfaceElementSet().elements();
 }
 
-const SBMBndElementBase &
+const SurfaceElement &
 UnsignedDistanceToSurfaceMesh::closestBoundaryElem(const Point & p) const
 {
-  // KDTree nearest neighbor search
+  // k-d tree nearest neighbor search
   std::vector<std::size_t> ret_index(1);
   _kd_tree->neighborSearch(p, 1, ret_index);
 
@@ -60,8 +91,11 @@ UnsignedDistanceToSurfaceMesh::closestBoundaryElem(const Point & p) const
 RealVectorValue
 UnsignedDistanceToSurfaceMesh::distanceVectorToSurface(const Point & p) const
 {
-  const SBMBndElementBase & elem = closestBoundaryElem(p);
-  return elem.distanceFrom(p);
+  if (_manager)
+    return _manager->queryInterface(_subdomain_pair.first, _subdomain_pair.second, p).distance;
+
+  const SurfaceElement & elem = closestBoundaryElem(p);
+  return SBMUtils::distanceFrom(elem, p);
 }
 
 Real
@@ -88,7 +122,10 @@ UnsignedDistanceToSurfaceMesh::gradient(Real /*t*/, const Point & p) const
 RealVectorValue
 UnsignedDistanceToSurfaceMesh::surfaceNormal(const Point & p) const
 {
-  const SBMBndElementBase & elem = closestBoundaryElem(p);
+  if (_manager)
+    return _manager->queryInterface(_subdomain_pair.first, _subdomain_pair.second, p).normal;
+
+  const SurfaceElement & elem = closestBoundaryElem(p);
 
   RealVectorValue n = elem.normal();
   const Real n_norm = n.norm();

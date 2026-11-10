@@ -21,6 +21,7 @@
 #include "Syntax.h"
 #include "MooseSyntax.h"
 #include "ExecFlagRegistry.h"
+#include "FVGradientMethod.h"
 
 #include "hit/parse.h"
 
@@ -62,6 +63,12 @@ const ExecFlagType EXEC_POST_ADAPTIVITY = registerExecFlag("POST_ADAPTIVITY");
 
 namespace Moose
 {
+
+bool
+isSolverExecFlag(const ExecFlagType & exec_flag)
+{
+  return exec_flag == EXEC_LINEAR || exec_flag == EXEC_NONLINEAR || exec_flag == EXEC_POSTCHECK;
+}
 
 void associateSyntaxInner(Syntax & syntax, ActionFactory & action_factory);
 
@@ -215,6 +222,7 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_dirac_kernel",                 VectorDiracKernel);
   registerMooseObjectTask("add_dg_kernel",                    DGKernel,                  false);
   registerMooseObjectTask("add_fv_kernel",                    FVKernel,                  false);
+  registerMooseObjectTask("add_gradient_method",              FVGradientMethod,          false);
   registerMooseObjectTask("add_interpolation_method",         FVInterpolationMethod,     false);
   registerMooseObjectTask("add_interpolation_method_physics", FVInterpolationMethod,     false);
   registerMooseObjectTask("add_linear_fv_kernel",             LinearFVKernel,            false);
@@ -317,6 +325,7 @@ addActionTypes(Syntax & syntax)
   registerTask("resolve_optional_materials", true);
   registerTask("check_integrity_early", true);
   registerTask("check_integrity_early_physics", false);
+  registerTask("flush_shared_physics_variables", false);
   registerTask("setup_quadrature", true);
   registerTask("create_tagged_matrices", true);
 
@@ -420,6 +429,7 @@ addActionTypes(Syntax & syntax)
                            "(add_aux_variable, add_variable, add_elemental_field_variable,"
                            " add_external_aux_variables)"
                            "(add_variables_physics)" // physics can skip adding variables if they already exist
+                           "(flush_shared_physics_variables)" // adds the variables that Physics requested to share
                            "(add_mortar_variable)"
                            "(setup_variable_complete)"
                            "(check_integrity_early_physics)"  // checks that systems and variables are consistent
@@ -430,6 +440,7 @@ addActionTypes(Syntax & syntax)
                            " add_default_steady_state_convergence)"
                            "(add_positions)"
                            "(add_periodic_bc)"
+                           "(add_gradient_method)"
                            "(add_user_object, add_corrector, add_mesh_modifier)"
                            "(add_field_split)" // split objects required before field split preconditioner itself
                            "(add_preconditioning)" // preconditioner may introduce objects such as static condensation which influence the underlying types of tagged matrices
@@ -491,14 +502,6 @@ addActionTypes(Syntax & syntax)
   // clang-format on
 
 #ifdef MOOSE_MFEM_ENABLED
-  registerTask("add_mfem_problem_operator", true);
-  addTaskDependency("add_mfem_problem_operator", "init_mesh");
-  addTaskDependency("add_variable", "add_mfem_problem_operator");
-  addTaskDependency("add_aux_variable", "add_mfem_problem_operator");
-  addTaskDependency("add_elemental_field_variable", "add_mfem_problem_operator");
-  addTaskDependency("add_bc", "add_mfem_problem_operator");
-  addTaskDependency("add_kernel", "add_mfem_problem_operator");
-
   // add SubMeshes
   registerMooseObjectTask("add_mfem_submeshes", MFEMSubMesh, false);
   addTaskDependency("add_mfem_submeshes", "create_problem_complete");
@@ -523,15 +526,6 @@ addActionTypes(Syntax & syntax)
   // kernels only need fespaces, not hierarchies
   addTaskDependency("add_kernel", "add_mfem_fespaces");
 
-  // add QuadratureFunctions
-  registerMooseObjectTask("add_mfem_quadrature_functions", MFEMQuadratureFunction, false);
-  // after the last task declaring coefficients the quadrature functions may project
-  addTaskDependency("add_mfem_quadrature_functions", "add_functor_material");
-  // before the tasks constructing objects that may consume the declared coefficients
-  addTaskDependency("add_kernel", "add_mfem_quadrature_functions");
-  addTaskDependency("add_bc", "add_mfem_quadrature_functions");
-  addTaskDependency("add_aux_kernel", "add_mfem_quadrature_functions");
-
   // add complex kernels
   registerMooseObjectTask("add_mfem_complex_kernel_components", Kernel, false);
   registerMooseObjectTask("add_mfem_complex_bc_components", BoundaryCondition, false);
@@ -545,14 +539,44 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("set_mesh_fe_space", "add_variable");
   addTaskDependency("set_mesh_fe_space", "init_mesh");
 
-  // add solver objects.
+  // add user-specified weak forms to build equation systems used in this problem
+  registerMooseObjectTask("add_mfem_weak_forms", MFEMWeakFormBase, false);
+  addTaskDependency("add_mfem_weak_forms", "init_mesh");
+  addTaskDependency("add_mfem_weak_forms", "add_variable");
+  addTaskDependency("add_mfem_weak_forms", "add_aux_variable");
+  addTaskDependency("add_mfem_weak_forms", "add_elemental_field_variable");
+  addTaskDependency("add_mfem_weak_forms", "add_kernel");
+  addTaskDependency("add_mfem_weak_forms", "add_bc");
+  addTaskDependency("add_mfem_weak_forms", "add_mfem_complex_kernel_components");
+  addTaskDependency("add_mfem_weak_forms", "add_mfem_complex_bc_components");
+  addTaskDependency("add_mfem_weak_forms", "add_mfem_fespace_hierarchies");
+
+  // build MFEM EquationSystems from MFEMWeakForms used in this problem
+  registerTask("set_mfem_equation_systems", true);
+  addTaskDependency("set_mfem_equation_systems", "add_mfem_weak_forms");
+
+  // add solver objects
   registerMooseObjectTask("add_mfem_solver", Moose::MFEM::SolverBase, true);
-  addTaskDependency("add_mfem_solver", "add_mfem_fespace_hierarchies");
-  addTaskDependency("add_mfem_solver", "add_mfem_problem_operator");
-  addTaskDependency("add_mfem_solver", "add_variable");
+  addTaskDependency("add_mfem_solver", "set_mfem_equation_systems");
+
+  // resolve dependency order between added solver objects
   registerTask("resolve_mfem_solvers", true);
   addTaskDependency("resolve_mfem_solvers", "add_mfem_solver");
-  addTaskDependency("init_problem", "resolve_mfem_solvers");
+
+  // indicators/estimators before markers
+  addTaskDependency("add_marker", "add_indicator");
+
+  // add problem composers
+  registerMooseObjectTask("add_mfem_problem_composer", MFEMProblemComposer, false);
+  addTaskDependency("add_mfem_problem_composer", "set_mfem_equation_systems");
+  addTaskDependency("add_mfem_problem_composer", "resolve_mfem_solvers");
+
+  // build MFEM ProblemOperators from MFEMProblemComposers used in this problem
+  registerTask("set_mfem_problem_operators", true);
+  addTaskDependency("set_mfem_problem_operators", "add_mfem_problem_composer");
+
+  addTaskDependency("init_problem", "set_mfem_problem_operators");
+
 #endif
 
   // Linear FV kernels fetch FVInterpolationMethod instances in their constructors. Some Physics
@@ -562,6 +586,10 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_linear_fv_kernel", "add_interpolation_method_physics");
   addTaskDependency("add_fv_kernel", "add_interpolation_method");
   addTaskDependency("add_linear_fv_kernel", "add_interpolation_method");
+  // Linear FV kernels and BCs may register named FVGradientMethod instances in their constructors
+  addTaskDependency("add_user_object", "add_gradient_method");
+  addTaskDependency("add_linear_fv_kernel", "add_gradient_method");
+  addTaskDependency("add_linear_fv_bc", "add_gradient_method");
 
   registerTask("parse_neml2", /*required=*/false);
   addTaskDependency("add_material", "parse_neml2");
@@ -793,6 +821,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddFVInterpolationMethodAction", "FVInterpolationMethods/*");
   syntax.registerSyntaxType("FVInterpolationMethods/*", "InterpolationMethodName");
 
+  // FVGradientMethods
+  registerSyntax("AddFVGradientMethodAction", "FVGradientMethods/*");
+  syntax.registerSyntaxType("FVGradientMethods/*", "GradientMethodName");
+
   // Indicator
   registerSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*");
   registerSyntax("AddIndicatorAction", "Adaptivity/Indicators/*");
@@ -816,20 +848,18 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // Transfers
   registerSyntax("AddTransferAction", "Transfers/*");
 
-  // Material derivative test
-  registerSyntaxTask("EmptyAction", "Debug/MaterialDerivativeTest", "no_action"); // placeholder
-  registerSyntax("MaterialDerivativeTestAction", "Debug/MaterialDerivativeTest/*");
-
   registerSyntax("ProjectedStatefulMaterialStorageAction", "ProjectedStatefulMaterialStorage/*");
 
   // Application Block System
   registerSyntax("CreateApplicationBlockAction", "Application");
 
 #ifdef MOOSE_MFEM_ENABLED
+  registerSyntaxTask("AddMFEMWeakFormAction", "WeakForms/*", "add_mfem_weak_forms");
+  syntax.registerSyntaxType("WeakForms/*", "MFEMWeakFormName");
+  syntax.registerSyntaxType("Kernels/*", "MFEMKernelName");
+  syntax.registerSyntaxType("BCs/*", "MFEMBoundaryConditionName");
   registerSyntaxTask("AddMFEMSubMeshAction", "SubMeshes/*", "add_mfem_submeshes");
   registerSyntaxTask("AddMFEMFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
-  registerSyntaxTask(
-      "AddMFEMQuadratureFunctionAction", "QuadratureFunctions/*", "add_mfem_quadrature_functions");
   registerSyntaxTask(
       "AddMFEMFESpaceHierarchyAction", "FESpaceHierarchies/*", "add_mfem_fespace_hierarchies");
   registerSyntaxTask(
@@ -838,6 +868,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
       "AddMFEMComplexBCComponentAction", "BCs/*/*", "add_mfem_complex_bc_components");
   registerSyntaxTask("AddMFEMSolverAction", "Solvers/*", "add_mfem_solver");
   syntax.registerSyntaxType("Solvers/*", "MFEMSolverName");
+  registerSyntaxTask(
+      "AddMFEMProblemComposerAction", "ProblemComposers/*", "add_mfem_problem_composer");
 #endif
 
   registerSyntax("NEML2ActionCommon", "NEML2");

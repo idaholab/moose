@@ -75,6 +75,25 @@ public:
   const SystemBase & sys() const { return _sys; }
 
   /**
+   * The subdomains the variable is active on
+   */
+  const std::set<SubdomainID> & activeSubdomains() const;
+
+  /**
+   * Is the variable active on the subdomain?
+   * @param subdomain The subdomain id in question
+   * @return true if active on subdomain, false otherwise
+   */
+  bool activeOnSubdomain(SubdomainID subdomain) const;
+
+  /**
+   * Is the variable active on the subdomains?
+   * @param subdomains The subdomain ids in question
+   * @return true if active on all provided subdomains, false otherwise
+   */
+  bool activeOnSubdomains(const std::set<SubdomainID> & subdomains) const;
+
+  /**
    * Get dual mortar option
    */
   bool useDual() const { return _use_dual; }
@@ -181,8 +200,6 @@ public:
    * Mark this variable as an eigen var or non-eigen var
    */
   void eigen(bool eigen) { _is_eigen = eigen; }
-
-  void initialSetup() override;
 
   virtual void clearAllDofIndices() { _dof_indices.clear(); }
 

@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "gtest/gtest.h"
@@ -31,7 +40,7 @@ public:
     mfem::DenseMatrix curlshape(nd, dim),
         curlshape_d_ft(nd, dim); // both trial and test function in Nedelec
                                  // space, represented with curlshape
-    elmat.SetSize(nd * dim);
+    elmat.SetSize(nd);
     elmat = 0.0;
     double w;
 
@@ -245,7 +254,7 @@ TEST(CheckData, NonlinearIntegratorTest)
 
   // nlf_test.Mult(lf_tdofs, gf_tdofs);
   newton_solver.Mult(lf_tdofs, gf_tdofs);
-  MFEM_VERIFY(newton_solver.GetConverged(), "Newton Solver did not converge.");
+  ASSERT_TRUE(newton_solver.GetConverged()) << "Newton Solver did not converge.";
   Moose::out << "Finished on rank:" << my_rank << std::endl;
   gf.Distribute(gf_tdofs);
 }

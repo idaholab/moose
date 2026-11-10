@@ -549,22 +549,16 @@ public:
 
   /**
    * Calls prepare_for_use() if the underlying MeshBase object isn't prepared, then communicates
-   * various boundary information on parallel meshes. Also calls update() internally. Instead of
-   * calling \p prepare_for_use on the currently held \p MeshBase object, a \p mesh_to_clone can be
-   * provided. If it is provided (e.g. this method is given a non-null argument), then \p _mesh will
-   * be assigned a clone of the \p mesh_to_clone. The provided \p mesh_to_clone must already be
-   * prepared
-   * @param mesh_to_clone If nonnull, we will clone this mesh instead of preparing our current one
-   * @return Whether the libMesh mesh was prepared. This should really only be relevant in MOOSE
-   * framework contexts where we need to make a decision about what to do with the displaced mesh.
-   * If the reference mesh base object has \p complete_preparation() called (e.g. this method
-   * returns \p true when called for the reference mesh), then we must pass the reference mesh base
-   * object into this method when we call this for the displaced mesh. This is because the displaced
-   * mesh \emph must be an exact clone of the reference mesh. We have seen that \p
-   * complete_preparation() called on two previously identical meshes can result in two different
-   * meshes even with Metis partitioning
+   * various boundary information on parallel meshes. Also calls update() internally.
    */
-  bool prepare(const MeshBase * mesh_to_clone);
+  void prepare();
+
+  /**
+   * Deprecated method; \p mesh_to_clone is no longer supported and must be null. Use the
+   * no-argument prepare() instead.
+   * @param mesh_to_clone Must be null; mesh cloning is handled elsewhere now
+   */
+  void prepare(const MeshBase * mesh_to_clone);
 
   /**
    * Calls buildNodeListFromSideList(), buildNodeList(), and buildBndElemList().
@@ -692,6 +686,11 @@ public:
 
   /**
    * Return list of blocks to which the given node belongs.
+   *
+   * The node may belong to any element this rank holds, local or ghosted, including the parent
+   * elements that adaptive refinement keeps. Callers that loop over more than this rank's local
+   * nodes rely on this, e.g. MultiApp transfers looping over a parent or child app's mesh, and
+   * MoveNodesToGeometryModifierBase looping over every node of a replicated mesh.
    */
   const std::set<SubdomainID> & getNodeBlockIds(const Node & node) const;
 
@@ -780,13 +779,17 @@ public:
   /**
    * This method sets the name for \p subdomain_id to \p name
    */
-  void setSubdomainName(SubdomainID subdomain_id, const SubdomainName & name);
+  void setSubdomainName(SubdomainID subdomain_id,
+                        const SubdomainName & name,
+                        const bool synchronous = false);
 
   /**
    * This method sets the name for \p subdomain_id on the provided \p mesh to \p name
    */
-  static void
-  setSubdomainName(MeshBase & mesh, SubdomainID subdomain_id, const SubdomainName & name);
+  static void setSubdomainName(MeshBase & mesh,
+                               SubdomainID subdomain_id,
+                               const SubdomainName & name,
+                               const bool synchronous = false);
 
   /**
    * Return the name of a block given an id.
@@ -1715,8 +1718,27 @@ protected:
       _elem_to_side_to_qp_to_quadrature_nodes;
   std::vector<BndNode> _extra_bnd_nodes;
 
-  /// list of nodes that belongs to a specified block (domain)
-  std::map<dof_id_type, std::set<SubdomainID>> _block_node_list;
+  /**
+   * Whether the elements of the mesh all have the same subdomain, according to the subdomain set
+   * that libMesh caches, which cacheInfo() refreshes. In that case cacheInfo() skips filling
+   * _node_block and _interface_node_blocks, and getNodeBlockIds() returns that set for every node.
+   */
+  bool hasSingleSubdomain() const { return getMesh().get_mesh_subdomains().size() == 1; }
+
+  /// The subdomain of the elements incident on a node, for the nodes whose incident elements all
+  /// agree, which is every node away from a subdomain interface. Left empty when
+  /// hasSingleSubdomain().
+  std::unordered_map<dof_id_type, SubdomainID> _node_block;
+
+  /// The full subdomain set of the nodes whose incident elements disagree, that is the nodes on a
+  /// subdomain interface. Interface nodes are typically a small fraction of the mesh, so storing a
+  /// set for each of them costs little.
+  std::unordered_map<dof_id_type, std::set<SubdomainID>> _interface_node_blocks;
+
+  /// For each subdomain, a std::set containing just that subdomain ID, e.g. {3} for subdomain 3.
+  /// getNodeBlockIds() returns a set reference, so for a node in _node_block, which stores only a
+  /// SubdomainID, it returns the stored set for that subdomain.
+  std::unordered_map<SubdomainID, std::set<SubdomainID>> _block_singletons;
 
   /// list of nodes that belongs to a specified nodeset: indexing [nodeset_id] -> [array of node ids]
   std::map<boundary_id_type, std::vector<dof_id_type>> _node_set_nodes;

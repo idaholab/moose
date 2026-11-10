@@ -23,6 +23,7 @@
 #include "Parser.h"
 #include "TimeIntegrator.h"
 #include "Conversion.h"
+#include "MooseUtils.h"
 
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/node_range.h"
@@ -34,32 +35,30 @@
 // C++
 #include <cstring> // for "Jacobian" exception test
 
-using namespace libMesh;
-
 // AuxiliarySystem ////////
 
 AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string & name)
   : SystemBase(subproblem, subproblem, name, Moose::VAR_AUXILIARY),
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "AuxiliarySystem"),
-    LinearFVGradientInterface(static_cast<SystemBase &>(*this)),
+    LinearFVGradientManager(cast_ref<SystemBase &>(*this)),
     _sys(subproblem.es().add_system<System>(name)),
     _current_solution(_sys.current_local_solution.get()),
-    _aux_scalar_storage(_app.getExecuteOnEnum()),
-    _nodal_aux_storage(_app.getExecuteOnEnum()),
-    _mortar_nodal_aux_storage(_app.getExecuteOnEnum()),
-    _elemental_aux_storage(_app.getExecuteOnEnum()),
-    _nodal_vec_aux_storage(_app.getExecuteOnEnum()),
-    _elemental_vec_aux_storage(_app.getExecuteOnEnum()),
-    _nodal_array_aux_storage(_app.getExecuteOnEnum()),
-    _elemental_array_aux_storage(_app.getExecuteOnEnum())
+    _aux_scalar_storage(_app.getExecuteOnEnum(), numThreads()),
+    _nodal_aux_storage(_app.getExecuteOnEnum(), numThreads()),
+    _mortar_nodal_aux_storage(_app.getExecuteOnEnum(), numThreads()),
+    _elemental_aux_storage(_app.getExecuteOnEnum(), numThreads()),
+    _nodal_vec_aux_storage(_app.getExecuteOnEnum(), numThreads()),
+    _elemental_vec_aux_storage(_app.getExecuteOnEnum(), numThreads()),
+    _nodal_array_aux_storage(_app.getExecuteOnEnum(), numThreads()),
+    _elemental_array_aux_storage(_app.getExecuteOnEnum(), numThreads())
 #ifdef MOOSE_KOKKOS_ENABLED
     ,
-    _kokkos_nodal_aux_storage(_app.getExecuteOnEnum()),
-    _kokkos_elemental_aux_storage(_app.getExecuteOnEnum())
+    _kokkos_nodal_aux_storage(_app.getExecuteOnEnum(), 1),
+    _kokkos_elemental_aux_storage(_app.getExecuteOnEnum(), 1)
 #endif
 {
-  _nodal_vars.resize(libMesh::n_threads());
-  _elem_vars.resize(libMesh::n_threads());
+  _nodal_vars.resize(this->numThreads());
+  _elem_vars.resize(this->numThreads());
 
   if (!_fe_problem.defaultGhosting())
   {
@@ -72,15 +71,22 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
 AuxiliarySystem::~AuxiliarySystem() = default;
 
 void
+AuxiliarySystem::initSolutionState()
+{
+  SystemBase::initSolutionState();
+  LinearFVGradientManager::initializeLinearFVGradientHistoryStorage();
+}
+
+void
 AuxiliarySystem::initialSetup()
 {
   TIME_SECTION("initialSetup", 3, "Initializing Auxiliary System");
 
   SystemBase::initialSetup();
   _current_solution = _sys.current_local_solution.get();
-  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
+  LinearFVGradientManager::initializeLinearFVGradientStorage();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.sort(tid);
     _aux_scalar_storage.initialSetup(tid);
@@ -113,6 +119,8 @@ AuxiliarySystem::initialSetup()
 
   _kokkos_elemental_aux_storage.sort(/*tid=*/0);
   _kokkos_elemental_aux_storage.initialSetup(/*tid=*/0);
+
+  buildKokkosAuxStages();
 #endif
 }
 
@@ -120,7 +128,21 @@ void
 AuxiliarySystem::reinit()
 {
   _current_solution = _sys.current_local_solution.get();
-  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
+  LinearFVGradientManager::rebuildLinearFVGradientStorage();
+}
+
+void
+AuxiliarySystem::copyAdditionalStateBackwards(const Moose::SolutionIterationType iteration_type,
+                                              const bool skip_current_to_old)
+{
+  if (iteration_type == Moose::SolutionIterationType::Time)
+    LinearFVGradientManager::copyPreviousGradientStates(iteration_type, skip_current_to_old);
+}
+
+void
+AuxiliarySystem::restoreAdditionalStates()
+{
+  LinearFVGradientManager::restoreGradientStates();
 }
 
 void
@@ -128,7 +150,7 @@ AuxiliarySystem::timestepSetup()
 {
   SystemBase::timestepSetup();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.timestepSetup(tid);
     _nodal_aux_storage.timestepSetup(tid);
@@ -151,7 +173,7 @@ AuxiliarySystem::customSetup(const ExecFlagType & exec_type)
 {
   SystemBase::customSetup(exec_type);
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.customSetup(exec_type, tid);
     _nodal_aux_storage.customSetup(exec_type, tid);
@@ -174,7 +196,7 @@ AuxiliarySystem::subdomainSetup()
 {
   SystemBase::subdomainSetup();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.subdomainSetup(tid);
     _nodal_aux_storage.subdomainSetup(tid);
@@ -192,7 +214,7 @@ AuxiliarySystem::jacobianSetup()
 {
   SystemBase::jacobianSetup();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.jacobianSetup(tid);
     _nodal_aux_storage.jacobianSetup(tid);
@@ -215,7 +237,7 @@ AuxiliarySystem::residualSetup()
 {
   SystemBase::residualSetup();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < this->numThreads(); tid++)
   {
     _aux_scalar_storage.residualSetup(tid);
     _nodal_aux_storage.residualSetup(tid);
@@ -250,6 +272,8 @@ AuxiliarySystem::updateActive(THREAD_ID tid)
   {
     _kokkos_nodal_aux_storage.updateActive(/*tid=*/0);
     _kokkos_elemental_aux_storage.updateActive(/*tid=*/0);
+
+    buildKokkosAuxStages();
   }
 #endif
 }
@@ -261,15 +285,14 @@ AuxiliarySystem::addVariable(const std::string & var_type,
 {
   SystemBase::addVariable(var_type, name, parameters);
 
-  auto fe_type = FEType(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")),
-                        Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family")));
+  const auto fe_type = MooseUtils::variableFEType(parameters);
 
   if (var_type == "MooseVariableScalar")
     return;
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); tid++)
   {
-    if (FEInterface::field_type(fe_type) == TYPE_VECTOR)
+    if (FEInterface::field_type(fe_type) == libMesh::TYPE_VECTOR)
     {
       auto * var = _vars[tid].getActualFieldVariable<RealVectorValue>(name);
       if (var)
@@ -313,7 +336,7 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
                            const std::string & name,
                            InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); tid++)
   {
     const auto & base = parameters.getBase();
     if (base == "AuxKernel" || base == "Bounds")
@@ -370,7 +393,7 @@ AuxiliarySystem::addScalarKernel(const std::string & kernel_name,
                                  const std::string & name,
                                  InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < this->numThreads(); tid++)
   {
     std::shared_ptr<AuxScalarKernel> kernel =
         _factory.create<AuxScalarKernel>(kernel_name, name, parameters, tid);
@@ -460,7 +483,7 @@ AuxiliarySystem::compute(ExecFlagType type)
     kokkosCompute(type);
 #endif
 
-    if (!_raw_grad_container.empty())
+    if (hasLinearFVGradients())
     {
       solution().close();
       _sys.update();
@@ -811,7 +834,7 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
           {
             ComputeMortarNodalAuxBndThread<AuxKernel> mnabt(
                 _fe_problem, mortar_nodal_warehouse, bnd_id, index);
-            Threads::parallel_reduce(bnd_nodes, mnabt);
+            Threads::parallel_reduce(bnd_nodes, mnabt, this->numThreads());
           }
           catch (MooseException & e)
           {
@@ -872,7 +895,7 @@ AuxiliarySystem::computeElementalArrayVars(ExecFlagType type)
 }
 
 void
-AuxiliarySystem::augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
+AuxiliarySystem::augmentSparsity(libMesh::SparsityPattern::Graph & /*sparsity*/,
                                  std::vector<dof_id_type> & /*n_nz*/,
                                  std::vector<dof_id_type> &
                                  /*n_oz*/)
@@ -924,7 +947,7 @@ AuxiliarySystem::computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernel
       ComputeElemAuxVarsThread<AuxKernelType> eavt(_fe_problem, warehouse, true);
       try
       {
-        Threads::parallel_reduce(range, eavt);
+        Threads::parallel_reduce(range, eavt, this->numThreads());
       }
       catch (MooseException & e)
       {
@@ -952,7 +975,7 @@ AuxiliarySystem::computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernel
       ComputeElemAuxBcsThread<AuxKernelType> eabt(_fe_problem, warehouse, true);
       try
       {
-        Threads::parallel_reduce(bnd_elems, eabt);
+        Threads::parallel_reduce(bnd_elems, eabt, this->numThreads());
       }
       catch (MooseException & e)
       {
@@ -981,7 +1004,7 @@ AuxiliarySystem::computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType
     {
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
       ComputeNodalAuxVarsThread<AuxKernelType> navt(_fe_problem, warehouse);
-      Threads::parallel_reduce(range, navt);
+      Threads::parallel_reduce(range, navt, this->numThreads());
 
       solution().close();
       _sys.update();
@@ -998,7 +1021,7 @@ AuxiliarySystem::computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType
     {
       ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
       ComputeNodalAuxBcsThread<AuxKernelType> nabt(_fe_problem, warehouse);
-      Threads::parallel_reduce(bnd_nodes, nabt);
+      Threads::parallel_reduce(bnd_nodes, nabt, this->numThreads());
 
       solution().close();
       _sys.update();

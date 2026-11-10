@@ -13,8 +13,6 @@
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/static_condensation.h"
 
-using namespace libMesh;
-
 registerMooseObject("NavierStokesApp", NavierStokesProblem);
 
 InputParameters
@@ -116,7 +114,7 @@ NavierStokesProblem::initialSetup()
       if (_have_L_matrix)
         mooseError("Static condensation and LSC preconditioning not supported together");
       if (_have_mass_matrix)
-        cast_ref<StaticCondensation &>(solver_sys->getMatrix(massMatrixTagID()))
+        cast_ref<libMesh::StaticCondensation &>(solver_sys->getMatrix(massMatrixTagID()))
             .uncondensed_dofs_only();
     }
 }
@@ -202,11 +200,11 @@ NavierStokesProblem::setupLSCMatrices(PC schur_pc)
   {
     auto & sparse_mass_mat = _current_nl_sys->getMatrix(massMatrixTagID());
     if (_current_nl_sys->system().has_static_condensation())
-      global_Q = cast_ref<const PetscMatrixBase<Number> &>(
-                     cast_ref<StaticCondensation &>(sparse_mass_mat).get_condensed_mat())
+      global_Q = cast_ref<const libMesh::PetscMatrixBase<Number> &>(
+                     cast_ref<libMesh::StaticCondensation &>(sparse_mass_mat).get_condensed_mat())
                      .mat();
     else
-      global_Q = cast_ref<PetscMatrixBase<Number> &>(sparse_mass_mat).mat();
+      global_Q = cast_ref<libMesh::PetscMatrixBase<Number> &>(sparse_mass_mat).mat();
   }
 
   // The Poisson operator matrix corresponding to the velocity degrees of freedom. This is only used
@@ -214,7 +212,8 @@ NavierStokesProblem::setupLSCMatrices(PC schur_pc)
   Mat global_L = nullptr;
   if (_have_L_matrix)
     global_L =
-        cast_ref<PetscMatrixBase<Number> &>(_current_nl_sys->getMatrix(LMatrixTagID())).mat();
+        cast_ref<libMesh::PetscMatrixBase<Number> &>(_current_nl_sys->getMatrix(LMatrixTagID()))
+            .mat();
 
   //
   // Process down from our system matrices to the sub-matrix containing the velocity-pressure dofs

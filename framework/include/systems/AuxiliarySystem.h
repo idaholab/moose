@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "SystemBase.h"
-#include "LinearFVGradientInterface.h"
+#include "LinearFVGradientManager.h"
 #include "ExecuteMooseObjectWarehouse.h"
 #include "PerfGraphInterface.h"
 
@@ -40,14 +40,13 @@ class NumericVector;
  * A system that holds auxiliary variables
  *
  */
-class AuxiliarySystem : public SystemBase,
-                        public PerfGraphInterface,
-                        public LinearFVGradientInterface
+class AuxiliarySystem : public SystemBase, public PerfGraphInterface, public LinearFVGradientManager
 {
 public:
   AuxiliarySystem(FEProblemBase & subproblem, const std::string & name);
   virtual ~AuxiliarySystem();
 
+  virtual void initSolutionState() override;
   virtual void initialSetup() override;
   virtual void reinit() override;
   virtual void timestepSetup() override;
@@ -110,6 +109,12 @@ public:
 
 #ifdef MOOSE_KOKKOS_ENABLED
   void kokkosCompute(ExecFlagType type);
+
+  /**
+   * Group the active Kokkos auxiliary kernels of each execution flag into stages that can each be
+   * computed in a single device pass
+   */
+  void buildKokkosAuxStages();
 #endif
 
   /**
@@ -136,8 +141,8 @@ public:
   virtual libMesh::System & system() override { return _sys; }
   virtual const libMesh::System & system() const override { return _sys; }
 
-  using LinearFVGradientInterface::linearFVLimitedGradientContainer;
-  using LinearFVGradientInterface::requestLinearFVLimitedGradients;
+  using LinearFVGradientManager::registerFVGradient;
+  using LinearFVGradientManager::updateFVGradient;
 
   /// Copies the current solution into the previous nonlinear iteration solution
   virtual void copyCurrentIntoPreviousNL();
@@ -165,6 +170,10 @@ public:
   void variableWiseRelativeSolutionDifferenceNorm(std::vector<Number> & var_diffs) const;
 
 protected:
+  virtual void copyAdditionalStateBackwards(Moose::SolutionIterationType iteration_type,
+                                            bool skip_current_to_old) override;
+  virtual void restoreAdditionalStates() override;
+
   void computeScalarVars(ExecFlagType type);
   void computeNodalVars(ExecFlagType type);
   void computeMortarNodalVars(ExecFlagType type);
@@ -218,6 +227,21 @@ protected:
   // Storage for KokkosAuxKernel objects
   ExecuteMooseObjectWarehouse<AuxKernelBase> _kokkos_nodal_aux_storage;
   ExecuteMooseObjectWarehouse<AuxKernelBase> _kokkos_elemental_aux_storage;
+
+  /// Kokkos auxiliary kernels computed in a single device pass
+  struct KokkosAuxStage
+  {
+    KokkosAuxStage();
+
+    /// Nodal kernels, which read coupled values from DOFs and are computed first
+    MooseObjectWarehouse<AuxKernelBase> nodal;
+    /// Elemental kernels, which read coupled values from the cached quadrature point values
+    MooseObjectWarehouse<AuxKernelBase> elemental;
+  };
+
+  /// Active Kokkos auxiliary kernels of each execution flag grouped into stages, where a kernel
+  /// coupling the current value of a variable runs in a later stage than the kernels writing it
+  std::map<ExecFlagType, std::vector<KokkosAuxStage>> _kokkos_aux_stages;
 #endif
 
   friend class ComputeIndicatorThread;

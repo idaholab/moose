@@ -137,14 +137,14 @@
   []
   [co2]
     type = TabulatedBicubicFluidProperties
-    fp = co2sw
+    input_fp = co2sw
   []
   [water]
     type = Water97FluidProperties
   []
   [watertab]
     type = TabulatedBicubicFluidProperties
-    fp = water
+    input_fp = water
     temperature_min = 273.15
     temperature_max = 573.15
     fluid_property_output_file = water_fluid_properties.csv

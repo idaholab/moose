@@ -156,7 +156,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
 
   params.addParamNamesToGroup(
       "cell_dislocation_density_forcing_function wall_dislocation_density_forcing_function "
-      "old_creep_strain_forcing_function effective_stress_forcing_function seed stress_unit",
+      "old_creep_strain_forcing_function effective_stress_forcing_function stress_unit",
       "Advanced");
 
   return params;

@@ -241,7 +241,7 @@ findEdgeNeighborsWithinEdgeInternal(const Elem * const candidate,
   // If we have the type already: use it so we can avoid all of the virtual
   // calls that we would be making on Elem
   mooseAssert(dynamic_cast<const T *>(candidate), "Incorrect elem type");
-  const T * const T_candidate = static_cast<const T *>(candidate);
+  const T * const T_candidate = cast_ptr<const T *>(candidate);
 
   // Local index of our two vertices of interest (if any)
   auto v1 = T_candidate->get_node_index(vertex1);

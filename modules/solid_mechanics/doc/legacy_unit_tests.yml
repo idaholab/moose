@@ -1,0 +1,8 @@
+# Existing GoogleTests awaiting SQA metadata. New entries are prohibited; this list may only shrink.
+unit:
+  - LagrangianObjectiveRateTest.jaumannJacobian
+  - LagrangianObjectiveRateTest.rashidJacobian
+  - LagrangianObjectiveRateTest.truesdellJacobian
+  - LagrangianObjectiveRateTest.zeroIncrement
+  - RankTwoScalarToolsTest.ErrorComputingEV
+  - RotationTensorTest.rotation

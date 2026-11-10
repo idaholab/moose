@@ -150,4 +150,13 @@
     issues = "#11716 #23609 #24381"
     design = 'PorousFlowMultiComponentFluid.md'
   []
+  [tabulated_pvt]
+    type = 'CSVDiff'
+    input = 'tabulated_pvt.i'
+    csvdiff = 'tabulated_pvt.csv'
+    rel_err = 1.0E-5
+    requirement = "The system shall be able to use fluid properties computed from a table of pressure, formation volume factor and viscosity in a PorousFlow simulation."
+    issues = "#34051"
+    design = 'TabulatedPVTFluidProperties.md'
+  []
 []

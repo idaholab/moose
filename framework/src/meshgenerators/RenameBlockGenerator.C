@@ -134,7 +134,10 @@ RenameBlockGenerator::RenameBlockGenerator(const InputParameters & parameters)
   }
 
   if (_old_block.size() != _new_block.size())
-    paramError(new_block_param_name, "Must be the same length as '", _old_block_param_name, "'");
+    paramError(new_block_param_name,
+               "Length (" + std::to_string(_new_block.size()) + ") must be the same length as '",
+               _old_block_param_name,
+               "' (" + std::to_string(_old_block.size()) + ")");
 }
 
 std::unique_ptr<MeshBase>
@@ -292,7 +295,7 @@ RenameBlockGenerator::generate()
       mesh->set_subdomain_name_map().erase(old_block_ids[i]);
   // With the old names removed, add the new names if there are any to add
   for (const auto & pair : new_names)
-    mesh->subdomain_name(pair.first) = pair.second;
+    mesh->set_subdomain_name(pair.first, pair.second);
 
   mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);

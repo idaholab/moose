@@ -1,0 +1,92 @@
+[Tests]
+  [tabulated_pvt_fluid_properties]
+    requirement = 'The system shall compute fluid properties from a table of pressure, formation volume factor and viscosity,'
+    design = 'TabulatedPVTFluidProperties.md'
+    issues = '#34051'
+    [fluid_name]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.fluidName
+      detail = 'returning the fluid name;'
+    []
+    [molar_mass]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.molarMass
+      detail = 'returning the user-supplied molar mass;'
+    []
+    [table_values]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.tableValues
+      detail = 'reproducing the tabulated density and viscosity exactly at the tabulated pressures;'
+    []
+    [interpolation]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.interpolation
+      detail = 'interpolating the reciprocal formation volume factor and the reciprocal of its product with viscosity linearly in pressure, and computing internal energy and enthalpy;'
+    []
+    [extrapolation]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.extrapolation
+      detail = 'extrapolating linearly from the end intervals outside the tabulated pressure range if out-of-bounds pressures are ignored;'
+    []
+    [throw]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.throwException
+      detail = 'throwing an exception by default for pressures outside the tabulated range;'
+    []
+    [invalid_solution]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.invalidSolution
+      detail = 'using the end values of the table outside the tabulated pressure range while declaring the solution invalid or recording a warning, when requested;'
+    []
+    [set_to_closest_bound]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.setToClosestBound
+      detail = 'using the end values of the table outside the tabulated pressure range when requested;'
+    []
+    [derivatives]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.derivatives
+      detail = 'with derivatives that match finite differences inside and outside the tabulated range;'
+    []
+    [ad]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.ad
+      detail = 'with automatic-differentiation derivatives that match the hand-coded derivatives;'
+    []
+    [extrapolation_error]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.extrapolationError
+      detail = 'throwing an exception if extrapolation gives a non-positive formation volume factor;'
+    []
+    [non_increasing_pressure]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.nonIncreasingPressure
+      detail = 'reporting an error if the tabulated pressures are not strictly increasing;'
+    []
+    [too_few_pressures]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.tooFewPressures
+      detail = 'reporting an error if fewer than two pressures are tabulated;'
+    []
+    [wrong_size_formation_volume_factor]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.wrongSizeFormationVolumeFactor
+      detail = 'reporting an error if the number of formation volume factors differs from the number of pressures;'
+    []
+    [wrong_size_viscosity]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.wrongSizeViscosity
+      detail = 'reporting an error if the number of viscosities differs from the number of pressures;'
+    []
+    [non_positive_formation_volume_factor]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.nonPositiveFormationVolumeFactor
+      detail = 'reporting an error if a formation volume factor is not positive; and'
+    []
+    [non_positive_viscosity]
+      type = GoogleTest
+      unit_test = TabulatedPVTFluidPropertiesTest.nonPositiveViscosity
+      detail = 'reporting an error if a viscosity is not positive.'
+    []
+  []
+[]

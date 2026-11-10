@@ -84,6 +84,8 @@
   start_time = 0.0
   end_time = 1.0
   dt = 0.0625
+  # converge tightly so the solution does not depend on how many iterations the solver takes
+  nl_rel_tol = 1e-12
 
  [./TimeIntegrator]
    type = ImplicitMidpoint

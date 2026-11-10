@@ -17,7 +17,7 @@ This example shows a multi-app with multiple sub applications. It uses the same 
 
 !listing reporter_transfer/clone.i block=multi_reporter indent=2 header=[MultiApps] footer=[]
 
-The transfer syntax is pretty minimal giving reporter value names (can be found in [sub0.i](reporter_transfer/sub0.i)) on the sub-app and reporter object name on main app, the object name is used to associate the cloned value to an object.
+The transfer syntax is pretty minimal giving reporter value names (can be found in [!file text=sub0.i](reporter_transfer/sub0.i)) on the sub-app and reporter object name on main app, the object name is used to associate the cloned value to an object.
 
 !listing reporter_transfer/clone.i block=multi_rep indent=2 header=[Transfers] footer=[]
 
@@ -25,7 +25,7 @@ When run in serial, a single output file is produced which shows the vectors of 
 
 !listing reporter_transfer/gold/clone_serial.json language=json start=multi_rep:from_sub_pp:value end=multi_vpp:from_sub_vpp:a
 
-In parallel, the sub app reporter values are split into different files, one for each processor. This example was run with 6 processors which split the 4 sub apps. So the root processor for each sub app ([clone_out.json](reporter_transfer/gold/clone_out.json), [clone_out.json.1](reporter_transfer/gold/clone_out.json.1), [clone_out.json.2](reporter_transfer/gold/clone_out.json.2), and [clone_out.json.4](reporter_transfer/gold/clone_out.json.4)) will show the value, while the other processors ([clone_out.json.3](reporter_transfer/gold/clone_out.json.3) and [clone_out.json.5](reporter_transfer/gold/clone_out.json.5)) will be empty:
+In parallel, the sub app reporter values are split into different files, one for each processor. This example was run with 6 processors which split the 4 sub apps. So the root processor for each sub app ([!file text=clone_out.json](reporter_transfer/gold/clone_out.json), [!file text=clone_out.json.1](reporter_transfer/gold/clone_out.json.1), [!file text=clone_out.json.2](reporter_transfer/gold/clone_out.json.2), and [!file text=clone_out.json.4](reporter_transfer/gold/clone_out.json.4)) will show the value, while the other processors ([!file text=clone_out.json.3](reporter_transfer/gold/clone_out.json.3) and [!file text=clone_out.json.5](reporter_transfer/gold/clone_out.json.5)) will be empty:
 
 !listing reporter_transfer/gold/clone_out.json language=json start=multi_rep:from_sub_pp:value end=multi_vpp:from_sub_vpp:a
 

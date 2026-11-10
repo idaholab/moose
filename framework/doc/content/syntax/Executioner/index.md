@@ -8,7 +8,7 @@ of commands in the `Executioner` block, and the `TimeStepper` block nested withi
 The PETSc package is used as the underlying solver in MOOSE, and provides a wide
 variety of options to control its behavior. These can be specified in the
 Executioner block. Please see the online
-[PETSc documentation](http://www.mcs.anl.gov/petsc/documentation/index.html) for
+[PETSc documentation](https://petsc.org/main/) for
 detailed information about these options.
 MOOSE exposes PETSc and MOOSE-specific nonlinear line searches through the
 [!param](/Executioner/Steady/line_search) parameter; see the

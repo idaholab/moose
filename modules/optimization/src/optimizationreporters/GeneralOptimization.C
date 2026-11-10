@@ -98,7 +98,7 @@ GeneralOptimization::setICsandBounds()
   // Set here because some derived reporters use a different method of
   // determining numbers of dofs
   if (!(isParamValid("num_values_name") ^ isParamValid("num_values")))
-    paramError("Need to supply one and only one of num_values_name or num_values.");
+    mooseError("Need to supply one and only one of 'num_values_name' or 'num_values'.");
 
   if (_num_values_reporter)
     _nvalues = *_num_values_reporter;
@@ -109,9 +109,13 @@ GeneralOptimization::setICsandBounds()
 
   // size checks
   if (_parameter_names.size() != _nvalues.size())
-    paramError(
-        "num_parameters",
-        "There should be a number in \'num_parameters\' for each name in \'parameter_names\'.");
+  {
+    const std::string source = isParamValid("num_values_name") ? "num_values_name" : "num_values";
+    paramError(source,
+               "There should be a number in \'",
+               source,
+               "\' for each name in \'parameter_names\'.");
+  }
 
   for (const auto & param_id : make_range(_nparams))
   {

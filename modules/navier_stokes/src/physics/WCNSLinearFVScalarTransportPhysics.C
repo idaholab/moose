@@ -72,7 +72,6 @@ WCNSLinearFVScalarTransportPhysics::addSolverVariables()
     return;
 
   auto params = getFactory().getValidParams("MooseLinearVariableFVReal");
-  assignBlocks(params, _blocks);
 
   for (const auto name_i : index_range(_passive_scalar_names))
   {
@@ -84,12 +83,11 @@ WCNSLinearFVScalarTransportPhysics::addSolverVariables()
       continue;
     }
 
-    params.set<SolverSystemName>("solver_sys") = getSolverSystem(name_i);
     if (isParamValid("passive_scalar_scaling"))
       params.set<std::vector<Real>>("scaling") = {
           getParam<std::vector<Real>>("passive_scalar_scaling")[name_i]};
 
-    getProblem().addVariable("MooseLinearVariableFVReal", _passive_scalar_names[name_i], params);
+    addSharedSolverVariable("MooseLinearVariableFVReal", _passive_scalar_names[name_i], params);
   }
 }
 
@@ -181,8 +179,11 @@ WCNSLinearFVScalarTransportPhysics::addScalarSourceKernels()
       {
         params.set<MooseFunctorName>("source_density") =
             _passive_scalar_coupled_sources[scalar_i][i];
-        if (_passive_scalar_sources_coef.size())
-          params.set<Real>("scaling_factor") = _passive_scalar_sources_coef[scalar_i][i];
+        if (_passive_scalar_coupled_sources_coef.size())
+          params.set<Real>("scaling_factor") = _passive_scalar_coupled_sources_coef[scalar_i][i];
+        if (_passive_scalar_coupled_sources_blocks.size())
+          params.set<std::vector<SubdomainName>>("block") =
+              _passive_scalar_coupled_sources_blocks[scalar_i][i];
 
         getProblem().addLinearFVKernel(kernel_type,
                                        prefix() + "ins_" + _passive_scalar_names[scalar_i] +

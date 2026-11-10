@@ -47,11 +47,11 @@ To model this thermo-hydro system, the `PorousFlowBasicTHM` action needs to be e
 
 and some extra properties need to be added to the [`SimpleFluidProperties`](SimpleFluidProperties.md):
 
-!listing modules/porous_flow/examples/tutorial/03.i start=[Modules] end=[Materials]
+!listing modules/porous_flow/examples/tutorial/03.i block=FluidProperties
 
 The boundary conditions used are the same as in [Page 01](porous_flow/tutorial_01.md) in addition to specifying a constant injection temperature of 313$\,$K:
 
-!listing modules/porous_flow/examples/tutorial/03.i start=[constant_injection_temperature] end=[]
+!listing modules/porous_flow/examples/tutorial/03.i block=BCs
 
 Finally, some temperature-related `Materials` need to be defined
 

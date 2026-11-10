@@ -14,7 +14,7 @@
 #include "NonlinearSystemBase.h"
 #include "ConvergenceIterationTypes.h"
 
-#include "libmesh/equation_systems.h"
+#include "libmesh/system.h"
 
 // PETSc includes
 #include <petsc.h>
@@ -44,24 +44,26 @@ DefaultNonlinearConvergence::DefaultNonlinearConvergence(const InputParameters &
     _div_threshold(std::numeric_limits<Real>::max()),
     _nl_forced_its(getSharedExecutionerParam<unsigned int>("nl_forced_its")),
     _nl_max_pingpong(getSharedExecutionerParam<unsigned int>("n_max_nonlinear_pingpong")),
-    _nl_current_pingpong(0)
+    _nl_current_pingpong(0),
+    _nl_rel_step_tol(getSharedExecutionerParam<Real>("nl_rel_step_tol")),
+    _nl_max_funcs(getSharedExecutionerParam<unsigned int>("nl_max_funcs")),
+    _nl_max_its(getSharedExecutionerParam<unsigned int>("nl_max_its")),
+    _nl_abs_tol(getSharedExecutionerParam<Real>("nl_abs_tol")),
+    _nl_rel_tol(getSharedExecutionerParam<Real>("nl_rel_tol"))
 {
-  EquationSystems & es = _fe_problem.es();
+}
 
-  es.parameters.set<unsigned int>("nonlinear solver maximum iterations") =
-      getSharedExecutionerParam<unsigned int>("nl_max_its");
-  es.parameters.set<unsigned int>("nonlinear solver maximum function evaluations") =
-      getSharedExecutionerParam<unsigned int>("nl_max_funcs");
-  es.parameters.set<Real>("nonlinear solver absolute residual tolerance") =
-      getSharedExecutionerParam<Real>("nl_abs_tol");
-  es.parameters.set<Real>("nonlinear solver relative residual tolerance") =
-      getSharedExecutionerParam<Real>("nl_rel_tol");
-  es.parameters.set<Real>("nonlinear solver divergence tolerance") =
-      getSharedExecutionerParam<Real>("nl_div_tol");
-  es.parameters.set<Real>("nonlinear solver absolute step tolerance") =
-      getSharedExecutionerParam<Real>("nl_abs_step_tol");
-  es.parameters.set<Real>("nonlinear solver relative step tolerance") =
-      getSharedExecutionerParam<Real>("nl_rel_step_tol");
+void
+DefaultNonlinearConvergence::initialSetup()
+{
+  DefaultConvergenceBase::initialSetup();
+
+  // This method is also called in preLoop(), which will overwrite the parameters set here.
+  // It needs to be called here to collect the names of any duplicate parameters for the
+  // checkDuplicateSetSharedExecutionerParams() check. It needs to be called in preLoop()
+  // because it needs to know the current nonlinear system; Convergence objects do not know
+  // their "associated" nonlinear system (and they could in fact have multiple).
+  setNonlinearSystemParameters();
 }
 
 void
@@ -71,6 +73,37 @@ DefaultNonlinearConvergence::checkIterationType(IterationType it_type) const
 
   if (it_type != ConvergenceIterationTypes::NONLINEAR)
     mooseError("DefaultNonlinearConvergence can only be used with nonlinear solves.");
+}
+
+void
+DefaultNonlinearConvergence::preLoop()
+{
+  DefaultConvergenceBase::preLoop();
+
+  setNonlinearSystemParameters();
+}
+
+void
+DefaultNonlinearConvergence::setNonlinearSystemParameters()
+{
+  NonlinearSystemBase & nl_sys = _fe_problem.currentNonlinearSystem();
+
+  auto & params = nl_sys.system().parameters;
+  params.set<unsigned int>("nonlinear solver maximum iterations") = _nl_max_its;
+  params.set<unsigned int>("nonlinear solver maximum function evaluations") = _nl_max_funcs;
+  params.set<Real>("nonlinear solver absolute residual tolerance") = _nl_abs_tol;
+  params.set<Real>("nonlinear solver relative residual tolerance") = _nl_rel_tol;
+  params.set<Real>("nonlinear solver divergence tolerance") =
+      getSharedExecutionerParam<Real>("nl_div_tol");
+  params.set<Real>("nonlinear solver absolute step tolerance") =
+      getSharedExecutionerParam<Real>("nl_abs_step_tol");
+  params.set<Real>("nonlinear solver relative step tolerance") = _nl_rel_step_tol;
+
+  // Records which object's tolerances are the ones actually active on the shared SNES, so that
+  // checkPetscToleranceOverrides() does not mistake another DefaultNonlinearConvergence object's
+  // (legitimately) overwriting these same parameters for an ignored PETSc command-line option.
+  params.set<const DefaultNonlinearConvergence *>(
+      "_default_nonlinear_convergence_tolerance_writer") = this;
 }
 
 NonlinearSystemBase &
@@ -103,6 +136,50 @@ DefaultNonlinearConvergence::checkResidualConvergence(const unsigned int n_iter,
     return false;
 }
 
+void
+DefaultNonlinearConvergence::checkPetscToleranceOverrides()
+{
+  if (_nl_checked_petsc_tolerance_overrides)
+    return;
+  _nl_checked_petsc_tolerance_overrides = true;
+
+  NonlinearSystemBase & nl_sys = nonlinearSystem();
+  auto & params = nl_sys.system().parameters;
+  // If another DefaultNonlinearConvergence object last wrote these shared parameters (as
+  // happens when multiple such objects are combined, e.g. via ParsedConvergence, onto the same
+  // nonlinear system), its tolerances are the ones actually active on the SNES, not ours; that
+  // is not a PETSc command-line override, so there is nothing for us to warn about here.
+  if (params.get<const DefaultNonlinearConvergence *>(
+          "_default_nonlinear_convergence_tolerance_writer") != this)
+    return;
+
+  SNES snes = nl_sys.getSNES();
+  PetscReal abs_tol, rel_tol, rel_step_tol;
+  PetscInt max_its, max_funcs;
+  LibmeshPetscCallA(
+      _fe_problem.comm().get(),
+      SNESGetTolerances(snes, &abs_tol, &rel_tol, &rel_step_tol, &max_its, &max_funcs));
+
+  std::ostringstream oss;
+  if (abs_tol != _nl_abs_tol)
+    oss << "  -snes_atol = " << abs_tol << " (nl_abs_tol = " << _nl_abs_tol << ")\n";
+  if (rel_tol != _nl_rel_tol)
+    oss << "  -snes_rtol = " << rel_tol << " (nl_rel_tol = " << _nl_rel_tol << ")\n";
+  if (rel_step_tol != _nl_rel_step_tol)
+    oss << "  -snes_stol = " << rel_step_tol << " (nl_rel_step_tol = " << _nl_rel_step_tol << ")\n";
+  if (max_its != static_cast<PetscInt>(_nl_max_its))
+    oss << "  -snes_max_it = " << max_its << " (nl_max_its = " << _nl_max_its << ")\n";
+  if (max_funcs != static_cast<PetscInt>(_nl_max_funcs))
+    oss << "  -snes_max_funcs = " << max_funcs << " (nl_max_funcs = " << _nl_max_funcs << ")\n";
+
+  if (!oss.str().empty())
+    mooseWarning("The following PETSc SNES option(s) were set to a value different from what "
+                 "this Convergence object enforces. Because this object performs its own "
+                 "convergence check using its own cached tolerances, these PETSc-level settings "
+                 "have no effect:\n",
+                 oss.str());
+}
+
 Convergence::MooseConvergenceStatus
 DefaultNonlinearConvergence::checkConvergence(unsigned int n_iter)
 {
@@ -112,6 +189,8 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int n_iter)
   MooseConvergenceStatus status = MooseConvergenceStatus::ITERATING;
 
   SNES snes = system.getSNES();
+
+  checkPetscToleranceOverrides();
 
   // ||u||
   PetscReal xnorm;
@@ -128,13 +207,6 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int n_iter)
   // Get current number of function evaluations done by SNES
   PetscInt nfuncs;
   LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetNumberFunctionEvals(snes, &nfuncs));
-
-  // Get tolerances from SNES
-  PetscReal rel_step_tol;
-  PetscInt max_its, max_funcs;
-  LibmeshPetscCallA(
-      _fe_problem.comm().get(),
-      SNESGetTolerances(snes, &_abs_tol, &_rel_tol, &rel_step_tol, &max_its, &max_funcs));
 
 #if !PETSC_VERSION_LESS_THAN(3, 8, 4)
   PetscBool force_iteration = PETSC_FALSE;
@@ -200,11 +272,11 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int n_iter)
     oss << "Failed to converge, residual norm is NaN\n";
     status = MooseConvergenceStatus::DIVERGED;
   }
-  else if (checkResidualConvergence(n_iter, fnorm, ref_residual, _rel_tol, _abs_tol, oss))
+  else if (checkResidualConvergence(n_iter, fnorm, ref_residual, _nl_rel_tol, _nl_abs_tol, oss))
     status = MooseConvergenceStatus::CONVERGED;
-  else if (nfuncs >= max_funcs)
+  else if (nfuncs >= cast_int<PetscInt>(_nl_max_funcs))
   {
-    oss << "Exceeded maximum number of residual evaluations: " << nfuncs << " > " << max_funcs
+    oss << "Exceeded maximum number of residual evaluations: " << nfuncs << " > " << _nl_max_funcs
         << '\n';
     status = MooseConvergenceStatus::DIVERGED;
   }
@@ -214,9 +286,9 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int n_iter)
     oss << "Nonlinear solve was blowing up!\n";
     status = MooseConvergenceStatus::DIVERGED;
   }
-  else if (snorm < rel_step_tol * xnorm)
+  else if (snorm < _nl_rel_step_tol * xnorm)
   {
-    oss << "Converged due to small update length: " << snorm << " < " << rel_step_tol << " * "
+    oss << "Converged due to small update length: " << snorm << " < " << _nl_rel_step_tol << " * "
         << xnorm << '\n';
     status = MooseConvergenceStatus::CONVERGED;
   }
@@ -255,4 +327,22 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int n_iter)
   verboseOutput(oss);
 
   return status;
+}
+
+void
+DefaultNonlinearConvergence::setMaximumIterations(const unsigned int max_iter)
+{
+  _nl_max_its = max_iter;
+}
+
+void
+DefaultNonlinearConvergence::setAbsoluteTolerance(const Real abs_tol)
+{
+  _nl_abs_tol = abs_tol;
+}
+
+void
+DefaultNonlinearConvergence::setRelativeTolerance(const Real rel_tol)
+{
+  _nl_rel_tol = rel_tol;
 }

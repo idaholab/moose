@@ -19,7 +19,7 @@ ParsedPostprocessor::validParams()
 
   params.addRequiredCustomTypeParam<std::string>(
       "expression", "FunctionExpression", "function expression");
-
+  params.declareControllable("expression", {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN});
   params.addParam<std::vector<PostprocessorName>>("pp_names", {}, "Post-processors arguments");
   params.addParam<std::vector<std::string>>(
       "pp_symbols", {}, "Symbol associated with each post-processor argument");
@@ -42,12 +42,15 @@ ParsedPostprocessor::ParsedPostprocessor(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     FunctionParserUtils(parameters),
     _n_pp(coupledPostprocessors("pp_names")),
+    _pexp(getParam<std::string>("expression")),
+    _oldexp(getParam<std::string>("expression")),
+    _pcnames(getParam<std::vector<std::string>>("constant_names")),
+    _pcexps(getParam<std::vector<std::string>>("constant_expressions")),
     _use_t(getParam<bool>("use_t")),
-    _value(0.0)
+    _value(0.0),
+    _postprocessors("")
 {
   // build postprocessors argument
-  std::string postprocessors;
-
   const std::vector<std::string> pp_symbols = getParam<std::vector<std::string>>("pp_symbols");
   // sanity checks
   if (!pp_symbols.empty() && (pp_symbols.size() != _n_pp))
@@ -58,20 +61,20 @@ ParsedPostprocessor::ParsedPostprocessor(const InputParameters & parameters)
   if (pp_symbols.empty())
   {
     for (std::size_t i = 0; i < _n_pp; ++i)
-      postprocessors += (i == 0 ? "" : ",") + pp_names[i];
+      _postprocessors += (i == 0 ? "" : ",") + pp_names[i];
   }
   else
-    postprocessors = MooseUtils::stringJoin(pp_symbols, ",");
+    _postprocessors = MooseUtils::stringJoin(pp_symbols, ",");
 
   // add time if required
   if (_use_t)
-    postprocessors += (postprocessors.empty() ? "" : ",") + std::string("t");
+    _postprocessors += (_postprocessors.empty() ? "" : ",") + std::string("t");
 
   // Create parsed function
   _func_F = std::make_shared<SymFunction>();
   parsedFunctionSetup(_func_F,
                       getParam<std::string>("expression"),
-                      postprocessors,
+                      _postprocessors,
                       getParam<std::vector<std::string>>("constant_names"),
                       getParam<std::vector<std::string>>("constant_expressions"),
                       comm());
@@ -91,6 +94,11 @@ ParsedPostprocessor::initialize()
 void
 ParsedPostprocessor::execute()
 {
+  if (_pexp != _oldexp)
+  {
+    _oldexp = _pexp;
+    parsedFunctionSetup(_func_F, _pexp, _postprocessors, _pcnames, _pcexps, comm());
+  }
 }
 
 void

@@ -1,0 +1,9 @@
+[Tests]
+  design = 'FVAdvectedMUSCLDeferredCorrection.md'
+  issues = '#31965'
+  [advected_muscl_deferred_correction]
+    type = GoogleTest
+    unit_test = FVInterpolationMethodTest.advectedMUSCLDeferredCorrection
+    requirement = 'The system shall compute the deferred-correction contribution of the MUSCL advected-interpolation scheme, reducing to pure upwinding when the deferred correction factor is zero and reproducing the full linear reconstruction to the face when the deferred correction factor is one.'
+  []
+[]

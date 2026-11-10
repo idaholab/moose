@@ -35,6 +35,17 @@
     max_threads = 1 # see libmesh issue #3808
     recover = false # SIMPLE is a steady solver
   []
+  [linearfv_reconstructed]
+    type = CSVDiff
+    input = conservation_LinearFV.i
+    csvdiff = conservation_LinearFV_reconstructed.csv
+    cli_args = 'pressure_gradient_method=reconstructed Executioner/num_iterations=400 Outputs/file_base=conservation_LinearFV_reconstructed'
+    abs_zero = 1e-8
+    requirement = 'The reconstructed pressure-gradient method shall preserve equal and opposite Rhie-Chow face mass fluxes at the inlet and outlet of a linear finite volume channel.'
+    max_threads = 1 # see libmesh issue #3808
+    recover = false # SIMPLE is a steady solver
+    issues = '#32995'
+  []
   [insfv_diverging]
     requirement = 'The system shall be able to compute flow rates and prove mass, momentum and energy conservation at internal and external boundaries of a frictionless heated diverging channel with a finite volume incompressible Navier Stokes model,'
     [insfv_quad_xy]

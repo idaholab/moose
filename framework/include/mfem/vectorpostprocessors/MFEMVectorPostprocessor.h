@@ -14,7 +14,7 @@
 #include "MFEMExecutedObject.h"
 #include "VectorPostprocessor.h"
 
-/*
+/**
  * Vector postprocessor for MFEM results. Must inherit from VectorPostprocessor
  * in order for MOOSE to call it.
  */

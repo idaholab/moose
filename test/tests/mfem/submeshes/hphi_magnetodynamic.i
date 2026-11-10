@@ -10,7 +10,7 @@ vacuum_permeability = 1.0
 []
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/split_embedded_concentric_torus.e
 []
 
@@ -88,7 +88,6 @@ vacuum_permeability = 1.0
     variable = j_field
     source = h_field
     scale_factor = 1.0
-    execute_on = TIMESTEP_END
   []
 []
 

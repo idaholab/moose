@@ -130,10 +130,14 @@ k2 = 0
 
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
+  # added to test PC reuse feature
+  momentum_pc_recompute_frequency = 2
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
   passive_scalar_petsc_options_iname = '-pc_type -pc_hypre_type'
   passive_scalar_petsc_options_value = 'hypre boomeramg'
+  # added to test PC reuse feature
+  passive_scalar_pc_recompute_frequency = 10
 
   print_fields = false
   continue_on_max_its = true

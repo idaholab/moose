@@ -121,7 +121,7 @@ ChainControlDataSystem::getChainControlData(const std::string & data_name)
   else
     _chain_control_data_map[data_name] = std::make_unique<ChainControlData<T>>(_app, data_name);
 
-  return static_cast<ChainControlData<T> &>(*_chain_control_data_map[data_name]);
+  return cast_ref<ChainControlData<T> &>(*_chain_control_data_map[data_name]);
 }
 
 template <typename T>

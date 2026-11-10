@@ -15,10 +15,12 @@
 #include "MooseLagrangeHelpers.h"
 #include "MortarSegmentHelper.h"
 #include "MortarUtils.h"
+#include "MooseMeshUtils.h"
 #include "FormattedTable.h"
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "Output.h"
+#include "SolutionInvalidity.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/explicit_system.h"
@@ -42,6 +44,7 @@
 #include "libmesh/enum_to_string.h"
 #include "libmesh/statistics.h"
 #include "libmesh/equation_systems.h"
+#include "libmesh/fe_map.h"
 
 #include "metaphysicl/dualnumber.h"
 
@@ -53,7 +56,6 @@
 #include <cmath>
 #include <limits>
 
-using namespace libMesh;
 using MetaPhysicL::DualNumber;
 
 // Make newer nanoflann API spelling compatible with older nanoflann
@@ -64,175 +66,6 @@ namespace nanoflann
 typedef SearchParams SearchParameters;
 }
 #endif
-
-namespace
-{
-// QNodal on a parent side returns normals, weights, and physical points in the
-// parent-side quadrature ordering. That ordering is not guaranteed to match the
-// node ordering of the generated lower-dimensional secondary element, especially
-// for higher-order faces. Build the association geometrically so each
-// quadrature value is attached to the secondary node at the same physical point.
-std::vector<unsigned int>
-nodalQuadraturePointToSecondaryNodeMap(const Elem & secondary_elem,
-                                       const std::vector<Point> & q_points)
-{
-  const auto n_nodes = secondary_elem.n_nodes();
-  if (q_points.size() != n_nodes)
-    mooseError("Nodal quadrature produced ",
-               q_points.size(),
-               " points for secondary mortar element ",
-               secondary_elem.id(),
-               " of type ",
-               libMesh::Utility::enum_to_string<ElemType>(secondary_elem.type()),
-               ", but the element has ",
-               n_nodes,
-               " nodes.");
-
-  const auto invalid_node = std::numeric_limits<unsigned int>::max();
-  std::vector<unsigned int> qpoint_to_node(n_nodes, invalid_node);
-  std::vector<bool> node_used(n_nodes, false);
-
-  const Real element_size = secondary_elem.hmax();
-  mooseAssert(element_size > 0,
-              "Secondary mortar element "
-                  << secondary_elem.id() << " of type "
-                  << libMesh::Utility::enum_to_string<ElemType>(secondary_elem.type())
-                  << " has a non-positive hmax and cannot be used for nodal quadrature point "
-                     "matching.");
-
-  // The nodal quadrature locations and the generated secondary nodes are two floating-point
-  // reconstructions of the same physical points. Scale the tolerance by element size so the
-  // matching is insensitive to coordinate magnitude; the 100*TOLERANCE factor allows roundoff
-  // from FE reinitialization and mesh generation while remaining far below a valid node spacing.
-  const Real matching_tol = 100 * TOLERANCE * element_size;
-  const Real matching_tol_sq = matching_tol * matching_tol;
-
-  // Each nodal quadrature point should coincide with exactly one still-unused
-  // secondary node. The unused-node search makes the mapping one-to-one and
-  // avoids silently assigning two quadrature entries to the same node.
-  for (const auto qp : make_range(q_points.size()))
-  {
-    unsigned int closest_node = invalid_node;
-    Real closest_dist_sq = std::numeric_limits<Real>::max();
-    Real second_closest_dist_sq = std::numeric_limits<Real>::max();
-
-    for (const auto n : make_range(n_nodes))
-    {
-      if (node_used[n])
-        continue;
-
-      const Real dist_sq = (q_points[qp] - secondary_elem.point(n)).norm_sq();
-      if (dist_sq < closest_dist_sq)
-      {
-        second_closest_dist_sq = closest_dist_sq;
-        closest_dist_sq = dist_sq;
-        closest_node = n;
-      }
-      else if (dist_sq < second_closest_dist_sq)
-        second_closest_dist_sq = dist_sq;
-    }
-
-    if (closest_node == invalid_node || closest_dist_sq > matching_tol_sq)
-      mooseError("Could not match nodal quadrature point ",
-                 qp,
-                 " at ",
-                 q_points[qp],
-                 " to a node on secondary mortar element ",
-                 secondary_elem.id(),
-                 " of type ",
-                 libMesh::Utility::enum_to_string<ElemType>(secondary_elem.type()),
-                 ". The nearest unmatched node distance is ",
-                 std::sqrt(closest_dist_sq),
-                 ", which exceeds the tolerance ",
-                 matching_tol,
-                 ".");
-
-    if (second_closest_dist_sq <= matching_tol_sq)
-      mooseError("Nodal quadrature point ",
-                 qp,
-                 " at ",
-                 q_points[qp],
-                 " does not map uniquely to secondary mortar element ",
-                 secondary_elem.id(),
-                 " of type ",
-                 libMesh::Utility::enum_to_string<ElemType>(secondary_elem.type()),
-                 ". Two unmatched nodes are within the matching tolerance ",
-                 matching_tol,
-                 ".");
-
-    qpoint_to_node[qp] = closest_node;
-    node_used[closest_node] = true;
-  }
-
-#ifdef DEBUG
-  // In optimized builds the mapping above skips already matched nodes for speed. In debug builds,
-  // audit the full candidate set to catch ambiguous geometry or accidental many-to-one matches.
-  std::vector<unsigned int> node_to_qpoint(n_nodes, invalid_node);
-  for (const auto qp : make_range(q_points.size()))
-  {
-    const auto mapped_node = qpoint_to_node[qp];
-    mooseAssert(mapped_node != invalid_node && mapped_node < n_nodes,
-                "Invalid secondary node mapping for nodal quadrature point " << qp << ".");
-    mooseAssert(node_to_qpoint[mapped_node] == invalid_node,
-                "Secondary node " << mapped_node << " on mortar element " << secondary_elem.id()
-                                  << " was matched to both nodal quadrature point "
-                                  << node_to_qpoint[mapped_node] << " and " << qp << ".");
-    node_to_qpoint[mapped_node] = qp;
-
-    // Check the qp -> node direction without excluding nodes already matched by previous qps.
-    unsigned int candidate_count = 0;
-    unsigned int candidate_node = invalid_node;
-    for (const auto n : make_range(n_nodes))
-      if ((q_points[qp] - secondary_elem.point(n)).norm_sq() <= matching_tol_sq)
-      {
-        ++candidate_count;
-        candidate_node = n;
-      }
-
-    mooseAssert(candidate_count == 1,
-                "Nodal quadrature point " << qp << " on mortar element " << secondary_elem.id()
-                                          << " has " << candidate_count
-                                          << " secondary node candidates within tolerance "
-                                          << matching_tol << ".");
-    mooseAssert(candidate_node == mapped_node,
-                "Nodal quadrature point " << qp << " on mortar element " << secondary_elem.id()
-                                          << " was matched to node " << mapped_node
-                                          << ", but the full candidate search found node "
-                                          << candidate_node << ".");
-  }
-
-  for (const auto n : make_range(n_nodes))
-  {
-    mooseAssert(node_to_qpoint[n] != invalid_node,
-                "Secondary node " << n << " on mortar element " << secondary_elem.id()
-                                  << " was not matched to a nodal quadrature point.");
-
-    // Check the node -> qp direction so every secondary node is also uniquely represented.
-    unsigned int candidate_count = 0;
-    unsigned int candidate_qp = invalid_node;
-    for (const auto qp : make_range(q_points.size()))
-      if ((q_points[qp] - secondary_elem.point(n)).norm_sq() <= matching_tol_sq)
-      {
-        ++candidate_count;
-        candidate_qp = qp;
-      }
-
-    mooseAssert(candidate_count == 1,
-                "Secondary node " << n << " on mortar element " << secondary_elem.id() << " has "
-                                  << candidate_count
-                                  << " nodal quadrature point candidates within tolerance "
-                                  << matching_tol << ".");
-    mooseAssert(candidate_qp == node_to_qpoint[n],
-                "Secondary node " << n << " on mortar element " << secondary_elem.id()
-                                  << " was matched to nodal quadrature point " << node_to_qpoint[n]
-                                  << ", but the full candidate search found point " << candidate_qp
-                                  << ".");
-  }
-#endif
-
-  return qpoint_to_node;
-}
-}
 
 class MortarNodalGeometryOutput : public Output
 {
@@ -259,9 +92,8 @@ public:
       mooseError("No entries found in the secondary node -> nodal geometry map.");
 
     auto & problem = _app.feProblem();
-    auto & subproblem = _amg._on_displaced
-                            ? static_cast<SubProblem &>(*problem.getDisplacedProblem())
-                            : static_cast<SubProblem &>(problem);
+    auto & subproblem = _amg._on_displaced ? cast_ref<SubProblem &>(*problem.getDisplacedProblem())
+                                           : cast_ref<SubProblem &>(problem);
     auto & nodal_normals_es = subproblem.es();
 
     const std::string nodal_normals_sys_name = "nodal_normals";
@@ -639,7 +471,7 @@ AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
               : Moose::fe_lagrange_2D_shape(secondary_elem.type(),
                                             secondary_elem.default_order(),
                                             n,
-                                            static_cast<const TypeVector<Real> &>(xi1_pts[qp]));
+                                            cast_ref<const TypeVector<Real> &>(xi1_pts[qp]));
       normals[qp] += phi * nodal_normals[n];
     }
 
@@ -908,13 +740,16 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // will not be considered in mortar thermomechanical contact.
     if (!orientation1_valid && !orientation2_valid)
     {
-      mooseDoOnce(mooseWarning(
-          "AutomaticMortarGeneration: Unable to determine valid secondary-primary orientation. "
-          "Consequently we will consider projection of the primary node invalid and not split the "
-          "mortar segment. "
-          "This situation can indicate there are very oblique projections between primary (mortar) "
-          "and secondary (non-mortar) surfaces for a good problem set up. It can also mean your "
-          "time step is too large. This message is only printed once."));
+      static const auto invalid_orientation_id =
+          moose::internal::getSolutionInvalidityRegistry().registerInvalidity(
+              "AutomaticMortarGeneration",
+              "Unable to determine valid secondary-primary orientation. Consequently we will "
+              "consider projection of the primary node invalid and not split the mortar segment. "
+              "This situation can indicate there are very oblique projections between primary "
+              "(mortar) and secondary (non-mortar) surfaces for a good problem set up. It can also "
+              "mean your time step is too large.",
+              true);
+      _app.solutionInvalidity().flagInvalidSolutionInternal(invalid_orientation_id);
       continue;
     }
 
@@ -1726,31 +1561,29 @@ AutomaticMortarGeneration::buildCouplingInformation()
     const Elem * secondary_elem = pr.second.secondary_elem;
     const Elem * primary_elem = pr.second.primary_elem;
 
+    // Every process owning a row on a secondary node or either volume parent needs the complete
+    // secondary face-star coupling, including when that process also owns the lower-dimensional
+    // face.
+    std::set<processor_id_type> secondary_face_coupling_processors{
+        secondary_elem->processor_id(),
+        secondary_elem->interior_parent()->processor_id(),
+        primary_elem->interior_parent()->processor_id()};
+    for (const auto n : secondary_elem->node_index_range())
+      secondary_face_coupling_processors.insert(secondary_elem->node_ptr(n)->processor_id());
+
     // LowerSecondary
-    coupling_info[secondary_elem->processor_id()].emplace_back(
-        secondary_elem->id(), secondary_elem->interior_parent()->id());
-    if (secondary_elem->processor_id() != _mesh.processor_id())
-      // We want to keep information for nonlocal lower-dimensional secondary element point
-      // neighbors for mortar nodal aux kernels
-      _mortar_interface_coupling[secondary_elem->id()].insert(
-          secondary_elem->interior_parent()->id());
+    for (const auto processor : secondary_face_coupling_processors)
+      coupling_info[processor].emplace_back(secondary_elem->id(),
+                                            secondary_elem->interior_parent()->id());
 
     // LowerPrimary
-    coupling_info[secondary_elem->processor_id()].emplace_back(
-        secondary_elem->id(), primary_elem->interior_parent()->id());
-    if (secondary_elem->processor_id() != _mesh.processor_id())
-      // We want to keep information for nonlocal lower-dimensional secondary element point
-      // neighbors for mortar nodal aux kernels
-      _mortar_interface_coupling[secondary_elem->id()].insert(
-          primary_elem->interior_parent()->id());
+    for (const auto processor : secondary_face_coupling_processors)
+      coupling_info[processor].emplace_back(secondary_elem->id(),
+                                            primary_elem->interior_parent()->id());
 
     // Lower-LowerDimensionalPrimary
-    coupling_info[secondary_elem->processor_id()].emplace_back(secondary_elem->id(),
-                                                               primary_elem->id());
-    if (secondary_elem->processor_id() != _mesh.processor_id())
-      // We want to keep information for nonlocal lower-dimensional secondary element point
-      // neighbors for mortar nodal aux kernels
-      _mortar_interface_coupling[secondary_elem->id()].insert(primary_elem->id());
+    for (const auto processor : secondary_face_coupling_processors)
+      coupling_info[processor].emplace_back(secondary_elem->id(), primary_elem->id());
 
     // SecondaryLower
     coupling_info[secondary_elem->interior_parent()->processor_id()].emplace_back(
@@ -1769,6 +1602,13 @@ AutomaticMortarGeneration::buildCouplingInformation()
         primary_elem->interior_parent()->id(), secondary_elem->interior_parent()->id());
   }
 
+  // A face pair may produce several mortar segments. Remove repeated entries before communication.
+  for (auto & [_, couplings] : coupling_info)
+  {
+    std::sort(couplings.begin(), couplings.end());
+    couplings.erase(std::unique(couplings.begin(), couplings.end()), couplings.end());
+  }
+
   // Push the coupling information
   auto action_functor =
       [this](processor_id_type,
@@ -1778,15 +1618,83 @@ AutomaticMortarGeneration::buildCouplingInformation()
       _mortar_interface_coupling[i].insert(j);
   };
   TIMPI::push_parallel_vector_data(_mesh.comm(), coupling_info, action_functor);
+
+  if (!_nonlocal_secondary_couplings)
+    return;
+
+  // The push above sends a secondary lower-dimensional element's couplings only to the processes
+  // owning it, its nodes, or its segments' volume parents. Some consumers (e.g. penalty contact)
+  // apply a secondary node's constraint on every process that contributes to it, not only on the
+  // node's owner. The weighted gap at a node shared by a local element E and a nonlocal element F
+  // carries the derivatives of the primary elements coupled to F, and the process owning E (or a
+  // volume parent coupled to E) applies that gap to its own rows. When AugmentSparsityOnInterface
+  // ghosts point neighbors, it reads the couplings of F to add those primary columns to the rows.
+  // For a local element, it reads the couplings of the point neighbors of the element's own
+  // secondary lower-dimensional elements and of the secondary elements coupled to it (e.g. those
+  // paired with a local primary element), so pull the couplings of those point neighbors from
+  // their owners, which hold the complete sets after the push
+  const auto is_secondary = [this](const Elem * const elem)
+  { return _secondary_boundary_subdomain_ids.count(elem->subdomain_id()); };
+  const auto pid = _mesh.processor_id();
+  std::unordered_set<const Elem *> secondary_elems_read;
+  for (const auto secondary_subdomain_id : _secondary_boundary_subdomain_ids)
+    for (const Elem * const secondary_elem :
+         as_range(_mesh.active_subdomain_elements_begin(secondary_subdomain_id),
+                  _mesh.active_subdomain_elements_end(secondary_subdomain_id)))
+      if (secondary_elem->processor_id() == pid ||
+          secondary_elem->interior_parent()->processor_id() == pid)
+        secondary_elems_read.insert(secondary_elem);
+  for (const auto & [elem_id, coupled_elem_ids] : _mortar_interface_coupling)
+    if (const Elem * const elem = _mesh.query_elem_ptr(elem_id);
+        elem && elem->processor_id() == pid)
+      for (const auto coupled_elem_id : coupled_elem_ids)
+        if (const Elem * const coupled_elem = _mesh.query_elem_ptr(coupled_elem_id);
+            coupled_elem && is_secondary(coupled_elem))
+          secondary_elems_read.insert(coupled_elem);
+
+  std::unordered_set<const Elem *> secondary_elems_queried;
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> secondary_elems_to_query;
+  for (const Elem * const secondary_elem : secondary_elems_read)
+  {
+    std::set<const Elem *> point_neighbors;
+    secondary_elem->find_point_neighbors(point_neighbors);
+    point_neighbors.insert(secondary_elem);
+    for (const Elem * const neigh : point_neighbors)
+      if (neigh->active() && is_secondary(neigh) && neigh->processor_id() != pid &&
+          secondary_elems_queried.insert(neigh).second)
+        secondary_elems_to_query[neigh->processor_id()].push_back(neigh->id());
+  }
+
+  auto gather_functor = [this](processor_id_type,
+                               const std::vector<dof_id_type> & secondary_elem_ids,
+                               std::vector<std::vector<dof_id_type>> & coupled_elem_ids)
+  {
+    coupled_elem_ids.resize(secondary_elem_ids.size());
+    for (const auto i : index_range(secondary_elem_ids))
+      if (const auto it = _mortar_interface_coupling.find(secondary_elem_ids[i]);
+          it != _mortar_interface_coupling.end())
+        coupled_elem_ids[i].assign(it->second.begin(), it->second.end());
+  };
+  auto act_on_data_functor = [this](processor_id_type,
+                                    const std::vector<dof_id_type> & secondary_elem_ids,
+                                    const std::vector<std::vector<dof_id_type>> & coupled_elem_ids)
+  {
+    for (const auto i : index_range(secondary_elem_ids))
+      _mortar_interface_coupling[secondary_elem_ids[i]].insert(coupled_elem_ids[i].begin(),
+                                                               coupled_elem_ids[i].end());
+  };
+  std::vector<dof_id_type> * example = nullptr;
+  TIMPI::pull_parallel_vector_data(
+      _mesh.comm(), secondary_elems_to_query, gather_functor, act_on_data_functor, example);
 }
 
 std::vector<AutomaticMortarGeneration::MsmSubdomainStats>
 AutomaticMortarGeneration::computeMsmStatistics()
 {
   std::vector<MsmSubdomainStats> result;
-  StatisticsVector<Real> primary;
-  StatisticsVector<Real> secondary;
-  StatisticsVector<Real> msm;
+  libMesh::StatisticsVector<Real> primary;
+  libMesh::StatisticsVector<Real> secondary;
+  libMesh::StatisticsVector<Real> msm;
   std::unordered_map<dof_id_type, Real> primary_elems_to_volume;
 
   for (const auto & [primary_subd_id, secondary_subd_id] : _primary_secondary_subdomain_id_pairs)
@@ -1825,26 +1733,33 @@ AutomaticMortarGeneration::computeMsmStatistics()
     }
 
     _mesh.comm().set_union(primary_elems_to_volume);
-    _mesh.comm().allgather(static_cast<std::vector<Real> &>(secondary));
-    _mesh.comm().allgather(static_cast<std::vector<Real> &>(msm));
+    _mesh.comm().allgather(cast_ref<std::vector<Real> &>(secondary));
+    _mesh.comm().allgather(cast_ref<std::vector<Real> &>(msm));
     primary.reserve(primary_elems_to_volume.size());
     for (const auto [_, volume] : primary_elems_to_volume)
       primary.push_back(volume);
+
+    // An interface on which no mortar segments formed has empty primary and segment lists, for
+    // which libMesh's maximum() and minimum() are undefined. Report 0, as median() does.
+    const auto max_volume = [](const auto & volumes)
+    { return volumes.empty() ? Real(0) : volumes.maximum(); };
+    const auto min_volume = [](const auto & volumes)
+    { return volumes.empty() ? Real(0) : volumes.minimum(); };
 
     MsmSubdomainStats stats;
     stats.primary_subd_id = primary_subd_id;
     stats.secondary_subd_id = secondary_subd_id;
     stats.secondary_lower_n_elems = secondary.size();
-    stats.secondary_lower_max_volume = secondary.maximum();
-    stats.secondary_lower_min_volume = secondary.minimum();
+    stats.secondary_lower_max_volume = max_volume(secondary);
+    stats.secondary_lower_min_volume = min_volume(secondary);
     stats.secondary_lower_median_volume = secondary.median();
     stats.primary_lower_n_elems = primary.size();
-    stats.primary_lower_max_volume = primary.maximum();
-    stats.primary_lower_min_volume = primary.minimum();
+    stats.primary_lower_max_volume = max_volume(primary);
+    stats.primary_lower_min_volume = min_volume(primary);
     stats.primary_lower_median_volume = primary.median();
     stats.msm_n_elems = msm.size();
-    stats.msm_max_volume = msm.maximum();
-    stats.msm_min_volume = msm.minimum();
+    stats.msm_max_volume = max_volume(msm);
+    stats.msm_min_volume = min_volume(msm);
     stats.msm_median_volume = msm.median();
     result.push_back(stats);
 
@@ -1912,9 +1827,6 @@ AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
   // linearized element does not have the same volume as the warped element
   const Real tol = (dim() == 3) ? 0.1 : TOLERANCE;
 
-  std::unordered_map<processor_id_type, std::set<dof_id_type>> proc_to_inactive_nodes_set;
-  const auto my_pid = _mesh.processor_id();
-
   // List of inactive nodes on local secondary elements
   std::unordered_set<dof_id_type> inactive_node_ids;
 
@@ -1945,55 +1857,20 @@ AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
           inactive_node_ids.insert(el->node_id(n));
       }
 
-  // Assemble list of procs that nodes contribute to
-  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
-  {
-    const auto secondary_subd_id = pr.second;
-
-    // Loop through all elements not on my processor
-    for (const auto el : _mesh.active_subdomain_elements_ptr_range(secondary_subd_id))
-    {
-      // Get processor_id
-      const auto pid = el->processor_id();
-
-      // If element is in my subdomain, skip
-      if (pid == my_pid)
-        continue;
-
-      // If element on proc pid shares any of my inactive nodes, mark to send
-      for (const auto n : make_range(el->n_nodes()))
-      {
-        const auto node_id = el->node_id(n);
-        if (inactive_node_ids.find(node_id) != inactive_node_ids.end())
-          proc_to_inactive_nodes_set[pid].insert(node_id);
-      }
-    }
-  }
-
-  // Send list of inactive nodes
-  {
-    // Pack set into vector for sending (push_parallel_vector_data doesn't like sets)
-    std::unordered_map<processor_id_type, std::vector<dof_id_type>> proc_to_inactive_nodes_vector;
-    for (const auto & proc_set : proc_to_inactive_nodes_set)
-      proc_to_inactive_nodes_vector[proc_set.first].insert(
-          proc_to_inactive_nodes_vector[proc_set.first].end(),
-          proc_set.second.begin(),
-          proc_set.second.end());
-
-    // First push data
-    auto action_functor = [this, &inactive_node_ids](const processor_id_type pid,
-                                                     const std::vector<dof_id_type> & sent_data)
-    {
-      if (pid == _mesh.processor_id())
-        mooseError("Should not be communicating with self.");
-      for (const auto pr : sent_data)
-        inactive_node_ids.insert(pr);
-    };
-    TIMPI::push_parallel_vector_data(_mesh.comm(), proc_to_inactive_nodes_vector, action_functor);
-  }
-  _inactive_local_lm_nodes.clear();
+  // Only the owner of a node zeroes its LM DoFs, but the owner need not own (or even ghost) any
+  // secondary lower-dimensional element touching it, so send each inactive node to its owner,
+  // which takes the union
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> proc_to_inactive_nodes;
   for (const auto node_id : inactive_node_ids)
-    _inactive_local_lm_nodes.insert(_mesh.node_ptr(node_id));
+    proc_to_inactive_nodes[_mesh.node_ptr(node_id)->processor_id()].push_back(node_id);
+
+  _inactive_local_lm_nodes.clear();
+  auto action_functor = [this](const processor_id_type, const std::vector<dof_id_type> & sent_data)
+  {
+    for (const auto node_id : sent_data)
+      _inactive_local_lm_nodes.insert(_mesh.node_ptr(node_id));
+  };
+  TIMPI::push_parallel_vector_data(_mesh.comm(), proc_to_inactive_nodes, action_functor);
 }
 
 void
@@ -2005,8 +1882,10 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
     return;
   }
 
-  std::unordered_map<processor_id_type, std::set<dof_id_type>> proc_to_active_nodes_set;
-  const auto my_pid = _mesh.processor_id();
+  // Only the owner of a node zeroes its LM DoFs, but the owner need not own (or even ghost) any
+  // secondary lower-dimensional element touching it. Each processor therefore sends every node of
+  // its local secondary elements to the node's owner, flagged as active if a local mortar segment
+  // touches it. A node is inactive if no processor flags it as active.
 
   // List of active nodes on local secondary elements
   std::unordered_set<dof_id_type> active_local_nodes;
@@ -2021,62 +1900,40 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
       active_local_nodes.insert(secondary_elem->node_id(n));
   }
 
-  // Assemble list of procs that nodes contribute to
-  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
-  {
-    const auto secondary_subd_id = pr.second;
-
-    // Loop through all elements not on my processor
-    for (const auto el : _mesh.active_subdomain_elements_ptr_range(secondary_subd_id))
-    {
-      // Get processor_id
-      const auto pid = el->processor_id();
-
-      // If element is in my subdomain, skip
-      if (pid == my_pid)
-        continue;
-
-      // If element on proc pid shares any of my active nodes, mark to send
-      for (const auto n : make_range(el->n_nodes()))
-      {
-        const auto node_id = el->node_id(n);
-        if (active_local_nodes.find(node_id) != active_local_nodes.end())
-          proc_to_active_nodes_set[pid].insert(node_id);
-      }
-    }
-  }
-
-  // Send list of active nodes
-  {
-    // Pack set into vector for sending (push_parallel_vector_data doesn't like sets)
-    std::unordered_map<processor_id_type, std::vector<dof_id_type>> proc_to_active_nodes_vector;
-    for (const auto & proc_set : proc_to_active_nodes_set)
-    {
-      proc_to_active_nodes_vector[proc_set.first].reserve(proc_to_active_nodes_set.size());
-      for (const auto node_id : proc_set.second)
-        proc_to_active_nodes_vector[proc_set.first].push_back(node_id);
-    }
-
-    // First push data
-    auto action_functor = [this, &active_local_nodes](const processor_id_type pid,
-                                                      const std::vector<dof_id_type> & sent_data)
-    {
-      if (pid == _mesh.processor_id())
-        mooseError("Should not be communicating with self.");
-      active_local_nodes.insert(sent_data.begin(), sent_data.end());
-    };
-    TIMPI::push_parallel_vector_data(_mesh.comm(), proc_to_active_nodes_vector, action_functor);
-  }
-
-  // Every proc has correct list of active local nodes, now take complement (list of inactive nodes)
-  // and store to use later to zero LM DoFs on inactive nodes
-  _inactive_local_lm_nodes.clear();
+  // List of all nodes on local secondary elements
+  std::unordered_set<dof_id_type> local_nodes;
   for (const auto & pr : _primary_secondary_subdomain_id_pairs)
     for (const auto el : _mesh.active_local_subdomain_elements_ptr_range(
              /*secondary_subd_id*/ pr.second))
       for (const auto n : make_range(el->n_nodes()))
-        if (active_local_nodes.find(el->node_id(n)) == active_local_nodes.end())
-          _inactive_local_lm_nodes.insert(el->node_ptr(n));
+        local_nodes.insert(el->node_id(n));
+
+  // Pairs of (node id, 1 if active on the sending processor and 0 otherwise)
+  std::unordered_map<processor_id_type, std::vector<std::pair<dof_id_type, unsigned char>>>
+      proc_to_nodes;
+  for (const auto node_id : local_nodes)
+    proc_to_nodes[_mesh.node_ptr(node_id)->processor_id()].emplace_back(
+        node_id, active_local_nodes.count(node_id));
+
+  std::unordered_set<dof_id_type> candidate_nodes, active_nodes;
+  auto action_functor = [&candidate_nodes, &active_nodes](
+                            const processor_id_type,
+                            const std::vector<std::pair<dof_id_type, unsigned char>> & sent_data)
+  {
+    for (const auto & [node_id, active] : sent_data)
+    {
+      candidate_nodes.insert(node_id);
+      if (active)
+        active_nodes.insert(node_id);
+    }
+  };
+  TIMPI::push_parallel_vector_data(_mesh.comm(), proc_to_nodes, action_functor);
+
+  // Store the owned inactive nodes to use later to zero LM DoFs on inactive nodes
+  _inactive_local_lm_nodes.clear();
+  for (const auto node_id : candidate_nodes)
+    if (!active_nodes.count(node_id))
+      _inactive_local_lm_nodes.insert(_mesh.node_ptr(node_id));
 }
 
 // Note: could be combined with previous routine, keeping separate for clarity (for now)
@@ -2138,7 +1995,7 @@ AutomaticMortarGeneration::computeNodalGeometry()
               "AutomaticMortarGeneration::computeNodalGeometry() is only valid for "
               "mortar constraints on 2D or 3D meshes.");
   // A nodal lower-dimensional nodal quadrature rule to be used on faces.
-  QNodal qface(dim - 1);
+  libMesh::QNodal qface(dim - 1);
 
   // A map from the node id to the attached elemental normals/weights evaluated at the node. Th
   // length of the vector will correspond to the number of elements attached to the node. If it is a
@@ -2197,7 +2054,7 @@ AutomaticMortarGeneration::computeNodalGeometry()
     // quadrature ordering and lower-dimensional side-element node ordering are
     // identical.
     const auto qpoint_to_secondary_node =
-        nodalQuadraturePointToSecondaryNodeMap(*secondary_elem, face_points);
+        MooseMeshUtils::nodalQuadraturePointToNodeMap(*secondary_elem, face_points);
 
     mooseAssert(face_normals.size() == face_points.size() && JxW.size() == face_points.size(),
                 "Face nodal geometry vectors must have the same size.");
@@ -2210,6 +2067,7 @@ AutomaticMortarGeneration::computeNodalGeometry()
     }
   }
 
+  // Normalize the JxW-weighted sum of incident face normals at each secondary node.
   for (const auto & pr : node_to_normals_map)
   {
     // Compute normal vector
@@ -2222,60 +2080,150 @@ AutomaticMortarGeneration::computeNodalGeometry()
     nodal_normal = nodal_normal.unit();
 
     _secondary_node_to_nodal_normal[_mesh.node_ptr(node_id)] = nodal_normal;
-
-    Point nodal_tangent_one;
-    Point nodal_tangent_two;
-    householderOrthogolization(nodal_normal, nodal_tangent_one, nodal_tangent_two);
-
-    _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)][0] = nodal_tangent_one;
-    _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)][1] = nodal_tangent_two;
+    _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)] =
+        Moose::Mortar::nodalTangents(nodal_normal, dim);
   }
 }
 
 void
-AutomaticMortarGeneration::householderOrthogolization(const Point & nodal_normal,
-                                                      Point & nodal_tangent_one,
-                                                      Point & nodal_tangent_two) const
+AutomaticMortarGeneration::computeADNodalNormals(
+    const std::function<ADPoint(const Node &)> & coordinate,
+    std::unordered_map<const Node *, ADRealVectorValue> & nodal_normals) const
 {
-  using std::abs;
+  const auto dim = _mesh.mesh_dimension();
+  mooseAssert(dim == 2 || dim == 3, "AD nodal normals are only valid for 2D or 3D mortar.");
 
-  mooseAssert(MooseUtils::absoluteFuzzyEqual(nodal_normal.norm(), 1),
-              "The input nodal normal should have unity norm");
+  libMesh::QNodal qface(dim - 1);
+  const auto & qweights = qface.get_weights();
+  const Real sign = _periodic ? -1 : 1;
 
-  const Real nx = nodal_normal(0);
-  const Real ny = nodal_normal(1);
-  const Real nz = nodal_normal(2);
+  std::unordered_map<const Node *, ADRealVectorValue> weighted_area_vectors;
+  std::unordered_map<const Node *, Real> weighted_area_magnitudes;
 
-  // See Lopes DS, Silva MT, Ambrosio JA. Tangent vectors to a 3-D surface normal: A geometric tool
-  // to find orthogonal vectors based on the Householder transformation. Computer-Aided Design. 2013
-  // Mar 1;45(3):683-94. We choose one definition of h_vector and deal with special case.
-  const Point h_vector(nx + 1.0, ny, nz);
+  // One face FE object per secondary element order, reused across elements of that order
+  std::map<Order, std::unique_ptr<FEBase>> fe_faces;
 
-  // Avoid singularity of the equations at the end of routine by providing the solution to
-  // (nx,ny,nz)=(-1,0,0) Normal/tangent fields can be visualized by outputting nodal geometry mesh
-  // on a spherical problem.
-  if (abs(h_vector(0)) < TOLERANCE)
+  // AD propagates coordinate derivatives through the parent-side area vectors and normalization.
+  for (const auto secondary_subdomain_id : _secondary_boundary_subdomain_ids)
+    for (const Elem * const secondary_elem :
+         as_range(_mesh.active_subdomain_elements_begin(secondary_subdomain_id),
+                  _mesh.active_subdomain_elements_end(secondary_subdomain_id)))
+    {
+      const Elem * const interior_parent = secondary_elem->interior_parent();
+      mooseAssert(interior_parent,
+                  "No interior parent exists for element "
+                      << secondary_elem->id()
+                      << ". There may be a problem with your sideset set-up.");
+
+      const Real element_size = secondary_elem->hmax();
+      if (element_size <= 0)
+        mooseError("Cannot compute an AD nodal normal for secondary mortar element ",
+                   secondary_elem->id(),
+                   " because it has a non-positive characteristic length.");
+
+      const auto side = interior_parent->which_side_am_i(secondary_elem);
+      auto & fe_face = fe_faces[secondary_elem->default_order()];
+      if (!fe_face)
+      {
+        fe_face = FEBase::build(dim, FEType(secondary_elem->default_order(), LAGRANGE));
+        fe_face->attach_quadrature_rule(&qface);
+      }
+
+      const auto & face_normals = fe_face->get_normals();
+      const auto & face_points = fe_face->get_xyz();
+      const auto & map_dpsidxi = fe_face->get_fe_map().get_dpsidxi();
+      const auto * const map_dpsideta = dim == 3 ? &fe_face->get_fe_map().get_dpsideta() : nullptr;
+
+      fe_face->reinit(interior_parent, side);
+
+      const auto qpoint_to_secondary_node =
+          MooseMeshUtils::nodalQuadraturePointToNodeMap(*secondary_elem, face_points);
+
+      mooseAssert(face_normals.size() == face_points.size() &&
+                      qweights.size() == face_points.size(),
+                  "Face nodal geometry vectors and quadrature weights must have the same size.");
+
+      // The parent-side map includes enriched face mappings such as TET14-to-TRI7.
+      auto parent_side_elem = interior_parent->build_side_ptr(side);
+      const unsigned int n_mapping_shape_functions =
+          dim == 2 ? libMesh::FE<2, LAGRANGE>::n_dofs(parent_side_elem.get(),
+                                                      parent_side_elem->default_order())
+                   : libMesh::FE<3, LAGRANGE>::n_dofs(parent_side_elem.get(),
+                                                      parent_side_elem->default_order());
+      if (map_dpsidxi.size() != n_mapping_shape_functions ||
+          (map_dpsideta && map_dpsideta->size() != n_mapping_shape_functions))
+        mooseError("The parent-side geometric map for secondary mortar element ",
+                   secondary_elem->id(),
+                   " of type ",
+                   libMesh::Utility::enum_to_string<ElemType>(secondary_elem->type()),
+                   " does not have one mapping shape function per element node.");
+      mooseAssert(n_mapping_shape_functions <= parent_side_elem->n_nodes(),
+                  "The mapping basis must not index past the side element's nodes.");
+
+      std::vector<ADPoint> side_points;
+      side_points.reserve(n_mapping_shape_functions);
+      for (const auto side_node_index : make_range(n_mapping_shape_functions))
+        side_points.push_back(coordinate(parent_side_elem->node_ref(side_node_index)));
+
+      for (const auto qp : index_range(face_points))
+      {
+        const auto secondary_node_index = qpoint_to_secondary_node[qp];
+        const Node * const secondary_node = secondary_elem->node_ptr(secondary_node_index);
+
+        ADRealVectorValue tangent_xi;
+        ADRealVectorValue tangent_eta;
+        for (const auto side_node_index : make_range(n_mapping_shape_functions))
+        {
+          tangent_xi.add_scaled(side_points[side_node_index], map_dpsidxi[side_node_index][qp]);
+          if (dim == 3)
+            tangent_eta.add_scaled(side_points[side_node_index],
+                                   (*map_dpsideta)[side_node_index][qp]);
+        }
+
+        auto area_vector = dim == 2 ? ADRealVectorValue(tangent_xi(1), -tangent_xi(0), 0)
+                                    : tangent_xi.cross(tangent_eta);
+        const Real area = MetaPhysicL::raw_value(area_vector.norm());
+        const Real degeneracy_tolerance =
+            dim == 2 ? TOLERANCE * element_size : TOLERANCE * element_size * element_size;
+        if (area <= degeneracy_tolerance)
+          mooseError("Cannot compute an AD nodal normal on degenerate secondary mortar element ",
+                     secondary_elem->id(),
+                     ".");
+
+        // qweight * area_vector is equivalent to JxW * face_normal. Fix its orientation to the
+        // Real-valued face normal because the incident-face set and orientation are not
+        // differentiated.
+        const Real orientation =
+            MetaPhysicL::raw_value(area_vector) * face_normals[qp] < 0 ? -1 : 1;
+
+        weighted_area_vectors[secondary_node] += sign * orientation * qweights[qp] * area_vector;
+        weighted_area_magnitudes[secondary_node] += std::abs(qweights[qp]) * area;
+      }
+    }
+
+  nodal_normals.clear();
+  nodal_normals.reserve(weighted_area_vectors.size());
+  for (auto & [secondary_node, weighted_area_vector] : weighted_area_vectors)
   {
-    nodal_tangent_one(0) = 0;
-    nodal_tangent_one(1) = 1;
-    nodal_tangent_one(2) = 0;
+    const Real weighted_area_vector_norm = MetaPhysicL::raw_value(weighted_area_vector.norm());
+    const Real weighted_area_magnitude = libmesh_map_find(weighted_area_magnitudes, secondary_node);
+    if (weighted_area_vector_norm <= TOLERANCE * weighted_area_magnitude)
+      mooseError("Cannot compute a normalized AD nodal normal for secondary node ",
+                 secondary_node->id(),
+                 " because its incident face contributions cancel to a near-zero weighted normal.");
 
-    nodal_tangent_two(0) = 0;
-    nodal_tangent_two(1) = 0;
-    nodal_tangent_two(2) = -1;
-
-    return;
+    auto nodal_normal = weighted_area_vector.unit();
+    const auto & stored_normal = libmesh_map_find(_secondary_node_to_nodal_normal, secondary_node);
+    // Equivalent FE and AD evaluations of the same unit normal may differ through operation
+    // ordering. The tolerance admits roundoff while detecting inconsistent geometry states.
+    mooseAssert((MetaPhysicL::raw_value(nodal_normal) - stored_normal).norm() < 1e-10,
+                "The stored and AD secondary nodal normals must use the same geometry state.");
+    // Set the raw value from the stored contact direction while retaining the derivatives produced
+    // by the equivalent AD area-vector calculation.
+    for (const auto component : make_range(Moose::dim))
+      nodal_normal(component).value() = stored_normal(component);
+    nodal_normals.emplace(secondary_node, std::move(nodal_normal));
   }
-
-  const Real h = h_vector.norm();
-
-  nodal_tangent_one(0) = -2.0 * h_vector(0) * h_vector(1) / (h * h);
-  nodal_tangent_one(1) = 1.0 - 2.0 * h_vector(1) * h_vector(1) / (h * h);
-  nodal_tangent_one(2) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
-
-  nodal_tangent_two(0) = -2.0 * h_vector(0) * h_vector(2) / (h * h);
-  nodal_tangent_two(1) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
-  nodal_tangent_two(2) = 1.0 - 2.0 * h_vector(2) * h_vector(2) / (h * h);
 }
 
 // Project secondary nodes onto their corresponding primary elements for each primary/secondary
@@ -2624,8 +2572,8 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
         _failed_secondary_node_projections.insert(secondary_node->id());
         if (_debug)
           _console << "Failed to find primary Elem into which secondary node "
-                   << static_cast<const Point &>(*secondary_node) << ", id '"
-                   << secondary_node->id() << "', projects onto\n"
+                   << cast_ref<const Point &>(*secondary_node) << ", id '" << secondary_node->id()
+                   << "', projects onto\n"
                    << std::endl;
       }
       else if (_debug)
@@ -2879,7 +2827,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
       if (!projection_succeeded && _debug)
       {
         _console << "\nFailed to find point from which primary node "
-                 << static_cast<const Point &>(*primary_node) << " was projected." << std::endl
+                 << cast_ref<const Point &>(*primary_node) << " was projected." << std::endl
                  << std::endl;
       }
     } // loop over side nodes

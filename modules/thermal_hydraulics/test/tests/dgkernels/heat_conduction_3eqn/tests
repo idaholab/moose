@@ -6,5 +6,6 @@
     input = 'test.py'
     test_case = TestHeatConduction3Eqn
     requirement = 'The heat conduction DG kernel for the single-phase flow model shall have the correct spatial convergence order.'
+    min_slots = 2
   []
 []

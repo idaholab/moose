@@ -14,8 +14,6 @@
 
 #include "libmesh/mesh_tools.h"
 
-using namespace libMesh;
-
 InputParameters
 ImageSampler::validParams()
 {
@@ -311,13 +309,18 @@ ImageSampler::vtkThreshold()
                "be set");
 
   // Create the thresholding object
-  _image_threshold = vtkSmartPointer<vtkImageThreshold>::New();
+  _image_threshold = vtkSmartPointer<mooseVtkImageBinaryThreshold>::New();
 
   // Set the data source
   _image_threshold->SetInputConnection(_algorithm);
 
   // Setup the thresholding options
+#if LIBMESH_DETECTED_VTK_VERSION_MAJOR < 9 ||                                                      \
+    (LIBMESH_DETECTED_VTK_VERSION_MAJOR == 9 && LIBMESH_DETECTED_VTK_VERSION_MINOR < 7)
   _image_threshold->ThresholdByUpper(_is_pars.get<Real>("threshold"));
+#else
+  _image_threshold->SetLowerThreshold(_is_pars.get<Real>("threshold"));
+#endif
   _image_threshold->ReplaceInOn();
   _image_threshold->SetInValue(_is_pars.get<Real>("upper_value"));
   _image_threshold->ReplaceOutOn();

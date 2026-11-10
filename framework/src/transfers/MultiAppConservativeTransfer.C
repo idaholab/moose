@@ -320,7 +320,7 @@ MultiAppConservativeTransfer::adjustTransferredSolutionNearestPoint(
   auto & to_sys = to_var.sys().system();
   auto var_num = to_sys.variable_number(_to_var_name);
   auto sys_num = to_sys.number();
-  auto & pps = static_cast<const NearestPointIntegralVariablePostprocessor &>(
+  auto & pps = cast_ref<const NearestPointIntegralVariablePostprocessor &>(
       _current_direction == FROM_MULTIAPP ? (to_problem.getUserObjectBase(to_postprocessor))
                                           : (from_problem->getUserObjectBase(from_postprocessor)));
   auto & to_solution = to_var.sys().solution();

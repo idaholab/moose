@@ -34,6 +34,8 @@ public:
   InternalSideUserObject(const InputParameters & parameters);
 
 protected:
+  bool usesFaceCoupledValues() const override { return true; }
+
   MooseMesh & _mesh;
 
   const MooseArray<Point> & _q_point;

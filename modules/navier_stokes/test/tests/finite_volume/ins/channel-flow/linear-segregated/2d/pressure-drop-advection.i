@@ -84,7 +84,7 @@ reference_pressure_drop = 0.8386252
     type = FVAdvectedMinmodWeightBased
   []
   [venkatakrishnan]
-    type = FVAdvectedVenkatakrishnanDeferredCorrection
+    type = FVAdvectedMUSCLDeferredCorrection
   []
 []
 

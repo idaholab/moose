@@ -15,8 +15,6 @@
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_quad9.h"
 
-using namespace libMesh;
-
 registerMooseObject("ThermalHydraulicsApp", THMMesh);
 
 const BoundaryName THMMesh::INVALID_BOUNDARY_ID = "invalid_boundary_id";
@@ -117,7 +115,7 @@ THMMesh::addNodeElement(dof_id_type node)
 {
   dof_id_type elem_id = getNextElementId();
 
-  Elem * elem = new NodeElem;
+  Elem * elem = new libMesh::NodeElem;
   elem->set_id(elem_id);
   _mesh->add_elem(elem);
   elem->set_node(0, _mesh->node_ptr(node));

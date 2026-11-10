@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -174,7 +174,7 @@ VectorIntegratedBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const De
   auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 2));
 
   auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 1)];
+  auto jvar = sys.getFieldCoupling(_kokkos_var.var())[_thread(tid, 1)];
 
   if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;

@@ -10,8 +10,6 @@
 #include "ExceptionMaterial.h"
 #include "NonlinearSystemBase.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseTestApp", ExceptionMaterial);
 
 InputParameters

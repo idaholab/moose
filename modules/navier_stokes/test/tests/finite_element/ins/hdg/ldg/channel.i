@@ -86,6 +86,9 @@ mu = 1
 
 [Executioner]
   type = Steady
+  # The default tolerance stops Newton one iteration early, which leaves differences in the solution
+  # that depend on the ordering of the statically condensed degrees of freedom
+  nl_rel_tol = 1e-10
 []
 
 [Outputs]

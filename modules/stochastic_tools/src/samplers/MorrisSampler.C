@@ -50,60 +50,54 @@ MorrisSampler::MorrisSampler(const InputParameters & parameters)
   setNumberOfRows(_num_trajectories * (nc + 1));
 
   _b = RealEigenMatrix::Ones(nc + 1, nc).triangularView<Eigen::StrictlyLower>();
-  _pstar.resize(nc, nc);
   _j.setOnes(nc + 1, nc);
-  _dstar.resize(nc, nc);
-  _xstar.resize(nc + 1, nc);
   _bstar.resize(nc + 1, nc);
 }
 
 Real
-MorrisSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
+MorrisSampler::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
   const dof_id_type traj = row_index / (getNumberOfCols() + 1);
   const dof_id_type traj_ind = row_index % (getNumberOfCols() + 1);
   if (traj != _curr_trajectory)
   {
     _curr_trajectory = traj;
-    updateBstar();
+    updateBstar(_curr_trajectory);
   }
   return _distributions[col_index]->quantile(_bstar(traj_ind, col_index));
 }
 
 void
-MorrisSampler::updateBstar()
+MorrisSampler::updateBstar(dof_id_type trajectory_index) const
 {
-  mooseAssert(_curr_trajectory < _num_trajectories,
+  mooseAssert(trajectory_index < _num_trajectories,
               "Current trajectory index is greater than the prescribed number of trajectories.");
 
-  const dof_id_type nc = getNumberOfCols(); // convenience
-  dof_id_type rn_ind = _curr_trajectory * nc * (nc + 1);
+  const dof_id_type nc = getNumberOfCols();
+  dof_id_type rn_ind = trajectory_index * nc * (nc + 1);
 
-  _pstar.setZero();
-  // Which parameter to perturb
+  RealEigenMatrix pstar = RealEigenMatrix::Zero(nc, nc);
   std::vector<dof_id_type> pchoice(nc);
   std::iota(pchoice.begin(), pchoice.end(), 0);
   for (dof_id_type c = 0; c < nc; ++c)
   {
     const unsigned int ind = nc > 1 ? getRandl(rn_ind++, 0, pchoice.size()) : 0;
-    _pstar(pchoice[ind], c) = 1.0;
+    pstar(pchoice[ind], c) = 1.0;
     pchoice.erase(pchoice.begin() + ind);
   }
 
-  _dstar.setZero();
-  // Direction of perturbation
+  RealEigenMatrix dstar = RealEigenMatrix::Zero(nc, nc);
   for (dof_id_type c = 0; c < nc; ++c)
-    _dstar(c, c) = getRand(rn_ind++) < 0.5 ? -1.0 : 1.0;
+    dstar(c, c) = getRand(rn_ind++) < 0.5 ? -1.0 : 1.0;
 
-  // Initial value
+  RealEigenMatrix xstar(nc + 1, nc);
   for (dof_id_type c = 0; c < nc; ++c)
   {
     const auto lind = getRandl(rn_ind++, 0, _num_levels / 2);
-    _xstar.col(c).setConstant((Real)lind * 1.0 / ((Real)_num_levels - 1));
+    xstar.col(c).setConstant((Real)lind * 1.0 / ((Real)_num_levels - 1));
   }
 
-  _bstar =
-      _xstar + _num_levels / 4.0 / (_num_levels - 1) * ((2.0 * _b * _pstar - _j) * _dstar + _j);
+  _bstar = xstar + _num_levels / 4.0 / (_num_levels - 1) * ((2.0 * _b * pstar - _j) * dstar + _j);
 }
 
 LocalRankConfig

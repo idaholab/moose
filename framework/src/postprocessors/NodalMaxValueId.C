@@ -69,7 +69,7 @@ NodalMaxValueId::finalize()
 void
 NodalMaxValueId::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const NodalMaxValueId &>(y);
+  const auto & pps = cast_ref<const NodalMaxValueId &>(y);
   if (pps._value > _value)
   {
     _value = pps._value;

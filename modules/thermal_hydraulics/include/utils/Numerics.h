@@ -17,8 +17,6 @@
 #include "NavierStokesMethods.h"
 #include "HeatTransferUtils.h"
 
-using namespace libMesh;
-
 namespace THM
 {
 

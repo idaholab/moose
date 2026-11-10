@@ -222,7 +222,7 @@ MeshRepairGenerator::separateSubdomainsByElementType(std::unique_ptr<MeshBase> &
       {
         auto new_id = next_block_id + i++;
         // Create blocks when a block has multiple element types
-        mesh->subdomain_name(new_id) = mesh->subdomain_name(id) + "_" + Moose::stringify(type);
+        mesh->set_subdomain_name(new_id, mesh->subdomain_name(id) + "_" + Moose::stringify(type));
 
         // Re-assign elements to the new blocks
         for (auto elem : mesh->active_subdomain_elements_ptr_range(id))

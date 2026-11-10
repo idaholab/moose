@@ -15,6 +15,8 @@
 #include "Conversion.h"
 #include "NonlinearSystem.h"
 
+#include <algorithm>
+
 registerMooseObject("MooseApp", Split);
 
 InputParameters
@@ -168,9 +170,51 @@ Split::setup(NonlinearSystemBase & nl, const std::string & prefix)
     po.pairs.emplace_back(dmprefix + "fieldsplit_names", Moose::stringify(_splitting, ","));
 
     // Finally, recursively configure the splits contained within this split.
+    std::map<NonlinearVariableName, std::vector<std::pair<std::string, std::shared_ptr<Split>>>>
+        vars_to_splits;
     for (const auto & split_name : _splitting)
     {
       std::shared_ptr<Split> split = nl.getSplit(split_name);
+
+      // Make sure no two sibling splits explicitly claim the same variable in a way that would
+      // leave at most one of them actually preconditioning it. Two splits sharing a variable are
+      // only known to be safe if they are both restricted to disjoint regions; we can only prove
+      // that when both restrict via non-overlapping "blocks" (blocks partition the mesh, so any
+      // shared block name means the splits overlap). An unrestricted split applies to the whole
+      // mesh, so it conflicts with any sibling that claims the same variable, however that
+      // sibling restricts itself. Restrictions we cannot compare this way (sides/unsides, or
+      // subclass-specific mechanisms like ContactSplit's contact/uncontact surfaces) are assumed
+      // to legitimately partition the variable, as before.
+      for (const auto & var : split->getVars())
+      {
+        auto & prior_claims = vars_to_splits[var];
+        for (const auto & [prior_name, prior_split] : prior_claims)
+        {
+          const auto & blocks = split->getBlocks();
+          const auto & prior_blocks = prior_split->getBlocks();
+          const bool blocks_overlap =
+              !blocks.empty() && !prior_blocks.empty() &&
+              std::any_of(blocks.begin(),
+                          blocks.end(),
+                          [&prior_blocks](const auto & block)
+                          {
+                            return std::find(prior_blocks.begin(), prior_blocks.end(), block) !=
+                                   prior_blocks.end();
+                          });
+          if (!split->restrictsRegion() || !prior_split->restrictsRegion() || blocks_overlap)
+            mooseError("Variable '",
+                       var,
+                       "' is specified in both split '",
+                       prior_name,
+                       "' and split '",
+                       split_name,
+                       "', which are both part of split '",
+                       name(),
+                       "'");
+        }
+        prior_claims.emplace_back(split_name, split);
+      }
+
       std::string sprefix = prefix + "fieldsplit_" + split_name + "_";
       split->setup(nl, sprefix);
     }

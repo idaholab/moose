@@ -20,7 +20,7 @@
 class ActionWarehouse;
 class Component;
 class ClosuresBase;
-class THMMesh;
+class MooseMesh;
 class THMProblem;
 
 /**
@@ -147,11 +147,14 @@ public:
    * @param[in] name   Name of the variable
    * @param[in] fe_type   FEType of the variable
    * @param[in] scaling_factor   Scaling factor for the variable
+   * @param[in] solver_sys   Name of the solver system to add the variable to; only used for
+   *                         nonlinear variables (aux variables are always added to the aux system)
    */
   void addSimVariable(bool nl,
                       const VariableName & name,
                       libMesh::FEType fe_type,
-                      Real scaling_factor = 1.0);
+                      Real scaling_factor = 1.0,
+                      const SolverSystemName & solver_sys = "nl0");
 
   /**
    * Queues a variable of type MooseVariable to be added to the nonlinear or aux system.
@@ -161,12 +164,15 @@ public:
    * @param[in] fe_type   FEType of the variable
    * @param[in] subdomain_names   List of subdomain names to add the variable to
    * @param[in] scaling_factor   Scaling factor for the variable
+   * @param[in] solver_sys   Name of the solver system to add the variable to; only used for
+   *                         nonlinear variables (aux variables are always added to the aux system)
    */
   void addSimVariable(bool nl,
                       const VariableName & name,
                       libMesh::FEType fe_type,
                       const std::vector<SubdomainName> & subdomain_names,
-                      Real scaling_factor = 1.0);
+                      Real scaling_factor = 1.0,
+                      const SolverSystemName & solver_sys = "nl0");
 
   /**
    * Queues a generic variable to be added to the nonlinear or aux system.
@@ -238,11 +244,6 @@ public:
    * creating ghosted elements.
    */
   virtual void setupMesh();
-
-  /**
-   * Get the ThermalHydraulicsApp
-   */
-  ThermalHydraulicsApp & getApp() { return _thm_app; }
 
   /**
    * Check the integrity of the simulation
@@ -385,13 +386,13 @@ protected:
   };
 
   /// THM mesh
-  THMMesh & _thm_mesh;
+  MooseMesh & _thm_mesh;
 
   /// Pointer to FEProblem representing this simulation
   FEProblemBase & _fe_problem;
 
   /// The application this is associated with
-  ThermalHydraulicsApp & _thm_app;
+  MooseApp & _thm_app;
 
   /// The Factory associated with the MooseApp
   Factory & _thm_factory;
@@ -435,8 +436,8 @@ protected:
   void setupEquations();
 
   /**
-   * Setup reading initial conditions from a specified file, see 'initial_from_file' and
-   * 'initial_from_file_timestep' parameters
+   * Setup reading initial conditions from a specified file, see 'initial_from_file',
+   * 'initial_from_file_timestep', and 'initial_from_file_weighting_type' parameters
    */
   void setupInitialConditionsFromFile();
 

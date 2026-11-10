@@ -101,11 +101,12 @@ PorousFlowDarcyBaseTempl<is_ad>::PorousFlowDarcyBaseTempl(const InputParameters 
     mooseError("The variable '",
                _var.name(),
                "' is not a nodal (Lagrange) variable.  This kernel uses full upwinding, which "
-               "requires a nodal variable.  For non-nodal variables use the non-upwinded "
-               "PorousFlowFullySaturated* kernels or Kuzmin-Turek (KT) stabilisation instead.");
+               "requires a nodal variable.  PorousFlow has no discontinuous-Galerkin "
+               "finite-element discretisation, so an element-local variable (eg CONSTANT "
+               "MONOMIAL) cannot be used as a PorousFlow variable.");
 
 #ifdef LIBMESH_HAVE_TBB_API
-  if (libMesh::n_threads() > 1)
+  if (this->_fe_problem.numThreads() > 1)
     mooseWarning("PorousFlowDarcyBase: num_upwinds and num_downwinds may not be computed "
                  "accurately when using TBB and greater than 1 thread");
 #endif
@@ -182,7 +183,7 @@ void
 PorousFlowDarcyBaseTempl<is_ad>::computeResidual()
 {
   if constexpr (!is_ad)
-    computeResidualAndJacobian(JacRes::CALCULATE_RESIDUAL, 0);
+    computeResidualOrJacobian(JacRes::CALCULATE_RESIDUAL, 0);
   else
   {
     adComputeProtoFlux(false);
@@ -212,7 +213,7 @@ void
 PorousFlowDarcyBaseTempl<is_ad>::computeJacobian()
 {
   if constexpr (!is_ad)
-    computeResidualAndJacobian(JacRes::CALCULATE_JACOBIAN, _var.number());
+    computeResidualOrJacobian(JacRes::CALCULATE_JACOBIAN, _var.number());
   else
     // Block-diagonal (e.g. PJFNK) assembly path: this is the only Jacobian call we get.
     adComputeJacobian();
@@ -251,7 +252,7 @@ void
 PorousFlowDarcyBaseTempl<is_ad>::computeOffDiagJacobian(const unsigned int jvar)
 {
   if constexpr (!is_ad)
-    computeResidualAndJacobian(JacRes::CALCULATE_JACOBIAN, jvar);
+    computeResidualOrJacobian(JacRes::CALCULATE_JACOBIAN, jvar);
   else
   {
     libmesh_ignore(jvar);
@@ -276,7 +277,12 @@ PorousFlowDarcyBaseTempl<is_ad>::computeProtoFluxWithoutMobility()
     _proto_flux[ph].assign(num_nodes, 0.0);
     for (_qp = 0; _qp < this->_qrule->n_points(); _qp++)
     {
-      const Real jxw_coord = this->_JxW[_qp] * this->_coord[_qp];
+      // The AD weight carries the displacement derivatives on a displaced mesh. Elsewhere use the
+      // Real weight, as ADKernel does: XFEM rescales only the Real weight.
+      GenericReal<is_ad> jxw_coord = this->_JxW[_qp] * this->_coord[_qp];
+      if constexpr (is_ad)
+        if (this->_use_displaced_mesh)
+          jxw_coord = this->_ad_JxW[_qp] * this->_ad_coord[_qp];
       for (_i = 0; _i < num_nodes; ++_i)
         _proto_flux[ph][_i] += jxw_coord * darcyQp(ph);
     }
@@ -374,7 +380,7 @@ PorousFlowDarcyBaseTempl<is_ad>::adComputeProtoFlux(bool do_counting)
 
 template <bool is_ad>
 void
-PorousFlowDarcyBaseTempl<is_ad>::computeResidualAndJacobian(JacRes res_or_jac, unsigned int jvar)
+PorousFlowDarcyBaseTempl<is_ad>::computeResidualOrJacobian(JacRes res_or_jac, unsigned int jvar)
 {
   if ((res_or_jac == JacRes::CALCULATE_JACOBIAN) && _dictator.notPorousFlowVariable(jvar))
     return;
@@ -507,11 +513,14 @@ PorousFlowDarcyBaseTempl<is_ad>::fullyUpwind(JacRes res_or_jac, unsigned int ph,
   // The following holds derivatives of these (non-AD path only)
   std::vector<Real> dtotal_mass_out;
   std::vector<Real> dtotal_in;
+
+  // These accumulate Jacobian columns, so they must be sized by the column variable's
+  // DOF count (_phi.size(), not by num_nodes = _test.size() (which is the row variable's)
   if constexpr (!is_ad)
     if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
     {
-      dtotal_mass_out.assign(num_nodes, 0.0);
-      dtotal_in.assign(num_nodes, 0.0);
+      dtotal_mass_out.assign(_phi.size(), 0.0);
+      dtotal_in.assign(_phi.size(), 0.0);
     }
 
   // Perform the upwinding using the mobility

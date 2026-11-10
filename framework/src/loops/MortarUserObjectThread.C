@@ -31,12 +31,24 @@ MortarUserObjectThread::MortarUserObjectThread(
     FEProblemBase & fe_problem,
     bool displaced,
     Assembly & assembly)
-  : _mortar_user_objects(mortar_user_objects),
+  : MortarExecutorInterface(fe_problem),
+    _mortar_user_objects(mortar_user_objects),
     _amg(amg),
     _subproblem(subproblem),
     _fe_problem(fe_problem),
     _displaced(displaced),
     _assembly(assembly)
+{
+  mortarSetup(_amg);
+}
+
+MortarUserObjectThread::~MortarUserObjectThread()
+{
+  _mortar_warehouse.dontNotifyWhenMortarSetup(this);
+}
+
+void
+MortarUserObjectThread::mortarSetup(const AutomaticMortarGeneration & /*amg*/)
 {
   Moose::Mortar::setupMortarMaterials(_mortar_user_objects,
                                       _fe_problem,

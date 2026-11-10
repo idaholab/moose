@@ -12,11 +12,9 @@
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
 
-using namespace libMesh;
-
 ArbitraryQuadrature::ArbitraryQuadrature(const unsigned int d, const Order o) : QBase(d, o) {}
 
-std::unique_ptr<QBase>
+std::unique_ptr<libMesh::QBase>
 ArbitraryQuadrature::clone() const
 {
   return std::make_unique<ArbitraryQuadrature>(*this);

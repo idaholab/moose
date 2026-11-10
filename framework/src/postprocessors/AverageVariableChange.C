@@ -59,7 +59,7 @@ void
 AverageVariableChange::threadJoin(const UserObject & y)
 {
   ElementIntegralVariablePostprocessor::threadJoin(y);
-  const auto & pps = static_cast<const AverageVariableChange &>(y);
+  const auto & pps = cast_ref<const AverageVariableChange &>(y);
   _volume += pps._volume;
 }
 

@@ -32,8 +32,6 @@
 #include <array>
 #include <memory>
 
-using namespace libMesh;
-
 namespace
 {
 constexpr BoundaryID primary_boundary_id = 10;
@@ -131,10 +129,10 @@ buildNodeFaceInterfaceMesh(MeshBase & mesh)
   boundary_info.add_side(remote_primary, 0, primary_boundary_id);
 }
 
-GhostingFunctor::map_type
+libMesh::GhostingFunctor::map_type
 coupledElementsForProcessor(RelationshipManager & rm, MeshBase & mesh)
 {
-  GhostingFunctor::map_type coupled_elements;
+  libMesh::GhostingFunctor::map_type coupled_elements;
   rm(mesh.active_pid_elements_begin(local_processor_id),
      mesh.active_pid_elements_end(local_processor_id),
      local_processor_id,

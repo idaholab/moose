@@ -113,7 +113,7 @@ ReactorGeometryMeshBuilderBase::updateElementBlockNameId(
     // Block name does not exist in mesh yet, assign new block id and name
     elem_block_id = next_free_id++;
     elem->subdomain_id() = elem_block_id;
-    input_mesh.subdomain_name(elem_block_id) = elem_block_name;
+    input_mesh.set_subdomain_name(elem_block_id, elem_block_name);
     name_id_map[elem_block_name] = elem_block_id;
   }
   else
@@ -237,68 +237,40 @@ ReactorGeometryMeshBuilderBase::callExtrusionMeshSubgenerators(
 }
 
 std::vector<std::reference_wrapper<const CSG::CSGSurface>>
-ReactorGeometryMeshBuilderBase::getOuterRadialSurfacesForUnitCell(unsigned int radial_index,
-                                                                  Real halfpitch,
-                                                                  CSG::CSGBase & csg_obj)
+ReactorGeometryMeshBuilderBase::getAxialPlaneSurfaces(CSG::CSGBase & csg_obj,
+                                                      const bool skip_intermediate_plane_generation)
 {
-  std::vector<std::reference_wrapper<const CSG::CSGSurface>> duct_surfaces;
-  const auto mesh_geometry = getReactorParam<std::string>(RGMB::mesh_geometry);
-  const auto n_azim_surfaces = mesh_geometry == "Square" ? 4 : 6;
-
-  // Convert halfpitch to radius (distance from vertex to center)
-  const Real angle_offset_degrees = mesh_geometry == "Square" ? 45. : 30.;
-  const Real angle_offset_radians = angle_offset_degrees * (M_PI / 180.);
-  const auto radius = halfpitch / std::cos(angle_offset_radians);
-
-  Real angle_increment_radians = 360. / n_azim_surfaces * (M_PI / 180.);
-
-  for (const auto i : make_range(n_azim_surfaces))
-  {
-    const auto surf_name =
-        name() + "_radial_duct_" + std::to_string(radial_index) + "_surf_" + std::to_string(i);
-
-    // Define 3 points on the surface
-    const auto current_angle = i * angle_increment_radians + angle_offset_radians;
-    const auto next_angle = (i + 1) * angle_increment_radians + angle_offset_radians;
-    libMesh::Point p0(radius * std::cos(current_angle), radius * std::sin(current_angle), 0.);
-    libMesh::Point p1(radius * std::cos(next_angle), radius * std::sin(next_angle), 0.);
-    libMesh::Point p2 = (p0 + p1) / 2.;
-    // Place third point above the two others to form a vertical plane
-    p2(2) = angle_offset_degrees;
-
-    std::unique_ptr<CSG::CSGSurface> duct_surf_ptr =
-        std::make_unique<CSG::CSGPlane>(surf_name, p0, p1, p2);
-    const auto & duct_surf = csg_obj.addSurface(std::move(duct_surf_ptr));
-    duct_surfaces.push_back(duct_surf);
-  }
-
-  return duct_surfaces;
-}
-
-std::vector<std::reference_wrapper<const CSG::CSGSurface>>
-ReactorGeometryMeshBuilderBase::getAxialPlaneSurfaces(CSG::CSGBase & csg_obj)
-{
+  std::vector<std::string> axial_surf_names;
   std::vector<std::reference_wrapper<const CSG::CSGSurface>> surfaces_by_axial_region;
-  const auto axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
+
+  // Add bottom boundary surface
+  const auto bottom_surf_name = RGMB::CSG_AXIAL_PLANE_PREFIX + "bottom_boundary";
+  axial_surf_names.push_back(bottom_surf_name);
+
+  // Add intermediate surfaces
+  auto axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
+  unsigned int n_intermediate_surfs = axial_boundaries.size() - 1;
+  for (const auto i : make_range(n_intermediate_surfs))
+    axial_surf_names.push_back(RGMB::CSG_AXIAL_PLANE_PREFIX + std::to_string(i));
+
+  // Add top boundary surface
+  const auto top_surf_name = RGMB::CSG_AXIAL_PLANE_PREFIX + "top_boundary";
+  axial_surf_names.push_back(top_surf_name);
+
+  // Check if axial planes have been defined in CSGBase and add it to surfaces_by_axial_region
   Real axial_level = 0.;
-
-  // Check if axial planes have been defined in CSGBase based on a surface name we expect
-  // to find
-  auto axial_surf_name = RGMB::CSG_AXIAL_PLANE_PREFIX + "0";
-  const auto has_axial_surfaces = csg_obj.hasSurface(axial_surf_name);
-
-  for (const auto i : make_range(axial_boundaries.size() + 1))
+  for (const auto i : index_range(axial_surf_names))
   {
-    axial_surf_name = RGMB::CSG_AXIAL_PLANE_PREFIX + std::to_string(i);
-    if (has_axial_surfaces)
-      // Surface should exist in CSGBase, retrieve from object
-      surfaces_by_axial_region.push_back(csg_obj.getSurfaceByName(axial_surf_name));
-    else
+    const auto & surf_name = axial_surf_names[i];
+    axial_level += (i != 0) ? axial_boundaries[i - 1] : 0.;
+    if (csg_obj.hasSurface(surf_name))
+      // Surface exists in CSGBase, retrieve from object
+      surfaces_by_axial_region.push_back(csg_obj.getSurfaceByName(surf_name));
+    else if (!skip_intermediate_plane_generation || i == 0 || i == axial_surf_names.size() - 1)
     {
       // Surface has not been defined, create it and add to CSGBase
-      axial_level += (i != 0) ? axial_boundaries[i - 1] : 0.;
       std::unique_ptr<CSG::CSGSurface> plane_surf_ptr =
-          std::make_unique<CSG::CSGPlane>(axial_surf_name, 0, 0, 1, axial_level);
+          std::make_unique<CSG::CSGPlane>(surf_name, 0, 0, 1, axial_level);
       const auto & plane_surf = csg_obj.addSurface(std::move(plane_surf_ptr));
       surfaces_by_axial_region.push_back(plane_surf);
     }
@@ -324,4 +296,26 @@ ReactorGeometryMeshBuilderBase::createRGMBLattice(
 
   auto & assembly_lattice = csg_obj.addLattice(std::move(lat_ptr));
   return assembly_lattice;
+}
+
+bool
+ReactorGeometryMeshBuilderBase::checkInputVectorInAscendingOrder(
+    const std::vector<Real> & input_vec)
+{
+  for (unsigned int i = 1; i < input_vec.size(); ++i)
+    if (input_vec[i] <= input_vec[i - 1])
+      return false;
+  return true;
+}
+
+bool
+ReactorGeometryMeshBuilderBase::checkUndefinedLatticeRefs(
+    const std::vector<std::vector<unsigned int>> & input_lattice, unsigned int num_inputs)
+{
+  for (const auto i : index_range(input_lattice))
+    for (const auto j : index_range(input_lattice[i]))
+      if (input_lattice[i][j] >= num_inputs)
+        return false;
+
+  return true;
 }

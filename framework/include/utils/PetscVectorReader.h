@@ -14,11 +14,6 @@
 #include "libmesh/libmesh_common.h"
 #include "MooseError.h"
 
-using libMesh::Number;
-using libMesh::numeric_index_type;
-using libMesh::NumericVector;
-using libMesh::PetscVector;
-
 /**
  * A class which helps with repeated reading from a petsc vector.
  * Its main purpose is to avoid unnecessary calls to the get_array() function

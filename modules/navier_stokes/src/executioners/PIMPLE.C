@@ -13,8 +13,6 @@
 #include "AuxiliarySystem.h"
 #include "LinearSystem.h"
 
-using namespace libMesh;
-
 registerMooseObject("NavierStokesApp", PIMPLE);
 
 InputParameters

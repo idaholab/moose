@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -28,7 +28,7 @@ public:
   static InputParameters validParams();
 
   /// VectorKernelGrad hooks factor out the test-function gradient
-  static constexpr bool use_precompute_hooks = true;
+  static constexpr bool uses_precompute_hooks = true;
 
   /**
    * Constructor

@@ -69,9 +69,13 @@ changeSubdomainId(MeshBase & mesh, const subdomain_id_type old_id, const subdoma
  *
  * The ordering of the returned boundary ID vector matches the vector of the boundary
  * names in \p boundary_name.
+ *
  * When a boundary name is not available in the mesh, if \p generate_unknown is true
  * a non-existant boundary ID will be returned, otherwise a BoundaryInfo::invalid_id
  * will be returned.
+ *
+ * If generate_unknown is true and !mesh.preparation().has_boundary_id_sets, this
+ * must be called across all ranks for synchronization.
  */
 std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
                                        const std::vector<BoundaryName> & boundary_name,
@@ -83,9 +87,13 @@ std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
  *
  * The ordering of the returned boundary ID vector matches the vector of the boundary
  * names in \p boundary_name.
+ *
  * When a boundary name is not available in the mesh, if \p generate_unknown is true
  * a non-existant boundary ID will be returned, otherwise a BoundaryInfo::invalid_id
  * will be returned.
+ *
+ * If generate_unknown is true and !mesh.preparation().has_boundary_id_sets, this
+ * must be called across all ranks for synchronization.
  */
 std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
                                        const std::vector<BoundaryName> & boundary_name,
@@ -97,9 +105,13 @@ std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
  * Because libMesh allows the same boundary to have multiple different boundary names,
  * the size of the returned boundary ID set may be smaller than the size of the boundary
  * name vector.
+ *
  * When a boundary name is not available in the mesh, if \p generate_unknown is true
  * a non-existant boundary ID will be returned, otherwise a BoundaryInfo::invalid_id
  * will be returned.
+ *
+ * If generate_unknown is true and !mesh.preparation().has_boundary_id_sets, this
+ * must be called across all ranks for synchronization.
  */
 std::set<BoundaryID> getBoundaryIDSet(const libMesh::MeshBase & mesh,
                                       const std::vector<BoundaryName> & boundary_name,
@@ -112,6 +124,14 @@ std::set<BoundaryID> getBoundaryIDSet(const libMesh::MeshBase & mesh,
  * If it is a name, the mesh is queried for the ID associated with said name.
  */
 BoundaryID getBoundaryID(const BoundaryName & boundary_name, const MeshBase & mesh);
+
+/**
+ * Get all boundary names and IDs from a mesh
+ * @param mesh the mesh of interest
+ * @return a set of pairs of boundary names and ids
+ */
+std::set<std::pair<BoundaryName, BoundaryID>>
+getAllBoundaryNamesAndIDs(const libMesh::MeshBase & mesh);
 
 /**
  * Gets the subdomain ID associated with the given SubdomainName.
@@ -132,6 +152,14 @@ std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                                const std::vector<SubdomainName> & subdomain_name);
 std::set<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                             const std::set<SubdomainName> & subdomain_name);
+
+/**
+ * Get all subdomain names and ids from a mesh
+ * @param mesh the mesh of interest
+ * @return a set of pairs of subdomain names and ids
+ */
+std::set<std::pair<SubdomainName, SubdomainID>>
+getAllSubdomainNamesAndIDs(const libMesh::MeshBase & mesh);
 
 /**
  * Calculates the centroid of a MeshBase.
@@ -513,8 +541,7 @@ std::set<dof_id_type> getBoundaryNodes(const MeshBase & mesh, const BoundaryID b
 void createSubdomainFromSidesets(MeshBase & mesh,
                                  std::vector<BoundaryName> boundary_names,
                                  const SubdomainID new_subdomain_id,
-                                 const SubdomainName new_subdomain_name,
-                                 const std::string type_name);
+                                 const SubdomainName & new_subdomain_name);
 
 /**
  * Convert a list of blocks in a given mesh to a standalone new mesh.
@@ -616,4 +643,17 @@ void buildPolyLineMesh(MeshBase & mesh,
  * shell)
  */
 void addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_external_bid);
+
+/**
+ * Match the points of a nodal quadrature rule (e.g. QNodal on a side of a parent element) to the
+ * nodes of an element at the same physical locations. The quadrature ordering is not guaranteed to
+ * match the node ordering of the element, especially for higher-order faces, so the association
+ * is built geometrically so each quadrature value is attached to the node at the same physical
+ * point.
+ * @param elem the element whose nodes are matched
+ * @param q_points the physical locations of the nodal quadrature points
+ * @return a map from each quadrature point index to the local index of the matching node
+ */
+std::vector<unsigned int> nodalQuadraturePointToNodeMap(const Elem & elem,
+                                                        const std::vector<Point> & q_points);
 }

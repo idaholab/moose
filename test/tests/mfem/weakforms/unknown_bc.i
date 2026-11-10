@@ -1,0 +1,9 @@
+!include ../kernels/darcy.i
+
+[WeakForms]
+  [Darcy]
+    type = MFEMWeakForm
+    kernels = 'VelocityMass PressureGrad VelocityDiv'
+    bcs = 'NotABC'
+  []
+[]

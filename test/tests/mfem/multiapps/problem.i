@@ -4,7 +4,7 @@
 []
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/square.e
 []
 
@@ -76,12 +76,10 @@
 [Postprocessors]
   [dt]
     type = TimestepSize
-    execute_on = TIMESTEP_END
   []
   [error]
     type = MFEML2Error
     variable = u
     function = exact_solution
-    execute_on = TIMESTEP_END
   []
 []

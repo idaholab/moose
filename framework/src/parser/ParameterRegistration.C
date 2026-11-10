@@ -84,6 +84,7 @@ registerParameter(DistributionName);
 registerParameter(SamplerName);
 registerParameter(UserObjectName);
 registerParameter(InterpolationMethodName);
+registerParameter(GradientMethodName);
 registerParameter(IndicatorName);
 registerParameter(MarkerName);
 registerParameter(MultiAppName);
@@ -111,6 +112,9 @@ registerParameter(MFEMVectorCoefficientName);
 registerParameter(MFEMMatrixCoefficientName);
 registerParameter(MFEMFESpaceName);
 registerParameter(MFEMSolverName);
+registerParameter(MFEMKernelName);
+registerParameter(MFEMBoundaryConditionName);
+registerParameter(MFEMWeakFormName);
 #endif
 
 /*******************************************************************************/

@@ -65,7 +65,7 @@ RotationAngle::computeValue()
 
   // angle between dr1 and dr2
   if (norms > libMesh::TOLERANCE)
-    return std::acos((dr1 * dr2) / norms) * ((dr1.cross(dr2) * _direction) > 0 ? 1.0 : -1.0);
+    return std::atan2(dr1.cross(dr2) * _direction, dr1 * dr2);
   else
     return 0.0;
 }

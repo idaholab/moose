@@ -53,6 +53,6 @@ NodalEnergyFluxPostprocessor::finalize()
 void
 NodalEnergyFluxPostprocessor::threadJoin(const UserObject & uo)
 {
-  const auto & niep = static_cast<const NodalEnergyFluxPostprocessor &>(uo);
+  const auto & niep = cast_ref<const NodalEnergyFluxPostprocessor &>(uo);
   _value += niep._value;
 }

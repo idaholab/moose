@@ -37,6 +37,7 @@
     variable = en
     scale_factor = 2.0
     from_variable = source_element
+    weighting_type = average
   [../]
 []
 

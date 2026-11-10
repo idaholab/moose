@@ -4,3 +4,8 @@ To build MOOSE run the following commands:
 cd {{PATH}}/moose/test
 make -j 6
 ```
+
+!alert! note
+If PETSc and libMesh were built with optimization flags (e.g. `-O3 -march=native`), MOOSE inherits
+them from libMesh automatically -- no additional flags are needed here.
+!alert-end!

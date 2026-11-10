@@ -27,7 +27,7 @@ ExternalPetscTimeStepper::validParams()
 ExternalPetscTimeStepper::ExternalPetscTimeStepper(const InputParameters & parameters)
   : TimeStepper(parameters),
     // ExternalPetscTimeStepper always requires ExternalPETScProblem
-    _external_petsc_problem(static_cast<ExternalPETScProblem &>(_fe_problem))
+    _external_petsc_problem(cast_ref<ExternalPETScProblem &>(_fe_problem))
 {
 }
 

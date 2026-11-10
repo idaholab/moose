@@ -35,8 +35,6 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/fe_base.h"
 
-using namespace libMesh;
-
 ParameterMesh::ParameterMesh(const FEType & param_type,
                              const std::string & exodus_mesh,
                              const bool find_closest,
@@ -55,7 +53,7 @@ ParameterMesh::ParameterMesh(const FEType & param_type,
   _exodusII_io->read(exodus_mesh);
   _mesh.read(exodus_mesh);
   // Create system to store parameter values
-  _eq = std::make_unique<EquationSystems>(_mesh);
+  _eq = std::make_unique<libMesh::EquationSystems>(_mesh);
   _sys = &_eq->add_system<ExplicitSystem>("_parameter_mesh_sys");
   _sys->add_variable("_parameter_mesh_var", param_type);
 
@@ -102,7 +100,7 @@ ParameterMesh::ParameterMesh(const FEType & param_type,
     _node_kdtree = std::make_unique<KDTree>(_mesh_nodes, 10);
   // Update cached values for gradient computations
   const_cast<unsigned short int &>(_param_var_id) = var_id;
-  const_cast<const DofMap *&>(_dof_map) = &_sys->get_dof_map();
+  const_cast<const libMesh::DofMap *&>(_dof_map) = &_sys->get_dof_map();
   const_cast<FEType &>(_fe_type) = _dof_map->variable_type(_param_var_id);
 }
 
@@ -125,7 +123,7 @@ ParameterMesh::getIndexAndWeight(const Point & pt,
   // Map the physical co-ordinates to the reference co-ordinates
   Point coor = FEMap::inverse_map(elem->dim(), elem, test_point);
   // get the shape function value via the FEInterface
-  FEComputeData fe_data(*_eq, coor);
+  libMesh::FEComputeData fe_data(*_eq, coor);
   FEInterface::compute_data(elem->dim(), _fe_type, elem, fe_data);
   // Set weights to the value of the shape functions
   weights = fe_data.shape;
@@ -153,7 +151,7 @@ ParameterMesh::getIndexAndWeight(const Point & pt,
   // Map the physical co-ordinates to the reference co-ordinates
   Point coor = FEMap::inverse_map(elem->dim(), elem, test_point);
   // get the shape function value via the FEInterface
-  FEComputeData fe_data(*_eq, coor);
+  libMesh::FEComputeData fe_data(*_eq, coor);
   fe_data.enable_derivative();
   FEInterface::compute_data(elem->dim(), _fe_type, elem, fe_data);
   // Set weights to the value of the shape functions
@@ -271,7 +269,7 @@ ParameterMesh::closestPoint(const Elem & elem, const Point & p) const
       Point a = *(elem.node_ptr(0));
       Point b = *(elem.node_ptr(1));
       Point c = *(elem.node_ptr(2));
-      Plane pl(a, b, c);
+      libMesh::Plane pl(a, b, c);
       Point trial = pl.closest_point(p);
       if (elem.contains_point(trial))
         return trial;
@@ -285,8 +283,8 @@ ParameterMesh::closestPoint(const Elem & elem, const Point & p) const
       Point b = *(elem.node_ptr(1));
       Point c = *(elem.node_ptr(2));
       Point d = *(elem.node_ptr(3));
-      Plane pl1(a, b, c);
-      Plane pl2(b, c, d);
+      libMesh::Plane pl1(a, b, c);
+      libMesh::Plane pl2(b, c, d);
       Point trial1 = pl1.closest_point(p);
       Point trial2 = pl2.closest_point(p);
       if (!trial1.absolute_fuzzy_equals(trial2, TOLERANCE * TOLERANCE))

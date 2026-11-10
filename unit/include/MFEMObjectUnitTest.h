@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
@@ -70,9 +79,9 @@ public:
 protected:
   void buildObjects()
   {
-    InputParameters mesh_params = _factory.getValidParams("MFEMMesh");
+    InputParameters mesh_params = _factory.getValidParams("MFEMFileMesh");
     mesh_params.set<MeshFileName>("file") = "../test/tests/mfem/mesh/beam-tet.mesh";
-    _mfem_mesh_ptr = _factory.createUnique<MFEMMesh>("MFEMMesh", "moose_mesh", mesh_params);
+    _mfem_mesh_ptr = _factory.createUnique<MFEMMesh>("MFEMFileMesh", "moose_mesh", mesh_params);
     _mfem_mesh_ptr->setMeshBase(_mfem_mesh_ptr->buildMeshBaseObject());
     _mfem_mesh_ptr->buildMesh();
 

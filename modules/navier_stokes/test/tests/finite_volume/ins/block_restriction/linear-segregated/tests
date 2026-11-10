@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#32995'
+  design = 'LinearFVPressureFluxBC.md FVReconstructedPressureGradient.md'
+
+  [reconstructed-gradient-no-block-restriction]
+    type = CSVDiff
+    input = reconstructed-gradient.i
+    csvdiff = reconstructed-gradient-face-orientation.csv
+    cli_args = "restricted_blocks='' Outputs/file_base=reconstructed-gradient-face-orientation"
+    abs_zero = 1e-10
+    max_threads = 1
+    requirement = "The reconstructed pressure-gradient method shall produce a reference solution without block restrictions."
+  []
+  [reconstructed-gradient-block-restricted]
+    type = CSVDiff
+    input = reconstructed-gradient.i
+    csvdiff = reconstructed-gradient-face-orientation.csv
+    cli_args = 'Mesh/inactive=delete_outside_blocks '
+               'Outputs/file_base=reconstructed-gradient-face-orientation'
+    abs_zero = 1e-10
+    prereq = reconstructed-gradient-no-block-restriction
+    max_threads = 1
+    requirement = "The reconstructed pressure-gradient method shall match the unrestricted reference when inactive blocks adjoin both ends of the block-restricted flow domain."
+  []
+[]

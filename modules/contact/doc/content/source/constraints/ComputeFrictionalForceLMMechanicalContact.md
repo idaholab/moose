@@ -21,6 +21,11 @@ where $\gamma_c^{(1)}$ denotes the secondary contact interface, $\Phi_j$ is the
 j'th lagrange multiplier test function, and $v_{t,h}$ is the discretized version
 of the tangential velocity function.
 
+When [!param](/Constraints/ComputeFrictionalForceLMMechanicalContact/function_friction) is
+provided, the friction coefficient is evaluated at each node with the nodal slip rate
+$\tilde{v}_{tj} / \int_{\gamma_c^{(1)}} \Phi_j dA$, the nodal coefficient of the mortar projection
+of the tangential velocity [!citep](wohlmuth2011variationally).
+
 This object automatically enforces normal contact constraints by making calls to its parent class `ComputeWeightedGapLMMechanicalContact`, see [ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md) for input parameters and details.
 
 The preliminary recommendation is to select  `c` to be on the order of the moduli of elasticity of the bodies into contact, and `c_t` to be a few orders of magnitude less than `c`. This selection of these purely numerical parameters can represent an initial difficulty when running *new* models, but they can be held constant once good convergence behavior has been attained.

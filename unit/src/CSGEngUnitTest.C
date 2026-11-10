@@ -236,7 +236,7 @@ TEST(CSGEngUnitTest, testPolygonUnitClone)
   CSGNPolygonUnit sq("test_square", num_sides, apothem);
   auto clone_ptr = sq.clone();
   const CSGEngUnit & clone_eng = dynamic_cast<const CSGEngUnit &>(*clone_ptr);
-  ASSERT_TRUE(static_cast<const CSGEngUnit &>(sq) == clone_eng);
+  ASSERT_TRUE(cast_ref<const CSGEngUnit &>(sq) == clone_eng);
 }
 
 /// error checks during construction
@@ -275,11 +275,11 @@ TEST(CSGEngUnitTest, testEngUnitEqual)
   // cast all to basic CSGEngUnit type to be able to compare across types (compilation error if
   // object types are different)
   const CSGEngUnit & eng_u1 = u1;
-  ASSERT_TRUE(eng_u1 != static_cast<const CSGEngUnit &>(u2));
-  ASSERT_TRUE(eng_u1 != static_cast<const CSGEngUnit &>(u3));
-  ASSERT_TRUE(eng_u1 != static_cast<const CSGEngUnit &>(u4));
-  ASSERT_TRUE(eng_u1 != static_cast<const CSGEngUnit &>(u5));
-  ASSERT_TRUE(eng_u1 != static_cast<const CSGEngUnit &>(u6));
+  ASSERT_TRUE(eng_u1 != cast_ref<const CSGEngUnit &>(u2));
+  ASSERT_TRUE(eng_u1 != cast_ref<const CSGEngUnit &>(u3));
+  ASSERT_TRUE(eng_u1 != cast_ref<const CSGEngUnit &>(u4));
+  ASSERT_TRUE(eng_u1 != cast_ref<const CSGEngUnit &>(u5));
+  ASSERT_TRUE(eng_u1 != cast_ref<const CSGEngUnit &>(u6));
 }
 
 /// tests that type-name getters resolve to the derived type when an engineering unit is accessed

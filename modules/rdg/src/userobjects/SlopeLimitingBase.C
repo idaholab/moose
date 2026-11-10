@@ -84,8 +84,8 @@ SlopeLimitingBase::serialize(std::string & serialized_buffer)
 
   for (auto it = _interface_elem_ids.begin(); it != _interface_elem_ids.end(); ++it)
   {
-    storeHelper(oss, *it, this);
-    storeHelper(oss, _lslope[*it], this);
+    dataStore(oss, *it, this);
+    dataStore(oss, _lslope[*it], this);
   }
 
   // Populate the passed in string pointer with the string stream's buffer contents
@@ -117,10 +117,10 @@ SlopeLimitingBase::deserialize(std::vector<std::string> & serialized_buffers)
     for (unsigned int i = 0; i < size; i++)
     {
       dof_id_type key;
-      loadHelper(iss, key, this);
+      dataLoad(iss, key, this);
 
       std::vector<RealGradient> value;
-      loadHelper(iss, value, this);
+      dataLoad(iss, value, this);
 
       // merge the data we received from other procs
       _lslope.insert(std::pair<dof_id_type, std::vector<RealGradient>>(key, value));

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,7 +22,7 @@ KernelCurl::validParams()
 }
 
 KernelCurl::KernelCurl(const InputParameters & parameters)
-  : VectorKernel(parameters), _curl_test(), _curl_phi(), _curl_u(_var)
+  : VectorKernel(parameters), _curl_test(), _curl_phi(), _curl_u(*_vars[0])
 {
 }
 

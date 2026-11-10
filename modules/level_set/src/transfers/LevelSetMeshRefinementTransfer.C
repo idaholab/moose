@@ -32,6 +32,8 @@ LevelSetMeshRefinementTransfer::validParams()
   exec = {LevelSet::EXEC_COMPUTE_MARKERS, LevelSet::EXEC_ADAPT_MESH};
   params.set<bool>("check_multiapp_execute_on") = false;
   params.suppressParameter<ExecFlagEnum>("execute_on");
+  // Sibling transfers not supported
+  params.suppressParameter<bool>("execute_after_from_multiapp");
 
   return params;
 }

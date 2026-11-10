@@ -57,6 +57,6 @@ SideAverageFunctorPostprocessor::threadJoin(const UserObject & y)
 {
   SideIntegralFunctorPostprocessorTempl<false>::threadJoin(y);
 
-  const auto & pps = static_cast<const SideAverageFunctorPostprocessor &>(y);
+  const auto & pps = cast_ref<const SideAverageFunctorPostprocessor &>(y);
   _area += pps._area;
 }

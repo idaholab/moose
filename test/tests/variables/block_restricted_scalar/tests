@@ -1,0 +1,33 @@
+[Tests]
+  design = 'syntax/Variables/index.md'
+  issues = '#33736'
+
+  [outside_blocks]
+    type = RunException
+    input = 'block_restricted_scalar.i'
+    expect_err = "The 'block' parameter of the object 'lm' must be a subset of the 'block' parameter "
+                 "of the variable 'lambda'"
+    requirement = 'The system shall report an error when an object couples a block restricted scalar '
+                  'variable on blocks where that scalar variable does not exist.'
+  []
+
+  [disjoint_scalar_variables]
+    type = RunException
+    input = 'block_restricted_scalar.i'
+    cli_args = 'Kernels/lm/block=1 Variables/lambda2/block=0'
+    expect_err = "The 'block' parameter of the scalar variable 'lambda2' coupled into the object "
+                 "'coupled' must overlap the 'block' parameter of the variable 'lambda' that the "
+                 "object acts on"
+    requirement = 'The system shall report an error when an object acting on a block restricted '
+                  'scalar variable couples a scalar variable that shares no blocks with it.'
+  []
+
+  [inside_blocks]
+    type = RunApp
+    input = 'block_restricted_scalar.i'
+    cli_args = 'Kernels/lm/block=1'
+    requirement = 'The system shall support coupling a block restricted scalar variable into an '
+                  'object restricted to the scalar variable blocks and into an object acting on a '
+                  'scalar variable that shares those blocks.'
+  []
+[]

@@ -11,6 +11,8 @@
 #include "MooseMesh.h"
 #include "Factory.h"
 #include "CacheChangedListsThread.h"
+#include "CacheInfoThread.h"
+#include "CacheSubdomainInfoThread.h"
 #include "MooseUtils.h"
 #include "MooseApp.h"
 #include "RelationshipManager.h"
@@ -63,8 +65,6 @@
 #include "libmesh/fe_type.h"
 #include "libmesh/enum_to_string.h"
 #include "libmesh/elem_side_builder.h"
-
-using namespace libMesh;
 
 // Make newer nanoflann API compatible with older nanoflann versions
 #if NANOFLANN_VERSION < 0x150
@@ -305,14 +305,16 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _skip_refine_when_use_split(other_mesh._skip_refine_when_use_split),
     _skip_deletion_repartition_after_refine(other_mesh._skip_deletion_repartition_after_refine),
     _is_nemesis(other_mesh._is_nemesis),
+    _mesh_subdomains(other_mesh._mesh_subdomains),
+    _mesh_boundary_ids(other_mesh._mesh_boundary_ids),
+    _mesh_sideset_ids(other_mesh._mesh_sideset_ids),
+    _mesh_nodeset_ids(other_mesh._mesh_nodeset_ids),
     _patch_size(other_mesh._patch_size),
     _ghosting_patch_size(other_mesh._ghosting_patch_size),
     _max_leaf_size(other_mesh._max_leaf_size),
     _patch_update_strategy(other_mesh._patch_update_strategy),
     _regular_orthogonal_mesh(false),
     _is_split(other_mesh._is_split),
-    _lower_d_interior_blocks(other_mesh._lower_d_interior_blocks),
-    _lower_d_boundary_blocks(other_mesh._lower_d_boundary_blocks),
     _allow_recovery(other_mesh._allow_recovery),
     _construct_node_list_from_side_list(other_mesh._construct_node_list_from_side_list),
     _displace_node_list_by_side_list(other_mesh._displace_node_list_by_side_list),
@@ -326,6 +328,10 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _provided_coord_blocks(other_mesh._provided_coord_blocks),
     _doing_p_refinement(other_mesh._doing_p_refinement)
 {
+  mooseAssert(other_mesh._moose_mesh_prepared,
+              "The mesh being cloned from must already be fully prepared; we rely on that to "
+              "rebuild our own prepare()-derived caches below");
+
   _bounds.resize(other_mesh._bounds.size());
   for (std::size_t i = 0; i < _bounds.size(); ++i)
   {
@@ -340,6 +346,13 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
   if (_app.isKokkosAvailable())
     _kokkos_mesh = std::make_unique<Moose::Kokkos::Mesh>(*this);
 #endif
+
+  // update() rebuilds caches (boundary node/element lists, lower-D/higher-D element maps, element
+  // ID info, etc.) directly from our own (just-cloned) _mesh. Those caches hold pointers into the
+  // MeshBase they were built from, so other_mesh's copies of them cannot simply be copied above;
+  // they must be rebuilt against our own clone instead.
+  update();
+  _moose_mesh_prepared = true;
 }
 
 MooseMesh::~MooseMesh()
@@ -382,14 +395,12 @@ MooseMesh::freeBndElems()
   _bnd_elem_range.reset();
 }
 
-bool
-MooseMesh::prepare(const MeshBase * const mesh_to_clone)
+void
+MooseMesh::prepare()
 {
   TIME_SECTION("prepare", 2, "Preparing Mesh", true);
 
   parallel_object_only();
-
-  bool libmesh_mesh_prepared = false;
 
   mooseAssert(_mesh, "The MeshBase has not been constructed");
 
@@ -397,29 +408,20 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
     // For whatever reason we do not want to allow renumbering here nor ever in the future?
     getMesh().allow_renumbering(false);
 
-  if (mesh_to_clone)
-  {
-    mooseAssert(mesh_to_clone->is_prepared(),
-                "The mesh we wish to clone from must already be prepared");
-    _mesh = mesh_to_clone->clone();
-    _moose_mesh_prepared = false;
-  }
-  else if (!_mesh->is_prepared())
+  if (!_mesh->is_prepared())
   {
     _mesh->complete_preparation();
     _moose_mesh_prepared = false;
-    libmesh_mesh_prepared = true;
   }
 
   if (_moose_mesh_prepared)
-    return libmesh_mesh_prepared;
+    return;
 
   // Collect (local) subdomain IDs
   _mesh_subdomains.clear();
   for (const auto & elem : getMesh().element_ptr_range())
     _mesh_subdomains.insert(elem->subdomain_id());
 
-  bool need_subdomain_name_map_sync = false;
   // add explicitly requested subdomains
   if (isParamValid("add_subdomain_ids") && !isParamValid("add_subdomain_names"))
   {
@@ -436,9 +438,8 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
       // add subdomain id
       _mesh_subdomains.insert(sub_id);
       // set name of the subdomain just added
-      setSubdomainName(sub_id, sub_name);
+      setSubdomainName(sub_id, sub_name, true);
     }
-    need_subdomain_name_map_sync = true;
   }
   else if (isParamValid("add_subdomain_names"))
   {
@@ -460,12 +461,9 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
       // add subdomain id
       _mesh_subdomains.insert(sub_id);
       // set name of the subdomain just added
-      setSubdomainName(sub_id, sub_name);
+      setSubdomainName(sub_id, sub_name, true);
     }
-    need_subdomain_name_map_sync = true;
   }
-  if (need_subdomain_name_map_sync)
-    _mesh->sync_subdomain_name_map();
 
   // Make sure nodesets have been generated
   buildNodeListFromSideList();
@@ -595,8 +593,15 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
   checkDuplicateSubdomainNames();
 
   _moose_mesh_prepared = true;
+}
 
-  return libmesh_mesh_prepared;
+void
+MooseMesh::prepare(const MeshBase * libmesh_dbg_var(mesh_to_clone))
+{
+  mooseDeprecated("MooseMesh::prepare(const MeshBase *) is deprecated, please use the "
+                  "no-argument MooseMesh::prepare() instead");
+  mooseAssert(!mesh_to_clone, "Cloning a mesh_to_clone is no longer supported by prepare()");
+  prepare();
 }
 
 bool
@@ -723,7 +728,8 @@ MooseMesh::buildLowerDMesh()
   for (const auto & tpid : interior_side_types)
   {
     const auto type = ElemType(tpid);
-    mesh.subdomain_name(id) = "INTERNAL_SIDE_LOWERD_SUBDOMAIN_" + Utility::enum_to_string(type);
+    mesh.set_subdomain_name(
+        id, "INTERNAL_SIDE_LOWERD_SUBDOMAIN_" + Utility::enum_to_string(type), true);
     interior_block_ids[type] = id;
     _lower_d_interior_blocks.insert(id);
     if (_mesh_subdomains.count(id) > 0)
@@ -734,7 +740,8 @@ MooseMesh::buildLowerDMesh()
   for (const auto & tpid : boundary_side_types)
   {
     const auto type = ElemType(tpid);
-    mesh.subdomain_name(id) = "BOUNDARY_SIDE_LOWERD_SUBDOMAIN_" + Utility::enum_to_string(type);
+    mesh.set_subdomain_name(
+        id, "BOUNDARY_SIDE_LOWERD_SUBDOMAIN_" + Utility::enum_to_string(type), true);
     boundary_block_ids[type] = id;
     _lower_d_boundary_blocks.insert(id);
     if (_mesh_subdomains.count(id) > 0)
@@ -920,7 +927,7 @@ MooseMesh::cacheChangedLists()
 
   ConstElemRange elem_range(getMesh().local_elements_begin(), getMesh().local_elements_end(), 1);
   CacheChangedListsThread cclt(*this);
-  Threads::parallel_reduce(elem_range, cclt);
+  Threads::parallel_reduce(elem_range, cclt, getMooseApp().numThreads());
 
   _coarsened_element_children.clear();
 
@@ -1239,7 +1246,7 @@ MooseMesh::nodeToElemMap()
 const ConstElemRange *
 MooseMesh::getActiveLocalElementRange()
 {
-  return &getMesh().active_local_element_stored_range();
+  return &const_cast<const MeshBase &>(getMesh()).active_local_element_stored_range();
 }
 
 NodeRange *
@@ -1400,79 +1407,43 @@ MooseMesh::cacheInfo()
 {
   TIME_SECTION("cacheInfo", 3);
 
-  _sub_to_data.clear();
-  _neighbor_subdomain_boundary_ids.clear();
-  _block_node_list.clear();
-  _higher_d_elem_side_to_lower_d_elem.clear();
-  _lower_d_elem_to_higher_d_elem_side.clear();
-  _lower_d_interior_blocks.clear();
-  _lower_d_boundary_blocks.clear();
+  // Elements can change subdomain after prepare_for_use(), e.g. through an
+  // ElementSubdomainModifier, so refresh the subdomain set that hasSingleSubdomain() and
+  // _block_singletons are built from
+  getMesh().cache_elem_data();
 
   const auto & mesh = getMesh();
 
-  // Cache higher and lowerD element information
-  for (const auto & elem : mesh.element_ptr_range())
-  {
-    const Elem * ip_elem = elem->interior_parent();
+  ConstElemRange all_elems(mesh.elements_begin(), mesh.elements_end(), 1);
+  CacheInfoThread ci(*this, !hasSingleSubdomain());
+  Threads::parallel_reduce(all_elems, ci);
 
-    if (ip_elem)
-    {
-      unsigned int ip_side = ip_elem->which_side_am_i(elem);
+  ConstElemRange local_elems(
+      mesh.active_local_elements_begin(), mesh.active_local_elements_end(), 1);
+  CacheSubdomainInfoThread csi(*this);
+  Threads::parallel_reduce(local_elems, csi);
 
-      // For some grid sequencing tests: ip_side == libMesh::invalid_uint
-      if (ip_side != libMesh::invalid_uint)
-      {
-        auto pair = std::make_pair(ip_elem, ip_side);
-        _higher_d_elem_side_to_lower_d_elem.insert(
-            std::pair<std::pair<const Elem *, unsigned short int>, const Elem *>(pair, elem));
-        _lower_d_elem_to_higher_d_elem_side.insert(
-            std::pair<const Elem *, unsigned short int>(elem, ip_side));
+  _node_block = std::move(ci._node_block);
+  _interface_node_blocks = std::move(ci._interface_node_blocks);
 
-        auto id = elem->subdomain_id();
-        if (ip_elem->neighbor_ptr(ip_side))
-        {
-          if (mesh.subdomain_name(id).find("INTERNAL_SIDE_LOWERD_SUBDOMAIN_") != std::string::npos)
-            _lower_d_interior_blocks.insert(id);
-        }
-        else
-        {
-          if (mesh.subdomain_name(id).find("BOUNDARY_SIDE_LOWERD_SUBDOMAIN_") != std::string::npos)
-            _lower_d_boundary_blocks.insert(id);
-        }
-      }
-    }
+  _block_singletons.clear();
+  for (const auto blk_id : mesh.get_mesh_subdomains())
+    _block_singletons.emplace(blk_id, std::set<SubdomainID>{blk_id});
 
-    for (unsigned int nd = 0; nd < elem->n_nodes(); ++nd)
-    {
-      const Node & node = *elem->node_ptr(nd);
-      _block_node_list[node.id()].insert(elem->subdomain_id());
-    }
-  }
+  _higher_d_elem_side_to_lower_d_elem = std::move(ci._higher_d_elem_side_to_lower_d_elem);
+  _lower_d_elem_to_higher_d_elem_side = std::move(ci._lower_d_elem_to_higher_d_elem_side);
+  _lower_d_interior_blocks = std::move(ci._lower_d_interior_blocks);
+  _lower_d_boundary_blocks = std::move(ci._lower_d_boundary_blocks);
+  _neighbor_subdomain_boundary_ids = std::move(csi._neighbor_subdomain_boundary_ids);
+
+  _sub_to_data.clear();
+  for (auto & [id, subs] : csi._neighbor_subs)
+    _sub_to_data[id].neighbor_subs = std::move(subs);
+  for (auto & [id, bids] : csi._sub_boundary_ids)
+    _sub_to_data[id].boundary_ids = std::move(bids);
+
   _communicator.set_union(_lower_d_interior_blocks);
   _communicator.set_union(_lower_d_boundary_blocks);
-
-  // Cache the boundaries next to each subdomain
-  for (const auto & elem : mesh.active_local_element_ptr_range())
-  {
-    SubdomainID subdomain_id = elem->subdomain_id();
-    auto & sub_data = _sub_to_data[subdomain_id];
-    const auto elem_boundary_ids = getBoundaryIDs(elem);
-    for (unsigned int side = 0; side < elem->n_sides(); side++)
-    {
-      const auto & boundary_ids = elem_boundary_ids[side];
-      sub_data.boundary_ids.insert(boundary_ids.begin(), boundary_ids.end());
-
-      const Elem * neig = elem->neighbor_ptr(side);
-      if (neig)
-      {
-        _neighbor_subdomain_boundary_ids[neig->subdomain_id()].insert(boundary_ids.begin(),
-                                                                      boundary_ids.end());
-        SubdomainID neighbor_subdomain_id = neig->subdomain_id();
-        if (neighbor_subdomain_id != subdomain_id)
-          sub_data.neighbor_subs.insert(neighbor_subdomain_id);
-      }
-    }
-  }
 
   for (const auto blk_id : _mesh_subdomains)
   {
@@ -1486,9 +1457,21 @@ MooseMesh::cacheInfo()
 const std::set<SubdomainID> &
 MooseMesh::getNodeBlockIds(const Node & node) const
 {
-  auto it = _block_node_list.find(node.id());
+  // cacheInfo() records nothing in this case, and every node belongs to the mesh's only subdomain
+  if (hasSingleSubdomain())
+  {
+    if (!getMesh().query_node_ptr(node.id()))
+      mooseError("Unable to find node: ", node.id(), " in any block list.");
+    return getMesh().get_mesh_subdomains();
+  }
 
-  if (it == _block_node_list.end())
+  // Away from an interface, which is almost every node, this is the only lookup needed
+  if (const auto it = _node_block.find(node.id()); it != _node_block.end())
+    return libmesh_map_find(_block_singletons, it->second);
+
+  const auto it = _interface_node_blocks.find(node.id());
+
+  if (it == _interface_node_blocks.end())
     mooseError("Unable to find node: ", node.id(), " in any block list.");
 
   return it->second;
@@ -1733,17 +1716,21 @@ MooseMesh::getSubdomainIDs(const std::set<SubdomainName> & subdomain_name) const
 }
 
 void
-MooseMesh::setSubdomainName(SubdomainID subdomain_id, const SubdomainName & name)
+MooseMesh::setSubdomainName(const SubdomainID subdomain_id,
+                            const SubdomainName & name,
+                            const bool synchronous)
 {
-  mooseAssert(name != "ANY_BLOCK_ID", "Cannot set subdomain name to 'ANY_BLOCK_ID'");
-  getMesh().subdomain_name(subdomain_id) = name;
+  setSubdomainName(getMesh(), subdomain_id, name, synchronous);
 }
 
 void
-MooseMesh::setSubdomainName(MeshBase & mesh, SubdomainID subdomain_id, const SubdomainName & name)
+MooseMesh::setSubdomainName(MeshBase & mesh,
+                            SubdomainID subdomain_id,
+                            const SubdomainName & name,
+                            const bool synchronous)
 {
   mooseAssert(name != "ANY_BLOCK_ID", "Cannot set subdomain name to 'ANY_BLOCK_ID'");
-  mesh.subdomain_name(subdomain_id) = name;
+  mesh.set_subdomain_name(subdomain_id, name, synchronous);
 }
 
 const std::string &
@@ -2976,7 +2963,7 @@ MooseMesh::init()
 std::vector<std::filesystem::path>
 MooseMesh::writeRecoveryFiles(const std::filesystem::path & file_base)
 {
-  CheckpointIO io(getMesh(), false);
+  libMesh::CheckpointIO io(getMesh(), false);
   io.write(file_base);
   return {};
 }

@@ -24,7 +24,6 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/type_tensor.h"
 
-using namespace libMesh;
 using namespace Moose;
 using namespace FV;
 
@@ -42,6 +41,7 @@ public:
   bool supportsElemSideQpArg() const override { return true; }
 
 private:
+  using FunctorBase<T>::evaluate;
   ValueType evaluate(const ElemArg &, const StateArg &) const override final { return 0; }
   ValueType evaluate(const FaceArg &, const StateArg &) const override final { return 0; }
   ValueType evaluate(const ElemQpArg &, const StateArg &) const override final { return 0; }
@@ -333,7 +333,7 @@ TEST(MooseFunctorTest, testArgs)
     mesh->setMeshBase(std::move(lm_mesh));
   }
 
-  mesh->prepare(nullptr);
+  mesh->prepare();
   mesh->setCoordSystem({}, coord_type_enum);
   // Build the face info
   mesh->buildFiniteVolumeInfo();

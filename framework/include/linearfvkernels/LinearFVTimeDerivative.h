@@ -41,12 +41,19 @@ protected:
   /// on how many states are required in the history.
   const TimeIntegrator & _time_integrator;
 
+  /// Whether to assemble d(cu)/dt rather than c du/dt
+  const bool _conservative_form;
+
 private:
-  /// Current and older values of the material property multiplier.
+  /// Values of the material property multiplier, one per history slot of the time integrator.
+  /// The integrator pairs entry i with the solution i+1 steps back, so in the conservative form
+  /// these are the multiplier at those same times, and in the non-conservative form they are all
+  /// the current multiplier.
   std::vector<Real> _factor_history;
 
-  /// State args, the args which will help us fetch the different states of
-  /// the material property multiplier. 0th is the current, 1st is old
-  /// 2nd is the older. Might not need all, depends on the time integrator.
+  /// State args used to fetch the entries of _factor_history above.
   std::vector<Moose::StateArg> _state_args;
+
+  /// The multiplier that scales the new solution, always the current one in either form
+  const Moose::StateArg _current_state;
 };

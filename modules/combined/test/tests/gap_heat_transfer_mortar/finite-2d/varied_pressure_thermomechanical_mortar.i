@@ -25,8 +25,15 @@
     dim = 2
     nx = 20
     ny = 13
-    xmin = 0.25
-    xmax = 0.5
+    # The fixed block starts slightly overlapping the moving block so the mortar contact
+    # constraint is active from the very first residual/Jacobian evaluation. Without this,
+    # nothing but the (stiffness-free) pressure BC resists the moving block's rigid-body
+    # x-translation until contact is detected, leaving the initial Jacobian singular. Only
+    # the sign of the initial gap matters here, not its magnitude, so the overlap is kept
+    # numerically negligible: a larger overlap forces a correspondingly larger one-step jump
+    # in contact pressure, which the gap flux model's contact/no-contact switch resolves poorly.
+    xmin = 0.249999
+    xmax = 0.499999
     ymin = 0
     ymax = 0.5
     boundary_name_prefix = fixed_block
@@ -53,9 +60,15 @@
 [Variables]
   [disp_x]
     block = 'left_block right_block'
+    # Scale the displacement equations to be commensurate with the energy transport equation, whose
+    # diagonal is much closer to order unity. Without this the elasticity block's ~1e11 Pa modulus
+    # dominates the raw (unscaled) matrix and swamps the conditioning contribution from every other
+    # physical equation in the system.
+    scaling = 1e-11
   []
   [disp_y]
     block = 'left_block right_block'
+    scaling = 1e-11
   []
   [temperature]
     initial_condition = 300.0
@@ -270,10 +283,9 @@
   line_search = 'none'
 
   # mortar contact solver options
-  petsc_options = '-snes_converged_reason -pc_svd_monitor'
+  petsc_options = '-snes_converged_reason'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
-  petsc_options_value = ' lu       mumps'
-  snesmf_reuse_base = false
+  petsc_options_value = 'lu       mumps'
 
   nl_rel_tol = 1e-7
   nl_max_its = 20
@@ -281,6 +293,7 @@
 
   dt = 0.125
   end_time = 1
+  abort_on_solve_fail = true
 []
 
 [Outputs]

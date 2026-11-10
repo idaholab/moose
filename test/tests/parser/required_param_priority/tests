@@ -1,0 +1,11 @@
+[Tests]
+  design = 'Parser.md'
+  issues = '#33156'
+  [missing_new_nodeset_name]
+    type = RunException
+    input = missing_new_nodeset_name.i
+    expect_err = "missing required parameter 'Mesh/nodeset/new_nodeset_name'"
+    requirement = 'The system shall report a missing required parameter error rather than a private parameter error if an object input uses a suppressed, inherited parameter instead of the required replacement parameter.'
+    mesh_mode = 'replicated'
+  []
+[]

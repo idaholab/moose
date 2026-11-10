@@ -27,9 +27,7 @@ public:
 
   explicit ShortestDistanceToSurfaceTestAux(const InputParameters & parameters);
 
-  /// If a 'builder' was supplied, calls SBMSurfaceMeshBuilder::getCentroids() once
-  /// and verifies it is non-empty. Used purely so coverage tests can touch the
-  /// otherwise-unused getter from production code paths.
+  /// If a 'builder' was supplied, validates it produced a non-empty surface element set.
   virtual void initialSetup() override;
 
 protected:

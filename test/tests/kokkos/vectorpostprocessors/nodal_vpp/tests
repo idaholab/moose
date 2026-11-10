@@ -8,6 +8,6 @@
     csvdiff = 'kokkos_nodal_vpp_test_out_nodal_solution_0001.csv'
     requirement = 'The Kokkos system shall be able to aggregate and output vector data by iterating over nodes.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
   []
 []

@@ -49,7 +49,7 @@ VectorPostprocessorSampler::executeSetUp()
 }
 
 Real
-VectorPostprocessorSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
+VectorPostprocessorSampler::computeSample(dof_id_type row_index, dof_id_type col_index) const
 {
   // Checks to make sure that the row and column indices are not out of bounds
   mooseAssert(row_index < _data[0]->size(), "row_index cannot be out of bounds of the data.");

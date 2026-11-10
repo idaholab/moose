@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "AugmentedLagrangianContactProblemInterface.h"
+#include "AugmentedLagrangianContactConvergenceBase.h"
 #include "ReferenceResidualConvergence.h"
 #include "DefaultNonlinearConvergence.h"
 
@@ -19,18 +19,16 @@
  */
 template <class T>
 class AugmentedLagrangianContactConvergence : public T,
-                                              public AugmentedLagrangianContactProblemInterface
+                                              public AugmentedLagrangianContactConvergenceBase
 {
 public:
   static InputParameters validParams();
 
   AugmentedLagrangianContactConvergence(const InputParameters & params);
 
-  virtual Convergence::MooseConvergenceStatus checkConvergence(unsigned int iter) override;
+  virtual void preLoop() override;
 
-protected:
-  using AugmentedLagrangianContactProblemInterface::_lagrangian_iteration_number;
-  using AugmentedLagrangianContactProblemInterface::_maximum_number_lagrangian_iterations;
+  virtual Convergence::MooseConvergenceStatus checkConvergence(unsigned int iter) override;
 };
 
 typedef AugmentedLagrangianContactConvergence<ReferenceResidualConvergence>

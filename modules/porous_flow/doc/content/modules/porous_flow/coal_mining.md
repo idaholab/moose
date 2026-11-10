@@ -97,7 +97,7 @@ A Corey relative permeability is used
          end=[elasticity_tensor_0]
 
 The fluid porepressure is fixed at the outer boundaries, and a
-[PorousFlowPiecewiseLinearSink](/modules/porous_flow/src/bcs/PorousFlowPiecewiseLinearSink.C) with a
+[!file text=PorousFlowPiecewiseLinearSink](/modules/porous_flow/src/bcs/PorousFlowPiecewiseLinearSink.C) with a
 spatially and temporally varying `flux_function` is used to withdraw water from the rock into the
 goaf:
 

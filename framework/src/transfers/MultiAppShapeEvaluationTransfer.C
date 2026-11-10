@@ -27,8 +27,6 @@
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 
-using namespace libMesh;
-
 registerMooseObjectDeprecated("MooseApp", MultiAppShapeEvaluationTransfer, "12/31/2024 24:00");
 registerMooseObjectRenamed("MooseApp",
                            MultiAppMeshFunctionTransfer,
@@ -238,7 +236,7 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
   }
 
   // Setup the local mesh functions.
-  std::vector<MeshFunction> local_meshfuns;
+  std::vector<libMesh::MeshFunction> local_meshfuns;
   local_meshfuns.reserve(_from_problems.size());
   for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
   {

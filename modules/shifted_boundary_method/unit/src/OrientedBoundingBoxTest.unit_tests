@@ -1,0 +1,35 @@
+[Tests]
+  design = 'AdaptiveRayContainmentCheck.md'
+  issues = '#33397'
+
+  [write_3d_box]
+    type = GoogleTest
+    unit_test = OrientedBoundingBoxTest.WriteMeshBox3D
+    requirement = 'The system shall write an oriented three-dimensional bounding box as a mesh containing a first-order hexahedral element whose vertices coincide with the corners of the box.'
+  []
+  [write_2d_box]
+    type = GoogleTest
+    unit_test = OrientedBoundingBoxTest.WriteMeshBox2D
+    requirement = 'The system shall write an oriented two-dimensional bounding box as a mesh containing a first-order quadrilateral element whose vertices coincide with the corners of the box.'
+  []
+  [write_ray]
+    type = GoogleTest
+    unit_test = OrientedBoundingBoxTest.WriteRay
+    requirement = 'The system shall write a ray along the shortest axis of an oriented bounding box as a mesh containing a first-order line element.'
+  []
+  [axis_aligned_queries]
+    type = GoogleTest
+    unit_test = OrientedBoundingBoxTest.QueryApiAxisAligned
+    requirement = 'The system shall report geometry, projected coordinates, and point containment for an axis-aligned oriented bounding box.'
+  []
+  [rotated_queries]
+    type = GoogleTest
+    unit_test = OrientedBoundingBoxTest.QueryApiRotated
+    requirement = 'The system shall report projected coordinates and point containment in the local basis of a rotated oriented bounding box.'
+  []
+  [default_construction]
+    type = GoogleTest
+    unit_test = OrientedBoundingBoxTest.DefaultConstructed
+    requirement = 'The system shall initialize the corners and centroid of an oriented bounding box constructed without geometric data at the origin.'
+  []
+[]

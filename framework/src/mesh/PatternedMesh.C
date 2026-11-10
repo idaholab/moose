@@ -104,7 +104,7 @@ PatternedMesh::buildMesh()
   std::vector<ReplicatedMesh *> row_meshes;
   row_meshes.reserve(_pattern.size());
   // First row is the original mesh
-  row_meshes.push_back(static_cast<ReplicatedMesh *>(&getMesh()));
+  row_meshes.push_back(cast_ptr<ReplicatedMesh *>(&getMesh()));
   // Copy the remaining raw pointers into the local vector
   for (const auto & row_mesh : _row_meshes)
     row_meshes.push_back(row_mesh.get());

@@ -33,8 +33,6 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/static_condensation.h"
 
-using namespace libMesh;
-
 /// Free function used for a libMesh callback
 void
 extraSendList(std::vector<dof_id_type> & send_list, void * context)
@@ -45,7 +43,7 @@ extraSendList(std::vector<dof_id_type> & send_list, void * context)
 
 /// Free function used for a libMesh callback
 void
-extraSparsity(SparsityPattern::Graph & sparsity,
+extraSparsity(libMesh::SparsityPattern::Graph & sparsity,
               std::vector<dof_id_type> & n_nz,
               std::vector<dof_id_type> & n_oz,
               void * context)
@@ -66,7 +64,7 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _factory(_app.getFactory()),
     _mesh(subproblem.mesh()),
     _name(name),
-    _vars(libMesh::n_threads()),
+    _vars(_app.numThreads()),
     _var_map(),
     _max_var_number(0),
     _u_dot(nullptr),
@@ -86,6 +84,9 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _skip_next_solution_to_old_copy(false)
 {
 }
+
+THREAD_ID
+SystemBase::numThreads() const { return _app.numThreads(); }
 
 MooseVariableFieldBase &
 SystemBase::getVariable(THREAD_ID tid, const std::string & var_name) const
@@ -188,7 +189,7 @@ SystemBase::setVariableGlobalDoFs(const std::string & var_name)
 {
   AllLocalDofIndicesThread aldit(_subproblem, {var_name});
   const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  Threads::parallel_reduce(elem_range, aldit);
+  Threads::parallel_reduce(elem_range, aldit, numThreads());
 
   // Gather the dof indices across procs to get all the dof indices for var_name
   aldit.dofIndicesSetUnion();
@@ -210,7 +211,7 @@ SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
 
     AllLocalDofIndicesThread aldit(*problem, vars_to_be_zeroed, true);
     const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    Threads::parallel_reduce(elem_range, aldit);
+    Threads::parallel_reduce(elem_range, aldit, numThreads());
 
     const auto & dof_indices_to_zero = aldit.getDofIndices();
 
@@ -359,7 +360,7 @@ SystemBase::reinitElem(const Elem * const elem, THREAD_ID tid)
     for (auto & [tag, matrix] : _active_tagged_matrices)
     {
       libmesh_ignore(tag);
-      cast_ptr<StaticCondensation *>(matrix)->set_current_elem(*elem);
+      cast_ptr<libMesh::StaticCondensation *>(matrix)->set_current_elem(*elem);
     }
 }
 
@@ -487,7 +488,7 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
         // Have to get each variable's dofs
         for (unsigned int v = 0; v < n_vars; v++)
         {
-          const Variable & var = sys.variable(v);
+          const libMesh::Variable & var = sys.variable(v);
           unsigned int var_num = var.number();
           unsigned int n_comp = var.n_components();
 
@@ -604,7 +605,9 @@ SystemBase::removeMatrix(TagID tag_id)
 }
 
 NumericVector<Number> &
-SystemBase::addVector(const std::string & vector_name, const bool project, const ParallelType type)
+SystemBase::addVector(const std::string & vector_name,
+                      const bool project,
+                      const libMesh::ParallelType type)
 {
   if (hasVector(vector_name))
     return getVector(vector_name);
@@ -614,7 +617,7 @@ SystemBase::addVector(const std::string & vector_name, const bool project, const
 }
 
 NumericVector<Number> &
-SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
+SystemBase::addVector(TagID tag, const bool project, const libMesh::ParallelType type)
 {
   if (!_subproblem.vectorTagExists(tag))
     mooseError("Cannot add tagged vector with TagID ",
@@ -627,7 +630,7 @@ SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
   {
     auto & vec = getVector(tag);
 
-    if (type != ParallelType::AUTOMATIC && vec.type() != type)
+    if (type != AUTOMATIC && vec.type() != type)
       mooseError("Cannot add tagged vector '",
                  _subproblem.vectorTagName(tag),
                  "', in system '",
@@ -718,7 +721,7 @@ SystemBase::addVariable(const std::string & var_type,
                         const std::string & name,
                         InputParameters & parameters)
 {
-  _numbered_vars.resize(libMesh::n_threads());
+  _numbered_vars.resize(numThreads());
 
   const auto components = parameters.get<unsigned int>("components");
 
@@ -732,16 +735,14 @@ SystemBase::addVariable(const std::string & var_type,
     blocks.insert(blk_id);
   }
 
-  const auto fe_type =
-      FEType(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")),
-             Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family")));
+  const auto fe_type = MooseUtils::variableFEType(parameters);
   const auto fe_field_type = FEInterface::field_type(fe_type);
 
   unsigned int var_num;
 
   if (var_type == "ArrayMooseVariable")
   {
-    if (fe_field_type == TYPE_VECTOR)
+    if (fe_field_type == libMesh::TYPE_VECTOR)
       mooseError("Vector family type cannot be used in an array variable");
 
     std::vector<std::string> array_var_component_names;
@@ -797,7 +798,7 @@ SystemBase::addVariable(const std::string & var_type,
   parameters.set<unsigned int>("_var_num") = var_num;
   parameters.set<SystemBase *>("_system_base") = this;
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < numThreads(); tid++)
   {
     parameters.set<THREAD_ID>("tid") = tid;
     std::shared_ptr<MooseVariableBase> var =
@@ -1262,16 +1263,24 @@ SystemBase::copySolutionsBackwards()
 }
 
 void
+SystemBase::copyStateHistoryBackwards()
+{
+  system().update();
+  advanceStateHistory(Moose::SolutionIterationType::Time);
+  advanceStateHistory(Moose::SolutionIterationType::Nonlinear);
+}
+
+void
 SystemBase::copyPreviousSolutions(const Moose::SolutionIterationType iteration_type)
 {
+  // Normally copy through old (index 1). For Time, optionally stop at older
+  // and leave old unchanged.
+  const bool skip_old =
+      iteration_type == Moose::SolutionIterationType::Time && _skip_next_solution_to_old_copy;
+
   const auto num_states = getNumSolutionStates(iteration_type);
   if (num_states > 1)
   {
-    // Normally copy through old (index 1). For Time, optionally stop at older
-    // and leave old unchanged.
-    const bool skip_old =
-        iteration_type == Moose::SolutionIterationType::Time && _skip_next_solution_to_old_copy;
-
     const std::size_t stop = skip_old ? 1 : 0;
     for (std::size_t i = num_states - 1; i > stop; --i)
       solutionState(i, iteration_type) = solutionState(i - 1, iteration_type);
@@ -1296,6 +1305,15 @@ SystemBase::copyPreviousSolutions(const Moose::SolutionIterationType iteration_t
     case Moose::SolutionIterationType::Count:
       break;
   }
+}
+
+void
+SystemBase::advanceStateHistory(const Moose::SolutionIterationType iteration_type)
+{
+  const bool skip_current_to_old =
+      iteration_type == Moose::SolutionIterationType::Time && _skip_next_solution_to_old_copy;
+  copyPreviousSolutions(iteration_type);
+  copyAdditionalStateBackwards(iteration_type, skip_current_to_old);
 }
 
 /**
@@ -1325,6 +1343,13 @@ SystemBase::restoreSolutions()
   if (solutionPreviousNewton())
     *solutionPreviousNewton() = solutionOld();
   system().update();
+}
+
+void
+SystemBase::restoreStateHistory()
+{
+  restoreSolutions();
+  restoreAdditionalStates();
 }
 
 void
@@ -1553,13 +1578,6 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
   }
 }
 
-void
-SystemBase::addScalingVector()
-{
-  addVector("scaling_factors", /*project=*/false, libMesh::ParallelType::GHOSTED);
-  _subproblem.hasScalingVector(number());
-}
-
 bool
 SystemBase::computingScalingJacobian() const
 {
@@ -1569,42 +1587,42 @@ SystemBase::computingScalingJacobian() const
 void
 SystemBase::initialSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < numThreads(); tid++)
     _vars[tid].initialSetup();
 }
 
 void
 SystemBase::timestepSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < numThreads(); tid++)
     _vars[tid].timestepSetup();
 }
 
 void
 SystemBase::customSetup(const ExecFlagType & exec_type)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < numThreads(); tid++)
     _vars[tid].customSetup(exec_type);
 }
 
 void
 SystemBase::subdomainSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < numThreads(); tid++)
     _vars[tid].subdomainSetup();
 }
 
 void
 SystemBase::residualSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < numThreads(); tid++)
     _vars[tid].residualSetup();
 }
 
 void
 SystemBase::jacobianSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < numThreads(); tid++)
     _vars[tid].jacobianSetup();
 }
 

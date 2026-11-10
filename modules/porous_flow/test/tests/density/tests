@@ -3,5 +3,8 @@
     type = 'CSVDiff'
     input = 'GravDensity01.i'
     csvdiff = 'GravDensity01.csv'
+    issues = '#9027'
+    design = 'PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity.md'
+    requirement = 'The system shall be able to compute the bulk density of a fully-saturated porous medium, and its derivative with respect to porepressure, from the porosity, solid density and fluid density.'
   [../]
 []

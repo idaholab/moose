@@ -16,7 +16,7 @@ from typing import Optional, Tuple
 
 from Tester import Tester
 
-from TestHarness import TestHarness, util
+from TestHarness import util
 from TestHarness.capability_util import addAugmentedCapability
 from TestHarness.mpi_config import MPIType
 
@@ -108,11 +108,6 @@ class RunApp(Tester):
             "Whether or not unused parameters are allowed in the input file.  Can be globally overridden by setting 'allow_unused = False' in the testroot file.",
         )
         params.addParam(
-            "allow_override",
-            True,
-            "Whether or not overriding a parameter/block in the input file generates an error.  Can be globally overridden by setting 'allow_override = False' in the testroot file.",
-        )
-        params.addParam(
             "allow_deprecated",
             True,
             "Whether or not deprecated warnings are allowed.  Setting to False will cause deprecation warnings to be treated as test failures.  We do NOT recommend you globally set this permanently to False!  Deprecations are a part of the normal development flow and _SHOULD_ be allowed!",
@@ -143,12 +138,6 @@ class RunApp(Tester):
             "NORMAL",
             "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.",
         )
-
-        device_list_str = "', '".join(
-            d.upper() for d in TestHarness.validComputeDevices()
-        )
-        device_param_doc = f"The devices to use for this libtorch or MFEM test ('{device_list_str}'); device availability depends on library support and compilation settings; default ('CPU')"
-        params.addParam("compute_devices", ["CPU"], device_param_doc)
 
         return params
 
@@ -191,10 +180,6 @@ class RunApp(Tester):
                 "The parameters 'command_proxy' and 'no_additional_cli_args' "
                 "cannot be supplied together"
             )
-
-        for value in params["compute_devices"]:
-            if value.lower() not in TestHarness.validComputeDevices():
-                raise Exception(f'Unknown device "{value}"')
 
         # The capabilities file that we need to set with
         # --testharness-capabilities, if any. This should
@@ -243,12 +228,6 @@ class RunApp(Tester):
             == None
         ):
             self.addCaveats("EXECUTABLE PATTERN")
-            self.setStatus(self.skip)
-            return False
-
-        devices_lower = [x.lower() for x in self.specs["compute_devices"]]
-        if options.compute_device not in devices_lower:
-            self.addCaveats(f"{options.compute_device} not in compute devices")
             self.setStatus(self.skip)
             return False
 
@@ -441,9 +420,6 @@ class RunApp(Tester):
         ):
             cli_args.append("--allow-unused")
 
-        if "--error-override" not in cli_args and not specs["allow_override"]:
-            cli_args.append("--error-override")
-
         if (
             "--error-deprecated" not in cli_args
             and not specs["no_error_deprecated"]
@@ -505,7 +481,8 @@ class RunApp(Tester):
                     "suppressions",
                     "errors.supp",
                 )
-                + " --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes --demangle=yes --enable-debuginfod=no -v "
+                + " --leak-check=full --tool=memcheck --dsymutil=yes --demangle=yes --enable-debuginfod=no -v "
+                + f"--track-origins={'yes' if options.valgrind_track_origins else 'no'} "
                 + command
             )
         elif nthreads > 1:

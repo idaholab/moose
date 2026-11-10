@@ -370,7 +370,7 @@ ADWallFrictionChengMaterial::computeQpProperties()
             {
               ADReal a = 87.26;
               ADReal b = 38.59;
-              ADReal c = -55.15;
+              ADReal c = -55.12;
               ADReal n = 1;
               const ADReal f_F = WallFriction::FanningFrictionFactorCheng(Re, a, b, c, n, _PoD);
               _f_D[_qp] = WallFriction::DarcyFrictionFactor(f_F);

@@ -96,8 +96,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         if (_fp)
           _fp->p_T_from_v_e(_specific_volume[i],
                             _internal_energy[j],
-                            _p_initial_guess,
-                            _T_initial_guess,
+                            p_guess,
+                            T_guess,
                             p_ve,
                             T_ve,
                             conversion_succeeded);
@@ -186,8 +186,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
         if (_fp)
           _fp->p_T_from_v_h(_specific_volume[i],
                             _enthalpy[j],
-                            _p_initial_guess,
-                            _T_initial_guess,
+                            p_guess,
+                            T_guess,
                             p_vh,
                             T_vh,
                             conversion_succeeded);
@@ -282,18 +282,18 @@ TabulatedBicubicFluidProperties::checkNaNs(Real min_1,
   // replace nan values with pmax or pmin
   if (std::isnan(variable_1))
   {
-    if (_specific_volume[i] > ((_v_min + _v_max) / 2))
+    if (_specific_volume[i] >= ((_v_min + _v_max) / 2))
       variable_1 = min_1;
-    else if (_specific_volume[i] < ((_v_min + _v_max) / 2))
+    else
       variable_1 = max_1;
     num_nans_1++;
   }
   // replace nan values with Tmax or Tmin
   if (std::isnan(variable_2))
   {
-    if (_specific_volume[i] > ((_v_min + _v_max) / 2))
+    if (_specific_volume[i] >= ((_v_min + _v_max) / 2))
       variable_2 = max_2;
-    else if (_specific_volume[i] < ((_v_min + _v_max) / 2))
+    else
       variable_2 = min_2;
     num_nans_2++;
   }

@@ -367,8 +367,8 @@
   [./andy]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol -sub_pc_factor_shift_type'
-    petsc_options_value = 'gmres asm lu 1E-10 1E-14 10 1E-15 1E-10 NONZERO'
+    petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -ksp_atol -ksp_rtol -sub_pc_factor_shift_type'
+    petsc_options_value = 'gmres asm lu 1E-15 1E-10 NONZERO'
   [../]
 []
 
@@ -376,6 +376,9 @@
   type = Transient
   solve_type = Newton
   num_steps = 1
+  nl_abs_tol = 1E-10
+  nl_rel_tol = 1E-14
+  nl_max_its = 10
 []
 
 [Outputs]

@@ -9,6 +9,10 @@ packages:
 conda create -n moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__
 !versioner-end!
 
+!alert note title=Custom libMesh or PETSc
+More advanced developers may need to build/use their own libMesh or PETSc; see
+[faq/faq_custom_libmesh_petsc.md optional=True] for alternative Conda instructions.
+
 After the installation completes, activate the new environment:
 
 ```bash

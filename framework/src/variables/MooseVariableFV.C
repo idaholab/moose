@@ -37,6 +37,11 @@ MooseVariableFV<OutputType>::validParams()
   params.set<bool>("fv") = true;
   params.set<MooseEnum>("family") = "MONOMIAL";
   params.set<MooseEnum>("order") = "CONSTANT";
+  // A finite volume variable is always a CONSTANT MONOMIAL, whose basis has no p-refined
+  // counterpart, so the p-refinement parameters are fixed here and hidden from the user
+  params.set<bool>("p_refinement") = false;
+  params.suppressParameter<bool>("p_refinement");
+  params.suppressParameter<bool>("disable_p_refinement");
   params.template addParam<bool>(
       "two_term_boundary_expansion",
       true,
@@ -72,17 +77,15 @@ template <typename OutputType>
 MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
   : MooseVariableField<OutputType>(parameters),
     _solution(this->_sys.currentSolution()),
-    _phi(this->_assembly.template fePhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi(this->_assembly.template feGradPhi<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_face(this->_assembly.template fePhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi_face(this->_assembly.template feGradPhiFace<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_face_neighbor(
-        this->_assembly.template fePhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _phi(this->_assembly.template fePhi<OutputShape>(this->_fe_type)),
+    _grad_phi(this->_assembly.template feGradPhi<OutputShape>(this->_fe_type)),
+    _phi_face(this->_assembly.template fePhiFace<OutputShape>(this->_fe_type)),
+    _grad_phi_face(this->_assembly.template feGradPhiFace<OutputShape>(this->_fe_type)),
+    _phi_face_neighbor(this->_assembly.template fePhiFaceNeighbor<OutputShape>(this->_fe_type)),
     _grad_phi_face_neighbor(
-        this->_assembly.template feGradPhiFaceNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _grad_phi_neighbor(
-        this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+        this->_assembly.template feGradPhiFaceNeighbor<OutputShape>(this->_fe_type)),
+    _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(this->_fe_type)),
+    _grad_phi_neighbor(this->_assembly.template feGradPhiNeighbor<OutputShape>(this->_fe_type)),
     _prev_elem(nullptr),
     _two_term_boundary_expansion(this->isParamValid("two_term_boundary_expansion")
                                      ? this->template getParam<bool>("two_term_boundary_expansion")
@@ -378,7 +381,7 @@ MooseVariableFV<OutputType>::getGradient(const Elem * /*elem*/) const
 
 template <typename OutputType>
 void
-MooseVariableFV<OutputType>::setNodalValue(const OutputType & /*value*/, unsigned int /*idx*/)
+MooseVariableFV<OutputType>::setNodalValue(const OutputType & /*value*/)
 {
   mooseError("FV variables do not support setNodalValue");
 }

@@ -32,8 +32,6 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/simple_range.h"
 
-using namespace libMesh;
-
 namespace ConsoleUtils
 {
 
@@ -87,7 +85,7 @@ outputFrameworkInformation(const MooseApp & app)
       << std::setw(console_field_width)
       << "  Num Processors: " << static_cast<std::size_t>(app.n_processors()) << '\n'
       << std::setw(console_field_width)
-      << "  Num Threads: " << static_cast<std::size_t>(libMesh::n_threads()) << std::endl;
+      << "  Num Threads: " << static_cast<std::size_t>(app.numThreads()) << std::endl;
 
   return oss.str();
 }
@@ -222,7 +220,7 @@ outputSystemInformationHelper(std::stringstream & oss, System & system)
     oss << std::setw(console_field_width) << "  Variables: ";
     for (unsigned int vg = 0; vg < system.n_variable_groups(); vg++)
     {
-      const VariableGroup & vg_description(system.variable_group(vg));
+      const libMesh::VariableGroup & vg_description(system.variable_group(vg));
 
       if (vg_description.n_variables() > 1)
         oss << "{ ";
@@ -295,7 +293,7 @@ outputSystemInformationHelper(std::stringstream & oss, System & system)
     for (unsigned int vg = 0; vg < system.n_variable_groups(); vg++)
     {
       oss << "\""
-          << libMesh::Utility::enum_to_string<InfMapType>(
+          << libMesh::Utility::enum_to_string<libMesh::InfMapType>(
                  system.get_dof_map().variable_group(vg).type().inf_map)
           << "\" ";
       curr_string_pos = oss.tellp();

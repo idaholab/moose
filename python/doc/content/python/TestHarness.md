@@ -35,8 +35,11 @@ find and run your tests and display the results. More detail on concurrency can 
 To see more options for `run_tests` you can invoke it with `-h`.  There are many options to look
 through, but some of the important ones are:
 
-- `--failed-tests`: Runs the tests that just failed.  Note: as long as you keep using this
-  option the set of failed tests will not change.
+- `--failed-tests`: Runs the tests that just failed.  Tests that now pass are removed from the
+  set of failed tests, so each subsequent use runs only the tests that still fail.  Once all of
+  them pass, the last set of failed tests is kept.
+- `--failed-tests-no-update`: Same as `--failed-tests`, but the set of failed tests does not
+  change, which is useful for checking that fixed tests keep passing.
 - `--n-threads <n>`: Causes the tests to run with `#` of (OpenMP/Pthread/TBB) threads.
 - `-p <n>`: Causes the tests to run with `#` MPI processes.  Useful for guaranteeing that you get the
   same result in parallel!
@@ -66,10 +69,12 @@ through, but some of the important ones are:
   - Stateful class member variables in objects. Typically, this can be resolved
     by checking if the current timestep is greater than the previous timestep
     the object was run on. See
-    [Predictor::timestepSetup](framework/src/predictors/Predictor.C) for an
+    [!file text=Predictor::timestepSetup](framework/src/predictors/Predictor.C) for an
     example.
-  - Specifying `Executioner/abort_on_solve_fail=true` in the test input or
-    in the command line arguments (`cli_args`).
+
+  `Executioner/abort_on_solve_fail=true` does not prevent restep testing: the
+  forcefully failed timestep is still retried, while any other failed solve
+  still aborts the simulation.
 
 - `--opt` (The default) Builds an optimized executable suitable for running calculations.
 - `--dbg` An executable meant for use in a debugger (like gdb or lldb). Will be very slow and not meant to be used on large problems
@@ -86,7 +91,7 @@ read by the `run_tests` script.  It should be placed in the root of your applica
 - `app_name`: A unique, short name for your application.
 - `allow_warnings`: `true` by default, set this to `false` to make all warnings from running tests be
   _errors_ instead.
-- `allow_override` and `allow_unused`: `true` by default if set to `false` then syntax errors in your
+- `allow_unused`: `false` by default, if set to `false` then syntax errors in your
   test input files will be treated as errors.
 - `known_capabilities`: Extra capabilities to register as false if they aren't registered by the application.
 
@@ -262,9 +267,40 @@ Ran 2 tests in 2.9 seconds.
 
 Caveats of MOOSE_TERM_COLS; If you specify too low a MOOSE_TERM_COLS, the TestHarness will only drop printing of the justification filler (see MOOSE_TERM_FORMAT above).
 
-#### MOOSE_MAX_MEMORY
+#### MOOSE_MAX_MEMORY_PER_SLOT
 
-Set `MOOSE_MAX_MEMORY` to a float or integer to influence the `--max-memory` command line option, limiting the amount of estimated memory per process each job can use in MB. If the `--max-memory` command line option is set, it will take precident over this variable.
+Set `MOOSE_MAX_MEMORY_PER_SLOT` to a float or integer to influence the `--max-memory-per-slot` command line option, limiting the amount of estimated memory per slot (MPI process or thread) each job can use in MB. If the `--max-memory-per-slot` command line option is set, it will take precedence over this variable.
+
+On Linux, the memory measured for a job excludes file-backed memory, such as the pages
+backing the test executable and its shared libraries. Those pages are typically mapped by
+every running job, so counting them would charge a job for memory it shares with everything
+else that happens to be running at the same time, rather than for memory the job itself
+needed. This exclusion requires Linux 5.3 or newer; on older kernels and on platforms
+other than Linux, the measured memory includes those pages, so the same limit may be
+reached sooner.
+
+Memory is sampled every `--memory-tracking-interval` seconds (default 0.2), so a job that
+starts and finishes between two consecutive samples reports no memory, and a short
+spike between samples is missed.
+
+#### MOOSE_MAX_GPU_MEMORY_PER_SLOT
+
+Set `MOOSE_MAX_GPU_MEMORY_PER_SLOT` to a float or integer to influence the
+`--max-gpu-memory-per-slot` command line option, limiting the NVIDIA GPU memory per slot each
+job can use in MB. If the `--max-gpu-memory-per-slot` command line option is set, it will take
+precedence over this variable.
+
+GPU memory is tracked whenever the `pynvml` Python package (from `nvidia-ml-py`) is available
+and NVML finds an NVIDIA GPU, independent of `--compute-device`: a test run on the CPU can
+still create CUDA contexts, for example through Kokkos or PETSc built with CUDA. Use
+`--no-gpu-memory-tracking` to disable it. The GPU memory of a job is the device memory that
+NVML attributes to its processes, summed over all GPUs. It includes the CUDA context of each
+process, so a job is charged once per MPI rank that uses a GPU.
+
+Jobs that share a GPU run at most `-j` slots at a time, so setting the limit to the available GPU memory minus some
+headroom, divided by the `-j` value, reduces the risk of running out of GPU memory. The
+headroom is needed because memory is sampled: an allocation made between samples can exceed
+the limit before the job is killed.
 
 # Validation
 

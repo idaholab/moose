@@ -47,7 +47,7 @@ and uses SOR preconditioners from PETSc as level solvers.
 
 If there are multiple nonlinear variables, this configuration will reuse interpolations
 generated for the first nonlinear variable for all other variables. This will significantly
-speedup preconditioner setup. A complete toy example is [test/tests/preconditioners/hmg/diffusion_hmg.i].
+speedup preconditioner setup. A complete toy example is [!file](test/tests/preconditioners/hmg/diffusion_hmg.i).
 We also demonstrate this capability for
 realistic neutron transport calculations in the following paper:
 

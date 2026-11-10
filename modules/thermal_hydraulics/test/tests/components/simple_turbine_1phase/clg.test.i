@@ -87,12 +87,15 @@
   []
 []
 
-[ControlLogic]
-  [W_dot_ctrl]
-    type = TimeFunctionComponentControl
-    component = turbine
-    parameter = power
+[ChainControls]
+  [W_dot_ctrl_fn]
+    type = GetFunctionValueChainControl
     function = W_dot_fn
+  []
+  [W_dot_ctrl]
+    type = SetRealValueChainControl
+    parameter = component::turbine/power
+    value = W_dot_ctrl_fn:value
   []
 []
 

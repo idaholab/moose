@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,6 +14,11 @@
 #include "AuxiliarySystem.h"
 
 #include "libmesh/system.h"
+#include "libmesh/int_range.h"
+
+#include "timpi/parallel_sync.h"
+
+#include <algorithm>
 
 namespace Moose::Kokkos
 {
@@ -22,8 +27,10 @@ System::System(SystemBase & system)
     MeshHolder(*system.mesh().getKokkosMesh()),
     _system(system),
     _mesh(system.mesh()),
-    _dof_map(system.dofMap()),
     _comm(system.dofMap().comm()),
+    _dof_map(system.dofMap()),
+    _first_dof(system.dofMap().first_dof()),
+    _end_dof(system.dofMap().end_dof()),
     _num_vars(system.system().n_vars()),
     _num_local_dofs(system.system().n_local_dofs()),
     _num_ghost_dofs(system.dofMap().get_send_list().size())
@@ -41,6 +48,7 @@ System::setupVariables()
   auto & sys = _system.system();
 
   _var_subdomain_active.create(_num_vars, kokkosMesh().getNumSubdomains());
+  _var_scaling_factor.create(_num_vars);
 
   for (unsigned int var = 0; var < _num_vars; ++var)
     for (auto subdomain : _mesh.meshSubdomains())
@@ -48,6 +56,22 @@ System::setupVariables()
           sys.variable(var).active_on_subdomain(subdomain);
 
   _var_subdomain_active.copyToDevice();
+  updateVariableScalingFactors();
+}
+
+void
+System::updateVariableScalingFactors()
+{
+  auto & sys = _system.system();
+  for (const auto var : make_range(_num_vars))
+  {
+    const auto & moose_var =
+        sys.variable_type(var).family == libMesh::FEFamily::SCALAR
+            ? static_cast<const MooseVariableBase &>(_system.getScalarVariable(0, var))
+            : static_cast<const MooseVariableBase &>(_system.getVariable(0, var));
+    _var_scaling_factor[var] = moose_var.arrayScalingFactor()[var - moose_var.number()];
+  }
+  _var_scaling_factor.copyToDevice();
 }
 
 void
@@ -67,10 +91,14 @@ System::setupDofs()
   _matrices.create(MAX_TAG);
 
   _local_elem_dof_index.create(_num_vars);
+  _scalar_dof_index.create(_num_vars);
   _local_to_global_dof_index.create(_num_local_dofs + _num_ghost_dofs);
 
   _max_dofs_per_elem.create(_num_vars);
   _max_dofs_per_elem = 0;
+
+  _var_is_scalar.create(_num_vars);
+  _var_is_scalar = false;
 
   auto solution = dynamic_cast<PetscVector<Number> *>(sys.current_local_solution.get());
 
@@ -80,50 +108,79 @@ System::setupDofs()
 #endif
   for (unsigned int var = 0; var < _num_vars; ++var)
   {
+    _var_is_scalar[var] = sys.variable_type(var).family == libMesh::FEFamily::SCALAR;
+
     std::vector<dof_id_type> dof_indices;
 
-    for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
+    if (!_var_is_scalar[var])
     {
-      _dof_map.dof_indices(elem, dof_indices, var);
-
-      _max_dofs_per_elem[var] =
-          std::max(_max_dofs_per_elem[var], static_cast<unsigned int>(dof_indices.size()));
-    }
-
-    _local_elem_dof_index[var].create(_max_dofs_per_elem[var], num_total_elems);
-    _local_elem_dof_index[var] = libMesh::DofObject::invalid_id;
-
-    for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
-    {
-      const auto id = kokkosMesh().getContiguousElementID(elem);
-
-      _dof_map.dof_indices(elem, dof_indices, var);
-
-      for (unsigned int dof = 0; dof < dof_indices.size(); ++dof)
+      for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
       {
-        _local_elem_dof_index[var](dof, id) = solution->map_global_to_local_index(dof_indices[dof]);
-        _local_to_global_dof_index[_local_elem_dof_index[var](dof, id)] = dof_indices[dof];
+        _dof_map.dof_indices(elem, dof_indices, var);
+
+        _max_dofs_per_elem[var] =
+            std::max(_max_dofs_per_elem[var], static_cast<unsigned int>(dof_indices.size()));
+      }
+
+      _local_elem_dof_index[var].create(_max_dofs_per_elem[var], num_total_elems);
+      _local_elem_dof_index[var] = libMesh::DofObject::invalid_id;
+
+      for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
+      {
+        const auto id = kokkosMesh().getContiguousElementID(elem);
+
+        _dof_map.dof_indices(elem, dof_indices, var);
+
+        for (unsigned int dof = 0; dof < dof_indices.size(); ++dof)
+        {
+          const auto local_idx = solution->map_global_to_local_index(dof_indices[dof]);
+          _local_elem_dof_index[var](dof, id) = local_idx;
+          _local_to_global_dof_index[local_idx] = dof_indices[dof];
+        }
+      }
+
+      for (auto & [ghost_elem, ghost_id] : kokkosMesh().getGhostElemIdMapping())
+      {
+        if (!_dof_map.is_evaluable(*ghost_elem, var))
+          continue;
+
+        _dof_map.dof_indices(ghost_elem, dof_indices, var);
+
+        for (const auto dof : index_range(dof_indices))
+        {
+          const auto local_idx = solution->map_global_to_local_index(dof_indices[dof]);
+          _local_elem_dof_index[var](dof, ghost_id) = local_idx;
+          _local_to_global_dof_index[local_idx] = dof_indices[dof];
+        }
       }
     }
-
-    for (auto & [ghost_elem, ghost_id] : kokkosMesh().getGhostElemIdMapping())
+    else if (num_total_elems)
     {
-      if (!_dof_map.is_evaluable(*ghost_elem, var))
-        continue;
-      _dof_map.dof_indices(ghost_elem, dof_indices, var);
+      _dof_map.SCALAR_dof_indices(dof_indices, var);
+      _scalar_dof_index[var].create(dof_indices.size());
+
       for (const auto dof : index_range(dof_indices))
       {
         const auto local_idx = solution->map_global_to_local_index(dof_indices[dof]);
-        _local_elem_dof_index[var](dof, ghost_id) = local_idx;
+        _scalar_dof_index[var][dof] = local_idx;
         _local_to_global_dof_index[local_idx] = dof_indices[dof];
       }
     }
   }
 
+  for (auto dof : _dof_map.get_send_list())
+  {
+    const auto local_idx = solution->map_global_to_local_index(dof);
+    _local_to_global_dof_index[local_idx] = dof;
+  }
+
   _local_elem_dof_index.copyToDeviceNested();
+  _scalar_dof_index.copyToDeviceNested();
   _local_to_global_dof_index.copyToDevice();
 
   _max_dofs_per_elem.copyToDevice();
+
+  _var_is_scalar.copyToDevice();
 
   // Setup DOF communication maps
 
@@ -132,11 +189,22 @@ System::setupDofs()
   std::vector<std::vector<dof_id_type>> send_list(num_procs);
   std::vector<std::vector<dof_id_type>> recv_list(num_procs);
 
-  for (auto dof : _dof_map.get_send_list())
-    recv_list[_dof_map.dof_owner(dof)].push_back(dof);
+  // Tell the owner of each ghost DOF that we need it. This is a sparse exchange with only the
+  // neighboring processes, so its cost does not grow with the total number of processes.
+  {
+    std::map<processor_id_type, std::vector<dof_id_type>> push_data;
 
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-    _comm.scatter(recv_list, send_list[proc], proc);
+    for (auto dof : _dof_map.get_send_list())
+      push_data[_dof_map.dof_owner(dof)].push_back(dof);
+
+    for (const auto & [proc, dofs] : push_data)
+      recv_list[proc] = dofs;
+
+    auto receive = [&send_list](const processor_id_type pid, std::vector<dof_id_type> && dofs)
+    { send_list[pid] = std::move(dofs); };
+
+    TIMPI::push_parallel_vector_data(_comm, std::move(push_data), receive);
+  }
 
   _local_comm_list.create(num_procs);
   _ghost_comm_list.create(num_procs);
@@ -174,61 +242,92 @@ System::setupSparsity()
     return;
 
   std::vector<PetscInt> col_idx;
-  std::vector<PetscInt> row_idx;
   std::vector<PetscInt> row_ptr = {0};
 
-  for (dof_id_type r = _dof_map.first_dof(); r < _dof_map.end_dof(); ++r)
+  // The rows are laid out as the locally owned rows in ascending order followed by the ghost rows
+  // in send list order.  buildCooIndices() recovers each row's global index from that ordering, so
+  // the two must be kept consistent.
+  for (dof_id_type r = _first_dof; r < _end_dof; ++r)
   {
-    auto & cols = pattern->get_sparsity_pattern().at(r - _dof_map.first_dof());
+    auto & cols = pattern->get_sparsity_pattern().at(r - _first_dof);
 
     for (auto col : cols)
-    {
       col_idx.push_back(col);
-      row_idx.push_back(r);
-    }
 
     row_ptr.push_back(col_idx.size());
   }
 
   auto num_procs = _comm.size();
 
-  std::vector<std::vector<PetscInt>> send_cols(num_procs), send_num_cols(num_procs);
-  std::vector<std::vector<PetscInt>> recv_cols(num_procs), recv_num_cols(num_procs);
+  // Send the sparsity of the rows ghosted by each neighboring process to it, packed as
+  // [n_cols, cols..., n_cols, cols..., ...] in the order of its ghost DOFs. This is a sparse
+  // exchange with only the neighboring processes.
+  std::map<processor_id_type, std::vector<PetscInt>> send_rows;
 
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
+  for (const auto proc : make_range(num_procs))
     for (auto r : _local_comm_list[proc])
     {
-      for (PetscInt c = row_ptr[r]; c < row_ptr[r + 1]; ++c)
-        send_cols[proc].push_back(col_idx[c]);
+      auto & send = send_rows[proc];
 
-      send_num_cols[proc].push_back(row_ptr[r + 1] - row_ptr[r]);
+      send.push_back(row_ptr[r + 1] - row_ptr[r]);
+
+      for (PetscInt c = row_ptr[r]; c < row_ptr[r + 1]; ++c)
+        send.push_back(col_idx[c]);
     }
 
-  for (processor_id_type proc = 0; proc < num_procs; proc++)
-  {
-    _comm.scatter(send_cols, recv_cols[proc], proc);
-    _comm.scatter(send_num_cols, recv_num_cols[proc], proc);
-  }
+  std::vector<std::vector<PetscInt>> recv_rows(num_procs);
 
-  std::vector<PetscInt> col(num_procs), row(num_procs);
+  auto receive = [&recv_rows](const processor_id_type pid, std::vector<PetscInt> && rows)
+  { recv_rows[pid] = std::move(rows); };
+
+  TIMPI::push_parallel_vector_data(_comm, std::move(send_rows), receive);
+
+  std::vector<std::size_t> pos(num_procs);
 
   for (auto r : _dof_map.get_send_list())
   {
     auto proc = _dof_map.dof_owner(r);
-    auto n_cols = recv_num_cols[proc][row[proc]++];
+    auto & rows = recv_rows[proc];
+    auto n_cols = rows[pos[proc]++];
 
     for (PetscInt c = 0; c < n_cols; ++c)
-    {
-      col_idx.push_back(recv_cols[proc][col[proc]++]);
-      row_idx.push_back(r);
-    }
+      col_idx.push_back(rows[pos[proc]++]);
 
     row_ptr.push_back(col_idx.size());
   }
 
   _sparsity.col_idx = col_idx;
-  _sparsity.row_idx = row_idx;
   _sparsity.row_ptr = row_ptr;
+}
+
+void
+System::buildCooIndices(std::vector<PetscInt> & coo_i, std::vector<PetscInt> & coo_j) const
+{
+  const auto & col_idx = _sparsity.col_idx;
+  const auto & row_ptr = _sparsity.row_ptr;
+
+  coo_i.resize(col_idx.size());
+  coo_j.assign(&col_idx.begin(), &col_idx.end());
+
+  // Every nonzero of a row carries that row's global index, which setupSparsity() leaves implicit
+  // in the row ordering.  The two loops below walk the rows in the order it wrote them.
+  dof_id_type row = 0;
+
+  auto fill_row = [&](const PetscInt global_row)
+  {
+    std::fill(coo_i.begin() + row_ptr[row], coo_i.begin() + row_ptr[row + 1], global_row);
+    ++row;
+  };
+
+  for (const auto global_row : make_range(_dof_map.first_dof(), _dof_map.end_dof()))
+    fill_row(global_row);
+
+  for (const auto global_row : _dof_map.get_send_list())
+    fill_row(global_row);
+
+  mooseAssert(row == row_ptr.size() - 1,
+              "Kokkos system error: the DOF map no longer describes the rows that setupSparsity() "
+              "recorded.");
 }
 
 void
@@ -236,6 +335,8 @@ System::sync(const MemcpyType dir)
 {
   if (dir == MemcpyType::HOST_TO_DEVICE)
   {
+    updateVariableScalingFactors();
+
     for (auto tag : _active_solution_tags)
     {
       auto & vector = _system.getVector(tag);
@@ -252,16 +353,23 @@ System::sync(const MemcpyType dir)
       _vectors[tag].copyToDevice();
     }
 
-    for (auto tag : _active_matrix_tags)
     {
-      auto & matrix = _system.getMatrix(tag);
+      // PETSc consumes the COO index arrays destructively, so each matrix needs its own copy of
+      // them.  Holding the storage here lets one allocation serve every matrix tag, and releases it
+      // once the last one is preallocated.
+      std::vector<PetscInt> coo_i, coo_j;
 
+      for (auto tag : _active_matrix_tags)
       {
-        TIME_SECTION("MatSetPreallocation", 1);
-        _matrices[tag].create(matrix, *this);
-      }
+        auto & matrix = _system.getMatrix(tag);
 
-      _matrices[tag] = 0;
+        {
+          TIME_SECTION("MatSetPreallocation", 1);
+          _matrices[tag].create(matrix, *this, coo_i, coo_j);
+        }
+
+        _matrices[tag] = 0;
+      }
     }
 
     _vectors.copyToDevice();

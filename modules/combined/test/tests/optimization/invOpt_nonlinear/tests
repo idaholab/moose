@@ -11,7 +11,7 @@
       abs_zero = 0.5
       input = main.i
       csvdiff = main_out_OptimizationReporter_0001.csv
-      cli_args = "Executioner/tao_solver=taolmvm"
+      cli_args = "Executioner/tao_solver=taobqnls"
       max_threads = 1
       valgrind = none
       recover = false

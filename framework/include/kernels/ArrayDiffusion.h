@@ -18,6 +18,8 @@ public:
 
   ArrayDiffusion(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
   virtual void initQpResidual() override;
   virtual void computeQpResidual(RealEigenVector & residual) override;

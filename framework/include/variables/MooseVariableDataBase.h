@@ -90,7 +90,7 @@ public:
   /**
    * Set nodal value
    */
-  void setNodalValue(const OutputType & value, unsigned int idx = 0);
+  void setNodalValue(const OutputType & value);
 
   /**
    * Set the current local DOF values to the input vector

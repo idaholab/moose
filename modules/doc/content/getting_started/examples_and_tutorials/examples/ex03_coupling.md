@@ -118,10 +118,10 @@ u = \frac{\exp\left(\frac{x}{\epsilon}\right) - 1}{\exp\left(\frac{1}{\epsilon}\
 
 ## Complete Source Files
 
-- [examples/ex03_coupling/ex03.i]
-- [examples/ex03_coupling/include/kernels/ExampleConvection.h]
-- [examples/ex03_coupling/src/kernels/ExampleConvection.C]
-- [examples/ex03_coupling/src/base/ExampleApp.C]
+- [!file](examples/ex03_coupling/ex03.i)
+- [!file](examples/ex03_coupling/include/kernels/ExampleConvection.h)
+- [!file](examples/ex03_coupling/src/kernels/ExampleConvection.C)
+- [!file](examples/ex03_coupling/src/base/ExampleApp.C)
 
 !content pagination use_title=True
                     previous=examples/ex02_kernel.md

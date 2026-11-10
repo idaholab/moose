@@ -1,0 +1,34 @@
+[Tests]
+  issues = '#32928'
+  design = 'syntax/Outputs/index.md'
+
+  [shortcut]
+    type = CheckFiles
+    input = parent.i
+    check_files = 'parent_out_sub0.e'
+    recover = false
+
+    requirement = "The system shall name shortcut syntax sub-application file output from the parent and sub-application names."
+  []
+
+  [explicit_default]
+    type = CheckFiles
+    input = parent.i
+    cli_args = 'MultiApps/sub/input_files=sub_explicit_default.i'
+    check_files = 'parent_out_sub0_out.e'
+    recover = false
+
+    requirement = "The system shall append the output object name to explicit syntax sub-application file output by default."
+  []
+
+  [explicit_no_append]
+    type = CheckFiles
+    input = parent.i
+    cli_args = 'MultiApps/sub/input_files=sub_explicit_no_append.i'
+    check_files = 'parent_out_sub0.e'
+    check_not_exists = 'parent_out_sub0_out.e'
+    recover = false
+
+    requirement = "The system shall allow explicit syntax sub-application file output to match shortcut syntax file naming."
+  []
+[]

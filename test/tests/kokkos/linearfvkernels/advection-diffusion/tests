@@ -7,7 +7,7 @@
     test_case = TestKokkosLinearFVAdvectionDiffusion1D
     requirement = 'The system shall be able to solve a one-dimensional advection-diffusion problem with a linear finite volume discretization using Kokkos boundary value and normal-gradient data.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu cuda xpu'
     max_threads = 1
   []
 []

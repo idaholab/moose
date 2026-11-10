@@ -14,8 +14,6 @@
 #include "NonlinearSystemBase.h"
 #include "RandomHitUserObject.h"
 
-using namespace libMesh;
-
 registerMooseObject("MooseTestApp", RandomHitSolutionModifier);
 
 InputParameters

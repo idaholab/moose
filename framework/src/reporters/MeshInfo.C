@@ -389,9 +389,9 @@ MeshInfo::possiblyAddElemInfo()
     // bounding_box
     if (items.bounding_box)
       gather([](const auto & info)
-             { return static_cast<const std::pair<Point, Point> &>(info.bounding_box); },
+             { return cast_ref<const std::pair<Point, Point> &>(info.bounding_box); },
              [](auto & info, const auto & value)
-             { static_cast<std::pair<Point, Point> &>(info.bounding_box) = value; });
+             { cast_ref<std::pair<Point, Point> &>(info.bounding_box) = value; });
 
 #define gather_simple(name)                                                                        \
   if (items.name)                                                                                  \
@@ -637,8 +637,12 @@ MeshInfo::possiblyAddDomainInfo(CombinedInfosType & infos)
     // a previous implementation of MeshInfo, we still reported these. So, keep
     // reporting them.
     if constexpr (is_sidesets)
-      for (const auto id : _mesh.get_boundary_info().get_global_boundary_ids())
+    {
+      auto sideset_ids = _mesh.get_boundary_info().get_side_boundary_ids();
+      comm().set_union(sideset_ids);
+      for (const auto id : sideset_ids)
         get_or_insert_info(global->map, id);
+    }
   }
 
   for (auto to : {local, global})

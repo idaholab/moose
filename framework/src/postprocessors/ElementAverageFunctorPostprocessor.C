@@ -54,6 +54,6 @@ void
 ElementAverageFunctorPostprocessor::threadJoin(const UserObject & y)
 {
   ElementIntegralFunctorPostprocessor::threadJoin(y);
-  const auto & pps = static_cast<const ElementAverageFunctorPostprocessor &>(y);
+  const auto & pps = cast_ref<const ElementAverageFunctorPostprocessor &>(y);
   _volume += pps._volume;
 }

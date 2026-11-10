@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -58,7 +58,7 @@ Mesh::initMap()
   _maps->subdomain_node_ids.clear();
   _maps->boundary_node_ids.clear();
 
-  std::unordered_set<ElemType> elem_types;
+  std::set<std::pair<ElemType, unsigned int>> elem_types;
   std::unordered_set<Node *> ghost_nodes;
 
   for (const auto subdomain : _mesh.meshSubdomains())
@@ -71,7 +71,7 @@ Mesh::initMap()
 
     for (auto elem : _mesh.getMesh().active_local_subdomain_elements_ptr_range(subdomain))
     {
-      elem_types.insert(elem->type());
+      elem_types.emplace(elem->type(), elem->p_level());
 
       eid = _num_local_elems;
       elem->set_extra_integer(_elem_id_integer, _num_local_elems++);
@@ -106,13 +106,13 @@ Mesh::initMap()
             !_maps->ghost_elem_id_mapping.count(neighbor))
         {
           _maps->ghost_elem_id_mapping[neighbor] = _num_local_elems + _num_ghost_elems++;
-          elem_types.insert(neighbor->type());
+          elem_types.emplace(neighbor->type(), neighbor->p_level());
         }
       }
 
   // Setup node maps
 
-  for (const auto type : elem_types)
+  for (const auto & type : elem_types)
     _maps->elem_type_id_mapping[type] = _maps->elem_type_id_mapping.size();
 
   _maps->local_nodes.insert(
@@ -151,8 +151,9 @@ Mesh::initElement()
   _num_side_nodes.create(num_elem_types);
   _local_side_node.create(num_elem_types);
 
-  for (auto & [elem_type, elem_type_id] : getElementTypeMap())
+  for (auto & [elem_type_and_p_level, elem_type_id] : getElementTypeMap())
   {
+    const auto [elem_type, _] = elem_type_and_p_level;
     auto elem = &libMesh::ReferenceElem::get(elem_type);
 
     _num_sides[elem_type_id] = elem->n_sides();
@@ -254,6 +255,40 @@ Mesh::initElement()
   _points.moveToDevice();
   _nodes.moveToDevice();
   _boundary_nodes.copyToDevice();
+
+  // Cache side boundary data
+
+  _side_boundary_ids.create(_mesh.getMaxSidesPerElem(), num_elems);
+
+  Array2D<unsigned int> num_side_boundary_ids(_mesh.getMaxSidesPerElem(), num_elems);
+
+  num_side_boundary_ids = 0;
+
+  for (const auto * const bnd_elem : *_mesh.getBoundaryElementRange())
+    if (bnd_elem->_elem->processor_id() == _mesh.processor_id())
+      ++num_side_boundary_ids(bnd_elem->_side, getContiguousElementID(bnd_elem->_elem));
+
+  for (const auto * const bnd_elem : *_mesh.getBoundaryElementRange())
+    if (bnd_elem->_elem->processor_id() == _mesh.processor_id())
+    {
+      const auto side = bnd_elem->_side;
+      const auto eid = getContiguousElementID(bnd_elem->_elem);
+      _side_boundary_ids.reserve({side, eid}, {num_side_boundary_ids(side, eid)});
+    }
+
+  _side_boundary_ids.finalize();
+
+  num_side_boundary_ids = 0;
+
+  for (const auto * const bnd_elem : *_mesh.getBoundaryElementRange())
+    if (bnd_elem->_elem->processor_id() == _mesh.processor_id())
+    {
+      const auto side = bnd_elem->_side;
+      const auto eid = getContiguousElementID(bnd_elem->_elem);
+      _side_boundary_ids(side, eid)[num_side_boundary_ids(side, eid)++] = bnd_elem->_bnd_id;
+    }
+
+  _side_boundary_ids.copyToDevice();
 }
 
 ContiguousSubdomainID
@@ -273,7 +308,8 @@ Mesh::getElementTypeID(const Elem * elem) const
 {
   mooseAssert(elem, "Element pointer is null");
 
-  return libmesh_map_find(_maps->elem_type_id_mapping, elem->type());
+  return libmesh_map_find(_maps->elem_type_id_mapping,
+                          std::make_pair(elem->type(), elem->p_level()));
 }
 
 ContiguousElementID
@@ -342,7 +378,6 @@ Mesh::initElementSideGeometry()
   _elem_centroid_to_side_centroid_distance.create(max_sides, num_elems);
   _elem_centroid_to_neighbor_centroid.create(max_sides, num_elems);
   _elem_centroid_to_neighbor_centroid_distance.create(max_sides, num_elems);
-  _side_boundary_id.create(max_sides, num_elems);
 
   _side_area = 0;
   _side_centroid = Real3();
@@ -351,7 +386,6 @@ Mesh::initElementSideGeometry()
   _elem_centroid_to_side_centroid_distance = 0;
   _elem_centroid_to_neighbor_centroid = Real3();
   _elem_centroid_to_neighbor_centroid_distance = 0;
-  _side_boundary_id = Moose::INVALID_BOUNDARY_ID;
 
   libMesh::ElemSideBuilder side_builder;
 
@@ -397,20 +431,6 @@ Mesh::initElementSideGeometry()
       _elem_centroid_to_neighbor_centroid(side, eid) = elem_centroid_to_neighbor_centroid;
       _elem_centroid_to_neighbor_centroid_distance(side, eid) =
           neighbor ? elem_centroid_to_neighbor_centroid.norm() : Real(0);
-
-      const auto boundary_ids = _mesh.getBoundaryIDs(elem, side);
-      if (boundary_ids.size() > 1)
-        mooseError("Kokkos element-side geometry does not support multiple boundary IDs on a "
-                   "single side. "
-                   "Element ",
-                   eid,
-                   " side ",
-                   side,
-                   " has ",
-                   boundary_ids.size(),
-                   " boundary IDs.");
-      if (!boundary_ids.empty())
-        _side_boundary_id(side, eid) = boundary_ids.front();
     }
   }
 
@@ -422,7 +442,6 @@ Mesh::initElementSideGeometry()
   _elem_centroid_to_side_centroid_distance.moveToDevice();
   _elem_centroid_to_neighbor_centroid.moveToDevice();
   _elem_centroid_to_neighbor_centroid_distance.moveToDevice();
-  _side_boundary_id.moveToDevice();
 
   _element_side_geometry_initialized = true;
 }

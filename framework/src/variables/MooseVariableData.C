@@ -22,8 +22,6 @@
 #include "libmesh/type_n_tensor.h"
 #include "libmesh/fe_interface.h"
 
-using namespace libMesh;
-
 template <typename OutputType>
 MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputType> & var,
                                                  SystemBase & sys,
@@ -135,6 +133,20 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
   _phi_face = &_phi_face_assembly_method(_assembly, _fe_type);
   _grad_phi = &_grad_phi_assembly_method(_assembly, _fe_type);
   _grad_phi_face = &_grad_phi_face_assembly_method(_assembly, _fe_type);
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::needADGradPhiFace() const
+{
+  _assembly.needADGradPhiFace();
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::needADGradPhi() const
+{
+  _assembly.needADGradPhi();
 }
 
 template <typename OutputType>
@@ -675,7 +687,10 @@ MooseVariableData<OutputType>::computeValuesInternal()
           _grad_u_dotdot, *_current_grad_phi, _dof_values_dotdot, nqp, num_shapes);
   }
 
-  if (_need_ad)
+  // A variable whose AD was only ever requested through the face-scoped accessors has no
+  // consumer on element interiors, so seeding the derivatives there is wasted work. In the
+  // volume context _current_qrule is _qrule; see setGeometry().
+  if (_need_ad && (_need_ad_volume || _current_qrule != _qrule))
     computeAD<constant_monomial>(num_dofs, nqp);
 }
 
@@ -782,6 +797,48 @@ MooseVariableData<RealEigenVector>::fetchADDofValues()
         Moose::derivInsert(dual_number.derivatives(), global_dof_index, 1.);
     }
   }
+
+  const bool is_transient = _subproblem.isTransient();
+  if (is_transient && _need_ad_u_dot)
+  {
+    _ad_dofs_dot.resize(n_test);
+    if (_need_ad_u_dotdot)
+      _ad_dofs_dotdot.resize(n_test);
+
+    for (const auto i : make_range(n_test))
+    {
+      _ad_dofs_dot[i].resize(_count);
+      if (_need_ad_u_dotdot)
+        _ad_dofs_dotdot[i].resize(_count);
+      for (const auto j : make_range(_count))
+      {
+        auto & dot = _ad_dofs_dot[i](j);
+        auto & dotdot = _need_ad_u_dotdot ? _ad_dofs_dotdot[i](j) : _ad_real_dummy;
+        if (_time_integrator)
+        {
+          if (_time_integrator->dt())
+          {
+            dot = _ad_dof_values[i](j);
+            _time_integrator->computeADTimeDerivatives(dot, _dof_indices[j * n_test + i], dotdot);
+          }
+          else
+          {
+            // Executing something with a time derivative at initial should not put a NaN
+            dot = 0;
+            dotdot = 0;
+          }
+        }
+        // We are too early in the setup to have a time integrator, so we are not really using
+        // the AD-derivatives. We set the AD value of the derivatives to the nonAD value
+        else
+        {
+          dot = _dof_values_dot[i](j);
+          if (_need_ad_u_dotdot)
+            dotdot = _dof_values_dotdot[i](j);
+        }
+      }
+    }
+  }
 }
 
 template <typename OutputType>
@@ -795,8 +852,15 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
   // Values
   if (_need_ad_u)
     fill<constant_monomial>(_ad_u, *_current_phi, _ad_dof_values, nqp, n_test);
-  // Grad
-  if (_need_ad_grad_u)
+  // Grad. On an element face, only fill the gradient when a face object requested it. Otherwise it
+  // stays empty so that a face object that read it through the volume accessor adGradSln() fails
+  // the bounds assertion instead of silently using gradients built without the AD face shape
+  // function gradients. Neighbor data never uses AD shape function gradients and is not affected.
+  const bool on_element_face =
+      _element_type == Moose::ElementType::Element && _current_qrule != _qrule;
+  if (_need_ad_grad_u && on_element_face && !_need_ad_grad_u_face)
+    _ad_grad_u.resize(0);
+  else if (_need_ad_grad_u)
   {
     // The latter check here is for handling the fact that we have not yet implemented
     // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
@@ -813,6 +877,9 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
   // Curl
   if (_need_ad_curl_u)
     fill<constant_monomial>(_ad_curl_u, *_current_curl_phi, _ad_dof_values, nqp, n_test);
+  // Div
+  if (_need_ad_div_u)
+    fill<constant_monomial>(_ad_div_u, *_current_div_phi, _ad_dof_values, nqp, n_test);
 
   const bool is_transient = _subproblem.isTransient();
   if (is_transient)
@@ -843,7 +910,11 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       }
     }
 
-    if (_need_ad_grad_u_dot)
+    // The gradient time derivative is volume-only, so on an element face it is left empty for the
+    // same reason as the gradient above
+    if (_need_ad_grad_u_dot && on_element_face)
+      _ad_grad_u_dot.resize(0);
+    else if (_need_ad_grad_u_dot)
     {
       if (_time_integrator)
       {

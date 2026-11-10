@@ -51,24 +51,23 @@ heated_length = 1.0
   atol = 1.0e-10
   implicit = true
   segregated = false
-  staggered_pressure = false
   verbose_multiapps = true
   verbose_subchannel = false
   interpolation_scheme = 'upwind'
   pin_HTC_closure = 'gnielinski'
-  friction_closure = 'Cheng'
-  mixing_closure = 'Cheng_Todreas'
+  friction_closure = 'Chen'
+  mixing_closure = 'Chen_Todreas'
 []
 
 [SCMClosures]
-  [Cheng]
-    type = SCMFrictionUpdatedChengTodreas
+  [Chen]
+    type = SCMFrictionChenTodreas
   []
   [gnielinski]
     type = SCMHTCGnielinski
   []
-  [Cheng_Todreas]
-    type = SCMMixingChengTodreas
+  [Chen_Todreas]
+    type = SCMMixingChenTodreas
     CT = 2.6
   []
 []

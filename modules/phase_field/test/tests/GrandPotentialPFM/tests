@@ -43,11 +43,53 @@
     type = 'CSVDiff'
     input = 'GrandPotentialInterface.i'
     csvdiff = 'GrandPotentialInterface_out_mat_0001.csv'
-    issues = '#12147'
+    issues = '#12147 #33932'
     design = '/GrandPotentialInterface.md'
     requirement = 'The system shall provide a material to automatically compute grand potential '
                   'model interface parameters based on provided interfacial free energies and widths'
     valgrind = 'heavy'
+  []
+  [GrandPotentialInterface_moelans2009]
+    type = 'CSVDiff'
+    input = 'GrandPotentialInterface.i'
+    csvdiff = 'GrandPotentialInterface_moelans2009_out_mat_0001.csv'
+    cli_args = 'Materials/iface/interface_fit=moelans2009 '
+               'Outputs/file_base=GrandPotentialInterface_moelans2009_out'
+    issues = '#33932'
+    design = '/GrandPotentialInterface.md'
+    requirement = 'The system shall optionally compute grand potential model interface parameters '
+                  'with the earlier 2009 polynomial fits of Moelans to reproduce earlier results'
+  []
+  [GrandPotentialInterface_reference]
+    requirement = 'The system shall compute grand potential model interface parameters using as '
+                  'reference the interface with'
+    issues = '#33932'
+    design = '/GrandPotentialInterface.md'
+    [max]
+      type = 'CSVDiff'
+      input = 'GrandPotentialInterfaceReference.i'
+      csvdiff = 'GrandPotentialInterfaceReference_out_mat_0001.csv'
+      detail = 'the largest interfacial free energy by default, or'
+    []
+    [median]
+      type = 'CSVDiff'
+      input = 'GrandPotentialInterfaceReference.i'
+      csvdiff = 'GrandPotentialInterfaceReference_median_out_mat_0001.csv'
+      cli_args = 'Materials/iface/reference_sigma=median '
+                 'Outputs/file_base=GrandPotentialInterfaceReference_median_out'
+      detail = 'the median interfacial free energy.'
+    []
+  []
+  [GrandPotentialInterface_out_of_range]
+    type = 'RunException'
+    input = 'GrandPotentialInterface.i'
+    cli_args = "Materials/iface/sigma='0.1 1'"
+    expect_err = 'outside the range 0.098 <= g <= 0.766'
+    issues = '#33932'
+    design = '/GrandPotentialInterface.md'
+    requirement = 'The system shall report an error if an interfacial free energy lies outside the '
+                  'range covered by the polynomial fit used to compute the grand potential model '
+                  'interface parameters'
   []
   [GrandPotentialAnisotropyAntitrap]
     type = 'Exodiff'

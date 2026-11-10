@@ -11,8 +11,6 @@
 
 #include "ElementLoopUserObject.h"
 
-using libMesh::RealGradient;
-
 /**
  * Base class for slope limiting to limit
  * the slopes of cell average variables
