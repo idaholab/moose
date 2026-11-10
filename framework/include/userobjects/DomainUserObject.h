@@ -31,8 +31,8 @@ class QBase;
  * This user object allows related evaluations on elements, boundaries, internal sides,
  * interfaces in one single place. DomainUserObject is still block restrictable.
  * By default, evaluations on elements, boundaries and internal sides happen, while
- * 'interface_boundaries' must be set to invoke evaluations on interfaces. When
- * 'external_boundaries' is set, boundary evaluations are restricted to its external sides.
+ * 'interface_boundaries' must be set to invoke evaluations on interfaces. When 'boundaries' is
+ * set, boundary evaluations are restricted to the selected boundary IDs.
  * We require this parameter for interface evaluations because we want to enforce sanity
  * checks on coupling variables that are not defined on the domain this user object works on
  * but only are available on the other side of the interfaces. All sides of an interface must
@@ -175,11 +175,11 @@ protected:
   /// The set of boundary IDs on which this object should perform \p executeOnInterface
   std::set<BoundaryID> _interface_bnd_ids;
 
-  /// The external boundary IDs on which this object should perform \p executeOnBoundary
-  std::set<BoundaryID> _external_bnd_ids;
+  /// The boundary IDs on which this object should perform \p executeOnBoundary
+  std::set<BoundaryID> _boundary_execution_ids;
 
-  /// Whether execution is restricted to explicitly selected external boundaries
-  const bool _external_bnd_restricted;
+  /// Whether boundary execution is restricted to explicitly selected boundary IDs
+  const bool _boundary_restricted;
 
   /// The set of blocks connected to our blocks through boundaries of the \p _interface_bnd_ids data member
   std::map<BoundaryID, std::set<SubdomainID>> _interface_connected_blocks;
@@ -283,27 +283,11 @@ DomainUserObject::shouldExecuteOnBoundary(const bool is_external_side) const
     return false;
   }
 
-  // If external_boundaries is set, executeOnBoundary should run only on its selected external
-  // sides.
-  if (_external_bnd_restricted)
-  {
-    // If the current boundary is not selected in external_boundaries, executeOnBoundary should not
-    // run on it.
-    if (!_external_bnd_ids.count(_current_boundary_id))
-      return false;
-
-    // A boundary selected in external_boundaries must not contain an internal side because external
-    // sides must not have neighbors.
-    if (!is_external_side)
-      paramError("external_boundaries",
-                 "Boundary ",
-                 _current_boundary_id,
-                 " contains an internal side, but external boundaries must not contain neighbors.");
-  }
-
-  // At this point, the current boundary is not an interface boundary, and external_boundaries is
-  // either unset or contains the current external side.
-  return true;
+  // We execute on a boundary in two cases: (1) when this user object is not boundary restricted,
+  // and (2) when the current boundary ID is selected. We must not require the current side to be
+  // external because executeOnBoundary() is also allowed to run on internal sides, such as a
+  // boundary created by a subdomain split.
+  return !_boundary_restricted || _boundary_execution_ids.count(_current_boundary_id);
 }
 
 inline bool

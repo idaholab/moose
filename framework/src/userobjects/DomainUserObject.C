@@ -28,10 +28,11 @@ DomainUserObject::validParams()
       "The interface boundaries on which this object will execute. If unset, the object executes "
       "on no interface boundary.");
   params.addParam<std::vector<BoundaryName>>(
-      "external_boundaries",
-      "The external boundaries on which this object will execute its boundary callback. If unset, "
-      "boundary execution is unrestricted except on selected interface boundaries. An explicitly "
-      "empty list disables boundary execution.");
+      "boundaries",
+      "The boundary IDs on which this object will execute its boundary operation. A boundary ID "
+      "may tag a side on the mesh exterior or an internal side with a neighbor. If unset, boundary "
+      "execution is unrestricted except on selected interface boundaries. An explicitly empty list "
+      "disables boundary execution.");
   // Need one layer of ghosting
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
@@ -57,7 +58,7 @@ DomainUserObject::DomainUserObject(const InputParameters & parameters)
     _current_neighbor_volume(_assembly.neighborVolume()),
     _current_boundary_id(_assembly.currentBoundaryID()),
     _normals(_assembly.normals()),
-    _external_bnd_restricted(isParamValid("external_boundaries")),
+    _boundary_restricted(isParamValid("boundaries")),
     _q_point(_assembly.qPoints()),
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),
@@ -66,11 +67,10 @@ DomainUserObject::DomainUserObject(const InputParameters & parameters)
     _JxW_face(_assembly.JxWFace()),
     _coord(_assembly.coordTransformation())
 {
-  // Check whether the user object is restricted to external boundaries and if so, get the boundary
-  // IDs
-  if (_external_bnd_restricted)
-    _external_bnd_ids = MooseMeshUtils::getBoundaryIDSet(
-        _mesh, getParam<std::vector<BoundaryName>>("external_boundaries"), false);
+  // Check whether the user object is boundary restricted and if so, get the boundary IDs
+  if (_boundary_restricted)
+    _boundary_execution_ids = MooseMeshUtils::getBoundaryIDSet(
+        _mesh, getParam<std::vector<BoundaryName>>("boundaries"), false);
 
   if (isParamValid("interface_boundaries"))
   {
@@ -79,11 +79,11 @@ DomainUserObject::DomainUserObject(const InputParameters & parameters)
     const auto & interface_boundaries = getParam<std::vector<BoundaryName>>("interface_boundaries");
     _interface_bnd_ids = MooseMeshUtils::getBoundaryIDSet(_mesh, interface_boundaries, false);
 
-    // Check that the user has not selected the same boundary as both an external boundary and an
-    // interface boundary.
+    // Check that the user has not selected the same boundary for both boundary and interface
+    // execution.
     std::vector<BoundaryID> overlapping_ids;
-    std::set_intersection(_external_bnd_ids.begin(),
-                          _external_bnd_ids.end(),
+    std::set_intersection(_boundary_execution_ids.begin(),
+                          _boundary_execution_ids.end(),
                           _interface_bnd_ids.begin(),
                           _interface_bnd_ids.end(),
                           std::back_inserter(overlapping_ids));
@@ -91,7 +91,7 @@ DomainUserObject::DomainUserObject(const InputParameters & parameters)
       paramError("interface_boundaries",
                  "Boundary IDs ",
                  Moose::stringify(overlapping_ids),
-                 " cannot be selected as both external boundaries and internal interfaces.");
+                 " cannot be selected by both boundaries and interface_boundaries.");
 
     for (const auto interface_bnd_id : _interface_bnd_ids)
     {

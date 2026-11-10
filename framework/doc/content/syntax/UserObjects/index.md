@@ -38,18 +38,20 @@ and use the interface without the use of dynamic casts.
   an +ElementUserObject+, +InternalSideUserObject+, +SideUserObject+, and +InterfaceUserObject+.
   The `interface_boundaries` parameter selects the internal boundaries treated as interfaces, where
   data from both sides are available. If unset, no boundaries are treated as interfaces. The
-  `external_boundaries` parameter selects the boundaries treated like those of a +SideUserObject+:
+  `boundaries` parameter selects where boundary evaluations occur. A boundary is an element side
+  tagged with a boundary ID and is not restricted to the exterior of the mesh. A tagged internal
+  side with a neighbor may also be selected:
 
   - If unset, every boundary ID not listed in `interface_boundaries` is selected, including IDs on
     internal sides.
-  - If set to an empty list, no boundaries are selected.
-  - If set to a list, only the listed external boundaries are selected. Listing a boundary ID on an
-    internal side causes an error.
+  - If set to an empty list, no boundary IDs are selected.
+  - If set to a list, only the listed boundary IDs are selected, regardless of whether they occur on
+    exterior or internal sides.
 
   MOOSE treats each boundary ID separately. If one internal side has both `crack` and `marked`, and
   only `crack` is in `interface_boundaries`, `crack` is treated as an interface while `marked` is
-  treated as a boundary when `external_boundaries` is unset. The same ID cannot be listed in both
-  parameters. These parameters do not affect element or unmarked internal-side operations.
+  treated as a boundary when `boundaries` is unset. The same ID cannot be listed in both parameters.
+  These parameters do not affect element or unmarked internal-side operations.
 - +MortarUserObject+: "execute" is called for each mortar segment element corresponding to the
   secondary-primary mortar interface pairing on each execution flag
 

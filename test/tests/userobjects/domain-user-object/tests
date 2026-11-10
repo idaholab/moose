@@ -73,49 +73,49 @@
     issues = '#34282'
   []
 
-  [external_boundary_selection]
-    requirement = 'The system shall invoke DomainUserObject boundary callbacks'
+  [boundary_selection]
+    requirement = 'The system shall execute domain user objects'
     design = 'UserObjects/index.md'
     issues = '#19995 #32413 #34421'
     [unset]
-      detail = 'on all boundaries not selected as interfaces when external_boundaries is unset,'
+      detail = 'on every boundary not selected as an interface when boundaries is unset,'
       type = RunApp
       mesh_mode = REPLICATED
       input = overlapping-interface.i
-      # When external_boundaries is unset, boundary callbacks run on every non-interface boundary ID.
-      # 6 calls: block 0 has 4 outer sides (2 bottom, 1 left, 1 right) plus the primary side of
-      # 2 internal sides on crack (y = 0); the overlapping 'new' interface boundary is excluded.
+      # When boundaries is unset, boundary callbacks run on every non-interface boundary ID. Boundary
+      # IDs are not limited to the mesh exterior: crack tags 2 internal sides between blocks 0 and 1,
+      # and both are included even though they have neighbors. The 6 calls consist of these 2 crack
+      # sides and block 0's 4 exterior sides (2 bottom, 1 left, and 1 right); the overlapping 'new'
+      # interface boundary ID is excluded.
       cli_args = 'UserObjects/conservation/expected_boundary_calls=6 Outputs/exodus=false'
     []
     [selected]
-      detail = 'only on selected external boundaries when external_boundaries lists them, and'
+      detail = 'only on the boundary IDs listed in boundaries when it is set, and'
       type = RunApp
       mesh_mode = REPLICATED
       input = overlapping-interface.i
-      # An explicit selection excludes internal sides that are not interfaces.
-      # 2 calls: block 0 has 2 element sides along the 'bottom' boundary (nx = 2).
-      cli_args = 'UserObjects/conservation/external_boundaries=bottom UserObjects/conservation/expected_boundary_calls=2 Outputs/exodus=false'
+      # The selected bottom boundary has 2 element sides in block 0 (nx = 2).
+      cli_args = 'UserObjects/conservation/boundaries=bottom UserObjects/conservation/expected_boundary_calls=2 Outputs/exodus=false'
     []
     [empty]
-      detail = 'on no boundaries when external_boundaries is explicitly empty.'
+      detail = 'on no boundaries when boundaries is set to an empty list.'
       type = RunApp
       mesh_mode = REPLICATED
       input = overlapping-interface.i
       # An explicitly empty list disables all boundary callbacks without disabling independently
       # selected interface callbacks.
-      cli_args = 'UserObjects/conservation/external_boundaries= UserObjects/conservation/expected_boundary_calls=0 UserObjects/conservation/check_conservation=false Outputs/exodus=false'
+      cli_args = 'UserObjects/conservation/boundaries= UserObjects/conservation/expected_boundary_calls=0 UserObjects/conservation/check_conservation=false Outputs/exodus=false'
     []
   []
 
-  [external_boundary_rejects_internal_side]
-    requirement = 'The system shall reject a DomainUserObject external boundary selection containing an internal side.'
+  [boundary_selection_accepts_internal_side]
+    requirement = 'The system shall execute a domain user object on a selected boundary containing internal sides.'
     design = 'UserObjects/index.md'
     issues = '#19995 #32413 #34421'
-    type = RunException
+    type = RunApp
     mesh_mode = REPLICATED
     input = overlapping-interface.i
-    cli_args = 'UserObjects/conservation/external_boundaries=crack Outputs/exodus=false'
-    expect_err = 'contains an internal side, but external boundaries must not contain neighbors'
+    cli_args = 'UserObjects/conservation/boundaries=crack UserObjects/conservation/expected_boundary_calls=2 Outputs/exodus=false'
   []
 
   [interface_boundary_rejects_external_side]
@@ -129,14 +129,14 @@
     expect_err = 'contains an external side, but interface boundaries must contain neighbors'
   []
 
-  [external_boundary_interface_overlap]
-    requirement = 'The system shall reject a DomainUserObject boundary ID selected as both an external boundary and an interface.'
+  [boundary_interface_overlap]
+    requirement = 'The system shall reject a DomainUserObject boundary ID selected for both boundary and interface execution.'
     design = 'UserObjects/index.md'
     issues = '#19995 #32413 #34421'
     type = RunException
     mesh_mode = REPLICATED
     input = overlapping-interface.i
-    cli_args = 'UserObjects/conservation/external_boundaries=new Outputs/exodus=false'
-    expect_err = 'cannot be selected as both external boundaries and internal interfaces'
+    cli_args = 'UserObjects/conservation/boundaries=new Outputs/exodus=false'
+    expect_err = 'cannot be selected by both boundaries and interface_boundaries'
   []
 []
