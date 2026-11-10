@@ -17,18 +17,24 @@ ADVectorRobinBC::validParams()
   InputParameters params = ADVectorIntegratedBC::validParams();
   params.addClassDescription("Imposes the Robin integrated boundary condition "
                              "$\\frac{\\partial u}{\\partial n}=u$.");
+  params.addParam<RealVectorValue>(
+      "value",
+      RealVectorValue(),
+      "Inhomogeneous value subtracted from the variable for Robin boundary condition.");
   params.addParam<Real>(
       "coefficient", 1.0, "Coefficient multiplier for the Robin boundary condition term.");
   return params;
 }
 
 ADVectorRobinBC::ADVectorRobinBC(const InputParameters & parameters)
-  : ADVectorIntegratedBC(parameters), _coef(getParam<Real>("coefficient"))
+  : ADVectorIntegratedBC(parameters),
+    _value(getParam<RealVectorValue>("value")),
+    _coef(getParam<Real>("coefficient"))
 {
 }
 
 ADReal
 ADVectorRobinBC::computeQpResidual()
 {
-  return _coef * _test[_i][_qp] * _u[_qp];
+  return _coef * _test[_i][_qp] * (_u[_qp] - _value);
 }

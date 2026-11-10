@@ -67,12 +67,15 @@
   []
 []
 
-[ControlLogic]
-  [set_outlet_value]
-    type = TimeFunctionComponentControl
-    component = outlet
-    parameter = p
+[ChainControls]
+  [set_outlet_value_fn]
+    type = GetFunctionValueChainControl
     function = outlet_p_fn
+  []
+  [set_outlet_value]
+    type = SetRealValueChainControl
+    parameter = component::outlet/p
+    value = set_outlet_value_fn:value
   []
 []
 

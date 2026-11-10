@@ -77,8 +77,8 @@ WeightedVelocitiesUserObject::contactTangents(const Elem & lower_secondary_elem,
   if (it == _ad_nodal_tangents.end())
     it = _ad_nodal_tangents
              .emplace(node,
-                      Moose::Mortar::householderTangents(
-                          contactNormal(lower_secondary_elem, nodal_index)))
+                      Moose::Mortar::nodalTangents(contactNormal(lower_secondary_elem, nodal_index),
+                                                   amg().dim()))
              .first;
 
 #ifndef NDEBUG

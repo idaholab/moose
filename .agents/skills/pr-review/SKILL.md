@@ -122,8 +122,10 @@ changed:
 - **Newly registered objects.** Find new user-facing objects in the diff:
   `git diff <base>...HEAD | grep -E '^\+.*register(MooseObject|.*Action)\('`.
   Each new object drives both a documentation check (Step 3E) and a testing check (Step 3D).
-- **Scope.** Is the change surgical and focused, or does it bundle unrelated edits ("rider"
-  commits)? MOOSE reviewers may legitimately ask to split a sprawling PR. Note mixed concerns.
+- **Scope.** Small rider fixes bundled with the main change are acceptable; do not ask for them
+  to be split out. Do ask to split a PR that carries several large, independent concepts, since
+  a human reviewer cannot review it as one unit. Removing test caveats such as
+  `max_parallel = 1` is welcome and needs no justification from the author.
 
 ## Step 3 - Review across the MOOSE dimensions
 

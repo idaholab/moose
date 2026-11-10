@@ -118,12 +118,10 @@ AugmentedLagrangianContactConvergence<T>::checkConvergence(unsigned int iter)
             if (!mccs.back())
               mccs.back() = mcc;
 
-            // check if any of the constraints is not yet converged
-            if (repeat_augmented_lagrange_step || !mcc->AugmentedLagrangianContactConverged())
-            {
+            // check if any of the constraints is not yet converged. The check is collective, so
+            // it must run for every constraint on every rank.
+            if (!mcc->AugmentedLagrangianContactConverged())
               repeat_augmented_lagrange_step = true;
-              break;
-            }
           }
       }
 
@@ -131,8 +129,9 @@ AugmentedLagrangianContactConvergence<T>::checkConvergence(unsigned int iter)
       const auto & pmuos = this->_app.template getInterfaceObjects<AugmentedLagrangeInterface>();
       for (auto * pmuo : pmuos)
       {
-        // check if any of the constraints is not yet converged
-        if (!repeat_augmented_lagrange_step && !pmuo->isAugmentedLagrangianConverged())
+        // check if any of the constraints is not yet converged. The check is collective, so it
+        // must run for every user object on every rank.
+        if (!pmuo->isAugmentedLagrangianConverged())
           repeat_augmented_lagrange_step = true;
       }
 

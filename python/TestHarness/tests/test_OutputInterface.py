@@ -115,12 +115,14 @@ class TestHarnessTester(unittest.TestCase):
         # Set null characters
         oi.setOutput(null_chars)
         failures = oi.sanitizeOutput()
-        self.assertEqual(failures, ["NULL output"])
+        self.assertEqual(failures, ["invalid output characters"])
         self.assertEqual(oi.getOutput(), null_replaced)
 
         # Set null characters without sanitize
         oi.setOutput(null_chars)
         with self.assertRaises(OutputInterface.BadOutputException) as e:
             oi.getOutput()
-        self.assertEqual(e.exception.errors, ["NULL output"])
-        self.assertEqual(str(e.exception), "Bad output detected: NULL output")
+        self.assertEqual(e.exception.errors, ["invalid output characters"])
+        self.assertEqual(
+            str(e.exception), "Bad output detected: invalid output characters"
+        )

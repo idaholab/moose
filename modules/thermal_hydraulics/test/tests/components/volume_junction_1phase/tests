@@ -107,7 +107,7 @@
       type = 'CSVDiff'
       input = 'phy.form_loss.i'
       csvdiff = 'phy.form_loss_crtl.csv'
-      cli_args = 'Components/junction/K=1 ControlLogic/active=K_crtl Outputs/execute_on=TIMESTEP_END Outputs/file_base=phy.form_loss_crtl'
+      cli_args = "Components/junction/K=1 ChainControls/active='K_crtl_fn K_crtl' Outputs/execute_on=TIMESTEP_END Outputs/file_base=phy.form_loss_crtl"
       rel_err = 2e-4
       recover = false
       restep = false # Test is prescribed to abort on failed timestep
@@ -123,6 +123,16 @@
     abs_zero = 1e-10
     restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall conserve mass and energy when a VolumJunction1Phase component is used'
+  []
+  [variable_area_conservation]
+    type = 'CSVDiff'
+    input = 'variable_area_conservation.i'
+    csvdiff = 'variable_area_conservation_out.csv'
+    # The differences are relative and limited by the nonlinear tolerance
+    abs_zero = 1e-7
+    restep = false # Test is prescribed to abort on failed timestep
+    issues = '#34097'
+    requirement = 'The system shall conserve mass across a volume junction when the area of a connected flow channel varies within the element at the connection.'
   []
   # error checking
   [err.missing_ics]

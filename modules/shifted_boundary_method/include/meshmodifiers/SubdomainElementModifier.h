@@ -12,6 +12,10 @@
 #include "SBMElementSubdomainModifierBase.h"
 #include "PointInSubdomainCheckUO.h" // UO with subdomain geometry checks
 
+/**
+ * Modifies element subdomains dynamically based on point-in-subdomain geometric checks
+ * provided by PointInSubdomainCheckUO.
+ */
 class SubdomainElementModifier : public SBMElementSubdomainModifierBase
 {
 public:

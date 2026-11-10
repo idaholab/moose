@@ -231,7 +231,7 @@ class Runner(OutputInterface):
                 if output and output[-1] != "\n":
                     output += "\n"
                 output += self.describeInvalidUTF8(data, name)
-                self.job.addCaveats(f"invalid UTF-8 in {name}")
+                self.job.addCaveats(f"invalid output characters in {name}")
         except:
             self.job.setStatus(self.job.error, "error reading output")
         if output and output[-1] != "\n":

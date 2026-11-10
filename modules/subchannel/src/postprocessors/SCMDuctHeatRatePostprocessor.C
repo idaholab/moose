@@ -46,6 +46,13 @@ SCMDuctHeatRatePostprocessor::execute()
   _value = power;
 }
 
+void
+SCMDuctHeatRatePostprocessor::finalize()
+{
+  // The subchannel solution is only available on processor 0
+  _communicator.broadcast(_value);
+}
+
 Real
 SCMDuctHeatRatePostprocessor::getValue() const
 {

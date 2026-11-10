@@ -37,6 +37,9 @@ protected:
   void computeQpProperties() override;
   void initQpStatefulProperties() override;
 
+  /// method used to compute the displacement jump in global coordinates
+  virtual void computeGlobalDisplacementJump();
+
   /// method used to compute the disaplcement jump in interface coordinates according to a
   ///  specific kinematic formulation
   virtual void computeLocalDisplacementJump() = 0;

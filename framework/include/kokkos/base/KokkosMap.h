@@ -9,65 +9,62 @@
 
 #pragma once
 
+#ifdef MOOSE_KOKKOS_SCOPE
+#include "Kokkos_Functional.hpp"
+#endif
+
 #include "KokkosArray.h"
 
 #include <memory>
 #include <map>
+#include <limits>
 
 namespace Moose::Kokkos
 {
 
 #ifdef MOOSE_KOKKOS_SCOPE
-constexpr uint32_t FNV_PRIME = 0x01000193;        // 16777619
-constexpr uint32_t FNV_OFFSET_BASIS = 0x811C9DC5; // 2166136261
-
+/**
+ * Hash a key for the device hash table using the MurmurHash3 implementation of Kokkos, which
+ * hashes the object representation of the key
+ * @param key The key
+ * @param seed The hash seed
+ * @returns The 32-bit hash
+ */
 template <typename T>
 KOKKOS_FUNCTION uint32_t
-fnv1aHash(const T & key, uint32_t hash)
+hashKey(const T & key, uint32_t seed = 0)
 {
-  auto bytes = reinterpret_cast<const uint8_t *>(&key);
-
-  for (size_t i = 0; i < sizeof(T); ++i)
-  {
-    hash ^= bytes[i];
-    hash *= FNV_PRIME;
-  }
-
-  return hash;
-}
-
-template <typename T>
-KOKKOS_FUNCTION uint32_t
-fnv1aHash(const T & key)
-{
-  return fnv1aHash(key, FNV_OFFSET_BASIS);
+  return ::Kokkos::pod_hash<T>()(key, seed);
 }
 
 template <typename T1, typename T2>
 struct Pair;
 
+/**
+ * Hash a pair member by member so that padding bytes between the members do not contribute
+ */
 template <typename T1, typename T2>
 KOKKOS_FUNCTION uint32_t
-fnv1aHash(const Pair<T1, T2> & key)
+hashKey(const Pair<T1, T2> & key, uint32_t seed = 0)
 {
-  return fnv1aHash(key.second, fnv1aHash(key.first));
+  return hashKey(key.second, hashKey(key.first, seed));
 }
 #endif
 
-template <typename T1, typename T2, template <typename...> class MapType>
+template <typename T1, typename T2, typename index_type, template <typename...> class MapType>
 class MapBase;
 
-template <typename T1, typename T2, template <typename...> class MapType>
-void dataStore(std::ostream & stream, MapBase<T1, T2, MapType> & map, void * context);
-template <typename T1, typename T2, template <typename...> class MapType>
-void dataLoad(std::istream & stream, MapBase<T1, T2, MapType> & map, void * context);
+template <typename T1, typename T2, typename index_type, template <typename...> class MapType>
+void dataStore(std::ostream & stream, MapBase<T1, T2, index_type, MapType> & map, void * context);
+template <typename T1, typename T2, typename index_type, template <typename...> class MapType>
+void dataLoad(std::istream & stream, MapBase<T1, T2, index_type, MapType> & map, void * context);
 
 /**
  * The Kokkos wrapper class for standard map.
  * The map can only be populated on host.
  * Make sure to call copyToDevice() or copyToDeviceNested() after populating the map on host.
  */
-template <typename T1, typename T2, template <typename...> class MapType>
+template <typename T1, typename T2, typename index_type, template <typename...> class MapType>
 class MapBase
 {
 public:
@@ -137,13 +134,13 @@ public:
    * Swap with another Kokkos map
    * @param map The Kokkos map to be swapped
    */
-  void swap(MapBase<T1, T2, MapType> & map);
+  void swap(MapBase<T1, T2, index_type, MapType> & map);
 
   /**
    * Get the size of map
    * @returns The size of map
    */
-  KOKKOS_FUNCTION dof_id_type size() const
+  KOKKOS_FUNCTION index_type size() const
   {
     KOKKOS_IF_ON_HOST(return get().size();)
 
@@ -154,7 +151,7 @@ public:
    * @param key The key
    * @returns The index of the key, invalid_id if the key does not exist
    */
-  KOKKOS_FUNCTION dof_id_type find(const T1 & key) const;
+  KOKKOS_FUNCTION index_type find(const T1 & key) const;
   /**
    * Get whether a key exists
    * @param key The key
@@ -166,7 +163,7 @@ public:
    * @param idx The index returned by find()
    * @returns The const reference of the key
    */
-  KOKKOS_FUNCTION const T1 & key(dof_id_type idx) const
+  KOKKOS_FUNCTION const T1 & key(index_type idx) const
   {
     KOKKOS_ASSERT(idx != invalid_id);
 
@@ -177,7 +174,7 @@ public:
    * @param idx The index returned by find()
    * @returns The const reference of the value
    */
-  KOKKOS_FUNCTION const T2 & value(dof_id_type idx) const
+  KOKKOS_FUNCTION const T2 & value(index_type idx) const
   {
     KOKKOS_ASSERT(idx != invalid_id);
 
@@ -207,7 +204,7 @@ public:
   ///@}
 #endif
 
-  static const dof_id_type invalid_id = libMesh::DofObject::invalid_id;
+  static constexpr index_type invalid_id = std::numeric_limits<index_type>::max();
 
 private:
 #ifdef MOOSE_KOKKOS_SCOPE
@@ -225,23 +222,27 @@ private:
   /**
    * Keys on device
    */
-  Array<T1> _keys;
+  Array<T1, 1, index_type> _keys;
   /**
    * Values on device
    */
-  Array<T2> _values;
+  Array<T2, 1, index_type> _values;
   /**
    * Beginning offset into device arrays of each bucket
    */
-  Array<dof_id_type> _offset;
+  Array<index_type, 1, index_type> _offset;
 
-  friend void dataStore<T1, T2, MapType>(std::ostream &, MapBase<T1, T2, MapType> &, void *);
-  friend void dataLoad<T1, T2, MapType>(std::istream &, MapBase<T1, T2, MapType> &, void *);
+  friend void dataStore<T1, T2, index_type, MapType>(std::ostream &,
+                                                     MapBase<T1, T2, index_type, MapType> &,
+                                                     void *);
+  friend void dataLoad<T1, T2, index_type, MapType>(std::istream &,
+                                                    MapBase<T1, T2, index_type, MapType> &,
+                                                    void *);
 };
 
-template <typename T1, typename T2, template <typename...> class MapType>
+template <typename T1, typename T2, typename index_type, template <typename...> class MapType>
 void
-MapBase<T1, T2, MapType>::clear()
+MapBase<T1, T2, index_type, MapType>::clear()
 {
   get().clear();
 
@@ -251,9 +252,9 @@ MapBase<T1, T2, MapType>::clear()
 }
 
 #ifdef MOOSE_KOKKOS_SCOPE
-template <typename T1, typename T2, template <typename...> class MapType>
+template <typename T1, typename T2, typename index_type, template <typename...> class MapType>
 void
-MapBase<T1, T2, MapType>::copy()
+MapBase<T1, T2, index_type, MapType>::copy()
 {
   _keys.create(size());
   _values.create(size());
@@ -262,20 +263,20 @@ MapBase<T1, T2, MapType>::copy()
 
   for (const auto & [key, value] : get())
   {
-    auto bucket = fnv1aHash(key) % size();
+    auto bucket = hashKey(key) % size();
 
     _offset[bucket]++;
   }
 
-  std::exclusive_scan(_offset.begin(), _offset.end(), _offset.begin(), 0);
+  std::exclusive_scan(_offset.begin(), _offset.end(), _offset.begin(), index_type(0));
 
   _offset.copyToDevice();
 
-  std::vector<dof_id_type> idx(size(), 0);
+  std::vector<index_type> idx(size(), 0);
 
   for (const auto & [key, value] : get())
   {
-    auto bucket = fnv1aHash(key) % size();
+    auto bucket = hashKey(key) % size();
 
     _keys[_offset[bucket] + idx[bucket]] = key;
     _values[_offset[bucket] + idx[bucket]] = value;
@@ -283,9 +284,9 @@ MapBase<T1, T2, MapType>::copy()
   }
 }
 
-template <typename T1, typename T2, template <typename...> class MapType>
+template <typename T1, typename T2, typename index_type, template <typename...> class MapType>
 void
-MapBase<T1, T2, MapType>::copyToDevice()
+MapBase<T1, T2, index_type, MapType>::copyToDevice()
 {
   copy();
 
@@ -293,9 +294,9 @@ MapBase<T1, T2, MapType>::copyToDevice()
   _values.copyToDevice();
 }
 
-template <typename T1, typename T2, template <typename...> class MapType>
+template <typename T1, typename T2, typename index_type, template <typename...> class MapType>
 void
-MapBase<T1, T2, MapType>::copyToDeviceNested()
+MapBase<T1, T2, index_type, MapType>::copyToDeviceNested()
 {
   copy();
 
@@ -303,9 +304,9 @@ MapBase<T1, T2, MapType>::copyToDeviceNested()
   _values.copyToDeviceNested();
 }
 
-template <typename T1, typename T2, template <typename...> class MapType>
+template <typename T1, typename T2, typename index_type, template <typename...> class MapType>
 void
-MapBase<T1, T2, MapType>::swap(MapBase<T1, T2, MapType> & map)
+MapBase<T1, T2, index_type, MapType>::swap(MapBase<T1, T2, index_type, MapType> & map)
 {
   get().swap(map.get());
   _keys.swap(map._keys);
@@ -313,27 +314,27 @@ MapBase<T1, T2, MapType>::swap(MapBase<T1, T2, MapType> & map)
   _offset.swap(map._offset);
 }
 
-template <typename T1, typename T2, template <typename...> class MapType>
-KOKKOS_FUNCTION dof_id_type
-MapBase<T1, T2, MapType>::find(const T1 & key) const
+template <typename T1, typename T2, typename index_type, template <typename...> class MapType>
+KOKKOS_FUNCTION index_type
+MapBase<T1, T2, index_type, MapType>::find(const T1 & key) const
 {
   if (!size())
     return invalid_id;
 
-  auto bucket = fnv1aHash(key) % size();
+  auto bucket = hashKey(key) % size();
   auto begin = _offset[bucket];
   auto end = _offset[bucket + 1];
 
-  for (dof_id_type i = begin; i < end; ++i)
+  for (index_type i = begin; i < end; ++i)
     if (_keys[i] == key)
       return i;
 
   return invalid_id;
 }
 
-template <typename T1, typename T2, template <typename...> class MapType>
+template <typename T1, typename T2, typename index_type, template <typename...> class MapType>
 void
-dataStore(std::ostream & stream, MapBase<T1, T2, MapType> & map, void * context)
+dataStore(std::ostream & stream, MapBase<T1, T2, index_type, MapType> & map, void * context)
 {
   using ::dataStore;
 
@@ -343,9 +344,9 @@ dataStore(std::ostream & stream, MapBase<T1, T2, MapType> & map, void * context)
   dataStore(stream, map._offset, context);
 }
 
-template <typename T1, typename T2, template <typename...> class MapType>
+template <typename T1, typename T2, typename index_type, template <typename...> class MapType>
 void
-dataLoad(std::istream & stream, MapBase<T1, T2, MapType> & map, void * context)
+dataLoad(std::istream & stream, MapBase<T1, T2, index_type, MapType> & map, void * context)
 {
   using ::dataLoad;
 
@@ -356,10 +357,10 @@ dataLoad(std::istream & stream, MapBase<T1, T2, MapType> & map, void * context)
 }
 #endif
 
-template <typename T1, typename T2>
-using Map = MapBase<T1, T2, std::map>;
+template <typename T1, typename T2, typename index_type = MOOSE_KOKKOS_INDEX_TYPE>
+using Map = MapBase<T1, T2, index_type, std::map>;
 
-template <typename T1, typename T2>
-using UnorderedMap = MapBase<T1, T2, std::unordered_map>;
+template <typename T1, typename T2, typename index_type = MOOSE_KOKKOS_INDEX_TYPE>
+using UnorderedMap = MapBase<T1, T2, index_type, std::unordered_map>;
 
 } // namespace Moose::Kokkos

@@ -14,11 +14,14 @@ InputParameters
 ScalarKernel::validParams()
 {
   InputParameters params = ScalarKernelBase::validParams();
+  params += NonADFunctorInterface::validParams();
   return params;
 }
 
 ScalarKernel::ScalarKernel(const InputParameters & parameters)
-  : ScalarKernelBase(parameters), _u(_is_implicit ? _var.sln() : uOld())
+  : ScalarKernelBase(parameters),
+    NonADFunctorInterface(this),
+    _u(_is_implicit ? _var.sln() : uOld())
 {
 }
 

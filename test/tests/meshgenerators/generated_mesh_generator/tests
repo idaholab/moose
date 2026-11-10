@@ -144,4 +144,28 @@
       detail = 'the specified maximum Z-coordinate is less than the minimum Z-coordinate.'
     []
   []
+
+  [boundary_names]
+    issues = '#20976'
+    design = 'meshgenerators/GeneratedMeshGenerator.md'
+    requirement = 'The system shall include mesh generation tools and allow setting the names of the boundaries'
+    [names]
+      type = 'Exodiff'
+      input = 'prefix.i'
+      cli_args = "Mesh/gmg/boundary_names='b0 b1 b2 b3 b4 b5' --mesh-only boundary_names_in.e"
+      exodiff = 'boundary_names_in.e'
+      exodiff_opts = '-pedantic'
+      recover = false
+
+      detail = 'and add the name prefix to the user-specified names, and'
+    []
+    [wrong_size]
+      type = RunException
+      input = 'prefix.i'
+      cli_args = "Mesh/gmg/boundary_names='b0 b1' --mesh-only"
+      expect_err = "Should be of size '6', currently of size: 2"
+
+      detail = 'error if the number of names does not match the number of boundaries.'
+    []
+  []
 []

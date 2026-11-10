@@ -91,6 +91,13 @@ SCMPlanarMean::execute()
   }
 }
 
+void
+SCMPlanarMean::finalize()
+{
+  // The subchannel solution is only available on processor 0
+  _communicator.broadcast(_mean_value);
+}
+
 Real
 SCMPlanarMean::getValue() const
 {

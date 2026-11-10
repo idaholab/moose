@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LStableDirk4.h"
+#include "libmesh/sparse_matrix.h"
 #include "NonlinearSystemBase.h"
 #include "FEProblem.h"
 #include "PetscSupport.h"
@@ -36,6 +37,7 @@ const Real LStableDirk4::_a[LStableDirk4::_n_stages][LStableDirk4::_n_stages] = 
 LStableDirk4::LStableDirk4(const InputParameters & parameters)
   : TimeIntegrator(parameters), _stage(1)
 {
+  requestTimeJacobian();
   mooseInfo("LStableDirk4 and other multistage TimeIntegrators are known not to work with "
             "Materials/AuxKernels that accumulate 'state' and should be used with caution.");
 
@@ -151,4 +153,12 @@ LStableDirk4::postResidual(NumericVector<Number> & residual)
   for (unsigned int j = 0; j < _stage; ++j)
     residual.add(_a[_stage - 1][j], *_stage_residuals[j]);
   residual.close();
+}
+
+void
+LStableDirk4::postJacobian(SparseMatrix<Number> & jacobian)
+{
+  // the current stage solution enters the stage residual through the time residual and the
+  // diagonal coefficient times the non-time residual of the stage, see postResidual()
+  weightNonTimeJacobian(jacobian, _a[_stage - 1][_stage - 1]);
 }

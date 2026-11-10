@@ -823,6 +823,12 @@ protected:
   void computeNodalBCsJacobian(const std::set<TagID> & tags);
 
   /**
+   * Let the time integrators combine the time and non-time parts of the system Jacobian, see
+   * NonlinearTimeIntegratorInterface::postJacobian()
+   */
+  void postJacobian(const std::set<TagID> & tags);
+
+  /**
    * Compute the residual and Jacobian together for nodal boundary conditions
    */
   void computeNodalBCsResidualAndJacobian(const std::set<TagID> & vector_tags,

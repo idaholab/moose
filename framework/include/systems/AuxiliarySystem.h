@@ -109,6 +109,12 @@ public:
 
 #ifdef MOOSE_KOKKOS_ENABLED
   void kokkosCompute(ExecFlagType type);
+
+  /**
+   * Group the active Kokkos auxiliary kernels of each execution flag into stages that can each be
+   * computed in a single device pass
+   */
+  void buildKokkosAuxStages();
 #endif
 
   /**
@@ -221,6 +227,21 @@ protected:
   // Storage for KokkosAuxKernel objects
   ExecuteMooseObjectWarehouse<AuxKernelBase> _kokkos_nodal_aux_storage;
   ExecuteMooseObjectWarehouse<AuxKernelBase> _kokkos_elemental_aux_storage;
+
+  /// Kokkos auxiliary kernels computed in a single device pass
+  struct KokkosAuxStage
+  {
+    KokkosAuxStage();
+
+    /// Nodal kernels, which read coupled values from DOFs and are computed first
+    MooseObjectWarehouse<AuxKernelBase> nodal;
+    /// Elemental kernels, which read coupled values from the cached quadrature point values
+    MooseObjectWarehouse<AuxKernelBase> elemental;
+  };
+
+  /// Active Kokkos auxiliary kernels of each execution flag grouped into stages, where a kernel
+  /// coupling the current value of a variable runs in a later stage than the kernels writing it
+  std::map<ExecFlagType, std::vector<KokkosAuxStage>> _kokkos_aux_stages;
 #endif
 
   friend class ComputeIndicatorThread;

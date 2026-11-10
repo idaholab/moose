@@ -5,7 +5,7 @@
 [VectorPostprocessors]
   [point_sample]
     type = MFEMVariablePointValueSampler
-    variable = 'concentration'
+    variables = 'concentration'
     points = '2.125 0 -1.375  2.125 0 1.125'
   []
 []

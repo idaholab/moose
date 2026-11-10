@@ -1,11 +1,11 @@
 !include 'expdyn.i'
 
 [NEML2]
+  eager = true
   input = '../elasticity/elasticity_neml2.i'
   [all]
     executor_name = 'neml2'
     model = 'model'
-    verbose = true
     input_kernels = 'neml2_strain'
     auto_output = false
   []
@@ -13,20 +13,20 @@
 
 [UserObjects]
   [assembly]
-    type = NEML2Assembly
+    type = TorchAssembly
   []
   [fe]
-    type = NEML2FEInterpolation
+    type = TorchFEInterpolation
     assembly = 'assembly'
   []
   [neml2_strain]
-    type = NEML2SmallStrain
+    type = TorchSmallStrain
     assembly = 'assembly'
     fe = 'fe'
     to_neml2 = 'neml2_strain'
   []
   [residual]
-    type = NEML2StressDivergence
+    type = TorchStressDivergence
     assembly = 'assembly'
     fe = 'fe'
     executor = 'neml2'
@@ -39,7 +39,7 @@
   type = Transient
 
   [TimeIntegrator]
-    type = NEML2CentralDifference
+    type = TorchCentralDifference
     mass_matrix_tag = 'mass'
     use_constant_mass = true
     second_order_vars = 'disp_x disp_y disp_z'

@@ -9,16 +9,22 @@ black:
   - 26.5.1
 
 clang_format:
-  - 19.1.7
+  - 21.1.8
 
 clang_tools:
-  - 19.1.7
+  - 21.1.8
 
 coverage:
   - 7.13.2
 
+# conda-forge pyarrow 26.0.1 pulls libarrow build _2, which links lz4 through
+# /opt/homebrew on macOS so that "import pyarrow" fails. Remove this pin once
+# a fixed 26.0.1 build is published.
+pyarrow:
+  - <26.0.1
+
 ruff:
-  - 0.15.15
+  - 0.17.2
 
 xmltodict:
   - <0.14

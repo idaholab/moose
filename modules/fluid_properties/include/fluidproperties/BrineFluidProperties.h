@@ -197,8 +197,6 @@ protected:
   Real _Mnacl;
   /// Molar mass of water (H2O) (kg/mol)
   Real _Mh2o;
-  /// Flag to indicate whether to calculate derivatives in water_fp
-  mutable bool _water_fp_derivs;
 };
 
 #pragma GCC diagnostic pop

@@ -21,6 +21,15 @@ class MooseMesh;
 class SystemBase;
 class AuxiliarySystem;
 
+/**
+ * Orders systems by system number. Use it for sets of systems that are iterated over with
+ * collective operations: pointer order can differ between ranks, system number cannot.
+ */
+struct SystemNumberLess
+{
+  bool operator()(const SystemBase * a, const SystemBase * b) const;
+};
+
 class SolveObject : public MooseObject, public PerfGraphInterface, public PostprocessorInterface
 {
 public:

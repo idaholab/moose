@@ -1,0 +1,289 @@
+######## BC's #################
+T_in = 359.15
+# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
+mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
+P_out = 4.923e6 # Pa
+heated_length = 1.0
+######## Geometry #
+[GlobalParams]
+    nx = 2
+    ny = 2
+    n_cells = 25
+    pitch = 0.0126
+    pin_diameter = 0.00950
+    side_gap = 0.00095
+    heated_length = ${heated_length}
+    spacer_z = '0.0'
+    spacer_k = '0.0'
+    power = 100000.0 # W
+[]
+
+[QuadSubChannelMesh]
+    [subchannel]
+        type = SCMQuadAssemblyMeshGenerator
+    []
+[]
+
+[Functions]
+    [axial_heat_rate]
+        type = ParsedFunction
+        expression = '(pi/2)*sin(pi*z/L)'
+        symbol_names = 'L'
+        symbol_values = '${heated_length}'
+    []
+[]
+
+[FluidProperties]
+    [water]
+        type = Water97FluidProperties
+    []
+[]
+
+[SubChannel]
+  type = QuadSubChannel1PhaseProblem
+  fp = water
+  n_blocks = 1
+  compute_density = true
+  compute_viscosity = true
+  compute_power = true
+  P_out = ${P_out}
+  verbose_subchannel = true
+  full_output = true
+  friction_closure = 'MATRA'
+  mixing_closure ='constant_beta'
+  pin_HTC_closure = 'Dittus-Boelter'
+[]
+
+[SCMClosures]
+  [MATRA]
+    type = SCMFrictionMATRA
+  []
+  [constant_beta]
+    type = SCMMixingConstantBeta
+    beta = 0.006
+    CT = 2.6
+  []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
+  []
+[]
+
+[ICs]
+
+
+    [q_prime_IC]
+        type = SCMQuadPowerIC
+        variable = q_prime
+        filename = "power_profile.txt"
+        axial_heat_rate = axial_heat_rate
+    []
+
+    [T_ic]
+        type = ConstantIC
+        variable = T
+        value = ${T_in}
+    []
+
+
+    [P_ic]
+        type = ConstantIC
+        variable = P
+        value = 0.0
+    []
+
+    [DP_ic]
+        type = ConstantIC
+        variable = DP
+        value = 0.0
+    []
+
+    [Viscosity_ic]
+        type = ViscosityIC
+        variable = mu
+        p = ${P_out}
+        T = T
+        fp = water
+    []
+
+    [rho_ic]
+        type = RhoFromPressureTemperatureIC
+        variable = rho
+        p = ${P_out}
+        T = T
+        fp = water
+    []
+
+    [h_ic]
+        type = SpecificEnthalpyFromPressureTemperatureIC
+        variable = h
+        p = ${P_out}
+        T = T
+        fp = water
+    []
+
+    [mdot_ic]
+        type = ConstantIC
+        variable = mdot
+        value = 0.0
+    []
+[]
+
+[AuxKernels]
+    [T_in_bc]
+        type = ConstantAux
+        variable = T
+        boundary = inlet
+        value = ${T_in}
+        execute_on = 'timestep_begin'
+    []
+    [mdot_in_bc]
+        type = SCMMassFlowRateAux
+        variable = mdot
+        boundary = inlet
+        area = S
+        mass_flux = ${mass_flux_in}
+        execute_on = 'timestep_begin'
+    []
+[]
+
+[Postprocessors]
+    # Heat rate from the pins to the coolant, which the q_prime transfer preserves
+    [pin_power]
+        type = SCMPinPowerPostprocessor
+        execute_on = 'timestep_end transfer'
+    []
+    [coolant_power]
+        type = SCMTHPowerPostprocessor
+    []
+[]
+
+[VectorPostprocessors]
+    # Pin surface temperature at the SCM axial nodes, interpolated linearly in the pin model when the
+    # Tpin_interpolated transfer is active
+    [Tpin_profile]
+        type = LineValueSampler
+        variable = Tpin
+        start_point = '0 0 0'
+        end_point = '0 0 ${heated_length}'
+        num_points = 26 # n_cells + 1, one point per SCM axial node
+        sort_by = z
+        execute_on = 'timestep_end'
+    []
+[]
+
+[Outputs]
+    exodus = true
+    csv = true
+    [Temp_Out_MATRIX]
+        type = QuadSubChannelNormalSliceValues
+        variable = T
+        execute_on = final
+        file_base = "Temp_Out.txt"
+        height = 1.0
+    []
+    [mdot_Out_MATRIX]
+        type = QuadSubChannelNormalSliceValues
+        variable = mdot
+        execute_on = final
+        file_base = "mdot_Out.txt"
+        height = 1.0
+    []
+    [mdot_In_MATRIX]
+        type = QuadSubChannelNormalSliceValues
+        variable = mdot
+        execute_on = final
+        file_base = "mdot_In.txt"
+        height = 0.0
+    []
+[]
+
+[Executioner]
+    type = Steady
+    petsc_options_iname = '-pc_type -pc_hypre_type'
+    petsc_options_value = 'hypre boomeramg'
+    # SCM does not compute a nonlinear residual, so the fixed-point tolerance has no effect and the
+    # number of coupling iterations is fixed. The pin power in SCM is converged after two iterations
+    fixed_point_max_its = 3
+    fixed_point_min_its = 3
+[]
+
+################################################################################
+[MultiApps]
+    ################################################################################
+    # Couple to Thermo-Mechanical Pin model (uses kernels available in MOOSE)
+    ################################################################################
+    [sub]
+        type = FullSolveMultiApp
+        input_files = one_pin_problem_sub.i
+        execute_on = 'timestep_end'
+        positions = '0   0   0 '
+        output_in_position = true
+        bounding_box_padding = '0 0 0.01'
+    []
+
+    ################################################################################
+    # A multiapp that projects the solution to a detailed mesh for visualization purposes
+    ################################################################################
+    [viz]
+        type = FullSolveMultiApp
+        input_files = '3d.i'
+        execute_on = 'FINAL'
+    []
+[]
+
+[Transfers]
+    # Tpin_interpolated replaces Tpin when the pin model uses the right_interpolated boundary condition
+    inactive = Tpin_interpolated
+    [Tpin] # send the nearest SCM pin surface temperature to each pin surface node
+        type = MultiAppGeneralFieldNearestLocationTransfer
+        to_multi_app = sub
+        variable = Pin_surface_temperature
+        source_variable = Tpin
+        execute_on = 'timestep_end'
+        greedy_search = true
+    []
+
+    [Tpin_interpolated] # alternative: send the pin surface temperature profile to the pin model
+        type = MultiAppReporterTransfer
+        to_multi_app = sub
+        from_reporters = 'Tpin_profile/z Tpin_profile/Tpin'
+        to_reporters = 'Tpin_profile/z Tpin_profile/Tpin'
+        execute_on = 'timestep_end'
+    []
+
+    [diameter] # send diameter information from pin model to subchannel
+        type = MultiAppGeneralFieldNearestLocationTransfer
+        from_multi_app = sub
+        variable = Dpin
+        source_variable = pin_diameter_deformed
+        from_boundaries = right
+        execute_on = 'timestep_end'
+        greedy_search = true
+    []
+
+    [q_prime] # send heat flux from pin model to subchannel
+        type = MultiAppGeneralFieldNearestLocationTransfer
+        from_multi_app = sub
+        variable = q_prime
+        source_variable = q_prime_nodal
+        from_boundaries = right
+        execute_on = 'timestep_end'
+        greedy_search = true
+        # Scale q_prime so that the pin power in SCM equals the heat rate through the pin surface
+        from_postprocessors_to_be_preserved = pin_surface_heat_rate
+        to_postprocessors_to_be_preserved = pin_power
+    []
+
+    [subchannel_transfer]
+        type = SCMSolutionTransfer
+        to_multi_app = viz
+        variable = 'mdot SumWij P DP h T rho mu S w_perim'
+    []
+
+    [pin_transfer]
+        type = SCMSolutionTransfer
+        transfer_type = pin
+        to_multi_app = viz
+        variable = 'Tpin Dpin q_prime'
+    []
+[]

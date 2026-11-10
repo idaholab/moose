@@ -283,19 +283,21 @@ TEST(ParameterRegistrationTest, testNumericScalars)
 
 TEST(ParameterRegistrationTest, testBool)
 {
-  const std::vector<std::string> trues{
-      "true", "TRUE", "trUe", "on", "ON", "oN", "yes", "YES", "yEs", "1"};
-  const std::vector<std::string> falses{
+  // Arrays of literals instead of std::vector<std::string>: with vectors, GCC 15 at -O2 attributes
+  // their inlined deallocation at the end of this test to an interior pointer from the
+  // initializer-list copy loop and reports a bogus -Wfree-nonheap-object error
+  const char * const trues[] = {"true", "TRUE", "trUe", "on", "ON", "oN", "yes", "YES", "yEs", "1"};
+  const char * const falses[] = {
       "false", "FALSE", "faLse", "off", "OFF", "oFF", "no", "NO", "nO", "0"};
 
   // successful scalar trues, with and without quotes
-  for (const auto & v : trues)
+  for (const std::string v : trues)
   {
     testValue<bool>(v, true);
     testValue<bool>("\"" + v + "\"", true);
   }
   // successful scalar falses, with and without quotes
-  for (const auto & v : falses)
+  for (const std::string v : falses)
   {
     testValue<bool>(v, false);
     testValue<bool>("\"" + v + "\"", false);
@@ -304,8 +306,8 @@ TEST(ParameterRegistrationTest, testBool)
   testValueError<bool>("foo", "invalid boolean syntax for parameter: " + param_name + "='foo'");
 
   // vector bools
-  for (const auto & true_v : trues)
-    for (const auto & false_v : falses)
+  for (const std::string true_v : trues)
+    for (const std::string false_v : falses)
     {
       // successful mixes
       testValue<std::vector<bool>>("\"" + true_v + " " + false_v + " \"", {true, false});

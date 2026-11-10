@@ -1,0 +1,15 @@
+[Tests]
+  design = 'TabulatedBicubicFluidProperties.md'
+  issues = '#34070'
+
+  [gibbs_without_temperature_column]
+    type = GoogleTest
+    unit_test = TabulatedBicubicFluidPropertiesTest.gibbsWithoutTemperatureColumn
+    requirement = 'The system shall compute the Gibbs free energy from a tabulation in specific volume and internal energy that does not interpolate temperature.'
+  []
+  [check_nans_midpoint]
+    type = GoogleTest
+    unit_test = TabulatedBicubicFluidPropertiesTest.checkNaNsMidpoint
+    requirement = 'The system shall replace NaN pressures and temperatures from the inversion of tabulated properties in specific volume and internal energy with a bound of the tabulated range at every specific volume, including the midpoint of the specific volume range.'
+  []
+[]

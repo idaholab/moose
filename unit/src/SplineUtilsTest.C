@@ -74,8 +74,8 @@ TEST(SplineUtilsTest, 3DCircularCPTest)
   const auto save_wae = Moose::_warnings_are_errors;
   Moose::_throw_on_warning = false;
   Moose::_warnings_are_errors = false;
-  const auto evaluated_points =
-      SplineUtils::bSplineControlPoints(start, end, direction, direction, cps / 2, /*sharpness*/ 0);
+  const auto evaluated_points = SplineUtils::bSplineControlPoints(
+      start, end, direction, direction, cps / 2, /*sharpness*/ 0, "test");
   Moose::_throw_on_warning = save_tow;
   Moose::_warnings_are_errors = save_wae;
   for (const auto i : index_range(expected_cps))
@@ -122,6 +122,38 @@ TEST(SplineUtilsTest, ClosestPoint3DTest2)
   EXPECT_NEAR((expected_points.second - evaluated_points.second).norm(), 0, libMesh::TOLERANCE);
 }
 
+TEST(SplineUtilsTest, ClosestPointAlignedTest)
+{
+  // Collinear lines have infinitely many closest points, the midpoint is used
+  const libMesh::Point start(1, 2, 0);
+  const libMesh::Point end(3, 2, 0);
+  const libMesh::RealVectorValue direction(1, 0, 0);
+  const auto evaluated_points = SplineUtils::closestPoints(start, end, direction, direction);
+  const libMesh::Point expected_point(2, 2, 0);
+  EXPECT_NEAR((expected_point - evaluated_points.first).norm(), 0, libMesh::TOLERANCE);
+  EXPECT_NEAR((expected_point - evaluated_points.second).norm(), 0, libMesh::TOLERANCE);
+}
+
+TEST(SplineUtilsTest, ClosestPointParallelError)
+{
+  const libMesh::Point start(1, 2, 0);
+  const libMesh::Point end(3, 3, 0);
+  const libMesh::RealVectorValue direction(1, 0, 0);
+  EXPECT_THROW(
+      {
+        try
+        {
+          SplineUtils::closestPoints(start, end, direction, direction);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_STREQ(e.what(), "Lines are parallel! Infinitely many closest points exist.");
+          throw;
+        }
+      },
+      std::exception);
+}
+
 TEST(SplineUtilsTest, CPsAlongLineTest)
 {
   const libMesh::Point start(1, 2, 0);
@@ -159,7 +191,7 @@ TEST(SplineUtilsTest, TrivialCPsTest)
   const libMesh::RealVectorValue direction2(0, 1, 0);
   const unsigned int cps_per_half = 3;
   const auto evaluated_cps = SplineUtils::bSplineControlPoints(
-      start, end, direction1, direction2, cps_per_half, /*sharpness*/ 0);
+      start, end, direction1, direction2, cps_per_half, /*sharpness*/ 0, "test");
 
   const std::vector<Point> expected_cps = {libMesh::Point(1, 2, 0),
                                            libMesh::Point(1, 2, 0),
@@ -167,6 +199,26 @@ TEST(SplineUtilsTest, TrivialCPsTest)
                                            libMesh::Point(2, 1, 0),
                                            libMesh::Point(2, 1, 0),
                                            libMesh::Point(2, 1, 0)};
+  for (const auto i : index_range(expected_cps))
+    EXPECT_NEAR((expected_cps[i] - evaluated_cps[i]).norm(), 0, libMesh::TOLERANCE);
+}
+
+TEST(SplineUtilsTest, StraightCPsTest)
+{
+  // Aligned start and end directions along the segment produce a straight spline rather than
+  // falling back to circular control points
+  const libMesh::Point start(1, 2, 0);
+  const libMesh::Point end(3, 2, 0);
+  const libMesh::RealVectorValue direction(1, 0, 0);
+  const unsigned int cps_per_half = 2;
+  const auto evaluated_cps = SplineUtils::bSplineControlPoints(
+      start, end, direction, direction, cps_per_half, /*sharpness*/ 1, "test");
+
+  const std::vector<Point> expected_cps = {libMesh::Point(1, 2, 0),
+                                           libMesh::Point(2, 2, 0),
+                                           libMesh::Point(2, 2, 0),
+                                           libMesh::Point(3, 2, 0)};
+  ASSERT_EQ(evaluated_cps.size(), expected_cps.size());
   for (const auto i : index_range(expected_cps))
     EXPECT_NEAR((expected_cps[i] - evaluated_cps[i]).norm(), 0, libMesh::TOLERANCE);
 }
@@ -180,7 +232,7 @@ TEST(SplineUtilsTest, HalfSharpCPsTest)
   const Real sharpness = 0.5;
   const unsigned int cps_per_half = 2;
   const auto evaluated_cps = SplineUtils::bSplineControlPoints(
-      start, end, direction1, direction2, cps_per_half, sharpness);
+      start, end, direction1, direction2, cps_per_half, sharpness, "test");
 
   const std::vector<Point> expected_cps = {libMesh::Point(1, 2, 0),
                                            libMesh::Point(1.5, 2, 0),
@@ -199,7 +251,7 @@ TEST(SplineUtilsTest, HalfSharpCPs3DTest)
   const Real sharpness = 0.5;
   const unsigned int cps_per_half = 2;
   const auto evaluated_cps = SplineUtils::bSplineControlPoints(
-      start, end, direction1, direction2, cps_per_half, sharpness);
+      start, end, direction1, direction2, cps_per_half, sharpness, "test");
 
   const std::vector<Point> expected_cps = {libMesh::Point(1, 2, 1),
                                            libMesh::Point(1.5, 2, 1),
@@ -218,7 +270,7 @@ TEST(SplineUtilsTest, FullSharpCPs3DTest)
   const Real sharpness = 1.0;
   const unsigned int cps_per_half = 3;
   const auto evaluated_cps = SplineUtils::bSplineControlPoints(
-      start, end, direction1, direction2, cps_per_half, sharpness);
+      start, end, direction1, direction2, cps_per_half, sharpness, "test");
 
   const std::vector<Point> expected_cps = {libMesh::Point(1, 2, 1),
                                            libMesh::Point(1.5, 2, 1),
@@ -243,11 +295,11 @@ TEST(SplineUtilsTest, NonuniquePointError)
         try
         {
           SplineUtils::bSplineControlPoints(
-              start, end, direction1, direction2, cps_per_half, sharpness);
+              start, end, direction1, direction2, cps_per_half, sharpness, "test");
         }
         catch (const std::exception & e)
         {
-          EXPECT_STREQ(e.what(), "Start and end points must be different.");
+          EXPECT_STREQ(e.what(), "test: Start and end points must be different.");
           throw;
         }
       },
@@ -267,11 +319,11 @@ TEST(SplineUtilsTest, ZeroDirection1Error)
         try
         {
           SplineUtils::bSplineControlPoints(
-              start, end, direction1, direction2, cps_per_half, sharpness);
+              start, end, direction1, direction2, cps_per_half, sharpness, "test");
         }
         catch (const std::exception & e)
         {
-          EXPECT_STREQ(e.what(), "Direction vectors must have a nonzero magnitude.");
+          EXPECT_STREQ(e.what(), "test: Direction vectors must have a nonzero magnitude.");
           throw;
         }
       },
@@ -291,11 +343,11 @@ TEST(SplineUtilsTest, ZeroDirection2Error)
         try
         {
           SplineUtils::bSplineControlPoints(
-              start, end, direction1, direction2, cps_per_half, sharpness);
+              start, end, direction1, direction2, cps_per_half, sharpness, "test");
         }
         catch (const std::exception & e)
         {
-          EXPECT_STREQ(e.what(), "Direction vectors must have a nonzero magnitude.");
+          EXPECT_STREQ(e.what(), "test: Direction vectors must have a nonzero magnitude.");
           throw;
         }
       },
@@ -315,11 +367,11 @@ TEST(SplineUtilsTest, ZeroDirectionBothError)
         try
         {
           SplineUtils::bSplineControlPoints(
-              start, end, direction1, direction2, cps_per_half, sharpness);
+              start, end, direction1, direction2, cps_per_half, sharpness, "test");
         }
         catch (const std::exception & e)
         {
-          EXPECT_STREQ(e.what(), "Direction vectors must have a nonzero magnitude.");
+          EXPECT_STREQ(e.what(), "test: Direction vectors must have a nonzero magnitude.");
           throw;
         }
       },

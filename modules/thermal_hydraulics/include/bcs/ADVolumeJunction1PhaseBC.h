@@ -36,11 +36,6 @@ protected:
   /// 1-phase volume junction user object
   const ADVolumeJunction1PhaseUserObject & _volume_junction_uo;
 
-  /// Cross-sectional area, elemental
-  const ADVariableValue & _A_elem;
-  /// Cross-sectional area, linear
-  const ADVariableValue & _A_linear;
-
   /// Flow channel rho*A coupled variable index
   const unsigned int _rhoA_jvar;
   /// Flow channel rho*u*A coupled variable index

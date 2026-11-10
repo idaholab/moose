@@ -124,31 +124,45 @@ p_out = 1e6
   []
 []
 
-[ControlLogic]
-  [mfr_cntrl]
-    type = TimeFunctionComponentControl
-    component = inlet
-    parameter = m_dot
+[ChainControls]
+  [mfr_cntrl_fn]
+    type = GetFunctionValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     function = mfr_fn
   []
+  [mfr_cntrl]
+    type = SetRealValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    parameter = component::inlet/m_dot
+    value = mfr_cntrl_fn:value
+  []
 
+  [get_omega]
+    type = GetPostprocessorChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    postprocessor = omega
+    name_data_same_as_postprocessor = true
+  []
   [speed_set_point]
-    type = GetFunctionValueControl
+    type = GetFunctionValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     function = ${omega_rated}
   []
   [pid_ctrl]
-    type = PIDControl
+    type = PIDChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     input = omega
     set_point = speed_set_point:value
     K_i = 2
     K_p = 5
     K_d = 5
-    initial_value = -450
+    initial_integral = -450
   []
   [set_torque_value]
-    type = SetRealValueControl
+    type = SetRealValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     parameter = Functions/dyno_torque_fn/value
-    value = pid_ctrl:output
+    value = pid_ctrl:value
   []
 []
 

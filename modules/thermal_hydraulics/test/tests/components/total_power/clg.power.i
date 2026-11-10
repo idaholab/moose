@@ -44,12 +44,15 @@
   []
 []
 
-[ControlLogic]
-  [reactor_power_control]
-    type = TimeFunctionComponentControl
-    component = total_power
-    parameter = power
+[ChainControls]
+  [reactor_power_control_fn]
+    type = GetFunctionValueChainControl
     function = decayheatcurve
+  []
+  [reactor_power_control]
+    type = SetRealValueChainControl
+    parameter = component::total_power/power
+    value = reactor_power_control_fn:value
   []
 []
 

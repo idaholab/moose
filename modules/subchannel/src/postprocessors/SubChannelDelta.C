@@ -60,6 +60,13 @@ SubChannelDelta::execute()
   _value = sum_Delta_mass_flow_in / mass_flow_in;
 }
 
+void
+SubChannelDelta::finalize()
+{
+  // The subchannel solution is only available on processor 0
+  _communicator.broadcast(_value);
+}
+
 Real
 SubChannelDelta::getValue() const
 {

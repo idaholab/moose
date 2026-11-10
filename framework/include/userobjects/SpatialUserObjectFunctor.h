@@ -32,6 +32,7 @@ protected:
   using FaceArg = Moose::FaceArg;
   using ElemPointArg = Moose::ElemPointArg;
   using NodeArg = Moose::NodeArg;
+  using PointArg = Moose::PointArg;
 
   virtual Real evaluate(const ElemArg & elem, const Moose::StateArg & state) const override;
   virtual Real evaluate(const FaceArg & face, const Moose::StateArg & state) const override final;
@@ -41,6 +42,7 @@ protected:
   virtual Real evaluate(const ElemPointArg & elem_point,
                         const Moose::StateArg & state) const override final;
   virtual Real evaluate(const NodeArg & node, const Moose::StateArg & state) const override final;
+  virtual Real evaluate(const PointArg & point, const Moose::StateArg & state) const override final;
 
   virtual bool supportsFaceArg() const override final { return true; }
   virtual bool supportsElemSideQpArg() const override final { return true; }
@@ -126,6 +128,14 @@ SpatialUserObjectFunctor<UserObjectType>::evaluate(const NodeArg & node,
                                                    const Moose::StateArg & state) const
 {
   return evaluateTemplate(node, state);
+}
+
+template <typename UserObjectType>
+Real
+SpatialUserObjectFunctor<UserObjectType>::evaluate(const PointArg & point,
+                                                   const Moose::StateArg & state) const
+{
+  return evaluateTemplate(point, state);
 }
 
 template <typename UserObjectType>

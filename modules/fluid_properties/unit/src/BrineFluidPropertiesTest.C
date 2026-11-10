@@ -269,3 +269,37 @@ TEST_F(BrineFluidPropertiesTest, combined)
   ABS_TEST(dmu_dT, dmu2_dT, tol);
   ABS_TEST(dmu_dx, dmu2_dx, tol);
 }
+
+/**
+ * Verify that the FPADReal density and enthalpy carry the water property derivatives regardless
+ * of which overload was called before
+ */
+TEST_F(BrineFluidPropertiesTest, adDerivativesAfterValueCall)
+{
+  const Real p = 30.0e6;
+  const Real T = 350.0;
+  const Real x = 0.1047;
+
+  Real rho, drho_dp, drho_dT, drho_dx;
+  _fp->rho_from_p_T_X(p, T, x, rho, drho_dp, drho_dT, drho_dx);
+  Real h, dh_dp, dh_dT, dh_dx;
+  _fp->h_from_p_T_X(p, T, x, h, dh_dp, dh_dT, dh_dx);
+
+  // Calls to the value-only overloads must not change subsequent FPADReal evaluations
+  _fp->rho_from_p_T_X(p, T, x);
+  _fp->h_from_p_T_X(p, T, x);
+
+  FPADReal p_ad = p;
+  Moose::derivInsert(p_ad.derivatives(), 0, 1.0);
+  FPADReal T_ad = T;
+  Moose::derivInsert(T_ad.derivatives(), 1, 1.0);
+  FPADReal x_ad = x;
+  Moose::derivInsert(x_ad.derivatives(), 2, 1.0);
+
+  const FPADReal rho_ad = _fp->rho_from_p_T_X(p_ad, T_ad, x_ad);
+  REL_TEST(rho_ad.derivatives()[0], drho_dp, REL_TOL_CONSISTENCY);
+  REL_TEST(rho_ad.derivatives()[1], drho_dT, REL_TOL_CONSISTENCY);
+  const FPADReal h_ad = _fp->h_from_p_T_X(p_ad, T_ad, x_ad);
+  REL_TEST(h_ad.derivatives()[0], dh_dp, REL_TOL_CONSISTENCY);
+  REL_TEST(h_ad.derivatives()[1], dh_dT, REL_TOL_CONSISTENCY);
+}

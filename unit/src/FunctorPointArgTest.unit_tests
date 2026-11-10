@@ -1,0 +1,19 @@
+[Tests]
+  design = 'GenericFunctorMaterial.md'
+  issues = '#34191'
+  [scalar_variable]
+    type = GoogleTest
+    unit_test = FunctorPointArg.ScalarVariable
+    requirement = 'The system shall evaluate a functor material property at a physical point without mesh information when it is defined on all blocks and depends only on a scalar variable.'
+  []
+  [field_variable]
+    type = GoogleTest
+    unit_test = FunctorPointArg.FieldVariable
+    requirement = 'The system shall report that evaluation at a physical point is not supported when a functor material property that depends on a field variable is evaluated there.'
+  []
+  [partial_block_restriction]
+    type = GoogleTest
+    unit_test = FunctorPointArg.PartialBlockRestriction
+    requirement = 'The system shall report a missing subdomain definition when a functor material property that is not defined on all blocks is evaluated at a physical point.'
+  []
+[]

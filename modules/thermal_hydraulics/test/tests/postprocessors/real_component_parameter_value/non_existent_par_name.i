@@ -67,16 +67,15 @@
   []
 []
 
-[ControlLogic]
+[ChainControls]
   [outlet_p_fn]
-    type = GetFunctionValueControl
+    type = GetFunctionValueChainControl
     function = p_fn
   []
 
   [set_outlet_value]
-    type = SetComponentRealValueControl
-    component = outlet
-    parameter = p
+    type = SetRealValueChainControl
+    parameter = component::outlet/p
     value = outlet_p_fn:value
   []
 []

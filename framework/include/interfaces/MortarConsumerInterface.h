@@ -18,6 +18,7 @@ class MooseObject;
 class MooseMesh;
 class MortarInterfaceWarehouse;
 class AutomaticMortarGeneration;
+class MooseVariableFieldBase;
 class SubProblem;
 class Assembly;
 
@@ -89,6 +90,17 @@ protected:
    */
   const MooseArray<std::vector<ADReal>> & adMortarTest(Moose::ElementType element_type,
                                                        const libMesh::FEType & fe_type) const;
+
+  /**
+   * Report an error if Petrov-Galerkin weights the gap of a SECOND order dual Lagrange multiplier
+   * with the standard basis on QUAD8 or TRI6 secondary faces. libMesh builds the dual basis on
+   * these faces against a transformed basis, and the nodal integrals of the standard basis are not
+   * positive there, so the combination does not converge.
+   * @param moose_object The object reporting the error
+   * @param lm_var The Lagrange multiplier
+   */
+  void checkPetrovGalerkinQuadraticFaces(const MooseObject & moose_object,
+                                         const MooseVariableFieldBase & lm_var) const;
 
   /**
    * Get rid of AD derivative entries by dof index

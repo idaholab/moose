@@ -1,0 +1,29 @@
+[Tests]
+  issues = '#34278'
+  design = 'CumulativeTimeAverageFunctorAux.md'
+
+  [time_averaged]
+    type = 'CSVDiff'
+    input = 'time_averaged.i'
+    csvdiff = 'time_averaged_out.csv'
+
+    requirement = 'The system shall have the ability to compute the running time-weighted average of a field, starting at a given simulation time and excluding any time before it.'
+  []
+  [trapezoidal]
+    type = 'CSVDiff'
+    input = 'time_averaged.i'
+    cli_args = 'AuxKernels/u_avg/time_integration_scheme=trapezoidal-rule '
+               'Outputs/file_base=time_averaged_trapezoidal_out'
+    csvdiff = 'time_averaged_trapezoidal_out.csv'
+
+    requirement = 'The system shall have the ability to compute the running time-weighted average of a field with the trapezoidal rule.'
+  []
+  [nodal_error]
+    type = 'RunException'
+    input = 'time_averaged.i'
+    cli_args = 'AuxVariables/u_avg/family=LAGRANGE AuxVariables/u_avg/order=FIRST'
+    expect_err = 'The averaged variable must be elemental'
+
+    requirement = 'The system shall report an error if the running time average is requested for a nodal variable.'
+  []
+[]

@@ -38,5 +38,6 @@ protected:
   /// whole-mesh set.
   void buildSetsBySubdomain();
 
+  /// SurfaceElementSet instances grouped by subdomain ID
   std::unordered_map<subdomain_id_type, SurfaceElementSet> _sets_by_subdomain;
 };
