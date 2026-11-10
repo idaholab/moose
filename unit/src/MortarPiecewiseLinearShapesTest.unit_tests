@@ -8,4 +8,10 @@
                   'and QUAD9 faces, built from the first-order basis of their linear sub-elements, '
                   'that interpolates the face nodes, is non-negative and forms a partition of unity.'
   []
+  [basis_integrals]
+    type = GoogleTest
+    unit_test = MortarPiecewiseLinearShapesTest.IntegratesBasisFunctions
+    requirement = 'The system shall integrate the piecewise-linear basis of quadratic EDGE3, TRI6, '
+                  'QUAD8 and QUAD9 faces to the exact nodal weights of their linear sub-elements.'
+  []
 []
