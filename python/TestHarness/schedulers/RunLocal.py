@@ -69,12 +69,12 @@ class RunLocal(Scheduler):
         pid_to_job = self.getActiveJobPIDMap()
 
         # Get latest samples from the monitor
-        samples = self._memory_monitor.get_samples()
+        last_memory_samples = self._memory_monitor.get_samples()
 
         # Report once if GPU memory sampling failed to start, which the sampler
         # records before it publishes the first samples
         if (
-            samples
+            last_memory_samples
             and not self._checked_gpu_error
             and self.scheduler_options.monitor_job_gpu_memory
         ):
@@ -90,7 +90,7 @@ class RunLocal(Scheduler):
         max_memory_per_slot_mb = self.options.max_memory_per_slot
         max_gpu_memory_per_slot_mb = self.options.max_gpu_memory_per_slot
         for pid, job in pid_to_job.items():
-            sample = samples.get(pid)
+            sample = last_memory_samples.get(pid)
 
             # Didn't get samples for this Job's process
             if sample is None:
