@@ -41,7 +41,7 @@
       exodiff = 'double_scalar_corr_in.e'
       cli_args = '--mesh-only'
       recover = false
-      requirement = 'The system should batch generate meshes of the same type with variation in two corresponding scalar parameters'
+      requirement = 'The system shall batch generate meshes of the same type with variation in two corresponding scalar parameters'
   []
   [double_scalar_cp]
     type = 'Exodiff'
@@ -49,7 +49,7 @@
       exodiff = 'double_scalar_cp_in.e'
       cli_args = '--mesh-only'
       recover = false
-      requirement = 'The system should batch generate meshes of the same type with variation in two scalar parameters using a Cartesian product'
+      requirement = 'The system shall batch generate meshes of the same type with variation in two scalar parameters using a Cartesian product'
   []
   [double_scalar_cp_decomp]
     type = 'Exodiff'
@@ -59,7 +59,7 @@
                   Mesh/cmbn/inputs='gmg_1_1 gmg_0_1 gmg_1_0 gmg_0_0'
                   --mesh-only"
       recover = false
-      requirement = 'The system should batch generate meshes of the same type with variation in two scalar parameters using a Cartesian product with decomposed indexing'
+      requirement = 'The system shall batch generate meshes of the same type with variation in two scalar parameters using a Cartesian product with decomposed indexing'
   []
   [single_vector]
     type = 'Exodiff'
@@ -67,7 +67,7 @@
       exodiff = 'single_vector_in.e'
       cli_args = '--mesh-only'
       recover = false
-      requirement = 'The system should batch generate meshes of the same type with variation in one single vector parameter'
+      requirement = 'The system shall batch generate meshes of the same type with variation in one single vector parameter'
   []
   [single_real_vector_value]
     type = 'Exodiff'
@@ -75,7 +75,7 @@
       exodiff = 'real_vector_value_in.e'
       cli_args = '--mesh-only'
       recover = false
-      requirement = 'The system should batch generated meshes of the same type with variation in one single real vector value parameter'
+      requirement = 'The system shall batch generated meshes of the same type with variation in one single real vector value parameter'
   []
   [fixed_real_vector_value_mixed]
     type = 'Exodiff'
@@ -83,7 +83,7 @@
       exodiff = 'real_vector_value_mixed_in.e'
       cli_args = '--mesh-only'
       recover = false
-      requirement = 'The system should batch generated meshes of the same type with a fixed real vector value mixed with other scalar parameters'
+      requirement = 'The system shall batch generated meshes of the same type with a fixed real vector value mixed with other scalar parameters'
   []
   [single_point_vector_value]
     type = 'Exodiff'
@@ -91,7 +91,7 @@
       exodiff = 'vector_point_in.e'
       cli_args = '--mesh-only'
       recover = false
-      requirement = 'The system should batch generated meshes of the same type with variation in one single point vector parameter'
+      requirement = 'The system shall batch generated meshes of the same type with variation in one single point vector parameter'
   []
   [double_vector_corr]
     type = 'Exodiff'
@@ -99,7 +99,7 @@
       exodiff = 'double_vector_corr_in.e'
       cli_args = '--mesh-only'
       recover = false
-      requirement = 'The system should batch generate meshes of the same type with variation in two vector parameters'
+      requirement = 'The system shall batch generate meshes of the same type with variation in two vector parameters'
   []
   [double_vector_cp]
     type = 'Exodiff'
@@ -107,7 +107,7 @@
       exodiff = 'double_vector_cp_in.e'
       cli_args = '--mesh-only'
       recover = false
-      requirement = 'The system should batch generate meshes of the same type with variation in two vector parameters using a Cartesian product for the combination of parameters.'
+      requirement = 'The system shall batch generate meshes of the same type with variation in two vector parameters using a Cartesian product for the combination of parameters.'
   []
   [scalar_vector_corr]
     type = 'Exodiff'
@@ -115,7 +115,7 @@
       exodiff = 'scalar_vector_corr_in.e'
       cli_args = '--mesh-only'
       recover = false
-      requirement = 'The system should batch generate meshes of the same type with variation in one scalar and one corresponding vector parameter'
+      requirement = 'The system shall batch generate meshes of the same type with variation in one scalar and one corresponding vector parameter'
   []
   [scalar_vector_cp]
     type = 'Exodiff'
@@ -123,7 +123,7 @@
       exodiff = 'scalar_vector_cp_in.e'
       cli_args = '--mesh-only'
       recover = false
-      requirement = 'The system should batch generate meshes of the same type with variation in one scalar and one vector parameter using a Cartesian product and decomposed indexing'
+      requirement = 'The system shall batch generate meshes of the same type with variation in one scalar and one vector parameter using a Cartesian product and decomposed indexing'
   []
   [enum_batch]
     type = 'Exodiff'
@@ -131,7 +131,7 @@
       exodiff = 'scalar_enum_test_in.e'
       cli_args = '--mesh-only'
       recover = false
-      requirement = 'The system should generate meshes of the same type with variation in one scalar parameter with a MooseEnum type.'
+      requirement = 'The system shall generate meshes of the same type with variation in one scalar parameter with a MooseEnum type.'
   []
 
   [errors]

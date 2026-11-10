@@ -6,7 +6,7 @@
     input = 'nearest_node_locator.i'
     exodiff = 'nearest_node_locator_out.e'
     group = 'geometric'
-    requirement = "The NearestNodeDistanceAux shall be capable of computing the shortest distance between two boundaries."
+    requirement = "The system shall provide a NearestNodeDistanceAux object capable of computing the shortest distance between two boundaries."
   [../]
 
   [./adapt]
@@ -15,6 +15,6 @@
     exodiff = 'adapt_out.e-s003'
     group = 'geometric'
     valgrind = 'HEAVY'
-    requirement = "The NearestNodeDistanceAux shall be capable of computing the shortest distance between two boundaries with adaptivity."
+    requirement = "The system shall provide a NearestNodeDistanceAux object capable of computing the shortest distance between two boundaries with adaptivity."
   [../]
 []

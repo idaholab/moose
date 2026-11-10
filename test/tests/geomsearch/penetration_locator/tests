@@ -6,7 +6,7 @@
     input = 'penetration_locator_test.i'
     exodiff = 'out.e'
     group = 'geometric'
-    requirement = "The PenetrationAux object shall compute the distance between two boundaries in 3D that overlap."
+    requirement = "The system shall compute, using the PenetrationAux object, the distance between two boundaries in 3D that overlap."
   [../]
 
   [./disconnected_test]
@@ -25,6 +25,6 @@
     min_parallel = 3
     max_parallel = 3
     prereq = 'test'
-    requirement = "The PenetrationAux object shall compute, in parallel, the distance between two boundaries in 3D that overlap."
+    requirement = "The system shall compute, in parallel and using the PenetrationAux object, the distance between two boundaries in 3D that overlap."
   [../]
 []

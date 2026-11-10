@@ -7,14 +7,14 @@
     type = 'Exodiff'
     input = 'adjacent.i'
     exodiff = 'adjacent_out.e'
-    requirement = "The adaptivity system shall create an auxiliary field variable that marks "
+    requirement = "The system shall, through the adaptivity system, create an auxiliary field variable that marks "
                   "elements for refinement adjacent to a boundary."
   []
   [distance]
     type = 'Exodiff'
     input = 'distance.i'
     exodiff = 'distance_out.e'
-    requirement = "The adaptivity system shall create an auxiliary field variable that marks "
+    requirement = "The system shall, through the adaptivity system, create an auxiliary field variable that marks "
                   "elements for refinement within a given distance of a boundary."
     mesh_mode = REPLICATED
   []
@@ -22,7 +22,7 @@
     type = 'Exodiff'
     input = 'multiple.i'
     exodiff = 'multiple_out.e'
-    requirement = "The adaptivity system shall create an auxiliary field variable that marks "
+    requirement = "The system shall, through the adaptivity system, create an auxiliary field variable that marks "
                   "elements for refinement adjacent to any of a given set of boundaries."
   []
 []

@@ -3,7 +3,7 @@
   issues = '#32763'
 
   [stl_manifold]
-    requirement = 'The sytem shall assign a subdomain to 3D mesh elements whose vertex-average points '
+    requirement = 'The system shall assign a subdomain to 3D mesh elements whose vertex-average points '
     [basic_inside]
       type = RunApp
       input = basic.i

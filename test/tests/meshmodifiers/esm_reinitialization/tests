@@ -3,7 +3,7 @@
   design = 'ElementSubdomainModifier.md'
 
   [group]
-    requirement = 'The framework shall include the ability to set initial conditions on newly activated nodes during simulation '
+    requirement = 'The system shall include the ability to set initial conditions on newly activated nodes during simulation '
 
     [IC_for_newlyactivated_nodes]
       type = 'Exodiff'
