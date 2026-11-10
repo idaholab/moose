@@ -70,9 +70,9 @@
     [no_mesh_only]
       type = RunException
       input = core.i
-      expect_err = 'The SCM core mesh can only be generated with --mesh-only'
+      expect_err = 'can only be generated with --mesh-only; solving on it is not supported yet'
       mesh_mode = 'replicated'
-      detail = 'if a solve on the core mesh is requested.'
+      detail = 'if a solve is requested on a core of one-dimensional assemblies.'
     []
   []
 []
