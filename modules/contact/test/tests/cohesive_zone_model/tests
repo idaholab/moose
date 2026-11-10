@@ -17,7 +17,7 @@
     exodiff = bilinear_mixed_mortar_only_czm_contact_out.e
     requirement = 'The system shall be able to apply cohesive zone modeling with bilinear mixed mode '
                   'traction and mechanical contact to a simple model.'
-    cli_args = "UserObjects/czm_uo/penalty=1e6 UserObjects/czm_uo/penalty_friction=0.0 Outputs/file_base=bilinear_mixed_mortar_only_czm_contact_out"
+    cli_args = "UserObjects/inactive='' Constraints/inactive='' Outputs/file_base=bilinear_mixed_mortar_only_czm_contact_out"
     abs_zero = 1.0e-6
     map = false
   []
@@ -28,6 +28,23 @@
     requirement = 'The system shall be able to apply reproduce the setup of the interface cohesive '
                   'zone modeling with a mortar formulation.'
     map = false
+  []
+  [nonlocal_secondary_couplings]
+    type = RunApp
+    issues = '#34130'
+    design = 'userobjects/BilinearMixedModeCohesiveZoneModel.md'
+    input = mortar_czm.i
+    # This partition puts a secondary node's contributing mortar segments on a process that does not
+    # own the node, which needs the couplings of nonlocal secondary elements
+    cli_args = 'Mesh/Partitioner/type=RandomPartitioner Mesh/Partitioner/seed=4 '
+               'Problem/error_on_jacobian_nonzero_reallocation=true Executioner/num_steps=1 '
+               'Outputs/exodus=false Outputs/file_base=nonlocal_secondary_couplings_out'
+    # The partition depends on the process count, so the test needs exactly 2 processes
+    min_parallel = 2
+    max_parallel = 2
+    requirement = 'The system shall preallocate the Jacobian couplings of a mortar cohesive zone '
+                  'interface when the mortar segments of a secondary node lie on several '
+                  'processes.'
   []
   [mortar_czm_analysis]
     type = Exodiff
@@ -85,15 +102,59 @@
     override_rel_err = '1.0e-6 1.0e-6'
     override_abs_zero = '1.0e-4 1.0e-4'
   []
-  [undisplaced_traction_error]
+  [nonpositive_nodal_integral_error]
+    type = RunException
+    issues = '#34130'
+    design = 'userobjects/BilinearMixedModeCohesiveZoneModel.md'
+    input = czm_objectivity_3d.i
+    cli_args = 'Mesh/bottom/elem_type=HEX20 Mesh/top/elem_type=HEX20 Outputs/csv=false'
+    expect_err = 'which is not positive for the QUAD8 secondary faces of this mesh at the active '
+                 'finite element order. Set .use_dual = true.'
+    requirement = 'The system shall report an error, suggesting the dual basis, if the mortar '
+                  'cohesive zone interface has faces whose nodal test functions do not have a '
+                  'positive integral.'
+  []
+  [partly_covered_quadratic_face_error]
+    type = RunException
+    issues = '#34130'
+    design = 'userobjects/BilinearMixedModeCohesiveZoneModel.md'
+    input = traction_curve_modeI_3d.i
+    cli_args = 'Mesh/base/elem_type=HEX20 Mesh/top/elem_type=HEX20 UserObjects/czm_uo/use_dual=true '
+               'Outputs/file_base=partly_covered_quadratic_face_error_out'
+    expect_err = 'is only partly covered by the primary surface'
+    requirement = 'The system shall report an error if a second-order secondary face of a mortar '
+                  'cohesive zone interface is only partly covered by the primary surface.'
+  []
+  [dual_quadratic_faces]
+    type = CSVDiff
+    issues = '#34130'
+    design = 'userobjects/BilinearMixedModeCohesiveZoneModel.md'
+    input = traction_curve_modeI_3d.i
+    # The secondary face spans the primary exactly, since a partly covered second-order face is
+    # rejected
+    cli_args = 'Mesh/base/elem_type=HEX20 Mesh/top/elem_type=HEX20 Mesh/base/xmin=0 Mesh/base/xmax=1 '
+               'Mesh/bottom_node/coord="0 0 0" Mesh/bottom_roller_node/coord="1 0 0" '
+               'UserObjects/czm_uo/use_dual=true Executioner/dt=0.1 Executioner/end_time=0.3 '
+               'Outputs/file_base=dual_quadratic_faces_out'
+    csvdiff = dual_quadratic_faces_out.csv
+    requirement = 'The system shall compute the mode-I traction of a mortar cohesive zone interface '
+                  'with QUAD8 faces, whose standard nodal test functions do not have a positive '
+                  'integral, by weighting the mortar integrals with the dual basis.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+    override_columns = 'traction_t1 traction_t2'
+    override_rel_err = '1.0e-6 1.0e-6'
+    override_abs_zero = '1.0e-4 1.0e-4'
+  []
+  [displaced_traction_error]
     type = RunException
     issues = '#34143'
     design = 'constraints/MortarGenericTraction.md'
     input = traction_curve_modeI.i
-    cli_args = 'Constraints/c_x/use_displaced_mesh=false'
-    expect_err = "'use_displaced_mesh' must be true for the MortarGenericTraction object"
+    cli_args = 'Constraints/c_x/use_displaced_mesh=true'
+    expect_err = "must match that of the cohesive zone user object"
     requirement = 'The system shall report an error if a mortar cohesive zone traction is applied '
-                  'on the undisplaced mesh, where the cohesive zone user object does not compute '
+                  'on the displaced mesh, where the cohesive zone user object does not compute '
                   'it.'
   []
   [traction_curve_modeI_dt_refined]
@@ -174,9 +235,8 @@
     csvdiff = traction_curve_modeII_no_healing_out.csv
     cli_args = 'Executioner/end_time=4 Executioner/dt=0.1 Executioner/dtmin=0.1 '
                'Outputs/file_base=traction_curve_modeII_no_healing_out'
-    requirement = 'The system shall retain full cohesive zone damage at interface nodes whose '
-                  'damage is no longer recomputed because they are no longer paired with a '
-                  'primary face.'
+    requirement = 'The system shall retain full cohesive zone damage at fully debonded interface '
+                  'nodes while the interface keeps sliding.'
     rel_err = 1.0e-6
     abs_zero = 1.0e-8
     ignore_columns = 'mode_mixity'
@@ -230,8 +290,8 @@
     input = compression_shear_toggle.i
     csvdiff = compression_shear_toggle_out.csv
     requirement = 'The system shall suppress compressive cohesive normal traction under combined '
-                  'compression and shear when mortar mechanical contact enforces the normal '
-                  'constraint.'
+                  'compression and shear when requested, leaving compression to a separate '
+                  'contact formulation.'
     rel_err = 1.0e-6
     abs_zero = 1.0e-8
   []
@@ -273,6 +333,24 @@
     csvdiff = traction_curve_modeI_3d_out.csv
     requirement = 'The system shall output normal traction and negligible tangential traction outputs '
                   'for a 3D mode-I mortar CZM loading path.'
+    rel_err = 1.0e-6
+    abs_zero = 1.0e-8
+    override_columns = 'traction_t1 traction_t2'
+    override_rel_err = '1.0e-6 1.0e-6'
+    override_abs_zero = '1.0e-4 1.0e-4'
+  []
+  [traction_curve_modeI_3d_refined]
+    type = CSVDiff
+    issues = '#34130'
+    design = 'userobjects/BilinearMixedModeCohesiveZoneModel.md'
+    input = traction_curve_modeI_3d.i
+    cli_args = 'Mesh/base/nx=2 Mesh/base/nz=2 Mesh/top/nx=2 Mesh/top/nz=2 '
+               'Executioner/dt=0.1 Executioner/end_time=0.2 '
+               'Outputs/file_base=traction_curve_modeI_3d_refined_out'
+    csvdiff = traction_curve_modeI_3d_refined_out.csv
+    requirement = 'The system shall output normal traction and negligible tangential traction '
+                  'outputs for a 3D mode-I mortar CZM loading path on an interface mesh with '
+                  'interior nodes.'
     rel_err = 1.0e-6
     abs_zero = 1.0e-8
     override_columns = 'traction_t1 traction_t2'
@@ -334,5 +412,57 @@
                   'division by zero in the mode-mixity ratio.'
     rel_err = 1.0e-5
     abs_zero = 1.0e-8
+  []
+  [rigid_rotation]
+    type = CSVDiff
+    issues = '#34130'
+    input = czm_rigid_rotation.i
+    csvdiff = czm_rigid_rotation_out.csv
+    requirement = 'The system shall compute the local displacement jump of a mortar cohesive zone '
+                  'model in the frame of the current interface, so that a rigid rotation of the '
+                  'bonded bodies does not change the normal and tangential jumps.'
+    abs_zero = 1.0e-10
+  []
+  [objectivity]
+    issues = '#34130'
+    design = 'BilinearMixedModeCohesiveZoneModel.md'
+    requirement = 'The system shall measure the local displacement jump of a mortar cohesive zone '
+                  'model between the bonded material points in a frame that follows the deformed '
+                  'interface, so that a rigid motion of the bonded bodies does not change it, '
+    [slide_2d]
+      type = CSVDiff
+      input = czm_objectivity_slide_2d.i
+      csvdiff = czm_objectivity_slide_2d_out.csv
+      detail = 'for a 2D interface with non-matching meshes that opens and slides, '
+      abs_zero = 1.0e-10
+    []
+    [curved_2d]
+      type = CSVDiff
+      input = czm_objectivity_curved_2d.i
+      csvdiff = czm_objectivity_curved_2d_out.csv
+      detail = 'for a bonded curved 2D interface whose two faceted sides do not coincide, and '
+      abs_zero = 1.0e-10
+    []
+    [3d]
+      type = CSVDiff
+      input = czm_objectivity_3d.i
+      csvdiff = czm_objectivity_3d_out.csv
+      detail = 'for a 3D interface with non-matching meshes that opens and slides in both '
+               'tangential directions under a rotation about an axis tilted against the normal, '
+               'and '
+      abs_zero = 1.0e-10
+    []
+    [3d_deformed]
+      type = CSVDiff
+      input = czm_objectivity_3d.i
+      csvdiff = czm_objectivity_3d_deformed_out.csv
+      # In-plane stretch and shear U; the expected jump (0.01, 0.0173027, 0.0234653) follows from
+      # the polar rotation of the in-plane surface map of F = R U
+      cli_args = 'u11=1.2 u13=0.3 u31=0.1 u33=0.9 Outputs/file_base=czm_objectivity_3d_deformed_out'
+      detail = 'for the same 3D interface when the rotation is combined with a stretch and shear '
+               'of the interface plane, so that the tangential frame follows the in-plane rotation '
+               'of the surface.'
+      abs_zero = 1.0e-10
+    []
   []
 []

@@ -98,7 +98,7 @@
   [penalty_normal_pressure_auxk]
     type = MortarUserObjectAux
     variable = penalty_normal_pressure
-    user_object = czm_uo
+    user_object = contact_uo
     contact_quantity = normal_pressure
   []
   [mode_mixity_ratio]
@@ -248,15 +248,9 @@
 
     disp_x = disp_x
     disp_y = disp_y
-    secondary_variable = disp_x
-    use_physical_gap = true
 
     set_compressive_traction_to_zero = true
     correct_edge_dropping = true
-
-    penalty_friction = 5e6
-    penalty = 1e5
-    friction_coefficient = 0.1
 
     # bilinear model parameters
     normal_strength = 'normal_strength'
@@ -265,7 +259,21 @@
     power_law_parameter = 2
     GI_c = 123
     GII_c = 54
-    displacements = 'disp_x disp_y'
+  []
+  [contact_uo]
+    type = PenaltyFrictionUserObject
+    primary_boundary = 101
+    secondary_boundary = 'top_base'
+    primary_subdomain = 10000
+    secondary_subdomain = 10001
+    disp_x = disp_x
+    disp_y = disp_y
+    secondary_variable = disp_x
+    correct_edge_dropping = true
+    use_physical_gap = true
+    penalty = 1e5
+    penalty_friction = 5e6
+    friction_coefficient = 0.1
   []
 []
 
@@ -280,7 +288,7 @@
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    weighted_gap_uo = czm_uo
+    weighted_gap_uo = contact_uo
   []
   [y]
     type = NormalMortarMechanicalContact
@@ -292,7 +300,7 @@
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    weighted_gap_uo = czm_uo
+    weighted_gap_uo = contact_uo
   []
 
   [t_x]
@@ -305,7 +313,7 @@
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    weighted_velocities_uo = czm_uo
+    weighted_velocities_uo = contact_uo
   []
   [t_y]
     type = TangentialMortarMechanicalContact
@@ -317,7 +325,7 @@
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    weighted_velocities_uo = czm_uo
+    weighted_velocities_uo = contact_uo
   []
 
   [c_x]
@@ -328,7 +336,6 @@
     secondary_subdomain = 10001
     secondary_variable = disp_x
     component = x
-    use_displaced_mesh = true
     compute_lm_residuals = false
     cohesive_zone_uo = czm_uo
   []
@@ -340,7 +347,6 @@
     secondary_subdomain = 10001
     secondary_variable = disp_y
     component = y
-    use_displaced_mesh = true
     compute_lm_residuals = false
     cohesive_zone_uo = czm_uo
   []
