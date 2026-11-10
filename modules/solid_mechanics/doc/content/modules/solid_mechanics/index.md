@@ -73,6 +73,7 @@ Specialized capabilities for particular problem classes:
 
   - [C0 Timoshenko Beam](solid_mechanics/C0TimoshenkoBeam.md)
   - [Shell Elements](solid_mechanics/ShellElements.md)
+  - [DSG Shell Elements](solid_mechanics/DSGShellElements.md)
   - [Cohesive Elements](CohesiveZone/index.md)
 
 - [Fracture Integrals](solid_mechanics/FractureIntegrals.md)
