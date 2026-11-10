@@ -111,12 +111,31 @@ p_inf = 7.456e8
     variable = p_err
     value_type = max_abs
     block = 'upper lower'
+    outputs = console
   []
   [max_abs_rhouA]
     type = ElementExtremeValue
     variable = rhouA
     value_type = max_abs
     block = 'upper lower'
+    outputs = console
+  []
+
+  # The two errors are at the round-off level of the pressure, so they differ between serial and
+  # parallel runs. The CSV output holds the two flags below instead: the pressure error must stay
+  # under 0.1 Pa and the mass flow rate under 1e-4 kg/s. Without the correction, the pressure error
+  # is of the order of 1000 Pa and the fluid does not stay at rest.
+  [p_err_below_tol]
+    type = ParsedPostprocessor
+    expression = 'abs(max_abs_p_err) < 0.1'
+    pp_names = max_abs_p_err
+    outputs = csv
+  []
+  [rhouA_below_tol]
+    type = ParsedPostprocessor
+    expression = 'abs(max_abs_rhouA) < 1e-4'
+    pp_names = max_abs_rhouA
+    outputs = csv
   []
 []
 

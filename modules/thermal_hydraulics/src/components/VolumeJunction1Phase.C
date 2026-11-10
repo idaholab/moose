@@ -193,8 +193,7 @@ VolumeJunction1Phase::check() const
                          "Using initial conditions from a file for VolumeJunction1Phase is "
                          "currently not tested for parallel threading.");
 
-  // The junction and the connected flow channels must share the gravity vector, which is
-  // usually set in GlobalParams.
+  // The junction and the connected flow channels must share the gravity vector
   if (_use_hydrostatic_correction)
     for (const auto & connection : _connections)
     {

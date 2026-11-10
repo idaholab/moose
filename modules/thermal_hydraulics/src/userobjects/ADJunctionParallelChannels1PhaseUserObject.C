@@ -105,9 +105,12 @@ ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(const unsi
   {
     // With the hydrostatic correction:
     // - a connection is an inlet when its flow channel ends on the side of the junction opposite
-    // to the direction of the first connection, whatever the sign of its mass flow rate. The wall
-    // term is the same as before when all channels flow in the same direction, and a fluid at rest
-    // cannot be seen as entering through all connections;
+    // to the direction of the first connection, whatever the sign of its mass flow rate. When all
+    // channels flow in the direction of the first connection, the groups are the same as with the
+    // sign of the mass flow rate. For a fluid at rest, the sign of the mass flow rate is round-off
+    // noise, so the groups would change at every nonlinear iteration, and when all connections
+    // fall in the same group the wall area becomes the sum of all areas and the wall term sets
+    // the fluid in motion;
     // - the wall pressure is the flow channel pressure at the face, from the slope
     // reconstruction, not the pressure at the cell center.
     _is_inlet[c] = (ni * _dir_c0) > 0;
