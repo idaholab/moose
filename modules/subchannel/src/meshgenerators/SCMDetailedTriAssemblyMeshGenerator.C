@@ -81,6 +81,9 @@ SCMDetailedTriAssemblyMeshGenerator::SCMDetailedTriAssemblyMeshGenerator(
     _verbose(getParam<bool>("verbose_flag")),
     _elem_id(0)
 {
+  // Read by SCMTriCoreMeshGenerator to check that assemblies placed in a core do not overlap
+  declareMeshProperty<Real>("flat_to_flat", _flat_to_flat);
+
   const Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
 
   if (_n_rings < 2)

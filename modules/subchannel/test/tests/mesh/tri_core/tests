@@ -12,7 +12,7 @@
       cli_args = '--mesh-only'
       recover = false
       mesh_mode = 'replicated'
-      detail = 'for assemblies of different sizes surrounded by ducts, and'
+      detail = 'for assemblies of different sizes surrounded by ducts,'
     []
     [empty_positions]
       type = Exodiff
@@ -21,7 +21,15 @@
       cli_args = '--mesh-only'
       recover = false
       mesh_mode = 'replicated'
-      detail = 'for a lattice with empty positions.'
+      detail = 'for a lattice with empty positions, and'
+    []
+    [detailed]
+      type = Exodiff
+      input = detailed_core.i
+      exodiff = detailed_core_exodus.e
+      recover = false
+      mesh_mode = 'replicated'
+      detail = 'for detailed 3D assemblies used to visualize core solutions.'
     []
   []
   [errors]
@@ -70,9 +78,9 @@
     [no_mesh_only]
       type = RunException
       input = core.i
-      expect_err = 'The SCM core mesh can only be generated with --mesh-only'
+      expect_err = 'can only be generated with --mesh-only; solving on it is not supported yet'
       mesh_mode = 'replicated'
-      detail = 'if a solve on the core mesh is requested.'
+      detail = 'if a solve is requested on a core of one-dimensional assemblies.'
     []
   []
 []

@@ -12,6 +12,7 @@
 #include "MooseApp.h"
 #include "MooseMeshUtils.h"
 #include "MooseUtils.h"
+#include "SubChannelMesh.h"
 
 #include "libmesh/mesh_modification.h"
 #include "libmesh/unstructured_mesh.h"
@@ -30,8 +31,8 @@ SCMTriCoreMeshGenerator::validParams()
       "assembly keeps its own subdomains and boundaries; assemblies are not connected.");
   params.addRequiredParam<std::vector<MeshGeneratorName>>(
       "inputs",
-      "The SCMTriAssemblyMeshGenerator or SCMTriDuctMeshGenerator meshes that can be placed in "
-      "the core");
+      "The SCMTriAssemblyMeshGenerator, SCMTriDuctMeshGenerator, or "
+      "SCMDetailedTriAssemblyMeshGenerator meshes that can be placed in the core");
   params.addRequiredParam<std::vector<std::vector<int>>>(
       "pattern",
       "Hexagonal core pattern of indices into 'inputs', using the row syntax of "
@@ -54,10 +55,12 @@ SCMTriCoreMeshGenerator::SCMTriCoreMeshGenerator(const InputParameters & paramet
   // Each SCMTriAssemblyMeshGenerator and SCMTriDuctMeshGenerator stores its channel, gap and pin
   // maps in the single TriSubChannelMesh, so with several assemblies only the data of the last
   // generated one remains, and it refers to nodes of a mesh that is merged here. The SCM solver
-  // cannot use the core mesh until that data is stored per assembly.
-  if (!_app.isParamSetByUser("mesh_only"))
-    mooseError("The SCM core mesh can only be generated with --mesh-only; solving on it is not "
-               "supported yet.");
+  // cannot use a core built from those generators until that data is stored per assembly. A core
+  // of SCMDetailedTriAssemblyMeshGenerator inputs is a plain [Mesh] and can be used in a run.
+  if (dynamic_cast<const SubChannelMesh *>(_mesh) && !_app.isParamSetByUser("mesh_only"))
+    mooseError("An SCM core mesh built from SCMTriAssemblyMeshGenerator or "
+               "SCMTriDuctMeshGenerator inputs can only be generated with --mesh-only; solving on "
+               "it is not supported yet.");
 
   const auto n_rows = _pattern.size();
   if (n_rows % 2 == 0)
@@ -112,7 +115,8 @@ SCMTriCoreMeshGenerator::generate()
                  "Input '",
                  input_name,
                  "' does not provide 'flat_to_flat' metadata. Inputs must be "
-                 "SCMTriAssemblyMeshGenerator or SCMTriDuctMeshGenerator objects.");
+                 "SCMTriAssemblyMeshGenerator, SCMTriDuctMeshGenerator, or "
+                 "SCMDetailedTriAssemblyMeshGenerator objects.");
     flat_to_flat.push_back(getMeshProperty<Real>("flat_to_flat", input_name));
   }
 
