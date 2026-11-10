@@ -84,8 +84,8 @@ get their exact constraints at the same time.
 
 ## Coefficients that change
 
-An exact constraint can have coefficients that depend on a controllable parameter. Such an object
-overrides `virtual bool exactConstraintsChanged()`. The override compares the parameter with the
+An exact constraint whose coefficients depend on a controllable parameter overrides
+`virtual bool exactConstraintsChanged()`. The override compares the parameter with the
 value that the object last used, records the new value, and returns true when they differ.
 
 At the start of each solve, before the first residual evaluation (the pre-SMO residual included),
