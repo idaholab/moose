@@ -4,7 +4,7 @@
     input = 'point_value_sampler_history.i'
     csvdiff = 'point_value_sampler_history_out_point_sample.csv'
 
-    requirement = "The VectorPostprocessor system takes a parameter \"contains_complete_history\" which guarentees the vector state is "
+    requirement = "The system shall accept a VectorPostprocessor parameter \"contains_complete_history\" which guarantees the vector state is "
                    " left alone between invocations resulting in a single CSV output file."
     issues = "#11300"
     design = "VectorPostprocessors/index.md"

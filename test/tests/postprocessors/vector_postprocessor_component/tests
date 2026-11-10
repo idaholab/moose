@@ -13,7 +13,7 @@
     input = vpp_component.i
     cli_args = 'Postprocessors/component/index=4'
     expect_err = 'In VectorPostprocessorComponent index greater than size of vector'
-    requirement = 'The Postprocessor that returns a single specified component of a VectorPostprocessor shall generate an error if the requested component is out of the range of the vector'
+    requirement = 'The system shall generate an error, in the Postprocessor that returns a single specified component of a VectorPostprocessor, if the requested component is out of the range of the vector'
     prereq = vpp_component
   [../]
 []

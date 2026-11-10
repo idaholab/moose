@@ -1,7 +1,7 @@
 [Tests]
   [./least_squares]
     issues = '#7907 #4464'
-    requirement = 'The LeastSquaresFit vectorpostprocessor shall compute a least squares fit of a first-order polynomial sampled from a solution field using LineValueSampler with shifting and scaling parameters specified'
+    requirement = 'The system shall compute, using the LeastSquaresFit vectorpostprocessor, a least squares fit of a first-order polynomial sampled from a solution field using LineValueSampler with shifting and scaling parameters specified'
     design = 'LeastSquaresFit.md LineValueSampler.md'
     type = 'CSVDiff'
     input = 'least_squares_fit.i'
@@ -9,7 +9,7 @@
   [../]
   [./least_squares_csv0]
     issues = '#13498'
-    requirement = 'The LeastSquaresFit vectorpostprocessor shall compute a least squares fit of a zeroth-order polynomial with data provided by a CSVReaderVectorPostprocessor'
+    requirement = 'The system shall compute, using the LeastSquaresFit vectorpostprocessor, a least squares fit of a zeroth-order polynomial with data provided by a CSVReaderVectorPostprocessor'
     design = 'LeastSquaresFit.md CSVReaderVectorPostprocessor.md'
     type = 'CSVDiff'
     input = 'least_squares_fit_csv_data.i'
@@ -18,7 +18,7 @@
   [../]
   [./least_squares_csv1]
     issues = '#13498'
-    requirement = 'The LeastSquaresFit vectorpostprocessor shall compute a least squares fit of a first-order polynomial with data provided by a CSVReaderVectorPostprocessor'
+    requirement = 'The system shall compute, using the LeastSquaresFit vectorpostprocessor, a least squares fit of a first-order polynomial with data provided by a CSVReaderVectorPostprocessor'
     design = 'LeastSquaresFit.md CSVReaderVectorPostprocessor.md'
     type = 'CSVDiff'
     input = 'least_squares_fit_csv_data.i'
@@ -28,7 +28,7 @@
   [../]
   [./least_squares_csv2]
     issues = '#13498'
-    requirement = 'The LeastSquaresFit vectorpostprocessor shall compute a least squares fit of a second-order polynomial with data provided by a CSVReaderVectorPostprocessor'
+    requirement = 'The system shall compute, using the LeastSquaresFit vectorpostprocessor, a least squares fit of a second-order polynomial with data provided by a CSVReaderVectorPostprocessor'
     design = 'LeastSquaresFit.md CSVReaderVectorPostprocessor.md'
     type = 'CSVDiff'
     input = 'least_squares_fit_csv_data.i'
@@ -38,7 +38,7 @@
   [../]
   [./least_squares_csv3_order_err]
     issues = '#13498'
-    requirement = 'The LeastSquaresFit vectorpostprocessor shall generate an error if a fit for a third-order polynomial is requested and only three data points are provided'
+    requirement = 'The system shall generate an error in the LeastSquaresFit vectorpostprocessor if a fit for a third-order polynomial is requested and only three data points are provided'
     design = 'LeastSquaresFit.md CSVReaderVectorPostprocessor.md'
     type = 'RunException'
     expect_err = 'PolynomialFit requires an order less than the size of the input vector'

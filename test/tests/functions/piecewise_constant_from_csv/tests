@@ -2,7 +2,7 @@
   issues = '#19109'
   design = 'PiecewiseConstantFromCSV.md'
   [csv_read]
-    requirement = 'The Function system shall include a function that can obtain data from a CSV file'
+    requirement = 'The system shall include, in the Function system, a function that can obtain data from a CSV file'
     [element]
       type = 'Exodiff'
       input = 'piecewise_constant.i'
