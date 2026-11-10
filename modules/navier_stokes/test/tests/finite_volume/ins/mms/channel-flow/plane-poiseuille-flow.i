@@ -12,8 +12,8 @@ two_term_boundary_expansion = true
     xmax = 10
     ymin = -1
     ymax = 1
-    nx = 20
-    ny = 4
+    nx = 40
+    ny = 8
   []
 []
 

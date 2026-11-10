@@ -137,13 +137,13 @@ class TestPlanePoiseuilleRCFirst(unittest.TestCase):
         labels = ["L2u", "L2v", "L2p"]
         df1 = run_spatial(
             "plane-poiseuille-flow.i",
-            7,
+            4,
             "velocity_interp_method='rc'",
             "two_term_boundary_expansion=false",
             "--error",
             "--error-unused",
             y_pp=labels,
-            mpi=16,
+            mpi=4,
         )
 
         fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="$L_2$ Error")

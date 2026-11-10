@@ -44,7 +44,7 @@
     input = test.py
     test_case = TestPlanePoiseuilleRCFirst
     requirement = 'The system shall demonstrate global second order convergence for all variables when using an RC interpolation for the velocity and a one term Taylor series expansion for face values on non-Dirichlet boundaries.'
-    min_parallel = 16
+    min_parallel = 4
     heavy = true
   []
   [2d-average-with-temp]
