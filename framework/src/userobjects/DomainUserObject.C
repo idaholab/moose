@@ -29,9 +29,9 @@ DomainUserObject::validParams()
       "on no interface boundary.");
   params.addParam<std::vector<BoundaryName>>(
       "external_boundaries",
-      "The external boundaries on which this object will execute. If unset, boundary execution "
-      "is unrestricted except on selected interface boundaries. An explicitly empty list "
-      "disables boundary execution.");
+      "The external boundaries on which this object will execute its boundary callback. If unset, "
+      "boundary execution is unrestricted except on selected interface boundaries. An explicitly "
+      "empty list disables boundary execution.");
   // Need one layer of ghosting
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |

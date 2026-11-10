@@ -115,6 +115,7 @@ residual_tolerance = 1e-10
     type = RobinBC
     variable = u
     boundary = bottom
+    coefficient = 2
   []
   [top]
     type = DirichletBC

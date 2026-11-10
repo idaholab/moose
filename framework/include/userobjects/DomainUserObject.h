@@ -102,6 +102,8 @@ public:
 
   /**
    * Return whether this object should run \p executeOnBoundary on the given side topology
+   *
+   * @param is_external_side Whether the current side has no neighbor
    */
   bool shouldExecuteOnBoundary(bool is_external_side) const;
 
@@ -266,8 +268,12 @@ DomainUserObject::setFaceData()
 inline bool
 DomainUserObject::shouldExecuteOnBoundary(const bool is_external_side) const
 {
+  // If the current boundary is selected as an interface boundary, executeOnBoundary should not run
+  // on it because it is handled by executeOnInterface.
   if (_interface_bnd_ids.count(_current_boundary_id))
   {
+    // An interface boundary must not contain an external side because every interface side must
+    // have a neighbor.
     if (is_external_side)
       paramError("interface_boundaries",
                  "Boundary ",
@@ -277,18 +283,26 @@ DomainUserObject::shouldExecuteOnBoundary(const bool is_external_side) const
     return false;
   }
 
-  if (!_external_bnd_restricted)
-    return true;
+  // If external_boundaries is set, executeOnBoundary should run only on its selected external
+  // sides.
+  if (_external_bnd_restricted)
+  {
+    // If the current boundary is not selected in external_boundaries, executeOnBoundary should not
+    // run on it.
+    if (!_external_bnd_ids.count(_current_boundary_id))
+      return false;
 
-  if (!_external_bnd_ids.count(_current_boundary_id))
-    return false;
+    // A boundary selected in external_boundaries must not contain an internal side because external
+    // sides must not have neighbors.
+    if (!is_external_side)
+      paramError("external_boundaries",
+                 "Boundary ",
+                 _current_boundary_id,
+                 " contains an internal side, but external boundaries must not contain neighbors.");
+  }
 
-  if (!is_external_side)
-    paramError("external_boundaries",
-               "Boundary ",
-               _current_boundary_id,
-               " contains an internal side, but external boundaries must not contain neighbors.");
-
+  // At this point, the current boundary is not an interface boundary, and external_boundaries is
+  // either unset or contains the current external side.
   return true;
 }
 
