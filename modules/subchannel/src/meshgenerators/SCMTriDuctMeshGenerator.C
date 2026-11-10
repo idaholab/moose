@@ -48,6 +48,9 @@ SCMTriDuctMeshGenerator::SCMTriDuctMeshGenerator(const InputParameters & params)
 {
   SubChannelMesh::generateZGrid(
       _unheated_length_entry, _heated_length, _unheated_length_exit, _n_cells, _z_grid);
+
+  // Read by SCMTriCoreMeshGenerator to check that assemblies placed in a core do not overlap
+  declareMeshProperty<Real>("flat_to_flat", _flat_to_flat);
 }
 
 std::unique_ptr<MeshBase>
