@@ -1,0 +1,5 @@
+TIME STEPS absolute 1e-10 relative 1e-06 floor 0
+
+GLOBAL VARIABLES absolute 1e-10 relative 1e-06 floor 0
+    val1
+    val2 absolute 1e-7 relative 1e-6 floor 0

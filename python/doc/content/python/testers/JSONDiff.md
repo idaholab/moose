@@ -18,6 +18,38 @@ Test configuration options are added to the `tests` file.
 
 Other test commands & restrictions may be found in the [TestHarness documentation](TestHarness.md).
 
+## Comparison criteria id=comparison
+
+The two files must have the same structure: the same keys and the same number of entries in
+every list, apart from the keys in `skip_keys`. Each pair of corresponding values is then
+compared. Booleans and integers must match exactly, and so must strings that do not parse as
+numbers. A value that is an integer in one file and a floating point number in the other is a
+difference. The tolerances apply to floating point values and to strings that hold numbers, which
+is how `XMLDiff` sees all of its numeric data. A string that holds a space-separated list of
+numbers is compared entry by entry.
+
+For a gold value $x$ and a test value $y$ with the absolute zero $z$ (`abs_zero`) and the
+relative tolerance $\tau$ (`rel_err`), a pair that is not exactly equal passes if both values are
+below the absolute zero in magnitude:
+
+!equation id=eq-jsondiff-floor
+\lvert x \rvert < z \quad \text{and} \quad \lvert y \rvert < z
+
+and otherwise passes if
+
+!equation id=eq-jsondiff-pass
+\begin{cases}
+\lvert x - y \rvert \le \tau & \text{if } \tau = 0 \text{ or } y = 0 \\
+\lvert x - y \rvert \le \tau \lvert y \rvert & \text{otherwise}
+\end{cases}
+
+- The relative difference is normalized by the test value $y$ only, so the comparison is not
+  symmetric in $x$ and $y$.
+- When the test value is zero, or `rel_err` is zero, `rel_err` is applied as an absolute
+  tolerance on $\lvert x - y \rvert$.
+- The absolute zero is a strict inequality and does not modify the values. If only one value is
+  below it, the pair is compared with [eq-jsondiff-pass].
+
 ### MOOSE-Specific
 
 The following options are specific to MOOSE JSON output:
