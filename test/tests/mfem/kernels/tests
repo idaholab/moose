@@ -311,8 +311,7 @@
   [MFEMRejectsUnknownRestriction]
     design = 'MFEMBlockRestrictable.md MFEMBoundaryRestrictable.md'
     issues = '#34198'
-    requirement = 'The system shall report an input error when an MFEM object is restricted to a '
-                  'block or boundary that the mesh does not have, given by'
+    requirement = 'The system shall report an input error when an MFEM object is restricted to a block or boundary that the mesh does not have, given by'
     [block_name]
       type = RunException
       input = diffusion.i
@@ -375,8 +374,7 @@
     type = RunException
     input = elasticity_eigenproblem.i
     cli_args = "Problem/rhs_matrix_coefficient='1 0;0 1'"
-    expect_err = 'A matrix rhs_coefficient on an H1 or L2 finite element space must be 3x3 to match '
-                 'the number of components of the space, but it is 2x2.'
+    expect_err = 'A matrix rhs_coefficient on an H1 or L2 finite element space must be 3x3 to match the number of components of the space, but it is 2x2.'
     requirement = 'The system shall report an error if the size of a matrix right-hand-side coefficient does not match the number of components of an H1 or L2 space in an MFEM eigenproblem.'
     design = 'MFEMEigenproblem.md'
     issues = '#34193'
@@ -409,6 +407,22 @@
     xmldiff = 'OutputData/VariableAnisotropicDiffusion/Run0/Cycle000001/data.pvtu
                OutputData/VariableAnisotropicDiffusion/Run0/Cycle000001/proc000000.vtu'
     requirement = 'The system shall solve anisotropic diffusion on an embedded surface using a matrix assembled from spatially varying scalar functions and numeric literals.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []
+  [MFEMTimeDependentAnisotropicDiffusion]
+    type = XMLDiff
+    input = time_dependent_anisotropic_diffusion.i
+    xmldiff = 'OutputData/TimeDependentAnisotropicDiffusion/Run0/Run0.pvd
+               OutputData/TimeDependentAnisotropicDiffusion/Run0/Cycle000001/data.pvtu
+               OutputData/TimeDependentAnisotropicDiffusion/Run0/Cycle000001/proc000000.vtu
+               OutputData/TimeDependentAnisotropicDiffusion/Run0/Cycle000010/data.pvtu
+               OutputData/TimeDependentAnisotropicDiffusion/Run0/Cycle000010/proc000000.vtu
+               OutputData/TimeDependentAnisotropicDiffusion/Run0/Cycle000020/data.pvtu
+               OutputData/TimeDependentAnisotropicDiffusion/Run0/Cycle000020/proc000000.vtu'
+    requirement = 'The system shall solve a transient problem with time-dependent anisotropic diffusion on an embedded surface.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
