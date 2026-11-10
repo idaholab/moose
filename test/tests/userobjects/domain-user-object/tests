@@ -76,7 +76,7 @@
   [external_boundary_selection]
     requirement = 'The system shall invoke DomainUserObject boundary callbacks'
     design = 'UserObjects/index.md'
-    issues = '#19995 #32413'
+    issues = '#19995 #32413 #34421'
     [unset]
       detail = 'on all boundaries not selected as interfaces when external_boundaries is unset,'
       type = RunApp
@@ -110,7 +110,7 @@
   [external_boundary_rejects_internal_side]
     requirement = 'The system shall reject a DomainUserObject external boundary selection containing an internal side.'
     design = 'UserObjects/index.md'
-    issues = '#19995 #32413'
+    issues = '#19995 #32413 #34421'
     type = RunException
     mesh_mode = REPLICATED
     input = overlapping-interface.i
@@ -121,7 +121,7 @@
   [interface_boundary_rejects_external_side]
     requirement = 'The system shall reject a DomainUserObject interface boundary selection containing an external side.'
     design = 'UserObjects/index.md'
-    issues = '#32413'
+    issues = '#19995 #32413 #34421'
     type = RunException
     mesh_mode = REPLICATED
     input = overlapping-interface.i
@@ -132,7 +132,7 @@
   [external_boundary_interface_overlap]
     requirement = 'The system shall reject a DomainUserObject boundary ID selected as both an external boundary and an interface.'
     design = 'UserObjects/index.md'
-    issues = '#19995 #32413'
+    issues = '#19995 #32413 #34421'
     type = RunException
     mesh_mode = REPLICATED
     input = overlapping-interface.i
