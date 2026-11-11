@@ -43,7 +43,7 @@ pytest
 pytest-cov
 pyyaml
 requests
-ruff==0.16.7
+ruff==0.17.2
 scikit-image
 setuptools
 sympy

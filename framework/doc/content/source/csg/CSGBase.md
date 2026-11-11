@@ -211,6 +211,9 @@ Doing this in multiple steps has the same outcome as that of method 2 for adding
 !alert! note title=Maintaining Connectivity
 
 When adding and removing cells to/from universes, it is important to maintain the connectivity of all universes meaning all universes should be nested under the root universe at the end of the generation process, in order to have a consistent model.
+Each cell must also belong to exactly one universe by the end of the generation process.
+The `checkGeometry` method warns about objects that are not linked to the root universe and errors if a cell belongs to more than one universe.
+This method is called automatically when the [!ac](CSG) [!ac](JSON) output is generated and can be called directly when the `CSGBase` is used without writing output.
 
 !alert-end!
 

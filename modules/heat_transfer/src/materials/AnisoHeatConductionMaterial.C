@@ -66,7 +66,7 @@ AnisoHeatConductionMaterialTempl<is_ad>::AnisoHeatConductionMaterialTempl(
     _specific_heat(declareGenericProperty<Real, is_ad>(_base_name + "specific_heat")),
     _dspecific_heat_dT(declarePropertyDerivative<Real>(_base_name + "specific_heat", _T_name)),
     _specific_heat_function(&getFunction("specific_heat")),
-    _ad_q_point(is_ad ? &_assembly.adQPoints() : nullptr)
+    _ad_q_point(is_ad ? (_bnd ? &_assembly.adQPointsFace() : &_assembly.adQPoints()) : nullptr)
 {
 }
 

@@ -273,7 +273,11 @@ public:
     return _ad_JxW;
   }
 
-  const MooseArray<ADReal> & adJxWFace() const { return _ad_JxW_face; }
+  const MooseArray<ADReal> & adJxWFace() const
+  {
+    _need_ad_face_map = true;
+    return _ad_JxW_face;
+  }
 
   const MooseArray<ADReal> & adCurvatures() const;
 
@@ -376,7 +380,11 @@ public:
     return _neighbor_extra_elem_ids[id];
   }
 
-  const MooseArray<ADPoint> & adNormals() const { return _ad_normals; }
+  const MooseArray<ADPoint> & adNormals() const
+  {
+    _need_ad_face_map = true;
+    return _ad_normals;
+  }
 
   const MooseArray<ADPoint> & adQPoints() const
   {
@@ -388,6 +396,7 @@ public:
   const MooseArray<ADPoint> & adQPointsFace() const
   {
     _calculate_face_xyz = true;
+    _need_ad_face_map = true;
     return _ad_q_points_face;
   }
 
@@ -2783,6 +2792,9 @@ protected:
   /// costs time even when no object reads them, and it needs an AD derivative size of at least the
   /// element's displacement dofs (81 on a HEX27).
   mutable bool _need_ad_volume_map = false;
+  /// Whether any object needs the AD face JxW, normals, quadrature points, curvatures or coordinate
+  /// transformation, which computeFaceMap provides on displaced meshes
+  mutable bool _need_ad_face_map = false;
 
   /**
    * The residual vector tags that Assembly could possibly contribute to.
@@ -2911,6 +2923,7 @@ Assembly::adCoordTransformation() const
   _calculate_xyz = true;
   _calculate_face_xyz = true;
   _need_ad_volume_map = true;
+  _need_ad_face_map = true;
 
   _calculate_ad_coord = true;
   return _ad_coord;

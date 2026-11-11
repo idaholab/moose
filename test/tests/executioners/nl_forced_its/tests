@@ -13,7 +13,7 @@
   [./2d_diffusion_test]
     type = 'RunApp'
     input = '2d_diffusion_test.i'
-    expect_out = 'Nonlinear solve converged due to CONVERGED_FNORM_ABS iterations 2'
+    expect_out = 'Number of forced iterations not yet reached: 1 < 2.*Nonlinear solve converged due to CONVERGED_USER iterations 2'
     requirement = 'The system shall force the prescribed number of non linear iterations even if convergence tolerance is already satisfied.'
     issues = '#16474'
     design = 'FEProblemSolve.md'
