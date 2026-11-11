@@ -4867,7 +4867,6 @@ FEProblemBase::setPetscOptionsHelper(const Moose::PetscSupport::PetscOptions & o
 #endif
 }
 
-
 void
 FEProblemBase::solveForSplineDofs(SystemBase & moose_sys)
 {
@@ -4893,7 +4892,6 @@ FEProblemBase::solveForSplineDofs(SystemBase & moose_sys)
 
   es.parameters.set<Real>("linear solver tolerance") = old_linear_tol;
 }
-
 
 void
 FEProblemBase::checkUserObjectNameCollision(const std::string & name,

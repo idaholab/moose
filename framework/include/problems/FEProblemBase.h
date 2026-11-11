@@ -3426,8 +3426,7 @@ protected:
    * PETSc versions.
    */
   template <typename ParamType>
-  void setPetscOptionsHelper(const Moose::PetscSupport::PetscOptions & options,
-                             ParamType & params);
+  void setPetscOptionsHelper(const Moose::PetscSupport::PetscOptions & options, ParamType & params);
 
   /**
    * Helper for projecting initial conditions (or any other solution
