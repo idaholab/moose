@@ -1,0 +1,10 @@
+[Tests]
+  design = 'ADDittusBoelterHTCFunctorMaterial.md'
+  issues = '#30651'
+  [test]
+    type = CSVDiff
+    input = 'ad_dittus_boelter_htc.i'
+    csvdiff = 'ad_dittus_boelter_htc_out.csv'
+    requirement = 'The system shall compute the Dittus-Boelter wall heat transfer coefficient of a path-integrated flow segment as a functor material property, upwinding the segment inlet temperature on the flow direction.'
+  []
+[]
