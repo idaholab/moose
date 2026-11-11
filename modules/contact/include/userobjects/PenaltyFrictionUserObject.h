@@ -49,6 +49,18 @@ public:
   virtual void updateAugmentedLagrangianMultipliers() override;
 
 protected:
+  std::pair<const Elem *, unsigned int> secondaryNode(const Node & node) const;
+  ADReal tangentialComponent(const Node & node,
+                             const ADRealVectorValue & vector,
+                             unsigned int direction) const;
+  Real tangentialComponent(const Node & node,
+                           const RealVectorValue & vector,
+                           unsigned int direction) const;
+  ADRealVectorValue tangentialVector(const Node & node, const ADTwoVector & components) const;
+  RealVectorValue tangentialVector(const Node & node, const TwoVector & components) const;
+  ADRealVectorValue tangentialProjection(const Node & node, const ADRealVectorValue & vector) const;
+  RealVectorValue tangentialProjection(const Node & node, const RealVectorValue & vector) const;
+
   virtual const VariableTestValue & test() const override;
   virtual bool constrainedByOwner() const override { return false; }
 
@@ -68,14 +80,15 @@ protected:
   // must restore their keys as well as their values: the augmented Lagrange updates loop over every
   // node a map holds, including nodes that were in contact only in earlier timesteps.
 
-  /// Map from node id to current and old step slip
-  std::unordered_map<dof_id_type, std::pair<TwoVector, TwoVector>> & _dof_to_step_slip;
+  /// Map from node id to current and old Cartesian step slip
+  std::unordered_map<dof_id_type, std::pair<RealVectorValue, RealVectorValue>> & _dof_to_step_slip;
 
   /// Map from node id to current and old accumulated slip
   std::unordered_map<dof_id_type, std::pair<TwoVector, TwoVector>> & _dof_to_accumulated_slip;
 
-  /// Map from node id to current and old tangential traction
-  std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>> & _dof_to_tangential_traction;
+  /// Map from node id to current and old Cartesian tangential traction
+  std::unordered_map<dof_id_type, std::pair<ADRealVectorValue, RealVectorValue>> &
+      _dof_to_tangential_traction;
 
   /// The first frictional contact pressure on the mortar segment quadrature points
   ADVariableValue _frictional_contact_traction_one;
@@ -83,8 +96,8 @@ protected:
   /// The second frictional contact pressure on the mortar segment quadrature points
   ADVariableValue _frictional_contact_traction_two;
 
-  /// Map from node id to augmented lagrange multiplier
-  std::unordered_map<dof_id_type, TwoVector> & _dof_to_frictional_lagrange_multipliers;
+  /// Map from node id to Cartesian augmented Lagrange multiplier increment
+  std::unordered_map<dof_id_type, RealVectorValue> & _dof_to_frictional_lagrange_multipliers;
 
   /// Map from node id to local friction penalty value
   std::unordered_map<dof_id_type, Real> & _dof_to_local_penalty_friction;
@@ -101,11 +114,12 @@ protected:
   int & _t_step_old_friction;
 
   ///@{ Frictional state at the start of the current timestep, restored when it is retried
-  std::unordered_map<dof_id_type, std::pair<TwoVector, TwoVector>> _dof_to_step_slip_start;
+  std::unordered_map<dof_id_type, std::pair<RealVectorValue, RealVectorValue>>
+      _dof_to_step_slip_start;
   std::unordered_map<dof_id_type, std::pair<TwoVector, TwoVector>> _dof_to_accumulated_slip_start;
-  std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>>
+  std::unordered_map<dof_id_type, std::pair<ADRealVectorValue, RealVectorValue>>
       _dof_to_tangential_traction_start;
-  std::unordered_map<dof_id_type, TwoVector> _dof_to_frictional_lagrange_multipliers_start;
+  std::unordered_map<dof_id_type, RealVectorValue> _dof_to_frictional_lagrange_multipliers_start;
   std::unordered_map<dof_id_type, Real> _dof_to_local_penalty_friction_start;
   ///@}
 };
