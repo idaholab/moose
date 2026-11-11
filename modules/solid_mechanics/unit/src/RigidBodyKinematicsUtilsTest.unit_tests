@@ -1,0 +1,23 @@
+[Tests]
+  design = 'RigidBodyDisplacementBC.md'
+  issues = '#33974'
+
+  [kinematics]
+    requirement = 'The system shall compute the finite displacement of a rigid body from a translation and a rotation vector'
+    [rigid_displacement]
+      type = GoogleTest
+      unit_test = RigidBodyKinematicsUtilsTest.rigidDisplacement
+      detail = 'matching the Rodrigues rotation tensor,'
+    []
+    [series_branch_continuity]
+      type = GoogleTest
+      unit_test = RigidBodyKinematicsUtilsTest.seriesBranchContinuity
+      detail = 'continuously across the switch between the series and closed-form coefficients, and'
+    []
+    [derivatives]
+      type = GoogleTest
+      unit_test = RigidBodyKinematicsUtilsTest.derivatives
+      detail = 'with automatic differentiation derivatives that are exact at zero rotation and agree with finite differences elsewhere.'
+    []
+  []
+[]

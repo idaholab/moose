@@ -1,0 +1,84 @@
+[Tests]
+  design = 'RigidBodyDisplacementBC.md'
+  issues = '#33974'
+
+  [rigid_motion]
+    requirement = 'The system shall prescribe the displacement of a rigid body undergoing a finite translation and rotation about a reference point, matching the exact rigid motion'
+    [3d]
+      type = CSVDiff
+      input = 'rigid_motion.i'
+      csvdiff = 'rigid_motion_out.csv'
+      abs_zero = 1e-12
+      detail = 'in three dimensions,'
+    []
+    [surface]
+      type = CSVDiff
+      input = 'rigid_motion.i'
+      csvdiff = 'rigid_motion_out.csv'
+      cli_args = 'Mesh/cube/dim=2 Mesh/tilt/type=TransformGenerator Mesh/tilt/input=cube Mesh/tilt/transform=ROTATE Mesh/tilt/vector_value="0 30 0" Mesh/all_nodes/input=tilt'
+      abs_zero = 1e-12
+      prereq = 'rigid_motion/3d'
+      detail = 'on a surface mesh embedded in three dimensions, and'
+    []
+    [2d]
+      type = CSVDiff
+      input = 'rigid_motion.i'
+      csvdiff = 'rigid_motion_2d_out.csv'
+      cli_args = 'Mesh/cube/dim=2 GlobalParams/displacements="disp_x disp_y" Variables/active="disp_x disp_y" BCs/active="rigid_x rigid_y" BCs/rigid_x/translations="tx ty" BCs/rigid_y/translations="tx ty" BCs/rigid_x/rotations=theta BCs/rigid_y/rotations=theta Functions/theta/expression="pi / 2 * t" Functions/exact_x/expression="0.3 - (y - 0.5) - (x - 0.5)" Functions/exact_y/expression="-0.2 + (x - 0.5) - (y - 0.5)" Postprocessors/active="error_x error_y" Outputs/file_base=rigid_motion_2d_out'
+      abs_zero = 1e-12
+      detail = 'in two dimensions, with a rotation about the z axis.'
+    []
+  []
+  [twist]
+    requirement = 'The system shall prescribe the finite rigid rotation of a surface of an elastic body under large deformation kinematics, giving the same response as a rotation prescribed about an axis'
+    [rigid_body_bc]
+      type = CSVDiff
+      input = 'twist_elastic_block.i'
+      csvdiff = 'twist_elastic_block_out.csv'
+      rel_err = 1e-8
+      abs_zero = 1e-10
+      detail = 'using a rotation vector, and'
+    []
+    [displacement_about_axis]
+      type = CSVDiff
+      input = 'twist_elastic_block.i'
+      csvdiff = 'twist_elastic_block_out.csv'
+      cli_args = "BCs/active='fix_x fix_y fix_z axis_x axis_y axis_z'"
+      rel_err = 1e-8
+      abs_zero = 1e-10
+      prereq = 'twist/rigid_body_bc'
+      detail = 'using a rotation about an axis.'
+    []
+  []
+  [errors]
+    requirement = 'The system shall report an error if the rigid body displacement boundary condition is applied'
+    [dimension]
+      type = RunException
+      input = 'rigid_motion.i'
+      cli_args = 'Mesh/cube/dim=1 BCs/active=rigid_x'
+      expect_err = 'A rigid body motion requires two or three spatial dimensions'
+      detail = 'in one dimension,'
+    []
+    [component]
+      type = RunException
+      input = 'rigid_motion.i'
+      cli_args = 'Mesh/cube/dim=2 BCs/active=rigid_z'
+      expect_err = 'The component must be less than the spatial dimension \(2\)'
+      detail = 'to a displacement component that exceeds the spatial dimension,'
+    []
+    [translations]
+      type = RunException
+      input = 'rigid_motion.i'
+      cli_args = 'BCs/rigid_x/translations="tx ty"'
+      expect_err = 'Expected 3 functions in 3D'
+      detail = 'with a number of translation functions different from the spatial dimension, or'
+    []
+    [rotations]
+      type = RunException
+      input = 'rigid_motion.i'
+      cli_args = 'BCs/rigid_x/rotations=theta'
+      expect_err = 'Expected 3 functions in 3D'
+      detail = 'with a number of rotation functions inconsistent with the spatial dimension.'
+    []
+  []
+[]
