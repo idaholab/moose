@@ -36,7 +36,7 @@ The initial step [!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_t
 $\Delta\tau_0$, sets how strongly the first outer iterations are damped. Sweeping it over five
 orders of magnitude on this case:
 
-| $\Delta\tau_0$ [s] | Temperature iterations | Coupled solve retries | Pressure drop [Pa] |
+| $\Delta\tau_0$ (s) | Temperature iterations | Coupled solve retries | Pressure drop (Pa) |
 | - | - | - | - |
 | $5\times10^{-6}$ | 47 | 0 | 41756.8 |
 | $5\times10^{-5}$ | 17 | 0 | 41756.9 |
