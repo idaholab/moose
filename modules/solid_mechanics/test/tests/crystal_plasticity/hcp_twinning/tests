@@ -2,7 +2,7 @@
   [coupling_demonstration]
     issues = '#18846'
     design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.md /CrystalPlasticityTwinningKalidindiUpdate.md'
-    requirement = 'The crystal plasticity HCP system shall: '
+    requirement = 'The system shall, in the crystal plasticity HCP system: '
     [modified_kalidindi_for_hcp]
       type = CSVDiff
       input = 'modified_kalidindi_for_hcp.i'
@@ -31,7 +31,7 @@
                'Outputs/file_base=demonstration_combined_hcp_slip_twins_restart_out '
                'Executioner/end_time=2.5 '
                'Executioner/dt=0.125'
-    requirement = 'The crystal plasticity system shall compute the plastic velocity gradient  '
+    requirement = 'The system shall compute, in the crystal plasticity system, the plastic velocity gradient  '
                   'from both slip and twinning in anHCP crystal upon simulation restart.'
     issues = '#26458'
     restep = false # Restep happens in demonstration_combined_hcp_slip_twins

@@ -2,8 +2,8 @@
   [constitutive_model]
     issues = '#18846'
     design = '/CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.md'
-    requirement = 'The model for HCP crystal plasticity, using the '
-                  'Beyerlein and Tome (2008) constitutive model, shall:'
+    requirement = 'The system shall, in the model for HCP crystal plasticity using the '
+                  'Beyerlein and Tome (2008) constitutive model:'
     [update_method_hcp_aprismatic_capyramidal]
       type = 'CSVDiff'
       input = 'update_method_hcp_aprismatic_capyramidal.i'
@@ -154,7 +154,7 @@
   [restart_capabilities]
     issues = '#26458'
     design = '/CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.md /ComputeMultipleCrystalPlasticityStress.md'
-    requirement = 'Upon simulation restart, the HCP crystal plasticity capability shall:'
+    requirement = 'The system shall, upon simulation restart, in the HCP crystal plasticity capability:'
     [update_method_hcp_basal_active_restart]
       type = 'CSVDiff'
       input = 'update_method_hcp_basal_active.i'
@@ -186,7 +186,7 @@
   [base_class_hcp]
     issues = '#18846'
     design = '/ComputeMultipleCrystalPlasticityStress.md'
-    requirement = 'The HCP crystal plasticity capability shall:'
+    requirement = 'The system shall, in the HCP crystal plasticity capability:'
     [update_method_hcp_representative_slip_systems]
       type = 'CSVDiff'
       input = 'update_method_hcp_representative_slip_systems.i'

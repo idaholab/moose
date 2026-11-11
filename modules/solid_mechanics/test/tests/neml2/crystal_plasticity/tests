@@ -19,7 +19,7 @@
   []
   [approx_kinematics_jacobian]
     type = PetscJacobianTester
-    requirement = 'The TL Jacobian assembled through ComputeLagrangianCauchyCustomStress is '
+    requirement = 'The system shall assemble the TL Jacobian through ComputeLagrangianCauchyCustomStress so that it is '
                   'consistent with the finite-differenced Jacobian to within NEML2 AD noise at '
                   'every nonlinear iteration of every load step, including steps that consume '
                   'non-zero old state (plastic_defgrad, orientation, slip_hardening).'
@@ -33,7 +33,7 @@
   []
   [exact_kinematics_jacobian]
     type = PetscJacobianTester
-    requirement = 'The TL Jacobian assembled through ComputeLagrangianStressCustomPK2 is '
+    requirement = 'The system shall assemble the TL Jacobian through ComputeLagrangianStressCustomPK2 so that it is '
                   'consistent with the finite-differenced Jacobian to within NEML2 AD noise at '
                   'every nonlinear iteration of every load step, including steps that consume '
                   'non-zero old state (plastic_defgrad, tauc).'
