@@ -115,7 +115,11 @@
     type = RunApp
     mesh_mode = REPLICATED
     input = overlapping-interface.i
-    cli_args = 'UserObjects/conservation/boundaries=crack UserObjects/conservation/expected_boundary_calls=2 Outputs/exodus=false'
+    # This test only checks that the 2 internal sides tagged as crack are selected. Restricting
+    # boundary execution to crack prevents this test user object from collecting the Robin
+    # contribution on bottom, so it cannot reconstruct the complete nodal residual. Disable that
+    # residual check here.
+    cli_args = 'UserObjects/conservation/boundaries=crack UserObjects/conservation/expected_boundary_calls=2 UserObjects/conservation/check_conservation=false Outputs/exodus=false'
   []
 
   [interface_boundary_rejects_external_side]
