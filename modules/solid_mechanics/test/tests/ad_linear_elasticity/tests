@@ -5,7 +5,7 @@
     input = 'linear_elastic_material.i'
     exodiff = 'linear_elastic_material_out.e'
     max_parallel = 1
-    requirement = 'We shall be able to reproduce linear elastic stress results of the hand-coded simulation using automatic differentiation.'
+    requirement = 'The system shall be able to reproduce linear elastic stress results of the hand-coded simulation using automatic differentiation.'
     design = 'ADComputeLinearElasticStress.md'
   []
   [linear_elastic_material-jac]
@@ -15,7 +15,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-1
     prereq = linear_elastic_material
-    requirement = 'The Jacobian for the AD linear elastic stress problem shall be perfect'
+    requirement = 'The system shall compute a perfect Jacobian for the AD linear elastic stress problem'
     design = 'ADComputeLinearElasticStress.md'
   []
 
@@ -23,7 +23,7 @@
     type = 'Exodiff'
     input = 'extra_stresses.i'
     exodiff = 'extra_stresses_out.e'
-    requirement = 'We shall be able to introduce extra stresses into the stress calculators using automatic differentiation.'
+    requirement = 'The system shall be able to introduce extra stresses into the stress calculators using automatic differentiation.'
     design = 'ADComputeLinearElasticStress.md'
   []
   [extra_stresses-jac]
@@ -33,7 +33,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-1
     prereq = extra_stresses
-    requirement = 'The Jacobian for the AD linear elastic stress problem with extra stress definition shall be perfect'
+    requirement = 'The system shall compute a perfect Jacobian for the AD linear elastic stress problem with extra stress definition'
     design = 'ADComputeLinearElasticStress.md'
   []
 
@@ -41,7 +41,7 @@
     type = 'Exodiff'
     input = 'applied_strain.i'
     exodiff = 'applied_strain_out.e'
-    requirement = 'We shall be able to reproduce eigenstrain results of the hand-coded simulation using automatic differentiation.'
+    requirement = 'The system shall be able to reproduce eigenstrain results of the hand-coded simulation using automatic differentiation.'
     design = 'ComputeEigenstrain.md'
   []
   [applied_strain-jac]
@@ -51,7 +51,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-1
     prereq = applied_strain
-    requirement = 'The Jacobian for the AD eigenstrain problem shall be perfect'
+    requirement = 'The system shall compute a perfect Jacobian for the AD eigenstrain problem'
     design = 'ComputeEigenstrain.md'
   []
 
@@ -60,7 +60,7 @@
     input = 'tensor.i'
     exodiff = 'tensor_out.e'
     max_parallel = 1
-    requirement = 'We shall be able to reproduce small strain with specified tensors results of the hand-coded simulation using automatic differentiation.'
+    requirement = 'The system shall be able to reproduce small strain with specified tensors results of the hand-coded simulation using automatic differentiation.'
     design = 'ADComputeLinearElasticStress.md'
   []
   [tensor-jac]
@@ -70,7 +70,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-4
     prereq = tensor
-    requirement = 'The Jacobian for the AD small strain with specified tensors problem shall be perfect'
+    requirement = 'The system shall compute a perfect Jacobian for the AD small strain with specified tensors problem'
     design = 'ADComputeLinearElasticStress.md'
   []
 
@@ -78,7 +78,7 @@
     type = 'Exodiff'
     input = 'thermal_expansion.i'
     exodiff = 'thermal_expansion_out.e'
-    requirement = 'We shall be able to reproduce thermal eigenstrain results of the hand-coded simulation using automatic differentiation.'
+    requirement = 'The system shall be able to reproduce thermal eigenstrain results of the hand-coded simulation using automatic differentiation.'
     design = 'ComputeEigenstrain.md'
   []
   [thermal_expansion-jac]
@@ -88,7 +88,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-4
     prereq = thermal_expansion
-    requirement = 'The Jacobian for the AD thermal eigenstrain problem shall be perfect'
+    requirement = 'The system shall compute a perfect Jacobian for the AD thermal eigenstrain problem'
     design = 'ComputeEigenstrain.md'
   []
 []
