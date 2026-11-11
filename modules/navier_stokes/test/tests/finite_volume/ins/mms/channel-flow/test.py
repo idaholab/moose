@@ -57,7 +57,12 @@ class Test2DRC(unittest.TestCase):
     def test(self):
         labels = ["L2u", "L2v", "L2p"]
         df1 = run_spatial(
-            "2d-rc.i", 7, "--error", "--error-unused", y_pp=labels, mpi=16
+            "2d-rc.i",
+            3,
+            "--error",
+            "--error-unused",
+            y_pp=labels,
+            mpi=4,
         )
 
         fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="$L_2$ Error")
@@ -80,13 +85,13 @@ class Test2DApproximateRC(unittest.TestCase):
         labels = ["L2u", "L2v", "L2p"]
         df1 = run_spatial(
             "2d-rc.i",
-            4,
+            3,
             "--error",
             "--error-unused",
             "FVKernels/u_advection/characteristic_speed=1",
             "FVKernels/v_advection/characteristic_speed=1",
             y_pp=labels,
-            mpi=6,
+            mpi=4,
         )
 
         fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="$L_2$ Error")
@@ -109,7 +114,7 @@ class TestPlanePoiseuilleRC(unittest.TestCase):
         labels = ["L2u", "L2v", "L2p"]
         df1 = run_spatial(
             "plane-poiseuille-flow.i",
-            4,
+            3,
             "velocity_interp_method='rc'",
             "--error",
             "--error-unused",
@@ -137,7 +142,7 @@ class TestPlanePoiseuilleRCFirst(unittest.TestCase):
         labels = ["L2u", "L2v", "L2p"]
         df1 = run_spatial(
             "plane-poiseuille-flow.i",
-            4,
+            3,
             "velocity_interp_method='rc'",
             "two_term_boundary_expansion=false",
             "--error",

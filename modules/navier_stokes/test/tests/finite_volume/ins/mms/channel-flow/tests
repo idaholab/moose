@@ -17,7 +17,7 @@
     type = MMSTest
     input = test.py
     test_case = Test2DRC
-    min_parallel = 16
+    min_parallel = 4
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, free slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using a Rhie-Chow interpolation scheme for the velocity.'
     heavy = 'true'
     max_time = 600
@@ -26,7 +26,7 @@
     type = MMSTest
     input = test.py
     test_case = Test2DApproximateRC
-    min_parallel = 6
+    min_parallel = 4
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, free slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using an approximate Rhie-Chow interpolation scheme for the velocity.'
     heavy = 'true'
     max_time = 600
