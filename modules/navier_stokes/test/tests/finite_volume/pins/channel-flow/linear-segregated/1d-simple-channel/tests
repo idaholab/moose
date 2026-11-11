@@ -161,7 +161,7 @@
       csvdiff = 'physics-form-loss.csv'
       cli_args = "forchheimer_value=50 mu=1 Outputs/file_base=physics-form-loss "
                  "Physics/NavierStokes/FlowSegregated/flow/pressure_drop_form_factors='10 10'"
-      detail = 'reproduces the irreversible baffle form losses of the explicit object setup, and'
+      detail = 'reproduces the irreversible baffle form losses of the explicit object setup,'
       recover = false # we don't support recovery for SIMPLE yet
       max_threads = 1 # see libmesh issue #3808
     []
@@ -172,7 +172,15 @@
       cli_args = "forchheimer_value=50 mu=1 Outputs/file_base=physics-form-loss-reference-side "
                  "Physics/NavierStokes/FlowSegregated/flow/pressure_drop_form_factors='10 10' "
                  "Physics/NavierStokes/FlowSegregated/flow/pressure_drop_reference_velocity_side='lower_porosity higher_porosity'"
-      detail = 'forwards the reference-velocity side of each baffle to the form loss.'
+      detail = 'forwards the reference-velocity side of each baffle to the form loss, and'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [scalar]
+      type = 'CSVDiff'
+      input = porous-scalar-1d-physics.i
+      csvdiff = 'porous-scalar-1d-physics_out.csv'
+      detail = 'transports a passive scalar per unit fluid volume continuously and conservatively through the baffles.'
       recover = false # we don't support recovery for SIMPLE yet
       max_threads = 1 # see libmesh issue #3808
     []
