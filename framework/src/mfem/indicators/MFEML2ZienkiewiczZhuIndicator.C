@@ -62,19 +62,35 @@ MFEML2ZienkiewiczZhuIndicator::createEstimator()
   int dim = getParMesh().Dimension();
   int sdim = getParMesh().SpaceDimension();
 
+  // Number of flux components for the default flux spaces: the gradient for diffusion, the
+  // symmetric stress tensor in Voigt notation for elasticity, and the curl for curl-curl, which is
+  // a scalar in 2D
+  int flux_vdim = sdim;
+  if (dynamic_cast<mfem::ElasticityIntegrator *>(_integ.get()))
+    flux_vdim = dim * (dim + 1) / 2;
+  else if (dynamic_cast<mfem::CurlCurlIntegrator *>(_integ.get()))
+  {
+    if (dim == 3 && !_flux_fes)
+      paramError("flux_fespace",
+                 "must be given for a curl-curl kernel in 3D, because the default L2 space cannot "
+                 "hold the curl of a Nedelec field.");
+    flux_vdim = dim == 3 ? 3 : 1;
+  }
+
   if (!_flux_fes)
   {
     // not supplied by the user - default to L2
     _flux_fec = std::make_unique<mfem::L2_FECollection>(order, dim);
-    _flux_fes = std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _flux_fec.get(), sdim);
+    _flux_fes =
+        std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _flux_fec.get(), flux_vdim);
   }
 
   if (!_smooth_flux_fes)
   {
     // not supplied by the user - default to H1
     _smooth_flux_fec = std::make_unique<mfem::H1_FECollection>(order, dim);
-    _smooth_flux_fes =
-        std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _smooth_flux_fec.get(), sdim);
+    _smooth_flux_fes = std::make_unique<mfem::ParFiniteElementSpace>(
+        &getParMesh(), _smooth_flux_fec.get(), flux_vdim);
   }
 
   // fetch the grid function we need

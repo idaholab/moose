@@ -9,11 +9,19 @@ an `mfem::L2ZienkiewiczZhuEstimator` to the [MFEMRefinementMarker.md].
 
 ## Overview
 
-This class implements `createEstimator()`. If the user doesn't supply an FESpace for the smoothed flux,
-then the method creates and stores an H1 finite element collection. Similarly, if the user doesn't
-supply an FESpace for the discontinuous flux, then the method creates and stores an L2 finite element
-collection. Be aware that the vector dimensions for each of these should match the space dimension and
-that these spaces must be defined on the same mesh used by the variable associated with the chosen kernel.
+This class implements `createEstimator()`. If the user doesn't supply an FESpace for the smoothed flux
+with [!param](/Adaptivity/Indicators/MFEML2ZienkiewiczZhuIndicator/smooth_flux_fespace), then the
+method creates and stores an H1 finite element collection. Similarly, if the user doesn't supply an
+FESpace for the discontinuous flux with
+[!param](/Adaptivity/Indicators/MFEML2ZienkiewiczZhuIndicator/flux_fespace), then the method creates
+and stores an L2 finite element collection. Both default spaces have the order of the variable and one
+component per component of the flux of the chosen kernel: the space dimension for the gradient of
+[MFEMDiffusionKernel.md], `dim(dim+1)/2` for the stress of [MFEMLinearElasticityKernel.md] (a
+symmetric tensor in Voigt notation), and one for the curl of [MFEMCurlCurlKernel.md] in 2D. In 3D, an L2
+space cannot hold the curl of a Nedelec field, so a curl-curl kernel requires
+[!param](/Adaptivity/Indicators/MFEML2ZienkiewiczZhuIndicator/flux_fespace). FESpaces supplied by the
+user must have the same number of components as the flux, and must be defined on the same mesh used by
+the variable associated with the chosen kernel.
 
 We can then construct the `mfem::L2ZienkiewiczZhuEstimator` object using the bilinear form integrator
 associated with the chosen kernel, the grid function associated with the variable, and the two finite
