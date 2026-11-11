@@ -152,6 +152,7 @@ you act on it and rewrite the row with what you find.
 | Reason | What it means and what to do |
 | --- | --- |
 | `KILLED: OVER MEMORY` | The harness enforced `--max-memory-per-slot`. Raise `min_slots` in the spec. Reproducible on Linux, where memory accounting is consistent; not on macOS. |
+| `KILLED: OVER GPU MEMORY` | The harness enforced `--max-gpu-memory-per-slot`. Raise `min_slots` in the spec. Reproducible only on a host with an NVIDIA GPU. |
 | `TIMEOUT` | Often a slow build rather than the test: `-O0` coverage jobs and `METHOD=dbg` jobs are both far slower than opt. If a test times out only there, reduce its problem size rather than raising `max_time`. |
 | `EXPECTED OUTPUT MISSING` | `RunApp`'s `expect_out` pattern did not match. Update `expect_out`, or fix the output it describes. |
 | `EXPECTED OUTPUT NOT FOUND` | Comes only from `PetscJacobianTester` and `TaoGradientTester`, which grep for a specific diagnostic line. The run usually died before PETSc/TAO printed it — look for the real error earlier in the same output. Nothing to do with gold files. |

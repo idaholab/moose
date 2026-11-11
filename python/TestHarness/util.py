@@ -58,6 +58,8 @@ class FormatResultEntry:
     timing: Optional[float] = None
     # Memory for the entry, optional
     memory: Optional[int] = None
+    # NVIDIA GPU memory for the entry, optional
+    gpu_memory: Optional[int] = None
     # JointStatus object for the entry, optional
     joint_status: Optional[str] = None
     # Detailed status message for the entry, optional
@@ -68,11 +70,28 @@ class FormatResultEntry:
     caveat_color: Optional[str] = None
 
 
+def _formatMemory(memory: Optional[int], timing: float) -> str:
+    """
+    Format memory in bytes for formatResult(), right justified to six characters
+    (four numerical characters plus two unit-specifying characters).
+
+    Unknown memory is shown as "?MB" unless the entry has not run (zero timing),
+    for which it is zero.
+    """
+    if memory is None and timing != 0:
+        return "   ?MB"
+    value = int(memory * 2**-20) if memory else 0
+    if value < 10000:
+        return f"{value:>4}MB"
+    return f"{int(value / 1024):>4}GB"
+
+
 def formatResult(
     entry: FormatResultEntry,
     options,
     timing: Optional[bool] = None,
     memory: Optional[bool] = None,
+    gpu_memory: bool = False,
 ) -> str:
     """
     Helper for prenting a one-line result for something.
@@ -145,15 +164,10 @@ def formatResult(
             and (options.timing or memory is True)
             and memory is not False
         ):
-            if entry.memory is not None or entry.timing == 0:
-                value = int(entry.memory * 2**-20) if entry.memory else 0
-                if value < 10000:
-                    message = f"[{value:>4}MB]"
-                else:
-                    value = int(value / 1024)
-                    message = f"[{value:>4}GB]"
-            else:
-                message = "[   ?MB]"
+            message = _formatMemory(entry.memory, entry.timing)
+            if gpu_memory:
+                message += f" {_formatMemory(entry.gpu_memory, entry.timing)} GPU"
+            message = f"[{message}]"
 
         add(key, message, color)
 
@@ -201,6 +215,7 @@ def formatJobResult(
     status_message: bool = True,
     timing: Optional[bool] = None,
     memory: Optional[bool] = None,
+    gpu_memory: bool = False,
     memory_per_slot: bool = False,
     caveats: bool = False,
 ) -> str:
@@ -228,18 +243,25 @@ def formatJobResult(
         name = prefix + suffix
 
     max_memory = job.getMaxMemory()
-    if memory_per_slot and max_memory is not None:
-        max_memory = int(max_memory / job.getSlots())
+    max_gpu_memory = job.getMaxGPUMemory()
+    if memory_per_slot:
+        if max_memory is not None:
+            max_memory = int(max_memory / job.getSlots())
+        if max_gpu_memory is not None:
+            max_gpu_memory = int(max_gpu_memory / job.getSlots())
     entry = FormatResultEntry(
         name=name,
         timing=job.getTiming(),
         memory=max_memory,
+        gpu_memory=max_gpu_memory,
         joint_status=job.getJointStatus(),
         status_message=status_message,
         caveats=job.getCaveats() if caveats else [],
         caveat_color=joint_status.color if job.isFail() else "CYAN",
     )
-    return formatResult(entry, options, timing=timing, memory=memory)
+    return formatResult(
+        entry, options, timing=timing, memory=memory, gpu_memory=gpu_memory
+    )
 
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because

@@ -278,6 +278,37 @@ class TestFormatResult(unittest.TestCase):
         test(1.0001, "1.000s")
         test(0.02345, "0.023s")
 
+    def testMemory(self):
+        def test(formatted: str, timing: float = 1.0, show_gpu=False, **entry):
+            result = self.formatResult(
+                entry={"timing": timing, **entry},
+                options={"term_format": "m"},
+                memory=True,
+                gpu_memory=show_gpu,
+            )
+            self.assertEqual(result, formatted)
+
+        mib = 2**20
+        # CPU memory only, fixed length to 6 characters
+        test("[  12MB]", memory=12 * mib)
+        test("[9999MB]", memory=9999 * mib)
+        test("[  10GB]", memory=10240 * mib)
+        test("[   ?MB]")
+        test("[   0MB]", timing=0)
+        # GPU memory is ignored unless requested
+        test("[  12MB]", memory=12 * mib, gpu_memory=34 * mib)
+        # With GPU memory
+        test("[  12MB   34MB GPU]", show_gpu=True, memory=12 * mib, gpu_memory=34 * mib)
+        test("[  12MB    0MB GPU]", show_gpu=True, memory=12 * mib, gpu_memory=0)
+        test(
+            "[  12MB   10GB GPU]",
+            show_gpu=True,
+            memory=12 * mib,
+            gpu_memory=10240 * mib,
+        )
+        test("[   ?MB    ?MB GPU]", show_gpu=True)
+        test("[   0MB    0MB GPU]", show_gpu=True, timing=0)
+
 
 if __name__ == "__main__":
     unittest.main()
