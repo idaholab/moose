@@ -76,20 +76,20 @@ ADKernel::dispatch()
   // A residual alone needs no derivatives, so it evaluates the hooks with plain reals
   if (!_computing_jacobian)
   {
-    if (!_residual_only_dispatcher)
-      _residual_only_dispatcher = buildConfigurationDispatcher<ResidualOnlyLoop>(this);
+    if (!_residual_dispatcher)
+      _residual_dispatcher = buildConfigurationDispatcher<ResidualLoop>(this);
 
-    dispatchADTeams(*_residual_only_dispatcher, n_items, max_qps, 0, _ad_slots);
+    dispatchADTeams(*_residual_dispatcher, n_items, max_qps, 0, _ad_slots);
   }
   // An object posed on the current configuration, or reading a property that depends on the
   // displacements, dispatches the instantiation whose dual numbers also carry the displacement
   // slots, provided that a displacement component is seeded
   else if (_ad_slots.hasDisplacements())
   {
-    if (!_displaced_residual_dispatcher)
-      _displaced_residual_dispatcher = buildConfigurationDispatcher<DisplacedResidualLoop>(this);
+    if (!_displacement_seeded_dispatcher)
+      _displacement_seeded_dispatcher = buildConfigurationDispatcher<DisplacementSeededLoop>(this);
 
-    dispatchADTeams(*_displaced_residual_dispatcher,
+    dispatchADTeams(*_displacement_seeded_dispatcher,
                     n_items,
                     max_qps,
                     _max_ad_slots + AD_DISPLACEMENT_SLOTS,
@@ -97,10 +97,11 @@ ADKernel::dispatch()
   }
   else
   {
-    if (!_residual_dispatcher)
-      _residual_dispatcher = buildConfigurationDispatcher<ResidualLoop>(this);
+    if (!_residual_and_jacobian_dispatcher)
+      _residual_and_jacobian_dispatcher =
+          buildConfigurationDispatcher<ResidualAndJacobianLoop>(this);
 
-    dispatchADTeams(*_residual_dispatcher, n_items, max_qps, _max_ad_slots, _ad_slots);
+    dispatchADTeams(*_residual_and_jacobian_dispatcher, n_items, max_qps, _max_ad_slots, _ad_slots);
   }
 }
 

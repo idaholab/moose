@@ -126,10 +126,11 @@ protected:
   std::unique_ptr<DispatcherBase> _jacobian_dispatcher;
   std::unique_ptr<DispatcherBase> _offdiag_jacobian_dispatcher;
   std::unique_ptr<DispatcherBase> _offdiag_jacobian_scalar_dispatcher;
-  /// Dispatcher of the residual and Jacobian of a pointwise AD object on the current configuration
-  std::unique_ptr<DispatcherBase> _displaced_residual_dispatcher;
-  /// Dispatcher of the residual alone of a pointwise AD object, evaluated without derivatives
-  std::unique_ptr<DispatcherBase> _residual_only_dispatcher;
+  /// Dispatcher of the residual and Jacobian of a pointwise AD object
+  std::unique_ptr<DispatcherBase> _residual_and_jacobian_dispatcher;
+  /// Dispatcher of the residual and Jacobian of a pointwise AD object when a displacement
+  /// component is seeded
+  std::unique_ptr<DispatcherBase> _displacement_seeded_dispatcher;
   /// Dispatcher of the Jacobian with respect to the displacements of a precompute object on the
   /// current configuration
   std::unique_ptr<DispatcherBase> _displacement_jacobian_dispatcher;
