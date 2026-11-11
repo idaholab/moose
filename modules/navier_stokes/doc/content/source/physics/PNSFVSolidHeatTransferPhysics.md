@@ -17,17 +17,23 @@ where:
 - $\epsilon$ is the porosity, the fluid fraction of the volume
 - $T_s$ is the solid temperature
 - $T_f$ is the fluid temperature
-- $\kappa_s$ is the effective solid thermal conductivity, given by
-  [!param](/Physics/NavierStokes/SolidHeatTransfer/PNSFVSolidHeatTransferPhysics/thermal_conductivity_solid)
+- $\kappa_s$ is the effective solid thermal conductivity
 - $(1-\epsilon) \dot{Q}$ is the source term per unit total volume, corresponding to energy deposited
   directly in the solid phase. It is given by
   [!param](/Physics/NavierStokes/SolidHeatTransfer/PNSFVSolidHeatTransferPhysics/external_heat_source),
   which is not multiplied by the solid fraction.
 - $\alpha$ is the ambient convection volumetric heat transfer coefficient
 
-The effective conductivity accounts for the solid fraction and the structure of the medium, so the
-Physics does not multiply it by the porosity. For a solid of intrinsic conductivity $k_s$ that
-conducts in parallel with the fluid, it is often approximated as $\kappa_s = (1-\epsilon) k_s$.
+The effective conductivity accounts for the solid fraction and the structure of the medium. By
+default,
+[!param](/Physics/NavierStokes/SolidHeatTransfer/PNSFVSolidHeatTransferPhysics/thermal_conductivity_solid)
+is this effective conductivity, $\kappa_s$. With
+[!param](/Physics/NavierStokes/SolidHeatTransfer/PNSFVSolidHeatTransferPhysics/effective_conductivity)
+set to `false`, it is instead the conductivity $k_s$ of the pure solid, and the Physics uses the
+approximation for a solid conducting in parallel with the fluid,
+
+!equation
+\kappa_s = (1-\epsilon) k_s .
 
 The enthalpy is used in lieu of $\rho c_p T$ to be able to model solids with temperature dependent
 specific heat.

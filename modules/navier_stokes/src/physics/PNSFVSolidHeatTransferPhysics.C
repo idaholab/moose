@@ -67,6 +67,12 @@ PNSFVSolidHeatTransferPhysics::validParams()
   params.addRequiredParam<std::vector<MooseFunctorName>>(
       "thermal_conductivity_solid",
       "Thermal conductivity, which may have different names depending on the subdomain");
+  params.addParam<bool>(
+      "effective_conductivity",
+      true,
+      "Whether 'thermal_conductivity_solid' is the effective conductivity of the solid phase, "
+      "which includes the solid fraction. If false, it is the conductivity of the pure solid and "
+      "is multiplied by the solid fraction (1 - porosity).");
 
   // Ambient convection with the liquid phase parameters
   params.addParam<std::vector<std::vector<SubdomainName>>>(
@@ -106,7 +112,8 @@ PNSFVSolidHeatTransferPhysics::validParams()
 
   // Parameter groups
   params.addParamNamesToGroup("rho_solid cp_solid thermal_conductivity_solid "
-                              "thermal_conductivity_blocks use_external_enthalpy_material",
+                              "thermal_conductivity_blocks effective_conductivity "
+                              "use_external_enthalpy_material",
                               "Material properties");
   params.addParamNamesToGroup("ambient_convection_alpha ambient_convection_blocks "
                               "ambient_convection_temperature",
@@ -233,10 +240,12 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyHeatConductionKernels()
 
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = _solid_temperature_name;
-  params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-  // The solid conductivity is an effective conductivity which includes the solid fraction. The
-  // kernels would otherwise scale it by the porosity, the fluid fraction.
-  params.set<bool>("effective_conductivity") = true;
+  // These kernels multiply a non-effective conductivity by their 'porosity' functor, which must
+  // therefore be the solid fraction rather than the porosity, the fluid fraction
+  const bool effective_conductivity = getParam<bool>("effective_conductivity");
+  params.set<bool>("effective_conductivity") = effective_conductivity;
+  params.set<MooseFunctorName>(NS::porosity) =
+      effective_conductivity ? _porosity_name : solidFractionName();
 
   // Set block restrictions
   const bool combined = _thermal_conductivity_blocks.size() > 1;
@@ -384,6 +393,24 @@ PNSFVSolidHeatTransferPhysics::addMaterials()
 
     getProblem().addMaterial(
         "INSFVEnthalpyFunctorMaterial", prefix() + "ins_enthalpy_material", params);
+  }
+
+  // Solid fraction multiplying the conductivity of the pure solid
+  if (!getParam<bool>("effective_conductivity"))
+  {
+    const std::string object_type = "ADParsedFunctorMaterial";
+    InputParameters params = getFactory().getValidParams(object_type);
+    assignBlocks(params, _blocks);
+    if (MooseUtils::parsesToReal(_porosity_name))
+      params.set<std::string>("expression") = "1 - " + _porosity_name;
+    else
+    {
+      params.set<std::string>("expression") = "1 - eps";
+      params.set<std::vector<std::string>>("functor_names") = {_porosity_name};
+      params.set<std::vector<std::string>>("functor_symbols") = {"eps"};
+    }
+    params.set<std::string>("property_name") = solidFractionName();
+    getProblem().addMaterial(object_type, prefix() + "solid_fraction_material", params);
   }
 
   // Combine the functors (combining scalars and vectors is not currently supported)

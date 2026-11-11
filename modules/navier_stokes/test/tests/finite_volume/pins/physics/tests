@@ -31,4 +31,15 @@
       detail = '0.75.'
     []
   []
+  [intrinsic-solid-conductivity]
+    type = 'CSVDiff'
+    input = solid_conduction_porosity.i
+    csvdiff = 'solid_conduction_porosity_out.csv'
+    # The pure solid conductivity 2 times the solid fraction 0.5 is the effective conductivity 1
+    cli_args = "porosity=0.5 Physics/NavierStokes/SolidHeatTransfer/solid/effective_conductivity=false "
+               "FunctorMaterials/constants/prop_values='2 1000 1000'"
+    prereq = 'effective-solid-conductivity/high-porosity'
+    requirement = 'The system shall multiply the conductivity of the pure solid by the solid fraction of a porous medium when the solid thermal conductivity is not an effective conductivity.'
+    issues = '#34448'
+  []
 []

@@ -50,6 +50,9 @@ private:
   /// Battery of additional checks on parameters
   void checkFluidAndSolidHeatTransferPhysicsParameters() const;
 
+  /// Name of the solid fraction (1 - porosity) functor, defined for a non-effective conductivity
+  MooseFunctorName solidFractionName() const { return prefix() + "solid_fraction"; }
+
   /// Solid temperature name
   const NonlinearVariableName _solid_temperature_name;
   /// Fluid temperature name
