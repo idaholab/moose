@@ -17,6 +17,8 @@ UpdatedLagrangianStressDivergenceBase<G>::UpdatedLagrangianStressDivergenceBase(
   : LagrangianStressDivergenceBase(parameters),
     _stress(getMaterialPropertyByName<RankTwoTensor>(_base_name + "cauchy_stress")),
     _material_jacobian(getMaterialPropertyByName<RankFourTensor>(_base_name + "cauchy_jacobian")),
+    _d_stress_d_F_ust(
+        getMaterialPropertyByName<RankFourTensor>(_base_name + "d_cauchy_stress_d_F_unstabilized")),
 
     // Assembly quantities in the reference frame for stabilization
     _assembly_undisplaced(_fe_problem.assembly(_tid, this->_sys.number())),
@@ -100,46 +102,87 @@ UpdatedLagrangianStressDivergenceBase<G>::computeQpResidual()
 }
 
 template <class G>
+void
+UpdatedLagrangianStressDivergenceBase<G>::precalculateJacobian()
+{
+  LagrangianStressDivergenceBase::precalculateJacobian();
+  populateStressCache(_alpha);
+}
+
+template <class G>
+void
+UpdatedLagrangianStressDivergenceBase<G>::precalculateOffDiagJacobian(unsigned int jvar)
+{
+  LagrangianStressDivergenceBase::precalculateOffDiagJacobian(jvar);
+  for (auto beta : make_range(_ndisp))
+    if (jvar == _disp_nums[beta])
+    {
+      populateStressCache(beta);
+      break;
+    }
+}
+
+template <class G>
+void
+UpdatedLagrangianStressDivergenceBase<G>::populateStressCache(unsigned int beta)
+{
+  // The stress change depends on (qp, j) only, so compute it once per column instead of per _i
+  const auto n_qp = _qrule->n_points();
+  _dstress_cache.assign(n_qp, std::vector<RankTwoTensor>(_phi.size()));
+  _grad_trial_cache.assign(n_qp, std::vector<RankTwoTensor>(_phi.size()));
+  for (_qp = 0; _qp < n_qp; ++_qp)
+    for (_j = 0; _j < _phi.size(); ++_j)
+    {
+      const auto grad_trial = gradTrialUnstabilized(beta);
+      _grad_trial_cache[_qp][_j] = grad_trial;
+
+      // Local contribution to delta(F_ust): pull the spatial trial gradient back through the
+      // literal n+1 deformation gradient (use_displaced_mesh = true uses F_actual, regardless
+      // of alpha or F-bar), then chain to F_ust via _d_F_d_grad_u (= alpha * I^(4)).
+      const RankTwoTensor delta_grad_u_local =
+          _large_kinematics ? grad_trial * _F_actual[_qp] : grad_trial;
+      const RankTwoTensor delta_F_ust_local = _d_F_d_grad_u[_qp] * delta_grad_u_local;
+
+      // Non-local F-bar contribution to delta(F_avg): _avg_grad_trial is stored as
+      // avg(gradTrial_reference) * F_avg^{-1} (see precalculateJacobianDisplacement). Multiply
+      // by F_avg to recover the reference-frame averaged gradient, then chain to F_ust the
+      // same way.
+      RankTwoTensor delta_F_avg;
+      if (_stabilize_strain)
+      {
+        const RankTwoTensor delta_grad_u_avg =
+            _large_kinematics ? _avg_grad_trial[beta][_j] * _F_avg[_qp] : _avg_grad_trial[beta][_j];
+        delta_F_avg = _d_F_d_grad_u[_qp] * delta_grad_u_avg;
+      }
+
+      // Stabilized delta(F_stab) through the F-bar tangent. With F-bar off, the partials are
+      // _d_F_stab_d_F_ust = I^(4) and _d_F_stab_d_F_avg = 0, so this reduces to
+      // delta_F_ust_local.
+      const RankTwoTensor delta_F_stab =
+          _d_F_stab_d_F_ust[_qp] * delta_F_ust_local + _d_F_stab_d_F_avg[_qp] * delta_F_avg;
+
+      const RankTwoTensor delta_dL = _d_deformation_gradient_increment_d_F[_qp] * delta_F_stab;
+
+      // The material jacobian, plus the direct dependence of the stress on F_ust
+      _dstress_cache[_qp][_j] =
+          _material_jacobian[_qp] * delta_dL + _d_stress_d_F_ust[_qp] * delta_F_ust_local;
+    }
+}
+
+template <class G>
 Real
 UpdatedLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned int alpha,
-                                                                        unsigned int beta)
+                                                                        unsigned int /*beta*/)
 {
-  const auto grad_test = gradTest(alpha);
-  const auto grad_trial = gradTrialUnstabilized(beta);
-
   //           J^{alpha beta} = J^{alpha beta}_material + J^{alpha beta}_geometric
   //  J^{alpha beta}_material = phi^alpha : T : d(dL)/d(grad u) * grad_trial
   // J^{alpha beta}_geometric = sigma_{ij} (phi^alpha_{k, k} psi^beta_{i, j} -
   //                                        phi^alpha_{k, j} psi^beta_{i, k})
+  // The trial-dependent pieces come from populateStressCache for the current column.
+  const auto grad_test = gradTest(alpha);
+  const RankTwoTensor & grad_trial = _grad_trial_cache[_qp][_j];
 
-  // Local contribution to delta(F_ust): pull the spatial trial gradient back through the
-  // literal n+1 deformation gradient (use_displaced_mesh = true uses F_actual, regardless
-  // of alpha or F-bar), then chain to F_ust via _d_F_d_grad_u (= alpha * I^(4)).
-  const RankTwoTensor delta_grad_u_local =
-      _large_kinematics ? grad_trial * _F_actual[_qp] : grad_trial;
-  const RankTwoTensor delta_F_ust_local = _d_F_d_grad_u[_qp] * delta_grad_u_local;
-
-  // Non-local F-bar contribution to delta(F_avg): _avg_grad_trial is stored as
-  // avg(gradTrial_reference) * F_avg^{-1} (see precalculateJacobianDisplacement). Multiply
-  // by F_avg to recover the reference-frame averaged gradient, then chain to F_ust the
-  // same way.
-  RankTwoTensor delta_F_avg;
-  if (_stabilize_strain)
-  {
-    const RankTwoTensor delta_grad_u_avg =
-        _large_kinematics ? _avg_grad_trial[beta][_j] * _F_avg[_qp] : _avg_grad_trial[beta][_j];
-    delta_F_avg = _d_F_d_grad_u[_qp] * delta_grad_u_avg;
-  }
-
-  // Stabilized delta(F_stab) through the F-bar tangent. With F-bar off, the partials are
-  // _d_F_stab_d_F_ust = I^(4) and _d_F_stab_d_F_avg = 0, so this reduces to delta_F_ust_local.
-  const RankTwoTensor delta_F_stab =
-      _d_F_stab_d_F_ust[_qp] * delta_F_ust_local + _d_F_stab_d_F_avg[_qp] * delta_F_avg;
-
-  const RankTwoTensor delta_dL = _d_deformation_gradient_increment_d_F[_qp] * delta_F_stab;
-
-  // The material jacobian
-  Real J = grad_test.doubleContraction(_material_jacobian[_qp] * delta_dL);
+  Real J = grad_test.doubleContraction(_dstress_cache[_qp][_j]);
 
   // The geometric jacobian (no F-bar stabilization in this term)
   if (_large_kinematics)

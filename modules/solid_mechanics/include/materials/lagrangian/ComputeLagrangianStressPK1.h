@@ -40,6 +40,10 @@ protected:
   /// wrap structure PK1 = F_ust * S with direct F_ust dependence) can override it.
   virtual void computeQpCauchyStress();
 
+  /// Derivative of sigma = F_ust S F_ust^T / det(F_ust) wrt F_ust at fixed PK2 stress S
+  /// (uses the current Cauchy stress)
+  RankFourTensor pk2WrapDerivative(const RankTwoTensor & S) const;
+
   /// Inverse incremental deformation gradient
   const MaterialProperty<RankTwoTensor> & _inv_df;
   /// Inverse F-bar-stabilized deformation gradient (= _F^{-1}). Kept for any internal
