@@ -11,6 +11,16 @@
       ignore_columns = 'id'
       detail = 'On EDGE3 faces of QUAD8 elements, mortar segments are split at the face mid nodes.'
     []
+    [edge3_overhang]
+      type = CSVDiff
+      input = 'tilted_gap.i'
+      csvdiff = 'tilted_gap_overhang_weighted_gap_0002.csv'
+      cli_args = 'Mesh/top/xmin=-0.125 Mesh/top/xmax=0.875 Contact/mortar/correct_edge_dropping=true '
+                 'Outputs/file_base=tilted_gap_overhang'
+      ignore_columns = 'id'
+      detail = 'On EDGE3 faces that overhang the primary surface edge by more than a quarter of their '
+               'length, where the quadratic nodal weights of the covered part are negative.'
+    []
     [quad8]
       type = CSVDiff
       input = 'tilted_gap_3d.i'
