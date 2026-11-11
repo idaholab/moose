@@ -268,9 +268,11 @@ inlet_u = 0.1
   pressure_variable_relaxation = 0.1
   num_iterations = 1000
   pressure_absolute_tolerance = 1e-8
-  # The Forchheimer case plateaus near 1e-2 after pressure and velocity stabilize; 2e-2 stops
-  # with the total pressure drop within 2e-6 relative to the value after 1000 iterations.
-  momentum_absolute_tolerance = 2e-2
+  # The exact superficial velocity is uniform, so the momentum normalization factor
+  # sum(|Ax - Ax_avg| + |b - Ax_avg|) nearly vanishes and the normalized momentum residual measures
+  # round-off. It levels off at a value that depends on the partitioning (near 1e-2 on one process,
+  # near 1e-1 on three), so only the pressure residual is used as a convergence criterion.
+  momentum_absolute_tolerance = 1
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
