@@ -1679,9 +1679,18 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         PetscInt row_td = i_gap + _n_gaps * iz_ind;
         PetscInt col_td = i_gap + _n_gaps * iz_ind;
         PetscScalar value_td = time_factor;
+        PetscScalar value_td_rhs = time_factor * _Wij_old(i_gap, iz);
+        // A closed gap, where the pins touch and the mesh sets the gap width to zero, carries no
+        // crossflow. Every coefficient of its row scales with Sij or with |Wij|, so the row is
+        // otherwise empty and the coupled system singular. The identity row Wij = 0 enforces the
+        // physical answer; the remaining terms add nothing to it because they are zero.
+        if (Sij == 0.0)
+        {
+          value_td = 1.0;
+          value_td_rhs = 0.0;
+        }
         LibmeshPetscCall(MatSetValues(
             _cmc_time_derivative_mat, 1, &row_td, 1, &col_td, &value_td, INSERT_VALUES));
-        PetscScalar value_td_rhs = time_factor * _Wij_old(i_gap, iz);
         LibmeshPetscCall(
             VecSetValues(_cmc_time_derivative_rhs, 1, &row_td, &value_td_rhs, INSERT_VALUES));
         const PetscScalar inertia = Lij * Sij * rho_star;

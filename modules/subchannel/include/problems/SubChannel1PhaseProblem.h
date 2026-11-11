@@ -107,6 +107,9 @@ public:
   /// Get fluid properties object
   const SinglePhaseFluidProperties * getSinglePhaseFluidProperties() const { return _fp; }
 
+  /// Whether the flow and enthalpy equations are solved implicitly
+  bool isImplicit() const { return _implicit_bool; }
+
   /// Interpolate a face value from its top and bottom nodes with the configured scheme
   PetscScalar interpolateFaceValue(PetscScalar topValue, PetscScalar botValue) const
   {
