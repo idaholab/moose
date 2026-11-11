@@ -4,7 +4,7 @@
     type = Exodiff
     input = parent.i
     exodiff = 'parent_out.e parent_out_sub0_out.e'
-    requirement = "The level set module shall include the ability to transfer refinement patterns, with a single level of refinement, to a sub-application."
+    requirement = "The system shall include the ability to transfer refinement patterns from a level set problem, with a single level of refinement, to a sub-application."
     issues = '#8465'
   []
   [parameter_error]
