@@ -80,8 +80,11 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   segregated = false
 
   # Tolerances
-  P_tol = 1.0e-4
-  T_tol = 1.0e-6
+  # Tight enough that the outer iteration reaches the converged solution: tightening further to
+  # 1e-8 and 1e-10 moves the sampled results by 6e-13, while the previous 1e-4 and 1e-6 stopped
+  # 2e-3 away from it, which made the test results platform dependent
+  P_tol = 1.0e-6
+  T_tol = 1.0e-8
 
   # Heat Transfer Correlation
   pin_HTC_closure = 'gnielinski'

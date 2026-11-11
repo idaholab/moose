@@ -3,6 +3,10 @@
   issues = '#28497 #29481'
   [SHRT-17_SS_test]
     type = CSVDiff
+    # This test also covers the assembly energy balance postprocessors
+    design = 'TriSubChannel1PhaseProblem.md SCMTHPowerPostprocessor.md
+              SCMPinPowerPostprocessor.md SCMInletConductionHeatRatePostprocessor.md'
+    issues = '#28497 #29481 #33723'
     input = XX09_SS_SHRT17.i
     csvdiff = XX09_SS_SHRT17_out.csv
     capabilities = 'method!=dbg'
