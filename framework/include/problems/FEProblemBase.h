@@ -3429,6 +3429,13 @@ protected:
   void setPetscOptionsHelper(const Moose::PetscSupport::PetscOptions & options,
                              ParamType & params);
 
+  /**
+   * Helper for projecting initial conditions (or any other solution
+   * values not set via a solve) from assembly elements to the DoFs
+   * (e.g. spline basis coefficients) constraining them.
+   */
+  void solveForSplineDofs(SystemBase & moose_sys);
+
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;
   unsigned int _cycles_completed;

@@ -190,27 +190,6 @@ shouldSolveForSplineDofs(const libMesh::MeshBase & mesh)
   return returnval;
 }
 
-void
-solveForSplineDofs(SystemBase & moose_sys)
-{
-  libMesh::System & sys = moose_sys.system();
-  libMesh::EquationSystems & es = sys.get_equation_systems();
-
-  // Old libMesh defaults to a *linear* solver tolerance here, which
-  // turns out to be enough in some cases (where a decent
-  // preconditioner converges us way past it) but which in parallel is
-  // too loose for a solve where we're not taking multiple
-  // quasi-Newton steps.
-  const Real old_linear_tol = es.parameters.get<Real>("linear solver tolerance");
-  es.parameters.set<Real>("linear solver tolerance") =
-      es.parameters.get<Real>("nonlinear solver relative residual tolerance");
-
-  sys.solve_for_unconstrained_dofs(moose_sys.solution());
-  sys.get_dof_map().enforce_constraints_exactly(sys, &moose_sys.solution());
-
-  es.parameters.set<Real>("linear solver tolerance") = old_linear_tol;
-}
-
 } // namespace
 
 Threads::spin_mutex get_function_mutex;
@@ -4886,6 +4865,33 @@ FEProblemBase::setPetscOptionsHelper(const Moose::PetscSupport::PetscOptions & o
     _is_petsc_options_inserted = true;
   }
 #endif
+}
+
+
+void
+FEProblemBase::solveForSplineDofs(SystemBase & moose_sys)
+{
+  libMesh::System & sys = moose_sys.system();
+  libMesh::EquationSystems & es = sys.get_equation_systems();
+
+  // Old libMesh defaults to a *linear* solver tolerance here, which
+  // turns out to be enough in some cases (where a decent
+  // preconditioner converges us way past it) but which in parallel is
+  // too loose for a solve where we're not taking multiple
+  // quasi-Newton steps.
+  const Real old_linear_tol = es.parameters.get<Real>("linear solver tolerance");
+  es.parameters.set<Real>("linear solver tolerance") =
+      es.parameters.get<Real>("nonlinear solver relative residual tolerance");
+
+  // Spline extraction operators on Flex IGA meshes can be poorly
+  // conditioned; we'd best use whatever PETSc options the user's
+  // input file specified.
+  setPetscOptionsHelper(getPetscOptions(), _solver_params);
+
+  sys.solve_for_unconstrained_dofs(moose_sys.solution());
+  sys.get_dof_map().enforce_constraints_exactly(sys, &moose_sys.solution());
+
+  es.parameters.set<Real>("linear solver tolerance") = old_linear_tol;
 }
 
 
