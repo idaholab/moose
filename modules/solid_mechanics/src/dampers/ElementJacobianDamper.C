@@ -206,7 +206,9 @@ ElementJacobianDamper::probeDamping(const NumericVector<Number> & update,
       point_copies.clear();
       point_copies.reserve(current_elem->n_nodes());
 
-      // Displace nodes with the trial Newton increment
+      // Displace nodes with the trial Newton increment. 'update' is the search direction, which
+      // the nonlinear solver subtracts (new = old - damping * update), and the displaced mesh is
+      // still at the old solution here.
       for (unsigned int i = 0; i < current_elem->n_nodes(); ++i)
       {
         Node & displaced_node = current_elem->node_ref(i);
@@ -217,7 +219,7 @@ ElementJacobianDamper::probeDamping(const NumericVector<Number> & update,
         {
           const dof_id_type disp_dof_num =
               displaced_node.dof_number(_sys.number(), _disp_var[j]->number(), 0);
-          displaced_node(j) += damping * update(disp_dof_num);
+          displaced_node(j) -= damping * update(disp_dof_num);
         }
       }
 
