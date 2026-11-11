@@ -110,7 +110,7 @@ BiLinearMixedModeTraction::computeTractionDerivatives()
   const RealVectorValue delta = _interface_displacement_jump[_qp];
   RankTwoTensor ddelta_active_ddelta, ddelta_inactive_ddelta;
   ddelta_active_ddelta.fillFromInputVector({delta(0) > 0 ? 1. : 0., 1., 1.});
-  ddelta_inactive_ddelta.fillFromInputVector({delta(0) < 0 ? 1. : 0., 0., 0.});
+  ddelta_inactive_ddelta.fillFromInputVector({delta(0) <= 0 ? 1. : 0., 0., 0.});
 
   RankTwoTensor dtraction_ddelta =
       (1 - _d[_qp]) * _K * ddelta_active_ddelta + _K * ddelta_inactive_ddelta;
