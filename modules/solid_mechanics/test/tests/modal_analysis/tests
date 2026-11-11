@@ -1,12 +1,19 @@
 [Tests]
-  issues = '#27295'
-  design = '1d_elastic_waves.md'
+  issues = '#27295 #33779'
+  design = '1d_elastic_waves.md Eigenvalues.md'
   [modal]
     type = Exodiff
     input = 'modal.i'
     exodiff = 'modal_out.e'
     exodiff_opts = '-eigen_relative'
     abs_zero = 1e-10
-    requirement = "The module shall be able to perform modal analysis with the Eigenvalue Executioner."
+    requirement = 'The system shall perform modal analysis of a cantilever beam with the Eigenvalue executioner using a mass term driven by a density material property.'
+  []
+  [bar_consistent]
+    type = CSVDiff
+    capabilities = 'slepc & mumps'
+    input = 'fixed_fixed_bar.i'
+    csvdiff = 'fixed_fixed_bar_out_eigenvalues_0001.csv'
+    requirement = 'The system shall report the angular frequency, the frequency in Hz, and the period of the first three longitudinal modes of a fixed-fixed elastic bar, with the frequencies within one percent of the analytic values.'
   []
 []

@@ -202,4 +202,52 @@
     requirement = "The system shall error if a user requests a standard eigenvalue solve when there are objects marked to contribute to the Bx vector or B matrix."
     cli_args = "Kernels/inactive=''"
   []
+
+  [natural_frequency]
+    design = 'Eigenvalues.md'
+    issues = '#33779'
+    requirement = 'The system shall compute the angular frequency, the frequency, and the period from each converged eigenvalue when the natural frequency output of the Eigenvalues vectorpostprocessor is requested, and'
+    [columns]
+      type = 'CSVDiff'
+      input = 'ipm.i'
+      cli_args = 'VectorPostprocessors/eigenvalues/natural_frequency=true Outputs/file_base=natural_frequency_columns'
+      csvdiff = 'natural_frequency_columns_eigenvalues_0001.csv'
+      capabilities = 'slepc'
+      detail = 'report the three quantities alongside the eigenvalues for real positive eigenvalues,'
+    []
+    [negative_eigenvalue_warning]
+      type = 'RunApp'
+      input = 'gipm.i'
+      cli_args = 'Problem/negative_sign_eigen_kernel=false VectorPostprocessors/eigenvalues/natural_frequency=true Outputs/csv=false'
+      allow_warnings = true
+      expect_out = 'eigenvalue\(s\) have a negative real part'
+      capabilities = 'slepc'
+      detail = 'warn when an eigenvalue has a negative real part,'
+    []
+    [inverse_conflict]
+      type = 'RunException'
+      input = 'ipm.i'
+      cli_args = 'VectorPostprocessors/eigenvalues/natural_frequency=true VectorPostprocessors/eigenvalues/inverse_eigenvalue=true'
+      expect_err = "'natural_frequency' cannot be used together with 'inverse_eigenvalue'"
+      capabilities = 'slepc'
+      detail = 'report an error when the inverse eigenvalue option is also requested,'
+    []
+    [zero_eigenvalue]
+      type = 'CSVDiff'
+      input = 'ipm.i'
+      cli_args = "BCs/active='' Kernels/active='diff' Executioner/which_eigen_pairs=smallest_magnitude VectorPostprocessors/eigenvalues/natural_frequency=true VectorPostprocessors/eigenvalues/zero_eigenvalue_tolerance=1e-8 Outputs/file_base=natural_frequency_zero"
+      csvdiff = 'natural_frequency_zero_eigenvalues_0001.csv'
+      ignore_columns = 'period'
+      capabilities = 'slepc'
+      detail = 'report a zero frequency, without a warning, for an eigenvalue whose real part is zero to within a relative tolerance, and'
+    []
+    [complex_eigenvalue_warning]
+      type = 'RunApp'
+      input = 'advection_diffusion.i'
+      allow_warnings = true
+      expect_out = 'nonzero imaginary part'
+      capabilities = 'slepc'
+      detail = 'warn when an eigenvalue has a nonzero imaginary part.'
+    []
+  []
 []
