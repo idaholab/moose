@@ -723,6 +723,15 @@ public:
   bool areCSGObjectsLinked() const;
 
   /**
+   * @brief Check that the geometry is valid for output and conversion to downstream codes.
+   *
+   * Warns about universes, cells, and surfaces that are not linked to the root universe, and
+   * errors if a cell belongs to more than one universe. Called by generateOutput(); codes that use
+   * the CSGBase directly, without writing output, can call it to apply the same checks.
+   */
+  void checkGeometry() const;
+
+  /**
    * @brief Join another CSGBase object to this one. The cells of the root universe
    * of the incoming CSGBase will be added to the existing root universe of this
    * CSGBase.
@@ -949,6 +958,9 @@ private:
 
   /// Check universes linked to root universe match universes defined in _universe_list
   void checkUniverseLinking() const;
+
+  /// Check that each cell belongs to at most one universe
+  void checkCellUniverseMembership() const;
 
   /**
    * @brief Recursive method to retrieve all universes, cells, and surfaces linked to current
@@ -1279,6 +1291,7 @@ private:
   FRIEND_TEST(CSGBaseTest, testAddGetSurface);
   FRIEND_TEST(CSGBaseTest, testUniverseLinking);
   FRIEND_TEST(CSGBaseTest, testEngUnitLinking);
+  FRIEND_TEST(CSGBaseTest, testCellUniverseMembership);
   FRIEND_TEST(CSGBaseTest, testCellEngUnitAddErrors);
   FRIEND_TEST(CSGBaseTest, testUnivEngUnitAddErrors);
   ///@}

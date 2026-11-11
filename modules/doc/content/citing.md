@@ -1,6 +1,6 @@
 # Citing MOOSE
 
-This page lists the references to use if you are using MOOSE for in your publication. For a
+This page lists the references to use if you are using MOOSE in your publication. For a
 list of publications that have cited MOOSE, please refer to the [publications.md].
 
 ## MOOSE
@@ -8,23 +8,24 @@ list of publications that have cited MOOSE, please refer to the [publications.md
 For all publications that use MOOSE or a MOOSE-based application please cite the following.
 
 ```tex
-@article{harbour2025moose,
-   title = {4.0 {MOOSE}: Enabling massively parallel Multiphysics simulation},
+@article{choi2026moose,
+   title = {5.0 {MOOSE}: Enabling massively parallel multiphysics simulation},
  journal = {SoftwareX},
-  volume = {31},
-   pages = {102264},
-    year = {2025},
+  volume = {36},
+   pages = {103122},
+    year = {2026},
     issn = {2352-7110},
-     doi = {https://doi.org/10.1016/j.softx.2025.102264},
-     url = {https://www.sciencedirect.com/science/article/pii/S2352711025002316},
-  author = {Logan Harbour and Guillaume Giudicelli and Alexander D. Lindsay and Peter German and
-            Joshua Hansel and Casey Icenhour and Mengnan Li and Jason M. Miller and Roy H. Stogner and
-            Patrick Behne and Daniel Yankura and Zachary M. Prince and Corey DeChant and Daniel Schwen and
-            Benjamin W. Spencer and Mauricio Tano and Namjae Choi and Yaqi Wang and Max Nezdyur and
-            Yinbin Miao and Tianchen Hu and Shikhar Kumar and Christopher Matthews and Brandon Langley and
-            Nuno Nobre and Alexander Blair and Chris MacMackin and Henrique Bergallo Rocha and
-            Edward Palmer and Jesse Carter and J{\"o}rg Meier and Andrew E. Slaughter and David Andr{\v{s}} and
-            Robert W. Carlsen and Fande Kong and Derek R. Gaston and Cody J. Permann},
+     doi = {https://doi.org/10.1016/j.softx.2026.103122},
+     url = {https://www.sciencedirect.com/science/article/pii/S2352711026006138},
+  author = {Namjae Choi and Guillaume Giudicelli and Alexander Lindsay and Logan Harbour and
+            Peter German and Joshua Hansel and Zachary Prince and Roy Stogner and Mengnan Li and
+            Casey Icenhour and Yaqi Wang and Daniel Schwen and Patrick Behne and Benjamin W. Spencer and
+            May Thu Win and Vasileios Kyriakopoulos and Andreas Frederiksen and Bozo Vazic and Lynn Munday and
+            Kyle Gamble and Kalin Kiesling and Shikhar Kumar and Tianchen Hu and Yinbin Miao and Cheng-Hau Yang and
+            Nuno Nobre and Alexander Blair and Chris MacMackin and Henrique Bergallo Rocha and Sean Baccas and
+            Ioannis Charalampidis and Sohail Rathore and Kingsley Collie and Kevin Sawatzky and Brandon Langley and
+            Christopher Matthews and Andrew Slaughter and Robert Carlsen and Fande Kong and Derek Gaston and
+            Cody Permann},
 keywords = {Finite element, Multiphysics, Finite volume, Engineering, Modeling, Simulation}
 }
 ```
