@@ -16,4 +16,12 @@
     recover = False
     requirement = 'The system shall recompute triangular subchannel flow area and wetted perimeter from the Dpin initial condition when it differs from the mesh-generator pin diameter.'
   []
+  [quad_closed_gaps]
+    type = CSVDiff
+    input = 'quad_closed_gaps.i'
+    csvdiff = 'quad_closed_gaps_out.csv'
+    recover = False
+    issues = '#33723'
+    requirement = 'The system shall solve the monolithic algorithm when pins come in contact and close the gaps between them, with no crossflow through a closed gap.'
+  []
 []

@@ -26,7 +26,9 @@ assembly. This term closes the assembly energy balance, as described in
 enthalpy flow rate rise of [SCMTHPowerPostprocessor.md] plus this conduction loss.
 
 Only [TriSubChannel1PhaseProblem.md] assembles axial heat conduction, so this postprocessor returns
-a value of zero for a quadrilateral assembly.
+a value of zero for a quadrilateral assembly. It evaluates the stencil of the implicit enthalpy
+solve, and reports an error for the explicit solve (`implicit = false`), which conducts
+temperature rather than enthalpy with a different stencil.
 
 ## Example Input File Syntax
 
