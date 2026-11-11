@@ -56,9 +56,17 @@ protected:
   Real tangentialComponent(const Node & node,
                            const RealVectorValue & vector,
                            unsigned int direction) const;
-  ADRealVectorValue tangentialVector(const Node & node, const ADTwoVector & components) const;
+  ADReal tangentialComponent(const Elem & elem,
+                             unsigned int node_index,
+                             const ADRealVectorValue & vector,
+                             unsigned int direction) const;
+  ADRealVectorValue tangentialVector(const Elem & elem,
+                                     unsigned int node_index,
+                                     const ADTwoVector & components) const;
   RealVectorValue tangentialVector(const Node & node, const TwoVector & components) const;
-  ADRealVectorValue tangentialProjection(const Node & node, const ADRealVectorValue & vector) const;
+  ADRealVectorValue tangentialProjection(const Elem & elem,
+                                         unsigned int node_index,
+                                         const ADRealVectorValue & vector) const;
   RealVectorValue tangentialProjection(const Node & node, const RealVectorValue & vector) const;
 
   virtual const VariableTestValue & test() const override;
@@ -95,6 +103,10 @@ protected:
 
   /// The second frictional contact pressure on the mortar segment quadrature points
   ADVariableValue _frictional_contact_traction_two;
+
+  /// Map from node id to the tangential traction components in the nodal tangent frame, set by
+  /// reinit() for the nodes of the current mortar segment
+  std::unordered_map<dof_id_type, std::array<ADReal, 2>> _dof_to_local_tangential_traction;
 
   /// Map from node id to Cartesian augmented Lagrange multiplier increment
   std::unordered_map<dof_id_type, RealVectorValue> & _dof_to_frictional_lagrange_multipliers;

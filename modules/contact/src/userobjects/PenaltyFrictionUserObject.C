@@ -145,10 +145,22 @@ PenaltyFrictionUserObject::tangentialComponent(const Node & node,
     return vector(direction);
 
   const auto [elem, node_index] = secondaryNode(node);
-  if (shouldRecordNodalNormalDerivatives())
-    return vector * contactTangents(*elem, node_index)[direction];
+  return tangentialComponent(*elem, node_index, vector, direction);
+}
 
-  const auto tangents = amg().getNodalTangents(*elem);
+ADReal
+PenaltyFrictionUserObject::tangentialComponent(const Elem & elem,
+                                               const unsigned int node_index,
+                                               const ADRealVectorValue & vector,
+                                               const unsigned int direction) const
+{
+  if (_subproblem.mesh().dimension() == 2)
+    return vector(direction);
+
+  if (shouldRecordNodalNormalDerivatives())
+    return vector * contactTangents(elem, node_index)[direction];
+
+  const auto tangents = amg().getNodalTangents(elem);
   return vector * tangents[direction][node_index];
 }
 
@@ -166,19 +178,20 @@ PenaltyFrictionUserObject::tangentialComponent(const Node & node,
 }
 
 ADRealVectorValue
-PenaltyFrictionUserObject::tangentialVector(const Node & node, const ADTwoVector & components) const
+PenaltyFrictionUserObject::tangentialVector(const Elem & elem,
+                                            const unsigned int node_index,
+                                            const ADTwoVector & components) const
 {
   if (_subproblem.mesh().dimension() == 2)
     return {components(0), components(1), ADReal(0)};
 
-  const auto [elem, node_index] = secondaryNode(node);
   if (shouldRecordNodalNormalDerivatives())
   {
-    const auto & tangents = contactTangents(*elem, node_index);
+    const auto & tangents = contactTangents(elem, node_index);
     return components(0) * tangents[0] + components(1) * tangents[1];
   }
 
-  const auto tangents = amg().getNodalTangents(*elem);
+  const auto tangents = amg().getNodalTangents(elem);
   return components(0) * tangents[0][node_index] + components(1) * tangents[1][node_index];
 }
 
@@ -194,20 +207,20 @@ PenaltyFrictionUserObject::tangentialVector(const Node & node, const TwoVector &
 }
 
 ADRealVectorValue
-PenaltyFrictionUserObject::tangentialProjection(const Node & node,
+PenaltyFrictionUserObject::tangentialProjection(const Elem & elem,
+                                                const unsigned int node_index,
                                                 const ADRealVectorValue & vector) const
 {
   if (_subproblem.mesh().dimension() == 2)
     return vector;
 
-  const auto [elem, node_index] = secondaryNode(node);
   if (shouldRecordNodalNormalDerivatives())
   {
-    const auto & normal = contactNormal(*elem, node_index);
+    const auto & normal = contactNormal(elem, node_index);
     return vector - (vector * normal) * normal;
   }
 
-  const auto normals = amg().getNodalNormals(*elem);
+  const auto normals = amg().getNodalNormals(elem);
   const auto & normal = normals[node_index];
   return vector - (vector * normal) * normal;
 }
@@ -350,8 +363,7 @@ PenaltyFrictionUserObject::nodalTangentialPressure(const Node & node,
                                                    const unsigned int direction) const
 {
   mooseAssert(direction < 2, "There are at most two tangent directions.");
-  return tangentialComponent(
-      node, libmesh_map_find(_dof_to_tangential_traction, node.id()).first, direction);
+  return libmesh_map_find(_dof_to_local_tangential_traction, node.id())[direction];
 }
 
 void
@@ -398,7 +410,8 @@ PenaltyFrictionUserObject::reinit()
           libmesh_map_find(_dof_to_real_tangential_velocity, node);
       const ADTwoVector slip_distance_components = {real_tangential_velocity[0] * _dt,
                                                     real_tangential_velocity[1] * _dt};
-      const ADRealVectorValue slip_distance = tangentialVector(*node, slip_distance_components);
+      const ADRealVectorValue slip_distance =
+          tangentialVector(*_lower_secondary_elem, i, slip_distance_components);
 
       // frictional lagrange multiplier (delta lambda^(k)_T)
       const auto & tangential_lm =
@@ -407,7 +420,8 @@ PenaltyFrictionUserObject::reinit()
       // tangential trial traction (Simo 3.12)
       ADRealVectorValue traction_history = old_tangential_traction + tangential_lm;
       ADRealVectorValue tangential_trial_traction =
-          tangentialProjection(*node, traction_history) + penalty_friction * slip_distance;
+          tangentialProjection(*_lower_secondary_elem, i, traction_history) +
+          penalty_friction * slip_distance;
 
       // Nonlinearity below
       ADReal tangential_trial_traction_norm = tangential_trial_traction.norm();
@@ -437,8 +451,10 @@ PenaltyFrictionUserObject::reinit()
 
     // Now that we have consistent nodal frictional values, create an interpolated frictional
     // pressure variable.
-    const auto tangential_traction_one = tangentialComponent(*node, tangential_traction, 0);
-    const auto tangential_traction_two = tangentialComponent(*node, tangential_traction, 1);
+    auto & local_traction = _dof_to_local_tangential_traction[node->id()];
+    local_traction = {tangentialComponent(*_lower_secondary_elem, i, tangential_traction, 0),
+                      tangentialComponent(*_lower_secondary_elem, i, tangential_traction, 1)};
+    const auto & [tangential_traction_one, tangential_traction_two] = local_traction;
     const auto & test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))
     {
