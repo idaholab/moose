@@ -63,4 +63,19 @@
     max_threads = 1
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using a monolithic algorithm.'
   []
+  [psbt_regression_test_monolithic_blocks]
+    type = CSVDiff
+    input = psbt_monolithic.i
+    csvdiff = psbt_monolithic_blocks_out.csv
+    cli_args = 'SubChannel/n_blocks=2 Outputs/file_base=psbt_monolithic_blocks_out'
+    capabilities = 'method!=dbg'
+    valgrind = NONE
+    recover = false
+    abs_zero = 1e-6
+    # The blocks are solved in sequence rather than together, which moves the result by 5e-6
+    rel_err = 5e-5
+    max_threads = 1
+    issues = '#33723'
+    requirement = 'The system shall solve a PSBT-type case with the monolithic algorithm over several axial blocks.'
+  []
 []
