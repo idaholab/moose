@@ -1,0 +1,32 @@
+[Tests]
+  issues = '#34039'
+  design = 'DisplacedProblem.md'
+  [nodes_without_dofs]
+    requirement = 'The system shall displace mesh nodes that carry no degrees of freedom of the '
+                  'displacement variables, consistently with the displacement field, for'
+    [tet14]
+      type = CSVDiff
+      input = 'nodes_without_dofs.i'
+      csvdiff = 'nodes_without_dofs_out.csv'
+      detail = 'TET14 elements with second order displacements,'
+    []
+    [pyramid18]
+      type = CSVDiff
+      input = 'nodes_without_dofs.i'
+      csvdiff = 'nodes_without_dofs_pyramid18_out.csv'
+      cli_args = 'Mesh/gmg/elem_type=PYRAMID5 Outputs/file_base=nodes_without_dofs_pyramid18_out'
+      detail = 'PYRAMID18 elements with second order displacements, and'
+    []
+    [tri7]
+      type = CSVDiff
+      input = 'nodes_without_dofs.i'
+      csvdiff = 'nodes_without_dofs_tri7_out.csv'
+      cli_args = "Mesh/gmg/dim=2 Mesh/gmg/elem_type=TRI3 GlobalParams/displacements='disp_x disp_y' "
+                 "AuxVariables/disp_y/InitialCondition/type=FunctionIC "
+                 "AuxVariables/disp_y/InitialCondition/function='${a} * x * (x + y)' "
+                 "AuxVariables/inactive=disp_z Postprocessors/z4_integral/function='y^4' "
+                 "Outputs/file_base=nodes_without_dofs_tri7_out"
+      detail = 'TRI7 elements with second order displacements.'
+    []
+  []
+[]
