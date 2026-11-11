@@ -4864,6 +4864,31 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
   }
 }
 
+template <typename ParamType>
+void
+FEProblemBase::setPetscOptionsHelper(const Moose::PetscSupport::PetscOptions & options,
+                                     ParamType & params)
+{
+#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  Moose::PetscSupport::petscSetOptions(
+      options, params); // Make sure the PETSc options are setup for this app
+#else
+  // Now this database will be the default
+  // Each app should have only one database
+  if (!_app.isUltimateMaster())
+    LibmeshPetscCall(PetscOptionsPush(_petsc_option_data_base));
+
+  // We did not add PETSc options to database yet
+  if (!_is_petsc_options_inserted)
+  {
+    // Insert options for all systems all at once
+    Moose::PetscSupport::petscSetOptions(options, params, this);
+    _is_petsc_options_inserted = true;
+  }
+#endif
+}
+
+
 void
 FEProblemBase::checkUserObjectNameCollision(const std::string & name,
                                             const std::string & type) const
@@ -7553,22 +7578,7 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // settings, including setting matrix prefixes. This must occur before petscSetOptions
   initPetscOutputAndSomeSolverSettings();
 
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  Moose::PetscSupport::petscSetOptions(
-      _petsc_options, _solver_params); // Make sure the PETSc options are setup for this app
-#else
-  // Now this database will be the default
-  // Each app should have only one database
-  if (!_app.isUltimateMaster())
-    LibmeshPetscCall(PetscOptionsPush(_petsc_option_data_base));
-  // We did not add PETSc options to database yet
-  if (!_is_petsc_options_inserted)
-  {
-    // Insert options for all systems all at once
-    Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params, this);
-    _is_petsc_options_inserted = true;
-  }
-#endif
+  setPetscOptionsHelper(_petsc_options, _solver_params);
 
   // set up DM which is required if use a field split preconditioner
   // We need to setup DM every "solve()" because libMesh destroy SNES after solve()
@@ -7707,22 +7717,7 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
   // Set custom convergence criteria
   Moose::PetscSupport::petscSetDefaults(*this);
 
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  LibmeshPetscCall(Moose::PetscSupport::petscSetOptions(
-      options, solver_params)); // Make sure the PETSc options are setup for this app
-#else
-  // Now this database will be the default
-  // Each app should have only one database
-  if (!_app.isUltimateMaster())
-    LibmeshPetscCall(PetscOptionsPush(_petsc_option_data_base));
-
-  // We did not add PETSc options to database yet
-  if (!_is_petsc_options_inserted)
-  {
-    Moose::PetscSupport::petscSetOptions(options, solver_params, this);
-    _is_petsc_options_inserted = true;
-  }
-#endif
+  setPetscOptionsHelper(options, solver_params);
 
   if (_solve)
     _current_linear_sys->solve();

@@ -3421,6 +3421,14 @@ protected:
                              const std::string & object_name,
                              const std::string & var_param_name = "variable");
 
+  /**
+   * Helper for setting PETSc options, with compatibility with older
+   * PETSc versions.
+   */
+  template <typename ParamType>
+  void setPetscOptionsHelper(const Moose::PetscSupport::PetscOptions & options,
+                             ParamType & params);
+
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;
   unsigned int _cycles_completed;
