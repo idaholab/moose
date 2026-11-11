@@ -29,6 +29,10 @@ static unsigned int bcs_counter = 0;
 // Counter for naming aux kernels
 static unsigned int aux_kenels_counter = 0;
 
+registerMooseAction("HeatTransferApp", ThermalContactAction, "append_mesh_generator");
+registerMooseAction("HeatTransferApp", ThermalContactAction, "add_mortar_variable");
+registerMooseAction("HeatTransferApp", ThermalContactAction, "add_constraint");
+registerMooseAction("HeatTransferApp", ThermalContactAction, "add_user_object");
 registerMooseAction("HeatTransferApp", ThermalContactAction, "add_aux_kernel");
 registerMooseAction("HeatTransferApp", ThermalContactAction, "add_aux_variable");
 registerMooseAction("HeatTransferApp", ThermalContactAction, "add_bc");
@@ -42,7 +46,12 @@ ThermalContactAction::validParams()
   InputParameters params = Action::validParams();
   params.addClassDescription(
       "Action that controls the creation of all of the necessary objects for "
-      "calculation of Thermal Contact");
+      "calculation of thermal contact using node-face or mortar formulations");
+
+  addMortarParameters(params);
+
+  MooseEnum formulations("node_face mortar", "node_face");
+  params.addParam<MooseEnum>("formulation", formulations, "The thermal contact formulation");
 
   params.addParam<std::string>(
       "gap_aux_type",
@@ -77,9 +86,10 @@ ThermalContactAction::validParams()
                                     "when using the GapPerfectConductance model");
   params.addParam<std::string>(
       "appended_property_name", "", "Name appended to material properties to make them unique");
-  params.addRequiredParam<std::string>(
+  params.addParam<std::string>(
       "type",
-      "A string representing the Moose object that will be used for heat conduction over the gap");
+      "A string representing the Moose object that will be used for node-face heat conduction over "
+      "the gap");
 
   params.addParam<std::vector<VariableName>>(
       "displacements",
@@ -113,6 +123,8 @@ ThermalContactAction::validParams()
   params += GapConductance::actionParameters();
   params += GapConductanceConstant::actionParameters();
 
+  params.set<MooseEnum>("gap_geometry_type") = MooseEnum("AUTO PLATE CYLINDER SPHERE");
+
   params += GeometricSearchInterface::validParams();
 
   params.addParamNamesToGroup("primary secondary", "Gap surface definition");
@@ -132,7 +144,8 @@ ThermalContactAction::validParams()
 }
 
 ThermalContactAction::ThermalContactAction(const InputParameters & params)
-  : Action(params),
+  : MortarGapHeatTransferAction(params, params.get<MooseEnum>("formulation") == "mortar"),
+    _mortar(getParam<MooseEnum>("formulation") == "mortar"),
     _quadrature(getParam<bool>("quadrature")),
     _order(getParam<MooseEnum>("order")),
     _penetration_var_name(_quadrature ? "qpoint_penetration" : "penetration"),
@@ -140,6 +153,26 @@ ThermalContactAction::ThermalContactAction(const InputParameters & params)
     _gap_conductivity_name("paired_k_" + getParam<NonlinearVariableName>("variable")),
     _boundary_pairs(getParam<BoundaryName, BoundaryName>("primary", "secondary"))
 {
+  if (_mortar)
+  {
+    if (_boundary_pairs.size() != 1)
+      paramError("formulation", "The mortar formulation requires exactly one contact pair");
+    if (params.isParamSetByUser("type"))
+      paramError("type", "The type parameter is only supported by the node_face formulation");
+    if (getParam<MultiMooseEnum>("gap_flux_options").size() == 0 &&
+        getParam<std::vector<UserObjectName>>("user_created_gap_flux_models").empty())
+      paramError("gap_flux_options",
+                 "The mortar formulation requires gap_flux_options or "
+                 "user_created_gap_flux_models");
+    return;
+  }
+
+  if (!params.isParamSetByUser("type"))
+    paramError("type", "The node_face formulation requires the type parameter");
+  if (params.isParamSetByUser("gap_geometry_type") &&
+      getParam<MooseEnum>("gap_geometry_type") == "AUTO")
+    paramError("gap_geometry_type", "AUTO is only supported by the mortar formulation");
+
   if (!params.get<bool>("check_boundary_restricted"))
   {
     if (_quadrature)
@@ -162,6 +195,12 @@ ThermalContactAction::ThermalContactAction(const InputParameters & params)
 void
 ThermalContactAction::act()
 {
+  if (_mortar)
+  {
+    MortarGapHeatTransferAction::act();
+    return;
+  }
+
   if (_current_task == "add_aux_kernel")
     addAuxKernels();
   else if (_current_task == "add_aux_variable")
@@ -174,6 +213,30 @@ ThermalContactAction::act()
     addMaterials();
   else if (_current_task == "add_secondary_flux_vector")
     addSecondaryFluxVector();
+}
+
+std::vector<VariableName>
+ThermalContactAction::temperatureVariables() const
+{
+  return {getParam<NonlinearVariableName>("variable")};
+}
+
+BoundaryName
+ThermalContactAction::primaryBoundary() const
+{
+  return _boundary_pairs[0].first;
+}
+
+BoundaryName
+ThermalContactAction::secondaryBoundary() const
+{
+  return _boundary_pairs[0].second;
+}
+
+std::vector<BoundaryName>
+ThermalContactAction::gapFluxBoundaries() const
+{
+  return {secondaryBoundary()};
 }
 
 void
@@ -277,7 +340,11 @@ ThermalContactAction::addBCs()
   {
     const std::string object_name = getParam<std::string>("type");
     InputParameters params = _factory.getValidParams(object_name);
-    params.applyParameters(parameters());
+    params.applyParameters(parameters(), {"gap_geometry_type"});
+    if (parameters().isParamSetByUser("gap_geometry_type") &&
+        params.have_parameter<MooseEnum>("gap_geometry_type"))
+      params.set<MooseEnum>("gap_geometry_type") =
+          getParam<MooseEnum>("gap_geometry_type").operator std::string();
 
     if (object_name == "GapPerfectConductance")
     {
@@ -362,7 +429,7 @@ ThermalContactAction::addMaterials()
     {
       const std::string object_type = "GapConductanceConstant";
       InputParameters params = _factory.getValidParams(object_type);
-      params.applyParameters(parameters());
+      params.applyParameters(parameters(), {"gap_geometry_type"});
       params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.second};
       _problem->addMaterial(object_type,
                             name() + "_" + "gap_value" + "_" + Moose::stringify(materials_counter),
@@ -386,7 +453,10 @@ ThermalContactAction::addMaterials()
     for (const auto & contact_pair : _boundary_pairs)
     {
       InputParameters params = _factory.getValidParams(object_type);
-      params.applyParameters(parameters(), {"variable"});
+      params.applyParameters(parameters(), {"variable", "gap_geometry_type"});
+      if (parameters().isParamSetByUser("gap_geometry_type"))
+        params.set<MooseEnum>("gap_geometry_type") =
+            getParam<MooseEnum>("gap_geometry_type").operator std::string();
 
       params.set<std::vector<VariableName>>("variable") = {
           getParam<NonlinearVariableName>("variable")};
@@ -437,6 +507,12 @@ ThermalContactAction::addSecondaryFluxVector()
 void
 ThermalContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
 {
+  if (_mortar)
+  {
+    MortarGapHeatTransferAction::addRelationshipManagers(input_rm_type);
+    return;
+  }
+
   if (!_quadrature)
     return;
 
@@ -444,7 +520,11 @@ ThermalContactAction::addRelationshipManagers(Moose::RelationshipManagerType inp
   {
     const auto & object_name = getParam<std::string>("type");
     auto params = _factory.getValidParams(object_name);
-    params.applyParameters(parameters());
+    params.applyParameters(parameters(), {"gap_geometry_type"});
+    if (parameters().isParamSetByUser("gap_geometry_type") &&
+        params.have_parameter<MooseEnum>("gap_geometry_type"))
+      params.set<MooseEnum>("gap_geometry_type") =
+          getParam<MooseEnum>("gap_geometry_type").operator std::string();
 
     params.set<BoundaryName>("paired_boundary") = contact_pair.first;
     params.set<bool>("use_displaced_mesh") = true;

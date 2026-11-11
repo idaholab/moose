@@ -105,19 +105,17 @@ name = 'finite'
   []
 []
 
-[MortarGapHeatTransfer]
+[ThermalContact]
   [mortar_heat_transfer]
-   temperature = temp
-   use_displaced_mesh = true
-   gap_flux_options = conduction
-   gap_conductivity = 1
-   boundary = plank_right
-   primary_boundary = plank_right
-   primary_subdomain = frictionless_primary_subdomain
-   secondary_boundary = block_left
-   secondary_subdomain = frictionless_secondary_subdomain
-   thermal_lm_scaling = 1e-7
-   gap_geometry_type = PLATE
+    formulation = mortar
+    variable = temp
+    primary = plank_right
+    secondary = block_left
+    use_displaced_mesh = true
+    gap_flux_options = conduction
+    gap_conductivity = 1
+    thermal_lm_scaling = 1e-7
+    gap_geometry_type = PLATE
   []
 []
 
