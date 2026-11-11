@@ -1,7 +1,8 @@
-# Pure Neumann diffusion of u has the constant field as its nullspace. The source has a nonzero
-# mean, so the right hand side is not in the range of the Jacobian. The transpose nullspace mode
-# removes that component. The Dirichlet problem for w is nonsingular, so the modes must have zero
-# entries on the degrees of freedom of w.
+# Pure Neumann diffusion of u has the constant field as its nullspace, so the nullspace mode
+# removes that component. In addition, the source has a nonzero mean, so the right hand side
+# is not in the range of the Jacobian. The transpose nullspace mode removes that component.
+# The Dirichlet problem for w is nonsingular, so the modes must have zero entries on the degrees
+# of freedom of w.
 
 [Mesh]
   type = GeneratedMesh
