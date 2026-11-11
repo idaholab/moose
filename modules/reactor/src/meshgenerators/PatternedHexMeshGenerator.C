@@ -602,6 +602,10 @@ PatternedHexMeshGenerator::generate()
   std::vector<std::vector<Real>> control_drum_azimuthals;
 
   std::unique_ptr<ReplicatedMesh> out_mesh;
+  // Without a pattern boundary, every site is placed as its own copy and the copies are stitched
+  // pairwise, which avoids repeatedly stitching onto one growing mesh
+  std::vector<std::unique_ptr<ReplicatedMesh>> row_meshes;
+  std::map<subdomain_id_type, std::string> placed_subdomain_map;
 
   for (unsigned i = 0; i < _pattern.size(); i++)
   {
@@ -614,13 +618,12 @@ PatternedHexMeshGenerator::generate()
       x_mov--;
     Real deltay = -(Real)(i)*input_pitch * std::sin(M_PI / 3);
 
+    std::vector<std::unique_ptr<ReplicatedMesh>> placed_meshes;
     for (unsigned int j = 0; j < _pattern[i].size(); j++)
     {
       const auto pattern = _pattern[i][j];
       ReplicatedMesh & pattern_mesh = *meshes[pattern];
 
-      // No pattern boundary, so no need to wrap with a peripheral mesh
-      // Use the inputs as they stand and translate accordingly later
       if (_pattern_boundary == "none")
       {
         if (_generate_core_metadata && is_control_drum_array[pattern] == 1)
@@ -630,21 +633,38 @@ PatternedHexMeshGenerator::generate()
           control_drum_azimuthals.push_back(control_drum_azimuthal_array[pattern]);
         }
 
-        if (j == 0 && i == 0)
-        {
-          out_mesh = dynamic_pointer_cast<ReplicatedMesh>(pattern_mesh.clone());
-          if (_assign_control_drum_id && _generate_core_metadata)
-            out_mesh->add_elem_integer(
-                "control_drum_id",
-                true,
-                is_control_drum_array[pattern] ? control_drum_azimuthals.size() : 0);
-          // Reassign interface boundary ids
-          if (_use_interface_boundary_id_shift)
-            reassignBoundaryIDs(*out_mesh,
-                                _interface_boundary_id_shift_pattern[i][j],
-                                input_interface_boundary_ids[pattern]);
-          continue;
-        }
+        const bool add_drum_id = _assign_control_drum_id && _generate_core_metadata;
+        // The array is only filled when core metadata is generated
+        const dof_id_type drum_id =
+            (add_drum_id && is_control_drum_array[pattern]) ? control_drum_azimuthals.size() : 0;
+        // The first site adds the integer to its copy only; every other site adds it to the shared
+        // input mesh before copying, so that later sites of the same input inherit it
+        if (add_drum_id && !(i == 0 && j == 0))
+          pattern_mesh.add_elem_integer("control_drum_id", true, drum_id);
+        auto placed_mesh = dynamic_pointer_cast<ReplicatedMesh>(pattern_mesh.clone());
+        if (add_drum_id && i == 0 && j == 0)
+          placed_mesh->add_elem_integer("control_drum_id", true, drum_id);
+
+        // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+        // subdomain map
+        const auto & increment_subdomain_map = placed_mesh->get_subdomain_name_map();
+        placed_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+        // Check if one SubdomainName is shared by more than one subdomain ids
+        std::set<SubdomainName> main_subdomain_map_name_list;
+        for (auto const & id_name_pair : placed_subdomain_map)
+          main_subdomain_map_name_list.emplace(id_name_pair.second);
+        if (placed_subdomain_map.size() != main_subdomain_map_name_list.size())
+          paramError("inputs", "The input meshes contain subdomain name maps with conflicts.");
+
+        // Shift interface boundary ids
+        if (_use_interface_boundary_id_shift)
+          reassignBoundaryIDs(*placed_mesh,
+                              _interface_boundary_id_shift_pattern[i][j],
+                              input_interface_boundary_ids[pattern]);
+        // Translate to correct position
+        MeshTools::Modification::translate(*placed_mesh, deltax + j * input_pitch, deltay, 0);
+        placed_meshes.push_back(std::move(placed_mesh));
+        continue;
       }
       // Has a pattern boundary so we need to wrap with a peripheral mesh
       else // has a pattern boundary
@@ -774,12 +794,6 @@ PatternedHexMeshGenerator::generate()
         }
       }
 
-      if (_assign_control_drum_id && _pattern_boundary == "none" && _generate_core_metadata)
-        pattern_mesh.add_elem_integer(
-            "control_drum_id",
-            true,
-            is_control_drum_array[pattern] ? control_drum_azimuthals.size() : 0);
-
       // Translate to correct position
       MeshTools::Modification::translate(pattern_mesh, deltax + j * input_pitch, deltay, 0);
 
@@ -818,6 +832,24 @@ PatternedHexMeshGenerator::generate()
                             input_interface_boundary_ids[pattern],
                             true);
     }
+
+    if (_pattern_boundary == "none")
+      row_meshes.push_back(stitchMeshesPairwise(
+          std::move(placed_meshes),
+          [](const MeshBase &) { return static_cast<boundary_id_type>(OUTER_SIDESET_ID); },
+          /*clear_stitched_boundary_ids=*/false,
+          /*verbose=*/false));
+  }
+
+  if (_pattern_boundary == "none")
+  {
+    out_mesh = stitchMeshesPairwise(
+        std::move(row_meshes),
+        [](const MeshBase &) { return static_cast<boundary_id_type>(OUTER_SIDESET_ID); },
+        /*clear_stitched_boundary_ids=*/false,
+        /*verbose=*/false);
+    // Stitching does not merge subdomain names
+    out_mesh->set_subdomain_name_map() = placed_subdomain_map;
   }
 
   // Check if OUTER_SIDESET_ID is really the external boundary. Correct if needed.

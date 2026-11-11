@@ -25,6 +25,8 @@
 #include "libmesh/boundary_info.h"
 #include "libmesh/utility.h"
 
+#include <functional>
+
 /**
  * A base class that contains common members for Reactor module mesh generators.
  */
@@ -702,6 +704,23 @@ protected:
       const unsigned int intervals,
       const singleBdryLayerParams inner_boundary_layer_params = {0.0, 0.0, 0, 1.0},
       const singleBdryLayerParams outer_boundary_layer_params = {0.0, 0.0, 0, 1.0}) const;
+
+  /**
+   * Stitch a list of meshes into one by repeatedly stitching neighboring pairs, so that the cost
+   * is O(N log N) in the number of elements instead of the O(N^2) of stitching each mesh onto one
+   * growing mesh. The left mesh of each pair absorbs the right one, so the element order of the
+   * result is the order of the list.
+   * @param meshes meshes to stitch, in order; must not be empty
+   * @param boundary_id returns the id of the stitching boundary of a given mesh
+   * @param clear_stitched_boundary_ids whether to clear the stitched boundary ids
+   * @param verbose whether libMesh prints stitching information
+   * @return the stitched mesh
+   */
+  static std::unique_ptr<ReplicatedMesh>
+  stitchMeshesPairwise(std::vector<std::unique_ptr<ReplicatedMesh>> meshes,
+                       const std::function<boundary_id_type(const MeshBase &)> & boundary_id,
+                       const bool clear_stitched_boundary_ids,
+                       const bool verbose);
 
   /**
    * Add InputParameters which are used by ring and sector IDs
