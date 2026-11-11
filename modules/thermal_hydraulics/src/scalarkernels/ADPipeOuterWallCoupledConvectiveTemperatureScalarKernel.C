@@ -19,7 +19,8 @@ ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel::validParams()
 {
   InputParameters params = Base::validParams();
   params.addClassDescription(
-      "Solves for the temperature of the outer-surface radial node of a pipe wall, "
+      "Assembles transport equation for the temperature of the outer-surface radial node of a pipe "
+      "wall, "
       "convectively coupled to a secondary-side flowing fluid, such as the shell side of a "
       "heat exchanger.");
   params.addCoupledVar("mass_flow_rate",
@@ -50,6 +51,10 @@ ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel::validParams()
   params.addRequiredParam<MooseFunctorName>(
       "heat_transfer_coefficient",
       "Heat transfer coefficient of the secondary-side fluid [W/(m^2-K)]");
+  params.addParam<bool>(
+      "use_fluid_node_temp",
+      true,
+      "Whether to use fluid node temperature for wall heat transfer or a segment-averaged value.");
 
   return params;
 }
@@ -70,17 +75,19 @@ ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel::
 ADReal
 ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel::convectiveLinearHeatRate() const
 {
-  const libMesh::Node node(0., 0., 0.);
-  const Moose::NodeArg elem_arg = {&node, &Moose::NodeArg::undefined_subdomain_connection};
+  const Moose::PointArg arg = {Point(1, 2, 3)};
   const int i = 0;
   const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
   // Upwind the segment inlet temperature on the flow direction
   const auto Tin = 1.0 / 2.0 * (1 - _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tfdown[i] +
                    1.0 / 2.0 * (1 + _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tfup[i];
 
+  // Bulk fluid temperature seen by the wall: segment average or fluid node temperature
+  const bool node_bulk = getParam<bool>("use_fluid_node_temp");
+  const auto Tbulk = node_bulk ? ADReal(_Tf[i]) : ADReal((_Tf[i] + Tin) / 2.0);
+
   // Convective heat transfer with the secondary-side fluid
-  return _h(elem_arg, state) * _wetted_perimeter(elem_arg, state) / 2.0 *
-         (_Tf[i] + Tin - 2 * Base::_u[i]);
+  return _h(arg, state) * _wetted_perimeter(arg, state) * (Tbulk - Base::_u[i]);
 }
 
 Real

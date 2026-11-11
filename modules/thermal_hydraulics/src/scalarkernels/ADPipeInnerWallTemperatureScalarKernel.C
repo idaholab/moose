@@ -17,8 +17,8 @@ InputParameters
 ADPipeInnerWallTemperatureScalarKernel::validParams()
 {
   InputParameters params = Base::validParams();
-  params.addClassDescription(
-      "Solves for the temperature of the inner-surface radial node of a pipe wall.");
+  params.addClassDescription("Assembles transport equation for the temperature of the "
+                             "inner-surface radial node of a pipe wall.");
   params.addCoupledVar("mass_flow_rate",
                        {},
                        "Mass flow rate in component. Takes a "
@@ -45,14 +45,10 @@ ADPipeInnerWallTemperatureScalarKernel::validParams()
       "wetted_perimeter", "Wetted perimeter of the fluid flow channel adjacent to this node [m]");
   params.addRequiredParam<MooseFunctorName>("heat_transfer_coefficient",
                                             "Heat transfer coefficient of the fluid [W/(m^2-K)]");
-  MooseEnum bulk_T("segment_average node", "segment_average");
-  params.addParam<MooseEnum>(
-      "heat_transfer_bulk_temperature",
-      bulk_T,
-      "Fluid temperature used for wall heat transfer. 'segment_average': (T_f + T_in)/2 with "
-      "T_in the upwinded neighbouring fluid temperature. 'node': the adjacent fluid "
-      "node temperature T_f. Must match the setting of the coupled "
-      "ADIncompressibleEnergySPScalarKernel so wall and fluid exchange the same heat.");
+  params.addParam<bool>(
+      "use_fluid_node_temp",
+      true,
+      "Whether to use fluid node temperature for wall heat transfer or a segment-averaged value.");
 
   return params;
 }
@@ -73,20 +69,19 @@ ADPipeInnerWallTemperatureScalarKernel::ADPipeInnerWallTemperatureScalarKernel(
 ADReal
 ADPipeInnerWallTemperatureScalarKernel::convectiveLinearHeatRate() const
 {
-  const libMesh::Node node(0., 0., 0.);
-  const Moose::NodeArg elem_arg = {&node, &Moose::NodeArg::undefined_subdomain_connection};
+  const Moose::PointArg arg = {Point(1, 2, 3)};
   const int i = 0;
   const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
   // Upwind the segment inlet temperature on the flow direction
   const auto Tin = 1.0 / 2.0 * (1 - _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tfdown[i] +
                    1.0 / 2.0 * (1 + _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tfup[i];
 
-  // Bulk fluid temperature seen by the wall: segment average (legacy) or fluid node temperature
-  const bool node_bulk = getParam<MooseEnum>("heat_transfer_bulk_temperature") == "node";
+  // Bulk fluid temperature seen by the wall: segment average or fluid node temperature
+  const bool node_bulk = getParam<bool>("use_fluid_node_temp");
   const auto Tbulk = node_bulk ? ADReal(_Tf[i]) : ADReal((_Tf[i] + Tin) / 2.0);
 
   // Convective heat transfer with the fluid
-  return _h(elem_arg, state) * _wetted_perimeter(elem_arg, state) * (Tbulk - Base::_u[i]);
+  return _h(arg, state) * _wetted_perimeter(arg, state) * (Tbulk - Base::_u[i]);
 }
 
 Real

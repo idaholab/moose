@@ -18,7 +18,8 @@ ADPipeWallTemperatureScalarKernelBase::validParams()
   InputParameters params = ADScalarKernel::validParams();
   params += ADFunctorInterface::validParams();
   params.addClassDescription(
-      "Base class for solving the temperature of a radial node of a pipe wall, with axial "
+      "Base class for assembling transport equation for the temperature of a radial node of a pipe "
+      "wall, with axial "
       "conduction to the upstream/downstream nodes of the same radial layer and radial "
       "conduction to the node on the other side of the wall.");
   params.addCoupledVar("upstream_wall_temperature",
@@ -78,12 +79,11 @@ ADPipeWallTemperatureScalarKernelBase::ADPipeWallTemperatureScalarKernelBase(
 ADReal
 ADPipeWallTemperatureScalarKernelBase::computeQpResidual()
 {
-  const libMesh::Node node(0., 0., 0.);
-  const Moose::NodeArg elem_arg = {&node, &Moose::NodeArg::undefined_subdomain_connection};
+  const Moose::PointArg arg = {Point(1, 2, 3)};
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
 
-  const auto A = _area(elem_arg, state);
+  const auto A = _area(arg, state);
   const auto k = _sp.k_from_T(Base::_u[i]);
   const auto cp = _sp.cp_from_T(Base::_u[i]);
   const auto rho = _sp.rho_from_T(Base::_u[i]);
@@ -91,22 +91,22 @@ ADPipeWallTemperatureScalarKernelBase::computeQpResidual()
   // Neighbor wall-layer cross-sectional areas and conductivities, used below to build a
   // harmonic-mean face conductance for axial conduction between control volumes whose
   // cross-section may differ (two half-length resistances in series)
-  const auto A_up = _upstream_area(elem_arg, state);
+  const auto A_up = _upstream_area(arg, state);
   const auto k_up = _sp.k_from_T(_Tup[i]);
-  const auto A_down = _downstream_area(elem_arg, state);
+  const auto A_down = _downstream_area(arg, state);
   const auto k_down = _sp.k_from_T(_Tdown[i]);
 
-  const auto G_up = 1.0 / (_upstream_spacing(elem_arg, state) / (2.0 * k * A) +
-                           _upstream_spacing(elem_arg, state) / (2.0 * k_up * A_up));
-  const auto G_down = 1.0 / (_downstream_spacing(elem_arg, state) / (2.0 * k * A) +
-                             _downstream_spacing(elem_arg, state) / (2.0 * k_down * A_down));
+  const auto G_up = 1.0 / (_upstream_spacing(arg, state) / (2.0 * k * A) +
+                           _upstream_spacing(arg, state) / (2.0 * k_up * A_up));
+  const auto G_down = 1.0 / (_downstream_spacing(arg, state) / (2.0 * k * A) +
+                             _downstream_spacing(arg, state) / (2.0 * k_down * A_down));
 
   // Radial conduction from the node on the other side of this layer
-  const auto q_radial = k * _interface_perimeter(elem_arg, state) *
-                        (otherNodeTemperature() - Base::_u[i]) / _wall_thickness(elem_arg, state);
+  const auto q_radial = k * _interface_perimeter(arg, state) *
+                        (otherNodeTemperature() - Base::_u[i]) / _wall_thickness(arg, state);
   // Axial conduction from the upstream/downstream nodes of this layer
-  const auto q_axial = (G_up * (_Tup[i] - Base::_u[i]) + G_down * (_Tdown[i] - Base::_u[i])) /
-                       _length(elem_arg, state);
+  const auto q_axial =
+      (G_up * (_Tup[i] - Base::_u[i]) + G_down * (_Tdown[i] - Base::_u[i])) / _length(arg, state);
   // Heat exchanged with the fluid or ambient environment on this node's non-radial side
   const auto q_convective = convectiveLinearHeatRate();
 

@@ -61,24 +61,23 @@ ADPipeOuterWallRadiationScalarKernel::ADPipeOuterWallRadiationScalarKernel(
 ADReal
 ADPipeOuterWallRadiationScalarKernel::computeQpResidual()
 {
-  const libMesh::Node node(0., 0., 0.);
-  const Moose::NodeArg elem_arg = {&node, &Moose::NodeArg::undefined_subdomain_connection};
+  const Moose::PointArg arg = {Point(1, 2, 3)};
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
 
-  const auto A = _area(elem_arg, state);
+  const auto A = _area(arg, state);
   const auto cp = _sp.cp_from_T(Base::_u[i]);
   const auto rho = _sp.rho_from_T(Base::_u[i]);
 
-  const auto scale = _scale(elem_arg, state);
-  const auto emissivity = _emissivity(elem_arg, state);
-  const auto view_factor = _view_factor(elem_arg, state);
+  const auto scale = _scale(arg, state);
+  const auto emissivity = _emissivity(arg, state);
+  const auto view_factor = _view_factor(arg, state);
   const auto T4 = pow(Base::_u[i], 4);
-  const auto T4inf = pow(_T_ambient(elem_arg, state), 4);
+  const auto T4inf = pow(_T_ambient(arg, state), 4);
 
   // Radiative heat transfer with the ambient/surrounding environment
   const auto q_radiation =
-      _sigma * scale * emissivity * view_factor * _perimeter(elem_arg, state) * (T4inf - T4);
+      _sigma * scale * emissivity * view_factor * _perimeter(arg, state) * (T4inf - T4);
 
   return -q_radiation / A / rho / cp;
 }

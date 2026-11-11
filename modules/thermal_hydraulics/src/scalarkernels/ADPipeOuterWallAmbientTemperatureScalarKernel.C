@@ -17,8 +17,9 @@ InputParameters
 ADPipeOuterWallAmbientTemperatureScalarKernel::validParams()
 {
   InputParameters params = Base::validParams();
-  params.addClassDescription(
-      "Solves for the temperature of the outer-surface radial node of a pipe wall.");
+  params.addClassDescription("Assembles transport equation for the temperature of the "
+                             "outer-surface radial node of a pipe wall, "
+                             "with heat transfer to an ambient environment.");
   params.addCoupledVar("inner_wall_temperature",
                        {},
                        "Temperature of the inner-surface wall node, on the other side of this "
@@ -45,13 +46,12 @@ ADPipeOuterWallAmbientTemperatureScalarKernel::ADPipeOuterWallAmbientTemperature
 ADReal
 ADPipeOuterWallAmbientTemperatureScalarKernel::convectiveLinearHeatRate() const
 {
-  const libMesh::Node node(0., 0., 0.);
-  const Moose::NodeArg elem_arg = {&node, &Moose::NodeArg::undefined_subdomain_connection};
+  const Moose::PointArg arg = {Point(1, 2, 3)};
   const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
 
   // Convective heat transfer with the ambient environment
-  return _htc_ambient(elem_arg, state) * _ambient_perimeter(elem_arg, state) *
-         (_T_ambient(elem_arg, state) - Base::_u[0]);
+  return _htc_ambient(arg, state) * _ambient_perimeter(arg, state) *
+         (_T_ambient(arg, state) - Base::_u[0]);
 }
 
 Real
