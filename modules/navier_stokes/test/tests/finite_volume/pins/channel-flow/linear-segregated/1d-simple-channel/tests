@@ -132,4 +132,82 @@
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
   []
+
+  [physics]
+    requirement = 'The system shall provide a Physics syntax for the linear finite volume porous medium flow equations with pressure-jump baffles that'
+    design = 'WCNSLinearFVFlowPhysics.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md'
+    issues = '#31995'
+    [no-visc]
+      type = 'CSVDiff'
+      input = porous-baffle-1d-physics.i
+      csvdiff = 'physics-no-visc.csv'
+      cli_args = 'forchheimer_value=0 Outputs/file_base=physics-no-visc'
+      detail = 'reproduces the Bernoulli baffle jumps of the explicit object setup without friction,'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [forchheimer]
+      type = 'CSVDiff'
+      input = porous-baffle-1d-physics.i
+      csvdiff = 'physics-forchheimer.csv'
+      cli_args = 'forchheimer_value=50 mu=1 Outputs/file_base=physics-forchheimer'
+      detail = 'reproduces the Forchheimer pressure drop of the explicit object setup,'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [form-loss]
+      type = 'CSVDiff'
+      input = porous-baffle-1d-physics.i
+      csvdiff = 'physics-form-loss.csv'
+      cli_args = "forchheimer_value=50 mu=1 Outputs/file_base=physics-form-loss "
+                 "Physics/NavierStokes/FlowSegregated/flow/pressure_drop_form_factors='10 10'"
+      detail = 'reproduces the irreversible baffle form losses of the explicit object setup, and'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [form-loss-reference-side]
+      type = 'CSVDiff'
+      input = porous-baffle-1d-physics.i
+      csvdiff = 'physics-form-loss-reference-side.csv'
+      cli_args = "forchheimer_value=50 mu=1 Outputs/file_base=physics-form-loss-reference-side "
+                 "Physics/NavierStokes/FlowSegregated/flow/pressure_drop_form_factors='10 10' "
+                 "Physics/NavierStokes/FlowSegregated/flow/pressure_drop_reference_velocity_side='lower_porosity higher_porosity'"
+      detail = 'forwards the reference-velocity side of each baffle to the form loss.'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+  []
+
+  [physics-errors]
+    requirement = 'The system shall report an error in the linear finite volume porous flow Physics if'
+    design = 'WCNSLinearFVFlowPhysics.md'
+    issues = '#31995'
+    [bernoulli-without-sidesets]
+      type = RunException
+      input = porous-baffle-1d-physics.i
+      cli_args = "Physics/NavierStokes/FlowSegregated/flow/pressure_drop_sidesets=''"
+      expect_err = 'The Bernoulli porosity interface treatment requires the sidesets of the pressure baffles'
+      detail = 'the Bernoulli interface treatment is requested without baffle sidesets,'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [sidesets-without-bernoulli]
+      type = RunException
+      input = porous-baffle-1d-physics.i
+      cli_args = 'Physics/NavierStokes/FlowSegregated/flow/porosity_interface_pressure_treatment=automatic'
+      expect_err = "Parameter 'pressure_drop_sidesets' should not be set by the user if parameter 'porosity_interface_pressure_treatment' has not been set to 'bernoulli'"
+      detail = 'baffle sidesets are provided without the Bernoulli interface treatment, or'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [relaxation-without-reconstruction]
+      type = RunException
+      input = porous-baffle-1d-physics.i
+      cli_args = 'Physics/NavierStokes/FlowSegregated/flow/use_reconstructed_pressure_gradient=false'
+      expect_err = "Parameter 'pressure_gradient_relaxation' should not be set by the user if parameter 'use_reconstructed_pressure_gradient' has not been set to 'true'"
+      detail = 'a reconstructed pressure gradient relaxation is set while the reconstruction is disabled.'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+  []
 []

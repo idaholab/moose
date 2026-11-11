@@ -15,11 +15,8 @@
 /**
  * Creates all the objects needed to solve the Navier-Stokes equations with the SIMPLE algorithm
  * using the linear finite volume discretization
- * Currently does not implement:
- * - friction
- * - other momentum sources and sinks
- * - porous media
- * - transients
+ * Porous media use superficial velocity variables, the PorousRhieChowMassFlux user object and,
+ * optionally, Bernoulli pressure-jump baffles on user-selected sidesets.
  */
 class WCNSLinearFVFlowPhysics final : public WCNSFVFlowPhysicsBase
 {
@@ -34,8 +31,13 @@ protected:
   virtual void initializePhysicsAdditional() override;
 
 private:
+  virtual void actOnAdditionalTasks() override;
   virtual void addSolverVariables() override;
   virtual void addFVInterpolationMethods() override;
+  /// Add the jump-aware and reconstructed gradient methods required by pressure baffles
+  void addFVGradientMethods();
+  /// Add the pressure-jump model acting on the baffle sidesets
+  void addPressureJumpModel();
   virtual void addFVKernels() override;
   virtual void addUserObjects() override;
 
@@ -59,7 +61,7 @@ private:
   virtual void addWallsBC() override;
   virtual void addSeparatorBC() override {}
 
-  virtual bool hasForchheimerFriction() const override { return false; };
+  virtual bool hasForchheimerFriction() const override;
 
   virtual void addRhieChowUserObjects() override;
   virtual void addFunctorMaterials() override;
@@ -73,4 +75,10 @@ private:
 
   /// Whether to use the correction term for non-orthogonality
   const bool _non_orthogonal_correction;
+  /// Sidesets carrying Bernoulli pressure-jump baffles (porous medium treatment only)
+  const std::vector<BoundaryName> _baffle_sidesets;
+  /// Whether pressure-jump baffles are present
+  const bool _has_baffles;
+  /// Whether the momentum pressure kernels use the reconstructed pressure gradient
+  const bool _use_reconstructed_pressure_gradient;
 };
