@@ -145,6 +145,32 @@ public:
                         std::vector<FluidStateProperties> & fsp) const;
 
   /**
+   * Properties of the phase that is absent in a single-phase state.
+   *
+   * An absent phase has zero saturation, so it carries no mass and no advective flux. Its
+   * density and composition are nevertheless used in terms that are not weighted by the
+   * saturation, such as the gravity head of a face in the finite-volume kernels and the phase
+   * composition in the diffusive flux. Leaving them at zero makes those terms jump when the
+   * phase appears or disappears, so the residual is discontinuous at the phase boundary and
+   * Newton can cycle between the one- and two-phase states (see #34412). Here the absent phase
+   * is given the equilibrium composition and the density, viscosity and (optionally) enthalpy
+   * it would have at the current pressure and temperature, which makes these properties
+   * continuous across the phase boundary. The saturation of the absent phase stays zero.
+   *
+   * @param pressure gas pressure (Pa)
+   * @param temperature temperature (K)
+   * @param Xnacl NaCl mass fraction (kg/kg)
+   * @param phase_state current phase state (LIQUID: the gas phase is absent, GAS: the liquid
+   * phase is absent)
+   * @param[out] FluidStateProperties data structure
+   */
+  void absentPhaseProperties(const ADReal & pressure,
+                             const ADReal & temperature,
+                             const ADReal & Xnacl,
+                             FluidStatePhaseEnum phase_state,
+                             std::vector<FluidStateProperties> & fsp) const;
+
+  /**
    * Gas saturation in the two-phase region
    *
    * @param pressure gas pressure (Pa)
