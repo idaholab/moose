@@ -897,10 +897,13 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto Sj = (*_S_flow_soln)(node_in_j);
           Real u_star = 0.0;
           // figure out donor axial velocity
-          if (_Wij(i_gap, iz) > 0.0)
+          if (_Wij(i_gap, iz) > donor_cell_deadband)
             u_star = (*_mdot_soln)(node_out_i) / Si / rho_i;
-          else
+          else if (_Wij(i_gap, iz) < -donor_cell_deadband)
             u_star = (*_mdot_soln)(node_out_j) / Sj / rho_j;
+          else
+            u_star = 0.5 * ((*_mdot_soln)(node_out_i) / Si / rho_i +
+                            (*_mdot_soln)(node_out_j) / Sj / rho_j);
 
           crossflow_term +=
               _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * u_star;
@@ -1098,13 +1101,18 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto S_j =
               computeInterpolatedValue((*_S_flow_soln)(node_out_j), (*_S_flow_soln)(node_in_j), Pe);
           auto u_star = 0.0;
-          // figure out donor axial velocity
-          if (_Wij(i_gap, cross_index) > 0.0)
+          // figure out donor axial velocity; a crossflow within the deadband of zero splits its
+          // contribution evenly between the two channels instead of picking one as the donor
+          const bool donor_i = _Wij(i_gap, cross_index) > donor_cell_deadband;
+          const bool donor_j = _Wij(i_gap, cross_index) < -donor_cell_deadband;
+          const Real weight_i = donor_j ? 0.0 : (donor_i ? 1.0 : 0.5);
+          const Real weight_j = donor_i ? 0.0 : (donor_j ? 1.0 : 0.5);
+          if (weight_i > 0.0)
           {
             if (iz == first_node)
             {
               u_star = (*_mdot_soln)(node_in_i) / S_i / rho_i;
-              PetscScalar value_vec_ct = -1.0 * alpha *
+              PetscScalar value_vec_ct = -1.0 * weight_i * alpha *
                                          _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                          _Wij(i_gap, cross_index) * u_star;
               PetscInt row_vec_ct = i_ch + _n_channels * iz_ind;
@@ -1113,14 +1121,15 @@ SubChannel1PhaseProblem::computeDP(int iblock)
             }
             else
             {
-              PetscScalar value_ct = alpha * _subchannel_mesh.getCrossflowSign(i_ch, counter) *
+              PetscScalar value_ct = weight_i * alpha *
+                                     _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                      _Wij(i_gap, cross_index) / S_i / rho_i;
               PetscInt row_ct = i_ch + _n_channels * iz_ind;
               PetscInt col_ct = ii_ch + _n_channels * (iz_ind - 1);
               LibmeshPetscCall(MatSetValues(
                   _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES));
             }
-            PetscScalar value_ct = (1.0 - alpha) *
+            PetscScalar value_ct = weight_i * (1.0 - alpha) *
                                    _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                    _Wij(i_gap, cross_index) / S_i / rho_i;
             PetscInt row_ct = i_ch + _n_channels * iz_ind;
@@ -1128,12 +1137,12 @@ SubChannel1PhaseProblem::computeDP(int iblock)
             LibmeshPetscCall(MatSetValues(
                 _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES));
           }
-          else if (_Wij(i_gap, cross_index) < 0.0) // _Wij=0 operations not necessary
+          if (weight_j > 0.0)
           {
             if (iz == first_node)
             {
               u_star = (*_mdot_soln)(node_in_j) / S_j / rho_j;
-              PetscScalar value_vec_ct = -1.0 * alpha *
+              PetscScalar value_vec_ct = -1.0 * weight_j * alpha *
                                          _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                          _Wij(i_gap, cross_index) * u_star;
               PetscInt row_vec_ct = i_ch + _n_channels * iz_ind;
@@ -1142,14 +1151,15 @@ SubChannel1PhaseProblem::computeDP(int iblock)
             }
             else
             {
-              PetscScalar value_ct = alpha * _subchannel_mesh.getCrossflowSign(i_ch, counter) *
+              PetscScalar value_ct = weight_j * alpha *
+                                     _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                      _Wij(i_gap, cross_index) / S_j / rho_j;
               PetscInt row_ct = i_ch + _n_channels * iz_ind;
               PetscInt col_ct = jj_ch + _n_channels * (iz_ind - 1);
               LibmeshPetscCall(MatSetValues(
                   _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES));
             }
-            PetscScalar value_ct = (1.0 - alpha) *
+            PetscScalar value_ct = weight_j * (1.0 - alpha) *
                                    _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                    _Wij(i_gap, cross_index) / S_j / rho_j;
             PetscInt row_ct = i_ch + _n_channels * iz_ind;
