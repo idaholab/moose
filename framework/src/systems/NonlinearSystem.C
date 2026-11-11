@@ -134,6 +134,13 @@ NonlinearSystem::potentiallySetupFiniteDifferencing()
   solver.mffd_residual_object = &_fd_residual_functor;
 
   solver.set_snesmf_reuse_base(_fe_problem.useSNESMFReuseBase());
+
+#ifdef MOOSE_ENABLE_KOKKOS_GPU
+  // GPU atomic adds sum in a run-dependent order, so the residual is not reproducible. This
+  // disables only the libMesh debug check of the reused base vector.
+  if (_fe_problem.hasKokkosResidualObjects())
+    solver.set_reproducible_residual(false);
+#endif
 }
 
 void
