@@ -108,6 +108,22 @@ Note that while this command is called `kill`, it does not actually terminate th
 []
 ```
 
+### Reading the Mesh from the Checkpoint
+
+By default, a restart builds its mesh from the `[Mesh]` block of the restart input, which must
+reproduce the mesh stored in the checkpoint. If the previous simulation modified its mesh, for
+example with `uniform_refine` or initial adaptivity, set `restart_use_checkpoint_mesh` in the
+`[Problem]` block to read the mesh from the checkpoint instead, as is done for recovery. Mesh
+generators in the `[Mesh]` block are then not executed, and uniform refinement and initial
+adaptivity are not applied again.
+
+```puppet
+[Problem]
+  restart_file_base = out_cp/LATEST
+  restart_use_checkpoint_mesh = true
+[]
+```
+
 ## Reloading Data
 
 - It is possible to load and project data onto a different mesh from a solution file usually as an initial condition in a new simulation.

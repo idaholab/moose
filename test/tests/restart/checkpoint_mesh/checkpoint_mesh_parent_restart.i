@@ -1,0 +1,27 @@
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+  nx = 1
+[]
+
+[Problem]
+  solve = false
+  restart_file_base = checkpoint_mesh_parent_base_cp/0001
+  restart_use_checkpoint_mesh = true
+[]
+
+[Executioner]
+  type = Steady
+[]
+
+[Outputs]
+  file_base = checkpoint_mesh_parent_restart
+[]
+
+[MultiApps]
+  [sub]
+    type = FullSolveMultiApp
+    input_files = checkpoint_mesh_sub_uniform_refine.i
+    execute_on = initial
+  []
+[]
