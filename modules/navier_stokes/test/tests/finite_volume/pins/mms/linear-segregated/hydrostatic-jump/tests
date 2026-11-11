@@ -1,0 +1,64 @@
+[Tests]
+  issues = '#31995'
+  design = 'LinearFVMomentumBuoyancy.md LinearFVMomentumBoussinesq.md PorousRhieChowMassFlux.md '
+           'LinearFVPressureCorrectionDiffusionJump.md FVPressureJumpGreenGaussGradient.md'
+
+  [porous-buoyancy]
+    requirement = 'The system shall keep a fluid at rest, with the hydrostatic pressure, to round-off '
+                  'across a pressure baffle with a porosity jump parallel to gravity when the buoyancy '
+                  'force is weighted by porosity'
+
+    [buoyancy]
+      type = CSVDiff
+      input = hydrostatic-jump.i
+      csvdiff = buoyancy.csv
+      cli_args = 'eps_left=0.39 Outputs/file_base=buoyancy'
+      abs_zero = 1e-10
+      detail = 'with a variable-density buoyancy force, and'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [boussinesq]
+      type = CSVDiff
+      input = hydrostatic-jump.i
+      csvdiff = boussinesq.csv
+      cli_args = "eps_left=0.39 LinearFVKernels/inactive='u_buoyancy v_buoyancy' "
+                 "Outputs/file_base=boussinesq"
+      abs_zero = 1e-10
+      detail = 'with a Boussinesq buoyancy force.'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+  []
+
+  [baffle-body-force]
+    requirement = 'The system shall keep a fluid at rest, with the hydrostatic pressure, to round-off '
+                  'across a pressure baffle normal to gravity with a porosity jump'
+    type = CSVDiff
+    input = hydrostatic-jump.i
+    csvdiff = level-porosity-jump.csv
+    cli_args = 'eps_left=0.39 gx=-9.81 gy=0 Outputs/file_base=level-porosity-jump'
+    abs_zero = 1e-10
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [oblique-baffle]
+    # The residual velocity is not round-off: the stratified density gives a quadratic pressure,
+    # whose curvature enters the Green-Gauss gradient through one-sided face values at the walls
+    # and the baffle, and the nonorthogonal correction turns that gradient error into flow. It
+    # vanishes for constant density or an orthogonal mesh, has the same size without the baffle,
+    # and converges at second order.
+    requirement = 'The system shall keep a stably stratified fluid at rest across an oblique '
+                  'pressure baffle with a porosity jump and gravity normal to the baffle, on a '
+                  'nonorthogonal parallelogram mesh, up to a spurious velocity of the size of the '
+                  'nonorthogonal discretization error without the baffle'
+    type = CSVDiff
+    input = hydrostatic-jump.i
+    csvdiff = oblique-baffle.csv
+    cli_args = 'eps_left=0.39 skew=0.3 nonorthogonal=true gx=-9.3962 gy=2.8193 '
+               'Outputs/file_base=oblique-baffle'
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]

@@ -77,6 +77,7 @@ public:
 protected:
   /**
    * Determine the single sided face argument when evaluating a functor on a face.
+   * The face argument is oriented from the side where this variable is defined.
    * @param fi the FaceInfo for this face
    * @param limiter_type the limiter type, to be specified if more than the default average
    *        interpolation is required for the parameters of the functor

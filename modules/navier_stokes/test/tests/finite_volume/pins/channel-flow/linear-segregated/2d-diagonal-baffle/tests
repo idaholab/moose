@@ -1,0 +1,54 @@
+[Tests]
+  issues = '#31995'
+  [straight-diagonal]
+    type = 'CSVDiff'
+    input = porous-baffle-straight-diagonal.i
+    csvdiff = 'porous-baffle-straight-diagonal_out.csv porous-baffle-straight-diagonal_out_horizontal_profile_0001.csv porous-baffle-straight-diagonal_out_skew_pressure_profile_0001.csv porous-baffle-straight-diagonal_out_v_y_left_of_interface_0001.csv porous-baffle-straight-diagonal_out_v_y_right_of_interface_0001.csv'
+    requirement = 'The system shall preserve pressure and velocity profiles across a straight channel with a diagonal porous baffle form-loss jump without introducing transverse velocity oscillations.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md '
+             'FVPressureJumpGreenGaussGradient.md LinearFVPressureCorrectionDiffusionJump.md '
+             'LinearFVMomentumFriction.md LinearPWCNSFVMomentumPressure.md'
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [straight-diagonal-complete-stress]
+    type = 'CSVDiff'
+    input = porous-baffle-straight-diagonal.i
+    csvdiff = 'porous-baffle-straight-diagonal-complete-stress_out.csv porous-baffle-straight-diagonal-complete-stress_out_v_y_left_of_interface_0001.csv porous-baffle-straight-diagonal-complete-stress_out_v_y_right_of_interface_0001.csv'
+    requirement = 'The system shall include conservative nonorthogonal and deviatoric viscous stress corrections across a diagonal porous baffle.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md BernoulliFormLossPressureJump.md '
+             'FVPressureJumpGreenGaussGradient.md LinearFVPressureCorrectionDiffusionJump.md '
+             'LinearPWCNSFVMomentumFlux.md'
+    cli_args = "LinearFVKernels/u_advection/use_nonorthogonal_correction=true "
+               "LinearFVKernels/v_advection/use_nonorthogonal_correction=true "
+               "LinearFVKernels/u_advection/use_deviatoric_terms=true "
+               "LinearFVKernels/v_advection/use_deviatoric_terms=true "
+               "mu=0.2 "
+               "Outputs/file_base=porous-baffle-straight-diagonal-complete-stress_out"
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [inviscid-tangential-advection]
+    type = 'CSVDiff'
+    input = porous-baffle-straight-diagonal.i
+    csvdiff = 'porous-baffle-straight-diagonal-inviscid_out_ut_left_of_interface_0001.csv porous-baffle-straight-diagonal-inviscid_out_ut_right_of_interface_0001.csv'
+    requirement = 'The system shall preserve the interstitial tangential velocity on the cells next to an inviscid diagonal porous baffle with a porosity jump and negligible drag and form losses.'
+    design = 'LinearPWCNSFVMomentumFlux.md PorousRhieChowMassFlux.md'
+    # Only the diagonal porosity jump (0.5 to 0.7) is kept: the clean zones take the porosity of
+    # the first porous zone, and drag and form losses are three or four orders of magnitude below
+    # the defaults so that they do not relax the tangential velocity.
+    cli_args = "mu=0 "
+               "mu_zone_2=0 "
+               "forch_zone_1=1e-3 "
+               "forch_zone_2=1e-3 "
+               "entry_form_loss=2e-3 "
+               "corner_form_loss=2e-3 "
+               "exit_form_loss=2e-3 "
+               "FunctorMaterials/porosity_clean/prop_values=0.5 "
+               "LinearFVKernels/u_advection/use_nonorthogonal_correction=true "
+               "LinearFVKernels/v_advection/use_nonorthogonal_correction=true "
+               "Outputs/file_base=porous-baffle-straight-diagonal-inviscid_out"
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]

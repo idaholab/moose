@@ -247,9 +247,10 @@ LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBound
 
   // A complete prescribed flux already includes the anisotropic tangential contribution.
   if (!diff_bc->providesCompleteBoundaryFlux())
-    grad_contrib += (scaled_diff_tensor - normal_scaled_diff_tensor * boundary_normal_multiplier *
-                                              _current_face_info->normal()) *
-                    boundary_grad;
+    grad_contrib +=
+        boundary_normal_multiplier *
+        (scaled_diff_tensor - normal_scaled_diff_tensor * _current_face_info->normal()) *
+        boundary_grad;
 
   if (diff_bc->needsBoundaryNonorthogonalCorrection() && _use_nonorthogonal_correction_on_boundary)
   {
