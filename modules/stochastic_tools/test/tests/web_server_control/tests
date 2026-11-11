@@ -73,7 +73,7 @@
     recover = false
     restep = false
     valgrind = none # Cannot handle extra command-line from valgrind
-    requirement = "Python utilities for driving stochastic simulations shall support cache tolerances supplied on a per-parameter basis"
+    requirement = "The system shall support, in the Python utilities for driving stochastic simulations, cache tolerances supplied on a per-parameter basis"
   []
   [list_format]
     type = RunApp
@@ -84,7 +84,7 @@
     recover = false
     restep = false
     valgrind = none # Cannot handle extra command-line from valgrind
-    requirement = "Python utilities for driving stochastic simulations shall support output of arbitrary dimensions (after the first two) with caching"
+    requirement = "The system shall support, in the Python utilities for driving stochastic simulations, output of arbitrary dimensions (after the first two) with caching"
   []
   [nested_list_format]
     type = RunApp
@@ -95,6 +95,6 @@
     recover = false
     restep = false
     valgrind = none # Cannot handle extra command-line from valgrind
-    requirement = "Python utilities for driving stochastic simulations shall support output of arbitrary dimensions (after the first two) with caching, including nested lists"
+    requirement = "The system shall support, in the Python utilities for driving stochastic simulations, output of arbitrary dimensions (after the first two) with caching, including nested lists"
   []
 []

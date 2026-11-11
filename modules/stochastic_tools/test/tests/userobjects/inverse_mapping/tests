@@ -12,7 +12,7 @@
     capabilities = 'petsc>=3.14'
   []
   [inverse_map]
-    requirement = 'The system should be able to reconstruct a full solution field for a given variable based on '
+    requirement = 'The system shall be able to reconstruct a full solution field for a given variable based on '
     [with_surrogate]
       detail = 'coordinates determined by a surrogate model.'
       type = Exodiff
