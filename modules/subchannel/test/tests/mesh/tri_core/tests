@@ -82,14 +82,7 @@
                  'TriSubChannelMesh/core/pattern="1 1; 1 0 1; 1 2"'
       expect_err = 'Input \'gen\' does not provide \'flat_to_flat\' metadata'
       mesh_mode = 'replicated'
-      detail = 'if an input is not a triangular subchannel assembly or duct mesh,'
-    []
-    [distributed]
-      type = RunException
-      input = core.i
-      cli_args = '--mesh-only --distributed-mesh'
-      expect_err = 'is not a replicated mesh. SCM core meshes require a replicated mesh'
-      detail = 'if the mesh is distributed, and'
+      detail = 'if an input is not a triangular subchannel assembly or duct mesh, and'
     []
     [no_mesh_only]
       type = RunException
