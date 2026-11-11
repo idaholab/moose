@@ -14,6 +14,7 @@ subchannel simulations, for bare pin, square lattice bundles or wire-wrapped/bar
 Familiarize yourself with the theory behind SCM, some important user notes and how to run the SCM input file. Browse through the following information:
 
 - [Theory](general/subchannel_theory.md)
+- [Crossflow damping on EBR-II SHRT-17](general/crossflow_damping_study.md)
 - [Running SCM input file](general/using_SubChannel.md)
 - [SCM AuxVariables](general/SCMAuxVariables.md)
 - [User Notes](general/user_notes.md)

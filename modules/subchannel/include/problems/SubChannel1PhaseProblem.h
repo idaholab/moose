@@ -107,6 +107,13 @@ public:
   /// Get fluid properties object
   const SinglePhaseFluidProperties * getSinglePhaseFluidProperties() const { return _fp; }
 
+  /// Interpolate a face value from its top and bottom nodes with the configured scheme
+  PetscScalar interpolateFaceValue(PetscScalar topValue, PetscScalar botValue) const
+  {
+    const PetscScalar alpha = computeInterpolationCoefficients();
+    return alpha * botValue + (1.0 - alpha) * topValue;
+  }
+
 protected:
   /// Pure virtual: daughters provide different implementations
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) const = 0;
@@ -190,7 +197,7 @@ protected:
   void computeBulkReynoldsNumber();
 
   /// Functions that computes the interpolation scheme given the Peclet number
-  PetscScalar computeInterpolationCoefficients(PetscScalar Peclet = 0.0);
+  PetscScalar computeInterpolationCoefficients(PetscScalar Peclet = 0.0) const;
   PetscScalar
   computeInterpolatedValue(PetscScalar topValue, PetscScalar botValue, PetscScalar Peclet = 0.0);
 

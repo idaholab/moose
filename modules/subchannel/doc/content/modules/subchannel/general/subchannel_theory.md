@@ -397,6 +397,45 @@ The above equation can be written in matrix form as follows:
 \end{equation}
 where the matrix $\boldsymbol{M_{hh}}$ is calculated using the lagged values of the unknown variables $\vec{w}, \vec{\dot{m}}$.
 
+### Energy balance id=energy_balance
+
+!! Intentional comment to provide extra spacing
+
+The heat added by the pins and the duct leaves the assembly through two paths, not one:
+
+\begin{equation}
+\label{energy-balance}
+\underbrace{Q_{pins} + Q_{duct}}_\text{heat added}
+= \underbrace{\sum_{i} \dot{m}_i(out)\,h_i(out) - \sum_{i} \dot{m}_i(in)\,h_i(in)}_\text{enthalpy flow rate rise}
++ \underbrace{\sum_{i} \left(\frac{k}{c_p}\right)_{i} S_{i} \frac{h_i(1) - h_i(0)}{\Delta z_1}}_\text{axial conduction out of the inlet}
+\end{equation}
+
+The first term on the right is the enthalpy the flow carries out of the outlet, computed by
+[SCMTHPowerPostprocessor.md]. The second is the axial conduction term of [enthalpy-dis] evaluated at
+the inlet face, computed by [SCMInletConductionHeatRatePostprocessor.md]. Both are needed to close
+the balance, and only the triangular assembly assembles axial conduction, so the conduction term is
+zero for a quadrilateral assembly.
+
+The inlet enthalpy is a boundary condition, prescribed at the inlet temperature. Where the first
+axial cell is heated, which happens when
+[!param](/Mesh/SCMTriAssemblyMeshGenerator/unheated_length_entry) is zero, the enthalpy gradient
+across the inlet face is as steep as the gradient the heating produces, and conduction carries heat
+down that gradient out of the domain, against the flow. The flux is physical, not a discretization
+error: it converges under axial refinement rather than growing, because refining the mesh resolves
+the inlet gradient instead of changing it. An unheated entry length removes it, since the first cell
+then sits at the inlet temperature and the boundary gradient vanishes.
+
+The outlet needs no matching term. Its conduction stencil holds a diagonal and a bottom entry that
+are equal and opposite, so the last cell conducts only with the cell below it and the outlet face is
+adiabatic. That is the correct condition for an outflow boundary, which has no downstream domain to
+conduct into, and unlike the inlet its enthalpy is solved for rather than prescribed. The enthalpy
+the flow carries out of the outlet is advective, and the advective term already accounts for it.
+
+On the EBR-II SHRT-17 steady state, which is heated from the inlet node, the conduction loss is
+26 W of the 486.2 kW assembly power, and [energy-balance] closes to $6\times10^{-10}$ relative once
+the enthalpy linear solve is converged tightly. Adding 5 cm of unheated entry length drops the
+conduction loss to 1 W.
+
 ## Algorithm
 
 !! Intentional comment to provide extra spacing
@@ -563,9 +602,8 @@ different roles:
 Both are needed. A damping that decays without the compensation still biases the solution wherever
 it has not fully vanished when the outer iteration stops. A fixed damping with the compensation is
 unbiased in principle, but converges slowly and can stop at the outer tolerance before it reaches
-the converged solution. On the EBR-II SHRT-17 case with 160 axial cells, for example, a fixed
-damping with the compensation needs about four times as many temperature iterations as a decaying
-one, and an uncompensated, non-decaying resistance changes the pressure drop by 0.5%.
+the converged solution. [Crossflow damping on EBR-II SHRT-17](crossflow_damping_study.md) measures
+both effects on a real case.
 
 The pseudo-time step follows the switched evolution relaxation [!cite](mulder1985experiments),
 
@@ -611,13 +649,10 @@ preconditioner cannot solve the undamped system, the step instead settles at the
 can handle; the converged solution is unaffected because the damping term vanishes at the fixed
 point.
 
-On the EBR-II SHRT-17 steady state with 40 to 160 axial cells, $\Delta\tau_0$ from
-$5\times10^{-6}$ to $10$ s leaves the pressure drop unchanged to $0.2$ Pa out of 36 kPa. Larger
-initial steps reduce the number of temperature iterations, a gain that levels off above about
-$10^{-3}$ s, while too small a step over-damps the iteration. The default of $5\times10^{-4}$ s
-gives about the same initial damping as a resistance scaled by the cross-momentum coefficients. The
-THORS FFM-5B high-flow case is sensitive to the initial step and reaches the outer-iteration limit
-for some values between $2\times10^{-4}$ and $2\times10^{-3}$ s.
+The converged solution does not depend on $\Delta\tau_0$; only the cost and the robustness of the
+iteration do. [Crossflow damping on EBR-II SHRT-17](crossflow_damping_study.md) reports the
+iteration counts and the pressure drop over five orders of magnitude of $\Delta\tau_0$, and
+[Troubleshooting failed solves](user_notes.md#troubleshooting) gives the guidance for choosing it.
 
 #### 2. Equation under-relaxation
 

@@ -189,12 +189,14 @@ SubChannel1PhaseProblem::validParams()
       "Boolean to define the use of a constant beta or beta correlation (Kim and Chung, 2001)",
       "Use closure system instead.");
 
+  params.addParamNamesToGroup("P_tol P_maxit T_tol T_maxit T_relaxation enthalpy_subcycles "
+                              "rtol atol dtol maxit",
+                              "Solver tolerances and iterations");
   params.addParamNamesToGroup(
-      "P_tol P_maxit T_tol T_maxit T_relaxation enthalpy_subcycles "
       "mass_flow_equation_relaxation pressure_equation_relaxation crossflow_equation_relaxation "
-      "mass_flow_relaxation pressure_relaxation crossflow_relaxation rtol atol dtol maxit "
-      "coupled_gmres_restart crossflow_pseudo_time_step",
-      "Solver tolerances and iterations");
+      "mass_flow_relaxation pressure_relaxation crossflow_relaxation coupled_gmres_restart "
+      "crossflow_pseudo_time_step",
+      "Monolithic solver");
   params.addParamNamesToGroup("implicit segregated interpolation_scheme", "Solution method");
   params.addParamNamesToGroup("fp friction_closure mixing_closure pin_HTC_closure duct_HTC_closure",
                               "Closures");
@@ -606,7 +608,7 @@ SubChannel1PhaseProblem::solverSystemConverged(const unsigned int)
 }
 
 PetscScalar
-SubChannel1PhaseProblem::computeInterpolationCoefficients(PetscScalar Peclet)
+SubChannel1PhaseProblem::computeInterpolationCoefficients(PetscScalar Peclet) const
 {
   switch (_interpolation_scheme)
   {
@@ -2209,11 +2211,16 @@ SubChannel1PhaseProblem::shiftCrossflowDamping(Mat M_ww,
                                                PetscScalar inv_dtau)
 {
   PetscFunctionBegin;
+  // damping = K_ij = L_ij S_ij rho* / dtau, the crossflow inertia of each gap of the block over the
+  // pseudo-time step
   Vec damping;
   LibmeshPetscCall(VecDuplicate(_cmc_pseudo_time_inertia, &damping));
   LibmeshPetscCall(VecCopy(_cmc_pseudo_time_inertia, damping));
   LibmeshPetscCall(VecScale(damping, inv_dtau));
+  // M_ww diagonal += K_ij, which damps the crossflow the coupled solve computes
   LibmeshPetscCall(MatDiagonalSet(M_ww, damping, ADD_VALUES));
+  // b_w += K_ij Wij_iter, the compensation that makes the term vanish at Wij = Wij_iter. The
+  // damping vector is no longer needed, so it holds the right-hand-side contribution.
   LibmeshPetscCall(VecPointwiseMult(damping, damping, Wij_iter));
   LibmeshPetscCall(VecAXPY(b_w, 1.0, damping));
   LibmeshPetscCall(VecDestroy(&damping));
