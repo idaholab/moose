@@ -667,9 +667,18 @@ public:
                              const std::vector<Real> * const weights = nullptr);
 
   /**
-   * Reintialize dual basis coefficients based on a customized quadrature rule
+   * Reinitialize dual basis coefficients based on a customized quadrature rule
+   * @param elem The secondary lower-dimensional face element
+   * @param pts Quadrature points in the reference coordinates of \p elem
+   * @param JxW Integration weights over all mortar segments on \p elem
+   * @param dpts Displacement derivatives of \p pts, with zero values
+   * @param ad_JxW Integration weights with their displacement derivatives
    */
-  void reinitDual(const Elem * elem, const std::vector<Point> & pts, const std::vector<Real> & JxW);
+  void reinitDual(const Elem * elem,
+                  const std::vector<Point> & pts,
+                  const std::vector<Real> & JxW,
+                  const std::vector<ADPoint> * dpts = nullptr,
+                  const std::vector<ADReal> * ad_JxW = nullptr);
 
   /**
    * Reinitialize FE data for a lower dimenesional element with a given set of reference points
@@ -2012,9 +2021,9 @@ public:
   {
     return _ad_mortar_phi_face_neighbor[type];
   }
-  const MooseArray<std::vector<ADReal>> & adMortarPhiLower(FEType type) const
+  const MooseArray<std::vector<ADReal>> & adMortarPhiLower(FEType type, bool use_dual = false) const
   {
-    return _ad_mortar_phi_lower[type];
+    return use_dual ? _ad_mortar_phi_dual_lower[type] : _ad_mortar_phi_lower[type];
   }
 
   /**
@@ -2023,8 +2032,8 @@ public:
    * are not set or there are no shape functions of \p type. A type that was not requested before
    * is computed here and from then on at every mortar segment.
    */
-  const MooseArray<std::vector<ADReal>> * adMortarPhi(Moose::ElementType element_type,
-                                                      FEType type) const;
+  const MooseArray<std::vector<ADReal>> *
+  adMortarPhi(Moose::ElementType element_type, FEType type, bool use_dual = false) const;
 
   /**
    * @return The AD quadrature points of the current mortar segment on the secondary and primary
@@ -2996,6 +3005,9 @@ protected:
   mutable std::map<FEType, MooseArray<std::vector<ADReal>>> _ad_mortar_phi_face;
   mutable std::map<FEType, MooseArray<std::vector<ADReal>>> _ad_mortar_phi_face_neighbor;
   mutable std::map<FEType, MooseArray<std::vector<ADReal>>> _ad_mortar_phi_lower;
+  /// AD dual coefficients over the current secondary face and dual values on its current segment
+  std::map<FEType, ADDenseMatrix> _ad_mortar_dual_coeff;
+  mutable std::map<FEType, MooseArray<std::vector<ADReal>>> _ad_mortar_phi_dual_lower;
 
   /// A working vector to avoid repeated heap allocations when caching residuals that must have
   /// libMesh-level constraints (hanging nodes, periodic bcs) applied to them. This stores local

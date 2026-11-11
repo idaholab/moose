@@ -66,11 +66,17 @@ node, a primary node, an intersection of a secondary and a primary edge, or a po
 the segments are built. Its position is then rebuilt from the displaced nodes and, for
 `AVERAGED_NODAL_NORMAL` subpatch planes, from the nodal normals.
 
-Segment geometry derivatives require `use_displaced_mesh = true` and standard Lagrange multiplier
-bases, because the dual basis coefficients also depend on the segment geometry. They are not
-available with a stabilized [EqualValueConstraint](EqualValueConstraint.md) (`delta > 0`). Every mortar object on an interface, including mortar
-auxiliary kernels and user objects, must use the same value. Supported constraints and user
-objects opt in, and other mortar constraints report an error when the option is set. A 3D
+Segment geometry derivatives require
+[!param](/Constraints/EqualValueConstraint/use_displaced_mesh) set to `true`. For dual Lagrange
+multiplier bases, the coefficient matrix assembled over all mortar segments of a secondary face is
+also differentiated. Petrov-Galerkin uses this dual basis for multiplier interpolation and its
+standard auxiliary basis for the test weighting. SECOND-order Petrov-Galerkin remains unavailable on
+QUAD8 and TRI6 secondary faces because the standard quadratic test weighting is incompatible with the
+transformed dual construction. Dual penalty traction bases remain unavailable because the auxiliary
+traction coefficients are not nonlinear unknowns. Segment geometry derivatives are not available
+with a stabilized [EqualValueConstraint](EqualValueConstraint.md) (`delta > 0`). Every mortar object on an interface,
+including mortar auxiliary kernels and user objects, must use the same value. Supported constraints
+and user objects opt in, and other mortar constraints report an error when the option is set. A 3D
 segment vertex that cannot be traced to the secondary and primary nodes is treated as fixed,
 with a warning.
 

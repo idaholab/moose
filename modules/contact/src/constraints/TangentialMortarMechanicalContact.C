@@ -64,8 +64,9 @@ TangentialMortarMechanicalContact::initialSetup()
                  "'weighted_velocities_uo' must also set 'segment_geometry_derivatives = true'.");
     // LMWeightedVelocitiesUserObject verifies that every tangential Lagrange multiplier shares the
     // finite element type of the normal one
-    _ad_traction_basis =
-        &adMortarTest(Moose::ElementType::Lower, _weighted_velocities_uo.tractionBasisFEType());
+    _ad_traction_basis = &adMortarTest(Moose::ElementType::Lower,
+                                       _weighted_velocities_uo.tractionBasisFEType(),
+                                       _weighted_velocities_uo.tractionBasisUsesDual());
   }
 
   if (!_weighted_velocities_uo.usesNodalNormalDerivatives())

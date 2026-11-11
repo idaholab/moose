@@ -52,8 +52,9 @@ NormalMortarMechanicalContact::initialSetup()
     if (!_weighted_gap_uo.segmentGeometryDerivatives())
       paramError("weighted_gap_uo",
                  "'weighted_gap_uo' must also set 'segment_geometry_derivatives = true'.");
-    _ad_traction_basis =
-        &adMortarTest(Moose::ElementType::Lower, _weighted_gap_uo.tractionBasisFEType());
+    _ad_traction_basis = &adMortarTest(Moose::ElementType::Lower,
+                                       _weighted_gap_uo.tractionBasisFEType(),
+                                       _weighted_gap_uo.tractionBasisUsesDual());
   }
 
   if (!_weighted_gap_uo.usesNodalNormalDerivatives())

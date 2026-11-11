@@ -267,7 +267,8 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
 
 const MooseArray<std::vector<ADReal>> &
 MortarConsumerInterface::adMortarTest(const Moose::ElementType element_type,
-                                      const FEType & fe_type) const
+                                      const FEType & fe_type,
+                                      const bool use_dual) const
 {
   switch (element_type)
   {
@@ -276,7 +277,7 @@ MortarConsumerInterface::adMortarTest(const Moose::ElementType element_type,
     case Moose::ElementType::Neighbor:
       return _mci_assembly.adMortarPhiFaceNeighbor(fe_type);
     default:
-      return _mci_assembly.adMortarPhiLower(fe_type);
+      return _mci_assembly.adMortarPhiLower(fe_type, use_dual);
   }
 }
 

@@ -177,6 +177,8 @@ loopOverMortarSegments(
     std::vector<Point> secondary_xi_pts, primary_xi_pts;
 
     std::vector<Real> JxW;
+    std::vector<ADPoint> secondary_dxi_all;
+    std::vector<ADReal> ad_JxW;
 
 #ifndef NDEBUG
     unsigned int expected_length = 0;
@@ -232,6 +234,36 @@ loopOverMortarSegments(
       if (assembly.needDual())
       {
         const auto & coord_msm = assembly.mortarCoordTransformation();
+        if (geometry_derivatives)
+        {
+          const auto segment_begin = secondary_xi_pts.size() - qrule_msm->n_points();
+          const std::vector<Point> secondary_xi(secondary_xi_pts.begin() + segment_begin,
+                                                secondary_xi_pts.end());
+          const std::vector<Point> primary_xi(primary_xi_pts.begin() + segment_begin,
+                                              primary_xi_pts.end());
+          amg.mortarSegmentGeometryDerivatives(*msm_elem,
+                                               ad_coordinate,
+                                               ad_nodal_normals,
+                                               *qrule_msm,
+                                               secondary_xi,
+                                               primary_xi,
+                                               secondary_dxi,
+                                               primary_dxi,
+                                               msm_nodes);
+          assembly.setMortarSegmentGeometryDerivatives(*secondary_face_elem,
+                                                       secondary_xi,
+                                                       secondary_dxi,
+                                                       *msinfo.primary_elem,
+                                                       primary_xi,
+                                                       primary_dxi,
+                                                       msm_nodes);
+          secondary_dxi_all.insert(
+              secondary_dxi_all.end(), secondary_dxi.begin(), secondary_dxi.end());
+          for (const auto qp : make_range(qrule_msm->n_points()))
+            ad_JxW.push_back(assembly.adJxWMortar()[qp] *
+                             assembly.adMortarCoordTransformation()[qp]);
+          assembly.clearMortarSegmentGeometryDerivatives();
+        }
         for (const auto qp : make_range(qrule_msm->n_points()))
           JxW.push_back(JxW_msm[qp] * coord_msm[qp]);
       }
@@ -252,7 +284,11 @@ loopOverMortarSegments(
     // Reinit dual shape coeffs if dual shape functions needed
     // lindsayad: is there any need to make sure we do this on both reference and displaced?
     if (assembly.needDual())
-      assembly.reinitDual(secondary_face_elem, secondary_xi_pts, JxW);
+      assembly.reinitDual(secondary_face_elem,
+                          secondary_xi_pts,
+                          JxW,
+                          geometry_derivatives ? &secondary_dxi_all : nullptr,
+                          geometry_derivatives ? &ad_JxW : nullptr);
 
     unsigned int n_segment = 0;
 

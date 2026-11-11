@@ -132,7 +132,7 @@ WeightedGapUserObject::initialSetup()
     if (!usesNodalNormalDerivatives())
       paramError("segment_geometry_derivatives",
                  "Segment geometry derivatives require nodal-normal derivatives.");
-    _ad_test = &adMortarTest(Moose::ElementType::Lower, testFEType());
+    _ad_test = &adMortarTest(Moose::ElementType::Lower, testFEType(), testUsesDual());
   }
 
   if (!usesNodalNormalDerivatives())

@@ -75,11 +75,17 @@ public:
    */
   virtual const libMesh::FEType & tractionBasisFEType() const { return testFEType(); }
 
+  /// @return Whether \p tractionBasis() uses dual shape functions
+  virtual bool tractionBasisUsesDual() const { return false; }
+
   /**
    * @return The finite element type of \p test(), which selects its AD values when
    * segment_geometry_derivatives = true
    */
   virtual const libMesh::FEType & testFEType() const;
+
+  /// @return Whether \p test() uses dual shape functions
+  virtual bool testUsesDual() const { return false; }
 
   /// Whether AD includes the displacement dependence of the mortar segment geometry
   bool segmentGeometryDerivatives() const { return _segment_geometry_derivatives; }

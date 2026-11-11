@@ -259,8 +259,10 @@ Assembly::~Assembly()
   _ad_q_points_mortar_primary.release();
   _ad_JxW_msm.release();
   _ad_coord_msm.release();
-  for (auto * ad_phi_data :
-       {&_ad_mortar_phi_face, &_ad_mortar_phi_face_neighbor, &_ad_mortar_phi_lower})
+  for (auto * ad_phi_data : {&_ad_mortar_phi_face,
+                             &_ad_mortar_phi_face_neighbor,
+                             &_ad_mortar_phi_lower,
+                             &_ad_mortar_phi_dual_lower})
     for (auto & [fe_type, ad_phi] : *ad_phi_data)
     {
       libmesh_ignore(fe_type);
@@ -2359,11 +2361,17 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
 void
 Assembly::reinitDual(const Elem * elem,
                      const std::vector<Point> & pts,
-                     const std::vector<Real> & JxW)
+                     const std::vector<Real> & JxW,
+                     const std::vector<ADPoint> * const dpts,
+                     const std::vector<ADReal> * const ad_JxW)
 {
   const unsigned int elem_dim = elem->dim();
   mooseAssert(elem_dim == _mesh_dimension - 1,
               "Dual shape functions should only be computed on lower dimensional face elements");
+  mooseAssert((dpts && ad_JxW) || (!dpts && !ad_JxW),
+              "Dual coefficient derivatives require both point and integration-weight derivatives");
+  mooseAssert(!dpts || (dpts->size() == pts.size() && ad_JxW->size() == JxW.size()),
+              "Dual coefficient data must use the same quadrature points");
 
   for (const auto & [fe_type, fe_lower] : _fe_lower[elem_dim])
   {
@@ -2374,6 +2382,59 @@ Assembly::reinitDual(const Elem * elem,
     // We use customized quadrature rule for integration along the mortar segment elements
     fe_lower->set_calculate_default_dual_coeff(false);
     fe_lower->reinit_dual_shape_coeffs(elem, pts, JxW);
+
+    if (!dpts)
+      continue;
+
+    const auto n_shapes = FEInterface::n_shape_functions(fe_type, elem);
+    ADDenseMatrix A(n_shapes, n_shapes), D(n_shapes, n_shapes);
+    std::vector<std::vector<ADReal>> phi(n_shapes, std::vector<ADReal>(pts.size()));
+    for (const auto i : make_range(n_shapes))
+      for (const auto qp : index_range(pts))
+      {
+        phi[i][qp] = FEInterface::shape(fe_type, elem, i, pts[qp]);
+        for (const auto d : make_range(elem_dim))
+          phi[i][qp] += FEInterface::shape_deriv(fe_type, elem, i, d, pts[qp]) * (*dpts)[qp](d);
+      }
+
+    for (const auto i : make_range(n_shapes))
+      for (const auto qp : index_range(pts))
+      {
+        D(i, i) += (*ad_JxW)[qp] * phi[i][qp];
+        for (const auto j : make_range(n_shapes))
+          A(i, j) += (*ad_JxW)[qp] * phi[i][qp] * phi[j][qp];
+      }
+
+    if ((fe_type.family == LAGRANGE || fe_type.family == L2_LAGRANGE) &&
+        (((elem->type() == TRI6 || elem->type() == TRI7) && n_shapes == 6) ||
+         (elem->type() == QUAD8 && n_shapes == 8)))
+    {
+      // Popp et al. (2012), Sec. 4.4.1: transformed quadratic basis with alpha = 1/5.
+      const Real alpha = Real(1) / 5;
+      for (const auto m : make_range(elem->n_vertices(), n_shapes))
+        for (const auto v : make_range(elem->n_second_order_adjacent_vertices(m)))
+        {
+          const auto vertex = elem->second_order_adjacent_vertex(m, v);
+          D(vertex, vertex) += alpha * D(m, m);
+          D(vertex, m) -= alpha * D(m, m);
+        }
+    }
+
+    auto & ad_coeff = _ad_mortar_dual_coeff[fe_type];
+    ad_coeff.resize(n_shapes, n_shapes);
+    const auto & coeff = fe_lower->get_dual_coeff();
+    for (const auto j : make_range(n_shapes))
+    {
+      ADDenseVector Dcol(n_shapes), coeffcol(n_shapes);
+      for (const auto i : make_range(n_shapes))
+        Dcol(i) = D(i, j);
+      A.cholesky_solve(Dcol, coeffcol);
+      for (const auto i : make_range(n_shapes))
+      {
+        ad_coeff(i, j) = coeffcol(i);
+        ad_coeff(i, j).value() = coeff(i, j);
+      }
+    }
   }
 }
 
@@ -2439,7 +2500,30 @@ Assembly::reinitLowerDElem(const Elem * elem,
   }
 
   if (_mortar_segment_geometry_derivatives)
+  {
     computeADMortarPhis(_fe_shape_data_lower, _mortar_qp_shift_secondary, _ad_mortar_phi_lower);
+    for (auto & [fe_type, ad_dual_phi] : _ad_mortar_phi_dual_lower)
+    {
+      const auto shape_it = _fe_shape_data_lower.find(fe_type);
+      const auto coeff_it = _ad_mortar_dual_coeff.find(fe_type);
+      if (shape_it == _fe_shape_data_lower.end() || !shape_it->second ||
+          coeff_it == _ad_mortar_dual_coeff.end())
+        continue;
+
+      MooseArray<std::vector<ADReal>> ad_phi;
+      computeADMortarPhi(*shape_it->second, _mortar_qp_shift_secondary, ad_phi);
+      ad_dual_phi.resize(ad_phi.size());
+      for (const auto j : index_range(ad_phi))
+      {
+        ad_dual_phi[j].assign(ad_phi[j].size(), 0);
+        for (const auto i : index_range(ad_phi))
+          for (const auto qp : index_range(ad_phi[j]))
+            ad_dual_phi[j][qp] += coeff_it->second(i, j) * ad_phi[i][qp];
+        for (const auto qp : index_range(ad_phi[j]))
+          ad_dual_phi[j][qp].value() = _fe_shape_data_dual_lower[fe_type]->_phi[j][qp];
+      }
+    }
+  }
 
   if (!_need_lower_d_elem_volume)
     return;
@@ -2626,18 +2710,23 @@ Assembly::computeADMortarPhis(const std::map<FEType, std::unique_ptr<FEShapeData
 }
 
 const MooseArray<std::vector<ADReal>> *
-Assembly::adMortarPhi(const Moose::ElementType element_type, const FEType type) const
+Assembly::adMortarPhi(const Moose::ElementType element_type,
+                      const FEType type,
+                      const bool use_dual) const
 {
   if (!_mortar_segment_geometry_derivatives)
     return nullptr;
 
+  mooseAssert(!use_dual || element_type == Moose::ElementType::Lower,
+              "Dual mortar shape functions are only defined on lower-dimensional elements");
   const bool neighbor = element_type == Moose::ElementType::Neighbor;
   const auto & shape_data = element_type == Moose::ElementType::Element ? _fe_shape_data_face
                             : neighbor ? _fe_shape_data_face_neighbor
                                        : _fe_shape_data_lower;
-  auto & ad_phi = element_type == Moose::ElementType::Element ? _ad_mortar_phi_face
-                  : neighbor                                  ? _ad_mortar_phi_face_neighbor
-                                                              : _ad_mortar_phi_lower;
+  auto & ad_phi = use_dual                                      ? _ad_mortar_phi_dual_lower
+                  : element_type == Moose::ElementType::Element ? _ad_mortar_phi_face
+                  : neighbor                                    ? _ad_mortar_phi_face_neighbor
+                                                                : _ad_mortar_phi_lower;
   const auto shape_it = shape_data.find(type);
   if (shape_it == shape_data.end() || !shape_it->second)
     return nullptr;
@@ -2645,9 +2734,27 @@ Assembly::adMortarPhi(const Moose::ElementType element_type, const FEType type) 
     return &it->second;
 
   auto & ad_phi_type = ad_phi[type];
-  computeADMortarPhi(*shape_it->second,
-                     neighbor ? _mortar_qp_shift_primary : _mortar_qp_shift_secondary,
-                     ad_phi_type);
+  const auto & shift = neighbor ? _mortar_qp_shift_primary : _mortar_qp_shift_secondary;
+  if (!use_dual)
+    computeADMortarPhi(*shape_it->second, shift, ad_phi_type);
+  else
+  {
+    const auto coeff_it = _ad_mortar_dual_coeff.find(type);
+    mooseAssert(coeff_it != _ad_mortar_dual_coeff.end(),
+                "The AD dual coefficients must be initialized before the dual shape values");
+    MooseArray<std::vector<ADReal>> ad_primal_phi;
+    computeADMortarPhi(*shape_it->second, shift, ad_primal_phi);
+    ad_phi_type.resize(ad_primal_phi.size());
+    for (const auto j : index_range(ad_primal_phi))
+    {
+      ad_phi_type[j].assign(ad_primal_phi[j].size(), 0);
+      for (const auto i : index_range(ad_primal_phi))
+        for (const auto qp : index_range(ad_primal_phi[j]))
+          ad_phi_type[j][qp] += coeff_it->second(i, j) * ad_primal_phi[i][qp];
+      for (const auto qp : index_range(ad_primal_phi[j]))
+        ad_phi_type[j][qp].value() = _fe_shape_data_dual_lower[type]->_phi[j][qp];
+    }
+  }
   return &ad_phi_type;
 }
 

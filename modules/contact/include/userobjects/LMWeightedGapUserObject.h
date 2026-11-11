@@ -36,6 +36,7 @@ public:
   static InputParameters newParams();
 
   virtual const libMesh::FEType & testFEType() const override;
+  virtual bool testUsesDual() const override { return !_use_petrov_galerkin && _lm_var->useDual(); }
 
   LMWeightedGapUserObject(const InputParameters & parameters);
 
@@ -49,6 +50,7 @@ public:
   /// uses. Under Petrov-Galerkin test() is the auxiliary standard basis carrying the weighted gap.
   virtual const VariableTestValue & tractionBasis() const override;
   virtual const libMesh::FEType & tractionBasisFEType() const override { return _lm_var->feType(); }
+  virtual bool tractionBasisUsesDual() const override { return _lm_var->useDual(); }
 
   virtual void initialize() override;
   virtual void finalize() override;

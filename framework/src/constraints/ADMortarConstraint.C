@@ -48,10 +48,10 @@ ADMortarConstraint::ADMortarConstraint(const InputParameters & parameters)
     if (!getParam<bool>("_supports_segment_geometry_derivatives"))
       paramError("segment_geometry_derivatives",
                  "Segment geometry derivatives are not supported by this mortar constraint.");
-    // Petrov-Galerkin is rejected with segment geometry derivatives, so _var supplies the test
-    // functions
     if (_var)
-      _ad_test = &adMortarTest(Moose::ElementType::Lower, _var->feType());
+      _ad_test = _use_petrov_galerkin
+                     ? &adMortarTest(Moose::ElementType::Lower, _aux_lm_var->feType())
+                     : &adMortarTest(Moose::ElementType::Lower, _var->feType(), _use_dual);
     _ad_test_secondary = &adMortarTest(Moose::ElementType::Element, _secondary_var.feType());
     _ad_test_primary = &adMortarTest(Moose::ElementType::Neighbor, _primary_var.feType());
   }

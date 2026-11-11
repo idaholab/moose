@@ -69,14 +69,6 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
                "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
                "false`.");
 
-  // The dual basis coefficients depend on the segment geometry, and their derivatives are not
-  // computed
-  if (getParam<bool>("segment_geometry_derivatives") &&
-      (_lm_var->useDual() || _use_petrov_galerkin))
-    paramError("segment_geometry_derivatives",
-               "Segment geometry derivatives are not available with dual Lagrange multiplier bases "
-               "or the Petrov-Galerkin approach.");
-
   // The Contact action couples aux_lm only to this object, not to the constraint
   if (_use_petrov_galerkin)
     checkPetrovGalerkinQuadraticFaces(*this, *_lm_var);

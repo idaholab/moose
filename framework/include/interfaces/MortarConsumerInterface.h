@@ -89,7 +89,8 @@ protected:
    * points and are only filled when \p _ad_segment_geometry is true.
    */
   const MooseArray<std::vector<ADReal>> & adMortarTest(Moose::ElementType element_type,
-                                                       const libMesh::FEType & fe_type) const;
+                                                       const libMesh::FEType & fe_type,
+                                                       bool use_dual = false) const;
 
   /**
    * Report an error if Petrov-Galerkin weights the gap of a SECOND order dual Lagrange multiplier
