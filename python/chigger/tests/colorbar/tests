@@ -29,7 +29,7 @@
     type = ImageDiff
     command = colorbar_left.py
     imagediff = 'colorbar_left.png'
-    requirement = "The The system colorbar shall support placing the tick marks on the left-side of a vertical oriented colorbar."
+    requirement = "The system shall support placing the colorbar tick marks on the left side of a vertically oriented colorbar."
     display_required = true
   []
 
@@ -37,7 +37,7 @@
     type = ImageDiff
     command = colorbar_top.py
     imagediff = 'colorbar_top.png'
-    requirement = "The The system colorbar shall support placing the tick marks on the top of a horizontal oriented colorbar."
+    requirement = "The system shall support placing the colorbar tick marks on the top of a horizontally oriented colorbar."
     display_required = true
   []
 
@@ -45,7 +45,7 @@
     type = ImageDiff
     command = colorbar_bottom.py
     imagediff = 'colorbar_bottom.png'
-    requirement = "The The system colorbar shall support placing the tick marks on the bottom of a horizontal oriented colorbar."
+    requirement = "The system shall support placing the colorbar tick marks on the bottom of a horizontally oriented colorbar."
     display_required = true
   []
 
@@ -85,7 +85,7 @@
     type = ImageDiff
     command = colorbar_font.py
     imagediff = 'colorbar_font.png'
-    requirement = "The The system colorbar shall support the ability to change the font size of the tick labels."
+    requirement = "The system shall support the ability to change the font size of the colorbar tick labels."
     display_required = true
   []
 
@@ -93,7 +93,7 @@
     type = ImageDiff
     command = zero_range.py
     imagediff = 'zero_range.png'
-    requirement = "The The system colorbar shall handle range values that do not differ in value."
+    requirement = "The system shall handle colorbar range values that do not differ in value."
     display_required = true
   []
 
@@ -102,7 +102,7 @@
     command = precision_with_wrong_notation.py
     expect_out = "When using 'precision' option, 'notation' option has to be set to either 'scientific' or 'fixed'"
     match_literal = true
-    requirement = "The The system colorbar shall error when the 'notation' and 'precision' settings are incongruent."
+    requirement = "The system shall error when the colorbar 'notation' and 'precision' settings are incongruent."
     display_required = true
   []
 []

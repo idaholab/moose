@@ -102,8 +102,8 @@
     type = PythonUnitTest
     input = test_Deleted.py
     min_slots = 2 # calls TestHarness, which could use threads
-    requirement = "The system shall report deleted tests as failures when specified with additional --extra-info options"
-                  "In all other cases, deleted tests will be treated as skipped tests"
+    requirement = "The system shall report deleted tests as failures when specified with additional --extra-info options, "
+                  "and shall treat deleted tests as skipped tests in all other cases."
   []
   [dry_run]
     type = PythonUnitTest
