@@ -38,9 +38,17 @@
       type = RunException
       input = core.i
       cli_args = '--mesh-only TriSubChannelMesh/core/assembly_pitch=0.49'
-      expect_err = 'Assembly 0 \(\'small_duct\'\) and assembly 3 \(\'large_duct\'\) overlap'
+      expect_err = 'The following assemblies overlap.*Assembly 0 \(\'small_duct\'\) and assembly 3 \(\'large_duct\'\)'
       mesh_mode = 'replicated'
-      detail = 'if neighboring assemblies overlap,'
+      detail = 'if any two assemblies overlap,'
+    []
+    [empty_pattern]
+      type = RunException
+      input = core.i
+      cli_args = "--mesh-only TriSubChannelMesh/core/pattern=''"
+      expect_err = 'The pattern must contain at least one row'
+      mesh_mode = 'replicated'
+      detail = 'if the pattern is empty,'
     []
     [even_rows]
       type = RunException
@@ -70,10 +78,18 @@
       type = RunException
       input = core.i
       cli_args = '--mesh-only TriSubChannelMesh/gen/type=GeneratedMeshGenerator '
-                 'TriSubChannelMesh/gen/dim=1 TriSubChannelMesh/core/inputs="large_duct small_duct gen"'
+                 'TriSubChannelMesh/gen/dim=1 TriSubChannelMesh/core/inputs="large_duct small_duct gen" '
+                 'TriSubChannelMesh/core/pattern="1 1; 1 0 1; 1 2"'
       expect_err = 'Input \'gen\' does not provide \'flat_to_flat\' metadata'
       mesh_mode = 'replicated'
-      detail = 'if an input is not a triangular subchannel assembly or duct mesh, and'
+      detail = 'if an input is not a triangular subchannel assembly or duct mesh,'
+    []
+    [distributed]
+      type = RunException
+      input = core.i
+      cli_args = '--mesh-only --distributed-mesh'
+      expect_err = 'is not a replicated mesh. SCM core meshes require a replicated mesh'
+      detail = 'if the mesh is distributed, and'
     []
     [no_mesh_only]
       type = RunException
@@ -82,5 +98,16 @@
       mesh_mode = 'replicated'
       detail = 'if a solve is requested on a core of one-dimensional assemblies.'
     []
+  []
+  [unused_input]
+    type = RunApp
+    input = core.i
+    cli_args = "--mesh-only TriSubChannelMesh/core/pattern='1 1; 1 1 1; 1 1'"
+    expect_out = 'Input \'large_duct\' is not used in \'pattern\''
+    allow_warnings = true
+    recover = false
+    mesh_mode = 'replicated'
+    requirement = 'The system shall warn when an input of a subchannel core mesh is not used in the '
+                  'core pattern.'
   []
 []

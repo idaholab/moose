@@ -19,12 +19,16 @@ detailed assembly over the subchannel assembly with the same index.
 Each assembly is generated centered at the origin and is translated so that its center lies on its
 lattice position. The inputs may differ in size, including `nx` and `ny`, as long as no two placed
 assemblies overlap. The outer duct of an assembly is $(n_x - 1)\,p + 2 g$ wide and
-$(n_y - 1)\,p + 2 g$ high, where $p$ is the subchannel `pitch` and $g$ the `side_gap`. Two ducts
+$(n_y - 1)\,p + 2 g$ high, where $p$ is the subchannel `pitch` and $g$ the `side_gap`, whether or
+not an [SCMQuadDuctMeshGenerator.md] builds a duct mesh for it, so the check applies equally to
+assemblies with and without a duct mesh. Two ducts
 overlap when their center offset is shorter than the sum of their half widths in $x$ and shorter
-than the sum of their half heights in $y$; ducts that exactly touch are allowed. With all positions
-filled, the ducts therefore fit if every duct fits inside an
+than the sum of their half heights in $y$; ducts that exactly touch are allowed. Every pair of
+placed assemblies is checked, so an assembly does not have to fit inside its
 [!param](/Mesh/SCMQuadCoreMeshGenerator/assembly_pitch) by
-[!param](/Mesh/SCMQuadCoreMeshGenerator/assembly_pitch) square.
+[!param](/Mesh/SCMQuadCoreMeshGenerator/assembly_pitch) lattice cell: a wide assembly may extend
+into a neighboring cell that is empty or holds a narrower assembly, as long as no two ducts
+overlap.
 
 [!param](/Mesh/SCMQuadCoreMeshGenerator/pattern) uses the row syntax of
 `PatternedCartesianMeshGenerator`: each entry is an index into
@@ -38,6 +42,11 @@ Placed assemblies are numbered $k = 0, 1, \ldots$ in pattern order, skipping emp
 subdomain and boundary of assembly $k$ receives a new id and has `_k` appended to its name, for
 example `subchannel_0`, `fuel_pins_0`, `inlet_0`, and `outlet_0`. Every element of assembly $k$ also
 stores $k$ in the `assembly_id` extra element integer.
+
+Because the subdomains are renamed, the auxiliary variables that SCM adds automatically on the
+`subchannel` and `fuel_pins` subdomains (see [SCMAuxVariables.md]) are not defined on a core mesh.
+Variables restricted to subdomains must list the renamed subdomains, as in the detailed core example
+below.
 
 !alert warning
 Each subchannel assembly and duct mesh generator stores the subchannel connectivity in a single mesh

@@ -40,6 +40,8 @@ SCMQuadCoreMeshGenerator::SCMQuadCoreMeshGenerator(const InputParameters & param
     paramError("pattern", "The pattern must contain at least one row.");
 
   const auto n_columns = _pattern[0].size();
+  if (n_columns == 0)
+    paramError("pattern", "Row 0 is empty; every row must contain at least one entry.");
   for (const auto i : index_range(_pattern))
   {
     if (_pattern[i].size() != n_columns)

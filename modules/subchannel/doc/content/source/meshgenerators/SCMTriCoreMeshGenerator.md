@@ -17,7 +17,10 @@ solutions. A detailed core built with the same pattern and pitch as a subchannel
 detailed assembly over the subchannel assembly with the same index. Each assembly is generated
 centered at the origin and is translated so that its center lies on its lattice position. The
 inputs may differ in size and number of pins, as long as no two placed assemblies overlap. The
-overlap check is exact for the hexagonal ducts, and ducts that exactly touch are allowed.
+overlap check is exact for the hexagonal ducts, and ducts that exactly touch are allowed. The duct
+of an assembly is the hexagon of its `flat_to_flat` size whether or not an
+[SCMTriDuctMeshGenerator.md] builds a duct mesh for it, so the check applies equally to assemblies
+with and without a duct mesh.
 
 [!param](/Mesh/SCMTriCoreMeshGenerator/pattern) uses the row syntax of `PatternedHexMeshGenerator`:
 each entry is an index into [!param](/Mesh/SCMTriCoreMeshGenerator/inputs), and `-1` marks an empty
@@ -30,6 +33,11 @@ Placed assemblies are numbered $k = 0, 1, \ldots$ in pattern order, skipping emp
 subdomain and boundary of assembly $k$ receives a new id and has `_k` appended to its name, for
 example `subchannel_0`, `fuel_pins_0`, `inlet_0`, and `outlet_0`. Every element of assembly $k$ also
 stores $k$ in the `assembly_id` extra element integer.
+
+Because the subdomains are renamed, the auxiliary variables that SCM adds automatically on the
+`subchannel` and `fuel_pins` subdomains (see [SCMAuxVariables.md]) are not defined on a core mesh.
+Variables restricted to subdomains must list the renamed subdomains, as in the detailed core example
+below.
 
 !alert warning
 Each subchannel assembly and duct mesh generator stores the subchannel connectivity in a single mesh

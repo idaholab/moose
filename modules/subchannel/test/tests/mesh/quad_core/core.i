@@ -37,7 +37,8 @@
   [core]
     type = SCMQuadCoreMeshGenerator
     inputs = 'big_duct small_duct'
-    # Every duct fits in a 0.5 m x 0.5 m cell, so a 0.5 m pitch is the smallest without overlap
+    # Ducts only need to not overlap. Every duct here fits in a 0.5 m square, so any pitch of at
+    # least 0.5 m works for any pattern; this pattern first overlaps below 0.425 m.
     assembly_pitch = 0.6
     pattern = '0 1  0;
                1 0 -1'

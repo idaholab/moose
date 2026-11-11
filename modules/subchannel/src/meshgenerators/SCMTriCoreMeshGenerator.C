@@ -37,6 +37,8 @@ SCMTriCoreMeshGenerator::SCMTriCoreMeshGenerator(const InputParameters & paramet
   : SCMCoreMeshGeneratorBase(parameters)
 {
   const auto n_rows = _pattern.size();
+  if (n_rows == 0)
+    paramError("pattern", "The pattern must contain at least one row.");
   if (n_rows % 2 == 0)
     paramError("pattern", "A hexagonal pattern must have an odd number of rows.");
 
