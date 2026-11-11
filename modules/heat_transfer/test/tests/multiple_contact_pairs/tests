@@ -7,6 +7,6 @@
     csvdiff = 'multiple_contact_pairs_out.csv'
     abs_zero = 5.0e-6 # zero on mac is ~2.0e-6
     rel_err = 1.0e-5
-    requirement = 'The system shall allow providing multiple contact pairs through the heat transfer module action.'
+    requirement = 'The system shall allow providing multiple contact pairs through the ThermalContactAction.'
   []
 []
