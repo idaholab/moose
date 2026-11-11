@@ -33,4 +33,15 @@
     requirement = 'The system shall report an error when the crossflow pseudo-time step is set '
                   'for the segregated solve, which does not use it.'
   []
+  [inlet_conduction_explicit_error]
+    type = RunException
+    input = XX09_SS_SHRT17.i
+    cli_args = 'SubChannel/implicit=false SubChannel/segregated=true'
+    expect_err = "SCMInletConductionHeatRatePostprocessor supports only the implicit solve"
+    issues = '#33723'
+    design = 'SCMInletConductionHeatRatePostprocessor.md'
+    requirement = 'The system shall report an error when the inlet conduction heat rate is '
+                  'requested for the explicit solve, whose conduction stencil it does not '
+                  'evaluate.'
+  []
 []

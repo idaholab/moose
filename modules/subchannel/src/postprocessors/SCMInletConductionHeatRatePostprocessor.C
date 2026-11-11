@@ -14,6 +14,7 @@
 #include "SCM.h"
 #include "SinglePhaseFluidProperties.h"
 #include "SubChannel1PhaseProblem.h"
+#include "TriSubChannel1PhaseProblem.h"
 
 registerMooseObject("SubChannelApp", SCMInletConductionHeatRatePostprocessor);
 
@@ -34,6 +35,12 @@ SCMInletConductionHeatRatePostprocessor::SCMInletConductionHeatRatePostprocessor
     _mesh(SCM::getConstMesh<SubChannelMesh>(_fe_problem.mesh())),
     _value(0)
 {
+  // The explicit solve conducts temperature with its own stencil, which differs from the implicit
+  // enthalpy stencil this postprocessor evaluates, so its result would not be the solver's flux
+  const auto scm_problem = dynamic_cast<const SubChannel1PhaseProblem *>(&_fe_problem);
+  if (scm_problem && !scm_problem->isImplicit())
+    mooseError("SCMInletConductionHeatRatePostprocessor supports only the implicit solve "
+               "('implicit = true').");
 }
 
 void
@@ -43,6 +50,14 @@ SCMInletConductionHeatRatePostprocessor::execute()
   if (!scm_problem)
     mooseError("SCMInletConductionHeatRatePostprocessor can only be used within a subchannel "
                "1phase problem.");
+
+  // Only the triangular assembly assembles axial heat conduction. A quadrilateral assembly has no
+  // conduction term, so none of its heat leaves through the inlet this way.
+  if (!dynamic_cast<TriSubChannel1PhaseProblem *>(&_fe_problem))
+  {
+    _value = 0.0;
+    return;
+  }
 
   const auto n_channels = _mesh.getNumOfChannels();
   const auto & z_grid = _mesh.getZGrid();
