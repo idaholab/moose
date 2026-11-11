@@ -7,6 +7,6 @@
     heavy = True
     issues = '#17966'
     design = 'ates.md'
-    requirement = 'An example of an ATES simulation shall be demonstrated in PorousFlow'
+    requirement = 'The system shall demonstrate an example of an ATES simulation in PorousFlow'
   [../]
 []

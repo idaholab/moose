@@ -9,7 +9,7 @@
     max_time = 1000
     issues = '#11110'
     design = 'thm_example.md'
-    requirement = 'An example of a 2-phase THM benchmark problem shall be demonstrated in PorousFlow'
+    requirement = 'The system shall demonstrate an example of a 2-phase THM benchmark problem in PorousFlow'
   [../]
   [./2D_c]
     type = Exodiff
@@ -21,6 +21,6 @@
     max_time = 1000
     issues = '#15922'
     design = 'thmc_example.md'
-    requirement = 'An example of a 2-phase THMC problem shall be demonstrated in PorousFlow'
+    requirement = 'The system shall demonstrate an example of a 2-phase THMC problem in PorousFlow'
   [../]
 []
