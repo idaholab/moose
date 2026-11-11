@@ -84,7 +84,7 @@ boundary = 'Block1_Block2'
     derivatives = 'interface_traction interface_displacement_jump dinterface_traction_djump'
 
     interface = ${boundary}
-    interface_only = true
+    volume = false
 
     # interface_displacement_jump is supplied by the interface material
     # CZMComputeDisplacementJumpTotalLagrangian, so it must be routed through

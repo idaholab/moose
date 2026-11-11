@@ -284,12 +284,12 @@
   [evaluation_domains]
     issues = '#32413'
     collections = 'SYSTEM'
-    requirement = 'The framework shall evaluate a NEML2 model at independently selected volume, external-boundary, and internal-interface quadrature points while preserving spatially varying quadrature-point data for '
+    requirement = 'The framework shall evaluate stateful NEML2 material properties at independently selected volume, external-boundary, and internal-interface quadrature points while preserving spatially varying quadrature-point data for '
     [volume]
       detail = 'volume only.'
       type = RunApp
       input = 'evaluation_domains.i'
-      cli_args = 'NEML2/domains/boundary= NEML2/domains/interface= Postprocessors/active=volume'
+      cli_args = "NEML2/domains/boundary= NEML2/domains/interface= Materials/active='B volume_stateful' Postprocessors/active=volume"
       expect_out = '1\.000000e\+00 \|   2\.000000e\+00'
       capabilities = 'libtorch & neml2'
     []
@@ -297,7 +297,7 @@
       detail = 'external boundaries only.'
       type = RunApp
       input = 'evaluation_domains.i'
-      cli_args = 'NEML2/domains/volume=false NEML2/domains/interface= Postprocessors/active=boundary'
+      cli_args = "NEML2/domains/volume=false NEML2/domains/interface= Materials/active='B boundary_stateful' Postprocessors/active=boundary"
       expect_out = '1\.000000e\+00 \|   1\.500000e\+00'
       capabilities = 'libtorch & neml2'
     []
@@ -305,7 +305,7 @@
       detail = 'internal interfaces only.'
       type = RunApp
       input = 'evaluation_domains.i'
-      cli_args = 'NEML2/domains/volume=false NEML2/domains/boundary= Postprocessors/active=interface'
+      cli_args = "NEML2/domains/volume=false NEML2/domains/boundary= Materials/active='B interface_stateful' Postprocessors/active=interface"
       expect_out = '1\.000000e\+00 \|   2\.000000e\+00'
       capabilities = 'libtorch & neml2'
     []
@@ -313,7 +313,7 @@
       detail = 'volume and external boundaries.'
       type = RunApp
       input = 'evaluation_domains.i'
-      cli_args = "NEML2/domains/interface= Postprocessors/active='volume boundary'"
+      cli_args = "NEML2/domains/interface= Materials/active='B volume_stateful boundary_stateful' Postprocessors/active='volume boundary'"
       expect_out = '1\.000000e\+00 \|   1\.500000e\+00 \|   2\.000000e\+00'
       capabilities = 'libtorch & neml2'
     []
@@ -321,7 +321,7 @@
       detail = 'volume and internal interfaces.'
       type = RunApp
       input = 'evaluation_domains.i'
-      cli_args = "NEML2/domains/boundary= Postprocessors/active='volume interface'"
+      cli_args = "NEML2/domains/boundary= Materials/active='B volume_stateful interface_stateful' Postprocessors/active='volume interface'"
       expect_out = '1\.000000e\+00 \|   2\.000000e\+00 \|   2\.000000e\+00'
       capabilities = 'libtorch & neml2'
     []
@@ -329,7 +329,7 @@
       detail = 'external boundaries and internal interfaces.'
       type = RunApp
       input = 'evaluation_domains.i'
-      cli_args = "NEML2/domains/volume=false Postprocessors/active='boundary interface'"
+      cli_args = "NEML2/domains/volume=false Materials/active='B boundary_stateful interface_stateful' Postprocessors/active='boundary interface'"
       expect_out = '1\.000000e\+00 \|   1\.500000e\+00 \|   2\.000000e\+00'
       capabilities = 'libtorch & neml2'
     []
@@ -337,7 +337,7 @@
       detail = 'volume, external boundaries, and internal interfaces together.'
       type = RunApp
       input = 'evaluation_domains.i'
-      cli_args = "Postprocessors/active='volume boundary interface'"
+      cli_args = "Materials/active='B volume_stateful boundary_stateful interface_stateful' Postprocessors/active='volume boundary interface'"
       expect_out = '1\.000000e\+00 \|   1\.500000e\+00 \|   2\.000000e\+00 \|   2\.000000e\+00'
       capabilities = 'libtorch & neml2'
     []
@@ -345,7 +345,7 @@
       detail = 'all three domains with matching batch layout and gathered-data ordering under MPI and threading.'
       type = RunApp
       input = 'evaluation_domains.i'
-      cli_args = "Postprocessors/active='volume boundary interface'"
+      cli_args = "Materials/active='B volume_stateful boundary_stateful interface_stateful' Postprocessors/active='volume boundary interface'"
       expect_out = '1\.000000e\+00 \|   1\.500000e\+00 \|   2\.000000e\+00 \|   2\.000000e\+00'
       capabilities = 'libtorch & neml2'
       min_parallel = 2
@@ -353,6 +353,22 @@
       min_threads = 2
       max_threads = 2
     []
+    [volume_boundary_interface_stateful]
+      detail = 'all three domains over multiple time steps with the old volume and side values retained independently.'
+      type = RunApp
+      input = 'evaluation_domains.i'
+      cli_args = "Executioner/num_steps=2 ICs/A/function=1 Materials/B/prop_values=t Materials/active='B volume_stateful boundary_stateful interface_stateful' Postprocessors/active='volume boundary interface volume_old boundary_old interface_old'"
+      expect_out = '2\.000000e\+00 \|   3\.000000e\+00 \|   2\.000000e\+00 \|   3\.000000e\+00 \|   2\.000000e\+00 \|   3\.000000e\+00 \|   2\.000000e\+00'
+      capabilities = 'libtorch & neml2'
+    []
+  []
+  [volume_stateful_internal_side]
+    requirement = 'The framework shall permit incidental internal-side reinitialization of a stateful NEML2 material property whose model is evaluated only at volume quadrature points when no side consumer requests that property.'
+    type = RunApp
+    input = 'volume_stateful_internal_side.i'
+    capabilities = 'libtorch & neml2'
+    issues = '#32413'
+    collections = 'SYSTEM'
   []
   [evaluation_domain_errors]
     issues = '#32413'
@@ -395,7 +411,7 @@
       type = RunException
       input = 'evaluation_domains.i'
       cli_args = 'NEML2/domains/boundary= NEML2/domains/interface= Postprocessors/active=boundary'
-      expect_err = 'requested at side quadrature points.*location was not evaluated'
+      expect_err = "requested at side quadrature points outside the NEML2 model's selected boundaries"
       capabilities = 'libtorch & neml2'
     []
     [mixed_topology_as_boundary]

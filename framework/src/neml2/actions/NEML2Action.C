@@ -396,36 +396,45 @@ NEML2Action::act()
 
   if (_current_task == "add_material")
   {
-    // Create and register a NEML2ToMOOSE material property retriever; `extra` lets each caller
-    // add the bits that are unique to outputs vs. derivatives.
+    // Create and register NEML2ToMOOSE material property retrievers; `extra` lets each caller add
+    // the bits that are unique to outputs vs. derivatives. Separate block and boundary materials
+    // make MOOSE's material-property integrity checks enforce the selected evaluation domains.
     auto addRetriever = [&](const std::string & moose_name,
                             const std::string & neml2_var,
                             const std::string & moose_tensor_type,
                             auto && extra)
     {
-      auto obj_name = obscureObjectName(moose_name, "neml2_to_moose", "", name());
-      auto obj_type = "NEML2ToMOOSE" + moose_tensor_type + "MaterialProperty";
-      auto obj_params = _factory.getValidParams(obj_type);
-      obj_params.set<UserObjectName>("neml2_executor") = _executor_name;
-      obj_params.set<MaterialPropertyName>("to_moose") = moose_name;
-      obj_params.set<std::string>("from_neml2") = neml2_var;
-      // A volume retriever is a block material and MOOSE reinitializes it in volume and face
-      // contexts. Without volume evaluation, register one boundary material over the selected
-      // external boundaries and internal interfaces instead of creating duplicate property owners.
-      if (_volume)
-        obj_params.set<std::vector<SubdomainName>>("block") = _block;
-      else
+      const auto obj_type = "NEML2ToMOOSE" + moose_tensor_type + "MaterialProperty";
+      auto add = [&](const std::string & suffix, const auto & restrict_retriever)
       {
+        auto obj_params = _factory.getValidParams(obj_type);
+        obj_params.set<UserObjectName>("neml2_executor") = _executor_name;
+        obj_params.set<MaterialPropertyName>("to_moose") = moose_name;
+        obj_params.set<std::string>("from_neml2") = neml2_var;
         auto sides = _boundary;
         sides.insert(sides.end(), _interface.begin(), _interface.end());
+        obj_params.set<std::vector<BoundaryName>>("evaluated_boundaries") = sides;
+        restrict_retriever(obj_params);
+        if (_export_output_targets.count(moose_name))
+          obj_params.set<std::vector<OutputName>>("outputs") = _export_output_targets[moose_name];
+        extra(obj_params);
+        _problem->addMaterial(
+            obj_type, obscureObjectName(moose_name, "neml2_to_moose", suffix, name()), obj_params);
+      };
+
+      if (_volume)
+        add("volume",
+            [&](InputParameters & p) { p.set<std::vector<SubdomainName>>("block") = _block; });
+
+      auto sides = _boundary;
+      sides.insert(sides.end(), _interface.begin(), _interface.end());
+      if (!sides.empty())
+      {
         std::sort(sides.begin(), sides.end());
         sides.erase(std::unique(sides.begin(), sides.end()), sides.end());
-        obj_params.set<std::vector<BoundaryName>>("boundary") = sides;
+        add("side",
+            [&](InputParameters & p) { p.set<std::vector<BoundaryName>>("boundary") = sides; });
       }
-      if (_export_output_targets.count(moose_name))
-        obj_params.set<std::vector<OutputName>>("outputs") = _export_output_targets[moose_name];
-      extra(obj_params);
-      _problem->addMaterial(obj_type, obj_name, obj_params);
     };
 
     // NEML2ToMOOSE output retrievers

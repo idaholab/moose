@@ -76,7 +76,7 @@
   [cohesive]
     model = 'linear_cohesive'
     interface = 'A_B'
-    interface_only = true
+    volume = false
     # 'jump' is supplied by a true InterfaceMaterial.
     interface_material_inputs = 'jump'
   []

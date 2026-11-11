@@ -81,10 +81,31 @@
 []
 
 [Materials]
+  active = 'B'
   [B]
     type = GenericFunctionMaterial
     prop_names = B
     prop_values = 'y+t'
+  []
+  [volume_stateful]
+    type = CoupledMaterial
+    mat_prop = unused_volume
+    coupled_mat_prop = sum
+    use_old_prop = true
+  []
+  [boundary_stateful]
+    type = CoupledMaterial
+    mat_prop = unused_boundary
+    coupled_mat_prop = sum
+    use_old_prop = true
+    boundary = left
+  []
+  [interface_stateful]
+    type = CoupledMaterial
+    mat_prop = unused_interface
+    coupled_mat_prop = sum
+    use_old_prop = true
+    boundary = left_block_right_block
   []
 []
 
@@ -103,6 +124,23 @@
   [interface]
     type = SideAverageMaterialProperty
     property = sum
+    boundary = left_block_right_block
+    execute_on = TIMESTEP_END
+  []
+  [volume_old]
+    type = ElementAverageMaterialProperty
+    mat_prop = unused_volume
+    execute_on = TIMESTEP_END
+  []
+  [boundary_old]
+    type = SideAverageMaterialProperty
+    property = unused_boundary
+    boundary = left
+    execute_on = TIMESTEP_END
+  []
+  [interface_old]
+    type = SideAverageMaterialProperty
+    property = unused_interface
     boundary = left_block_right_block
     execute_on = TIMESTEP_END
   []
