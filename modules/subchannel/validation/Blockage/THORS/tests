@@ -9,7 +9,7 @@
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
-    requirement = 'The system will examine the subchannel solver for the FFM-5B low flow case'
+    requirement = 'The system shall examine the subchannel solver for the FFM-5B low flow case'
   []
   [FFM-5B_high]
     type = CSVDiff
@@ -19,7 +19,7 @@
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
-    requirement = 'The system will examine the subchannel solver for the FFM-5B high flow case'
+    requirement = 'The system shall examine the subchannel solver for the FFM-5B high flow case'
   []
   [FFM-3A]
     type = CSVDiff
@@ -30,6 +30,6 @@
     rel_err = 3e-5
     valgrind = NONE
     recover = false
-    requirement = 'The system will examine the subchannel solver for the FFM-3A case'
+    requirement = 'The system shall examine the subchannel solver for the FFM-3A case'
   []
 []
