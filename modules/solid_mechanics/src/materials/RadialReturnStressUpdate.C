@@ -58,6 +58,10 @@ RadialReturnStressUpdateTempl<is_ad>::validParams()
   params.addParam<bool>("apply_strain", true, "Flag to apply strain. Used for testing.");
   params.addParamNamesToGroup(
       "effective_inelastic_strain_name substep_strain_tolerance apply_strain", "Advanced");
+  // Warm starting the return mapping solve from the previous step's converged increment is only
+  // beneficial for models with a yield surface (plasticity). Models without one (e.g. creep) are
+  // opted out so they keep the default zero initial guess; derived classes that benefit enable this.
+  params.addPrivateParam<bool>("use_warm_start_initial_guess", false);
   params.addParam<bool>("use_substep_integration_error",
                         false,
                         "If true, it establishes a substep size that will yield, at most,"
@@ -79,6 +83,22 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
     _effective_inelastic_strain_old(this->template getMaterialPropertyOld<Real>(
         this->_base_name +
         this->template getParam<std::string>("effective_inelastic_strain_name"))),
+    _use_warm_start_initial_guess(
+        this->template getParam<bool>("use_warm_start_initial_guess")),
+    _effective_inelastic_strain_increment_state(
+        _use_warm_start_initial_guess
+            ? &this->template declareGenericProperty<Real, is_ad>(
+                  this->_base_name +
+                  this->template getParam<std::string>("effective_inelastic_strain_name") +
+                  "_increment")
+            : nullptr),
+    _effective_inelastic_strain_increment_state_old(
+        _use_warm_start_initial_guess
+            ? &this->template getMaterialPropertyOld<Real>(
+                  this->_base_name +
+                  this->template getParam<std::string>("effective_inelastic_strain_name") +
+                  "_increment")
+            : nullptr),
     _max_inelastic_increment(this->template getParam<Real>("max_inelastic_increment")),
     _substep_tolerance(this->template getParam<Real>("substep_strain_tolerance")),
     _identity_two(RankTwoTensor::initIdentity),
@@ -125,6 +145,8 @@ void
 RadialReturnStressUpdateTempl<is_ad>::initQpStatefulProperties()
 {
   _effective_inelastic_strain[_qp] = 0.0;
+  if (_use_warm_start_initial_guess)
+    (*_effective_inelastic_strain_increment_state)[_qp] = 0.0;
 }
 
 template <bool is_ad>
@@ -138,10 +160,36 @@ RadialReturnStressUpdateTempl<is_ad>::computeStressInitialize(
 }
 
 template <bool is_ad>
+GenericReal<is_ad>
+RadialReturnStressUpdateTempl<is_ad>::initialGuess(
+    const GenericReal<is_ad> & effective_trial_stress)
+{
+  if (!_use_warm_start_initial_guess)
+    return SingleVariableReturnMappingSolutionTempl<is_ad>::initialGuess(effective_trial_stress);
+
+  // Warm start from the previous step's converged increment, but only when it lies strictly inside
+  // this step's admissible range. The maximum permissible value is the elastic prediction, where the
+  // updated stress (effective_trial_stress - 3*shear_modulus*scalar) is zero; seeding the solve there
+  // leaves some hardening models with a singular or non-positive derivative. When the previous
+  // increment reaches or exceeds that bound it is stale for this step, so fall back to the default
+  // zero initial guess.
+  const Real previous_increment = (*_effective_inelastic_strain_increment_state_old)[_qp];
+  const Real maximum_increment =
+      MetaPhysicL::raw_value(maximumPermissibleValue(effective_trial_stress));
+  if (previous_increment <= 0.0 || previous_increment >= maximum_increment)
+    return SingleVariableReturnMappingSolutionTempl<is_ad>::initialGuess(effective_trial_stress);
+
+  return previous_increment;
+}
+
+template <bool is_ad>
 void
 RadialReturnStressUpdateTempl<is_ad>::propagateQpStatefulPropertiesRadialReturn()
 {
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
+  if (_use_warm_start_initial_guess)
+    (*_effective_inelastic_strain_increment_state)[_qp] =
+        (*_effective_inelastic_strain_increment_state_old)[_qp];
 }
 
 template <bool is_ad>
@@ -279,6 +327,9 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
   else
     inelastic_strain_increment.zero();
 
+  if (_use_warm_start_initial_guess)
+    (*_effective_inelastic_strain_increment_state)[_qp] = _effective_inelastic_strain_increment;
+
   if (_apply_strain)
   {
     strain_increment -= inelastic_strain_increment;
@@ -407,6 +458,8 @@ RadialReturnStressUpdateTempl<is_ad>::updateStateSubstepInternal(
 
   // update effective inelastic strain
   updateEffectiveInelasticStrain(sub_effective_inelastic_strain_increment);
+  if (_use_warm_start_initial_guess)
+    (*_effective_inelastic_strain_increment_state)[_qp] = sub_effective_inelastic_strain_increment;
 }
 
 template <bool is_ad>
