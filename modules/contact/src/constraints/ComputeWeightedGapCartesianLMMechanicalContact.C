@@ -293,7 +293,10 @@ void
 ComputeWeightedGapCartesianLMMechanicalContact::enforceConstraintOnDof(const DofObject * const dof)
 {
   const auto & weighted_gap = *_weighted_gap_ptr;
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
+  // The nodal integral of the test function over the covered part of a partly covered
+  // second-order face can be negative. Its magnitude scales c, so that c * weighted_gap keeps the
+  // sign of the gap in the complementarity condition.
+  const Real c = _normalize_c ? _c / std::abs(*_normalization_ptr) : _c;
 
   const auto dof_index_x = dof->dof_number(_sys.number(), _lm_vars[0]->number(), 0);
   const auto dof_index_y = dof->dof_number(_sys.number(), _lm_vars[1]->number(), 0);

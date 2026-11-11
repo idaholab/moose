@@ -219,8 +219,12 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   // normalizeCDivisor() returns *_normalization_ptr unchanged unless node-based scaling is active,
   // in which case it substitutes a coverage-independent (full-element) integral so the two
   // mechanisms don't double-count coverage (PR review discussion; not from Popp 2013).
+  // The nodal integral of the test function over the covered part of a partly covered
+  // second-order face can be negative. Its magnitude scales c, so that c * weighted_gap keeps the
+  // sign of the gap in the complementarity condition.
   const Real c =
-      _normalize_c ? _c / _weighted_gap_uo.normalizeCDivisor(dof, *_normalization_ptr) : _c;
+      _normalize_c ? _c / std::abs(_weighted_gap_uo.normalizeCDivisor(dof, *_normalization_ptr))
+                   : _c;
 
   // Scaling factor kappa_j (Popp 2013 eq. 34; 1 when disabled/fully covered): dividing the gap by
   // kappa_j gives g_bar/kappa_j, preserving the complementarity root with zhat_j = kappa_j

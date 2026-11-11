@@ -124,6 +124,17 @@
     allow_test_objects = true
     capabilities = 'ad_size>=100'
   []
+  [overhang-normalize-c-2d]
+    type = 'CSVDiff'
+    input = 'overhang_normalize_c_2d.i'
+    csvdiff = 'overhang_normalize_c_2d_out.csv'
+    requirement = 'The system shall keep the sign of the weighted gap in the normalized mortar '
+                  'contact condition when a second-order secondary face slides while overhanging '
+                  'the primary surface edge, where the covered nodal integral of the dual basis is '
+                  'negative.'
+    design = 'constraints/ComputeWeightedGapLMMechanicalContact.md'
+    issues = '#34445'
+  []
   [nodal-scaling-requires-first-order]
     type = 'RunException'
     input = 'two_equal_blocks_slide_2d.i'
