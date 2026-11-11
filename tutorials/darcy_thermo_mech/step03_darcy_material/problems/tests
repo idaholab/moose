@@ -4,11 +4,11 @@
   [step]
     type = RunApp
     input = 'step3.i'
-    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of creating material properties."
+    requirement = "The system shall include, as part of the Darcy-Thermomechanics tutorial, a demonstration of creating material properties."
   []
   [stepb]
     type = RunApp
     input = 'step3b.i'
-    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of creating material properties with variable inputs based on a function."
+    requirement = "The system shall include, as part of the Darcy-Thermomechanics tutorial, a demonstration of creating material properties with variable inputs based on a function."
   []
 []

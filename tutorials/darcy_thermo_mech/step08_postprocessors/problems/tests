@@ -5,6 +5,6 @@
     type = RunApp
     input = 'step8.i'
     cli_args = Executioner/num_steps=1
-    requirement = "The Darcy-Thermomechanics tutorial shall include a step the demonstrates postprocessing tools."
+    requirement = "The system shall include, as part of the Darcy-Thermomechanics tutorial, a step that demonstrates postprocessing tools."
   []
 []

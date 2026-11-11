@@ -4,6 +4,6 @@
   [step]
     type = RunApp
     input = 'step4.i'
-    requirement = "The Darcy-Thermomechanics tutorial shall include a demonstration of directly computing a field variable."
+    requirement = "The system shall include, as part of the Darcy-Thermomechanics tutorial, a demonstration of directly computing a field variable."
   []
 []
