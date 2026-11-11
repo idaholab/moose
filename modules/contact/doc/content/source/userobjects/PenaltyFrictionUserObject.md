@@ -21,6 +21,9 @@ That is, the tangential contact pressure values computed by this object serve a 
 analogous to the Lagrange multipliers when exact enforcement is used
 (see [ComputeFrictionalForceLMMechanicalContact](/ComputeFrictionalForceLMMechanicalContact.md)).
 This object is set up automatically when using the [contact action](/ContactAction.md).
+In three dimensions, the tangential traction history is stored as a Cartesian vector and projected
+onto the current contact tangent plane before each friction update. This makes the response
+independent of the tangent directions chosen to represent that plane.
 
 This object is built from within the contact action when the formulation `MORTAR_PENALTY` and
 the model `COULOMB` is selected. The action sets the `use_physical_gap` parameter to true,
