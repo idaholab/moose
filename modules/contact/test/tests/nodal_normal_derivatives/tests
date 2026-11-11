@@ -330,17 +330,6 @@
       ratio_tol = 4e-6
       detail = 'for three-dimensional frictional penalty contact, and'
     []
-    [penalty_3d_dual_error]
-      type = RunException
-      input = curved_3d_action.i
-      cli_args = 'Contact/mortar/formulation=mortar_penalty Contact/mortar/use_dual=true '
-                 'Contact/mortar/segment_geometry_derivatives=true'
-      expect_err = 'Segment geometry derivatives are not available with dual penalty traction bases'
-      requirement = 'The system shall report an error when mortar segment geometry derivatives are '
-                    'requested with a dual penalty traction basis.'
-      design = 'AutomaticMortarGeneration.md ContactAction.md'
-      issues = '#34177'
-    []
     [friction_2d_rz]
       type = PetscJacobianTester
       input = ../bouncing-block-contact/variational-frictional-action.i
@@ -355,5 +344,17 @@
       ratio_tol = 1e-7
       detail = 'for axisymmetric frictional Lagrange-multiplier contact.'
     []
+  []
+
+  [segment_geometry_derivatives_dual_penalty_error]
+    type = RunException
+    input = curved_3d_action.i
+    cli_args = 'Contact/mortar/formulation=mortar_penalty Contact/mortar/use_dual=true '
+               'Contact/mortar/segment_geometry_derivatives=true'
+    expect_err = 'Segment geometry derivatives are not available with dual penalty traction bases'
+    requirement = 'The system shall report an error when mortar segment geometry derivatives are '
+                  'requested with a dual penalty traction basis.'
+    design = 'AutomaticMortarGeneration.md ContactAction.md'
+    issues = '#34177'
   []
 []
