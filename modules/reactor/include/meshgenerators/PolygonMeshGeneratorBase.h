@@ -708,9 +708,12 @@ protected:
   /**
    * Stitch a list of meshes into one by repeatedly stitching neighboring pairs, so that the cost
    * is O(N log N) in the number of elements instead of the O(N^2) of stitching each mesh onto one
-   * growing mesh. The left mesh of each pair absorbs the right one, so the element order of the
-   * result is the order of the list.
-   * @param meshes meshes to stitch, in order; must not be empty
+   * growing mesh. The left mesh of each pair absorbs the right one, and a stitch appends the
+   * elements of the right mesh after those of the left, so the elements of the result are those of
+   * meshes[0], then meshes[1], and so on. A node shared by several meshes keeps the copy of the
+   * lowest-index mesh. The element and node order is therefore the same as stitching the list one
+   * mesh after another onto meshes[0]; reporting id assignment depends on this order.
+   * @param meshes meshes to stitch, in the order their elements must appear; must not be empty
    * @param boundary_id returns the id of the stitching boundary of a given mesh
    * @param clear_stitched_boundary_ids whether to clear the stitched boundary ids
    * @param verbose whether libMesh prints stitching information
