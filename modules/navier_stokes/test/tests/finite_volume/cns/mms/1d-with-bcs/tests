@@ -129,7 +129,7 @@
     []
   []
   [sources_give_hllc_problems_irregular]
-    requirement = 'The system displays issues when trying to solve hyperbolic equations with sources when using a Godunov method with HLLC approximate Riemann solver on an irregular grid'
+    requirement = 'The system shall display issues when trying to solve hyperbolic equations with sources when using a Godunov method with HLLC approximate Riemann solver on an irregular grid'
     design = 'CNSFVHLLCBase.md'
     [hllc_with_volume_source]
       type = Exodiff
@@ -140,7 +140,7 @@
     []
   []
   [sources_give_hllc_problems_regular]
-    requirement = 'On a regular grid, using a HLLC scheme to calculate inter-cell fluxes, the system shall show, via the momentum variable'
+    requirement = 'The system shall show, on a regular grid using a HLLC scheme to calculate inter-cell fluxes and via the momentum variable,'
     design = 'CNSFVHLLCBase.md'
     [conserved]
       type = Exodiff

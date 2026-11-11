@@ -15,7 +15,7 @@
     exodiff = rc-action.e
     capabilities = 'method!=dbg'
     issues = "#19472"
-    requirement = 'The system should be able to run a porous medium channel computation using the NSFV action.'
+    requirement = 'The system shall be able to run a porous medium channel computation using the NSFV action.'
     cli_args = "Outputs/file_base='rc-action'"
   []
   [free-slip-rz]

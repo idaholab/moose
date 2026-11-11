@@ -12,20 +12,20 @@
     expect_err = 'Number of components of velocity_vector must be at least equal to the mesh dimension'
     input = '2d_advection_bc.i'
     cli_args = 'Outputs/exodus=false'
-    requirement = 'We shall error if the user provides less velocity components than the mesh dimension'
+    requirement = 'The system shall error if the user provides fewer velocity components than the mesh dimension'
   []
   [check_too_many_components]
     type = RunException
     expect_err = 'You cannot supply more than 3 components for the velocity vector'
     input = 2d_advection_bc.i
     cli_args = "Outputs/exodus=false BCs/outflow_term/velocity_vector='1 0 0 0'"
-    requirement = 'We shall error if the user provides more than 3 velocity components'
+    requirement = 'The system shall error if the user provides more than 3 velocity components'
   []
   [check_more_components_than_mesh_dim]
     type = Exodiff
     input = 2d_advection_bc.i
     exodiff = '2d_advection_bc_out.e'
     cli_args = "BCs/outflow_term/velocity_vector='1 0 0'"
-    requirement = 'We shall allow the user to supply more velocity components than the mesh dimension (up to 3 components)'
+    requirement = 'The system shall allow the user to supply more velocity components than the mesh dimension (up to 3 components)'
   []
 []
