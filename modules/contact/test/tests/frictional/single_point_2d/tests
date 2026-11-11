@@ -7,7 +7,7 @@
     exodiff = 'single_point_2d_out.e'
     custom_cmp = 'single_point_2d.cmp'
     capabilities = 'superlu'
-    requirement = 'The contact system shall enforce 2D single-point contact with significant accumulated slip.'
+    requirement = 'The system shall enforce 2D single-point contact with significant accumulated slip.'
   [../]
   [./single_point_2d_predictor]
     type = 'Exodiff'
@@ -15,7 +15,7 @@
     exodiff = 'single_point_2d_predictor_out.e'
     custom_cmp = 'single_point_2d.cmp'
     capabilities = 'superlu'
-    requirement = 'The contact system shall enforce 2D single-point contact with significant accumulated slip. With predictor solver options.'
+    requirement = 'The system shall enforce 2D single-point contact with significant accumulated slip. With predictor solver options.'
   [../]
   [./single_point_2d_tp]
     type = 'Exodiff'
@@ -23,6 +23,6 @@
     exodiff = 'single_point_2d_tp_out.e'
     custom_cmp = 'single_point_2d.cmp'
     capabilities = 'superlu'
-    requirement = 'The contact system shall enforce 2D single-point contact with significant accumulated slip when formulation selected is tangential_penalty contact.'
+    requirement = 'The system shall enforce 2D single-point contact with significant accumulated slip when formulation selected is tangential_penalty contact.'
   [../]
 []

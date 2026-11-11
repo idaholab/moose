@@ -2,7 +2,7 @@
   issues = '#24349'
   [aux_errors]
     design = MortarUserObjectAux.md
-    requirement = 'The aux kernel shall throw an error if the supplied user object dies not support computing the property'
+    requirement = 'The system shall report an error from the aux kernel if the supplied user object does not support computing the property'
 
     [accumulated_slip_one]
       type = RunException

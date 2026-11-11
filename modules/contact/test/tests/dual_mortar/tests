@@ -69,8 +69,8 @@
   [force_balance]
     design = 'ContactAction.md NormalMortarMechanicalContact.md'
     issues = '#33657'
-    requirement = 'Mortar mechanical contact shall transmit equal and opposite forces across a '
-                  'curved interface.'
+    requirement = 'The system shall transmit equal and opposite forces across a '
+                  'curved interface using mortar mechanical contact.'
     # abs_zero checks the normalized force imbalance against zero.
     [dual]
       type = 'CSVDiff'
@@ -122,8 +122,8 @@
   [force_balance_friction]
     design = 'ContactAction.md NormalMortarMechanicalContact.md'
     issues = '#33378'
-    requirement = 'Mortar mechanical contact shall transmit equal and opposite forces across a '
-                  'curved, frictional interface.'
+    requirement = 'The system shall transmit equal and opposite forces across a '
+                  'curved, frictional interface using mortar mechanical contact.'
     # The penalty formulation checks normal and tangential force balance without PDASS active-set
     # parameters.
     [penalty]
