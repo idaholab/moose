@@ -1,0 +1,48 @@
+[Tests]
+  design = 'SphereContactor.md RigidBodyNodalNCPKernel.md RigidBodyNormalMechanicalContact.md'
+  issues = '#33801'
+  [hertz_elastic]
+    type = 'CSVDiff'
+    input = 'hertz_elastic.i'
+    csvdiff = 'hertz_elastic_csv.csv hertz_elastic_csv_contact_lm_0010.csv'
+    rel_err = 1e-4
+    max_parallel = 1
+    requirement = 'The system shall drive a rigid sphere into an elastic half-space (2D '
+                  'axisymmetric) using a nodewise semismooth-Newton NCP against an analytic '
+                  'level-set contactor, without mortar-segment integration and without AD.'
+  []
+  # Jacobian tests come in a pair - one per branch of the min-NCP.  The default
+  # input has the sphere tangent to the material tip at t=0, so lambda = 0 and
+  # g = 0 both evaluate to zero.  That is exactly the semismooth kink, where any
+  # FD probe straddles the two derivative branches and disagrees with the
+  # hand-coded Jacobian at O(1).  Moving the sphere away or into the body forces
+  # the state onto ONE branch and lets us assert a tight ratio.
+  [hertz_elastic-jac-open]
+    type = 'PetscJacobianTester'
+    input = 'hertz_elastic.i'
+    prereq = 'hertz_elastic'
+    ratio_tol = 5e-7
+    difference_tol = 1e-6
+    # Sphere top at y = -2.5, material tip at y = -2 --> g = +0.5, lambda = 0.
+    # min(lambda, c*g) = 0 on the lambda branch.  dR/dlambda = 1, dR/du = 0.
+    cli_args = 'UserObjects/sphere/center="0 -4.5 0" Executioner/num_steps=1 -snes_test_err 1e-8'
+    max_parallel = 1
+    requirement = 'The hand-coded Jacobian of the rigid-elastic Hertz setup shall match the '
+                  'finite-differenced Jacobian to near machine precision when the min-NCP '
+                  'residual is unambiguously on its lambda branch (no contact).'
+  []
+  [hertz_elastic-jac-penetrated]
+    type = 'PetscJacobianTester'
+    input = 'hertz_elastic.i'
+    prereq = 'hertz_elastic-jac-open'
+    ratio_tol = 5e-7
+    difference_tol = 1e-6
+    # Sphere top at y = -1.5, material tip at y = -2 --> g = -0.5, lambda = 0.
+    # min(lambda, c*g) = c*g on the gap branch.  dR/dlambda = 0, dR/du_k = c*n_k.
+    cli_args = 'UserObjects/sphere/center="0 -3.5 0" Executioner/num_steps=1 -snes_test_err 1e-8'
+    max_parallel = 1
+    requirement = 'The hand-coded Jacobian of the rigid-elastic Hertz setup shall match the '
+                  'finite-differenced Jacobian to near machine precision when the min-NCP '
+                  'residual is unambiguously on its gap branch (deep penetration).'
+  []
+[]

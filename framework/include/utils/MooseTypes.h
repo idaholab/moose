@@ -989,6 +989,7 @@ enum LineSearchType
   LS_SHELL,
   LS_CONTACT,
   LS_PROJECT,
+  LS_SEMISMOOTH,
   LS_L2,
   LS_BT,
   LS_CP

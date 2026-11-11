@@ -1,0 +1,106 @@
+[Tests]
+  design = 'UzawaTransient.md'
+  issues = '#33801'
+  # Certifies UzawaTransient correctness on a force-controlled 3D
+  # elastic-Hertz problem where plain Newton (baseline
+  # load_controlled_elastic_3d/hertz_load_3d) already converges.  We
+  # compare the converged state at every time step against a gold
+  # captured with Uzawa on -- these must match the plain-Newton state
+  # within the RigidBodyLoadControl residual tolerance, since the
+  # physical fixed point is mode-independent.
+  #
+  # This test does NOT certify iteration-count savings.  For an elastic
+  # 3D problem that plain Newton already handles cheaply, Uzawa is
+  # actually slower per-solve (each outer iter runs a full primal
+  # SNES).  Its purpose is to convert cases that plain Newton
+  # limit-cycles on into cases that terminate at all -- see the
+  # `examples/rigid/stl-contact/material_into_indenter.i` header for the
+  # motivating case (finite-strain J2 plasticity, load ramp to
+  # F(1) = 1.5e5).
+
+  [hertz_load_3d_with_uzawa]
+    type = 'CSVDiff'
+    input = '../load_controlled_elastic_3d/hertz_load_3d.i'
+    csvdiff = 'hertz_load_3d_uzawa_csv.csv'
+    cli_args = 'Outputs/file_base=hertz_load_3d_uzawa_csv Executioner/end_time=0.05 Executioner/type=UzawaTransient Executioner/load_control_kernel=load_control Executioner/outer_max_iter=30 Executioner/max_step=1e-3 Executioner/outer_abs_tol=1 Executioner/outer_rel_tol=1e-3 ScalarKernels/load_control/kss_stiffness=1e6'
+    rel_err = 1e-4
+    max_parallel = 1
+    heavy = true
+    requirement = 'UzawaTransient shall converge a 3D force-controlled rigid-body contact '
+                  'problem to the same fixed point as plain Newton, within the load-control '
+                  'residual tolerance.  This certifies that the outer 1D scalar Newton and the '
+                  'inner primal SSLS produce a physically-consistent (u, lambda, s) state.'
+  []
+  # Parallel MPI regression: the same 3D force-controlled Uzawa run,
+  # this time under mpiexec -n 2.  This locks in a fix for a bug where
+  # `RigidBodyLoadControl::_cached_reaction_minus_F` was populated only
+  # on the scalar-owning rank (the last MPI rank -- MOOSE calls
+  # `computeResidual` only there for ScalarKernels), so the outer
+  # `UzawaSolveObject` on rank 0 read a stale 0 and the outer loop
+  # "converged" in 1 iter with a wrong state.  The accessor now does
+  # an MPI sum reduction across ranks so callers on any rank see the
+  # correct value.  Without the fix this test hangs (outer loop
+  # thinks R_s = 0 -> exits after 1 iter -> next timestep starts from
+  # wrong state -> primal solve diverges -> IterationAdaptiveDT cuts
+  # back forever).
+  # Output-config regression tests -- confirm the `outer_verbose` param
+  # gates the `Uzawa outer iter N: s=X, |R_s|=Y` progress line.  The
+  # inner primal SNES + KSP monitor output (`M Nonlinear |R|`,
+  # `M Linear |R|`) prints unconditionally; MOOSE installs those
+  # monitors from `PetscOutput::solveSetup` on every
+  # `FEProblemBase::solve()` and there is no clean pre-iter-0 hook to
+  # cancel them, so they are left alone.
+  # Displacement-control pass-through: with no `load_control_kernel`,
+  # UzawaTransient's outer loop is bypassed and the class behaves as
+  # a plain Transient wrapper.  Runs the standard 2D disp-controlled
+  # Hertz test through UzawaTransient and CSVDiffs against the
+  # baseline plain-Transient gold (bit-for-bit -- pass-through path
+  # adds one SolveObject::solve call on the stack and nothing else).
+  [hertz_moving_with_uzawa_passthrough]
+    type = 'CSVDiff'
+    input = '../displacement_moving_indenter_elastic/hertz_moving.i'
+    csvdiff = 'hertz_moving_csv.csv'
+    cli_args = 'Executioner/type=UzawaTransient Outputs/csv/file_base=hertz_moving_csv'
+    rel_err = 1e-6
+    max_parallel = 1
+    requirement = 'UzawaTransient shall pass through to plain Transient behavior when no '
+                  '`load_control_kernel` is supplied, so displacement-controlled inputs can be '
+                  'run under UzawaTransient without any per-solve overhead beyond a single '
+                  'extra SolveObject::solve call on the stack.'
+  []
+  [output_default]
+    type = 'RunApp'
+    input = '../load_controlled_elastic_3d/hertz_load_3d.i'
+    cli_args = 'Outputs/file_base=/tmp/uzawa_out_default Executioner/end_time=0.01 Executioner/type=UzawaTransient Executioner/load_control_kernel=load_control Executioner/outer_max_iter=15 Executioner/max_step=1e-3 Executioner/outer_abs_tol=1 ScalarKernels/load_control/kss_stiffness=1e6'
+    expect_out = 'Uzawa outer iter'
+    max_parallel = 1
+    requirement = 'UzawaTransient shall show the outer-iter convergence line by default '
+                  '(`Uzawa outer iter N: s=X, |R_s|=Y`).  This is the load-control outer loops '
+                  'primary progress signal.'
+  []
+  [output_silent]
+    type = 'RunApp'
+    input = '../load_controlled_elastic_3d/hertz_load_3d.i'
+    cli_args = 'Outputs/file_base=/tmp/uzawa_out_silent Executioner/end_time=0.01 Executioner/type=UzawaTransient Executioner/load_control_kernel=load_control Executioner/outer_max_iter=15 Executioner/max_step=1e-3 Executioner/outer_abs_tol=1 Executioner/outer_verbose=false ScalarKernels/load_control/kss_stiffness=1e6'
+    absent_out = 'Uzawa outer iter'
+    max_parallel = 1
+    requirement = 'UzawaTransient shall suppress its own outer-iter progress line when '
+                  '`outer_verbose = false`, for callers who want to see only MOOSEs standard '
+                  'per-solve output.'
+  []
+  [hertz_load_3d_with_uzawa_mpi]
+    type = 'CSVDiff'
+    input = '../load_controlled_elastic_3d/hertz_load_3d.i'
+    csvdiff = 'hertz_load_3d_uzawa_csv.csv'
+    cli_args = 'Outputs/file_base=hertz_load_3d_uzawa_csv Executioner/end_time=0.05 Executioner/type=UzawaTransient Executioner/load_control_kernel=load_control Executioner/outer_max_iter=30 Executioner/max_step=1e-3 Executioner/outer_abs_tol=1 Executioner/outer_rel_tol=1e-3 ScalarKernels/load_control/kss_stiffness=1e6'
+    rel_err = 1e-4
+    prereq = 'hertz_load_3d_with_uzawa'
+    min_parallel = 2
+    max_parallel = 2
+    heavy = true
+    requirement = 'UzawaTransient shall converge under MPI to the same physical fixed point '
+                  'as the single-rank run, exercising the MPI reduction on '
+                  'RigidBodyLoadControl.currentReactionMinusF (the scalar residual is populated '
+                  'only on the rank owning the scalar DoF; other ranks must not read a stale 0).'
+  []
+[]

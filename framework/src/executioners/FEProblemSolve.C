@@ -18,7 +18,8 @@
 #include "MooseUtils.h"
 #include "AuxiliarySystem.h"
 
-std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
+std::set<std::string> const FEProblemSolve::_moose_line_searches = {
+    "contact", "project", "semismooth"};
 
 const std::set<std::string> &
 FEProblemSolve::mooseLineSearches()
@@ -91,6 +92,19 @@ FEProblemSolve::validParams()
                         "The linear relative tolerance to be used while the contact state is "
                         "changing between non-linear iterations. We recommend that this tolerance "
                         "be looser than the standard linear tolerance");
+  params.addParam<Real>("semismooth_line_search_armijo_constant",
+                        "Armijo sufficient-decrease constant for the semismooth line search "
+                        "(defaults to 1e-4 in SemismoothContactLineSearch).");
+  params.addParam<Real>("semismooth_line_search_backtrack_factor",
+                        "Backtracking factor for the semismooth line search "
+                        "(defaults to 0.5 in SemismoothContactLineSearch).");
+  params.addParam<unsigned int>("semismooth_line_search_max_cuts",
+                                "Maximum backtracks for the semismooth line search "
+                                "(defaults to 10 in SemismoothContactLineSearch).");
+  params.addParam<unsigned int>(
+      "semismooth_line_search_nonmonotone_window",
+      "Nonmonotone reference-merit window M for the semismooth line search "
+      "(defaults to 5 in SemismoothContactLineSearch).");
 
   params += Moose::PetscSupport::getPetscValidParams();
   params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");

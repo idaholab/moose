@@ -2,9 +2,11 @@
 
 The interaction of moving bodies is a common occurrence in our world, and therefore modeling such problems is essential to accurately represent the mechanical behavior of the physical world. However, finite element methods do not have an inherent means of modeling contact. Therefore, specific contact algorithms are required. These algorithms enforce constraints between surfaces in the mesh, to prevent penetration and develop contact forces. The MOOSE contact module provides the necessary tools for modeling mechanical contact.
 
+## Deformable body contact
 
+Here both bodies in contact deform and so both are represented with MOOSE physics solved on finite element meshes.
 
-## Theory
+### Theory
 
 Mechanical contact between two deformable bodies is based on three requirements.
 
@@ -23,13 +25,13 @@ That is, the penetration distance (typically referred to as the gap $g$ in the c
 
 
 
-## Node/Face Mechanical Contact
+### Node/Face Mechanical Contact
 
 Contact constraints can be enforced through the use of node/face constraints in a manner similar to that detailed by [!cite](heinstein_algorithm_1999)). In this approach, first, a geometric search determines which secondary nodes have penetrated primary faces. For those nodes, the internal force computed by the divergence of stress is moved to the appropriate primary face at the point of contact. Those forces are distributed to primary nodes by employing the finite element shape functions. Additionally, the secondary nodes are constrained to remain on the primary faces, preventing penetration. The module currently supports frictionless, frictional, and glued contact.
 
 
 
-## Mortar-Based Mechanical Contact
+### Mortar-Based Mechanical Contact
 
 Models specific for mechanical contact enforcement have been developed based on the MOOSE
 [mortar constraint system](Constraints/index.md), and provide an alternative
@@ -38,10 +40,11 @@ using this approach are summarized in [MortarPerformance](modules/contact/Mortar
 
 
 
+
 !row!
 !col! small=8 medium=4 large=5 icon=device_hub
 
-### Tutorial and examples class=center style=font-weight:200;
+#### Tutorial and examples class=center style=font-weight:200;
 
 !include modules/contact/contact_examples.md
 
@@ -49,7 +52,7 @@ using this approach are summarized in [MortarPerformance](modules/contact/Mortar
 
 !col! small=8 medium=4 large=5 icon=storage
 
-### Implementation details and analysis class=center style=font-weight:200;
+#### Implementation details and analysis class=center style=font-weight:200;
 
 - [Mortar performance](contact/MortarPerformance.md)
 
@@ -57,7 +60,7 @@ using this approach are summarized in [MortarPerformance](modules/contact/Mortar
 !col-end!
 !row-end!
 
-## `Contact` Syntax Block
+### `Contact` Syntax Block
 
 Setting up a model to use contact enforcement in MOOSE requires the creation of
 multiple types of MOOSE objects. Using the top-level
@@ -66,6 +69,18 @@ setting up these objects, is highly recommended, and supports most available typ
 The following input file example shows the basic usage of the `Contact` block:
 
 !listing test/tests/sliding_block/sliding/frictionless_kinematic.i block=Contact
+
+## Rigid-Body Contact
+
+When one body in the contact pair can be idealized as rigid, the contact module provides
+a dedicated formulation that discretizes the rigid body implicitly through a signed-distance
+(level-set) function.  This bypasses the geometric search entirely and reduces the coupled
+system to a pointwise complementarity condition on the deformable side, with optional
+load-control machinery that turns the indenter's translation into a scalar unknown driven
+by a prescribed integrated reaction.  Analytic level-set contactors (spheres) and STL-based
+contactors (arbitrary triangulated surfaces) are both supported.  See the
+[Rigid-Body Contact](modules/contact/rigid_contact/index.md) landing page for an overview,
+theory, worked examples, and syntax details for the `[RigidContact]` block.
 
 ## Objects, Actions, and Syntax
 
