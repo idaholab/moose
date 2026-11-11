@@ -234,6 +234,9 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyHeatConductionKernels()
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = _solid_temperature_name;
   params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+  // The solid conductivity is an effective conductivity which includes the solid fraction. The
+  // kernels would otherwise scale it by the porosity, the fluid fraction.
+  params.set<bool>("effective_conductivity") = true;
 
   // Set block restrictions
   const bool combined = _thermal_conductivity_blocks.size() > 1;
