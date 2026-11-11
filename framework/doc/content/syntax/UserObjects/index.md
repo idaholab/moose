@@ -36,24 +36,52 @@ and use the interface without the use of dynamic casts.
    and the secondary side of the internal boundary are available.
 - +DomainUserObject+: this object is capable of executing all the operations of
   an +ElementUserObject+, +InternalSideUserObject+, +SideUserObject+, and +InterfaceUserObject+.
-  The `interface_boundaries` parameter selects the internal boundaries treated as interfaces, where
-  data from both sides are available. If unset, no boundaries are treated as interfaces. The
-  `boundaries` parameter selects where boundary evaluations occur. A boundary is an element side
-  tagged with a boundary ID and is not restricted to the exterior of the mesh. A tagged internal
-  side with a neighbor may also be selected:
-
-  - If unset, every boundary ID not listed in `interface_boundaries` is selected, including IDs on
-    internal sides.
-  - If set to an empty list, no boundary IDs are selected.
-  - If set to a list, only the listed boundary IDs are selected, regardless of whether they occur on
-    exterior or internal sides.
-
-  MOOSE treats each boundary ID separately. If one internal side has both `crack` and `marked`, and
-  only `crack` is in `interface_boundaries`, `crack` is treated as an interface while `marked` is
-  treated as a boundary when `boundaries` is unset. The same ID cannot be listed in both parameters.
-  These parameters do not affect element or unmarked internal-side operations.
+  See [DomainUserObject side execution](#domain-user-object-side-execution) for how sides are
+  dispatched to these operations.
 - +MortarUserObject+: "execute" is called for each mortar segment element corresponding to the
   secondary-primary mortar interface pairing on each execution flag
+
+## DomainUserObject side execution id=domain-user-object-side-execution
+
+A boundary in MOOSE is an ID attached to an element side. It does not imply that the side has no
+neighbor: a side with a neighboring element may also have one or more boundary IDs. A
+`DomainUserObject` processes these two properties independently:
+
+- A side with a neighbor executes `executeOnInternalSide()` when both elements are within the
+  object's block restriction.
+- Each boundary ID on a side is dispatched according to `boundaries` and `interface_boundaries`.
+  An ID selected by `boundaries` executes `executeOnBoundary()`, whether or not the side has a
+  neighbor. An ID selected by `interface_boundaries` executes `executeOnInterface()`, requires a
+  neighbor, and makes data from both sides available.
+
+Consequently, a side with a neighbor and a boundary ID executes `executeOnInternalSide()` together
+with either `executeOnBoundary()` or `executeOnInterface()`. The boundary-ID operations are mutually
+exclusive for a given ID, but neither is mutually exclusive with `executeOnInternalSide()`.
+
+The `boundaries` parameter has the following selection behavior:
+
+- If unset, every boundary ID not listed in `interface_boundaries` executes `executeOnBoundary()`.
+- If set to an empty list, no boundary ID executes `executeOnBoundary()`.
+- If set to a list, only the listed IDs execute `executeOnBoundary()`.
+
+If `interface_boundaries` is unset or empty, no boundary ID executes `executeOnInterface()`. The
+same boundary ID cannot be listed in both parameters.
+
+The following cases illustrate the resulting side operations:
+
+1. A side with no neighbor and the boundary ID `wall` executes `executeOnBoundary()` when `wall` is
+   selected by `boundaries`. Selecting `wall` with `interface_boundaries` instead produces an error
+   because an interface requires a neighbor. The side does not execute `executeOnInternalSide()`.
+2. A side with a neighbor and no boundary ID executes only `executeOnInternalSide()` when both
+   elements are within the object's block restriction. The `boundaries` and `interface_boundaries`
+   parameters do not disable this operation.
+3. A side with a neighbor and the boundary ID `crack` executes `executeOnInternalSide()` and
+   `executeOnBoundary()` when `crack` is selected by `boundaries`. It executes
+   `executeOnInternalSide()` and `executeOnInterface()` when `crack` is selected by
+   `interface_boundaries`.
+4. If a side with a neighbor has both `crack` and `marked`, setting `boundaries = marked` and
+   `interface_boundaries = crack` executes all three operations: `executeOnBoundary()` for `marked`,
+   `executeOnInterface()` for `crack`, and `executeOnInternalSide()` because the side has a neighbor.
 
 # Execution order
 

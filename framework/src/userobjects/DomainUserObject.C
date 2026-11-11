@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DomainUserObject.h"
+#include "MooseMeshUtils.h"
 #include "MooseVariableFE.h"
 #include "SubProblem.h"
 #include "Assembly.h"
@@ -25,14 +26,15 @@ DomainUserObject::validParams()
   params += RandomInterface::validParams();
   params.addParam<std::vector<BoundaryName>>(
       "interface_boundaries",
-      "The interface boundaries on which this object will execute. If unset, the object executes "
-      "on no interface boundary.");
+      "The boundary IDs on which this object will call executeOnInterface(). Each selected side "
+      "must have a neighbor. The same boundary, whether specified by name or ID, cannot also be "
+      "listed in 'boundaries'. If unset, executeOnInterface() is not called.");
   params.addParam<std::vector<BoundaryName>>(
       "boundaries",
-      "The boundary IDs on which this object will execute its boundary operation. A boundary ID "
-      "may tag a side on the mesh exterior or an internal side with a neighbor. If unset, boundary "
-      "execution is unrestricted except on selected interface boundaries. An explicitly empty list "
-      "disables boundary execution.");
+      "The boundary IDs on which this object will call executeOnBoundary(). A selected side may or "
+      "may not have a neighbor. The same boundary, whether specified by name or ID, cannot also be "
+      "listed in 'interface_boundaries'. If unset, execution is unrestricted except on selected "
+      "interface boundaries. An explicitly empty list disables executeOnBoundary().");
   // Need one layer of ghosting
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
@@ -69,14 +71,27 @@ DomainUserObject::DomainUserObject(const InputParameters & parameters)
 {
   // Check whether the user object is boundary restricted and if so, get the boundary IDs
   if (_boundary_restricted)
-    _boundary_execution_ids = MooseMeshUtils::getBoundaryIDSet(
-        _mesh, getParam<std::vector<BoundaryName>>("boundaries"), false);
+  {
+    // Catch misspelled or otherwise nonexistent boundary names here rather than letting them
+    // silently resolve to an invalid boundary ID and disable executeOnBoundary().
+    const auto & boundary_names = getParam<std::vector<BoundaryName>>("boundaries");
+    for (const auto & boundary_name : boundary_names)
+      if (!boundary_name.empty() && !MooseUtils::isDigits(boundary_name) &&
+          !MooseMeshUtils::hasBoundaryName(_mesh, boundary_name))
+        paramError("boundaries", "Boundary '", boundary_name, "' does not exist in the mesh.");
+    _boundary_execution_ids = MooseMeshUtils::getBoundaryIDSet(_mesh, boundary_names, false);
+  }
 
   if (isParamValid("interface_boundaries"))
   {
     // Check whether the user object is restricted to interface boundaries and if so, get the
     // boundary IDs
     const auto & interface_boundaries = getParam<std::vector<BoundaryName>>("interface_boundaries");
+    for (const auto & boundary_name : interface_boundaries)
+      if (!boundary_name.empty() && !MooseUtils::isDigits(boundary_name) &&
+          !MooseMeshUtils::hasBoundaryName(_mesh, boundary_name))
+        paramError(
+            "interface_boundaries", "Boundary '", boundary_name, "' does not exist in the mesh.");
     _interface_bnd_ids = MooseMeshUtils::getBoundaryIDSet(_mesh, interface_boundaries, false);
 
     // Check that the user has not selected the same boundary for both boundary and interface

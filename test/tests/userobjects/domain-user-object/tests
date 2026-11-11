@@ -133,6 +133,28 @@
     expect_err = 'contains an external side, but interface boundaries must contain neighbors'
   []
 
+  [reject_nonexistent_boundary]
+    requirement = 'The system shall reject a nonexistent boundary name selected for DomainUserObject boundary execution.'
+    design = 'UserObjects/index.md'
+    issues = '#19995 #32413 #34421'
+    type = RunException
+    mesh_mode = REPLICATED
+    input = overlapping-interface.i
+    cli_args = 'UserObjects/conservation/boundaries=non_existing_boundary Outputs/exodus=false'
+    expect_err = "Boundary 'non_existing_boundary' does not exist in the mesh"
+  []
+
+  [reject_nonexistent_interface]
+    requirement = 'The system shall reject a nonexistent boundary name selected for DomainUserObject interface execution.'
+    design = 'UserObjects/index.md'
+    issues = '#19995 #32413 #34421'
+    type = RunException
+    mesh_mode = REPLICATED
+    input = overlapping-interface.i
+    cli_args = 'UserObjects/conservation/interface_boundaries=non_existing_boundary Outputs/exodus=false'
+    expect_err = "Boundary 'non_existing_boundary' does not exist in the mesh"
+  []
+
   [boundary_interface_overlap]
     requirement = 'The system shall reject a DomainUserObject boundary ID selected for both boundary and interface execution.'
     design = 'UserObjects/index.md'
