@@ -8,7 +8,7 @@
 
     allow_test_objects = true
 
-    requirement = "RDGBoundaryFluxPostprocessor shall output correct boundary flux values."
+    requirement = "The system shall output correct boundary flux values using RDGBoundaryFluxPostprocessor."
     issues = '#13178'
     design = '/RDGBoundaryFluxPostprocessor.md'
   [../]

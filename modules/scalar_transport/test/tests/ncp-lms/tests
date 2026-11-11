@@ -25,7 +25,7 @@
     type = Exodiff
     exodiff = diagonal-ncp-lm-nodal-enforcement-amg.e
     cli_args = 'Outputs/file_base=diagonal-ncp-lm-nodal-enforcement-amg -pc_type hypre -pc_hypre_type boomeramg'
-    requirement = 'Nodal enforcement of the positivity constraint shall be solvable using algebraic multi-grid'
+    requirement = 'The system shall be able to solve nodal enforcement of the positivity constraint using algebraic multi-grid'
     custom_cmp = nodal.cmp
   []
   [interpolated_lm_ncp_nodal_constraint_enforcement]
