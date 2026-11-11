@@ -39,7 +39,7 @@ protected:
    */
   virtual bool overlap(unsigned int input_a, unsigned int input_b, const Point & offset) const = 0;
 
-  /// Names of the input SCM assembly (or duct) mesh generators
+  /// Names of the input SCM assembly, duct, or detailed assembly mesh generators
   const std::vector<MeshGeneratorName> & _input_names;
   /// Input meshes
   const std::vector<std::unique_ptr<MeshBase> *> _meshes;

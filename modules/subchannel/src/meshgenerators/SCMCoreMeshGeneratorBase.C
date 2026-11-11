@@ -62,34 +62,44 @@ SCMCoreMeshGeneratorBase::addAssembly(const int entry, const Point & center)
 std::unique_ptr<MeshBase>
 SCMCoreMeshGeneratorBase::generate()
 {
+  std::vector<bool> used(_input_names.size(), false);
+  for (const auto & [input, _] : _assemblies)
+    used[input] = true;
+  for (const auto i : index_range(_input_names))
+    if (!used[i])
+      paramWarning("inputs", "Input '", _input_names[i], "' is not used in 'pattern'.");
+
   readAssemblySizes();
 
-  // All pairs are checked because empty positions can leave room for an assembly larger than the
-  // pitch
+  // All pairs are checked, not only neighbors, because an assembly next to an empty position may
+  // extend past its lattice cell into a farther occupied one. Every overlapping pair is reported at
+  // once so the user does not have to fix and rerun one pair at a time.
+  std::string overlaps;
   for (const auto a : index_range(_assemblies))
     for (const auto b : make_range(a + 1, _assemblies.size()))
     {
       const auto & [input_a, center_a] = _assemblies[a];
       const auto & [input_b, center_b] = _assemblies[b];
       if (overlap(input_a, input_b, center_b - center_a))
-        paramError("assembly_pitch",
-                   "Assembly ",
-                   a,
-                   " ('",
-                   _input_names[input_a],
-                   "') and assembly ",
-                   b,
-                   " ('",
-                   _input_names[input_b],
-                   "') overlap. Increase 'assembly_pitch' or use smaller assemblies.");
+        overlaps += "\n  Assembly " + std::to_string(a) + " ('" + _input_names[input_a] +
+                    "') and assembly " + std::to_string(b) + " ('" + _input_names[input_b] + "')";
     }
+  if (!overlaps.empty())
+    paramError("assembly_pitch",
+               "The following assemblies overlap. Increase 'assembly_pitch' or use smaller "
+               "assemblies.",
+               overlaps);
 
   std::vector<std::unique_ptr<MeshBase>> inputs;
   for (const auto i : index_range(_meshes))
   {
     inputs.push_back(std::move(*_meshes[i]));
     if (!inputs.back()->is_replicated())
-      paramError("inputs", "Input '", _input_names[i], "' is not a replicated mesh.");
+      paramError("inputs",
+                 "Input '",
+                 _input_names[i],
+                 "' is not a replicated mesh. SCM core meshes require a replicated mesh; run "
+                 "without --distributed-mesh.");
   }
 
   auto mesh = dynamic_pointer_cast<UnstructuredMesh>(buildMeshBaseObject());
@@ -121,6 +131,12 @@ SCMCoreMeshGeneratorBase::generate()
     }
     assembly->set_subdomain_name_map() = subdomain_names;
 
+    if (assembly->has_elem_integer("assembly_id"))
+      paramError("inputs",
+                 "Input '",
+                 _input_names[input],
+                 "' already has an 'assembly_id' extra element integer, which this mesh "
+                 "generator would overwrite.");
     const auto assembly_id_index = assembly->add_elem_integer("assembly_id");
     for (auto * const elem : assembly->element_ptr_range())
     {
@@ -148,6 +164,8 @@ SCMCoreMeshGeneratorBase::generate()
     for (const auto & [old_id, _] : nodeset_names)
       map_boundary(old_id);
 
+    // SCM assembly, duct, and detailed assembly meshes carry only side and node boundaries, so the
+    // edge and shellface boundaries that clear() also drops are not restored
     boundary_info.clear();
     for (const auto & [elem_id, side, old_id] : side_list)
       boundary_info.add_side(elem_id, side, libmesh_map_find(boundary_map, old_id));
