@@ -134,12 +134,14 @@ protected:
   /**
    * A routine for moving all of the solution values from a given grain to a new variable number. It
    * is called with different modes to only cache, or actually do the work, or bypass the cache
-   * altogether.
+   * altogether. remote_nodes are local nodes of the grain whose elements were flooded on other
+   * processors.
    */
   void swapSolutionValues(FeatureData & grain,
                           std::size_t new_var_index,
                           std::vector<std::map<Node *, CacheValues>> & cache,
-                          RemapCacheMode cache_mode);
+                          RemapCacheMode cache_mode,
+                          const std::set<Node *> & remote_nodes);
 
   /**
    * Helper method for actually performing the swaps.
