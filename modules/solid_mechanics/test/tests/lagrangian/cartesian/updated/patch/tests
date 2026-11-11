@@ -5,14 +5,14 @@
     type = Exodiff
     input = 'small_patch.i'
     exodiff = 'small_patch_out.e'
-    requirement = "Small strain uniaxial patch test passes with the updated Lagrangian formulation"
+    requirement = "The system shall pass the small strain uniaxial patch test with the updated Lagrangian formulation"
     abs_zero = 1e-6
   []
   [large]
     type = Exodiff
     input = 'large_patch.i'
     exodiff = 'large_patch_out.e'
-    requirement = "Large strain uniaxial patch test passes with the updated Lagrangian formulation"
+    requirement = "The system shall pass the large strain uniaxial patch test with the updated Lagrangian formulation"
     abs_zero = 1e-6
   []
 []
