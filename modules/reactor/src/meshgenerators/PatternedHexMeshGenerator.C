@@ -602,8 +602,9 @@ PatternedHexMeshGenerator::generate()
   std::vector<std::vector<Real>> control_drum_azimuthals;
 
   std::unique_ptr<ReplicatedMesh> out_mesh;
-  // Every site is placed as its own copy and the copies are stitched pairwise, which avoids
-  // repeatedly stitching onto one growing mesh
+  // The cells of each row are stitched pairwise into one row mesh, and the row meshes are then
+  // stitched pairwise into the full pattern, which avoids repeatedly stitching onto one growing
+  // mesh
   std::vector<std::unique_ptr<ReplicatedMesh>> row_meshes;
   std::map<subdomain_id_type, std::string> placed_subdomain_map;
   const auto stitching_boundary_id_of = [](const MeshBase &)
@@ -638,10 +639,14 @@ PatternedHexMeshGenerator::generate()
       const auto pattern = _pattern[i][j];
       ReplicatedMesh & pattern_mesh = *meshes[pattern];
 
-      // The left site of each pair of neighboring sites in a row is a copy of its input mesh, since
-      // it absorbs the right site and is kept while later sites are placed. The right site is only
-      // read by the stitch, so an interior one is stitched straight from its input mesh, moved
-      // into place and back, instead of being copied
+      // This loop performs the first level of the pairwise stitching of the row. Cells with an
+      // even index j are the left cell of a pair: each absorbs the cell to its right and is kept,
+      // so it is a copy of its input mesh that is added to placed_meshes. A cell with an odd index
+      // is the right cell of a pair and is only read by the stitch, so an interior one is
+      // stitched into the preceding entry of placed_meshes straight from its input mesh, which is
+      // moved into place and back, instead of being copied. Cells on the periphery are always
+      // copied because addPeripheralMesh modifies them. stitchMeshesPairwise performs the
+      // remaining levels of the stitching.
       bool stitch_from_input = false;
       std::unique_ptr<ReplicatedMesh> placed_mesh;
 
@@ -658,8 +663,8 @@ PatternedHexMeshGenerator::generate()
         // The array is only filled when core metadata is generated
         const dof_id_type drum_id =
             (add_drum_id && is_control_drum_array[pattern]) ? control_drum_azimuthals.size() : 0;
-        // The first site adds the integer to its copy only; every other site adds it to the shared
-        // input mesh before copying, so that later sites of the same input inherit it
+        // The first cell adds the integer to its copy only; every other cell adds it to the shared
+        // input mesh before copying, so that later cells of the same input inherit it
         if (add_drum_id && !(i == 0 && j == 0))
           pattern_mesh.add_elem_integer("control_drum_id", true, drum_id);
         stitch_from_input = (j % 2 == 1);
@@ -788,7 +793,7 @@ PatternedHexMeshGenerator::generate()
                                             TOLERANCE,
                                             /*clear_stitched_boundary_ids=*/false,
                                             /*verbose=*/false);
-        // Move the input mesh back so that the other sites that use it find it at the origin
+        // Move the input mesh back so that the other cells that use it find it at the origin
         MeshTools::Modification::translate(pattern_mesh, -(deltax + j * input_pitch), -deltay, 0);
         if (_use_interface_boundary_id_shift)
           reassignBoundaryIDs(pattern_mesh,
@@ -810,6 +815,7 @@ PatternedHexMeshGenerator::generate()
       placed_meshes.push_back(std::move(placed_mesh));
     }
 
+    // Stitch the cells of this row into one row mesh
     row_meshes.push_back(MooseMeshUtils::stitchMeshesPairwise(std::move(placed_meshes),
                                                               stitching_boundary_id_of,
                                                               stitching_boundary_id_of,
@@ -817,6 +823,7 @@ PatternedHexMeshGenerator::generate()
                                                               /*verbose=*/false));
   }
 
+  // Stitch the row meshes into the full pattern
   out_mesh = MooseMeshUtils::stitchMeshesPairwise(std::move(row_meshes),
                                                   stitching_boundary_id_of,
                                                   stitching_boundary_id_of,

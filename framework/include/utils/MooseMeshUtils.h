@@ -661,7 +661,7 @@ std::vector<unsigned int> nodalQuadraturePointToNodeMap(const Elem & elem,
 
 /**
  * Stitch a list of meshes into one by repeatedly stitching neighboring pairs, so that the cost
- * is O(N log N) in the number of elements instead of the O(N^2) of stitching each mesh onto one
+ * is O(N log N) in the number of meshes N instead of the O(N^2) of stitching each mesh onto one
  * growing mesh. The left mesh of each pair absorbs the right one, and a stitch appends the
  * elements of the right mesh after those of the left, so the elements of the result are those of
  * meshes[0], then meshes[1], and so on. A node shared by several meshes keeps the copy of the
