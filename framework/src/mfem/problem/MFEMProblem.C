@@ -76,7 +76,14 @@ MFEMProblem::MFEMProblem(const InputParameters & params)
     _solution_state_data(declareRestartableDataWithContext<Moose::MFEM::SolutionState>(
         "mfem_solution_state", &_problem_data))
 {
-  // Initialise Hypre for all MFEM problems.
+  // Initialize a dummy PETSc hypre PC to consume options such as -hypre_umpire_device_pool_size.
+  {
+    PC pc;
+    LibmeshPetscCall(PCCreate(PETSC_COMM_SELF, &pc));
+    LibmeshPetscCall(PCSetType(pc, PCHYPRE));
+    LibmeshPetscCall(PCDestroy(&pc));
+  }
+  // Initialize Hypre for all MFEM problems.
   mfem::Hypre::Init();
   setMesh();
 }

@@ -150,7 +150,7 @@ coil_conductivity = 1.0
   []
   [source]
     type = MFEMMixedGradGradKernel
-    trial_variable = coil_external_potential
+    coupled_variable = coil_external_potential
     variable = coil_induced_potential
     coefficient = conductivity
     block = 'transition_dom'

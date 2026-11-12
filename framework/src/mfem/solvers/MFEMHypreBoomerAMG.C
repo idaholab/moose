@@ -53,8 +53,6 @@ MFEMHypreBoomerAMG::validParams()
       0.25,
       "HypreBoomerAMG strong threshold. Defaults to 0.25, or to 0.5 when vector_treatment is "
       "'by_component' or 'rigid_body_modes'.");
-  MooseEnum errmode("ignore=0 warn=1 abort=2", "abort");
-  params.addParam<MooseEnum>("error_mode", errmode, "Set the behavior for treating hypre errors.");
   return params;
 }
 
@@ -94,7 +92,13 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
   ConstructSolver();
 }
 
-MFEMHypreBoomerAMG::~MFEMHypreBoomerAMG() { _solver.reset(); }
+MFEMHypreBoomerAMG::~MFEMHypreBoomerAMG()
+{
+  _solver.reset();
+  // Like mfem, ignore hypre_ParCSRComputeL1Norms reporting zero rows in the l1 norm as an error
+  if (_vector_treatment == VectorTreatment::RIGID_BODY_MODES && !mfem::HypreUsingGPU())
+    HYPRE_ClearError(12);
+}
 
 void
 MFEMHypreBoomerAMG::ConstructSolver()
@@ -111,7 +115,6 @@ MFEMHypreBoomerAMG::SetSolverParameters(mfem::HypreBoomerAMG & solver)
   solver.SetTol(getParam<mfem::real_t>("l_tol"));
   solver.SetMaxIter(getParam<int>("l_max_its"));
   solver.SetPrintLevel(getParam<int>("print_level"));
-  solver.SetErrorMode(mfem::HypreSolver::ErrorMode(int(getParam<MooseEnum>("error_mode"))));
 
   switch (_vector_treatment)
   {
