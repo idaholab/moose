@@ -18,7 +18,7 @@
  *
  *   coef * dA/dt
  *
- * Used for the magnetoquasistatic EM equation:
+ * An example of use is the magnetoquasistatic EM equation:
  *
  *   mu0 * sigma * dA/dt = nabla^2 A + mu0 * J
  *
