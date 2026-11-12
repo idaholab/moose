@@ -9,6 +9,7 @@
 
 #include "ComputeDynamicWeightedGapLMMechanicalContact.h"
 #include "MortarContactUtils.h"
+#include "MortarNodalFrames.h"
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "AutomaticMortarGeneration.h"
@@ -77,6 +78,9 @@ ComputeDynamicWeightedGapLMMechanicalContact::validParams()
       "the value of c effectively depends on element size since in the constraint we compare nodal "
       "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
       "element size, where integrated values are dependent on element size).");
+  // The nodal normal at a secondary node depends on every face incident to it, so the Jacobian
+  // needs the secondary face point-neighbor ghosted and coupled.
+  params.set<bool>("ghost_point_neighbors") = true;
   params.set<bool>("use_displaced_mesh") = true;
   params.set<bool>("interpolate_normals") = false;
   return params;
@@ -110,11 +114,26 @@ ComputeDynamicWeightedGapLMMechanicalContact::ComputeDynamicWeightedGapLMMechani
     _newmark_beta(getParam<Real>("newmark_beta")),
     _newmark_gamma(getParam<Real>("newmark_gamma")),
     _t_step_old(declareRestartableData<int>("t_step_old", 0)),
-    _retried_timestep(false)
+    _retried_timestep(false),
+    _nodal_frames(std::array<const MooseVariable *, 3>{{_disp_x_var, _disp_y_var, _disp_z_var}})
 {
   if (!useDual())
     mooseError("Dynamic mortar contact constraints requires the use of Lagrange multipliers dual "
                "interpolation");
+
+  if (getParam<bool>("interpolate_normals"))
+    paramError("interpolate_normals",
+               "Mechanical mortar contact uses normalized secondary nodal normals and cannot be "
+               "combined with quadrature-point normal interpolation.");
+}
+
+void
+ComputeDynamicWeightedGapLMMechanicalContact::initialSetup()
+{
+  ADMortarConstraint::initialSetup();
+
+  Moose::Mortar::checkNodalNormalDisplacements(
+      *this, {{_disp_x_var, _disp_y_var, _disp_z_var}}, _sys);
 }
 
 void
@@ -210,12 +229,17 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpIProperties()
                               ? cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                               : cast_ptr<const DofObject *>(_lower_secondary_elem);
 
+  const auto & normal = _nodal_frames.normal(amg(),
+                                             _lower_secondary_elem->node_ref(_i),
+                                             _normals[_i],
+                                             Moose::doDerivatives(_subproblem, _sys));
+
   // Regular normal contact constraint: Use before contact is established for contact detection
-  _dof_to_weighted_gap[dof].first += _test[_i][_qp] * (_qp_gap_nodal * _normals[_i]);
+  _dof_to_weighted_gap[dof].first += _test[_i][_qp] * (_qp_gap_nodal * normal);
 
   // Integrated part of the "persistency" constraint
-  _dof_to_weighted_gap_dynamics[dof] += _test[_i][_qp] * _qp_gap_nodal_dynamics * _normals[_i];
-  _dof_to_velocity[dof] += _test[_i][_qp] * _qp_velocity * _normals[_i];
+  _dof_to_weighted_gap_dynamics[dof] += _test[_i][_qp] * _qp_gap_nodal_dynamics * normal;
+  _dof_to_velocity[dof] += _test[_i][_qp] * _qp_velocity * normal;
 
   _dof_to_nodal_wear_depth[dof] += _test[_i][_qp] * _wear_depth[_qp] * _JxW_msm[_qp] * _coord[_qp];
 
@@ -259,6 +283,7 @@ ComputeDynamicWeightedGapLMMechanicalContact::residualSetup()
   _dof_to_weighted_gap.clear();
   _dof_to_weighted_gap_dynamics.clear();
   _dof_to_velocity.clear();
+  _nodal_frames.clear();
 
   // Wear
   _dof_to_nodal_wear_depth.clear();

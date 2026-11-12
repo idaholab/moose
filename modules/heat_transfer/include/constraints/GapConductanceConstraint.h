@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ADMortarConstraint.h"
+#include "MortarNodalFrames.h"
 
 /**
  * This Constraint implements thermal contact using a "gap
@@ -53,11 +54,24 @@ public:
 
   GapConductanceConstraint(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+  virtual void residualSetup() override;
+  virtual void jacobianSetup() override;
+
 protected:
   /**
    * Computes the residual for the LM equation, lambda = (k/l)*(T^(1) - PT^(2)).
    */
   virtual ADReal computeQpResidual(Moose::MortarType mortar_type) override;
+
+  /**
+   * @return The normal at the current quadrature point. Its displacement derivatives are included
+   * while assembling the Jacobian when the displacements allow it.
+   */
+  const ADRealVectorValue & qpNormal();
+
+  /// @return The x, y, and z displacement variables; missing components are null
+  std::array<const MooseVariable *, 3> displacementVariables() const;
 
   /// Thermal conductivity of the gap medium (e.g. air).
   const Real _k;
@@ -71,4 +85,20 @@ protected:
   std::vector<const ADVariableValue *> _disp_secondary;
   std::vector<const ADVariableValue *> _disp_primary;
   ///@}
+
+  /// Secondary nodal normals with their displacement derivatives
+  Moose::Mortar::ADNodalFrames _nodal_frames;
+
+  /// Whether the displacement derivatives of the normals can be included, i.e. whether the
+  /// displacements are nodal variables of this constraint's nonlinear system
+  bool _normal_derivatives = false;
+
+  /// The secondary element of \p _qp_normals
+  const Elem * _qp_normals_elem = nullptr;
+
+  /// The reference points of \p _qp_normals on \p _qp_normals_elem
+  std::vector<Point> _qp_normals_xi;
+
+  /// The normals at the quadrature points of \p _qp_normals_elem
+  std::vector<ADRealVectorValue> _qp_normals;
 };
