@@ -157,6 +157,15 @@ ReferenceResidualConvergence::initialSetup()
                  "variable ",
                  _group_variables[i][0],
                  " is not grouped with other variables.");
+    for (const auto & var_name : _group_variables[i])
+      if (std::find(_soln_var_names.begin(), _soln_var_names.end(), var_name) ==
+          _soln_var_names.end())
+        paramError("group_variables",
+                   "Variable '",
+                   var_name,
+                   "' is not a variable of the nonlinear system '",
+                   s.name(),
+                   "'.");
   }
 
   // If no groups, size = n_soln_vars
