@@ -29,6 +29,16 @@ struct Ctx
   SubChannel1PhaseProblem * schp;
 };
 
+namespace
+{
+/// Crossflow [kg/s] below which the donor-cell density of the lateral momentum residual is
+/// averaged instead of taken from the upwind channel. The donor switch at Wij = 0 makes the
+/// residual discontinuous, and the finite-difference step of the matrix-free Jacobian of the
+/// crossflow solve is comparable to the many crossflows that are nearly zero, so it would
+/// otherwise cross the switch. The value is well below the smallest crossflows of interest.
+constexpr Real donor_cell_deadband = 1e-6;
+}
+
 PetscErrorCode
 formFunction(SNES, Vec x, Vec f, void * ctx)
 {
@@ -887,10 +897,13 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto Sj = (*_S_flow_soln)(node_in_j);
           Real u_star = 0.0;
           // figure out donor axial velocity
-          if (_Wij(i_gap, iz) > 0.0)
+          if (_Wij(i_gap, iz) > donor_cell_deadband)
             u_star = (*_mdot_soln)(node_out_i) / Si / rho_i;
-          else
+          else if (_Wij(i_gap, iz) < -donor_cell_deadband)
             u_star = (*_mdot_soln)(node_out_j) / Sj / rho_j;
+          else
+            u_star = 0.5 * ((*_mdot_soln)(node_out_i) / Si / rho_i +
+                            (*_mdot_soln)(node_out_j) / Sj / rho_j);
 
           crossflow_term +=
               _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * u_star;
@@ -1088,13 +1101,23 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto S_j =
               computeInterpolatedValue((*_S_flow_soln)(node_out_j), (*_S_flow_soln)(node_in_j), Pe);
           auto u_star = 0.0;
-          // figure out donor axial velocity
-          if (_Wij(i_gap, cross_index) > 0.0)
+          // figure out donor axial velocity; a crossflow within the deadband of zero splits its
+          // contribution evenly between the two channels instead of picking one as the donor. The
+          // deadband only matters for the segregated solve, where this term is also evaluated
+          // under the finite-difference perturbations of the crossflow SNES; the monolithic solve
+          // assembles this matrix directly from the converged Wij and has no reason to widen the
+          // donor-cell switch beyond Wij = 0
+          const Real local_deadband = _segregated_bool ? donor_cell_deadband : 0.0;
+          const bool donor_i = _Wij(i_gap, cross_index) > local_deadband;
+          const bool donor_j = _Wij(i_gap, cross_index) < -local_deadband;
+          const Real weight_i = donor_j ? 0.0 : (donor_i ? 1.0 : 0.5);
+          const Real weight_j = donor_i ? 0.0 : (donor_j ? 1.0 : 0.5);
+          if (weight_i > 0.0)
           {
             if (iz == first_node)
             {
               u_star = (*_mdot_soln)(node_in_i) / S_i / rho_i;
-              PetscScalar value_vec_ct = -1.0 * alpha *
+              PetscScalar value_vec_ct = -1.0 * weight_i * alpha *
                                          _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                          _Wij(i_gap, cross_index) * u_star;
               PetscInt row_vec_ct = i_ch + _n_channels * iz_ind;
@@ -1103,14 +1126,15 @@ SubChannel1PhaseProblem::computeDP(int iblock)
             }
             else
             {
-              PetscScalar value_ct = alpha * _subchannel_mesh.getCrossflowSign(i_ch, counter) *
+              PetscScalar value_ct = weight_i * alpha *
+                                     _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                      _Wij(i_gap, cross_index) / S_i / rho_i;
               PetscInt row_ct = i_ch + _n_channels * iz_ind;
               PetscInt col_ct = ii_ch + _n_channels * (iz_ind - 1);
               LibmeshPetscCall(MatSetValues(
                   _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES));
             }
-            PetscScalar value_ct = (1.0 - alpha) *
+            PetscScalar value_ct = weight_i * (1.0 - alpha) *
                                    _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                    _Wij(i_gap, cross_index) / S_i / rho_i;
             PetscInt row_ct = i_ch + _n_channels * iz_ind;
@@ -1118,12 +1142,12 @@ SubChannel1PhaseProblem::computeDP(int iblock)
             LibmeshPetscCall(MatSetValues(
                 _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES));
           }
-          else if (_Wij(i_gap, cross_index) < 0.0) // _Wij=0 operations not necessary
+          if (weight_j > 0.0)
           {
             if (iz == first_node)
             {
               u_star = (*_mdot_soln)(node_in_j) / S_j / rho_j;
-              PetscScalar value_vec_ct = -1.0 * alpha *
+              PetscScalar value_vec_ct = -1.0 * weight_j * alpha *
                                          _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                          _Wij(i_gap, cross_index) * u_star;
               PetscInt row_vec_ct = i_ch + _n_channels * iz_ind;
@@ -1132,14 +1156,15 @@ SubChannel1PhaseProblem::computeDP(int iblock)
             }
             else
             {
-              PetscScalar value_ct = alpha * _subchannel_mesh.getCrossflowSign(i_ch, counter) *
+              PetscScalar value_ct = weight_j * alpha *
+                                     _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                      _Wij(i_gap, cross_index) / S_j / rho_j;
               PetscInt row_ct = i_ch + _n_channels * iz_ind;
               PetscInt col_ct = jj_ch + _n_channels * (iz_ind - 1);
               LibmeshPetscCall(MatSetValues(
                   _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES));
             }
-            PetscScalar value_ct = (1.0 - alpha) *
+            PetscScalar value_ct = weight_j * (1.0 - alpha) *
                                    _subchannel_mesh.getCrossflowSign(i_ch, counter) *
                                    _Wij(i_gap, cross_index) / S_j / rho_j;
             PetscInt row_ct = i_ch + _n_channels * iz_ind;
@@ -1575,9 +1600,9 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         auto DPij = (*_P_soln)(node_in_i) - (*_P_soln)(node_in_j);
         // Figure out donor cell density
         auto rho_star = 0.0;
-        if (_Wij(i_gap, iz) > 0.0)
+        if (_Wij(i_gap, iz) > donor_cell_deadband)
           rho_star = rho_i;
-        else if (_Wij(i_gap, iz) < 0.0)
+        else if (_Wij(i_gap, iz) < -donor_cell_deadband)
           rho_star = rho_j;
         else
           rho_star = (rho_i + rho_j) / 2.0;
@@ -1644,11 +1669,15 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
         auto Lij = pitch;
 
-        // Figure out donor cell density
+        // Figure out donor cell density. The deadband only matters for the segregated solve,
+        // where this residual is also evaluated under the finite-difference perturbations of the
+        // crossflow SNES; the monolithic solve assembles this matrix directly from the converged
+        // Wij and has no reason to widen the donor-cell switch beyond Wij = 0
+        const Real local_deadband = _segregated_bool ? donor_cell_deadband : 0.0;
         auto rho_star = 0.0;
-        if (_Wij(i_gap, iz) > 0.0)
+        if (_Wij(i_gap, iz) > local_deadband)
           rho_star = rho_i_interp;
-        else if (_Wij(i_gap, iz) < 0.0)
+        else if (_Wij(i_gap, iz) < -local_deadband)
           rho_star = rho_j_interp;
         else
           rho_star = (rho_i_interp + rho_j_interp) / 2.0;
@@ -2054,6 +2083,13 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   LibmeshPetscCall(KSPGetPC(ksp, &pc));
   LibmeshPetscCall(PCSetType(pc, PCNONE));
   LibmeshPetscCall(KSPSetTolerances(ksp, _rtol, _atol, _dtol, _maxit));
+  // Large restart because the crossflow Krylov history stagnates at the PETSc default of 30
+  LibmeshPetscCall(KSPSetType(ksp, KSPGMRES));
+  LibmeshPetscCall(KSPGMRESSetRestart(ksp, 1000));
+  // Absolute tolerance so that an already-converged crossflow is not reported as a failed line
+  // search; the PETSc default of 1e-50 is never reached and the line search fails at round-off
+  LibmeshPetscCall(
+      SNESSetTolerances(snes, 1e-10, PETSC_CURRENT, PETSC_CURRENT, PETSC_CURRENT, PETSC_CURRENT));
   LibmeshPetscCall(SNESSetFromOptions(snes));
   LibmeshPetscCall(VecGetArray(x, &xx));
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
@@ -2063,9 +2099,6 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   LibmeshPetscCall(VecRestoreArray(x, &xx));
 
   LibmeshPetscCall(SNESSolve(snes, NULL, x));
-  // A diverged solve leaves x at its initial guess, which is then used as the crossflow of this
-  // iteration. Report it rather than stopping, since the unpreconditioned linear solve can break
-  // down near convergence
   SNESConvergedReason reason;
   LibmeshPetscCall(SNESGetConvergedReason(snes, &reason));
   if (reason < 0)
@@ -2074,15 +2107,16 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
     PetscReal residual_norm;
     LibmeshPetscCall(SNESGetIterationNumber(snes, &iterations));
     LibmeshPetscCall(SNESGetFunctionNorm(snes, &residual_norm));
-    mooseWarning("Crossflow nonlinear solve did not converge: ",
-                 SNESConvergedReasons[reason],
-                 " (",
-                 static_cast<int>(reason),
-                 ") after ",
-                 iterations,
-                 " iterations; residual norm = ",
-                 residual_norm,
-                 ". The crossflow of this iteration is not updated.");
+    mooseError(name(),
+               ": Crossflow nonlinear solve did not converge: ",
+               SNESConvergedReasons[reason],
+               " (",
+               static_cast<int>(reason),
+               ") after ",
+               iterations,
+               " iterations; residual norm = ",
+               residual_norm,
+               ".");
   }
   LibmeshPetscCall(VecGetArray(x, &xx));
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)

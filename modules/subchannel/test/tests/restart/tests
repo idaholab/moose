@@ -4,28 +4,60 @@
   [steady]
     type = CSVDiff
     input = steady.i
-    csvdiff = 'steady_out.csv steady_out_fluid_0001.csv steady_out_pins_0001.csv'
+    csvdiff = 'steady_out.csv steady_out_pins_0001.csv'
     recover = false
     abs_zero = 1e-7
     max_threads = 1
-    # The crossflow solve does not converge in every iteration; remove once #34306 is fixed
-    allow_warnings = true
     requirement = 'The system shall be able to restart after a steady state solution'
+  []
+  [steady_fluid]
+    type = CSVDiff
+    input = steady.i
+    csvdiff = 'steady_out_fluid_0001.csv'
+    prereq = 'steady'
+    should_execute = false
+    delete_output_before_running = false
+    abs_zero = 1e-7
+    # SumWij is the sum of several comparable, opposite-sign crossflows into a channel, and it
+    # is close to that same cancellation everywhere along this channel's profile (its smallest
+    # values run from about 7e-6 to 1e-4 kg/s), so platform-dependent summation order moves it by
+    # about 1e-9 kg/s at any row, not only where it happens to cross zero. 5e-4 relative clears
+    # that noise with a few times margin at the smallest values while still catching a crossflow
+    # error of that size, which is far below the 1.1e-5 to 1.3e-2 kg/s crossflows this column
+    # otherwise reports
+    override_columns = 'SumWij'
+    override_rel_err = '5e-4'
+    override_abs_zero = '1e-7'
+    max_threads = 1
+    requirement = 'The system shall be able to restart after a steady state solution, including the '
+                  'mass flow rate field'
   []
   [transient]
     type = CSVDiff
     input = transient.i
-    csvdiff = 'transient_out.csv transient_out_fluid_0000.csv transient_out_fluid_0001.csv
-               transient_out_fluid_0002.csv transient_out_pins_0000.csv transient_out_pins_0001.csv
+    csvdiff = 'transient_out.csv transient_out_pins_0000.csv transient_out_pins_0001.csv
                transient_out_pins_0002.csv'
-    prereq = 'steady'
+    prereq = 'steady_fluid'
     abs_zero = 5e-6
+    requirement = 'The system shall be able to restart a transient from a steady state solution. '
+                  'The time = 0 outputs must match the final steady outputs'
+  []
+  [transient_fluid]
+    type = CSVDiff
+    input = transient.i
+    csvdiff = 'transient_out_fluid_0000.csv transient_out_fluid_0001.csv transient_out_fluid_0002.csv'
+    prereq = 'transient'
+    should_execute = false
+    delete_output_before_running = false
+    abs_zero = 5e-6
+    # Same cancellation-driven noise in SumWij as 'steady_fluid' above
+    override_columns = 'SumWij'
+    override_rel_err = '5e-4'
+    override_abs_zero = '1e-7'
     max_threads = 1
-    # The crossflow solve does not converge in every iteration; remove once #34306 is fixed
-    allow_warnings = true
-    # The time = 0 outputs (row 0 of transient_out.csv and the *_0000.csv files)
-    # must match the final steady outputs
-    requirement = 'The system shall be able to restart a transient from a steady state solution'
+    requirement = 'The system shall be able to restart a transient from a steady state solution, '
+                  'including the mass flow rate field. The time = 0 outputs must match the final '
+                  'steady outputs'
   []
   [transient_time_integrator_warning]
     type = RunApp
