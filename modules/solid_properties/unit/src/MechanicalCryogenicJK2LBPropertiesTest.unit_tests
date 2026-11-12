@@ -1,0 +1,20 @@
+[Tests]
+  design = 'MechanicalCryogenicJK2LBProperties.md'
+  issues = '#33677'
+
+  [E]
+    type = GoogleTest
+    unit_test = MechanicalCryogenicJK2LBPropertiesTest.E
+    requirement = 'The system shall compute Young\'s modulus for JK2LB steel using a linear correlation from PPPL-4687 and verify analytical derivatives against finite differences.'
+  []
+  [nu]
+    type = GoogleTest
+    unit_test = MechanicalCryogenicJK2LBPropertiesTest.nu
+    requirement = 'The system shall compute Poisson\'s ratio for JK2LB steel as a constant value from Lu et al. (2009) and verify analytical derivatives against finite differences.'
+  []
+  [alpha]
+    type = GoogleTest
+    unit_test = MechanicalCryogenicJK2LBPropertiesTest.alpha
+    requirement = 'The system shall compute thermal expansion coefficient for JK2LB steel using a quintic polynomial fit to strain data from Lu et al. (2009) and verify analytical derivatives against finite differences.'
+  []
+[]

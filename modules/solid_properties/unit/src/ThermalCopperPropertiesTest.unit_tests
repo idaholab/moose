@@ -1,0 +1,25 @@
+[Tests]
+  design = 'ThermalCopperProperties.md'
+  issues = '#33677'
+
+  [k_rrr100]
+    type = GoogleTest
+    unit_test = ThermalCopperPropertiesTest.k_rrr100
+    requirement = 'The system shall compute thermal conductivity for OFHC copper with default RRR=100 and verify analytical derivatives against finite differences.'
+  []
+  [cp]
+    type = GoogleTest
+    unit_test = ThermalCopperPropertiesTest.cp
+    requirement = 'The system shall compute isobaric specific heat capacity for OFHC copper and verify analytical derivatives against finite differences.'
+  []
+  [e]
+    type = GoogleTest
+    unit_test = ThermalCopperPropertiesTest.e
+    requirement = 'The system shall compute specific internal energy for OFHC copper by integrating specific heat capacity and verify thermodynamic consistency.'
+  []
+  [rho]
+    type = GoogleTest
+    unit_test = ThermalCopperPropertiesTest.rho
+    requirement = 'The system shall compute density for OFHC copper as a constant value and verify analytical derivatives against finite differences.'
+  []
+[]

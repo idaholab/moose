@@ -1,0 +1,25 @@
+[Tests]
+  design = 'ThermalCryogenicJK2LBProperties.md'
+  issues = '#33677'
+
+  [k]
+    type = GoogleTest
+    unit_test = ThermalCryogenicJK2LBPropertiesTest.k
+    requirement = 'The system shall compute thermal conductivity for JK2LB steel using log-polynomial correlations and verify analytical derivatives against finite differences.'
+  []
+  [cp]
+    type = GoogleTest
+    unit_test = ThermalCryogenicJK2LBPropertiesTest.cp
+    requirement = 'The system shall compute isobaric specific heat capacity for JK2LB steel using log-polynomial correlations and verify analytical derivatives against finite differences.'
+  []
+  [e]
+    type = GoogleTest
+    unit_test = ThermalCryogenicJK2LBPropertiesTest.e
+    requirement = 'The system shall compute specific internal energy for JK2LB steel by numerically integrating specific heat capacity and verify thermodynamic consistency.'
+  []
+  [rho]
+    type = GoogleTest
+    unit_test = ThermalCryogenicJK2LBPropertiesTest.rho
+    requirement = 'The system shall compute density for JK2LB steel as a constant value and verify analytical derivatives against finite differences.'
+  []
+[]
