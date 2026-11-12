@@ -13,29 +13,42 @@
 #include "DerivativeMaterialInterface.h"
 
 /**
- * ComputeVariableEigenstrain computes an Eigenstrain that is a function of
- * variables defined by a base tensor and a scalar function defined in a Derivative Material.
+ * Computes an eigenstrain whose scalar prefactor is supplied by a material property.
+ *
+ * The AD specialization obtains the prefactor and its AD derivatives through the AD material
+ * property. The non-AD specialization obtains the prefactor derivatives from derivative material
+ * properties and publishes the corresponding first and second derivatives of elastic_strain.
  */
-class ComputeVariableEigenstrain : public DerivativeMaterialInterface<ComputeEigenstrain>
+template <bool is_ad>
+class ComputeVariableEigenstrainTempl
+  : public DerivativeMaterialInterface<ComputeEigenstrainTempl<is_ad>>
 {
 public:
   static InputParameters validParams();
 
-  ComputeVariableEigenstrain(const InputParameters & parameters);
+  ComputeVariableEigenstrainTempl(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpEigenstrain();
+  virtual void computeQpEigenstrain() override;
 
-  /// number of variables the prefactor depends on
+  /// Number of variables on which the prefactor material property depends
   const unsigned int _num_args;
 
-  /// first derivatives of the prefactor w.r.t. to the args
+  /// Names of the variables on which the prefactor material property depends
+  std::vector<VariableName> _arg_names;
+
+  /// First derivatives of the prefactor material property (non-AD only)
   std::vector<const MaterialProperty<Real> *> _dprefactor;
-  /// second derivatives of the prefactor w.r.t. to the args
+
+  /// Second derivatives of the prefactor material property (non-AD only)
   std::vector<std::vector<const MaterialProperty<Real> *>> _d2prefactor;
 
-  /// first derivatives of the elastic strain w.r.t. to the args
+  /// First derivatives of elastic_strain with respect to args (non-AD only)
   std::vector<MaterialProperty<RankTwoTensor> *> _delastic_strain;
-  /// second derivatives of the elastic strain w.r.t. to the args
+
+  /// Second derivatives of elastic_strain with respect to args (non-AD only)
   std::vector<std::vector<MaterialProperty<RankTwoTensor> *>> _d2elastic_strain;
 };
+
+typedef ComputeVariableEigenstrainTempl<false> ComputeVariableEigenstrain;
+typedef ComputeVariableEigenstrainTempl<true> ADComputeVariableEigenstrain;
