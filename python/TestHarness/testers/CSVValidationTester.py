@@ -7,13 +7,13 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from FileTester import FileTester
-from TestHarness import util
-from mooseutils.csvdiff import CSVTools
-from mooseutils import colorText
-import os
 import math
+import os
 import statistics
+
+from FileTester import FileTester
+from mooseutils import colorText
+from mooseutils.csvdiff import CSVTools
 
 
 def diff_files(gold_file, out_file, err_type="relative"):
@@ -22,7 +22,6 @@ def diff_files(gold_file, out_file, err_type="relative"):
 
     'time' column is ignored
     """
-
     found_column = {}
 
     csv = CSVTools()
@@ -147,7 +146,9 @@ class CSVValidationTester(FileTester):
                 gold_file = os.path.join(
                     self.getTestDir(), self.specs["gold_dir"], file
                 )
-                out_file = os.path.join(self.getTestDir(), file)
+                out_file = os.path.join(
+                    self.getTestDir(), self.specs["output_dir"], file
+                )
                 mean, std = diff_files(gold_file, out_file, self.specs["err_type"])
 
                 computed = ""
