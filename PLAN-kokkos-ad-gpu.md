@@ -1,7 +1,6 @@
 # Handoff: Kokkos AD GPU work on PR #34088 (arco, updated 2026-11-12)
 
-Status: branch at `2709e503f9d` (steps 0-10, step 10 without a commit). Next: step 10b. Updated
-2026-11-12.
+Status: branch at `c9d341fd322` (steps 0-10b). Next: step 12. Updated 2026-11-12.
 Git tracks this document on the feature branch. Commit it alone with a `PLAN:` subject, and drop
 those commits before the merge. Relative paths outside the MOOSE tree, such as `profiles/`,
 `scripts/`, `patches/`, `ptx/`, `logs/`, `runs/`, and `archive/`, are under `moose-stack-build/`
@@ -14,22 +13,16 @@ Branch `kokkos-reference-configuration` in `/ibmstor/scratch/lindad/projects/moo
 is idaholab/moose#34088. NamjaeChoi left a performance review on it. Answer it with measurements
 once the design work below is final. Do not reply yet.
 
-**Next: step 10b**, a v3 probe of the step 10 qp slices (see "Step 10 result"). The user approved
-it (2026-11-12).
+**Next: step 12**, finish the reply to NamjaeChoi. First action: read
+`moose-stack-build/review-reply-34088.md` and list its `TODO(user)` markers. Then:
 
-1. Apply `patches/step10/residual-qp-slices-v2.patch` to the main tree. For `residual_slices == 1`,
-   restore the original serial residual loop. Take it from
-   `git show 2709e503f9d:framework/include/kokkos/base/KokkosResidualObject.h`: it is the
-   `computing_residual` block before the Jacobian. The sliced path stays after the Jacobian.
-2. Before the sweep, compare the displaced `ResidualLoop` register counts of v1, v2 and v3 with
-   `cuobjdump -res-usage <lib>.so | c++filt` (see "Profiling setup"). v1 has 93, v2 has 104, and
-   `HEAD` has 91. Find what v2 changed that costs registers, and fix it in v3 until the count is
-   near 93.
-3. Build and test (`build_and_test.sbatch`, AD regex, `cuda`). Then run the sweep `nsys-v19` and
-   compare it with `nsys-v16`.
+1. Ask the user whether to remove the aliases in this PR (`index.md:113`).
+2. Draft the p-refinement scratch sizing issue with the `issue-create` skill. File it only after
+   approval.
+3. Fill the `TODO(user)` markers with the step 8-10b results. Add step 8, 8d and later rows to the
+   step tables from `profiles/nsys-v19` (`step_table.sh`, `launch_compare.py`).
 
-Exit: commit when no AD launch is more than 3% slower than in `nsys-v16`. If the displaced
-`ResidualLoop` still regresses, report the register cause to the user before you commit.
+Exit: the user approves the reply text. Do not post it without approval.
 
 The draft reply is `moose-stack-build/review-reply-34088.md`. It answers all 10 inline comments
 (`gh api repos/idaholab/moose/pulls/34088/comments`) and holds the per-step time and ratio tables.
@@ -51,8 +44,8 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 ### Decisions
 
-- Step 10b: land the qp slices if no AD launch is more than 3% slower than `nsys-v16`. Report a
-  displaced residual regression, with its register cause, before committing it (user, 2026-11-12).
+- Step 10b: land the qp slices if no AD launch is more than 3% slower than `nsys-v16` (user,
+  2026-11-12). Met.
 - Step 10: use a hand-rolled slice reduction over the group. Do not use a Kokkos
   `ThreadVectorRange` with vector length above 1. That needs a new team and group layout, which is
   too large for this PR (user, 2026-11-12).
@@ -88,6 +81,7 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 ### Commits on this branch (newest first)
 
+- `c9d341fd322` Step 10b: AD residual qp sum split in slices over idle group threads.
 - `2709e503f9d` Step 9: AD groups aligned to half-warps when the launch has contraction planes.
 - `168e488f70c` Step 8e: datum transform reset per AD qp.
 - `4736f915264` Step 8d: AD datum out of local memory (T1).
@@ -108,44 +102,24 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 (empty)
 
-## Step 10 result (no commit, 2026-11-12)
+## Step 10b result (`c9d341fd322`, 2026-11-12)
 
-Probe of NamjaeChoi's inner `parallel_reduce` over qps for the AD residual. Groups are hand-rolled
-sub-teams, so a Kokkos `ThreadVectorRange` reduce does not map onto them (vector length 1). The
-probes split the qps of test function i into slices, one thread per (i, slice), and sum the
-partials through the qp scratch after a barrier. The residual moves after the Jacobian, so it can
-overwrite the qp scratch. Slices at 8 test functions: q8 1, q27 3 (R) or 4 (R&J), q64 8. Both
-probes pass the AD tests 34/34 (jobs 13706, 13723). Tree reverted to `HEAD`.
+Qp slices for the AD residual (reply to NamjaeChoi's inner `parallel_reduce`). Groups are
+hand-rolled sub-teams, so a Kokkos `ThreadVectorRange` reduce does not map onto them. With
+`ADScratchLayout::residual_slices > 1`, one thread per (i, slice) sums a strided qp subset. The
+partials go through the qp scratch after the Jacobian. One slice keeps the serial loop. Slices at
+8 test functions: q8 1, q27 3 (R) or 4 (R&J), q64 8. AD tests 34/34 (job 13755). Sweep
+`profiles/nsys-v19` vs `nsys-v16`: every AD launch within +2.9%.
 
-- v1 `patches/step10/residual-qp-slices.patch`: slices `group.size() / n_idofs` on the device, two
-  team barriers always. Sweep `profiles/nsys-v17`.
-- v2 `patches/step10/residual-qp-slices-v2.patch`: `ADScratchLayout::residual_slices`, set in
-  `dispatchADTeams` from the group size and the widest test function set. One slice skips the
-  barriers. Sweep `profiles/nsys-v18`.
-
-AD `ResidualLoop` ms (`launch_compare.py profiles/nsys-v16/launches.txt <dir>/launches.txt 0`):
-
-| variant | v16 | v1 | v2 |
-|---|---|---|---|
-| ad3_q8 | 0.136 | 0.131 | 0.126 |
-| ad3_q27 | 0.587 | 0.447 | 0.435 |
-| ad3_q64 | 2.086 | 0.885 | 0.872 |
-| ad3disp_q8 | 0.241 | 0.255 | 0.267 |
-| ad3disp_q27 | 0.918 | 0.888 | 1.004 |
-| ad3disp_q64 | 2.508 | 1.952 | 2.102 |
-| ad3sdisp_q8 | 0.241 | 0.258 | 0.271 |
-| ad3sdisp_q27 | 0.912 | 0.890 | 1.007 |
-| ad3sdisp_q64 | 2.468 | 1.911 | 2.041 |
-| ad8_q8 | 0.133 | 0.139 | 0.134 |
-| ad8disp_q8 | 0.264 | 0.271 | 0.273 |
-| ad8sdisp_q8 | 0.269 | 0.277 | 0.275 |
-
-- ad3_q64 now 0.70x the hand-coded `ResidualLoop` (1.241 ms), ad3_q27 1.01x (0.430).
-- R&J launches -1-3% in both. Seeded J within +1.5%. Hand-coded launches unchanged.
-- Displaced `ResidualLoop` registers: v1 91 -> 93, v2 91 -> 104, which likely explains why v2 is
-  slower there than v1. ad8 displaced: 104 -> 96 in both, yet +2-4%. Causes unmeasured.
-- Every variant with one slice (q8) gets no benefit by design. Their changes come from code
-  generation.
+- AD `ResidualLoop`: ad3_q64 2.086 -> 0.912 ms (now 0.73x hand-coded 1.241), ad3_q27 0.587 ->
+  0.451, ad3disp/ad3sdisp_q64 -20%, ad8 displaced -4-5%. Largest increase: ad3sdisp_q8 +2.9%.
+- R&J: ad3_q8 -13%, ad3_q64 -8% (reference R&J registers 96 -> 127, yet faster). Seeded J
+  +1-2.5%. Hand-coded launches unchanged apart from 5 us `DirichletBC` quantization.
+- Displaced `ResidualLoop` registers (base/v1/v2/v3): `KokkosADDiffusion` 91/93/104/94,
+  `KokkosADMatDiffusion` 104/96/96/96 (`ptx/10b-*`). v2 put the one-slice store branch inside the
+  slice loop. v3 splits the one-slice and sliced paths.
+- Probes in `patches/step10/` (v1 always two barriers, `nsys-v17`; v2 one loop for both, `nsys-v18`;
+  v3 is the commit).
 
 ## Step 9 result (`2709e503f9d`, 2026-11-12)
 
@@ -302,11 +276,8 @@ Measure each step alone against the step before, with a full sweep on arco-c04.
 8d. Done (`4736f915264`, sweep `profiles/nsys-t1`). See "Step 8d sweep result".
 8e. Done (`168e488f70c`, sweep `profiles/nsys-v14`). See "Step 8e result".
 9. Done (`2709e503f9d`, sweep `profiles/nsys-v16`). See "Step 9 result".
-10. Done (measurement, no commit). See "Step 10 result".
-10b. Approved by the user (2026-11-12). A v3 probe: v2 with the original serial loop when
-    `residual_slices == 1`, and the v2 register increase fixed. Commit it if it passes the exit
-    criterion in "Next". If it lands, the reply reports the step 10 gain. Otherwise the reply
-    reports the measurement without a change.
+10. Done (measurement probes v1, v2, no commit).
+10b. Done (`c9d341fd322`, sweep `profiles/nsys-v19`). See "Step 10b result".
 11. Done (trim of this document, 2026-11-10).
 12. Finish the reply. Draft the p-refinement issue with the `issue-create` skill (file it only
     after approval). Ask about alias removal. Fill the `TODO(user)` markers with the step 8-10
@@ -352,8 +323,8 @@ Details: `moose-stack-build/PLAN-kokkos-known-failures.md`.
   `qM` is the qps per element.
 - Sweep, from the case directory: `sbatch -w arco-c04 --output=<log dir>/%x-%j.log sweep.sbatch
   <out dir> nsys|ncu`. Filter with `VARIANTS_FILTER`, `NCU_KERNELS`, `NCU_COUNT`. Latest full sweep:
-  `profiles/nsys-v16` (step 9). Step 10 probes: `nsys-v17`, `nsys-v18`. Latest ncu: `ncu-v15`. Next:
-  `nsys-v19`, `ncu-v16`. Build `launches.txt` with `launch_table.sh <dir>/*.nsys-rep`.
+  `profiles/nsys-v19` (step 10b). Latest ncu: `ncu-v15`. Next: `nsys-v20`, `ncu-v16`.
+  Build `launches.txt` with `launch_table.sh <dir>/*.nsys-rep`.
 - Tables in `scripts/`: `step_table.sh <dir>` (per-step summary), `launch_table.sh <nsys-rep>...`
   (every launch, tagged `[R]`/`[J]`), `kernel_table.sh`, `ncu_table.sh`, `ncu_shared_stores.py`,
   and `ncu_metrics.sh <metric,...> <ncu-rep>...`.
@@ -376,7 +347,7 @@ Details: `moose-stack-build/PLAN-kokkos-known-failures.md`.
   whole library per patch. `scripts/object_variants.sbatch <wt> <src .K> <regex> <out root>
   base|<patch>...` builds one object per patch through `scripts/kokkos_object_ptx.sbatch` (PTX with
   `.loc` lines, SASS, res usage). PTX entries are `.weak .entry`. Scratch worktree:
-  `runs/branch-exp`, at `168e488f70c`, clean. It has empty `libmesh`/`petsc`, so it serves object
+  `runs/branch-exp`, at `2709e503f9d`, clean. It has empty `libmesh`/`petsc`, so it serves object
   probes only. Build the app in the main tree. Step 8d probe trees: `/tmp/pe-x` (login node, one git branch
   per probe). It can disappear. The patches in `patches/step8d/` are the record. Write probe patches in a copy (`git archive
   be2f2ac9b8f framework/include/kokkos` into `/tmp/pe`, then `git init`), never in the worktree
