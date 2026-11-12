@@ -1,6 +1,7 @@
 # Handoff: Kokkos AD GPU work on PR #34088 (arco, updated 2026-11-12)
 
-Status: branch at `2709e503f9d` (steps 0-9). Next: step 10. Updated 2026-11-12.
+Status: branch at `2709e503f9d` (steps 0-10, step 10 without a commit). Next: user decision on
+step 10b. Updated 2026-11-12.
 Git tracks this document on the feature branch. Commit it alone with a `PLAN:` subject, and drop
 those commits before the merge. Relative paths outside the MOOSE tree, such as `profiles/`,
 `scripts/`, `patches/`, `ptx/`, `logs/`, `runs/`, and `archive/`, are under `moose-stack-build/`
@@ -13,10 +14,13 @@ Branch `kokkos-reference-configuration` in `/ibmstor/scratch/lindad/projects/moo
 is idaholab/moose#34088. NamjaeChoi left a performance review on it. Answer it with measurements
 once the design work below is final. Do not reply yet.
 
-**Next: step 10**, an inner `parallel_reduce` over qps in the AD residual contraction. See step
-10 in "Performance plan". First action: read the residual `group_for` in
-`ResidualObject::assembleADTerms` (`KokkosResidualObject.h`). Then write the probe as a patch under
-`patches/step10/` and build it in the main tree (see "Profiling setup").
+**Next: ask the user about step 10b** (see "Step 10 result"). The qp slices make the reference
+AD residual up to 2.4x faster, but slow some q8 and displaced q27 residual launches by up to 12%. If
+the user approves 10b: apply `patches/step10/residual-qp-slices-v2.patch`, then keep the original
+serial loop (`git show 2709e503f9d:framework/include/kokkos/base/KokkosResidualObject.h`, the
+`computing_residual` block before the Jacobian) for `residual_slices == 1`. Build and test, then run
+the sweep `nsys-v19`. Exit: no AD launch slower than `nsys-v16` by more than 3%, or a report to the
+user. Otherwise go to step 12.
 
 The draft reply is `moose-stack-build/review-reply-34088.md`. It answers all 10 inline comments
 (`gh api repos/idaholab/moose/pulls/34088/comments`) and holds the per-step time and ratio tables.
@@ -89,6 +93,45 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 ## Working notes
 
 (empty)
+
+## Step 10 result (no commit, 2026-11-12)
+
+Probe of NamjaeChoi's inner `parallel_reduce` over qps for the AD residual. Groups are hand-rolled
+sub-teams, so a Kokkos `ThreadVectorRange` reduce does not map onto them (vector length 1). The
+probes split the qps of test function i into slices, one thread per (i, slice), and sum the
+partials through the qp scratch after a barrier. The residual moves after the Jacobian, so it can
+overwrite the qp scratch. Slices at 8 test functions: q8 1, q27 3 (R) or 4 (R&J), q64 8. Both
+probes pass the AD tests 34/34 (jobs 13706, 13723). Tree reverted to `HEAD`.
+
+- v1 `patches/step10/residual-qp-slices.patch`: slices `group.size() / n_idofs` on the device, two
+  team barriers always. Sweep `profiles/nsys-v17`.
+- v2 `patches/step10/residual-qp-slices-v2.patch`: `ADScratchLayout::residual_slices`, set in
+  `dispatchADTeams` from the group size and the widest test function set. One slice skips the
+  barriers. Sweep `profiles/nsys-v18`.
+
+AD `ResidualLoop` ms (`launch_compare.py profiles/nsys-v16/launches.txt <dir>/launches.txt 0`):
+
+| variant | v16 | v1 | v2 |
+|---|---|---|---|
+| ad3_q8 | 0.136 | 0.131 | 0.126 |
+| ad3_q27 | 0.587 | 0.447 | 0.435 |
+| ad3_q64 | 2.086 | 0.885 | 0.872 |
+| ad3disp_q8 | 0.241 | 0.255 | 0.267 |
+| ad3disp_q27 | 0.918 | 0.888 | 1.004 |
+| ad3disp_q64 | 2.508 | 1.952 | 2.102 |
+| ad3sdisp_q8 | 0.241 | 0.258 | 0.271 |
+| ad3sdisp_q27 | 0.912 | 0.890 | 1.007 |
+| ad3sdisp_q64 | 2.468 | 1.911 | 2.041 |
+| ad8_q8 | 0.133 | 0.139 | 0.134 |
+| ad8disp_q8 | 0.264 | 0.271 | 0.273 |
+| ad8sdisp_q8 | 0.269 | 0.277 | 0.275 |
+
+- ad3_q64 now 0.70x the hand-coded `ResidualLoop` (1.241 ms), ad3_q27 1.01x (0.430).
+- R&J launches -1-3% in both. Seeded J within +1.5%. Hand-coded launches unchanged.
+- Displaced `ResidualLoop` registers: v1 91 -> 93, v2 91 -> 104, which likely explains why v2 is
+  slower there than v1. ad8 displaced: 104 -> 96 in both, yet +2-4%. Causes unmeasured.
+- Every variant with one slice (q8) gets no benefit by design. Their changes come from code
+  generation.
 
 ## Step 9 result (`2709e503f9d`, 2026-11-12)
 
@@ -207,6 +250,10 @@ Probe table, patch descriptions, and REG/STACK per probe: `archive/step8d-findin
   variant (lead, unverified: the narrow path of `ADMaterialPropertyValue::operator=` goes through
   `store()` and holds a datum reference). ad8disp_q8 J +9% and AD `ResidualLoop` +1-7%, causes
   unknown.
+- ad3disp_q27 R&J is 20% slower than ad3_q27 (3.20 vs 2.66 ms, `profiles/ncu-v15`). DRAM reads
+  double (0.88 -> 1.74 GB): the precomputed qp values and gradients of 3 displacements are 12 reals
+  per qp (0.68 GB), and the L2 hit rate falls 55 -> 34%. Registers 96 -> 120 cut blocks/SM 6 -> 5.
+  Unmeasured lever: form `grad u` from the 8 nodal DOFs per element instead of the qp arrays.
 - AD materials compute derivatives in residual-only evaluations. A plain material can read the
   stored `_ad_derivatives` (`KokkosADDerivativeSlotMaterial`, test `ad_material/values`), so a skip
   must know whether an active consumer reads them. Separate change.
@@ -241,11 +288,10 @@ Measure each step alone against the step before, with a full sweep on arco-c04.
 8d. Done (`4736f915264`, sweep `profiles/nsys-t1`). See "Step 8d sweep result".
 8e. Done (`168e488f70c`, sweep `profiles/nsys-v14`). See "Step 8e result".
 9. Done (`2709e503f9d`, sweep `profiles/nsys-v16`). See "Step 9 result".
-10. Measure an inner `parallel_reduce` over qps in the AD residual contraction (NamjaeChoi's
-    follow-up on `KokkosResidualObject.h:588`). Today one thread per test function sums the qps
-    serially. Measurement only: a patch in `patches/step10/`, applied to the main tree for the build,
-    then reverted. Commit it only if it is faster. Exit: a `nsys-v17` sweep compared with `nsys-v16`
-    (`launch_compare.py`), with the AD `ResidualLoop` and Jacobian times recorded either way.
+10. Done (measurement, no commit). See "Step 10 result". Open: the user's decision on 10b.
+10b. Proposed, waits on the user. A v3 probe that keeps v2's host-side slice count but runs the
+    exact pre-step code when `residual_slices == 1`, to remove the q8 and displaced regressions.
+    Then commit it, or record step 10 as "measured, not landed" in the reply.
 11. Done (trim of this document, 2026-11-10).
 12. Finish the reply. Draft the p-refinement issue with the `issue-create` skill (file it only
     after approval). Ask about alias removal. Fill the `TODO(user)` markers with the step 8-10
@@ -291,8 +337,8 @@ Details: `moose-stack-build/PLAN-kokkos-known-failures.md`.
   `qM` is the qps per element.
 - Sweep, from the case directory: `sbatch -w arco-c04 --output=<log dir>/%x-%j.log sweep.sbatch
   <out dir> nsys|ncu`. Filter with `VARIANTS_FILTER`, `NCU_KERNELS`, `NCU_COUNT`. Latest full sweep:
-  `profiles/nsys-v16` (step 9). Latest ncu: `ncu-v14` (ad3_q27, ad3sdisp_q27). Next: `nsys-v17`,
-  `ncu-v15`. Build `launches.txt` with `launch_table.sh <dir>/*.nsys-rep`.
+  `profiles/nsys-v16` (step 9). Step 10 probes: `nsys-v17`, `nsys-v18`. Latest ncu: `ncu-v15`. Next:
+  `nsys-v19`, `ncu-v16`. Build `launches.txt` with `launch_table.sh <dir>/*.nsys-rep`.
 - Tables in `scripts/`: `step_table.sh <dir>` (per-step summary), `launch_table.sh <nsys-rep>...`
   (every launch, tagged `[R]`/`[J]`), `kernel_table.sh`, `ncu_table.sh`, `ncu_shared_stores.py`,
   and `ncu_metrics.sh <metric,...> <ncu-rep>...`.
