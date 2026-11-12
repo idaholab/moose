@@ -15,4 +15,32 @@
     requirement = "The system shall compute the solution of rank-deficient linear equations if the right hand side has components that are orthogonal to the range of the linear operator."
     abs_zero = 1e-8
   [../]
+  [constant_null_space]
+    issues = '#34344'
+    requirement = "The system shall solve a singular linear system whose nullspace and transpose nullspace are spanned by the constant field of a variable, returning the solution with zero nodal sum, with"
+    [single_system]
+      type = 'CSVDiff'
+      input = 'constant_null_space.i'
+      csvdiff = 'constant_null_space_out.csv'
+      detail = 'one nonlinear system, and'
+    []
+    [multiple_systems]
+      type = 'CSVDiff'
+      input = 'constant_null_space.i'
+      csvdiff = 'constant_null_space_out.csv'
+      cli_args = "Problem/nl_sys_names='u w' Variables/u/solver_sys=u Variables/w/solver_sys=w "
+                 "Executioner/type=SteadySolve2 Executioner/first_nl_sys_to_solve=u "
+                 "Executioner/second_nl_sys_to_solve=w"
+      prereq = 'constant_null_space/single_system'
+      detail = 'the variable associated with the nullspaces in one of multiple nonlinear systems.'
+    []
+  []
+  [constant_null_space_variable_error]
+    type = 'RunException'
+    input = 'singular.i'
+    cli_args = 'Problem/constant_null_space_variables=aux_v'
+    issues = '#34344'
+    expect_err = "Variable 'aux_v' is not in any nonlinear system."
+    requirement = "The system shall report an error if a variable requested to span a constant nullspace mode is not a nonlinear variable."
+  []
 []
