@@ -7,7 +7,7 @@ cp = 3000
 
 # Solid properties
 rho_solid = 1.1
-# Effective solid conductivity, the former value of 13 multiplied by the porosity of 0.5
+# Effective solid conductivity, the former value of 13 multiplied by (1 - porosity) = 0.5
 k_solid = 6.5
 cp_solid = 1000
 

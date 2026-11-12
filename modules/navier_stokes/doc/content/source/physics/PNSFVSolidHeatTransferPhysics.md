@@ -35,8 +35,8 @@ specific heat.
 The kernels potentially created for this equation are:
 
 - [INSFVEnergyTimeDerivative.md] for the time derivative of the energy
-- [FVDiffusion.md] for energy diffusion with an isotropic thermal diffusivity
-- [FVAnisotropicDiffusion.md] for energy diffusion with an anisotropic thermal diffusivity
+- [FVDiffusion.md] for energy diffusion with an isotropic effective thermal diffusivity
+- [FVAnisotropicDiffusion.md] for energy diffusion with an anisotropic effective thermal diffusivity
 - [FVCoupledForce.md] for the energy source term
 - [PINSFVEnergyAmbientConvection.md] for the volumetric ambient convection term, if present
 
