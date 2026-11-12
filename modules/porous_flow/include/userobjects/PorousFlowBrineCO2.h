@@ -121,6 +121,25 @@ public:
                      std::vector<FluidStateProperties> & fsp) const;
 
   /**
+   * As above, but also returns the equilibrium composition computed on the way, so that it
+   * does not have to be computed a second time for the absent phase (absentPhaseProperties())
+   *
+   * @param[out] Xco2_eq equilibrium mass fraction of CO2 in the liquid (kg/kg)
+   * @param[out] Yh2o_eq equilibrium mass fraction of H2O in the gas (kg/kg)
+   * @param[out] eq_computed false if Z is below the smallest solubility, in which case the
+   * equilibrium composition is not computed and the two values above are not set
+   */
+  void massFractions(const ADReal & pressure,
+                     const ADReal & temperature,
+                     const ADReal & Xnacl,
+                     const ADReal & Z,
+                     FluidStatePhaseEnum & phase_state,
+                     std::vector<FluidStateProperties> & fsp,
+                     ADReal & Xco2_eq,
+                     ADReal & Yh2o_eq,
+                     bool & eq_computed) const;
+
+  /**
    * Thermophysical properties of the gaseous state
    *
    * @param pressure gas pressure (Pa)
@@ -162,12 +181,19 @@ public:
    * @param Xnacl NaCl mass fraction (kg/kg)
    * @param phase_state current phase state (LIQUID: the gas phase is absent, GAS: the liquid
    * phase is absent)
+   * @param Xco2_eq equilibrium mass fraction of CO2 in the liquid, from massFractions()
+   * @param Yh2o_eq equilibrium mass fraction of H2O in the gas, from massFractions()
+   * @param eq_computed whether the two values above were computed by massFractions(); if not,
+   * the equilibrium composition is computed here
    * @param[out] FluidStateProperties data structure
    */
   void absentPhaseProperties(const ADReal & pressure,
                              const ADReal & temperature,
                              const ADReal & Xnacl,
                              FluidStatePhaseEnum phase_state,
+                             const ADReal & Xco2_eq,
+                             const ADReal & Yh2o_eq,
+                             bool eq_computed,
                              std::vector<FluidStateProperties> & fsp) const;
 
   /**

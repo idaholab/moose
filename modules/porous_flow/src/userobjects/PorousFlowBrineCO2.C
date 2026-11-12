@@ -126,7 +126,9 @@ PorousFlowBrineCO2::thermophysicalProperties(const ADReal & pressure,
   clearFluidStateProperties(fsp);
 
   FluidStatePhaseEnum phase_state;
-  massFractions(pressure, temperature, Xnacl, Z, phase_state, fsp);
+  ADReal Xco2_eq, Yh2o_eq;
+  bool eq_computed;
+  massFractions(pressure, temperature, Xnacl, Z, phase_state, fsp, Xco2_eq, Yh2o_eq, eq_computed);
 
   switch (phase_state)
   {
@@ -139,7 +141,8 @@ PorousFlowBrineCO2::thermophysicalProperties(const ADReal & pressure,
       gasProperties(pressure, temperature, fsp);
 
       // Properties of the absent liquid phase
-      absentPhaseProperties(pressure, temperature, Xnacl, phase_state, fsp);
+      absentPhaseProperties(
+          pressure, temperature, Xnacl, phase_state, Xco2_eq, Yh2o_eq, eq_computed, fsp);
 
       break;
     }
@@ -151,7 +154,8 @@ PorousFlowBrineCO2::thermophysicalProperties(const ADReal & pressure,
       liquidProperties(liquid_pressure, temperature, Xnacl, fsp);
 
       // Properties of the absent gas phase
-      absentPhaseProperties(pressure, temperature, Xnacl, phase_state, fsp);
+      absentPhaseProperties(
+          pressure, temperature, Xnacl, phase_state, Xco2_eq, Yh2o_eq, eq_computed, fsp);
 
       break;
     }
@@ -181,12 +185,29 @@ PorousFlowBrineCO2::massFractions(const ADReal & pressure,
                                   FluidStatePhaseEnum & phase_state,
                                   std::vector<FluidStateProperties> & fsp) const
 {
+  ADReal Xco2_eq, Yh2o_eq;
+  bool eq_computed;
+  massFractions(pressure, temperature, Xnacl, Z, phase_state, fsp, Xco2_eq, Yh2o_eq, eq_computed);
+}
+
+void
+PorousFlowBrineCO2::massFractions(const ADReal & pressure,
+                                  const ADReal & temperature,
+                                  const ADReal & Xnacl,
+                                  const ADReal & Z,
+                                  FluidStatePhaseEnum & phase_state,
+                                  std::vector<FluidStateProperties> & fsp,
+                                  ADReal & Xco2_eq,
+                                  ADReal & Yh2o_eq,
+                                  bool & eq_computed) const
+{
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
   ADReal Xco2 = 0.0;
   ADReal Yh2o = 0.0;
   ADReal Yco2 = 0.0;
+  eq_computed = false;
 
   // If the amount of CO2 is less than the smallest solubility, then all CO2 will
   // be dissolved, and the equilibrium mass fractions do not need to be computed
@@ -197,6 +218,9 @@ PorousFlowBrineCO2::massFractions(const ADReal & pressure,
   {
     // Equilibrium mass fraction of CO2 in liquid and H2O in gas phases
     equilibriumMassFractions(pressure, temperature, Xnacl, Xco2, Yh2o);
+    Xco2_eq = Xco2;
+    Yh2o_eq = Yh2o;
+    eq_computed = true;
 
     Yco2 = 1.0 - Yh2o;
 
@@ -249,15 +273,21 @@ PorousFlowBrineCO2::absentPhaseProperties(const ADReal & pressure,
                                           const ADReal & temperature,
                                           const ADReal & Xnacl,
                                           FluidStatePhaseEnum phase_state,
+                                          const ADReal & Xco2_eq,
+                                          const ADReal & Yh2o_eq,
+                                          bool eq_computed,
                                           std::vector<FluidStateProperties> & fsp) const
 {
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
   // The absent phase is given the composition it would have in equilibrium with the present
-  // phase, which is also the composition it has when it first appears
-  ADReal Xco2, Yh2o;
-  equilibriumMassFractions(pressure, temperature, Xnacl, Xco2, Yh2o);
+  // phase, which is also the composition it has when it first appears. massFractions() has
+  // already computed it unless Z is below the smallest solubility
+  ADReal Xco2 = Xco2_eq;
+  ADReal Yh2o = Yh2o_eq;
+  if (!eq_computed)
+    equilibriumMassFractions(pressure, temperature, Xnacl, Xco2, Yh2o);
 
   switch (phase_state)
   {
