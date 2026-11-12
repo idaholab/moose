@@ -128,16 +128,21 @@ private:
    * @tparam slots The number of dual slots of the instantiation
    * @tparam displaced Whether the instantiation carries the displacement derivatives. Its dual
    * slots then hold intermediate quantities, which the chain rule maps to the true slots.
-   * @param datum The Datum object of the element or side
+   * @param elem The contiguous element ID
+   * @param side The side index, or libMesh::invalid_uint for the element
    * @param material The material of the final derived type
    */
   template <typename Derived, unsigned int slots, bool displaced>
-  KOKKOS_FUNCTION void computeADProperties(const Datum & datum, const Derived & material) const;
+  KOKKOS_FUNCTION void computeADProperties(const ContiguousElementID elem,
+                                           const unsigned int side,
+                                           const Derived & material) const;
   /**
    * Evaluate the properties with the instantiation matching the configuration of the material
    */
   template <typename Derived>
-  KOKKOS_FUNCTION void dispatchADProperties(const Datum & datum, const Derived & material) const;
+  KOKKOS_FUNCTION void dispatchADProperties(const ContiguousElementID elem,
+                                            const unsigned int side,
+                                            const Derived & material) const;
 
   /// Registration of the AD accessors created during construction
   ADSlotSetup _ad_setup;
@@ -222,17 +227,21 @@ ADMaterial::adCoupledGradient(const std::string & var_name, const unsigned int c
 
 template <typename Derived, unsigned int slots, bool displaced>
 KOKKOS_FUNCTION void
-ADMaterial::computeADProperties(const Datum & datum, const Derived & material) const
+ADMaterial::computeADProperties(const ContiguousElementID elem,
+                                const unsigned int side,
+                                const Derived & material) const
 {
-  const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
-
   // The chain record holds the plain values of the intermediate slots at one quadrature point
   [[maybe_unused]] std::conditional_t<displaced, ADChainRecord<slots>, char> chain{};
   ADChainRecord<slots> * chain_ptr = nullptr;
   if constexpr (displaced)
     chain_ptr = &chain;
 
-  ADMaterialDatum<slots> ad_datum(datum, _ad_slots, chain_ptr);
+  ADMaterialDatum<slots> ad_datum(
+      _ad_slots, chain_ptr, elem, side, kokkosAssembly(), kokkosSystems(), _configuration);
+
+  const unsigned int num_qps =
+      _constant_option == PropertyConstantOption::NONE ? ad_datum.n_qps() : 1;
 
   for (unsigned int qp = 0; qp < num_qps; ++qp)
   {
@@ -245,15 +254,17 @@ ADMaterial::computeADProperties(const Datum & datum, const Derived & material) c
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-ADMaterial::dispatchADProperties(const Datum & datum, const Derived & material) const
+ADMaterial::dispatchADProperties(const ContiguousElementID elem,
+                                 const unsigned int side,
+                                 const Derived & material) const
 {
   // A material on the current configuration, or reading a property that depends on the
   // displacements, evaluates the instantiation whose dual numbers also carry the displacement
   // slots, provided that a displacement component is seeded
   if (_ad_slots.hasDisplacements())
-    computeADProperties<Derived, ad_displaced_slots<Derived>, true>(datum, material);
+    computeADProperties<Derived, ad_displaced_slots<Derived>, true>(elem, side, material);
   else
-    computeADProperties<Derived, Derived::max_ad_slots, false>(datum, material);
+    computeADProperties<Derived, Derived::max_ad_slots, false>(elem, side, material);
 }
 
 template <typename Derived>
@@ -264,9 +275,7 @@ ADMaterial::operator()(ElementCompute, const ThreadID tid, const Derived & mater
   // datum is invalid
   auto elem = kokkosElementID(tid);
 
-  dispatchADProperties(
-      Datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems(), _configuration),
-      material);
+  dispatchADProperties(elem, libMesh::invalid_uint, material);
 }
 
 template <typename Derived>
@@ -275,8 +284,7 @@ ADMaterial::operator()(SideCompute, const ThreadID tid, const Derived & material
 {
   auto [elem, side] = kokkosElementSideID(tid);
 
-  dispatchADProperties(Datum(elem, side, kokkosAssembly(), kokkosSystems(), _configuration),
-                       material);
+  dispatchADProperties(elem, side, material);
 }
 
 template <typename Derived>
@@ -285,8 +293,7 @@ ADMaterial::operator()(NeighborCompute, const ThreadID tid, const Derived & mate
 {
   auto [elem, side] = kokkosElementSideID(tid);
 
-  dispatchADProperties(Datum(elem, side, kokkosAssembly(), kokkosSystems(), _configuration),
-                       material);
+  dispatchADProperties(elem, side, material);
 }
 
 } // namespace Moose::Kokkos

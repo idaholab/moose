@@ -98,6 +98,26 @@ constexprFor(F && f)
 ///@}
 
 /**
+ * Call a function with an index known only at run time as a compile-time index. A thread-local
+ * array indexed at run time is placed in local memory, together with the object that holds it.
+ * Comparing the index with each compile-time index keeps the array in registers.
+ * @tparam n The bound
+ * @param index The index, which is ignored at n or above
+ * @param f The function, called with a std::integral_constant
+ */
+template <unsigned int n, typename F>
+KOKKOS_INLINE_FUNCTION void
+constexprIndex(const unsigned int index, F && f)
+{
+  constexprFor<n>(
+      [&](auto i)
+      {
+        if (decltype(i)::value == index)
+          f(i);
+      });
+}
+
+/**
  * Set the value of a dense dual number and seed its derivatives with a single direction
  * @param value The value
  * @param slot The slot seeded, or libMesh::invalid_uint to seed nothing
@@ -115,8 +135,7 @@ seededDenseADReal(const Real value, const unsigned int slot, const Real seed)
     DenseADReal<slots> dual = value;
     dual.derivatives() = 0;
 
-    if (slot != libMesh::invalid_uint)
-      dual.derivatives()[slot] = seed;
+    constexprIndex<slots>(slot, [&](auto s) { dual.derivatives()[s] = seed; });
 
     return dual;
   }

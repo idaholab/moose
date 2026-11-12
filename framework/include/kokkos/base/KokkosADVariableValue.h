@@ -378,15 +378,17 @@ public:
   static constexpr unsigned int ad_slots = slots;
 
   /**
-   * Constructor
-   * @param datum The plain datum of the element, side, or node
+   * Constructor, which constructs the plain datum in place
    * @param table The slot table of the object
    * @param chain The chain record of the displaced instantiation, or nullptr
+   * @param args The constructor arguments of the plain datum of the element, side, or node. Pass a
+   * host constant such as libMesh::invalid_uint as a prvalue. Device code cannot bind a reference
+   * to it.
    */
-  KOKKOS_FUNCTION ADDatumBase(const Base & datum,
-                              const ADSlotTable & table,
-                              ADChainRecord<slots> * chain = nullptr)
-    : Base(datum), _table(table), _chain(chain)
+  template <typename... Args>
+  KOKKOS_FUNCTION
+  ADDatumBase(const ADSlotTable & table, ADChainRecord<slots> * const chain, Args &&... args)
+    : Base(std::forward<Args>(args)...), _table(table), _chain(chain)
   {
     // On the current configuration the position carries displacement derivatives only as a dual
     // number
@@ -524,9 +526,19 @@ ADDatumBase<Base, slots>::chainDerivatives(const unsigned int qp,
               break;
 
             case ADDualSlot::Kind::GRADIENT:
+            {
+              // A runtime component index would place F_inv, with the datum, in local memory
+              Real3 F_inv_column;
+              constexprIndex<3>(dual.component,
+                                [&](auto c)
+                                {
+                                  for (unsigned int k = 0; k < 3; ++k)
+                                    F_inv_column(k) = F_inv(k, c);
+                                });
+
               for (unsigned int t = 0; t < n; ++t)
                 for (unsigned int k = 0; k < 3; ++k)
-                  h[t][k] += F_inv(k, dual.component) * f[t].derivatives()[s];
+                  h[t][k] += F_inv_column(k) * f[t].derivatives()[s];
 
               // The last component of the accessor flushes its reference and deformation terms
               if (dual.component == AD_GRADIENT_SLOTS - 1)
@@ -552,6 +564,7 @@ ADDatumBase<Base, slots>::chainDerivatives(const unsigned int qp,
                     h[t][k] = 0;
               }
               break;
+            }
 
             case ADDualSlot::Kind::NONE:
               break;
@@ -586,20 +599,36 @@ ADDatumBase<Base, slots>::geometryDerivatives(const unsigned int qp,
   // F^{-T} dxi/dX, has d(dxi/dx)_{ci}/d(grad_X u_c)_d = -(dxi/dx)_{ci} (F^{-1})_{d:}.
   for (unsigned int c = 0; c < disp.components(); ++c)
   {
+    // Gather the entries of component c, since a runtime component index would place the
+    // geometry, with the datum, in local memory
+    Real grad_log_coord_c = 0, normal_c = 0;
+    Real3 F_inv_column, dxi_dx_row;
+    constexprIndex<3>(c,
+                      [&](auto i)
+                      {
+                        grad_log_coord_c = grad_log_coord(i);
+                        normal_c = normal(i);
+                        for (unsigned int k = 0; k < 3; ++k)
+                        {
+                          F_inv_column(k) = F_inv(k, i);
+                          dxi_dx_row(k) = dxi_dx(i, k);
+                        }
+                      });
+
     if (const auto vs = _table.displacementValueSlot(c); vs != libMesh::invalid_uint)
       for (unsigned int t = 0; t < 4; ++t)
-        add(t, vs, coef[t] * grad_log_coord(c));
+        add(t, vs, coef[t] * grad_log_coord_c);
 
     if (const auto gs = _table.displacementGradientSlot(c); gs != libMesh::invalid_uint)
       for (unsigned int d = 0; d < 3; ++d)
       {
-        Real dlog = F_inv(d, c);
+        Real dlog = F_inv_column(d);
         if (this->isSide())
         {
           Real n_col = 0;
           for (unsigned int k = 0; k < 3; ++k)
             n_col += normal(k) * F_inv(d, k);
-          dlog -= normal(c) * n_col;
+          dlog -= normal_c * n_col;
         }
 
         Real F_inv_grad_d = 0;
@@ -608,7 +637,7 @@ ADDatumBase<Base, slots>::geometryDerivatives(const unsigned int qp,
 
         add(0, gs + d, coef[0] * dlog);
         for (unsigned int i = 0; i < 3; ++i)
-          add(1 + i, gs + d, coef[1 + i] * dlog - dxi_dx(c, i) * F_inv_grad_d);
+          add(1 + i, gs + d, coef[1 + i] * dlog - dxi_dx_row(i) * F_inv_grad_d);
       }
   }
 }
@@ -725,7 +754,7 @@ public:
 
       if (first != libMesh::invalid_uint)
         for (unsigned int k = 0; k < AD_GRADIENT_SLOTS; ++k)
-          chain->value[first + k] = grad(k);
+          constexprIndex<slots>(first + k, [&](auto s) { chain->value[s] = grad(k); });
 
       return result;
     }

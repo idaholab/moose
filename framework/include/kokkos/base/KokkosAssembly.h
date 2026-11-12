@@ -378,9 +378,15 @@ private:
    */
   Array<Moose::CoordinateSystemType> _coord_type;
   /**
-   * Radial coordinate index in cylindrical coordinate system
+   * Whether the cylindrical coordinate system uses a general axis per subdomain
    */
-  unsigned int _rz_radial_coord = libMesh::invalid_uint;
+  bool _rz_general_axes = false;
+  /**
+   * Unit vector of the radial coordinate in the cylindrical coordinate system without general
+   * axes. A dot product with it selects the radial coordinate without a runtime index, which would
+   * place the point in local memory.
+   */
+  Real3 _rz_radial_direction;
   /**
    * General axisymmetric axis of each subdomain in cylindrical coordinate system
    */
@@ -480,11 +486,11 @@ Assembly::coordTransformFactor(const ContiguousSubdomainID subdomain, const Real
     case Moose::COORD_XYZ:
       return 1;
     case Moose::COORD_RZ:
-      if (_rz_radial_coord == libMesh::invalid_uint)
+      if (_rz_general_axes)
         return 2 * M_PI *
                (point - _rz_axis[subdomain].first).cross_product(_rz_axis[subdomain].second).norm();
       else
-        return 2 * M_PI * point(_rz_radial_coord);
+        return 2 * M_PI * (point * _rz_radial_direction);
     case Moose::COORD_RSPHERICAL:
       return 4 * M_PI * point(0) * point(0);
     default:
@@ -501,7 +507,7 @@ Assembly::coordTransformFactorGradient(const ContiguousSubdomainID subdomain,
   switch (_coord_type[subdomain])
   {
     case Moose::COORD_RZ:
-      if (_rz_radial_coord == libMesh::invalid_uint)
+      if (_rz_general_axes)
       {
         // The factor is 2 pi times the distance to the axis, whose gradient is 2 pi times the unit
         // vector normal to the axis pointing toward the point
@@ -510,7 +516,7 @@ Assembly::coordTransformFactorGradient(const ContiguousSubdomainID subdomain,
         gradient = (2 * M_PI / radial.norm()) * radial;
       }
       else
-        gradient(_rz_radial_coord) = 2 * M_PI;
+        gradient = 2 * M_PI * _rz_radial_direction;
       break;
     case Moose::COORD_RSPHERICAL:
       gradient(0) = 8 * M_PI * point(0);

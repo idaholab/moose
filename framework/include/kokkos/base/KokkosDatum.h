@@ -14,6 +14,7 @@
 #include "KokkosFESystem.h"
 #include "KokkosVariable.h"
 #include "KokkosConfiguration.h"
+#include "KokkosDenseADReal.h"
 
 namespace Moose::Kokkos
 {
@@ -769,8 +770,11 @@ Datum::q_point(const unsigned int qp)
       for (unsigned int c = 0; c < disp.components(); ++c)
       {
         auto & sys = _systems[disp.sys(c)];
-        _xyz(c) +=
+        const auto u =
             sys.getVectorDofValue(sys.getNodeLocalDofIndex(_node, 0, disp.var(c)), disp.tag());
+
+        // A runtime component index would place the point in local memory
+        constexprIndex<3>(c, [&](auto i) { _xyz(i) += u; });
       }
     }
   }
@@ -966,10 +970,16 @@ Datum::reinitTransform(const unsigned int qp)
       const auto u = !isSide() ? sys.getVectorQpValue(_elem, _qp_offset + qp, var, tag)
                                : sys.getVectorQpValueFace(_elem, _side, qp, var, tag);
 
-      for (unsigned int d = 0; d < 3; ++d)
-        F(c, d) += grad_u(d);
+      // A runtime component index would place F and the point, with the datum that holds the
+      // point, in local memory
+      constexprIndex<3>(c,
+                        [&](auto i)
+                        {
+                          for (unsigned int d = 0; d < 3; ++d)
+                            F(i, d) += grad_u(d);
 
-      _xyz(c) += u;
+                          _xyz(i) += u;
+                        });
     }
 
     _F_inv = F.inverse();

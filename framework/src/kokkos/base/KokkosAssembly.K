@@ -45,7 +45,9 @@ Assembly::init()
 
   _coord_type.copyToDevice();
 
-  if (_mesh.usingGeneralAxisymmetricCoordAxes())
+  _rz_general_axes = _mesh.usingGeneralAxisymmetricCoordAxes();
+
+  if (_rz_general_axes)
   {
     _rz_axis.create(num_subdomains);
 
@@ -56,7 +58,7 @@ Assembly::init()
     _rz_axis.copyToDevice();
   }
   else
-    _rz_radial_coord = _mesh.getAxisymmetricRadialCoord();
+    _rz_radial_direction(_mesh.getAxisymmetricRadialCoord()) = 1;
 
   // Initialize quadrature and shape data
 

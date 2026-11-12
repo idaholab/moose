@@ -229,14 +229,16 @@ ADKernel::operator()(ConfigurationLoop<ResidualAndJacobianLoop, displaced>,
   const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerElem(), numKokkosBlockElements());
   const auto elem = kokkosBlockElementID(group.item());
 
-  AssemblyDatum datum(elem,
-                      libMesh::invalid_uint,
-                      kokkosAssembly(),
-                      kokkosSystems(),
-                      _kokkos_var,
-                      _kokkos_var.var(),
-                      _configuration,
-                      std::bool_constant<displaced>{});
+  ADAssemblyDatum<Derived::max_ad_slots> datum(_ad_slots,
+                              nullptr,
+                              elem,
+                              static_cast<unsigned int>(libMesh::invalid_uint),
+                              kokkosAssembly(),
+                              kokkosSystems(),
+                              _kokkos_var,
+                              _kokkos_var.var(),
+                              _configuration,
+                              std::bool_constant<displaced>{});
 
   assembleADTerms<Derived::max_ad_slots, false>(
       kernel, team, group, datum, _ad_slots, _computing_residual, _computing_jacobian);
@@ -251,16 +253,21 @@ ADKernel::operator()(ConfigurationLoop<DisplacementSeededLoop, displaced>,
   const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerElem(), numKokkosBlockElements());
   const auto elem = kokkosBlockElementID(group.item());
 
-  AssemblyDatum datum(elem,
-                      libMesh::invalid_uint,
-                      kokkosAssembly(),
-                      kokkosSystems(),
-                      _kokkos_var,
-                      _kokkos_var.var(),
-                      _configuration,
-                      std::bool_constant<displaced>{});
+  // The chain record holds the plain values of the intermediate slots at one quadrature point
+  constexpr auto slots = ad_displaced_slots<Derived>;
+  ADChainRecord<slots> chain;
+  ADAssemblyDatum<slots> datum(_ad_slots,
+                              &chain,
+                              elem,
+                              static_cast<unsigned int>(libMesh::invalid_uint),
+                              kokkosAssembly(),
+                              kokkosSystems(),
+                              _kokkos_var,
+                              _kokkos_var.var(),
+                              _configuration,
+                              std::bool_constant<displaced>{});
 
-  assembleADTerms<ad_displaced_slots<Derived>, true>(
+  assembleADTerms<slots, true>(
       kernel, team, group, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }
 
@@ -273,14 +280,16 @@ ADKernel::operator()(ConfigurationLoop<ResidualLoop, displaced>,
   const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerElem(), numKokkosBlockElements());
   const auto elem = kokkosBlockElementID(group.item());
 
-  AssemblyDatum datum(elem,
-                      libMesh::invalid_uint,
-                      kokkosAssembly(),
-                      kokkosSystems(),
-                      _kokkos_var,
-                      _kokkos_var.var(),
-                      _configuration,
-                      std::bool_constant<displaced>{});
+  ADAssemblyDatum<0> datum(_ad_slots,
+                              nullptr,
+                              elem,
+                              static_cast<unsigned int>(libMesh::invalid_uint),
+                              kokkosAssembly(),
+                              kokkosSystems(),
+                              _kokkos_var,
+                              _kokkos_var.var(),
+                              _configuration,
+                              std::bool_constant<displaced>{});
 
   assembleADTerms<0, false>(kernel, team, group, datum, _ad_slots, true, false);
 }

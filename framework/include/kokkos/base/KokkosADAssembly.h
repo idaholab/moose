@@ -237,17 +237,20 @@ struct HasADResidualGrad<
  * dual slots and maps their derivatives to the true slots with the chain rule.
  * @tparam displaced Whether the instantiation carries the displacement derivatives
  * @param object The residual object of the final derived type
- * @param datum The plain datum of the element or side
+ * @param ad_datum The AD datum of the thread
  * @param table The slot table of the object
  * @param true_slots The number of true slots of the scratch layout
  * @param qp The local quadrature point index
  * @param scratch The scratch entries of the quadrature point
  * @tparam slots The number of dual slots
+ *
+ * The function is force-inlined, together with its caller ResidualObject::assembleADTerms. A
+ * separate device function would take the AD datum by reference and place it in local memory.
  */
 template <bool displaced, unsigned int slots, typename Object>
-KOKKOS_FUNCTION void
+KOKKOS_FORCEINLINE_FUNCTION void
 evaluateADTerms(const Object & object,
-                const AssemblyDatum & datum,
+                ADAssemblyDatum<slots> & ad_datum,
                 const ADSlotTable & table,
                 const unsigned int true_slots,
                 const unsigned int qp,
@@ -256,12 +259,8 @@ evaluateADTerms(const Object & object,
   constexpr auto term_size = ADScratchLayout::term_size;
 
   // The chain record holds the plain values of the intermediate slots at this quadrature point
-  [[maybe_unused]] std::conditional_t<displaced, ADChainRecord<slots>, char> chain{};
-  ADChainRecord<slots> * chain_ptr = nullptr;
   if constexpr (displaced)
-    chain_ptr = &chain;
-
-  ADAssemblyDatum<slots> ad_datum(datum, table, chain_ptr);
+    *ad_datum.chain() = ADChainRecord<slots>{};
 
   // The coefficients are linear in JxW and in the map to the reference element, whose variation
   // with the displacements the displaced instantiation adds after the hooks

@@ -282,16 +282,21 @@ protected:
    * @param object The residual object of the final derived type
    * @param team The team handle
    * @param group The group of the team that assembles the element or side
-   * @param datum The AssemblyDatum object of the element or side
+   * @param datum The AD datum of the element or side for the current thread. The displaced
+   * instantiation needs its chain record.
    * @param table The slot table of the residual object
    * @param computing_residual Whether to assemble the residual
    * @param computing_jacobian Whether to assemble the Jacobian
+   *
+   * The function is force-inlined, together with evaluateADTerms. The compiler declines to inline
+   * it because of its size. A separate device function would take the AD datum by reference and
+   * place it in local memory.
    */
   template <unsigned int slots, bool displaced, typename Object, typename Team>
-  KOKKOS_FUNCTION void assembleADTerms(const Object & object,
+  KOKKOS_FORCEINLINE_FUNCTION void assembleADTerms(const Object & object,
                                        const Team & team,
                                        const ADTeamGroup & group,
-                                       const AssemblyDatum & datum,
+                                       ADAssemblyDatum<slots> & datum,
                                        const ADSlotTable & table,
                                        bool computing_residual,
                                        bool computing_jacobian) const;
@@ -640,11 +645,11 @@ ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) co
 }
 
 template <unsigned int slots, bool displaced, typename Object, typename Team>
-KOKKOS_FUNCTION void
+KOKKOS_FORCEINLINE_FUNCTION void
 ResidualObject::assembleADTerms(const Object & object,
                                 const Team & team,
                                 const ADTeamGroup & group,
-                                const AssemblyDatum & datum,
+                                ADAssemblyDatum<slots> & datum,
                                 const ADSlotTable & table,
                                 const bool computing_residual,
                                 const bool computing_jacobian) const
@@ -655,6 +660,7 @@ ResidualObject::assembleADTerms(const Object & object,
   // instantiation, the dual slots are the true slots.
   const auto & layout = _ad_layout;
   KOKKOS_ASSERT(displaced || layout.slots == slots);
+  KOKKOS_ASSERT(displaced == (datum.chain() != nullptr));
   const auto qp_size = ADScratchLayout::qpSize(displaced ? layout.slots : slots);
 
   const auto n_qps = datum.n_qps();
@@ -673,11 +679,10 @@ ResidualObject::assembleADTerms(const Object & object,
 
   // Each thread evaluates its quadrature points with its own datum, whose geometry cache is
   // thread-private
-  group_for(n_qps,
-            [&](const unsigned int qp) {
-              evaluateADTerms<displaced, slots>(
-                  object, datum, table, layout.slots, qp, &scratch(qp * qp_size));
-            });
+  if (group.active())
+    for (unsigned int qp = group.rank(); qp < n_qps; qp += group.size())
+      evaluateADTerms<displaced, slots>(
+          object, datum, table, layout.slots, qp, &scratch(qp * qp_size));
   team.team_barrier();
 
   const auto & assembly = datum.assembly();

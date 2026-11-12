@@ -231,14 +231,16 @@ ADIntegratedBC::operator()(
   const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerSide(), numKokkosBoundarySides());
   const auto [elem, side] = kokkosBoundaryElementSideID(group.item());
 
-  AssemblyDatum datum(elem,
-                      side,
-                      kokkosAssembly(),
-                      kokkosSystems(),
-                      _kokkos_var,
-                      _kokkos_var.var(),
-                      _configuration,
-                      std::bool_constant<displaced>{});
+  ADAssemblyDatum<Derived::max_ad_slots> datum(_ad_slots,
+                              nullptr,
+                              elem,
+                              side,
+                              kokkosAssembly(),
+                              kokkosSystems(),
+                              _kokkos_var,
+                              _kokkos_var.var(),
+                              _configuration,
+                              std::bool_constant<displaced>{});
 
   assembleADTerms<Derived::max_ad_slots, false>(
       bc, team, group, datum, _ad_slots, _computing_residual, _computing_jacobian);
@@ -254,16 +256,21 @@ ADIntegratedBC::operator()(
   const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerSide(), numKokkosBoundarySides());
   const auto [elem, side] = kokkosBoundaryElementSideID(group.item());
 
-  AssemblyDatum datum(elem,
-                      side,
-                      kokkosAssembly(),
-                      kokkosSystems(),
-                      _kokkos_var,
-                      _kokkos_var.var(),
-                      _configuration,
-                      std::bool_constant<displaced>{});
+  // The chain record holds the plain values of the intermediate slots at one quadrature point
+  constexpr auto slots = ad_displaced_slots<Derived>;
+  ADChainRecord<slots> chain;
+  ADAssemblyDatum<slots> datum(_ad_slots,
+                              &chain,
+                              elem,
+                              side,
+                              kokkosAssembly(),
+                              kokkosSystems(),
+                              _kokkos_var,
+                              _kokkos_var.var(),
+                              _configuration,
+                              std::bool_constant<displaced>{});
 
-  assembleADTerms<ad_displaced_slots<Derived>, true>(
+  assembleADTerms<slots, true>(
       bc, team, group, datum, _ad_slots, _computing_residual, _computing_jacobian);
 }
 
@@ -276,14 +283,16 @@ ADIntegratedBC::operator()(ConfigurationLoop<ResidualLoop, displaced>,
   const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerSide(), numKokkosBoundarySides());
   const auto [elem, side] = kokkosBoundaryElementSideID(group.item());
 
-  AssemblyDatum datum(elem,
-                      side,
-                      kokkosAssembly(),
-                      kokkosSystems(),
-                      _kokkos_var,
-                      _kokkos_var.var(),
-                      _configuration,
-                      std::bool_constant<displaced>{});
+  ADAssemblyDatum<0> datum(_ad_slots,
+                              nullptr,
+                              elem,
+                              side,
+                              kokkosAssembly(),
+                              kokkosSystems(),
+                              _kokkos_var,
+                              _kokkos_var.var(),
+                              _configuration,
+                              std::bool_constant<displaced>{});
 
   assembleADTerms<0, false>(bc, team, group, datum, _ad_slots, true, false);
 }

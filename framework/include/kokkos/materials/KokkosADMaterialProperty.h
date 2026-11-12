@@ -330,9 +330,13 @@ public:
       if (auto * const chain = datum.chain())
       {
         const auto slot = datum.table().propertyDual(_index);
-        result.derivatives()[slot] = 1;
-        if (map.size())
-          chain->derivatives[slot] = &_derivatives(datum, qp)(0);
+        constexprIndex<slots>(slot,
+                              [&](auto s)
+                              {
+                                result.derivatives()[s] = 1;
+                                if (map.size())
+                                  chain->derivatives[s] = &_derivatives(datum, qp)(0);
+                              });
 
         return result;
       }
@@ -341,7 +345,7 @@ public:
 
       for (unsigned int s = 0; s < map.size(); ++s)
         if (map[s] != libMesh::invalid_uint)
-          result.derivatives()[map[s]] += derivatives(s);
+          constexprIndex<slots>(map[s], [&](auto t) { result.derivatives()[t] += derivatives(s); });
     }
 
     return result;
