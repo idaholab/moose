@@ -21,6 +21,9 @@ which is nonzero for $m == k$.
 
 If the solve type for the simulation is set to +NEWTON+ the finite deformation Jacobian will need
 to be calculated.  Set the parameter `use_finite_deform_jacobian = true` in this case.
+In Cartesian coordinates with `volumetric_locking_correction = true`, this Jacobian also includes
+the element-averaged pressure of the kernel and the volumetric locking correction of the finite
+strain calculator, so it couples all quadrature points of an element.
 
 
 !alert note title=Use of the Solid Mechanics QuasiStatic Physics Recommended
