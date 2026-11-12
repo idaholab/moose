@@ -26,15 +26,16 @@ DomainUserObject::validParams()
   params += RandomInterface::validParams();
   params.addParam<std::vector<BoundaryName>>(
       "interface_boundaries",
-      "The boundary IDs on which this object will call executeOnInterface(). Each selected side "
-      "must have a neighbor. The same boundary, whether specified by name or ID, cannot also be "
-      "listed in 'boundaries'. If unset, executeOnInterface() is not called.");
+      "The boundary IDs on which this object will perform interface evaluations. Each selected "
+      "side must have a neighbor. The same boundary, whether specified by name or ID, cannot also "
+      "be listed in 'boundaries'. If unset, interface evaluations are not performed.");
   params.addParam<std::vector<BoundaryName>>(
       "boundaries",
-      "The boundary IDs on which this object will call executeOnBoundary(). A selected side may or "
-      "may not have a neighbor. The same boundary, whether specified by name or ID, cannot also be "
-      "listed in 'interface_boundaries'. If unset, execution is unrestricted except on selected "
-      "interface boundaries. An explicitly empty list disables executeOnBoundary().");
+      "The boundary IDs on which this object will perform boundary evaluations. A selected side "
+      "may or may not have a neighbor. The same boundary, whether specified by name or ID, cannot "
+      "also be listed in 'interface_boundaries'. If unset, boundary execution is unrestricted "
+      "except on selected interface boundaries. An explicitly empty list disables boundary "
+      "evaluations.");
   // Need one layer of ghosting
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
