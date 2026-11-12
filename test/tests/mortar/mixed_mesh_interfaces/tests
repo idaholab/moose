@@ -1,0 +1,17 @@
+[Tests]
+  [mixed_mesh_interfaces]
+    type = CSVDiff
+    input = 'mixed_mesh_interfaces.i'
+    csvdiff = 'mixed_mesh_interfaces_out.csv'
+    # Three processes on two elements leave one process without elements, which is the case that
+    # needs the processes to agree on the mortar coverage
+    min_parallel = 3
+    # The run takes about a second, so a disagreement shows up as a timeout
+    max_time = 60
+    issues = '#34413'
+    design = 'AutomaticMortarGeneration.md'
+    requirement = 'The system shall solve a problem with mortar interfaces on both the reference and '
+                  'the displaced mesh of the same boundary pair, on a distributed mesh where some '
+                  'processes own no elements.'
+  []
+[]

@@ -9,131 +9,175 @@
 
 #pragma once
 
-#include "TwoVector.h"
-#include "PenaltyWeightedGapUserObject.h"
-#include "WeightedVelocitiesUserObject.h"
-#include "AugmentedLagrangeInterface.h"
+#include "MortarUserObject.h"
+#include "RankTwoTensor.h"
+
+#include <array>
 
 /**
- * Base class for mortar-based cohesive zone model.
+ * Base class for mortar-based cohesive zone models.
+ *
+ * The object runs on the undisplaced mortar interface, so the mortar segments pair each secondary
+ * point with the primary point it is bonded to for the whole simulation. At secondary node j the
+ * displacement jump is measured in a local frame that follows the deformed secondary surface:
+ *
+ *   delta_j = Q_j^T (u_j + dX_j) - Q0_j^T dX_j,
+ *
+ * where u_j and dX_j are the mortar-weighted primary-minus-secondary displacement and reference
+ * position. Q_j = [n, t1, t2] and Q0_j = [N, T1, T2] are the frames that computeInterfaceFrames
+ * builds from the deformed and the reference positions of the secondary faces incident to node j.
+ * The two frames coincide on the reference mesh, and a rigid motion R of the bonded bodies gives
+ * Q_j = R Q0_j and delta_j = 0, whether or not the paired points coincide in the reference
+ * configuration.
  */
-class CohesiveZoneModelBase : virtual public PenaltyWeightedGapUserObject,
-                              virtual public WeightedVelocitiesUserObject
+class CohesiveZoneModelBase : public MortarUserObject
 {
 public:
   static InputParameters validParams();
 
   CohesiveZoneModelBase(const InputParameters & parameters);
 
-  virtual const ADVariableValue & contactTangentialPressureDirOne() const override;
-  virtual const ADVariableValue & contactTangentialPressureDirTwo() const override;
-
+  virtual void initialSetup() override;
   virtual void initialize() override;
+  virtual void execute() override;
   virtual void finalize() override;
   virtual void reinit() override;
-  virtual ADReal nodalTangentialPressure(const Node & node, unsigned int direction) const override;
-  virtual bool usesNodalNormalDerivatives() const override { return false; }
   virtual void timestepSetup() override;
+
+  /// @return The global traction component \p i interpolated at the mortar segment quadrature
+  /// points, per unit reference area
   virtual const ADVariableValue & czmGlobalTraction(unsigned int i) const;
 
 protected:
-  virtual void computeQpProperties() override;
-  virtual void computeQpIProperties() override;
+  /// Computes the mortar integrands that depend only on the current quadrature point
+  virtual void computeQpProperties();
 
-  virtual const VariableTestValue & test() const override;
-  virtual bool constrainedByOwner() const override { return false; }
+  /// Accumulates the nodal mortar integrals at the current quadrature point and test function
+  virtual void computeQpIProperties();
 
-  // Compute CZM kinematics.
-  virtual void prepareJumpKinematicQuantities();
-  virtual void computeFandR(const Node * const node);
+  /**
+   * Compute the weighted local displacement jump at a secondary node and store it in
+   * \p _dof_to_interface_displacement_jump.
+   * @param node The secondary node
+   * @param orientation_normal The mortar nodal normal at \p node, which orients the incident faces
+   * @return The rotation Q from the local interface frame to global coordinates
+   */
+  ADRankTwoTensor computeLocalDisplacementJump(const Node & node,
+                                               const RealVectorValue & orientation_normal);
 
-  /// Encapsulate the CZM constitutive behavior.
-  virtual void computeCZMTraction(const Node * const /*node*/) = 0;
+  /**
+   * Build the reference frame Q0 = [N, T1, T2] and the deformed frame Q = [n, t1, t2] of the
+   * secondary surface at \p node from the nodes of the secondary faces incident to \p node.
+   * N and n are the normalized sums of the reference and deformed face area vectors at the node,
+   * and T1, T2 follow from N by CohesiveZoneModelTools::computeReferenceRotation. In 2D, t1 is n
+   * rotated by +90 degrees. In 3D, t1 and t2 are T1 and T2 rotated by the in-plane polar rotation
+   * of the surface deformation gradient F_s, averaged over the incident faces with their reference
+   * areas as weights.
+   * @param node The secondary node
+   * @param orientation_normal The mortar nodal normal at \p node, which orients the incident faces
+   * @return The reference frame and the deformed frame with its displacement derivatives
+   */
+  std::pair<RankTwoTensor, ADRankTwoTensor>
+  computeInterfaceFrames(const Node & node, const RealVectorValue & orientation_normal) const;
 
-  virtual void computeDamage(const Node * const /*node*/) = 0;
+  /// Encapsulate the CZM constitutive behavior: store the local traction of \p node in
+  /// \p _dof_to_czm_traction
+  virtual void computeCZMTraction(const Node * const node) = 0;
 
-  /// Compute global traction for mortar application.
-  virtual void computeGlobalTraction(const Node * const node);
+  /// Update the damage of \p node
+  virtual void computeDamage(const Node * const node) = 0;
+
+  /// Rotate the local traction of \p node to global coordinates with \p rotation
+  void computeGlobalTraction(const Node * const node, const ADRankTwoTensor & rotation);
 
   /// Normalize mortar quantities (remove mortar integral scaling)
   template <class T>
   T normalizeQuantity(const std::unordered_map<const DofObject *, T> & map, const Node * const node)
   {
-    return libmesh_map_find(map, node) / _dof_to_weighted_gap[node].second;
+    return libmesh_map_find(map, node) / libmesh_map_find(_dof_to_normalization, node);
   }
 
-  /// Number of displacement components
-  const unsigned int _ndisp;
+  /// @return The deformed position of \p node, carrying displacement derivatives while they are
+  /// recorded for this object's system
+  ADPoint deformedPosition(const Node & node) const;
 
-  /// Coupled displacement gradients
-  std::vector<const GenericVariableGradient<true> *> _grad_disp;
+  /// The x displacement variable
+  const MooseVariable * const _disp_x_var;
 
-  /// Coupled displacement and neighbor displacement gradient
-  std::vector<const GenericVariableGradient<true> *> _grad_disp_neighbor;
+  /// The y displacement variable
+  const MooseVariable * const _disp_y_var;
 
-  /// *** Kinematics/displacement jump quantities ***
-  /// Map from degree of freedom to rotation matrix
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_rotation_matrix;
+  /// Whether the problem is three-dimensional
+  const bool _has_disp_z;
 
-  /// Map from degree of freedom to local displacement jump
+  /// The z displacement variable
+  const MooseVariable * const _disp_z_var;
+
+  ///@{ Displacements on the secondary and primary faces at the mortar quadrature points
+  const ADVariableValue & _secondary_disp_x;
+  const ADVariableValue & _primary_disp_x;
+  const ADVariableValue & _secondary_disp_y;
+  const ADVariableValue & _primary_disp_y;
+  const ADVariableValue * const _secondary_disp_z;
+  const ADVariableValue * const _primary_disp_z;
+  ///@}
+
+  /// Member for handling change of coordinate systems (xyz, rz, spherical)
+  const MooseArray<Real> & _coord;
+
+  /// The time step size
+  const Real & _dt;
+
+  /// Whether the nodal mortar integrals are weighted with the dual basis
+  const bool _use_dual;
+
+  /// The test functions that weight the nodal mortar integrals and interpolate the traction
+  const VariableTestValue * _test = nullptr;
+
+  /// Quadrature point index for the mortar segments
+  unsigned int _qp = 0;
+
+  /// Test function index
+  unsigned int _i = 0;
+
+  /// The mortar integration weight at the current quadrature point
+  Real _qp_factor = 0;
+
+  /// Weighted primary-minus-secondary displacement at the current quadrature point
+  ADRealVectorValue _qp_displacement;
+
+  /// Weighted primary-minus-secondary reference position at the current quadrature point
+  RealVectorValue _qp_reference_offset;
+
+  /// Map from secondary node to the integral of its test function over the mortar segments
+  std::unordered_map<const DofObject *, Real> _dof_to_normalization;
+
+  /// Map from secondary node to the weighted primary-minus-secondary displacement
+  std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_weighted_displacements;
+
+  /// Map from secondary node to the weighted primary-minus-secondary reference position
+  std::unordered_map<const DofObject *, RealVectorValue> _dof_to_weighted_reference_offset;
+
+  /// Map from secondary node to the weighted local displacement jump
   std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_interface_displacement_jump;
 
-  /// Deformation gradient for interpolation
-  ADRankTwoTensor _F_interpolation;
-
-  /// Deformation gradient for interpolation of the neighbor projection
-  ADRankTwoTensor _F_neighbor_interpolation;
-
-  /// Map from degree of freedom to secondary, interpolated deformation gradient tensor
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_F;
-
-  /// Map from degree of freedom to neighbor, interpolated deformation gradient tensor
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_F_neighbor;
-
-  /// Map from degree of freedom to interface deformation gradient tensor
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_interface_F;
-
-  /// Map from degree of freedom to interface rotation tensor
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_interface_R;
-
-  /// The global traction
-  std::vector<ADVariableValue> _czm_interpolated_traction;
-
-  /// The penalty factor for the frictional constraints
-  const Real _penalty_friction;
-
-  /// The friction coefficient
-  const Real _friction_coefficient;
-
-  /// Map from degree of freedom to current and old AD iteration step slip
-  std::unordered_map<const DofObject *, std::pair<ADTwoVector, TwoVector>> _dof_to_step_slip;
-
-  /// Map from degree of freedom to current and old accumulated slip
-  std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>> & _dof_to_accumulated_slip;
-
-  // Map from degree of freedom to current and old tangential traction
-  std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>> & _dof_to_tangential_traction;
-
-  /// The first frictional contact pressure on the mortar segment quadrature points
-  ADVariableValue _frictional_contact_traction_one;
-
-  /// The second frictional contact pressure on the mortar segment quadrature points
-  ADVariableValue _frictional_contact_traction_two;
-
-  /// Map from degree of freedom to augmented lagrange multiplier
-  std::unordered_map<const DofObject *, TwoVector> _dof_to_frictional_lagrange_multipliers;
-
-  /// Map from degree of freedom to local friction penalty value
-  std::unordered_map<const DofObject *, Real> _dof_to_local_penalty_friction;
-
-  /// Tolerance to avoid NaN/Inf in automatic differentiation operations.
-  const Real _epsilon_tolerance;
-
-  /// Total Lagrangian stress to be applied on CZM interface
+  /// Map from secondary node to the local cohesive traction
   std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_czm_traction;
 
-  /// Displacement jump on CZM interface
-  std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_displacement_jump;
+  /// Map from secondary node to the global cohesive traction
+  std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_global_czm_traction;
+
+  /// The global traction interpolated at the mortar segment quadrature points
+  std::array<ADVariableValue, 3> _czm_interpolated_traction;
+
+  /**
+   * Tolerance to avoid NaN/Inf in automatic differentiation operations. It is added under square
+   * roots of squared jumps, whose derivative is unbounded at zero, and is the threshold for an
+   * opening normal jump. 1e-40 is far below the square of any resolvable jump (a jump of 1e-15
+   * squares to 1e-30), so it does not change the computed values, while sqrt(1e-40) = 1e-20 keeps
+   * the derivatives finite.
+   */
+  const Real _epsilon_tolerance;
 
   /// Damage values (pair of current and old) on CZM interface
   std::unordered_map<dof_id_type, std::pair<ADReal, Real>> & _dof_to_damage;
