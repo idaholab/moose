@@ -258,6 +258,9 @@ evaluateADTerms(const Object & object,
 {
   constexpr auto term_size = ADScratchLayout::term_size;
 
+  // Each call visits a new quadrature point, so the cache of the previous one is never read again
+  ad_datum.resetTransform();
+
   // The chain record holds the plain values of the intermediate slots at this quadrature point
   if constexpr (displaced)
     *ad_datum.chain() = ADChainRecord<slots>{};

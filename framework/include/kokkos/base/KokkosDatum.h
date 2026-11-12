@@ -411,6 +411,12 @@ public:
   KOKKOS_FUNCTION const Real3 & grad_log_coord(const unsigned int qp);
 
   /**
+   * Invalidate the cached physical transformation data. A loop that visits each quadrature point
+   * once calls this per point, so the data of the previous point is dead and holds no registers.
+   */
+  KOKKOS_FUNCTION void resetTransform() { _cached_qp = libMesh::invalid_uint; }
+
+  /**
    * Get the inverse of the Jacobian of the map from the reference element to the reference
    * configuration, regardless of the configuration of the Datum
    * @param qp The local quadrature point index
