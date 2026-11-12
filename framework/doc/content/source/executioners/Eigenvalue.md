@@ -11,7 +11,7 @@ converged eigenvector instead, so that all of the modes land in a single Exodus 
 
 Each step loads eigenvector $i$ into the solution, normalizes it, and executes the `LINEAR` and
 `TIMESTEP_END` objects before the output is written, so aux variables and post-processors such as
-[NodalExtremeValue.md] report the mode of that step. The `TIMESTEP_END` objects therefore run once per
+[NodalExtremeValue.md] report on the mode of that step. The `TIMESTEP_END` objects therefore run once per
 converged mode, and once more for the restore at the end of the loop, so a post-processor that
 accumulates on `TIMESTEP_END`, such as a running sum or a counter, advances on each run instead of
 once per solve. MultiApps and transfers are not re-executed per mode; they run once, as they do with

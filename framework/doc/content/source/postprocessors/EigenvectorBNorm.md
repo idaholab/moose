@@ -34,18 +34,8 @@ $B$ has to be assembled, not applied matrix-free. Use a solve type that assemble
 SLEPc solver such as `KRYLOVSCHUR` or `JACOBI_DAVIDSON`, or `PJFNKMO`). With a matrix-free
 [!param](/Executioner/Eigenvalue/solve_type) such as the default `PJFNK`, or `JFNK`, $B$ is a shell
 matrix whose product would re-enter the residual evaluation from inside a `linear` post-processor,
-and this object reports
-
-```
-EigenvectorBNorm requires an assembled B matrix, but this eigenvalue solve forms B matrix-free. Use a solve type that assembles B, i.e. a linear eigen solve type such as KRYLOVSCHUR or JACOBI_DAVIDSON, or PJFNKMO.
-```
-
-`NEWTON` evaluates the products with $B$ as residuals and never assembles $B$, so it is rejected as
-well:
-
-```
-EigenvectorBNorm requires an assembled B matrix, but the NEWTON eigenvalue solve never assembles B. Use a solve type that assembles B, i.e. a linear eigen solve type such as KRYLOVSCHUR or JACOBI_DAVIDSON, or PJFNKMO.
-```
+and this object reports an error. `NEWTON` evaluates the products with $B$ as residuals and never
+assembles $B$, so it is an error as well.
 
 A negative $\phi^{\top} B \phi$ has no square root and is also an error; it means the eigen kernels
 and [!param](/Problem/EigenProblem/negative_sign_eigen_kernel) together give an indefinite $B$.

@@ -71,9 +71,9 @@ protected:
 private:
 #ifdef LIBMESH_HAVE_SLEPC
   /**
-   * Copy the converged eigenvector \p i into the solution of the eigen system, refresh the objects
-   * that execute on linear iterations, scale the eigenvector with the normalization hook, and
-   * execute the objects that execute at the end of a time step.
+   * Copy the converged eigenvector \p i into the solution of the eigen system, recompute the
+   * objects that execute on linear iterations, scale the eigenvector with the normalization hook,
+   * and execute the objects that execute at the end of a time step.
    */
   void loadEigenvector(dof_id_type i);
 

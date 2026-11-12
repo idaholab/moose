@@ -125,7 +125,7 @@ Eigenvalue::loadEigenvector(dof_id_type i)
   // constrained degrees of freedom, e.g. of hanging nodes, their constrained values
   nl.dofMap().enforce_constraints_exactly(nl.system());
   nl.update();
-  // Refresh the objects the normalization hook reads before and after it scales the eigenvector,
+  // Recompute the objects the normalization hook reads before and after it scales the eigenvector,
   // then let the objects executing at the end of a time step see the scaled eigenvector. Neither
   // execution runs multiapps or transfers.
   _eigen_problem.execute(EXEC_LINEAR);
@@ -233,7 +233,7 @@ Eigenvalue::execute()
       for (const auto i : index_range(eigenvalues))
       {
         loadEigenvector(i);
-        _time_step = first_step + static_cast<int>(i);
+        _time_step = first_step + cast_int<int>(i);
         _time = eigenvectorTime(i, eigenvalues[i]);
         if (i == _eigen_problem.activeEigenvalueIndex())
           active_eigenvector_time = _time;
@@ -260,11 +260,12 @@ Eigenvalue::execute()
     _eigen_problem.finalizeMultiApps();
     _eigen_problem.postExecute();
     _eigen_problem.execute(EXEC_FINAL);
-    _time = _time_step;
     // Keep the final step on the requested time axis, at the time of the step holding the active
     // eigenvector in the last solve, which is the one restored into the solution after that step
     if (active_eigenvector_time)
       _time = *active_eigenvector_time;
+    else
+      _time = _time_step;
     _eigen_problem.outputStep(EXEC_FINAL);
     _time = _system_time;
   }
