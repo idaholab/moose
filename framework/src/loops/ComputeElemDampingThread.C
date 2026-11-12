@@ -17,11 +17,13 @@
 #include "libmesh/threads.h"
 
 ComputeElemDampingThread::ComputeElemDampingThread(FEProblemBase & feproblem,
-                                                   NonlinearSystemBase & nl)
+                                                   NonlinearSystemBase & nl,
+                                                   const Moose::DampingStage stage)
   : ThreadedElementLoop<ConstElemRange>(feproblem),
     _damping(1.0),
     _nl(nl),
-    _element_dampers(_nl.getElementDamperWarehouse())
+    _element_dampers(_nl.getElementDamperWarehouse()),
+    _stage(stage)
 {
 }
 
@@ -31,7 +33,8 @@ ComputeElemDampingThread::ComputeElemDampingThread(ComputeElemDampingThread & x,
   : ThreadedElementLoop<ConstElemRange>(x, split),
     _damping(1.0),
     _nl(x._nl),
-    _element_dampers(x._element_dampers)
+    _element_dampers(x._element_dampers),
+    _stage(x._stage)
 {
 }
 
@@ -47,7 +50,7 @@ ComputeElemDampingThread::onElement(const Elem * elem)
 
   const auto & edampers = _element_dampers.getActiveObjects(_tid);
   for (const auto & damper : edampers)
-    if (damper->variableDefinedOnElement(elem))
+    if (damper->appliesTo(_stage) && damper->variableDefinedOnElement(elem))
       damped_vars.insert(damper->getVariable());
 
   if (!damped_vars.empty())
@@ -55,7 +58,7 @@ ComputeElemDampingThread::onElement(const Elem * elem)
 
   for (const auto & damper : edampers)
   {
-    if (!damper->variableDefinedOnElement(elem))
+    if (!damper->appliesTo(_stage) || !damper->variableDefinedOnElement(elem))
       continue;
 
     Real cur_damping = damper->computeDamping();

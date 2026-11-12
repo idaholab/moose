@@ -24,7 +24,9 @@ class ComputeNodalDampingThread
   : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalDampingThread(FEProblemBase & feproblem, NonlinearSystemBase & nl);
+  ComputeNodalDampingThread(FEProblemBase & feproblem,
+                            NonlinearSystemBase & nl,
+                            Moose::DampingStage stage = Moose::DampingStage::NONLINEAR);
 
   // Splitting Constructor
   ComputeNodalDampingThread(ComputeNodalDampingThread & x, Threads::split split);
@@ -44,4 +46,7 @@ protected:
   Real _damping;
   NonlinearSystemBase & _nl;
   const MooseObjectWarehouse<NodalDamper> & _nodal_dampers;
+
+  /// The solution update whose dampers this loop evaluates
+  const Moose::DampingStage _stage;
 };

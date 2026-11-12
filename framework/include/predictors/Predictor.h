@@ -38,6 +38,9 @@ public:
   virtual bool shouldApply();
   virtual void apply(NumericVector<Number> & sln) = 0;
 
+  /// Apply the prediction to \p sln, with its change scaled by the predictor dampers
+  void applyDamped(NumericVector<Number> & sln);
+
   virtual NumericVector<Number> & solutionPredictor() { return _solution_predictor; }
 
 protected:
@@ -71,6 +74,9 @@ protected:
 
   /// Timestep tolerance from Transient executioner
   const Real & _timestep_tolerance;
+
+  /// Whether a failed predictor damper cuts the time step instead of skipping the prediction
+  const bool _cut_timestep_on_damping_failure;
 
   friend class SetupPredictorAction;
 };

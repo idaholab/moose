@@ -24,6 +24,11 @@ Damper::validParams()
                         "Minimum value of computed damping. Damping lower than "
                         "this will result in an exception being thrown and "
                         "cutting the time step");
+  params.addParam<MultiMooseEnum>(
+      "apply_to",
+      MultiMooseEnum("nonlinear predictor", "nonlinear"),
+      "The solution updates this damper limits: the nonlinear updates, the change of the initial "
+      "guess made by the Predictor, or both");
   return params;
 }
 
@@ -34,8 +39,17 @@ Damper::Damper(const InputParameters & parameters)
     MeshChangedInterface(parameters),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _min_damping(getParam<Real>("min_damping"))
+    _min_damping(getParam<Real>("min_damping")),
+    _apply_to(getParam<MultiMooseEnum>("apply_to"))
 {
+  if (!_apply_to.isValid())
+    paramError("apply_to", "At least one solution update must be selected.");
+}
+
+bool
+Damper::appliesTo(const Moose::DampingStage stage) const
+{
+  return _apply_to.isValueSet(stage == Moose::DampingStage::NONLINEAR ? "nonlinear" : "predictor");
 }
 
 void

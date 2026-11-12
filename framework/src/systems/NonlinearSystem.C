@@ -143,7 +143,7 @@ NonlinearSystem::solve()
   // have dampers or if the FEProblemBase needs to update the solution,
   // which is also done during the linesearch postcheck.  It doesn't
   // hurt to do this multiple times, it is just setting a pointer.
-  if (_fe_problem.hasDampers() || _fe_problem.shouldUpdateSolution() ||
+  if (_fe_problem.hasNonlinearDampers() || _fe_problem.shouldUpdateSolution() ||
       _fe_problem.needsPreviousNewtonIteration())
     _nl_implicit_sys.nonlinear_solver->postcheck = Moose::compute_postcheck;
 

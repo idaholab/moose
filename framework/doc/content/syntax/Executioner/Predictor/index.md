@@ -24,6 +24,10 @@ The `apply` parameter of a predictor is controllable, so the prediction can be s
 during a simulation with the [Controls](syntax/Controls/index.md) system, e.g. for a time step
 repeated after a failed solve, see [syntax/Controls/index.md#failed_time_steps].
 
+The change of the initial guess made by a predictor can be limited by
+[Dampers](syntax/Dampers/index.md) set to apply to the predictor, see
+[syntax/Dampers/index.md#predictor].
+
 !syntax list /Executioner/Predictor objects=True actions=False subsystems=False
 
 !syntax list /Executioner/Predictor objects=False actions=False subsystems=True

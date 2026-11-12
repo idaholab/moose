@@ -16,11 +16,13 @@
 #include "libmesh/threads.h"
 
 ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblemBase & feproblem,
-                                                     NonlinearSystemBase & nl)
+                                                     NonlinearSystemBase & nl,
+                                                     const Moose::DampingStage stage)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(feproblem),
     _damping(1.0),
     _nl(nl),
-    _nodal_dampers(_nl.getNodalDamperWarehouse())
+    _nodal_dampers(_nl.getNodalDamperWarehouse()),
+    _stage(stage)
 {
 }
 
@@ -30,7 +32,8 @@ ComputeNodalDampingThread::ComputeNodalDampingThread(ComputeNodalDampingThread &
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _damping(1.0),
     _nl(x._nl),
-    _nodal_dampers(x._nodal_dampers)
+    _nodal_dampers(x._nodal_dampers),
+    _stage(x._stage)
 {
 }
 
@@ -46,7 +49,7 @@ ComputeNodalDampingThread::onNode(ConstNodeRange::const_iterator & node_it)
 
   const auto & ndampers = _nodal_dampers.getActiveObjects(_tid);
   for (const auto & damper : ndampers)
-    if (damper->variableDefinedOnNode(node))
+    if (damper->appliesTo(_stage) && damper->variableDefinedOnNode(node))
       damped_vars.insert(damper->getVariable());
 
   if (!damped_vars.empty())
@@ -54,7 +57,7 @@ ComputeNodalDampingThread::onNode(ConstNodeRange::const_iterator & node_it)
 
   for (const auto & damper : ndampers)
   {
-    if (!damper->variableDefinedOnNode(node))
+    if (!damper->appliesTo(_stage) || !damper->variableDefinedOnNode(node))
       continue;
 
     Real cur_damping = damper->computeDamping();
