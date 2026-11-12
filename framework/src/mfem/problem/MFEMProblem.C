@@ -614,6 +614,7 @@ const std::vector<std::string> SCALAR_FUNCS = {"Axisymmetric2D3DSolutionFunction
                                                "TimeRampFunction"},
                                VECTOR_FUNCS = {"ParsedVectorFunction", "LevelSetOlssonVortex"},
                                MFEM_FUNCS = {"MFEMParsedFunction",
+                                             "MFEMMatrixCoefficientFunction",
                                              "MFEMCoordinateTransformations",
                                              "MFEMScalarQuadratureFunction",
                                              "MFEMVectorQuadratureFunction"};
