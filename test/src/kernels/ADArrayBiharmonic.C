@@ -15,7 +15,9 @@ InputParameters
 ADArrayBiharmonic::validParams()
 {
   InputParameters params = ADArrayKernel::validParams();
-  params.addCoupledVar("v", "The coupled array variable; the kernel variable if not given");
+  params.addCoupledVar("v",
+                       "The coupled array variable, or its constant component values; the kernel "
+                       "variable if not given");
   params.addClassDescription("Adds the biharmonic residual $(\\nabla^2 \\vec{v}, \\nabla^2 "
                              "\\vec{u}^\\ast)$ using automatic differentiation.");
   return params;
@@ -23,7 +25,7 @@ ADArrayBiharmonic::validParams()
 
 ADArrayBiharmonic::ADArrayBiharmonic(const InputParameters & parameters)
   : ADArrayKernel(parameters),
-    _second_v(isCoupled("v") ? adCoupledArraySecond("v") : _var.adSecondSln()),
+    _second_v(isParamSetByUser("v") ? adCoupledArraySecond("v") : _var.adSecondSln()),
     _second_test(secondTest())
 {
   if (isCoupled("v") && getArrayVar("v", 0)->count() != _count)
