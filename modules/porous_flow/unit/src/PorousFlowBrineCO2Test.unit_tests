@@ -1,0 +1,9 @@
+[Tests]
+  [absent_phase_properties]
+    type = GoogleTest
+    unit_test = PorousFlowBrineCO2Test.absentPhaseProperties
+    requirement = 'The system shall give the absent phase of a single-phase brine and CO2 fluid state the equilibrium composition and the density, viscosity and enthalpy it has at the current pressure and temperature, so that these properties are continuous when the phase appears.'
+    design = 'PorousFlowBrineCO2.md'
+    issues = '#34412'
+  []
+[]
