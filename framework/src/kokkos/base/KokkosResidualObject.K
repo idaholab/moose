@@ -127,7 +127,7 @@ ResidualObject::dispatchADTeams(DispatcherBase & dispatcher,
   // Fill a team of the target size with groups, within the scratch limit and the item count
   auto shape = [&](const unsigned int team_size)
   {
-    const auto group_size = ADTeamGroup::groupSize(max_qps, team_size);
+    const auto group_size = ADTeamGroup::groupSize(layout, team_size);
     const auto groups = static_cast<unsigned int>(std::min<std::size_t>(
         {std::max(1u, team_size / group_size), max_groups_scratch, n_items}));
 

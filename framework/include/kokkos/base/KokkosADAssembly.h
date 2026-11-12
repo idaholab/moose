@@ -88,7 +88,7 @@ struct ADScratchLayout
 /**
  * Partition of a team of a pointwise AD assembly into groups of threads. Each group assembles one
  * element or side, so that a team of short quadrature point loops keeps its threads busy. A group
- * holds one thread per quadrature point, up to the team size.
+ * holds at least one thread per quadrature point, up to the team size.
  */
 class ADTeamGroup
 {
@@ -96,27 +96,38 @@ public:
   /// Number of threads per team that a dispatch aims for, which the backend limits may lower
   static constexpr unsigned int target_team_size = 128;
 
+  /// Number of threads of one shared memory wavefront of 8-byte accesses: 32 banks of 4 bytes
+  /// serve 16 reals per wavefront
+  static constexpr unsigned int half_warp = 16;
+
   /**
-   * Get the number of threads per group
-   * @param max_qps The maximum number of quadrature points of an element or side
+   * Get the number of threads per group. With a Jacobian contraction, a group of more than half a
+   * warp spans whole half-warps, so that the contraction plane loads of two such groups never
+   * share a wavefront and cannot conflict.
+   * @param layout The scratch layout of the dispatch
    * @param team_size The number of threads per team
    */
-  KOKKOS_FUNCTION static unsigned int groupSize(const unsigned int max_qps,
+  KOKKOS_FUNCTION static unsigned int groupSize(const ADScratchLayout & layout,
                                                 const unsigned int team_size)
   {
-    return ::Kokkos::max(1u, ::Kokkos::min(max_qps, team_size));
+    const auto qps = layout.max_qps;
+    const auto size = layout.max_jdofs && qps > half_warp
+                          ? (qps + half_warp - 1) / half_warp * half_warp
+                          : qps;
+    return ::Kokkos::max(1u, ::Kokkos::min(size, team_size));
   }
 
   /**
    * Constructor
    * @param team The team handle
-   * @param max_qps The maximum number of quadrature points of an element or side
+   * @param layout The scratch layout of the dispatch
    * @param n_items The number of elements or sides of the dispatch
    */
   template <typename Team>
-  KOKKOS_FUNCTION ADTeamGroup(const Team & team, const unsigned int max_qps, const ThreadID n_items)
-    : _max_qps(max_qps),
-      _size(groupSize(max_qps, team.team_size())),
+  KOKKOS_FUNCTION
+  ADTeamGroup(const Team & team, const ADScratchLayout & layout, const ThreadID n_items)
+    : _max_qps(layout.max_qps),
+      _size(groupSize(layout, team.team_size())),
       _count(team.team_size() / _size),
       _index(team.team_rank() / _size),
       _rank(team.team_rank() % _size),

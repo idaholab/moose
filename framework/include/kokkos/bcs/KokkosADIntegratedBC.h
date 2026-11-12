@@ -228,7 +228,7 @@ ADIntegratedBC::operator()(
     const TeamMember<ConfigurationLoop<ResidualAndJacobianLoop, displaced>> & team,
     const Derived & bc) const
 {
-  const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerSide(), numKokkosBoundarySides());
+  const ADTeamGroup group(team, _ad_layout, numKokkosBoundarySides());
   const auto [elem, side] = kokkosBoundaryElementSideID(group.item());
 
   ADAssemblyDatum<Derived::max_ad_slots> datum(_ad_slots,
@@ -253,7 +253,7 @@ ADIntegratedBC::operator()(
     const TeamMember<ConfigurationLoop<DisplacementSeededLoop, displaced>> & team,
     const Derived & bc) const
 {
-  const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerSide(), numKokkosBoundarySides());
+  const ADTeamGroup group(team, _ad_layout, numKokkosBoundarySides());
   const auto [elem, side] = kokkosBoundaryElementSideID(group.item());
 
   // The chain record holds the plain values of the intermediate slots at one quadrature point
@@ -280,7 +280,7 @@ ADIntegratedBC::operator()(ConfigurationLoop<ResidualLoop, displaced>,
                            const TeamMember<ConfigurationLoop<ResidualLoop, displaced>> & team,
                            const Derived & bc) const
 {
-  const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerSide(), numKokkosBoundarySides());
+  const ADTeamGroup group(team, _ad_layout, numKokkosBoundarySides());
   const auto [elem, side] = kokkosBoundaryElementSideID(group.item());
 
   ADAssemblyDatum<0> datum(_ad_slots,

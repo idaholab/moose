@@ -226,7 +226,7 @@ ADKernel::operator()(ConfigurationLoop<ResidualAndJacobianLoop, displaced>,
                      const TeamMember<ConfigurationLoop<ResidualAndJacobianLoop, displaced>> & team,
                      const Derived & kernel) const
 {
-  const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerElem(), numKokkosBlockElements());
+  const ADTeamGroup group(team, _ad_layout, numKokkosBlockElements());
   const auto elem = kokkosBlockElementID(group.item());
 
   ADAssemblyDatum<Derived::max_ad_slots> datum(_ad_slots,
@@ -250,7 +250,7 @@ ADKernel::operator()(ConfigurationLoop<DisplacementSeededLoop, displaced>,
                      const TeamMember<ConfigurationLoop<DisplacementSeededLoop, displaced>> & team,
                      const Derived & kernel) const
 {
-  const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerElem(), numKokkosBlockElements());
+  const ADTeamGroup group(team, _ad_layout, numKokkosBlockElements());
   const auto elem = kokkosBlockElementID(group.item());
 
   // The chain record holds the plain values of the intermediate slots at one quadrature point
@@ -277,7 +277,7 @@ ADKernel::operator()(ConfigurationLoop<ResidualLoop, displaced>,
                      const TeamMember<ConfigurationLoop<ResidualLoop, displaced>> & team,
                      const Derived & kernel) const
 {
-  const ADTeamGroup group(team, kokkosAssembly().getMaxQpsPerElem(), numKokkosBlockElements());
+  const ADTeamGroup group(team, _ad_layout, numKokkosBlockElements());
   const auto elem = kokkosBlockElementID(group.item());
 
   ADAssemblyDatum<0> datum(_ad_slots,
