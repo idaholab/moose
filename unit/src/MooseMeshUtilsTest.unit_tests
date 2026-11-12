@@ -13,4 +13,11 @@
     requirement = 'The system shall be able to list the names and IDs of all boundaries in a mesh, using the nodeset name for boundaries without a sideset name, to report them in error messages.'
     design = 'LowerDBlockFromSidesetGenerator.md'
   []
+  [stitch_meshes_pairwise]
+    type = GoogleTest
+    unit_test = MooseMeshUtilsTest.stitchMeshesPairwise
+    issues = '#34429'
+    requirement = 'The system shall be able to stitch a list of meshes into one mesh by stitching neighboring pairs, with the elements of the result in the order of the list.'
+    design = 'PatternedMeshGenerator.md'
+  []
 []

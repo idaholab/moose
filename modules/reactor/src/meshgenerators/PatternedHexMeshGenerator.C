@@ -606,6 +606,8 @@ PatternedHexMeshGenerator::generate()
   // repeatedly stitching onto one growing mesh
   std::vector<std::unique_ptr<ReplicatedMesh>> row_meshes;
   std::map<subdomain_id_type, std::string> placed_subdomain_map;
+  const auto stitching_boundary_id_of = [](const MeshBase &)
+  { return static_cast<boundary_id_type>(OUTER_SIDESET_ID); };
   // Retrieve the subdomain name map of a mesh to be stitched and insert it to the main subdomain
   // map, which is checked for one SubdomainName shared by more than one subdomain id
   const auto add_subdomain_names = [this, &placed_subdomain_map](const ReplicatedMesh & mesh)
@@ -808,18 +810,18 @@ PatternedHexMeshGenerator::generate()
       placed_meshes.push_back(std::move(placed_mesh));
     }
 
-    row_meshes.push_back(stitchMeshesPairwise(
-        std::move(placed_meshes),
-        [](const MeshBase &) { return static_cast<boundary_id_type>(OUTER_SIDESET_ID); },
-        /*clear_stitched_boundary_ids=*/false,
-        /*verbose=*/false));
+    row_meshes.push_back(MooseMeshUtils::stitchMeshesPairwise(std::move(placed_meshes),
+                                                              stitching_boundary_id_of,
+                                                              stitching_boundary_id_of,
+                                                              /*clear_stitched_boundary_ids=*/false,
+                                                              /*verbose=*/false));
   }
 
-  out_mesh = stitchMeshesPairwise(
-      std::move(row_meshes),
-      [](const MeshBase &) { return static_cast<boundary_id_type>(OUTER_SIDESET_ID); },
-      /*clear_stitched_boundary_ids=*/false,
-      /*verbose=*/false);
+  out_mesh = MooseMeshUtils::stitchMeshesPairwise(std::move(row_meshes),
+                                                  stitching_boundary_id_of,
+                                                  stitching_boundary_id_of,
+                                                  /*clear_stitched_boundary_ids=*/false,
+                                                  /*verbose=*/false);
   // Stitching does not merge subdomain names
   out_mesh->set_subdomain_name_map() = placed_subdomain_map;
 

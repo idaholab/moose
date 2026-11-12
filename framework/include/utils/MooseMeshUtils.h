@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/boundary_info.h"
 
@@ -656,4 +658,28 @@ void addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & ha
  */
 std::vector<unsigned int> nodalQuadraturePointToNodeMap(const Elem & elem,
                                                         const std::vector<Point> & q_points);
+
+/**
+ * Stitch a list of meshes into one by repeatedly stitching neighboring pairs, so that the cost
+ * is O(N log N) in the number of elements instead of the O(N^2) of stitching each mesh onto one
+ * growing mesh. The left mesh of each pair absorbs the right one, and a stitch appends the
+ * elements of the right mesh after those of the left, so the elements of the result are those of
+ * meshes[0], then meshes[1], and so on. A node shared by several meshes keeps the copy of the
+ * lowest-index mesh. The element and node order is therefore the same as stitching the list one
+ * mesh after another onto meshes[0]; reporting id assignment depends on this order.
+ * @param meshes meshes to stitch, in the order their elements must appear; must not be empty
+ * @param left_boundary_id returns the id of the boundary of a given mesh that is stitched to the
+ * mesh on its right
+ * @param right_boundary_id returns the id of the boundary of a given mesh that is stitched to the
+ * mesh on its left
+ * @param clear_stitched_boundary_ids whether to clear the stitched boundary ids
+ * @param verbose whether libMesh prints stitching information
+ * @return the stitched mesh
+ */
+std::unique_ptr<ReplicatedMesh>
+stitchMeshesPairwise(std::vector<std::unique_ptr<ReplicatedMesh>> meshes,
+                     const std::function<BoundaryID(const MeshBase &)> & left_boundary_id,
+                     const std::function<BoundaryID(const MeshBase &)> & right_boundary_id,
+                     const bool clear_stitched_boundary_ids,
+                     const bool verbose);
 }

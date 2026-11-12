@@ -795,16 +795,18 @@ PatternedCartesianMeshGenerator::generate()
       placed_meshes.push_back(std::move(placed_mesh));
     }
 
-    row_meshes.push_back(stitchMeshesPairwise(std::move(placed_meshes),
-                                              stitching_boundary_id_of,
-                                              /*clear_stitched_boundary_ids=*/false,
-                                              _verbose_stitching));
+    row_meshes.push_back(MooseMeshUtils::stitchMeshesPairwise(std::move(placed_meshes),
+                                                              stitching_boundary_id_of,
+                                                              stitching_boundary_id_of,
+                                                              /*clear_stitched_boundary_ids=*/false,
+                                                              _verbose_stitching));
   }
 
-  out_mesh = stitchMeshesPairwise(std::move(row_meshes),
-                                  stitching_boundary_id_of,
-                                  /*clear_stitched_boundary_ids=*/false,
-                                  _verbose_stitching);
+  out_mesh = MooseMeshUtils::stitchMeshesPairwise(std::move(row_meshes),
+                                                  stitching_boundary_id_of,
+                                                  stitching_boundary_id_of,
+                                                  /*clear_stitched_boundary_ids=*/false,
+                                                  _verbose_stitching);
   // Stitching does not merge subdomain names
   out_mesh->set_subdomain_name_map() = placed_subdomain_map;
 
