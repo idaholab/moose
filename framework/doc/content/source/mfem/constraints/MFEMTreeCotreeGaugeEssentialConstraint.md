@@ -42,9 +42,10 @@ triangular faces (tetrahedra, prisms and pyramids).
 
 The forest is grown by a distributed Boruvka pass in which no rank ever holds more than its
 own share of the mesh graph. Each edge is keyed on its two endpoint coordinates, read from
-the mesh nodes, which are bit-identical on every rank sharing a vertex. A distributed sort turns those coordinates into dense global
-vertex ids in canonical (lexicographic) order, which gives every edge a weight that depends
-only on the geometry and not on the partitioning.
+the mesh nodes, which are bit-identical on every rank sharing a vertex. A distributed sort
+turns those coordinates into dense global vertex ids in canonical (lexicographic) order,
+which gives every edge a weight that depends only on the geometry and not on the
+partitioning.
 
 Because those weights are distinct, the minimum spanning forest is *unique*, so the result
 is the same as a serial Kruskal pass over the globally sorted edge list. The gauge - and
@@ -56,8 +57,11 @@ was partitioned, without the construction ever being replicated.
 Edges whose degrees of freedom are already fixed, by an essential (tangential Dirichlet)
 boundary condition or by another essential constraint on the variable, seed the spanning
 forest, so that the gauge stays compatible with those conditions instead of
-over-constraining them. The constraint takes these degrees of freedom from the equation
-system, which applies the gauge after every other essential constraint on the variable.
+over-constraining them. Essential constraints on one variable must be restricted to
+disjoint subdomains (see [MFEMConstraint.md]), so another constraint always acts outside
+the gauge's `block` and its edges seed the forest as described below, whichever of the two
+is applied first. A gauge used alongside another constraint therefore needs `block` set to
+exclude that constraint's subdomains.
 
 ### Restricting the gauge with `block`
 
@@ -66,18 +70,17 @@ freedom left to fix and gauging anyway would over-constrain the solution. Set `b
 subdomain(s) that do need gauging; all edges of the excluded elements, including those
 at the interface between gauged and non-gauged subdomains, then seed the spanning
 forest but are never gauged, and neither are the faces of the excluded elements. Leaving
-`block` empty gauges the whole
-mesh, which is correct only when the operator is genuinely unregularized everywhere.
+`block` empty gauges the whole mesh, which is correct only when the operator is genuinely
+unregularized everywhere.
 
 Getting this wrong is not a subtle effect: in the example below, gauging only the
 unregularized subdomain reproduces the solution obtained from a vanishing artificial
 regularization to six significant figures, whereas a whole-mesh gauge perturbs it by several
 percent.
 
-For a complex variable use
-[MFEMComplexTreeCotreeGaugeEssentialConstraint.md], which selects the same degrees of
-freedom (the selection is shared via `Moose::MFEM::TreeCotreeGauge`) and fixes both their real
-and imaginary parts.
+For a complex variable use [MFEMComplexTreeCotreeGaugeEssentialConstraint.md], which selects
+the same degrees of freedom (the selection is shared via `Moose::MFEM::TreeCotreeGauge`) and
+fixes both their real and imaginary parts.
 
 ### Notes and limitations
 
@@ -85,10 +88,10 @@ and imaginary parts.
 - The variable must be an $H(\mathrm{curl})$ (Nedelec) variable.
 - Conforming meshes only. Meshes with discontinuous nodes, such as periodic meshes, are
   rejected, because their vertices cannot be identified by coordinates.
-- Construction is fully distributed in memory, but it is a global graph computation: for
-  a mesh with `V` vertices, it costs `O(log V)` communication rounds and is rebuilt whenever the mesh or the finite
-  element space is refined. The result is cached between solves, so a transient pays for it
-  once rather than once per time step.
+- Construction is fully distributed in memory, but it is a global graph computation: for a
+  mesh with `V` vertices, it costs `O(log V)` communication rounds and is rebuilt whenever
+  the mesh or the finite element space is refined. The result is cached between solves, so a
+  transient pays for it once rather than once per time step.
 
 ## Example: a magnetodynamic A-formulation
 

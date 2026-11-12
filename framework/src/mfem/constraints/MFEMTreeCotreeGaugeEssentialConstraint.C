@@ -27,6 +27,9 @@ MFEMTreeCotreeGaugeEssentialConstraint::validParams()
       "compatible with it. Set 'block' to the subdomains to gauge; the complement is treated as "
       "already gauged and only seeds the spanning forest. Leaving 'block' empty gauges the "
       "whole mesh. Above SECOND order, the mesh must have no triangular faces.");
+  // The gauge must reach the vertices on the boundary of its subdomains to remove
+  // the gradients that do not vanish there.
+  params.suppressParameter<bool>("constrain_subdomain_boundary");
   return params;
 }
 

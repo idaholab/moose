@@ -24,6 +24,18 @@ This mirrors the way [MFEMEssentialBC.md] and [MFEMComplexEssentialBC.md] both d
 `MFEMBoundaryCondition`. Applying a constraint of the wrong kind to a problem is reported as
 an error when the constraint is added, rather than being silently ignored.
 
+By default a constraint fixes every degree of freedom of the elements in its subdomains,
+including those on the subdomain boundary. Setting `constrain_subdomain_boundary = false`
+leaves out the degrees of freedom on that boundary, both on interfaces with other subdomains
+and on the exterior boundary of the mesh, so that they are solved for or fixed by an
+essential boundary condition instead. The tree-cotree gauges do not take this parameter,
+since a gauge has to reach the vertices on the boundary of the region it gauges.
+
+The essential constraints on a variable must be restricted to disjoint subdomains; an empty
+`block` covers every subdomain. Constraints sharing a subdomain are reported as an error,
+since the degrees of freedom they fix together would depend on the order they are applied
+in, most notably for [MFEMTreeCotreeGaugeEssentialConstraint.md].
+
 !if-end!
 
 !else

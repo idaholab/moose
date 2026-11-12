@@ -30,10 +30,6 @@ public:
   void ApplyConstraint(mfem::ParComplexGridFunction & gridfunc,
                        mfem::Array<int> & ess_tdof_list) override;
 
-  /// The gauge seeds its spanning forest with every edge already fixed, so it must
-  /// see the dofs fixed by all other essential conditions on the variable.
-  bool appliedAfterOtherConstraints() const override { return true; }
-
 protected:
   /// Selects and caches the gauged true dofs.
   Moose::MFEM::TreeCotreeGauge _gauge;

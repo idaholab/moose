@@ -37,8 +37,10 @@ MFEMVectorEssentialConstraint::ApplyConstraint(mfem::ParGridFunction & gridfunc,
   if (gridfunc.ParFESpace()->GetVectorDim() != _vec_coef.GetVDim())
     paramError("vector_coefficient", "dimension does not match the variable's.");
 
-  Moose::MFEM::projectCoefficientOnSubdomains(gridfunc, _vec_coef, getSubdomainMarkers());
-  ess_tdof_list.Append(getSubdomainTrueDofs(*gridfunc.ParFESpace()));
+  mfem::ParFiniteElementSpace & pfes = *gridfunc.ParFESpace();
+  Moose::MFEM::projectCoefficientOnSubdomains(
+      gridfunc, _vec_coef, getSubdomainMarkers(), getSubdomainDofMarker(pfes));
+  ess_tdof_list.Append(getSubdomainTrueDofs(pfes));
 }
 
 #endif

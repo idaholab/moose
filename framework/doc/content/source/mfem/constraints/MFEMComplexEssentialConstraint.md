@@ -14,7 +14,9 @@ Complex counterpart of [MFEMEssentialConstraint.md], and its sibling under
 `mfem::ParComplexGridFunction` of a problem with `numeric_type = complex`, constraining the
 real and imaginary components together. The true degrees of freedom in the constrained
 subdomain are added to the essential-DOF list, so the corresponding rows of the discrete
-system are eliminated in favor of the projected values.
+system are eliminated in favor of the projected values. Whether the degrees of freedom on the
+boundary of the subdomain are constrained is set by `constrain_subdomain_boundary`, described
+in [MFEMConstraint.md].
 
 A complex constraint cannot be used in a real problem, and a real constraint cannot be used in
 a complex one; both cases are reported as errors when the constraint is added.

@@ -1,14 +1,16 @@
 # Magnetostatic A-formulation, curl(nu curl A) = J, solved with first-kind Nedelec
 # elements on a beam split into two subdomains. The magnetic vector potential is
 # strongly prescribed in subdomain 2 by an MFEMVectorEssentialConstraint, and a
-# tree-cotree gauge removes the gradient null space of the curl-curl operator
-# elsewhere.
+# tree-cotree gauge restricted to subdomain 1 removes the gradient null space of the
+# curl-curl operator there.
 #
-# The gauge must seed its spanning forest with the edges the constraint already
-# fixes; a forest grown without them links vertices of subdomain 2 through edges of
-# subdomain 1, whose gauged values then over-constrain the potential. Gauging the
-# whole mesh therefore has to give exactly the same solution as excluding subdomain
-# 2 from the gauge with 'block', which seeds the forest with the same edges.
+# The gauge must seed its spanning forest with the edges the constraint fixes; a
+# forest grown without them links vertices of subdomain 2 through edges of
+# subdomain 1, whose gauged values then over-constrain the potential. Excluding
+# subdomain 2 from the gauge seeds the forest with every edge of subdomain 2, so the
+# gauge must not depend on the order the constraints are applied in. Constraints
+# reach the equation system sorted by name, so naming the gauge 'gauge' applies it
+# before the constraint.
 
 [Mesh]
   type = MFEMFileMesh
@@ -83,15 +85,16 @@
 []
 
 [Constraints]
+  [gauge]
+    type = MFEMTreeCotreeGaugeEssentialConstraint
+    variable = a_field
+    block = 1
+  []
   [prescribed_potential]
     type = MFEMVectorEssentialConstraint
     variable = a_field
     block = 2
     vector_coefficient = prescribed_potential
-  []
-  [tree_cotree_gauge]
-    type = MFEMTreeCotreeGaugeEssentialConstraint
-    variable = a_field
   []
 []
 

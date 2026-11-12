@@ -12,7 +12,9 @@ Classes deriving from `MFEMEssentialConstraint` strongly constrain the values a 
 solution may take within one or more mesh subdomains, given by `block`. The true degrees of
 freedom in the constrained subdomain are added to the essential-DOF list, so the corresponding
 rows of the discrete system are eliminated in favor of projected values. This is the
-volumetric analogue of [MFEMEssentialBC.md].
+volumetric analogue of [MFEMEssentialBC.md]. Whether the degrees of freedom on the boundary
+of the subdomain are constrained is set by `constrain_subdomain_boundary`, described in
+[MFEMConstraint.md].
 
 It derives from [MFEMConstraint.md], which carries the `variable` and `block` parameters, and
 is a sibling of [MFEMComplexEssentialConstraint.md] for complex problems.

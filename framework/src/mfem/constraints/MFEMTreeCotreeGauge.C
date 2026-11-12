@@ -77,13 +77,6 @@ UnionFind::join(int a, int b)
 // A vertex location, used as a partition-independent vertex identity.
 using Coord3 = std::array<mfem::real_t, 3>;
 
-// Local dof index with the sign MFEM uses to record an orientation flip removed.
-int
-decodeDof(int dof)
-{
-  return (dof >= 0) ? dof : -1 - dof;
-}
-
 // First dof of parallel mesh edge e, sign-decoded; the edge's dofs are left in
 // dofs. Called once per mesh edge in each pass below, so the caller supplies the
 // dof scratch space rather than having it reallocated for every edge.
@@ -91,7 +84,7 @@ int
 edgeLDof(mfem::ParFiniteElementSpace & pfes, int e, mfem::Array<int> & dofs)
 {
   pfes.GetEdgeDofs(e, dofs);
-  return decodeDof(dofs[0]);
+  return mfem::FiniteElementSpace::DecodeDof(dofs[0]);
 }
 
 Coord3
@@ -131,7 +124,7 @@ excludedDofMarker(mfem::ParFiniteElementSpace & pfes, const mfem::Array<int> & g
     {
       pfes.GetElementDofs(el, edofs);
       for (const auto d : edofs)
-        marker[decodeDof(d)] = 1;
+        marker[mfem::FiniteElementSpace::DecodeDof(d)] = 1;
     }
   pfes.Synchronize(marker); // boolean-OR over shared dofs
   return marker;
@@ -491,7 +484,10 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
     return std::all_of(dofs.begin(),
                        dofs.end(),
                        [&](int d)
-                       { return is_essential_tdof[pfes.GetLocalTDofNumber(decodeDof(d))] != 0; });
+                       {
+                         return is_essential_tdof[pfes.GetLocalTDofNumber(
+                                    mfem::FiniteElementSpace::DecodeDof(d))] != 0;
+                       });
   };
 
   // The dofs on each reference entity that remove the gradients of its H1 bubbles.
@@ -601,7 +597,8 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
     in_forest[free_edges[index].mesh_edge] = 1;
 
   mfem::Array<int> gauged_tdofs;
-  auto gauge = [&](int ldof) { gauged_tdofs.Append(pfes.GetLocalTDofNumber(decodeDof(ldof))); };
+  auto gauge = [&](int ldof)
+  { gauged_tdofs.Append(pfes.GetLocalTDofNumber(mfem::FiniteElementSpace::DecodeDof(ldof))); };
 
   // 6. Fix every dof of a forest edge, and the bubble-removing dofs of any other
   //    free edge. MFEM orders the dofs of an edge from its lower-numbered local
@@ -646,7 +643,7 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
       const int * canonical_to_face = nd_fec.DofOrderForOrientation(
           mfem::Geometry::SQUARE, canonicalQuadOrientation(pmesh, fv));
       for (const auto k : face_gauged)
-        gauge(face_dofs[decodeDof(canonical_to_face[k])]);
+        gauge(face_dofs[mfem::FiniteElementSpace::DecodeDof(canonical_to_face[k])]);
     }
   }
 

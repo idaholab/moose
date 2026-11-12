@@ -162,7 +162,10 @@ EquationSystem::AddEssentialConstraint(std::shared_ptr<MFEMEssentialConstraint> 
     auto constraints = std::make_shared<std::vector<std::shared_ptr<MFEMEssentialConstraint>>>();
     _essential_constraint_map.Register(trial_var_name, std::move(constraints));
   }
-  _essential_constraint_map.GetRef(trial_var_name).push_back(std::move(constraint));
+  auto & constraints = _essential_constraint_map.GetRef(trial_var_name);
+  for (const auto & other : constraints)
+    constraint->checkDisjointSubdomains(*other);
+  constraints.push_back(std::move(constraint));
 }
 
 void
@@ -240,14 +243,11 @@ EquationSystem::ApplyEssentialConstraint(const std::string & var_name,
     }
   trial_gf.ParFESpace()->GetEssentialTrueDofs(global_bdr_markers, global_ess_tdofs);
 
-  // Set constrained DoF values and append the constrained tdofs. Constraints that
-  // must see the dofs fixed by every other constraint, such as the tree-cotree
-  // gauge, are applied after the rest.
+  // Set constrained DoF values and append the constrained tdofs. The constraints on a
+  // variable act on disjoint subdomains, so they may be applied in any order.
   if (_essential_constraint_map.Has(var_name))
-    for (const bool applied_last : {false, true})
-      for (auto & constraint : _essential_constraint_map.GetRef(var_name))
-        if (constraint->appliedAfterOtherConstraints() == applied_last)
-          constraint->ApplyConstraint(trial_gf, global_ess_tdofs);
+    for (auto & constraint : _essential_constraint_map.GetRef(var_name))
+      constraint->ApplyConstraint(trial_gf, global_ess_tdofs);
   // Deduplicate. mfem::Array::Unique only drops *consecutive* duplicates, so the
   // list must be sorted first; a constraint whose block touches an essential
   // boundary reports tdofs already present from GetEssentialTrueDofs.

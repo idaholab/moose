@@ -38,22 +38,36 @@ public:
   /// Name of the trial variable (gridfunction) the constraint acts on.
   virtual const std::string & getTrialVariableName() const { return _trial_var_name; }
 
-  /// Whether the constraint must see the true dofs fixed by every other essential
-  /// condition on its variable. Such constraints are applied after all others.
-  virtual bool appliedAfterOtherConstraints() const { return false; }
+  /// Reports an error if this constraint shares a subdomain with @p other, a
+  /// constraint on the same variable. Restricting the constraints on a variable to
+  /// disjoint subdomains makes the dofs a tree-cotree gauge selects independent of
+  /// the order the constraints are applied in, since the gauge seeds its spanning
+  /// forest with every dof of the subdomains it excludes.
+  void checkDisjointSubdomains(MFEMConstraint & other);
 
 protected:
-  /// True dofs of @p pfes lying in the constrained subdomains (see
-  /// Moose::MFEM::subdomainTrueDofs). They depend only on the mesh and the space, so
+  /// True dofs of @p pfes the constraint fixes: those of the constrained subdomains,
+  /// less the subdomain boundary unless 'constrain_subdomain_boundary' is set (see
+  /// Moose::MFEM::subdomainDofs). They depend only on the mesh and the space, so
   /// they are cached and only recomputed when the space is updated.
   const mfem::Array<int> & getSubdomainTrueDofs(mfem::ParFiniteElementSpace & pfes);
+  /// L-dof marker of the dofs of @p pfes the constraint fixes, matching
+  /// getSubdomainTrueDofs() and cached alongside it.
+  const mfem::Array<int> & getSubdomainDofMarker(mfem::ParFiniteElementSpace & pfes);
 
   /// Name of the trial variable the constraint is applied to.
   const VariableName & _trial_var_name;
 
 private:
-  /// Subdomain true dofs of the most recent getSubdomainTrueDofs() call.
+  /// Rebuilds the cached constrained dofs if @p pfes was updated since they were built.
+  void updateSubdomainDofs(mfem::ParFiniteElementSpace & pfes);
+
+  /// Whether the dofs on the boundary of the constrained subdomains are constrained.
+  const bool _constrain_subdomain_boundary;
+  /// Constrained true dofs of the most recent updateSubdomainDofs() call.
   mfem::Array<int> _subdomain_tdofs;
+  /// L-dof marker matching _subdomain_tdofs.
+  mfem::Array<int> _subdomain_dof_marker;
   /// FE space sequence number _subdomain_tdofs was built for; -1 marks "never built".
   long _subdomain_tdofs_sequence = -1;
 };

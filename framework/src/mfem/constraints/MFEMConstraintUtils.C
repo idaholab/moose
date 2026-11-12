@@ -52,18 +52,20 @@ accumulateSubdomainProjection(mfem::ParGridFunction & gf,
     // AddElementVector undoes the ND/RT sign encoding carried in vdofs.
     values.AddElementVector(vdofs, vals);
     for (const auto vdof : vdofs)
-      counter[vdof < 0 ? -1 - vdof : vdof]++;
+      counter[mfem::FiniteElementSpace::DecodeDof(vdof)]++;
   }
 }
 
 /**
  * Average the accumulated projection over every rank that contributed to a dof and
- * write the result into the dofs of @p gf that received a contribution.
+ * write the result into the dofs of @p gf marked in @p dof_marker that received a
+ * contribution.
  */
 void
 distributeSubdomainProjection(mfem::ParGridFunction & gf,
                               mfem::Vector & values,
-                              mfem::Array<int> & counter)
+                              mfem::Array<int> & counter,
+                              const mfem::Array<int> & dof_marker)
 {
   // Sum the contributions and their multiplicity across the ranks sharing a dof,
   // then broadcast both back so every rank forms the same average. Without this a
@@ -78,8 +80,11 @@ distributeSubdomainProjection(mfem::ParGridFunction & gf,
   // Ensure host data is up-to-date before writing to it.
   gf.HostReadWrite();
 
+  // Unmarked dofs on the subdomain boundary still received a contribution, but they
+  // are not constrained and must keep their values, which may come from an essential
+  // boundary condition.
   for (const auto i : libMesh::make_range(gf.Size()))
-    if (counter[i])
+    if (counter[i] && dof_marker[i])
       gf(i) = values(i) / counter[i];
 
   gcomm.Bcast<mfem::real_t>(gf.HostReadWrite());
@@ -90,7 +95,8 @@ template <typename CoefficientType>
 void
 projectOnSubdomains(mfem::ParGridFunction & gf,
                     CoefficientType & coef,
-                    const mfem::Array<int> & subdomain_markers)
+                    const mfem::Array<int> & subdomain_markers,
+                    const mfem::Array<int> & dof_marker)
 {
   mooseAssert(gf.FESpace()->GetVectorDim() == coef.GetVDim(),
               "The coefficient must have one component per space component");
@@ -98,7 +104,7 @@ projectOnSubdomains(mfem::ParGridFunction & gf,
   mfem::Vector values;
   mfem::Array<int> counter;
   accumulateSubdomainProjection(gf, coef, subdomain_markers, values, counter);
-  distributeSubdomainProjection(gf, values, counter);
+  distributeSubdomainProjection(gf, values, counter, dof_marker);
 }
 }
 
@@ -106,29 +112,59 @@ namespace Moose::MFEM
 {
 
 void
-subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
-                  const mfem::Array<int> & subdomain_markers,
-                  mfem::Array<int> & tdofs)
+subdomainDofs(mfem::ParFiniteElementSpace & pfes,
+              const mfem::Array<int> & subdomain_markers,
+              const bool include_boundary,
+              mfem::Array<int> & dof_marker,
+              mfem::Array<int> & tdofs)
 {
   mfem::ParMesh & pmesh = *pfes.GetParMesh();
 
-  // Local L-dof marker: 1 if the dof touches a local element carrying one of the
-  // requested attributes. All requested attributes are marked in a single pass so
-  // multi-subdomain restrictions are not clobbered.
-  mfem::Array<int> dof_marker(pfes.GetVSize());
+  // Local L-dof markers: dof_marker is 1 if the dof touches a local element carrying
+  // one of the requested attributes, outside_marker if it touches one that does not.
+  // All requested attributes are marked in a single pass so multi-subdomain
+  // restrictions are not clobbered.
+  dof_marker.SetSize(pfes.GetVSize());
   dof_marker = 0;
+  mfem::Array<int> outside_marker(pfes.GetVSize());
+  outside_marker = 0;
   mfem::Array<int> vdofs;
   for (const auto e : libMesh::make_range(pmesh.GetNE()))
-    if (subdomain_markers[pmesh.GetAttribute(e) - 1])
-    {
-      pfes.GetElementVDofs(e, vdofs);
-      for (const auto d : vdofs)
-        dof_marker[d < 0 ? -1 - d : d] = 1; // undo ND/RT sign encoding
-    }
+  {
+    pfes.GetElementVDofs(e, vdofs);
+    auto & marker = subdomain_markers[pmesh.GetAttribute(e) - 1] ? dof_marker : outside_marker;
+    for (const auto d : vdofs)
+      marker[mfem::FiniteElementSpace::DecodeDof(d)] = 1; // undo ND/RT sign encoding
+  }
 
-  // Make the marker consistent across processors sharing a dof (boolean-OR), then
-  // convert the L-dof marker to a T-dof list exactly as GetEssentialTrueDofs does.
+  // Make the marker consistent across processors sharing a dof (boolean-OR).
   pfes.Synchronize(dof_marker);
+
+  if (!include_boundary)
+  {
+    // The subdomain boundary consists of the dofs the subdomains share with other
+    // elements, marked above, and those on the exterior boundary of the mesh.
+    // Periodic faces and nonconforming master faces are not exterior, and neither
+    // are faces shared between ranks. GetFaceInformation only tells those apart once
+    // ParMesh::ExchangeFaceNbrData has run, so they are skipped explicitly.
+    std::vector<bool> shared_face(pmesh.GetNumFaces(), false);
+    for (const auto i : libMesh::make_range(pmesh.GetNSharedFaces()))
+      shared_face[pmesh.GetSharedFace(i)] = true;
+    for (const auto f : libMesh::make_range(pmesh.GetNumFaces()))
+      if (!shared_face[f] && pmesh.GetFaceInformation(f).IsBoundary())
+      {
+        pfes.GetFaceVDofs(f, vdofs);
+        for (const auto d : vdofs)
+          outside_marker[mfem::FiniteElementSpace::DecodeDof(d)] = 1;
+      }
+    // Synchronizing makes an interface coinciding with a processor boundary visible
+    // on the rank holding only the subdomain side of it.
+    pfes.Synchronize(outside_marker);
+    for (const auto i : libMesh::make_range(dof_marker.Size()))
+      dof_marker[i] = dof_marker[i] && !outside_marker[i];
+  }
+
+  // Convert the L-dof marker to a T-dof list exactly as GetEssentialTrueDofs does.
   mfem::Array<int> tdof_marker;
   pfes.GetRestrictionMatrix()->BooleanMult(dof_marker, tdof_marker);
   mfem::FiniteElementSpace::MarkerToList(tdof_marker, tdofs);
@@ -137,17 +173,19 @@ subdomainTrueDofs(mfem::ParFiniteElementSpace & pfes,
 void
 projectCoefficientOnSubdomains(mfem::ParGridFunction & gf,
                                mfem::Coefficient & coef,
-                               const mfem::Array<int> & subdomain_markers)
+                               const mfem::Array<int> & subdomain_markers,
+                               const mfem::Array<int> & dof_marker)
 {
-  projectOnSubdomains(gf, coef, subdomain_markers);
+  projectOnSubdomains(gf, coef, subdomain_markers, dof_marker);
 }
 
 void
 projectCoefficientOnSubdomains(mfem::ParGridFunction & gf,
                                mfem::VectorCoefficient & coef,
-                               const mfem::Array<int> & subdomain_markers)
+                               const mfem::Array<int> & subdomain_markers,
+                               const mfem::Array<int> & dof_marker)
 {
-  projectOnSubdomains(gf, coef, subdomain_markers);
+  projectOnSubdomains(gf, coef, subdomain_markers, dof_marker);
 }
 
 void

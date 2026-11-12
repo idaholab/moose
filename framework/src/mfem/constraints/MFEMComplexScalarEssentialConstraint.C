@@ -46,12 +46,14 @@ MFEMComplexScalarEssentialConstraint::ApplyConstraint(mfem::ParComplexGridFuncti
 
   // Bring the real and imaginary views up to date with the complex vector before
   // writing through them, and hand their state back afterwards.
+  mfem::ParFiniteElementSpace & pfes = *gridfunc.ParFESpace();
   const mfem::Array<int> & markers = getSubdomainMarkers();
+  const mfem::Array<int> & dof_marker = getSubdomainDofMarker(pfes);
   gridfunc.Sync();
-  Moose::MFEM::projectCoefficientOnSubdomains(gridfunc.real(), _coef_real, markers);
-  Moose::MFEM::projectCoefficientOnSubdomains(gridfunc.imag(), _coef_imag, markers);
+  Moose::MFEM::projectCoefficientOnSubdomains(gridfunc.real(), _coef_real, markers, dof_marker);
+  Moose::MFEM::projectCoefficientOnSubdomains(gridfunc.imag(), _coef_imag, markers, dof_marker);
   gridfunc.SyncAlias();
-  ess_tdof_list.Append(getSubdomainTrueDofs(*gridfunc.ParFESpace()));
+  ess_tdof_list.Append(getSubdomainTrueDofs(pfes));
 }
 
 #endif

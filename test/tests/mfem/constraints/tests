@@ -62,6 +62,56 @@
     compute_devices = 'cpu'
     recover = false
   []
+  [MFEMConstraintExcludingSubdomainBoundary]
+    design = 'MFEMConstraint.md'
+    requirement = 'The system shall be able to restrict an essential constraint in an MFEM problem to the degrees of freedom interior to its subdomains, leaving those on the subdomain boundary unconstrained, for'
+    [scalar]
+      type = CSVDiff
+      input = subdomain_constraint_source.i
+      cli_args = 'Constraints/circle_interior/constrain_subdomain_boundary=false '
+                 'Outputs/file_base=subdomain_constraint_source_interior_out'
+      csvdiff = subdomain_constraint_source_interior_out_line_sample_0001.csv
+      detail = 'a scalar variable on a subdomain enclosed by another subdomain,'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+    []
+    [scalar_exterior]
+      type = CSVDiff
+      input = subdomain_constraint_source.i
+      cli_args = 'Constraints/circle_interior/block=1 '
+                 'Constraints/circle_interior/constrain_subdomain_boundary=false '
+                 'Outputs/file_base=subdomain_constraint_source_exterior_out'
+      csvdiff = subdomain_constraint_source_exterior_out_line_sample_0001.csv
+      detail = 'a scalar variable on a subdomain reaching the exterior boundary of the mesh, '
+               'keeping the values of an essential boundary condition there,'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+    []
+    [vector]
+      type = CSVDiff
+      input = vector_subdomain_constraint_source.i
+      cli_args = 'Constraints/circle_interior/constrain_subdomain_boundary=false '
+                 'Outputs/file_base=vector_subdomain_constraint_source_interior_out'
+      csvdiff = vector_subdomain_constraint_source_interior_out_point_sample_0001.csv
+      detail = 'an H(curl) variable, and'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+    []
+    [complex]
+      type = CSVDiff
+      input = complex_subdomain_constraint_source.i
+      cli_args = 'Constraints/circle_interior/constrain_subdomain_boundary=false '
+                 'Outputs/file_base=complex_subdomain_constraint_source_interior_out'
+      csvdiff = complex_subdomain_constraint_source_interior_out_point_sample_0001.csv
+      detail = 'a complex scalar variable.'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+    []
+  []
   [MFEMInvalidConstraintBlock]
     type = RunException
     input = subdomain_constraint_source.i
@@ -229,26 +279,34 @@
     capabilities = 'mfem'
   []
   [MFEMTreeCotreeGaugeWithConstraint]
+    type = CSVDiff
+    input = tree_cotree_gauge_with_constraint.i
+    csvdiff = tree_cotree_gauge_with_constraint_out.csv
     design = 'MFEMTreeCotreeGaugeEssentialConstraint.md'
-    requirement = 'The system shall seed the tree-cotree gauge of an H(curl) variable with the degrees of freedom fixed by other essential constraints on the variable, giving the same solution'
-    [whole_mesh]
-      type = CSVDiff
+    requirement = 'The system shall apply a tree-cotree gauge to an H(curl) variable alongside an essential constraint on a disjoint subdomain'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMOverlappingConstraints]
+    design = 'MFEMConstraint.md'
+    requirement = 'The system shall report an error if two essential constraints on the same MFEM variable share a subdomain, for'
+    [real]
+      type = RunException
       input = tree_cotree_gauge_with_constraint.i
-      csvdiff = tree_cotree_gauge_with_constraint_out.csv
-      detail = 'when the gauge spans the whole mesh, including the constrained subdomain, as'
+      cli_args = "Constraints/gauge/block='1 2'"
+      expect_err = "shares subdomain 2 with the constraint 'gauge' on variable 'a_field'"
+      detail = 'a real variable, and'
       capabilities = 'mfem'
-      compute_devices = 'cpu cuda'
-      recover = false
     []
-    [excluded_block]
-      type = CSVDiff
-      input = tree_cotree_gauge_with_constraint.i
-      cli_args = 'Constraints/tree_cotree_gauge/block=1'
-      csvdiff = tree_cotree_gauge_with_constraint_out.csv
-      detail = 'when the constrained subdomain is excluded from the gauge.'
+    [complex]
+      type = RunException
+      input = complex_subdomain_constraint_source.i
+      cli_args = 'Constraints/second/type=MFEMComplexScalarEssentialConstraint '
+                 'Constraints/second/variable=temperature'
+      expect_err = "with the constraint 'circle_interior' on variable 'temperature'"
+      detail = 'a complex variable.'
       capabilities = 'mfem'
-      compute_devices = 'cpu cuda'
-      recover = false
     []
   []
 []
