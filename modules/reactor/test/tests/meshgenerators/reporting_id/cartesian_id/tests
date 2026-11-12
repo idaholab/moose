@@ -5,6 +5,7 @@
     requirement = 'The system shall support the generation of reporting IDs for Cartesian assemblies assigned'
     [cell]
       type = 'Exodiff'
+      exodiff_opts = '-pedantic'
       input = 'assembly_reporting_id.i'
       exodiff = 'assembly_reporting_id_cell_out.e'
       cli_args = "Outputs/file_base='assembly_reporting_id_cell_out'"
@@ -13,6 +14,7 @@
     []
     [pattern]
       type = 'Exodiff'
+      exodiff_opts = '-pedantic'
       input = 'assembly_reporting_id.i'
       exodiff = 'assembly_reporting_id_pattern_out.e'
       cli_args = "Mesh/assembly/assign_type='pattern' Outputs/file_base='assembly_reporting_id_pattern_out'"
@@ -21,6 +23,7 @@
     []
     [manual]
       type = 'Exodiff'
+      exodiff_opts = '-pedantic'
       input = 'assembly_reporting_id.i'
       exodiff = 'assembly_reporting_id_manual_out.e'
       cli_args = "Mesh/assembly/assign_type='manual' Mesh/assembly/id_pattern='0 0 1 1;0 0 1 1;2 2 3 3;2 2 3 3' Outputs/file_base='assembly_reporting_id_manual_out'"
@@ -32,6 +35,7 @@
     requirement = 'The system shall support the generation of assembly and pin reporting IDs for Cartesian cores'
     [regular_boundary]
       type = 'Exodiff'
+      exodiff_opts = '-pedantic'
       input = 'core_reporting_id.i'
       exodiff = 'core_reporting_id_out.e'
       detail = 'with regular square core boundary'
@@ -39,6 +43,7 @@
     []
     [zigzag_boundary]
       type = 'Exodiff'
+      exodiff_opts = '-pedantic'
       input = 'core_zigzag_reporting_id.i'
       exodiff = 'core_zigzag_reporting_id_out.e'
       detail = 'with zagged core boundary formed by removal of certain assemblies on periphery'
@@ -81,6 +86,7 @@
     []
     [multi_id]
       type = 'Exodiff'
+      exodiff_opts = '-pedantic'
       input = 'patterned_cartesian_assembly_reporting_multi_id.i'
       exodiff = 'patterned_cartesian_assembly_reporting_multi_id_out.e'
       detail = 'for having different reporting ID assignment schemes for each pattern'

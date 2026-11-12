@@ -114,6 +114,7 @@
   []
   [none_boundary]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'patterned_2d.i'
     exodiff = 'patterned_none.e'
     cli_args = 'Mesh/pattern/pattern_boundary=none --mesh-only "patterned_none.e"'
@@ -318,6 +319,7 @@
   []
   [interface_boundary_id_shift_pattern]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'interface_boundary_id_shift.i'
     exodiff = 'interface_boundary_id_shift_in.e'
     cli_args = '--mesh-only'
