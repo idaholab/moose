@@ -1,7 +1,7 @@
 # Handoff: Kokkos AD GPU work on PR #34088 (arco, updated 2026-11-12)
 
-Status: branch at `2709e503f9d` (steps 0-10, step 10 without a commit). Next: user decision on
-step 10b. Updated 2026-11-12.
+Status: branch at `2709e503f9d` (steps 0-10, step 10 without a commit). Next: step 10b. Updated
+2026-11-12.
 Git tracks this document on the feature branch. Commit it alone with a `PLAN:` subject, and drop
 those commits before the merge. Relative paths outside the MOOSE tree, such as `profiles/`,
 `scripts/`, `patches/`, `ptx/`, `logs/`, `runs/`, and `archive/`, are under `moose-stack-build/`
@@ -14,13 +14,22 @@ Branch `kokkos-reference-configuration` in `/ibmstor/scratch/lindad/projects/moo
 is idaholab/moose#34088. NamjaeChoi left a performance review on it. Answer it with measurements
 once the design work below is final. Do not reply yet.
 
-**Next: ask the user about step 10b** (see "Step 10 result"). The qp slices make the reference
-AD residual up to 2.4x faster, but slow some q8 and displaced q27 residual launches by up to 12%. If
-the user approves 10b: apply `patches/step10/residual-qp-slices-v2.patch`, then keep the original
-serial loop (`git show 2709e503f9d:framework/include/kokkos/base/KokkosResidualObject.h`, the
-`computing_residual` block before the Jacobian) for `residual_slices == 1`. Build and test, then run
-the sweep `nsys-v19`. Exit: no AD launch slower than `nsys-v16` by more than 3%, or a report to the
-user. Otherwise go to step 12.
+**Next: step 10b**, a v3 probe of the step 10 qp slices (see "Step 10 result"). The user approved
+it (2026-11-12).
+
+1. Apply `patches/step10/residual-qp-slices-v2.patch` to the main tree. For `residual_slices == 1`,
+   restore the original serial residual loop. Take it from
+   `git show 2709e503f9d:framework/include/kokkos/base/KokkosResidualObject.h`: it is the
+   `computing_residual` block before the Jacobian. The sliced path stays after the Jacobian.
+2. Before the sweep, compare the displaced `ResidualLoop` register counts of v1, v2 and v3 with
+   `cuobjdump -res-usage <lib>.so | c++filt` (see "Profiling setup"). v1 has 93, v2 has 104, and
+   `HEAD` has 91. Find what v2 changed that costs registers, and fix it in v3 until the count is
+   near 93.
+3. Build and test (`build_and_test.sbatch`, AD regex, `cuda`). Then run the sweep `nsys-v19` and
+   compare it with `nsys-v16`.
+
+Exit: commit when no AD launch is more than 3% slower than in `nsys-v16`. If the displaced
+`ResidualLoop` still regresses, report the register cause to the user before you commit.
 
 The draft reply is `moose-stack-build/review-reply-34088.md`. It answers all 10 inline comments
 (`gh api repos/idaholab/moose/pulls/34088/comments`) and holds the per-step time and ratio tables.
@@ -42,6 +51,11 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 ### Decisions
 
+- Step 10b: land the qp slices if no AD launch is more than 3% slower than `nsys-v16`. Report a
+  displaced residual regression, with its register cause, before committing it (user, 2026-11-12).
+- Step 10: use a hand-rolled slice reduction over the group. Do not use a Kokkos
+  `ThreadVectorRange` with vector length above 1. That needs a new team and group layout, which is
+  too large for this PR (user, 2026-11-12).
 - Step 8d: sweep R4 and T1, then land the faster one (user, 2026-11-11). T1 won.
 - Pursue the best computer-science design, also when it is a large change, for example a change to
   the hook interface (user, 2026-11-10, step 8d).
@@ -288,10 +302,11 @@ Measure each step alone against the step before, with a full sweep on arco-c04.
 8d. Done (`4736f915264`, sweep `profiles/nsys-t1`). See "Step 8d sweep result".
 8e. Done (`168e488f70c`, sweep `profiles/nsys-v14`). See "Step 8e result".
 9. Done (`2709e503f9d`, sweep `profiles/nsys-v16`). See "Step 9 result".
-10. Done (measurement, no commit). See "Step 10 result". Open: the user's decision on 10b.
-10b. Proposed, waits on the user. A v3 probe that keeps v2's host-side slice count but runs the
-    exact pre-step code when `residual_slices == 1`, to remove the q8 and displaced regressions.
-    Then commit it, or record step 10 as "measured, not landed" in the reply.
+10. Done (measurement, no commit). See "Step 10 result".
+10b. Approved by the user (2026-11-12). A v3 probe: v2 with the original serial loop when
+    `residual_slices == 1`, and the v2 register increase fixed. Commit it if it passes the exit
+    criterion in "Next". If it lands, the reply reports the step 10 gain. Otherwise the reply
+    reports the measurement without a change.
 11. Done (trim of this document, 2026-11-10).
 12. Finish the reply. Draft the p-refinement issue with the `issue-create` skill (file it only
     after approval). Ask about alias removal. Fill the `TODO(user)` markers with the step 8-10
