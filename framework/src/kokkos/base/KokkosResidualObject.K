@@ -121,6 +121,16 @@ ResidualObject::dispatchADTeams(DispatcherBase & dispatcher,
                scratch_max,
                " bytes.");
 
+  // The residual quadrature point sums of a group split into slices over the widest test
+  // function set
+  unsigned int max_idofs = 1;
+  {
+    const auto & assembly = kokkosAssembly();
+    const auto ife = kokkosSystem(_kokkos_var.sys()).getFETypeID(_kokkos_var.var());
+    for (const auto type : make_range(kokkosMesh().getNumLocalElementTypes()))
+      max_idofs = std::max(max_idofs, assembly.getNumDofs(type, ife));
+  }
+
   TeamLaunch launch;
   const auto max_groups_scratch = std::max<std::size_t>(1, scratch_max / layout.bytes(1));
 
@@ -134,6 +144,7 @@ ResidualObject::dispatchADTeams(DispatcherBase & dispatcher,
     launch.team_size = group_size * groups;
     launch.league_size = (n_items + groups - 1) / groups;
     launch.scratch_bytes = layout.bytes(groups);
+    layout.residual_slices = std::max(1u, group_size / max_idofs);
   };
 
   shape(ADTeamGroup::target_team_size);

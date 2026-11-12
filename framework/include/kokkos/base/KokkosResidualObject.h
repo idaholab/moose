@@ -706,7 +706,9 @@ ResidualObject::assembleADTerms(const Object & object,
     return ::Kokkos::pair<Real, Real3>(phi, ref);
   };
 
-  if (computing_residual)
+  // With one slice, each thread sums the quadrature points of its test functions alone
+  const auto n_slices = layout.residual_slices;
+  if (computing_residual && n_slices == 1)
     group_for(n_idofs,
               [&](const unsigned int i)
               {
@@ -804,6 +806,42 @@ ResidualObject::assembleADTerms(const Object & object,
         }
       }
     }
+
+  // With several slices, the residual of test function i sums over the quadrature points in
+  // slices, one thread per (i, slice), so that the threads of the group beyond the test function
+  // count share the sum. The partial sums then overwrite the quadrature point scratch, after the
+  // Jacobian has read it. The slice count is uniform over the dispatch, so every group of a team
+  // reaches the barriers.
+  if (computing_residual && n_slices > 1)
+  {
+    KOKKOS_ASSERT(n_slices * n_idofs <= group.size());
+    Real partial = 0;
+
+    group_for(n_idofs * n_slices,
+              [&](const unsigned int k)
+              {
+                const auto i = k % n_idofs;
+                for (unsigned int qp = k / n_idofs; qp < n_qps; qp += n_slices)
+                {
+                  const auto psi = shape(ife, i, qp);
+                  partial += contractADTerms(&scratch(qp * qp_size), psi.first, psi.second);
+                }
+              });
+
+    team.team_barrier();
+    if (group.active() && group.rank() < n_idofs * n_slices)
+      scratch(group.rank()) = partial;
+    team.team_barrier();
+
+    group_for(n_idofs,
+              [&](const unsigned int i)
+              {
+                Real local_re = 0;
+                for (unsigned int p = 0; p < n_slices; ++p)
+                  local_re += scratch(p * n_idofs + i);
+                accumulateTaggedElementalResidual(local_re * scaling_factor, elem.id, i);
+              });
+  }
 }
 
 } // namespace Moose::Kokkos

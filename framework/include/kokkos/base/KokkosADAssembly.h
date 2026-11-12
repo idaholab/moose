@@ -83,6 +83,8 @@ struct ADScratchLayout
   unsigned int max_jdofs = 0;
   /// Number of quadrature points per chunk of the Jacobian contraction
   unsigned int qp_chunk = 0;
+  /// Number of threads that share the quadrature point sum of one residual test function
+  unsigned int residual_slices = 1;
 };
 
 /**
