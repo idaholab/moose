@@ -124,8 +124,8 @@ long as the sweeps are granular enough. The second mode is visualized in
 ## Natural Frequencies
 
 The eigenvalues that the [vectorpostprocessors/Eigenvalues.md] vector postprocessor writes are
-$\omega^2$, in rad$^2$/s$^2$. To read the modes as frequencies instead, set
-[!param](/VectorPostprocessors/Eigenvalues/natural_frequency) to `true`. Three more columns are then written:
+$\omega^2$, in rad$^2$/s$^2$. To read the modes as frequencies instead, use the
+[NaturalFrequencies.md] vector postprocessor. It writes the eigenvalues and three more columns:
 `angular_frequency` in rad/s, `frequency` in Hz, and `period` in s, each computed from the real part
 of the eigenvalue.
 
