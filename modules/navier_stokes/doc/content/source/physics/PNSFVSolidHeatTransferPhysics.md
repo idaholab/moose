@@ -14,12 +14,20 @@ where:
 
 - $h_s$ is the solid specific enthalpy, computed from the specific heat $c_{ps}$ and the solid temperature
 - $\rho$ is the solid density
-- $\epsilon$ is the porosity
+- $\epsilon$ is the porosity, the fluid fraction of the volume
 - $T_s$ is the solid temperature
 - $T_f$ is the fluid temperature
-- $k_s$ the solid thermal conductivity
-- $(1-\epsilon) Q$ is the source term, corresponding to energy deposited directly in the solid phase
+- $\kappa_s$ is the effective solid thermal conductivity, given by
+  [!param](/Physics/NavierStokes/SolidHeatTransfer/PNSFVSolidHeatTransferPhysics/thermal_conductivity_solid)
+- $(1-\epsilon) \dot{Q}$ is the source term per unit total volume, corresponding to energy deposited
+  directly in the solid phase. It is given by
+  [!param](/Physics/NavierStokes/SolidHeatTransfer/PNSFVSolidHeatTransferPhysics/external_heat_source),
+  which is not multiplied by the solid fraction.
 - $\alpha$ is the ambient convection volumetric heat transfer coefficient
+
+The effective conductivity accounts for the solid fraction and the structure of the medium, so the
+Physics does not multiply it by the porosity. For a solid of intrinsic conductivity $k_s$ that
+conducts in parallel with the fluid, it is often approximated as $\kappa_s = (1-\epsilon) k_s$.
 
 The enthalpy is used in lieu of $\rho c_p T$ to be able to model solids with temperature dependent
 specific heat.
@@ -27,8 +35,8 @@ specific heat.
 The kernels potentially created for this equation are:
 
 - [INSFVEnergyTimeDerivative.md] for the time derivative of the energy
-- [PINSFVEnergyDiffusion.md] for energy diffusion with an isotropic thermal diffusivity
-- [PINSFVEnergyAnisotropicDiffusion.md] for energy diffusion with an anisotropic thermal diffusivity
+- [FVDiffusion.md] for energy diffusion with an isotropic effective thermal diffusivity
+- [FVAnisotropicDiffusion.md] for energy diffusion with an anisotropic effective thermal diffusivity
 - [FVCoupledForce.md] for the energy source term
 - [PINSFVEnergyAmbientConvection.md] for the volumetric ambient convection term, if present
 

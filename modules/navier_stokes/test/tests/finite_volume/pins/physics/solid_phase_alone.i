@@ -45,8 +45,9 @@
 [FunctorMaterials]
   [constants]
     type = GenericFunctorMaterial
+    # The effective solid conductivity is the former value multiplied by (1 - porosity) = 0.5
     prop_names = 'k_solid cp_solid rho_solid'
-    prop_values = '1 1000 1000'
+    prop_values = '0.5 1000 1000'
   []
 []
 

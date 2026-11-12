@@ -228,12 +228,12 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyHeatConductionKernels()
 {
   const auto vector_conductivity = processThermalConductivity();
 
-  const auto kernel_type =
-      vector_conductivity ? "PINSFVEnergyAnisotropicDiffusion" : "PINSFVEnergyDiffusion";
+  // The solid conductivity is an effective conductivity which already includes the solid fraction,
+  // so the conduction term does not involve the porosity
+  const auto kernel_type = vector_conductivity ? "FVAnisotropicDiffusion" : "FVDiffusion";
 
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = _solid_temperature_name;
-  params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
 
   // Set block restrictions
   const bool combined = _thermal_conductivity_blocks.size() > 1;
@@ -247,11 +247,10 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyHeatConductionKernels()
   assignBlocks(params, block_names);
 
   // Set thermal conductivity
-  const auto conductivity_name = vector_conductivity ? NS::kappa : NS::k;
   if (combined)
-    params.set<MooseFunctorName>(conductivity_name) = prefix() + "combined_thermal_conductivity";
+    params.set<MooseFunctorName>("coeff") = prefix() + "combined_thermal_conductivity";
   else
-    params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[0];
+    params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name[0];
 
   getProblem().addFVKernel(kernel_type, prefix() + "pins_energy_diffusion", params);
 }
