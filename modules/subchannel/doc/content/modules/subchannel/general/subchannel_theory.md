@@ -151,7 +151,12 @@ h_{ij}' = \sum_{j} w_{ij}'\Delta h_{ij} = \sum_{j} w'_{ij}\big[ h_i - h_j  \big]
 w_{ij}' = \beta S_{ij} \bar{G}, ~\frac{dw_{ij}'}{dz} = \frac{w_{ij}'}{\Delta Z}=\beta g_{ij} \bar{G}.
 \end{equation}
 
-where $\beta$ is the turbulent mixing parameter or thermal transfer coefficient and $\bar{G}$ is the average mass flux of the adjacent subchannels. The $\beta$ term is the tuning parameter for the mixing model. Physically, it is a non-dimensional coefficient that represents the ratio of the lateral mass flux due to mixing to the axial mass flux. It is used to model the effect of the unresolved scales of motion that are produced through the averaging process. In single-phase flow no net mass exchange occurs, both momentum and energy are exchanged between subchannels, and their rates of exchange are characterized in terms of hypothetical turbulent interchange flow rates ($w_{ij}^{'H},w_{ij}^{'M}$) [!cite](todreas2021nuclear2), for enthalpy and momentum respectively. For this unresolved turbulent interchange model, the approximation that the rate of turbulent exchange for energy and momentum are related as follows is adopted: $w'_{ij} = w_{ij}^{'H} = w_{ij}^{'M} / C_T$.
+where $\beta$ is the turbulent mixing parameter or thermal transfer coefficient and $\bar{G}$ is the average mass flux of the adjacent subchannels, the total mass flow rate of the two subchannels over their total flow area, averaged over the inlet and outlet faces of the cell:
+
+\begin{equation}
+\label{mixing-mass-flux}
+\bar{G}_{ij,k} = \frac{1}{2}\left[\frac{\dot{m}_{i,k-1} + \dot{m}_{j,k-1}}{S_{i,k-1} + S_{j,k-1}} + \frac{\dot{m}_{i,k} + \dot{m}_{j,k}}{S_{i,k} + S_{j,k}}\right].
+\end{equation} The $\beta$ term is the tuning parameter for the mixing model. Physically, it is a non-dimensional coefficient that represents the ratio of the lateral mass flux due to mixing to the axial mass flux. It is used to model the effect of the unresolved scales of motion that are produced through the averaging process. In single-phase flow no net mass exchange occurs, both momentum and energy are exchanged between subchannels, and their rates of exchange are characterized in terms of hypothetical turbulent interchange flow rates ($w_{ij}^{'H},w_{ij}^{'M}$) [!cite](todreas2021nuclear2), for enthalpy and momentum respectively. For this unresolved turbulent interchange model, the approximation that the rate of turbulent exchange for energy and momentum are related as follows is adopted: $w'_{ij} = w_{ij}^{'H} = w_{ij}^{'M} / C_T$.
 
 The mixing closure provides only this unresolved turbulent interchange coefficient. Friction closures enter the axial and lateral momentum equations through the pressure-drop terms, and heat-transfer closures enter the energy equation through pin/duct heat addition. When a mixing closure requires local flow information such as a friction factor, the selected friction closure is used internally by that empirical mixing correlation; otherwise $\beta$ is coupled to the governing equations only through $w'_{ij}$ and the optional $C_T$ momentum scaling above.
 
@@ -212,13 +217,35 @@ and gravity, use face quantities interpolated to the cell center,
 \phi_{i,k-1/2} = \alpha \phi_{i,k-1} + (1 - \alpha) \phi_{i,k},
 \end{equation}
 
-where $\alpha$ is set by [!param](/Problem/TriSubChannel1PhaseProblem/interpolation_scheme):
-$\alpha = 1$ for `upwind`, $\alpha = 0.5$ for `central_difference`, $\alpha = 0$ for `downwind`,
-and a cell Peclet number dependent value for `exponential`. The lateral momentum equation uses the
-same weight to interpolate the cell-center crossflow to the faces and the pressure to the cell
-center, except that for `exponential` it uses the fixed weight of a Peclet number of 0.5. The interpolation
-scheme does not change the axial mass and enthalpy fluxes. Radial heat conduction is evaluated
-with the enthalpies of the top face, which keeps it implicit in the axial direction.
+where $\alpha$ is the weight of the bottom face, set by
+[!param](/Problem/TriSubChannel1PhaseProblem/interpolation_scheme):
+
+\begin{equation}
+\label{interpolation-weight}
+\alpha =
+\begin{cases}
+1, & \texttt{upwind}\\
+0, & \texttt{downwind}\\
+0.5, & \texttt{central\_difference}\\
+1 - \dfrac{1}{Pe} + \dfrac{e^{-Pe}}{1 - e^{-Pe}}, & \texttt{exponential},\ Pe > 0
+\end{cases}
+\end{equation}
+
+The `exponential` weight is the one of the exponential profile of steady one-dimensional
+advection-diffusion. For $Pe < 0$ it is $1 - \alpha(|Pe|)$, and for $|Pe| < 10^{-6}$ the series
+limit $0.5 + Pe/12$ is used. The cell Peclet number depends on the equation:
+
+- axial momentum: $Pe = \operatorname{sign}(\dot{m}) / \left[\frac{1}{2}\left(f_w \Delta Z/Dhy + k_i\right)\right]$, from the friction and form loss of the cell;
+- enthalpy: $Pe = \operatorname{sign}(\dot{m})\, \dot{m}\, Dhy\, c_p / (k\, S)$;
+- lateral momentum, the inlet-to-outlet interpolation of the donor density $\rho^{*}$, the flow area
+  of the axial pressure force, and the storage volume of the enthalpy equation: the fixed value
+  $Pe = 0.5$, so $\alpha \approx 0.54$ for `exponential`;
+- axial heat conduction: $Pe = 0$, so $\alpha = 0.5$ for `exponential`.
+
+The quantities used to evaluate these Peclet numbers are themselves interpolated with
+$Pe = 0.5$. The interpolation scheme does not change the axial mass and enthalpy fluxes. Radial heat
+conduction is evaluated with the enthalpies of the top face, which keeps it implicit in the axial
+direction.
 
 - Conservation of mass:
 
@@ -369,9 +396,10 @@ iterate. In each sum over the neighbors $j$ of subchannel $i$, $w_{ij}$ is posit
 \end{equation}
 
 where $d$ is the donor subchannel of gap $ij$ ($i$ if $w_{ij,k}^{\ell} > 0$, $j$ if
-$w_{ij,k}^{\ell} < 0$, and no term if it is zero), $\bar{S}_{i,k} = \frac{1}{2}(S_{i,k-1} + S_{i,k})$,
-and $K_{i,k} = f_w \Delta Z / Dhy_{i,k-1/2} + k_i$ with the form loss $k_i$ taken from the upstream
-node for the sign of $\dot{m}_{i,k}$. The momentum flux $\dot{m}^2/(S\rho)$ and the friction are
+$w_{ij,k}^{\ell} < 0$, and no term if it is zero), $\bar{S}_{i,k}$ is the flow area interpolated to
+the cell center with the weight of $Pe = 0.5$, and $K_{i,k} = f_w \Delta Z / Dhy_{i,k-1/2} + k_i$
+with the form loss $k_i$ taken from the upstream node for the sign of $\dot{m}_{i,k}$. In the first
+cell of a block, the terms in the known $\dot{m}_{i,k-1}$ go to the right-hand side. The momentum flux $\dot{m}^2/(S\rho)$ and the friction are
 linearized about the iterate $\ell$. $g_{dir}$ is set by
 [!param](/Problem/TriSubChannel1PhaseProblem/gravity): $+1$ for `counter_flow`, the default, in
 which the flow goes up against gravity, $-1$ for `co_flow`, and $0$ for `none`. The time-derivative
@@ -405,8 +433,10 @@ $\vec{b_{p}}$.
 where $\bar{U}_{ij,k} = \frac{1}{2}\left(\frac{\dot{m}_{i,k}^{\ell}}{S_{i,k}\rho_{i,k}} +
 \frac{\dot{m}_{j,k}^{\ell}}{S_{j,k}\rho_{j,k}}\right)$ is the mean axial velocity of the two
 subchannels at node $k$, $\hat{w}_{ij,k} = \alpha\, w_{ij,k} + (1-\alpha)\, w_{ij,k+1}$ is the
-crossflow interpolated to node $k$, and $\rho^{*}$ is the cell-average density of the donor
-subchannel, or the mean of both if $w_{ij,k}^{\ell} = 0$. The crossflow below the block is known.
+crossflow interpolated to node $k$, and $\rho^{*}$ is the density of the donor subchannel
+interpolated to the cell center, or the mean of those of both subchannels if $w_{ij,k}^{\ell} = 0$.
+The weight $\alpha$ of this equation is the one of $Pe = 0.5$. The crossflow below the block is
+known.
 In the top cell of a block, the lagged $w_{ij,k}^{\ell}$ takes the place of $w_{ij,k+1}$, so the
 crossflow of the block above does not enter. A closed gap, where the pins touch and $S_{ij,k} = 0$,
 has the row $w_{ij,k} = 0$. In matrix form,
@@ -432,9 +462,15 @@ has the row $w_{ij,k} = 0$. In matrix form,
 \end{aligned}
 \end{equation}
 
-where $\bar{V}_{i,k} = \bar{S}_{i,k}\,\Delta Z$, $d$ is the donor subchannel, and $\dot{m}$, $w$, and
-$w'$ are those of the latest flow solve. The radial and axial conduction terms on the right are
-assembled for the triangular assembly only. The radial term uses the harmonic mean of $k/c_p$ at
+where $\bar{V}_{i,k} = \bar{S}_{i,k}\,\Delta Z$ with $\bar{S}_{i,k}$ as in [axial-momentum-dis], $d$ is
+the donor subchannel, and $\dot{m}$, $w$, and $w'$ are those of the latest flow solve. The pin heat of
+the cell is
+$\left\langle q' \right\rangle_{i,k} \Delta Z = \sum_{pins} \phi_i\,\frac{1}{2}\left(q'_{k-1} + q'_{k}\right)\Delta Z$
+over the pins that touch subchannel $i$, inside the heated length only, where $q'$ is the pin
+linear heat rate and $\phi_i$ the fraction of the pin perimeter facing the subchannel: $1/4$ in a
+quadrilateral assembly, and $1/6$ for center and corner and $1/4$ for edge subchannels in a
+triangular assembly. The radial and axial
+conduction terms on the right are assembled for the triangular assembly only. The radial term uses the harmonic mean of $k/c_p$ at
 the inlet nodes of the two subchannels, the shape factor $\eta_{ij} = 0.66\,(p/D)\,(g_{ij}/D)^{-0.3}$,
 and the distance $L_{ij}$ between the subchannel centers. The axial term has no upper part in the
 top cell of a block, so that face is adiabatic. The triangular assembly also adds the duct heat and, for wire-wrapped pins,
@@ -548,7 +584,16 @@ use the relative field change
 \end{equation}
 
 whereas the monolithic algorithm uses the largest unrelaxed pressure fixed-point update among the
-blocks. Measuring the monolithic update before post-solve relaxation keeps the meaning of [!param](/Problem/TriSubChannel1PhaseProblem/P_tol)
+blocks,
+
+\begin{equation}
+\epsilon_P = \max_{\text{blocks}}
+\frac{\left\|\vec{P}^{\,\star}-\vec{P}^{\,\ell}\right\|_2}
+{\left\|\vec{P}^{\,\ell}+P_{\mathrm{out}}\mathbf{1}\right\|_2+10^{-14}},
+\end{equation}
+
+where $\vec{P}^{\,\star}$ is the pressure of the coupled linear solve of the block, over its nodes
+$k-1$ of each cell. Measuring the monolithic update before post-solve relaxation keeps the meaning of [!param](/Problem/TriSubChannel1PhaseProblem/P_tol)
 independent of [!param](/Problem/TriSubChannel1PhaseProblem/pressure_relaxation). The maximum errors are synchronized across processes. If the
 pressure field has not converged, the block sweep starts again at the inlet; pressure information
 therefore requires multiple outer iterations to propagate upstream when several blocks are used.
@@ -609,7 +654,10 @@ are uncoupled from the other equations in this otherwise monolithic system (enth
 the flow equations through the fluid-property update), enthalpy is lagged and solved separately.
 The flow system retrieves $\vec{\dot{m}}$, $\vec{P}$, and $\vec{w}$ concurrently at every node in a
 block; $\vec{\Delta P}$ is not explicitly calculated. The coupled flow system is solved with PETSc
-FGMRES and a multiplicative field-split preconditioner with one split per field. The FGMRES restart
+FGMRES and a multiplicative field-split preconditioner with one split per field. Its tolerances are
+[!param](/Problem/TriSubChannel1PhaseProblem/rtol) and
+[!param](/Problem/TriSubChannel1PhaseProblem/atol), both $10^{-6}$ by default, and
+[!param](/Problem/TriSubChannel1PhaseProblem/maxit), $10^4$ by default. The FGMRES restart
 length is set by [!param](/Problem/TriSubChannel1PhaseProblem/coupled_gmres_restart), and other options of the coupled solve can be changed with the
 `scm_coupled_` PETSc prefix; see [Troubleshooting failed solves](user_notes.md#troubleshooting) for choosing them. SCM checks the
 PETSc convergence reason for both the coupled flow and enthalpy linear solves and reports
@@ -620,8 +668,9 @@ lagged coefficients, so $\boldsymbol{M_{pw}} = 0$, and the lateral momentum equa
 flow only through its lagged coefficients, so $\boldsymbol{M_{wm}} = 0$. Each temperature iteration
 of a block performs one coupled solve, which is one Picard step on these coefficients:
 
-1. The turbulent crossflow $w'_{ij}$ is evaluated from the current mass flow, and the three flow
-   equations are assembled about the current iterate $\ell$.
+1. The turbulent crossflow $w'_{ij}$ is evaluated from the current mass flow with
+   [mixing-mass-flux], and the three flow equations are assembled about the current iterate $\ell$:
+   [mass-dis-monolithic], [axial-momentum-dis3], and [lateral-momentum-dis2].
 2. The crossflow damping and the equation relaxation are applied, and the system is solved.
 3. The pressure error is measured, the post-solve relaxation is applied, and $\vec{\dot{m}}$,
    $\vec{P}$, $\vec{w}$, and the net crossflow are stored. $w'_{ij}$ is reevaluated from the new
@@ -764,8 +813,20 @@ M_{ff} &\leftarrow M_{ff} +
 The off-diagonal entries are unchanged. A factor of one bypasses relaxation, while a factor below
 one increases the diagonal magnitude and damps the update toward the previous iterate without
 changing the fixed point. With the defaults, only the crossflow equation is under-relaxed. Because
-$D_W$ includes the crossflow damping added before it, the crossflow equation relaxation also scales
-that damping by $1/\alpha_W$.
+$D_W$ includes the crossflow damping added before it, $D_W = \mathbf d + \mathbf K^{\ell}$, where
+the vector $\mathbf d$ is the diagonal of $M_{ww}$ without the damping: the time, self-advection,
+and friction coefficients of each gap in [lateral-momentum-dis]. The crossflow equation the coupled
+solve satisfies is therefore
+
+\begin{equation}
+\label{relaxed-crossflow}
+M_{wp}\,\mathbf P + M_{ww}\,\mathbf W - \mathbf b_w =
+-\left[\frac{\mathbf K^{\ell}}{\alpha_W} + \frac{1-\alpha_W}{\alpha_W}\operatorname{diag}(\mathbf d)\right]
+\left(\mathbf W - \mathbf W^{\ell}\right),
+\end{equation}
+
+the damping scaled by $1/\alpha_W$ plus the classical under-relaxation of the undamped equation. Both
+terms vanish at $\mathbf W = \mathbf W^{\ell}$.
 
 #### 3. Post-solve solution relaxation
 
