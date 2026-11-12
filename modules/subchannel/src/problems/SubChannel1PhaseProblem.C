@@ -2534,12 +2534,13 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // step far more than necessary. The crossflow equation relaxation has scaled the damping of the
   // first attempt by 1/crossflow_equation_relaxation but does not scale the retry increments, so
   // with relaxation a retry raises the damping by less than a halving of the step would. The
-  // reduction applies in the next outer iteration before the relaxation and takes full effect.
+  // reduction applies in the next coupled solve of the block before the relaxation and takes full
+  // effect.
   const PetscInt retry_maxit = 1000;
-  // The reduction is kept for the remaining outer iterations of this solve so that a failure is not
-  // repeated every iteration. Capping it at the reduction one fully retried solve provides keeps
-  // the damping bounded by a multiple of the residual ratio, so it still vanishes at convergence.
-  // Every attempt starts from the current outer iterate
+  // The reduction is kept for the remaining coupled solves of the block in this SCM solve so that a
+  // failure is not repeated every iteration. Capping it at the reduction one fully retried solve
+  // provides keeps the damping bounded by a multiple of the residual ratio, so it still vanishes at
+  // convergence. Every attempt starts from the current outer iterate
   auto setInitialGuess = [&]()
   {
     std::vector<Vec> x_sub(Q);
