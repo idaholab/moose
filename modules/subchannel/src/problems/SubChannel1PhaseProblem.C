@@ -1102,9 +1102,14 @@ SubChannel1PhaseProblem::computeDP(int iblock)
               computeInterpolatedValue((*_S_flow_soln)(node_out_j), (*_S_flow_soln)(node_in_j), Pe);
           auto u_star = 0.0;
           // figure out donor axial velocity; a crossflow within the deadband of zero splits its
-          // contribution evenly between the two channels instead of picking one as the donor
-          const bool donor_i = _Wij(i_gap, cross_index) > donor_cell_deadband;
-          const bool donor_j = _Wij(i_gap, cross_index) < -donor_cell_deadband;
+          // contribution evenly between the two channels instead of picking one as the donor. The
+          // deadband only matters for the segregated solve, where this term is also evaluated
+          // under the finite-difference perturbations of the crossflow SNES; the monolithic solve
+          // assembles this matrix directly from the converged Wij and has no reason to widen the
+          // donor-cell switch beyond Wij = 0
+          const Real local_deadband = _segregated_bool ? donor_cell_deadband : 0.0;
+          const bool donor_i = _Wij(i_gap, cross_index) > local_deadband;
+          const bool donor_j = _Wij(i_gap, cross_index) < -local_deadband;
           const Real weight_i = donor_j ? 0.0 : (donor_i ? 1.0 : 0.5);
           const Real weight_j = donor_i ? 0.0 : (donor_j ? 1.0 : 0.5);
           if (weight_i > 0.0)
@@ -1664,11 +1669,15 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
         auto Lij = pitch;
 
-        // Figure out donor cell density
+        // Figure out donor cell density. The deadband only matters for the segregated solve,
+        // where this residual is also evaluated under the finite-difference perturbations of the
+        // crossflow SNES; the monolithic solve assembles this matrix directly from the converged
+        // Wij and has no reason to widen the donor-cell switch beyond Wij = 0
+        const Real local_deadband = _segregated_bool ? donor_cell_deadband : 0.0;
         auto rho_star = 0.0;
-        if (_Wij(i_gap, iz) > donor_cell_deadband)
+        if (_Wij(i_gap, iz) > local_deadband)
           rho_star = rho_i_interp;
-        else if (_Wij(i_gap, iz) < -donor_cell_deadband)
+        else if (_Wij(i_gap, iz) < -local_deadband)
           rho_star = rho_j_interp;
         else
           rho_star = (rho_i_interp + rho_j_interp) / 2.0;
