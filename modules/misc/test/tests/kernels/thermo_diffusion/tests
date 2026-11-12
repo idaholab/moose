@@ -5,7 +5,7 @@
     exodiff = 'thermo_diffusion_out.e'
     abs_zero = 1e-8
     rel_err = 5e-4
-    requirement = 'Thermo diffusion shall reproduce an analytical solution'
+    requirement = 'The system shall reproduce an analytical solution for a thermodiffusion (Soret effect) problem'
     design = "ThermoDiffusion.md"
     issues = "#3392"
   [../]
@@ -15,7 +15,7 @@
     exodiff = 'ad_thermo_diffusion_out.e'
     abs_zero = 1e-8
     rel_err = 5e-4
-    requirement = 'AD thermo diffusion shall reproduce an analytical solution'
+    requirement = 'The system shall reproduce an analytical solution for a thermodiffusion (Soret effect) problem using automatic differentiation'
     design = "ADThermoDiffusion.md"
     issues = "#12633"
     allow_test_objects = true
@@ -26,7 +26,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-3
     run_sim = True
-    requirement = 'AD thermo diffusion shall work with material properties and the Jacobian shall be beautiful'
+    requirement = 'The system shall compute numerically accurate Jacobians for a thermodiffusion (Soret effect) problem using automatic differentiation with material properties'
     design = "ADThermoDiffusion.md"
     issues = "#5658"
     allow_test_objects = true
