@@ -89,8 +89,7 @@
 
 [VectorPostprocessors]
   [eigenvalues]
-    type = Eigenvalues
-    natural_frequency = true
+    type = NaturalFrequencies
     execute_on = TIMESTEP_END
   []
 []
