@@ -9,7 +9,7 @@
     # This test requires VTK because it uses the ImageFunction class
     capabilities = 'vtk'
 
-    requirement = "The FeatureVolumeVectorPostprocessor shall capture volume information of individual features."
+    requirement = "The system shall capture volume information of individual features using the FeatureVolumeVectorPostprocessor."
   [../]
 
   [./boundary_intersecting_features_flipped]
@@ -20,7 +20,7 @@
     # This test requires VTK because it uses the ImageFunction class
     capabilities = 'vtk'
 
-    requirement = "The FeatureVolumeVectorPostprocessor shall capture whether any feature intersects the boundary, "
+    requirement = "The system shall capture, using the FeatureVolumeVectorPostprocessor, whether any feature intersects the boundary, "
                    " even when the non-root rank doesn't own a part of the feature that intersects the boundary."
   [../]
 []

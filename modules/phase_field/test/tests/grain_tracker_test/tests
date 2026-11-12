@@ -34,7 +34,7 @@
     recover = false # No solve
     max_parallel = 1
 
-    requirement = "The PolycrystalVoronoi object shall create a valid coloring for a given number of "
+    requirement = "The system shall create, using the PolycrystalVoronoi object, a valid coloring for a given number of "
                   "grains and order parameters."
     issues = '#7005 #9018'
     design = "GrainTracker.md"
@@ -47,7 +47,7 @@
     recover = false # No solve
     cli_args = 'GlobalParams/op_num=4 Outputs/csv=false'
 
-    requirement = "The PolycrystalUserObject base class shall error when a valid coloring cannot be "
+    requirement = "The system shall report an error from the PolycrystalUserObject base class when a valid coloring cannot be "
                   "found when using the simple back-tracking algorithm."
     issues = '#7005 #8804'
     design = "PolycrystalICs.md"
@@ -60,7 +60,7 @@
     recover = false # No solve
     cli_args = 'UserObjects/voronoi/coloring_algorithm=jp GlobalParams/op_num=6 Outputs/csv=false'
 
-    requirement = "The PolycrystalUserObject base class shall error when a valid coloring cannot be "
+    requirement = "The system shall report an error from the PolycrystalUserObject base class when a valid coloring cannot be "
                   "found when using the built-in PETSc based stochastic algorithms."
     issues = '#7005 #8804'
     design = "PolycrystalICs.md"
@@ -74,7 +74,7 @@
     valgrind = 'HEAVY'
     max_parallel = 1
 
-    requirement = "The GrainTracker/PolycrystalUserObject base class shall support having only a "
+    requirement = "The system shall support, in the GrainTracker/PolycrystalUserObject base class, having only a "
                   "grain halo bleeding over a periodic edge."
     issues = '#6713 #8926'
     design = "GrainTracker.md"
@@ -89,7 +89,7 @@
     capabilities = 'method!=dbg' # slow test
     valgrind = 'NONE' # Exact same test used elsewhere
 
-    requirement = "The GrainTracker object shall support remapping order parameter values."
+    requirement = "The system shall support remapping order parameter values using the GrainTracker object."
     issues = '#1298'
     design = "GrainTracker.md"
   []
@@ -106,7 +106,7 @@
 
     min_parallel = 8 # Test distributed merge work with grain tracker
 
-    requirement = "The FeatureFloodCount object shall distribute the merging of features when the "
+    requirement = "The system shall distribute, in the FeatureFloodCount object, the merging of features when the "
                   "processor count exceeds number of order parameters for efficiency."
     issues = '#11805'
     design = "GrainTracker.md"
@@ -118,7 +118,7 @@
     csvdiff = 'grain_tracker_remapping_linearized_interface_test_out.csv'
     capabilities = 'method!=dbg' # slow test
 
-    requirement = "The GrainTracker object shall support remapping order parameter values with "
+    requirement = "The system shall support remapping order parameter values using the GrainTracker object with "
                   "nonlinear preconditioning."
     issues = '#21938 #21940 #25419'
     design = "GrainTracker.md"
@@ -135,7 +135,7 @@
     restep = false # Restep isn't compatible with recover tests
     heavy = true
 
-    requirement = "The GrainTracker object shall properly checkpoint unique grain information in "
+    requirement = "The system shall properly checkpoint unique GrainTracker object grain information in "
                   "serial."
     issues = "#6713 #12427"
     design = "GrainTracker.md"
@@ -152,7 +152,7 @@
     capabilities = 'method!=dbg'
     valgrind = 'NONE'
 
-    requirement = "The GrainTracker object shall properly recover unique grain information in "
+    requirement = "The system shall properly recover unique GrainTracker object grain information in "
                   "serial."
     issues = "#6713 #12427"
     design = "GrainTracker.md"
@@ -172,7 +172,7 @@
     valgrind = 'NONE'
     restep = false # Restep isn't compatible with recover tests
 
-    requirement = "The GrainTracker object shall properly checkpoint unique grain information in "
+    requirement = "The system shall properly checkpoint unique GrainTracker object grain information in "
                   "parallel."
     issues = "#6713 #12427"
     design = "GrainTracker.md"
@@ -191,7 +191,7 @@
     capabilities = 'method!=dbg'
     valgrind = 'NONE'
 
-    requirement = "The GrainTracker object shall properly recover unique grain information in "
+    requirement = "The system shall properly recover unique GrainTracker object grain information in "
                   "parallel."
     issues = "#6713 #12427"
     design = "GrainTracker.md"
@@ -207,7 +207,7 @@
     capabilities = 'method!=dbg' # slow test
     valgrind = 'NONE' # Exact same test used elsewhere
 
-    requirement = "The GrainTracker shall support reusing the data structures from the "
+    requirement = "The system shall support reusing in the GrainTracker the data structures from the "
                   "PolycrystalUserObjectBase after the  initial condition for efficiency."
     issues = '#8810'
     design = "PolycrystalICs.md"
@@ -221,7 +221,7 @@
     capabilities = 'method!=dbg' # slow test
     valgrind = 'HEAVY'
 
-    requirement = "The GrainTracker shall support maintaining reserve order parameters for "
+    requirement = "The system shall support maintaining GrainTracker reserve order parameters for "
                   "simulations where new grains can form."
     issues = '#7605'
     design = "GrainTracker.md"
@@ -237,14 +237,14 @@
     capabilities = 'method!=dbg' # slow test
     valgrind = 'HEAVY'
 
-    requirement = "The GrainTracker shall support beginning a simulation with no active grain "
+    requirement = "The system shall support beginning a GrainTracker simulation with no active grain "
                   "structure."
     issues = "#12200"
     design = "GrainTracker.md"
   []
 
   [ebsd]
-    requirement = "The GrainTracker shall support reading EBSD data to create initial conditions "
+    requirement = "The system shall support reading EBSD data in the GrainTracker to create initial conditions "
                   "where IDs in the data:"
     issues = '#5067 #9060'
     design = "PolycrystalICs.md"
@@ -282,7 +282,7 @@
     exodiff = 'grain_tracker_ebsd_adapt_out.e'
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=1 Executioner/Adaptivity/refine_fraction=0.7 Executioner/Adaptivity/max_h_level=1 Outputs/file_base=grain_tracker_ebsd_adapt_out'
 
-    requirement = "The GrainTracker shall support reading EBSD data to create initial conditions "
+    requirement = "The system shall support reading EBSD data in the GrainTracker to create initial conditions "
                   "while supporting initial condition refinement."
     issues = '#5067 #9060'
     design = "PolycrystalICs.md"
@@ -298,7 +298,7 @@
     capabilities = 'method!=dbg' # slow test
     valgrind = 'HEAVY'
 
-    requirement = "The GrainTracker shall support handling the splitting of a grain during a "
+    requirement = "The system shall support handling in the GrainTracker the splitting of a grain during a "
                   "simulation."
     issues = '#7875'
     design = "GrainTracker.md"
@@ -314,7 +314,7 @@
     valgrind = 'HEAVY'
     restep = false # Issue #31054
 
-    requirement = "The AverageFeatureVolume Postprocessor shall calculate the average volume of each "
+    requirement = "The system shall calculate, using the AverageFeatureVolume Postprocessor, the average volume of each "
                   "active grain in a simulation."
     issues = '#11822'
     design = "GrainTracker.md"
@@ -330,7 +330,7 @@
     capabilities = 'method!=dbg' # slow test
     min_parallel = 2
 
-    requirement = "The GrainTracker shall support a mode where it can continue even when it fails to "
+    requirement = "The system shall support a GrainTracker mode where it can continue even when it fails to "
                   "remap for post-modern analysis and debugging."
     issues = '#11843'
     design = "GrainTracker.md"

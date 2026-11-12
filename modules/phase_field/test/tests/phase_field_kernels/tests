@@ -209,7 +209,7 @@
     exodiff = 'nonuniform_barrier_coefficient_out.e'
     issues = '#15573'
     design = '/ACBarrierFunction.md /ACKappaFunction.md'
-    requirement = 'MOOSE shall have AD examples where the barrier height and gradient energy parameter depend on non-linear variables'
+    requirement = 'The system shall have AD examples where the barrier height and gradient energy parameter depend on non-linear variables'
   [../]
 
   [./ADnonuniform_barrier_coefficient-jac]
@@ -221,7 +221,7 @@
     difference_tol = 2e-4
     issues = '#15573'
     design = '/ACBarrierFunction.md /ACKappaFunction.md'
-    requirement = 'The Jacobian for the AD Allen-Cahn problem with a variable dependent coeffecients shall be perfect'
+    requirement = 'The system shall compute a perfect Jacobian for the AD Allen-Cahn problem with a variable dependent barrier height and gradient energy coefficient'
   [../]
 
   [CHInterface_coupled_mobility_jacobian]
