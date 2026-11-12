@@ -10,11 +10,13 @@
 #include "SwitchingFunctionMaterial.h"
 
 registerMooseObject("PhaseFieldApp", SwitchingFunctionMaterial);
+registerMooseObject("PhaseFieldApp", ADSwitchingFunctionMaterial);
 
+template <bool is_ad>
 InputParameters
-SwitchingFunctionMaterial::validParams()
+SwitchingFunctionMaterialTempl<is_ad>::validParams()
 {
-  InputParameters params = OrderParameterFunctionMaterial::validParams();
+  InputParameters params = OrderParameterFunctionMaterialTempl<is_ad>::validParams();
   params.addClassDescription(
       "Helper material to provide $h(\\eta)$ and its derivative in one of two "
       "polynomial forms.\nSIMPLE: $3\\eta^2-2\\eta^3$\nHIGH: "
@@ -26,32 +28,39 @@ SwitchingFunctionMaterial::validParams()
   return params;
 }
 
-SwitchingFunctionMaterial::SwitchingFunctionMaterial(const InputParameters & parameters)
-  : OrderParameterFunctionMaterial(parameters), _h_order(getParam<MooseEnum>("h_order"))
+template <bool is_ad>
+SwitchingFunctionMaterialTempl<is_ad>::SwitchingFunctionMaterialTempl(
+    const InputParameters & parameters)
+  : OrderParameterFunctionMaterialTempl<is_ad>(parameters),
+    _h_order(this->template getParam<MooseEnum>("h_order"))
 {
 }
 
+template <bool is_ad>
 void
-SwitchingFunctionMaterial::computeQpProperties()
+SwitchingFunctionMaterialTempl<is_ad>::computeQpProperties()
 {
-  Real n = _eta[_qp];
+  GenericReal<is_ad> n = this->_eta[this->_qp];
   n = n > 1 ? 1 : (n < 0 ? 0 : n);
 
   switch (_h_order)
   {
     case 0: // SIMPLE
-      _prop_f[_qp] = 3.0 * n * n - 2.0 * n * n * n;
-      _prop_df[_qp] = 6.0 * n - 6.0 * n * n;
-      _prop_d2f[_qp] = 6.0 - 12.0 * n;
+      this->_prop_f[this->_qp] = 3.0 * n * n - 2.0 * n * n * n;
+      this->_prop_df[this->_qp] = 6.0 * n - 6.0 * n * n;
+      this->_prop_d2f[this->_qp] = 6.0 - 12.0 * n;
       break;
 
     case 1: // HIGH
-      _prop_f[_qp] = n * n * n * (6.0 * n * n - 15.0 * n + 10.0);
-      _prop_df[_qp] = 30.0 * n * n * (n * n - 2.0 * n + 1.0);
-      _prop_d2f[_qp] = n * (120.0 * n * n - 180.0 * n + 60.0);
+      this->_prop_f[this->_qp] = n * n * n * (6.0 * n * n - 15.0 * n + 10.0);
+      this->_prop_df[this->_qp] = 30.0 * n * n * (n * n - 2.0 * n + 1.0);
+      this->_prop_d2f[this->_qp] = n * (120.0 * n * n - 180.0 * n + 60.0);
       break;
 
     default:
-      mooseError("Internal error");
+      this->mooseError("Internal error");
   }
 }
+
+template class SwitchingFunctionMaterialTempl<false>;
+template class SwitchingFunctionMaterialTempl<true>;

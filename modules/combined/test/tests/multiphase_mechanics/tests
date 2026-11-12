@@ -72,4 +72,10 @@
     design = 'GradientComponent.md'
     issues = '#5631'
   [../]
+  [ADelasticenergymaterial]
+    type = 'Exodiff'
+    input = 'ADElasticEnergyMaterial.i'
+    exodiff = 'ADElasticEnergyMaterial_out.e'
+    requirement = 'The ADElasticEnergyMaterial shall correctly compute the elastic energy according to linear elasticity.'
+  []
 []
