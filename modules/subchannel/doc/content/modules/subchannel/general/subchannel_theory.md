@@ -625,14 +625,16 @@ rate of the undamped system. The coupled crossflow linear solve starts from the 
 convergence tolerance `rtol` is applied to the residual of that initial iterate rather than to the
 right-hand side.
 
-The block factor $\gamma$ starts at one in every solve and is capped at $2^8$. As the step grows,
-the coupled system can become too poorly conditioned for the field-split preconditioner. Each
-coupled solve is therefore attempted with at most 1000 Krylov iterations; if it does not converge,
-the inverse step $1/\Delta\tau$ is increased by $\max(1/\Delta\tau,\,0.05/\Delta\tau_0)$, which
-halves the step unless it is above $20\,\Delta\tau_0$, and the solve is repeated, up to eight times,
-the last attempt with the full [!param](/Problem/TriSubChannel1PhaseProblem/maxit). This is the step
-rejection of pseudo-transient continuation. Each retry also doubles $\gamma$, which keeps the step
-at the size the preconditioner needs for the remaining outer iterations.
+The block factor $\gamma$ starts at one at the start of each SCM solve, that is each time step, and
+is capped at $2^8$. As the step grows, the coupled system can become too poorly conditioned for the
+field-split preconditioner. Each coupled solve is therefore attempted with at most 1000 Krylov
+iterations; if it does not converge, the inverse step $1/\Delta\tau$ is increased by
+$\max(1/\Delta\tau,\,0.05/\Delta\tau_0)$ and the solve is repeated from the same iterate, up to
+eight times, the last attempt with the full
+[!param](/Problem/TriSubChannel1PhaseProblem/maxit). The increment halves a step up to
+$20\,\Delta\tau_0$ and shrinks a larger one by more than half, toward $20\,\Delta\tau_0$. This is the
+step rejection of pseudo-transient continuation. Each retry also doubles $\gamma$, which keeps the
+step at the size the preconditioner needs for the remaining outer iterations.
 
 The crossflow equation relaxation described below is applied after the damping is added, so the
 first attempt of a solve is damped by $\mathbf K^{\ell}/\alpha_W$, while the increment of a retry is
@@ -642,7 +644,13 @@ $\left(1/\alpha_W + 2^n - 1\right)\mathbf K^{\ell}$, compared with $2^n\,\mathbf
 only without crossflow equation relaxation, $\alpha_W = 1$. With the default $\alpha_W = 0.1$, the
 first retry raises the damping by 10% and eight retries by a factor of about 26 rather than $2^8$.
 The doubled $\gamma$ enters the damping before the relaxation, so from the next outer iteration of
-the solve on, the damping is raised by the full factor $\gamma$.
+the solve on, the damping is raised by the full factor $\gamma$, up to the cap of the step at
+$\Delta\tau_0$.
+
+Although $\gamma$ accumulates over the retries of an SCM solve, the step never falls below
+$\Delta\tau_0$ at the start of a coupled solve, so every coupled solve starts with a damping of at
+most $\mathbf K_0/\alpha_W$, where $\mathbf K_0$ is the damping at $\Delta\tau = \Delta\tau_0$. Its
+retries can raise it to at most $\mathbf K_0/\alpha_W + (2^8-1)\,\mathbf K_0$.
 
 Because $\gamma$ is bounded, the step still grows as the residual decreases. Where the
 preconditioner cannot solve the undamped system, the step instead settles at the largest value it
