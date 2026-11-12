@@ -68,11 +68,15 @@
     type = VectorVariableMagnitudeAux
     variable = var_mag
     vector_variable = var
+    # Needs to be executed after old
+    execution_order_group = 2
   []
   [old_var_mag]
     type = VectorVariableMagnitudeAux
     variable = old_var_mag
     vector_variable = old_var
+    # Needs to be executed after old
+    execution_order_group = 2
   []
 []
 [Executioner]

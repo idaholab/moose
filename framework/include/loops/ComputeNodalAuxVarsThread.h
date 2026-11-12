@@ -11,22 +11,20 @@
 
 // MOOSE includes
 #include "ThreadedNodeLoop.h"
+#include "TheWarehouse.h"
 
 #include "libmesh/node_range.h"
 
 // Forward declarations
 class AuxiliarySystem;
 class FEProblemBase;
-template <typename T>
-class MooseObjectWarehouse;
 
 template <typename AuxKernelType>
 class ComputeNodalAuxVarsThread
   : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalAuxVarsThread(FEProblemBase & fe_problem,
-                            const MooseObjectWarehouse<AuxKernelType> & storage);
+  ComputeNodalAuxVarsThread(FEProblemBase & fe_problem, const TheWarehouse::Query & query);
 
   // Splitting Constructor
   ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split split);
@@ -45,8 +43,10 @@ protected:
 
   AuxiliarySystem & _aux_sys;
 
-  /// Storage object containing active AuxKernel objects
-  const MooseObjectWarehouse<AuxKernelType> & _storage;
+  /// Query for every kernel this loop may run, before restricting to a block or boundary. Only
+  /// used to list them in the debug execution output; the loop itself queries the cache below.
+  const TheWarehouse::Query _all_kernels_query;
+  TheWarehouse::QueryCache<AttribThread, AttribSubdomains> _query_subdomain;
 
   std::set<SubdomainID> _block_ids;
 

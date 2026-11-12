@@ -57,8 +57,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
 
     _var(_aux_sys.getActualFieldVariable<ComputeValueType>(
         _tid, parameters.get<AuxVariableName>("variable"))),
-    _nodal(_var.isNodal()),
-    _u(_nodal ? _var.nodalValueArray() : _var.sln()),
+    _u(isNodal() ? _var.nodalValueArray() : _var.sln()),
 
     _test(_bnd ? _var.phiFace() : _var.phi()),
     _q_point(_bnd ? _assembly.qPointsFace() : _assembly.qPoints()),
@@ -78,7 +77,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     _current_lower_d_elem(_assembly.lowerDElem())
 {
 
-  if (!_bnd || _nodal)
+  if (!_bnd || isNodal())
     // If we're not boundary restricted then we cannot be a coincident lower-d calculation
     _coincident_lower_d_calc = false;
 }
@@ -302,7 +301,7 @@ AuxKernelTempl<ComputeValueType>::uOld() const
                "::uOld().\n\n",
                "Make sure to call uOld() within the object constructor.");
 
-  return _nodal ? _var.nodalValueOldArray() : _var.slnOld();
+  return isNodal() ? _var.nodalValueOldArray() : _var.slnOld();
 }
 
 template <typename ComputeValueType>
@@ -315,7 +314,7 @@ AuxKernelTempl<ComputeValueType>::uOlder() const
                "::uOlder().\n\n",
                "Make sure to call uOlder() within the object constructor.");
 
-  return _nodal ? _var.nodalValueOlderArray() : _var.slnOlder();
+  return isNodal() ? _var.nodalValueOlderArray() : _var.slnOlder();
 }
 
 template <typename ComputeValueType>
