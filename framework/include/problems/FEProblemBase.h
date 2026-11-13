@@ -3437,6 +3437,20 @@ protected:
                              const std::string & object_name,
                              const std::string & var_param_name = "variable");
 
+  /**
+   * Helper for setting PETSc options, with compatibility with older
+   * PETSc versions.
+   */
+  template <typename ParamType>
+  void setPetscOptionsHelper(const Moose::PetscSupport::PetscOptions & options, ParamType & params);
+
+  /**
+   * Helper for projecting initial conditions (or any other solution
+   * values not set via a solve) from assembly elements to the DoFs
+   * (e.g. spline basis coefficients) constraining them.
+   */
+  void solveForSplineDofs(SystemBase & moose_sys);
+
 #ifdef LIBMESH_ENABLE_AMR
   Adaptivity _adaptivity;
   unsigned int _cycles_completed;

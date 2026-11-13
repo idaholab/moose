@@ -1,0 +1,14 @@
+[Tests]
+  [./test]
+    # exodiff doesn't like spline nodes on assembly element centroids
+    type = 'CSVDiff'
+    # "Nasty" extraction because its C^T*C matrix breaks with ILU0 and
+    # needs user preconditioning options to enable IC solves
+    input = 'nasty_extraction.i'
+    csvdiff = 'nasty_extraction_out.csv'
+    cli_args = '-ksp_error_if_not_converged'
+
+    requirement = 'The system shall support projecting initial conditions onto spline bases.'
+    issues = '#18768'
+  [../]
+[]

@@ -190,27 +190,6 @@ shouldSolveForSplineDofs(const libMesh::MeshBase & mesh)
   return returnval;
 }
 
-void
-solveForSplineDofs(SystemBase & moose_sys)
-{
-  libMesh::System & sys = moose_sys.system();
-  libMesh::EquationSystems & es = sys.get_equation_systems();
-
-  // Old libMesh defaults to a *linear* solver tolerance here, which
-  // turns out to be enough in some cases (where a decent
-  // preconditioner converges us way past it) but which in parallel is
-  // too loose for a solve where we're not taking multiple
-  // quasi-Newton steps.
-  const Real old_linear_tol = es.parameters.get<Real>("linear solver tolerance");
-  es.parameters.set<Real>("linear solver tolerance") =
-      es.parameters.get<Real>("nonlinear solver relative residual tolerance");
-
-  sys.solve_for_unconstrained_dofs(moose_sys.solution());
-  sys.get_dof_map().enforce_constraints_exactly(sys, &moose_sys.solution());
-
-  es.parameters.set<Real>("linear solver tolerance") = old_linear_tol;
-}
-
 } // namespace
 
 Threads::spin_mutex get_function_mutex;
@@ -4882,6 +4861,56 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
   }
 }
 
+template <typename ParamType>
+void
+FEProblemBase::setPetscOptionsHelper(const Moose::PetscSupport::PetscOptions & options,
+                                     ParamType & params)
+{
+#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  Moose::PetscSupport::petscSetOptions(
+      options, params); // Make sure the PETSc options are setup for this app
+#else
+  // Now this database will be the default
+  // Each app should have only one database
+  if (!_app.isUltimateMaster())
+    LibmeshPetscCall(PetscOptionsPush(_petsc_option_data_base));
+
+  // We did not add PETSc options to database yet
+  if (!_is_petsc_options_inserted)
+  {
+    // Insert options for all systems all at once
+    Moose::PetscSupport::petscSetOptions(options, params, this);
+    _is_petsc_options_inserted = true;
+  }
+#endif
+}
+
+void
+FEProblemBase::solveForSplineDofs(SystemBase & moose_sys)
+{
+  libMesh::System & sys = moose_sys.system();
+  libMesh::EquationSystems & es = sys.get_equation_systems();
+
+  // Old libMesh defaults to a *linear* solver tolerance here, which
+  // turns out to be enough in some cases (where a decent
+  // preconditioner converges us way past it) but which in parallel is
+  // too loose for a solve where we're not taking multiple
+  // quasi-Newton steps.
+  const Real old_linear_tol = es.parameters.get<Real>("linear solver tolerance");
+  es.parameters.set<Real>("linear solver tolerance") =
+      es.parameters.get<Real>("nonlinear solver relative residual tolerance");
+
+  // Spline extraction operators on Flex IGA meshes can be poorly
+  // conditioned; we'd best use whatever PETSc options the user's
+  // input file specified.
+  setPetscOptionsHelper(getPetscOptions(), _solver_params);
+
+  sys.solve_for_unconstrained_dofs(moose_sys.solution());
+  sys.get_dof_map().enforce_constraints_exactly(sys, &moose_sys.solution());
+
+  es.parameters.set<Real>("linear solver tolerance") = old_linear_tol;
+}
+
 void
 FEProblemBase::checkUserObjectNameCollision(const std::string & name,
                                             const std::string & type) const
@@ -7580,22 +7609,7 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // settings, including setting matrix prefixes. This must occur before petscSetOptions
   initPetscOutputAndSomeSolverSettings();
 
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  Moose::PetscSupport::petscSetOptions(
-      _petsc_options, _solver_params); // Make sure the PETSc options are setup for this app
-#else
-  // Now this database will be the default
-  // Each app should have only one database
-  if (!_app.isUltimateMaster())
-    LibmeshPetscCall(PetscOptionsPush(_petsc_option_data_base));
-  // We did not add PETSc options to database yet
-  if (!_is_petsc_options_inserted)
-  {
-    // Insert options for all systems all at once
-    Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params, this);
-    _is_petsc_options_inserted = true;
-  }
-#endif
+  setPetscOptionsHelper(_petsc_options, _solver_params);
 
   // set up DM which is required if use a field split preconditioner
   // We need to setup DM every "solve()" because libMesh destroy SNES after solve()
@@ -7734,22 +7748,7 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
   // Set custom convergence criteria
   Moose::PetscSupport::petscSetDefaults(*this);
 
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  LibmeshPetscCall(Moose::PetscSupport::petscSetOptions(
-      options, solver_params)); // Make sure the PETSc options are setup for this app
-#else
-  // Now this database will be the default
-  // Each app should have only one database
-  if (!_app.isUltimateMaster())
-    LibmeshPetscCall(PetscOptionsPush(_petsc_option_data_base));
-
-  // We did not add PETSc options to database yet
-  if (!_is_petsc_options_inserted)
-  {
-    Moose::PetscSupport::petscSetOptions(options, solver_params, this);
-    _is_petsc_options_inserted = true;
-  }
-#endif
+  setPetscOptionsHelper(options, solver_params);
 
   if (_solve)
     _current_linear_sys->solve();
