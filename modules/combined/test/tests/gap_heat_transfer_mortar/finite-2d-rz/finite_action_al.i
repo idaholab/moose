@@ -233,6 +233,9 @@ name = 'finite_al'
   dtmin = 0.1
   timestep_tolerance = 1e-6
   line_search = 'none'
+  # The solves after the last multiplier updates start from residuals near 1e-5, so the default
+  # relative tolerance alone would ask for a residual below the round-off level of about 3e-13
+  nl_abs_tol = 1e-10
 []
 
 [Postprocessors]

@@ -37,6 +37,10 @@ public:
   void setAbsoluteTolerance(const Real abs_tol);
   /// Sets the relative nonlinear tolerance
   void setRelativeTolerance(const Real rel_tol);
+  /// Sets the number of nonlinear iterations to force
+  void setForcedIterations(const unsigned int forced_its) { _nl_forced_its = forced_its; }
+  /// @return The number of nonlinear iterations to force
+  unsigned int getForcedIterations() const { return _nl_forced_its; }
 
 protected:
   /// Sets the nonlinear system parameters, such as tolerances
