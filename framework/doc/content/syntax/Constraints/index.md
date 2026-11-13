@@ -138,6 +138,18 @@ standard interfaces for quadrature point contributions to primary, secondary, lo
 scalar variables in the residual and Jacobian. Additional discussion can be found at
 [`ScalarKernels`](syntax/ScalarKernels/index.md).
 
+## Constraints in Eigenvalue Problems id=eigen-tag
+
+libMesh removes the dependent degrees of freedom of each exact constraint, for example of a
+[MultiPointConstraint.md], from both eigen matrices. libMesh then computes the values of these
+degrees of freedom on the eigenvector. Other constraints act on degrees of freedom that stay in
+the eigen matrices.
+
+Exact constraints in an eigenvalue problem need a nonlinear eigen solve, such as
+`solve_type = newton`. This solve returns one eigenpair, so set `n_eigen_pairs = 1`.
+
+!listing test/tests/problems/eigen_problem/constraints/multipoint_tie_eigen.i block=Executioner
+
 !syntax list /Constraints objects=True actions=False subsystems=False
 
 !syntax list /Constraints objects=False actions=False subsystems=True
