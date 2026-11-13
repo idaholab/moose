@@ -6,7 +6,7 @@
     command = mes_spatial.py
     recover = false
     csvdiff = 'cartesian_test_no1_first_order.csv'
-    requirement = 'The MOOSE solutions shall converge to the analytic solutions with an expected order of accuracy (two for linear, three for quadratic) where a standard set of heat conduction problems is used for code verification.'
+    requirement = 'The system shall produce solutions that converge to the analytic solutions with an expected order of accuracy (two for linear, three for quadratic) where a standard set of heat conduction problems is used for code verification.'
     valgrind = none
     capabilities = 'method=opt'
     heavy = true

@@ -7,7 +7,7 @@
     csvdiff = 'large_gap_heat_transfer_test_sphere_out.csv'
     abs_zero = 1e-6
     rel_err = 1e-6
-    requirement = "Energy balance must be fulfilled for the heat transfer of concentric spheres "
+    requirement = "The system shall fulfill energy balance for the heat transfer of concentric spheres "
                   "involving radiation, when the gap distance is not negligible with respect to the "
                   "body main dimensions."
   []
@@ -17,7 +17,7 @@
     csvdiff = 'large_gap_heat_transfer_test_rz_cylinder_out.csv'
     abs_zero = 1e-6
     rel_err = 1e-6
-    requirement = "Energy balance must be fulfilled for the heat transfer of concentric cylinders "
+    requirement = "The system shall fulfill energy balance for the heat transfer of concentric cylinders "
                   "involving radiation in two-dimensions, when the gap distance is not negligible "
                   "with respect to the body main dimensions."
   []
@@ -27,7 +27,7 @@
     csvdiff = 'large_gap_heat_transfer_test_cylinder_out.csv'
     abs_zero = 1e-6
     rel_err = 1e-6
-    requirement = "Energy balance must be fulfilled for the heat transfer of concentric cylinders "
+    requirement = "The system shall fulfill energy balance for the heat transfer of concentric cylinders "
                   "involving radiation in two-dimensions with axisymmetry, when the gap distance is "
                   "not negligible with respect to the body main dimensions."
   []

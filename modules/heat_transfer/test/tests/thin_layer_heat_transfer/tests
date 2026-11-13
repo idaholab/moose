@@ -48,7 +48,7 @@
     design = 'ThinLayerHeatTransfer.md'
     difference_tol = 1e-6
     recover = false
-    requirement = 'The Jacobian for the ThinLayerHeatTransfer calculations shall provide perfect '
-                  'jacobians.'
+    requirement = 'The system shall compute numerically accurate Jacobians for the ThinLayerHeatTransfer '
+                  'calculations.'
   []
 []
