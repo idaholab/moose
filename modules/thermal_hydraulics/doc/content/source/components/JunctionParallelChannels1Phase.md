@@ -74,6 +74,24 @@ the wall pressure integral projected in the flow direction is:
 
 !template load file=volume_junction_1phase_formulation_formloss.md.template name=JunctionParallelChannels1Phase
 
+### Hydrostatic correction
+
+With [!param](/Components/JunctionParallelChannels1Phase/use_hydrostatic_correction), the flow
+channel and junction solutions are moved to the junction faces before the numerical flux is
+computed, as described in
+[modules/thermal_hydraulics/theory_manual/vace_model/volume_junction.md#hydrostatic_correction],
+and two more things change in the wall pressure term above:
+
+- the wall pressure $p_\text{in}$ or $p_\text{out}$ is the pressure of the flow channel at the
+  junction face, from the slope reconstruction, instead of the pressure of the cell center;
+- the inlet and outlet groups are formed by the side of the junction on which each flow channel
+  ends, instead of the sign of the mass flow rate of each connection. The inlet side is the one
+  opposite to the direction of the first connection. When all channels flow in the direction of
+  the first connection, the groups are the same as before. For a fluid at rest, the sign of the
+  mass flow rate is round-off noise, so the groups would change at every nonlinear iteration, and
+  when all connections fall in the same group the wall area becomes the sum of all areas, which
+  sets the fluid in motion.
+
 !syntax inputs /Components/JunctionParallelChannels1Phase
 
 !syntax children /Components/JunctionParallelChannels1Phase
