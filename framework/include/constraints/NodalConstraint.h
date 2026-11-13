@@ -84,6 +84,12 @@ protected:
   std::vector<dof_id_type> gatherAndRetainConnectedElems(MooseMesh & mesh,
                                                          const std::vector<dof_id_type> & node_ids);
 
+  /**
+   * Gather and retain one element per node on the reference mesh, and on the displaced mesh when
+   * one exists, and mark them ghosted on the SubProblem.
+   */
+  void ghostConnectedElems(const std::vector<dof_id_type> & node_ids);
+
   /// Elements this constraint retained on each distributed mesh during the previous mesh update.
   std::map<MooseMesh *, std::set<Elem *>> _retained_elems;
 

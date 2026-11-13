@@ -9,7 +9,6 @@
 
 // MOOSE includes
 #include "EqualValueBoundaryConstraint.h"
-#include "DisplacedProblem.h"
 #include "MooseMesh.h"
 
 registerMooseObject("MooseApp", EqualValueBoundaryConstraint);
@@ -185,20 +184,7 @@ EqualValueBoundaryConstraint::ghostPrimary()
 {
   mooseAssert(_primary_node_vector.size() == 1, type() + " should have exactly one primary node");
 
-  const auto primary_node_id = _primary_node_vector.front();
-  const auto connected_elem_ids =
-      gatherAndRetainConnectedElems(_fe_problem.mesh(), {primary_node_id});
-  const auto primary_elem_id = connected_elem_ids.front();
-  _subproblem.addGhostedElem(primary_elem_id);
-
-  if (const auto displaced_problem = _fe_problem.getDisplacedProblem())
-  {
-    const auto displaced_connected_elem_ids =
-        gatherAndRetainConnectedElems(displaced_problem->mesh(), {primary_node_id});
-    const auto displaced_primary_elem_id = displaced_connected_elem_ids.front();
-    if (displaced_primary_elem_id != primary_elem_id)
-      mooseError("Reference and displaced meshes selected different primary elements");
-  }
+  ghostConnectedElems(_primary_node_vector);
 }
 
 Real

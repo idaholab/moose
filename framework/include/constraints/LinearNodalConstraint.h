@@ -25,7 +25,16 @@ public:
 
   LinearNodalConstraint(const InputParameters & parameters);
 
+  virtual void meshChanged() override;
+
 protected:
+  /**
+   * Rebuild the primary and secondary node lists and the ghosting the constraint requires. Called
+   * again whenever the mesh changes, since the node to element connectivity and the set of locally
+   * available elements may both have changed.
+   */
+  void updateConstrainedNodes();
+
   /**
    * Computes the residual for the current secondary node
    */
