@@ -51,17 +51,15 @@ hasOverlap(const std::vector<BoundaryName> & lhs, const std::vector<BoundaryName
   return false;
 }
 
-bool
-producesProperty(const NEML2Action & action, const MaterialPropertyName & property_name)
-{
-  const auto & outputs = action.getParam<std::vector<std::string>>("moose_outputs");
-  if (std::find(outputs.begin(), outputs.end(), property_name) != outputs.end())
-    return true;
-
-  const auto & derivatives = action.getParam<std::vector<std::string>>("moose_derivatives");
-  return std::find(derivatives.begin(), derivatives.end(), property_name) != derivatives.end();
-}
-
+/**
+ * Map a stress or tangent name consumed by SCZM to the property name declared in [NEML2].
+ *
+ * SCZMInterfaceKernelSmallStrain accepts either a Cauchy tangent ("Jacobian_mult",
+ * d(sigma)/d(strain), contracted with the symmetric displacement gradient) or a PK1 tangent
+ * ("pk1_jacobian", d(PK1)/d(F), contracted with the full displacement gradient). When
+ * ComputeLagrangianCauchyCustomStress wraps a NEML2 Cauchy stress and tangent into PK1
+ * properties, return the wrapped Cauchy names; otherwise return property_name unchanged.
+ */
 MaterialPropertyName
 resolveTransferredProperty(ActionWarehouse & awh, const MaterialPropertyName & property_name)
 {
@@ -260,13 +258,21 @@ ShiftedCohesiveZoneAction::act()
       tangent_names.push_back("pk1_jacobian");
     }
 
+    // NEML2 properties already checked; candidate aliases may resolve to the same property
     std::vector<MaterialPropertyName> validated_neml2_properties;
 
+    // Directional correction evaluates the adjacent continuum stress and tangent on the cohesive
+    // interface. Native materials are reinitialized on interface faces automatically, but NEML2
+    // evaluates only on its declared domains, so a NEML2 block providing the stress or tangent
+    // must list the SCZM boundary in 'interface'.
     const auto validate_neml2_interface =
         [this, &validated_neml2_properties](const MaterialPropertyName & property_name)
     {
+      // Trace PK1 names created by ComputeLagrangianCauchyCustomStress back to the NEML2 name
       const auto neml2_property_name = resolveTransferredProperty(_awh, property_name);
 
+      // In small strain, "stress" and "pk1_stress" can resolve to the same Cauchy stress; check
+      // it once to avoid duplicate traversals and errors
       if (std::find(validated_neml2_properties.begin(),
                     validated_neml2_properties.end(),
                     neml2_property_name) != validated_neml2_properties.end())
@@ -276,7 +282,8 @@ ShiftedCohesiveZoneAction::act()
 
       for (const auto * const neml2_action : _awh.getActions<NEML2Action>())
       {
-        if (!producesProperty(*neml2_action, neml2_property_name))
+        // Check every [NEML2] block that produces the property, not only the first one
+        if (!neml2_action->producesProperty(neml2_property_name))
           continue;
 
         const bool interface_set = neml2_action->isParamSetByUser("interface");
@@ -285,28 +292,28 @@ ShiftedCohesiveZoneAction::act()
         if (!interface_set || interfaces.empty())
           neml2_action->paramError(
               "interface",
-              "This NEML2 block provides the material property '",
+              "The material property '",
               neml2_property_name,
-              "' used by [Physics/SolidMechanics/ShiftedCohesiveZone] with "
-              "directional_correction = true. Set 'interface' to the SCZM boundary (for example, "
-              "interface = ${boundary}) or set "
-              "'directional_correction = false' in the ShiftedCohesiveZone block.");
+              "' produced by this NEML2 block is required on the cohesive interface by "
+              "[Physics/SolidMechanics/ShiftedCohesiveZone] with directional_correction = true. "
+              "This NEML2 block needs 'interface' set to the SCZM boundary (for example, "
+              "interface = ${boundary}) or set 'directional_correction = false' in the "
+              "ShiftedCohesiveZone block.");
 
         if (!hasOverlap(_boundary, interfaces))
           neml2_action->paramError(
               "interface",
-              "This NEML2 block provides the material property '",
+              "The material property '",
               neml2_property_name,
-              "' used by "
+              "' produced by this NEML2 block is required on the cohesive interface by "
               "[Physics/SolidMechanics/ShiftedCohesiveZone] with directional_correction = true, "
-              "but "
-              "its 'interface' setting does not overlap the SCZM boundary. Make the NEML2 "
-              "'interface' include the SCZM boundary or set 'directional_correction = false'.");
-
-        return;
+              "but its 'interface' setting does not overlap the SCZM boundary. This NEML2 block "
+              "needs 'interface' to include the SCZM boundary or set 'directional_correction = "
+              "false' in the ShiftedCohesiveZone block.");
       }
     };
 
+    // Check every stress and tangent name the interface kernel may consume
     for (const auto & stress_name : stress_names)
       validate_neml2_interface(stress_name);
 

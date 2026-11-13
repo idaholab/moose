@@ -35,6 +35,9 @@ public:
 
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
 
+  /// Check whether this action produces a given MOOSE material property
+  bool producesProperty(const MaterialPropertyName & name) const;
+
 protected:
   const NEML2ActionCommon & getCommonAction() const;
 

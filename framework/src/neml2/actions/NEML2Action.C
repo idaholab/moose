@@ -224,6 +224,12 @@ NEML2Action::act()
 {
 }
 
+bool
+NEML2Action::producesProperty(const MaterialPropertyName &) const
+{
+  return false;
+}
+
 #else
 
 static std::string
@@ -901,5 +907,20 @@ NEML2Action::getLongestMOOSEName() const
   for (const auto & deriv : _derivs)
     max_moose_name_length = std::max(max_moose_name_length, deriv.name.size());
   return max_moose_name_length;
+}
+
+bool
+NEML2Action::producesProperty(const MaterialPropertyName & name) const
+{
+  for (const auto & out : _outputs)
+    if (out.name == name)
+      return true;
+  for (const auto & deriv : _derivs)
+    if (deriv.name == name)
+      return true;
+  for (const auto & pderiv : _param_derivs)
+    if (pderiv.name == name)
+      return true;
+  return false;
 }
 #endif // NEML2_ENABLED
