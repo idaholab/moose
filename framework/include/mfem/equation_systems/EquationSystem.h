@@ -16,6 +16,7 @@
 #include "libmesh/restore_warnings.h"
 #include "MFEMIntegratedBC.h"
 #include "MFEMEssentialBC.h"
+#include "MFEMEssentialConstraint.h"
 #include "MFEMContainers.h"
 #include "MFEMKernel.h"
 #include "MFEMMixedBilinearFormKernel.h"
@@ -53,6 +54,8 @@ public:
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
   /// Add BC associated with essentially constrained DoFs on boundaries.
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
+  /// Add constraint associated with essentially constrained DoFs on domains.
+  virtual void AddEssentialConstraint(std::shared_ptr<MFEMEssentialConstraint> constraint);
 
   /// Initialise
   virtual void Init(GridFunctions & gridfunctions,
@@ -143,6 +146,15 @@ public:
    */
   mfem::Array<int> & GetEssentialBoundaryMarkers(const std::string & var_name);
 
+  /**
+   * Return the essentially constrained true dofs of a given trial variable: those on
+   * essential boundaries and those set by essential constraints within subdomains.
+   */
+  const mfem::Array<int> & GetEssentialTrueDofs(const std::string & var_name) const;
+
+  /// @returns Whether any essential constraint acts on trial variable @p var_name
+  virtual bool HasEssentialConstraints(const std::string & var_name) const;
+
   /// @returns Whether this EquationSystem includes complex components
   virtual bool IsComplex() const { return false; }
   /// @returns Whether this EquationSystem represents an eigenproblem
@@ -167,6 +179,15 @@ protected:
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
   virtual void SetTrialVariableNames();
 
+  /// Error if any variable that @p map holds strongly constrained DoFs for is not
+  /// a trial variable of this system. Essential BCs and constraints do not create
+  /// an equation for the variable they act on; they rely on one already existing,
+  /// and are only ever applied while iterating the trial variables, so a variable
+  /// missing from that set would have them silently dropped.
+  template <typename T>
+  void CheckConstrainedVariablesAreTrialVariables(
+      const Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<T>>> & map) const;
+
   /// Deletes the HypreParMatrix associated with any pointer stored in _h_blocks,
   /// and then proceeds to delete all dynamically allocated memory for _h_blocks
   /// itself, resetting all dimensions to zero.
@@ -180,13 +201,14 @@ protected:
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
 
-  /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
+  /// Apply essential constraints associated with var_name to set true DoFs of trial_gf, and update
   /// markers of all essential boundaries
-  virtual void ApplyEssentialBC(const std::string & var_name,
-                                mfem::ParGridFunction & trial_gf,
-                                mfem::Array<int> & global_ess_markers);
-  /// Update all essentially constrained true DoF markers and values on boundaries
-  virtual void ApplyEssentialBCs();
+  virtual void ApplyEssentialConstraint(const std::string & var_name,
+                                        mfem::ParGridFunction & trial_gf,
+                                        mfem::Array<int> & global_bdr_markers,
+                                        mfem::Array<int> & global_ess_tdofs);
+  /// Update essential boundary markers and all constrained true DoF lists and values
+  virtual void ApplyEssentialConstraints();
   /// Perform trivial eliminations of coupled variables lacking corresponding test variables
   virtual void EliminateCoupledVariables();
   /// Build linear forms and eliminate constrained DoFs
@@ -309,7 +331,7 @@ protected:
   /// Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
   std::vector<mfem::Array<int>> _ess_tdof_lists;
-  std::vector<mfem::Array<int>> _ess_markers;
+  std::vector<mfem::Array<int>> _ess_bdr_markers;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks, _jacobian_blocks;
   /// Arrays to store kernels to act on each component of weak form.
@@ -321,6 +343,9 @@ protected:
   /// Arrays to store essential BCs to act on each component of weak form.
   /// Named according to test variable.
   NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
+  /// Arrays to store essential domain constraints to act on each component of weak form.
+  /// Named according to trial variable.
+  NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialConstraint>>> _essential_constraint_map;
 
   // Operator handle for the jacobian
   mutable mfem::OperatorHandle _jacobian;
@@ -346,6 +371,23 @@ private:
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
 };
+
+template <typename T>
+void
+EquationSystem::CheckConstrainedVariablesAreTrialVariables(
+    const Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<T>>> & map) const
+{
+  for (const auto & [var_name, objects] : map)
+    if (!VectorContainsName(_trial_var_names, var_name))
+      mooseError("MFEM variable '",
+                 var_name,
+                 "' has an object of type '",
+                 MooseUtils::prettyCppType(objects->front().get()),
+                 "' applied to it, but it is not a trial variable of the equation system. "
+                 "Add a kernel acting on '",
+                 var_name,
+                 "', or remove it.");
+}
 
 template <class FormType>
 void
