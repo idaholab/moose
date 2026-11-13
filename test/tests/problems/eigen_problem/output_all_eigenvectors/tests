@@ -1,0 +1,124 @@
+[Tests]
+  design = 'Eigenvalue.md EigenvectorBNorm.md'
+  issues = '#27333'
+
+  [all_modes_exodus]
+    type = Exodiff
+    input = all_modes.i
+    exodiff = all_modes_out.e
+    exodiff_opts = '-eigen_relative'
+    abs_zero = 1e-8
+    capabilities = 'slepc'
+    requirement = 'The system shall write every converged eigenvector of an eigenvalue solve as its own Exodus time step when requested.'
+  []
+
+  [all_modes_csv]
+    type = CSVDiff
+    input = all_modes.i
+    csvdiff = 'all_modes_out.csv all_modes_out_eigenvalues_0001.csv'
+    prereq = all_modes_exodus
+    capabilities = 'slepc'
+    requirement = 'The system shall mass-normalize every output eigenvector through the normalization postprocessor so that the B-norm of each mode equals the requested factor.'
+  []
+
+  [eigenvector_time]
+    requirement = 'The system shall support choosing the output time of each eigenvector step'
+    [time_axis_eigenvalue]
+      type = CSVDiff
+      input = all_modes.i
+      cli_args = 'Executioner/eigenvector_time=eigenvalue Outputs/file_base=eigenvalue_axis'
+      csvdiff = eigenvalue_axis.csv
+      capabilities = 'slepc'
+      detail = 'using the real part of the eigenvalue.'
+    []
+    [time_axis_sqrt_eigenvalue]
+      type = CSVDiff
+      input = all_modes.i
+      cli_args = 'Executioner/eigenvector_time=sqrt_eigenvalue Outputs/file_base=sqrt_axis'
+      csvdiff = sqrt_axis.csv
+      capabilities = 'slepc'
+      detail = 'using the square root of the eigenvalue.'
+    []
+  []
+
+  [active_index_matches_step]
+    type = CSVDiff
+    input = all_modes.i
+    cli_args = 'Executioner/output_all_eigenvectors=false Problem/active_eigen_index=2 Outputs/file_base=active_2'
+    csvdiff = active_2.csv
+    capabilities = 'slepc'
+    requirement = 'The system shall output the eigenvector selected by the active eigen index when the per-eigenvector output is disabled.'
+  []
+
+  [restore_active_after_loop]
+    type = CSVDiff
+    input = all_modes.i
+    cli_args = 'Outputs/final/type=CSV Outputs/final/execute_on=final Outputs/final/file_base=restore_final Problem/active_eigen_index=2 Outputs/file_base=restore_active'
+    csvdiff = restore_final.csv
+    capabilities = 'slepc'
+    requirement = 'The system shall restore the eigenvector selected by the active eigen index in the solution after writing every eigenvector.'
+  []
+
+  [index_time_across_adaptivity]
+    type = CSVDiff
+    input = all_modes.i
+    cli_args = 'Adaptivity/steps=1 Adaptivity/marker=uni Adaptivity/Markers/uni/type=UniformMarker Adaptivity/Markers/uni/mark=refine Outputs/file_base=adapt_index'
+    csvdiff = adapt_index.csv
+    capabilities = 'slepc'
+    requirement = 'The system shall keep the output time of every eigenvector step equal to its time step across mesh adaptivity cycles when the eigenvector index is the time axis.'
+  []
+
+  [time_axis_requires_flag]
+    type = RunException
+    input = all_modes.i
+    cli_args = 'Executioner/output_all_eigenvectors=false Executioner/eigenvector_time=eigenvalue Outputs/file_base=requires_flag'
+    expect_err = 'eigenvector_time.*requires.*output_all_eigenvectors'
+    capabilities = 'slepc'
+    requirement = 'The system shall report an error when an eigenvector time axis is requested without enabling the per-eigenvector output.'
+  []
+
+  [bnorm_shell_matrix_error]
+    type = RunException
+    input = all_modes.i
+    cli_args = 'Executioner/solve_type=PJFNK Executioner/n_eigen_pairs=1 Outputs/file_base=shell_matrix'
+    expect_err = 'EigenvectorBNorm requires an assembled B matrix.*KRYLOVSCHUR'
+    capabilities = 'slepc'
+    requirement = 'The system shall report an error when the B-norm postprocessor is used with a matrix-free eigenvalue solve, naming the assembled solve types.'
+  []
+
+  [bnorm_newton_error]
+    type = RunException
+    input = all_modes.i
+    cli_args = 'Executioner/solve_type=NEWTON Outputs/file_base=bnorm_newton'
+    expect_err = 'EigenvectorBNorm requires an assembled B matrix, but the NEWTON eigenvalue solve never assembles B'
+    capabilities = 'slepc'
+    requirement = 'The system shall report an error when the B-norm postprocessor is used with a Newton eigenvalue solve, which does not assemble the B matrix.'
+  []
+
+  [sqrt_negative_eigenvalue_error]
+    type = RunException
+    input = all_modes.i
+    cli_args = 'Kernels/rea/coefficient=-5 Executioner/eigenvector_time=sqrt_eigenvalue Outputs/file_base=sqrt_negative'
+    expect_err = 'negative eigenvalue.*of mode'
+    capabilities = 'slepc'
+    requirement = 'The system shall report an error naming the mode when the square-root time axis meets a negative eigenvalue.'
+  []
+
+  [bnorm_not_eigen_system_error]
+    type = RunException
+    input = all_modes.i
+    cli_args = 'Problem/type=FEProblem Executioner/type=Steady Executioner/solve_type=NEWTON Kernels/inactive=rhs BCs/inactive=eigen_bc Outputs/file_base=bnorm_not_eigen'
+    expect_err = 'Given system is not a NonlinearEigenSystem'
+    capabilities = 'slepc'
+    requirement = 'The system shall report an error when the B-norm postprocessor is used in a problem without a nonlinear eigen system.'
+  []
+
+  [bnorm_negative_quadratic_form_error]
+    type = RunException
+    input = all_modes.i
+    cli_args = 'Kernels/rhs/coefficient=1 Outputs/file_base=bnorm_negative'
+    expect_err = 'B is not positive definite for this eigenvector'
+    capabilities = 'slepc'
+    requirement = 'The system shall report an error when the B operator gives a negative quadratic form for an eigenvector in the B-norm postprocessor.'
+  []
+[]

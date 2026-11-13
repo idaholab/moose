@@ -14,6 +14,9 @@
 #include "MooseApp.h"
 #include "NonlinearEigenSystem.h"
 
+#include <cmath>
+#include <optional>
+
 registerMooseObject("MooseApp", Eigenvalue);
 
 InputParameters
@@ -27,6 +30,20 @@ Eigenvalue::validParams()
   params += EigenProblemSolve::validParams();
   params.addParam<Real>("time", 0.0, "System time");
 
+  params.addParam<bool>("output_all_eigenvectors",
+                        false,
+                        "Whether to write one output step per converged eigenvector instead of "
+                        "writing the active eigenvector only");
+  params.addParam<MooseEnum>("eigenvector_time",
+                             MooseEnum("index eigenvalue sqrt_eigenvalue", "index"),
+                             "What the output time of each eigenvector step is: the time step "
+                             "number, which is the one-based index of the eigenvector in the "
+                             "first solve and keeps increasing over mesh adaptivity cycles, the "
+                             "real part of its eigenvalue, or the square root of the real part "
+                             "of its eigenvalue. This parameter "
+                             "requires 'output_all_eigenvectors' to be true.");
+  params.addParamNamesToGroup("output_all_eigenvectors eigenvector_time", "Eigenvector output");
+
   return params;
 }
 
@@ -38,10 +55,33 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     _system_time(getParam<Real>("time")),
     _time_step(_eigen_problem.timeStep()),
     _time(_eigen_problem.time()),
-    _final_timer(registerTimedSection("final", 1))
+    _final_timer(registerTimedSection("final", 1)),
+    _output_all_eigenvectors(getParam<bool>("output_all_eigenvectors")),
+    _eigenvector_time(getParam<MooseEnum>("eigenvector_time"))
 {
   _fixed_point_solve->setInnerSolve(_eigen_problem_solve);
   _time = _system_time;
+
+  if (!_output_all_eigenvectors && isParamSetByUser("eigenvector_time"))
+    paramError("eigenvector_time",
+               "'eigenvector_time' requires 'output_all_eigenvectors' to be true, as a single "
+               "eigenvector is written at a single output time otherwise.");
+
+  // Output objects take their time from the time step number unless the problem is transient, so
+  // flagging the problem transient is the only way the per-eigenvector output times reach the
+  // output files, as the legacy EigenExecutionerBase does as well. The executioner is constructed
+  // before the outputs are added, and an output captures this flag at construction, so this is the
+  // place to set it.
+  //
+  // The flag is problem-wide rather than output-only. Besides Output::time() returning _time
+  // instead of _t_step, it turns on TransientInterface::_is_transient for every object constructed
+  // after this executioner, the old- and older-state branches of MooseVariableData, and the time
+  // and dt banners of the Console. It also changes FixedPointSolve::autoAdvance(), which turns
+  // auto-advance off for a transient problem with fixed point iterations; the cast to Eigenvalue
+  // added there exists only to keep auto-advance behaving for eigen problems with multiapps
+  // exactly as it did before this flag was set.
+  if (_output_all_eigenvectors)
+    _eigen_problem.transient(true);
 }
 
 #ifdef LIBMESH_HAVE_SLEPC
@@ -75,6 +115,48 @@ Eigenvalue::checkIntegrity()
   if (_eigen_problem.getNonlinearSystemBase(/*nl_sys=*/0).containsTimeKernel())
     mooseError("You have specified time kernels in your eigenvalue simulation");
 }
+
+void
+Eigenvalue::loadEigenvector(dof_id_type i)
+{
+  auto & nl = _eigen_problem.getNonlinearEigenSystem(/*nl_sys=*/0);
+  nl.getConvergedEigenpair(i);
+  // A condensed eigen solve sets the non-condensed entries of the solution only, so give the
+  // constrained degrees of freedom, e.g. of hanging nodes, their constrained values
+  nl.dofMap().enforce_constraints_exactly(nl.system());
+  nl.update();
+  // Recompute the objects the normalization hook reads before and after it scales the eigenvector,
+  // then let the objects executing at the end of a time step see the scaled eigenvector. Neither
+  // execution runs multiapps or transfers.
+  _eigen_problem.execute(EXEC_LINEAR);
+  _eigen_problem.postScaleEigenVector(i);
+  _eigen_problem.execute(EXEC_TIMESTEP_END);
+}
+
+Real
+Eigenvalue::eigenvectorTime(dof_id_type i, const std::pair<Real, Real> & eig) const
+{
+  // The time of an eigenvector step is based on the real part of its eigenvalue only
+  if (_eigenvector_time == "index")
+    // The time equals the time step as it does for a single output step, which keeps the time
+    // increasing over the eigenvector steps of every adaptivity cycle
+    return _time_step;
+
+  if (_eigenvector_time == "eigenvalue")
+    return eig.first;
+
+  // sqrt_eigenvalue
+  if (eig.first < 0)
+    paramError("eigenvector_time",
+               "Cannot take the square root of the negative eigenvalue ",
+               eig.first,
+               " of mode ",
+               i + 1,
+               " to form an output time. Use 'eigenvector_time = eigenvalue' or 'eigenvector_time "
+               "= index' instead.");
+
+  return std::sqrt(eig.first);
+}
 #endif
 
 void
@@ -107,6 +189,10 @@ Eigenvalue::execute()
   // First step in any eigenvalue state solve is always 1 (preserving backwards compatibility)
   _time_step = 1;
 
+  // Output time of the step holding the active eigenvector in the last solve, set only when one
+  // output step per converged eigenvector is written
+  std::optional<Real> active_eigenvector_time;
+
 #ifdef LIBMESH_ENABLE_AMR
 
   // Define the refinement loop
@@ -116,6 +202,7 @@ Eigenvalue::execute()
 #endif // LIBMESH_ENABLE_AMR
     _eigen_problem.timestepSetup();
 
+    active_eigenvector_time.reset();
     _last_solve_converged = _fixed_point_solve->solve();
     if (!lastSolveConverged())
     {
@@ -129,10 +216,33 @@ Eigenvalue::execute()
       _eigen_problem.computeIndicators();
       _eigen_problem.computeMarkers();
     }
-    // need to keep _time in sync with _time_step to get correct output
-    _time = _time_step;
-    _eigen_problem.outputStep(EXEC_TIMESTEP_END);
-    _time = _system_time;
+    // Without a converged eigenpair, e.g. when the solve is skipped, the solution is written as is
+    const auto & eigenvalues =
+        _eigen_problem.getNonlinearEigenSystem(/*nl_sys=*/0).getAllConvergedEigenvalues();
+    if (!_output_all_eigenvectors || eigenvalues.empty())
+    {
+      // need to keep _time in sync with _time_step to get correct output
+      _time = _time_step;
+      _eigen_problem.outputStep(EXEC_TIMESTEP_END);
+      _time = _system_time;
+    }
+    else
+    {
+      // Write one output step per converged eigenvector
+      const int first_step = _time_step;
+      for (const auto i : index_range(eigenvalues))
+      {
+        loadEigenvector(i);
+        _time_step = first_step + cast_int<int>(i);
+        _time = eigenvectorTime(i, eigenvalues[i]);
+        if (i == _eigen_problem.activeEigenvalueIndex())
+          active_eigenvector_time = _time;
+        _eigen_problem.outputStep(EXEC_TIMESTEP_END);
+      }
+      // Restore the eigenvector the rest of the simulation expects in the solution
+      loadEigenvector(_eigen_problem.activeEigenvalueIndex());
+      _time = _system_time;
+    }
 
 #ifdef LIBMESH_ENABLE_AMR
     if (r_step < steps)
@@ -150,7 +260,12 @@ Eigenvalue::execute()
     _eigen_problem.finalizeMultiApps();
     _eigen_problem.postExecute();
     _eigen_problem.execute(EXEC_FINAL);
-    _time = _time_step;
+    // Keep the final step on the requested time axis, at the time of the step holding the active
+    // eigenvector in the last solve, which is the one restored into the solution after that step
+    if (active_eigenvector_time)
+      _time = *active_eigenvector_time;
+    else
+      _time = _time_step;
     _eigen_problem.outputStep(EXEC_FINAL);
     _time = _system_time;
   }

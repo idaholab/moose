@@ -13,6 +13,7 @@
 
 #include "Executioner.h"
 #include "EigenProblemSolve.h"
+#include "MooseEnum.h"
 
 class InputParameters;
 class EigenProblem;
@@ -68,5 +69,27 @@ protected:
   PerfID _final_timer;
 
 private:
+#ifdef LIBMESH_HAVE_SLEPC
+  /**
+   * Copy the converged eigenvector \p i into the solution of the eigen system, recompute the
+   * objects that execute on linear iterations, scale the eigenvector with the normalization hook,
+   * and execute the objects that execute at the end of a time step.
+   */
+  void loadEigenvector(dof_id_type i);
+
+  /**
+   * @return The output time of the step holding the converged eigenvector \p i, whose eigenvalue
+   * is \p eig as (real, imaginary), according to the 'eigenvector_time' parameter. The 'index'
+   * time is the current time step, so the caller sets the time step of this step beforehand
+   */
+  Real eigenvectorTime(dof_id_type i, const std::pair<Real, Real> & eig) const;
+#endif
+
+  /// Whether one output step is written per converged eigenvector instead of the active one only
+  const bool _output_all_eigenvectors;
+
+  /// What the output time of each eigenvector step is
+  const MooseEnum _eigenvector_time;
+
   bool _last_solve_converged = true;
 };
