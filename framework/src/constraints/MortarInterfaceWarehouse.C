@@ -153,7 +153,7 @@ MortarInterfaceWarehouse::createMortarInterface(
                   "Secondary lower dimensional elements should always have an interior parent "
                   "set when using mortar");
       pr.second->insert(
-          AutomaticMortarGeneration::primaryInteriorElem(*lower_d_elem).subdomain_id());
+          AutomaticMortarGeneration::primaryInteriorParentOrSelf(*lower_d_elem).subdomain_id());
     }
 
     // Make sure that we get this right in parallel

@@ -2263,14 +2263,6 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
   // coming from reinit of the mortar segment element in the case of mortar
   setNeighborQRule(neighbor_rule, neighbor_dim);
 
-  // An invalid side means the neighbor is itself the face, e.g. a primary surface element, so the
-  // points are reference points on the neighbor element
-  if (neighbor_side == libMesh::invalid_uint)
-  {
-    reinitFEFaceNeighbor(neighbor, *pts);
-    return;
-  }
-
   // reinit neighbor face
   for (const auto & it : _fe_face_neighbor[neighbor_dim])
   {
@@ -2325,6 +2317,23 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
   // We need to dig out the q_points from it
   _current_q_points_face_neighbor.shallowCopy(
       const_cast<std::vector<Point> &>(_holder_fe_face_neighbor_helper[neighbor_dim]->get_xyz()));
+}
+
+void
+Assembly::reinitNeighborSurfaceElemRef(const Elem * neighbor, const std::vector<Point> & pts)
+{
+  _current_neighbor_elem = neighbor;
+
+  const unsigned int neighbor_dim = neighbor->dim();
+
+  // As in reinitNeighborFaceRef, the quadrature weights are never used
+  ArbitraryQuadrature * neighbor_rule =
+      qrules(neighbor_dim, neighbor->subdomain_id()).neighbor.get();
+  neighbor_rule->setPoints(pts);
+  setNeighborQRule(neighbor_rule, neighbor_dim);
+
+  // The neighbor is the face, so the face neighbor FE objects are reinitialized on the element
+  reinitFEFaceNeighbor(neighbor, pts);
 }
 
 void

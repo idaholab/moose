@@ -10410,6 +10410,18 @@ FEProblemBase::reinitNeighborFaceRef(const Elem * neighbor_elem,
 }
 
 void
+FEProblemBase::reinitNeighborSurfaceElemRef(const Elem * neighbor_elem,
+                                            const std::vector<Point> & pts,
+                                            const THREAD_ID tid)
+{
+  SubProblem::reinitNeighborSurfaceElemRef(neighbor_elem, pts, tid);
+
+  if (_displaced_problem)
+    _displaced_problem->reinitNeighborSurfaceElemRef(
+        _displaced_mesh->elemPtr(neighbor_elem->id()), pts, tid);
+}
+
+void
 FEProblemBase::getFVMatsAndDependencies(
     const SubdomainID blk_id,
     std::vector<std::shared_ptr<MaterialBase>> & face_materials,

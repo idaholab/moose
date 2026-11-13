@@ -425,7 +425,7 @@ AutomaticMortarGeneration::getPrimaryIpToLowerElementMap(
 }
 
 const Elem &
-AutomaticMortarGeneration::primaryInteriorElem(const Elem & lower_primary_elem)
+AutomaticMortarGeneration::primaryInteriorParentOrSelf(const Elem & lower_primary_elem)
 {
   const Elem * const ip = lower_primary_elem.interior_parent();
   return ip ? *ip : lower_primary_elem;
@@ -948,7 +948,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     else
     {
       _secondary_ip_sub_ids.insert(msinfo.secondary_elem->interior_parent()->subdomain_id());
-      _primary_ip_sub_ids.insert(primaryInteriorElem(*msinfo.primary_elem).subdomain_id());
+      _primary_ip_sub_ids.insert(primaryInteriorParentOrSelf(*msinfo.primary_elem).subdomain_id());
     }
   }
 
@@ -1484,7 +1484,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             _secondary_ip_sub_ids.insert(msinfo.secondary_elem->interior_parent()->subdomain_id());
             // Unlike for 2D, we always have a primary when building the mortar mesh so we don't
             // have to check for null
-            _primary_ip_sub_ids.insert(primaryInteriorElem(*msinfo.primary_elem).subdomain_id());
+            _primary_ip_sub_ids.insert(
+                primaryInteriorParentOrSelf(*msinfo.primary_elem).subdomain_id());
           }
         }
         // End loop through primary element candidates
@@ -1567,7 +1568,7 @@ AutomaticMortarGeneration::buildCouplingInformation()
   {
     const Elem * secondary_elem = pr.second.secondary_elem;
     const Elem * primary_elem = pr.second.primary_elem;
-    const Elem & primary_interior_elem = primaryInteriorElem(*primary_elem);
+    const Elem & primary_interior_elem = primaryInteriorParentOrSelf(*primary_elem);
 
     // Every process owning a row on a secondary node or either volume parent needs the complete
     // secondary face-star coupling, including when that process also owns the lower-dimensional

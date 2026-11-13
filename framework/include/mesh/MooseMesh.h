@@ -1123,7 +1123,8 @@ public:
   /**
    * Returns true if \p elem is a surface element without an interior parent, e.g. of a rigid
    * surface mesh, and all of its nodes are on the nodeset \p bnd_id, in which case the element is
-   * its own face on that boundary. Always false if \p bnd_id is a sideset.
+   * its own face on that boundary. Always false if \p bnd_id is a sideset, so any contact boundary
+   * may be passed.
    */
   bool isSurfaceElemOnNodeset(const Elem & elem, BoundaryID bnd_id) const;
 

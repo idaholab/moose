@@ -152,9 +152,11 @@ PenetrationInfo::PenetrationInfo()
 PenetrationInfo::~PenetrationInfo() { delete _side; }
 
 std::unique_ptr<const Elem>
-PenetrationInfo::buildSide(const Elem & elem, const unsigned int side_num, const bool surface_elem)
+PenetrationInfo::buildSide(const Elem & elem,
+                           const unsigned int side_num,
+                           const bool elem_is_surface_elem)
 {
-  if (!surface_elem)
+  if (!elem_is_surface_elem)
     return elem.build_side_ptr(side_num);
 
   // Copy the element, because the penetration info owns and deletes its face

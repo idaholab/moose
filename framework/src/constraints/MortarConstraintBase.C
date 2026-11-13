@@ -316,7 +316,7 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
 }
 
 bool
-MortarConstraintBase::skipPrimaryJacobian()
+MortarConstraintBase::skipPrimaryJacobian() const
 {
   // Residual and Jacobian computed together would also skip the primary residual
   if (_fe_problem.currentlyComputingResidualAndJacobian())
