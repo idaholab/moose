@@ -690,6 +690,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("ElementIDOutputAction", "Mesh");
   syntax.registerSyntaxType("Mesh/*", "MeshGeneratorName");
 
+  registerSyntax("CSGAction", "ConstructiveSolidGeometry");
+
   registerSyntax("AddFunctionAction", "Functions/*");
   syntax.registerSyntaxType("Functions/*", "FunctionName");
 
@@ -708,8 +710,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("SetupDebugAction", "Debug");
   registerSyntax("SetupResidualDebugAction", "Debug");
-
-  registerSyntax("CSGAction", "ConstructiveSolidGeometry");
 
   /// Variable/AuxVariable Actions
   registerSyntax("AddVariableAction", "Variables/*");
