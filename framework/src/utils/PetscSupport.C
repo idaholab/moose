@@ -816,6 +816,22 @@ addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags,
       po.flags.setAdditionalValue(prefixed_option);
       po.user_set_options.setAdditionalValue(prefixed_option);
     }
+
+    // Precedence for options with the same prefixed name, highest first:
+    // - PETSc command line options (the last occurrence wins)
+    // - Preconditioner pair parameter
+    // - Preconditioner flag parameter
+    // - Executioner pair parameter
+    // - Executioner flag parameter
+    // - Programmatic default, e.g. "-ksp_converged_reason ::failed" from setConvergedReasonFlags
+    // A flag removes the pairs of the same name that were stored before it. PETSc option names are
+    // case-insensitive.
+    const auto upper_option = MooseUtils::toUpper(prefixed_option);
+    po.pairs.erase(std::remove_if(po.pairs.begin(),
+                                  po.pairs.end(),
+                                  [&upper_option](const auto & pair)
+                                  { return MooseUtils::toUpper(pair.first) == upper_option; }),
+                   po.pairs.end());
   }
 }
 
