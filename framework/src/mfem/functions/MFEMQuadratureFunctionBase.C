@@ -34,7 +34,7 @@ MFEMQuadratureFunctionBase::MFEMQuadratureFunctionBase(const InputParameters & p
   : Function(parameters),
     _mfem_problem(
         cast_ref<MFEMProblem &>(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem"))),
-    _qspace(&_mfem_problem.mesh().getMFEMParMesh(), getParam<int>("order"))
+    _qspace(&_mfem_problem.mfemParMesh(), getParam<int>("order"))
 {
 }
 

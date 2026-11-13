@@ -15,8 +15,14 @@ The order in which these actions are executed respects the dependencies declared
 
 ## Example Input File Syntax
 
-In order to build the FE problem using the MFEM library on the backend, the `MFEMProblem` type must
- be used in `Problem` block in the user input.
+In order to build the FE problem using the MFEM library on the
+backend, the `MFEMProblem` type must be used in `Problem` block in the
+user input. Furthermore, the mesh used with the problem must be either
+an MFEM-backed mesh ([MFEMFileMesh](source/mfem/mesh/MFEMFileMesh.md)
+or [MFEMMeshGeneratorMesh](source/mfem/mesh/MFEMMeshGeneratorMesh.md))
+or a libMesh-based mesh [suitable for
+conversion](source/mfem/utils/BuildMFEMMesh.md#Overview) to an
+MFEM-based mesh.
 
 !listing test/tests/mfem/kernels/diffusion.i block=Problem
 

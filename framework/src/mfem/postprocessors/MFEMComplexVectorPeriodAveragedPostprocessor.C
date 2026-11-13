@@ -42,7 +42,7 @@ MFEMComplexVectorPeriodAveragedPostprocessor::MFEMComplexVectorPeriodAveragedPos
                 ->ParFESpace()
                 ->GetMaxElementOrder(),
             getMesh().Dimension()),
-    _scalar_test_fespace(const_cast<mfem::ParMesh *>(&getMesh()), &_l2_fec),
+    _scalar_test_fespace(&getMFEMProblem().mfemParMesh(), &_l2_fec),
     _scalar_var(&_scalar_test_fespace),
     _scalar_coef(getScalarCoefficient("coefficient")),
     _primal_var_real_coef(

@@ -1,0 +1,85 @@
+[Tests]
+  design = 'source/mfem/utils/BuildMFEMMesh.md'
+  issues = '#32520'
+
+  [generated_mesh_1d]
+    type = GoogleTest
+    unit_test = GeneratedMeshMFEMTest.Check1D
+    requirement = 'The system shall convert a one-dimensional libMesh mesh of edge elements to an MFEM mesh with the same vertices and elements.'
+  []
+  [generated_mesh_2d]
+    type = GoogleTest
+    unit_test = GeneratedMeshMFEMTest.Check2D
+    requirement = 'The system shall convert a two-dimensional libMesh mesh of quadrilateral elements to an MFEM mesh with the same vertices, edges, and elements.'
+  []
+  [generated_mesh_3d]
+    type = GoogleTest
+    unit_test = GeneratedMeshMFEMTest.Check3D
+    requirement = 'The system shall convert a three-dimensional libMesh mesh of hexahedral elements to an MFEM mesh with the same vertices, edges, faces, and elements.'
+  []
+  [block_id_zero]
+    type = GoogleTest
+    unit_test = GeneratedMeshMFEMTest.BlockIDZero
+    requirement = 'The system shall report an error when converting a libMesh mesh containing block ID 0 to an MFEM mesh, since MFEM element attributes must be positive.'
+  []
+  [boundary_id_zero]
+    type = GoogleTest
+    unit_test = GeneratedMeshMFEMTest.BoundaryIDZero
+    requirement = 'The system shall report an error when converting a libMesh mesh containing boundary ID 0 to an MFEM mesh, since MFEM boundary attributes must be positive.'
+  []
+  [quad8_centre_nodes]
+    type = GoogleTest
+    unit_test = GeneratedMeshMFEMTest.Quad8CentreNodes
+    requirement = 'The system shall interpolate the centre node of each second-order MFEM quadrilateral when converting a libMesh mesh of QUAD8 elements, which lack that node.'
+  []
+  [higher_order_geometry]
+    type = GoogleTest
+    unit_test = HigherOrderGeometryMFEMTest.MatchesFirstOrder
+    requirement = 'The system shall place every higher-order node correctly when converting straight-sided multi-element libMesh meshes of higher-order edge, triangle, quadrilateral, tetrahedral, hexahedral, and prism elements to MFEM meshes.'
+  []
+  [complete_prism_fallback]
+    type = GoogleTest
+    unit_test = CompletePrismMFEMTest.FallbackMatchesFirstOrder
+    requirement = 'The system shall convert libMesh PRISM20 and PRISM21 elements to MFEM second-order prisms with the correct geometry when fallback element types are allowed.'
+  []
+  [complete_prism_error]
+    type = GoogleTest
+    unit_test = CompletePrismMFEMTest.ErrorWithoutFallback
+    requirement = 'The system shall report an error when converting libMesh PRISM20 or PRISM21 elements to an MFEM mesh if fallback element types are not allowed.'
+  []
+  [file_mesh]
+    type = GoogleTest
+    unit_test = FileMeshMFEMTest.CheckLoad
+    requirement = 'The system shall convert libMesh meshes read from ExodusII files to MFEM meshes, preserving element types, nodes per element, and named boundaries.'
+  []
+  [single_element]
+    type = GoogleTest
+    unit_test = ElementGeneratorMFEMTest.CheckElem
+    requirement = 'The system shall convert each supported libMesh element type to an MFEM element with the same vertices, positive orientation, and geometric mapping.'
+  []
+  [unsupported_pyramid]
+    type = GoogleTest
+    unit_test = UnsupportedElementGeneratorMFEMTest.CheckElem
+    requirement = 'The system shall report an error when converting higher-order libMesh pyramid elements to an MFEM mesh.'
+  []
+  [fallback_warning]
+    type = GoogleTest
+    unit_test = LibMeshToMFEMMeshFallbackTest.CheckWarningThrown
+    requirement = 'The system shall warn when converting libMesh TRI7 or TET14 elements to their closest MFEM approximation.'
+  []
+  [fallback_geometry]
+    type = GoogleTest
+    unit_test = LibMeshToMFEMMeshFallbackTest.CheckFallbackCorrect
+    requirement = 'The system shall convert libMesh TRI7 and TET14 elements to MFEM elements with the geometry of the corresponding TRI6 and TET10 elements when fallback element types are allowed.'
+  []
+  [fallback_error]
+    type = GoogleTest
+    unit_test = LibMeshToMFEMMeshFallbackTest.CheckError
+    requirement = 'The system shall report an error when converting libMesh TRI7 or TET14 elements to an MFEM mesh if fallback element types are not allowed.'
+  []
+  [first_order]
+    type = GoogleTest
+    unit_test = LibMeshToMFEMMeshFirstOrderTest.CheckConversion
+    requirement = 'The system shall convert each supported libMesh element type to a first-order MFEM element with the geometry of the corresponding first-order libMesh element when first-order conversion is requested.'
+  []
+[]
