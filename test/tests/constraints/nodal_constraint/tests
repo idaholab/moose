@@ -55,6 +55,10 @@
     type = 'CSVDiff'
     input = 'nodal_constraint_extra_tag_test.i'
     csvdiff = 'nodal_constraint_extra_tag_test_out.csv'
+    # react_u_at_primary and react_u_at_secondary are residuals converged to zero, so what is
+    # left in them is the solve's termination noise, which varies with the partitioning. The
+    # nonlinear solve stops at |R| ~ 1e-8, so compare them against zero at that scale.
+    abs_zero = 1e-7
     issues = '#665 #33385'
     design = 'syntax/Constraints/index.md interfaces/TaggingInterface.md'
     requirement = "The system shall be able to tally the contributions of nodal constraints in "
