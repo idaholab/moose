@@ -149,6 +149,12 @@ pcre%.$(obj-suffix) : pcre%.cc | $$(prebuild)
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(ADDITIONAL_CPPFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
+%.$(obj-suffix) : %.cxx | $$(prebuild)
+	@echo "Compiling MFEM kernels (in "$(METHOD)" mode) "$<"..."
+	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
+	  $(MFEM_CXX) $(if $(filter YES,$(MFEM_USE_CUDA)),,-x c++) $(filter-out -pedantic,$(MFEM_CXXFLAGS)) $(MFEM_INCFLAGS) $(app_INCLUDES) \
+	  -DMFEM_CONFIG_FILE=\"_config-$(METHOD).hpp\" -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+
 gtest%.$(no-method-obj-suffix) : gtest%.cc | $$(prebuild)
 	@echo "Compiling C++ "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
