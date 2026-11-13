@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "EqualValueNodalConstraint.h"
+#include "MooseMesh.h"
 
 registerMooseObject("MooseTestApp", EqualValueNodalConstraint);
 
@@ -24,8 +25,33 @@ EqualValueNodalConstraint::validParams()
 EqualValueNodalConstraint::EqualValueNodalConstraint(const InputParameters & parameters)
   : NodalConstraint(parameters), _penalty(getParam<Real>("penalty"))
 {
-  _connected_nodes.push_back(getParam<unsigned int>("secondary"));
+  updateConstrainedNodes();
+}
+
+void
+EqualValueNodalConstraint::meshChanged()
+{
+  updateConstrainedNodes();
+}
+
+void
+EqualValueNodalConstraint::updateConstrainedNodes()
+{
+  _connected_nodes.clear();
+  _primary_node_vector.clear();
+
+  // Only the process that owns the secondary node assembles for it.
+  const auto secondary_node_id = getParam<unsigned int>("secondary");
+  const Node * const secondary_node = _mesh.getMesh().query_node_ptr(secondary_node_id);
+  if (secondary_node && secondary_node->processor_id() == _subproblem.processor_id())
+    _connected_nodes.push_back(secondary_node_id);
+
+  // Every process keeps the primary node, since the processes owning secondary nodes need its
+  // value. ghostConnectedElems() retains an element connected to it so it stays available on a
+  // distributed mesh.
   _primary_node_vector.push_back(getParam<unsigned int>("primary"));
+
+  ghostConnectedElems(_primary_node_vector);
 }
 
 EqualValueNodalConstraint::~EqualValueNodalConstraint() {}
