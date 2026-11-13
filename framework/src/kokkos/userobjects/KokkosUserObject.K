@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosUserObject.h"
-#include "KokkosConfiguration.h"
+#include "KokkosDeformation.h"
 
 namespace Moose::Kokkos
 {
@@ -17,7 +17,7 @@ InputParameters
 UserObject::validParams()
 {
   InputParameters params = ::UserObjectBase::validParams();
-  addConfigurationParams(params);
+  addDeformationParams(params);
 
   params.registerSystemAttributeName("KokkosUserObject");
 

@@ -13,7 +13,7 @@
 #include "KokkosAssembly.h"
 #include "KokkosFESystem.h"
 #include "KokkosVariable.h"
-#include "KokkosConfiguration.h"
+#include "KokkosDeformation.h"
 #include "KokkosDenseADReal.h"
 
 namespace Moose::Kokkos
@@ -260,7 +260,7 @@ public:
         const unsigned int side,
         const Assembly & assembly,
         const Array<FESystem> & systems,
-        const Configuration & configuration);
+        const Deformation & deformation);
   /**
    * Constructor for element and side data of a loop compiled for one configuration. The
    * instantiation on the reference configuration compiles out the composition of the deformation
@@ -277,11 +277,11 @@ public:
                         const unsigned int side,
                         const Assembly & assembly,
                         const Array<FESystem> & systems,
-                        const Configuration & configuration,
+                        const Deformation & deformation,
                         std::bool_constant<displaced>)
-    : Datum(elem, side, assembly, systems, configuration, displaced)
+    : Datum(elem, side, assembly, systems, deformation, displaced)
   {
-    KOKKOS_ASSERT(displaced == configuration.displaced());
+    KOKKOS_ASSERT(displaced == deformation.displaced());
   }
 
   /**
@@ -295,7 +295,7 @@ public:
   Datum(const ContiguousNodeID node,
         const Assembly & assembly,
         const Array<FESystem> & systems,
-        const Configuration & configuration);
+        const Deformation & deformation);
 
   /**
    * Get the Kokkos assembly
@@ -361,10 +361,10 @@ public:
   KOKKOS_FUNCTION bool isNodalDefined(const Variable & var) const;
 
   /**
-   * Get the configuration on which the geometry is posed
-   * @returns The configuration
+   * Get the deformation that poses the geometry
+   * @returns The deformation
    */
-  KOKKOS_FUNCTION const Configuration & configuration() const { return _configuration; }
+  KOKKOS_FUNCTION const Deformation & deformation() const { return _deformation; }
   /**
    * Get whether the geometry is posed on the current configuration
    * @returns Whether the geometry is posed on the current configuration
@@ -545,7 +545,7 @@ protected:
         const unsigned int side,
         const Assembly & assembly,
         const Array<FESystem> & systems,
-        const Configuration & configuration,
+        const Deformation & deformation,
         const bool displaced);
 
   /**
@@ -596,9 +596,9 @@ protected:
   const dof_id_type _elem_property_idx = libMesh::DofObject::invalid_id;
 
   /**
-   * Configuration on which the geometry is posed
+   * Deformation that poses the geometry
    */
-  const Configuration & _configuration;
+  const Deformation & _deformation;
 
 private:
   /**
@@ -669,8 +669,8 @@ KOKKOS_FUNCTION inline Datum::Datum(const ContiguousElementID elem,
                                     const unsigned int side,
                                     const Assembly & assembly,
                                     const Array<FESystem> & systems,
-                                    const Configuration & configuration)
-  : Datum(elem, side, assembly, systems, configuration, configuration.displaced())
+                                    const Deformation & deformation)
+  : Datum(elem, side, assembly, systems, deformation, deformation.displaced())
 {
 }
 
@@ -678,7 +678,7 @@ KOKKOS_FUNCTION inline Datum::Datum(const ContiguousElementID elem,
                                     const unsigned int side,
                                     const Assembly & assembly,
                                     const Array<FESystem> & systems,
-                                    const Configuration & configuration,
+                                    const Deformation & deformation,
                                     const bool displaced)
   : MeshDatum(elem, side, assembly.kokkosMesh()),
     _assembly(assembly),
@@ -687,7 +687,7 @@ KOKKOS_FUNCTION inline Datum::Datum(const ContiguousElementID elem,
     _qp_offset(!isSide() ? assembly.getQpOffset(_elem) : assembly.getQpFaceOffset(_elem, side)),
     _elem_property_idx(!isSide() ? _elem.id - _mesh.getStartingContiguousElementID(_elem.subdomain)
                                  : assembly.getElemFacePropertyIndex(_elem, _side)),
-    _configuration(configuration),
+    _deformation(deformation),
     _displaced(displaced)
 {
 }
@@ -695,13 +695,13 @@ KOKKOS_FUNCTION inline Datum::Datum(const ContiguousElementID elem,
 KOKKOS_FUNCTION inline Datum::Datum(const ContiguousNodeID node,
                                     const Assembly & assembly,
                                     const Array<FESystem> & systems,
-                                    const Configuration & configuration)
+                                    const Deformation & deformation)
   : MeshDatum(libMesh::DofObject::invalid_id, libMesh::invalid_uint, assembly.kokkosMesh()),
     _assembly(assembly),
     _systems(systems),
     _node(node),
-    _configuration(configuration),
-    _displaced(configuration.displaced())
+    _deformation(deformation),
+    _displaced(deformation.displaced())
 {
 }
 
@@ -771,7 +771,7 @@ Datum::q_point(const unsigned int qp)
 
     if (_displaced)
     {
-      const auto & disp = _configuration.displacements();
+      const auto & disp = _deformation.displacements();
 
       for (unsigned int c = 0; c < disp.components(); ++c)
       {
@@ -959,7 +959,7 @@ Datum::reinitTransform(const unsigned int qp)
   {
     // Compose the deformation gradient F = I + grad_X u, evaluated from the reference map, into
     // the map of the reference element to the current configuration
-    const auto & disp = _configuration.displacements();
+    const auto & disp = _deformation.displacements();
     const auto X = _xyz;
 
     Real33 F;
@@ -1074,10 +1074,10 @@ public:
                 const Array<FESystem> & systems,
                 const Variable & ivar,
                 const unsigned int jvar,
-                const Configuration & configuration,
+                const Deformation & deformation,
                 const unsigned int comp = 0)
     : AssemblyDatum(
-          elem, side, assembly, systems, ivar, jvar, configuration, configuration.displaced(), comp)
+          elem, side, assembly, systems, ivar, jvar, deformation, deformation.displaced(), comp)
   {
   }
   /**
@@ -1101,12 +1101,12 @@ public:
                                 const Array<FESystem> & systems,
                                 const Variable & ivar,
                                 const unsigned int jvar,
-                                const Configuration & configuration,
+                                const Deformation & deformation,
                                 std::bool_constant<displaced>,
                                 const unsigned int comp = 0)
-    : AssemblyDatum(elem, side, assembly, systems, ivar, jvar, configuration, displaced, comp)
+    : AssemblyDatum(elem, side, assembly, systems, ivar, jvar, deformation, displaced, comp)
   {
-    KOKKOS_ASSERT(displaced == configuration.displaced());
+    KOKKOS_ASSERT(displaced == deformation.displaced());
   }
   /**
    * Constructor for node data
@@ -1124,9 +1124,9 @@ public:
                 const Array<FESystem> & systems,
                 const Variable & ivar,
                 const unsigned int jvar,
-                const Configuration & configuration,
+                const Deformation & deformation,
                 const unsigned int comp = 0)
-    : Datum(node, assembly, systems, configuration),
+    : Datum(node, assembly, systems, deformation),
       _tag(ivar.tag()),
       _sys(ivar.sys(comp)),
       _ivar(ivar.var(comp)),
@@ -1232,10 +1232,10 @@ protected:
                 const Array<FESystem> & systems,
                 const Variable & ivar,
                 const unsigned int jvar,
-                const Configuration & configuration,
+                const Deformation & deformation,
                 const bool displaced,
                 const unsigned int comp)
-    : Datum(elem, side, assembly, systems, configuration, displaced),
+    : Datum(elem, side, assembly, systems, deformation, displaced),
       _tag(ivar.tag()),
       _sys(ivar.sys(comp)),
       _ivar(ivar.var(comp)),

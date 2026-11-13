@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosMaterialBase.h"
-#include "KokkosConfiguration.h"
+#include "KokkosDeformation.h"
 
 #include "FEProblemBase.h"
 
@@ -28,7 +28,7 @@ MaterialBase::validParams()
       "element/face or subdomain, respectively. Material properties will be only stored for each "
       "element/face or subdomain accordingly. The 'qp' argument wlll be ignored.");
 
-  addConfigurationParams(params);
+  addDeformationParams(params);
   params.suppressParameter<bool>("compute");
   params.suppressParameter<std::vector<OutputName>>("outputs");
   params.suppressParameter<std::vector<std::string>>("output_properties");

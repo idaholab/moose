@@ -14,7 +14,7 @@
 #include "KokkosVariableValue.h"
 #include "KokkosADAssembly.h"
 #include "KokkosMaterialPropertyValue.h"
-#include "KokkosConfiguration.h"
+#include "KokkosDeformation.h"
 #include "KokkosPrecomputeHooks.h"
 
 #include "MooseVariableBase.h"
@@ -79,13 +79,13 @@ public:
   };
   ///@}
   /**
-   * Kokkos function tag of a loop of a precompute or AD object compiled for one configuration.
-   * The reference instantiation compiles out the displaced geometry of its Datum.
+   * Kokkos function tag of a loop of a precompute or AD object compiled for one deformation.
+   * The identity instantiation compiles out the displaced geometry of its Datum.
    * @tparam Loop The function tag of the loop
    * @tparam displaced Whether the loop runs on the current configuration
    */
   template <typename Loop, bool displaced>
-  struct ConfigurationLoop
+  struct DeformationLoop
   {
   };
 
@@ -111,9 +111,9 @@ protected:
    */
   Variable _kokkos_var;
   /**
-   * Configuration on which the weak form is posed
+   * Deformation that poses the weak form
    */
-  Configuration _configuration;
+  Deformation _deformation;
   /**
    * Kokkos thread object
    */
@@ -335,22 +335,22 @@ protected:
   void dispatchDisplacementJacobian(ThreadID league_size, bool vector);
 
   /**
-   * Build the dispatcher of a loop of a precompute or AD object compiled for its configuration
+   * Build the dispatcher of a loop of a precompute or AD object compiled for its deformation
    * @tparam Loop The function tag of the loop
    * @param object The pointer to the functor of the final derived type
    * @returns The dispatcher
    */
   template <typename Loop>
-  std::unique_ptr<DispatcherBase> buildConfigurationDispatcher(const void * object) const;
+  std::unique_ptr<DispatcherBase> buildDeformationDispatcher(const void * object) const;
   /**
    * Get whether a precompute object defines the hooks that a loop assembles
    * @tparam Loop The function tag of the loop
    * @returns Whether the object defines the hooks
    */
   template <typename Loop>
-  bool hasConfigurationUserMethod() const
+  bool hasDeformationUserMethod() const
   {
-    return DispatcherRegistry::hasUserMethod<ConfigurationLoop<Loop, false>>(type());
+    return DispatcherRegistry::hasUserMethod<DeformationLoop<Loop, false>>(type());
   }
 
 private:
@@ -565,11 +565,11 @@ ResidualObject::accumulateTaggedVectorNodalMatrix(const bool add,
 
 template <typename Loop>
 std::unique_ptr<DispatcherBase>
-ResidualObject::buildConfigurationDispatcher(const void * object) const
+ResidualObject::buildDeformationDispatcher(const void * object) const
 {
-  return _configuration.displaced()
-             ? DispatcherRegistry::build<ConfigurationLoop<Loop, true>>(object, type())
-             : DispatcherRegistry::build<ConfigurationLoop<Loop, false>>(object, type());
+  return _deformation.displaced()
+             ? DispatcherRegistry::build<DeformationLoop<Loop, true>>(object, type())
+             : DispatcherRegistry::build<DeformationLoop<Loop, false>>(object, type());
 }
 
 template <typename function>

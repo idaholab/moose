@@ -27,7 +27,7 @@ ReducerBase::ReducerBase(const ReducerBase & reducer)
     AssemblyHolder(reducer),
     FESystemHolder(reducer),
     _reducer_object(reducer._reducer_object),
-    _configuration(reducer._configuration)
+    _deformation(reducer._deformation)
 {
 }
 

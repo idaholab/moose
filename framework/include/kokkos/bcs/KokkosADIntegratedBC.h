@@ -83,8 +83,8 @@ public:
    */
   template <typename Derived, bool displaced>
   KOKKOS_FUNCTION void
-  operator()(ConfigurationLoop<ResidualAndJacobianLoop, displaced>,
-             const TeamMember<ConfigurationLoop<ResidualAndJacobianLoop, displaced>> & team,
+  operator()(DeformationLoop<ResidualAndJacobianLoop, displaced>,
+             const TeamMember<DeformationLoop<ResidualAndJacobianLoop, displaced>> & team,
              const Derived & bc) const;
   /**
    * The team operation called by Kokkos for each team of boundary sides when the Jacobian is
@@ -92,8 +92,8 @@ public:
    */
   template <typename Derived, bool displaced>
   KOKKOS_FUNCTION void
-  operator()(ConfigurationLoop<DisplacementSeededLoop, displaced>,
-             const TeamMember<ConfigurationLoop<DisplacementSeededLoop, displaced>> & team,
+  operator()(DeformationLoop<DisplacementSeededLoop, displaced>,
+             const TeamMember<DeformationLoop<DisplacementSeededLoop, displaced>> & team,
              const Derived & bc) const;
   /**
    * The team operation called by Kokkos for each team of boundary sides when only the residual is
@@ -101,8 +101,8 @@ public:
    */
   template <typename Derived, bool displaced>
   KOKKOS_FUNCTION void
-  operator()(ConfigurationLoop<ResidualLoop, displaced>,
-             const TeamMember<ConfigurationLoop<ResidualLoop, displaced>> & team,
+  operator()(DeformationLoop<ResidualLoop, displaced>,
+             const TeamMember<DeformationLoop<ResidualLoop, displaced>> & team,
              const Derived & bc) const;
 
   /**
@@ -224,8 +224,8 @@ ADIntegratedBC::getKokkosADMaterialProperty(const std::string & name)
 template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
 ADIntegratedBC::operator()(
-    ConfigurationLoop<ResidualAndJacobianLoop, displaced>,
-    const TeamMember<ConfigurationLoop<ResidualAndJacobianLoop, displaced>> & team,
+    DeformationLoop<ResidualAndJacobianLoop, displaced>,
+    const TeamMember<DeformationLoop<ResidualAndJacobianLoop, displaced>> & team,
     const Derived & bc) const
 {
   const ADTeamGroup group(team, _ad_layout, numKokkosBoundarySides());
@@ -239,7 +239,7 @@ ADIntegratedBC::operator()(
                               kokkosSystems(),
                               _kokkos_var,
                               _kokkos_var.var(),
-                              _configuration,
+                              _deformation,
                               std::bool_constant<displaced>{});
 
   assembleADTerms<Derived::max_ad_slots, false>(
@@ -249,8 +249,8 @@ ADIntegratedBC::operator()(
 template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
 ADIntegratedBC::operator()(
-    ConfigurationLoop<DisplacementSeededLoop, displaced>,
-    const TeamMember<ConfigurationLoop<DisplacementSeededLoop, displaced>> & team,
+    DeformationLoop<DisplacementSeededLoop, displaced>,
+    const TeamMember<DeformationLoop<DisplacementSeededLoop, displaced>> & team,
     const Derived & bc) const
 {
   const ADTeamGroup group(team, _ad_layout, numKokkosBoundarySides());
@@ -267,7 +267,7 @@ ADIntegratedBC::operator()(
                               kokkosSystems(),
                               _kokkos_var,
                               _kokkos_var.var(),
-                              _configuration,
+                              _deformation,
                               std::bool_constant<displaced>{});
 
   assembleADTerms<slots, true>(
@@ -276,8 +276,8 @@ ADIntegratedBC::operator()(
 
 template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-ADIntegratedBC::operator()(ConfigurationLoop<ResidualLoop, displaced>,
-                           const TeamMember<ConfigurationLoop<ResidualLoop, displaced>> & team,
+ADIntegratedBC::operator()(DeformationLoop<ResidualLoop, displaced>,
+                           const TeamMember<DeformationLoop<ResidualLoop, displaced>> & team,
                            const Derived & bc) const
 {
   const ADTeamGroup group(team, _ad_layout, numKokkosBoundarySides());
@@ -291,7 +291,7 @@ ADIntegratedBC::operator()(ConfigurationLoop<ResidualLoop, displaced>,
                               kokkosSystems(),
                               _kokkos_var,
                               _kokkos_var.var(),
-                              _configuration,
+                              _deformation,
                               std::bool_constant<displaced>{});
 
   assembleADTerms<0, false>(bc, team, group, datum, _ad_slots, true, false);

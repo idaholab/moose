@@ -238,7 +238,7 @@ ADMaterial::computeADProperties(const ContiguousElementID elem,
     chain_ptr = &chain;
 
   ADMaterialDatum<slots> ad_datum(
-      _ad_slots, chain_ptr, elem, side, kokkosAssembly(), kokkosSystems(), _configuration);
+      _ad_slots, chain_ptr, elem, side, kokkosAssembly(), kokkosSystems(), _deformation);
 
   const unsigned int num_qps =
       _constant_option == PropertyConstantOption::NONE ? ad_datum.n_qps() : 1;

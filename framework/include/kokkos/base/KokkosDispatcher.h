@@ -600,10 +600,10 @@ namespace Moose::Kokkos
  */
 template <typename Loop, typename Object>
 void
-registerConfigurationDispatchers(const std::string & objectname, const bool has_user_method)
+registerDeformationDispatchers(const std::string & objectname, const bool has_user_method)
 {
-  using Reference = typename Object::template ConfigurationLoop<Loop, false>;
-  using Displaced = typename Object::template ConfigurationLoop<Loop, true>;
+  using Reference = typename Object::template DeformationLoop<Loop, false>;
+  using Displaced = typename Object::template DeformationLoop<Loop, true>;
 
   DispatcherRegistry::addDispatcher<Reference, Object>(objectname);
   DispatcherRegistry::addDispatcher<Displaced, Object>(objectname);
@@ -626,10 +626,10 @@ registerResidualObjectDispatchers(const std::string & objectname)
                   "KokkosPrecomputeHookTraits.h.");
 
     // Precompute objects compile each loop once per configuration
-    registerConfigurationDispatchers<typename Object::ResidualLoop, Object>(objectname, true);
-    registerConfigurationDispatchers<typename Object::JacobianLoop, Object>(
+    registerDeformationDispatchers<typename Object::ResidualLoop, Object>(objectname, true);
+    registerDeformationDispatchers<typename Object::JacobianLoop, Object>(
         objectname, has_jacobian_hook<Object>);
-    registerConfigurationDispatchers<typename Object::OffDiagJacobianLoop, Object>(
+    registerDeformationDispatchers<typename Object::OffDiagJacobianLoop, Object>(
         objectname, has_offdiag_jacobian_hook<Object>);
 
     DispatcherRegistry::addTeamDispatcher<typename Object::DisplacementJacobianLoop, Object>(
@@ -650,7 +650,7 @@ registerResidualObjectDispatchers(const std::string & objectname)
   }
 
   if constexpr (Object::supports_scalar_jacobian)
-    registerConfigurationDispatchers<typename Object::OffDiagJacobianScalarLoop, Object>(
+    registerDeformationDispatchers<typename Object::OffDiagJacobianScalarLoop, Object>(
         objectname, has_offdiag_jacobian_scalar_hook<Object>);
 }
 
@@ -725,11 +725,11 @@ inline constexpr unsigned int ad_displaced_slots = ADDisplacedSlots<Object>::val
  */
 template <typename Loop, typename Object>
 void
-registerConfigurationTeamDispatchers(const std::string & objectname)
+registerDeformationTeamDispatchers(const std::string & objectname)
 {
-  DispatcherRegistry::addTeamDispatcher<typename Object::template ConfigurationLoop<Loop, false>,
+  DispatcherRegistry::addTeamDispatcher<typename Object::template DeformationLoop<Loop, false>,
                                         Object>(objectname);
-  DispatcherRegistry::addTeamDispatcher<typename Object::template ConfigurationLoop<Loop, true>,
+  DispatcherRegistry::addTeamDispatcher<typename Object::template DeformationLoop<Loop, true>,
                                         Object>(objectname);
 }
 
@@ -747,10 +747,10 @@ registerADResidualObjectDispatchers(const std::string & objectname)
   // seeded. Each loop is compiled once per configuration.
   if constexpr (Object::uses_team_dispatch)
   {
-    registerConfigurationTeamDispatchers<typename Object::ResidualLoop, Object>(objectname);
-    registerConfigurationTeamDispatchers<typename Object::ResidualAndJacobianLoop, Object>(
+    registerDeformationTeamDispatchers<typename Object::ResidualLoop, Object>(objectname);
+    registerDeformationTeamDispatchers<typename Object::ResidualAndJacobianLoop, Object>(
         objectname);
-    registerConfigurationTeamDispatchers<typename Object::DisplacementSeededLoop, Object>(
+    registerDeformationTeamDispatchers<typename Object::DisplacementSeededLoop, Object>(
         objectname);
   }
   else

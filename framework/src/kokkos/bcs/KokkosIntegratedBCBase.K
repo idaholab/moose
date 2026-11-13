@@ -32,7 +32,7 @@ IntegratedBCBase::IntegratedBCBase(const InputParameters & parameters,
     MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
     LocalParallelInterface(this)
 {
-  _configuration = Configuration(*this);
+  _deformation = Deformation(*this);
 }
 
 IntegratedBCBase::IntegratedBCBase(const IntegratedBCBase & object)

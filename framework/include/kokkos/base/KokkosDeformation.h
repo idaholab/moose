@@ -18,7 +18,8 @@ namespace Moose::Kokkos
 {
 
 /**
- * The configuration on which a Kokkos object poses its weak form.
+ * The deformation that maps the reference configuration of a Kokkos object onto the
+ * configuration on which it poses its weak form.
  *
  * Kokkos objects integrate on the reference configuration. An object with use_displaced_mesh =
  * true is posed on the current configuration x = X + u(X) given by the [Mesh] displacements, and
@@ -29,19 +30,19 @@ namespace Moose::Kokkos
  * so that the object sees current-configuration quantities. For an isoparametric displacement
  * field this reproduces the quadrature of the same integrand on a mesh whose nodes are moved by u.
  */
-class Configuration
+class Deformation
 {
 public:
   /**
-   * Default constructor, describing the reference configuration
+   * Default constructor, describing the identity map onto the reference configuration
    */
-  Configuration() = default;
+  Deformation() = default;
   /**
    * Constructor
    * @param object The object, which couples the displacements through the private parameter
    * _displacements when it is posed on the current configuration
    */
-  Configuration(const Coupleable & object);
+  Deformation(const Coupleable & object);
 
   /**
    * Get whether the object is posed on the current configuration
@@ -79,11 +80,11 @@ private:
 };
 
 /**
- * Add the parameters through which an object selects and couples its configuration:
+ * Add the parameters through which an object selects and couples its deformation:
  * use_displaced_mesh, and the private coupled parameter _displacements that the problem fills with
  * the [Mesh] displacements when use_displaced_mesh is true
  * @param params The parameters of the object
  */
-void addConfigurationParams(InputParameters & params);
+void addDeformationParams(InputParameters & params);
 
 } // namespace Moose::Kokkos

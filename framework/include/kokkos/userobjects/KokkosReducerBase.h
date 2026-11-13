@@ -11,7 +11,7 @@
 
 #include "KokkosHeader.h"
 #include "KokkosDatum.h"
-#include "KokkosConfiguration.h"
+#include "KokkosDeformation.h"
 #include "KokkosDispatcher.h"
 #include "KokkosFESystem.h"
 
@@ -97,9 +97,9 @@ protected:
    */
   const MooseObject * _reducer_object;
   /**
-   * Configuration on which the object is posed
+   * Deformation that poses the object
    */
-  Configuration _configuration;
+  Deformation _deformation;
   /**
    * Kokkos functor dispatcher
    */

@@ -61,7 +61,7 @@ NodalReducer::operator()(ReducerLoop,
 {
   auto node = _bnd ? kokkosBoundaryNodeID(tid) : kokkosBlockNodeID(tid);
 
-  Datum datum(node, kokkosAssembly(), kokkosSystems(), _configuration);
+  Datum datum(node, kokkosAssembly(), kokkosSystems(), _deformation);
 
   reducer.template reduce<Derived>(datum, result);
 }

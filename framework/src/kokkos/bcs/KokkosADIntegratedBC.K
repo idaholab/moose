@@ -35,7 +35,7 @@ ADIntegratedBC::initialSetup()
                    _kokkos_var,
                    _max_ad_slots,
                    DispatcherRegistry::getProperty("max_ad_displaced_slots", type()),
-                   _configuration.displacements(),
+                   _deformation.displacements(),
                    kokkosMesh());
   _ad_slots = _ad_setup.table();
 }
@@ -77,7 +77,7 @@ ADIntegratedBC::dispatch()
   if (!_computing_jacobian)
   {
     if (!_residual_dispatcher)
-      _residual_dispatcher = buildConfigurationDispatcher<ResidualLoop>(this);
+      _residual_dispatcher = buildDeformationDispatcher<ResidualLoop>(this);
 
     dispatchADTeams(*_residual_dispatcher, n_items, max_qps, 0, _ad_slots);
   }
@@ -87,7 +87,7 @@ ADIntegratedBC::dispatch()
   else if (_ad_slots.hasDisplacements())
   {
     if (!_displacement_seeded_dispatcher)
-      _displacement_seeded_dispatcher = buildConfigurationDispatcher<DisplacementSeededLoop>(this);
+      _displacement_seeded_dispatcher = buildDeformationDispatcher<DisplacementSeededLoop>(this);
 
     dispatchADTeams(*_displacement_seeded_dispatcher,
                     n_items,
@@ -99,7 +99,7 @@ ADIntegratedBC::dispatch()
   {
     if (!_residual_and_jacobian_dispatcher)
       _residual_and_jacobian_dispatcher =
-          buildConfigurationDispatcher<ResidualAndJacobianLoop>(this);
+          buildDeformationDispatcher<ResidualAndJacobianLoop>(this);
 
     dispatchADTeams(*_residual_and_jacobian_dispatcher, n_items, max_qps, _max_ad_slots, _ad_slots);
   }

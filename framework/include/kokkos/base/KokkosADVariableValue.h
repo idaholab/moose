@@ -487,7 +487,7 @@ ADDatumBase<Base, slots>::chainDerivatives(const unsigned int qp,
   if constexpr (slots > 0)
   {
     const auto displaced = this->displaced();
-    const auto & disp = this->_configuration.displacements();
+    const auto & disp = this->_deformation.displacements();
     const auto & F_inv = this->F_inv(qp);
 
     // F^{-1} applied to the derivatives with respect to the gradient of the current accessor. Its
@@ -584,7 +584,7 @@ ADDatumBase<Base, slots>::geometryDerivatives(const unsigned int qp,
   if (!this->displaced())
     return;
 
-  const auto & disp = this->_configuration.displacements();
+  const auto & disp = this->_deformation.displacements();
   const auto & F_inv = this->F_inv(qp);
   const auto & dxi_dx = this->dxi_dx(qp);
   const auto & grad_log_coord = this->grad_log_coord(qp);

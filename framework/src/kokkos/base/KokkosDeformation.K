@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "KokkosConfiguration.h"
+#include "KokkosDeformation.h"
 #include "KokkosVariableValue.h"
 
 #include "Coupleable.h"
@@ -17,7 +17,7 @@ namespace Moose::Kokkos
 {
 
 void
-addConfigurationParams(InputParameters & params)
+addDeformationParams(InputParameters & params)
 {
   const std::string doc = "Whether the object is posed on the current configuration given by the "
                           "displacements of the [Mesh] block. Kokkos objects integrate on the "
@@ -39,7 +39,7 @@ addConfigurationParams(InputParameters & params)
   params.suppressParameter<std::vector<VariableName>>("_displacements");
 }
 
-Configuration::Configuration(const Coupleable & object)
+Deformation::Deformation(const Coupleable & object)
   : _displacements(
         object.kokkosCoupledVectorTagValuesByName("_displacements", Moose::SOLUTION_TAG).variable())
 {

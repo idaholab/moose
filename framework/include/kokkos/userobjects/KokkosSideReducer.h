@@ -47,7 +47,7 @@ SideReducer::operator()(ReducerLoop,
 {
   auto [elem, side] = kokkosBoundaryElementSideID(tid);
 
-  Datum datum(elem, side, kokkosAssembly(), kokkosSystems(), _configuration);
+  Datum datum(elem, side, kokkosAssembly(), kokkosSystems(), _deformation);
 
   reducer.template reduce<Derived>(datum, result);
 }

@@ -52,15 +52,15 @@ public:
    */
   ///@{
   template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(ConfigurationLoop<ResidualLoop, displaced>,
+  KOKKOS_FUNCTION void operator()(DeformationLoop<ResidualLoop, displaced>,
                                   const ThreadID tid,
                                   const Derived & bc) const;
   template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(ConfigurationLoop<JacobianLoop, displaced>,
+  KOKKOS_FUNCTION void operator()(DeformationLoop<JacobianLoop, displaced>,
                                   const ThreadID tid,
                                   const Derived & bc) const;
   template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>,
+  KOKKOS_FUNCTION void operator()(DeformationLoop<OffDiagJacobianLoop, displaced>,
                                   const ThreadID tid,
                                   const Derived & bc) const;
   /**
@@ -116,7 +116,7 @@ protected:
 
 template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-VectorIntegratedBC::operator()(ConfigurationLoop<ResidualLoop, displaced>,
+VectorIntegratedBC::operator()(DeformationLoop<ResidualLoop, displaced>,
                                const ThreadID tid,
                                const Derived & bc) const
 {
@@ -128,7 +128,7 @@ VectorIntegratedBC::operator()(ConfigurationLoop<ResidualLoop, displaced>,
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration,
+                      _deformation,
                       std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
@@ -138,7 +138,7 @@ VectorIntegratedBC::operator()(ConfigurationLoop<ResidualLoop, displaced>,
 
 template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-VectorIntegratedBC::operator()(ConfigurationLoop<JacobianLoop, displaced>,
+VectorIntegratedBC::operator()(DeformationLoop<JacobianLoop, displaced>,
                                const ThreadID tid,
                                const Derived & bc) const
 {
@@ -150,7 +150,7 @@ VectorIntegratedBC::operator()(ConfigurationLoop<JacobianLoop, displaced>,
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration,
+                      _deformation,
                       std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
@@ -160,7 +160,7 @@ VectorIntegratedBC::operator()(ConfigurationLoop<JacobianLoop, displaced>,
 
 template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-VectorIntegratedBC::operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>,
+VectorIntegratedBC::operator()(DeformationLoop<OffDiagJacobianLoop, displaced>,
                                const ThreadID tid,
                                const Derived & bc) const
 {
@@ -178,7 +178,7 @@ VectorIntegratedBC::operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>
                       kokkosSystems(),
                       _kokkos_var,
                       jvar,
-                      _configuration,
+                      _deformation,
                       std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
@@ -215,7 +215,7 @@ VectorIntegratedBC::operator()(DisplacementJacobianLoop,
 {
   auto [elem, side] = kokkosBoundaryElementSideID(team.league_rank());
 
-  const auto & disp = _configuration.displacements();
+  const auto & disp = _deformation.displacements();
   const auto c = _displacement_component;
   const auto jvar = disp.var(c);
 
@@ -229,7 +229,7 @@ VectorIntegratedBC::operator()(DisplacementJacobianLoop,
                       kokkosSystems(),
                       _kokkos_var,
                       jvar,
-                      _configuration,
+                      _deformation,
                       std::true_type{});
 
   const auto scaling_factor =

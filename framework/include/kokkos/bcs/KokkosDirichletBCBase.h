@@ -105,7 +105,7 @@ DirichletBCBaseTempl<is_ad>::operator()(PresetLoop, const ThreadID tid, const De
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      this->_configuration);
+                      this->_deformation);
 
   sys.getVectorDofValue(dof, _solution_tag) =
       denseADValue(bc.template computeValue<Derived>(0, datum));

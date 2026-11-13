@@ -107,7 +107,7 @@ ADNodalBC::operator()(ResidualLoop, const ThreadID tid, const Derived & bc) cons
                                                 kokkosSystems(),
                                                 _kokkos_var,
                                                 _kokkos_var.var(),
-                                                _configuration);
+                                                _deformation);
 
   const auto local_re = bc.template computeQpResidual<Derived>(0, datum);
 

@@ -19,7 +19,7 @@ ResidualObject::validParams()
 {
   auto params = ::ResidualObject::validParams();
 
-  addConfigurationParams(params);
+  addDeformationParams(params);
 
   params.addPrivateParam<bool>(MooseBase::kokkos_object_param, true);
 
@@ -57,7 +57,7 @@ ResidualObject::ResidualObject(const ResidualObject & object)
     FESystemHolder(object),
     _var(object._var),
     _kokkos_var(object._kokkos_var),
-    _configuration(object._configuration),
+    _deformation(object._deformation),
     _thread(object._thread),
     _dimension(object._dimension),
     _t(object._t),
@@ -175,7 +175,7 @@ ResidualObject::dispatchDisplacementJacobian(const ThreadID league_size, const b
   auto & ivar = const_cast<Variable &>(_kokkos_var);
   const auto & problem = ivar.mooseVar()->sys().feProblem();
   const auto residual_sys = _kokkos_var.sys();
-  const auto & disp = _configuration.displacements();
+  const auto & disp = _deformation.displacements();
 
   for (const auto c : make_range(disp.components()))
   {

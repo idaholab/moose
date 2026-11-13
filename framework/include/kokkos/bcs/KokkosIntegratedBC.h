@@ -60,15 +60,15 @@ public:
    */
   ///@{
   template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(ConfigurationLoop<ResidualLoop, displaced>,
+  KOKKOS_FUNCTION void operator()(DeformationLoop<ResidualLoop, displaced>,
                                   const ThreadID tid,
                                   const Derived & bc) const;
   template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(ConfigurationLoop<JacobianLoop, displaced>,
+  KOKKOS_FUNCTION void operator()(DeformationLoop<JacobianLoop, displaced>,
                                   const ThreadID tid,
                                   const Derived & bc) const;
   template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>,
+  KOKKOS_FUNCTION void operator()(DeformationLoop<OffDiagJacobianLoop, displaced>,
                                   const ThreadID tid,
                                   const Derived & bc) const;
   /**
@@ -80,7 +80,7 @@ public:
                                   const TeamMember<DisplacementJacobianLoop> & team,
                                   const Derived & bc) const;
   template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(ConfigurationLoop<OffDiagJacobianScalarLoop, displaced>,
+  KOKKOS_FUNCTION void operator()(DeformationLoop<OffDiagJacobianScalarLoop, displaced>,
                                   const ThreadID tid,
                                   const Derived & bc) const;
   ///@}
@@ -151,7 +151,7 @@ protected:
 
 template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-IntegratedBC::operator()(ConfigurationLoop<ResidualLoop, displaced>,
+IntegratedBC::operator()(DeformationLoop<ResidualLoop, displaced>,
                          const ThreadID tid,
                          const Derived & bc) const
 {
@@ -163,7 +163,7 @@ IntegratedBC::operator()(ConfigurationLoop<ResidualLoop, displaced>,
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration,
+                      _deformation,
                       std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
@@ -173,7 +173,7 @@ IntegratedBC::operator()(ConfigurationLoop<ResidualLoop, displaced>,
 
 template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-IntegratedBC::operator()(ConfigurationLoop<JacobianLoop, displaced>,
+IntegratedBC::operator()(DeformationLoop<JacobianLoop, displaced>,
                          const ThreadID tid,
                          const Derived & bc) const
 {
@@ -185,7 +185,7 @@ IntegratedBC::operator()(ConfigurationLoop<JacobianLoop, displaced>,
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration,
+                      _deformation,
                       std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
@@ -195,7 +195,7 @@ IntegratedBC::operator()(ConfigurationLoop<JacobianLoop, displaced>,
 
 template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-IntegratedBC::operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>,
+IntegratedBC::operator()(DeformationLoop<OffDiagJacobianLoop, displaced>,
                          const ThreadID tid,
                          const Derived & bc) const
 {
@@ -213,7 +213,7 @@ IntegratedBC::operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>,
                       kokkosSystems(),
                       _kokkos_var,
                       jvar,
-                      _configuration,
+                      _deformation,
                       std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
@@ -223,7 +223,7 @@ IntegratedBC::operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>,
 
 template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-IntegratedBC::operator()(ConfigurationLoop<OffDiagJacobianScalarLoop, displaced>,
+IntegratedBC::operator()(DeformationLoop<OffDiagJacobianScalarLoop, displaced>,
                          const ThreadID tid,
                          const Derived & bc) const
 {
@@ -241,7 +241,7 @@ IntegratedBC::operator()(ConfigurationLoop<OffDiagJacobianScalarLoop, displaced>
                       kokkosSystems(),
                       _kokkos_var,
                       jvar,
-                      _configuration,
+                      _deformation,
                       std::bool_constant<displaced>{});
 
   bc.computeOffDiagJacobianScalarInternal(bc, datum);
@@ -284,7 +284,7 @@ IntegratedBC::operator()(DisplacementJacobianLoop,
 {
   auto [elem, side] = kokkosBoundaryElementSideID(team.league_rank());
 
-  const auto & disp = _configuration.displacements();
+  const auto & disp = _deformation.displacements();
   const auto c = _displacement_component;
   const auto jvar = disp.var(c);
 
@@ -298,7 +298,7 @@ IntegratedBC::operator()(DisplacementJacobianLoop,
                       kokkosSystems(),
                       _kokkos_var,
                       jvar,
-                      _configuration,
+                      _deformation,
                       std::true_type{});
 
   const auto scaling_factor =

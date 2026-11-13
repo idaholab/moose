@@ -27,7 +27,7 @@ NodalBCBase::NodalBCBase(const InputParameters & parameters, Moose::VarFieldType
   : BoundaryCondition(parameters, field_type, true),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true)
 {
-  _configuration = Configuration(*this);
+  _deformation = Deformation(*this);
 }
 
 NodalBCBase::NodalBCBase(const NodalBCBase & object)

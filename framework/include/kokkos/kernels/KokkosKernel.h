@@ -68,15 +68,15 @@ public:
    */
   ///@{
   template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(ConfigurationLoop<ResidualLoop, displaced>,
+  KOKKOS_FUNCTION void operator()(DeformationLoop<ResidualLoop, displaced>,
                                   const ThreadID tid,
                                   const Derived & kernel) const;
   template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(ConfigurationLoop<JacobianLoop, displaced>,
+  KOKKOS_FUNCTION void operator()(DeformationLoop<JacobianLoop, displaced>,
                                   const ThreadID tid,
                                   const Derived & kernel) const;
   template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>,
+  KOKKOS_FUNCTION void operator()(DeformationLoop<OffDiagJacobianLoop, displaced>,
                                   const ThreadID tid,
                                   const Derived & kernel) const;
   /**
@@ -88,7 +88,7 @@ public:
                                   const TeamMember<DisplacementJacobianLoop> & team,
                                   const Derived & kernel) const;
   template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(ConfigurationLoop<OffDiagJacobianScalarLoop, displaced>,
+  KOKKOS_FUNCTION void operator()(DeformationLoop<OffDiagJacobianScalarLoop, displaced>,
                                   const ThreadID tid,
                                   const Derived & kernel) const;
   ///@}
@@ -159,7 +159,7 @@ protected:
 
 template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-Kernel::operator()(ConfigurationLoop<ResidualLoop, displaced>,
+Kernel::operator()(DeformationLoop<ResidualLoop, displaced>,
                    const ThreadID tid,
                    const Derived & kernel) const
 {
@@ -171,7 +171,7 @@ Kernel::operator()(ConfigurationLoop<ResidualLoop, displaced>,
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration,
+                      _deformation,
                       std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
@@ -181,7 +181,7 @@ Kernel::operator()(ConfigurationLoop<ResidualLoop, displaced>,
 
 template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-Kernel::operator()(ConfigurationLoop<JacobianLoop, displaced>,
+Kernel::operator()(DeformationLoop<JacobianLoop, displaced>,
                    const ThreadID tid,
                    const Derived & kernel) const
 {
@@ -193,7 +193,7 @@ Kernel::operator()(ConfigurationLoop<JacobianLoop, displaced>,
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration,
+                      _deformation,
                       std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
@@ -203,7 +203,7 @@ Kernel::operator()(ConfigurationLoop<JacobianLoop, displaced>,
 
 template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-Kernel::operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>,
+Kernel::operator()(DeformationLoop<OffDiagJacobianLoop, displaced>,
                    const ThreadID tid,
                    const Derived & kernel) const
 {
@@ -221,7 +221,7 @@ Kernel::operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>,
                       kokkosSystems(),
                       _kokkos_var,
                       jvar,
-                      _configuration,
+                      _deformation,
                       std::bool_constant<displaced>{});
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
@@ -231,7 +231,7 @@ Kernel::operator()(ConfigurationLoop<OffDiagJacobianLoop, displaced>,
 
 template <typename Derived, bool displaced>
 KOKKOS_FUNCTION void
-Kernel::operator()(ConfigurationLoop<OffDiagJacobianScalarLoop, displaced>,
+Kernel::operator()(DeformationLoop<OffDiagJacobianScalarLoop, displaced>,
                    const ThreadID tid,
                    const Derived & kernel) const
 {
@@ -249,7 +249,7 @@ Kernel::operator()(ConfigurationLoop<OffDiagJacobianScalarLoop, displaced>,
                       kokkosSystems(),
                       _kokkos_var,
                       jvar,
-                      _configuration,
+                      _deformation,
                       std::bool_constant<displaced>{});
 
   kernel.computeOffDiagJacobianScalarInternal(kernel, datum);
@@ -294,7 +294,7 @@ Kernel::operator()(DisplacementJacobianLoop,
   auto elem = kokkosBlockElementID(team.league_rank());
   const auto side = libMesh::invalid_uint;
 
-  const auto & disp = _configuration.displacements();
+  const auto & disp = _deformation.displacements();
   const auto c = _displacement_component;
   const auto jvar = disp.var(c);
 
@@ -308,7 +308,7 @@ Kernel::operator()(DisplacementJacobianLoop,
                       kokkosSystems(),
                       _kokkos_var,
                       jvar,
-                      _configuration,
+                      _deformation,
                       std::true_type{});
 
   const auto scaling_factor =

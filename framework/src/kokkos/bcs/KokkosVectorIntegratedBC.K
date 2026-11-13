@@ -39,7 +39,7 @@ VectorIntegratedBC::computeResidual()
   Policy policy(0, _thread.size());
 
   if (!_residual_dispatcher)
-    _residual_dispatcher = buildConfigurationDispatcher<ResidualLoop>(this);
+    _residual_dispatcher = buildDeformationDispatcher<ResidualLoop>(this);
 
   _residual_dispatcher->parallelFor(policy);
 }
@@ -47,19 +47,19 @@ VectorIntegratedBC::computeResidual()
 void
 VectorIntegratedBC::computeJacobian()
 {
-  if (hasConfigurationUserMethod<JacobianLoop>())
+  if (hasDeformationUserMethod<JacobianLoop>())
   {
     _thread.resize(_num_local_jacobian_threads, numKokkosBoundarySides());
 
     Policy policy(0, _thread.size());
 
     if (!_jacobian_dispatcher)
-      _jacobian_dispatcher = buildConfigurationDispatcher<JacobianLoop>(this);
+      _jacobian_dispatcher = buildDeformationDispatcher<JacobianLoop>(this);
 
     _jacobian_dispatcher->parallelFor(policy);
   }
 
-  if (hasConfigurationUserMethod<OffDiagJacobianLoop>())
+  if (hasDeformationUserMethod<OffDiagJacobianLoop>())
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
@@ -70,14 +70,14 @@ VectorIntegratedBC::computeJacobian()
     Policy policy(0, _thread.size());
 
     if (!_offdiag_jacobian_dispatcher)
-      _offdiag_jacobian_dispatcher = buildConfigurationDispatcher<OffDiagJacobianLoop>(this);
+      _offdiag_jacobian_dispatcher = buildDeformationDispatcher<OffDiagJacobianLoop>(this);
 
     _offdiag_jacobian_dispatcher->parallelFor(policy);
   }
 
   // An object posed on the current configuration assembles its Jacobian with respect to the
   // displacements from its own hooks
-  if (_configuration.displaced())
+  if (_deformation.displaced())
     dispatchDisplacementJacobian(numKokkosBoundarySides(), true);
 }
 

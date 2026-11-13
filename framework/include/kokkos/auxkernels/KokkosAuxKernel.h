@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "KokkosConfiguration.h"
+#include "KokkosDeformation.h"
 
 #include "KokkosDispatcher.h"
 #include "KokkosVariableValue.h"
@@ -197,9 +197,9 @@ protected:
   ///@}
 
   /**
-   * Configuration of the geometry, which is the reference configuration
+   * Deformation of the geometry, which is the identity
    */
-  const Configuration _configuration;
+  const Deformation _deformation;
 
 private:
   /**
@@ -222,7 +222,7 @@ AuxKernel::operator()(ElementLoop, const ThreadID tid, const Derived & auxkernel
                       kokkosSystems(),
                       _kokkos_var,
                       _kokkos_var.var(),
-                      _configuration);
+                      _deformation);
 
   auxkernel.computeElementInternal(auxkernel, datum);
 }
@@ -238,7 +238,7 @@ AuxKernel::operator()(NodeLoop, const ThreadID tid, const Derived & auxkernel) c
     return;
 
   AssemblyDatum datum(
-      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(), _configuration);
+      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(), _deformation);
 
   auxkernel.computeNodeInternal(auxkernel, datum);
 }

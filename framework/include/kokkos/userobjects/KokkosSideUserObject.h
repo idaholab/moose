@@ -59,7 +59,7 @@ SideUserObject::operator()(DefaultLoop, const ThreadID tid, const Derived & obje
 {
   auto [elem, side] = kokkosBoundaryElementSideID(tid);
 
-  Datum datum(elem, side, kokkosAssembly(), kokkosSystems(), _configuration);
+  Datum datum(elem, side, kokkosAssembly(), kokkosSystems(), _deformation);
 
   object.template execute<Derived>(datum);
 }

@@ -47,7 +47,7 @@ ElementReducer::operator()(ReducerLoop,
 {
   auto elem = kokkosBlockElementID(tid);
 
-  Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems(), _configuration);
+  Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems(), _deformation);
 
   reducer.template reduce<Derived>(datum, result);
 }

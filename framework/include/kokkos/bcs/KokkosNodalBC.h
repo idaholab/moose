@@ -140,7 +140,7 @@ NodalBC::operator()(ResidualLoop, const ThreadID tid, const Derived & bc) const
     return;
 
   AssemblyDatum datum(
-      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(), _configuration);
+      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(), _deformation);
 
   Real local_re = bc.template computeQpResidual<Derived>(0, datum);
 
@@ -158,7 +158,7 @@ NodalBC::operator()(JacobianLoop, const ThreadID tid, const Derived & bc) const
     return;
 
   AssemblyDatum datum(
-      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(), _configuration);
+      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(), _deformation);
 
   Real local_ke = bc.template computeQpJacobian<Derived>(0, datum);
 
@@ -177,7 +177,7 @@ NodalBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc)
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar, _configuration);
+  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar, _deformation);
 
   Real local_ke = bc.template computeQpOffDiagJacobian<Derived>(jvar, 0, datum);
 
