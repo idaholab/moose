@@ -1,12 +1,50 @@
 [Tests]
-  issues = '#27295'
-  design = '1d_elastic_waves.md'
+  issues = '#27295 #33779'
+  design = '1d_elastic_waves.md NaturalFrequencies.md'
   [modal]
     type = Exodiff
     input = 'modal.i'
     exodiff = 'modal_out.e'
     exodiff_opts = '-eigen_relative'
     abs_zero = 1e-10
-    requirement = "The module shall be able to perform modal analysis with the Eigenvalue Executioner."
+    requirement = 'The system shall perform modal analysis of a cantilever beam with the Eigenvalue executioner using a mass term driven by a density material property.'
+  []
+  [bar_consistent]
+    type = CSVDiff
+    capabilities = 'slepc & mumps'
+    input = 'fixed_fixed_bar.i'
+    csvdiff = 'fixed_fixed_bar_out_eigenvalues_0001.csv'
+    requirement = 'The system shall report the angular frequency, the frequency in Hz, and the period of the first three longitudinal modes of a fixed-fixed elastic bar, with the frequencies within one percent of the analytic values.'
+  []
+  [negative_eigenvalue_warning]
+    type = RunApp
+    capabilities = 'slepc & mumps'
+    input = 'fixed_fixed_bar.i'
+    cli_args = 'Problem/negative_sign_eigen_kernel=false Outputs/csv=false'
+    allow_warnings = true
+    expect_out = 'eigenvalue\(s\) have a negative real part'
+    requirement = 'The system shall warn when a natural frequency is requested for an eigenvalue with a negative real part.'
+  []
+  [zero_eigenvalue]
+    type = CSVDiff
+    capabilities = 'slepc & mumps'
+    input = 'fixed_fixed_bar.i'
+    cli_args = "BCs/active='' Executioner/petsc_options_value='sinvert -1e7 lu mumps' VectorPostprocessors/eigenvalues/zero_eigenvalue_tolerance=1e-10 Outputs/file_base=free_free_bar_out"
+    csvdiff = 'free_free_bar_out_eigenvalues_0001.csv'
+    ignore_columns = 'period'
+    override_columns = 'eigen_values_real'
+    # The rigid body eigenvalue is solver noise (about 5e-7 here) beside elastic eigenvalues
+    # above 2e8, so only that column gets a loose zero threshold
+    override_abs_zero = '1e-2'
+    override_rel_err = '5.5e-6'
+    requirement = 'The system shall report a zero frequency, without a warning, for a rigid body mode whose eigenvalue is zero to within a relative tolerance.'
+  []
+  [complex_eigenvalue_warning]
+    type = RunApp
+    capabilities = 'slepc'
+    input = 'advection_diffusion.i'
+    allow_warnings = true
+    expect_out = 'nonzero imaginary part'
+    requirement = 'The system shall warn when a natural frequency is requested for an eigenvalue with a nonzero imaginary part.'
   []
 []
