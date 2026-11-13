@@ -362,6 +362,67 @@
       capabilities = 'libtorch & neml2'
     []
   []
+  [evaluation_domains_exodus]
+    issues = '#32413'
+    collections = 'SYSTEM'
+    requirement = 'The framework shall preserve spatially varying NEML2 outputs in Exodus volume and side fields for visualization and regression comparison when evaluating on '
+    [volume]
+      detail = 'volume only.'
+      type = Exodiff
+      input = 'evaluation_domains_exodus.i'
+      cli_args = "NEML2/domains/boundary= NEML2/domains/interface= AuxKernels/active=volume Outputs/exodus/file_base=evaluation_domains_exodus_volume"
+      exodiff = 'evaluation_domains_exodus_volume.e'
+      capabilities = 'libtorch & neml2'
+    []
+    [boundary]
+      detail = 'external boundaries only.'
+      type = Exodiff
+      input = 'evaluation_domains_exodus.i'
+      cli_args = "NEML2/domains/volume=false NEML2/domains/interface= AuxKernels/active=boundary Outputs/exodus/file_base=evaluation_domains_exodus_boundary"
+      exodiff = 'evaluation_domains_exodus_boundary.e'
+      capabilities = 'libtorch & neml2'
+    []
+    [interface]
+      detail = 'internal interfaces only.'
+      type = Exodiff
+      input = 'evaluation_domains_exodus.i'
+      cli_args = "NEML2/domains/volume=false NEML2/domains/boundary= AuxKernels/active=interface Outputs/exodus/file_base=evaluation_domains_exodus_interface"
+      exodiff = 'evaluation_domains_exodus_interface.e'
+      capabilities = 'libtorch & neml2'
+    []
+    [volume_boundary]
+      detail = 'volume and external boundaries.'
+      type = Exodiff
+      input = 'evaluation_domains_exodus.i'
+      cli_args = "NEML2/domains/interface= AuxKernels/active='volume boundary' Outputs/exodus/file_base=evaluation_domains_exodus_volume_boundary"
+      exodiff = 'evaluation_domains_exodus_volume_boundary.e'
+      capabilities = 'libtorch & neml2'
+    []
+    [volume_interface]
+      detail = 'volume and internal interfaces.'
+      type = Exodiff
+      input = 'evaluation_domains_exodus.i'
+      cli_args = "NEML2/domains/boundary= AuxKernels/active='volume interface' Outputs/exodus/file_base=evaluation_domains_exodus_volume_interface"
+      exodiff = 'evaluation_domains_exodus_volume_interface.e'
+      capabilities = 'libtorch & neml2'
+    []
+    [boundary_interface]
+      detail = 'external boundaries and internal interfaces.'
+      type = Exodiff
+      input = 'evaluation_domains_exodus.i'
+      cli_args = "NEML2/domains/volume=false AuxKernels/active='boundary interface' Outputs/exodus/file_base=evaluation_domains_exodus_boundary_interface"
+      exodiff = 'evaluation_domains_exodus_boundary_interface.e'
+      capabilities = 'libtorch & neml2'
+    []
+    [volume_boundary_interface]
+      detail = 'volume, external boundaries, and internal interfaces together.'
+      type = Exodiff
+      input = 'evaluation_domains_exodus.i'
+      cli_args = "AuxKernels/active='volume boundary interface' Outputs/exodus/file_base=evaluation_domains_exodus_volume_boundary_interface"
+      exodiff = 'evaluation_domains_exodus_volume_boundary_interface.e'
+      capabilities = 'libtorch & neml2'
+    []
+  []
   [volume_stateful_internal_side]
     requirement = 'The framework shall permit incidental internal-side reinitialization of a stateful NEML2 material property whose model is evaluated only at volume quadrature points when no side consumer requests that property.'
     type = RunApp

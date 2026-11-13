@@ -1,0 +1,189 @@
+# NEML2 TSL equivalence counterpart of bilinear_mixed.i.
+# The native MOOSE BiLinearMixedModeTraction material is replaced by the
+# NEML2 traction-separation law; everything else (mesh, physics, BCs) is kept.
+boundary = 'Block1_Block2'
+
+[Mesh]
+  use_displaced_mesh = false
+  [msh]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmax = 1
+    ymax = 2
+    nx = 1
+    ny = 2
+  []
+  [block1]
+    type = SubdomainBoundingBoxGenerator
+    input = 'msh'
+    bottom_left = '0 0 0'
+    top_right = '1 1 0'
+    block_id = 1
+    block_name = 'Block1'
+  []
+  [block2]
+    type = SubdomainBoundingBoxGenerator
+    input = 'block1'
+    bottom_left = '0 1 0'
+    top_right = '1 2 0'
+    block_id = 2
+    block_name = 'Block2'
+  []
+  [split]
+    type = BreakMeshByBlockGenerator
+    input = block2
+  []
+  [top_node]
+    type = ExtraNodesetGenerator
+    coord = '0 2 0'
+    input = split
+    new_boundary = top_node
+  []
+  [bottom_node]
+    type = ExtraNodesetGenerator
+    coord = '0 0 0'
+    input = top_node
+    new_boundary = bottom_node
+  []
+[]
+
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
+[Problem]
+  extra_tag_vectors = 'ref'
+[]
+
+[Physics]
+  [SolidMechanics]
+    [QuasiStatic]
+      generate_output = 'cauchy_stress_yy'
+      [all]
+        strain = FINITE
+        add_variables = true
+        new_system = true
+        kinematic_approximation = rashid_eigen
+        extra_vector_tags = 'ref'
+      []
+    []
+  []
+[]
+
+[BCs]
+  [fix_x]
+    type = DirichletBC
+    preset = true
+    value = 0.0
+    boundary = bottom_node
+    variable = disp_x
+  []
+
+  [fix_top]
+    type = DirichletBC
+    preset = true
+    boundary = top
+    variable = disp_x
+    value = 0
+  []
+
+  [top]
+    type = FunctionDirichletBC
+    boundary = top
+    variable = disp_y
+    function = 't'
+    preset = true
+  []
+
+  [bottom]
+    type = DirichletBC
+    boundary = bottom
+    variable = disp_y
+    value = 0
+    preset = true
+  []
+[]
+
+[Physics/SolidMechanics/CohesiveZone]
+  [czm_ik]
+    boundary = ${boundary}
+  []
+[]
+
+[NEML2]
+  input = 'tsl.i'
+  eager = true
+  [interface]
+    model = 'czm'
+    device = 'cpu'
+
+    manage_state_advance = true
+
+    interface = ${boundary}
+    volume = false
+
+    interface_material_inputs = 'interface_displacement_jump'
+
+    derivatives = 'interface_traction interface_displacement_jump dinterface_traction_djump'
+  []
+[]
+
+[Materials]
+  [stress]
+    type = ComputeLagrangianLinearElasticStress
+    objective_rate = rashid
+  []
+  [elasticity_tensor]
+    type = ComputeElasticityTensor
+    fill_method = symmetric9
+    C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
+  []
+[]
+
+[AuxVariables]
+  [react_y]
+  []
+[]
+
+[AuxKernels]
+  [react_y]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_y'
+    variable = 'react_y'
+    remove_variable_scaling = true
+  []
+[]
+
+[Preconditioning]
+  [smp]
+    type = SMP
+    full = true
+  []
+[]
+
+[Executioner]
+  type = Transient
+
+  solve_type = 'NEWTON'
+  line_search = none
+
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+
+  automatic_scaling = true
+
+  l_max_its = 2
+  l_tol = 1e-14
+  nl_max_its = 30
+  nl_rel_tol = 1e-50
+  nl_abs_tol = 1e-15
+  start_time = 0.0
+  dt = 0.1
+  end_time = 1.0
+  dtmin = 0.1
+[]
+
+[Outputs]
+  exodus = true
+[]

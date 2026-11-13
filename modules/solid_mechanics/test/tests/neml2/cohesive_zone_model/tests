@@ -1,0 +1,76 @@
+[Tests]
+  issues = '#33198'
+  design = 'source/materials/cohesive_zone_model/BiLinearMixedModeTraction.md source/neml2/actions/NEML2Action.md'
+  [bilinear_mixed_moose]
+    type = Exodiff
+    input = 'bilinear_mixed_moose.i'
+    exodiff = 'bilinear_mixed_moose_out.e'
+    requirement = 'The system shall compute the reaction-force history of a bi-linear mixed-mode cohesive zone problem using the native MOOSE cohesive traction law.'
+  []
+  [bilinear_mixed_neml2]
+    type = Exodiff
+    input = 'bilinear_mixed_neml2.i'
+    # The gold is a symlink to the native-MOOSE reference output above. The custom
+    # comparison accounts for the known bracket-formulation difference.
+    exodiff = 'bilinear_mixed_neml2_out.e'
+    custom_cmp = 'react_xy.cmp'
+    capabilities = 'libtorch & neml2'
+    requirement = 'The system shall reproduce the reaction-force history of an equivalent cohesive zone problem within the react_xy.cmp tolerances using the NEML2 traction separation law.'
+  []
+  [bilinear_mixed_power_law_moose]
+    type = Exodiff
+    input = 'bilinear_mixed_power_law_moose.i'
+    exodiff = 'bilinear_mixed_power_law_moose_out.e'
+    requirement = 'The system shall compute the reaction-force history under the power-law criterion using the native MOOSE cohesive traction law.'
+  []
+  [bilinear_mixed_power_law_neml2]
+    type = Exodiff
+    input = 'bilinear_mixed_power_law_neml2.i'
+    exodiff = 'bilinear_mixed_power_law_neml2_out.e'
+    custom_cmp = 'react_xy.cmp'
+    capabilities = 'libtorch & neml2'
+    requirement = 'The system shall reproduce the power-law cohesive response within the react_xy.cmp tolerances using the NEML2 traction separation law.'
+  []
+  [bilinear_mixed_small_strain_moose]
+    type = Exodiff
+    input = 'bilinear_mixed_small_strain_moose.i'
+    exodiff = 'bilinear_mixed_small_strain_moose_out.e'
+    requirement = 'The system shall compute the reaction-force history with small-strain CZM using the native MOOSE cohesive traction law.'
+  []
+  [bilinear_mixed_small_strain_neml2]
+    type = Exodiff
+    input = 'bilinear_mixed_small_strain_neml2.i'
+    exodiff = 'bilinear_mixed_small_strain_neml2_out.e'
+    custom_cmp = 'react_y.cmp'
+    capabilities = 'libtorch & neml2'
+    requirement = 'The system shall reproduce the small-strain cohesive response within the react_y.cmp tolerances using the NEML2 traction separation law.'
+  []
+  [bilinear_mixed_mode_I_moose]
+    type = Exodiff
+    input = 'bilinear_mixed_mode_I_moose.i'
+    exodiff = 'bilinear_mixed_mode_I_moose_out.e'
+    requirement = 'The system shall compute the mode-I reaction-force history using the native MOOSE cohesive traction law.'
+  []
+  [bilinear_mixed_mode_I_neml2]
+    type = Exodiff
+    input = 'bilinear_mixed_mode_I_neml2.i'
+    exodiff = 'bilinear_mixed_mode_I_neml2_out.e'
+    custom_cmp = 'react_y.cmp'
+    capabilities = 'libtorch & neml2'
+    requirement = 'The system shall reproduce the mode-I cohesive response within the react_y.cmp tolerances using the NEML2 traction separation law.'
+  []
+  [bilinear_mixed_shear_moose]
+    type = Exodiff
+    input = 'bilinear_mixed_shear_moose.i'
+    exodiff = 'bilinear_mixed_shear_moose_out.e'
+    requirement = 'The system shall compute the shear reaction-force history using the native MOOSE cohesive traction law.'
+  []
+  [bilinear_mixed_shear_neml2]
+    type = Exodiff
+    input = 'bilinear_mixed_shear_neml2.i'
+    exodiff = 'bilinear_mixed_shear_neml2_out.e'
+    custom_cmp = 'react_x.cmp'
+    capabilities = 'libtorch & neml2'
+    requirement = 'The system shall reproduce the shear cohesive response within the react_x.cmp tolerances using the NEML2 traction separation law.'
+  []
+[]
