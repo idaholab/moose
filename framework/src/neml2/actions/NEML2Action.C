@@ -86,11 +86,6 @@ NEML2Action::validParams()
       "boundary", {}, "External boundaries where the material model is evaluated");
   params.addParam<std::vector<BoundaryName>>(
       "interface", {}, "Internal interfaces where the material model is evaluated on both sides");
-  params.addDeprecatedParam<bool>(
-      "interface_only",
-      false,
-      "If true, evaluate only on the internal interfaces listed in 'interface'.",
-      "Use 'volume = false' with 'interface' instead.");
   // Block materials need no hint: the same material is reinit'd as BLOCK/FACE/NEIGHBOR data and the
   // gatherer reads the store for where it is. A true InterfaceMaterial instead lives in the
   // separate INTERFACE_MATERIAL_DATA store, which the native block/face/neighbor selection never
@@ -115,10 +110,9 @@ NEML2Action::NEML2Action(const InputParameters & params)
                             ? getParam<std::string>("batch_index_generator_name")
                             : "neml2_index_" + getParam<std::string>("model") + "_" + name()),
     _block(getParam<std::vector<SubdomainName>>("block")),
-    _volume(getParam<bool>("interface_only") ? false : getParam<bool>("volume")),
+    _volume(getParam<bool>("volume")),
     _boundary(getParam<std::vector<BoundaryName>>("boundary")),
     _interface(getParam<std::vector<BoundaryName>>("interface")),
-    _interface_only(getParam<bool>("interface_only")),
     _interface_material_inputs(
         getParam<std::vector<MaterialPropertyName>>("interface_material_inputs")),
     _skip_input_variables(getParam<std::vector<std::string>>("skip_input_variables"))
@@ -256,15 +250,6 @@ NEML2Action::act()
   const bool is_boundary = !_boundary.empty();
   const bool is_interface = !_interface.empty();
 
-  if (isParamSetByUser("interface_only") &&
-      (isParamSetByUser("volume") || isParamSetByUser("boundary")))
-    paramError("interface_only",
-               "The deprecated 'interface_only' parameter cannot be combined with 'volume' or "
-               "'boundary'. Remove it and use the independent domain selectors instead.");
-  if (_interface_only && !is_interface)
-    paramError("interface_only",
-               "'interface_only' is true, but 'interface' is unset. Use 'volume = false' and list "
-               "the internal sidesets in 'interface'.");
   if (!_volume && !is_boundary && !is_interface)
     paramError("volume",
                "At least one NEML2 evaluation domain must be enabled with 'volume = true', a "

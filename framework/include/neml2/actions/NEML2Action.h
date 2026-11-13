@@ -147,9 +147,6 @@ protected:
   /// Internal interfaces this sub-block action applies to
   const std::vector<BoundaryName> _interface;
 
-  /// Deprecated selector retained for input migration
-  const bool _interface_only;
-
   /// MATERIAL inputs supplied by a true InterfaceMaterial (read from INTERFACE_MATERIAL_DATA)
   const std::vector<MaterialPropertyName> _interface_material_inputs;
 

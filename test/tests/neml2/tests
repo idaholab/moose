@@ -241,17 +241,6 @@
     valgrind = none
     collections = 'SYSTEM'
   []
-  [interface_only_no_interface]
-    requirement = 'The framework shall throw an error when a NEML2 model is set to be interface-only but no interface is specified.'
-    type = RunException
-    issues = '#32413'
-    input = 'custom_model.i'
-    cli_args = 'NEML2/all/interface_only=true'
-    expect_err = "'interface_only' is true, but 'interface' is unset"
-    collections = 'SYSTEM'
-    capabilities = 'libtorch & neml2'
-    valgrind = none
-  []
   [linear_cohesive_interface_jacobian]
     requirement = 'The framework shall compute a correct Jacobian for a NEML2 linear cohesive interface law using the derivative provided by the NEML2 model.'
     type = PetscJacobianTester
@@ -457,14 +446,6 @@
       input = 'evaluation_domains.i'
       cli_args = 'NEML2/domains/volume=false NEML2/domains/boundary= NEML2/domains/interface=left Postprocessors/active='
       expect_err = 'interface boundaries must contain neighbors'
-      capabilities = 'libtorch & neml2'
-    []
-    [legacy_conflict]
-      detail = 'the deprecated interface_only selector is explicitly combined with a new selector.'
-      type = RunException
-      input = 'evaluation_domains.i'
-      cli_args = 'NEML2/domains/interface_only=false'
-      expect_err = "deprecated 'interface_only' parameter cannot be combined"
       capabilities = 'libtorch & neml2'
     []
     [unselected_side_access]
