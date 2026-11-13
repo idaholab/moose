@@ -13,6 +13,11 @@
 
 #include "MFEMIntegratedBC.h"
 
+/**
+ * \f[
+ * (k \vec u \cdot \hat n, \vec v \cdot \hat n)
+ * \f]
+ */
 class MFEMVectorFEBoundaryFluxIntegratedBC : public MFEMIntegratedBC
 {
 public:
@@ -20,8 +25,8 @@ public:
 
   MFEMVectorFEBoundaryFluxIntegratedBC(const InputParameters & parameters);
 
-  /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
-  virtual mfem::LinearFormIntegrator * createLFIntegrator();
+  /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
+  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
 protected:
   mfem::Coefficient & _coef;

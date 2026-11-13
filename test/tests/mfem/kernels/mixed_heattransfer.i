@@ -61,13 +61,13 @@
 
 [BCs]
   [gamma_T_right]
-    type = MFEMVectorFEBoundaryFluxIntegratedBC
+    type = MFEMVectorFEBoundaryFluxLFIntegratedBC
     variable = time_integrated_heat_flux
     coefficient = 0.0
     boundary = 2
   []
   [gamma_T_left]
-    type = MFEMVectorFEBoundaryFluxIntegratedBC
+    type = MFEMVectorFEBoundaryFluxLFIntegratedBC
     variable = time_integrated_heat_flux
     coefficient = -1.0
     boundary = 4
