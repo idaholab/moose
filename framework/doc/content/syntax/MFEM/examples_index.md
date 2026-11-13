@@ -24,6 +24,12 @@ that may serve as a useful starting point for users to adapt.
   problem for the deformation of a multi-material cantilever beam. This example
   is based on [MFEM Example 2](https://mfem.org/examples/#ex2).
 
+## Thermomechanical Problems
+
+- [Thermal Expansion](syntax/MFEM/ThermalExpansion.md): Solves a coupled 3D thermomechanical
+  problem for the bending of a cantilever beam heated on its top face, coupling the thermal strain
+  into the momentum balance through a transposed mixed bilinear form.
+
 ## Electromagnetic Problems
 
 - [Definite Maxwell](syntax/MFEM/DefiniteMaxwell.md): Solves a 3D electromagnetic
