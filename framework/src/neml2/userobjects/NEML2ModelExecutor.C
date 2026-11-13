@@ -389,13 +389,14 @@ NEML2ModelExecutor::advanceState()
   {
     const auto [base_name, lag] = parseLag(name);
     mooseAssert(lag > 0, "Invalid lag for a stateful variable");
-    // cache the value from the current step (favor output over input); the value that feeds
-    // "base~lag" next step is the current "base~(lag-1)" (which is "base" itself for lag == 1).
+    // Save a separate copy because gathered input tensors are rewritten during later evaluations.
+    // Without clone(), the old state would share storage with the current value and be overwritten.
+    // Favor output over input when choosing the current value to save.
     const auto curr_name = lagName(base_name, lag - 1);
     if (_out.count(curr_name))
-      _state_vars[name] = _out.at(curr_name);
+      _state_vars[name] = _out.at(curr_name).clone();
     else if (_in.count(curr_name))
-      _state_vars[name] = _in.at(curr_name);
+      _state_vars[name] = _in.at(curr_name).clone();
     else
       mooseError("Failed to find cached value for old variable: ", name);
   }
