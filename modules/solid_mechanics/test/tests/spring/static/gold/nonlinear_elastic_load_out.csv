@@ -1,0 +1,3 @@
+time,disp_x,disp_y,disp_z,force_1,force_2,force_3
+0,0,0,0,0,0,0
+1,0.3,-0.04,0.03,10,-4,3
