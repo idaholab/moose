@@ -1,6 +1,6 @@
 # Handoff: Kokkos AD GPU work on PR #34088 (arco, updated 2026-11-12)
 
-Status: branch at `c9d341fd322` (steps 0-10b). Next: step 12. Updated 2026-11-12.
+Status: branch at `c9d341fd322` (steps 0-10b, 12). Next: step 12b. Updated 2026-11-12.
 Git tracks this document on the feature branch. Commit it alone with a `PLAN:` subject, and drop
 those commits before the merge. Relative paths outside the MOOSE tree, such as `profiles/`,
 `scripts/`, `patches/`, `ptx/`, `logs/`, `runs/`, and `archive/`, are under `moose-stack-build/`
@@ -13,20 +13,29 @@ Branch `kokkos-reference-configuration` in `/ibmstor/scratch/lindad/projects/moo
 is idaholab/moose#34088. NamjaeChoi left a performance review on it. Answer it with measurements
 once the design work below is final. Do not reply yet.
 
-**Next: step 12**, finish the reply to NamjaeChoi. First action: read
-`moose-stack-build/review-reply-34088.md` and list its `TODO(user)` markers. Then:
+**Next: step 12b**, remove the Kokkos kernel aliases (user, 2026-11-12). First action: list the
+users with `grep -rlE 'Kokkos::(Vector)?(Time)?Kernel(Value|Grad)\b|Kokkos(Vector)?(Time)?Kernel(Value|Grad)\.h'
+framework modules test unit`.
 
-1. Ask the user whether to remove the aliases in this PR (`index.md:113`).
-2. Draft the p-refinement scratch sizing issue with the `issue-create` skill. File it only after
-   approval.
-3. Fill the `TODO(user)` markers with the step 8-10b results. Add step 8, 8d and later rows to the
-   step tables from `profiles/nsys-v19` (`step_table.sh`, `launch_compare.py`).
+- Delete the alias headers `KokkosKernelValue.h`, `KokkosKernelGrad.h`, `KokkosVectorKernelValue.h`,
+  `KokkosVectorKernelGrad.h`, `KokkosTimeKernelValue.h`, and `KokkosVectorTimeKernelValue.h`
+  (`framework/include/kokkos/kernels/`). Each is one `using` of a merged base.
+- Port the users to `Kernel`, `VectorKernel`, `TimeKernel`, or `VectorTimeKernel`: framework
+  kernels (`KokkosBodyForce`, `KokkosCoupledForce`, `KokkosMatCoupledForce`,
+  `KokkosCoupledTimeDerivative`, `KokkosTimeDerivative`, `KokkosVectorDiffusion`,
+  `KokkosVectorTimeDerivative`), `modules/heat_transfer` `KokkosHeatConduction`, the test kernels
+  `KokkosConvectionPrecompute`, `KokkosDiffusionPrecompute`, `KokkosVectorBodyForce`, and
+  `framework/doc/content/syntax/KokkosKernels/index.md` (line 113, the review comment).
+- Exit: the whole `kokkos` test dir passes on the H200 (189, only the known failures), the
+  `heat_transfer` Kokkos tests pass, and the grep above finds nothing. Commit with `#33860`.
 
-Exit: the user approves the reply text. Do not post it without approval.
+Then step 12c (rename `Configuration`) and step 13 (final reply). See "Performance plan: remaining
+steps".
 
 The draft reply is `moose-stack-build/review-reply-34088.md`. It answers all 10 inline comments
-(`gh api repos/idaholab/moose/pulls/34088/comments`) and holds the per-step time and ratio tables.
-Its `TODO(user)` markers wait on steps 8d-12.
+(`gh api repos/idaholab/moose/pulls/34088/comments`) and holds the per-step time and ratio tables
+up to step 10b. Its two `TODO(step 12b/12c commit)` markers wait on those commits. Do not post it
+without user approval.
 
 Kokkos ignores `--compute-device`. This build compiles Kokkos for CUDA, so every Kokkos kernel runs
 on the H200 under both `cpu` and `cuda`. The flag only selects specs (`compute_devices`). Test once,
@@ -44,6 +53,9 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 ### Decisions
 
+- Step 12 (user, 2026-11-12): remove the kernel aliases in this PR (step 12b). Rename
+  `Moose::Kokkos::Configuration` to `MeshConfiguration` (step 12c). The reply says some reference
+  Jacobian gap is expected for AD, and names no follow-up work.
 - Step 10b: land the qp slices if no AD launch is more than 3% slower than `nsys-v16` (user,
   2026-11-12). Met.
 - Step 10: use a hand-rolled slice reduction over the group. Do not use a Kokkos
@@ -102,102 +114,44 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 (empty)
 
-## Step 10b result (`c9d341fd322`, 2026-11-12)
+## Step 12 result (no code commit, 2026-11-12)
 
-Qp slices for the AD residual (reply to NamjaeChoi's inner `parallel_reduce`). Groups are
-hand-rolled sub-teams, so a Kokkos `ThreadVectorRange` reduce does not map onto them. With
-`ADScratchLayout::residual_slices > 1`, one thread per (i, slice) sums a strided qp subset. The
-partials go through the qp scratch after the Jacobian. One slice keeps the serial loop. Slices at
-8 test functions: q8 1, q27 3 (R) or 4 (R&J), q64 8. AD tests 34/34 (job 13755). Sweep
-`profiles/nsys-v19` vs `nsys-v16`: every AD launch within +2.9%.
+- Reply rewritten with steps 8-10b. Old copy: `archive/review-reply-34088-pre-step12.md`. Each
+  ratio column divides by the hand-coded time of the same sweep. The reply header lists the
+  step-to-sweep map for `scripts/ratio_table.sh`.
+- Filed idaholab/moose#34456 (p-refinement scratch sizing). The reply cites it.
+- `profiles/ncu-v16` (seeded J): ad8sdisp_q8 184 registers, 4/4 blocks/SM by registers/shared;
+  ad3sdisp_q8 167, 6/6; ad3sdisp_q64 167, 6/5; 0 spills. The comment 1 table uses it.
+- Current ratios (AD/hand, `nsys-v19`): reference residual 0.73-1.07, reference Jacobian 1.24-1.52.
+  Current-configuration loops 0.31-0.80, except the ad3disp_q8 Jacobian (1.01).
+- The aliases are separate classes on `next`. This PR reduced them to `using` aliases.
 
-- AD `ResidualLoop`: ad3_q64 2.086 -> 0.912 ms (now 0.73x hand-coded 1.241), ad3_q27 0.587 ->
-  0.451, ad3disp/ad3sdisp_q64 -20%, ad8 displaced -4-5%. Largest increase: ad3sdisp_q8 +2.9%.
-- R&J: ad3_q8 -13%, ad3_q64 -8% (reference R&J registers 96 -> 127, yet faster). Seeded J
-  +1-2.5%. Hand-coded launches unchanged apart from 5 us `DirichletBC` quantization.
-- Displaced `ResidualLoop` registers (base/v1/v2/v3): `KokkosADDiffusion` 91/93/104/94,
-  `KokkosADMatDiffusion` 104/96/96/96 (`ptx/10b-*`). v2 put the one-slice store branch inside the
-  slice loop. v3 splits the one-slice and sliced paths.
-- Probes in `patches/step10/` (v1 always two barriers, `nsys-v17`; v2 one loop for both, `nsys-v18`;
-  v3 is the commit).
+## Steps 8d-10b results (summary)
 
-## Step 9 result (`2709e503f9d`, 2026-11-12)
+Full results, probe lists, and per-launch numbers: `archive/step8d-10b-results.md`. Per-step
+times and ratios: the reply tables (`review-reply-34088.md`).
 
-`ADTeamGroup` takes the `ADScratchLayout`. With contraction planes (`max_jdofs > 0`), a group of
-more than 16 threads rounds up to a multiple of 16. Sweep `profiles/nsys-v16` vs `nsys-v14`, ncu
-`profiles/ncu-v13` (before) and `ncu-v14` (after, first patch with the same Jacobian path). AD tests
-34/34 (job 13694).
-
-- Cause (`ncu-v13`): all 47.2M excess wavefronts were 28 stage 2 `LDS.64` loads. Two groups of 27
-  shared a half-warp (16 doubles per wavefront). After: 0.00 load conflicts.
-- ad3_q27 J 3.47 -> 2.67 ms, ad3sdisp_q27 seeded J 23.2 -> 17.9, ad3disp_q27 J 3.64 -> 3.22. No
-  other launch changes beyond 5 us `DirichletBC` quantization.
-- Dead ends: padding the group stride to 8 mod 16 (fixes stage 2, adds stage 1 store conflicts in a
-  half-warp model). Aligning residual-only groups too (q27 `ResidualLoop` +8-15%: the 8 active
-  residual threads per group span more warps, `nsys-v15`).
-- Stage 1 stores still conflict (`st_conflicts` ~0.39M ad3_q27, 1.1M ad3sdisp_q27). Not measured
-  as a cost.
-
-## Step 8e result (`168e488f70c`, 2026-11-12)
-
-`Datum::resetTransform()` at the start of `evaluateADTerms`. Sweep `profiles/nsys-v14` (Y1 patch,
-same code as the commit apart from comments), against `nsys-t1`. AD tests 34/34 (job 13602).
-
-- Cause: occupancy. ncu (`profiles/ncu-v12/ad8disp_q8`, at T1): 248 registers, 0 spills, block
-  limit 2 by registers and 3 by shared memory (40.3 KB per 72-thread block). The S1b `_xyz(i) += u`
-  select in `reinitTransform` put the whole datum, kept live by the qp cache, in registers. The
-  `F_inv` and geometry gathers do not affect R&J. Without the `F_inv` gather, the reference seeded
-  loop gets 112/616. Probes X1-X6 and Y1-Y2 in `patches/step8e/`, output `ptx/8e*/`.
-- ad8disp_q8 J 3.49 -> 1.94 ms (166 registers). Faster: ad8_q8 J -12% (127 -> 162 registers),
-  ad3sdisp_q64 seeded -11%, ad8sdisp_q8 seeded -7%, ad3 and ad3disp R&J -4-5%.
-- Slower: see "Open performance items". The user accepted them (2026-11-12).
-- Dead end: Y2, a reset only when `displaced()`. The ad8 reference R&J still has 163 registers.
-
-## Step 8d sweep result (2026-11-11)
-
-T1 is faster than R4 in almost every launch. Compare with `python3 -I scripts/launch_compare.py
-profiles/nsys-v12/launches.txt profiles/nsys-t1/launches.txt 1.03` (per launch, old loop names
-mapped). `step_table.sh profiles/nsys-t1` gives the per-variant sums.
-
-- Exit targets met: ad3_q8 J 1.74 -> 1.48 ms, ad3_q27 J 5.03 -> 3.66 ms (targets 1.63, 4.60).
-- Large gains: the displaced `ResidualLoop` and hand-coded displaced loops 3-4x faster.
-  ad3disp_q27/q64 J 6.60/9.41 -> 3.74/6.28. Seeded J 10-15% faster. The material
-  `ElementCompute` 0.41 -> 0.13 ms (REG/STACK 172/1816 -> 108/88).
-- Slower than v12, accepted by the user (2026-11-11), the ad8 displaced J to be probed in step 8e:
-  - ad8disp_q8 `ResidualAndJacobianLoop` 2.72 -> 3.49 ms (+28%, reg 132 -> 248). R4: 2.53.
-  - ad3 reference `ResidualLoop` +8-13% (reg 48 -> 54). R4 has it too, so it comes from the
-    shared R4 part (N or the forced inlining), not from S1.
-  - ad8 reference `ResidualLoop` +5% (56 regs, unchanged). `DirichletBC` launches +3-11% at 5 us
-    (noise).
-- R4 alone: the material `ElementCompute` slowed 1.8x (0.41 -> 0.74 ms) with fewer registers and
-  less stack (134/808). Likely the step 8a carveout effect (unverified). R4 is rejected.
-- Builds: R4 and T1 pass the AD tests (34/34, jobs 13448, 13504). g++ rejected the first T1
-  (`Real3 _rz_radial_direction = 0`, two conversions). The patch now drops the initializer.
-
-## Step 8d findings (probes, no commit)
-
-Probe table, patch descriptions, and REG/STACK per probe: `archive/step8d-findings.md`. Patches in
-`patches/step8d/`, output in `ptx/8d-*`.
-
-- Cause of the reference frame: `ADDatumBase(datum)` copied the ~550 B `AssemblyDatum`, which
-  stayed in local memory. Fix M builds the AD datum in place.
-- Do not forward `libMesh::invalid_uint` by reference into device code. Pass
-  `static_cast<unsigned int>(libMesh::invalid_uint)`.
-- Dead ends: the runtime dual index (A, B), maps held by value (F), forced inlining with the copy
-  (L), a direct qp loop (R1: outlines `evaluateADTerms`), one `assembleADTerms` instantiation per
-  configuration (R3: equals N), the RZ `constexprIndex` (K: adds code to every geometry call), and
-  composition (`ADDatumBase` holding `Base &`: changes every accessor and hook for one indirection).
-- NVVM IR dump: cicc's front end consumes every `-X...` option, so LLVM options do not reach the
-  optimizer.
+- 10b (`c9d341fd322`, `nsys-v19`): residual qp sum in slices (`ADScratchLayout::residual_slices`).
+  Every AD launch within +2.9% of `nsys-v16`. Probes in `patches/step10/`.
+- 9 (`2709e503f9d`, `nsys-v16`, ncu `v13`/`v14`): half-warp-aligned groups with contraction planes.
+  Dead ends: padding the group stride to 8 mod 16 (adds stage 1 store conflicts). Aligning
+  residual-only groups too (q27 `ResidualLoop` +8-15%). Stage 1 store conflicts remain, unmeasured.
+- 8e (`168e488f70c`, `nsys-v14`): `Datum::resetTransform()` per AD qp. Dead end: Y2, a reset only
+  when `displaced()` (ad8 reference R&J keeps 163 registers). Probes in `patches/step8e/`.
+- 8d (`4736f915264`, `nsys-t1`): T1 won against R4. R4 slowed the material `ElementCompute` 1.8x.
+- 8d probes (`patches/step8d/`, `archive/step8d-findings.md`): `ADDatumBase(datum)` copied the
+  ~550 B `AssemblyDatum` into local memory. Fix M builds it in place. Do not forward
+  `libMesh::invalid_uint` by reference into device code. Dead ends: runtime dual index (A, B), maps
+  by value (F), forced inlining with the copy (L), direct qp loop (R1), one `assembleADTerms` per
+  configuration (R3), RZ `constexprIndex` (K), composition (`ADDatumBase` holding `Base &`). cicc
+  consumes every `-X...` option, so LLVM options do not reach the optimizer.
 
 ## User decisions on the draft reply (2026-11-10)
 
 - Fix the 27-qp contraction-plane bank conflict in this PR (step 9, done).
 - Measure an inner `parallel_reduce` over qps before replying (step 10).
-- Open an issue for p-refinement scratch sizing: one high-order element sizes the scratch of every
-  team (`Assembly::getMaxQpsPerElem()`). Reference the issue in the reply (step 12).
-- Aliases: NamjaeChoi asked to remove them (`index.md:113`). The user has not decided whether to
-  remove them in this PR (ask in step 12).
+- p-refinement scratch sizing: filed as #34456, cited in the reply.
+- Aliases: remove them in this PR (user, 2026-11-12, step 12b).
 
 ## Step results that the code does not record
 
@@ -279,9 +233,16 @@ Measure each step alone against the step before, with a full sweep on arco-c04.
 10. Done (measurement probes v1, v2, no commit).
 10b. Done (`c9d341fd322`, sweep `profiles/nsys-v19`). See "Step 10b result".
 11. Done (trim of this document, 2026-11-10).
-12. Finish the reply. Draft the p-refinement issue with the `issue-create` skill (file it only
-    after approval). Ask about alias removal. Fill the `TODO(user)` markers with the step 8-10
-    results. The reply has the step tables up to step 7. Add step 8 and 8d rows from a new sweep.
+12. Done (reply draft, issue #34456). See "Step 12 result".
+12b. Remove the kernel aliases. See "Next".
+12c. Rename `Moose::Kokkos::Configuration` to `MeshConfiguration`. Rename the file
+    `KokkosConfiguration.h/.K` to match (MOOSE names a file after its class). 14 framework files
+    and `unit/src/KokkosCoupleableTest.K` name the class (`grep -rlw Configuration
+    framework/include/kokkos framework/src/kokkos unit/src`). Leave `ConfigurationLoop` unless the
+    user asks. Exit: the `kokkos` dir passes on the H200, and the grep finds only `ConfigurationLoop`.
+13. Fill the two `TODO(step 12b/12c commit)` markers in the reply with the commits. Get user
+    approval of the reply text, then post it only on approval. Answer the `Coupleable.h` and
+    `KokkosADGeometry.h` comments too.
 
 Out of scope: each matrix entry costs a CSR search (`Matrix::find`) and an atomic, in hand-coded
 and AD kernels alike. A per-pattern map from element entries to value indices would help both.
@@ -301,7 +262,7 @@ Open a separate issue for it.
   residual-only launches computed full duals (step 2), and auxiliary displacements carried 12 dead
   slots (step 1).
 - State which hand-coded baseline each ratio uses: before step 7 or after it.
-- Non-performance comments still open: alias removal, the `Configuration` name, the `Coupleable.h`
+- Non-performance comments: aliases (step 12b), the `Configuration` name (step 12c), the `Coupleable.h`
   question, and the `KokkosADGeometry.h` placement (step 5 deletes the header).
 
 ## Known failures not caused by this work
@@ -323,9 +284,10 @@ Details: `moose-stack-build/PLAN-kokkos-known-failures.md`.
   `qM` is the qps per element.
 - Sweep, from the case directory: `sbatch -w arco-c04 --output=<log dir>/%x-%j.log sweep.sbatch
   <out dir> nsys|ncu`. Filter with `VARIANTS_FILTER`, `NCU_KERNELS`, `NCU_COUNT`. Latest full sweep:
-  `profiles/nsys-v19` (step 10b). Latest ncu: `ncu-v15`. Next: `nsys-v20`, `ncu-v16`.
+  `profiles/nsys-v19` (step 10b). Latest ncu: `ncu-v16`. Next: `nsys-v20`, `ncu-v17`.
   Build `launches.txt` with `launch_table.sh <dir>/*.nsys-rep`.
-- Tables in `scripts/`: `step_table.sh <dir>` (per-step summary), `launch_table.sh <nsys-rep>...`
+- Tables in `scripts/`: `step_table.sh <dir>` (per-step summary), `ratio_table.sh <adN>
+  <label>=<dir>...` (AD/hand ratio per sweep, `FIELD=residual|jacobian`), `launch_table.sh <nsys-rep>...`
   (every launch, tagged `[R]`/`[J]`), `kernel_table.sh`, `ncu_table.sh`, `ncu_shared_stores.py`,
   and `ncu_metrics.sh <metric,...> <ncu-rep>...`.
 - `scripts/occupancy_probe.sbatch <out> <variant regex> <label>[:VAR=val,...]...` runs the sweep
