@@ -383,6 +383,7 @@ typedef typename OutputTools<RealEigenVector>::VariableValue ArrayVariableValue;
 typedef typename OutputTools<ADRealEigenVector>::VariableValue ADArrayVariableValue;
 typedef typename OutputTools<RealEigenVector>::VariableGradient ArrayVariableGradient;
 typedef typename OutputTools<ADRealEigenVector>::VariableGradient ADArrayVariableGradient;
+typedef typename OutputTools<ADRealEigenVector>::VariableSecond ADArrayVariableSecond;
 typedef typename OutputTools<RealEigenVector>::VariableSecond ArrayVariableSecond;
 typedef typename OutputTools<RealEigenVector>::VariableCurl ArrayVariableCurl;
 typedef typename OutputTools<RealEigenVector>::VariableDivergence ArrayVariableDivergence;

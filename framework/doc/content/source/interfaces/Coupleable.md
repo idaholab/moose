@@ -72,7 +72,7 @@ name with `ad` and preserving `camelCase`, e.g. `adCoupledValue` or `adCoupledVe
 Note that all of these prefixes and suffixes are mutually exclusive, i.e. none can be mixed and matched in any way.
 
 Lastly, some methods are only available with automatic differentiation info, e.g.
-`adCoupledLowerValue` returns the value of a coupled lower-dimensional variable and `adCoupledVectorSecond` returns the second spatial derivatives of a coupled vector variable.
+`adCoupledLowerValue` returns the value of a coupled lower-dimensional variable, and `adCoupledVectorSecond` and `adCoupledArraySecond` return the second spatial derivatives of a coupled vector and array variable, respectively.
 
 ## Optional Coupling
 
