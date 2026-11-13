@@ -96,6 +96,26 @@ The mass matrix takes the following form of a volume integral:
 \mathbf{M} = \int_{V}^{} \rho \mathbf{H}^{T} \mathbf{H} dV
 \end{equation}
 
-where $\mathbf{H}$ is an element-wise matrix that contains the interpolation functions for displacement and rotational degrees of freedom. In the implementation, the volume integral is simplified, and it is assumed that the element thickness is constant. Similarly, one orientation matrix is used per element, that is, changes in orientation in a single element's geometry are neglected.
+where $\mathbf{H}$ is an element-wise matrix that contains the interpolation functions for displacement and rotational degrees of freedom. In the implementation, the volume integral is simplified, and it is assumed that the element thickness is constant. All four nodes also use the element normal, as in the kinematics above.
+
+The volume integral uses the displacement field of the kinematics equation above, with $dV = (a/2)\, dr_3\, dA$ and a constant thickness $a$. The mass is consistent, not lumped. The translational part acts on the global nodal displacement vectors $\mathbf{u}_k$:
+
+\begin{equation}
+\mathbf{f}_k = \rho\, a \sum_{l=1}^{4} \left( \int_A h_k h_l \, dA \right) \left( \ddot{\mathbf{u}}_l + \eta\, \dot{\mathbf{u}}^{*}_l \right)
+\end{equation}
+
+The rotary part acts on the nodal rotations $\boldsymbol{\theta}_k = (\alpha_k, \beta_k)$, which are the rotations of the kinematics equation about the in-plane nodal axes $^tV_1^k$ and $^tV_2^k$. Let $\mathbf{G}_k = (a/2)\left[ -^tV_2^k \;\; ^tV_1^k \right]$, so that the rotation part of the displacement is $r_3 \sum_{k=1}^4 h_k \mathbf{G}_k \boldsymbol{\theta}_k$. The thickness integral of the rotary term is:
+
+\begin{equation}
+\int_{-1}^{1} r_3^2 \, \frac{a}{2} \, dr_3 = \frac{a}{3}
+\end{equation}
+
+The nodal axes are orthonormal and all four nodes share the element normal, so $\mathbf{G}_k^{T} \mathbf{G}_l = (a^2/4)\, \mathbf{I}$. The rotary inertia is then:
+
+\begin{equation}
+\mathbf{m}_k = \frac{\rho\, a^3}{12} \sum_{l=1}^{4} \left( \int_A h_k h_l \, dA \right) \left( \ddot{\boldsymbol{\theta}}_l + \eta\, \dot{\boldsymbol{\theta}}^{*}_l \right)
+\end{equation}
+
+In these equations, $\rho$ is the density, $h_k$ are the in-plane interpolation functions, and $\eta$ is the mass-proportional Rayleigh damping coefficient. The HHT-weighted velocity is $\dot{\mathbf{u}}^{*} = (1 + \alpha_H)\, \dot{\mathbf{u}} - \alpha_H\, \dot{\mathbf{u}}_{old}$, with $\alpha_H$ the HHT parameter, and $\dot{\boldsymbol{\theta}}^{*}$ uses the same form. The inertia uses no transformation matrix, because $\mathbf{G}_k$ already carries the nodal axes and each residual is assembled in the components of its own degree of freedom. [ADInertialForceShell](/ADInertialForceShell.md) computes these residuals.
 
 !bibtex bibliography
