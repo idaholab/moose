@@ -1,0 +1,108 @@
+[Tests]
+  design = "DSGShellElements.md InertialForceDSGShell.md"
+  issues = "#34417"
+
+  [free_vibration]
+    type = 'CSVDiff'
+    input = 'free_vibration.i'
+    csvdiff = 'free_vibration_out.csv'
+    requirement = "The mechanics system shall compute the free vibration of a clamped plate modeled "
+                  "with a four-node DSG shell element after a force pulse."
+    verification = "dsg_shell_vandv.md"
+  []
+  [free_vibration_inclined]
+    type = 'CSVDiff'
+    input = 'free_vibration.i'
+    cli_args = "Mesh/orientation/vector_value='0 45 0' "
+               "Mesh/tip_corners/coord='0.0 1.0606601717798212 1.0606601717798212; 1.0 1.0606601717798212 1.0606601717798212' "
+               "Postprocessors/disp_z_tip/point='1.0 1.0606601717798212 1.0606601717798212' "
+               "Postprocessors/rot_x_tip/point='0.0 1.0606601717798212 1.0606601717798212' "
+               "Outputs/file_base=free_vibration_inclined_out"
+    csvdiff = 'free_vibration_inclined_out.csv'
+    requirement = "The mechanics system shall compute the free vibration of the clamped plate when it "
+                  "is inclined at 45 degrees to the Y axis."
+  []
+  [free_vibration_damped]
+    type = 'CSVDiff'
+    input = 'free_vibration_damped.i'
+    csvdiff = 'free_vibration_damped_out.csv'
+    requirement = "The mechanics system shall compute the damped free vibration of the clamped plate "
+                  "with mass-proportional Rayleigh damping and the HHT shift of the damping term."
+  []
+  [free_vibration_inclined_damped]
+    type = 'CSVDiff'
+    input = 'free_vibration_damped.i'
+    cli_args = "Mesh/orientation/vector_value='0 45 0' "
+               "Mesh/tip_corners/coord='0.0 1.0606601717798212 1.0606601717798212; 1.0 1.0606601717798212 1.0606601717798212' "
+               "Postprocessors/disp_z_tip/point='1.0 1.0606601717798212 1.0606601717798212' "
+               "Postprocessors/rot_x_tip/point='0.0 1.0606601717798212 1.0606601717798212' "
+               "Outputs/file_base=free_vibration_inclined_damped_out"
+    csvdiff = 'free_vibration_inclined_damped_out.csv'
+    requirement = "The mechanics system shall compute the damped free vibration of the clamped plate "
+                  "when it is inclined at 45 degrees to the Y axis, with the HHT shift of the damping "
+                  "term."
+  []
+  [free_vibration_tri6]
+    type = 'CSVDiff'
+    input = 'free_vibration.i'
+    cli_args = 'Mesh/plate/elem_type=TRI6 Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+               'Variables/disp_z/order=SECOND Variables/rot_x/order=SECOND Variables/rot_y/order=SECOND '
+               'Variables/rot_z/order=SECOND Executioner/num_steps=10 Outputs/file_base=free_vibration_tri6_out'
+    csvdiff = 'free_vibration_tri6_out.csv'
+    requirement = "The mechanics system shall compute the vibration of the clamped plate modeled with "
+                  "six-node DSG shell elements."
+  []
+  [free_vibration_no_rotary_inertia]
+    type = 'CSVDiff'
+    input = 'free_vibration.i'
+    cli_args = 'Kernels/inertia_rot_x/rotary_inertia=false Kernels/inertia_rot_y/rotary_inertia=false '
+               'Kernels/inertia_rot_z/rotary_inertia=false Executioner/num_steps=10 '
+               'Outputs/file_base=free_vibration_no_rotary_out'
+    csvdiff = 'free_vibration_no_rotary_out.csv'
+    requirement = "The mechanics system shall compute the vibration of the clamped plate with the "
+                  "rotary inertia of the DSG shell elements turned off."
+  []
+  [jacobian_dynamics]
+    type = 'PetscJacobianTester'
+    input = 'free_vibration.i'
+    cli_args = 'Executioner/num_steps=2 Outputs/csv=false'
+    requirement = "The mechanics system shall compute the exact Jacobian of the inertial force of the "
+                  "DSG shell element, including the rotary inertia."
+  []
+
+  [natural_frequencies]
+    type = 'CSVDiff'
+    input = 'natural_frequencies.i'
+    csvdiff = 'natural_frequencies_out_omega_squared_0001.csv'
+    requirement = "The system shall compute the natural frequencies of a cantilever plate of DSG "
+                  "shell elements with the Eigenvalue executioner, with the consistent mass and the "
+                  "rotary inertia of the elements, and report a first frequency within one percent "
+                  "of the thin plate value."
+    design = 'DSGShellMassEigenKernel.md'
+    capabilities = 'slepc'
+  []
+  [natural_frequencies_tri6]
+    type = 'CSVDiff'
+    input = 'natural_frequencies.i'
+    cli_args = 'Mesh/plate/elem_type=TRI6 Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+               'Variables/disp_z/order=SECOND Variables/rot_x/order=SECOND Variables/rot_y/order=SECOND '
+               'Variables/rot_z/order=SECOND Outputs/file_base=natural_frequencies_tri6_out'
+    csvdiff = 'natural_frequencies_tri6_out_omega_squared_0001.csv'
+    requirement = "The system shall compute the natural frequencies of a cantilever plate of "
+                  "six-node DSG shell elements with the Eigenvalue executioner."
+    design = 'DSGShellMassEigenKernel.md'
+    capabilities = 'slepc'
+  []
+  [natural_frequencies_no_rotary_inertia]
+    type = 'CSVDiff'
+    input = 'natural_frequencies.i'
+    cli_args = 'Kernels/inertia_rot_x/rotary_inertia=false Kernels/inertia_rot_y/rotary_inertia=false '
+               'Kernels/inertia_rot_z/rotary_inertia=false Outputs/file_base=natural_frequencies_no_rotary_out'
+    csvdiff = 'natural_frequencies_no_rotary_out_omega_squared_0001.csv'
+    requirement = "The system shall compute the natural frequencies of a cantilever plate of DSG "
+                  "shell elements with the translational mass alone, leaving the rotations without "
+                  "inertia."
+    design = 'DSGShellMassEigenKernel.md'
+    capabilities = 'slepc'
+  []
+[]

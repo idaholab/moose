@@ -1,0 +1,376 @@
+[Tests]
+  design = "DSGShellElements.md"
+  issues = "#34417"
+
+  [cantilever_strip]
+    type = 'CSVDiff'
+    input = 'cantilever_strip.i'
+    csvdiff = 'cantilever_strip_out.csv'
+    requirement = "The mechanics system shall compute the tip deflection, tip slope and clamped-edge "
+                  "moment and shear of a cantilever strip modeled with four-node DSG shell elements."
+    verification = "dsg_shell_vandv.md"
+  []
+  [cantilever_strip_tri3]
+    type = 'CSVDiff'
+    input = 'cantilever_strip.i'
+    cli_args = 'Mesh/gmg/elem_type=TRI3 Outputs/file_base=cantilever_strip_tri3_out'
+    csvdiff = 'cantilever_strip_tri3_out.csv'
+    requirement = "The mechanics system shall compute the deflection of a cantilever strip modeled "
+                  "with three-node DSG shell elements."
+    verification = "dsg_shell_vandv.md"
+  []
+  [cantilever_strip_tri6]
+    type = 'CSVDiff'
+    input = 'cantilever_strip.i'
+    cli_args = 'Mesh/gmg/elem_type=TRI6 Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+               'Variables/disp_z/order=SECOND Variables/rot_x/order=SECOND Variables/rot_y/order=SECOND '
+               'Variables/rot_z/order=SECOND Outputs/file_base=cantilever_strip_tri6_out'
+    csvdiff = 'cantilever_strip_tri6_out.csv'
+    requirement = "The mechanics system shall compute the deflection of a cantilever strip modeled "
+                  "with six-node DSG shell elements on a second-order mesh."
+    verification = "dsg_shell_vandv.md"
+  []
+  [cantilever_strip_quad8]
+    type = 'CSVDiff'
+    input = 'cantilever_strip.i'
+    cli_args = 'Mesh/gmg/elem_type=QUAD8 Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+               'Variables/disp_z/order=SECOND Variables/rot_x/order=SECOND Variables/rot_y/order=SECOND '
+               'Variables/rot_z/order=SECOND Outputs/file_base=cantilever_strip_quad8_out'
+    csvdiff = 'cantilever_strip_quad8_out.csv'
+    requirement = "The mechanics system shall compute the deflection of a cantilever strip modeled "
+                  "with eight-node DSG shell elements on a second-order mesh."
+    verification = "dsg_shell_vandv.md"
+  []
+
+  [jacobian_quad4]
+    type = 'PetscJacobianTester'
+    input = 'cantilever_strip.i'
+    cli_args = 'Outputs/csv=false'
+    requirement = "The mechanics system shall compute the exact Jacobian of the four-node DSG shell element."
+  []
+  [jacobian_tri3]
+    type = 'PetscJacobianTester'
+    input = 'cantilever_strip.i'
+    cli_args = 'Mesh/gmg/elem_type=TRI3 Outputs/csv=false'
+    requirement = "The mechanics system shall compute the exact Jacobian of the three-node DSG shell element."
+  []
+  [jacobian_tri6]
+    type = 'PetscJacobianTester'
+    input = 'cantilever_strip.i'
+    cli_args = 'Mesh/gmg/elem_type=TRI6 Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+               'Variables/disp_z/order=SECOND Variables/rot_x/order=SECOND Variables/rot_y/order=SECOND '
+               'Variables/rot_z/order=SECOND Outputs/csv=false'
+    requirement = "The mechanics system shall compute the exact Jacobian of the six-node DSG shell element."
+  []
+  [jacobian_quad8]
+    type = 'PetscJacobianTester'
+    input = 'cantilever_strip.i'
+    cli_args = 'Mesh/gmg/elem_type=QUAD8 Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+               'Variables/disp_z/order=SECOND Variables/rot_x/order=SECOND Variables/rot_y/order=SECOND '
+               'Variables/rot_z/order=SECOND Outputs/csv=false'
+    requirement = "The mechanics system shall compute the exact Jacobian of the eight-node DSG shell element."
+  []
+
+  [plate_bending]
+    type = 'CSVDiff'
+    input = 'plate_bending.i'
+    csvdiff = 'plate_bending_out.csv'
+    requirement = "The mechanics system shall compute the center deflection of a simply supported plate "
+                  "under a uniform load applied as nodal forces, modeled with four-node DSG shell elements."
+    verification = "dsg_shell_vandv.md"
+  []
+  [plate_bending_distributed_quad4]
+    type = 'CSVDiff'
+    input = 'plate_bending_distributed.i'
+    csvdiff = 'plate_bending_distributed_out.csv'
+    requirement = "The mechanics system shall compute the center deflection of a simply supported plate "
+                  "under a distributed load, modeled with four-node DSG shell elements."
+    verification = "dsg_shell_vandv.md"
+  []
+  [plate_bending_distributed_tri3]
+    type = 'CSVDiff'
+    input = 'plate_bending_distributed.i'
+    cli_args = 'Mesh/gmg/elem_type=TRI3 Outputs/file_base=plate_bending_distributed_tri3_out'
+    csvdiff = 'plate_bending_distributed_tri3_out.csv'
+    requirement = "The mechanics system shall compute the center deflection of a simply supported plate "
+                  "under a distributed load, modeled with three-node DSG shell elements."
+    verification = "dsg_shell_vandv.md"
+  []
+  [plate_bending_distributed_tri6]
+    type = 'CSVDiff'
+    input = 'plate_bending_distributed.i'
+    cli_args = 'Mesh/gmg/elem_type=TRI6 Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+               'Variables/disp_z/order=SECOND Variables/rot_x/order=SECOND Variables/rot_y/order=SECOND '
+               'Variables/rot_z/order=SECOND Outputs/file_base=plate_bending_distributed_tri6_out'
+    csvdiff = 'plate_bending_distributed_tri6_out.csv'
+    requirement = "The mechanics system shall compute the center deflection of a simply supported plate "
+                  "under a distributed load, modeled with six-node DSG shell elements."
+    verification = "dsg_shell_vandv.md"
+  []
+  [plate_bending_distributed_quad8]
+    type = 'CSVDiff'
+    input = 'plate_bending_distributed.i'
+    cli_args = 'Mesh/gmg/elem_type=QUAD8 Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+               'Variables/disp_z/order=SECOND Variables/rot_x/order=SECOND Variables/rot_y/order=SECOND '
+               'Variables/rot_z/order=SECOND Outputs/file_base=plate_bending_distributed_quad8_out'
+    csvdiff = 'plate_bending_distributed_quad8_out.csv'
+    requirement = "The mechanics system shall compute the center deflection of a simply supported plate "
+                  "under a distributed load, modeled with eight-node DSG shell elements."
+    verification = "dsg_shell_vandv.md"
+  []
+  [plate_bending_gmsh]
+    type = 'CSVDiff'
+    input = 'plate_bending_gmsh.i'
+    csvdiff = 'plate_bending_gmsh_out.csv'
+    requirement = "The mechanics system shall compute the center deflection of a simply supported plate "
+                  "under a distributed load on a mesh read from a Gmsh file, modeled with DSG shell elements."
+  []
+  [plate_force_moment_loads]
+    type = 'CSVDiff'
+    input = 'plate_force_moment_loads.i'
+    csvdiff = 'plate_force_moment_loads_out.csv'
+    requirement = "The mechanics system shall compute the deflection of a plate under concentrated "
+                  "force and moment loads at its vertices, modeled with one DSG shell element."
+    verification = "dsg_shell_vandv.md"
+  []
+  [plate_cantilever]
+    type = 'CSVDiff'
+    input = 'plate_cantilever.i'
+    csvdiff = 'plate_cantilever_out.csv'
+    requirement = "The mechanics system shall compute the constant bending moment and the tip deflection "
+                  "of a cantilever plate under an end rotation, modeled with DSG shell elements."
+    verification = "dsg_shell_vandv.md"
+  []
+  [plate_concentrated_loads]
+    type = 'CSVDiff'
+    input = 'plate_concentrated_loads.i'
+    csvdiff = 'plate_concentrated_loads_out.csv'
+    requirement = "The mechanics system shall compute the deflection, bending moment and transverse "
+                  "shear force of a simply supported plate strip under two line loads, modeled with "
+                  "DSG shell elements."
+    verification = "dsg_shell_vandv.md"
+  []
+
+  [pinched_cylinder]
+    type = 'CSVDiff'
+    input = 'pinched_cylinder.i'
+    csvdiff = 'pinched_cylinder_out.csv'
+    requirement = "The mechanics system shall compute the displacement under the load of a pinched "
+                  "cylinder with rigid end diaphragms, modeled with four-node DSG shell elements."
+    verification = "dsg_shell_vandv.md"
+  []
+  [pinched_cylinder_y]
+    type = 'CSVDiff'
+    input = 'pinched_cylinder.i'
+    cli_args = "DiracKernels/point/variable=disp_y DiracKernels/point/point='0 1 1' "
+               "Outputs/file_base=pinched_cylinder_y_out"
+    csvdiff = 'pinched_cylinder_y_out.csv'
+    requirement = "The mechanics system shall compute the same displacement of the pinched cylinder "
+                  "when the load is applied along the other symmetry plane."
+  []
+  [scordelis_lo_roof]
+    type = 'CSVDiff'
+    input = 'scordelis_lo_roof.i'
+    csvdiff = 'scordelis_lo_roof_out.csv'
+    requirement = "The mechanics system shall compute the free-edge deflection of the Scordelis-Lo roof "
+                  "under its self weight, modeled with four-node DSG shell elements."
+    verification = "dsg_shell_vandv.md"
+  []
+
+  [axial_strain]
+    type = 'CSVDiff'
+    input = 'axial_strain.i'
+    csvdiff = 'axial_strain_out.csv'
+    requirement = "The mechanics system shall compute the membrane force of a DSG shell element under "
+                  "a uniform axial stretch."
+  []
+  [shear_strain]
+    type = 'CSVDiff'
+    input = 'shear_strain.i'
+    csvdiff = 'shear_strain_out.csv'
+    requirement = "The mechanics system shall compute the membrane shear force of a strip of DSG shell "
+                  "elements under an in-plane shear displacement."
+  []
+  [inclined_element]
+    type = 'CSVDiff'
+    input = 'inclined_element.i'
+    csvdiff = 'inclined_element_out.csv'
+    requirement = "The mechanics system shall report the resultants of an inclined DSG shell element in "
+                  "its own frame, equal to those of the same element lying flat."
+  []
+  [tapered]
+    type = 'CSVDiff'
+    input = 'tapered.i'
+    csvdiff = 'tapered_out.csv'
+    requirement = "The mechanics system shall compute the membrane forces of a tapered strip of DSG "
+                  "shell elements under a uniform end displacement."
+  []
+
+  [wrong_variable_order]
+    type = 'RunException'
+    input = 'cantilever_strip.i'
+    cli_args = 'Mesh/gmg/elem_type=TRI6 Outputs/csv=false'
+    expect_err = 'must be Lagrange variables of the element.s order'
+    requirement = "The system shall report an error when the variables of a DSG shell element are not "
+                  "of the order of the mesh."
+  []
+  [wrong_variable_count]
+    type = 'RunException'
+    input = 'cantilever_strip.i'
+    cli_args = "Materials/strain/rotations='rot_x rot_y' Outputs/csv=false"
+    expect_err = "'rotations' must list three variables"
+    requirement = "The system shall report an error when a DSG shell object is not given three "
+                  "displacement and three rotation variables."
+  []
+  [wrong_element_type]
+    type = 'RunException'
+    input = 'cantilever_strip.i'
+    cli_args = 'Mesh/gmg/elem_type=QUAD9 Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+               'Variables/disp_z/order=SECOND Variables/rot_x/order=SECOND Variables/rot_y/order=SECOND '
+               'Variables/rot_z/order=SECOND Outputs/csv=false'
+    expect_err = 'the DSG shell family covers TRI3, QUAD4, TRI6 and QUAD8 elements'
+    requirement = "The system shall report an error when a DSG shell object is used on an element type "
+                  "outside the family."
+  []
+
+  [nodal_resultants]
+    type = 'CSVDiff'
+    input = 'nodal_resultants.i'
+    csvdiff = 'nodal_resultants_out.csv'
+    requirement = "The system shall recover the stress resultants of DSG shell elements at the nodes, "
+                  "averaging the values the elements sharing a node evaluate at it, and report the "
+                  "exact linear bending moment of a cantilever strip at the nodes between four-node "
+                  "elements."
+    design = 'DSGShellNodalResultants.md DSGShellNodalResultantsAux.md'
+  []
+  [nodal_resultants_quad8]
+    type = 'CSVDiff'
+    input = 'nodal_resultants.i'
+    cli_args = 'Mesh/gmg/elem_type=QUAD8 Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+               'Variables/disp_z/order=SECOND Variables/rot_x/order=SECOND Variables/rot_y/order=SECOND '
+               'Variables/rot_z/order=SECOND Outputs/file_base=nodal_resultants_quad8_out'
+    csvdiff = 'nodal_resultants_quad8_out.csv'
+    requirement = "The system shall recover the stress resultants of eight-node DSG shell elements at "
+                  "the nodes and report the exact linear bending moment of a cantilever strip at "
+                  "every node, the clamped edge included."
+    design = 'DSGShellNodalResultants.md DSGShellNodalResultantsAux.md'
+  []
+
+  [cantilever_strip_rotated]
+    type = 'CSVDiff'
+    input = 'cantilever_strip.i'
+    cli_args = "Mesh/rotate/type=TransformGenerator Mesh/rotate/input=tip_corners "
+               "Mesh/rotate/transform=ROTATE Mesh/rotate/vector_value='0 90 0' "
+               "NodalKernels/tip_load/variable=disp_y Postprocessors/disp_z_tip/variable=disp_y "
+               "Postprocessors/disp_z_tip/point='1.0 0.0 10.0' Postprocessors/rot_x_tip/point='0.0 0.0 10.0' "
+               "Outputs/file_base=cantilever_strip_rotated_out"
+    csvdiff = 'cantilever_strip_rotated_out.csv'
+    requirement = "The system shall compute the deflection of the cantilever strip of DSG shell elements "
+                  "when the strip is rotated to lie in the XZ plane, with the same tip deflection as in "
+                  "the XY plane."
+  []
+  [pinched_cylinder_unstructured]
+    type = 'CSVDiff'
+    input = 'pinched_cylinder_unstructured.i'
+    csvdiff = 'pinched_cylinder_unstructured_out.csv'
+    requirement = "The system shall compute the displacement of the pinched cylinder of DSG shell "
+                  "elements on an unstructured quadrilateral mesh."
+  []
+  [pinched_cylinder_local_axis]
+    type = 'CSVDiff'
+    input = 'pinched_cylinder.i'
+    cli_args = "Materials/strain/reference_first_local_direction='1 -1 0' "
+               "Outputs/file_base=pinched_cylinder_local_axis_out"
+    csvdiff = 'pinched_cylinder_local_axis_out.csv'
+    requirement = "The system shall compute the same displacement of the pinched cylinder of DSG shell "
+                  "elements when the first local axis of the elements is set by the user, the "
+                  "displacements being independent of the element frame."
+  []
+  [tank_shell]
+    type = 'CSVDiff'
+    input = 'tank_shell.i'
+    csvdiff = 'tank_shell_out.csv'
+    requirement = "The system shall apply a pressure along the normals of a cylindrical tank of DSG shell "
+                  "elements and report the hoop force p r and the radial displacement p r^2 / (E t) of "
+                  "the membrane state, with no axial force."
+    design = 'DSGShellElements.md DistributedLoadDSGShell.md'
+  []
+  [tank_shell_rotated]
+    type = 'CSVDiff'
+    input = 'tank_shell_rotated.i'
+    csvdiff = 'tank_shell_rotated_out.csv'
+    requirement = "The system shall apply a pressure along the normals of a cylindrical tank of DSG shell "
+                  "elements whose axis is inclined in space and report the same hoop force and radial "
+                  "displacement as for the upright tank."
+    design = 'DSGShellElements.md DistributedLoadDSGShell.md'
+  []
+
+  [nodal_resultants_parallel]
+    type = 'CSVDiff'
+    input = 'nodal_resultants.i'
+    csvdiff = 'nodal_resultants_out.csv'
+    prereq = 'nodal_resultants'
+    min_parallel = 2
+    max_parallel = 2
+    requirement = "The system shall recover the same stress resultants at the nodes of DSG shell "
+                  "elements on two processors as on one."
+    design = 'DSGShellNodalResultants.md'
+  []
+  [reference_direction_normal_to_element]
+    type = 'CSVDiff'
+    input = 'cantilever_strip.i'
+    cli_args = "Materials/strain/reference_first_local_direction='0 0 1' "
+               "Outputs/file_base=cantilever_strip_normal_reference_out"
+    csvdiff = 'cantilever_strip_normal_reference_out.csv'
+    requirement = "The system shall fall back to the global axis least aligned with the element "
+                  "normal when the reference first local direction of DSG shell elements is normal "
+                  "to an element, and report the same results as with the default direction."
+  []
+  [wrong_component]
+    type = 'RunException'
+    input = 'cantilever_strip.i'
+    cli_args = 'Kernels/solid_disp_x/component=1 Outputs/csv=false'
+    expect_err = 'The variable of this kernel is not the one listed for component'
+    requirement = "The system shall report an error when the component of a DSG shell stress "
+                  "divergence kernel does not match its variable."
+  []
+  [zero_reference_direction]
+    type = 'RunException'
+    input = 'cantilever_strip.i'
+    cli_args = "Materials/strain/reference_first_local_direction='0 0 0' Outputs/csv=false"
+    expect_err = 'The reference direction must not be zero'
+    requirement = "The system shall report an error when the reference first local direction of DSG "
+                  "shell elements is the zero vector."
+  []
+  [nodal_resultants_without_nodal_strains]
+    type = 'RunException'
+    input = 'nodal_resultants.i'
+    cli_args = 'Materials/strain/compute_nodal_strains=false Outputs/csv=false'
+    expect_err = 'carries no nodal resultants'
+    requirement = "The system shall report an error when the nodal recovery of the resultants of DSG "
+                  "shell elements is requested without the nodal strains of the strain material."
+    design = 'DSGShellNodalResultants.md'
+  []
+  [load_on_rotation]
+    type = 'RunException'
+    input = 'scordelis_lo_roof.i'
+    cli_args = 'Kernels/self_weight/variable=rot_x Outputs/csv=false'
+    expect_err = 'must be one of the .displacements.'
+    requirement = "The system shall report an error when a DSG shell distributed load is applied to "
+                  "a rotation variable."
+    design = 'DistributedLoadDSGShell.md'
+  []
+  [plate_bending_thin_distorted]
+    type = CSVDiff
+    input = plate_bending_thin_distorted.i
+    csvdiff = plate_bending_thin_distorted_out.csv
+    requirement = 'The four-node DSG shell element shall not lock in transverse shear on a distorted mesh of a simply supported plate with a thickness-to-span ratio of 1/1000, giving the thin-plate center deflection within 0.1 percent.'
+  []
+  [pinched_cylinder_drilling_factor]
+    type = CSVDiff
+    input = pinched_cylinder.i
+    cli_args = 'Materials/section/drilling_stiffness_factor=0.1 Outputs/file_base=pinched_cylinder_drilling_factor_out'
+    csvdiff = pinched_cylinder_drilling_factor_out.csv
+    requirement = 'The drilling stiffness of the DSG shell section shall be scalable through a factor, a factor of 0.1 on the pinched cylinder changing the displacement under the load by about one percent.'
+  []
+[]
