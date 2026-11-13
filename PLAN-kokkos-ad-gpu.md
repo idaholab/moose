@@ -1,6 +1,6 @@
 # Handoff: Kokkos AD GPU work on PR #34088 (arco, updated 2026-11-12)
 
-Status: branch at `c9d341fd322` (steps 0-10b, 12). Next: step 12b. Updated 2026-11-12.
+Status: branch at `98852e75c2f` (steps 0-10b, 12, 12b). Next: step 12c. Updated 2026-11-12.
 Git tracks this document on the feature branch. Commit it alone with a `PLAN:` subject, and drop
 those commits before the merge. Relative paths outside the MOOSE tree, such as `profiles/`,
 `scripts/`, `patches/`, `ptx/`, `logs/`, `runs/`, and `archive/`, are under `moose-stack-build/`
@@ -13,29 +13,25 @@ Branch `kokkos-reference-configuration` in `/ibmstor/scratch/lindad/projects/moo
 is idaholab/moose#34088. NamjaeChoi left a performance review on it. Answer it with measurements
 once the design work below is final. Do not reply yet.
 
-**Next: step 12b**, remove the Kokkos kernel aliases (user, 2026-11-12). First action: list the
-users with `grep -rlE 'Kokkos::(Vector)?(Time)?Kernel(Value|Grad)\b|Kokkos(Vector)?(Time)?Kernel(Value|Grad)\.h'
-framework modules test unit`.
+**Next: step 12c**, rename `Moose::Kokkos::Configuration` to `MeshConfiguration` (user,
+2026-11-12). First action: list the users with `grep -rlw Configuration framework/include/kokkos
+framework/src/kokkos unit/src` (15 files, including `KokkosConfiguration.h/.K`).
 
-- Delete the alias headers `KokkosKernelValue.h`, `KokkosKernelGrad.h`, `KokkosVectorKernelValue.h`,
-  `KokkosVectorKernelGrad.h`, `KokkosTimeKernelValue.h`, and `KokkosVectorTimeKernelValue.h`
-  (`framework/include/kokkos/kernels/`). Each is one `using` of a merged base.
-- Port the users to `Kernel`, `VectorKernel`, `TimeKernel`, or `VectorTimeKernel`: framework
-  kernels (`KokkosBodyForce`, `KokkosCoupledForce`, `KokkosMatCoupledForce`,
-  `KokkosCoupledTimeDerivative`, `KokkosTimeDerivative`, `KokkosVectorDiffusion`,
-  `KokkosVectorTimeDerivative`), `modules/heat_transfer` `KokkosHeatConduction`, the test kernels
-  `KokkosConvectionPrecompute`, `KokkosDiffusionPrecompute`, `KokkosVectorBodyForce`, and
-  `framework/doc/content/syntax/KokkosKernels/index.md` (line 113, the review comment).
-- Exit: the whole `kokkos` test dir passes on the H200 (189, only the known failures), the
-  `heat_transfer` Kokkos tests pass, and the grep above finds nothing. Commit with `#33860`.
+- Rename the class and the files `KokkosConfiguration.h/.K` to `KokkosMeshConfiguration.h/.K`
+  (MOOSE names a file after its class). Update every `#include` and the docs
+  (`grep -rn 'Kokkos::Configuration\|KokkosConfiguration' framework modules test unit`).
+- Leave `ConfigurationLoop` unless the user asks.
+- Check the column width of any line that the longer name lengthens (100 columns). Do not run
+  the container clang-format (auto-memory).
+- Exit: the `kokkos` dir passes on the H200 (189, only the known failures), and the grep finds
+  only `ConfigurationLoop`. Commit with `#33860`.
 
-Then step 12c (rename `Configuration`) and step 13 (final reply). See "Performance plan: remaining
-steps".
+Then step 13 (final reply). See "Performance plan: remaining steps".
 
 The draft reply is `moose-stack-build/review-reply-34088.md`. It answers all 10 inline comments
 (`gh api repos/idaholab/moose/pulls/34088/comments`) and holds the per-step time and ratio tables
-up to step 10b. Its two `TODO(step 12b/12c commit)` markers wait on those commits. Do not post it
-without user approval.
+up to step 10b. Its two `TODO(step 12b/12c commit)` markers wait on step 13. The 12b commit is
+`98852e75c2f`. Do not post it without user approval.
 
 Kokkos ignores `--compute-device`. This build compiles Kokkos for CUDA, so every Kokkos kernel runs
 on the H200 under both `cpu` and `cuda`. The flag only selects specs (`compute_devices`). Test once,
@@ -93,6 +89,7 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 ### Commits on this branch (newest first)
 
+- `98852e75c2f` Step 12b: Kokkos kernel and integrated BC aliases removed.
 - `c9d341fd322` Step 10b: AD residual qp sum split in slices over idle group threads.
 - `2709e503f9d` Step 9: AD groups aligned to half-warps when the launch has contraction planes.
 - `168e488f70c` Step 8e: datum transform reset per AD qp.
@@ -151,7 +148,8 @@ times and ratios: the reply tables (`review-reply-34088.md`).
 - Fix the 27-qp contraction-plane bank conflict in this PR (step 9, done).
 - Measure an inner `parallel_reduce` over qps before replying (step 10).
 - p-refinement scratch sizing: filed as #34456, cited in the reply.
-- Aliases: remove them in this PR (user, 2026-11-12, step 12b).
+- Aliases: remove them in this PR (user, 2026-11-12, step 12b). Also `KernelCurl` and the BC
+  aliases `IntegratedBCValue`, `VectorIntegratedBCValue` (user, 2026-11-12). Done.
 
 ## Step results that the code does not record
 
@@ -234,12 +232,10 @@ Measure each step alone against the step before, with a full sweep on arco-c04.
 10b. Done (`c9d341fd322`, sweep `profiles/nsys-v19`). See "Step 10b result".
 11. Done (trim of this document, 2026-11-10).
 12. Done (reply draft, issue #34456). See "Step 12 result".
-12b. Remove the kernel aliases. See "Next".
-12c. Rename `Moose::Kokkos::Configuration` to `MeshConfiguration`. Rename the file
-    `KokkosConfiguration.h/.K` to match (MOOSE names a file after its class). 14 framework files
-    and `unit/src/KokkosCoupleableTest.K` name the class (`grep -rlw Configuration
-    framework/include/kokkos framework/src/kokkos unit/src`). Leave `ConfigurationLoop` unless the
-    user asks. Exit: the `kokkos` dir passes on the H200, and the grep finds only `ConfigurationLoop`.
+12b. Done (`98852e75c2f`). Kernel and BC aliases removed. `kokkos` dir 189 pass,
+    `heat_transfer` Kokkos 12/12. The `thermal_hydraulics` Kokkos library builds, but its
+    executable does not link (see "Known failures").
+12c. Rename `Moose::Kokkos::Configuration` to `MeshConfiguration`. See "Next".
 13. Fill the two `TODO(step 12b/12c commit)` markers in the reply with the commits. Get user
     approval of the reply text, then post it only on approval. Answer the `Coupleable.h` and
     `KokkosADGeometry.h` comments too.
@@ -272,6 +268,8 @@ Details: `moose-stack-build/PLAN-kokkos-known-failures.md`.
 - `kokkos/problems/eigen_problem.test` and `eigen_problem.petsc_gpu`: libMesh was built without
   SLEPc detection.
 - `kokkos/materials/parsed.parsed_material`: a CPU-only test that fails on CPU in a GPU build.
+- `modules/thermal_hydraulics` executable: the link fails on undefined SLEPc `EPS*` symbols in
+  `libnavier_stokes-opt.so`. The cause is the same missing SLEPc. Its Kokkos test cannot run.
 
 ## Profiling setup
 
@@ -328,7 +326,9 @@ See the auto-memory `arco-hpc-moose-build`. In short:
   the 120G default of `build_and_test.sbatch`: 60G at 24 nvcc jobs is OOM-killed.
 - Linking needs `LIBRARY_PATH=/ibmstor/scratch/lindad/projects/moose-stack-build/linkdir`.
 - `scripts/build_and_test.sbatch <moose dir> <test regex> cuda` rebuilds the opt test app and runs
-  the tests. `BUILD_METHOD=dbg` and `REPEAT=n` select dbg and repeat. The login shell exports
+  the tests. `APP_DIR=modules/<name>` selects a module app. On a build failure it prints the last
+  lines of the full make log (`MAKE_LOG`). Run module jobs one at a time: they share libraries.
+  `sbatch --wrap` fails here (an exported shell function breaks it), so use a script. `BUILD_METHOD=dbg` and `REPEAT=n` select dbg and repeat. The login shell exports
   `METHOD=dbg`, so scripts must not read `METHOD`. Write logs to `moose-stack-build/logs/`.
 - AD regex: `'kokkos.*(ad_|current_configuration|function_dirichlet)'`. Expected: 33 pass with
   `cuda`. Whole `kokkos` dir: 189 pass, only the known failures. Filter logs for ` error`,
