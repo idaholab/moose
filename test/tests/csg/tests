@@ -87,7 +87,7 @@
     [csg_only_poly_unit_cli_expand]
       type = 'JSONDiff'
       input = 'csg_only_poly_unit.i'
-      cli_args = 'inactive=CSG --csg-only csg_only_poly_unit_expand_out_csg.json'
+      cli_args = 'inactive=ConstructiveSolidGeometry --csg-only csg_only_poly_unit_expand_out_csg.json'
       jsondiff = 'csg_only_poly_unit_expand_out_csg.json'
       recover = false
       mesh_mode = REPLICATED
