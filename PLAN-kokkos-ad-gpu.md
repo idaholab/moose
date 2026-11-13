@@ -1,6 +1,6 @@
 # Handoff: Kokkos AD GPU work on PR #34088 (arco, updated 2026-11-12)
 
-Status: branch at `98852e75c2f` (steps 0-10b, 12, 12b). Next: step 12c. Updated 2026-11-12.
+Status: branch at `53584d78efd` (steps 0-10b, 12-12c). Next: step 13. Updated 2026-11-13.
 Git tracks this document on the feature branch. Commit it alone with a `PLAN:` subject, and drop
 those commits before the merge. Relative paths outside the MOOSE tree, such as `profiles/`,
 `scripts/`, `patches/`, `ptx/`, `logs/`, `runs/`, and `archive/`, are under `moose-stack-build/`
@@ -13,25 +13,17 @@ Branch `kokkos-reference-configuration` in `/ibmstor/scratch/lindad/projects/moo
 is idaholab/moose#34088. NamjaeChoi left a performance review on it. Answer it with measurements
 once the design work below is final. Do not reply yet.
 
-**Next: step 12c**, rename `Moose::Kokkos::Configuration` to `MeshConfiguration` (user,
-2026-11-12). First action: list the users with `grep -rlw Configuration framework/include/kokkos
-framework/src/kokkos unit/src` (15 files, including `KokkosConfiguration.h/.K`).
+**Next: step 13**, the final reply. First action: read `moose-stack-build/review-reply-34088.md`.
 
-- Rename the class and the files `KokkosConfiguration.h/.K` to `KokkosMeshConfiguration.h/.K`
-  (MOOSE names a file after its class). Update every `#include` and the docs
-  (`grep -rn 'Kokkos::Configuration\|KokkosConfiguration' framework modules test unit`).
-- Leave `ConfigurationLoop` unless the user asks.
-- Check the column width of any line that the longer name lengthens (100 columns). Do not run
-  the container clang-format (auto-memory).
-- Exit: the `kokkos` dir passes on the H200 (189, only the known failures), and the grep finds
-  only `ConfigurationLoop`. Commit with `#33860`.
-
-Then step 13 (final reply). See "Performance plan: remaining steps".
+- Replace `TODO(step 12b commit)` with `98852e75c2f` and `TODO(step 12c commit)` with
+  `53584d78efd`. Resolve each `TODO(user)` marker with the user.
+- Draft answers to the `Coupleable.h` and `KokkosADGeometry.h` comments (see "Review findings").
+- Exit: the user approves the reply text. Post it only on approval. Do not push without a user
+  request.
 
 The draft reply is `moose-stack-build/review-reply-34088.md`. It answers all 10 inline comments
 (`gh api repos/idaholab/moose/pulls/34088/comments`) and holds the per-step time and ratio tables
-up to step 10b. Its two `TODO(step 12b/12c commit)` markers wait on step 13. The 12b commit is
-`98852e75c2f`. Do not post it without user approval.
+up to step 10b. Do not post it without user approval.
 
 Kokkos ignores `--compute-device`. This build compiles Kokkos for CUDA, so every Kokkos kernel runs
 on the H200 under both `cpu` and `cuda`. The flag only selects specs (`compute_devices`). Test once,
@@ -50,7 +42,8 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 ### Decisions
 
 - Step 12 (user, 2026-11-12): remove the kernel aliases in this PR (step 12b). Rename
-  `Moose::Kokkos::Configuration` to `MeshConfiguration` (step 12c). The reply says some reference
+  `Moose::Kokkos::Configuration` to `Deformation`, and `ConfigurationLoop` to `DeformationLoop`
+  (step 12c, user, 2026-11-13). Rejected: `MeshConfiguration`, because the mesh never moves. The reply says some reference
   Jacobian gap is expected for AD, and names no follow-up work.
 - Step 10b: land the qp slices if no AD launch is more than 3% slower than `nsys-v16` (user,
   2026-11-12). Met.
@@ -89,6 +82,7 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 ### Commits on this branch (newest first)
 
+- `53584d78efd` Step 12c: `Configuration` renamed to `Deformation`.
 - `98852e75c2f` Step 12b: Kokkos kernel and integrated BC aliases removed.
 - `c9d341fd322` Step 10b: AD residual qp sum split in slices over idle group threads.
 - `2709e503f9d` Step 9: AD groups aligned to half-warps when the launch has contraction planes.
@@ -235,10 +229,9 @@ Measure each step alone against the step before, with a full sweep on arco-c04.
 12b. Done (`98852e75c2f`). Kernel and BC aliases removed. `kokkos` dir 189 pass,
     `heat_transfer` Kokkos 12/12. The `thermal_hydraulics` Kokkos library builds, but its
     executable does not link (see "Known failures").
-12c. Rename `Moose::Kokkos::Configuration` to `MeshConfiguration`. See "Next".
-13. Fill the two `TODO(step 12b/12c commit)` markers in the reply with the commits. Get user
-    approval of the reply text, then post it only on approval. Answer the `Coupleable.h` and
-    `KokkosADGeometry.h` comments too.
+12c. Done (`53584d78efd`). Class, files, `DeformationLoop`, members, and helpers renamed.
+    `kokkos` dir 189 pass. The profiling scripts match both loop names.
+13. Final reply. See "Next".
 
 Out of scope: each matrix entry costs a CSR search (`Matrix::find`) and an atomic, in hand-coded
 and AD kernels alike. A per-pattern map from element entries to value indices would help both.
@@ -258,7 +251,7 @@ Open a separate issue for it.
   residual-only launches computed full duals (step 2), and auxiliary displacements carried 12 dead
   slots (step 1).
 - State which hand-coded baseline each ratio uses: before step 7 or after it.
-- Non-performance comments: aliases (step 12b), the `Configuration` name (step 12c), the `Coupleable.h`
+- Non-performance comments: aliases (step 12b), the `Configuration` name (step 12c, now `Deformation`), the `Coupleable.h`
   question, and the `KokkosADGeometry.h` placement (step 5 deletes the header).
 
 ## Known failures not caused by this work
@@ -328,7 +321,7 @@ See the auto-memory `arco-hpc-moose-build`. In short:
 - `scripts/build_and_test.sbatch <moose dir> <test regex> cuda` rebuilds the opt test app and runs
   the tests. `APP_DIR=modules/<name>` selects a module app. On a build failure it prints the last
   lines of the full make log (`MAKE_LOG`). Run module jobs one at a time: they share libraries.
-  `sbatch --wrap` fails here (an exported shell function breaks it), so use a script. `BUILD_METHOD=dbg` and `REPEAT=n` select dbg and repeat. The login shell exports
+  `BUILD_METHOD=dbg` and `REPEAT=n` select dbg and repeat. The login shell exports
   `METHOD=dbg`, so scripts must not read `METHOD`. Write logs to `moose-stack-build/logs/`.
 - AD regex: `'kokkos.*(ad_|current_configuration|function_dirichlet)'`. Expected: 33 pass with
   `cuda`. Whole `kokkos` dir: 189 pass, only the known failures. Filter logs for ` error`,
