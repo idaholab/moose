@@ -1,0 +1,98 @@
+[Tests]
+  design = 'SCMQuadCoreMeshGenerator.md'
+  issues = '#33354'
+  [core]
+    requirement = 'The system shall place square-lattice subchannel assemblies of different sizes on '
+                  'a rectangular core lattice with empty positions, with each assembly keeping its '
+                  'own subdomains, boundaries, and assembly id,'
+    [ducted]
+      type = Exodiff
+      input = core.i
+      exodiff = core_in.e
+      cli_args = '--mesh-only'
+      recover = false
+      mesh_mode = 'replicated'
+      detail = 'for subchannel assemblies surrounded by ducts, and'
+    []
+    [detailed]
+      type = Exodiff
+      input = detailed_core.i
+      exodiff = detailed_core_exodus.e
+      recover = false
+      mesh_mode = 'replicated'
+      detail = 'for detailed 3D assemblies used to visualize core solutions.'
+    []
+  []
+  [errors]
+    requirement = 'The system shall report an error when building a square-lattice subchannel core '
+                  'mesh'
+    [overlap]
+      type = RunException
+      input = core.i
+      cli_args = '--mesh-only QuadSubChannelMesh/core/assembly_pitch=0.4'
+      expect_err = 'The following assemblies overlap.*Assembly 0 \(\'big_duct\'\) and assembly 1 \(\'small_duct\'\)'
+      mesh_mode = 'replicated'
+      detail = 'if neighboring assemblies overlap,'
+    []
+    [overlap_across_empty]
+      type = RunException
+      input = core_wide.i
+      cli_args = '--mesh-only'
+      expect_err = 'The following assemblies overlap.*Assembly 0 \(\'wide_duct\'\) and assembly 1 '
+                   '\(\'wide_duct\'\)'
+      mesh_mode = 'replicated'
+      detail = 'if assemblies overlap across an empty position,'
+    []
+    [empty_pattern]
+      type = RunException
+      input = core.i
+      cli_args = "--mesh-only QuadSubChannelMesh/core/pattern=''"
+      expect_err = 'The pattern must contain at least one row'
+      mesh_mode = 'replicated'
+      detail = 'if the pattern is empty,'
+    []
+    [empty_row]
+      type = RunException
+      input = core.i
+      cli_args = "--mesh-only QuadSubChannelMesh/core/pattern='; 0'"
+      expect_err = 'Row 0 is empty; every row must contain at least one entry'
+      mesh_mode = 'replicated'
+      detail = 'if a pattern row is empty,'
+    []
+    [row_length]
+      type = RunException
+      input = core.i
+      cli_args = "--mesh-only QuadSubChannelMesh/core/pattern='0 1 0; 1 0'"
+      expect_err = 'Row 1 has 2 entries; all rows of a rectangular pattern must have the 3 entries '
+                   'of the first row'
+      mesh_mode = 'replicated'
+      detail = 'if the pattern rows have different lengths,'
+    []
+    [bad_index]
+      type = RunException
+      input = core.i
+      cli_args = "--mesh-only QuadSubChannelMesh/core/pattern='0 1 0; 1 0 2'"
+      expect_err = 'Entry 2 is neither -1 nor a valid index into \'inputs\''
+      mesh_mode = 'replicated'
+      detail = 'if a pattern entry is not a valid input index,'
+    []
+    [not_scm_input]
+      type = RunException
+      input = core.i
+      cli_args = '--mesh-only QuadSubChannelMesh/gen/type=GeneratedMeshGenerator '
+                 'QuadSubChannelMesh/gen/dim=1 '
+                 'QuadSubChannelMesh/core/inputs="big_duct small_duct gen" '
+                 'QuadSubChannelMesh/core/pattern="0 1 0; 1 0 2"'
+      expect_err = 'Input \'gen\' does not provide \'duct_size_x\' and \'duct_size_y\' metadata'
+      mesh_mode = 'replicated'
+      detail = 'if an input is not a square-lattice subchannel assembly or duct mesh, and'
+    []
+    [no_mesh_only]
+      type = RunException
+      input = core.i
+      expect_err = 'can only be generated with --mesh-only; solving on it is not supported yet'
+      mesh_mode = 'replicated'
+      detail = 'if a solve is requested on a core of one-dimensional assemblies.'
+    []
+  []
+[]
