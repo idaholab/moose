@@ -111,7 +111,7 @@ public:
    * when the element itself is the contact face (see MooseMesh::isSurfaceElemOnNodeset).
    */
   static std::unique_ptr<const Elem>
-  buildSide(const Elem & elem, unsigned int side_num, bool surface_elem);
+  buildSide(const Elem & elem, unsigned int side_num, bool elem_is_surface_elem);
 };
 
 // Used for Restart

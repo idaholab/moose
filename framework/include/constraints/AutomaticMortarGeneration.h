@@ -330,7 +330,7 @@ public:
    * @return The interior parent of a lower-dimensional primary element, or the element itself if
    * it has no interior parent, e.g. when the primary side is a rigid surface mesh
    */
-  static const Elem & primaryInteriorElem(const Elem & lower_primary_elem);
+  static const Elem & primaryInteriorParentOrSelf(const Elem & lower_primary_elem);
 
   /**
    * Compute the normals at given reference points on a secondary element
@@ -472,7 +472,8 @@ public:
   const std::set<SubdomainID> & secondaryIPSubIDs() const { return _secondary_ip_sub_ids; }
 
   /**
-   * @return All the primary interior parent subdomain IDs associated with the mortar mesh
+   * @return All the primary interior parent subdomain IDs associated with the mortar mesh, and the
+   * subdomain IDs of primary elements without an interior parent
    */
   const std::set<SubdomainID> & primaryIPSubIDs() const { return _primary_ip_sub_ids; }
 
@@ -610,7 +611,8 @@ private:
   /// All the secondary interior parent subdomain IDs associated with the mortar mesh
   std::set<SubdomainID> _secondary_ip_sub_ids;
 
-  /// All the primary interior parent subdomain IDs associated with the mortar mesh
+  /// All the primary interior parent subdomain IDs associated with the mortar mesh, and the
+  /// subdomain IDs of primary elements without an interior parent
   std::set<SubdomainID> _primary_ip_sub_ids;
 
   /**

@@ -133,10 +133,10 @@ protected:
    * residual is still computed, so that tagged residuals such as reaction forces keep the contact
    * contribution.
    */
-  bool skipPrimaryJacobian();
+  bool skipPrimaryJacobian() const;
 
   /// Cached result of \p skipPrimaryJacobian(), computed on first use
-  std::optional<bool> _skip_primary_jacobian;
+  mutable std::optional<bool> _skip_primary_jacobian;
 
   /// A dummy object useful for constructing _test when not using Lagrange multipliers
   const VariableTestValue _test_dummy;

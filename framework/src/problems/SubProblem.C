@@ -946,6 +946,29 @@ SubProblem::reinitNeighborFaceRef(const Elem * neighbor_elem,
 }
 
 void
+SubProblem::reinitNeighborSurfaceElemRef(const Elem * neighbor_elem,
+                                         const std::vector<Point> & pts,
+                                         const THREAD_ID tid)
+{
+  // The element has no side that is the face; it is the face
+  const auto no_side = libMesh::invalid_uint;
+
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+  {
+    assembly(tid, nl_sys_num).reinitNeighborSurfaceElemRef(neighbor_elem, pts);
+
+    auto & nl = systemBaseNonlinear(nl_sys_num);
+    nl.prepareNeighbor(tid);
+    nl.reinitNeighborFace(neighbor_elem, no_side, tid);
+  }
+
+  systemBaseAuxiliary().prepareNeighbor(tid);
+  systemBaseAuxiliary().reinitNeighborFace(neighbor_elem, no_side, tid);
+
+  assembly(tid, currentNlSysNum()).prepareNeighbor();
+}
+
+void
 SubProblem::reinitLowerDElem(const Elem * elem,
                              const THREAD_ID tid,
                              const std::vector<Point> * const pts,

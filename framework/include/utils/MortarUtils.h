@@ -296,9 +296,13 @@ loopOverMortarSegments(
       if (displaced)
         reinit_primary_elem = fe_problem.mesh().elemPtr(reinit_primary_elem->id());
 
-      // reinit the variables/residuals/jacobians on the primary interior
-      fe_problem.reinitNeighborFaceRef(
-          reinit_primary_elem, primary_side_id, TOLERANCE, &xi2_pts, nullptr, tid);
+      // reinit the variables/residuals/jacobians on the primary interior, or on the primary
+      // element itself if it has no interior parent
+      if (primary_side_id == libMesh::invalid_uint)
+        fe_problem.reinitNeighborSurfaceElemRef(reinit_primary_elem, xi2_pts, tid);
+      else
+        fe_problem.reinitNeighborFaceRef(
+            reinit_primary_elem, primary_side_id, TOLERANCE, &xi2_pts, nullptr, tid);
 
       // reinit neighbor materials, but be careful not to execute stateful materials since
       // conceptually they don't make sense with mortar (they're not interpolary)
