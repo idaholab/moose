@@ -77,6 +77,13 @@ $T_\text{mid} = 1000$ K. The fits cover 200 K to 3500 K, except for N$_2$, which
 5000 K. The utilities do not check these ranges. The molar masses are those Cantera computes from
 its atomic weights.
 
+The built-in noble gases, He, Ar, Kr, and Xe, are not in GRI-Mech 3.0 except for Ar. Their data
+are those of [!citet](mcbride1993) as distributed with Cantera 3.2.0 in `nasa_gas.yaml`, which
+cover 200 K to 6000 K. Their heat capacity is $c_p^\circ/R = 5/2$, apart from corrections below
+$4 \times 10^{-5}$ for Xe. The reference pressure of these data is 1 bar, so their entropy constants $a_6$
+are reduced by $\ln(101325/10^5)$ to refer them to 101325 Pa. Their standard entropies at
+298.15 K then agree with the JANAF tables [!citep](chase1998janaf) within 0.001 J/(mol K).
+
 At $T_\text{mid}$ the low-temperature polynomial applies, as in Cantera. The two polynomials of
 a species do not match exactly at $T_\text{mid}$: for the built-in species, the mismatch is below
 $4 \times 10^{-7}$ relative in $c_p^\circ$, $6 \times 10^{-3}$ J/mol in $h^\circ$, and
@@ -102,10 +109,17 @@ $\epsilon_{ij} = \sqrt{\epsilon_i \epsilon_j}$. The reduced collision integrals
 $\Omega^{(1,1)*}$ and $\Omega^{(2,2)*}$ of the Lennard-Jones (12-6) potential follow the fits of
 [!citet](neufeld1972), valid for $0.3 \le T^* \le 100$.
 
-The Lennard-Jones parameters of the built-in species, H$_2$, O$_2$, H$_2$O, CH$_4$, CO, CO$_2$, and
-N$_2$, are those of GRI-Mech 3.0 [!citep](smith_grimech30) as distributed with Cantera 3.2.0
-[!citep](cantera320), the same source as the NASA 7-coefficient data. Their reduced temperatures
-remain within the range of the fits over the temperature ranges of the NASA 7-coefficient data.
+The Lennard-Jones parameters of the built-in species, H$_2$, O$_2$, H$_2$O, CH$_4$, CO, CO$_2$,
+N$_2$, He, and Ar, are those of GRI-Mech 3.0 [!citep](smith_grimech30) as distributed with
+Cantera 3.2.0 [!citep](cantera320), the same source as most of the NASA 7-coefficient data. Those
+of Kr and Xe, which GRI-Mech 3.0 does not include, are those of [!citet](svehla1962). Except for
+He, their reduced temperatures remain within the range of the fits over the temperature ranges of
+the NASA 7-coefficient data. That of He exceeds it above about 1000 K, and those of the pairs
+He-H$_2$ and He-N$_2$ above about 1970 K and 3150 K. Even within the range of the fits, the
+Lennard-Jones potential describes He poorly at high temperatures: its Chapman-Enskog viscosity is
+about 4% lower than that of [!citet](petersen) at 600 K and 6% lower at 1000 K. The binary diffusion
+coefficients of pairs with He likely carry errors of similar size at these temperatures, which
+have not been checked against measurements.
 The viscosities of the species other than H$_2$O agree with those of Cantera within 0.5%. The
 GRI-Mech parameters of H$_2$O assume a correction for its dipole moment, which is not applied here,
 so the binary diffusion coefficients of pairs with H$_2$O differ from those of Cantera by up to 4%.
