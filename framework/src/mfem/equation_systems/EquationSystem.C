@@ -230,6 +230,7 @@ EquationSystem::ApplyEssentialConstraint(const std::string & var_name,
   // A mesh without boundary elements, such as a periodic one, has no boundary attributes
   const auto & bdr_attributes = trial_gf.ParFESpace()->GetParMesh()->bdr_attributes;
   global_bdr_markers.SetSize(bdr_attributes.Size() ? bdr_attributes.Max() : 0, 0);
+  global_ess_tdofs.SetSize(0);
   if (_essential_bc_map.Has(var_name))
     for (auto & bc : _essential_bc_map.GetRef(var_name))
     {
@@ -240,19 +241,29 @@ EquationSystem::ApplyEssentialConstraint(const std::string & var_name,
       // Add these boundary markers to the set of markers labelling all essential boundaries
       for (const auto i : make_range(ess_bdrs.Size()))
         global_bdr_markers[i] |= ess_bdrs[i];
-    }
-  trial_gf.ParFESpace()->GetEssentialTrueDofs(global_bdr_markers, global_ess_tdofs);
 
-  // Set constrained DoF values and append the constrained tdofs. The constraints on a
-  // variable act on disjoint subdomains, so they may be applied in any order.
+      // Append to the global list so we can detect duplicate essential true DoFs below
+      mfem::Array<int> ess_tdofs;
+      trial_gf.ParFESpace()->GetEssentialTrueDofs(ess_bdrs, ess_tdofs);
+      global_ess_tdofs.Append(ess_tdofs);
+    }
+
+  // Set constrained DoF values and append the constrained tdofs. The constraints on a variable act
+  // on disjoint sets of subdomains and we error below if any one DoF is constrained more than once,
+  // so they may be applied in any order.
   if (_essential_constraint_map.Has(var_name))
     for (auto & constraint : _essential_constraint_map.GetRef(var_name))
       constraint->ApplyConstraint(trial_gf, global_ess_tdofs);
-  // Deduplicate. mfem::Array::Unique only drops *consecutive* duplicates, so the
-  // list must be sorted first; a constraint whose block touches an essential
-  // boundary reports tdofs already present from GetEssentialTrueDofs.
+
+  // We do not allow users to constrain the same DoFs more than once.
+  // mfem::Array::Unique only drops *consecutive* duplicates, so the list must be sorted first.
+  const int num_ess_tdofs = global_ess_tdofs.Size();
   global_ess_tdofs.Sort();
   global_ess_tdofs.Unique();
+  if (global_ess_tdofs.Size() != num_ess_tdofs)
+    mooseError("Duplicate essential true degrees of freedom for variable '",
+               var_name,
+               "'. Check for overlapping essential constraints or boundary conditions.");
 }
 
 void

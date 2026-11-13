@@ -40,7 +40,7 @@ public:
 
   /// Reports an error if this constraint shares a subdomain with @p other, a
   /// constraint on the same variable. Restricting the constraints on a variable to
-  /// disjoint subdomains makes the dofs a tree-cotree gauge selects independent of
+  /// disjoint sets of subdomains makes the dofs a tree-cotree gauge selects independent of
   /// the order the constraints are applied in, since the gauge seeds its spanning
   /// forest with every dof of the subdomains it excludes.
   void checkDisjointSubdomains(MFEMConstraint & other);

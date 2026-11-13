@@ -59,7 +59,7 @@ MFEMConstraint::checkDisjointSubdomains(MFEMConstraint & other)
                  "' on variable '",
                  getTrialVariableName(),
                  "'. Essential constraints on the same variable must be restricted to disjoint "
-                 "subdomains.");
+                 "sets of subdomains.");
 }
 
 const mfem::Array<int> &

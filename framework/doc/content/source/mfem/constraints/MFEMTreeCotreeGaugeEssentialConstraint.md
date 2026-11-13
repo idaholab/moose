@@ -58,10 +58,10 @@ Edges whose degrees of freedom are already fixed, by an essential (tangential Di
 boundary condition or by another essential constraint on the variable, seed the spanning
 forest, so that the gauge stays compatible with those conditions instead of
 over-constraining them. Essential constraints on one variable must be restricted to
-disjoint subdomains (see [MFEMConstraint.md]), so another constraint always acts outside
-the gauge's `block` and its edges seed the forest as described below, whichever of the two
-is applied first. A gauge used alongside another constraint therefore needs `block` set to
-exclude that constraint's subdomains.
+disjoint sets of subdomains (see [MFEMConstraint.md]), so another constraint is restricted
+to subdomains outside the gauge's `block` and their edges seed the forest as described below,
+whichever of the two is applied first. A gauge used alongside another constraint therefore
+needs `block` set to exclude that constraint's subdomains.
 
 ### Restricting the gauge with `block`
 

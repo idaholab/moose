@@ -29,10 +29,10 @@
     boundary = 1
     coefficient = 1.0
   []
-  [bottom]
+  [front]
     type = MFEMScalarDirichletBC
     variable = transfer_var
-    boundary = 2
+    boundary = 6
   []
 []
 

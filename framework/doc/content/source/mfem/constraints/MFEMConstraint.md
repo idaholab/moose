@@ -31,10 +31,13 @@ and on the exterior boundary of the mesh, so that they are solved for or fixed b
 essential boundary condition instead. The tree-cotree gauges do not take this parameter,
 since a gauge has to reach the vertices on the boundary of the region it gauges.
 
-The essential constraints on a variable must be restricted to disjoint subdomains; an empty
-`block` covers every subdomain. Constraints sharing a subdomain are reported as an error,
-since the degrees of freedom they fix together would depend on the order they are applied
-in, most notably for [MFEMTreeCotreeGaugeEssentialConstraint.md].
+The essential constraints on a variable must be restricted to disjoint sets of subdomains;
+an empty `block` covers every subdomain. Constraints sharing a subdomain are reported as an
+error, since the degrees of freedom they fix together would depend on the order they are
+applied in, most notably for [MFEMTreeCotreeGaugeEssentialConstraint.md].
+Since, even when the sets of subdomains are disjoint, the subdomains themselves might only
+be interior-disjoint, an error is also reported if a constraint fixes a true degree of freedom
+already fixed by another constraint or an essential boundary condition on the same variable.
 
 !if-end!
 

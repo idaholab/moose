@@ -259,7 +259,8 @@
     type = RunException
     input = ../solvers/pmg_diffusion.i
     cli_args = 'Constraints/fixed/type=MFEMScalarEssentialConstraint '
-               'Constraints/fixed/variable=concentration'
+               'Constraints/fixed/variable=concentration '
+               'Constraints/fixed/constrain_subdomain_boundary=false'
     expect_err = "geometric multigrid cannot account for"
     design = 'MFEMGeometricMultigridSolver.md'
     requirement = 'The system shall report an error if geometric multigrid is used to solve for an MFEM variable with essential constraints within subdomains, which it cannot eliminate'
@@ -272,7 +273,8 @@
                'FESpaces/HCurlFESpace/closed_basis=GaussLobatto '
                'FESpaces/HCurlFESpace/open_basis=IntegratedGLL '
                'Constraints/fixed/type=MFEMVectorEssentialConstraint '
-               'Constraints/fixed/variable=e_field'
+               'Constraints/fixed/variable=e_field '
+               'Constraints/fixed/constrain_subdomain_boundary=false'
     expect_err = "which this solver cannot account for"
     design = 'MFEMMatrixFreeAMS.md'
     requirement = 'The system shall report an error if matrix-free AMS is used to solve for an MFEM variable with essential constraints within subdomains, which it cannot eliminate'
@@ -283,7 +285,7 @@
     input = tree_cotree_gauge_with_constraint.i
     csvdiff = tree_cotree_gauge_with_constraint_out.csv
     design = 'MFEMTreeCotreeGaugeEssentialConstraint.md'
-    requirement = 'The system shall apply a tree-cotree gauge to an H(curl) variable alongside an essential constraint on a disjoint subdomain'
+    requirement = 'The system shall apply a tree-cotree gauge to an H(curl) variable alongside an essential constraint on a different subdomain'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
