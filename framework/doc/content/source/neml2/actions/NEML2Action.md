@@ -65,18 +65,44 @@ Next, a [NEML2BatchIndexGenerator](NEML2BatchIndexGenerator.md) and a [NEML2Mode
 
 The last step is creating the `NEML2ToMOOSE` retrievers to retrieve NEML2 model outputs (and their derivatives) back to MOOSE. This step is similar to [creating MOOSEToNEML2 gatherers](NEML2Action.md#gatherer).
 
-The action passes three independent domain selectors to every gatherer and the index generator:
-`volume`, `boundary` (as `DomainUserObject::external_boundaries`), and `interface` (as
-`DomainUserObject::interface_boundaries`). Volume locations are keyed by element ID. Side locations
-are keyed by `(element ID, side)` and internal interfaces add one entry for each side of the pair.
-These key spaces are intentionally distinct; a retriever never maps between them using the current
-quadrature-point index.
+## Evaluation domains id=domains
 
-When `volume` is enabled, an output retriever is a block material and can be reinitialized in volume
-or selected side contexts. Without volume, the action creates one boundary material on the
-deduplicated union of `boundary` and `interface`. In both cases, an attempted read at a location that
-was not selected produces an error. Retrievers also verify that each span size matches the current
-quadrature rule before indexing a NEML2 output tensor.
+The user-facing behavior is described in [NEML2 syntax](syntax/NEML2/index.md#domains). This section
+explains how the action implements it.
+
+The three domain parameters of the sub-block are passed to the constructed objects as follows:
+
+| Sub-block parameter | Gatherers and index generator | Retrievers                                   |
+| :------------------ | :---------------------------- | :------------------------------------------- |
+| `volume`            | `volume`                      | Block material on `block` if `true`          |
+| `boundary`          | `external_boundaries`         | Part of `boundary` if `volume = false`       |
+| `interface`         | `interface_boundaries`        | Part of `boundary` if `volume = false`       |
+
++Batch layout.+ The gatherers and the index generator are domain user objects, so they visit the same
+locations in the same order. Each visited location receives one contiguous span of the NEML2 batch,
+with one entry per quadrature point:
+
+- a volume span for each element when `volume = true`,
+- a side span for each `(element ID, side)` pair on a selected external boundary,
+- two side spans for each face on a selected interface, one for each of the two elements.
+
+Volume spans are keyed by element ID and side spans by `(element ID, side)`, in separate maps. A
+retriever never converts between the two, because volume and side quadrature points do not coincide.
+
++Retrievers.+ With `volume = true`, each retriever is a block material. MOOSE reinitializes it both in
+element interiors and on faces, and the retriever reads the volume or side span that matches the
+current context. With `volume = false`, the action creates one boundary material per output on the
+sorted, deduplicated union of `boundary` and `interface`; a single material avoids declaring the
+same property twice.
+
++Safety checks.+ A retriever stops with an error if
+
+- no span exists for the current element or element side, which means the location was not selected;
+- the span size differs from the number of quadrature points in the current quadrature rule.
+
++Interface material inputs.+ Interface material data is available only in the interface callback of a
+domain user object. It cannot fill volume or external-boundary spans, so the action rejects
+[!param](/NEML2/interface_material_inputs) unless `volume = false` and `boundary` is empty.
 
 ## Debugging a failed constitutive update id=dump
 

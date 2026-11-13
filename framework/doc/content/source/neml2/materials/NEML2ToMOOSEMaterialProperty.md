@@ -20,6 +20,12 @@ The following flavors exist:
 | `NEML2ToMOOSESymmetricRankFourTensorMaterialProperty` | `SymmetricRankFourTensor`   |
 | `NEML2ToMOOSEStdVectorMaterialProperty`               | `std::vector<Real>`         |
 
+In element interiors, the object reads the NEML2 batch span of the current element. On a side, it
+reads the span of the current `(element, side)` pair. If that location was not evaluated, or if the
+span size does not match the current quadrature rule, the object stops with an error rather than
+reading the wrong entries. See [evaluation domains](syntax/NEML2/index.md#domains) for how to select
+the evaluated locations.
+
 !syntax parameters /Materials/NEML2ToMOOSERealMaterialProperty
 
 !if-end!

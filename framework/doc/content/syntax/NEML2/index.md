@@ -7,44 +7,75 @@ The `[NEML2]` block in the MOOSE input file is the entry point for defining NEML
 !alert note
 This page is +user-facing+, i.e., the [Input file syntax](syntax/NEML2/index.md#input-syntax) section explains how to write the MOOSE input file in order to connect MOOSE to NEML2 for material modeling. +For developers+, please refer to the [NEML2Action](NEML2Action.md) and [NEML2ActionCommon](NEML2ActionCommon.md) pages regarding what objects are constructed by the underlying Action.
 
-## Evaluation domains
+## Evaluation domains id=domains
 
-Each NEML2 sub-block independently selects where its model is evaluated:
+A NEML2 model is evaluated at quadrature points. Each sub-block chooses which quadrature points to
+use with three independent parameters:
 
-- `volume = true` evaluates element-interior quadrature points. This is the default.
-- `boundary` lists external sidesets. Each selected side must have no neighboring element.
-- `interface` lists internal sidesets. Both element sides of each selected interface are evaluated.
+| Parameter                  | Quadrature points that are evaluated                                     | Default |
+| :------------------------- | :----------------------------------------------------------------------- | :------ |
+| [!param](/NEML2/volume)    | Element interiors                                                        | `true`  |
+| [!param](/NEML2/boundary)  | Sides in the listed +external+ sidesets (sides with no neighbor element) | empty   |
+| [!param](/NEML2/interface) | +Both+ sides of the listed +internal+ sidesets (sides between elements)  | empty   |
 
-At least one domain must be selected. All seven nonempty combinations of volume, external boundary,
-and internal interface evaluation are supported. For example:
+At least one domain must be selected, which gives seven supported cases (V = volume, B = boundary,
+I = interface):
 
-```
-[NEML2]
-  [side_model]
-    model = model
-    volume = false
-    boundary = 'left right'
-    interface = 'block_A_block_B'
-  []
-[]
-```
+| Case      | Settings                                                    |
+| :-------- | :---------------------------------------------------------- |
+| V         | `volume = true` (default)                                   |
+| B         | `volume = false`, `boundary = '...'`                        |
+| I         | `volume = false`, `interface = '...'`                       |
+| V + B     | `volume = true`, `boundary = '...'`                         |
+| V + I     | `volume = true`, `interface = '...'`                        |
+| B + I     | `volume = false`, `boundary = '...'`, `interface = '...'`   |
+| V + B + I | `volume = true`, `boundary = '...'`, `interface = '...'`    |
 
-A NEML2 output is available only at locations selected by that sub-block. A volume material consumer
-cannot read an output from a side-only evaluation, and an unselected boundary cannot read a volume
-output as if it were side data. Such access is an error because volume and side quadrature points do
-not generally coincide.
+### Example
 
-`interface_only` is deprecated. Replace `interface_only = true` with `volume = false` and the same
-`interface` list. Do not combine an explicitly specified `interface_only` with `volume` or
-`boundary`.
+The sub-block below evaluates the model `sum = A + B` in all three domains, with `A = x` taken from a
+variable and `B = y + t` taken from a material property:
 
-Material properties from ordinary block materials are evaluated directly in each selected context:
-volume material data in element interiors, face material data on external boundaries and the current
-interface side, and neighbor material data on the opposite interface side. Variables used on a side
-are FE-field traces evaluated at that side's quadrature points; this does not turn them into boundary
-or interface variables. A property produced by a true `InterfaceMaterial` instead lives in the
-separate interface material data store and must be listed in `interface_material_inputs`. Such inputs
-currently require an interface-only domain (`volume = false`, no `boundary`).
+!listing test/tests/neml2/evaluation_domains.i block=NEML2
+
+After the first time step ($t = 1$), the average of `sum` is 2.0 over the volume, 1.5 on the `left`
+boundary ($x = 0$), and 2.0 on the interface at $x = 0.5$. Each value is computed from inputs at that
+domain's own quadrature points. Side values are not copied from the volume.
+
+### Choosing the domains
+
+Select a domain for every place where a NEML2 output is used:
+
+| Object that uses the NEML2 output                                     | Required setting                     |
+| :-------------------------------------------------------------------- | :----------------------------------- |
+| Kernels, block materials, element postprocessors                      | `volume = true`                      |
+| Boundary conditions or side postprocessors on external sideset `S`    | `S` is listed in `boundary`          |
+| Interface kernels or interface postprocessors on internal sideset `S` | `S` is listed in `interface`         |
+
+An output exists only where it was evaluated. Using it anywhere else is an error. For example, a
+side postprocessor on `left` fails if `volume = true` but `left` is not listed in `boundary`. MOOSE
+does not reuse volume values on a side, because volume and side quadrature points are at different
+locations.
+
+The sidesets must also match their parameter:
+
+- `boundary` accepts only external sides, and `interface` accepts only internal sides. A sideset that
+  contains both kinds of sides is rejected by either parameter.
+- The same sideset cannot be listed in both `boundary` and `interface`.
+
+### Where the inputs come from
+
+In every domain, NEML2 inputs are read at that domain's quadrature points:
+
+- +Variables and functions+ are evaluated at each quadrature point. On a side, a variable gives its
+  value on that side; it does not need to be a boundary or interface variable.
+- +Material properties from ordinary block materials+ are read from the volume material data in
+  element interiors, from the face material data on external boundaries and on the current side of an
+  interface, and from the neighbor material data on the other side of an interface. Each material
+  input must therefore be available in every selected domain.
+- +Material properties from an `InterfaceMaterial`+ are stored separately by MOOSE and must be listed
+  in [!param](/NEML2/interface_material_inputs). Such properties exist only on internal interfaces,
+  so this option requires `volume = false` and an empty `boundary`.
 
 ## Input File Syntax id=input-syntax
 
