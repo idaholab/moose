@@ -676,6 +676,12 @@ public:
                              const std::vector<Real> * const weights = nullptr);
 
   /**
+   * Reinitialize FE data for a neighbor element that is itself the face, i.e. a surface element
+   * without an interior parent, with a given set of reference points on that element
+   */
+  void reinitNeighborSurfaceElemRef(const Elem * neighbor_elem, const std::vector<Point> & pts);
+
+  /**
    * Reintialize dual basis coefficients based on a customized quadrature rule
    */
   void reinitDual(const Elem * elem, const std::vector<Point> & pts, const std::vector<Real> & JxW);

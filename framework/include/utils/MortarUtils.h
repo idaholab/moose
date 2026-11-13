@@ -244,9 +244,13 @@ loopOverMortarSegments(
       // Get a reference to the MortarSegmentInfo for this Elem.
       const MortarSegmentInfo & msinfo = amg.mortarSegmentMeshElemToInfo().at(msm_elem);
 
-      // Set the primary interior parent and side ids
+      // Set the primary interior parent and side ids, or the element itself if it has no parent
       const Elem * primary_ip = msinfo.primary_elem->interior_parent();
-      unsigned int primary_side_id = primary_ip->which_side_am_i(msinfo.primary_elem);
+      unsigned int primary_side_id = libMesh::invalid_uint;
+      if (primary_ip)
+        primary_side_id = primary_ip->which_side_am_i(msinfo.primary_elem);
+      else
+        primary_ip = msinfo.primary_elem;
       const auto & primary_ip_mats =
           libmesh_map_find(primary_ip_sub_to_mats, primary_ip->subdomain_id());
 
@@ -292,9 +296,13 @@ loopOverMortarSegments(
       if (displaced)
         reinit_primary_elem = fe_problem.mesh().elemPtr(reinit_primary_elem->id());
 
-      // reinit the variables/residuals/jacobians on the primary interior
-      fe_problem.reinitNeighborFaceRef(
-          reinit_primary_elem, primary_side_id, TOLERANCE, &xi2_pts, nullptr, tid);
+      // reinit the variables/residuals/jacobians on the primary interior, or on the primary
+      // element itself if it has no interior parent
+      if (primary_side_id == libMesh::invalid_uint)
+        fe_problem.reinitNeighborSurfaceElemRef(reinit_primary_elem, xi2_pts, tid);
+      else
+        fe_problem.reinitNeighborFaceRef(
+            reinit_primary_elem, primary_side_id, TOLERANCE, &xi2_pts, nullptr, tid);
 
       // reinit neighbor materials, but be careful not to execute stateful materials since
       // conceptually they don't make sense with mortar (they're not interpolary)

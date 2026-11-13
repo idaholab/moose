@@ -493,6 +493,15 @@ public:
                                      const THREAD_ID tid = 0);
 
   /**
+   * reinitialize FE objects on a given neighbor element that is itself the face, i.e. a surface
+   * element without an interior parent, at a given set of reference points on that element and
+   * then compute variable data. Like \p reinitNeighborFaceRef, this is an all-in-one reinit
+   */
+  virtual void reinitNeighborSurfaceElemRef(const Elem * neighbor_elem,
+                                            const std::vector<Point> & pts,
+                                            const THREAD_ID tid = 0);
+
+  /**
    * reinitialize a neighboring lower dimensional element
    */
   void reinitNeighborLowerDElem(const Elem * elem, const THREAD_ID tid = 0);

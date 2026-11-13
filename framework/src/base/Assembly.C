@@ -2334,6 +2334,23 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
 }
 
 void
+Assembly::reinitNeighborSurfaceElemRef(const Elem * neighbor, const std::vector<Point> & pts)
+{
+  _current_neighbor_elem = neighbor;
+
+  const unsigned int neighbor_dim = neighbor->dim();
+
+  // As in reinitNeighborFaceRef, the quadrature weights are never used
+  ArbitraryQuadrature * neighbor_rule =
+      qrules(neighbor_dim, neighbor->subdomain_id()).neighbor.get();
+  neighbor_rule->setPoints(pts);
+  setNeighborQRule(neighbor_rule, neighbor_dim);
+
+  // The neighbor is the face, so the face neighbor FE objects are reinitialized on the element
+  reinitFEFaceNeighbor(neighbor, pts);
+}
+
+void
 Assembly::reinitDual(const Elem * elem,
                      const std::vector<Point> & pts,
                      const std::vector<Real> & JxW)
@@ -2504,7 +2521,11 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
         "JxW must also correspond to the 'top' quadrature point. And libMesh/MOOSE has no way to "
         "guarantee that with multiple quadrature points.");
 
-    _current_neighbor_side_elem = &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
+    // An invalid side means the neighbor is itself the face, e.g. a primary surface element
+    _current_neighbor_side_elem =
+        neighbor_side == libMesh::invalid_uint
+            ? neighbor
+            : &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
 
     // With a single point our size-1 JxW should just be the element volume
     _current_JxW_neighbor.resize(1);
