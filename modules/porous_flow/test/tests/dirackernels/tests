@@ -469,7 +469,7 @@
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#TODO'
   []
-  [bh_except21]
+  [bh_except22]
     type = 'RunException'
     input = 'bh_except18.i'
     cli_args = "DiracKernels/bh/unit_weight='0 0 0' DiracKernels/bh/well_constants='1E-12'"
