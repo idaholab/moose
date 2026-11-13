@@ -38,7 +38,6 @@ PorousFlowBrineCO2::PorousFlowBrineCO2(const InputParameters & parameters)
     _Rbar(_R * 10.0),
     _Tlower(372.15),
     _Tupper(382.15),
-    _Zmin(1.0e-4),
     _co2_henry(_co2_fp.henryCoefficients())
 {
   // Check that the correct FluidProperties UserObjects have been provided
@@ -138,6 +137,9 @@ PorousFlowBrineCO2::thermophysicalProperties(const ADReal & pressure,
       // Calculate gas properties
       gasProperties(pressure, temperature, fsp);
 
+      // Properties of the absent liquid phase
+      absentPhaseProperties(pressure, temperature, Xnacl, phase_state, fsp);
+
       break;
     }
 
@@ -146,6 +148,9 @@ PorousFlowBrineCO2::thermophysicalProperties(const ADReal & pressure,
       // Calculate the liquid properties
       const ADReal liquid_pressure = pressure - _pc.capillaryPressure(1.0, qp);
       liquidProperties(liquid_pressure, temperature, Xnacl, fsp);
+
+      // Properties of the absent gas phase
+      absentPhaseProperties(pressure, temperature, Xnacl, phase_state, fsp);
 
       break;
     }
@@ -178,56 +183,38 @@ PorousFlowBrineCO2::massFractions(const ADReal & pressure,
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
-  ADReal Xco2 = 0.0;
-  ADReal Yh2o = 0.0;
-  ADReal Yco2 = 0.0;
+  // Equilibrium mass fraction of CO2 in liquid and H2O in gas phases. These are the mass
+  // fractions in the two-phase state, and the mass fractions of the absent phase in the
+  // single-phase states
+  ADReal Xco2, Yh2o;
+  equilibriumMassFractions(pressure, temperature, Xnacl, Xco2, Yh2o);
+  ADReal Yco2 = 1.0 - Yh2o;
+  ADReal Xh2o = 1.0 - Xco2;
 
-  // If the amount of CO2 is less than the smallest solubility, then all CO2 will
-  // be dissolved, and the equilibrium mass fractions do not need to be computed
-  if (Z.value() < _Zmin)
-    phase_state = FluidStatePhaseEnum::LIQUID;
+  // Determine which phases are present based on the value of z
+  phaseState(Z.value(), Xco2.value(), Yco2.value(), phase_state);
 
-  else
-  {
-    // Equilibrium mass fraction of CO2 in liquid and H2O in gas phases
-    equilibriumMassFractions(pressure, temperature, Xnacl, Xco2, Yh2o);
-
-    Yco2 = 1.0 - Yh2o;
-
-    // Determine which phases are present based on the value of z
-    phaseState(Z.value(), Xco2.value(), Yco2.value(), phase_state);
-  }
-
-  // The equilibrium mass fractions calculated above are only correct in the two phase
-  // state. If only liquid or gas phases are present, the mass fractions are given by
-  // the total mass fraction z
-  ADReal Xh2o = 0.0;
-
+  // If only liquid or gas phases are present, the mass fractions of the present phase are
+  // given by the total mass fraction z. The absent phase keeps the equilibrium composition,
+  // which is the composition it has when it appears (see absentPhaseProperties())
   switch (phase_state)
   {
     case FluidStatePhaseEnum::LIQUID:
     {
       Xco2 = Z;
-      Yco2 = 0.0;
       Xh2o = 1.0 - Z;
-      Yh2o = 0.0;
       break;
     }
 
     case FluidStatePhaseEnum::GAS:
     {
-      Xco2 = 0.0;
       Yco2 = Z;
       Yh2o = 1.0 - Z;
       break;
     }
 
     case FluidStatePhaseEnum::TWOPHASE:
-    {
-      // Keep equilibrium mass fractions
-      Xh2o = 1.0 - Xco2;
       break;
-    }
   }
 
   // Save the mass fractions in the FluidStateProperties object
@@ -236,6 +223,40 @@ PorousFlowBrineCO2::massFractions(const ADReal & pressure,
   liquid.mass_fraction[_salt_component] = Xnacl;
   gas.mass_fraction[_aqueous_fluid_component] = Yh2o;
   gas.mass_fraction[_gas_fluid_component] = Yco2;
+}
+
+void
+PorousFlowBrineCO2::absentPhaseProperties(const ADReal & pressure,
+                                          const ADReal & temperature,
+                                          const ADReal & Xnacl,
+                                          FluidStatePhaseEnum phase_state,
+                                          std::vector<FluidStateProperties> & fsp) const
+{
+  // The composition of the absent phase has been set to the equilibrium composition by
+  // massFractions(); here it is given the corresponding properties
+  switch (phase_state)
+  {
+    case FluidStatePhaseEnum::LIQUID:
+    {
+      // Gas phase absent: pure CO2 density and viscosity at the gas pressure (as in the
+      // two-phase region)
+      gasProperties(pressure, temperature, fsp);
+      break;
+    }
+
+    case FluidStatePhaseEnum::GAS:
+    {
+      // Liquid phase absent: brine saturated with CO2. The liquid pressure at zero liquid
+      // saturation is the gas pressure less the (possibly capped) maximum capillary pressure,
+      // which can lie outside the range of the brine equation of state, so the gas pressure is
+      // used instead (the same approximation as in saturation())
+      liquidProperties(pressure, temperature, Xnacl, fsp);
+      break;
+    }
+
+    case FluidStatePhaseEnum::TWOPHASE:
+      break;
+  }
 }
 
 void
