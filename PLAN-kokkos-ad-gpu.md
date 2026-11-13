@@ -1,6 +1,6 @@
 # Handoff: Kokkos AD GPU work on PR #34088 (arco, updated 2026-11-12)
 
-Status: branch at `53584d78efd` (steps 0-10b, 12-12c), pushed to the fork. Next: step 13a. Updated
+Status: branch at `53584d78efd` (steps 0-10b, 12-13a), pushed to the fork. Next: step 13b. Updated
 2026-11-13.
 Git tracks this document on the feature branch. Commit it alone with a `PLAN:` subject, and drop
 those commits before the merge. Relative paths outside the MOOSE tree, such as `profiles/`,
@@ -14,21 +14,18 @@ Branch `kokkos-reference-configuration` in `/ibmstor/scratch/lindad/projects/moo
 is idaholab/moose#34088. NamjaeChoi left a performance review on it. Answer it with measurements
 once the design work below is final. Do not reply yet.
 
-**Next: step 13a**, an upstream baseline sweep. First action: create a worktree of `up/next`
-(`git fetch up next`) under `moose-stack-build/runs/upstream-next`, and build its test app.
+**Next: step 13b**, the team shape of `assembleDisplacementJacobian`
+(`framework/include/kokkos/base/KokkosPrecomputeHooks.h`). First action: read it and its callers,
+`Kernel::operator()(DisplacementJacobianLoop, ...)` (`framework/include/kokkos/kernels/KokkosKernel.h`)
+and the `IntegratedBC`/`VectorIntegratedBC` counterparts, and the dispatch that sets its team size.
 
-- `up/next` has no `KokkosADMatDiffusion`, no AD materials, and no displacement support. Sweep only
-  `hand_q8|hand_q27|hand_q64|ad3_q8|ad3_q27|ad3_q64` (`VARIANTS_FILTER`, `APP=<upstream exe>`).
-  Check first that `ad_assembly.i` runs there. It may need input changes, e.g. kernel parameters.
-- Link the upstream app against the built stack (libMesh `47f1f98731e`, PETSc `76e5a9e55b0`), as
-  this branch does. `up/next` pins libMesh `69c4f84efca`. The built libMesh carries the
-  MetaPhysicL and libMesh#4575 changes this branch needs, so the upstream code may need small
-  build fixes. Record any in "Working notes".
-- Add two variants to `sweep.sbatch` on this branch and upstream: `hand_h27` and `ad3_h27`
-  (`order=SECOND elem=HEX27`, default quadrature). Choose `n` so the DOF count stays near 64^3
-  HEX8 (e.g. `n=32`).
-- Exit: a table of upstream vs branch residual and Jacobian times per variant, in "Step results
-  that the code does not record". Sweep names: `nsys-up1` (upstream), `nsys-v20` (branch).
+- Flaw (see "Hand-coded loop findings"): one element per team of 128 (`AUTO`) threads, with
+  `TeamThreadRange` over the qps and then the columns. At q8, 120 of 128 threads idle.
+  handsdisp_q8 J is 37.18 ms (`nsys-v20`), ad3sdisp_q8 J 11.64 ms.
+- Candidate: several elements per team, as step 3 did for the AD loops (`dispatchADTeams`). Reuse
+  that machinery if it fits. Present the design to the user before a large change.
+- Exit: the `kokkos` dir passes (189), and a `VARIANTS_FILTER='hand.*'` sweep `nsys-v21` against
+  `nsys-v20` shows the handsdisp J gain with no other hand-coded launch slower than 3%.
 
 The draft reply is `moose-stack-build/review-reply-34088.md`. A local git repository in
 `moose-stack-build` tracks only that file (`.gitignore` allowlist). Commit the reply after each
@@ -117,6 +114,36 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 ## Working notes
 
 (empty)
+
+## Step 13a result (no code commit, 2026-11-13)
+
+Sweeps `profiles/nsys-up1` (upstream `ffc574921d7`) and `profiles/nsys-v20` (branch `53584d78efd`).
+Mean ms per evaluation of the u kernel. Both builds give the same residual history.
+
+| variant  | up R  | branch R | up J    | branch J |
+|----------|-------|----------|---------|----------|
+| hand_q8  | 0.23  | 0.16     | 1.01    | 0.80     |
+| ad3_q8   | 3.37  | 0.14     | 91.03   | 1.22     |
+| hand_q27 | 0.59  | 0.43     | 2.67    | 1.98     |
+| ad3_q27  | 12.22 | 0.45     | 306.17  | 2.61     |
+| hand_q64 | 2.04  | 1.22     | 5.82    | 4.00     |
+| ad3_q64  | 28.41 | 0.91     | 723.13  | 4.99     |
+| hand_h27 | 0.25  | 0.18     | 5.25    | 3.61     |
+| ad3_h27  | 5.49  | 0.13     | 1004.17 | 5.13     |
+
+- AD/hand ratio, upstream: R 14-22, J 90-191. Branch: R 0.72-1.05, J 1.25-1.52.
+- The branch hand-coded loops are 0.60-0.79x upstream (step 7).
+- Upstream AD runs one `ResidualLoop` (122 registers, team 128) for both evaluations.
+- Upstream setup: worktree `runs/upstream-next`. Run `LIBMESH_DIR=<moose>/libmesh/installed
+  ./configure --with-kokkos` there first, or it builds without Kokkos. Build with
+  `LIBMESH_DIR=... WASP_DIR=<moose>/framework/contrib/wasp/install build_and_test.sbatch`. No
+  source changes were needed (`kokkos.*kernels`: 59 pass).
+- Upstream errors on any displaced mesh and has no `KokkosADQuadraticMaterial`. Sweep it with
+  `EXTRA_ARGS="Materials/inactive=k Mesh/use_displaced_mesh=false"`.
+- `h27` variants: n=32 HEX27 (65^3 nodes, the DOFs of 64^3 HEX8), 27 qps. nsys reports are 108 MB.
+- New: `scripts/run_app.sbatch <exe> <args>...` (one run, full output). `step_table.py` sorts `h27`.
+- Delete stale `.sqlite` exports before `nsys stats` on a rerun sweep directory. nsys refuses an
+  export older than its report.
 
 ## Step 12 result (no code commit, 2026-11-12)
 
@@ -232,23 +259,13 @@ the binding limit. Reducing the live data per thread can relieve both. Step 8e i
 
 Measure each step alone against the step before, with a full sweep on arco-c04.
 
-8d. Done (`4736f915264`, sweep `profiles/nsys-t1`). See "Step 8d sweep result".
-8e. Done (`168e488f70c`, sweep `profiles/nsys-v14`). See "Step 8e result".
-9. Done (`2709e503f9d`, sweep `profiles/nsys-v16`). See "Step 9 result".
-10. Done (measurement probes v1, v2, no commit).
-10b. Done (`c9d341fd322`, sweep `profiles/nsys-v19`). See "Step 10b result".
-11. Done (trim of this document, 2026-11-10).
-12. Done (reply draft, issue #34456). See "Step 12 result".
-12b. Done (`98852e75c2f`). Kernel and BC aliases removed. `kokkos` dir 189 pass,
-    `heat_transfer` Kokkos 12/12. The `thermal_hydraulics` Kokkos library builds, but its
-    executable does not link (see "Known failures").
-12c. Done (`53584d78efd`). Class, files, `DeformationLoop`, members, and helpers renamed.
-    `kokkos` dir 189 pass. The profiling scripts match both loop names.
-13. Stopped and split (2026-11-13). The user's review of the draft raised the items of 13a-13c.
-13a. Upstream baseline sweep, plus HEX27 variants. See "Next".
-13b. Hand-coded loop fix in this PR. Exit: hand-coded residual within noise of AD residual, or a
-    measured reason why not. Targets (see "Hand-coded loop findings"): the team shape of
-    `assembleDisplacementJacobian`, and the repeated qp evaluation of the precompute loops.
+Steps 0-13a: done. Commits in "Commits on this branch". Step 12b also passed `heat_transfer` Kokkos
+12/12. Step 13 split into 13a-13d after the user's review of the draft (2026-11-13).
+13a. Done (sweeps `nsys-up1`, `nsys-v20`). See "Step 13a result".
+13b. Team shape of `assembleDisplacementJacobian`. See "Next".
+13b2. Repeated qp evaluation of the hand-coded precompute loops (see "Hand-coded loop findings").
+    Exit: hand-coded residual within noise of AD residual, or a measured reason why not. Split from
+    13b because the two fixes need separate sweeps.
 13c. `ThreadVectorRange` probe for the AD group (see "Hand-coded loop findings" for the mapping).
     Exit: a measured comparison with `nsys-v20`. Land it if no AD launch is slower than 3%.
 13d. Final reply: resolve every `TODO(user)`, get user approval, then post.
@@ -320,7 +337,8 @@ Details: `moose-stack-build/PLAN-kokkos-known-failures.md`.
   `qM` is the qps per element.
 - Sweep, from the case directory: `sbatch -w arco-c04 --output=<log dir>/%x-%j.log sweep.sbatch
   <out dir> nsys|ncu`. Filter with `VARIANTS_FILTER`, `NCU_KERNELS`, `NCU_COUNT`. Latest full sweep:
-  `profiles/nsys-v19` (step 10b). Latest ncu: `ncu-v16`. Next: `nsys-v20`, `ncu-v17`.
+  `profiles/nsys-v20` (step 13a). Upstream: `nsys-up1`. Latest ncu: `ncu-v16`. Next: `nsys-v21`,
+  `ncu-v17`.
   Build `launches.txt` with `launch_table.sh <dir>/*.nsys-rep`.
 - Tables in `scripts/`: `step_table.sh <dir>` (per-step summary), `ratio_table.sh <adN>
   <label>=<dir>...` (AD/hand ratio per sweep, `FIELD=residual|jacobian`), `launch_table.sh <nsys-rep>...`
