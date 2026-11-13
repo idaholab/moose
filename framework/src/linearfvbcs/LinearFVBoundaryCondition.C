@@ -83,7 +83,13 @@ LinearFVBoundaryCondition::singleSidedFaceArg(const FaceInfo * fi,
                                               const bool correct_skewness) const
 {
   mooseAssert(fi, "FaceInfo should not be null!");
-  return makeFace(*fi, limiter_type, true, correct_skewness);
+  const auto face_type = fi->faceType(std::make_pair(_var_num, _sys_num));
+  mooseAssert(face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+                  face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR,
+              "Single-sided face arguments should only be evaluated on one-sided faces.");
+
+  const bool cell_side_is_elem = face_type == FaceInfo::VarFaceNeighbors::ELEM;
+  return makeFace(*fi, limiter_type, cell_side_is_elem, correct_skewness);
 }
 
 Real
@@ -114,7 +120,7 @@ LinearFVBoundaryCondition::functorFaceArg(const FunctorType & functor,
   const auto on_neighbor = functor.hasFaceSide(*fi, false);
 
   if (on_elem && on_neighbor)
-    face.face_side = nullptr;
+    return face;
   else if (on_elem)
     face.face_side = fi->elemPtr();
   else if (on_neighbor)
@@ -126,7 +132,9 @@ LinearFVBoundaryCondition::functorFaceArg(const FunctorType & functor,
   return face;
 }
 
-// For now this assume reals only, considering this system doesn't support AD. If we need
-// vectors/tensors we might add it here later.
+// For now this assume non-AD types only, considering this system doesn't support AD. If we need
+// tensors we might add them here later.
 template Moose::FaceArg LinearFVBoundaryCondition::functorFaceArg<Moose::Functor<Real>>(
     const Moose::Functor<Real> &, const FaceInfo *, Moose::FV::LimiterType, bool) const;
+template Moose::FaceArg LinearFVBoundaryCondition::functorFaceArg<Moose::Functor<RealVectorValue>>(
+    const Moose::Functor<RealVectorValue> &, const FaceInfo *, Moose::FV::LimiterType, bool) const;

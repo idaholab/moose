@@ -279,6 +279,29 @@ needed. This exclusion requires Linux 5.3 or newer; on older kernels and on plat
 other than Linux, the measured memory includes those pages, so the same limit may be
 reached sooner.
 
+Memory is sampled every `--memory-tracking-interval` seconds (default 0.2), so a job that
+starts and finishes between two consecutive samples reports no memory, and a short
+spike between samples is missed.
+
+#### MOOSE_MAX_GPU_MEMORY_PER_SLOT
+
+Set `MOOSE_MAX_GPU_MEMORY_PER_SLOT` to a float or integer to influence the
+`--max-gpu-memory-per-slot` command line option, limiting the NVIDIA GPU memory per slot each
+job can use in MB. If the `--max-gpu-memory-per-slot` command line option is set, it will take
+precedence over this variable.
+
+GPU memory is tracked whenever the `pynvml` Python package (from `nvidia-ml-py`) is available
+and NVML finds an NVIDIA GPU, independent of `--compute-device`: a test run on the CPU can
+still create CUDA contexts, for example through Kokkos or PETSc built with CUDA. Use
+`--no-gpu-memory-tracking` to disable it. The GPU memory of a job is the device memory that
+NVML attributes to its processes, summed over all GPUs. It includes the CUDA context of each
+process, so a job is charged once per MPI rank that uses a GPU.
+
+Jobs that share a GPU run at most `-j` slots at a time, so setting the limit to the available GPU memory minus some
+headroom, divided by the `-j` value, reduces the risk of running out of GPU memory. The
+headroom is needed because memory is sampled: an allocation made between samples can exceed
+the limit before the job is killed.
+
 # Validation
 
 The TestHarness can also be utilized for performing validation. The results of the validation checks are stored within the JSON  output that each test harness execution produces, providing a method to store the validation results in a database.

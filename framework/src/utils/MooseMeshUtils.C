@@ -1165,6 +1165,10 @@ convertBlockToMesh(MeshBase & source_mesh,
 
   const auto target_block_ids = MooseMeshUtils::getSubdomainIDs(source_mesh, target_blocks);
 
+  // Our source is non-const, so we can fix any missing caches
+  if (!source_mesh.preparation().has_cached_elem_data)
+    source_mesh.cache_elem_data();
+
   // Check that the block ids/names exist in the mesh
   std::set<SubdomainID> mesh_blocks;
   source_mesh.subdomain_ids(mesh_blocks);

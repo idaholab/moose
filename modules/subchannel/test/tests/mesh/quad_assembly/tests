@@ -7,7 +7,7 @@
     cli_args = "--mesh-only"
     recover = false
     issues = '#29241'
-    requirement = 'The system will create a mesh of the subchannels and pins for quadrilateral assemblies'
+    requirement = 'The system shall create a mesh of the subchannels and pins for quadrilateral assemblies'
   []
   [subchannel_number]
     type = 'RunException'
