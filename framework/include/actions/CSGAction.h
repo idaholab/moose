@@ -12,8 +12,9 @@
 #include "Action.h"
 
 /**
- * Holds the parameters of the [CSG] input block. The block is read by MooseApp to enable
- * CSG-only mode and by CSGOnlyAction to configure the CSG output; this action itself does nothing.
+ * Holds the parameters of the [ConstructiveSolidGeometry] input block. The block is read by
+ * MooseApp to enable CSG-only mode and by CSGOnlyAction to configure the CSG output; this action
+ * itself does nothing.
  */
 class CSGAction : public Action
 {

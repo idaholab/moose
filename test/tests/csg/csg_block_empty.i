@@ -5,5 +5,5 @@
   []
 []
 
-[CSG]
+[ConstructiveSolidGeometry]
 []

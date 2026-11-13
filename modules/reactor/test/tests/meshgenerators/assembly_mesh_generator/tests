@@ -183,7 +183,7 @@
       type = JSONDiff
       input = 'assembly_hex_2d.i'
       cli_args = "Outputs/file_base=assembly_hex_2d_engunit
-                  CSG/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'assembly_hex_2d_engunit_csg.json'
       recover = false
@@ -194,7 +194,7 @@
       type = JSONDiff
       input = 'assembly_hex.i'
       cli_args = "Outputs/file_base=assembly_hex_engunit
-                  CSG/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'assembly_hex_engunit_csg.json'
       recover = false
@@ -205,7 +205,7 @@
       type = JSONDiff
       input = 'assembly_square_2d.i'
       cli_args = "Outputs/file_base=assembly_square_2d_engunit
-                  CSG/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'assembly_square_2d_engunit_csg.json'
       recover = false
@@ -217,7 +217,7 @@
       input = 'assembly_square.i'
       cli_args = "Outputs/file_base=assembly_square_engunit
                   Mesh/inactive=translate
-                  CSG/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'assembly_square_engunit_csg.json'
       recover = false
@@ -233,7 +233,7 @@
                   Mesh/amg/background_region_id='6'
                   Mesh/amg/background_intervals=1
                   Outputs/file_base=assembly_square_2d_background_engunit
-                  CSG/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'assembly_square_2d_background_engunit_csg.json'
       recover = false
@@ -250,7 +250,7 @@
                   Mesh/amg/background_intervals=1
                   Mesh/inactive='translate'
                   Outputs/file_base=assembly_square_background_engunit
-                  CSG/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'assembly_square_background_engunit_csg.json'
       recover = false

@@ -91,7 +91,7 @@
       jsondiff = 'csg_only_poly_unit_expand_out_csg.json'
       recover = false
       mesh_mode = REPLICATED
-      detail = 'includes an engineering unit that is expanded by default when generated from the command line without a CSG block.'
+      detail = 'includes an engineering unit that is expanded by default when generated from the command line without a ConstructiveSolidGeometry block.'
     []
     [csg_only_poly_unit_expand]
       type = 'JSONDiff'
@@ -105,7 +105,7 @@
   []
   [input_block]
     requirement = "The system shall support controlling the generation of Constructive Solid Geometry (CSG) representations from the input file "
-    design = 'CSGAction.md syntax/CSG/index.md'
+    design = 'CSGAction.md syntax/ConstructiveSolidGeometry/index.md'
     issues = '#34321'
     [block_enables_csg_only]
       type = 'JSONDiff'
@@ -113,12 +113,12 @@
       jsondiff = 'csg_block_empty_out_csg.json'
       recover = false
       mesh_mode = REPLICATED
-      detail = 'by the presence of an empty CSG block alone,'
+      detail = 'by the presence of an empty ConstructiveSolidGeometry block alone,'
     []
     [output_file]
       type = 'JSONDiff'
       input = 'csg_only_chained_with_universe_cell_deletion.i'
-      cli_args = 'CSG/output_file=csg_only_chained_out_csg.json'
+      cli_args = 'ConstructiveSolidGeometry/output_file=csg_only_chained_out_csg.json'
       jsondiff = 'csg_only_chained_out_csg.json'
       recover = false
       mesh_mode = REPLICATED
@@ -127,7 +127,7 @@
     [cli_output_file_precedence]
       type = 'JSONDiff'
       input = 'csg_only_inf_planes.i'
-      cli_args = 'CSG/output_file=csg_block_unused_out_csg.json --csg-only csg_only_inf_planes_out_csg.json'
+      cli_args = 'ConstructiveSolidGeometry/output_file=csg_block_unused_out_csg.json --csg-only csg_only_inf_planes_out_csg.json'
       jsondiff = 'csg_only_inf_planes_out_csg.json'
       recover = false
       mesh_mode = REPLICATED
@@ -136,7 +136,7 @@
     [disabled_block_with_cli]
       type = 'JSONDiff'
       input = 'csg_only_chained.i'
-      cli_args = 'Mesh/final_generator=inf_square CSG/csg_only=false CSG/output_file=csg_only_inf_planes_out_csg.json --csg-only'
+      cli_args = 'Mesh/final_generator=inf_square ConstructiveSolidGeometry/csg_only=false ConstructiveSolidGeometry/output_file=csg_only_inf_planes_out_csg.json --csg-only'
       jsondiff = 'csg_only_inf_planes_out_csg.json'
       expect_out = 'csg_only = false is ignored because --csg-only was passed on the command line'
       recover = false
@@ -162,7 +162,7 @@
     [mesh_only_precedence]
       type = 'RunApp'
       input = '../meshgenerators/generated_mesh_generator/generated_mesh_generator.i'
-      cli_args = 'CSG/csg_only=true --mesh-only csg_block_mesh_only_in.e'
+      cli_args = 'ConstructiveSolidGeometry/csg_only=true --mesh-only csg_block_mesh_only_in.e'
       expect_out = 'csg_only = true is ignored because --mesh-only was passed on the command line'
       allow_warnings = true
       recover = false
@@ -192,7 +192,7 @@
       type = RunException
       input = 'csg_only_inf_planes.i'
       detail = ' enabled from the input file and used in conjunction with distributed mesh command line option'
-      cli_args = 'CSG/csg_only=true --distributed-mesh'
+      cli_args = 'ConstructiveSolidGeometry/csg_only=true --distributed-mesh'
       expect_err = "--csg-only cannot be used in conjunction with --distributed-mesh"
     []
     [split_mesh]

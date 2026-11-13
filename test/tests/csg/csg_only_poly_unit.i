@@ -6,6 +6,6 @@
   []
 []
 
-[CSG]
+[ConstructiveSolidGeometry]
   expand_units = false
 []

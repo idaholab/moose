@@ -1405,8 +1405,8 @@ MooseApp::setupOptions()
     const std::vector<std::string> final_task_params = {
         "csg_only", "mesh_only", "split_mesh", "parse_neml2_only"};
 
-    // CSG-only mode can also be requested in the input file through [CSG], but any final task
-    // option on the command line takes precedence
+    // CSG-only mode can also be requested in the input file through [ConstructiveSolidGeometry],
+    // but any final task option on the command line takes precedence
     const auto csg_actions = _action_warehouse.getActions<CSGAction>();
     mooseAssert(csg_actions.size() <= 1, "Should not be more than one CSGAction");
     bool csg_only_from_input =
@@ -1417,7 +1417,7 @@ MooseApp::setupOptions()
         if (isParamSetByUser(param))
         {
           if (param != "csg_only")
-            mooseWarning("[CSG] csg_only = true is ignored because ",
+            mooseWarning("[ConstructiveSolidGeometry] csg_only = true is ignored because ",
                          parameters().getCommandLineMetadata(param).switches.front(),
                          " was passed on the command line");
           csg_only_from_input = false;
@@ -1425,8 +1425,8 @@ MooseApp::setupOptions()
         }
     }
     else if (!csg_actions.empty() && isParamSetByUser("csg_only"))
-      mooseInfo(
-          "[CSG] csg_only = false is ignored because --csg-only was passed on the command line");
+      mooseInfo("[ConstructiveSolidGeometry] csg_only = false is ignored because --csg-only was "
+                "passed on the command line");
 
     if (isExclusiveParamSetByUser(final_task_params, "csg_only") || csg_only_from_input)
     {
@@ -1598,7 +1598,7 @@ MooseApp::runInputFile()
 
   _action_warehouse.executeAllActions();
 
-  // Set from either --csg-only or [CSG]
+  // Set from either --csg-only or [ConstructiveSolidGeometry]
   if (getMeshGeneratorSystem().getCSGOnly())
   {
     _early_exit_param = "--csg-only";

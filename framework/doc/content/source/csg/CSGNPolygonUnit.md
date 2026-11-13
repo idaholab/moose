@@ -82,7 +82,7 @@ When the unit is expanded within a `CSGBase` instance, the unit is replaced by t
 
 The following is an end-to-end example of a mesh generator that produces an N-sided polygon unit.
 Within the `generateCSG` method, the polygon unit is created, added to the `CSGBase` instance, and used as the region of a material cell.
-Whether the unit is expanded into its rudimentary components in the output is controlled by `expand_units` in the [`[CSG]`](syntax/CSG/index.md#how-to-generate-a-csg-model) input block.
+Whether the unit is expanded into its rudimentary components in the output is controlled by `expand_units` in the [`[ConstructiveSolidGeometry]`](syntax/ConstructiveSolidGeometry/index.md) input block.
 
 !listing TestPolygonUnitMeshGenerator.C start=// name of the current mesh generator end=return csg_obj include-end=true
 

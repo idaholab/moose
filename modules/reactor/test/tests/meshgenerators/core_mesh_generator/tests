@@ -512,7 +512,7 @@
       input = 'core_hex.i'
       cli_args = "Mesh/inactive=rotate90
                   Outputs/file_base=core_hex_engunit
-                  CSG/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'core_hex_engunit_csg.json'
       recover = false
@@ -538,7 +538,7 @@
                   Mesh/pin2/mesh_intervals='1 1'
                   Mesh/pin2/duct_halfpitch='0.6'
                   Outputs/file_base=core_hex_duct_het_empty_engunit
-                  CSG/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
     []
     [core_hex_periphery]
@@ -550,7 +550,7 @@
       mesh_mode = REPLICATED
       cli_args = "Mesh/inactive='rotate90'
                   Outputs/file_base=core_hex_periphery_engunit
-                  CSG/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
     []
     [core_hex_single_assembly_empty]
@@ -559,7 +559,7 @@
       input = 'core_single_assembly.i'
       cli_args = "Mesh/inactive='rotate90 translate'
                   Outputs/file_base=core_hex_single_assembly_empty_engunit
-                  CSG/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'core_hex_single_assembly_empty_engunit_csg.json'
       recover = false
@@ -581,7 +581,7 @@
                   Mesh/amg2/duct_intervals=1
                   Mesh/inactive='translate'
                   Outputs/file_base=core_square_mixed_background_duct_engunit
-                  CSG/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'core_square_mixed_background_duct_engunit_csg.json'
       recover = false
@@ -606,7 +606,7 @@
                   Mesh/cmg/pattern='1 0; 0 1'
                   Mesh/translate/input=cmg
                   Outputs/file_base=core_square_single_assembly_engunit
-                  CSG/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'core_square_single_assembly_engunit_csg.json'
       recover = false
@@ -618,7 +618,7 @@
       input = 'core_square.i'
       cli_args = "Mesh/inactive=translate
                   Outputs/file_base=core_square_engunit
-                  CSG/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'core_square_engunit_csg.json'
       recover = false
@@ -631,7 +631,7 @@
       cli_args = "Mesh/inactive=translate
                   Mesh/cmg/pattern='2 1; 1 0'
                   Outputs/file_base=core_square_empty_engunit
-                  CSG/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'core_square_empty_engunit_csg.json'
       recover = false

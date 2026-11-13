@@ -7,5 +7,5 @@
 []
 
 # Engineering units are expanded by default
-[CSG]
+[ConstructiveSolidGeometry]
 []

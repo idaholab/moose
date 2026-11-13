@@ -637,7 +637,7 @@ Example Output:
 
 ### Engineering Unit Example
 
-This fourth example is creating an infinite N-Sided polygon, similar to the [first infinite prism example](#infinite-prism-example), but it instead creates an engineering unit, which can be expanded into the corresponding rudimentary components with the `expand_units` parameter of the [`[CSG]`](syntax/CSG/index.md#how-to-generate-a-csg-model) input block.
+This fourth example is creating an infinite N-Sided polygon, similar to the [first infinite prism example](#infinite-prism-example), but it instead creates an engineering unit, which can be expanded into the corresponding rudimentary components with the `expand_units` parameter of the [`[ConstructiveSolidGeometry]`](syntax/ConstructiveSolidGeometry/index.md) input block.
 
 !listing TestPolygonUnitMeshGenerator.C start=InputParameters
 
