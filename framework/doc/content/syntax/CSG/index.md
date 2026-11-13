@@ -77,7 +77,7 @@ This process is run as a [data-only mode](source/meshgenerators/MeshGenerator.md
 
 ## Output
 
-Calling `--csg-only` or including the [`[ConstructiveSolidGeometry]`](syntax/ConstructiveSolidGeometry/index.md) input block with `csg_only = true` will produce a [!ac](JSON) file containing the complete geometric description of the mesh generator input.
+Calling `--csg-only` or including the [`[ConstructiveSolidGeometry]`](syntax/ConstructiveSolidGeometry/index.md) input block with `generate_csg = true` will produce a [!ac](JSON) file containing the complete geometric description of the mesh generator input.
 There are four main sections in the file:
 
 - [`surfaces`](#surfaces)

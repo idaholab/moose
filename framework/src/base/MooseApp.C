@@ -1410,14 +1410,14 @@ MooseApp::setupOptions()
     const auto csg_actions = _action_warehouse.getActions<CSGAction>();
     mooseAssert(csg_actions.size() <= 1, "Should not be more than one CSGAction");
     bool csg_only_from_input =
-        !csg_actions.empty() && (*csg_actions.begin())->getParam<bool>("csg_only");
+        !csg_actions.empty() && (*csg_actions.begin())->getParam<bool>("generate_csg");
     if (csg_only_from_input)
     {
       for (const auto & param : final_task_params)
         if (isParamSetByUser(param))
         {
           if (param != "csg_only")
-            mooseWarning("[ConstructiveSolidGeometry] csg_only = true is ignored because ",
+            mooseWarning("[ConstructiveSolidGeometry] generate_csg = true is ignored because ",
                          parameters().getCommandLineMetadata(param).switches.front(),
                          " was passed on the command line");
           csg_only_from_input = false;
@@ -1425,8 +1425,8 @@ MooseApp::setupOptions()
         }
     }
     else if (!csg_actions.empty() && isParamSetByUser("csg_only"))
-      mooseInfo("[ConstructiveSolidGeometry] csg_only = false is ignored because --csg-only was "
-                "passed on the command line");
+      mooseInfo("[ConstructiveSolidGeometry] generate_csg = false is ignored because "
+                "--csg-only was passed on the command line");
 
     if (isExclusiveParamSetByUser(final_task_params, "csg_only") || csg_only_from_input)
     {

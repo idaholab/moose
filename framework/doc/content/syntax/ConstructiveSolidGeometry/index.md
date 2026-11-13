@@ -14,7 +14,7 @@ For a description of [!ac](CSG) in MOOSE and of the contents of the output file,
 ```
 
 The presence of the block enables [!ac](CSG)-only mode, so that the mesh generators call `generateCSG()` instead of `generate()` and no finite element mesh is produced.
-Setting `csg_only = false` keeps the block in the input file while running the input normally.
+Setting `generate_csg = false` keeps the block in the input file while running the input normally.
 
 The [!ac](JSON) file is named by `output_file`. By default, it is the name of the input file with `_csg` appended.
 
@@ -27,7 +27,7 @@ Command line options take precedence over the block:
 
 - An output file name passed to `--csg-only` overrides `output_file`.
 - `--mesh-only`, `--split-mesh`, and `--parse-neml2-only` disable [!ac](CSG)-only mode with a warning.
-- When `--csg-only` is used with `csg_only = false`, [!ac](CSG)-only mode is enabled with a message noting that the command line takes precedence. The `output_file` and `expand_units` parameters still apply.
+- When `--csg-only` is used with `generate_csg = false`, [!ac](CSG)-only mode is enabled with a message noting that the command line takes precedence. The `output_file` and `expand_units` parameters still apply.
 
 ## Input Parameters
 

@@ -18,7 +18,7 @@ CSGAction::validParams()
   params.addClassDescription("Controls the generation of the Constructive Solid Geometry (CSG) "
                              "representation of the mesh generators in the input file.");
   params.addParam<bool>(
-      "csg_only",
+      "generate_csg",
       true,
       "Whether to generate and output the CSG representation of the mesh generators instead of "
       "the finite element mesh, then exit. Ignored when --mesh-only, --split-mesh, or "
