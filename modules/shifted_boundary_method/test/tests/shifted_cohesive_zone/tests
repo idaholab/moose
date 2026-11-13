@@ -103,6 +103,56 @@
       detail = 'and comparing the two reaction-force histories.'
     []
   []
+  [neml2_traction_law_comparison]
+    [bilinear]
+      [native]
+        type = CSVDiff
+        input = 'rectangle_sczm_tri_material_bilinear.i'
+        cli_args = 'Outputs/file_base=sczm_bilinear_native Outputs/exodus=false'
+        csvdiff = 'sczm_bilinear_native.csv'
+        mesh_mode = REPLICATED
+        recover = false
+        requirement = 'The system shall compute the reaction-force history of a shifted cohesive zone model using the native MOOSE bilinear mixed-mode traction law.'
+      []
+      [neml2]
+        type = CSVDiff
+        input = 'rectangle_sczm_tri_material_bilinear_neml2.i'
+        cli_args = 'Outputs/file_base=sczm_bilinear_neml2 Outputs/exodus=false'
+        # This gold is a symlink to sczm_bilinear_native.csv. Both implementations are therefore
+        # compared against one native reference instead of maintaining two gold files that can drift.
+        csvdiff = 'sczm_bilinear_neml2.csv'
+        comparison_file = 'react_x.cmp'
+        capabilities = 'libtorch & neml2'
+        mesh_mode = REPLICATED
+        recover = false
+        requirement = 'The system shall reproduce the native MOOSE bilinear mixed-mode reaction-force history within one percent using the NEML2 traction law.'
+      []
+    []
+    [linear]
+      [native]
+        type = CSVDiff
+        input = 'rectangle_sczm_tri_material_linear.i'
+        cli_args = 'Outputs/file_base=sczm_linear_native Outputs/exodus=false'
+        csvdiff = 'sczm_linear_native.csv'
+        mesh_mode = REPLICATED
+        recover = false
+        requirement = 'The system shall compute the reaction-force history of a shifted cohesive zone model using the native MOOSE linear-elastic traction law.'
+      []
+      [neml2]
+        type = CSVDiff
+        input = 'rectangle_sczm_tri_material_linear_neml2.i'
+        cli_args = 'Outputs/file_base=sczm_linear_neml2 Outputs/exodus=false'
+        # This gold is a symlink to sczm_linear_native.csv. Both implementations are therefore
+        # compared against one native reference instead of maintaining two gold files that can drift.
+        csvdiff = 'sczm_linear_neml2.csv'
+        comparison_file = 'react_x.cmp'
+        capabilities = 'libtorch & neml2'
+        mesh_mode = REPLICATED
+        recover = false
+        requirement = 'The system shall reproduce the native MOOSE linear-elastic reaction-force history within one percent using the NEML2 traction law.'
+      []
+    []
+  []
   [rectangle_sczm_tri_material_jacobian]
     type = PetscJacobianTester
     input = 'rectangle_sczm_tri_material.i'
@@ -299,6 +349,41 @@
       cli_args = "Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/interface_subdomain_pairs='1 2'"
       expect_err = "This parameter is only valid with 'complete_interface_mesh'."
       detail = 'if interface subdomain pairs are supplied without a complete interface mesh.'
+    []
+    [neml2_interface_missing]
+      type = RunException
+      input = 'rectangle_sczm_tri_material_neml2.i'
+      cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/stress=interface_traction '
+                 'NEML2/sczm/volume=true '
+                 'NEML2/sczm/interface_material_inputs= '
+                 'NEML2/sczm/interface='
+      expect_err = "This NEML2 block needs 'interface' set to the SCZM boundary"
+      capabilities = 'libtorch & neml2'
+      detail = 'if a NEML2 block provides a stress material property used by shifted cohesive zone with directional correction enabled but does not configure the cohesive interface.'
+    []
+    [neml2_interface_nonoverlapping]
+      type = RunException
+      input = 'rectangle_sczm_tri_material_neml2.i'
+      cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/stress=interface_traction '
+                 'NEML2/sczm/volume=true '
+                 'NEML2/sczm/interface_material_inputs= '
+                 'NEML2/sczm/interface=left'
+      expect_err = "its 'interface' setting does not overlap the SCZM boundary"
+      capabilities = 'libtorch & neml2'
+      detail = 'if a NEML2 block provides a stress material property used by shifted cohesive zone with directional correction enabled but its interface setting does not overlap the cohesive boundary.'
+    []
+    [neml2_interface_missing_second_block]
+      type = RunException
+      input = 'rectangle_sczm_tri_material_neml2.i'
+      # The existing NEML2/sczm block covers the cohesive interface and passes; the added
+      # NEML2/bulk block provides the same property without an interface and must still be checked.
+      cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/stress=interface_traction '
+                 'NEML2/bulk/model=czm '
+                 'NEML2/bulk/device=cpu '
+                 'NEML2/bulk/volume=true'
+      expect_err = "This NEML2 block needs 'interface' set to the SCZM boundary"
+      capabilities = 'libtorch & neml2'
+      detail = 'if any of several NEML2 blocks providing a stress material property used by shifted cohesive zone with directional correction enabled does not configure the cohesive interface.'
     []
   []
   [distance_error_tests]
