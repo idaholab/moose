@@ -110,7 +110,6 @@ KokkosDiffusion::precomputeQpJacobianGrad(const unsigned int j,
 !alert note
 [Every GPU function needs to be inlineable](syntax/Kokkos/index.md#kokkos_execution_space) and thus should be defined in headers.
 
-`Moose::Kokkos::KernelValue` and `Moose::Kokkos::KernelGrad` are other names for `Moose::Kokkos::Kernel` that state in the class declaration which term a kernel contributes.
 A kernel whose weak form has both terms, such as convection-diffusion, defines both families of hooks on a single class.
 See the following source codes of `KokkosConvectionPrecompute` and `KokkosDiffusionPrecompute` for examples:
 
@@ -125,7 +124,6 @@ Kernels on vector variables derive from `Moose::Kokkos::VectorKernel` and use th
 ## Time Derivative Kernels
 
 [Like the original MOOSE](syntax/Kernels/index.md#time-derivative), you can create a time-derivative kernel by subclassing `Moose::Kokkos::TimeKernel`, which also provides `_u_dot` and `_du_dot_du`.
-`Moose::Kokkos::TimeKernelValue` is another name for it.
 In Kokkos-MOOSE, the dummy `_qp` indexing of the `du_dot_du` term was lifted.
 The following shows the conversion of the example presented in the original page into the Kokkos version:
 

@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "KokkosIntegratedBCValue.h"
+#include "KokkosIntegratedBC.h"
 
 /**
  * Boundary condition for convective heat flux where temperature and heat transfer coefficient are
  * given by auxiliary variables.  Typically used in multi-app coupling scenario. It is possible to
  * couple in a vector variable where each entry corresponds to a "phase".
  */
-class KokkosCoupledConvectiveHeatFluxBC : public Moose::Kokkos::IntegratedBCValue
+class KokkosCoupledConvectiveHeatFluxBC : public Moose::Kokkos::IntegratedBC
 {
 public:
   static InputParameters validParams();

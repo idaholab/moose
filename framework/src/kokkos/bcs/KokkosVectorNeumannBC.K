@@ -14,7 +14,7 @@ registerKokkosResidualObject("MooseApp", KokkosVectorNeumannBC);
 InputParameters
 KokkosVectorNeumannBC::validParams()
 {
-  InputParameters params = Moose::Kokkos::VectorIntegratedBCValue::validParams();
+  InputParameters params = Moose::Kokkos::VectorIntegratedBC::validParams();
   params.addParam<RealVectorValue>(
       "values",
       RealVectorValue(0, 0, 0),
@@ -27,14 +27,14 @@ KokkosVectorNeumannBC::validParams()
 }
 
 KokkosVectorNeumannBC::KokkosVectorNeumannBC(const InputParameters & parameters)
-  : Moose::Kokkos::VectorIntegratedBCValue(parameters),
+  : Moose::Kokkos::VectorIntegratedBC(parameters),
     _values_host(getParam<RealVectorValue>("values")),
     _values(_values_host)
 {
 }
 
 KokkosVectorNeumannBC::KokkosVectorNeumannBC(const KokkosVectorNeumannBC & object)
-  : Moose::Kokkos::VectorIntegratedBCValue(object),
+  : Moose::Kokkos::VectorIntegratedBC(object),
     _values_host(object._values_host),
     _values(_values_host)
 {

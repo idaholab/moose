@@ -14,7 +14,7 @@ registerKokkosResidualObject("MooseTestApp", KokkosVectorBodyForce);
 InputParameters
 KokkosVectorBodyForce::validParams()
 {
-  InputParameters params = Moose::Kokkos::VectorKernelValue::validParams();
+  InputParameters params = Moose::Kokkos::VectorKernel::validParams();
   params.addClassDescription("Test vector body force with KokkosParsedFunction components.");
   params.addParam<Real>("value", 1.0, "Coefficient to multiply by the body force term");
   params.addRequiredParam<FunctionName>(
@@ -30,7 +30,7 @@ KokkosVectorBodyForce::validParams()
 }
 
 KokkosVectorBodyForce::KokkosVectorBodyForce(const InputParameters & parameters)
-  : Moose::Kokkos::VectorKernelValue(parameters),
+  : Moose::Kokkos::VectorKernel(parameters),
     _scale(getParam<Real>("value")),
     _has_function_y(isParamValid("function_y")),
     _has_function_z(isParamValid("function_z")),

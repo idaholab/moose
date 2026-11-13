@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "KokkosKernelValue.h"
+#include "KokkosKernel.h"
 
 /**
  * This calculates the time derivative for a coupled variable
  **/
-class KokkosCoupledTimeDerivative : public Moose::Kokkos::KernelValue
+class KokkosCoupledTimeDerivative : public Moose::Kokkos::Kernel
 {
 public:
   static InputParameters validParams();

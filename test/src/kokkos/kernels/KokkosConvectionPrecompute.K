@@ -18,12 +18,12 @@ registerKokkosResidualObject("MooseTestApp", KokkosConvectionPrecompute);
 InputParameters
 KokkosConvectionPrecompute::validParams()
 {
-  InputParameters params = Moose::Kokkos::KernelValue::validParams();
+  InputParameters params = Moose::Kokkos::Kernel::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity Vector");
   return params;
 }
 
 KokkosConvectionPrecompute::KokkosConvectionPrecompute(const InputParameters & parameters)
-  : Moose::Kokkos::KernelValue(parameters), _velocity(getParam<RealVectorValue>("velocity"))
+  : Moose::Kokkos::Kernel(parameters), _velocity(getParam<RealVectorValue>("velocity"))
 {
 }

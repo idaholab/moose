@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "KokkosVectorIntegratedBCValue.h"
+#include "KokkosVectorIntegratedBC.h"
 
 /**
  * Imposes a constant flux on each component of a vector variable along a boundary
  */
-class KokkosVectorNeumannBC : public Moose::Kokkos::VectorIntegratedBCValue
+class KokkosVectorNeumannBC : public Moose::Kokkos::VectorIntegratedBC
 {
 public:
   static InputParameters validParams();

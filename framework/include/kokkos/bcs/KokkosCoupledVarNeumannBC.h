@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "KokkosIntegratedBCValue.h"
+#include "KokkosIntegratedBC.h"
 
 /**
  * Implements a Neumann BC where grad(u)=_coupled_var on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
-class KokkosCoupledVarNeumannBC : public Moose::Kokkos::IntegratedBCValue
+class KokkosCoupledVarNeumannBC : public Moose::Kokkos::IntegratedBC
 {
 public:
   static InputParameters validParams();

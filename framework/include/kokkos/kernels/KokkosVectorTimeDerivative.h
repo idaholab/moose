@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "KokkosVectorTimeKernelValue.h"
+#include "KokkosVectorTimeKernel.h"
 
-class KokkosVectorTimeDerivative : public Moose::Kokkos::VectorTimeKernelValue
+class KokkosVectorTimeDerivative : public Moose::Kokkos::VectorTimeKernel
 {
 public:
   static InputParameters validParams();

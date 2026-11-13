@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "KokkosIntegratedBCValue.h"
+#include "KokkosIntegratedBC.h"
 
 /**
  * Boundary condition for convective heat flux where temperature and heat transfer coefficient are
  * given by material properties.
  */
-class KokkosConvectiveHeatFluxBC : public Moose::Kokkos::IntegratedBCValue
+class KokkosConvectiveHeatFluxBC : public Moose::Kokkos::IntegratedBC
 {
 public:
   static InputParameters validParams();

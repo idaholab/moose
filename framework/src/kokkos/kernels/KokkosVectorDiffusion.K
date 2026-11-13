@@ -14,7 +14,7 @@ registerKokkosResidualObject("MooseApp", KokkosVectorDiffusion);
 InputParameters
 KokkosVectorDiffusion::validParams()
 {
-  InputParameters params = Moose::Kokkos::VectorKernelGrad::validParams();
+  InputParameters params = Moose::Kokkos::VectorKernel::validParams();
   params.addClassDescription(
       "The Laplacian operator ($-\\nabla \\cdot \\nabla \\vec{u}$), with the weak "
       "form of $(\\nabla \\vec{\\phi_i}, \\nabla \\vec{u_h})$.");
@@ -22,6 +22,6 @@ KokkosVectorDiffusion::validParams()
 }
 
 KokkosVectorDiffusion::KokkosVectorDiffusion(const InputParameters & parameters)
-  : Moose::Kokkos::VectorKernelGrad(parameters)
+  : Moose::Kokkos::VectorKernel(parameters)
 {
 }

@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "KokkosVectorKernelGrad.h"
+#include "KokkosVectorKernel.h"
 
 /**
  * This vector kernel implements the Laplacian operator:
  * $\nabla \vec{u} : \nabla \vec{\phi_i}$
  */
-class KokkosVectorDiffusion : public Moose::Kokkos::VectorKernelGrad
+class KokkosVectorDiffusion : public Moose::Kokkos::VectorKernel
 {
 public:
   static InputParameters validParams();

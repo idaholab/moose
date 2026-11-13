@@ -14,7 +14,7 @@ registerKokkosResidualObject("HeatTransferApp", KokkosCoupledConvectiveHeatFluxB
 InputParameters
 KokkosCoupledConvectiveHeatFluxBC::validParams()
 {
-  InputParameters params = Moose::Kokkos::IntegratedBCValue::validParams();
+  InputParameters params = Moose::Kokkos::IntegratedBC::validParams();
   params.addClassDescription(
       "Convective heat transfer boundary condition with temperature and heat "
       "transfer coefficent given by auxiliary variables.");
@@ -28,7 +28,7 @@ KokkosCoupledConvectiveHeatFluxBC::validParams()
 
 KokkosCoupledConvectiveHeatFluxBC::KokkosCoupledConvectiveHeatFluxBC(
     const InputParameters & parameters)
-  : Moose::Kokkos::IntegratedBCValue(parameters),
+  : Moose::Kokkos::IntegratedBC(parameters),
     _n_components(coupledComponents("T_infinity")),
     _T_infinity(kokkosCoupledValues("T_infinity")),
     _htc(kokkosCoupledValues("htc")),

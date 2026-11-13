@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "KokkosIntegratedBCValue.h"
+#include "KokkosIntegratedBC.h"
 
 /**
  * Boundary condition for radiative heat flux where temperature and the
  * temperature of a body in radiative heat transfer are specified.
  */
-class KokkosRadiativeHeatFluxBCBase : public Moose::Kokkos::IntegratedBCValue
+class KokkosRadiativeHeatFluxBCBase : public Moose::Kokkos::IntegratedBC
 {
 public:
   static InputParameters validParams();

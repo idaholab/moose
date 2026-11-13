@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "KokkosKernelValue.h"
+#include "KokkosKernel.h"
 
 /**
  * Implements a source term proportional to the value of a coupled variable. Weak form: $(\\psi_i,
  * -\\sigma v)$.
  */
-class KokkosCoupledForce : public Moose::Kokkos::KernelValue
+class KokkosCoupledForce : public Moose::Kokkos::Kernel
 {
 public:
   static InputParameters validParams();

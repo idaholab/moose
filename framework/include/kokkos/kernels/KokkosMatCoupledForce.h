@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "KokkosKernelValue.h"
+#include "KokkosKernel.h"
 #include "KokkosMap.h"
 
 /**
@@ -18,7 +18,7 @@
  * m_j is a vector of material properties, and v_j is a vector
  * of variables
  */
-class KokkosMatCoupledForce : public Moose::Kokkos::KernelValue
+class KokkosMatCoupledForce : public Moose::Kokkos::Kernel
 {
 public:
   static InputParameters validParams();

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "KokkosIntegratedBCValue.h"
+#include "KokkosIntegratedBC.h"
 
 /**
  * Implements a simple Vacuum BC for neutron diffusion on the boundary.
@@ -17,7 +17,7 @@
  * Hence, \f$ D\frac{du}{dn}=-\frac{u}{2} \f$ and \f$ -\frac{u}{2} \f$ is substituted into
  * the Neumann BC term produced from integrating the diffusion operator by parts.
  */
-class KokkosVacuumBC : public Moose::Kokkos::IntegratedBCValue
+class KokkosVacuumBC : public Moose::Kokkos::IntegratedBC
 {
 public:
   static InputParameters validParams();

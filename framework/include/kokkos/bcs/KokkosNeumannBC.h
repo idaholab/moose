@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "KokkosIntegratedBCValue.h"
+#include "KokkosIntegratedBC.h"
 
-class KokkosNeumannBC : public Moose::Kokkos::IntegratedBCValue
+class KokkosNeumannBC : public Moose::Kokkos::IntegratedBC
 {
 public:
   static InputParameters validParams();

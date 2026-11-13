@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "KokkosIntegratedBCValue.h"
+#include "KokkosIntegratedBC.h"
 
 /**
  * Implements a flux boundary condition grad(u).n = V.n, where the
  * vector V is specifed by the user. This differs from NeumannBC,
  * where the user instead specifies the _scalar_ value g = grad(u).n.
  */
-class KokkosDirectionalNeumannBC : public Moose::Kokkos::IntegratedBCValue
+class KokkosDirectionalNeumannBC : public Moose::Kokkos::IntegratedBC
 {
 public:
   static InputParameters validParams();

@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include "KokkosVectorKernelValue.h"
+#include "KokkosVectorKernel.h"
 #include "KokkosParsedFunction.h"
 
-class KokkosVectorBodyForce : public Moose::Kokkos::VectorKernelValue
+class KokkosVectorBodyForce : public Moose::Kokkos::VectorKernel
 {
 public:
   static InputParameters validParams();

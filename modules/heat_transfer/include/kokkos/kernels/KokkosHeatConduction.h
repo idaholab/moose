@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "KokkosKernelGrad.h"
+#include "KokkosKernel.h"
 
 /**
  * Kokkos kernel for a heat conduction term with an isotropic conductivity
  */
-class KokkosHeatConduction : public Moose::Kokkos::KernelGrad
+class KokkosHeatConduction : public Moose::Kokkos::Kernel
 {
   using Real3 = Moose::Kokkos::Real3;
 

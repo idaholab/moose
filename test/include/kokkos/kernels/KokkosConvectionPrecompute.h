@@ -9,11 +9,11 @@
 
 #pragma once
 
-#include "KokkosKernelValue.h"
+#include "KokkosKernel.h"
 
 using Real3 = Moose::Kokkos::Real3;
 
-class KokkosConvectionPrecompute : public Moose::Kokkos::KernelValue
+class KokkosConvectionPrecompute : public Moose::Kokkos::Kernel
 {
 public:
   static InputParameters validParams();
