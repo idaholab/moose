@@ -1,6 +1,7 @@
 # Handoff: Kokkos AD GPU work on PR #34088 (arco, updated 2026-11-12)
 
-Status: branch at `53584d78efd` (steps 0-10b, 12-12c). Next: step 13. Updated 2026-11-13.
+Status: branch at `53584d78efd` (steps 0-10b, 12-12c), pushed to the fork. Next: step 13a. Updated
+2026-11-13.
 Git tracks this document on the feature branch. Commit it alone with a `PLAN:` subject, and drop
 those commits before the merge. Relative paths outside the MOOSE tree, such as `profiles/`,
 `scripts/`, `patches/`, `ptx/`, `logs/`, `runs/`, and `archive/`, are under `moose-stack-build/`
@@ -13,17 +14,26 @@ Branch `kokkos-reference-configuration` in `/ibmstor/scratch/lindad/projects/moo
 is idaholab/moose#34088. NamjaeChoi left a performance review on it. Answer it with measurements
 once the design work below is final. Do not reply yet.
 
-**Next: step 13**, the final reply. First action: read `moose-stack-build/review-reply-34088.md`.
+**Next: step 13a**, an upstream baseline sweep. First action: create a worktree of `up/next`
+(`git fetch up next`) under `moose-stack-build/runs/upstream-next`, and build its test app.
 
-- Replace `TODO(step 12b commit)` with `98852e75c2f` and `TODO(step 12c commit)` with
-  `53584d78efd`. Resolve each `TODO(user)` marker with the user.
-- Draft answers to the `Coupleable.h` and `KokkosADGeometry.h` comments (see "Review findings").
-- Exit: the user approves the reply text. Post it only on approval. Do not push without a user
-  request.
+- `up/next` has no `KokkosADMatDiffusion`, no AD materials, and no displacement support. Sweep only
+  `hand_q8|hand_q27|hand_q64|ad3_q8|ad3_q27|ad3_q64` (`VARIANTS_FILTER`, `APP=<upstream exe>`).
+  Check first that `ad_assembly.i` runs there. It may need input changes, e.g. kernel parameters.
+- Link the upstream app against the built stack (libMesh `47f1f98731e`, PETSc `76e5a9e55b0`), as
+  this branch does. `up/next` pins libMesh `69c4f84efca`. The built libMesh carries the
+  MetaPhysicL and libMesh#4575 changes this branch needs, so the upstream code may need small
+  build fixes. Record any in "Working notes".
+- Add two variants to `sweep.sbatch` on this branch and upstream: `hand_h27` and `ad3_h27`
+  (`order=SECOND elem=HEX27`, default quadrature). Choose `n` so the DOF count stays near 64^3
+  HEX8 (e.g. `n=32`).
+- Exit: a table of upstream vs branch residual and Jacobian times per variant, in "Step results
+  that the code does not record". Sweep names: `nsys-up1` (upstream), `nsys-v20` (branch).
 
-The draft reply is `moose-stack-build/review-reply-34088.md`. It answers all 10 inline comments
-(`gh api repos/idaholab/moose/pulls/34088/comments`) and holds the per-step time and ratio tables
-up to step 10b. Do not post it without user approval.
+The draft reply is `moose-stack-build/review-reply-34088.md`. A local git repository in
+`moose-stack-build` tracks only that file (`.gitignore` allowlist). Commit the reply after each
+turn that edits it, so the user can review the edits with `git diff`. `TODO(user)` marks sections
+that wait on steps 13a-13c. Post nothing without user approval.
 
 Kokkos ignores `--compute-device`. This build compiles Kokkos for CUDA, so every Kokkos kernel runs
 on the H200 under both `cpu` and `cuda`. The flag only selects specs (`compute_devices`). Test once,
@@ -41,6 +51,9 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 ### Decisions
 
+- Step 13 (user, 2026-11-13): do steps 13a-13d. The reply must say the `PLAN:` commits are
+  squashed before merge, and must give a technical reason for or against `ThreadVectorRange`, not
+  a cost reason. The agent may push the branch to the fork at any time.
 - Step 12 (user, 2026-11-12): remove the kernel aliases in this PR (step 12b). Rename
   `Moose::Kokkos::Configuration` to `Deformation`, and `ConfigurationLoop` to `DeformationLoop`
   (step 12c, user, 2026-11-13). Rejected: `MeshConfiguration`, because the mesh never moves. The reply says some reference
@@ -231,11 +244,43 @@ Measure each step alone against the step before, with a full sweep on arco-c04.
     executable does not link (see "Known failures").
 12c. Done (`53584d78efd`). Class, files, `DeformationLoop`, members, and helpers renamed.
     `kokkos` dir 189 pass. The profiling scripts match both loop names.
-13. Final reply. See "Next".
+13. Stopped and split (2026-11-13). The user's review of the draft raised the items of 13a-13c.
+13a. Upstream baseline sweep, plus HEX27 variants. See "Next".
+13b. Hand-coded loop fix in this PR. Exit: hand-coded residual within noise of AD residual, or a
+    measured reason why not. Targets (see "Hand-coded loop findings"): the team shape of
+    `assembleDisplacementJacobian`, and the repeated qp evaluation of the precompute loops.
+13c. `ThreadVectorRange` probe for the AD group (see "Hand-coded loop findings" for the mapping).
+    Exit: a measured comparison with `nsys-v20`. Land it if no AD launch is slower than 3%.
+13d. Final reply: resolve every `TODO(user)`, get user approval, then post.
 
 Out of scope: each matrix entry costs a CSR search (`Matrix::find`) and an atomic, in hand-coded
 and AD kernels alike. A per-pattern map from element entries to value indices would help both.
 Open a separate issue for it.
+
+## Hand-coded loop findings (code reading, not measured)
+
+- The hand-coded precompute loops (`ResidualObject::computeResidualInternal`,
+  `precomputeResidualBody`, `precomputeJacobianBody`) run one flat `RangePolicy` over
+  (local thread, element) (`Thread::resize`, local thread fastest). Each of the
+  `num_local_residual_threads` (default 2) threads of an element evaluates every qp. The Jacobian
+  (`num_local_jacobian_threads`, default 4) evaluates every qp again per column j, because `Datum`
+  caches the geometry of one qp only. With displacements, each evaluation runs
+  `Datum::reinitTransform` (12 global reads and an F inverse). AD evaluates each qp once into
+  scratch. This is the likely reason AD residuals beat hand-coded ones.
+- `assembleDisplacementJacobian` (`KokkosPrecomputeHooks.h`) runs one element per team of 128
+  (`AUTO`) threads, with `TeamThreadRange` over 8 qps and then 8 columns at q8. 120 of 128 threads
+  idle. One launch per component: 11.86 ms each at handsdisp_q8 (`nsys-v19`), 3 per Jacobian.
+  This is the flaw of review comment 3, in new code of this PR.
+- `ThreadVectorRange` mapping for the AD group: one group per Kokkos thread, qps over vector
+  lanes. CUDA needs a power-of-2 vector length <= 32. So 27 qps pad to 32, and 64 qps take 2 qps
+  per lane. Gains: warp shuffle reductions, no team barrier inside a group, and a native OpenMP
+  mapping. One element per team with team size = qps instead hits the 32 resident blocks per SM
+  cap.
+- Upstream `up/next` (`ffc574921d7`) has hand-coded and sparse AD Kokkos kernels
+  (`KokkosADDiffusion`, `KokkosADReal.h`), Kokkos materials without AD, and no displacement
+  support. `origin` is the user's fork. Its `next` is from 2023.
+- Default MOOSE quadrature is twice the FE order (q8 for FIRST HEX8, q27 for SECOND HEX27). The q27
+  and q64 sweep variants keep 8 HEX8 test functions.
 
 ## Review findings for the reply to NamjaeChoi
 
