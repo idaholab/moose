@@ -25,6 +25,9 @@ public:
   void threadJoin(const UserObject & y) override;
 
 private:
+  /// Whether to check the interface diffusion conservation residual
+  const bool _check_conservation;
+
   /// Whether to error if executeOnBoundary is called on an interface boundary
   const bool _check_boundary_calls;
 
@@ -36,4 +39,7 @@ private:
 
   /// Count of calls to executeOnBoundary on interface boundaries (should stay 0)
   unsigned int _num_boundary_calls_on_interface;
+
+  /// Total number of executeOnBoundary calls
+  unsigned int _num_boundary_calls;
 };

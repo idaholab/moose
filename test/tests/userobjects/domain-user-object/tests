@@ -72,4 +72,97 @@
     design = 'UserObjects/index.md'
     issues = '#34282'
   []
+
+  [boundary_selection]
+    requirement = 'The system shall execute domain user objects'
+    design = 'UserObjects/index.md'
+    issues = '#19995 #32413 #34421'
+    [unset]
+      detail = 'on every boundary not selected as an interface when boundaries is unset,'
+      type = RunApp
+      mesh_mode = REPLICATED
+      input = overlapping-interface.i
+      # When boundaries is unset, boundary callbacks run on every non-interface boundary ID. Boundary
+      # IDs are not limited to the mesh exterior: crack tags 2 internal sides between blocks 0 and 1,
+      # and both are included even though they have neighbors. The 6 calls consist of these 2 crack
+      # sides and block 0's 4 exterior sides (2 bottom, 1 left, and 1 right); the overlapping 'new'
+      # interface boundary ID is excluded.
+      cli_args = 'UserObjects/conservation/expected_boundary_calls=6 Outputs/exodus=false'
+    []
+    [selected]
+      detail = 'only on the boundary IDs listed in boundaries when it is set, and'
+      type = RunApp
+      mesh_mode = REPLICATED
+      input = overlapping-interface.i
+      # The selected bottom boundary has 2 element sides in block 0 (nx = 2).
+      cli_args = 'UserObjects/conservation/boundaries=bottom UserObjects/conservation/expected_boundary_calls=2 Outputs/exodus=false'
+    []
+    [empty]
+      detail = 'on no boundaries when boundaries is set to an empty list.'
+      type = RunApp
+      mesh_mode = REPLICATED
+      input = overlapping-interface.i
+      # An explicitly empty list disables all boundary callbacks without disabling independently
+      # selected interface callbacks.
+      cli_args = 'UserObjects/conservation/boundaries= UserObjects/conservation/expected_boundary_calls=0 UserObjects/conservation/check_conservation=false Outputs/exodus=false'
+    []
+  []
+
+  [boundary_selection_accepts_internal_side]
+    requirement = 'The system shall execute a domain user object on a selected boundary containing internal sides.'
+    design = 'UserObjects/index.md'
+    issues = '#19995 #32413 #34421'
+    type = RunApp
+    mesh_mode = REPLICATED
+    input = overlapping-interface.i
+    # This test only checks that the 2 internal sides tagged as crack are selected. Restricting
+    # boundary execution to crack prevents this test user object from collecting the Robin
+    # contribution on bottom, so it cannot reconstruct the complete nodal residual. Disable that
+    # residual check here.
+    cli_args = 'UserObjects/conservation/boundaries=crack UserObjects/conservation/expected_boundary_calls=2 UserObjects/conservation/check_conservation=false Outputs/exodus=false'
+  []
+
+  [interface_boundary_rejects_external_side]
+    requirement = 'The system shall reject a DomainUserObject interface boundary selection containing an external side.'
+    design = 'UserObjects/index.md'
+    issues = '#19995 #32413 #34421'
+    type = RunException
+    mesh_mode = REPLICATED
+    input = overlapping-interface.i
+    cli_args = 'UserObjects/conservation/interface_boundaries=bottom Outputs/exodus=false'
+    expect_err = 'contains an external side, but interface boundaries must contain neighbors'
+  []
+
+  [reject_nonexistent_boundary]
+    requirement = 'The system shall reject a nonexistent boundary name selected for DomainUserObject boundary execution.'
+    design = 'UserObjects/index.md'
+    issues = '#19995 #32413 #34421'
+    type = RunException
+    mesh_mode = REPLICATED
+    input = overlapping-interface.i
+    cli_args = 'UserObjects/conservation/boundaries=non_existing_boundary Outputs/exodus=false'
+    expect_err = "Boundary 'non_existing_boundary' does not exist in the mesh"
+  []
+
+  [reject_nonexistent_interface]
+    requirement = 'The system shall reject a nonexistent boundary name selected for DomainUserObject interface execution.'
+    design = 'UserObjects/index.md'
+    issues = '#19995 #32413 #34421'
+    type = RunException
+    mesh_mode = REPLICATED
+    input = overlapping-interface.i
+    cli_args = 'UserObjects/conservation/interface_boundaries=non_existing_boundary Outputs/exodus=false'
+    expect_err = "Boundary 'non_existing_boundary' does not exist in the mesh"
+  []
+
+  [boundary_interface_overlap]
+    requirement = 'The system shall reject a DomainUserObject boundary ID selected for both boundary and interface execution.'
+    design = 'UserObjects/index.md'
+    issues = '#19995 #32413 #34421'
+    type = RunException
+    mesh_mode = REPLICATED
+    input = overlapping-interface.i
+    cli_args = 'UserObjects/conservation/boundaries=new Outputs/exodus=false'
+    expect_err = 'cannot be selected by both boundaries and interface_boundaries'
+  []
 []
