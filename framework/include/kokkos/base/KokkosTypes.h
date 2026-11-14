@@ -392,8 +392,10 @@ Real33::identity(const unsigned int dim)
 {
   *this = 0;
 
-  for (unsigned int i = 0; i < dim; ++i)
-    a[i][i] = 1;
+  // Index with compile-time constants only. A runtime index can keep the enclosing object, such
+  // as a Datum, in local memory.
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    a[i][i] = i < dim;
 }
 
 KOKKOS_INLINE_FUNCTION Real

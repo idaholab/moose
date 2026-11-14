@@ -485,28 +485,6 @@ public:
   KOKKOS_FUNCTION Real33 pushForward(const Real33 & grad_X, const unsigned int qp);
 
   /**
-   * Set local parallelization option
-   * @param local_thread_id The current local thread ID
-   * @param num_local_threads The number of local threads
-   */
-  KOKKOS_FUNCTION void set_local_parallel(const unsigned int local_thread_id,
-                                          const unsigned int num_local_threads)
-  {
-    _local_thread_id = local_thread_id;
-    _num_local_threads = num_local_threads;
-  }
-  /**
-   * Get the current local thread ID
-   * @returns The current local thread ID
-   */
-  KOKKOS_FUNCTION unsigned int local_thread_id() const { return _local_thread_id; }
-  /**
-   * Get the number of local threads
-   * @returns The number of local threads
-   */
-  KOKKOS_FUNCTION unsigned int num_local_threads() const { return _num_local_threads; }
-
-  /**
    * Set whether the hooks of an object are being differentiated with respect to the displacements
    * of the current configuration. The displacements move the normals and the quadrature points, so
    * reading either in this state aborts unless the object linearizes its residual in it.
@@ -655,14 +633,6 @@ private:
    * quadrature point coordinates carry their displacement derivatives only as dual numbers
    */
   bool _ad_displaced = false;
-  /**
-   * Thread ID for local parallelization
-   */
-  unsigned int _local_thread_id = 0;
-  /**
-   * Number of threads for local parallelization
-   */
-  unsigned int _num_local_threads = 1;
 };
 
 KOKKOS_FUNCTION inline Datum::Datum(const ContiguousElementID elem,
