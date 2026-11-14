@@ -40,13 +40,17 @@ public:
 
 private:
   /// Check if this vector is readable
-  bool readable() const { return _raw_value != nullptr; }
+  bool readable() const { return _retrieved; }
 
   /// Reference to the petsc vector whose values shall be read
   PetscVector<Number> & _vec;
 
   /// The raw values in the vector
   const PetscScalar * _raw_value;
+
+  /// Whether the array is retrieved. The array pointer cannot tell: PETSc may return a null
+  /// pointer for a process that holds no entries of the vector.
+  bool _retrieved;
 };
 
 inline PetscScalar

@@ -108,3 +108,13 @@ BDF2::timeDerivativeMatrixContribution(const Real factor) const
   else
     return factor * _weight[0] / _dt;
 }
+
+std::vector<Real>
+BDF2::timeDerivativeRHSWeights() const
+{
+  // The first step is a backward Euler step; the older state does not enter it
+  if (_t_step == 1)
+    return {1.0 / _dt, 0.0};
+  else
+    return {-_weight[1] / _dt, -_weight[2] / _dt};
+}
