@@ -67,6 +67,9 @@ The [!ac](CSG) model generation can be invoked on the command line using the `--
 The [!ac](JSON) file that is generated will be called the name of the input file with `_csg` appended by default.
 An optional output file name can be provided on the command line (`--csg-only <output_file_name.json>`).
 
+The [!ac](CSG) model generation can also be invoked from the input file with the top-level [`[ConstructiveSolidGeometry]`](syntax/ConstructiveSolidGeometry/index.md) block, which also sets the output file name and controls the expansion of engineering units.
+All [engineering units](#engineering-units) are expanded into standard [!ac](CSG) components before output by default, including when `--csg-only` is used without the block.
+
 !alert note title=Code requirements
 A [!ac](CSG) [!ac](JSON) file will be produced if and only if all mesh generators in the input file have the `generateCSG` method implemented.
 If any mesh generators do not have the `generateCSG` method implemented, an error will be returned explaining as such.
@@ -74,7 +77,7 @@ This process is run as a [data-only mode](source/meshgenerators/MeshGenerator.md
 
 ## Output
 
-Calling `--csg-only` will produce a [!ac](JSON) file containing the complete geometric description of the mesh generator input.
+Calling `--csg-only` or including the [`[ConstructiveSolidGeometry]`](syntax/ConstructiveSolidGeometry/index.md) input block with `generate_csg = true` will produce a [!ac](JSON) file containing the complete geometric description of the mesh generator input.
 There are four main sections in the file:
 
 - [`surfaces`](#surfaces)

@@ -182,8 +182,8 @@
       detail = '2D hexagonal assembly'
       type = JSONDiff
       input = 'assembly_hex_2d.i'
-      cli_args = "Mesh/rmp/expand_units=false
-                  Outputs/file_base=assembly_hex_2d_engunit
+      cli_args = "Outputs/file_base=assembly_hex_2d_engunit
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'assembly_hex_2d_engunit_csg.json'
       recover = false
@@ -193,8 +193,8 @@
       detail = '3D hexagonal assembly'
       type = JSONDiff
       input = 'assembly_hex.i'
-      cli_args = "Mesh/rmp/expand_units=false
-                  Outputs/file_base=assembly_hex_engunit
+      cli_args = "Outputs/file_base=assembly_hex_engunit
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'assembly_hex_engunit_csg.json'
       recover = false
@@ -204,8 +204,8 @@
       detail = '2D Cartesian assembly mesh with no background/duct region'
       type = JSONDiff
       input = 'assembly_square_2d.i'
-      cli_args = "Mesh/rmp/expand_units=false
-                  Outputs/file_base=assembly_square_2d_engunit
+      cli_args = "Outputs/file_base=assembly_square_2d_engunit
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'assembly_square_2d_engunit_csg.json'
       recover = false
@@ -215,9 +215,9 @@
       detail = '3D Cartesian assembly mesh with no background/duct region'
       type = JSONDiff
       input = 'assembly_square.i'
-      cli_args = "Mesh/rmp/expand_units=false
-                  Outputs/file_base=assembly_square_engunit
+      cli_args = "Outputs/file_base=assembly_square_engunit
                   Mesh/inactive=translate
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'assembly_square_engunit_csg.json'
       recover = false
@@ -232,8 +232,8 @@
                   Mesh/pin2/pitch=1.25
                   Mesh/amg/background_region_id='6'
                   Mesh/amg/background_intervals=1
-                  Mesh/rmp/expand_units=false
                   Outputs/file_base=assembly_square_2d_background_engunit
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'assembly_square_2d_background_engunit_csg.json'
       recover = false
@@ -249,8 +249,8 @@
                   Mesh/amg/background_region_id='6 16'
                   Mesh/amg/background_intervals=1
                   Mesh/inactive='translate'
-                  Mesh/rmp/expand_units=false
                   Outputs/file_base=assembly_square_background_engunit
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = 'assembly_square_background_engunit_csg.json'
       recover = false

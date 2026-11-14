@@ -3,6 +3,9 @@
     type = TestPolygonUnitMeshGenerator
     apothem = 4
     num_sides = 3
-    expand_unit = true
   []
+[]
+
+# Engineering units are expanded by default
+[ConstructiveSolidGeometry]
 []

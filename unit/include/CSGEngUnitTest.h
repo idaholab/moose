@@ -296,4 +296,95 @@ protected:
     getBase().renameRootUniverse(getName() + "_expanded");
   }
 };
+
+/**
+ * Engineering units whose expansions all create a sphere named "shared_sphere" with a radius set
+ * at construction, for testing how expansion handles a surface that already exists in the base:
+ * an identical one is reused and a different one is an error.
+ *
+ *    TestSharedSurfEngUnit: expands to the shared sphere and a uniquely named sphere
+ *    TestSharedCellEngUnit: expands to one cell bounded by the shared sphere
+ *    TestSharedUnivEngUnit: expands to a universe with one cell bounded by the shared sphere
+ */
+class TestSharedSurfEngUnit : public CSGSurfaceEngUnit
+{
+public:
+  TestSharedSurfEngUnit(const std::string & name, const Real shared_radius)
+    : CSGSurfaceEngUnit(name), _shared_radius(shared_radius)
+  {
+  }
+  std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
+  Real evaluateSurfaceEquationAtPoint(const Point &) const override { return 1.0; }
+
+protected:
+  std::unique_ptr<CSGSurface> clone() const override
+  {
+    return std::make_unique<TestSharedSurfEngUnit>(getName(), _shared_radius);
+  }
+
+  void expandUnit() override
+  {
+    auto & shared =
+        getBase().addSurface(std::make_unique<CSGSphere>("shared_sphere", _shared_radius));
+    auto & own =
+        getBase().addSurface(std::make_unique<CSGSphere>(getName() + "_own", _shared_radius + 1.0));
+    _expanded_region = -own & +shared;
+  }
+
+  /// Radius of the sphere named "shared_sphere" created during expansion
+  const Real _shared_radius;
+};
+
+class TestSharedCellEngUnit : public CSGCellEngUnit
+{
+public:
+  TestSharedCellEngUnit(const std::string & name, const Real shared_radius)
+    : CSGCellEngUnit(name), _shared_radius(shared_radius)
+  {
+  }
+  std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
+
+protected:
+  std::unique_ptr<CSGCellEngUnit> clone() const override
+  {
+    return std::make_unique<TestSharedCellEngUnit>(getName(), _shared_radius);
+  }
+
+  void expandUnit() override
+  {
+    auto & shared =
+        getBase().addSurface(std::make_unique<CSGSphere>("shared_sphere", _shared_radius));
+    getBase().createCell(getName() + "_expanded_cell", -shared);
+  }
+
+  /// Radius of the sphere named "shared_sphere" created during expansion
+  const Real _shared_radius;
+};
+
+class TestSharedUnivEngUnit : public CSGUniverseEngUnit
+{
+public:
+  TestSharedUnivEngUnit(const std::string & name, const Real shared_radius)
+    : CSGUniverseEngUnit(name), _shared_radius(shared_radius)
+  {
+  }
+  std::unordered_map<std::string, AttributeVariant> getAttributes() const override { return {}; }
+
+protected:
+  std::unique_ptr<CSGUniverseEngUnit> clone() const override
+  {
+    return std::make_unique<TestSharedUnivEngUnit>(getName(), _shared_radius);
+  }
+
+  void expandUnit() override
+  {
+    auto & shared =
+        getBase().addSurface(std::make_unique<CSGSphere>("shared_sphere", _shared_radius));
+    getBase().createCell(getName() + "_cell", -shared);
+    getBase().renameRootUniverse(getName() + "_expanded");
+  }
+
+  /// Radius of the sphere named "shared_sphere" created during expansion
+  const Real _shared_radius;
+};
 }
