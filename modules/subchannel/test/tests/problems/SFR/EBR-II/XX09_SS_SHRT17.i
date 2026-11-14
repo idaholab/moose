@@ -244,6 +244,19 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     execute_on = 'TIMESTEP_END'
     height = 0.322
   []
+  ### Energy conservation: the pin heat rate must match the enthalpy flow rate rise plus the heat
+  ### that axial conduction carries out of the inlet. This assembly has no duct mesh, so the pins
+  ### are the only heat source, and it is heated from the inlet node, so the inlet conduction is
+  ### not negligible. See the energy balance section of the SCM theory manual.
+  [power_enthalpy_balance]
+    type = SCMTHPowerPostprocessor
+  []
+  [power_pins]
+    type = SCMPinPowerPostprocessor
+  []
+  [power_inlet_conduction]
+    type = SCMInletConductionHeatRatePostprocessor
+  []
 []
 
 [Outputs]

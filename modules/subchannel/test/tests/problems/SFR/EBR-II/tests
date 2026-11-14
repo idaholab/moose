@@ -3,6 +3,10 @@
   issues = '#28497 #29481'
   [SHRT-17_SS_test]
     type = CSVDiff
+    # This test also covers the assembly energy balance postprocessors
+    design = 'TriSubChannel1PhaseProblem.md SCMTHPowerPostprocessor.md
+              SCMPinPowerPostprocessor.md SCMInletConductionHeatRatePostprocessor.md'
+    issues = '#28497 #29481 #33723'
     input = XX09_SS_SHRT17.i
     csvdiff = XX09_SS_SHRT17_out.csv
     capabilities = 'method!=dbg'
@@ -18,5 +22,26 @@
     override_abs_zero = '1e-6'
     max_threads = 1
     requirement = 'The system shall examine the subchannel solver for the EBR-II case'
+  []
+  [pseudo_time_segregated_error]
+    type = RunException
+    input = XX09_SS_SHRT17.i
+    cli_args = 'SubChannel/segregated=true SubChannel/crossflow_pseudo_time_step=5e-4'
+    expect_err = "The 'crossflow_pseudo_time_step' parameter is only used by the implicit "
+                 "non-segregated solve"
+    issues = '#33723'
+    requirement = 'The system shall report an error when the crossflow pseudo-time step is set '
+                  'for the segregated solve, which does not use it.'
+  []
+  [inlet_conduction_explicit_error]
+    type = RunException
+    input = XX09_SS_SHRT17.i
+    cli_args = 'SubChannel/implicit=false SubChannel/segregated=true'
+    expect_err = "SCMInletConductionHeatRatePostprocessor supports only the implicit solve"
+    issues = '#33723'
+    design = 'SCMInletConductionHeatRatePostprocessor.md'
+    requirement = 'The system shall report an error when the inlet conduction heat rate is '
+                  'requested for the explicit solve, whose conduction stencil it does not '
+                  'evaluate.'
   []
 []

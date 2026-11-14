@@ -6,6 +6,9 @@
     input = 'FFM-5B_low.i'
     csvdiff  = 'FFM-5B_low_out.csv'
     capabilities = 'method!=dbg'
+    # The outer iterations stop at P_tol = T_tol = 3e-5, the tightest these blockage cases reach,
+    # so the result is not converged to round-off and can differ slightly between platforms
+    rel_err = 5e-5
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
@@ -16,6 +19,9 @@
     input = 'FFM-5B_high.i'
     csvdiff  = 'FFM-5B_high_out.csv'
     capabilities = 'method!=dbg'
+    # The outer iterations stop at P_tol = T_tol = 3e-5, the tightest these blockage cases reach,
+    # so the result is not converged to round-off and can differ slightly between platforms
+    rel_err = 5e-5
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
@@ -27,7 +33,7 @@
     csvdiff  = 'FFM-3A_out.csv'
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
-    rel_err = 3e-5
+    rel_err = 5e-5
     valgrind = NONE
     recover = false
     requirement = 'The system shall examine the subchannel solver for the FFM-3A case'

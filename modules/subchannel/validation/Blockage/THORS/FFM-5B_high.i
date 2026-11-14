@@ -51,12 +51,21 @@ P_out = 2.0e5 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-4
-  T_tol = 1.0e-4
+  # These blockage cases do not converge to 1e-6 or 1e-5: the temperature and pressure errors stall
+  # near 5e-6 to 9e-5 and then oscillate. 3e-5 is the tightest tolerance both flow cases reach with
+  # the blockage model below. The previous 1e-4 stopped up to 9e-4 away from the 3e-5 result.
+  P_tol = 3.0e-5
+  T_tol = 3.0e-5
+  # Fewer coupled-solve retries than the default of 0.1, and the high flow case converges at 3e-5
+  # only with it
+  crossflow_equation_relaxation = 0.5
   implicit = true
   segregated = false
   verbose_subchannel = true
-  interpolation_scheme = exponential
+  # The monolithic solve diverges for this case with the exponential and upwind schemes, while
+  # central differencing converges. Against the measured thermocouple temperatures, the RMS error is
+  # 5.8 K, compared with 5.0 K for the earlier exponential result with the added crossflow resistance
+  interpolation_scheme = central_difference
   pin_HTC_closure = 'Dittus-Boelter'
   # friction model
   friction_closure = 'Chen'
