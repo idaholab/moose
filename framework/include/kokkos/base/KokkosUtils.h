@@ -61,40 +61,63 @@ find(const T & target, const T * const begin, const T * const end)
 }
 
 /**
- * Perform an in-place linear solve using Cholesky decomposition
- * Matrix and right-hand-side vector are modified after this call
- * @param A The row-major matrix
- * @param x The solution vector
- * @param b The right-hand-side vector
+ * Get the index of entry (i, j), j <= i, of a lower-triangular matrix packed row by row
+ * @param i The row index
+ * @param j The column index
+ * @returns The packed index
+ */
+KOKKOS_INLINE_FUNCTION unsigned int
+packedLowerIndex(const unsigned int i, const unsigned int j)
+{
+  return i * (i + 1) / 2 + j;
+}
+
+/**
+ * Perform an in-place Cholesky decomposition of a symmetric positive definite matrix
+ * @param L The lower triangle of the matrix packed row by row, overwritten by its Cholesky factor
  * @param n The system size
  */
 KOKKOS_INLINE_FUNCTION void
-choleskySolve(Real * const A, Real * const x, Real * const b, const unsigned int n)
+choleskyFactor(Real * const L, const unsigned int n)
 {
   for (unsigned int i = 0; i < n; ++i)
   {
     for (unsigned int j = 0; j <= i; ++j)
     {
-      Real sum = A[j + n * i];
+      Real sum = L[packedLowerIndex(i, j)];
 
       for (unsigned int k = 0; k < j; ++k)
-        sum -= A[k + n * i] * A[k + n * j];
+        sum -= L[packedLowerIndex(i, k)] * L[packedLowerIndex(j, k)];
 
       if (i == j)
-        A[j + n * i] = ::Kokkos::sqrt(sum);
+        L[packedLowerIndex(i, j)] = ::Kokkos::sqrt(sum);
       else
-        A[j + n * i] = sum / A[j + n * j];
+        L[packedLowerIndex(i, j)] = sum / L[packedLowerIndex(j, j)];
     }
   }
+}
 
+/**
+ * Solve a linear system with a Cholesky factor from choleskyFactor()
+ * The right-hand-side vector is modified after this call
+ * @tparam Vector A pointer or a vector view whose operator[] returns a modifiable entry
+ * @param L The Cholesky factor packed row by row
+ * @param x The solution vector
+ * @param b The right-hand-side vector
+ * @param n The system size
+ */
+template <typename Vector>
+KOKKOS_INLINE_FUNCTION void
+choleskySubstitute(const Real * const L, Vector x, Vector b, const unsigned int n)
+{
   for (unsigned int i = 0; i < n; ++i)
   {
     Real sum = b[i];
 
     for (unsigned int j = 0; j < i; ++j)
-      sum -= A[j + n * i] * b[j];
+      sum -= L[packedLowerIndex(i, j)] * b[j];
 
-    b[i] = sum / A[i + n * i];
+    b[i] = sum / L[packedLowerIndex(i, i)];
   }
 
   for (int i = n - 1; i >= 0; --i)
@@ -102,9 +125,9 @@ choleskySolve(Real * const A, Real * const x, Real * const b, const unsigned int
     Real sum = b[i];
 
     for (unsigned int j = i + 1; j < n; ++j)
-      sum -= A[i + n * j] * x[j];
+      sum -= L[packedLowerIndex(j, i)] * x[j];
 
-    x[i] = sum / A[i + n * i];
+    x[i] = sum / L[packedLowerIndex(i, i)];
   }
 }
 
