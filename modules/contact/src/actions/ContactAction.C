@@ -200,6 +200,30 @@ ContactAction::validParams()
                              "Degree of the friction-residual projection; see "
                              "MortarContactUtils.h. Only valid for Coulomb friction mortar "
                              "contact.");
+  MooseEnum c_strategy("user physical", "user");
+  c_strategy.addDocumentation(
+      "user", "Use the values supplied via 'c_normal' and 'c_tangential' (default).");
+  c_strategy.addDocumentation(
+      "physical",
+      "Derive a per-node contact stiffness from the normal acoustic stiffness and element depth of "
+      "the two contacting bodies and use it for both the normal and tangential constraints. This "
+      "implies 'normalize_c = true'.");
+  params.addParam<MooseEnum>(
+      "c_strategy",
+      c_strategy,
+      "Strategy for setting the mortar contact constants 'c_normal' and 'c_tangential'.");
+  params.addParam<std::string>("secondary_elasticity_tensor_base_name",
+                               "",
+                               "Base name prefix of the elasticity_tensor material property on "
+                               "the secondary body. Used when 'c_strategy = physical'.");
+  params.addParam<std::string>("primary_elasticity_tensor_base_name",
+                               "",
+                               "Base name prefix of the elasticity_tensor material property on "
+                               "the primary body. Used when 'c_strategy = physical'.");
+  params.addParam<bool>("elasticity_tensor_is_ad",
+                        false,
+                        "Whether the elasticity tensor material property was declared as an AD "
+                        "property. Used when 'c_strategy = physical'.");
   params.addParam<bool>("ping_pong_protection",
                         false,
                         "Whether to protect against ping-ponging, e.g. the oscillation of the "
@@ -453,6 +477,40 @@ ContactAction::ContactAction(const InputParameters & params)
       paramError("friction_projection_degree",
                  "'friction_projection_degree' is only valid for Coulomb friction mortar "
                  "contact.");
+
+    if (getParam<MooseEnum>("c_strategy") == "physical")
+    {
+      // The physical strategy sets every mortar contact constant and the multipliers' scaling
+      for (const auto & param : {"c_normal",
+                                 "c_tangential",
+                                 "normalize_c",
+                                 "normal_lm_scaling",
+                                 "tangential_lm_scaling"})
+        if (isParamSetByUser(param))
+          paramError(param,
+                     "'",
+                     param,
+                     "' cannot be set when 'c_strategy = physical'; the contact constants and "
+                     "multiplier scaling are derived from the material elasticity tensors and the "
+                     "displacement variable scaling.");
+      if (_mortar_dynamics)
+        paramError("c_strategy",
+                   "'c_strategy = physical' is not supported with 'mortar_dynamics'.");
+      // The degree-two friction residual is homogeneous of degree two in the pressures and the
+      // Coulomb radius, so its Jacobian scales with the solution-dependent contact pressure and a
+      // fixed row and column scaling cannot bring it to the order of the elasticity block.
+      if (_model == ContactModel::COULOMB &&
+          getParam<MooseEnum>("friction_projection_degree") != "ONE")
+        paramError("friction_projection_degree",
+                   "'c_strategy = physical' requires 'friction_projection_degree = ONE' for "
+                   "Coulomb friction.");
+    }
+    else
+      for (const auto & param : {"secondary_elasticity_tensor_base_name",
+                                 "primary_elasticity_tensor_base_name",
+                                 "elasticity_tensor_is_ad"})
+        if (isParamSetByUser(param))
+          paramError(param, "'", param, "' is only used when 'c_strategy = physical'.");
   }
   else
   {
@@ -499,6 +557,9 @@ ContactAction::ContactAction(const InputParameters & params)
     else if (params.isParamSetByUser("c_tangential"))
       paramError("c_tangential",
                  "The 'c_tangential' option can only be used with the 'mortar' formulation");
+    else if (params.isParamSetByUser("c_strategy"))
+      paramError("c_strategy",
+                 "The 'c_strategy' option can only be used with the 'mortar' formulation");
     else if (params.isParamSetByUser("mortar_dynamics"))
       paramError("mortar_dynamics",
                  "The 'mortar_dynamics' constraint option can only be used with the 'mortar' "
@@ -589,6 +650,14 @@ ContactAction::act()
     // PETSc-3.8.4 or higher will have the same behavior as PETSc-3.8.3.
     if (!_problem->isSNESMFReuseBaseSetbyUser())
       _problem->setSNESMFReuseBase(false, false);
+
+    // The physical strategy bakes an analytically derived scaling directly into the mortar
+    // Lagrange multiplier variables. Automatic scaling would additionally rescale those same
+    // equations based on the assembled Jacobian, double-scaling them.
+    if (getParam<MooseEnum>("c_strategy") == "physical" && _problem->automaticScaling())
+      paramError("c_strategy",
+                 "'c_strategy = physical' cannot be used with automatic scaling; disable the "
+                 "'automatic_scaling' executioner parameter.");
   }
 
   if (_automatic_pairing_boundaries.size() > 0)
@@ -685,6 +754,11 @@ ContactAction::act()
                                                                 suffix};
         params.set<std::vector<VariableName>>("tangent_two") = {action_name + "_tangential_3d_lm" +
                                                                 suffix};
+        if (getParam<MooseEnum>("c_strategy") == "physical")
+          params.set<UserObjectName>("weighted_gap_uo") =
+              libmesh_map_find(_bnd_pair_to_mortar_info,
+                               std::make_pair(primary_boundary, secondary_boundary))
+                  .uo_name;
 
         std::vector<std::string> disp_components({"x", "y", "z"});
         unsigned component_index = 0;
@@ -1121,6 +1195,16 @@ ContactAction::addMortarContact()
                                            "debug_mesh"});
         if (getParam<bool>("use_petrov_galerkin"))
           uo_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
+        if (getParam<MooseEnum>("c_strategy") == "physical")
+        {
+          uo_params.set<bool>("derive_c_from_elasticity") = true;
+          uo_params.set<bool>("elasticity_tensor_is_ad") =
+              getParam<bool>("elasticity_tensor_is_ad");
+          uo_params.set<std::string>("secondary_base_name") =
+              getParam<std::string>("secondary_elasticity_tensor_base_name");
+          uo_params.set<std::string>("primary_base_name") =
+              getParam<std::string>("primary_elasticity_tensor_base_name");
+        }
 
         _problem->addUserObject(
             "LMWeightedGapUserObject",
@@ -1161,6 +1245,16 @@ ContactAction::addMortarContact()
                                            "debug_mesh"});
         if (getParam<bool>("use_petrov_galerkin"))
           uo_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
+        if (getParam<MooseEnum>("c_strategy") == "physical")
+        {
+          uo_params.set<bool>("derive_c_from_elasticity") = true;
+          uo_params.set<bool>("elasticity_tensor_is_ad") =
+              getParam<bool>("elasticity_tensor_is_ad");
+          uo_params.set<std::string>("secondary_base_name") =
+              getParam<std::string>("secondary_elasticity_tensor_base_name");
+          uo_params.set<std::string>("primary_base_name") =
+              getParam<std::string>("primary_elasticity_tensor_base_name");
+        }
 
         _problem->addUserObject(
             "LMWeightedVelocitiesUserObject",
@@ -1318,7 +1412,13 @@ ContactAction::addMortarContact()
         params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
         params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
         params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
-        params.set<Real>("c") = getParam<Real>("c_normal");
+        if (getParam<MooseEnum>("c_strategy") == "physical")
+          params.set<bool>("use_derived_c") = true;
+        else
+        {
+          params.set<Real>("c") = getParam<Real>("c_normal");
+          params.applySpecificParameters(parameters(), {"normalize_c"});
+        }
 
         if (ndisp > 1)
           params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
@@ -1334,7 +1434,6 @@ ContactAction::addMortarContact()
                                         "minimum_projection_angle",
                                         "mortar_3d_subpatch_plane",
                                         "mortar_3d_qp_mapping",
-                                        "normalize_c",
                                         "extra_vector_tags",
                                         "absolute_value_vector_tags",
                                         "debug_mesh"});
@@ -1371,9 +1470,14 @@ ContactAction::addMortarContact()
         params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
         params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
         params.set<bool>("use_displaced_mesh") = true;
-        params.set<Real>("c_t") = getParam<Real>("c_tangential");
-        params.set<Real>("c") = getParam<Real>("c_normal");
-        params.set<bool>("normalize_c") = getParam<bool>("normalize_c");
+        if (getParam<MooseEnum>("c_strategy") == "physical")
+          params.set<bool>("use_derived_c") = true;
+        else
+        {
+          params.set<Real>("c") = getParam<Real>("c_normal");
+          params.set<Real>("c_t") = getParam<Real>("c_tangential");
+          params.set<bool>("normalize_c") = getParam<bool>("normalize_c");
+        }
         params.set<bool>("compute_primal_residuals") = false;
 
         params.set<MooseEnum>("segment_quadrature") = getParam<MooseEnum>("segment_quadrature");

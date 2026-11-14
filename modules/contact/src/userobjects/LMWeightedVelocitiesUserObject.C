@@ -70,6 +70,7 @@ LMWeightedVelocitiesUserObject::finalize()
 {
   WeightedVelocitiesUserObject::finalize();
   finalizeNodalScaling();
+  finalizeDerivedC();
 }
 
 void
@@ -77,6 +78,7 @@ LMWeightedVelocitiesUserObject::computeQpIProperties()
 {
   WeightedVelocitiesUserObject::computeQpIProperties();
   computeQpINodalScaling();
+  accumulateDerivedCIfNeeded();
 }
 
 ADReal
@@ -94,13 +96,13 @@ LMWeightedVelocitiesUserObject::nodalTangentialPressure(const Node & node,
               "The tangential Lagrange multiplier must have a degree of freedom at this node.");
 
   // Seed the lower-dimensional nodal Lagrange multiplier derivative explicitly. Nodal scaling
-  // applies only to the normal complementarity row; the tangential dof value is the physical
-  // pressure lambda_t.
+  // applies only to the normal complementarity row; the physical tangential pressure is
+  // lambda_t = D_j y_j for the stored y_j.
   const auto dof_index = node.dof_number(sys_num, var_num, 0);
   ADReal nodal_pressure = (*lm_var->sys().currentSolution())(dof_index);
   if (Moose::doDerivatives(_subproblem, _sys))
     Moose::derivInsert(nodal_pressure.derivatives(), dof_index, 1.);
-  return nodal_pressure;
+  return nodal_pressure * derivedTangentialScale(&node);
 }
 
 const VariableTestValue &

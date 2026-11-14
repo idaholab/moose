@@ -126,7 +126,7 @@ offset = -0.045
     displacements = 'disp_x disp_y'
     friction_coefficient = 0.5
     energy_wear_coefficient = 1.0e-6
-    normal_pressure = normal_normal_lm
+    weighted_gap_uo = lm_weightedvelocities_object_normal
     execute_on = 'TIMESTEP_END'
   []
 []
