@@ -24,7 +24,8 @@ namespace FV
 void
 relaxMatrix(SparseMatrix<Number> & matrix,
             const Real relaxation_parameter,
-            NumericVector<Number> & diff_diagonal)
+            NumericVector<Number> & diff_diagonal,
+            const bool enforce_diagonal_dominance)
 {
   PetscMatrix<Number> * mat = dynamic_cast<PetscMatrix<Number> *>(&matrix);
   mooseAssert(mat, "This should be a PetscMatrix!");
@@ -72,15 +73,19 @@ relaxMatrix(SparseMatrix<Number> & matrix,
       const Real abs_sum = std::accumulate(
           values.cbegin(), values.cend(), 0.0, [](Real a, Real b) { return a + std::abs(b); });
       const Real abs_diagonal = std::abs(diff_diga_reader(global_index));
-      new_diagonal[row_i] = inverse_relaxation * std::max(abs_sum - abs_diagonal, abs_diagonal);
+      new_diagonal[row_i] =
+          inverse_relaxation * (enforce_diagonal_dominance
+                                    ? std::max(abs_sum - abs_diagonal, abs_diagonal)
+                                    : abs_diagonal);
     }
   }
   diff_diag->insert(new_diagonal, indices);
+  // PETSc reads the vector below, so its inserted values have to be assembled first
+  diff_diag->close();
 
   // Time to modify the diagonal of the matrix. TODO: add this function to libmesh
   LibmeshPetscCallA(mat->comm().get(), MatDiagonalSet(mat->mat(), diff_diag->vec(), INSERT_VALUES));
   mat->close();
-  diff_diag->close();
 
   // Finally, we can create (D*-D) vector which is used for the relaxation of the
   // right hand side later

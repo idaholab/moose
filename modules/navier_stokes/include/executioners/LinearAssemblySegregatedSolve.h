@@ -44,6 +44,43 @@ protected:
   virtual std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor() override;
   virtual std::pair<unsigned int, Real> solvePressureCorrector() override;
 
+  /**
+   * Assembles and relaxes the momentum predictor of one component, letting the Rhie-Chow object
+   * see the operator before relaxation and add its explicit forcing after. With
+   * \p prepare_without_solve the system vectors are closed first, for a predictor that is
+   * assembled for its coefficients only and never solved.
+   */
+  void assembleMomentumPredictorOperator(const unsigned int system_i,
+                                         const bool prepare_without_solve = false);
+
+  /**
+   * Lets a derived solve refresh whatever pressure-equation sources it owns once H/A has been
+   * computed and before the pressure corrector is assembled. The reduced-pressure diffuse
+   * interface solve publishes its surface-tension, hydrostatic and transient-projection face
+   * fluxes here; they are part of the pressure equation, so they have to be rebuilt for every
+   * corrector rather than only at startup.
+   */
+  virtual void postPreparePressureCorrectorState() {}
+
+  /**
+   * Lets a derived solve refresh state that depends on the published corrected velocity, which is
+   * only valid once the corrector has written it.
+   */
+  virtual void postPublishPressureCorrectedState() {}
+
+  /**
+   * Lets a derived solve update state that depends on the energy solution, such as a temperature
+   * recovered from a conserved energy, before anything else reads it.
+   */
+  virtual void postEnergySolve() {}
+
+  /**
+   * Whether the energy matrix is made diagonally dominant before it is solved. A derived solve
+   * can opt out when the energy unknown is a positive column scaling of a variable whose system
+   * is already an M-matrix, where the enforcement only adds a lagged correction.
+   */
+  virtual bool enforceEnergyDiagonalDominance() const { return true; }
+
   /// Computes new velocity field based on computed pressure gradients
   /// @param recompute_face_mass_flux If we want to recompute the face flux too
   /// @param solver_params Dummy solver parameter object for the linear solve
@@ -60,6 +97,7 @@ protected:
   /// @param reuse_pc Whether to reuse the preconditioning from the previous solve
   /// @param field_relaxation (optional) The relaxation factor for fields if relax_fields is true. Default value is 1.0.
   /// @param min_value_limiter (optional) The minimum value for the solution field
+  /// @param enforce_diagonal_dominance (optional) Whether to make the matrix diagonally dominant
   /// @return The normalized residual norm of the equation.
   std::pair<unsigned int, Real>
   solveAdvectedSystem(const unsigned int system_num,
@@ -69,7 +107,8 @@ protected:
                       const Real abs_tol,
                       const bool reuse_pc,
                       const Real field_relaxation = 1.0,
-                      const Real min_value_limiter = std::numeric_limits<Real>::min());
+                      const Real min_value_limiter = std::numeric_limits<Real>::min(),
+                      const bool enforce_diagonal_dominance = true);
 
   /// Aggregated storage for residuals, tolerances, and indices used in convergence checks
   struct ResidualStorage
@@ -96,6 +135,17 @@ protected:
     /// If we dont have anything we just set this to true.
     bool converged = false;
   };
+
+  /// Runs once before the outer iterations of a solve start
+  virtual void initializeSolveLoop(const SolverParams & /*solver_params*/) {}
+  /// Runs at the start of every outer iteration, before the momentum predictor
+  virtual void preMomentumPressureIteration(ResidualStorage & /*residual_storage*/,
+                                            const SolverParams & /*solver_params*/)
+  {
+  }
+  /// Whether the active scalars are solved after the pressure-velocity loop of each outer
+  /// iteration; a derived solve that solves them elsewhere in the iteration returns false
+  virtual bool shouldSolveActiveScalarsAfterFlowLoop() const { return true; }
 
   /**
    * Build residual/tolerance vectors and associated indices for all enabled systems.

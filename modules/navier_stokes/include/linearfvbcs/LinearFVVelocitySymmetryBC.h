@@ -10,6 +10,7 @@
 #pragma once
 
 #include "LinearFVAdvectionDiffusionBC.h"
+#include "NSFVUtils.h"
 
 /**
  * Class implementing a symmetry boundary condition for the velocity variable.
@@ -45,15 +46,8 @@ protected:
   /// The dimension of the mesh
   const unsigned int _dim;
 
-  /// Velocity in direction x
-  const MooseLinearVariableFVReal * const _u_var;
-  /// Velocity in direction y
-  const MooseLinearVariableFVReal * const _v_var;
-  /// Velocity in direction z
-  const MooseLinearVariableFVReal * const _w_var;
-
-  /// For convenience we organize the velocity variables in a vector
-  std::vector<const MooseLinearVariableFVReal *> _vel_vars;
+  /// Velocity variables by component
+  const NS::LinearFVVelocityVariableArray _velocity_vars;
 
   /// Index x|y|z, this is mainly to handle the deviatoric parts correctly in
   /// in the stress term

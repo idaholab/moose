@@ -29,10 +29,15 @@ LinearFVPressureFluxBC::validParams()
       true,
       "Whether to reconstruct the boundary pressure using the pressure flux and cell gradient. If "
       "false, the boundary pressure is approximated by the adjacent cell pressure.");
-  params.addRequiredParam<MooseFunctorName>("u", "The x-velocity functor on the boundary.");
+  params.addParam<MooseFunctorName>(
+      "constrained_pressure_normal_gradient",
+      "A boundary normal pressure gradient supplied from outside, normally by the Rhie-Chow "
+      "object. When given it supersedes the gradient this object would otherwise reconstruct from "
+      "the prescribed boundary velocity, and the velocity and density are then not needed.");
+  params.addParam<MooseFunctorName>("u", "The x-velocity functor on the boundary.");
   params.addParam<MooseFunctorName>("v", "The y-velocity functor on the boundary.");
   params.addParam<MooseFunctorName>("w", "The z-velocity functor on the boundary.");
-  params.addRequiredParam<MooseFunctorName>(
+  params.addParam<MooseFunctorName>(
       NS::density, "The density functor used together with the prescribed boundary velocity.");
   return params;
 }
@@ -43,15 +48,33 @@ LinearFVPressureFluxBC::LinearFVPressureFluxBC(const InputParameters & parameter
     _Ainv(getFunctor<RealVectorValue>("Ainv")),
     _dim(_subproblem.mesh().dimension()),
     _two_term_expansion(getParam<bool>("use_two_term_expansion")),
-    _u(getFunctor<Real>("u")),
+    _constrained_pressure_normal_gradient(
+        parameters.isParamValid("constrained_pressure_normal_gradient")
+            ? &getFunctor<Real>("constrained_pressure_normal_gradient")
+            : nullptr),
+    _u(parameters.isParamValid("u") ? &getFunctor<Real>("u") : nullptr),
     _v(parameters.isParamValid("v") ? &getFunctor<Real>("v") : nullptr),
     _w(parameters.isParamValid("w") ? &getFunctor<Real>("w") : nullptr),
-    _rho(getFunctor<Real>(NS::density))
+    _rho(parameters.isParamValid(NS::density) ? &getFunctor<Real>(NS::density) : nullptr)
 {
-  if (_dim >= 2 && !_v)
+  // Without a supplied gradient this object reconstructs one from the prescribed boundary mass
+  // flux, which needs the velocity and the density.
+  if (!_constrained_pressure_normal_gradient)
+  {
+    if (!_u)
+      paramError("u",
+                 "The 'u' boundary velocity functor must be provided unless "
+                 "'constrained_pressure_normal_gradient' supplies the boundary gradient.");
+    if (!_rho)
+      paramError(NS::density,
+                 "The density functor must be provided unless "
+                 "'constrained_pressure_normal_gradient' supplies the boundary gradient.");
+  }
+
+  if (_u && _dim >= 2 && !_v)
     paramError("v", "The 'v' boundary velocity functor must be provided for 2D and 3D problems.");
 
-  if (_dim >= 3 && !_w)
+  if (_u && _dim >= 3 && !_w)
     paramError("w", "The 'w' boundary velocity functor must be provided for 3D problems.");
 
   if (_dim < 2 && _v)
@@ -72,7 +95,7 @@ LinearFVPressureFluxBC::computeRequiredPressureFlux() const
 
   Real required_pressure_flux = _HbyA_flux(face_arg, state);
   const auto & normal = _current_face_info->normal();
-  Real boundary_velocity_dot_normal = _u(face_arg, state) * normal(0);
+  Real boundary_velocity_dot_normal = (*_u)(face_arg, state) * normal(0);
 
   if (_dim >= 2)
     boundary_velocity_dot_normal += (*_v)(face_arg, state) * normal(1);
@@ -85,7 +108,7 @@ LinearFVPressureFluxBC::computeRequiredPressureFlux() const
   const Real boundary_normal_multiplier =
       _current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0;
   required_pressure_flux +=
-      _rho(face_arg, state) * boundary_normal_multiplier * boundary_velocity_dot_normal;
+      (*_rho)(face_arg, state) * boundary_normal_multiplier * boundary_velocity_dot_normal;
 
   return required_pressure_flux;
 }
@@ -114,6 +137,13 @@ LinearFVPressureFluxBC::computeBoundaryAinv() const
 Real
 LinearFVPressureFluxBC::computeBoundaryValue() const
 {
+  if (_constrained_pressure_normal_gradient)
+    return _var.getElemValue(*(_current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                                   ? _current_face_info->elemInfo()
+                                   : _current_face_info->neighborInfo()),
+                             determineState()) +
+           suppliedBoundaryNormalGradient() * computeCellToFaceDistance();
+
   const auto state = determineState();
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                              ? _current_face_info->elemInfo()
@@ -143,6 +173,9 @@ LinearFVPressureFluxBC::computeBoundaryValue() const
 Real
 LinearFVPressureFluxBC::computeBoundaryNormalGradient() const
 {
+  if (_constrained_pressure_normal_gradient)
+    return suppliedBoundaryNormalGradient();
+
   if (!_two_term_expansion)
     return 0.0;
 
@@ -180,6 +213,9 @@ LinearFVPressureFluxBC::computeBoundaryValueMatrixContribution() const
 Real
 LinearFVPressureFluxBC::computeBoundaryValueRHSContribution() const
 {
+  if (_constrained_pressure_normal_gradient)
+    return suppliedBoundaryNormalGradient() * computeCellToFaceDistance();
+
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
@@ -195,5 +231,17 @@ LinearFVPressureFluxBC::computeBoundaryGradientMatrixContribution() const
 Real
 LinearFVPressureFluxBC::computeBoundaryGradientRHSContribution() const
 {
+  if (_constrained_pressure_normal_gradient)
+    return suppliedBoundaryNormalGradient() * computeBoundaryAinv();
+
   return -computeRequiredPressureFlux();
+}
+
+Real
+LinearFVPressureFluxBC::suppliedBoundaryNormalGradient() const
+{
+  mooseAssert(_constrained_pressure_normal_gradient,
+              "Only call this when a boundary gradient has been supplied.");
+  return (*_constrained_pressure_normal_gradient)(singleSidedFaceArg(_current_face_info),
+                                                  determineState());
 }

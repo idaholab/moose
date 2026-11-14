@@ -28,12 +28,15 @@ namespace FV
  *
  * @param matrix_in The matrix that needs to be relaxed
  * @param relaxation_parameter The scale which described how much the matrix is relaxed
- * @param diff_diagonal A vector holding the $A_{diag}-A_{diag, relaxed}$ entries for further
+ * @param diff_diagonal A vector holding the $A_{diag, relaxed}-A_{diag}$ entries for further
  *                      use in the relaxation of the right hand side
+ * @param enforce_diagonal_dominance Whether to raise the diagonal to the sum of the
+ *                      off-diagonals; without it, only the relaxation parameter scales the diagonal
  */
 void relaxMatrix(SparseMatrix<Number> & matrix_in,
                  const Real relaxation_parameter,
-                 NumericVector<Number> & diff_diagonal);
+                 NumericVector<Number> & diff_diagonal,
+                 bool enforce_diagonal_dominance = true);
 
 /**
  * Relax the right hand side of an equation, this needs to be called once and the system matrix

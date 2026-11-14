@@ -23,7 +23,7 @@ class MeshBase;
 
 class RhieChowFaceFluxProvider : public GeneralUserObject,
                                  public BlockRestrictable,
-                                 public FaceArgInterface
+                                 public FaceArgProducerInterface
 {
 public:
   static InputParameters validParams();
