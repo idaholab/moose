@@ -413,8 +413,10 @@ public:
   /**
    * Invalidate the cached physical transformation data. A loop that visits each quadrature point
    * once calls this per point, so the data of the previous point is dead and holds no registers.
+   * The data are overwritten with constants: a loop that carries the cache across iterations then
+   * carries constants, which the compiler folds, and no stale value stays live.
    */
-  KOKKOS_FUNCTION void resetTransform() { _cached_qp = libMesh::invalid_uint; }
+  KOKKOS_FUNCTION void resetTransform();
 
   /**
    * Get the inverse of the Jacobian of the map from the reference element to the reference
@@ -900,6 +902,22 @@ Datum::normals(const unsigned int qp)
     reinitTransform(qp);
 
   return _normal;
+}
+
+KOKKOS_FUNCTION inline void
+Datum::resetTransform()
+{
+  _cached_qp = libMesh::invalid_uint;
+  _dxi_dx = 0;
+  _JxW = 0;
+  _xyz = 0;
+  _normal = 0;
+  _F_inv = 0;
+  _grad_log_coord = 0;
+  _reference_dxi_dx = 0;
+  _reference_JxW = 0;
+  _reference_xyz = 0;
+  _reference_normal = 0;
 }
 
 KOKKOS_FUNCTION inline void

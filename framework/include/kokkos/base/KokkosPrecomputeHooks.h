@@ -890,6 +890,10 @@ assemblePrecomputedTerms(const Object & object,
             }
           }
         }
+
+        // No later quadrature point of this thread reuses the transformation, and stage 2 reads
+        // only reference test functions, so the cached geometry must not stay live
+        datum.resetTransform();
       }
     team.team_barrier();
 
