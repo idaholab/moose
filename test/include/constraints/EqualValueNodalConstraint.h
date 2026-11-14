@@ -19,9 +19,17 @@ public:
   EqualValueNodalConstraint(const InputParameters & parameters);
   virtual ~EqualValueNodalConstraint();
 
+  virtual void meshChanged() override;
+
 protected:
-  virtual Real computeQpResidual(Moose::ConstraintType type);
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
+  /**
+   * Rebuild the constrained node lists and the ghosting they require. Called again whenever the
+   * mesh changes, since node ownership and the locally available elements may both have changed.
+   */
+  void updateConstrainedNodes();
+
+  virtual Real computeQpResidual(Moose::ConstraintType type) override;
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
   Real _penalty;
 };

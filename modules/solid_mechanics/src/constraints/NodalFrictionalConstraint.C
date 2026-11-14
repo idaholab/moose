@@ -9,7 +9,6 @@
 
 // MOOSE includes
 #include "NodalFrictionalConstraint.h"
-#include "DisplacedProblem.h"
 #include "MooseMesh.h"
 #include "Assembly.h"
 #include "SystemBase.h"
@@ -92,17 +91,7 @@ NodalFrictionalConstraint::updateConstrainedNodes()
   for (auto in : primary_nodelist)
     _primary_node_vector.push_back(in);
 
-  const auto elem_ids = gatherAndRetainConnectedElems(_fe_problem.mesh(), _primary_node_vector);
-  for (const auto elem_id : elem_ids)
-    _subproblem.addGhostedElem(elem_id);
-
-  if (const auto displaced_problem = _fe_problem.getDisplacedProblem())
-  {
-    const auto displaced_elem_ids =
-        gatherAndRetainConnectedElems(displaced_problem->mesh(), _primary_node_vector);
-    if (displaced_elem_ids != elem_ids)
-      mooseError("Reference and displaced meshes selected different primary elements");
-  }
+  ghostConnectedElems(_primary_node_vector);
 
   // Cache map between secondary node and primary node
   _connected_nodes.clear();

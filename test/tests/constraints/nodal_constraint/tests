@@ -5,7 +5,6 @@
     type = 'Exodiff'
     input = 'nodal_constraint_test.i'
     exodiff = 'nodal_constraint_test_out.e'
-    max_parallel = 1
     requirement = "The system shall support the ability to constrain nodal values."
   []
 
@@ -13,7 +12,6 @@
     type = 'Exodiff'
     input = 'nodal_constraint_displaced_test.i'
     exodiff = 'nodal_constraint_displaced_test_out.e'
-    max_parallel = 1
     requirement = "The system shall support the ability to constrain nodal values using a displaced mesh."
   []
 
@@ -21,7 +19,6 @@
     type = 'Exodiff'
     input = 'linear_nodal_constraint.i'
     exodiff = 'linear_nodal_constraint_out.e'
-    max_parallel = 1
     requirement = "The system shall support the ability to linearly constrain nodal values."
   []
 
@@ -29,15 +26,41 @@
     type = 'Exodiff'
     input = 'linear_nodal_constraint_different_variables.i'
     exodiff = 'linear_nodal_constraint_different_variables_out.e'
-    max_parallel = 1
     requirement = "The system shall support the ability to constrain nodal values of different variables."
+  []
+
+  [linear_nodal_multiple_primaries]
+    type = 'CSVDiff'
+    input = 'linear_nodal_constraint_multiple_primaries.i'
+    csvdiff = 'linear_nodal_constraint_multiple_primaries_out.csv'
+    issues = '#5783'
+    design = 'source/constraints/LinearNodalConstraint.md'
+    requirement = "The system shall apply each linear nodal constraint weight to its own primary "
+                  "node, for any number of processors and on either a replicated or a distributed "
+                  "mesh."
+  []
+
+  [linear_nodal_multiple_primaries_jac]
+    type = 'PetscJacobianTester'
+    input = 'linear_nodal_constraint_multiple_primaries.i'
+    run_sim = True
+    # Compare the relative Frobenius norm rather than the absolute one, which scales with the
+    # 1e8 penalty.
+    ratio_tol = 1e-7
+    issues = '#5783'
+    design = 'source/constraints/LinearNodalConstraint.md'
+    requirement = "The system shall compute a perfect Jacobian for a linear nodal constraint with "
+                  "several primary nodes carrying different weights."
   []
 
   [extra_tags]
     type = 'CSVDiff'
     input = 'nodal_constraint_extra_tag_test.i'
     csvdiff = 'nodal_constraint_extra_tag_test_out.csv'
-    max_parallel = 1
+    # react_u_at_primary and react_u_at_secondary are residuals converged to zero, so what is
+    # left in them is the solve's termination noise, which varies with the partitioning. The
+    # nonlinear solve stops at |R| ~ 1e-8, so compare them against zero at that scale.
+    abs_zero = 1e-7
     issues = '#665 #33385'
     design = 'syntax/Constraints/index.md interfaces/TaggingInterface.md'
     requirement = "The system shall be able to tally the contributions of nodal constraints in "

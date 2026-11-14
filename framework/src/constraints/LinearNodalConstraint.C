@@ -43,24 +43,43 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
   if (_primary_node_ids.size() != _weights.size())
     mooseError("primary and weights should be of equal size.");
 
-  const auto & lm_mesh = _mesh.getMesh();
-
   if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id == "NaN"))
     mooseError("Please specify secondary_node_ids or secondary_node_set.");
-  else if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id != "NaN"))
-  {
-    std::vector<dof_id_type> nodelist =
-        _mesh.getNodeList(_mesh.getBoundaryID(_secondary_node_set_id));
-    std::vector<dof_id_type>::iterator in;
+  if ((_secondary_node_ids.size() > 0) && (_secondary_node_set_id != "NaN"))
+    paramError("secondary_node_set",
+               "Both 'secondary_node_ids' and 'secondary_node_set' parameters are set. They are "
+               "mutually exclusive.");
 
-    for (in = nodelist.begin(); in != nodelist.end(); ++in)
+  updateConstrainedNodes();
+}
+
+void
+LinearNodalConstraint::meshChanged()
+{
+  updateConstrainedNodes();
+}
+
+void
+LinearNodalConstraint::updateConstrainedNodes()
+{
+  _connected_nodes.clear();
+  _primary_node_vector.clear();
+
+  const auto & lm_mesh = _mesh.getMesh();
+
+  if (_secondary_node_ids.size() == 0)
+  {
+    const std::vector<dof_id_type> & nodelist =
+        _mesh.getNodeList(_mesh.getBoundaryID(_secondary_node_set_id));
+
+    for (const auto & dof : nodelist)
     {
-      const Node * const node = lm_mesh.query_node_ptr(*in);
+      const Node * const node = lm_mesh.query_node_ptr(dof);
       if (node && node->processor_id() == _subproblem.processor_id())
-        _connected_nodes.push_back(*in); // defining secondary nodes in the base class
+        _connected_nodes.push_back(dof); // defining secondary nodes in the base class
     }
   }
-  else if ((_secondary_node_ids.size() > 0) && (_secondary_node_set_id == "NaN"))
+  else
   {
     for (const auto & dof : _secondary_node_ids)
     {
@@ -70,25 +89,12 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
     }
   }
 
-  const auto & node_to_elem_map = _mesh.nodeToElemMap();
+  // Every rank must agree on the primary nodes, and in the order the user listed them, because
+  // _weights is indexed by position in that list. Taking the list verbatim rather than filtering
+  // it by local connectivity is what keeps the weights aligned on a distributed mesh.
+  _primary_node_vector.assign(_primary_node_ids.begin(), _primary_node_ids.end());
 
-  // Add elements connected to primary node to Ghosted Elements
-  for (const auto & dof : _primary_node_ids)
-  {
-    auto node_to_elem_pair = node_to_elem_map.find(dof);
-
-    // Our mesh may be distributed
-    if (node_to_elem_pair == node_to_elem_map.end())
-      continue;
-
-    // defining primary nodes in base class
-    _primary_node_vector.push_back(dof);
-
-    const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
-
-    for (const auto & elem_id : elems)
-      _subproblem.addGhostedElem(elem_id);
-  }
+  ghostConnectedElems(_primary_node_vector);
 }
 
 Real
@@ -102,7 +108,7 @@ LinearNodalConstraint::computeQpResidual(Moose::ConstraintType type)
    *secondary residual resembles the above expression.
    **/
 
-  unsigned int primary_size = _primary_node_ids.size();
+  unsigned int primary_size = _primary_node_vector.size();
 
   switch (type)
   {
@@ -117,7 +123,7 @@ LinearNodalConstraint::computeQpResidual(Moose::ConstraintType type)
 Real
 LinearNodalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
-  unsigned int primary_size = _primary_node_ids.size();
+  unsigned int primary_size = _primary_node_vector.size();
 
   switch (type)
   {

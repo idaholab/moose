@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "Assembly.h"
+#include "DisplacedProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
 #include "SubProblem.h"
@@ -163,12 +164,44 @@ NodalConstraint::gatherAndRetainConnectedElems(MooseMesh & mesh,
 }
 
 void
+NodalConstraint::ghostConnectedElems(const std::vector<dof_id_type> & node_ids)
+{
+  const auto elem_ids = gatherAndRetainConnectedElems(_fe_problem.mesh(), node_ids);
+  for (const auto elem_id : elem_ids)
+    _subproblem.addGhostedElem(elem_id);
+
+  if (const auto displaced_problem = _fe_problem.getDisplacedProblem())
+  {
+    const auto displaced_elem_ids =
+        gatherAndRetainConnectedElems(displaced_problem->mesh(), node_ids);
+    if (displaced_elem_ids != elem_ids)
+      mooseError("Reference and displaced meshes selected different primary elements");
+  }
+}
+
+void
 NodalConstraint::reinitConstraintNodes()
 {
   // _subproblem is the displaced problem when this constraint uses the displaced mesh, which is
   // where its variables (and therefore the dof indices the assembly loops iterate over) live.
   _subproblem.reinitNodes(_primary_node_vector, _tid);
   _subproblem.reinitNodesNeighbor(_connected_nodes, _tid);
+
+  // Derived classes index per-primary data by position in the primary node list (weights, for
+  // instance), so a primary node that contributes no dof would silently shift every subsequent
+  // entry. reinitNodes() drops nodes that are not semilocal or that the variable is not defined
+  // on, so compare the counts. Every primary node is ghosted onto every process, so a process
+  // that assembles this constraint must resolve all of them.
+  const auto n_primary_dofs = _var.dofIndices().size();
+  if (n_primary_dofs != _primary_node_vector.size())
+    mooseError("Found ",
+               n_primary_dofs,
+               " primary degrees of freedom for ",
+               _primary_node_vector.size(),
+               " primary nodes. Nodal constraints index per-primary data by position in the "
+               "primary node list, so variable '",
+               _var.name(),
+               "' must be defined on every primary node.");
 }
 
 void
@@ -223,13 +256,18 @@ NodalConstraint::computeJacobian(const SparseMatrix<Number> & jacobian)
   std::vector<dof_id_type> secondarydof = _var_secondary.dofIndicesNeighbor();
   std::vector<dof_id_type> primarydof = _var.dofIndices();
 
-  DenseMatrix<Number> Kee(primarydof.size(), primarydof.size());
   DenseMatrix<Number> Ken(primarydof.size(), secondarydof.size());
   DenseMatrix<Number> Kne(secondarydof.size(), primarydof.size());
 
-  Kee.zero();
   Ken.zero();
   Kne.zero();
+
+  // The primary-primary and secondary-secondary couplings are both diagonal under either
+  // formulation, so they are accumulated here and cached one entry at a time below. Inserting
+  // them as dense blocks would instead demand sparsity for entries that are always zero, and two
+  // primary nodes are only coupled in the sparsity pattern when they happen to share an element.
+  std::vector<Number> Kee_diag(primarydof.size(), 0.);
+  std::vector<Number> Knn_diag(secondarydof.size(), 0.);
 
   for (_i = 0; _i < secondarydof.size(); ++_i)
   {
@@ -238,40 +276,33 @@ NodalConstraint::computeJacobian(const SparseMatrix<Number> & jacobian)
       switch (_formulation)
       {
         case Moose::Penalty:
-          Kee(_j, _j) += computeQpJacobian(Moose::PrimaryPrimary);
+          Kee_diag[_j] += computeQpJacobian(Moose::PrimaryPrimary);
           Ken(_j, _i) += computeQpJacobian(Moose::PrimarySecondary);
           Kne(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
+          // Accumulated over the primary nodes to match the secondary residual, which sums one
+          // contribution per primary node.
+          Knn_diag[_i] += computeQpJacobian(Moose::SecondarySecondary);
           break;
         case Moose::Kinematic:
-          Kee(_j, _j) = 0.;
+          Kee_diag[_j] = 0.;
           Ken(_j, _i) += jacobian(secondarydof[_i], primarydof[_j]) * _weights[_j];
           Kne(_i, _j) += -jacobian(secondarydof[_i], primarydof[_j]) / primarydof.size() +
                          computeQpJacobian(Moose::SecondaryPrimary);
+          Knn_diag[_i] += -jacobian(secondarydof[_i], secondarydof[_i]) / primarydof.size() +
+                          computeQpJacobian(Moose::SecondarySecondary);
           break;
       }
     }
   }
-  addJacobian(_assembly, Kee, primarydof, primarydof, _var.scalingFactor());
   addJacobian(_assembly, Ken, primarydof, secondarydof, _var.scalingFactor());
   addJacobian(_assembly, Kne, secondarydof, primarydof, _var_secondary.scalingFactor());
 
-  // Calculate and cache the diagonal secondary-secondary entries
-  for (_i = 0; _i < secondarydof.size(); ++_i)
-  {
-    Number value = 0.0;
-    switch (_formulation)
-    {
-      case Moose::Penalty:
-        value = computeQpJacobian(Moose::SecondarySecondary);
-        break;
-      case Moose::Kinematic:
-        value = -jacobian(secondarydof[_i], secondarydof[_i]) / primarydof.size() +
-                computeQpJacobian(Moose::SecondarySecondary);
-        break;
-    }
+  for (const auto j : index_range(primarydof))
+    addJacobianElement(_assembly, Kee_diag[j], primarydof[j], primarydof[j], _var.scalingFactor());
+
+  for (const auto i : index_range(secondarydof))
     addJacobianElement(
-        _assembly, value, secondarydof[_i], secondarydof[_i], _var_secondary.scalingFactor());
-  }
+        _assembly, Knn_diag[i], secondarydof[i], secondarydof[i], _var_secondary.scalingFactor());
 }
 
 void
