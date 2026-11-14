@@ -1,7 +1,7 @@
 # Handoff: Kokkos AD GPU work on PR #34088 (arco, updated 2026-11-12)
 
-Status: branch at `53584d78efd` (steps 0-10b, 12-13a), pushed to the fork. Next: step 13b. Updated
-2026-11-13.
+Status: branch at `e4c7b785f70` (steps 0-10b, 12-13b), not pushed since `53584d78efd`. Next: step
+13b2. Updated 2026-11-13.
 Git tracks this document on the feature branch. Commit it alone with a `PLAN:` subject, and drop
 those commits before the merge. Relative paths outside the MOOSE tree, such as `profiles/`,
 `scripts/`, `patches/`, `ptx/`, `logs/`, `runs/`, and `archive/`, are under `moose-stack-build/`
@@ -14,18 +14,21 @@ Branch `kokkos-reference-configuration` in `/ibmstor/scratch/lindad/projects/moo
 is idaholab/moose#34088. NamjaeChoi left a performance review on it. Answer it with measurements
 once the design work below is final. Do not reply yet.
 
-**Next: step 13b**, the team shape of `assembleDisplacementJacobian`
-(`framework/include/kokkos/base/KokkosPrecomputeHooks.h`). First action: read it and its callers,
-`Kernel::operator()(DisplacementJacobianLoop, ...)` (`framework/include/kokkos/kernels/KokkosKernel.h`)
-and the `IntegratedBC`/`VectorIntegratedBC` counterparts, and the dispatch that sets its team size.
+**Next: step 13b2**, repeated qp evaluation in the hand-coded precompute loops. First action:
+read `ResidualObject::computeResidualInternal` and `computeJacobianInternal`
+(`framework/include/kokkos/base/KokkosResidualObject.h`), `precomputeResidualBody` and
+`precomputeJacobianBody` (`KokkosPrecomputeHooks.h`), and `Thread::resize`. See "Hand-coded loop
+findings" for the flaw.
 
-- Flaw (see "Hand-coded loop findings"): one element per team of 128 (`AUTO`) threads, with
-  `TeamThreadRange` over the qps and then the columns. At q8, 120 of 128 threads idle.
-  handsdisp_q8 J is 37.18 ms (`nsys-v20`), ad3sdisp_q8 J 11.64 ms.
-- Candidate: several elements per team, as step 3 did for the AD loops (`dispatchADTeams`). Reuse
-  that machinery if it fits. Present the design to the user before a large change.
-- Exit: the `kokkos` dir passes (189), and a `VARIANTS_FILTER='hand.*'` sweep `nsys-v21` against
-  `nsys-v20` shows the handsdisp J gain with no other hand-coded launch slower than 3%.
+- Data (`nsys-v21`, ms, R / J): handdisp_q27 1.69 / 3.96 vs ad3disp_q27 0.92 / 3.18. hand_q64
+  1.25 / 4.01 vs ad3_q64 0.91 / 4.97. hand_q27 0.42 / 1.96 vs ad3_q27 0.45 / 2.61.
+- Candidate: the step 13b pattern. Groups of `max_qps` threads per element (`TeamGroup`,
+  `groupedTeamLaunch` in `KokkosResidualObject.K`). Each thread evaluates its qp once into scratch,
+  then threads contract over i (residual) or (i, j) (Jacobian). The Jacobian hooks take j, so
+  stage 1 stores per-(qp, j) terms. This replaces a `RangePolicy` with a team policy for every
+  hand-coded precompute object, so present the design to the user first.
+- Exit: the `kokkos` dir passes (189), and a full sweep `nsys-v22` against `nsys-v21` shows the
+  hand-coded R and J gain, or a measured reason why not, with no other launch slower than 3%.
 
 The draft reply is `moose-stack-build/review-reply-34088.md`. A local git repository in
 `moose-stack-build` tracks only that file (`.gitignore` allowlist). Commit the reply after each
@@ -92,6 +95,7 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 ### Commits on this branch (newest first)
 
+- `e4c7b785f70` Step 13b: displacement Jacobian packs several elements per team (`TeamGroup`).
 - `53584d78efd` Step 12c: `Configuration` renamed to `Deformation`.
 - `98852e75c2f` Step 12b: Kokkos kernel and integrated BC aliases removed.
 - `c9d341fd322` Step 10b: AD residual qp sum split in slices over idle group threads.
@@ -114,6 +118,18 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 ## Working notes
 
 (empty)
+
+## Step 13b result (`e4c7b785f70`, 2026-11-13)
+
+- User chose the full restructure over packing only (2026-11-13). Groups of `max_qps` threads,
+  half-warp aligned. Stage 1 stores D[qp][d][i], the contraction of direction d with test
+  function i. Directions are (1, 0) and (0, M e_b), with M = `dxi_dx`. Stage 2 runs over (i, j).
+- `nsys-v21` against `nsys-v20`: `DisplacementJacobianLoop` 11.84/16.87/35.66 -> 2.27/7.77/15.99 ms
+  (q8/q27/q64), 118 -> 128 registers. Every other launch within 1.5%, except hand_q64
+  `ResidualLoop` +2.5% (untouched code, noise). `kokkos` dir: 189 pass (job 14163).
+- handsdisp J per Jacobian is now 8.47/27.61/56.59 ms (q8/q27/q64), of which 3 x 2.27 ms at q8
+  is the displacement Jacobian.
+- `launches.txt` of `nsys-v20` and `nsys-v21` now hold every variant.
 
 ## Step 13a result (no code commit, 2026-11-13)
 
@@ -259,15 +275,15 @@ the binding limit. Reducing the live data per thread can relieve both. Step 8e i
 
 Measure each step alone against the step before, with a full sweep on arco-c04.
 
-Steps 0-13a: done. Commits in "Commits on this branch". Step 12b also passed `heat_transfer` Kokkos
+Steps 0-13b: done. Commits in "Commits on this branch". Step 12b also passed `heat_transfer` Kokkos
 12/12. Step 13 split into 13a-13d after the user's review of the draft (2026-11-13).
 13a. Done (sweeps `nsys-up1`, `nsys-v20`). See "Step 13a result".
-13b. Team shape of `assembleDisplacementJacobian`. See "Next".
+13b. Done (`e4c7b785f70`, `nsys-v21`). See "Step 13b result".
 13b2. Repeated qp evaluation of the hand-coded precompute loops (see "Hand-coded loop findings").
     Exit: hand-coded residual within noise of AD residual, or a measured reason why not. Split from
     13b because the two fixes need separate sweeps.
 13c. `ThreadVectorRange` probe for the AD group (see "Hand-coded loop findings" for the mapping).
-    Exit: a measured comparison with `nsys-v20`. Land it if no AD launch is slower than 3%.
+    Exit: a measured comparison with the latest sweep. Land it if no AD launch is slower than 3%.
 13d. Final reply: resolve every `TODO(user)`, get user approval, then post.
 
 Out of scope: each matrix entry costs a CSR search (`Matrix::find`) and an atomic, in hand-coded
@@ -284,10 +300,8 @@ Open a separate issue for it.
   caches the geometry of one qp only. With displacements, each evaluation runs
   `Datum::reinitTransform` (12 global reads and an F inverse). AD evaluates each qp once into
   scratch. This is the likely reason AD residuals beat hand-coded ones.
-- `assembleDisplacementJacobian` (`KokkosPrecomputeHooks.h`) runs one element per team of 128
-  (`AUTO`) threads, with `TeamThreadRange` over 8 qps and then 8 columns at q8. 120 of 128 threads
-  idle. One launch per component: 11.86 ms each at handsdisp_q8 (`nsys-v19`), 3 per Jacobian.
-  This is the flaw of review comment 3, in new code of this PR.
+- `assembleDisplacementJacobian` ran one element per team of 128 threads (flaw of review comment
+  3, in new code of this PR). Step 13b fixed it.
 - `ThreadVectorRange` mapping for the AD group: one group per Kokkos thread, qps over vector
   lanes. CUDA needs a power-of-2 vector length <= 32. So 27 qps pad to 32, and 64 qps take 2 qps
   per lane. Gains: warp shuffle reductions, no team barrier inside a group, and a native OpenMP
@@ -337,7 +351,7 @@ Details: `moose-stack-build/PLAN-kokkos-known-failures.md`.
   `qM` is the qps per element.
 - Sweep, from the case directory: `sbatch -w arco-c04 --output=<log dir>/%x-%j.log sweep.sbatch
   <out dir> nsys|ncu`. Filter with `VARIANTS_FILTER`, `NCU_KERNELS`, `NCU_COUNT`. Latest full sweep:
-  `profiles/nsys-v20` (step 13a). Upstream: `nsys-up1`. Latest ncu: `ncu-v16`. Next: `nsys-v21`,
+  `profiles/nsys-v21` (step 13b). Upstream: `nsys-up1`. Latest ncu: `ncu-v16`. Next: `nsys-v22`,
   `ncu-v17`.
   Build `launches.txt` with `launch_table.sh <dir>/*.nsys-rep`.
 - Tables in `scripts/`: `step_table.sh <dir>` (per-step summary), `ratio_table.sh <adN>
