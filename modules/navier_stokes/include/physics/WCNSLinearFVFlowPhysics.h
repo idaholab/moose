@@ -12,13 +12,15 @@
 #include "WCNSFVFlowPhysicsBase.h"
 #include "WCNSFVTurbulencePhysics.h"
 
+class RhieChowMassFlux;
+
 /**
  * Creates all the objects needed to solve the Navier-Stokes equations with the SIMPLE algorithm
  * using the linear finite volume discretization
  * Porous media use superficial velocity variables, the PorousRhieChowMassFlux user object and,
  * optionally, Bernoulli pressure-jump baffles on user-selected sidesets.
  */
-class WCNSLinearFVFlowPhysics final : public WCNSFVFlowPhysicsBase
+class WCNSLinearFVFlowPhysics : public WCNSFVFlowPhysicsBase
 {
 public:
   static InputParameters validParams();
@@ -29,6 +31,16 @@ public:
 
 protected:
   virtual void initializePhysicsAdditional() override;
+
+  virtual void addFunctorMaterials() override;
+
+  /// The Rhie-Chow mass flux user object whose published flux the pressure equation corrects.
+  const RhieChowMassFlux & pressureCorrectionProvider() const;
+
+  /// The functor the Rhie-Chow object publishes the pressure equation's face coefficient as
+  virtual MooseFunctorName pressureDiffusionCoefficientName() const { return "Ainv"; }
+  /// The functor the Rhie-Chow object publishes the pressure equation's predictor face flux as
+  virtual MooseFunctorName predictorFaceFluxName() const { return "HbyA"; }
 
 private:
   virtual void actOnAdditionalTasks() override;
@@ -51,6 +63,8 @@ private:
    */
   void addMomentumTimeKernels() override;
   void addMomentumFluxKernels();
+  virtual void addAxisymmetricViscousSourceKernel(const std::vector<SubdomainName> & rz_blocks,
+                                                  unsigned int radial_index) override;
   virtual void addMomentumPressureKernels() override;
   virtual void addMomentumGravityKernels() override;
   virtual void addMomentumFrictionKernels() override;
@@ -64,7 +78,6 @@ private:
   virtual bool hasForchheimerFriction() const override;
 
   virtual void addRhieChowUserObjects() override;
-  virtual void addFunctorMaterials() override;
 
   virtual MooseFunctorName getLinearFrictionCoefName() const override
   {

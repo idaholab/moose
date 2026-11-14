@@ -44,6 +44,30 @@ protected:
   virtual std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor() override;
   virtual std::pair<unsigned int, Real> solvePressureCorrector() override;
 
+  /**
+   * Assembles and relaxes the momentum predictor of one component, letting the Rhie-Chow object
+   * see the operator before relaxation and add its explicit forcing after. With
+   * \p prepare_without_solve the system vectors are closed first, for a predictor that is
+   * assembled for its coefficients only and never solved.
+   */
+  void assembleMomentumPredictorOperator(const unsigned int system_i,
+                                         const bool prepare_without_solve = false);
+
+  /**
+   * Lets a derived solve refresh whatever pressure-equation sources it owns once H/A has been
+   * computed and before the pressure corrector is assembled. The reduced-pressure diffuse
+   * interface solve publishes its surface-tension, hydrostatic and transient-projection face
+   * fluxes here; they are part of the pressure equation, so they have to be rebuilt for every
+   * corrector rather than only at startup.
+   */
+  virtual void postPreparePressureCorrectorState() {}
+
+  /**
+   * Lets a derived solve refresh state that depends on the published corrected velocity, which is
+   * only valid once the corrector has written it.
+   */
+  virtual void postPublishPressureCorrectedState() {}
+
   /// Computes new velocity field based on computed pressure gradients
   /// @param recompute_face_mass_flux If we want to recompute the face flux too
   /// @param solver_params Dummy solver parameter object for the linear solve
@@ -96,6 +120,17 @@ protected:
     /// If we dont have anything we just set this to true.
     bool converged = false;
   };
+
+  /// Runs once before the outer iterations of a solve start
+  virtual void initializeSolveLoop(const SolverParams & /*solver_params*/) {}
+  /// Runs at the start of every outer iteration, before the momentum predictor
+  virtual void preMomentumPressureIteration(ResidualStorage & /*residual_storage*/,
+                                            const SolverParams & /*solver_params*/)
+  {
+  }
+  /// Whether the active scalars are solved after the pressure-velocity loop of each outer
+  /// iteration; a derived solve that solves them elsewhere in the iteration returns false
+  virtual bool shouldSolveActiveScalarsAfterFlowLoop() const { return true; }
 
   /**
    * Build residual/tolerance vectors and associated indices for all enabled systems.
