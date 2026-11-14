@@ -27,15 +27,6 @@ KokkosVectorNeumannBC::validParams()
 }
 
 KokkosVectorNeumannBC::KokkosVectorNeumannBC(const InputParameters & parameters)
-  : Moose::Kokkos::VectorIntegratedBCValue(parameters),
-    _values_host(getParam<RealVectorValue>("values")),
-    _values(_values_host)
-{
-}
-
-KokkosVectorNeumannBC::KokkosVectorNeumannBC(const KokkosVectorNeumannBC & object)
-  : Moose::Kokkos::VectorIntegratedBCValue(object),
-    _values_host(object._values_host),
-    _values(_values_host)
+  : Moose::Kokkos::VectorIntegratedBCValue(parameters), _values(getParam<RealVectorValue>("values"))
 {
 }
