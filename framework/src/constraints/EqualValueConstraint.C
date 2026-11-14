@@ -26,6 +26,7 @@ EqualValueConstraint::validParams()
   params.addParam<MaterialPropertyName>(
       "diff_secondary", 1, "The diffusivity on the secondary side");
   params.addParam<MaterialPropertyName>("diff_primary", 1, "The diffusivity on the primary side");
+  params.set<bool>("_supports_segment_geometry_derivatives") = true;
   return params;
 }
 
@@ -38,6 +39,11 @@ EqualValueConstraint::EqualValueConstraint(const InputParameters & parameters)
     _diff_primary(getADMaterialProperty<Real>("diff_primary")),
     _stabilize(_delta > TOLERANCE * TOLERANCE)
 {
+  // The stabilizing terms use gradients, normals, and element volumes, whose dependence on the
+  // segment geometry is not differentiated
+  if (_stabilize && _segment_geometry_derivatives)
+    paramError("delta",
+               "Stabilization is not available with 'segment_geometry_derivatives = true'.");
 }
 
 ADReal
@@ -49,7 +55,8 @@ EqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
     {
       // The sign choice here makes it so that for the true solution: lambda = normals_secondary *
       // diff_secondary * grad_u_secondary
-      auto residual = -_lambda[_qp] * _test_secondary[_i][_qp];
+      ADReal residual = _ad_segment_geometry ? -_lambda[_qp] * adTestSecondary()
+                                             : -_lambda[_qp] * _test_secondary[_i][_qp];
 
       if (_stabilize)
         residual += _delta * _lower_secondary_volume *
@@ -63,7 +70,8 @@ EqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
     {
       // The sign choice here makes it so that for the true solution: lambda = -normals_primary *
       // diff_primary * grad_u_primary
-      auto residual = _lambda[_qp] * _test_primary[_i][_qp];
+      ADReal residual = _ad_segment_geometry ? _lambda[_qp] * adTestPrimary()
+                                             : _lambda[_qp] * _test_primary[_i][_qp];
 
       if (_stabilize)
         residual -= _delta * _lower_primary_volume *
@@ -75,7 +83,8 @@ EqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
 
     case Moose::MortarType::Lower:
     {
-      auto residual = (_u_primary[_qp] - _u_secondary[_qp]) * _test[_i][_qp];
+      const auto jump = _u_primary[_qp] - _u_secondary[_qp];
+      ADReal residual = _ad_segment_geometry ? jump * adTest() : jump * _test[_i][_qp];
 
       if (_stabilize)
       {

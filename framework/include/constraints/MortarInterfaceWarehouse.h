@@ -30,7 +30,8 @@ class MooseEnum;
  * Per-mortar-interface configuration. Owns the AutomaticMortarGeneration object together with
  * the user-supplied flags that must remain consistent across all constraints sharing a primary-
  * secondary surface pair (periodic, debug, minimum projection angle, 3D subpatch plane mode,
- * triangulation mode, triangulate-triangles, and 3D quadrature point mapping).
+ * triangulation mode, triangulate-triangles, 3D quadrature point mapping, and segment geometry
+ * derivatives).
  */
 struct MortarInterfaceConfig
 {
@@ -42,6 +43,7 @@ struct MortarInterfaceConfig
   MortarSegmentTriangulationMode triangulation;
   bool triangulate_triangles;
   Mortar3DQuadraturePointMapping mortar_3d_qp_mapping;
+  bool segment_geometry_derivatives;
 };
 
 class MortarInterfaceWarehouse : public libMesh::ParallelObject
@@ -67,6 +69,8 @@ public:
    * @param triangulate_triangles whether a clipped polygon that is already a triangle should still
    * be subdivided
    * @param mortar_3d_qp_mapping method for mapping 3D mortar quadrature points to faces
+   * @param segment_geometry_derivatives whether AD includes the displacement dependence of the
+   * mortar segment geometry
    */
   void createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
                              const std::pair<SubdomainID, SubdomainID> & subdomain_key,
@@ -80,7 +84,8 @@ public:
                              const MooseEnum & triangulation,
                              const bool triangulate_triangles,
                              const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping =
-                                 Mortar3DQuadraturePointMapping::NORMAL_PROJECTION);
+                                 Mortar3DQuadraturePointMapping::NORMAL_PROJECTION,
+                             const bool segment_geometry_derivatives = false);
 
   /**
    * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and

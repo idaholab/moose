@@ -83,6 +83,16 @@ protected:
   bool interpolateNormals() const { return _interpolate_normals; }
 
   /**
+   * @return The AD shape function values of \p fe_type at the mortar segment quadrature points for
+   * the data of \p element_type (Element: secondary interior face, Neighbor: primary interior
+   * face, Lower: secondary lower-dimensional face). They carry the motion of the quadrature
+   * points and are only filled when \p _ad_segment_geometry is true.
+   */
+  const MooseArray<std::vector<ADReal>> & adMortarTest(Moose::ElementType element_type,
+                                                       const libMesh::FEType & fe_type,
+                                                       bool use_dual = false) const;
+
+  /**
    * Report an error if Petrov-Galerkin weights the gap of a SECOND order dual Lagrange multiplier
    * with the standard basis on QUAD8 or TRI6 secondary faces. libMesh builds the dual basis on
    * these faces against a transformed basis, and the nodal integrals of the standard basis are not
@@ -175,6 +185,27 @@ protected:
 
   /// The element Jacobian times weights
   const std::vector<Real> & _JxW_msm;
+
+  /// Whether AD includes the displacement dependence of the mortar segment geometry
+  const bool _segment_geometry_derivatives;
+
+  /// Whether the AD mortar segment geometry quantities below are set at the current mortar
+  /// segment. They are only set when \p _segment_geometry_derivatives is true and derivatives are
+  /// computed.
+  const bool & _ad_segment_geometry;
+
+  /// The AD mortar segment Jacobian times weights. Only filled when \p _ad_segment_geometry is
+  /// true.
+  const MooseArray<ADReal> & _ad_JxW_msm;
+
+  /// The AD mortar segment coordinate transformation. Only filled when \p _ad_segment_geometry
+  /// is true.
+  const MooseArray<ADReal> & _ad_coord_msm;
+
+  /// The AD locations of the quadrature points on the secondary and primary faces. Only filled
+  /// when \p _ad_segment_geometry is true.
+  const MooseArray<ADPoint> & _ad_phys_points_secondary;
+  const MooseArray<ADPoint> & _ad_phys_points_primary;
 
   /// The current mortar segment element
   const Elem * const & _msm_elem;

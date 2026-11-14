@@ -32,6 +32,10 @@ MortarConstraint::MortarConstraint(const InputParameters & parameters)
     _phi(nullptr),
     _grad_phi(nullptr)
 {
+  // Hand-coded Jacobians do not carry the segment geometry derivatives
+  if (getParam<bool>("segment_geometry_derivatives"))
+    paramError("segment_geometry_derivatives",
+               "Segment geometry derivatives are only available for AD mortar constraints.");
 }
 
 void

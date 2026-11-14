@@ -26,6 +26,8 @@ class PenaltyWeightedGapUserObject : virtual public WeightedGapUserObject,
 public:
   static InputParameters validParams();
 
+  virtual const libMesh::FEType & testFEType() const override;
+
   PenaltyWeightedGapUserObject(const InputParameters & parameters);
 
   virtual void timestepSetup() override;
@@ -131,13 +133,18 @@ protected:
    * - (penalty / A) * (g~ / A) if _use_physical_gap. The second factor is the physical gap, and
    *   dividing the penalty by A normalizes it with the area assigned to the node.
    * The sign follows the gap, so the pressure is negative in penetration.
+   * @param dof The node whose nodal area is used
    * @param wgap The (weighted gap, nodal area) pair of the node
    * @param penalty The penalty factor of the node
    */
-  ADReal penaltyPressure(const std::pair<ADReal, Real> & wgap, const Real penalty) const
+  ADReal penaltyPressure(const DofObject * dof,
+                         const std::pair<ADReal, Real> & wgap,
+                         const Real penalty) const
   {
     const auto & [weighted_gap, area] = wgap;
-    return _use_physical_gap ? (penalty / area) * (weighted_gap / area) : penalty * weighted_gap;
+    const auto ad_area = adNormalization(dof, area);
+    return _use_physical_gap ? (penalty / ad_area) * (weighted_gap / ad_area)
+                             : penalty * weighted_gap;
   }
 
   /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
