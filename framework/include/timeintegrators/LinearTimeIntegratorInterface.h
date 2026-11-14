@@ -43,6 +43,13 @@ public:
   /// For now, this does not depend of the DoF index, might change in the future.
   virtual Real timeDerivativeMatrixContribution(const Real factor) const;
 
+  /// The weights of the old solution states in the time derivative's right hand side, per unit
+  /// factor and ordered old, older, ...: timeDerivativeRHSContribution(dof, factors) equals
+  /// sum_i factors[i] * weights[i] * u_{n-i}(dof). With timeDerivativeMatrixContribution(1) this
+  /// lets an object that keeps its own history of a quantity form the same discrete time
+  /// derivative of it that the kernels form of the solution.
+  virtual std::vector<Real> timeDerivativeRHSWeights() const;
+
 protected:
   /// Pointer to the linear system, can happen that we dont have any
   LinearSystem * _linear_system;
