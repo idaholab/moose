@@ -53,7 +53,7 @@ $k_2=4.694$\\
 $k_3=7.855$\\
 The moment of inertia for a rectangular cross section beam is $I=\frac{wh^3}{12}$, where $h$ is the dimension in the direction being loaded and $w$ is the other cross sectional dimension.
 
-For an aluminum cantilever beam, $E=$68e9 Pa, $\nu=$0.36, $\rho=$27.e3 kg/m$^3$.
+For an aluminum cantilever beam, $E=$68e9 Pa, $\nu=$0.36, $\rho=$2.7e3 kg/m$^3$.
 The analytic first and second natural frequencies for this system bending in directions tangential to the beam axis are:\\
 $\omega_{1a}=$509 rad/s\\
 $\omega_{1b}=$763 rad/s\\
