@@ -88,35 +88,22 @@ struct ADScratchLayout
 };
 
 /**
- * Partition of a team of a pointwise AD assembly into groups of threads. Each group assembles one
- * element or side, so that a team of short quadrature point loops keeps its threads busy. A group
- * holds at least one thread per quadrature point, up to the team size.
+ * Partition of a team of a pointwise AD assembly into groups of threads. A group holds at least one
+ * thread per quadrature point, up to the team size. With a Jacobian contraction, the groups align
+ * to half-warps, so that the contraction plane loads of two groups cannot conflict.
  */
-class ADTeamGroup
+class ADTeamGroup : public TeamGroup
 {
 public:
-  /// Number of threads per team that a dispatch aims for, which the backend limits may lower
-  static constexpr unsigned int target_team_size = 128;
-
-  /// Number of threads of one shared memory wavefront of 8-byte accesses: 32 banks of 4 bytes
-  /// serve 16 reals per wavefront
-  static constexpr unsigned int half_warp = 16;
-
   /**
-   * Get the number of threads per group. With a Jacobian contraction, a group of more than half a
-   * warp spans whole half-warps, so that the contraction plane loads of two such groups never
-   * share a wavefront and cannot conflict.
+   * Get the number of threads per group
    * @param layout The scratch layout of the dispatch
    * @param team_size The number of threads per team
    */
   KOKKOS_FUNCTION static unsigned int groupSize(const ADScratchLayout & layout,
                                                 const unsigned int team_size)
   {
-    const auto qps = layout.max_qps;
-    const auto size = layout.max_jdofs && qps > half_warp
-                          ? (qps + half_warp - 1) / half_warp * half_warp
-                          : qps;
-    return ::Kokkos::max(1u, ::Kokkos::min(size, team_size));
+    return TeamGroup::groupSize(layout.max_qps, layout.max_jdofs != 0, team_size);
   }
 
   /**
@@ -128,43 +115,10 @@ public:
   template <typename Team>
   KOKKOS_FUNCTION
   ADTeamGroup(const Team & team, const ADScratchLayout & layout, const ThreadID n_items)
-    : _max_qps(layout.max_qps),
-      _size(groupSize(layout, team.team_size())),
-      _count(team.team_size() / _size),
-      _index(team.team_rank() / _size),
-      _rank(team.team_rank() % _size),
-      _item(ThreadID(team.league_rank()) * _count + _index),
-      _active(_item < n_items)
+    : TeamGroup(team, layout.max_qps, layout.max_jdofs != 0, n_items), _max_qps(layout.max_qps)
   {
-    // A thread without an element or side still reaches the team barriers, and reads a valid one
-    if (!_active)
-      _item = n_items - 1;
   }
 
-  /**
-   * Get the index of the element or side of the group within the dispatch
-   */
-  KOKKOS_FUNCTION ThreadID item() const { return _item; }
-  /**
-   * Get whether the group assembles its element or side
-   */
-  KOKKOS_FUNCTION bool active() const { return _active; }
-  /**
-   * Get the number of groups of the team
-   */
-  KOKKOS_FUNCTION unsigned int count() const { return _count; }
-  /**
-   * Get the index of the group within the team
-   */
-  KOKKOS_FUNCTION unsigned int index() const { return _index; }
-  /**
-   * Get the rank of the thread within the group
-   */
-  KOKKOS_FUNCTION unsigned int rank() const { return _rank; }
-  /**
-   * Get the number of threads of the group
-   */
-  KOKKOS_FUNCTION unsigned int size() const { return _size; }
   /**
    * Get the maximum number of quadrature points of an element or side, which strides the scratch
    * of the groups
@@ -174,18 +128,6 @@ public:
 private:
   /// Maximum number of quadrature points of an element or side
   const unsigned int _max_qps;
-  /// Number of threads per group
-  const unsigned int _size;
-  /// Number of groups per team
-  const unsigned int _count;
-  /// Index of the group within the team
-  const unsigned int _index;
-  /// Rank of the thread within the group
-  const unsigned int _rank;
-  /// Index of the element or side of the group within the dispatch
-  ThreadID _item;
-  /// Whether the group assembles its element or side
-  const bool _active;
 };
 
 /**

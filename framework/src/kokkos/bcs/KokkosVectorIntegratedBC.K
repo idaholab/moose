@@ -78,7 +78,7 @@ VectorIntegratedBC::computeJacobian()
   // An object posed on the current configuration assembles its Jacobian with respect to the
   // displacements from its own hooks
   if (_deformation.displaced())
-    dispatchDisplacementJacobian(numKokkosBoundarySides(), true);
+    dispatchDisplacementJacobian(numKokkosBoundarySides(), kokkosAssembly().getMaxQpsPerSide());
 }
 
 } // namespace Moose::Kokkos

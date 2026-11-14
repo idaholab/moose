@@ -347,8 +347,8 @@ curlCoefficientAsGradient(const Real3 & f, const unsigned int dim)
  *
  * The variation is linear in (phi_j, h), because the Jacobian, position, and normal Jacobian hooks
  * are linear in their trial function and variation arguments. The assembly therefore evaluates it
- * once per quadrature point along the directions (1, 0) and (0, e_k) and contracts the results
- * with the shape functions of each column.
+ * once per quadrature point along four directions and combines the results for each column (see
+ * assembleDisplacementJacobian()).
  * @param phi The value of the displacement shape function
  * @param h The gradient of the displacement shape function on the configuration
  */
@@ -502,115 +502,68 @@ precomputeDisplacementJacobianTerms(const Object & object,
 }
 
 /**
- * Layout of the per-team scratch memory of the displacement Jacobian of a precompute object. At
- * each quadrature point the scratch holds the JxW-weighted coefficients of the variation along the
- * directions (phi, h) = (1, 0), (0, e_0), (0, e_1), (0, e_2), each as a value coefficient, a
- * gradient coefficient pulled back to the reference element, and for vector fields a curl
- * coefficient, followed by the inverse of the map of the configuration
- * @tparam is_vector Whether the field is vector-valued
+ * Layout of the scratch memory of one group of the displacement Jacobian of a precompute object.
+ * For a chunk of quadrature points, the scratch holds at [qp][d][i] the coefficients of the
+ * variation along direction d contracted with test function i. The directions are (phi, h) =
+ * (1, 0) and (0, M e_b) for b = 0, 1, 2, where M maps reference gradients to the configuration.
  */
-template <bool is_vector>
 struct DisplacementScratchLayout
 {
-  /// Number of reals of the value coefficient
-  static constexpr unsigned int value_size = is_vector ? 3 : 1;
-  /// Number of reals of the gradient coefficient
-  static constexpr unsigned int grad_size = is_vector ? 9 : 3;
-  /// Number of reals of the curl coefficient
-  static constexpr unsigned int curl_size = is_vector ? 3 : 0;
-  /// Number of reals of the coefficients of one direction
-  static constexpr unsigned int direction_size = value_size + grad_size + curl_size;
-  /// Number of directions
+  /// Number of directions of the variation
   static constexpr unsigned int num_directions = 4;
-  /// Offset of the inverse of the map of the configuration within a quadrature point
-  static constexpr unsigned int map_offset = num_directions * direction_size;
-  /// Number of reals per quadrature point
-  static constexpr unsigned int qp_size = map_offset + 9;
+  /// Whether the groups align to half-warps, so that the scratch accesses of two groups never share
+  /// a shared memory wavefront
+  static constexpr bool align_groups = true;
 
   /**
-   * Get the number of bytes of scratch memory per team
-   * @param max_qps The maximum number of quadrature points of an element or side
+   * Get the number of reals stored per quadrature point. The count is odd, so that the stores of
+   * the quadrature points of a group fall in distinct shared memory banks.
    */
-  static std::size_t bytes(const unsigned int max_qps)
+  KOKKOS_FUNCTION unsigned int qpSize() const { return num_directions * max_idofs + 1; }
+  /**
+   * Get the number of reals of the scratch of a group
+   */
+  KOKKOS_FUNCTION unsigned int groupSize() const { return qp_chunk * qpSize(); }
+  /**
+   * Get the number of bytes of scratch memory per team
+   * @param groups The number of groups of the team, each assembling one element or side
+   */
+  std::size_t bytes(const unsigned int groups) const
   {
     return ::Kokkos::View<Real *, ::Kokkos::DefaultExecutionSpace::scratch_memory_space>::
-        shmem_size(max_qps * qp_size);
+        shmem_size(groups * groupSize());
   }
+
+  /// Maximum number of quadrature points of an element or side
+  unsigned int max_qps = 0;
+  /// Maximum number of test function DOFs of an element or side
+  unsigned int max_idofs = 0;
+  /// Number of quadrature points per chunk
+  unsigned int qp_chunk = 0;
 };
 
 /**
- * Store and load precomputed terms of one direction of the displacement variation
- */
-///@{
-template <bool is_vector, typename Terms>
-KOKKOS_FUNCTION void
-storeDisplacementTerms(Real * scratch, const Terms & terms)
-{
-  using Layout = DisplacementScratchLayout<is_vector>;
-
-  if constexpr (!is_vector)
-  {
-    scratch[0] = terms.value;
-    for (unsigned int k = 0; k < 3; ++k)
-      scratch[Layout::value_size + k] = terms.grad(k);
-  }
-  else
-  {
-    for (unsigned int a = 0; a < 3; ++a)
-    {
-      scratch[a] = terms.value(a);
-      scratch[Layout::value_size + Layout::grad_size + a] = terms.curl(a);
-      for (unsigned int b = 0; b < 3; ++b)
-        scratch[Layout::value_size + 3 * a + b] = terms.grad(a, b);
-    }
-  }
-}
-
-template <bool is_vector>
-KOKKOS_FUNCTION auto
-loadDisplacementTerms(const Real * scratch)
-{
-  using Layout = DisplacementScratchLayout<is_vector>;
-  using Field = PrecomputeField<is_vector>;
-
-  PrecomputedTerms<typename Field::Coefficient, typename Field::GradCoefficient> terms{};
-
-  if constexpr (!is_vector)
-  {
-    terms.value = scratch[0];
-    for (unsigned int k = 0; k < 3; ++k)
-      terms.grad(k) = scratch[Layout::value_size + k];
-  }
-  else
-  {
-    for (unsigned int a = 0; a < 3; ++a)
-    {
-      terms.value(a) = scratch[a];
-      terms.curl(a) = scratch[Layout::value_size + Layout::grad_size + a];
-      for (unsigned int b = 0; b < 3; ++b)
-        terms.grad(a, b) = scratch[Layout::value_size + 3 * a + b];
-    }
-  }
-
-  return terms;
-}
-///@}
-
-/**
  * Assemble the Jacobian of a precompute object posed on the current configuration with respect to
- * one displacement component on one element or side with one team. The team evaluates the
- * variation of the residual along the four directions of precomputeDisplacementJacobianTerms() once
- * per quadrature point into scratch, then combines the stored coefficients for each displacement
- * shape function and contracts them with the test functions:
+ * one displacement component on the element or side of one group of a team. With h = M ref_j the
+ * gradient of the displacement shape function on the configuration, the linearity of the variation
+ * T(phi_j, h) of precomputeDisplacementJacobianTerms() gives
  *
- *   J_ij = sum_qp T(phi_j T_0 + sum_k h_k T_(1 + k))(psi_i)
+ *   T(phi_j, h) = phi_j T(1, 0) + sum_b ref_jb T(0, M e_b)
  *
- * where T_d are the coefficients of direction d and T(.)(psi_i) contracts coefficients with the
- * test function i.
+ * Stage 1 evaluates the four directions once per quadrature point and contracts each with the test
+ * functions. Stage 2 combines them for each entry (i, j) with the reference shape function and
+ * gradient of column j:
+ *
+ *   J_ij = sum_qp (phi_j D_0i + sum_b ref_jb D_(1 + b)i)
+ *
  * @param object The residual object of the final derived type
  * @param team The team handle
- * @param datum The AssemblyDatum object of the element or side, whose column variable is the
- * displacement component
+ * @param group The group of the thread
+ * @param layout The scratch layout of the dispatch
+ * @param active Whether the group assembles its element or side. A group that does not still
+ * reaches the team barriers.
+ * @param datum The AssemblyDatum object of the thread, whose column variable is the displacement
+ * component
  * @param c The displacement component
  * @param accumulate The callable accumulating an entry (i, j) of the local matrix
  */
@@ -618,105 +571,100 @@ template <bool is_vector, typename Object, typename Team, typename Accumulate>
 KOKKOS_FUNCTION void
 assembleDisplacementJacobian(const Object & object,
                              const Team & team,
-                             const AssemblyDatum & datum,
+                             const TeamGroup & group,
+                             const DisplacementScratchLayout & layout,
+                             const bool active,
+                             AssemblyDatum & datum,
                              const unsigned int c,
                              Accumulate accumulate)
 {
-  using Layout = DisplacementScratchLayout<is_vector>;
+  constexpr auto num_directions = DisplacementScratchLayout::num_directions;
 
-  const auto n_qps = datum.n_qps();
+  const auto group_scratch_size = layout.groupSize();
   ::Kokkos::
       View<Real *, ExecSpace::scratch_memory_space, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>
-          scratch(team.team_scratch(0), n_qps * Layout::qp_size);
-
-  // Each thread evaluates its quadrature points with its own datum, whose geometry cache and trial
-  // function replacement are thread-private
-  ::Kokkos::parallel_for(
-      ::Kokkos::TeamThreadRange(team, n_qps),
-      [&](const unsigned int qp)
-      {
-        AssemblyDatum qp_datum(datum);
-        Real * q = &scratch(qp * Layout::qp_size);
-
-        storeDisplacementTerms<is_vector>(
-            q,
-            precomputeDisplacementJacobianTerms<is_vector>(object, qp_datum, c, 1, Real3(0), qp));
-
-        for (unsigned int k = 0; k < 3; ++k)
-        {
-          Real3 e_k(0);
-          e_k(k) = 1;
-          storeDisplacementTerms<is_vector>(
-              q + (1 + k) * Layout::direction_size,
-              precomputeDisplacementJacobianTerms<is_vector>(object, qp_datum, c, 0, e_k, qp));
-        }
-
-        const auto & dxi_dx = qp_datum.dxi_dx(qp);
-        for (unsigned int a = 0; a < 3; ++a)
-          for (unsigned int b = 0; b < 3; ++b)
-            q[Layout::map_offset + 3 * a + b] = dxi_dx(a, b);
-      });
-  team.team_barrier();
+          team_scratch(team.team_scratch(0), group.count() * group_scratch_size);
+  Real * const scratch = &team_scratch(group.index() * group_scratch_size);
 
   const auto & assembly = datum.assembly();
   const auto & elem = datum.elem();
   const auto side = datum.side();
   const auto jfe = datum.jfe();
+  const auto n_qps = datum.n_qps();
   const auto n_idofs = datum.n_idofs();
   const auto n_jdofs = datum.n_jdofs();
+  const auto qp_size = layout.qpSize();
+  const auto stride = layout.max_idofs;
+  const auto chunk = layout.qp_chunk;
+  KOKKOS_ASSERT(chunk > 0);
+  // Every group runs the same number of chunks, so that the team barriers match
+  const auto n_chunks = (layout.max_qps + chunk - 1) / chunk;
 
-  // Each thread contracts the columns j it is assigned with its own datum, whose cached geometry is
-  // read by the test function accessors
-  ::Kokkos::parallel_for(
-      ::Kokkos::TeamThreadRange(team, n_jdofs),
-      [&](const unsigned int j)
+  for (unsigned int ch = 0; ch < n_chunks; ++ch)
+  {
+    const auto qp_begin = ch * chunk;
+    const auto n_chunk_qps = qp_begin < n_qps ? ::Kokkos::min(chunk, n_qps - qp_begin) : 0u;
+
+    // Stage 1: each thread evaluates its quadrature points with its own datum, whose geometry cache
+    // and trial function replacement are thread-private
+    if (active)
+      for (unsigned int q = group.rank(); q < n_chunk_qps; q += group.size())
       {
-        AssemblyDatum j_datum(datum);
-        Real local_ke[MAX_CACHED_DOF];
+        const auto qp = qp_begin + q;
+        Real * const D = scratch + q * qp_size;
 
-        for (unsigned int ib = 0; ib < n_idofs; ib += MAX_CACHED_DOF)
+        for (unsigned int d = 0; d < num_directions; ++d)
         {
-          const auto ie = ::Kokkos::min(ib + MAX_CACHED_DOF, n_idofs);
-
-          for (unsigned int i = ib; i < ie; ++i)
-            local_ke[i - ib] = 0;
-
-          for (unsigned int qp = 0; qp < n_qps; ++qp)
+          Real3 h(0);
+          if (d)
           {
-            const Real * q = &scratch(qp * Layout::qp_size);
-
-            const Real phi = side == libMesh::invalid_uint
-                                 ? assembly.getPhi(elem.subdomain, elem.type, jfe)(j, qp)
-                                 : assembly.getPhiFace(elem.subdomain, elem.type, jfe)(side)(j, qp);
-            const Real3 ref =
-                side == libMesh::invalid_uint
-                    ? assembly.getGradPhi(elem.subdomain, elem.type, jfe)(j, qp)
-                    : assembly.getGradPhiFace(elem.subdomain, elem.type, jfe)(side)(j, qp);
-
-            const Real * map = q + Layout::map_offset;
-            const Real3 h(map[0] * ref(0) + map[1] * ref(1) + map[2] * ref(2),
-                          map[3] * ref(0) + map[4] * ref(1) + map[5] * ref(2),
-                          map[6] * ref(0) + map[7] * ref(1) + map[8] * ref(2));
-
-            // Combine the directions into the coefficients of column j
-            const Real weights[Layout::num_directions] = {phi, h(0), h(1), h(2)};
-            Real combined[Layout::direction_size] = {};
-
-            for (unsigned int d = 0; d < Layout::num_directions; ++d)
-              for (unsigned int k = 0; k < Layout::direction_size; ++k)
-                combined[k] += weights[d] * q[d * Layout::direction_size + k];
-
-            const auto terms = loadDisplacementTerms<is_vector>(combined);
-
-            for (unsigned int i = ib; i < ie; ++i)
-              local_ke[i - ib] +=
-                  contractTerms<is_vector, true, true, is_vector>(terms, j_datum, i, qp);
+            const auto & M = datum.dxi_dx(qp);
+            for (unsigned int a = 0; a < 3; ++a)
+              h(a) = M(a, d - 1);
           }
 
-          for (unsigned int i = ib; i < ie; ++i)
-            accumulate(local_ke[i - ib], i, j);
+          const auto terms =
+              precomputeDisplacementJacobianTerms<is_vector>(object, datum, c, Real(d == 0), h, qp);
+
+          for (unsigned int i = 0; i < n_idofs; ++i)
+            D[d * stride + i] =
+                contractTerms<is_vector, true, true, is_vector>(terms, datum, i, qp);
         }
-      });
+      }
+    team.team_barrier();
+
+    // Stage 2: combine the directions for each entry
+    if (active && n_chunk_qps)
+      for (unsigned int k = group.rank(); k < n_idofs * n_jdofs; k += group.size())
+      {
+        const auto i = k / n_jdofs;
+        const auto j = k % n_jdofs;
+        Real local_ke = 0;
+
+        for (unsigned int q = 0; q < n_chunk_qps; ++q)
+        {
+          const auto qp = qp_begin + q;
+          const Real phi =
+              side == libMesh::invalid_uint
+                  ? assembly.getPhi(elem.subdomain, elem.type, jfe)(j, qp)
+                  : assembly.getPhiFace(elem.subdomain, elem.type, jfe)(side)(j, qp);
+          const Real3 ref =
+              side == libMesh::invalid_uint
+                  ? assembly.getGradPhi(elem.subdomain, elem.type, jfe)(j, qp)
+                  : assembly.getGradPhiFace(elem.subdomain, elem.type, jfe)(side)(j, qp);
+          const Real * const D = scratch + q * qp_size + i;
+
+          local_ke += phi * D[0] + ref(0) * D[stride] + ref(1) * D[2 * stride] +
+                      ref(2) * D[3 * stride];
+        }
+
+        accumulate(local_ke, i, j);
+      }
+
+    // The next chunk overwrites the scratch
+    if (ch + 1 < n_chunks)
+      team.team_barrier();
+  }
 }
 
 /**

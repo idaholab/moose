@@ -82,7 +82,7 @@ VectorKernel::computeJacobian()
   // An object posed on the current configuration assembles its Jacobian with respect to the
   // displacements from its own hooks
   if (_deformation.displaced())
-    dispatchDisplacementJacobian(numKokkosBlockElements(), true);
+    dispatchDisplacementJacobian(numKokkosBlockElements(), kokkosAssembly().getMaxQpsPerElem());
 }
 
 } // namespace Moose::Kokkos

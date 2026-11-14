@@ -73,7 +73,7 @@ public:
   {
   };
   /// Jacobian with respect to one displacement component of an object posed on the current
-  /// configuration, dispatched with one team per element or side
+  /// configuration, dispatched with teams of groups that each assemble one element or side
   struct DisplacementJacobianLoop
   {
   };
@@ -328,11 +328,17 @@ protected:
   unsigned int _displacement_component = 0;
 
   /**
-   * Dispatch the Jacobian with respect to each displacement component of a precompute object posed
-   * on the current configuration, one team per element or side
-   * @param league_size The number of elements or sides
+   * Scratch layout of the current dispatch of DisplacementJacobianLoop
    */
-  void dispatchDisplacementJacobian(ThreadID league_size, bool vector);
+  DisplacementScratchLayout _displacement_layout;
+
+  /**
+   * Dispatch the Jacobian with respect to each displacement component of a precompute object posed
+   * on the current configuration, with teams of groups that each assemble one element or side
+   * @param n_items The number of elements or sides
+   * @param max_qps The maximum number of quadrature points of an element or side
+   */
+  void dispatchDisplacementJacobian(ThreadID n_items, unsigned int max_qps);
 
   /**
    * Build the dispatcher of a loop of a precompute or AD object compiled for its deformation

@@ -67,6 +67,7 @@ ResidualObject::ResidualObject(const ResidualObject & object)
     _dt_old(object._dt_old),
     _ad_layout(object._ad_layout),
     _displacement_component(object._displacement_component),
+    _displacement_layout(object._displacement_layout),
     _vector_tags(object._vector_tags),
     _matrix_tags(object._matrix_tags)
 {
@@ -77,6 +78,51 @@ ResidualObject::ResidualObject(const ResidualObject & object)
   _vector_tags = object.getVectorTags({});
   _matrix_tags = object.getMatrixTags({});
 }
+
+namespace
+{
+/**
+ * Shape the launch of a team operation whose teams hold groups of threads, one group per element or
+ * side. A team of the target size holds as many groups as fit, within the scratch limit and the
+ * item count. Registers and scratch may cap the team size below the target.
+ * @param dispatcher The team dispatcher
+ * @param n_items The number of elements or sides
+ * @param threads The number of threads that one element or side needs
+ * @param align Whether the groups align to half-warps
+ * @param bytes The callable giving the scratch bytes of a team of a number of groups
+ */
+template <typename Bytes>
+TeamLaunch
+groupedTeamLaunch(const DispatcherBase & dispatcher,
+                  const ThreadID n_items,
+                  const unsigned int threads,
+                  const bool align,
+                  Bytes bytes)
+{
+  const auto scratch_max = TeamPolicy<ResidualObject::ResidualLoop>::scratch_size_max(0);
+  const auto max_groups_scratch = std::max<std::size_t>(1, scratch_max / bytes(1));
+
+  TeamLaunch launch;
+
+  auto shape = [&](const unsigned int team_size)
+  {
+    const auto group_size = TeamGroup::groupSize(threads, align, team_size);
+    const auto groups = static_cast<unsigned int>(std::min<std::size_t>(
+        {std::max(1u, team_size / group_size), max_groups_scratch, n_items}));
+
+    launch.team_size = group_size * groups;
+    launch.league_size = (n_items + groups - 1) / groups;
+    launch.scratch_bytes = bytes(groups);
+  };
+
+  shape(TeamGroup::target_team_size);
+
+  if (const auto team_size_max = dispatcher.teamSizeMax(launch); launch.team_size > team_size_max)
+    shape(team_size_max);
+
+  return launch;
+}
+} // namespace
 
 void
 ResidualObject::dispatchADTeams(DispatcherBase & dispatcher,
@@ -131,44 +177,59 @@ ResidualObject::dispatchADTeams(DispatcherBase & dispatcher,
       max_idofs = std::max(max_idofs, assembly.getNumDofs(type, ife));
   }
 
-  TeamLaunch launch;
-  const auto max_groups_scratch = std::max<std::size_t>(1, scratch_max / layout.bytes(1));
-
-  // Fill a team of the target size with groups, within the scratch limit and the item count
-  auto shape = [&](const unsigned int team_size)
-  {
-    const auto group_size = ADTeamGroup::groupSize(layout, team_size);
-    const auto groups = static_cast<unsigned int>(std::min<std::size_t>(
-        {std::max(1u, team_size / group_size), max_groups_scratch, n_items}));
-
-    launch.team_size = group_size * groups;
-    launch.league_size = (n_items + groups - 1) / groups;
-    launch.scratch_bytes = layout.bytes(groups);
-    layout.residual_slices = std::max(1u, group_size / max_idofs);
-  };
-
-  shape(ADTeamGroup::target_team_size);
-
-  // Registers and scratch may cap the team size below the target
-  if (const auto team_size_max = dispatcher.teamSizeMax(launch); launch.team_size > team_size_max)
-    shape(team_size_max);
+  const auto launch =
+      groupedTeamLaunch(dispatcher,
+                        n_items,
+                        layout.max_qps,
+                        layout.max_jdofs != 0,
+                        [&](const unsigned int groups) { return layout.bytes(groups); });
+  const auto group_size = ADTeamGroup::groupSize(layout, launch.team_size);
+  layout.residual_slices = std::max(1u, group_size / max_idofs);
 
   dispatcher.parallelForTeams(launch);
 }
 
 void
-ResidualObject::dispatchDisplacementJacobian(const ThreadID league_size, const bool vector)
+ResidualObject::dispatchDisplacementJacobian(const ThreadID n_items, const unsigned int max_qps)
 {
+  if (!n_items)
+    return;
+
   if (!_displacement_jacobian_dispatcher)
     _displacement_jacobian_dispatcher =
         DispatcherRegistry::build<DisplacementJacobianLoop>(this, type());
 
-  TeamLaunch launch;
-  launch.league_size = league_size;
+  const auto scratch_max = TeamPolicy<ResidualLoop>::scratch_size_max(0);
 
-  const auto max_qps = kokkosAssembly().getMaxQpsPerElem();
-  launch.scratch_bytes = vector ? DisplacementScratchLayout<true>::bytes(max_qps)
-                                : DisplacementScratchLayout<false>::bytes(max_qps);
+  auto & layout = _displacement_layout;
+  layout = DisplacementScratchLayout();
+  layout.max_qps = max_qps;
+  layout.max_idofs = 1;
+  {
+    const auto & assembly = kokkosAssembly();
+    const auto ife = kokkosSystem(_kokkos_var.sys()).getFETypeID(_kokkos_var.var());
+    for (const auto type : make_range(kokkosMesh().getNumLocalElementTypes()))
+      layout.max_idofs = std::max(layout.max_idofs, assembly.getNumDofs(type, ife));
+  }
+
+  // Chunk the quadrature points only when one group does not fit
+  layout.qp_chunk = max_qps;
+  while (layout.qp_chunk > 1 && layout.bytes(1) > scratch_max)
+    layout.qp_chunk = (layout.qp_chunk + 1) / 2;
+
+  if (layout.bytes(1) > scratch_max)
+    mooseError("The displacement Jacobian assembly needs ",
+               layout.bytes(1),
+               " bytes of scratch memory per element or side, more than the limit of ",
+               scratch_max,
+               " bytes.");
+
+  const auto launch =
+      groupedTeamLaunch(*_displacement_jacobian_dispatcher,
+                        n_items,
+                        max_qps,
+                        DisplacementScratchLayout::align_groups,
+                        [&](const unsigned int groups) { return layout.bytes(groups); });
 
   // Each nonlinear displacement component of the residual system that the coupling matrix couples
   // to the residual variable contributes a Jacobian block

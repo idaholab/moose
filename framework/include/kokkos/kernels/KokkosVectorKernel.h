@@ -245,16 +245,21 @@ VectorKernel::operator()(DisplacementJacobianLoop,
                          const TeamMember<DisplacementJacobianLoop> & team,
                          const Derived & kernel) const
 {
-  auto elem = kokkosBlockElementID(team.league_rank());
+  const TeamGroup group(team,
+                        _displacement_layout.max_qps,
+                        DisplacementScratchLayout::align_groups,
+                        numKokkosBlockElements());
+  const auto elem = kokkosBlockElementID(group.item());
   const auto side = libMesh::invalid_uint;
 
   const auto & disp = _deformation.displacements();
   const auto c = _displacement_component;
   const auto jvar = disp.var(c);
 
-  if (!kokkosSystem(_kokkos_var.sys())
-           .isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
-    return;
+  // A group whose displacement component is inactive on its subdomain still reaches the barriers
+  const bool active =
+      group.active() && kokkosSystem(_kokkos_var.sys())
+                            .isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain);
 
   AssemblyDatum datum(elem,
                       side,
@@ -271,6 +276,9 @@ VectorKernel::operator()(DisplacementJacobianLoop,
   assembleDisplacementJacobian<true>(
       kernel,
       team,
+      group,
+      _displacement_layout,
+      active,
       datum,
       c,
       [&](const Real local_ke, const unsigned int i, const unsigned int j)
