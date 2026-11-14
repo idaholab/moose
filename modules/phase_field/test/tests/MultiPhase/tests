@@ -4,16 +4,26 @@
     input = 'derivativetwophasematerial.i'
     exodiff = 'derivativetwophasematerial_out.e'
     capabilities = 'fparser=jit'
-    requirement = 'The system shall provide a material to combine two free energies materials into a WBM two phase free energy'
+    requirement = 'The system shall provide a material to combine two free energies materials into a Wheeler-Boettinger-McFadden two phase free energy'
     design = 'DerivativeTwoPhaseMaterial.md'
     issues = '#4035'
+  [../]
+  [./derivativetwophasematerial_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'derivativetwophasematerial_jacobian.i'
+    run_sim = 'True'
+    ratio_tol = 1e-7
+    difference_tol = 1e-5
+    requirement = 'The system shall provide exact third derivatives of a Wheeler-Boettinger-McFadden two phase free energy with respect to the order parameter and the phase free energy arguments'
+    design = 'DerivativeTwoPhaseMaterial.md'
+    issues = '#34438'
   [../]
   [./orderparameterfunctionmaterial]
     type = 'Exodiff'
     input = 'orderparameterfunctionmaterial.i'
     exodiff = 'orderparameterfunctionmaterial_out.e'
     design = 'SwitchingFunctionMaterial.md'
-    requirement = 'The system shall provide a materials to generate barrier and switching function in a WBM multiphase model'
+    requirement = 'The system shall provide a materials to generate barrier and switching function in a Wheeler-Boettinger-McFadden multiphase model'
     issues = '#4355'
   [../]
   [./thirdphasesuppressionmaterial]
