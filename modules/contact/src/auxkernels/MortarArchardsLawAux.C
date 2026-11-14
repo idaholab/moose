@@ -11,6 +11,7 @@
 #include "MooseVariableFE.h"
 #include "FEProblemBase.h"
 #include "Assembly.h"
+#include "MortarContactPressureProvider.h"
 
 registerMooseObject("ContactApp", MortarArchardsLawAux);
 
@@ -27,9 +28,13 @@ MortarArchardsLawAux::validParams()
   params.addRequiredCoupledVar("displacements",
                                "The displacement variables. This mortar nodal auxiliary kernel can "
                                "take two or three displacements");
-  params.addRequiredCoupledVar("normal_pressure",
-                               "The name of the Lagrange multiplier that holds the normal contact "
-                               "pressure in mortar formulations");
+  params.addParam<UserObjectName>(
+      "weighted_gap_uo",
+      "The mortar contact user object that provides the normal contact pressure. Required when the "
+      "contact pressure comes from a mechanical contact solve.");
+  params.addCoupledVar(
+      "normal_pressure",
+      "An auxiliary variable holding a prescribed physical normal contact pressure");
   params.addParam<bool>("use_displaced_mesh",
                         true,
                         "Whether to use the displaced mesh to compute the auxiliary kernel value");
@@ -50,7 +55,13 @@ MortarArchardsLawAux::validParams()
 
 MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
   : MortarNodalAuxKernel(parameters),
-    _normal_pressure(coupledValueLower("normal_pressure")),
+    _contact_pressure_provider(
+        isParamValid("weighted_gap_uo")
+            ? &getUserObject<MortarContactPressureProvider>("weighted_gap_uo")
+            : nullptr),
+    _normal_pressure(isCoupled("normal_pressure") || isCoupledConstant("normal_pressure")
+                         ? &coupledValueLower("normal_pressure")
+                         : nullptr),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _energy_wear_coefficient(getParam<Real>("energy_wear_coefficient")),
     _displacements(
@@ -69,6 +80,26 @@ MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
     paramError("use_displaced_mesh",
                "The MortarArchardsLawAux auxiliary kernel requires the use of displaced meshes to "
                "compute the worn-out depth.");
+
+  if (_contact_pressure_provider && _normal_pressure)
+    paramError("normal_pressure",
+               "Provide the normal contact pressure through either 'normal_pressure' or "
+               "'weighted_gap_uo', but not both.");
+  if (!_contact_pressure_provider && !_normal_pressure)
+    paramError("weighted_gap_uo",
+               "Provide the normal contact pressure through 'weighted_gap_uo' or "
+               "'normal_pressure'.");
+  if (_contact_pressure_provider)
+    _contact_pressure_provider->checkConsumer(
+        *this, "weighted_gap_uo", primarySubdomain(), secondarySubdomain(), _displaced);
+}
+
+Real
+MortarArchardsLawAux::normalPressure() const
+{
+  return _normal_pressure ? (*_normal_pressure)[0]
+                          : MetaPhysicL::raw_value(
+                                _contact_pressure_provider->nodalContactPressure(*_current_node));
 }
 
 Real
@@ -77,6 +108,7 @@ MortarArchardsLawAux::computeValue()
   mooseAssert(_normals.size() == _test_lower.size(),
               "Normals and test_lower must be the same size");
   _worn_depth = 0;
+  _nodal_normal_pressure = normalPressure();
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
     computeQpProperties();
@@ -110,8 +142,8 @@ MortarArchardsLawAux::computeQpIProperties()
   const auto norm_tangential_vel = gap_velocity_vec.norm();
 
   const auto worn_out_depth_dt = norm_tangential_vel * _energy_wear_coefficient *
-                                 _friction_coefficient * _normal_pressure[0] * _dt * _JxW_msm[_qp] *
-                                 _coord_msm[_qp];
+                                 _friction_coefficient * _nodal_normal_pressure * _dt *
+                                 _JxW_msm[_qp] * _coord_msm[_qp];
 
   // Accumulate worn-out depth over time.
   _worn_depth += _test_lower[_i][_qp] * worn_out_depth_dt;

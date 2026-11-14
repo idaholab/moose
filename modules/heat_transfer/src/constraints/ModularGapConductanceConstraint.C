@@ -121,6 +121,8 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
           name,
           "' should operate on the same mesh (displaced/undisplaced) as the constraint object");
 
+    gap_model.checkConstraint(*this);
+
     // add gap model to list
     _gap_flux_models.push_back(&gap_model);
   }
