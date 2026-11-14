@@ -23,6 +23,7 @@ public:
 protected:
   virtual Result run() override;
 
-  Executor & _inner1;
-  Executor & _inner2;
+  /// The optional inner executors; null when the corresponding parameter is not set
+  Executor * const _inner1;
+  Executor * const _inner2;
 };

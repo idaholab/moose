@@ -9,30 +9,35 @@
 
 #pragma once
 
-#include "NodalKernel.h"
+#include "GenericNodalKernel.h"
 
 /**
  * Adds a force proportional to the value of the coupled variable
  */
-class CoupledForceNodalKernel : public NodalKernel
+template <bool is_ad>
+class CoupledForceNodalKernelTempl : public GenericNodalKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  CoupledForceNodalKernel(const InputParameters & parameters);
+  CoupledForceNodalKernelTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  usingGenericNodalKernelMembers;
 
 private:
   /// The number of the coupled variable
   const unsigned int _v_var;
 
   /// The value of the coupled variable
-  const VariableValue & _v;
+  const GenericVariableValue<is_ad> & _v;
 
   /// A multiplicative factor for computing the coupled force
   const Real _coef;
 };
+
+typedef CoupledForceNodalKernelTempl<false> CoupledForceNodalKernel;
+typedef CoupledForceNodalKernelTempl<true> ADCoupledForceNodalKernel;

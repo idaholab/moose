@@ -31,7 +31,9 @@ public:
   AugmentedLagrangianContactProblemTempl(const InputParameters & params);
   virtual ~AugmentedLagrangianContactProblemTempl() {}
 
-  virtual void addDefaultNonlinearConvergence(const InputParameters & params) override;
+  virtual void
+  addDefaultNonlinearConvergence(const InputParameters & params,
+                                 const std::vector<ConvergenceName> & conv_names) override;
   virtual bool onlyAllowDefaultNonlinearConvergence() const override { return true; }
 };
 

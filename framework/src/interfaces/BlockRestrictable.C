@@ -116,7 +116,7 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
   else if (moose_object->isParamValid("variable"))
   {
     std::string variable_name = moose_object->parameters().getMooseType("variable");
-    if (!variable_name.empty())
+    if (!variable_name.empty() && !_blk_feproblem->hasScalarVariable(variable_name))
       _blk_ids = _blk_feproblem
                      ->getVariable(_blk_tid,
                                    variable_name,

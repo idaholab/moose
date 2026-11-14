@@ -43,6 +43,7 @@ class NodalKernelBase;
 class Split;
 class KernelBase;
 class HDGKernel;
+class ElementADScalarKernel;
 class BoundaryCondition;
 class ResidualObject;
 class PenetrationInfo;
@@ -639,6 +640,10 @@ public:
   {
     return _scalar_kernels;
   }
+  MooseObjectTagWarehouse<ElementADScalarKernel> & getElementScalarKernelWarehouse()
+  {
+    return _element_scalar_kernels;
+  }
   const MooseObjectTagWarehouse<NodalKernelBase> & getNodalKernelWarehouse() const
   {
     return _nodal_kernels;
@@ -954,6 +959,7 @@ protected:
   MooseObjectTagWarehouse<KernelBase> _kernels;
   MooseObjectTagWarehouse<HDGKernel> _hybridized_kernels;
   MooseObjectTagWarehouse<ScalarKernelBase> _scalar_kernels;
+  MooseObjectTagWarehouse<ElementADScalarKernel> _element_scalar_kernels;
   MooseObjectTagWarehouse<DGKernelBase> _dg_kernels;
   MooseObjectTagWarehouse<InterfaceKernelBase> _interface_kernels;
   ///@}
