@@ -96,6 +96,7 @@
   []
   [sim_hex]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'sim_patterned.i'
     exodiff = 'sim_patterned_in.e'
     cli_args = '--mesh-only'
@@ -297,6 +298,7 @@
   []
   [interface_boundary_id_shift_pattern]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'interface_boundary_id_shift_pattern.i'
     exodiff = 'interface_boundary_id_shift_pattern_in.e'
     cli_args = '--mesh-only'

@@ -614,16 +614,47 @@ PatternedCartesianMeshGenerator::generate()
   std::vector<std::vector<Real>> control_drum_azimuthals;
 
   std::unique_ptr<ReplicatedMesh> out_mesh;
+  // The cells of each row are stitched pairwise into one row mesh, and the row meshes are then
+  // stitched pairwise into the full pattern, which avoids repeatedly stitching onto one growing
+  // mesh
+  std::vector<std::unique_ptr<ReplicatedMesh>> row_meshes;
+  std::map<subdomain_id_type, std::string> placed_subdomain_map;
+  const auto stitching_boundary_id_of = [this](const MeshBase & mesh)
+  { return MooseMeshUtils::getBoundaryID(_stitching_boundary_name, mesh); };
+  // Retrieve the subdomain name map of a mesh to be stitched and insert it to the main subdomain
+  // map, which is checked for one SubdomainName shared by more than one subdomain id
+  const auto add_subdomain_names = [this, &placed_subdomain_map](const ReplicatedMesh & mesh)
+  {
+    const auto & increment_subdomain_map = mesh.get_subdomain_name_map();
+    placed_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+    std::set<SubdomainName> main_subdomain_map_name_list;
+    for (auto const & id_name_pair : placed_subdomain_map)
+      main_subdomain_map_name_list.emplace(id_name_pair.second);
+    if (placed_subdomain_map.size() != main_subdomain_map_name_list.size())
+      paramError("inputs", "The input meshes contain subdomain name maps with conflicts.");
+  };
 
   for (unsigned i = 0; i < _pattern.size(); i++)
   {
     const Real deltax = 0.0;
     Real deltay = -(Real)(i)*input_pitch;
 
+    std::vector<std::unique_ptr<ReplicatedMesh>> placed_meshes;
     for (unsigned int j = 0; j < _pattern[i].size(); j++)
     {
       const auto pattern = _pattern[i][j];
       ReplicatedMesh & pattern_mesh = *meshes[pattern];
+
+      // This loop performs the first level of the pairwise stitching of the row. Cells with an
+      // even index j are the left cell of a pair: each absorbs the cell to its right and is kept,
+      // so it is a copy of its input mesh that is added to placed_meshes. A cell with an odd index
+      // is the right cell of a pair and is only read by the stitch, so an interior one is
+      // stitched into the preceding entry of placed_meshes straight from its input mesh, which is
+      // moved into place and back, instead of being copied. Cells on the periphery are always
+      // copied because addPeripheralMesh modifies them. stitchMeshesPairwise performs the
+      // remaining levels of the stitching.
+      bool stitch_from_input = false;
+      std::unique_ptr<ReplicatedMesh> placed_mesh;
 
       // No pattern boundary, so no need to wrap with a peripheral mesh
       // Use the inputs as they stand and translate accordingly later
@@ -636,20 +667,20 @@ PatternedCartesianMeshGenerator::generate()
           control_drum_azimuthals.push_back(control_drum_azimuthal_array[pattern]);
         }
 
-        if (j == 0 && i == 0)
+        const bool add_drum_id = _assign_control_drum_id && _generate_core_metadata;
+        // The array is only filled when core metadata is generated
+        const dof_id_type drum_id =
+            (add_drum_id && is_control_drum_array[pattern]) ? control_drum_azimuthals.size() : 0;
+        // The first cell adds the integer to its copy only; every other cell adds it to the shared
+        // input mesh before copying, so that later cells of the same input inherit it
+        if (add_drum_id && !(i == 0 && j == 0))
+          pattern_mesh.add_elem_integer("control_drum_id", true, drum_id);
+        stitch_from_input = (j % 2 == 1);
+        if (!stitch_from_input)
         {
-          out_mesh = dynamic_pointer_cast<ReplicatedMesh>(pattern_mesh.clone());
-          if (_assign_control_drum_id && _generate_core_metadata)
-            out_mesh->add_elem_integer(
-                "control_drum_id",
-                true,
-                is_control_drum_array[pattern] ? control_drum_azimuthals.size() : 0);
-          // shift interface boundary ids
-          if (_use_interface_boundary_id_shift)
-            reassignBoundaryIDs(*out_mesh,
-                                _interface_boundary_id_shift_pattern[i][j],
-                                input_interface_boundary_ids[pattern]);
-          continue;
+          placed_mesh = dynamic_pointer_cast<ReplicatedMesh>(pattern_mesh.clone());
+          if (add_drum_id && i == 0 && j == 0)
+            placed_mesh->add_elem_integer("control_drum_id", true, drum_id);
         }
       }
       // Has a pattern boundary so we need to wrap with a peripheral mesh
@@ -711,106 +742,80 @@ PatternedCartesianMeshGenerator::generate()
         else
           on_periphery = false;
 
-        if (on_periphery)
+        stitch_from_input = (j % 2 == 1) && !on_periphery;
+        if (!stitch_from_input)
         {
-          auto tmp_peripheral_mesh = dynamic_pointer_cast<ReplicatedMesh>(pattern_mesh.clone());
-          addPeripheralMesh(*tmp_peripheral_mesh,
-                            pattern,
-                            pitch_array.front(),
-                            extra_dist,
-                            num_sectors_per_side_array,
-                            peripheral_duct_intervals,
-                            rotation_angle,
-                            mesh_type);
-
-          if (extra_dist_shift != 0)
-            cutOffPolyDeform(
-                *tmp_peripheral_mesh, orientation, y_max_0, y_max_n, y_min, mesh_type, 90.0);
-
-          // Reassign interface boundary ids
-          if (_use_interface_boundary_id_shift)
-            reassignBoundaryIDs(*tmp_peripheral_mesh,
-                                _interface_boundary_id_shift_pattern[i][j],
-                                input_interface_boundary_ids[pattern]);
-
-          if (i == 0 && j == 0)
-            out_mesh = std::move(tmp_peripheral_mesh);
-          else
+          placed_mesh = dynamic_pointer_cast<ReplicatedMesh>(pattern_mesh.clone());
+          if (on_periphery)
           {
-            // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
-            // subdomain map
-            const auto & increment_subdomain_map = tmp_peripheral_mesh->get_subdomain_name_map();
-            out_mesh->set_subdomain_name_map().insert(increment_subdomain_map.begin(),
-                                                      increment_subdomain_map.end());
+            addPeripheralMesh(*placed_mesh,
+                              pattern,
+                              pitch_array.front(),
+                              extra_dist,
+                              num_sectors_per_side_array,
+                              peripheral_duct_intervals,
+                              rotation_angle,
+                              mesh_type);
 
-            const auto stitching_boundary_id_base =
-                MooseMeshUtils::getBoundaryID(_stitching_boundary_name, *out_mesh);
-            const auto stitching_boundary_id_periph =
-                MooseMeshUtils::getBoundaryID(_stitching_boundary_name, *tmp_peripheral_mesh);
-
-            MeshTools::Modification::translate(
-                *tmp_peripheral_mesh, deltax + j * input_pitch, deltay, 0);
-            out_mesh->stitch_meshes(*tmp_peripheral_mesh,
-                                    stitching_boundary_id_base,
-                                    stitching_boundary_id_periph,
-                                    TOLERANCE,
-                                    /*clear_stitched_boundary_ids=*/true,
-                                    _verbose_stitching);
+            if (extra_dist_shift != 0)
+              cutOffPolyDeform(*placed_mesh, orientation, y_max_0, y_max_n, y_min, mesh_type, 90.0);
           }
-
-          continue;
         }
       }
 
-      if (_assign_control_drum_id && _pattern_boundary == "none" && _generate_core_metadata)
-        pattern_mesh.add_elem_integer(
-            "control_drum_id",
-            true,
-            is_control_drum_array[pattern] ? control_drum_azimuthals.size() : 0);
+      if (stitch_from_input)
+      {
+        add_subdomain_names(pattern_mesh);
+        if (_use_interface_boundary_id_shift)
+          reassignBoundaryIDs(pattern_mesh,
+                              _interface_boundary_id_shift_pattern[i][j],
+                              input_interface_boundary_ids[pattern]);
+        MeshTools::Modification::translate(pattern_mesh, deltax + j * input_pitch, deltay, 0);
+        auto & left_mesh = *placed_meshes.back();
+        left_mesh.stitch_meshes(pattern_mesh,
+                                stitching_boundary_id_of(left_mesh),
+                                stitching_boundary_id_of(pattern_mesh),
+                                TOLERANCE,
+                                /*clear_stitched_boundary_ids=*/false,
+                                _verbose_stitching);
+        // Move the input mesh back so that the other cells that use it find it at the origin
+        MeshTools::Modification::translate(pattern_mesh, -(deltax + j * input_pitch), -deltay, 0);
+        if (_use_interface_boundary_id_shift)
+          reassignBoundaryIDs(pattern_mesh,
+                              _interface_boundary_id_shift_pattern[i][j],
+                              input_interface_boundary_ids[pattern],
+                              true);
+        continue;
+      }
 
-      // Translate to correct position
-      MeshTools::Modification::translate(pattern_mesh, deltax + j * input_pitch, deltay, 0);
+      add_subdomain_names(*placed_mesh);
 
-      // Define a reference map variable for subdomain map
-      auto & main_subdomain_map = out_mesh->set_subdomain_name_map();
-      // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
-      // subdomain map
-      const auto & increment_subdomain_map = pattern_mesh.get_subdomain_name_map();
-      main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
-      // Check if one SubdomainName is shared by more than one subdomain ids
-      std::set<SubdomainName> main_subdomain_map_name_list;
-      for (auto const & id_name_pair : main_subdomain_map)
-        main_subdomain_map_name_list.emplace(id_name_pair.second);
-      if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
-        paramError("inputs", "The input meshes contain subdomain name maps with conflicts.");
-      // Reassign interface boundary ids
+      // Shift interface boundary ids
       if (_use_interface_boundary_id_shift)
-        reassignBoundaryIDs(pattern_mesh,
+        reassignBoundaryIDs(*placed_mesh,
                             _interface_boundary_id_shift_pattern[i][j],
                             input_interface_boundary_ids[pattern]);
-
-      const auto stitching_boundary_id_1 =
-          MooseMeshUtils::getBoundaryID(_stitching_boundary_name, *out_mesh);
-      const auto stitching_boundary_id_2 =
-          MooseMeshUtils::getBoundaryID(_stitching_boundary_name, pattern_mesh);
-      out_mesh->stitch_meshes(pattern_mesh,
-                              stitching_boundary_id_1,
-                              stitching_boundary_id_2,
-                              TOLERANCE,
-                              /*clear_stitched_boundary_ids=*/false,
-                              _verbose_stitching);
-
-      // Translate back now that we've stitched so that anyone else that uses this mesh has it at
-      // the origin
-      MeshTools::Modification::translate(pattern_mesh, -(deltax + j * input_pitch), -deltay, 0);
-      // Roll back the changes in interface boundary ids for the same reason
-      if (_use_interface_boundary_id_shift)
-        reassignBoundaryIDs(pattern_mesh,
-                            _interface_boundary_id_shift_pattern[i][j],
-                            input_interface_boundary_ids[pattern],
-                            true);
+      // Translate to correct position
+      MeshTools::Modification::translate(*placed_mesh, deltax + j * input_pitch, deltay, 0);
+      placed_meshes.push_back(std::move(placed_mesh));
     }
+
+    // Stitch the cells of this row into one row mesh
+    row_meshes.push_back(MooseMeshUtils::stitchMeshesPairwise(std::move(placed_meshes),
+                                                              stitching_boundary_id_of,
+                                                              stitching_boundary_id_of,
+                                                              /*clear_stitched_boundary_ids=*/false,
+                                                              _verbose_stitching));
   }
+
+  // Stitch the row meshes into the full pattern
+  out_mesh = MooseMeshUtils::stitchMeshesPairwise(std::move(row_meshes),
+                                                  stitching_boundary_id_of,
+                                                  stitching_boundary_id_of,
+                                                  /*clear_stitched_boundary_ids=*/false,
+                                                  _verbose_stitching);
+  // Stitching does not merge subdomain names
+  out_mesh->set_subdomain_name_map() = placed_subdomain_map;
 
   // Check if stitching_boundary_id is really the external boundary. Correct if needed.
   auto side_list = out_mesh->get_boundary_info().build_side_list();

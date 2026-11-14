@@ -228,7 +228,8 @@ PatternedMeshGenerator::generate(std::vector<std::unique_ptr<ReplicatedMesh>> * 
   }
 
   // Data structure that holds each row
-  std::vector<std::unique_ptr<ReplicatedMesh>> row_meshes(_pattern.size());
+  std::vector<std::unique_ptr<ReplicatedMesh>> row_meshes;
+  row_meshes.reserve(_pattern.size());
 
   // Aliases
   const boundary_id_type &left_bid(stitch_bids[boundary_name_to_index_map["left_boundary"]]),
@@ -236,74 +237,56 @@ PatternedMeshGenerator::generate(std::vector<std::unique_ptr<ReplicatedMesh>> * 
       top_bid(stitch_bids[boundary_name_to_index_map["top_boundary"]]),
       bottom_bid(stitch_bids[boundary_name_to_index_map["bottom_boundary"]]);
 
-  // Build each row mesh
+  // Stitching does not merge subdomain names, so they are aggregated here from every cell
+  std::map<subdomain_id_type, std::string> main_subdomain_map;
+
+  // Build each row mesh by stitching its cells pairwise. Each cell is its own copy of an input
+  // mesh since the inputs can be used by more than one cell.
   for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
+  {
+    std::vector<std::unique_ptr<ReplicatedMesh>> cell_meshes;
+    cell_meshes.reserve(_pattern[i].size());
     for (MooseIndex(_pattern[i]) j = 0; j < _pattern[i].size(); ++j)
     {
       Real deltax = j * _x_width, deltay = i * _y_width;
 
-      // If this is the first cell of the row initialize the row mesh
-      if (j == 0)
-      {
-        auto clone = meshes[_pattern[i][j]]->clone();
-        row_meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(clone);
-
-        MeshTools::Modification::translate(*row_meshes[i], deltax, -deltay, 0);
-
-        continue;
-      }
-
-      ReplicatedMesh & cell_mesh = *meshes[_pattern[i][j]];
+      auto cell_mesh = dynamic_pointer_cast<ReplicatedMesh>(meshes[_pattern[i][j]]->clone());
 
       // Move the mesh into the right spot.  -i because we are starting at the top
-      MeshTools::Modification::translate(cell_mesh, deltax, -deltay, 0);
+      MeshTools::Modification::translate(*cell_mesh, deltax, -deltay, 0);
 
-      // Subdomain map is aggregated on each row first. This retrieves a writable reference
-      auto & main_subdomain_map = row_meshes[i]->set_subdomain_name_map();
-      // Retrieve subdomain name map from the mesh to be stitched and merge into the row's
-      // subdomain map
-      const auto & increment_subdomain_map = cell_mesh.get_subdomain_name_map();
-      mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
+      mergeSubdomainNameMaps(main_subdomain_map, cell_mesh->get_subdomain_name_map());
 
-      row_meshes[i]->stitch_meshes(cell_mesh,
-                                   right_bid,
-                                   left_bid,
-                                   TOLERANCE,
-                                   /*clear_stitched_boundary_ids=*/true,
-                                   /*verbose=*/false);
-
-      // Undo the translation
-      MeshTools::Modification::translate(cell_mesh, -deltax, deltay, 0);
+      cell_meshes.push_back(std::move(cell_mesh));
     }
 
-  // Now stitch together the rows
-  // We're going to stitch them all to row 0 (which is the real mesh)
-  for (MooseIndex(_pattern) i = 1; i < _pattern.size(); i++)
-  {
-    // Get a writeable reference subdomain-name map for the main mesh to which the other rows are
-    // stitched
-    auto & main_subdomain_map = row_meshes[0]->set_subdomain_name_map();
-    // Retrieve subdomain name map from the mesh to be stitched and merge into the main
-    // subdomain map
-    const auto & increment_subdomain_map = row_meshes[i]->get_subdomain_name_map();
-    mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
-
-    row_meshes[0]->stitch_meshes(*row_meshes[i],
-                                 bottom_bid,
-                                 top_bid,
-                                 TOLERANCE,
-                                 /*clear_stitched_boundary_ids=*/true,
-                                 /*verbose=*/false);
+    // The right boundary of each cell is stitched to the left boundary of its right neighbor
+    row_meshes.push_back(MooseMeshUtils::stitchMeshesPairwise(
+        std::move(cell_meshes),
+        [right_bid](const MeshBase &) { return right_bid; },
+        [left_bid](const MeshBase &) { return left_bid; },
+        /*clear_stitched_boundary_ids=*/true,
+        /*verbose=*/false));
   }
+
+  // Now stitch the rows together pairwise. The bottom boundary of each row is stitched to the top
+  // boundary of the row below it.
+  auto out_mesh = MooseMeshUtils::stitchMeshesPairwise(
+      std::move(row_meshes),
+      [bottom_bid](const MeshBase &) { return bottom_bid; },
+      [top_bid](const MeshBase &) { return top_bid; },
+      /*clear_stitched_boundary_ids=*/true,
+      /*verbose=*/false);
+  out_mesh->set_subdomain_name_map() = std::move(main_subdomain_map);
 
   // Change boundary ids back to those of meshes[0] to not surprise user
   if (!have_common_ids)
     for (const auto side : index_range(stitch_bids))
       MeshTools::Modification::change_boundary_id(
-          *row_meshes[0], stitch_bids[side], input_bids_unique[0][side]);
+          *out_mesh, stitch_bids[side], input_bids_unique[0][side]);
 
-  row_meshes[0]->unset_is_prepared();
-  return dynamic_pointer_cast<MeshBase>(row_meshes[0]);
+  out_mesh->unset_is_prepared();
+  return out_mesh;
 }
 
 void
