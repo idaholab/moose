@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#30655'
+  design = 'syntax/Kokkos/index.md'
+
+  [ex2]
+    requirement = 'The Kokkos-MOOSE workshop solutions shall solve a diffusion-reaction problem with a kernel that binds a coupled variable by value, stores coefficients in a device-capable array, and evaluates an inlined device function'
+    [solve]
+      type = CSVDiff
+      input = 'ex2.i'
+      csvdiff = 'ex2_out.csv'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'to the expected solution, and'
+    []
+    [jacobian]
+      type = PetscJacobianTester
+      input = 'ex2.i'
+      cli_args = 'Mesh/gen/nx=3 Mesh/gen/ny=3 Outputs/csv=false'
+      recover = false
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'with an exact Jacobian.'
+    []
+  []
+[]
