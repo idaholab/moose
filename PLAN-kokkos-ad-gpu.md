@@ -1,7 +1,7 @@
 # Handoff: Kokkos AD GPU work on PR #34088 (arco, updated 2026-11-12)
 
-Status: branch at `d30dadacd08` (steps 0-10b, 12-13b3), not pushed since `53584d78efd`. Next: step
-13b4. Updated 2026-11-14.
+Status: branch at `a94736bf66c` (steps 0-10b, 12-13b4), not pushed since `53584d78efd`. Next: step
+13c. Updated 2026-11-14.
 Git tracks this document on the feature branch. Commit it alone with a `PLAN:` subject, and drop
 those commits before the merge. Relative paths outside the MOOSE tree, such as `profiles/`,
 `scripts/`, `patches/`, `ptx/`, `logs/`, `runs/`, and `archive/`, are under `moose-stack-build/`
@@ -14,25 +14,12 @@ Branch `kokkos-reference-configuration` in `/ibmstor/scratch/lindad/projects/moo
 is idaholab/moose#34088. NamjaeChoi left a performance review on it. Answer it with measurements
 once the design work below is final. Do not reply yet.
 
-**Next: step 13b4**: register count of the hand-coded `KokkosCoefDiffusion` reference
-`JacobianLoop` (test app, `test/src/kokkos/kernels/KokkosCoefDiffusion.K`). Step 13b3 took it
-from 80 to 83 registers. The sdisp variants run +3.3% (q8), +5.4% (q27), and +15% (q64, 3.35 ->
-3.85 ms) in `profiles/nsys-v23` against `nsys-v22`. First action: run ncu on
-`JacobianLoop.*KokkosCoefDiffusion` for handsdisp_q64 at `HEAD` and at `HEAD~1` (the 13b2 commit,
-80 registers), and compare blocks/SM and the occupancy limiter. Then diff the PTX of the two
-builds with `scripts/object_variants.sbatch runs/branch-exp
-test/src/kokkos/kernels/KokkosCoefDiffusion.K KokkosCoefDiffusion <out> base <reverse patch>`
-(`runs/branch-exp` is at `ccbfc3288a5`. Move it to `d30dadacd08` first).
-
-- What 13b3 showed: every form of a compile-time-indexed `identity`, and setting the nodal
-  identity once in the nodal `Datum` constructor, gives 83. Only the runtime-indexed loop in the
-  element path gives 80, although that path has stack 0. Probes: `patches/step13b3/`, output
-  `runs/probe-13b3-KokkosCoefDiffusion`. 80 -> 83 crosses an 8-register allocation step (6 -> 5
-  blocks of 128 threads per SM if registers bind). This is a guess. ncu has not checked it.
-- Do not restore the runtime index. It keeps the AD datum in local memory (step 13b3 result).
-- Exit: the cause is named, and a fix brings every `KokkosCoefDiffusion` `JacobianLoop` launch
-  within 3% of `nsys-v22`, with no other launch slower than 3% against `nsys-v23`. Or the user
-  accepts the regression with a reason the measurements support. The `kokkos` dir passes (189).
+**Next: step 13c**: `ThreadVectorRange` probe for the AD group (mapping in "Hand-coded loop
+findings"). The reply needs a technical reason for or against it (step 13 decision). First action:
+read `ADTeamGroup` and `dispatchADTeams` (`KokkosResidualObject.h`, `KokkosADAssembly.h`), and
+write the probe as a patch in `patches/step13c/` against `a94736bf66c`. Measure against
+`profiles/nsys-v24`. Exit: a measured comparison. Land it if no AD launch is more than 3% slower.
+The `kokkos` dir passes (189). Write the technical reason into the reply either way.
 
 The draft reply is `moose-stack-build/review-reply-34088.md`. A local git repository in
 `moose-stack-build` tracks only that file (`.gitignore` allowlist). Commit the reply after each
@@ -55,6 +42,9 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 ### Decisions
 
+- Step 13b4 (user, 2026-11-14): commit the `resetTransform` fix with the q8 reference J regression
+  open. Carveout hints are acceptable if they are a general CS solution, not tuned to one GPU
+  architecture. This revises the step 8d rejection.
 - Step 13 (user, 2026-11-13): do steps 13a-13d. The reply must say the `PLAN:` commits are
   squashed before merge, and must give a technical reason for or against `ThreadVectorRange`, not
   a cost reason. The agent may push the branch to the fork at any time.
@@ -75,16 +65,17 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
   regressions open: step 2 (ad3sdisp_q64 J +4.6%), step 3 (ad3sdisp_q27 J +2.1%), step 4
   (ad3sdisp_q8 J +1.2%), step 5 ("Open performance items"), step 7 (AD +0-2.5%, node noise), and
   step 8 (ad3 reference J, fixed by step 8d), step 8d (ad8disp_q8 J +28%, fixed by step 8e; ad3
-  reference `ResidualLoop` +8-13%), step 8e (seeded J and AD `ResidualLoop` +4-9%), and step
-  13b3 (`KokkosCoefDiffusion` `JacobianLoop` +3-15%, probed in step 13b4, user, 2026-11-14).
+  reference `ResidualLoop` +8-13%), step 8e (seeded J and AD `ResidualLoop` +4-9%), step
+  13b3 (`KokkosCoefDiffusion` `JacobianLoop` +3-15%, fixed by 13b4 except q8), and step 13b4 (q8
+  reference `JacobianLoop` +10-23%, user, 2026-11-14).
 - Step 8d: commit T1 with its regressions, then probe the ad8 displaced J in step 8e (user,
   2026-11-11).
 - Step 8e: commit Y1 with its regressions and list them as open items (user, 2026-11-12). Not
   noise: a repeat run (`nsys-v14r`) agrees within 0.5%, and the 35 hand-coded launches, which Y1
   does not touch, vary by -0.8% to +1.6%.
 - Step 8d: remove the per-thread stack. Reason: the stack writes ~4 GB per Jacobian at ad3_q27,
-  and its cost depends on the carveout (step 8a). Rejected: an explicit carveout preference, and a cap
-  on blocks per SM. Both depend on the GPU.
+  and its cost depends on the carveout (step 8a). Rejected then: an explicit carveout preference, and
+  a cap on blocks per SM, because both depend on the GPU. The step 13b4 decision revises this.
 - Step 5: displacement derivatives outside the dual, in this PR. Width: optional class constant
   `max_ad_displaced_slots`, default `max_ad_slots + 3` (the position), trait `ad_displaced_slots`.
   Table-driven seeding, no width-based `if constexpr`. Only the chain rule after the hook takes a
@@ -100,6 +91,7 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 ### Commits on this branch (newest first)
 
+- `a94736bf66c` Step 13b4: datum transform cache reset after each precompute qp.
 - `d30dadacd08` Step 13b3: `Real33::identity` indexed at compile time, unread `Datum` members out.
 - `ccbfc3288a5` Step 13b2: precompute loops on teams of element groups.
 - `e4c7b785f70` Step 13b: displacement Jacobian packs several elements per team (`TeamGroup`).
@@ -126,23 +118,32 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 (empty)
 
+## Step 13b4 result (`a94736bf66c`, 2026-11-14)
+
+- Cause of 13b3's 80 -> 83: the cached `_dxi_dx` (9 doubles, 18 registers) stayed live through
+  stage 2 of `assemblePrecomputedTerms` as a phi over the chunk loop. ncu `profiles/ncu-v17`: at 83
+  registers, registers allow 5 blocks/SM and shared memory allows 6.
+- Dead ends: `resetTransform()` with only `_cached_qp = invalid_uint` (83 -> 82; the hit test
+  cannot exclude `qp == invalid_uint`). A `bool` validity flag (only `ResidualLoop` falls; the old
+  value still feeds the `j`-loop phi). Writing constants to the cache is what kills the carry.
+- Registers: hand reference J 83 -> 63, R 72 -> 54, displaced R 106 -> 91, displaced J 96 -> 94.
+  AD loops unchanged. `kokkos` dir 189 pass (job 14375).
+- `nsys-v24` against `nsys-v23`: hand R 0.88-0.94x, reference J q27 0.81x, q64 0.87x. Open: q8
+  reference J hand_q8 `KokkosDiffusion` 0.71 -> 0.87 ms, sdisp `KokkosCoefDiffusion` +10%.
+- q8 cause (`ncu-v18`, `profiles/probe-13b4`): 8 blocks/SM, so the driver picks the 228 KB carveout,
+  and the L1 hit rate falls (60%). A 164 KB hint (shim, `SHIM_CARVEOUT=72`) gives 0.66 ms but slows
+  handsdisp_q8 displaced J 21%. So a fixed hint is not general. See "Open performance items".
+- SASS liveness tools: `nvdisasm -plr -lrm wide` (life ranges) and `nvdisasm -gi` (lines) cannot be
+  combined. Join them on address. Scripts in `/tmp/b4/bin` (may vanish): `live_defs.py` lists the
+  registers live at the peak by defining source line.
+
 ## Step 13b3 result (`d30dadacd08`, 2026-11-14)
 
-- Cause, from the PTX of `runs/probe-13b2/full` (HEAD without the two `Datum` members). NVVM
-  outlined `ADKernel::operator()<..., DisplacementSeededLoop>` as a `.func`. The function has a
-  616 B depot, and the entry adds 72 B for the team member, so the total is 688 B. In the function
-  the `AssemblyDatum` lives in local memory. Its only runtime-indexed stores are
-  `Real33::identity(dim)` (`a[i][i] = 1` with runtime `dim`), from the nodal branch of
-  `Datum::dxi_dx`. Fix: loop over `Moose::dim`.
-- Seeded loop (reference/displaced): 126/184 registers and 0/64 B stack at 13b2, 126/180 and 0/64
-  after. ad8sdisp_q8 seeded J 11.77 ms (`nsys-v23`). `kokkos` dir 189 pass (job 14288).
-- `nsys-v23` against `nsys-v22`: `KokkosCoefDiffusion` `JacobianLoop` regression (step 13b4).
-  Hand-coded `KokkosDiffusion` `JacobianLoop` registers fell (96 -> 83 reference, 128 -> 96 handsdisp
-  displaced) with times within +2.6% (hand_h27). All other launches within +1.2%, except 5 us BC
-  launches. User accepted the commit with the regression open (2026-11-14).
+- NVVM outlined `ADKernel::operator()<..., DisplacementSeededLoop>` as a `.func`. Its `AssemblyDatum`
+  was in local memory, from runtime-indexed `Real33::identity(dim)`. Fixed by a `Moose::dim` loop.
+  Do not restore the runtime index.
 - The 64 B stack of the displaced seeded loop comes from other sites
   (`KokkosADVariableValue.h:757`, `Kokkos_Cuda_Team.hpp`). It is unchanged and was not probed.
-- `ptx_local_sites.py` matches `.entry` only. Read an outlined `.func` by hand.
 
 ## Step 13b2 result (`ccbfc3288a5`, 2026-11-14)
 
@@ -279,6 +280,10 @@ times and ratios: the reply tables (`review-reply-34088.md`).
 
 ### Open performance items
 
+- Step 13b4 q8 reference J (+10-23%): the driver carveout choice at 8 blocks/SM shrinks L1. A
+  general fix is acceptable (user, 2026-11-14), for example a carveout derived from the launch's
+  shared memory per block and a target block count, not one tuned to the H200. Unprobed.
+
 - ad3sdisp_q8 Jacobian (12.96 ms at step 5): 6 groups of 8 threads per team. Shared memory (37.7 KB
   per team) and registers both cap it at 6 teams per SM (`profiles/ncu-v10`). 16 lanes idle.
 - Step 5 regressions (v9 -> v10): `KokkosADQuadraticMaterial` `ElementCompute` +15% in every ad8
@@ -320,14 +325,13 @@ the binding limit. Reducing the live data per thread can relieve both. Step 8e i
 
 Measure each step alone against the step before, with a full sweep on arco-c04.
 
-Steps 0-13b3: done. Commits in "Commits on this branch". Step 12b also passed `heat_transfer` Kokkos
+Steps 0-13b4: done. Commits in "Commits on this branch". Step 12b also passed `heat_transfer` Kokkos
 12/12. Step 13 split into 13a-13d after the user's review of the draft (2026-11-13).
 13a. Done (sweeps `nsys-up1`, `nsys-v20`). See "Step 13a result".
 13b. Done (`e4c7b785f70`, `nsys-v21`). See "Step 13b result".
 13b2. Done (`ccbfc3288a5`, `nsys-v22`). See "Step 13b2 result".
 13b3. Done (`d30dadacd08`, `nsys-v23`). See "Step 13b3 result".
-13b4. `KokkosCoefDiffusion` `JacobianLoop` registers 80 -> 83 after 13b3 (see "Next"). Added
-    because the user committed 13b3 with this regression open (2026-11-14).
+13b4. Done (`a94736bf66c`, `nsys-v24`). See "Step 13b4 result".
 13c. `ThreadVectorRange` probe for the AD group (see "Hand-coded loop findings" for the mapping).
     Exit: a measured comparison with the latest sweep. Land it if no AD launch is slower than 3%.
 13d. Final reply: resolve every `TODO(user)`, get user approval, then post.
@@ -397,8 +401,8 @@ Details: `moose-stack-build/PLAN-kokkos-known-failures.md`.
   `qM` is the qps per element.
 - Sweep, from the case directory: `sbatch -w arco-c04 --output=<log dir>/%x-%j.log sweep.sbatch
   <out dir> nsys|ncu`. Filter with `VARIANTS_FILTER`, `NCU_KERNELS`, `NCU_COUNT`. Latest full sweep:
-  `profiles/nsys-v23` (step 13b3). Upstream: `nsys-up1`. Latest ncu: `ncu-v16`.
-  Next: `nsys-v24`, `ncu-v17`.
+  `profiles/nsys-v24` (step 13b4). Upstream: `nsys-up1`. Latest ncu: `ncu-v18`.
+  Next: `nsys-v25`, `ncu-v19`.
   Build `launches.txt` with `launch_table.sh <dir>/*.nsys-rep`.
 - Tables in `scripts/`: `step_table.sh <dir>` (per-step summary), `ratio_table.sh <adN>
   <label>=<dir>...` (AD/hand ratio per sweep, `FIELD=residual|jacobian`), `launch_table.sh <nsys-rep>...`
@@ -423,13 +427,13 @@ Details: `moose-stack-build/PLAN-kokkos-known-failures.md`.
   whole library per patch. `scripts/object_variants.sbatch <wt> <src .K> <regex> <out root>
   base|<patch>...` builds one object per patch through `scripts/kokkos_object_ptx.sbatch` (PTX with
   `.loc` lines, SASS, res usage). PTX entries are `.weak .entry`. Scratch worktree:
-  `runs/branch-exp`, at `ccbfc3288a5`, clean. It has empty `libmesh`/`petsc`, so it serves object
+  `runs/branch-exp`, at `d30dadacd08`, clean. It has empty `libmesh`/`petsc`, so it serves object
   probes only. Build the app in the main tree. Step 8d probe trees: `/tmp/pe-x` (login node, one git branch
   per probe). It can disappear. The patches in `patches/step8d/` are the record. Write probe patches in a copy (`git archive
   be2f2ac9b8f framework/include/kokkos` into `/tmp/pe`, then `git init`), never in the worktree
   while a job uses it. Queue jobs on the worktree with `--dependency=singleton
-  --job-name=object-variants`. `~/.claude/skills/gpu-local-memory/scripts/ptx_local_sites.py <ptx> <entry regex>` (skill `gpu-local-memory`) lists the
-  runtime-indexed local sites of one entry. Check `.func` and `call.uni` in the PTX as well.
+  --job-name=object-variants`. `~/.claude/skills/gpu-local-memory/scripts/ptx_local_sites.py [--kind entry|func] <ptx> <regex>`
+  (skill `gpu-local-memory`) lists the runtime-indexed local sites of one entry or outlined `.func`.
 - `scripts/hang_stack.sh <exe> <input dir> <delay s> -- <args>` prints the thread stacks of a run
   that is still running after the delay.
 
