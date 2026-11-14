@@ -43,6 +43,9 @@ public:
   /// Whether this object dispatches its residual computation with teams of elements or sides
   static constexpr bool uses_team_dispatch = false;
 
+  /// Whether the precompute hooks of this object assemble vector test functions
+  static constexpr bool uses_vector_test_functions = false;
+
   /**
    * Constructor
    * @param field_type The MOOSE variable field type
@@ -245,19 +248,96 @@ protected:
                                                          const unsigned int jvar) const;
 
   /**
-   * The common loop structure template for computing elemental residual
-   * @param datum The AssemblyDatum object of the current thread
-   * @param body The quadrature point loop body
+   * Assemble one hook family of a precompute object on the element or side of one group of a team,
+   * and accumulate the entries into the tagged vectors or matrices
+   * @tparam family The hook family
+   * @tparam is_vector Whether the object assembles vector test functions
+   * @param object The residual object of the final derived type
+   * @param team The team handle
+   * @param group The group of the thread
+   * @param active Whether the group assembles its element or side
+   * @param datum The AssemblyDatum object of the thread
    */
-  template <typename function>
-  KOKKOS_FUNCTION void computeResidualInternal(AssemblyDatum & datum, function body) const;
+  template <PrecomputeFamily family, bool is_vector, typename Object, typename Team>
+  KOKKOS_FUNCTION void assemblePrecomputed(const Object & object,
+                                           const Team & team,
+                                           const TeamGroup & group,
+                                           bool active,
+                                           AssemblyDatum & datum) const;
   /**
-   * The common loop structure template for computing elemental Jacobian
-   * @param datum The AssemblyDatum object of the current thread
-   * @param body The quadrature point loop body
+   * The parallel computation bodies of a precompute object, which a derived class may hide by
+   * defining methods with the same signature as inlined public methods
+   * @param object The residual object of the final derived type
+   * @param team The team handle
+   * @param group The group of the thread
+   * @param active Whether the group assembles its element or side
+   * @param datum The AssemblyDatum object of the thread
    */
-  template <typename function>
-  KOKKOS_FUNCTION void computeJacobianInternal(AssemblyDatum & datum, function body) const;
+  ///@{
+  template <typename Derived, typename Team>
+  KOKKOS_FUNCTION void computeResidualInternal(const Derived & object,
+                         const Team & team,
+                         const TeamGroup & group,
+                         bool active,
+                         AssemblyDatum & datum) const;
+  template <typename Derived, typename Team>
+  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & object,
+                         const Team & team,
+                         const TeamGroup & group,
+                         bool active,
+                         AssemblyDatum & datum) const;
+  template <typename Derived, typename Team>
+  KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived & object,
+                         const Team & team,
+                         const TeamGroup & group,
+                         bool active,
+                         AssemblyDatum & datum) const;
+  template <typename Derived, typename Team>
+  KOKKOS_FUNCTION void computeOffDiagJacobianScalarInternal(const Derived & object,
+                         const Team & team,
+                         const TeamGroup & group,
+                         bool active,
+                         AssemblyDatum & datum) const;
+  ///@}
+
+  /**
+   * The team operation of a loop of a precompute object. Each group of the team assembles one item,
+   * an element or side of one column variable: the variable itself for the residual and the
+   * Jacobian, and each coupled field or scalar variable for the off-diagonal Jacobians. The items
+   * of one column variable are consecutive.
+   * @tparam Loop The function tag of the loop
+   * @tparam displaced Whether the loop runs on the current configuration
+   * @param object The residual object of the final derived type
+   * @param team The team handle
+   * @param n_elems The number of elements or sides of the object
+   * @param elem_side The callable mapping an element or side index to its contiguous element ID and
+   * side index
+   */
+  template <typename Loop, bool displaced, typename Object, typename Team, typename ElemSide>
+  KOKKOS_FUNCTION void precomputeTeamLoop(const Object & object,
+                                          const Team & team,
+                                          ThreadID n_elems,
+                                          ElemSide elem_side) const;
+
+  /**
+   * Dispatch the residual of a precompute object
+   * @param n_elems The number of elements or sides
+   * @param max_qps The maximum number of quadrature points of an element or side
+   */
+  void computePrecomputedResidual(ThreadID n_elems, unsigned int max_qps);
+  /**
+   * Dispatch the Jacobian of a precompute object, including the Jacobian with respect to the
+   * displacements of an object posed on the current configuration
+   * @param n_elems The number of elements or sides
+   * @param max_qps The maximum number of quadrature points of an element or side
+   * @param scalar_jacobian Whether the object supports the off-diagonal scalar Jacobian hooks
+   */
+  void computePrecomputedJacobian(ThreadID n_elems, unsigned int max_qps, bool scalar_jacobian);
+
+  /**
+   * Scratch layout of the current dispatch of a precompute loop
+   */
+  PrecomputeScratchLayout _precompute_layout;
 
   /**
    * Assemble the residual and Jacobian of a pointwise AD residual object on one element or side
@@ -360,6 +440,21 @@ protected:
   }
 
 private:
+  /**
+   * Dispatch one hook family of a precompute object over its elements or sides and the column
+   * variables of the family
+   * @param dispatcher The team dispatcher of the loop
+   * @param family The hook family
+   * @param n_elems The number of elements or sides
+   * @param max_qps The maximum number of quadrature points of an element or side
+   * @param columns The column variables. The residual and the Jacobian have the variable alone.
+   */
+  void dispatchPrecomputed(DispatcherBase & dispatcher,
+                           PrecomputeFamily family,
+                           ThreadID n_elems,
+                           unsigned int max_qps,
+                           const std::vector<unsigned int> & columns);
+
   /**
    * Tags this object operates on
    */
@@ -578,76 +673,136 @@ ResidualObject::buildDeformationDispatcher(const void * object) const
              : DispatcherRegistry::build<DeformationLoop<Loop, false>>(object, type());
 }
 
-template <typename function>
+template <PrecomputeFamily family, bool is_vector, typename Object, typename Team>
 KOKKOS_FUNCTION void
-ResidualObject::computeResidualInternal(AssemblyDatum & datum, function body) const
+ResidualObject::assemblePrecomputed(const Object & object,
+                                    const Team & team,
+                                    const TeamGroup & group,
+                                    const bool active,
+                                    AssemblyDatum & datum) const
 {
-  Real local_re[MAX_CACHED_DOF];
-
   const auto scaling_factor =
       kokkosSystem(_kokkos_var.sys()).getVariableScalingFactor(_kokkos_var.var());
 
-  unsigned int stride = MAX_CACHED_DOF * datum.num_local_threads();
-  unsigned int num_batches = datum.n_dofs() / stride;
-
-  if (datum.n_dofs() % stride)
-    ++num_batches;
-
-  for (unsigned int batch = 0; batch < num_batches; ++batch)
-  {
-    unsigned int ib = batch * stride;
-    unsigned int ie = ::Kokkos::min(ib + stride, datum.n_dofs());
-
-    const unsigned int n = ie - ib;
-    const unsigned int d = n / datum.num_local_threads();
-    const unsigned int m = n % datum.num_local_threads();
-    const unsigned int t = datum.local_thread_id();
-
-    ib += t * d + (t < m ? t : m);
-    ie = ib + d + (t < m ? 1 : 0);
-
-    for (unsigned int i = ib; i < ie; ++i)
-      local_re[i - ib] = 0;
-
-    body(local_re - ib, ib, ie);
-
-    for (unsigned int i = ib; i < ie; ++i)
-      accumulateTaggedElementalResidual(local_re[i - ib] * scaling_factor, datum.elem().id, i);
-  }
+  assemblePrecomputedTerms<family, is_vector>(
+      object,
+      team,
+      group,
+      _precompute_layout,
+      active,
+      datum,
+      [&](const Real local, const unsigned int i, const unsigned int j)
+      {
+        if constexpr (family == PrecomputeFamily::Residual)
+          accumulateTaggedElementalResidual(local * scaling_factor, datum.elem().id, i);
+        else
+          accumulateTaggedElementalMatrix(
+              local * scaling_factor, datum.elem().id, i, j, datum.jvar());
+      });
 }
 
-template <typename function>
+template <typename Derived, typename Team>
 KOKKOS_FUNCTION void
-ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) const
+ResidualObject::computeResidualInternal(const Derived & object,
+                    const Team & team,
+                    const TeamGroup & group,
+                    const bool active,
+                    AssemblyDatum & datum) const
 {
-  Real local_ke[MAX_CACHED_DOF];
+  assemblePrecomputed<PrecomputeFamily::Residual, Derived::uses_vector_test_functions>(
+      object, team, group, active, datum);
+}
 
-  const auto scaling_factor =
-      kokkosSystem(_kokkos_var.sys()).getVariableScalingFactor(_kokkos_var.var());
+template <typename Derived, typename Team>
+KOKKOS_FUNCTION void
+ResidualObject::computeJacobianInternal(const Derived & object,
+                    const Team & team,
+                    const TeamGroup & group,
+                    const bool active,
+                    AssemblyDatum & datum) const
+{
+  assemblePrecomputed<PrecomputeFamily::Jacobian, Derived::uses_vector_test_functions>(
+      object, team, group, active, datum);
+}
 
-  for (unsigned int j = datum.local_thread_id(); j < datum.n_jdofs();
-       j += datum.num_local_threads())
-  {
-    unsigned int num_batches = datum.n_idofs() / MAX_CACHED_DOF;
+template <typename Derived, typename Team>
+KOKKOS_FUNCTION void
+ResidualObject::computeOffDiagJacobianInternal(const Derived & object,
+                    const Team & team,
+                    const TeamGroup & group,
+                    const bool active,
+                    AssemblyDatum & datum) const
+{
+  assemblePrecomputed<PrecomputeFamily::OffDiagJacobian, Derived::uses_vector_test_functions>(
+      object, team, group, active, datum);
+}
 
-    if (datum.n_idofs() % MAX_CACHED_DOF)
-      ++num_batches;
+template <typename Derived, typename Team>
+KOKKOS_FUNCTION void
+ResidualObject::computeOffDiagJacobianScalarInternal(const Derived & object,
+                    const Team & team,
+                    const TeamGroup & group,
+                    const bool active,
+                    AssemblyDatum & datum) const
+{
+  assemblePrecomputed<PrecomputeFamily::OffDiagJacobianScalar, Derived::uses_vector_test_functions>(
+      object, team, group, active, datum);
+}
 
-    for (unsigned int batch = 0; batch < num_batches; ++batch)
-    {
-      unsigned int ib = batch * MAX_CACHED_DOF;
-      unsigned int ie = ::Kokkos::min(ib + MAX_CACHED_DOF, datum.n_idofs());
+template <typename Loop, bool displaced, typename Object, typename Team, typename ElemSide>
+KOKKOS_FUNCTION void
+ResidualObject::precomputeTeamLoop(const Object & object,
+                                   const Team & team,
+                                   const ThreadID n_elems,
+                                   ElemSide elem_side) const
+{
+  constexpr bool offdiag = std::is_same_v<Loop, OffDiagJacobianLoop>;
+  constexpr bool scalar = std::is_same_v<Loop, OffDiagJacobianScalarLoop>;
 
-      for (unsigned int i = ib; i < ie; ++i)
-        local_ke[i - ib] = 0;
+  const auto & sys = kokkosSystem(_kokkos_var.sys());
+  const auto ivar = _kokkos_var.var();
 
-      body(local_ke - ib, ib, ie, j);
+  ThreadID n_columns = 1;
+  if constexpr (offdiag)
+    n_columns = sys.getFieldCoupling(ivar).size();
+  else if constexpr (scalar)
+    n_columns = sys.getScalarCoupling(ivar).size();
 
-      for (unsigned int i = ib; i < ie; ++i)
-        accumulateTaggedElementalMatrix(
-            local_ke[i - ib] * scaling_factor, datum.elem().id, i, j, datum.jvar());
-    }
-  }
+  const auto & layout = _precompute_layout;
+  const TeamGroup group(team, layout.max_qps, layout.align_groups, n_columns * n_elems);
+  [[maybe_unused]] const auto column = group.item() / n_elems;
+  const auto elem_side_id = elem_side(group.item() % n_elems);
+  const auto elem = elem_side_id.first;
+  const auto side = elem_side_id.second;
+
+  auto jvar = ivar;
+  if constexpr (offdiag)
+    jvar = sys.getFieldCoupling(ivar)[column];
+  else if constexpr (scalar)
+    jvar = sys.getScalarCoupling(ivar)[column];
+
+  // A group whose column variable is inactive on its subdomain still reaches the barriers
+  bool active = group.active();
+  if constexpr (offdiag || scalar)
+    active = active && sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain);
+
+  AssemblyDatum datum(elem,
+                      side,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      jvar,
+                      _deformation,
+                      std::bool_constant<displaced>{});
+
+  if constexpr (std::is_same_v<Loop, ResidualLoop>)
+    object.computeResidualInternal(object, team, group, active, datum);
+  else if constexpr (std::is_same_v<Loop, JacobianLoop>)
+    object.computeJacobianInternal(object, team, group, active, datum);
+  else if constexpr (offdiag)
+    object.computeOffDiagJacobianInternal(object, team, group, active, datum);
+  else
+    object.computeOffDiagJacobianScalarInternal(object, team, group, active, datum);
 }
 
 template <unsigned int slots, bool displaced, typename Object, typename Team>

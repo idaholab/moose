@@ -668,87 +668,282 @@ assembleDisplacementJacobian(const Object & object,
 }
 
 /**
- * Assembly loop bodies of precompute residual objects, passed to
- * ResidualObject::computeResidualInternal() and ResidualObject::computeJacobianInternal()
+ * Get the precomputed terms of one hook family at a quadrature point
+ * @param j The trial function DOF index, which the residual family ignores
  */
-///@{
-template <bool is_vector, typename Object>
+template <PrecomputeFamily family, bool is_vector, typename Object>
 KOKKOS_FUNCTION auto
-precomputeResidualBody(const Object & object, AssemblyDatum & datum)
+precomputeFamilyTerms(const Object & object,
+                      AssemblyDatum & datum,
+                      [[maybe_unused]] const unsigned int j,
+                      const unsigned int qp)
 {
-  return [&](Real * local_re, const unsigned int ib, const unsigned int ie)
-  {
-    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-    {
-      const auto terms = precomputeResidualTerms<is_vector>(object, datum, qp);
-
-      for (unsigned int i = ib; i < ie; ++i)
-        local_re[i] += contractTerms<is_vector,
-                                     has_precomputeQpResidualValue_v<Object>,
-                                     has_precomputeQpResidualGrad_v<Object>,
-                                     has_precomputeQpResidualCurl_v<Object>>(terms, datum, i, qp);
-    }
-  };
+  if constexpr (family == PrecomputeFamily::Residual)
+    return precomputeResidualTerms<is_vector>(object, datum, qp);
+  else if constexpr (family == PrecomputeFamily::Jacobian)
+    return precomputeJacobianTerms<is_vector>(object, datum, j, qp);
+  else if constexpr (family == PrecomputeFamily::OffDiagJacobian)
+    return precomputeOffDiagJacobianTerms<is_vector>(object, datum, j, qp);
+  else
+    return precomputeOffDiagJacobianScalarTerms<is_vector>(object, datum, j, qp);
 }
 
-template <bool is_vector, typename Object>
-KOKKOS_FUNCTION auto
-precomputeJacobianBody(const Object & object, AssemblyDatum & datum)
+/**
+ * Layout of the scratch memory of one group of a precompute assembly. For a chunk of quadrature
+ * points, the scratch holds at [qp][t][j] the stored terms t of trial function j: the value
+ * coefficient, followed by the gradient coefficient pulled back to the reference element. The
+ * gradient coefficient of a vector object absorbs its curl coefficient, so that the contraction
+ * reads no geometry.
+ */
+struct PrecomputeScratchLayout
 {
-  return [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
+  /**
+   * Get the number of reals stored per quadrature point. The count is odd, so that the stores of
+   * the quadrature points of a group fall in distinct shared memory banks.
+   */
+  KOKKOS_FUNCTION unsigned int qpSize() const { return (size * max_jdofs) | 1u; }
+  /**
+   * Get the number of reals of the scratch of a group
+   */
+  KOKKOS_FUNCTION unsigned int groupSize() const { return qp_chunk * qpSize(); }
+  /**
+   * Get the number of bytes of scratch memory per team
+   * @param groups The number of groups of the team, each assembling one element or side
+   */
+  std::size_t bytes(const unsigned int groups) const
   {
-    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-    {
-      const auto terms = precomputeJacobianTerms<is_vector>(object, datum, j, qp);
+    return ::Kokkos::View<Real *, ::Kokkos::DefaultExecutionSpace::scratch_memory_space>::
+        shmem_size(groups * groupSize());
+  }
 
-      for (unsigned int i = ib; i < ie; ++i)
-        local_ke[i] += contractTerms<is_vector,
-                                     has_precomputeQpJacobianValue_v<Object>,
-                                     has_precomputeQpJacobianGrad_v<Object>,
-                                     has_precomputeQpJacobianCurl_v<Object>>(terms, datum, i, qp);
+  /// Maximum number of quadrature points of an element or side
+  unsigned int max_qps = 0;
+  /// Number of stored terms per quadrature point and trial function (precompute_stored_size)
+  unsigned int size = 0;
+  /// Maximum number of trial function DOFs of an element or side, one for the residual
+  unsigned int max_jdofs = 1;
+  /// Number of quadrature points per chunk
+  unsigned int qp_chunk = 0;
+  /// Number of threads that share the quadrature point sum of one entry
+  unsigned int slices = 1;
+  /// Whether the groups align to half-warps, so that the contraction loads of two groups never
+  /// share a shared memory wavefront
+  bool align_groups = false;
+};
+
+/**
+ * Contract the stored terms of one trial function at a quadrature point with test function i
+ * @param terms The first stored term of the trial function
+ * @param stride The distance between two stored terms
+ */
+template <bool is_vector, bool has_value, bool has_grad>
+KOKKOS_FUNCTION Real
+contractStoredTerms(const Real * const terms,
+                    const unsigned int stride,
+                    AssemblyDatum & datum,
+                    const unsigned int i,
+                    const unsigned int qp)
+{
+  // The gradient coefficient follows the value coefficient
+  constexpr unsigned int t = has_value ? (is_vector ? 3 : 1) : 0;
+  Real result = 0;
+
+  if constexpr (has_value)
+  {
+    if constexpr (!is_vector)
+      result += terms[0] * VariableTestValue()(datum, i, qp);
+    else
+    {
+      const auto psi = VectorVariableTestValue()(datum, i, qp);
+      for (unsigned int a = 0; a < 3; ++a)
+        result += terms[a * stride] * psi(a);
     }
-  };
+  }
+
+  if constexpr (has_grad)
+  {
+    if constexpr (!is_vector)
+    {
+      const auto & grad = VariableTestGradient().reference(datum, i, qp);
+      for (unsigned int a = 0; a < 3; ++a)
+        result += terms[(t + a) * stride] * grad(a);
+    }
+    else
+    {
+      const auto & grad = VectorVariableTestGradient().reference(datum, i, qp);
+      for (unsigned int a = 0; a < 3; ++a)
+        for (unsigned int b = 0; b < 3; ++b)
+          result += terms[(t + 3 * a + b) * stride] * grad(a, b);
+    }
+  }
+
+  return result;
 }
 
-template <bool is_vector, typename Object>
-KOKKOS_FUNCTION auto
-precomputeOffDiagJacobianBody(const Object & object, AssemblyDatum & datum)
+/**
+ * Assemble one hook family of a precompute object on the element or side of one group of a team:
+ *
+ *   K_ij = sum_qp (f_value(j) . psi_i + f_grad(j) : grad_xi psi_i)
+ *
+ * where f_grad is the JxW-weighted gradient coefficient pulled back to the reference element.
+ * Stage 1 evaluates the hooks once per quadrature point and trial function, one thread per
+ * quadrature point, so that each thread maps the geometry of its quadrature point once. Stage 2
+ * contracts the stored terms with the test functions, one thread per entry (i, j), or several per
+ * entry over slices of the quadrature points when the group outnumbers the entries.
+ * @tparam family The hook family. The residual family has one trial function, j = 0.
+ * @param object The residual object of the final derived type
+ * @param team The team handle
+ * @param group The group of the thread
+ * @param layout The scratch layout of the dispatch
+ * @param active Whether the group assembles its element or side. A group that does not still
+ * reaches the team barriers.
+ * @param datum The AssemblyDatum object of the thread
+ * @param accumulate The callable accumulating an entry (i, j)
+ */
+template <PrecomputeFamily family,
+          bool is_vector,
+          typename Object,
+          typename Team,
+          typename Accumulate>
+KOKKOS_FUNCTION void
+assemblePrecomputedTerms(const Object & object,
+                         const Team & team,
+                         const TeamGroup & group,
+                         const PrecomputeScratchLayout & layout,
+                         const bool active,
+                         AssemblyDatum & datum,
+                         Accumulate accumulate)
 {
-  return [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
+  using Hooks = PrecomputeFamilyHooks<family, Object>;
+  constexpr bool has_value = Hooks::value;
+  constexpr bool has_grad = Hooks::grad || Hooks::curl;
+  // The gradient coefficient follows the value coefficient
+  constexpr unsigned int t = has_value ? (is_vector ? 3 : 1) : 0;
+  static_assert(is_vector || !Hooks::curl, "Only vector objects assemble a curl coefficient.");
+  KOKKOS_ASSERT(layout.size == (precompute_stored_size<is_vector, family, Object>));
+
+  const auto group_scratch_size = layout.groupSize();
+  ::Kokkos::
+      View<Real *, ExecSpace::scratch_memory_space, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>
+          team_scratch(team.team_scratch(0), group.count() * group_scratch_size);
+  Real * const scratch = &team_scratch(group.index() * group_scratch_size);
+
+  const auto n_qps = datum.n_qps();
+  const auto n_idofs = datum.n_idofs();
+  const auto n_jdofs = family == PrecomputeFamily::Residual ? 1u : datum.n_jdofs();
+  const auto n_entries = n_idofs * n_jdofs;
+  const auto stride = layout.max_jdofs;
+  const auto qp_size = layout.qpSize();
+  const auto chunk = layout.qp_chunk;
+  const auto n_slices = layout.slices;
+  KOKKOS_ASSERT(chunk > 0);
+  KOKKOS_ASSERT(n_jdofs <= stride);
+  KOKKOS_ASSERT(n_slices == 1 || n_entries * n_slices <= group.size());
+  // Every group runs the same number of chunks, so that the team barriers match
+  const auto n_chunks = (layout.max_qps + chunk - 1) / chunk;
+
+  // With several slices, each thread sums one entry over its slice of every chunk
+  Real partial = 0;
+
+  for (unsigned int ch = 0; ch < n_chunks; ++ch)
   {
-    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+    const auto qp_begin = ch * chunk;
+    const auto n_chunk_qps = qp_begin < n_qps ? ::Kokkos::min(chunk, n_qps - qp_begin) : 0u;
+
+    // Stage 1: each thread evaluates its quadrature points with its own datum, whose geometry cache
+    // is thread-private
+    if (active)
+      for (unsigned int q = group.rank(); q < n_chunk_qps; q += group.size())
+      {
+        const auto qp = qp_begin + q;
+
+        for (unsigned int j = 0; j < n_jdofs; ++j)
+        {
+          const auto terms = precomputeFamilyTerms<family, is_vector>(object, datum, j, qp);
+          Real * const T = scratch + q * qp_size + j;
+
+          if constexpr (has_value)
+          {
+            if constexpr (!is_vector)
+              T[0] = terms.value;
+            else
+              for (unsigned int a = 0; a < 3; ++a)
+                T[a * stride] = terms.value(a);
+          }
+
+          if constexpr (has_grad)
+          {
+            if constexpr (!is_vector)
+              for (unsigned int a = 0; a < 3; ++a)
+                T[(t + a) * stride] = terms.grad(a);
+            else
+            {
+              // C : grad psi = f_curl . curl psi, with the gradient pulled back like f_grad
+              auto grad = terms.grad;
+              if constexpr (Hooks::curl)
+                grad += curlCoefficientAsGradient(terms.curl, datum.assembly().getDimension()) *
+                        datum.dxi_dx(qp);
+
+              for (unsigned int a = 0; a < 3; ++a)
+                for (unsigned int b = 0; b < 3; ++b)
+                  T[(t + 3 * a + b) * stride] = grad(a, b);
+            }
+          }
+        }
+      }
+    team.team_barrier();
+
+    // Stage 2: contract with the test functions
+    auto contract = [&](const unsigned int i, const unsigned int j, const unsigned int q)
     {
-      const auto terms = precomputeOffDiagJacobianTerms<is_vector>(object, datum, j, qp);
+      return contractStoredTerms<is_vector, has_value, has_grad>(
+          scratch + q * qp_size + j, stride, datum, i, qp_begin + q);
+    };
 
-      for (unsigned int i = ib; i < ie; ++i)
-        local_ke[i] +=
-            contractTerms<is_vector,
-                          has_precomputeQpOffDiagJacobianValue_v<Object>,
-                          has_precomputeQpOffDiagJacobianGrad_v<Object>,
-                          has_precomputeQpOffDiagJacobianCurl_v<Object>>(terms, datum, i, qp);
+    if (active && n_chunk_qps)
+    {
+      if (n_slices == 1)
+        for (unsigned int k = group.rank(); k < n_entries; k += group.size())
+        {
+          const auto i = k / n_jdofs;
+          const auto j = k % n_jdofs;
+          Real local = 0;
+
+          for (unsigned int q = 0; q < n_chunk_qps; ++q)
+            local += contract(i, j, q);
+
+          accumulate(local, i, j);
+        }
+      else if (group.rank() < n_entries * n_slices)
+      {
+        const auto k = group.rank() % n_entries;
+        for (unsigned int q = group.rank() / n_entries; q < n_chunk_qps; q += n_slices)
+          partial += contract(k / n_jdofs, k % n_jdofs, q);
+      }
     }
-  };
-}
 
-template <bool is_vector, typename Object>
-KOKKOS_FUNCTION auto
-precomputeOffDiagJacobianScalarBody(const Object & object, AssemblyDatum & datum)
-{
-  return [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
+    // The next chunk, or the partial sums, overwrite the scratch
+    if (ch + 1 < n_chunks || n_slices > 1)
+      team.team_barrier();
+  }
+
+  // The slice count is uniform over the dispatch, so every group of a team reaches the barrier
+  if (n_slices > 1)
   {
-    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-    {
-      const auto terms = precomputeOffDiagJacobianScalarTerms<is_vector>(object, datum, j, qp);
+    if (active && group.rank() < n_entries * n_slices)
+      scratch[group.rank()] = partial;
+    team.team_barrier();
 
-      for (unsigned int i = ib; i < ie; ++i)
-        local_ke[i] +=
-            contractTerms<is_vector,
-                          has_precomputeQpOffDiagJacobianScalarValue_v<Object>,
-                          has_precomputeQpOffDiagJacobianScalarGrad_v<Object>,
-                          has_precomputeQpOffDiagJacobianScalarCurl_v<Object>>(terms, datum, i, qp);
-    }
-  };
+    if (active)
+      for (unsigned int k = group.rank(); k < n_entries; k += group.size())
+      {
+        Real local = 0;
+        for (unsigned int s = 0; s < n_slices; ++s)
+          local += scratch[s * n_entries + k];
+
+        accumulate(local, k / n_jdofs, k % n_jdofs);
+      }
+  }
 }
-///@}
 
 } // namespace Moose::Kokkos

@@ -692,15 +692,19 @@ namespace Moose::Kokkos
  */
 template <typename Loop, typename Object>
 void
-registerDeformationDispatchers(const std::string & objectname, const bool has_user_method)
+registerPrecomputeDispatchers(const std::string & objectname,
+                              const PrecomputeFamily family,
+                              const bool has_user_method,
+                              const unsigned int stored_size)
 {
   using Reference = typename Object::template DeformationLoop<Loop, false>;
   using Displaced = typename Object::template DeformationLoop<Loop, true>;
 
-  DispatcherRegistry::addDispatcher<Reference, Object>(objectname);
-  DispatcherRegistry::addDispatcher<Displaced, Object>(objectname);
+  DispatcherRegistry::addTeamDispatcher<Reference, Object>(objectname);
+  DispatcherRegistry::addTeamDispatcher<Displaced, Object>(objectname);
   DispatcherRegistry::hasUserMethod<Reference>(objectname, has_user_method);
   DispatcherRegistry::hasUserMethod<Displaced>(objectname, has_user_method);
+  DispatcherRegistry::setProperty(precomputeStoredSizeProperty(family), objectname, stored_size);
 }
 
 template <typename Object>
@@ -717,12 +721,31 @@ registerResidualObjectDispatchers(const std::string & objectname)
                   "precomputeQpResidualCurl() with the signature documented in "
                   "KokkosPrecomputeHookTraits.h.");
 
-    // Precompute objects compile each loop once per configuration
-    registerDeformationDispatchers<typename Object::ResidualLoop, Object>(objectname, true);
-    registerDeformationDispatchers<typename Object::JacobianLoop, Object>(
-        objectname, has_jacobian_hook<Object>);
-    registerDeformationDispatchers<typename Object::OffDiagJacobianLoop, Object>(
-        objectname, has_offdiag_jacobian_hook<Object>);
+    constexpr bool is_vector = Object::uses_vector_test_functions;
+    using Family = PrecomputeFamily;
+
+    registerPrecomputeDispatchers<typename Object::ResidualLoop, Object>(
+        objectname,
+        Family::Residual,
+        true,
+        precompute_stored_size<is_vector, Family::Residual, Object>);
+    registerPrecomputeDispatchers<typename Object::JacobianLoop, Object>(
+        objectname,
+        Family::Jacobian,
+        has_jacobian_hook<Object>,
+        precompute_stored_size<is_vector, Family::Jacobian, Object>);
+    registerPrecomputeDispatchers<typename Object::OffDiagJacobianLoop, Object>(
+        objectname,
+        Family::OffDiagJacobian,
+        has_offdiag_jacobian_hook<Object>,
+        precompute_stored_size<is_vector, Family::OffDiagJacobian, Object>);
+
+    if constexpr (Object::supports_scalar_jacobian)
+      registerPrecomputeDispatchers<typename Object::OffDiagJacobianScalarLoop, Object>(
+          objectname,
+          Family::OffDiagJacobianScalar,
+          has_offdiag_jacobian_scalar_hook<Object>,
+          precompute_stored_size<is_vector, Family::OffDiagJacobianScalar, Object>);
 
     DispatcherRegistry::addTeamDispatcher<typename Object::DisplacementJacobianLoop, Object>(
         objectname);
@@ -740,10 +763,6 @@ registerResidualObjectDispatchers(const std::string & objectname)
         &Object::template computeQpOffDiagJacobian<Object> !=
             Object::template defaultOffDiagJacobian<Object>());
   }
-
-  if constexpr (Object::supports_scalar_jacobian)
-    registerDeformationDispatchers<typename Object::OffDiagJacobianScalarLoop, Object>(
-        objectname, has_offdiag_jacobian_scalar_hook<Object>);
 }
 
 } // namespace Moose::Kokkos

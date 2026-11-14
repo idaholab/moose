@@ -10,7 +10,6 @@
 #pragma once
 
 #include "KokkosResidualObject.h"
-#include "KokkosLocalParallelInterface.h"
 
 #include "BlockRestrictable.h"
 #include "MaterialPropertyInterface.h"
@@ -25,8 +24,7 @@ namespace Moose::Kokkos
 class KernelBase : public ResidualObject,
                    public BlockRestrictable,
                    public CoupleableMooseVariableDependencyIntermediateInterface,
-                   public MaterialPropertyInterface,
-                   public LocalParallelInterface
+                   public MaterialPropertyInterface
 {
 public:
   static InputParameters validParams();

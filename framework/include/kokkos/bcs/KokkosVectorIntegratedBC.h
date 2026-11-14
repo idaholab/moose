@@ -32,6 +32,8 @@ public:
 
   /// Vector integrated BCs assemble the products of precompute hooks with the test functions
   static constexpr bool uses_precompute_hooks = true;
+  /// Vector objects assemble vector test functions
+  static constexpr bool uses_vector_test_functions = true;
 
   /**
    * Constructor
@@ -48,20 +50,12 @@ public:
   virtual void computeJacobian() override;
 
   /**
-   * The parallel computation entry functions called by Kokkos
+   * The team operations called by Kokkos for each team of sides
    */
   ///@{
-  template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(DeformationLoop<ResidualLoop, displaced>,
-                                  const ThreadID tid,
-                                  const Derived & bc) const;
-  template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(DeformationLoop<JacobianLoop, displaced>,
-                                  const ThreadID tid,
-                                  const Derived & bc) const;
-  template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(DeformationLoop<OffDiagJacobianLoop, displaced>,
-                                  const ThreadID tid,
+  template <typename Derived, typename Loop, bool displaced>
+  KOKKOS_FUNCTION void operator()(DeformationLoop<Loop, displaced>,
+                                  const TeamMember<DeformationLoop<Loop, displaced>> & team,
                                   const Derived & bc) const;
   /**
    * The team operation called by Kokkos for each boundary side, assembling the Jacobian with
@@ -71,20 +65,6 @@ public:
   KOKKOS_FUNCTION void operator()(DisplacementJacobianLoop,
                                   const TeamMember<DisplacementJacobianLoop> & team,
                                   const Derived & bc) const;
-  ///@}
-
-  /**
-   * The parallel computation bodies that can be customized in the derived class by defining
-   * them in the derived class with the same signature.
-   */
-  ///@{
-  template <typename Derived>
-  KOKKOS_FUNCTION void computeResidualInternal(const Derived & bc, AssemblyDatum & datum) const;
-  template <typename Derived>
-  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & bc, AssemblyDatum & datum) const;
-  template <typename Derived>
-  KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived & bc,
-                                                      AssemblyDatum & datum) const;
   ///@}
 
 protected:
@@ -114,97 +94,17 @@ protected:
   const VectorVariableGradient _grad_u;
 };
 
-template <typename Derived, bool displaced>
+template <typename Derived, typename Loop, bool displaced>
 KOKKOS_FUNCTION void
-VectorIntegratedBC::operator()(DeformationLoop<ResidualLoop, displaced>,
-                               const ThreadID tid,
-                               const Derived & bc) const
+VectorIntegratedBC::operator()(DeformationLoop<Loop, displaced>,
+                              const TeamMember<DeformationLoop<Loop, displaced>> & team,
+                              const Derived & bc) const
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
-
-  AssemblyDatum datum(elem,
-                      side,
-                      kokkosAssembly(),
-                      kokkosSystems(),
-                      _kokkos_var,
-                      _kokkos_var.var(),
-                      _deformation,
-                      std::bool_constant<displaced>{});
-
-  datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
-
-  bc.computeResidualInternal(bc, datum);
-}
-
-template <typename Derived, bool displaced>
-KOKKOS_FUNCTION void
-VectorIntegratedBC::operator()(DeformationLoop<JacobianLoop, displaced>,
-                               const ThreadID tid,
-                               const Derived & bc) const
-{
-  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
-
-  AssemblyDatum datum(elem,
-                      side,
-                      kokkosAssembly(),
-                      kokkosSystems(),
-                      _kokkos_var,
-                      _kokkos_var.var(),
-                      _deformation,
-                      std::bool_constant<displaced>{});
-
-  datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
-
-  bc.computeJacobianInternal(bc, datum);
-}
-
-template <typename Derived, bool displaced>
-KOKKOS_FUNCTION void
-VectorIntegratedBC::operator()(DeformationLoop<OffDiagJacobianLoop, displaced>,
-                               const ThreadID tid,
-                               const Derived & bc) const
-{
-  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 2));
-
-  auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto jvar = sys.getFieldCoupling(_kokkos_var.var())[_thread(tid, 1)];
-
-  if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
-    return;
-
-  AssemblyDatum datum(elem,
-                      side,
-                      kokkosAssembly(),
-                      kokkosSystems(),
-                      _kokkos_var,
-                      jvar,
-                      _deformation,
-                      std::bool_constant<displaced>{});
-
-  datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
-
-  bc.computeOffDiagJacobianInternal(bc, datum);
-}
-
-template <typename Derived>
-KOKKOS_FUNCTION void
-VectorIntegratedBC::computeResidualInternal(const Derived & bc, AssemblyDatum & datum) const
-{
-  ResidualObject::computeResidualInternal(datum, precomputeResidualBody<true>(bc, datum));
-}
-
-template <typename Derived>
-KOKKOS_FUNCTION void
-VectorIntegratedBC::computeJacobianInternal(const Derived & bc, AssemblyDatum & datum) const
-{
-  ResidualObject::computeJacobianInternal(datum, precomputeJacobianBody<true>(bc, datum));
-}
-
-template <typename Derived>
-KOKKOS_FUNCTION void
-VectorIntegratedBC::computeOffDiagJacobianInternal(const Derived & bc, AssemblyDatum & datum) const
-{
-  ResidualObject::computeJacobianInternal(datum, precomputeOffDiagJacobianBody<true>(bc, datum));
+  precomputeTeamLoop<Loop, displaced>(
+      bc,
+      team,
+      numKokkosBoundarySides(),
+      [&](const ThreadID e) { return kokkosBoundaryElementSideID(e); });
 }
 
 template <typename Derived>

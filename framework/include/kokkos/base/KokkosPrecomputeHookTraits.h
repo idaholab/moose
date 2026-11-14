@@ -113,4 +113,83 @@ inline constexpr bool has_offdiag_jacobian_scalar_hook =
     has_precomputeQpOffDiagJacobianScalarCurl_v<Object>;
 ///@}
 
+/**
+ * Hook families that a precompute object assembles in a loop of its own
+ */
+enum class PrecomputeFamily
+{
+  Residual,
+  Jacobian,
+  OffDiagJacobian,
+  OffDiagJacobianScalar
+};
+
+/**
+ * The hooks that an object defines in one family
+ */
+///@{
+template <PrecomputeFamily family, typename Object>
+struct PrecomputeFamilyHooks;
+
+template <typename Object>
+struct PrecomputeFamilyHooks<PrecomputeFamily::Residual, Object>
+{
+  static constexpr bool value = has_precomputeQpResidualValue_v<Object>;
+  static constexpr bool grad = has_precomputeQpResidualGrad_v<Object>;
+  static constexpr bool curl = has_precomputeQpResidualCurl_v<Object>;
+};
+template <typename Object>
+struct PrecomputeFamilyHooks<PrecomputeFamily::Jacobian, Object>
+{
+  static constexpr bool value = has_precomputeQpJacobianValue_v<Object>;
+  static constexpr bool grad = has_precomputeQpJacobianGrad_v<Object>;
+  static constexpr bool curl = has_precomputeQpJacobianCurl_v<Object>;
+};
+template <typename Object>
+struct PrecomputeFamilyHooks<PrecomputeFamily::OffDiagJacobian, Object>
+{
+  static constexpr bool value = has_precomputeQpOffDiagJacobianValue_v<Object>;
+  static constexpr bool grad = has_precomputeQpOffDiagJacobianGrad_v<Object>;
+  static constexpr bool curl = has_precomputeQpOffDiagJacobianCurl_v<Object>;
+};
+template <typename Object>
+struct PrecomputeFamilyHooks<PrecomputeFamily::OffDiagJacobianScalar, Object>
+{
+  static constexpr bool value = has_precomputeQpOffDiagJacobianScalarValue_v<Object>;
+  static constexpr bool grad = has_precomputeQpOffDiagJacobianScalarGrad_v<Object>;
+  static constexpr bool curl = has_precomputeQpOffDiagJacobianScalarCurl_v<Object>;
+};
+///@}
+
+/**
+ * Number of reals that the assembly stores per quadrature point and trial function for one hook
+ * family: the value coefficient and the gradient coefficient, which absorbs the curl coefficient
+ * @tparam is_vector Whether the object assembles vector test functions
+ */
+template <bool is_vector, PrecomputeFamily family, typename Object>
+inline constexpr unsigned int precompute_stored_size =
+    (PrecomputeFamilyHooks<family, Object>::value ? (is_vector ? 3 : 1) : 0) +
+    (PrecomputeFamilyHooks<family, Object>::grad || PrecomputeFamilyHooks<family, Object>::curl
+         ? (is_vector ? 9 : 3)
+         : 0);
+
+/**
+ * Get the name of the registered object property holding precompute_stored_size of a family
+ */
+inline const char *
+precomputeStoredSizeProperty(const PrecomputeFamily family)
+{
+  switch (family)
+  {
+    case PrecomputeFamily::Residual:
+      return "precompute_residual_size";
+    case PrecomputeFamily::Jacobian:
+      return "precompute_jacobian_size";
+    case PrecomputeFamily::OffDiagJacobian:
+      return "precompute_offdiag_jacobian_size";
+    default:
+      return "precompute_offdiag_jacobian_scalar_size";
+  }
+}
+
 } // namespace Moose::Kokkos

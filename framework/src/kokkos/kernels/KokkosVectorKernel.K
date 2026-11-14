@@ -38,51 +38,14 @@ VectorKernel::VectorKernel(const InputParameters & parameters)
 void
 VectorKernel::computeResidual()
 {
-  _thread.resize(_num_local_residual_threads, numKokkosBlockElements());
-
-  Policy policy(0, _thread.size());
-
-  if (!_residual_dispatcher)
-    _residual_dispatcher = buildDeformationDispatcher<ResidualLoop>(this);
-
-  _residual_dispatcher->parallelFor(policy);
+  computePrecomputedResidual(numKokkosBlockElements(), kokkosAssembly().getMaxQpsPerElem());
 }
 
 void
 VectorKernel::computeJacobian()
 {
-  if (hasDeformationUserMethod<JacobianLoop>())
-  {
-    _thread.resize(_num_local_jacobian_threads, numKokkosBlockElements());
-
-    Policy policy(0, _thread.size());
-
-    if (!_jacobian_dispatcher)
-      _jacobian_dispatcher = buildDeformationDispatcher<JacobianLoop>(this);
-
-    _jacobian_dispatcher->parallelFor(policy);
-  }
-
-  if (hasDeformationUserMethod<OffDiagJacobianLoop>())
-  {
-    auto & sys = kokkosSystem(_kokkos_var.sys());
-
-    _thread.resize(_num_local_jacobian_threads,
-                   sys.getFieldCoupling(_kokkos_var.var()).size(),
-                   numKokkosBlockElements());
-
-    Policy policy(0, _thread.size());
-
-    if (!_offdiag_jacobian_dispatcher)
-      _offdiag_jacobian_dispatcher = buildDeformationDispatcher<OffDiagJacobianLoop>(this);
-
-    _offdiag_jacobian_dispatcher->parallelFor(policy);
-  }
-
-  // An object posed on the current configuration assembles its Jacobian with respect to the
-  // displacements from its own hooks
-  if (_deformation.displaced())
-    dispatchDisplacementJacobian(numKokkosBlockElements(), kokkosAssembly().getMaxQpsPerElem());
+  computePrecomputedJacobian(
+      numKokkosBlockElements(), kokkosAssembly().getMaxQpsPerElem(), supports_scalar_jacobian);
 }
 
 } // namespace Moose::Kokkos

@@ -36,6 +36,8 @@ public:
 
   /// Vector kernels assemble the products of precompute hooks with the test functions
   static constexpr bool uses_precompute_hooks = true;
+  /// Vector objects assemble vector test functions
+  static constexpr bool uses_vector_test_functions = true;
 
   /**
    * Constructor
@@ -52,20 +54,12 @@ public:
   virtual void computeJacobian() override;
 
   /**
-   * The parallel computation entry functions called by Kokkos
+   * The team operations called by Kokkos for each team of elements
    */
   ///@{
-  template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(DeformationLoop<ResidualLoop, displaced>,
-                                  const ThreadID tid,
-                                  const Derived & kernel) const;
-  template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(DeformationLoop<JacobianLoop, displaced>,
-                                  const ThreadID tid,
-                                  const Derived & kernel) const;
-  template <typename Derived, bool displaced>
-  KOKKOS_FUNCTION void operator()(DeformationLoop<OffDiagJacobianLoop, displaced>,
-                                  const ThreadID tid,
+  template <typename Derived, typename Loop, bool displaced>
+  KOKKOS_FUNCTION void operator()(DeformationLoop<Loop, displaced>,
+                                  const TeamMember<DeformationLoop<Loop, displaced>> & team,
                                   const Derived & kernel) const;
   /**
    * The team operation called by Kokkos for each element, assembling the Jacobian with respect to a
@@ -75,35 +69,6 @@ public:
   KOKKOS_FUNCTION void operator()(DisplacementJacobianLoop,
                                   const TeamMember<DisplacementJacobianLoop> & team,
                                   const Derived & kernel) const;
-  ///@}
-
-  /**
-   * The parallel computation bodies, which a derived class may hide by defining methods with the
-   * same signature as inlined public methods
-   */
-  ///@{
-  /**
-   * Compute residual
-   * @param kernel The kernel object of the final derived type
-   * @param datum The AssemblyDatum object of the current thread
-   */
-  template <typename Derived>
-  KOKKOS_FUNCTION void computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const;
-  /**
-   * Compute diagonal Jacobian
-   * @param kernel The kernel object of the final derived type
-   * @param datum The AssemblyDatum object of the current thread
-   */
-  template <typename Derived>
-  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const;
-  /**
-   * Compute off-diagonal Jacobian
-   * @param kernel The kernel object of the final derived type
-   * @param datum The AssemblyDatum object of the current thread
-   */
-  template <typename Derived>
-  KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived & kernel,
-                                                      AssemblyDatum & datum) const;
   ///@}
 
 protected:
@@ -145,98 +110,22 @@ protected:
   const VectorVariableCurl _curl_u;
 };
 
-template <typename Derived, bool displaced>
+template <typename Derived, typename Loop, bool displaced>
 KOKKOS_FUNCTION void
-VectorKernel::operator()(DeformationLoop<ResidualLoop, displaced>,
-                         const ThreadID tid,
-                         const Derived & kernel) const
+VectorKernel::operator()(DeformationLoop<Loop, displaced>,
+                        const TeamMember<DeformationLoop<Loop, displaced>> & team,
+                        const Derived & kernel) const
 {
-  auto elem = kokkosBlockElementID(_thread(tid, 1));
-
-  AssemblyDatum datum(elem,
-                      libMesh::invalid_uint,
-                      kokkosAssembly(),
-                      kokkosSystems(),
-                      _kokkos_var,
-                      _kokkos_var.var(),
-                      _deformation,
-                      std::bool_constant<displaced>{});
-
-  datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
-
-  kernel.computeResidualInternal(kernel, datum);
-}
-
-template <typename Derived, bool displaced>
-KOKKOS_FUNCTION void
-VectorKernel::operator()(DeformationLoop<JacobianLoop, displaced>,
-                         const ThreadID tid,
-                         const Derived & kernel) const
-{
-  auto elem = kokkosBlockElementID(_thread(tid, 1));
-
-  AssemblyDatum datum(elem,
-                      libMesh::invalid_uint,
-                      kokkosAssembly(),
-                      kokkosSystems(),
-                      _kokkos_var,
-                      _kokkos_var.var(),
-                      _deformation,
-                      std::bool_constant<displaced>{});
-
-  datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
-
-  kernel.computeJacobianInternal(kernel, datum);
-}
-
-template <typename Derived, bool displaced>
-KOKKOS_FUNCTION void
-VectorKernel::operator()(DeformationLoop<OffDiagJacobianLoop, displaced>,
-                         const ThreadID tid,
-                         const Derived & kernel) const
-{
-  auto elem = kokkosBlockElementID(_thread(tid, 2));
-
-  auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto jvar = sys.getFieldCoupling(_kokkos_var.var())[_thread(tid, 1)];
-
-  if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
-    return;
-
-  AssemblyDatum datum(elem,
-                      libMesh::invalid_uint,
-                      kokkosAssembly(),
-                      kokkosSystems(),
-                      _kokkos_var,
-                      jvar,
-                      _deformation,
-                      std::bool_constant<displaced>{});
-
-  datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
-
-  kernel.computeOffDiagJacobianInternal(kernel, datum);
-}
-
-template <typename Derived>
-KOKKOS_FUNCTION void
-VectorKernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const
-{
-  ResidualObject::computeResidualInternal(datum, precomputeResidualBody<true>(kernel, datum));
-}
-
-template <typename Derived>
-KOKKOS_FUNCTION void
-VectorKernel::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const
-{
-  ResidualObject::computeJacobianInternal(datum, precomputeJacobianBody<true>(kernel, datum));
-}
-
-template <typename Derived>
-KOKKOS_FUNCTION void
-VectorKernel::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const
-{
-  ResidualObject::computeJacobianInternal(datum,
-                                          precomputeOffDiagJacobianBody<true>(kernel, datum));
+  precomputeTeamLoop<Loop, displaced>(
+      kernel,
+      team,
+      numKokkosBlockElements(),
+      [&](const ThreadID e)
+      {
+        // A reference to libMesh::invalid_uint is not valid in device code
+        const unsigned int side = libMesh::invalid_uint;
+        return ::Kokkos::pair<ContiguousElementID, unsigned int>(kokkosBlockElementID(e), side);
+      });
 }
 
 template <typename Derived>

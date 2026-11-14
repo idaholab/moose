@@ -65,6 +65,7 @@ ResidualObject::ResidualObject(const ResidualObject & object)
     _t_step(object._t_step),
     _dt(object._dt),
     _dt_old(object._dt_old),
+    _precompute_layout(object._precompute_layout),
     _ad_layout(object._ad_layout),
     _displacement_component(object._displacement_component),
     _displacement_layout(object._displacement_layout),
@@ -123,6 +124,137 @@ groupedTeamLaunch(const DispatcherBase & dispatcher,
   return launch;
 }
 } // namespace
+
+void
+ResidualObject::dispatchPrecomputed(DispatcherBase & dispatcher,
+                                    const PrecomputeFamily family,
+                                    const ThreadID n_elems,
+                                    const unsigned int max_qps,
+                                    const std::vector<unsigned int> & columns)
+{
+  const ThreadID n_items = n_elems * columns.size();
+  if (!n_items)
+    return;
+
+  const auto & assembly = kokkosAssembly();
+  const auto & sys = kokkosSystem(_kokkos_var.sys());
+  const auto n_elem_types = kokkosMesh().getNumLocalElementTypes();
+
+  auto max_dofs = [&](const unsigned int var)
+  {
+    if (sys.isScalarVariable(var))
+      return sys.getNumScalarDofs(var);
+
+    unsigned int n = 1;
+    const auto fe = sys.getFETypeID(var);
+    for (const auto type : make_range(n_elem_types))
+      n = std::max(n, assembly.getNumDofs(type, fe));
+    return n;
+  };
+
+  auto & layout = _precompute_layout;
+  layout = PrecomputeScratchLayout();
+  layout.max_qps = max_qps;
+  layout.size = DispatcherRegistry::getProperty(precomputeStoredSizeProperty(family), type());
+  if (family != PrecomputeFamily::Residual)
+    for (const auto var : columns)
+      layout.max_jdofs = std::max(layout.max_jdofs, max_dofs(var));
+  layout.align_groups = layout.max_jdofs > 1;
+
+  // Chunk the quadrature points only when one group does not fit
+  const auto scratch_max = TeamPolicy<ResidualLoop>::scratch_size_max(0);
+  layout.qp_chunk = max_qps;
+  while (layout.qp_chunk > 1 && layout.bytes(1) > scratch_max)
+    layout.qp_chunk = (layout.qp_chunk + 1) / 2;
+
+  if (layout.bytes(1) > scratch_max)
+    mooseError("The precompute assembly needs ",
+               layout.bytes(1),
+               " bytes of scratch memory per element or side, more than the limit of ",
+               scratch_max,
+               " bytes.");
+
+  const auto launch =
+      groupedTeamLaunch(dispatcher,
+                        n_items,
+                        max_qps,
+                        layout.align_groups,
+                        [&](const unsigned int groups) { return layout.bytes(groups); });
+
+  // The entry sums of a group split into slices over the threads beyond the widest entry set. The
+  // partial sums overwrite the scratch, which must hold one per thread.
+  const auto group_size = TeamGroup::groupSize(max_qps, layout.align_groups, launch.team_size);
+  const auto max_entries = max_dofs(_kokkos_var.var()) * layout.max_jdofs;
+  layout.slices = std::max(1u, std::min(group_size, layout.groupSize()) / max_entries);
+
+  dispatcher.parallelForTeams(launch);
+}
+
+void
+ResidualObject::computePrecomputedResidual(const ThreadID n_elems, const unsigned int max_qps)
+{
+  if (!_residual_dispatcher)
+    _residual_dispatcher = buildDeformationDispatcher<ResidualLoop>(this);
+
+  dispatchPrecomputed(
+      *_residual_dispatcher, PrecomputeFamily::Residual, n_elems, max_qps, {_kokkos_var.var()});
+}
+
+void
+ResidualObject::computePrecomputedJacobian(const ThreadID n_elems,
+                                           const unsigned int max_qps,
+                                           const bool scalar_jacobian)
+{
+  const auto & sys = kokkosSystem(_kokkos_var.sys());
+  const auto ivar = _kokkos_var.var();
+
+  auto columns = [](const Array<unsigned int> & coupling)
+  {
+    std::vector<unsigned int> vars(coupling.size());
+    for (const auto k : index_range(vars))
+      vars[k] = coupling[k];
+    return vars;
+  };
+
+  if (hasDeformationUserMethod<JacobianLoop>())
+  {
+    if (!_jacobian_dispatcher)
+      _jacobian_dispatcher = buildDeformationDispatcher<JacobianLoop>(this);
+
+    dispatchPrecomputed(
+        *_jacobian_dispatcher, PrecomputeFamily::Jacobian, n_elems, max_qps, {ivar});
+  }
+
+  if (hasDeformationUserMethod<OffDiagJacobianLoop>())
+  {
+    if (!_offdiag_jacobian_dispatcher)
+      _offdiag_jacobian_dispatcher = buildDeformationDispatcher<OffDiagJacobianLoop>(this);
+
+    dispatchPrecomputed(*_offdiag_jacobian_dispatcher,
+                        PrecomputeFamily::OffDiagJacobian,
+                        n_elems,
+                        max_qps,
+                        columns(sys.getFieldCoupling(ivar)));
+  }
+
+  if (scalar_jacobian && hasDeformationUserMethod<OffDiagJacobianScalarLoop>())
+  {
+    if (!_offdiag_jacobian_scalar_dispatcher)
+      _offdiag_jacobian_scalar_dispatcher =
+          buildDeformationDispatcher<OffDiagJacobianScalarLoop>(this);
+
+    dispatchPrecomputed(*_offdiag_jacobian_scalar_dispatcher,
+                        PrecomputeFamily::OffDiagJacobianScalar,
+                        n_elems,
+                        max_qps,
+                        columns(sys.getScalarCoupling(ivar)));
+  }
+
+  // An object posed on the current configuration assembles its Jacobian with respect to the
+  // displacements from its own hooks
+  if (_deformation.displaced())
+    dispatchDisplacementJacobian(n_elems, max_qps);
+}
 
 void
 ResidualObject::dispatchADTeams(DispatcherBase & dispatcher,
