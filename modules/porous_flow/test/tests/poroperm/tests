@@ -352,11 +352,39 @@
     issues = '#33944'
     design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
   []
-  [vinsome_westerveld_cyclic]
+  [vinsome_westerveld_sqrt]
     type = CSVDiff
-    input = vinsome_westerveld_cyclic.i
-    csvdiff = vinsome_westerveld_cyclic_out.csv
-    requirement = 'The system shall calculate the Vinsome-Westerveld thermal-opening porosity of a matrix layer of finite thickness when the fracture-face temperature repeatedly changes sign.'
+    input = vinsome_westerveld_sqrt.i
+    cli_args = 'Executioner/end_time=10'
+    csvdiff = vinsome_westerveld_sqrt_out.csv
+    requirement = 'The system shall calculate the Vinsome-Westerveld thermal-opening porosity of a semi-infinite matrix when the fracture-face temperature slowly cycles.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
+  [vinsome_westerveld_sqrt_thickness]
+    type = CSVDiff
+    input = vinsome_westerveld_sqrt.i
+    cli_args = 'Executioner/end_time=10 Materials/porosity_VW/matrix_thickness=1 Outputs/file_base=vinsome_westerveld_sqrt_thickness_out'
+    csvdiff = vinsome_westerveld_sqrt_thickness_out.csv
+    requirement = 'The system shall calculate the Vinsome-Westerveld thermal-opening porosity of an insulated matrix layer of finite thickness when the fracture-face temperature slowly cycles.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
+  [vinsome_westerveld_pulse]
+    type = CSVDiff
+    input = vinsome_westerveld_pulse.i
+    cli_args = 'Executioner/end_time=1'
+    csvdiff = vinsome_westerveld_pulse_out.csv
+    requirement = 'The system shall calculate the Vinsome-Westerveld thermal-opening porosity of a semi-infinite matrix when the fracture-face temperature follows a long cold pulse and then cycles.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
+  [vinsome_westerveld_pulse_thickness]
+    type = CSVDiff
+    input = vinsome_westerveld_pulse.i
+    cli_args = 'Executioner/end_time=1 Materials/porosity_VW/matrix_thickness=1 Outputs/file_base=vinsome_westerveld_pulse_thickness_out'
+    csvdiff = vinsome_westerveld_pulse_thickness_out.csv
+    requirement = 'The system shall calculate the Vinsome-Westerveld thermal-opening porosity of an insulated matrix layer of finite thickness when the fracture-face temperature follows a long cold pulse and then cycles.'
     issues = '#33944'
     design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
   []

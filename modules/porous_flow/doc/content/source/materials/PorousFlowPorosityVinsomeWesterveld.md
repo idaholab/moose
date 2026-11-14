@@ -60,16 +60,19 @@ T(z, t) - T_{\mathrm{ref}} = P(z)\, e^{-z/d} + P(2L - z)\, e^{-(2L - z)/d}, \qqu
 
 which is symmetric about $z = L$, so $\partial T / \partial z = 0$ there.  At each time step, $A$, $B$, $C$ and the heat content of the layer, $I = \int_{0}^{L} (T - T_{\mathrm{ref}})\, \mathrm{d}z = \int_{0}^{2L} P(z)\, e^{-z/d}\, \mathrm{d}z$, are found from the fracture-face temperature, the heat-conduction equation at $z = 0$ and the energy balance $\mathrm{d}I/\mathrm{d}t = -\kappa\, \partial T / \partial z |_{z=0}$, as in [eq:vw_update].  These conditions are linear, so $I$ is again a linear function of the current temperature.  As $L \to \infty$ the image term vanishes and the method reduces exactly to [eq:vw_update].  Because the layer is insulated, heat entering through the fracture face stays in the layer, and $I \to \theta L$ once the whole layer has reached the fracture-face temperature, so the opening is bounded.
 
-To check positive and negative temperature changes and reversals, the fracture-face temperature is set to $\theta = t \sin t$, with $\kappa = 1$, $L = 0.5$ and $\Delta t = 0.1$.  [vw_cyclic] compares $I$ with the exact heat content of an insulated layer, obtained from the series solution for a slab and Duhamel's theorem.  $I$ changes sign with $\theta$, stays within the bound $L \max|\theta|$, and differs from the exact value by less than $1\%$ of that bound.
+A finite thickness bounds the opening, and it can also change how the opening responds to a fluctuating fracture-face temperature.  [vw_finite_examples] shows two examples, with $\kappa = 1$ and $L = 1$.  It plots $-I$, which is proportional to the change in porosity (aperture), because cooling opens the fracture when $D > 0$.
 
-!table id=vw_cyclic caption=Heat content of an insulated matrix layer of thickness L = 0.5 when the fracture-face temperature change is t sin(t)
-| $t$ | $\theta$ | $I$ (Vinsome-Westerveld) | $I$ (exact) | $L \max \vert\theta\vert$ |
-| --- | --- | --- | --- | --- |
-| 2 | 1.82 | 0.892 | 0.896 | 0.91 |
-| 6 | -1.68 | -1.041 | -1.050 | 2.41 |
-| 10 | -5.44 | -2.333 | -2.336 | 3.96 |
-| 16 | -4.61 | -1.650 | -1.649 | 7.09 |
-| 20 | 18.26 | 8.654 | 8.684 | 9.13 |
+- $\theta = \sin\sqrt{t}$ (top).  At small $t$ the semi-infinite and finite-thickness results agree.  Once the cycles are slow compared with $L^{2}/\kappa$, the finite-thickness heat content stays close to $\theta L$, so the aperture cycles with the fracture-face temperature.  With a semi-infinite matrix, $I$ integrates the whole temperature history, so its swings grow and lag behind the temperature: at $t = 100$, for instance, $\theta < 0$ but $I > 0$.
+- $\theta = \sin\left(2\pi(16 - t)^{1/4}\right)$ (bottom).  The long cold pulse takes the finite-thickness heat content to $I = -L$ (the whole layer at $\theta = -1$), and the following warm phase reverses it to about $I = +0.95L$.  With a semi-infinite matrix, $I$ stays negative, because it is dominated by the deep cooled rock.
+
+In both examples the finite-thickness result is within $0.01$ of the exact solution for an insulated layer, obtained from the series solution for a slab and Duhamel's theorem.  The semi-infinite result differs from its own exact solution by up to about $20\%$ of its amplitude under these slow cycles, which is a property of the single-profile approximation.
+
+!media large_media/porous_flow/vinsome_westerveld_finite_thickness.png
+       id=vw_finite_examples
+       style=width:90%;margin:auto;
+       caption=Heat content of the matrix ($-I$, proportional to the change in aperture) for two fluctuating fracture-face temperatures, computed with a semi-infinite matrix and with an insulated layer of thickness $L = 1$, compared with the exact solutions.
+
+The input files for these examples are [vinsome_westerveld_sqrt.i](modules/porous_flow/test/tests/poroperm/vinsome_westerveld_sqrt.i) and [vinsome_westerveld_pulse.i](modules/porous_flow/test/tests/poroperm/vinsome_westerveld_pulse.i).
 
 ## Choosing the thermal-opening coefficient
 

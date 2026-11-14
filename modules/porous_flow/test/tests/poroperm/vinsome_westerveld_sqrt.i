@@ -1,9 +1,10 @@
-# Testing PorousFlowPorosityVinsomeWesterveld with matrix_thickness when the fracture-face
-# temperature changes sign repeatedly: theta = T - matrix_reference_temperature = t * sin(t).
-# With porosity_ref = 0.5 and thermal_opening_coeff = 0.01, heat_content = (0.5 - porosity) / 0.01 = I_L,
-# the heat content of the insulated layer 0 <= z <= matrix_thickness = 0.5.  |I_L| must not
-# exceed 0.5 * max|theta|.  The exact I_L, from the slab series solution and Duhamel's theorem,
-# is computed by vinsome_westerveld_cyclic_exact.py
+# Vinsome-Westerveld porosity with a slowly cycling fracture-face temperature
+# Example from the PorousFlowPorosityVinsomeWesterveld documentation: the fracture-face temperature
+# change is theta = sin(sqrt(t)), with kappa = 1.  Without matrix_thickness the matrix is semi-infinite;
+# the tests also run it with matrix_thickness = 1 (an insulated layer).  With porosity_ref = 0.5 and
+# thermal_opening_coeff = 0.01, heat_content = (0.5 - porosity) / 0.01 = I.  The tests run only the
+# first 20 time steps; the documentation figure uses the full run to t = 400.  Exact values of I
+# are computed by vinsome_westerveld_finite_exact.py
 [GlobalParams]
   PorousFlowDictator = dictator
 []
@@ -50,7 +51,7 @@
   [T]
     type = FunctionAux
     variable = T
-    function = 't * sin(t)'
+    function = 'sin(sqrt(t))'
   []
   [porosity]
     type = PorousFlowPropertyAux
@@ -92,14 +93,13 @@
     thermal_opening_coeff = 0.01
     matrix_thermal_diffusivity = 1
     matrix_reference_temperature = 0
-    matrix_thickness = 0.5
   []
 []
 
 [Executioner]
   type = Transient
-  dt = 0.1
-  end_time = 20
+  dt = 0.5
+  end_time = 400
 []
 
 [Outputs]
