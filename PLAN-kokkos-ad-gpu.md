@@ -1,7 +1,7 @@
 # Handoff: Kokkos AD GPU work on PR #34088 (arco, updated 2026-11-12)
 
-Status: branch at `e4c7b785f70` (steps 0-10b, 12-13b), not pushed since `53584d78efd`. Next: step
-13b2. Updated 2026-11-13.
+Status: branch at `ccbfc3288a5` (steps 0-10b, 12-13b2), not pushed since `53584d78efd`. Next: check
+the 13b2 verification jobs, then step 13b3. Updated 2026-11-14.
 Git tracks this document on the feature branch. Commit it alone with a `PLAN:` subject, and drop
 those commits before the merge. Relative paths outside the MOOSE tree, such as `profiles/`,
 `scripts/`, `patches/`, `ptx/`, `logs/`, `runs/`, and `archive/`, are under `moose-stack-build/`
@@ -14,21 +14,31 @@ Branch `kokkos-reference-configuration` in `/ibmstor/scratch/lindad/projects/moo
 is idaholab/moose#34088. NamjaeChoi left a performance review on it. Answer it with measurements
 once the design work below is final. Do not reply yet.
 
-**Next: step 13b2**, repeated qp evaluation in the hand-coded precompute loops. First action:
-read `ResidualObject::computeResidualInternal` and `computeJacobianInternal`
-(`framework/include/kokkos/base/KokkosResidualObject.h`), `precomputeResidualBody` and
-`precomputeJacobianBody` (`KokkosPrecomputeHooks.h`), and `Thread::resize`. See "Hand-coded loop
-findings" for the flaw.
+**Next, first action: check the step 13b2 verification.** `ccbfc3288a5` was committed before its
+final build was verified (user, 2026-11-14). It keeps the two `Datum` members. Jobs: build +
+`kokkos` test 14265 (`logs/step13b2-build-14265.log`, expect 189 pass), sweep 14266 into
+`profiles/nsys-v22`. Then `launch_table.sh profiles/nsys-v22/*.nsys-rep > .../launches.txt` and
+`launch_compare.py profiles/nsys-v21/launches.txt profiles/nsys-v22/launches.txt 0`. Expect the
+"Step 13b2 result" gains, and ad8sdisp_q8 `DisplacementSeededLoop[J]` near 11.8 ms (184 regs). If
+a launch regresses more than 3%, report it to the user before step 13b3. Record the outcome in
+"Step 13b2 result".
 
-- Data (`nsys-v21`, ms, R / J): handdisp_q27 1.69 / 3.96 vs ad3disp_q27 0.92 / 3.18. hand_q64
-  1.25 / 4.01 vs ad3_q64 0.91 / 4.97. hand_q27 0.42 / 1.96 vs ad3_q27 0.45 / 2.61.
-- Candidate: the step 13b pattern. Groups of `max_qps` threads per element (`TeamGroup`,
-  `groupedTeamLaunch` in `KokkosResidualObject.K`). Each thread evaluates its qp once into scratch,
-  then threads contract over i (residual) or (i, j) (Jacobian). The Jacobian hooks take j, so
-  stage 1 stores per-(qp, j) terms. This replaces a `RangePolicy` with a team policy for every
-  hand-coded precompute object, so present the design to the user first.
-- Exit: the `kokkos` dir passes (189), and a full sweep `nsys-v22` against `nsys-v21` shows the
-  hand-coded R and J gain, or a measured reason why not, with no other launch slower than 3%.
+**Then step 13b3**: local memory of the AD `DisplacementSeededLoop`. First action: load the
+`gpu-local-memory` skill and compare the PTX of `ADKernel` `DeformationLoop<DisplacementSeededLoop,
+true>` for `KokkosADMatDiffusion` with and without `patches/step13b2/datum.patch`, applied on top
+of the full step (rebuild `full.patch` as HEAD minus `e4c7b785f70`). Use
+`scripts/object_variants.sbatch runs/branch-exp framework/src/kokkos/kernels/KokkosADMatDiffusion.K
+KokkosADMatDiffusion <out> base <patch>`. Move `runs/branch-exp` to `ccbfc3288a5` first.
+
+- Finding: removing `Datum::_local_thread_id` and `_num_local_threads` (8 B, unread) alone takes
+  that loop from 126/184 registers (reference/displaced) and 0/64 B stack to 226/226 and 688/688
+  B. ad8sdisp_q8 seeded J then runs 11.77 -> 20.28 ms (`profiles/nsys-v22-nodatum`). The base
+  displaced instantiation already has a 64 B stack, so the loop sits on a local-memory edge. 688 B
+  is close to the ~550 B `AssemblyDatum`. Step 8d found a datum copy into local memory before.
+- Exit: the cause is named in the PTX, a fix keeps the seeded loop at or below 184 registers with
+  the dead members removed, `Datum::set_local_parallel`, `local_thread_id`, and
+  `num_local_threads` are removed (step 13b2 left them unread), the `kokkos` dir passes (189), and
+  a sweep shows no launch slower than 3% against the 13b2 sweep.
 
 The draft reply is `moose-stack-build/review-reply-34088.md`. A local git repository in
 `moose-stack-build` tracks only that file (`.gitignore` allowlist). Commit the reply after each
@@ -95,6 +105,7 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 ### Commits on this branch (newest first)
 
+- `ccbfc3288a5` Step 13b2: precompute loops on teams of element groups.
 - `e4c7b785f70` Step 13b: displacement Jacobian packs several elements per team (`TeamGroup`).
 - `53584d78efd` Step 12c: `Configuration` renamed to `Deformation`.
 - `98852e75c2f` Step 12b: Kokkos kernel and integrated BC aliases removed.
@@ -118,6 +129,23 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 ## Working notes
 
 (empty)
+
+## Step 13b2 result (`ccbfc3288a5`, 2026-11-14)
+
+- User pre-approved the team-loop design (2026-11-13). Every precompute loop runs on `TeamGroup`s
+  through `assemblePrecomputedTerms` (`KokkosPrecomputeHooks.h`). `ResidualObject` holds
+  `precomputeTeamLoop`, `dispatchPrecomputed`, and `computePrecomputed{Residual,Jacobian}`.
+  `LocalParallelInterface` is removed, with `num_local_{residual,jacobian}_threads`.
+- Sweep `profiles/nsys-v22-nodatum` (build without the two `Datum` members) against `nsys-v21`:
+  hand-coded R 0.48-0.94x (hand_q64 1.25 -> 0.89 ms, handdisp_q27 1.69 -> 1.00), J 0.58-0.98x
+  (hand_q64 4.01 -> 3.68, handdisp_q27 3.96 -> 2.50). Hand J registers 84 -> 96 (reference),
+  112 -> 128 (displaced). The hand-coded residual now beats AD at q8 (0.11 vs 0.14 ms) and
+  equals it at q64 (0.89 vs 0.91). AD launches within 1.7%, except the 13b3 regression. `kokkos`
+  dir: 189 pass (job 14198).
+- Device code cannot bind `libMesh::invalid_uint` to a reference, and the `Kokkos::pair`
+  constructor takes references. Copy the value into a local first.
+- `runs/branch-exp/framework/build/header_symlinks` was stale after step 12c. Refresh it after
+  a header rename. Probe patches: `patches/step13b2/`. Probe output: `runs/probe-13b2`.
 
 ## Step 13b result (`e4c7b785f70`, 2026-11-13)
 
@@ -279,9 +307,10 @@ Steps 0-13b: done. Commits in "Commits on this branch". Step 12b also passed `he
 12/12. Step 13 split into 13a-13d after the user's review of the draft (2026-11-13).
 13a. Done (sweeps `nsys-up1`, `nsys-v20`). See "Step 13a result".
 13b. Done (`e4c7b785f70`, `nsys-v21`). See "Step 13b result".
-13b2. Repeated qp evaluation of the hand-coded precompute loops (see "Hand-coded loop findings").
-    Exit: hand-coded residual within noise of AD residual, or a measured reason why not. Split from
-    13b because the two fixes need separate sweeps.
+13b2. Done (`ccbfc3288a5`, `nsys-v22-nodatum`, final sweep `nsys-v22` pending). See "Step 13b2
+    result".
+13b3. Local memory of the AD `DisplacementSeededLoop` (see "Next"). Added because the 13b2
+    removal of two dead `Datum` members regressed it 1.7x (user, 2026-11-14).
 13c. `ThreadVectorRange` probe for the AD group (see "Hand-coded loop findings" for the mapping).
     Exit: a measured comparison with the latest sweep. Land it if no AD launch is slower than 3%.
 13d. Final reply: resolve every `TODO(user)`, get user approval, then post.
@@ -292,7 +321,7 @@ Open a separate issue for it.
 
 ## Hand-coded loop findings (code reading, not measured)
 
-- The hand-coded precompute loops (`ResidualObject::computeResidualInternal`,
+- Fixed by step 13b2: the hand-coded precompute loops (`ResidualObject::computeResidualInternal`,
   `precomputeResidualBody`, `precomputeJacobianBody`) run one flat `RangePolicy` over
   (local thread, element) (`Thread::resize`, local thread fastest). Each of the
   `num_local_residual_threads` (default 2) threads of an element evaluates every qp. The Jacobian
@@ -351,8 +380,8 @@ Details: `moose-stack-build/PLAN-kokkos-known-failures.md`.
   `qM` is the qps per element.
 - Sweep, from the case directory: `sbatch -w arco-c04 --output=<log dir>/%x-%j.log sweep.sbatch
   <out dir> nsys|ncu`. Filter with `VARIANTS_FILTER`, `NCU_KERNELS`, `NCU_COUNT`. Latest full sweep:
-  `profiles/nsys-v21` (step 13b). Upstream: `nsys-up1`. Latest ncu: `ncu-v16`. Next: `nsys-v22`,
-  `ncu-v17`.
+  `profiles/nsys-v22` (step 13b2, pending job 14266). Upstream: `nsys-up1`. Latest ncu: `ncu-v16`.
+  Next: `nsys-v23`, `ncu-v17`.
   Build `launches.txt` with `launch_table.sh <dir>/*.nsys-rep`.
 - Tables in `scripts/`: `step_table.sh <dir>` (per-step summary), `ratio_table.sh <adN>
   <label>=<dir>...` (AD/hand ratio per sweep, `FIELD=residual|jacobian`), `launch_table.sh <nsys-rep>...`
@@ -377,7 +406,7 @@ Details: `moose-stack-build/PLAN-kokkos-known-failures.md`.
   whole library per patch. `scripts/object_variants.sbatch <wt> <src .K> <regex> <out root>
   base|<patch>...` builds one object per patch through `scripts/kokkos_object_ptx.sbatch` (PTX with
   `.loc` lines, SASS, res usage). PTX entries are `.weak .entry`. Scratch worktree:
-  `runs/branch-exp`, at `2709e503f9d`, clean. It has empty `libmesh`/`petsc`, so it serves object
+  `runs/branch-exp`, at `e4c7b785f70`, clean. It has empty `libmesh`/`petsc`, so it serves object
   probes only. Build the app in the main tree. Step 8d probe trees: `/tmp/pe-x` (login node, one git branch
   per probe). It can disappear. The patches in `patches/step8d/` are the record. Write probe patches in a copy (`git archive
   be2f2ac9b8f framework/include/kokkos` into `/tmp/pe`, then `git init`), never in the worktree
