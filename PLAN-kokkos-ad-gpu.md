@@ -1,7 +1,7 @@
 # Handoff: Kokkos AD GPU work on PR #34088 (arco, updated 2026-11-12)
 
-Status: branch at `ccbfc3288a5` (steps 0-10b, 12-13b2), not pushed since `53584d78efd`. Next: check
-the 13b2 verification jobs, then step 13b3. Updated 2026-11-14.
+Status: branch at `ccbfc3288a5` (steps 0-10b, 12-13b2), not pushed since `53584d78efd`. Next: step
+13b3. Updated 2026-11-14.
 Git tracks this document on the feature branch. Commit it alone with a `PLAN:` subject, and drop
 those commits before the merge. Relative paths outside the MOOSE tree, such as `profiles/`,
 `scripts/`, `patches/`, `ptx/`, `logs/`, `runs/`, and `archive/`, are under `moose-stack-build/`
@@ -14,16 +14,7 @@ Branch `kokkos-reference-configuration` in `/ibmstor/scratch/lindad/projects/moo
 is idaholab/moose#34088. NamjaeChoi left a performance review on it. Answer it with measurements
 once the design work below is final. Do not reply yet.
 
-**Next, first action: check the step 13b2 verification.** `ccbfc3288a5` was committed before its
-final build was verified (user, 2026-11-14). It keeps the two `Datum` members. Jobs: build +
-`kokkos` test 14265 (`logs/step13b2-build-14265.log`, expect 189 pass), sweep 14266 into
-`profiles/nsys-v22`. Then `launch_table.sh profiles/nsys-v22/*.nsys-rep > .../launches.txt` and
-`launch_compare.py profiles/nsys-v21/launches.txt profiles/nsys-v22/launches.txt 0`. Expect the
-"Step 13b2 result" gains, and ad8sdisp_q8 `DisplacementSeededLoop[J]` near 11.8 ms (184 regs). If
-a launch regresses more than 3%, report it to the user before step 13b3. Record the outcome in
-"Step 13b2 result".
-
-**Then step 13b3**: local memory of the AD `DisplacementSeededLoop`. First action: load the
+**Next: step 13b3**: local memory of the AD `DisplacementSeededLoop`. First action: load the
 `gpu-local-memory` skill and compare the PTX of `ADKernel` `DeformationLoop<DisplacementSeededLoop,
 true>` for `KokkosADMatDiffusion` with and without `patches/step13b2/datum.patch`, applied on top
 of the full step (rebuild `full.patch` as HEAD minus `e4c7b785f70`). Use
@@ -142,6 +133,9 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
   112 -> 128 (displaced). The hand-coded residual now beats AD at q8 (0.11 vs 0.14 ms) and
   equals it at q64 (0.89 vs 0.91). AD launches within 1.7%, except the 13b3 regression. `kokkos`
   dir: 189 pass (job 14198).
+- Verified on the committed code (members kept): `kokkos` 189 pass (job 14265). Sweep
+  `profiles/nsys-v22` against `nsys-v21`: hand-coded launches 0.49-0.98x, every launch within
+  +1.6%, and within 1.5% of `nsys-v22-nodatum` for the hand-coded loops.
 - Device code cannot bind `libMesh::invalid_uint` to a reference, and the `Kokkos::pair`
   constructor takes references. Copy the value into a local first.
 - `runs/branch-exp/framework/build/header_symlinks` was stale after step 12c. Refresh it after
@@ -307,8 +301,7 @@ Steps 0-13b: done. Commits in "Commits on this branch". Step 12b also passed `he
 12/12. Step 13 split into 13a-13d after the user's review of the draft (2026-11-13).
 13a. Done (sweeps `nsys-up1`, `nsys-v20`). See "Step 13a result".
 13b. Done (`e4c7b785f70`, `nsys-v21`). See "Step 13b result".
-13b2. Done (`ccbfc3288a5`, `nsys-v22-nodatum`, final sweep `nsys-v22` pending). See "Step 13b2
-    result".
+13b2. Done (`ccbfc3288a5`, `nsys-v22`). See "Step 13b2 result".
 13b3. Local memory of the AD `DisplacementSeededLoop` (see "Next"). Added because the 13b2
     removal of two dead `Datum` members regressed it 1.7x (user, 2026-11-14).
 13c. `ThreadVectorRange` probe for the AD group (see "Hand-coded loop findings" for the mapping).
@@ -380,7 +373,7 @@ Details: `moose-stack-build/PLAN-kokkos-known-failures.md`.
   `qM` is the qps per element.
 - Sweep, from the case directory: `sbatch -w arco-c04 --output=<log dir>/%x-%j.log sweep.sbatch
   <out dir> nsys|ncu`. Filter with `VARIANTS_FILTER`, `NCU_KERNELS`, `NCU_COUNT`. Latest full sweep:
-  `profiles/nsys-v22` (step 13b2, pending job 14266). Upstream: `nsys-up1`. Latest ncu: `ncu-v16`.
+  `profiles/nsys-v22` (step 13b2). Upstream: `nsys-up1`. Latest ncu: `ncu-v16`.
   Next: `nsys-v23`, `ncu-v17`.
   Build `launches.txt` with `launch_table.sh <dir>/*.nsys-rep`.
 - Tables in `scripts/`: `step_table.sh <dir>` (per-step summary), `ratio_table.sh <adN>
