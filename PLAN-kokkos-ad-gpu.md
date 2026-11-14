@@ -1,7 +1,7 @@
 # Handoff: Kokkos AD GPU work on PR #34088 (arco, updated 2026-11-12)
 
-Status: branch at `a94736bf66c` (steps 0-10b, 12-13c), not pushed since `53584d78efd`. Next: step
-13d. Updated 2026-11-14.
+Status: branch at `a94736bf66c` (steps 0-10b, 12-13c), pushed to the fork. Next: step 13d, waiting
+on user approval of the reply. Updated 2026-11-14.
 Git tracks this document on the feature branch. Commit it alone with a `PLAN:` subject, and drop
 those commits before the merge. Relative paths outside the MOOSE tree, such as `profiles/`,
 `scripts/`, `patches/`, `ptx/`, `logs/`, `runs/`, and `archive/`, are under `moose-stack-build/`
@@ -14,11 +14,16 @@ Branch `kokkos-reference-configuration` in `/ibmstor/scratch/lindad/projects/moo
 is idaholab/moose#34088. NamjaeChoi left a performance review on it. Answer it with measurements
 once the design work below is final. Do not reply yet.
 
-**Next: step 13d**: final reply. First action: read `moose-stack-build/review-reply-34088.md` and
-list every `TODO(user)`. Resolve each one from this document (sections "Step 13a result" to "Step
-13c result", "Hand-coded loop findings"). The `KokkosADAssembly.h:36` section waits on 13c, which
-is now done. Then ask the user for approval. Post nothing before approval. Exit: no `TODO(user)`
-left, and the user approves the reply. Push the branch to the fork before posting.
+**Next: step 13d**: final reply. The reply has no `TODO(user)` left (reply repo `3f43ced` and
+later). Its tables now use `nsys-v24` and `nsys-up1`. First action: ask the user whether they
+have reviewed the reply (`git -C moose-stack-build log -p review-reply-34088.md`). Apply their
+edits and commit each turn. After approval, post each section as a reply to its review thread on
+idaholab/moose#34088. Post the top-level section as a PR comment. Root comment IDs:
+`gh api repos/idaholab/moose/pulls/34088/comments --jq '.[] | select(.in_reply_to_id==null) |
+"\(.id) \(.path)"'`. The `KokkosResidualObject.h:588` follow-up answers the reply
+`in_reply_to_id` 4296312543. The reply headings use old line numbers: `:36` is the thread at
+`KokkosADAssembly.h:38`, `:71` is at `:120`, and `:588` is at `KokkosResidualObject.h:550`. End
+every post with the Claude Code trailer. Exit: user approval, then all sections posted.
 
 The draft reply is `moose-stack-build/review-reply-34088.md`. A local git repository in
 `moose-stack-build` tracks only that file (`.gitignore` allowlist). Commit the reply after each
@@ -344,7 +349,7 @@ Steps 0-13c: done. Commits in "Commits on this branch". Step 12b also passed `he
 13b3. Done (`d30dadacd08`, `nsys-v23`). See "Step 13b3 result".
 13b4. Done (`a94736bf66c`, `nsys-v24`). See "Step 13b4 result".
 13c. Done, rejected (`nsys-v25`). See "Step 13c result".
-13d. Final reply: resolve every `TODO(user)`, get user approval, then post.
+13d. Final reply: TODOs resolved (reply repo `3f43ced`). Waits on user approval, then post.
 
 Out of scope: each matrix entry costs a CSR search (`Matrix::find`) and an atomic, in hand-coded
 and AD kernels alike. A per-pattern map from element entries to value indices would help both.
