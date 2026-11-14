@@ -262,11 +262,12 @@ NodalConstraint::computeJacobian(const SparseMatrix<Number> & jacobian)
   Ken.zero();
   Kne.zero();
 
-  // The primary-primary coupling is diagonal under both formulations, so it is accumulated here
-  // and cached one entry at a time below. Inserting it as a dense primary-by-primary block would
-  // instead demand sparsity for entries that are always zero, and two primary nodes are only
-  // coupled in the sparsity pattern when they happen to share an element.
+  // The primary-primary and secondary-secondary couplings are both diagonal under either
+  // formulation, so they are accumulated here and cached one entry at a time below. Inserting
+  // them as dense blocks would instead demand sparsity for entries that are always zero, and two
+  // primary nodes are only coupled in the sparsity pattern when they happen to share an element.
   std::vector<Number> Kee_diag(primarydof.size(), 0.);
+  std::vector<Number> Knn_diag(secondarydof.size(), 0.);
 
   for (_i = 0; _i < secondarydof.size(); ++_i)
   {
@@ -278,12 +279,17 @@ NodalConstraint::computeJacobian(const SparseMatrix<Number> & jacobian)
           Kee_diag[_j] += computeQpJacobian(Moose::PrimaryPrimary);
           Ken(_j, _i) += computeQpJacobian(Moose::PrimarySecondary);
           Kne(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
+          // Accumulated over the primary nodes to match the secondary residual, which sums one
+          // contribution per primary node.
+          Knn_diag[_i] += computeQpJacobian(Moose::SecondarySecondary);
           break;
         case Moose::Kinematic:
           Kee_diag[_j] = 0.;
           Ken(_j, _i) += jacobian(secondarydof[_i], primarydof[_j]) * _weights[_j];
           Kne(_i, _j) += -jacobian(secondarydof[_i], primarydof[_j]) / primarydof.size() +
                          computeQpJacobian(Moose::SecondaryPrimary);
+          Knn_diag[_i] += -jacobian(secondarydof[_i], secondarydof[_i]) / primarydof.size() +
+                          computeQpJacobian(Moose::SecondarySecondary);
           break;
       }
     }
@@ -294,23 +300,9 @@ NodalConstraint::computeJacobian(const SparseMatrix<Number> & jacobian)
   for (const auto j : index_range(primarydof))
     addJacobianElement(_assembly, Kee_diag[j], primarydof[j], primarydof[j], _var.scalingFactor());
 
-  // Calculate and cache the diagonal secondary-secondary entries
-  for (_i = 0; _i < secondarydof.size(); ++_i)
-  {
-    Number value = 0.0;
-    switch (_formulation)
-    {
-      case Moose::Penalty:
-        value = computeQpJacobian(Moose::SecondarySecondary);
-        break;
-      case Moose::Kinematic:
-        value = -jacobian(secondarydof[_i], secondarydof[_i]) / primarydof.size() +
-                computeQpJacobian(Moose::SecondarySecondary);
-        break;
-    }
+  for (const auto i : index_range(secondarydof))
     addJacobianElement(
-        _assembly, value, secondarydof[_i], secondarydof[_i], _var_secondary.scalingFactor());
-  }
+        _assembly, Knn_diag[i], secondarydof[i], secondarydof[i], _var_secondary.scalingFactor());
 }
 
 void
