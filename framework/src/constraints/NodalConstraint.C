@@ -166,9 +166,16 @@ NodalConstraint::gatherAndRetainConnectedElems(MooseMesh & mesh,
 void
 NodalConstraint::ghostConnectedElems(const std::vector<dof_id_type> & node_ids)
 {
+  // The gather is collective, so every process takes part in it even when it holds no secondary
+  // node of its own.
   const auto elem_ids = gatherAndRetainConnectedElems(_fe_problem.mesh(), node_ids);
-  for (const auto elem_id : elem_ids)
-    _subproblem.addGhostedElem(elem_id);
+
+  // Only a process that owns a secondary node assembles this constraint, and so only it reads the
+  // primary values. Ghosting the primary elements anywhere else would ghost degrees of freedom
+  // that are never used.
+  if (!_connected_nodes.empty())
+    for (const auto elem_id : elem_ids)
+      _subproblem.addGhostedElem(elem_id);
 
   if (const auto displaced_problem = _fe_problem.getDisplacedProblem())
   {
