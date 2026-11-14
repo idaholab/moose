@@ -844,6 +844,15 @@ enum class ComputeType
 };
 
 /**
+ * The solution update a damper limits
+ */
+enum class DampingStage
+{
+  NONLINEAR, ///< the nonlinear (Newton) updates
+  PREDICTOR  ///< the change of the initial guess made by the Predictor
+};
+
+/**
  * The filter type applied to a particular piece of "restartable" data. These filters
  * will be applied during deserialization to include or exclude data as appropriate.
  */

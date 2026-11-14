@@ -38,10 +38,16 @@ public:
    */
   void checkMinDamping(const Real cur_damping) const;
 
+  /// Whether this damper limits the updates of \p stage
+  bool appliesTo(Moose::DampingStage stage) const;
+
 protected:
   SubProblem & _subproblem;
   SystemBase & _sys;
 
   /// Minimum allowable value of damping
   const Real & _min_damping;
+
+  /// The solution updates this damper limits
+  const MultiMooseEnum & _apply_to;
 };

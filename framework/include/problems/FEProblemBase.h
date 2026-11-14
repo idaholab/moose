@@ -1675,6 +1675,9 @@ public:
    */
   bool hasDampers() { return _has_dampers; }
 
+  /// Whether or not this system has dampers that limit the nonlinear updates
+  bool hasNonlinearDampers() const { return _has_nonlinear_dampers; }
+
   // Indicators /////
   virtual void addIndicator(const std::string & indicator_name,
                             const std::string & name,
@@ -1952,6 +1955,17 @@ public:
 
   virtual Real computeDamping(const NumericVector<libMesh::Number> & soln,
                               const NumericVector<libMesh::Number> & update);
+
+  /**
+   * Damping of the predictor change by the predictor dampers. Collective on MPI.
+   * @param soln The predicted solution (ghosted)
+   * @param update The predictor change as a search direction: soln = current - update (ghosted)
+   * @param failure Set to the message of a failed damper
+   * @return The damping factor, or nothing if a damper failed
+   */
+  std::optional<Real> computePredictorDamping(const NumericVector<libMesh::Number> & soln,
+                                              const NumericVector<libMesh::Number> & update,
+                                              std::string & failure);
 
   /**
    * Check to see whether the problem should update the solution
@@ -3463,6 +3477,9 @@ protected:
 
   /// Whether or not this system has any Dampers associated with it.
   bool _has_dampers;
+
+  /// Whether or not this system has any Dampers that limit the nonlinear updates
+  bool _has_nonlinear_dampers;
 
   /// Whether or not this system has any Constraints.
   bool _has_constraints;

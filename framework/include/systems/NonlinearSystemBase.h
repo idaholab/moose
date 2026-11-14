@@ -410,9 +410,15 @@ public:
    * Compute damping
    * @param solution The trail solution vector
    * @param update The incremental update to the solution vector
+   * @param stage The solution update whose dampers to use
    * @return returns The damping factor
    */
-  Real computeDamping(const NumericVector<Number> & solution, const NumericVector<Number> & update);
+  Real computeDamping(const NumericVector<Number> & solution,
+                      const NumericVector<Number> & update,
+                      Moose::DampingStage stage = Moose::DampingStage::NONLINEAR);
+
+  /// Whether any active damper limits the updates of \p stage
+  bool hasDampers(Moose::DampingStage stage) const;
 
   /**
    * Called at the beginning of the time step

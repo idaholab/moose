@@ -53,6 +53,60 @@
     csvdiff = 'predictor_test_pre_smo_out.csv'
   []
 
+  [damping]
+    requirement = "The system shall limit the change of the initial guess made by a predictor with "
+                  "the dampers that are set to apply to the predictor, by"
+    design = 'SimplePredictor.md syntax/Dampers/index.md'
+    issues = '#34453'
+    [damped]
+      type = 'CSVDiff'
+      input = 'predictor_damped_test.i'
+      csvdiff = 'predictor_damped_out.csv'
+      expect_out = 'Predictor damping factor'
+      absent_out = ' Damping factor:'
+      detail = "scaling the change by their damping factor, without damping the nonlinear updates,"
+    []
+    [trial_value]
+      type = 'RunApp'
+      input = 'predictor_test.i'
+      cli_args = 'Dampers/bound/type=BoundingValueNodalDamper Dampers/bound/variable=u '
+                 'Dampers/bound/max_value=0.8 Dampers/bound/apply_to=predictor'
+      expect_out = 'Predictor damping factor: 0\.6\n'
+      detail = "evaluating the dampers at the predicted solution,"
+    []
+    [both]
+      type = 'RunApp'
+      input = 'predictor_damped_test.i'
+      cli_args = 'Dampers/cap/apply_to="nonlinear predictor"'
+      expect_out = 'Predictor damping factor.* Damping factor:'
+      detail = "also damping the nonlinear updates with dampers set to apply to both,"
+    []
+    [skip]
+      type = 'CSVDiff'
+      input = 'predictor_damped_test.i'
+      cli_args = 'Dampers/cap/min_damping=0.5 Outputs/file_base=predictor_damping_skip_out'
+      csvdiff = 'predictor_damping_skip_out.csv'
+      detail = "skipping the prediction when a damper fails, or"
+    []
+    [cut_timestep]
+      type = 'RunApp'
+      input = 'predictor_damped_test.i'
+      cli_args = 'Dampers/cap/min_damping=0.5 Executioner/Predictor/damping_failure=cut_timestep'
+      expect_out = 'Cutting the time step.*Time Step 2, time = 0\.75'
+      detail = "cutting the time step when a damper fails and the predictor is set to do so."
+    []
+  []
+  [damping_no_stage]
+    type = 'RunException'
+    input = 'predictor_damped_test.i'
+    cli_args = 'Dampers/cap/apply_to=""'
+    expect_err = 'At least one solution update must be selected'
+    requirement = "The system shall report an error when a damper is set to limit no solution "
+                  "update."
+    design = 'syntax/Dampers/index.md'
+    issues = '#34453'
+  []
+
   [timestep_tolerance]
     requirement = "The system shall support the ability to use the Execitioner timestep tolerance to "
                   "determine if a prediction should be peformed."

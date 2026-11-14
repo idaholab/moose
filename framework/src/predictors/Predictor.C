@@ -34,6 +34,10 @@ Predictor::validParams()
                         "Skip prediction in a repeated time step after a failed time step");
   params.addParam<NonlinearSystemName>(
       "nl_sys", "nl0", "The nonlinear system that this predictor should be applied to.");
+  params.addParam<MooseEnum>("damping_failure",
+                             MooseEnum("skip cut_timestep", "skip"),
+                             "What to do when a damper on the predictor fails (e.g. damping below "
+                             "its min_damping): skip the prediction, or cut the time step");
 
   params.registerBase("Predictor");
 
@@ -60,13 +64,59 @@ Predictor::Predictor(const InputParameters & parameters)
     _skip_times(getParam<std::vector<Real>>("skip_times")),
     _skip_times_old(getParam<std::vector<Real>>("skip_times_old")),
     _skip_after_failed_timetep(getParam<bool>("skip_after_failed_timestep")),
-    _timestep_tolerance(dynamic_cast<TransientBase *>(_app.getExecutioner())->timestepTol())
+    _timestep_tolerance(dynamic_cast<TransientBase *>(_app.getExecutioner())->timestepTol()),
+    _cut_timestep_on_damping_failure(getParam<MooseEnum>("damping_failure") == "cut_timestep")
 {
   if (_scale < 0.0 || _scale > 1.0)
     mooseError("Input value for scale = ", _scale, " is outside of permissible range (0 to 1)");
 }
 
 Predictor::~Predictor() {}
+
+void
+Predictor::applyDamped(NumericVector<Number> & sln)
+{
+  if (!_nl.hasDampers(Moose::DampingStage::PREDICTOR))
+  {
+    apply(sln);
+    return;
+  }
+
+  const auto current = sln.clone();
+  apply(sln);
+
+  // Dampers take ghosted vectors and the change as a search direction, as in
+  // FEProblemBase::computePostCheck(): predicted = current - update
+  const auto & ghosting = *_nl.system().current_local_solution;
+  auto predicted = ghosting.zero_clone();
+  auto update = ghosting.zero_clone();
+  *predicted = sln;
+  *update = *current;
+  update->add(-1.0, sln);
+  update->close();
+
+  std::string failure;
+  const auto damping = _fe_problem.computePredictorDamping(*predicted, *update, failure);
+
+  if (!damping)
+  {
+    sln = *current;
+    _console << "  Predictor damping failed: " << failure << '\n';
+    if (_cut_timestep_on_damping_failure)
+    {
+      _console << "  Cutting the time step" << std::endl;
+      _fe_problem.setFailNextNonlinearConvergenceCheck();
+    }
+    else
+      _console << "  Skipping the prediction" << std::endl;
+  }
+  else if (*damping < 1.0)
+  {
+    _console << "  Predictor damping factor: " << *damping << std::endl;
+    sln = *current;
+    sln.add(-*damping, *update);
+  }
+}
 
 void
 Predictor::timestepSetup()
