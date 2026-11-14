@@ -45,6 +45,21 @@ protected:
    */
   Real dptqp(unsigned pvar) const;
 
+  /**
+   * The mobility that multiplies the flux when _use_mobility==true.  This is the mobility of the
+   * nominated phase, k_r*rho/mu.  Derived classes may weight fluid entering the porespace
+   * differently
+   * @param injecting Whether fluid is entering the porespace at the current point
+   */
+  virtual Real mobility(bool injecting) const;
+
+  /**
+   * d(mobility)/d(PorousFlow variable)
+   * @param pvar The PorousFlow variable number
+   * @param injecting Whether fluid is entering the porespace at the current point
+   */
+  virtual Real dmobility(unsigned pvar, bool injecting) const;
+
   /// Returns the flux from the line sink (before modification by mobility, etc).  Derived classes should override this
   virtual Real computeQpBaseOutflow(unsigned current_dirac_ptid) const = 0;
 
