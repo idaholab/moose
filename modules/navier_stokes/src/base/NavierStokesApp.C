@@ -57,6 +57,12 @@ NavierStokesApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   // Physics syntax
   registerSyntax("WCNSFVFlowPhysics", "Physics/NavierStokes/Flow/*");
   registerSyntax("WCNSLinearFVFlowPhysics", "Physics/NavierStokes/FlowSegregated/*");
+  registerSyntax("WCNSLinearFVConservativeDiffuseInterfaceFlowPhysics",
+                 "Physics/NavierStokes/ConservativeDiffuseInterfaceFlowSegregated/*");
+  registerSyntax("WCNSLinearFVConservativeDiffuseInterfaceVOFPhysics",
+                 "Physics/NavierStokes/ConservativeDiffuseInterfaceVOFSegregated/*");
+  registerSyntax("WCNSLinearFVConservativeDiffuseInterfaceHeatTransferPhysics",
+                 "Physics/NavierStokes/ConservativeDiffuseInterfaceHeatTransferSegregated/*");
   registerSyntax("WCNSFVFluidHeatTransferPhysics", "Physics/NavierStokes/FluidHeatTransfer/*");
   registerSyntax("WCNSLinearFVFluidHeatTransferPhysics",
                  "Physics/NavierStokes/FluidHeatTransferSegregated/*");
