@@ -1,7 +1,7 @@
 # Handoff: Kokkos AD GPU work on PR #34088 (arco, updated 2026-11-12)
 
-Status: branch at `a94736bf66c` (steps 0-10b, 12-13b4), not pushed since `53584d78efd`. Next: step
-13c. Updated 2026-11-14.
+Status: branch at `a94736bf66c` (steps 0-10b, 12-13c), not pushed since `53584d78efd`. Next: step
+13d. Updated 2026-11-14.
 Git tracks this document on the feature branch. Commit it alone with a `PLAN:` subject, and drop
 those commits before the merge. Relative paths outside the MOOSE tree, such as `profiles/`,
 `scripts/`, `patches/`, `ptx/`, `logs/`, `runs/`, and `archive/`, are under `moose-stack-build/`
@@ -14,17 +14,16 @@ Branch `kokkos-reference-configuration` in `/ibmstor/scratch/lindad/projects/moo
 is idaholab/moose#34088. NamjaeChoi left a performance review on it. Answer it with measurements
 once the design work below is final. Do not reply yet.
 
-**Next: step 13c**: `ThreadVectorRange` probe for the AD group (mapping in "Hand-coded loop
-findings"). The reply needs a technical reason for or against it (step 13 decision). First action:
-read `ADTeamGroup` and `dispatchADTeams` (`KokkosResidualObject.h`, `KokkosADAssembly.h`), and
-write the probe as a patch in `patches/step13c/` against `a94736bf66c`. Measure against
-`profiles/nsys-v24`. Exit: a measured comparison. Land it if no AD launch is more than 3% slower.
-The `kokkos` dir passes (189). Write the technical reason into the reply either way.
+**Next: step 13d**: final reply. First action: read `moose-stack-build/review-reply-34088.md` and
+list every `TODO(user)`. Resolve each one from this document (sections "Step 13a result" to "Step
+13c result", "Hand-coded loop findings"). The `KokkosADAssembly.h:36` section waits on 13c, which
+is now done. Then ask the user for approval. Post nothing before approval. Exit: no `TODO(user)`
+left, and the user approves the reply. Push the branch to the fork before posting.
 
 The draft reply is `moose-stack-build/review-reply-34088.md`. A local git repository in
 `moose-stack-build` tracks only that file (`.gitignore` allowlist). Commit the reply after each
 turn that edits it, so the user can review the edits with `git diff`. `TODO(user)` marks sections
-that wait on steps 13a-13c. Post nothing without user approval.
+that wait on step 13d. Post nothing without user approval.
 
 Kokkos ignores `--compute-device`. This build compiles Kokkos for CUDA, so every Kokkos kernel runs
 on the H200 under both `cpu` and `cuda`. The flag only selects specs (`compute_devices`). Test once,
@@ -118,6 +117,21 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 
 (empty)
 
+## Step 13c result (no code commit, 2026-11-14)
+
+- Probe `patches/step13c/vector-lanes.patch` against `a94736bf66c`: one AD group per Kokkos
+  thread, qps over vector lanes (`bit_ceil(max_qps)`, cap 32), `TeamLaunch::vector_length`, no team
+  barriers, residual by lanes over test functions or one vector `parallel_reduce` per test
+  function. AD tests 34 pass (job 14491). Sweep `profiles/nsys-v25` (probe build) against `nsys-v24`:
+  every AD launch 1.04-3.6x slower. Rejected by the exit criterion. Reply section updated.
+- Causes: q64 team 64x1 -> 1x32 (scratch allows 1 group, vector cap 32), ad3_q64 J 2.2x. Seeded J
+  1.4-3.6x: NVVM outlines the `ThreadVectorRange` closure as a `.func` and the datum goes to a
+  680 B stack. An `always_inline` closure (`vector-lanes-inline.patch`) moves the `.func` up to
+  `Kokkos::parallel_for`. Serial per-test-function vector reductions: q27 R 2.6x.
+- Reference R&J registers fell 127 -> 92 in the probe, but the time rose. Do not retry the
+  mapping without a team layout that keeps several groups per team at 64 qps and inlines the
+  vector loop. PTX/SASS: `runs/probe-13c/`.
+
 ## Step 13b4 result (`a94736bf66c`, 2026-11-14)
 
 - Cause of 13b3's 80 -> 83: the cached `_dxi_dx` (9 doubles, 18 registers) stayed live through
@@ -133,9 +147,6 @@ Loop names (step 8b): profiles up to `nsys-v12` and `ncu-v11` use the old names.
 - q8 cause (`ncu-v18`, `profiles/probe-13b4`): 8 blocks/SM, so the driver picks the 228 KB carveout,
   and the L1 hit rate falls (60%). A 164 KB hint (shim, `SHIM_CARVEOUT=72`) gives 0.66 ms but slows
   handsdisp_q8 displaced J 21%. So a fixed hint is not general. See "Open performance items".
-- SASS liveness tools: `nvdisasm -plr -lrm wide` (life ranges) and `nvdisasm -gi` (lines) cannot be
-  combined. Join them on address. Scripts in `/tmp/b4/bin` (may vanish): `live_defs.py` lists the
-  registers live at the peak by defining source line.
 
 ## Step 13b3 result (`d30dadacd08`, 2026-11-14)
 
@@ -325,15 +336,14 @@ the binding limit. Reducing the live data per thread can relieve both. Step 8e i
 
 Measure each step alone against the step before, with a full sweep on arco-c04.
 
-Steps 0-13b4: done. Commits in "Commits on this branch". Step 12b also passed `heat_transfer` Kokkos
+Steps 0-13c: done. Commits in "Commits on this branch". Step 12b also passed `heat_transfer` Kokkos
 12/12. Step 13 split into 13a-13d after the user's review of the draft (2026-11-13).
 13a. Done (sweeps `nsys-up1`, `nsys-v20`). See "Step 13a result".
 13b. Done (`e4c7b785f70`, `nsys-v21`). See "Step 13b result".
 13b2. Done (`ccbfc3288a5`, `nsys-v22`). See "Step 13b2 result".
 13b3. Done (`d30dadacd08`, `nsys-v23`). See "Step 13b3 result".
 13b4. Done (`a94736bf66c`, `nsys-v24`). See "Step 13b4 result".
-13c. `ThreadVectorRange` probe for the AD group (see "Hand-coded loop findings" for the mapping).
-    Exit: a measured comparison with the latest sweep. Land it if no AD launch is slower than 3%.
+13c. Done, rejected (`nsys-v25`). See "Step 13c result".
 13d. Final reply: resolve every `TODO(user)`, get user approval, then post.
 
 Out of scope: each matrix entry costs a CSR search (`Matrix::find`) and an atomic, in hand-coded
@@ -352,11 +362,8 @@ Open a separate issue for it.
   scratch. This is the likely reason AD residuals beat hand-coded ones.
 - `assembleDisplacementJacobian` ran one element per team of 128 threads (flaw of review comment
   3, in new code of this PR). Step 13b fixed it.
-- `ThreadVectorRange` mapping for the AD group: one group per Kokkos thread, qps over vector
-  lanes. CUDA needs a power-of-2 vector length <= 32. So 27 qps pad to 32, and 64 qps take 2 qps
-  per lane. Gains: warp shuffle reductions, no team barrier inside a group, and a native OpenMP
-  mapping. One element per team with team size = qps instead hits the 32 resident blocks per SM
-  cap.
+- `ThreadVectorRange` mapping for the AD group: measured in step 13c and rejected. One element per
+  team with team size = qps instead hits the 32 resident blocks per SM cap.
 - Upstream `up/next` (`ffc574921d7`) has hand-coded and sparse AD Kokkos kernels
   (`KokkosADDiffusion`, `KokkosADReal.h`), Kokkos materials without AD, and no displacement
   support. `origin` is the user's fork. Its `next` is from 2023.
@@ -401,8 +408,8 @@ Details: `moose-stack-build/PLAN-kokkos-known-failures.md`.
   `qM` is the qps per element.
 - Sweep, from the case directory: `sbatch -w arco-c04 --output=<log dir>/%x-%j.log sweep.sbatch
   <out dir> nsys|ncu`. Filter with `VARIANTS_FILTER`, `NCU_KERNELS`, `NCU_COUNT`. Latest full sweep:
-  `profiles/nsys-v24` (step 13b4). Upstream: `nsys-up1`. Latest ncu: `ncu-v18`.
-  Next: `nsys-v25`, `ncu-v19`.
+  `profiles/nsys-v24` (step 13b4, the branch head). `nsys-v25` is the rejected 13c probe.
+  Upstream: `nsys-up1`. Latest ncu: `ncu-v18`. Next: `nsys-v26`, `ncu-v19`.
   Build `launches.txt` with `launch_table.sh <dir>/*.nsys-rep`.
 - Tables in `scripts/`: `step_table.sh <dir>` (per-step summary), `ratio_table.sh <adN>
   <label>=<dir>...` (AD/hand ratio per sweep, `FIELD=residual|jacobian`), `launch_table.sh <nsys-rep>...`
@@ -427,13 +434,15 @@ Details: `moose-stack-build/PLAN-kokkos-known-failures.md`.
   whole library per patch. `scripts/object_variants.sbatch <wt> <src .K> <regex> <out root>
   base|<patch>...` builds one object per patch through `scripts/kokkos_object_ptx.sbatch` (PTX with
   `.loc` lines, SASS, res usage). PTX entries are `.weak .entry`. Scratch worktree:
-  `runs/branch-exp`, at `d30dadacd08`, clean. It has empty `libmesh`/`petsc`, so it serves object
+  `runs/branch-exp`, at `a94736bf66c`, clean. It has empty `libmesh`/`petsc`, so it serves object
   probes only. Build the app in the main tree. Step 8d probe trees: `/tmp/pe-x` (login node, one git branch
   per probe). It can disappear. The patches in `patches/step8d/` are the record. Write probe patches in a copy (`git archive
   be2f2ac9b8f framework/include/kokkos` into `/tmp/pe`, then `git init`), never in the worktree
   while a job uses it. Queue jobs on the worktree with `--dependency=singleton
   --job-name=object-variants`. `~/.claude/skills/gpu-local-memory/scripts/ptx_local_sites.py [--kind entry|func] <ptx> <regex>`
   (skill `gpu-local-memory`) lists the runtime-indexed local sites of one entry or outlined `.func`.
+- Register peaks: `~/.claude/skills/gpu-register-pressure/scripts/live_defs.py <cubin> <regex>`
+  (skill `gpu-register-pressure`) lists the registers live at the peak by defining source line.
 - `scripts/hang_stack.sh <exe> <input dir> <delay s> -- <args>` prints the thread stacks of a run
   that is still running after the delay.
 
