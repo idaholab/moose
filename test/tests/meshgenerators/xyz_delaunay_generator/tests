@@ -139,6 +139,15 @@
       valgrind = none
       capabilities = 'netgen'
     []
+    [unprepared_hole]
+      type = 'CSVDiff'
+      input = 'xyzdelaunay_unprepared_hole.i'
+      csvdiff = 'xyzdelaunay_unprepared_hole_out.csv'
+      recover = false
+      detail = "converting an unprepared hole mesh with non-TRI3 surface sides."
+      valgrind = none # see #31360
+      capabilities = 'netgen'
+    []
     [bcid_no_stitch]
       type = 'CSVDiff'
       input = 'xyzdelaunay_bcid.i'
