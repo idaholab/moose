@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#34293'
+  design = 'syntax/KokkosAuxKernels/index.md'
+
+  [multi_variable]
+    requirement = 'The Kokkos system shall be capable of computing multiple auxiliary variables of the same finite element family and order with a single auxiliary kernel'
+    [elemental_and_nodal]
+      type = 'Exodiff'
+      input = 'kokkos_multi_variable_aux.i'
+      exodiff = 'kokkos_multi_variable_aux_out.e'
+      detail = 'for elemental and nodal variables, matching the results of one single-variable kernel per variable, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+    [mismatched_fe_type]
+      type = 'RunException'
+      input = 'kokkos_multi_variable_aux.i'
+      cli_args = "AuxKernels/elem/variables='elem_u node_u'"
+      expect_err = 'For multi-variable Kokkos auxiliary kernels, all variables should have the same FE family and order.'
+      detail = 'shall error if the variables have different finite element families or orders.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+    []
+  []
+[]

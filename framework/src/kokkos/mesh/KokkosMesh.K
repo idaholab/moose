@@ -172,12 +172,12 @@ Mesh::initElement()
         _local_side_node[elem_type_id](node, side) = elem->local_side_node(side, node);
     }
 
-    _num_side_nodes[elem_type_id].moveToDevice();
-    _local_side_node[elem_type_id].moveToDevice();
+    _num_side_nodes[elem_type_id].copyToDevice();
+    _local_side_node[elem_type_id].copyToDevice();
   }
 
-  _num_sides.moveToDevice();
-  _num_nodes.moveToDevice();
+  _num_sides.copyToDevice();
+  _num_nodes.copyToDevice();
   _num_side_nodes.copyToDevice();
   _local_side_node.copyToDevice();
 
@@ -225,9 +225,9 @@ Mesh::initElement()
     _elem_info[ghost_eid].subdomain = getContiguousSubdomainID(ghost_elem->subdomain_id());
   }
 
-  _elem_info.moveToDevice();
-  _extra_elem_ids.moveToDevice();
-  _starting_elem_id.moveToDevice();
+  _elem_info.copyToDevice();
+  _extra_elem_ids.copyToDevice();
+  _starting_elem_id.copyToDevice();
 
   // Cache node data
 
@@ -252,8 +252,8 @@ Mesh::initElement()
     _boundary_nodes[getContiguousBoundaryID(boundary)].copySet<false, true>(
         _maps->boundary_node_ids[boundary]);
 
-  _points.moveToDevice();
-  _nodes.moveToDevice();
+  _points.copyToDevice();
+  _nodes.copyToDevice();
   _boundary_nodes.copyToDevice();
 
   // Cache side boundary data
@@ -356,8 +356,8 @@ Mesh::initElementGeometry()
     _elem_centroid[eid] = elem_centroid;
   }
 
-  _elem_volume.moveToDevice();
-  _elem_centroid.moveToDevice();
+  _elem_volume.copyToDevice();
+  _elem_centroid.copyToDevice();
 
   _element_geometry_initialized = true;
 }
@@ -434,14 +434,14 @@ Mesh::initElementSideGeometry()
     }
   }
 
-  _elem_neighbor.moveToDevice();
-  _side_area.moveToDevice();
-  _side_centroid.moveToDevice();
-  _side_normal.moveToDevice();
-  _elem_centroid_to_side_centroid.moveToDevice();
-  _elem_centroid_to_side_centroid_distance.moveToDevice();
-  _elem_centroid_to_neighbor_centroid.moveToDevice();
-  _elem_centroid_to_neighbor_centroid_distance.moveToDevice();
+  _elem_neighbor.copyToDevice();
+  _side_area.copyToDevice();
+  _side_centroid.copyToDevice();
+  _side_normal.copyToDevice();
+  _elem_centroid_to_side_centroid.copyToDevice();
+  _elem_centroid_to_side_centroid_distance.copyToDevice();
+  _elem_centroid_to_neighbor_centroid.copyToDevice();
+  _elem_centroid_to_neighbor_centroid_distance.copyToDevice();
 
   _element_side_geometry_initialized = true;
 }

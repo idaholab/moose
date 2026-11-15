@@ -25,6 +25,7 @@
 #include "BoundaryRestrictable.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
+#include "MeshDisplacedInterface.h"
 #include "VectorPostprocessorInterface.h"
 #include "ElementIDInterface.h"
 #include "UserObjectBase.h"
@@ -54,6 +55,7 @@ class AuxKernelBase : public MooseObject,
                       public GeometricSearchInterface,
                       public Restartable,
                       public MeshChangedInterface,
+                      public MeshDisplacedInterface,
                       protected VectorPostprocessorInterface,
                       public ElementIDInterface,
                       protected NonADFunctorInterface
@@ -129,6 +131,12 @@ protected:
 
   /// Mesh this kernel is active on
   MooseMesh & _mesh;
+
+  /**
+   * Get the names of the variables this object operates on: 'variable', or 'variables' for Kokkos
+   * objects that operate on multiple variables. The first one is the variable held by _var.
+   */
+  static std::vector<AuxVariableName> getVariableNamesHelper(const InputParameters & parameters);
 
 private:
   void addPostprocessorDependencyHelper(const PostprocessorName & name) const override final;
