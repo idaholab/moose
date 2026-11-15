@@ -46,4 +46,22 @@
     expect_out = 'Damping factor:'
     requirement = "The element Jacobian damper shall optionally backtrack a trial nonlinear update to avoid generating a degenerate element map."
   []
+  [update_direction]
+    requirement = "The element Jacobian damper shall evaluate the trial nonlinear update in the "
+                  "direction applied by the nonlinear solver, so that it"
+    issues = '#34450'
+    [inverting]
+      type = RunApp
+      input = 'update_direction.i'
+      expect_out = 'Damping factor: 0\.5\n'
+      detail = "reduces an update that inverts an element and"
+    []
+    [stretching]
+      type = RunApp
+      input = 'update_direction.i'
+      cli_args = 'target=1.5'
+      absent_out = 'Damping factor'
+      detail = "accepts the full update when it only stretches the element."
+    []
+  []
 []
