@@ -35,9 +35,59 @@ and use the interface without the use of dynamic casts.
    within the mesh on each execution flag. Variables, material properties, etc. at both the primary
    and the secondary side of the internal boundary are available.
 - +DomainUserObject+: this object is capable of executing all the operations of
-  a +ElementUserObject+, +InternalSideUserObject+, +SideUserObject+ and +InterfaceUserObject+.
+  an +ElementUserObject+, +InternalSideUserObject+, +SideUserObject+, and +InterfaceUserObject+.
+  See [DomainUserObject side execution](#domain-user-object-side-execution) for how sides are
+  dispatched to these operations.
 - +MortarUserObject+: "execute" is called for each mortar segment element corresponding to the
   secondary-primary mortar interface pairing on each execution flag
+
+## DomainUserObject side execution id=domain-user-object-side-execution
+
+In MOOSE, a boundary is an ID attached to element sides (a side set) or nodes (a node set). In the
+context of side operations, a boundary ID on an element side does not imply that the side has no
+neighbor: a side with a neighboring element may also have one or more boundary IDs. A
+`DomainUserObject` processes these two properties independently:
+
+- A side with a neighbor undergoes internal-side evaluation when both elements are within the
+  object's block restriction.
+- Each boundary ID on a side is dispatched according to `boundaries` and `interface_boundaries`.
+  An ID selected by `boundaries` undergoes boundary evaluation, whether or not the side has a
+  neighbor. An ID selected by `interface_boundaries` undergoes interface evaluation, requires a
+  neighbor, and makes face data (notably variable values and material properties from both the
+  primary and neighbor sides) available.
+
+Consequently, a side with a neighbor and a boundary ID undergoes internal-side evaluation together
+with either boundary evaluation or interface evaluation. The boundary-ID operations are mutually
+exclusive for a given ID, but neither is mutually exclusive with internal-side evaluation.
+
+The `boundaries` parameter has the following selection behavior:
+
+- If unset, every boundary ID not listed in `interface_boundaries` undergoes boundary evaluation.
+- If set to an empty list, no boundary evaluations are performed.
+- If set to a list, only the listed IDs undergo boundary evaluation.
+
+If `interface_boundaries` is unset or empty, interface evaluations are not performed. The same
+boundary ID cannot be listed in both parameters.
+
+The following cases illustrate the resulting side operations:
+
+1. A side with no neighbor and the boundary ID `wall` undergoes boundary evaluation when `wall` is
+   selected by `boundaries`. Selecting `wall` with `interface_boundaries` instead produces an error
+   because an interface requires a neighbor. The side does not undergo internal-side evaluation.
+2. A side with a neighbor and no boundary ID undergoes only internal-side evaluation when both
+   elements are within the object's block restriction. The `boundaries` and `interface_boundaries`
+   parameters do not disable this operation.
+3. A side with a neighbor and the boundary ID `crack` undergoes internal-side evaluation and
+   boundary evaluation when `crack` is selected by `boundaries`. It undergoes internal-side
+   evaluation and interface evaluation when `crack` is selected by `interface_boundaries`.
+4. If a side with a neighbor has both `crack` and `marked`, setting `boundaries = marked` and
+   `interface_boundaries = crack` executes all three operations: boundary evaluation for `marked`,
+   interface evaluation for `crack`, and internal-side evaluation because the side has a neighbor.
+5. An internal side between an element within the object's block restriction and a neighboring
+   element outside it does not undergo internal-side evaluation. If the side has a boundary ID
+   selected by `boundaries`, it undergoes boundary evaluation for the element within the block
+   restriction. If the boundary ID is selected by `interface_boundaries`, it undergoes interface
+   evaluation, making face data from both the primary element and the external neighbor available.
 
 # Execution order
 
