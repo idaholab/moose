@@ -17,7 +17,18 @@
       input = '3D_cavity.i'
       exodiff = '3D_cavity_refined_in.e'
       cli_args = 'ActionComponents/cavity/target_element_volume=1 --mesh-only 3D_cavity_refined_in.e'
-      detail = 'with a target element volume for the cavity elements.'
+      detail = 'with a target element volume for the cavity elements,'
+      capabilities = 'netgen'
+      recover = false
+    []
+    [boundary_layer]
+      type = Exodiff
+      input = '3D_cavity.i'
+      exodiff = '3D_cavity_boundary_layer_in.e'
+      cli_args = 'ActionComponents/cavity/n_boundary_layers=2
+                  ActionComponents/cavity/boundary_layer_width=0.5
+                  --mesh-only 3D_cavity_boundary_layer_in.e'
+      detail = 'and with extruded boundary layers between the component and the bulk cavity mesh.'
       capabilities = 'netgen'
       recover = false
     []
@@ -40,7 +51,21 @@
       # keeps the cylinder inside it
       cli_args = "ActionComponents/cavity/recenter_surface_mesh_to='3 0.5 0'
                   --mesh-only 2D_cavity_recentered_in.e"
-      detail = 'and re-centering the enclosing surface mesh on a specified point.'
+      detail = 're-centering the enclosing surface mesh on a specified point,'
+      recover = false
+    []
+    [boundary_layer]
+      type = Exodiff
+      input = '2D_cavity.i'
+      exodiff = '2D_cavity_boundary_layer_in.e'
+      # With a boundary layer the cavity stitches the cylinder mesh into its own, so there is
+      # nothing left for the combiner to add
+      cli_args = 'ActionComponents/cavity/n_boundary_layers=2
+                  ActionComponents/cavity/boundary_layer_width=0.5
+                  ActionComponents/combine_component_meshes=false
+                  Mesh/final_generator=cavity_stitched
+                  --mesh-only 2D_cavity_boundary_layer_in.e'
+      detail = 'and with extruded boundary layers between the component and the bulk cavity mesh.'
       recover = false
     []
   []

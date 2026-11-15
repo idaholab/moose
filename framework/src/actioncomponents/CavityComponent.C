@@ -207,8 +207,15 @@ CavityComponent::addMeshGenerators()
     if (isParamValid("block"))
     {
       const auto block_name = getParam<SubdomainName>("block");
-      _blocks.push_back(block_name + "_transition_layer_to_tet");
-      _blocks.push_back(block_name + "_transition_layer_to_pyramid");
+      // In 3D the BoundaryElementConversionGenerator splits the layer's outer elements into
+      // tets and pyramids, each in their own subdomain. In 2D the layer keeps its own block
+      if (_dimension == 3)
+      {
+        _blocks.push_back(block_name + "_transition_layer_to_tet");
+        _blocks.push_back(block_name + "_transition_layer_to_pyramid");
+      }
+      else
+        _blocks.push_back(block_name + "_transition_layer");
     }
   }
 
@@ -253,22 +260,22 @@ CavityComponent::addMeshGenerators()
     if (getParam<unsigned int>("n_boundary_layers") == 0)
       params.set<std::vector<bool>>("stitch_holes") = std::vector<bool>(holes_mgs.size(), true);
     addMeshGenerator("XYZDelaunayGenerator", "tetrahedralization", params);
+  }
 
-    // Stitch the tetrahedralization to the boundary layer
-    // The boundary layer should have a transition layer too
-    if (getParam<unsigned int>("n_boundary_layers") > 0)
-    {
-      InputParameters stitcher_params = _factory.getValidParams("StitchMeshGenerator");
-      stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") = {*(_mg_names.rbegin() + 1),
-                                                                       _mg_names.back()};
-      stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
-          {holes_boundaries.back(), holes_boundaries.back()}};
-      stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") = true;
-      stitcher_params.set<bool>("clear_stitched_boundary_ids") = false;
-      stitcher_params.set<bool>("verbose_stitching") = _verbose;
-      stitcher_params.set<bool>("verbose_remapping") = _verbose;
-      addMeshGenerator("StitchMeshGenerator", "stitched_bl", stitcher_params);
-    }
+  // Stitch the cavity mesh to the boundary layer. In 3D the boundary layer carries a transition
+  // layer so that its triangulated side matches the tetrahedralization
+  if (getParam<unsigned int>("n_boundary_layers") > 0)
+  {
+    InputParameters stitcher_params = _factory.getValidParams("StitchMeshGenerator");
+    stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") = {*(_mg_names.rbegin() + 1),
+                                                                     _mg_names.back()};
+    stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
+        {holes_boundaries.back(), holes_boundaries.back()}};
+    stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") = true;
+    stitcher_params.set<bool>("clear_stitched_boundary_ids") = false;
+    stitcher_params.set<bool>("verbose_stitching") = _verbose;
+    stitcher_params.set<bool>("verbose_remapping") = _verbose;
+    addMeshGenerator("StitchMeshGenerator", "stitched_bl", stitcher_params);
   }
 
   if (getParam<unsigned int>("n_boundary_layers") > 0)

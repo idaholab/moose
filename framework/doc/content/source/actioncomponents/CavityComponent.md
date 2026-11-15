@@ -14,7 +14,7 @@ It offers the following options:
 - the target element volume (area in 2D) can be set using the [!param](/ActionComponents/CavityComponent/target_element_volume) parameter
 - the enclosing mesh can be automatically recentered using a [TransformGenerator.md]'s `TRANSLATE_CENTER` option using the [!param](/ActionComponents/CavityComponent/recenter_surface_mesh_to) parameter
 - extruded boundary layers can be added inside the cavity mesh using [!param](/ActionComponents/CavityComponent/n_boundary_layers) parameter.
-  When the component mesh is made of hexahedrals, we need to form a transition layer to be able to stitch to the cavity's tetrahedral elements
+  In 3D, when the component mesh is made of hexahedrals, we need to form a transition layer to be able to stitch to the cavity's tetrahedral elements
 
 This components inherits from the following interfaces to help facilitate the definition of equations on its geometry:
 
