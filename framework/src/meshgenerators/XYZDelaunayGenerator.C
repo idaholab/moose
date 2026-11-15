@@ -299,7 +299,14 @@ XYZDelaunayGenerator::generate()
           hole_mesh.prepare_for_use();
         }
         else
+        {
+          // all_tri() only calls prepare_for_use() itself for non-replicated meshes, and it
+          // queries the mesh dimension, which reads the cached element data. Caching that is
+          // all it needs from the preparation; it rebuilds the neighbor links itself
+          if (!hole_mesh.is_prepared())
+            hole_mesh.cache_elem_data();
           MeshTools::Modification::all_tri(**_hole_ptrs[hole_i]);
+        }
       }
 
       // For second-order output, raise a stitched hole's order so its seam faces have
