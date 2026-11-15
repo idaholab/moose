@@ -26,6 +26,14 @@ MOOSEQuantityToNEML2<T, state>::validParams()
 {
   auto params = MOOSEToNEML2::validParams();
   params += DomainUserObject::validParams();
+  // Side data is set up only for explicitly selected boundaries, so default to no boundary
+  // execution instead of DomainUserObject's unrestricted default. The generator does the same so
+  // that the gathered rows match the batch.
+  params.addParam<std::vector<BoundaryName>>(
+      "external_boundaries",
+      {},
+      "The external boundaries on which this object gathers data. By default, it gathers on no "
+      "external boundary.");
 
   params.addClassDescription(
       "Gather a MOOSE quantity of type " + demangle(typeid(T).name()) +

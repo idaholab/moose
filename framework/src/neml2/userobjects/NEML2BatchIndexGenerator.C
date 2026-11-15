@@ -15,6 +15,12 @@ InputParameters
 NEML2BatchIndexGenerator::validParams()
 {
   auto params = DomainUserObject::validParams();
+  // Match the gatherers, which gather on no external boundary unless boundaries are selected
+  params.addParam<std::vector<BoundaryName>>(
+      "external_boundaries",
+      {},
+      "The external boundaries whose sides contribute to the NEML2 batch. By default, no external "
+      "boundary contributes.");
   params.addClassDescription("Generates the element to batch index map for MOOSEToNEML2 gatherers, "
                              "NEML2ToMOOSE retrievers, and the NEML2 executor");
 
