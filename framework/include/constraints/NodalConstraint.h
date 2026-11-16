@@ -40,6 +40,12 @@ public:
   std::vector<dof_id_type> & getSecondaryNodeId() { return _connected_nodes; }
 
   /**
+   * Get the formulation used to enforce this constraint
+   * @return penalty or kinematic
+   */
+  Moose::ConstraintFormulationType getFormulation() const { return _formulation; }
+
+  /**
    * Built the connectivity for this constraint
    */
   virtual void updateConnectivity();
