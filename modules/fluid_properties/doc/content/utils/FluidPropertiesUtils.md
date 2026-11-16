@@ -110,9 +110,9 @@ $\Omega^{(1,1)*}$ and $\Omega^{(2,2)*}$ of the Lennard-Jones (12-6) potential fo
 
 The Lennard-Jones parameters are those of GRI-Mech 3.0 [!citep](smith_grimech30) as distributed
 with Cantera 3.2.0 [!citep](cantera320), and those of [!citet](svehla1962) for Kr and Xe. He, with
-$\epsilon/k_B = 10.2$ K, leaves the range of the collision integral fits above 1020 K. Most pairs
-with He leave it between 1970 K and 4850 K. All other species and pairs stay within the fits. The
-binary diffusion coefficients of pairs with He have not been checked against measurements.
+$\epsilon/k_B = 10.2$ K, leaves the range of the collision integral fits above 1020 K, and most
+pairs with He leave it at higher temperatures. All other species and pairs stay within the fits.
+The binary diffusion coefficients of pairs with He have not been checked against measurements.
 The viscosities of the species other than H$_2$O agree with those of Cantera within 0.5%. The
 GRI-Mech parameters of H$_2$O assume a correction for its dipole moment, which is not applied here,
 so the binary diffusion coefficients of pairs with H$_2$O differ from those of Cantera by up to 4%.
