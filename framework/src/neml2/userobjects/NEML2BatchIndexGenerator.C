@@ -15,12 +15,12 @@ InputParameters
 NEML2BatchIndexGenerator::validParams()
 {
   auto params = DomainUserObject::validParams();
-  // Match the gatherers, which gather on no external boundary unless boundaries are selected
+  // Match the gatherers, which gather on no boundary unless boundaries are selected
   params.addParam<std::vector<BoundaryName>>(
-      "external_boundaries",
+      "boundaries",
       {},
-      "The external boundaries whose sides contribute to the NEML2 batch. By default, no external "
-      "boundary contributes.");
+      "The boundaries whose sides contribute to the NEML2 batch, on the element in the domain that "
+      "owns each side. By default, no boundary contributes.");
   params.addClassDescription("Generates the element to batch index map for MOOSEToNEML2 gatherers, "
                              "NEML2ToMOOSE retrievers, and the NEML2 executor");
 
@@ -163,7 +163,7 @@ NEML2BatchIndexGenerator::getSideBatchSpan(const ElemSide & elem_side) const
                std::get<0>(elem_side),
                ", ",
                std::get<1>(elem_side),
-               "). Configure this external side with NEML2 'boundary' or this internal side with "
+               "). Configure this boundary side with NEML2 'boundary' or this interface side with "
                "NEML2 'interface'. Volume quadrature-point data cannot be used for side "
                "quadrature points.");
   return it->second;

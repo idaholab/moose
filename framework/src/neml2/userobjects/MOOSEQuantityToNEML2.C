@@ -30,10 +30,10 @@ MOOSEQuantityToNEML2<T, state>::validParams()
   // execution instead of DomainUserObject's unrestricted default. The generator does the same so
   // that the gathered rows match the batch.
   params.addParam<std::vector<BoundaryName>>(
-      "external_boundaries",
+      "boundaries",
       {},
-      "The external boundaries on which this object gathers data. By default, it gathers on no "
-      "external boundary.");
+      "The boundaries on which this object gathers side data, on the element in the domain that "
+      "owns each side. By default, it gathers on no boundary.");
 
   params.addClassDescription(
       "Gather a MOOSE quantity of type " + demangle(typeid(T).name()) +
@@ -68,7 +68,7 @@ MOOSEQuantityToNEML2<T, state>::MOOSEQuantityToNEML2(const InputParameters & par
     _type(getParam<MooseEnum>("quantity_type").template getEnum<NEML2Utils::MOOSEIOType>()),
     _volume(getParam<bool>("volume")),
     _from_interface_material(getParam<bool>("from_interface_material")),
-    _has_side(!_external_bnd_ids.empty() || !_interface_bnd_ids.empty()),
+    _has_side(!_boundary_execution_ids.empty() || !_interface_bnd_ids.empty()),
     _has_interface(!_interface_bnd_ids.empty()),
     _var_scalar(
         _type == NEML2Utils::MOOSEIOType::SCALAR && state == 0

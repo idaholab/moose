@@ -432,14 +432,6 @@
       expect_err = 'At least one NEML2 evaluation domain must be enabled'
       capabilities = 'libtorch & neml2'
     []
-    [internal_as_boundary]
-      detail = 'an internal sideset is selected as an external boundary.'
-      type = RunException
-      input = 'evaluation_domains.i'
-      cli_args = 'NEML2/domains/volume=false NEML2/domains/boundary=left_block_right_block NEML2/domains/interface= Postprocessors/active='
-      expect_err = 'contains an internal side, but external boundaries must not contain neighbors'
-      capabilities = 'libtorch & neml2'
-    []
     [external_as_interface]
       detail = 'an external sideset is selected as an internal interface.'
       type = RunException
@@ -456,15 +448,6 @@
       expect_err = "requested at side quadrature points outside the NEML2 model's selected boundaries"
       capabilities = 'libtorch & neml2'
     []
-    [mixed_topology_as_boundary]
-      detail = 'a sideset containing both external and internal sides is selected as an external boundary.'
-      type = RunException
-      input = 'evaluation_domains.i'
-      cli_args = 'NEML2/domains/volume=false NEML2/domains/boundary=mixed_topology NEML2/domains/interface= Postprocessors/active='
-      expect_err = 'contains an internal side, but external boundaries must not contain neighbors'
-      capabilities = 'libtorch & neml2'
-      valgrind = none
-    []
     [mixed_topology_as_interface]
       detail = 'a sideset containing both external and internal sides is selected as an internal interface.'
       type = RunException
@@ -475,11 +458,212 @@
       valgrind = none
     []
     [boundary_interface_overlap]
-      detail = 'the same boundary is selected as both an external boundary and an internal interface.'
+      detail = 'the same boundary is selected in both boundary and interface.'
       type = RunException
       input = 'evaluation_domains.i'
       cli_args = 'NEML2/domains/volume=false NEML2/domains/boundary=left NEML2/domains/interface=left Postprocessors/active='
-      expect_err = 'cannot be selected as both external boundaries and internal interfaces'
+      expect_err = "cannot be selected in both 'boundary' and 'interface'"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [missing_boundary_name]
+      detail = 'a boundary sideset name does not exist in the mesh.'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/boundary=no_such_sideset Postprocessors/active='
+      expect_err = "Sideset 'no_such_sideset' does not exist in the mesh"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [missing_boundary_id]
+      detail = 'a boundary sideset given as a numeric ID does not exist in the mesh.'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/boundary=99 Postprocessors/active='
+      expect_err = "Sideset '99' does not exist in the mesh"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [missing_interface_name]
+      detail = 'an interface sideset name does not exist in the mesh.'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/interface=no_such_sideset Postprocessors/active='
+      expect_err = "Sideset 'no_such_sideset' does not exist in the mesh"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [missing_block]
+      detail = 'the NEML2 block does not exist in the mesh.'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/block=no_such_block Postprocessors/active='
+      expect_err = "Subdomain 'no_such_block' does not exist in the mesh"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+  []
+  [block_restricted_boundary]
+    issues = '#33198'
+    design = 'NEML2/index.md NEML2Action.md MOOSEQuantityToNEML2.md NEML2BatchIndexGenerator.md'
+    collections = 'SYSTEM'
+    requirement = 'The framework shall support and validate NEML2 boundary evaluation on a block-restricted domain by '
+    [evaluate]
+      detail = 'evaluating a sideset owned by the NEML2 block whose neighbor block lies outside the NEML2 domain on the side inside the domain only, and'
+      type = Exodiff
+      input = 'block_restricted_boundary.i'
+      exodiff = 'block_restricted_boundary_out.e'
+      capabilities = 'libtorch & neml2'
+    []
+    [reversed_boundary_error]
+      detail = 'reporting an error suggesting SideSetsBetweenSubdomainsGenerator when a boundary sideset is owned by elements outside the NEML2 domain while their neighbors are inside the domain, and'
+      type = RunException
+      input = 'block_restricted_boundary.i'
+      cli_args = 'Mesh/interface/primary_block=right_block Mesh/interface/paired_block=left_block'
+      expect_err = "SideSetsBetweenSubdomainsGenerator with 'primary_block' set to the NEML2 block"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [reversed_any_domain_boundary_error]
+      detail = 'reporting the same error when ANY_DOMAIN_BOUNDARY_ID encounters such a reversed sideset, and'
+      type = RunException
+      input = 'block_restricted_boundary.i'
+      cli_args = 'Mesh/interface/primary_block=right_block Mesh/interface/paired_block=left_block NEML2/domains/boundary=ANY_DOMAIN_BOUNDARY_ID'
+      expect_err = "SideSetsBetweenSubdomainsGenerator with 'primary_block' set to the NEML2 block"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [internal_in_domain_boundary]
+      detail = 'evaluating a boundary sideset whose two elements are both inside the NEML2 domain on the owning element only, and'
+      type = Exodiff
+      input = 'block_restricted_boundary.i'
+      cli_args = "NEML2/domains/block='left_block right_block' Outputs/file_base=block_restricted_boundary_internal_out"
+      exodiff = 'block_restricted_boundary_internal_out.e'
+      capabilities = 'libtorch & neml2'
+    []
+    [any_domain_boundary]
+      detail = 'selecting the external sidesets of the NEML2 block and the sideset it owns toward the neighboring block with ANY_DOMAIN_BOUNDARY_ID, and'
+      type = Exodiff
+      input = 'block_restricted_boundary.i'
+      cli_args = 'NEML2/domains/boundary=ANY_DOMAIN_BOUNDARY_ID Outputs/file_base=block_restricted_boundary_any_out'
+      exodiff = 'block_restricted_boundary_any_out.e'
+      capabilities = 'libtorch & neml2'
+    []
+    [empty_interface_expansion_error]
+      detail = 'reporting an error when ANY_BOUNDARY_ID in interface matches no sideset inside the NEML2 domain, and'
+      type = RunException
+      input = 'block_restricted_boundary.i'
+      cli_args = 'NEML2/domains/interface=ANY_BOUNDARY_ID'
+      expect_err = "'ANY_BOUNDARY_ID' matched no sideset whose sides all have both elements in the NEML2 domain"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [no_owned_sides_error]
+      detail = 'reporting an error when a boundary sideset has no side owned by an element in the NEML2 domain, and'
+      type = RunException
+      input = 'block_restricted_boundary.i'
+      cli_args = 'NEML2/domains/boundary=right'
+      expect_err = "Sideset 'right' has no sides owned by an element in the NEML2 domain"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [interface_without_internal_sides_error]
+      detail = 'reporting an error when an interface sideset has no side whose two elements are both in the NEML2 domain, and'
+      type = RunException
+      input = 'block_restricted_boundary.i'
+      cli_args = 'NEML2/domains/interface=right'
+      expect_err = "Sideset 'right' has no internal interface sides in the NEML2 domain"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [subdomain_edge_interface_error]
+      detail = 'reporting an error directing the user to boundary when an interface sideset has a side whose other element lies outside the NEML2 domain.'
+      type = RunException
+      input = 'block_restricted_boundary.i'
+      cli_args = 'NEML2/domains/boundary=left NEML2/domains/interface=left_block_right_block'
+      expect_err = "has a side whose other element is outside the NEML2 domain; use 'boundary' for the edge of a block-restricted domain"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+  []
+  [any_boundary_id]
+    issues = '#33198'
+    design = 'NEML2/index.md NEML2Action.md MOOSEQuantityToNEML2.md NEML2BatchIndexGenerator.md'
+    collections = 'SYSTEM'
+    requirement = 'The framework shall expand ANY_DOMAIN_BOUNDARY_ID in the NEML2 boundary parameter and ANY_BOUNDARY_ID in the NEML2 interface parameter into the corresponding sideset lists by '
+    [explicit]
+      detail = 'establishing the reference solution with explicit boundary and interface sideset lists, and'
+      type = Exodiff
+      input = 'any_boundary_id.i'
+      cli_args = "NEML2/domains/boundary='bottom right top left' NEML2/domains/interface=left_block_right_block Outputs/file_base=any_boundary_id_explicit_out"
+      exodiff = 'any_boundary_id_explicit_out.e'
+      capabilities = 'libtorch & neml2'
+    []
+    [keyword]
+      detail = 'reproducing the explicit-list solution when boundary is set to ANY_DOMAIN_BOUNDARY_ID and interface to ANY_BOUNDARY_ID,'
+      type = Exodiff
+      input = 'any_boundary_id.i'
+      exodiff = 'any_boundary_id_out.e'
+      capabilities = 'libtorch & neml2'
+    []
+    [mixed_sideset_boundary_error]
+      detail = 'reporting an error when ANY_DOMAIN_BOUNDARY_ID encounters a sideset containing both sides on the boundary of the NEML2 domain and sides with both elements in the domain,'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/boundary=ANY_DOMAIN_BOUNDARY_ID NEML2/domains/interface= Postprocessors/active='
+      expect_err = "Sideset 'mixed_topology' contains both sides on the boundary of the NEML2 domain and sides whose two elements are both in the domain, so 'ANY_DOMAIN_BOUNDARY_ID' cannot classify it"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [mixed_sideset_interface_error]
+      detail = 'reporting an error when ANY_BOUNDARY_ID encounters such a sideset,'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = 'NEML2/domains/boundary= NEML2/domains/interface=ANY_BOUNDARY_ID Postprocessors/active='
+      expect_err = "Sideset 'mixed_topology' contains both sides whose two elements are both in the NEML2 domain and sides on the boundary of the domain, so 'ANY_BOUNDARY_ID' cannot classify it"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [explicit_mixed_sideset]
+      detail = 'evaluating on the owning elements a sideset with both external sides and sides whose two elements are in the NEML2 domain when it is listed by name in boundary,'
+      type = RunApp
+      input = 'evaluation_domains.i'
+      cli_args = "NEML2/domains/volume=false NEML2/domains/boundary=mixed_topology NEML2/domains/interface= Materials/active='B boundary_stateful' Materials/boundary_stateful/boundary=mixed_topology Postprocessors/active=boundary Postprocessors/boundary/boundary=mixed_topology"
+      expect_out = '1\.000000e\+00 \|   1\.750000e\+00'
+      capabilities = 'libtorch & neml2'
+    []
+    [explicit_name_with_keyword]
+      detail = 'giving a sideset listed by name in boundary precedence over ANY_DOMAIN_BOUNDARY_ID so that it is not classified by the keyword,'
+      type = RunApp
+      input = 'evaluation_domains.i'
+      cli_args = "NEML2/domains/boundary='ANY_DOMAIN_BOUNDARY_ID mixed_topology' NEML2/domains/interface= Materials/active='B volume_stateful boundary_stateful' Materials/boundary_stateful/boundary=mixed_topology Postprocessors/active='volume boundary' Postprocessors/boundary/boundary=mixed_topology"
+      expect_out = '1\.000000e\+00 \|   1\.750000e\+00 \|   2\.000000e\+00'
+      capabilities = 'libtorch & neml2'
+    []
+    [empty_boundary_expansion_error]
+      detail = 'reporting an error when ANY_DOMAIN_BOUNDARY_ID matches no sideset on the boundary of the NEML2 domain,'
+      type = RunException
+      input = 'evaluation_domains.i'
+      cli_args = "NEML2/domains/boundary=ANY_DOMAIN_BOUNDARY_ID NEML2/domains/interface= Postprocessors/active= Mesh/only_interface/type=BoundaryDeletionGenerator Mesh/only_interface/input=mixed_topology Mesh/only_interface/boundary_names=left_block_right_block Mesh/only_interface/operation=keep"
+      expect_err = "'ANY_DOMAIN_BOUNDARY_ID' matched no sideset on the boundary of the NEML2 domain"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [any_boundary_id_in_boundary_error]
+      detail = 'reporting an error suggesting ANY_DOMAIN_BOUNDARY_ID when boundary is set to ANY_BOUNDARY_ID, and'
+      type = RunException
+      input = 'any_boundary_id.i'
+      cli_args = 'NEML2/domains/boundary=ANY_BOUNDARY_ID'
+      expect_err = "use 'ANY_DOMAIN_BOUNDARY_ID' to select every such sideset"
+      capabilities = 'libtorch & neml2'
+      valgrind = none
+    []
+    [any_domain_boundary_id_in_interface_error]
+      detail = 'reporting an error suggesting ANY_BOUNDARY_ID when interface is set to ANY_DOMAIN_BOUNDARY_ID.'
+      type = RunException
+      input = 'any_boundary_id.i'
+      cli_args = 'NEML2/domains/interface=ANY_DOMAIN_BOUNDARY_ID'
+      expect_err = "'ANY_DOMAIN_BOUNDARY_ID' is only accepted in 'boundary'"
       capabilities = 'libtorch & neml2'
       valgrind = none
     []

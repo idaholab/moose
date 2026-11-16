@@ -12,11 +12,11 @@ This page is +user-facing+, i.e., the [Input file syntax](syntax/NEML2/index.md#
 A NEML2 model is evaluated at quadrature points. Each sub-block chooses which quadrature points to
 use with three independent parameters:
 
-| Parameter                  | Quadrature points that are evaluated                                     | Default |
-| :------------------------- | :----------------------------------------------------------------------- | :------ |
-| [!param](/NEML2/volume)    | Element interiors                                                        | `true`  |
-| [!param](/NEML2/boundary)  | Sides in the listed +external+ sidesets (sides with no neighbor element) | empty   |
-| [!param](/NEML2/interface) | +Both+ sides of the listed +internal+ sidesets (sides between elements)  | empty   |
+| Parameter                  | Quadrature points that are evaluated                                                                                                                                    | Default |
+| :------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------ |
+| [!param](/NEML2/volume)    | Element interiors                                                                                                                                                       | `true`  |
+| [!param](/NEML2/boundary)  | Sides in the listed sidesets that bound the NEML2 domain: the other side has no element, or its element lies outside [!param](/NEML2/block). Only the side inside the domain is evaluated. | empty   |
+| [!param](/NEML2/interface) | +Both+ sides of the listed sidesets whose two sides both lie inside the NEML2 domain.                                                                                   | empty   |
 
 At least one domain must be selected, which gives seven supported cases (V = volume, B = boundary,
 I = interface):
@@ -46,22 +46,93 @@ domain's own quadrature points. Side values are not copied from the volume.
 
 Select a domain for every place where a NEML2 output is used:
 
-| Object that uses the NEML2 output                                     | Required setting                     |
-| :-------------------------------------------------------------------- | :----------------------------------- |
-| Kernels, block materials, element postprocessors                      | `volume = true`                      |
-| Boundary conditions or side postprocessors on external sideset `S`    | `S` is listed in `boundary`          |
-| Interface kernels or interface postprocessors on internal sideset `S` | `S` is listed in `interface`         |
+| Object that uses the NEML2 output                                                  | Required setting             |
+| :--------------------------------------------------------------------------------- | :--------------------------- |
+| Kernels, block materials, element postprocessors                                   | `volume = true`              |
+| Boundary conditions or side postprocessors on sideset `S` on the edge of the NEML2 domain | `S` is listed in `boundary`  |
+| Interface kernels or interface postprocessors on internal sideset `S`              | `S` is listed in `interface` |
 
 An output exists only where it was evaluated. Using it anywhere else is an error. For example, a
 side postprocessor on `left` fails if `volume = true` but `left` is not listed in `boundary`. MOOSE
 does not reuse volume values on a side, because volume and side quadrature points are at different
 locations.
 
-The sidesets must also match their parameter:
+The NEML2 domain is the set of blocks in [!param](/NEML2/block), or all mesh blocks when
+[!param](/NEML2/block) is empty. MOOSE evaluates a boundary on the element that owns each side (see
+[DomainUserObject side execution](syntax/UserObjects/index.md#domain-user-object-side-execution)).
+Each side of a selected sideset is one of four cases, which each parameter accepts as follows:
 
-- `boundary` accepts only external sides, and `interface` accepts only internal sides. A sideset that
-  contains both kinds of sides is rejected by either parameter.
-- The same sideset cannot be listed in both `boundary` and `interface`.
+| Side of the sideset                                                      | `boundary`              | `interface`           |
+| :----------------------------------------------------------------------- | :---------------------- | :-------------------- |
+| 1. Owner in the NEML2 domain, no other element (external boundary)       | Owner side evaluated    | Rejected              |
+| 2. Owner in the NEML2 domain, other element outside it                   | Owner side evaluated    | Rejected              |
+| 3. Owner and other element both in the NEML2 domain                      | Owner side evaluated    | Both sides evaluated  |
+| 4. Owner outside the NEML2 domain, other element inside it (reversed)    | Rejected                | Rejected              |
+
+Every side of an `interface` sideset must be case 3. The same sideset cannot be listed in both
+`boundary` and `interface`.
+
+Case 3 in `boundary` is a special use. Only the owning element's side is evaluated, so NEML2 outputs
+do not exist on the other side and cannot be used there, for example as the neighbor value of an
+interface kernel. List the sideset in `interface` to evaluate both sides.
+
+### Boundary of a block-restricted domain id=block-restricted-boundary
+
+When a `[NEML2]` sub-block is restricted to a subset of subdomains via [!param](/NEML2/block), an
+internal sideset along the edge between the NEML2 block and a neighboring block outside
+[!param](/NEML2/block) bounds the NEML2 domain (case 2). List such a sideset in
+[!param](/NEML2/boundary), not [!param](/NEML2/interface): only the side inside the NEML2 domain has
+the NEML2 model and is evaluated.
+
+Every side of a `boundary` sideset must be owned by an element inside [!param](/NEML2/block). If a
+sideset is oriented the other way (case 4), `NEML2Action` rejects it during setup rather than
+skipping it silently. Rebuild the sideset with [SideSetsBetweenSubdomainsGenerator.md] with
+`primary_block` set to the NEML2 block and `paired_block` set to the adjacent block:
+
+```
+[Mesh]
+  ...
+  [interface]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = ...
+    new_boundary = left_block_right_block
+    primary_block = left_block
+    paired_block = right_block
+  []
+[]
+```
+
+The input below restricts the NEML2 model to `left_block` and evaluates it in the volume of
+`left_block`, on the external boundary `left`, and on the `left_block` side of
+`left_block_right_block`:
+
+!listing test/tests/neml2/block_restricted_boundary.i block=Mesh NEML2
+
+### Selecting every sideset id=any-boundary-id
+
+Two keywords select sidesets by their cases relative to the sub-block's NEML2 domain:
+
+- `boundary = ANY_DOMAIN_BOUNDARY_ID` selects every sideset on the boundary of the NEML2 domain,
+  i.e. every sideset whose sides touching the domain are all case 1 or 2. The domain boundary is
+  relative to the NEML2 domain, not the mesh: with `block = A`, it selects the external sidesets of
+  `A` and a sideset between `A` and another block `B` owned by `A`.
+- `interface = ANY_BOUNDARY_ID` selects every sideset whose sides are all case 3. A sideset between
+  `A` and a block outside the NEML2 domain is not an interface of the domain and is not selected.
+
+`boundary = ANY_BOUNDARY_ID` and `interface = ANY_DOMAIN_BOUNDARY_ID` are errors. The keywords may be
+combined with sideset names; a named sideset keeps the parameter it is listed under. Sidesets that do
+not touch the NEML2 domain are ignored, and the two keywords never select the same sideset.
+Selection is per sideset: a side between `A` and `B` that belongs to no sideset is never selected,
+so create one with [SideSetsBetweenSubdomainsGenerator.md] as shown above.
+
+`NEML2Action` reports an error when a keyword matches no sideset, or when a sideset touching the NEML2
+domain cannot be classified for the keyword:
+
+- for `ANY_DOMAIN_BOUNDARY_ID`, a sideset with a case 4 side, or with case 1 or 2 sides mixed with
+  case 3 sides (list it in `boundary` by name to evaluate every side on its owner);
+- for `ANY_BOUNDARY_ID`, a sideset with case 3 sides mixed with case 1, 2, or 4 sides.
+
+!listing test/tests/neml2/any_boundary_id.i block=NEML2
 
 ### Where the inputs come from
 
@@ -70,7 +141,7 @@ In every domain, NEML2 inputs are read at that domain's quadrature points:
 - +Variables and functions+ are evaluated at each quadrature point. On a side, a variable gives its
   value on that side; it does not need to be a boundary or interface variable.
 - +Material properties from ordinary block materials+ are read from the volume material data in
-  element interiors, from the face material data on external boundaries and on the current side of an
+  element interiors, from the face material data on selected boundaries and on the current side of an
   interface, and from the neighbor material data on the other side of an interface. Each material
   input must therefore be available in every selected domain.
 - +Material properties from an `InterfaceMaterial`+ are stored separately by MOOSE and must be listed

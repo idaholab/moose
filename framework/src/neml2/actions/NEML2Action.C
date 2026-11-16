@@ -13,6 +13,12 @@
 #include "Factory.h"
 #include "NEML2Utils.h"
 #include "InputParameterWarehouse.h"
+#include "MooseMesh.h"
+#include "MooseMeshUtils.h"
+#include "MooseUtils.h"
+
+#include "libmesh/boundary_info.h"
+#include "libmesh/elem.h"
 
 #ifdef NEML2_ENABLED
 #include <algorithm>
@@ -83,9 +89,18 @@ NEML2Action::validParams()
       true,
       "Whether to evaluate the material model at element-interior quadrature points");
   params.addParam<std::vector<BoundaryName>>(
-      "boundary", {}, "External boundaries where the material model is evaluated");
+      "boundary",
+      {},
+      "Sidesets where the material model is evaluated on the element that owns each side, which "
+      "must be in the NEML2 domain ('block', or all blocks when empty). Pass "
+      "'ANY_DOMAIN_BOUNDARY_ID' to select every sideset on the boundary of the NEML2 domain, i.e. "
+      "whose sides have no other element or one outside the domain.");
   params.addParam<std::vector<BoundaryName>>(
-      "interface", {}, "Internal interfaces where the material model is evaluated on both sides");
+      "interface",
+      {},
+      "Internal interfaces where the material model is evaluated on both sides: the elements on "
+      "both sides of each selected side must lie in the NEML2 domain ('block', or all blocks when "
+      "empty). Pass 'ANY_BOUNDARY_ID' to select every such sideset.");
   // Block materials need no hint: the same material is reinit'd as BLOCK/FACE/NEIGHBOR data and the
   // gatherer reads the store for where it is. A true InterfaceMaterial instead lives in the
   // separate INTERFACE_MATERIAL_DATA store, which the native block/face/neighbor selection never
@@ -244,7 +259,10 @@ NEML2Action::act()
       if (!_app.parameters().get<bool>("parse_neml2_only"))
         return;
     printSummary();
+    return;
   }
+
+  resolveAndValidateEvaluationDomains();
 
   const bool is_blk = !_block.empty();
   const bool is_boundary = !_boundary.empty();
@@ -314,7 +332,7 @@ NEML2Action::act()
       if (is_blk)
         obj_params.set<std::vector<SubdomainName>>("block") = _block;
       obj_params.set<bool>("volume") = _volume;
-      obj_params.set<std::vector<BoundaryName>>("external_boundaries") = _boundary;
+      obj_params.set<std::vector<BoundaryName>>("boundaries") = _boundary;
       if (is_interface)
         obj_params.set<std::vector<BoundaryName>>("interface_boundaries") = _interface;
       // Only a MATERIAL input listed in 'interface_material_inputs' reads from interface material
@@ -367,7 +385,7 @@ NEML2Action::act()
       if (is_blk)
         params.set<std::vector<SubdomainName>>("block") = _block;
       params.set<bool>("volume") = _volume;
-      params.set<std::vector<BoundaryName>>("external_boundaries") = _boundary;
+      params.set<std::vector<BoundaryName>>("boundaries") = _boundary;
       if (is_interface)
         params.set<std::vector<BoundaryName>>("interface_boundaries") = _interface;
       _problem->addUserObject(type, _idx_generator_name, params);
@@ -810,6 +828,301 @@ NEML2Action::checkStatefulConsistency(const NEML2ModelHandle & model) const
           "; model outputs: ",
           names_list(model.output_names()),
           ".");
+}
+
+void
+NEML2Action::resolveAndValidateEvaluationDomains()
+{
+  if (_domains_resolved)
+    return;
+  _domains_resolved = true;
+
+  if (_boundary.empty() && _interface.empty())
+    return;
+
+  mooseAssert(_mesh, "Mesh must exist before resolving NEML2 evaluation domains");
+  const auto & mesh = *_mesh;
+  const auto & mesh_base = mesh.getMesh();
+  const auto & bnd_info = mesh_base.get_boundary_info();
+
+  // Determine the NEML2 domain D: 'block', or all mesh subdomains when 'block' is empty or
+  // contains 'ANY_BLOCK_ID'.
+  std::set<SubdomainID> domain_blocks;
+  if (_block.empty() || std::find(_block.begin(), _block.end(), "ANY_BLOCK_ID") != _block.end())
+    domain_blocks = mesh.meshSubdomains();
+  else
+  {
+    for (const auto & blk_name : _block)
+      if (!MooseUtils::isDigits(blk_name) && !MooseMeshUtils::hasSubdomainName(mesh_base, blk_name))
+        paramError("block", "Subdomain '", blk_name, "' does not exist in the mesh.");
+    const auto ids = mesh.getSubdomainIDs(_block);
+    domain_blocks.insert(ids.begin(), ids.end());
+  }
+  const auto in_domain = [&](const SubdomainID sid) { return domain_blocks.count(sid) > 0; };
+
+  // 'boundary' selects sides on the boundary of the NEML2 domain, which can lie inside the mesh,
+  // so its keyword is 'ANY_DOMAIN_BOUNDARY_ID': 'ANY_BOUNDARY_ID' would suggest every sideset,
+  // including those between two blocks of the domain. 'interface' keeps 'ANY_BOUNDARY_ID'.
+  const auto contains = [](const std::vector<BoundaryName> & names, const std::string & keyword)
+  { return std::find(names.begin(), names.end(), keyword) != names.end(); };
+  if (contains(_boundary, "ANY_BOUNDARY_ID"))
+    paramError("boundary",
+               "'ANY_BOUNDARY_ID' is not accepted because 'boundary' selects sides on the boundary "
+               "of the NEML2 domain; use 'ANY_DOMAIN_BOUNDARY_ID' to select every such sideset.");
+  if (contains(_interface, "ANY_DOMAIN_BOUNDARY_ID"))
+    paramError("interface",
+               "'ANY_DOMAIN_BOUNDARY_ID' is only accepted in 'boundary'; use 'ANY_BOUNDARY_ID' to "
+               "select every internal interface of the NEML2 domain.");
+  const bool expand_boundary = contains(_boundary, "ANY_DOMAIN_BOUNDARY_ID");
+  const bool expand_interface = contains(_interface, "ANY_BOUNDARY_ID");
+
+  std::set<BoundaryID> candidate_set;
+  if (expand_boundary || expand_interface)
+    candidate_set = mesh.meshSidesetIds();
+
+  // Sidesets listed by name keep the role they are listed under; a keyword only adds the others.
+  std::set<BoundaryID> explicit_ids;
+  const auto collect_explicit_ids =
+      [&](const std::string & param, const std::vector<BoundaryName> & names)
+  {
+    for (const auto & bname : names)
+    {
+      if (bname == "ANY_DOMAIN_BOUNDARY_ID" || bname == "ANY_BOUNDARY_ID")
+        continue;
+      if (bname.empty() ||
+          (!MooseUtils::isDigits(bname) && !MooseMeshUtils::hasBoundaryName(mesh_base, bname)))
+        paramError(param, "Sideset '", bname, "' does not exist in the mesh.");
+      const auto bid = mesh.getBoundaryID(bname);
+      if (!mesh.meshBoundaryIds().count(bid))
+        paramError(param, "Sideset '", bname, "' does not exist in the mesh.");
+      candidate_set.insert(bid);
+      explicit_ids.insert(bid);
+    }
+  };
+  collect_explicit_ids("boundary", _boundary);
+  collect_explicit_ids("interface", _interface);
+
+  const std::vector<BoundaryID> candidate_bids(candidate_set.begin(), candidate_set.end());
+  std::map<BoundaryID, std::size_t> bid_to_idx;
+  for (const auto i : index_range(candidate_bids))
+    bid_to_idx[candidate_bids[i]] = i;
+
+  // Per-sideset classification flags (4 entries per candidate BoundaryID, valued 0 or 1 so
+  // elementwise _communicator.max is exact logical OR across ranks):
+  //   0: ext_bnd -- side owned by an element in D with no neighbor
+  //   1: sub_bnd -- side owned by an element in D whose neighbor is outside D
+  //   2: iface   -- side whose owning and neighbor elements are both in D
+  //   3: rev     -- side owned by an element outside D whose neighbor is in D
+  std::vector<unsigned char> flat_flags(4 * candidate_bids.size(), 0);
+  std::vector<bool> needs_side_loop(candidate_bids.size(), false);
+  bool any_needs_side_loop = false;
+
+  for (const auto i : index_range(candidate_bids))
+  {
+    const auto bid = candidate_bids[i];
+    const auto primary_blocks = mesh.getBoundaryConnectedBlocks(bid);
+    const auto secondary_blocks = mesh.getBoundaryConnectedSecondaryBlocks(bid);
+
+    bool any_primary_in_d = false;
+    for (const auto sid : primary_blocks)
+      if (in_domain(sid))
+        any_primary_in_d = true;
+
+    bool any_secondary_in_d = false;
+    for (const auto sid : secondary_blocks)
+      if (in_domain(sid))
+        any_secondary_in_d = true;
+
+    auto * const flags = &flat_flags[4 * i];
+    if (!any_primary_in_d && !any_secondary_in_d)
+      continue;
+    if (!any_primary_in_d && any_secondary_in_d)
+      flags[3] = 1;
+    else if (any_primary_in_d && secondary_blocks.empty())
+      flags[0] = 1;
+    else
+    {
+      needs_side_loop[i] = true;
+      any_needs_side_loop = true;
+    }
+  }
+
+  if (any_needs_side_loop)
+  {
+    for (const auto & [elem_id, side, bid] : bnd_info.build_side_list())
+    {
+      const auto it = bid_to_idx.find(bid);
+      if (it == bid_to_idx.end() || !needs_side_loop[it->second])
+        continue;
+      const Elem * const elem = mesh_base.elem_ptr(elem_id);
+      if (!elem->active() || elem->processor_id() != _app.processor_id())
+        continue;
+
+      const bool elem_in_d = in_domain(elem->subdomain_id());
+      const Elem * const neighbor = elem->neighbor_ptr(side);
+      auto * const flags = &flat_flags[4 * it->second];
+      if (!neighbor)
+      {
+        if (elem_in_d)
+          flags[0] = 1;
+      }
+      else
+      {
+        mooseAssert(neighbor != libMesh::remote_elem,
+                    "Active local element neighbor must be ghosted");
+        const bool neighbor_in_d = in_domain(neighbor->subdomain_id());
+        if (elem_in_d && !neighbor_in_d)
+          flags[1] = 1;
+        else if (elem_in_d && neighbor_in_d)
+          flags[2] = 1;
+        else if (!elem_in_d && neighbor_in_d)
+          flags[3] = 1;
+      }
+    }
+    _communicator.max(flat_flags);
+  }
+
+  const auto sideset_name = [&](const BoundaryID bid) -> BoundaryName
+  {
+    const auto & sname = bnd_info.get_sideset_name(bid);
+    return sname.empty() ? BoundaryName(std::to_string(bid)) : BoundaryName(sname);
+  };
+
+  const auto report_reversed = [&](const std::string & param, const std::string & bname)
+  {
+    paramError(
+        param,
+        "Sideset '",
+        bname,
+        "' has a side owned by an element outside the NEML2 domain while its neighbor is inside "
+        "the domain. MOOSE evaluates a boundary on the element that owns each side; rebuild the "
+        "sideset with SideSetsBetweenSubdomainsGenerator with 'primary_block' set to the NEML2 "
+        "block.");
+  };
+
+  if (expand_boundary || expand_interface)
+  {
+    std::vector<BoundaryName> resolved_boundary;
+    std::vector<BoundaryName> resolved_interface;
+
+    for (const auto i : index_range(candidate_bids))
+    {
+      const auto bid = candidate_bids[i];
+      if (explicit_ids.count(bid))
+        continue;
+      const auto * const flags = &flat_flags[4 * i];
+      const bool has_bnd = flags[0] || flags[1];
+      const bool has_iface = flags[2];
+      const bool has_rev = flags[3];
+
+      // The two keywords select disjoint sidesets: ANY_DOMAIN_BOUNDARY_ID takes those touching
+      // the domain boundary, ANY_BOUNDARY_ID those lying entirely inside the domain.
+      if (expand_boundary && (has_bnd || has_rev))
+      {
+        if (has_rev)
+          report_reversed("boundary", sideset_name(bid));
+        if (has_iface)
+          paramError(
+              "boundary",
+              "Sideset '",
+              sideset_name(bid),
+              "' contains both sides on the boundary of the NEML2 domain and sides whose two "
+              "elements are both in the domain, so 'ANY_DOMAIN_BOUNDARY_ID' cannot classify "
+              "it; list it explicitly in 'boundary' to evaluate every side on its owning "
+              "element only, or split it into separate sidesets.");
+        resolved_boundary.push_back(sideset_name(bid));
+      }
+      else if (expand_interface && has_iface)
+      {
+        if (has_bnd || has_rev)
+          paramError(
+              "interface",
+              "Sideset '",
+              sideset_name(bid),
+              "' contains both sides whose two elements are both in the NEML2 domain and "
+              "sides on the boundary of the domain, so 'ANY_BOUNDARY_ID' cannot classify it; "
+              "list it explicitly in 'boundary', or split it into separate sidesets.");
+        resolved_interface.push_back(sideset_name(bid));
+      }
+    }
+
+    if (expand_boundary && resolved_boundary.empty())
+      paramError("boundary",
+                 "'ANY_DOMAIN_BOUNDARY_ID' matched no sideset on the boundary of the NEML2 domain. "
+                 "Sides between a block of the domain and a block outside it are selected only if "
+                 "they belong to a sideset, such as one from SideSetsBetweenSubdomainsGenerator.");
+    if (expand_interface && resolved_interface.empty())
+      paramError("interface",
+                 "'ANY_BOUNDARY_ID' matched no sideset whose sides all have both elements in the "
+                 "NEML2 domain.");
+
+    const auto replace_keyword = [](std::vector<BoundaryName> & names,
+                                    const std::string & keyword,
+                                    const std::vector<BoundaryName> & resolved)
+    {
+      names.erase(std::remove(names.begin(), names.end(), keyword), names.end());
+      names.insert(names.end(), resolved.begin(), resolved.end());
+    };
+    if (expand_boundary)
+      replace_keyword(_boundary, "ANY_DOMAIN_BOUNDARY_ID", resolved_boundary);
+    if (expand_interface)
+      replace_keyword(_interface, "ANY_BOUNDARY_ID", resolved_interface);
+  }
+
+  std::set<BoundaryID> selected_boundary_ids;
+  for (const auto & bname : _boundary)
+  {
+    const auto bid = mesh.getBoundaryID(bname);
+    selected_boundary_ids.insert(bid);
+    const auto * const flags = &flat_flags[4 * libmesh_map_find(bid_to_idx, bid)];
+    const bool has_bnd = flags[0] || flags[1];
+    const bool has_iface = flags[2];
+    const bool has_rev = flags[3];
+
+    // Sides whose two elements are both in the domain are accepted and evaluated on the owning
+    // element only, as DomainUserObject does for 'boundaries'.
+    if (has_rev)
+      report_reversed("boundary", bname);
+    if (!has_bnd && !has_iface)
+      paramError("boundary",
+                 "Sideset '",
+                 bname,
+                 "' has no sides owned by an element in the NEML2 domain.");
+  }
+
+  for (const auto & bname : _interface)
+  {
+    const auto bid = mesh.getBoundaryID(bname);
+    if (selected_boundary_ids.count(bid))
+      paramError("interface",
+                 "Sideset '",
+                 bname,
+                 "' cannot be selected in both 'boundary' and 'interface'.");
+
+    const auto * const flags = &flat_flags[4 * libmesh_map_find(bid_to_idx, bid)];
+    const bool has_ext = flags[0];
+    const bool has_sub = flags[1];
+    const bool has_iface = flags[2];
+    const bool has_rev = flags[3];
+
+    if (has_ext)
+      paramError("interface",
+                 "Sideset '",
+                 bname,
+                 "' contains an external side, but interface boundaries must contain neighbors; "
+                 "use 'boundary' instead.");
+    if (has_sub || has_rev)
+      paramError("interface",
+                 "Sideset '",
+                 bname,
+                 "' has a side whose other element is outside the NEML2 domain; use 'boundary' for "
+                 "the edge of a block-restricted domain.");
+    if (!has_iface)
+      paramError("interface",
+                 "Sideset '",
+                 bname,
+                 "' has no internal interface sides in the NEML2 domain.");
+  }
 }
 
 void

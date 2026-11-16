@@ -92,6 +92,11 @@ protected:
   /// old value is requested).
   void checkStatefulConsistency(const NEML2ModelHandle &) const;
 
+  /// Expand 'ANY_DOMAIN_BOUNDARY_ID' in 'boundary' and 'ANY_BOUNDARY_ID' in 'interface', and
+  /// validate sideset topology and orientation against the NEML2 domain ('block', or all blocks
+  /// when empty).
+  void resolveAndValidateEvaluationDomains();
+
   /// Resolve a user-written parameter name to a fully-qualified NEML2 parameter name. Accepts an
   /// exact match or an unambiguous trailing ".<name>" suffix of a registered parameter. The
   /// candidates are the keys of the model's parameter_base_shapes() map.
@@ -141,11 +146,14 @@ protected:
   /// Whether this sub-block action evaluates element-interior quadrature points
   const bool _volume;
 
-  /// External boundaries this sub-block action applies to
-  const std::vector<BoundaryName> _boundary;
+  /// Boundaries of the NEML2 domain this sub-block action applies to
+  std::vector<BoundaryName> _boundary;
 
   /// Internal interfaces this sub-block action applies to
-  const std::vector<BoundaryName> _interface;
+  std::vector<BoundaryName> _interface;
+
+  /// Whether 'boundary' and 'interface' have been resolved and validated against the mesh
+  bool _domains_resolved = false;
 
   /// MATERIAL inputs supplied by a true InterfaceMaterial (read from INTERFACE_MATERIAL_DATA)
   const std::vector<MaterialPropertyName> _interface_material_inputs;

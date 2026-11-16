@@ -75,16 +75,27 @@ The three domain parameters of the sub-block are passed to the constructed objec
 | Sub-block parameter | Gatherers and index generator | Retrievers                                   |
 | :------------------ | :---------------------------- | :------------------------------------------- |
 | `volume`            | `volume`                      | Block material on `block` if `true`          |
-| `boundary`          | `external_boundaries`         | Part of `boundary` if `volume = false`       |
+| `boundary`          | `boundaries`                  | Part of `boundary` if `volume = false`       |
 | `interface`         | `interface_boundaries`        | Part of `boundary` if `volume = false`       |
+
+Before constructing any objects, the action classifies mesh sidesets against the NEML2 domain
+([!param](/NEML2/block), or all blocks when empty), reduces the classification across MPI ranks,
+expands `ANY_DOMAIN_BOUNDARY_ID` in `boundary` and `ANY_BOUNDARY_ID` in `interface` into explicit
+sideset lists, and validates
+sideset topology and orientation (see
+[DomainUserObject side execution](syntax/UserObjects/index.md#domain-user-object-side-execution)).
+Downstream gatherers, the batch index generator, and retrievers receive only the resolved explicit
+lists.
 
 +Batch layout.+ The gatherers and the index generator are domain user objects, so they visit the same
 locations in the same order. Each visited location receives one contiguous span of the NEML2 batch,
 with one entry per quadrature point:
 
 - a volume span for each element when `volume = true`,
-- a side span for each `(element ID, side)` pair on a selected external boundary,
-- two side spans for each face on a selected interface, one for each of the two elements.
+- a side span for each `(element ID, side)` pair on a selected boundary whose owning element is in
+  the NEML2 domain,
+- two side spans for each face on a selected interface (where the elements on both sides are in the
+  NEML2 domain), one for each of the two elements.
 
 Volume spans are keyed by element ID and side spans by `(element ID, side)`, in separate maps. A
 retriever never converts between the two, because volume and side quadrature points do not coincide.
