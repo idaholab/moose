@@ -5,7 +5,7 @@
     exodiff = 'timestepmaterial_out.e'
     issues = '#7621'
     design = 'TimeStepMaterial.md'
-    requirement = 'A material shall be implemented that provides dt, time, and time step number as '
+    requirement = 'The system shall implement a material that provides dt, time, and time step number as '
                   'material properties'
   []
   [variablegradientmaterial]
@@ -13,7 +13,7 @@
     input = 'variablegradientmaterial.i'
     exodiff = 'variablegradientmaterial_out.e'
     issues = '#7621'
-    requirement = 'A material shall be implemented that computes the magnitude of the gradient of a '
+    requirement = 'The system shall implement a material that computes the magnitude of the gradient of a '
                   'given variable'
     design = 'VariableGradientMaterial.md'
   []
@@ -23,7 +23,7 @@
     input = 'interface_grad.i'
     exodiff = 'interface_grad_out.e'
     issues = '#8211'
-    requirement = 'An interface kernel shall be implemented to match gradients between two '
+    requirement = 'The system shall implement an interface kernel to match gradients between two '
                   'subdomains'
     design = 'InterfaceDiffusionFluxMatch.md'
   []
@@ -32,7 +32,7 @@
     input = 'interface_flux.i'
     exodiff = 'interface_flux_out.e'
     issues = '#8211'
-    requirement = 'Demonstrate an InterfaceKernel (InterfaceDiffusionFlux) that can replace a pair '
+    requirement = 'The system shall provide an InterfaceKernel (InterfaceDiffusionFlux) that can replace a pair '
                   'of integrated DiffusionFluxBC boundary conditions.'
     design = 'InterfaceDiffusionBoundaryTerm.md'
   []
@@ -42,7 +42,7 @@
     input = 'equal_gradient_lagrange.i'
     exodiff = 'equal_gradient_lagrange_out.e'
     issues = '#8211'
-    requirement = 'An InterfaceKernel set shall be implemented that can enforce the componentwise '
+    requirement = 'The system shall implement an InterfaceKernel set that can enforce the componentwise '
                   'continuity of the gradient of a variable using the Lagrange multiplier method'
     design = 'EqualGradientLagrangeInterface.md'
   []
@@ -52,7 +52,7 @@
     input = 'coupled_value_function_ic.i'
     csvdiff = 'coupled_value_function_ic_out.csv'
     issues = '#16405'
-    requirement = 'An initial condition shall be implemented that can set the value of a variable to '
+    requirement = 'The system shall implement an initial condition that can set the value of a variable to '
                   'the value of a function evaluated over a set of up to four coupled variables'
     design = 'CoupledValueFunctionIC.md'
   []
@@ -62,7 +62,7 @@
     input = 'interface_normal_curvatures.i'
     exodiff = 'interface_normal_curvatures_out.e'
     issues = '#32436'
-    requirement = 'An Material shall be implemented that can calculate the normal curvatures of'
+    requirement = 'The system shall implement a Material that can calculate the normal curvatures of '
                   'an interface defined by an order parameter'
     design = 'InterfaceNormalCurvatures.md'
   []

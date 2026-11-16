@@ -5,6 +5,6 @@
     exodiff = 'fourier_noise_out.e'
     issues = '#13316'
     design = '/FourierNoise.md'
-    requirement = 'A function that returns a new periodic random field with a lower wavelength cut-off shall be provided.'
+    requirement = 'The system shall provide a function that returns a new periodic random field with a lower wavelength cut-off.'
   [../]
 []
