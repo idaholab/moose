@@ -77,6 +77,8 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   T_tol = 1.0e-5
   implicit = true
   segregated = false
+  # An exact factorization of the coupled matrix is faster for this case
+  coupled_preconditioner = lu
   interpolation_scheme = 'central_difference'
   verbose_subchannel = true
   friction_closure = 'Chen'

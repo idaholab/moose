@@ -317,11 +317,15 @@ protected:
   /// The divergence tolerance for the ksp linear solver
   const PetscReal & _dtol;
   /// The maximum number of iterations to use for the ksp linear solver
-  const PetscInt & _maxit;
+  const PetscInt _maxit;
   /// Restart length of the FGMRES solver of the coupled monolithic flow system
-  const PetscInt & _coupled_gmres_restart;
+  const PetscInt _coupled_gmres_restart;
   /// Initial pseudo-time step of the crossflow damping
   const Real & _crossflow_pseudo_time_step;
+  /// Whether the crossflow of the coupled solve is damped with a pseudo-time derivative
+  const bool _crossflow_pseudo_time_damping;
+  /// Preconditioner of the coupled monolithic flow system
+  const MooseEnum _coupled_preconditioner;
   /// The interpolation method used in constructing the systems
   const MooseEnum _interpolation_scheme;
   /// The direction of gravity

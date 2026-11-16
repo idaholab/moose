@@ -5,7 +5,8 @@ method itself is described in [Crossflow damping](subchannel_theory.md#monolithi
 measured behavior is reported. The case is the EBR-II SHRT-17 steady state,
 `test/tests/problems/SFR/EBR-II/XX09_SS_SHRT17.i`, a 61-pin wire-wrapped assembly at 486.2 kW with
 50 axial cells, solved with [!param](/Problem/TriSubChannel1PhaseProblem/P_tol) of $10^{-4}$ and
-[!param](/Problem/TriSubChannel1PhaseProblem/T_tol) of $10^{-5}$.
+[!param](/Problem/TriSubChannel1PhaseProblem/T_tol) of $10^{-5}$, with the damping enabled and the
+`fieldsplit_ilu` preconditioner.
 
 ## Why the damping needs both of its parts
 

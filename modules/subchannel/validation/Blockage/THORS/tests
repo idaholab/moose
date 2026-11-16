@@ -25,6 +25,7 @@
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
+    heavy = true
     requirement = 'The system shall examine the subchannel solver for the FFM-5B high flow case'
   []
   [FFM-3A]

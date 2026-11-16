@@ -7,8 +7,8 @@
 !! this comment introduces vertical space
 
 The user needs to specify a subchannel problem, either a [QuadSubChannel1PhaseProblem.md] or a
-[TriSubChannel1PhaseProblem.md]. The postprocessor calculates the heat rate that axial conduction
-carries out of the assembly through the inlet, against the flow, [inlet_conduction], where $i$ is
+[TriSubChannel1PhaseProblem.md]. The postprocessor calculates the surface-integrated heat flux that
+axial conduction carries out of the assembly through the inlet, against the flow, [inlet_conduction], where $i$ is
 the subchannel index, $k$ the thermal conductivity, $c_p$ the specific heat, $S$ the flow area and
 $\Delta z$ the height of the first axial cell. Face values are the average of the two nodes, as in
 the enthalpy equation.

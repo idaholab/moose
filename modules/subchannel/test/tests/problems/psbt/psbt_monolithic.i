@@ -38,6 +38,8 @@ pin_diameter = 0.00950
   verbose_subchannel = true
   implicit = true
   segregated = false
+  # An exact factorization of the coupled matrix is faster for this case
+  coupled_preconditioner = lu
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'
   full_output = true

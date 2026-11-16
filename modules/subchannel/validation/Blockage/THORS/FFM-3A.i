@@ -55,7 +55,7 @@ P_out = 2.0e5 # Pa
   compute_power = true
   # Tight enough that the outer iteration reaches the converged solution: tightening further to 1e-8
   # moves the thermocouple temperatures by 4e-7, while 1e-4 stopped up to 4e-4 away from it, at a
-  # point that depended on the relaxation and on the PETSc version
+  # point that depended on the crossflow relaxation
   P_tol = 1.0e-6
   T_tol = 1.0e-6
   # Fewer coupled-solve retries than the default of 0.1 at these tolerances (33 against 72), and the
@@ -63,6 +63,8 @@ P_out = 2.0e5 # Pa
   crossflow_equation_relaxation = 0.5
   implicit = true
   segregated = false
+  # An exact factorization of the coupled matrix is faster for this case
+  coupled_preconditioner = lu
   verbose_subchannel = true
   interpolation_scheme = exponential
   pin_HTC_closure = 'Dittus-Boelter'
