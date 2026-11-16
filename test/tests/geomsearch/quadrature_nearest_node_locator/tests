@@ -5,7 +5,7 @@
     input = 'quadrature_nearest_node_locator.i'
     exodiff = 'quadrature_nearest_node_locator_out.e'
     group = 'geometric'
-    requirement = "The system shall compute, using the NearestNodeDistanceAux object, the shortest distance between nodes on two overlapping boundaries using a constant monomial auxiliary variable."
+    requirement = "The system shall compute the shortest distance between nodes on two overlapping boundaries using a constant monomial auxiliary variable."
     issues = '#1462'
   [../]
   [qnnl_ad]

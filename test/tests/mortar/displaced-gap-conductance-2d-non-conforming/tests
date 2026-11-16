@@ -20,7 +20,7 @@
     []
   [../]
   [dynamic_gap_jacobian]
-    requirement = 'The system shall compute a perfect Jacobian for the dynamic aux displacement gap conductance test case when computing the residual and Jacobian'
+    requirement = 'The system shall compute a numerically accurate Jacobian for the dynamic aux displacement gap conductance test case when computing the residual and Jacobian'
     [separate]
       type = PetscJacobianTester
       run_sim = True

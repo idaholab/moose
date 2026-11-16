@@ -32,7 +32,7 @@
     input = 'soln-continuity.i'
     run_sim = True
     difference_tol = 1e-7
-    requirement = 'The system shall compute a perfect Jacobian for the solution continuity test case'
+    requirement = 'The system shall compute a numerically accurate Jacobian for the solution continuity test case'
     prereq = 'soln-continuity'
   []
   [soln-continuity-pg]

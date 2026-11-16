@@ -13,6 +13,6 @@
     run_sim = True
     difference_tol = 1e-7
     cli_args = 'Mesh/file/file=square_coarse.msh'
-    requirement = 'The system shall compute a perfect Jacobian for mortar enforcement of periodic boundary conditions'
+    requirement = 'The system shall compute a numerically accurate Jacobian for mortar enforcement of periodic boundary conditions'
   []
 []

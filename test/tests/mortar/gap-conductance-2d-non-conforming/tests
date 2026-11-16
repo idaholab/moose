@@ -12,7 +12,7 @@
     run_sim = True
     input = 'gap-conductance.i'
     difference_tol = 1e-7
-    requirement = 'The system shall compute a perfect Jacobian for the gap conductance test case'
+    requirement = 'The system shall compute a numerically accurate Jacobian for the gap conductance test case'
     prereq = 'real_mortar_gap_conductance'
   []
   [gap_conductance_fine]

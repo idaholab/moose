@@ -7,7 +7,7 @@
     input = 'point_marker_test.i'
     exodiff = 'point_marker_test_out.e'
     scale_refine = 2
-    requirement = "The system shall, through the adaptivity system, create an auxiliary field variable that marks "
+    requirement = "The system shall create an auxiliary field variable that marks "
                   "elements containing the points from the reporter for refinement."
   []
   [wrong_size_error]
