@@ -70,7 +70,7 @@
   []
   [auxvar_source]
     type = MFEMMixedVectorGradientKernel
-    trial_variable = electric_potential
+    coupled_variable = electric_potential
     variable = a_field
     block = 1
   []
