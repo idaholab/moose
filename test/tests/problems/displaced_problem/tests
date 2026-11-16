@@ -29,4 +29,22 @@
       detail = 'TRI7 elements with second order displacements.'
     []
   []
+  [nodes_without_dofs_jacobian]
+    requirement = 'The system shall compute exact AD Jacobians of element and side integrals on the '
+                  'displaced mesh with respect to the displacements of mesh nodes that carry no '
+                  'degrees of freedom of the displacement variables, for'
+    [tet14]
+      type = PetscJacobianTester
+      input = 'nodes_without_dofs_jacobian.i'
+      detail = 'TET14 elements with second order displacements and'
+    []
+    [tri7]
+      type = PetscJacobianTester
+      input = 'nodes_without_dofs_jacobian.i'
+      cli_args = "Mesh/gmg/dim=2 Mesh/gmg/elem_type=TRI3 GlobalParams/displacements='disp_x disp_y' "
+                 "Variables/inactive=disp_z Kernels/inactive=diff_z "
+                 "Variables/disp_y/InitialCondition/function='0.1 * x * (x + y)'"
+      detail = 'TRI7 elements with second order displacements.'
+    []
+  []
 []

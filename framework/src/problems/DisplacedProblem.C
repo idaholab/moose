@@ -1557,8 +1557,8 @@ DisplacedProblem::UpdateDisplacedMeshThread::displaceNodesWithoutDofs()
     {
       const auto var_num = var_numbers[i];
       const auto & fe_type = dof_map.variable_type(var_num);
-      // Only for Lagrange variables are all element degrees of freedom nodal, and therefore in
-      // the ghosted solution built by init()
+      // Only for Lagrange variables are all element degrees of freedom located at Node points, and
+      // therefore in the ghosted solution built by init()
       if (fe_type.family != LAGRANGE)
         continue;
 
@@ -1572,9 +1572,8 @@ DisplacedProblem::UpdateDisplacedMeshThread::displaceNodesWithoutDofs()
                         { return elem->node_ref(n).n_dofs(sys_num, var_num) > 0; }))
           continue;
 
-        // libMesh evaluates the element's displacement at nodes without degrees of freedom from
-        // the nodes of the face (or element) they belong to, so elements sharing such a node give
-        // it the same position
+        // nodal_soln computes the displacement of a face node from the nodes of that face alone, so
+        // every element sharing the face moves the node to the same position
         dof_map.dof_indices(elem, dof_indices, var_num);
         soln.get(dof_indices, elem_soln);
         FEInterface::nodal_soln(elem->dim(), fe_type, elem, elem_soln, nodal_soln);

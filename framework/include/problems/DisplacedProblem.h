@@ -421,7 +421,7 @@ protected:
      * Displace the nodes of elements on which a displacement variable has no degrees of freedom,
      * such as the face and interior nodes of TRI7 or TET14 elements with SECOND order
      * displacements, by interpolating the displacement from the other element nodes. This is not
-     * threaded because elements sharing such a node write to it.
+     * threaded because multiple elements sharing a face node write to it.
      */
     void displaceNodesWithoutDofs();
 
