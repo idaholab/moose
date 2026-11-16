@@ -15,10 +15,10 @@
 /**
  * Mesh generator that builds a 3D mesh representing triangular subchannels and pins
  */
-class SCMDetailedTriAssemblyMeshGenerator : public MeshGenerator
+class SCMTriVisualizationAssemblyMeshGenerator : public MeshGenerator
 {
 public:
-  SCMDetailedTriAssemblyMeshGenerator(const InputParameters & parameters);
+  SCMTriVisualizationAssemblyMeshGenerator(const InputParameters & parameters);
   virtual std::unique_ptr<MeshBase> generate() override;
 
 protected:

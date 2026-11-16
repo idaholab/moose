@@ -13,12 +13,13 @@
 #include "SubChannelEnums.h"
 
 /**
- * Mesh generator that builds a detailed 3D mesh representing quadrilateral subchannels and pins
+ * Mesh generator that builds a 3D visualization mesh representing quadrilateral subchannels and
+ * pins
  */
-class SCMDetailedQuadAssemblyMeshGenerator : public MeshGenerator
+class SCMQuadVisualizationAssemblyMeshGenerator : public MeshGenerator
 {
 public:
-  SCMDetailedQuadAssemblyMeshGenerator(const InputParameters & parameters);
+  SCMQuadVisualizationAssemblyMeshGenerator(const InputParameters & parameters);
   virtual std::unique_ptr<MeshBase> generate() override;
 
 protected:
