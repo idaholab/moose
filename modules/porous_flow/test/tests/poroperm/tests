@@ -343,6 +343,15 @@
     issues = '#33944'
     design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
   []
+  [vinsome_westerveld_thin_thickness]
+    type = CSVDiff
+    input = vinsome_westerveld.i
+    cli_args = 'Materials/porosity_VW/matrix_thickness=1E-6 Outputs/file_base=vinsome_westerveld_thin_thickness_out'
+    csvdiff = vinsome_westerveld_thin_thickness_out.csv
+    requirement = 'The system shall calculate the Vinsome-Westerveld thermal opening of a matrix layer that is much thinner than the diffusion length, for which the layer temperature is uniform.'
+    issues = '#33944'
+    design = 'porous_flow/porosity.md PorousFlowPorosityVinsomeWesterveld.md'
+  []
   [vinsome_westerveld_thickness_one_step]
     type = CSVDiff
     input = vinsome_westerveld.i
