@@ -23,6 +23,6 @@
     input = 'min_general_damping.i'
     expect_err = "Solve failed and timestep already at or below dtmin"
     design = 'syntax/Dampers/index.md'
-    requirement = "The system shall, through the Damper system, error if the damping value is below a minimum."
+    requirement = "The system shall error if the damping value is below a minimum."
   [../]
 []
