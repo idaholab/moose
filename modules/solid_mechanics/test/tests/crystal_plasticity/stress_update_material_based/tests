@@ -48,7 +48,7 @@
     exodiff = 'substep_out.e'
     allow_warnings = true
     issues = '#6097'
-    requirement = 'The system shall provide, in the crystal plasticity system, a substepping capability for improved '
+    requirement = 'The system shall provide a substepping capability for improved '
                   'convergence using the stress-update based crystal plasticity implementation'
     design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
     capabilities = 'method!=dbg'
@@ -58,7 +58,7 @@
     input = 'linesearch.i'
     exodiff = 'linesearch_out.e'
     issues = '#16064'
-    requirement = 'The system shall implement, in the crystal plasticity system, a line search capability for '
+    requirement = 'The system shall implement a line search capability for '
                   'accelerated internal Newton solves using the stress-update based crystal plasticity implementation'
     design = '/CrystalPlasticityKalidindiUpdate.md'
   []

@@ -29,7 +29,7 @@
     input = 'fileread.i'
     exodiff = 'fileread_out.e'
     issues = '#6097'
-    requirement = 'The system shall provide, in the crystal plasticity system, a function to read slip system parameters from files'
+    requirement = 'The system shall provide a function to read crystal plasticity slip system parameters from files'
     design = '/FiniteStrainUObasedCP.md'
   []
   [user_object]
@@ -37,7 +37,7 @@
     input = 'user_object.i'
     exodiff = 'user_object_out.e'
     issues = '#6097'
-    requirement = 'The system shall use, in the crystal plasticity system, pluggable user objects to determine the plasticity state variable evolution'
+    requirement = 'The system shall use pluggable user objects to determine the crystal plasticity state variable evolution'
     design = '/FiniteStrainUObasedCP.md'
     capabilities = 'method!=dbg'
   []
@@ -46,7 +46,7 @@
     input = 'save_euler.i'
     exodiff = 'save_euler_out.e'
     issues = '#6097'
-    requirement = 'The system shall make, in the crystal plasticity system, local Euler angles at material points available for output'
+    requirement = 'The system shall make crystal plasticity local Euler angles at material points available for output'
     design = '/FiniteStrainUObasedCP.md'
     capabilities = 'method!=dbg'
   []
@@ -56,7 +56,7 @@
     exodiff = 'substep_out.e'
     allow_warnings = true
     issues = '#6097'
-    requirement = 'The system shall provide, in the crystal plasticity system, a substepping capability for improved convergence'
+    requirement = 'The system shall provide a crystal plasticity substepping capability for improved convergence'
     design = '/FiniteStrainUObasedCP.md'
     capabilities = 'method!=dbg'
   []
@@ -65,7 +65,7 @@
     input = 'linesearch.i'
     exodiff = 'linesearch_out.e'
     issues = '#6097'
-    requirement = 'The system shall implement, in the crystal plasticity system, a line search capability for accelerated internal Newton solves'
+    requirement = 'The system shall implement a crystal plasticity line search capability for accelerated internal Newton solves'
     design = '/FiniteStrainUObasedCP.md'
   []
   [orthotropic_rotation_Cijkl]
@@ -82,7 +82,7 @@
     input = 'user_object_Voce_BCC.i'
     exodiff = 'user_object_Voce_BCC_out.e'
     issues = '#11307'
-    requirement = 'The system shall provide, in the crystal plasticity system, a plugin user object implementing the Voce hardening law'
+    requirement = 'The system shall provide a crystal plasticity plugin user object implementing the Voce hardening law'
     design = '/CrystalPlasticityStateVarRateComponentVoce.md'
     capabilities = 'method!=dbg'
   []
