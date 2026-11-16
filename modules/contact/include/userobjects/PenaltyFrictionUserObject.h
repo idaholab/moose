@@ -49,25 +49,50 @@ public:
   virtual void updateAugmentedLagrangianMultipliers() override;
 
 protected:
+  /**
+   * Find a lower-dimensional secondary element containing a node
+   * @param node Secondary node
+   * @return The element and the node's local index in it
+   */
   std::pair<const Elem *, unsigned int> secondaryNode(const Node & node) const;
-  ADReal tangentialComponent(const Node & node,
-                             const ADRealVectorValue & vector,
-                             unsigned int direction) const;
-  Real tangentialComponent(const Node & node,
-                           const RealVectorValue & vector,
-                           unsigned int direction) const;
-  ADReal tangentialComponent(const Elem & elem,
-                             unsigned int node_index,
-                             const ADRealVectorValue & vector,
-                             unsigned int direction) const;
-  ADRealVectorValue tangentialVector(const Elem & elem,
-                                     unsigned int node_index,
-                                     const ADTwoVector & components) const;
-  RealVectorValue tangentialVector(const Node & node, const TwoVector & components) const;
-  ADRealVectorValue tangentialProjection(const Elem & elem,
+
+  /**
+   * Component of a Cartesian vector along one of a secondary node's tangent directions. With
+   * \p is_ad, the tangent carries the nodal-normal derivatives when they are being recorded.
+   * @param elem Lower-dimensional secondary element containing the node
+   * @param node_index Local index of the node in \p elem
+   * @param vector Cartesian vector
+   * @param direction Tangent direction, 0 or 1
+   */
+  template <bool is_ad>
+  GenericReal<is_ad> tangentialComponent(const Elem & elem,
                                          unsigned int node_index,
-                                         const ADRealVectorValue & vector) const;
-  RealVectorValue tangentialProjection(const Node & node, const RealVectorValue & vector) const;
+                                         const GenericRealVectorValue<is_ad> & vector,
+                                         unsigned int direction) const;
+
+  /**
+   * Cartesian vector from its components along a secondary node's two tangent directions
+   * @param elem Lower-dimensional secondary element containing the node
+   * @param node_index Local index of the node in \p elem
+   * @param components Components along the first and second tangent directions
+   */
+  template <bool is_ad>
+  GenericRealVectorValue<is_ad>
+  tangentialVector(const Elem & elem,
+                   unsigned int node_index,
+                   const GenericTwoVector<GenericReal<is_ad>> & components) const;
+
+  /**
+   * Projection of a Cartesian vector onto a secondary node's current tangent plane
+   * @param elem Lower-dimensional secondary element containing the node
+   * @param node_index Local index of the node in \p elem
+   * @param vector Cartesian vector
+   */
+  template <bool is_ad>
+  GenericRealVectorValue<is_ad>
+  tangentialProjection(const Elem & elem,
+                       unsigned int node_index,
+                       const GenericRealVectorValue<is_ad> & vector) const;
 
   virtual const VariableTestValue & test() const override;
   virtual bool constrainedByOwner() const override { return false; }

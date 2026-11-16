@@ -136,104 +136,62 @@ PenaltyFrictionUserObject::secondaryNode(const Node & node) const
   mooseError("Unable to locate secondary node ", node.id(), " in its mortar elements.");
 }
 
-ADReal
-PenaltyFrictionUserObject::tangentialComponent(const Node & node,
-                                               const ADRealVectorValue & vector,
-                                               const unsigned int direction) const
-{
-  if (_subproblem.mesh().dimension() == 2)
-    return vector(direction);
-
-  const auto [elem, node_index] = secondaryNode(node);
-  return tangentialComponent(*elem, node_index, vector, direction);
-}
-
-ADReal
+template <bool is_ad>
+GenericReal<is_ad>
 PenaltyFrictionUserObject::tangentialComponent(const Elem & elem,
                                                const unsigned int node_index,
-                                               const ADRealVectorValue & vector,
+                                               const GenericRealVectorValue<is_ad> & vector,
                                                const unsigned int direction) const
 {
   if (_subproblem.mesh().dimension() == 2)
     return vector(direction);
 
-  if (shouldRecordNodalNormalDerivatives())
-    return vector * contactTangents(elem, node_index)[direction];
+  if constexpr (is_ad)
+    if (shouldRecordNodalNormalDerivatives())
+      return vector * contactTangents(elem, node_index)[direction];
 
   const auto tangents = amg().getNodalTangents(elem);
   return vector * tangents[direction][node_index];
 }
 
-Real
-PenaltyFrictionUserObject::tangentialComponent(const Node & node,
-                                               const RealVectorValue & vector,
-                                               const unsigned int direction) const
+template <bool is_ad>
+GenericRealVectorValue<is_ad>
+PenaltyFrictionUserObject::tangentialVector(
+    const Elem & elem,
+    const unsigned int node_index,
+    const GenericTwoVector<GenericReal<is_ad>> & components) const
 {
   if (_subproblem.mesh().dimension() == 2)
-    return vector(direction);
+    return {components(0), components(1), GenericReal<is_ad>(0)};
 
-  const auto [elem, node_index] = secondaryNode(node);
-  const auto tangents = amg().getNodalTangents(*elem);
-  return vector * tangents[direction][node_index];
-}
-
-ADRealVectorValue
-PenaltyFrictionUserObject::tangentialVector(const Elem & elem,
-                                            const unsigned int node_index,
-                                            const ADTwoVector & components) const
-{
-  if (_subproblem.mesh().dimension() == 2)
-    return {components(0), components(1), ADReal(0)};
-
-  if (shouldRecordNodalNormalDerivatives())
-  {
-    const auto & tangents = contactTangents(elem, node_index);
-    return components(0) * tangents[0] + components(1) * tangents[1];
-  }
+  if constexpr (is_ad)
+    if (shouldRecordNodalNormalDerivatives())
+    {
+      const auto & tangents = contactTangents(elem, node_index);
+      return components(0) * tangents[0] + components(1) * tangents[1];
+    }
 
   const auto tangents = amg().getNodalTangents(elem);
   return components(0) * tangents[0][node_index] + components(1) * tangents[1][node_index];
 }
 
-RealVectorValue
-PenaltyFrictionUserObject::tangentialVector(const Node & node, const TwoVector & components) const
-{
-  if (_subproblem.mesh().dimension() == 2)
-    return {components(0), components(1), 0};
-
-  const auto [elem, node_index] = secondaryNode(node);
-  const auto tangents = amg().getNodalTangents(*elem);
-  return components(0) * tangents[0][node_index] + components(1) * tangents[1][node_index];
-}
-
-ADRealVectorValue
+template <bool is_ad>
+GenericRealVectorValue<is_ad>
 PenaltyFrictionUserObject::tangentialProjection(const Elem & elem,
                                                 const unsigned int node_index,
-                                                const ADRealVectorValue & vector) const
+                                                const GenericRealVectorValue<is_ad> & vector) const
 {
   if (_subproblem.mesh().dimension() == 2)
     return vector;
 
-  if (shouldRecordNodalNormalDerivatives())
-  {
-    const auto & normal = contactNormal(elem, node_index);
-    return vector - (vector * normal) * normal;
-  }
+  if constexpr (is_ad)
+    if (shouldRecordNodalNormalDerivatives())
+    {
+      const auto & normal = contactNormal(elem, node_index);
+      return vector - (vector * normal) * normal;
+    }
 
   const auto normals = amg().getNodalNormals(elem);
-  const auto & normal = normals[node_index];
-  return vector - (vector * normal) * normal;
-}
-
-RealVectorValue
-PenaltyFrictionUserObject::tangentialProjection(const Node & node,
-                                                const RealVectorValue & vector) const
-{
-  if (_subproblem.mesh().dimension() == 2)
-    return vector;
-
-  const auto [elem, node_index] = secondaryNode(node);
-  const auto normals = amg().getNodalNormals(*elem);
   const auto & normal = normals[node_index];
   return vector - (vector * normal) * normal;
 }
@@ -317,7 +275,11 @@ PenaltyFrictionUserObject::getFrictionalContactPressure(const Node * const node,
   const auto it = _dof_to_tangential_traction.find(node->id());
 
   if (it != _dof_to_tangential_traction.end())
-    return tangentialComponent(*node, MetaPhysicL::raw_value(it->second.first), component);
+  {
+    const auto [elem, node_index] = secondaryNode(*node);
+    return tangentialComponent<false>(
+        *elem, node_index, MetaPhysicL::raw_value(it->second.first), component);
+  }
   else
     return 0.0;
 }
@@ -353,7 +315,10 @@ PenaltyFrictionUserObject::getDeltaTangentialLagrangeMultiplier(const Node * con
   const auto it = _dof_to_frictional_lagrange_multipliers.find(node->id());
 
   if (it != _dof_to_frictional_lagrange_multipliers.end())
-    return tangentialComponent(*node, it->second, component);
+  {
+    const auto [elem, node_index] = secondaryNode(*node);
+    return tangentialComponent<false>(*elem, node_index, it->second, component);
+  }
   else
     return 0.0;
 }
@@ -411,7 +376,7 @@ PenaltyFrictionUserObject::reinit()
       const ADTwoVector slip_distance_components = {real_tangential_velocity[0] * _dt,
                                                     real_tangential_velocity[1] * _dt};
       const ADRealVectorValue slip_distance =
-          tangentialVector(*_lower_secondary_elem, i, slip_distance_components);
+          tangentialVector<true>(*_lower_secondary_elem, i, slip_distance_components);
 
       // frictional lagrange multiplier (delta lambda^(k)_T)
       const auto & tangential_lm =
@@ -420,7 +385,7 @@ PenaltyFrictionUserObject::reinit()
       // tangential trial traction (Simo 3.12)
       ADRealVectorValue traction_history = old_tangential_traction + tangential_lm;
       ADRealVectorValue tangential_trial_traction =
-          tangentialProjection(*_lower_secondary_elem, i, traction_history) +
+          tangentialProjection<true>(*_lower_secondary_elem, i, traction_history) +
           penalty_friction * slip_distance;
 
       // Nonlinearity below
@@ -452,8 +417,8 @@ PenaltyFrictionUserObject::reinit()
     // Now that we have consistent nodal frictional values, create an interpolated frictional
     // pressure variable.
     auto & local_traction = _dof_to_local_tangential_traction[node->id()];
-    local_traction = {tangentialComponent(*_lower_secondary_elem, i, tangential_traction, 0),
-                      tangentialComponent(*_lower_secondary_elem, i, tangential_traction, 1)};
+    local_traction = {tangentialComponent<true>(*_lower_secondary_elem, i, tangential_traction, 0),
+                      tangentialComponent<true>(*_lower_secondary_elem, i, tangential_traction, 1)};
     const auto & [tangential_traction_one, tangential_traction_two] = local_traction;
     const auto & test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))
@@ -504,8 +469,8 @@ PenaltyFrictionUserObject::isAugmentedLagrangianConverged()
       const TwoVector slip_velocity_components = {
           MetaPhysicL::raw_value(real_tangential_velocity[0]),
           MetaPhysicL::raw_value(real_tangential_velocity[1])};
-      slip_velocity =
-          tangentialVector(*static_cast<const Node *>(dof_object), slip_velocity_components);
+      const auto [elem, node_index] = secondaryNode(*static_cast<const Node *>(dof_object));
+      slip_velocity = tangentialVector<false>(*elem, node_index, slip_velocity_components);
     }
 
     // Check slip/stick
@@ -570,22 +535,24 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
     const TwoVector slip_velocity_components = {
         MetaPhysicL::raw_value(real_tangential_velocity[0]),
         MetaPhysicL::raw_value(real_tangential_velocity[1])};
-    const auto & node = *static_cast<const Node *>(dof_object);
-    const RealVectorValue slip_velocity = tangentialVector(node, slip_velocity_components);
+    const auto [elem, node_index] = secondaryNode(*static_cast<const Node *>(dof_object));
+    const RealVectorValue slip_velocity =
+        tangentialVector<false>(*elem, node_index, slip_velocity_components);
 
     auto & [tangential_traction, old_tangential_traction] = _dof_to_tangential_traction[node_id];
     const RealVectorValue projected_old_tangential_traction =
-        tangentialProjection(node, old_tangential_traction);
+        tangentialProjection<false>(*elem, node_index, old_tangential_traction);
 
-    const RealVectorValue tangential_trial_traction = projected_old_tangential_traction +
-                                                      tangentialProjection(node, tangential_lm) +
-                                                      penalty_friction * slip_velocity * _dt;
+    const RealVectorValue tangential_trial_traction =
+        projected_old_tangential_traction +
+        tangentialProjection<false>(*elem, node_index, tangential_lm) +
+        penalty_friction * slip_velocity * _dt;
     const Real tangential_trial_traction_norm = tangential_trial_traction.norm();
 
     // Augment
     if (tangential_trial_traction_norm * (1 + TOLERANCE) <= abs(_friction_coefficient * normal_lm))
-      tangential_lm =
-          tangentialProjection(node, tangential_lm) + penalty_friction * slip_velocity * _dt;
+      tangential_lm = tangentialProjection<false>(*elem, node_index, tangential_lm) +
+                      penalty_friction * slip_velocity * _dt;
     else
     {
       // Project the total tangential traction onto the Coulomb cone
