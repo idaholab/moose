@@ -103,7 +103,7 @@
     type = 'Exodiff'
     input = 'multi_update_elem_var_test.i'
     exodiff = 'out_multi_elem_var.e'
-    requirement = "The system shall, through the auxiliary system, be capable of updating multiple elemental "
+    requirement = "The system shall be capable of updating multiple elemental "
                   "auxiliary variables within a single AuxKernel object, including the kernel "
                   "variable itsef using the setNodalValue method."
   []
@@ -112,7 +112,7 @@
     input = 'multi_update_elem_var_test.i'
     cli_args = 'AuxKernels/all/use_compute_value=true'
     exodiff = 'out_multi_elem_var.e'
-    requirement = "The system shall, through the auxiliary system, be capable of updating multiple elemental "
+    requirement = "The system shall be capable of updating multiple elemental "
                   "auxiliary variables within a single AuxKernel object."
     issues = '#22563'
   []
@@ -122,7 +122,7 @@
     input = 'multi_update_elem_var_test.i'
     cli_args = 'AuxVariables/ten/order=FIRST AuxVariables/ten/family=LAGRANGE'
     expect_err = "The elemental AuxKernel 'all' cannot obtain a writable reference to the nodal variable 'ten'\."
-    requirement = "The system shall, through the auxiliary system, check compatibility between primary and writable "
+    requirement = "The system shall check compatibility between primary and writable "
                   "coupled variables."
     issues = '#22563'
   []
@@ -131,7 +131,7 @@
     type = 'Exodiff'
     input = 'nodal_aux_ts_test.i'
     exodiff = 'out_ts.e'
-    requirement = "The system shall, through the auxiliary system, be capable of coupling to nonlinear variables at "
+    requirement = "The system shall be capable of coupling to nonlinear variables at "
                   "the end of a timestep."
   []
 []
