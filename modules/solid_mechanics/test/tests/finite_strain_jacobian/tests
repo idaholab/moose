@@ -5,7 +5,7 @@
     exodiff = 'bending_jacobian_out.e'
     issues = '#7228'
     design = '/ComputeFiniteStrain.md'
-    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
+    requirement = 'The system shall, using finite strain methods in Solid Mechanics, adequately simulate a
                    bar bending simulation in 2D'
   [../]
   [./bending_Bbar]
@@ -16,7 +16,7 @@
     prereq = 'bending'
     issues = '#7228'
     design = '/ComputeFiniteStrain.md'
-    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
+    requirement = 'The system shall, using finite strain methods in Solid Mechanics, adequately simulate a
                    bar bending simulation in 2D using a volumetric locking correction'
   [../]
   [./3d_bar]
@@ -25,7 +25,7 @@
     exodiff = '3d_bar_out.e'
     issues = '#7228'
     design = '/ComputeFiniteStrain.md'
-    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
+    requirement = 'The system shall, using finite strain methods in Solid Mechanics, adequately simulate a
                    tensile test simulation in 3D'
     capabilities = 'method!=dbg'
   [../]
@@ -37,7 +37,7 @@
     prereq = '3d_bar'
     issues = '#7228'
     design = '/ComputeFiniteStrain.md'
-    requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
+    requirement = 'The system shall, using finite strain methods in Solid Mechanics, adequately simulate a
                    tensile test simulation in 3D using a volumetric locking correction'
     capabilities = 'method!=dbg'
   [../]

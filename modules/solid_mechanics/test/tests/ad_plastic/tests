@@ -5,7 +5,7 @@
     input = 'power_law_creep.i'
     csvdiff = 'power_law_creep_out.csv'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten"'
-    requirement = "The AD multiple inelastic stress calculator shall provide a correct stress for a single power law creep model (reference computation)"
+    requirement = "The system shall provide, using the AD multiple inelastic stress calculator, a correct stress for a single power law creep model (reference computation)"
     design = 'PowerLawCreepStressUpdate.md'
     capabilities = 'method!=dbg'
   [../]
@@ -15,7 +15,7 @@
     csvdiff = 'power_law_creep_out.csv'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_zero"'
     prereq = powerlaw_ten
-    requirement = "The AD multiple inelastic stress calculator shall provide a correct stress for a single power law creep model and an additional zero creep power law model"
+    requirement = "The system shall provide, using the AD multiple inelastic stress calculator, a correct stress for a single power law creep model and an additional zero creep power law model"
     design = 'ADComputeMultipleInelasticStress.md'
     capabilities = 'method!=dbg'
   [../]
@@ -26,7 +26,7 @@
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_nine creep_one"'
     prereq = powerlaw_zero
     valgrind = HEAVY
-    requirement = "The AD multiple inelastic stress calculator shall provide a correct stress for the linear combination of two power law creep models"
+    requirement = "The system shall provide, using the AD multiple inelastic stress calculator, a correct stress for the linear combination of two power law creep models"
     design = 'ADComputeMultipleInelasticStress.md'
     capabilities = 'method!=dbg'
   [../]
@@ -36,7 +36,7 @@
     csvdiff = 'power_law_creep_out.csv'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_ten2" Materials/elastic_strain/cycle_models=true'
     prereq = powerlaw_sum
-    requirement = "The AD multiple inelastic stress calculator shall provide a correct stress when cycling through two identical power law creep models"
+    requirement = "The system shall provide, using the AD multiple inelastic stress calculator, a correct stress when cycling through two identical power law creep models"
     design = 'ADComputeMultipleInelasticStress.md'
     capabilities = 'method!=dbg'
   [../]
@@ -49,7 +49,7 @@
     ratio_tol = 5e-6
     difference_tol = 2e-2
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten" Outputs/csv=false -snes_test_err 1e-9 -mat_fd_type ds'
-    requirement = "The AD multiple inelastic stress calculator shall provide a correct jacobian for a single power law creep model"
+    requirement = "The system shall provide, using the AD multiple inelastic stress calculator, a correct Jacobian for a single power law creep model"
     design = 'ADComputeMultipleInelasticStress.md'
   [../]
   [./powerlaw_zero_jacobian]
@@ -59,7 +59,7 @@
     ratio_tol = 5e-6
     difference_tol = 2e-2
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_zero" Outputs/csv=false -snes_test_err 1e-9 -mat_fd_type ds'
-    requirement = "The AD multiple inelastic stress calculator shall provide a correct jacobian for a single power law creep model and an additional zero creep power law model"
+    requirement = "The system shall provide, using the AD multiple inelastic stress calculator, a correct Jacobian for a single power law creep model and an additional zero creep power law model"
     design = 'ADComputeMultipleInelasticStress.md'
   [../]
   [./powerlaw_sum_jacobian]
@@ -69,7 +69,7 @@
     ratio_tol = 5e-6
     difference_tol = 2e-2
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_nine creep_one" Outputs/csv=false -snes_test_err 1e-9 -mat_fd_type ds'
-    requirement = "The AD multiple inelastic stress calculator shall provide a correct jacobian for the linear combination of two power law creep models"
+    requirement = "The system shall provide, using the AD multiple inelastic stress calculator, a correct Jacobian for the linear combination of two power law creep models"
     design = 'ADComputeMultipleInelasticStress.md'
     valgrind = 'none' # too slow especially after #14547
   [../]
@@ -80,7 +80,7 @@
     ratio_tol = 5e-6
     difference_tol = 2e-2
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_ten2" Materials/elastic_strain/cycle_models=true Outputs/csv=false -snes_test_err 1e-9 -mat_fd_type ds'
-    requirement = "The AD multiple inelastic stress calculator shall provide a correct jacobian when cycling through two identical power law creep models"
+    requirement = "The system shall provide, using the AD multiple inelastic stress calculator, a correct Jacobian when cycling through two identical power law creep models"
     design = 'ADComputeMultipleInelasticStress.md'
   [../]
 []

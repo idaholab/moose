@@ -4,7 +4,7 @@
     input = 'elastic_stress.i'
     csvdiff = 'elastic_stress_out.csv'
 
-    requirement = "The ComputeDeformGradBasedStress class shall correctly"
+    requirement = "The system shall, using the ComputeDeformGradBasedStress class, correctly"
                   " compute the stress based on the lagrangian strain."
     design = "source/materials/ComputeDeformGradBasedStress.md"
     issues = "#6604"
@@ -15,7 +15,7 @@
     cli_args = 'Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true'
     csvdiff = 'elastic_stress_out.csv'
     prereq = 'elastic'
-    requirement = "The ComputeDeformGradBasedStress class shall correctly compute"
+    requirement = "The system shall, using the ComputeDeformGradBasedStress class, correctly compute"
                   " the stress from lagrangian strain when volumetric locking"
                   " correction is used."
     design = "source/materials/ComputeDeformGradBasedStress.md VolumetricLocking.md"
@@ -25,7 +25,7 @@
     type = 'CSVDiff'
     input = 'volumetric_strain_interface.i'
     csvdiff = 'volumetric_strain_interface_out.csv'
-    requirement = "The ComputeVolumeDeformGrad and the VolumeDeformGradCorrectedStress classes shall correctly"
+    requirement = "The system shall, using the ComputeVolumeDeformGrad and the VolumeDeformGradCorrectedStress classes, correctly"
                   " compute the volumetric deformation gradient, total deformation gradient and transform"
                   " the stress from previous configuration to the current configuration."
     design = "source/materials/ComputeVolumetricDeformGrad.md"
@@ -37,7 +37,7 @@
     csvdiff = 'volumetric_strain_interface_out.csv'
     prereq = 'interface'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true'
-    requirement = "The ComputeVolumeDeformGrad and the VolumeDeformGradCorrectedStress classes shall correctly"
+    requirement = "The system shall, using the ComputeVolumeDeformGrad and the VolumeDeformGradCorrectedStress classes, correctly"
                   " compute the volumetric deformation gradient, total deformation gradient and transform"
                   " the stress from previous configuration to the current configuration when volumetric locking"
                   " correction is used."
