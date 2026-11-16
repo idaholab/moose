@@ -1,0 +1,63 @@
+[Tests]
+  design = 'actions/ContactAction.md userobjects/LMWeightedGapUserObject.md'
+  issues = '#32856'
+  [varying_derived_scale]
+    type = 'CSVDiff'
+    input = 'varying_derived_scale.i'
+    csvdiff = 'varying_derived_scale_out.csv'
+    capabilities = 'ad_size>=150 & method!=dbg'
+    requirement = 'The system shall compute the same derived physical mortar contact stiffness scale '
+                  'on every process that shares a secondary contact node, giving the same solution as '
+                  'a serial run when that scale varies along the contact surface.'
+  []
+  [frictional]
+    requirement = 'The system shall solve frictional mortar contact with contact constants derived '
+                  'from the material elasticity tensors'
+    [2d]
+      type = 'CSVDiff'
+      input = 'frictional_2d.i'
+      csvdiff = 'frictional_2d_out.csv'
+      # Before contact the stresses are roundoff, several orders of magnitude below a 1e-6
+      # fraction of the stresses in contact
+      abs_zero = 1e-6
+      capabilities = 'method!=dbg'
+      detail = 'in two dimensions for a block sliding along a plank, and'
+    []
+    [3d]
+      type = 'CSVDiff'
+      input = 'frictional_3d.i'
+      csvdiff = 'frictional_3d_out.csv'
+      capabilities = 'ad_size>=150 & method!=dbg'
+      detail = 'in three dimensions for a block that slides while pressed into another block, '
+               'with a derived contact stiffness that varies along the contact surface.'
+    []
+  []
+  [errors]
+    requirement = 'The system shall report an error when the contact constants are derived from '
+                  'the material elasticity tensors and'
+    [user_constant]
+      type = 'RunException'
+      input = 'frictional_3d.i'
+      cli_args = 'Contact/mortar/c_tangential=1e3'
+      expect_err = "'c_tangential' cannot be set when 'c_strategy = physical'"
+      capabilities = 'ad_size>=150'
+      detail = 'a contact constant is also set by the user,'
+    []
+    [degree_two]
+      type = 'RunException'
+      input = 'frictional_3d.i'
+      cli_args = 'Contact/mortar/friction_projection_degree=TWO'
+      expect_err = "'c_strategy = physical' requires 'friction_projection_degree = ONE'"
+      capabilities = 'ad_size>=150'
+      detail = 'the degree-two friction residual is requested,'
+    []
+    [unused_base_name]
+      type = 'RunException'
+      input = 'frictional_3d.i'
+      cli_args = 'Contact/mortar/c_strategy=user Contact/mortar/primary_elasticity_tensor_base_name=a'
+      expect_err = "'primary_elasticity_tensor_base_name' is only used when 'c_strategy = physical'"
+      capabilities = 'ad_size>=150'
+      detail = 'or, conversely, an elasticity tensor parameter is set without the physical strategy.'
+    []
+  []
+[]

@@ -1,0 +1,25 @@
+[Tests]
+  design = 'ContactAction.md LMWeightedGapUserObject.md'
+  issues = '#32856'
+
+  [frictionless_beats_default]
+    type = GoogleTest
+    unit_test = PhysicalMortarConstants.FrictionlessBeatsDefault
+    requirement = 'The system shall solve frictionless mortar contact in fewer cumulative nonlinear iterations with contact constants derived from the material elasticity tensors than with the default user-supplied normal contact constant.'
+  []
+  [frictional_beats_default]
+    type = GoogleTest
+    unit_test = PhysicalMortarConstants.FrictionalBeatsDefault
+    requirement = 'The system shall solve sliding frictional mortar contact in fewer cumulative nonlinear iterations with contact constants derived from the material elasticity tensors than with fixed user-supplied normal and tangential contact constants.'
+  []
+  [user_constant_with_physical_throws]
+    type = GoogleTest
+    unit_test = PhysicalMortarConstants.UserConstantWithPhysicalThrows
+    requirement = 'The system shall report an error when a mortar contact constant or its normalization is set by the user while the contact constants are derived from the material elasticity tensors.'
+  []
+  [physical_with_automatic_scaling_throws]
+    type = GoogleTest
+    unit_test = PhysicalMortarConstants.PhysicalWithAutomaticScalingThrows
+    requirement = 'The system shall report an error when automatic variable scaling is requested while the mortar contact constants are derived from the material elasticity tensors.'
+  []
+[]

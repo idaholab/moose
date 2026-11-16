@@ -29,6 +29,29 @@
     # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
     recover = false
   []
+  [wear-pressure-errors]
+    requirement = 'The system shall report an error when the mortar Archard wear auxiliary kernel is '
+                  'given'
+    issues = '#32856'
+    design = 'MortarArchardsLawAux.md'
+    [solution_variable_pressure]
+      type = 'RunException'
+      input = 'block-dynamics-aux-wear-lm-pressure.i'
+      expect_err = "'normal_pressure' couples the solution variable 'normal_lm'"
+      capabilities = 'ad_size>=50'
+      detail = 'a solution variable as the normal contact pressure, since a contact Lagrange '
+               'multiplier can store a scaled pressure, or'
+    []
+    [both_pressures]
+      type = 'RunException'
+      input = 'block-dynamics-aux-wear.i'
+      cli_args = 'AuxKernels/worn_depth/normal_pressure=normal_lm'
+      expect_err = "Provide the normal contact pressure through either 'normal_pressure' or "
+                   "'weighted_gap_uo', but not both"
+      capabilities = 'ad_size>=50'
+      detail = 'the normal contact pressure through both a variable and a contact user object.'
+    []
+  []
   [block-dynamics-aux-wear-vel]
     type = 'Exodiff'
     exodiff = 'block-dynamics-aux-wear-vel_out.e'
