@@ -5,7 +5,7 @@
     type = CSVDiff
     input = 'kokkos_vector_neumann.i'
     csvdiff = 'kokkos_vector_neumann_out.csv'
-    requirement = "The Kokkos system shall impose a constant flux on each component of a vector "
+    requirement = "The system shall, using Kokkos, impose a constant flux on each component of a vector "
                   "variable along a boundary."
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'

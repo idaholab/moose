@@ -5,7 +5,7 @@
     type = 'CSVDiff'
     input = 'kokkos_aux_chain.i'
     csvdiff = 'kokkos_aux_chain_out_results_0001.csv'
-    requirement = 'The Kokkos system should properly consider the dependencies between auxiliary kernels due to variable coupling.'
+    requirement = 'The system shall, using Kokkos, properly consider the dependencies between auxiliary kernels due to variable coupling.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []

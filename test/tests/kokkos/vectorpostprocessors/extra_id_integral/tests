@@ -3,7 +3,7 @@
   issues = '#30655'
 
   [atomic]
-    requirement = 'The Kokkos system shall be able to integrate or average variables or material properties parsed by extra IDs using atomic addition'
+    requirement = 'The system shall, using Kokkos, be able to integrate or average variables or material properties parsed by extra IDs using atomic addition'
     [default]
       type = 'CSVDiff'
       input = 'kokkos_extra_id_vpp.i'
@@ -57,7 +57,7 @@
   []
 
   [reduction]
-    requirement = 'The Kokkos system shall be able to integrate or average variables or material properties parsed by extra IDs using reduction'
+    requirement = 'The system shall, using Kokkos, be able to integrate or average variables or material properties parsed by extra IDs using reduction'
     [default]
       type = 'CSVDiff'
       input = 'kokkos_extra_id_vpp.i'

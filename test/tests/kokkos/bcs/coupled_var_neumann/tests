@@ -6,7 +6,7 @@
     type = 'Exodiff'
     input = 'kokkos_coupled_var_neumann.i'
     exodiff = 'kokkos_coupled_var_neumann_out.e'
-    requirement = 'The Kokkos system shall support coupled Neumann type boundary conditions.'
+    requirement = 'The system shall, using Kokkos, support coupled Neumann type boundary conditions.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
@@ -15,13 +15,13 @@
     type = 'Exodiff'
     input = 'kokkos_on_off.i'
     exodiff = 'kokkos_on_off_out.e'
-    requirement = 'The Kokkos system shall enable scaling of the Neumann type boundary conditions.'
+    requirement = 'The system shall, using Kokkos, enable scaling of the Neumann type boundary conditions.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
 
   [nonlinear]
-    requirement = 'When coupling nonlinear variables into a Neumann type boundary condition, the Kokkos system shall'
+    requirement = 'The system shall, when coupling nonlinear variables into a Neumann type boundary condition with Kokkos,'
     [exo]
       type = Exodiff
       input = 'kokkos_coupled_var_neumann_nl.i'

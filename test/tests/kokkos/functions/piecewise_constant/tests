@@ -2,7 +2,7 @@
   issues = '#30655'
   design = 'KokkosPiecewiseConstant.md'
   [piecewise_constant]
-    requirement = 'The Kokkos function system shall include a piece-wise constant function based on x- and y-data'
+    requirement = 'The system shall, in the Kokkos function system, include a piece-wise constant function based on x- and y-data'
     [x_y]
       type = 'Exodiff'
       input = 'kokkos_piecewise_constant.i'

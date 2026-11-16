@@ -3,7 +3,7 @@
   design = 'KokkosDirectionalNeumannBC.md'
 
   [tests]
-    requirement = 'The Kokkos system shall support Neumann type boundary conditions where the specified value is defined as the value of a vector, $v$, in the direction of the boundary outward facing normal, $\hat{n}$ (i.e., $v\cdot\hat{n}$)'
+    requirement = 'The system shall, using Kokkos, support Neumann type boundary conditions where the specified value is defined as the value of a vector, $v$, in the direction of the boundary outward facing normal, $\hat{n}$ (i.e., $v\cdot\hat{n}$)'
     [1d]
       type = Exodiff
       input = 'kokkos_1d_directional_neumann_bc_test.i'

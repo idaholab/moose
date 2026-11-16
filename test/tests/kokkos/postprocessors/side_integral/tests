@@ -3,7 +3,7 @@
 
   [side_integral]
     design = 'KokkosSideIntegralVariablePostprocessor.md KokkosSideIntegralMaterialProperty.md'
-    requirement = 'The Kokkos system shall compute the integral over a side of'
+    requirement = 'The system shall, using Kokkos, compute the integral over a side of'
     [variable]
       type = 'CSVDiff'
       input = 'kokkos_side_integral_value_test.i'
@@ -24,7 +24,7 @@
 
   [side_average]
     design = 'KokkosSideAverageValue.md KokkosSideAverageMaterialProperty.md'
-    requirement = 'The Kokkos system shall compute the area-weighted average over a side of'
+    requirement = 'The system shall, using Kokkos, compute the area-weighted average over a side of'
     [variable]
       type = 'CSVDiff'
       input = 'kokkos_side_average_value_test.i'
