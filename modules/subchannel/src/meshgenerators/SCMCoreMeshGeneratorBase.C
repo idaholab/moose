@@ -182,7 +182,8 @@ SCMCoreMeshGeneratorBase::generate()
                                  *assembly,
                                  /*avoid_merging_subdomains=*/false,
                                  /*avoid_merging_boundaries=*/false,
-                                 _communicator);
+                                 _communicator,
+                                 /*skip_preparation=*/true);
   }
 
   mesh->unset_is_prepared();

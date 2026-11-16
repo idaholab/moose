@@ -1248,7 +1248,8 @@ copyIntoMesh(MeshGenerator & mg,
              const UnstructuredMesh & source,
              const bool avoid_merging_subdomains,
              const bool avoid_merging_boundaries,
-             const Parallel::Communicator & communicator)
+             const Parallel::Communicator & communicator,
+             const bool skip_preparation)
 {
   dof_id_type node_delta = destination.max_node_id();
   dof_id_type elem_delta = destination.max_elem_id();
@@ -1299,7 +1300,8 @@ copyIntoMesh(MeshGenerator & mg,
                                       elem_delta,
                                       node_delta,
                                       unique_delta,
-                                      avoid_merging_subdomains ? &id_remapping : nullptr);
+                                      avoid_merging_subdomains ? &id_remapping : nullptr,
+                                      skip_preparation);
 
   // Get an offset to prevent overlaps / wild merging between boundaries
   BoundaryInfo & boundary = destination.get_boundary_info();
