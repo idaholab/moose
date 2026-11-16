@@ -126,7 +126,9 @@ LinearNodalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
     case Moose::PrimarySecondary:
       return -_penalty / primary_size;
     case Moose::SecondarySecondary:
-      return _penalty / primary_size;
+      // Added once per secondary node (see NodalConstraint::computeJacobian), so this is the
+      // derivative of the secondary residual summed over the primary nodes
+      return _penalty;
     case Moose::SecondaryPrimary:
       return -_penalty * _weights[_j];
     default:
