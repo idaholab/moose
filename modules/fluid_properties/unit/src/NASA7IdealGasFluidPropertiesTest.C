@@ -439,9 +439,8 @@ TEST_F(NASA7IdealGasFluidPropertiesTest, nobleGases)
   const Real p_ref = 1e5;
   const Real tol_s = 2e-3;
   // Viscosities [Pa s] and thermal conductivities [W/(m K)] at 1e5 Pa from the NIST Chemistry
-  // WebBook, which include the small effect of density at this pressure, at the highest
-  // temperatures the WebBook provides up to 1500 K. The tolerance bounds the deviations at these
-  // states.
+  // WebBook, which include the small effect of density at this pressure. The tolerance bounds the
+  // deviations at these states.
   const Real tol_transport = 0.025;
   struct Reference
   {

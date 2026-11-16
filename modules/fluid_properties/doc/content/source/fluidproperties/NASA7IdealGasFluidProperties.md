@@ -80,13 +80,14 @@ k = \mu R_s \left( 1.32 \, \frac{c_p^\circ}{R} + 0.45 \right) .
 
 Compared with the fluid properties of the real fluids at 1 bar from 300 K to 900 K, the viscosities
 of N$_2$, CH$_4$, and CO$_2$ agree within 2.5%, that of H$_2$ is up to 6% low at 900 K, and the
-thermal conductivities agree within 9%. For the noble gases the modified Eucken correlation
-reduces to the exact kinetic theory result for monatomic gases, $k = 15 \mu R_s / 4$. Compared
-with the NIST Chemistry WebBook at 1 bar, the viscosities and thermal conductivities of Ar from
-300 K to 1500 K and of Kr and Xe from 300 K to 600 K agree within 2.5%.
+thermal conductivities agree within 9%. For the noble gases, $c_p^\circ/R = 5/2$ and the modified
+Eucken correlation reduces to $k = 15 \mu R_s / 4$, the Chapman-Enskog result for monatomic gases.
+Compared with the NIST Chemistry WebBook [!citep](nist_webbook) at 1 bar, the viscosities and
+thermal conductivities of Ar from 300 K to 1500 K and of Kr and Xe from 300 K to 600 K agree
+within 2.5%.
 
 The reduced temperature of He exceeds the range of the collision integral fits above about
-1000 K, where the Chapman-Enskog viscosity of He is up to 8% low. For He, the viscosity and
+1000 K, and the Chapman-Enskog viscosity of He is about 8% low at 1500 K. For He, the viscosity and
 thermal conductivity therefore follow the correlations of [!citet](petersen), as in
 [HeliumFluidProperties.md], with the thermal conductivity in the limit of zero pressure. They
 agree with the NIST Chemistry WebBook within 1.5% at 1 bar from 300 K to 1500 K. They are fitted

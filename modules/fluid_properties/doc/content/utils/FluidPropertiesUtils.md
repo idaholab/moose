@@ -112,14 +112,11 @@ $\Omega^{(1,1)*}$ and $\Omega^{(2,2)*}$ of the Lennard-Jones (12-6) potential fo
 The Lennard-Jones parameters of the built-in species, H$_2$, O$_2$, H$_2$O, CH$_4$, CO, CO$_2$,
 N$_2$, He, and Ar, are those of GRI-Mech 3.0 [!citep](smith_grimech30) as distributed with
 Cantera 3.2.0 [!citep](cantera320), the same source as most of the NASA 7-coefficient data. Those
-of Kr and Xe, which GRI-Mech 3.0 does not include, are those of [!citet](svehla1962). Except for
-He, their reduced temperatures remain within the range of the fits over the temperature ranges of
-the NASA 7-coefficient data. That of He exceeds it above about 1000 K, and those of the pairs
-He-H$_2$ and He-N$_2$ above about 1970 K and 3150 K. Even within the range of the fits, the
-Lennard-Jones potential describes He poorly at high temperatures: its Chapman-Enskog viscosity is
-about 4% lower than that of [!citet](petersen) at 600 K and 6% lower at 1000 K. The binary diffusion
-coefficients of pairs with He likely carry errors of similar size at these temperatures, which
-have not been checked against measurements.
+of Kr and Xe, which GRI-Mech 3.0 does not include, are those of [!citet](svehla1962). He, with
+$\epsilon/k_B = 10.2$ K, leaves the range of the collision integral fits above 1020 K, and pairs
+with He above $100 \, \epsilon_{ij}/k_B$, as low as 1970 K for He-H$_2$. All other species and
+pairs stay within the fits over the temperature ranges of their data. The binary diffusion
+coefficients of pairs with He have not been checked against measurements.
 The viscosities of the species other than H$_2$O agree with those of Cantera within 0.5%. The
 GRI-Mech parameters of H$_2$O assume a correction for its dipole moment, which is not applied here,
 so the binary diffusion coefficients of pairs with H$_2$O differ from those of Cantera by up to 4%.
