@@ -51,6 +51,8 @@ SCMTriDuctMeshGenerator::SCMTriDuctMeshGenerator(const InputParameters & params)
 
   // Read by SCMTriCoreMeshGenerator to check that assemblies placed in a core do not overlap
   declareMeshProperty<Real>("flat_to_flat", _flat_to_flat);
+  // Read by the SCM core mesh generators to warn about assemblies without a duct mesh
+  declareMeshProperty<bool>("duct_mesh", true);
 }
 
 std::unique_ptr<MeshBase>

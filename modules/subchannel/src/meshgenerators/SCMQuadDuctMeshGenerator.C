@@ -63,6 +63,8 @@ SCMQuadDuctMeshGenerator::SCMQuadDuctMeshGenerator(const InputParameters & param
   // do not overlap. The duct wall is pitch / 2 + side_gap from the outer subchannel centroids.
   declareMeshProperty<Real>("duct_size_x", (_nx - 1) * _pitch + 2.0 * _side_gap);
   declareMeshProperty<Real>("duct_size_y", (_ny - 1) * _pitch + 2.0 * _side_gap);
+  // Read by the SCM core mesh generators to warn about assemblies without a duct mesh
+  declareMeshProperty<bool>("duct_mesh", true);
 }
 
 std::unique_ptr<MeshBase>

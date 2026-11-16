@@ -22,7 +22,8 @@ SCMCoreMeshGeneratorBase::validParams()
   InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<std::vector<MeshGeneratorName>>(
       "inputs",
-      "The SCM assembly, duct, or detailed assembly meshes that can be placed in the core");
+      "The SCM 1D assembly, duct, or 3D visualization assembly meshes that can be placed in the "
+      "core");
   params.addRequiredParam<std::vector<std::vector<int>>>(
       "pattern", "Core pattern of indices into 'inputs'; -1 marks an empty position.");
   params.addRequiredRangeCheckedParam<Real>(
@@ -42,8 +43,8 @@ SCMCoreMeshGeneratorBase::SCMCoreMeshGeneratorBase(const InputParameters & param
   // Each SCM assembly and duct mesh generator stores its channel, gap and pin maps in the single
   // SubChannelMesh, so with several assemblies only the data of the last generated one remains,
   // and it refers to nodes of a mesh that is merged here. The SCM solver cannot use a core built
-  // from those generators until that data is stored per assembly. A core of detailed assembly
-  // inputs is a plain [Mesh] and can be used in a run.
+  // from those generators until that data is stored per assembly. A core of 3D visualization
+  // assembly meshes is a plain [Mesh] and can be used in a run.
   if (dynamic_cast<const SubChannelMesh *>(_mesh) && !_app.isParamSetByUser("mesh_only"))
     mooseError("An SCM core mesh built from subchannel assembly or duct inputs can only be "
                "generated with --mesh-only; solving on it is not supported yet.");
@@ -70,6 +71,20 @@ SCMCoreMeshGeneratorBase::generate()
       paramWarning("inputs", "Input '", _input_names[i], "' is not used in 'pattern'.");
 
   readAssemblySizes();
+
+  // The edge and corner subchannels of a 1D assembly are bounded by a duct wall, which the overlap
+  // check below also uses, whether or not a duct mesh is generated. A 3D visualization core has no
+  // duct generator, so the warning applies to 1D cores only.
+  if (dynamic_cast<const SubChannelMesh *>(_mesh))
+    for (const auto i : index_range(_input_names))
+      if (used[i] && !hasMeshProperty<bool>("duct_mesh", _input_names[i]))
+        paramWarning(
+            "inputs",
+            "Input '",
+            _input_names[i],
+            "' has no duct mesh. Its edge and corner subchannels are still bounded by a "
+            "duct wall, which the overlap check also uses, but the wall does not appear in "
+            "the mesh. Use a duct mesh generator to include it.");
 
   // All pairs are checked, not only neighbors, because an assembly next to an empty position may
   // extend past its lattice cell into a farther occupied one. Every overlapping pair is reported at
@@ -164,8 +179,8 @@ SCMCoreMeshGeneratorBase::generate()
     for (const auto & [old_id, _] : nodeset_names)
       map_boundary(old_id);
 
-    // SCM assembly, duct, and detailed assembly meshes carry only side and node boundaries, so the
-    // edge and shellface boundaries that clear() also drops are not restored
+    // SCM 1D assembly, duct, and 3D visualization assembly meshes carry only side and node
+    // boundaries, so the edge and shellface boundaries that clear() also drops are not restored
     boundary_info.clear();
     for (const auto & [elem_id, side, old_id] : side_list)
       boundary_info.add_side(elem_id, side, libmesh_map_find(boundary_map, old_id));

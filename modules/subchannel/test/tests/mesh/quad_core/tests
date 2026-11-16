@@ -12,7 +12,18 @@
       cli_args = '--mesh-only'
       recover = false
       mesh_mode = 'replicated'
-      detail = 'for subchannel assemblies surrounded by ducts.'
+      detail = 'for subchannel assemblies surrounded by ducts, and'
+    []
+    [no_duct]
+      type = Exodiff
+      input = core_no_duct.i
+      exodiff = core_no_duct_in.e
+      cli_args = '--mesh-only'
+      expect_out = 'Input \'big\' has no duct mesh'
+      allow_warnings = true
+      recover = false
+      mesh_mode = 'replicated'
+      detail = 'for assemblies without duct meshes, warning that the duct wall is not meshed.'
     []
   []
   [errors]

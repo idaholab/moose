@@ -12,7 +12,7 @@
       cli_args = '--mesh-only'
       recover = false
       mesh_mode = 'replicated'
-      detail = 'for assemblies of different sizes surrounded by ducts, and'
+      detail = 'for assemblies of different sizes surrounded by ducts,'
     []
     [empty_positions]
       type = Exodiff
@@ -21,7 +21,18 @@
       cli_args = '--mesh-only'
       recover = false
       mesh_mode = 'replicated'
-      detail = 'for a lattice with empty positions.'
+      detail = 'for a lattice with empty positions, and'
+    []
+    [no_duct]
+      type = Exodiff
+      input = core_no_duct.i
+      exodiff = core_no_duct_in.e
+      cli_args = '--mesh-only'
+      expect_out = 'Input \'large\' has no duct mesh'
+      allow_warnings = true
+      recover = false
+      mesh_mode = 'replicated'
+      detail = 'for assemblies without duct meshes, warning that the duct wall is not meshed.'
     []
   []
   [errors]
@@ -33,6 +44,16 @@
       expect_err = 'The following assemblies overlap.*Assembly 0 \(\'small_duct\'\) and assembly 3 \(\'large_duct\'\)'
       mesh_mode = 'replicated'
       detail = 'if any two assemblies overlap,'
+    []
+    [overlap_no_duct]
+      type = RunException
+      input = core_no_duct.i
+      cli_args = '--mesh-only TriSubChannelMesh/core/assembly_pitch=0.49'
+      expect_err = 'The following assemblies overlap.*Assembly 0 \(\'small\'\) and assembly 3 '
+                   '\(\'large\'\)'
+      allow_warnings = true
+      mesh_mode = 'replicated'
+      detail = 'if any two assemblies without duct meshes overlap,'
     []
     [empty_pattern]
       type = RunException

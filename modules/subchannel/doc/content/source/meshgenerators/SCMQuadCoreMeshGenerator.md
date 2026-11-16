@@ -11,10 +11,13 @@ merges them into one mesh. The assemblies are not connected: there are no inter-
 crossflow between assemblies. It is the square-lattice counterpart of [SCMTriCoreMeshGenerator.md].
 
 Each entry of [!param](/Mesh/SCMQuadCoreMeshGenerator/inputs) is an
-[SCMQuadAssemblyMeshGenerator.md] or an [SCMQuadDuctMeshGenerator.md] for a subchannel core mesh,
-or an [SCMDetailedQuadAssemblyMeshGenerator.md] for a detailed 3D core mesh used to visualize core
-solutions. A detailed core built with the same pattern and pitch as a subchannel core places each
-detailed assembly over the subchannel assembly with the same index.
+[SCMQuadAssemblyMeshGenerator.md] or an [SCMQuadDuctMeshGenerator.md] for a 1D subchannel core
+mesh, or an [SCMDetailedQuadAssemblyMeshGenerator.md] for a 3D visualization core mesh. In a 3D
+visualization assembly mesh, each subchannel and pin is meshed in 3D with prism elements. Such a
+mesh is used only to visualize results: the SCM solution is computed on the 1D mesh and copied onto
+the 3D mesh with [SCMSolutionTransfer.md], as in the single-assembly example
+`examples/MultiApp/fuel_assembly.i`. A 3D visualization core built with the same pattern and pitch
+as a 1D core places each 3D assembly over the 1D assembly with the same index.
 
 Each assembly is generated centered at the origin and is translated so that its center lies on its
 lattice position. The inputs may differ in size, including `nx` and `ny`, as long as no two placed
@@ -50,7 +53,7 @@ Variables restricted to subdomains must list the renamed subdomains.
 !alert warning
 Each subchannel assembly and duct mesh generator stores the subchannel connectivity in a single mesh
 object, so the subchannel solvers cannot use the core mesh yet. A core of those inputs can only be
-generated with `--mesh-only`. A detailed core has no such restriction.
+generated with `--mesh-only`. A 3D visualization core has no such restriction.
 
 ## Example Input File Syntax
 
