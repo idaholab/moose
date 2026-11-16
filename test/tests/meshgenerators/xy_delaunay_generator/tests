@@ -86,6 +86,19 @@
       recover = false
       detail = "selectively stitching 'hole' meshes into the final mesh"
     []
+    [stitching_several_holes]
+      type = 'Exodiff'
+      input = 'xydelaunay_stitching.i'
+      # The two holes are generated separately, so they share subdomain and boundary ids
+      cli_args = "Mesh/final_generator=triang
+                  Mesh/triang/holes='hole_1_name hole_2_name_1'
+                  Mesh/triang/stitch_holes='true true'
+                  --mesh-only xydelaunay_stitching_several_holes.e"
+      exodiff = 'xydelaunay_stitching_several_holes.e'
+      exodiff_opts = '-pedantic'
+      recover = false
+      detail = "stitching several 'hole' meshes into the final mesh, keeping the subdomains of each"
+    []
     [nested]
       type = 'Exodiff'
       input = 'xydelaunay_nested.i'

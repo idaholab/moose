@@ -324,6 +324,38 @@ bool isCoPlanar(const std::vector<Point> & vec_pts);
 SubdomainID getNextFreeSubdomainID(MeshBase & input_mesh);
 
 /**
+ * Renumber the subdomains of a mesh about to be stitched into another so that the subdomain names
+ * of both meshes survive the stitching. Subdomains sharing a name are merged onto the primary
+ * mesh's ID, while a subdomain whose ID is already used for a different name in the primary mesh
+ * is moved to a free ID. Both meshes are modified: the secondary mesh's elements are renumbered,
+ * and the names of the moved subdomains are added to the primary mesh.
+ * @param mesh the primary mesh, which the secondary mesh will be stitched into
+ * @param secondary_mesh the mesh to be stitched in, whose subdomains are renumbered
+ * @param merge_same_name_across_ids whether to merge subdomains that share a name but not an ID.
+ *                                   If false, such a pair is left for the caller to handle, which
+ *                                   lets a caller that considers it an error keep reporting one
+ * @return the remapping applied to the secondary mesh, from old to new subdomain ID
+ */
+std::unordered_map<subdomain_id_type, subdomain_id_type> remapSecondarySubdomainIDsForStitching(
+    MeshBase & mesh, MeshBase & secondary_mesh, bool merge_same_name_across_ids = true);
+
+/**
+ * Renumber the boundaries of a mesh about to be stitched into another so that the boundary names
+ * of both meshes survive the stitching. A boundary whose ID is already used for a different name
+ * in the primary mesh is moved to a free ID; boundaries sharing a name keep their ID so that they
+ * still merge. Only the secondary mesh is modified.
+ * @param mesh the primary mesh, which the secondary mesh will be stitched into
+ * @param secondary_mesh the mesh to be stitched in, whose boundaries are renumbered
+ * @param ids_to_preserve boundary IDs to leave alone, such as the temporary IDs identifying the
+ *                        surfaces being stitched together
+ * @return the remapping applied to the secondary mesh, from old to new boundary ID
+ */
+std::unordered_map<boundary_id_type, boundary_id_type>
+remapSecondaryBoundaryIDsForStitching(MeshBase & mesh,
+                                      MeshBase & secondary_mesh,
+                                      const std::set<boundary_id_type> & ids_to_preserve = {});
+
+/**
  * Checks input mesh and returns the largest boundary ID in the mesh plus one, which is
  * a boundary ID in the mesh that is not currently in use
  * @param input mesh over which to compute the next free boundary ID

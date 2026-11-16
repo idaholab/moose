@@ -669,6 +669,16 @@ XYZDelaunayGenerator::generate()
 
     if (_stitch_holes.size() && _stitch_holes[hole_i])
     {
+      // Hole meshes are generated independently, so two of them routinely use the same subdomain
+      // and boundary IDs for different subdomains and boundaries. Renumber the hole's so that the
+      // names of every hole survive the stitching instead of being merged onto the first hole's.
+      // Subdomains sharing a name across different IDs are left to the conflict check below
+      MooseMeshUtils::remapSecondarySubdomainIDsForStitching(
+          *mesh, hole_mesh, /*merge_same_name_across_ids=*/false);
+      // new_hole_bcid marks the hole surface being stitched, so it must keep its ID
+      MooseMeshUtils::remapSecondaryBoundaryIDsForStitching(
+          *mesh, hole_mesh, {new_hole_bcid, inner_bcid});
+
       // Retrieve subdomain name map from the mesh to be stitched and insert it into the main
       // subdomain map
       const auto & increment_subdomain_map = hole_mesh.get_subdomain_name_map();
