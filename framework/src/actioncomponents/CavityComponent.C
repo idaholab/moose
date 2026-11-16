@@ -239,6 +239,13 @@ CavityComponent::addMeshGenerators()
       params.set<SubdomainName>("output_subdomain_name") = block_name;
       _blocks.push_back(block_name);
     }
+    // we can stitch to the components directly when not using a boundary layer
+    if (getParam<unsigned int>("n_boundary_layers") == 0)
+    {
+      params.set<std::vector<bool>>("stitch_holes") = std::vector<bool>(holes_mgs.size(), true);
+      // A refined hole boundary would no longer match the component mesh we stitch it to
+      params.set<std::vector<bool>>("refine_holes") = std::vector<bool>(holes_mgs.size(), false);
+    }
     addMeshGenerator("XYDelaunayGenerator", "triangulation", params);
   }
   else
