@@ -2,7 +2,7 @@
   issues = '#16064'
   design = 'solid_mechanics/index.md'
   [test]
-    requirement = 'This is a deprecated system that has been replaced by the stress update material-based crystal plasticity and should be removed. List of deprecated test cases:'
+    requirement = 'The system shall retain, until removal, the deprecated monolithic crystal plasticity system (replaced by the stress update material-based crystal plasticity) for the following test cases:'
     [test]
       type = 'Exodiff'
       input = 'crysp.i'

@@ -26,7 +26,7 @@
                  '10.0000000\n TIME_ 2   10.0000000\n CELENT 1.0000000\n CMNAME: umat\s*\n NDI_ '
                  '3\n NSHR_ 3\n NTENS_ 6\n NOEL_ 1\n NPT_ 8\n LAYER_-1\n KSPT_-1\n KSTEP_ 1\n KINC_ '
                  '2\n'
-    requirement = 'The Abaqus UMAT interface shall pass correct values for STRAN, DSTRAN, TIME, '
+    requirement = 'The system shall, through the Abaqus UMAT interface, pass correct values for STRAN, DSTRAN, TIME, '
                   'CMNAME, NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, DFGRD1, NOEL, NPT, and '
                   'KINC, when a single element is subjected to axial loading. Values are checked '
                   'against verified references '
@@ -40,7 +40,7 @@
     # installation_type=in_tree: see #25279
     capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
-    requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
+    requirement = 'The system shall, through the Abaqus UMAT interface, produce the same results (stress, strain, '
                   'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
                   'two external fields (not temperature) step increment affecting material behavior '
                   'and shear deformation '
@@ -83,7 +83,7 @@
                  '-]0.0000000\n CELENT 1.0000000\n CMNAME: umat\s*\n NDI_ 3\n NSHR_ 3\n NTENS_ 6\n '
                  'NOEL_ 1\n NPT_ 8\n LAYER_-1\n KSPT_-1\n KSTEP_ 1\n KINC_ 1\n FIELD1_[ '
                  '-]0.0000000\n FIELD2_[ -]0.0000000\n DFIELD1_ 0.0000739\n DFIELD2_ 0.0022982'
-    requirement = 'The Abaqus UMAT interface shall pass the correct values for STRAN, DSTRAN, TIME, '
+    requirement = 'The system shall, through the Abaqus UMAT interface, pass the correct values for STRAN, DSTRAN, TIME, '
                   'CMNAME, NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, DFGRD1, NOEL, NPT, and '
                   'KINC, when shear deformation (causing nontrivial rotation kinematics) is present. '
   []
@@ -101,7 +101,7 @@
                  ' [ -]0.0000000\n DROT_ 3 1   [ -]0.0000000\n DROT_ 3 2   [ -]0.0000000\n DROT_ 3 3 '
                  '   1.0000000\n '
 
-    requirement = 'The Abaqus UMAT interface shall pass the correct values for the deformation '
+    requirement = 'The system shall, through the Abaqus UMAT interface, pass the correct values for the deformation '
                   'gradient DFGRD1 and the rotation increment DROT, accounting for the fact, that '
                   'the calling C++ code is row majorand the called Fortran code is column major.'
   []
@@ -131,7 +131,7 @@
                  '-]0.0000000\n CELENT 1.0000114\n CMNAME: umat\s*\n NDI_ 3\n NSHR_ 3\n NTENS_ 6\n '
                  'NOEL_ 1\n NPT_ 8\n LAYER_-1\n KSPT_-1\n KSTEP_ 1\n KINC_ 1\n FIELD1_[ '
                  '-]0.0000000\n FIELD2_[ -]0.0000000\n DFIELD1_ 0.0000739\n DFIELD2_ 0.0022982'
-    requirement = 'The Abaqus UMAT interface shall pass the values for STRAN, DSTRAN, TIME, CMNAME, '
+    requirement = 'The system shall, through the Abaqus UMAT interface, pass the values for STRAN, DSTRAN, TIME, CMNAME, '
                   'NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, DFGRD1, NOEL, NPT, and KINC, when '
                   'shear deformation is present and large deformation kinematics is true, which '
                   'captures variables or properties that may rely on the displaced mesh, such as '

@@ -6,7 +6,7 @@
     input = '2_block.i'
     exodiff = '2_block_out.e'
 
-    requirement = "The LineElementAction class shall correctly create the objects"
+    requirement = "The system shall correctly create, using the LineElementAction class, the objects"
                   " required for a mechanics simulation using beam or truss elements."
   [../]
   [./2_block_common_action]
@@ -15,7 +15,7 @@
     exodiff = '2_block_out.e'
     prereq = '2_block_action'
 
-    requirement = "The LineElementAction class shall correctly set the common parameters"
+    requirement = "The system shall correctly set, using the LineElementAction class, the common parameters"
                   " in the action subblocks."
   [../]
   [./beam_action_test1]
@@ -23,7 +23,7 @@
     input = 'beam_action_chk.i'
     expect_err = 'LineElementAction: A vector of displacement variable names should be provided as'
 
-    requirement = "The LineElementAction class shall produce an error when the displacement"
+    requirement = "The system shall produce an error in the LineElementAction class when the displacement"
                   " variables are not provided by the user."
   [../]
   [./beam_action_test2]
@@ -33,7 +33,7 @@
     Physics/SolidMechanics/LineElement/QuasiStatic/block_1/use_displaced_mesh=true Physics/SolidMechanics/LineElement/QuasiStatic/block_1/strain_type=small Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotation_type=small'
     expect_err = 'LineElementAction: Wrong combination of `use_displaced_mesh`, `strain_type` and `rotation_type`.'
 
-    requirement = "The LineElementAction class shall produce an error if the user provided"
+    requirement = "The system shall produce an error in the LineElementAction class if the user provided"
                   " inputs for `strain_type`, `rotation_type` and `use_displaced_mesh`"
                   " parameters are not compatible."
   [../]
@@ -43,7 +43,7 @@
     cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/block_1/displacements="disp_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotations="rot_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/save_in="res_x res_y"'
     expect_err = 'LineElementAction: Number of save_in variables should equal to the number of displacement variables'
 
-    requirement = "The LineElementAction class shall produce an error if the number"
+    requirement = "The system shall produce an error in the LineElementAction class if the number"
                   " of variables listed in the `save_in` parameter differs from"
                   " the number of displacement variables."
   [../]
@@ -53,7 +53,7 @@
     cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/block_1/displacements="disp_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotations="rot_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/diag_save_in="res_x res_y"'
     expect_err = 'LineElementAction: Number of diag_save_in variables should equal to the number of displacement variables'
 
-    requirement = "The LineElementAction class shall produce an error if the number of"
+    requirement = "The system shall produce an error in the LineElementAction class if the number of"
                   " variables listed in the `diag_save_in` parameter differs from the"
                   " number of displacement variables."
   [../]
@@ -63,7 +63,7 @@
     cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/block_1/displacements=""'
     expect_err = 'LineElementAction: Rotational variable names should be provided for beam elements using `rotations` parameter'
 
-    requirement = "The LineElementAction class shall produce an error if the names for the"
+    requirement = "The system shall produce an error in the LineElementAction class if the names for the"
                   " rotational degrees of freedom are not provided by the user."
   [../]
   [./beam_action_test6]
@@ -72,7 +72,7 @@
     cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/block_1/displacements="disp_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotations=""'
     expect_err = 'LineElementAction: Number of rotational and displacement variable names provided as input for beam should be same.'
 
-    requirement = "The LineElementAction class shall produce an error if the number of"
+    requirement = "The system shall produce an error in the LineElementAction class if the number of"
                   " rotational variables provided as input differs from the"
                   " number of displacement variables."
   [../]
@@ -82,7 +82,7 @@
     cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/block_1/displacements="disp_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotations="rot_x"'
     expect_err = 'LineElementAction: `y_orientation`, `area`, `Iy` and `Iz` should be provided for'
 
-    requirement = "The LineElementAction class shall produce an error if the moment of"
+    requirement = "The system shall produce an error in the LineElementAction class if the moment of"
                   " inertia, area and orientation of the beam are not provided"
                   " as input."
   [../]
@@ -92,7 +92,7 @@
     cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/block_1/displacements="disp_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotations="rot_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/area=1.0'
     expect_err = 'LineElementAction: Variable names for translational and rotational velocities and accelerations should be provided as input to perform dynamic simulation using beam elements using `velocities`, `accelerations`, `rotational_velocities`'
 
-    requirement = "The LineElementAction class shall produce an error if translational and"
+    requirement = "The system shall produce an error in the LineElementAction class if translational and"
                   " rotational velocities and accelerations are not provided as"
                   " input for dynamic simulations using beam elements."
   [../]
@@ -102,7 +102,7 @@
     cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/block_1/displacements="disp_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotations="rot_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/area=1.0 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotational_velocities="rot_vel_x rot_vel_y"'
     expect_err = 'LineElementAction: Number of translational and rotational velocity and acceleration variable names provided as input for the beam should be same as number of displacement variables'
 
-    requirement = "The LineElementAction class shall produce an error if the number of"
+    requirement = "The system shall produce an error in the LineElementAction class if the number of"
                   " translational and rotational velocities and accelerations"
                   " differs from the number of displacement variables."
   [../]
@@ -112,7 +112,7 @@
     cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/block_1/displacements="disp_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotations="rot_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/area=1.0 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotational_velocities="rot_vel_x"'
     expect_err = 'LineElementAction: Newmark time integration parameters `beta` and `gamma` should be provided as input to perform dynamic simulations using beams.'
 
-    requirement = "The LineElementAction class shall produce an error if Newmark time"
+    requirement = "The system shall produce an error in the LineElementAction class if Newmark time"
                   " integration parameters (`beta` and `gamma`) are not provided"
                   " as input for dynamic simulations using beam elements."
   [../]
@@ -122,7 +122,7 @@
     cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/block_1/displacements="disp_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotations="rot_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/area=1.0 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotational_velocities="rot_vel_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/beta=0.25'
     expect_err = 'LineElementAction: Either name of the density material property or a constant density value should be provided as input using `density` for creating the consistent mass/inertia matrix required for dynamic beam simulation.'
 
-    requirement = "The LineElementAction class shall produce an error if density is not"
+    requirement = "The system shall produce an error in the LineElementAction class if density is not"
                   " provided as input for dynamic beam simulations using beams elements with consistent"
                   " mass/inertia matrix."
   [../]
@@ -132,7 +132,7 @@
     cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/block_1/displacements="disp_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotations="rot_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/area=1.0 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotational_velocities="rot_vel_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/beta=0.25 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/density=1.0'
     expect_err = 'LineElementAction: `nodal_mass` or `nodal_mass_file` should be provided as input to calculate inertial forces on beam due to nodal mass.'
 
-    requirement = "The LineElementAction class shall produce an error if nodal mass is not"
+    requirement = "The system shall produce an error in the LineElementAction class if nodal mass is not"
                   " provided as input for dynamic beam simulations using beam elements with nodal"
                   " mass matrix."
   [../]
@@ -142,7 +142,7 @@
     cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/block_1/displacements="disp_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotations="rot_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/area=1.0 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotational_velocities="rot_vel_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/beta=0.25 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/density=1.0 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/nodal_mass=0.1'
     expect_err = 'LineElementAction: `nodal_Ixx`, `nodal_Iyy`, `nodal_Izz` should be provided as input to calculate inertial torque on beam due to nodal inertia.'
 
-    requirement = "The LineElementAction class shall produce an error if nodal inertia"
+    requirement = "The system shall produce an error in the LineElementAction class if nodal inertia"
                   " is not provided as input for dynamic beam simulations using beam elements with nodal"
                   " inertia matrix."
   [../]
@@ -152,7 +152,7 @@
     cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/block_1/displacements="disp_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotations="rot_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/area=1.0 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotational_velocities="rot_vel_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/beta=0.25 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/density=1.0 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/nodal_mass=0.1 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/nodal_Ixx=0.1 Physics/SolidMechanics/LineElement/QuasiStatic/block_all/block="1 2"'
     expect_err = 'LineElementAction: The block restrictions in the LineElement actions must be non-overlapping.'
 
-    requirement = "The LineElementAction class shall produce an error if multiple subblocks"
+    requirement = "The system shall produce an error in the LineElementAction class if multiple subblocks"
                   " specify properties for the same mesh block."
   [../]
   [./beam_action_test15]
@@ -161,7 +161,7 @@
     cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/block_1/displacements="disp_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotations="rot_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/area=1.0 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/rotational_velocities="rot_vel_x" Physics/SolidMechanics/LineElement/QuasiStatic/block_1/beta=0.25 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/density=1.0 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/nodal_mass=0.1 Physics/SolidMechanics/LineElement/QuasiStatic/block_1/nodal_Ixx=0.1'
     expect_err = 'LineElementAction: No LineElement action can be block unrestricted if more than one LineElement action is specified.'
 
-    requirement = "The LineElementAction class shall produce an error if an action subblock"
+    requirement = "The system shall produce an error in the LineElementAction class if an action subblock"
                   " is mesh block restricted while another is not."
   [../]
   [./beam_action_test16]
@@ -170,7 +170,7 @@
     cli_args = 'Physics/SolidMechanics/LineElement/QuasiStatic/dynamic_nodal_translational_inertia=true'
     expect_err = 'LineElementAction: Variable names for translational and rotational velocities and accelerations should be provided as input to perform dynamic simulation using beam elements'
 
-    requirement = "The LineElementAction class shall produce an error if `dynamic_nodal_translational_inertia`"
+    requirement = "The system shall produce an error in the LineElementAction class if `dynamic_nodal_translational_inertia`"
                   " is set to true in the common action block but the subblocks do"
                   " not have the parameters required for a dynamic beam simulation using beam elements."
   [../]
