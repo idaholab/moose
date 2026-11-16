@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#4522'
+  issues = '#4522 #28875'
   design = 'examples_and_tutorials/index.md'
   [default]
     type = 'Exodiff'
