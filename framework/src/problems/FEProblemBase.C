@@ -9077,9 +9077,6 @@ FEProblemBase::computeDamping(const NumericVector<Number> & soln,
 std::optional<Real>
 FEProblemBase::computePredictorDamping(const NumericVector<Number> & soln,
                                        const NumericVector<Number> & update,
-                                       const MooseObjectWarehouse<ElementDamper> & element_dampers,
-                                       const MooseObjectWarehouse<NodalDamper> & nodal_dampers,
-                                       const MooseObjectWarehouse<GeneralDamper> & general_dampers,
                                        std::string & failure)
 {
   TIME_SECTION("computePredictorDamping", 1, "Computing Predictor Damping");
@@ -9096,8 +9093,7 @@ FEProblemBase::computePredictorDamping(const NumericVector<Number> & soln,
 
   const NumericVector<Number> * const saved_solution = _current_nl_sys->currentSolution();
   _current_nl_sys->setSolution(soln);
-  const Real damping = _current_nl_sys->computeDamping(
-      soln, update, element_dampers, nodal_dampers, general_dampers);
+  const Real damping = _current_nl_sys->computePredictorDamping(soln, update);
   _current_nl_sys->setSolution(*saved_solution);
   _skip_exception_check = skip_exception_check;
 

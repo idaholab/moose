@@ -12,9 +12,6 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "Transient.h"
-#include "ElementDamper.h"
-#include "NodalDamper.h"
-#include "GeneralDamper.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -73,9 +70,6 @@ Predictor::Predictor(const InputParameters & parameters)
     _skip_after_failed_timetep(getParam<bool>("skip_after_failed_timestep")),
     _timestep_tolerance(dynamic_cast<TransientBase *>(_app.getExecutioner())->timestepTol()),
     _damper_names(getParam<std::vector<std::string>>("dampers")),
-    _element_dampers(_app.numThreads()),
-    _nodal_dampers(_app.numThreads()),
-    _general_dampers(/*num_threads=*/1),
     _cut_timestep_on_damping_failure(getParam<MooseEnum>("damping_failure") == "cut_timestep")
 {
   if (_scale < 0.0 || _scale > 1.0)
@@ -88,44 +82,6 @@ bool
 Predictor::usesDamper(const std::string & name) const
 {
   return std::find(_damper_names.begin(), _damper_names.end(), name) != _damper_names.end();
-}
-
-void
-Predictor::addDamper(const std::shared_ptr<Damper> & damper, const THREAD_ID tid)
-{
-  _added_dampers.insert(damper->name());
-  if (const auto gd = std::dynamic_pointer_cast<GeneralDamper>(damper))
-    _general_dampers.addObject(gd);
-  else if (const auto ed = std::dynamic_pointer_cast<ElementDamper>(damper))
-    _element_dampers.addObject(ed, tid);
-  else if (const auto nd = std::dynamic_pointer_cast<NodalDamper>(damper))
-    _nodal_dampers.addObject(nd, tid);
-  else
-    mooseError("Invalid damper type");
-}
-
-void
-Predictor::updateActive(const THREAD_ID tid)
-{
-  _element_dampers.updateActive(tid);
-  _nodal_dampers.updateActive(tid);
-  if (tid == 0)
-    _general_dampers.updateActive();
-}
-
-void
-Predictor::initialSetup()
-{
-  for (const auto & name : _damper_names)
-    if (!_added_dampers.count(name))
-      paramError("dampers", "The damper '", name, "' does not exist.");
-
-  for (const auto tid : make_range(_app.numThreads()))
-  {
-    _element_dampers.initialSetup(tid);
-    _nodal_dampers.initialSetup(tid);
-  }
-  _general_dampers.initialSetup();
 }
 
 void
@@ -151,8 +107,7 @@ Predictor::applyDamped(NumericVector<Number> & sln)
   update->close();
 
   std::string failure;
-  const auto damping = _fe_problem.computePredictorDamping(
-      *predicted, *update, _element_dampers, _nodal_dampers, _general_dampers, failure);
+  const auto damping = _fe_problem.computePredictorDamping(*predicted, *update, failure);
 
   if (!damping)
   {
@@ -177,13 +132,6 @@ Predictor::applyDamped(NumericVector<Number> & sln)
 void
 Predictor::timestepSetup()
 {
-  for (const auto tid : make_range(_app.numThreads()))
-  {
-    _element_dampers.timestepSetup(tid);
-    _nodal_dampers.timestepSetup(tid);
-  }
-  _general_dampers.timestepSetup();
-
   _is_repeated_timestep = false;
 
   // if the time step number hasn't changed

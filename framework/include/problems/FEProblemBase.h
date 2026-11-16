@@ -56,9 +56,6 @@ class DisplacedProblem;
 class MooseMesh;
 class NonlinearSystemBase;
 class LinearSystem;
-class ElementDamper;
-class NodalDamper;
-class GeneralDamper;
 class SolverSystem;
 class NonlinearSystem;
 class RandomInterface;
@@ -1957,20 +1954,15 @@ public:
                               const NumericVector<libMesh::Number> & update);
 
   /**
-   * Damping of the change made by a predictor. Collective on MPI.
+   * Damping of the change made by the predictor, by the dampers it lists. Collective on MPI.
    * @param soln The predicted solution (ghosted)
    * @param update The change as a search direction: soln = current - update (ghosted)
-   * @param element_dampers, nodal_dampers, general_dampers The dampers of the predictor
    * @param failure Set to the message of a failed damper
    * @return The damping factor, or nothing if a damper failed
    */
-  std::optional<Real>
-  computePredictorDamping(const NumericVector<libMesh::Number> & soln,
-                          const NumericVector<libMesh::Number> & update,
-                          const MooseObjectWarehouse<ElementDamper> & element_dampers,
-                          const MooseObjectWarehouse<NodalDamper> & nodal_dampers,
-                          const MooseObjectWarehouse<GeneralDamper> & general_dampers,
-                          std::string & failure);
+  std::optional<Real> computePredictorDamping(const NumericVector<libMesh::Number> & soln,
+                                              const NumericVector<libMesh::Number> & update,
+                                              std::string & failure);
 
   /**
    * Check to see whether the problem should update the solution

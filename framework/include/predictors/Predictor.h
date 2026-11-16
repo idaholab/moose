@@ -12,14 +12,9 @@
 // MOOSE includes
 #include "MooseObject.h"
 #include "Restartable.h"
-#include "MooseObjectWarehouse.h"
 
 class FEProblemBase;
 class NonlinearSystemBase;
-class Damper;
-class ElementDamper;
-class NodalDamper;
-class GeneralDamper;
 
 namespace libMesh
 {
@@ -39,7 +34,6 @@ public:
   virtual ~Predictor();
 
   virtual int order() { return 0; }
-  virtual void initialSetup();
   virtual void timestepSetup();
   virtual bool shouldApply();
   virtual void apply(NumericVector<Number> & sln) = 0;
@@ -47,14 +41,11 @@ public:
   /// Apply the prediction to \p sln, with its change scaled by the dampers of this predictor
   void applyDamped(NumericVector<Number> & sln);
 
+  /// Names of the dampers that limit the change of the prediction
+  const std::vector<std::string> & damperNames() const { return _damper_names; }
+
   /// Whether \p name is one of the dampers of this predictor
   bool usesDamper(const std::string & name) const;
-
-  /// Add \p damper (one per thread) to the dampers of this predictor
-  void addDamper(const std::shared_ptr<Damper> & damper, THREAD_ID tid);
-
-  /// Update the active dampers of this predictor, e.g. after a Control changed their enable
-  void updateActive(THREAD_ID tid);
 
   virtual NumericVector<Number> & solutionPredictor() { return _solution_predictor; }
 
@@ -92,16 +83,6 @@ protected:
 
   /// Names of the dampers that limit the change of the prediction
   const std::vector<std::string> & _damper_names;
-
-  /// The dampers of this predictor, which do not damp the nonlinear updates
-  ///@{
-  MooseObjectWarehouse<ElementDamper> _element_dampers;
-  MooseObjectWarehouse<NodalDamper> _nodal_dampers;
-  MooseObjectWarehouse<GeneralDamper> _general_dampers;
-  ///@}
-
-  /// Names of the dampers added to this predictor
-  std::set<std::string> _added_dampers;
 
   /// Whether a failed damper cuts the time step instead of skipping the prediction
   const bool _cut_timestep_on_damping_failure;

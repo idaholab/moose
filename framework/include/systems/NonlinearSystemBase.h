@@ -415,19 +415,13 @@ public:
   Real computeDamping(const NumericVector<Number> & solution, const NumericVector<Number> & update);
 
   /**
-   * Compute the damping of the given dampers
-   * @param solution The trial solution vector
-   * @param update The update to the solution vector, as a search direction: solution = old - update
-   * @param element_dampers The element dampers to evaluate
-   * @param nodal_dampers The nodal dampers to evaluate
-   * @param general_dampers The general dampers to evaluate
+   * Compute the damping of the dampers listed in the predictor
+   * @param solution The predicted solution vector
+   * @param update The change of the prediction, as a search direction: solution = old - update
    * @return returns The damping factor
    */
-  Real computeDamping(const NumericVector<Number> & solution,
-                      const NumericVector<Number> & update,
-                      const MooseObjectWarehouse<ElementDamper> & element_dampers,
-                      const MooseObjectWarehouse<NodalDamper> & nodal_dampers,
-                      const MooseObjectWarehouse<GeneralDamper> & general_dampers);
+  Real computePredictorDamping(const NumericVector<Number> & solution,
+                               const NumericVector<Number> & update);
 
   /**
    * Called at the beginning of the time step
@@ -1004,6 +998,13 @@ protected:
   /// General Dampers
   MooseObjectWarehouse<GeneralDamper> _general_dampers;
 
+  /// Dampers listed in the predictor, which limit only the change of the prediction
+  ///@{
+  MooseObjectWarehouse<ElementDamper> _predictor_element_dampers;
+  MooseObjectWarehouse<NodalDamper> _predictor_nodal_dampers;
+  MooseObjectWarehouse<GeneralDamper> _predictor_general_dampers;
+  ///@}
+
   /// NodalKernels for each thread
   MooseObjectTagWarehouse<NodalKernelBase> _nodal_kernels;
 
@@ -1129,6 +1130,13 @@ private:
    * Setup group scaling containers
    */
   void setupScalingData();
+
+  /// Compute the damping of the given dampers, see computeDamping()
+  Real computeDamping(const NumericVector<Number> & solution,
+                      const NumericVector<Number> & update,
+                      const MooseObjectWarehouse<ElementDamper> & element_dampers,
+                      const MooseObjectWarehouse<NodalDamper> & nodal_dampers,
+                      const MooseObjectWarehouse<GeneralDamper> & general_dampers);
 
   /// Functors for computing undisplaced mortar constraints
   std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>
