@@ -303,7 +303,12 @@ public:
 
   void zeroVectorForResidual(const std::string & vector_name);
 
-  void setInitialSolution();
+  /**
+   * Set the initial guess of the solve: apply the predictor and the preset boundary conditions
+   * @return Whether the time step can be solved, false if a damper of the predictor failed and the
+   * predictor is set to cut the time step
+   */
+  bool setInitialSolution();
 
 #ifdef MOOSE_KOKKOS_ENABLED
   void setKokkosInitialSolution();
@@ -422,6 +427,9 @@ public:
    */
   Real computePredictorDamping(const NumericVector<Number> & solution,
                                const NumericVector<Number> & update);
+
+  /// Check that the dampers listed in the predictor exist
+  void checkPredictorDampers() const;
 
   /**
    * Called at the beginning of the time step
@@ -1131,12 +1139,12 @@ private:
    */
   void setupScalingData();
 
-  /// Compute the damping of the given dampers, see computeDamping()
-  Real computeDamping(const NumericVector<Number> & solution,
-                      const NumericVector<Number> & update,
-                      const MooseObjectWarehouse<ElementDamper> & element_dampers,
-                      const MooseObjectWarehouse<NodalDamper> & nodal_dampers,
-                      const MooseObjectWarehouse<GeneralDamper> & general_dampers);
+  /// Compute the damping of the dampers in the given warehouses, see computeDamping()
+  Real computeDamperWarehouses(const NumericVector<Number> & solution,
+                               const NumericVector<Number> & update,
+                               const MooseObjectWarehouse<ElementDamper> & element_dampers,
+                               const MooseObjectWarehouse<NodalDamper> & nodal_dampers,
+                               const MooseObjectWarehouse<GeneralDamper> & general_dampers);
 
   /// Functors for computing undisplaced mortar constraints
   std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>

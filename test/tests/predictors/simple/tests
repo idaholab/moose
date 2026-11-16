@@ -77,10 +77,11 @@
     [separate]
       type = 'RunApp'
       input = 'predictor_damped_test.i'
-      cli_args = 'Dampers/newton/type=MaxIncrement Dampers/newton/variable=u '
-                 'Dampers/newton/max_increment=0.1'
-      expect_out = 'Predictor damping factor.* Damping factor:'
-      detail = "with dampers separate from those that damp the nonlinear updates,"
+      cli_args = 'Dampers/constant/type=ConstantDamper Dampers/constant/damping=0.25 '
+                 'Executioner/Predictor/dampers=constant'
+      expect_out = 'Predictor damping factor: 0\.25\n.* Damping factor:'
+      detail = "with dampers of any type that are separate from those that damp the nonlinear "
+               "updates,"
     []
     [skip]
       type = 'CSVDiff'
@@ -100,10 +101,10 @@
   [damper_not_found]
     type = 'RunException'
     input = 'predictor_damped_test.i'
-    cli_args = 'Executioner/Predictor/dampers=missing'
+    cli_args = 'Executioner/Predictor/dampers=missing --check-input'
     expect_err = "The damper 'missing' does not exist"
-    requirement = "The system shall report an error when a predictor lists a damper that does not "
-                  "exist."
+    requirement = "The system shall report an error when checking the input of a predictor that "
+                  "lists a damper that does not exist."
     design = 'SimplePredictor.md'
     issues = '#34453'
   []

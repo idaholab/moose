@@ -84,13 +84,13 @@ Predictor::usesDamper(const std::string & name) const
   return std::find(_damper_names.begin(), _damper_names.end(), name) != _damper_names.end();
 }
 
-void
+bool
 Predictor::applyDamped(NumericVector<Number> & sln)
 {
   if (_damper_names.empty())
   {
     apply(sln);
-    return;
+    return true;
   }
 
   const auto current = sln.clone();
@@ -116,10 +116,11 @@ Predictor::applyDamped(NumericVector<Number> & sln)
     if (_cut_timestep_on_damping_failure)
     {
       _console << "  Cutting the time step" << std::endl;
+      // fails the convergence check of this time step, as for a failed automatic scaling
       _fe_problem.setFailNextNonlinearConvergenceCheck();
+      return false;
     }
-    else
-      _console << "  Skipping the prediction" << std::endl;
+    _console << "  Skipping the prediction" << std::endl;
   }
   else if (*damping < 1.0)
   {
@@ -127,6 +128,7 @@ Predictor::applyDamped(NumericVector<Number> & sln)
     sln = *current;
     sln.add(-*damping, *update);
   }
+  return true;
 }
 
 void

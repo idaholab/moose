@@ -372,22 +372,26 @@ NonlinearSystemBase::initialSetup()
 
   if (_preconditioner)
     _preconditioner->initialSetup();
+}
 
-  if (_predictor)
+void
+NonlinearSystemBase::checkPredictorDampers() const
+{
+  if (!_predictor)
+    return;
+
+  std::set<std::string> predictor_dampers;
+  const auto add_names = [&predictor_dampers](const auto & warehouse)
   {
-    std::set<std::string> predictor_dampers;
-    const auto add_names = [&predictor_dampers](const auto & warehouse)
-    {
-      for (const auto & damper : warehouse.getObjects())
-        predictor_dampers.insert(damper->name());
-    };
-    add_names(_predictor_element_dampers);
-    add_names(_predictor_nodal_dampers);
-    add_names(_predictor_general_dampers);
-    for (const auto & name : _predictor->damperNames())
-      if (!predictor_dampers.count(name))
-        _predictor->paramError("dampers", "The damper '", name, "' does not exist.");
-  }
+    for (const auto & damper : warehouse.getObjects())
+      predictor_dampers.insert(damper->name());
+  };
+  add_names(_predictor_element_dampers);
+  add_names(_predictor_nodal_dampers);
+  add_names(_predictor_general_dampers);
+  for (const auto & name : _predictor->damperNames())
+    if (!predictor_dampers.count(name))
+      _predictor->paramError("dampers", "The damper '", name, "' does not exist.");
 }
 
 void
@@ -967,7 +971,7 @@ NonlinearSystemBase::onTimestepBegin()
     _predictor->timestepSetup();
 }
 
-void
+bool
 NonlinearSystemBase::setInitialSolution()
 {
   deactivateAllMatrixTags();
@@ -979,7 +983,8 @@ NonlinearSystemBase::setInitialSolution()
     {
       TIME_SECTION("applyPredictor", 2, "Applying Predictor");
 
-      _predictor->applyDamped(initial_solution);
+      if (!_predictor->applyDamped(initial_solution))
+        return false;
       _fe_problem.predictorCleanup(initial_solution);
     }
     else
@@ -1034,6 +1039,8 @@ NonlinearSystemBase::setInitialSolution()
 
   if (_fe_problem.getDisplacedProblem())
     setConstraintSecondaryValues(initial_solution, true);
+
+  return true;
 }
 
 void
@@ -3506,7 +3513,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
                                     const NumericVector<Number> & update)
 {
   const auto damping =
-      computeDamping(solution, update, _element_dampers, _nodal_dampers, _general_dampers);
+      computeDamperWarehouses(solution, update, _element_dampers, _nodal_dampers, _general_dampers);
   if (damping < 1.0)
     _console << " Damping factor: " << damping << std::endl;
   return damping;
@@ -3516,19 +3523,20 @@ Real
 NonlinearSystemBase::computePredictorDamping(const NumericVector<Number> & solution,
                                              const NumericVector<Number> & update)
 {
-  return computeDamping(solution,
-                        update,
-                        _predictor_element_dampers,
-                        _predictor_nodal_dampers,
-                        _predictor_general_dampers);
+  return computeDamperWarehouses(solution,
+                                 update,
+                                 _predictor_element_dampers,
+                                 _predictor_nodal_dampers,
+                                 _predictor_general_dampers);
 }
 
 Real
-NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
-                                    const NumericVector<Number> & update,
-                                    const MooseObjectWarehouse<ElementDamper> & element_dampers,
-                                    const MooseObjectWarehouse<NodalDamper> & nodal_dampers,
-                                    const MooseObjectWarehouse<GeneralDamper> & general_dampers)
+NonlinearSystemBase::computeDamperWarehouses(
+    const NumericVector<Number> & solution,
+    const NumericVector<Number> & update,
+    const MooseObjectWarehouse<ElementDamper> & element_dampers,
+    const MooseObjectWarehouse<NodalDamper> & nodal_dampers,
+    const MooseObjectWarehouse<GeneralDamper> & general_dampers)
 {
   // Default to no damping
   Real damping = 1.0;
@@ -4340,10 +4348,7 @@ NonlinearSystemBase::preSolve()
   _current_nl_its = 0;
 
   // Initialize the solution vector using a predictor and known values from nodal bcs
-  setInitialSolution();
-
-  // a failed predictor damper with damping_failure = cut_timestep
-  if (_fe_problem.getFailNextNonlinearConvergenceCheck())
+  if (!setInitialSolution())
     return false;
 
   // Now that the initial solution has ben set, potentially perform a residual/Jacobian evaluation

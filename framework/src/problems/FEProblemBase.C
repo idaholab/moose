@@ -6124,8 +6124,18 @@ FEProblemBase::addDamper(const std::string & damper_name,
 {
   parallel_object_only();
 
+  // a damper listed in a predictor belongs to the system of that predictor
+  const auto predictor_nl = std::find_if(_nl.begin(),
+                                         _nl.end(),
+                                         [&name](const auto & nl)
+                                         {
+                                           const auto predictor = nl->getPredictor();
+                                           return predictor && predictor->usesDamper(name);
+                                         });
+
   const auto nl_sys_num =
-      parameters.isParamValid("variable")
+      predictor_nl != _nl.end() ? (*predictor_nl)->number()
+      : parameters.isParamValid("variable")
           ? determineSolverSystem(parameters.varName("variable", name), true).second
           : (unsigned int)0;
 
@@ -6136,9 +6146,8 @@ FEProblemBase::addDamper(const std::string & damper_name,
   parameters.set<SubProblem *>("_subproblem") = this;
   parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
 
-  // a damper of the predictor does not damp the nonlinear updates
-  const auto predictor = _nl[nl_sys_num]->getPredictor();
-  if (!predictor || !predictor->usesDamper(name))
+  // a damper listed in a predictor does not damp the nonlinear updates
+  if (predictor_nl == _nl.end())
     _has_dampers = true;
   logAdd("Damper", name, damper_name, parameters);
   _nl[nl_sys_num]->addDamper(damper_name, name, parameters);
@@ -9081,21 +9090,38 @@ FEProblemBase::computePredictorDamping(const NumericVector<Number> & soln,
 {
   TIME_SECTION("computePredictorDamping", 1, "Computing Predictor Damping");
 
-  // an exception still pending from earlier (skip_exception_check) is left for the solve
+  // an exception still pending from earlier (skip_exception_check) is left for the solve, and the
+  // prediction is skipped since the dampers cannot be evaluated
   bool pending = _has_exception;
   _communicator.max(pending);
   if (pending)
-    return 1.0;
+  {
+    failure = "an exception is pending from before the prediction";
+    return {};
+  }
 
-  // No solve is running, so damper exceptions must stay pending instead of stopping one
-  const bool skip_exception_check = _skip_exception_check;
-  _skip_exception_check = true;
-
+  // No solve is running, so damper exceptions must stay pending instead of stopping one. The
+  // solution and the exception check are restored also if a damper throws.
   const NumericVector<Number> * const saved_solution = _current_nl_sys->currentSolution();
+  const bool skip_exception_check = _skip_exception_check;
+  const auto restore = [this, saved_solution, skip_exception_check]()
+  {
+    _current_nl_sys->setSolution(*saved_solution);
+    _skip_exception_check = skip_exception_check;
+  };
+  _skip_exception_check = true;
   _current_nl_sys->setSolution(soln);
-  const Real damping = _current_nl_sys->computePredictorDamping(soln, update);
-  _current_nl_sys->setSolution(*saved_solution);
-  _skip_exception_check = skip_exception_check;
+  Real damping;
+  try
+  {
+    damping = _current_nl_sys->computePredictorDamping(soln, update);
+  }
+  catch (...)
+  {
+    restore();
+    throw;
+  }
+  restore();
 
   unsigned int processor_id;
   bool has_exception = _has_exception;
@@ -9820,6 +9846,9 @@ FEProblemBase::checkProblemIntegrity()
 
   // Check for postprocessor names with same name as a scalar variable
   checkDuplicatePostprocessorVariableNames();
+
+  for (auto & nl : _nl)
+    nl->checkPredictorDampers();
 }
 
 void

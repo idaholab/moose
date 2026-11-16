@@ -38,8 +38,11 @@ public:
   virtual bool shouldApply();
   virtual void apply(NumericVector<Number> & sln) = 0;
 
-  /// Apply the prediction to \p sln, with its change scaled by the dampers of this predictor
-  void applyDamped(NumericVector<Number> & sln);
+  /**
+   * Apply the prediction to \p sln, with its change scaled by the dampers of this predictor
+   * @return false if a damper failed and the time step is to be cut
+   */
+  bool applyDamped(NumericVector<Number> & sln);
 
   /// Names of the dampers that limit the change of the prediction
   const std::vector<std::string> & damperNames() const { return _damper_names; }
