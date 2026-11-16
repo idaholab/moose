@@ -376,8 +376,17 @@ CavityComponent::addMeshGenerators()
       }
     }
   }
-
+  // Last mesh generator gives the component's mesh
   _top_mg_name = _mg_names.back();
+
+  // the cavity is connected (by stitching) to all the components it encloses
+  for (const auto & comp_name : _components_to_enclose)
+  {
+    auto & comp = _awh.getAction<ActionComponent>(comp_name);
+    comp.addConnectedComponent(*this);
+    for (auto * component : comp.getConnectedComponents())
+      component->setCurrentTopLevelMeshGeneratorName(_top_mg_name);
+  }
 }
 
 void
