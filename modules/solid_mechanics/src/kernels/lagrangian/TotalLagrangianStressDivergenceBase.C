@@ -43,10 +43,9 @@ template <class G>
 RankTwoTensor
 TotalLagrangianStressDivergenceBase<G>::gradTrial(unsigned int component)
 {
-  // After the F_ust-wrap architectural change, pk1_jacobian = dPK1/d(F_ust) already
-  // contains the local F-bar contribution (via the sigma-chain through
-  // `_d_F_stab_d_F_ust`). The trial gradient is always unstabilized; the non-local F-bar
-  // Jacobian contribution is added explicitly in `computeQpJacobianDisplacement`.
+  // pk1_jacobian = dPK1/d(F_ust) already contains the local F-bar contribution (via the
+  // sigma-chain through `_d_F_stab_d_F_ust`). The trial gradient is always unstabilized; the
+  // non-local F-bar Jacobian contribution is added explicitly in `computeQpJacobianDisplacement`.
   return gradTrialUnstabilized(component);
 }
 
