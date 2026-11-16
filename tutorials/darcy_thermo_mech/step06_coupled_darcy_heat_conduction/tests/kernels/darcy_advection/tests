@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'darcy_advection.i'
     exodiff = 'darcy_advection_out.e'
-    requirement = "The Darcy-Thermomechanics tutorial shall include an implementation of an advection operator coupled to pressure."
+    requirement = "The system shall include, as part of the Darcy-Thermomechanics tutorial, an implementation of an advection operator coupled to pressure."
   []
 []

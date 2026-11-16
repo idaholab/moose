@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'velocity_aux.i'
     exodiff = 'velocity_aux_out.e'
-    requirement = "The Darcy-Thermomechanics tutorial shall include method for computing the velocity based pressure using Darcy equation."
+    requirement = "The system shall include, as part of the Darcy-Thermomechanics tutorial, a method for computing the pressure-based velocity using the Darcy equation."
     custom_cmp = 'velocity_aux.cmp'
   []
 []
