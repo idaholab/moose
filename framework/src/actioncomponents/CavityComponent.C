@@ -342,7 +342,8 @@ CavityComponent::addMeshGenerators()
   // DeleteElementsNearMeshGenerator forms a giant KD-Tree with side Qps to create the deletion
   // criterion
   // TODO: add a check on other component meshes (can already be done with diagnostics) or
-  // add an option to delete more (can already be done with an additional MG in Mesh block)
+  // add an option to delete from additional unconnected components (can already be done with
+  // an additional MG in Mesh block)
   for (const auto & comp_name : _components_to_enclose)
   {
     const auto & component = _awh.getAction<ActionComponent>(comp_name);
@@ -375,8 +376,6 @@ CavityComponent::addMeshGenerators()
       }
     }
   }
-
-  // TODO: cavity is a connected component
 
   _top_mg_name = _mg_names.back();
 }
