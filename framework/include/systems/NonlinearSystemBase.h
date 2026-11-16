@@ -48,6 +48,7 @@ class ResidualObject;
 class PenetrationInfo;
 class FieldSplitPreconditionerBase;
 class Convergence;
+class ExactConstraintFunctor;
 
 // libMesh forward declarations
 namespace libMesh
@@ -785,6 +786,14 @@ public:
 
 protected:
   /**
+   * Rebuild the exact constraints when a constraint reports changed coefficients, for example from
+   * a Control. Only NonlinearSystem::solve() and NonlinearEigenSystem::solve() call this. They
+   * call it before the first residual evaluation of the solve, the pre-SMO residual included. All
+   * residuals and Jacobians of a solve then use the same constraints.
+   */
+  void updateExactConstraints();
+
+  /**
    * Compute the residual for a given tag
    * @param tags The tags of kernels for which the residual is to be computed.
    */
@@ -998,6 +1007,13 @@ protected:
   /// Constraints storage object
   ConstraintWarehouse _constraints;
 
+  /// Applies the exact constraints to this system. The system builds it when it adds the first
+  /// constraint that uses exact constraints.
+  std::unique_ptr<ExactConstraintFunctor> _exact_constraint_functor;
+
+  /// Applies the same exact constraints to the displaced copy of this system
+  std::unique_ptr<ExactConstraintFunctor> _displaced_exact_constraint_functor;
+
   /// increment vector
   NumericVector<Number> * _increment_vec;
   /// Preconditioner
@@ -1095,6 +1111,12 @@ protected:
   std::unique_ptr<libMesh::DiagonalMatrix<Number>> _scaling_matrix;
 
 private:
+  /**
+   * Rebuild the exact constraints of this system and of its displaced copy. This does not rebuild
+   * the sparsity pattern, so only the coefficients of the rows can change.
+   */
+  void reinitExactConstraints();
+
   /**
    * Retrieve every finite volume object belonging to this system on thread \p tid, as
    * SetupInterfaces, so that the setup methods can be dispatched to all finite volume families

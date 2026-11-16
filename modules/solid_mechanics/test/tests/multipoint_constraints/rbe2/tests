@@ -1,0 +1,59 @@
+[Tests]
+  design = 'source/constraints/RBE2Constraint.md'
+  issues = '#33821'
+  [rbe2_rigid_rotation]
+    type = CSVDiff
+    input = 'rbe2_rigid_rotation.i'
+    csvdiff = 'rbe2_rigid_rotation_out.csv'
+    requirement = 'The system shall move every dependent node of an RBE2 constraint as a rigid body when the independent node is given a prescribed rotation.'
+  []
+  [rbe2_after_refinement]
+    type = CSVDiff
+    input = 'rbe2_after_refinement.i'
+    csvdiff = 'rbe2_after_refinement_out.csv'
+    mesh_mode = REPLICATED
+    requirement = 'The system shall re-apply RBE2 exact constraints after uniform mesh refinement, including on the nodes the refinement creates on the dependent boundary.'
+  []
+  [rbe2_beam_splice]
+    type = CSVDiff
+    input = 'rbe2_beam_splice.i'
+    csvdiff = 'rbe2_beam_splice_out.csv'
+    rel_err = 1e-6
+    requirement = 'The system shall tie translations and rotations of a dependent beam node to an independent beam node so that two beam segments joined by an RBE2 constraint deflect as one continuous cantilever.'
+  []
+  [cantilever_face_mass_eigen]
+    type = CSVDiff
+    input = 'cantilever_face_mass_eigen.i'
+    csvdiff = 'cantilever_face_mass_eigen_out_omega_squared_0001.csv'
+    capabilities = 'slepc & mumps'
+    requirement = 'The system shall compute the first bending eigenvalue of a cantilever whose tip mass is lumped directly onto the free-face nodes.'
+  []
+  [rbe2_tip_mass_eigen]
+    type = CSVDiff
+    input = 'rbe2_tip_mass_eigen.i'
+    csvdiff = 'rbe2_tip_mass_eigen_out_omega_squared_0001.csv'
+    capabilities = 'slepc & mumps'
+    rel_err = 1e-2
+    requirement = 'The system shall match, within one percent, the first bending eigenvalue of a cantilever whose tip mass sits on the independent node of an RBE2 spider to that of the same cantilever with the mass lumped on the face nodes.'
+  []
+
+  [errors]
+    requirement = 'The system shall report an error'
+    [dependent_is_independent]
+      type = RunException
+      input = 'rbe2_beam_splice.i'
+      cli_args = 'Constraints/splice/dependent_boundary=splice_independent'
+      expect_err = "is the independent node of boundary 'splice_independent'. A node cannot be "
+                   "tied rigidly to itself."
+      detail = 'when a dependent node of an RBE2 constraint is its independent node, and'
+    []
+    [missing_rotation_dof]
+      type = RunException
+      input = 'rbe2_rigid_rotation.i'
+      cli_args = 'Constraints/rbe2/dependent_dofs=translations_and_rotations'
+      expect_err = "The rotation variable 'rot_x' has no degree of freedom at the dependent node"
+      detail = 'when an RBE2 constraint ties the rotations of a dependent node that carries no '
+               'rotation degree of freedom.'
+    []
+  []
+[]

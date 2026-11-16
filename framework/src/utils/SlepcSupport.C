@@ -610,6 +610,39 @@ mooseEPSFormMatrices(EigenProblem & eigen_problem, EPS eps, Vec x, void * ctx)
 
 namespace
 {
+/**
+ * SLEPc creates its work vectors, including the SNES solution and right-hand side, from the
+ * operators. The vector type a matrix creates is chosen by its matrix type (VECSTANDARD for a
+ * shell matrix, VECCUDA or VECHIP for MATHYPRE built with device support), so match the system
+ * solution type, which honors '-vec_type' (e.g. device vectors required by GPU solvers).
+ */
+void
+setSystemVecType(EigenProblem & eigen_problem, Mat mat)
+{
+  const auto & solution = cast_ref<const PetscVector<Number> &>(
+      *eigen_problem.getCurrentNonlinearEigenSystem().sys().solution);
+  VecType vec_type;
+  LibmeshPetscCallA(eigen_problem.comm().get(), VecGetType(solution.vec(), &vec_type));
+  LibmeshPetscCallA(eigen_problem.comm().get(), MatSetVecType(mat, vec_type));
+}
+
+/**
+ * Copy the unconstrained rows and columns of \p all_dofs_mat into the condensed matrix
+ * \p eigen_mat that SLEPc holds
+ */
+void
+copyToCondensedMat(EigenProblem & eigen_problem,
+                   libMesh::CondensedEigenSystem & sys,
+                   const SparseMatrix<Number> & all_dofs_mat,
+                   Mat eigen_mat)
+{
+  PetscMatrix<Number> wrapped_eigen_mat(eigen_mat, sys.comm());
+  sys.copy_super_to_sub(all_dofs_mat, wrapped_eigen_mat);
+  // The copy can replace the matrix data, which resets the vector type to the matrix type default.
+  // EPSSetOperators requires the same vector type on both operators.
+  setSystemVecType(eigen_problem, eigen_mat);
+}
+
 void
 updateCurrentLocalSolution(libMesh::CondensedEigenSystem & sys, Vec x)
 {
@@ -700,10 +733,7 @@ moosePetscSNESFormMatrixTag(
   eigen_problem->computeJacobianTag(*sys.current_local_solution.get(), all_dofs_mat, tag);
 
   if (dof_map.n_constrained_dofs())
-  {
-    PetscMatrix<Number> wrapped_eigen_mat(eigen_mat, sys.comm());
-    sys.copy_super_to_sub(all_dofs_mat, wrapped_eigen_mat);
-  }
+    copyToCondensedMat(*eigen_problem, sys, all_dofs_mat, eigen_mat);
 }
 
 void
@@ -737,10 +767,7 @@ moosePetscSNESFormMatricesTags(SNES /*snes*/,
 
   if (dof_map.n_constrained_dofs())
     for (const auto i : index_range(eigen_mats))
-    {
-      PetscMatrix<Number> wrapped_eigen_mat(eigen_mats[i], sys.comm());
-      sys.copy_super_to_sub(*all_dofs_mats[i], wrapped_eigen_mat);
-    }
+      copyToCondensedMat(*eigen_problem, sys, *all_dofs_mats[i], eigen_mats[i]);
 }
 
 PetscErrorCode
@@ -1119,15 +1146,7 @@ attachCallbacksToMat(EigenProblem & eigen_problem, Mat mat, bool eigen)
 
   LibmeshPetscCallA(eigen_problem.comm().get(), PetscContainerDestroy(&container));
 
-  // SLEPc creates its work vectors, including the SNES solution and right-hand side, from the
-  // operators. The vector type a matrix creates is chosen by its matrix type (VECSTANDARD for a
-  // shell matrix, VECCUDA or VECHIP for MATHYPRE built with device support), so match the system
-  // solution type, which honors '-vec_type' (e.g. device vectors required by GPU solvers).
-  const auto & solution = cast_ref<const PetscVector<Number> &>(
-      *eigen_problem.getCurrentNonlinearEigenSystem().sys().solution);
-  VecType vec_type;
-  LibmeshPetscCallA(eigen_problem.comm().get(), VecGetType(solution.vec(), &vec_type));
-  LibmeshPetscCallA(eigen_problem.comm().get(), MatSetVecType(mat, vec_type));
+  setSystemVecType(eigen_problem, mat);
 }
 
 PetscErrorCode
