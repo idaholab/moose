@@ -100,7 +100,7 @@ ComputeLagrangianStressBase::pullBackCauchyStress()
 }
 
 void
-ComputeLagrangianStressBase::pullBackCauchyJacobian(const RankFourTensor & dsigma_dF_stab)
+ComputeLagrangianStressBase::pullBackCauchyJacobian(const RankFourTensor dsigma_dF_stab)
 {
   // sigma depends on the displacements only through F_stab, so its part of dP/d(F_ust) carries
   // the local F-bar factor d(F_stab)/d(F_ust)

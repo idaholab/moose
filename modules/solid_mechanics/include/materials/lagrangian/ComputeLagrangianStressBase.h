@@ -69,8 +69,9 @@ protected:
   /// P = det(F_ust) sigma F_ust^{-T}
   void pullBackCauchyStress();
   /// Set pk1_jacobian and pk1_jacobian_bypass_fbar of P = det(F_ust) sigma F_ust^{-T} from
-  /// dsigma/d(F_stab), the derivative of the Cauchy stress wrt the stabilized deformation gradient
-  void pullBackCauchyJacobian(const RankFourTensor & dsigma_dF_stab);
+  /// dsigma/d(F_stab), the derivative of the Cauchy stress wrt the stabilized deformation gradient.
+  /// Taken by value because callers may pass pk1_jacobian itself, which this overwrites.
+  void pullBackCauchyJacobian(const RankFourTensor dsigma_dF_stab);
   /// Provide for the actual stress updates
   virtual void computeQpStressUpdate() = 0;
 

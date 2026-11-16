@@ -1,7 +1,8 @@
 # One HEX8 with prescribed displacements that give a different det(F) at each quadrature point.
 # With F-bar stabilization the Cauchy stress at each quadrature point is the Neo-Hookean stress
 # of the stabilized deformation gradient Fbar, sigma = Fbar S(Fbar) Fbar^T / det(Fbar). The
-# output lists sigma and Fbar per quadrature point.
+# output lists sigma_xx per quadrature point (the stress error of using F instead of Fbar is a
+# scalar factor, so one component shows it).
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   large_kinematics = true
@@ -76,33 +77,12 @@
     index_i = 0
     index_j = 0
   []
-  [s_xy]
-    type = RankTwoCartesianComponent
-    rank_two_tensor = cauchy_stress
-    property_name = s_xy
-    index_i = 0
-    index_j = 1
-  []
-  [s_yy]
-    type = RankTwoCartesianComponent
-    rank_two_tensor = cauchy_stress
-    property_name = s_yy
-    index_i = 1
-    index_j = 1
-  []
-  [s_zz]
-    type = RankTwoCartesianComponent
-    rank_two_tensor = cauchy_stress
-    property_name = s_zz
-    index_i = 2
-    index_j = 2
-  []
 []
 
 [VectorPostprocessors]
   [stress]
     type = ElementMaterialSampler
-    property = 's_xx s_xy s_yy s_zz'
+    property = 's_xx'
   []
 []
 
