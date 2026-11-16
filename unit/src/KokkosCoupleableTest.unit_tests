@@ -13,6 +13,12 @@
     requirement = 'The system shall provide Kokkos coupling APIs for vector field variable values, gradients, degrees of freedom, solution states, vector tags, and time derivatives.'
     issues = '#33099'
   []
+  [array_variable_apis]
+    type = GoogleTest
+    unit_test = KokkosCoupleableTest.ArrayVariableAPIs
+    requirement = 'The system shall provide Kokkos coupling APIs for array variable values, gradients, nodal values, degrees of freedom, solution states, vector tags, and time derivatives.'
+    issues = '#33501'
+  []
   [ad_field_variable_apis]
     type = GoogleTest
     unit_test = KokkosCoupleableTest.ADFieldVariableAPIs
@@ -25,11 +31,17 @@
     requirement = 'The system shall evaluate the expected elemental, nodal, vector, scalar, and automatic-differentiation coupled values and derivatives on a Kokkos execution device.'
     issues = '#30655 #33709 #33099 #32699'
   []
+  [coupled_array_values_on_device]
+    type = GoogleTest
+    unit_test = KokkosCoupleableTest.CoupledArrayValuesOnDevice
+    requirement = 'The system shall evaluate the expected array variable component values, degrees of freedom, and gradients on a Kokkos execution device.'
+    issues = '#33501'
+  []
   [default_apis]
     type = GoogleTest
     unit_test = KokkosCoupleableTest.DefaultAPIs
-    requirement = 'The system shall provide configured default values and zero values for uncoupled Kokkos scalar field, vector field, and scalar variable coupling APIs.'
-    issues = '#30655 #33709 #33099'
+    requirement = 'The system shall provide configured default values and zero values for uncoupled Kokkos scalar field, vector field, array, and scalar variable coupling APIs.'
+    issues = '#30655 #33709 #33099 #33501'
   []
   [scalar_variable_apis]
     type = GoogleTest
@@ -40,7 +52,7 @@
   [validation_errors]
     type = GoogleTest
     unit_test = KokkosCoupleableTest.ValidationErrors
-    requirement = 'The system shall reject invalid Kokkos field, vector field, and scalar variable coupling API requests.'
-    issues = '#30655 #33709 #33099'
+    requirement = 'The system shall reject invalid Kokkos field, vector field, array, and scalar variable coupling API requests.'
+    issues = '#30655 #33709 #33099 #33501'
   []
 []
