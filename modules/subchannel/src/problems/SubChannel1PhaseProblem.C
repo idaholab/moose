@@ -14,6 +14,7 @@
 #include "libmesh/dense_vector.h"
 #include <iostream>
 #include <cmath>
+#include <limits>
 #include "AuxiliarySystem.h"
 #include "SCM.h"
 #include "SinglePhaseFluidProperties.h"
@@ -64,6 +65,7 @@ SubChannel1PhaseProblem::validParams()
   // Enumerations
   MooseEnum schemes("upwind downwind central_difference exponential", "central_difference");
   MooseEnum gravity_direction("counter_flow co_flow none", "counter_flow");
+  MooseEnum coupled_preconditioners("lu fieldsplit_lu fieldsplit_ilu", "fieldsplit_ilu");
 
   // Inputs
   InputParameters params = ExternalProblem::validParams();
@@ -122,8 +124,10 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<PetscReal>("rtol", 1e-6, "Relative tolerance for ksp solver");
   params.addParam<PetscReal>("atol", 1e-6, "Absolute tolerance for ksp solver");
   params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
-  params.addParam<PetscInt>("maxit", 1e4, "Maximum number of iterations for ksp solver");
-  params.addRangeCheckedParam<PetscInt>(
+  // The iteration counts are declared as unsigned int rather than PetscInt, which is long long in
+  // 64-bit-index PETSc builds and has no input parser
+  params.addParam<unsigned int>("maxit", 1e4, "Maximum number of iterations for ksp solver");
+  params.addRangeCheckedParam<unsigned int>(
       "coupled_gmres_restart",
       30,
       "coupled_gmres_restart > 0",
@@ -138,6 +142,19 @@ SubChannel1PhaseProblem::validParams()
       "[s]. Each gap is damped by its crossflow inertia over a pseudo-time step that grows from "
       "this value as the cross-momentum residual decreases. Smaller values damp more strongly "
       "and need more outer iterations; the converged solution does not depend on it.");
+  params.addParam<bool>(
+      "crossflow_pseudo_time_damping",
+      false,
+      "Whether to damp the crossflow of the coupled monolithic flow system with a pseudo-time "
+      "derivative. Without it the coupled system is solved undamped, and a coupled linear solve "
+      "that does not converge is an error.");
+  params.addParam<MooseEnum>(
+      "coupled_preconditioner",
+      coupled_preconditioners,
+      "Preconditioner of the coupled monolithic flow system: 'lu' factors the coupled matrix "
+      "exactly with MUMPS; 'fieldsplit_lu' and 'fieldsplit_ilu' use a multiplicative field split "
+      "with one split per field, factored exactly or with ILU(0). 'fieldsplit_ilu' is the "
+      "cheapest per iteration and scales best to large assemblies.");
   params.addParam<MooseEnum>(
       "interpolation_scheme",
       schemes,
@@ -195,7 +212,7 @@ SubChannel1PhaseProblem::validParams()
   params.addParamNamesToGroup(
       "mass_flow_equation_relaxation pressure_equation_relaxation crossflow_equation_relaxation "
       "mass_flow_relaxation pressure_relaxation crossflow_relaxation coupled_gmres_restart "
-      "crossflow_pseudo_time_step",
+      "crossflow_pseudo_time_step crossflow_pseudo_time_damping coupled_preconditioner",
       "Monolithic solver");
   params.addParamNamesToGroup("implicit segregated interpolation_scheme", "Solution method");
   params.addParamNamesToGroup("fp friction_closure mixing_closure pin_HTC_closure duct_HTC_closure",
@@ -244,9 +261,11 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _rtol(getParam<PetscReal>("rtol")),
     _atol(getParam<PetscReal>("atol")),
     _dtol(getParam<PetscReal>("dtol")),
-    _maxit(getParam<PetscInt>("maxit")),
-    _coupled_gmres_restart(getParam<PetscInt>("coupled_gmres_restart")),
+    _maxit(getParam<unsigned int>("maxit")),
+    _coupled_gmres_restart(getParam<unsigned int>("coupled_gmres_restart")),
     _crossflow_pseudo_time_step(getParam<Real>("crossflow_pseudo_time_step")),
+    _crossflow_pseudo_time_damping(getParam<bool>("crossflow_pseudo_time_damping")),
+    _coupled_preconditioner(getParam<MooseEnum>("coupled_preconditioner")),
     _interpolation_scheme(getParam<MooseEnum>("interpolation_scheme")),
     _gravity_direction(getParam<MooseEnum>("gravity")),
     _dir_grav(computeGravityDir(_gravity_direction)),
@@ -278,13 +297,19 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
                                           "mass_flow_relaxation",
                                           "pressure_relaxation",
                                           "crossflow_relaxation",
-                                          "crossflow_pseudo_time_step"})
+                                          "crossflow_pseudo_time_step",
+                                          "crossflow_pseudo_time_damping",
+                                          "coupled_preconditioner"})
       if (params.isParamSetByUser(relaxation_param))
         paramError(relaxation_param,
                    "The '",
                    relaxation_param,
                    "' parameter is only used by the implicit non-segregated solve. Set "
                    "'implicit = true' and 'segregated = false' to use it.");
+  if (!_crossflow_pseudo_time_damping && params.isParamSetByUser("crossflow_pseudo_time_step"))
+    paramError("crossflow_pseudo_time_step",
+               "The 'crossflow_pseudo_time_step' parameter is only used with "
+               "'crossflow_pseudo_time_damping = true'.");
   // NOTE: The four quantities below are 0 for processor_id != 0
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
   _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
@@ -2428,8 +2453,9 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(createPetscVector(Wij_iter, _block_size * _n_gaps));
   LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
       Wij_iter, _Wij, first_node, last_node, _n_gaps));
-  LibmeshPetscCall(addCrossflowDamping(
-      mat_array[Idx(2, 2)], mat_array[Idx(2, 1)], vec_array[2], Wij_iter, iblock, inv_dtau));
+  if (_crossflow_pseudo_time_damping)
+    LibmeshPetscCall(addCrossflowDamping(
+        mat_array[Idx(2, 2)], mat_array[Idx(2, 1)], vec_array[2], Wij_iter, iblock, inv_dtau));
 
   V("Relax mdot: " + std::to_string(_mass_flow_equation_relaxation));
   V("Relax P: " + std::to_string(_pressure_equation_relaxation));
@@ -2500,13 +2526,38 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(KSPGMRESSetRestart(ksp, _coupled_gmres_restart));
   LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));
   LibmeshPetscCall(KSPGetPC(ksp, &pc));
-  LibmeshPetscCall(PCSetType(pc, PCFIELDSPLIT));
   LibmeshPetscCall(KSPSetTolerances(ksp, _rtol, _atol, _dtol, _maxit));
-
-  // split equations
-  for (const auto f : make_range(Q))
-    LibmeshPetscCall(PCFieldSplitSetIS(pc, NULL, field_is[f]));
+  if (_coupled_preconditioner == "lu")
+  {
+    // An exact factorization of the coupled matrix; MUMPS factors the nested matrix directly.
+    // FGMRES is kept so the solve can start from the current iterate, and converges in one
+    // iteration.
+    LibmeshPetscCall(PCSetType(pc, PCLU));
+    LibmeshPetscCall(PCFactorSetMatSolverType(pc, MATSOLVERMUMPS));
+  }
+  else
+  {
+    // A multiplicative field split with one split per field
+    LibmeshPetscCall(PCSetType(pc, PCFIELDSPLIT));
+    for (const auto f : make_range(Q))
+      LibmeshPetscCall(PCFieldSplitSetIS(pc, NULL, field_is[f]));
+  }
   LibmeshPetscCall(KSPSetFromOptions(ksp));
+  if (_coupled_preconditioner == "fieldsplit_lu")
+  {
+    // Each split is factored exactly; the default of each split is ILU(0)
+    LibmeshPetscCall(KSPSetUp(ksp));
+    PetscInt n_splits;
+    KSP * sub_ksp;
+    LibmeshPetscCall(PCFieldSplitGetSubKSP(pc, &n_splits, &sub_ksp));
+    for (const auto f : make_range(n_splits))
+    {
+      PC sub_pc;
+      LibmeshPetscCall(KSPGetPC(sub_ksp[f], &sub_pc));
+      LibmeshPetscCall(PCSetType(sub_pc, PCLU));
+    }
+    LibmeshPetscCall(PetscFree(sub_ksp));
+  }
   V("Linear solver assembled");
 
   // ============================== Solve =====================================
@@ -2555,9 +2606,11 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
       LibmeshPetscCall(VecRestoreSubVector(x_vec, field_is[f], &x_sub[f]));
   };
   KSPConvergedReason reason;
-  for (const auto attempt : make_range(_max_crossflow_retries + 1))
+  // Without the damping there is no pseudo-time step to reduce, so the solve is attempted once
+  const unsigned int max_retries = _crossflow_pseudo_time_damping ? _max_crossflow_retries : 0;
+  for (const auto attempt : make_range(max_retries + 1))
   {
-    const bool last_attempt = attempt == _max_crossflow_retries;
+    const bool last_attempt = attempt == max_retries;
     LibmeshPetscCall(KSPSetTolerances(
         ksp, rtol, atol, dtol, last_attempt ? maxit : std::min(maxit, retry_maxit)));
     setInitialGuess();

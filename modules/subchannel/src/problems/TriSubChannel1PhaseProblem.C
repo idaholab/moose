@@ -723,12 +723,13 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
               _hc_axial_heat_conduction_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES));
 
           // No conduction term for the outlet face: the two entries above are equal and opposite,
-          // so the row conducts only with the cell below and the outlet is adiabatic. That is the
-          // right condition for an outflow boundary, which has no downstream domain to conduct
-          // into, and it is why the conduction of the block loses heat only through the inlet,
-          // where the enthalpy is prescribed (see SCMInletConductionHeatRatePostprocessor). The
-          // outflow enthalpy the flow itself carries is already in the advective term, whose
-          // diagonal holds mdot of this face for every cell including this one.
+          // so the row conducts only with the cell below and the outlet is modeled as adiabatic
+          // (zero enthalpy gradient). This neglects conduction into an outlet plenum, which is not
+          // part of the domain, and it is why the conduction of the block loses heat only through
+          // the inlet, where the enthalpy is prescribed (see
+          // SCMInletConductionHeatRatePostprocessor). The outflow enthalpy the flow itself carries
+          // is already in the advective term, whose diagonal holds mdot of this face for every cell
+          // including this one.
         }
         else
         {

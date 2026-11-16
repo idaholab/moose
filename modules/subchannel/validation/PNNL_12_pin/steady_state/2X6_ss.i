@@ -83,6 +83,8 @@ P_out = 101325 # Pa
   P_out = ${P_out}
   implicit = true
   segregated = false
+  # The undamped coupled solve does not converge this case
+  crossflow_pseudo_time_damping = true
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'
   full_output = true

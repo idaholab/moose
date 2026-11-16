@@ -9,6 +9,9 @@
     issues = '#28497 #29481 #33723'
     input = XX09_SS_SHRT17.i
     csvdiff = XX09_SS_SHRT17_out.csv
+    # An exact factorization of the coupled matrix is faster for this case; it is set here because
+    # the input is also run with the segregated solve, which rejects it
+    cli_args = 'SubChannel/coupled_preconditioner=lu'
     capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false

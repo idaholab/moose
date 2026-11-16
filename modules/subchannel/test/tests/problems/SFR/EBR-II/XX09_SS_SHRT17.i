@@ -55,8 +55,10 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-4
-  T_tol = 1.0e-5
+  # Tight enough that the outer iteration reaches the converged solution: tightening to 1e-8
+  # moves the result by 3e-6, while the previous 1e-4 stopped 8e-5 away from it
+  P_tol = 1.0e-6
+  T_tol = 1.0e-6
   implicit = true
   segregated = false
   interpolation_scheme = 'upwind'

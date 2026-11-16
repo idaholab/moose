@@ -13,11 +13,11 @@
 #include "SubChannelMesh.h"
 
 /**
- * Calculates the heat flow $[W]$ that axial conduction carries out of the assembly through the
- * inlet boundary, against the flow. The inlet enthalpy is prescribed, so when the first cell is
- * heated the enthalpy gradient across the inlet face drives this flux. It is the term that closes
- * the assembly energy balance between the pin and duct heat rates and the enthalpy flow rate rise
- * of SCMTHPowerPostprocessor.
+ * Calculates the surface-integrated heat flux $[W]$ that axial conduction carries out of the
+ * assembly through the inlet boundary, against the flow. The inlet enthalpy is prescribed, so when
+ * the first cell is heated the enthalpy gradient across the inlet face drives this flux. It is the
+ * term that closes the assembly energy balance between the pin and duct heat rates and the enthalpy
+ * flow rate rise of SCMTHPowerPostprocessor.
  */
 class SCMInletConductionHeatRatePostprocessor : public GeneralPostprocessor
 {

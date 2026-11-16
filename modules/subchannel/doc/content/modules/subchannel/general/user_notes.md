@@ -43,12 +43,21 @@ SCM's solver is designed to solve for relative pressure: $P_{relative} = P_{abso
 
 !! Intentional comment to provide extra spacing
 
-The monolithic solver solves the coupled mass flow, pressure, and crossflow equations of a block with
-PETSc FGMRES and a field-split preconditioner, with a crossflow damping that decays as the outer
-iteration converges ([Monolithic](subchannel_theory.md#monolithic)). If its solve fails or converges
-slowly:
+The monolithic solver solves the coupled mass flow, pressure, and crossflow equations of a block
+together, by default with a field-split preconditioner and no crossflow damping
+([Monolithic](subchannel_theory.md#monolithic)). If its solve fails or converges slowly:
 
-- +Coupled solves stagnate with tight tolerances.+ With tight
+- +The outer iteration does not converge, or the enthalpy becomes negative.+ Turn on the crossflow
+  damping with [!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_time_damping). Flow
+  blockage cases, square lattices, and some sodium cases need it; the converged solution does not
+  depend on it.
+- +Choosing the preconditioner.+ The default
+  [!param](/Problem/TriSubChannel1PhaseProblem/coupled_preconditioner) `fieldsplit_ilu` scales best
+  with the axial and lateral size and with the number of time steps. `lu` factors the coupled
+  matrix exactly and needs no retries; it is faster for small cases and converges some that the
+  field split does not, such as THORS FFM-3A without damping. A field split retries a coupled
+  solve that does not converge with more damping.
+- +Coupled solves stagnate with tight tolerances.+ With a field split and tight
   [!param](/Problem/TriSubChannel1PhaseProblem/P_tol) and
   [!param](/Problem/TriSubChannel1PhaseProblem/T_tol), once the crossflow damping has decayed, the
   default FGMRES restart of 30 can discard the Krylov space before it resolves the coupled
@@ -65,6 +74,8 @@ slowly:
   iteration diverges or reaches its iteration limit, at the cost of more iterations. Because the
   convergence can be sensitive to it, as in flow blockage cases, try values a factor of two to five
   either side of the default rather than a single value.
+  [Crossflow damping on EBR-II SHRT-17](crossflow_damping_study.md) reports the iteration counts
+  over five orders of magnitude of the step.
 - +The outer iteration diverges on a coarse axial mesh.+ With the
   `upwind` or `exponential` [!param](/Problem/TriSubChannel1PhaseProblem/interpolation_scheme),
   the discrete flow equations of a coarse axial mesh can have no solution close to the

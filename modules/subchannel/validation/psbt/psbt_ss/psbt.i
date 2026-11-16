@@ -76,6 +76,8 @@ P_out = 14.72e6 # Pa
   P_out = ${P_out}
   implicit = true
   segregated = false
+  # The undamped coupled solve does not converge this case
+  crossflow_pseudo_time_damping = true
   verbose_subchannel = true
   # At this Peclet number the exponential scheme reduces to upwind, where the cell-center
   # turbulent mixing uses only the bottom-face enthalpies. On this 20-cell mesh the mixing flow of a

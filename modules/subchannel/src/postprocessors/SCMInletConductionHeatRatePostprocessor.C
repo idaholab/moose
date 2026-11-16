@@ -23,7 +23,8 @@ SCMInletConductionHeatRatePostprocessor::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription(
-      "Calculates the heat rate $[W]$ that axial conduction carries out of the assembly through "
+      "Calculates the surface integrated heat flux (W) that axial conduction carries out of the "
+      "assembly through "
       "the inlet, against the flow. It closes the energy balance between the pin and duct heat "
       "rates and the enthalpy flow rate rise of SCMTHPowerPostprocessor.");
   return params;
