@@ -17,6 +17,8 @@
 ///   1) The 1st PK stress
 ///   2) The derivative of the 1st PK stress wrt the deformation gradient
 ///
+/// both at the F-bar-stabilized deformation gradient when stabilization is on
+///
 /// and wraps these to provide:
 ///   1) The Cauchy stress
 ///   2) The derivative of the increment in the Cauchy stress wrt the
@@ -36,21 +38,14 @@ protected:
   virtual void computeQpPK1Stress() = 0;
 
 protected:
-  /// Wrap the PK stress to get the Cauchy stress. Protected so PK2 (which has its own
-  /// wrap structure PK1 = F_ust * S with direct F_ust dependence) can override it.
+  /// Wrap the PK stress to get the Cauchy stress
   virtual void computeQpCauchyStress();
-
-  /// Derivative of sigma = F_ust S F_ust^T / det(F_ust) wrt F_ust at fixed PK2 stress S
-  /// (uses the current Cauchy stress)
-  RankFourTensor pk2WrapDerivative(const RankTwoTensor & S) const;
 
   /// Inverse incremental deformation gradient
   const MaterialProperty<RankTwoTensor> & _inv_df;
-  /// Inverse F-bar-stabilized deformation gradient (= _F^{-1}). Kept for any internal
-  /// consumer that still needs it; the kinematic stress-measure wrap uses _F_ust below.
+  /// Inverse F-bar-stabilized deformation gradient (= _F^{-1})
   const MaterialProperty<RankTwoTensor> & _inv_def_grad;
-  /// F-bar-stabilized deformation gradient (= the strain calc's published `_F`). Drives
-  /// the constitutive update via the strain calc's F-bar'd `_f_inv`; NOT used for the
-  /// kinematic PK1 -> sigma wrap (that's `_F_ust`, declared on the base).
+  /// F-bar-stabilized deformation gradient (= the strain calc's published `_F`). The
+  /// constitutive PK1 stress is a function of it, and the PK1 -> sigma push-forward uses it.
   const MaterialProperty<RankTwoTensor> & _F;
 };

@@ -39,66 +39,46 @@ ComputeLagrangianStressPK1::computeQpStressUpdate()
 void
 ComputeLagrangianStressPK1::computeQpCauchyStress()
 {
-  // Wrap PK1 -> sigma using the *unstabilized* F. F-bar enters only through the constitutive
-  // PK1's strain dependence (via the F-bar'd `_f_inv`); the geometric wrap uses F_ust so
-  // the residual matches OLD.
+  // computeQpPK1Stress provides the constitutive PK1 stress Pbar and dPbar/dFbar at the
+  // F-bar-stabilized deformation gradient Fbar = F_stab. F-bar replaces F only in the
+  // constitutive model (de Souza Neto et al. 1996), so the Cauchy stress is the push-forward
+  // with Fbar,
+  //   sigma = Pbar Fbar^T / det(Fbar),
+  // and the residual pulls it back with the unstabilized F, P = det(F) sigma F^{-T}.
   //
   // All RankFourTensor algebra below builds Jacobian-only quantities
-  // (`_cauchy_jacobian`, the post-multiplied `_pk1_jacobian`, and `_pk1_jacobian_bypass_fbar`).
+  // (`_cauchy_jacobian`, `_pk1_jacobian`, and `_pk1_jacobian_bypass_fbar`).
   // Skip them on residual-only sweeps.
   const bool need_jacobian = _fe_problem.currentlyComputingJacobian() ||
                              _fe_problem.currentlyComputingResidualAndJacobian();
   if (_large_kinematics)
   {
-    const Real J_ust = _F_ust[_qp].det();
-    _cauchy_stress[_qp] = _pk1_stress[_qp] * _F_ust[_qp].transpose() / J_ust;
+    const RankTwoTensor & F_bar = _F[_qp];
+    const Real J_bar = F_bar.det();
+    const RankTwoTensor P_bar = _pk1_stress[_qp];
+    _cauchy_stress[_qp] = P_bar * F_bar.transpose() / J_bar;
+    pullBackCauchyStress();
 
     if (!need_jacobian)
       return;
 
-    // sigma = (1/J(F_ust)) * PK1(F_stab) * F_ust^T. cauchy_jacobian = dsigma/d(dL) at fixed F_ust;
-    // the kernels supply d(dL) including the F-bar terms.
-    if (needCauchyJacobian())
-      _cauchy_jacobian[_qp] = _pk1_jacobian[_qp].singleProductJ(_F_ust[_qp]) / J_ust *
-                              _d_deformation_gradient_increment_d_F[_qp].inverse();
-
-    // dsigma/d(F_ust) at fixed PK1: (1/J) * PK1 * d(F_ust^T)/d(F_ust) - sigma (x) F_ust^{-T}
-    if (isPropertyActive(_d_cauchy_d_F_ust.id()))
-    {
-      usingTensorIndices(i_, j_, m_, n_);
-      const auto I = RankTwoTensor::Identity();
-      _d_cauchy_d_F_ust[_qp] = _pk1_stress[_qp].times<i_, n_, j_, m_>(I) / J_ust -
-                               _cauchy_stress[_qp].times<i_, j_, n_, m_>(_F_ust[_qp].inverse());
-    }
-
-    // Chain _pk1_jacobian to F_ust and publish the variant without the local F-bar factor
-    const RankFourTensor pk1_jac_no_fbar = _pk1_jacobian[_qp];
-    _pk1_jacobian[_qp] = _pk1_jacobian[_qp] * _d_F_stab_d_F_ust[_qp];
-    _pk1_jacobian_bypass_fbar[_qp] = pk1_jac_no_fbar;
+    // dsigma/dFbar = [dPbar/dFbar Fbar^T + Pbar d(Fbar^T)/dFbar] / det(Fbar) - sigma (x) Fbar^{-T}
+    usingTensorIndices(i_, j_, m_, n_);
+    const auto I = RankTwoTensor::Identity();
+    const RankFourTensor dsigma_dF_bar =
+        _pk1_jacobian[_qp].singleProductJ(F_bar) / J_bar + P_bar.times<i_, n_, j_, m_>(I) / J_bar -
+        _cauchy_stress[_qp].times<i_, j_, n_, m_>(_inv_def_grad[_qp]);
+    _cauchy_jacobian[_qp] = dsigma_dF_bar * _d_deformation_gradient_increment_d_F[_qp].inverse();
+    pullBackCauchyJacobian(dsigma_dF_bar);
   }
-  // Small deformations: sigma = PK1 (no wrap). For TL, the kernel chain wants
-  // dPK1/d(F_ust) -- pk1_jacobian (constitutive's dPK1/d(F_stab)) must be chained to
-  // F_ust via `_d_F_stab_d_F_ust`. For UL, cauchy_jacobian = dsigma/d(dL) = pk1_jacobian
-  // (since the constitutive's dPK1/d(F_stab) is essentially dsigma/d(dL) at small kin).
+  // Small deformations: sigma = PK1 (no wrap), and the constitutive dPK1/d(F_stab) is
+  // cauchy_jacobian = dsigma/d(dL) since d(dL)/d(F_stab) = I.
   else
   {
     _cauchy_stress[_qp] = _pk1_stress[_qp];
     if (!need_jacobian)
       return;
-    if (needCauchyJacobian())
-      _cauchy_jacobian[_qp] = _pk1_jacobian[_qp];
-    _pk1_jacobian_bypass_fbar[_qp] = _pk1_jacobian[_qp];
-    _pk1_jacobian[_qp] = _pk1_jacobian[_qp] * _d_F_stab_d_F_ust[_qp];
+    _cauchy_jacobian[_qp] = _pk1_jacobian[_qp];
+    pullBackCauchyJacobian(_pk1_jacobian[_qp]);
   }
-}
-
-RankFourTensor
-ComputeLagrangianStressPK1::pk2WrapDerivative(const RankTwoTensor & S) const
-{
-  // dsigma_ij/dF_mn = (delta_im (S F^T)_nj + (F S)_in delta_jm) / det(F) - sigma_ij F^-1_nm
-  usingTensorIndices(i_, j_, m_, n_);
-  const auto I = RankTwoTensor::Identity();
-  const RankTwoTensor & F = _F_ust[_qp];
-  return (I.times<i_, m_, n_, j_>(S * F.transpose()) + (F * S).times<i_, n_, j_, m_>(I)) / F.det() -
-         _cauchy_stress[_qp].times<i_, j_, n_, m_>(F.inverse());
 }

@@ -33,8 +33,7 @@
 ///   1) "stress" -- the cauchy stress
 ///   2) "cauchy_jacobian" -- the derivative of the increment in the
 ///                           cauchy stress with respect to the increment
-///                           in the spatial velocity gradient, plus
-///      "d_cauchy_stress_d_F_unstabilized" -- its direct dependence on F_ust
+///                           in the spatial velocity gradient
 ///   3) "pk1_stress" -- the first Piola-Kirchhoff stress
 ///   4) "pk1_jacobian" -- the derivative of the first PK stress with respect
 ///                           to the deformation gradient
@@ -66,8 +65,12 @@ protected:
   virtual void initQpStatefulProperties() override;
   /// Update all properties (here just the stress/derivatives)
   virtual void computeQpProperties() override;
-  /// Whether a kernel or the non-local F-bar operator reads _cauchy_jacobian
-  bool needCauchyJacobian() const;
+  /// Pull the Cauchy stress back to the 1st PK stress with the unstabilized deformation gradient,
+  /// P = det(F_ust) sigma F_ust^{-T}
+  void pullBackCauchyStress();
+  /// Set pk1_jacobian and pk1_jacobian_bypass_fbar of P = det(F_ust) sigma F_ust^{-T} from
+  /// dsigma/d(F_stab), the derivative of the Cauchy stress wrt the stabilized deformation gradient
+  void pullBackCauchyJacobian(const RankFourTensor & dsigma_dF_stab);
   /// Provide for the actual stress updates
   virtual void computeQpStressUpdate() = 0;
 
@@ -83,11 +86,8 @@ protected:
   /// The Cauchy stress
   MaterialProperty<RankTwoTensor> & _cauchy_stress;
   /// The derivative of the Cauchy stress wrt the increment in the spatial
-  /// velocity gradient, at fixed unstabilized deformation gradient
+  /// velocity gradient
   MaterialProperty<RankFourTensor> & _cauchy_jacobian;
-  /// The derivative of the Cauchy stress wrt the unstabilized deformation gradient at fixed
-  /// Piola-Kirchhoff stress (zero unless a PK stress is converted with large kinematics)
-  MaterialProperty<RankFourTensor> & _d_cauchy_d_F_ust;
 
   /// The 1st Piola-Kirchhoff stress
   MaterialProperty<RankTwoTensor> & _pk1_stress;
@@ -110,11 +110,15 @@ protected:
   /// d(F)/d(grad u_{n+1}) (= alpha * IdentityFour for the generalized midpoint rule)
   const MaterialProperty<RankFourTensor> & _d_F_d_grad_u;
 
-  /// Unstabilized deformation gradient (= F_actual at alpha = 1). Used by the stress
-  /// materials as F in the kinematic stress-measure wraps (sigma <-> PK1 <-> PK2) so that the
-  /// residual matches OLD's `StressDivergenceTensors`-on-displaced-mesh form. F-bar
-  /// enters only through the constitutive stress via the strain calc's F-bar'd `_f_inv`.
+  /// Unstabilized deformation gradient (= F_actual at alpha = 1). Used to pull the Cauchy stress
+  /// back to the 1st PK stress, so that the residual is the equilibrium of sigma on the deformed
+  /// mesh. F-bar enters only through sigma, which the constitutive model evaluates at the
+  /// F-bar-stabilized deformation gradient.
   const MaterialProperty<RankTwoTensor> & _F_ust;
+  /// Inverse and determinant of the unstabilized deformation gradient, published by the strain
+  /// calculator
+  const MaterialProperty<RankTwoTensor> & _F_ust_inv;
+  const MaterialProperty<Real> & _F_ust_det;
 
   /// d(spatial velocity gradient increment)/d(F_stab). Used in the sigma-via-dL chain to
   /// build pk1_jacobian / cauchy_jacobian.

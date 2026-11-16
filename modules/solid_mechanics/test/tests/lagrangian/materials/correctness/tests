@@ -70,4 +70,14 @@
     design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
     capabilities = 'method!=dbg'
   []
+  [neohookean_fbar]
+    type = CSVDiff
+    input = neohookean_fbar.i
+    csvdiff = 'neohookean_fbar_out_stress_0001.csv'
+    issues = '#34324'
+    requirement = 'The system shall compute the Cauchy stress of a second Piola-Kirchhoff stress '
+                  'update with F-bar stabilization and large deformations from the stabilized '
+                  'deformation gradient at each quadrature point.'
+    design = 'source/materials/lagrangian/ComputeNeoHookeanStress.md Stabilization.md'
+  []
 []

@@ -36,8 +36,6 @@ ComputeLagrangianStressBase::ComputeLagrangianStressBase(const InputParameters &
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _cauchy_stress(declareProperty<RankTwoTensor>(_base_name + "cauchy_stress")),
     _cauchy_jacobian(declareProperty<RankFourTensor>(_base_name + "cauchy_jacobian")),
-    _d_cauchy_d_F_ust(
-        declareProperty<RankFourTensor>(_base_name + "d_cauchy_stress_d_F_unstabilized")),
     _pk1_stress(declareProperty<RankTwoTensor>(_base_name + "pk1_stress")),
     _pk1_jacobian(declareProperty<RankFourTensor>(_base_name + "pk1_jacobian")),
     _pk1_jacobian_bypass_fbar(
@@ -47,6 +45,10 @@ ComputeLagrangianStressBase::ComputeLagrangianStressBase(const InputParameters &
         _base_name + "d_deformation_gradient_d_grad_displacement")),
     _F_ust(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
+    _F_ust_inv(getMaterialPropertyByName<RankTwoTensor>(
+        _base_name + "inverse_unstabilized_deformation_gradient")),
+    _F_ust_det(
+        getMaterialPropertyByName<Real>(_base_name + "det_unstabilized_deformation_gradient")),
     _d_deformation_gradient_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
         _base_name + "d_spatial_deformation_gradient_increment_d_deformation_gradient")),
     _d_F_stab_d_F_ust(
@@ -85,18 +87,51 @@ ComputeLagrangianStressBase::initQpStatefulProperties()
   // Actually no need to zero out the stresses as they aren't stateful (yet)
 }
 
-bool
-ComputeLagrangianStressBase::needCauchyJacobian() const
+void
+ComputeLagrangianStressBase::pullBackCauchyStress()
 {
-  return isPropertyActive(_cauchy_jacobian.id()) || isPropertyActive(_d_nl_fbar.id());
+  // F_ust^{-1} and det(F_ust) are published once per qp by the strain calculator; reuse them
+  // instead of recomputing a 3x3 inverse + determinant here on every residual/Jacobian sweep.
+  if (_large_kinematics)
+    _pk1_stress[_qp] = _F_ust_det[_qp] * _cauchy_stress[_qp] * _F_ust_inv[_qp].transpose();
+  // Small kinematics: PK1 = sigma (no wrap)
+  else
+    _pk1_stress[_qp] = _cauchy_stress[_qp];
+}
+
+void
+ComputeLagrangianStressBase::pullBackCauchyJacobian(const RankFourTensor & dsigma_dF_stab)
+{
+  // sigma depends on the displacements only through F_stab, so its part of dP/d(F_ust) carries
+  // the local F-bar factor d(F_stab)/d(F_ust)
+  if (_large_kinematics)
+  {
+    usingTensorIndices(i_, j_, k_, l_);
+    const RankTwoTensor & F_ust_inv = _F_ust_inv[_qp];
+    const Real det_F_ust = _F_ust_det[_qp];
+    // Geometric pieces of dPK1/d(F_ust) (independent of F-bar):
+    const RankFourTensor geom = _pk1_stress[_qp].outerProduct(F_ust_inv.transpose()) -
+                                _pk1_stress[_qp].times<i_, l_, j_, k_>(F_ust_inv);
+    // sigma chain WITHOUT the F-bar `_d_F_stab_d_F_ust` factor -- for specialty kernels
+    // whose coupled variable adds to F_ust AFTER F-bar (WPS strain_zz, homogenization
+    // macro_grad), so the perturbation bypasses F-bar's chain.
+    _pk1_jacobian_bypass_fbar[_qp] = geom + det_F_ust * dsigma_dF_stab.singleProductJ(F_ust_inv);
+    // sigma chain WITH the F-bar chain -- the default `_pk1_jacobian` for disp Jacobian.
+    _pk1_jacobian[_qp] =
+        geom + det_F_ust * (dsigma_dF_stab * _d_F_stab_d_F_ust[_qp]).singleProductJ(F_ust_inv);
+  }
+  else
+  {
+    // Small kinematics: the F-bar chain enters via `_d_F_stab_d_F_ust` for the disp Jacobian
+    // path; specialty paths bypass it.
+    _pk1_jacobian[_qp] = dsigma_dF_stab * _d_F_stab_d_F_ust[_qp];
+    _pk1_jacobian_bypass_fbar[_qp] = dsigma_dF_stab;
+  }
 }
 
 void
 ComputeLagrangianStressBase::computeQpProperties()
 {
-  // Cleared because only Piola-Kirchhoff materials with large kinematics set it
-  if (isPropertyActive(_d_cauchy_d_F_ust.id()))
-    _d_cauchy_d_F_ust[_qp].zero();
   computeQpStressUpdate();
   // Chain the kinematic policy into the PK1 Jacobian so the TL kernel consumes a single
   // d(PK1)/d(grad u) property and doesn't need to know about the generalized-alpha weighting.
