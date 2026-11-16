@@ -49,6 +49,26 @@
       valgrind = none # see #31360
       capabilities = 'netgen'
     []
+    [stitching_several_holes]
+      type = 'CSVDiff'
+      # The two holes are generated separately, so they share subdomain ids. Their volumes are
+      # reported per subdomain, which does not depend on the tetrahedralization of the exterior
+      input = 'xyzdelaunay_stitching.i'
+      cli_args = "Mesh/final_generator=triang
+                  Mesh/triang/holes='hole_1_name hole_2_name_1'
+                  Mesh/triang/stitch_holes='true true'
+                  Postprocessors/hole_1_volume/type=VolumePostprocessor
+                  Postprocessors/hole_1_volume/block=hole
+                  Postprocessors/hole_2_volume/type=VolumePostprocessor
+                  Postprocessors/hole_2_volume/block=1
+                  Outputs/file_base=xyzdelaunay_stitching_several_holes_out"
+      csvdiff = 'xyzdelaunay_stitching_several_holes_out.csv'
+      recover = false
+      issues = '#34317'
+      detail = "stitching several 'hole' meshes into the final mesh, keeping the subdomains of each"
+      valgrind = none # see #31360
+      capabilities = 'netgen'
+    []
     [stitching_combined]
       type = 'CSVDiff'
       input = 'xyzdelaunay_stitching.i'
