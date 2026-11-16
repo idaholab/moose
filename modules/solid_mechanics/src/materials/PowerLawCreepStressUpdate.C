@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PowerLawCreepStressUpdate.h"
+#include "Function.h"
 
 registerMooseObject("SolidMechanicsApp", PowerLawCreepStressUpdate);
 registerMooseObject("SolidMechanicsApp", ADPowerLawCreepStressUpdate);
@@ -24,7 +25,7 @@ PowerLawCreepStressUpdateTempl<is_ad>::validParams()
 
   // Linear strain hardening parameters
   params.addCoupledVar("temperature", "Coupled temperature");
-  params.addRequiredParam<Real>("coefficient", "Leading coefficient in power-law equation");
+  params.addRequiredParam<FunctionName>("coefficient", "Leading coefficient in power-law equation");
   params.addRequiredParam<Real>("n_exponent", "Exponent on effective stress in power-law equation");
   params.addParam<Real>("m_exponent", 0.0, "Exponent on time in power-law equation");
   params.addRequiredParam<Real>("activation_energy", "Activation energy");
@@ -40,7 +41,7 @@ PowerLawCreepStressUpdateTempl<is_ad>::PowerLawCreepStressUpdateTempl(
     _temperature(this->isParamValid("temperature")
                      ? &this->template coupledGenericValue<is_ad>("temperature")
                      : nullptr),
-    _coefficient(this->template getParam<Real>("coefficient")),
+    _coefficient(this->getFunction("coefficient")),
     _n_exponent(this->template getParam<Real>("n_exponent")),
     _m_exponent(this->template getParam<Real>("m_exponent")),
     _activation_energy(this->template getParam<Real>("activation_energy")),
@@ -80,8 +81,9 @@ PowerLawCreepStressUpdateTempl<is_ad>::computeResidualInternal(
   using std::pow;
 
   const ScalarType stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
+  const Real coefficient = _coefficient.value(_t, Material::_q_point[_qp]);
   const ScalarType creep_rate =
-      _coefficient * pow(stress_delta, _n_exponent) * _exponential * _exp_time;
+      coefficient * pow(stress_delta, _n_exponent) * _exponential * _exp_time;
   return creep_rate * _dt - scalar;
 }
 
@@ -93,8 +95,9 @@ PowerLawCreepStressUpdateTempl<is_ad>::computeDerivative(
   using std::pow;
 
   const GenericReal<is_ad> stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
+  const Real coefficient = _coefficient.value(_t, Material::_q_point[_qp]);
   const GenericReal<is_ad> creep_rate_derivative =
-      -_coefficient * _three_shear_modulus * _n_exponent * pow(stress_delta, _n_exponent - 1.0) *
+      -coefficient * _three_shear_modulus * _n_exponent * pow(stress_delta, _n_exponent - 1.0) *
       _exponential * _exp_time;
   return creep_rate_derivative * _dt - 1.0;
 }
