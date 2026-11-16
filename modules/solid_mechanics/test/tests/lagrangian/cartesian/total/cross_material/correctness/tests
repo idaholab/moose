@@ -5,7 +5,7 @@
     type = CSVDiff
     input = 'plastic_j2.i'
     csvdiff = 'plastic_j2_out.csv'
-    requirement = "Resulting flow curve matches analytic calculation with the total Lagrangian "
+    requirement = "The system shall produce a flow curve that matches the analytic calculation with the total Lagrangian "
                   "formulation"
     capabilities = 'method!=dbg'
   []

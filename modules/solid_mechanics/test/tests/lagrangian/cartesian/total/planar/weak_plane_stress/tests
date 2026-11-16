@@ -8,7 +8,7 @@
     difference_tol = 1E10
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false"
-    requirement = 'Weak plane stress Jacobian is exact with relative tolerance of 1e-6 for small '
+    requirement = 'The system shall compute an exact weak plane stress Jacobian, to a relative tolerance of 1e-6, for small '
                   'displacements without stabilization.'
   []
   [jacobian_small_stabilized]
@@ -18,7 +18,7 @@
     difference_tol = 1E10
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true"
-    requirement = 'Weak plane stress Jacobian is exact with relative tolerance of 1e-6 for small '
+    requirement = 'The system shall compute an exact weak plane stress Jacobian, to a relative tolerance of 1e-6, for small '
                   'displacements with stabilization.'
   []
   [jacobian_large_unstabilized]
@@ -28,7 +28,7 @@
     difference_tol = 1E10
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false"
-    requirement = 'Weak plane stress Jacobian is exact with relative tolerance of 1e-6 for large '
+    requirement = 'The system shall compute an exact weak plane stress Jacobian, to a relative tolerance of 1e-6, for large '
                   'displacements without stabilization.'
   []
   [jacobian_large_stabilized]
@@ -38,11 +38,11 @@
     difference_tol = 1E10
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true"
-    requirement = 'Weak plane stress Jacobian is exact with relative tolerance of 1e-6 for large '
+    requirement = 'The system shall compute an exact weak plane stress Jacobian, to a relative tolerance of 1e-6, for large '
                   'displacements with stabilization.'
   []
   [correctness]
-    requirement = "Using weak plane stress,"
+    requirement = "The system shall ensure that, using weak plane stress,"
     [2D]
       type = CSVDiff
       input = 'pull_2D.i'

@@ -9,7 +9,7 @@
     difference_tol = 1E10
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for small displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for small displacements in 1D '
                   'centrosymmetric spherical coordinates, no stabilization, including cross-terms'
   []
   [jacobian_large_no_stab]
@@ -19,7 +19,7 @@
     difference_tol = 1E10
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, no stabilization, including cross-terms'
   []
   [jacobian_small_with_stab]
@@ -29,7 +29,7 @@
     difference_tol = 1E10
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for small displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for small displacements in 1D '
                   'centrosymmetric spherical coordinates, with stabilization, including cross-terms'
   []
   [jacobian_large_with_stab]
@@ -39,7 +39,7 @@
     difference_tol = 1E10
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, with stabilization, including cross-terms'
   []
   [jacobian_large_no_stab_alpha05]
@@ -51,7 +51,7 @@
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
                "GlobalParams/alpha=0.5"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, no stabilization, including cross-terms, '
                   'using the generalized midpoint rule (alpha=0.5)'
   []
@@ -64,7 +64,7 @@
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
                "GlobalParams/alpha=0.5"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, with stabilization, including cross-terms, '
                   'using the generalized midpoint rule (alpha=0.5)'
   []
@@ -76,7 +76,7 @@
     difference_tol = 1E10
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=quadratic"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, no stabilization, including cross-terms, using the quadratic kinematic approximation'
   []
   [jacobian_large_no_stab_rashid_approximate]
@@ -87,7 +87,7 @@
     difference_tol = 1E10
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=rashid_approximate"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, no stabilization, including cross-terms, using the rashid_approximate kinematic approximation'
   []
   [jacobian_large_no_stab_rashid_eigen]
@@ -98,7 +98,7 @@
     difference_tol = 1E10
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=rashid_eigen"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, no stabilization, including cross-terms, using the rashid_eigen kinematic approximation'
   []
   [jacobian_large_with_stab_quadratic]
@@ -109,7 +109,7 @@
     difference_tol = 1E10
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=quadratic"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, with stabilization, including cross-terms, using the quadratic kinematic approximation'
   []
   [jacobian_large_with_stab_rashid_approximate]
@@ -120,7 +120,7 @@
     difference_tol = 1E10
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=rashid_approximate"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, with stabilization, including cross-terms, using the rashid_approximate kinematic approximation'
   []
   [jacobian_large_with_stab_rashid_eigen]
@@ -131,7 +131,7 @@
     difference_tol = 1E10
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true GlobalParams/kinematic_approximation=rashid_eigen"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, with stabilization, including cross-terms, using the rashid_eigen kinematic approximation'
   []
   [jacobian_large_no_stab_alpha05_quadratic]
@@ -143,7 +143,7 @@
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=quadratic"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, no stabilization, including cross-terms, '
                   'using the generalized midpoint rule (alpha=0.5), using the quadratic kinematic approximation'
   []
@@ -156,7 +156,7 @@
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_approximate"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, no stabilization, including cross-terms, '
                   'using the generalized midpoint rule (alpha=0.5), using the rashid_approximate kinematic approximation'
   []
@@ -169,7 +169,7 @@
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false "
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_eigen"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, no stabilization, including cross-terms, '
                   'using the generalized midpoint rule (alpha=0.5), using the rashid_eigen kinematic approximation'
   []
@@ -182,7 +182,7 @@
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=quadratic"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, with stabilization, including cross-terms, '
                   'using the generalized midpoint rule (alpha=0.5), using the quadratic kinematic approximation'
   []
@@ -195,7 +195,7 @@
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_approximate"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, with stabilization, including cross-terms, '
                   'using the generalized midpoint rule (alpha=0.5), using the rashid_approximate kinematic approximation'
   []
@@ -208,7 +208,7 @@
     run_sim = true
     cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
                "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_eigen"
-    requirement = 'Jacobian is exact with relative tolerance of 5e-6 for large displacements in 1D '
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 5e-6, for large displacements in 1D '
                   'centrosymmetric spherical coordinates, with stabilization, including cross-terms, '
                   'using the generalized midpoint rule (alpha=0.5), using the rashid_eigen kinematic approximation'
   []
