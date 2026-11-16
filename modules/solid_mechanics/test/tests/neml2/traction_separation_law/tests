@@ -2,8 +2,13 @@
   [bilinear_mixed_moose]
     type = Exodiff
     input = 'bilinear_mixed_moose.i'
-    # Native-MOOSE reference solution; its gold is its own output at tight default tolerance.
+    # Native-MOOSE reference solution; its gold is its own output.
     exodiff = 'bilinear_mixed_moose_out.e'
+    # Once the cohesive traction has fully softened, stress_yy is a cancellation residue of about
+    # 1e-8 (its peak is about 3.4e4). The residue differs between platforms and Torch/BLAS builds by
+    # about 2e-11, a relative difference of up to 2e-3, so values below 1e-7 are compared as zero.
+    # That is still about 11 orders of magnitude below the peak stress and reaction.
+    abs_zero = 1e-7
     capabilities = 'libtorch & neml2'
     requirement = 'The system shall compute the reaction-force history of a bi-linear mixed-mode cohesive zone problem driven through a prescribed loading history using the native MOOSE cohesive traction law.'
   []
