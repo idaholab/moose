@@ -165,13 +165,18 @@ CavityComponent::addMeshGenerators()
     addMeshGenerator("BlockToMeshConverterGenerator", "lowerD_into_block", blockToMesh_params);
 
     // Create a boundary layer by extruding from the component surfaces
-    // NOTE: this should become an option, a parameter we can turn on
     InputParameters ext_params = _factory.getValidParams("AdvancedExtruderGenerator");
     ext_params.set<std::vector<unsigned int>>("num_layers") = {
         getParam<unsigned int>("n_boundary_layers")};
     ext_params.set<MeshGeneratorName>("input") = _mg_names.back();
     if (isParamValid("boundary_layer_width"))
-      ext_params.set<std::vector<Real>>("heights") = {getParam<Real>("boundary_layer_width")};
+    {
+      // The node normals of a 2D surface point away from the component, but those of the 1D loop
+      // bounding a 2D component point into it, so we extrude backwards along them to grow the
+      // layer outwards in both cases
+      const auto width = getParam<Real>("boundary_layer_width");
+      ext_params.set<std::vector<Real>>("heights") = {_dimension == 3 ? width : -width};
+    }
     else
       paramError("boundary_layer_width", "Must be passed if n_boundary_layers > 0");
     ext_params.set<BoundaryName>("bottom_boundary") = name() + "_base_layer";
@@ -196,8 +201,7 @@ CavityComponent::addMeshGenerators()
     // NOTE: we only support a single connected (by mesh generation) component at this time
     holes_mgs.clear();
     // we are going to rely on BoundaryElementConversionGenerator and all_tri giving the same
-    // tetrahedralization of the boundary here... because all_tri can't handle pyramids at this time
-    // TODO: see https://github.com/libMesh/libmesh/issues/4495
+    // tetrahedralization of the boundary here.
     holes_mgs.push_back(blayer_mg_name);
     holes_boundaries.clear();
     holes_boundaries.push_back(name() + "_boundary_layers");

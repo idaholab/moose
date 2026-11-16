@@ -710,7 +710,10 @@ AdvancedExtruderGenerator::generate()
   else
     for (const auto h : _heights)
       total_extrusion_distance_at_axis += h;
-  mooseAssert(total_extrusion_distance_at_axis > 0, "Should not be 0");
+  // Only used to normalize the progress along the extrusion for 'end_radial_extent', which is
+  // incompatible with node normals. The heights all share a sign, so this is only zero if they
+  // are, and negative when extruding backwards along the direction or the node normals
+  mooseAssert(total_extrusion_distance_at_axis != 0, "Should not be 0");
 
   // When extruding along node normals, precompute each node's extrusion direction from the
   // normals of the elements connected to it
