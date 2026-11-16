@@ -15,14 +15,14 @@
 
 #include "libmesh/threads.h"
 
-ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblemBase & feproblem,
-                                                     NonlinearSystemBase & nl,
-                                                     const Moose::DampingStage stage)
+ComputeNodalDampingThread::ComputeNodalDampingThread(
+    FEProblemBase & feproblem,
+    NonlinearSystemBase & nl,
+    const MooseObjectWarehouse<NodalDamper> & dampers)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(feproblem),
     _damping(1.0),
     _nl(nl),
-    _nodal_dampers(_nl.getNodalDamperWarehouse()),
-    _stage(stage)
+    _nodal_dampers(dampers)
 {
 }
 
@@ -32,8 +32,7 @@ ComputeNodalDampingThread::ComputeNodalDampingThread(ComputeNodalDampingThread &
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _damping(1.0),
     _nl(x._nl),
-    _nodal_dampers(x._nodal_dampers),
-    _stage(x._stage)
+    _nodal_dampers(x._nodal_dampers)
 {
 }
 
@@ -49,7 +48,7 @@ ComputeNodalDampingThread::onNode(ConstNodeRange::const_iterator & node_it)
 
   const auto & ndampers = _nodal_dampers.getActiveObjects(_tid);
   for (const auto & damper : ndampers)
-    if (damper->appliesTo(_stage) && damper->variableDefinedOnNode(node))
+    if (damper->variableDefinedOnNode(node))
       damped_vars.insert(damper->getVariable());
 
   if (!damped_vars.empty())
@@ -57,7 +56,7 @@ ComputeNodalDampingThread::onNode(ConstNodeRange::const_iterator & node_it)
 
   for (const auto & damper : ndampers)
   {
-    if (!damper->appliesTo(_stage) || !damper->variableDefinedOnNode(node))
+    if (!damper->variableDefinedOnNode(node))
       continue;
 
     Real cur_damping = damper->computeDamping();
@@ -83,7 +82,7 @@ ComputeNodalDampingThread::join(const ComputeNodalDampingThread & y)
 void
 ComputeNodalDampingThread::printGeneralExecutionInformation() const
 {
-  const auto & damper_wh = _nl.getNodalDamperWarehouse();
+  const auto & damper_wh = _nodal_dampers;
   if (!_fe_problem.shouldPrintExecution(_tid) || !damper_wh.hasActiveObjects())
     return;
 

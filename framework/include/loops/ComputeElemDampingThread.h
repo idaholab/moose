@@ -25,7 +25,7 @@ class ComputeElemDampingThread : public ThreadedElementLoop<ConstElemRange>
 public:
   ComputeElemDampingThread(FEProblemBase & feproblem,
                            NonlinearSystemBase & nl,
-                           Moose::DampingStage stage = Moose::DampingStage::NONLINEAR);
+                           const MooseObjectWarehouse<ElementDamper> & dampers);
 
   // Splitting Constructor
   ComputeElemDampingThread(ComputeElemDampingThread & x, Threads::split split);
@@ -45,7 +45,4 @@ protected:
   Real _damping;
   NonlinearSystemBase & _nl;
   const MooseObjectWarehouse<ElementDamper> & _element_dampers;
-
-  /// The solution update whose dampers this loop evaluates
-  const Moose::DampingStage _stage;
 };

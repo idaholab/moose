@@ -55,7 +55,7 @@
 
   [damping]
     requirement = "The system shall limit the change of the initial guess made by a predictor with "
-                  "the dampers that are set to apply to the predictor, by"
+                  "the dampers listed in the predictor, by"
     design = 'SimplePredictor.md syntax/Dampers/index.md'
     issues = '#34453'
     [damped]
@@ -70,16 +70,17 @@
       type = 'RunApp'
       input = 'predictor_test.i'
       cli_args = 'Dampers/bound/type=BoundingValueNodalDamper Dampers/bound/variable=u '
-                 'Dampers/bound/max_value=0.8 Dampers/bound/apply_to=predictor'
+                 'Dampers/bound/max_value=0.8 Executioner/Predictor/dampers=bound'
       expect_out = 'Predictor damping factor: 0\.6\n'
       detail = "evaluating the dampers at the predicted solution,"
     []
-    [both]
+    [separate]
       type = 'RunApp'
       input = 'predictor_damped_test.i'
-      cli_args = 'Dampers/cap/apply_to="nonlinear predictor"'
+      cli_args = 'Dampers/newton/type=MaxIncrement Dampers/newton/variable=u '
+                 'Dampers/newton/max_increment=0.1'
       expect_out = 'Predictor damping factor.* Damping factor:'
-      detail = "also damping the nonlinear updates with dampers set to apply to both,"
+      detail = "with dampers separate from those that damp the nonlinear updates,"
     []
     [skip]
       type = 'CSVDiff'
@@ -96,14 +97,14 @@
       detail = "cutting the time step when a damper fails and the predictor is set to do so."
     []
   []
-  [damping_no_stage]
+  [damper_not_found]
     type = 'RunException'
     input = 'predictor_damped_test.i'
-    cli_args = 'Dampers/cap/apply_to=""'
-    expect_err = 'At least one solution update must be selected'
-    requirement = "The system shall report an error when a damper is set to limit no solution "
-                  "update."
-    design = 'syntax/Dampers/index.md'
+    cli_args = 'Executioner/Predictor/dampers=missing'
+    expect_err = "The damper 'missing' does not exist"
+    requirement = "The system shall report an error when a predictor lists a damper that does not "
+                  "exist."
+    design = 'SimplePredictor.md'
     issues = '#34453'
   []
 

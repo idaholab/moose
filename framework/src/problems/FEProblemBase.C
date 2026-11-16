@@ -587,7 +587,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _reinit_displaced_neighbor(false),
     _input_file_saved(false),
     _has_dampers(false),
-    _has_nonlinear_dampers(false),
     _has_constraints(false),
     _snesmf_reuse_base(true),
     _skip_exception_check(false),
@@ -6137,9 +6136,10 @@ FEProblemBase::addDamper(const std::string & damper_name,
   parameters.set<SubProblem *>("_subproblem") = this;
   parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
 
-  _has_dampers = true;
-  if (parameters.get<MultiMooseEnum>("apply_to").isValueSet("nonlinear"))
-    _has_nonlinear_dampers = true;
+  // a damper of the predictor does not damp the nonlinear updates
+  const auto predictor = _nl[nl_sys_num]->getPredictor();
+  if (!predictor || !predictor->usesDamper(name))
+    _has_dampers = true;
   logAdd("Damper", name, damper_name, parameters);
   _nl[nl_sys_num]->addDamper(damper_name, name, parameters);
 }
@@ -8988,7 +8988,7 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
 
   // MOOSE's FEProblemBase doesn't update the solution during the
   // postcheck, but FEProblemBase-derived classes might.
-  if (_has_nonlinear_dampers || shouldUpdateSolution())
+  if (_has_dampers || shouldUpdateSolution())
   {
     // We need ghosted versions of new_soln and search_direction (the
     // ones we get from libmesh/PETSc are PARALLEL vectors.  To make
@@ -9006,7 +9006,7 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
     *ghosted_solution = new_soln;
     *ghosted_search_direction = search_direction;
 
-    if (_has_nonlinear_dampers)
+    if (_has_dampers)
     {
       // Compute the damping coefficient using the ghosted vectors
       Real damping = computeDamping(*ghosted_solution, *ghosted_search_direction);
@@ -9052,7 +9052,7 @@ FEProblemBase::computeDamping(const NumericVector<Number> & soln,
   // Default to no damping
   Real damping = 1.0;
 
-  if (_has_nonlinear_dampers)
+  if (_has_dampers)
   {
     TIME_SECTION("computeDamping", 1, "Computing Damping");
 
@@ -9077,6 +9077,9 @@ FEProblemBase::computeDamping(const NumericVector<Number> & soln,
 std::optional<Real>
 FEProblemBase::computePredictorDamping(const NumericVector<Number> & soln,
                                        const NumericVector<Number> & update,
+                                       const MooseObjectWarehouse<ElementDamper> & element_dampers,
+                                       const MooseObjectWarehouse<NodalDamper> & nodal_dampers,
+                                       const MooseObjectWarehouse<GeneralDamper> & general_dampers,
                                        std::string & failure)
 {
   TIME_SECTION("computePredictorDamping", 1, "Computing Predictor Damping");
@@ -9093,8 +9096,8 @@ FEProblemBase::computePredictorDamping(const NumericVector<Number> & soln,
 
   const NumericVector<Number> * const saved_solution = _current_nl_sys->currentSolution();
   _current_nl_sys->setSolution(soln);
-  const Real damping =
-      _current_nl_sys->computeDamping(soln, update, Moose::DampingStage::PREDICTOR);
+  const Real damping = _current_nl_sys->computeDamping(
+      soln, update, element_dampers, nodal_dampers, general_dampers);
   _current_nl_sys->setSolution(*saved_solution);
   _skip_exception_check = skip_exception_check;
 

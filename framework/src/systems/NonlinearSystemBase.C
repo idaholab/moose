@@ -366,6 +366,9 @@ NonlinearSystemBase::initialSetup()
 
   if (_preconditioner)
     _preconditioner->initialSetup();
+
+  if (_predictor)
+    _predictor->initialSetup();
 }
 
 void
@@ -693,6 +696,15 @@ NonlinearSystemBase::addDamper(const std::string & damper_name,
   for (THREAD_ID tid = 0; tid < this->numThreads(); ++tid)
   {
     std::shared_ptr<Damper> damper = _factory.create<Damper>(damper_name, name, parameters, tid);
+
+    // A damper of the predictor limits only the change of the prediction
+    if (_predictor && _predictor->usesDamper(name))
+    {
+      _predictor->addDamper(damper, tid);
+      if (std::dynamic_pointer_cast<GeneralDamper>(damper))
+        break; // not threaded
+      continue;
+    }
 
     // Attempt to cast to the damper types
     std::shared_ptr<ElementDamper> ed = std::dynamic_pointer_cast<ElementDamper>(damper);
@@ -3432,6 +3444,8 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
 {
   _element_dampers.updateActive(tid);
   _nodal_dampers.updateActive(tid);
+  if (_predictor)
+    _predictor->updateActive(tid);
   _integrated_bcs.updateActive(tid);
   _dg_kernels.updateActive(tid);
   _interface_kernels.updateActive(tid);
@@ -3459,38 +3473,36 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
   }
 }
 
-bool
-NonlinearSystemBase::hasDampers(const Moose::DampingStage stage) const
+Real
+NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
+                                    const NumericVector<Number> & update)
 {
-  const auto applies = [stage](const auto & damper) { return damper->appliesTo(stage); };
-  const auto & gdampers = _general_dampers.getActiveObjects();
-  // element and nodal dampers are stored per thread, but every thread holds the same dampers
-  const auto & edampers = _element_dampers.getActiveObjects();
-  const auto & ndampers = _nodal_dampers.getActiveObjects();
-  return std::any_of(edampers.begin(), edampers.end(), applies) ||
-         std::any_of(ndampers.begin(), ndampers.end(), applies) ||
-         std::any_of(gdampers.begin(), gdampers.end(), applies);
+  const auto damping =
+      computeDamping(solution, update, _element_dampers, _nodal_dampers, _general_dampers);
+  if (damping < 1.0)
+    _console << " Damping factor: " << damping << std::endl;
+  return damping;
 }
 
 Real
 NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
                                     const NumericVector<Number> & update,
-                                    const Moose::DampingStage stage)
+                                    const MooseObjectWarehouse<ElementDamper> & element_dampers,
+                                    const MooseObjectWarehouse<NodalDamper> & nodal_dampers,
+                                    const MooseObjectWarehouse<GeneralDamper> & general_dampers)
 {
   // Default to no damping
   Real damping = 1.0;
-  bool has_active_dampers = false;
 
   try
   {
-    if (_element_dampers.hasActiveObjects())
+    if (element_dampers.hasActiveObjects())
     {
       PARALLEL_TRY
       {
         TIME_SECTION("computeDampers", 3, "Computing Dampers");
-        has_active_dampers = true;
         *_increment_vec = update;
-        ComputeElemDampingThread cid(_fe_problem, *this, stage);
+        ComputeElemDampingThread cid(_fe_problem, *this, element_dampers);
         Threads::parallel_reduce(
             _fe_problem.getCurrentAlgebraicElementRange(), cid, this->numThreads());
         damping = std::min(cid.damping(), damping);
@@ -3498,15 +3510,14 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
       PARALLEL_CATCH;
     }
 
-    if (_nodal_dampers.hasActiveObjects())
+    if (nodal_dampers.hasActiveObjects())
     {
       PARALLEL_TRY
       {
         TIME_SECTION("computeDamping::element", 3, "Computing Element Damping");
 
-        has_active_dampers = true;
         *_increment_vec = update;
-        ComputeNodalDampingThread cndt(_fe_problem, *this, stage);
+        ComputeNodalDampingThread cndt(_fe_problem, *this, nodal_dampers);
         Threads::parallel_reduce(
             _fe_problem.getCurrentAlgebraicNodeRange(), cndt, this->numThreads());
         damping = std::min(cndt.damping(), damping);
@@ -3514,18 +3525,15 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
       PARALLEL_CATCH;
     }
 
-    if (_general_dampers.hasActiveObjects())
+    if (general_dampers.hasActiveObjects())
     {
       PARALLEL_TRY
       {
         TIME_SECTION("computeDamping::general", 3, "Computing General Damping");
 
-        has_active_dampers = true;
-        const auto & gdampers = _general_dampers.getActiveObjects();
+        const auto & gdampers = general_dampers.getActiveObjects();
         for (const auto & damper : gdampers)
         {
-          if (!damper->appliesTo(stage))
-            continue;
           Real gd_damping = damper->computeDamping(solution, update);
           try
           {
@@ -3556,9 +3564,6 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
   }
 
   _communicator.min(damping);
-
-  if (has_active_dampers && damping < 1.0 && stage == Moose::DampingStage::NONLINEAR)
-    _console << " Damping factor: " << damping << std::endl;
 
   return damping;
 }
