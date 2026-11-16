@@ -1,0 +1,9 @@
+[Tests]
+  issues = '#23958'
+  design = 'FullSolveMultiApp.md'
+  [reset]
+    type = RunApp
+    input = 'parent.i'
+    requirement = "The system shall be able to reset a sub-application that performs a full solve on every execution."
+  []
+[]

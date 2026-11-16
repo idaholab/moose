@@ -23,7 +23,7 @@
 [MultiApps]
   [full_solve]
     type = FullSolveMultiApp
-    execute_on = initial
+    execute_on = timestep_end
     positions = '0 0 0'
     input_files = sub.i
     reset_apps = '0'
