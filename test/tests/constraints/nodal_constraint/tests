@@ -25,6 +25,58 @@
     requirement = "The system shall support the ability to linearly constrain nodal values."
   []
 
+  [jacobian]
+    issues = '#27955'
+    design = 'LinearNodalConstraint.md'
+    requirement = "The system shall compute a Jacobian that is consistent with the residual of a "
+                  "linear nodal constraint in a steady problem:"
+    [penalty_two_primaries]
+      type = 'PetscJacobianTester'
+      input = 'linear_nodal_constraint_two_primaries.i'
+      max_parallel = 1
+      detail = "with more than one primary node, using the penalty formulation;"
+    []
+    [kinematic_two_primaries]
+      type = 'PetscJacobianTester'
+      input = 'linear_nodal_constraint_two_primaries.i'
+      cli_args = 'Constraints/c1/formulation=kinematic'
+      max_parallel = 1
+      detail = "with more than one primary node, using the kinematic formulation;"
+    []
+    [kinematic_one_primary]
+      type = 'PetscJacobianTester'
+      input = 'linear_nodal_constraint_two_primaries.i'
+      cli_args = 'Constraints/c1/formulation=kinematic Constraints/c1/primary=1 Constraints/c1/weights=1'
+      max_parallel = 1
+      detail = "with one primary node, using the kinematic formulation;"
+    []
+    [kinematic_scaled]
+      type = 'PetscJacobianTester'
+      input = 'linear_nodal_constraint_two_primaries.i'
+      cli_args = 'Constraints/c1/formulation=kinematic Variables/u/scaling=10'
+      max_parallel = 1
+      detail = "with a scaled variable, using the kinematic formulation;"
+    []
+    [kinematic_elemental_coupling]
+      type = 'PetscJacobianTester'
+      input = 'linear_nodal_constraint_two_primaries.i'
+      cli_args = 'Constraints/c1/formulation=kinematic Variables/v/family=MONOMIAL '
+                 'Variables/v/order=CONSTANT Kernels/u_v/type=CoupledForce Kernels/u_v/variable=u '
+                 'Kernels/u_v/v=v Kernels/v_u/type=CoupledForce Kernels/v_u/variable=v '
+                 'Kernels/v_u/v=u Kernels/v_reaction/type=Reaction Kernels/v_reaction/variable=v'
+      max_parallel = 1
+      detail = "with an elemental variable coupled to the constrained variable, using the "
+               "kinematic formulation; and"
+    []
+    [kinematic_chained]
+      type = 'PetscJacobianTester'
+      input = 'linear_nodal_constraint_chained.i'
+      max_parallel = 1
+      detail = "with a primary node that is the secondary node of another constraint, using the "
+               "kinematic formulation."
+    []
+  []
+
   [linear_nodal_constraint_different_variables]
     type = 'Exodiff'
     input = 'linear_nodal_constraint_different_variables.i'
