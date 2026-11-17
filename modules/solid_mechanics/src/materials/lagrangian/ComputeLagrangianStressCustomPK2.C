@@ -43,9 +43,12 @@ ComputeLagrangianStressCustomPK2::initialSetup()
 void
 ComputeLagrangianStressCustomPK2::computeQpPK1Stress()
 {
-  // Pbar = Fbar * PK2(Fbar), with Fbar the strain calc's F-bar'd `_F` (which is what NEML2 sees
-  // as `forces/F`). The PK1 base pushes it forward with Fbar to the Cauchy stress.
-  _pk1_stress[_qp] = _F[_qp] * _pk2[_qp];
+  // Pbar = Fbar * Sbar, with Fbar the strain calc's F-bar'd `_F` (which is what NEML2 sees
+  // as `forces/F`) and Sbar = PK2(Fbar). The PK1 base pushes it forward with Fbar to the Cauchy
+  // stress.
+  const RankTwoTensor & F_bar = _F[_qp];
+  const RankTwoTensor & S_bar = _pk2[_qp];
+  _pk1_stress[_qp] = F_bar * S_bar;
 
   // The R4 algebra for `_pk1_jacobian` is read only on Jacobian sweeps; skip it on
   // residual-only sweeps.
@@ -53,9 +56,9 @@ ComputeLagrangianStressCustomPK2::computeQpPK1Stress()
       !_fe_problem.currentlyComputingResidualAndJacobian())
     return;
 
-  // dPbar/dFbar = del_ik PK2_lj  +  Fbar * dPK2/dFbar.
+  // dPbar/dFbar = del_ik Sbar_lj  +  Fbar * dSbar/dFbar.
   usingTensorIndices(i_, j_, k_, l_);
   const auto I = RankTwoTensor::Identity();
-  _pk1_jacobian[_qp] = I.template times<i_, k_, j_, l_>(_pk2[_qp].transpose()) +
-                       _dpk2_dF[_qp].singleProductI(_F[_qp]);
+  _pk1_jacobian[_qp] =
+      I.template times<i_, k_, j_, l_>(S_bar.transpose()) + _dpk2_dF[_qp].singleProductI(F_bar);
 }

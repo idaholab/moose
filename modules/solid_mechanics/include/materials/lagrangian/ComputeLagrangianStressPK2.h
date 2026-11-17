@@ -15,7 +15,7 @@
 ///
 /// This class *implements* the 2nd PK stress update, providing:
 ///   1) The 2nd PK stress
-///   2) The derivative of the 2nd PK stress wrt the Cauchy-Green strain
+///   2) The derivative of the 2nd PK stress wrt the Green-Lagrange strain
 ///
 /// and wraps these to provide:
 ///   1) The 1st PK stress
@@ -30,7 +30,7 @@ public:
 protected:
   /// Wrap PK2 -> PK1
   virtual void computeQpPK1Stress() override;
-  /// Provide the PK2 stress and dPK2/dC
+  /// Provide the PK2 stress and dS/dE
   virtual void computeQpPK2Stress() = 0;
 
 protected:
@@ -38,6 +38,6 @@ protected:
   MaterialProperty<RankTwoTensor> & _E;
   /// 2nd PK stress
   MaterialProperty<RankTwoTensor> & _S;
-  /// 2nd PK tangent (dS/dF)
+  /// 2nd PK tangent (dS/dE)
   MaterialProperty<RankFourTensor> & _C;
 };

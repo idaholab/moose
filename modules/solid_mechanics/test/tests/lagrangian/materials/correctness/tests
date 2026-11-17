@@ -80,4 +80,14 @@
                   'deformation gradient at each quadrature point.'
     design = 'source/materials/lagrangian/ComputeNeoHookeanStress.md Stabilization.md'
   []
+  [j2_fbar]
+    type = CSVDiff
+    input = j2_fbar.i
+    csvdiff = 'j2_fbar_out_stress_0001.csv'
+    issues = '#34324'
+    requirement = 'The system shall compute the Cauchy stress of a first Piola-Kirchhoff stress '
+                  'update with F-bar stabilization and large deformations from the stabilized '
+                  'deformation gradient at each quadrature point.'
+    design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md Stabilization.md'
+  []
 []

@@ -55,6 +55,20 @@
     requirement = 'Weak plane stress Jacobian is exact with relative tolerance of 1e-6 for large '
                   'displacements with stabilization.'
   []
+  [jacobian_large_stabilized_pk2]
+    type = PetscJacobianTester
+    input = 'convergence.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    run_sim = true
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true "
+               "Materials/stress/type=ComputeStVenantKirchhoffStress"
+    issues = '#34324'
+    design = 'source/kernels/lagrangian/TotalLagrangianWeakPlaneStress.md '
+             'source/materials/lagrangian/ComputeLagrangianStressPK2.md'
+    requirement = 'Weak plane stress Jacobian is exact with relative tolerance of 1e-6 for large '
+                  'displacements with stabilization and a second Piola-Kirchhoff stress update.'
+  []
   [correctness]
     requirement = "Using weak plane stress,"
     [2D]

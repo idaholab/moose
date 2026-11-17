@@ -41,25 +41,27 @@ ComputeLagrangianStressPK2::computeQpPK1Stress()
   const bool need_jacobian = _fe_problem.currentlyComputingJacobian() ||
                              _fe_problem.currentlyComputingResidualAndJacobian();
 
-  // The constitutive PK1 stress Pbar = Fbar S and dPbar/dFbar, with Fbar = `_F`. The PK1 base
+  // The constitutive PK1 stress Pbar = Fbar Sbar and dPbar/dFbar, with Fbar = `_F`. The PK1 base
   // pushes them forward with Fbar to the Cauchy stress.
   if (_large_kinematics)
   {
-    _pk1_stress[_qp] = _F[_qp] * _S[_qp];
+    const RankTwoTensor & F_bar = _F[_qp];
+    const RankTwoTensor & S_bar = _S[_qp];
+    _pk1_stress[_qp] = F_bar * S_bar;
     if (!need_jacobian)
       return;
 
     usingTensorIndices(i_, j_, k_, l_);
     // dE/dFbar
-    const RankFourTensor dE_dF =
-        0.5 * (RankTwoTensor::Identity().times<i_, l_, j_, k_>(_F[_qp].transpose()) +
-               _F[_qp].transpose().times<i_, k_, j_, l_>(RankTwoTensor::Identity()));
+    const RankFourTensor dE_dF_bar =
+        0.5 * (RankTwoTensor::Identity().times<i_, l_, j_, k_>(F_bar.transpose()) +
+               F_bar.transpose().times<i_, k_, j_, l_>(RankTwoTensor::Identity()));
 
-    // dPbar/dFbar = dFbar/dFbar * S + Fbar * dS/dE * dE/dFbar
-    //   dFbar/dFbar * S gives I x S^T (per the existing template, with S^T because
-    //   Pbar = Fbar * S and we differentiate Fbar).
-    _pk1_jacobian[_qp] = RankTwoTensor::Identity().times<i_, k_, j_, l_>(_S[_qp].transpose()) +
-                         (_C[_qp] * dE_dF).singleProductI(_F[_qp]);
+    // dPbar/dFbar = dFbar/dFbar * Sbar + Fbar * dSbar/dE * dE/dFbar
+    //   dFbar/dFbar * Sbar gives I x Sbar^T (per the existing template, with Sbar^T because
+    //   Pbar = Fbar * Sbar and we differentiate Fbar).
+    _pk1_jacobian[_qp] = RankTwoTensor::Identity().times<i_, k_, j_, l_>(S_bar.transpose()) +
+                         (_C[_qp] * dE_dF_bar).singleProductI(F_bar);
   }
   // Small deformations: PK1 = PK2 = sigma
   else

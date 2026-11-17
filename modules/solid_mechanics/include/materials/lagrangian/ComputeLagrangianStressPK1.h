@@ -24,6 +24,11 @@
 ///   2) The derivative of the increment in the Cauchy stress wrt the
 ///      increment in the spatial velocity gradient
 ///
+/// computeQpPK1Stress() writes the constitutive Pbar and dPbar/dFbar into `_pk1_stress` and
+/// `_pk1_jacobian`. computeQpCauchyStress() then overwrites both in place with the PK1 stress
+/// of the unstabilized deformation gradient and its derivative wrt that gradient, which the
+/// kernels use.
+///
 class ComputeLagrangianStressPK1 : public ComputeLagrangianStressBase
 {
 public:
