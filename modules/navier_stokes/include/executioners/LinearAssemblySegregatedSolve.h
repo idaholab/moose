@@ -195,6 +195,9 @@ protected:
   const bool _should_solve_turbulence;
   const bool _should_solve_passive_scalars;
   const bool _should_solve_active_scalars;
+  const bool _should_solve_pm_radiation;
+
+  // ****************** Ordering and subcycling of the active scalars ****************** //
 
   /**
    * Solve every active scalar system over the current time step, optionally split into subcycles.
@@ -220,7 +223,6 @@ protected:
 
   /// Number of subcycles for the active scalar equations within one time step
   const unsigned int _active_scalar_subcycles;
-  const bool _should_solve_pm_radiation;
 
   // ************************ Active Scalar Variables ************************ //
 

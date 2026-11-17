@@ -100,9 +100,9 @@ WCNSFV2PInterfacialMassTransferFunctorMaterial::WCNSFV2PInterfacialMassTransferF
 
     const auto latent_heat = _latent_heat(r, t);
     if (latent_heat <= 0.0)
-      mooseException("A non-positive latent heat of ",
-                     latent_heat,
-                     " leaves the interfacial mass transfer rate undefined");
+      mooseError("A non-positive latent heat of ",
+                 latent_heat,
+                 " leaves the interfacial mass transfer rate undefined");
 
     return area * interfacial_coefficient * (_temperature(r, t) - _T_saturation(r, t)) /
            latent_heat;

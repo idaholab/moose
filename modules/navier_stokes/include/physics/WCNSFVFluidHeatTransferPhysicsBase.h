@@ -40,10 +40,7 @@ public:
    * a source to the energy equation has to target this rather than the temperature, since with
    * that parameter set the temperature is not a solver variable at all.
    */
-  const VariableName & getFluidEnergyVariableName() const
-  {
-    return _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
-  }
+  const VariableName & getFluidEnergyVariableName() const;
   /// Whether the energy equation is solved in specific enthalpy rather than temperature
   bool solveForEnthalpy() const { return _solve_for_enthalpy; }
 
@@ -136,3 +133,9 @@ protected:
   /// Functors describing the wall boundary values. See energy_wall_types for what the functors actually represent
   std::vector<MooseFunctorName> _energy_wall_functors;
 };
+
+inline const VariableName &
+WCNSFVFluidHeatTransferPhysicsBase::getFluidEnergyVariableName() const
+{
+  return _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
+}

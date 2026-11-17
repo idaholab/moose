@@ -103,12 +103,17 @@ protected:
 
   /// The exact coefficient of the diffusion stress, beta_d beta_c / rho_m, at the given argument
   template <typename SpaceArg>
-  Real diffusionStressCoefficient(const SpaceArg & arg, const Moose::StateArg & state) const
-  {
-    return NS::diffusionStressCoefficient(_f_d(arg, state), _rho_d(arg, state), _rho_c(arg, state));
-  }
+  Real diffusionStressCoefficient(const SpaceArg & arg, const Moose::StateArg & state) const;
 
   /// Coefficient of the implicit surrogate used for the deferred correction. Chosen for
   /// convergence only, see setupFaceData; the converged solution does not depend on it.
   Real _gamma;
 };
+
+template <typename SpaceArg>
+Real
+LinearWCNSFV2PMomentumDriftFlux::diffusionStressCoefficient(const SpaceArg & arg,
+                                                            const Moose::StateArg & state) const
+{
+  return NS::diffusionStressCoefficient(_f_d(arg, state), _rho_d(arg, state), _rho_c(arg, state));
+}

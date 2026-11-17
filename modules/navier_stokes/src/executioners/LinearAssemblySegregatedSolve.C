@@ -219,9 +219,9 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
     _should_solve_turbulence(getParam<bool>("should_solve_turbulence")),
     _should_solve_passive_scalars(getParam<bool>("should_solve_passive_scalars")),
     _should_solve_active_scalars(getParam<bool>("should_solve_active_scalars")),
+    _should_solve_pm_radiation(getParam<bool>("should_solve_pm_radiation")),
     _solve_active_scalars_before_flow(getParam<bool>("solve_active_scalars_before_flow")),
     _active_scalar_subcycles(getParam<unsigned int>("active_scalar_subcycles")),
-    _should_solve_pm_radiation(getParam<bool>("should_solve_pm_radiation")),
     _active_scalar_system_names(getParam<std::vector<SolverSystemName>>("active_scalar_systems")),
     _has_active_scalar_systems(!_active_scalar_system_names.empty()),
     _active_scalar_equation_relaxation(

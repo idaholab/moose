@@ -30,10 +30,7 @@ public:
 protected:
   /// The slip velocity vector at the given argument
   template <typename SpaceArg>
-  RealVectorValue slipVelocity(const SpaceArg & arg, const Moose::StateArg & state) const
-  {
-    return NS::slipVelocityVector(_u_slip, _v_slip, _w_slip, arg, state);
-  }
+  RealVectorValue slipVelocity(const SpaceArg & arg, const Moose::StateArg & state) const;
 
   /// The argument the current face is evaluated at: single sided on a boundary face, central
   /// difference on an internal one
@@ -49,21 +46,7 @@ protected:
   template <typename Coefficient>
   Real faceCoefficient(const Coefficient & coefficient,
                        const Moose::StateArg & state,
-                       Moose::FV::InterpMethod method) const
-  {
-    if (Moose::FV::onBoundary(*this, *_current_face_info))
-      return coefficient(singleSidedFaceArg(_current_face_info), state);
-
-    const Real elem_value = coefficient(makeElemArg(_current_face_info->elemPtr()), state);
-    const Real neighbor_value = coefficient(makeElemArg(_current_face_info->neighborPtr()), state);
-    if (elem_value * neighbor_value <= 0.0)
-      method = Moose::FV::InterpMethod::Average;
-
-    Real face_value;
-    Moose::FV::interpolate(
-        method, face_value, elem_value, neighbor_value, *_current_face_info, true);
-    return face_value;
-  }
+                       Moose::FV::InterpMethod method) const;
 
   /// The dimension of the simulation
   const unsigned int _dim;
@@ -85,3 +68,34 @@ protected:
   /// which are internal to the mesh
   Real _boundary_normal_factor;
 };
+
+template <typename SpaceArg>
+RealVectorValue
+LinearWCNSFV2PDriftFluxBase::slipVelocity(const SpaceArg & arg, const Moose::StateArg & state) const
+{
+  return NS::slipVelocityVector(_u_slip, _v_slip, _w_slip, arg, state);
+}
+
+template <typename Coefficient>
+Real
+LinearWCNSFV2PDriftFluxBase::faceCoefficient(const Coefficient & coefficient,
+                                             const Moose::StateArg & state,
+                                             Moose::FV::InterpMethod method) const
+{
+  if (Moose::FV::onBoundary(*this, *_current_face_info))
+    return coefficient(singleSidedFaceArg(_current_face_info), state);
+
+  const Real elem_value = coefficient(makeElemArg(_current_face_info->elemPtr()), state);
+  const Real neighbor_value = coefficient(makeElemArg(_current_face_info->neighborPtr()), state);
+
+  // The requested method is overridden where the harmonic mean is undefined: it divides by the sum
+  // of the reciprocals, which is infinite where one side vanishes and can vanish where the two
+  // differ in sign. This happens at the edge of the dispersed phase, where the coefficient is
+  // zero on one side, so the arithmetic average is taken there instead.
+  if (elem_value * neighbor_value <= 0.0)
+    method = Moose::FV::InterpMethod::Average;
+
+  Real face_value;
+  Moose::FV::interpolate(method, face_value, elem_value, neighbor_value, *_current_face_info, true);
+  return face_value;
+}

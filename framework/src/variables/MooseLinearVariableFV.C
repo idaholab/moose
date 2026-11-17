@@ -305,10 +305,7 @@ MooseLinearVariableFV<Real>::evaluateDot(const ElemArg & elem_arg, const StateAr
   //
   // where timeDerivativeMatrixContribution(1) supplies c_t and timeDerivativeRHSContribution
   // supplies the history sum for a unit multiplier at every required state.
-  // Sized once and reused: this routine is called for every velocity component at every point a
-  // closure asks for a time derivative, and the contents never change
-  static thread_local std::vector<Real> unit_factors;
-  unit_factors.assign(time_integrator->numStatesRequired(), 1.0);
+  const std::vector<Real> unit_factors(time_integrator->numStatesRequired(), 1.0);
 
   return time_integrator->timeDerivativeMatrixContribution(1.0) * getElemValue(elem_info, state) -
          time_integrator->timeDerivativeRHSContribution(dof_id, unit_factors);
