@@ -7,7 +7,7 @@ n_cells = 20
 
 [Mesh]
   [assembly]
-    type = SCMDetailedQuadAssemblyMeshGenerator
+    type = SCMQuadVisualizationAssemblyMeshGenerator
     nx = 3
     ny = 3
     n_cells = '${n_cells}'

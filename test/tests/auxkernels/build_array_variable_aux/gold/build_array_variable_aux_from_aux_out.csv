@@ -1,0 +1,5 @@
+time,max_a_in_ab,max_b_in_ab,max_c_in_cd,max_d_in_cd
+0,0,0,0,0
+1,1,2,3,4
+2,2,4,6,8
+3,3,6,9,12

@@ -1,6 +1,6 @@
 # Frequency Response function for cantilever beam:
-# Analytic results: 509Hz and 763Hz
-# Simulation results with coarse mesh: 600Hz and 800Hz
+# Analytic results: 509 rad/s and 763 rad/s
+# Simulation results with coarse mesh: 650 rad/s and 850 rad/s
 
 [Mesh]
    type = GeneratedMesh

@@ -4,7 +4,7 @@
     input = 's01.i'
     csvdiff = 's01.csv'
     rel_err = 1.0E-5
-    requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow'
+    requirement = 'The system shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -13,7 +13,7 @@
     input = 's02.i'
     csvdiff = 's02.csv'
     rel_err = 1.0E-5
-    requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, when the source/sink strength is multiplied by the mobility'
+    requirement = 'The system shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, when the source/sink strength is multiplied by the mobility'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -22,7 +22,7 @@
     input = 's03.i'
     csvdiff = 's03.csv'
     rel_err = 1.0E-5
-    requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, unsaturated flow, when the source/sink strength is multiplied by the relative permeability'
+    requirement = 'The system shall be able to model a source/sink boundary condition for single-phase, single-component, unsaturated flow, when the source/sink strength is multiplied by the relative permeability'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -31,7 +31,7 @@
     input = 's04.i'
     csvdiff = 's04.csv'
     rel_err = 1.0E-5
-    requirement = 'PorousFlow shall be able to model source/sink boundary condition for single-phase, single-component flow, when the boundary flux is a piecewise-linear function of porepressure'
+    requirement = 'The system shall be able to model source/sink boundary condition for single-phase, single-component flow, when the boundary flux is a piecewise-linear function of porepressure'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -40,7 +40,7 @@
     input = 's05.i'
     csvdiff = 's05.csv'
     rel_err = 1.0E-5
-    requirement = 'PorousFlow shall be able to model source/sink boundary condition for single-phase, single-component flow, when the boundary flux is a half-gaussian function of porepressure'
+    requirement = 'The system shall be able to model source/sink boundary condition for single-phase, single-component flow, when the boundary flux is a half-gaussian function of porepressure'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -49,7 +49,7 @@
     input = 's06.i'
     csvdiff = 's06.csv'
     rel_err = 1.0E-5
-    requirement = 'PorousFlow shall be able to model source/sink boundary condition for single-phase, single-component flow, when the boundary flux is a half-cubic function of porepressure'
+    requirement = 'The system shall be able to model source/sink boundary condition for single-phase, single-component flow, when the boundary flux is a half-cubic function of porepressure'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -58,7 +58,7 @@
     input = 's07.i'
     csvdiff = 's07.csv'
     rel_err = 1.0E-5
-    requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, multi-component, fully-saturated flow'
+    requirement = 'The system shall be able to model a source/sink boundary condition for single-phase, multi-component, fully-saturated flow'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -67,7 +67,7 @@
     input = 's08.i'
     csvdiff = 's08.csv'
     rel_err = 1.0E-5
-    requirement = 'PorousFlow shall be able to model a source/sink boundary condition for multi-phase, multi-component flow'
+    requirement = 'The system shall be able to model a source/sink boundary condition for multi-phase, multi-component flow'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -76,7 +76,7 @@
     input = s09.i
     csvdiff = 's09_mf_0100.csv s09_mf_0050.csv s09_mf_0010.csv'
     abs_zero = 1E-7
-    requirement = 'PorousFlow shall be able to model a source/sink boundary condition that holds porepressures fixed and extracts fluid components from boundaries at a rate prescribed by the flow within the model at the boundary - viz, the sink should behave like a free boundary'
+    requirement = 'The system shall be able to model a source/sink boundary condition that holds porepressures fixed and extracts fluid components from boundaries at a rate prescribed by the flow within the model at the boundary - viz, the sink should behave like a free boundary'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -85,7 +85,7 @@
     input = s09_fully_saturated.i
     csvdiff = 's09_fully_saturated_mf_0100.csv s09_fully_saturated_mf_0050.csv s09_fully_saturated_mf_0010.csv'
     abs_zero = 1E-5
-    requirement = 'PorousFlow shall be able to model a source/sink boundary condition that holds porepressures fixed and extracts fluid components from boundaries at a rate prescribed by the flow within the model at the boundary - viz, the sink should behave like a free boundary, and this feature shall be compatible with the fully-saturated formalism within PorousFlow'
+    requirement = 'The system shall be able to model a source/sink boundary condition that holds porepressures fixed and extracts fluid components from boundaries at a rate prescribed by the flow within the model at the boundary - viz, the sink should behave like a free boundary, and this feature shall be compatible with the fully-saturated formalism within PorousFlow'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -95,7 +95,7 @@
     input = s10.i
     cli_args = 'BCs/flux/boundary=left Outputs/file_base=s10_left'
     exodiff = s10_left.e
-    requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the left-side nodes in this case'
+    requirement = 'The system shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the left-side nodes in this case'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -104,7 +104,7 @@
     input = s10.i
     cli_args = 'BCs/flux/boundary=right Outputs/file_base=s10_right'
     exodiff = s10_right.e
-    requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the right-side nodes in this case'
+    requirement = 'The system shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the right-side nodes in this case'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -113,7 +113,7 @@
     input = s10.i
     cli_args = 'BCs/flux/boundary=top Outputs/file_base=s10_top'
     exodiff = s10_top.e
-    requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the top-side nodes in this case'
+    requirement = 'The system shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the top-side nodes in this case'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -122,7 +122,7 @@
     input = s10.i
     cli_args = 'BCs/flux/boundary=bottom Outputs/file_base=s10_bottom'
     exodiff = s10_bottom.e
-    requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the bottom-side nodes in this case'
+    requirement = 'The system shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the bottom-side nodes in this case'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -131,7 +131,7 @@
     input = s10.i
     cli_args = 'BCs/flux/boundary=front Outputs/file_base=s10_front'
     exodiff = s10_front.e
-    requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the front-side nodes in this case'
+    requirement = 'The system shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the front-side nodes in this case'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -140,7 +140,7 @@
     input = s10.i
     cli_args = 'BCs/flux/boundary=back Outputs/file_base=s10_back'
     exodiff = s10_back.e
-    requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the back-side nodes in this case'
+    requirement = 'The system shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the back-side nodes in this case'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -149,7 +149,7 @@
     input = s11.i
     exodiff = s11.e
     cli_args = 'BCs/left_T/fluid_phase=0'
-    requirement = 'PorousFlow shall be able to inject fluid at user specified temperature.'
+    requirement = 'The system shall be able to inject fluid at user specified temperature.'
     design = 'PorousFlowEnthalpySink.md'
     issues = '#15742'
   []
@@ -158,7 +158,7 @@
     input = s11_act.i
     exodiff = s11.e
     prereq = 's11'
-    requirement = 'PorousFlow shall be able to setup fluid injection at user specified temperature using a simplified syntax.'
+    requirement = 'The system shall be able to setup fluid injection at user specified temperature using a simplified syntax.'
     issues = '#15742'
     design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
   []
@@ -167,7 +167,7 @@
     input = s11_act.i
     cli_args = 'Variables/pp1/initial_condition=3 Kernels/td_pp1/type=TimeDerivative Kernels/td_pp1/variable=pp1 UserObjects/dictator/porous_flow_vars="pp pp1 temp"'
     expect_err = "Number of porous flow variables in simulation is '3', but this BC can be used only with pressure and temperature."
-    requirement = 'PorousFlow shall report an error when incorrect number of variables is used when using a simplified enthalpy sink BC syntax.'
+    requirement = 'The system shall report an error when incorrect number of variables is used when using a simplified enthalpy sink BC syntax.'
     issues = '#15742'
     design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
   []
@@ -176,7 +176,7 @@
     input = s11_act.i
     cli_args = 'Variables/pp1/initial_condition=3 Kernels/td_pp1/type=TimeDerivative Kernels/td_pp1/variable=pp1 UserObjects/dictator/porous_flow_vars="pp temp" Modules/PorousFlow/BCs/left/porepressure_var="pp pp1"'
     expect_err = "'porepressure_var' parameter can currently take only a single value"
-    requirement = 'PorousFlow shall report an error when more than 2 porepressure variables are specified when using a simplified BC syntax.'
+    requirement = 'The system shall report an error when more than 2 porepressure variables are specified when using a simplified BC syntax.'
     issues = '#15742'
     design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
   []
@@ -185,7 +185,7 @@
     input = s11.i
     cli_args = 'AuxVariables/press/initial_condition=3 BCs/left_T/porepressure_var=press BCs/left_T/fluid_phase=0'
     expect_err = "Cannot specify both pressure and pore pressure."
-    requirement = 'PorousFlow shall report an error when both external and pore pressures are specified.'
+    requirement = 'The system shall report an error when both external and pore pressures are specified.'
     issues = '#15742'
     design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
   []
@@ -193,7 +193,7 @@
     type = RunException
     input = s11.i
     expect_err = "You have to specify either 'pressure' or 'fluid_phase'."
-    requirement = 'PorousFlow shall report an error when neither external and pore pressures are specified.'
+    requirement = 'The system shall report an error when neither external and pore pressures are specified.'
     issues = '#15742'
     design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
   []
@@ -202,7 +202,7 @@
     input = s11.i
     cli_args = "BCs/left_T/fluid_phase=2"
     expect_err = "Specified 'fluid_phase' is larger than the number of phases available in the simulation \(1\)."
-    requirement = 'PorousFlow shall report an error when incorrect fluid phase is specified in a BC for injecting fluid at user specified temperature.'
+    requirement = 'The system shall report an error when incorrect fluid phase is specified in a BC for injecting fluid at user specified temperature.'
     issues = '#15742'
     design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
   []
@@ -210,7 +210,7 @@
     type = CSVDiff
     input = s12.i
     csvdiff = s12.csv
-    requirement = 'PorousFlow shall be able to inject fluid at user specified pressure and temperature.'
+    requirement = 'The system shall be able to inject fluid at user specified pressure and temperature.'
     design = 'PorousFlowEnthalpySink.md'
     issues = '#15742'
   []
@@ -219,7 +219,7 @@
     input = 'injection_production_eg.i'
     csvdiff = 'injection_production_eg_out_pps_0002.csv'
     rel_err = 1.0E-5
-    requirement = 'PorousFlow shall be able to model a free boundary condition for multi-phase, multi-component fluids, and a clear example showing how this is possible shall be given'
+    requirement = 'The system shall be able to model a free boundary condition for multi-phase, multi-component fluids, and a clear example showing how this is possible shall be given'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -227,7 +227,7 @@
     type = 'CSVDiff'
     input = 'PorousFlowPiecewiseLinearSink_BC_eg1.i'
     csvdiff = 'PorousFlowPiecewiseLinearSink_BC_eg1_out.csv'
-    requirement = 'PorousFlow shall be able to model a source/sink boundary condition, and a clear example showing how these boundary conditions can be used to fix porepressures shall be given'
+    requirement = 'The system shall be able to model a source/sink boundary condition, and a clear example showing how these boundary conditions can be used to fix porepressures shall be given'
     issues = '#12769'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
   []
@@ -237,7 +237,7 @@
     input = outflow_except1.i
     expect_err = "The Dictator declares that the maximum fluid component index is 0, but you have set mass_fraction_component to 1. Remember that indexing starts at 0"
     match_literal = true
-    requirement = 'PorousFlow shall report an error for an incorrect mass-fraction specification in PorousFlowOutflowBC'
+    requirement = 'The system shall report an error for an incorrect mass-fraction specification in PorousFlowOutflowBC'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
   []
@@ -247,7 +247,7 @@
     cli_args = 'Materials/fluid_props/at_nodes=false'
     expect_err = "PorousFlowOutflowBC: You requested to multiply_by_density, but you have no nodal fluid density Material"
     match_literal = true
-    requirement = 'PorousFlow shall report an error if there is no nodal density Material when using PorousFlowOutflowBC'
+    requirement = 'The system shall report an error if there is no nodal density Material when using PorousFlowOutflowBC'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
   []
@@ -257,7 +257,7 @@
     cli_args = 'Materials/inactive=relperm'
     expect_err = "PorousFlowOutflowBC: You requested to include the relative permeability, but you have no nodal relative permeability Material"
     match_literal = true
-    requirement = 'PorousFlow shall report an error if there is no nodal relative-permeability Material when using PorousFlowOutflowBC'
+    requirement = 'The system shall report an error if there is no nodal relative-permeability Material when using PorousFlowOutflowBC'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
   []
@@ -267,7 +267,7 @@
     cli_args = 'Materials/inactive=massfrac'
     expect_err = "PorousFlowOutflowBC: For flux_type = fluid, you need a nodal mass-fraction Material"
     match_literal = true
-    requirement = 'PorousFlow shall report an error if there is no nodal mass-fraction Material when using PorousFlowOutflowBC'
+    requirement = 'The system shall report an error if there is no nodal mass-fraction Material when using PorousFlowOutflowBC'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
   []
@@ -277,7 +277,7 @@
     cli_args = 'BCs/outflow/flux_type=heat Materials/inactive=thermal_conductivity'
     expect_err = "PorousFlowOutflowBC: For flux_type = heat, you need a thermal conductivity Material"
     match_literal = true
-    requirement = 'PorousFlow shall report an error if there is no thermal conductivity Material when using PorousFlowOutflowBC'
+    requirement = 'The system shall report an error if there is no thermal conductivity Material when using PorousFlowOutflowBC'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
   []
@@ -287,7 +287,7 @@
     cli_args = 'BCs/outflow/flux_type=heat Materials/fluid_props/compute_enthalpy=false'
     expect_err = "PorousFlowOutflowBC: For flux_type = heat, you need a nodal fluid enthalpy Material"
     match_literal = true
-    requirement = 'PorousFlow shall report an error if there is no enthalpy Material when using PorousFlowOutflowBC'
+    requirement = 'The system shall report an error if there is no enthalpy Material when using PorousFlowOutflowBC'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
   []
@@ -297,7 +297,7 @@
     cli_args = 'BCs/outflow/flux_type=heat Materials/inactive=temperature'
     expect_err = "PorousFlowOutflowBC: For flux_type = heat, you need a temperature Material"
     match_literal = true
-    requirement = 'PorousFlow shall report an error if there is no temperature Material when using PorousFlowOutflowBC'
+    requirement = 'The system shall report an error if there is no temperature Material when using PorousFlowOutflowBC'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
   []
@@ -306,7 +306,7 @@
     input = s13.i
     csvdiff = 's13_csv_mf_0100.csv s13_csv_mf_0050.csv s13_csv_mf_0010.csv'
     abs_zero = 1E-7
-    requirement = 'PorousFlow shall be able to model an outflow boundary condition in single-phase, fully-saturated, multi-component cases'
+    requirement = 'The system shall be able to model an outflow boundary condition in single-phase, fully-saturated, multi-component cases'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
   []
@@ -314,7 +314,7 @@
     type = CSVDiff
     input = s14.i
     csvdiff = s14_out.csv
-    requirement = 'PorousFlow shall be able to model an outflow boundary condition in single-phase, fully-saturated, single-component case and record the total mass outflow'
+    requirement = 'The system shall be able to model an outflow boundary condition in single-phase, fully-saturated, single-component case and record the total mass outflow'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
   []
@@ -322,7 +322,7 @@
     type = CSVDiff
     input = s15.i
     csvdiff = s15_out.csv
-    requirement = 'PorousFlow shall be able to model a heat-energy outflow boundary condition in single-phase, fully-saturated, single-component case and record the total heat-energy outflow'
+    requirement = 'The system shall be able to model a heat-energy outflow boundary condition in single-phase, fully-saturated, single-component case and record the total heat-energy outflow'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
   []
@@ -331,7 +331,7 @@
     input = injection_production_eg_outflowBC.i
     csvdiff = injection_production_eg_outflowBC_out_pps_0002.csv
     rel_err = 1.0E-5
-    requirement = 'PorousFlow shall be able to model a free, outflow boundary condition for multi-phase, multi-component fluids'
+    requirement = 'The system shall be able to model a free, outflow boundary condition for multi-phase, multi-component fluids'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
   []
@@ -341,7 +341,7 @@
     csvdiff = aquiferBC01.csv
     abs_zero = 1e-6
     rel_err = 1e-5
-    requirement = 'PorousFlowAquiferBC shall produce zero flux on a boundary whose model pressure '
+    requirement = 'The system shall produce, using PorousFlowAquiferBC, zero flux on a boundary whose model pressure '
                   'is in hydrostatic equilibrium with the far-field aquifer head, even when the '
                   'boundary has vertical extent. The pressure field must remain unchanged after '
                   'one timestep. This test fails with PorousFlowPiecewiseLinearSink and a scalar PT_shift.'
@@ -354,7 +354,7 @@
     csvdiff = aquiferBC02.csv
     abs_zero = 1
     rel_err = 1e-4
-    requirement = 'PorousFlowAquiferBC shall drain an over-pressured domain toward the aquifer '
+    requirement = 'The system shall drain, using PorousFlowAquiferBC, an over-pressured domain toward the aquifer '
                   'reference pressure. After many time constants (t >> tau) the pressure throughout '
                   'the domain shall converge to the aquifer reference pressure.'
     issues = '#33448'
@@ -366,7 +366,7 @@
     csvdiff = aquiferBC03.csv
     abs_zero = 1
     rel_err = 1e-4
-    requirement = 'PorousFlowAquiferBC shall recharge an under-pressured domain from the aquifer. '
+    requirement = 'The system shall recharge, using PorousFlowAquiferBC, an under-pressured domain from the aquifer. '
                   'After many time constants (t >> tau) the pressure throughout the domain shall '
                   'converge to the aquifer reference pressure.'
     issues = '#33448'
@@ -378,7 +378,7 @@
     csvdiff = aquiferBC04.csv
     abs_zero = 1
     rel_err = 1e-4
-    requirement = 'PorousFlowAquiferBC shall converge to the correct steady-state pressure on a '
+    requirement = 'The system shall converge, using PorousFlowAquiferBC, to the correct steady-state pressure on a '
                   'horizontal boundary when the nodal fluid density from PorousFlow is used for '
                   'the hydrostatic correction.'
     issues = '#33448'
@@ -391,8 +391,8 @@
     abs_zero = 1
     rel_err = 1e-4
     prereq = 'aquiferBC04_aquifer'
-    requirement = 'On a horizontal boundary PorousFlowAquiferBC and PorousFlowPiecewiseLinearSink '
-                  'with a matching PT_shift shall converge to pressures within the test tolerance, '
+    requirement = 'The system shall converge PorousFlowAquiferBC and PorousFlowPiecewiseLinearSink '
+                  'with a matching PT_shift on a horizontal boundary to pressures within the test tolerance, '
                   'confirming near-equivalence of the two formulations for typical compressibility.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
@@ -403,7 +403,7 @@
     csvdiff = aquiferBC05.csv
     abs_zero = 1e-6
     rel_err = 1e-5
-    requirement = 'PorousFlowAquiferBC shall produce zero flux on a vertical boundary whose model '
+    requirement = 'The system shall produce, using PorousFlowAquiferBC, zero flux on a vertical boundary whose model '
                   'pressure is in hydrostatic equilibrium with the far-field aquifer head. The '
                   'elevation correction must be applied per quadrature point so that every point '
                   'on the vertical face sees zero pressure difference and the pressure field '
@@ -418,7 +418,7 @@
     csvdiff = aquiferBC06.csv
     abs_zero = 1
     rel_err = 5e-4
-    requirement = 'When aquifer_permeability is not supplied, PorousFlowAquiferBC shall compute '
+    requirement = 'The system shall compute, in PorousFlowAquiferBC when aquifer_permeability is not supplied, '
                   'the conductance from the boundary permeability material property. The '
                   'transient drainage at t = 2*tau shall match the analytic lumped-capacitor '
                   'solution based on the mesh permeability.'
@@ -435,7 +435,7 @@
     abs_zero = 1
     rel_err = 5e-4
     prereq = 'aquiferBC06_default'
-    requirement = 'When aquifer_permeability is supplied, PorousFlowAquiferBC shall use it in '
+    requirement = 'The system shall use aquifer_permeability, when supplied to PorousFlowAquiferBC, in '
                   'the conductance in place of the boundary permeability. With the mesh '
                   'permeability raised 100x but aquifer_permeability set to the original value, '
                   'the transient drainage shall be unchanged, demonstrating both the override '
@@ -449,7 +449,7 @@
     csvdiff = fv_aquiferBC01.csv
     abs_zero = 1e-6
     rel_err = 1e-5
-    requirement = 'FVPorousFlowAquiferBC shall produce zero flux on boundaries whose model '
+    requirement = 'The system shall produce, using FVPorousFlowAquiferBC, zero flux on boundaries whose model '
                   'pressure is in hydrostatic equilibrium with the far-field aquifer head, on '
                   'vertical and horizontal boundaries alike. Evaluating the aquifer pressure at '
                   'the cell-centroid elevation shall make the pressure field remain unchanged '
@@ -463,7 +463,7 @@
     csvdiff = fv_aquiferBC02.csv
     abs_zero = 1
     rel_err = 5e-4
-    requirement = 'When aquifer_permeability is not supplied, FVPorousFlowAquiferBC shall '
+    requirement = 'The system shall, in FVPorousFlowAquiferBC when aquifer_permeability is not supplied, '
                   'compute the conductance from the boundary cell permeability material '
                   'property, and the transient drainage shall match the finite-element '
                   'PorousFlowAquiferBC result for the same problem.'
@@ -480,7 +480,7 @@
     abs_zero = 1
     rel_err = 5e-4
     prereq = 'fv_aquiferBC02_default'
-    requirement = 'When aquifer_permeability is supplied, FVPorousFlowAquiferBC shall use it in '
+    requirement = 'The system shall use aquifer_permeability, when supplied to FVPorousFlowAquiferBC, in '
                   'the conductance in place of the boundary cell permeability. With the mesh '
                   'permeability raised 100x but aquifer_permeability set to the original value, '
                   'the transient drainage shall be unchanged.'
@@ -491,7 +491,7 @@
     type = RunException
     input = aquiferBC_exc.i
     expect_err = 'Either aquifer_head or aquifer_pressure_at_datum must be specified'
-    requirement = 'PorousFlowAquiferBC shall report an error when neither aquifer_head nor aquifer_pressure_at_datum is specified.'
+    requirement = 'The system shall report an error in PorousFlowAquiferBC when neither aquifer_head nor aquifer_pressure_at_datum is specified.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
@@ -500,7 +500,7 @@
     input = aquiferBC_exc.i
     cli_args = 'BCs/aquifer_exc/aquifer_head=10 BCs/aquifer_exc/aquifer_pressure_at_datum=1e6'
     expect_err = 'Specify either aquifer_head or aquifer_pressure_at_datum, not both'
-    requirement = 'PorousFlowAquiferBC shall report an error when both aquifer_head and aquifer_pressure_at_datum are specified.'
+    requirement = 'The system shall report an error in PorousFlowAquiferBC when both aquifer_head and aquifer_pressure_at_datum are specified.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
@@ -509,7 +509,7 @@
     input = aquiferBC_exc.i
     cli_args = 'BCs/aquifer_exc/aquifer_head=10'
     expect_err = 'aquifer_conductance:.*This parameter must be specified when using the aquifer_head formulation'
-    requirement = 'PorousFlowAquiferBC shall report an error when aquifer_head is specified without aquifer_conductance.'
+    requirement = 'The system shall report an error in PorousFlowAquiferBC when aquifer_head is specified without aquifer_conductance.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
@@ -518,7 +518,7 @@
     input = aquiferBC_exc.i
     cli_args = 'BCs/aquifer_exc/aquifer_pressure_at_datum=1e6'
     expect_err = 'aquifer_distance:.*This parameter must be specified when using the aquifer_pressure_at_datum formulation'
-    requirement = 'PorousFlowAquiferBC shall report an error when aquifer_pressure_at_datum is specified without aquifer_distance.'
+    requirement = 'The system shall report an error in PorousFlowAquiferBC when aquifer_pressure_at_datum is specified without aquifer_distance.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
@@ -527,7 +527,7 @@
     input = aquiferBC_exc.i
     cli_args = 'BCs/aquifer_exc/aquifer_pressure_at_datum=1e6 BCs/aquifer_exc/aquifer_distance=-1'
     expect_err = 'aquifer_distance > 0'
-    requirement = 'PorousFlowAquiferBC shall report an error when aquifer_distance is non-positive, to prevent division by zero in the conductance formula.'
+    requirement = 'The system shall report an error in PorousFlowAquiferBC when aquifer_distance is non-positive, to prevent division by zero in the conductance formula.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
@@ -536,7 +536,7 @@
     input = aquiferBC_exc.i
     cli_args = 'BCs/aquifer_exc/aquifer_head=10 BCs/aquifer_exc/aquifer_conductance=5e-9 BCs/aquifer_exc/aquifer_permeability=1e-10'
     expect_err = 'aquifer_permeability is only used with the aquifer_pressure_at_datum formulation'
-    requirement = 'PorousFlowAquiferBC shall report an error when aquifer_permeability is specified with the aquifer_head formulation, in which the conductance is supplied directly.'
+    requirement = 'The system shall report an error in PorousFlowAquiferBC when aquifer_permeability is specified with the aquifer_head formulation, in which the conductance is supplied directly.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
@@ -545,7 +545,7 @@
     input = aquiferBC_exc.i
     cli_args = 'BCs/aquifer_exc/aquifer_pressure_at_datum=1e6 BCs/aquifer_exc/aquifer_distance=20000 BCs/aquifer_exc/aquifer_permeability=-1'
     expect_err = 'aquifer_permeability > 0'
-    requirement = 'PorousFlowAquiferBC shall report an error when aquifer_permeability is non-positive.'
+    requirement = 'The system shall report an error in PorousFlowAquiferBC when aquifer_permeability is non-positive.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md PorousFlowAquiferBC.md'
   []
@@ -553,7 +553,7 @@
     type = RunException
     input = fv_aquiferBC_exc.i
     expect_err = 'Either aquifer_head or aquifer_pressure_at_datum must be specified'
-    requirement = 'FVPorousFlowAquiferBC shall report an error when neither aquifer_head nor aquifer_pressure_at_datum is specified.'
+    requirement = 'The system shall report an error in FVPorousFlowAquiferBC when neither aquifer_head nor aquifer_pressure_at_datum is specified.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
@@ -562,7 +562,7 @@
     input = fv_aquiferBC_exc.i
     cli_args = 'FVBCs/aquifer_exc/aquifer_head=10 FVBCs/aquifer_exc/aquifer_pressure_at_datum=1e6'
     expect_err = 'Specify either aquifer_head or aquifer_pressure_at_datum, not both'
-    requirement = 'FVPorousFlowAquiferBC shall report an error when both aquifer_head and aquifer_pressure_at_datum are specified.'
+    requirement = 'The system shall report an error in FVPorousFlowAquiferBC when both aquifer_head and aquifer_pressure_at_datum are specified.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
@@ -571,7 +571,7 @@
     input = fv_aquiferBC_exc.i
     cli_args = 'FVBCs/aquifer_exc/aquifer_head=10'
     expect_err = 'aquifer_conductance:.*This parameter must be specified when using the aquifer_head formulation'
-    requirement = 'FVPorousFlowAquiferBC shall report an error when aquifer_head is specified without aquifer_conductance.'
+    requirement = 'The system shall report an error in FVPorousFlowAquiferBC when aquifer_head is specified without aquifer_conductance.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
@@ -580,7 +580,7 @@
     input = fv_aquiferBC_exc.i
     cli_args = 'FVBCs/aquifer_exc/aquifer_pressure_at_datum=1e6'
     expect_err = 'aquifer_distance:.*This parameter must be specified when using the aquifer_pressure_at_datum formulation'
-    requirement = 'FVPorousFlowAquiferBC shall report an error when aquifer_pressure_at_datum is specified without aquifer_distance.'
+    requirement = 'The system shall report an error in FVPorousFlowAquiferBC when aquifer_pressure_at_datum is specified without aquifer_distance.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
@@ -589,7 +589,7 @@
     input = fv_aquiferBC_exc.i
     cli_args = 'FVBCs/aquifer_exc/aquifer_pressure_at_datum=1e6 FVBCs/aquifer_exc/aquifer_distance=-1'
     expect_err = 'aquifer_distance > 0'
-    requirement = 'FVPorousFlowAquiferBC shall report an error when aquifer_distance is non-positive, to prevent division by zero in the conductance formula.'
+    requirement = 'The system shall report an error in FVPorousFlowAquiferBC when aquifer_distance is non-positive, to prevent division by zero in the conductance formula.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
@@ -598,7 +598,7 @@
     input = fv_aquiferBC_exc.i
     cli_args = 'FVBCs/aquifer_exc/aquifer_head=10 FVBCs/aquifer_exc/aquifer_conductance=5e-9 FVBCs/aquifer_exc/aquifer_permeability=1e-10'
     expect_err = 'aquifer_permeability is only used with the aquifer_pressure_at_datum formulation'
-    requirement = 'FVPorousFlowAquiferBC shall report an error when aquifer_permeability is specified with the aquifer_head formulation, in which the conductance is supplied directly.'
+    requirement = 'The system shall report an error in FVPorousFlowAquiferBC when aquifer_permeability is specified with the aquifer_head formulation, in which the conductance is supplied directly.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
@@ -607,7 +607,7 @@
     input = fv_aquiferBC_exc.i
     cli_args = 'FVBCs/aquifer_exc/aquifer_pressure_at_datum=1e6 FVBCs/aquifer_exc/aquifer_distance=20000 FVBCs/aquifer_exc/aquifer_permeability=-1'
     expect_err = 'aquifer_permeability > 0'
-    requirement = 'FVPorousFlowAquiferBC shall report an error when aquifer_permeability is non-positive.'
+    requirement = 'The system shall report an error in FVPorousFlowAquiferBC when aquifer_permeability is non-positive.'
     issues = '#33448'
     design = 'porous_flow/boundaries.md FVPorousFlowAquiferBC.md'
   []
@@ -616,7 +616,7 @@
     input = aquiferBC_s09.i
     csvdiff = 'aquiferBC_s09_mf_0100.csv aquiferBC_s09_mf_0050.csv aquiferBC_s09_mf_0010.csv'
     abs_zero = 1E-7
-    requirement = 'PorousFlowAquiferBC with zero aquifer pressure and no gravity shall be '
+    requirement = 'The system shall make PorousFlowAquiferBC with zero aquifer pressure and no gravity '
                   'equivalent to PorousFlowPiecewiseLinearSink encoding a linear flux with the '
                   'same conductance. The mass-fraction front advection profile shall be '
                   'identical to s09, confirming that PorousFlowAquiferBC can replace '

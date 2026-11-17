@@ -29,6 +29,43 @@
     # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
     recover = false
   []
+  [wear-pressure-both]
+    type = 'RunException'
+    input = 'block-dynamics-aux-wear.i'
+    cli_args = 'AuxKernels/worn_depth/normal_pressure=normal_lm'
+    expect_err = "Provide the normal contact pressure through either 'normal_pressure' or "
+                 "'weighted_gap_uo', but not both"
+    capabilities = 'ad_size>=50'
+    requirement = 'The system shall report an error when the mortar Archard wear auxiliary kernel is '
+                  'given the normal contact pressure through both a variable and a contact user '
+                  'object.'
+    issues = '#32856'
+    design = 'MortarArchardsLawAux.md'
+  []
+  [wear-constant-pressure]
+    type = 'RunApp'
+    input = 'block-dynamics-aux-wear-constant-pressure.i'
+    cli_args = 'Executioner/end_time=0.075 Outputs/exodus=false'
+    capabilities = 'ad_size>=50'
+    requirement = 'The system shall compute the mortar Archard wear depth from a constant normal '
+                  'contact pressure given as a number.'
+    issues = '#32856'
+    design = 'MortarArchardsLawAux.md'
+    recover = false
+  []
+  [wear-provider-mismatched-interface]
+    type = 'RunException'
+    input = 'block-dynamics-aux-wear.i'
+    cli_args = 'AuxKernels/worn_depth/secondary_subdomain=4 AuxKernels/worn_depth/primary_subdomain=3 '
+               'AuxKernels/worn_depth/secondary_boundary=20 AuxKernels/worn_depth/primary_boundary=10'
+    expect_err = "must be defined on the same primary/secondary subdomain pair"
+    capabilities = 'ad_size>=50'
+    requirement = 'The system shall report an error when the mortar Archard wear auxiliary kernel '
+                  'reads the contact pressure from a contact user object on another mortar '
+                  'interface.'
+    issues = '#32856'
+    design = 'MortarArchardsLawAux.md'
+  []
   [block-dynamics-aux-wear-vel]
     type = 'Exodiff'
     exodiff = 'block-dynamics-aux-wear-vel_out.e'

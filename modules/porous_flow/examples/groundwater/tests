@@ -6,7 +6,7 @@
     csvdiff = 'ex01_aquitard_extraction_drawdown_0004.csv'
     issues = '#15921'
     design = 'groundwater_models.md'
-    requirement = 'PorousFlow shall be able to simulate groundwater extraction via a borehole'
+    requirement = 'The system shall be able to simulate groundwater extraction via a borehole'
   [../]
   [./ex02_steady_state]
     type = CSVDiff
@@ -16,7 +16,7 @@
     csvdiff = 'ex02_steady_state_csv.csv'
     issues = '#15921'
     design = 'groundwater_models.md'
-    requirement = 'PorousFlow shall be able to simulate rainfall recharge, evapotranspiration and baseflow, and converge to a usable steadystate solution in such instances'
+    requirement = 'The system shall be able to simulate rainfall recharge, evapotranspiration and baseflow, and converge to a usable steady-state solution in such instances'
   [../]
   [./ex02_abstraction]
     type = CSVDiff
@@ -26,6 +26,6 @@
     csvdiff = 'ex02_abstraction_csv.csv'
     issues = '#15921'
     design = 'groundwater_models.md'
-    requirement = 'PorousFlow shall be able to simulate rainfall recharge, evapotranspiration and baseflow in transient simulations'
+    requirement = 'The system shall be able to simulate rainfall recharge, evapotranspiration and baseflow in transient simulations'
   [../]
 []

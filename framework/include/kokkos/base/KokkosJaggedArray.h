@@ -89,6 +89,14 @@ public:
    */
   template <typename... indices>
   KOKKOS_FUNCTION T & operator()(indices... i) const;
+  /**
+   * Get a one-dimensional view of the inner array along a dimension
+   * @tparam dim The dimension along which the view runs
+   * @param i The index of each of the other dimensions, in order
+   * @returns The JaggedArrayInnerSlice object
+   */
+  template <unsigned int dim, typename... indices>
+  KOKKOS_FUNCTION auto slice(indices... i) const;
 
 protected:
   /**
@@ -134,6 +142,83 @@ JaggedArrayInnerData<T, inner, layout>::operator()(indices... i) const
      ...);
 
   return _data[idx];
+}
+
+/**
+ * A one-dimensional view of an inner array along one dimension, with the indices of all other
+ * dimensions fixed. Entries alias the entries of the inner array.
+ * @tparam T The data type
+ */
+template <typename T>
+class JaggedArrayInnerSlice
+{
+public:
+  /**
+   * Constructor
+   * @param data The pointer to the first entry of the view
+   * @param stride The distance between consecutive entries of the view
+   * @param size The number of entries of the view
+   */
+  KOKKOS_FUNCTION
+  JaggedArrayInnerSlice(T * data, const unsigned int stride, const unsigned int size)
+    : _data(data), _stride(stride), _size(size)
+  {
+  }
+
+  /**
+   * Get the number of entries
+   * @returns The number of entries
+   */
+  KOKKOS_FUNCTION unsigned int size() const { return _size; }
+  /**
+   * Get an entry
+   * @param i The entry index
+   */
+  KOKKOS_FUNCTION T & operator[](const unsigned int i) const
+  {
+    KOKKOS_ASSERT(i < _size);
+
+    return _data[i * _stride];
+  }
+
+private:
+  /**
+   * Pointer to the first entry
+   */
+  T * const _data;
+  /**
+   * Distance between consecutive entries
+   */
+  const unsigned int _stride;
+  /**
+   * Number of entries
+   */
+  const unsigned int _size;
+};
+
+template <typename T, unsigned int inner, LayoutType layout>
+template <unsigned int dim, typename... indices>
+KOKKOS_FUNCTION auto
+JaggedArrayInnerData<T, inner, layout>::slice(indices... i) const
+{
+  static_assert(dim < inner, "The sliced dimension should be less than the inner array dimension");
+  static_assert(sizeof...(i) == inner - 1,
+                "Number of arguments should be the inner array dimension minus one");
+
+  const unsigned int fixed[inner - 1] = {static_cast<unsigned int>(i)...};
+
+  // The stride of every dimension is stored by reserve(), including the contiguous one
+  unsigned int offset = 0;
+
+  for (unsigned int d = 0, f = 0; d < inner; ++d)
+    if (d != dim)
+    {
+      KOKKOS_ASSERT(fixed[f] < _dim[d]);
+
+      offset += fixed[f++] * _dim.stride[d];
+    }
+
+  return JaggedArrayInnerSlice<T>(_data + offset, _dim.stride[dim], _dim[dim]);
 }
 #endif
 

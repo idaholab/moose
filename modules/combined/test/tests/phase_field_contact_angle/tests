@@ -12,6 +12,6 @@
     restep = false # Test is prescribed to abort on failed timestep
     max_time = 600
     heavy = true
-    requirement = "The ADPhaseFieldContactAngleBC kernel correctly implements the prescribed contact angle."
+    requirement = "The system shall correctly impose the prescribed contact angle using the ADPhaseFieldContactAngleBC kernel."
   []
 []

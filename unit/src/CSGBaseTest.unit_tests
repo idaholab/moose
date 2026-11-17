@@ -395,6 +395,53 @@
     requirement = 'The system shall report an error when a surface, cell, or universe is created with the name of an existing engineering unit of the same base type, and shall allow the name when the engineering unit is of a different base type.'
   []
 
+  # Surface sharing during engineering unit expansion
+  [reuse_identical_surfaces]
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104 #34321'
+    requirement = 'The system shall reuse an existing surface, rather than add a duplicate, when expanding an engineering unit creates a surface identical to one already in the Constructive Solid Geometry (CSG) representation, for'
+    [surface_unit]
+      type = GoogleTest
+      unit_test = CSGBaseTest.testSurfEngUnitExpandSharedSurface
+      detail = 'a surface engineering unit, with the expanded region referring to the stored surface,'
+    []
+    [cell_unit]
+      type = GoogleTest
+      unit_test = CSGBaseTest.testCellEngUnitExpandSharedSurface
+      detail = 'a cell engineering unit, with the expanded cell referring to the stored surface, and'
+    []
+    [universe_units]
+      type = GoogleTest
+      unit_test = CSGBaseTest.testUnivEngUnitExpandSharedSurface
+      detail = 'several universe engineering units that create the same surface.'
+    []
+  []
+  [conflicting_surfaces]
+    design = 'CSGBase.md CSGEngUnit.md'
+    issues = '#29095 #33104 #34321'
+    requirement = 'The system shall report an error when expanding an engineering unit creates a surface with the name of an existing surface in the Constructive Solid Geometry (CSG) representation but a different definition, for'
+    [surface_unit]
+      type = GoogleTest
+      unit_test = CSGBaseTest.testSurfEngUnitExpandConflictingSurface
+      detail = 'a surface engineering unit,'
+    []
+    [transformed_surface_unit]
+      type = GoogleTest
+      unit_test = CSGBaseTest.testSurfEngUnitExpandTransformedSharedSurface
+      detail = 'a surface engineering unit whose transformation makes the created surface differ from the existing one,'
+    []
+    [cell_unit]
+      type = GoogleTest
+      unit_test = CSGBaseTest.testCellEngUnitExpandConflictingSurface
+      detail = 'a cell engineering unit, and'
+    []
+    [universe_units]
+      type = GoogleTest
+      unit_test = CSGBaseTest.testUnivEngUnitExpandConflictingSurface
+      detail = 'universe engineering units that create surfaces with the same name.'
+    []
+  []
+
   # Transformations
   [apply_rotation]
     type = GoogleTest
