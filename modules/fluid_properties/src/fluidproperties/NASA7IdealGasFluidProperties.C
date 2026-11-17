@@ -35,7 +35,8 @@ NASA7IdealGasFluidProperties::NASA7IdealGasFluidProperties(const InputParameters
     _data(NASA7::speciesData(getParam<MooseEnum>("species"))),
     _R_specific(_R / _data.molar_mass),
     _lennard_jones(GasTransportUtils::lennardJonesParameters(_data.name)),
-    _is_steam(_data.name == "H2O")
+    _is_steam(_data.name == "H2O"),
+    _is_helium(_data.name == "He")
 {
 }
 
@@ -88,6 +89,10 @@ NASA7IdealGasFluidProperties::checkTransportTemperature(const CppType & T) const
   if (_is_steam && (T_raw < 273.16 || T_raw > 1173.15))
     flagSolutionWarning("Temperature outside the range of validity of the IAPWS transport "
                         "formulations for steam");
+  // Range of validity of the helium correlations of Petersen (1970)
+  if (_is_helium && (T_raw < 273.15 || T_raw > 1800))
+    flagSolutionWarning("Temperature outside the range of validity of the transport correlations "
+                        "for helium");
 }
 
 template <typename CppType>
@@ -138,6 +143,10 @@ NASA7IdealGasFluidProperties::mu_from_T(const CppType & T) const
   checkTransportTemperature(T);
   if (_is_steam)
     return GasTransportUtils::steamViscosityZeroDensity(T);
+  // The reduced temperature of helium exceeds the range of the collision integral fits above
+  // about 1000 K, and the Chapman-Enskog viscosity is then up to 8% low at 1500 K
+  if (_is_helium)
+    return GasTransportUtils::heliumViscosity(T);
   return GasTransportUtils::viscosity(T, _data.molar_mass, _lennard_jones);
 }
 
@@ -150,6 +159,8 @@ NASA7IdealGasFluidProperties::k_from_T(const CppType & T) const
   // by 20% to 40%
   if (_is_steam)
     return GasTransportUtils::steamConductivityZeroDensity(T);
+  if (_is_helium)
+    return GasTransportUtils::heliumConductivityZeroPressure(T);
   return GasTransportUtils::modifiedEuckenConductivity(
       GasTransportUtils::viscosity(T, _data.molar_mass, _lennard_jones),
       NASA7::cpOverR(_data, T),
