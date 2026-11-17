@@ -184,7 +184,7 @@
     rel_err = 1e-3
     abs_zero = 5e-6
     design = 'WCNSLinearFVTwoPhaseMixturePhysics.md'
-    requirement = 'The system shall close the mixture mass balance in a transient in which the domain gains or loses mass, by carrying the density transient of the mixture continuity equation into the pressure equation. Without that term the pressure equation forces the mass flow in to equal the mass flow out at every instant, and the whole of the storage rate is unaccounted for; the imbalance in this case is then three per cent of the inlet mass flow rather than the six significant figures the term recovers. The test is also sensitive to the sign of the term, which doubles the imbalance rather than closing it when reversed.'
+    requirement = 'The system shall close the mixture mass balance in a transient in which the domain gains or loses mass, by including the mixture density transient in the pressure equation.'
     max_threads = 1 # see libmesh issue #3808
   []
 
@@ -194,7 +194,7 @@
     csvdiff = 'conservative-transient-energy_out.csv'
     abs_zero = 1e-6
     design = 'WCNSLinearFVTwoPhaseMixturePhysics.md LinearFVTimeDerivative.md'
-    requirement = 'The system shall conserve the mixture enthalpy of a closed quiescent cavity whose dispersed phase density varies in time, by assembling the energy transient in conservative form: a factor of rho_m cp_m gives d(rho_m cp_m T)/dt, whose discrete sum telescopes, so the integral of rho_m cp_m T holds to round-off over a tripling of the dispersed phase density. Holding the multiplier outside the derivative instead gives rho_m cp_m dT/dt, and the temperature does not move at all and the integral rises by a factor of two and two thirds, so the assertion fails by nine orders of magnitude rather than by a margin comparable to the tolerance.'
+    requirement = 'The system shall conserve the mixture enthalpy of a closed quiescent cavity whose dispersed phase density varies in time, by assembling the energy transient in conservative form.'
     max_threads = 1 # see libmesh issue #3808
   []
 
@@ -204,7 +204,7 @@
     csvdiff = 'conservative-transient-interfacial-area_out.csv'
     abs_zero = 1e-6
     design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md LinearFVTimeDerivative.md'
-    requirement = 'The system shall conserve the interfacial area of a closed quiescent cavity whose dispersed phase density varies in time, by assembling the transient of its conservative transport equation as d(rho_d xi)/dt, whose discrete sum telescopes, so the integral of rho_d xi holds to round-off over a tripling of the dispersed phase density. Holding the multiplier outside the derivative instead gives rho_d d(xi)/dt, and the interfacial area does not move at all and the integral triples, so the assertion fails by nine orders of magnitude rather than by a margin comparable to the tolerance.'
+    requirement = 'The system shall conserve the interfacial area of a closed quiescent cavity whose dispersed phase density rises in time, by assembling the interfacial area transient in conservative form.'
     max_threads = 1 # see libmesh issue #3808
   []
 
@@ -217,7 +217,7 @@
     csvdiff = 'conservative-transient-interfacial-area-compression_out.csv'
     abs_zero = 1e-6
     design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md LinearFVTimeDerivative.md'
-    requirement = 'The system shall conserve the interfacial area of a closed quiescent cavity whose dispersed phase density falls in time. The integral of rho_d xi shall hold to round-off over a fall to a third of the initial density, as it does over a tripling, which is the property of the conservative form of the transient term this case is built on. The sources of the interfacial area equation are not assembled here, so this says nothing about them.'
+    requirement = 'The system shall conserve the interfacial area of a closed quiescent cavity whose dispersed phase density falls in time, by assembling the interfacial area transient in conservative form.'
     max_threads = 1 # see libmesh issue #3808
   []
 
@@ -227,7 +227,7 @@
     csvdiff = 'interfacial-mass-transfer-verification_out.csv'
     abs_zero = 1e-8
     design = 'WCNSFV2PInterfacialMassTransferFunctorMaterial.md LinearWCNSFV2PInterfaceAreaSourceSink.md'
-    requirement = 'The system shall close the interfacial mass transfer rate on the transported interfacial area concentration and drive the phase, energy and interfacial area equations with that one rate. In a closed quiescent cavity whose phases have equal densities and specific heats, the transfer grows the particles present without changing their number, so xi / alpha^(2/3) is invariant. It shall hold over a sixfold growth of the phase fraction to the order of the time integrator: the drift is 4.7 per cent of the initial value at a step of 0.2 and falls to 2.4, 1.2 and 0.6 per cent as that step is halved, which is the first order rate of the implicit Euler default. The rate the Physics builds shall agree exactly with the same closure declared by hand from the same inputs.'
+    requirement = 'The system shall close the interfacial mass transfer rate on the transported interfacial area concentration, drive the phase, energy and interfacial area equations with that one rate, and give the same rate whether the closure is built by the Physics or declared in the input.'
     max_threads = 1 # see libmesh issue #3808
   []
   [interfacial_mass_transfer_prescribed]
@@ -236,7 +236,7 @@
     csvdiff = 'interfacial-mass-transfer-prescribed_out.csv'
     abs_zero = 1e-8
     design = 'WCNSLinearFVTwoPhaseMixturePhysics.md'
-    requirement = 'The system shall drive the phase, energy and interfacial area equations with a prescribed interfacial mass transfer rate. In a closed quiescent cavity with a constant rate the phase fraction and the temperature are linear in time, which the implicit Euler step reproduces exactly: the phase fraction shall follow alpha_0 + Gamma t / rho_d and the temperature T_0 - Gamma h t / (rho cp) to round-off, over a fivefold growth of the phase fraction.'
+    requirement = 'The system shall drive the phase, energy and interfacial area equations with a prescribed interfacial mass transfer rate, reproducing the analytic phase fraction and temperature of a closed quiescent cavity.'
     max_threads = 1 # see libmesh issue #3808
   []
 

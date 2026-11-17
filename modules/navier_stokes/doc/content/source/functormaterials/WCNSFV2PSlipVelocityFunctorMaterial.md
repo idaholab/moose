@@ -23,8 +23,9 @@ where:
 - $\bm{a}$ is the particle acceleration vector.
 
 This is the algebraic slip closure of [!cite](manninen1996mixture). The density subtracted from
-$\rho_d$ in the buoyancy factor is the *mixture* density, so the `rho` parameter should be given
-`rho_mixture` and not the continuous phase density; the two agree only in the dilute limit.
+$\rho_d$ in the buoyancy factor is the *mixture* density, so
+[!param](/FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial/rho) should be given `rho_mixture`
+and not the continuous phase density; the two agree only in the dilute limit.
 
 The particle relaxation time is modeled as follows [!cite](bilicki1990dragmodel):
 
@@ -35,7 +36,8 @@ The particle relaxation time is modeled as follows [!cite](bilicki1990dragmodel)
 where:
 
 - $d_d$ is the particle diameter,
-- $\mu_c$ is the dynamic viscosity of the continuous phase, supplied under `mu`.
+- $\mu_c$ is the dynamic viscosity of the continuous phase, supplied under
+  [!param](/FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial/mu).
 
 The acceleration vector is the particle acceleration vector:
 
@@ -62,8 +64,10 @@ two are related by the dispersed phase mass fraction $c_d = \alpha_d \rho_d / \r
 \bm{u}_{Md} = \left( 1 - c_d \right) \bm{u}_{slip,d} \,.
 \end{equation}
 
-It is declared under `drift_velocity_name`, which
-needs `fraction_dispersed` for the conversion, and it is the velocity the phase transport
+It is declared under
+[!param](/FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial/drift_velocity_name), which needs
+[!param](/FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial/fraction_dispersed) for the
+conversion, and it is the velocity the phase transport
 equation must be advected at: the dispersed phase moves at $\bm{u}_m + \bm{u}_{Md}$, so
 [INSFVScalarFieldAdvection.md] takes the drift velocity and not the slip velocity. Advecting the
 phase at $\bm{u}_m + \bm{u}_{slip,d}$ instead is the dilute approximation $c_d \to 0$.
@@ -71,13 +75,15 @@ phase at $\bm{u}_m + \bm{u}_{slip,d}$ instead is the dilute approximation $c_d \
 The slip velocity itself is what [WCNSFV2PMomentumDriftFlux.md] consumes, the diffusion stress
 being a sum over both phases that collapses onto the slip velocity for a single dispersed phase.
 
-`volumetric_drift_velocity_name` declares $(\alpha_d - c_d) \bm{u}_{slip,d}$, the difference
+[!param](/FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial/volumetric_drift_velocity_name)
+declares $(\alpha_d - c_d) \bm{u}_{slip,d}$, the difference
 between the volume averaged and the mass averaged mixture velocity, which the pressure work of
 the energy equation carries.
 
 ## The drag function
 
-With `use_dispersed_phase_drag_model = true` the drag is solved together with the force balance,
+With [!param](/FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial/use_dispersed_phase_drag_model)
+set to `true` the drag is solved together with the force balance,
 so that the particle Reynolds number
 
 !equation
@@ -85,11 +91,13 @@ Re_p = \frac{\rho_c d_d |\bm{u}_{slip,d}|}{\mu_c}
 
 is formed from the slip velocity and the continuous phase properties, which is its definition
 [!cite](manninen1996mixture). The continuous phase density it needs is supplied
-under `rho_c`. The alternative is to impose the drag directly through `linear_coef_name`; the two
-are mutually exclusive.
+under [!param](/FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial/rho_c). The alternative is to
+impose the drag directly through
+[!param](/FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial/linear_coef_name); the two are
+mutually exclusive.
 
 [!param](/FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial/drag_model) selects the law, and
-`swarm_exponent` applies the hindrance factor $(1 - \alpha_d)^p$ that the two single particle
+[!param](/FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial/swarm_exponent) applies the hindrance factor $(1 - \alpha_d)^p$ that the two single particle
 laws need in a swarm.
 
 !syntax parameters /FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial

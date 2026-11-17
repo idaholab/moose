@@ -45,7 +45,9 @@ in its own direction:
 F^m_f + F^d_f = F_f
 \end{equation}
 
-Each part is separately in donor cell form, so for an upwind scheme the sum is an M-matrix. On a
+Each part is separately in donor cell form, so for an upwind scheme the sum is an M-matrix: its
+off-diagonal entries are non-positive and its diagonal dominates them, which guarantees that the
+solve introduces no new extrema and keeps the phase fraction bounded. On a
 face where the two fluxes share a sign they select the same donor cell and the assembly is
 identical, to the last bit, to interpolating their sum once. They differ only where the drift
 opposes the mixture flux, and there the diagonal receives
@@ -61,9 +63,7 @@ together at high dispersed phase fraction: with the sum interpolated once, a ver
 a dispersed phase fraction of $0.25$ loses control of the phase fraction and the solve fails part
 way through the transient.
 
-Splitting also makes the drift a term of its own, which is the prerequisite for limiting it
-separately, in the manner of the MULES treatment used by OpenFOAM's `driftFluxFoam`. The price is
-that the scheme is more diffusive, each part upwinding independently.
+The price is that the scheme is more diffusive, each part upwinding independently.
 
 The slip contributes on internal faces always, and on a boundary face only where that boundary is
 listed in [!param](/LinearFVKernels/LinearFVScalarAdvection/slip_boundaries). The dispersed phase
@@ -76,7 +76,8 @@ When [!param](/LinearFVKernels/LinearFVScalarAdvection/density) is supplied the 
 are turned into mass fluxes, so that $\nabla\cdot\left(\rho\,\vec{u}\,C_i\right)$ is assembled
 rather than $\nabla\cdot\left(\vec{u}\,C_i\right)$. The density is applied after the slip, so
 that it multiplies the whole phase velocity, and before the interpolations, so that the upwind
-directions are unaffected by it. The matching `factor` must be set on the time derivative kernel,
+directions are unaffected by it. The matching
+[!param](/LinearFVKernels/LinearFVTimeDerivative/factor) must be set on the time derivative kernel,
 and the same density must reach every other term of the equation, for the pair to be consistent.
 
 !syntax parameters /LinearFVKernels/LinearFVScalarAdvection

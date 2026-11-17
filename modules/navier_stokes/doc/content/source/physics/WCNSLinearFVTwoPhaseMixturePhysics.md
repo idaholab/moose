@@ -59,7 +59,8 @@ the presence of a two-phase mixture. If specified with the
 parameter, a phase change source term is added to the fluid phase energy equation. The nonlinear
 discretization uses the [NSFVPhaseChangeSource.md] kernel for this; because that term is the product of
 a temperature-dependent coefficient and the temperature time derivative, the linear finite volume
-implementation instead assembles it from a [LinearFVTimeDerivative.md] whose `factor` is that
+implementation instead assembles it from a [LinearFVTimeDerivative.md] whose
+[!param](/LinearFVKernels/LinearFVTimeDerivative/factor) is that
 coefficient, computed by a [ParsedFunctorMaterial.md]. The coefficient is lagged to the previous fixed
 point iteration rather than differentiated, so the mushy zone may require tighter fixed point solve
 tolerances than the nonlinear implementation.

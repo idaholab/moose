@@ -20,8 +20,10 @@ volume:
 \end{equation}
 
 This object assembles the right hand side only. The two terms on the left are the business of
-[LinearFVTimeDerivative.md], given a `factor` of $\rho_g$, and of [LinearFVScalarAdvection.md],
-given a `density` of $\rho_g$ and the dispersed phase velocity
+[LinearFVTimeDerivative.md], given a [!param](/LinearFVKernels/LinearFVTimeDerivative/factor) of
+$\rho_g$, and of [LinearFVScalarAdvection.md], given a
+[!param](/LinearFVKernels/LinearFVScalarAdvection/density) of $\rho_g$ and the dispersed phase
+velocity
 $\bm{u}_g = \bm{u}_m + \bm{u}_{Md}$. Assembling the equation in any other form, in particular
 without the density on both, is inconsistent with the sources computed here.
 
@@ -107,7 +109,7 @@ pair reproduces the equation exactly.
 
 !alert note
 The expansion contribution to the diagonal carries the sign of the material derivative of the
-dispersed phase density and is not guaranteed positive. In a strongly compressible transient it can
+dispersed phase density and is not guaranteed positive. Where that density falls quickly it can
 reduce the diagonal.
 
 ## Guards
@@ -125,24 +127,14 @@ Four guards are applied, and they are the only departures from the reference.
   divergence exactly at the packing limit.
 - $C_D$, and with it $S_{WE}$, is set to zero when $Re_D \leq 10^{-6}$.
 
-## Verification
-
-Both closure sets are verified against their analytic steady states by the
-`interface_area_hibiki_ishii` and `interface_area_ishii_kim` tests. With no flow, a constant
-dispersed phase density and no mass transfer, the equation reduces to
-$\partial \xi/\partial t = S_{RC}+S_{WE}+S_{TI}$, whose steady state is a balance of coalescence
-against breakage. Every term of both models carries the same power of $\xi$, so that balance is a
-scalar equation in $d_b$ alone and is therefore a property of the closure formulas rather than of
-the discretization. The computed steady states agree with roots obtained independently by a
-bracketing solver to twelve significant figures.
-
 !alert note
-The Hibiki and Ishii interaction sources are shared with
-[WCNSFV2PInterfaceAreaSourceSink.md] through `NS::hibikiIshiiAreaSources()`, so the two
-discretizations cannot disagree on that closure. The rest of the equation still differs: the
-nonlinear kernel has no wake entrainment model and forms the area added by new dispersed phase
-from a nucleation diameter below a cutoff fraction, where this kernel takes the phase change
-source alone.
+The nonlinear counterpart of this kernel, [WCNSFV2PInterfaceAreaSourceSink.md], computes the same
+Hibiki and Ishii sources but does not offer the Ishii and Kim closure. The two kernels also treat
+phase change differently. Below a cutoff void fraction, the nonlinear kernel relaxes the
+interfacial area toward $6\alpha_g/d_p$, the area of spherical bubbles of a prescribed diameter
+$d_p$, so it can create interfacial area where there was none. This kernel uses only the
+$\frac{2}{3}\frac{\dot m_g}{\alpha_g}\xi$ term, which is proportional to $\xi$: it grows the area
+of the particles already present, but creates no area where $\xi = 0$.
 
 !syntax parameters /LinearFVKernels/LinearWCNSFV2PInterfaceAreaSourceSink
 

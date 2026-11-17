@@ -596,21 +596,10 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMassDensityTransientTerm()
   // buildMixtureDensityTimeDerivative().
   const auto drho_m_dt = buildMixtureDensityTimeDerivative();
 
-  // Where the dispersed phase density is read from the solved pressure, part of d(rho_m)/dt is a
-  // function of the very unknown this equation solves for:
-  //
-  //   d(rho_m)/dt = R + (d(rho_m)/dp) dp/dt ,   R = (rho_d - rho_c) d(alpha)/dt + ... ,
-  //
-  // and a LinearFVSource contributes nothing to the matrix, so lagging that second piece one outer
-  // iteration gives the segregated loop a gain of order (d(rho_m)/dp) V / (a_P dt), which stops it
-  // contracting above unity. LinearFVTimeDerivative in its non-conservative form is c du/dt with c
-  // on the diagonal, so handing it the pressure and d(rho_m)/dp puts the coefficient on the matrix
-  // and leaves R in the explicit source. The two forms have the same fixed point, the piece removed
-  // from one being the piece added to the other.
-  //
-  // This needs a phase compressibility, which arrives as an opaque functor and cannot be inferred.
-  // Either phase's will do, though in practice it is the dispersed one that matters. With neither,
-  // the explicit assembly is kept.
+  // When a phase density depends on pressure, the (d(rho_m)/dp) dp/dt part of the storage term is
+  // put on the matrix through a non-conservative LinearFVTimeDerivative, since lagging it stalls
+  // the outer iteration when that compressibility is large. The remainder stays an explicit source.
+  // Without a supplied density pressure derivative, the whole term is explicit.
   const bool implicit_pressure_part = isParamValid("phase_2_density_pressure_derivative") ||
                                       isParamValid("phase_1_density_pressure_derivative");
   MooseFunctorName source_density = drho_m_dt;

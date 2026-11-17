@@ -2,7 +2,9 @@
 # Conservation of interfacial area in a closed quiescent cavity whose dispersed phase density moves
 # in time. The companion of conservative-transient-energy.i, covering the interfacial area equation.
 #
-# THE TERM UNDER TEST. The interfacial area equation of Hibiki and Ishii (2000) is conservative,
+# THE TERM UNDER TEST. The interfacial area equation of T. Hibiki and M. Ishii, "One-group
+# interfacial area transport of bubbly flows in vertical round tubes", International Journal of
+# Heat and Mass Transfer 43 (2000) 2711-2726, is conservative,
 # d(rho_d xi)/dt + div(rho_d u_d xi) = sources, and a 'factor' of rho_d is exactly what
 # LinearFVTimeDerivative assembles: the product. Setting 'conservative_form' to false instead
 # holds the multiplier outside the derivative, giving rho_d d(xi)/dt. The two differ only where the

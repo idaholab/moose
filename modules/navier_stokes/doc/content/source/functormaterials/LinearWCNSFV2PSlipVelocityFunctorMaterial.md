@@ -11,14 +11,16 @@ Two distinct relative velocities appear in the mixture model and are easy to con
 
 The *slip*, or relative, velocity is the velocity of the dispersed phase with respect to the
 continuous phase, $\bm{u}_{slip,d} = \bm{u}_d - \bm{u}_c$. It is what the algebraic closure
-predicts, and it is declared under `slip_velocity_name`. It is what
+predicts, and it is declared under
+[!param](/FunctorMaterials/LinearWCNSFV2PSlipVelocityFunctorMaterial/slip_velocity_name). It is what
 [LinearWCNSFV2PMomentumDriftFlux.md] and [LinearWCNSFV2PEnergyDriftFlux.md] consume.
 
 The *diffusion*, or drift, velocity is the velocity of the dispersed phase with respect to the
 centre of mass of the mixture, $\bm{u}_{Md} = \bm{u}_d - \bm{u}_m$. It is what appears in the
-conservation equations, and it is declared under `drift_velocity_name` when that parameter is
-supplied. The two are related by the dispersed phase mass fraction $c_d = \alpha_d \rho_d /
-\rho_m$ [!cite](manninen1996mixture),
+conservation equations, and it is declared under
+[!param](/FunctorMaterials/LinearWCNSFV2PSlipVelocityFunctorMaterial/drift_velocity_name) when that
+parameter is supplied. The two are related by the dispersed phase mass fraction
+$c_d = \alpha_d \rho_d / \rho_m$ [!cite](manninen1996mixture),
 
 \begin{equation}
 \bm{u}_{Md} = \left( 1 - c_d \right) \bm{u}_{slip,d} \,.
@@ -27,7 +29,8 @@ supplied. The two are related by the dispersed phase mass fraction $c_d = \alpha
 The phase transport equation must be advected at
 $\bm{u}_m + \bm{u}_{Md} = \bm{u}_d$; advecting it at $\bm{u}_m + \bm{u}_{slip,d}$ instead is
 the dilute approximation $c_d \to 0$. Computing the conversion requires the phase fraction, which
-is why `fraction_dispersed` is needed whenever a drift velocity is requested.
+is why [!param](/FunctorMaterials/LinearWCNSFV2PSlipVelocityFunctorMaterial/fraction_dispersed) is
+needed whenever a drift velocity is requested.
 
 ## The density in the buoyancy factor
 
@@ -41,21 +44,22 @@ The closure is
   - \frac{\partial \bm{u}_m}{\partial t} \,,
 \end{equation}
 
-following [!cite](manninen1996mixture). The density subtracted from $\rho_d$ in
-the buoyancy factor is the
-*mixture* density, so the `rho` parameter of this object should be given `rho_mixture` and not the
-continuous phase density. The two agree only in the dilute limit. The viscosity of the relaxation
-time is that of the continuous phase, supplied under `mu`.
+following [!cite](manninen1996mixture). The density subtracted from $\rho_d$ in the buoyancy factor
+is the *mixture* density, so [!param](/FunctorMaterials/LinearWCNSFV2PSlipVelocityFunctorMaterial/rho)
+should be given `rho_mixture` and not the continuous phase density. The two agree only in the dilute
+limit. The viscosity of the relaxation time is that of the continuous phase, supplied under
+[!param](/FunctorMaterials/LinearWCNSFV2PSlipVelocityFunctorMaterial/mu).
 
 ## The drag function
 
-With `use_dispersed_phase_drag_model = true` this object evaluates a drag law itself rather than
-reading one from a functor, and
+With [!param](/FunctorMaterials/LinearWCNSFV2PSlipVelocityFunctorMaterial/use_dispersed_phase_drag_model)
+set to `true` this object evaluates a drag law itself rather than reading one from a functor, and
 [!param](/FunctorMaterials/LinearWCNSFV2PSlipVelocityFunctorMaterial/drag_model) selects which.
 Three of the four options supply a drag function that closes the force balance; the fourth,
-`ishii-zuber`, is a correlation for the relative velocity itself and is described in its own
-section below. The rigid sphere law is taken first. The particle Reynolds number of the Schiller
-and Naumann correlation is formed from the slip velocity and the continuous phase properties,
+`ishii-zuber`, is the multi-bubble correlation of [!cite](ishiizuber1979drag) in the form given by
+[!cite](hibikiishii2003driftflux), which predicts the relative velocity itself. The rigid sphere
+law is taken first. The particle Reynolds number of the Schiller and Naumann correlation is formed
+from the slip velocity and the continuous phase properties,
 
 !equation
 Re_p = \frac{\rho_c d_d |\bm{u}_{slip,d}|}{\mu_c}
@@ -75,13 +79,18 @@ Stokes guess.
 
 Solving it here is also what keeps the functor dependency graph acyclic. A drag functor evaluated
 from the definition above depends on the slip velocity, so it cannot simultaneously be an input to
-the slip velocity; that is why `use_dispersed_phase_drag_model` and a prescribed
-`linear_coef_name` are mutually exclusive. Supply `linear_coef_name` only to impose a drag
-function directly.
+the slip velocity; that is why
+[!param](/FunctorMaterials/LinearWCNSFV2PSlipVelocityFunctorMaterial/use_dispersed_phase_drag_model)
+and a prescribed [!param](/FunctorMaterials/LinearWCNSFV2PSlipVelocityFunctorMaterial/linear_coef_name)
+are mutually exclusive. Supply
+[!param](/FunctorMaterials/LinearWCNSFV2PSlipVelocityFunctorMaterial/linear_coef_name) only to
+impose a drag function directly.
 
-The `rho_c` parameter is the continuous phase density needed for $Re_p$, and is required whenever
-the drag model is active. It is distinct from `rho`, the *mixture* density of the buoyancy factor.
-The viscosity in $Re_p$ is the continuous phase viscosity already supplied under `mu`.
+[!param](/FunctorMaterials/LinearWCNSFV2PSlipVelocityFunctorMaterial/rho_c) is the continuous phase
+density needed for $Re_p$, and is required whenever the drag model is active. It is distinct from
+[!param](/FunctorMaterials/LinearWCNSFV2PSlipVelocityFunctorMaterial/rho), the *mixture* density of
+the buoyancy factor. The viscosity in $Re_p$ is the continuous phase viscosity already supplied
+under [!param](/FunctorMaterials/LinearWCNSFV2PSlipVelocityFunctorMaterial/mu).
 
 ### The distorted particle law
 
@@ -108,8 +117,7 @@ s_\infty = \sqrt{2}\left(\frac{g \sigma \Delta\rho}{\rho_c^2}\right)^{1/4}
 independent of the particle diameter, which cancels between the relaxation time and the drag
 coefficient. That is Ishii's drift velocity correlation for the bubbly regime, see
 [!cite](hibikiishii2002), reproduced as an identity of the algebra rather than
-approached to within a tolerance. The size independence is what the verification checks, by
-instantiating the law at two diameters and requiring the same speed exactly.
+approached to within a tolerance.
 
 `automatic` evaluates both single particle laws and takes whichever resists more, which selects the
 regime by itself where it is not known in advance or varies across the domain.

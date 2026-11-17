@@ -218,9 +218,7 @@ position the transporting flux changes underneath them between subcycles, so sub
 refused.
 
 Neither option changes the converged answer. Both alter the path taken to the fixed point, not the
-fixed point itself, which is asserted by the `active_scalars_before_flow` and
-`active_scalar_subcycling` tests: each is compared against the gold file of the default ordering and
-reproduces it.
+fixed point itself.
 
 !syntax parameters /Executioner/SIMPLE
 

@@ -3,7 +3,7 @@
 This object implements the enthalpy carried by the relative motion of the phases of a two-phase
 mixture, in the linear finite volume discretization. It is the energy counterpart of the diffusion
 stress assembled by [LinearWCNSFV2PMomentumDriftFlux.md], and it is the term written
-$q_p = \sum_k \alpha_k \rho_k e_k \bm{u}_k$ in the multiphase literature.
+$q_p = \sum_k \alpha_k \rho_k e_k \bm{u}_k$ by [!cite](manninen1996mixture).
 
 ## Formulation
 
@@ -28,7 +28,8 @@ with the same coefficient that carries the diffusion stress,
 \end{equation}
 
 The mixture model assumes thermal equilibrium between the phases, so both are at the mixture
-temperature and $h_k = c_{p,k} T$. This kernel therefore assembles, on the left hand side,
+temperature. Taking each specific heat as constant, $h_k = c_{p,k} T$, this kernel assembles, on
+the left hand side,
 
 \begin{equation}
 + \nabla \cdot \left[ \frac{\beta_d \beta_c}{\rho_m}
@@ -38,10 +39,13 @@ temperature and $h_k = c_{p,k} T$. This kernel therefore assembles, on the left 
 where $\beta_d = \alpha_d \rho_d$, $\beta_c = (1 - \alpha_d) \rho_c$ and $\rho_m = \beta_d +
 \beta_c$. The term is proportional to the difference of the two specific heats and vanishes
 identically when they are equal. It is linear in the advected temperature and is assembled
-implicitly, with the interpolation selected by `advected_interp_method`.
+implicitly, with the interpolation selected by
+[!param](/LinearFVKernels/LinearWCNSFV2PEnergyDriftFlux/advected_interp_method).
 
-The phase-summed advective term is $\nabla \cdot \sum_k \alpha_k \bm{u}_k (\rho_k E_k + p)$; see
-[!cite](manninen1996mixture) for the slip to diffusion velocity conversion.
+!alert note
+The constant specific heat form is exact only when $c_{p,d}$ and $c_{p,c}$ do not vary with
+temperature. Otherwise $h_k = \int c_{p,k}\, dT$ and the flux carries the difference of the phase
+enthalpies rather than of the specific heats times $T$.
 
 ## Mixture specific heat
 
@@ -59,14 +63,17 @@ not the volume-weighted average used for the density, the viscosity and the ther
 
 The dispersed phase cannot cross an impermeable wall, so no enthalpy may be carried through one by
 the relative motion of the phases. The flux is applied on every internal face and on the boundaries
-listed in `slip_boundaries`, normally the inlets and the outlets, and nowhere else. Carrying a
-temperature boundary condition is not evidence that a boundary is permeable: a wall may legitimately
-pin the temperature. [WCNSLinearFVTwoPhaseMixturePhysics.md] fills `slip_boundaries` from the flow
-inlets and outlets automatically.
+listed in [!param](/LinearFVKernels/LinearWCNSFV2PEnergyDriftFlux/slip_boundaries), normally the
+inlets and the outlets, and nowhere else. Carrying a temperature boundary condition is not evidence
+that a boundary is permeable: a wall may legitimately pin the temperature.
+[WCNSLinearFVTwoPhaseMixturePhysics.md] fills
+[!param](/LinearFVKernels/LinearWCNSFV2PEnergyDriftFlux/slip_boundaries) from the flow inlets and
+outlets automatically.
 
 Because the term advects the temperature, it needs a boundary value to act on, and it contributes
-only on boundaries where the temperature carries a boundary condition. `force_boundary_execution`
-is deliberately left at its default of `false`.
+only on boundaries where the temperature carries a boundary condition.
+[!param](/LinearFVKernels/LinearWCNSFV2PEnergyDriftFlux/force_boundary_execution) is deliberately
+left at its default of `false`.
 
 !alert note
 This term has no counterpart in the nonlinear finite volume discretization of the mixture model,

@@ -220,11 +220,8 @@ schillerNaumannDragDerivative(const T & Re_p)
  * transition and Newton's regime above it. See Schiller, L. and Naumann, A., "A drag coefficient
  * correlation", Zeitschrift des Vereins Deutscher Ingenieure 77 (1933) 318-320.
  *
- * The function is strictly increasing, which is what makes the slip velocity solvable from the
- * force balance. It is very nearly, but not exactly, continuous: at the transition the two
- * branches give 18.262 and 18.300, a step of about 0.2%. Any iteration that evaluates this
- * function must therefore be bracketed, or must select its branch in advance from a quantity that
- * does not change as the iteration proceeds.
+ * The function is strictly increasing but jumps by about 0.2% at the transition, so an iteration
+ * that evaluates it must be bracketed or must fix its branch in advance.
  */
 template <typename T>
 T

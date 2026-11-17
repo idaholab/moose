@@ -60,12 +60,6 @@ RELAP5 takes the larger of this correlation and a Plesset-Zwick bubble growth ra
 dominating at strong superheat. Only the Lee-Ryley branch is evaluated here, so rapid flashing is
 outside what this closure has been written for.
 
-Wall nucleation is not included. This is bulk transfer between phases already in contact, which
-grows the particles present at a fixed number density, and that is the assumption the two thirds
-exponent of the interfacial area source encodes. Vapour generated at a heated wall creates new
-particles instead, and representing it needs a nucleation source the interfacial area equation does
-not have.
-
 ## Use through the mixture Physics
 
 The rate is normally created by
