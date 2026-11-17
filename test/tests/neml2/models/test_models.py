@@ -112,7 +112,7 @@ class NEML2TestModel(Model):
 @register_neml2_object("NEML2TestModel2")
 class NEML2TestModel2(Model):
     r"""``s = u * u - 0.1``.
-    
+
     One scalar input (``u``), one scalar output (``s``).
     """
 
