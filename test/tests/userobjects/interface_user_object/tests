@@ -4,19 +4,12 @@
       type = 'Exodiff'
       input = 'interface_value_user_object_QP.i'
       exodiff = 'interface_value_user_object_QP_out.e'
-      requirement = "The system shall correctly compute interface values with the InterfaceQpValueUserObject."
-                 " This test also shows the use of "
-                 "InterfaceValueUserObjectAux AuxKernel. InterfaceValueUserObjectAux "
-                 "use interface values computed and stored at each qp from the "
-                 "InterfaceQpValueUserObject and output them into an auxiliary variable. "
-                 "Values on the interface are then computed via SideAverageValue PP. "
-                 "By design at the end of the first step we should observe: "
-                 "an average material property of 7, "
-                 "an average material property absolute jump fo 6, "
-                 "a singed material property jump (primary-secondary) of 6 "
-                 "a singed material propertyjump (secondary-primary) of -6 "
-                 "a material property value on the primary side of  10 "
-                 "a material property value on the primary side of  4 "
+      requirement = "The system shall correctly compute interface values at quadrature points and "
+                 "store them in an auxiliary variable for averaging over a side. At the end of "
+                 "the first step it shall report an average material property of 7, an absolute "
+                 "jump of 6, a signed jump (primary minus secondary) of 6, a signed jump "
+                 "(secondary minus primary) of -6, a value on the primary side of 10, and a "
+                 "value on the secondary side of 4."
       issues = '#11647'
       max_threads = 1
     [../]
@@ -24,12 +17,9 @@
       type = 'RunApp'
       input = 'interface_userobject_material_value.i'
       expect_out = ' Solve Converged!'
-      requirement = "The system shall, through the InterfaceUserObject system, be able to "
-                    "get updated bulk, boundary and interface material property values. "
-                    "This test uses two specific test materials "
-                    "(e.g. LinearNonLinearIterationMaterial and LinearNonLinearIterationInterfaceMaterial)"
-                    " and one test userobject (e.g. InterfaceUserObjectTestGetMaterialProperty). "
-                    "This test will produce an error if the computed and retrieved material property are not the same."
+      requirement = "The system shall be able to get updated bulk, boundary and interface "
+                    "material property values from an interface user object, and shall produce "
+                    "an error if the computed and retrieved material property are not the same."
       issues = '#14680'
       max_threads = 1
     [../]
@@ -37,8 +27,8 @@
       type = 'Exodiff'
       input = 'interface_value_rate_increment_user_object_QP.i'
       exodiff = 'interface_value_rate_increment_user_object_QP_out.e'
-      requirement = "The system shall correctly compute values with the InterfaceQpValueUserObject"
-                    " when computing the variable rate or increment."
+      requirement = "The system shall correctly compute interface values at quadrature"
+                    "points when computing the variable rate or increment."
       issues = '#14680'
       max_threads = 1
     [../]

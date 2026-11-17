@@ -123,8 +123,8 @@
     input = 'no_ref.i'
     csvdiff = 'no_ref_out.csv'
     cli_args = 'Problem/extra_tag_vectors=absref'
-    requirement = 'The system shall have the ability to default to the traditional convergence checks if no '
-                  'reference vector is provided in ReferenceResidualConvergence.'
+    requirement = 'The system shall have the ability to default to the traditional convergence checks if no'
+                  'reference vector is provided for reference residual convergence.'
   []
   [zero_tolerance_ref]
     type = RunException
@@ -211,7 +211,7 @@
   []
 
   [error]
-    requirement = 'The system shall, when using ReferenceResidualConvergence, throw an error '
+    requirement = 'The system shall, when using reference residual convergence, throw an error '
     [wrong_vector_tag_type]
       type = RunException
       input = abs_ref.i

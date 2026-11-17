@@ -38,7 +38,7 @@
     type = Exodiff
     input = parent_nearest_point.i
     exodiff = 'parent_nearest_point_out.e parent_nearest_point_out_sub0.e parent_nearest_point_out_sub1.e'
-    requirement = 'The system shall support conservative transfers with nearestpoint VectorPostprocessors'
+    requirement = 'The system shall support conservative transfers with nearest-point vector postprocessors'
   [../]
 
   [./nearest_point_execute_on]
@@ -62,7 +62,7 @@
     type = Exodiff
     input = parent_userobject.i
     exodiff = 'parent_userobject_out.e parent_userobject_out_sub_app0.e parent_userobject_out_sub_app1.e'
-    requirement = 'The system shall support conservative transfers in MultiAppUserObjectTransfer'
+    requirement = 'The system shall support conservative transfers in a user object transfer'
   [../]
 
   [./userobject_transfer_csv]
@@ -70,7 +70,7 @@
     input = 'parent_userobject.i'
     csvdiff = 'parent_userobject_out_to_nearest_point_0001.csv parent_userobject_out_to_nearest_point_element_0001.csv'
     prereq = userobject_transfer
-    requirement = 'The system shall be able to output the adjusting values in conservative transfers for MultiAppUserObjectTransfer'
+    requirement = 'The system shall be able to output the adjusting values in conservative transfers for a user object transfer'
   [../]
 
   [./negative_adjuster]

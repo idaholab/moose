@@ -7,7 +7,7 @@
     min_threads = 2
     min_parallel = 2
     design = 'source/dampers/BoundingValueNodalDamper.md'
-    requirement = "The system shall report if the BoundingValueNodalDamper minimum value is greater than the maximum value."
+    requirement = "The system shall report if the bounding value nodal damper minimum value is greater than the maximum value."
   [../]
   [./min_elem_damping]
     type = 'RunApp'
@@ -16,7 +16,7 @@
     min_threads = 2
     min_parallel = 2
     design = 'source/dampers/BoundingValueElementDamper.md'
-    requirement = "The system shall report if the BoundingValueElementDamper minimum value is greater than the maximum value."
+    requirement = "The system shall report if the bounding value elemental damper minimum value is greater than the maximum value."
   [../]
   [./min_general_damping]
     type = 'RunException'

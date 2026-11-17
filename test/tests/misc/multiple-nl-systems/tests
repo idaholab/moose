@@ -45,7 +45,7 @@
     type = PetscJacobianTester
     run_sim = True
     input = test.i
-    requirement = 'The system shall be able to perform a segregated solve using objects with hand-coded Jacobians and show perfect Jacobians for those objects.'
+    requirement = 'The system shall be able to perform a segregated solve using objects with hand-coded Jacobians and show numerically accurate Jacobians for those objects.'
     cli_args = '-u_snes_test_jacobian -v_snes_test_jacobian'
   []
   [different_num_vars_per_system]

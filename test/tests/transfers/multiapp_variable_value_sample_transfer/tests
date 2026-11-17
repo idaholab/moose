@@ -103,8 +103,8 @@
     type = Exodiff
     input = full_domain_primary.i
     exodiff = full_domain_primary_out.e
-    requirement = "The system shall guarantee that constant monomial variables transferred via MultiAppVariableValueSamplePostprocessorTransfer to the subapp are retrieved "
-                  " unchanged when transferred back using MultiAppVariableValueSamplePostprocessorTransfer in case the CentroidMultiApp is used."
+    requirement = "The system shall guarantee that constant monomial variables transferred via a variable value sample postprocessor transfer "
+                  "to the subapp are retrieved unchanged when transferred back the same way, with a centroid MultiApp."
   []
 
   [same_distance_error]
@@ -124,7 +124,7 @@
                 Transfers/primary_average/source_variable=to_subapp
                 Outputs/file_base=set_primary_var_error_out'
     expect_err = 'Variable must be an auxiliary variable'
-    requirement = "The system shall error out if the MultiAppVariableValueSamplePostprocessorTransfer transfers postprocessor values on sub-applications to a primary variable on the main application."
+    requirement = "The system shall error out if a variable value sample postprocessor transfer transfers postprocessor values on sub-applications to a primary variable on the main application."
   []
 
   [block_restricted_primary]
