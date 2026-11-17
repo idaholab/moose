@@ -196,6 +196,7 @@ NEML2Action::NEML2Action(const InputParameters & params)
   const auto mpi_comm = comm().get();
 
   _fname = getParam<DataFileName>("input");
+  const NEML2Utils::ScopedDefaultDtype scoped_dtype;
   _model = makeNEML2ModelHandle(eager,
                                 std::string(_fname),
                                 getParam<std::string>("model"),
@@ -396,6 +397,7 @@ NEML2Action::act()
       auto type = "NEML2ModelExecutor";
       auto params = _factory.getValidParams(type);
       params.applyParameters(parameters());
+      params.set<std::unique_ptr<NEML2ModelHandle> *>("_neml2_model_handle") = &_model;
       params.set<UserObjectName>("batch_index_generator") = _idx_generator_name;
       params.set<std::vector<UserObjectName>>("gatherers") = gatherers;
       params.set<std::vector<UserObjectName>>("param_gatherers") = param_gatherers;

@@ -114,8 +114,8 @@ protected:
   /// List of cli-args
   std::vector<std::string> _cli_args;
 
-  /// The neml2 model handle, used here only for introspection during setup. Built from the
-  /// cpp-eager source '.i' or the cpp-aoti artifact folder -- both given by 'input' -- per 'eager'.
+  /// The NEML2 model handle, owned here for setup introspection and then transferred to the executor.
+  /// Built from the cpp-eager source '.i' or the cpp-aoti artifact folder given by 'input'.
   std::unique_ptr<NEML2ModelHandle> _model;
 
   /// MOOSE-NEML2 input variable mappings
