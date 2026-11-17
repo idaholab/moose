@@ -40,6 +40,10 @@ GrainForceAndTorqueSum::GrainForceAndTorqueSum(const InputParameters & parameter
 void
 GrainForceAndTorqueSum::initialize()
 {
+  // The summed objects have not executed yet at INITIAL, so their data is not populated
+  if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL)
+    return;
+
   for (unsigned int i = 0; i < _grain_num; ++i)
   {
     _force_values[i] = 0.0;
@@ -50,7 +54,11 @@ GrainForceAndTorqueSum::initialize()
       const auto & torque_values = _sum_forces[j]->getTorqueValues();
 
       if (force_values.size() != _grain_num || torque_values.size() != _grain_num)
-        continue;
+        mooseError("The force and torque data of '",
+                   _sum_objects[j],
+                   "' must have one entry per grain (",
+                   _grain_num,
+                   ").");
 
       _force_values[i] += force_values[i];
       _torque_values[i] += torque_values[i];
@@ -67,8 +75,9 @@ GrainForceAndTorqueSum::initialize()
       for (unsigned int j = 0; j < _num_forces; ++j)
       {
         const auto & c_jacobians = _sum_forces[j]->getForceCJacobians();
-        if (c_jacobians.size() == _c_jacobians.size())
-          _c_jacobians[i] += c_jacobians[i];
+        if (c_jacobians.size() != _c_jacobians.size())
+          mooseError("The force Jacobian of '", _sum_objects[j], "' has an unexpected size.");
+        _c_jacobians[i] += c_jacobians[i];
       }
 
     for (unsigned int i = 0; i < _grain_num; ++i)
@@ -78,9 +87,10 @@ GrainForceAndTorqueSum::initialize()
         for (unsigned int k = 0; k < _num_forces; ++k)
         {
           const auto & eta_jacobians = _sum_forces[k]->getForceEtaJacobians();
-          if (eta_jacobians.size() == _grain_num &&
-              eta_jacobians[i].size() == _eta_jacobians[i].size())
-            _eta_jacobians[i][j] += eta_jacobians[i][j];
+          if (eta_jacobians.size() != _grain_num ||
+              eta_jacobians[i].size() != _eta_jacobians[i].size())
+            mooseError("The force eta Jacobian of '", _sum_objects[k], "' has an unexpected size.");
+          _eta_jacobians[i][j] += eta_jacobians[i][j];
         }
     }
   }
