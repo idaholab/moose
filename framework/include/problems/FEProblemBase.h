@@ -3385,8 +3385,9 @@ protected:
   void computeKokkosUserObjectsInternal(const ExecFlagType & type, TheWarehouse::Query & query);
 #endif
 
-  /// Verify that SECOND order mesh uses SECOND order displacements.
-  void checkDisplacementOrders();
+  /// Verify that the displaced mesh update can move every node of the elements the displacement
+  /// variables are defined on
+  void checkDisplacementNodes();
 
   void checkUserObjects();
 
