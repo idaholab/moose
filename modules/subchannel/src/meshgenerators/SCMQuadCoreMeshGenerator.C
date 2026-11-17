@@ -21,9 +21,10 @@ SCMQuadCoreMeshGenerator::validParams()
   params.addClassDescription(
       "Places square-lattice subchannel assembly meshes on a rectangular core lattice. Each "
       "assembly keeps its own subdomains and boundaries; assemblies are not connected.");
-  params.setDocString("inputs",
-                      "The SCMQuadAssemblyMeshGenerator, SCMQuadDuctMeshGenerator, or "
-                      "SCMDetailedQuadAssemblyMeshGenerator meshes that can be placed in the core");
+  params.setDocString(
+      "inputs",
+      "The SCMQuadAssemblyMeshGenerator, SCMQuadDuctMeshGenerator, or "
+      "SCMQuadVisualizationAssemblyMeshGenerator meshes that can be placed in the core");
   params.setDocString(
       "pattern",
       "Rectangular core pattern of indices into 'inputs', using the row syntax of "
@@ -79,7 +80,7 @@ SCMQuadCoreMeshGenerator::readAssemblySizes()
                  input_name,
                  "' does not provide 'duct_size_x' and 'duct_size_y' metadata. Inputs must be "
                  "SCMQuadAssemblyMeshGenerator, SCMQuadDuctMeshGenerator, or "
-                 "SCMDetailedQuadAssemblyMeshGenerator objects.");
+                 "SCMQuadVisualizationAssemblyMeshGenerator objects.");
     _duct_size.emplace_back(getMeshProperty<Real>("duct_size_x", input_name),
                             getMeshProperty<Real>("duct_size_y", input_name));
   }

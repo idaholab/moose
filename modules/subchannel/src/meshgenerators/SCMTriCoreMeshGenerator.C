@@ -22,9 +22,10 @@ SCMTriCoreMeshGenerator::validParams()
   params.addClassDescription(
       "Places triangular-lattice subchannel assembly meshes on a hexagonal core lattice. Each "
       "assembly keeps its own subdomains and boundaries; assemblies are not connected.");
-  params.setDocString("inputs",
-                      "The SCMTriAssemblyMeshGenerator, SCMTriDuctMeshGenerator, or "
-                      "SCMDetailedTriAssemblyMeshGenerator meshes that can be placed in the core");
+  params.setDocString(
+      "inputs",
+      "The SCMTriAssemblyMeshGenerator, SCMTriDuctMeshGenerator, or "
+      "SCMTriVisualizationAssemblyMeshGenerator meshes that can be placed in the core");
   params.setDocString(
       "pattern",
       "Hexagonal core pattern of indices into 'inputs', using the row syntax of "
@@ -85,7 +86,7 @@ SCMTriCoreMeshGenerator::readAssemblySizes()
                  input_name,
                  "' does not provide 'flat_to_flat' metadata. Inputs must be "
                  "SCMTriAssemblyMeshGenerator, SCMTriDuctMeshGenerator, or "
-                 "SCMDetailedTriAssemblyMeshGenerator objects.");
+                 "SCMTriVisualizationAssemblyMeshGenerator objects.");
     _flat_to_flat.push_back(getMeshProperty<Real>("flat_to_flat", input_name));
   }
 }

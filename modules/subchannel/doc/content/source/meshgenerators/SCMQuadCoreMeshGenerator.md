@@ -12,7 +12,7 @@ crossflow between assemblies. It is the square-lattice counterpart of [SCMTriCor
 
 Each entry of [!param](/Mesh/SCMQuadCoreMeshGenerator/inputs) is an
 [SCMQuadAssemblyMeshGenerator.md] or an [SCMQuadDuctMeshGenerator.md] for a 1D subchannel core
-mesh, or an [SCMDetailedQuadAssemblyMeshGenerator.md] for a 3D visualization core mesh. In a 3D
+mesh, or an [SCMQuadVisualizationAssemblyMeshGenerator.md] for a 3D visualization core mesh. In a 3D
 visualization assembly mesh, each subchannel and pin is meshed in 3D with prism elements. Such a
 mesh is used only to visualize results: the SCM solution is computed on the 1D mesh and copied onto
 the 3D mesh with [SCMSolutionTransfer.md], as in the single-assembly example
