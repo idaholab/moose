@@ -160,23 +160,21 @@ LinearFVScalarAdvection::setupFaceData(const FaceInfo * face_info)
   // The phase fraction is advected at the dispersed phase velocity u_m + u_Md, so the drift has to
   // reach the flux.
   //
-  // The drift is added on every internal face, and on a boundary face only if that boundary is one
-  // of the 'slip_boundaries', the inlets and outlets the phase enters and leaves through. On a wall
-  // the mixture flux from the Rhie-Chow object is already zero, and a gravity driven drift added
-  // there would advect phase straight through the wall, whether or not the boundary carries a
-  // condition on the phase fraction: a wall may prescribe the fraction and still let no phase
-  // through.
-  if (_u_slip && NS::slipAllowedOnFace(*face_info, _slip_boundaries))
+  // The drift is added on every face the phase fraction lives on from both sides, and on a
+  // boundary face, including one internal to the mesh, only if that boundary is one of the
+  // 'slip_boundaries', the inlets and outlets the phase enters and leaves through. On a wall the
+  // mixture flux from the Rhie-Chow object is already zero, and a gravity driven drift added there
+  // would advect phase straight through the wall, whether or not the boundary carries a condition
+  // on the phase fraction: a wall may prescribe the fraction and still let no phase through.
+  if (_u_slip && NS::slipAllowedOnFace(*face_info, _current_face_type, _slip_boundaries))
   {
     const auto state = determineState();
+    // The same face argument as the drift flux kernels, so that the phase and the momentum and
+    // energy drift fluxes see the same slip velocity on a face. On a boundary it is evaluated from
+    // the side the phase fraction lives on.
     // TODO Add boundary treatment to be able select two-term expansion if desired
-    const auto face_arg = face_info->neighborPtr()
-                              ? Moose::FaceArg{face_info,
-                                               Moose::FV::LimiterType::CentralDifference,
-                                               true,
-                                               false,
-                                               face_info->neighborPtr(),
-                                               nullptr}
+    const auto face_arg = (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
+                              ? makeCDFace(*face_info)
                               : singleSidedFaceArg(face_info);
 
     const RealVectorValue velocity_slip_vel_vec =

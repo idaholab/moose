@@ -184,6 +184,15 @@
     requirement = 'The system shall conserve the dispersed phase in a closed cavity when a slip velocity is present, by not transporting the phase across impermeable boundaries, even when those boundaries constrain the phase fraction.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [phase_slip_internal_wall_conservation]
+    type = CSVDiff
+    input = 'phase-slip-internal-wall-conservation.i'
+    csvdiff = 'phase-slip-internal-wall-conservation_out.csv'
+    abs_zero = 1e-6
+    design = 'LinearFVScalarAdvection.md'
+    requirement = 'The system shall conserve the dispersed phase in a closed cavity when a slip velocity is present, by not transporting the phase across an impermeable boundary internal to the mesh, the interface with a block the phase fraction is not defined on.'
+    max_threads = 1 # see libmesh issue #3808
+  []
 
   [energy_slip_wall_conservation]
     type = CSVDiff
@@ -195,6 +204,16 @@
     abs_zero = 1e-3
     design = 'LinearWCNSFV2PEnergyDriftFlux.md'
     requirement = 'The system shall conserve the mixture enthalpy in a closed cavity when the phases move relative to one another, by not carrying enthalpy across impermeable boundaries, even when those boundaries constrain the temperature.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [energy_slip_internal_wall_conservation]
+    type = CSVDiff
+    input = 'energy-slip-internal-wall-conservation.i'
+    csvdiff = 'energy-slip-internal-wall-conservation_out.csv'
+    # Same tolerance as the mesh boundary case, see energy_slip_wall_conservation
+    abs_zero = 1e-3
+    design = 'LinearWCNSFV2PEnergyDriftFlux.md'
+    requirement = 'The system shall conserve the mixture enthalpy in a closed cavity when the phases move relative to one another, by not carrying enthalpy across an impermeable boundary internal to the mesh, the interface with a block the energy equation is not defined on.'
     max_threads = 1 # see libmesh issue #3808
   []
   [energy_slip_wall_conservation_harmonic]

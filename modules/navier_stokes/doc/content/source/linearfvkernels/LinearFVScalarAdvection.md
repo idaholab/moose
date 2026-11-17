@@ -65,8 +65,10 @@ way through the transient.
 
 The price is that the scheme is more diffusive, each part upwinding independently.
 
-The slip contributes on internal faces always, and on a boundary face only where that boundary is
-listed in [!param](/LinearFVKernels/LinearFVScalarAdvection/slip_boundaries). The dispersed phase
+The slip contributes on every face the variable is defined on from both sides, and on a boundary
+face only where that boundary is listed in
+[!param](/LinearFVKernels/LinearFVScalarAdvection/slip_boundaries). This includes boundaries
+internal to the mesh, such as the interface with a block the variable is not defined on. The dispersed phase
 cannot cross an impermeable wall, and the mixture flux returned by the Rhie-Chow object is already
 zero there, so adding a gravity driven slip would advect the phase straight through it.
 

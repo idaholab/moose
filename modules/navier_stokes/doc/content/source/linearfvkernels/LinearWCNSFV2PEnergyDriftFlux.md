@@ -62,8 +62,8 @@ not the volume-weighted average used for the density, the viscosity and the ther
 ## Permeable boundaries
 
 The dispersed phase cannot cross an impermeable wall, so no enthalpy may be carried through one by
-the relative motion of the phases. The flux is applied on every internal face and on the boundaries
-listed in [!param](/LinearFVKernels/LinearWCNSFV2PEnergyDriftFlux/slip_boundaries), normally the
+the relative motion of the phases. The flux is applied on every face the temperature is defined on
+from both sides, and on the boundaries, including those internal to the mesh, listed in [!param](/LinearFVKernels/LinearWCNSFV2PEnergyDriftFlux/slip_boundaries), normally the
 inlets and the outlets, and nowhere else. Carrying a temperature boundary condition is not evidence
 that a boundary is permeable: a wall may legitimately pin the temperature.
 [WCNSLinearFVTwoPhaseMixturePhysics.md] fills

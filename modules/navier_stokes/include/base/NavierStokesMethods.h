@@ -138,14 +138,23 @@ diffusionStressCoefficient(const T & fd_in, const T & rho_d, const T & rho_c)
 }
 
 /**
- * Whether the dispersed phase may cross a face: any internal face, and a boundary face only if one
- * of the sidesets the face belongs to is in `slip_boundaries`. Every sideset of the face is
- * checked, the permeable one need not be the first the mesh lists.
+ * Whether the dispersed phase may cross a face: a face the variable lives on from both sides, and
+ * a boundary face only if one of the sidesets the face belongs to is in `slip_boundaries`. Every
+ * sideset of the face is checked, the permeable one need not be the first the mesh lists.
+ *
+ * The face type of the variable decides, not the presence of a neighbor element: on a boundary
+ * internal to the mesh, such as the interface with a block the variable is not defined on, there
+ * is a neighbor element but the face is a boundary of the equation.
+ * @param fi the face
+ * @param face_type the face type of the variable the flux is assembled for
+ * @param slip_boundaries the boundaries the dispersed phase may cross
  */
 inline bool
-slipAllowedOnFace(const FaceInfo & fi, const std::set<BoundaryID> & slip_boundaries)
+slipAllowedOnFace(const FaceInfo & fi,
+                  const FaceInfo::VarFaceNeighbors face_type,
+                  const std::set<BoundaryID> & slip_boundaries)
 {
-  if (fi.neighborPtr())
+  if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
     return true;
   const auto & ids = fi.boundaryIDs();
   return std::any_of(ids.begin(),

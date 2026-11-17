@@ -113,7 +113,7 @@ LinearWCNSFV2PEnergyDriftFlux::setupFaceData(const FaceInfo * face_info)
                                                 state,
                                                 _coeff_interp_method);
 
-  _face_flux = NS::slipAllowedOnFace(*_current_face_info, _slip_boundaries)
+  _face_flux = NS::slipAllowedOnFace(*_current_face_info, _current_face_type, _slip_boundaries)
                    ? face_coefficient * (normal * u_slip_vel_vec)
                    : 0.0;
 
