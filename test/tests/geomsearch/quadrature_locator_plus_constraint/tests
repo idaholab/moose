@@ -3,7 +3,7 @@
     type = RunApp
     input = quadrature_locator_plus_constraint.i
     issues = '#5234'
-    requirement = 'The system shall be able to augment the nonlinear system sparsity based on constraints when we have a quadrature nearest-node locator.'
+    requirement = 'The system shall be able to augment the nonlinear system sparsity based on constraints when there is a quadrature nearest-node locator.'
     design = 'GeometricSearchData.md'
   []
   [adaptivity]
