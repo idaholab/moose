@@ -91,19 +91,9 @@ LinearAssemblySegregatedSolve::validParams()
       "solve_active_scalars_before_flow",
       false,
       "Whether the active scalar equations are solved at the start of each outer iteration, ahead "
-      "of the momentum predictor, rather than after the flow has been corrected. Solving them "
-      "first is what allows them to be subcycled on their own time step and to carry an explicit "
-      "bounded correction, since the flux they are transported by is then held fixed across the "
-      "subcycles.");
-  params.addRangeCheckedParam<unsigned int>(
-      "active_scalar_subcycles",
-      1,
-      "active_scalar_subcycles>0",
-      "Number of subcycles used for the active scalar equations within one time step. Only "
-      "available together with 'solve_active_scalars_before_flow', and only meaningful in a "
-      "transient, where it reduces the Courant number seen by each individual solve.");
-  params.addParamNamesToGroup("solve_active_scalars_before_flow active_scalar_subcycles",
-                              "Active scalars");
+      "of the momentum predictor, against the flux left by the previous outer iteration, rather "
+      "than after the flow has been corrected.");
+  params.addParamNamesToGroup("solve_active_scalars_before_flow", "Active scalars");
   params.addParam<bool>("should_solve_pm_radiation",
                         true,
                         "Whether we should solve participating media radiation equations.");
@@ -221,7 +211,6 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
     _should_solve_active_scalars(getParam<bool>("should_solve_active_scalars")),
     _should_solve_pm_radiation(getParam<bool>("should_solve_pm_radiation")),
     _solve_active_scalars_before_flow(getParam<bool>("solve_active_scalars_before_flow")),
-    _active_scalar_subcycles(getParam<unsigned int>("active_scalar_subcycles")),
     _active_scalar_system_names(getParam<std::vector<SolverSystemName>>("active_scalar_systems")),
     _has_active_scalar_systems(!_active_scalar_system_names.empty()),
     _active_scalar_equation_relaxation(
@@ -234,14 +223,6 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
     _active_scalar_pc_solve_counter(0),
     _cht(ex.parameters())
 {
-  if (_active_scalar_subcycles > 1 && !_solve_active_scalars_before_flow)
-    paramError("active_scalar_subcycles",
-               "Subcycling the active scalar equations requires them to be solved ahead of the "
-               "flow, so that the flux transporting them is held fixed across the subcycles. Set "
-               "'solve_active_scalars_before_flow' to true. Subcycling them in their default "
-               "position, after the flow has been corrected, would advance them against a flux "
-               "that changes between subcycles.");
-
   if (!_should_solve_momentum && _should_solve_pressure)
     paramError("should_solve_momentum",
                "Pressure correction requires solving the momentum equations.");
@@ -767,77 +748,25 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
   return residuals;
 }
 
-void
-LinearAssemblySegregatedSolve::advanceSubcycleOldState(LinearSystem & system) const
-{
-  system.solutionOld() = *(system.system().current_local_solution);
-  system.solutionOld().close();
-
-  if (auto * const previous_solution = system.solutionPreviousNewton())
-  {
-    *previous_solution = system.solutionOld();
-    previous_solution->close();
-  }
-}
-
 std::vector<std::pair<unsigned int, Real>>
 LinearAssemblySegregatedSolve::solveActiveScalarSystems(const SolverParams & solver_params)
 {
-  std::vector<std::pair<unsigned int, Real>> residuals(_active_scalar_system_names.size(),
-                                                       std::make_pair(0, 0.0));
+  std::vector<std::pair<unsigned int, Real>> residuals;
 
-  // Subcycling only means something when there is a time derivative to subdivide
-  const unsigned int subcycles = _problem.isTransient() ? _active_scalar_subcycles : 1;
+  _problem.execute(EXEC_NONLINEAR);
 
-  const Real global_dt = _problem.dt();
-  const Real global_time = _problem.time();
-  const Real global_time_old = _problem.timeOld();
-  const Real subcycle_dt = global_dt / subcycles;
-
-  for (const auto subcycle : make_range(subcycles))
-  {
-    if (subcycles > 1)
-    {
-      // Present each subcycle to the time integrator as a step of its own, so that the time
-      // derivative kernels see the reduced step rather than the whole one
-      _problem.dt() = subcycle_dt;
-      _problem.timeOld() = global_time_old + subcycle * subcycle_dt;
-      _problem.time() = _problem.timeOld() + subcycle_dt;
-
-      if (subcycle > 0)
-        for (auto * const system : _active_scalar_systems)
-          advanceSubcycleOldState(*system);
-    }
-
-    _problem.execute(EXEC_NONLINEAR);
-
-    // We set the preconditioner/controllable parameters through petsc options. Linear
-    // tolerances will be overridden within the solver.
-    Moose::PetscSupport::petscSetOptions(_active_scalar_petsc_options, solver_params);
-    for (const auto i : index_range(_active_scalar_system_names))
-    {
-      // The preconditioner reuse counter is advanced here as it is in the unsubcycled path, so
-      // that a subcycled solve recomputes the preconditioner on the same schedule.
-      const auto residual = solveAdvectedSystem(
-          _active_scalar_system_numbers[i],
-          *_active_scalar_systems[i],
-          _active_scalar_equation_relaxation[i],
-          _active_scalar_linear_control,
-          _active_scalar_l_abs_tol,
-          (_active_scalar_pc_solve_counter % _active_scalar_pc_recompute_frequency) != 0);
-      // Report the residual of the last subcycle, which is the one that leaves the state the
-      // outer iteration will see
-      residuals[i] = residual;
-    }
-    ++_active_scalar_pc_solve_counter;
-  }
-
-  if (subcycles > 1)
-  {
-    _problem.dt() = global_dt;
-    _problem.timeOld() = global_time_old;
-    _problem.time() = global_time;
-  }
+  // We set the preconditioner/controllable parameters through petsc options. Linear
+  // tolerances will be overridden within the solver.
+  Moose::PetscSupport::petscSetOptions(_active_scalar_petsc_options, solver_params);
+  for (const auto i : index_range(_active_scalar_system_names))
+    residuals.push_back(solveAdvectedSystem(
+        _active_scalar_system_numbers[i],
+        *_active_scalar_systems[i],
+        _active_scalar_equation_relaxation[i],
+        _active_scalar_linear_control,
+        _active_scalar_l_abs_tol,
+        (_active_scalar_pc_solve_counter % _active_scalar_pc_recompute_frequency) != 0));
+  ++_active_scalar_pc_solve_counter;
 
   return residuals;
 }
@@ -907,9 +836,8 @@ LinearAssemblySegregatedSolve::solve()
 
     _console << "Iteration " << simple_iteration_counter << " Initial residual norms:" << std::endl;
 
-    // The active scalars may be solved ahead of the flow. Doing so lets them be subcycled against
-    // the flux left by the previous outer iteration, which is held fixed across the subcycles, and
-    // it is the arrangement an explicit bounded correction on those equations requires.
+    // The active scalars may be solved ahead of the flow, against the flux left by the previous
+    // outer iteration
     if (_has_active_scalar_systems && _should_solve_active_scalars &&
         _solve_active_scalars_before_flow)
     {

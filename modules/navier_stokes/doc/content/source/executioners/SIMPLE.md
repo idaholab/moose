@@ -201,23 +201,15 @@ pressure, and energy solves:
 []
 ```
 
-## Ordering and subcycling of the active scalar equations
+## Ordering of the active scalar equations
 
 By default the active scalar equations are solved after the flow has been corrected within each
 outer iteration. Setting
 [!param](/Executioner/SIMPLE/solve_active_scalars_before_flow) moves them to the start of the outer
-iteration instead, ahead of the momentum predictor.
+iteration instead, ahead of the momentum predictor, so that they are advanced against the flux left
+by the previous outer iteration.
 
-The distinction matters for equations that need an explicit bounded correction, such as a phase
-fraction. Solved first, the scalars are advanced against the flux left by the previous outer
-iteration, which is then held fixed while they are updated. That fixed flux is what allows the step
-to be subdivided: [!param](/Executioner/SIMPLE/active_scalar_subcycles) splits the update into
-several subcycles, each presented to the time integrator as a step of its own, so that each solve
-and each correction sees a Courant number reduced by the number of subcycles. In their default
-position the transporting flux changes underneath them between subcycles, so subcycling there is
-refused.
-
-Neither option changes the converged answer. Both alter the path taken to the fixed point, not the
+This does not change the converged answer. It alters the path taken to the fixed point, not the
 fixed point itself.
 
 !syntax parameters /Executioner/SIMPLE

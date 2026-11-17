@@ -165,15 +165,6 @@
     requirement = 'The system shall reach the same converged solution when the active scalar equations are solved ahead of the flow within each outer iteration as when they are solved after it.'
     max_threads = 1 # see libmesh issue #3808
   []
-  [active_scalar_subcycling]
-    type = CSVDiff
-    input = 'channel-drift-flux-physics.i'
-    cli_args = "Executioner/solve_active_scalars_before_flow=true Executioner/active_scalar_subcycles=4 Outputs/file_base=active-scalar-subcycling"
-    csvdiff = 'active-scalar-subcycling.csv'
-    design = 'SIMPLE.md'
-    requirement = 'The system shall reach the same converged solution when the active scalar equations are subcycled within each outer iteration as when they are not.'
-    max_threads = 1 # see libmesh issue #3808
-  []
 
   [phase_slip_wall_conservation]
     type = CSVDiff
@@ -305,14 +296,6 @@
       cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/slip_linear_friction_name=1"
       expect_err = "Parameter 'slip_linear_friction_name' should not be specified if parameter 'use_dispersed_phase_drag_model' is set to true"
       detail = 'a slip friction factor is prescribed while the dispersed phase drag model is used, since the drag model computes that factor itself.'
-      max_threads = 1 # see libmesh issue #3808
-    []
-    [active_scalar_subcycles_without_reordering]
-      type = RunException
-      input = 'channel-drift-flux-physics.i'
-      cli_args = "Executioner/active_scalar_subcycles=4"
-      expect_err = 'Subcycling the active scalar equations requires them to be solved ahead of the flow'
-      detail = 'the active scalar equations are subcycled without being moved ahead of the flow, since the flux transporting them would then change between subcycles.'
       max_threads = 1 # see libmesh issue #3808
     []
     [skewness]
