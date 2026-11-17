@@ -37,7 +37,8 @@ L = 3.9676     # z/D = 22.4 to 98.7
 
 # Flow condition, the first of the low void fraction cases of the reference report
 # Conditions from Pena-Monferrer et al., Sci. Technol. Nucl. Install. 2018, 2153019, Table 1,
-# which is the source of the data Wu et al. compare against. Liquid velocity 0.5 m/s throughout.
+# which is the source of the data Wu et al., Annals of Nuclear Energy 213 (2025) 111179, compare
+# against. Liquid velocity 0.5 m/s throughout.
 #
 #   case      j_g (m/s)   alpha    bubble mean d (mm)   sigma (mm)   Sauter d32 (mm)
 #   PW05002    0.01962    0.0215        2.777             0.602          3.026
@@ -160,7 +161,7 @@ k_g = 1
 
 
 [LinearFVKernels]
-  # Interfacial area concentration, Fluent 16.4-27 in conservative form
+  # Interfacial area concentration, in conservative form
 
   [radial_rz_viscous]
     type = LinearFVRZViscousSource

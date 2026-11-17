@@ -41,7 +41,7 @@ identically when they are equal. It is linear in the advected temperature and is
 implicitly, with the interpolation selected by `advected_interp_method`.
 
 The phase-summed advective term is $\nabla \cdot \sum_k \alpha_k \bm{u}_k (\rho_k E_k + p)$; see
-[!cite](manninen1996mixture) equation (28) for the slip to diffusion velocity conversion.
+[!cite](manninen1996mixture) for the slip to diffusion velocity conversion.
 
 ## Mixture specific heat
 

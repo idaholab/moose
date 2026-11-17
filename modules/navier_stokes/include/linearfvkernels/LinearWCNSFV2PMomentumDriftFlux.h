@@ -37,8 +37,8 @@ class LinearFVBoundaryCondition;
  * \f]
  *
  * The coefficient is exact, not the dilute limit \f$ \beta_d \f$ obtained by letting
- * \f$ \beta_c / \rho_m \to 1 \f$. See Manninen, Taivassalo and Kallio, VTT Publications 288
- * (1996), equations (18), (21) and (76).
+ * \f$ \beta_c / \rho_m \to 1 \f$. See Manninen, M., Taivassalo, V. and Kallio, S., "On the
+ * mixture model for multiphase flow", VTT Publications 288 (1996).
  */
 class LinearWCNSFV2PMomentumDriftFlux : public LinearWCNSFV2PDriftFluxBase
 {

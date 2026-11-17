@@ -217,7 +217,8 @@ schillerNaumannDragDerivative(const T & Re_p)
 
 /**
  * The linear drag function of a dispersed phase: Schiller and Naumann's correlation below the
- * transition and Newton's regime above it. ANSYS Fluent Theory Guide equation 16.4-14.
+ * transition and Newton's regime above it. See Schiller, L. and Naumann, A., "A drag coefficient
+ * correlation", Zeitschrift des Vereins Deutscher Ingenieure 77 (1933) 318-320.
  *
  * The function is strictly increasing, which is what makes the slip velocity solvable from the
  * force balance. It is very nearly, but not exactly, continuous: at the transition the two

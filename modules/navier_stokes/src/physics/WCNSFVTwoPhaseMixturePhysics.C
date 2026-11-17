@@ -300,7 +300,8 @@ void
 WCNSFVTwoPhaseMixturePhysics::setSlipVelocityParams(InputParameters & params) const
 {
   // The phase fraction is advected at u_m + u_Md: the drift velocity, measured against the centre
-  // of mass, not the slip velocity, see VTT Publications 288 equation (28)
+  // of mass, not the slip velocity; see Manninen, Taivassalo and Kallio, "On the mixture model for
+  // multiphase flow", VTT Publications 288 (1996)
   params.set<MooseFunctorName>("u_slip") = "vel_drift_x";
   if (dimension() >= 2)
     params.set<MooseFunctorName>("v_slip") = "vel_drift_y";
@@ -461,7 +462,8 @@ WCNSFVTwoPhaseMixturePhysics::addFunctorMaterials()
         params.set<SolverVariableName>(vel_components[j]) =
             _flow_equations_physics->getVelocityNames()[j];
       // The buoyancy factor of the closure is (rho_d - rho_m) / rho_d, which carries the mixture
-      // density, see VTT Publications 288 equation (58); the relaxation time carries the
+      // density (Manninen, Taivassalo and Kallio, "On the mixture model for multiphase flow", VTT
+      // Publications 288, 1996); the relaxation time carries the
       // continuous phase viscosity, Stokes drag being exerted by the fluid the particle moves in
       params.set<MooseFunctorName>(NS::density) = "rho_mixture";
       params.set<MooseFunctorName>(NS::mu) = _phase_1_viscosity;

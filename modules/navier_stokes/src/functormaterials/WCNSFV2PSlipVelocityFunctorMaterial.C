@@ -81,7 +81,7 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::validParams()
       "friction_pressure_gradient",
       "0",
       "The frictional pressure gradient of the two phase flow, M_F = 4 tau_fw / D = (-dp/dz)_F, "
-      "which is equation (41) of Hibiki and Ishii, \"One-dimensional drift-flux model and "
+      "as defined by Hibiki and Ishii, \"One-dimensional drift-flux model and "
       "constitutive equations for relative motion between phases in various two-phase flow "
       "regimes\", Int. J. Heat Mass Transfer 46 (2003) 4935-4948. Only used by the 'ishii-zuber' "
       "drag model, where it carries the effect of the wall friction on the relative velocity. "
@@ -92,10 +92,9 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::validParams()
       "single_particle_friction_pressure_gradient",
       "0",
       "The frictional pressure gradient of the corresponding single particle system, "
-      "M_Finf = (f / 2D) rho_f <v_finf>^2. This is equation (24) of the Hibiki and Ishii paper "
-      "cited under 'friction_pressure_gradient'; it enters both the terminal velocity of that "
-      "paper's equation (49) and the ratio of its equation (46), so it is not simply a correction "
-      "on the hindrance.");
+      "M_Finf = (f / 2D) rho_f <v_finf>^2, as defined by the Hibiki and Ishii paper cited under "
+      "'friction_pressure_gradient'. It enters both the single particle terminal velocity and the "
+      "concentration ratio, so it is not simply a correction on the hindrance.");
   params.addParam<MooseFunctorName>(
       "surface_tension",
       "Surface tension between the phases. Required by the distorted particle drag.");
@@ -423,7 +422,8 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::WCNSFV2PSlipVelocityFunctorMate
 
   // The diffusion (drift) velocity, the velocity of the dispersed phase relative to the centre of
   // mass of the mixture. This, not the slip velocity, is the velocity that appears in the phase
-  // conservation equations, see VTT Publications 288 equation (28).
+  // conservation equations; see Manninen, Taivassalo and Kallio, "On the mixture model for
+  // multiphase flow", VTT Publications 288 (1996).
   if (isParamValid("drift_velocity_name"))
     this->template addFunctorProperty<GenericReal<is_ad>>(
         getParam<MooseFunctorName>("drift_velocity_name"),
@@ -455,28 +455,28 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::ishiiZuberSlipSpeed(
       MetaPhysicL::raw_value(rho_c) <= 0.0 || MetaPhysicL::raw_value(one_minus) <= 0.0)
     return 0.0;
 
-  // Equation numbers below are those of Hibiki and Ishii (2003), the paper this form is taken from.
+  // This form is taken from Hibiki and Ishii (2003), cited in full in the header.
   //
-  // The terminal velocity of an isolated distorted particle, equation (49). The frictional pressure
+  // The terminal velocity of an isolated distorted particle. The frictional pressure
   // gradient of the single particle system adds to the buoyancy rather than hindering it.
   const GenericReal<is_ad> v_r_inf =
       sqrt(2.0) * pow(denominator * sigma / Utility::pow<2>(rho_c), 0.25);
 
-  // The ratio of equation (46), through which the frictional pressure gradient of the two phase
+  // The concentration ratio, through which the frictional pressure gradient of the two phase
   // flow enters. With both gradients zero it is simply 1 - alpha.
   const GenericReal<is_ad> ratio =
       std::max((buoyancy * one_minus + m_f) / denominator, GenericReal<is_ad>(0.0));
 
-  // Equation (46) with the viscosity ratio of equation (47), mu_f / mu_m = 1 - alpha
+  // The concentration function, with the viscosity ratio mu_f / mu_m = 1 - alpha
   const GenericReal<is_ad> f_alpha = one_minus * sqrt(ratio);
 
-  // Equation (45), the multi-particle relative velocity. The constants are those of the Newton
+  // The multi-particle relative velocity. The constants are those of the Newton
   // regime drag ratio of Ishii and Zuber (1979), arranged so that the concentration factor is
   // unity at alpha = 0.
   const GenericReal<is_ad> concentration =
       18.67 * f_alpha / (1.0 + 17.67 * pow(f_alpha, 6.0 / 7.0));
 
-  // Equation (45) gives the drift velocity; the relative velocity carries one power of
+  // The correlation gives the drift velocity; the relative velocity carries one power of
   // (1 - alpha) less
   return v_r_inf * sqrt(one_minus) * concentration;
 }

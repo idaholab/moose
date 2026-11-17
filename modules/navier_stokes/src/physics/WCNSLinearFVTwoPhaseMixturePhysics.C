@@ -428,7 +428,9 @@ WCNSLinearFVTwoPhaseMixturePhysics::addLatentHeatTransferTerm()
 {
   // Generating the dispersed phase absorbs its latent heat from the mixture, so the energy equation
   // takes a sink of Gamma * h_lat, and a source of the same size when the transfer runs the other
-  // way. Wu et al. carry this as -h'_l Gamma_g in a liquid phase enthalpy equation. This is a
+  // way. Wu et al., "Development of a two-phase flow solver with drift-flux model based on
+  // OpenFOAM: Validation against single/two-phase and boiling flow", Annals of Nuclear Energy 213
+  // (2025) 111179, carry this as -h'_l Gamma_g in a liquid phase enthalpy equation. This is a
   // single energy equation for the mixture, so what the term supports is a transfer at, or close
   // to, thermal equilibrium.
   const auto latent_source = prefix() + "latent_heat_source";
@@ -836,8 +838,8 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMixtureSpecificHeatMaterial()
   // The mixture energy density is the sum over the phases of each phase's own enthalpy density,
   // rho_m e_m = sum_k a_k rho_k cp_k T, so the specific heat that reproduces it when multiplied by
   // the mixture density is the mass-weighted average, not the volume-weighted average used for the
-  // density, the viscosity and the conductivity. See Fluent Theory Guide equation 16.4-7. The
-  // phase fraction is clamped to match the mixture property material.
+  // density, the viscosity and the conductivity. The phase fraction is clamped to match the
+  // mixture property material.
   addParsedFunctorMaterial(
       prefix() + "mixture_specific_heat",
       "cp_mixture",
@@ -932,7 +934,8 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
         params.set<SolverVariableName>(velocity_components[j]) =
             _flow_equations_physics->getVelocityNames()[j];
       // The buoyancy factor of the closure is (rho_d - rho_m) / rho_d, which carries the mixture
-      // density, not the continuous phase density, see VTT Publications 288 equation (58)
+      // density, not the continuous phase density; see Manninen, Taivassalo and Kallio, "On the
+      // mixture model for multiphase flow", VTT Publications 288 (1996)
       params.set<MooseFunctorName>(NS::density) = "rho_mixture";
       // The slip closure forms both the relaxation time and the particle Reynolds number
       // from the continuous phase viscosity, not from the mixture viscosity

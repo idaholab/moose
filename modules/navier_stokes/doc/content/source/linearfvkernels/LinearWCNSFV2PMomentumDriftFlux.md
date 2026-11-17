@@ -33,7 +33,7 @@ where:
 
 The coefficient $\beta_d \beta_c / \rho_m$ is exact. It follows from
 $\tau_{Dm} = -\rho_m c_d (1 - c_d) \bm{u}_{slip} \bm{u}_{slip}$ with $c_d = \alpha_d \rho_d /
-\rho_m$ the dispersed phase mass fraction, equation (76) of [!cite](manninen1996mixture). The
+\rho_m$ the dispersed phase mass fraction [!cite](manninen1996mixture). The
 dilute limit $\beta_c / \rho_m \to 1$ reduces it to $\alpha_d \rho_d$, which is the form quoted in
 much of the reactor literature; it is accurate only when the mass fraction of the dispersed phase
 is small, and it is not what this kernel implements.
@@ -45,9 +45,7 @@ Its energy counterpart is [LinearWCNSFV2PEnergyDriftFlux.md].
 
 The term is positive on the left hand side, equivalently $+\nabla \cdot \tau_{Dm}$ on the right
 hand side with $\tau_{Dm} = -\sum_k \alpha_k \rho_k \bm{u}_{Mk} \bm{u}_{Mk}$. This matches
-equations (18) and (21) of [!cite](manninen1996mixture) and the `driftFluxFoam` solver of OpenFOAM,
-which adds `fvc::div(tauDm)` to the left hand side of its momentum equation with
-`tauDm = betad*sqr(Udm) + betac*sqr(Ucm)`.
+the mixture momentum equation of [!cite](manninen1996mixture).
 
 ## Numerical treatment
 

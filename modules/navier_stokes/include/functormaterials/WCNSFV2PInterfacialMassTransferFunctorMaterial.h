@@ -21,7 +21,7 @@
  * \f]
  *
  * positive generating the dispersed phase, with \f$ h_i \f$ the bubbly-flow interfacial Nusselt
- * number of RELAP5/MOD3, NUREG/CR-5535 Volume 4 Section 4.1.1.1.1. The driving potential is the
+ * number of the RELAP5/MOD3.3 Code Manual, Volume IV, NUREG/CR-5535. The driving potential is the
  * departure of the mixture temperature from saturation, there being one energy equation. The
  * substitution of the transported area for the algebraic area of that reference, and the limits it
  * carries, are set out in the documentation page.

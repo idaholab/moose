@@ -28,7 +28,7 @@ solved area instead of being tuned.
 ## The heat transfer coefficient
 
 The coefficient is the bubbly-flow interfacial Nusselt number of RELAP5/MOD3, the modified Lee-Ryley
-correlation of Section 4.1.1.1.1 of [!cite](relap5manual),
+correlation of [!cite](relap5manual),
 
 \begin{equation}
   h_i = \frac{k_c}{d_b}\left(2 + 0.74\, Re_b^{1/2}\right) ~,

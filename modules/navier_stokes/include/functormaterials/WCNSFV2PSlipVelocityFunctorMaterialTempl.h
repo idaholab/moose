@@ -51,9 +51,8 @@ protected:
     DISTORTED_PARTICLE = 1,
     /// Whichever of the two resists more, which selects the regime automatically
     AUTOMATIC = 2,
-    /// The multi-bubble distorted particle relation of Ishii and Zuber (1979), as written in
-    /// equation (57) of Hibiki and Ishii (2003); both papers are cited in full on
-    /// ishiiZuberSlipSpeed below
+    /// The multi-bubble distorted particle relation of Ishii and Zuber (1979), as written by
+    /// Hibiki and Ishii (2003); both papers are cited in full on ishiiZuberSlipSpeed below
     ISHII_ZUBER = 3
   };
 
@@ -160,13 +159,13 @@ protected:
   const Real _swarm_exponent;
 
   /// Frictional pressure gradients of the two phase and single particle systems, M_F and M_Finf,
-  /// equations (41) and (24) of the Hibiki and Ishii paper cited on ishiiZuberSlipSpeed below.
+  /// as defined by the Hibiki and Ishii paper cited on ishiiZuberSlipSpeed below.
   /// Only the 'ishii-zuber' drag model uses them.
   const Moose::Functor<GenericReal<is_ad>> & _friction_pressure_gradient;
   const Moose::Functor<GenericReal<is_ad>> & _single_particle_friction_pressure_gradient;
 
   /**
-   * The relative velocity of the distorted particle multi-bubble system, equations (45) to (50) of
+   * The relative velocity of the distorted particle multi-bubble system of
    *
    *   Hibiki, T. and Ishii, M., "One-dimensional drift-flux model and constitutive equations for
    *   relative motion between phases in various two-phase flow regimes", International Journal of

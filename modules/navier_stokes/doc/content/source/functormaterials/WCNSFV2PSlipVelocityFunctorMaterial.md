@@ -22,8 +22,8 @@ where:
 - $\rho_m$ is the density of the mixture,
 - $\bm{a}$ is the particle acceleration vector.
 
-This is equation (58) of [!cite](manninen1996mixture). The density subtracted from $\rho_d$ in
-the buoyancy factor is the *mixture* density, so the `rho` parameter should be given
+This is the algebraic slip closure of [!cite](manninen1996mixture). The density subtracted from
+$\rho_d$ in the buoyancy factor is the *mixture* density, so the `rho` parameter should be given
 `rho_mixture` and not the continuous phase density; the two agree only in the dilute limit.
 
 The particle relaxation time is modeled as follows [!cite](bilicki1990dragmodel):
@@ -55,13 +55,14 @@ The slip velocity above is measured against the continuous phase,
 $\bm{u}_{slip,d} = \bm{u}_d - \bm{u}_c$. The conservation equations of the mixture model are
 written against the centre of mass of the mixture, and the velocity of the dispersed phase
 relative to that is the diffusion, or drift, velocity $\bm{u}_{Md} = \bm{u}_d - \bm{u}_m$. The
-two are related by the dispersed phase mass fraction $c_d = \alpha_d \rho_d / \rho_m$,
+two are related by the dispersed phase mass fraction $c_d = \alpha_d \rho_d / \rho_m$
+[!cite](manninen1996mixture),
 
 \begin{equation}
-\bm{u}_{Md} = \left( 1 - c_d \right) \bm{u}_{slip,d} \,,
+\bm{u}_{Md} = \left( 1 - c_d \right) \bm{u}_{slip,d} \,.
 \end{equation}
 
-equation (28) of [!cite](manninen1996mixture). It is declared under `drift_velocity_name`, which
+It is declared under `drift_velocity_name`, which
 needs `fraction_dispersed` for the conversion, and it is the velocity the phase transport
 equation must be advected at: the dispersed phase moves at $\bm{u}_m + \bm{u}_{Md}$, so
 [INSFVScalarFieldAdvection.md] takes the drift velocity and not the slip velocity. Advecting the
@@ -82,8 +83,8 @@ so that the particle Reynolds number
 !equation
 Re_p = \frac{\rho_c d_d |\bm{u}_{slip,d}|}{\mu_c}
 
-is formed from the slip velocity and the continuous phase properties, which is its definition,
-equation (39) of [!cite](manninen1996mixture). The continuous phase density it needs is supplied
+is formed from the slip velocity and the continuous phase properties, which is its definition
+[!cite](manninen1996mixture). The continuous phase density it needs is supplied
 under `rho_c`. The alternative is to impose the drag directly through `linear_coef_name`; the two
 are mutually exclusive.
 

@@ -93,8 +93,8 @@ WCNSFV2PInterfacialMassTransferFunctorMaterial::WCNSFV2PInterfacialMassTransferF
 
     const auto reynolds = HeatTransferUtils::reynolds(_rho_c(r, t), slip.norm(), d_b, _mu_c(r, t));
 
-    // RELAP5/MOD3 modified Lee-Ryley, NUREG/CR-5535 Volume 4 Section 4.1.1.1.1, with the Prandtl
-    // dependence dropped as that reference drops it for bubbly flow
+    // Modified Lee-Ryley of the RELAP5/MOD3.3 Code Manual, Volume IV, NUREG/CR-5535, with the
+    // Prandtl dependence dropped as that reference drops it for bubbly flow
     const auto nusselt = 2.0 + 0.74 * std::sqrt(reynolds);
     const auto interfacial_coefficient = _k_c(r, t) * nusselt / d_b;
 

@@ -1,8 +1,11 @@
 ##########################################################
 # Verification of both interfacial area concentration closure sets against their steady states.
 #
-# The models implemented are those of the ANSYS Fluent Theory Guide section 16.4.9, whose transport
-# equation, 16.4-27, is
+# The models implemented are the one-group closures of T. Hibiki and M. Ishii, "One-group
+# interfacial area transport of bubbly flows in vertical round tubes", International Journal of
+# Heat and Mass Transfer 43 (2000) 2711-2726, and of M. Ishii and S. Kim, "Micro four-sensor probe
+# measurement of interfacial area transport for bubbly flow in round pipes", Nuclear Engineering
+# and Design 205 (2001) 123-131. The transport equation is
 #
 #   d(rho_g xi)/dt + div(rho_g u_g xi)
 #     = (1/3)(D rho_g/Dt) xi + (2/3)(mdot_g/alpha_g) xi + rho_g (S_RC + S_WE + S_TI)
@@ -74,7 +77,7 @@ shape_factor = 6.0
 []
 
 [LinearFVKernels]
-  # d(rho_g xi)/dt, the conservative time derivative of equation 16.4-27
+  # d(rho_g xi)/dt, the conservative time derivative of the transport equation
   [time]
     type = LinearFVTimeDerivative
     variable = interface_area

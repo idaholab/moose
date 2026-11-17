@@ -41,7 +41,7 @@ The closure is
   - \frac{\partial \bm{u}_m}{\partial t} \,,
 \end{equation}
 
-equations (58) and (63) of [!cite](manninen1996mixture). The density subtracted from $\rho_d$ in
+following [!cite](manninen1996mixture). The density subtracted from $\rho_d$ in
 the buoyancy factor is the
 *mixture* density, so the `rho` parameter of this object should be given `rho_mixture` and not the
 continuous phase density. The two agree only in the dilute limit. The viscosity of the relaxation
@@ -60,7 +60,7 @@ and Naumann correlation is formed from the slip velocity and the continuous phas
 !equation
 Re_p = \frac{\rho_c d_d |\bm{u}_{slip,d}|}{\mu_c}
 
-which is its definition, see [!cite](manninen1996mixture) equation (39). That makes the drag depend
+which is its definition [!cite](manninen1996mixture). That makes the drag depend
 on the very quantity the closure determines. Writing $s = |\bm{u}_{slip,d}|$, $R = \rho_c d_d /
 \mu_c$ and $s_0$ for the slip that the Stokes limit $f_{drag} \equiv 1$ would give, the closure and
 the correlation together are the scalar equation
@@ -107,7 +107,7 @@ s_\infty = \sqrt{2}\left(\frac{g \sigma \Delta\rho}{\rho_c^2}\right)^{1/4}
 
 independent of the particle diameter, which cancels between the relaxation time and the drag
 coefficient. That is Ishii's drift velocity correlation for the bubbly regime, see
-[!cite](hibikiishii2002) equation (15), reproduced as an identity of the algebra rather than
+[!cite](hibikiishii2002), reproduced as an identity of the algebra rather than
 approached to within a tolerance. The size independence is what the verification checks, by
 instantiating the law at two diameters and requiring the same speed exactly.
 

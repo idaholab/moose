@@ -13,19 +13,18 @@
 #   c_d     = alpha rho_d / rho_m             = 0.25 * 200 / 800                  = 0.0625
 #   u_drift = (1 - c_d) u_slip                = 0.9375 * 3.2700000000e-2          = 3.0656250000e-2
 #
-# The relaxation time is formed from the CONTINUOUS phase viscosity, Fluent Theory Guide equation
-# 16.4-13, not from the mixture viscosity of VTT equation (63). The mixture form there is a way of
-# folding the swarm correction into the drag and is only valid with the apparent viscosity of Ishii
-# and Zuber, VTT equation (43), which rises with the dispersed fraction; a volume averaged mixture
-# viscosity falls with it. Concentration effects are carried by 'swarm_exponent' instead, which is
-# zero here.
+# The relaxation time is formed from the CONTINUOUS phase viscosity, not from the mixture viscosity
+# Manninen et al. substitute. Their mixture form is a way of folding the swarm correction into the
+# drag and is only valid with the apparent viscosity of Ishii and Zuber, which rises with the
+# dispersed fraction; a volume averaged mixture viscosity falls with it. Concentration effects are
+# carried by 'swarm_exponent' instead, which is zero here.
 #
 # The slip is positive while gravity points down because the dispersed phase is the lighter of the
 # two, so it rises relative to the continuous phase.
 #
 # The second half of the input repeats the check with the Schiller and Naumann drag model, whose
-# particle Reynolds number is formed from the slip velocity, Re_p = rho_c dd |u_slip| / mu_c, VTT
-# equation (39). That makes the drag depend on the very quantity it determines, so the closure is
+# particle Reynolds number is formed from the slip velocity, Re_p = rho_c dd |u_slip| / mu_c.
+# That makes the drag depend on the very quantity it determines, so the closure is
 # the implicit scalar equation
 #
 #   s f(R s) = s0,   R = rho_c dd / mu_c = 1000 * 0.01 / 1 = 10,   s0 = 3.2700000000e-2
@@ -40,7 +39,7 @@
 #
 # The last material takes the Ishii and Zuber multi-bubble relation, which is a correlation for the
 # relative velocity itself rather than a drag law. With both frictional pressure gradients at their
-# zero default it is, in the notation of Hibiki and Ishii (2003) equations (45) to (49),
+# zero default it is, in the notation of Hibiki and Ishii (2003),
 #
 #   v_inf   = sqrt(2) (g |rho_c - rho_d| sigma / rho_c^2)^(1/4)
 #           = sqrt(2) (9.81 * 800 * 0.072 / 1e6)^(1/4)                         = 2.1804085208e-1
@@ -52,9 +51,16 @@
 # The particle diameter does not enter, and neither does the swarm exponent: the correlation
 # carries its own concentration dependence through f and C.
 #
-# References for the closure: Manninen, Taivassalo and Kallio, VTT Publications 288 (1996),
-# equations (39), (58) and (63); ANSYS Fluent Theory Guide equations 16.4-12 to 16.4-15. For
-# the slip to drift conversion, VTT equation (28).
+# References:
+#   M. Manninen, V. Taivassalo and S. Kallio, "On the mixture model for multiphase flow",
+#     VTT Publications 288 (1996). The closure and the slip to drift conversion.
+#   L. Schiller and A. Naumann, "A drag coefficient correlation", Z. Ver. Dtsch. Ing. 77 (1933)
+#     318-320.
+#   M. Ishii and N. Zuber, "Drag coefficient and relative velocity in bubbly, droplet or
+#     particulate flows", AIChE Journal 25 (1979) 843-855.
+#   T. Hibiki and M. Ishii, "One-dimensional drift-flux model and constitutive equations for
+#     relative motion between phases in various two-phase flow regimes", International Journal
+#     of Heat and Mass Transfer 46 (2003) 4935-4948.
 
 # Named so that they cannot be shadowed: the slip material carries parameters called 'rho' and
 # 'mu', and MOOSE resolves ${...} against the enclosing block before the global scope, so globals

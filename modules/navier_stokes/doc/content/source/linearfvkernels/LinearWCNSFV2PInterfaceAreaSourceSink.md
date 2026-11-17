@@ -54,7 +54,7 @@ bound as the dispersed phase approaches its maximum.
 
 ## Ishii and Kim
 
-With the mean bubble fluctuating velocity
+From [!cite](ishiikim2001micro). With the mean bubble fluctuating velocity
 $u_t = \epsilon^{1/3} d_b^{1/3}$ and the Weber number $We = \rho_f u_t^2 d_b / \sigma$:
 
 \begin{equation}
