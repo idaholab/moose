@@ -11,12 +11,12 @@
 
 #pragma once
 
-#include "MFEMPostprocessor.h"
+#include "MFEMNormPostprocessor.h"
 
 /**
  * Compute the L2 error for a vector variable.
  */
-class MFEMVectorL2Error : public MFEMPostprocessor
+class MFEMVectorL2Error : public MFEMNormPostprocessor
 {
 public:
   static InputParameters validParams();
