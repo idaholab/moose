@@ -67,21 +67,11 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
                "'eigenvector_time' requires 'output_all_eigenvectors' to be true, as a single "
                "eigenvector is written at a single output time otherwise.");
 
-  // Output objects take their time from the time step number unless the problem is transient, so
-  // flagging the problem transient is the only way the per-eigenvector output times reach the
-  // output files, as the legacy EigenExecutionerBase does as well. The executioner is constructed
-  // before the outputs are added, and an output captures this flag at construction, so this is the
-  // place to set it.
-  //
-  // The flag is problem-wide rather than output-only. Besides Output::time() returning _time
-  // instead of _t_step, it turns on TransientInterface::_is_transient for every object constructed
-  // after this executioner, the old- and older-state branches of MooseVariableData, and the time
-  // and dt banners of the Console. It also changes FixedPointSolve::autoAdvance(), which turns
-  // auto-advance off for a transient problem with fixed point iterations; the cast to Eigenvalue
-  // added there exists only to keep auto-advance behaving for eigen problems with multiapps
-  // exactly as it did before this flag was set.
+  // Outputs of a problem that is not transient take their time from the time step number, so let
+  // the per-eigenvector output times reach the output files. The executioner is constructed before
+  // the outputs, which read this switch at construction.
   if (_output_all_eigenvectors)
-    _eigen_problem.transient(true);
+    _eigen_problem.setOutputsUseProblemTime(true);
 }
 
 #ifdef LIBMESH_HAVE_SLEPC
@@ -216,33 +206,42 @@ Eigenvalue::execute()
       _eigen_problem.computeIndicators();
       _eigen_problem.computeMarkers();
     }
-    // Without a converged eigenpair, e.g. when the solve is skipped, the solution is written as is
+    // Write one output step per eigenvector index: every converged one when requested, the active
+    // one otherwise. After the solve the solution already holds the active eigenvector, scaled, so
+    // it is written as is, as is the solution when no eigenpair converged, e.g. when the solve is
+    // skipped
     const auto & eigenvalues =
         _eigen_problem.getNonlinearEigenSystem(/*nl_sys=*/0).getAllConvergedEigenvalues();
-    if (!_output_all_eigenvectors || eigenvalues.empty())
-    {
-      // need to keep _time in sync with _time_step to get correct output
-      _time = _time_step;
-      _eigen_problem.outputStep(EXEC_TIMESTEP_END);
-      _time = _system_time;
-    }
-    else
-    {
-      // Write one output step per converged eigenvector
-      const int first_step = _time_step;
+    const auto active_index = _eigen_problem.activeEigenvalueIndex();
+    const bool load_eigenvectors = _output_all_eigenvectors && !eigenvalues.empty();
+    std::vector<dof_id_type> eigenvector_indices;
+    if (load_eigenvectors)
       for (const auto i : index_range(eigenvalues))
+        eigenvector_indices.push_back(i);
+    else
+      eigenvector_indices.push_back(active_index);
+
+    const int first_step = _time_step;
+    for (const auto s : index_range(eigenvector_indices))
+    {
+      const auto i = eigenvector_indices[s];
+      _time_step = first_step + cast_int<int>(s);
+      if (load_eigenvectors)
       {
         loadEigenvector(i);
-        _time_step = first_step + cast_int<int>(i);
         _time = eigenvectorTime(i, eigenvalues[i]);
-        if (i == _eigen_problem.activeEigenvalueIndex())
+        if (i == active_index)
           active_eigenvector_time = _time;
-        _eigen_problem.outputStep(EXEC_TIMESTEP_END);
       }
-      // Restore the eigenvector the rest of the simulation expects in the solution
-      loadEigenvector(_eigen_problem.activeEigenvalueIndex());
-      _time = _system_time;
+      else
+        // need to keep _time in sync with _time_step to get correct output
+        _time = _time_step;
+      _eigen_problem.outputStep(EXEC_TIMESTEP_END);
     }
+    // Restore the eigenvector the rest of the simulation expects in the solution
+    if (load_eigenvectors)
+      loadEigenvector(active_index);
+    _time = _system_time;
 
 #ifdef LIBMESH_ENABLE_AMR
     if (r_step < steps)

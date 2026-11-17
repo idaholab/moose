@@ -37,8 +37,10 @@ matrix whose product would re-enter the residual evaluation from inside a `linea
 and this object reports an error. `NEWTON` evaluates the products with $B$ as residuals and never
 assembles $B$, so it is an error as well.
 
-A negative $\phi^{\top} B \phi$ has no square root and is also an error; it means the eigen kernels
-and [!param](/Problem/EigenProblem/negative_sign_eigen_kernel) together give an indefinite $B$.
+$c(\phi)$ is a norm only when $B$ is symmetric positive definite. The eigen kernels and
+[!param](/Problem/EigenProblem/negative_sign_eigen_kernel) can together give an indefinite or
+negative definite $B$. A negative $\phi^{\top} B \phi$ has no square root, and this object reports
+an error.
 
 The default [!param](/Postprocessors/EigenvectorBNorm/execute_on) is `'linear timestep_end'`. The
 `linear` flag is required, because the normalization hook reads the post-processor during the scaling

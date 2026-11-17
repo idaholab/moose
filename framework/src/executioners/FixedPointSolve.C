@@ -17,7 +17,6 @@
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
 #include "EigenExecutionerBase.h"
-#include "Eigenvalue.h"
 #include "Convergence.h"
 #include "ConvergenceIterationTypes.h"
 #include "MooseUtils.h"
@@ -617,9 +616,7 @@ FixedPointSolve::autoAdvance() const
 {
   bool auto_advance = !(_has_fixed_point_its && _problem.isTransient());
 
-  if ((dynamic_cast<EigenExecutionerBase *>(&_executioner) ||
-       dynamic_cast<Eigenvalue *>(&_executioner)) &&
-      _has_fixed_point_its)
+  if (dynamic_cast<EigenExecutionerBase *>(&_executioner) && _has_fixed_point_its)
     auto_advance = true;
 
   if (_auto_advance_set_by_user)

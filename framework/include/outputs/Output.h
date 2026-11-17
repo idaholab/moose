@@ -187,6 +187,9 @@ protected:
   /// Transient flag (true = transient)
   bool _transient;
 
+  /// Whether time(), timeOld(), dt(), and dtOld() return the problem time instead of the time step
+  const bool _use_problem_time;
+
   /// Flag for using displaced mesh
   bool _use_displaced;
 
