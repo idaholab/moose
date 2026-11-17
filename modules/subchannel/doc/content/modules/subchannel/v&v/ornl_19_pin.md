@@ -127,7 +127,7 @@ The executioner can be *Steady* or *Transient*.
 
 !! Intentional comment to provide extra spacing
 
-A *MultiApp* is used for transfering the SCM solution into a detailed mesh.
+A *MultiApp* is used for transfering the SCM solution into a 3D visualization mesh.
 
 !listing /validation/ORNL_19_pin/test_ORNL_19.i block=MultiApps language=moose
 
@@ -135,7 +135,7 @@ A custom transfer, *SCMSolutionTransfer*, is used for this purpose.
 
 !listing /validation/ORNL_19_pin/test_ORNL_19.i block=Transfers language=moose
 
-The detailed mesh uses a *SCMDetailedTriAssemblyMeshGenerator* and the solution variables are populated by the transfer.
+The visualization mesh uses a *SCMTriVisualizationAssemblyMeshGenerator* and the solution variables are populated by the transfer.
 
 !listing /validation/ORNL_19_pin/test_ORNL_19.i language=moose
 

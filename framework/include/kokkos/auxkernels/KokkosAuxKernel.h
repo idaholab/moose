@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosDispatcher.h"
+#include "KokkosJaggedArray.h"
 #include "KokkosVariableValue.h"
 #include "KokkosMaterialPropertyValue.h"
 #include "KokkosAssembly.h"
@@ -56,6 +57,10 @@ public:
   // Unused for Kokkos auxiliary kernels because all elements are computed in parallel
   virtual void subdomainSetup() override final {}
 
+  virtual void initialSetup() override;
+  virtual void meshChanged() override;
+  virtual void meshDisplaced() override;
+
   /**
    * Dispatch calculation
    */
@@ -77,6 +82,9 @@ public:
   struct NodeLoop
   {
   };
+  struct MassMatrixLoop
+  {
+  };
   ///@}
 
   /**
@@ -87,6 +95,9 @@ public:
   KOKKOS_FUNCTION void operator()(ElementLoop, const ThreadID tid, const Derived & auxkernel) const;
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(NodeLoop, const ThreadID tid, const Derived & auxkernel) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(MassMatrixLoop, const ThreadID tid, const Derived & auxkernel) const;
   ///@}
 
   /**
@@ -125,22 +136,32 @@ protected:
   VariableValue uOlder() const;
 
   /**
-   * Set element values to the auxiliary solution vector
-   * @param values The array containing the solution values of the element
-   * @param datum The AssemblyDatum object of the current thread
-   * @param comp The variable component
+   * Compute the Cholesky factors of the element mass matrices and allocate the right-hand side and
+   * solution storage used by computeElementInternal().
+   * Called from initialSetup(), meshChanged(), and meshDisplaced(). A derived class whose
+   * computeElementInternal() does not use them can override this to skip the computation.
+   * @param rebuild Whether to rebuild the storage, which is needed when the elements or their
+   * numbers of DOFs may have changed. Mesh displacement only moves nodes, so it keeps the storage
+   * and only recomputes the factors.
    */
-  KOKKOS_FUNCTION void setElementSolution(const Real * const values,
-                                          const AssemblyDatum & datum,
-                                          const unsigned int comp = 0) const;
+  virtual void setupMassFactors(const bool rebuild);
+
+  /**
+   * Set element values to the auxiliary solution vector
+   * @tparam Values A pointer or a view whose operator[] returns the value of an element-local DOF
+   * @param values The solution values of the element, indexed by the element-local DOF index
+   * @param datum The AssemblyDatum object of the current thread, which selects the variable
+   * component
+   */
+  template <typename Values>
+  KOKKOS_FUNCTION void setElementSolution(const Values & values, const AssemblyDatum & datum) const;
   /**
    * Set node value to the auxiliary solution vector
    * @param values The node solution value
-   * @param datum The AssemblyDatum object of the current thread
-   * @param comp The variable component
+   * @param datum The AssemblyDatum object of the current thread, which selects the variable
+   * component
    */
-  KOKKOS_FUNCTION void
-  setNodeSolution(const Real value, const AssemblyDatum & datum, const unsigned int comp = 0) const;
+  KOKKOS_FUNCTION void setNodeSolution(const Real value, const AssemblyDatum & datum) const;
 
   /**
    * Flag whether this kernel is nodal
@@ -148,9 +169,17 @@ protected:
   const bool _nodal;
 
   /**
+   * MOOSE variables, whose first entry is _var
+   */
+  const std::vector<MooseVariableFieldBase *> _vars;
+  /**
    * Kokkos variable
    */
   Variable _kokkos_var;
+  /**
+   * Kokkos thread object, indexed by the variable component and the element or node
+   */
+  Thread<> _thread;
   /**
    * Kokkos functor dispatchers
    */
@@ -201,20 +230,46 @@ private:
    */
   void getKokkosMaterialPropertyHook(const std::string & prop_name_in,
                                      const unsigned int state) override final;
+
+  /**
+   * Get the MOOSE variables from the 'variable' or 'variables' parameter
+   * @returns The MOOSE variables
+   */
+  std::vector<MooseVariableFieldBase *> getMooseVariables();
+
+  /**
+   * Kokkos FE type ID of the variables, which all have the same FE type
+   */
+  unsigned int _fe_type = libMesh::invalid_uint;
+  /**
+   * Cholesky factors of the element mass matrices of the L2 projection, indexed by the contiguous
+   * element ID, each packed as the row-major lower triangle (n(n+1)/2 entries for n element DOFs)
+   */
+  JaggedArray<Real, 1, 1> _mass_factors;
+  /**
+   * Right-hand side and solution of the L2 projection, indexed by the contiguous element ID, each
+   * holding (variable component, element-local DOF) entries
+   */
+  ///@{
+  JaggedArray<Real, 2, 1> _rhs;
+  JaggedArray<Real, 2, 1> _solution;
+  ///@}
 };
 
 template <typename Derived>
 KOKKOS_FUNCTION void
 AuxKernel::operator()(ElementLoop, const ThreadID tid, const Derived & auxkernel) const
 {
-  auto elem = kokkosBlockElementID(tid);
+  auto comp = _thread(tid, 0);
+  auto elem = kokkosBlockElementID(_thread(tid, 1));
 
   AssemblyDatum datum(elem,
                       libMesh::invalid_uint,
                       kokkosAssembly(),
                       kokkosSystems(),
                       _kokkos_var,
-                      _kokkos_var.var());
+                      _kokkos_var.var(comp),
+                      comp);
 
   auxkernel.computeElementInternal(auxkernel, datum);
 }
@@ -223,53 +278,81 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 AuxKernel::operator()(NodeLoop, const ThreadID tid, const Derived & auxkernel) const
 {
-  auto node = _bnd ? kokkosBoundaryNodeID(tid) : kokkosBlockNodeID(tid);
-  auto & sys = kokkosSystem(_kokkos_var.sys());
+  auto comp = _thread(tid, 0);
+  auto node = _bnd ? kokkosBoundaryNodeID(_thread(tid, 1)) : kokkosBlockNodeID(_thread(tid, 1));
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
 
-  if (!sys.isNodalDefined(node, _kokkos_var.var()))
+  if (!sys.isNodalDefined(node, _kokkos_var.var(comp)))
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(
+      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(comp), comp);
 
   auxkernel.computeNodeInternal(auxkernel, datum);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
+AuxKernel::operator()(MassMatrixLoop, const ThreadID tid, const Derived & /* auxkernel */) const
+{
+  const auto & assembly = kokkosAssembly();
+  const auto info = kokkosMesh().getElementInfo(kokkosBlockElementID(tid));
+  const auto n = assembly.getNumDofs(info.type, _fe_type);
+  const auto & phi = assembly.getPhi(info.subdomain, info.type, _fe_type);
+
+  auto factor = _mass_factors[info.id];
+  auto L = &factor[0];
+
+  for (unsigned int i = 0; i < n; ++i)
+    for (unsigned int j = 0; j <= i; ++j)
+      L[Utils::packedLowerIndex(i, j)] = 0;
+
+  for (unsigned int qp = 0; qp < assembly.getNumQps(info); ++qp)
+  {
+    const auto JxW = assembly.getJxW(info, qp);
+
+    for (unsigned int i = 0; i < n; ++i)
+    {
+      const auto t = JxW * phi(i, qp);
+
+      for (unsigned int j = 0; j <= i; ++j)
+        L[Utils::packedLowerIndex(i, j)] += t * phi(j, qp);
+    }
+  }
+
+  if (n > 1)
+    Utils::choleskyFactor(L, n);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
 AuxKernel::computeElementInternal(const Derived & auxkernel, AssemblyDatum & datum) const
 {
-  Real x[MAX_CACHED_DOF];
-  Real b[MAX_CACHED_DOF];
-  Real A[MAX_CACHED_DOF * MAX_CACHED_DOF];
+  auto b = _rhs[datum.elemID()].slice<1>(datum.comp());
+  auto x = _solution[datum.elemID()].slice<1>(datum.comp());
 
-  for (unsigned int i = 0; i < datum.n_dofs(); ++i)
+  const auto n = datum.n_dofs();
+
+  for (unsigned int i = 0; i < n; ++i)
   {
     x[i] = 0;
     b[i] = 0;
-
-    for (unsigned int j = 0; j < datum.n_dofs(); ++j)
-      A[j + datum.n_dofs() * i] = 0;
   }
 
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
     const auto value = auxkernel.template computeValue<Derived>(qp, datum);
 
-    for (unsigned int i = 0; i < datum.n_dofs(); ++i)
-    {
-      const auto t = datum.JxW(qp) * _test(datum, i, qp);
-
-      b[i] += t * value;
-
-      for (unsigned int j = 0; j < datum.n_dofs(); ++j)
-        A[j + datum.n_dofs() * i] += t * _test(datum, j, qp);
-    }
+    for (unsigned int i = 0; i < n; ++i)
+      b[i] += datum.JxW(qp) * _test(datum, i, qp) * value;
   }
 
-  if (datum.n_dofs() == 1)
-    x[0] = b[0] / A[0];
+  auto factor = _mass_factors[datum.elemID()];
+
+  if (n == 1)
+    x[0] = b[0] / factor[0];
   else
-    Utils::choleskySolve(A, x, b, datum.n_dofs());
+    Utils::choleskySubstitute(&factor[0], x, b, n);
 
   setElementSolution(x, datum);
 }
@@ -283,11 +366,11 @@ AuxKernel::computeNodeInternal(const Derived & auxkernel, AssemblyDatum & datum)
   setNodeSolution(value, datum);
 }
 
-KOKKOS_FUNCTION inline void
-AuxKernel::setElementSolution(const Real * const values,
-                              const AssemblyDatum & datum,
-                              const unsigned int comp) const
+template <typename Values>
+KOKKOS_FUNCTION void
+AuxKernel::setElementSolution(const Values & values, const AssemblyDatum & datum) const
 {
+  auto comp = datum.comp();
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto var_num = _kokkos_var.var(comp);
   auto tag = _kokkos_var.tag();
@@ -298,10 +381,9 @@ AuxKernel::setElementSolution(const Real * const values,
 }
 
 KOKKOS_FUNCTION inline void
-AuxKernel::setNodeSolution(const Real value,
-                           const AssemblyDatum & datum,
-                           const unsigned int comp) const
+AuxKernel::setNodeSolution(const Real value, const AssemblyDatum & datum) const
 {
+  auto comp = datum.comp();
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto var_num = _kokkos_var.var(comp);
   auto tag = _kokkos_var.tag();

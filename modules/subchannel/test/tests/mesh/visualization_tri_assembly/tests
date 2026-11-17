@@ -1,0 +1,23 @@
+[Tests]
+  design = 'SCMTriVisualizationAssemblyMeshGenerator.md'
+  issues = '#32796 #34468'
+  [coords]
+    type = Exodiff
+    input = coords.i
+    exodiff = coords_in.e
+    cli_args = "--mesh-only"
+    recover = false
+    requirement = 'The system shall create a 3D visualization mesh of the subchannels and pins in triangular assemblies'
+  []
+  [deprecated_name]
+    type = RunApp
+    input = coords.i
+    cli_args = '--mesh-only TriSubChannelMesh/subchannel/type=SCMDetailedTriAssemblyMeshGenerator'
+    expect_out = 'Replace SCMDetailedTriAssemblyMeshGenerator with SCMTriVisualizationAssemblyMeshGenerator'
+    allow_deprecated = true
+    recover = false
+    issues = '#34468'
+    requirement = 'The system shall accept the previous name of the triangular 3D visualization assembly mesh '
+                  'generator and report its replacement.'
+  []
+[]

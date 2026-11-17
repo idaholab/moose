@@ -8,7 +8,7 @@
     valgrind = NONE
     recover = false
     allow_warnings = true
-    requirement = 'The system will examine the subchannel explicit solver for a 19pin liquid sodium cooled assembly'
+    requirement = 'The system shall examine the subchannel explicit solver for a 19-pin liquid sodium cooled assembly'
   []
   [test_implicit]
     type = CSVDiff
@@ -21,7 +21,7 @@
     # and PR: various mods #31283
     rel_err = 3e-03
     allow_warnings = true
-    requirement = 'The system will examine the subchannel implicit solver for a 19pin liquid sodium cooled assembly'
+    requirement = 'The system shall examine the subchannel implicit solver for a 19-pin liquid sodium cooled assembly'
   []
   [test_radial_conduction]
     type = CSVDiff
@@ -55,7 +55,7 @@
     recover = false
     max_threads = 1
     max_parallel = 1
-    requirement = 'The coupled subchannel solver shall converge a transient sodium case with a 10 microsecond time step, upwind spatial interpolation, and enthalpy subcycling.'
+    requirement = 'The system shall converge, with the coupled subchannel solver, a transient sodium case with a 10 microsecond time step, upwind spatial interpolation, and enthalpy subcycling.'
   []
   [test_saturated_sodium_tiny_dt]
     type = RunApp
@@ -67,7 +67,7 @@
     allow_warnings = true
     max_threads = 1
     max_parallel = 1
-    requirement = 'The coupled subchannel solver shall converge a transient saturated sodium case with a 10 microsecond time step, upwind spatial interpolation, and enthalpy subcycling.'
+    requirement = 'The system shall converge, with the coupled subchannel solver, a transient saturated sodium case with a 10 microsecond time step, upwind spatial interpolation, and enthalpy subcycling.'
   []
   [test_monolithic]
     type = CSVDiff
@@ -77,7 +77,7 @@
     rel_err = 7e-06
     valgrind = NONE
     recover = false
-    requirement = 'The system will examine the relaxed subchannel monolithic solver for a 19pin liquid sodium cooled assembly'
+    requirement = 'The system shall examine the relaxed subchannel monolithic solver for a 19-pin liquid sodium cooled assembly'
   []
   [test_monolithic_pacio]
     type = CSVDiff
@@ -89,6 +89,6 @@
     recover = false
     design = 'SCMFrictionChenTodreas.md SCMMixingChenTodreas.md'
     issues = '#33608'
-    requirement = 'The system will examine the relaxed subchannel monolithic solver for a 19pin liquid sodium cooled assembly with the Pacio-Chen-Todreas friction and mixing parameterizations'
+    requirement = 'The system shall examine the relaxed subchannel monolithic solver for a 19-pin liquid sodium cooled assembly with the Pacio-Chen-Todreas friction and mixing parameterizations'
   []
 []

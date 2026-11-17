@@ -19,7 +19,7 @@
   []
 
   [elem_type]
-    requirement = 'Self shadow calculations shall support mesh element type '
+    requirement = 'The system shall support, in self shadow calculations, mesh element type '
 
     [quad4]
       type = CSVDiff

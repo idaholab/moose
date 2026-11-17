@@ -10,11 +10,12 @@
 #pragma once
 
 #include "MortarUserObject.h"
+#include "MortarContactPressureProvider.h"
 
 /**
  * Creates dof object to weighted gap map
  */
-class WeightedGapUserObject : public MortarUserObject
+class WeightedGapUserObject : public MortarUserObject, public MortarContactPressureProvider
 {
 public:
   static InputParameters validParams();
@@ -53,14 +54,14 @@ public:
    * Popp et al., Comput Methods Appl Mech Eng 264 (2013) 67, Eq. (11).
    * The default reports that this operation is not available.
    */
-  virtual ADReal nodalContactPressure(const Node & node) const;
+  virtual ADReal nodalContactPressure(const Node & node) const override;
 
   /**
    * @return The basis that interpolates the contact traction. Under the Petrov-Galerkin approach,
    * this is the dual basis; \p test() is the auxiliary standard basis used by the weighted gap.
    * The default returns \p test().
    */
-  virtual const VariableTestValue & tractionBasis() const;
+  virtual const VariableTestValue & tractionBasis() const override;
 
   /**
    * @param node Node pointer

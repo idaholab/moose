@@ -55,7 +55,7 @@
     type = 'RunException'
     input = 'mass07.i'
     expect_err = 'The Dictator decrees that the number of phases in this simulation is 2 but you have entered 3 phases.'
-    requirement = 'If the phase number exceeds the number of phases in the system, the system shall produce an appropriate error message and exit.'
+    requirement = 'The system shall produce an appropriate error message and exit if the phase number exceeds the number of phases in the system.'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
   []
@@ -63,7 +63,7 @@
     type = 'RunException'
     input = 'mass08.i'
     expect_err = 'The Dictator proclaims that the phase index 2 is greater than the largest phase index possible, which is 1'
-    requirement = 'If the phase index exceeds the number of phases in the system, the system shall produce an appropriate error message and exit.'
+    requirement = 'The system shall produce an appropriate error message and exit if the phase index exceeds the number of phases in the system.'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
   []
@@ -71,7 +71,7 @@
     type = 'RunException'
     input = 'mass09.i'
     expect_err = 'A single phase_index must be entered when prescribing a saturation_threshold'
-    requirement = 'If a saturation threshold is used in computing the fluid mass, and a phase index is not provided, the system shall produce an appropriate error message and exit.'
+    requirement = 'The system shall produce an appropriate error message and exit if a saturation threshold is used in computing the fluid mass, and a phase index is not provided.'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
   []
@@ -79,7 +79,7 @@
     type = 'RunException'
     input = 'mass10.i'
     expect_err = 'The Dictator pronounces that the number of PorousFlow variables is 2, however you have used 2. This is an error'
-    requirement = 'If the user enters a PorousFlow variable number that is not less than the number of PorousFlow variables, the system shall produce an appropriate error message and exit.'
+    requirement = 'The system shall produce an appropriate error message and exit if the user enters a PorousFlow variable number that is not less than the number of PorousFlow variables.'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#13155'
   []
@@ -114,7 +114,7 @@
     type = 'RunException'
     input = 'mass14.i'
     expect_err = 'A strain base_name incorrect_base_name_ does not exist'
-    requirement = 'If the user enters a base_name strain that does not exist when using FV variables, the system should produce an error.'
+    requirement = 'The system shall produce an error if the user enters a base_name strain that does not exist when using FV variables.'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md FVPorousFlowFluidMass.md'
     issues = '#25673'
   []
@@ -122,7 +122,7 @@
     type = 'RunException'
     input = 'mass15.i'
     expect_err = 'A strain base_name incorrect_base_name_ does not exist'
-    requirement = 'If the user enters a base_name strain that does not exist when using FE variables, the system should produce an error.'
+    requirement = 'The system shall produce an error if the user enters a base_name strain that does not exist when using FE variables.'
     design = 'porous_flow/tests/mass_conservation/mass_conservation_tests.md PorousFlowFluidMass.md'
     issues = '#25673'
   []

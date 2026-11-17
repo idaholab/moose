@@ -1983,6 +1983,22 @@ public:
                                 std::vector<NumericVector<libMesh::Number> *> & sp);
   virtual void computeTransposeNullSpace(libMesh::NonlinearImplicitSystem & sys,
                                          std::vector<NumericVector<libMesh::Number> *> & sp);
+  /**
+   * Append one mode per variable of \p vars in the current nonlinear system to \p sp. A mode is one
+   * basis vector of a subspace. It has one entry per degree of freedom of the system. Here each
+   * mode is one on the variable's degrees of freedom and zero elsewhere. This is the coefficient
+   * vector of a constant field of the variable for a basis that is a partition of unity, such as a
+   * Lagrange or a constant monomial basis. libMesh orthonormalizes the modes before it passes them
+   * to PETSc.
+   * @param vars The variables that each contribute one mode. Variables in other nonlinear
+   * systems are skipped.
+   * @param prefix The prefix of the name of the system vector that stores each mode
+   * @param sp The basis vectors of a subspace, such as the nullspace or the transpose nullspace of
+   * the Jacobian, that libMesh passes to PETSc
+   */
+  void appendConstantModes(const std::vector<VariableName> & vars,
+                           const std::string & prefix,
+                           std::vector<NumericVector<libMesh::Number> *> & sp);
   virtual void computePostCheck(libMesh::NonlinearImplicitSystem & sys,
                                 const NumericVector<libMesh::Number> & old_soln,
                                 NumericVector<libMesh::Number> & search_direction,
@@ -3591,6 +3607,11 @@ protected:
 
   // loop state during projection of initial conditions
   unsigned short _current_ic_state;
+
+  /// Variables whose constant fields span part of the Jacobian nullspace
+  const std::vector<VariableName> _constant_null_space_vars;
+  /// Variables whose constant fields span part of the Jacobian transpose nullspace
+  const std::vector<VariableName> _constant_transpose_null_space_vars;
 
   /// Whether to assemble matrices using hash tables instead of preallocating matrix memory. This
   /// can be a good option if the sparsity pattern changes throughout the course of the simulation

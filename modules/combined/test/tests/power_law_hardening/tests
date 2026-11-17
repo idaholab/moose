@@ -6,7 +6,7 @@
     input = 'PowerLawHardening.i'
     exodiff = 'PowerLawHardening_out.e'
     abs_zero = 1e-09
-    requirement = 'The tensor mechanics system shall reproduce isotropic power law hardening on a single Hex8 element.'
+    requirement = 'The system shall reproduce isotropic power law hardening on a single Hex8 element.'
   []
   [ADPowerLawHardening]
     issues = '#18454'
@@ -14,6 +14,6 @@
     input = 'ADPowerLawHardening.i'
     exodiff = 'PowerLawHardening_out.e'
     abs_zero = 1e-09
-    requirement = 'The tensor mechanics system shall reproduce isotropic power law hardening on a single Hex8 element using automatic differentiation.'
+    requirement = 'The system shall reproduce isotropic power law hardening on a single Hex8 element using automatic differentiation.'
   []
 []

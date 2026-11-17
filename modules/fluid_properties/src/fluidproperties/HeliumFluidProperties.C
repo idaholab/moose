@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "HeliumFluidProperties.h"
+#include "GasTransportUtils.h"
 
 registerMooseObject("FluidPropertiesApp", HeliumFluidProperties);
 
@@ -293,14 +294,15 @@ HeliumFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Rea
 Real
 HeliumFluidProperties::mu_from_v_e(Real v, Real e) const
 {
-  return 3.674e-7 * std::pow(T_from_v_e(v, e), 0.7);
+  return GasTransportUtils::heliumViscosity(T_from_v_e(v, e));
 }
 
 void
 HeliumFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
 {
   mu = mu_from_v_e(v, e);
-  const Real dmu_dT = 0.7 * 3.674e-7 * std::pow(T_from_v_e(v, e), -0.3);
+  // The viscosity is proportional to T^0.7
+  const Real dmu_dT = 0.7 * mu / T_from_v_e(v, e);
   dmu_dv = 0.0;          // dmu_dp = 0, dT_dv is zero
   dmu_de = dmu_dT / _cv; // dmu_dp = 0
 }
@@ -473,7 +475,7 @@ HeliumFluidProperties::cv_from_p_T(
 Real
 HeliumFluidProperties::mu_from_p_T(Real /*pressure*/, Real temperature) const
 {
-  return 3.674e-7 * std::pow(temperature, 0.7);
+  return GasTransportUtils::heliumViscosity(temperature);
 }
 
 void
@@ -482,7 +484,8 @@ HeliumFluidProperties::mu_from_p_T(
 {
   mu = mu_from_p_T(pressure, temperature);
   dmu_dp = 0.0;
-  dmu_dT = 3.674e-7 * 0.7 * std::pow(temperature, -0.3);
+  // The viscosity is proportional to T^0.7
+  dmu_dT = 0.7 * mu / temperature;
 }
 
 Real

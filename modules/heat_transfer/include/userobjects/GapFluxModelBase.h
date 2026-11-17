@@ -34,6 +34,13 @@ public:
    */
   virtual ADReal computeFlux() const = 0;
 
+  /**
+   * Report an error if this model cannot operate with the mortar constraint that calls it
+   */
+  virtual void checkConstraint(const ModularGapConductanceConstraint & /*mortar_constraint*/) const
+  {
+  }
+
   virtual void finalize() final {};
   virtual void threadJoin(const UserObject &) final {};
 
@@ -43,6 +50,9 @@ protected:
   mutable ADReal _surface_integration_factor;
   mutable ADReal _adjusted_length;
   mutable ADReal _normal_pressure;
+
+  /// The secondary lower-dimensional element of the current mortar segment
+  mutable const Elem * _lower_secondary_elem = nullptr;
 
   /// The secondary quadrature point location
   mutable Moose::ElemPointArg _secondary_point;

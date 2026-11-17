@@ -19,6 +19,7 @@
 #include "ScalarKernelBase.h"
 #include "MooseVariableScalar.h"
 #include "Conversion.h"
+#include "AuxKernelBase.h"
 
 #include <algorithm>
 #include <iterator>
@@ -357,15 +358,21 @@ isValid(MooseObject * obj)
     return;
   }
 
+  // AuxKernels frequently couple variables from other, non-overlapping blocks by design (e.g. a
+  // NearestNodeLocator-based transfer object, or a mortar AuxKernel coupling primary/secondary
+  // volumetric variables while itself living on the mortar segment block), so skip the
+  // coupled-variable block check for them. Their own "variable" is still checked below.
+  const bool is_aux_kernel = dynamic_cast<AuxKernelBase *>(obj) != nullptr;
+
   // Check variables
   auto c_ptr = dynamic_cast<Coupleable *>(obj);
-  if (c_ptr)
+  if (c_ptr && !is_aux_kernel)
     for (MooseVariableFEBase * var : c_ptr->getCoupledMooseVars())
       blk->checkVariable(*var);
 
   // Check scalar variables
   auto sc_ptr = dynamic_cast<ScalarCoupleable *>(obj);
-  if (sc_ptr)
+  if (sc_ptr && !is_aux_kernel)
     for (MooseVariableScalar * var : sc_ptr->getCoupledMooseScalarVars())
       blk->checkVariable(*var);
 
