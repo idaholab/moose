@@ -133,7 +133,7 @@ of the eigenvalue.
 caption=Requesting the frequency columns.
 
 The input that produces those columns is a bar of length $L=$1m held fixed at both ends, meshed with
-40 EDGE2 elements. It is aluminum, $E=$68e9 Pa and $\rho=$2700 kg/m$^3$, and
+40 EDGE2 elements. It is aluminum, $E=68\times 10^9$ Pa and $\rho=$2700 kg/m$^3$, and
 [!param](/Materials/ComputeIsotropicElasticityTensor/poissons_ratio) is set to zero so that the
 one-dimensional stiffness is exactly $E$. The mass term is the same [ADMatReaction](ADMatReaction.md) on the `eigen`
 tag that the cantilever uses.

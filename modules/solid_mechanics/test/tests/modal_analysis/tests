@@ -7,7 +7,7 @@
     exodiff = 'modal_out.e'
     exodiff_opts = '-eigen_relative'
     abs_zero = 1e-10
-    requirement = 'The system shall perform modal analysis of a cantilever beam with the Eigenvalue executioner using a mass term driven by a density material property.'
+    requirement = 'The system shall perform modal analysis of a cantilever beam with an eigenvalue executioner using a mass term driven by a density material property.'
   []
   [bar_consistent]
     type = CSVDiff

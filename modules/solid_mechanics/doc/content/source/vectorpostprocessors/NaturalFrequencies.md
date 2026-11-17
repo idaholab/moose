@@ -1,7 +1,5 @@
 # NaturalFrequencies
 
-!syntax description /VectorPostprocessors/NaturalFrequencies
-
 ## Description
 
 `NaturalFrequencies` reports the eigenvalues computed by the [Eigenvalue.md] executioner, as the
