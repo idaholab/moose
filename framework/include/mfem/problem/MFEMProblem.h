@@ -52,12 +52,10 @@ public:
   virtual void syncSolutions(Direction) override {}
 
   /**
-   * Overwritten mesh() method from base MooseMesh to retrieve the correct mesh type, in this case
-   * MFEMMesh.
+   * Provide the underlying MFEM mesh object used by the problem.
    */
-  virtual MFEMMesh & mesh() override;
-  virtual const MFEMMesh & mesh() const override;
-  using ExternalProblem::mesh;
+  mfem::ParMesh & mfemParMesh() { return *(_problem_data.pmesh); }
+  const mfem::ParMesh & mfemParMesh() const { return *(_problem_data.pmesh); }
 
   /**
    * Returns all the variable names from the auxiliary system base. This is helpful in the
@@ -345,6 +343,11 @@ public:
   }
 
   /**
+   * Returns true if the mesh is an MFEMMesh with mesh displacement enabled.
+   */
+  bool shouldDisplaceMesh() const;
+
+  /**
    * Displace the mesh, if mesh displacement is enabled.
    */
   void displaceMesh();
@@ -461,6 +464,11 @@ protected:
    * The numeric representation currently active for this problem.
    */
   NumericType _num_type;
+
+  /**
+   * Options controlling how a libMesh mesh is converted into an MFEM mesh.
+   */
+  const bool _fallback_elements, _first_order_mesh;
 
   /**
    * Solver definitions recorded by AddMFEMSolverAction before the dependency resolver constructs
