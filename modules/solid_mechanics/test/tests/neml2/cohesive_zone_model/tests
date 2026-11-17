@@ -21,6 +21,9 @@
     type = Exodiff
     input = 'bilinear_mixed_power_law_moose.i'
     exodiff = 'bilinear_mixed_power_law_moose_out.e'
+    # Fully degraded traction residues vary by about 4e-11 across platforms. Comparing values below
+    # 1e-5 as zero leaves the finite degradation history compared to the default relative tolerance.
+    abs_zero = 1e-5
     requirement = 'The system shall compute the reaction-force history under the power-law criterion using the native MOOSE cohesive traction law.'
   []
   [bilinear_mixed_power_law_neml2]
@@ -49,6 +52,9 @@
     type = Exodiff
     input = 'bilinear_mixed_mode_I_moose.i'
     exodiff = 'bilinear_mixed_mode_I_moose_out.e'
+    # Fully degraded traction residues vary by about 4e-11 across platforms. Comparing values below
+    # 1e-5 as zero leaves the finite degradation history compared to the default relative tolerance.
+    abs_zero = 1e-5
     requirement = 'The system shall compute the mode-I reaction-force history using the native MOOSE cohesive traction law.'
   []
   [bilinear_mixed_mode_I_neml2]
@@ -63,6 +69,9 @@
     type = Exodiff
     input = 'bilinear_mixed_shear_moose.i'
     exodiff = 'bilinear_mixed_shear_moose_out.e'
+    # Fully degraded traction residues vary by about 4e-11 across platforms. Comparing values below
+    # 1e-5 as zero leaves the finite degradation history compared to the default relative tolerance.
+    abs_zero = 1e-5
     requirement = 'The system shall compute the shear reaction-force history using the native MOOSE cohesive traction law.'
   []
   [bilinear_mixed_shear_neml2]
