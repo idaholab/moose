@@ -36,17 +36,10 @@ EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters
 }
 
 void
-EqualValueBoundaryConstraint::meshChanged()
-{
-  updateConstrainedNodes();
-}
-
-void
-EqualValueBoundaryConstraint::updateConstrainedNodes()
+EqualValueBoundaryConstraint::updateConnectivity()
 {
   populateSecondaryNodes();
   pickPrimaryNode();
-  ghostPrimary();
 }
 
 void
@@ -66,26 +59,18 @@ EqualValueBoundaryConstraint::populateSecondaryNodes()
   //
   // Note that later on when we pick the primary node from the secondary node set, we
   // will make sure to remove it from _connected_nodes
-  _connected_nodes.clear();
 
   // user provided boundary name
   if (isParamValid("secondary"))
   {
     const auto & secondary_bnd = getParam<BoundaryName>("secondary");
-    const auto & secondary_nodes = _mesh.getNodeList(_mesh.getBoundaryID(secondary_bnd));
-
-    for (const auto & nid : secondary_nodes)
-      if (_mesh.nodeRef(nid).processor_id() == _subproblem.processor_id())
-        _connected_nodes.push_back(nid);
+    _connected_nodes = localSecondaryNodes(_mesh.getNodeList(_mesh.getBoundaryID(secondary_bnd)));
   }
   // user provided node ids
   else if (isParamValid("secondary_node_ids"))
   {
     const auto & secondary_node_ids = getParam<std::vector<unsigned int>>("secondary_node_ids");
-    for (const auto & nid : secondary_node_ids)
-      if (_mesh.queryNodePtr(nid) &&
-          _mesh.nodeRef(nid).processor_id() == _subproblem.processor_id())
-        _connected_nodes.push_back(nid);
+    _connected_nodes = localSecondaryNodes({secondary_node_ids.begin(), secondary_node_ids.end()});
   }
 }
 
@@ -177,14 +162,6 @@ EqualValueBoundaryConstraint::getPrimaryNodeIDByCoord() const
     mooseError("Multiple nodes found for the specified primary_node_coord.");
 
   return *global_primary_node_ids.begin();
-}
-
-void
-EqualValueBoundaryConstraint::ghostPrimary()
-{
-  mooseAssert(_primary_node_vector.size() == 1, type() + " should have exactly one primary node");
-
-  ghostConnectedElems(_primary_node_vector);
 }
 
 Real
