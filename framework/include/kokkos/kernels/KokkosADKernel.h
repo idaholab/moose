@@ -107,14 +107,16 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 ADKernel::operator()(ResidualLoop, const ThreadID tid, const Derived & kernel) const
 {
-  auto elem = kokkosBlockElementID(_thread(tid, 1));
+  auto comp = _thread(tid, 1);
+  auto elem = kokkosBlockElementID(_thread(tid, 2));
 
   AssemblyDatum datum(elem,
                       libMesh::invalid_uint,
                       kokkosAssembly(),
                       kokkosSystems(),
                       _kokkos_var,
-                      _kokkos_var.var());
+                      _kokkos_var.var(comp),
+                      comp);
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
@@ -140,9 +142,9 @@ ADKernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum)
     local_re *= scaling_factor;
 
     if (_computing_residual)
-      accumulateTaggedElementalResidual(local_re.value(), datum.elem().id, i);
+      accumulateTaggedElementalResidual(local_re.value(), datum.elem().id, i, datum.comp());
     if (_computing_jacobian)
-      accumulateTaggedElementalMatrix(local_re.derivatives(), datum, i);
+      accumulateTaggedElementalMatrix(local_re.derivatives(), datum, i, datum.comp());
   }
 }
 

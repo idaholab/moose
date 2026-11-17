@@ -20,6 +20,10 @@ Using a predictor changes the value of the solution on each time step. As such,
 it can lower the accuracy of explicit higher order time integration scheme if it does not
 work tightly within that scheme.
 
+The `apply` parameter of a predictor is controllable, so the prediction can be switched off and on
+during a simulation with the [Controls](syntax/Controls/index.md) system, e.g. for a time step
+repeated after a failed solve, see [syntax/Controls/index.md#failed_time_steps].
+
 !syntax list /Executioner/Predictor objects=True actions=False subsystems=False
 
 !syntax list /Executioner/Predictor objects=False actions=False subsystems=True

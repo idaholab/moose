@@ -3,7 +3,7 @@
 [VectorPostprocessors]
   [submesh_sample]
     type = MFEMVariablePointValueSampler
-    variable = submesh_potential
+    variables = submesh_potential
     points = '0 0 0.5'
   []
 []

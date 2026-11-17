@@ -7,6 +7,9 @@
     allow_warnings = true
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
+    issues = '#5279'
+    design = 'MultiGrainRigidBodyMotion.md SingleGrainRigidBodyMotion.md ConstantGrainForceAndTorque.md'
+    requirement = 'The system shall be able to move grains according to a constant applied force and torque, while tracking grains.'
   [../]
 
   [./grain_forcedensity]
@@ -14,6 +17,9 @@
     input = 'grain_forcedensity.i'
     exodiff = 'grain_forcedensity_out.e'
     allow_warnings = true
+    issues = '#5279'
+    design = 'ComputeGrainForceAndTorque.md ForceDensityMaterial.md'
+    requirement = 'The system shall be able to compute a grain force and torque from the interaction between grains, while tracking grains.'
   [../]
 
   [./grain_motion2]
@@ -23,6 +29,9 @@
     allow_warnings = true
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
+    issues = '#7233'
+    design = 'MultiGrainRigidBodyMotion.md FauxGrainTracker.md'
+    requirement = 'The system shall be able to move grains according to a constant applied force and torque, while simply using as many grains as order parameters.'
   [../]
 
   [./grain_motion_faux]
@@ -32,6 +41,9 @@
     allow_warnings = true
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
+    issues = '#7233'
+    design = 'ComputeGrainForceAndTorque.md ForceDensityMaterial.md FauxGrainTracker.md'
+    requirement = 'The system shall be able to compute a grain force and torque from the interaction between grains, while simply using as many grains as order parameters.'
   [../]
 
   [./grain_appliedforcedensity]
@@ -41,6 +53,9 @@
     allow_warnings = true
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
+    issues = '#5521'
+    design = 'ComputeExternalGrainForceAndTorque.md ExternalForceDensityMaterial.md'
+    requirement = 'The system shall be able to apply an externally specified force and torque to grains.'
   [../]
 
   [./grain_forcesum]
@@ -48,6 +63,9 @@
     input = 'grain_forcesum.i'
     exodiff = 'grain_forcesum_out.e'
     allow_warnings = true
+    issues = '#5521'
+    design = 'GrainForceAndTorqueSum.md'
+    requirement = 'The system shall be able to sum multiple grain force and torque contributions.'
   [../]
 
   [./grain_forcemasked]
@@ -57,6 +75,9 @@
     allow_warnings = true
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
+    issues = '#5521'
+    design = 'MaskedGrainForceAndTorque.md'
+    requirement = 'The system shall be able to mask the grain force and torque contribution of specific grains.'
   [../]
 
   [./polycrystal_action]
@@ -66,6 +87,9 @@
     allow_warnings = true
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
+    issues = '#7730'
+    design = 'RigidBodyMultiKernelAction.md'
+    requirement = 'The system shall provide an action to set up a rigid body grain motion problem.'
   [../]
 
   [./euler_angles_updater]
@@ -75,6 +99,9 @@
     allow_warnings = true
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
+    issues = '#7959'
+    design = 'EulerAngleUpdater.md'
+    requirement = 'The system shall be able to update the Euler angle orientation of grains as they rotate due to rigid body motion.'
   [../]
 
   [./euler_angles_updater_check]
@@ -85,5 +112,8 @@
     allow_warnings = true
     # NonlocalKernel not compatible with distributed mesh
     mesh_mode = REPLICATED
+    issues = '#7959'
+    design = 'EulerAngleUpdaterCheck.md'
+    requirement = 'The system shall be able to verify that the Euler angle orientation of grains is correctly updated as they rotate due to rigid body motion.'
   [../]
 []

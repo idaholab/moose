@@ -117,7 +117,7 @@
 [VectorPostprocessors]
   [line_sample]
     type = MFEMVariableLineValueSampler
-    variable = 'B'
+    variables = 'B'
     start_point = '0 1.99 0'
     end_point = '0 -1.99 0'
     num_points = 10

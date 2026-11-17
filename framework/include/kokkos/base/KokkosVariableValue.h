@@ -245,6 +245,28 @@ public:
   {
     checkVariable(_var, false, is_ad ? "ADVariableValue" : "VariableValue");
   }
+  /**
+   * Constructor
+   * @param vars The MOOSE variables
+   * @param tag The vector tag name
+   * @param dof Whether to get DOF values
+   */
+  ///@{
+  VariableValueTempl(const std::vector<const MooseVariableFieldBase *> & vars,
+                     const TagName & tag = Moose::SOLUTION_TAG,
+                     bool dof = false)
+    : _var(vars, tag), _dof(dof)
+  {
+    checkVariable(_var, false, is_ad ? "ADVariableValue" : "VariableValue");
+  }
+  VariableValueTempl(const std::vector<MooseVariableFieldBase *> & vars,
+                     const TagName & tag = Moose::SOLUTION_TAG,
+                     bool dof = false)
+    : _var(vars, tag), _dof(dof)
+  {
+    checkVariable(_var, false, is_ad ? "ADVariableValue" : "VariableValue");
+  }
+  ///@}
 
   /**
    * Copy constructor for parallel dispatch
@@ -280,8 +302,13 @@ public:
    * @param comp The variable component
    * @returns The variable value
    */
-  KOKKOS_FUNCTION auto
-  operator()(AssemblyDatum & datum, unsigned int idx, unsigned int comp = 0) const;
+  ///@{
+  KOKKOS_FUNCTION auto operator()(AssemblyDatum & datum, unsigned int idx, unsigned int comp) const;
+  KOKKOS_FUNCTION auto operator()(AssemblyDatum & datum, unsigned int idx) const
+  {
+    return this->operator()(datum, idx, datum.comp());
+  }
+  ///@}
 
   /**
    * Get the Kokkos variable
@@ -449,6 +476,25 @@ public:
   {
     checkVariable(_var, false, is_ad ? "ADVariableGradient" : "VariableGradient");
   }
+  /**
+   * Constructor
+   * @param vars The MOOSE variables
+   * @param tag The vector tag name
+   */
+  ///@{
+  VariableGradientTempl(const std::vector<const MooseVariableFieldBase *> & vars,
+                        const TagName & tag = Moose::SOLUTION_TAG)
+    : _var(vars, tag)
+  {
+    checkVariable(_var, false, is_ad ? "ADVariableGradient" : "VariableGradient");
+  }
+  VariableGradientTempl(const std::vector<MooseVariableFieldBase *> & vars,
+                        const TagName & tag = Moose::SOLUTION_TAG)
+    : _var(vars, tag)
+  {
+    checkVariable(_var, false, is_ad ? "ADVariableGradient" : "VariableGradient");
+  }
+  ///@}
 
   /**
    * Copy constructor for parallel dispatch
@@ -484,8 +530,13 @@ public:
    * @param comp The variable component
    * @returns The variable gradient
    */
-  KOKKOS_FUNCTION auto
-  operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp = 0) const;
+  ///@{
+  KOKKOS_FUNCTION auto operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp) const;
+  KOKKOS_FUNCTION auto operator()(AssemblyDatum & datum, unsigned int qp) const
+  {
+    return this->operator()(datum, qp, datum.comp());
+  }
+  ///@}
 
   /**
    * Get the Kokkos variable

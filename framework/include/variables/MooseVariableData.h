@@ -303,6 +303,7 @@ public:
   const ADTemplateVariableGradient<OutputType> & adGradSln() const
   {
     _need_ad = _need_ad_volume = _need_ad_grad_u = true;
+    needADGradPhi();
     return _ad_grad_u;
   }
 
@@ -335,6 +336,7 @@ public:
   const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const
   {
     _need_ad = _need_ad_volume = _need_ad_grad_u_dot = true;
+    needADGradPhi();
 
     if (!_time_integrator)
       // If we don't have a time integrator (this will be the case for variables that are a part of
@@ -529,8 +531,12 @@ private:
             std::size_t num_shapes);
 
   /// Ask the assembly to compute the AD face shape function gradients, which this variable's AD
-  /// gradient and AD face test function gradients are built from
+  /// face gradients are built from and adGradPhiFace() returns
   void needADGradPhiFace() const;
+
+  /// Ask the assembly to compute the AD element shape function gradients, which this variable's AD
+  /// gradients are built from and adGradPhi() returns
+  void needADGradPhi() const;
 
   /// A const reference to the owning MooseVariableFE object
   const MooseVariableFE<OutputType> & _var;
@@ -883,6 +889,7 @@ MooseVariableData<OutputType>::adGradPhi() const
   if (_element_type == Moose::ElementType::Neighbor || _element_type == Moose::ElementType::Lower)
     mooseError("Unsupported element type: ", Moose::stringify(_element_type));
   mooseAssert(_ad_grad_phi, "this should be non-null");
+  needADGradPhi();
   return *_ad_grad_phi;
 }
 

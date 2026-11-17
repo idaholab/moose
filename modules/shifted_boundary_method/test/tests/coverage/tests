@@ -21,8 +21,8 @@
       input = 'build_kd_tree_false.i'
       mesh_mode = REPLICATED
       recover = false
-      detail = 'build boundary element representations from an SBM surface mesh without a KDTree '
-               'when KDTree construction is disabled.'
+      detail = 'build boundary element representations from an SBM surface mesh without a k-d tree '
+               'when k-d tree construction is disabled.'
     []
 
     [non_watertight]

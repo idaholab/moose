@@ -10,11 +10,12 @@
 #pragma once
 
 #include "ScalarKernelBase.h"
+#include "ADFunctorInterface.h"
 
 /**
  * Base class for AD scalar kernels
  */
-class ADScalarKernel : public ScalarKernelBase
+class ADScalarKernel : public ScalarKernelBase, public ADFunctorInterface
 {
 public:
   static InputParameters validParams();

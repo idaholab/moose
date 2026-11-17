@@ -15,11 +15,15 @@ InputParameters
 ADScalarKernel::validParams()
 {
   InputParameters params = ScalarKernelBase::validParams();
+  params += ADFunctorInterface::validParams();
   return params;
 }
 
 ADScalarKernel::ADScalarKernel(const InputParameters & parameters)
-  : ScalarKernelBase(parameters), _u(_var.adSln()), _jacobian_already_computed(false)
+  : ScalarKernelBase(parameters),
+    ADFunctorInterface(this),
+    _u(_var.adSln()),
+    _jacobian_already_computed(false)
 {
 }
 

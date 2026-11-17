@@ -53,7 +53,7 @@ requirements:
     - plotly
     - psutil
     - psycopg2
-    - pyarrow
+    - pyarrow {{ pyarrow }}
     - pybtex
     - pycobertura
     - pyflakes

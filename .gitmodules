@@ -62,3 +62,18 @@
     url = ../../pytorch/pytorch.git
     update = none
     ignore = untracked
+[submodule "framework/contrib/neml2-hit"]
+    path = framework/contrib/neml2-hit
+    url = ../../applied-material-modeling/neml2-hit.git
+    update = none
+    ignore = untracked
+[submodule "framework/contrib/pyzag"]
+    path = framework/contrib/pyzag
+    url = ../../applied-material-modeling/pyzag.git
+    update = none
+    ignore = untracked
+[submodule "framework/contrib/pyro"]
+    path = framework/contrib/pyro
+    url = ../../pyro-ppl/pyro.git
+    update = none
+    ignore = untracked

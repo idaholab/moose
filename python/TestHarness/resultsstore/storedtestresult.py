@@ -396,6 +396,14 @@ class StoredTestResult:
             return get_typed(self.data, "max_memory", (NoneType, int))
         return None
 
+    @property
+    def max_gpu_memory(self) -> Optional[int]:
+        """Get the max GPU memory usage for the test in bytes, if available."""
+        self._require_filter(TestDataFilter.MAX_GPU_MEMORY)
+        if self.result.version > 10:
+            return get_typed(self.data, "max_gpu_memory", (NoneType, int))
+        return None
+
     def serialize(self) -> dict:
         """
         Serialize the data so that it is JSON dumpable.

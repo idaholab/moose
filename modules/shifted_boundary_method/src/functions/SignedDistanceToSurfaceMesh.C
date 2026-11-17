@@ -21,7 +21,7 @@ SignedDistanceToSurfaceMesh::validParams()
   params.addRequiredParam<UserObjectName>("in_out_test", "The name of the in-out test user object");
 
   params.addClassDescription(
-      "Returns signed distance to a surface mesh using KDTree nearest neighbor search. "
+      "Returns signed distance to a surface mesh using k-d tree nearest neighbor search. "
       "The gradient returns the unit vector pointing from boundary to query point.");
   return params;
 }

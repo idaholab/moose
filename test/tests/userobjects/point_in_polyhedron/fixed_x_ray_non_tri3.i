@@ -51,7 +51,7 @@
 [UserObjects]
   [surface_builder]
     type = BoundaryMeshBuilder
-    surface_mesh = surface_mesh
+    boundary_mesh = surface_mesh
   []
 
   [in_out_test]

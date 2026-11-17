@@ -32,9 +32,11 @@ template <bool is_ad>
 void
 DirichletBCBaseTempl<is_ad>::presetSolution(TagID tag)
 {
+  _thread.resize(_vars.size(), numKokkosBoundaryNodes());
+
   _solution_tag = tag;
 
-  Policy policy(0, numKokkosBoundaryNodes());
+  Policy policy(0, _thread.size());
 
   auto dispatcher = DispatcherRegistry::build<PresetLoop>(this, this->type());
 

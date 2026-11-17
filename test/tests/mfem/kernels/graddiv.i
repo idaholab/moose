@@ -117,14 +117,14 @@
 [VectorPostprocessors]
   [F_line_sample]
     type = MFEMVariableLineValueSampler
-    variable = 'F'
+    variables = 'F'
     start_point = '0.01 0.013 0.014'
     end_point = '7.98 0.99 0.97'
     num_points = 114
   []
   [divF_line_sample]
     type = MFEMVariableLineValueSampler
-    variable = 'divF'
+    variables = 'divF'
     start_point = '0.01 0.013 0.014'
     end_point = '7.98 0.99 0.97'
     num_points = 114

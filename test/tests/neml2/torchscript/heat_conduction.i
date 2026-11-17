@@ -7,6 +7,7 @@
 []
 
 [NEML2]
+  eager = true
   input = 'thermal_conductivity.i'
   [thermal_conductivity_model]
     model = 'kappa'

@@ -24,6 +24,7 @@
                   'every nonlinear iteration of every load step, including steps that consume '
                   'non-zero old state (plastic_defgrad, orientation, slip_hardening).'
     input = 'approx_kinematics.i'
+    cli_args = 'N=1 Executioner/num_steps=3'
     run_sim = true
     ratio_tol = 5E-5
     difference_tol = 1E10

@@ -85,8 +85,12 @@ MOOSEQuantityToNEML2<T, state>::MOOSEQuantityToNEML2(const InputParameters & par
 #endif
 {
 #ifdef NEML2_ENABLED
-  // The variable is accessed directly rather than through the Coupleable interface, so the
-  // dependency must be declared explicitly for the variable to be reinitialized on each element.
+  // A VARIABLE gatherer reads the field through getStandardVariable(...).sln()/slnOld() rather than
+  // the Coupleable interface, so the variable is not otherwise part of this user object's reinit
+  // set. Register it as a dependency so MOOSE refreshes its elemental solution before each
+  // execute(); without this, .sln() can carry a stale (one-timestep-lagged) value depending on what
+  // else in the problem happens to force the variable's reinit. Mirrors
+  // ElementIntegralVariableUserObject.
   if (_type == NEML2Utils::MOOSEIOType::VARIABLE)
     addMooseVariableDependency(
         &this->_fe_problem.getStandardVariable(_tid, getParam<std::string>("from_moose")));
@@ -124,19 +128,21 @@ MOOSEQuantityToNEML2<T, state>::threadJoin(const UserObject & uo)
 }
 
 template <typename T, unsigned int state>
-neml2::Tensor
+at::Tensor
 MOOSEQuantityToNEML2<T, state>::gatheredData() const
 {
+  // Unbatched scalars (time / scalar variable) are returned as 0-dim tensors; the executor
+  // broadcasts them against the batched inputs before evaluating the model.
+  const auto opts = at::TensorOptions().dtype(at::kDouble);
   if (!_batched)
   {
     switch (_type)
     {
       case NEML2Utils::MOOSEIOType::TIME:
-        return state == 0 ? neml2::Scalar::full(_t, neml2::kFloat64)
-                          : neml2::Scalar::full(_t_old, neml2::kFloat64);
+        return state == 0 ? at::scalar_tensor(_t, opts) : at::scalar_tensor(_t_old, opts);
       case NEML2Utils::MOOSEIOType::SCALAR:
-        return state == 0 ? neml2::Scalar::full((*_var_scalar)[0], neml2::kFloat64)
-                          : neml2::Scalar::full((*_var_scalar_old)[0], neml2::kFloat64);
+        return state == 0 ? at::scalar_tensor((*_var_scalar)[0], opts)
+                          : at::scalar_tensor((*_var_scalar_old)[0], opts);
       case NEML2Utils::MOOSEIOType::FUNCTION:
       case NEML2Utils::MOOSEIOType::VARIABLE:
       case NEML2Utils::MOOSEIOType::MATERIAL:

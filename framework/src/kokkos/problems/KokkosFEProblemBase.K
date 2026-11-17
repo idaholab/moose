@@ -76,7 +76,8 @@ FEProblemBase::addKokkosKernel(const std::string & kernel_name,
 
   parallel_object_only();
 
-  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  const auto nl_sys_num =
+      determineSolverSystem(parameters.varName(parameters.varParamName(), name), true).second;
   if (!isSolverSystemNonlinear(nl_sys_num))
     mooseError("You are trying to add a Kernel to a linear variable/system, which is not "
                "supported at the moment!");
@@ -99,7 +100,8 @@ FEProblemBase::addKokkosNodalKernel(const std::string & kernel_name,
 
   parallel_object_only();
 
-  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  const auto nl_sys_num =
+      determineSolverSystem(parameters.varName(parameters.varParamName(), name), true).second;
 
   setResidualObjectParamsAndLog(
       kernel_name, name, parameters, nl_sys_num, "KokkosNodalKernel", _reinit_displaced_elem);
@@ -119,7 +121,8 @@ FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
 
   parallel_object_only();
 
-  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  const auto nl_sys_num =
+      determineSolverSystem(parameters.varName(parameters.varParamName(), name), true).second;
   if (!isSolverSystemNonlinear(nl_sys_num))
     mooseError(
         "You are trying to add a BoundaryCondition to a linear variable/system, which is not "

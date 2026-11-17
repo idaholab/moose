@@ -6,5 +6,8 @@
 # Run in serial so RandomIC gets fixed PRNG results
     max_parallel = 1
     max_threads  = 1
+    issues = '#5336'
+    design = 'PFCTradMaterial.md CHBulkPFCTrad.md'
+    requirement = 'The system shall be able to solve the traditional phase field crystal model.'
   [../]
 []

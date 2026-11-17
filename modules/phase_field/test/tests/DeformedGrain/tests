@@ -4,5 +4,8 @@
     type = 'Exodiff'
     input = 'DeformedGrain.i'
     exodiff = 'DeformedGrain_out.e'
+    issues = '#7499'
+    design = 'DeformedGrainMaterial.md'
+    requirement = 'The system shall be able to compute the stored energy of deformed grains in a Voronoi polycrystal, tracked by the GrainTracker.'
   [../]
 []

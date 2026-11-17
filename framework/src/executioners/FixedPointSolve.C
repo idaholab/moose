@@ -483,6 +483,9 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
     // Keep track of the solution warnings from the solve
     _app.solutionInvalidity().accumulateTimeStepIntoTotalOccurences(_problem.timeStep());
 
+    // Controls on FAILED may change how the step is repeated (e.g. the time step cutback)
+    _problem.executeControls(EXEC_FAILED);
+
     // Perform the output of the current, failed time step (this only occurs if desired)
     _problem.outputStep(EXEC_FAILED);
     return false;

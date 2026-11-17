@@ -46,7 +46,7 @@
     type = 'CSVDiff'
     input = 'theis_tabulated.i'
     csvdiff = "theis_tabulated_csvout.csv theis_tabulated_csvout_line_0010.csv"
-    requirement = 'The system shall evolve a gas phase as a gas component is added in a water and NCG system.'
+    requirement = 'The system shall evolve a gas phase as a gas component is added in a water and NCG system, using tabulated fluid properties.'
     design = 'PorousFlowWaterNCG.md'
     issues = '#8818'
     valgrind = 'none' # too slow
@@ -118,7 +118,7 @@
     csvdiff = "theis_brineco2_csvout.csv theis_brineco2_csvout_line_0028.csv"
     heavy = true
     max_time = 1000
-    requirement = 'The system shall evolve a gas phase as CO2 is added to a liquid brine phase.'
+    requirement = 'The system shall evolve a gas phase as CO2 is injected into a liquid brine phase in a radial Theis problem.'
     design = 'PorousFlowBrineCO2.md'
     issues = '#8818'
   []

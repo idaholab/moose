@@ -104,14 +104,14 @@
 [VectorPostprocessors]
   [line_sample_h1_scalar]
     type = MFEMVariableLineValueSampler
-    variable = 'h1_scalar'
+    variables = 'h1_scalar'
     start_point = '-1 0 -0.5'
     end_point = '1 0 0.5'
     num_points = 101
   []
   [line_sample_l2_scalar]
     type = MFEMVariableLineValueSampler
-    variable = 'l2_scalar'
+    variables = 'l2_scalar'
     start_point = '-0.99 -0.01 -0.49'
     end_point = '0.99 0.01 0.49'
     num_points = 114

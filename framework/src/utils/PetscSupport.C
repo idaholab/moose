@@ -466,11 +466,11 @@ petscNonlinearConverged(SNES /*snes*/,
       break;
 
     case Convergence::MooseConvergenceStatus::CONVERGED:
-      *reason = SNES_CONVERGED_FNORM_ABS;
+      *reason = SNES_CONVERGED_USER;
       break;
 
     case Convergence::MooseConvergenceStatus::DIVERGED:
-      *reason = SNES_DIVERGED_DTOL;
+      *reason = SNES_DIVERGED_USER;
       break;
   }
 

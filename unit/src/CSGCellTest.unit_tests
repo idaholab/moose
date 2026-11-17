@@ -1,0 +1,45 @@
+[Tests]
+  design = 'CSGBase.md'
+  issues = '#29095'
+
+  [void_cell]
+    type = GoogleTest
+    unit_test = CSGCellTest.testVoidCell
+    requirement = 'The system shall create a constructive solid geometry (CSG) cell with a void fill from a name and a region.'
+  []
+  [material_cell]
+    type = GoogleTest
+    unit_test = CSGCellTest.testMaterialCell
+    requirement = 'The system shall create a CSG cell filled with a named material.'
+  []
+  [universe_cell]
+    type = GoogleTest
+    unit_test = CSGCellTest.testUniverseCell
+    requirement = 'The system shall create a CSG cell filled with a universe.'
+  []
+  [get_fill]
+    type = GoogleTest
+    unit_test = CSGCellTest.testGetFill
+    requirement = 'The system shall return the universe or material fill of a CSG cell and report an error when the requested fill type differs from the fill type of the cell.'
+  []
+  [equality]
+    type = GoogleTest
+    unit_test = CSGCellTest.testCellEquality
+    requirement = 'The system shall compare CSG cells for equality using their name, fill, region, and transformations.'
+  []
+  [set_name]
+    type = GoogleTest
+    unit_test = CSGCellTest.testSetName
+    requirement = 'The system shall rename a CSG cell.'
+  []
+  [update_region]
+    type = GoogleTest
+    unit_test = CSGCellTest.testUpdateRegion
+    requirement = 'The system shall replace the region of a CSG cell.'
+  []
+  [update_fill]
+    type = GoogleTest
+    unit_test = CSGCellTest.testUpdateFill
+    requirement = 'The system shall change the fill of a CSG cell to void, a material, a universe, or a lattice.'
+  []
+[]

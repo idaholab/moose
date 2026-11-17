@@ -70,7 +70,7 @@
   active = ''
   [point_sample]
     type = MFEMVariablePointValueSampler
-    variable = concentration
+    variables = concentration
     points = '0.5 0.25 0
               0.5 0.50 0
               0.5 0.75 0'

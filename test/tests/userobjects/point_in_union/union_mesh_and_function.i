@@ -57,7 +57,7 @@
 [UserObjects]
   [builder1]
     type = BoundaryMeshBuilder
-    surface_mesh = circle1
+    boundary_mesh = circle1
   []
   [check_mesh]
     type = PointInPolyhedronCheckUO

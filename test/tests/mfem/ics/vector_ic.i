@@ -94,28 +94,28 @@
 [VectorPostprocessors]
   [line_sample_h1_vector]
     type = MFEMVariableLineValueSampler
-    variable = 'h1_vector'
+    variables = 'h1_vector'
     start_point = '-1 0 -0.5'
     end_point = '1 0 0.5'
     num_points = 101
   []
   [line_sample_nd_vector]
     type = MFEMVariableLineValueSampler
-    variable = 'nd_vector'
+    variables = 'nd_vector'
     start_point = '-0.99 -0.01 -0.49'
     end_point = '0.99 0.01 0.49'
     num_points = 114
   []
   [line_sample_rt_vector]
     type = MFEMVariableLineValueSampler
-    variable = 'rt_vector'
+    variables = 'rt_vector'
     start_point = '-0.99 -0.01 -0.49'
     end_point = '0.99 0.01 0.49'
     num_points = 114
   []
   [line_sample_l2_vector]
     type = MFEMVariableLineValueSampler
-    variable = 'l2_vector'
+    variables = 'l2_vector'
     start_point = '-0.99 -0.01 -0.49'
     end_point = '0.99 0.01 0.49'
     num_points = 114

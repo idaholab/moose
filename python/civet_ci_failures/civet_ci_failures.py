@@ -66,8 +66,11 @@ BLOCKED_DESCRIPTION = "Won't run due to failed dependencies"
 # without asking CIVET for per-step status
 STEP_RETURN_CODE_RE = re.compile(r"completed with return code (\d+)")
 
-# Leading timestamp and memory annotations on TestHarness output lines
-LINE_PREFIX_RE = re.compile(r"^\[[\d.]+s\]\s*\[\s*\d+MB\]\s*")
+# Leading timestamp and memory annotations on TestHarness output lines. The
+# memory is CPU memory and optionally GPU memory, each in MB or GB, or "?" if
+# unknown, e.g., "[ 123MB]" or "[ 123MB   12GB GPU]".
+_MEMORY = r"(?:\d+|\?)[MG]B"
+LINE_PREFIX_RE = re.compile(rf"^\[[\d.]+s\]\s*\[\s*{_MEMORY}(?:\s+{_MEMORY} GPU)?\]\s*")
 
 # The TestHarness prefixes each line of a test's output with the test name.
 # It has to come off before output lines can be compared, or every line looks
@@ -131,7 +134,7 @@ INVOCATION_RE = re.compile(r"^\[[\d:]+\]\s+(\S+):\s+(\./run_tests\b.*)$")
 
 # Arguments that describe the CI machine rather than the test mode, and so are
 # dropped from a reproduce command. Everything else is kept, including
-# --compute-device and --max-memory-per-slot, which change whether tests pass.
+# --compute-device and --max-[gpu-]memory-per-slot, which change whether tests pass.
 STRIP_EXACT_ARGS = {"-t", "--timing"}
 STRIP_PREFIX_ARGS = ("--longest-jobs=",)
 STRIP_VALUED_ARGS = {"-j", "-l"}
@@ -139,7 +142,7 @@ STRIP_VALUED_ARGS = {"-j", "-l"}
 # Arguments kept in a reproduce command but ignored when deciding whether two
 # runs were the same test mode. Memory limits are tuned per job and would
 # otherwise make one mode look like several.
-MODE_EXCLUDE_PREFIXES = ("--max-memory-per-slot=",)
+MODE_EXCLUDE_PREFIXES = ("--max-memory-per-slot=", "--max-gpu-memory-per-slot=")
 
 # A MOOSE error block opens with this marker and carries boilerplate before
 # the message that identifies the failure
