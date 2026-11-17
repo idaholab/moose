@@ -15,9 +15,9 @@ Each node of the displaced mesh is moved by the value of the displacement variab
 node. A `LAGRANGE` displacement variable can have no degree of freedom on some nodes, for example
 first order displacements on QUAD9 elements or second order displacements on the face nodes of
 TET14 elements. These nodes are moved by the displacement interpolated from the other nodes of
-the element, so the displacement order does not need to match the mesh order. Displacement
-variables of other families must have degrees of freedom on every node of the elements they are
-defined on.
+the element, so the displacement order does not need to match the mesh order, except on PRISM21
+elements, which require at least second order displacements. Displacement variables of other
+families must have degrees of freedom on every node of the elements they are defined on.
 
 !alert note
 The `DisplacedProblem` is automatically created by the [CreateDisplacedProblemAction.md]

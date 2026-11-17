@@ -1561,6 +1561,11 @@ DisplacedProblem::UpdateDisplacedMeshThread::displaceNodesWithoutDofs()
       // therefore in the ghosted solution built by init()
       if (fe_type.family != LAGRANGE)
         continue;
+      // A Lagrange variable has degrees of freedom on every node of elements whose geometric
+      // order does not exceed its own
+      const auto & elem_orders = _ref_mesh.getMesh().elem_default_orders();
+      if (elem_orders.empty() || *elem_orders.rbegin() <= fe_type.order)
+        continue;
 
       for (const Elem * const elem : _ref_mesh.getMesh().active_element_ptr_range())
       {
