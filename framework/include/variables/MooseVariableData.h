@@ -223,23 +223,6 @@ public:
   const ADVectorVariablePhiDivergence & adDivPhi() const;
   const ADVectorVariablePhiDivergence & adDivPhiFace() const;
 
-private:
-  /// Error unless this is the element data of a vector variable
-  void checkADVectorPhi() const;
-
-  /// Request the AD shape function values of a vector variable on a displaced mesh, whose Piola
-  /// maps depend on the displacements
-  void requestADVectorPhi() const
-  {
-    if constexpr (std::is_same_v<OutputType, RealVectorValue>)
-      if (_displaced && _element_type == Moose::ElementType::Element)
-      {
-        adVectorPhi();
-        adVectorPhiFace();
-      }
-  }
-
-public:
   /**
    * Return phi size
    */
@@ -415,12 +398,11 @@ public:
     _need_ad = _need_ad_volume = _need_ad_curl_u = true;
     curlPhi();
     curlPhiFace();
-    if constexpr (std::is_same_v<OutputType, RealVectorValue>)
-      if (_displaced && _element_type == Moose::ElementType::Element)
-      {
-        adCurlPhi();
-        adCurlPhiFace();
-      }
+    if (needsADVectorPhi())
+    {
+      adCurlPhi();
+      adCurlPhiFace();
+    }
     return _ad_curl_u;
   }
 
@@ -429,12 +411,11 @@ public:
     _need_ad = _need_ad_volume = _need_ad_div_u = true;
     divPhi();
     divPhiFace();
-    if constexpr (std::is_same_v<OutputType, RealVectorValue>)
-      if (_displaced && _element_type == Moose::ElementType::Element)
-      {
-        adDivPhi();
-        adDivPhiFace();
-      }
+    if (needsADVectorPhi())
+    {
+      adDivPhi();
+      adDivPhiFace();
+    }
     return _ad_div_u;
   }
 
@@ -541,6 +522,16 @@ public:
   void computeIncrementAtNode(const libMesh::NumericVector<libMesh::Number> & increment_vec);
 
 private:
+  /// Error unless this is the element data of a vector variable
+  void checkADVectorPhi() const;
+
+  /// Whether this is the element data of a vector variable on a displaced mesh, whose AD shape
+  /// function values, curls and divergences carry displacement derivatives
+  bool needsADVectorPhi() const;
+
+  /// Request the AD shape function values when needsADVectorPhi()
+  void requestADVectorPhi() const;
+
   /**
    * Helper method for assigning the _ad_dof_* arrays
    */
@@ -948,6 +939,27 @@ MooseVariableData<OutputType>::adUDotDot() const
   }
 
   return _ad_u_dotdot;
+}
+
+template <typename OutputType>
+bool
+MooseVariableData<OutputType>::needsADVectorPhi() const
+{
+  if constexpr (std::is_same_v<OutputType, RealVectorValue>)
+    return _displaced && _element_type == Moose::ElementType::Element;
+  else
+    return false;
+}
+
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::requestADVectorPhi() const
+{
+  if (needsADVectorPhi())
+  {
+    adVectorPhi();
+    adVectorPhiFace();
+  }
 }
 
 template <typename OutputType>

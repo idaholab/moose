@@ -2821,8 +2821,12 @@ protected:
   mutable std::map<FEType, ADVectorVariablePhiCurl> _ad_vector_curl_phi_data_face;
   mutable std::map<FEType, ADVectorVariablePhiDivergence> _ad_vector_div_phi_data;
   mutable std::map<FEType, ADVectorVariablePhiDivergence> _ad_vector_div_phi_data_face;
-  /// Vector FE types whose AD shape function values (and curls or divergences) were requested
+  /// Vector FE types whose AD shape function values were requested
   mutable std::set<FEType> _need_ad_vector_phi;
+  /// Vector FE types whose AD shape function curls and divergences were requested. These are kept
+  /// apart from _need_curl and _need_div, which non-AD objects set as well.
+  mutable std::set<FEType> _need_ad_curl;
+  mutable std::set<FEType> _need_ad_div;
   /// Whether any object needs the AD face shape function gradients. Computing them on a displaced
   /// mesh propagates the displacement derivatives of the face map into every shape function
   /// gradient, which is expensive and unnecessary when only values and normals are used.

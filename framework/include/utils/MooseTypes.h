@@ -667,7 +667,7 @@ using ADTemplateVariableDivergence =
 typedef VariableTestValue ADVariableTestValue;
 typedef VariableTestGradient ADVariableTestGradient;
 typedef VariableTestSecond ADVariableTestSecond;
-typedef VectorVariableTestValue ADVectorVariableTestValue;
+typedef OutputTools<ADRealVectorValue>::VariableTestValue ADVectorVariableTestValue;
 typedef VectorVariableTestGradient ADVectorVariableTestGradient;
 typedef VectorVariableTestSecond ADVectorVariableTestSecond;
 

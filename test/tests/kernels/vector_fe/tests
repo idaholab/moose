@@ -478,30 +478,11 @@
     requirement = 'The system shall compute exact Jacobians with respect to the mesh displacements for '
                   'automatic differentiation objects on displaced meshes that use the values, curls '
                   'and divergences of Nedelec and Raviart-Thomas variables and their test functions'
-    # These tests compare the AD Jacobian with the finite difference Jacobian that PETSc builds
-    # for -snes_test_jacobian, and that reference is only reliable on few MPI processes, hence
-    # max_parallel = 2. The AD Jacobian itself does not depend on the partitioning: mapped through
-    # the DOF maps, the 2D AD Jacobian on 3 processes equals the serial one entry by entry, and
-    # Newton with it and a direct solver converges quadratically to 1e-15 on 1 and 3 processes.
-    # The finite difference Jacobian does change with the partitioning. It perturbs one degree of
-    # freedom at a time and evaluates the residual again; perturbing a displacement moves the
-    # displaced mesh, whose ghosted nodes on other processes follow only through the ghost
-    # update of the perturbed solution. The Piola maps and the libMesh orientation of the Nedelec
-    # and Raviart-Thomas shape functions, which compares vertex coordinates, read those node
-    # positions, so the finite difference residual mixes perturbed and unperturbed geometry on
-    # elements that touch a partition boundary. On these small meshes nearly every element does
-    # once there are 3 or more processes, and the finite difference Jacobian differs from the
-    # exact one by 5 to 80 percent in the rows of the vector variables. H1 vector variables such
-    # as LAGRANGE_VEC do not read node positions in their values and pass at any process count.
-    # kernels/jxw_grad_test_dep_on_displacements limits its displaced mesh Jacobian tests to 2
-    # processes for what is likely the same reason.
-    #
-    # The random displacements of ad_piola_displaced.i also differ with the mesh distribution, so
-    # the time derivative test uses smooth ones to keep its transient solve converging.
-    #
-    # The displacements depend on position, and the meshes have only a few elements, because the
-    # orientation comparison also flips when the finite difference perturbation crosses two vertex
-    # coordinates that are equal; larger meshes reach such configurations during the solve.
+    # The finite difference reference of -snes_test_jacobian is unreliable on more than 2
+    # processes for these small displaced meshes, because the Piola maps and the orientation of
+    # the Nedelec and Raviart-Thomas shape functions read node positions that the perturbation
+    # moves, hence max_parallel = 2 (#34478). The displacements depend on position because the
+    # orientation also flips when the perturbation crosses two equal vertex coordinates.
     [2d]
       type = PetscJacobianTester
       input = ad_piola_displaced.i
@@ -525,6 +506,22 @@
       max_parallel = 2
       detail = 'for the curl of LAGRANGE_VEC variables, which follows from their gradients,'
     []
+    [h1_no_ad_face_gradient]
+      type = PetscJacobianTester
+      input = ad_piola_displaced.i
+      # The AD values of the variable are requested on displaced faces, where the only face object
+      # is a non-AD condition with zero penalty that requests no AD face gradients
+      cli_args = "Variables/active='disp_x disp_y e' Variables/e/family=LAGRANGE_VEC "
+                 "Kernels/active='disp_x disp_y e_wave' Kernels/e_wave/type=ADVectorDiffusion "
+                 "BCs/active='e_penalty disp_x_left disp_x_right disp_y_bottom disp_y_top' "
+                 "BCs/e_penalty/type=VectorPenaltyDirichletBC BCs/e_penalty/variable=e "
+                 "BCs/e_penalty/boundary='left right top bottom' BCs/e_penalty/penalty=0 "
+                 "BCs/e_penalty/use_displaced_mesh=true ICs/active='disp_x disp_y e' --allow-unused"
+      ratio_tol = 5e-7
+      run_sim = true
+      max_parallel = 2
+      detail = 'for LAGRANGE_VEC variables on faces without objects that need AD face gradients,'
+    []
     [h1_div]
       type = PetscJacobianTester
       input = ad_piola_displaced.i
@@ -543,7 +540,7 @@
       ratio_tol = 5e-7
       run_sim = true
       max_parallel = 2
-      detail = 'for the time derivative of a coupled Nedelec variable, and'
+      detail = 'for the time derivative of a coupled Nedelec variable,'
     []
     [3d]
       type = PetscJacobianTester
@@ -553,7 +550,22 @@
       ratio_tol = 5e-7
       run_sim = true
       max_parallel = 2
-      detail = 'on TET10 elements and boundary faces for Nedelec variables.'
+      detail = 'on TET10 elements and boundary faces for Nedelec variables, and'
+    []
+    [3d_rt]
+      type = PetscJacobianTester
+      input = ad_piola_displaced_3d.i
+      # libMesh provides first order RAVIART_THOMAS in 3D on TET14 only, where second order
+      # displacements exceed the AD derivative storage, so the displacements are first order
+      cli_args = "Mesh/elem_type=TET14 Variables/disp_x/order=FIRST Variables/disp_y/order=FIRST "
+                 "Variables/disp_z/order=FIRST Variables/e/family=RAVIART_THOMAS "
+                 "Kernels/e_div/type=ADVectorDivDiv Kernels/e_div/variable=e "
+                 "Kernels/e_div/use_displaced_mesh=true "
+                 "Executioner/line_search=none"
+      ratio_tol = 5e-7
+      run_sim = true
+      max_parallel = 2
+      detail = 'on TET14 elements and boundary faces for Raviart-Thomas variables.'
     []
   []
 []

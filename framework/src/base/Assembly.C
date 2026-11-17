@@ -36,6 +36,17 @@
 
 #include <algorithm>
 
+namespace
+{
+/// Whether the shape functions of a vector family are Piola-mapped (H(curl) and H(div) families),
+/// rather than mapped like H1 shape functions
+bool
+isPiolaMapped(const FEFamily family)
+{
+  return family == NEDELEC_ONE || family == RAVIART_THOMAS || family == L2_RAVIART_THOMAS;
+}
+}
+
 template <typename P, typename C>
 void
 coordTransformFactor(const SubProblem & s,
@@ -919,14 +930,15 @@ Assembly::reinitFE(const Elem * elem)
       }
 
       if (_need_ad_vector_phi.count(fe_type))
-        computeADVectorPhi(elem,
-                           n_qp,
-                           fe,
-                           *_vector_fe_shape_data[fe_type],
-                           &grad_phi,
-                           _ad_vector_phi_data[fe_type],
-                           _need_curl.count(fe_type) ? &_ad_vector_curl_phi_data[fe_type] : nullptr,
-                           _need_div.count(fe_type) ? &_ad_vector_div_phi_data[fe_type] : nullptr);
+        computeADVectorPhi(
+            elem,
+            n_qp,
+            fe,
+            *_vector_fe_shape_data[fe_type],
+            &grad_phi,
+            _ad_vector_phi_data[fe_type],
+            _need_ad_curl.count(fe_type) ? &_ad_vector_curl_phi_data[fe_type] : nullptr,
+            _need_ad_div.count(fe_type) ? &_ad_vector_div_phi_data[fe_type] : nullptr);
     }
   }
 
@@ -1055,7 +1067,7 @@ Assembly::computeADVectorPhi(const Elem * elem,
   }
 
   // On an undisplaced mesh the map carries no derivatives (the AD map is not computed there)
-  if (!_displaced || dim < 2)
+  if (!_displaced)
   {
     for (const auto i : make_range(num_shapes))
       for (const auto qp : make_range(n_qp))
@@ -1073,11 +1085,15 @@ Assembly::computeADVectorPhi(const Elem * elem,
   // AD shape function gradients, entry (k, l) of which is d phi_k / d x_l
   if (!covariant && !contravariant)
   {
-    mooseAssert(ad_grad_phi, "H1 vector families need the AD shape function gradients");
+    mooseAssert(ad_grad_phi || (!curl_phi && !div_phi),
+                "The AD curl and divergence of H1 vector families need the AD shape function "
+                "gradients");
     for (const auto i : make_range(num_shapes))
       for (const auto qp : make_range(n_qp))
       {
         phi[i][qp] = fesd._phi[i][qp];
+        if (!curl_phi && !div_phi)
+          continue;
         const auto & g = (*ad_grad_phi)[i][qp];
         if (curl_phi)
           (*curl_phi)[i][qp] =
@@ -1717,10 +1733,13 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         const Node & node = side_elem.node_ref(i);
         VectorValue<ADReal> side_point = node;
 
+        // As in computeSinglePointMapAD, mapping nodes such as the face center node of a TET14
+        // carry no degrees of freedom of lower order displacements
         if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
-            Moose::derivInsert(
-                side_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
+            if (node.n_dofs(sys_num, disp_num))
+              Moose::derivInsert(
+                  side_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
 
         for (const auto p : make_range(n_qp))
         {
@@ -2436,8 +2455,8 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
             *_vector_fe_shape_data_face[fe_type],
             _need_ad_grad_phi_face ? &_ad_vector_grad_phi_data_face[fe_type] : nullptr,
             _ad_vector_phi_data_face[fe_type],
-            _need_curl.count(fe_type) ? &_ad_vector_curl_phi_data_face[fe_type] : nullptr,
-            _need_face_div.count(fe_type) ? &_ad_vector_div_phi_data_face[fe_type] : nullptr);
+            _need_ad_curl.count(fe_type) ? &_ad_vector_curl_phi_data_face[fe_type] : nullptr,
+            _need_ad_div.count(fe_type) ? &_ad_vector_div_phi_data_face[fe_type] : nullptr);
     }
   }
 }
@@ -5060,6 +5079,7 @@ const ADVectorVariablePhiCurl &
 Assembly::feADVectorCurlPhi(FEType type) const
 {
   _need_ad_vector_phi.insert(type);
+  _need_ad_curl.insert(type);
   feCurlPhi<VectorValue<Real>>(type);
   return _ad_vector_curl_phi_data[type];
 }
@@ -5068,8 +5088,10 @@ const ADVectorVariablePhiCurl &
 Assembly::feADVectorCurlPhiFace(FEType type) const
 {
   _need_ad_vector_phi.insert(type);
+  _need_ad_curl.insert(type);
   // H1 vector families build the AD face curl and divergence from the AD face gradients
-  _need_ad_grad_phi_face = true;
+  if (!isPiolaMapped(type.family))
+    _need_ad_grad_phi_face = true;
   feCurlPhiFace<VectorValue<Real>>(type);
   return _ad_vector_curl_phi_data_face[type];
 }
@@ -5078,6 +5100,7 @@ const ADVectorVariablePhiDivergence &
 Assembly::feADVectorDivPhi(FEType type) const
 {
   _need_ad_vector_phi.insert(type);
+  _need_ad_div.insert(type);
   feDivPhi<VectorValue<Real>>(type);
   return _ad_vector_div_phi_data[type];
 }
@@ -5086,8 +5109,10 @@ const ADVectorVariablePhiDivergence &
 Assembly::feADVectorDivPhiFace(FEType type) const
 {
   _need_ad_vector_phi.insert(type);
+  _need_ad_div.insert(type);
   // H1 vector families build the AD face curl and divergence from the AD face gradients
-  _need_ad_grad_phi_face = true;
+  if (!isPiolaMapped(type.family))
+    _need_ad_grad_phi_face = true;
   feDivPhiFace<VectorValue<Real>>(type);
   return _ad_vector_div_phi_data_face[type];
 }
