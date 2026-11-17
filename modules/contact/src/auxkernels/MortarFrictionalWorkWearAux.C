@@ -7,21 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MortarArchardsLawAux.h"
+#include "MortarFrictionalWorkWearAux.h"
 #include "MooseVariableFE.h"
 #include "FEProblemBase.h"
 #include "Assembly.h"
 #include "MortarContactPressureProvider.h"
 
-registerMooseObject("ContactApp", MortarArchardsLawAux);
+registerMooseObject("ContactApp", MortarFrictionalWorkWearAux);
+registerMooseObjectRenamed("ContactApp",
+                           MortarArchardsLawAux,
+                           "06/30/2027 24:00",
+                           MortarFrictionalWorkWearAux);
 
 InputParameters
-MortarArchardsLawAux::validParams()
+MortarFrictionalWorkWearAux::validParams()
 {
   InputParameters params = MortarNodalAuxKernel::validParams();
   params.addClassDescription(
-      "Returns the weighted gap velocity at a node. This quantity is useful for mortar contact, "
-      "particularly when dual basis functions are used in contact mechanics");
+      "Computes the nodal worn-out depth from the frictional work dissipated on a mortar contact "
+      "surface (Reye's wear law, commonly called Archard's law)");
   params.addCoupledVar("v",
                        "Optional variable to take the value of. If omitted the value of the "
                        "`variable` itself is returned.");
@@ -44,16 +48,17 @@ MortarArchardsLawAux::validParams()
       "Whether to accumulate worn-out depth (The default 'true' is strongly recommended)");
   params.addRequiredParam<Real>(
       "friction_coefficient",
-      "Friction coefficient used to compute wear (to match that of frictional contact)");
+      "Coulomb friction coefficient used to compute the frictional dissipation rate (to match "
+      "that of frictional contact)");
   params.addRequiredParam<Real>(
       "energy_wear_coefficient",
-      "Energy wear coefficient is a surface-dependent parameter used in Archard's wear law");
+      "Worn-out depth per unit frictional work dissipated per unit area (Reye's wear law)");
   params.set<bool>("interpolate_normals") = false;
 
   return params;
 }
 
-MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
+MortarFrictionalWorkWearAux::MortarFrictionalWorkWearAux(const InputParameters & parameters)
   : MortarNodalAuxKernel(parameters),
     _contact_pressure_provider(
         isParamValid("weighted_gap_uo")
@@ -77,9 +82,10 @@ MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
     _qp_gap_velocity_nodal(0)
 {
   if (!_displaced)
-    paramError("use_displaced_mesh",
-               "The MortarArchardsLawAux auxiliary kernel requires the use of displaced meshes to "
-               "compute the worn-out depth.");
+    paramError(
+        "use_displaced_mesh",
+        "The MortarFrictionalWorkWearAux auxiliary kernel requires the use of displaced meshes to "
+        "compute the worn-out depth.");
 
   if (_contact_pressure_provider && _normal_pressure)
     paramError("normal_pressure",
@@ -95,7 +101,7 @@ MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
 }
 
 Real
-MortarArchardsLawAux::normalPressure() const
+MortarFrictionalWorkWearAux::normalPressure() const
 {
   return _normal_pressure ? (*_normal_pressure)[0]
                           : MetaPhysicL::raw_value(
@@ -103,7 +109,7 @@ MortarArchardsLawAux::normalPressure() const
 }
 
 Real
-MortarArchardsLawAux::computeValue()
+MortarFrictionalWorkWearAux::computeValue()
 {
   mooseAssert(_normals.size() == _test_lower.size(),
               "Normals and test_lower must be the same size");
@@ -120,13 +126,13 @@ MortarArchardsLawAux::computeValue()
 }
 
 void
-MortarArchardsLawAux::computeQpProperties()
+MortarFrictionalWorkWearAux::computeQpProperties()
 {
   _msm_volume += _JxW_msm[_qp] * _coord_msm[_qp];
 }
 
 void
-MortarArchardsLawAux::computeQpIProperties()
+MortarFrictionalWorkWearAux::computeQpIProperties()
 {
   RealVectorValue gap_velocity_vec;
   gap_velocity_vec(0) = MetaPhysicL::raw_value(_secondary_x_dot[_qp] - _primary_x_dot[_qp]);

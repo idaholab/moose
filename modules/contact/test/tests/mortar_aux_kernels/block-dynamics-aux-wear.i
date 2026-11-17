@@ -119,7 +119,7 @@ offset = -0.05
 
 [AuxKernels]
   [worn_depth]
-    type = MortarArchardsLawAux
+    type = MortarFrictionalWorkWearAux
     variable = worn_depth
     primary_boundary = 20
     secondary_boundary = 10

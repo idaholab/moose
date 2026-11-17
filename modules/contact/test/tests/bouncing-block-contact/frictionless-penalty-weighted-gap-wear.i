@@ -1,4 +1,4 @@
-# Archard wear that reads the normal contact pressure from a penalty contact user object
+# Frictional-work wear that reads the normal contact pressure from a penalty contact user object
 
 !include frictionless-penalty-weighted-gap.i
 
@@ -10,7 +10,7 @@
 
 [AuxKernels]
   [worn_depth]
-    type = MortarArchardsLawAux
+    type = MortarFrictionalWorkWearAux
     variable = worn_depth
     primary_boundary = 20
     secondary_boundary = 10
