@@ -30,6 +30,17 @@ public:
   virtual void residualSetup() override;
   virtual void jacobianSetup() override;
 
+  /**
+   * @param problem The problem holding the variables
+   * @param temperature The temperature variable
+   * @param displacements The displacement variables
+   * @return Whether every displacement variable is a solver variable of the temperature's system,
+   * so that the displacement derivatives of the gap normal enter the Jacobian
+   */
+  static bool displacementsShareSystem(const FEProblemBase & problem,
+                                       const VariableName & temperature,
+                                       const std::vector<std::string> & displacements);
+
 protected:
   /**
    * Computes the residual for the LM equation, lambda = (k/l)*(T^(1) - PT^(2)).

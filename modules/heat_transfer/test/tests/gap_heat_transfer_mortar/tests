@@ -60,6 +60,28 @@
     requirement = "We shall be able to produce the expected result for a gap conductance test case "
                   "using the mortar method using the modular gap flux system with a displaced mesh."
   []
+  [modular_displaced_point_neighbor_coupling]
+    type = RunApp
+    input = 'modular_gap_heat_transfer_mortar_displaced.i'
+    # Two processes on a distributed mesh split this interface so that a secondary node's incident
+    # faces lie on different processes
+    cli_args = 'Mesh/parallel_type=distributed Problem/error_on_jacobian_nonzero_reallocation=true '
+               'Outputs/exodus=false'
+    min_parallel = 2
+    max_parallel = 2
+    issues = '#34212'
+    requirement = "The system shall preallocate the Jacobian couplings of the secondary nodal normal "
+                  "derivatives in the mortar gap conductance constraint when the displacements are "
+                  "solved with the temperature."
+  []
+  [modular_displaced_without_displacements]
+    type = RunApp
+    input = 'modular_gap_heat_transfer_mortar_displaced.i'
+    cli_args = "Constraints/ced/displacements='' Outputs/exodus=false"
+    issues = '#34212'
+    requirement = "The system shall be able to compute mortar gap heat transfer on a displaced mesh "
+                  "when the gap conductance constraint is not given the displacement variables."
+  []
   [displaced_rz]
     type = Exodiff
     input = 'gap_heat_transfer_mortar_displaced.i'

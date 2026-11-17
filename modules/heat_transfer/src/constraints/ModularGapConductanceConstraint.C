@@ -30,9 +30,42 @@ ModularGapConductanceConstraint::validParams()
   params.addParam<std::vector<UserObjectName>>("gap_flux_models",
                                                "List of GapFluxModel user objects");
   params.addCoupledVar("displacements", "Displacement variables");
-  // The nodal normal at a secondary node depends on every face incident to it, so the Jacobian
-  // needs the secondary face point-neighbor ghosted and coupled.
-  params.set<bool>("ghost_point_neighbors") = true;
+
+  // The nodal normal at a secondary node depends on every face incident to it. When the
+  // displacements are solved with the temperature, the Jacobian therefore couples the secondary
+  // face point neighbors. The variables exist by the time the coupling functors are added.
+  params.addRelationshipManager(
+      "AugmentSparsityOnInterface",
+      Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
+        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+        rm_params.set<BoundaryName>("secondary_boundary") =
+            obj_params.get<BoundaryName>("secondary_boundary");
+        rm_params.set<BoundaryName>("primary_boundary") =
+            obj_params.get<BoundaryName>("primary_boundary");
+        rm_params.set<SubdomainName>("secondary_subdomain") =
+            obj_params.get<SubdomainName>("secondary_subdomain");
+        rm_params.set<SubdomainName>("primary_subdomain") =
+            obj_params.get<SubdomainName>("primary_subdomain");
+        rm_params.set<bool>("ghost_higher_d_neighbors") =
+            obj_params.get<bool>("ghost_higher_d_neighbors");
+        // Relationship manager callbacks also run before the problem and its variables exist
+        const auto & problem =
+            obj_params.get<MooseApp *>(MooseBase::app_param)->actionWarehouse().problemBase();
+        if (!problem || !obj_params.isParamValid("displacements") ||
+            !obj_params.isParamValid("secondary_variable"))
+          return;
+        const auto & temperature = obj_params.get<VariableName>("secondary_variable");
+        const auto displacements = obj_params.getVecMooseType("displacements");
+        if (!problem->hasVariable(temperature))
+          return;
+        for (const auto & disp : displacements)
+          if (!problem->hasVariable(disp))
+            return;
+        rm_params.set<bool>("ghost_point_neighbors") =
+            displacementsShareSystem(*problem, temperature, displacements);
+      });
 
   MooseEnum gap_geometry_type("AUTO PLATE CYLINDER SPHERE", "AUTO");
   params.addParam<MooseEnum>(
@@ -414,7 +447,7 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
 
       // ...which uses the derivative vector of the primary and secondary displacements as
       // an approximation of the true phys points derivatives when the mesh is displacing
-      if (_displaced)
+      if (_displaced && _n_disp)
       {
         // Trim interior node variable derivatives
         const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
@@ -462,6 +495,19 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
     default:
       return 0;
   }
+}
+
+bool
+ModularGapConductanceConstraint::displacementsShareSystem(
+    const FEProblemBase & problem,
+    const VariableName & temperature,
+    const std::vector<std::string> & displacements)
+{
+  const auto temperature_sys = problem.systemNumForVariable(temperature);
+  for (const auto & disp : displacements)
+    if (problem.systemNumForVariable(disp) != temperature_sys)
+      return false;
+  return true;
 }
 
 ADReal
