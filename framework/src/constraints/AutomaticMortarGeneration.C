@@ -2247,8 +2247,8 @@ AutomaticMortarGeneration::mortarSegmentGeometryDerivatives(
     const QBase & qrule_msm,
     const std::vector<Point> & secondary_xi,
     const std::vector<Point> & primary_xi,
-    std::vector<ADPoint> & secondary_dxi,
-    std::vector<ADPoint> & primary_dxi,
+    std::vector<ADPoint> & ad_secondary_xi,
+    std::vector<ADPoint> & ad_primary_xi,
     std::vector<ADPoint> & msm_nodes) const
 {
   if (dim() == 3)
@@ -2258,8 +2258,8 @@ AutomaticMortarGeneration::mortarSegmentGeometryDerivatives(
                                               qrule_msm,
                                               secondary_xi,
                                               primary_xi,
-                                              secondary_dxi,
-                                              primary_dxi,
+                                              ad_secondary_xi,
+                                              ad_primary_xi,
                                               msm_nodes);
 
   const auto & msinfo = libmesh_map_find(_msm_elem_to_info, &msm_elem);
@@ -2349,13 +2349,15 @@ AutomaticMortarGeneration::mortarSegmentGeometryDerivatives(
   // The quadrature points interpolate the end point reference coordinates linearly, see
   // Moose::Mortar::loopOverMortarSegments
   const auto n_qp = qrule_msm.n_points();
-  secondary_dxi.resize(n_qp);
-  primary_dxi.resize(n_qp);
+  ad_secondary_xi.resize(n_qp);
+  ad_primary_xi.resize(n_qp);
   for (const auto qp : make_range(n_qp))
   {
     const Real eta = qrule_msm.qp(qp)(0);
-    secondary_dxi[qp] = ADPoint(0.5 * (1 - eta) * dxi1_a + 0.5 * (1 + eta) * dxi1_b, 0, 0);
-    primary_dxi[qp] = ADPoint(0.5 * (1 - eta) * dxi2_a + 0.5 * (1 + eta) * dxi2_b, 0, 0);
+    ad_secondary_xi[qp] =
+        secondary_xi[qp] + ADPoint(0.5 * (1 - eta) * dxi1_a + 0.5 * (1 + eta) * dxi1_b, 0, 0);
+    ad_primary_xi[qp] =
+        primary_xi[qp] + ADPoint(0.5 * (1 - eta) * dxi2_a + 0.5 * (1 + eta) * dxi2_b, 0, 0);
   }
 
   // The mortar segment nodes lie on the secondary face at the end points and, for second order
@@ -2381,8 +2383,8 @@ AutomaticMortarGeneration::mortarSegmentGeometryDerivatives3d(
     const QBase & qrule_msm,
     const std::vector<Point> & secondary_xi,
     const std::vector<Point> & primary_xi,
-    std::vector<ADPoint> & secondary_dxi,
-    std::vector<ADPoint> & primary_dxi,
+    std::vector<ADPoint> & ad_secondary_xi,
+    std::vector<ADPoint> & ad_primary_xi,
     std::vector<ADPoint> & msm_nodes) const
 {
   using Type = MortarSegmentNodeOrigin::Type;
@@ -2544,8 +2546,8 @@ AutomaticMortarGeneration::mortarSegmentGeometryDerivatives3d(
   };
 
   const auto n_qp = qrule_msm.n_points();
-  secondary_dxi.resize(n_qp);
-  primary_dxi.resize(n_qp);
+  ad_secondary_xi.resize(n_qp);
+  ad_primary_xi.resize(n_qp);
   const auto msm_type = msm_elem.type();
   const auto msm_order = msm_elem.default_order();
   if (_mortar_3d_qp_mapping == Mortar3DQuadraturePointMapping::REFERENCE_INTERPOLATION)
@@ -2563,14 +2565,14 @@ AutomaticMortarGeneration::mortarSegmentGeometryDerivatives3d(
     }
     for (const auto qp : make_range(n_qp))
     {
-      secondary_dxi[qp].zero();
-      primary_dxi[qp].zero();
+      ad_secondary_xi[qp] = secondary_xi[qp];
+      ad_primary_xi[qp] = primary_xi[qp];
       for (const auto v : make_range(3))
       {
         const Real phi = Moose::fe_lagrange_2D_shape(
             msm_type, msm_order, v, static_cast<const TypeVector<Real> &>(qrule_msm.qp(qp)));
-        secondary_dxi[qp].add_scaled(secondary_vertex_dxi[v], phi);
-        primary_dxi[qp].add_scaled(primary_vertex_dxi[v], phi);
+        ad_secondary_xi[qp].add_scaled(secondary_vertex_dxi[v], phi);
+        ad_primary_xi[qp].add_scaled(primary_vertex_dxi[v], phi);
       }
     }
   }
@@ -2589,8 +2591,9 @@ AutomaticMortarGeneration::mortarSegmentGeometryDerivatives3d(
             msm_nodes[n],
             Moose::fe_lagrange_2D_shape(
                 msm_type, msm_order, n, static_cast<const TypeVector<Real> &>(qrule_msm.qp(qp))));
-      secondary_dxi[qp] = parent_dxi(secondary, secondary_xi[qp], x_qp, msm_normal);
-      primary_dxi[qp] = parent_dxi(primary, primary_xi[qp], x_qp, msm_normal);
+      ad_secondary_xi[qp] =
+          secondary_xi[qp] + parent_dxi(secondary, secondary_xi[qp], x_qp, msm_normal);
+      ad_primary_xi[qp] = primary_xi[qp] + parent_dxi(primary, primary_xi[qp], x_qp, msm_normal);
     }
   }
 }

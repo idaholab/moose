@@ -676,18 +676,22 @@ public:
                              const std::vector<Real> * const weights = nullptr);
 
   /**
-   * Reinitialize dual basis coefficients based on a customized quadrature rule
+   * Reinitialize dual basis coefficients based on a customized quadrature rule. With AD points and
+   * weights, the coefficients also carry the displacement derivatives of the points and weights;
+   * their values are the Real coefficients.
    * @param elem The secondary lower-dimensional face element
    * @param pts Quadrature points in the reference coordinates of \p elem
    * @param JxW Integration weights over all mortar segments on \p elem
-   * @param dpts Displacement derivatives of \p pts, with zero values
-   * @param ad_JxW Integration weights with their displacement derivatives
    */
-  void reinitDual(const Elem * elem,
-                  const std::vector<Point> & pts,
-                  const std::vector<Real> & JxW,
-                  const std::vector<ADPoint> * dpts = nullptr,
-                  const std::vector<ADReal> * ad_JxW = nullptr);
+  void reinitDual(const Elem * elem, const std::vector<Point> & pts, const std::vector<Real> & JxW)
+  {
+    reinitDualImpl<false>(elem, pts, JxW);
+  }
+  void
+  reinitDual(const Elem * elem, const std::vector<ADPoint> & pts, const std::vector<ADReal> & JxW)
+  {
+    reinitDualImpl<true>(elem, pts, JxW);
+  }
 
   /**
    * Reinitialize FE data for a lower dimenesional element with a given set of reference points
@@ -1980,20 +1984,18 @@ public:
    * computes the AD quadrature points on both faces and the AD mortar segment JxW and coordinate
    * transformation. The values of all AD quantities equal their Real counterparts.
    * @param secondary_face The secondary lower-dimensional face element
-   * @param secondary_xi The quadrature points in the reference coordinates of \p secondary_face
-   * @param secondary_dxi The displacement derivatives of \p secondary_xi (zero values)
+   * @param secondary_xi The quadrature points in the reference coordinates of \p secondary_face,
+   * with their displacement derivatives
    * @param primary_face The primary lower-dimensional face element
-   * @param primary_xi The quadrature points in the reference coordinates of \p primary_face
-   * @param primary_dxi The displacement derivatives of \p primary_xi (zero values)
+   * @param primary_xi The quadrature points in the reference coordinates of \p primary_face, with
+   * their displacement derivatives
    * @param msm_nodes The positions of the mortar segment nodes with their displacement
    * derivatives
    */
   void setMortarSegmentGeometryDerivatives(const Elem & secondary_face,
-                                           const std::vector<Point> & secondary_xi,
-                                           const std::vector<ADPoint> & secondary_dxi,
+                                           const std::vector<ADPoint> & secondary_xi,
                                            const Elem & primary_face,
-                                           const std::vector<Point> & primary_xi,
-                                           const std::vector<ADPoint> & primary_dxi,
+                                           const std::vector<ADPoint> & primary_xi,
                                            const std::vector<ADPoint> & msm_nodes);
 
   /**
@@ -2017,29 +2019,41 @@ public:
   ADPoint adNodalPoint(const Node & node) const;
 
   /**
-   * @return The AD shape function values of \p type at the mortar segment quadrature points on
-   * the secondary interior face, the primary interior face, and the secondary lower-dimensional
-   * face, respectively. Only the requested types are filled while mortar segment geometry
+   * Request the AD shape function values of \p type at the mortar segment quadrature points for
+   * the data of \p element_type. Objects request them at construction; while mortar segment
+   * geometry derivatives are set, the face and lower-dimensional reinits compute every requested
+   * type.
+   * @param element_type The secondary interior face (Element), primary interior face (Neighbor),
+   * or secondary lower-dimensional face (Lower)
+   * @param type The finite element type
+   * @param use_dual Whether to request the dual shape functions of \p type (Lower only)
+   */
+  void needADMortarPhi(Moose::ElementType element_type, FEType type, bool use_dual = false) const;
+
+  /**
+   * @return The requested AD shape function values of \p type at the mortar segment quadrature
+   * points on the secondary interior face, the primary interior face, and the secondary
+   * lower-dimensional face, respectively. They are filled while mortar segment geometry
    * derivatives are set.
    */
   const MooseArray<std::vector<ADReal>> & adMortarPhiFace(FEType type) const
   {
-    return _ad_mortar_phi_face[type];
+    return libmesh_map_find(_ad_mortar_phi_face, type);
   }
   const MooseArray<std::vector<ADReal>> & adMortarPhiFaceNeighbor(FEType type) const
   {
-    return _ad_mortar_phi_face_neighbor[type];
+    return libmesh_map_find(_ad_mortar_phi_face_neighbor, type);
   }
   const MooseArray<std::vector<ADReal>> & adMortarPhiLower(FEType type, bool use_dual = false) const
   {
-    return use_dual ? _ad_mortar_phi_dual_lower[type] : _ad_mortar_phi_lower[type];
+    return use_dual ? libmesh_map_find(_ad_mortar_phi_dual_lower, type)
+                    : libmesh_map_find(_ad_mortar_phi_lower, type);
   }
 
   /**
    * @return The AD shape function values of \p type for the data of \p element_type at the
    * current mortar segment quadrature points, or nullptr if mortar segment geometry derivatives
-   * are not set or there are no shape functions of \p type. A type that was not requested before
-   * is computed here and from then on at every mortar segment.
+   * are not set or \p type was not requested with needADMortarPhi()
    */
   const MooseArray<std::vector<ADReal>> *
   adMortarPhi(Moose::ElementType element_type, FEType type, bool use_dual = false) const;
@@ -3000,6 +3014,12 @@ protected:
                                   const MooseArray<ADRealVectorValue> & shift,
                                   std::map<FEType, MooseArray<std::vector<ADReal>>> & ad_phi);
 
+  /// The body of both reinitDual() overloads
+  template <bool is_ad>
+  void reinitDualImpl(const Elem * elem,
+                      const std::vector<Moose::GenericType<Point, is_ad>> & pts,
+                      const std::vector<GenericReal<is_ad>> & JxW);
+
   /// Whether the displacement derivatives of the current mortar segment geometry are set
   bool _mortar_segment_geometry_derivatives = false;
   /// The physical displacement derivatives of the mortar segment quadrature points that come from
@@ -3013,7 +3033,7 @@ protected:
   MooseArray<ADReal> _ad_JxW_msm;
   MooseArray<ADReal> _ad_coord_msm;
   /// AD shape function values at the current mortar segment quadrature points, keyed by the
-  /// requested types
+  /// types requested with needADMortarPhi()
   mutable std::map<FEType, MooseArray<std::vector<ADReal>>> _ad_mortar_phi_face;
   mutable std::map<FEType, MooseArray<std::vector<ADReal>>> _ad_mortar_phi_face_neighbor;
   mutable std::map<FEType, MooseArray<std::vector<ADReal>>> _ad_mortar_phi_lower;

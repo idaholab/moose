@@ -324,10 +324,8 @@ public:
    * @param qrule_msm The quadrature rule on the mortar segment
    * @param secondary_xi The reference coordinates of the quadrature points on the secondary face
    * @param primary_xi The reference coordinates of the quadrature points on the primary face
-   * @param secondary_dxi The derivatives (zero values) of the reference coordinates of the
-   * quadrature points on the secondary face
-   * @param primary_dxi The derivatives (zero values) of the reference coordinates of the
-   * quadrature points on the primary face
+   * @param ad_secondary_xi \p secondary_xi with their displacement derivatives
+   * @param ad_primary_xi \p primary_xi with their displacement derivatives
    * @param msm_nodes The positions of the mortar segment nodes with their derivatives
    */
   void mortarSegmentGeometryDerivatives(
@@ -337,8 +335,8 @@ public:
       const libMesh::QBase & qrule_msm,
       const std::vector<Point> & secondary_xi,
       const std::vector<Point> & primary_xi,
-      std::vector<ADPoint> & secondary_dxi,
-      std::vector<ADPoint> & primary_dxi,
+      std::vector<ADPoint> & ad_secondary_xi,
+      std::vector<ADPoint> & ad_primary_xi,
       std::vector<ADPoint> & msm_nodes) const;
 
   /**
@@ -528,8 +526,8 @@ private:
       const libMesh::QBase & qrule_msm,
       const std::vector<Point> & secondary_xi,
       const std::vector<Point> & primary_xi,
-      std::vector<ADPoint> & secondary_dxi,
-      std::vector<ADPoint> & primary_dxi,
+      std::vector<ADPoint> & ad_secondary_xi,
+      std::vector<ADPoint> & ad_primary_xi,
       std::vector<ADPoint> & msm_nodes) const;
 
   /**

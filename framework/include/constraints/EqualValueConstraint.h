@@ -43,4 +43,11 @@ protected:
   /// whether to perform stabilization. We have this parameter to save computational cost in the
   /// unstabilized case
   const bool _stabilize;
+
+  /// An empty gradient for the unstabilized case
+  const ADVariableGradient _grad_u_empty;
+
+  /// The primal solution gradients used by the stabilizing terms. Empty unless \p _stabilize.
+  const ADVariableGradient & _grad_u_secondary_stabilize;
+  const ADVariableGradient & _grad_u_primary_stabilize;
 };

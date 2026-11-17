@@ -270,6 +270,7 @@ MortarConsumerInterface::adMortarTest(const Moose::ElementType element_type,
                                       const FEType & fe_type,
                                       const bool use_dual) const
 {
+  _mci_assembly.needADMortarPhi(element_type, fe_type, use_dual);
   switch (element_type)
   {
     case Moose::ElementType::Element:

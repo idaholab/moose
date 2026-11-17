@@ -297,6 +297,7 @@ public:
   const ADTemplateVariableValue<OutputType> & adSln() const
   {
     _need_ad = _need_ad_volume = _need_ad_u = true;
+    needADMortarPhi();
     return _ad_u;
   }
 
@@ -315,6 +316,7 @@ public:
   const ADTemplateVariableValue<OutputType> & adSlnFace() const
   {
     _need_ad = _need_ad_u = true;
+    needADMortarPhi();
     return _ad_u;
   }
 
@@ -537,6 +539,11 @@ private:
   /// Ask the assembly to compute the AD element shape function gradients, which this variable's AD
   /// gradients are built from and adGradPhi() returns
   void needADGradPhi() const;
+
+  /// Ask the assembly to compute this variable's AD shape function values at the moving mortar
+  /// segment quadrature points, which its AD values and time derivatives use while mortar segment
+  /// geometry derivatives are set
+  void needADMortarPhi() const;
 
   /// A const reference to the owning MooseVariableFE object
   const MooseVariableFE<OutputType> & _var;
@@ -830,6 +837,7 @@ const typename MooseVariableData<OutputType>::ADDofValues &
 MooseVariableData<OutputType>::adDofValuesDot() const
 {
   _need_ad = _need_ad_volume = _need_ad_u_dot = true;
+  needADMortarPhi();
   if (!_time_integrator)
     // See explanation in adUDot() body
     _need_u_dot = true;
@@ -851,6 +859,7 @@ const ADTemplateVariableValue<OutputType> &
 MooseVariableData<OutputType>::adUDot() const
 {
   _need_ad = _need_ad_volume = _need_ad_u_dot = true;
+  needADMortarPhi();
 
   if (!_time_integrator)
     // If we don't have a time integrator (this will be the case for variables that are a part of
@@ -868,6 +877,7 @@ MooseVariableData<OutputType>::adUDotDot() const
 {
   // the time integrator computes the second time derivative together with the first one
   _need_ad = _need_ad_volume = _need_ad_u_dot = _need_ad_u_dotdot = true;
+  needADMortarPhi();
 
   // If we don't have a time integrator (this will be the case for variables that are a part
   // of the AuxiliarySystem) then we have no way to calculate _ad_u_dotdot and we are just

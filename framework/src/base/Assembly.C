@@ -2366,20 +2366,24 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
   }
 }
 
+template <bool is_ad>
 void
-Assembly::reinitDual(const Elem * elem,
-                     const std::vector<Point> & pts,
-                     const std::vector<Real> & JxW,
-                     const std::vector<ADPoint> * const dpts,
-                     const std::vector<ADReal> * const ad_JxW)
+Assembly::reinitDualImpl(const Elem * elem,
+                         const std::vector<Moose::GenericType<Point, is_ad>> & pts,
+                         const std::vector<GenericReal<is_ad>> & JxW)
 {
   const unsigned int elem_dim = elem->dim();
   mooseAssert(elem_dim == _mesh_dimension - 1,
               "Dual shape functions should only be computed on lower dimensional face elements");
-  mooseAssert((dpts && ad_JxW) || (!dpts && !ad_JxW),
-              "Dual coefficient derivatives require both point and integration-weight derivatives");
-  mooseAssert(!dpts || (dpts->size() == pts.size() && ad_JxW->size() == JxW.size()),
-              "Dual coefficient data must use the same quadrature points");
+  mooseAssert(pts.size() == JxW.size(), "Every quadrature point needs an integration weight");
+
+  std::vector<Point> real_pts(pts.size());
+  std::vector<Real> real_JxW(JxW.size());
+  for (const auto qp : index_range(pts))
+  {
+    real_pts[qp] = MetaPhysicL::raw_value(pts[qp]);
+    real_JxW[qp] = MetaPhysicL::raw_value(JxW[qp]);
+  }
 
   for (const auto & [fe_type, fe_lower] : _fe_lower[elem_dim])
   {
@@ -2389,62 +2393,73 @@ Assembly::reinitDual(const Elem * elem,
 
     // We use customized quadrature rule for integration along the mortar segment elements
     fe_lower->set_calculate_default_dual_coeff(false);
-    fe_lower->reinit_dual_shape_coeffs(elem, pts, JxW);
+    fe_lower->reinit_dual_shape_coeffs(elem, real_pts, real_JxW);
 
-    if (!dpts)
-      continue;
-
-    const auto n_shapes = FEInterface::n_shape_functions(fe_type, elem);
-    ADDenseMatrix A(n_shapes, n_shapes), D(n_shapes, n_shapes);
-    std::vector<std::vector<ADReal>> phi(n_shapes, std::vector<ADReal>(pts.size()));
-    for (const auto i : make_range(n_shapes))
-      for (const auto qp : index_range(pts))
-      {
-        phi[i][qp] = FEInterface::shape(fe_type, elem, i, pts[qp]);
-        for (const auto d : make_range(elem_dim))
-          phi[i][qp] += FEInterface::shape_deriv(fe_type, elem, i, d, pts[qp]) * (*dpts)[qp](d);
-      }
-
-    for (const auto i : make_range(n_shapes))
-      for (const auto qp : index_range(pts))
-      {
-        D(i, i) += (*ad_JxW)[qp] * phi[i][qp];
-        for (const auto j : make_range(n_shapes))
-          A(i, j) += (*ad_JxW)[qp] * phi[i][qp] * phi[j][qp];
-      }
-
-    if ((fe_type.family == LAGRANGE || fe_type.family == L2_LAGRANGE) &&
-        (((elem->type() == TRI6 || elem->type() == TRI7) && n_shapes == 6) ||
-         (elem->type() == QUAD8 && n_shapes == 8)))
+    if constexpr (is_ad)
     {
-      // Popp et al. (2012), Sec. 4.4.1: transformed quadratic basis with alpha = 1/5.
-      const Real alpha = Real(1) / 5;
-      for (const auto m : make_range(elem->n_vertices(), n_shapes))
-        for (const auto v : make_range(elem->n_second_order_adjacent_vertices(m)))
+      // The same construction as libMesh's FEGenericBase<Real>::compute_dual_shape_coeffs(),
+      // evaluated with the displacement derivatives of the points and weights
+      const auto n_shapes = FEInterface::n_shape_functions(fe_type, elem);
+      ADDenseMatrix A(n_shapes, n_shapes), D(n_shapes, n_shapes);
+      std::vector<std::vector<ADReal>> phi(n_shapes, std::vector<ADReal>(pts.size()));
+      for (const auto i : make_range(n_shapes))
+        for (const auto qp : index_range(pts))
         {
-          const auto vertex = elem->second_order_adjacent_vertex(m, v);
-          D(vertex, vertex) += alpha * D(m, m);
-          D(vertex, m) -= alpha * D(m, m);
+          phi[i][qp] = FEInterface::shape(fe_type, elem, i, real_pts[qp]);
+          for (const auto d : make_range(elem_dim))
+            phi[i][qp] += FEInterface::shape_deriv(fe_type, elem, i, d, real_pts[qp]) *
+                          (pts[qp](d) - real_pts[qp](d));
         }
-    }
 
-    auto & ad_coeff = _ad_mortar_dual_coeff[fe_type];
-    ad_coeff.resize(n_shapes, n_shapes);
-    const auto & coeff = fe_lower->get_dual_coeff();
-    for (const auto j : make_range(n_shapes))
-    {
-      ADDenseVector Dcol(n_shapes), coeffcol(n_shapes);
       for (const auto i : make_range(n_shapes))
-        Dcol(i) = D(i, j);
-      A.cholesky_solve(Dcol, coeffcol);
-      for (const auto i : make_range(n_shapes))
+        for (const auto qp : index_range(pts))
+        {
+          D(i, i) += JxW[qp] * phi[i][qp];
+          for (const auto j : make_range(n_shapes))
+            A(i, j) += JxW[qp] * phi[i][qp] * phi[j][qp];
+        }
+
+      if ((fe_type.family == LAGRANGE || fe_type.family == L2_LAGRANGE) &&
+          (((elem->type() == TRI6 || elem->type() == TRI7) && n_shapes == 6) ||
+           (elem->type() == QUAD8 && n_shapes == 8)))
       {
-        ad_coeff(i, j) = coeffcol(i);
-        ad_coeff(i, j).value() = coeff(i, j);
+        // Popp et al. (2012), Sec. 4.4.1: transformed quadratic basis with alpha = 1/5.
+        const Real alpha = Real(1) / 5;
+        for (const auto m : make_range(elem->n_vertices(), n_shapes))
+          for (const auto v : make_range(elem->n_second_order_adjacent_vertices(m)))
+          {
+            const auto vertex = elem->second_order_adjacent_vertex(m, v);
+            D(vertex, vertex) += alpha * D(m, m);
+            D(vertex, m) -= alpha * D(m, m);
+          }
+      }
+
+      auto & ad_coeff = _ad_mortar_dual_coeff[fe_type];
+      ad_coeff.resize(n_shapes, n_shapes);
+      const auto & coeff = fe_lower->get_dual_coeff();
+      for (const auto j : make_range(n_shapes))
+      {
+        ADDenseVector Dcol(n_shapes), coeffcol(n_shapes);
+        for (const auto i : make_range(n_shapes))
+          Dcol(i) = D(i, j);
+        A.cholesky_solve(Dcol, coeffcol);
+        for (const auto i : make_range(n_shapes))
+        {
+          ad_coeff(i, j) = coeffcol(i);
+          // The libMesh coefficients are the reference values
+          ad_coeff(i, j).value() = coeff(i, j);
+        }
       }
     }
   }
 }
+
+template void Assembly::reinitDualImpl<false>(const Elem *,
+                                              const std::vector<Point> &,
+                                              const std::vector<Real> &);
+template void Assembly::reinitDualImpl<true>(const Elem *,
+                                             const std::vector<ADPoint> &,
+                                             const std::vector<ADReal> &);
 
 void
 Assembly::reinitLowerDElem(const Elem * elem,
@@ -2603,17 +2618,14 @@ Assembly::adNodalPoint(const Node & node) const
 
 void
 Assembly::setMortarSegmentGeometryDerivatives(const Elem & secondary_face,
-                                              const std::vector<Point> & secondary_xi,
-                                              const std::vector<ADPoint> & secondary_dxi,
+                                              const std::vector<ADPoint> & secondary_xi,
                                               const Elem & primary_face,
-                                              const std::vector<Point> & primary_xi,
-                                              const std::vector<ADPoint> & primary_dxi,
+                                              const std::vector<ADPoint> & primary_xi,
                                               const std::vector<ADPoint> & msm_nodes)
 {
   mooseAssert(_msm_elem, "reinitMortarElem() must be called first");
   const auto n_qp = _qrule_msm->n_points();
-  mooseAssert(secondary_xi.size() == n_qp && secondary_dxi.size() == n_qp &&
-                  primary_xi.size() == n_qp && primary_dxi.size() == n_qp,
+  mooseAssert(secondary_xi.size() == n_qp && primary_xi.size() == n_qp,
               "Every mortar segment quadrature point needs reference coordinates on both faces");
   mooseAssert(msm_nodes.size() == _msm_elem->n_nodes(),
               "Every mortar segment node needs a position");
@@ -2623,8 +2635,7 @@ Assembly::setMortarSegmentGeometryDerivatives(const Elem & secondary_face,
   // into the motion of the face nodes X_a at fixed xi and the motion dx/dxi dxi of the reference
   // point along the face.
   const auto face_points = [this, n_qp](const Elem & face,
-                                        const std::vector<Point> & xi,
-                                        const std::vector<ADPoint> & dxi,
+                                        const std::vector<ADPoint> & ad_xi,
                                         MooseArray<ADRealVectorValue> & shift,
                                         MooseArray<ADPoint> & ad_points)
   {
@@ -2643,23 +2654,20 @@ Assembly::setMortarSegmentGeometryDerivatives(const Elem & secondary_face,
       const auto node_point = adNodalPoint(face.node_ref(a));
       for (const auto qp : make_range(n_qp))
       {
-        ad_points[qp].add_scaled(node_point, FEInterface::shape(map_type, 0, &face, a, xi[qp]));
+        const Point xi = MetaPhysicL::raw_value(ad_xi[qp]);
+        ad_points[qp].add_scaled(node_point, FEInterface::shape(map_type, 0, &face, a, xi));
         for (const auto j : make_range(face_dim))
           shift[qp].add_scaled(Point(face.point(a)) *
-                                   FEInterface::shape_deriv(map_type, 0, &face, a, j, xi[qp]),
-                               dxi[qp](j));
+                                   FEInterface::shape_deriv(map_type, 0, &face, a, j, xi),
+                               ad_xi[qp](j) - xi(j));
       }
     }
     for (const auto qp : make_range(n_qp))
       ad_points[qp] += shift[qp];
   };
-  face_points(secondary_face,
-              secondary_xi,
-              secondary_dxi,
-              _mortar_qp_shift_secondary,
-              _ad_q_points_mortar_secondary);
   face_points(
-      primary_face, primary_xi, primary_dxi, _mortar_qp_shift_primary, _ad_q_points_mortar_primary);
+      secondary_face, secondary_xi, _mortar_qp_shift_secondary, _ad_q_points_mortar_secondary);
+  face_points(primary_face, primary_xi, _mortar_qp_shift_primary, _ad_q_points_mortar_primary);
 
   // The mortar segment JxW and coordinate transformation follow its nodes. Their values are set to
   // the Real values from reinitMortarElem() so that residuals do not depend on this method.
@@ -2717,6 +2725,20 @@ Assembly::computeADMortarPhis(const std::map<FEType, std::unique_ptr<FEShapeData
       computeADMortarPhi(*it->second, shift, ad_phi_type);
 }
 
+void
+Assembly::needADMortarPhi(const Moose::ElementType element_type,
+                          const FEType type,
+                          const bool use_dual) const
+{
+  mooseAssert(!use_dual || element_type == Moose::ElementType::Lower,
+              "Dual mortar shape functions are only defined on lower-dimensional elements");
+  auto & ad_phi = use_dual                                       ? _ad_mortar_phi_dual_lower
+                  : element_type == Moose::ElementType::Element  ? _ad_mortar_phi_face
+                  : element_type == Moose::ElementType::Neighbor ? _ad_mortar_phi_face_neighbor
+                                                                 : _ad_mortar_phi_lower;
+  ad_phi.try_emplace(type);
+}
+
 const MooseArray<std::vector<ADReal>> *
 Assembly::adMortarPhi(const Moose::ElementType element_type,
                       const FEType type,
@@ -2725,45 +2747,13 @@ Assembly::adMortarPhi(const Moose::ElementType element_type,
   if (!_mortar_segment_geometry_derivatives)
     return nullptr;
 
-  mooseAssert(!use_dual || element_type == Moose::ElementType::Lower,
-              "Dual mortar shape functions are only defined on lower-dimensional elements");
-  const bool neighbor = element_type == Moose::ElementType::Neighbor;
-  const auto & shape_data = element_type == Moose::ElementType::Element ? _fe_shape_data_face
-                            : neighbor ? _fe_shape_data_face_neighbor
-                                       : _fe_shape_data_lower;
-  auto & ad_phi = use_dual                                      ? _ad_mortar_phi_dual_lower
-                  : element_type == Moose::ElementType::Element ? _ad_mortar_phi_face
-                  : neighbor                                    ? _ad_mortar_phi_face_neighbor
-                                                                : _ad_mortar_phi_lower;
-  const auto shape_it = shape_data.find(type);
-  if (shape_it == shape_data.end() || !shape_it->second)
-    return nullptr;
-  if (const auto it = ad_phi.find(type); it != ad_phi.end())
-    return &it->second;
-
-  auto & ad_phi_type = ad_phi[type];
-  const auto & shift = neighbor ? _mortar_qp_shift_primary : _mortar_qp_shift_secondary;
-  if (!use_dual)
-    computeADMortarPhi(*shape_it->second, shift, ad_phi_type);
-  else
-  {
-    const auto coeff_it = _ad_mortar_dual_coeff.find(type);
-    mooseAssert(coeff_it != _ad_mortar_dual_coeff.end(),
-                "The AD dual coefficients must be initialized before the dual shape values");
-    MooseArray<std::vector<ADReal>> ad_primal_phi;
-    computeADMortarPhi(*shape_it->second, shift, ad_primal_phi);
-    ad_phi_type.resize(ad_primal_phi.size());
-    for (const auto j : index_range(ad_primal_phi))
-    {
-      ad_phi_type[j].assign(ad_primal_phi[j].size(), 0);
-      for (const auto i : index_range(ad_primal_phi))
-        for (const auto qp : index_range(ad_primal_phi[j]))
-          ad_phi_type[j][qp] += coeff_it->second(i, j) * ad_primal_phi[i][qp];
-      for (const auto qp : index_range(ad_primal_phi[j]))
-        ad_phi_type[j][qp].value() = _fe_shape_data_dual_lower[type]->_phi[j][qp];
-    }
-  }
-  return &ad_phi_type;
+  const auto & ad_phi = use_dual                                      ? _ad_mortar_phi_dual_lower
+                        : element_type == Moose::ElementType::Element ? _ad_mortar_phi_face
+                        : element_type == Moose::ElementType::Neighbor
+                            ? _ad_mortar_phi_face_neighbor
+                            : _ad_mortar_phi_lower;
+  const auto it = ad_phi.find(type);
+  return it == ad_phi.end() || it->second.size() == 0 ? nullptr : &it->second;
 }
 
 void

@@ -73,8 +73,10 @@ also differentiated. Petrov-Galerkin uses this dual basis for multiplier interpo
 standard auxiliary basis for the test weighting. SECOND-order Petrov-Galerkin remains unavailable on
 QUAD8 and TRI6 secondary faces because the standard quadratic test weighting is incompatible with the
 transformed dual construction. Dual penalty traction bases remain unavailable because the auxiliary
-traction coefficients are not nonlinear unknowns. Segment geometry derivatives are not available
-with a stabilized [EqualValueConstraint](EqualValueConstraint.md) (`delta > 0`). Every mortar object on an interface,
+traction coefficients are not nonlinear unknowns. The AD solution gradients do not include the motion
+of the quadrature points, so a mortar constraint whose residual uses primal solution gradients
+reports an error when the option is set; this excludes a stabilized
+[EqualValueConstraint](EqualValueConstraint.md) (`delta > 0`). Every mortar object on an interface,
 including mortar auxiliary kernels and user objects, must use the same value. Supported constraints
 and user objects opt in, and other mortar constraints report an error when the option is set. A 3D
 segment vertex that cannot be traced to the secondary and primary nodes is treated as fixed,

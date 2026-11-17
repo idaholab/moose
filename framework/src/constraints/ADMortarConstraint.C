@@ -48,6 +48,11 @@ ADMortarConstraint::ADMortarConstraint(const InputParameters & parameters)
     if (!getParam<bool>("_supports_segment_geometry_derivatives"))
       paramError("segment_geometry_derivatives",
                  "Segment geometry derivatives are not supported by this mortar constraint.");
+    // The AD primal gradients do not include the motion of the mortar segment quadrature points
+    if (getParam<bool>("_compute_primal_gradients"))
+      paramError("segment_geometry_derivatives",
+                 "Segment geometry derivatives are not available when the residual uses primal "
+                 "solution gradients.");
     if (_var)
       _ad_test = _use_petrov_galerkin
                      ? &adMortarTest(Moose::ElementType::Lower, _aux_lm_var->feType())

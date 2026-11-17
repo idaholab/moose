@@ -86,7 +86,8 @@ protected:
    * @return The AD shape function values of \p fe_type at the mortar segment quadrature points for
    * the data of \p element_type (Element: secondary interior face, Neighbor: primary interior
    * face, Lower: secondary lower-dimensional face). They carry the motion of the quadrature
-   * points and are only filled when \p _ad_segment_geometry is true.
+   * points and are only filled when \p _ad_segment_geometry is true. Call this at construction or
+   * in initialSetup(), since it requests the values from the assembly.
    */
   const MooseArray<std::vector<ADReal>> & adMortarTest(Moose::ElementType element_type,
                                                        const libMesh::FEType & fe_type,

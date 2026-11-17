@@ -151,6 +151,16 @@ MooseVariableData<OutputType>::needADGradPhi() const
 
 template <typename OutputType>
 void
+MooseVariableData<OutputType>::needADMortarPhi() const
+{
+  // The dual basis is added on top of these values in Assembly, see Assembly::adMortarPhi()
+  if constexpr (std::is_same_v<OutputType, Real>)
+    if (!_use_dual)
+      _assembly.needADMortarPhi(_element_type, _fe_type);
+}
+
+template <typename OutputType>
+void
 MooseVariableData<OutputType>::setGeometry(Moose::GeometryType gm_type)
 {
   switch (gm_type)

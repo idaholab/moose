@@ -138,7 +138,7 @@ loopOverMortarSegments(
   std::unordered_map<const Node *, ADRealVectorValue> ad_nodal_normals;
   if (geometry_derivatives)
     amg.computeADNodalNormals(ad_coordinate, ad_nodal_normals);
-  std::vector<ADPoint> secondary_dxi, primary_dxi, msm_nodes;
+  std::vector<ADPoint> ad_secondary_xi, ad_primary_xi, msm_nodes;
   // Faces reinitialized outside of a mortar segment must not see the segment geometry derivatives
   struct ClearGeometryDerivatives
   {
@@ -177,7 +177,7 @@ loopOverMortarSegments(
     std::vector<Point> secondary_xi_pts, primary_xi_pts;
 
     std::vector<Real> JxW;
-    std::vector<ADPoint> secondary_dxi_all;
+    std::vector<ADPoint> ad_secondary_xi_pts;
     std::vector<ADReal> ad_JxW;
 
 #ifndef NDEBUG
@@ -247,18 +247,16 @@ loopOverMortarSegments(
                                                *qrule_msm,
                                                secondary_xi,
                                                primary_xi,
-                                               secondary_dxi,
-                                               primary_dxi,
+                                               ad_secondary_xi,
+                                               ad_primary_xi,
                                                msm_nodes);
           assembly.setMortarSegmentGeometryDerivatives(*secondary_face_elem,
-                                                       secondary_xi,
-                                                       secondary_dxi,
+                                                       ad_secondary_xi,
                                                        *msinfo.primary_elem,
-                                                       primary_xi,
-                                                       primary_dxi,
+                                                       ad_primary_xi,
                                                        msm_nodes);
-          secondary_dxi_all.insert(
-              secondary_dxi_all.end(), secondary_dxi.begin(), secondary_dxi.end());
+          ad_secondary_xi_pts.insert(
+              ad_secondary_xi_pts.end(), ad_secondary_xi.begin(), ad_secondary_xi.end());
           for (const auto qp : make_range(qrule_msm->n_points()))
             ad_JxW.push_back(assembly.adJxWMortar()[qp] *
                              assembly.adMortarCoordTransformation()[qp]);
@@ -284,11 +282,12 @@ loopOverMortarSegments(
     // Reinit dual shape coeffs if dual shape functions needed
     // lindsayad: is there any need to make sure we do this on both reference and displaced?
     if (assembly.needDual())
-      assembly.reinitDual(secondary_face_elem,
-                          secondary_xi_pts,
-                          JxW,
-                          geometry_derivatives ? &secondary_dxi_all : nullptr,
-                          geometry_derivatives ? &ad_JxW : nullptr);
+    {
+      if (geometry_derivatives)
+        assembly.reinitDual(secondary_face_elem, ad_secondary_xi_pts, ad_JxW);
+      else
+        assembly.reinitDual(secondary_face_elem, secondary_xi_pts, JxW);
+    }
 
     unsigned int n_segment = 0;
 
@@ -329,16 +328,11 @@ loopOverMortarSegments(
                                              *qrule_msm,
                                              xi1_pts,
                                              xi2_pts,
-                                             secondary_dxi,
-                                             primary_dxi,
+                                             ad_secondary_xi,
+                                             ad_primary_xi,
                                              msm_nodes);
-        assembly.setMortarSegmentGeometryDerivatives(*secondary_face_elem,
-                                                     xi1_pts,
-                                                     secondary_dxi,
-                                                     *msinfo.primary_elem,
-                                                     xi2_pts,
-                                                     primary_dxi,
-                                                     msm_nodes);
+        assembly.setMortarSegmentGeometryDerivatives(
+            *secondary_face_elem, ad_secondary_xi, *msinfo.primary_elem, ad_primary_xi, msm_nodes);
       }
 
       const Elem * reinit_secondary_elem = secondary_ip;
