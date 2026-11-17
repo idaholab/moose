@@ -58,6 +58,7 @@
 #include "Parser.h"
 #include "CSGBase.h"
 #include "Capabilities.h"
+#include "RestartableDataReader.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -81,6 +82,7 @@
 #endif
 
 // C++ includes
+#include <algorithm>
 #include <numeric> // std::accumulate
 #include <fstream>
 #include <iterator>
