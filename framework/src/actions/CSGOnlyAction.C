@@ -9,6 +9,7 @@
 
 #include "MooseApp.h"
 #include "CSGOnlyAction.h"
+#include "CSGAction.h"
 #include "CSGBase.h"
 #include "MeshGenerator.h"
 
@@ -64,13 +65,24 @@ CSGOnlyAction::act()
       mooseError("Expecting final generator with name " + final_mg_name +
                  " but not found in mesh generator tree");
 
+    // Optional [ConstructiveSolidGeometry] block with output options
+    const auto csg_actions = _awh.getActions<CSGAction>();
+    const CSGAction * const csg_block = csg_actions.empty() ? nullptr : *csg_actions.begin();
+
+    // Engineering units are expanded unless [ConstructiveSolidGeometry]/expand_units = false
+    if (!csg_block || csg_block->getParam<bool>("expand_units"))
+      _csg_obj->expandAllEngUnits();
+
     Moose::out << "Outputting CSGBase object for " + final_mg_name + "\n";
 
     auto csg_json = _csg_obj->generateOutput();
 
     // write generated json to file. Filename will be based on optional argument to
-    // --csg-only. If not provided, the output name will be based on the filename
+    // --csg-only, then on [ConstructiveSolidGeometry]/output_file. If neither is provided, the
+    // output name will be based on the filename
     std::string json_out = _app.parameters().get<std::string>("csg_only");
+    if (json_out.empty() && csg_block && csg_block->isParamValid("output_file"))
+      json_out = csg_block->getParam<std::string>("output_file");
     if (json_out.empty())
       json_out = _app.getOutputFileBase() + "_csg.json";
 

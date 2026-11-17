@@ -222,7 +222,7 @@ public:
 
   friend class SCMTriAssemblyMeshGenerator;
   friend class SCMTriDuctMeshGenerator;
-  friend class SCMDetailedTriAssemblyMeshGenerator;
+  friend class SCMTriVisualizationAssemblyMeshGenerator;
 
   /// number of corners in the duct x-sec
   static const unsigned int N_CORNERS = 6;

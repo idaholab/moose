@@ -640,11 +640,11 @@ Example Output:
 
 ### Engineering Unit Example
 
-This fourth example is creating an infinite N-Sided polygon, similar to the [first infinite prism example](#infinite-prism-example), but it instead creates an engineering unit with the option to expand that unit into the corresponding rudimentary components.
+This fourth example is creating an infinite N-Sided polygon, similar to the [first infinite prism example](#infinite-prism-example), but it instead creates an engineering unit, which can be expanded into the corresponding rudimentary components with the [!param](/ConstructiveSolidGeometry/expand_units) parameter of the [`[ConstructiveSolidGeometry]`](syntax/ConstructiveSolidGeometry/index.md) input block.
 
 !listing TestPolygonUnitMeshGenerator.C start=InputParameters
 
-This first set of input and output show the use case where the engineering unit is the final output (not expanded).
+This first set of input and output show the use case where the engineering unit is the final output (setting [!param](/ConstructiveSolidGeometry/expand_units) to `false`).
 
 Input:
 
@@ -654,7 +654,7 @@ Output:
 
 !listing csg_only_poly_unit_out_csg.json
 
-The second use case for this mesh generator is when `expand_unit = true`, thus removing the engineering unit from the output and replacing it with the appropriate surface definitions.
+The second use case is when [!param](/ConstructiveSolidGeometry/expand_units) is `true` (the default), thus removing the engineering unit from the output and replacing it with the appropriate surface definitions.
 
 Input:
 

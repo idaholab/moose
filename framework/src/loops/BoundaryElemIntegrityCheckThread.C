@@ -9,7 +9,7 @@
 
 // MOOSE includes
 #include "BoundaryElemIntegrityCheckThread.h"
-#include "AuxiliarySystem.h"
+#include "AuxKernelBase.h"
 #include "NonlinearSystemBase.h"
 #include "FEProblemBase.h"
 #include "SideUserObject.h"
@@ -25,24 +25,14 @@
 
 BoundaryElemIntegrityCheckThread::BoundaryElemIntegrityCheckThread(
     FEProblemBase & fe_problem, const TheWarehouse::Query & query)
-  : _fe_problem(fe_problem),
-    _aux_sys(fe_problem.getAuxiliarySystem()),
-    _elem_aux(_aux_sys.elemAuxWarehouse()),
-    _elem_vec_aux(_aux_sys.elemVectorAuxWarehouse()),
-    _elem_array_aux(_aux_sys.elemArrayAuxWarehouse()),
-    _query(query)
+  : _fe_problem(fe_problem), _query(query)
 {
 }
 
 // Splitting Constructor
 BoundaryElemIntegrityCheckThread::BoundaryElemIntegrityCheckThread(
     BoundaryElemIntegrityCheckThread & x, Threads::split)
-  : _fe_problem(x._fe_problem),
-    _aux_sys(x._aux_sys),
-    _elem_aux(x._elem_aux),
-    _elem_vec_aux(x._elem_vec_aux),
-    _elem_array_aux(x._elem_array_aux),
-    _query(x._query)
+  : _fe_problem(x._fe_problem), _query(x._query)
 {
 }
 
@@ -90,12 +80,8 @@ BoundaryElemIntegrityCheckThread::operator()(const ConstBndElemRange & range)
         boundaryIntegrityCheckError(*uo, leftover_vars, bnd_name);
       }
 
-    auto check = [elem, boundary_id, &bnd_name, tid, &mesh, side](const auto & warehouse)
+    auto check = [elem, &bnd_name, &mesh, side](const auto & bnd_objects)
     {
-      if (!warehouse.hasBoundaryObjects(boundary_id, tid))
-        return;
-
-      const auto & bnd_objects = warehouse.getBoundaryObjects(boundary_id, tid);
       for (const auto & bnd_object : bnd_objects)
         // Skip if this object uses geometric search because coupled variables may be defined on
         // paired boundaries instead of the boundary this elem is on
@@ -118,11 +104,25 @@ BoundaryElemIntegrityCheckThread::operator()(const ConstBndElemRange & range)
         }
     };
 
-    check(_elem_aux);
-    check(_elem_vec_aux);
-    check(_elem_array_aux);
+    // Mortar AuxKernels are excluded here: their boundaryIDs() report the primary/secondary
+    // boundaries they couple across, but their coupled variables are only required to be
+    // defined on the mortar segment mesh, not on every element of those boundaries.
+    std::vector<AuxKernelBase *> auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>("AuxKernel")
+        .condition<AttribThread>(tid)
+        .condition<AttribAuxKernelType>(AuxKernelType::Nodal | AuxKernelType::Elemental)
+        .condition<AttribBoundaries>(boundary_id, true)
+        .queryInto(auxkernels);
+    check(auxkernels);
+
     for (const auto i : make_range(_fe_problem.numNonlinearSystems()))
-      check(_fe_problem.getNonlinearSystemBase(i).getIntegratedBCWarehouse());
+    {
+      const auto & warehouse = _fe_problem.getNonlinearSystemBase(i).getIntegratedBCWarehouse();
+      if (warehouse.hasBoundaryObjects(boundary_id, tid))
+        check(warehouse.getBoundaryObjects(boundary_id, tid));
+    }
   }
 }
 

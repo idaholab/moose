@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NEML2Utils.h"
+#include "MooseError.h"
 
 #ifdef NEML2_ENABLED
 #include "ConsoleStream.h"

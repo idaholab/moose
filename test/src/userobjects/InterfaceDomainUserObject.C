@@ -108,9 +108,15 @@ void
 InterfaceDomainUserObject::finalize()
 {
   gatherSum(_nodal_integrals);
-  for (const auto integral : _nodal_integrals)
-    if (std::abs(integral) > _nl_abs_tol)
-      mooseError("Interface diffusion problem not converged");
+  for (const auto node_id : index_range(_nodal_integrals))
+    if (std::abs(_nodal_integrals[node_id]) > _nl_abs_tol)
+      mooseError("Nodal residual check failed at node ",
+                 node_id,
+                 ": the absolute nodal residual ",
+                 std::abs(_nodal_integrals[node_id]),
+                 " exceeds the tolerance ",
+                 _nl_abs_tol,
+                 ".");
 }
 
 void

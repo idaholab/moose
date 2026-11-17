@@ -9,6 +9,8 @@
 
 #include "KokkosOnDemandTest.h"
 
+#include "FEProblemBase.h"
+
 registerKokkosMaterial("MooseTestApp", KokkosOnDemandTest);
 
 InputParameters
@@ -31,4 +33,20 @@ KokkosOnDemandTest::KokkosOnDemandTest(const InputParameters & parameters)
 
   for (unsigned int i = 0; i < _num_props; ++i)
     _properties[i] = declareKokkosOnDemandProperty<Real>(_prop_names[i]);
+}
+
+void
+KokkosOnDemandTest::initialSetup()
+{
+  Material::initialSetup();
+
+  for (unsigned int i = 0; i < _num_props; ++i)
+    if (bool(_properties[i]) != _fe_problem.isMatPropRequested(_prop_names[i]))
+      mooseError("The validity of property '",
+                 _prop_names[i],
+                 "' on host (",
+                 bool(_properties[i]),
+                 ") does not agree with whether it is requested (",
+                 _fe_problem.isMatPropRequested(_prop_names[i]),
+                 ").");
 }

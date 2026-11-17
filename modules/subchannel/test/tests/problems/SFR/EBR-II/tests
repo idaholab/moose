@@ -17,6 +17,6 @@
     override_rel_err = '5e-5'
     override_abs_zero = '1e-6'
     max_threads = 1
-    requirement = 'The system will examine the subchannel solver for the EBR-II case'
+    requirement = 'The system shall examine the subchannel solver for the EBR-II case'
   []
 []

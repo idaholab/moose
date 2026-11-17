@@ -139,7 +139,7 @@ function _python_modules()
         /usr/bin/env python3 -c "import ${warn_module}" 2>/dev/null
         if [[ $? -ge 1 ]]; then
             # fix naming convention from package name vs import name
-            if [[ ${warn_module} == 'yaml' ]]; then warn_module='pyaml'; fi
+            if [[ ${warn_module} == 'yaml' ]]; then warn_module='pyyaml'; fi
             warn_cnt+=("$warn_module ")
         fi
     done

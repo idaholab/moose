@@ -57,6 +57,8 @@ requirements:
     - sysroot_linux-64 {{ c_stdlib_version }}.*               # [linux]
     - clangxx_osx-64 {{ cxx_compiler_version }}.*             # [osx and x86_64]
     - clangxx_osx-arm64 {{ cxx_compiler_version }}.*          # [osx and arm64]
+    # hit.so is compiled against the build python and must run on the same one
+    - python 3.14.*
     # for testharness/python utilities
     - moose-tools 2026.11.09
     # for running app --copy-inputs

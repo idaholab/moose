@@ -1374,11 +1374,17 @@ MooseMesh::isBoundaryFullyExternalToSubdomains(BoundaryID bid,
 {
   mooseAssert(_bnd_elem_range, "Boundary element range is not initialized");
 
+  // On a distributed mesh the boundary element range only holds the local and ghosted sides, so
+  // each process checks the sides of the elements it owns and the answers are combined. The
+  // owner always has the neighbor across the side, while a ghosted element may not. The loop
+  // therefore must not return early: every process has to reach the reduction.
+  bool crosses_subdomains = false;
+
   // Loop over all side elements of the mesh, select those on the boundary
   for (const auto & bnd_elem : *_bnd_elem_range)
   {
     const auto & [elem_ptr, elem_side, elem_bid] = *bnd_elem;
-    if (elem_bid == bid)
+    if (elem_bid == bid && elem_ptr->processor_id() == processor_id())
     {
       // If an element is internal to the group of subdomain, check the neighbor
       if (blk_group.find(elem_ptr->subdomain_id()) != blk_group.end())
@@ -1395,11 +1401,16 @@ MooseMesh::isBoundaryFullyExternalToSubdomains(BoundaryID bid,
         // If the neighbor is also in the group of subdomain,
         // then the boundary cuts the subdomains
         if (blk_group.find(neighbor->subdomain_id()) != blk_group.end())
-          return false;
+        {
+          crosses_subdomains = true;
+          break;
+        }
       }
     }
   }
-  return true;
+
+  comm().max(crosses_subdomains);
+  return !crosses_subdomains;
 }
 
 void

@@ -3,7 +3,7 @@
 
   [conduction]
     design = 'KokkosHeatConduction.md KokkosHeatConductionMaterial.md'
-    requirement = 'The Kokkos system shall compute temperature field through conduction'
+    requirement = 'The system shall compute temperature field through conduction using Kokkos'
     [material]
       type = 'Exodiff'
       input = 'kokkos_conduction.i'
@@ -25,7 +25,7 @@
 
   [transient]
     design = 'KokkosHeatConductionTimeDerivative.md'
-    requirement = 'The Kokkos system shall compute temperature field through conduction with time-derivative terms'
+    requirement = 'The system shall compute temperature field through conduction with time-derivative terms using Kokkos'
     [plain]
       type = 'Exodiff'
       input = 'kokkos_transient_conduction.i'
@@ -56,7 +56,7 @@
 
   [convective]
     design = 'KokkosConvectiveHeatFluxBC.md KokkosCoupledConvectiveHeatFluxBC.md'
-    requirement = 'The Kokkos system shall provide convective heat flux boundary condition where far-field temperature and convective heat transfer coefficient are given as'
+    requirement = 'The system shall provide, using Kokkos, a convective heat flux boundary condition where far-field temperature and convective heat transfer coefficient are given as'
     [constant]
       type = 'Exodiff'
       input = 'kokkos_convective_heat_flux.i'

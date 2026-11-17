@@ -53,10 +53,10 @@ $k_2=4.694$\\
 $k_3=7.855$\\
 The moment of inertia for a rectangular cross section beam is $I=\frac{wh^3}{12}$, where $h$ is the dimension in the direction being loaded and $w$ is the other cross sectional dimension.
 
-For an aluminum cantilever beam, $E=$68e9 Pa, $\nu=$0.36, $\rho=$27.e3 kg/m$^3$.
+For an aluminum cantilever beam, $E=$68e9 Pa, $\nu=$0.36, $\rho=$2.7e3 kg/m$^3$.
 The analytic first and second natural frequencies for this system bending in directions tangential to the beam axis are:\\
-$\omega_{1a}=$509Hz\\
-$\omega_{1b}=$763Hz\\
+$\omega_{1a}=$509 rad/s\\
+$\omega_{1b}=$763 rad/s\\
 Both of these frequencies use the same value of $k_1$, but with the moment of inertia recomputed for bending about the different widths, where the lower frequency is the first bending mode about the thin direction ($h=a=$0.1m) and the next higher frequency is the first bending mode about the thicker direction ($h=b=$0.15m).
 
 
@@ -106,8 +106,8 @@ change which eigenvector is outputted adjust the index in
 id=m_prob caption=Eigenvalues
 
 For this coarse mesh example, we were able to determine the first two
-$\omega$'s: 645.1 Hz and 855 Hz. Which are close to the theoretical result of
-509 Hz and 763 Hz, and as the mesh is refined the results would converge on to the
+$\omega$'s: 645.1 rad/s and 855 rad/s. Which are close to the theoretical result of
+509 rad/s and 763 rad/s, and as the mesh is refined the results would converge on to the
 true solutions. The results are similar to the frequency response function as
 long as the sweeps are granular enough. The second mode is visualized in
 [mode2], and the outline of the undeformed state is shown in black.
@@ -159,9 +159,9 @@ with amplitude $A$ and frequency $f$, is transformed to
 
 
 The simulated natural frequencies given by peaks in the FRF for a coarse mesh are:\\
-$\omega_{1a}=$650Hz\\
-$\omega_{1b}=$850Hz\\
-where 50Hz frequency increments are used in the FRF frequency sweep. The FRF where each displacement is plotted separately is shown in [cantileverfrf] where each mode is excited separately.  A scaled displacement magnitude is shown in [cantileverfrfmag] for a coarse and fine mesh.  A coarse mesh shows a stiffer response and and the natural frequencies are over-estimated.  The natural frequencies converge on the analytic result from above as the mesh is refined.
+$\omega_{1a}=$650 rad/s\\
+$\omega_{1b}=$850 rad/s\\
+where 50 rad/s frequency increments are used in the FRF frequency sweep. The FRF where each displacement is plotted separately is shown in [cantileverfrf] where each mode is excited separately.  A scaled displacement magnitude is shown in [cantileverfrfmag] for a coarse and fine mesh.  A coarse mesh shows a stiffer response and and the natural frequencies are over-estimated.  The natural frequencies converge on the analytic result from above as the mesh is refined.
 The simulations will fail if they are run at the natural frequencies because the solution will become singular,
 i.e the displacements blow-up as shown by the asymptotes in [cantileverfrf].
 

@@ -1,0 +1,61 @@
+# PorousRhieChowMassFlux
+
+!syntax description /UserObjects/PorousRhieChowMassFlux
+
+## Overview
+
+`PorousRhieChowMassFlux` extends [RhieChowMassFlux.md] for porous-medium and
+porous-baffle calculations in the linear finite volume SIMPLE workflow.
+
+Compared with the base object, it adds:
+
+- cell-porosity scaling of the pressure-coupling fields,
+- porous-baffle pressure jumps stored and relaxed on coupled interface faces,
+- compatibility with [FVPressureJumpGreenGaussGradient](FVPressureJumpGreenGaussGradient.md), which
+  reconstructs the pressure separately on each side of every baffle, and
+- a pressure-velocity coupling gradient that remains separate from the solution gradient used by
+  the baffle diffusion correction.
+
+Pressure jumps are supplied by the models listed in
+[!param](/UserObjects/PorousRhieChowMassFlux/pressure_jump_models), such as
+[BernoulliFormLossPressureJump.md]. The jump is updated from the
+current face mass flux and under-relaxed with
+[!param](/UserObjects/PorousRhieChowMassFlux/pressure_jump_relaxation). See
+[porous_rhie_chow_baffle.md] for the discrete coupling.
+
+Before each pressure corrector, the object updates the jump from the preceding corrected face flux. With
+[PIMPLE.md], this happens before each of the $n+1$ pressure correctors of an outer iteration, so
+the effective relaxation grows with
+[!param](/Executioner/PIMPLE/num_piso_iterations). Without a reconstructed pressure gradient, the
+face flux is only recomputed after the last corrector, so a relaxation factor $\omega$ acts per
+outer iteration as $1 - (1 - \omega)^{n+1}$.
+The pressure variable's [FVPressureJumpGreenGaussGradient](FVPressureJumpGreenGaussGradient.md)
+then removes that jump when interpolating pressure across each baffle. A zero jump recovers the
+standard Green-Gauss face value exactly.
+
+The tangential superficial velocity also jumps across a baffle wherever porosity does. Density
+and viscosity must vary continuously. Every
+velocity variable must therefore use
+[FVVelocityJumpGreenGaussGradient](FVVelocityJumpGreenGaussGradient.md) as its default gradient
+method. On baffle faces the $\rho\mathbf{H}/\mathbf{A}$ flux of each side is weighted with the same
+half-cell conductances as the pressure (see
+[LinearFVPressureCorrectionDiffusionJump](LinearFVPressureCorrectionDiffusionJump.md)), so neither
+the velocity jump nor a body force balanced by the pressure on each side is read as a mass-flux
+error.
+
+This is the user object expected by
+[LinearPWCNSFVMomentumFlux.md],
+[LinearFVPressureCorrectionDiffusionJump.md], and porous
+uses of
+[LinearFVEnergyAdvection.md].
+
+In this example, `PorousRhieChowMassFlux` uses a separately configured pressure-jump model on two
+porous interfaces.
+
+!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/linear-segregated/1d-simple-channel/porous-baffle-1d.i block=UserObjects
+
+!syntax parameters /UserObjects/PorousRhieChowMassFlux
+
+!syntax inputs /UserObjects/PorousRhieChowMassFlux
+
+!syntax children /UserObjects/PorousRhieChowMassFlux

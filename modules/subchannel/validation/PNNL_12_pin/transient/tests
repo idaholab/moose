@@ -14,6 +14,6 @@
       # so differences of that size between compilers are within the solver tolerance
       rel_err = 2e-4
       max_threads = 1
-      requirement = 'The system will examine the subchannel solver for the PNNL 12-pin transient case'
+      requirement = 'The system shall examine the subchannel solver for the PNNL 12-pin transient case'
   []
 []
