@@ -24,7 +24,7 @@ public:
 
   MFEMVectorEssentialConstraint(const InputParameters & parameters);
 
-  void ApplyConstraint(mfem::ParGridFunction & gridfunc, mfem::Array<int> & ess_tdof_list) override;
+  void ApplyConstraint(mfem::ParGridFunction & gridfunc, mfem::Array<int> & ess_tdofs) override;
 
 protected:
   mfem::VectorCoefficient & _vec_coef;

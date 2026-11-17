@@ -65,29 +65,29 @@ MFEMConstraint::checkDisjointSubdomains(MFEMConstraint & other)
 const mfem::Array<int> &
 MFEMConstraint::getSubdomainTrueDofs(mfem::ParFiniteElementSpace & pfes)
 {
-  updateSubdomainDofs(pfes);
+  updateSubdomainTDofs(pfes);
   return _subdomain_tdofs;
 }
 
 const mfem::Array<int> &
-MFEMConstraint::getSubdomainDofMarker(mfem::ParFiniteElementSpace & pfes)
+MFEMConstraint::getSubdomainLDofMarker(mfem::ParFiniteElementSpace & pfes)
 {
-  updateSubdomainDofs(pfes);
-  return _subdomain_dof_marker;
+  updateSubdomainTDofs(pfes);
+  return _subdomain_ldof_marker;
 }
 
 void
-MFEMConstraint::updateSubdomainDofs(mfem::ParFiniteElementSpace & pfes)
+MFEMConstraint::updateSubdomainTDofs(mfem::ParFiniteElementSpace & pfes)
 {
   // MFEM bumps the sequence number whenever the space is updated, including after
   // refinement of the mesh, so it invalidates the cache exactly when needed.
   if (_subdomain_tdofs_sequence != pfes.GetSequence())
   {
-    Moose::MFEM::subdomainDofs(pfes,
-                               getSubdomainMarkers(),
-                               _constrain_subdomain_boundary,
-                               _subdomain_dof_marker,
-                               _subdomain_tdofs);
+    Moose::MFEM::subdomainTDofs(pfes,
+                                getSubdomainMarkers(),
+                                _constrain_subdomain_boundary,
+                                _subdomain_ldof_marker,
+                                _subdomain_tdofs);
     _subdomain_tdofs_sequence = pfes.GetSequence();
   }
 }

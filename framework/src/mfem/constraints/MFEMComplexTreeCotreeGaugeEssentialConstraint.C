@@ -41,10 +41,10 @@ MFEMComplexTreeCotreeGaugeEssentialConstraint::MFEMComplexTreeCotreeGaugeEssenti
 
 void
 MFEMComplexTreeCotreeGaugeEssentialConstraint::ApplyConstraint(
-    mfem::ParComplexGridFunction & gridfunc, mfem::Array<int> & ess_tdof_list)
+    mfem::ParComplexGridFunction & gridfunc, mfem::Array<int> & ess_tdofs)
 {
   const mfem::Array<int> & tree_tdofs =
-      _gauge.trueDofs(*this, *gridfunc.ParFESpace(), ess_tdof_list, getSubdomainMarkers());
+      _gauge.trueDofs(*this, *gridfunc.ParFESpace(), ess_tdofs, getSubdomainMarkers());
 
   // The gauge fixes the tree dofs to zero in both components so the lifted
   // right-hand side stays consistent. The real and imaginary views are brought up
@@ -55,7 +55,7 @@ MFEMComplexTreeCotreeGaugeEssentialConstraint::ApplyConstraint(
   Moose::MFEM::zeroTrueDofs(gridfunc.imag(), tree_tdofs);
   gridfunc.SyncAlias();
 
-  ess_tdof_list.Append(tree_tdofs);
+  ess_tdofs.Append(tree_tdofs);
 }
 
 #endif

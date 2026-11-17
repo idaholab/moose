@@ -28,11 +28,10 @@ public:
   MFEMEssentialConstraint(const InputParameters & parameters);
 
   /// Apply the essential constraint, overwriting the values of @p gridfunc in the
-  /// subdomain as desired and appending the constrained true dofs to @p ess_tdof_list.
-  /// On entry @p ess_tdof_list holds the true dofs already fixed by essential BCs and
+  /// subdomain as desired and appending the constrained true dofs to @p ess_tdofs.
+  /// On entry @p ess_tdofs holds the true dofs already fixed by essential BCs and
   /// by the constraints applied before this one; it may contain duplicates.
-  virtual void ApplyConstraint(mfem::ParGridFunction & gridfunc,
-                               mfem::Array<int> & ess_tdof_list) = 0;
+  virtual void ApplyConstraint(mfem::ParGridFunction & gridfunc, mfem::Array<int> & ess_tdofs) = 0;
 };
 
 #endif

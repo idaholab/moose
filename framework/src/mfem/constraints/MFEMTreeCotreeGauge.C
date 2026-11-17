@@ -13,7 +13,7 @@
 #include "MFEMDistributedGraph.h"
 #include "MFEMConstraint.h"
 #include "MooseError.h"
-#include "libmesh/int_range.h"
+#include "libMeshReducedNamespace.h"
 
 #include <algorithm>
 #include <array>
@@ -78,13 +78,13 @@ UnionFind::join(int a, int b)
 using Coord3 = std::array<mfem::real_t, 3>;
 
 // First dof of parallel mesh edge e, sign-decoded; the edge's dofs are left in
-// dofs. Called once per mesh edge in each pass below, so the caller supplies the
+// ldofs. Called once per mesh edge in each pass below, so the caller supplies the
 // dof scratch space rather than having it reallocated for every edge.
 int
-edgeLDof(mfem::ParFiniteElementSpace & pfes, int e, mfem::Array<int> & dofs)
+edgeLDof(mfem::ParFiniteElementSpace & pfes, int e, mfem::Array<int> & ldofs)
 {
-  pfes.GetEdgeDofs(e, dofs);
-  return mfem::FiniteElementSpace::DecodeDof(dofs[0]);
+  pfes.GetEdgeDofs(e, ldofs);
+  return mfem::FiniteElementSpace::DecodeDof(ldofs[0]);
 }
 
 Coord3
@@ -105,7 +105,7 @@ vertexCoord(const mfem::ParMesh & pmesh, int v)
   return p;
 }
 
-// Per-local-dof marker: 1 if the dof belongs to an element whose attribute is NOT
+// Local dof marker: 1 if the dof belongs to an element whose attribute is NOT
 // set in the attribute marker array gauge_markers, i.e. a dof of a region the gauge
 // must not reach because some other term of the weak form already removes the
 // gradient null space there. Edges carrying such dofs seed the spanning forest, and
@@ -113,17 +113,17 @@ vertexCoord(const mfem::ParMesh & pmesh, int v)
 // that merely touch such a region are NOT flagged, so the gauge still reaches the
 // vertices next to it. Consistent across ranks for shared dofs.
 mfem::Array<int>
-excludedDofMarker(mfem::ParFiniteElementSpace & pfes, const mfem::Array<int> & gauge_markers)
+excludedLDofMarker(mfem::ParFiniteElementSpace & pfes, const mfem::Array<int> & gauge_markers)
 {
   mfem::ParMesh & pmesh = *pfes.GetParMesh();
   mfem::Array<int> marker(pfes.GetVSize());
   marker = 0;
-  mfem::Array<int> edofs;
-  for (const auto el : libMesh::make_range(pmesh.GetNE()))
+  mfem::Array<int> ldofs;
+  for (const auto el : make_range(pmesh.GetNE()))
     if (!gauge_markers[pmesh.GetAttribute(el) - 1])
     {
-      pfes.GetElementDofs(el, edofs);
-      for (const auto d : edofs)
+      pfes.GetElementDofs(el, ldofs);
+      for (const auto d : ldofs)
         marker[mfem::FiniteElementSpace::DecodeDof(d)] = 1;
     }
   pfes.Synchronize(marker); // boolean-OR over shared dofs
@@ -167,8 +167,8 @@ referenceGaugedDofs(const mfem::FiniteElementCollection & nd_fec,
   const int num_rows = nd_fec.GetNumDof(geom, order);
   const int row0 = nd_fe.GetDof() - num_rows, col0 = h1_fe.GetDof() - num_bubbles;
   std::vector<mfem::Vector> rows(num_rows, mfem::Vector(num_bubbles));
-  for (const auto r : libMesh::make_range(num_rows))
-    for (const auto c : libMesh::make_range(num_bubbles))
+  for (const auto r : make_range(num_rows))
+    for (const auto c : make_range(num_bubbles))
       rows[r](c) = grad(row0 + r, col0 + c);
 
   // Symmetric reference elements produce rows whose residuals are equal in exact
@@ -181,7 +181,7 @@ referenceGaugedDofs(const mfem::FiniteElementCollection & nd_fec,
   while (static_cast<int>(selected.size()) < num_bubbles)
   {
     mfem::real_t max_norm = 0;
-    for (const auto r : libMesh::make_range(num_rows))
+    for (const auto r : make_range(num_rows))
       if (available[r])
         max_norm = std::max(max_norm, rows[r].Norml2());
 
@@ -192,7 +192,7 @@ referenceGaugedDofs(const mfem::FiniteElementCollection & nd_fec,
     selected.push_back(pick);
 
     rows[pick] /= rows[pick].Norml2();
-    for (const auto r : libMesh::make_range(num_rows))
+    for (const auto r : make_range(num_rows))
       if (available[r])
         rows[r].Add(-(rows[r] * rows[pick]), rows[pick]);
   }
@@ -210,21 +210,21 @@ int
 canonicalQuadOrientation(const mfem::ParMesh & pmesh, const mfem::Array<int> & fv)
 {
   std::array<Coord3, 4> coords;
-  for (const auto i : libMesh::make_range(4))
+  for (const auto i : make_range(4))
     coords[i] = vertexCoord(pmesh, fv[i]);
   const int first = std::min_element(coords.begin(), coords.end()) - coords.begin();
   const int step = (coords[(first + 1) % 4] < coords[(first + 3) % 4]) ? 1 : 3;
   std::array<int, 4> canonical;
-  for (const auto i : libMesh::make_range(4))
+  for (const auto i : make_range(4))
     canonical[i] = fv[(first + i * step) % 4];
 
   // Mesh::GetQuadOrientation(base, test) is protected. It returns the entry o of
   // the orientation table for which test[Orient[o][j]] == base[j] for every j.
   using Square = mfem::Geometry::Constants<mfem::Geometry::SQUARE>;
-  for (const auto o : libMesh::make_range(Square::NumOrient))
+  for (const auto o : make_range(Square::NumOrient))
   {
     std::array<int, 4> permuted;
-    for (const auto j : libMesh::make_range(4))
+    for (const auto j : make_range(4))
       permuted[j] = canonical[Square::Orient[o][j]];
     if (std::equal(permuted.begin(), permuted.end(), fv.begin()))
       return o;
@@ -297,7 +297,7 @@ canonicalVertexIds(const std::vector<Coord3> & coords, MPI_Comm comm)
   // the mapping from every input coordinate onto it, so no coordinate ever has to
   // be looked up by binary search afterwards.
   std::vector<std::pair<Coord3, int>> sorted(coords.size());
-  for (const auto i : libMesh::index_range(coords))
+  for (const auto i : index_range(coords))
     sorted[i] = {coords[i], static_cast<int>(i)};
   std::sort(sorted.begin(), sorted.end());
 
@@ -323,7 +323,7 @@ canonicalVertexIds(const std::vector<Coord3> & coords, MPI_Comm comm)
   constexpr std::size_t oversample = 32;
   const std::size_t num_samples = std::min(oversample, distinct.size());
   std::vector<Coord3> sample;
-  for (const auto i : libMesh::make_range(num_samples))
+  for (const auto i : make_range(num_samples))
     sample.push_back(distinct[i * distinct.size() / num_samples]);
 
   int sample_count = static_cast<int>(sample.size());
@@ -348,7 +348,7 @@ canonicalVertexIds(const std::vector<Coord3> & coords, MPI_Comm comm)
   std::sort(all_samples.begin(), all_samples.end());
 
   std::vector<Coord3> splitters;
-  for (const auto p : libMesh::make_range(nprocs - 1))
+  for (const auto p : make_range(nprocs - 1))
     if (!all_samples.empty())
       splitters.push_back(all_samples[(p + 1) * all_samples.size() / nprocs]);
   auto bucketOf = [&](const Coord3 & c)
@@ -359,7 +359,7 @@ canonicalVertexIds(const std::vector<Coord3> & coords, MPI_Comm comm)
 
   // Send each distinct local coordinate to the rank owning its bucket.
   std::vector<CoordQuery> outgoing(distinct.size());
-  for (const auto i : libMesh::index_range(distinct))
+  for (const auto i : index_range(distinct))
     outgoing[i] = {distinct[i], 0, rank, static_cast<int>(i)};
 
   std::vector<int> counts;
@@ -396,7 +396,7 @@ canonicalVertexIds(const std::vector<Coord3> & coords, MPI_Comm comm)
 
   // Spread the distinct ids back over the caller's coordinate list.
   numbering.global_id.resize(coords.size());
-  for (const auto i : libMesh::index_range(coords))
+  for (const auto i : index_range(coords))
     numbering.global_id[i] = distinct_ids[numbering.local_index[i]];
   return numbering;
 }
@@ -458,7 +458,7 @@ filterLocalCycles(std::vector<CandidateEdge> candidates, int num_local)
 //   essential_tdofs - true dofs already fixed by other essential conditions;
 //                     edges whose dofs are all fixed seed the forest, and no
 //                     entity whose dofs are all fixed is gauged
-//   excluded        - per-local-dof marker of dofs the gauge must not touch;
+//   excluded        - local dof marker of dofs the gauge must not touch;
 //                     their edges seed the forest like the fixed edges, and no
 //                     edge, face or element carrying them is gauged
 // ---------------------------------------------------------------------
@@ -479,10 +479,10 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
   std::vector<char> is_essential_tdof(pfes.GetTrueVSize(), 0);
   for (const auto tdof : essential_tdofs)
     is_essential_tdof[tdof] = 1;
-  auto allFixed = [&](const mfem::Array<int> & dofs)
+  auto allFixed = [&](const mfem::Array<int> & ldofs)
   {
-    return std::all_of(dofs.begin(),
-                       dofs.end(),
+    return std::all_of(ldofs.begin(),
+                       ldofs.end(),
                        [&](int d)
                        {
                          return is_essential_tdof[pfes.GetLocalTDofNumber(
@@ -499,10 +499,10 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
   // 1. This rank's owned edges. Each mesh edge is owned by exactly one rank, so
   //    the union over ranks is the mesh 1-skeleton with no duplicates.
   std::vector<OwnedEdge> owned_edges;
-  mfem::Array<int> ev, edge_dofs;
-  for (const auto e : libMesh::make_range(pmesh.GetNEdges()))
+  mfem::Array<int> ev, edge_ldofs;
+  for (const auto e : make_range(pmesh.GetNEdges()))
   {
-    const int ldof = edgeLDof(pfes, e, edge_dofs);
+    const int ldof = edgeLDof(pfes, e, edge_ldofs);
     if (pfes.GetLocalTDofNumber(ldof) < 0)
       continue; // owned by another rank; it will contribute this edge
 
@@ -510,7 +510,7 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
     owned_edges.push_back({vertexCoord(pmesh, ev[0]),
                            vertexCoord(pmesh, ev[1]),
                            e,
-                           excluded[ldof] != 0 || allFixed(edge_dofs)});
+                           excluded[ldof] != 0 || allFixed(edge_ldofs)});
   }
 
   // 2. Canonical global vertex ids for both endpoints of every owned edge.
@@ -529,7 +529,7 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
   std::vector<CandidateEdge> seed_edges, free_edges;
   // Every free edge is gauged, including those filtered out below.
   std::vector<int> free_mesh_edges;
-  for (const auto i : libMesh::index_range(owned_edges))
+  for (const auto i : index_range(owned_edges))
   {
     const std::int64_t a = numbering.global_id[2 * i], b = numbering.global_id[2 * i + 1];
     const int la = numbering.local_index[2 * i], lb = numbering.local_index[2 * i + 1];
@@ -551,7 +551,7 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
   //    boundary and of the excluded subdomains, which are fixed without being
   //    gauged.
   std::vector<Moose::MFEM::DistributedEdge> seed_graph(seed_edges.size());
-  for (const auto i : libMesh::index_range(seed_edges))
+  for (const auto i : index_range(seed_edges))
     seed_graph[i] = {seed_edges[i].wu,
                      seed_edges[i].wv,
                      seed_edges[i].wu,
@@ -579,7 +579,7 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
 
   std::vector<Moose::MFEM::DistributedEdge> free_graph;
   free_graph.reserve(free_edges.size());
-  for (const auto i : libMesh::index_range(free_edges))
+  for (const auto i : index_range(free_edges))
     free_graph.push_back({free_edges[i].wu,
                           free_edges[i].wv,
                           free_labels[2 * i],
@@ -606,10 +606,10 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
   //    endpoint instead, so it does not depend on the local numbering.
   for (const auto e : free_mesh_edges)
   {
-    pfes.GetEdgeDofs(e, edge_dofs);
+    pfes.GetEdgeDofs(e, edge_ldofs);
     if (in_forest[e])
     {
-      for (const auto d : edge_dofs)
+      for (const auto d : edge_ldofs)
         gauge(d);
       continue;
     }
@@ -617,7 +617,7 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
     const bool reversed =
         vertexCoord(pmesh, std::max(ev[0], ev[1])) < vertexCoord(pmesh, std::min(ev[0], ev[1]));
     for (const auto k : edge_gauged)
-      gauge(edge_dofs[reversed ? edge_dofs.Size() - 1 - k : k]);
+      gauge(edge_ldofs[reversed ? edge_ldofs.Size() - 1 - k : k]);
   }
 
   // 7. Fix the bubble-removing dofs of every owned free face of a 3D mesh, chosen
@@ -628,14 +628,14 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
                                : std::vector<int>();
   if (!face_gauged.empty())
   {
-    mfem::Array<int> face_dofs, fv;
-    for (const auto f : libMesh::make_range(pmesh.GetNFaces()))
+    mfem::Array<int> face_ldofs, fv;
+    for (const auto f : make_range(pmesh.GetNFaces()))
     {
       if (pmesh.GetFaceGeometry(f) != mfem::Geometry::SQUARE)
         continue;
-      pfes.GetFaceInteriorDofs(f, face_dofs);
-      if (pfes.GetLocalTDofNumber(face_dofs[0]) < 0 || excluded[face_dofs[0]] ||
-          allFixed(face_dofs))
+      pfes.GetFaceInteriorDofs(f, face_ldofs);
+      if (pfes.GetLocalTDofNumber(face_ldofs[0]) < 0 || excluded[face_ldofs[0]] ||
+          allFixed(face_ldofs))
         continue;
 
       pmesh.GetFaceVertices(f, fv);
@@ -643,7 +643,7 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
       const int * canonical_to_face = nd_fec.DofOrderForOrientation(
           mfem::Geometry::SQUARE, canonicalQuadOrientation(pmesh, fv));
       for (const auto k : face_gauged)
-        gauge(face_dofs[mfem::FiniteElementSpace::DecodeDof(canonical_to_face[k])]);
+        gauge(face_ldofs[mfem::FiniteElementSpace::DecodeDof(canonical_to_face[k])]);
     }
   }
 
@@ -656,17 +656,17 @@ buildTreeCotreeGaugeTDofs(mfem::ParFiniteElementSpace & pfes,
   for (const auto geom : element_geoms)
     interior_gauged[geom] = referenceGaugedDofs(nd_fec, h1_fec, geom, order);
 
-  mfem::Array<int> interior_dofs;
-  for (const auto el : libMesh::make_range(pmesh.GetNE()))
+  mfem::Array<int> interior_ldofs;
+  for (const auto el : make_range(pmesh.GetNE()))
   {
     const auto & gauged = interior_gauged[pmesh.GetElementGeometry(el)];
     if (gauged.empty())
       continue;
-    pfes.GetElementInteriorDofs(el, interior_dofs);
-    if (excluded[interior_dofs[0]] || allFixed(interior_dofs))
+    pfes.GetElementInteriorDofs(el, interior_ldofs);
+    if (excluded[interior_ldofs[0]] || allFixed(interior_ldofs))
       continue;
     for (const auto k : gauged)
-      gauge(interior_dofs[k]);
+      gauge(interior_ldofs[k]);
   }
 
   // Keep the ascending tdof order the caller's elimination path expects.
@@ -734,7 +734,7 @@ TreeCotreeGauge::trueDofs(const MFEMConstraint & constraint,
     return _tdofs;
 
   // Dofs of subdomains that are not gauged.
-  mfem::Array<int> excluded = excludedDofMarker(pfes, gauge_block_markers);
+  mfem::Array<int> excluded = excludedLDofMarker(pfes, gauge_block_markers);
 
   _tdofs = buildTreeCotreeGaugeTDofs(pfes, essential_tdofs, excluded);
 

@@ -41,7 +41,7 @@ MFEMComplexVectorEssentialConstraint::MFEMComplexVectorEssentialConstraint(
 
 void
 MFEMComplexVectorEssentialConstraint::ApplyConstraint(mfem::ParComplexGridFunction & gridfunc,
-                                                      mfem::Array<int> & ess_tdof_list)
+                                                      mfem::Array<int> & ess_tdofs)
 {
   if (gridfunc.ParFESpace()->GetVectorDim() != _vec_coef_real.GetVDim())
     paramError("vector_coefficient_real", "dimension does not match the variable's.");
@@ -52,12 +52,14 @@ MFEMComplexVectorEssentialConstraint::ApplyConstraint(mfem::ParComplexGridFuncti
   // writing through them, and hand their state back afterwards.
   mfem::ParFiniteElementSpace & pfes = *gridfunc.ParFESpace();
   const mfem::Array<int> & markers = getSubdomainMarkers();
-  const mfem::Array<int> & dof_marker = getSubdomainDofMarker(pfes);
+  const mfem::Array<int> & ldof_marker = getSubdomainLDofMarker(pfes);
   gridfunc.Sync();
-  Moose::MFEM::projectCoefficientOnSubdomains(gridfunc.real(), _vec_coef_real, markers, dof_marker);
-  Moose::MFEM::projectCoefficientOnSubdomains(gridfunc.imag(), _vec_coef_imag, markers, dof_marker);
+  Moose::MFEM::projectCoefficientOnSubdomains(
+      gridfunc.real(), _vec_coef_real, markers, ldof_marker);
+  Moose::MFEM::projectCoefficientOnSubdomains(
+      gridfunc.imag(), _vec_coef_imag, markers, ldof_marker);
   gridfunc.SyncAlias();
-  ess_tdof_list.Append(getSubdomainTrueDofs(pfes));
+  ess_tdofs.Append(getSubdomainTrueDofs(pfes));
 }
 
 #endif

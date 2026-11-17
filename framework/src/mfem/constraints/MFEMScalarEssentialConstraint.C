@@ -32,15 +32,15 @@ MFEMScalarEssentialConstraint::MFEMScalarEssentialConstraint(const InputParamete
 
 void
 MFEMScalarEssentialConstraint::ApplyConstraint(mfem::ParGridFunction & gridfunc,
-                                               mfem::Array<int> & ess_tdof_list)
+                                               mfem::Array<int> & ess_tdofs)
 {
   if (gridfunc.ParFESpace()->GetVectorDim() != 1)
     paramError("variable", "not scalar; use MFEMVectorEssentialConstraint instead.");
 
   mfem::ParFiniteElementSpace & pfes = *gridfunc.ParFESpace();
   Moose::MFEM::projectCoefficientOnSubdomains(
-      gridfunc, _coef, getSubdomainMarkers(), getSubdomainDofMarker(pfes));
-  ess_tdof_list.Append(getSubdomainTrueDofs(pfes));
+      gridfunc, _coef, getSubdomainMarkers(), getSubdomainLDofMarker(pfes));
+  ess_tdofs.Append(getSubdomainTrueDofs(pfes));
 }
 
 #endif

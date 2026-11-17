@@ -48,26 +48,26 @@ public:
 protected:
   /// True dofs of @p pfes the constraint fixes: those of the constrained subdomains,
   /// less the subdomain boundary unless 'constrain_subdomain_boundary' is set (see
-  /// Moose::MFEM::subdomainDofs). They depend only on the mesh and the space, so
+  /// Moose::MFEM::subdomainTDofs). They depend only on the mesh and the space, so
   /// they are cached and only recomputed when the space is updated.
   const mfem::Array<int> & getSubdomainTrueDofs(mfem::ParFiniteElementSpace & pfes);
-  /// L-dof marker of the dofs of @p pfes the constraint fixes, matching
+  /// Local dof marker of the dofs of @p pfes the constraint fixes, matching
   /// getSubdomainTrueDofs() and cached alongside it.
-  const mfem::Array<int> & getSubdomainDofMarker(mfem::ParFiniteElementSpace & pfes);
+  const mfem::Array<int> & getSubdomainLDofMarker(mfem::ParFiniteElementSpace & pfes);
 
   /// Name of the trial variable the constraint is applied to.
   const VariableName & _trial_var_name;
 
 private:
   /// Rebuilds the cached constrained dofs if @p pfes was updated since they were built.
-  void updateSubdomainDofs(mfem::ParFiniteElementSpace & pfes);
+  void updateSubdomainTDofs(mfem::ParFiniteElementSpace & pfes);
 
   /// Whether the dofs on the boundary of the constrained subdomains are constrained.
   const bool _constrain_subdomain_boundary;
-  /// Constrained true dofs of the most recent updateSubdomainDofs() call.
+  /// Constrained true dofs of the most recent updateSubdomainTDofs() call.
   mfem::Array<int> _subdomain_tdofs;
-  /// L-dof marker matching _subdomain_tdofs.
-  mfem::Array<int> _subdomain_dof_marker;
+  /// Local dof marker matching _subdomain_tdofs.
+  mfem::Array<int> _subdomain_ldof_marker;
   /// FE space sequence number _subdomain_tdofs was built for; -1 marks "never built".
   long _subdomain_tdofs_sequence = -1;
 };

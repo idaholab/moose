@@ -28,7 +28,7 @@ public:
   MFEMComplexTreeCotreeGaugeEssentialConstraint(const InputParameters & parameters);
 
   void ApplyConstraint(mfem::ParComplexGridFunction & gridfunc,
-                       mfem::Array<int> & ess_tdof_list) override;
+                       mfem::Array<int> & ess_tdofs) override;
 
 protected:
   /// Selects and caches the gauged true dofs.

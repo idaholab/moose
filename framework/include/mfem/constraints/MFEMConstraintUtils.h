@@ -24,21 +24,21 @@ namespace Moose::MFEM
  * dofs on the boundary of the subdomains - those shared with any other element and
  * those on the exterior boundary of the mesh - are left out.
  *
- * @p dof_marker is set to a local-dof (L-dof) marker of the selected dofs and
+ * @p ldof_marker is set to a local dof marker of the selected dofs and
  * @p tdofs to the matching true-dof indices; both are overwritten. Both are
  * parallel-consistent: a dof shared across a processor boundary that coincides with
  * the subdomain boundary is selected on every rank that touches it, even a rank
  * whose own elements do not carry the attribute.
  */
-void subdomainDofs(mfem::ParFiniteElementSpace & pfes,
-                   const mfem::Array<int> & subdomain_markers,
-                   bool include_boundary,
-                   mfem::Array<int> & dof_marker,
-                   mfem::Array<int> & tdofs);
+void subdomainTDofs(mfem::ParFiniteElementSpace & pfes,
+                    const mfem::Array<int> & subdomain_markers,
+                    bool include_boundary,
+                    mfem::Array<int> & ldof_marker,
+                    mfem::Array<int> & tdofs);
 
 /**
- * Overwrite the degrees of freedom of grid function @p gf marked in the L-dof
- * marker @p dof_marker with the projection of coefficient @p coef over the
+ * Overwrite the degrees of freedom of grid function @p gf marked in the local dof
+ * marker @p ldof_marker with the projection of coefficient @p coef over the
  * elements whose mesh attribute is set in the attribute marker array
  * @p subdomain_markers. Every marked dof must belong to such an element. The
  * projected values are averaged across all elements and ranks contributing to a
@@ -50,11 +50,11 @@ void subdomainDofs(mfem::ParFiniteElementSpace & pfes,
 void projectCoefficientOnSubdomains(mfem::ParGridFunction & gf,
                                     mfem::Coefficient & coef,
                                     const mfem::Array<int> & subdomain_markers,
-                                    const mfem::Array<int> & dof_marker);
+                                    const mfem::Array<int> & ldof_marker);
 void projectCoefficientOnSubdomains(mfem::ParGridFunction & gf,
                                     mfem::VectorCoefficient & coef,
                                     const mfem::Array<int> & subdomain_markers,
-                                    const mfem::Array<int> & dof_marker);
+                                    const mfem::Array<int> & ldof_marker);
 
 /**
  * Strongly set the true dofs listed in @p tdofs of grid function @p gf to zero,

@@ -41,16 +41,16 @@ MFEMTreeCotreeGaugeEssentialConstraint::MFEMTreeCotreeGaugeEssentialConstraint(
 
 void
 MFEMTreeCotreeGaugeEssentialConstraint::ApplyConstraint(mfem::ParGridFunction & gridfunc,
-                                                        mfem::Array<int> & ess_tdof_list)
+                                                        mfem::Array<int> & ess_tdofs)
 {
   const mfem::Array<int> & tree_tdofs =
-      _gauge.trueDofs(*this, *gridfunc.ParFESpace(), ess_tdof_list, getSubdomainMarkers());
+      _gauge.trueDofs(*this, *gridfunc.ParFESpace(), ess_tdofs, getSubdomainMarkers());
 
   // The gauge fixes the tree dofs to zero: zero those entries of the solution
   // gridfunction so the lifted right-hand side stays consistent.
   Moose::MFEM::zeroTrueDofs(gridfunc, tree_tdofs);
 
-  ess_tdof_list.Append(tree_tdofs);
+  ess_tdofs.Append(tree_tdofs);
 }
 
 #endif

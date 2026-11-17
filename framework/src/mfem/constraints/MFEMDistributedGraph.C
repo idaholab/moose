@@ -11,7 +11,7 @@
 
 #include "MFEMDistributedGraph.h"
 #include "MooseError.h"
-#include "libmesh/int_range.h"
+#include "libMeshReducedNamespace.h"
 
 namespace
 {
@@ -73,7 +73,7 @@ fetchLabels(const std::vector<std::int64_t> & queries,
   MPI_Comm_rank(comm, &rank);
 
   std::vector<LabelQuery> outgoing(queries.size());
-  for (const auto i : libMesh::index_range(queries))
+  for (const auto i : index_range(queries))
     outgoing[i] = {queries[i], 0, rank, static_cast<int>(i)};
 
   std::vector<int> counts;
@@ -184,7 +184,7 @@ distributedSpanningForest(std::vector<DistributedEdge> & edges,
     {
       std::vector<Proposal> picks;
       picks.reserve(num_owned);
-      for (const auto slot : libMesh::index_range(best))
+      for (const auto slot : index_range(best))
         if (best[slot])
           picks.push_back(*best[slot]);
 
@@ -198,14 +198,14 @@ distributedSpanningForest(std::vector<DistributedEdge> & edges,
     // Hook each component onto the component at the far end of its chosen edge.
     // A component that received no offer is already a root and hooks to itself.
     std::vector<std::int64_t> hook(num_owned);
-    for (const auto slot : libMesh::index_range(best))
+    for (const auto slot : index_range(best))
       hook[slot] = best[slot] ? best[slot]->partner : id_of(slot);
 
     // Two components that chose the same edge point at each other. Root that pair
     // at the smaller id; every other chain terminates at such a pair, because the
     // chosen weights strictly decrease along a chain.
     const auto partner_hook = fetchLabels(hook, hook, dist, comm);
-    for (const auto slot : libMesh::index_range(hook))
+    for (const auto slot : index_range(hook))
       if (partner_hook[slot] == id_of(slot))
         hook[slot] = std::min(id_of(slot), hook[slot]);
 
@@ -214,7 +214,7 @@ distributedSpanningForest(std::vector<DistributedEdge> & edges,
     {
       const auto grandparent = fetchLabels(hook, hook, dist, comm);
       std::int64_t local_changed = 0;
-      for (const auto slot : libMesh::index_range(hook))
+      for (const auto slot : index_range(hook))
         if (hook[slot] != grandparent[slot])
         {
           hook[slot] = grandparent[slot];
@@ -240,7 +240,7 @@ distributedSpanningForest(std::vector<DistributedEdge> & edges,
       endpoints.push_back(e.v);
     }
     const auto relabelled = fetchLabels(endpoints, hook, dist, comm);
-    for (const auto i : libMesh::index_range(edges))
+    for (const auto i : index_range(edges))
     {
       edges[i].u = relabelled[2 * i];
       edges[i].v = relabelled[2 * i + 1];

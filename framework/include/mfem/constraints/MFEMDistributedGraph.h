@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "libmesh/int_range.h"
+#include "libMeshReducedNamespace.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -60,14 +60,14 @@ groupByDestination(const std::vector<T> & items,
   // search over the splitters, which the placement pass would otherwise repeat.
   std::vector<int> destinations(items.size());
   counts.assign(nprocs, 0);
-  for (const auto i : libMesh::index_range(items))
+  for (const auto i : index_range(items))
     counts[destinations[i] = destination(items[i])]++;
 
   std::vector<int> offset(nprocs, 0);
   std::partial_sum(counts.begin(), counts.end() - 1, offset.begin() + 1);
 
   std::vector<T> grouped(items.size());
-  for (const auto i : libMesh::index_range(items))
+  for (const auto i : index_range(items))
     grouped[offset[destinations[i]]++] = items[i];
   return grouped;
 }
