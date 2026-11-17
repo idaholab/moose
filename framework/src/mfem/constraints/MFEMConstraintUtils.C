@@ -122,17 +122,25 @@ subdomainTDofs(mfem::ParFiniteElementSpace & pfes,
 
   // Local dof markers: ldof_marker is 1 if the dof touches a local element carrying
   // one of the requested attributes, outside_marker if it touches one that does not.
-  // All requested attributes are marked in a single pass so multi-subdomain
-  // restrictions are not clobbered.
+  // outside_marker is needed only to exclude the subdomain boundary. All requested
+  // attributes are marked in a single pass so multi-subdomain restrictions are not
+  // clobbered.
   ldof_marker.SetSize(pfes.GetVSize());
   ldof_marker = 0;
-  mfem::Array<int> outside_marker(pfes.GetVSize());
-  outside_marker = 0;
+  mfem::Array<int> outside_marker;
+  if (!include_boundary)
+  {
+    outside_marker.SetSize(pfes.GetVSize());
+    outside_marker = 0;
+  }
   mfem::Array<int> ldofs;
   for (const auto e : make_range(pmesh.GetNE()))
   {
+    const bool inside = subdomain_markers[pmesh.GetAttribute(e) - 1];
+    if (!inside && include_boundary)
+      continue;
     pfes.GetElementVDofs(e, ldofs);
-    auto & marker = subdomain_markers[pmesh.GetAttribute(e) - 1] ? ldof_marker : outside_marker;
+    auto & marker = inside ? ldof_marker : outside_marker;
     for (const auto d : ldofs)
       marker[mfem::FiniteElementSpace::DecodeDof(d)] = 1; // undo ND/RT sign encoding
   }
