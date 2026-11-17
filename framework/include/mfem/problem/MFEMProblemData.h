@@ -42,6 +42,7 @@ public:
   Moose::MFEM::ComplexGridFunctions cmplx_gridfunctions;
   Moose::MFEM::Kernels kernels;
   Moose::MFEM::BoundaryConditions bcs;
+  Moose::MFEM::Constraints constraints;
   Moose::MFEM::EquationSystems eqn_systems;
 
   std::string mode_separator{"_"};

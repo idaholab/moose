@@ -1304,6 +1304,7 @@ MooseDerivativeStringClass(MFEMFESpaceName);
 MooseDerivativeStringClass(MFEMSolverName);
 MooseDerivativeStringClass(MFEMKernelName);
 MooseDerivativeStringClass(MFEMBoundaryConditionName);
+MooseDerivativeStringClass(MFEMConstraintName);
 MooseDerivativeStringClass(MFEMWeakFormName);
 ///@}
 #endif

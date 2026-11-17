@@ -73,6 +73,15 @@ void
 Moose::MFEM::LORLinearSolverBase<mfem::MatrixFreeAMS>::UpdateEquationSystemContext()
 {
   SetupLOR();
+
+  // mfem::MatrixFreeAMS eliminates essential dofs by boundary attribute only, so it
+  // would precondition an operator in which constrained subdomain dofs are still free.
+  const auto & var_name = _equation_system->GetTestVarNames().at(0);
+  if (_equation_system->HasEssentialConstraints(var_name))
+    mooseError("Variable '",
+               var_name,
+               "' has essential constraints within subdomains, which this solver cannot "
+               "account for: it eliminates essential degrees of freedom by boundary only.");
 }
 
 #endif

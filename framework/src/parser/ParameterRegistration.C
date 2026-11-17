@@ -114,6 +114,7 @@ registerParameter(MFEMFESpaceName);
 registerParameter(MFEMSolverName);
 registerParameter(MFEMKernelName);
 registerParameter(MFEMBoundaryConditionName);
+registerParameter(MFEMConstraintName);
 registerParameter(MFEMWeakFormName);
 #endif
 
