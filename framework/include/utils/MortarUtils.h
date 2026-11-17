@@ -391,7 +391,7 @@ setupMortarMaterials(const Consumers & consumers,
         secondary_ip_sub, get_required_sub_mats(secondary_ip_sub, Moose::FACE_MATERIAL_DATA));
 
   // Construct primary *block* materials container
-  const auto & primary_ip_sub_ids = amg.primaryIPSubIDs();
+  const auto & primary_ip_sub_ids = amg.primaryInternalSubIDs();
   for (const auto primary_ip_sub : primary_ip_sub_ids)
     primary_ip_sub_to_mats.emplace(
         primary_ip_sub, get_required_sub_mats(primary_ip_sub, Moose::NEIGHBOR_MATERIAL_DATA));

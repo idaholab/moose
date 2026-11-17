@@ -5,7 +5,7 @@
 #
 # SETUP/LOADING: identical geometry and timing to mortar_late_activation.i and
 # nodal_aux_late_activation.i - the right block starts offset in y so every mortar segment is pruned at
-# initialization (amg.secondaryIPSubIDs()/primaryIPSubIDs() empty, so
+# initialization (amg.secondaryIPSubIDs()/primaryInternalSubIDs() empty, so
 # ComputeMortarFunctor::_secondary_ip_sub_to_mats/_primary_ip_sub_to_mats have no entry for either
 # interior-parent subdomain), then slides down via a prescribed disp_y AuxVariable until segments appear
 # at t ~ 0.6.

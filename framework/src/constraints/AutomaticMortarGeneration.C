@@ -311,7 +311,7 @@ AutomaticMortarGeneration::clear()
   _secondary_element_to_secondary_lowerd_element.clear();
   _secondary_elems_to_mortar_segments.clear();
   _secondary_ip_sub_ids.clear();
-  _primary_ip_sub_ids.clear();
+  _primary_internal_sub_ids.clear();
   _projected_secondary_nodes.clear();
   _failed_secondary_node_projections.clear();
 }
@@ -948,7 +948,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     else
     {
       _secondary_ip_sub_ids.insert(msinfo.secondary_elem->interior_parent()->subdomain_id());
-      _primary_ip_sub_ids.insert(primaryInteriorParentOrSelf(*msinfo.primary_elem).subdomain_id());
+      _primary_internal_sub_ids.insert(
+          primaryInteriorParentOrSelf(*msinfo.primary_elem).subdomain_id());
     }
   }
 
@@ -1484,7 +1485,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             _secondary_ip_sub_ids.insert(msinfo.secondary_elem->interior_parent()->subdomain_id());
             // Unlike for 2D, we always have a primary when building the mortar mesh so we don't
             // have to check for null
-            _primary_ip_sub_ids.insert(
+            _primary_internal_sub_ids.insert(
                 primaryInteriorParentOrSelf(*msinfo.primary_elem).subdomain_id());
           }
         }

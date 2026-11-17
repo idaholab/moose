@@ -472,10 +472,11 @@ public:
   const std::set<SubdomainID> & secondaryIPSubIDs() const { return _secondary_ip_sub_ids; }
 
   /**
-   * @return All the primary interior parent subdomain IDs associated with the mortar mesh, and the
-   * subdomain IDs of primary elements without an interior parent
+   * @return All the subdomain IDs of the primary interior associated with the mortar mesh: those of
+   * the primary interior parents, and those of primary elements without an interior parent, which
+   * represent their own interior (e.g. a rigid surface)
    */
-  const std::set<SubdomainID> & primaryIPSubIDs() const { return _primary_ip_sub_ids; }
+  const std::set<SubdomainID> & primaryInternalSubIDs() const { return _primary_internal_sub_ids; }
 
   /**
    * @return Map from node id to secondary lower-d element pointer
@@ -611,9 +612,9 @@ private:
   /// All the secondary interior parent subdomain IDs associated with the mortar mesh
   std::set<SubdomainID> _secondary_ip_sub_ids;
 
-  /// All the primary interior parent subdomain IDs associated with the mortar mesh, and the
-  /// subdomain IDs of primary elements without an interior parent
-  std::set<SubdomainID> _primary_ip_sub_ids;
+  /// All the subdomain IDs of the primary interior associated with the mortar mesh (see
+  /// primaryInternalSubIDs())
+  std::set<SubdomainID> _primary_internal_sub_ids;
 
   /**
    * Helper function responsible for projecting secondary nodes
