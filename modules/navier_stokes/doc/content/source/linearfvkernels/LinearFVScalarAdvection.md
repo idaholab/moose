@@ -67,7 +67,7 @@ that the scheme is more diffusive, each part upwinding independently.
 
 The slip contributes on internal faces always, and on a boundary face only where that boundary is
 listed in [!param](/LinearFVKernels/LinearFVScalarAdvection/slip_boundaries). The dispersed phase
-cannot cross an impermeable wall, and the mixture flux returned by the Rhie--Chow object is already
+cannot cross an impermeable wall, and the mixture flux returned by the Rhie-Chow object is already
 zero there, so adding a gravity driven slip would advect the phase straight through it.
 
 ## The conservative form

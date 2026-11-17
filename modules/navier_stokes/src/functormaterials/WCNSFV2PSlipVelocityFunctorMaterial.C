@@ -36,19 +36,13 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::validParams()
   params.addRequiredParam<MooseFunctorName>(
       NS::density,
       "Mixture density. This is the density that appears in the buoyancy factor "
-      "(rho_d - rho_m) / rho_d of the algebraic slip closure, see VTT Publications 288 equation "
-      "(58), not the continuous phase density.");
+      "(rho_d - rho_m) / rho_d of the algebraic slip closure.");
   params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
   params.addRequiredParam<MooseFunctorName>(
       NS::mu,
       "Continuous phase dynamic viscosity. Both the particle relaxation time and the particle "
-      "Reynolds number are formed from it, which is the single particle form of the closure. This "
-      "is deliberately not the mixture viscosity. Manninen substitutes an apparent mixture "
-      "viscosity here as a way of folding the swarm correction into the drag, but that "
-      "substitution is only valid with the apparent viscosity of Ishii and Zuber, VTT "
-      "Publications 288 equation (43), which rises with the dispersed fraction; a volume "
-      "averaged mixture viscosity falls with it and would invert the correction. Concentration "
-      "effects belong in 'swarm_exponent' or in the 'ishii-zuber' drag model instead.");
+      "Reynolds number are formed from it, which is the single particle form of the closure. "
+      "A volume averaged mixture viscosity here would invert the swarm correction.");
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0, 0, 0), "Gravity acceleration vector");
   params.addParam<Real>("force_value", 0.0, "Coefficient to multiply by the body force term");
@@ -110,12 +104,8 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::validParams()
       0.0,
       "Exponent p of the hindrance factor (1 - alpha)^p multiplying the slip velocity. A particle "
       "in a swarm meets more resistance than an isolated one, and 'schiller-naumann' and "
-      "'distorted-particle' are both single particle laws, so they need this correction. Zero, "
-      "the default, leaves the single particle result untouched. A value of 0.75 makes the "
-      "void-fraction-weighted mean drift velocity scale as (1 - alpha)^1.75, which is the swarm "
-      "dependence of Ishii's correlation, since the remaining factor of (1 - alpha) is kinematic. "
-      "It is ignored by 'ishii-zuber', which is a multi-particle correlation and carries its own "
-      "concentration dependence.");
+      "'distorted-particle' are both single particle laws, so they need this correction. "
+      "Ignored by 'ishii-zuber', which carries its own concentration dependence.");
 
   params.addParam<MooseFunctorName>(
       "particle_diameter", 1.0, "Diameter of particles in the dispersed phase.");

@@ -242,9 +242,6 @@ cp_d = 10
   []
 []
 
-[LinearFVBCs]
-[]
-
 [Executioner]
   type = PIMPLE
   rhie_chow_user_object = 'ins_rhie_chow_interpolator'

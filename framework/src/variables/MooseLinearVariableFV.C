@@ -298,8 +298,8 @@ MooseLinearVariableFV<Real>::evaluateDot(const ElemArg & elem_arg, const StateAr
   const auto & elem_info = this->_mesh.elemInfo(elem_arg.elem->id());
   const auto dof_id = elem_info.dofIndices()[this->_sys_num][this->_var_num];
 
-  // Built from the discrete operator LinearFVTimeDerivative assembles rather than a hand rolled
-  // (u - u_old) / dt, so that it carries the order of the time integrator:
+  // Built from the discrete operator LinearFVTimeDerivative
+  // so that it carries the order of the time integrator:
   //
   //   du/dt = c_t * u^{n+1} - sum_{m >= 1} c_m * u^{n+1-m}
   //

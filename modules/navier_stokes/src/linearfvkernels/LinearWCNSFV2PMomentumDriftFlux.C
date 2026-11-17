@@ -61,11 +61,7 @@ LinearWCNSFV2PMomentumDriftFlux ::LinearWCNSFV2PMomentumDriftFlux(const InputPar
     _slip_mass_flux(0.0),
     _gamma(0.0)
 {
-  // The deferred correction of computeCoefficients() and deferredCorrection() reads this
-  // variable at the previous outer iteration, so that state has to exist. Requesting it here
-  // rather than leaving the input to set 'previous_nl_solution_required' keeps the requirement
-  // with the object that has it, and allocates the vector before assembly rather than lazily
-  // inside a threaded loop, which is not allowed.
+  // We need the older solution in the fixed-point iteration.
   _var.sys().needSolutionState(1, Moose::SolutionIterationType::Nonlinear);
 
   // Note that since this is used in a segregated solver at this time, we don't need to declare

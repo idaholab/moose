@@ -18,13 +18,13 @@ The *diffusion*, or drift, velocity is the velocity of the dispersed phase with 
 centre of mass of the mixture, $\bm{u}_{Md} = \bm{u}_d - \bm{u}_m$. It is what appears in the
 conservation equations, and it is declared under `drift_velocity_name` when that parameter is
 supplied. The two are related by the dispersed phase mass fraction $c_d = \alpha_d \rho_d /
-\rho_m$,
+\rho_m$ [!cite](manninen1996mixture),
 
 \begin{equation}
-\bm{u}_{Md} = \left( 1 - c_d \right) \bm{u}_{slip,d} \,,
+\bm{u}_{Md} = \left( 1 - c_d \right) \bm{u}_{slip,d} \,.
 \end{equation}
 
-equation (28) of [!cite](manninen1996mixture). The phase transport equation must be advected at
+The phase transport equation must be advected at
 $\bm{u}_m + \bm{u}_{Md} = \bm{u}_d$; advecting it at $\bm{u}_m + \bm{u}_{slip,d}$ instead is
 the dilute approximation $c_d \to 0$. Computing the conversion requires the phase fraction, which
 is why `fraction_dispersed` is needed whenever a drift velocity is requested.
@@ -79,9 +79,9 @@ the slip velocity; that is why `use_dispersed_phase_drag_model` and a prescribed
 `linear_coef_name` are mutually exclusive. Supply `linear_coef_name` only to impose a drag
 function directly.
 
-The `rho_c` and `mu_c` parameters are the continuous phase properties needed for $Re_p$, and are
-required whenever the drag model is active. Note that they are distinct from `rho` and `mu`, which
-are the *mixture* density and viscosity used by the buoyancy factor and the relaxation time.
+The `rho_c` parameter is the continuous phase density needed for $Re_p$, and is required whenever
+the drag model is active. It is distinct from `rho`, the *mixture* density of the buoyancy factor.
+The viscosity in $Re_p$ is the continuous phase viscosity already supplied under `mu`.
 
 ### The distorted particle law
 
@@ -113,12 +113,6 @@ instantiating the law at two diameters and requiring the same speed exactly.
 
 `automatic` evaluates both single particle laws and takes whichever resists more, which selects the
 regime by itself where it is not known in advance or varies across the domain.
-
-## Verification
-
-The closure and the slip to drift conversion are verified against their analytic values by the
-`slip_closure_verification` test, which holds the velocity field at zero so that the acceleration
-is exactly gravity and every resulting quantity is known in closed form.
 
 ## Relation to the nonlinear implementation
 
