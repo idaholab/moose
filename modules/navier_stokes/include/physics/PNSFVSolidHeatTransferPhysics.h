@@ -15,7 +15,7 @@
 /**
  * Creates all the objects needed to solve the porous media solid energy equation
  */
-class PNSFVSolidHeatTransferPhysics final : public HeatConductionFV
+class PNSFVSolidHeatTransferPhysics : public HeatConductionFV
 {
 public:
   static InputParameters validParams();
@@ -23,7 +23,6 @@ public:
   PNSFVSolidHeatTransferPhysics(const InputParameters & parameters);
 
 protected:
-private:
   virtual void addSolverVariables() override;
   virtual void addFVKernels() override;
   virtual void addMaterials() override;
@@ -35,20 +34,15 @@ private:
 
   virtual InputParameters getAdditionalRMParams() const override;
 
-  /**
-   * Functions adding kernels for the solid energy equation
-   */
-  void addPINSSolidEnergyTimeKernels();
-  void addPINSSolidEnergyHeatConductionKernels();
-  void addPINSSolidEnergyAmbientConvection();
-  void addPINSSolidEnergyExternalHeatSource();
-
   /// Process thermal conductivity (multiple functor input options are available).
   /// Return true if we have vector thermal conductivity and false if scalar
   bool processThermalConductivity();
 
   /// Battery of additional checks on parameters
   void checkFluidAndSolidHeatTransferPhysicsParameters() const;
+
+  /// Check the number of ambient convection heat transfer coefficients against the blocks
+  void checkAmbientConvectionParameters() const;
 
   /// Solid temperature name
   const NonlinearVariableName _solid_temperature_name;
@@ -71,4 +65,13 @@ private:
   std::vector<MooseFunctorName> _ambient_convection_alpha;
   /// Name of the solid domain temperature for each block-group
   std::vector<MooseFunctorName> _ambient_temperature;
+
+private:
+  /**
+   * Functions adding kernels for the solid energy equation
+   */
+  void addPINSSolidEnergyTimeKernels();
+  void addPINSSolidEnergyHeatConductionKernels();
+  void addPINSSolidEnergyAmbientConvection();
+  void addPINSSolidEnergyExternalHeatSource();
 };

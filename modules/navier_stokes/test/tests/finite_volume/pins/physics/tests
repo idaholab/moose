@@ -31,4 +31,31 @@
       detail = '0.75.'
     []
   []
+  [linear-solid-conductivity]
+    requirement = 'The system shall use the solid thermal conductivity of a porous medium as an effective conductivity in the linear finite volume solid energy equation, so that the steady conduction temperature rise in a heated porous solid does not depend on the porosity, for a porosity of'
+    design = 'PNSLinearFVSolidHeatTransferPhysics.md'
+    issues = '#31995 #34448'
+    [low-porosity]
+      type = 'CSVDiff'
+      input = solid_conduction_porosity_linear.i
+      csvdiff = 'solid_conduction_porosity_linear_out.csv'
+      detail = '0.25 and'
+    []
+    [high-porosity]
+      type = 'CSVDiff'
+      input = solid_conduction_porosity_linear.i
+      csvdiff = 'solid_conduction_porosity_linear_out.csv'
+      cli_args = 'porosity=0.75'
+      prereq = 'linear-solid-conductivity/low-porosity'
+      detail = '0.75.'
+    []
+  []
+  [linear-solid-variable-cp]
+    type = 'CSVDiff'
+    input = solid_heating_variable_cp_linear.i
+    csvdiff = 'solid_heating_variable_cp_linear_out.csv'
+    requirement = 'The system shall conserve the enthalpy of a stationary porous solid with a temperature-dependent specific heat in the linear finite volume solid energy equation, matching the analytical temperature of a uniformly heated insulated solid.'
+    design = 'PNSLinearFVSolidHeatTransferPhysics.md'
+    issues = '#31995'
+  []
 []

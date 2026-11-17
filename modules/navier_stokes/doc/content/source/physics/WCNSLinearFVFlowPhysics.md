@@ -141,8 +141,9 @@ For the default names of other variables used in this action, visit [!file text=
 
 The [WCNSLinearFVFluidHeatTransferPhysics.md], [WCNSLinearFVScalarTransportPhysics.md],
 [WCNSLinearFVTurbulencePhysics.md] and [WCNSLinearFVTwoPhaseMixturePhysics.md] couple to the face
-mass fluxes of the `WCNSLinearFVFlowPhysics`. The turbulence and two-phase mixture Physics do not
-support the porous medium treatment.
+mass fluxes of the `WCNSLinearFVFlowPhysics`. For porous medium flow, the solid phase energy
+equation is added by the [PNSLinearFVSolidHeatTransferPhysics.md]. The turbulence and two-phase
+mixture Physics do not support the porous medium treatment.
 
 !syntax parameters /Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics
 

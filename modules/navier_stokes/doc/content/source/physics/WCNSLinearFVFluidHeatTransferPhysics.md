@@ -44,7 +44,10 @@ the [PorousRhieChowMassFlux.md] without a porosity factor. The effective fluid c
 $\kappa_f$ is the given conductivity by default, and $\epsilon k_f$ if
 [!param](/Physics/NavierStokes/FluidHeatTransferSegregated/WCNSLinearFVFluidHeatTransferPhysics/effective_conductivity)
 is `false`. The source $Q$ and the heat transfer coefficient $\alpha$ are given per unit total
-volume.
+volume. The solid phase is coupled through the ambient convection term with the
+[PNSLinearFVSolidHeatTransferPhysics.md].
+
+!listing test/tests/finite_volume/pins/channel-flow/linear-segregated/2d-simple-channel-enthalpy/porous-baffle-2d-enthalpy-physics.i block=Physics
 
 
 ## Automatically defined variables
