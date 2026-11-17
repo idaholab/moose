@@ -91,7 +91,7 @@ INSADMomentumViscous::computeResidual()
       const RealVectorValue rz_value = raw_value(qpAdditionalRZTerm()) * _JxW[_qp] * _coord[_qp];
 
       for (_i = 0; _i < n_test; _i++) // target for auto vectorization
-        _local_re(_i) += rz_value * _test[_i][_qp];
+        _local_re(_i) += rz_value * _regular_test[_i][_qp];
     }
   }
 
@@ -148,7 +148,7 @@ INSADMomentumViscous::computeResidualsForJacobian()
         // Compute scalar quanitities up front to reduce DualNumber operations
         const ADRealVectorValue rz_value = _JxW[_qp] * _coord[_qp] * qpAdditionalRZTerm();
         for (_i = 0; _i < n_test; _i++)
-          _residuals[_i] += rz_value * _test[_i][_qp];
+          _residuals[_i] += rz_value * _regular_test[_i][_qp];
       }
     }
 }

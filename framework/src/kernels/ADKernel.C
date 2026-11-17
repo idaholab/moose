@@ -45,7 +45,15 @@ ADKernelTempl<T>::ADKernelTempl(const InputParameters & parameters)
                                                            : Moose::VarFieldType::VAR_FIELD_VECTOR),
     ADFunctorInterface(this),
     _var(*this->mooseVariable()),
-    _test(_var.phi()),
+    _test(
+        [this]() -> const ADTemplateVariableTestValue<T> &
+        {
+          if constexpr (std::is_same_v<T, RealVectorValue>)
+            return _var.adVectorPhi();
+          else
+            return _var.phi();
+        }()),
+    _regular_test(_var.phi()),
     _grad_test(_var.adGradPhi()),
     _regular_grad_test(_var.gradPhi()),
     _u(_var.adSln()),
