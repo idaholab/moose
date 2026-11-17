@@ -33,7 +33,7 @@
     type = 'CSVDiff'
     input = 'linear_nodal_constraint_multiple_primaries.i'
     csvdiff = 'linear_nodal_constraint_multiple_primaries_out.csv'
-    issues = '#5783'
+    issues = '#5783 #31735'
     design = 'source/constraints/LinearNodalConstraint.md'
     requirement = "The system shall apply each linear nodal constraint weight to its own primary "
                   "node, for any number of processors and on either a replicated or a distributed "
@@ -47,10 +47,21 @@
     # Compare the relative Frobenius norm rather than the absolute one, which scales with the
     # 1e8 penalty.
     ratio_tol = 1e-7
-    issues = '#5783'
+    issues = '#5783 #31735'
     design = 'source/constraints/LinearNodalConstraint.md'
     requirement = "The system shall compute a perfect Jacobian for a linear nodal constraint with "
                   "several primary nodes carrying different weights."
+  []
+
+  [linear_nodal_adaptivity]
+    type = 'CSVDiff'
+    input = 'linear_nodal_constraint_adaptivity.i'
+    csvdiff = 'linear_nodal_constraint_adaptivity_out.csv'
+    issues = '#5783 #31735'
+    design = 'source/constraints/LinearNodalConstraint.md'
+    requirement = "The system shall keep a linear nodal constraint valid when mesh adaptivity "
+                  "replaces the elements it ghosted, for any number of processors and on either a "
+                  "replicated or a distributed mesh."
   []
 
   [extra_tags]

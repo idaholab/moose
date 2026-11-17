@@ -8,7 +8,6 @@
     ratio_tol = 5e-6
     difference_tol = 5e-6
     max_threads = 1
-    max_parallel = 1
     allow_test_objects = true
     requirement = "The system shall be able to compute numerically accurate Jacobians when constraining the momentum equation on selected nodes."
   []

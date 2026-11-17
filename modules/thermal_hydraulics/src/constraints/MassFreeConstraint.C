@@ -32,7 +32,20 @@ MassFreeConstraint::MassFreeConstraint(const InputParameters & parameters)
     _rhouA(coupledValue("rhouA")),
     _rhouA_var_number(coupled("rhouA"))
 {
+  if (_normals.size() != getParam<std::vector<dof_id_type>>("nodes").size())
+    paramError("normals", "'normals' must have as many entries as 'nodes'.");
+
+  updateConstrainedNodes();
+}
+
+void
+MassFreeConstraint::updateConnectivity()
+{
+  // _normals is indexed by position in this list, so every process keeps all of the nodes in the
+  // order the user gave them. updateConstrainedNodes() ghosts the elements that keep them
+  // available on a distributed mesh.
   _primary_node_vector = getParam<std::vector<dof_id_type>>("nodes");
+
   // just a dummy value that is never used
   _connected_nodes.push_back(*_primary_node_vector.begin());
 }

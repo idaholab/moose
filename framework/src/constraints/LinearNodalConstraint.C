@@ -19,8 +19,8 @@ LinearNodalConstraint::validParams()
   InputParameters params = NodalConstraint::validParams();
   params.addClassDescription(
       "Constrains secondary node to move as a linear combination of primary nodes.");
-  params.addRequiredParam<std::vector<unsigned int>>("primary", "The primary node IDs.");
-  params.addParam<std::vector<unsigned int>>(
+  params.addRequiredParam<std::vector<dof_id_type>>("primary", "The primary node IDs.");
+  params.addParam<std::vector<dof_id_type>>(
       "secondary_node_ids", {}, "The list of secondary node ids");
   params.addParam<BoundaryName>(
       "secondary_node_set", "NaN", "The boundary ID associated with the secondary side");
@@ -33,14 +33,13 @@ LinearNodalConstraint::validParams()
 
 LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
   : NodalConstraint(parameters),
-    _primary_node_ids(getParam<std::vector<unsigned int>>("primary")),
-    _secondary_node_ids(getParam<std::vector<unsigned int>>("secondary_node_ids")),
+    _secondary_node_ids(getParam<std::vector<dof_id_type>>("secondary_node_ids")),
     _secondary_node_set_id(getParam<BoundaryName>("secondary_node_set")),
     _penalty(getParam<Real>("penalty"))
 {
   _weights = getParam<std::vector<Real>>("weights");
 
-  if (_primary_node_ids.size() != _weights.size())
+  if (getParam<std::vector<dof_id_type>>("primary").size() != _weights.size())
     mooseError("primary and weights should be of equal size.");
 
   if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id == "NaN"))
@@ -54,47 +53,16 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
 }
 
 void
-LinearNodalConstraint::meshChanged()
+LinearNodalConstraint::updateConnectivity()
 {
-  updateConstrainedNodes();
-}
+  _connected_nodes = localSecondaryNodes(
+      _secondary_node_ids.empty() ? _mesh.getNodeList(_mesh.getBoundaryID(_secondary_node_set_id))
+                                  : _secondary_node_ids);
 
-void
-LinearNodalConstraint::updateConstrainedNodes()
-{
-  _connected_nodes.clear();
-  _primary_node_vector.clear();
-
-  const auto & lm_mesh = _mesh.getMesh();
-
-  if (_secondary_node_ids.size() == 0)
-  {
-    const std::vector<dof_id_type> & nodelist =
-        _mesh.getNodeList(_mesh.getBoundaryID(_secondary_node_set_id));
-
-    for (const auto & dof : nodelist)
-    {
-      const Node * const node = lm_mesh.query_node_ptr(dof);
-      if (node && node->processor_id() == _subproblem.processor_id())
-        _connected_nodes.push_back(dof); // defining secondary nodes in the base class
-    }
-  }
-  else
-  {
-    for (const auto & dof : _secondary_node_ids)
-    {
-      const Node * const node = lm_mesh.query_node_ptr(dof);
-      if (node && node->processor_id() == _subproblem.processor_id())
-        _connected_nodes.push_back(dof);
-    }
-  }
-
-  // Every rank must agree on the primary nodes, and in the order the user listed them, because
+  // Every process must agree on the primary nodes, and in the order the user listed them, because
   // _weights is indexed by position in that list. Taking the list verbatim rather than filtering
   // it by local connectivity is what keeps the weights aligned on a distributed mesh.
-  _primary_node_vector.assign(_primary_node_ids.begin(), _primary_node_ids.end());
-
-  ghostConnectedElems(_primary_node_vector);
+  _primary_node_vector = getParam<std::vector<dof_id_type>>("primary");
 }
 
 Real

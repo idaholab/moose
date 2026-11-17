@@ -44,39 +44,17 @@ NodalStickConstraint::NodalStickConstraint(const InputParameters & parameters)
 }
 
 void
-NodalStickConstraint::meshChanged()
+NodalStickConstraint::updateConnectivity()
 {
-  updateConstrainedNodes();
-}
-
-void
-NodalStickConstraint::updateConstrainedNodes()
-{
-  _primary_node_vector.clear();
-  _connected_nodes.clear();
   _primary_conn.clear();
 
   std::vector<dof_id_type> secondary_nodelist =
       _mesh.getNodeList(_mesh.getBoundaryID(_secondary_boundary_id));
-  std::vector<dof_id_type> primary_nodelist =
-      _mesh.getNodeList(_mesh.getBoundaryID(_primary_boundary_id));
 
-  // Fill in _connected_nodes, which defines secondary nodes in the base class
-  for (auto in : secondary_nodelist)
-  {
-    if (_mesh.nodeRef(in).processor_id() == _subproblem.processor_id())
-      _connected_nodes.push_back(in);
-  }
-
-  // Fill in _primary_node_vector, which defines secondary nodes in the base class
-  for (auto in : primary_nodelist)
-    _primary_node_vector.push_back(in);
-
-  ghostConnectedElems(_primary_node_vector);
+  // Fill in _primary_node_vector, which defines primary nodes in the base class
+  _primary_node_vector = _mesh.getNodeList(_mesh.getBoundaryID(_primary_boundary_id));
 
   // Cache map between secondary node and primary node
-  _connected_nodes.clear();
-  _primary_conn.clear();
   for (unsigned int j = 0; j < secondary_nodelist.size(); ++j)
   {
     if (_mesh.nodeRef(secondary_nodelist[j]).processor_id() == _subproblem.processor_id())

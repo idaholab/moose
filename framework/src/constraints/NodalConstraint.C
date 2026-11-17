@@ -163,6 +163,34 @@ NodalConstraint::gatherAndRetainConnectedElems(MooseMesh & mesh,
   return elem_ids;
 }
 
+std::vector<dof_id_type>
+NodalConstraint::localSecondaryNodes(const std::vector<dof_id_type> & node_ids) const
+{
+  const auto & lm_mesh = _mesh.getMesh();
+
+  std::vector<dof_id_type> local_nodes;
+  for (const auto node_id : node_ids)
+  {
+    // The node may be remote, and therefore absent, on a distributed mesh.
+    const Node * const node = lm_mesh.query_node_ptr(node_id);
+    if (node && node->processor_id() == _subproblem.processor_id())
+      local_nodes.push_back(node_id);
+  }
+
+  return local_nodes;
+}
+
+void
+NodalConstraint::updateConstrainedNodes()
+{
+  _primary_node_vector.clear();
+  _connected_nodes.clear();
+
+  updateConnectivity();
+
+  ghostConnectedElems(_primary_node_vector);
+}
+
 void
 NodalConstraint::ghostConnectedElems(const std::vector<dof_id_type> & node_ids)
 {
@@ -197,8 +225,10 @@ NodalConstraint::reinitConstraintNodes()
   // Derived classes index per-primary data by position in the primary node list (weights, for
   // instance), so a primary node that contributes no dof would silently shift every subsequent
   // entry. reinitNodes() drops nodes that are not semilocal or that the variable is not defined
-  // on, so compare the counts. Every primary node is ghosted onto every process, so a process
-  // that assembles this constraint must resolve all of them.
+  // on, so compare the counts. Only processes that own a secondary node call this method, and
+  // each such process ghosts every primary node. So a mismatch between the number of nodes and
+  // the number of degrees of freedom here means the variable is missing on one of the primary
+  // nodes.
   const auto n_primary_dofs = _var.dofIndices().size();
   if (n_primary_dofs != _primary_node_vector.size())
     mooseError("Found ",

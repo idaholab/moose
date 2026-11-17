@@ -25,16 +25,9 @@ public:
 
   LinearNodalConstraint(const InputParameters & parameters);
 
-  virtual void meshChanged() override;
+  virtual void updateConnectivity() override;
 
 protected:
-  /**
-   * Rebuild the primary and secondary node lists and the ghosting the constraint requires. Called
-   * again whenever the mesh changes, since the node to element connectivity and the set of locally
-   * available elements may both have changed.
-   */
-  void updateConstrainedNodes();
-
   /**
    * Computes the residual for the current secondary node
    */
@@ -45,10 +38,8 @@ protected:
    */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
-  // Holds the primary node ids
-  std::vector<unsigned int> _primary_node_ids;
   // Holds the list of secondary node ids
-  std::vector<unsigned int> _secondary_node_ids;
+  std::vector<dof_id_type> _secondary_node_ids;
   // Holds the secondary node set or side set
   std::string _secondary_node_set_id;
   // Penalty if constraint is not satisfied
