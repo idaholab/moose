@@ -31,7 +31,7 @@
     run_sim = True
     ratio_tol = 1e-7
     difference_tol = 1e-6
-    requirement = 'The system shall compute a perfect Jacobian for VectorCoupledTimeDerivative'
+    requirement = 'The system shall compute a numerically accurate Jacobian for a vector coupled time derivative'
     issues = '#13913'
     design = 'VectorCoupledTimeDerivative.md'
   [../]

@@ -16,7 +16,7 @@
     exodiff = 'piecewise_linear_interpolation_material_out.e'
     custom_cmp = custom.cmp
     issues = "#8265"
-    requirement = 'The system shall create, using PiecewiseLinearInterpolationMaterial, a material with a linear interpolation of a variable and perform appropriate scaling'
+    requirement = 'The system shall create a material with a linear interpolation of a variable and perform appropriate scaling'
   [../]
   [./test_extrapolation]
     type = 'Exodiff'
@@ -71,7 +71,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-5
     run_sim = True
-    requirement = 'The system shall calculate perfect Jacobians for ADPiecewiseLinearInterpolationMaterial'
+    requirement = 'The system shall calculate numerically accurate Jacobians for an AD piecewise linear interpolation material'
     issues = "#5658"
   [../]
 []

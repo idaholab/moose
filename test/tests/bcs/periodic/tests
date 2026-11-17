@@ -31,7 +31,7 @@
     expect_err = '"point" is outside of the domain'
     cli_args = 'AuxKernels/periodic_dist/point="0 99999 0"'
     prereq = 'auto_wrap_2d_test'
-    requirement = "The system shall produce an error within the PeriodicDistanceAux object when a point is provided that is outside the mesh domain."
+    requirement = "The system shall produce an error when computing a periodic distance and a point is provided that is outside the mesh domain."
   []
 
   [auto_wrap_3d_test]

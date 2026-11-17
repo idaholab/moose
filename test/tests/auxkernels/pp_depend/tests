@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'pp_depend.i'
     exodiff = 'pp_depend_out.e'
-    requirement = "The system shall execute a UserObject after executing the AuxKernel objects if the former depends on the latter."
+    requirement = "The system shall execute a user object after executing the auxiliary kernels if the former depends on the latter."
   [../]
 
   [./pp_depend_indirect_wrong]

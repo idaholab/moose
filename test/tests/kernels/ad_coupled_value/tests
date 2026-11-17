@@ -51,7 +51,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-6
     issues = '#16396'
-    requirement = 'The system shall automatically generate a full coupling matrix when doing global AD indexing, resulting in a perfect Jacobian even when the user has not requested full coupling.'
+    requirement = 'The system shall automatically generate a full coupling matrix when doing global AD indexing, resulting in a numerically accurate Jacobian even when the user has not requested full coupling.'
   []
   [trust_user_and_then_error]
     type = RunException

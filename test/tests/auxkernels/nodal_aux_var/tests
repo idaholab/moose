@@ -5,8 +5,8 @@
     type = 'Exodiff'
     input = 'nodal_aux_init_test.i'
     exodiff = 'out_init.e'
-    requirement = "The system shall include the ability to limit the execution of an AuxKernel "
-                  "object to initial setup."
+    requirement = "The system shall include the ability to limit the execution of an auxiliary"
+                  "kernel to initial setup."
   []
 
   [test]
@@ -20,7 +20,7 @@
     type = 'Exodiff'
     input = 'nodal_sort_test.i'
     exodiff = 'nodal_sort_test_out.e'
-    requirement = "The system shall be capable of resolving dependencies between AuxKernel objects "
+    requirement = "The system shall be capable of resolving dependencies between auxiliary kernels"
                   "regardless of input file order."
   []
 
@@ -38,8 +38,8 @@
                  "NodalUserObjects, NodeFaceConstraints, NodeElemConstraints or Materials\. 'all' is none of those\."
     issues = '#22563'
     allow_deprecated = true
-    requirement = "The system shall limit writing to auxiliary variables to use from AuxKernels, "
-                  "ElementUserObjects, or NodalUserObjects."
+    requirement = "The system shall limit writing to auxiliary variables to use from auxiliary"
+                  "kernels and element or nodal user objects."
   []
 
   [multi_update_deprecated_test]
@@ -59,8 +59,8 @@
                  "AuxKernel\."
     issues = '#22563'
     allow_deprecated = true
-    requirement = "The system shall limit writing to auxiliary variables to use from AuxKernels, "
-                  "ElementUserObjects, or NodalUserObjects using variable values."
+    requirement = "The system shall limit writing to auxiliary variables to use from auxiliary"
+                  "kernels and element or nodal user objects using variable values."
   []
   [multi_update_deprecated_error2]
     type = RunException
@@ -79,7 +79,7 @@
     expect_err = "'ten2' must be an auxiliary variable in Coupleable::writableCoupledValue"
     issues = '#22563'
     allow_deprecated = true
-    requirement = "The system shall only allow the writableCoupledValue API to act on AuxVariables."
+    requirement = "The system shall only allow the writableCoupledValue API to act on auxiliary variables."
   []
   [multi_update_deprecated_error4]
     type = RunException
@@ -104,7 +104,7 @@
     input = 'multi_update_elem_var_test.i'
     exodiff = 'out_multi_elem_var.e'
     requirement = "The system shall be capable of updating multiple elemental "
-                  "auxiliary variables within a single AuxKernel object, including the kernel "
+                  "auxiliary variables within a single auxiliary kernel, including the kernel "
                   "variable itsef using the setNodalValue method."
   []
   [multi_update_elem_test_coupled_value]
@@ -113,7 +113,7 @@
     cli_args = 'AuxKernels/all/use_compute_value=true'
     exodiff = 'out_multi_elem_var.e'
     requirement = "The system shall be capable of updating multiple elemental "
-                  "auxiliary variables within a single AuxKernel object."
+                  "auxiliary variables within a single auxiliary kernel."
     issues = '#22563'
   []
 

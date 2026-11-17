@@ -7,6 +7,6 @@
     exodiff = 'constant_scalar_aux_out.e'
     use_old_floor = true
     abs_zero = 1e-9
-    requirement = "The system shall set the value of a scalar auxiliary variable to a constant value using the `ConstantScalarAux` object."
+    requirement = "The system shall set the value of a scalar auxiliary variable to a constant value."
   [../]
 []

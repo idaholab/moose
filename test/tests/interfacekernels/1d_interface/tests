@@ -33,7 +33,7 @@
     exodiff = 'coupled_value_coupled_flux_with_jump_material_out.e'
     design = 'InterfaceKernels/index.md'
     issues = '#12066'
-    requirement = "The system shall support InterfaceKernel objects used with interface material in 1D."
+    requirement = "The system shall support interface kernels used with interface material in 1D."
     prereq = 'interface_diffusion'
   []
   # This test ensures that shape functions for the NEIGHBORING variable are used in test_neighbor
@@ -153,7 +153,7 @@
     ratio_tol = 1e-8
     difference_tol = 1e-6
     issues = '#13365'
-    requirement = "The system shall compute a perfect Jacobian for InterfaceReaction"
+    requirement = "The system shall compute a numerically accurate Jacobian for an interface reaction"
     design = 'InterfaceReaction.md'
   []
 
