@@ -54,7 +54,7 @@ protected:
    * @param node Secondary node
    * @return The element and the node's local index in it
    */
-  std::pair<const Elem *, unsigned int> secondaryNode(const Node & node) const;
+  std::pair<const Elem *, unsigned int> secondaryElemAndNode(const Node & node) const;
 
   /**
    * Component of a Cartesian vector along one of a secondary node's tangent directions. With

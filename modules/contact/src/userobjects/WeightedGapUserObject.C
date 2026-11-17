@@ -238,6 +238,23 @@ WeightedGapUserObject::contactNormal(const Elem & lower_secondary_elem,
   return libmesh_map_find(_ad_nodal_normals, node);
 }
 
+template <bool is_ad>
+GenericRealVectorValue<is_ad>
+WeightedGapUserObject::genericContactNormal(const Elem & lower_secondary_elem,
+                                            const unsigned int nodal_index) const
+{
+  if constexpr (is_ad)
+    if (shouldRecordNodalNormalDerivatives())
+      return contactNormal(lower_secondary_elem, nodal_index);
+
+  return amg().getNodalNormals(lower_secondary_elem)[nodal_index];
+}
+
+template GenericRealVectorValue<false>
+WeightedGapUserObject::genericContactNormal<false>(const Elem &, unsigned int) const;
+template GenericRealVectorValue<true>
+WeightedGapUserObject::genericContactNormal<true>(const Elem &, unsigned int) const;
+
 ADPoint
 WeightedGapUserObject::nodalCoordinate(const Node & node) const
 {
