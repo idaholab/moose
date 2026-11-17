@@ -38,9 +38,18 @@ protected:
 
   /**
    * @return The normal at the current quadrature point. Its displacement derivatives are included
-   * while assembling the Jacobian when the displacements allow it.
+   * while assembling the Jacobian when the displacements are in the same nonlinear system.
    */
   const ADRealVectorValue & qpNormal();
+
+  /**
+   * @return The gap heat flux at the current quadrature point, the sum of the gap flux model
+   * contributions
+   */
+  virtual ADReal computeGapFlux();
+
+  /// Gap width at the current quadrature point
+  const ADReal & gapWidth() const { return _gap_width; }
 
   /// Gap flux model names
   std::vector<UserObjectName> _gap_flux_model_names;
@@ -118,15 +127,12 @@ private:
 
   /// Whether the displacement derivatives of the normals can be included, i.e. whether the
   /// displacements are nodal variables of this constraint's nonlinear system
-  bool _normal_derivatives = false;
+  const bool _normal_derivatives;
 
-  /// The secondary element of \p _qp_normals
-  const Elem * _qp_normals_elem = nullptr;
+  /// The mortar segment whose quadrature points \p _qp_normals belong to
+  const Elem * _qp_normals_msm_elem = nullptr;
 
-  /// The reference points of \p _qp_normals on \p _qp_normals_elem
-  std::vector<Point> _qp_normals_xi;
-
-  /// The normals at the quadrature points of \p _qp_normals_elem
+  /// The normals at the quadrature points of \p _qp_normals_msm_elem
   std::vector<ADRealVectorValue> _qp_normals;
 
   friend class GapFluxModelBase;

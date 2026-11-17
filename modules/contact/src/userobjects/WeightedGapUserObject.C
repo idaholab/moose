@@ -131,7 +131,7 @@ WeightedGapUserObject::initialSetup()
                "combined with quadrature-point normal interpolation.");
 
   Moose::Mortar::checkNodalNormalDisplacements(
-      *this, {{_disp_x_var, _disp_y_var, _disp_z_var}}, _sys);
+      *this, {{_disp_x_var, _disp_y_var, _disp_z_var}}, {{"disp_x", "disp_y", "disp_z"}}, _sys);
 }
 
 void

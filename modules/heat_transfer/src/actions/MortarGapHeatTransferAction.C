@@ -190,9 +190,19 @@ MortarGapHeatTransferAction::addRelationshipManagers(Moose::RelationshipManagerT
   params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
   params.set<BoundaryName>("primary_boundary") = getParam<BoundaryName>("primary_boundary");
   params.set<BoundaryName>("secondary_boundary") = getParam<BoundaryName>("secondary_boundary");
-  // The gap width uses secondary nodal normals, whose derivatives span each secondary node's
-  // incident faces
-  params.set<bool>("ghost_point_neighbors") = true;
+
+  // The gap width uses secondary nodal normals, whose displacement derivatives span each secondary
+  // node's incident faces. They enter the Jacobian only when the displacements are solved together
+  // with the temperature. The variables exist by the time the coupling functors are added.
+  if (input_rm_type == Moose::RelationshipManagerType::COUPLING && isParamValid("displacements"))
+  {
+    const auto & temperature = getParam<std::vector<VariableName>>("temperature")[0];
+    const auto temperature_sys = _problem->systemNumForVariable(temperature);
+    bool same_system = true;
+    for (const auto & disp : getParam<std::vector<VariableName>>("displacements"))
+      same_system = same_system && _problem->systemNumForVariable(disp) == temperature_sys;
+    params.set<bool>("ghost_point_neighbors") = same_system;
+  }
 
   if (_user_provided_mortar_meshes)
   {

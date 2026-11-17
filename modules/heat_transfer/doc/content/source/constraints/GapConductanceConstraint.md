@@ -8,10 +8,8 @@ conductance, $l$ is the gap distance, $u_m$ is the temperature on the primary
 side of the mortar interface, and $u_s$ is the temperature on the secondary
 side. Constraint enforcement is done using lagrange multipliers.
 
-On a displaced mesh, the gap distance is the projection of the primary-secondary point difference
-onto the secondary normal, interpolated from the nodal normals. When the displacements are nodal
-variables of the same nonlinear system, the Jacobian includes the displacement derivatives of
-those nodal normals.
+It is [ModularGapConductanceConstraint](ModularGapConductanceConstraint.md) with this flux and a
+plate gap in every coordinate system, so it computes the gap distance and its Jacobian the same way.
 
 !syntax parameters /Constraints/GapConductanceConstraint
 

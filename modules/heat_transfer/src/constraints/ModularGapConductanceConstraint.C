@@ -81,8 +81,18 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     _disp_x_var(getVar("displacements", 0)),
     _disp_y_var(getVar("displacements", 1)),
     _disp_z_var(_n_disp == 3 ? getVar("displacements", 2) : nullptr),
-    _nodal_frames(std::array<const MooseVariable *, 3>{{_disp_x_var, _disp_y_var, _disp_z_var}})
+    _nodal_frames(std::array<const MooseVariable *, 3>{{_disp_x_var, _disp_y_var, _disp_z_var}}),
+    // Displacements solved in another system or as auxiliary variables enter the gap width with
+    // the stored normals only
+    _normal_derivatives(_displaced && _n_disp &&
+                        Moose::Mortar::supportsNodalNormalDerivatives(
+                            {{_disp_x_var, _disp_y_var, _disp_z_var}}, _sys))
 {
+  if (!interpolateNormals())
+    paramError("interpolate_normals",
+               "The gap width is evaluated at quadrature points and requires interpolated "
+               "normals.");
+
   if (_n_disp && !getParam<bool>("use_displaced_mesh"))
     paramWarning("displacements",
                  "You are coupling displacement variables but are evaluating the gap width on the "
@@ -136,7 +146,7 @@ ModularGapConductanceConstraint::residualSetup()
 {
   ADMortarConstraint::residualSetup();
   _nodal_frames.clear();
-  _qp_normals_elem = nullptr;
+  _qp_normals_msm_elem = nullptr;
 }
 
 void
@@ -144,22 +154,19 @@ ModularGapConductanceConstraint::jacobianSetup()
 {
   ADMortarConstraint::jacobianSetup();
   _nodal_frames.clear();
-  _qp_normals_elem = nullptr;
+  _qp_normals_msm_elem = nullptr;
 }
 
 const ADRealVectorValue &
 ModularGapConductanceConstraint::qpNormal()
 {
-  // Each mortar segment reinitializes the secondary face at its own quadrature points, so the
-  // cache is keyed on those points rather than on the secondary element
-  const auto & xi_pts = _qrule_face->get_points();
-  if (_qp_normals_elem != _lower_secondary_elem || _qp_normals_xi != xi_pts)
+  // The secondary face quadrature points are those of the current mortar segment
+  if (_qp_normals_msm_elem != _msm_elem)
   {
     const bool do_derivatives = _normal_derivatives && Moose::doDerivatives(_subproblem, _sys);
     _qp_normals = _nodal_frames.interpolatedNormals(
-        amg(), *_lower_secondary_elem, xi_pts, _normals, do_derivatives);
-    _qp_normals_elem = _lower_secondary_elem;
-    _qp_normals_xi = xi_pts;
+        amg(), *_lower_secondary_elem, _qrule_face->get_points(), _normals, do_derivatives);
+    _qp_normals_msm_elem = _msm_elem;
   }
   return _qp_normals[_qp];
 }
@@ -180,13 +187,6 @@ ModularGapConductanceConstraint::initialSetup()
   // Select proper coordinate system and geometry (plate, cylinder, sphere)
   setGapGeometryParameters(
       _pars, coord_system, feProblem().getAxisymmetricRadialCoord(), _gap_geometry_type);
-
-  // The gap width uses quadrature-point normals interpolated from the nodal normals.
-  // Displacements solved in another system or as auxiliary variables enter it with the stored
-  // normals only.
-  _normal_derivatives = _displaced && _n_disp && interpolateNormals() &&
-                        Moose::Mortar::supportsNodalNormalDerivatives(
-                            {{_disp_x_var, _disp_y_var, _disp_z_var}}, _sys);
 }
 
 void
@@ -455,18 +455,23 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
       // Ensure energy balance for non-flat (non-PLATE) general geometries when using radiation
       _surface_integration_factor = computeSurfaceIntegrationFactor();
 
-      // Sum up all flux contributions from all supplied gap flux models
-      ADReal flux = 0.0;
-      for (const auto & model : _gap_flux_models)
-        flux += model->computeFluxInternal(*this);
-
       // The Lagrange multiplier _is_ the gap flux
-      return (_lambda[_qp] - flux) * _test[_i][_qp];
+      return (_lambda[_qp] - computeGapFlux()) * _test[_i][_qp];
     }
 
     default:
       return 0;
   }
+}
+
+ADReal
+ModularGapConductanceConstraint::computeGapFlux()
+{
+  // Sum up all flux contributions from all supplied gap flux models
+  ADReal flux = 0.0;
+  for (const auto & model : _gap_flux_models)
+    flux += model->computeFluxInternal(*this);
+  return flux;
 }
 
 void

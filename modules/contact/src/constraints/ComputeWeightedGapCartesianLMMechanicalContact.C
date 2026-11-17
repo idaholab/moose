@@ -131,7 +131,7 @@ ComputeWeightedGapCartesianLMMechanicalContact::initialSetup()
   ADMortarConstraint::initialSetup();
 
   Moose::Mortar::checkNodalNormalDisplacements(
-      *this, {{_disp_x_var, _disp_y_var, _disp_z_var}}, _sys);
+      *this, {{_disp_x_var, _disp_y_var, _disp_z_var}}, {{"disp_x", "disp_y", "disp_z"}}, _sys);
 }
 
 ADReal
@@ -212,16 +212,15 @@ ComputeWeightedGapCartesianLMMechanicalContact::timestepSetup()
 {
   _dof_to_old_normal_vector.clear();
 
-  for (const auto & [dof, normal] : _dof_to_normal_vector)
-    _dof_to_old_normal_vector.emplace(dof, MetaPhysicL::raw_value(normal));
+  for (const auto & [dof, frame_node] : _dof_to_frame_node)
+    _dof_to_old_normal_vector.emplace(dof, frame_node.second);
 }
 
 void
 ComputeWeightedGapCartesianLMMechanicalContact::residualSetup()
 {
   _dof_to_weighted_gap.clear();
-  _dof_to_normal_vector.clear();
-  _dof_to_tangent_vectors.clear();
+  _dof_to_frame_node.clear();
   _nodal_frames.clear();
 }
 
@@ -255,13 +254,24 @@ ComputeWeightedGapCartesianLMMechanicalContact::computeResidual(const Moose::Mor
                                   ? cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                                   : cast_ptr<const DofObject *>(_lower_secondary_elem);
       // We do not interpolate geometry, so just match the local node _i with the corresponding _i
-      const auto & node = _lower_secondary_elem->node_ref(_i);
-      const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
-      _dof_to_normal_vector[dof] = _nodal_frames.normal(amg(), node, _normals[_i], do_derivatives);
-      _dof_to_tangent_vectors[dof] =
-          _nodal_frames.tangents(amg(), node, _normals[_i], do_derivatives);
+      _dof_to_frame_node[dof] = {_lower_secondary_elem->node_ptr(_i), _normals[_i]};
     }
   }
+}
+
+const ADRealVectorValue &
+ComputeWeightedGapCartesianLMMechanicalContact::dofNormal(const DofObject * const dof)
+{
+  const auto & [node, stored_normal] = libmesh_map_find(_dof_to_frame_node, dof);
+  return _nodal_frames.normal(amg(), *node, stored_normal, Moose::doDerivatives(_subproblem, _sys));
+}
+
+const std::array<ADRealVectorValue, 2> &
+ComputeWeightedGapCartesianLMMechanicalContact::dofTangents(const DofObject * const dof)
+{
+  const auto & [node, stored_normal] = libmesh_map_find(_dof_to_frame_node, dof);
+  return _nodal_frames.tangents(
+      amg(), *node, stored_normal, Moose::doDerivatives(_subproblem, _sys));
 }
 
 void
@@ -342,20 +352,20 @@ ComputeWeightedGapCartesianLMMechanicalContact::enforceConstraintOnDof(const Dof
     scaling_factor_z = _lm_vars[2]->scalingFactor();
   }
 
-  ADReal normal_pressure_value =
-      lm_x * _dof_to_normal_vector[dof](0) + lm_y * _dof_to_normal_vector[dof](1);
-  ADReal tangential_pressure_value =
-      lm_x * _dof_to_tangent_vectors[dof][0](0) + lm_y * _dof_to_tangent_vectors[dof][0](1);
+  const auto & normal = dofNormal(dof);
+  const auto & tangents = dofTangents(dof);
+
+  ADReal normal_pressure_value = lm_x * normal(0) + lm_y * normal(1);
+  ADReal tangential_pressure_value = lm_x * tangents[0](0) + lm_y * tangents[0](1);
 
   ADReal tangential_pressure_value_dir;
 
   if (_has_disp_z)
   {
-    normal_pressure_value += lm_z * _dof_to_normal_vector[dof](2);
-    tangential_pressure_value += lm_z * _dof_to_tangent_vectors[dof][0](2);
-    tangential_pressure_value_dir = lm_x * _dof_to_tangent_vectors[dof][1](0) +
-                                    lm_y * _dof_to_tangent_vectors[dof][1](1) +
-                                    lm_z * _dof_to_tangent_vectors[dof][1](2);
+    normal_pressure_value += lm_z * normal(2);
+    tangential_pressure_value += lm_z * tangents[0](2);
+    tangential_pressure_value_dir =
+        lm_x * tangents[1](0) + lm_y * tangents[1](1) + lm_z * tangents[1](2);
   }
 
   ADReal normal_dof_residual = std::min(normal_pressure_value, weighted_gap * c);
@@ -369,8 +379,8 @@ ComputeWeightedGapCartesianLMMechanicalContact::enforceConstraintOnDof(const Dof
   // Intially, use the current normal vector
   if (_dof_to_old_normal_vector[dof].norm() < TOLERANCE)
   {
-    ny = MetaPhysicL::raw_value(_dof_to_normal_vector[dof](1));
-    nz = MetaPhysicL::raw_value(_dof_to_normal_vector[dof](2));
+    ny = MetaPhysicL::raw_value(normal(1));
+    nz = MetaPhysicL::raw_value(normal(2));
   }
   else
   {

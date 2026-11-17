@@ -111,17 +111,21 @@ protected:
   /// A map from node to weighted gap and normalization (if requested)
   std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_weighted_gap;
 
-  /// A map from node to normal vector (2D)
-  std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_normal_vector;
+  /// A map from LM degree of freedom to the secondary node whose frame projects its multipliers,
+  /// and that node's stored normal
+  std::unordered_map<const DofObject *, std::pair<const Node *, Point>> _dof_to_frame_node;
 
   /// A map from node to normal vector (2D) - old
   std::unordered_map<const DofObject *, RealVectorValue> _dof_to_old_normal_vector;
 
-  /// A map from node to tangent vector (2D for now)
-  std::unordered_map<const DofObject *, std::array<ADRealVectorValue, 2>> _dof_to_tangent_vectors;
-
   /// Secondary nodal normals and tangents with their displacement derivatives
   Moose::Mortar::ADNodalFrames _nodal_frames;
+
+  /// @return The normal of the frame projecting the multipliers of \p dof
+  const ADRealVectorValue & dofNormal(const DofObject * dof);
+
+  /// @return The tangents of the frame projecting the multipliers of \p dof
+  const std::array<ADRealVectorValue, 2> & dofTangents(const DofObject * dof);
 
   /// A pointer members that can be used to help avoid copying ADReals
   const ADReal * _weighted_gap_ptr = nullptr;

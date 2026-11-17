@@ -41,6 +41,15 @@
     requirement = "We shall be able to run the mortar method on a displaced mesh, supplying the "
                   "displacements with **constant** auxiliary variables"
   []
+  [interpolated_normals_required]
+    type = RunException
+    input = 'modular_gap_heat_transfer_mortar_displaced.i'
+    cli_args = 'Constraints/ced/interpolate_normals=false'
+    expect_err = 'The gap width is evaluated at quadrature points and requires interpolated normals.'
+    issues = '#34212'
+    requirement = "The system shall report an error if the mortar gap conductance constraint is "
+                  "asked to use nodal rather than interpolated normals."
+  []
   [modular_displaced]
     type = Exodiff
     input = 'modular_gap_heat_transfer_mortar_displaced.i'

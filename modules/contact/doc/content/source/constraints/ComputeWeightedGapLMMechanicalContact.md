@@ -74,16 +74,19 @@ tangential-friction, and penalty contact constraints use the same linearized dir
 Mortar test functions, coordinate factors, and dual or Petrov-Galerkin basis choices are unchanged;
 their weighted contributions are already contained in $\boldsymbol{G}_A$.
 
-Dynamic mortar contact and Cartesian-LM contact
+Dynamic mortar contact
+([ComputeDynamicWeightedGapLMMechanicalContact](/ComputeDynamicWeightedGapLMMechanicalContact.md))
+and Cartesian-LM contact
 ([ComputeWeightedGapCartesianLMMechanicalContact](/ComputeWeightedGapCartesianLMMechanicalContact.md))
 use the same linearized directions in their weighted-gap, weighted-velocity, and Cartesian
 multiplier projections. The thermal mortar gap constraints of the heat transfer module
-differentiate the interpolated normal in their gap width. Cohesive-zone and nonmortar contact do not include
-displacement derivatives of normal and tangent vectors in their Jacobians. Quadrature-point normal
-interpolation is not supported for these Lagrange multiplier formulations. The displacement
-variables must be nodal nonlinear variables in the system assembled by the contact objects.
+differentiate the interpolated normal in their gap width. Cohesive-zone and nonmortar contact do
+not include displacement derivatives of normal and tangent vectors in their Jacobians.
+Quadrature-point normal interpolation is not supported for the standard-basis, dynamic, or
+Cartesian-LM mechanical contact constraints. The displacement variables must be nodal nonlinear
+variables in the system assembled by the contact objects.
 
-Only the averaged secondary nodal-normal field and its derived Householder tangents are
+Only the averaged secondary nodal-normal field and the nodal tangents derived from it are
 differentiated. Mortar segment topology, primary-secondary projections and parent reference
 coordinates, mortar-segment `JxW`, moving overlap boundaries, and active-set decisions do not
 include displacement derivatives. The contact Jacobian therefore includes additional

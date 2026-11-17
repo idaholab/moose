@@ -16,6 +16,7 @@
 #include "libmesh/point.h"
 
 #include <array>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -56,10 +57,12 @@ bool supportsNodalNormalDerivatives(const std::array<const MooseVariable *, 3> &
  * Error unless supportsNodalNormalDerivatives() holds
  * @param object The mortar object whose parameters name the displacement variables
  * @param disp_vars The x, y, and z displacement variables; the z entry is null in 2D
+ * @param param_names The parameters of \p object that name each entry of \p disp_vars
  * @param sys The nonlinear system assembled by \p object
  */
 void checkNodalNormalDisplacements(const MooseBase & object,
                                    const std::array<const MooseVariable *, 3> & disp_vars,
+                                   const std::array<std::string, 3> & param_names,
                                    const SystemBase & sys);
 
 /**
@@ -91,7 +94,8 @@ public:
                                    bool do_derivatives);
 
   /**
-   * @return The nodal tangents (nodalTangents()) at \p node, consistent with \p normal()
+   * @return The nodal tangents (nodalTangents()) at \p node, built from \p normal() with the
+   * same arguments. They carry displacement derivatives exactly when that normal does.
    */
   const std::array<ADRealVectorValue, 2> & tangents(const AutomaticMortarGeneration & amg,
                                                     const Node & node,

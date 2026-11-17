@@ -51,17 +51,17 @@ supportsNodalNormalDerivatives(const std::array<const MooseVariable *, 3> & disp
 void
 checkNodalNormalDisplacements(const MooseBase & object,
                               const std::array<const MooseVariable *, 3> & disp_vars,
+                              const std::array<std::string, 3> & param_names,
                               const SystemBase & sys)
 {
-  const std::array<const char *, 3> parameter_names{{"disp_x", "disp_y", "disp_z"}};
   for (const auto component : index_range(disp_vars))
     if (const auto * const variable = disp_vars[component])
     {
       if (!variable->isNodal())
-        object.paramError(parameter_names[component],
+        object.paramError(param_names[component],
                           "Nodal-normal derivatives require a nodal displacement variable.");
       if (&variable->sys() != &sys)
-        object.paramError(parameter_names[component],
+        object.paramError(param_names[component],
                           "Nodal-normal derivatives require displacement variables in the "
                           "nonlinear system assembled by this contact object.");
     }
