@@ -125,7 +125,7 @@ PenaltyFrictionUserObject::contactTangentialPressureDirTwo() const
 }
 
 std::pair<const Elem *, unsigned int>
-PenaltyFrictionUserObject::secondaryNode(const Node & node) const
+PenaltyFrictionUserObject::secondaryElemAndNode(const Node & node) const
 {
   const auto & elements = libmesh_map_find(amg().nodesToSecondaryElem(), node.id());
   for (const auto * const elem : elements)
@@ -146,12 +146,7 @@ PenaltyFrictionUserObject::tangentialComponent(const Elem & elem,
   if (_subproblem.mesh().dimension() == 2)
     return vector(direction);
 
-  if constexpr (is_ad)
-    if (shouldRecordNodalNormalDerivatives())
-      return vector * contactTangents(elem, node_index)[direction];
-
-  const auto tangents = amg().getNodalTangents(elem);
-  return vector * tangents[direction][node_index];
+  return vector * genericContactTangents<is_ad>(elem, node_index)[direction];
 }
 
 template <bool is_ad>
@@ -164,15 +159,8 @@ PenaltyFrictionUserObject::tangentialVector(
   if (_subproblem.mesh().dimension() == 2)
     return {components(0), components(1), GenericReal<is_ad>(0)};
 
-  if constexpr (is_ad)
-    if (shouldRecordNodalNormalDerivatives())
-    {
-      const auto & tangents = contactTangents(elem, node_index);
-      return components(0) * tangents[0] + components(1) * tangents[1];
-    }
-
-  const auto tangents = amg().getNodalTangents(elem);
-  return components(0) * tangents[0][node_index] + components(1) * tangents[1][node_index];
+  const auto tangents = genericContactTangents<is_ad>(elem, node_index);
+  return components(0) * tangents[0] + components(1) * tangents[1];
 }
 
 template <bool is_ad>
@@ -184,15 +172,7 @@ PenaltyFrictionUserObject::tangentialProjection(const Elem & elem,
   if (_subproblem.mesh().dimension() == 2)
     return vector;
 
-  if constexpr (is_ad)
-    if (shouldRecordNodalNormalDerivatives())
-    {
-      const auto & normal = contactNormal(elem, node_index);
-      return vector - (vector * normal) * normal;
-    }
-
-  const auto normals = amg().getNodalNormals(elem);
-  const auto & normal = normals[node_index];
+  const auto normal = genericContactNormal<is_ad>(elem, node_index);
   return vector - (vector * normal) * normal;
 }
 
@@ -276,7 +256,7 @@ PenaltyFrictionUserObject::getFrictionalContactPressure(const Node * const node,
 
   if (it != _dof_to_tangential_traction.end())
   {
-    const auto [elem, node_index] = secondaryNode(*node);
+    const auto [elem, node_index] = secondaryElemAndNode(*node);
     return tangentialComponent<false>(
         *elem, node_index, MetaPhysicL::raw_value(it->second.first), component);
   }
@@ -316,7 +296,7 @@ PenaltyFrictionUserObject::getDeltaTangentialLagrangeMultiplier(const Node * con
 
   if (it != _dof_to_frictional_lagrange_multipliers.end())
   {
-    const auto [elem, node_index] = secondaryNode(*node);
+    const auto [elem, node_index] = secondaryElemAndNode(*node);
     return tangentialComponent<false>(*elem, node_index, it->second, component);
   }
   else
@@ -346,6 +326,7 @@ PenaltyFrictionUserObject::reinit()
     _frictional_contact_traction_two[qp] = 0.0;
   }
 
+  // zero vector
   const static RealVectorValue zero;
 
   // iterate over nodes
@@ -469,7 +450,7 @@ PenaltyFrictionUserObject::isAugmentedLagrangianConverged()
       const TwoVector slip_velocity_components = {
           MetaPhysicL::raw_value(real_tangential_velocity[0]),
           MetaPhysicL::raw_value(real_tangential_velocity[1])};
-      const auto [elem, node_index] = secondaryNode(*static_cast<const Node *>(dof_object));
+      const auto [elem, node_index] = secondaryElemAndNode(*static_cast<const Node *>(dof_object));
       slip_velocity = tangentialVector<false>(*elem, node_index, slip_velocity_components);
     }
 
@@ -535,7 +516,7 @@ PenaltyFrictionUserObject::updateAugmentedLagrangianMultipliers()
     const TwoVector slip_velocity_components = {
         MetaPhysicL::raw_value(real_tangential_velocity[0]),
         MetaPhysicL::raw_value(real_tangential_velocity[1])};
-    const auto [elem, node_index] = secondaryNode(*static_cast<const Node *>(dof_object));
+    const auto [elem, node_index] = secondaryElemAndNode(*static_cast<const Node *>(dof_object));
     const RealVectorValue slip_velocity =
         tangentialVector<false>(*elem, node_index, slip_velocity_components);
 

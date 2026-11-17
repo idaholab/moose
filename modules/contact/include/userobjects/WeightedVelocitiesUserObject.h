@@ -39,6 +39,16 @@ public:
                                                            unsigned int nodal_index) const;
 
   /**
+   * Contact tangents for the supplied lower-dimensional secondary element node: contactTangents()
+   * with \p is_ad while nodal-normal derivatives are recorded, the stored nodal tangents otherwise.
+   * It returns a copy, so quadrature-point loops that only run while derivatives are recorded
+   * should call contactTangents() instead.
+   */
+  template <bool is_ad>
+  std::array<GenericRealVectorValue<is_ad>, 2>
+  genericContactTangents(const Elem & lower_secondary_elem, unsigned int nodal_index) const;
+
+  /**
    * @return The contact force at quadrature points on the mortar segment
    */
   virtual const ADVariableValue & contactTangentialPressureDirOne() const = 0;
