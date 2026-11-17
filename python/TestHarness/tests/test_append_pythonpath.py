@@ -22,7 +22,14 @@ class TestAppendPythonPath(unittest.TestCase):
         self.dir = os.path.realpath(tempfile.mkdtemp())
         self.orig_cwd = os.getcwd()
 
+        # TestHarness.build modifies these process-wide, so restore them
+        self.orig_sys_path = list(sys.path)
+        self.orig_environ = dict(os.environ)
+
     def tearDown(self):
+        sys.path[:] = self.orig_sys_path
+        os.environ.clear()
+        os.environ.update(self.orig_environ)
         shutil.rmtree(self.dir, ignore_errors=True)
         os.chdir(self.orig_cwd)
 
@@ -83,8 +90,11 @@ class TestAppendPythonPath(unittest.TestCase):
         TestHarness.build(
             ["unused", "--minimal-capabilities"], "test_harness_test", MOOSE_DIR
         )
+        pythonpath = os.environ["PYTHONPATH"].split(":")
         for path in new_paths_abs:
             self.assertEqual(sys.path.count(path), 1)
+            # Needed for tests that run in a subprocess
+            self.assertEqual(pythonpath.count(path), 1)
 
     def test_append_pythonpath_from_executable(self):
         # Add a fake package in the directory to grab
@@ -104,7 +114,10 @@ class TestAppendPythonPath(unittest.TestCase):
             MOOSE_DIR,
             skip_testroot=True,
         )
-        self.assertEqual(sys.path.count(os.path.join(self.dir, "python")), 1)
+        python_dir = os.path.join(self.dir, "python")
+        self.assertEqual(sys.path.count(python_dir), 1)
+        # Needed for tests that run in a subprocess
+        self.assertEqual(os.environ["PYTHONPATH"].split(":").count(python_dir), 1)
 
 
 if __name__ == "__main__":
