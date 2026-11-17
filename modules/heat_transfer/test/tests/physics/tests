@@ -68,4 +68,28 @@
       detail = 'with convective heat flux boundary conditions.'
     []
   []
+  [shared_temperature]
+    requirement = 'The system shall allow multiple heat conduction physics to share the temperature variable across their blocks, with'
+    design = 'PhysicsVariableCoordinator.md'
+    issues = '#30533'
+    [cg]
+      type = CSVDiff
+      input = 'shared_temperature_cg.i'
+      csvdiff = 'shared_temperature_cg_out.csv'
+      detail = 'a continuous Galerkin discretization on adjacent blocks,'
+    []
+    [fv]
+      type = CSVDiff
+      input = 'shared_temperature_fv.i'
+      csvdiff = 'shared_temperature_fv_out.csv'
+      detail = 'a finite volume discretization on blocks that are not adjacent,'
+    []
+    [fv_adjacent]
+      type = RunException
+      input = 'shared_temperature_fv.i'
+      cli_args = 'Physics/HeatConduction/FiniteVolume/right/block=2'
+      expect_err = "Physics 'left' and 'right' share the finite volume variable 'T' on the adjacent subdomains '0' and '2', but neither is defined on both"
+      detail = 'and an error if the finite volume discretization is used on adjacent blocks.'
+    []
+  []
 []

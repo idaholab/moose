@@ -131,8 +131,8 @@ ifeq ($(FLUID_PROPERTIES),yes)
         MISC                        := yes
 endif
 
-ifeq ($(SOLID_MECHANICS),yes)
-        SHIFTED_BOUNDARY_METHOD     := yes
+ifeq ($(SHIFTED_BOUNDARY_METHOD),yes)
+        SOLID_MECHANICS             := yes
 endif
 
 # The complete list of all moose modules
@@ -255,19 +255,20 @@ ifeq ($(SOLID_PROPERTIES),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
-# Depended on by solid_mechanics
-ifeq ($(SHIFTED_BOUNDARY_METHOD),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/shifted_boundary_method
-  APPLICATION_NAME   := shifted_boundary_method
-  SUFFIX             := sbm
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-# Depended on by contact, fsi, misc, peridynamics, phase_field, porous_flow, xfem
+# Depended on by contact, fsi, misc, peridynamics, phase_field, porous_flow, xfem,
+# shifted_boundary_method
 ifeq ($(SOLID_MECHANICS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_mechanics
   APPLICATION_NAME   := solid_mechanics
   SUFFIX             := sm
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(SHIFTED_BOUNDARY_METHOD),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/shifted_boundary_method
+  APPLICATION_NAME   := shifted_boundary_method
+  DEPEND_MODULES     := solid_mechanics
+  SUFFIX             := sbm
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

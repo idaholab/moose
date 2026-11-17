@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ImplicitMidpoint.h"
+#include "libmesh/sparse_matrix.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "PetscSupport.h"
@@ -27,6 +28,7 @@ ImplicitMidpoint::ImplicitMidpoint(const InputParameters & parameters)
     _stage(1),
     _residual_stage1(addVector("residual_stage1", false, libMesh::GHOSTED))
 {
+  requestTimeJacobian();
   mooseInfo("ImplicitMidpoint and other multistage TimeIntegrators are known not to work with "
             "Materials/AuxKernels that accumulate 'state' and should be used with caution.");
 }
@@ -130,4 +132,12 @@ ImplicitMidpoint::postResidual(NumericVector<Number> & residual)
   else
     mooseError(
         "ImplicitMidpoint::postResidual(): _stage = ", _stage, ", only _stage = 1, 2 is allowed.");
+}
+
+void
+ImplicitMidpoint::postJacobian(SparseMatrix<Number> & jacobian)
+{
+  // stage 1 weights its non-time residual by 1/2; the update stage uses the non-time residual
+  // of stage 1 only, which does not depend on the current solution, see postResidual()
+  weightNonTimeJacobian(jacobian, _stage == 1 ? 0.5 : 0.0);
 }

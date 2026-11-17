@@ -92,6 +92,28 @@ householderTangents(const Vector & normal)
                   -2.0 * h_vector(1) * h_vector(2) / h_squared,
                   1.0 - 2.0 * h_vector(2) * h_vector(2) / h_squared)}};
 }
+
+/**
+ * Construct the two tangent vectors used by mortar from a unit normal on a \p dim dimensional
+ * mesh.
+ *
+ * In 2D the first tangent is e_z x n and the second is e_z, as in Gitterle, Popp, Gee, and Wall,
+ * Int. J. Numer. Meth. Engng. 84(5), 2010, pp. 543-571, eq. (37). This frame is smooth for every
+ * in-plane normal, whereas householderTangents() switches charts near n = (-1, 0, 0) and flips the
+ * sign of both tangents there. Away from that pole the two constructions coincide. Tangential
+ * Lagrange multipliers are stored in this frame, so a sign flip would reverse their meaning during
+ * a nonlinear solve. In 3D every frame built from the normal alone has a discontinuity somewhere,
+ * and householderTangents() is used.
+ */
+template <typename Vector>
+std::array<Vector, 2>
+nodalTangents(const Vector & normal, const unsigned int dim)
+{
+  if (dim == 2)
+    return {{Vector(-normal(1), normal(0), 0.0), Vector(0.0, 0.0, 1.0)}};
+
+  return householderTangents(normal);
+}
 }
 }
 
@@ -363,6 +385,16 @@ public:
   }
 
   /**
+   * Request that every process receive the mortar interface couplings of the nonlocal secondary
+   * lower-dimensional elements that point-neighbor ghosting reads for its local elements: the
+   * point neighbors of its local secondary elements and of the secondary elements coupled to its
+   * local elements. Consumers that apply a node's constraint on every process contributing to it,
+   * rather than only on the node's owner, need these couplings to preallocate the rows of their
+   * local elements.
+   */
+  void requestNonlocalSecondaryCouplings() { _nonlocal_secondary_couplings = true; }
+
+  /**
    * @return The primary-secondary boundary ID pair
    */
   const std::pair<BoundaryID, BoundaryID> & primarySecondaryBoundaryIDPair() const;
@@ -612,6 +644,10 @@ private:
 
   /// Whether the mortar segment mesh is distributed
   const bool _distributed;
+
+  /// Whether buildCouplingInformation() also gathers the couplings of nonlocal secondary
+  /// lower-dimensional elements
+  bool _nonlocal_secondary_couplings = false;
 
   /// Newton solve tolerance for node projections
   Real _newton_tolerance = 1e-12;

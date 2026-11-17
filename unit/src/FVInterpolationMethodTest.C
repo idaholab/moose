@@ -63,6 +63,7 @@ public:
   bool supportsElemSideQpArg() const override { return false; }
 
 private:
+  using Moose::FunctorBase<Real>::evaluate;
   ValueType evaluate(const Moose::ElemArg & elem_arg, const Moose::StateArg &) const override final
   {
     return valueFor(elem_arg.elem);
@@ -207,6 +208,17 @@ TEST_F(FVInterpolationMethodTest, harmonicAverage)
   const Real expected = 1.0 / (gc / elem_value + (1.0 - gc) / neighbor_value);
 
   EXPECT_NEAR(method.interpolate(*_internal_face, elem_value, neighbor_value), expected, 1e-12);
+}
+
+TEST(FVInterpolationMethodUtilityTest, harmonicAverageWithExplicitWeights)
+{
+  const Real value1 = 4.0;
+  const Real value2 = 1.0;
+  const Real weight1 = 0.25;
+  const Real weight2 = 0.75;
+  const Real expected = 1.0 / (weight1 / value1 + weight2 / value2);
+
+  EXPECT_NEAR(Moose::FV::harmonicInterpolation(value1, value2, weight1, weight2), expected, 1e-12);
 }
 
 TEST_F(FVInterpolationMethodTest, advectedUpwind)

@@ -143,7 +143,8 @@ ACInterface::computeQpOffDiagJacobian(unsigned int jvar)
     for (unsigned int i = 0; i < _n_args; ++i)
       dgradL += (*_gradarg[i])[_qp] * _phi[_j][_qp] * (*_d2Ldarg2[cvar][i])[_qp];
 
-    dsum += (_kappa[_qp] * dgradL + _dkappadop[_qp] * _phi[_j][_qp] * gradL()) * _test[_i][_qp];
+    dsum += (_kappa[_qp] * dgradL + (*_dkappadarg[cvar])[_qp] * _phi[_j][_qp] * gradL()) *
+            _test[_i][_qp];
   }
 
   return _grad_u[_qp] * dsum;

@@ -82,6 +82,7 @@ GateValve1Phase::addMooseObjects()
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_names[0];
     params.set<Real>("open_area_fraction") = getParam<Real>("open_area_fraction");
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
+    params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
     params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
     params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
@@ -106,8 +107,6 @@ GateValve1Phase::addMooseObjects()
       params.set<NonlinearVariableName>("variable") = var_names[j];
       params.set<UserObjectName>("gate_valve_uo") = _junction_uo_name;
       params.set<unsigned int>("connection_index") = i;
-      params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
-      params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
       params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
       params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
       params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};

@@ -21,6 +21,8 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
+  /// Value to be applied to the Robin boundary condition
+  const RealVectorValue & _value;
   /// Coefficient to be applied to the Robin boundary condition
   const Real _coef;
 };

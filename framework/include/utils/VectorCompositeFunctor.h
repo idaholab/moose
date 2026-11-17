@@ -68,6 +68,7 @@ private:
   ValueType evaluate(const ElemSideQpArg & elem_side_qp, const StateArg & state) const override;
   ValueType evaluate(const ElemPointArg & elem_point_arg, const StateArg & state) const override;
   ValueType evaluate(const NodeArg & node_arg, const StateArg & state) const override;
+  ValueType evaluate(const PointArg & point_arg, const StateArg & state) const override;
 
   using FunctorBase<VectorValue<T>>::evaluateGradient;
   GradientType evaluateGradient(const ElemArg & elem_arg, const StateArg & state) const override;
@@ -210,6 +211,13 @@ typename VectorCompositeFunctor<T>::ValueType
 VectorCompositeFunctor<T>::evaluate(const NodeArg & node_arg, const StateArg & state) const
 {
   return {_x_comp(node_arg, state), _y_comp(node_arg, state), _z_comp(node_arg, state)};
+}
+
+template <typename T>
+typename VectorCompositeFunctor<T>::ValueType
+VectorCompositeFunctor<T>::evaluate(const PointArg & point_arg, const StateArg & state) const
+{
+  return {_x_comp(point_arg, state), _y_comp(point_arg, state), _z_comp(point_arg, state)};
 }
 
 template <typename T>

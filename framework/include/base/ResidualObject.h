@@ -104,6 +104,12 @@ public:
   virtual const MooseVariableBase & variable() const = 0;
 
   /**
+   * Returns all the variables that this object operates on. Most objects operate on a single
+   * variable
+   */
+  virtual std::vector<const MooseVariableBase *> variables() const { return {&variable()}; }
+
+  /**
    * Returns a reference to the SubProblem for which this Kernel is active
    */
   const SubProblem & subProblem() const { return _subproblem; }

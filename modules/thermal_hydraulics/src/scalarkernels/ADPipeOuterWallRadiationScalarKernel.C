@@ -9,11 +9,8 @@
 
 #include "ADPipeOuterWallRadiationScalarKernel.h"
 
-#include "ADFunctorInterface.h"
 #include "ThermalSolidProperties.h"
 #include "PhysicalConstants.h"
-#include "MooseMesh.h"
-#include "libmesh/point_locator_base.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADPipeOuterWallRadiationScalarKernel);
 
@@ -21,7 +18,6 @@ InputParameters
 ADPipeOuterWallRadiationScalarKernel::validParams()
 {
   InputParameters params = ADScalarKernel::validParams();
-  params += ADFunctorInterface::validParams();
   params.addClassDescription(
       "Adds a radiative heat transfer term, exchanged with an ambient/surrounding "
       "environment, to the outer-surface radial node of a pipe wall.");
@@ -43,10 +39,6 @@ ADPipeOuterWallRadiationScalarKernel::validParams()
   params.addParam<Real>("stefan_boltzmann_constant",
                         PhysicalConstants::stefan_boltzmann_constant,
                         "Stefan-Boltzmann constant");
-  params.addParam<Point>("functor_evaluation_point",
-                         Point(),
-                         "Point at which spatially varying functors (functions, field variables, "
-                         "functor material properties) are evaluated");
 
   return params;
 }
@@ -54,7 +46,6 @@ ADPipeOuterWallRadiationScalarKernel::validParams()
 ADPipeOuterWallRadiationScalarKernel::ADPipeOuterWallRadiationScalarKernel(
     const InputParameters & parameters)
   : Base(parameters),
-    ADFunctorInterface(this),
     _sp(this->template getUserObject<ThermalSolidProperties>("solid_properties")),
     _is_implicit(this->template getParam<bool>("is_implicit")),
     _area(this->template getFunctor<ADReal>("area")),
@@ -63,42 +54,30 @@ ADPipeOuterWallRadiationScalarKernel::ADPipeOuterWallRadiationScalarKernel(
     _emissivity(this->template getFunctor<ADReal>("emissivity")),
     _view_factor(this->template getFunctor<ADReal>("view_factor")),
     _scale(this->template getFunctor<ADReal>("scale")),
-    _sigma(this->template getParam<Real>("stefan_boltzmann_constant")),
-    _functor_point(getParam<Point>("functor_evaluation_point"))
+    _sigma(this->template getParam<Real>("stefan_boltzmann_constant"))
 {
-}
-
-void
-ADPipeOuterWallRadiationScalarKernel::initialSetup()
-{
-  ADScalarKernel::initialSetup();
-
-  // Locate the element that spatially varying functors will be evaluated on
-  auto pl = _mesh.getPointLocator();
-  pl->enable_out_of_mesh_mode();
-  _functor_elem = (*pl)(_functor_point);
 }
 
 ADReal
 ADPipeOuterWallRadiationScalarKernel::computeQpResidual()
 {
-  const auto elem_arg = functorArg();
+  const Moose::PointArg arg = {Point(1, 2, 3)};
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
 
-  const auto A = _area(elem_arg, state);
+  const auto A = _area(arg, state);
   const auto cp = _sp.cp_from_T(Base::_u[i]);
   const auto rho = _sp.rho_from_T(Base::_u[i]);
 
-  const auto scale = _scale(elem_arg, state);
-  const auto emissivity = _emissivity(elem_arg, state);
-  const auto view_factor = _view_factor(elem_arg, state);
+  const auto scale = _scale(arg, state);
+  const auto emissivity = _emissivity(arg, state);
+  const auto view_factor = _view_factor(arg, state);
   const auto T4 = pow(Base::_u[i], 4);
-  const auto T4inf = pow(_T_ambient(elem_arg, state), 4);
+  const auto T4inf = pow(_T_ambient(arg, state), 4);
 
   // Radiative heat transfer with the ambient/surrounding environment
   const auto q_radiation =
-      _sigma * scale * emissivity * view_factor * _perimeter(elem_arg, state) * (T4inf - T4);
+      _sigma * scale * emissivity * view_factor * _perimeter(arg, state) * (T4inf - T4);
 
   return -q_radiation / A / rho / cp;
 }

@@ -46,4 +46,6 @@ protected:
   const Real _ref_temperature;
   /// the density
   const Moose::Functor<Real> & _rho;
+  /// The porosity
+  const Moose::Functor<Real> & _eps;
 };

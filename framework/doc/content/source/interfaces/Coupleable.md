@@ -27,10 +27,10 @@ The following tables summarize the methods it provides.
 
 | Methods for array field variables | Description |
 | :--- | :--- |
-`coupledArrayValue`‡ | Value of a coupled array variable at q-points
-`coupledArrayGradient`‡ | Gradient of a coupled array variable at q-points
-`coupledArrayDot`† | Time derivative of a coupled array variable at q-points
-`coupledArrayDotDot`† | Second time derivative of a coupled array variable at q-points
+`coupledArrayValue`‡§ | Value of a coupled array variable at q-points
+`coupledArrayGradient`‡§ | Gradient of a coupled array variable at q-points
+`coupledArrayDot`†§ | Time derivative of a coupled array variable at q-points
+`coupledArrayDotDot`†§ | Second time derivative of a coupled array variable at q-points
 `coupledArrayDotDu` | Derivative with regards to the variable of the time derivative of a coupled array variable at q-points
 `coupledArrayGradientDot` | Time derivative of the gradient of a coupled array variable at q-points
 
@@ -40,8 +40,8 @@ The following tables summarize the methods it provides.
 | :--- | :--- |
 `coupledVectorValue`‡§ | Value of a coupled vector variable at q-points
 `coupledVectorGradient`‡§ | Gradient of a coupled vector variable at q-points
-`coupledCurl`‡ | Curl of a coupled vector variable at q-points
-`coupledDiv`‡ | Divergence of a coupled vector variable at q-points
+`coupledCurl`‡§ | Curl of a coupled vector variable at q-points
+`coupledDiv`‡§ | Divergence of a coupled vector variable at q-points
 `coupledVectorDot`†§ | Time derivative of a coupled vector variable at q-points
 `coupledVectorDotDot`† | Second time derivative of a coupled vector variable at q-points
 `coupledVectorDotDu` | Derivative with regards to the variable of the time derivative of a coupled vector variable at q-points
@@ -72,7 +72,7 @@ name with `ad` and preserving `camelCase`, e.g. `adCoupledValue` or `adCoupledVe
 Note that all of these prefixes and suffixes are mutually exclusive, i.e. none can be mixed and matched in any way.
 
 Lastly, some methods are only available with automatic differentiation info, e.g.
-`adCoupledLowerValue` returns the value of a coupled lower-dimensional variable and `adCoupledVectorSecond` returns the second spatial derivatives of a coupled vector variable.
+`adCoupledLowerValue` returns the value of a coupled lower-dimensional variable, and `adCoupledVectorSecond` and `adCoupledArraySecond` return the second spatial derivatives of a coupled vector and array variable, respectively.
 
 ## Optional Coupling
 

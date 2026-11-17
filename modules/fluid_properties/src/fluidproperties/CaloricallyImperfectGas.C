@@ -187,10 +187,9 @@ CaloricallyImperfectGas::cv_from_T(Real T, Real & cv, Real & dcv_dT) const
 {
   if (T < _min_temperature || T > _max_temperature)
     outOfBounds("cv_from_T (3 args)", T, _min_temperature, _max_temperature);
-  Real pert = 1.0e-7;
   cv = cv_from_T(T);
-  Real cv_pert = cv_from_T(T * (1 + pert));
-  dcv_dT = (cv_pert - cv) / (T * pert);
+  const Real dT = temperatureStep(T);
+  dcv_dT = (cv_from_T(T + dT) - cv) / dT;
 }
 
 void
@@ -198,10 +197,9 @@ CaloricallyImperfectGas::cp_from_T(Real T, Real & cp, Real & dcp_dT) const
 {
   if (T < _min_temperature || T > _max_temperature)
     outOfBounds("cp_from_T (3 args)", T, _min_temperature, _max_temperature);
-  Real pert = 1.0e-7;
   cp = cp_from_T(T);
-  Real cp_pert = cp_from_T(T * (1 + pert));
-  dcp_dT = (cp_pert - cp) / (T * pert);
+  const Real dT = temperatureStep(T);
+  dcp_dT = (cp_from_T(T + dT) - cp) / dT;
 }
 
 Real
@@ -215,7 +213,9 @@ CaloricallyImperfectGas::T_from_e(Real e) const
   else if (e > _max_e)
     return _T_e_lookup.back();
 
-  unsigned int index = std::floor((e - _min_e) / _delta_e);
+  // e == _max_e falls in the last interval, not past the end of the table
+  const unsigned int index =
+      std::min<unsigned int>(std::floor((e - _min_e) / _delta_e), _T_e_lookup.size() - 2);
   Real x = (e - _min_e - index * _delta_e) / _delta_e;
   return x * _T_e_lookup[index + 1] + (1 - x) * _T_e_lookup[index];
 }
@@ -224,14 +224,16 @@ Real
 CaloricallyImperfectGas::T_from_h(Real h) const
 {
   if (h < _min_h || h > _max_h)
-    outOfBounds("h_from_e", h, _min_h, _max_h);
+    outOfBounds("T_from_h", h, _min_h, _max_h);
 
   if (h < _min_h)
     return _T_h_lookup[0];
   else if (h > _max_h)
     return _T_h_lookup.back();
 
-  unsigned int index = std::floor((h - _min_h) / _delta_h);
+  // h == _max_h falls in the last interval, not past the end of the table
+  const unsigned int index =
+      std::min<unsigned int>(std::floor((h - _min_h) / _delta_h), _T_h_lookup.size() - 2);
   Real x = (h - _min_h - index * _delta_h) / _delta_h;
   return x * _T_h_lookup[index + 1] + (1 - x) * _T_h_lookup[index];
 }
@@ -242,7 +244,13 @@ CaloricallyImperfectGas::Z_from_T(Real T) const
   if (T < _min_temperature || T > _max_temperature)
     outOfBounds("Z_from_T", T, _min_temperature, _max_temperature);
 
-  unsigned int index = std::floor((T - _min_temperature) / _delta_T);
+  if (T <= _min_temperature)
+    return _Z_T_lookup[0];
+  else if (T >= _max_temperature)
+    return _Z_T_lookup.back();
+
+  const unsigned int index =
+      std::min<unsigned int>(std::floor((T - _min_temperature) / _delta_T), _Z_T_lookup.size() - 2);
   Real x = (T - _min_temperature - index * _delta_T) / _delta_T;
   return x * _Z_T_lookup[index + 1] + (1 - x) * _Z_T_lookup[index];
 }
@@ -350,13 +358,12 @@ CaloricallyImperfectGas::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real
   Real T, dT_dv, dT_de;
   T_from_v_e(v, e, T, dT_dv, dT_de);
 
-  Real gamma, dgamma_dv, dgamma_dT;
-  gamma_from_v_e(v, e, gamma, dgamma_dv, dgamma_dT);
+  Real gamma, dgamma_dv, dgamma_de;
+  gamma_from_v_e(v, e, gamma, dgamma_dv, dgamma_de);
   c = std::sqrt(gamma * _R_specific * T);
 
-  const Real dc_dT = 0.5 / c * _R_specific * (gamma + T * dgamma_dT);
-  dc_dv = dc_dT * dT_dv;
-  dc_de = dc_dT * dT_de;
+  dc_dv = 0.5 / c * _R_specific * (gamma * dT_dv + T * dgamma_dv);
+  dc_de = 0.5 / c * _R_specific * (gamma * dT_de + T * dgamma_de);
 }
 
 Real
@@ -889,9 +896,8 @@ CaloricallyImperfectGas::mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_dp, R
 {
   mu = this->mu_from_p_T(p, T);
   dmu_dp = 0.0;
-  Real pert = 1.0e-7;
-  Real mu2 = this->mu_from_p_T(p, T * (1 + pert));
-  dmu_dT = (mu2 - mu) / (T * pert);
+  const Real dT = temperatureStep(T);
+  dmu_dT = (this->mu_from_p_T(p, T + dT) - mu) / dT;
 }
 
 Real
@@ -905,9 +911,8 @@ CaloricallyImperfectGas::k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, Real
 {
   k = k_from_p_T(p, T);
   dk_dp = 0.0;
-  Real pert = 1.0e-7;
-  Real k2 = this->k_from_p_T(p, T * (1 + pert));
-  dk_dT = (k2 - k) / (T * pert);
+  const Real dT = temperatureStep(T);
+  dk_dT = (this->k_from_p_T(p, T + dT) - k) / dT;
 }
 
 Real
@@ -933,11 +938,20 @@ void
 CaloricallyImperfectGas::p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const
 {
   p = p_from_h_s(h, s);
-  Real pert = 1e-7;
-  Real p_pert = p_from_h_s(h * (1 + pert), s);
-  dp_dh = (p_pert - p) / (h * pert);
-  p_pert = p_from_h_s(h, s * (1 + pert));
-  dp_ds = (p_pert - p) / (s * pert);
+  // From dh = T ds + v dp
+  const Real T = T_from_h(h);
+  const Real rho = rho_from_p_T(p, T);
+  dp_dh = rho;
+  dp_ds = -T * rho;
+}
+
+Real
+CaloricallyImperfectGas::temperatureStep(Real T) const
+{
+  // Relative step for one-sided finite differences, taken backward near the upper bound of
+  // the tabulated temperature range so that the perturbed state stays inside it
+  const Real dT = 1.0e-7 * T;
+  return T + dT > _max_temperature ? -dT : dT;
 }
 
 void

@@ -20,6 +20,7 @@ Finally, a list of publications supporting SCM development can be found [here](s
 | 1 | [Friction Model, Verification](subchannel/v&v/friction.md) |
 | 2 | [Friction Factor Closures, Verification](subchannel/v&v/friction_factor_closures.md) |
 | 3 | [Enthalpy Mixing Model, Verification](subchannel/v&v/enthalpy.md) |
+| 4 | [Radial Heat Conduction, Verification](subchannel/v&v/radial_conduction.md) |
 
 ## List of validation cases
 

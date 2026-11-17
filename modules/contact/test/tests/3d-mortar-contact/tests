@@ -71,6 +71,19 @@
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint using Petrov-Galerkin approach in contact action.'
   []
+  [frictionless-mortar-3d-pg-action-quadratic-faces]
+    type = RunException
+    input = 'frictionless-mortar-3d-action.i'
+    cli_args = 'Mesh/top_block/elem_type=HEX20 Mesh/bottom_block/elem_type=HEX20 '
+               'Variables/disp_x/order=SECOND Variables/disp_y/order=SECOND '
+               'Variables/disp_z/order=SECOND Contact/mortar/use_petrov_galerkin=true --check-input'
+    expect_err = 'The Petrov-Galerkin approach is not supported for a SECOND order dual Lagrange'
+    issues = '#33558'
+    design = 'Petrov-Galerkin_approach_for_Lagrange_multipliers.md'
+    requirement = 'The system shall report an error if the contact action is asked to use the '
+                  'Petrov-Galerkin approach with a second-order dual Lagrange multiplier on QUAD8 '
+                  'secondary faces.'
+  []
   [frictionless-mortar-3d-action-qp-mapping]
     design = 'ContactAction.md AutomaticMortarGeneration.md'
     issues = '#33367'
@@ -507,6 +520,20 @@
                   'penalty approach'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
+  []
+  [penalty-sparsity]
+    type = 'RunApp'
+    input = 'penalty-sparsity.i'
+    # The input partitions the mesh into three slabs across the interface
+    min_parallel = 3
+    max_parallel = 3
+    # The weighted gap of a contact node carries up to 78 derivatives
+    capabilities = 'ad_size>=100'
+    requirement = 'The system shall preallocate every Jacobian entry assembled by mortar penalty '
+                  'contact in 3D when the secondary faces around a contact node are owned by '
+                  'other processes.'
+    design = 'AutomaticMortarGeneration.md PenaltyWeightedGapUserObject.md'
+    issues = '#34065'
   []
   [frictional-mortar-3d-al]
     type = 'Exodiff'

@@ -34,7 +34,7 @@
 [UserObjects]
   [TreeBuilder]
     type = SBMSurfaceMeshBuilder
-    surface_mesh = shift_boundary_mesh
+    interface_mesh = shift_boundary_mesh
     build_kd_tree = false
   []
 []

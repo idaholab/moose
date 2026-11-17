@@ -466,6 +466,9 @@ public:
   [[noreturn]] virtual const ADTemplateVariableCurl<OutputType> & adCurlSln() const override;
   [[noreturn]] virtual const ADTemplateVariableCurl<OutputType> &
   adCurlSlnNeighbor() const override;
+  [[noreturn]] virtual const ADTemplateVariableDivergence<OutputType> & adDivSln() const override;
+  [[noreturn]] virtual const ADTemplateVariableDivergence<OutputType> &
+  adDivSlnNeighbor() const override;
 
   virtual const DofValues & dofValues() const override;
   virtual const DofValues & dofValuesOld() const override;

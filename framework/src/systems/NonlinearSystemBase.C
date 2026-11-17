@@ -236,7 +236,10 @@ NonlinearSystemBase::preInit()
 
 #ifdef MOOSE_KOKKOS_ENABLED
   if (_fe_problem.hasKokkosResidualObjects())
+  {
     _sys.get_dof_map().full_sparsity_pattern_needed();
+    _sys.get_dof_map().ghost_constraints_needed();
+  }
 #endif
 }
 
@@ -911,6 +914,7 @@ NonlinearSystemBase::computeResidualAndJacobianTags(const std::set<TagID> & vect
       residual.close();
     }
 
+    postJacobian(matrix_tags);
     computeNodalBCsResidualAndJacobian(vector_tags, matrix_tags);
     closeTaggedVectors(vector_tags);
     closeTaggedMatrices(matrix_tags);
@@ -2167,6 +2171,16 @@ NonlinearSystemBase::computeNodalBCsResidual(const std::set<TagID> & tags)
 }
 
 void
+NonlinearSystemBase::postJacobian(const std::set<TagID> & tags)
+{
+  if (!tags.count(systemMatrixTag()) || !hasMatrix(systemMatrixTag()))
+    return;
+  auto & jacobian = getMatrix(systemMatrixTag());
+  for (auto & ti : _time_integrators)
+    ti->postJacobian(jacobian);
+}
+
+void
 NonlinearSystemBase::computeNodalBCsJacobian(const std::set<TagID> & tags)
 {
   // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs
@@ -3251,6 +3265,9 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     }
   }
   PARALLEL_CATCH;
+
+  // constraint residuals are part of the non-time residual, so their Jacobians are weighted too
+  postJacobian(tags);
 
   computeNodalBCsJacobian(tags);
   closeTaggedMatrices(tags);

@@ -114,24 +114,19 @@ Typically, it is sufficient to assume that negligible momentum and energy transf
 
 ## Conjugate Heat Transfer
 
-The flow energy equation above is designed to couple to a variable segment wall temperature. For convenience and modularity, additional conjugate heat transfer kernels are added to close the heat transfer through the solid bounding wall. The area-averaged governing equation for which is:
+The flow energy equation above is designed to couple to a variable segment wall temperature. For convenience and modularity, additional conjugate heat transfer kernels are added to close the heat transfer through the solid bounding wall. The governing equation for which is the heat conduction equation in the solid wall:
 
 !equation id=pipe_CHT_conservation
-A_w \rho_w c_{p,w} \pd{T_w}{t} = \nabla \cdot \left (k_w \nabla T_w \right ) + q_{i,w}^{''} P_{i,w} - q_{o,w}^{''} P_{o,w}
+\rho_w c_{p,w} \pd{T_w}{t} = \nabla \cdot \left (k_w \nabla T_w \right )
 
 where
 
-- $A_w$ is the cross-sectional area of the wall,
 - $\rho_w$ is the density of the wall,
 - $c_{p,w}$ is the specific isobaric heat capacity of the wall,
-- $T_w$ is the temperature of the wall,
-- $k_w$ is the thermal conductivity of the wall,
-- $q_{i,w}^{''}$ is the heat flux entering the inner surface of the wall,
-- $q_{o,w}^{''}$ is the heat flux exiting the outer surface of the wall,
-- $P_{i,w}$ is the perimeter of the inner surface of the cross-section, and
-- $P_{o,w}$ is the perimeter of the outer surface of the cross-section.
+- $T_w$ is the temperature of the wall, and
+- $k_w$ is the thermal conductivity of the wall.
 
-This equation is discretized on a per-segment basis to match what is done in [!eqref](discretized_energy). Furthermore, the wall is discretized into two nodes through the thickness to capture the inner wall temperature and the outer wall temperature, as shown in [fig:pipe_CHT_discretization].
+The heat flux entering the inner surface of the wall and the heat flux exiting the outer surface of the wall enter as boundary conditions of this equation. Integrating it over the wall cross-section and over each segment, on a per-segment basis to match what is done in [!eqref](discretized_energy), yields the node equations below. Furthermore, the wall is discretized into two nodes through the thickness to capture the inner wall temperature and the outer wall temperature, as shown in [fig:pipe_CHT_discretization].
 
 !media modules/thermal_hydraulics/media/conjugate-heat-transfer_pipe_cross_section.png
        id=fig:pipe_CHT_discretization

@@ -69,6 +69,10 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
                "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
                "false`.");
 
+  // The Contact action couples aux_lm only to this object, not to the constraint
+  if (_use_petrov_galerkin)
+    checkPetrovGalerkinQuadraticFaces(*this, *_lm_var);
+
   if (_use_nodal_scaling)
   {
     // kappa_j's denominator int_e N_j is zero at TRI6 and TET10 vertices and negative at QUAD8 and

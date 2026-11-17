@@ -17,14 +17,19 @@ InputParameters
 MFEMVectorProjectionAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
-  params.addClassDescription("Projects a vector coefficient onto a vector MFEM auxvariable.");
+  params.addClassDescription("Projects a vector coefficient $\\vec u$, optionally scaled by a "
+                             "scalar coefficient $k$, onto a vector MFEM auxvariable, storing "
+                             "$k \\vec u$.");
   params.addRequiredParam<MFEMVectorCoefficientName>("vector_coefficient",
                                                      "Name of the vector coefficient to project.");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient", "1.", "Name of the scalar coefficient k to scale the vector coefficient by.");
   return params;
 }
 
 MFEMVectorProjectionAux::MFEMVectorProjectionAux(const InputParameters & parameters)
-  : MFEMAuxKernel(parameters), _vec_coef(getVectorCoefficient("vector_coefficient"))
+  : MFEMAuxKernel(parameters),
+    _vec_coef(getScalarCoefficient("coefficient"), getVectorCoefficient("vector_coefficient"))
 {
 }
 

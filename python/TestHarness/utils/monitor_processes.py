@@ -16,9 +16,10 @@ from collections import defaultdict
 from multiprocessing import get_context
 from multiprocessing.context import ForkProcess
 from multiprocessing.managers import NamespaceProxy, SyncManager
-from typing import Optional
+from typing import NamedTuple, Optional
 
 import psutil
+from TestHarness.utils.nvidia_gpu_memory import NvidiaGPUMemory
 
 MEMORY_PSS = sys.platform.startswith("linux") and os.path.exists(
     f"/proc/{os.getpid()}/smaps_rollup"
@@ -131,16 +132,28 @@ def get_process_memory(process: psutil.Process) -> Optional[int]:
     return _rollup_memory(fields, MEMORY_PSS_EXCLUDE_FILE)
 
 
+class MemorySample(NamedTuple):
+    """The memory of a child process and all of its descendants."""
+
+    cpu: Optional[int]
+    """The CPU memory in bytes, if any process's could be read."""
+    gpu: Optional[int]
+    """The NVIDIA GPU memory in bytes, if GPU memory is tracked."""
+
+
 class MemoryMonitor:
     """Monitor that runs in a separate process to track children memory usage."""
 
-    def __init__(self, parent_pid: int, interval: float = 0.1):
+    def __init__(self, parent_pid: int, interval: float = 0.1, track_gpu: bool = False):
         """Initialize state."""
         self._parent_pid: int = parent_pid
         """PID of the parent process to sample the children of."""
 
         self._interval: float = interval
         """How often to sample in seconds."""
+
+        self._track_gpu: bool = track_gpu
+        """Whether or not to also sample NVIDIA GPU memory."""
 
         self._process: Optional[ForkProcess] = None
         """The Multiprocessing process."""
@@ -151,15 +164,16 @@ class MemoryMonitor:
         self._shared: Optional[NamespaceProxy] = None
         """
         Shared state whose "samples" attribute is the latest samples (child pid ->
-        memory in bytes), once started.
+        MemorySample) and whose "gpu_error" attribute is the reason GPU memory
+        sampling failed to start, if it did, once started.
         """
 
         self._stop_event = None
         """Event to stop the Multiprocessing process, once started."""
 
-    def get_samples(self) -> dict[int, int]:
+    def get_samples(self) -> dict[int, MemorySample]:
         """
-        Get the last samples; child PID to cumulative memory usage in bytes.
+        Get the last samples; child PID to cumulative memory usage.
 
         Each call fetches a copy from the sampler process, so you should get
         it once and then use it many times as needed.
@@ -167,11 +181,40 @@ class MemoryMonitor:
         assert self._shared is not None
         return self._shared.samples
 
+    def get_gpu_error(self) -> Optional[str]:
+        """
+        Get the reason that GPU memory sampling failed to start in the sampler, if any.
+
+        It is set before the first samples are published, after which GPU memory
+        is reported as not tracked (None).
+        """
+        assert self._shared is not None
+        return self._shared.gpu_error
+
     @staticmethod
-    def _sampler(parent_pid: int, interval: float, stop_event, shared: NamespaceProxy):
+    def _sampler(
+        parent_pid: int,
+        interval: float,
+        track_gpu: bool,
+        stop_event,
+        shared: NamespaceProxy,
+    ):
         """Run the sampler process; internal method called by start()."""
+        # Initialized after the fork, as NVML state cannot be shared across one.
+        # On failure, keep sampling CPU memory and report why GPU memory is not
+        gpu_memory = None
+        if track_gpu:
+            try:
+                gpu_memory = NvidiaGPUMemory()
+            except Exception as e:
+                shared.gpu_error = str(e)
+
         while not stop_event.is_set():
             start = time.monotonic()
+
+            # Sample GPU memory before walking the process tree, so that a process
+            # that NVML reports is normally also in the tree
+            gpu_samples = gpu_memory.sample() if gpu_memory is not None else {}
 
             # Get the entire flattened process tree, removing process 0 as
             # it's the exit condition when walking up parents (on macOS, it
@@ -191,21 +234,35 @@ class MemoryMonitor:
                 return pid
 
             # Accumulate the memory of each direct child and all of its descendants
-            result = defaultdict(int)
+            cpu_result: dict[int, int] = defaultdict(int)
+            gpu_result: dict[int, int] = defaultdict(int)
             for pid, p in all_processes.items():
-                if (child := top_level_child(pid)) is not None and (
-                    memory := get_process_memory(p)
-                ) is not None:
-                    result[child] += memory
+                if (child := top_level_child(pid)) is None:
+                    continue
+                # Counted separately, so that a process whose CPU memory cannot be
+                # read (e.g. while exiting) still contributes its GPU memory
+                if (memory := get_process_memory(p)) is not None:
+                    cpu_result[child] += memory
+                if (pid_gpu_memory := gpu_samples.get(pid)) is not None:
+                    gpu_result[child] += pid_gpu_memory
 
             # And update the shared state; a single assignment, so a reader never
             # sees a partially updated set of samples
-            shared.samples = dict(result)
+            shared.samples = {
+                child: MemorySample(
+                    cpu_result.get(child),
+                    gpu_result.get(child, 0) if gpu_memory is not None else None,
+                )
+                for child in cpu_result.keys() | gpu_result.keys()
+            }
 
             # Wait out the rest of the interval, so that a slow pass (many or
             # large processes) does not lengthen the sampling period; wake early
             # if stop_event is set
             stop_event.wait(max(0.0, interval - (time.monotonic() - start)))
+
+        if gpu_memory is not None:
+            gpu_memory.close()
 
     def start(self):
         """Start the sampler process."""
@@ -213,13 +270,14 @@ class MemoryMonitor:
 
         ctx = get_context("fork")
         self._manager = ctx.Manager()
-        self._shared = self._manager.Namespace(samples={})
+        self._shared = self._manager.Namespace(samples={}, gpu_error=None)
         self._stop_event = ctx.Event()
         self._process = ctx.Process(
             target=self._sampler,
             args=(
                 self._parent_pid,
                 self._interval,
+                self._track_gpu,
                 self._stop_event,
                 self._shared,
             ),

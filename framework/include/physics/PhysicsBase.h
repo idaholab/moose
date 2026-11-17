@@ -170,6 +170,41 @@ protected:
   /// Keep track of the name of an aux variable defined in the Physics
   void saveAuxVariableName(const VariableName & var_name) { _aux_var_names.push_back(var_name); }
 
+  /**
+   * Requests a solver variable that may be shared with other Physics, on the blocks of this
+   * Physics. Requests for the same variable name from different Physics are merged into a single
+   * variable on the union of their blocks, which is added on the 'flush_shared_physics_variables'
+   * task (see PhysicsVariableCoordinator). Call this from addSolverVariables() in place of adding
+   * the variable directly. The variable does not exist yet when this returns.
+   * @param var_type type of the variable, e.g. 'MooseVariable' or 'MooseVariableFVReal'
+   * @param var_name name of the variable
+   * @param params parameters of the variable. The 'block' parameter is ignored, and 'solver_sys'
+   * is set from this Physics' solver systems. Every other parameter must match the other
+   * requests for this variable.
+   */
+  void addSharedSolverVariable(const std::string & var_type,
+                               const VariableName & var_name,
+                               InputParameters params);
+  /// Same as addSharedSolverVariable() but for an auxiliary variable, from addAuxiliaryVariables()
+  void addSharedAuxVariable(const std::string & var_type,
+                            const VariableName & var_name,
+                            const InputParameters & params);
+  /**
+   * Convenience overload of addSharedSolverVariable() for a finite element 'MooseVariable'
+   * @param var_name name of the variable
+   * @param family finite element family
+   * @param order finite element order
+   * @param scaling scaling factor of the variable
+   */
+  void addSharedSolverVariable(const VariableName & var_name,
+                               const std::string & family,
+                               const std::string & order,
+                               Real scaling = 1.0);
+  /// Convenience overload of addSharedAuxVariable() for a finite element 'MooseVariable'
+  void addSharedAuxVariable(const VariableName & var_name,
+                            const std::string & family,
+                            const std::string & order);
+
   /// Check whether a variable already exists
   bool variableExists(const VariableName & var_name, bool error_if_aux) const;
   /// Check whether a variable already exists and is a solver variable

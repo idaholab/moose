@@ -200,9 +200,7 @@ DiffusionFV::addSolverVariables()
 
   const std::string variable_type = "MooseVariableFVReal";
   InputParameters params = getFactory().getValidParams(variable_type);
-  assignBlocks(params, _blocks);
-  params.set<SolverSystemName>("solver_sys") = getSolverSystem(_var_name);
-  getProblem().addVariable(variable_type, _var_name, params);
+  addSharedSolverVariable(variable_type, _var_name, params);
 }
 
 InputParameters

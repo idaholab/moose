@@ -24,6 +24,9 @@ class TestDataFilter(Enum):
     HPC = "hpc"
     """Load HPC data in tests."""
 
+    MAX_GPU_MEMORY = "max_gpu_memory"
+    """Load max_gpu_memory in tests."""
+
     MAX_MEMORY = "max_memory"
     """Load max_memory in tests."""
 

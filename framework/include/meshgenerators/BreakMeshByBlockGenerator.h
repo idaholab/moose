@@ -25,11 +25,6 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 private:
-  /// check that if split_interface==true interface_id and interface_name are
-  /// not set by the user. It also check that the provided interface_id is not
-  /// already used
-  void checkInputParameter();
-
   /// given the primary and secondary blocks this method return the appropriate
   /// boundary id and name
   void findBoundaryName(const MeshBase & mesh,
@@ -82,10 +77,6 @@ private:
 
   /// the mesh to modify
   std::unique_ptr<MeshBase> & _input;
-  /// the name of the new interface
-  std::string _interface_name;
-  /// the flag to split the interface by block
-  bool _split_interface;
   /// set of subdomain pairs between which interfaces will be generated.
   std::unordered_set<std::pair<SubdomainID, SubdomainID>> _block_pairs;
   /// set of the blocks to split the mesh on
@@ -94,14 +85,6 @@ private:
   const bool _block_pairs_restricted;
   /// whether interfaces will be generated surrounding blocks
   const bool _surrounding_blocks_restricted;
-  /// whether to add a boundary when splitting the mesh
-  const bool _add_transition_interface;
-  /// whether to split the transition boundary between the blocks and the rest of the mesh
-  const bool _split_transition_interface;
-  /// the name of the transition interface
-  const BoundaryName _interface_transition_name;
-  /// whether to add two sides interface boundaries
-  const bool _add_interface_on_two_sides;
 
   using NodeConnectedBlocksPair = std::pair<dof_id_type, std::vector<subdomain_id_type>>;
   using SubdomainPair = std::pair<subdomain_id_type, subdomain_id_type>;

@@ -22,7 +22,7 @@ BrineFluidProperties::validParams()
 }
 
 BrineFluidProperties::BrineFluidProperties(const InputParameters & parameters)
-  : MultiComponentFluidProperties(parameters), _water_fp_derivs(true)
+  : MultiComponentFluidProperties(parameters)
 {
   // There are two possibilities to consider:
   // 1) No water_fp has been supplied (in which case one is constructed)
@@ -150,17 +150,10 @@ BrineFluidProperties::rho_from_p_T_X(const FPADReal & pressure,
 
   // The density of water at temperature Tv
   // Note: convert Tv to Kelvin to calculate water density
-  FPADReal water_density;
-  if (_water_fp_derivs)
-  {
-    Real rho, drho_dp, drho_dT;
-    _water_fp->rho_from_p_T(pressure.value(), Tv.value() + _T_c2k, rho, drho_dp, drho_dT);
-    water_density = rho;
-
-    water_density.derivatives() = pressure.derivatives() * drho_dp + Tv.derivatives() * drho_dT;
-  }
-  else
-    water_density = _water_fp->rho_from_p_T(pressure.value(), Tv.value() + _T_c2k);
+  Real rho, drho_dp, drho_dT;
+  _water_fp->rho_from_p_T(pressure.value(), Tv.value() + _T_c2k, rho, drho_dp, drho_dT);
+  FPADReal water_density = rho;
+  water_density.derivatives() = pressure.derivatives() * drho_dp + Tv.derivatives() * drho_dT;
 
   // The brine density is given by the water density scaled by the ratio of
   // brine molar mass to pure water molar mass
@@ -175,7 +168,6 @@ BrineFluidProperties::rho_from_p_T_X(Real pressure, Real temperature, Real xnacl
   FPADReal T = temperature;
   FPADReal x = xnacl;
 
-  _water_fp_derivs = false;
   FPADReal ad_rho = this->rho_from_p_T_X(p, T, x);
 
   return ad_rho.value();
@@ -198,7 +190,6 @@ BrineFluidProperties::rho_from_p_T_X(Real pressure,
   FPADReal x = xnacl;
   Moose::derivInsert(x.derivatives(), 2, 1.0);
 
-  _water_fp_derivs = true;
   FPADReal ad_rho = this->rho_from_p_T_X(p, T, x);
 
   rho = ad_rho.value();
@@ -297,17 +288,10 @@ BrineFluidProperties::h_from_p_T_X(const FPADReal & pressure,
 
   // The brine enthalpy is then given by the enthalpy of water at temperature Th
   // Note: water enthalpy requires temperature in Kelvin
-  FPADReal enthalpy;
-  if (_water_fp_derivs)
-  {
-    Real h, dh_dp, dh_dT;
-    _water_fp->h_from_p_T(pressure.value(), Th.value() + _T_c2k, h, dh_dp, dh_dT);
-    enthalpy = h;
-
-    enthalpy.derivatives() = pressure.derivatives() * dh_dp + Th.derivatives() * dh_dT;
-  }
-  else
-    enthalpy = _water_fp->h_from_p_T(pressure.value(), Th.value() + _T_c2k);
+  Real h, dh_dp, dh_dT;
+  _water_fp->h_from_p_T(pressure.value(), Th.value() + _T_c2k, h, dh_dp, dh_dT);
+  FPADReal enthalpy = h;
+  enthalpy.derivatives() = pressure.derivatives() * dh_dp + Th.derivatives() * dh_dT;
 
   return enthalpy;
 }
@@ -320,7 +304,6 @@ BrineFluidProperties::h_from_p_T_X(Real pressure, Real temperature, Real xnacl) 
   FPADReal T = temperature;
   FPADReal x = xnacl;
 
-  _water_fp_derivs = false;
   return h_from_p_T_X(p, T, x).value();
 }
 
@@ -341,7 +324,6 @@ BrineFluidProperties::h_from_p_T_X(Real pressure,
   FPADReal x = xnacl;
   Moose::derivInsert(x.derivatives(), 2, 1.0);
 
-  _water_fp_derivs = true;
   FPADReal ad_h = h_from_p_T_X(p, T, x);
 
   h = ad_h.value();
@@ -424,7 +406,6 @@ BrineFluidProperties::e_from_p_T_X(Real pressure,
   FPADReal x = xnacl;
   Moose::derivInsert(x.derivatives(), 2, 1.0);
 
-  _water_fp_derivs = true;
   FPADReal ad_e = e_from_p_T_X(p, T, x);
 
   e = ad_e.value();

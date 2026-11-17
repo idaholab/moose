@@ -1,6 +1,7 @@
 Content:
     - framework/doc/content
     - modules/shifted_boundary_method/doc/content
+    - modules/solid_mechanics/doc/content
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
 Extensions:
@@ -14,6 +15,7 @@ Extensions:
         includes:
             - framework/include
             - modules/shifted_boundary_method/include
+            - modules/solid_mechanics/include
     MooseDocs.extensions.common:
         shortcuts: !include ${MOOSE_DIR}/framework/doc/globals.yml
     MooseDocs.extensions.acronym:
@@ -24,5 +26,6 @@ Extensions:
         categories:
             framework: !include ${MOOSE_DIR}/framework/doc/sqa_framework.yml
             shifted_boundary_method: !include ${ROOT_DIR}/modules/shifted_boundary_method/doc/sqa_shifted_boundary_method.yml
+            solid_mechanics: !include ${MOOSE_DIR}/modules/solid_mechanics/doc/sqa_solid_mechanics.yml
     MooseDocs.extensions.template:
         active: true

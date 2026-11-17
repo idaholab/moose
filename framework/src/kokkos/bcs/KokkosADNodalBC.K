@@ -20,10 +20,9 @@ ADNodalBC::validParams()
 }
 
 ADNodalBC::ADNodalBC(const InputParameters & parameters)
-  : NodalBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _u(_var, Moose::SOLUTION_TAG, true)
+  : NodalBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD), _u(_kokkos_var, true)
 {
-  addMooseVariableDependency(&_var);
+  addMooseVariableDependency(_vars);
 }
 
 void
@@ -56,7 +55,9 @@ ADNodalBC::computeResidualAndJacobian()
 void
 ADNodalBC::dispatch()
 {
-  Policy policy(0, numKokkosBoundaryNodes());
+  _thread.resize(_vars.size(), numKokkosBoundaryNodes());
+
+  Policy policy(0, _thread.size());
 
   if (!_residual_dispatcher)
     _residual_dispatcher = DispatcherRegistry::build<ResidualLoop>(this, type());

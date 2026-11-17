@@ -77,11 +77,13 @@
     type = RobinBC
     variable = u
     boundary = 'left'
+    coefficient = 2
   []
   [right]
     type = RobinBC
     variable = v
     boundary = 'right'
+    coefficient = 2
   []
 []
 

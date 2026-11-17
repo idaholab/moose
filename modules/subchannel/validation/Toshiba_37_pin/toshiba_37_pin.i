@@ -78,7 +78,6 @@ P_out = 2.0e5 # Pa
   T_tol = 1.0e-3
   implicit = true
   segregated = false
-  staggered_pressure = false
   verbose_multiapps = true
   verbose_subchannel = false
   pin_HTC_closure = 'Dittus-Boelter'

@@ -27,7 +27,7 @@ protected:
   /// list of interfacial free energies
   const std::vector<Real> _sigma;
 
-  /// Interface width for the interface with the median interfacial free energy
+  /// Interface width for the reference interface
   const Real _width;
 
   /// number of interface pairs

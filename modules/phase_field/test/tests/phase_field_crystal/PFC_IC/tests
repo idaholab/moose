@@ -1,17 +1,24 @@
 [Tests]
-  [./BCC_test]
-    type = 'Exodiff'
-    input = 'PFC_IC_BCC_test.i'
-    exodiff = 'PFC_IC_BCC_test_out.e'
-    # 0-step transient does not recover
-    recover = false
-  [../]
+  issues = '#5336'
+  design = 'PFCFreezingIC.md'
+  [./lattice]
+    requirement = 'The system shall provide an initial condition for a phase field crystal model that seeds a'
+    [./BCC_test]
+      type = 'Exodiff'
+      input = 'PFC_IC_BCC_test.i'
+      exodiff = 'PFC_IC_BCC_test_out.e'
+      # 0-step transient does not recover
+      recover = false
+      detail = 'body-centered cubic lattice, and'
+    [../]
 
-  [./FCC_test]
-    type = 'Exodiff'
-    input = 'PFC_IC_FCC_test.i'
-    exodiff = 'PFC_IC_FCC_test_out.e'
-    # 0-step transient does not recover
-    recover = false
+    [./FCC_test]
+      type = 'Exodiff'
+      input = 'PFC_IC_FCC_test.i'
+      exodiff = 'PFC_IC_FCC_test_out.e'
+      # 0-step transient does not recover
+      recover = false
+      detail = 'face-centered cubic lattice.'
+    [../]
   [../]
 []

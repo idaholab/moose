@@ -37,6 +37,17 @@ The following example shows the implementation of `KokkosVariableTimeIntegration
 !listing framework/src/kokkos/auxkernels/KokkosVariableTimeIntegrationAux.K id=kokkos-time-integration-aux-source language=cpp
          caption=The `KokkosVariableTimeIntegrationAux` source file.
 
+## Multi-variable AuxKernels
+
+Like [multi-variable kernels](syntax/KokkosKernels/index.md#multi-variable-kernels), Kokkos-MOOSE auxiliary kernels can compute multiple auxiliary variables in parallel.
+Instead of the `variable` parameter, you can specify the `variables` parameter with the variables you want the auxiliary kernel to compute.
+In the code, you can obtain which component of the variables you are currently computing using `datum.comp()`.
+The restriction is that all variables should have the same finite element shape function family and order.
+
+Computing multiple variables with a single elemental auxiliary kernel is more efficient than using one kernel per variable.
+The values of elemental variables are obtained through an $L^2$ projection onto the element shape functions, which requires solving a system with the element mass matrix.
+The mass matrix depends only on the element and the shape functions, so it is factored once per element and shared by all variables, while each variable only adds the cost of its right-hand side and the triangular solves.
+
 ## Advanced Topics
 
 The computational loops are defined in `computeElementInternal()` and `computeNodeInternal()` for elemental and nodal variables, respectively, and they call the hook method `computeValue()`.

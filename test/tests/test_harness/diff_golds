@@ -3,6 +3,7 @@
     type = Exodiff
     input = exodiff_diff_gold.i
     exodiff = exodiff_diff_gold_out.e
+    cli_args = 'Outputs/exodus=true'
     gold_dir = diff_gold
   [../]
 

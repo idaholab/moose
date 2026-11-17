@@ -9,12 +9,12 @@
     mesh_mode = REPLICATED
     requirement = "The system shall support execution using the PETSc non-linear divergence tolerance."
     issues = '#13991'
-    expect_err = "Nonlinear solve did not converge due to DIVERGED_DTOL iterations 1"
+    expect_err = "Diverged due to relative residual \S+ > divergence tolerance"
   [../]
   [./test_abs_divtol]
     type = RunException
     input = 'nl_abs_divergence_tolerance.i'
-    expect_err = "Nonlinear solve did not converge due to DIVERGED_DTOL iterations 1"
+    expect_err = "Diverged due to residual \S+ > absolute divergence tolerance"
     requirement = 'The system shall consider a nonlinear solve diverged if the nonlinear residual exceeds the absolute divergence tolerance while iterating'
     issues = '#16474'
     design = 'FEProblemSolve.md'

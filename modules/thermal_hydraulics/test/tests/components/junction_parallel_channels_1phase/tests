@@ -62,7 +62,7 @@
   [conservation_1phase_K_crtl]
     type = 'CSVDiff'
     input = 'conservation.i'
-    cli_args = "ControlLogic/active=K_crtl Outputs/file_base=conservation_K "
+    cli_args = "ChainControls/active='K_crtl_fn K_crtl' Outputs/file_base=conservation_K "
                "Outputs/out/show='dp_junction'"
     csvdiff = 'conservation_K.csv'
     restep = false # Test is prescribed to abort on failed timestep

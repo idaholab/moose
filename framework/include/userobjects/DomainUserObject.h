@@ -30,8 +30,9 @@ class QBase;
 /**
  * This user object allows related evaluations on elements, boundaries, internal sides,
  * interfaces in one single place. DomainUserObject is still block restrictable.
- * While evaluations on elements, boundaries and internal sides always happen,
- * a parameter 'interface_boundaries' needs to be set to invoke evaluations on interfaces.
+ * By default, evaluations on elements, boundaries and internal sides happen, while
+ * 'interface_boundaries' must be set to invoke evaluations on interfaces. When 'boundaries' is
+ * set, boundary evaluations are restricted to the selected boundary IDs.
  * We require this parameter for interface evaluations because we want to enforce sanity
  * checks on coupling variables that are not defined on the domain this user object works on
  * but only are available on the other side of the interfaces. All sides of an interface must
@@ -100,6 +101,13 @@ public:
   void preExecuteOnInterface();
 
   /**
+   * Return whether this object should run \p executeOnBoundary on the given side topology
+   *
+   * @param is_external_side Whether the current side has no neighbor
+   */
+  bool shouldExecuteOnBoundary(bool is_external_side) const;
+
+  /**
    * Return whether this object should run \p executeOnInterface
    */
   bool shouldExecuteOnInterface() const;
@@ -166,6 +174,12 @@ protected:
 
   /// The set of boundary IDs on which this object should perform \p executeOnInterface
   std::set<BoundaryID> _interface_bnd_ids;
+
+  /// The boundary IDs on which this object should perform \p executeOnBoundary
+  std::set<BoundaryID> _boundary_execution_ids;
+
+  /// Whether boundary execution is restricted to explicitly selected boundary IDs
+  const bool _boundary_restricted;
 
   /// The set of blocks connected to our blocks through boundaries of the \p _interface_bnd_ids data member
   std::map<BoundaryID, std::set<SubdomainID>> _interface_connected_blocks;
@@ -249,6 +263,31 @@ DomainUserObject::setFaceData()
   _current_q_point = &_q_point_face;
   _current_q_rule = _qrule_face;
   _current_JxW = &_JxW_face;
+}
+
+inline bool
+DomainUserObject::shouldExecuteOnBoundary(const bool is_external_side) const
+{
+  // If the current boundary is selected as an interface boundary, executeOnBoundary should not run
+  // on it because it is handled by executeOnInterface.
+  if (_interface_bnd_ids.count(_current_boundary_id))
+  {
+    // An interface boundary must not contain an external side because every interface side must
+    // have a neighbor.
+    if (is_external_side)
+      paramError("interface_boundaries",
+                 "Boundary ",
+                 _current_boundary_id,
+                 " contains an external side, but interface boundaries must contain neighbors.");
+
+    return false;
+  }
+
+  // We execute on a boundary in two cases: (1) when this user object is not boundary restricted,
+  // and (2) when the current boundary ID is selected. We must not require the current side to be
+  // external because executeOnBoundary() is also allowed to run on internal sides, such as a
+  // boundary created by a subdomain split.
+  return !_boundary_restricted || _boundary_execution_ids.count(_current_boundary_id);
 }
 
 inline bool

@@ -1,9 +1,14 @@
 [Tests]
+  # SVN issue r18100
+  issues = '#7769'
   [./volume_fraction_test]
     type = CSVDiff
     input = 'feature_volume_fraction.i'
     csvdiff = 'feature_volume_fraction_out.csv'
     rel_err = 5.0e-02
+    requirement = 'The system shall compute the volume fraction of flooded features relative to '
+                  'the total mesh volume.'
+    design = 'FeatureVolumeFraction.md'
   [../]
 
   [./Avrami_test]
@@ -11,5 +16,8 @@
     input = 'Avrami.i'
     csvdiff = 'Avrami_out.csv'
     rel_err = 1.0e-02
+    requirement = 'The system shall compute the Avrami fraction of flooded features relative to '
+                  'an equilibrium volume fraction.'
+    design = 'FeatureVolumeFraction.md'
   [../]
 []

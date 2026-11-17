@@ -24,7 +24,7 @@ public:
   SCMQuadPowerAux(const InputParameters & params);
   virtual Real computeValue() override;
   virtual void initialSetup() override;
-  virtual void timestepSetup() override { initialSetup(); }
+  virtual void timestepSetup() override;
 
 protected:
   const QuadSubChannelMesh & _quadMesh;
@@ -37,14 +37,13 @@ protected:
   /// Matrix that holds the relative pin power
   Eigen::MatrixXd _power_dis;
   const Function & _axial_heat_rate;
-  /// Average linear heat rate over the whole pin [W/m]
-  Eigen::MatrixXd _ref_qprime;
-  /// Actual pin power [W]
-  Eigen::MatrixXd _ref_power;
-  /// The correction that will be applied to the estimated calculation [unitless]
-  Eigen::MatrixXd _pin_power_correction;
-  /// Matrix which will hold the total estimated power of each pin [W]
-  Eigen::MatrixXd _estimate_power;
+  /// Whether to print the per-pin power correction every time it is computed
+  const bool _verbose;
+  /// Trapezoidal integral of the axial power shape over each pin on the SCM axial grid [m]
+  Eigen::MatrixXd _shape_integral;
+
+  /// Compute the trapezoidal integral of the axial power shape over each pin
+  void computeShapeIntegral();
 
 public:
   static InputParameters validParams();

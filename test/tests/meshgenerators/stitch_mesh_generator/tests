@@ -70,4 +70,16 @@
     expect_err = "Boundary ID 1 corresponds to different boundary names on the input meshes! On the first mesh it corresponds to `right` while on the second mesh it corresponds to `bazinga`."
     input = 'stitched_mesh_generator_sameid.i'
   []
+  [remap_subdomains]
+    type = 'Exodiff'
+    design = 'meshgenerators/StitchMeshGenerator.md'
+    issues = '#23791'
+    input = 'stitch_remap_subdomains.i'
+    cli_args = '--mesh-only'
+    exodiff = 'stitch_remap_subdomains_in.e'
+    exodiff_opts = '-match_by_name -pedantic'
+    recover = false
+
+    requirement = "The system shall, when stitching meshes, merge subdomains with the same name but different IDs and separate subdomains with the same ID but different names"
+  []
 []

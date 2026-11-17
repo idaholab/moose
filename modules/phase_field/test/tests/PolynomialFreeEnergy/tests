@@ -1,32 +1,43 @@
 [Tests]
-  [./split_order4]
-    type = 'Exodiff'
-    input = 'split_order4_test.i'
-    exodiff = 'split_order4_test_out.e'
-  [../]
-  [./split_order6]
-    type = 'Exodiff'
-    input = 'split_order6_test.i'
-    exodiff = 'split_order6_test_out.e'
-  [../]
-  [./split_order8]
-    type = 'Exodiff'
-    input = 'split_order8_test.i'
-    exodiff = 'split_order8_test_out.e'
-  [../]
-  [./direct_order4]
-    type = 'Exodiff'
-    input = 'direct_order4_test.i'
-    exodiff = 'direct_order4_test_out.e'
-  [../]
-  [./direct_order6]
-    type = 'Exodiff'
-    input = 'direct_order6_test.i'
-    exodiff = 'direct_order6_test_out.e'
-  [../]
-  [./direct_order8]
-    type = 'Exodiff'
-    input = 'direct_order8_test.i'
-    exodiff = 'direct_order8_test_out.e'
+  issues = '#5076'
+  design = 'PolynomialFreeEnergy.md'
+  [./polynomial]
+    requirement = 'The system shall provide a polynomial free energy material of'
+    [./split_order4]
+      type = 'Exodiff'
+      input = 'split_order4_test.i'
+      exodiff = 'split_order4_test_out.e'
+      detail = '4th order for the split Cahn-Hilliard formulation,'
+    [../]
+    [./split_order6]
+      type = 'Exodiff'
+      input = 'split_order6_test.i'
+      exodiff = 'split_order6_test_out.e'
+      detail = '6th order for the split Cahn-Hilliard formulation,'
+    [../]
+    [./split_order8]
+      type = 'Exodiff'
+      input = 'split_order8_test.i'
+      exodiff = 'split_order8_test_out.e'
+      detail = '8th order for the split Cahn-Hilliard formulation,'
+    [../]
+    [./direct_order4]
+      type = 'Exodiff'
+      input = 'direct_order4_test.i'
+      exodiff = 'direct_order4_test_out.e'
+      detail = '4th order for the direct (non-split) Cahn-Hilliard formulation,'
+    [../]
+    [./direct_order6]
+      type = 'Exodiff'
+      input = 'direct_order6_test.i'
+      exodiff = 'direct_order6_test_out.e'
+      detail = '6th order for the direct (non-split) Cahn-Hilliard formulation, and'
+    [../]
+    [./direct_order8]
+      type = 'Exodiff'
+      input = 'direct_order8_test.i'
+      exodiff = 'direct_order8_test_out.e'
+      detail = '8th order for the direct (non-split) Cahn-Hilliard formulation.'
+    [../]
   [../]
 []

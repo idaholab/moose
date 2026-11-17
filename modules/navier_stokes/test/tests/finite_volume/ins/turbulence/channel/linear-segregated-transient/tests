@@ -4,7 +4,7 @@
   [channel_ERCOFTAC_linear_transient]
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
-    csvdiff = 'channel_ERCOFTAC_out_line_center_channel_0001.csv channel_ERCOFTAC_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC_out_side_bottom_0001.csv channel_ERCOFTAC_out_side_top_0001.csv'
+    csvdiff = 'channel_ERCOFTAC_out_line_center_channel_FINAL.csv channel_ERCOFTAC_out_line_quarter_radius_channel_FINAL.csv channel_ERCOFTAC_out_side_bottom_FINAL.csv channel_ERCOFTAC_out_side_top_FINAL.csv'
     abs_zero = 5e-6
     rel_err = 5e-6
     capabilities = 'method!=dbg'

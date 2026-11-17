@@ -129,6 +129,14 @@ class Exodiff(FileTester):
                 self.setStatus(self.fail, "MISSING GOLD FILE")
                 break
 
+        # Make sure that all of the Exodiff files were actually produced by the run
+        if not self.isFail():
+            for file in self.specs["exodiff"]:
+                if not os.path.exists(os.path.join(self.getTestDir(), file)):
+                    output += "File Not Found: " + os.path.join(self.getTestDir(), file)
+                    self.setStatus(self.fail, "MISSING OUTPUT FILE")
+                    break
+
         if not self.isFail():
             # Retrieve the commands
             commands = self.processResultsCommand(moose_dir, options)

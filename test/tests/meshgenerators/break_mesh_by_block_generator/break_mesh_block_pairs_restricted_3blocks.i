@@ -9,8 +9,6 @@
   [split]
     input = msh
     type = BreakMeshByBlockGenerator
-    split_interface = true
-    add_interface_on_two_sides = false
   []
 []
 

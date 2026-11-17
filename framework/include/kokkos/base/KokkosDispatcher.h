@@ -633,6 +633,7 @@ registerResidualObjectDispatchers(const std::string & objectname)
                                                                                                    \
     DispatcherRegistry::addDispatcher<classname::ElementLoop, classname>(objectname);              \
     DispatcherRegistry::addDispatcher<classname::NodeLoop, classname>(objectname);                 \
+    DispatcherRegistry::addDispatcher<classname::MassMatrixLoop, classname>(objectname);           \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \

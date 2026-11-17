@@ -9,10 +9,7 @@
 
 #include "ADPipeOuterWallHeatFluxScalarKernel.h"
 
-#include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
-#include "MooseMesh.h"
-#include "libmesh/point_locator_base.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADPipeOuterWallHeatFluxScalarKernel);
 
@@ -20,9 +17,9 @@ InputParameters
 ADPipeOuterWallHeatFluxScalarKernel::validParams()
 {
   InputParameters params = Base::validParams();
-  params.addClassDescription(
-      "Solves for the temperature of the outer-surface radial node of a pipe wall, with a "
-      "prescribed heat flux applied to its non-radial side.");
+  params.addClassDescription("Assembles transport equation for the temperature of the "
+                             "outer-surface radial node of a pipe wall, with a "
+                             "prescribed heat flux applied to its outer surface.");
   params.addCoupledVar("inner_wall_temperature",
                        {},
                        "Temperature of the inner-surface wall node, on the other side of this "
@@ -46,11 +43,11 @@ ADPipeOuterWallHeatFluxScalarKernel::ADPipeOuterWallHeatFluxScalarKernel(
 ADReal
 ADPipeOuterWallHeatFluxScalarKernel::convectiveLinearHeatRate() const
 {
-  const auto elem_arg = functorArg();
+  const Moose::PointArg arg = {Point(1, 2, 3)};
   const auto state = Base::_is_implicit ? Moose::currentState() : Moose::oldState();
 
   // Prescribed heat flux applied to this node, positive into the wall
-  return _heat_flux(elem_arg, state) * _heated_perimeter(elem_arg, state);
+  return _heat_flux(arg, state) * _heated_perimeter(arg, state);
 }
 
 Real

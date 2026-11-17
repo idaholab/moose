@@ -176,6 +176,10 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     paramError("aux_lm",
                "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
                "false`.");
+
+  if (_use_petrov_galerkin)
+    checkPetrovGalerkinQuadraticFaces(*this, *_var);
+
   if (isParamSetByUser("quadrature") && isParamSetByUser("segment_quadrature"))
     paramError("quadrature", "Only one of 'quadrature' and 'segment_quadrature' should be set.");
 

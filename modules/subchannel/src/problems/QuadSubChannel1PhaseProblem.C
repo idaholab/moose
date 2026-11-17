@@ -338,7 +338,26 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
         auto volume = dz * S_interp;
 
         // interpolation weight coefficient
-        auto alpha = computeInterpolationCoefficients(0.5);
+        PetscScalar Pe = 0.5;
+        if (_interpolation_scheme == 3)
+        {
+          // Compute the cell Peclet number
+          auto w_perim_in = (*_w_perim_soln)(node_in);
+          auto w_perim_out = (*_w_perim_soln)(node_out);
+          auto w_perim_interp = this->computeInterpolatedValue(w_perim_out, w_perim_in, 0.5);
+          auto K_in = _fp->k_from_p_T((*_P_soln)(node_in) + _P_out, (*_T_soln)(node_in));
+          auto K_out = _fp->k_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out));
+          auto K = this->computeInterpolatedValue(K_out, K_in, 0.5);
+          auto cp_in = _fp->cp_from_p_T((*_P_soln)(node_in) + _P_out, (*_T_soln)(node_in));
+          auto cp_out = _fp->cp_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out));
+          auto cp = this->computeInterpolatedValue(cp_out, cp_in, 0.5);
+          auto mdot_loc =
+              this->computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), 0.5);
+          // hydraulic diameter in the i direction
+          auto Dh_i = 4.0 * S_interp / w_perim_interp;
+          Pe = mdot_loc * Dh_i * cp / (K * S_interp) * (mdot_loc / std::abs(mdot_loc));
+        }
+        auto alpha = computeInterpolationCoefficients(Pe);
 
         // Keep temporal storage independent of the spatial interpolation scheme. Applying the
         // upwind coefficient to this term puts the storage on the upstream node and makes the

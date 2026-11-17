@@ -851,7 +851,9 @@ Assembly::reinitFE(const Elem * elem)
       const_cast<std::vector<Point> &>(_holder_fe_helper[dim]->get_xyz()));
   _current_JxW.shallowCopy(const_cast<std::vector<Real> &>(_holder_fe_helper[dim]->get_JxW()));
 
-  if (_subproblem.haveADObjects())
+  // The AD map is needed for the AD JxW, quadrature points and coordinate transformation and for
+  // the AD shape function gradients, which use its inverse
+  if (_subproblem.haveADObjects() && (_need_ad_volume_map || _need_ad_grad_phi))
   {
     auto n_qp = _current_qrule->n_points();
     resizeADMappingObjects(n_qp, dim);
@@ -872,6 +874,8 @@ Assembly::reinitFE(const Elem * elem)
 
     for (const auto & it : _fe[dim])
     {
+      if (!_need_ad_grad_phi)
+        break;
       FEBase & fe = *it.second;
       auto fe_type = it.first;
       auto num_shapes = FEInterface::n_shape_functions(fe_type, elem);
@@ -893,6 +897,8 @@ Assembly::reinitFE(const Elem * elem)
     }
     for (const auto & it : _vector_fe[dim])
     {
+      if (!_need_ad_grad_phi)
+        break;
       FEVectorBase & fe = *it.second;
       auto fe_type = it.first;
       auto num_shapes = FEInterface::n_shape_functions(fe_type, elem);
@@ -2174,11 +2180,19 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
     if (_displaced)
     {
       const auto & qw = _current_qrule_face->get_weights();
-      computeFaceMap(elem, side, qw);
-      const std::vector<Real> dummy_qw(n_qp, 1.);
+      // computeFaceMap supplies the AD face JxW, normals and points; the single-point map only adds
+      // the inverse map that computeGradPhiAD needs
+      if (_need_ad_face_map)
+        computeFaceMap(elem, side, qw);
+      if (_need_ad_grad_phi_face)
+      {
+        // Faces can have different numbers of quadrature points, so grow the weights as needed
+        static thread_local std::vector<Real> dummy_qw;
+        dummy_qw.resize(n_qp, 1.);
 
-      for (unsigned int qp = 0; qp != n_qp; qp++)
-        computeSinglePointMapAD(&elem, dummy_qw, qp, _holder_fe_face_helper[dim]);
+        for (unsigned int qp = 0; qp != n_qp; qp++)
+          computeSinglePointMapAD(&elem, dummy_qw, qp, _holder_fe_face_helper[dim]);
+      }
     }
     else
     {
@@ -4843,6 +4857,7 @@ const MooseArray<ADReal> &
 Assembly::adCurvatures() const
 {
   _calculate_curvatures = true;
+  _need_ad_face_map = true;
   // Must prerequest the second derivatives. Sadly because there is only one
   // _need_second_derivative map for both volumetric and face FE objects we must request both here
   feSecondPhi<Real>(_helper_type);

@@ -79,12 +79,17 @@ ramp_time = 5.0
   []
 []
 
-[ControlLogic]
-  [mfr_cntrl]
-    type = TimeFunctionComponentControl
-    component = bc_inlet
-    parameter = m_dot
+[ChainControls]
+  [mfr_cntrl_fn]
+    type = GetFunctionValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     function = mfr_fn
+  []
+  [mfr_cntrl]
+    type = SetRealValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    parameter = component::bc_inlet/m_dot
+    value = mfr_cntrl_fn:value
   []
 []
 

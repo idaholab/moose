@@ -91,7 +91,9 @@ The diffusion coefficient can be computed from first principles, which
 generally is within an error of 10%, but in general this is not practical for
 non-specialists. Instead it is recommended to search literature for appropriate
 values, which may or may not be available, depending on the how common the
-gas pairing is.
+gas pairing is. For mixtures of [NASA7IdealGasFluidProperties.md] gases,
+[FluidPropertiesBinaryDiffusionCoefMaterial.md] computes the coefficient from first principles,
+with Chapman-Enskog kinetic theory, through the fluid properties.
 
 ## Initial Conditions
 

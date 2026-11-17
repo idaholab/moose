@@ -6,7 +6,10 @@ extend-exclude = '''
   | framework/contrib/conduit
   | framework/contrib/mfem
   | framework/contrib/neml2
+  | framework/contrib/neml2-hit
+  | framework/contrib/pyro
   | framework/contrib/pytorch
+  | framework/contrib/pyzag
   | framework/contrib/wasp
   | large_media
   | libmesh

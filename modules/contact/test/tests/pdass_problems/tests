@@ -51,6 +51,28 @@
                   "two-dimensional cylinder via an augmented Lagrange approach to constraint "
                   "enforcement."
   []
+  [cylinder_friction_penalty_al_normal_weighted_gap]
+    type = 'CSVDiff'
+    csvdiff = 'cylinder_friction_penalty_normal_al_weighted_gap_surface_FINAL.csv'
+    input = 'cylinder_friction_penalty_normal_al.i'
+    # The penalty is the physical-gap penalty 1e7 divided by the squared secondary edge length
+    # 5.236e-3, so that both gap measures give the same penalty pressure
+    cli_args = "UserObjects/friction_uo/use_physical_gap=false "
+               "UserObjects/friction_uo/penalty=3.64e11 "
+               "UserObjects/friction_uo/penetration_tolerance=1e-6 "
+               "Problem/maximum_lagrangian_update_iterations=10 Executioner/end_time=0.1 "
+               "Outputs/exodus=false "
+               "Outputs/file_base=cylinder_friction_penalty_normal_al_weighted_gap"
+    rel_err = 5.0e-4
+    abs_zero = 1.0e-2
+    capabilities = 'method=opt'
+    valgrind = none
+    recover = false # Only doing one timestep
+    issues = '#34217'
+    requirement = "The contact module shall update the augmented Lagrange multipliers of penalty "
+                  "mortar contact with the same weighted gap that defines the penalty contact "
+                  "pressure."
+  []
   [action_error]
     type = 'RunException'
     input = 'cylinder_friction_penalty_frictional_al_action.i'

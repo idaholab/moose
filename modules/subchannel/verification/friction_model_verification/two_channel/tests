@@ -1,5 +1,5 @@
 [Tests]
-  design = 'QuadSubChannel1PhaseProblem.md'
+  design = 'friction.md'
   issues = '#29219'
   [friction_model_verification]
     type = CSVDiff

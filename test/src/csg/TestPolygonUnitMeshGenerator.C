@@ -20,7 +20,6 @@ TestPolygonUnitMeshGenerator::validParams()
 
   params.addRequiredParam<Real>("apothem", "apothem distance (center-to-flat) for the polygon.");
   params.addRequiredParam<int>("num_sides", "number of sides for for the polygon (>= 3)");
-  params.addParam<bool>("expand_unit", false, "expand the polygon into plain surfaces");
   // Declare that this generator has a generateCSG method
   MeshGenerator::setHasGenerateCSG(params);
   return params;
@@ -29,8 +28,7 @@ TestPolygonUnitMeshGenerator::validParams()
 TestPolygonUnitMeshGenerator::TestPolygonUnitMeshGenerator(const InputParameters & params)
   : MeshGenerator(params),
     _apothem(getParam<Real>("apothem")),
-    _num_sides(getParam<int>("num_sides")),
-    _expand(getParam<bool>("expand_unit"))
+    _num_sides(getParam<int>("num_sides"))
 {
 }
 
@@ -59,10 +57,6 @@ TestPolygonUnitMeshGenerator::generateCSG()
   const auto cell_name = mg_name + "_poly_cell";
   const auto material_name = "poly_material";
   csg_obj->createCell(cell_name, material_name, -poly);
-
-  // expand polygon unit if requested
-  if (_expand)
-    csg_obj->expandEngUnit(poly);
 
   return csg_obj;
 }

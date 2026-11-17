@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Material.h"
+#include "MoelansInterfaceFits.h"
 
 // Forward Declarations
 
@@ -28,6 +29,9 @@ public:
 protected:
   virtual void computeQpProperties();
 
+  /// Error if g^2 lies outside the range covered by the selected interface fit
+  void checkFitRange(Real g2) const;
+
   const unsigned int _mesh_dimension;
 
   const Real _length_scale;
@@ -39,6 +43,9 @@ protected:
   const FileName _Anisotropic_GB_file_name;
 
   const bool _inclination_anisotropy;
+
+  /// Polynomial fits used to compute gamma and the diffuse interface width
+  const MoelansInterfaceFits::Fit _interface_fit;
 
   const VariableValue & _T;
 

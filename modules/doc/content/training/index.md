@@ -3,9 +3,17 @@
 !style! halign=left
 Upcoming MOOSE related training in chronological order:
 
-- MOOSE Developer Training (2026 June 2-4, Idaho Falls) [Registration](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
+- MOOSE-based Microreactor and MSR Simulation Training (2027 January 5-6, Washington DC Area)
 
-- MOOSE-based Thermal Hydraulics and Fluid Dynamics Training (2026 August 13-14, North Carolina State University) [Registration](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
+- [MOOSE Framework User training (2027 January 26-27, Massachusetts Institute of Technology)](https://github.com/idaholab/moose/discussions/34121)
+
+- [BISON](https://mooseframework.inl.gov/bison) [Fuels Performance (2027 January 28-29, Massachusetts Institute of Technology)](https://github.com/idaholab/moose/discussions/34121)
+
+- [MOOSE Introductory Training during M&C 2027](https://www.ans.org/meetings/mc2027/) (2027 April 18, Columbus OH)
+
+- [Griffin Workshop during M&C 2027](https://www.ans.org/meetings/mc2027/) (2027 April 18, Columbus OH)
+
+- MOOSE Framework Fundamentals (2027 June TBD, Idaho Falls)
 
 !style-end!
 
@@ -19,12 +27,13 @@ refer to the [getting_started/examples_and_tutorials/index.md] page.
 
 # Conferences
 
-- [UK MOOSE Conference 2026](https://cfms.org.uk/article/2026-uk-moose-conference/) (2026 May 11-13, CFMS, Bristol, UK)
-
-- 2nd MOOSE International Conference (2027 February, Idaho Falls)
-
+- [2nd MOOSE International Conference](https://inl.gov/moose-international-workshop/) (April 6-9th 2027, University of Utah, Salt Lake City)
 
 #### Past Training:
+
+- MOOSE Developer Training (2026 June 2-4, Idaho Falls)
+
+- MOOSE-based Thermal Hydraulics and Fluid Dynamics Training (2026 August 13-14, North Carolina State University)
 
 - [Griffin Workshop during PHYSOR 2026](https://www.physor2026.org/info-workshop/) (2026 April 19, Turin, Italy)
 
@@ -78,5 +87,7 @@ refer to the [getting_started/examples_and_tutorials/index.md] page.
 - MOOSE Framework (2022 June)
 
 #### Past Conferences
+
+- [UK MOOSE Conference 2026](https://cfms.org.uk/article/2026-uk-moose-conference/) (2026 May 11-13, CFMS, Bristol, UK)
 
 - [MOOSE International Workshop (2025 March 10-14, Idaho Falls)](https://inl.gov/mooseworkshop2025/)

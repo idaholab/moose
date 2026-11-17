@@ -44,7 +44,8 @@ std::vector<Point> bSplineControlPoints(const libMesh::Point & start_point,
                                         const libMesh::RealVectorValue & start_direction,
                                         const libMesh::RealVectorValue & end_direction,
                                         const unsigned int cps_per_half,
-                                        const libMesh::Real sharpness);
+                                        const libMesh::Real sharpness,
+                                        const std::string & caller_name);
 
 /**
  * Creates control points along an extrapolated line up to a certain intercept.

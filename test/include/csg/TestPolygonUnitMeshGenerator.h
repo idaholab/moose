@@ -29,6 +29,4 @@ protected:
   const Real _apothem;
   /// the number of sides
   const int _num_sides;
-  /// whether or not to expand the final polygon unit into regular surfaces
-  bool _expand;
 };

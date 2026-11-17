@@ -121,25 +121,44 @@ pout = 7e6
   []
 []
 
-[ControlLogic]
+[ChainControls]
+  [get_core_inlet_pressure]
+    type = GetPostprocessorChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    postprocessor = core_inlet_pressure
+    name_data_same_as_postprocessor = true
+  []
+  [get_core_outlet_mdot]
+    type = GetPostprocessorChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    postprocessor = core_outlet_mdot
+    name_data_same_as_postprocessor = true
+  []
+  [get_core_outlet_temperature]
+    type = GetPostprocessorChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    postprocessor = core_outlet_temperature
+    name_data_same_as_postprocessor = true
+  []
+
   [set_core_inlet_pressure]
-    type = SetComponentRealValueControl
-    component = core_top_bc
-    parameter = p
+    type = SetRealValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    parameter = component::core_top_bc/p
     value = core_inlet_pressure
   []
 
   [set_core_outlet_mdot]
-    type = SetComponentRealValueControl
-    component = core_bottom_bc
-    parameter = m_dot
+    type = SetRealValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    parameter = component::core_bottom_bc/m_dot
     value = core_outlet_mdot
   []
 
   [set_core_outlet_temperature]
-    type = SetComponentRealValueControl
-    component = core_bottom_bc
-    parameter = T
+    type = SetRealValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    parameter = component::core_bottom_bc/T
     value = core_outlet_temperature
   []
 []

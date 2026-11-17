@@ -179,7 +179,7 @@
     type = CSVDiff
     input = precipitation.i
     csvdiff = precipitation_out.csv
-    requirement = "The system shall be able to calculate mineral precipitation using a kinetic reaction."
+    requirement = "The system shall be able to calculate mineral precipitation from a single primary species using a kinetic reaction."
     issues = "#10847"
     design = 'PorousFlowAqueousPreDisMineral.md'
   []
@@ -249,7 +249,7 @@
     type = Exodiff
     input = 2species_predis.i
     exodiff = 2species_predis_out.e
-    requirement = "The system shall be able to calculate mineral precipitation using a kinetic reaction."
+    requirement = "The system shall be able to calculate mineral precipitation from two diffusing primary species using a kinetic reaction."
     issues = "#10847"
     design = 'PorousFlowAqueousPreDisChemistry.md'
   []

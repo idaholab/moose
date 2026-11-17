@@ -15,6 +15,8 @@
 #include "VectorCompositeFunctor.h"
 #include "PIMPLE.h"
 #include "SIMPLE.h"
+#include "MathFVUtils.h"
+#include "FVUtils.h"
 #include "PetscVectorReader.h"
 #include "LinearSystem.h"
 #include "LinearFVGradientManager.h"
@@ -24,7 +26,6 @@
 #include "LinearFVMomentumPressure.h"
 #include "LinearFVPressureFluxBC.h"
 #include "FVReconstructedPressureGradient.h"
-#include "FVUtils.h"
 #include "MooseUtils.h"
 
 // libMesh includes
@@ -495,17 +496,17 @@ RhieChowMassFlux::setupMeshInformation()
 {
   // We cache the cell volumes into a petsc vector for corrections here so we can use
   // the optimized petsc operations for the normalization
-  _cell_volumes = _pressure_system->currentSolution()->zero_clone();
+  _cell_fluid_volumes = _pressure_system->currentSolution()->zero_clone();
   for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
     // We have to check this because the variable might not be defined on the given
     // block
     if (hasBlocks(elem_info->subdomain_id()))
     {
       const auto elem_dof = elem_info->dofIndices()[_global_pressure_system_number][0];
-      _cell_volumes->set(elem_dof, elem_info->volume() * elem_info->coordFactor());
+      _cell_fluid_volumes->set(elem_dof, elem_info->volume() * elem_info->coordFactor());
     }
 
-  _cell_volumes->close();
+  _cell_fluid_volumes->close();
 
   _flow_face_info.clear();
   for (auto & fi : _fe_problem.mesh().faceInfo())
@@ -572,7 +573,6 @@ RhieChowMassFlux::initFaceMassFlux()
   for (auto & fi : _flow_face_info)
   {
     RealVectorValue density_times_velocity;
-
     // On internal face we do a regular interpolation with geometric weights
     if (_vel[0]->isInternalFace(*fi))
     {
@@ -604,7 +604,7 @@ RhieChowMassFlux::initFaceMassFlux()
       const Real face_rho = _rho(boundary_face, time_arg);
       for (const auto dim_i : index_range(_vel))
         density_times_velocity(dim_i) = boundary_normal_multiplier * face_rho *
-                                        raw_value((*_vel[dim_i])(boundary_face, time_arg));
+                                        velocityBoundaryValue(dim_i, *fi, boundary_face);
     }
 
     _face_mass_flux[fi->id()] = density_times_velocity * fi->normal();
@@ -647,11 +647,17 @@ RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
                neighbor_cell_id,
                ".");
 
+  // On a face shared with a non-flow block, the FaceInfo element may be the non-flow cell, so
+  // the density must be evaluated on the flow side.
+  const Elem * face_side = fi.elemPtr();
+  if (!_vel[0]->isInternalFace(fi) && !hasBlocks(fi.elemPtr()->subdomain_id()))
+    face_side = fi.neighborPtr();
+
   const Moose::FaceArg face_arg{&fi,
                                 /*limiter_type=*/Moose::FV::LimiterType::CentralDifference,
                                 /*elem_is_upwind=*/true,
                                 /*correct_skewness=*/false,
-                                &fi.elem(),
+                                face_side,
                                 /*state_limiter*/ nullptr};
   const Real face_rho = _rho(face_arg, Moose::currentState());
   if (!std::isfinite(face_rho) || face_rho <= 0.0)
@@ -756,8 +762,6 @@ RhieChowMassFlux::computeFaceMassFlux()
 {
   using namespace Moose::FV;
 
-  const auto time_arg = Moose::currentState();
-
   // Petsc vector reader to make the repeated reading from the vector faster
   PetscVectorReader p_reader(*_pressure_system->system().current_local_solution);
 
@@ -765,62 +769,98 @@ RhieChowMassFlux::computeFaceMassFlux()
   // and the momentum matrix/right hand side
   for (auto & fi : _flow_face_info)
   {
-    // Making sure the kernel knows which face we are on
-    _p_diffusion_kernel->setupFaceData(fi);
-
-    // We are setting this to 1.0 because we don't want to multiply the kernel contributions
-    // with the surface area yet. The surface area will be factored in in the advection kernels.
-    _p_diffusion_kernel->setCurrentFaceArea(1.0);
-
-    Real p_grad_flux = 0.0;
-    if (_p->isInternalFace(*fi))
-    {
-      const auto & elem_info = *fi->elemInfo();
-      const auto & neighbor_info = *fi->neighborInfo();
-
-      // Fetching the dof indices for the pressure variable
-      const auto elem_dof = elem_info.dofIndices()[_global_pressure_system_number][0];
-      const auto neighbor_dof = neighbor_info.dofIndices()[_global_pressure_system_number][0];
-
-      // Fetching the values of the pressure for the element and the neighbor
-      const auto p_elem_value = p_reader(elem_dof);
-      const auto p_neighbor_value = p_reader(neighbor_dof);
-
-      // Compute the elem matrix contributions for the face
-      const auto elem_matrix_contribution = _p_diffusion_kernel->computeElemMatrixContribution();
-      const auto neighbor_matrix_contribution =
-          _p_diffusion_kernel->computeNeighborMatrixContribution();
-      const auto elem_rhs_contribution =
-          _p_diffusion_kernel->computeElemRightHandSideContribution();
-
-      // Compute the face flux from the matrix and right hand side contributions
-      p_grad_flux = (p_neighbor_value * neighbor_matrix_contribution +
-                     p_elem_value * elem_matrix_contribution) -
-                    elem_rhs_contribution;
-    }
-    else if (auto * bc_pointer = _p->getBoundaryCondition(*fi->boundaryIDs().begin()))
-    {
-      mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
-
-      bc_pointer->setupFaceData(
-          fi, fi->faceType(std::make_pair(_p->number(), _global_pressure_system_number)));
-
-      const ElemInfo & elem_info =
-          hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
-      const auto p_elem_value = _p->getElemValue(elem_info, time_arg);
-      const auto matrix_contribution =
-          _p_diffusion_kernel->computeBoundaryMatrixContribution(*bc_pointer);
-      const auto rhs_contribution =
-          _p_diffusion_kernel->computeBoundaryRHSContribution(*bc_pointer);
-
-      // On the boundary, only the element side has a contribution
-      p_grad_flux = (p_elem_value * matrix_contribution - rhs_contribution);
-    }
+    const Real p_grad_flux = computeFacePressureGradientFlux(*fi, p_reader);
     // Compute the new face flux
-    _face_mass_flux[fi->id()] = -_HbyA_flux[fi->id()] + p_grad_flux;
+    const Real face_flux = -_HbyA_flux[fi->id()] + p_grad_flux;
+    _face_mass_flux[fi->id()] = face_flux;
   }
 
   ++_face_mass_flux_generation;
+}
+
+Real
+RhieChowMassFlux::velocityBoundaryValue(const unsigned int component,
+                                        const FaceInfo & fi,
+                                        const Moose::FaceArg & boundary_face) const
+{
+  const auto face_type = fi.faceType(
+      std::make_pair(_vel[component]->number(), _global_momentum_system_numbers[component]));
+
+  LinearFVBoundaryCondition * dirichlet_bc = nullptr;
+  for (const auto bnd_id : fi.boundaryIDs())
+    if (auto * const bc_pointer = _vel[component]->getBoundaryCondition(bnd_id))
+      if (dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(bc_pointer))
+      {
+        // Two Dirichlet conditions on one face would prescribe conflicting velocities.
+        mooseAssert(!dirichlet_bc,
+                    "Face " + std::to_string(fi.id()) +
+                        " carries more than one Dirichlet velocity boundary condition.");
+        dirichlet_bc = bc_pointer;
+      }
+
+  if (dirichlet_bc)
+  {
+    dirichlet_bc->setupFaceData(&fi, face_type);
+    return dirichlet_bc->computeBoundaryValue();
+  }
+
+  return MetaPhysicL::raw_value((*_vel[component])(boundary_face, Moose::currentState()));
+}
+
+Real
+RhieChowMassFlux::computeFacePressureGradientFlux(const FaceInfo & fi, PetscVectorReader & p_reader)
+{
+  // Making sure the kernel knows which face we are on
+  _p_diffusion_kernel->setupFaceData(&fi);
+
+  // We are setting this to 1.0 because we don't want to multiply the kernel contributions
+  // with the surface area yet. The surface area will be factored in in the advection kernels.
+  _p_diffusion_kernel->setCurrentFaceArea(1.0);
+
+  Real p_grad_flux = 0.0;
+  if (_p->isInternalFace(fi))
+  {
+    const auto & elem_info = *fi.elemInfo();
+    const auto & neighbor_info = *fi.neighborInfo();
+
+    // Fetching the dof indices for the pressure variable
+    const auto elem_dof = elem_info.dofIndices()[_global_pressure_system_number][0];
+    const auto neighbor_dof = neighbor_info.dofIndices()[_global_pressure_system_number][0];
+
+    // Fetching the values of the pressure for the element and the neighbor
+    const auto p_elem_value = p_reader(elem_dof);
+    const auto p_neighbor_value = p_reader(neighbor_dof);
+
+    // Compute the elem matrix contributions for the face
+    const auto elem_matrix_contribution = _p_diffusion_kernel->computeElemMatrixContribution();
+    const auto neighbor_matrix_contribution =
+        _p_diffusion_kernel->computeNeighborMatrixContribution();
+    const auto elem_rhs_contribution = _p_diffusion_kernel->computeElemRightHandSideContribution();
+
+    // Compute the face flux from the matrix and right hand side contributions
+    p_grad_flux = (p_neighbor_value * neighbor_matrix_contribution +
+                   p_elem_value * elem_matrix_contribution) -
+                  elem_rhs_contribution;
+  }
+  else if (auto * bc_pointer = _p->getBoundaryCondition(*fi.boundaryIDs().begin()))
+  {
+    mooseAssert(fi.boundaryIDs().size() == 1, "We should only have one boundary on every face.");
+    bc_pointer->setupFaceData(
+        &fi, fi.faceType(std::make_pair(_p->number(), _global_pressure_system_number)));
+
+    const auto time_arg = Moose::currentState();
+    const ElemInfo & elem_info =
+        hasBlocks(fi.elemPtr()->subdomain_id()) ? *fi.elemInfo() : *fi.neighborInfo();
+    const auto p_elem_value = _p->getElemValue(elem_info, time_arg);
+    const auto matrix_contribution =
+        _p_diffusion_kernel->computeBoundaryMatrixContribution(*bc_pointer);
+    const auto rhs_contribution = _p_diffusion_kernel->computeBoundaryRHSContribution(*bc_pointer);
+
+    // On the boundary, only the element side has a contribution
+    p_grad_flux = p_elem_value * matrix_contribution - rhs_contribution;
+  }
+
+  return p_grad_flux;
 }
 
 void
@@ -1048,7 +1088,8 @@ RhieChowMassFlux::computeHbyA(bool verbose)
     // Unfortunately, the pressure forces are included in the momentum RHS
     // so we have to correct them back using the same coupling gradient that
     // assembled the momentum pressure source.
-    working_vector_petsc->pointwise_mult(*coupling_pressure_gradient[system_i], *_cell_volumes);
+    working_vector_petsc->pointwise_mult(*coupling_pressure_gradient[system_i],
+                                         *_cell_fluid_volumes);
     HbyA.add(-1.0, *working_vector_petsc);
 
     if (verbose)
@@ -1123,14 +1164,14 @@ RhieChowMassFlux::computeHbyA(bool verbose)
       // Correct HbyA
       Ainv_full->add(-1.0, Ainv);
       working_vector_petsc->pointwise_mult(*Ainv_full, *coupling_pressure_gradient[system_i]);
-      working_vector_petsc->pointwise_mult(*working_vector_petsc, *_cell_volumes);
+      working_vector_petsc->pointwise_mult(*working_vector_petsc, *_cell_fluid_volumes);
       HbyA.add(-1.0, *working_vector_petsc);
 
       // Correct Ainv
       Ainv = *Ainv_full_old;
     }
 
-    Ainv.pointwise_mult(Ainv, *_cell_volumes);
+    Ainv.pointwise_mult(Ainv, *_cell_fluid_volumes);
 
     if (verbose)
     {

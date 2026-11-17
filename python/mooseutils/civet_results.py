@@ -27,6 +27,7 @@ DEFAULT_CIVET_REPO = "idaholab/moose"
 
 TEST_RE = re.compile(
     r"^(?:\[(?P<time>.+?)s\])?"  # Optional test time
+    r"(?: *\[ *(?P<memory>[^\]]*)\])?"  # Optional test memory (civet uses the "tmpnsc" format, refs #27479)
     r" *(?P<status>[A-Z]+?)"  # Test status (e.g., OK)
     r" +(?P<test>.*?)"  # Test name
     r"(?: +(?P<reason>.*?))?"  # reason FAILED (FAILED (ERRORMSG))

@@ -32,7 +32,9 @@
   [z]
     type = RandomIC
     min = 0.01
-    max = 0.03
+    # Below the CO2 solubility at the lowest pressure and highest salt mass fraction (0.016 at
+    # 5 MPa, 50 C and 0.15), so that every point is liquid whatever the random values
+    max = 0.015
     variable = zi
   []
   [xnacl]

@@ -12,4 +12,22 @@
     recover = false
     compute_devices = 'cpu cuda'
   []
+  [MFEMVariableLineValueSamplerMultiVariable]
+    type = CSVDiff
+    input = line_value_sampler_multi_variable.i
+    csvdiff = 'OutputData/line_value_sampler_multi_variable_line_sampler_0001.csv'
+    requirement = 'The system shall be able to sample multiple variables along a line using MFEM.'
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+  []
+  [MFEMComplexVariableLineValueSamplerMultiVariable]
+    type = CSVDiff
+    input = complex_line_value_sampler_multi_variable.i
+    csvdiff = 'OutputData/complex_line_value_sampler_multi_variable_line_sampler_0001.csv'
+    requirement = 'The system shall be able to sample multiple complex variables along a line using MFEM.'
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+  []
 []

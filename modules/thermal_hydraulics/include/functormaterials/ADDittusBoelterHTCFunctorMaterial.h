@@ -26,6 +26,8 @@ public:
 protected:
   /// Fluid properties of the flowing fluid
   const SinglePhaseFluidProperties & _fp;
+  /// Fluid properties of the pure liquid
+  const SinglePhaseFluidProperties * _fp_ref;
   /// Mass flow rate through the segment
   const ADVariableValue & _m;
   /// Fluid temperature of the segment

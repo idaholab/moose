@@ -56,10 +56,6 @@ ManifoldSubdomainGenerator::ManifoldSubdomainGenerator(const InputParameters & p
     _has_restriction(isParamValid("restricted_subdomains")),
     _surface_tolerance(getParam<Real>("surface_tolerance"))
 {
-#if LIBMESH_DOF_ID_BYTES != 8
-  mooseDocumentedError(
-      "moose", 32898, "ManifoldSubdomainGenerator currently only works with 64-bit DoF IDs");
-#endif
 }
 
 std::unique_ptr<MeshBase>
@@ -81,6 +77,10 @@ ManifoldSubdomainGenerator::generate()
   if (*(manifold_mesh->elem_dimensions().begin()) != 2 ||
       *(manifold_mesh->elem_dimensions().rbegin()) != 2)
     paramError("manifold", "Only 2D meshes are supported.");
+
+  // We may need up-to-date caches to query hasSubdomainName/ID
+  if (!mesh->preparation().has_cached_elem_data)
+    mesh->cache_elem_data();
 
   std::set<SubdomainID> restricted_ids;
   if (_has_restriction)

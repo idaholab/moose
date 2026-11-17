@@ -77,7 +77,7 @@
 [VectorPostprocessors]
   [line_sample]
     type = MFEMVariableLineValueSampler
-    variable = 'submesh_potential'
+    variables = 'submesh_potential'
     start_point = '0 -0.5 -0.5'
     end_point = '0 0.5 0.5'
     num_points = 101

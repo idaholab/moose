@@ -51,7 +51,6 @@ ComputeLagrangianStressPK1::computeQpCauchyStress()
   if (_large_kinematics)
   {
     const RankTwoTensor F_ust_inv = _F_ust[_qp].inverse();
-    const RankTwoTensor F_ust_invT = F_ust_inv.transpose();
     const Real J_ust = _F_ust[_qp].det();
     _cauchy_stress[_qp] = _pk1_stress[_qp] * _F_ust[_qp].transpose() / J_ust;
 

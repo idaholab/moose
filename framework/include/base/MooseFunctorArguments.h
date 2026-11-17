@@ -273,6 +273,27 @@ struct NodeArg
 };
 
 /**
+ * A structure that is used to evaluate Moose functors at an arbitrary physical point, without any
+ * mesh information. Functors that need mesh information, e.g. field variables, do not support this
+ * argument.
+ */
+struct PointArg
+{
+  libMesh::Point point;
+
+  /**
+   * @returns The physical location of this data structure
+   */
+  Point getPoint() const { return point; }
+
+  /**
+   * friend function that allows this structure to be used as keys in ordered containers like sets
+   * and maps
+   */
+  friend bool operator<(const PointArg & l, const PointArg & r) { return l.point < r.point; }
+};
+
+/**
  * Argument for requesting functor evaluation at a quadrature point location in an element. Data
  * in the argument:
  * - The element containing the quadrature point

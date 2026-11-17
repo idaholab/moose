@@ -13,6 +13,5 @@
     type = BreakMeshByBlockGenerator
     block_pairs = '0 1;
                    2 3'
-    split_interface = true
   []
 []

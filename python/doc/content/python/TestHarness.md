@@ -35,8 +35,11 @@ find and run your tests and display the results. More detail on concurrency can 
 To see more options for `run_tests` you can invoke it with `-h`.  There are many options to look
 through, but some of the important ones are:
 
-- `--failed-tests`: Runs the tests that just failed.  Note: as long as you keep using this
-  option the set of failed tests will not change.
+- `--failed-tests`: Runs the tests that just failed.  Tests that now pass are removed from the
+  set of failed tests, so each subsequent use runs only the tests that still fail.  Once all of
+  them pass, the last set of failed tests is kept.
+- `--failed-tests-no-update`: Same as `--failed-tests`, but the set of failed tests does not
+  change, which is useful for checking that fixed tests keep passing.
 - `--n-threads <n>`: Causes the tests to run with `#` of (OpenMP/Pthread/TBB) threads.
 - `-p <n>`: Causes the tests to run with `#` MPI processes.  Useful for guaranteeing that you get the
   same result in parallel!
@@ -275,6 +278,29 @@ else that happens to be running at the same time, rather than for memory the job
 needed. This exclusion requires Linux 5.3 or newer; on older kernels and on platforms
 other than Linux, the measured memory includes those pages, so the same limit may be
 reached sooner.
+
+Memory is sampled every `--memory-tracking-interval` seconds (default 0.2), so a job that
+starts and finishes between two consecutive samples reports no memory, and a short
+spike between samples is missed.
+
+#### MOOSE_MAX_GPU_MEMORY_PER_SLOT
+
+Set `MOOSE_MAX_GPU_MEMORY_PER_SLOT` to a float or integer to influence the
+`--max-gpu-memory-per-slot` command line option, limiting the NVIDIA GPU memory per slot each
+job can use in MB. If the `--max-gpu-memory-per-slot` command line option is set, it will take
+precedence over this variable.
+
+GPU memory is tracked whenever the `pynvml` Python package (from `nvidia-ml-py`) is available
+and NVML finds an NVIDIA GPU, independent of `--compute-device`: a test run on the CPU can
+still create CUDA contexts, for example through Kokkos or PETSc built with CUDA. Use
+`--no-gpu-memory-tracking` to disable it. The GPU memory of a job is the device memory that
+NVML attributes to its processes, summed over all GPUs. It includes the CUDA context of each
+process, so a job is charged once per MPI rank that uses a GPU.
+
+Jobs that share a GPU run at most `-j` slots at a time, so setting the limit to the available GPU memory minus some
+headroom, divided by the `-j` value, reduces the risk of running out of GPU memory. The
+headroom is needed because memory is sampled: an allocation made between samples can exceed
+the limit before the job is killed.
 
 # Validation
 

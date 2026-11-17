@@ -1,0 +1,10 @@
+[Tests]
+  design = 'BrineFluidProperties.md'
+  issues = '#34070'
+
+  [ad_derivatives_after_value_call]
+    type = GoogleTest
+    unit_test = BrineFluidPropertiesTest.adDerivativesAfterValueCall
+    requirement = 'The system shall include the pressure and temperature derivatives of the water density and enthalpy in the brine density and enthalpy computed with forward-mode automatic differentiation, regardless of which brine property methods were called before.'
+  []
+[]

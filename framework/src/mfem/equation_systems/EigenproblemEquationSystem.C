@@ -24,7 +24,9 @@ EigenproblemEquationSystem::ApplyEssentialBCs()
   mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(0));
   trial_gf.Update();
   trial_gf = _gfuncs->GetRef(_trial_var_names.at(0));
-  _ess_markers.at(0).SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(), 0);
+  // A mesh without boundary elements, such as a periodic one, has no boundary attributes
+  const auto & bdr_attributes = trial_gf.ParFESpace()->GetParMesh()->bdr_attributes;
+  _ess_markers.at(0).SetSize(bdr_attributes.Size() ? bdr_attributes.Max() : 0, 0);
   // Set constrained DoF values on user-declared essential boundaries and collect their markers
   ApplyEssentialBC(_trial_var_names.at(0), trial_gf, _ess_markers.at(0));
   trial_gf.FESpace()->GetEssentialTrueDofs(_ess_markers.at(0), _ess_tdof_lists.at(0));
@@ -69,10 +71,26 @@ EigenproblemEquationSystem::FormMassMatrix(EigenRHSCoefficient rhs_coefficient)
 
   if (fespace->GetTypicalFE()->GetRangeType() == mfem::FiniteElement::SCALAR)
   {
+    // VectorMassIntegrator reads vdim x vdim entries of the evaluated matrix without bounds checks.
     if (std::holds_alternative<mfem::MatrixCoefficient *>(rhs_coefficient))
-      mooseError("A matrix rhs_coefficient cannot be used with a scalar finite element space.");
-    m->AddDomainIntegrator(
-        new mfem::MassIntegrator(*std::get<mfem::Coefficient *>(rhs_coefficient)));
+    {
+      const auto & mat_coef = *std::get<mfem::MatrixCoefficient *>(rhs_coefficient);
+      if (mat_coef.GetHeight() != fespace->GetVDim() || mat_coef.GetWidth() != fespace->GetVDim())
+        mooseError("A matrix rhs_coefficient on an H1 or L2 finite element space must be ",
+                   fespace->GetVDim(),
+                   "x",
+                   fespace->GetVDim(),
+                   " to match the number of components of the space, but it is ",
+                   mat_coef.GetHeight(),
+                   "x",
+                   mat_coef.GetWidth(),
+                   ".");
+    }
+    auto * const integ = std::visit(
+        [](auto * coef) { return new mfem::VectorMassIntegrator(*coef); }, rhs_coefficient);
+    // Otherwise, for scalar coefficients, VectorMassIntegrator defaults to the space dimension.
+    integ->SetVDim(fespace->GetVDim());
+    m->AddDomainIntegrator(integ);
   }
   else
     m->AddDomainIntegrator(std::visit(
@@ -82,7 +100,7 @@ EigenproblemEquationSystem::FormMassMatrix(EigenRHSCoefficient rhs_coefficient)
   // Shift the eigenvalue corresponding to eliminated dofs to a large value. The BC DoFs on the
   // stiffness matrix are set to 1 and the mass matrix BC DoFs are set to a small value eps, such
   // that the eigenvalues associate with these DOFs are ~1/eps.
-  m->EliminateEssentialBCDiag(_ess_markers.at(0), std::numeric_limits<mfem::real_t>::min());
+  m->EliminateEssentialBCDiag(_ess_markers.at(0), std::numeric_limits<mfem::real_t>::epsilon());
   m->Finalize();
   _mass_rhs.Reset(m->ParallelAssemble());
 }

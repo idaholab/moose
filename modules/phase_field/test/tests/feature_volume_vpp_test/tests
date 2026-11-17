@@ -16,8 +16,8 @@
     csvdiff = 'feature_volume_vpp_test_out_features_0000.csv'
 
     issues = "#11395"
-    requirement = "The FeatureVolumeVectorPostprocessor shall output individual centroid locations "
-                  "when requested."
+    requirement = "The system shall output individual feature centroid locations using a "
+                  "postprocessor when requested, when running with multiple MPI processes."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2
@@ -42,9 +42,9 @@
     csvdiff = 'percolation_test_out_features_0000.csv'
 
     issues = "#13169"
-    requirement = "The FeatureVolumeVectorPostprocessor shall output whether a percolated pathway "
+    requirement = "The system shall output, using a postprocessor, whether a percolated pathway "
                   "exists between specified primary_percolation_boundaries and "
-                  "secondary_percolation_boundaries."
+                  "secondary_percolation_boundaries, when running with multiple MPI processes."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2
@@ -71,8 +71,9 @@
     csvdiff = 'boundary_area_2D_single_out_features_0000.csv'
 
     issues = "#13202"
-    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied "
-                  "boundary by each feature by calulating the area/length of boundary elements."
+    requirement = "The system shall calculate coverage of a supplied boundary by each feature by "
+                  "calculating the area/length of boundary elements using a postprocessor, in a "
+                  "two-dimensional geometry."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2
@@ -98,8 +99,9 @@
     csvdiff = 'boundary_area_3D_single_out_features_0000.csv'
 
     issues = "#13202"
-    requirement = "The FeatureVolumeVectorPostprocessor shall calculate coverage of a supplied "
-                  "boundary by each feature by calulating the area/length of boundary elements."
+    requirement = "The system shall calculate coverage of a supplied boundary by each feature by "
+                  "calculating the area/length of boundary elements using a postprocessor, in a "
+                  "three-dimensional geometry."
     design = "/FeatureVolumeVectorPostprocessor.md"
 
     min_parallel = 2

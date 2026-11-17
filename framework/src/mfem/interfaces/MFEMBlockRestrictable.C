@@ -16,13 +16,11 @@ MFEMBlockRestrictable::validParams()
 {
   // Create InputParameters object that will be appended to the parameters for the inheriting object
   InputParameters params = emptyInputParameters();
-  // Create user-facing 'boundary' input for restricting inheriting object to boundaries
-  // MFEM uses the boundary -1 to signify every sideset
-  params.addParam<std::vector<SubdomainName>>("block",
-                                              {},
-                                              "The list of subdomains (names or ids) that this "
-                                              "object will be restricted to. Leave empty to apply "
-                                              "to all subdomains.");
+  params.addParam<std::vector<SubdomainName>>(
+      "block",
+      {},
+      "The list of subdomains (names or ids) that this object will be restricted to. "
+      "Leave empty to apply to all subdomains.");
   return params;
 }
 
@@ -30,15 +28,18 @@ MFEMBlockRestrictable::MFEMBlockRestrictable(const InputParameters & parameters,
                                              const mfem::ParMesh & mfem_mesh)
   : _mfem_mesh(mfem_mesh),
     _subdomain_names(parameters.get<std::vector<SubdomainName>>("block")),
-    _subdomain_attributes(subdomainsToAttributes())
+    _subdomain_attributes(subdomainsToAttributes(parameters)),
+    _subdomain_markers(_mfem_mesh.attributes.IsEmpty()
+                           ? mfem::Array<int>()
+                           : mfem::AttributeSets::AttrToMarker(_mfem_mesh.attributes.Max(),
+                                                               _subdomain_attributes.IsEmpty()
+                                                                   ? _mfem_mesh.attributes
+                                                                   : _subdomain_attributes))
 {
-  if (!_subdomain_attributes.IsEmpty())
-    mfem::common::AttrToMarker(
-        _mfem_mesh.attributes.Max(), _subdomain_attributes, _subdomain_markers);
 }
 
 mfem::Array<int>
-MFEMBlockRestrictable::subdomainsToAttributes()
+MFEMBlockRestrictable::subdomainsToAttributes(const InputParameters & parameters)
 {
   mfem::Array<int> attributes;
   auto & mesh = getMesh();
@@ -54,11 +55,17 @@ MFEMBlockRestrictable::subdomainsToAttributes()
     catch (...)
     {
       // It was not
+      if (!mesh.attribute_sets.AttributeSetExists(subdomain_name))
+        parameters.paramError("block", "the mesh has no block named '", subdomain_name, "'.");
       auto & subdomain_ids = mesh.attribute_sets.GetAttributeSet(subdomain_name);
       for (const auto & subdomain_id : subdomain_ids)
         attributes.Append(subdomain_id);
     }
   }
+
+  for (const auto attribute : attributes)
+    if (mesh.attributes.Find(attribute) == -1)
+      parameters.paramError("block", "the mesh has no block with ID ", attribute, ".");
   return attributes;
 }
 

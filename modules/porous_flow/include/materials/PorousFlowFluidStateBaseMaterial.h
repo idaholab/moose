@@ -26,6 +26,8 @@ public:
 
   PorousFlowFluidStateBaseMaterialTempl(const InputParameters & parameters);
 
+  virtual void residualSetup() override;
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;

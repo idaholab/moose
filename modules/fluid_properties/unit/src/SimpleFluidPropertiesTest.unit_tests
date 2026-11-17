@@ -1,0 +1,10 @@
+[Tests]
+  design = 'SimpleFluidProperties.md'
+  issues = '#34070'
+
+  [energy_derivatives_low_expansion_modulus_product]
+    type = GoogleTest
+    unit_test = SimpleFluidPropertiesTest.energyDerivativesLowExpansionModulusProduct
+    requirement = 'The system shall compute derivatives of the internal energy of a simple fluid with respect to pressure and density when the product of the thermal expansion coefficient and the bulk modulus is small.'
+  []
+[]

@@ -68,6 +68,7 @@ e = c_v T, \qquad h = e + \frac{p}{\rho}.
 The object is used with [PorousFlowSingleComponentFluid](PorousFlowSingleComponentFluid.md), so it
 can be used for one phase of a two-phase oil-water simulation with, for example,
 `PorousFlow2PhasePS`.
+A complete dead-oil waterflood is described in [modules/porous_flow/dead_oil_waterflood.md].
 
 !syntax parameters /FluidProperties/TabulatedPVTFluidProperties
 

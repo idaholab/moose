@@ -89,21 +89,21 @@
 [VectorPostprocessors]
   [line_sample_e_field]
     type = MFEMVariableLineValueSampler
-    variable = 'e_field'
+    variables = 'e_field'
     start_point = '0.01 0.01 0.01'
     end_point = '0.99 0.99 0.99'
     num_points = 101
   []
   [line_sample_b_field]
     type = MFEMVariableLineValueSampler
-    variable = 'b_field'
+    variables = 'b_field'
     start_point = '0.01 0.01 0.01'
     end_point = '0.99 0.99 0.99'
     num_points = 101
   []
   [line_sample_lorentz_force]
     type = MFEMVariableLineValueSampler
-    variable = 'lorentz_force'
+    variables = 'lorentz_force'
     start_point = '0.01 0.01 0.01'
     end_point = '0.99 0.99 0.99'
     num_points = 101

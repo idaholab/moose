@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LStableDirk2.h"
+#include "libmesh/sparse_matrix.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "PetscSupport.h"
@@ -30,6 +31,7 @@ LStableDirk2::LStableDirk2(const InputParameters & parameters)
     _residual_stage2(addVector("residual_stage2", false, GHOSTED)),
     _alpha(1. - 0.5 * std::sqrt(2))
 {
+  requestTimeJacobian();
   mooseInfo("LStableDirk2 and other multistage TimeIntegrators are known not to work with "
             "Materials/AuxKernels that accumulate 'state' and should be used with caution.");
 }
@@ -151,4 +153,12 @@ LStableDirk2::postResidual(NumericVector<Number> & residual)
   }
   else
     mooseError("LStableDirk2::postResidual(): Member variable _stage can only have values 1 or 2.");
+}
+
+void
+LStableDirk2::postJacobian(SparseMatrix<Number> & jacobian)
+{
+  // the current stage solution enters the stage residual through the time residual and alpha
+  // times the non-time residual of the stage, see postResidual()
+  weightNonTimeJacobian(jacobian, _alpha);
 }

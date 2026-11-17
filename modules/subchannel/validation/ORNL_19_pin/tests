@@ -11,6 +11,6 @@
         abs_zero = 1e-5
         rel_err = 1e-4
         max_threads = 1
-        requirement = 'The system will examine the subchannel solver for the ORNL 19-pin case'
+        requirement = 'The system shall examine the subchannel solver for the ORNL 19-pin case'
     []
 []

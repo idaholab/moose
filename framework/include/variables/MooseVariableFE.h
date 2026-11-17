@@ -377,6 +377,10 @@ public:
   {
     return _element_data->adCurlSln();
   }
+  const ADTemplateVariableDivergence<OutputType> & adDivSln() const override
+  {
+    return _element_data->adDivSln();
+  }
 
   /// neighbor AD
   const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override
@@ -406,6 +410,10 @@ public:
   const ADTemplateVariableCurl<OutputType> & adCurlSlnNeighbor() const override
   {
     return _neighbor_data->adCurlSln();
+  }
+  const ADTemplateVariableDivergence<OutputType> & adDivSlnNeighbor() const override
+  {
+    return _neighbor_data->adDivSln();
   }
 
   /// element dots

@@ -415,10 +415,10 @@ SimpleFluidProperties::e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Re
   T_from_p_rho(p, rho, T, dT_dp, dT_drho);
 
   // get energy and derivatives
-  Real de_dT;
-  e_from_p_T(p, T, e, de_dp, de_dT);
-  de_dp = de_dT * dT_dp + de_dp;
-  de_drho = de_dT * dT_drho + de_dp * dT_dp;
+  Real de_dp_T, de_dT;
+  e_from_p_T(p, T, e, de_dp_T, de_dT);
+  de_dp = de_dT * dT_dp + de_dp_T;
+  de_drho = de_dT * dT_drho;
 }
 
 Real

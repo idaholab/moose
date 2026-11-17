@@ -19,6 +19,6 @@
     # THM/relap7 #215
     issues = '#26336'
     design = 'RZSymmetry.md'
-    requirement = 'The system should error out when users set boundary-restricted RZ-symmtrical THM-specific objects on RZ-subdomains.'
+    requirement = 'The system shall error out when users set boundary-restricted RZ-symmetrical THM-specific objects on RZ-subdomains.'
   []
 []

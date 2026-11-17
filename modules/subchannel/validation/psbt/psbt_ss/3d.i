@@ -1,6 +1,6 @@
 [Mesh]
   [assembly]
-    type = SCMDetailedQuadAssemblyMeshGenerator
+    type = SCMQuadVisualizationAssemblyMeshGenerator
     nx = 6
     ny = 6
     n_cells = 20

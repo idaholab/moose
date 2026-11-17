@@ -26,6 +26,7 @@
     type = RobinBC
     variable = u
     boundary = '1 2 3 4 5 6'
+    coefficient = 2
   []
 []
 

@@ -36,6 +36,10 @@ n_cells = 20
   n_blocks = 1
   P_tol = 1e-6
   T_tol = 1e-6
+  # The explicit crossflow solve uses unpreconditioned GMRES, which breaks down near convergence
+  # at the default linear tolerances of 1e-6 and leaves the crossflow at its previous iterate
+  rtol = 1e-4
+  atol = 1e-4
   full_output = true
   compute_density = true
   compute_viscosity = true

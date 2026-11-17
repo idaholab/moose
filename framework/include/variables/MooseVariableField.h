@@ -131,6 +131,11 @@ public:
   virtual const ADTemplateVariableCurl<OutputType> & adCurlSln() const = 0;
 
   /**
+   * AD divergence solution getter
+   */
+  virtual const ADTemplateVariableDivergence<OutputType> & adDivSln() const = 0;
+
+  /**
    * AD grad neighbor solution getter
    */
   virtual const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const = 0;
@@ -144,6 +149,11 @@ public:
    * AD curl neighbor solution getter
    */
   virtual const ADTemplateVariableCurl<OutputType> & adCurlSlnNeighbor() const = 0;
+
+  /**
+   * AD divergence neighbor solution getter
+   */
+  virtual const ADTemplateVariableDivergence<OutputType> & adDivSlnNeighbor() const = 0;
 
   /**
    * AD second solution getter

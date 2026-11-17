@@ -155,6 +155,33 @@ FESystem::setupDofs()
   }
 
   _local_node_dof_index.copyToDeviceNested();
+
+  if (_dof_map.n_constrained_dofs())
+  {
+    _local_constraints.create(_num_local_dofs + _num_ghost_dofs);
+
+    for (auto it = _dof_map.constraint_rows_begin(); it != _dof_map.constraint_rows_end(); ++it)
+      if (_dof_map.semilocal_index(it->first))
+      {
+        auto local_dof = solution->map_global_to_local_index(it->first);
+
+        _local_constraints.reserve({local_dof}, {it->second.size()});
+      }
+
+    _local_constraints.finalize();
+
+    for (auto it = _dof_map.constraint_rows_begin(); it != _dof_map.constraint_rows_end(); ++it)
+      if (_dof_map.semilocal_index(it->first))
+      {
+        auto local_dof = solution->map_global_to_local_index(it->first);
+
+        unsigned int i = 0;
+        for (auto [dof, weight] : it->second)
+          _local_constraints[local_dof][i++] = {solution->map_global_to_local_index(dof), weight};
+      }
+
+    _local_constraints.copyToDevice();
+  }
 }
 
 void
@@ -180,22 +207,25 @@ FESystem::setupNodalBCDofs()
 void
 FESystem::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
 {
-  auto var = nbc->variable().number();
-  auto num_dofs = _var_is_vector[var] ? kokkosAssembly().getDimension() : 1;
-
   if (!dofs.isAlloc())
   {
     dofs.create(_num_local_dofs + _num_ghost_dofs);
     dofs = false;
   }
 
-  for (auto node : nbc->getContiguousNodes())
+  for (const auto variable : nbc->variables())
   {
-    auto dof = _local_node_dof_index[var][node];
+    auto var = variable->number();
+    auto num_dofs = _var_is_vector[var] ? kokkosAssembly().getDimension() : 1;
 
-    if (dof != libMesh::DofObject::invalid_id)
-      for (const auto i : make_range(num_dofs))
-        dofs[dof + i] = true;
+    for (auto node : nbc->getContiguousNodes())
+    {
+      auto dof = _local_node_dof_index[var][node];
+
+      if (dof != libMesh::DofObject::invalid_id)
+        for (const auto i : make_range(num_dofs))
+          dofs[dof + i] = true;
+    }
   }
 
   // Let remote processes know about ghost DOFs associated with nodal BCs not to contribute on them

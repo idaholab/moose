@@ -74,7 +74,6 @@ P_out = 101325 # Pa
   P_out = ${P_out}
   implicit = true
   segregated = false
-  staggered_pressure = false
   interpolation_scheme = 'upwind'
   friction_closure = 'MATRA'
   mixing_closure ='constant_beta'

@@ -9,7 +9,8 @@
 
 #include "MassDiffusionEnergyGasMixDGKernel.h"
 #include "VaporMixtureFluidProperties.h"
-#include "IdealGasFluidProperties.h"
+#include "SinglePhaseFluidProperties.h"
+#include "IdealGasMixtureInterface.h"
 #include "FlowModelGasMixUtils.h"
 #include "MooseUtils.h"
 
@@ -48,9 +49,11 @@ MassDiffusionEnergyGasMixDGKernel::MassDiffusionEnergyGasMixDGKernel(
     _fp_primary(_fp.getPrimaryFluidProperties()),
     _fp_secondary(_fp.getSecondaryFluidProperties())
 {
-  if (!dynamic_cast<const IdealGasFluidProperties *>(&_fp_primary) ||
-      !dynamic_cast<const IdealGasFluidProperties *>(&_fp_secondary))
-    mooseError("This class requires gases to use IdealGasFluidProperties.");
+  // The component enthalpies are computed with the ideal gas law
+  if (!dynamic_cast<const IdealGasMixtureInterface *>(&_fp_primary) ||
+      !dynamic_cast<const IdealGasMixtureInterface *>(&_fp_secondary))
+    mooseError("This class requires ideal gases that implement IdealGasMixtureInterface, such as "
+               "IdealGasFluidProperties or NASA7IdealGasFluidProperties.");
 }
 
 ADReal

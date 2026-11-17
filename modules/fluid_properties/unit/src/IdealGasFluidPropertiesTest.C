@@ -112,3 +112,36 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
 
   REL_TEST(_fp->molarMass(), _molar_mass, rel_tol_consistency);
 }
+
+/**
+ * Verify the Gibbs free energy against its definition g = h - T s, with a nonzero reference
+ * internal energy
+ */
+TEST_F(IdealGasFluidPropertiesTest, gibbsFreeEnergy)
+{
+  const Real T = 350.0;
+  const Real p = 2.0e5;
+  const Real v = _fp->v_from_p_T(p, T);
+  const Real e = _fp->e_from_p_T(p, T);
+  REL_TEST(_fp->g_from_v_e(v, e),
+           _fp->h_from_p_T(p, T) - T * _fp->s_from_p_T(p, T),
+           REL_TOL_CONSISTENCY);
+}
+
+/**
+ * Verify that the sound speed and its derivatives stay finite for a nonphysical state with
+ * negative temperature, as can occur during nonlinear iterations
+ */
+TEST_F(IdealGasFluidPropertiesTest, soundSpeedNonphysicalState)
+{
+  const Real v = 1.0;
+  // Below the reference internal energy, so that the temperature is negative
+  const Real e = 0.0;
+  EXPECT_LT(_fp->T_from_v_e(v, e), 0.0);
+
+  Real c, dc_dv, dc_de;
+  _fp->c_from_v_e(v, e, c, dc_dv, dc_de);
+  EXPECT_EQ(c, _fp->c_from_v_e(v, e));
+  EXPECT_TRUE(std::isfinite(dc_dv));
+  EXPECT_TRUE(std::isfinite(dc_de));
+}

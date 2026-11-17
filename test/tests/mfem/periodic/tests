@@ -1,0 +1,35 @@
+[Tests]
+  design = 'MFEMProblem.md MFEMEigenproblem.md'
+  issues = '#34194'
+  [MFEMNoBoundaryElements]
+    requirement = 'The system shall solve problems using MFEM on a mesh without boundary elements, '
+                  'including'
+    [steady]
+      type = CSVDiff
+      input = periodic.i
+      csvdiff = 'OutputData/Periodic.csv'
+      detail = 'a real-valued steady problem,'
+      capabilities = 'mfem'
+      compute_devices = 'cpu cuda'
+      recover = false
+    []
+    [complex]
+      type = CSVDiff
+      input = periodic_complex.i
+      csvdiff = 'OutputData/PeriodicComplex.csv'
+      detail = 'a complex-valued steady problem,'
+      capabilities = 'mfem'
+      compute_devices = 'cpu cuda'
+      recover = false
+    []
+    [eigenproblem]
+      type = CSVDiff
+      input = periodic_eigenproblem.i
+      csvdiff = 'OutputData/PeriodicEigenproblem_eigenvalues_0001.csv'
+      detail = 'and an eigenproblem.'
+      capabilities = 'mfem'
+      compute_devices = 'cpu cuda'
+      recover = false
+    []
+  []
+[]

@@ -13,6 +13,10 @@
 
 class ShortestDistanceToSurface;
 
+/**
+ * Evaluates the shortest distance from each element centroid to the true interface
+ * and stores it into an auxiliary variable.
+ */
 class ElementCentroidToSurfaceDistanceAux : public AuxKernel
 {
 public:

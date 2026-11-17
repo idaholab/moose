@@ -10,4 +10,12 @@
                   'and unit norm both away from and at the pole where the reflection chart '
                   'switches.'
   []
+  [two_dimensional_tangents_across_negative_x]
+    type = GoogleTest
+    unit_test = MortarNodalGeometryTest.twoDimensionalTangentsAcrossNegativeX
+    issues = '#34145'
+    requirement = 'The system shall compute a two dimensional mortar nodal tangent that turns '
+                  'continuously with the normal through the negative x direction, with automatic '
+                  'differentiation derivatives matching a finite-difference approximation.'
+  []
 []

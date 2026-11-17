@@ -239,10 +239,11 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 IntegratedBC::operator()(ResidualLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
+  auto comp = _thread(tid, 1);
+  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 2));
 
   AssemblyDatum datum(
-      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(comp), comp);
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
@@ -253,10 +254,11 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 IntegratedBC::operator()(JacobianLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
+  auto comp = _thread(tid, 1);
+  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 2));
 
   AssemblyDatum datum(
-      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(comp), comp);
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
@@ -267,15 +269,16 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 IntegratedBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 2));
+  auto comp = _thread(tid, 1);
+  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 3));
 
-  auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto jvar = sys.getFieldCoupling(_kokkos_var.var())[_thread(tid, 1)];
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
+  auto jvar = sys.getFieldCoupling(_kokkos_var.var(comp))[_thread(tid, 2)];
 
   if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;
 
-  AssemblyDatum datum(elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
+  AssemblyDatum datum(elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar, comp);
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
@@ -286,15 +289,16 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 IntegratedBC::operator()(OffDiagJacobianScalarLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
+  auto comp = _thread(tid, 0);
+  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 2));
 
-  auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto jvar = sys.getScalarCoupling(_kokkos_var.var())[_thread(tid, 0)];
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
+  auto jvar = sys.getScalarCoupling(_kokkos_var.var(comp))[_thread(tid, 1)];
 
   if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;
 
-  AssemblyDatum datum(elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
+  AssemblyDatum datum(elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar, comp);
 
   bc.computeOffDiagJacobianScalarInternal(bc, datum);
 }

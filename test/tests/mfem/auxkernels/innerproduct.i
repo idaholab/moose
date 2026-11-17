@@ -28,7 +28,7 @@
   active=line_sample
   [line_sample]
     type=MFEMVariableLineValueSampler
-    variable=joule_heating
+    variables=joule_heating
     start_point="-0.99 -0.99 0.99"
     end_point="0.99 0.99 -0.99"
     num_points=114

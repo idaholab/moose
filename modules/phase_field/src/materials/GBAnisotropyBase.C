@@ -16,6 +16,7 @@ InputParameters
 GBAnisotropyBase::validParams()
 {
   InputParameters params = Material::validParams();
+  params += MoelansInterfaceFits::validParams();
   params.addCoupledVar("T", 300.0, "Temperature in Kelvin");
   params.addParam<Real>("length_scale", 1.0e-9, "Length scale in m, where default is nm");
   params.addParam<Real>("time_scale", 1.0e-9, "Time scale in s, where default is ns");
@@ -46,6 +47,7 @@ GBAnisotropyBase::GBAnisotropyBase(const InputParameters & parameters)
     _delta_mob(getParam<Real>("delta_mob")),
     _Anisotropic_GB_file_name(getParam<FileName>("Anisotropic_GB_file_name")),
     _inclination_anisotropy(getParam<bool>("inclination_anisotropy")),
+    _interface_fit(getParam<MooseEnum>("interface_fit").getEnum<MoelansInterfaceFits::Fit>()),
     _T(coupledValue("T")),
     _kappa(declareProperty<Real>("kappa_op")),
     _gamma(declareProperty<Real>("gamma_asymm")),
@@ -148,9 +150,8 @@ GBAnisotropyBase::computeQpProperties()
         f_mob = 1.0 + _delta_mob * cos_4phi;
 
         Real g2 = _a_g2[n][m] * f_sigma;
-        Real y = -5.288 * g2 * g2 * g2 * g2 - 0.09364 * g2 * g2 * g2 + 9.965 * g2 * g2 -
-                 8.183 * g2 + 2.007;
-        gamma_value = 1.0 / y;
+        checkFitRange(g2);
+        gamma_value = 1.0 / MoelansInterfaceFits::inverseGamma(g2, _interface_fit);
       }
 
       Val = (100000.0 * ((*_vals[m])[_qp]) * ((*_vals[m])[_qp]) + 0.01) *
@@ -174,4 +175,14 @@ GBAnisotropyBase::computeQpProperties()
       _M_V / (_length_scale * _length_scale * _length_scale); // m^3/mol converted to ls^3/mol
   _entropy_diff[_qp] = 9.5 * _JtoeV;                          // J/(K mol) converted to eV(K mol)
   _act_wGB[_qp] = 0.5e-9 / _length_scale;                     // 0.5 nm
+}
+
+void
+GBAnisotropyBase::checkFitRange(Real g2) const
+{
+  if (!MoelansInterfaceFits::inRange(g2, _interface_fit))
+    mooseError("The grain boundary energies give g = ",
+               std::sqrt(g2),
+               ", which is outside the range 0.098 <= g <= 0.766 (0.53 <= gamma <= 40) covered by "
+               "interface_fit = moelans2022.");
 }

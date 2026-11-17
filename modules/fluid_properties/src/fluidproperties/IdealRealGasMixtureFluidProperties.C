@@ -132,19 +132,8 @@ registerMooseObject("FluidPropertiesApp", IdealRealGasMixtureFluidProperties);
     for (unsigned int i = 0; i < _n_secondary_vapors; i++)                                         \
     {                                                                                              \
       dy_dx[i] = y_sec[i] - x[i] * dy_dv_sec[i] * v / (x[i] * x[i]);                               \
-      for (unsigned int j = 0; j < _n_secondary_vapors; j++)                                       \
-      {                                                                                            \
-        if (j == i)                                                                                \
-          continue;                                                                                \
-        if (_n_secondary_vapors > 1)                                                               \
-          imperfectJacobianMessage(                                                                \
-              "The mass fraction derivatives in the following "                                    \
-              "function have not been tested for mixtures of 3 or more components:\n\n",           \
-              __PRETTY_FUNCTION__);                                                                \
-        const Real dxj_dxi = 0;                                                                    \
-        dy_dx[i] += dxj_dxi * y_sec[j] - x[j] * dy_dv_sec[j] * v / (x[j] * x[j]) * dxj_dxi;        \
-      }                                                                                            \
-      const Real dx_primary_dxi = -x_primary / (1. - x[i]);                                        \
+      /* the secondary mass fractions are independent and x_primary = 1 - sum_j x_j */             \
+      const Real dx_primary_dxi = -1.0;                                                            \
       dy_dx[i] += dx_primary_dxi * y_primary -                                                     \
                   x_primary * dy_dv_primary * v / (x_primary * x_primary) * dx_primary_dxi;        \
     }                                                                                              \
@@ -173,7 +162,7 @@ registerMooseObject("FluidPropertiesApp", IdealRealGasMixtureFluidProperties);
     for (unsigned int i = 0; i < _n_secondary_vapors; i++)                                         \
     {                                                                                              \
       const Real vi = v / x[i];                                                                    \
-      const Real ei = _fp_secondary[i]->e_from_T_v(T, vp);                                         \
+      const Real ei = _fp_secondary[i]->e_from_T_v(T, vi);                                         \
       const Real Mi = _fp_secondary[i]->molarMass();                                               \
       const Real yi = _fp_secondary[i]->prop##_from_v_e(vi, ei);                                   \
       y += x[i] * M_star / Mi * yi;                                                                \
@@ -262,6 +251,7 @@ InputParameters IdealRealGasMixtureFluidProperties::validParams()
   params.addRequiredParam<std::vector<UserObjectName>>(
       "fp_secondary", "Name of fluid properties user object(s) for secondary vapor component(s)");
   params.addParam<Real>("_T_mix_max", 1300., "Maximum temperature of the mixture");
+  params.deprecateParam("_T_mix_max", "T_mix_max", "04/01/2027");
 
   return params;
 }
@@ -273,7 +263,7 @@ IdealRealGasMixtureFluidProperties::IdealRealGasMixtureFluidProperties(
     _fp_primary(&getUserObject<SinglePhaseFluidProperties>("fp_primary")),
     _fp_secondary_names(getParam<std::vector<UserObjectName>>("fp_secondary")),
     _n_secondary_vapors(_fp_secondary_names.size()),
-    _T_mix_max(getParam<Real>("_T_mix_max"))
+    _T_mix_max(getParam<Real>("T_mix_max"))
 {
   _fp_secondary.resize(_n_secondary_vapors);
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
@@ -297,8 +287,8 @@ Real
 IdealRealGasMixtureFluidProperties::T_from_v_e(Real v, Real e, const std::vector<Real> & x) const
 {
   Real v_primary = v / primaryMassFraction(x);
-  static const Real vc = 1. / _fp_primary->criticalDensity();
-  static const Real ec = _fp_primary->criticalInternalEnergy();
+  const Real vc = 1. / _fp_primary->criticalDensity();
+  const Real ec = _fp_primary->criticalInternalEnergy();
 
   // Initial estimate of a bracketing interval for the temperature
   Real lower_temperature, upper_temperature;
@@ -382,8 +372,8 @@ IdealRealGasMixtureFluidProperties::v_from_p_T(Real p, Real T, const std::vector
   Real v_ideal = R_molar * T / (M_star * p);
 
   // check range of validity for primary (condensable) component
-  static const Real Tc = _fp_primary->criticalTemperature();
-  static const Real vc = 1. / _fp_primary->criticalDensity();
+  const Real Tc = _fp_primary->criticalTemperature();
+  const Real vc = 1. / _fp_primary->criticalDensity();
   Real v_spndl, e_spndl;
   if (T < Tc)
     _fp_primary->v_e_spndl_from_T(T, v_spndl, e_spndl);
@@ -470,8 +460,8 @@ Real
 IdealRealGasMixtureFluidProperties::T_from_p_v(Real p, Real v, const std::vector<Real> & x) const
 {
   Real v_primary = v / primaryMassFraction(x);
-  static const Real vc = 1. / _fp_primary->criticalDensity();
-  static const Real ec = _fp_primary->criticalInternalEnergy();
+  const Real vc = 1. / _fp_primary->criticalDensity();
+  const Real ec = _fp_primary->criticalInternalEnergy();
 
   // Initial estimate of a bracketing interval for the temperature
   Real lower_temperature, upper_temperature;
@@ -547,7 +537,7 @@ IdealRealGasMixtureFluidProperties::p_from_T_v(Real T,
   dp_dv = dp_dv_primary / x_primary;
 
   // get the partial pressures and their derivatives first
-  Real p_sec, dp_dT_sec, dxj_dxi;
+  Real p_sec, dp_dT_sec;
   std::vector<Real> dp_dv_sec(_n_secondary_vapors);
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
   {
@@ -562,23 +552,9 @@ IdealRealGasMixtureFluidProperties::p_from_T_v(Real T,
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
   {
     dp_dx[i] = -dp_dv_sec[i] * v / (x[i] * x[i]);
-    for (unsigned int j = 0; j < _n_secondary_vapors; j++)
-    {
-      if (j == i)
-        continue;
-      // Note: this was previously as follows, but we were unable to understand
-      // why and this is not currently tested (requires 3 or more components in
-      // the mixture):
-      // dxj_dxi = -x[j] / (1. - x[i]);
-      if (_n_secondary_vapors > 1)
-        imperfectJacobianMessage(
-            "The mass fraction derivatives in the following "
-            "function have not been tested for mixtures of 3 or more components:\n\n",
-            __PRETTY_FUNCTION__);
-      dxj_dxi = 0;
-      dp_dx[i] += -dp_dv_sec[j] * v / (x[j] * x[j]) * dxj_dxi;
-    }
-    dp_dx[i] += -dp_dv_primary * v / (x_primary * x_primary) * (-x_primary / (1. - x[i]));
+    // the secondary mass fractions are independent and x_primary = 1 - sum_j x_j
+    const Real dx_primary_dxi = -1.0;
+    dp_dx[i] += -dp_dv_primary * v / (x_primary * x_primary) * dx_primary_dxi;
   }
 }
 
@@ -651,13 +627,14 @@ IdealRealGasMixtureFluidProperties::cp_from_T_v(Real T, Real v, const std::vecto
 
   Real h, dh_dT, dh_dv;
   _fp_primary->h_from_T_v(T, v / x_primary, h, dh_dT, dh_dv);
-  const Real cp_primary = dh_dT - dh_dv * dp_dT / dp_dv;
+  // h_i is evaluated at v_i = v / x_i, so dv_i/dv = 1 / x_i
+  const Real cp_primary = dh_dT - dh_dv / x_primary * dp_dT / dp_dv;
   Real cp = x_primary * cp_primary;
 
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
   {
     _fp_secondary[i]->h_from_T_v(T, v / x[i], h, dh_dT, dh_dv);
-    const Real cp_sec = dh_dT - dh_dv * dp_dT / dp_dv;
+    const Real cp_sec = dh_dT - dh_dv / x[i] * dp_dT / dp_dv;
     cp += x[i] * cp_sec;
   }
 
@@ -681,7 +658,8 @@ IdealRealGasMixtureFluidProperties::cp_from_T_v(Real T,
 
   Real h, dh_dT, dh_dv;
   _fp_primary->h_from_T_v(T, v / x_primary, h, dh_dT, dh_dv);
-  const Real cp_primary = dh_dT - dh_dv * dp_dT / dp_dv;
+  // h_i is evaluated at v_i = v / x_i, so dv_i/dv = 1 / x_i
+  const Real cp_primary = dh_dT - dh_dv / x_primary * dp_dT / dp_dv;
   cp = x_primary * cp_primary;
 
   // Neglect these for now. These require higher-order derivatives, so a finite
@@ -696,7 +674,7 @@ IdealRealGasMixtureFluidProperties::cp_from_T_v(Real T,
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
   {
     _fp_secondary[i]->h_from_T_v(T, v / x[i], h, dh_dT, dh_dv);
-    const Real cp_sec = dh_dT - dh_dv * dp_dT / dp_dv;
+    const Real cp_sec = dh_dT - dh_dv / x[i] * dp_dT / dp_dv;
     cp += x[i] * cp_sec;
     dcp_dx[i] = cp_sec - cp_primary;
   }

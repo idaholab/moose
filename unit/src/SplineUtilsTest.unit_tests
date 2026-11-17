@@ -1,0 +1,20 @@
+[Tests]
+  design = 'BSplineCurveGenerator.md'
+  issues = '#31003'
+
+  [closest_point_aligned]
+    type = GoogleTest
+    unit_test = SplineUtilsTest.ClosestPointAlignedTest
+    requirement = 'The system shall return the midpoint between two points as the closest points of two collinear lines when interpolating splines.'
+  []
+  [closest_point_parallel_error]
+    type = GoogleTest
+    unit_test = SplineUtilsTest.ClosestPointParallelError
+    requirement = 'The system shall report an error when requesting the closest points of two parallel, non-collinear lines when interpolating splines.'
+  []
+  [straight_control_points]
+    type = GoogleTest
+    unit_test = SplineUtilsTest.StraightCPsTest
+    requirement = 'The system shall create spline control points along a straight line when the start and end directions are aligned with the segment between the start and end points.'
+  []
+[]

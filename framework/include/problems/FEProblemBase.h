@@ -542,7 +542,7 @@ public:
    *  * The exception have be registered by calling setException() prior to calling this.
    *  * This is collective on MPI, and must be called simultaneously by all processors!
    *  * If called when the solve can be interruped, it will do so and also throw a
-   *    MooseException, which must be handled.
+   *    MooseHandledException, which must be handled.
    *  * If called at a stage in the execution when the solve cannot be interupted (i.e.,
    *    there is no solve active), it will generate an error and terminate the application.
    *  * DO NOT CALL THIS IN A THREADED REGION! This is meant to be called just after a
@@ -1983,6 +1983,22 @@ public:
                                 std::vector<NumericVector<libMesh::Number> *> & sp);
   virtual void computeTransposeNullSpace(libMesh::NonlinearImplicitSystem & sys,
                                          std::vector<NumericVector<libMesh::Number> *> & sp);
+  /**
+   * Append one mode per variable of \p vars in the current nonlinear system to \p sp. A mode is one
+   * basis vector of a subspace. It has one entry per degree of freedom of the system. Here each
+   * mode is one on the variable's degrees of freedom and zero elsewhere. This is the coefficient
+   * vector of a constant field of the variable for a basis that is a partition of unity, such as a
+   * Lagrange or a constant monomial basis. libMesh orthonormalizes the modes before it passes them
+   * to PETSc.
+   * @param vars The variables that each contribute one mode. Variables in other nonlinear
+   * systems are skipped.
+   * @param prefix The prefix of the name of the system vector that stores each mode
+   * @param sp The basis vectors of a subspace, such as the nullspace or the transpose nullspace of
+   * the Jacobian, that libMesh passes to PETSc
+   */
+  void appendConstantModes(const std::vector<VariableName> & vars,
+                           const std::string & prefix,
+                           std::vector<NumericVector<libMesh::Number> *> & sp);
   virtual void computePostCheck(libMesh::NonlinearImplicitSystem & sys,
                                 const NumericVector<libMesh::Number> & old_soln,
                                 NumericVector<libMesh::Number> & search_direction,
@@ -3506,6 +3522,9 @@ protected:
   /// e.g. whether the variable dependencies are defined on the selected boundaries
   const bool _boundary_restricted_elem_integrity_check;
 
+  /// Whether to check that interface kernel variables match the orientation of their boundaries
+  const bool _interface_kernel_integrity_check;
+
   /// Whether to check that side user objects do not consume interface material properties
   const bool _side_uo_interface_mat_prop_integrity_check;
 
@@ -3589,16 +3608,37 @@ protected:
   // loop state during projection of initial conditions
   unsigned short _current_ic_state;
 
+  /// Variables whose constant fields span part of the Jacobian nullspace
+  const std::vector<VariableName> _constant_null_space_vars;
+  /// Variables whose constant fields span part of the Jacobian transpose nullspace
+  const std::vector<VariableName> _constant_transpose_null_space_vars;
+
   /// Whether to assemble matrices using hash tables instead of preallocating matrix memory. This
   /// can be a good option if the sparsity pattern changes throughout the course of the simulation
   const bool _use_hash_table_matrix_assembly;
 
 private:
   /**
+   * Classify the exception currently being handled and register its message with setException(),
+   * or error if the exception cannot be recovered from. Must be called from within a catch block.
+   * This does not communicate, so every rank must subsequently call checkExceptionAndStopSolve().
+   * A MooseHandledException has already been communicated and is rethrown unchanged.
+   */
+  void translateCaughtException(const std::string & calling_method);
+
+  /**
    * Handle exceptions. Note that the result of this call will be a thrown MooseException. The
    * caller of this method must determine how to handle the thrown exception
    */
   void handleException(const std::string & calling_method);
+
+  /**
+   * Execute \p work, user object computations local to this process, and register any exception
+   * it raises with translateCaughtException() instead of letting it propagate, so that this
+   * process does not skip communication entered by the other processes. Every process must
+   * subsequently call checkExceptionAndStopSolve().
+   */
+  void translateUserObjectExceptions(const std::function<void()> & work);
 
   /**
    * Helper for getting mortar objects corresponding to primary boundary ID, secondary boundary ID,

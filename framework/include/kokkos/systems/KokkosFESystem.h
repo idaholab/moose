@@ -49,7 +49,18 @@ public:
   void reinit();
 
   /**
-   * Get the list of off-diagonal coupled field variable numbers of a variable
+   * Get the local-indexed constraint of a local DOF
+   * @param dof The local DOF index
+   * @returns The local-indexed constraint
+   */
+  KOKKOS_FUNCTION auto getLocalConstraints(dof_id_type dof) const
+  {
+    return _local_constraints.size() ? _local_constraints[dof]
+                                     : decltype(_local_constraints[dof])(nullptr, {});
+  }
+
+  /**
+   * Get the list of off-diagonal coupled variable numbers of a variable
    * @param var The variable number
    * @returns The list of off-diagonal coupled field variable numbers
    */
@@ -130,7 +141,7 @@ public:
    * @param dof The local DOF index
    * @param tag The vector tag
    * @param seed The derivative seed
-   * @returns The DOF AD value with optional seed derivative
+   * @returns The DOF AD value with optional seed derivative keyed by the local DOF index
    */
   KOKKOS_FUNCTION ADReal getVectorDofADValue(const dof_id_type dof,
                                              const TagID tag,
@@ -421,6 +432,11 @@ private:
    * Per-matrix-tag local-plus-ghost DOF masks for nodal BC coverage
    */
   Array<Array<bool>> _nbc_matrix_tag_dof;
+
+  /**
+   * Constraining DOFs and weights of each constrained local or ghost DOF
+   */
+  JaggedArray<Pair<dof_id_type, Real>, 1, 1> _local_constraints;
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
@@ -431,7 +447,7 @@ FESystem::getVectorDofADValue(const dof_id_type dof, TagID tag, const Real seed)
   ADReal value = _vectors[tag][dof];
 
   if (seed != 0)
-    value.derivatives().insert(_local_to_global_dof_index[dof]) = seed;
+    value.derivatives().insert(dof) = seed;
 
   return value;
 }
