@@ -80,21 +80,15 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::validParams()
   params.addParam<MooseFunctorName>(
       "friction_pressure_gradient",
       "0",
-      "The frictional pressure gradient of the two phase flow, M_F = 4 tau_fw / D = (-dp/dz)_F, "
-      "as defined by Hibiki and Ishii, \"One-dimensional drift-flux model and "
-      "constitutive equations for relative motion between phases in various two-phase flow "
-      "regimes\", Int. J. Heat Mass Transfer 46 (2003) 4935-4948. Only used by the 'ishii-zuber' "
-      "drag model, where it carries the effect of the wall friction on the relative velocity. "
-      "Zero, the default, leaves the balance gravity dominant, which is the limit in which that "
-      "model reduces to Ishii's correlation. That paper obtains it from the correlation of "
-      "Lockhart and Martinelli.");
+      "Frictional pressure gradient of the two phase flow, which carries the effect of wall "
+      "friction on the relative velocity. Only used by the 'ishii-zuber' drag model. The default "
+      "of zero leaves the balance gravity dominated.");
   params.addParam<MooseFunctorName>(
       "single_particle_friction_pressure_gradient",
       "0",
-      "The frictional pressure gradient of the corresponding single particle system, "
-      "M_Finf = (f / 2D) rho_f <v_finf>^2, as defined by the Hibiki and Ishii paper cited under "
-      "'friction_pressure_gradient'. It enters both the single particle terminal velocity and the "
-      "concentration ratio, so it is not simply a correction on the hindrance.");
+      "Frictional pressure gradient of the corresponding single particle system. Only used by the "
+      "'ishii-zuber' drag model, where it affects both the single particle terminal velocity and "
+      "the concentration dependence.");
   params.addParam<MooseFunctorName>(
       "surface_tension",
       "Surface tension between the phases. Required by the distorted particle drag.");
@@ -124,12 +118,11 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::validParams()
       "between the volume averaged and the mass averaged mixture velocity. Declared only when "
       "supplied.");
   params.addParam<MooseFunctorName>(
-      "fd",
+      "fraction_dispersed",
       0.0,
       "Volume fraction of the dispersed phase. It converts the slip velocity into the drift "
       "velocity, it sets the swarm hindrance factor, and it supplies the whole concentration "
       "dependence of the 'ishii-zuber' drag model.");
-  params.renameParam("fd", "fraction_dispersed", "");
   params.addParam<unsigned short>("ghost_layers",
                                   3,
                                   "The number of layers of elements to ghost. With Rhie-Chow and "
@@ -180,7 +173,7 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::WCNSFV2PSlipVelocityFunctorMate
     _rho_mixture(this->template getFunctor<GenericReal<is_ad>>(NS::density)),
     _rho_d(this->template getFunctor<GenericReal<is_ad>>("rho_d")),
     _mu_c(this->template getFunctor<GenericReal<is_ad>>(NS::mu)),
-    _f_d(this->template getFunctor<GenericReal<is_ad>>("fd")),
+    _f_d(this->template getFunctor<GenericReal<is_ad>>("fraction_dispersed")),
     _gravity(getParam<RealVectorValue>("gravity")),
     _force_scale(getParam<Real>("force_value")),
     _force_function(getFunction("force_function")),

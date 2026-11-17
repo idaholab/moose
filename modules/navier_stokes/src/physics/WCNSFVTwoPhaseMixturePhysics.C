@@ -269,13 +269,10 @@ WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters
     errorDependentParameter("add_drift_flux_momentum_terms", "true", {"density_interp_method"});
   if (!getParam<bool>("use_dispersed_phase_drag_model"))
     errorDependentParameter("use_dispersed_phase_drag_model", "true", {"particle_diameter"});
-  if (getParam<bool>("use_dispersed_phase_drag_model") &&
-      isParamSetByUser("slip_linear_friction_name"))
-    paramError("slip_linear_friction_name",
-               "A prescribed slip friction factor cannot be combined with "
-               "'use_dispersed_phase_drag_model'. The drag model forms its particle Reynolds "
-               "number from the slip velocity, so it is solved inside the slip closure rather "
-               "than supplied to it.");
+  // The drag model forms its particle Reynolds number from the slip velocity, so it is solved
+  // inside the slip closure rather than supplied to it
+  checkSecondParamNotSetIfFirstOneTrue("use_dispersed_phase_drag_model",
+                                       "slip_linear_friction_name");
 }
 
 void

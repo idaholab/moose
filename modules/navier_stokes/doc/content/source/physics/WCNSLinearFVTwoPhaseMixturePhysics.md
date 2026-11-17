@@ -69,7 +69,11 @@ tolerances than the nonlinear implementation.
 The advection slip momentum term is currently not supported in the linear finite volume discretization.
 
 !alert note
-Interfacial area transport is currently not supported in the linear finite volume discretization.
+This Physics does not create the interfacial area transport equation. The equation can be assembled
+in the input from [LinearFVTimeDerivative.md], [LinearFVScalarAdvection.md] and
+[LinearWCNSFV2PInterfaceAreaSourceSink.md], and its variable passed to
+[!param](/Physics/NavierStokes/TwoPhaseMixtureSegregated/WCNSLinearFVTwoPhaseMixturePhysics/interfacial_area)
+to close the interfacial mass transfer on it.
 
 !alert note
 Mesh skewness combined with buoyancy is currently not supported, as the reconstruction of the buoyancy

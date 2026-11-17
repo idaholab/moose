@@ -261,7 +261,7 @@ g = -9.81
     particle_diameter = ${dp}
     use_dispersed_phase_drag_model = true
     rho_c = ${rho}
-    fd = 'phase_2'
+    fraction_dispersed = 'phase_2'
     drift_velocity_name = 'vel_drift_x'
   []
   [populate_v_slip]
@@ -276,7 +276,7 @@ g = -9.81
     particle_diameter = ${dp}
     use_dispersed_phase_drag_model = true
     rho_c = ${rho}
-    fd = 'phase_2'
+    fraction_dispersed = 'phase_2'
     drift_velocity_name = 'vel_drift_y'
   []
 []

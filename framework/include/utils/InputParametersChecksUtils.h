@@ -56,6 +56,11 @@ protected:
   /// @param param2 second parameter to check, that should not be set if first one is set
   void checkSecondParamNotSetIfFirstOneSet(const std::string & param1,
                                            const std::string & param2) const;
+  /// Check that a parameter is not set if the first one is set to true
+  /// @param param1 first boolean parameter to check, check that the second is not set if true
+  /// @param param2 second parameter to check, that should not be set if first one is true
+  void checkSecondParamNotSetIfFirstOneTrue(const std::string & param1,
+                                            const std::string & param2) const;
   /// Check that the two vector parameters are of the same length
   /// @param param1 first vector parameter to compare the size of
   /// @param param2 second vector parameter to compare the size of
@@ -663,4 +668,15 @@ InputParametersChecksUtils<C>::checkSecondParamNotSetIfFirstOneSet(const std::st
     forwardParamError(param2,
                       "Parameter '" + param2 + "' should not be specified if parameter '" + param1 +
                           "' is specified.");
+}
+
+template <typename C>
+void
+InputParametersChecksUtils<C>::checkSecondParamNotSetIfFirstOneTrue(
+    const std::string & param1, const std::string & param2) const
+{
+  if (forwardGetParam<bool>(param1) && forwardIsParamSetByUser(param2))
+    forwardParamError(param2,
+                      "Parameter '" + param2 + "' should not be specified if parameter '" + param1 +
+                          "' is set to true.");
 }

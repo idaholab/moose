@@ -77,10 +77,10 @@ advected_interp_method = 'average'
   previous_nl_solution_required = true
 []
 
-# 1 when the energy equation carries the pressure work. The discrete term is then assembled from
+# Whether the energy equation carries the pressure work. The discrete term is then assembled from
 # the same functor the Physics builds, and the manufactured value is subtracted, so what is left to
-# balance is the discretisation error of the term itself. 0 leaves the study as it was.
-pw_on = 0
+# balance is the discretisation error of the term itself.
+pw_on = false
 
 [Mesh]
   [gmg]
@@ -454,13 +454,14 @@ pw_on = 0
     type = LinearFVSource
     variable = T_fluid
     source_density = mms_pressure_work
-    scaling_factor = ${fparse -pw_on}
+    scaling_factor = -1
+    enable = ${pw_on}
   []
   [T_pressure_work]
     type = LinearFVSource
     variable = T_fluid
     source_density = pressure_work
-    scaling_factor = ${pw_on}
+    enable = ${pw_on}
   []
 []
 

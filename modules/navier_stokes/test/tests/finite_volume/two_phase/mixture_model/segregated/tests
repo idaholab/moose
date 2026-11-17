@@ -63,12 +63,50 @@
   []
 
   [slip_closure_verification]
-    type = CSVDiff
-    input = 'slip-closure-verification.i'
-    csvdiff = 'slip-closure-verification_out.csv'
+    requirement = 'The system shall compute the algebraic slip velocity of a two phase mixture and the drift velocity derived from it, in agreement with their analytic values,'
     design = 'LinearWCNSFV2PSlipVelocityFunctorMaterial.md'
-    requirement = 'The system shall compute the algebraic slip velocity of a two phase mixture, the diffusion velocity derived from it, and the slip velocity obtained by solving the drag correlation together with the force balance, in agreement with their analytic values. It shall do so on every branch of the drag model: the rigid sphere law solved iteratively, the deformed bubble law whose terminal velocity is independent of the particle size, which is checked by instantiating it at two diameters a factor of two apart and requiring the same speed exactly, and the automatic selection, which shall return the more resistive of the two and is checked against the rigid sphere result it must reproduce at these conditions. It shall also evaluate the Ishii and Zuber multi-bubble relation, which predicts the relative velocity directly, in agreement with its closed form at zero frictional pressure gradient.'
-    max_threads = 1 # see libmesh issue #3808
+    # Each branch activates only its own materials and postprocessors, so a failure names the
+    # branch that broke
+    [prescribed_drag]
+      type = CSVDiff
+      input = 'slip-closure-verification.i'
+      cli_args = "FunctorMaterials/active='mixture slip_x slip_y' Postprocessors/active='rho_mixture mu_mixture slip_x slip_y drift_y drift_over_slip_y' Outputs/file_base=slip-closure-verification-prescribed-drag"
+      csvdiff = 'slip-closure-verification-prescribed-drag.csv'
+      detail = 'with a prescribed drag function,'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [schiller_naumann]
+      type = CSVDiff
+      input = 'slip-closure-verification.i'
+      cli_args = "FunctorMaterials/active='mixture slip_drag_x slip_drag_y drag' Postprocessors/active='slipdrag_y driftdrag_y drag_function slip_times_drag' Outputs/file_base=slip-closure-verification-schiller-naumann"
+      csvdiff = 'slip-closure-verification-schiller-naumann.csv'
+      detail = 'with the rigid sphere drag law solved together with the force balance,'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [distorted_particle]
+      type = CSVDiff
+      input = 'slip-closure-verification.i'
+      cli_args = "FunctorMaterials/active='mixture slip_dist_y slip_dist_half_y' Postprocessors/active='slipdist_y slipdist_half_y dist_size_ratio' Outputs/file_base=slip-closure-verification-distorted-particle"
+      csvdiff = 'slip-closure-verification-distorted-particle.csv'
+      detail = 'with the deformed bubble drag law, whose terminal velocity is independent of the particle size,'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [automatic]
+      type = CSVDiff
+      input = 'slip-closure-verification.i'
+      cli_args = "FunctorMaterials/active='mixture slip_drag_x slip_drag_y slip_auto_y' Postprocessors/active='slipauto_y slipdrag_y auto_over_drag' Outputs/file_base=slip-closure-verification-automatic"
+      csvdiff = 'slip-closure-verification-automatic.csv'
+      detail = 'with the automatic selection of the more resistive single particle law, and'
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [ishii_zuber]
+      type = CSVDiff
+      input = 'slip-closure-verification.i'
+      cli_args = "FunctorMaterials/active='mixture slip_iz_y' Postprocessors/active='slipiz_y driftiz_y' Outputs/file_base=slip-closure-verification-ishii-zuber"
+      csvdiff = 'slip-closure-verification-ishii-zuber.csv'
+      detail = 'with the Ishii and Zuber multi-bubble relation.'
+      max_threads = 1 # see libmesh issue #3808
+    []
   []
 
   [interface_area_hibiki_ishii]
@@ -82,7 +120,7 @@
   [interface_area_ishii_kim]
     type = CSVDiff
     input = 'interface-area-verification.i'
-    cli_args = "model=ishii-kim Outputs/file_base=interface-area-verification-ik"
+    cli_args = "model=ishii-kim Executioner/end_time=30 Outputs/file_base=interface-area-verification-ik"
     csvdiff = 'interface-area-verification-ik.csv'
     design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md'
     requirement = 'The system shall reproduce the analytic steady state of the Ishii and Kim interfacial area closure, at which random collision and wake entrainment balance turbulent impact.'
@@ -91,7 +129,7 @@
   [interface_area_hibiki_ishii_coefficients]
     type = CSVDiff
     input = 'interface-area-verification.i'
-    cli_args = "shape_factor=4 LinearFVKernels/sources/gamma_c=0.15 LinearFVKernels/sources/k_c=0.2 LinearFVKernels/sources/gamma_b=0.3 LinearFVKernels/sources/k_b=1.0 Outputs/file_base=interface-area-verification-hi-coefficients"
+    cli_args = "shape_factor=4 LinearFVKernels/sources/gamma_c=0.15 LinearFVKernels/sources/k_c=0.2 LinearFVKernels/sources/gamma_b=0.3 LinearFVKernels/sources/k_b=1.0 Executioner/end_time=35 Outputs/file_base=interface-area-verification-hi-coefficients"
     csvdiff = 'interface-area-verification-hi-coefficients.csv'
     design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md'
     requirement = 'The system shall reproduce the analytic steady state of the Hibiki and Ishii closure when every one of its coefficients and the shape factor of the particle size are changed from their defaults, the root moving to the value the changed coefficients imply.'
@@ -100,7 +138,7 @@
   [interface_area_ishii_kim_coefficients]
     type = CSVDiff
     input = 'interface-area-verification.i'
-    cli_args = "model=ishii-kim LinearFVKernels/sources/c_rc=0.006 LinearFVKernels/sources/c_we=0.004 LinearFVKernels/sources/c_ti=0.1 LinearFVKernels/sources/c=2 LinearFVKernels/sources/we_cr=4 LinearFVKernels/sources/fd_max=0.7 Outputs/file_base=interface-area-verification-ik-coefficients"
+    cli_args = "model=ishii-kim LinearFVKernels/sources/c_rc=0.006 LinearFVKernels/sources/c_we=0.004 LinearFVKernels/sources/c_ti=0.1 LinearFVKernels/sources/c=2 LinearFVKernels/sources/we_cr=4 LinearFVKernels/sources/fd_max=0.7 Executioner/end_time=70 Outputs/file_base=interface-area-verification-ik-coefficients"
     csvdiff = 'interface-area-verification-ik-coefficients.csv'
     design = 'LinearWCNSFV2PInterfaceAreaSourceSink.md'
     requirement = 'The system shall reproduce the analytic steady state of the Ishii and Kim closure when every one of its coefficients, its critical Weber number and its packing limit are changed from their defaults, the root moving to the value the changed coefficients imply.'
@@ -242,6 +280,14 @@
 
   [errors]
     requirement = "The system shall return an error if"
+    [drag_model_with_prescribed_slip_friction]
+      type = RunException
+      input = 'channel-drift-flux-physics.i'
+      cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/slip_linear_friction_name=1"
+      expect_err = "Parameter 'slip_linear_friction_name' should not be specified if parameter 'use_dispersed_phase_drag_model' is set to true"
+      detail = 'a slip friction factor is prescribed while the dispersed phase drag model is used, since the drag model computes that factor itself.'
+      max_threads = 1 # see libmesh issue #3808
+    []
     [active_scalar_subcycles_without_reordering]
       type = RunException
       input = 'channel-drift-flux-physics.i'

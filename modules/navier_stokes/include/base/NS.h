@@ -48,6 +48,8 @@ static const std::string velocity_x = "vel_x";
 static const std::string velocity_y = "vel_y";
 static const std::string velocity_z = "vel_z";
 const std::string velocity_vector[3] = {velocity_x, velocity_y, velocity_z};
+/// Parameter names of the velocity components on objects that take them one by one
+const std::string velocity_component_params[3] = {"u", "v", "w"};
 static const std::string superficial_velocity_x = "superficial_vel_x";
 static const std::string superficial_velocity_y = "superficial_vel_y";
 static const std::string superficial_velocity_z = "superficial_vel_z";

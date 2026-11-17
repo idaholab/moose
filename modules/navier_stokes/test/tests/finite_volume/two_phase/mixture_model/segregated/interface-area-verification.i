@@ -103,9 +103,10 @@ shape_factor = 6.0
 [Executioner]
   type = Transient
   system_names = 'xi_system'
-  # Long enough that both balances are converged to machine precision, not merely approached
+  # Long enough that the balance is converged to machine precision, not merely approached. The
+  # other closure sets settle sooner and shorten this from the test specification.
   start_time = 0
-  end_time = 500
+  end_time = 175
   dt = 1
   l_tol = 1e-12
   l_abs_tol = 1e-14

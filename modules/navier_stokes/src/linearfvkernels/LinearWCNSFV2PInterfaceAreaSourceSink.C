@@ -40,8 +40,8 @@ LinearWCNSFV2PInterfaceAreaSourceSink::validParams()
       "mu_f",
       "Dynamic viscosity of the continuous phase. Required by the Ishii and Kim model, which "
       "forms a particle Reynolds number for its drag coefficient.");
-  params.addParam<MooseFunctorName>("fd", 0.0, "Volume fraction of the dispersed phase, alpha_g.");
-  params.renameParam("fd", "fraction_dispersed", "");
+  params.addParam<MooseFunctorName>(
+      "fraction_dispersed", 0.0, "Volume fraction of the dispersed phase, alpha_g.");
   params.addParam<MooseFunctorName>("sigma", 1.0, "Surface tension between the phases.");
   params.addRequiredParam<MooseFunctorName>("epsilon",
                                             "Turbulent dissipation rate of the continuous phase.");
@@ -88,7 +88,7 @@ LinearWCNSFV2PInterfaceAreaSourceSink::LinearWCNSFV2PInterfaceAreaSourceSink(
     _rho_d(getFunctor<Real>("rho_d")),
     _rho_f(getFunctor<Real>("rho_f")),
     _mu_f(isParamValid("mu_f") ? &getFunctor<Real>("mu_f") : nullptr),
-    _f_d(getFunctor<Real>("fd")),
+    _f_d(getFunctor<Real>("fraction_dispersed")),
     _sigma(getFunctor<Real>("sigma")),
     _epsilon(getFunctor<Real>("epsilon")),
     _mass_transfer_rate(getFunctor<Real>("mass_transfer_rate")),
@@ -179,14 +179,12 @@ LinearWCNSFV2PInterfaceAreaSourceSink::computeCoefficients()
   // The averaged size of the particle
   const auto db = has_interface ? mean_size : 0.0;
 
-  // The coalescence sinks are non-positive and the breakage source non-negative, by construction
+  // The coalescence sinks are non-positive and the breakage source non-negative, by construction.
+  // Without an interface they stay at zero. There is no early return, because the expansion and
+  // phase change terms assembled below still contribute to the diagonal.
   Real s_rc = 0.0, s_we = 0.0, s_ti = 0.0;
 
-  if (!has_interface)
-  {
-    // Nothing to do, the sources stay at zero
-  }
-  else if (_model == ModelEnum::HIBIKI_ISHII)
+  if (has_interface && _model == ModelEnum::HIBIKI_ISHII)
   {
     // Hibiki and Ishii, shared with the nonlinear kernel. The packing factor divides, so both
     // terms grow without bound as the dispersed phase approaches its maximum.
@@ -197,7 +195,7 @@ LinearWCNSFV2PInterfaceAreaSourceSink::computeCoefficients()
     s_ti = sources.second;
     // No wake entrainment model in this formulation
   }
-  else
+  else if (has_interface)
   {
     // The mean bubble fluctuating velocity, u_t = epsilon^(1/3) d_b^(1/3)
     const auto u_t = cbrt(epsilon) * cbrt(db);

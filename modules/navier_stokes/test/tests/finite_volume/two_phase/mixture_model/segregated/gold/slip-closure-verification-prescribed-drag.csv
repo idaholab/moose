@@ -1,0 +1,3 @@
+time,drift_over_slip_y,drift_y,mu_mixture,rho_mixture,slip_x,slip_y
+0,0,0,0,0,0,0
+1,0.9375,0.03065625,0.775,800,0,0.0327

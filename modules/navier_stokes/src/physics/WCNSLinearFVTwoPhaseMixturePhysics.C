@@ -21,12 +21,6 @@ registerMooseAction("NavierStokesApp",
 registerMooseAction("NavierStokesApp", WCNSLinearFVTwoPhaseMixturePhysics, "add_material");
 registerMooseAction("NavierStokesApp", WCNSLinearFVTwoPhaseMixturePhysics, "check_integrity");
 
-namespace
-{
-/// Parameter names of the velocity components on the objects that take them one by one
-const std::string velocity_components[3] = {"u", "v", "w"};
-}
-
 InputParameters
 WCNSLinearFVTwoPhaseMixturePhysics::validParams()
 {
@@ -299,13 +293,10 @@ WCNSLinearFVTwoPhaseMixturePhysics::WCNSLinearFVTwoPhaseMixturePhysics(
     errorDependentParameter("add_drift_flux_momentum_terms", "true", {"density_interp_method"});
   if (!getParam<bool>("use_dispersed_phase_drag_model"))
     errorDependentParameter("use_dispersed_phase_drag_model", "true", {"particle_diameter"});
-  if (getParam<bool>("use_dispersed_phase_drag_model") &&
-      isParamSetByUser("slip_linear_friction_name"))
-    paramError("slip_linear_friction_name",
-               "A prescribed slip friction factor cannot be combined with "
-               "'use_dispersed_phase_drag_model'. The drag model forms its particle Reynolds "
-               "number from the slip velocity, so it is solved inside the slip closure rather "
-               "than supplied to it.");
+  // The drag model forms its particle Reynolds number from the slip velocity, so it is solved
+  // inside the slip closure rather than supplied to it
+  checkSecondParamNotSetIfFirstOneTrue("use_dispersed_phase_drag_model",
+                                       "slip_linear_friction_name");
 }
 
 void
@@ -920,7 +911,7 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
       params.set<MooseFunctorName>("slip_velocity_name") = "vel_slip_" + NS::directions[dim];
       params.set<MooseEnum>("momentum_component") = NS::directions[dim];
       for (const auto j : make_range(dimension()))
-        params.set<SolverVariableName>(velocity_components[j]) =
+        params.set<SolverVariableName>(NS::velocity_component_params[j]) =
             _flow_equations_physics->getVelocityNames()[j];
       // The buoyancy factor of the closure is (rho_d - rho_m) / rho_d, which carries the mixture
       // density, not the continuous phase density; see Manninen, Taivassalo and Kallio, "On the
@@ -1002,7 +993,8 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
     // properties, which is its definition. The material evaluates in AD; the linear finite
     // volume friction kernel takes the raw value through the functor wrapper.
     for (const auto j : make_range(dimension()))
-      params.set<MooseFunctorName>(velocity_components[j]) = "vel_slip_" + NS::directions[j];
+      params.set<MooseFunctorName>(NS::velocity_component_params[j]) =
+          "vel_slip_" + NS::directions[j];
     params.set<MooseFunctorName>(NS::density) = _phase_1_density;
     params.set<MooseFunctorName>(NS::mu) = _phase_1_viscosity;
     params.set<MooseFunctorName>("particle_diameter") =
