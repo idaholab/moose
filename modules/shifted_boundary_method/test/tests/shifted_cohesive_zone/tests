@@ -364,10 +364,11 @@
     [neml2_interface_nonoverlapping]
       type = RunException
       input = 'rectangle_sczm_tri_material_neml2.i'
+      # The reverse internal sideset has a distinct ID from the SCZM boundary Block1_Block2.
       cli_args = 'Physics/SolidMechanics/ShiftedCohesiveZone/czm_ik/stress=interface_traction '
                  'NEML2/sczm/volume=true '
                  'NEML2/sczm/interface_material_inputs= '
-                 'NEML2/sczm/interface=left'
+                 'NEML2/sczm/interface=Block2_Block1'
       expect_err = "its 'interface' setting does not overlap the SCZM boundary"
       capabilities = 'libtorch & neml2'
       detail = 'if a NEML2 block provides a stress material property used by shifted cohesive zone with directional correction enabled but its interface setting does not overlap the cohesive boundary.'
