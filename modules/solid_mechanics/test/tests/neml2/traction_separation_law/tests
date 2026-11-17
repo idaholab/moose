@@ -1,6 +1,9 @@
 [Tests]
   [bilinear_mixed_moose]
     type = Exodiff
+    # BreakMeshByBlockGenerator currently relies on periodic boundary machinery, which does not
+    # support recovery.
+    recover = false
     input = 'bilinear_mixed_moose.i'
     # Native-MOOSE reference solution; its gold is its own output.
     exodiff = 'bilinear_mixed_moose_out.e'
@@ -14,6 +17,9 @@
   []
   [bilinear_mixed_neml2]
     type = Exodiff
+    # BreakMeshByBlockGenerator currently relies on periodic boundary machinery, which does not
+    # support recovery.
+    recover = false
     input = 'bilinear_mixed_neml2.i'
     # The gold is a symlink to the native-MOOSE reference output above, so the NEML2
     # cohesive response must reproduce it to within the react_y.cmp tolerances.
