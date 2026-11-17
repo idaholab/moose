@@ -137,7 +137,7 @@ protected:
   std::map<std::string, at::Tensor> _out;
 
   /// Cached stateful variables from the last successful step (for on-device advance)
-  std::map<std::string, at::Tensor> _state_vars;
+  std::map<std::string, at::Tensor> & _state_vars;
 
   /// Base-shaped zero tensors for cold-started in-place-updated unknowns (an order-0 NEML2 input
   /// that is also a model output and is not gathered; see initialSetup). Injected into _in on every

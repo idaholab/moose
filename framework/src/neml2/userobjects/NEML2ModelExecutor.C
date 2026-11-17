@@ -103,6 +103,7 @@ NEML2ModelExecutor::NEML2ModelExecutor(const InputParameters & params)
     // No derivative retained yet -> nothing stale; the retriever's undefined-derivative path (zero
     // fill) covers the first steps. Only an actual batch resize (meshChanged) makes it invalid.
     _derivative_valid(true),
+    _state_vars(declareRestartableData<std::map<std::string, at::Tensor>>("state_vars")),
     _error_message(""),
     _num_failed_dumps(0)
 #endif
@@ -192,7 +193,7 @@ NEML2ModelExecutor::initialSetup()
     const auto & in_shapes = model().input_base_shapes();
     const auto opts = at::TensorOptions().dtype(at::kDouble).device(device());
     for (const auto i : index_range(in_names))
-      if (parseLag(in_names[i]).second > 0)
+      if (parseLag(in_names[i]).second > 0 && !_state_vars.count(in_names[i]))
         _state_vars[in_names[i]] = at::zeros(in_shapes[i], opts);
   }
 }
@@ -274,6 +275,10 @@ NEML2ModelExecutor::meshChanged()
 void
 NEML2ModelExecutor::execute()
 {
+  // Ranks with no local batch have no inputs, outputs, or state to advance.
+  if (_batch_index_generator.isEmpty())
+    return;
+
   // Nothing to recompute at EXEC_TIMESTEP_END: the value, parameter derivatives, and input Jacobian
   // are all retained from the solve (see below), so output/coupling consumers read the retained
   // tensors. The only job here is the optional on-device state advance after a converged step.
@@ -283,10 +288,6 @@ NEML2ModelExecutor::execute()
       advanceState();
     return;
   }
-
-  // If the batch is empty, we do not need to do anything
-  if (_batch_index_generator.isEmpty())
-    return;
 
   // Pin libtorch's intra-op thread count to this model's setting for the duration of the
   // evaluation, then restore it. MOOSE runs its element loops with libMesh threads and sets
