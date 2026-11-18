@@ -243,7 +243,7 @@ public:
    * (from the input file) along with the full parameter path+name followed by the given args as
    * the message.  If this object's parameters were not created directly by the Parser, then this
    * function falls back to the normal behavior of mooseInfo - only printing a message using
-   * the given args.
+   * the given args.  Unlike mooseInfo, the message is printed on every call.
    */
   template <typename... Args>
   void paramInfo(const std::string & param, Args... args) const;
@@ -470,5 +470,6 @@ template <typename... Args>
 void
 MooseBase::paramInfo(const std::string & param, Args... args) const
 {
-  mooseInfo(_pars.paramMessage(param, std::forward<Args>(args)...));
+  moose::internal::mooseInfoStreamRepeated(
+      _console, messagePrefix(true), _pars.paramMessage(param, std::forward<Args>(args)...));
 }
