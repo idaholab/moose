@@ -1,6 +1,7 @@
 # Purpose: Verify heterogeneous interface debonding with spatially varying normal strength.
-# Setup: Two 5x5 blocks, mode-I pull to t=0.3. Left half (x<0.5) has N=1e4 (weak),
-#   right half (x>=0.5) has N=1e6 (strong). K=1e6, GI_c=1e3, GII_c=1e2, viscosity=1e-3.
+# Setup: Two 5x5 blocks, mode-I pull to t=0.35. Left half (x<0.5) has N=1e4 (weak),
+#   right half (x>=0.5) has N=1e6 (strong). K=1e6, GI_c=1e3, GII_c=1e2, viscosity=1e-2.
+#   With viscosity=1e-3 Newton stalls during the snap-through of the strong half.
 # Exercises: Asymmetric damage initiation, load redistribution (weak->strong), near-brittle
 #   snap-through with viscous regularization, and full debonding of both sides.
 # Outputs: Exodus with interface fields on secondary_lower, CSV with PointValue at x=0.25/0.75.
@@ -111,7 +112,7 @@
     type = FunctionDirichletBC
     boundary = top_top
     variable = disp_y
-    function = 'if(t<=0.3,t,if(t<=0.6,0.3-(t-0.3),0.6-t))'
+    function = 'if(t<=0.35,t,if(t<=0.7,0.35-(t-0.35),0.7-t))'
     preset = true
   []
 
@@ -218,7 +219,7 @@
   nl_abs_tol = 1e-11
   start_time = 0.0
   dt = 0.01
-  end_time = 0.3
+  end_time = 0.35
   dtmin = 1e-4
 []
 
@@ -282,7 +283,7 @@
     correct_edge_dropping = true
     normal_strength = N
     shear_strength = 1e3
-    viscosity = 1e-3
+    viscosity = 1e-2
     penalty_stiffness = 1e6
 
     power_law_parameter = 2.2
