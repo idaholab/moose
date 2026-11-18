@@ -1,6 +1,7 @@
 # Solves the Poisson problem -Div(sigma Grad u) = 1, in 3D on a 2D surface,
 # where the diffusion coefficient sigma is a constant 3x3 matrix.
-# Based on MFEM Example ex29p. See corresponding `gold/` directory for more info.
+# Based on MFEM Example ex29p, with the function coefficient matrix changed to
+# a constant matrix coefficient.
 
 [Mesh]
   type = MFEMFileMesh
@@ -65,10 +66,21 @@
   []
 []
 
+[Postprocessors]
+  [u_l2_norm]
+    type = MFEML2Error
+    variable = u
+    function = 0
+  []
+  [u_average]
+    type = MFEMElementAverageValue
+    variable = u
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
+  [csv]
+    type = CSV
     file_base = OutputData/AnisotropicDiffusion
-    vtk_format = ASCII
   []
 []
