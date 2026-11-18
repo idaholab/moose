@@ -164,11 +164,11 @@ DerivativeTwoPhaseMaterial::computeD3F(unsigned int i_var, unsigned int j_var, u
     return _d2h[_qp] * ((*_prop_dFb[k])[_qp] - (*_prop_dFa[k])[_qp]);
 
   if (i_var == _eta_var)
-    return _dh[_qp] * (*_prop_d2Fb[j][k])[_qp] + (1.0 - _dh[_qp]) * (*_prop_d2Fa[j][k])[_qp];
+    return _dh[_qp] * ((*_prop_d2Fb[j][k])[_qp] - (*_prop_d2Fa[j][k])[_qp]);
   if (j_var == _eta_var)
-    return _dh[_qp] * (*_prop_d2Fb[i][k])[_qp] + (1.0 - _dh[_qp]) * (*_prop_d2Fa[i][k])[_qp];
+    return _dh[_qp] * ((*_prop_d2Fb[i][k])[_qp] - (*_prop_d2Fa[i][k])[_qp]);
   if (k_var == _eta_var)
-    return _dh[_qp] * (*_prop_d2Fb[i][j])[_qp] + (1.0 - _dh[_qp]) * (*_prop_d2Fa[i][j])[_qp];
+    return _dh[_qp] * ((*_prop_d2Fb[i][j])[_qp] - (*_prop_d2Fa[i][j])[_qp]);
 
   return _h[_qp] * (*_prop_d3Fb[i][j][k])[_qp] + (1.0 - _h[_qp]) * (*_prop_d3Fa[i][j][k])[_qp];
 }
