@@ -1,0 +1,30 @@
+[Tests]
+  design = 'ElectromagneticCopperProperties.md'
+  issues = '#33677'
+
+  [electrical_resistivity]
+    type = GoogleTest
+    unit_test = ElectromagneticCopperPropertiesTest.electrical_resistivity
+    requirement = 'The system shall compute electrical resistivity for OFHC copper at temperatures from 2 to 900 K using NIST three-component resistivity model (residual, ideal, and Matthiessen deviation) and verify analytical derivatives against finite differences.'
+  []
+  [electrical_conductivity]
+    type = GoogleTest
+    unit_test = ElectromagneticCopperPropertiesTest.electrical_conductivity
+    requirement = 'The system shall compute electrical conductivity for OFHC copper as the reciprocal of electrical resistivity and verify analytical derivatives against finite differences.'
+  []
+  [magnetic_permeability]
+    type = GoogleTest
+    unit_test = ElectromagneticCopperPropertiesTest.magnetic_permeability
+    requirement = 'The system shall provide magnetic permeability for OFHC copper as a temperature-independent constant equal to the permeability of free space.'
+  []
+  [resistivity_conductivity_reciprocal]
+    type = GoogleTest
+    unit_test = ElectromagneticCopperPropertiesTest.resistivity_conductivity_reciprocal
+    requirement = 'The system shall maintain numerical consistency between electrical resistivity and conductivity such that their product equals unity to machine precision.'
+  []
+  [rrr_effect]
+    type = GoogleTest
+    unit_test = ElectromagneticCopperPropertiesTest.rrr_effect
+    requirement = 'The system shall compute residual resistivity from the user-specified residual resistivity ratio (RRR) parameter, with higher RRR values producing lower resistivity at cryogenic temperatures.'
+  []
+[]
