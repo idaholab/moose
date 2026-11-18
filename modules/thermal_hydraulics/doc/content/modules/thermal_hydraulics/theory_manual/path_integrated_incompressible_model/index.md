@@ -1,6 +1,6 @@
 # Path-Integrated Incompressible Flow Model
 
-The Path-Integrated Incompressible Flow Model is used to model one-dimensional, single-phase flow using the incompressible Navier-Stokes equation in flow paths of variable geometry. The incompressible formulation used here is termed "globally compressible, locally incompressible", meaning the effects of natural circulation are accounted for in the gravitational acceleration term through variable density resulting from thermal expansion, but for all other terms a single, average density is used. Property changes resulting from pressure changes are not accounted for.
+The Path-Integrated Incompressible Flow Model is used to model one-dimensional, single-phase flow using the incompressible Navier-Stokes equation in flow paths of variable geometry. The incompressible formulation used here is termed "globally compressible, locally incompressible", meaning the effects of natural circulation are accounted for in the gravitational acceleration term through variable density resulting from thermal expansion, but the friction and form loss terms use each segment's own density evaluated at the segment temperature. Property changes resulting from pressure changes are not accounted for.
 
 ## Flow Equations
 
@@ -40,7 +40,7 @@ where
 Integrating the above momentum equation along a 1D flow path consisting of $N$ segments results in the following equations, ignoring conservation of mass since it has been substituted in the conservation of momentum and energy equations already:
 
 !equation id=discretized_momentum
-\sum_{i=1}^{N} \frac{L_i}{A_i} \pd{\dot{m}}{t} = - \Delta P_c - \sum_{i=1}^{N} \frac{f_i L_i}{D_{h,i}} \frac{\dot{m}|\dot{m}|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} K_i \frac{\dot{m}|\dot{m}|}{2 \rho_c A_i^2} - \sum_{i=1}^{N} \rho_i g \Delta h_i + \Delta P_p \,
+\sum_{i=1}^{N} \frac{L_i}{A_i} \pd{\dot{m}}{t} = - \Delta P_c - \sum_{i=1}^{N} \frac{f_i L_i}{D_{h,i}} \frac{\dot{m}|\dot{m}|}{2 \rho_i A_i^2} - \sum_{i=1}^{N} K_i \frac{\dot{m}|\dot{m}|}{2 \rho_i A_i^2} - \sum_{i=1}^{N} \rho_i g \Delta h_i + \Delta P_p \,
 
 where
 
@@ -52,7 +52,9 @@ A core assumption of this model is that the flow path consists of N segments, th
 
 Input parameters are all given as functors, which enables flexibility in controllability, state changes in time, etc. However, caution should be exercised in changing parameters in time, as the parameters are assumed to be constant in time in the mathematical derivation. Hence, allowing the parameters to vary in time is intended only for long-running transients where the change over time is small, or for cases where the immediate transient effects of changing a parameter in time are unimportant to the phenomena of interest. This isn't the model to use for studying rapid transient effects.
 
-To preserve proper friction force direction regardless of flow direction, $\dot{m}^2$ is replaced with $\dot{m}|\dot{m}|$ in the friction terms. Subscript $c$ in $\rho_c$ represents the characteristic (or average) density of the fluid along the flow path. The gravity term uses local density based on temperature to account for natural convection. This partitioning of the "global" density for most terms, but "local" density for the gravity term only results in a "globally compressible, locally incompressible" formulation that accounts for natural circulation but is otherwise incompressible in formulation.
+To preserve proper friction force direction regardless of flow direction, $\dot{m}^2$ is replaced with $\dot{m}|\dot{m}|$ in the friction terms. The density $\rho_i$ of each segment is evaluated at that segment's temperature, so the gravity term accounts for natural convection and the friction and form losses reflect the local fluid state. Because pressure effects on properties are neglected, this results in a "globally compressible, locally incompressible" formulation that accounts for natural circulation but is otherwise incompressible in formulation.
+
+A segment may optionally be partially or fully filled with a lighter fluid (e.g., a gas-filled segment in a draining problem) by supplying a reference liquid fluid properties object with density $\rho_{ref,i}$. The volumetric velocity is then continuous along the path, $v_i = \dot{m} / (\rho_{ref,i} A_i)$, so the mass flux in segment $i$ is $G_i = \rho_i v_i$, and the friction and form loss pressure drops become $\rho_i v_i |v_i| / 2$ times their coefficients. The inertia sum on the left-hand side of [!eqref](discretized_momentum) is weighted by $\max(\rho_i / \rho_{ref,i}, 10^{-6})$, so that light segments carry almost no inertia. Without a reference fluid, $\rho_{ref,i} = \rho_i$ and the weighting is unity.
 
 Given the effect of local temperature on the momentum equation, the energy equation is discretized on a per-segment basis as follows:
 
@@ -72,7 +74,7 @@ Most closure quantities in the governing equations are user-supplied quantities,
 
 A few notable closure quantities are not user-specified inputs, and are worth some discussion.
 
-The thermophysical properties ($\rho$, $\mu$, $k$, and $c_p$) are computed from the coupled temperature values and the reference pressure using a supplied [SinglePhaseFluidProperties.md] object. Most terms in the momentum equation utilize the average temperature from inlet to outlet of the flow path to compute the fluid properties, except for the gravitational term, which uses local temperature to model natural circulation effects. Since the temperature equation is solved on a segment-local basis, local temperature is used to compute the thermophysical properties.
+The thermophysical properties ($\rho$, $\mu$, $k$, and $c_p$) are computed from the coupled temperature values and the reference pressure using a supplied [SinglePhaseFluidProperties.md] object. In the momentum equation, the properties of each segment are computed from that segment's temperature. Since the temperature equation is solved on a segment-local basis, local temperature is also used to compute the thermophysical properties there, with the exception of the bulk temperature used for wall heat transfer described below.
 
 The hydraulic diameter of each segment is computed using the closure relation:
 
@@ -89,18 +91,17 @@ For $Re > 4000$ the flow is deemed turbulent and the Swamee-Jain approximation o
 !equation id=swamee_jain_friction
 f = \frac{0.25}{\left( \log_{10} \left( \frac{\epsilon}{3.7 D_{h,i}} + \frac{5.74}{Re^{0.9}} \right) \right)^2} \,
 
-For $2300 < Re < 4000$ the flow is deemed be transitioning and a conservative interpolation between turbulent and laminar predictions is used:
+For $2300 < Re < 4000$ the flow is deemed to be transitioning and a linear interpolation between the laminar prediction at $Re = 2300$ and the turbulent prediction at $Re = 4000$ is used:
 
 !equation id=transition_friction
-f = \max\left(\frac{f_{turb} - f_{lam}}{1700} f_{turb} + f_{lam}, \max(f_{turb}, f_{lam})\right) \,
+f = f_{lam}(2300) + \left(f_{turb}(4000) - f_{lam}(2300)\right) \frac{Re - 2300}{1700} \,
 
 The heat transfer coefficient is computed using the Dittus-Boelter correlation [!citep](dittus1930heat):
 
 !equation id=dittus_boelter
 h = 0.023 Re^{0.8} Pr^{0.4} \frac{k_f}{D_h} \,
 
-where the fluid properties entering $Re$ and $Pr$ are evaluated at the segment's bulk film
-temperature, the mean of the segment fluid temperature and its upwinded inlet value. For
+where the fluid properties entering $Re$ and $Pr$ are evaluated at the bulk temperature used for wall heat transfer. By default this is the segment average, the mean of the segment fluid temperature and its upwinded inlet value, which matches the form of [!eqref](discretized_energy). Alternatively, the segment temperature itself (well-mixed node) may be selected, which replaces the wall term in [!eqref](discretized_energy) with $h P_w (T_w - T)$ and remains monotone for any number of transfer units and any flow rate. For
 the conjugate heat transfer kernels below, this coefficient is supplied by
 [ADDittusBoelterHTCFunctorMaterial.md].
 
