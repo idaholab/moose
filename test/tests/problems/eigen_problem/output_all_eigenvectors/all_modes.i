@@ -62,6 +62,7 @@
   output_all_eigenvectors = true
   normalization = bnorm
   normal_factor = 1
+  eigenvector_normalization = b_norm
 []
 
 [Postprocessors]

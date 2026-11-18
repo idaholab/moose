@@ -11,16 +11,13 @@
 
 #include "GeneralPostprocessor.h"
 
-#include "libmesh/numeric_vector.h"
-
-#include <memory>
-
-class NonlinearEigenSystem;
+class EigenProblem;
 
 /**
- * Computes the B-norm sqrt(phi^T B phi) of the current solution phi of the nonlinear eigen system,
- * where B is the operator the eigen solver solved with. Being homogeneous of degree one in phi, it
- * is usable as the 'normalization' postprocessor of an eigenvalue executioner.
+ * Reports the B-norm sqrt(phi^T B phi) of the current solution phi of the nonlinear eigen system,
+ * which the EigenProblem computes with the B operator of the solve after each solve and each time
+ * it loads an eigenvector. Being homogeneous of degree one in phi, it is usable as the
+ * 'normalization' postprocessor of an eigenvalue executioner.
  */
 class EigenvectorBNorm : public GeneralPostprocessor
 {
@@ -30,20 +27,14 @@ public:
   EigenvectorBNorm(const InputParameters & parameters);
 
   void initialize() override {}
-  void execute() override;
+  void execute() override {}
 
   /**
-   * @return The B-norm of the current eigenvector
+   * @return The B-norm of the current eigenvector, zero before the first solve
    */
   Real getValue() const override;
 
 private:
-  /// Nonlinear eigen system holding the eigenvector and the operators of the eigen solver
-  NonlinearEigenSystem * const _nl_eigen;
-
-  /// The quadratic form phi^T B phi of the current eigenvector, computed by execute()
-  Real _b_norm_squared;
-
-  /// Work vector holding B * phi, allocated on first use and reused by every execution
-  std::unique_ptr<NumericVector<Number>> _b_phi;
+  /// Eigen problem computing and storing the B-norm of the eigenvector in the solution
+  EigenProblem * const _eigen_problem;
 };

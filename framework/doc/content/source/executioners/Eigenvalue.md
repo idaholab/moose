@@ -21,27 +21,46 @@ single output step is written as without the option.
 After each solve, the executioner performs these steps for every converged eigenvector $i$:
 
 1. Load eigenvector $i$ into the solution.
-1. Execute the `LINEAR` objects.
-1. Scale the eigenvector with the [!param](/Executioner/Eigenvalue/normalization) post-processor for
-   index $i$.
+1. Scale the eigenvector to the requested $B$-norm, only when
+   [!param](/Executioner/Eigenvalue/eigenvector_normalization) is `b_norm`.
 1. Execute the `TIMESTEP_END` objects.
 1. Write one output step.
 
-Aux variables and post-processors such as [NodalExtremeValue.md] therefore report on the mode of
-that step. After the last mode the executioner restores the eigenvector selected by
-[!param](/Problem/EigenProblem/active_eigen_index) with the same load, `LINEAR`, scaling, and
-`TIMESTEP_END` sequence, without an output step. `FINAL` objects, transfers, and any following
-fixed-point iteration thus see the same solution as without the option. The `TIMESTEP_END` objects
-run once per converged mode and once more for the restore, so a post-processor that accumulates on
-`TIMESTEP_END`, such as a running sum or a counter, advances on each run instead of once per solve.
+The `LINEAR` objects and the [!param](/Executioner/Eigenvalue/normalization) post-processor do not
+execute per mode. Aux variables and post-processors that execute on `TIMESTEP_END`, such as
+[NodalExtremeValue.md], therefore report on the mode of that step. After the last mode the
+executioner reloads the eigenvector selected by [!param](/Problem/EigenProblem/active_eigen_index)
+and normalizes it with the [!param](/Executioner/Eigenvalue/normalization) hook as after the solve,
+which can execute the `LINEAR` objects. Then it executes the `TIMESTEP_END` objects, without an
+output step. `FINAL` objects, transfers, and any following fixed-point iteration thus see the same
+solution as without the option. The `TIMESTEP_END` objects run once per converged mode and once more
+for the restore, so a post-processor that accumulates on `TIMESTEP_END`, such as a running sum or a
+counter, advances on each run instead of once per solve.
 
-The per-mode scaling only affects the output steps. Each output mode is scaled by the normalization
-hook, so [!param](/Executioner/Eigenvalue/normalization) and
-[!param](/Executioner/Eigenvalue/normal_factor) apply per mode rather than to the active eigenvector
-alone. The restored active eigenvector is scaled as it is without the option. Combining
-`normalization` with [EigenvectorBNorm.md] and `normal_factor = 1` mass-normalizes every mode, so that
-$\phi_i^{\top} B \phi_i = 1$ in every output step. Without a `normalization` post-processor each mode
-keeps the scaling SLEPc returned for it and the magnitudes are not comparable between steps.
+### Scaling of each mode id=eigenvector-normalization
+
+[!param](/Executioner/Eigenvalue/eigenvector_normalization) chooses how each output mode is scaled.
+With `none`, each mode is written as the eigen solver returns it, and the magnitudes are not
+comparable between steps. With `b_norm`, each mode is scaled directly so that
+
+\begin{equation}
+\phi_i^{\top} B \phi_i = f^2,
+\end{equation}
+
+where $\phi_i$ is mode $i$, $B$ is the operator that the eigen solve assembled, and $f$ is
+[!param](/Executioner/Eigenvalue/normal_factor), or 1 when that parameter is not set. $B$ includes the
+sign of [!param](/Problem/EigenProblem/negative_sign_eigen_kernel), and $B = I$ for a standard
+eigenproblem. The scaling uses the quadratic form that the [EigenProblem.md] stores when it loads the
+mode, so it needs no post-processor and no `LINEAR` execution. It has the solve-type requirements
+that [EigenvectorBNorm.md] describes: $B$ has to be assembled, and $\phi_i^{\top} B \phi_i$ has to be
+positive. A mode with a zero $B$-norm cannot be scaled and is an error. Setting
+[!param](/Executioner/Eigenvalue/eigenvector_normalization) to `b_norm` without
+[!param](/Executioner/Eigenvalue/output_all_eigenvectors) set to `true` is an error.
+
+The [!param](/Executioner/Eigenvalue/normalization) and
+[!param](/Executioner/Eigenvalue/normal_factor) hook applies to the active eigenvector only, as
+without the option. It does not change the output modes. An [EigenvectorBNorm.md] post-processor
+reports the $B$-norm of each output mode, which is $f$ with `b_norm`.
 
 ### Output time of each mode id=eigenvector-time
 

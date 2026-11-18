@@ -18,7 +18,7 @@
     csvdiff = 'all_modes_out.csv all_modes_out_eigenvalues_0001.csv'
     prereq = all_modes_exodus
     capabilities = 'slepc'
-    requirement = 'The system shall mass-normalize every output eigenvector through the normalization postprocessor so that the B-norm of each mode equals the requested factor.'
+    requirement = 'The system shall mass-normalize every output eigenvector when requested so that the B-norm of each mode equals the requested factor.'
   []
 
   [eigenvector_time]
@@ -44,7 +44,7 @@
   [active_index_matches_step]
     type = CSVDiff
     input = all_modes.i
-    cli_args = 'Executioner/output_all_eigenvectors=false Problem/active_eigen_index=2 Outputs/file_base=active_2'
+    cli_args = 'Executioner/output_all_eigenvectors=false Executioner/eigenvector_normalization=none Problem/active_eigen_index=2 Outputs/file_base=active_2'
     csvdiff = active_2.csv
     capabilities = 'slepc'
     requirement = 'The system shall output the eigenvector selected by the active eigen index when the per-eigenvector output is disabled.'
@@ -75,6 +75,15 @@
     expect_err = 'eigenvector_time.*requires.*output_all_eigenvectors'
     capabilities = 'slepc'
     requirement = 'The system shall report an error when an eigenvector time axis is requested without enabling the per-eigenvector output.'
+  []
+
+  [normalization_requires_flag]
+    type = RunException
+    input = all_modes.i
+    cli_args = 'Executioner/output_all_eigenvectors=false Outputs/file_base=normalization_requires_flag'
+    expect_err = 'eigenvector_normalization.*requires.*output_all_eigenvectors'
+    capabilities = 'slepc'
+    requirement = 'The system shall report an error when the per-eigenvector normalization is requested without enabling the per-eigenvector output.'
   []
 
   [bnorm_shell_matrix_error]

@@ -42,7 +42,14 @@ Eigenvalue::validParams()
                              "real part of its eigenvalue, or the square root of the real part "
                              "of its eigenvalue. This parameter "
                              "requires 'output_all_eigenvectors' to be true.");
-  params.addParamNamesToGroup("output_all_eigenvectors eigenvector_time", "Eigenvector output");
+  params.addParam<MooseEnum>(
+      "eigenvector_normalization",
+      MooseEnum("none b_norm", "none"),
+      "How each output eigenvector is scaled: not at all, or so that phi^T B phi, with B the "
+      "operator of the eigen solve, equals the square of 'normal_factor' when it is set and 1 "
+      "otherwise. The b_norm option requires 'output_all_eigenvectors' to be true.");
+  params.addParamNamesToGroup("output_all_eigenvectors eigenvector_time eigenvector_normalization",
+                              "Eigenvector output");
 
   return params;
 }
@@ -57,7 +64,9 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     _time(_eigen_problem.time()),
     _final_timer(registerTimedSection("final", 1)),
     _output_all_eigenvectors(getParam<bool>("output_all_eigenvectors")),
-    _eigenvector_time(getParam<MooseEnum>("eigenvector_time"))
+    _eigenvector_time(getParam<MooseEnum>("eigenvector_time")),
+    _b_normalize_eigenvectors(getParam<MooseEnum>("eigenvector_normalization") == "b_norm"),
+    _eigenvector_b_norm(isParamValid("normal_factor") ? getParam<Real>("normal_factor") : 1)
 {
   _fixed_point_solve->setInnerSolve(_eigen_problem_solve);
   _time = _system_time;
@@ -66,6 +75,15 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     paramError("eigenvector_time",
                "'eigenvector_time' requires 'output_all_eigenvectors' to be true, as a single "
                "eigenvector is written at a single output time otherwise.");
+  if (!_output_all_eigenvectors && _b_normalize_eigenvectors)
+    paramError("eigenvector_normalization",
+               "'eigenvector_normalization' requires 'output_all_eigenvectors' to be true, as only "
+               "the eigenvector the solve leaves in the solution is written otherwise.");
+
+#ifdef LIBMESH_HAVE_SLEPC
+  if (_b_normalize_eigenvectors)
+    _eigen_problem.needEigenvectorBNorm();
+#endif
 
   // Outputs of a problem that is not transient take their time from the time step number, so let
   // the per-eigenvector output times reach the output files. The executioner is constructed before
@@ -109,17 +127,17 @@ Eigenvalue::checkIntegrity()
 void
 Eigenvalue::loadEigenvector(dof_id_type i)
 {
-  auto & nl = _eigen_problem.getNonlinearEigenSystem(/*nl_sys=*/0);
-  nl.getConvergedEigenpair(i);
-  // A condensed eigen solve sets the non-condensed entries of the solution only, so give the
-  // constrained degrees of freedom, e.g. of hanging nodes, their constrained values
-  nl.dofMap().enforce_constraints_exactly(nl.system());
-  nl.update();
-  // Recompute the objects the normalization hook reads before and after it scales the eigenvector,
-  // then let the objects executing at the end of a time step see the scaled eigenvector. Neither
-  // execution runs multiapps or transfers.
-  _eigen_problem.execute(EXEC_LINEAR);
-  _eigen_problem.postScaleEigenVector(i);
+  _eigen_problem.loadEigenvector(i);
+  if (_b_normalize_eigenvectors)
+  {
+    const Real b_norm = _eigen_problem.eigenvectorBNorm();
+    if (b_norm == 0)
+      paramError(
+          "eigenvector_normalization", "Cannot normalize mode ", i + 1, " as its B-norm is zero.");
+    _eigen_problem.scaleEigenvector(_eigenvector_b_norm / b_norm);
+  }
+  // Let the objects executing at the end of a time step see the eigenvector. This does not run
+  // multiapps or transfers.
   _eigen_problem.execute(EXEC_TIMESTEP_END);
 }
 
@@ -238,9 +256,14 @@ Eigenvalue::execute()
         _time = _time_step;
       _eigen_problem.outputStep(EXEC_TIMESTEP_END);
     }
-    // Restore the eigenvector the rest of the simulation expects in the solution
+    // Restore the eigenvector the rest of the simulation expects in the solution, in the state the
+    // solve left it in
     if (load_eigenvectors)
-      loadEigenvector(active_index);
+    {
+      _eigen_problem.loadEigenvector(active_index);
+      _eigen_problem.finalizeEigenvector(/*nl_sys_num=*/0);
+      _eigen_problem.execute(EXEC_TIMESTEP_END);
+    }
     _time = _system_time;
 
 #ifdef LIBMESH_ENABLE_AMR
