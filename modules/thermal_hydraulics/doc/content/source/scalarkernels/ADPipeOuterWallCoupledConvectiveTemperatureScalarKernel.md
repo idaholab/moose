@@ -12,9 +12,9 @@ temperature $T_{i,w}$ and coupled variables for the upstream $T_{o,u}$ and downs
 This kernel implements a secondary side, coupled convective heat transfer term for the per-length heat transfer term:
 
 !equation
-q_o^{'} = \frac{h P_{o,w}}{2} \left ( T_{in,f} + T_f - 2 T_{o,w} \right )
+q_o^{'} = h P_{o,w} \left ( T_m - T_{o,w} \right )
 
-where $h$ is the secondary-side heat transfer coefficient, supplied as a
+where $T_m = T_f$ by default, or $T_m = (T_{in,f} + T_f)/2$ if [!param](/ScalarKernels/ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel/use_fluid_node_temp) is `false`, and $h$ is the secondary-side heat transfer coefficient, supplied as a
 [functor](/Functors/index.md) through the
 [!param](/ScalarKernels/ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel/heat_transfer_coefficient)
 parameter. [ADDittusBoelterHTCFunctorMaterial.md] provides it from a Dittus-Boelter
@@ -26,7 +26,7 @@ T_{in,f} = \frac{1}{2} \left(1-\frac{|\dot{m}|}{\dot{m}} \right) T_{d,f} + \frac
 
 Note, use of this kernel with transient problems also necessitates the use of a
 [ADScalarTimeDerivative.md] (or its non-AD equivalent) with `coefficient = 1` on the same scalar
-variable, which contributes the time derivative term, $\frac{dT_{i,w}}{dt}$, so the two kernels together form the complete transient equation.
+variable, which contributes the time derivative term, $\frac{dT_{o,w}}{dt}$, so the two kernels together form the complete transient equation.
 
 This kernel derives from [ADPipeWallTemperatureScalarKernelBase.md], which implements the
 axial and radial conduction terms shared by every radial node of the wall; this class adds
@@ -48,6 +48,9 @@ parameter. This term allows the user to select whether the solve should be done 
 current or the previous state values of functor properties. This may allow the system to
 evolve more slowly which may avoid some issues with respect to divergence of particularly
 unstable systems.
+
+The fluid temperature used for the heat transfer is the fluid node temperature by default. Setting
+[!param](/ScalarKernels/ADPipeOuterWallCoupledConvectiveTemperatureScalarKernel/use_fluid_node_temp) to `false` uses the segment average of the node and upwinded neighbor temperatures instead.
 
 As a reminder, the system of variables should be defined with the
 [!param](/Variables/family) attribute set to `SCALAR` for each variable.

@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "ADScalarKernel.h"
 #include "ADFunctorInterface.h"
 
 class SinglePhaseFluidProperties;

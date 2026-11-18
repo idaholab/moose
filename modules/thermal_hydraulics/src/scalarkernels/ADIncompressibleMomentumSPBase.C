@@ -17,7 +17,8 @@ InputParameters
 ADIncompressibleMomentumSPBase::validParams()
 {
   InputParameters params = ADScalarKernel::validParams();
-  params.addClassDescription("Base class for path-integrated incompressible momentum kernels.");
+  params.addClassDescription(
+      "Base class for assembling the path-integrated incompressible momentum equation.");
   params.addCoupledVar("temperatures",
                        {},
                        "Fluid temperature in each segment of this component. Takes a "
@@ -62,7 +63,7 @@ ADIncompressibleMomentumSPBase::validParams()
       std::vector<MooseFunctorName>({}),
       "Component wall roughnesses per segment [m]. Takes a vector of functors.");
   params.addParam<MooseFunctorName>(
-      "g", PhysicalConstants::acceleration_of_gravity, "Gravitational acceleration [m/s]");
+      "g", PhysicalConstants::acceleration_of_gravity, "Gravitational acceleration [m/s^2]");
 
   return params;
 }
@@ -131,11 +132,10 @@ ADReal
 ADIncompressibleMomentumSPBase::computeQpResidual()
 {
   ADReal momentum_residual = 0;
-  const libMesh::Node node(0., 0., 0.);
-  const Moose::NodeArg elem_arg = {&node, &Moose::NodeArg::undefined_subdomain_connection};
+  const Moose::PointArg arg = {Point(1, 2, 3)};
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
-  const auto P = _Pref(elem_arg, state);
+  const auto P = _Pref(arg, state);
 
   // Inertia scale: Sum_j (rho_j / rho_ref,j) L_j / A_j. Reduces to Sum_j L_j / A_j when
   // every segment holds the reference liquid. Gas-filled segments carry ~no inertia.
@@ -145,16 +145,16 @@ ADIncompressibleMomentumSPBase::computeQpResidual()
     const auto Tj = (*(_T[j]))[i];
     const auto rho_j = _fp[j]->rho_from_p_T(P, Tj);
     const auto rho_ref = _fp_ref ? _fp_ref->rho_from_p_T(P, Tj) : rho_j;
-    L_over_A_sum += max(rho_j / rho_ref, 1e-6) * (*(_lengths[j]))(elem_arg, state) /
-                    (*(_areas[j]))(elem_arg, state);
+    L_over_A_sum +=
+        max(rho_j / rho_ref, 1e-6) * (*(_lengths[j]))(arg, state) / (*(_areas[j]))(arg, state);
   }
   const auto inv_L_over_A_sum = 1.0 / L_over_A_sum;
 
   for (const auto j : make_range(_n_segments))
   {
     const auto Tj = (*(_T[j]))[i];
-    const auto A = (*(_areas[j]))(elem_arg, state);
-    const auto Dh = 4.0 * A / (*(_perimeters[j]))(elem_arg, state);
+    const auto A = (*(_areas[j]))(arg, state);
+    const auto Dh = 4.0 * A / (*(_perimeters[j]))(arg, state);
     // Segment properties (blended liquid/gas) and liquid reference density
     const auto mu = _fp[j]->mu_from_p_T(P, Tj);
     const auto rho_j = _fp[j]->rho_from_p_T(P, Tj);
@@ -165,12 +165,12 @@ ADIncompressibleMomentumSPBase::computeQpResidual()
     const auto Gj = rho_j * v;
     const auto fd = computeFrictionFactor(mu, Gj, Dh, j);
     // Friction and form losses: f L/Dh * rho_j v|v| / 2  (-> 0 as rho_j -> 0)
-    momentum_residual += fd * (*(_lengths[j]))(elem_arg, state) / Dh * Gj * abs(Gj) / 2.0 / rho_j;
-    momentum_residual += (*(_forms_losses[j]))(elem_arg, state) * Gj * abs(Gj) / 2.0 / rho_j;
+    momentum_residual += fd * (*(_lengths[j]))(arg, state) / Dh * Gj * abs(Gj) / 2.0 / rho_j;
+    momentum_residual += (*(_forms_losses[j]))(arg, state) * Gj * abs(Gj) / 2.0 / rho_j;
     // Gravity: hydrostatic head of whatever is in the segment
-    momentum_residual += rho_j * _gravity(elem_arg, state) * (*(_dHs[j]))(elem_arg, state);
+    momentum_residual += rho_j * _gravity(arg, state) * (*(_dHs[j]))(arg, state);
     // Pump
-    momentum_residual -= (*(_dPps[j]))(elem_arg, state);
+    momentum_residual -= (*(_dPps[j]))(arg, state);
   }
   momentum_residual += pressureDrop();
   return momentum_residual * inv_L_over_A_sum;
@@ -189,22 +189,20 @@ ADIncompressibleMomentumSPBase::computeFrictionFactor(const ADReal & mu,
                                                       const ADReal & Dh,
                                                       const unsigned int j)
 {
-  const libMesh::Node node(0., 0., 0.);
-  const Moose::NodeArg elem_arg = {&node, &Moose::NodeArg::undefined_subdomain_connection};
+  const Moose::PointArg arg = {Point(1, 2, 3)};
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
   const auto Re = max(abs(G) * Dh / mu, 1.0e-03);
   if (Re < 2300.0) // laminar
     return 64.0 / Re;
   else if (Re > 4000.0) // turbulent using Swamee-Jain approx. of Colebrook-White eq.
     return 0.25 /
-           pow((log10((*(_roughnesses[j]))(elem_arg, state) / (Dh * 3.7) + 5.74 / pow(Re, 0.9))),
-               2);
+           pow((log10((*(_roughnesses[j]))(arg, state) / (Dh * 3.7) + 5.74 / pow(Re, 0.9))), 2);
   else // transition, conservative interpolation between the two
   {
     const auto f_lam_2300 = 64.0 / 2300.0;
     const auto f_turb_4000 =
         0.25 /
-        pow(log10((*(_roughnesses[j]))(elem_arg, state) / (Dh * 3.7) + 5.74 / pow(4000.0, 0.9)), 2);
+        pow(log10((*(_roughnesses[j]))(arg, state) / (Dh * 3.7) + 5.74 / pow(4000.0, 0.9)), 2);
     return f_lam_2300 + (f_turb_4000 - f_lam_2300) * (Re - 2300.0) / 1700.0;
   }
 }

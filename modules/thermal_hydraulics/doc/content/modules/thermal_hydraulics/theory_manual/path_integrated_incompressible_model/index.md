@@ -1,6 +1,6 @@
 # Path-Integrated Incompressible Flow Model
 
-The Path-Integrated Incompressible Flow Model is used to model one-dimensional, single-phase flow using the incompressible Navier-Stokes equation in flow paths of variable geometry. The incompressible formulation used here is termed "globally compressible, locally incompressible", meaning the effects of natural circulation are accounted for in the gravitational acceleration term through variable density resulting from thermal expansion, but the friction and form loss terms use each segment's own density evaluated at the segment temperature. Property changes resulting from pressure changes are not accounted for.
+The Path-Integrated Incompressible Flow Model is used to model one-dimensional, single-phase flow using the incompressible Navier-Stokes equation in flow paths of variable geometry. The incompressible formulation used here is termed "globally compressible, locally incompressible", meaning the effects of natural circulation are accounted for through temperature-dependent variable density resulting from thermal expansion. Property changes resulting from pressure changes are not accounted for.
 
 ## Flow Equations
 
@@ -29,7 +29,7 @@ where
 - $\delta$ is the dirac delta function,
 - $g$ is the gravitational acceleration in the downward direction,
 - $\alpha$ is the angle of the flow path with respect to horizontal,
-- $\Delta P_p$ is the pump pressure increase in the flow path,
+- $P_p$ is the pump pressure in the flow path, so $\pd{P_p}{x}$ is the pump pressure gain per unit length,
 - $c_p$ is the specific isobaric heat capacity of the fluid,
 - $T$ is the bulk fluid temperature,
 - $q_w^{''}$ is the heat flux through the bounding surface(s), and
@@ -46,7 +46,9 @@ where
 
 - $L_i$ is the length of segment $i$,
 - $\Delta P_c$ is the characteristic pressure drop from inlet to outlet, and
-- $\Delta h_i$ is the height difference between the inlet and the outlet of a segment.
+- $\Delta h_i$ is the height difference between the inlet and the outlet of a segment,
+- $\Delta P_p$ is the total pump pressure increase over the flow path, and
+- $\epsilon$ is the surface roughness (used in the friction factor below).
 
 A core assumption of this model is that the flow path consists of N segments, that the segments may have different cross sections, but within each segment, the cross section is assumed to be approximately constant. For example, a segment may have elbows, support structures, etc. within it but the overall cross section shouldn't change significantly over the length of the segment. Other properties are permitted to be unique to each segment as well, including viscosity, surface roughness, height change, and length.
 
@@ -59,18 +61,21 @@ A segment may optionally be partially or fully filled with a lighter fluid (e.g.
 Given the effect of local temperature on the momentum equation, the energy equation is discretized on a per-segment basis as follows:
 
 !equation id=discretized_energy
-A \rho c_p \pd{T}{t} + \frac{\dot{m}}{2 L} \left(1 - \frac{|\dot{m}|}{\dot{m}}\right) c_p T_d - \frac{\dot{m}}{2 L} \left(1 + \frac{|\dot{m}|}{\dot{m}}\right) c_p T_u + \frac{|\dot{m}| c_p}{L} T = \frac{h P_w}{2} \left( 2 T_w - T - \frac{1}{2} \left( 1 - \frac{|\dot{m}|}{\dot{m}} \right) T_d - \frac{1}{2} \left( 1 + \frac{|\dot{m}|}{\dot{m}} \right) T_u \right) \,
+A \rho c_p \pd{T}{t} + \frac{\dot{m}}{2 L} \left(1 - \frac{|\dot{m}|}{\dot{m}}\right) c_p T_d - \frac{\dot{m}}{2 L} \left(1 + \frac{|\dot{m}|}{\dot{m}}\right) c_p T_u + \frac{|\dot{m}| c_p}{L} T = h P_w \left( T_w - T_m \right) \,
 
 where
 
 - $T_d$ is the downstream segment's temperature,
 - $T_u$ is the upstream segment's temperature,
-- $h$ is the heat transfer coefficient, and
-- $T_w$ is the wall temperature.
+- $h$ is the heat transfer coefficient,
+- $T_w$ is the wall temperature, and
+- $T_m$ is the bulk fluid temperature seen by the wall.
 
-The implication of this discretization is that the temperature of the segment is defined at the opposite end of the segment from the flow entrance. Hence, proper conservation of energy necessitates the modified wall heat transfer term following the form of Newton's law of cooling. Furthermore, a modified advection term is used to ensure the proper directionality of the advection regardless of the flow direction.
+By default the node temperature is used, $T_m = T$, which is monotone for any number of transfer units and any flow rate. Alternatively, the segment average may be selected, $T_m = (T + T_{in})/2$, with $T_{in} = \frac{1}{2} \left( 1 - \frac{|\dot{m}|}{\dot{m}} \right) T_d + \frac{1}{2} \left( 1 + \frac{|\dot{m}|}{\dot{m}} \right) T_u$ the upwinded inlet temperature. When a reference fluid is supplied, the advection terms are scaled by $\rho / \rho_{ref}$ (volumetric continuity).
 
-Most closure quantities in the governing equations are user-supplied quantities, including: flow area, reference pressure, forms loss coefficients, gravitational acceleration, segment angles, pump pressure gains, and wetted perimeters.
+The temperature of the segment is defined at the opposite end of the segment from the flow entrance. When the segment average is selected, proper conservation of energy therefore requires evaluating the wall heat transfer between $T_w$ and the mean of the segment's inlet and outlet temperatures, following the form of Newton's law of cooling. Furthermore, a modified advection term is used to ensure the proper directionality of the advection regardless of the flow direction.
+
+Most closure quantities in the governing equations are user-supplied quantities, including: flow area, segment length, reference pressure, forms loss coefficients, gravitational acceleration, segment height changes $\Delta h_i$, pump pressure gains, surface roughness $\epsilon$, and wetted perimeters.
 
 A few notable closure quantities are not user-specified inputs, and are worth some discussion.
 
@@ -81,7 +86,7 @@ The hydraulic diameter of each segment is computed using the closure relation:
 !equation id=hydraulic_diameter
 D_{h,i} = \frac{4 A_i}{P_{w,i}} \,
 
-The friction factor of each segment is computed differently for laminar, turbulent, and transition flow. For $Re < 2300$ the flow is deemed laminar and the following analytical relation is used:
+The friction factor of each segment is computed differently for laminar, turbulent, and transition flow, based on the Reynolds number $Re = G D_h / \mu$, with $G$ the segment mass flux and $\mu$ the dynamic viscosity. $Re$ is bounded below by $10^{-3}$ to avoid division by zero at zero flow. For $Re < 2300$ the flow is deemed laminar and the following analytical relation is used:
 
 !equation id=laminar_friction
 f = \frac{64}{Re} \,
@@ -99,9 +104,9 @@ f = f_{lam}(2300) + \left(f_{turb}(4000) - f_{lam}(2300)\right) \frac{Re - 2300}
 The heat transfer coefficient is computed using the Dittus-Boelter correlation [!citep](dittus1930heat):
 
 !equation id=dittus_boelter
-h = 0.023 Re^{0.8} Pr^{0.4} \frac{k_f}{D_h} \,
+h = \max\left(0.023 Re^{0.8} Pr^{0.4},\, 4\right) \frac{k_f}{D_h} \,
 
-where the fluid properties entering $Re$ and $Pr$ are evaluated at the bulk temperature used for wall heat transfer. By default this is the segment average, the mean of the segment fluid temperature and its upwinded inlet value, which matches the form of [!eqref](discretized_energy). Alternatively, the segment temperature itself (well-mixed node) may be selected, which replaces the wall term in [!eqref](discretized_energy) with $h P_w (T_w - T)$ and remains monotone for any number of transfer units and any flow rate. For
+where $Pr = c_p \mu / k_f$, $k_f$ is the fluid thermal conductivity, and the mass flux in $Re$ is $G = \frac{|\dot{m}|}{A} \frac{\rho}{\rho_{ref}}$. The lower bound of 4 on the Nusselt number is the approximate laminar limit, which keeps the heat transfer coefficient finite and physically reasonable at low flow. The fluid properties are evaluated at the segment film temperature, the mean of the segment fluid temperature and its upwinded inlet value, independent of the bulk temperature option $T_m$ used in the wall term of [!eqref](discretized_energy). For
 the conjugate heat transfer kernels below, this coefficient is supplied by
 [ADDittusBoelterHTCFunctorMaterial.md].
 
@@ -140,7 +145,7 @@ Thus, the discretized energy equation for the inner wall temperature is:
 !equation id=discretized_inner_pipe_temperature
 A_{i,w} \rho_w c_{p,w} \pd{T_{i,w}}{t} = \frac{k_w P_{m,w} \left( T_{o,w} - T_{i,w} \right)}{\delta} +
 \frac{G_{i,u} \left( T_{i,u} - T_{i,w} \right) + G_{i,d} \left( T_{i,d} - T_{i,w} \right)}{L} +
-h \frac{P_{i,w}}{2} \left( T_f + T_{in} - 2T_{i,w} \right)
+h P_{i,w} \left( T_m - T_{i,w} \right)
 
 where
 
@@ -151,8 +156,7 @@ where
 - $\delta$ is the thickness of the wall,
 - $L$ is the segment length,
 - $h$ is the heat transfer coefficient of the fluid,
-- $T_f$ is the fluid temperature of the segment (defined at the outlet of the segment, as mentioned before), and
-- $T_{in}$ is the fluid temperature at the inlet of the segment.
+- $T_m$ is the fluid bulk temperature defined for [!eqref](discretized_energy), which must use the same option as the fluid energy equation so that the wall and fluid exchange the same heat.
 
 $G_{i,u}$ and $G_{i,d}$ are the axial face conductances to the upstream and downstream inner wall nodes. Each is the harmonic mean of two half-length conduction resistances in series across the face, accounting for the upstream/downstream node potentially having a different cross-section than this node:
 
@@ -164,7 +168,7 @@ G_{i,d} = \left( \frac{\Delta x_d}{2 k_w A_{i,w}} + \frac{\Delta x_d}{2 k_d A_{i
 
 where
 
-- $\Delta x_u$ and $\Delta x_d$ are the axial spacings to the upstream and downstream nodes, related to lengths via $\Delta x_u = L/2 + L_u/2$,
+- $\Delta x_u$ and $\Delta x_d$ are the axial spacings to the upstream and downstream nodes, supplied as inputs (for node-centered control volumes, $\Delta x_u = L/2 + L_u/2$),
 - $k_u$ and $k_d$ are the wall conductivity evaluated at the upstream and downstream node's own temperature, and
 - $A_{i,u}$ and $A_{i,d}$ are the layer area evaluated at the upstream and downstream node's own cross-section.
 
@@ -176,6 +180,9 @@ A_{o,w} \rho_w c_{p,w} \pd{T_{o,w}}{t} = \frac{k_w P_{m,w} \left( T_{i,w} - T_{o
 
 where
 
+- $A_{o,w}$ is the cross-sectional area of the outer layer of the wall,
+- $T_{o,u}$ and $T_{o,d}$ are the upstream and downstream outer-surface wall temperatures,
+- $G_{o,u}$ and $G_{o,d}$ are the axial face conductances of the outer layer, defined as $G_{i,u}$ and $G_{i,d}$ above but with the outer-layer areas and node temperatures, and
 - $q_o^{'}$ is the per-length heat transfer term through the outer boundary.
 
 Since the outer boundary of the wall may be subject to a number of boundary conditions, a number of kernels are provided for flexibility in modeling the per-length heat transfer term. The base kernels include:

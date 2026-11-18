@@ -18,7 +18,8 @@ InputParameters
 ADIncompressibleEnergySPScalarKernel::validParams()
 {
   InputParameters params = ADScalarKernel::validParams();
-  params.addClassDescription("Implements a generic energy solve over a 1D flow path segment.");
+  params.addClassDescription(
+      "Assembles transport equation for the fluid temperature over a 1D flow path segment.");
   params.addCoupledVar("mass_flow_rate",
                        {},
                        "Mass flow rate in component. Takes a "
@@ -48,16 +49,12 @@ ADIncompressibleEnergySPScalarKernel::validParams()
   params.addRequiredParam<MooseFunctorName>("length", "Segment/Component length [m]");
   params.addRequiredParam<MooseFunctorName>("heat_transfer_coefficient",
                                             "Heat transfer coefficient of the fluid [W/(m^2-K)]");
-  MooseEnum bulk_T("segment_average node", "segment_average");
-  params.addParam<MooseEnum>(
-      "heat_transfer_bulk_temperature",
-      bulk_T,
-      "Fluid temperature used for wall heat transfer (and fluid properties). "
-      "'segment_average': (T + T_in)/2 with T_in the upwinded neighbour (legacy). Not monotone "
-      "for NTU > 2 and, at zero flow, blind to an odd/even mode of the node temperatures, which "
-      "can then grow without bound. 'node': the node temperature T (well-mixed node); "
-      "monotone for any NTU and any flow rate. Must match the setting of the coupled "
-      "ADPipeInnerWallTemperatureScalarKernel so wall and fluid exchange the same heat.");
+  params.addParam<bool>(
+      "use_fluid_node_temp",
+      true,
+      "Whether to use fluid node temperature for wall heat transfer or a segment-averaged value. "
+      "Must match the setting of the coupled ADPipeInnerWallTemperatureScalarKernel so wall and "
+      "fluid exchange the same heat.");
 
   return params;
 }
@@ -86,29 +83,29 @@ ADReal
 ADIncompressibleEnergySPScalarKernel::computeQpResidual()
 {
   ADReal energy_residual = 0;
-  const libMesh::Node node(0., 0., 0.);
-  const Moose::NodeArg elem_arg = {&node, &Moose::NodeArg::undefined_subdomain_connection};
+  const Moose::PointArg arg = {Point(1, 2, 3)};
   const int i = 0;
   const auto state = _is_implicit ? Moose::currentState() : Moose::oldState();
   // start by getting fluid properties
   const auto in = 1.0 / 2.0 * (1 - _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tdown[i] +
                   1.0 / 2.0 * (1 + _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tup[i];
-  // Bulk temperature seen by the wall: segment average (legacy) or node temperature
-  const bool node_bulk = getParam<MooseEnum>("heat_transfer_bulk_temperature") == "node";
+  // Bulk temperature seen by the wall: segment average or node temperature
+  const bool node_bulk = getParam<bool>("use_fluid_node_temp");
   const auto Tm = node_bulk ? ADReal(Base::_u[i]) : ADReal((Base::_u[i] + in) / 2);
-  const auto rho = _fp.rho_from_p_T(_Pref(elem_arg, state), Tm);
-  const auto cp = _fp.cp_from_p_T(_Pref(elem_arg, state), Tm);
-  const auto rho_ref = _fp_ref ? _fp_ref->rho_from_p_T(_Pref(elem_arg, state), Tm) : rho;
+  const auto P = _Pref(arg, state);
+  const auto rho = _fp.rho_from_p_T(P, Tm);
+  const auto cp = _fp.cp_from_p_T(P, Tm);
+  const auto rho_ref = _fp_ref ? _fp_ref->rho_from_p_T(P, Tm) : rho;
 
   // Heat transfer to fluid (Dittus-Boelter)
-  const auto q = _h(elem_arg, state) * _perimeter(elem_arg, state) * (_Tw[i] - Tm);
+  const auto q = _h(arg, state) * _perimeter(arg, state) * (_Tw[i] - Tm);
   // Advection component
   energy_residual += (_m[i] / 2.0 * (1 - _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tdown[i] -
                       _m[i] / 2.0 * (1 + _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08)) * _Tup[i] +
                       _m[i] * _m[i] / sqrt(_m[i] * _m[i] + 1.0e-08) * Base::_u[i]) /
-                     _length(elem_arg, state) / _area(elem_arg, state) / rho_ref;
+                     _length(arg, state) / _area(arg, state) / rho_ref;
   // Wall heat transfer
-  energy_residual -= q / _area(elem_arg, state) / rho / cp;
+  energy_residual -= q / _area(arg, state) / rho / cp;
 
   return energy_residual;
 }

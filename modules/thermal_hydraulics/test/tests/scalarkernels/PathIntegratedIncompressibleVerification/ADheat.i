@@ -82,6 +82,7 @@ area = '${fparse 3.14159* ${R}^2}'
   []
   [temp1]
     type = ADIncompressibleEnergySPScalarKernel
+    use_fluid_node_temp = false
     mass_flow_rate = 'm1'
     inlet_temperature = 'T0'
     outlet_temperature = 'T2'

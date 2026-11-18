@@ -32,7 +32,7 @@ ADPipeWallTemperatureScalarKernelBase::validParams()
                        "a scalar variable name");
   params.addParam<bool>(
       "is_implicit",
-      false,
+      true,
       "Whether an explicit (previous value calculation) or implicit (current value) is used");
   params.addRequiredParam<UserObjectName>("solid_properties",
                                           "The name of the user object for solid properties");
