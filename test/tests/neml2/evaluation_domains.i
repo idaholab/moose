@@ -45,6 +45,8 @@
   [domains]
     model = model
     device = cpu
+    # This test exercises MOOSE threading, not libtorch intra-op threading.
+    num_threads = 1
     volume = true
     boundary = left
     interface = left_block_right_block
