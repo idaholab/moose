@@ -121,8 +121,7 @@
       type = RunException
       input = trainer_and_surr.i
       allow_test_objects = true
-      cli_args = "VectorPostprocessors/res/execute_on='initial final' "
-                 "VectorPostprocessors/res/expect_model_ready=true"
+      cli_args = "VectorPostprocessors/res/execute_on='initial final'"
       detail = 'evaluation is requested before the basis vectors and reduced operators exist.'
       expect_err = "does not have basis vectors and reduced operators"
       max_parallel = 3 # We need fewer processors than samples
