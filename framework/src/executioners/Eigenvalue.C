@@ -45,9 +45,9 @@ Eigenvalue::validParams()
   params.addParam<MooseEnum>(
       "eigenvector_normalization",
       MooseEnum("none b_norm", "none"),
-      "How each output eigenvector is scaled: not at all, or so that phi^T B phi, with B the "
-      "operator of the eigen solve, equals the square of 'normal_factor' when it is set and 1 "
-      "otherwise. The b_norm option requires 'output_all_eigenvectors' to be true.");
+      "How each output eigenvector is scaled: not at all, or so that phi^T B phi equals 1, with "
+      "B the operator of the eigen solve. The b_norm option requires 'output_all_eigenvectors' "
+      "to be true.");
   params.addParamNamesToGroup("output_all_eigenvectors eigenvector_time eigenvector_normalization",
                               "Eigenvector output");
 
@@ -65,8 +65,7 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     _final_timer(registerTimedSection("final", 1)),
     _output_all_eigenvectors(getParam<bool>("output_all_eigenvectors")),
     _eigenvector_time(getParam<MooseEnum>("eigenvector_time")),
-    _b_normalize_eigenvectors(getParam<MooseEnum>("eigenvector_normalization") == "b_norm"),
-    _eigenvector_b_norm(isParamValid("normal_factor") ? getParam<Real>("normal_factor") : 1)
+    _b_normalize_eigenvectors(getParam<MooseEnum>("eigenvector_normalization") == "b_norm")
 {
   _fixed_point_solve->setInnerSolve(_eigen_problem_solve);
   _time = _system_time;
@@ -131,7 +130,7 @@ Eigenvalue::loadEigenvector(dof_id_type i)
     if (b_norm == 0)
       paramError(
           "eigenvector_normalization", "Cannot normalize mode ", i + 1, " as its B-norm is zero.");
-    _eigen_problem.scaleEigenvector(_eigenvector_b_norm / b_norm);
+    _eigen_problem.scaleEigenvector(1 / b_norm);
   }
   // Let the objects executing at the end of a time step see the eigenvector. This does not run
   // multiapps or transfers.

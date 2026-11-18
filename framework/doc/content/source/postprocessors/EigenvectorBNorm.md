@@ -51,18 +51,16 @@ $c(\phi)$ is a norm only when $B$ is symmetric positive definite. The eigen kern
 negative definite $B$. A negative $\phi^{\top} B \phi$ has no square root, and the eigen problem
 reports an error.
 
-The default [!param](/Postprocessors/EigenvectorBNorm/execute_on) is `'linear timestep_end'`. The
-`linear` flag is required for use as the [!param](/Executioner/Eigenvalue/normalization)
-post-processor: the executioner requires that post-processor to execute on `linear`, and the
-normalization hook reads it again after each `linear` execution. `timestep_end` puts the value in
-the output.
+The default [!param](/Postprocessors/EigenvectorBNorm/execute_on) is `timestep_end`, which puts the
+value in the output. To use this post-processor as the
+[!param](/Executioner/Eigenvalue/normalization) post-processor, add `linear` to its
+[!param](/Postprocessors/EigenvectorBNorm/execute_on): the executioner requires that post-processor
+to execute on `linear`, and the normalization hook reads it again after each `linear` execution.
 
 To mass-normalize every output mode, set
 [!param](/Executioner/Eigenvalue/output_all_eigenvectors) to `true` and
 [!param](/Executioner/Eigenvalue/eigenvector_normalization) to `b_norm`. Each mode written then
-satisfies $\phi_i^{\top} B \phi_i = 1$, or the square of
-[!param](/Executioner/Eigenvalue/normal_factor) when it is set; see
-[Eigenvalue.md#output-all-eigenvectors]. That option uses the stored quadratic form directly and
+satisfies $\phi_i^{\top} B \phi_i = 1$; see [Eigenvalue.md#output-all-eigenvectors]. That option uses the stored quadratic form directly and
 does not need this post-processor. Add this post-processor to report the $B$-norm of each mode, or
 to normalize the active eigenvector through the
 [!param](/Executioner/Eigenvalue/normalization) hook.

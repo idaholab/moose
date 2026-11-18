@@ -23,10 +23,7 @@ EigenvectorBNorm::validParams()
       "Reports the B-norm sqrt(phi^T B phi) of the current eigenvector of the nonlinear eigen "
       "system, which the eigen problem computes with the B operator of the solve after each solve "
       "and each time it loads an eigenvector for output.");
-  // The normalization of an eigenvector is performed on LINEAR, and the eigenvalue executioner
-  // requires its 'normalization' postprocessor to execute there, so this postprocessor has to be
-  // executed there to be usable as that postprocessor
-  params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_TIMESTEP_END};
+  params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
   return params;
 }
 

@@ -44,7 +44,7 @@
   [active_index_matches_step]
     type = CSVDiff
     input = all_modes.i
-    cli_args = 'Executioner/output_all_eigenvectors=false Executioner/eigenvector_normalization=none Problem/active_eigen_index=2 Outputs/file_base=active_2'
+    cli_args = 'Executioner/output_all_eigenvectors=false Executioner/eigenvector_normalization=none Executioner/normalization=bnorm Executioner/normal_factor=1 Postprocessors/bnorm/execute_on="linear timestep_end" Problem/active_eigen_index=2 Outputs/file_base=active_2'
     csvdiff = active_2.csv
     capabilities = 'slepc'
     requirement = 'The system shall output the eigenvector selected by the active eigen index when the per-eigenvector output is disabled.'

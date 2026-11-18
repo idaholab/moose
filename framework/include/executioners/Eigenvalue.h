@@ -91,11 +91,8 @@ private:
   /// What the output time of each eigenvector step is
   const MooseEnum _eigenvector_time;
 
-  /// Whether each output eigenvector is scaled to the B-norm \p _eigenvector_b_norm
+  /// Whether each output eigenvector is scaled to a unit B-norm sqrt(phi^T B phi)
   const bool _b_normalize_eigenvectors;
-
-  /// The B-norm sqrt(phi^T B phi) each output eigenvector is scaled to
-  const Real _eigenvector_b_norm;
 
   bool _last_solve_converged = true;
 };

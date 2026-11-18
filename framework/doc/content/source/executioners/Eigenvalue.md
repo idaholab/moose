@@ -44,11 +44,10 @@ With `none`, each mode is written as the eigen solver returns it, and the magnit
 comparable between steps. With `b_norm`, each mode is scaled directly so that
 
 \begin{equation}
-\phi_i^{\top} B \phi_i = f^2,
+\phi_i^{\top} B \phi_i = 1,
 \end{equation}
 
-where $\phi_i$ is mode $i$, $B$ is the operator that the eigen solve assembled, and $f$ is
-[!param](/Executioner/Eigenvalue/normal_factor), or 1 when that parameter is not set. $B$ includes the
+where $\phi_i$ is mode $i$ and $B$ is the operator that the eigen solve assembled. $B$ includes the
 sign of [!param](/Problem/EigenProblem/negative_sign_eigen_kernel), and $B = I$ for a standard
 eigenproblem. The scaling uses the quadratic form that the [EigenProblem.md] stores when it loads the
 mode, so it needs no post-processor and no `LINEAR` execution. It has the solve-type requirements
@@ -60,7 +59,9 @@ positive. A mode with a zero $B$-norm cannot be scaled and is an error. Setting
 The [!param](/Executioner/Eigenvalue/normalization) and
 [!param](/Executioner/Eigenvalue/normal_factor) hook applies to the active eigenvector only, as
 without the option. It does not change the output modes. An [EigenvectorBNorm.md] post-processor
-reports the $B$-norm of each output mode, which is $f$ with `b_norm`.
+reports the $B$-norm of each output mode, which is 1 with `b_norm`. To mass-normalize the active
+eigenvector as well, set [!param](/Executioner/Eigenvalue/normalization) to that post-processor,
+[!param](/Executioner/Eigenvalue/normal_factor) to 1, and add `linear` to its `execute_on`.
 
 ### Output time of each mode id=eigenvector-time
 
