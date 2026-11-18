@@ -214,7 +214,7 @@ public:
   /**
    * Whether informational messages are suppressed for this app.
    */
-  bool suppressInfo() const;
+  bool suppressInfo() const { return _suppress_info; }
 
   /**
    * Return a writable reference to the ActionWarehouse associated with this app
@@ -1454,6 +1454,9 @@ protected:
 
   /// true if we want to just check the input file
   const bool _check_input;
+
+  /// Whether informational messages from actions and objects are suppressed
+  const bool _suppress_info;
 
   /// The relationship managers that have been added
   std::set<std::shared_ptr<RelationshipManager>> _relationship_managers;
