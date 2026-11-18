@@ -40,14 +40,17 @@ Function::value(const ADReal & t, const ADPoint & p) const
   const auto rp = MetaPhysicL::raw_value(p);
   const auto grad = gradient(rt, rp);
   ADReal ret = value(rt, rp);
-  ret.derivatives() = grad(0) * p(0).derivatives()
+  ret.derivatives() = grad(0) * p(0).derivatives();
 #if LIBMESH_DIM > 1
-                      + grad(1) * p(1).derivatives()
+  ret.derivatives() += grad(1) * p(1).derivatives();
 #endif
 #if LIBMESH_DIM > 2
-                      + grad(2) * p(2).derivatives()
+  ret.derivatives() += grad(2) * p(2).derivatives();
 #endif
-                      + timeDerivative(rt, rp) * t.derivatives();
+  // Skip timeDerivative() for a time without derivatives, so that functions which do not
+  // implement it can still be evaluated at points with derivatives
+  if (t.derivatives().size())
+    ret.derivatives() += timeDerivative(rt, rp) * t.derivatives();
   return ret;
 }
 
