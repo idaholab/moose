@@ -52,6 +52,8 @@
     input = 'bilinear_mixed_mode_I_moose.i'
     exodiff = 'bilinear_mixed_mode_I_moose_out.e'
     # Fully degraded reaction and stress residues vary by about 4e-11 across platforms.
+    # The near-zero displacement residues are O(1e-10), so O(1e-15) roundoff differences can
+    # dominate a relative comparison. The displacement floor in native_y.cmp treats them as zero.
     custom_cmp = 'native_y.cmp'
     requirement = 'The system shall compute the mode-I reaction-force history using the native MOOSE cohesive traction law.'
   []
