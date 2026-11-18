@@ -1,0 +1,10 @@
+[Tests]
+  [jacobian]
+    type = PetscJacobianTester
+    input = 'transient_absorbing.i'
+    run_sim = false
+    requirement = 'The system shall use the correct jacobian contribution for a first order transient absorbing boundary condition for vector field variables.'
+    design = 'VectorTransientAbsorbingBC.md'
+    issues = '#34235'
+  []
+[]
