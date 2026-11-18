@@ -11,19 +11,22 @@
     nx = 2
     ny = 2
   []
-  # Node ids run along x and then y, so node 0 is at (0,0), node 5 at (1,0.5) and node 6 at (0,1).
   [secondary]
     type = ExtraNodesetGenerator
     input = square
     new_boundary = secondary
-    nodes = '5'
+    coord = '1 0.5'
   []
+  # LinearNodalConstraint takes primary nodes by ID, so they have to keep the numbering this
+  # generator gives them: node 0 is at (0,0) and node 6 is at (0,1).
   allow_renumbering = false
 []
 
 [Problem]
-  # Refinement moves the constrained nodes' couplings, so the sparsity pattern changes between
-  # time steps, as in the equal value boundary constraint adaptivity test.
+  # A constraint's coupling entries are added to the sparsity pattern when the constraint is
+  # built, but that is not redone when refinement recomputes the pattern, so the second step
+  # hits a new nonzero. Hash table assembly does not preallocate, which is how the equal value
+  # boundary constraint adaptivity test handles the same problem.
   use_hash_table_matrix_assembly = true
 []
 
@@ -91,9 +94,10 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
-  automatic_scaling = true
+  # The penalty makes the unpreconditioned residual a poor convergence measure, so judge
+  # convergence on the preconditioned norm instead.
+  petsc_options_iname = '-pc_type -ksp_norm_type'
+  petsc_options_value = 'lu preconditioned'
   num_steps = 3
   nl_rel_tol = 1e-06
   nl_abs_tol = 1e-08

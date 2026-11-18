@@ -173,7 +173,7 @@ NodalConstraint::localSecondaryNodes(const std::vector<dof_id_type> & node_ids) 
   {
     // The node may be remote, and therefore absent, on a distributed mesh.
     const Node * const node = lm_mesh.query_node_ptr(node_id);
-    if (node && node->processor_id() == _subproblem.processor_id())
+    if (node && node->processor_id() == lm_mesh.processor_id())
       local_nodes.push_back(node_id);
   }
 

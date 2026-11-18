@@ -13,15 +13,15 @@
     nx = 2
     ny = 2
   []
-  # Node ids run along x and then y for this generator, so node 0 is at (0,0), node 5 is at
-  # (1,0.5) and node 6 is at (0,1). Node 5 is the only node on the right boundary that no
-  # Dirichlet condition also acts on.
+  # (1,0.5) is the only node on the right boundary that no Dirichlet condition also acts on.
   [secondary]
     type = ExtraNodesetGenerator
     input = square
     new_boundary = secondary
-    nodes = '5'
+    coord = '1 0.5'
   []
+  # LinearNodalConstraint takes primary nodes by ID, so they have to keep the numbering this
+  # generator gives them: node 0 is at (0,0) and node 6 is at (0,1).
   allow_renumbering = false
 []
 

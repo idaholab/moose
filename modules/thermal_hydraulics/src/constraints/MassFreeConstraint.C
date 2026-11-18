@@ -46,7 +46,10 @@ MassFreeConstraint::updateConnectivity()
   // available on a distributed mesh.
   _primary_node_vector = getParam<std::vector<dof_id_type>>("nodes");
 
-  // just a dummy value that is never used
+  // This constraint has no secondary node: it overrides computeResidual() and computeJacobian()
+  // and only ever assembles on _primary_node_vector. The value here is never read, but
+  // _connected_nodes has to be non-empty, because NonlinearSystemBase skips a nodal constraint
+  // whose secondary node list is empty.
   _connected_nodes.push_back(*_primary_node_vector.begin());
 }
 

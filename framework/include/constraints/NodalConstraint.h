@@ -42,10 +42,11 @@ public:
   /**
    * Fill _primary_node_vector and _connected_nodes for this constraint.
    *
-   * Called by updateConstrainedNodes() with both lists already cleared, and only to fill them:
-   * the ghosting the lists imply is added afterwards by updateConstrainedNodes(). Put a secondary
-   * node in _connected_nodes only on the process that owns it, for which localSecondaryNodes()
-   * does the filtering.
+   * updateConstrainedNodes() clears both lists, calls this method, and then ghosts what the
+   * lists require, so an implementation only has to fill them. Every process must put every
+   * primary node in _primary_node_vector, in the same order, because per-primary data such as
+   * weights is indexed by position in that list. Only the process that owns a secondary node may
+   * put it in _connected_nodes; localSecondaryNodes() applies that filter.
    */
   virtual void updateConnectivity();
 
