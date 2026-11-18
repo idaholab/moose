@@ -54,6 +54,12 @@ ComputeSimoHughesJ2PlasticityStress::initialSetup()
 {
   ComputeLagrangianStressBase::initialSetup();
 
+  // The elastic predictor uses the incremental deformation gradient, which is the identity with
+  // small kinematics, so the model would have no deviatoric response.
+  if (!_large_kinematics)
+    mooseError("ComputeSimoHughesJ2PlasticityStress requires large kinematics; set "
+               "large_kinematics = true on the ComputeLagrangianStrain calculator.");
+
   _flow_stress_material = &getMaterial("flow_stress_material");
 
   // Enforce isotropic elastic tensor
