@@ -330,9 +330,15 @@ public:
         _console, false, true, false, messagePrefix(true), std::forward<Args>(args)...);
   }
 
+  /**
+   * Emits an informational message prefixed with the object name and type, unless the
+   * application suppresses informational messages.
+   */
   template <typename... Args>
   void mooseInfo(Args &&... args) const
   {
+    if (suppressInfo())
+      return;
     moose::internal::mooseInfoStream(_console, messagePrefix(true), std::forward<Args>(args)...);
   }
 
@@ -384,6 +390,9 @@ protected:
   const InputParameters & _pars;
 
 private:
+  /// Whether the application of this object suppresses informational messages
+  bool suppressInfo() const;
+
   /**
    * Internal method for getting the message prefix for an object (object type, name, etc).
    *

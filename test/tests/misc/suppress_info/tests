@@ -1,0 +1,29 @@
+[Tests]
+  issues = '#31883'
+  design = 'command_line_usage.md'
+  [suppress_info]
+    requirement = 'The system shall support suppressing informational messages from objects with a '
+                  'command-line option, including'
+    [default]
+      type = RunApp
+      input = suppress_info.i
+      expect_out = '\*\*\* Info \*\*\*'
+      detail = 'outputting informational messages when the option is not provided,'
+    []
+    [suppressed]
+      type = RunApp
+      input = suppress_info.i
+      cli_args = '--suppress-info'
+      absent_out = '\*\*\* Info \*\*\*'
+      detail = 'suppressing informational messages when the option is provided, and'
+    []
+    [multiapp]
+      type = RunApp
+      input = suppress_info_parent.i
+      cli_args = '--suppress-info'
+      absent_out = '\*\*\* Info \*\*\*'
+      detail = 'suppressing informational messages in sub-applications when the option is provided '
+               'to the parent application.'
+    []
+  []
+[]

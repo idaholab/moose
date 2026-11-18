@@ -232,8 +232,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
               "This message will only print once for all apps and all time steps."));
       }
 
-      ScopedAppInfoSuppression scoped_info(*_apps[i]);
-
       if (_sub_cycling)
       {
         Real time_old = ex->getTime() + app_time_offset;
@@ -562,10 +560,7 @@ TransientMultiApp::incrementTStep(Real target_time)
       // Only increment the step if we are after (target_time) the
       // start_time (added to app_time_offset) of this sub_app.
       if (_apps[i]->getStartTime() + app_time_offset < target_time)
-      {
-        ScopedAppInfoSuppression scoped_info(*_apps[i]);
         ex->incrementStepOrReject();
-      }
     }
   }
 }
@@ -578,7 +573,6 @@ TransientMultiApp::finishStep(bool recurse_through_multiapp_levels)
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
       TransientBase * ex = _transient_executioners[i];
-      ScopedAppInfoSuppression scoped_info(*_apps[i]);
       ex->endStep();
       ex->postStep();
       if (recurse_through_multiapp_levels)
@@ -607,7 +601,6 @@ TransientMultiApp::computeDT()
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
       TransientBase * ex = _transient_executioners[i];
-      ScopedAppInfoSuppression scoped_info(*_apps[i]);
       ex->computeDT();
       Real dt = ex->getDT();
 
@@ -655,7 +648,6 @@ void
 TransientMultiApp::setupApp(unsigned int i, Real /*time*/) // FIXME: Should we be passing time?
 {
   auto & app = _apps[i];
-  ScopedAppInfoSuppression scoped_info(*app);
   TransientBase * ex = dynamic_cast<TransientBase *>(app->getExecutioner());
   if (!ex)
     mooseError("MultiApp ", name(), " is not using a Transient Executioner!");

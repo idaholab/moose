@@ -20,8 +20,8 @@ messages:
 - `mooseInfoRepeated(args)`: The same as `mooseInfo(args)` but only prints a message
   once, even if called multiple times.
 
-Informational messages emitted with `mooseInfo(args)` or `mooseInfoRepeated(args)` can
-be suppressed with the command-line flag `--suppress-info`.
+Informational messages emitted by objects with `mooseInfo(args)` or `paramInfo(param, args)`
+can be suppressed with the command-line flag `--suppress-info`.
 
 !alert note title=Warnings in repeating sections
 For warnings in sections of the code that are often executed, it is recommended to leverage

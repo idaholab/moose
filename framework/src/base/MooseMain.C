@@ -13,7 +13,6 @@
 #include "AppFactory.h"
 #include "CommandLine.h"
 #include "InputParameters.h"
-#include "Moose.h"
 #include "MooseApp.h"
 
 #ifdef LIBMESH_HAVE_OPENMP
@@ -53,7 +52,6 @@ createMooseApp(const std::string & default_app_type, int argc, char * argv[])
   // command line arguments for the Parser
   auto command_line = std::make_unique<CommandLine>(argc, argv);
   command_line->parse();
-  Moose::_suppress_info = command_line->hasArgument("--suppress-info");
 
   // Setup the parser with the input and the HIT parameters from the command line. The parse
   // will also look for "Application/type=" in input to specify the application type
