@@ -23,10 +23,13 @@
 []
 
 [Problem]
-  # A constraint's coupling entries are added to the sparsity pattern when the constraint is
-  # built, but that is not redone when refinement recomputes the pattern, so the second step
-  # hits a new nonzero. Hash table assembly does not preallocate, which is how the equal value
-  # boundary constraint adaptivity test handles the same problem.
+  # Mortar and node-face constraints declare a COUPLING relationship manager, which libMesh keeps
+  # in its coupling functors and consults every time it builds the sparsity pattern. Nodal
+  # constraints have none: their coupling reaches the pattern only through
+  # NonlinearSystemBase::augmentSparsity(), and the entries it adds for the refined mesh do not
+  # end up in the preallocated Jacobian, so assembling the constraint needs a new nonzero.
+  # Hash table assembly does not preallocate, and is how the equal value boundary constraint
+  # adaptivity test handles the same problem.
   use_hash_table_matrix_assembly = true
 []
 
