@@ -229,7 +229,10 @@ loopOverMortarSegments(
     // Reinit dual shape coeffs if dual shape functions needed
     // lindsayad: is there any need to make sure we do this on both reference and displaced?
     if (assembly.needDual())
-      assembly.reinitDual(secondary_face_elem, secondary_xi_pts, JxW);
+      assembly.reinitDual(secondary_face_elem,
+                          secondary_xi_pts,
+                          JxW,
+                          amg.getInactiveLMElems().count(secondary_face_elem));
 
     unsigned int n_segment = 0;
 
