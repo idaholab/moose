@@ -1,0 +1,16 @@
+[Tests]
+  [jk2lb_thermal_csvdiff]
+    type = CSVDiff
+    input = '../../thermal_solid_properties.i'
+    cli_args = "
+      solid_properties_class=ThermalCryogenicJK2LBProperties
+      file_base=jk2lb_thermal
+      T_min=2.0
+      T_max=300.0"
+    csvdiff = 'jk2lb_thermal_vpp_0000.csv'
+    mesh_mode = 'replicated'
+    requirement = "The system shall compute thermal properties for JK2LB austenitic stainless steel using log-polynomial correlations fitted to experimental data."
+    design = 'ThermalCryogenicJK2LBProperties.md ThermalSolidPropertiesMaterial.md'
+    issues = '#33677'
+  []
+[]
