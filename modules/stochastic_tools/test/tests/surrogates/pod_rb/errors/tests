@@ -96,6 +96,15 @@
       match_literal = true
       max_parallel = 3
     []
+    [no_snapshots]
+      type = RunException
+      input = trainer_and_surr.i
+      allow_test_objects = true
+      cli_args = "Trainers/pod_rb/execute_on='initial timestep_begin final'"
+      detail = 'the trainer executes before any snapshots are available.'
+      expect_err = "No snapshots are available to build the POD basis"
+      max_parallel = 3 # We need fewer processors than samples
+    []
   []
   [surrogate]
     requirement = 'PODReducedBasisSurrogate shall throw an error when '
@@ -112,8 +121,7 @@
       type = RunException
       input = trainer_and_surr.i
       allow_test_objects = true
-      cli_args = "Trainers/pod_rb/execute_on='initial timestep_begin final' "
-                 "VectorPostprocessors/res/execute_on='initial final' "
+      cli_args = "VectorPostprocessors/res/execute_on='initial final' "
                  "VectorPostprocessors/res/expect_model_ready=true"
       detail = 'evaluation is requested before the basis vectors and reduced operators exist.'
       expect_err = "does not have basis vectors and reduced operators"

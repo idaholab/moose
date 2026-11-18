@@ -40,10 +40,6 @@ GrainForceAndTorqueSum::GrainForceAndTorqueSum(const InputParameters & parameter
 void
 GrainForceAndTorqueSum::initialize()
 {
-  // The summed objects have not executed yet at INITIAL, so their data is not populated
-  if (_fe_problem.getCurrentExecuteOnFlag() == EXEC_INITIAL)
-    return;
-
   for (unsigned int i = 0; i < _grain_num; ++i)
   {
     _force_values[i] = 0.0;
@@ -58,7 +54,9 @@ GrainForceAndTorqueSum::initialize()
                    _sum_objects[j],
                    "' must have one entry per grain (",
                    _grain_num,
-                   ").");
+                   "). Make sure '",
+                   _sum_objects[j],
+                   "' has executed before this object.");
 
       _force_values[i] += force_values[i];
       _torque_values[i] += torque_values[i];

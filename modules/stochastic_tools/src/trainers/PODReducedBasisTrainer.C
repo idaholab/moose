@@ -109,7 +109,8 @@ PODReducedBasisTrainer::execute()
   if (!_base_completed)
   {
     if (_snapshots.empty() || getSnapsSize(0) == 0)
-      return;
+      mooseError("No snapshots are available to build the POD basis. Make sure the snapshots are "
+                 "transferred before this trainer executes.");
 
     computeCorrelationMatrix();
     computeEigenDecomposition();
