@@ -968,175 +968,6 @@ DMCreateDomainDecomposition_Moose(
 }
 
 static PetscErrorCode
-DMMooseFunction(DM dm, Vec x, Vec r)
-{
-  PetscFunctionBegin;
-  libmesh_assert(x);
-  libmesh_assert(r);
-
-  NonlinearSystemBase * nl = NULL;
-  LibmeshPetscCallQ(DMMooseGetNonlinearSystem(dm, nl));
-  PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number> *>(nl->system().solution.get());
-  PetscVector<Number> X_global(x, nl->comm()), R(r, nl->comm());
-
-  // Use the system's update() to get a good local version of the
-  // parallel solution.  system.update() does change the residual vector,
-  // so there's no reason to swap PETSc's residual into the system for
-  // this step.
-  X_global.swap(X_sys);
-  nl->system().update();
-  X_global.swap(X_sys);
-
-  // Enforce constraints (if any) exactly on the
-  // current_local_solution.  This is the solution vector that is
-  // actually used in the computation of the residual below, and is
-  // not locked by debug-enabled PETSc the way that "x" is.
-  nl->system().get_dof_map().enforce_constraints_exactly(nl->system(),
-                                                         nl->system().current_local_solution.get());
-
-  // Zero the residual vector before assembling
-  R.zero();
-
-  // if the user has provided both function pointers and objects only the pointer
-  // will be used, so catch that as an error
-  if (nl->nonlinearSolver()->residual && nl->nonlinearSolver()->residual_object)
-  {
-    std::ostringstream err;
-    err << "ERROR: cannot specifiy both a function and object to compute the Residual!"
-        << std::endl;
-    mooseError(err.str());
-  }
-  if (nl->nonlinearSolver()->matvec && nl->nonlinearSolver()->residual_and_jacobian_object)
-  {
-    std::ostringstream err;
-    err << "ERROR: cannot specifiy both a function and object to compute the combined Residual & "
-           "Jacobian!"
-        << std::endl;
-    mooseError(err.str());
-  }
-  if (nl->nonlinearSolver()->residual != NULL)
-    nl->nonlinearSolver()->residual(
-        *(nl->system().current_local_solution.get()), R, nl->nonlinearSolver()->system());
-  else if (nl->nonlinearSolver()->residual_object != NULL)
-    nl->nonlinearSolver()->residual_object->residual(
-        *(nl->system().current_local_solution.get()), R, nl->nonlinearSolver()->system());
-  else if (nl->nonlinearSolver()->matvec != NULL)
-    nl->nonlinearSolver()->matvec(
-        *(nl->system().current_local_solution.get()), &R, NULL, nl->nonlinearSolver()->system());
-  else if (nl->nonlinearSolver()->residual_and_jacobian_object != NULL)
-    nl->nonlinearSolver()->residual_and_jacobian_object->residual_and_jacobian(
-        *(nl->system().current_local_solution.get()), &R, NULL, nl->nonlinearSolver()->system());
-  else
-  {
-    std::ostringstream err;
-    err << "No suitable residual computation routine found";
-    mooseError(err.str());
-  }
-  R.close();
-  PetscFunctionReturn(PETSC_SUCCESS);
-}
-
-static PetscErrorCode
-SNESFunction_DMMoose(SNES, Vec x, Vec r, void * ctx)
-{
-  DM dm = (DM)ctx;
-
-  PetscFunctionBegin;
-  LibmeshPetscCallQ(DMMooseFunction(dm, x, r));
-  PetscFunctionReturn(PETSC_SUCCESS);
-}
-
-static PetscErrorCode
-DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
-{
-  NonlinearSystemBase * nl = NULL;
-
-  PetscFunctionBegin;
-  LibmeshPetscCallQ(DMMooseGetNonlinearSystem(dm, nl));
-
-  PetscMatrix<Number> the_pc(pc, nl->comm());
-  PetscMatrix<Number> Jac(jac, nl->comm());
-  PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number> *>(nl->system().solution.get());
-  PetscVector<Number> X_global(x, nl->comm());
-
-  // Set the dof maps
-  the_pc.attach_dof_map(nl->system().get_dof_map());
-  Jac.attach_dof_map(nl->system().get_dof_map());
-
-  // Use the system's update() to get a good local version of the
-  // parallel solution.  system.update() does change the Jacobian, so
-  // there's no reason to swap PETSc's Jacobian into the system for
-  // this step.
-  X_global.swap(X_sys);
-  nl->system().update();
-  X_global.swap(X_sys);
-
-  // Enforce constraints (if any) exactly on the
-  // current_local_solution.  This is the solution vector that is
-  // actually used in the computation of the Jacobian below, and is
-  // not locked by debug-enabled PETSc the way that "x" is.
-  nl->system().get_dof_map().enforce_constraints_exactly(nl->system(),
-                                                         nl->system().current_local_solution.get());
-
-  // Zero out the preconditioner before computing the Jacobian.
-  the_pc.zero();
-
-  // if the user has provided both function pointers and objects only the pointer
-  // will be used, so catch that as an error
-  if (nl->nonlinearSolver()->jacobian && nl->nonlinearSolver()->jacobian_object)
-  {
-    std::ostringstream err;
-    err << "ERROR: cannot specifiy both a function and object to compute the Jacobian!"
-        << std::endl;
-    mooseError(err.str());
-  }
-  if (nl->nonlinearSolver()->matvec && nl->nonlinearSolver()->residual_and_jacobian_object)
-  {
-    std::ostringstream err;
-    err << "ERROR: cannot specifiy both a function and object to compute the combined Residual & "
-           "Jacobian!"
-        << std::endl;
-    mooseError(err.str());
-  }
-  if (nl->nonlinearSolver()->jacobian != NULL)
-    nl->nonlinearSolver()->jacobian(
-        *(nl->system().current_local_solution.get()), the_pc, nl->nonlinearSolver()->system());
-  else if (nl->nonlinearSolver()->jacobian_object != NULL)
-    nl->nonlinearSolver()->jacobian_object->jacobian(
-        *(nl->system().current_local_solution.get()), the_pc, nl->nonlinearSolver()->system());
-  else if (nl->nonlinearSolver()->matvec != NULL)
-    nl->nonlinearSolver()->matvec(*(nl->system().current_local_solution.get()),
-                                  NULL,
-                                  &the_pc,
-                                  nl->nonlinearSolver()->system());
-  else if (nl->nonlinearSolver()->residual_and_jacobian_object != NULL)
-    nl->nonlinearSolver()->residual_and_jacobian_object->residual_and_jacobian(
-        *(nl->system().current_local_solution.get()),
-        NULL,
-        &the_pc,
-        nl->nonlinearSolver()->system());
-  else
-  {
-    std::ostringstream err;
-    err << "No suitable Jacobian routine or object";
-    mooseError(err.str());
-  }
-  the_pc.close();
-  Jac.close();
-  PetscFunctionReturn(PETSC_SUCCESS);
-}
-
-static PetscErrorCode
-SNESJacobian_DMMoose(SNES, Vec x, Mat jac, Mat pc, void * ctx)
-{
-  DM dm = (DM)ctx;
-
-  PetscFunctionBegin;
-  LibmeshPetscCallQ(DMMooseJacobian(dm, x, jac, pc));
-  PetscFunctionReturn(PETSC_SUCCESS);
-}
-
-static PetscErrorCode
 DMVariableBounds_Moose(DM dm, Vec xl, Vec xu)
 {
   NonlinearSystemBase * nl = NULL;
@@ -1664,17 +1495,13 @@ DMSetUp_Moose(DM dm)
     }
   }
   /*
-   Do not evaluate function, Jacobian or bounds for an embedded DM -- the subproblem might not have
-   enough information for that.
+   Do not evaluate bounds for an embedded DM -- the subproblem might not have enough information for
+   that.
    */
   if (dmm->_all_vars && dmm->_all_blocks && dmm->_nosides && dmm->_nounsides && dmm->_nocontacts &&
       dmm->_nouncontacts)
-  {
-    LibmeshPetscCallQ(DMSNESSetFunction(dm, SNESFunction_DMMoose, (void *)dm));
-    LibmeshPetscCallQ(DMSNESSetJacobian(dm, SNESJacobian_DMMoose, (void *)dm));
     if (dmm->_nl->nonlinearSolver()->bounds || dmm->_nl->nonlinearSolver()->bounds_object)
       LibmeshPetscCallQ(DMSetVariableBounds(dm, DMVariableBounds_Moose));
-  }
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 #if !PETSC_VERSION_LESS_THAN(3, 23, 0)
@@ -2132,47 +1959,6 @@ DMCreate_Moose(DM dm)
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 EXTERN_C_END
-
-#undef __FUNCT__
-#define __FUNCT__ "SNESUpdateDMMoose"
-PetscErrorCode
-SNESUpdateDMMoose(SNES snes, PetscInt iteration)
-{
-  /* This is called any time the structure of the problem changes in a way that affects the Jacobian
-     sparsity pattern.
-     For example, this may happen when NodeFaceConstraints change Jacobian's sparsity pattern based
-     on newly-detected Penetration.
-     In that case certain preconditioners (e.g., PCASM) will not work, unless we tell them that the
-     sparsity pattern has changed.
-     For now we are rebuilding the whole KSP, when necessary.
-  */
-  DM dm;
-  KSP ksp;
-  const char * prefix;
-  MPI_Comm comm;
-  PC pc;
-
-  PetscFunctionBegin;
-  if (iteration)
-  {
-    /* TODO: limit this only to situations when displaced (un)contact splits are present, as is
-     * DisplacedProblem(). */
-    LibmeshPetscCallQ(SNESGetDM(snes, &dm));
-    LibmeshPetscCallQ(DMMooseReset(dm));
-    LibmeshPetscCallQ(DMSetUp(dm));
-    LibmeshPetscCallQ(SNESGetKSP(snes, &ksp));
-    /* Should we rebuild the whole KSP? */
-    LibmeshPetscCallQ(PetscObjectGetOptionsPrefix((PetscObject)ksp, &prefix));
-    LibmeshPetscCallQ(PetscObjectGetComm((PetscObject)ksp, &comm));
-    LibmeshPetscCallQ(PCCreate(comm, &pc));
-    LibmeshPetscCallQ(PCSetDM(pc, dm));
-    LibmeshPetscCallQ(PCSetOptionsPrefix(pc, prefix));
-    LibmeshPetscCallQ(PCSetFromOptions(pc));
-    LibmeshPetscCallQ(KSPSetPC(ksp, pc));
-    LibmeshPetscCallQ(PCDestroy(&pc));
-  }
-  PetscFunctionReturn(PETSC_SUCCESS);
-}
 
 PetscErrorCode
 DMMooseRegisterAll()

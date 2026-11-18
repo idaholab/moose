@@ -250,15 +250,17 @@ PorousFlowBrineCO2::gasProperties(const ADReal & pressure,
   ADReal co2_density, co2_viscosity;
   _co2_fp.rho_mu_from_p_T(pressure, temperature, co2_density, co2_viscosity);
 
-  ADReal co2_enthalpy = _co2_fp.h_from_p_T(pressure, temperature);
-
   // Save the values to the FluidStateProperties object. Note that derivatives wrt z are 0
   gas.density = co2_density;
   gas.viscosity = co2_viscosity;
-  gas.enthalpy = co2_enthalpy;
 
   mooseAssert(gas.density.value() > 0.0, "Gas density must be greater than zero");
-  gas.internal_energy = gas.enthalpy - pressure / gas.density;
+
+  if (_compute_enthalpy || _compute_internal_energy)
+    gas.enthalpy = _co2_fp.h_from_p_T(pressure, temperature);
+
+  if (_compute_internal_energy)
+    gas.internal_energy = gas.enthalpy - pressure / gas.density;
 }
 
 void
@@ -283,24 +285,28 @@ PorousFlowBrineCO2::liquidProperties(const ADReal & pressure,
   // Assume that liquid viscosity is just the brine viscosity
   const ADReal liquid_viscosity = _brine_fp.mu_from_p_T_X(pressure, temperature, Xnacl);
 
-  // Liquid enthalpy (including contribution due to the enthalpy of dissolution)
-  const ADReal brine_enthalpy = _brine_fp.h_from_p_T_X(pressure, temperature, Xnacl);
-
-  // Enthalpy of CO2
-  const ADReal co2_enthalpy = _co2_fp.h_from_p_T(pressure, temperature);
-
-  // Enthalpy of dissolution
-  const ADReal hdis = enthalpyOfDissolution(temperature);
-
-  const ADReal liquid_enthalpy = (1.0 - Xco2) * brine_enthalpy + Xco2 * (co2_enthalpy + hdis);
-
   // Save the values to the FluidStateProperties object
   liquid.density = liquid_density;
   liquid.viscosity = liquid_viscosity;
-  liquid.enthalpy = liquid_enthalpy;
 
   mooseAssert(liquid.density.value() > 0.0, "Liquid density must be greater than zero");
-  liquid.internal_energy = liquid.enthalpy - pressure / liquid.density;
+
+  if (_compute_enthalpy || _compute_internal_energy)
+  {
+    // Liquid enthalpy (including contribution due to the enthalpy of dissolution)
+    const ADReal brine_enthalpy = _brine_fp.h_from_p_T_X(pressure, temperature, Xnacl);
+
+    // Enthalpy of CO2
+    const ADReal co2_enthalpy = _co2_fp.h_from_p_T(pressure, temperature);
+
+    // Enthalpy of dissolution
+    const ADReal hdis = enthalpyOfDissolution(temperature);
+
+    liquid.enthalpy = (1.0 - Xco2) * brine_enthalpy + Xco2 * (co2_enthalpy + hdis);
+  }
+
+  if (_compute_internal_energy)
+    liquid.internal_energy = liquid.enthalpy - pressure / liquid.density;
 }
 
 ADReal

@@ -3,34 +3,62 @@
     type = 'Exodiff'
     input = 'strain.i'
     exodiff = 'strain_out.e'
+    requirement = 'The system shall accumulate a creep strain increment computed from the '
+                   'divergence of a diffusional, grain-boundary-dependent Cahn-Hilliard flux.'
+    design = 'FluxBasedStrainIncrement.md SumTensorIncrements.md'
+    issues = '#6612'
   [../]
   [./strain_gb_relax]
     type = 'Exodiff'
     input = 'strain_gb_relax.i'
     exodiff = 'strain_gb_relax_out.e'
+    requirement = 'The system shall accumulate a strain increment representing grain boundary '
+                   'relaxation, oriented along the local grain boundary normal.'
+    design = 'GBRelaxationStrainIncrement.md SumTensorIncrements.md'
+    issues = '#6612'
   [../]
   [./stress]
     type = 'Exodiff'
     input = 'stress.i'
     exodiff = 'stress_out.e'
     custom_cmp = 'stress.cmp'
+    requirement = 'The system shall compute the mechanical stress resulting from a creep strain '
+                   'that is driven by the diffusional flux of a Cahn-Hilliard concentration '
+                   'field.'
+    design = 'FluxBasedStrainIncrement.md ComputeStrainIncrementBasedStress.md'
+    issues = '#6612'
   [../]
   [./stress_flux_n_gb_relax]
     type = 'Exodiff'
     input = 'stress_flux_n_gb_relax.i'
     exodiff = 'stress_flux_n_gb_relax_out.e'
     custom_cmp = 'stress.cmp'
+    requirement = 'The system shall compute the mechanical stress resulting from a creep strain '
+                   'that combines a diffusional flux-based strain increment with a grain '
+                   'boundary relaxation strain increment.'
+    design = 'FluxBasedStrainIncrement.md GBRelaxationStrainIncrement.md SumTensorIncrements.md'
+    issues = '#6612'
   [../]
   [./stress_based_chem_pot]
     type = 'Exodiff'
     input = 'stress_based_chem_pot.i'
     exodiff = 'stress_based_chem_pot_out.e'
     abs_zero = 1e-7
+    requirement = 'The system shall add a mechanical contribution derived from the stress '
+                   'tensor to the chemical potential driving a Cahn-Hilliard diffusion '
+                   'calculation.'
+    design = 'StressBasedChemicalPotential.md'
+    issues = '#6612'
   [../]
   [./variable_base_eigen_strain]
     type = 'Exodiff'
     input = 'variable_base_eigen_strain.i'
     exodiff = 'variable_base_eigen_strain_out.e'
     abs_zero = 1e-8
+    requirement = 'The system shall compute an eigenstrain whose base tensor is a '
+                   'grain-boundary-dependent anisotropic material tensor scaled by a '
+                   'concentration-dependent prefactor.'
+    design = 'ComputeVariableBaseEigenStrain.md'
+    issues = '#6612'
   [../]
 []

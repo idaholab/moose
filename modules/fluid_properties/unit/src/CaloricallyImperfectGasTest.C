@@ -656,3 +656,125 @@ TEST_F(CaloricallyImperfectGasTest, compareWithIdeal)
     REL_TEST(de_dh, de_dh2, 1e-5);
   }
 }
+
+/**
+ * Verify the sound speed derivatives for an internal energy that is quadratic in temperature,
+ * so that the specific heat ratio varies with the internal energy
+ */
+TEST_F(CaloricallyImperfectGasTest, soundSpeedVaryingGamma)
+{
+  // e(T) = 3000 T + 2 T^2, so cv = 3000 + 4 T and the specific heat ratio vary continuously
+  InputParameters e_fn_params = _factory.getValidParams("ParsedFunction");
+  e_fn_params.set<std::string>("expression") = "3000 * t + 2 * t * t";
+  _fe_problem->addFunction("ParsedFunction", "e_quad_fn", e_fn_params);
+  _fe_problem->getFunction("e_quad_fn").initialSetup();
+
+  InputParameters uo_pars = _factory.getValidParams("CaloricallyImperfectGas");
+  uo_pars.set<Real>("molar_mass") = 0.002;
+  uo_pars.set<FunctionName>("e") = "e_quad_fn";
+  uo_pars.set<FunctionName>("mu") = "default_fn";
+  uo_pars.set<FunctionName>("k") = "default_fn";
+  uo_pars.set<Real>("min_temperature") = 100.0;
+  uo_pars.set<Real>("max_temperature") = 500.0;
+  uo_pars.set<Real>("temperature_resolution") = 0.01;
+  _fe_problem->addUserObject("CaloricallyImperfectGas", "fp_quad", uo_pars);
+  auto & fp = _fe_problem->getUserObject<CaloricallyImperfectGas>("fp_quad");
+  fp.initialSetup();
+
+  const Real T = 300.0;
+  const Real p = 1e5;
+  const Real v = 1.0 / fp.rho_from_p_T(p, T);
+  const Real e = fp.e_from_p_T(p, T);
+
+  // The tolerance accounts for the linear interpolation of the T(e) lookup table
+  DERIV_TEST_CUSTOM_PERTURBATION(fp.c_from_v_e, v, e, 1e-4, 1e-4);
+  DERIV_TEST_CUSTOM_PERTURBATION(fp.gamma_from_v_e, v, e, 1e-4, 1e-4);
+}
+
+/**
+ * Verify the lookup tables at and beyond their bounds
+ */
+TEST_F(CaloricallyImperfectGasTest, lookupTableBounds)
+{
+  const bool original_throw_on_warning = Moose::_throw_on_warning;
+  Moose::_throw_on_warning = false;
+
+  InputParameters e_fn_params = _factory.getValidParams("PiecewiseLinear");
+  e_fn_params.set<std::vector<Real>>("x") = {100, 500};
+  e_fn_params.set<std::vector<Real>>("y") = {1e6, 5e6};
+  _fe_problem->addFunction("PiecewiseLinear", "e_lin_fn", e_fn_params);
+
+  InputParameters uo_pars = _factory.getValidParams("CaloricallyImperfectGas");
+  uo_pars.set<Real>("molar_mass") = 0.002;
+  uo_pars.set<FunctionName>("e") = "e_lin_fn";
+  uo_pars.set<FunctionName>("mu") = "default_fn";
+  uo_pars.set<FunctionName>("k") = "default_fn";
+  uo_pars.set<Real>("min_temperature") = 100.0;
+  uo_pars.set<Real>("max_temperature") = 500.0;
+  uo_pars.set<Real>("temperature_resolution") = 1.0;
+  uo_pars.set<bool>("out_of_bound_error") = false;
+  _fe_problem->addUserObject("CaloricallyImperfectGas", "fp_bounds", uo_pars);
+  auto & fp = _fe_problem->getUserObject<CaloricallyImperfectGas>("fp_bounds");
+  fp.initialSetup();
+
+  const Real v = 1.0;
+  const Real p = 1e5;
+  // Upper bound of the T(e), T(h) and Z(T) tables
+  REL_TEST(fp.T_from_v_e(v, 5e6), 500.0, REL_TOL_CONSISTENCY);
+  REL_TEST(fp.T_from_p_h(p, fp.h_from_p_T(p, 500.0)), 500.0, REL_TOL_CONSISTENCY);
+  EXPECT_TRUE(std::isfinite(fp.s_from_p_T(p, 500.0)));
+  // Below and above the tables, the values are clamped to the bounds
+  REL_TEST(fp.T_from_v_e(v, 0.5e6), 100.0, REL_TOL_CONSISTENCY);
+  REL_TEST(fp.T_from_v_e(v, 6e6), 500.0, REL_TOL_CONSISTENCY);
+  // s(T, v) = Z(T) + R ln(v), so at fixed v the entropy outside the table equals that at
+  // the nearest bound
+  REL_TEST(fp.s_from_T_v(50.0, v), fp.s_from_T_v(100.0, v), REL_TOL_CONSISTENCY);
+  REL_TEST(fp.s_from_T_v(600.0, v), fp.s_from_T_v(500.0, v), REL_TOL_CONSISTENCY);
+
+  Moose::_throw_on_warning = original_throw_on_warning;
+}
+
+/**
+ * Verify derivatives that were computed with relative finite-difference steps, at states where
+ * the step would vanish (s = 0) or leave the table (T = max_temperature)
+ */
+TEST_F(CaloricallyImperfectGasTest, derivativesAtEdgeStates)
+{
+  InputParameters e_fn_params = _factory.getValidParams("ParsedFunction");
+  e_fn_params.set<std::string>("expression") = "3000 * t + 2 * t * t";
+  _fe_problem->addFunction("ParsedFunction", "e_edge_fn", e_fn_params);
+  _fe_problem->getFunction("e_edge_fn").initialSetup();
+
+  InputParameters uo_pars = _factory.getValidParams("CaloricallyImperfectGas");
+  uo_pars.set<Real>("molar_mass") = 0.002;
+  uo_pars.set<FunctionName>("e") = "e_edge_fn";
+  uo_pars.set<FunctionName>("mu") = "e_edge_fn";
+  uo_pars.set<FunctionName>("k") = "e_edge_fn";
+  uo_pars.set<Real>("min_temperature") = 100.0;
+  uo_pars.set<Real>("max_temperature") = 500.0;
+  uo_pars.set<Real>("temperature_resolution") = 0.01;
+  _fe_problem->addUserObject("CaloricallyImperfectGas", "fp_edge", uo_pars);
+  auto & fp = _fe_problem->getUserObject<CaloricallyImperfectGas>("fp_edge");
+  fp.initialSetup();
+
+  // (dp/dh)_s = rho and (dp/ds)_h = -T rho, from dh = T ds + v dp
+  const Real T = 300.0;
+  const Real v = 1.0 / fp.rho_from_p_T(1e5, T);
+  const Real h = fp.h_from_T_v(T, v);
+  // The entropy reference makes s = 0 at the state with Z(T) + R ln(v) = 0
+  const Real s0 = 0.0;
+  Real p, dp_dh, dp_ds;
+  fp.p_from_h_s(h, s0, p, dp_dh, dp_ds);
+  const Real T0 = fp.T_from_p_h(p, h);
+  const Real rho0 = fp.rho_from_p_T(p, T0);
+  REL_TEST(dp_dh, rho0, REL_TOL_DERIVATIVE);
+  REL_TEST(dp_ds, -T0 * rho0, REL_TOL_DERIVATIVE);
+
+  // Temperature derivatives at the upper bound of the table must not leave the table
+  Real cp, dcp_dp, dcp_dT;
+  fp.cp_from_p_T(1e5, 500.0, cp, dcp_dp, dcp_dT);
+  REL_TEST(dcp_dT, 4.0, 1e-4);
+  Real mu, dmu_dp, dmu_dT;
+  fp.mu_from_p_T(1e5, 500.0, mu, dmu_dp, dmu_dT);
+  REL_TEST(dmu_dT, 3000.0 + 4.0 * 500.0, 1e-4);
+}

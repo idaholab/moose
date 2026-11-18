@@ -34,7 +34,9 @@ ADGateValve1PhaseUserObject::validParams()
                                 "Fraction of possible flow area that is open");
   params.addParam<Real>("open_area_fraction_min", 1e-10, "Minimum open area fraction");
 
-  params.addRequiredCoupledVar("A", "Cross-sectional area of connected flow channels");
+  params.addRequiredCoupledVar("A", "Cross-sectional area of connected flow channels, elemental");
+  params.addRequiredCoupledVar("A_linear",
+                               "Cross-sectional area of connected flow channels, linear");
   params.addRequiredCoupledVar("rhoA", "rho*A of the connected flow channels");
   params.addRequiredCoupledVar("rhouA", "rhou*A of the connected flow channels");
   params.addRequiredCoupledVar("rhoEA", "rhoE*A of the connected flow channels");
@@ -57,6 +59,7 @@ ADGateValve1PhaseUserObject::ADGateValve1PhaseUserObject(const InputParameters &
     _f_open_min(getParam<Real>("open_area_fraction_min")),
 
     _A(adCoupledValue("A")),
+    _A_linear(adCoupledValue("A_linear")),
     _rhoA(adCoupledValue("rhoA")),
     _rhouA(adCoupledValue("rhouA")),
     _rhoEA(adCoupledValue("rhoEA")),
@@ -118,12 +121,14 @@ ADGateValve1PhaseUserObject::execute()
     _dof_indices[c][varname_eq_index_pair.second] = dofs[0];
   }
 
-  // Store solution vector for connection
+  // Store solution vector for connection, evaluated at the connection, where the area is A_linear,
+  // so that both flow channels receive the same flux, as on flow channel interior faces
+  const ADReal A_ratio = _A_linear[0] / _A[0];
   std::vector<ADReal> U(THMVACE1D::N_FLUX_INPUTS, ADReal(0.));
-  U[THMVACE1D::RHOA] = _rhoA[0];
-  U[THMVACE1D::RHOUA] = _rhouA[0];
-  U[THMVACE1D::RHOEA] = _rhoEA[0];
-  U[THMVACE1D::AREA] = _A[0];
+  U[THMVACE1D::RHOA] = _rhoA[0] * A_ratio;
+  U[THMVACE1D::RHOUA] = _rhouA[0] * A_ratio;
+  U[THMVACE1D::RHOEA] = _rhoEA[0] * A_ratio;
+  U[THMVACE1D::AREA] = _A_linear[0];
   _solutions[c] = U;
 
   // Store element ID and local side ID for connection
@@ -131,7 +136,7 @@ ADGateValve1PhaseUserObject::execute()
   _local_side_ids[c] = _current_side;
 
   // Store direction and area of channel at junction (used for error-checking)
-  _areas[c] = _A[0];
+  _areas[c] = _A_linear[0];
   _directions[c] = _dir[0];
 
   _stored_p[c] = _p[0];

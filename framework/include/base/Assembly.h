@@ -25,6 +25,7 @@
 #include "libmesh/elem_side_builder.h"
 
 #include <unordered_map>
+#include <algorithm>
 
 // libMesh forward declarations
 namespace libMesh
@@ -266,9 +267,17 @@ public:
    */
   const MooseArray<Real> & JxW() const { return _current_JxW; }
 
-  const MooseArray<ADReal> & adJxW() const { return _ad_JxW; }
+  const MooseArray<ADReal> & adJxW() const
+  {
+    _need_ad_volume_map = true;
+    return _ad_JxW;
+  }
 
-  const MooseArray<ADReal> & adJxWFace() const { return _ad_JxW_face; }
+  const MooseArray<ADReal> & adJxWFace() const
+  {
+    _need_ad_face_map = true;
+    return _ad_JxW_face;
+  }
 
   const MooseArray<ADReal> & adCurvatures() const;
 
@@ -288,17 +297,7 @@ public:
    * Returns the reference to the AD version of the coordinate transformation coefficients
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<ADReal> & adCoordTransformation() const
-  {
-    // Coord values for non-cartesian coordinate systems are functions of the locations of the
-    // quadrature points in physical space. We also have no way of knowing whether this was called
-    // from a volumetric or face object so we should set both volumetric and face xyz to true
-    _calculate_xyz = true;
-    _calculate_face_xyz = true;
-
-    _calculate_ad_coord = true;
-    return _ad_coord;
-  }
+  const MooseArray<ADReal> & adCoordTransformation() const;
 
   /**
    * Get the coordinate system type
@@ -381,17 +380,23 @@ public:
     return _neighbor_extra_elem_ids[id];
   }
 
-  const MooseArray<ADPoint> & adNormals() const { return _ad_normals; }
+  const MooseArray<ADPoint> & adNormals() const
+  {
+    _need_ad_face_map = true;
+    return _ad_normals;
+  }
 
   const MooseArray<ADPoint> & adQPoints() const
   {
     _calculate_xyz = true;
+    _need_ad_volume_map = true;
     return _ad_q_points;
   }
 
   const MooseArray<ADPoint> & adQPointsFace() const
   {
     _calculate_face_xyz = true;
+    _need_ad_face_map = true;
     return _ad_q_points_face;
   }
 
@@ -1312,6 +1317,7 @@ public:
   template <typename T>
   const ADTemplateVariablePhiGradient<T> & adGradPhi(const MooseVariableFE<T> & v) const
   {
+    _need_ad_grad_phi = true;
     return _ad_grad_phi_data.at(v.feType());
   }
   const VariablePhiValue & phi(const MooseVariableField<Real> &) const { return _phi; }
@@ -1666,6 +1672,18 @@ public:
   {
     return _ad_grad_phi_data_face[type];
   }
+
+  /**
+   * Request that face reinitialization compute the AD shape function gradients. Variables call this
+   * when an object needs their AD gradient or their AD face test function gradients.
+   */
+  void needADGradPhiFace() const { _need_ad_grad_phi_face = true; }
+
+  /**
+   * Request that element reinitialization compute the AD shape function gradients. Variables call
+   * this when an object needs their AD gradient or their AD test function gradients.
+   */
+  void needADGradPhi() const { _need_ad_grad_phi = true; }
 
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiSecond & feSecondPhiFace(FEType type) const
@@ -2763,6 +2781,20 @@ protected:
   mutable std::map<FEType, ADTemplateVariablePhiGradient<Real>> _ad_grad_phi_data_face;
   mutable std::map<FEType, ADTemplateVariablePhiGradient<RealVectorValue>>
       _ad_vector_grad_phi_data_face;
+  /// Whether any object needs the AD face shape function gradients. Computing them on a displaced
+  /// mesh propagates the displacement derivatives of the face map into every shape function
+  /// gradient, which is expensive and unnecessary when only values and normals are used.
+  mutable bool _need_ad_grad_phi_face = false;
+  /// Whether any object needs the AD element shape function gradients
+  mutable bool _need_ad_grad_phi = false;
+  /// Whether any object needs the AD element JxW, quadrature points or coordinate transformation.
+  /// On a displaced mesh their map carries derivatives for every element node displacement. That
+  /// costs time even when no object reads them, and it needs an AD derivative size of at least the
+  /// element's displacement dofs (81 on a HEX27).
+  mutable bool _need_ad_volume_map = false;
+  /// Whether any object needs the AD face JxW, normals, quadrature points, curvatures or coordinate
+  /// transformation, which computeFaceMap provides on displaced meshes
+  mutable bool _need_ad_face_map = false;
 
   /**
    * The residual vector tags that Assembly could possibly contribute to.
@@ -2881,6 +2913,21 @@ protected:
   /// The current reference points on the neighbor element
   std::vector<Point> _current_neighbor_ref_points;
 };
+
+inline const MooseArray<ADReal> &
+Assembly::adCoordTransformation() const
+{
+  // Coord values for non-cartesian coordinate systems are functions of the locations of the
+  // quadrature points in physical space. We also have no way of knowing whether this was called
+  // from a volumetric or face object so we should set both volumetric and face xyz to true
+  _calculate_xyz = true;
+  _calculate_face_xyz = true;
+  _need_ad_volume_map = true;
+  _need_ad_face_map = true;
+
+  _calculate_ad_coord = true;
+  return _ad_coord;
+}
 
 template <typename OutputType>
 const typename OutputTools<OutputType>::VariablePhiValue &
@@ -3028,6 +3075,7 @@ template <>
 inline const ADTemplateVariablePhiGradient<RealVectorValue> &
 Assembly::adGradPhi<RealVectorValue>(const MooseVariableFE<RealVectorValue> & v) const
 {
+  _need_ad_grad_phi = true;
   return _ad_vector_grad_phi_data.at(v.feType());
 }
 
@@ -3046,7 +3094,10 @@ Assembly::cacheResiduals(const Residuals & residuals,
   if (!computingResidual() || vector_tags.empty())
     return;
 
-  if (residuals.size() == 1)
+  // A single row needs no constraining unless its dof is constrained (e.g. by a periodic boundary,
+  // a hanging node, or a user constraint), in which case its residual must be distributed to the
+  // constraining dofs
+  if (residuals.size() == 1 && !_dof_map.is_constrained_dof(input_row_indices[0]))
   {
     // No constraining is required. (This is likely a finite volume computation if we only have a
     // single dof)
@@ -3100,7 +3151,13 @@ Assembly::cacheJacobian(const Residuals & residuals,
   if (!computingJacobian() || matrix_tags.empty())
     return;
 
-  if (residuals.size() == 1)
+  // A single row needs no constraining unless its dof or one of its column dofs is constrained, in
+  // which case its entries must be distributed to the constraining rows and columns
+  const auto & single_row_dofs = residuals[0].derivatives().nude_indices();
+  if (residuals.size() == 1 && !_dof_map.is_constrained_dof(input_row_indices[0]) &&
+      std::none_of(single_row_dofs.begin(),
+                   single_row_dofs.end(),
+                   [this](const auto dof) { return _dof_map.is_constrained_dof(dof); }))
   {
     // No constraining is required. (This is likely a finite volume computation if we only have a
     // single dof)

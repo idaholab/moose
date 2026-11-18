@@ -269,6 +269,7 @@
     porosity_zero = 0.1
     biot_coefficient = 0.6
     solid_bulk = 1
+    porosity_min = -1 # the analytical solution of this linear poroelasticity benchmark has negative porosity at early times
   []
   [permeability]
     type = PorousFlowPermeabilityConst

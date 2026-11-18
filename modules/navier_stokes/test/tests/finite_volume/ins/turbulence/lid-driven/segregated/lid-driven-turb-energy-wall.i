@@ -355,11 +355,13 @@ pressure_tag = "pressure_grad"
     execute_on = 'NONLINEAR'
   []
   [compute_k_t]
-    type = TurbulentConductivityAux
+    type = EffectiveTurbulentThermalConductivityAux
     variable = k_t
     Pr_t = ${Pr_t}
     cp = ${cp}
     mu_t = 'mu_t'
+    k = ${k}
+    turbulent_thermal_conductivity = true
     execute_on = 'NONLINEAR'
   []
 []

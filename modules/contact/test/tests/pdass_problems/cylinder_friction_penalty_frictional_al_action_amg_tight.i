@@ -217,7 +217,7 @@
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
   petsc_options_value = ' 201                hypre    boomeramg      8'
 
-  line_search = 'none'
+  line_search = 'l2'
 
   nl_abs_tol = 1e-12
   nl_rel_tol = 1e-10

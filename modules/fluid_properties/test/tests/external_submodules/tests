@@ -4,7 +4,7 @@
   design = 'ExternalFluidPropertiesSubmodules.md'
 
   [fps]
-    requirement = 'fluid properties from an external submodule for'
+    requirement = 'The system shall compute fluid properties from an external submodule for'
     [air_pT]
       type = CSVDiff
       input = 'air.i'

@@ -28,10 +28,5 @@ AddLinearFVBCAction::AddLinearFVBCAction(const InputParameters & params) : Moose
 void
 AddLinearFVBCAction::act()
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  if (_moose_object_pars.isKokkosObject())
-    _problem->addKokkosLinearFVBC(_type, _name, _moose_object_pars);
-  else
-#endif
-    _problem->addLinearFVBC(_type, _name, _moose_object_pars);
+  _problem->addLinearFVBC(_type, _name, _moose_object_pars);
 }

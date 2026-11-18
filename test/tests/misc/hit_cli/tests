@@ -49,26 +49,31 @@
     [vanilla]
       type = RunCommand
       command = './hit_wrapper.py gold/diff_vanilla diff input1.i input2.i'
+      min_slots = 2 # memory heavy
       detail = 'show differences between input files,'
     []
     [color]
       type = RunCommand
       command = './hit_wrapper.py gold/diff_color diff -color input1.i input2.i'
+      min_slots = 2 # memory heavy
       detail = 'show differences between input files marked up using terminal colors,'
     []
     [verbose]
       type = RunCommand
       command = './hit_wrapper.py gold/diff_verbose diff -v input1.i input2.i'
+      min_slots = 2 # memory heavy
       detail = 'show differences between input files with verbose explanations,'
     []
     [verbose_color]
       type = RunCommand
       command = './hit_wrapper.py gold/diff_verbose_color diff -v -color input1.i input2.i'
+      min_slots = 2 # memory heavy
       detail = 'show differences between input files with verbose explanations marked up using terminal colors,'
     []
     [common]
       type = RunCommand
       command = './hit_wrapper.py gold/diff_common diff -common input1.i input2.i'
+      min_slots = 2 # memory heavy
       detail = 'show common parameters/value pairs between input files,'
     []
   []

@@ -40,14 +40,17 @@ Function::value(const ADReal & t, const ADPoint & p) const
   const auto rp = MetaPhysicL::raw_value(p);
   const auto grad = gradient(rt, rp);
   ADReal ret = value(rt, rp);
-  ret.derivatives() = grad(0) * p(0).derivatives()
+  ret.derivatives() = grad(0) * p(0).derivatives();
 #if LIBMESH_DIM > 1
-                      + grad(1) * p(1).derivatives()
+  ret.derivatives() += grad(1) * p(1).derivatives();
 #endif
 #if LIBMESH_DIM > 2
-                      + grad(2) * p(2).derivatives()
+  ret.derivatives() += grad(2) * p(2).derivatives();
 #endif
-                      + timeDerivative(rt, rp) * t.derivatives();
+  // Skip timeDerivative() for a time without derivatives, so that functions which do not
+  // implement it can still be evaluated at points with derivatives
+  if (t.derivatives().size())
+    ret.derivatives() += timeDerivative(rt, rp) * t.derivatives();
   return ret;
 }
 
@@ -174,6 +177,12 @@ Function::evaluate(const NodeArg & node_arg, const Moose::StateArg & state) cons
   return evaluateHelper(node_arg, state);
 }
 
+typename Function::ValueType
+Function::evaluate(const PointArg & point_arg, const Moose::StateArg & state) const
+{
+  return evaluateHelper(point_arg, state);
+}
+
 template <typename R>
 typename Function::GradientType
 Function::evaluateGradientHelper(const R & r, const Moose::StateArg & state) const
@@ -217,6 +226,12 @@ Function::evaluateGradient(const NodeArg & node_arg, const Moose::StateArg & sta
   return evaluateGradientHelper(node_arg, state);
 }
 
+typename Function::GradientType
+Function::evaluateGradient(const PointArg & point_arg, const Moose::StateArg & state) const
+{
+  return evaluateGradientHelper(point_arg, state);
+}
+
 template <typename R>
 typename Function::DotType
 Function::evaluateDotHelper(const R & r, const Moose::StateArg & state) const
@@ -258,6 +273,12 @@ typename Function::DotType
 Function::evaluateDot(const NodeArg & node_arg, const Moose::StateArg & state) const
 {
   return evaluateDotHelper(node_arg, state);
+}
+
+typename Function::DotType
+Function::evaluateDot(const PointArg & point_arg, const Moose::StateArg & state) const
+{
+  return evaluateDotHelper(point_arg, state);
 }
 
 void

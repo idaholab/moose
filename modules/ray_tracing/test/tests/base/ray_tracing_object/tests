@@ -3,7 +3,7 @@
   issues = '#16028'
 
   [errors]
-    requirement = 'A RayTracingObject shall return a useful error when'
+    requirement = 'The system shall return a useful error from a RayTracingObject when'
 
     [get_study_bad_param]
       type = 'RunException'

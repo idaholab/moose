@@ -1246,7 +1246,7 @@ MooseMesh::nodeToElemMap()
 const ConstElemRange *
 MooseMesh::getActiveLocalElementRange()
 {
-  return &getMesh().active_local_element_stored_range();
+  return &const_cast<const MeshBase &>(getMesh()).active_local_element_stored_range();
 }
 
 NodeRange *
@@ -1374,11 +1374,17 @@ MooseMesh::isBoundaryFullyExternalToSubdomains(BoundaryID bid,
 {
   mooseAssert(_bnd_elem_range, "Boundary element range is not initialized");
 
+  // On a distributed mesh the boundary element range only holds the local and ghosted sides, so
+  // each process checks the sides of the elements it owns and the answers are combined. The
+  // owner always has the neighbor across the side, while a ghosted element may not. The loop
+  // therefore must not return early: every process has to reach the reduction.
+  bool crosses_subdomains = false;
+
   // Loop over all side elements of the mesh, select those on the boundary
   for (const auto & bnd_elem : *_bnd_elem_range)
   {
     const auto & [elem_ptr, elem_side, elem_bid] = *bnd_elem;
-    if (elem_bid == bid)
+    if (elem_bid == bid && elem_ptr->processor_id() == processor_id())
     {
       // If an element is internal to the group of subdomain, check the neighbor
       if (blk_group.find(elem_ptr->subdomain_id()) != blk_group.end())
@@ -1395,11 +1401,16 @@ MooseMesh::isBoundaryFullyExternalToSubdomains(BoundaryID bid,
         // If the neighbor is also in the group of subdomain,
         // then the boundary cuts the subdomains
         if (blk_group.find(neighbor->subdomain_id()) != blk_group.end())
-          return false;
+        {
+          crosses_subdomains = true;
+          break;
+        }
       }
     }
   }
-  return true;
+
+  comm().max(crosses_subdomains);
+  return !crosses_subdomains;
 }
 
 void
@@ -1407,10 +1418,15 @@ MooseMesh::cacheInfo()
 {
   TIME_SECTION("cacheInfo", 3);
 
+  // Elements can change subdomain after prepare_for_use(), e.g. through an
+  // ElementSubdomainModifier, so refresh the subdomain set that hasSingleSubdomain() and
+  // _block_singletons are built from
+  getMesh().cache_elem_data();
+
   const auto & mesh = getMesh();
 
   ConstElemRange all_elems(mesh.elements_begin(), mesh.elements_end(), 1);
-  CacheInfoThread ci(*this);
+  CacheInfoThread ci(*this, !hasSingleSubdomain());
   Threads::parallel_reduce(all_elems, ci);
 
   ConstElemRange local_elems(
@@ -1418,7 +1434,13 @@ MooseMesh::cacheInfo()
   CacheSubdomainInfoThread csi(*this);
   Threads::parallel_reduce(local_elems, csi);
 
-  _block_node_list = std::move(ci._block_node_list);
+  _node_block = std::move(ci._node_block);
+  _interface_node_blocks = std::move(ci._interface_node_blocks);
+
+  _block_singletons.clear();
+  for (const auto blk_id : mesh.get_mesh_subdomains())
+    _block_singletons.emplace(blk_id, std::set<SubdomainID>{blk_id});
+
   _higher_d_elem_side_to_lower_d_elem = std::move(ci._higher_d_elem_side_to_lower_d_elem);
   _lower_d_elem_to_higher_d_elem_side = std::move(ci._lower_d_elem_to_higher_d_elem_side);
   _lower_d_interior_blocks = std::move(ci._lower_d_interior_blocks);
@@ -1446,9 +1468,21 @@ MooseMesh::cacheInfo()
 const std::set<SubdomainID> &
 MooseMesh::getNodeBlockIds(const Node & node) const
 {
-  auto it = _block_node_list.find(node.id());
+  // cacheInfo() records nothing in this case, and every node belongs to the mesh's only subdomain
+  if (hasSingleSubdomain())
+  {
+    if (!getMesh().query_node_ptr(node.id()))
+      mooseError("Unable to find node: ", node.id(), " in any block list.");
+    return getMesh().get_mesh_subdomains();
+  }
 
-  if (it == _block_node_list.end())
+  // Away from an interface, which is almost every node, this is the only lookup needed
+  if (const auto it = _node_block.find(node.id()); it != _node_block.end())
+    return libmesh_map_find(_block_singletons, it->second);
+
+  const auto it = _interface_node_blocks.find(node.id());
+
+  if (it == _interface_node_blocks.end())
     mooseError("Unable to find node: ", node.id(), " in any block list.");
 
   return it->second;

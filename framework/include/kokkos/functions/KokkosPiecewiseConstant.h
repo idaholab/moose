@@ -25,6 +25,7 @@ public:
   using Real3 = Moose::Kokkos::Real3;
 
   KOKKOS_FUNCTION Real value(Real t, Real3 p) const;
+  KOKKOS_FUNCTION Real timeDerivative(Real, Real3) const { return 0; }
   KOKKOS_FUNCTION Real integral() const;
   KOKKOS_FUNCTION Real average() const;
 

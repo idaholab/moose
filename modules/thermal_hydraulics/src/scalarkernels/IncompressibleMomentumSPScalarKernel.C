@@ -9,7 +9,6 @@
 
 #include "IncompressibleMomentumSPScalarKernel.h"
 
-#include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
 
@@ -21,7 +20,6 @@ InputParameters
 IncompressibleMomentumSPScalarKernelTempl<is_ad>::validParams()
 {
   InputParameters params = IncompressibleMomentumSPBaseTempl<is_ad>::validParams();
-  params += FunctorInterface::validParams();
   params.addClassDescription(
       "Implements a generic momentum solve over a 1D flow path, acting on the mass flow rate.");
   params.addCoupledVar("reference_pressure_drop",
@@ -34,7 +32,8 @@ IncompressibleMomentumSPScalarKernelTempl<is_ad>::validParams()
 template <bool is_ad>
 IncompressibleMomentumSPScalarKernelTempl<is_ad>::IncompressibleMomentumSPScalarKernelTempl(
     const InputParameters & parameters)
-  : Base(parameters), _dPc(ScalarCoupleable::coupledScalarValue("reference_pressure_drop"))
+  : Base(parameters),
+    _dPc(ScalarCoupleable::coupledGenericScalarValue<is_ad>("reference_pressure_drop"))
 {
 }
 

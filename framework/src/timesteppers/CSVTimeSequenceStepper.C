@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSVTimeSequenceStepper.h"
+#include "MixedDataDelimitedFileReader.h"
 
 registerMooseObject("MooseApp", CSVTimeSequenceStepper);
 
@@ -33,9 +34,10 @@ CSVTimeSequenceStepper::CSVTimeSequenceStepper(const InputParameters & parameter
   : TimeSequenceStepperBase(parameters),
     _file_name(getParam<FileName>("file_name")),
     _header(isParamValid("header")
-                ? (getParam<bool>("header") ? MooseUtils::DelimitedFileReader::HeaderFlag::ON
-                                            : MooseUtils::DelimitedFileReader::HeaderFlag::OFF)
-                : MooseUtils::DelimitedFileReader::HeaderFlag::AUTO),
+                ? (getParam<bool>("header")
+                       ? MooseUtils::DelimitedFileOfStringReader::HeaderFlag::ON
+                       : MooseUtils::DelimitedFileOfStringReader::HeaderFlag::OFF)
+                : MooseUtils::DelimitedFileOfStringReader::HeaderFlag::AUTO),
     _delimiter(getParam<std::string>("delimiter")),
     _column_name(getParam<std::string>("column_name")),
     _search_by_index(isParamValid("column_index")),
@@ -46,7 +48,7 @@ CSVTimeSequenceStepper::CSVTimeSequenceStepper(const InputParameters & parameter
 void
 CSVTimeSequenceStepper::init()
 {
-  MooseUtils::DelimitedFileReader file(_file_name);
+  MooseUtils::MixedDataDelimitedFileReader file(_file_name);
 
   file.setHeaderFlag(_header);
   file.setDelimiter(_delimiter);
@@ -56,13 +58,10 @@ CSVTimeSequenceStepper::init()
 
   if (_search_by_index)
   {
-    std::vector<std::vector<double>> data = file.getData();
-    if (_column_index >= data.size())
-      mooseError("cannot find column ", _column_index, " in file ", _file_name);
-    instants = data[_column_index];
+    instants = file.getData<Real>(_column_index);
   }
   else
-    instants = file.getData(_column_name);
+    instants = file.getData<Real>(_column_name);
 
   if (instants.size() == 0)
     mooseError("empty sequence in file ", _file_name);

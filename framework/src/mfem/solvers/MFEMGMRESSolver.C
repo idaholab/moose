@@ -41,7 +41,6 @@ MFEMGMRESSolver::ConstructSolver()
 {
   auto solver = std::make_unique<mfem::GMRESSolver>(getMFEMProblem().getComm());
   SetSolverParameters(*solver);
-  SetPreconditioner(*solver);
   _solver = std::move(solver);
 }
 

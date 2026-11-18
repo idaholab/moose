@@ -169,13 +169,16 @@ HelmholtzFluidProperties::s_from_p_T(
   const Real tau = criticalTemperature() / temperature;
 
   const Real da_dd = dalpha_ddelta(delta, tau);
-  const Real da_dt = dalpha_dtau(delta, tau);
   const Real d2a_dd2 = d2alpha_ddelta2(delta, tau);
   const Real d2a_dt2 = d2alpha_dtau2(delta, tau);
   const Real d2a_ddt = d2alpha_ddeltatau(delta, tau);
 
-  ds_dp = tau * (d2a_ddt - da_dd) / (density * temperature * (2.0 * da_dd + delta * d2a_dd2));
-  ds_dT = -_R * tau * (da_dt - alpha(delta, tau) + tau * (d2a_dt2 - da_dt)) /
+  // Maxwell relation (ds/dp)_T = (1/rho^2) (drho/dT)_p
+  ds_dp = (tau * d2a_ddt - da_dd) / (density * temperature * (2.0 * da_dd + delta * d2a_dd2));
+  // (ds/dT)_p = cp / T
+  ds_dT = _R *
+          (-tau * tau * d2a_dt2 +
+           Utility::pow<2>(da_dd - tau * d2a_ddt) / (2.0 * da_dd / delta + d2a_dd2)) /
           (molarMass() * temperature);
 }
 

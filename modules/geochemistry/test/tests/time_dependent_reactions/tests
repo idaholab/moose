@@ -5,7 +5,7 @@
     capabilities = 'installation_type=in_tree'
     input = except1.i
     expect_err = 'source_species_names: must have the same size as source_species_rates'
-    requirement = 'An error will be thrown if each source species is not provided with exactly onerate'
+    requirement = 'The system shall report an error if each source species is not provided with exactly one rate'
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   [../]
@@ -16,7 +16,7 @@
     input = except2.i
     expect_err = 'TimeDependentReactionSolver/source_species_names: The name badname does not appear in the basis, equilibrium or kinetic species list'
     match_literal = true
-    requirement = 'An error will be thrown if a source species does not exist in the geochemical system'
+    requirement = 'The system shall report an error if a source species does not exist in the geochemical system'
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   [../]
@@ -26,7 +26,7 @@
     capabilities = 'installation_type=in_tree'
     input = except3.i
     expect_err = 'The species NaCl is not in the basis, so cannot have its activity or fugacity constraint removed'
-    requirement = 'An error will be thrown if a species whose activity constraint is to be removed is not in the basis'
+    requirement = 'The system shall report an error if a species whose activity constraint is to be removed is not in the basis'
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   [../]
@@ -36,7 +36,7 @@
     capabilities = 'installation_type=in_tree'
     input = except4.i
     expect_err = 'TimeDependentReactionSolver/remove_fixed_activity_name: The species Na\+ is does not have an activity or fugacity constraint so cannot have such a constraint removed'
-    requirement = 'An error will be thrown if a species whose activity constraint is to be removed does not have an activity or fugacity constraint'
+    requirement = 'The system shall report an error if a species whose activity constraint is to be removed does not have an activity or fugacity constraint'
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   [../]
@@ -46,7 +46,7 @@
     capabilities = 'installation_type=in_tree'
     input = except5.i
     expect_err = 'remove_fixed_activity_name: must be of the same size as remove_fixed_activity_time'
-    requirement = 'An error will be thrown if the number of species whose activity constraints are to be removed is not equal to the number of times when the activity constraints will be removed'
+    requirement = 'The system shall report an error if the number of species whose activity constraints are to be removed is not equal to the number of times when the activity constraints will be removed'
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   [../]
@@ -56,7 +56,7 @@
     capabilities = 'installation_type=in_tree'
     input = except6.i
     expect_err = 'controlled_activity_name: must have the same size as controlled_activity_value'
-    requirement = 'An error will be thrown if the number of species whose activity values are controlled is not equal to the number of activity values provided'
+    requirement = 'The system shall report an error if the number of species whose activity values are controlled is not equal to the number of activity values provided'
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   [../]
@@ -66,7 +66,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'add_feldspar.i'
     csvdiff = 'add_feldspar_out.csv'
-    requirement = "The geochemistry module shall be able to solve time-dependent reactions that involve adding reactants"
+    requirement = "The system shall be able to solve time-dependent reactions that involve adding reactants"
     issues = '#15330'
     design = 'adding_feldspar.md'
   [../]
@@ -76,7 +76,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'calcite_dumping.i'
     csvdiff = 'calcite_dumping_dump.csv'
-    requirement = "The geochemistry module shall be able to solve time-dependent reactions where initial precipitates are dumped and then reactants are added"
+    requirement = "The system shall be able to solve time-dependent reactions where initial precipitates are dumped and then reactants are added"
     issues = '#15330'
     design = 'calcite_buffer.md'
   [../]
@@ -88,7 +88,7 @@
     cli_args = 'TimeDependentReactionSolver/mode=0 Outputs/file_base=calcite_dumping_no_dump'
     prereq = 'calcite_dumping_dump'
     csvdiff = 'calcite_dumping_no_dump.csv'
-    requirement = "The geochemistry module shall be able to solve time-dependent reactions where initial precipitates are not dumped and then reactants are added"
+    requirement = "The system shall be able to solve time-dependent reactions where initial precipitates are not dumped and then reactants are added"
     issues = '#15330'
     design = 'calcite_buffer.md'
   [../]
@@ -98,7 +98,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'changing_fugacity_calcite.i'
     csvdiff = 'changing_fugacity_calcite_out.csv'
-    requirement = "The geochemistry module shall be able to solve time-dependent reactions where gas fugacity is changed over time"
+    requirement = "The system shall be able to solve time-dependent reactions where gas fugacity is changed over time"
     issues = '#15330'
     design = 'changing_fugacity_with_calcite.md'
   [../]
@@ -108,7 +108,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'changing_pH_ferric_hydroxide.i'
     csvdiff = 'changing_pH_ferric_hydroxide_out.csv'
-    requirement = "The geochemistry module shall be able to solve time-dependent reactions where pH is changed over time"
+    requirement = "The system shall be able to solve time-dependent reactions where pH is changed over time"
     issues = '#15330'
     design = 'changing_pH_iron.md'
   [../]
@@ -118,7 +118,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'cooling.i'
     csvdiff = 'cooling_out.csv'
-    requirement = "The geochemistry module shall be able to solve reactions when temperature is time-dependent"
+    requirement = "The system shall be able to solve reactions when temperature is time-dependent"
     issues = '#15330'
     design = 'cooling_feldspar.md'
   [../]
@@ -128,7 +128,7 @@
     capabilities = 'installation_type=in_tree'
     input = 'dissolution_pyrite_1.i'
     csvdiff = 'dissolution_pyrite_1_out.csv'
-    requirement = "The geochemistry module shall be able to solve reactions involving dissolution and addition of reactants when gas fugacity is not fixed"
+    requirement = "The system shall be able to solve reactions involving dissolution and addition of reactants when gas fugacity is not fixed"
     issues = '#15330'
     design = 'adding_pyrite.md'
   [../]
@@ -139,7 +139,7 @@
     input = 'dissolution_pyrite_2.i'
     csvdiff = 'dissolution_pyrite_2_out.csv'
     match_literal = true
-    requirement = "The geochemistry module shall be able to solve reactions involving dissolution and addition of reactants when gas fugacity is fixed"
+    requirement = "The system shall be able to solve reactions involving dissolution and addition of reactants when gas fugacity is fixed"
     issues = '#15330'
     design = 'adding_pyrite.md'
   [../]
@@ -200,7 +200,7 @@ Minerals:
 Nernst potentials:
 e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     match_literal = true
-    requirement = "The geochemistry module shall be able to record molalities as AuxVariables in order to assist with fluid-mixing problems, including the case without precipitates"
+    requirement = "The system shall be able to record molalities as AuxVariables in order to assist with fluid-mixing problems, including the case without precipitates"
     issues = '#15330'
     design = 'pickup.md'
   [../]
@@ -211,7 +211,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     input = 'mixing_seawater_step2.i'
     csvdiff = 'mixing_seawater_step2_out.csv'
     rel_err = 1.4E-5
-    requirement = "The geochemistry module shall be able to record molalities as AuxVariables in order to assist with fluid-mixing problems, including the case with precipitates"
+    requirement = "The system shall be able to record molalities as AuxVariables in order to assist with fluid-mixing problems, including the case with precipitates"
     issues = '#15330'
     design = 'pickup.md'
   [../]
@@ -222,7 +222,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     input = 'mixing.i'
     csvdiff = 'mixing_out.csv'
     heavy = true
-    requirement = "The geochemistry module shall be able to mix different fluids together and find the resulting stable assemblage"
+    requirement = "The system shall be able to mix different fluids together and find the resulting stable assemblage"
     issues = '#15330'
     design = 'pickup.md'
   [../]
@@ -232,7 +232,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     capabilities = 'installation_type=in_tree'
     input = 'seawater_evaporation_flow_through.i'
     csvdiff = 'seawater_evaporation_flow_through_out.csv'
-    requirement = "The geochemistry module shall be able to progressively remove reactants, and any precipitates that form shall be able to be removed at the end of the timestep"
+    requirement = "The system shall be able to progressively remove reactants, and any precipitates that form shall be able to be removed at the end of the timestep"
     issues = '#15330'
     design = 'flow_through.md'
   [../]
@@ -242,7 +242,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     capabilities = 'installation_type=in_tree'
     input = 'seawater_evaporation_no_flow_through.i'
     csvdiff = 'seawater_evaporation_no_flow_through_out.csv'
-    requirement = "The geochemistry module shall be able to progressively remove reactants"
+    requirement = "The system shall be able to progressively remove reactants"
     issues = '#15330'
     design = 'flow_through.md'
   [../]
@@ -253,7 +253,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     input = 'simple.i'
     csvdiff = 'simple_out.csv'
     rel_err = 1.0E-5
-    requirement = 'Controlling pH should be possible either through explicitly setting a controlled activity or by titrating acids into the solution'
+    requirement = 'The system shall allow controlling pH either through explicitly setting a controlled activity or by titrating acids into the solution'
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   [../]
@@ -265,7 +265,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     csvdiff = 'simple_out.csv'
     prereq = 'simple'
     rel_err = 1.0E-5
-    requirement = 'Controlling pH should be possible either through explicitly setting a controlled activity or by titrating acids into the solution, without using an Action'
+    requirement = 'The system shall allow controlling pH either through explicitly setting a controlled activity or by titrating acids into the solution, without using an Action'
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   [../]
@@ -275,7 +275,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     capabilities = 'installation_type=in_tree'
     input = 'flushing_equilibrium_at70degC.i'
     csvdiff = 'flushing_equilibrium_at70degC_out.csv'
-    requirement = "The geochemistry module shall be able to find equilibrium concentrations of species that are later provided with kinetic laws"
+    requirement = "The system shall be able to find equilibrium concentrations of species that are later provided with kinetic laws"
     issues = '#15330'
     design = 'flush.md'
   [../]
@@ -285,7 +285,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     capabilities = 'installation_type=in_tree'
     input = 'flushing.i'
     csvdiff = 'flushing_out.csv'
-    requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
+    requirement = "The system shall be able to flush aqueous solutions while adding reactants"
     issues = '#15330'
     design = 'flush.md'
   [../]

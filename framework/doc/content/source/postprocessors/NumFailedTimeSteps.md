@@ -4,7 +4,11 @@
 
 ## Description
 
-`NumFailedTimeSteps` reports the number of failed time steps.
+`NumFailedTimeSteps` reports the number of failed time steps. With `current_time_step_only = true`
+it reports only the failed solves of the current time step, which is reset to zero when a time step
+converges. Executed on `TIMESTEP_BEGIN`, this is the number of failures before the current attempt,
+which [Controls](syntax/Controls/index.md#failed_time_steps) can use to handle a repeated time step
+differently from the first attempt.
 
 ## Example Input Syntax
 

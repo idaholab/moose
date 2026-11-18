@@ -154,10 +154,26 @@ g = 9.81
     pp_names = 'E_pipes E_pump'
     execute_on = 'initial timestep_end'
   []
+  [m_dot_pump_in]
+    type = ADFlowJunctionFlux1Phase
+    boundary = 'pipe1:out'
+    connection_index = 0
+    junction = pump
+    equation = mass
+    execute_on = 'initial timestep_end'
+  []
+  [m_dot_pump_out]
+    type = ADFlowJunctionFlux1Phase
+    boundary = 'pipe2:in'
+    connection_index = 1
+    junction = pump
+    equation = mass
+    execute_on = 'initial timestep_end'
+  []
   [S_energy]
     type = FunctionValuePostprocessor
     function = S_energy_fcn
-    indirect_dependencies = 'pump_rhouV'
+    indirect_dependencies = 'm_dot_pump_in m_dot_pump_out'
     execute_on = 'initial timestep_end'
   []
   [E_change]
@@ -173,21 +189,15 @@ g = 9.81
     function = E_conservation_fcn
     execute_on = 'timestep_end'
   []
-
-  [pump_rhouV]
-    type = ElementAverageValue
-    variable = rhouV
-    block = 'pump'
-    execute_on = 'initial timestep_end'
-  []
 []
 
 [Functions]
+  # The pump adds g * head per unit mass flowing through each of its two connections
   [S_energy_fcn]
     type = ParsedFunction
-    expression = 'rhouV * g * head * A / volume'
-    symbol_names = 'rhouV g head A volume'
-    symbol_values = 'pump_rhouV ${g} ${head} ${A} ${volume}'
+    expression = '0.5 * (m_dot_in + m_dot_out) * g * head'
+    symbol_names = 'm_dot_in m_dot_out g head'
+    symbol_values = 'm_dot_pump_in m_dot_pump_out ${g} ${head}'
   []
   [E_conservation_fcn]
     type = ParsedFunction

@@ -12,7 +12,8 @@ Base class for MFEM classes that are restricted to a subset of mesh boundaries.
 boundary (sidesets) of the mesh, specified by the list of boundaries in the `boundary` input
 parameter.
 
-Boundaries may be specified either by their integer attribute ID or their name.
+Boundaries may be specified either by their integer attribute ID or their name. A name or ID that
+the mesh does not have is an input error.
 
 Child classes should access the array of boundary attributes and markers using the
 `getBoundaryAttributes()` and `getBoundaryMarkers()` methods respectively.

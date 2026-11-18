@@ -6,6 +6,8 @@ This term is described by $(\rho-\rho_{ref}) \vec{g}$ present in the momentum co
 
 This term deals only with the force due to the variation in density $\Delta \rho \vec{g}$, with the fluid density being $\rho = \rho_{ref}+\Delta\rho$. Thus, with no extra added terms to the conventional incompressible Navier Stokes equations, the system will solve for the total pressure minus the hydrostatic pressure.
 
+In a porous medium solved for the superficial velocity, set [!param](/LinearFVKernels/LinearFVMomentumBuoyancy/porosity) so the force is $\epsilon (\rho-\rho_{ref}) \vec{g}$, consistent with the porosity-weighted pressure gradient $\epsilon \nabla p$ of [LinearPWCNSFVMomentumPressure.md]. Without it, a fluid at rest across a porosity change is not in hydrostatic balance.
+
 For stability purposes, the value of $\rho_{ref}$ is recommended be set to the midpoint of the estimated maximum and minimum temperature values in the simulation.
 
 For natural convection simulations, it is advisable to compute relevant dimensionless numbers such as the Rayleigh number or the Richardson number to decide on the need for turbulence models, mesh refinement and stability considerations.

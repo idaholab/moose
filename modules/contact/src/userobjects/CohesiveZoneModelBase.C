@@ -44,6 +44,7 @@ CohesiveZoneModelBase::validParams()
   params.suppressParameter<Real>("penalty_multiplier");
   params.suppressParameter<Real>("penetration_tolerance");
   params.setParameters("penalty", 0.0);
+  params.set<bool>("ghost_point_neighbors") = false;
   return params;
 }
 
@@ -86,11 +87,11 @@ CohesiveZoneModelBase::CohesiveZoneModelBase(const InputParameters & parameters)
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
     _grad_disp.push_back(&adCoupledGradient("displacements", i));
-    _grad_disp_neighbor.push_back(&adCoupledGradient("displacements", i));
+    _grad_disp_neighbor.push_back(&adCoupledNeighborGradient("displacements", i));
   }
 
   // Set non-intervening components to zero
-  for ([[maybe_unused]] const auto i : make_range(_ndisp))
+  for ([[maybe_unused]] const auto i : make_range(_ndisp, 3u))
   {
     _grad_disp.push_back(&_ad_grad_zero);
     _grad_disp_neighbor.push_back(&_ad_grad_zero);
@@ -133,6 +134,8 @@ CohesiveZoneModelBase::computeQpIProperties()
   // Get the _dof_to_weighted_gap map
   const auto * const dof = cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
+  _dof_to_weighted_displacements[dof] += (*_test)[_i][_qp] * _qp_displacement_nodal;
+
   // TODO: Probably better to interpolate the deformation gradients.
   _dof_to_F[dof] += (*_test)[_i][_qp] * _F_interpolation;
   _dof_to_F_neighbor[dof] += (*_test)[_i][_qp] * _F_neighbor_interpolation;
@@ -154,9 +157,14 @@ CohesiveZoneModelBase::computeFandR(const Node * const node)
 
   for (const auto i : make_range(Moose::dim))
     for (const auto j : make_range(Moose::dim))
+    {
       if (!std::isfinite(MetaPhysicL::raw_value(normalized_F(i, j))))
         throw MooseException("The deformation gradient on the secondary surface is not finite in "
                              "CohesiveZoneModelBase. MOOSE needs to cut the time step size.");
+      if (!std::isfinite(MetaPhysicL::raw_value(normalized_F_neighbor(i, j))))
+        throw MooseException("The deformation gradient on the primary surface is not finite in "
+                             "CohesiveZoneModelBase. MOOSE needs to cut the time step size.");
+    }
 
   const auto dof_to_interface_F_node = libmesh_map_find(_dof_to_interface_F, node);
 
@@ -232,7 +240,7 @@ CohesiveZoneModelBase::timestepSetup()
   {
     auto & [damage, old_damage] = map_pr.second;
     old_damage = {MetaPhysicL::raw_value(damage)};
-    damage = {0.0};
+    damage = old_damage;
   }
 
   _dof_to_step_slip_start = _dof_to_step_slip;
@@ -260,6 +268,14 @@ CohesiveZoneModelBase::initialize()
   _dof_to_czm_traction.clear();
   for (auto & map_pr : _dof_to_rotation_matrix)
     map_pr.second.setToIdentity();
+}
+
+ADReal
+CohesiveZoneModelBase::nodalTangentialPressure(const Node & node,
+                                               const unsigned int direction) const
+{
+  mooseAssert(direction < 2, "There are at most two tangent directions.");
+  return libmesh_map_find(_dof_to_tangential_traction, node.id()).first(direction);
 }
 
 void
@@ -311,7 +327,8 @@ CohesiveZoneModelBase::reinit()
     auto & [accumulated_slip, old_accumulated_slip] = _dof_to_accumulated_slip[node->id()];
 
     Real normal_lm = -1;
-    if (auto it = _dof_to_lagrange_multiplier.find(node); it != _dof_to_lagrange_multiplier.end())
+    if (auto it = _dof_to_lagrange_multiplier.find(node->id());
+        it != _dof_to_lagrange_multiplier.end())
       normal_lm = it->second;
 
     // Keep active set fixed from second Uzawa loop

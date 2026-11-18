@@ -80,9 +80,6 @@
   [boomeramg]
     type = MFEMHypreBoomerAMG
     fespace = H1FESpace
-    l_max_its = 20
-    l_tol = 1e-5
-    print_level = 2
   []
   [main]
     type = MFEMHyprePCG

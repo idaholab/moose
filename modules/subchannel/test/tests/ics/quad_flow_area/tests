@@ -10,6 +10,6 @@
     abs_zero = 1e-6
     max_threads = 1
     input = 'test.i'
-    requirement = 'The system will calculate the subchannel flow area for quadrilateral assemblies'
+    requirement = 'The system shall calculate the subchannel flow area for quadrilateral assemblies'
   []
 []

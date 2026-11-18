@@ -90,6 +90,35 @@
       valgrind = none # see #31360
       capabilities = 'netgen'
     []
+    [surface_convert_subdomain_names]
+      type = 'CSVDiff'
+      input = 'xyzdelaunay_stitching.i'
+      # Restricting postprocessors to the converted subdomains by name checks the names, while
+      # their volumes do not depend on the tetrahedralization outside the holes, which differs
+      # between replicated and distributed meshes
+      cli_args = 'Mesh/gmg/elem_type=HEX8
+                  Mesh/gmg/nx=3
+                  Mesh/gmg/ny=3
+                  Mesh/gmg/nz=3
+                  Mesh/triang/convert_holes_for_stitching=true
+                  Mesh/triang/conversion_method=SURFACE
+                  Mesh/triang/converted_pyramid_element_subdomain_name_suffix=pyr
+                  Mesh/final_generator=triang
+                  Postprocessors/tet_volume/type=VolumePostprocessor
+                  Postprocessors/tet_volume/block=hole_to_tet
+                  Postprocessors/pyramid_volume/type=VolumePostprocessor
+                  Postprocessors/pyramid_volume/block=hole_pyr
+                  Postprocessors/unconverted_volume/type=VolumePostprocessor
+                  Postprocessors/unconverted_volume/block=hole
+                  Outputs/file_base=surface_convert_subdomain_names_out'
+      csvdiff = 'surface_convert_subdomain_names_out.csv'
+      # The total volume depends on the tetrahedralization outside the holes
+      ignore_columns = 'volume'
+      recover = false
+      detail = "selectively stitching 'hole' meshes into the final mesh after converting non-TET4 meshes using boundary element conversion, and naming the subdomains of the converted elements"
+      valgrind = none # see #31360
+      capabilities = 'netgen'
+    []
     [nested]
       type = 'CSVDiff'
       input = 'xyzdelaunay_nested.i'

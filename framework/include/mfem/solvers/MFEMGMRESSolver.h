@@ -28,6 +28,11 @@ public:
 protected:
   /// Update the wrapped MFEM solver parameters
   virtual void SetSolverParameters(mfem::GMRESSolver & solver) override;
+
+  virtual void SetPreconditionerImpl() override
+  {
+    cast_ref<mfem::GMRESSolver &>(GetSolver()).SetPreconditioner(_preconditioner->GetSolver());
+  }
 };
 
 #endif

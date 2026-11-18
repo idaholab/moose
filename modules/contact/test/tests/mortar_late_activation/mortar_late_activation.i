@@ -4,7 +4,7 @@
 # Derived from modules/contact/test/tests/mortar_tm/horizontal_blocks_mortar_TM.i, changed only in
 # the geometry/loading needed to exhibit the bug.
 #
-# SETUP: two blocks with a permanent 0.1 x-gap, offset in y so the facing sidesets do NOT overlap
+# SETUP: two blocks with a 0.1 x-gap in the mesh, offset in y so the facing sidesets do NOT overlap
 # laterally at t=0. Every mortar segment is therefore pruned at initialization
 # (AutomaticMortarGeneration.C:1082, |xi2| > 1+TOLERANCE), so amg.secondaryIPSubIDs() is EMPTY and
 # Moose::Mortar::setupMortarMaterials inserts NO key for the secondary interior-parent subdomain.
@@ -15,8 +15,9 @@
 # on a map with no such key -> throw:
 #     map_find() error: key "1" not found in .../MortarUtils.h on line 144
 #
-# The blocks NEVER touch (the x-gap stays 0.1), so the Lagrange multiplier stays zero throughout.
-# The trigger is PROJECTION coming into range, not contact engaging.
+# The right block is held 0.15 to the left, so it overlaps the left block by 0.05 in x and the
+# Lagrange multiplier becomes non-zero once the faces align. The trigger is PROJECTION coming into
+# range; the non-zero multiplier checks that the late-activated interface transfers contact pressure.
 #
 # EXPECTED: unpatched MOOSE throws at t ~ 0.6; patched MOOSE runs to end_time.
 
@@ -114,7 +115,8 @@
     preset = true
     variable = disp_x
     boundary = rb_right
-    value = 0.0
+    # Closes the 0.1 mesh gap and leaves a 0.05 overlap for contact to resolve
+    value = -0.15
   []
   [rb_slide_y]
     type = FunctionDirichletBC
@@ -180,9 +182,7 @@
 []
 
 [Postprocessors]
-  # The multiplier stays at exactly zero for the whole run because the blocks never touch: the
-  # 0.1 gap normal to the interface is held by the disp_x BCs on lb_left and rb_right. This is what
-  # shows the bug is triggered by projection coming into range rather than by contact engaging.
+  # The multiplier is zero until the faces overlap laterally and non-zero once contact engages.
   [max_normal_lm]
     type = NodalExtremeValue
     variable = leftright_normal_lm

@@ -36,6 +36,10 @@ To use *all* off diagonal blocks, you can use the following input file syntax:
 full = true
 ```
 
+When the solve type is `NEWTON` or `LINEAR` and none of `full`, `off_diag_row`, `off_diag_column` or
+`coupled_groups` are specified, `full` defaults to `true`, because these solve types assume the
+exact Jacobian. Set `full = false` explicitly to only use the diagonal blocks.
+
 ## Example Input File Syntax
 
 !listing ex11_prec/smp.i block=Preconditioning

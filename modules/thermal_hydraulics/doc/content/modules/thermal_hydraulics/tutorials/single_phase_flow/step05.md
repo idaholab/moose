@@ -86,39 +86,18 @@ function in the top-level `[Functions]` block:
          block=Functions/m_dot_sec_fn
          link=False
 
-In the [ControlLogic](ControlLogic/index.md) block, we bring the function value in using the [GetFunctionValueControl.md]
-block:
+In the [ChainControls](syntax/ChainControls/index.md) block, we bring the function value in using the
+[GetFunctionValueChainControl.md] block:
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i
-         block=ControlLogic/m_dot_sec_inlet_ctrl
+         block=ChainControls/m_dot_sec_inlet_ctrl
          link=False
 
-And then we feed this value back into the system:
+And then we feed this value back into the system using a [SetValueChainControl.md] block:
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i
-         block=ControlLogic/set_m_dot_sec_ctrl
+         block=ChainControls/set_m_dot_sec_ctrl
          link=False
-
-
-### Alternative Solution
-
-An alternative solution to this is to use a convenience block called [TimeFunctionComponentControl.md]
-which combines these two `ControlLogic` blocks into one.
-It takes three parameters `component`, `parameter`, and `function`.
-
-The equivalent syntax would look like this:
-
-```
-[set_m_dot_sec_ctrl]
-  type = TimeFunctionComponentControl
-  component = inlet_sec
-  parameter = m_dot
-  function = m_dot_sec_fn
-[]
-```
-
-!alert note
-+Note:+ This should be your preferred setup when you want to use time-dependent component parameters.
 
 
 !content pagination previous=tutorials/single_phase_flow/step04.md

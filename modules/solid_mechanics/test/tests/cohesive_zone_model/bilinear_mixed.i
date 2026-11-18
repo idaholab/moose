@@ -1,4 +1,5 @@
 [Mesh]
+  use_displaced_mesh = false
   [msh]
     type = GeneratedMeshGenerator
     dim = 2
@@ -48,12 +49,12 @@
 [Physics]
   [SolidMechanics]
     [QuasiStatic]
-      generate_output = 'stress_yy'
+      generate_output = 'cauchy_stress_yy'
       [all]
         strain = FINITE
         add_variables = true
-        use_automatic_differentiation = true
-        decomposition_method = TaylorExpansion
+        new_system = true
+        kinematic_approximation = rashid_eigen
       []
     []
   []
@@ -101,10 +102,11 @@
 
 [Materials]
   [stress]
-    type = ADComputeFiniteStrainElasticStress
+    type = ComputeLagrangianLinearElasticStress
+    objective_rate = rashid
   []
   [elasticity_tensor]
-    type = ADComputeElasticityTensor
+    type = ComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
   []

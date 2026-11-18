@@ -1,0 +1,26 @@
+[Tests]
+  issues = '#19571'
+  design = 'LibtorchDRLControlTrainer.md'
+  [errors]
+    requirement = "The system shall report an error when training a DRL controller if"
+    [zero-timestep-window]
+      type = RunException
+      input = trainer_errors.i
+      cli_args = "Trainers/nn_trainer/timestep_window=0"
+      expect_err = "Range check failed for parameter Trainers/nn_trainer/timestep_window"
+      detail = "the timestep window used to downsample the rollout data is zero, or"
+      capabilities = 'libtorch'
+    []
+    [mismatched-sample-count]
+      type = RunException
+      input = trainer_errors.i
+      cli_args = "Reporters/data/real_vector_vector_values='300 301 302 | 0 1 2; 0 2 4 | 0 -1 -1; "
+                 "0 -2 -2 | 0 1 2; 0 2 4'"
+      expect_err = "Entry 0 of the observation reporters holds 1 samples, but the reward reporter "
+                   "holds 2 samples."
+      detail = "the observation reporters hold a different number of rollout samples than the "
+               "reward reporter."
+      capabilities = 'libtorch'
+    []
+  []
+[]

@@ -29,7 +29,7 @@
 
 [BCs]
   [bnd]
-    type = KokkosVectorFunctionDirichletBC
+    type = KokkosParsedVectorFunctionDirichletBC
     variable = u
     function_x = 'x_exact_sln'
     boundary = 'left right'

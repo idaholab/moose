@@ -30,11 +30,13 @@
     variable = u
     boundary = left
     enable = false
+    coefficient = 2
   [../]
   [./right]
     type = RobinBC
     variable = u
     boundary = right
+    coefficient = 2
   [../]
 []
 

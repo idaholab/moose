@@ -13,4 +13,22 @@
     exodiff = heated_porous_medium_out.e
     requirement = 'The system shall be able to model heated flow in a porous medium with convection between phases.'
   []
+  [effective-solid-conductivity]
+    requirement = 'The system shall use the solid thermal conductivity of a porous medium as an effective conductivity, so that the steady conduction temperature rise in a heated porous solid does not depend on the porosity, for a porosity of'
+    issues = '#34448'
+    [low-porosity]
+      type = 'CSVDiff'
+      input = solid_conduction_porosity.i
+      csvdiff = 'solid_conduction_porosity_out.csv'
+      detail = '0.25 and'
+    []
+    [high-porosity]
+      type = 'CSVDiff'
+      input = solid_conduction_porosity.i
+      csvdiff = 'solid_conduction_porosity_out.csv'
+      cli_args = 'porosity=0.75'
+      prereq = 'effective-solid-conductivity/low-porosity'
+      detail = '0.75.'
+    []
+  []
 []

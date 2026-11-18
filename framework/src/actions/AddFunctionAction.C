@@ -38,10 +38,5 @@ AddFunctionAction::act()
         "functions from 'FunctionName' parameters, so is this consumer going to end up using the "
         "functional form 'x' or 'xy'? It is undefined behavior.");
 
-#ifdef MOOSE_KOKKOS_ENABLED
-  if (_moose_object_pars.isKokkosObject())
-    _problem->addKokkosFunction(_type, _name, _moose_object_pars);
-  else
-#endif
-    _problem->addFunction(_type, _name, _moose_object_pars);
+  _problem->addFunction(_type, _name, _moose_object_pars);
 }

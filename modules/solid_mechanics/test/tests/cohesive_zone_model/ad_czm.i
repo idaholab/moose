@@ -1,4 +1,5 @@
 [Mesh]
+  use_displaced_mesh = false
   [msh]
     type = FileMeshGenerator
     file = patch_mesh.e
@@ -93,7 +94,6 @@
     type = FunctionDirichletBC
     boundary = 'z1'
     variable = disp_z
-    use_displaced_mesh = true
     function = stretch
     preset = false
   []

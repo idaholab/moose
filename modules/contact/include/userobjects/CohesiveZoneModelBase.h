@@ -31,6 +31,8 @@ public:
   virtual void initialize() override;
   virtual void finalize() override;
   virtual void reinit() override;
+  virtual ADReal nodalTangentialPressure(const Node & node, unsigned int direction) const override;
+  virtual bool usesNodalNormalDerivatives() const override { return false; }
   virtual void timestepSetup() override;
   virtual const ADVariableValue & czmGlobalTraction(unsigned int i) const;
 

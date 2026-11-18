@@ -11,14 +11,15 @@
 
 #include "ScalarKernel.h"
 #include "ADScalarKernel.h"
-#include "FunctorInterface.h"
 
 class SinglePhaseFluidProperties;
 
+/**
+ * Path-integrated incompressible momentum kernel base class
+ */
 template <bool is_ad>
 class IncompressibleMomentumSPBaseTempl
-  : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type,
-    public FunctorInterface
+  : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type
 {
   using Base = typename std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type;
 
@@ -41,7 +42,7 @@ protected:
   /// Number of coupled temperature variables
   const size_t _n_temps;
   /// Coupled temperature variables
-  std::vector<const VariableValue *> _T;
+  std::vector<const GenericVariableValue<is_ad> *> _T;
   /// Property state integration flag
   const bool _is_implicit;
   /// System reference pressure

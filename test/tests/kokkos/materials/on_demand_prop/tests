@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#30655'
+  issues = '#30655 #34477'
   design = 'KokkosMaterials/index.md'
 
   [test]

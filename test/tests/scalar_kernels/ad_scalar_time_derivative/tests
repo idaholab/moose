@@ -17,4 +17,14 @@
       cli_args = "Outputs/file_base=coupled ScalarKernels/inactive='time'"
     []
   []
+  [second_order_jacobian]
+    requirement = 'The system shall compute the exact Jacobian of an automatic differentiation scalar kernel acting on a higher order scalar variable, whose components depend on different degrees of freedom.'
+    issues = '#33966'
+    type = PetscJacobianTester
+    input = 'ad_scalar_time_derivative.i'
+    cli_args = 'Variables/u/order=SECOND Outputs/csv=false'
+    run_sim = true
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+  []
 []

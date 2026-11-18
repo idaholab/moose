@@ -302,13 +302,15 @@ p_ambient = 1e5
   []
 []
 
-[ControlLogic]
+[ChainControls]
   [get_motor_torque_control]
-    type = GetFunctionValueControl
+    type = GetFunctionValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     function = motor_torque_time_fn
   []
   [set_motor_torque_control]
-    type = SetRealValueControl
+    type = SetRealValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     parameter = Functions/motor_torque_fn/value
     value = get_motor_torque_control:value
   []

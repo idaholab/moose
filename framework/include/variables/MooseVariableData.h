@@ -303,6 +303,7 @@ public:
   const ADTemplateVariableGradient<OutputType> & adGradSln() const
   {
     _need_ad = _need_ad_volume = _need_ad_grad_u = true;
+    needADGradPhi();
     return _ad_grad_u;
   }
 
@@ -317,16 +318,25 @@ public:
     return _ad_u;
   }
 
-  /// Face-only counterpart of adGradSln(); see adSlnFace()
+  /**
+   * Face counterpart of adGradSln(); see adSlnFace(). Objects evaluating on element faces must use
+   * this accessor: on a face, the AD gradient is only computed when it was requested here.
+   */
   const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const
   {
-    _need_ad = _need_ad_grad_u = true;
+    _need_ad = _need_ad_grad_u = _need_ad_grad_u_face = true;
+    needADGradPhiFace();
     return _ad_grad_u;
   }
 
+  /**
+   * Volume-only: on element faces the AD gradient time derivative is not computed, because it
+   * would require the AD face shape function gradients, and the returned array is left empty
+   */
   const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const
   {
     _need_ad = _need_ad_volume = _need_ad_grad_u_dot = true;
+    needADGradPhi();
 
     if (!_time_integrator)
       // If we don't have a time integrator (this will be the case for variables that are a part of
@@ -376,6 +386,14 @@ public:
     curlPhi();
     curlPhiFace();
     return _ad_curl_u;
+  }
+
+  const ADTemplateVariableDivergence<OutputType> & adDivSln() const
+  {
+    _need_ad = _need_ad_volume = _need_ad_div_u = true;
+    divPhi();
+    divPhiFace();
+    return _ad_div_u;
   }
 
   ///////////////////////// Nodal value getters ///////////////////////////////////////////
@@ -512,6 +530,14 @@ private:
             unsigned int nqp,
             std::size_t num_shapes);
 
+  /// Ask the assembly to compute the AD face shape function gradients, which this variable's AD
+  /// face gradients are built from and adGradPhiFace() returns
+  void needADGradPhiFace() const;
+
+  /// Ask the assembly to compute the AD element shape function gradients, which this variable's AD
+  /// gradients are built from and adGradPhi() returns
+  void needADGradPhi() const;
+
   /// A const reference to the owning MooseVariableFE object
   const MooseVariableFE<OutputType> & _var;
 
@@ -566,6 +592,8 @@ private:
   mutable bool _need_ad_volume = false;
   mutable bool _need_ad_u = false;
   mutable bool _need_ad_grad_u = false;
+  /// Whether the AD gradient is needed on element faces, i.e. requested through adGradSlnFace()
+  mutable bool _need_ad_grad_u_face = false;
   mutable bool _need_ad_grad_u_dot = false;
   mutable bool _need_ad_second_u = false;
   mutable bool _need_ad_curl_u = false;
@@ -608,6 +636,7 @@ private:
   ADTemplateVariableValue<OutputType> _ad_u_dotdot;
   ADTemplateVariableGradient<OutputType> _ad_grad_u_dot;
   ADTemplateVariableCurl<OutputType> _ad_curl_u;
+  ADTemplateVariableDivergence<OutputType> _ad_div_u;
 
   // time derivatives
 
@@ -837,14 +866,18 @@ template <typename OutputType>
 const ADTemplateVariableValue<OutputType> &
 MooseVariableData<OutputType>::adUDotDot() const
 {
-  _need_ad = _need_ad_volume = _need_ad_u_dotdot = true;
+  // the time integrator computes the second time derivative together with the first one
+  _need_ad = _need_ad_volume = _need_ad_u_dot = _need_ad_u_dotdot = true;
 
+  // If we don't have a time integrator (this will be the case for variables that are a part
+  // of the AuxiliarySystem) then we have no way to calculate _ad_u_dotdot and we are just
+  // going to copy the values from _u_dotdot. Of course in order to be able to do that we need
+  // to calculate _u_dotdot, and _u_dot for the first time derivative copied alongside
   if (!_time_integrator)
-    // If we don't have a time integrator (this will be the case for variables that are a part
-    // of the AuxiliarySystem) then we have no way to calculate _ad_u_dotdot and we are just
-    // going to copy the values from _u_dotdot. Of course in order to be able to do that we need
-    // to calculate _u_dotdot
+  {
+    _need_u_dot = true;
     _need_u_dotdot = true;
+  }
 
   return _ad_u_dotdot;
 }
@@ -856,6 +889,7 @@ MooseVariableData<OutputType>::adGradPhi() const
   if (_element_type == Moose::ElementType::Neighbor || _element_type == Moose::ElementType::Lower)
     mooseError("Unsupported element type: ", Moose::stringify(_element_type));
   mooseAssert(_ad_grad_phi, "this should be non-null");
+  needADGradPhi();
   return *_ad_grad_phi;
 }
 
@@ -866,5 +900,6 @@ MooseVariableData<OutputType>::adGradPhiFace() const
   if (_element_type == Moose::ElementType::Neighbor || _element_type == Moose::ElementType::Lower)
     mooseError("Unsupported element type: ", Moose::stringify(_element_type));
   mooseAssert(_ad_grad_phi_face, "this should be non-null");
+  needADGradPhiFace();
   return *_ad_grad_phi_face;
 }

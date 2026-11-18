@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -121,8 +121,9 @@ MaterialBase::initializeMaterialRestrictable()
 
         if (elem->processor_id() == processor_id() &&
             restricted_blocks.find(elem->subdomain_id()) != restricted_blocks.end())
-          element_side_ids.insert({_mesh.getKokkosMesh()->getContiguousElementID(elem),
-                                   _mesh.sideWithBoundaryID(elem, boundary)});
+          for (const auto side :
+               _mesh.getMesh().get_boundary_info().sides_with_boundary_id(elem, boundary))
+            element_side_ids.insert({_mesh.getKokkosMesh()->getContiguousElementID(elem), side});
       }
 
     _element_side_ids = element_side_ids;

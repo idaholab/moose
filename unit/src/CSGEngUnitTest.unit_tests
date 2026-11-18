@@ -1,0 +1,64 @@
+[Tests]
+  issues = '#29095 #33104'
+
+  [surface_unit]
+    type = GoogleTest
+    unit_test = CSGEngUnitTest.testSurfUnit
+    design = 'CSGEngUnit.md'
+    requirement = 'The system shall provide surface-type constructive solid geometry (CSG) engineering units that behave as both an engineering unit and a CSG surface, report an error when the expanded region is requested or coefficients are retrieved before expansion, and expand into a region of surfaces that belong to the internal geometry of the unit.'
+  []
+  [cell_unit]
+    type = GoogleTest
+    unit_test = CSGEngUnitTest.testCellUnit
+    design = 'CSGEngUnit.md'
+    requirement = 'The system shall provide cell-type CSG engineering units that behave as both an engineering unit and a CSG cell, report an error when the expanded cell is requested before expansion, and expand into a cell that belongs to the internal geometry of the unit.'
+  []
+  [universe_unit]
+    type = GoogleTest
+    unit_test = CSGEngUnitTest.testUnivUnit
+    design = 'CSGEngUnit.md'
+    requirement = 'The system shall provide universe-type CSG engineering units that behave as both an engineering unit and a CSG universe, report an error when the expanded universe is requested before expansion, and expand into the root universe of the internal geometry of the unit.'
+  []
+  [polygon_properties]
+    type = GoogleTest
+    unit_test = CSGEngUnitTest.testPolygonUnitProperties
+    design = 'CSGNPolygonUnit.md'
+    requirement = 'The system shall provide a CSG engineering unit for a regular polygon that reports its number of sides, apothem, side length, and circumradius.'
+  []
+  [polygon_surface_evaluation]
+    type = GoogleTest
+    unit_test = CSGEngUnitTest.testPolygonUnitSurfaceEval
+    design = 'CSGNPolygonUnit.md'
+    requirement = 'The system shall evaluate the surface equation of a regular polygon engineering unit with a negative value inside the polygon and a positive value outside of each face of the polygon.'
+  []
+  [polygon_expansion]
+    type = GoogleTest
+    unit_test = CSGEngUnitTest.testPolygonUnitExpansion
+    design = 'CSGNPolygonUnit.md'
+    requirement = 'The system shall expand a regular polygon engineering unit into one plane per side with coefficients that match the polygon apothem.'
+  []
+  [polygon_clone]
+    type = GoogleTest
+    unit_test = CSGEngUnitTest.testPolygonUnitClone
+    design = 'CSGNPolygonUnit.md'
+    requirement = 'The system shall create an equal copy of a regular polygon engineering unit.'
+  []
+  [polygon_errors]
+    type = GoogleTest
+    unit_test = CSGEngUnitTest.testPolygonUnitErrors
+    design = 'CSGNPolygonUnit.md'
+    requirement = 'The system shall report an error when a regular polygon engineering unit is created with fewer than three sides or a negative apothem.'
+  []
+  [equality]
+    type = GoogleTest
+    unit_test = CSGEngUnitTest.testEngUnitEqual
+    design = 'CSGEngUnit.md'
+    requirement = 'The system shall compare CSG engineering units for equality using their name, behavior, unit type, attributes, and transformations.'
+  []
+  [type_through_base]
+    type = GoogleTest
+    unit_test = CSGEngUnitTest.testTypeThroughBase
+    design = 'CSGEngUnit.md'
+    requirement = 'The system shall return the derived unit type of a CSG engineering unit that is accessed through a base class reference.'
+  []
+[]

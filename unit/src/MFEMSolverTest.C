@@ -234,6 +234,7 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMG)
   // Build required solver inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreBoomerAMG");
   solver_params.set<mfem::real_t>("l_tol") = 1e-7; // HypreBoomerAMG cannot set absolute tolerance
+  solver_params.set<int>("l_max_its") = 30;
 
   // Construct solver
   MFEMHypreBoomerAMG & solver =

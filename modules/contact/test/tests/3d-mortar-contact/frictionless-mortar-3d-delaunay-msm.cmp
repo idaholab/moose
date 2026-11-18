@@ -1,0 +1,3 @@
+# Near-cocircular overlap polygons can receive different valid diagonals across toolchains. Partial
+# matching checks the common elements and all shared node coordinates.
+COORDINATES absolute 1.e-4

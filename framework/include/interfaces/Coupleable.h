@@ -543,6 +543,25 @@ protected:
   std::vector<const ArrayVariableValue *> coupledArrayValues(const std::string & var_name) const;
 
   /**
+   * Returns value of a coupled array variable for use with Automatic Differentiation
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a ADArrayVariableValue for the coupled array variable
+   * @see ADArrayKernel::_u
+   */
+  const ADArrayVariableValue & adCoupledArrayValue(const std::string & var_name,
+                                                   unsigned int comp = 0) const;
+
+  /**
+   * Returns the values for all of a coupled array variable's components for use in Automatic
+   * Differentiation
+   * @param var_name Name of coupled array variable
+   * @return Vector of ADArrayVariableValue pointers for each component of \p var_name
+   */
+  std::vector<const ADArrayVariableValue *>
+  adCoupledArrayValues(const std::string & var_name) const;
+
+  /**
    * Returns a *writable* MooseVariable object for a nodal or elemental variable. Use
    * var.setNodalValue(val) in both cases (!) to set the solution DOF values. Only one
    * object can obtain a writable reference in a simulation. Note that the written values will
@@ -855,6 +874,38 @@ protected:
                                                              unsigned int comp = 0) const;
 
   /**
+   * Returns gradient of a coupled array variable for use in Automatic Differentiation
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a ADArrayVariableGradient containing the gradient of the coupled array
+   * variable
+   * @see ADArrayKernel::_grad_u
+   */
+  const ADArrayVariableGradient & adCoupledArrayGradient(const std::string & var_name,
+                                                         unsigned int comp = 0) const;
+
+  /**
+   * Returns second derivatives of a coupled array variable for use in Automatic Differentiation.
+   * Each entry is a matrix with one row per array component and LIBMESH_DIM * LIBMESH_DIM
+   * columns, the row-major flattened Hessian: column LIBMESH_DIM * d1 + d2 holds the derivative
+   * with respect to x_d1 and x_d2.
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to the second derivatives of the coupled array variable
+   */
+  const ADArrayVariableSecond & adCoupledArraySecond(const std::string & var_name,
+                                                     unsigned int comp = 0) const;
+
+  /**
+   * Returns the gradients for all of a coupled array variable's components for use in Automatic
+   * Differentiation
+   * @param var_name Name of coupled array variable
+   * @return Vector of ADArrayVariableGradient pointers for each component of \p var_name
+   */
+  std::vector<const ADArrayVariableGradient *>
+  adCoupledArrayGradients(const std::string & var_name) const;
+
+  /**
    * Returns an old gradient from previous time step of a coupled array variable
    * @param var_name Name of coupled array variable
    * @param comp Component number for vector of coupled array variables
@@ -923,6 +974,18 @@ protected:
    */
   const ADVectorVariableCurl & adCoupledCurl(const std::string & var_name,
                                              unsigned int comp = 0) const;
+
+  /**
+   * Returns divergence of a coupled variable for use in objects utilizing Automatic
+   * Differentiation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to an ADVectorVariableDivergence containing the divergence of the coupled
+   * variable
+   * @see Kernel::_div_u
+   */
+  const ADVectorVariableDivergence & adCoupledDiv(const std::string & var_name,
+                                                  unsigned int comp = 0) const;
 
   /**
    * Returns divergence of a coupled variable
@@ -1159,6 +1222,26 @@ protected:
    */
   virtual const ArrayVariableValue & coupledArrayDotDot(const std::string & var_name,
                                                         unsigned int comp = 0) const;
+
+  /**
+   * Time derivative of a coupled array variable for use in Automatic Differentiation
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a ADArrayVariableValue containing the time derivative of the coupled
+   * variable
+   */
+  const ADArrayVariableValue & adCoupledArrayDot(const std::string & var_name,
+                                                 unsigned int comp = 0) const;
+
+  /**
+   * Second time derivative of a coupled array variable for use in Automatic Differentiation
+   * @param var_name Name of coupled array variable
+   * @param comp Component number for vector of coupled array variables
+   * @return Reference to a ADArrayVariableValue containing the second time derivative of the
+   * coupled variable
+   */
+  const ADArrayVariableValue & adCoupledArrayDotDot(const std::string & var_name,
+                                                    unsigned int comp = 0) const;
 
   /**
    * Old time derivative of a coupled array variable
@@ -1466,6 +1549,25 @@ protected:
   /// Will hold the default value for optional array coupled variables.
   mutable std::unordered_map<std::string, std::unique_ptr<ArrayVariableValue>> _default_array_value;
 
+  /// Will hold the default value for optional array coupled variables for automatic differentiation.
+  mutable std::unordered_map<std::string, std::unique_ptr<ADArrayVariableValue>>
+      _ad_default_array_value;
+
+  /// Will hold the zero default gradient for optional array coupled variables for automatic
+  /// differentiation. The number of array components depends on the variable.
+  mutable std::unordered_map<std::string, std::unique_ptr<ADArrayVariableGradient>>
+      _ad_default_array_gradient;
+
+  /// Will hold the zero default time derivative for optional array coupled variables for
+  /// automatic differentiation. The number of array components depends on the variable.
+  mutable std::unordered_map<std::string, std::unique_ptr<ADArrayVariableValue>>
+      _ad_default_array_value_zero;
+
+  /// Will hold the zero default second derivatives for optional array coupled variables for
+  /// automatic differentiation. The number of array components depends on the variable.
+  mutable std::unordered_map<std::string, std::unique_ptr<ADArrayVariableSecond>>
+      _ad_default_array_second;
+
   /// Will hold the default value for optional vector coupled variables for automatic differentiation.
   mutable std::unordered_map<std::string, std::unique_ptr<MooseArray<ADRealVectorValue>>>
       _ad_default_vector_value;
@@ -1493,6 +1595,10 @@ protected:
 
   /// This will always be zero because the default values for optionally coupled vector variables is always constant
   mutable MooseArray<ADRealVectorValue> _ad_default_curl;
+
+  /// Will hold the default value for optional vector coupled variable divergences for automatic
+  /// differentiation.
+  mutable MooseArray<ADReal> _ad_default_div;
 
   /// Zero value of a variable
   const VariableValue & _zero;
@@ -1606,6 +1712,12 @@ private:
   void checkFuncType(const std::string var_name, VarType t, FuncAge age) const;
 
 protected:
+  /**
+   * Whether this object evaluates coupled variables on element faces, so that it must request
+   * coupled AD gradients through the face accessors. Base classes of face objects override this.
+   */
+  virtual bool usesFaceCoupledValues() const { return false; }
+
   /**
    * Deprecated method. Use \p getFieldVar instead
    * Extract pointer to a base coupled field variable. Could be either a finite volume or finite
@@ -1780,6 +1892,45 @@ public:
    */
   const ADVectorVariableCurl & getADDefaultCurl() const;
 
+  /**
+   * Helper method to return (and insert if necessary) the default divergence value for Automatic
+   * Differentiation for an uncoupled vector variable.
+   * @return the default divergence value for the vector variable
+   */
+  const ADVectorVariableDivergence & getADDefaultDiv() const;
+
+  /**
+   * Helper method to return (and insert if necessary) the default array value for Automatic
+   * Differentiation for an uncoupled array variable.
+   * @param var_name the name of the array variable for which to retrieve a default value
+   * @return Pointer to the ADArrayVariableValue holding the default values
+   */
+  const ADArrayVariableValue * getADDefaultArrayValue(const std::string & var_name) const;
+
+  /**
+   * Helper method to return (and insert if necessary) the default gradient for Automatic
+   * Differentiation for an uncoupled array variable.
+   * @param var_name the name of the array variable for which to retrieve a default gradient
+   * @return Reference to a ADArrayVariableGradient containing zero entries for the default values
+   */
+  const ADArrayVariableGradient & getADDefaultArrayGradient(const std::string & var_name) const;
+
+  /**
+   * Helper method to return (and insert if necessary) the zero default time derivative for
+   * Automatic Differentiation for an uncoupled array variable.
+   * @param var_name the name of the array variable for which to retrieve a default
+   * @return Reference to a ADArrayVariableValue containing zero entries
+   */
+  const ADArrayVariableValue & getADDefaultArrayValueZero(const std::string & var_name) const;
+
+  /**
+   * Helper method to return (and insert if necessary) the zero default second derivatives for
+   * Automatic Differentiation for an uncoupled array variable.
+   * @param var_name the name of the array variable for which to retrieve a default
+   * @return Reference to the zero second derivatives
+   */
+  const ADArrayVariableSecond & getADDefaultArraySecond(const std::string & var_name) const;
+
 private:
   /**
    * Helper method to return (and insert if necessary) the default value
@@ -1846,16 +1997,54 @@ private:
   const Real _kokkos_default_value_zero = 0;
 
 #ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Request the computations and solution states that coupling the field variables of a coupled
+   * variable parameter with a vector tag requires, and register the vector tag
+   * @param var_name The coupled variable parameter name
+   * @param tag_name The vector tag name
+   * @param vars The coupled field variables
+   * @returns The vector tag ID
+   */
+  TagID kokkosRequestCoupledVectorTag(const std::string & var_name,
+                                      const std::string & tag_name,
+                                      const std::vector<MooseVariableFieldBase *> & vars) const;
+  /**
+   * Get the vector tag name stored in a parameter
+   * @param tag_param_name The name of the parameter holding the vector tag name
+   * @returns The vector tag name
+   */
+  const TagName & kokkosTagName(const std::string & tag_param_name) const;
+
+  /**
+   * Build the Kokkos variable of a coupled standard, vector, or array variable parameter
+   * @param var_name The coupled variable parameter name
+   * @param tag_name The vector tag name
+   * @param comp The component of the coupled variable parameter
+   * @param zero_default Whether an uncoupled variable takes zero instead of its default value, so
+   * that it does not require a default value, as is done for gradients. An uncoupled variable
+   * always takes zero for a time derivative tag.
+   * @returns The Kokkos variable
+   */
+  ///@{
   Moose::Kokkos::Variable kokkosCoupledVectorTagVariable(const std::string & var_name,
                                                          const std::string & tag_name,
-                                                         unsigned int comp) const;
+                                                         unsigned int comp,
+                                                         bool zero_default = false) const;
   Moose::Kokkos::Variable kokkosCoupledVectorTagVariables(const std::string & var_name,
-                                                          const std::string & tag_name) const;
+                                                          const std::string & tag_name,
+                                                          bool zero_default = false) const;
   Moose::Kokkos::Variable kokkosCoupledVectorTagVectorVariable(const std::string & var_name,
                                                                const std::string & tag_name,
-                                                               unsigned int comp) const;
+                                                               unsigned int comp,
+                                                               bool zero_default = false) const;
   Moose::Kokkos::Variable kokkosCoupledVectorTagVectorVariables(const std::string & var_name,
-                                                                const std::string & tag_name) const;
+                                                                const std::string & tag_name,
+                                                                bool zero_default = false) const;
+  Moose::Kokkos::Variable kokkosCoupledVectorTagArrayVariable(const std::string & var_name,
+                                                              const std::string & tag_name,
+                                                              unsigned int comp,
+                                                              bool zero_default = false) const;
+  ///@}
   Moose::Kokkos::Variable kokkosZeroVariable() const;
 
 public:
@@ -2062,6 +2251,116 @@ public:
   Moose::Kokkos::VectorVariableValue kokkosCoupledVectorDots(const std::string & var_name) const;
   Moose::Kokkos::VectorVariableValue
   kokkosCoupledVectorNodalDots(const std::string & var_name) const;
+
+  Moose::Kokkos::ArrayVariableValue kokkosCoupledVectorTagArrayValueByName(
+      const std::string & var_name, const std::string & tag_name, unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledVectorTagArrayValuesByName(const std::string & var_name,
+                                          const std::string & tag_name) const;
+  Moose::Kokkos::ArrayVariableGradient kokkosCoupledVectorTagArrayGradientByName(
+      const std::string & var_name, const std::string & tag_name, unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableGradient>
+  kokkosCoupledVectorTagArrayGradientsByName(const std::string & var_name,
+                                             const std::string & tag_name) const;
+  Moose::Kokkos::ArrayVariableValue kokkosCoupledVectorTagArrayNodalValueByName(
+      const std::string & var_name, const std::string & tag_name, unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledVectorTagArrayNodalValuesByName(const std::string & var_name,
+                                               const std::string & tag_name) const;
+  Moose::Kokkos::ArrayVariableValue kokkosCoupledVectorTagArrayDofValueByName(
+      const std::string & var_name, const std::string & tag_name, unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledVectorTagArrayDofValuesByName(const std::string & var_name,
+                                             const std::string & tag_name) const;
+
+  Moose::Kokkos::ArrayVariableValue
+  kokkosCoupledVectorTagArrayValue(const std::string & var_name,
+                                   const std::string & tag_param_name,
+                                   unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledVectorTagArrayValues(const std::string & var_name,
+                                    const std::string & tag_param_name) const;
+  Moose::Kokkos::ArrayVariableGradient
+  kokkosCoupledVectorTagArrayGradient(const std::string & var_name,
+                                      const std::string & tag_param_name,
+                                      unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableGradient>
+  kokkosCoupledVectorTagArrayGradients(const std::string & var_name,
+                                       const std::string & tag_param_name) const;
+  Moose::Kokkos::ArrayVariableValue
+  kokkosCoupledVectorTagArrayNodalValue(const std::string & var_name,
+                                        const std::string & tag_param_name,
+                                        unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledVectorTagArrayNodalValues(const std::string & var_name,
+                                         const std::string & tag_param_name) const;
+  Moose::Kokkos::ArrayVariableValue
+  kokkosCoupledVectorTagArrayDofValue(const std::string & var_name,
+                                      const std::string & tag_param_name,
+                                      unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledVectorTagArrayDofValues(const std::string & var_name,
+                                       const std::string & tag_param_name) const;
+
+  Moose::Kokkos::ArrayVariableValue kokkosCoupledArrayValue(const std::string & var_name,
+                                                            unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledArrayValues(const std::string & var_name) const;
+  Moose::Kokkos::ArrayVariableGradient kokkosCoupledArrayGradient(const std::string & var_name,
+                                                                  unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableGradient>
+  kokkosCoupledArrayGradients(const std::string & var_name) const;
+  Moose::Kokkos::ArrayVariableValue kokkosCoupledArrayNodalValue(const std::string & var_name,
+                                                                 unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledArrayNodalValues(const std::string & var_name) const;
+  Moose::Kokkos::ArrayVariableValue kokkosCoupledArrayDofValue(const std::string & var_name,
+                                                               unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledArrayDofValues(const std::string & var_name) const;
+
+  Moose::Kokkos::ArrayVariableValue kokkosCoupledArrayValueOld(const std::string & var_name,
+                                                               unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledArrayValuesOld(const std::string & var_name) const;
+  Moose::Kokkos::ArrayVariableGradient kokkosCoupledArrayGradientOld(const std::string & var_name,
+                                                                     unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableGradient>
+  kokkosCoupledArrayGradientsOld(const std::string & var_name) const;
+  Moose::Kokkos::ArrayVariableValue kokkosCoupledArrayNodalValueOld(const std::string & var_name,
+                                                                    unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledArrayNodalValuesOld(const std::string & var_name) const;
+  Moose::Kokkos::ArrayVariableValue kokkosCoupledArrayDofValueOld(const std::string & var_name,
+                                                                  unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledArrayDofValuesOld(const std::string & var_name) const;
+
+  Moose::Kokkos::ArrayVariableValue kokkosCoupledArrayValueOlder(const std::string & var_name,
+                                                                 unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledArrayValuesOlder(const std::string & var_name) const;
+  Moose::Kokkos::ArrayVariableGradient kokkosCoupledArrayGradientOlder(const std::string & var_name,
+                                                                       unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableGradient>
+  kokkosCoupledArrayGradientsOlder(const std::string & var_name) const;
+  Moose::Kokkos::ArrayVariableValue kokkosCoupledArrayNodalValueOlder(const std::string & var_name,
+                                                                      unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledArrayNodalValuesOlder(const std::string & var_name) const;
+  Moose::Kokkos::ArrayVariableValue kokkosCoupledArrayDofValueOlder(const std::string & var_name,
+                                                                    unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledArrayDofValuesOlder(const std::string & var_name) const;
+
+  Moose::Kokkos::ArrayVariableValue kokkosCoupledArrayDot(const std::string & var_name,
+                                                          unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledArrayDots(const std::string & var_name) const;
+  Moose::Kokkos::ArrayVariableValue kokkosCoupledArrayNodalDot(const std::string & var_name,
+                                                               unsigned int comp = 0) const;
+  Moose::Kokkos::Array<Moose::Kokkos::ArrayVariableValue>
+  kokkosCoupledArrayNodalDots(const std::string & var_name) const;
 
   Moose::Kokkos::ADVariableValue kokkosADCoupledVectorTagValueByName(const std::string & var_name,
                                                                      const std::string & tag_name,

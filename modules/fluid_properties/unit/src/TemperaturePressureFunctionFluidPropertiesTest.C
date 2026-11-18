@@ -39,7 +39,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_constant_cv)
   Real visc = 1e-3 + 1e-5 * T - 3e-9 * p;
   Real density = 1 / v;
   Real alpha = -1. / density * 2.5;
-  Real beta = -1. / density * 32e-5;
+  Real beta = 1. / density * 32e-5;
   Real cp = cv + MathUtils::pow(alpha, 2) * T / density / beta;
 
   // Testing the properties with a constant cv
@@ -76,7 +76,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_constant_cv)
   visc = 1e-3 + 1e-5 * T - 3e-9 * p;
   density = 1 / v;
   alpha = -1. / density * 2.5;
-  beta = -1. / density * 32e-5;
+  beta = 1. / density * 32e-5;
   cp = cv + MathUtils::pow(alpha, 2) * T / density / beta;
 
   ABS_TEST(_fp->cp_from_p_T(p, T), cp, tol);
@@ -116,7 +116,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
     Real p = 8.56E7;
     Real T = 200.0;
     Real cp = 3000. + 3 * T + 5e-4 * p;
-    Real e = 9220000.46051060781;
+    Real e = 9219999.5394894015;
     Real v = 1 / (1400 + 2.5 * T + 32e-5 * p);
     Real h = e + p * v;
 
@@ -125,7 +125,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
     Real visc = 1e-3 + 1e-5 * T - 3e-9 * p;
     Real density = 1 / v;
     Real alpha = -1. / density * 2.5;
-    Real beta = -1. / density * 32e-5;
+    Real beta = 1. / density * 32e-5;
     Real cv = cp - MathUtils::pow(alpha, 2) * T / density / beta;
 
     ABS_TEST(_fp_cp->cp_from_p_T(p, T), cp, tol);
@@ -152,7 +152,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
     Real p = 1.06841E8;
     Real T = 300.0;
     Real cp = 3000. + 3 * T + 5e-4 * p;
-    Real e = 17061150.6748718396;
+    Real e = 17061149.3251282759;
     Real v = 1 / (1400 + 2.5 * T + 32e-5 * p);
     Real h = e + p * v;
 
@@ -161,7 +161,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties_function_cp)
     Real visc = 1e-3 + 1e-5 * T - 3e-9 * p;
     Real density = 1 / v;
     Real alpha = -1. / density * 2.5;
-    Real beta = -1. / density * 32e-5;
+    Real beta = 1. / density * 32e-5;
     Real cv = cp - MathUtils::pow(alpha, 2) * T / density / beta;
 
     ABS_TEST(_fp_cp->cp_from_p_T(p, T), cp, tol);
@@ -325,4 +325,52 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, combined)
   ABS_TEST(e, e2, tol);
   ABS_TEST(de_dp, de2_dp, tol);
   ABS_TEST(de_dT, de2_dT, tol);
+}
+
+/**
+ * Verify the thermodynamic relation cp - cv = T alpha^2 / (rho kappa_T), with
+ * alpha = -(1/rho) drho/dT the thermal expansion coefficient and kappa_T = (1/rho) drho/dp > 0
+ * the isothermal compressibility, so that cp >= cv
+ */
+TEST_F(TemperaturePressureFunctionFluidPropertiesTest, heatCapacityDifference)
+{
+  const Real p = 8.56E7;
+  const Real T = 200.0;
+  const Real rho = 1400 + 2.5 * T + 32e-5 * p;
+  const Real alpha = -2.5 / rho;
+  const Real kappa_T = 32e-5 / rho;
+  const Real cp_minus_cv = T * alpha * alpha / (rho * kappa_T);
+  EXPECT_GT(cp_minus_cv, 0.0);
+
+  // constant cv
+  REL_TEST(_fp->cp_from_p_T(p, T), _fp->cv_from_p_T(p, T) + cp_minus_cv, REL_TOL_CONSISTENCY);
+  // function cp
+  REL_TEST(_fp_cp->cv_from_p_T(p, T), _fp_cp->cp_from_p_T(p, T) - cp_minus_cv, REL_TOL_CONSISTENCY);
+}
+
+/**
+ * Verify that the finite-difference derivatives remain finite at zero pressure and zero internal
+ * energy, where a purely relative perturbation vanishes
+ */
+TEST_F(TemperaturePressureFunctionFluidPropertiesTest, derivativesAtZeroArguments)
+{
+  // e_ref = 0 at T_ref = 0, so the internal energy vanishes at T = 0 for the constant-cv object
+  const Real T = 250.0;
+  Real cp, dcp_dp, dcp_dT;
+  _fp->cp_from_p_T(0.0, T, cp, dcp_dp, dcp_dT);
+  EXPECT_TRUE(std::isfinite(dcp_dp));
+  Real cv, dcv_dp, dcv_dT;
+  _fp_cp->cv_from_p_T(0.0, T, cv, dcv_dp, dcv_dT);
+  EXPECT_TRUE(std::isfinite(dcv_dp));
+  Real e, de_dp, de_dT;
+  _fp_cp->e_from_p_T(0.0, T, e, de_dp, de_dT);
+  EXPECT_TRUE(std::isfinite(de_dp));
+
+  // The constant-cv object reaches e = 0 at T = T_ref = 0; use a pressure that keeps the
+  // density positive
+  const Real p = 1e6;
+  const Real v = _fp->v_from_p_T(p, T);
+  Real cp_ve, dcp_dv, dcp_de;
+  _fp->cp_from_v_e(v, 0.0, cp_ve, dcp_dv, dcp_de);
+  EXPECT_TRUE(std::isfinite(dcp_de));
 }

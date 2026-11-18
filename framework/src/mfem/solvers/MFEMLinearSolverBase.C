@@ -43,49 +43,36 @@ LinearSolverBase::LinearSolverBase(const InputParameters & parameters)
   _equation_system = getMFEMProblem().getEquationSystem(weak_form_name);
 }
 
-template <typename T>
 void
-LinearSolverBase::SetPreconditioner(T & solver)
+LinearSolverBase::SetPreconditioner(const mfem::Operator & op)
 {
-  if (isParamSetByUser("preconditioner"))
-  {
-    if (!_preconditioner)
-    {
-      auto & pre = getMFEMProblem().getMFEMObject<LinearSolverBase>(
-          "Moose::MFEM::SolverBase", getParam<MFEMSolverName>("preconditioner"));
-      // Take shared ownership so the preconditioner outlives the solver
-      _preconditioner = std::static_pointer_cast<LinearSolverBase>(pre.shared_from_this());
-    }
+  if (!isParamSetByUser("preconditioner"))
+    return;
 
-    if (dynamic_cast<const EigensolverBase *>(GetPreconditioner()))
-      mooseError("Eigensolvers cannot be used as preconditioners.");
-
-    auto & mfem_pre = _preconditioner->GetSolver();
-    if constexpr (std::is_base_of_v<mfem::HypreSolver, T> || std::is_same_v<mfem::HypreAME, T>)
-      if (auto * const hypre_pre = dynamic_cast<mfem::HypreSolver *>(&mfem_pre))
-        solver.SetPreconditioner(*hypre_pre);
-      else
-        mooseError("hypre solver preconditioners must themselves be hypre solvers");
-    else
-      solver.SetPreconditioner(mfem_pre);
-  }
+  auto & pre = getMFEMProblem().getMFEMObject<LinearSolverBase>(
+      "Moose::MFEM::SolverBase", getParam<MFEMSolverName>("preconditioner"));
+  if (dynamic_cast<const EigensolverBase *>(&pre))
+    paramError("preconditioner", "Eigensolvers cannot be used as preconditioners.");
+  // Take shared ownership so the preconditioner outlives the solver
+  _preconditioner = std::static_pointer_cast<LinearSolverBase>(pre.getSharedPtr());
+  // SetOperatorImpl() may build the preconditioner (e.g. MatrixFreeAMS) for SetPreconditionerImpl()
+  _preconditioner->SetOperator(op);
+  SetPreconditionerImpl();
 }
 
-template void LinearSolverBase::SetPreconditioner(mfem::CGSolver &);
-template void LinearSolverBase::SetPreconditioner(mfem::GMRESSolver &);
-template void LinearSolverBase::SetPreconditioner(mfem::HypreFGMRES &);
-template void LinearSolverBase::SetPreconditioner(mfem::HypreGMRES &);
-template void LinearSolverBase::SetPreconditioner(mfem::HyprePCG &);
-template void LinearSolverBase::SetPreconditioner(mfem::HypreLOBPCG &);
-template void LinearSolverBase::SetPreconditioner(mfem::HypreAME &);
-
 void
-LinearSolverBase::UpdateEquationSystemContext()
+LinearSolverBase::SetOperator(const mfem::Operator & op)
 {
-  if (_preconditioner)
-    _preconditioner->UpdateEquationSystemContext();
-}
+  // May replace the wrapped solver (e.g. LOR), so this must precede SetPreconditioner()
+  UpdateEquationSystemContext();
 
+  SetPreconditioner(op);
+
+  // SetOperatorImpl() calls SetOperator() on the wrapped mfem solver. In most cases, this will
+  // redundantly reset the operator on the preconditioner. For others it requires the preconditioner
+  // be already set (e.g. AME), thus why it follows SetPreconditioner().
+  SetOperatorImpl(op);
+}
 } // namespace Moose::MFEM
 
 #endif

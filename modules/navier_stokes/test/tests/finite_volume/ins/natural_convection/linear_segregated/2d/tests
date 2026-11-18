@@ -30,6 +30,17 @@
     max_threads = 1
     requirement = 'The system shall be able to use arbitrary densities to solve buoyant flow in a differentially heated 2D cavity.'
   []
+  [diff_heated_cavity_s2s_rad]
+    type = 'Exodiff'
+    input = 'diff_heated_cavity_s2s_rad.i'
+    exodiff = 'diff_heated_cavity_s2s_rad_out.e'
+    design = 'LinearFVGrayLambertBC.md'
+    issues = '#33742'
+    mesh_mode = REPLICATED # The input requests a replicated mesh
+    max_threads = 1 # Linear FV doesn't support threading at the moment
+    recover = false # We don't support recover for SIMPLE at the moment
+    requirement = 'The system shall be able to solve natural convection in a differentially heated 2D cavity with surface-to-surface radiation between the cavity walls.'
+  []
 
 
 []

@@ -21,7 +21,7 @@ import mooseutils
 from FactorySystem.InputParameters import InputParameters
 from FactorySystem.MooseObject import MooseObject
 
-from TestHarness import OutputInterface
+from TestHarness import OutputInterface, TestHarness
 from TestHarness.capability_util import checkAppCapabilities
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.validation import ValidationCase, ValidationCaseClasses
@@ -237,6 +237,12 @@ class Tester(MooseObject, OutputInterface):
             "hpc_mem_per_cpu", "Memory requirement per CPU to use for HPC submission"
         )
 
+        device_list_str = "', '".join(
+            d.upper() for d in TestHarness.validComputeDevices()
+        )
+        device_param_doc = f"The compute devices to use for this test ('{device_list_str}'); default ('CPU')"
+        params.addParam("compute_devices", ["CPU"], device_param_doc)
+
         params.addParam(
             "validation_test", None, "List of validation scripts to run with this test"
         )
@@ -443,6 +449,10 @@ class Tester(MooseObject, OutputInterface):
 
         self._capability_names: Optional[set[str]] = None
         """The capability names from the checked "capabilities" param, if any."""
+
+        for value in params["compute_devices"]:
+            if value.lower() not in TestHarness.validComputeDevices():
+                raise Exception(f'Unknown device "{value}"')
 
     def getStatus(self):
         return self.test_status.getStatus()
@@ -1084,6 +1094,13 @@ class Tester(MooseObject, OutputInterface):
         # Use shell not supported for HPC
         if self.specs["use_shell"] and options.hpc:
             reasons["use_shell"] = "no use_shell with hpc"
+
+        # Compute device not supported by the test
+        devices_lower = [x.lower() for x in self.specs["compute_devices"]]
+        if options.compute_device not in devices_lower:
+            reasons["compute_devices"] = (
+                f"{options.compute_device} not in compute devices"
+            )
 
         ##### The below must be performed last to register all above caveats #####
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that

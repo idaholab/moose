@@ -1,0 +1,9 @@
+[Tests]
+  design = 'JvarMapInterface.md'
+  [skips_variables_from_other_systems]
+    type = GoogleTest
+    unit_test = JvarMapInterface.SkipsVariablesFromOtherSystems
+    requirement = 'The system shall map coupled variables to their off-diagonal Jacobian indices only for variables of the same system as the kernel, ignoring variables of other nonlinear systems and auxiliary variables that share the same variable numbers.'
+    issues = '#33973'
+  []
+[]

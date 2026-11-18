@@ -1,0 +1,112 @@
+[Tests]
+  design = 'CSGBase.md CSGSurface.md'
+  issues = '#29095'
+
+  [plane_from_points]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testPlaneFromPoints
+    requirement = 'The system shall create a constructive solid geometry (CSG) plane from three points and compute the coefficients of its equation.'
+  []
+  [plane_from_coeffs]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testPlaneFromCoeffs
+    requirement = 'The system shall create a CSG plane from the coefficients of its equation.'
+  []
+  [plane_collinear_points]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testPlaneCollinearPoints
+    requirement = 'The system shall report an error when a CSG plane is defined by three collinear points.'
+  []
+  [plane_evaluate]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testPlaneEvaluateEq
+    requirement = 'The system shall evaluate the equation of a CSG plane at a point.'
+  []
+  [sphere_at_point]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testSphereAtPoint
+    requirement = 'The system shall create a CSG sphere from a center point and a radius.'
+  []
+  [sphere_at_origin]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testphereAtOrigin
+    requirement = 'The system shall create a CSG sphere centered at the origin from a radius.'
+  []
+  [sphere_evaluate]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testSphereEvaluateEq
+    requirement = 'The system shall evaluate the equation of a CSG sphere at a point.'
+  []
+  [sphere_negative_radius]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testSphereNegativeRadius
+    requirement = 'The system shall report an error when a CSG sphere is created with a negative radius.'
+  []
+  [x_cylinder]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testXCylinder
+    requirement = 'The system shall create a CSG cylinder aligned with the x-axis from the y and z coordinates of its center and a radius.'
+  []
+  [y_cylinder]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testYCylinder
+    requirement = 'The system shall create a CSG cylinder aligned with the y-axis from the x and z coordinates of its center and a radius.'
+  []
+  [z_cylinder]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testZCylinder
+    requirement = 'The system shall create a CSG cylinder aligned with the z-axis from the x and y coordinates of its center and a radius.'
+  []
+  [cylinder_negative_radius]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testCylNegativeRadius
+    requirement = 'The system shall report an error when a CSG cylinder aligned with the x-, y-, or z-axis is created with a negative radius.'
+  []
+  [cylinder_evaluate]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testCylEvaluateEq
+    requirement = 'The system shall evaluate the equation of a CSG cylinder aligned with the x-, y-, or z-axis at a point.'
+  []
+  [halfspace_from_point]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testGetHalfspaceFromPoint
+    requirement = 'The system shall determine whether a point is in the positive or negative half-space of a CSG surface and report an error when the point lies on the surface.'
+  []
+  [halfspace_with_transform]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testHalfspaceWithTransform
+    issues = '#29095 #32308'
+    requirement = 'The system shall apply the scaling, rotation, and translation transformations of a CSG surface, in the order in which they were added, when determining the half-space of a point.'
+  []
+  [halfspace_with_null_transform]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testHalfspaceWithNullTransform
+    issues = '#29095 #32308'
+    requirement = 'The system shall determine the same half-space of a point when the transformations of a CSG surface leave the surface unchanged.'
+  []
+  [equality]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testSurfaceEquality
+    requirement = 'The system shall compare CSG surfaces for equality using their name, type, coefficients, and transformations.'
+  []
+  [get_name]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testGetName
+    requirement = 'The system shall return the name of a CSG surface.'
+  []
+  [set_name]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testSetName
+    requirement = 'The system shall rename a CSG surface.'
+  []
+  [surface_type_through_base]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testGetSurfaceTypeThroughBase
+    requirement = 'The system shall return the derived surface type of a CSG surface that is accessed through a base class reference.'
+  []
+  [valid_name]
+    type = GoogleTest
+    unit_test = CSGSurfaceTest.testValidSurfaceName
+    requirement = 'The system shall report an error when the name of a CSG surface contains whitespace or any of the characters "+", "-", "~", "|", or "&".'
+  []
+[]

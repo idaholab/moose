@@ -10,14 +10,18 @@
 #pragma once
 
 #include "MooseObject.h"
+#include "UserObjectInterface.h"
 #include "NonADFunctorInterface.h"
 #include "FaceCenteredMapFunctor.h"
 #include "SystemBase.h"
 #include "MooseLinearVariableFV.h"
 #include "NS.h"
 
+#include <set>
+
 class LinearFVFluxKernel;
 class LinearFVBoundaryCondition;
+class GrayLambertSurfaceRadiationBase;
 
 namespace NS
 {
@@ -28,7 +32,7 @@ namespace FV
  * This class provides an interface for managing  conjugate heat transfer (CHT)
  * between fluid and solid domains.
  */
-class CHTHandler : public MooseObject, public NonADFunctorInterface
+class CHTHandler : public MooseObject, public UserObjectInterface, public NonADFunctorInterface
 {
 public:
   /// Constructor with initialization parameters
@@ -109,6 +113,12 @@ protected:
   /// Tolerance for heat flux at the CHT interfaces
   const Real _cht_heat_flux_tolerance;
 
+  /// Optional surface-to-surface radiation model supplying net outward wall heat fluxes.
+  const GrayLambertSurfaceRadiationBase * _surface_radiation_uo;
+
+  /// Boundaries represented by the surface-to-surface radiation model.
+  std::set<BoundaryID> _surface_radiation_boundary_ids;
+
   /// Thermal resistance functors, one per CHT interface
   std::vector<const Moose::Functor<Real> *> _thermal_resistance;
 
@@ -146,8 +156,12 @@ protected:
   std::vector<std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>>
       _boundary_heat_flux;
 
-  /// Integrated flux for the boundaries, first index is the boundary second is solid/fluid.
+  /// Integrated source-domain flux for each boundary and solid/fluid transfer direction.
   std::vector<std::vector<Real>> _integrated_boundary_heat_flux;
+
+  /// Integrated net outward surface-radiation flux, kept separate for the CHT energy balance.
+  /// Only populated when a surface-radiation user object is supplied.
+  std::vector<Real> _integrated_boundary_surface_radiation_heat_flux;
 
   /// Functors describing the raw wall temperatures on the conjugate heat transfer interfaces.
   /// Two functors per sideset, first is solid second is fluid.

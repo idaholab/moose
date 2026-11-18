@@ -26,7 +26,9 @@ ADVolumeJunction1PhaseUserObject::validParams()
 {
   InputParameters params = ADVolumeJunctionBaseUserObject::validParams();
 
-  params.addRequiredCoupledVar("A", "Cross-sectional area of connected flow channels");
+  params.addRequiredCoupledVar("A", "Cross-sectional area of connected flow channels, elemental");
+  params.addRequiredCoupledVar("A_linear",
+                               "Cross-sectional area of connected flow channels, linear");
   params.addRequiredCoupledVar("rhoA", "rho*A of the connected flow channels");
   params.addRequiredCoupledVar("rhouA", "rhou*A of the connected flow channels");
   params.addRequiredCoupledVar("rhoEA", "rhoE*A of the connected flow channels");
@@ -58,6 +60,7 @@ ADVolumeJunction1PhaseUserObject::ADVolumeJunction1PhaseUserObject(const InputPa
   : ADVolumeJunctionBaseUserObject(params),
 
     _A(adCoupledValue("A")),
+    _A_linear(adCoupledValue("A_linear")),
     _rhoA(adCoupledValue("rhoA")),
     _rhouA(adCoupledValue("rhouA")),
     _rhoEA(adCoupledValue("rhoEA")),
@@ -101,13 +104,16 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
   const RealVectorValue ni = di * din;
   const Real nJi_dot_di = -din;
 
+  // The flow channel state is evaluated at the connection, where the area is A_linear, so that
+  // the junction and the flow channel exchange the same flux, as on flow channel interior faces.
+  const ADReal A_ratio = _A_linear[0] / _A[0];
   std::vector<ADReal> Ui(THMVACE3D::N_FLUX_INPUTS, 0.);
-  Ui[THMVACE3D::RHOA] = _rhoA[0];
-  Ui[THMVACE3D::RHOUA] = _rhouA[0] * di(0);
-  Ui[THMVACE3D::RHOVA] = _rhouA[0] * di(1);
-  Ui[THMVACE3D::RHOWA] = _rhouA[0] * di(2);
-  Ui[THMVACE3D::RHOEA] = _rhoEA[0];
-  Ui[THMVACE3D::AREA] = _A[0];
+  Ui[THMVACE3D::RHOA] = _rhoA[0] * A_ratio;
+  Ui[THMVACE3D::RHOUA] = _rhouA[0] * A_ratio * di(0);
+  Ui[THMVACE3D::RHOVA] = _rhouA[0] * A_ratio * di(1);
+  Ui[THMVACE3D::RHOWA] = _rhouA[0] * A_ratio * di(2);
+  Ui[THMVACE3D::RHOEA] = _rhoEA[0] * A_ratio;
+  Ui[THMVACE3D::AREA] = _A_linear[0];
 
   const auto flux_3d = compute3DFlux(*(_numerical_flux_uo[c]), Ui, ni);
 

@@ -851,7 +851,9 @@ Assembly::reinitFE(const Elem * elem)
       const_cast<std::vector<Point> &>(_holder_fe_helper[dim]->get_xyz()));
   _current_JxW.shallowCopy(const_cast<std::vector<Real> &>(_holder_fe_helper[dim]->get_JxW()));
 
-  if (_subproblem.haveADObjects())
+  // The AD map is needed for the AD JxW, quadrature points and coordinate transformation and for
+  // the AD shape function gradients, which use its inverse
+  if (_subproblem.haveADObjects() && (_need_ad_volume_map || _need_ad_grad_phi))
   {
     auto n_qp = _current_qrule->n_points();
     resizeADMappingObjects(n_qp, dim);
@@ -872,6 +874,8 @@ Assembly::reinitFE(const Elem * elem)
 
     for (const auto & it : _fe[dim])
     {
+      if (!_need_ad_grad_phi)
+        break;
       FEBase & fe = *it.second;
       auto fe_type = it.first;
       auto num_shapes = FEInterface::n_shape_functions(fe_type, elem);
@@ -893,6 +897,8 @@ Assembly::reinitFE(const Elem * elem)
     }
     for (const auto & it : _vector_fe[dim])
     {
+      if (!_need_ad_grad_phi)
+        break;
       FEVectorBase & fe = *it.second;
       auto fe_type = it.first;
       auto num_shapes = FEInterface::n_shape_functions(fe_type, elem);
@@ -1079,8 +1085,10 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
 
   auto dim = elem->dim();
   const auto & elem_nodes = elem->get_nodes();
-  auto num_shapes = FEInterface::n_shape_functions(fe->get_fe_type(), elem);
   const auto & phi_map = fe->get_fe_map().get_phi_map();
+  // The mapping basis includes every mapping node, including enriched nodes on elements such as
+  // TET14.
+  const auto num_shapes = phi_map.size();
   const auto & dphidxi_map = fe->get_fe_map().get_dphidxi_map();
   const auto & dphideta_map = fe->get_fe_map().get_dphideta_map();
   const auto & dphidzeta_map = fe->get_fe_map().get_dphidzeta_map();
@@ -2142,6 +2150,15 @@ Assembly::reinitElemFaceRef(const Elem * elem,
         const_cast<std::vector<Real> &>(_holder_fe_face_helper[elem_dim]->get_curvatures()));
 
   computeADFace(*elem, elem_side);
+
+  // Keep the current-side bookkeeping consistent with the other elem/side reinit overloads so
+  // that consumers of _current_side, _current_side_elem, and _current_side_volume (e.g.
+  // InterfaceKernelBase) see correct values rather than whatever was left over from a previous
+  // reinit.
+  _current_side = elem_side;
+  _current_side_elem = &_current_side_elem_builder(*elem, elem_side);
+  _current_side_volume_computed = false;
+  computeCurrentFaceVolume();
 }
 
 void
@@ -2163,11 +2180,19 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
     if (_displaced)
     {
       const auto & qw = _current_qrule_face->get_weights();
-      computeFaceMap(elem, side, qw);
-      const std::vector<Real> dummy_qw(n_qp, 1.);
+      // computeFaceMap supplies the AD face JxW, normals and points; the single-point map only adds
+      // the inverse map that computeGradPhiAD needs
+      if (_need_ad_face_map)
+        computeFaceMap(elem, side, qw);
+      if (_need_ad_grad_phi_face)
+      {
+        // Faces can have different numbers of quadrature points, so grow the weights as needed
+        static thread_local std::vector<Real> dummy_qw;
+        dummy_qw.resize(n_qp, 1.);
 
-      for (unsigned int qp = 0; qp != n_qp; qp++)
-        computeSinglePointMapAD(&elem, dummy_qw, qp, _holder_fe_face_helper[dim]);
+        for (unsigned int qp = 0; qp != n_qp; qp++)
+          computeSinglePointMapAD(&elem, dummy_qw, qp, _holder_fe_face_helper[dim]);
+      }
     }
     else
     {
@@ -2184,45 +2209,48 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
           _ad_curvatures[qp] = _curvatures[qp];
     }
 
-    for (const auto & it : _fe_face[dim])
+    if (_need_ad_grad_phi_face)
     {
-      FEBase & fe = *it.second;
-      auto fe_type = it.first;
-      auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
-      auto & grad_phi = _ad_grad_phi_data_face[fe_type];
+      for (const auto & it : _fe_face[dim])
+      {
+        FEBase & fe = *it.second;
+        auto fe_type = it.first;
+        auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
+        auto & grad_phi = _ad_grad_phi_data_face[fe_type];
 
-      grad_phi.resize(num_shapes);
-      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-        grad_phi[i].resize(n_qp);
-
-      const auto & regular_grad_phi = _fe_shape_data_face[fe_type]->_grad_phi;
-
-      if (_displaced)
-        computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
-      else
+        grad_phi.resize(num_shapes);
         for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-          for (unsigned qp = 0; qp < n_qp; ++qp)
-            grad_phi[i][qp] = regular_grad_phi[i][qp];
-    }
-    for (const auto & it : _vector_fe_face[dim])
-    {
-      FEVectorBase & fe = *it.second;
-      auto fe_type = it.first;
-      auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
-      auto & grad_phi = _ad_vector_grad_phi_data_face[fe_type];
+          grad_phi[i].resize(n_qp);
 
-      grad_phi.resize(num_shapes);
-      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-        grad_phi[i].resize(n_qp);
+        const auto & regular_grad_phi = _fe_shape_data_face[fe_type]->_grad_phi;
 
-      const auto & regular_grad_phi = _vector_fe_shape_data_face[fe_type]->_grad_phi;
+        if (_displaced)
+          computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
+        else
+          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+            for (unsigned qp = 0; qp < n_qp; ++qp)
+              grad_phi[i][qp] = regular_grad_phi[i][qp];
+      }
+      for (const auto & it : _vector_fe_face[dim])
+      {
+        FEVectorBase & fe = *it.second;
+        auto fe_type = it.first;
+        auto num_shapes = FEInterface::n_shape_functions(fe_type, &elem);
+        auto & grad_phi = _ad_vector_grad_phi_data_face[fe_type];
 
-      if (_displaced)
-        computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
-      else
+        grad_phi.resize(num_shapes);
         for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-          for (unsigned qp = 0; qp < n_qp; ++qp)
-            grad_phi[i][qp] = regular_grad_phi[i][qp];
+          grad_phi[i].resize(n_qp);
+
+        const auto & regular_grad_phi = _vector_fe_shape_data_face[fe_type]->_grad_phi;
+
+        if (_displaced)
+          computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
+        else
+          for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+            for (unsigned qp = 0; qp < n_qp; ++qp)
+              grad_phi[i][qp] = regular_grad_phi[i][qp];
+      }
     }
   }
 }
@@ -4829,6 +4857,7 @@ const MooseArray<ADReal> &
 Assembly::adCurvatures() const
 {
   _calculate_curvatures = true;
+  _need_ad_face_map = true;
   // Must prerequest the second derivatives. Sadly because there is only one
   // _need_second_derivative map for both volumetric and face FE objects we must request both here
   feSecondPhi<Real>(_helper_type);

@@ -37,4 +37,15 @@
       detail = 'with a value on the boundary set by a function and shall be able to produce the exact Jacobian.'
     [../]
   [../]
+  [function_displaced]
+    type = 'PetscJacobianTester'
+    input = '../ad_function_neumann_bc/displaced.i'
+    cli_args = 'BCs/right/type=ADFunctionPenaltyDirichletBC BCs/right/penalty=10'
+    run_sim = False
+    issues = '#34483'
+    design = 'source/bcs/ADFunctionPenaltyDirichletBC.md'
+    requirement = 'The system shall compute the exact Jacobian of a penalty Dirichlet boundary '
+                  'condition defined by a position-dependent function on the displaced mesh, '
+                  'including its dependence on the displacements.'
+  []
 []

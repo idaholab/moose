@@ -10,27 +10,15 @@
 #pragma once
 
 #include "ElementSubdomainModifier.h"
-#include "libmesh/enum_order.h"
+#include "SBMElementClassificationInterface.h"
 
 /**
  * Common partial-element classification parameters for shifted boundary element modifiers.
  */
-class SBMElementSubdomainModifierBase : public ElementSubdomainModifier
+class SBMElementSubdomainModifierBase : public ElementSubdomainModifier,
+                                        public SBMElementClassificationInterface
 {
 public:
   static InputParameters validParams();
   SBMElementSubdomainModifierBase(const InputParameters & parameters);
-
-protected:
-  /// Threshold applied to the inactive fraction of a partially active element
-  const Real _lambda;
-
-  /// Quadrature order used to estimate the active fraction
-  const Order _qrule_order;
-
-  /// Whether to assign a dedicated subdomain ID to intercepted elements
-  const bool _mark_intercepted;
-
-  /// Subdomain ID assigned to intercepted elements
-  const SubdomainID _subdomain_id_intercepted;
 };

@@ -73,6 +73,16 @@
     requirement = "The system shall report a failure if a test is missing its gold file"
     collections = 'FAILURE_ANALYSIS'
   []
+  [missing_output]
+    type = PythonUnitTest
+    input = test_MissingOutput.py
+    min_slots = 2 # calls TestHarness, which could use threads
+    # diff and write_results run the diffs fixture, which writes the same exodiff_out.e
+    prereq = 'diff write_results'
+    requirement = "The system shall report a failure if a test does not produce the file it is to compare against its gold file"
+    issues = '#21309'
+    collections = 'FAILURE_ANALYSIS'
+  []
   [expect]
     type = PythonUnitTest
     input = test_Expect.py
@@ -222,12 +232,25 @@
     requirement = "The system shall detect and report unreadable output in executed commands"
     issues = '#14370'
   []
+  [runner_read_output]
+    type = PythonUnitTest
+    input = test_RunnerReadOutput.py
+    requirement = "The system shall keep output that is not valid UTF-8 as escapes and describe the location of each invalid sequence."
+    issues = '#34111'
+  []
+  [null_output]
+    type = PythonUnitTest
+    input = test_NullOutput.py
+    min_slots = 2 # calls TestHarness, which could use threads
+    requirement = "The system shall flag NULL characters in the output of executed commands as invalid output characters with a caveat, and determine the test result from the test's own checks."
+    issues = '#34111'
+  []
   [failed_tests]
     type = PythonUnitTest
     input = test_FailedTests.py
     min_slots = 2 # calls TestHarness, which could use threads
-    requirement = "The system shall run only tests which previously have failed"
-    issues = '#14512'
+    requirement = "The system shall run only tests which previously have failed and mark those that now pass as passing in the previous results, unless all of them now pass or it is requested to leave the previous results unchanged"
+    issues = '#14512 #33905'
   []
   [python_version]
     type = PythonUnitTest
@@ -268,10 +291,19 @@
   [schema_expect_err]
     type = PythonUnitTest
     input = test_SchemaDiff.py
+    test_case = TestHarnessTester
     min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report multiple failures resulting from SchemaDiff operations."
     required_python_packages = 'deepdiff xmltodict'
     collections = 'FAILURE_ANALYSIS'
+  []
+  [schema_string_lists]
+    type = PythonUnitTest
+    input = test_SchemaDiff.py
+    test_case = TestSchemaDiffStringLists
+    requirement = "The system shall report a SchemaDiff difference between whitespace-separated lists of values that differ beyond the tolerances, including lists of negative values."
+    required_python_packages = 'deepdiff packaging'
+    issues = '#33873'
   []
   [test_show_last_results]
     type = PythonUnitTest
@@ -318,6 +350,24 @@
     type = PythonUnitTest
     input = test_SubprocessRunner.py
     requirement = 'The system shall wait for specified application output before delivering a signal.'
+  []
+  [monitor_processes]
+    type = PythonUnitTest
+    input = test_MonitorProcesses.py
+    required_python_packages = 'psutil'
+    requirement = "The system shall measure the memory usage of a process and its descendants, "
+                  "splitting memory shared between processes proportionally and excluding "
+                  "file-backed memory when the kernel reports it separately, and shall measure "
+                  "the NVIDIA GPU memory of a process and its descendants."
+    issues = '#33796 #34366'
+  []
+  [run_local_memory_limits]
+    type = PythonUnitTest
+    input = test_RunLocalMonitorJobProcesses.py
+    required_python_packages = 'psutil'
+    requirement = "The system shall track the peak CPU and NVIDIA GPU memory of each running test "
+                  "and kill a test whose memory per slot exceeds the CPU or GPU limit."
+    issues = '#34366'
   []
   [test_method]
     type = PythonUnitTest

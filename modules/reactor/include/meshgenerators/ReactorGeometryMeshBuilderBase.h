@@ -65,10 +65,6 @@ static const std::string region_id_as_block_name = "region_id_as_block_name";
 // only generating the mesh metadata
 static const std::string bypass_meshgen = "bypass_meshgen";
 
-// Name of a boolean metadata that controls whether CSG components or engineering units are used in
-// --csg-only mode
-static const std::string expand_units = "expand_units";
-
 // Default values for setting block IDs and region IDs of RGMB regions
 const subdomain_id_type PIN_BLOCK_ID_TRI_FLEXIBLE = 9998;
 const subdomain_id_type PIN_BLOCK_ID_TRI = 9999;
@@ -308,6 +304,26 @@ protected:
       const Real pitch,
       const std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> pattern,
       CSG::CSGBase & csg_obj);
+
+  /**
+   * Check if input vector of Reals is defined in ascending order
+   *
+   * @param input_vec Input vector to check
+   * @return true if vector is in ascending order, false otherwise
+   */
+  bool checkInputVectorInAscendingOrder(const std::vector<Real> & input_vec);
+
+  /**
+   * Check if input lattice has values that are less than the number of input elements in lattice
+   *
+   * @param input_lattice Input lattice to check
+   * @param num_inputs number of expected inputs in lattice. This sets the value that the lattice
+   *                   entries should all be less than
+   * @return true if all elements in `input_lattice` have values less than `num_inputs`, false
+   *         otherwise
+   */
+  bool checkUndefinedLatticeRefs(const std::vector<std::vector<unsigned int>> & input_lattice,
+                                 unsigned int num_inputs);
 
 private:
   /// The dummy param mesh that we need to clear once we've generated (in freeReactorMeshParams)

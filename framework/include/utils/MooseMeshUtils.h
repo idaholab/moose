@@ -126,6 +126,14 @@ std::set<BoundaryID> getBoundaryIDSet(const libMesh::MeshBase & mesh,
 BoundaryID getBoundaryID(const BoundaryName & boundary_name, const MeshBase & mesh);
 
 /**
+ * Get all boundary names and IDs from a mesh
+ * @param mesh the mesh of interest
+ * @return a set of pairs of boundary names and ids
+ */
+std::set<std::pair<BoundaryName, BoundaryID>>
+getAllBoundaryNamesAndIDs(const libMesh::MeshBase & mesh);
+
+/**
  * Gets the subdomain ID associated with the given SubdomainName.
  *
  * This is needed because the SubdomainName can be either an ID or a name.
@@ -144,6 +152,14 @@ std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                                const std::vector<SubdomainName> & subdomain_name);
 std::set<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                             const std::set<SubdomainName> & subdomain_name);
+
+/**
+ * Get all subdomain names and ids from a mesh
+ * @param mesh the mesh of interest
+ * @return a set of pairs of subdomain names and ids
+ */
+std::set<std::pair<SubdomainName, SubdomainID>>
+getAllSubdomainNamesAndIDs(const libMesh::MeshBase & mesh);
 
 /**
  * Calculates the centroid of a MeshBase.
@@ -547,13 +563,17 @@ void convertBlockToMesh(MeshBase & source_mesh,
  * @param avoid_merging_boundaries If true, boundary IDs in the source mesh will
  * be offset to avoid merging with boundary IDs in the destination mesh
  * @param communicator The communicator for parallel operations
+ * @param skip_preparation If true, the destination mesh is not prepared after the copy. A caller
+ * that copies many meshes in a row should set this and prepare the destination once at the end,
+ * since preparing it after every copy makes the total cost quadratic in the number of copies.
  */
 void copyIntoMesh(MeshGenerator & mg,
                   UnstructuredMesh & destination,
                   const UnstructuredMesh & source,
                   const bool avoid_merging_subdomains,
                   const bool avoid_merging_boundaries,
-                  const Parallel::Communicator & communicator);
+                  const Parallel::Communicator & communicator,
+                  const bool skip_preparation = false);
 
 /**
  * Generates meshes from edges connecting a list of points.
@@ -627,4 +647,17 @@ void buildPolyLineMesh(MeshBase & mesh,
  * shell)
  */
 void addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_external_bid);
+
+/**
+ * Match the points of a nodal quadrature rule (e.g. QNodal on a side of a parent element) to the
+ * nodes of an element at the same physical locations. The quadrature ordering is not guaranteed to
+ * match the node ordering of the element, especially for higher-order faces, so the association
+ * is built geometrically so each quadrature value is attached to the node at the same physical
+ * point.
+ * @param elem the element whose nodes are matched
+ * @param q_points the physical locations of the nodal quadrature points
+ * @return a map from each quadrature point index to the local index of the matching node
+ */
+std::vector<unsigned int> nodalQuadraturePointToNodeMap(const Elem & elem,
+                                                        const std::vector<Point> & q_points);
 }

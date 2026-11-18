@@ -102,6 +102,37 @@ unstable — otherwise you're just relocating where the instability bites next t
    old logs/gold to check whether it predates your change before treating it as something you
    caused.
 
+## Nonlinear stagnation at a round-off floor
+
+A residual cannot fall below a round-off floor. The floor comes from evaluating the residual
+function. Each residual entry is a sum of contributions, and rounding leaves an error of about `eps`
+times the sum of their magnitudes. At convergence the contributions cancel, so the floor of variable
+`i` is about `eps * || sum_k |r_ik| ||`. That magnitude is what `absolute_value_vector_tags`
+assembles. A reaction rate that is a small difference of two large fluxes therefore has a high
+floor. A check that compares each variable against its own tolerance, as
+`ReferenceResidualConvergence` does, exposes every variable's floor. A single global norm hides the
+floors of small variables.
+
+Suspect a floor, not ill-conditioning, when all of these hold:
+
+- One variable's residual stops falling and oscillates between a few values for many Newton
+  iterations.
+- Its reference residual stays constant over those iterations.
+- The linear solves still converge to round-off.
+
+Then:
+
+1. Read the floor off the logs. For each stalled solve, take the larger of the variable's residuals
+   at its last two iterations.
+2. Collect that floor over the whole run, not only at the first failure. Which variable stalls
+   can change between phases of a transient.
+3. Set each absolute tolerance about ten times above the largest observed floor of its variable.
+   Use a per-variable tolerance (`variable_nl_abs_tol`) when the floors differ by orders of
+   magnitude. One `nl_abs_tol` above the largest floor is potentially far looser than the other
+   variables need.
+4. Confirm that the outputs do not change materially across a range of tolerances above the floor.
+   Then regold. The old gold may be the less converged answer.
+
 ## When targeted tolerance widening is legitimate, not an anti-pattern
 
 Not every diff that varies with build/flags/hardware/thread count is an algorithmic conditioning

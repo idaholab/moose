@@ -81,13 +81,18 @@
   []
 []
 
-[ControlLogic]
+[ChainControls]
   active = ''
-  [K_crtl]
-    type = TimeFunctionComponentControl
-    component = junction1
-    parameter = K
+  [K_crtl_fn]
+    type = GetFunctionValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     function = K_loss_fn
+  []
+  [K_crtl]
+    type = SetRealValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    parameter = component::junction1/K
+    value = K_crtl_fn:value
   []
 []
 

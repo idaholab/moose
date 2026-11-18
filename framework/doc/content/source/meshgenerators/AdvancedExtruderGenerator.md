@@ -28,6 +28,10 @@ Boundary ID remapping also works similarly to subdomain ID remapping. During ext
 
 The other categories of the boundaries that can be defined are the interfaces between subdomains in different elevations, as well as the top/bottom surfaces of the subdomains. As each elevation interface (or top/bottom surface) is simply a duplicate of the `input` mesh, these interface (or top/bottom surface) boundaries correspond to the subdomains of the `input` mesh, which are referred to as `source_blocks`. Also, due to the nature of sidesets, they can be defined on either side of the elevation interface. Thus, both `upward` and `downward` boundaries can be defined. Here `upward` means the normal vector of the sideset has the "same-ish" direction as the [!param](/Mesh/AdvancedExtruderGenerator/direction) vector; `downward` means the normal vector of the sideset has the "opposite-ish" direction as the [!param](/Mesh/AdvancedExtruderGenerator/direction) vector.
 
+## Side Boundary
+
+The lateral surface of the extruded mesh, formed by extruding the exterior sides of the `input` mesh, can be added to a boundary named by [!param](/Mesh/AdvancedExtruderGenerator/side_boundary). Both the extruded sides and their nodes are added to this boundary, so it is available as a sideset and as a nodeset. The exterior sides are the sides of the `input` mesh without a neighbor element.
+
 ## Extrusion along a line mesh / curve
 
 Instead of a fixed direction, the mesh can be extruded following a line mesh. The extrusion is performed following the direction of the line mesh.
@@ -39,6 +43,26 @@ The direction is computed locally for every node as:
 
 !alert note
 When extruding along an line mesh curve, specifying the biases, heights, number of layers and directions is not currently supported.
+
+## Extrusion along node normals
+
+Instead of a fixed [!param](/Mesh/AdvancedExtruderGenerator/direction), each node can be extruded along the
+local surface normal by setting [!param](/Mesh/AdvancedExtruderGenerator/extrude_along_node_normals) to `true`.
+This is useful to grow boundary layers off of a curved surface. The [!param](/Mesh/AdvancedExtruderGenerator/heights),
+[!param](/Mesh/AdvancedExtruderGenerator/num_layers) and [!param](/Mesh/AdvancedExtruderGenerator/biases) parameters are
+used as usual to control the layer thicknesses and grading; only the extrusion direction changes.
+
+The direction at each node is computed as the area-weighted average of the normals of all the elements connected to that
+node, using the same nodal quadrature as the mortar nodal normals. Each element normal is evaluated at the node itself, so
+curved (higher-order) surface elements contribute their local normal at that node rather than a single per-element normal.
+The input surface mesh is expected to have consistently oriented elements, which [OrientSurfaceMeshGenerator.md] can enforce. To flip the overall
+growth direction (inward versus outward), negate the [!param](/Mesh/AdvancedExtruderGenerator/heights).
+
+This option is supported when extruding a 2D surface mesh into 3D, and when extruding a 1D mesh into 2D. In the latter
+case, the 1D mesh must lie in a plane of constant $z$, and the normal of each element at a node is its tangent rotated by
+90 degrees counterclockwise about the $z$ axis. This option is not currently implemented for distributed meshes.
+
+!listing test/tests/meshgenerators/advanced_extruder_generator/extrude_along_normals.i block=Mesh/extrude
 
 ## Radial growth during extrusion
 

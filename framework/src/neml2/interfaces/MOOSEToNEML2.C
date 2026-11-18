@@ -31,7 +31,7 @@ MOOSEToNEML2::MOOSEToNEML2(const InputParameters & params)
 }
 
 void
-MOOSEToNEML2::insertInto(std::map<std::string, neml2::Tensor> & map) const
+MOOSEToNEML2::insertInto(std::map<std::string, at::Tensor> & map) const
 {
   map[_neml2_name] = gatheredData();
 }

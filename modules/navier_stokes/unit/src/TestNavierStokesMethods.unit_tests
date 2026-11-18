@@ -1,0 +1,10 @@
+[Tests]
+  design = 'LinearFVTemperatureWallFunctionBC.md'
+  issues = '#32476'
+
+  [find_y_plus_thermal]
+    type = GoogleTest
+    unit_test = NavierStokesMethodsTest.findYplusThermalSatisfiesMatchingCondition
+    requirement = 'The system shall compute the thermal sublayer non-dimensional wall distance that satisfies the laminar-logarithmic temperature profile matching condition for a range of molecular and turbulent Prandtl numbers.'
+  []
+[]

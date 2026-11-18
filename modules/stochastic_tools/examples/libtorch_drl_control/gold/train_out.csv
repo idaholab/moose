@@ -1,3 +1,2 @@
-time,reward/average_reward
-0,0
-1,-41.027157860234
+time,reward/average_reward,reward/std_reward
+1,-10.627422385279,8.4891157809449

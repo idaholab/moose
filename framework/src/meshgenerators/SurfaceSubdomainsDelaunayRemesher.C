@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -116,7 +116,10 @@ SurfaceSubdomainsDelaunayRemesher::generate()
     if (_subdomain_names.size())
       _subdomain_names.erase(_subdomain_names.begin());
 
-    // Get all subdomains from the mesh
+    // Get all subdomains from the mesh.  Make sure they're cached.
+    if (!mesh_3d->preparation().has_cached_elem_data)
+      mesh_3d->cache_elem_data();
+
     std::set<subdomain_id_type> sub_ids;
     mesh_3d->subdomain_ids(sub_ids);
 

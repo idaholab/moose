@@ -29,6 +29,11 @@ class SCMMixingClosureBase;
 
 /**
  * Base class for the 1-phase steady-state/transient subchannel solver.
+ *
+ * All variables are face values stored at the axial nodes, except the diversion and turbulent
+ * crossflows, the pressure drop DP and the friction factor ff, which are cell values stored at the
+ * top node of their cell. Axial fluxes are evaluated from face values; terms that act over a cell
+ * use face values interpolated to the cell center with the interpolation_scheme weight.
  */
 class SubChannel1PhaseProblem : public ExternalProblem, public PostprocessorInterface
 {
@@ -45,6 +50,7 @@ public:
   const SCMHTCClosureBase * getPinHTCClosure() const { return _pin_HTC_closure; } // optional
   const SCMFrictionClosureBase * getFrictionClosure() const { return _friction_closure; }
   Real getBulkReynoldsNumber() const { return _bulk_Re; }
+  Real getBulkVelocity() const { return _bulk_V; }
 
   /// structure with the needed information to compute the friction factor at a specific subchannel cell
   struct FrictionStruct
@@ -228,6 +234,8 @@ protected:
   bool _converged;
   /// Assembly bulk Reynolds number
   Real _bulk_Re;
+  /// Assembly bulk velocity
+  Real _bulk_V;
   /// Whether the time integrator has been checked for consistency with the implementation
   bool _time_integrator_checked = false;
   /// Time step
@@ -273,8 +281,6 @@ protected:
   const Real _dir_grav;
   /// Flag to define the usage of a implicit or explicit solution
   const bool _implicit_bool;
-  /// Flag to define the usage of staggered or collocated pressure
-  const bool _staggered_pressure_bool;
   /// Segregated solve
   const bool _segregated_bool;
   /// Boolean to printout information related to subchannel solve

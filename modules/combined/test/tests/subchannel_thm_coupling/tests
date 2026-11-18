@@ -10,6 +10,10 @@
     abs_zero = 1e-5
     max_threads = 1
     max_parallel = 1
+    requirement = 'The system shall solve a steady-state single-phase subchannel flow problem '
+                  'on a triangular lattice fuel assembly.'
+    design = 'TriSubChannel1PhaseProblem.md'
+    issues = '#29500'
   []
   [THM_pump]
     type = CSVDiff
@@ -23,6 +27,11 @@
     max_threads = 1
     max_parallel = 1
     restep = false # First, subchannel needs to work with recover to make sure multiapps are restored properly
+    requirement = 'The system shall couple a system-level thermal hydraulics model of a closed '
+                  'loop with a pump, pressurizer, and heat exchanger to a subchannel application of '
+                  'the reactor core using postprocessor transfers.'
+    design = 'FullSolveMultiApp.md MultiAppPostprocessorTransfer.md Pump1Phase.md'
+    issues = '#29500'
   []
   [THM]
     type = CSVDiff
@@ -36,5 +45,9 @@
     max_threads = 1
     max_parallel = 1
     restep = false # First, subchannel needs to work with recover to make sure multiapps are restored properly
+    requirement = 'The system shall couple a system-level thermal hydraulics model of the '
+                  'reactor core to a subchannel application using postprocessor transfers.'
+    design = 'FullSolveMultiApp.md MultiAppPostprocessorTransfer.md'
+    issues = '#29500'
   []
 []

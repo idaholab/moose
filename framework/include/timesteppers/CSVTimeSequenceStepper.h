@@ -34,7 +34,7 @@ protected:
   const std::string _file_name;
 
   /// whether the file contains a header with the column names
-  const MooseUtils::DelimitedFileReader::HeaderFlag _header;
+  const MooseUtils::DelimitedFileOfStringReader::HeaderFlag _header;
 
   /// string used as a delimiter
   const std::string _delimiter;

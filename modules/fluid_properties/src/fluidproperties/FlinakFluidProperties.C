@@ -348,9 +348,12 @@ void
 FlinakFluidProperties::cv_from_p_T(
     Real pressure, Real temperature, Real & cv, Real & dcv_dp, Real & dcv_dT) const
 {
+  // cv = cp - (dp/dT)_v v(p, T), with constant cp and (dp/dT)_v
+  Real v, dv_dp, dv_dT;
+  v_from_p_T(pressure, temperature, v, dv_dp, dv_dT);
   cv = cv_from_p_T(pressure, temperature);
-  dcv_dp = 0.0;
-  dcv_dT = 0.0;
+  dcv_dp = -_dp_dT_at_constant_v * dv_dp;
+  dcv_dT = -_dp_dT_at_constant_v * dv_dT;
 }
 
 Real

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -633,6 +633,7 @@ registerResidualObjectDispatchers(const std::string & objectname)
                                                                                                    \
     DispatcherRegistry::addDispatcher<classname::ElementLoop, classname>(objectname);              \
     DispatcherRegistry::addDispatcher<classname::NodeLoop, classname>(objectname);                 \
+    DispatcherRegistry::addDispatcher<classname::MassMatrixLoop, classname>(objectname);           \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \

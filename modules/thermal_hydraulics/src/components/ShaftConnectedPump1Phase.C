@@ -113,6 +113,7 @@ ShaftConnectedPump1Phase::buildVolumeJunctionUserObject()
     params.set<std::vector<UserObjectName>>("numerical_flux_names") = _numerical_flux_names;
     params.set<Real>("volume") = _volume;
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
+    params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
     params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
     params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};

@@ -76,7 +76,17 @@ After the data is read using the "read" method, there are two methods used for a
 - `getData`: There are three overloaded versions of this method. One returns a reference to the
 - entire data set as a vector of vectors. The others access a single vector by name or index.
 
+## MixedDataDelimitedFileReader
 
+This object provides the same functionality as the [#delimitedfilereader], but it allows you to request specific columns, either by index or name, and cast only that column as the requested data type.
+When the data file is first read it is stored as string data and then when a specific column is requested only the data in the requested column is converted to the requested datatype.
+This allows a user to provide a csv file that contains columns in addition to the ones that are actually needed, and those columns that may contain data types different from those that are actually being used.
+
+!listing unit/src/MixedDataDelimitedFileReaderTest.C
+         start=MooseUtils::MixedDataDelimitedFileReader reader("data/csv/example_mixed_data.csv");
+         include-start=true
+         end=EXPECT_EQ
+         include-end=false
 
 ## Tensor Operators
 

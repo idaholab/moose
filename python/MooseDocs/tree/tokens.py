@@ -85,7 +85,16 @@ class Token(NodeBase):
         strings = []
         for node in moosetree.iterate(self):
             if node.name in ["Word", "Number", "String"]:
-                strings.append(node["content"])
+                # The lexer splits a word such as 'ElementL2Error' into adjacent Word and Number
+                # tokens with no Space between them, so join those without the separator
+                if (
+                    node.name in ["Word", "Number"]
+                    and node.previous is not None
+                    and node.previous.name in ["Word", "Number"]
+                ):
+                    strings[-1] += node["content"]
+                else:
+                    strings.append(node["content"])
         return sep.join(strings)
 
     def copy(self, _parent=None, info=False):

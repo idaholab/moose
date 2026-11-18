@@ -1,0 +1,23 @@
+[Tests]
+  design = 'syntax/Controls/index.md NumFailedTimeSteps.md'
+  issues = '#34337'
+  [retry]
+    requirement = 'The system shall support controls executed when a time step fails.'
+    [same_dt_without_predictor]
+      type = CSVDiff
+      input = 'retry_without_predictor.i'
+      csvdiff = 'retry_without_predictor_out.csv'
+      restep = false # the controls act on the failed time step
+      detail = 'These controls can repeat a failed time step once with the same size and without '
+               'the predictor.'
+    []
+    [cut_dt_on_second_failure]
+      type = CSVDiff
+      input = 'retry_without_predictor.i'
+      cli_args = "Problem/fail_steps='3 3' Outputs/file_base=cut_dt_on_second_failure_out"
+      csvdiff = 'cut_dt_on_second_failure_out.csv'
+      restep = false # the controls act on the failed time step
+      detail = 'These controls can cut the time step size if the repeated time step fails again.'
+    []
+  []
+[]

@@ -105,6 +105,9 @@ function configure_petsc()
     EXTRA_CONFIGURE_OPTIONS+=("FFLAGS=-march=armv8.3-a")
   fi
 
+  # OpenBLAS is held at v0.3.33 because v0.3.34, the PETSc 3.26.0 default, deadlocks in
+  # threaded dense kernels called from the MUMPS, SuperLU_DIST and STRUMPACK factorizations
+  # when OMP_NUM_THREADS is greater than one. Drop the pin once a fixed OpenBLAS is released.
   cd "$PETSC_DIR" || exit 1
   python3 ./configure --with-64-bit-indices \
       --with-cxx-dialect=C++17 \
@@ -117,6 +120,7 @@ function configure_petsc()
       --with-shared-libraries=1 \
       --with-sowing=0 \
       --download-openblas=1 \
+      --download-openblas-commit=v0.3.33 \
       --download-openblas-make-options='DYNAMIC_ARCH=1' \
       --download-hpddm=1 \
       --download-hypre=1 \

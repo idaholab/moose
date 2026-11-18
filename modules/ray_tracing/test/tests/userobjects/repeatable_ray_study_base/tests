@@ -2,7 +2,7 @@
   design = 'RepeatableRayStudyBase.md'
   issues = '#16028 #16848'
   [test]
-    requirement = 'The RepeatableRayStudyBase shall support the'
+    requirement = 'The system shall support, for the RepeatableRayStudyBase, the'
     [checkpoint]
       type = 'RunApp'
       input = 'recover.i'
@@ -25,7 +25,7 @@
   []
 
   [replicated_no_claim]
-    requirement = 'The RepeatableRayStudyBase shall report a useful warning when rays are to be replicated but claiming is disabled.'
+    requirement = 'The system shall report a useful warning from the RepeatableRayStudyBase when rays are to be replicated but claiming is disabled.'
     type = 'RunException'
     input = 'errors.i'
     cli_args = 'UserObjects/study/type=RepeatableRayStudyDefineNoClaimTest'
@@ -34,7 +34,7 @@
   []
 
   [non_unique_id_error]
-    requirement = 'The RepeatableRayStudyBase shall return a useful error when a ray is added with a non-unique ID.'
+    requirement = 'The system shall return a useful error from the RepeatableRayStudyBase when a ray is added with a non-unique ID.'
     type = 'RunException'
     input = 'errors.i'
     cli_args = 'UserObjects/study/create_non_unique_id_rays=true'
@@ -43,7 +43,7 @@
   []
 
   [replicated_errors]
-    requirement = 'The RepeatableRayStudyBase shall return a useful error with replicated ray functionality when'
+    requirement = 'The system shall return a useful error from the RepeatableRayStudyBase with replicated ray functionality when'
     [additional]
       type = 'RunException'
       input = 'errors.i'
@@ -85,7 +85,7 @@
   []
 
   [define_errors]
-    requirement = 'The RepeatableRayStudyBase shall return a useful error after defining rays when'
+    requirement = 'The system shall return a useful error from the RepeatableRayStudyBase after defining rays when'
 
     [no_rays]
       type = 'RunException'

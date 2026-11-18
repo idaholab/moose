@@ -168,6 +168,9 @@ CutMeshByLevelSetGeneratorBase::generate()
     }
   }
 
+  // Setting subdomain ids invalidates their caches
+  mesh.unset_has_cached_elem_data();
+
   // Then we need to identify and make the transition layer
   std::vector<dof_id_type> transition_elems_list;
   std::vector<std::vector<unsigned int>> transition_elems_sides_list;

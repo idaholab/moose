@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -107,14 +107,16 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 ADKernel::operator()(ResidualLoop, const ThreadID tid, const Derived & kernel) const
 {
-  auto elem = kokkosBlockElementID(_thread(tid, 1));
+  auto comp = _thread(tid, 1);
+  auto elem = kokkosBlockElementID(_thread(tid, 2));
 
   AssemblyDatum datum(elem,
                       libMesh::invalid_uint,
                       kokkosAssembly(),
                       kokkosSystems(),
                       _kokkos_var,
-                      _kokkos_var.var());
+                      _kokkos_var.var(comp),
+                      comp);
 
   datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
@@ -127,6 +129,9 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 ADKernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
+  const auto scaling_factor =
+      kokkosSystem(_kokkos_var.sys()).getVariableScalingFactor(_kokkos_var.var());
+
   for (unsigned int i = datum.local_thread_id(); i < datum.n_dofs(); i += datum.num_local_threads())
   {
     ADReal local_re = 0;
@@ -134,10 +139,12 @@ ADKernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum)
     for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
       local_re += datum.JxW(qp) * kernel.template computeQpResidual<Derived>(i, qp, datum);
 
+    local_re *= scaling_factor;
+
     if (_computing_residual)
-      accumulateTaggedElementalResidual(local_re.value(), datum.elem().id, i);
+      accumulateTaggedElementalResidual(local_re.value(), datum.elem().id, i, datum.comp());
     if (_computing_jacobian)
-      accumulateTaggedElementalMatrix(local_re.derivatives(), datum, i);
+      accumulateTaggedElementalMatrix(local_re.derivatives(), datum, i, datum.comp());
   }
 }
 

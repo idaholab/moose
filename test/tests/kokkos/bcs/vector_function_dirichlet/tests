@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#33594'
+  design = 'KokkosVectorFunctionDirichletBC.md'
+  [test]
+    type = Exodiff
+    input = 'kokkos_vector_function_dirichlet.i'
+    exodiff = 'kokkos_vector_function_dirichlet_out.e'
+    requirement = 'The Kokkos system shall impose a Dirichlet boundary condition on a vector variable with components given by functions.'
+    capabilities = 'kokkos & !cuda'
+    compute_devices = 'cpu'
+  []
+[]

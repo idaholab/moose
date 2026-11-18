@@ -7,4 +7,13 @@
     requirement = 'The system shall not duplicate computation of kernels on a node that is shared between two subdomains.'
     design = 'NodalKernels/index.md'
   []
+  [shared_node_jacobian]
+    type = PetscJacobianTester
+    input = shared_node_jacobian.i
+    ratio_tol = 1e-7
+    difference_tol = 1e-10
+    issues = '#33970'
+    requirement = 'The system shall not duplicate the Jacobian contribution of nodal kernels on a node that is shared between two subdomains.'
+    design = 'NodalKernels/index.md'
+  []
 []

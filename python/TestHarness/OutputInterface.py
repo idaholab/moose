@@ -126,7 +126,7 @@ class OutputInterface:
         for null_char in null_chars:
             if null_char in output:
                 output = output.replace(null_char, "NULL")
-                failures.add("NULL output")
+                failures.add("invalid output characters")
 
         return output, list(failures)
 

@@ -412,8 +412,8 @@ disp_x_scaling = ${fparse 1 / temp_scaling}
 
   l_max_its = 60
 
-  num_steps = 9
-  dt = 0.1
+  num_steps = 18
+  dt = 0.05
 []
 
 [Postprocessors]
@@ -532,7 +532,7 @@ disp_x_scaling = ${fparse 1 / temp_scaling}
 
 [Outputs]
   csv = true
-  time_step_interval = 9
+  time_step_interval = 18
 []
 
 [Debug]

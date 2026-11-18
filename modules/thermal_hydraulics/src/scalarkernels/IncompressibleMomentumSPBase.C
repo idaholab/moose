@@ -9,7 +9,6 @@
 
 #include "IncompressibleMomentumSPBase.h"
 
-#include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
 #include "PhysicalConstants.h"
@@ -19,7 +18,6 @@ InputParameters
 IncompressibleMomentumSPBaseTempl<is_ad>::validParams()
 {
   InputParameters params = is_ad ? ADScalarKernel::validParams() : ScalarKernel::validParams();
-  params += FunctorInterface::validParams();
   params.addClassDescription("Base class for path-integrated incompressible momentum kernels.");
   params.addCoupledVar("temperatures",
                        {},
@@ -70,7 +68,6 @@ template <bool is_ad>
 IncompressibleMomentumSPBaseTempl<is_ad>::IncompressibleMomentumSPBaseTempl(
     const InputParameters & parameters)
   : Base(parameters),
-    FunctorInterface(this),
     _n_temps(ScalarCoupleable::coupledScalarComponents("temperatures")),
     _T(_n_temps),
     _is_implicit(this->template getParam<bool>("is_implicit")),
@@ -104,7 +101,7 @@ IncompressibleMomentumSPBaseTempl<is_ad>::IncompressibleMomentumSPBaseTempl(
   }
   for (const auto j : make_range(_n_segments))
   {
-    _T[j] = &(ScalarCoupleable::coupledScalarValue("temperatures", j));
+    _T[j] = &(ScalarCoupleable::coupledGenericScalarValue<is_ad>("temperatures", j));
     _areas[j] = &(this->template getFunctor<GenericReal<is_ad>>(area_names[j]));
     _perimeters[j] = &(this->template getFunctor<GenericReal<is_ad>>(perimeter_names[j]));
     _lengths[j] = &(this->template getFunctor<GenericReal<is_ad>>(length_names[j]));

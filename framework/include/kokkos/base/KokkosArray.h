@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -316,6 +316,8 @@ public:
    */
   KOKKOS_FUNCTION T & first() const
   {
+    KOKKOS_ASSERT(_size);
+
     KOKKOS_IF_ON_HOST(return _host_data[0];)
 
     return _device_data[0];
@@ -327,6 +329,8 @@ public:
    */
   KOKKOS_FUNCTION T & last() const
   {
+    KOKKOS_ASSERT(_size);
+
     KOKKOS_IF_ON_HOST(return _host_data[_size - 1];)
 
     return _device_data[_size - 1];
@@ -1743,6 +1747,17 @@ public:
   {
     *this = vector;
   }
+  /**
+   * Constructor
+   * Initialize and allocate a real array by copying a real Eigen vector
+   * This allocates and copies to both host and device data
+   * @param vector The real Eigen vector to copy
+   */
+  template <typename U = T, std::enable_if_t<std::is_same_v<U, Real>, int> = 0>
+  Array(const RealEigenVector & vector) : ArrayBase<T, 1, index_type>(LayoutType::LEFT)
+  {
+    *this = vector;
+  }
 #endif
 
   /**
@@ -1759,7 +1774,7 @@ public:
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Copy a standard vector variable
-   * This re-initializes and re-allocates array with the size of the vector
+   * This re-initializes and re-allocates the array with the size of the vector
    * @tparam host Whether to allocate and copy to the host data
    * @tparam device Whether to allocate and copy to the device data
    * @param vector The standard vector variable to copy
@@ -1782,14 +1797,51 @@ public:
           this->deviceData(), vector.data(), this->size());
   }
   /**
+   * Copy a real Eigen vector variable
+   * This re-initializes and re-allocates the array with the size of the vector
+   * @tparam host Whether to allocate and copy to the host data
+   * @tparam device Whether to allocate and copy to the device data
+   * @param vector The real Eigen vector variable to copy
+   */
+  template <bool host,
+            bool device,
+            typename U = T,
+            std::enable_if_t<std::is_same_v<U, Real>, int> = 0>
+  void copyEigenVector(const RealEigenVector & vector)
+  {
+    this->template createInternal<host, device, false>({static_cast<index_type>(vector.size())});
+
+    if (host)
+      std::memcpy(this->hostData(), vector.data(), this->size() * sizeof(T));
+
+    if (device)
+      this->template copyInternal<MemSpace, ::Kokkos::HostSpace>(
+          this->deviceData(), vector.data(), this->size());
+  }
+  /**
    * Copy a standard set variable
-   * This re-initializes and re-allocates array with the size of the set
+   * This re-initializes and re-allocates the array with the size of the set
    * @tparam host Whether to allocate and copy to the host data
    * @tparam device Whether to allocate and copy to the device data
    * @param set The standard set variable to copy
    */
   template <bool host, bool device>
   void copySet(const std::set<T> & set)
+  {
+    std::vector<T> vector(set.begin(), set.end());
+
+    copyVector<host, device>(vector);
+  }
+  /**
+   * Copy a standard unordered set variable
+   * This re-initializes and re-allocates the array with the size of the set
+   * The entries are stored in the iteration order of the set, which is unspecified
+   * @tparam host Whether to allocate and copy to the host data
+   * @tparam device Whether to allocate and copy to the device data
+   * @param set The standard unordered set variable to copy
+   */
+  template <bool host, bool device>
+  void copyUnorderedSet(const std::unordered_set<T> & set)
   {
     std::vector<T> vector(set.begin(), set.end());
 
@@ -1808,13 +1860,39 @@ public:
     return *this;
   }
   /**
+   * Copy a real Eigen vector variable
+   * This allocates and copies to both host and device data
+   * @param vector The real Eigen vector variable to copy
+   */
+  template <typename U = T, std::enable_if_t<std::is_same_v<U, Real>, int> = 0>
+  auto & operator=(const RealEigenVector & vector)
+  {
+    copyEigenVector<true, true>(vector);
+
+    return *this;
+  }
+  /**
    * Copy a standard set variable
    * This allocates and copies to both host and device data
    * @param set The standard set variable to copy
    */
-  auto & operator=(const std::set<T> & set)
+  template <typename Set, std::enable_if_t<std::is_same_v<Set, std::set<T>>, int> = 0>
+  auto & operator=(const Set & set)
   {
     copySet<true, true>(set);
+
+    return *this;
+  }
+  /**
+   * Copy a standard unordered set variable
+   * This allocates and copies to both host and device data
+   * The entries are stored in the iteration order of the set, which is unspecified
+   * @param set The standard unordered set variable to copy
+   */
+  template <typename Set, std::enable_if_t<std::is_same_v<Set, std::unordered_set<T>>, int> = 0>
+  auto & operator=(const Set & set)
+  {
+    copyUnorderedSet<true, true>(set);
 
     return *this;
   }

@@ -17,7 +17,9 @@
       type = 'CSVDiff'
       input = 'finite.i'
       csvdiff = 'finite_short.csv'
-      cli_args = 'name=finite_short Executioner/num_steps=10 Executioner/nl_abs_tol=1.0e-5'
+      # The fixed reduced time step makes any time-step cutback fail the regression.
+      cli_args = 'name=finite_short Executioner/dt=0.06 Executioner/num_steps=20 '
+                 'Executioner/nl_abs_tol=1.0e-5 Executioner/dtmin=0.06'
       valgrind = 'heavy'
       capabilities = 'method!=dbg'
     []

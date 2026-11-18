@@ -9,7 +9,6 @@
 
 #include "IncompressibleEnergySPScalarKernel.h"
 
-#include "FunctorInterface.h"
 #include "ScalarCoupleable.h"
 #include "SinglePhaseFluidProperties.h"
 
@@ -21,7 +20,6 @@ InputParameters
 IncompressibleEnergySPScalarKernelTempl<is_ad>::validParams()
 {
   InputParameters params = is_ad ? ADScalarKernel::validParams() : ScalarKernel::validParams();
-  params += FunctorInterface::validParams();
   params.addClassDescription("Implements a generic energy solve over a 1D flow path segment.");
   params.addCoupledVar("mass_flow_rate",
                        {},
@@ -56,12 +54,11 @@ template <bool is_ad>
 IncompressibleEnergySPScalarKernelTempl<is_ad>::IncompressibleEnergySPScalarKernelTempl(
     const InputParameters & parameters)
   : Base(parameters),
-    FunctorInterface(this),
     _fp(this->template getUserObject<SinglePhaseFluidProperties>("fp")),
-    _m(ScalarCoupleable::coupledScalarValue("mass_flow_rate")),
-    _Tup(ScalarCoupleable::coupledScalarValue("inlet_temperature")),
-    _Tdown(ScalarCoupleable::coupledScalarValue("outlet_temperature")),
-    _Tw(ScalarCoupleable::coupledScalarValue("wall_temperature")),
+    _m(ScalarCoupleable::coupledGenericScalarValue<is_ad>("mass_flow_rate")),
+    _Tup(ScalarCoupleable::coupledGenericScalarValue<is_ad>("inlet_temperature")),
+    _Tdown(ScalarCoupleable::coupledGenericScalarValue<is_ad>("outlet_temperature")),
+    _Tw(ScalarCoupleable::coupledGenericScalarValue<is_ad>("wall_temperature")),
     _is_implicit(this->template getParam<bool>("is_implicit")),
     _Pref(this->template getFunctor<GenericReal<is_ad>>("reference_pressure")),
     _area(this->template getFunctor<GenericReal<is_ad>>("area")),

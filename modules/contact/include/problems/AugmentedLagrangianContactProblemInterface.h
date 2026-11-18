@@ -10,6 +10,9 @@
 #pragma once
 
 #include "InputParameters.h"
+#include "AugmentedLagrangianContactConvergenceBase.h"
+
+class FEProblemBase;
 
 /**
  *  Class to provide an interface for parameters and routines required to check
@@ -19,20 +22,20 @@ class AugmentedLagrangianContactProblemInterface
 {
 public:
   static InputParameters validParams();
-  AugmentedLagrangianContactProblemInterface(const InputParameters & params);
+
+  AugmentedLagrangianContactProblemInterface(const InputParameters & params,
+                                             FEProblemBase & problem);
+
+  /// @return the augmented Lagrangian contact convergence object of the problem's nonlinear solve
+  virtual const AugmentedLagrangianContactConvergenceBase &
+  getAugmentedLagrangianContactConvergence() const;
+
   virtual const unsigned int & getLagrangianIterationNumber() const
   {
-    return _lagrangian_iteration_number;
-  }
-  virtual void setLagrangianIterationNumber(unsigned int iter)
-  {
-    _lagrangian_iteration_number = iter;
+    return getAugmentedLagrangianContactConvergence().getLagrangianIterationNumber();
   }
 
-protected:
-  /// maximum mumber of augmented lagrange iterations
-  const unsigned int _maximum_number_lagrangian_iterations;
-
-  /// current augmented lagrange iteration number
-  unsigned int _lagrangian_iteration_number;
+private:
+  /// The problem that owns this interface, used to look up the convergence object
+  FEProblemBase & _problem;
 };

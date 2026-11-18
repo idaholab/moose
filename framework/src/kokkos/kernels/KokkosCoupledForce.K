@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -31,7 +31,8 @@ KokkosCoupledForce::KokkosCoupledForce(const InputParameters & parameters)
     _v(kokkosCoupledValue("v")),
     _coef(getParam<Real>("coef"))
 {
-  if (_var.number() == _v_var)
-    paramError(
-        "v", "Coupled variable 'v' needs to be different from 'variable' with KokkosCoupledForce.");
+  for (const auto var : _vars)
+    if (var->number() == _v_var)
+      paramError(
+          "v", "Coupled variable 'v' needs to be different from variable with KokkosCoupledForce.");
 }

@@ -353,7 +353,7 @@ public:
   {
     return _element_data->adSlnFace();
   }
-  const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const
+  const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const override
   {
     return _element_data->adGradSlnFace();
   }
@@ -376,6 +376,10 @@ public:
   const ADTemplateVariableCurl<OutputType> & adCurlSln() const override
   {
     return _element_data->adCurlSln();
+  }
+  const ADTemplateVariableDivergence<OutputType> & adDivSln() const override
+  {
+    return _element_data->adDivSln();
   }
 
   /// neighbor AD
@@ -406,6 +410,10 @@ public:
   const ADTemplateVariableCurl<OutputType> & adCurlSlnNeighbor() const override
   {
     return _neighbor_data->adCurlSln();
+  }
+  const ADTemplateVariableDivergence<OutputType> & adDivSlnNeighbor() const override
+  {
+    return _neighbor_data->adDivSln();
   }
 
   /// element dots

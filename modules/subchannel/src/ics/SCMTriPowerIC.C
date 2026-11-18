@@ -9,6 +9,7 @@
 
 #include "SCMTriPowerIC.h"
 #include "Function.h"
+#include "Receiver.h"
 #include "TriSubChannelMesh.h"
 
 registerMooseObject("SubChannelApp", SCMTriPowerIC);
@@ -24,10 +25,12 @@ SCMTriPowerIC::validParams()
       "power", "The postprocessor or Real to use for the total power of the subassembly [W]");
   params.addRequiredParam<std::string>(
       "filename", "name of radial power profile .txt file (should be a single column) [UnitLess].");
-  params.addParam<FunctionName>("axial_heat_rate",
-                                "1.0",
-                                "user provided normalized function of axial heat rate [Unitless]. "
-                                "The integral over pin length should equal the heated length");
+  params.addParam<FunctionName>(
+      "axial_heat_rate",
+      "1.0",
+      "Axial shape of the heat rate as a function of the distance from the start of the "
+      "heated section [Unitless]. Its magnitude does not matter because each pin is "
+      "rescaled to its assigned power");
   return params;
 }
 
@@ -45,7 +48,6 @@ SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
     mooseError(name(), ": This object requires a pin mesh.");
 
   auto n_pins = _mesh.getNumOfPins();
-  auto heated_length = _mesh.getHeatedLength();
 
   _power_dis.resize(n_pins, 1);
   _power_dis.setZero();
@@ -77,19 +79,20 @@ SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
     i++;
   }
   inFile.close();
-
-  auto sum = _power_dis.sum();
-  // full (100%) power of one pin [W]
-  auto fpin_power = _power / sum;
-  // actual pin power [W]
-  _ref_power = _power_dis * fpin_power;
-  // Convert the actual pin power to a linear heat rate [W/m]
-  _ref_qprime = _ref_power / heated_length;
 }
 
 void
 SCMTriPowerIC::initialSetup()
 {
+  // A power postprocessor executes before initial conditions only if it executes on INITIAL;
+  // otherwise it still holds its default of zero here. A Receiver is set by a transfer instead,
+  // so its execute_on does not control its value.
+  if (!isDefaultPostprocessorValue("power") &&
+      !dynamic_cast<const Receiver *>(&getUserObjectBase("power")) &&
+      !getUserObjectBase("power").getExecuteOnEnum().isValueSet(EXEC_INITIAL))
+    paramError("power",
+               "The 'execute_on' parameter of the power postprocessor must include 'initial'");
+
   if (processor_id() > 0)
     return;
   auto n_pins = _mesh.getNumOfPins();
@@ -98,6 +101,16 @@ SCMTriPowerIC::initialSetup()
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
 
+  // The power postprocessor executes on INITIAL before initial conditions are set up, so its
+  // value is only available here, not in the constructor
+  auto sum = _power_dis.sum();
+  // full (100%) power of one pin [W]
+  auto fpin_power = _power / sum;
+  // actual pin power [W]
+  _ref_power = _power_dis * fpin_power;
+  // Convert the actual pin power to a linear heat rate [W/m]
+  _ref_qprime = _ref_power / heated_length;
+
   _estimate_power.resize(n_pins, 1);
   _estimate_power.setZero();
   for (unsigned int iz = 1; iz < nz + 1; iz++)
@@ -105,16 +118,18 @@ SCMTriPowerIC::initialSetup()
     // Compute axial location of nodes.
     auto z2 = z_grid[iz];
     auto z1 = z_grid[iz - 1];
-    Point p1(0, 0, z1 - unheated_length_entry);
-    Point p2(0, 0, z2 - unheated_length_entry);
-    auto heat1 = _axial_heat_rate.value(_t, p1);
-    auto heat2 = _axial_heat_rate.value(_t, p2);
     if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
         MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
     {
       // cycle through pins
       for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
       {
+        // Evaluate the axial shape at this pin's nodes, where value() assigns q_prime and the
+        // solver integrates it, so the correction also holds for shapes that vary between pins
+        const Point shift(0, 0, unheated_length_entry);
+        auto heat1 = _axial_heat_rate.value(_t, Point(*_mesh.getPinNode(i_pin, iz - 1) - shift));
+        auto heat2 = _axial_heat_rate.value(_t, Point(*_mesh.getPinNode(i_pin, iz) - shift));
+
         // Compute the height of this element.
         auto dz = z2 - z1;
 

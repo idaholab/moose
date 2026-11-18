@@ -269,6 +269,11 @@ public:
   {
     return _element_data->adGradSln();
   }
+  /// Finite volume variables do not distinguish face and volume AD gradient requests
+  const ADTemplateVariableGradient<OutputType> & adGradSlnFace() const override
+  {
+    return adGradSln();
+  }
 
   /**
    * Retrieve (or potentially compute) the gradient on the provided element. Overriders of this
@@ -343,6 +348,10 @@ public:
   {
     mooseError("We don't currently implement curl for FV");
   }
+  const ADTemplateVariableDivergence<OutputType> & adDivSln() const override
+  {
+    mooseError("We don't currently implement divergence for FV");
+  }
 
   /// neighbor AD
   const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override
@@ -372,6 +381,10 @@ public:
   const ADTemplateVariableCurl<OutputType> & adCurlSlnNeighbor() const override
   {
     mooseError("We don't currently implement curl for FV");
+  }
+  const ADTemplateVariableDivergence<OutputType> & adDivSlnNeighbor() const override
+  {
+    mooseError("We don't currently implement divergence for FV");
   }
 
   /// Initializes/computes variable values from the solution vectors for the

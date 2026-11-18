@@ -1,12 +1,16 @@
 [Tests]
+  issues = '#8448'
+  design = 'GrainBoundaryArea.md'
   [./disc]
     type = 'CSVDiff'
     input = 'disc.i'
     csvdiff = 'disc_out.csv'
+    requirement = 'The system shall be able to compute the grain boundary area of a circular grain interface, matching the known analytical perimeter.'
   [../]
   [./diagonal]
     type = 'CSVDiff'
     input = 'diagonal.i'
     csvdiff = 'diagonal_out.csv'
+    requirement = 'The system shall be able to compute the grain boundary area of a diagonal planar grain interface, matching the known analytical length.'
   [../]
 []

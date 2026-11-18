@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -78,22 +78,24 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 ADNodalBC::operator()(ResidualLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto node = kokkosBoundaryNodeID(tid);
-  auto & sys = kokkosSystem(_kokkos_var.sys());
+  auto comp = _thread(tid, 0);
+  auto node = kokkosBoundaryNodeID(_thread(tid, 1));
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
 
-  if (!sys.isNodalDefined(node, _kokkos_var.var()))
+  if (!sys.isNodalDefined(node, _kokkos_var.var(comp)))
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(
+      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(comp), comp);
 
   datum.do_derivatives(_computing_jacobian);
 
   ADReal local_re = bc.template computeQpResidual<Derived>(0, datum);
 
   if (_computing_residual)
-    accumulateTaggedNodalResidual(false, local_re.value(), node);
+    accumulateTaggedNodalResidual(false, local_re.value(), node, datum.comp());
   if (_computing_jacobian)
-    accumulateTaggedNodalMatrix(false, local_re.derivatives(), node);
+    accumulateTaggedNodalMatrix(false, local_re.derivatives(), node, datum.comp());
 }
 
 } // namespace Moose::Kokkos

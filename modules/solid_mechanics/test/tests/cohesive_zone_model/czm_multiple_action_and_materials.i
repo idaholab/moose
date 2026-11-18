@@ -1,4 +1,5 @@
 [Mesh]
+  use_displaced_mesh = false
   [./msh]
     type = GeneratedMeshGenerator
     dim = 3
@@ -7,16 +8,11 @@
     nz = 4
     zmin = 0
     zmax = 4
-  [../]
-  [./subdomain_id]
-    type = SubdomainPerElementGenerator
-    input = msh
     subdomain_ids = '0 1 2 3'
-  []
+  [../]
   [./split]
     type = BreakMeshByBlockGenerator
-    input = subdomain_id
-    split_interface = true
+    input = msh
   []
   [add_side_sets]
     input = split
@@ -122,10 +118,11 @@
   [../]
   # bulk materials
   [./stress]
-    type = ADComputeFiniteStrainElasticStress
+    type = ComputeLagrangianLinearElasticStress
+    objective_rate = rashid
   [../]
   [./elasticity_tensor]
-    type = ADComputeIsotropicElasticityTensor
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 200e4
     poissons_ratio = 0.3
   [../]
@@ -137,9 +134,9 @@
       [./all]
         strain = FINITE
         add_variables = true
-        use_finite_deform_jacobian = true
-        use_automatic_differentiation = true
-        generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_xz'
+        new_system = true
+        kinematic_approximation = rashid_eigen
+        generate_output = 'cauchy_stress_xx cauchy_stress_yy cauchy_stress_zz cauchy_stress_xy cauchy_stress_yz cauchy_stress_xz'
       [../]
     [../]
   [../]

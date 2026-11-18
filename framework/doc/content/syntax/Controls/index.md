@@ -157,6 +157,21 @@ The tag name does not include the object name although the tag name is added by 
 To access a controllable parameter, the syntax is `tag/object/name`.
 Internally, MOOSE adds the input block name as a special tag name.
 
+## Controls Executed on Failed Time Steps id=failed_time_steps
+
+A `Control` executed on `FAILED` runs after a failed solve and before the time stepper computes the
+size of the repeated time step. [retry_controls] repeats a failed time step once with the same size
+and without the predictor, using the controllable `apply` parameter of the
+[Predictor](syntax/Executioner/Predictor/index.md), the controllable `cutback_factor_at_failure` of
+the time stepper to adjust the cutback time step size, and also a [NumFailedTimeSteps.md]
+postprocessor with `current_time_step_only = true` to detect a failed time step.
+
+!listing test/tests/controls/failed_retry/retry_without_predictor.i
+         block=Postprocessors Functions Controls
+         id=retry_controls
+         caption=Controls that repeat a failed time step once with the same size and without the
+                 predictor.
+
 ## Controllable Parameters Added by Actions id=controllable_params_added_by_actions
 
 MOOSE also allows parameters in [Actions](Action.md) to be controllable.

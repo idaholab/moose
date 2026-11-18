@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,9 +32,11 @@ template <bool is_ad>
 void
 DirichletBCBaseTempl<is_ad>::presetSolution(TagID tag)
 {
+  _thread.resize(_vars.size(), numKokkosBoundaryNodes());
+
   _solution_tag = tag;
 
-  Policy policy(0, numKokkosBoundaryNodes());
+  Policy policy(0, _thread.size());
 
   auto dispatcher = DispatcherRegistry::build<PresetLoop>(this, this->type());
 

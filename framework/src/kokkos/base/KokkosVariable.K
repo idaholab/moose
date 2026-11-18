@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -79,6 +79,12 @@ Variable::init(const std::vector<const MooseVariableBase *> & variables, const T
   for (unsigned int comp = 0; comp < _components; ++comp)
   {
     auto field_variable = dynamic_cast<const MooseVariableFieldBase *>(variables[comp]);
+
+    if (variables[comp]->count() > 1)
+      mooseError("Cannot initialize a Kokkos variable from a list of variables containing the "
+                 "array variable '",
+                 variables[comp]->name(),
+                 "'.");
 
     if (field_variable && _scalar)
       mooseError("Cannot initialize a Kokkos variable with mixed scalar and field variables.");

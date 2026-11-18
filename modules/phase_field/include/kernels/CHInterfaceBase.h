@@ -157,7 +157,7 @@ CHInterfaceBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
                              (*_dMdarg[cvar])[_qp] * _grad_phi[_j][_qp];
 
   for (unsigned int i = 0; i < _nvar; ++i)
-    dgrad_Mdarg += (*_d2Mdargdarg[cvar][i])[_qp] * _phi[_j][_qp] * (*_coupled_grad_vars[cvar])[_qp];
+    dgrad_Mdarg += (*_d2Mdargdarg[cvar][i])[_qp] * _phi[_j][_qp] * (*_coupled_grad_vars[i])[_qp];
 
   // Jacobian value using product rule
   Real value = _kappa[_qp] * _second_u[_qp].tr() *

@@ -537,10 +537,17 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     // Store final mesh subgenerator
     _build_mesh = &getMeshByName(build_mesh_name);
   }
-  // If mesh generation should be bypassed, call getMeshes to resolve MeshGeneratorSystem
-  // dependencies
   else
+  {
+    // If mesh generation should be bypassed, call getMeshes to resolve MeshGeneratorSystem
+    // dependencies
     auto input_meshes = getMeshes("inputs");
+
+    // Since subgenerators are not called, error checking on input parameters needs to happen here
+    if (!checkUndefinedLatticeRefs(_pattern, _inputs.size()))
+      paramError("pattern",
+                 "Core lattice contains an index that exceeds the number of input assemblies");
+  }
 
   // If we are in CSG only mode, store the CSGBase objects associated with input MG's
   if (_app.getMeshGeneratorSystem().getCSGOnly())

@@ -1,0 +1,34 @@
+[Tests]
+  issues = '#33594'
+  design = 'KokkosFunctionDirichletBC.md KokkosADFunctionDirichletBC.md'
+  [test]
+    requirement = 'The Kokkos system shall impose a Dirichlet boundary condition with a value given by a function'
+    [regular]
+      type = Exodiff
+      input = 'kokkos_function_dirichlet.i'
+      exodiff = 'kokkos_function_dirichlet_out.e'
+      capabilities = 'kokkos & !cuda'
+      compute_devices = 'cpu'
+      detail = 'with a hand-coded Jacobian,'
+    []
+    [ad]
+      type = Exodiff
+      input = 'kokkos_function_dirichlet.i'
+      exodiff = 'kokkos_function_dirichlet_out.e'
+      cli_args = 'Kernels/diff/type=KokkosADDiffusion BCs/all/type=KokkosADFunctionDirichletBC'
+      capabilities = 'kokkos & !cuda'
+      compute_devices = 'cpu'
+      detail = 'and with automatic differentiation,'
+    []
+    [ad_jacobian]
+      type = PetscJacobianTester
+      input = 'kokkos_function_dirichlet.i'
+      cli_args = 'Kernels/diff/type=KokkosADDiffusion BCs/all/type=KokkosADFunctionDirichletBC '
+                 'BCs/all/preset=false Outputs/exodus=false'
+      run_sim = true
+      capabilities = 'kokkos & !cuda'
+      compute_devices = 'cpu'
+      detail = 'with automatic differentiation producing an exact Jacobian.'
+    []
+  []
+[]

@@ -15,11 +15,15 @@ InputParameters
 ADScalarKernel::validParams()
 {
   InputParameters params = ScalarKernelBase::validParams();
+  params += ADFunctorInterface::validParams();
   return params;
 }
 
 ADScalarKernel::ADScalarKernel(const InputParameters & parameters)
-  : ScalarKernelBase(parameters), _u(_var.adSln()), _jacobian_already_computed(false)
+  : ScalarKernelBase(parameters),
+    ADFunctorInterface(this),
+    _u(_var.adSln()),
+    _jacobian_already_computed(false)
 {
 }
 
@@ -69,5 +73,12 @@ ADScalarKernel::computeADJacobian()
   for (_i = 0; _i < _var.order(); _i++)
     _residuals[_i] = computeQpResidual();
 
-  addJacobian(_assembly, _residuals, _var.dofIndices(), _var.scalingFactor());
+  // Each component of a higher order scalar variable may depend on different dofs (e.g. component
+  // i of a time derivative depends only on dof i), while the rows passed together to addJacobian
+  // must share the same dependencies, so the components are added one at a time
+  for (const auto i : index_range(_residuals))
+    addJacobian(_assembly,
+                Moose::makeSpan(_residuals, i, 1),
+                Moose::makeSpan(_var.dofIndices(), i, 1),
+                _var.scalingFactor());
 }

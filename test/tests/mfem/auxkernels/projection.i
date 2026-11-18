@@ -115,28 +115,28 @@
 [VectorPostprocessors]
   [line_sample_Az]
     type = MFEMVariableLineValueSampler
-    variable = 'Az'
+    variables = 'Az'
     start_point = '-3 -2 0'
     end_point = '3 2 0'
     num_points = 101
   []
   [line_sample_J]
     type = MFEMVariableLineValueSampler
-    variable = 'J'
+    variables = 'J'
     start_point = '-2.9 -1.9 0'
     end_point = '2.9 1.9 0'
     num_points = 101
   []
   [line_sample_GAz]
     type = MFEMVariableLineValueSampler
-    variable = 'GAz'
+    variables = 'GAz'
     start_point = '-2.9 -1.9 0'
     end_point = '2.9 1.9 0'
     num_points = 101
   []
   [line_sample_GAz_copy]
     type = MFEMVariableLineValueSampler
-    variable = 'GAz(copy)'
+    variables = 'GAz(copy)'
     start_point = '-2.9 -1.9 0'
     end_point = '2.9 1.9 0'
     num_points = 101

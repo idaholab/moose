@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,10 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "NavierStokesMethods.h"
+#include "TheWarehouse.h"
+#include "LinearFVTurbulentAdvection.h"
+#include "LinearFVTurbulentDiffusion.h"
+#include "LinearFVTurbulentTimeDerivative.h"
 
 registerMooseObject("NavierStokesApp", LinearFVTKESourceSink);
 
@@ -58,6 +62,13 @@ LinearFVTKESourceSink::LinearFVTKESourceSink(const InputParameters & params)
     _C_mu(getParam<Real>("C_mu")),
     _C_pl(getParam<Real>("C_pl"))
 {
+  // An informational message rather than a warning, because flows without walls are valid and
+  // warnings are treated as errors in the test suite
+  if (_wall_boundary_names.empty())
+    mooseInfo("No 'walls' were specified for the turbulent kinetic energy. "
+              "Wall-bounded flows need 'walls' for the wall treatment of this variable, "
+              "otherwise its production and destruction are not modified near walls.");
+
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied!");
 
@@ -77,6 +88,36 @@ void
 LinearFVTKESourceSink::initialSetup()
 {
   LinearFVElementalKernel::initialSetup();
+
+  // Unlike TKED, which is fixed by the wall function in wall-bounded cells, TKE is still solved
+  // for there; only its production and destruction are modified by this kernel. The turbulent
+  // transport kernels of TKE must therefore not skip wall-bounded cells.
+  // Kernels are registered in the warehouse under their elemental or flux system name
+  std::vector<LinearFVKernel *> kernels;
+  for (const auto & system : {"LinearFVElementalKernel", "LinearFVFluxKernel"})
+  {
+    std::vector<LinearFVKernel *> system_kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .condition<AttribSystem>(system)
+        .condition<AttribSysNum>(_var.sys().number())
+        .condition<AttribVar>(_var.number())
+        .condition<AttribThread>(_tid)
+        .queryInto(system_kernels);
+    kernels.insert(kernels.end(), system_kernels.begin(), system_kernels.end());
+  }
+  for (const auto kernel : kernels)
+    if ((dynamic_cast<LinearFVTurbulentAdvection *>(kernel) ||
+         dynamic_cast<LinearFVTurbulentDiffusion *>(kernel) ||
+         dynamic_cast<LinearFVTurbulentTimeDerivative *>(kernel)) &&
+        !kernel->getParam<std::vector<BoundaryName>>("walls").empty())
+      kernel->paramError(
+          "walls",
+          "Walls should not be specified for turbulent kernels acting on the "
+          "turbulent kinetic energy variable '",
+          _var.name(),
+          "'. They are only used for the turbulent kinetic energy dissipation rate.");
+
   NS::getWallBoundedElements(
       _wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _wall_bounded);
   NS::getWallDistance(_wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _dist);

@@ -159,7 +159,7 @@
     exodiff = 'SimpleSplitCHWRes_out.e'
     issues = '#6910'
     design = '/SimpleSplitCHWRes.md'
-    requirement = 'The system shall provide a suite of simple to understand phase field kernels for novice users.'
+    requirement = 'The system shall provide a simplified split Cahn-Hilliard chemical-potential-residual kernel with constant mobility, for novice users.'
   [../]
 
   [./SimpleCHInterface]
@@ -168,7 +168,7 @@
     exodiff = 'SimpleCHInterface_out.e'
     issues = '#6910'
     design = '/SimpleCHInterface.md'
-    requirement = 'The system shall provide a suite of simple to understand phase field kernels for novice users.'
+    requirement = 'The system shall provide a simplified Cahn-Hilliard interface-energy kernel with constant mobility and interfacial parameter, for novice users.'
     # Use exodus oversampling. See #2295
     recover = false
   [../]
@@ -223,4 +223,41 @@
     design = '/ACBarrierFunction.md /ACKappaFunction.md'
     requirement = 'The Jacobian for the AD Allen-Cahn problem with a variable dependent coeffecients shall be perfect'
   [../]
+
+  [CHInterface_coupled_mobility_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'CHInterface_coupled_mobility_jacobian.i'
+    run_sim = 'True'
+    ratio_tol = 1e-7
+    issues = '#34180'
+    design = '/CHInterface.md'
+    requirement = 'The system shall compute a correct Jacobian for the Cahn-Hilliard interface kernel with a mobility that depends on multiple coupled variables.'
+  []
+  [ACInterface_coupled_kappa_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ACInterface_coupled_kappa_jacobian.i'
+    run_sim = 'True'
+    ratio_tol = 1e-7
+    issues = '#34180'
+    design = '/ACInterface.md'
+    requirement = 'The system shall compute a correct Jacobian for the Allen-Cahn interface kernel with a variable mobility and a gradient energy coefficient that both depend on a coupled variable.'
+  []
+  [barrier_function_three_grains]
+    requirement = 'The system shall compute the Allen-Cahn barrier function residual for more than two order parameters'
+    issues = '#34180'
+    design = '/ACBarrierFunction.md'
+    [non_ad]
+      type = 'Exodiff'
+      input = 'barrier_function_three_grains.i'
+      exodiff = 'barrier_function_three_grains_out.e'
+      detail = 'with a hand-coded Jacobian,'
+    []
+    [ad]
+      type = 'Exodiff'
+      input = 'ADbarrier_function_three_grains.i'
+      exodiff = 'barrier_function_three_grains_out.e'
+      prereq = 'barrier_function_three_grains/non_ad'
+      detail = 'and with automatic differentiation, yielding identical results.'
+    []
+  []
 []

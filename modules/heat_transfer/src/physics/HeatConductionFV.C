@@ -252,9 +252,7 @@ HeatConductionFV::addSolverVariables()
 
   const std::string variable_type = "MooseVariableFVReal";
   InputParameters params = getFactory().getValidParams(variable_type);
-  assignBlocks(params, _blocks);
   params.set<std::vector<Real>>("scaling") = {getParam<Real>("temperature_scaling")};
-  params.set<SolverSystemName>("solver_sys") = getSolverSystem(_temperature_name);
 
-  getProblem().addVariable(variable_type, _temperature_name, params);
+  addSharedSolverVariable(variable_type, _temperature_name, params);
 }

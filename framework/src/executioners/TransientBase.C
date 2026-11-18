@@ -683,7 +683,8 @@ TransientBase::keepGoing()
         keep_going = false;
     }
   }
-  else if (_abort)
+  // The failure forced by --test-restep must be retried, not aborted on
+  else if (_abort && !_testing_restep)
   {
     _console << "Aborting as solve did not converge and input selected to abort" << std::endl;
     keep_going = false;

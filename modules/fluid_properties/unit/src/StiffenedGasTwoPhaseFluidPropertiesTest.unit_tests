@@ -1,0 +1,10 @@
+[Tests]
+  design = 'StiffenedGasTwoPhaseFluidProperties.md'
+  issues = '#34070'
+
+  [default_latent_heat_of_fusion]
+    type = GoogleTest
+    unit_test = StiffenedGasTwoPhaseFluidPropertiesTest.defaultLatentHeatOfFusion
+    requirement = 'The system shall use the latent heat of fusion of water as the default latent heat of fusion of the two-phase stiffened gas fluid properties.'
+  []
+[]

@@ -93,6 +93,28 @@ TEST_F(NaClFluidPropertiesTest, halite)
  * Verify calculation of the derivatives of halite properties by comparing with finite
  * differences
  */
+/**
+ * Verify the isochoric heat capacity against cv = cp - T alpha^2 / (rho kappa_T). With the
+ * thermal expansion (1.4e-4 1/K) and bulk modulus (21 GPa) of the halite density correlation
+ * at 300 C, the difference is about 120 J/kg/K, or 13% of cp.
+ */
+TEST_F(NaClFluidPropertiesTest, cv)
+{
+  const Real p = 30.0e6;
+  const Real T = 573.15;
+
+  Real rho, drho_dp, drho_dT;
+  _fp->rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+  const Real alpha = -drho_dT / rho;
+  const Real kappa_T = drho_dp / rho;
+  const Real cp = _fp->cp_from_p_T(p, T);
+  const Real cv = _fp->cv_from_p_T(p, T);
+
+  REL_TEST(cv, cp - T * alpha * alpha / (rho * kappa_T), REL_TOL_CONSISTENCY);
+  EXPECT_LT(cv, cp);
+  EXPECT_GT(cv, 0.8 * cp);
+}
+
 TEST_F(NaClFluidPropertiesTest, derivatives)
 {
   const Real tol = REL_TOL_DERIVATIVE;

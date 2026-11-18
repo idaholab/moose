@@ -25,6 +25,7 @@
 #include "BoundaryRestrictable.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
+#include "MeshDisplacedInterface.h"
 #include "VectorPostprocessorInterface.h"
 #include "ElementIDInterface.h"
 #include "UserObjectBase.h"
@@ -54,6 +55,7 @@ class AuxKernelBase : public MooseObject,
                       public GeometricSearchInterface,
                       public Restartable,
                       public MeshChangedInterface,
+                      public MeshDisplacedInterface,
                       protected VectorPostprocessorInterface,
                       public ElementIDInterface,
                       protected NonADFunctorInterface
@@ -82,9 +84,24 @@ public:
 
   virtual void initialSetup() override;
 
+  /**
+   * Nodal or elemental kernel?
+   * @return true if this is a nodal kernel, otherwise false
+   */
+  bool isNodal() const { return _is_nodal_kernel; }
+
 protected:
+  /// Elemental aux kernels restricted to a boundary are evaluated at the face quadrature points of
+  /// the boundary sides; nodal aux kernels are evaluated at nodes even when boundary restricted
+  bool usesFaceCoupledValues() const override { return !_c_nodal && boundaryRestricted(); }
+
   /// Base MooseVariable
   MooseVariableFieldBase & _var;
+
+  /// true if this kernel computes a nodal (as opposed to elemental) variable. Named distinctly
+  /// from MooseVariableInterface::_nodal (a sibling base in AuxKernelTempl) to avoid an ambiguous
+  /// name lookup for subclasses that reference that member directly.
+  const bool _is_nodal_kernel;
 
   /// true if the kernel is boundary kernel, false if it is interior kernels
   const bool _bnd;
@@ -114,6 +131,12 @@ protected:
 
   /// Mesh this kernel is active on
   MooseMesh & _mesh;
+
+  /**
+   * Get the names of the variables this object operates on: 'variable', or 'variables' for Kokkos
+   * objects that operate on multiple variables. The first one is the variable held by _var.
+   */
+  static std::vector<AuxVariableName> getVariableNamesHelper(const InputParameters & parameters);
 
 private:
   void addPostprocessorDependencyHelper(const PostprocessorName & name) const override final;

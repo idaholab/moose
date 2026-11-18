@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,6 +26,11 @@ public:
    * Constructor
    */
   TimeKernel(const InputParameters & parameters);
+
+  /**
+   * Copy constructor for parallel dispatch
+   */
+  TimeKernel(const TimeKernel & object);
 
   /**
    * Hook for additional computation for residual after the standard calls
@@ -56,7 +61,7 @@ protected:
   /**
    * Derivative of u_dot with respect to u
    */
-  const Scalar<const Real> _du_dot_du;
+  Array<Real> _du_dot_du;
 };
 
 template <typename Derived>

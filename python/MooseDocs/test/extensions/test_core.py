@@ -140,6 +140,24 @@ this"""
         self.assertToken(ast(0, 0), "Link", size=1, url="foo")
         self.assertToken(ast(0, 0, 0), "Monospace", content="[Foo]")
 
+        # A shortcut followed by punctuation must not swallow a later link
+        for text in [
+            "([foo]) [Bar](bar)",
+            "a [foo]; [Bar](bar)",
+            "a [foo]: [Bar](bar)",
+        ]:
+            ast = self.tokenize(text)
+            link = ast(0)(len(ast(0)) - 1)
+            self.assertToken(link, "Link", size=1, url="bar")
+            self.assertToken(link(0), "Word", content="Bar")
+            self.assertEqual(sum(t.name == "ShortcutLink" for t in ast(0)), 1)
+
+        # A shortcut at the end of a line must not swallow a link on the next line
+        text = "[foo]\n[Bar](bar)"
+        ast = self.tokenize(text)
+        self.assertToken(ast(0, 0), "ShortcutLink", key="foo")
+        self.assertToken(ast(0, 2), "Link", size=1, url="bar")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

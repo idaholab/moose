@@ -16,6 +16,8 @@ PorousFlowFluidStateMultiComponentBase::validParams()
   params.addParam<unsigned int>(
       "liquid_fluid_component", 0, "The fluid component number of the primary liquid component");
   params.addParam<unsigned int>("salt_component", 2, "The component number of salt");
+  params.addParam<bool>("compute_internal_energy", true, "Compute the fluid internal energy");
+  params.addParam<bool>("compute_enthalpy", true, "Compute the fluid enthalpy");
   params.addClassDescription("Base class for multiple component fluid state classes");
   return params;
 }
@@ -25,6 +27,8 @@ PorousFlowFluidStateMultiComponentBase::PorousFlowFluidStateMultiComponentBase(
   : PorousFlowFluidStateFlash(parameters),
     _aqueous_fluid_component(getParam<unsigned int>("liquid_fluid_component")),
     _salt_component(getParam<unsigned int>("salt_component")),
+    _compute_internal_energy(getParam<bool>("compute_internal_energy")),
+    _compute_enthalpy(getParam<bool>("compute_enthalpy")),
     _pidx(0),
     _Zidx(1),
     _Tidx(2),

@@ -31,13 +31,8 @@ public:
   AugmentedLagrangianContactProblemTempl(const InputParameters & params);
   virtual ~AugmentedLagrangianContactProblemTempl() {}
 
-  virtual void timestepSetup() override;
   virtual void addDefaultNonlinearConvergence(const InputParameters & params) override;
   virtual bool onlyAllowDefaultNonlinearConvergence() const override { return true; }
-
-protected:
-  using AugmentedLagrangianContactProblemInterface::_lagrangian_iteration_number;
-  using AugmentedLagrangianContactProblemInterface::_maximum_number_lagrangian_iterations;
 };
 
 typedef AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>

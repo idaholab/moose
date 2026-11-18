@@ -83,6 +83,7 @@ temp_print_trace.*
 *.zip
 *.pt
 *.net
+*.net_best
 .depend
 *.png
 *.avi
@@ -323,6 +324,7 @@ share/
 .vscode/*
 *.code-workspace
 .cache
+.env
 
 # Ignore Claude Code project context
 .claude/
@@ -365,3 +367,5 @@ binaryoutput
 # large, machine-local artifact; only the checked-in config is tracked.
 .codegraph/
 !codegraph.json
+
+.env

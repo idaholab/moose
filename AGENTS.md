@@ -92,6 +92,8 @@ that request requires.
   make_range(n))`) instead of raw index loops. Use `index_range(container)`
   when iterating over the indices of a container. But don't use `make_range`
   in Kokkos functions or any other device functons.
+  Exception: loops whose index is a data member, such as `_qp` and `_i` in
+  residual objects, keep the classic `for (_qp = 0; ...)` form.
 - Use `libmesh_map_find` for map lookups instead of `.at()`.
 - MOOSE requires C++17, so modern C++ constructs up through that standard are
   encouraged where they increase code readability. Along those lines, when a member
@@ -121,6 +123,11 @@ that request requires.
 - Give the TestHarness enough job slots for each test: `-j` must be at least
   the requested `-p` process count or `--n-threads` thread count. When MPI
   processes and threads are combined, use at least their product.
+- When adding or changing a hand-coded Jacobian, including off-diagonal
+  couplings, add or update a `PetscJacobianTester` test that exercises every
+  coupling and coordinate system the change affects. A correct residual does
+  not imply a correct Jacobian, and only a finite-difference comparison catches
+  a missing or wrong term.
 
 ## 8. Goal-Driven Execution
 
@@ -160,10 +167,10 @@ not govern unrelated conversations or prescribe the user's conversational style.
   one line.
 - Leave investigation dead ends out. A path that looked related and turned out not to be is not
   a finding, and reporting it competes with the actual change for the reviewer's attention.
-- Write clear, grammatical, concise prose for peer computational scientists and engineers.
-  Explain unfamiliar terms, preserve MOOSE terminology and exact names of classes, parameters,
-  input syntax, commands, and diagnostics, and remove repetition and boilerplate before
-  presenting.
+- Write clear, grammatical, *very* concise prose for peer computational scientists and
+  engineers. Explain unfamiliar terms, preserve MOOSE terminology and exact names of classes,
+  parameters, input syntax, commands, and diagnostics, and remove repetition and boilerplate
+  before presenting.
 - Use the vocabulary a MOOSE developer would use, and avoid stock phrasing that reads as
   machine-drafted. "bit-for-bit" is one such tell; say that results are unchanged.
 - Prefer self-explanatory code, using comments for non-obvious behavior, correctness

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -78,8 +78,18 @@ LinearWCNSFV2PMomentumDriftFlux::computeFlux()
   const bool on_boundary = Moose::FV::onBoundary(*this, *_current_face_info);
 
   Moose::FaceArg face_arg;
+  // The boundary is determined by this kernel's blocks, which may be fewer than the velocity
+  // variable's, so the face is sided by this kernel's blocks rather than by the variable.
   if (on_boundary)
-    face_arg = singleSidedFaceArg(_current_face_info);
+  {
+    const bool elem_is_inside = hasBlocks(_current_face_info->elemPtr()->subdomain_id());
+    face_arg = {_current_face_info,
+                Moose::FV::LimiterType::CentralDifference,
+                elem_is_inside,
+                false,
+                elem_is_inside ? _current_face_info->elemPtr() : _current_face_info->neighborPtr(),
+                nullptr};
+  }
   else
     face_arg = makeCDFace(*_current_face_info);
 

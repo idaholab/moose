@@ -25,6 +25,15 @@
     design = 'PorousFlowWaterNCG.md'
     issues = '#8818'
   []
+  [waterncg_no_enthalpy]
+    type = 'CSVDiff'
+    input = 'waterncg.i'
+    csvdiff = 'waterncg_no_enthalpy.csv'
+    cli_args = 'UserObjects/fs/compute_enthalpy=false UserObjects/fs/compute_internal_energy=false Outputs/exodus=false Outputs/csv=true Outputs/file_base=waterncg_no_enthalpy'
+    requirement = 'The system shall not compute the enthalpy or internal energy of the phases in a water and NCG system when they are not required.'
+    design = 'PorousFlowWaterNCG.md'
+    issues = '#33348'
+  []
   [theis]
     type = 'CSVDiff'
     input = 'theis.i'
@@ -37,7 +46,7 @@
     type = 'CSVDiff'
     input = 'theis_tabulated.i'
     csvdiff = "theis_tabulated_csvout.csv theis_tabulated_csvout_line_0010.csv"
-    requirement = 'The system shall evolve a gas phase as a gas component is added in a water and NCG system.'
+    requirement = 'The system shall evolve a gas phase as a gas component is added in a water and NCG system, using tabulated fluid properties.'
     design = 'PorousFlowWaterNCG.md'
     issues = '#8818'
     valgrind = 'none' # too slow
@@ -77,6 +86,16 @@
     design = 'PorousFlowBrineCO2.md'
     issues = '#8818 #21275'
   []
+  [brineco2_no_enthalpy]
+    type = 'CSVDiff'
+    input = 'brineco2.i'
+    csvdiff = 'brineco2_no_enthalpy.csv'
+    prereq = brineco2
+    cli_args = 'UserObjects/fs/compute_enthalpy=false UserObjects/fs/compute_internal_energy=false Outputs/file_base=brineco2_no_enthalpy'
+    requirement = 'The system shall not compute the enthalpy or internal energy of the phases in a brine and CO2 system when they are not required.'
+    design = 'PorousFlowBrineCO2.md'
+    issues = '#33348'
+  []
   [brineco2_2]
     type = 'CSVDiff'
     input = 'brineco2_2.i'
@@ -99,7 +118,7 @@
     csvdiff = "theis_brineco2_csvout.csv theis_brineco2_csvout_line_0028.csv"
     heavy = true
     max_time = 1000
-    requirement = 'The system shall evolve a gas phase as CO2 is added to a liquid brine phase.'
+    requirement = 'The system shall evolve a gas phase as CO2 is injected into a liquid brine phase in a radial Theis problem.'
     design = 'PorousFlowBrineCO2.md'
     issues = '#8818'
   []
@@ -185,5 +204,24 @@
     design = 'PorousFlowWaterVapor.md'
     issues = '#13108'
     rel_err = 4e-5
+  []
+  [residual_gradients]
+    requirement = 'The system shall compute the gradients of saturation, porepressure and mass fraction in a two-phase fluid state from up-to-date derivatives of the fluid properties, so that the solution is the same'
+    design = 'PorousFlowFluidState.md'
+    issues = '#34252'
+    [residual_only]
+      type = 'CSVDiff'
+      input = 'residual_gradients.i'
+      csvdiff = 'residual_gradients_out.csv'
+      detail = 'when the residual is computed separately from the Jacobian, and'
+    []
+    [residual_and_jacobian_together]
+      type = 'CSVDiff'
+      input = 'residual_gradients.i'
+      csvdiff = 'residual_gradients_out.csv'
+      cli_args = 'Executioner/residual_and_jacobian_together=true'
+      prereq = 'residual_gradients/residual_only'
+      detail = 'when the residual and Jacobian are computed together.'
+    []
   []
 []

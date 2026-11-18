@@ -1,0 +1,11 @@
+[Tests]
+  design = 'LinearFVTemperatureWallFunctionBC.md EffectiveTurbulentThermalConductivityAux.md'
+  issues = '#32476'
+  [channel_ERCOFTAC_heated]
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC_heated.i'
+    csvdiff = 'channel_ERCOFTAC_heated_out_line_center_channel_0001.csv channel_ERCOFTAC_heated_out_side_bottom_0001.csv channel_ERCOFTAC_heated_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC_heated_out_side_top_0001.csv'
+    max_threads = 1 # see libmesh issue #3808
+    requirement = 'The system shall be able to turbulent fluid flow problems with k-epsilon turbulence model and with temperature wall functions in a heated channel.'
+  []
+[]

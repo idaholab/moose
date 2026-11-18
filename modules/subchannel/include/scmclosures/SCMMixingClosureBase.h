@@ -34,6 +34,18 @@ public:
   virtual Real computeSweepFlowMixingParameter(const unsigned int i_gap,
                                                const unsigned int iz) const;
 
+  /// @brief Precomputes the mixing coefficients that depend only on the bulk flow. Called after
+  /// the bulk Reynolds number and velocity are updated; does nothing by default.
+  virtual void computeBulkMixingParameters() const {}
+
+  /// @brief Precomputes the mixing coefficients that depend on the flow solution of the axial
+  /// levels first_node to last_node. Called before the turbulent crossflow of a block is
+  /// computed; does nothing by default.
+  virtual void computeBlockMixingParameters(const unsigned int /*first_node*/,
+                                            const unsigned int /*last_node*/) const
+  {
+  }
+
   /// Turbulent modeling parameter used in axial momentum equation
   const Real _CT;
 

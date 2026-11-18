@@ -435,7 +435,7 @@ if __name__ == "__main__":
             ]
         )
         if options.cli_args != None:
-            mooseparams.extend([options.cli_args])
+            mooseparams.extend(options.cli_args.split())
         if options.debug:
             print("Running\n%s\n" % " ".join(mooseparams))
         try:
@@ -529,7 +529,7 @@ if __name__ == "__main__":
             ]
         )
     if options.cli_args != None:
-        mooseparams.extend([options.cli_args])
+        mooseparams.extend(options.cli_args.split())
 
     if options.debug:
         print("Running\n%s\n" % " ".join(mooseparams))

@@ -67,12 +67,15 @@
   []
 []
 
-[ControlLogic]
-  [set_inlet_value]
-    type = TimeFunctionComponentControl
-    component = inlet
-    parameter = p0
+[ChainControls]
+  [set_inlet_value_fn]
+    type = GetFunctionValueChainControl
     function = inlet_p0_fn
+  []
+  [set_inlet_value]
+    type = SetRealValueChainControl
+    parameter = component::inlet/p0
+    value = set_inlet_value_fn:value
   []
 []
 

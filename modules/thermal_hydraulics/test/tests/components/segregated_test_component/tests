@@ -1,0 +1,13 @@
+[Tests]
+  design = 'syntax/Components/index.md'
+  issues = '#33924'
+  [segregated]
+    type = CSVDiff
+    input = 'segregated.i'
+    csvdiff = 'segregated_out.csv'
+    allow_test_objects = true
+    requirement = 'The system shall be able to solve a segregated system in which a component adds '
+                  'variables to separate nonlinear solver systems coupled through a fixed-point '
+                  'iteration.'
+  []
+[]

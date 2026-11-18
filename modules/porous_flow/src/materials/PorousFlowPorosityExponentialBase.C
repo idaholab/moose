@@ -28,23 +28,13 @@ PorousFlowPorosityExponentialBaseTempl<is_ad>::validParams()
                         "Modify the usual exponential relationships that "
                         "governs porosity so that porosity is always "
                         "positive");
-  params.addParam<Real>(
+  params.setDocString(
       "porosity_min",
-      std::numeric_limits<Real>::lowest(),
       "Minimum allowed value of the porosity: if the computed porosity is less than this value, "
-      "porosity is set to this value instead.  By default no floor is imposed.  The "
-      "ensure_positive "
-      "transform only acts for decay > 0, so chemistry-driven (precipitation) porosity is "
-      "otherwise "
-      "unbounded below and can become negative once pore space is filled by mineral; set this to a "
-      "small positive value in that case.");
-  params.addParam<Real>("zero_modifier",
-                        1E-3,
-                        "If the porosity_min floor is active, the porosity derivatives are set to "
-                        "zero_modifier times their unfloored values (rather than exactly zero) to "
-                        "hint to the Newton-Krylov nonlinear solver that porosity "
-                        "is not strictly constant, which aids convergence");
-  params.addParamNamesToGroup("zero_modifier", "Advanced");
+      "porosity is set to this value instead.  The default of zero means porosity is never "
+      "negative.  The ensure_positive transform only acts for decay > 0, so chemistry-driven "
+      "(precipitation) porosity would otherwise become negative once pore space is filled by "
+      "mineral; a small positive value may be preferable in that case.");
   params.addClassDescription("Base class Material for porosity that is computed via an exponential "
                              "relationship with coupled variables (strain, porepressure, "
                              "temperature, chemistry)");
@@ -56,9 +46,7 @@ PorousFlowPorosityExponentialBaseTempl<is_ad>::PorousFlowPorosityExponentialBase
     const InputParameters & parameters)
   : PorousFlowPorosityBaseTempl<is_ad>(parameters),
     _strain_at_nearest_qp(this->template getParam<bool>("strain_at_nearest_qp")),
-    _ensure_positive(this->template getParam<bool>("ensure_positive")),
-    _porosity_min(this->template getParam<Real>("porosity_min")),
-    _zero_modifier(this->template getParam<Real>("zero_modifier"))
+    _ensure_positive(this->template getParam<bool>("ensure_positive"))
 {
 }
 
@@ -153,28 +141,8 @@ PorousFlowPorosityExponentialBaseTempl<is_ad>::computeQpProperties()
   }
 
   // Apply the porosity floor last, after the unfloored derivatives above have been
-  // formed.  When floored, soften the derivatives with _zero_modifier so the Newton
-  // process still sees porosity as weakly varying (cf. PorousFlowPorosityLinear).
-  if (_porosity[_qp] < _porosity_min)
-  {
-    if constexpr (!is_ad)
-    {
-      _porosity[_qp] = _porosity_min;
-      for (unsigned int v = 0; v < _num_var; ++v)
-      {
-        (*_dporosity_dvar)[_qp][v] *= _zero_modifier;
-        (*_dporosity_dgradvar)[_qp][v] *= _zero_modifier;
-      }
-    }
-    else
-    {
-      // The AD path carries its derivatives inside the value and has no derivative material
-      // properties (they are nullptr), so the value and the seeds are softened separately here.
-      // Assigning _porosity_min to the ADReal would instead discard the derivatives entirely.
-      _porosity[_qp].value() = _porosity_min;
-      _porosity[_qp].derivatives() *= _zero_modifier;
-    }
-  }
+  // formed (see PorousFlowPorosityBaseTempl::applyPorosityMin)
+  applyPorosityMin();
 }
 
 template class PorousFlowPorosityExponentialBaseTempl<false>;

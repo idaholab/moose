@@ -44,6 +44,17 @@
     requirement = 'The system shall be able to simulate a gate valve in between two components with the component oriented in either direction.'
   []
 
+  [variable_area_conservation]
+    type = CSVDiff
+    input = 'variable_area_conservation.i'
+    csvdiff = 'variable_area_conservation_out.csv'
+    # The difference is relative and limited by the nonlinear tolerance
+    abs_zero = 1e-7
+    restep = false # Test is prescribed to abort on failed timestep
+    issues = '#34097'
+    requirement = 'The system shall conserve mass across a gate valve when the area of a connected flow channel varies within the element at the connection.'
+  []
+
   [err:not_2_connections]
     type = 'RunException'
     input = 'gate_valve_1phase.i'

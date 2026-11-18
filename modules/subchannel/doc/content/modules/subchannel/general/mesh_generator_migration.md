@@ -11,8 +11,10 @@ replaced by the assembly mesh generator objects listed below.
 | :- | :- |
 | `SCMQuadSubChannelMeshGenerator` + `SCMQuadPinMeshGenerator` | `SCMQuadAssemblyMeshGenerator` |
 | `SCMTriSubChannelMeshGenerator` + `SCMTriPinMeshGenerator` | `SCMTriAssemblyMeshGenerator` |
-| `SCMDetailedQuadSubChannelMeshGenerator` + `SCMDetailedQuadPinMeshGenerator` | `SCMDetailedQuadAssemblyMeshGenerator` |
-| `SCMDetailedTriSubChannelMeshGenerator` + `SCMDetailedTriPinMeshGenerator` | `SCMDetailedTriAssemblyMeshGenerator` |
+| `SCMDetailedQuadSubChannelMeshGenerator` + `SCMDetailedQuadPinMeshGenerator` | `SCMQuadVisualizationAssemblyMeshGenerator` |
+| `SCMDetailedTriSubChannelMeshGenerator` + `SCMDetailedTriPinMeshGenerator` | `SCMTriVisualizationAssemblyMeshGenerator` |
+| `SCMDetailedQuadAssemblyMeshGenerator` | `SCMQuadVisualizationAssemblyMeshGenerator` |
+| `SCMDetailedTriAssemblyMeshGenerator` | `SCMTriVisualizationAssemblyMeshGenerator` |
 
 The new assembly generators create a mesh with both `subchannel` and `fuel_pins` subdomains. The
 old `input = ...` parameter on the pin mesh generator is no longer used because there is no separate
@@ -120,17 +122,19 @@ parameter.
 Triangular assembly meshes always contain pins. The minimum triangular assembly has `nrings = 2`,
 which creates seven pins.
 
-## Detailed Mesh Migration
+## Visualization Mesh Migration
 
-The detailed visualization mesh generators follow the same pattern. Replace the old chained
-subchannel and pin generator blocks with a single detailed assembly generator.
+The 3D visualization mesh generators follow the same pattern. Replace the old chained
+subchannel and pin generator blocks with a single visualization assembly generator. The
+`SCMDetailed*AssemblyMeshGenerator` names are deprecated aliases of the visualization assembly
+generators.
 
-For quad detailed meshes:
+For quad visualization meshes:
 
 !listing! language=moose
 [Mesh]
   [assembly]
-    type = SCMDetailedQuadAssemblyMeshGenerator
+    type = SCMQuadVisualizationAssemblyMeshGenerator
     nx = 3
     ny = 3
     n_cells = 10
@@ -142,12 +146,12 @@ For quad detailed meshes:
 []
 !listing-end!
 
-For triangular detailed meshes:
+For triangular visualization meshes:
 
 !listing! language=moose
 [Mesh]
   [assembly]
-    type = SCMDetailedTriAssemblyMeshGenerator
+    type = SCMTriVisualizationAssemblyMeshGenerator
     nrings = 3
     n_cells = 20
     flat_to_flat = 0.056
@@ -176,5 +180,5 @@ restriction to use the new assembly generator subdomain names or IDs. The defaul
 subdomain names are `subchannel` for the fluid/subchannel mesh and `fuel_pins` for the pin mesh.
 
 See [SCMQuadAssemblyMeshGenerator.md], [SCMTriAssemblyMeshGenerator.md],
-[SCMDetailedQuadAssemblyMeshGenerator.md], and [SCMDetailedTriAssemblyMeshGenerator.md] for the full
-parameter lists.
+[SCMQuadVisualizationAssemblyMeshGenerator.md], and [SCMTriVisualizationAssemblyMeshGenerator.md] for
+the full parameter lists.

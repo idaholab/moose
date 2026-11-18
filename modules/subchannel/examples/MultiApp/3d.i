@@ -29,7 +29,7 @@ n_cells = 100
 
 [Mesh]
   [subchannel]
-    type = SCMDetailedTriAssemblyMeshGenerator
+    type = SCMTriVisualizationAssemblyMeshGenerator
     nrings = '${fparse n_rings}'
     n_cells = ${n_cells}
     flat_to_flat = '${fparse duct_inside}'

@@ -11,14 +11,15 @@
 
 #include "ADScalarKernel.h"
 #include "ScalarKernel.h"
-#include "FunctorInterface.h"
 
 class SinglePhaseFluidProperties;
 
+/**
+ * Path-integrated incompressible energy kernel
+ */
 template <bool is_ad>
 class IncompressibleEnergySPScalarKernelTempl
-  : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type,
-    public FunctorInterface
+  : public std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type
 {
   using Base = typename std::conditional<is_ad, ADScalarKernel, ScalarKernel>::type;
 
@@ -33,13 +34,13 @@ protected:
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
   /// Coupled mass flow rate through the segment
-  const VariableValue & _m;
+  const GenericVariableValue<is_ad> & _m;
   /// Coupled temperature of the upstream segment
-  const VariableValue & _Tup;
+  const GenericVariableValue<is_ad> & _Tup;
   /// Coupled temperature of the downstream segment
-  const VariableValue & _Tdown;
+  const GenericVariableValue<is_ad> & _Tdown;
   /// Coupled temperature of the component wall
-  const VariableValue & _Tw;
+  const GenericVariableValue<is_ad> & _Tw;
   /// Property state integration flag
   const bool _is_implicit;
   /// System reference pressure

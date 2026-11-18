@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#33594'
+  design = 'KokkosPostprocessorDirichletBC.md'
+  [test]
+    type = Exodiff
+    input = 'kokkos_pp_dirichlet.i'
+    exodiff = 'kokkos_pp_dirichlet_out.e'
+    requirement = 'The Kokkos system shall impose a Dirichlet boundary condition with a value given by a postprocessor.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda xpu'
+  []
+[]

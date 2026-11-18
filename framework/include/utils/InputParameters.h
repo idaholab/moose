@@ -1267,6 +1267,14 @@ public:
                       const std::string & moose_object_with_var_param_name) const;
 
   /**
+   * Determine which parameter specifies the variable(s) of an object. Kokkos objects can operate on
+   * either a single variable through 'variable' or multiple variables through 'variables', while
+   * all other objects always use 'variable'
+   * @returns The name of the variable parameter, which is either 'variable' or 'variables'
+   */
+  std::string varParamName() const;
+
+  /**
    * Rename a parameter and provide a new documentation string
    * @param old_name The old name of the parameter
    * @param new_name The new name of the parameter

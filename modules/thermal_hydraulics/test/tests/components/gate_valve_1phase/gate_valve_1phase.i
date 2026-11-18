@@ -151,18 +151,28 @@ delta_t_open = 0.1
   []
 []
 
-[ControlLogic]
-  [pipe2_valve_control]
-    type = TimeFunctionComponentControl
-    component = pipe2_valve
-    parameter = open_area_fraction
+[ChainControls]
+  [pipe2_valve_control_fn]
+    type = GetFunctionValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     function = pipe2_open_fn
   []
-  [pipe3_valve_control]
-    type = TimeFunctionComponentControl
-    component = pipe3_valve
-    parameter = open_area_fraction
+  [pipe2_valve_control]
+    type = SetRealValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    parameter = component::pipe2_valve/open_area_fraction
+    value = pipe2_valve_control_fn:value
+  []
+  [pipe3_valve_control_fn]
+    type = GetFunctionValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
     function = pipe3_open_fn
+  []
+  [pipe3_valve_control]
+    type = SetRealValueChainControl
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    parameter = component::pipe3_valve/open_area_fraction
+    value = pipe3_valve_control_fn:value
   []
 []
 

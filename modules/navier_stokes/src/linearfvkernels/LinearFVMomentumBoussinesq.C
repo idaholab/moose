@@ -29,6 +29,11 @@ LinearFVMomentumBoussinesq::validParams()
                                     "this is of the form rho = rho_ref*(1-alpha (T-T_ref))");
   params.addRequiredParam<Real>("ref_temperature", "The value for the reference temperature.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The value for the density");
+  params.addParam<MooseFunctorName>(
+      NS::porosity,
+      "1",
+      "The porosity. With superficial velocity variables the buoyancy force is "
+      "-eps alpha rho g (T - T_ref).");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -44,7 +49,8 @@ LinearFVMomentumBoussinesq::LinearFVMomentumBoussinesq(const InputParameters & p
     _gravity(getParam<RealVectorValue>("gravity")),
     _alpha(getFunctor<Real>("alpha_name")),
     _ref_temperature(getParam<Real>("ref_temperature")),
-    _rho(getFunctor<Real>(NS::density))
+    _rho(getFunctor<Real>(NS::density)),
+    _eps(getFunctor<Real>(NS::porosity))
 {
   if (!_rho.isConstant())
     paramError(NS::density, "The density in the boussinesq term is not constant!");
@@ -74,7 +80,7 @@ LinearFVMomentumBoussinesq::computeRightHandSideContribution()
 {
   const auto elem = makeElemArg(_current_elem_info->elem());
   const auto state = determineState();
-  return -_alpha(elem, state) * _gravity(_index) * _rho(elem, state) *
+  return -_eps(elem, state) * _alpha(elem, state) * _gravity(_index) * _rho(elem, state) *
          (_temperature_var.getElemValue(*_current_elem_info, state) - _ref_temperature) *
          _current_elem_volume;
 }

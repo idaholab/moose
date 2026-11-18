@@ -80,4 +80,6 @@ PorousFlowPorosityHMBiotModulus::computeQpProperties()
     (*_dporosity_dgradvar)[_qp][v] =
         _biot * (*_dvol_strain_qp_dvar)[qp_to_use][v] / denom -
         _porosity[_qp] / denom * _dvol_strain_rate_qp_dvar[qp_to_use][v] * _dt;
+
+  applyPorosityMin();
 }

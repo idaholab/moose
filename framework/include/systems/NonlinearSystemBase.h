@@ -823,6 +823,12 @@ protected:
   void computeNodalBCsJacobian(const std::set<TagID> & tags);
 
   /**
+   * Let the time integrators combine the time and non-time parts of the system Jacobian, see
+   * NonlinearTimeIntegratorInterface::postJacobian()
+   */
+  void postJacobian(const std::set<TagID> & tags);
+
+  /**
    * Compute the residual and Jacobian together for nodal boundary conditions
    */
   void computeNodalBCsResidualAndJacobian(const std::set<TagID> & vector_tags,
@@ -832,6 +838,12 @@ protected:
    * Form multiple matrices for all the tags. Users should not call this func directly.
    */
   void computeJacobianInternal(const std::set<TagID> & tags);
+
+  /**
+   * Set the PETSc options used for assembling the matrices of the given tags
+   * @param tags The matrix tags
+   */
+  void setMatrixOptions(const std::set<TagID> & tags);
 
   /**
    * Compute Jacobian with Kokkos objects

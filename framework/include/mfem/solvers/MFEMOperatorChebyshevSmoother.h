@@ -35,7 +35,7 @@ public:
 
 protected:
   /// Rebuilds the multigrid hierarchy for the supplied finest-level operator.
-  virtual void SetOperatorImpl(mfem::Operator & op) override;
+  virtual void SetOperatorImpl(const mfem::Operator & op) override;
 
 private:
   /// Degree of the Chebyshev polynomial used by the MFEM smoother.

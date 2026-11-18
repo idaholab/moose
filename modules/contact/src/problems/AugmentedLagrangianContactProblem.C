@@ -45,16 +45,8 @@ AugmentedLagrangianContactProblemTempl<T>::validParams()
 template <class T>
 AugmentedLagrangianContactProblemTempl<T>::AugmentedLagrangianContactProblemTempl(
     const InputParameters & params)
-  : T(params), AugmentedLagrangianContactProblemInterface(params)
+  : T(params), AugmentedLagrangianContactProblemInterface(params, *this)
 {
-}
-
-template <class T>
-void
-AugmentedLagrangianContactProblemTempl<T>::timestepSetup()
-{
-  _lagrangian_iteration_number = 0;
-  T::timestepSetup();
 }
 
 template <>

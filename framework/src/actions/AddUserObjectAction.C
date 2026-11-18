@@ -27,10 +27,5 @@ AddUserObjectAction::AddUserObjectAction(const InputParameters & params) : Moose
 void
 AddUserObjectAction::act()
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  if (_moose_object_pars.isKokkosObject())
-    _problem->addKokkosUserObject(_type, _name, _moose_object_pars);
-  else
-#endif
-    _problem->addUserObject(_type, _name, _moose_object_pars);
+  _problem->addUserObject(_type, _name, _moose_object_pars);
 }

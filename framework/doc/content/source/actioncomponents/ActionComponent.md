@@ -19,7 +19,7 @@ be used. For example:
 - `outerSurfaceArea()` should return the total outer surface area of the component.
 
 Components will likely create other objects, for example for generating a mesh or for postprocessing purposes.
-The following protected APIs should be overriden. This list is intended to grow as the uses for `ActionComponents` expand.
+The following protected APIs should be overridden. This list is intended to grow as the uses for `ActionComponents` expand.
 
 - `addMeshGenerators()` to add [MeshGenerators](syntax/Mesh/index.md) that create the mesh for the component. An example is the [CylinderComponent.md].
   Not all components will use mesh generators to describe their mesh.
@@ -27,7 +27,7 @@ The following protected APIs should be overriden. This list is intended to grow 
   aligns with the component for postprocessing or field transfer use.
 - `addPositionsObjects()` to add [Positions](syntax/Positions/index.md) object that describe the location of the component
 
-Additionally the following routines may be overriden:
+Additionally the following routines may be overridden:
 
 - `setupComponent()` for any component-specific initialization that does not consist of adding an object
 - `actOnAdditionalTasks()` to any component-specific initialization that requires a task that is not currently

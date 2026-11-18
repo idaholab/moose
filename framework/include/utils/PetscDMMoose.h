@@ -75,4 +75,3 @@ extern PetscErrorCode DMMooseSetSplitBlocks(DM, const std::string &, const std::
 extern PetscErrorCode DMMooseGetSplitBlocks(DM, const std::string &, std::set<std::string> &);
 extern PetscErrorCode DMMooseSetSplitSides(DM, const std::string &, const std::set<std::string> &);
 extern PetscErrorCode DMMooseGetSplitSides(DM, const std::string &, std::set<std::string> &);
-extern PetscErrorCode SNESUpdateDMMoose(SNES snes, PetscInt iteration);

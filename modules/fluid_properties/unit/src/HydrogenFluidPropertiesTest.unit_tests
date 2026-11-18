@@ -1,0 +1,10 @@
+[Tests]
+  design = 'HydrogenFluidProperties.md'
+  issues = '#34070'
+
+  [derivatives_near_critical]
+    type = GoogleTest
+    unit_test = HydrogenFluidPropertiesTest.derivativesNearCritical
+    requirement = 'The system shall compute derivatives of the hydrogen density, internal energy and enthalpy with respect to pressure and temperature, and an isobaric heat capacity equal to the temperature derivative of the enthalpy, near the critical point.'
+  []
+[]

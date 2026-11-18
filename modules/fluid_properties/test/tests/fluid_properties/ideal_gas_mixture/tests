@@ -4,7 +4,7 @@
   [error_nonideal_gases]
     type = RunException
     input = 'ideal_gas_mixture.i'
-    expect_err = "Each entry in 'component_fluid_properties' must have type 'IdealGasFluidProperties'"
+    expect_err = "Each entry in 'component_fluid_properties' must be an ideal gas that implements IdealGasMixtureInterface"
     requirement = 'The system shall report an error if non-ideal gases are used with the ideal gas mixture model.'
   []
 []

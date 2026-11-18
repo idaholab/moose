@@ -34,6 +34,8 @@ public:
   InterfaceUserObjectBase(const InputParameters & parameters);
 
 protected:
+  bool usesFaceCoupledValues() const override { return true; }
+
   /**
    * Execute method.
    */

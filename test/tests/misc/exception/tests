@@ -96,6 +96,29 @@
                   "communication."
   []
 
+  [parallel_exception_element_user_object]
+    requirement = 'The system shall terminate when one process throws an exception during element user object execution'
+    issues = '#33908'
+    [non_solver]
+      type = RunException
+      input = parallel_exception_element_user_object.i
+      expect_err = 'parallel-communicated exception was detected during TIMESTEP_END evaluation:.*ExceptionElementUserObject intentional execute exception'
+      min_parallel = 2
+      max_parallel = 2
+      detail = 'outside of a solve, and'
+    []
+    [solver]
+      type = RunException
+      input = parallel_exception_element_user_object.i
+      cli_args = 'UserObjects/exception/execute_on=LINEAR'
+      expect_err = 'Aborting as solve did not converge.*^A std::exception was raised during FEProblemBase::computeUserObjectsInternal\nExceptionElementUserObject intentional execute exception'
+      absent_out = 'raised during FEProblemBase::compute(ResidualTags|JacobianTags|ResidualAndJacobian)'
+      min_parallel = 2
+      max_parallel = 2
+      detail = 'during residual evaluation.'
+    []
+  []
+
   [exception_transient]
     type = 'CSVDiff'
     input = 'exception_transient.i'

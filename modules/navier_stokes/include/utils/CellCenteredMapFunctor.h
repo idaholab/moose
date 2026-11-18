@@ -76,6 +76,7 @@ private:
 
   const bool _extrapolated_boundary;
 
+  using Moose::FunctorBase<T>::evaluate;
   ValueType evaluate(const ElemArg & elem_arg, const StateArg &) const override;
   ValueType evaluate(const ElemPointArg & elem_point, const StateArg & state) const override;
   ValueType evaluate(const FaceArg & face, const StateArg &) const override;

@@ -297,3 +297,25 @@ ReactorGeometryMeshBuilderBase::createRGMBLattice(
   auto & assembly_lattice = csg_obj.addLattice(std::move(lat_ptr));
   return assembly_lattice;
 }
+
+bool
+ReactorGeometryMeshBuilderBase::checkInputVectorInAscendingOrder(
+    const std::vector<Real> & input_vec)
+{
+  for (unsigned int i = 1; i < input_vec.size(); ++i)
+    if (input_vec[i] <= input_vec[i - 1])
+      return false;
+  return true;
+}
+
+bool
+ReactorGeometryMeshBuilderBase::checkUndefinedLatticeRefs(
+    const std::vector<std::vector<unsigned int>> & input_lattice, unsigned int num_inputs)
+{
+  for (const auto i : index_range(input_lattice))
+    for (const auto j : index_range(input_lattice[i]))
+      if (input_lattice[i][j] >= num_inputs)
+        return false;
+
+  return true;
+}

@@ -57,6 +57,26 @@ class TestTokens(unittest.TestCase):
         self.assertEqual(t2(2).name, "Word")
         self.assertEqual(t2(2)["content"], "Word")
 
+    def testText(self):
+        from MooseDocs.extensions import core
+
+        # 'ElementL2Error Postprocessor' tokenizes to Word, Number, Word, Space, Word
+        token = Test(None)
+        core.Word(token, content="ElementL")
+        core.Number(token, content="2")
+        core.Word(token, content="Error")
+        core.Space(token, count=1)
+        core.Word(token, content="Postprocessor")
+        self.assertEqual(token.text(), "ElementL2Error Postprocessor")
+        self.assertEqual(token.text("-"), "ElementL2Error-Postprocessor")
+
+        # Punctuation still separates words
+        token = Test(None)
+        core.Word(token, content="Foo")
+        core.Punctuation(token, content="-")
+        core.Word(token, content="bar")
+        self.assertEqual(token.text(), "Foo bar")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

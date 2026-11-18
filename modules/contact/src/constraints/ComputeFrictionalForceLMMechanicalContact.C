@@ -84,6 +84,28 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     _3d(_has_disp_z)
 
 {
+  if (!_weighted_velocities_uo.usesNodalNormalDerivatives())
+    paramError("weighted_velocities_uo",
+               "Nodal-normal derivatives are not supported by user object '",
+               _weighted_velocities_uo.name(),
+               "'.");
+
+  // The weighted-gap and weighted-velocity parameters may identify different user objects, so each
+  // object's interface and displacement configuration must be validated.
+  if (secondarySubdomain() != _weighted_velocities_uo.secondarySubdomain() ||
+      primarySubdomain() != _weighted_velocities_uo.primarySubdomain())
+    paramError("weighted_velocities_uo",
+               "'weighted_velocities_uo' must be defined on the same secondary/primary subdomain "
+               "pair as this constraint when nodal-normal derivatives are enabled.");
+
+  const std::array<std::pair<const MooseVariable *, unsigned int>, 3>
+      velocity_displacement_variables{{{_disp_x_var, 0}, {_disp_y_var, 1}, {_disp_z_var, 2}}};
+  for (const auto & [variable, component] : velocity_displacement_variables)
+    if (variable != _weighted_velocities_uo.dispVar(component))
+      paramError("weighted_velocities_uo",
+                 "'weighted_velocities_uo' must use the same displacement variables as this "
+                 "constraint when nodal-normal derivatives are enabled.");
+
   if (parameters.isParamSetByUser("mu") && _has_friction_function)
     paramError(
         "mu",
@@ -220,10 +242,13 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
-  // Compute the friction coefficient (constant or function)
+  // Compute the friction coefficient (constant or function). The nodal slip rate is the weighted
+  // tangential velocity divided by the integral of the same test function, which is the nodal
+  // coefficient of the mortar projection of the relative tangential velocity
+  // (Wohlmuth 2011, eq. 3.10a).
   ADReal mu_ad = computeFrictionValue(contact_pressure,
-                                      _dof_to_real_tangential_velocity[dof][0],
-                                      _dof_to_real_tangential_velocity[dof][1]);
+                                      *tangential_vel[0] / *_normalization_ptr,
+                                      *tangential_vel[1] / *_normalization_ptr);
 
   const std::array<ADReal, 2> tangential_velocity{{*tangential_vel[0], *tangential_vel[1]}};
 
@@ -273,9 +298,9 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
-  // Compute the friction coefficient (constant or function)
-  ADReal mu_ad =
-      computeFrictionValue(contact_pressure, _dof_to_real_tangential_velocity[dof][0], 0.0);
+  // Compute the friction coefficient (constant or function) from the projected nodal slip rate, as
+  // in enforceConstraintOnDof3d()
+  ADReal mu_ad = computeFrictionValue(contact_pressure, tangential_vel / *_normalization_ptr, 0.0);
 
   const std::array<ADReal, 1> tangential_pressure{{friction_lm_value}};
   const std::array<ADReal, 1> tangential_velocity{{tangential_vel}};

@@ -4,8 +4,11 @@
   [torch-parameters]
     type = JSONDiff
     input = libtorch_drl_control_trainer.i
+    # The runner gold is a symlink to the trainer gold, so the network the control receives must
+    # match the trainer's. Only the reporter type, time, and time step differ between the apps; the
+    # time pattern is one segment so that it spans the list index in root['time_steps'][0]['time'].
     jsondiff = 'train_out.json train_out_runner0_json_out.json'
-    skip_keys = 'reporters time time_step'
+    ignored_regex_items = "reporters/nn_parameters/type time_steps.*\['time(_step)?"
     requirement = "The system shall be able to transfer an artificial neural network between a "
                   "trainer object and a control object residing on different apps."
     capabilities = 'libtorch'

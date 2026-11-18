@@ -2,6 +2,7 @@
 # Loads are expressed using functions. See the czm_materials/3DC section in the
 # test file  for examples.
 [Mesh]
+  use_displaced_mesh = false
   [./msh]
     type = GeneratedMeshGenerator
     dim = 3
