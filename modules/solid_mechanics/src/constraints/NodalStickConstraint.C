@@ -137,13 +137,35 @@ NodalStickConstraint::computeJacobian(const SparseMatrix<Number> & jacobian)
         Knn(_i, _i) += computeQpJacobian(Moose::SecondarySecondary);
         break;
       case Moose::Kinematic:
-        Kee(_j, _j) = 0.;
-        Ken(_j, _i) += jacobian(secondarydof[_i], primarydof[_j]);
-        Kne(_i, _j) += -jacobian(secondarydof[_i], primarydof[_j]) +
-                       computeQpJacobian(Moose::SecondaryPrimary);
-        Knn(_i, _i) += -jacobian(secondarydof[_i], secondarydof[_i]) +
-                       computeQpJacobian(Moose::SecondarySecondary);
+      {
+        // The residual of the secondary node is moved to its primary node and replaced by the
+        // constraint (see computeResidual). The Jacobian follows the same two steps: every
+        // entry of the secondary row is added to the primary row and removed from the
+        // secondary row, which is then left with the constraint alone.
+        std::vector<numeric_index_type> row_columns;
+        std::vector<Number> row_values;
+        jacobian.get_row(secondarydof[_i], row_columns, row_values);
+        for (std::size_t entry = 0; entry < row_columns.size(); ++entry)
+        {
+          // Entries that are only reserved in the sparsity pattern have nothing to transfer
+          if (row_values[entry] == 0)
+            continue;
+
+          addJacobianElement(_assembly,
+                             row_values[entry],
+                             primarydof[_j],
+                             row_columns[entry],
+                             /*scaling_factor=*/1);
+          addJacobianElement(_assembly,
+                             -row_values[entry],
+                             secondarydof[_i],
+                             row_columns[entry],
+                             /*scaling_factor=*/1);
+        }
+        Kne(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
+        Knn(_i, _i) += computeQpJacobian(Moose::SecondarySecondary);
         break;
+      }
     }
   }
   addJacobian(_assembly, Kee, primarydof, primarydof, _var.scalingFactor());
@@ -175,7 +197,7 @@ NodalStickConstraint::computeResidual(const NumericVector<Number> & residual)
         // Transfer the current residual of the secondary node to the primary nodes
         Real res = residual(secondarydof[_i]);
         re(_j) += res;
-        neighbor_re(_i) += -res + computeQpResidual(Moose::Secondary);
+        neighbor_re(_i) += -res + computeQpResidual(Moose::Secondary) * _var.scalingFactor();
         break;
     }
   }

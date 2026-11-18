@@ -2456,11 +2456,53 @@ NonlinearSystemBase::findImplicitGeometricCouplingEntries(
     _communicator.allgather(secondary_dofs);
 
     for (const auto & primary_id : primary_dofs)
+    {
+      // The primary nodes of a constraint need not share an element
+      for (const auto & other_primary_id : primary_dofs)
+        graph[primary_id].push_back(other_primary_id);
+
       for (const auto & secondary_id : secondary_dofs)
       {
         graph[primary_id].push_back(secondary_id);
         graph[secondary_id].push_back(primary_id);
       }
+    }
+
+    // The kinematic formulation adds the Jacobian rows of the secondary nodes to the rows of
+    // the primary nodes, so the primary rows need the columns of the secondary rows: the dofs
+    // of the elements connected to the secondary nodes. Columns that do not come from the
+    // element connectivity (scalar variables, other constraints) are not covered.
+    if (nc->getFormulation() == Moose::Kinematic)
+    {
+      std::set<dof_id_type> unique_secondary_row_dofs;
+      for (const auto & node_id : secondary_node_ids)
+      {
+        Node * node = _mesh.queryNodePtr(node_id);
+        if (!node || node->processor_id() != this->processor_id())
+          continue;
+
+        const auto node_to_elem_pair = node_to_elem_map.find(node_id);
+        if (node_to_elem_pair == node_to_elem_map.end())
+          continue;
+
+        // Get the dof indices from each elem connected to the node
+        for (const auto & cur_elem : node_to_elem_pair->second)
+          if (const Elem * elem = _mesh.queryElemPtr(cur_elem))
+          {
+            std::vector<dof_id_type> dof_indices;
+            dofMap().dof_indices(elem, dof_indices);
+            unique_secondary_row_dofs.insert(dof_indices.begin(), dof_indices.end());
+          }
+      }
+
+      std::vector<dof_id_type> secondary_row_dofs(unique_secondary_row_dofs.begin(),
+                                                  unique_secondary_row_dofs.end());
+      _communicator.allgather(secondary_row_dofs);
+
+      for (const auto & primary_id : primary_dofs)
+        for (const auto & row_dof : secondary_row_dofs)
+          graph[primary_id].push_back(row_dof);
+    }
   }
 
   // Make every entry sorted and unique
