@@ -1,14 +1,7 @@
 # Flat Interface Surface Plasmon Polariton Benchmark
 
-!! TODO: We only want 'tag' to run on the full MOOSE website build, so skip if a moose submodule
-!! exists (implying an app). Remove this if statement when the tagging extension is not "experimental".
-
-!if function=!hasSubmodule('moose')
-!tag name=spp_flat_interface pairs=example_type:benchmark simulation_type:scalar fiscal_year:2027
-
-This section summarizes and describes the two-dimensional surface plasmon polariton
-(SPP) benchmark and verification test for a flat metal--dielectric interface in the
-electromagnetics module. An SPP is a transverse-magnetic (TM) wave bound to the
+This example case describes the two-dimensional surface plasmon polariton
+(SPP) benchmark and verification test for a flat metal--dielectric interface. An SPP is a transverse-magnetic (TM) wave bound to the
 interface, oscillating along it and decaying evanescently into both media
 [!citep](raether1988). Because the metal permittivity is negative, the squared
 wavenumber changes sign across the interface, which makes this case a useful check
@@ -62,8 +55,7 @@ This is a standard diffusion-reaction style equation without a source, so the
 [Diffusion.md] and [MatReaction.md] objects are used for each real and imaginary
 component in each subdomain, with the material properties `kSquared_lower`
 ($-2k_0^2$) and `kSquared_upper` ($k_0^2$) supplying $k_j^2$. Each component in each
-subdomain is a separate first-order Lagrange variable (four in total), so no
-complex-arithmetic PETSc build is required. The real and imaginary equations are
+subdomain is a separate first-order Lagrange variable (four in total). The real and imaginary equations are
 coupled only through the Robin boundary conditions.
 
 At the interface, the tangential electric field is continuous,
@@ -196,4 +188,4 @@ Robin boundary treatment is one candidate.
 
 The scope of this benchmark is limited. The metal is lossless ($\varepsilon_m$ is
 real), the interface is flat, and the $E_x$ formulation with the interface condition
-[spp-flux] is verified here only for a flat interface.
+[spp-flux] is verified here only for a flat interface. We extend this scope to curved interfaces in (#34243) and further to lossy metal in subsequent work.
