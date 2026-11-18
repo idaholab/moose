@@ -1,0 +1,14 @@
+[Tests]
+  design = 'ADRankTwoCartesianComponent.md'
+  issues = '#34500'
+  [ad_cartesian_component_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ad_cartesian_component_jacobian.i'
+    run_sim = False
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The system shall propagate the derivatives of a rank two tensor component '
+                  'extracted with automatic differentiation, so that the Jacobian of a residual '
+                  'depending on this component is exact.'
+  []
+[]

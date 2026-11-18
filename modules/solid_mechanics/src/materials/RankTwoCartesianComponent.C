@@ -10,8 +10,6 @@
 #include "RankTwoCartesianComponent.h"
 #include "RankTwoScalarTools.h"
 
-#include "metaphysicl/raw_type.h"
-
 registerMooseObject("SolidMechanicsApp", RankTwoCartesianComponent);
 registerMooseObject("SolidMechanicsApp", ADRankTwoCartesianComponent);
 
@@ -58,7 +56,7 @@ template <bool is_ad>
 void
 RankTwoCartesianComponentTempl<is_ad>::computeQpProperties()
 {
-  _property[_qp] = RankTwoScalarTools::component(MetaPhysicL::raw_value(_tensor[_qp]), _i, _j);
+  _property[_qp] = RankTwoScalarTools::component(_tensor[_qp], _i, _j);
 }
 
 template class RankTwoCartesianComponentTempl<false>;
