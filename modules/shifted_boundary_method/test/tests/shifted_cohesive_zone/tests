@@ -104,53 +104,50 @@
     []
   []
   [neml2_traction_law_comparison]
-    [bilinear]
-      [native]
-        type = CSVDiff
-        input = 'rectangle_sczm_tri_material_bilinear.i'
-        cli_args = 'Outputs/file_base=sczm_bilinear_native Outputs/exodus=false'
-        csvdiff = 'sczm_bilinear_native.csv'
-        mesh_mode = REPLICATED
-        recover = false
-        requirement = 'The system shall compute the reaction-force history of a shifted cohesive zone model using the native MOOSE bilinear mixed-mode traction law.'
-      []
-      [neml2]
-        type = CSVDiff
-        input = 'rectangle_sczm_tri_material_bilinear_neml2.i'
-        cli_args = 'Outputs/file_base=sczm_bilinear_neml2 Outputs/exodus=false'
-        # This gold is a symlink to sczm_bilinear_native.csv. Both implementations are therefore
-        # compared against one native reference instead of maintaining two gold files that can drift.
-        csvdiff = 'sczm_bilinear_neml2.csv'
-        comparison_file = 'react_x.cmp'
-        capabilities = 'libtorch & neml2'
-        mesh_mode = REPLICATED
-        recover = false
-        requirement = 'The system shall reproduce the native MOOSE bilinear mixed-mode reaction-force history within one percent using the NEML2 traction law.'
-      []
+    requirement = 'The system shall produce reaction-force histories for shifted cohesive zone models'
+    [bilinear_native]
+      type = CSVDiff
+      input = 'rectangle_sczm_tri_material_bilinear.i'
+      cli_args = 'Outputs/file_base=sczm_bilinear_native Outputs/exodus=false'
+      csvdiff = 'sczm_bilinear_native.csv'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'using the native MOOSE bilinear mixed-mode traction law,'
     []
-    [linear]
-      [native]
-        type = CSVDiff
-        input = 'rectangle_sczm_tri_material_linear.i'
-        cli_args = 'Outputs/file_base=sczm_linear_native Outputs/exodus=false'
-        csvdiff = 'sczm_linear_native.csv'
-        mesh_mode = REPLICATED
-        recover = false
-        requirement = 'The system shall compute the reaction-force history of a shifted cohesive zone model using the native MOOSE linear-elastic traction law.'
-      []
-      [neml2]
-        type = CSVDiff
-        input = 'rectangle_sczm_tri_material_linear_neml2.i'
-        cli_args = 'Outputs/file_base=sczm_linear_neml2 Outputs/exodus=false'
-        # This gold is a symlink to sczm_linear_native.csv. Both implementations are therefore
-        # compared against one native reference instead of maintaining two gold files that can drift.
-        csvdiff = 'sczm_linear_neml2.csv'
-        comparison_file = 'react_x.cmp'
-        capabilities = 'libtorch & neml2'
-        mesh_mode = REPLICATED
-        recover = false
-        requirement = 'The system shall reproduce the native MOOSE linear-elastic reaction-force history within one percent using the NEML2 traction law.'
-      []
+    [bilinear_neml2]
+      type = CSVDiff
+      input = 'rectangle_sczm_tri_material_bilinear_neml2.i'
+      cli_args = 'Outputs/file_base=sczm_bilinear_neml2 Outputs/exodus=false'
+      # This gold is a symlink to sczm_bilinear_native.csv. Both implementations are therefore
+      # compared against one native reference instead of maintaining two gold files that can drift.
+      csvdiff = 'sczm_bilinear_neml2.csv'
+      comparison_file = 'react_x.cmp'
+      capabilities = 'libtorch & neml2'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'using the NEML2 bilinear mixed-mode traction law within one percent of the native result,'
+    []
+    [linear_native]
+      type = CSVDiff
+      input = 'rectangle_sczm_tri_material_linear.i'
+      cli_args = 'Outputs/file_base=sczm_linear_native Outputs/exodus=false'
+      csvdiff = 'sczm_linear_native.csv'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'using the native MOOSE linear-elastic traction law,'
+    []
+    [linear_neml2]
+      type = CSVDiff
+      input = 'rectangle_sczm_tri_material_linear_neml2.i'
+      cli_args = 'Outputs/file_base=sczm_linear_neml2 Outputs/exodus=false'
+      # This gold is a symlink to sczm_linear_native.csv. Both implementations are therefore
+      # compared against one native reference instead of maintaining two gold files that can drift.
+      csvdiff = 'sczm_linear_neml2.csv'
+      comparison_file = 'react_x.cmp'
+      capabilities = 'libtorch & neml2'
+      mesh_mode = REPLICATED
+      recover = false
+      detail = 'using the NEML2 linear-elastic traction law within one percent of the native result.'
     []
   []
   [rectangle_sczm_tri_material_jacobian]

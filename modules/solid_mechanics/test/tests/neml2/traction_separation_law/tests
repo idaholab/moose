@@ -1,4 +1,6 @@
 [Tests]
+  design = 'syntax/NEML2/index.md'
+  issues = '#32413'
   [bilinear_mixed_moose]
     type = Exodiff
     # BreakMeshByBlockGenerator currently relies on periodic boundary machinery, which does not
