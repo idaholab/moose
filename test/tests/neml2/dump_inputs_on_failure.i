@@ -15,6 +15,7 @@
 [NEML2]
   eager = true
   input = 'models/failing_model.i'
+  load = 'models/float64.py'
   dump_inputs_on_failure = true
   [all]
     model = 'model'

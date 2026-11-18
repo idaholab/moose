@@ -59,7 +59,7 @@
   input = 'models/custom_model.i'
   device = 'cpu'
   eager = true
-  load = 'models/test_models.py'
+  load = 'models/float64.py models/test_models.py'
 
   input_types = 'VARIABLE'
   inputs = 'u'
