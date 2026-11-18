@@ -45,8 +45,6 @@
   [domains]
     model = model
     device = cpu
-    # This test exercises MOOSE threading, not libtorch intra-op threading.
-    num_threads = 1
     volume = true
     boundary = left
     interface = left_block_right_block
@@ -90,23 +88,20 @@
     prop_values = 'y+t'
   []
   [volume_stateful]
-    type = CoupledMaterial
-    mat_prop = unused_volume
-    coupled_mat_prop = sum
-    use_old_prop = true
+    type = OldMaterialProperty
+    property = unused_volume
+    coupled_property = sum
   []
   [boundary_stateful]
-    type = CoupledMaterial
-    mat_prop = unused_boundary
-    coupled_mat_prop = sum
-    use_old_prop = true
+    type = OldMaterialProperty
+    property = unused_boundary
+    coupled_property = sum
     boundary = left
   []
   [interface_stateful]
-    type = CoupledMaterial
-    mat_prop = unused_interface
-    coupled_mat_prop = sum
-    use_old_prop = true
+    type = OldMaterialProperty
+    property = unused_interface
+    coupled_property = sum
     boundary = left_block_right_block
   []
 []
