@@ -4,6 +4,6 @@
     type = CSVDiff
     input = spp_flat_interface.i
     csvdiff = spp_flat_interface_out_Ex_out_0001.csv
-    requirement = 'The system shall reproduce a surface plasmon polariton at a flat metal-dielectric interface, matching the analytical solution to within a specified RMS error.'
+    requirement = 'The system shall reproduce a surface plasmon polariton at a flat metal-dielectric interface, matching the analytical solution to within a reasonable RMS error.'
   []
 []
