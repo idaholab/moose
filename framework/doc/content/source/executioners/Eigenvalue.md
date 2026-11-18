@@ -10,9 +10,9 @@ the one selected by [!param](/Problem/EigenProblem/active_eigen_index) reaches t
 converged eigenvector instead, so that all of the modes land in a single Exodus file.
 
 MultiApps and transfers are not re-executed per mode. They run once per solve, at the same execution
-points as without the option. The option sets a problem-level switch that makes only the output
-objects take their time from the problem time, which is the eigenvector time below, instead of from
-the time step number; the problem stays non-transient for every other object. When a solve yields no
+points as without the option. With the option, the executioner gives the output objects the
+eigenvector time below as their output time instead of the time step number; the problem stays
+non-transient for every other object. When a solve yields no
 converged eigenpair, for example with [!param](/Problem/EigenProblem/solve) set to `false`, the
 single output step is written as without the option.
 

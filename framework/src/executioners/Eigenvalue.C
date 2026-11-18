@@ -85,11 +85,8 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     _eigen_problem.needEigenvectorBNorm();
 #endif
 
-  // Outputs of a problem that is not transient take their time from the time step number, so let
-  // the per-eigenvector output times reach the output files. The executioner is constructed before
-  // the outputs, which read this switch at construction.
-  if (_output_all_eigenvectors)
-    _eigen_problem.setOutputsUseProblemTime(true);
+  // Each eigenvector step is written at the eigenvector time execute() sets
+  _outputs_use_simulation_time = _output_all_eigenvectors;
 }
 
 #ifdef LIBMESH_HAVE_SLEPC

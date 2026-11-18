@@ -192,6 +192,7 @@ TransientBase::TransientBase(const InputParameters & parameters)
 
   _time = _time_old = _time_older = _start_time;
   _problem.transient(true);
+  _outputs_use_simulation_time = true;
 
   setupTimeIntegrator();
 

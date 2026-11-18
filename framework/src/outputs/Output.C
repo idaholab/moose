@@ -120,7 +120,6 @@ Output::Output(const InputParameters & parameters)
     PerfGraphInterface(this),
     _problem_ptr(getParam<FEProblemBase *>("_fe_problem_base")),
     _transient(_problem_ptr->isTransient()),
-    _use_problem_time(_transient || _problem_ptr->outputsUseProblemTime()),
     _use_displaced(getParam<bool>("use_displaced")),
     _es_ptr(nullptr),
     _mesh_ptr(nullptr),
@@ -351,16 +350,13 @@ Output::setWallTimeIntervalFromCommandLineParam()
 Real
 Output::time()
 {
-  if (_use_problem_time)
-    return _time;
-  else
-    return _t_step;
+  return _problem_ptr->getOutputTime();
 }
 
 Real
 Output::timeOld()
 {
-  if (_use_problem_time)
+  if (_problem_ptr->outputsUseSimulationTime())
     return _time_old;
   else
     return _t_step - 1;
@@ -369,7 +365,7 @@ Output::timeOld()
 Real
 Output::dt()
 {
-  if (_use_problem_time)
+  if (_problem_ptr->outputsUseSimulationTime())
     return _dt;
   else
     return 1;
@@ -378,7 +374,7 @@ Output::dt()
 Real
 Output::dtOld()
 {
-  if (_use_problem_time)
+  if (_problem_ptr->outputsUseSimulationTime())
     return _dt_old;
   else
     return 1;

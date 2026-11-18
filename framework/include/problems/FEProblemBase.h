@@ -592,18 +592,19 @@ public:
   virtual bool isTransient() const override { return _transient; }
 
   /**
-   * Set whether outputs take their time, old time, and time step size from the problem even though
-   * the problem is not transient. Outputs read this switch when they are constructed, so it must be
-   * set before the outputs are added.
-   * @param use Whether outputs take their time from the problem
+   * Get the time that outputs write for the current step, as chosen by the executioner
+   * @return The output time from Executioner::getOutputTime(), or, without an executioner, the
+   * time when the problem is transient and the time step number otherwise
    */
-  void setOutputsUseProblemTime(bool use) { _outputs_use_problem_time = use; }
+  Real getOutputTime() const;
 
   /**
-   * @return Whether outputs take their time, old time, and time step size from the problem even
-   * though the problem is not transient
+   * Whether outputs take their time, old time, and time step sizes from the simulation time rather
+   * than from the time step number, as chosen by the executioner
+   * @return Executioner::outputsUseSimulationTime(), or, without an executioner, whether the
+   * problem is transient
    */
-  bool outputsUseProblemTime() const { return _outputs_use_problem_time; }
+  bool outputsUseSimulationTime() const;
 
   virtual void addTimeIntegrator(const std::string & type,
                                  const std::string & name,
@@ -3199,8 +3200,6 @@ protected:
   const bool & _solve;
 
   bool _transient;
-  /// Whether outputs take their time from the problem even though the problem is not transient
-  bool _outputs_use_problem_time = false;
   Real & _time;
   Real & _time_old;
   Real & _time_older;
