@@ -62,7 +62,7 @@
     input = 'bspline_curve_2D.i'
     cli_args = 'Mesh/bscg/degree=3 Mesh/bscg/num_cps=3 --mesh-only error.e'
     expect_err = 'Number of control points must be at least degree\+1'
-    requirement = 'The system will throw an error with incompatible number of control points with the desired interpolation degree.'
+    requirement = 'The system shall throw an error with incompatible number of control points with the desired interpolation degree.'
   []
   [3D_curve_simple]
     type = 'Exodiff'

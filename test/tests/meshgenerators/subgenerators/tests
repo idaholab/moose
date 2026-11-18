@@ -2,7 +2,7 @@
   [stitched_subgenerators]
     design = 'meshgenerators/MeshGenerator.md'
     issues = '#17184'
-    requirement = "The system mesh generation capability shall be
+    requirement = "The system shall make its mesh generation capability
                    extensible to allow composition of existing mesh generators."
 
     type = 'Exodiff'
