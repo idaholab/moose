@@ -563,13 +563,17 @@ void convertBlockToMesh(MeshBase & source_mesh,
  * @param avoid_merging_boundaries If true, boundary IDs in the source mesh will
  * be offset to avoid merging with boundary IDs in the destination mesh
  * @param communicator The communicator for parallel operations
+ * @param skip_preparation If true, the destination mesh is not prepared after the copy. A caller
+ * that copies many meshes in a row should set this and prepare the destination once at the end,
+ * since preparing it after every copy makes the total cost quadratic in the number of copies.
  */
 void copyIntoMesh(MeshGenerator & mg,
                   UnstructuredMesh & destination,
                   const UnstructuredMesh & source,
                   const bool avoid_merging_subdomains,
                   const bool avoid_merging_boundaries,
-                  const Parallel::Communicator & communicator);
+                  const Parallel::Communicator & communicator,
+                  const bool skip_preparation = false);
 
 /**
  * Generates meshes from edges connecting a list of points.
