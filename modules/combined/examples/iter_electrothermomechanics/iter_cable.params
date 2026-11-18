@@ -1,0 +1,26 @@
+# Parameter file that contains geometric and material property information for ITER's CS superconducting cables
+
+# Units:
+# Space - mm
+# Time - s
+# Pressure - MPa
+# Temperature - K
+
+# Geometric parameters
+cable_length = '${units 5.0 cm -> mm}'
+cable_radius = ${units 16.3 mm}
+
+# Electromagnetic parameters
+vacuum_permeability = '${units 1.25663706e-6 N/A^2}'
+current_density_z = '${units 1e6 A/m^2 -> A/mm^2}'
+
+# Temperature Parameters
+starting_temperature = '${units 4.5 K}'
+ending_temperature = '${units 300 K}'
+stress_free_temperature = '${starting_temperature}'
+
+# Simulation Parameters
+simulation_time = '${units 10 s}'
+
+# Mesh Refinement
+refinement_level = 2
