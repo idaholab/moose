@@ -10,7 +10,7 @@ Adds the domain integrator for integrating the mixed bilinear form
 (k \vec \nabla u, \vec v)_\Omega \,\,\, \forall \vec v \in V
 
 where $u \in H^1$, $\vec v \in H(\mathrm{curl})$ or $H(\mathrm{div})$, and $k$ is a scalar
-coefficient.
+or matrix coefficient.
 
 This term arises from the weak form of the gradient operator
 

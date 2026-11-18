@@ -23,21 +23,26 @@ MFEMVectorFEMassKernel::validParams()
                              "arising from the weak form of the mass operator "
                              "$k \\vec u$.");
   params.addParam<MFEMScalarCoefficientName>(
-      "coefficient", "1.", "Name of property k to multiply the integrator by");
+      MFEMKernel::COEFFICIENT_PARAM,
+      "1.",
+      "Name of scalar coefficient k to multiply the integrator by.");
+  params.addParam<MFEMMatrixCoefficientName>(MFEMKernel::MATRIX_COEFFICIENT_PARAM,
+                                             "Name of matrix coefficient for property k. Mutually "
+                                             "exclusive with parameter 'coefficient'.");
   return params;
 }
 
 MFEMVectorFEMassKernel::MFEMVectorFEMassKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
-// FIXME: The MFEM bilinear form can also handle vector and matrix
-// coefficients, so ideally we'd handle all three too.
+  : MFEMKernel(parameters)
 {
 }
 
 mfem::BilinearFormIntegrator *
 MFEMVectorFEMassKernel::createBFIntegrator()
 {
-  return new mfem::VectorFEMassIntegrator(_coef);
+  auto coeffs = getMFEMProblem().getCoefficients().resolveCoefficientVariant(
+      _pars, MFEMKernel::COEFFICIENT_PARAM, MFEMKernel::MATRIX_COEFFICIENT_PARAM);
+  return std::visit([](auto & c) { return new mfem::VectorFEMassIntegrator(c); }, coeffs);
 }
 
 #endif
