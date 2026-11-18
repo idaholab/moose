@@ -8,4 +8,12 @@
     type = CSVDiff
     absent_out = 'Option left'
   []
+  [preconditioner_flag_overrides_default_pair]
+    issues = '#34457'
+    requirement = 'The system shall apply a converged reason flag that a preconditioner sets in place of the default that prints only failed linear solves.'
+    input = test.i
+    type = RunApp
+    cli_args = "Preconditioning/smp/type=SMP Preconditioning/smp/petsc_options=-ksp_converged_reason Outputs/csv=false"
+    expect_out = 'Linear solve converged due to'
+  []
 []

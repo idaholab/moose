@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'meshed_gap_thermal_contact.i'
     exodiff = 'meshed_gap_thermal_contact_out.e'
-    requirement = "The ThermalContact system shall enforce heat transfer
+    requirement = "The system shall be able to model thermal contact to enforce heat transfer
     across a meshed gap in a 2D plane geometry."
   [../]
 
@@ -15,7 +15,7 @@
     exodiff = 'meshed_gap_thermal_contact_constant_conductance_out.e'
     issues = '#13061'
     design = 'syntax/ThermalContact/index.md source/materials/GapConductanceConstant.md'
-    requirement = "The ThermalContact system shall correctly enforce heat transfer
+    requirement = "The system shall be able to model thermal contact to correctly enforce heat transfer
     across a meshed gap in a 2D plane geometry using a prescribed constant conductance."
   [../]
 
@@ -27,7 +27,7 @@
     exodiff = 'meshed_gap_thermal_contact_constant_conductance_quadrature_out.e'
     issues = '#13061'
     design = 'syntax/ThermalContact/index.md source/materials/GapConductanceConstant.md'
-    requirement = "The ThermalContact system shall correctly enforce heat transfer
+    requirement = "The system shall be able to model thermal contact to correctly enforce heat transfer
     across a meshed gap in a 2D plane geometry using a prescribed constant conductance with the quadrature option"
   [../]
 
@@ -35,7 +35,7 @@
     type = 'Exodiff'
     input = 'meshed_annulus_thermal_contact.i'
     exodiff = 'meshed_annulus_thermal_contact_out.e'
-    requirement = "The ThermalContact system shall enforce heat transfer
+    requirement = "The system shall be able to model thermal contact to enforce heat transfer
     across a meshed circular annulus in a 2D plane geometry."
   [../]
 []

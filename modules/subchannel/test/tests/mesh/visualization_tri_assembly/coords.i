@@ -8,7 +8,7 @@
 
 [TriSubChannelMesh]
   [subchannel]
-    type = SCMDetailedTriAssemblyMeshGenerator
+    type = SCMTriVisualizationAssemblyMeshGenerator
     pin_diameter = 0.01
     verbose_flag = true
   []

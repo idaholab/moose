@@ -295,11 +295,12 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
   std::vector<UserObject *> userobjs;
   queryBoundary(Interfaces::SideUserObject, bnd_id, userobjs);
 
+  const bool is_external_side = !elem->neighbor_ptr(side);
   bool has_domain_objs = false;
   // we need to check all domain user objects because if the boundary is included as an interface
   // boundary, it will be handled by onInterface
   for (const auto * const domain_uo : _domain_objs)
-    if (domain_uo->shouldExecuteOnBoundary())
+    if (domain_uo->shouldExecuteOnBoundary(is_external_side))
     {
       has_domain_objs = true;
       break;
@@ -330,7 +331,7 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
     uo->execute();
 
   for (auto & uo : _domain_objs)
-    if (uo->shouldExecuteOnBoundary())
+    if (uo->shouldExecuteOnBoundary(is_external_side))
     {
       uo->preExecuteOnBoundary();
       uo->executeOnBoundary();

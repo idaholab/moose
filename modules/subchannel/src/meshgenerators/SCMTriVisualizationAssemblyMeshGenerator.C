@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SCMDetailedTriAssemblyMeshGenerator.h"
+#include "SCMTriVisualizationAssemblyMeshGenerator.h"
 #include "TriSubChannelMesh.h"
 #include <array>
 #include <cmath>
@@ -15,30 +15,35 @@
 #include "libmesh/cell_prism6.h"
 #include "libmesh/unstructured_mesh.h"
 
-registerMooseObject("SubChannelApp", SCMDetailedTriAssemblyMeshGenerator);
+registerMooseObject("SubChannelApp", SCMTriVisualizationAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           SCMDetailedTriAssemblyMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMTriVisualizationAssemblyMeshGenerator);
 registerMooseObjectRenamed("SubChannelApp",
                            SCMDetailedTriSubChannelMeshGenerator,
                            "06/30/2027 24:00",
-                           SCMDetailedTriAssemblyMeshGenerator);
+                           SCMTriVisualizationAssemblyMeshGenerator);
 registerMooseObjectRenamed("SubChannelApp",
                            DetailedTriSubChannelMeshGenerator,
                            "06/30/2027 24:00",
-                           SCMDetailedTriAssemblyMeshGenerator);
+                           SCMTriVisualizationAssemblyMeshGenerator);
 registerMooseObjectRenamed("SubChannelApp",
                            SCMDetailedTriPinMeshGenerator,
                            "06/30/2027 24:00",
-                           SCMDetailedTriAssemblyMeshGenerator);
+                           SCMTriVisualizationAssemblyMeshGenerator);
 registerMooseObjectRenamed("SubChannelApp",
                            DetailedTriPinMeshGenerator,
                            "06/30/2027 24:00",
-                           SCMDetailedTriAssemblyMeshGenerator);
+                           SCMTriVisualizationAssemblyMeshGenerator);
 
 InputParameters
-SCMDetailedTriAssemblyMeshGenerator::validParams()
+SCMTriVisualizationAssemblyMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addClassDescription(
-      "Creates a detailed mesh of subchannels and pins in a triangular lattice arrangement");
+      "Creates a 3D visualization mesh of subchannels and pins in a triangular lattice "
+      "arrangement");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
   params.addRequiredParam<Real>("pin_diameter", "Rod diameter [m]");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
@@ -62,7 +67,7 @@ SCMDetailedTriAssemblyMeshGenerator::validParams()
   return params;
 }
 
-SCMDetailedTriAssemblyMeshGenerator::SCMDetailedTriAssemblyMeshGenerator(
+SCMTriVisualizationAssemblyMeshGenerator::SCMTriVisualizationAssemblyMeshGenerator(
     const InputParameters & parameters)
   : MeshGenerator(parameters),
     _unheated_length_entry(getParam<Real>("unheated_length_entry")),
@@ -327,8 +332,8 @@ SCMDetailedTriAssemblyMeshGenerator::SCMDetailedTriAssemblyMeshGenerator(
 }
 
 void
-SCMDetailedTriAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & mesh_base,
-                                                 const Point & center)
+SCMTriVisualizationAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & mesh_base,
+                                                      const Point & center)
 {
   const Real dalpha = 360. / _num_sectors;
   const Real radius = _pin_diameter / 2.;
@@ -370,7 +375,7 @@ SCMDetailedTriAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & mes
 }
 
 std::unique_ptr<MeshBase>
-SCMDetailedTriAssemblyMeshGenerator::generate()
+SCMTriVisualizationAssemblyMeshGenerator::generate()
 {
   auto mesh_base = buildMeshBaseObject();
   BoundaryInfo & boundary_info = mesh_base->get_boundary_info();
@@ -869,7 +874,7 @@ SCMDetailedTriAssemblyMeshGenerator::generate()
 }
 
 Point
-SCMDetailedTriAssemblyMeshGenerator::rotatePoint(Point b, Real theta)
+SCMTriVisualizationAssemblyMeshGenerator::rotatePoint(Point b, Real theta)
 {
   std::vector<std::vector<Real>> A(3, std::vector<Real>(3));
 

@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SCMDetailedQuadAssemblyMeshGenerator.h"
+#include "SCMQuadVisualizationAssemblyMeshGenerator.h"
 #include "QuadSubChannelMesh.h"
 
 #include "libmesh/cell_prism6.h"
@@ -17,30 +17,35 @@
 #include <cmath>
 #include <memory>
 
-registerMooseObject("SubChannelApp", SCMDetailedQuadAssemblyMeshGenerator);
+registerMooseObject("SubChannelApp", SCMQuadVisualizationAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           SCMDetailedQuadAssemblyMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMQuadVisualizationAssemblyMeshGenerator);
 registerMooseObjectRenamed("SubChannelApp",
                            SCMDetailedQuadSubChannelMeshGenerator,
                            "06/30/2027 24:00",
-                           SCMDetailedQuadAssemblyMeshGenerator);
+                           SCMQuadVisualizationAssemblyMeshGenerator);
 registerMooseObjectRenamed("SubChannelApp",
                            DetailedQuadSubChannelMeshGenerator,
                            "06/30/2027 24:00",
-                           SCMDetailedQuadAssemblyMeshGenerator);
+                           SCMQuadVisualizationAssemblyMeshGenerator);
 registerMooseObjectRenamed("SubChannelApp",
                            SCMDetailedQuadPinMeshGenerator,
                            "06/30/2027 24:00",
-                           SCMDetailedQuadAssemblyMeshGenerator);
+                           SCMQuadVisualizationAssemblyMeshGenerator);
 registerMooseObjectRenamed("SubChannelApp",
                            DetailedQuadPinMeshGenerator,
                            "06/30/2027 24:00",
-                           SCMDetailedQuadAssemblyMeshGenerator);
+                           SCMQuadVisualizationAssemblyMeshGenerator);
 
 InputParameters
-SCMDetailedQuadAssemblyMeshGenerator::validParams()
+SCMQuadVisualizationAssemblyMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addClassDescription(
-      "Creates a detailed mesh of subchannels and fuel pins in a square lattice arrangement");
+      "Creates a 3D visualization mesh of subchannels and fuel pins in a square lattice "
+      "arrangement");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
   params.addRequiredParam<Real>("pin_diameter", "Rod diameter [m]");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
@@ -64,7 +69,7 @@ SCMDetailedQuadAssemblyMeshGenerator::validParams()
   return params;
 }
 
-SCMDetailedQuadAssemblyMeshGenerator::SCMDetailedQuadAssemblyMeshGenerator(
+SCMQuadVisualizationAssemblyMeshGenerator::SCMQuadVisualizationAssemblyMeshGenerator(
     const InputParameters & parameters)
   : MeshGenerator(parameters),
     _unheated_length_entry(getParam<Real>("unheated_length_entry")),
@@ -136,8 +141,8 @@ SCMDetailedQuadAssemblyMeshGenerator::SCMDetailedQuadAssemblyMeshGenerator(
 }
 
 void
-SCMDetailedQuadAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & mesh_base,
-                                                  const Point & center)
+SCMQuadVisualizationAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & mesh_base,
+                                                       const Point & center)
 {
   const Real dalpha = 360. / _num_sectors;
   const Real radius = _pin_diameter / 2.;
@@ -179,7 +184,7 @@ SCMDetailedQuadAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & me
 }
 
 std::unique_ptr<MeshBase>
-SCMDetailedQuadAssemblyMeshGenerator::generate()
+SCMQuadVisualizationAssemblyMeshGenerator::generate()
 {
   auto mesh_base = buildMeshBaseObject();
   BoundaryInfo & boundary_info = mesh_base->get_boundary_info();

@@ -277,7 +277,12 @@ public:
    * Get whether this property is valid
    * @returns Whether this property is valid
    */
-  KOKKOS_FUNCTION operator bool() const { return _data.isAlloc() || _default; }
+  KOKKOS_FUNCTION operator bool() const
+  {
+    KOKKOS_IF_ON_HOST(if (_reference) return _reference->_data.isAlloc() || _reference->_default;)
+
+    return _data.isAlloc() || _default;
+  }
 
   /**
    * Get the property values of a quadrature point

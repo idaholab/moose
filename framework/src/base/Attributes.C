@@ -15,6 +15,9 @@
 #include "SetupInterface.h"
 #include "MooseVariableInterface.h"
 #include "MooseVariableFE.h"
+#include "AuxKernelBase.h"
+#include "AuxKernel.h"
+#include "MortarNodalAuxKernel.h"
 #include "ElementUserObject.h"
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
@@ -240,10 +243,18 @@ AttribBoundaries::isMatch(const Attribute & other) const
   if (!a || a->_vals.size() < 1)
     return false;
 
+  // An object that is not boundary restricted stores only Moose::ANY_BOUNDARY_ID
+  const bool unrestricted =
+      std::find(_vals.begin(), _vals.end(), Moose::ANY_BOUNDARY_ID) != _vals.end();
+  if (a->_restriction == Restriction::UnrestrictedOnly)
+    return unrestricted;
+  if (a->_restriction == Restriction::RestrictedOnly && unrestricted)
+    return false;
+
   // return true if a single tag matches between the two attribute objects
   for (auto val : _vals)
   {
-    if (!a->_must_be_restricted && (val == Moose::ANY_BOUNDARY_ID))
+    if (a->_restriction == Restriction::Any && (val == Moose::ANY_BOUNDARY_ID))
       return true;
     if (std::find(a->_vals.begin(), a->_vals.end(), val) != a->_vals.end())
       return true;
@@ -257,7 +268,7 @@ bool
 AttribBoundaries::isEqual(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribBoundaries *>(&other);
-  if (!a || a->_vals.size() != _vals.size())
+  if (!a || a->_vals.size() != _vals.size() || a->_restriction != _restriction)
     return false;
 
   for (size_t i = 0; i < a->_vals.size(); i++)
@@ -286,8 +297,12 @@ AttribThread::isEqual(const Attribute & other) const
 void
 AttribExecutionOrderGroup::initFrom(const MooseObject * obj)
 {
-  const auto * uo = dynamic_cast<const UserObjectBase *>(obj);
-  _val = uo ? uo->getParam<int>("execution_order_group") : 0;
+  if (const auto * uo = dynamic_cast<const UserObjectBase *>(obj))
+    _val = uo->getParam<int>("execution_order_group");
+  else if (const auto * aux = dynamic_cast<const AuxKernelBase *>(obj))
+    _val = aux->getParam<int>("execution_order_group");
+  else
+    _val = 0;
 }
 bool
 AttribExecutionOrderGroup::isMatch(const Attribute & other) const
@@ -299,6 +314,53 @@ bool
 AttribExecutionOrderGroup::isEqual(const Attribute & other) const
 {
   return isMatch(other);
+}
+
+void
+AttribAuxKernelType::initFrom(const MooseObject * obj)
+{
+  _val = static_cast<AuxKernelType>(0);
+  const auto * aux = dynamic_cast<const AuxKernelBase *>(obj);
+  if (!aux)
+    return;
+
+  if (dynamic_cast<const AuxKernel *>(obj))
+    _val = AuxKernelType::Real;
+  else if (dynamic_cast<const VectorAuxKernel *>(obj))
+    _val = AuxKernelType::Vector;
+  else if (dynamic_cast<const ArrayAuxKernel *>(obj))
+    _val = AuxKernelType::Array;
+  else
+    return;
+
+  if (dynamic_cast<const MortarNodalAuxKernelTempl<Real> *>(obj) ||
+      dynamic_cast<const MortarNodalAuxKernelTempl<RealVectorValue> *>(obj) ||
+      dynamic_cast<const MortarNodalAuxKernelTempl<RealEigenVector> *>(obj))
+    _val |= AuxKernelType::Mortar;
+  else if (aux->isNodal())
+    _val |= AuxKernelType::Nodal;
+  else
+    _val |= AuxKernelType::Elemental;
+}
+bool
+AttribAuxKernelType::isMatch(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribAuxKernelType *>(&other);
+  if (!a)
+    return false;
+
+  // Each bit group the query requests must share a bit with this object's type
+  const auto query = a->_val;
+  for (const auto group : {AuxKernelType::AllValueTypes, AuxKernelType::AllCategories})
+    if (static_cast<bool>(query & group) && !static_cast<bool>(query & group & _val))
+      return false;
+  return static_cast<bool>(_val);
+}
+bool
+AttribAuxKernelType::isEqual(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribAuxKernelType *>(&other);
+  return a && (a->_val == _val);
 }
 
 void
