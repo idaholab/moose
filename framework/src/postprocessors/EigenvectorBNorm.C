@@ -38,7 +38,7 @@ EigenvectorBNorm::EigenvectorBNorm(const InputParameters & parameters)
   mooseAssert(_eigen_problem, "A nonlinear eigen system belongs to an eigen problem");
 
 #ifdef LIBMESH_HAVE_SLEPC
-  _eigen_problem->needEigenvectorBNorm();
+  static_cast<EigenProblem &>(_fe_problem).needEigenvectorBNorm();
 #endif
 }
 

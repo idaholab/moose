@@ -36,5 +36,5 @@ public:
 
 private:
   /// Eigen problem computing and storing the B-norm of the eigenvector in the solution
-  EigenProblem * const _eigen_problem;
+  const EigenProblem * const _eigen_problem;
 };
