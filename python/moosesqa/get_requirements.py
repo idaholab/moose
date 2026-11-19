@@ -6,15 +6,18 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import os
 import collections
 import fnmatch
 import logging
-import pyhit
-import mooseutils
+import os
+
 import moosetree
+import mooseutils
+import pyhit
+
 import moosesqa
-from .Requirement import TestSpecification, Requirement, Detail
+
+from .Requirement import Detail, Requirement, TestSpecification
 
 
 def get_requirements_from_tests(directories, specs, include_non_testable=False):
@@ -130,6 +133,18 @@ def get_requirements_from_file(
             )
             req.details.append(detail)
 
+            # "issues" parameter
+            if req.deprecated:
+                continue
+
+            if "issues" in grandchild:
+                if req.issues is None:
+                    req.issues = []
+                req.issues.extend(grandchild.get("issues").split())
+                # following the pattern within _create_requirement to set the
+                # issues line to whatever the most nested occurance is
+                req.issues_line = grandchild.line("issues", issues_line)
+
         if not req.details:
             req.specification = _create_specification(
                 child, child.name, filename, root_dir
@@ -137,6 +152,14 @@ def get_requirements_from_file(
 
         if req.testable or include_non_testable:
             requirements.append(req)
+
+        # TODO: better behavior
+        # this will remove duplicate listing
+        # really we should error or warn on duplicates so the user doesn't
+        # provide them but there is a lot of duplicates due to previous behavior
+        # so error on duplicate is likely to break not only framework but other codes
+        if req.issues is not None:
+            req.issues = list(dict.fromkeys(req.issues))
 
     return requirements
 
@@ -256,7 +279,13 @@ def _create_requirement(
     req.design_line = child.line("design", design_line)
 
     # "issues" parameter
-    issues = child.get("issues", issues if not req.deprecated else None)
+    if req.deprecated:
+        req.issues = None
+    else:
+        if "issues" in child:
+            if issues is None:
+                issues = ""
+            issues += " " + child.get("issues")
     req.issues = issues.split() if (issues is not None) else None
     req.issues_line = child.line("issues", issues_line)
 

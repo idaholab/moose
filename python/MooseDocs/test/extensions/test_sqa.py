@@ -7,31 +7,33 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-
-import mock
-import unittest
-import logging
 import collections
 import itertools
+import logging
+import pdb
+import unittest
+
+import mock
 import moosesqa
 import moosetree
 from mooseutils import civet_results
-from MooseDocs.test import MooseDocsTestCase
+
+from MooseDocs import base, common
 from MooseDocs.extensions import (
-    core,
-    command,
-    floats,
+    alert,
     autolink,
-    heading,
     civet,
+    command,
+    core,
+    floats,
+    heading,
+    materialicon,
+    modal,
     sqa,
     table,
-    modal,
     template,
-    alert,
-    materialicon,
 )
-from MooseDocs import base, common
+from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.tree import pages
 
 logging.basicConfig()
@@ -89,14 +91,22 @@ class TestSQARequirementsAST(MooseDocsTestCase):
         self._assertAST_common(ast(0))
 
         self.assertToken(ast(0)(1)(1), "SQARequirementIssues", issues=["#1234"])
-        self.assertToken(ast(0)(2)(1), "SQARequirementIssues", issues=["#3456"])
+        self.assertToken(
+            ast(0)(2)(1), "SQARequirementIssues", issues=["#1234", "#3456"]
+        )
         self.assertToken(ast(0)(3)(1), "SQARequirementIssues", issues=["#1234"])
-        self.assertToken(ast(0)(4)(1), "SQARequirementIssues", issues=["#4567"])
+        self.assertToken(
+            ast(0)(4)(1), "SQARequirementIssues", issues=["#1234", "#4567"]
+        )
 
         self.assertToken(ast(0)(5)(2), "SQARequirementIssues", issues=["#1234"])
-        self.assertToken(ast(0)(6)(2), "SQARequirementIssues", issues=["#8910"])
+        self.assertToken(
+            ast(0)(6)(2), "SQARequirementIssues", issues=["#1234", "#8910"]
+        )
         self.assertToken(ast(0)(7)(2), "SQARequirementIssues", issues=["#1234"])
-        self.assertToken(ast(0)(8)(2), "SQARequirementIssues", issues=["#4321"])
+        self.assertToken(
+            ast(0)(8)(2), "SQARequirementIssues", issues=["#1234", "#4321"]
+        )
 
     def testASTPrereqLink(self):
         text = "!sqa requirements category=Demo link=True link-spec=False link-design=False link-issues=False link-prerequisites=True link-collections=False link-types=False link-results=False"

@@ -8,12 +8,19 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os
 import collections
+import os
+import tempfile
 import unittest
+
 import mooseutils
-from moosesqa import Requirement, number_requirements, get_requirements_from_file
-from moosesqa import get_requirements_from_tests, get_test_specification
+from moosesqa import (
+    Requirement,
+    get_requirements_from_file,
+    get_requirements_from_tests,
+    get_test_specification,
+    number_requirements,
+)
 from moosesqa.get_requirements import _find_file
 
 
@@ -227,7 +234,7 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         self.assertEqual(r.requirement, "Requirement One")
 
         r = req["test_get_requirements_spec0"][1]
-        self.assertEqual(r.issues, ["#3456"])
+        self.assertEqual(r.issues, ["#1234", "#3456"])
         self.assertEqual(r.design, ["core.md"])
         self.assertEqual(r.requirement, "Requirement Two")
 
@@ -237,7 +244,7 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         self.assertEqual(r.requirement, "Requirement Three")
 
         r = req["test_get_requirements_spec0"][3]
-        self.assertEqual(r.issues, ["#4567"])
+        self.assertEqual(r.issues, ["#1234", "#4567"])
         self.assertEqual(r.design, ["katex.md"])
         self.assertEqual(r.requirement, "Requirement Four")
 
@@ -258,7 +265,7 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         self.assertEqual(d.detail_line, 30)
 
         r = req["test_get_requirements_spec0"][5]
-        self.assertEqual(r.issues, ["#8910"])
+        self.assertEqual(r.issues, ["#1234", "#8910"])
         self.assertEqual(r.design, ["core.md"])
         self.assertEqual(r.requirement, "Requirement Group Two")
         self.assertEqual(len(r.details), 2)
@@ -290,7 +297,7 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         self.assertEqual(d.detail_line, 53)
 
         r = req["test_get_requirements_spec0"][7]
-        self.assertEqual(r.issues, ["#4321"])
+        self.assertEqual(r.issues, ["#1234", "#4321"])
         self.assertEqual(r.design, ["katex.md"])
         self.assertEqual(r.requirement, "Requirement Group Four")
         self.assertEqual(len(r.details), 2)
@@ -344,6 +351,26 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         # prereq_group
         r = req["test_get_requirements_spec0"][18]
         self.assertEqual(r.prerequisites, {"prereq_first", "prereq_group/a"})
+
+    def testNestingIssues(self):
+        MOOSE_DIR = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "..")
+        )
+        filename = os.path.join(
+            MOOSE_DIR, "python", "moosesqa", "test", "specs", "spec_issues_listing"
+        )
+
+        req = get_requirements_from_file(filename)
+
+        self.assertEqual(3, len(req))
+
+        INDEX_TEST_0 = 0
+        INDEX_TEST_1 = 1
+        INDEX_TEST_2 = 2
+
+        self.assertEqual(req[INDEX_TEST_0].issues, ["#1234"])
+        self.assertEqual(req[INDEX_TEST_1].issues, ["#2345", "#3456"])
+        self.assertEqual(req[INDEX_TEST_2].issues, ["#4567", "#5678"])
 
 
 class TestRequirementCollections(unittest.TestCase):
