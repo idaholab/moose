@@ -11,7 +11,15 @@
   [subchannel_height]
     type = 'RunException'
     input = 'test_error.i'
-    expect_err = ": No element located at given height."
+    expect_err = "height: is outside the axial extent of the mesh, 0 to 1."
     requirement = 'The system shall test the user provided height'
+  []
+  [subchannel_index]
+    type = 'RunException'
+    input = 'test.i'
+    cli_args = 'Postprocessors/T/index=9'
+    expect_err = "index: is out of range; valid subchannel indices are 0 to 8."
+    issues = '#34499'
+    requirement = 'The system shall report an error if the subchannel index of a point value is out of range'
   []
 []

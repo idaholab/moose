@@ -27,7 +27,7 @@ SCMPinSurfaceTemperature::validParams()
       "Returns the surface temperature of a specific fuel pin at a user defined height. Applies a "
       "linear reconstruction for the temperature.");
   params.addRequiredParam<Real>("height", "Axial location on fuel pin [m]");
-  params.addRequiredParam<int>("index", "Index of fuel pin");
+  params.addRequiredParam<unsigned int>("index", "Index of fuel pin");
   return params;
 }
 
@@ -35,7 +35,7 @@ SCMPinSurfaceTemperature::SCMPinSurfaceTemperature(const InputParameters & param
   : GeneralPostprocessor(parameters),
     _mesh(SCM::getConstMesh<SubChannelMesh>(_fe_problem.mesh())),
     _height(getParam<Real>("height")),
-    _i_pin(getParam<int>("index")),
+    _i_pin(getParam<unsigned int>("index")),
     _value(0)
 {
   if (!_mesh.pinMeshExist())
@@ -43,39 +43,27 @@ SCMPinSurfaceTemperature::SCMPinSurfaceTemperature(const InputParameters & param
         name(),
         " : The SCMPinSurfaceTemperature post processor calculates temperature on pins. A Pin "
         "Mesh should be defined.");
+  // getNumOfPins() is zero off rank 0, so every rank checks against the rank 0 count
+  auto n_pins = _mesh.getNumOfPins();
+  _communicator.broadcast(n_pins);
+  if (_i_pin >= n_pins)
+    paramError("index", "is out of range; valid pin indices are 0 to ", n_pins - 1, ".");
+  if (_height < _mesh.getZGrid().front())
+    paramError("height", "is below the inlet of the mesh at ", _mesh.getZGrid().front(), ".");
+  std::tie(_iz, _weight) = _mesh.getAxialInterpolation(_height);
 }
 
 void
 SCMPinSurfaceTemperature::execute()
 {
+  // Creating a solution handle is collective, so it must happen on every processor
+  const auto Tpin_soln = SolutionHandle(_fe_problem.getVariable(0, "Tpin"));
   // No data on other ranks
   if (processor_id() != 0)
     return;
-  auto Tpin_soln = SolutionHandle(_fe_problem.getVariable(0, "Tpin"));
-  auto nz = _mesh.getNumOfAxialCells();
-  auto z_grid = _mesh.getZGrid();
-  auto total_length =
-      _mesh.getHeatedLength() + _mesh.getHeatedLengthEntry() + _mesh.getHeatedLengthExit();
-
-  if (_height >= total_length)
-  {
-    auto * node = _mesh.getPinNode(_i_pin, nz);
-    _value = Tpin_soln(node);
-  }
-  else
-  {
-    for (unsigned int iz = 0; iz < nz; iz++)
-    {
-      if (_height >= z_grid[iz] && _height < z_grid[iz + 1])
-      {
-        auto * node_out = _mesh.getPinNode(_i_pin, iz + 1);
-        auto * node_in = _mesh.getPinNode(_i_pin, iz);
-        _value = Tpin_soln(node_in) + (Tpin_soln(node_out) - Tpin_soln(node_in)) *
-                                          (_height - z_grid[iz]) / (z_grid[iz + 1] - z_grid[iz]);
-        break;
-      }
-    }
-  }
+  const auto T_in = Tpin_soln(_mesh.getPinNode(_i_pin, _iz));
+  const auto T_out = Tpin_soln(_mesh.getPinNode(_i_pin, _iz + 1));
+  _value = T_in + (T_out - T_in) * _weight;
 }
 
 void

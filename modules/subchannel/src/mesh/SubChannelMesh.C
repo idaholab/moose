@@ -9,6 +9,8 @@
 
 #include "SubChannelMesh.h"
 
+#include <algorithm>
+
 InputParameters
 SubChannelMesh::validParams()
 {
@@ -91,6 +93,19 @@ SubChannelMesh::getZIndex(const Point & point) const
       hi = mid;
   }
   return lo;
+}
+
+std::pair<unsigned int, Real>
+SubChannelMesh::getAxialInterpolation(Real z) const
+{
+  mooseAssert(_z_grid.size() > 1, "The axial grid needs at least one cell.");
+  const auto n_cells = _z_grid.size() - 1;
+  if (z >= _z_grid.back())
+    return {n_cells - 1, 1.0};
+  // First grid point strictly above z; the cell starts one point below it
+  const auto it = std::upper_bound(_z_grid.begin(), _z_grid.end(), z);
+  const unsigned int iz = std::max<std::ptrdiff_t>(std::distance(_z_grid.begin(), it) - 1, 0);
+  return {iz, (z - _z_grid[iz]) / (_z_grid[iz + 1] - _z_grid[iz])};
 }
 
 Node *

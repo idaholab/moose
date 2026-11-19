@@ -8,4 +8,12 @@
     recover = False
     requirement = 'The system shall print a variable on a plane in a quadrilateral assembly'
   []
+  [height_below_inlet]
+    type = RunException
+    input = 'test.i'
+    cli_args = 'Outputs/Temp_Out_MATRIX/height=-0.1'
+    expect_err = "height: is below the inlet of the mesh at 0."
+    issues = '#34499'
+    requirement = 'The system shall report an error if the height of a normal slice is below the inlet'
+  []
 []

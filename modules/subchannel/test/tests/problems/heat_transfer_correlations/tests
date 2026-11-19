@@ -140,4 +140,25 @@
       cli_args = 'SubChannel/pin_HTC_closure=borishanskii SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=borishanskii'
     []
   []
+  [SCMPinSurfaceTemperature_errors]
+    requirement = 'The system shall report an error if the pin surface temperature postprocessor is given'
+    design = 'SCMPinSurfaceTemperature.md'
+    issues = '#34499'
+    [pin_index]
+      type = RunException
+      input = 'XX09_SCM_SS17.i'
+      allow_test_objects = true
+      cli_args = 'SubChannel/pin_HTC_closure=gnielinski SubChannel/duct_HTC_closure=gnielinski Postprocessors/Pin_Temp_0_Inlet/index=61'
+      expect_err = "index: is out of range; valid pin indices are 0 to 60."
+      detail = 'a pin index out of range or'
+    []
+    [height_below_inlet]
+      type = RunException
+      input = 'XX09_SCM_SS17.i'
+      allow_test_objects = true
+      cli_args = 'SubChannel/pin_HTC_closure=gnielinski SubChannel/duct_HTC_closure=gnielinski Postprocessors/Pin_Temp_0_Inlet/height=-0.1'
+      expect_err = "height: is below the inlet of the mesh at 0."
+      detail = 'a height below the inlet.'
+    []
+  []
 []

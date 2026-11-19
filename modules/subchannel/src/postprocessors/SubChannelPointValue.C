@@ -8,12 +8,12 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SubChannelPointValue.h"
+#include "SolutionHandle.h"
 #include "FEProblemBase.h"
 #include "Function.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"
-#include "libmesh/system.h"
 #include "SCM.h"
 
 registerMooseObject("SubChannelApp", SubChannelPointValue);
@@ -24,7 +24,7 @@ SubChannelPointValue::validParams()
   InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<VariableName>("variable", "Variable you want the value of");
   params.addRequiredParam<Real>("height", "Axial location of point [m]");
-  params.addRequiredParam<int>("index", "Index of subchannel");
+  params.addRequiredParam<unsigned int>("index", "Index of subchannel");
   params.addClassDescription(
       "Prints out a user selected value of a specified subchannel at a user selected axial height");
   return params;
@@ -34,35 +34,43 @@ SubChannelPointValue::SubChannelPointValue(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _mesh(SCM::getConstMesh<SubChannelMesh>(_fe_problem.mesh())),
     _height(getParam<Real>("height")),
-    _i_ch(getParam<int>("index")),
-    _var_number(_subproblem
-                    .getVariable(_tid,
-                                 parameters.get<VariableName>("variable"),
-                                 Moose::VarKindType::VAR_ANY,
-                                 Moose::VarFieldType::VAR_FIELD_STANDARD)
-                    .number()),
-    _system(_subproblem.getSystem(getParam<VariableName>("variable"))),
+    _i_ch(getParam<unsigned int>("index")),
+    _variable(getParam<VariableName>("variable")),
     _value(0)
 {
-  _point =
-      Point(_mesh._subchannel_position[_i_ch][0], _mesh._subchannel_position[_i_ch][1], _height);
+  // getNumOfChannels() is zero off rank 0, so every rank checks against the rank 0 count
+  auto n_channels = _mesh.getNumOfChannels();
+  _communicator.broadcast(n_channels);
+  if (_i_ch >= n_channels)
+    paramError("index", "is out of range; valid subchannel indices are 0 to ", n_channels - 1, ".");
+  const auto & z_grid = _mesh.getZGrid();
+  if (_height < z_grid.front() || _height > z_grid.back())
+    paramError("height",
+               "is outside the axial extent of the mesh, ",
+               z_grid.front(),
+               " to ",
+               z_grid.back(),
+               ".");
+  std::tie(_iz, _weight) = _mesh.getAxialInterpolation(_height);
 }
 
 void
 SubChannelPointValue::execute()
 {
-  _value = _system.point_value(_var_number, _point, false);
+  // Creating a solution handle is collective, so it must happen on every processor
+  const auto soln = SolutionHandle(_fe_problem.getVariable(0, _variable));
+  // The subchannel solution is only available on processor 0
+  if (processor_id() != 0)
+    return;
+  const auto value_in = soln(_mesh.getChannelNode(_i_ch, _iz));
+  const auto value_out = soln(_mesh.getChannelNode(_i_ch, _iz + 1));
+  _value = value_in + (value_out - value_in) * _weight;
+}
 
-  if (MooseUtils::absoluteFuzzyEqual(_value, 0.0))
-  {
-    auto pl = _subproblem.mesh().getPointLocator();
-    pl->enable_out_of_mesh_mode();
-    auto * elem = (*pl)(_point);
-    auto elem_id = elem ? elem->id() : DofObject::invalid_id;
-    gatherMin(elem_id);
-    if (elem_id == DofObject::invalid_id)
-      mooseError(name(), " height: No element located at given height.");
-  }
+void
+SubChannelPointValue::finalize()
+{
+  _communicator.broadcast(_value);
 }
 
 Real
