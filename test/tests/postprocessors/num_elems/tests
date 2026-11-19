@@ -4,7 +4,7 @@
     input = 'num_elems.i'
     csvdiff = 'num_elems_out.csv'
 
-    requirement = 'The NumElements Postprocessor shall report the number of elements
+    requirement = 'The system shall report, using the NumElements Postprocessor, the number of elements
                    (active or total) in the simulation.'
     design = '/NumElements.md'
     issues = '#2094 #8421'
@@ -20,7 +20,7 @@
 
     csvdiff = 'num_elems_split_out.csv'
 
-    requirement = 'The NumElements Postprocessor shall report the number of elements
+    requirement = 'The system shall report, using the NumElements Postprocessor, the number of elements
                    (active or total) in the simulation when using distributed (pre-split) mesh.'
     design = '/NumElements.md'
     issues = '#2094 #8421'

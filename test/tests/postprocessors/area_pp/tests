@@ -4,7 +4,7 @@
     input = 'area_pp.i'
     csvdiff = 'area_pp_out.csv'
 
-    requirement = 'The AreaPostprocessor shall compute the "area" or dimension - 1 "volume" of sides.'
+    requirement = 'The system shall compute, using the AreaPostprocessor, the "area" or dimension - 1 "volume" of sides.'
     issues = '#1901'
     design = '/AreaPostprocessor.md'
 

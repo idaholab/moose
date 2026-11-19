@@ -3,7 +3,7 @@
   issues = '#11704'
 
   [group]
-    requirement = "Vector post-processor values shall be able to be compared and return a boolean "
+    requirement = "The system shall be able to compare vector post-processor values and return a boolean "
                   "value for"
 
     [greater_than_equals]

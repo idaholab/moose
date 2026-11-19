@@ -3,14 +3,14 @@
     type = 'Exodiff'
     input = 'interface_fe_variable_value_postprocessor.i'
     exodiff = 'InterfaceAverageVariableValuePostprocessor_fe.e'
-    requirement = "Testing the implementation of the InterfaceAverageVariableValuePostprocessor "
-               "By design at the end of the first step we should observe: "
+    requirement = "The system shall correctly compute values with the InterfaceAverageVariableValuePostprocessor. "
+               "At the end of the first step it shall report "
                "an average material property of 7, "
-               "an average material property absolute jump to 6,"
+               "an average material property absolute jump of 6, "
                "a signed material property jump (primary minus secondary) of 6, "
-               "a signed material propertyjump (secondary minus primary) of -6, "
+               "a signed material property jump (secondary minus primary) of -6, "
                "a material property value on the primary side of 10, "
-               "a material property value on the primary side of 4 "
+               "a material property value on the secondary side of 4."
     design = 'InterfaceAverageVariableValuePostprocessor.md'
     cli_args = 'postprocessor_type=InterfaceAverageVariableValuePostprocessor'
     issues = '#11647'
@@ -20,14 +20,14 @@
     type = 'Exodiff'
     input = 'interface_fe_variable_value_postprocessor.i'
     exodiff = 'InterfaceIntegralVariableValuePostprocessor_fe.e'
-    requirement = "Testing the implementation of the InterfaceIntegralVariableValuePostprocessor "
-               "By design at the end of the first step we should observe: "
+    requirement = "The system shall correctly compute values with the InterfaceIntegralVariableValuePostprocessor. "
+               "At the end of the first step it shall report "
                "an integral material property of 21, "
-               "an integral material property absolute jump to 18,"
+               "an integral material property absolute jump of 18, "
                "a signed integral material property jump (primary minus secondary) of 18, "
-               "a signed integral material propertyjump (secondary minus primary) of -18, "
+               "a signed integral material property jump (secondary minus primary) of -18, "
                "a material integral property value on the primary side of 30, "
-               "a material integral property value on the primary side of 12 "
+               "a material integral property value on the secondary side of 12."
     design = 'InterfaceIntegralVariableValuePostprocessor.md'
     cli_args = 'postprocessor_type=InterfaceIntegralVariableValuePostprocessor'
     issues = '#11647'
@@ -37,15 +37,15 @@
     type = 'Exodiff'
     input = 'interface_fv_variable_value_postprocessor.i'
     exodiff = 'InterfaceAverageVariableValuePostprocessor_fv.e'
-    requirement = "Testing the implementation of the InterfaceAverageVariableValuePostprocessor "
-               "for finite volume variables."
-               "By design at the end of the first step we should observe: "
+    requirement = "The system shall correctly compute values with the InterfaceAverageVariableValuePostprocessor "
+               "for finite volume variables. "
+               "At the end of the first step it shall report "
                "an average material property of 7, "
-               "an average material property absolute jump to 6,"
+               "an average material property absolute jump of 6, "
                "a signed material property jump (primary minus secondary) of 6, "
-               "a signed material propertyjump (secondary minus primary) of -6, "
+               "a signed material property jump (secondary minus primary) of -6, "
                "a material property value on the primary side of 10, "
-               "a material property value on the primary side of 4 "
+               "a material property value on the secondary side of 4."
     design = 'InterfaceAverageVariableValuePostprocessor.md'
     cli_args = 'postprocessor_type=InterfaceAverageVariableValuePostprocessor'
     issues = '#11647 #16099'
@@ -55,15 +55,15 @@
     type = 'Exodiff'
     input = 'interface_fv_variable_value_postprocessor.i'
     exodiff = 'InterfaceIntegralVariableValuePostprocessor_fv.e'
-    requirement = "Testing the implementation of the InterfaceIntegralVariableValuePostprocessor "
-               "for finite volume variables."
-               "By design at the end of the first step we should observe: "
+    requirement = "The system shall correctly compute values with the InterfaceIntegralVariableValuePostprocessor "
+               "for finite volume variables. "
+               "At the end of the first step it shall report "
                "an integral material property of 21, "
-               "an integral material property absolute jump to 18,"
+               "an integral material property absolute jump of 18, "
                "a signed integral material property jump (primary minus secondary) of 18, "
-               "a signed integral material propertyjump (secondary minus primary) of -18, "
+               "a signed integral material property jump (secondary minus primary) of -18, "
                "a material integral property value on the primary side of 30, "
-               "a material integral property value on the primary side of 12 "
+               "a material integral property value on the secondary side of 12."
     design = 'InterfaceIntegralVariableValuePostprocessor.md'
     cli_args = 'postprocessor_type=InterfaceIntegralVariableValuePostprocessor'
     issues = '#11647 #16099'

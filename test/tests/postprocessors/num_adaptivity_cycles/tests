@@ -14,7 +14,7 @@
     csvdiff = 'num_adaptivity_cycles_toggle_adaptivity_out.csv'
 
     issues = '#9746'
-    requirement = 'They system shall be capable of toggling adaptivity at the start of the simulation.'
+    requirement = 'The system shall be capable of toggling adaptivity at the start of the simulation.'
   [../]
   [./num_adaptivity_cycles_toggle_adaptivity_wait]
     type = 'CSVDiff'
@@ -22,6 +22,6 @@
     csvdiff = 'num_adaptivity_cycles_toggle_adaptivity_wait_out.csv'
 
     issues = '#9746'
-    requirement = 'They system shall be capable of toggling adaptivity during the simulation.'
+    requirement = 'The system shall be capable of toggling adaptivity during the simulation.'
   [../]
 []
