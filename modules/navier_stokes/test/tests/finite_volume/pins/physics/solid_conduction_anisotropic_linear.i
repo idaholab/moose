@@ -6,6 +6,9 @@
 # A conductivity taken from the x component would give a rise four times larger. With the uniform
 # source, the two-point flux of each face equals the exact heat flux, so the value in the cell next
 # to the insulated end reproduces this rise.
+# The heat-flux variant imposes q = 100 on the top, which adds the linear profile q y / kappa_s,y.
+# It is exact at the cell centroids, so the rise in the top cell (y = 4.875) becomes
+#   1875 + 100 * 4.875 / 4 = 1996.875.
 
 [Mesh]
   [gen]

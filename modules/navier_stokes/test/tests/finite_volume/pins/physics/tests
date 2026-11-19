@@ -60,13 +60,14 @@
       csvdiff = 'solid_conduction_anisotropic_linear_out.csv'
       detail = 'matching the analytical temperature rise of a heated slab conducting along its high-conductivity direction, and'
     []
-    [reject-heat-flux]
-      type = RunException
+    [heat-flux]
+      type = 'CSVDiff'
       input = solid_conduction_anisotropic_linear.i
+      csvdiff = 'solid_conduction_anisotropic_linear_heat_flux.csv'
       cli_args = "Physics/NavierStokes/SolidHeatTransferSegregated/solid/heat_flux_boundaries='top' "
-                 "Physics/NavierStokes/SolidHeatTransferSegregated/solid/boundary_heat_fluxes='0'"
-      expect_err = 'Heat flux boundary conditions are not supported with a vector thermal conductivity'
-      detail = 'reporting an error if it is combined with a heat flux boundary condition.'
+                 "Physics/NavierStokes/SolidHeatTransferSegregated/solid/boundary_heat_fluxes='100' "
+                 "Outputs/file_base=solid_conduction_anisotropic_linear_heat_flux"
+      detail = 'matching the analytical temperature rise when a heat flux is also imposed on the boundary opposite the fixed temperature.'
     []
   []
   [linear-solid-variable-cp]

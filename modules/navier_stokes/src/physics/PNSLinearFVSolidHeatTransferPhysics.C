@@ -226,7 +226,7 @@ PNSLinearFVSolidHeatTransferPhysics::addFVBCs()
   const auto add_bcs = [this](const std::string & bc_type,
                               const std::string & boundaries_param,
                               const std::string & functors_param,
-                              const std::string & functor_param_name)
+                              const std::string & conductivity_param_name)
   {
     const auto & boundaries = getParam<std::vector<BoundaryName>>(boundaries_param);
     const auto & functors = getParam<std::vector<MooseFunctorName>>(functors_param);
@@ -235,9 +235,10 @@ PNSLinearFVSolidHeatTransferPhysics::addFVBCs()
     for (const auto i : index_range(boundaries))
     {
       params.set<std::vector<BoundaryName>>("boundary") = {boundaries[i]};
-      params.set<MooseFunctorName>(functor_param_name) = functors[i];
-      if (bc_type == "LinearFVAdvectionDiffusionFunctorNeumannBC")
-        params.set<MooseFunctorName>("diffusion_coeff") =
+      params.set<MooseFunctorName>("functor") = functors[i];
+      // The heat flux conditions recover the boundary temperature with the conductivity
+      if (!conductivity_param_name.empty())
+        params.set<MooseFunctorName>(conductivity_param_name) =
             _thermal_conductivity_blocks.size() > 1 ? prefix() + "combined_thermal_conductivity"
                                                     : _thermal_conductivity_name[0];
       getProblem().addLinearFVBC(
@@ -248,15 +249,14 @@ PNSLinearFVSolidHeatTransferPhysics::addFVBCs()
   add_bcs("LinearFVAdvectionDiffusionFunctorDirichletBC",
           "fixed_temperature_boundaries",
           "boundary_temperatures",
-          "functor");
-  // The Neumann condition recovers the boundary value from the flux with a scalar conductivity
-  if (getParam<std::vector<BoundaryName>>("heat_flux_boundaries").size() &&
-      processThermalConductivity())
-    paramError("heat_flux_boundaries",
-               "Heat flux boundary conditions are not supported with a vector thermal conductivity "
-               "in the linear finite volume discretization");
-  add_bcs("LinearFVAdvectionDiffusionFunctorNeumannBC",
-          "heat_flux_boundaries",
-          "boundary_heat_fluxes",
-          "functor");
+          "");
+  if (getParam<std::vector<BoundaryName>>("heat_flux_boundaries").size())
+  {
+    const bool vector_conductivity = processThermalConductivity();
+    add_bcs(vector_conductivity ? "LinearFVAnisotropicDiffusionFunctorNeumannBC"
+                                : "LinearFVAdvectionDiffusionFunctorNeumannBC",
+            "heat_flux_boundaries",
+            "boundary_heat_fluxes",
+            vector_conductivity ? "diffusion_tensor" : "diffusion_coeff");
+  }
 }

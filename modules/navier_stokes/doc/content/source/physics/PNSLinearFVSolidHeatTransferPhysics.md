@@ -32,7 +32,7 @@ between discretizations. The kernels created are:
 - [LinearFVTimeDerivative.md] for the time derivative
 - [LinearFVDiffusion.md] for the conduction term, or [LinearFVAnisotropicDiffusion.md] if the
   solid thermal conductivity is a vector functor, the diagonal of an anisotropic conductivity
-  tensor. Heat flux boundary conditions are not supported with an anisotropic conductivity.
+  tensor. Heat flux boundaries then use [LinearFVAnisotropicDiffusionFunctorNeumannBC.md].
 - [LinearFVVolumetricHeatTransfer.md] for the heat exchange with the fluid, if present
 - [LinearFVSource.md] for the heat source, if present
 
