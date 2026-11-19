@@ -81,7 +81,8 @@ SetupMeshCompleteAction::act()
      */
     if (_app.getExodusFileRestart() == false)
     {
-      if (_app.isRecovering() == false || !_app.isUltimateMaster())
+      if ((_app.isRecovering() == false || !_app.isUltimateMaster()) &&
+          !_app.isRestartingFromCheckpointMesh())
       {
         TIME_SECTION("uniformRefine", 2, "Uniformly Refining");
 
