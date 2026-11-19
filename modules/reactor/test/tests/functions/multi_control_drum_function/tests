@@ -19,7 +19,7 @@
     []
   []
   [errors]
-    requirement = 'The function that describes control drums shall throw an error '
+    requirement = 'The system shall throw an error from the function that describes control drums '
     [err_diff_start_angles_size]
       type = RunException
       input = 'multi_cd.i'

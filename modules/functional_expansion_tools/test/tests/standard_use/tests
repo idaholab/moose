@@ -8,7 +8,7 @@
     custom_cmp = ignore_picard_its.cmp
     min_threads = 2
     group = functional_expansion_tools
-    requirement = 'The functional_expansion_tools module shall be capable of coupling interface data between a parent and sub app in 2D.'
+    requirement = 'The system shall be capable of coupling interface data between a parent and sub app in 2D using the functional_expansion_tools module.'
   [../]
 
 
@@ -19,7 +19,7 @@
     exodiff = volume_coupled_out.e
     custom_cmp = ignore_picard_its.cmp
     group = functional_expansion_tools
-    requirement = 'The functional_expansion_tools module shall be capable of coupling volumetric data between a parent and sub app in 1D.'
+    requirement = 'The system shall be capable of coupling volumetric data between a parent and sub app in 1D using the functional_expansion_tools module.'
   [../]
 
   [./volume_coupling_custom_norm]
@@ -29,7 +29,7 @@
     custom_cmp = ignore_picard_its.cmp
     group = functional_expansion_tools
     prereq = 'volume_coupling'
-    requirement = 'The functional_expansion_tools module shall be capable of coupling volumetric data between a parent and sub app in 1D using a custom norm.'
+    requirement = 'The system shall be capable of coupling volumetric data between a parent and sub app in 1D using a custom norm with the functional_expansion_tools module.'
   [../]
 
 
@@ -37,7 +37,7 @@
     type = RunApp
     input = multiapp_print_coefficients.i
     group = functional_expansion
-    requirement = "The functional_expansion_tools module shall be capable of printing coefficients when an extraneous field is provided, as long as the 'physical_bounds' and 'orders' fields are of the correct length."
+    requirement = "The system shall be capable of printing coefficients with the functional_expansion_tools module when an extraneous field is provided, as long as the 'physical_bounds' and 'orders' fields are of the correct length."
   [../]
 
 
@@ -45,7 +45,7 @@
     type = RunApp
     input = neglect_invalid_enum.i
     group = functional_expansion
-    requirement = "The functional_expansion_tools module shall not generate an error when an extraneous field is provided, as long as the 'physical_bounds' and 'orders' fields are of the correct length."
+    requirement = "The system shall not generate an error in the functional_expansion_tools module when an extraneous field is provided, as long as the 'physical_bounds' and 'orders' fields are of the correct length."
   [../]
 
 
@@ -53,6 +53,6 @@
     type = RunApp
     input = multiapp_different_physical_boundaries.i
     group = functional_expansion_tools
-    requirement = 'The functional_expansion_tools module shall not validate the physical dimensions between objects.'
+    requirement = 'The system shall not validate the physical dimensions between objects in the functional_expansion_tools module.'
   [../]
 []
