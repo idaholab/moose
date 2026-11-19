@@ -7,9 +7,11 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from FileTester import FileTester
-from TestHarness import util
 import os
+
+from FileTester import FileTester
+
+from TestHarness import util
 
 
 class CheckFiles(FileTester):
@@ -37,8 +39,14 @@ class CheckFiles(FileTester):
     def getOutputFiles(self, options):
         return (
             super().getOutputFiles(options)
-            + self.specs["check_files"]
-            + self.specs["check_not_exists"]
+            + [
+                os.path.join(self.specs["output_dir"], f)
+                for f in self.specs["check_files"]
+            ]
+            + [
+                os.path.join(self.specs["output_dir"], f)
+                for f in self.specs["check_not_exists"]
+            ]
         )
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
@@ -53,14 +61,18 @@ class CheckFiles(FileTester):
             # if still no errors, check other files (just for existence)
             errors = []
             for file in self.specs["check_files"]:
-                full_path = os.path.abspath(os.path.join(self.getTestDir(), file))
+                full_path = os.path.abspath(
+                    os.path.join(self.getTestDir(), self.specs["output_dir"], file)
+                )
                 if os.path.isfile(full_path):
                     errors.append('File "' + full_path + '" exists.')
                 else:
                     errors.append('File "' + full_path + '" does not exist but should.')
                     reason = "MISSING FILES"
             for file in self.specs["check_not_exists"]:
-                full_path = os.path.abspath(os.path.join(self.getTestDir(), file))
+                full_path = os.path.abspath(
+                    os.path.join(self.getTestDir(), self.specs["output_dir"], file)
+                )
                 if os.path.isfile(full_path):
                     errors.append('File "' + full_path + '" exists but should not.')
                     reason = "UNEXPECTED FILES"
@@ -73,7 +85,12 @@ class CheckFiles(FileTester):
                 # if still no errors, check that all the files contain the file_expect_out expression
                 if self.specs.isValid("file_expect_out"):
                     for file in self.specs["check_files"]:
-                        fid = open(os.path.join(self.getTestDir(), file), "r")
+                        fid = open(
+                            os.path.join(
+                                self.getTestDir(), self.specs["output_dir"], file
+                            ),
+                            "r",
+                        )
                         contents = fid.read()
                         fid.close()
                         if not util.checkOutputForPattern(
@@ -81,7 +98,6 @@ class CheckFiles(FileTester):
                         ):
                             reason = "NO EXPECTED OUT IN FILE"
                             break
-
         # populate status bucket
         if reason != "":
             self.setStatus(self.fail, reason)
