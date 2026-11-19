@@ -26,10 +26,13 @@ The solid is stationary, so the porosity and the solid density must be constant 
 specific heat may depend on the temperature: since $dh_s = c_{p,s} dT_s$, the time derivative above
 is the rate of change of the solid enthalpy $(1-\epsilon) \rho_s h_s$.
 
-The parameters are those of [PNSFVSolidHeatTransferPhysics.md]. The kernels created are:
+The parameters are the same as [PNSFVSolidHeatTransferPhysics.md], to facilitate the transition
+between discretizations. The kernels created are:
 
 - [LinearFVTimeDerivative.md] for the time derivative
-- [LinearFVDiffusion.md] for the conduction term
+- [LinearFVDiffusion.md] for the conduction term, or [LinearFVAnisotropicDiffusion.md] if the
+  solid thermal conductivity is a vector functor, the diagonal of an anisotropic conductivity
+  tensor. Heat flux boundary conditions are not supported with an anisotropic conductivity.
 - [LinearFVVolumetricHeatTransfer.md] for the heat exchange with the fluid, if present
 - [LinearFVSource.md] for the heat source, if present
 
@@ -47,7 +50,8 @@ temperature, named by default:
 The fluid phase is solved by the [WCNSLinearFVFlowPhysics.md] with the porous medium treatment and
 the [WCNSLinearFVFluidHeatTransferPhysics.md]. The volumetric heat exchange between the phases is
 defined in both Physics with the same heat transfer coefficients. The following input couples the
-fluid and solid energy equations in a porous block bounded by two pressure baffles:
+fluid and solid energy equations in a porous block bounded by two pressure baffles (porosity change
+interfaces):
 
 !listing test/tests/finite_volume/pins/channel-flow/linear-segregated/2d-simple-channel-enthalpy/porous-baffle-2d-enthalpy-physics.i block=Physics
 

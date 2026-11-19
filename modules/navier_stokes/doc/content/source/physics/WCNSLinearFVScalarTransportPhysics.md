@@ -26,7 +26,7 @@ The kernels created are:
 
 ## Porous medium flow
 
-When the coupled [WCNSLinearFVFlowPhysics.md] uses the porous medium treatment, each scalar is a
+When the coupled [WCNSLinearFVFlowPhysics.md] uses the porous medium treatment, each scalar variable $\phi_i$ is a
 concentration per unit fluid volume:
 
 !equation

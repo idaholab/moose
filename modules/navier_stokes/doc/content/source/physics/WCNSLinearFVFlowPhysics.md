@@ -56,7 +56,8 @@ in place of their free-flow counterparts are:
 - [LinearFVMomentumFriction.md] for the Darcy and Forchheimer friction, listed in
   [!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/friction_types)
 - [LinearFVPressureFluxBC.md] for the pressure on the walls, which uses the wall velocity and the
-  $A^{-1}H$ flux
+  $A^{-1}H$ flux. Its two-term boundary pressure reconstruction is controlled by
+  [!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/pressure_two_term_bc_expansion).
 
 The gravity term, the [LinearFVMomentumBoussinesq.md] term and the friction terms are weighted by
 the same porosity.
@@ -72,7 +73,8 @@ The optional irreversible form loss of each sideset is given by
 [!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/pressure_drop_form_factors),
 and the side of the baffle providing its reference velocity by
 [!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/pressure_drop_reference_velocity_side).
-With baffles, the Physics also creates:
+When pressure baffles are present, the Physics also creates the following to set up their numerical
+treatment:
 
 - [LinearFVPressureCorrectionDiffusionJump.md] for the pressure correction diffusion term
 - [FVPressureJumpGreenGaussGradient.md] as the gradient method of the pressure variable

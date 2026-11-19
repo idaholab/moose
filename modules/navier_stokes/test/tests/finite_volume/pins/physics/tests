@@ -50,6 +50,25 @@
       detail = '0.75.'
     []
   []
+  [linear-solid-anisotropic-conductivity]
+    requirement = 'The system shall support an anisotropic effective solid thermal conductivity in the linear finite volume solid energy equation of a porous medium'
+    design = 'PNSLinearFVSolidHeatTransferPhysics.md LinearFVAnisotropicDiffusion.md'
+    issues = '#31995'
+    [conduction]
+      type = 'CSVDiff'
+      input = solid_conduction_anisotropic_linear.i
+      csvdiff = 'solid_conduction_anisotropic_linear_out.csv'
+      detail = 'matching the analytical temperature rise of a heated slab conducting along its high-conductivity direction, and'
+    []
+    [reject-heat-flux]
+      type = RunException
+      input = solid_conduction_anisotropic_linear.i
+      cli_args = "Physics/NavierStokes/SolidHeatTransferSegregated/solid/heat_flux_boundaries='top' "
+                 "Physics/NavierStokes/SolidHeatTransferSegregated/solid/boundary_heat_fluxes='0'"
+      expect_err = 'Heat flux boundary conditions are not supported with a vector thermal conductivity'
+      detail = 'reporting an error if it is combined with a heat flux boundary condition.'
+    []
+  []
   [linear-solid-variable-cp]
     type = 'CSVDiff'
     input = solid_heating_variable_cp_linear.i

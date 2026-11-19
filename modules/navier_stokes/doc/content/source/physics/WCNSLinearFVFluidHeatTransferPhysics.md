@@ -41,7 +41,9 @@ equation becomes
 
 where $\mathbf{U}$ is the superficial velocity, so the advection term uses the face mass flux of
 the [PorousRhieChowMassFlux.md] without a porosity factor. The effective fluid conductivity
-$\kappa_f$ is the given conductivity by default, and $\epsilon k_f$ if
+$\kappa_f$ is the
+[!param](/Physics/NavierStokes/FluidHeatTransferSegregated/WCNSLinearFVFluidHeatTransferPhysics/thermal_conductivity)
+by default, and $\epsilon k_f$ if
 [!param](/Physics/NavierStokes/FluidHeatTransferSegregated/WCNSLinearFVFluidHeatTransferPhysics/effective_conductivity)
 is `false`. The source $Q$ and the heat transfer coefficient $\alpha$ are given per unit total
 volume. The solid phase is coupled through the ambient convection term with the

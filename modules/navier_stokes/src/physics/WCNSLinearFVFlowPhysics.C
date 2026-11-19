@@ -746,6 +746,7 @@ WCNSLinearFVFlowPhysics::addWallsBC()
     params.set<MooseFunctorName>(NS::density) = _density_name;
     for (const auto d : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
+    params.set<bool>("use_two_term_expansion") = getParam<bool>("pressure_two_term_bc_expansion");
     getProblem().addLinearFVBC(bc_type, prefix() + _pressure_name + "_walls", params);
   }
   else if (getParam<bool>("pressure_two_term_bc_expansion"))

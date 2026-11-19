@@ -152,19 +152,18 @@ PNSLinearFVSolidHeatTransferPhysics::addFVKernels()
 
     params.set<MooseFunctorName>("factor") = capacity_name;
     // The solid is stationary, so (1 - eps) rho_s is constant in time and the stored energy changes
-    // as (1 - eps) rho_s dh_s/dt = (1 - eps) rho_s cp_s dT_s/dt. The specific heat must stay outside
-    // the derivative: d(cp_s T_s)/dt is not dh_s/dt when cp_s depends on the temperature.
+    // as (1 - eps) rho_s dh_s/dt = (1 - eps) rho_s cp_s dT_s/dt. The specific heat must stay
+    // outside the derivative: d(cp_s T_s)/dt is not dh_s/dt when cp_s depends on the temperature.
     params.set<bool>("conservative_form") = false;
     getProblem().addLinearFVKernel(kernel_type, prefix() + "solid_energy_time", params);
   }
 
-  // Conduction. The solid thermal conductivity is an effective conductivity
+  // Conduction. The solid thermal conductivity is an effective conductivity, either a scalar or
+  // the diagonal of an anisotropic conductivity tensor
   {
-    if (processThermalConductivity())
-      paramError("thermal_conductivity_solid",
-                 "Vector thermal conductivities are not supported with the linear finite volume "
-                 "discretization");
-    const std::string kernel_type = "LinearFVDiffusion";
+    const bool vector_conductivity = processThermalConductivity();
+    const std::string kernel_type =
+        vector_conductivity ? "LinearFVAnisotropicDiffusion" : "LinearFVDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<LinearVariableName>("variable") = _solid_temperature_name;
     params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
@@ -173,7 +172,7 @@ PNSLinearFVSolidHeatTransferPhysics::addFVKernels()
       conduction_blocks.insert(conduction_blocks.end(), block_group.begin(), block_group.end());
     assignBlocks(params, _thermal_conductivity_blocks.size() ? conduction_blocks : _blocks);
     // Multiple conductivities are combined by the material of the base class
-    params.set<MooseFunctorName>("diffusion_coeff") =
+    params.set<MooseFunctorName>(vector_conductivity ? "diffusion_tensor" : "diffusion_coeff") =
         _thermal_conductivity_blocks.size() > 1 ? prefix() + "combined_thermal_conductivity"
                                                 : _thermal_conductivity_name[0];
     getProblem().addLinearFVKernel(kernel_type, prefix() + "solid_energy_diffusion", params);
@@ -250,6 +249,12 @@ PNSLinearFVSolidHeatTransferPhysics::addFVBCs()
           "fixed_temperature_boundaries",
           "boundary_temperatures",
           "functor");
+  // The Neumann condition recovers the boundary value from the flux with a scalar conductivity
+  if (getParam<std::vector<BoundaryName>>("heat_flux_boundaries").size() &&
+      processThermalConductivity())
+    paramError("heat_flux_boundaries",
+               "Heat flux boundary conditions are not supported with a vector thermal conductivity "
+               "in the linear finite volume discretization");
   add_bcs("LinearFVAdvectionDiffusionFunctorNeumannBC",
           "heat_flux_boundaries",
           "boundary_heat_fluxes",
