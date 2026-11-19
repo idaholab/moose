@@ -75,11 +75,6 @@ phase at $\bm{u}_m + \bm{u}_{slip,d}$ instead is the dilute approximation $c_d \
 The slip velocity itself is what [WCNSFV2PMomentumDriftFlux.md] consumes, the diffusion stress
 being a sum over both phases that collapses onto the slip velocity for a single dispersed phase.
 
-[!param](/FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial/volumetric_drift_velocity_name)
-declares $(\alpha_d - c_d) \bm{u}_{slip,d}$, the difference
-between the volume averaged and the mass averaged mixture velocity, which the pressure work of
-the energy equation carries.
-
 ## The drag function
 
 With [!param](/FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial/use_dispersed_phase_drag_model)

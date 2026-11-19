@@ -80,11 +80,6 @@ private:
   /// Adds the latent heat absorbed or released by the interfacial mass transfer
   void addLatentHeatTransferTerm();
   void addPhaseChangeEnergySource();
-  /**
-   * Adds the pressure work the relative motion carries, (alpha - c_d) u_s . grad(p). The mixture
-   * part of the term is added by the energy Physics; this is the part peculiar to the mixture.
-   */
-  void addEnergyPressureWorkDriftTerm();
   /// Adds the functor material holding the coefficient of the phase change energy term
   void addPhaseChangeCoefficientMaterial();
   void addPhaseDriftFluxTerm();

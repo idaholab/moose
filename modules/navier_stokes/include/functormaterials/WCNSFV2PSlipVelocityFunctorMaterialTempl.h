@@ -92,21 +92,6 @@ protected:
     return (rho_m - fd * _rho_d(r, t)) / rho_m;
   }
 
-  /**
-   * The factor converting the slip velocity into the volumetric drift, \f$ \alpha - c_d \f$, the
-   * difference between the volume averaged and the mass averaged mixture velocity.
-   */
-  template <typename SpaceArg, typename StateArg>
-  GenericReal<is_ad> volumetricDriftFactor(const SpaceArg & r, const StateArg & t) const
-  {
-    const auto rho_m = _rho_mixture(r, t);
-    if (MetaPhysicL::raw_value(rho_m) <= 0.0)
-      return 0.0;
-    const auto fd =
-        std::min(std::max(_f_d(r, t), GenericReal<is_ad>(0.0)), GenericReal<is_ad>(1.0));
-    return fd * (rho_m - _rho_d(r, t)) / rho_m;
-  }
-
   /// Dimension of the domain
   const unsigned int _dim;
 

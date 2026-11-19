@@ -37,7 +37,6 @@ private:
   void addEnergyAdvectionKernels() override;
   void addEnergyAmbientConvection() override;
   void addEnergyExternalHeatSource() override;
-  void addEnergyPressureWork() override;
 
   /// Functions adding boundary conditions for the incompressible / weakly compressible energy equation
   void addEnergyInletBC() override;

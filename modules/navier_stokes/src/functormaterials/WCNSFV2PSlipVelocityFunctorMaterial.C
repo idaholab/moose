@@ -113,11 +113,6 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::validParams()
       "Name of the diffusion (drift) velocity property to declare, the velocity of the dispersed "
       "phase relative to the centre of mass of the mixture. Declared only when supplied.");
   params.addParam<MooseFunctorName>(
-      "volumetric_drift_velocity_name",
-      "Name of the volumetric drift property to declare, (alpha - c_d) u_slip, the difference "
-      "between the volume averaged and the mass averaged mixture velocity. Declared only when "
-      "supplied.");
-  params.addParam<MooseFunctorName>(
       "fraction_dispersed",
       0.0,
       "Volume fraction of the dispersed phase. It converts the slip velocity into the drift "
@@ -422,14 +417,6 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::WCNSFV2PSlipVelocityFunctorMate
         getParam<MooseFunctorName>("drift_velocity_name"),
         [this, &slip_velocity](const auto & r, const auto & t) -> GenericReal<is_ad>
         { return this->diffusionVelocityFactor(r, t) * slip_velocity(r, t); });
-
-  // The volumetric drift, j - u_m = (alpha - c_d) u_slip, which the pressure work of the energy
-  // equation carries
-  if (isParamValid("volumetric_drift_velocity_name"))
-    this->template addFunctorProperty<GenericReal<is_ad>>(
-        getParam<MooseFunctorName>("volumetric_drift_velocity_name"),
-        [this, &slip_velocity](const auto & r, const auto & t) -> GenericReal<is_ad>
-        { return this->volumetricDriftFactor(r, t) * slip_velocity(r, t); });
 }
 
 template <bool is_ad>

@@ -29,8 +29,7 @@ Tt = 1 + sp.sin(2 * pi * t) / 2
 u = x**2 * (1 - x) ** 2 * (4 * y**3 - 6 * y**2 + 2 * y) * Tt
 v = -(y**2) * (1 - y) ** 2 * (4 * x**3 - 6 * x**2 + 2 * x) * Tt
 # shifted so that it vanishes at the centre of the domain. The shift is uniform in space, so the
-# gradient does not notice it and every forcing built from grad(p) is unchanged; dp/dt does notice,
-# which is what the pressure work reads.
+# gradient does not notice it and every forcing built from grad(p) is unchanged.
 p = (x * (1 - x) - sp.Rational(1, 4)) * Tt
 al = sp.Rational(1, 2) + sp.sin(2 * pi * t) * sp.sin(pi * x) * sp.sin(pi * y) / 5
 Te = 1 + sp.sin(pi * x) * sp.sin(pi * y) * sp.sin(2 * pi * t) / 2
@@ -84,16 +83,6 @@ S_T = (
     + Gam * hlat
 )
 
-# The pressure work an energy equation written in enthalpy carries on its right hand side, which a
-# weakly compressible formulation drops. It is emitted on its own rather than folded into S_T, so
-# that the study with the term switched off keeps exactly the forcing it had.
-c_d = bd / rm
-Dp_Dt = (
-    sp.diff(p, t)
-    + (u + (al - c_d) * a) * sp.diff(p, x)
-    + (v + (al - c_d) * b) * sp.diff(p, y)
-)
-
 
 def emit(e):
     return str(e).replace("**", "^")
@@ -115,7 +104,6 @@ out = {
     "forcing_v": S_v,
     "forcing_phi": S_al,
     "forcing_T": S_T,
-    "mms_pressure_work": Dp_Dt,
 }
 import json, sys
 
