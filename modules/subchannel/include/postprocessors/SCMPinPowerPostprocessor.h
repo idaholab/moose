@@ -12,6 +12,8 @@
 #include "GeneralPostprocessor.h"
 #include "SubChannelMesh.h"
 
+class SubChannel1PhaseProblem;
+
 /**
  * Calculates the total heat rate $[W]$ that goes into the coolant from all the heated fuel pins
  * based on the variable q_prime
@@ -29,6 +31,8 @@ public:
 protected:
   /// geometric information
   const SubChannelMesh & _mesh;
+  /// subchannel problem that holds the solution
+  const SubChannel1PhaseProblem & _scm_problem;
   /// value we want to calculate
   Real _value;
 };

@@ -28,6 +28,7 @@ SCMPinPowerPostprocessor::validParams()
 SCMPinPowerPostprocessor::SCMPinPowerPostprocessor(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _mesh(SCM::getConstMesh<SubChannelMesh>(_fe_problem.mesh())),
+    _scm_problem(SCM::getConstProblem<SubChannel1PhaseProblem>(_fe_problem)),
     _value(0)
 {
 }
@@ -35,15 +36,12 @@ SCMPinPowerPostprocessor::SCMPinPowerPostprocessor(const InputParameters & param
 void
 SCMPinPowerPostprocessor::execute()
 {
-  const auto scm_problem = dynamic_cast<SubChannel1PhaseProblem *>(&_fe_problem);
   const auto nz = _mesh.getNumOfAxialCells();
   const auto n_channels = _mesh.getNumOfChannels();
-  if (!scm_problem)
-    mooseError("SCMPinPowerPostprocessor can only be used within a subchannel 1phase problem.");
   auto power = 0.0;
   for (unsigned int iz = 1; iz < nz + 1; iz++)
     for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
-      power += scm_problem->getAddedHeatPin(i_ch, iz);
+      power += _scm_problem.getAddedHeatPin(i_ch, iz);
   _value = power;
 }
 

@@ -12,6 +12,7 @@
 #include "MooseUtils.h"
 
 class MooseMesh;
+class FEProblemBase;
 
 namespace SCM
 {
@@ -41,5 +42,18 @@ getMesh(MooseMesh & mesh)
                MooseUtils::prettyCppType<T>(),
                ". You must use the relevant Subchannel mesh/mesh generator with this object.");
   return *T_mesh;
+}
+
+/// function to cast const problem
+template <typename T>
+const T &
+getConstProblem(const FEProblemBase & problem)
+{
+  const auto T_problem = dynamic_cast<const T *>(&problem);
+  if (!T_problem)
+    mooseError("The problem is not of type: ",
+               MooseUtils::prettyCppType<T>(),
+               ". You must use the relevant Subchannel problem with this object.");
+  return *T_problem;
 }
 }
