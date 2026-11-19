@@ -1,6 +1,6 @@
 [Tests]
   issues = '#31883'
-  design = 'MooseApp.md'
+  design = 'Console.md'
   [suppress_info]
     requirement = 'The system shall support suppressing informational messages from objects with a '
                   'command-line option, including'

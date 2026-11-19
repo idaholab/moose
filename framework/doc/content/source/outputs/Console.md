@@ -10,6 +10,12 @@ This output supports an additional execution schedule, with the `execute_on` fla
 to the end of each successful MultiApp fixed point iteration (if there is iteration).
 In this case it is recommended to set [!param](/Outputs/Console/new_row_detection_columns) to `all`.
 
+## Suppressing Informational Messages
+
+Informational messages emitted by actions and objects through `mooseInfo()` or `paramInfo()` can
+be disabled with the `--suppress-info` command-line option. The option is passed on to MultiApp
+sub-applications.
+
 ## Multiapp Output
 
 When using the MOOSE Multiapp system, Output to the _console object will be automatically
