@@ -1,0 +1,19 @@
+[Tests]
+  [test0]
+    issues = "#1234"
+  []
+  [test1]
+    [subtest0]
+      issues = "#2345"
+    []
+    [subtest1]
+      issues = "#3456"
+    []
+  []
+  [test2]
+    issues = "#4567"
+    [subtest0]
+      issues = "#5678"
+    []
+  []
+[]
