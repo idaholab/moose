@@ -255,7 +255,8 @@ k_d = 1
   [phase_2_right]
     type = LinearFVAdvectionDiffusionOutflowBC
     boundary = right
-    use_two_term_expansion = true
+    # As the mixture Physics sets it for the phase fraction
+    use_two_term_expansion = false
     variable = phase_2
   []
 []

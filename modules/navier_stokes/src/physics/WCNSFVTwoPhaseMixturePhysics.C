@@ -168,8 +168,11 @@ WCNSFVTwoPhaseMixturePhysics::renamePassiveScalarToMixtureParams(InputParameters
   params.renameParam(
       "passive_scalar_two_term_bc_expansion",
       "phase_two_term_bc_expansion",
-      "If a two-term Taylor expansion is needed for the determination of the boundary values"
-      "of the phase fraction.");
+      "If a two-term Taylor expansion is needed for the determination of the boundary values "
+      "of the phase fraction. The expansion is not limited, so at an outlet it can carry away "
+      "more of the phase than a cell holds and drive the fraction negative; it is therefore off "
+      "by default for the phase fraction.");
+  params.set<bool>("phase_two_term_bc_expansion") = false;
 
   // Numerical system parameters
   params.renameParam("passive_scalar_scaling",

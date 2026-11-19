@@ -52,6 +52,8 @@ velocity_interp_method = 'rc'
   []
   [phase_2]
     type = INSFVScalarFieldVariable
+    # As the mixture Physics sets it for the phase fraction
+    two_term_boundary_expansion = false
   []
 []
 

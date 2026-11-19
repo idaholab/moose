@@ -61,6 +61,29 @@
     requirement = 'The system shall interpolate the coefficient of the diffusion stress to the faces with a harmonic mean when asked to, reproducing the arithmetic mean result where the coefficient is nearly uniform.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [channel_outlet_phase_bounded]
+    type = CSVDiff
+    input = 'channel-drift-flux-physics.i'
+    # Gravity across the channel separates the gas upward, leaving a nearly gas free layer along the
+    # bottom wall that leaves through the outlet. With the unlimited two term expansion of the
+    # outlet value, 'phase_two_term_bc_expansion = true', 'min_phase2' reaches -4.4e-6 by t = 3 s.
+    cli_args = "Mesh/gen/nx=20 Mesh/gen/ny=8 inlet_phase_2=0.1
+                Physics/NavierStokes/FlowSegregated/flow/gravity='0 -9.81 0'
+                Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/alpha_exchange=0
+                Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/add_mass_density_transient=true
+                Executioner/type=PIMPLE Executioner/dt=0.05 Executioner/end_time=3
+                Executioner/num_iterations=100
+                Postprocessors/min_phase2/type=ElementExtremeValue
+                Postprocessors/min_phase2/variable=phase_2
+                Postprocessors/min_phase2/value_type=min
+                Outputs/out/enable=false Outputs/file_base=channel-outlet-phase-bounded"
+    csvdiff = 'channel-outlet-phase-bounded.csv'
+    # 'min_phase2' is of order 1e-10 with the default one term outlet value; any value below 1e-8
+    # in magnitude is a bounded answer, while the undershoot it guards against is -4.4e-6
+    abs_zero = 1e-8
+    requirement = 'The system shall, by default, keep the phase fraction from undershooting zero in a channel where gravity separates the phases and a nearly phase free layer leaves through the outlet.'
+    max_threads = 1 # see libmesh issue #3808
+  []
 
   [slip_closure_verification]
     requirement = 'The system shall compute the algebraic slip velocity of a two phase mixture and the drift velocity derived from it, in agreement with their analytic values,'
