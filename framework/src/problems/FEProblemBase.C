@@ -4879,8 +4879,18 @@ FEProblemBase::solveForSplineDofs(SystemBase & moose_sys)
   // too loose for a solve where we're not taking multiple
   // quasi-Newton steps.
   const Real old_linear_tol = es.parameters.get<Real>("linear solver tolerance");
-  es.parameters.set<Real>("linear solver tolerance") =
-      es.parameters.get<Real>("nonlinear solver relative residual tolerance");
+  if (es.parameters.have_parameter<Real>("nonlinear solver relative residual tolerance"))
+    es.parameters.set<Real>("linear solver tolerance") =
+        es.parameters.get<Real>("nonlinear solver relative residual tolerance");
+  else if (getMooseApp().getExecutioner()->parameters().have_parameter<Real>("eigen_tol"))
+    es.parameters.set<Real>("linear solver tolerance") =
+        getMooseApp().getExecutioner()->parameters().get<Real>("eigen_tol");
+  else
+  {
+    mooseWarning("Appropriate solver tolerance for spline ICs not found. "
+                 "Defaulting to 1e-9.");
+    es.parameters.set<Real>("linear solver tolerance") = 1e-9;
+  }
 
   // Spline extraction operators on Flex IGA meshes can be poorly
   // conditioned; we'd best use whatever PETSc options the user's
