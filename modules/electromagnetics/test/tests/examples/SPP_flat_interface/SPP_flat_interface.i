@@ -69,18 +69,6 @@ coeff_real_mag = 0.628318530718
     type = ParsedFunction
     expression = 'if(y>=0, exp(-${ky_p}*y), exp(${ky_m}*y))'
   []
-  [top_x]
-    type = ParsedFunction
-    expression = 'cos(${kx}*x)'
-  []
-  [upper_IC_func]
-    type = ParsedFunction
-    expression = 'if(y>=0, exp(-${ky_p}*y)*cos(${kx}*x), 0)'
-  []
-  [lower_IC_func]
-    type = ParsedFunction
-    expression = 'if(y<0, exp(${ky_m}*y)*cos(${kx}*x), 0)'
-  []
 []
 
 [Kernels]
