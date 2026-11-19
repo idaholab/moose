@@ -50,10 +50,7 @@ public:
 
   /// output data in solve (if ever called)
   virtual void solve(unsigned int /*nl_sys_num*/) override {}
-  virtual void solveLinearSystem(unsigned int /*linear_sys_num*/,
-                                 const Moose::PetscSupport::PetscOptions *) override
-  {
-  }
+  virtual void solveLinearSystem(unsigned int /*linear_sys_num*/) override {}
 
   // output data (we expect to call this from the DumpObjectsAction)
   void printObjects();

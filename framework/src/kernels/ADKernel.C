@@ -208,5 +208,13 @@ ADKernelTempl<T>::computeResidualAndJacobian()
   addResidualsAndJacobian(_assembly, _residuals, _var.dofIndices(), _var.scalingFactor());
 }
 
+template <typename T>
+Real
+ADKernelTempl<T>::computeQpJacobian()
+{
+  mooseAssert(false, "This should never be called");
+  return 0;
+}
+
 template class ADKernelTempl<Real>;
 template class ADKernelTempl<RealVectorValue>;

@@ -1,10 +1,11 @@
-# CoupledForceNodalKernel
+# CoupledForceNodalKernel / ADCoupledForceNodalKernel
 
 !syntax description /NodalKernels/CoupledForceNodalKernel
 
 ## Description
 
-The `CoupledForceNodalKernel` applies either a sink or source term
+The `CoupledForceNodalKernel` (and its automatic differentiation version,
+`ADCoupledForceNodalKernel`) applies either a sink or source term
 proportional to the value of a coupled variable `v`. An optional parameter
 `coef` determines whether the term is a source or a sink and the proportionality
 between the coupled variable and the applied force. When `coef` is positive

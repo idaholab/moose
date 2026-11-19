@@ -15,6 +15,7 @@
 #include "FVElementalKernel.h"
 #include "InterfaceKernelBase.h"
 #include "HDGKernel.h"
+#include "ElementADScalarKernel.h"
 #include "libmesh/threads.h"
 
 ComputeResidualThread::ComputeResidualThread(FEProblemBase & fe_problem,
@@ -35,6 +36,12 @@ void
 ComputeResidualThread::compute(ResidualObject & ro)
 {
   ro.computeResidual();
+}
+
+void
+ComputeResidualThread::computeElementScalarKernel(ElementADScalarKernel & esk)
+{
+  esk.computeResidualOnElement();
 }
 
 void

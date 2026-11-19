@@ -24,7 +24,6 @@ public:
 
 protected:
   virtual Real computeQpResidual() { mooseError(type(), " must implement 'computeQpResidual'"); }
-  virtual Real computeQpJacobian() { mooseError(type(), " must implement 'computeQpJacobian'"); }
 
   /// The current solution (old solution if explicit)
   const VariableValue & _u;

@@ -64,13 +64,36 @@ std::unique_ptr<MooseApp>
 AppFactory::create(const std::string & app_type,
                    const std::vector<std::string> & cli_args /* = {} */)
 {
-  auto parser = std::make_unique<Parser>(std::vector<std::string>());
-  parser->parse();
-  parser->setAppType(app_type);
+  // Extract input filenames via a temporary CommandLine so the main one remains
+  // unpopulated for the populateCommandLineParams call inside AppFactory::create(parser, cl).
+  std::vector<std::string> input_filenames;
+  {
+    auto cl_params = emptyInputParameters();
+    MooseApp::addInputParam(cl_params);
+    CommandLine temp_cl(std::vector<std::string>{"unused"});
+    temp_cl.addArguments(cli_args);
+    temp_cl.parse();
+    temp_cl.populateCommandLineParams(cl_params);
+    input_filenames = cl_params.get<std::vector<std::string>>("input_file");
+  }
 
   auto command_line = std::make_unique<CommandLine>(std::vector<std::string>{"unused"});
   command_line->addArguments(cli_args);
   command_line->parse();
+
+  auto parser = std::make_unique<Parser>(input_filenames);
+  parser->setAppType(app_type);
+  parser->setCommandLineParams(command_line->buildHitParams());
+  parser->parse();
+
+  // Allow --app or Application/type= on the command line to override the app type
+  for (const auto & entry : std::as_const(*command_line).getEntries())
+    if (!entry.subapp_name && entry.value &&
+        (entry.name == "--app" || entry.name == "Application/type"))
+      parser->setAppType(*entry.value);
+
+  if (!AppFactory::instance().isRegistered(parser->getAppType()))
+    mooseError("'", parser->getAppType(), "' is not a registered application type.");
 
   return AppFactory::create(std::move(parser), std::move(command_line));
 }

@@ -48,6 +48,7 @@ protected:
 
   virtual void compute(ResidualObject &) override { mooseError("Not implemented"); };
   void compute(KernelBase & kernel) override;
+  void computeElementScalarKernel(ElementADScalarKernel & esk) override;
   void compute(FVElementalKernel & kernel) override;
   void compute(IntegratedBCBase & bc) override;
   void compute(DGKernelBase & dg, const Elem * neighbor) override;

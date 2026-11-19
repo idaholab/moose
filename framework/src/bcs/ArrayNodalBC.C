@@ -61,6 +61,9 @@ ArrayNodalBC::computeJacobian()
     const dof_id_type cached_row = _var.nodalDofIndex();
 
     for (const auto i : make_range(_var.count()))
+      constrainJacobianRow(_fe_problem.assembly(0, _sys.number()), cached_row + i);
+
+    for (const auto i : make_range(_var.count()))
       addJacobianElement(_fe_problem.assembly(0, _sys.number()),
                          cached_val(i),
                          cached_row + i,
@@ -82,6 +85,11 @@ ArrayNodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
   const dof_id_type cached_row = _var.nodalDofIndex();
   // Note: this only works for Lagrange variables...
   const dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar_num, 0);
+
+  // The diagonal block replaces this BC's rows, so mark them for zeroing once
+  if (jvar_num == _var.number())
+    for (const auto i : make_range(_var.count()))
+      constrainJacobianRow(_fe_problem.assembly(0, _sys.number()), cached_row + i);
 
   // Cache the user's computeQpJacobian() value for later use.
   for (const auto i : make_range(_var.count()))

@@ -305,8 +305,7 @@ void
 MooseVariableScalar::computeAD(bool)
 {
   auto n_dofs = _dof_indices.size();
-  const bool do_derivatives =
-      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
+  const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
 
   if (_need_ad_u)
   {

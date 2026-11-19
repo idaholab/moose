@@ -66,9 +66,10 @@ protected:
   virtual ADReal computeQpResidual() = 0;
 
   /**
-   * Compute this Kernel's contribution to the Jacobian at the current quadrature point
+   * Provide this virtual interface purely so that generic classes, templated on an \p is_ad
+   * boolean, that derive from this can override this function
    */
-  virtual Real computeQpJacobian() { return 0; }
+  virtual Real computeQpJacobian();
 
   /**
    * This is the virtual that derived classes should override for computing an off-diagonal Jacobian

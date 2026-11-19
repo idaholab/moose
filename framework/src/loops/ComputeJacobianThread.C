@@ -22,6 +22,7 @@
 #include "MaterialBase.h"
 #include "ConsoleUtils.h"
 #include "Assembly.h"
+#include "ElementADScalarKernel.h"
 
 #include "libmesh/threads.h"
 
@@ -161,6 +162,12 @@ ComputeJacobianThread::postElement(const Elem * /*elem*/)
 void
 ComputeJacobianThread::join(const ComputeJacobianThread & /*y*/)
 {
+}
+
+void
+ComputeJacobianThread::computeElementScalarKernel(ElementADScalarKernel & esk)
+{
+  esk.computeJacobianOnElement();
 }
 
 void

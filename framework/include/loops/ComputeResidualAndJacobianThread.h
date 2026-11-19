@@ -38,6 +38,7 @@ public:
 protected:
   using NonlinearThread::compute;
   void compute(ResidualObject & ro) override;
+  void computeElementScalarKernel(ElementADScalarKernel & esk) override;
   void accumulateNeighbor() override;
   void accumulateNeighborLower() override;
   void accumulateLower() override;

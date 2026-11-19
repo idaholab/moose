@@ -411,7 +411,12 @@ InputParameters::isParamValid(const std::string & name_in) const
   else if (have_parameter<ExecFlagEnum>(name))
     return get<ExecFlagEnum>(name).isValid();
   else
-    return _params.count(name) > 0 && _params.at(name)._valid;
+  {
+    if (auto it = _params.find(name); it != _params.end())
+      return it->second._valid;
+    else
+      return false;
+  }
 }
 
 bool

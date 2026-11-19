@@ -10,11 +10,13 @@
 #include "CoupledForceNodalKernel.h"
 
 registerMooseObject("MooseApp", CoupledForceNodalKernel);
+registerMooseObject("MooseApp", ADCoupledForceNodalKernel);
 
+template <bool is_ad>
 InputParameters
-CoupledForceNodalKernel::validParams()
+CoupledForceNodalKernelTempl<is_ad>::validParams()
 {
-  InputParameters params = NodalKernel::validParams();
+  InputParameters params = GenericNodalKernel<is_ad>::validParams();
   params.addClassDescription("Adds a force proportional to the value of the coupled variable");
   params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
   params.addParam<Real>(
@@ -23,34 +25,39 @@ CoupledForceNodalKernel::validParams()
   return params;
 }
 
-CoupledForceNodalKernel::CoupledForceNodalKernel(const InputParameters & parameters)
-  : NodalKernel(parameters),
+template <bool is_ad>
+CoupledForceNodalKernelTempl<is_ad>::CoupledForceNodalKernelTempl(
+    const InputParameters & parameters)
+  : GenericNodalKernel<is_ad>(parameters),
     _v_var(coupled("v")),
-    _v(coupledValue("v")),
-    _coef(getParam<Real>("coef"))
+    _v(this->template coupledGenericValue<is_ad>("v")),
+    _coef(this->template getParam<Real>("coef"))
 {
   if (_var.number() == _v_var)
-    mooseError(
-        "Coupled variable 'v' needs to be different from 'variable' with CoupledForceNodalKernel, "
-        "consider using Reaction or somethig similar");
+    this->paramError("v",
+                     "Coupled variable 'v' needs to be different from 'variable' with "
+                     "CoupledForceNodalKernel / ADCoupledForceNodalKernel, consider using "
+                     "ReactionNodalKernel / ADReactionNodalKernel or something similar");
 }
 
-Real
-CoupledForceNodalKernel::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+CoupledForceNodalKernelTempl<is_ad>::computeQpResidual()
 {
   return -_coef * _v[_qp];
 }
 
+template <bool is_ad>
 Real
-CoupledForceNodalKernel::computeQpJacobian()
+CoupledForceNodalKernelTempl<is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  return 0;
-}
-
-Real
-CoupledForceNodalKernel::computeQpOffDiagJacobian(unsigned int jvar)
-{
+  mooseAssert(!is_ad,
+              "In ADCoupledForceNodalKernel, computeQpOffDiagJacobian should not be called. Check "
+              "computeJacobian implementation.");
   if (jvar == _v_var)
     return -_coef;
   return 0.0;
 }
+
+template class CoupledForceNodalKernelTempl<false>;
+template class CoupledForceNodalKernelTempl<true>;
