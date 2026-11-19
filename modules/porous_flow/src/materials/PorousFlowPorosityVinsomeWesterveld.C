@@ -26,10 +26,9 @@ namespace
  * mu_2 ~ s^3 / 3 as s -> 0), so the series
  * mu_k = exp(-s) s^(k+1) sum_n s^n / ((k+1)(k+2)...(k+1+n)), whose terms are all positive, is used
  */
-std::array<Real, 3>
-expMoments(const Real s)
+void
+expMoments(const Real s, std::array<Real, 3> & mu)
 {
-  std::array<Real, 3> mu;
   if (s > 1.0)
   {
     const Real e = std::exp(-s);
@@ -53,7 +52,6 @@ expMoments(const Real s)
       mu[k] = std::exp(-s) * sum;
     }
   }
-  return mu;
 }
 }
 
@@ -118,7 +116,12 @@ PorousFlowPorosityVinsomeWesterveld::PorousFlowPorosityVinsomeWesterveld(
                                   : declareProperty<Real>("PorousFlow_vw_heat_content_qp")),
     _heat_content_old(_nodal_material
                           ? getMaterialPropertyOld<Real>("PorousFlow_vw_heat_content_nodal")
-                          : getMaterialPropertyOld<Real>("PorousFlow_vw_heat_content_qp"))
+                          : getMaterialPropertyOld<Real>("PorousFlow_vw_heat_content_qp")),
+    _profile_matrix(3, 3),
+    _profile_rhs(3),
+    _profile_drhs(3),
+    _profile_sol(3),
+    _profile_dsol(3)
 {
 }
 
@@ -206,8 +209,11 @@ PorousFlowPorosityVinsomeWesterveld::computeUnboundedPorosityQp()
     {
       const Real ap = 4.0 * time_step / time;
       const Real e = std::exp(-s);
-      const std::array<Real, 3> mu = expMoments(s);
-      DenseMatrix<Real> m(3, 3);
+      expMoments(s, _mu);
+      const std::array<Real, 3> & mu = _mu;
+      // resize zeroes the matrix and clears the LU decomposition from the previous quadpoint
+      DenseMatrix<Real> & m = _profile_matrix;
+      m.resize(3, 3);
       m(0, 0) = 1.0 + e;
       m(0, 1) = s * e;
       m(0, 2) = s * s * e;
@@ -218,16 +224,16 @@ PorousFlowPorosityVinsomeWesterveld::computeUnboundedPorosityQp()
       m(2, 0) = mu[0] * (1.0 - ap);
       m(2, 1) = mu[1] + ap * (mu[0] + s * e);
       m(2, 2) = mu[2] - ap * s * e * (2.0 - s);
-      DenseVector<Real> rhs(3);
+      DenseVector<Real> & rhs = _profile_rhs;
       rhs(0) = theta;
       rhs(1) = (theta - _theta_old[_qp]) / ap;
       rhs(2) = _heat_content_old[_qp] / d;
-      DenseVector<Real> drhs(3);
+      DenseVector<Real> & drhs = _profile_drhs;
       drhs(0) = 1.0;
       drhs(1) = 1.0 / ap;
       drhs(2) = 0.0;
-      DenseVector<Real> x(3);
-      DenseVector<Real> dx(3);
+      DenseVector<Real> & x = _profile_sol;
+      DenseVector<Real> & dx = _profile_dsol;
       // lu_solve uses partial pivoting, and the second call reuses the LU decomposition
       m.lu_solve(rhs, x);
       m.lu_solve(drhs, dx);

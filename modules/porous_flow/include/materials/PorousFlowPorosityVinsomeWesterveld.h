@@ -10,6 +10,10 @@
 #pragma once
 
 #include "PorousFlowPorosityLinear.h"
+#include "libmesh/dense_matrix.h"
+#include "libmesh/dense_vector.h"
+
+#include <array>
 
 /**
  * Porosity (typically the aperture of a lower-dimensional fracture) given by the
@@ -86,4 +90,16 @@ protected:
 
   /// Old value of the heat content
   const MaterialProperty<Real> & _heat_content_old;
+
+  /// For a matrix layer of finite thickness: the moments mu_k = int_0^s x^k exp(-x) dx (k = 0, 1, 2)
+  std::array<Real, 3> _mu;
+
+  /// For a matrix layer of finite thickness: the linear system for the profile coefficients, its
+  /// right-hand sides (for I and for dI/dT) and its solutions.  These are members so that they are
+  /// not created and destroyed at every quadpoint
+  DenseMatrix<Real> _profile_matrix;
+  DenseVector<Real> _profile_rhs;
+  DenseVector<Real> _profile_drhs;
+  DenseVector<Real> _profile_sol;
+  DenseVector<Real> _profile_dsol;
 };

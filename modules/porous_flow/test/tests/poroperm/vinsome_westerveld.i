@@ -4,7 +4,10 @@
 # porosity = porosity_ref - thermal_opening_coeff * I
 # where I is the Vinsome-Westerveld approximation to the matrix heat content.
 # The exact heat content for a step change is I = 2 * theta * sqrt(kappa * t / pi), which is
-# also output for comparison.
+# also output for comparison, as heat_content_semi_infinite_exact.  It is exact only for a
+# semi-infinite matrix, so it differs from heat_content in the tests that set matrix_thickness.
+# Even for a semi-infinite matrix, heat_content differs from it by the error of the
+# Vinsome-Westerveld profile, which is -17.7% after the first time step (see below).
 # With dt = 3.15E6 the error at t = 3.15E7 is -5.1%.  The error decreases approximately linearly
 # as dt decreases (-3.5% with dt = 3.15E5, -3.3% with dt = 3.15E3), but it does not go to zero:
 # for a step change, the Vinsome-Westerveld profile itself gives I = (12/11) * theta * sqrt(kappa * t),
@@ -101,7 +104,7 @@
     pp_names = porosity
     expression = '(0.1 - porosity) / 1E-5'
   []
-  [heat_content_exact]
+  [heat_content_semi_infinite_exact]
     type = ParsedPostprocessor
     expression = '2 * (-150) * sqrt(1E-6 * t / pi)'
     constant_names = pi
