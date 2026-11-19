@@ -13,22 +13,27 @@
 #include "CellCenteredMapFunctor.h"
 #include "FaceCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
+#include "PetscVectorReader.h"
 #include <unordered_map>
 #include <set>
 
 #include "libmesh/petsc_vector.h"
 
 class MooseMesh;
+class ElemInfo;
 class PetscVectorReader;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
 class LinearFVGradientReader;
 class FVReconstructedPressureGradient;
 class LinearFVPressureCorrectionDiffusion;
+class LinearFVBoundaryCondition;
 namespace libMesh
 {
 class Elem;
 class MeshBase;
+template <typename T>
+class SparseMatrix;
 }
 
 /**
@@ -40,12 +45,13 @@ class RhieChowMassFlux : public RhieChowFaceFluxProvider, public NonADFunctorInt
 public:
   static InputParameters validParams();
   RhieChowMassFlux(const InputParameters & params);
+  ~RhieChowMassFlux() override;
 
   /// Get the face velocity times density (used in advection terms)
-  Real getMassFlux(const FaceInfo & fi) const;
+  virtual Real getMassFlux(const FaceInfo & fi) const;
 
   /// Get the volumetric face flux (used in advection terms)
-  Real getVolumetricFaceFlux(const FaceInfo & fi) const;
+  virtual Real getVolumetricFaceFlux(const FaceInfo & fi) const;
 
   /**
    * Check the block consistency between the passed in \p var and us
@@ -112,8 +118,48 @@ public:
   virtual void initFaceMassFlux();
   /// Initialize the coupling fields (HbyA and Ainv)
   virtual void initCouplingField();
+  /// Cache the pressure-equation face flux from the current solved pressure field.
+  void cachePressureEquationFlux();
   /// Update the values of the face velocities in the containers
   virtual void computeFaceMassFlux();
+  /**
+   * Writes the pressure-corrected cell velocity. This is the seam the corrector goes through, so
+   * that a provider which reconstructs that velocity differently is given the chance to; the
+   * arithmetic for the ordinary case lives in updateCellVelocity.
+   */
+  virtual void computeCellVelocity();
+  /**
+   * The momentum predictor assembly seams. The executioner announces each component's assembly,
+   * hands over the assembled, not yet relaxed operator, and finally offers the relaxed right hand
+   * side for explicit forcing. A provider that assembles its predictor without the pressure and
+   * body forces (see splitMomentumPredictorOperator) keeps the operator here and adds those
+   * forces itself; this provider needs none of it.
+   */
+  virtual void beginMomentumPredictorAssembly(const unsigned int /*system_i*/) {}
+  /// Receives the assembled operator of component \p system_i before relaxation
+  virtual void momentumPredictorAssembled(const unsigned int /*system_i*/,
+                                          libMesh::SparseMatrix<Number> & /*matrix*/,
+                                          const NumericVector<Number> & /*rhs*/,
+                                          const Real /*relaxation_parameter*/)
+  {
+  }
+  /// Adds the explicit pressure and body forces to the relaxed right hand side
+  virtual void addMomentumPredictorExplicitForcing(const unsigned int system_i,
+                                                   NumericVector<Number> & rhs) const;
+  /**
+   * Whether the momentum predictor is assembled without its explicit pressure and body forces.
+   * The flow physics then adds no momentum pressure kernel, and the coupling pressure gradient is
+   * requested here rather than read off that kernel.
+   */
+  virtual bool splitMomentumPredictorOperator() const { return false; }
+
+  /**
+   * Whether this provider's pressure-correction face fluxes carry the face measure, rather than
+   * being flux densities. The pressure equation that corrects the flux must match it, so the
+   * flow physics asks here when it builds that equation, and the face area handed to the
+   * pressure diffusion kernel derives from the same answer so the two cannot disagree.
+   */
+  virtual bool pressureCorrectionFluxIsIntegrated() const { return false; }
 
   /// Whether the registered pressure gradient field is produced by the reconstructed method.
   bool usingReconstructedPressureGradientMethod() const;
@@ -194,7 +240,33 @@ protected:
   void checkReconstructedPressureGradientCompatibility() const;
 
   /// Compute the pressure-gradient flux contribution for a single face
-  Real computeFacePressureGradientFlux(const FaceInfo & fi, PetscVectorReader & p_reader);
+  Real computeFacePressureGradientFlux(const FaceInfo & fi, PetscVectorReader & p_reader) const;
+
+  /// The predictor quantities of one face that the pressure equation's fields are built from
+  struct FaceMomentumPredictorState
+  {
+    /// The interpolated face density, or the boundary density on a boundary face
+    Real face_rho = 0.0;
+    /// H/A on the face, with the sign it is stored in: u = -(H/A) - Ainv grad(p). A consumer that
+    /// wants the physical predictor velocity negates it at the point of use.
+    RealVectorValue face_hbya;
+    /// face_rho times face_hbya, the mass-flux form the stock pressure equation uses
+    RealVectorValue density_weighted_face_hbya;
+    /// The face value of rho/A per component, interpolated as a product of the cell values
+    RealVectorValue face_density_weighted_ainv;
+  };
+
+  /// Whether a boundary face should use constrained boundary values for the predictor state.
+  virtual bool useConstrainedBoundaryPredictorState(const FaceInfo & fi) const;
+  /// Flow-side element information for a boundary face.
+  const ElemInfo & boundaryElemInfo(const FaceInfo & fi) const;
+  /// Orientation multiplier from flow-side boundary values to face normal convention.
+  Real boundaryNormalMultiplier(const FaceInfo & fi) const;
+  /// The boundary face value of a velocity component: the value of its Dirichlet boundary
+  /// condition if the face has one, otherwise the variable's own face value.
+  virtual Real boundaryVelocityValue(const FaceInfo & fi,
+                                     const unsigned int component,
+                                     const Moose::StateArg & time_arg) const;
 
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
@@ -204,10 +276,27 @@ protected:
   populateCouplingFunctors(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
                            const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv);
 
-  /// Get the prescribed velocity value on a Dirichlet boundary face
-  Real velocityBoundaryValue(unsigned int component,
-                             const FaceInfo & fi,
-                             const Moose::FaceArg & boundary_face) const;
+  /// Build the face predictor state shared by stock and diffuse-interface pressure coupling.
+  FaceMomentumPredictorState
+  buildMomentumPredictorFaceState(const FaceInfo & fi,
+                                  const std::vector<PetscVectorReader> & hbya_reader,
+                                  const std::vector<PetscVectorReader> & ainv_reader,
+                                  const Moose::StateArg & time_arg) const;
+
+  /**
+   * Form H(u) - b and the diagonal A of one momentum component, in the momentum system's layout.
+   * The stock predictor carries the pressure force in its right hand side, so it is removed again
+   * here with the coupling gradient snapshot the momentum pressure source used.
+   */
+  virtual void computePredictorOperator(const unsigned int system_i,
+                                        NumericVector<Number> & HbyA,
+                                        NumericVector<Number> & Ainv);
+
+  /// Build the base predictor operator vectors M*u - A*u - rhs and the relaxed diagonal.
+  void computePredictorOperatorBase(const unsigned int system_i,
+                                    NumericVector<Number> & base_raw,
+                                    NumericVector<Number> & diagonal_raw,
+                                    const NumericVector<Number> * rhs_override = nullptr) const;
 
   virtual bool supportMeshVelocity() const override { return false; }
 
@@ -265,6 +354,14 @@ protected:
 
   /// Coupling pressure gradient captured before the current momentum predictor is assembled.
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_current;
+  /**
+   * Exact face flux contribution from the solved pressure equation, in the same sign convention
+   * used in face_mass_flux = -predictor_flux + pressure_equation_flux.
+   */
+  FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _pressure_equation_flux;
+
+  /// Indicates whether _pressure_equation_flux matches the latest solved pressure field.
+  bool _pressure_equation_flux_valid = false;
 
   /**
    * Producer counter for the conservative face mass flux: incremented every time

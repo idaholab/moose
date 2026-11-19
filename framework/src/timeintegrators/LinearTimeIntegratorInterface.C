@@ -36,3 +36,11 @@ LinearTimeIntegratorInterface::timeDerivativeMatrixContribution(const Real /*fac
              _linear_system ? " for time integrator of system " + _linear_system->name() : "",
              "!");
 }
+
+std::vector<Real>
+LinearTimeIntegratorInterface::timeDerivativeRHSWeights() const
+{
+  mooseError("The time derivative right hand side weights have not been implemented yet",
+             _linear_system ? " for time integrator of system " + _linear_system->name() : "",
+             "!");
+}

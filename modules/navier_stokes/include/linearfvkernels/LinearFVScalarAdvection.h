@@ -41,8 +41,13 @@ public:
   virtual void setupFaceData(const FaceInfo * face_info) override;
 
 protected:
-  /// The Rhie-Chow user object that provides us with the face velocity
-  const RhieChowMassFlux & _mass_flux_provider;
+  /// The Rhie-Chow user object that provides us with the face velocity. Null when a face flux is
+  /// supplied directly instead.
+  const RhieChowMassFlux * const _mass_flux_provider;
+
+  /// A volumetric face flux supplied directly, in place of the Rhie-Chow object. A model that
+  /// solves its own flux, such as a limited volume fraction transport, provides it this way.
+  const Moose::Functor<Real> * const _face_flux;
 
 private:
   /// The interpolation method to use for the advected quantity

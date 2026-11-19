@@ -45,6 +45,9 @@ protected:
   /// The functor for the face flux.
   const Moose::Functor<Real> & _face_flux;
 
+  /// Whether the supplied face flux already includes face area.
+  const bool _face_flux_is_integrated;
+
   /// The cached right hand side contribution
   Real _flux_rhs_contribution;
 };

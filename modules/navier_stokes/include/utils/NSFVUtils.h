@@ -11,6 +11,11 @@
 
 #include "MathFVUtils.h"
 #include "MooseEnum.h"
+#include "MooseLinearVariableFV.h"
+#include "FaceInfo.h"
+#include "ElemInfo.h"
+
+#include <array>
 
 class MooseObject;
 class InputParameters;
@@ -42,6 +47,54 @@ InputParameters interpolationParameters();
 
 namespace NS
 {
+using LinearFVVelocityVariableArray = std::array<const MooseLinearVariableFVReal *, 3>;
+
+/// The measure of a face: its area times the coordinate factor, so it is a length in 2D Cartesian
+/// and an area in 3D, and carries the axisymmetric factor where one applies.
+inline Real
+faceMeasure(const FaceInfo & fi)
+{
+  return fi.faceArea() * fi.faceCoord();
+}
+
+/// The measure of a cell: its volume times the coordinate factor, the counterpart of faceMeasure
+inline Real
+cellMeasure(const ElemInfo & elem_info)
+{
+  return elem_info.volume() * elem_info.coordFactor();
+}
+
+/**
+ * Adds the standard velocity-component parameters used by linear FV Navier-Stokes objects.
+ */
+void addLinearFVVelocityVariableParams(InputParameters & params);
+
+/**
+ * Gets and validates linear FV velocity variables from the standard u/v/w parameters.
+ */
+LinearFVVelocityVariableArray getLinearFVVelocityVariables(const MooseObject & obj,
+                                                           FEProblemBase & problem,
+                                                           THREAD_ID tid,
+                                                           unsigned int dim);
+
+/**
+ * Reconstructs a velocity vector from linear FV cell-centered velocity component variables.
+ */
+RealVectorValue linearFVCellVelocity(const LinearFVVelocityVariableArray & velocity_vars,
+                                     unsigned int dim,
+                                     const ElemInfo & elem_info,
+                                     const Moose::StateArg & state);
+
+/// The element on the side of a face that the current face type names
+const ElemInfo & linearFVFaceSideElemInfo(const FaceInfo & fi,
+                                          FaceInfo::VarFaceNeighbors face_type);
+/// -1 when the variable lives on the neighbor side of the face, else 1: the face normal points
+/// from element to neighbor, and a boundary quantity is wanted outward of the fluid side
+Real linearFVBoundaryNormalMultiplier(FaceInfo::VarFaceNeighbors face_type);
+/// The face normal oriented out of the side the variable lives on
+RealVectorValue linearFVOutwardUnitNormal(const FaceInfo & fi,
+                                          FaceInfo::VarFaceNeighbors face_type);
+
 /**
  * Enum of the advected interpolation methods supported by FVInterpolationMethod objects.
  */

@@ -326,6 +326,24 @@ MooseLinearVariableFV<OutputType>::getBoundaryCondition(const BoundaryID bd_id) 
 }
 
 template <typename OutputType>
+LinearFVBoundaryCondition *
+MooseLinearVariableFV<OutputType>::getBoundaryCondition(const FaceInfo & fi) const
+{
+  if (fi.boundaryIDs().empty())
+    return nullptr;
+
+  if (fi.boundaryIDs().size() > 1)
+    mooseError("We currently don't support multiple boundary conditions for the same variable on "
+               "the same face.");
+
+  auto * const bc = getBoundaryCondition(*fi.boundaryIDs().begin());
+  if (bc)
+    bc->setupFaceData(&fi, fi.faceType(std::make_pair(this->_var_num, this->_sys_num)));
+
+  return bc;
+}
+
+template <typename OutputType>
 const Elem * const &
 MooseLinearVariableFV<OutputType>::currentElem() const
 {
