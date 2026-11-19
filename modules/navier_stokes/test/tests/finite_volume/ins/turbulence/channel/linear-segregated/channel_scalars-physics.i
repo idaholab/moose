@@ -167,9 +167,15 @@ variables_to_sample = 'vel_x vel_y pressure advected_scalar TKE TKED'
     advected_quantity = 'advected_scalar'
     rhie_chow_user_object = 'ins_rhie_chow_interpolator'
   []
+  # The turbulent diffusion carries scalar out through the inlet, where the scalar is fixed to 0
+  [S_diffusion_in]
+    type = BoundaryLinearFVFluxIntegral
+    boundary = 'left'
+    linearfvkernels = 'scalar_ins_advected_scalar_diffusion'
+  []
   [balance_percent]
     type = ParsedPostprocessor
-    expression = '100 * (0 - S_out + 2 * ${L} * ${H} * ${qs}) / S_out'
-    pp_names = 'S_out'
+    expression = '100 * (2 * ${L} * ${H} * ${qs} - S_out - S_diffusion_in) / (2 * ${L} * ${H} * ${qs})'
+    pp_names = 'S_out S_diffusion_in'
   []
 []

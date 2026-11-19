@@ -39,6 +39,16 @@ public:
   /// Whether the physics is actually creating the scalar advection equations
   bool hasScalarEquations() const { return _has_scalar_equation; }
 
+  /**
+   * Name of the functor holding the molecular plus the turbulent diffusivity of a scalar,
+   * D + mu_t / (rho Sc_t). The linear finite volume discretization assembles one diffusion kernel
+   * per equation, so the turbulence Physics forms this sum and the scalar Physics diffuses with it.
+   */
+  MooseFunctorName effectiveDiffusivityName(const VariableName & scalar_name) const
+  {
+    return prefix() + scalar_name + "_diffusivity_plus_mut/Sc_t";
+  }
+
 protected:
   virtual void actOnAdditionalTasks() override;
   virtual void addFVKernels() override;

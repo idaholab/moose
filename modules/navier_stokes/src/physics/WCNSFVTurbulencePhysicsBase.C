@@ -488,21 +488,29 @@ WCNSFVTurbulencePhysicsBase::addMaterials()
       params.set<MooseFunctorName>(NS::mu_t + "_inverse_factor") = rho_name;
       const auto turbulent_schmidt_number = getParam<std::vector<Real>>("Sc_t");
       assignBlocks(params, _blocks);
-      // LinearFV can only use 1 diffusion kernel per equation, so we create N_scalars mu_effs
+      // LinearFV can only use 1 diffusion kernel per equation, so we create N_scalars mu_effs.
+      // Each holds the scalar diffusivity, when one is given, plus mu_t / (rho Sc_t): the same
+      // sum the WCNSFV discretization forms from two separate diffusion kernels. The turbulent
+      // part is added whether or not a scalar diffusivity is given.
       if (is_linear)
-        for (const auto i : index_range(scalar_diffs))
+      {
+        const auto & scalar_names = _scalar_transport_physics->getAdvectedScalarNames();
+        for (const auto i : index_range(scalar_names))
         {
-          if (!getProblem().hasFunctor(scalar_diffs[i] + "_eff", /*thread_id=*/0))
-          {
-            params.set<MooseFunctorName>("property_name") = scalar_diffs[i] + "_plus_mut/Sc_t";
-            params.set<bool>("add_dynamic_viscosity") = true;
-            params.set<Real>(NS::mu_t + "_extra_inverse_factor") =
-                (turbulent_schmidt_number.size() == 1 ? turbulent_schmidt_number[0]
-                                                      : turbulent_schmidt_number[i]);
-            getProblem().addMaterial(
-                mat_type, prefix() + "mu_eff_passive_scalar_" + std::to_string(i), params);
-          }
+          // No existence check: the scalar diffusion kernel has already requested this functor, so
+          // it would be reported as existing before it is provided
+          params.set<MooseFunctorName>("property_name") =
+              _scalar_transport_physics->effectiveDiffusivityName(scalar_names[i]);
+          // The 'mu' slot of the material carries the scalar diffusivity, not the fluid viscosity
+          params.set<MooseFunctorName>(NS::mu) = scalar_diffs.size() ? scalar_diffs[i] : "0";
+          params.set<bool>("add_dynamic_viscosity") = !scalar_diffs.empty();
+          params.set<Real>(NS::mu_t + "_extra_inverse_factor") =
+              (turbulent_schmidt_number.size() == 1 ? turbulent_schmidt_number[0]
+                                                    : turbulent_schmidt_number[i]);
+          getProblem().addMaterial(
+              mat_type, prefix() + "mu_eff_passive_scalar_" + std::to_string(i), params);
         }
+      }
       // WCNSFV can add multiple diffusion kernels
       else
       {

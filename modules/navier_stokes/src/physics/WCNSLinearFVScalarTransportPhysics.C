@@ -149,7 +149,9 @@ WCNSLinearFVScalarTransportPhysics::addScalarDiffusionKernels()
   const auto passive_scalar_diffusivities =
       getParam<std::vector<MooseFunctorName>>("passive_scalar_diffusivity");
 
-  if (passive_scalar_diffusivities.size())
+  // A turbulence model diffuses the scalar even when no molecular diffusivity is given, as the
+  // turbulent diffusion kernel of the WCNSFV discretization does
+  if (passive_scalar_diffusivities.size() || _has_turbulence_model)
   {
     const std::string kernel_type = "LinearFVDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
@@ -160,8 +162,11 @@ WCNSLinearFVScalarTransportPhysics::addScalarDiffusionKernels()
     {
       const auto & vname = _passive_scalar_names[name_i];
       params.set<LinearVariableName>("variable") = vname;
-      auto diffusivity =
-          passive_scalar_diffusivities[name_i] + (_has_turbulence_model ? "_plus_mut/Sc_t" : "");
+      // With a turbulence model, the turbulence Physics provides the sum of the molecular and the
+      // turbulent diffusivities under this name
+      MooseFunctorName diffusivity = _has_turbulence_model
+                                         ? effectiveDiffusivityName(vname)
+                                         : passive_scalar_diffusivities[name_i];
 
       // In conservative form the diffusive flux is a mass flux too, so the density multiplies the
       // diffusivity along with every other term of the equation. Leaving it out would change the
