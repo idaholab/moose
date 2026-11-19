@@ -1,8 +1,15 @@
 # This example case describes the two-dimensional surface plasmon polariton (SPP) benchmark and verification test 
-#for a flat metal--dielectric interface. An SPP is a transverse-magnetic (TM) wave bound to the interface, oscillating along it and decaying evanescently into both media. Because the metal permittivity is negative, the squared
+#for a flat metal--dielectric interface. An SPP is a transverse-magnetic (TM) wave bound to the interface, 
+#oscillating along it and decaying evanescently into both media. Because the metal permittivity is negative, the squared
 #wavenumber changes sign across the interface, which makes this case a useful check
 #of the interface conditions and of the Robin port conditions in [EMRobinBC.md].
+# Common wave numbers (shared by the functions below)
+ky_p = 0.444288293816
+ky_m = ${fparse 2*ky_p}
+kx   = ${fparse sqrt(2)*ky_p}
 
+# Magnitude of the real part of the interface coefficient (sign is set where it is used)
+coeff_real_mag = 0.628318530718
 
 [Mesh]
   [gen]
@@ -60,19 +67,19 @@
 [Functions]
   [inc_y]
     type = ParsedFunction
-    expression = 'ky_p:=0.444288293816;ky_m:=2*0.444288293816;if(y>=0, exp(-ky_p*y), exp(ky_m*y))'
+    expression = 'if(y>=0, exp(-${ky_p}*y), exp(${ky_m}*y))'
   []
   [top_x]
     type = ParsedFunction
-    expression = 'kx:=sqrt(2)*0.444288293816;cos(kx*x)'
+    expression = 'cos(${kx}*x)'
   []
   [upper_IC_func]
     type = ParsedFunction
-    expression = 'kx:=sqrt(2)*0.444288293816;ky_p:=0.444288293816;if(y>=0, exp(-ky_p*y)*cos(kx*x), 0)'
+    expression = 'if(y>=0, exp(-${ky_p}*y)*cos(${kx}*x), 0)'
   []
   [lower_IC_func]
     type = ParsedFunction
-    expression = 'kx:=sqrt(2)*0.444288293816;ky_m:=2*0.444288293816;if(y<0, exp(ky_m*y)*cos(kx*x), 0)'
+    expression = 'if(y<0, exp(${ky_m}*y)*cos(${kx}*x), 0)'
   []
 []
 
@@ -150,7 +157,7 @@
     variable = E_real_upper
     mode= port
     sign = positive
-    coeff_real = -0.628318530718
+    coeff_real = ${fparse -coeff_real_mag}
     coeff_imag = 0.0
     boundary = left
     field_real = E_real_upper
@@ -162,7 +169,7 @@
     variable = E_real_upper
     mode= absorbing
     sign = negative
-    coeff_real = 0.628318530718
+    coeff_real = ${coeff_real_mag}
     coeff_imag = 0.0
     boundary = right
     field_real = E_real_upper
@@ -175,7 +182,7 @@
     variable = E_real_lower
     mode= port
     sign = positive
-    coeff_real = -0.628318530718
+    coeff_real = ${fparse -coeff_real_mag}
     coeff_imag = 0.0
     boundary = left
     field_real = E_real_lower
@@ -187,7 +194,7 @@
     variable = E_real_lower
     mode= absorbing
     sign = negative
-    coeff_real = 0.628318530718
+    coeff_real = ${coeff_real_mag}
     coeff_imag = 0.0
     boundary = right
     field_real = E_real_lower
@@ -200,7 +207,7 @@
     variable = E_imag_upper
     mode= port
     sign = positive
-    coeff_real = -0.628318530718
+    coeff_real = ${fparse -coeff_real_mag}
     coeff_imag = 0.0
     boundary = left
     field_real = E_real_upper
@@ -212,7 +219,7 @@
     variable = E_imag_upper
     mode= absorbing
     sign = negative
-    coeff_real = 0.628318530718
+    coeff_real = ${coeff_real_mag}
     coeff_imag = 0.0
     boundary = right
     field_real = E_real_upper
@@ -225,7 +232,7 @@
     variable = E_imag_lower
     mode= port
     sign = positive
-    coeff_real = -0.628318530718
+    coeff_real = ${fparse -coeff_real_mag}
     coeff_imag = 0.0
     boundary = left
     field_real = E_real_lower
@@ -237,7 +244,7 @@
     variable = E_imag_lower
     mode= absorbing
     sign = negative
-    coeff_real = 0.628318530718
+    coeff_real = ${coeff_real_mag}
     coeff_imag = 0.0
     boundary = right
     field_real = E_real_lower
