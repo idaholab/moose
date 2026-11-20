@@ -618,6 +618,16 @@ MooseMesh::possiblyRebuildNodeToElemMap()
   _node_to_elem_map.clear();
   _node_to_elem_map_built = false;
   internalNodeToElemMap();
+
+  // Quadrature nodes are not part of the libMesh mesh, so the rebuild above drops the entries
+  // addQuadratureNode() made for them. Restore them: geometric search relies on them to decide
+  // which processor tracks a quadrature node.
+  for (const auto & [elem_id, side_map] : _elem_to_side_to_qp_to_quadrature_nodes)
+    if (getMesh().elem_ptr(elem_id)->active())
+      for (const auto & side_qps : side_map)
+        for (const auto & qp_qnode : side_qps.second)
+          _node_to_elem_map[qp_qnode.second->id()].push_back(elem_id);
+
   return true;
 }
 

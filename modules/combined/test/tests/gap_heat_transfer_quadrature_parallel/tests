@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#34516'
+  design = 'GapHeatTransfer.md'
+
+  [quadrature_parallel_slip]
+    type = CSVDiff
+    input = quadrature_parallel_slip.i
+    csvdiff = quadrature_parallel_slip_out.csv
+    min_parallel = 3
+    requirement = 'The system shall keep quadrature thermal contact gap distances up to date in parallel when kinematic mechanical contact shares the surface pair and the surfaces slide past each other.'
+  []
+[]
