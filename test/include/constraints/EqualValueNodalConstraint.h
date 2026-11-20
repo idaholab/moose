@@ -19,9 +19,11 @@ public:
   EqualValueNodalConstraint(const InputParameters & parameters);
   virtual ~EqualValueNodalConstraint();
 
+  virtual void updateConnectivity() override;
+
 protected:
-  virtual Real computeQpResidual(Moose::ConstraintType type);
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
+  virtual Real computeQpResidual(Moose::ConstraintType type) override;
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
   Real _penalty;
 };

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "EqualValueNodalConstraint.h"
+#include "MooseMesh.h"
 
 registerMooseObject("MooseTestApp", EqualValueNodalConstraint);
 
@@ -24,7 +25,16 @@ EqualValueNodalConstraint::validParams()
 EqualValueNodalConstraint::EqualValueNodalConstraint(const InputParameters & parameters)
   : NodalConstraint(parameters), _penalty(getParam<Real>("penalty"))
 {
-  _connected_nodes.push_back(getParam<unsigned int>("secondary"));
+  updateConstrainedNodes();
+}
+
+void
+EqualValueNodalConstraint::updateConnectivity()
+{
+  _connected_nodes = localSecondaryNodes({getParam<unsigned int>("secondary")});
+
+  // Every process keeps the primary node, since the processes owning secondary nodes need its
+  // value.
   _primary_node_vector.push_back(getParam<unsigned int>("primary"));
 }
 
