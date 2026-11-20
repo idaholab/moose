@@ -43,11 +43,9 @@ ComputeLagrangianStressBase::ComputeLagrangianStressBase(const InputParameters &
     _dpk1_d_grad_u(declareProperty<RankFourTensor>(_base_name + "dpk1_d_grad_u")),
     _d_F_d_grad_u(getMaterialPropertyByName<RankFourTensor>(
         _base_name + "d_deformation_gradient_d_grad_displacement")),
-    _F_ust(
-        getMaterialPropertyByName<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
-    _F_ust_inv(getMaterialPropertyByName<RankTwoTensor>(
+    _inverse_unstabilized_deformation_gradient(getMaterialPropertyByName<RankTwoTensor>(
         _base_name + "inverse_unstabilized_deformation_gradient")),
-    _F_ust_det(
+    _det_unstabilized_deformation_gradient(
         getMaterialPropertyByName<Real>(_base_name + "det_unstabilized_deformation_gradient")),
     _d_deformation_gradient_increment_d_F(getMaterialPropertyByName<RankFourTensor>(
         _base_name + "d_spatial_deformation_gradient_increment_d_deformation_gradient")),
@@ -93,7 +91,8 @@ ComputeLagrangianStressBase::pullBackCauchyStress()
   // F_ust^{-1} and det(F_ust) are published once per qp by the strain calculator; reuse them
   // instead of recomputing a 3x3 inverse + determinant here on every residual/Jacobian sweep.
   if (_large_kinematics)
-    _pk1_stress[_qp] = _F_ust_det[_qp] * _cauchy_stress[_qp] * _F_ust_inv[_qp].transpose();
+    _pk1_stress[_qp] = _det_unstabilized_deformation_gradient[_qp] * _cauchy_stress[_qp] *
+                       _inverse_unstabilized_deformation_gradient[_qp].transpose();
   // Small kinematics: PK1 = sigma (no wrap)
   else
     _pk1_stress[_qp] = _cauchy_stress[_qp];
@@ -107,8 +106,8 @@ ComputeLagrangianStressBase::pullBackCauchyJacobian(const RankFourTensor dsigma_
   if (_large_kinematics)
   {
     usingTensorIndices(i_, j_, k_, l_);
-    const RankTwoTensor & F_ust_inv = _F_ust_inv[_qp];
-    const Real det_F_ust = _F_ust_det[_qp];
+    const RankTwoTensor & F_ust_inv = _inverse_unstabilized_deformation_gradient[_qp];
+    const Real det_F_ust = _det_unstabilized_deformation_gradient[_qp];
     // Geometric pieces of dPK1/d(F_ust) (independent of F-bar):
     const RankFourTensor geom = _pk1_stress[_qp].outerProduct(F_ust_inv.transpose()) -
                                 _pk1_stress[_qp].times<i_, l_, j_, k_>(F_ust_inv);

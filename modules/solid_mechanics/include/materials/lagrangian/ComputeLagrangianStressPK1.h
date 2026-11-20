@@ -48,9 +48,9 @@ protected:
 
   /// Inverse incremental deformation gradient
   const MaterialProperty<RankTwoTensor> & _inv_df;
-  /// Inverse F-bar-stabilized deformation gradient (= _F^{-1})
+  /// Inverse F-bar-stabilized deformation gradient (= `_stabilized_deformation_gradient`^{-1})
   const MaterialProperty<RankTwoTensor> & _inv_def_grad;
   /// F-bar-stabilized deformation gradient (= the strain calc's published `_F`). The
   /// constitutive PK1 stress is a function of it, and the PK1 -> sigma push-forward uses it.
-  const MaterialProperty<RankTwoTensor> & _F;
+  const MaterialProperty<RankTwoTensor> & _stabilized_deformation_gradient;
 };

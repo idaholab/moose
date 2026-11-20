@@ -46,7 +46,7 @@ ComputeLagrangianStressCustomPK2::computeQpPK1Stress()
   // Pbar = Fbar * Sbar, with Fbar the strain calc's F-bar'd `_F` (which is what NEML2 sees
   // as `forces/F`) and Sbar = PK2(Fbar). The PK1 base pushes it forward with Fbar to the Cauchy
   // stress.
-  const RankTwoTensor & F_bar = _F[_qp];
+  const RankTwoTensor & F_bar = _stabilized_deformation_gradient[_qp];
   const RankTwoTensor & S_bar = _pk2[_qp];
   _pk1_stress[_qp] = F_bar * S_bar;
 

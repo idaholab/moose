@@ -50,15 +50,17 @@ ComputeStVenantKirchhoffStress::computeQpPK2Stress()
   // use a linear strain measure
 
   // Jacobian is the same for both the small and Green-Lagrange strains
-  _C[_qp] = _elasticity_tensor[_qp];
+  _pk2_jacobian[_qp] = _elasticity_tensor[_qp];
 
   // Get the right strain
   RankTwoTensor strain;
   if (_large_kinematics) // Large deformations = Green-Lagrange strain
     strain = _E[_qp];
   else // Small deformations = linear strain
-    strain = 0.5 * (_F[_qp] + _F[_qp].transpose()) - RankTwoTensor::Identity();
+    strain = 0.5 * (_stabilized_deformation_gradient[_qp] +
+                    _stabilized_deformation_gradient[_qp].transpose()) -
+             RankTwoTensor::Identity();
 
   // The stress update is linear with the correct strains/frame
-  _S[_qp] = _C[_qp] * strain;
+  _pk2_stress[_qp] = _pk2_jacobian[_qp] * strain;
 }

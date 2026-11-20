@@ -111,15 +111,13 @@ protected:
   /// d(F)/d(grad u_{n+1}) (= alpha * IdentityFour for the generalized midpoint rule)
   const MaterialProperty<RankFourTensor> & _d_F_d_grad_u;
 
-  /// Unstabilized deformation gradient (= F_actual at alpha = 1). Used to pull the Cauchy stress
-  /// back to the 1st PK stress, so that the residual is the equilibrium of sigma on the deformed
-  /// mesh. F-bar enters only through sigma, which the constitutive model evaluates at the
-  /// F-bar-stabilized deformation gradient.
-  const MaterialProperty<RankTwoTensor> & _F_ust;
-  /// Inverse and determinant of the unstabilized deformation gradient, published by the strain
-  /// calculator
-  const MaterialProperty<RankTwoTensor> & _F_ust_inv;
-  const MaterialProperty<Real> & _F_ust_det;
+  /// Inverse and determinant of the unstabilized deformation gradient (= F_actual at alpha = 1),
+  /// published by the strain calculator. Used to pull the Cauchy stress back to the 1st PK
+  /// stress, so that the residual is the equilibrium of sigma on the deformed mesh. F-bar enters
+  /// only through sigma, which the constitutive model evaluates at the F-bar-stabilized
+  /// deformation gradient.
+  const MaterialProperty<RankTwoTensor> & _inverse_unstabilized_deformation_gradient;
+  const MaterialProperty<Real> & _det_unstabilized_deformation_gradient;
 
   /// d(spatial velocity gradient increment)/d(F_stab). Used in the sigma-via-dL chain to
   /// build pk1_jacobian / cauchy_jacobian.

@@ -25,7 +25,8 @@ ComputeLagrangianStressCauchy::ComputeLagrangianStressCauchy(const InputParamete
                                                      "inverse_incremental_deformation_gradient")),
     _inv_def_grad(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "inverse_deformation_gradient")),
-    _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient"))
+    _stabilized_deformation_gradient(
+        getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient"))
 {
 }
 

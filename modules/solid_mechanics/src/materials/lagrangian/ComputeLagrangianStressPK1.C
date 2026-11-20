@@ -25,7 +25,8 @@ ComputeLagrangianStressPK1::ComputeLagrangianStressPK1(const InputParameters & p
                                                      "inverse_incremental_deformation_gradient")),
     _inv_def_grad(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "inverse_deformation_gradient")),
-    _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient"))
+    _stabilized_deformation_gradient(
+        getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient"))
 {
 }
 
@@ -53,7 +54,7 @@ ComputeLagrangianStressPK1::computeQpCauchyStress()
                              _fe_problem.currentlyComputingResidualAndJacobian();
   if (_large_kinematics)
   {
-    const RankTwoTensor & F_bar = _F[_qp];
+    const RankTwoTensor & F_bar = _stabilized_deformation_gradient[_qp];
     const Real J_bar = F_bar.det();
     const RankTwoTensor P_bar = _pk1_stress[_qp];
     _cauchy_stress[_qp] = P_bar * F_bar.transpose() / J_bar;

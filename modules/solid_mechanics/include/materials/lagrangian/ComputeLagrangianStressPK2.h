@@ -37,7 +37,7 @@ protected:
   /// Green-Lagrange strain
   MaterialProperty<RankTwoTensor> & _E;
   /// 2nd PK stress
-  MaterialProperty<RankTwoTensor> & _S;
+  MaterialProperty<RankTwoTensor> & _pk2_stress;
   /// 2nd PK tangent (dS/dE)
-  MaterialProperty<RankFourTensor> & _C;
+  MaterialProperty<RankFourTensor> & _pk2_jacobian;
 };
