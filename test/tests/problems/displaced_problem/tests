@@ -1,0 +1,72 @@
+[Tests]
+  issues = '#34039'
+  design = 'DisplacedProblem.md'
+  [nodes_without_dofs]
+    requirement = 'The system shall displace mesh nodes that carry no degrees of freedom of the '
+                  'displacement variables, consistently with the displacement field, for'
+    [tet14]
+      type = CSVDiff
+      input = 'nodes_without_dofs.i'
+      csvdiff = 'nodes_without_dofs_out.csv'
+      detail = 'TET14 elements with second order displacements,'
+    []
+    [pyramid18]
+      type = CSVDiff
+      input = 'nodes_without_dofs.i'
+      csvdiff = 'nodes_without_dofs_pyramid18_out.csv'
+      cli_args = 'Mesh/gmg/elem_type=PYRAMID5 Outputs/file_base=nodes_without_dofs_pyramid18_out'
+      detail = 'PYRAMID18 elements with second order displacements,'
+    []
+    [tri7]
+      type = CSVDiff
+      input = 'nodes_without_dofs.i'
+      csvdiff = 'nodes_without_dofs_tri7_out.csv'
+      cli_args = "Mesh/gmg/dim=2 Mesh/gmg/elem_type=TRI3 GlobalParams/displacements='disp_x disp_y' "
+                 "AuxVariables/disp_y/InitialCondition/type=FunctionIC "
+                 "AuxVariables/disp_y/InitialCondition/function='${a} * x * (x + y)' "
+                 "AuxVariables/inactive=disp_z Postprocessors/z4_integral/function='y^4' "
+                 "Outputs/file_base=nodes_without_dofs_tri7_out"
+      detail = 'TRI7 elements with second order displacements, and'
+    []
+    [hex27_first]
+      type = CSVDiff
+      input = 'nodes_without_dofs.i'
+      csvdiff = 'nodes_without_dofs_hex27_first_out.csv'
+      # A linear displacement is represented exactly, so the displaced volume is 1 + a
+      cli_args = "Mesh/gmg/elem_type=HEX8 Mesh/complete/conversion_type=SECOND_ORDER "
+                 "AuxVariables/disp_x/order=FIRST AuxVariables/disp_y/order=FIRST "
+                 "AuxVariables/disp_z/order=FIRST "
+                 "AuxVariables/disp_z/InitialCondition/function='${a} * (x + z)' "
+                 "Outputs/file_base=nodes_without_dofs_hex27_first_out"
+      detail = 'HEX27 elements with first order displacements.'
+    []
+  []
+  [prism21_first]
+    type = RunException
+    input = 'nodes_without_dofs.i'
+    cli_args = "Mesh/gmg/elem_type=PRISM6 AuxVariables/disp_x/order=FIRST "
+               "AuxVariables/disp_y/order=FIRST AuxVariables/disp_z/order=FIRST"
+    expect_err = "The displacement variable 'disp_x' must be at least SECOND order on PRISM21 "
+                 "elements"
+    requirement = 'The system shall report an error when a displacement variable below second order '
+                  'is defined on PRISM21 elements, whose interior node it cannot displace.'
+  []
+  [nodes_without_dofs_jacobian]
+    requirement = 'The system shall compute exact AD Jacobians of element and side integrals on the '
+                  'displaced mesh with respect to the displacements of mesh nodes that carry no '
+                  'degrees of freedom of the displacement variables, for'
+    [tet14]
+      type = PetscJacobianTester
+      input = 'nodes_without_dofs_jacobian.i'
+      detail = 'TET14 elements with second order displacements and'
+    []
+    [tri7]
+      type = PetscJacobianTester
+      input = 'nodes_without_dofs_jacobian.i'
+      cli_args = "Mesh/gmg/dim=2 Mesh/gmg/elem_type=TRI3 GlobalParams/displacements='disp_x disp_y' "
+                 "Variables/inactive=disp_z Kernels/inactive=diff_z "
+                 "Variables/disp_y/InitialCondition/function='0.1 * x * (x + y)'"
+      detail = 'TRI7 elements with second order displacements.'
+    []
+  []
+[]
