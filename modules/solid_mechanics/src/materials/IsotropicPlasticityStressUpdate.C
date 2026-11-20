@@ -38,6 +38,9 @@ IsotropicPlasticityStressUpdateTempl<is_ad>::validParams()
       "String that is prepended to the plastic_strain Material Property",
       "This has been replaced by the 'base_name' parameter");
   params.set<std::string>("effective_inelastic_strain_name") = "effective_plastic_strain";
+  // Plasticity has a yield surface, so warm starting the return mapping solve from the previous
+  // step's converged increment is beneficial and robust (guarded by the yield condition below).
+  params.set<bool>("use_warm_start_initial_guess") = true;
 
   return params;
 }
@@ -116,6 +119,16 @@ IsotropicPlasticityStressUpdateTempl<is_ad>::computeStressInitialize(
   _yield_condition = effective_trial_stress - _hardening_variable_old[_qp] - _yield_stress;
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+IsotropicPlasticityStressUpdateTempl<is_ad>::initialGuess(
+    const GenericReal<is_ad> & effective_trial_stress)
+{
+  return _yield_condition > 0.0
+             ? RadialReturnStressUpdateTempl<is_ad>::initialGuess(effective_trial_stress)
+             : 0.0;
 }
 
 template <bool is_ad>
