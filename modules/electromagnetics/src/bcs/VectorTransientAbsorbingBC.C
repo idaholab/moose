@@ -41,12 +41,10 @@ VectorTransientAbsorbingBC::VectorTransientAbsorbingBC(const InputParameters & p
     _component(getParam<MooseEnum>("component")),
 
     _coupled_val(coupledVectorValue("coupled_field")),
-    _coupled_var_num(coupled("coupled_field")),
 
     _u_dot(dot()),
     _coupled_dot(coupledVectorDot("coupled_field")),
-    _du_dot_du(dotDu()),
-    _coupled_dot_du(coupledVectorDotDu("coupled_field"))
+    _du_dot_du(dotDu())
 {
 }
 
@@ -102,19 +100,5 @@ VectorTransientAbsorbingBC::computeQpJacobian()
   RealVectorValue prefix =
       EM::mu_0 * _admittance.value(_t, _q_point[_qp]) * _test[_i][_qp].cross(_normals[_qp]);
 
-  return prefix * _normals[_qp].cross(_du_dot_du[_qp] * _phi[_j][_qp]);
-}
-
-Real
-VectorTransientAbsorbingBC::computeQpOffDiagJacobian(unsigned int jvar)
-{
-  if (jvar == _coupled_var_num)
-  {
-    RealVectorValue prefix =
-        EM::mu_0 * _admittance.value(_t, _q_point[_qp]) * _test[_i][_qp].cross(_normals[_qp]);
-
-    return prefix * _normals[_qp].cross(_coupled_dot_du[_qp] * _phi[_j][_qp]);
-  }
-  else
-    return 0.0;
+  return -prefix * _normals[_qp].cross(_du_dot_du[_qp] * _phi[_j][_qp]);
 }
