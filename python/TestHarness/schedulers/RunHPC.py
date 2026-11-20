@@ -184,6 +184,18 @@ class RunHPC(Scheduler):
             None if self.options.hpc_no_hold else ThreadPool(processes=10)
         )
 
+        # Load the pre-source if it exists; must be done before
+        # setupRunEnvironment(), which splices it into the submission template
+        self.pre_source_contents = None
+        if self.options.hpc_pre_source:
+            if not os.path.exists(self.options.hpc_pre_source):
+                print(
+                    f"ERROR: --hpc-pre-source path {self.options.hpc_pre_source} does not exist"
+                )
+                sys.exit(1)
+            with open(self.options.hpc_pre_source, "r") as f:
+                self.pre_source_contents = f.read()
+
         # Build the base submission environemnt for a job
         self.submit_env, self.app_exec_prefix, self.app_exec_suffix = (
             self.setupRunEnvironment(harness)
@@ -207,25 +219,12 @@ class RunHPC(Scheduler):
                 )
                 sys.exit(1)
 
-        if self.options.hpc_pre_source and not os.path.exists(
-            self.options.hpc_pre_source
-        ):
-            print(
-                f"ERROR: --hpc-pre-source path {self.options.hpc_pre_source} does not exist"
-            )
-            sys.exit(1)
         if self.options.hpc and self.options.pedantic_checks:
             print("ERROR: --hpc and --pedantic-checks cannot be used simultaneously")
             sys.exit(1)
         if self.options.hpc and self.options.jobs:
             print("ERROR: --hpc and -j|--jobs cannot be used simultaneously")
             sys.exit(1)
-
-        # Load the pre-source if it exists
-        self.pre_source_contents = None
-        if self.options.hpc_pre_source:
-            with open(self.options.hpc_pre_source, "r") as f:
-                self.pre_source_contents = f.read()
 
         # Load the submission template
         template_path = os.path.join(
@@ -1113,7 +1112,7 @@ class RunHPC(Scheduler):
         # --hpc-pre-source contents
         if self.options.hpc_pre_source:
             submit_env["PRE_SOURCE_FILE"] = self.options.hpc_pre_source
-            submit_env["PRE_SOURCE_CONTENTS"] = self.source_contents
+            submit_env["PRE_SOURCE_CONTENTS"] = self.pre_source_contents
 
         # If running on INL HPC, minimize the bindpath; this is a configuration
         # option for the container mpi modules on INL HPC
