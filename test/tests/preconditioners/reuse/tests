@@ -5,7 +5,7 @@
     type = CSVDiff
     input = convergence.i
     csvdiff = base_case.csv
-    requirement = 'Convergence matches previous version of MOOSE without the '
+    requirement = 'The system shall match the convergence of the previous version of MOOSE without the '
                   'preconditioner reuse system'
   []
   [with_reuse]
@@ -17,7 +17,7 @@
     # preconditioner is reused. Thus changing the number of linear iterations for
     # a given timestep, which this test is golded on.
     restep = false
-    requirement = 'Preconditioner is reused until the linear iterations exceed '
+    requirement = 'The system shall reuse the preconditioner until the linear iterations exceed '
                   'the value of reuse_preconditioner_max_its upon which the '
                   'system recalculates the preconditioner'
   []
@@ -30,7 +30,7 @@
     # preconditioner is reused. Thus changing the number of linear iterations for
     # a given timestep, which this test is golded on.
     restep = false
-    requirement = 'A new preconditioner is formed if the system of equations changes '
+    requirement = 'The system shall form a new preconditioner if the system of equations changes '
                   'for example here through mesh refinement'
   []
 []

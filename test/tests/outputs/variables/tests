@@ -56,7 +56,7 @@
     max_parallel = 2
     exodiff = 'nemesis_hide_out.n.2.0 nemesis_hide_out.n.2.1'
 
-    requirement = "The variables specified in an Output object's 'hide = ' list shall not appear in the output file."
+    requirement = "The system shall exclude the variables specified in an Output object's 'hide = ' list from the output file."
     issues = '#1895'
   [../]
 []

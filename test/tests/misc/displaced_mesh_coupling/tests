@@ -2,7 +2,7 @@
   design = 'MooseApp.md'
   issues = '#9659'
   [./g]
-    requirement = 'The system allow coupling between variables on or off displaced meshes'
+    requirement = 'The system shall allow coupling between variables on or off displaced meshes'
     [./nonad]
       type = Exodiff
       input = 'nonad.i'

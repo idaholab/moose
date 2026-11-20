@@ -3,7 +3,7 @@
   design = 'PerfGraph.md'
 
   [errors]
-    requirement = 'The PerfGraph shall report a reasonable error when'
+    requirement = 'The system shall report, in the PerfGraph, a reasonable error when'
 
     [register_no_section]
       type = RunException
