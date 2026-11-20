@@ -39,6 +39,68 @@
     capabilities = 'method!=dbg'
     valgrind = 'heavy'
   []
+  [GrandPotentialStrictMassConservationTwoSpecies]
+    type = 'CSVDiff'
+    input = 'GrandPotentialStrictMassConservationTwoSpecies.i'
+    csvdiff = 'GrandPotentialStrictMassConservationTwoSpecies_out.csv'
+    # c_err and w_err vanish for the exact solution and come out at ~1e-8 here, limited by the
+    # linear and nonlinear solve tolerances. 1e-6 leaves room for solver and partitioning
+    # differences; coupling the second species to the first gives |w_err| ~ 7.
+    abs_zero = 1e-6
+    issues = '#23329 #34237'
+    design = '/GrandPotentialKernelAction.md'
+    requirement = 'The system shall solve the strict mass conservation Grand Potential '
+                  'formulation for multiple species, each with its own per-phase equilibrium '
+                  'concentrations and curvature coefficients'
+    capabilities = 'method!=dbg'
+    valgrind = 'heavy'
+  []
+  [GrandPotentialStrictMassConservationTwoSpecies_jac]
+    type = 'PetscJacobianTester'
+    input = 'GrandPotentialStrictMassConservationTwoSpecies.i'
+    # Nonzero chemical potentials so the order parameter derivatives of the per-species
+    # coefficients and mobilities enter the Jacobian; at w = 0 they multiply zero
+    cli_args = 'Mesh/nx=4 Mesh/ny=4 Executioner/num_steps=1 Outputs/csv=false '
+               'ICs/w_IC/type=ConstantIC ICs/w_IC/variable=w ICs/w_IC/value=-5 '
+               'ICs/w2_IC/type=ConstantIC ICs/w2_IC/variable=w2 ICs/w2_IC/value=-10'
+    issues = '#34237'
+    design = '/GrandPotentialKernelAction.md'
+    requirement = 'The system shall compute the Jacobian of the strict mass conservation Grand '
+                  'Potential formulation with multiple species, including the coupling between '
+                  'each species and the order parameters'
+    capabilities = 'method!=dbg'
+  []
+  [StrictMassConservationErrors]
+    issues = '#23329 #34237'
+    design = '/GrandPotentialKernelAction.md'
+    requirement = 'The system shall report an error for the strict mass conservation Grand '
+                  'Potential formulation if'
+    [concentrations_size]
+      type = RunException
+      input = 'GrandPotentialStrictMassConservation.i'
+      cli_args = "Modules/PhaseField/GrandPotential/concentrations='c c2'"
+      expect_err = "Provide as many concentrations as entries in 'chemical_potentials'."
+      detail = 'the number of concentrations differs from the number of chemical potentials, or'
+    []
+    [coefficients_size]
+      type = RunException
+      input = 'GrandPotentialStrictMassConservation.i'
+      cli_args = "Modules/PhaseField/GrandPotential/hj_c_min='hv_c_min'"
+      expect_err = "Provide length of 'chemical_potentials' \* length of "
+                   "'switching_function_names' values."
+      detail = 'the number of per-phase concentration minima is not the number of chemical '
+               'potentials times the number of phases, or'
+    []
+    [curvature_coefficients_size]
+      type = RunException
+      input = 'GrandPotentialStrictMassConservation.i'
+      cli_args = "Modules/PhaseField/GrandPotential/hj_over_kVa='hv_over_kVa'"
+      expect_err = "Provide length of 'chemical_potentials' \* length of "
+                   "'switching_function_names' values."
+      detail = 'the number of per-phase curvature coefficients is not the number of chemical '
+               'potentials times the number of phases.'
+    []
+  []
   [GrandPotentialInterface]
     type = 'CSVDiff'
     input = 'GrandPotentialInterface.i'
