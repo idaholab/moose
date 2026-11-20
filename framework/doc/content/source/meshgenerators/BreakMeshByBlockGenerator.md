@@ -10,6 +10,8 @@ To split the mesh, nodes shared by multiple blocks are duplicated N-1 times (whe
 
 Two block restriction options are provided: [!param](/Mesh/BreakMeshByBlockGenerator/surrounding_blocks) and [!param](/Mesh/BreakMeshByBlockGenerator/block_pairs). The [!param](/Mesh/BreakMeshByBlockGenerator/surrounding_blocks) option creates interfaces both between the listed blocks and between the listed blocks and the rest of the mesh. The [!param](/Mesh/BreakMeshByBlockGenerator/block_pairs) option creates interfaces only between the specified block pairs. Multiple block pairs are separated by semicolons (`;`). These two options cannot be used together. When neither is specified, interfaces are generated between all adjacent blocks.
 
+Elements on the two sides of a generated interface are connected as [disjoint neighbors](syntax/Mesh/index.md#disjoint-neighbors), which libMesh matches by the position of their sides. Because the two sides separate when the mesh deforms, a broken mesh cannot be used with a displaced mesh: set `use_displaced_mesh = false` in the `[Mesh]` block.
+
 ## Example Input File Syntax
 
 ### Mesh Splitting

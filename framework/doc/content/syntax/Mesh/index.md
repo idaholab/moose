@@ -249,7 +249,37 @@ $ mpiexec -n 1000 moose-app-opt -i your_input-file.i --use-split
 
 For more details see "[Mesh Splitting](/Mesh/splitting.md)".
 
-## Displaced Mesh
+## Disjoint Neighbors id=disjoint-neighbors
+
+A mesh may be cut along internal surfaces so that the elements on opposite sides of the cut share
+no nodes, for example by [BreakMeshByBlockGenerator.md]. The mesh is then topologically
+discontiguous across the cut, and a continuous (e.g. Lagrange) variable may be discontinuous
+there. To keep the two sides of the cut available to each other, the cut surfaces are registered
+with libMesh as disjoint neighbor boundary pairs. Each pair consists of two sidesets with separate
+boundary IDs, one for the sides on each side of the cut, such as `blockA_blockB` and
+`blockB_blockA`. libMesh matches each side in one sideset to the coincident side in the other and
+treats the two elements as face neighbors even though they share no nodes. Because the pairing is
+stored with the mesh rather than inferred from shared nodes, libMesh can also rebuild these
+neighbor links on a [distributed mesh](#replicated-and-distributed-mesh), where the matching
+element may be on another process.
+
+Only objects that use the neighbor element across a side couple the two sides of a cut, such as
+[InterfaceKernels](syntax/InterfaceKernels/index.md), interface materials, and cohesive zone
+models. Without such objects, the regions on either side of a cut are independent. In the
+following example, the variable `u` on block 0 and the variable `v` on block 1 are coupled across
+the cut created by [BreakMeshByBlockGenerator.md] only through the interface kernel on the
+directional boundary `Block0_Block1`:
+
+!listing test/tests/materials/interface_material/interface_value_material_split_mesh.i
+         block=Mesh InterfaceKernels
+
+Disjoint neighbor pairing relies on the two sides of each pair coinciding. It is therefore not
+compatible with a [displaced mesh](#displaced-mesh), on which the two sides separate as the mesh
+deforms, and MOOSE reports an error if a displaced mesh is requested for a mesh with disjoint
+neighbor boundary pairs. Set `use_displaced_mesh = false` in the `[Mesh]` block, or use a
+mortar-based formulation, which does not rely on this pairing.
+
+## Displaced Mesh id=displaced-mesh
 
 Calculations can take place in either the initial mesh configuration or, when requested, the
 "displaced" configuration. To enable displacements, provide a vector of displacement variable names
