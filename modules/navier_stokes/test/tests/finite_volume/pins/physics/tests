@@ -35,6 +35,7 @@
     requirement = 'The system shall use the solid thermal conductivity of a porous medium as an effective conductivity in the linear finite volume solid energy equation, so that the steady conduction temperature rise in a heated porous solid does not depend on the porosity, for a porosity of'
     design = 'PNSLinearFVSolidHeatTransferPhysics.md'
     issues = '#31995 #34448'
+    max_threads = 1 # see libmesh issue #3808
     [low-porosity]
       type = 'CSVDiff'
       input = solid_conduction_porosity_linear.i
@@ -54,6 +55,7 @@
     requirement = 'The system shall support an anisotropic effective solid thermal conductivity in the linear finite volume solid energy equation of a porous medium'
     design = 'PNSLinearFVSolidHeatTransferPhysics.md LinearFVAnisotropicDiffusion.md'
     issues = '#31995'
+    max_threads = 1 # see libmesh issue #3808
     [conduction]
       type = 'CSVDiff'
       input = solid_conduction_anisotropic_linear.i
@@ -77,5 +79,6 @@
     requirement = 'The system shall conserve the enthalpy of a stationary porous solid with a temperature-dependent specific heat in the linear finite volume solid energy equation, matching the analytical temperature of a uniformly heated insulated solid.'
     design = 'PNSLinearFVSolidHeatTransferPhysics.md'
     issues = '#31995'
+    max_threads = 1 # see libmesh issue #3808
   []
 []
