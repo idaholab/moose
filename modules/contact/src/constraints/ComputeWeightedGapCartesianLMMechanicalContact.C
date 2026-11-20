@@ -358,7 +358,7 @@ ComputeWeightedGapCartesianLMMechanicalContact::enforceConstraintOnDof(const Dof
   ADReal normal_pressure_value = lm_x * normal(0) + lm_y * normal(1);
   ADReal tangential_pressure_value = lm_x * tangents[0](0) + lm_y * tangents[0](1);
 
-  ADReal tangential_pressure_value_dir;
+  ADReal tangential_pressure_value_dir = 0;
 
   if (_has_disp_z)
   {

@@ -66,7 +66,8 @@
     # Two processes on a distributed mesh split this interface so that a secondary node's incident
     # faces lie on different processes
     cli_args = 'Mesh/parallel_type=distributed Problem/error_on_jacobian_nonzero_reallocation=true '
-               'Outputs/exodus=false'
+               'Outputs/exodus=false '
+               'Outputs/file_base=modular_displaced_point_neighbor_coupling_out'
     min_parallel = 2
     max_parallel = 2
     issues = '#34212'
@@ -77,7 +78,8 @@
   [modular_displaced_without_displacements]
     type = RunApp
     input = 'modular_gap_heat_transfer_mortar_displaced.i'
-    cli_args = "Constraints/ced/displacements='' Outputs/exodus=false"
+    cli_args = "Constraints/ced/displacements='' Outputs/exodus=false "
+               "Outputs/file_base=modular_displaced_without_displacements_out"
     issues = '#34212'
     requirement = "The system shall be able to compute mortar gap heat transfer on a displaced mesh "
                   "when the gap conductance constraint is not given the displacement variables."
