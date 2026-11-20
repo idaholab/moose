@@ -22,6 +22,8 @@
 #include "libmesh/type_n_tensor.h"
 #include "libmesh/fe_interface.h"
 
+#include <algorithm>
+
 template <typename OutputType>
 MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputType> & var,
                                                  SystemBase & sys,
@@ -561,6 +563,16 @@ MooseVariableData<OutputType>::computeValuesInternal()
   const auto nqp = _current_qrule->n_points();
   const auto & active_coupleable_matrix_tags =
       _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
+
+  // The piecewise-linear lower-dimensional basis has no gradients
+  if (_element_type == Moose::ElementType::Lower && _var.usePiecewiseLinearBasis() &&
+      (_need_ad_grad_u || _need_grad_dot || _need_grad_dotdot ||
+       std::find(_need_vector_tag_grad.begin(), _need_vector_tag_grad.end(), true) !=
+           _need_vector_tag_grad.end()))
+    mooseError("Gradients of variable '",
+               _var.name(),
+               "' are not available on lower-dimensional elements, because it uses the "
+               "piecewise-linear basis ('use_piecewise_linear_basis = true').");
 
   // Map grad_phi using Eigen so that we can perform array operations easier
   if constexpr (std::is_same_v<OutputType, RealEigenVector>)

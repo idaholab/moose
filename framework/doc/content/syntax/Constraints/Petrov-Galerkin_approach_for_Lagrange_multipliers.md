@@ -86,7 +86,7 @@ One can enable Petrov-Galerkin for mortar-based constraints not limited to mecha
 ## Piecewise-linear basis for second-order faces
 
 On QUAD8 and TRI6 faces, the faces of HEX20 and TET10 elements, the standard basis $N_i$ is not
-non-negative and its nodal integrals are not positive ($-1/3$ at QUAD8 corners, $0$ at TRI6
+non-negative and its nodal integrals are not positive ($-1/3$ at QUAD8 vertices, $0$ at TRI6
 vertices). The weighted gap can then have the wrong sign, and MOOSE reports an error if
 Petrov-Galerkin is combined with a SECOND order dual Lagrange multiplier on these faces (see
 [Transformed_dual_basis_for_higher_order_mortar.md]).
@@ -112,9 +112,11 @@ are:
 | QUAD8 | $1/6$  | $5/6$    |        |
 | QUAD9 | $1/4$  | $1/2$    | $1$    |
 
-In three dimensions, mortar segments already lie within single sub-elements. In two dimensions,
-mortar segments of EDGE3 faces are split at the mid node, so that the weighted gap is integrated
-exactly on every segment.
+In three dimensions, mortar segments lie within single sub-elements of flat faces. In two
+dimensions, mortar segments of EDGE3 faces are split at the mid node. On each segment the basis is
+then polynomial and the weighted gap is integrated exactly. On curved TRI6 and QUAD8 faces, a
+projected segment can cross a sub-element edge, where the basis is continuous but has a kink, so
+the integration is not exact there.
 
 In the [Contact](Contact/index.md optional=True) action, set `petrov_galerkin_test` to
 `PIECEWISE_LINEAR` together with `use_petrov_galerkin`. This also applies to

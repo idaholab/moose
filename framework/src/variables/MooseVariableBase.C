@@ -125,11 +125,11 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
   if (_use_piecewise_linear_basis)
   {
     // The basis has no gradients, which only the Jacobians of nonlinear variables would read
-    if (_var_kind != Moose::VAR_AUXILIARY || _use_dual || _fe_type.family != LAGRANGE ||
-        _fe_type.order != SECOND || _fe_type.p_refinement)
+    if (_var_kind != Moose::VAR_AUXILIARY || _count != 1 || _use_dual ||
+        _fe_type.family != LAGRANGE || _fe_type.order != SECOND || _fe_type.p_refinement)
       paramError("use_piecewise_linear_basis",
-                 "The piecewise-linear basis requires a SECOND order LAGRANGE auxiliary variable "
-                 "with 'use_dual = false' and without p-refinement.");
+                 "The piecewise-linear basis requires a single-component SECOND order LAGRANGE "
+                 "auxiliary variable with 'use_dual = false' and without p-refinement.");
 
     // Assembly sizes the basis by the number of face nodes, so every element of the variable must
     // be a supported face
