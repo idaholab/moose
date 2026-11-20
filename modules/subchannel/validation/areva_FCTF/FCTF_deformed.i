@@ -82,6 +82,8 @@ unheated_length_exit = 0.855 #m
   T_tol = 1.0e-4
   implicit = true
   segregated = false
+  # The undamped coupled solve does not converge this case
+  crossflow_pseudo_time_damping = true
   interpolation_scheme = 'upwind'
   verbose_subchannel = true
   # Heat Transfer Correlations

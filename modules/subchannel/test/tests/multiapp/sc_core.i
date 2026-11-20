@@ -130,6 +130,8 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   # Solver settings
   implicit = true
   segregated = false
+  # The undamped coupled solve gives a non-finite mixing parameter for this core
+  crossflow_pseudo_time_damping = true
 
   # Output
   verbose_multiapps = true
