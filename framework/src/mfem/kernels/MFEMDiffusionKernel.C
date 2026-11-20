@@ -10,7 +10,6 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMDiffusionKernel.h"
-#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMDiffusionKernel);
 
@@ -24,20 +23,22 @@ MFEMDiffusionKernel::validParams()
                              "$- \\vec\\nabla \\cdot \\left( k \\vec \\nabla u \\right)$.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of property for diffusion coefficient k.");
+  params.addParam<MFEMMatrixCoefficientName>("matrix_coefficient",
+                                             "Name of matrix coefficient for property k. Mutually "
+                                             "exclusive with parameter 'coefficient'.");
   return params;
 }
 
 MFEMDiffusionKernel::MFEMDiffusionKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
-// FIXME: The MFEM bilinear form can also handle vector and matrix
-// coefficients, so ideally we'd handle all three too.
+  : MFEMKernel(parameters),
+    _variant_coef(getVariantCoefficient("coefficient", "vector_coefficient", "matrix_coefficient"))
 {
 }
 
 mfem::BilinearFormIntegrator *
 MFEMDiffusionKernel::createBFIntegrator()
 {
-  return new mfem::DiffusionIntegrator(_coef);
+  return std::visit([](auto & c) { return new mfem::DiffusionIntegrator(c); }, _variant_coef);
 }
 
 #endif

@@ -446,4 +446,23 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMAnisotropicDiffusion]
+    type = CSVDiff
+    csvdiff = 'OutputData/AnisotropicDiffusion.csv'
+    input = anisotropic_diffusion.i
+    requirement = 'The system shall have the ability to solve anisotropic diffusion problems with a given coefficient matrix, using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMConflictingCoefficientsError]
+    type = RunException
+    input = anisotropic_diffusion.i
+    cli_args = 'Kernels/bilinear_form/coefficient=10.0'
+    expect_err = "Specify only one of "
+    requirement = 'The system shall error given a user specifies a scalar and matrix coefficient in an MFEM kernel.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
 []

@@ -28,7 +28,10 @@ public:
   virtual mfem::BilinearFormIntegrator * createMBFIntegrator() override;
 
 protected:
-  mfem::Coefficient & _coef;
+  std::variant<std::reference_wrapper<mfem::Coefficient>,
+               std::reference_wrapper<mfem::DiagonalMatrixCoefficient>,
+               std::reference_wrapper<mfem::MatrixCoefficient>>
+      _variant_coef;
 };
 
 #endif

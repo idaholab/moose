@@ -72,4 +72,40 @@ MFEMObject::getMatrixCoefficient(const std::string & name)
   return getMatrixCoefficientByName(getParam<MFEMMatrixCoefficientName>(name));
 }
 
+std::variant<std::reference_wrapper<mfem::Coefficient>,
+             std::reference_wrapper<mfem::DiagonalMatrixCoefficient>,
+             std::reference_wrapper<mfem::MatrixCoefficient>>
+MFEMObject::getVariantCoefficient(const std::string & name_scalar,
+                                  const std::string & name_diagonal,
+                                  const std::string & name_matrix)
+{
+  const bool scalar_set = isParamSetByUser(name_scalar);
+  const bool diagonal_set = isParamSetByUser(name_diagonal);
+  const bool matrix_set = isParamSetByUser(name_matrix);
+  if (scalar_set + diagonal_set + matrix_set > 1)
+  {
+    paramError(name_scalar,
+               "Specify only one of ",
+               std::quoted(name_scalar),
+               ", ",
+               std::quoted(name_diagonal),
+               ", and ",
+               std::quoted(name_matrix),
+               ".");
+  }
+
+  if (matrix_set)
+  {
+    return getMatrixCoefficient(name_matrix);
+  }
+
+  if (diagonal_set)
+  {
+    return getVectorCoefficient(name_diagonal);
+  }
+
+  // Use the scalar parameter's default when no coefficient is specified.
+  return getScalarCoefficient(name_scalar);
+}
+
 #endif

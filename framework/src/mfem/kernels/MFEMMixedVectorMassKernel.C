@@ -20,21 +20,24 @@ MFEMMixedVectorMassKernel::validParams()
   params.addClassDescription(
       "Adds the domain integrator to an MFEM problem for the mixed bilinear form "
       "$(k\\vec u, \\vec v)_\\Omega$.");
-  params.addParam<MFEMScalarCoefficientName>("coefficient", "1.", "Name of property k to use.");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient", "1.", "Name of scalar coefficient k to multiply the integrator by.");
+  params.addParam<MFEMMatrixCoefficientName>("matrix_coefficient",
+                                             "Name of matrix coefficient for property k. Mutually "
+                                             "exclusive with parameter 'coefficient'.");
   return params;
 }
 
 MFEMMixedVectorMassKernel::MFEMMixedVectorMassKernel(const InputParameters & parameters)
-  : MFEMMixedBilinearFormKernel(parameters), _coef(getScalarCoefficient("coefficient"))
-// FIXME: The MFEM bilinear form can also handle vector and matrix
-// coefficients, so ideally we'd handle all three too.
+  : MFEMMixedBilinearFormKernel(parameters),
+    _variant_coef(getVariantCoefficient("coefficient", "vector_coefficient", "matrix_coefficient"))
 {
 }
 
 mfem::BilinearFormIntegrator *
 MFEMMixedVectorMassKernel::createMBFIntegrator()
 {
-  return new mfem::MixedVectorMassIntegrator(_coef);
+  return std::visit([](auto & c) { return new mfem::MixedVectorMassIntegrator(c); }, _variant_coef);
 }
 
 #endif
