@@ -1165,6 +1165,10 @@ convertBlockToMesh(MeshBase & source_mesh,
 
   const auto target_block_ids = MooseMeshUtils::getSubdomainIDs(source_mesh, target_blocks);
 
+  // Our source is non-const, so we can fix any missing caches
+  if (!source_mesh.preparation().has_cached_elem_data)
+    source_mesh.cache_elem_data();
+
   // Check that the block ids/names exist in the mesh
   std::set<SubdomainID> mesh_blocks;
   source_mesh.subdomain_ids(mesh_blocks);
@@ -1244,7 +1248,8 @@ copyIntoMesh(MeshGenerator & mg,
              const UnstructuredMesh & source,
              const bool avoid_merging_subdomains,
              const bool avoid_merging_boundaries,
-             const Parallel::Communicator & communicator)
+             const Parallel::Communicator & communicator,
+             const bool skip_preparation)
 {
   dof_id_type node_delta = destination.max_node_id();
   dof_id_type elem_delta = destination.max_elem_id();
@@ -1295,7 +1300,8 @@ copyIntoMesh(MeshGenerator & mg,
                                       elem_delta,
                                       node_delta,
                                       unique_delta,
-                                      avoid_merging_subdomains ? &id_remapping : nullptr);
+                                      avoid_merging_subdomains ? &id_remapping : nullptr,
+                                      skip_preparation);
 
   // Get an offset to prevent overlaps / wild merging between boundaries
   BoundaryInfo & boundary = destination.get_boundary_info();
@@ -1707,5 +1713,38 @@ nodalQuadraturePointToNodeMap(const Elem & elem, const std::vector<Point> & q_po
 #endif
 
   return qpoint_to_node;
+}
+
+std::unique_ptr<ReplicatedMesh>
+stitchMeshesPairwise(std::vector<std::unique_ptr<ReplicatedMesh>> meshes,
+                     const std::function<BoundaryID(const MeshBase &)> & left_boundary_id,
+                     const std::function<BoundaryID(const MeshBase &)> & right_boundary_id,
+                     const bool clear_stitched_boundary_ids,
+                     const bool verbose)
+{
+  mooseAssert(!meshes.empty(), "No meshes to stitch");
+  while (meshes.size() > 1)
+  {
+    const auto n = meshes.size();
+    for (const auto k : make_range(n / 2))
+    {
+      auto & left = meshes[2 * k];
+      auto & right = meshes[2 * k + 1];
+      left->stitch_meshes(*right,
+                          left_boundary_id(*left),
+                          right_boundary_id(*right),
+                          TOLERANCE,
+                          clear_stitched_boundary_ids,
+                          verbose);
+      // Free the absorbed mesh now and compact the list in place; k <= 2k, so this never
+      // overwrites a mesh that is still needed
+      right.reset();
+      meshes[k] = std::move(left);
+    }
+    if (n % 2)
+      meshes[n / 2] = std::move(meshes[n - 1]);
+    meshes.resize((n + 1) / 2);
+  }
+  return std::move(meshes.front());
 }
 }

@@ -357,8 +357,17 @@
     required_python_packages = 'psutil'
     requirement = "The system shall measure the memory usage of a process and its descendants, "
                   "splitting memory shared between processes proportionally and excluding "
-                  "file-backed memory when the kernel reports it separately."
-    issues = '#33796'
+                  "file-backed memory when the kernel reports it separately, and shall measure "
+                  "the NVIDIA GPU memory of a process and its descendants."
+    issues = '#33796 #34366'
+  []
+  [run_local_memory_limits]
+    type = PythonUnitTest
+    input = test_RunLocalMonitorJobProcesses.py
+    required_python_packages = 'psutil'
+    requirement = "The system shall track the peak CPU and NVIDIA GPU memory of each running test "
+                  "and kill a test whose memory per slot exceeds the CPU or GPU limit."
+    issues = '#34366'
   []
   [test_method]
     type = PythonUnitTest

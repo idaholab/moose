@@ -412,6 +412,9 @@ XYZDelaunayGenerator::generate()
       }
     }
 
+  // Setting subdomain_id()s invalidates subdomain caches
+  mesh->unset_has_cached_elem_data();
+
   const bool use_binary_search = (_algorithm == "BINARY");
 
   // The hole meshes are specified by the user, so they could have any

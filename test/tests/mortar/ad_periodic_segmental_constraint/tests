@@ -32,7 +32,7 @@
     type = 'CSVDiff'
     input = 'penalty_periodic_checker2d.i'
     csvdiff = 'penalty_periodic_checker2d_out.csv'
-    requirement = "AD mortar surfaces coupled with scalar variables can handle nonuniform conductivity."
+    requirement = "The system shall handle nonuniform conductivity with AD mortar surfaces coupled with scalar variables."
   []
   [testperiodicsole]
     type = 'CSVDiff'

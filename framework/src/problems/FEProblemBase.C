@@ -224,6 +224,20 @@ FEProblemBase::validParams()
       "transpose_null_space_dimension", 0, "The dimension of the transpose nullspace");
   params.addParam<unsigned int>(
       "near_null_space_dimension", 0, "The dimension of the near nullspace");
+  params.addParam<std::vector<VariableName>>(
+      "constant_null_space_variables",
+      {},
+      "Variables whose constant fields span the nullspace of the Jacobian. Each variable adds one "
+      "mode that is one on the variable's degrees of freedom and zero elsewhere.");
+  params.addParam<std::vector<VariableName>>(
+      "constant_transpose_null_space_variables",
+      {},
+      "Variables whose equation residual entries have a sum that is independent of the solution. "
+      "For each variable, the residual-space vector that is one on the variable's equations' "
+      "vector entries and zero elsewhere then spans part of the transpose nullspace of the "
+      "Jacobian. The linear solver removes the component of the residual along this vector. A "
+      "sum that is nonzero beyond round-off means that the nonlinear system has no solution "
+      "without projection.");
   params.addParam<bool>("solve",
                         true,
                         "Whether or not to actually solve the Nonlinear system.  "
@@ -468,7 +482,8 @@ FEProblemBase::validParams()
   params.addParamNamesToGroup(
       "verbose_setup verbose_multiapps verbose_restore parallel_barrier_messaging", "Verbosity");
   params.addParamNamesToGroup(
-      "null_space_dimension transpose_null_space_dimension near_null_space_dimension",
+      "null_space_dimension transpose_null_space_dimension near_null_space_dimension "
+      "constant_null_space_variables constant_transpose_null_space_variables",
       "Null space removal");
   params.addParamNamesToGroup(
       "extra_tag_vectors extra_tag_matrices extra_tag_solutions not_zeroed_tag_vectors",
@@ -621,6 +636,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _line_search(nullptr),
     _using_ad_mat_props(false),
     _current_ic_state(0),
+    _constant_null_space_vars(getParam<std::vector<VariableName>>("constant_null_space_variables")),
+    _constant_transpose_null_space_vars(
+        getParam<std::vector<VariableName>>("constant_transpose_null_space_variables")),
     _use_hash_table_matrix_assembly(getParam<bool>("use_hash_table_matrix_assembly")),
     _error_on_jacobian_nonzero_reallocation(
         isParamValid("error_on_jacobian_nonzero_reallocation")
@@ -7401,6 +7419,15 @@ FEProblemBase::init()
       mooseError("No variables specified in nonlinear system '", nl->name(), "'.");
   }
 
+  for (const auto param :
+       {"constant_null_space_variables", "constant_transpose_null_space_variables"})
+    for (const auto & var : getParam<std::vector<VariableName>>(param))
+      if (std::none_of(_nl.begin(),
+                       _nl.end(),
+                       [&var](const auto & nl)
+                       { return nl->hasVariable(var) || nl->hasScalarVariable(var); }))
+        paramError(param, "Variable '", var, "' is not in any nonlinear system.");
+
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
 
   // We may have added element/nodes to the mesh in ghostGhostedBoundaries so we need to update
@@ -8187,8 +8214,6 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
       for (unsigned int tid = 0; tid < n_threads; tid++)
         reinitScalars(tid);
 
-      computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
-
       _aux->residualSetup();
 
       if (_displaced_problem)
@@ -8208,6 +8233,8 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 #ifdef MOOSE_KOKKOS_ENABLED
       _kokkos_functions.residualSetup();
 #endif
+
+      computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
 
       computeSystems(EXEC_LINEAR);
 
@@ -8455,8 +8482,6 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
       for (unsigned int tid = 0; tid < n_threads; tid++)
         reinitScalars(tid);
 
-      computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
-
       _aux->residualSetup();
 
       if (_displaced_problem)
@@ -8476,6 +8501,8 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 #ifdef MOOSE_KOKKOS_ENABLED
       _kokkos_functions.residualSetup();
 #endif
+
+      computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
 
       computeSystems(EXEC_LINEAR);
 
@@ -8608,8 +8635,6 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
         for (unsigned int tid = 0; tid < n_threads; tid++)
           reinitScalars(tid);
 
-        computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
-
         _aux->jacobianSetup();
 
         if (_displaced_problem)
@@ -8634,6 +8659,8 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 #ifdef MOOSE_KOKKOS_ENABLED
         _kokkos_functions.jacobianSetup();
 #endif
+
+        computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
 
         computeSystems(EXEC_NONLINEAR);
 
@@ -8888,6 +8915,7 @@ FEProblemBase::computeNullSpace(NonlinearImplicitSystem & libmesh_dbg_var(sys),
     postfix << "_" << i;
     sp.push_back(&_current_nl_sys->getVector("NullSpace" + postfix.str()));
   }
+  appendConstantModes(_constant_null_space_vars, "ConstantNullSpace_", sp);
 }
 
 void
@@ -8902,6 +8930,32 @@ FEProblemBase::computeTransposeNullSpace(NonlinearImplicitSystem & libmesh_dbg_v
     std::stringstream postfix;
     postfix << "_" << i;
     sp.push_back(&_current_nl_sys->getVector("TransposeNullSpace" + postfix.str()));
+  }
+  appendConstantModes(_constant_transpose_null_space_vars, "ConstantTransposeNullSpace_", sp);
+}
+
+void
+FEProblemBase::appendConstantModes(const std::vector<VariableName> & vars,
+                                   const std::string & prefix,
+                                   std::vector<NumericVector<Number> *> & sp)
+{
+  auto & sys = _current_nl_sys->system();
+  std::vector<dof_id_type> dofs;
+  for (const auto & var : vars)
+  {
+    // Each variable lives in exactly one nonlinear system
+    if (!sys.has_variable(var))
+      continue;
+
+    // The mode is rebuilt on every request so that it stays valid after the dof
+    // distribution changes, e.g. after mesh adaptivity
+    auto & mode = _current_nl_sys->addVector(prefix + var, false, libMesh::PARALLEL);
+    mode.zero();
+    sys.get_dof_map().local_variable_indices(dofs, sys.variable_number(var));
+    for (const auto dof : dofs)
+      mode.set(dof, 1);
+    mode.close();
+    sp.push_back(&mode);
   }
 }
 
@@ -9724,53 +9778,60 @@ FEProblemBase::checkProblemIntegrity()
                "desired mesh modification.\n\n",
                Moose::stringify(MooseAppCoordTransform::validParams()));
 
-  // If using displacements, verify that the order of the displacement
-  // variables matches the order of the elements in the displaced
-  // mesh.
-  checkDisplacementOrders();
+  // If using displacements, verify that the displaced mesh update can move every mesh node
+  checkDisplacementNodes();
 
   // Check for postprocessor names with same name as a scalar variable
   checkDuplicatePostprocessorVariableNames();
 }
 
 void
-FEProblemBase::checkDisplacementOrders()
+FEProblemBase::checkDisplacementNodes()
 {
-  if (_displaced_problem)
+  if (!_displaced_problem)
+    return;
+
+  // The displaced mesh update moves a node with the displacement degree of freedom on it, or,
+  // for a Lagrange variable, with the nodal_soln of the element degrees of freedom. A node
+  // with neither would keep its reference position.
+  for (const auto & var_name : _displaced_problem->getDisplacementVarNames())
   {
-    bool mesh_has_second_order_elements = false;
-    for (const auto & elem : as_range(_displaced_mesh->activeLocalElementsBegin(),
-                                      _displaced_mesh->activeLocalElementsEnd()))
+    const auto & var = getVariable(
+        /*tid=*/0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+    const bool lagrange = var.feType().family == LAGRANGE;
+    const auto sys_num = var.sys().number();
+    const auto & dof_map_var = var.sys().dofMap().variable(var.number());
+    bool has_nodes_without_dofs = false;
+    bool has_first_order_prism21 = false;
+    for (const auto & elem :
+         as_range(_mesh.activeLocalElementsBegin(), _mesh.activeLocalElementsEnd()))
     {
-      if (elem->default_order() == SECOND)
-      {
-        mesh_has_second_order_elements = true;
+      if (!dof_map_var.active_on_subdomain(elem->subdomain_id()))
+        continue;
+      // libMesh's nodal_soln for Lagrange variables below SECOND order does not compute the
+      // interior node of a PRISM21 from the element degrees of freedom
+      if (lagrange && var.order() < SECOND && elem->type() == PRISM21)
+        has_first_order_prism21 = true;
+      else if (!lagrange)
+        for (const auto & node : elem->node_ref_range())
+          if (!node.n_dofs(sys_num, var.number()))
+            has_nodes_without_dofs = true;
+      if (has_nodes_without_dofs || has_first_order_prism21)
         break;
-      }
     }
 
     // We checked our local elements, so take the max over all processors.
-    _displaced_mesh->comm().max(mesh_has_second_order_elements);
-
-    // If the Mesh has second order elements, make sure the
-    // displacement variables are second-order.
-    if (mesh_has_second_order_elements)
-    {
-      const std::vector<std::string> & displacement_variables =
-          _displaced_problem->getDisplacementVarNames();
-
-      for (const auto & var_name : displacement_variables)
-      {
-        MooseVariableFEBase & mv =
-            _displaced_problem->getVariable(/*tid=*/0,
-                                            var_name,
-                                            Moose::VarKindType::VAR_ANY,
-                                            Moose::VarFieldType::VAR_FIELD_STANDARD);
-        if (mv.order() != SECOND)
-          mooseError("Error: mesh has SECOND order elements, so all displacement variables must be "
-                     "SECOND order.");
-      }
-    }
+    _mesh.comm().max(has_nodes_without_dofs);
+    _mesh.comm().max(has_first_order_prism21);
+    if (has_nodes_without_dofs)
+      mooseError("The displacement variable '",
+                 var_name,
+                 "' has no degrees of freedom on some mesh nodes, so the displaced mesh cannot be "
+                 "updated at those nodes. Use a LAGRANGE displacement variable.");
+    if (has_first_order_prism21)
+      mooseError("The displacement variable '",
+                 var_name,
+                 "' must be at least SECOND order on PRISM21 elements.");
   }
 }
 

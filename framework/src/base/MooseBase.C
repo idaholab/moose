@@ -171,3 +171,9 @@ MooseBase::getHitNode(const InputParameters & params)
       return hit_node;
   return nullptr;
 }
+
+bool
+MooseBase::suppressInfo() const
+{
+  return _app.suppressInfo();
+}

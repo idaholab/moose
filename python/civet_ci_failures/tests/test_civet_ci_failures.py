@@ -147,6 +147,8 @@ class TestReproduceCommandAndModeIdentity(unittest.TestCase):
     def testModeIdentityDropsMemoryLimitButKeepsRest(self):
         invocation = ("test", ["-p", "4", "--max-memory-per-slot=1024"])
         self.assertEqual(ccf.mode_identity(invocation), "-p 4")
+        invocation = ("test", ["-p", "4", "--max-gpu-memory-per-slot=1024"])
+        self.assertEqual(ccf.mode_identity(invocation), "-p 4")
 
     def testModeIdentityNoneInvocation(self):
         self.assertEqual(ccf.mode_identity(None), "")
@@ -271,6 +273,25 @@ class TestExtractStepErrors(unittest.TestCase):
         self.assertEqual(result["total"], 1)
         self.assertEqual(result["tally"], "1 passed, 1 FAILED")
         self.assertIn("TIMEOUT", result["reasons"][0])
+
+    def testMemoryPrefixForms(self):
+        # CPU only, GB, CPU and GPU, and unknown memory
+        for memory in [
+            "[ 10MB]",
+            "[  12GB]",
+            "[ 123MB   12GB GPU]",
+            "[   ?MB    ?MB GPU]",
+        ]:
+            with self.subTest(memory=memory):
+                text = (
+                    f"[0.1s] {memory} some/test: ERROR some.test FAILED (TIMEOUT)\n"
+                    "1 passed, 1 FAILED\n"
+                )
+                result = ccf.extract_step_errors(text, limit=5)
+                self.assertEqual(result["kind"], "test")
+                self.assertEqual(result["total"], 1)
+                self.assertNotIn("MB", result["reasons"][0])
+                self.assertNotIn("GPU", result["reasons"][0])
 
     def testBuildKindFromCompilerDiagnostic(self):
         text = "foo.cc:12:3: error: use of undeclared identifier 'x'\n"

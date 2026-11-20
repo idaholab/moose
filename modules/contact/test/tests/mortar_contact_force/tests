@@ -1,0 +1,29 @@
+[Tests]
+  issues = '#34357'
+  design = 'MortarContactForce.md'
+  [mortar_contact_force]
+    requirement = 'The system shall report the normal contact force of each of several mortar '
+                  'contact pairs, two of which share a primary surface, equal to the nodal sum of the '
+                  'contact residual on the pair secondary surface,'
+    [lagrange_multiplier]
+      type = CSVDiff
+      input = 'mortar_contact_force.i'
+      csvdiff = 'mortar_contact_force_out.csv'
+      detail = 'with Lagrange multipliers and'
+    []
+    [penalty]
+      type = CSVDiff
+      input = 'mortar_contact_force.i'
+      csvdiff = 'mortar_contact_force_penalty.csv'
+      cli_args = "Contact/active=penalty "
+                 "Postprocessors/left_bottom_force/weighted_gap_uo="
+                 "penalty_weightedgap_object_penalty_p_base_top_s_left_bottom "
+                 "Postprocessors/right_bottom_force/weighted_gap_uo="
+                 "penalty_weightedgap_object_penalty_p_base_top_s_right_bottom "
+                 "Postprocessors/left_bottom_force_magnitude/weighted_gap_uo="
+                 "penalty_weightedgap_object_penalty_p_base_top_s_left_bottom "
+                 "Outputs/file_base=mortar_contact_force_penalty"
+      detail = 'with a penalty.'
+    []
+  []
+[]

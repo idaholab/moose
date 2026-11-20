@@ -18,7 +18,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
 
-    requirement = 'The winding order of the elements created by the mesh generator shall be uniform.'
+    requirement = 'The system shall create elements with a uniform winding order in the mesh generator.'
     design = 'meshgenerators/ConcentricCircleMeshGenerator.md'
     issues = '#17533'
   [../]

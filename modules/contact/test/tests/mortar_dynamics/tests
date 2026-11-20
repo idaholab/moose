@@ -15,6 +15,26 @@
     # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
     recover = false
   []
+  [block-dynamics-correct-edge-dropping]
+    type = 'Exodiff'
+    exodiff = 'block-dynamics_out.e'
+    input = 'block-dynamics.i'
+    rel_err = 5.0e-4
+    abs_zero = 1.0e-5
+    capabilities = 'ad_size>=50'
+    cli_args = 'Executioner/dt=0.05 Executioner/end_time=0.3 '
+               'UserObjects/weighted_gap_uo/correct_edge_dropping=true '
+               'Constraints/weighted_gap_lm/correct_edge_dropping=true '
+               'Constraints/normal_x/correct_edge_dropping=true '
+               'Constraints/normal_y/correct_edge_dropping=true'
+    issues = '#19671 #34485'
+    requirement = 'The system shall solve mortar frictionless contact between two blocks with '
+                  'weighted gap time stabilization using mortar nodal geometry and correct edge '
+                  'dropping, with the same results as without it when the secondary surface is '
+                  'covered by the primary surface.'
+    # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
+    recover = false
+  []
   [block-dynamics-reference]
     type = 'CSVDiff'
     input = 'block-dynamics-reference.i'

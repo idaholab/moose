@@ -138,7 +138,7 @@ offset = -0.045
     disp_y = disp_y
   []
   [worn_depth]
-    type = MortarArchardsLawAux
+    type = MortarFrictionalWorkWearAux
     variable = worn_depth
     primary_boundary = 20
     secondary_boundary = 10
@@ -147,7 +147,7 @@ offset = -0.045
     displacements = 'disp_x disp_y'
     friction_coefficient = 0.5
     energy_wear_coefficient = 1.0e-6
-    normal_pressure = normal_lm
+    weighted_gap_uo = weighted_vel_uo
     execute_on = 'TIMESTEP_END'
   []
   [accel_x]

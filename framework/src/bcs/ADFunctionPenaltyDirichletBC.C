@@ -34,5 +34,9 @@ ADFunctionPenaltyDirichletBC::ADFunctionPenaltyDirichletBC(const InputParameters
 ADReal
 ADFunctionPenaltyDirichletBC::computeQpResidual()
 {
-  return _p * _test[_i][_qp] * (-_func.value(_t, _q_point[_qp]) + _u[_qp]);
+  // On the displaced mesh the quadrature points move with the displacements, so the function
+  // value depends on them
+  const ADReal func =
+      _use_displaced_mesh ? _func.value(_t, _ad_q_points[_qp]) : _func.value(_t, _q_point[_qp]);
+  return _p * _test[_i][_qp] * (-func + _u[_qp]);
 }

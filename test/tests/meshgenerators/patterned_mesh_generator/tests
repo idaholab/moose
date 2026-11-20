@@ -4,6 +4,7 @@
 
   [patterned_mesh_generator_test]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'patterned_mesh_generator.i'
     exodiff = 'patterned_mesh_generator_out.e'
     mesh_mode = 'REPLICATED'

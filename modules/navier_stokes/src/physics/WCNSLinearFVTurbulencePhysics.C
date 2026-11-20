@@ -80,6 +80,10 @@ WCNSLinearFVTurbulencePhysics::WCNSLinearFVTurbulencePhysics(const InputParamete
 {
   addRequiredPhysicsTask("add_interpolation_method_physics");
 
+  if (_porous_medium_treatment && _turbulence_model != "none")
+    _flow_equations_physics->paramError(
+        "porous_medium_treatment",
+        "The porous medium treatment is not implemented for the linear turbulence physics");
   if (_turbulence_model != "k-epsilon")
     errorDependentParameter("turbulence_handling", "k-epsilon", {"use_nonorthogonal_correction"});
   if (_turbulence_model == "mixing-length")

@@ -21,6 +21,17 @@
     []
   []
 
+  [sub_relaxed_initial_value]
+    type = 'CSVDiff'
+    input = 'sub_relaxed_initial_main.i'
+    csvdiff = 'sub_relaxed_initial_main_out.csv sub_relaxed_initial_main_out_sub0.csv'
+    recover = false
+    design = 'multiapps/FullSolveMultiApp.md'
+    issues = '#33208'
+    requirement = "The system shall use the initial value of a sub-application postprocessor, "
+                  "rather than zero, when relaxing it on the first multiapp fixed point iteration."
+  []
+
   [pp_transient]
     requirement = "The system shall allow transient multiapp simulations coupled by a postprocessor transfer using Picard iterations"
     issues = '#2116 #17479'

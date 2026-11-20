@@ -55,7 +55,7 @@
     type = 'RunException'
     input = 'darcy_velocity_lower_except.i'
     expect_err = 'The variable fracture_vel_x must must be defined on lower-dimensional elements only since it employs PorousFlowDarcyVelocityComponentLowerDimensional'
-    requirement = 'An error shall be produced if the system is asked to calculate the Darcy flow velocity vector on a lower-dimensional fracture, but the variables are not defined only on the lower-dimensional elements.'
+    requirement = 'The system shall report an error if the system is asked to calculate the Darcy flow velocity vector on a lower-dimensional fracture, but the variables are not defined only on the lower-dimensional elements.'
     issues = '#17159'
     design = 'PorousFlowDarcyVelocityComponentLowerDimensional.md'
   []

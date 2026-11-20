@@ -40,8 +40,10 @@ class Runner(OutputInterface):
         """The job's exit code, should be set after wait()."""
         self._max_memory: Optional[int] = None
         """The job's estimated max memory in bytes, if any."""
+        self._max_gpu_memory: Optional[int] = None
+        """The job's max NVIDIA GPU memory in bytes, if tracked."""
         self._max_memory_lock = Lock()
-        """Thread lock for _max_memory."""
+        """Thread lock for _max_memory and _max_gpu_memory."""
 
         self._cpu_percent: Optional[float] = None
         """The job's average CPU % usage, if known."""
@@ -71,24 +73,45 @@ class Runner(OutputInterface):
         with self._max_memory_lock:
             return self._max_memory
 
-    def updateMaxMemory(self, value: int) -> bool:
+    @property
+    def max_gpu_memory(self) -> Optional[int]:
         """
-        Update the max memory in bytes for the process, if greater.
+        Get the max NVIDIA GPU memory in bytes for the job, if tracked.
+
+        Is thread safe: can be used while the job is running.
+        """
+        with self._max_memory_lock:
+            return self._max_gpu_memory
+
+    def updateMaxMemory(
+        self, value: Optional[int], gpu_value: Optional[int] = None
+    ) -> tuple[bool, bool]:
+        """
+        Update the max memory and GPU memory in bytes for the process, if greater.
 
         Should be used by derived runners to set the memory
-        as it is running if available.
+        as it is running if available. Each is only updated
+        if its value is not None.
 
         Is thread safe so that a running job can update its memory
         usage while being read by the long running job printer.
 
-        Returns whether or not the max memory was updated (if
-        the value was greater than the current max memory).
+        Returns whether or not the max memory and the max GPU
+        memory were updated (if the value was greater than the
+        current max).
         """
         with self._max_memory_lock:
-            if self._max_memory is None or value > self._max_memory:
+            updated = value is not None and (
+                self._max_memory is None or value > self._max_memory
+            )
+            if updated:
                 self._max_memory = value
-                return True
-        return False
+            gpu_updated = gpu_value is not None and (
+                self._max_gpu_memory is None or gpu_value > self._max_gpu_memory
+            )
+            if gpu_updated:
+                self._max_gpu_memory = gpu_value
+        return updated, gpu_updated
 
     @property
     def cpu_percent(self) -> Optional[float]:

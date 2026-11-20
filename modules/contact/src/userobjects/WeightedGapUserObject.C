@@ -62,6 +62,7 @@ WeightedGapUserObject::addNodalNormalCoupling(InputParameters & params)
 
 WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
   : MortarUserObject(parameters),
+    MortarContactPressureProvider(static_cast<const MortarUserObject &>(*this)),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _nodal(getVar("disp_x", 0)->feType().family == LAGRANGE),
     _disp_x_var(getVar("disp_x", 0)),

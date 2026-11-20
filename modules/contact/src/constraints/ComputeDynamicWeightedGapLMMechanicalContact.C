@@ -296,7 +296,7 @@ ComputeDynamicWeightedGapLMMechanicalContact::post()
     else
     {
       ADReal term = -_newmark_gamma / _newmark_beta / _dt * _dof_to_old_weighted_gap[pr.first];
-      term += _dof_to_old_velocity[pr.first];
+      term -= _dof_to_old_velocity[pr.first];
       _dof_to_weighted_gap_dynamics[pr.first] += term;
       _weighted_gap_ptr = &_dof_to_weighted_gap_dynamics[pr.first];
     }

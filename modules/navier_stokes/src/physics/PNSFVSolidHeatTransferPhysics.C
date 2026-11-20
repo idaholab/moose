@@ -9,8 +9,8 @@
 
 #include "PNSFVSolidHeatTransferPhysics.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
-#include "WCNSFVFlowPhysics.h"
-#include "WCNSFVFluidHeatTransferPhysics.h"
+#include "WCNSFVFlowPhysicsBase.h"
+#include "WCNSFVFluidHeatTransferPhysicsBase.h"
 #include "NSFVBase.h"
 
 registerPhysicsBaseTasks("NavierStokesApp", PNSFVSolidHeatTransferPhysics);
@@ -228,12 +228,12 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyHeatConductionKernels()
 {
   const auto vector_conductivity = processThermalConductivity();
 
-  const auto kernel_type =
-      vector_conductivity ? "PINSFVEnergyAnisotropicDiffusion" : "PINSFVEnergyDiffusion";
+  // The solid conductivity is an effective conductivity which already includes the solid fraction,
+  // so the conduction term does not involve the porosity
+  const auto kernel_type = vector_conductivity ? "FVAnisotropicDiffusion" : "FVDiffusion";
 
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = _solid_temperature_name;
-  params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
 
   // Set block restrictions
   const bool combined = _thermal_conductivity_blocks.size() > 1;
@@ -247,11 +247,10 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyHeatConductionKernels()
   assignBlocks(params, block_names);
 
   // Set thermal conductivity
-  const auto conductivity_name = vector_conductivity ? NS::kappa : NS::k;
   if (combined)
-    params.set<MooseFunctorName>(conductivity_name) = prefix() + "combined_thermal_conductivity";
+    params.set<MooseFunctorName>("coeff") = prefix() + "combined_thermal_conductivity";
   else
-    params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[0];
+    params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name[0];
 
   getProblem().addFVKernel(kernel_type, prefix() + "pins_energy_diffusion", params);
 }
@@ -261,15 +260,7 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyAmbientConvection()
 {
   const auto num_convection_blocks = _ambient_convection_blocks.size();
   const auto num_used_blocks = num_convection_blocks ? num_convection_blocks : 1;
-
-  // Check parameter. Late check in case the block was added by a Component
-  if (num_used_blocks != _ambient_convection_alpha.size())
-    paramError("ambient_convection_alpha",
-               "Number of ambient convection heat transfer coefficients (" +
-                   std::to_string(_ambient_convection_alpha.size()) +
-                   ") should match the number of "
-                   "blocks (" +
-                   std::to_string(num_convection_blocks) + ") each HTC is defined on.");
+  checkAmbientConvectionParameters();
 
   const auto kernel_type = "PINSFVEnergyAmbientConvection";
   InputParameters params = getFactory().getValidParams(kernel_type);
@@ -316,6 +307,22 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyExternalHeatSource()
   params.set<Real>("coef") = getParam<Real>("external_heat_source_coeff");
 
   getProblem().addFVKernel(kernel_type, prefix() + "external_heat_source", params);
+}
+
+void
+PNSFVSolidHeatTransferPhysics::checkAmbientConvectionParameters() const
+{
+  const auto num_convection_blocks = _ambient_convection_blocks.size();
+  const auto num_used_blocks = num_convection_blocks ? num_convection_blocks : 1;
+
+  // Check parameter. Late check in case the block was added by a Component
+  if (num_used_blocks != _ambient_convection_alpha.size())
+    paramError("ambient_convection_alpha",
+               "Number of ambient convection heat transfer coefficients (" +
+                   std::to_string(_ambient_convection_alpha.size()) +
+                   ") should match the number of "
+                   "blocks (" +
+                   std::to_string(num_convection_blocks) + ") each HTC is defined on.");
 }
 
 bool
@@ -428,9 +435,9 @@ void
 PNSFVSolidHeatTransferPhysics::checkFluidAndSolidHeatTransferPhysicsParameters() const
 {
   // Get a pointer to a flow physics and a heat transfer physics on the same blocks, if it exists
-  const WCNSFVFlowPhysics * flow_physics = nullptr;
-  const WCNSFVFluidHeatTransferPhysics * fluid_energy_physics = nullptr;
-  const auto all_flow_physics = getCoupledPhysics<const WCNSFVFlowPhysics>(/*allow_fail=*/true);
+  const WCNSFVFlowPhysicsBase * flow_physics = nullptr;
+  const WCNSFVFluidHeatTransferPhysicsBase * fluid_energy_physics = nullptr;
+  const auto all_flow_physics = getCoupledPhysics<const WCNSFVFlowPhysicsBase>(/*allow_fail=*/true);
   for (const auto physics : all_flow_physics)
     if (checkBlockRestrictionIdentical(
             physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
@@ -441,7 +448,7 @@ PNSFVSolidHeatTransferPhysics::checkFluidAndSolidHeatTransferPhysicsParameters()
       flow_physics = physics;
     }
   const auto all_fluid_energy_physics =
-      getCoupledPhysics<const WCNSFVFluidHeatTransferPhysics>(/*allow_fail=*/true);
+      getCoupledPhysics<const WCNSFVFluidHeatTransferPhysicsBase>(/*allow_fail=*/true);
   for (const auto physics : all_fluid_energy_physics)
     if (checkBlockRestrictionIdentical(
             physics->name(), physics->blocks(), /*error_if_not_identical=*/false))

@@ -26,10 +26,10 @@
     # The disp_x Dirichlet conditions would reject the elemental variable before contact setup
     cli_args = "Variables/disp_x/family=MONOMIAL Variables/disp_x/order=CONSTANT "
                "BCs/active='boty botz topy topz'"
-    expect_err = 'Nodal-normal derivatives require a nodal displacement variable.'
-    design = 'ComputeWeightedGapLMMechanicalContact.md'
-    requirement = 'Mechanical mortar contact shall require nodal displacement variables when '
-                  'constructing nodal-normal derivatives.'
+    expect_err = "The displacement variable 'disp_x' has no degrees of freedom on some mesh nodes"
+    design = 'ComputeWeightedGapLMMechanicalContact.md DisplacedProblem.md'
+    requirement = 'The system shall reject a non-nodal displacement variable in mechanical mortar '
+                  'contact with nodal-normal derivatives.'
   []
 
   [cross_system_displacement]

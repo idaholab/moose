@@ -47,7 +47,7 @@ ADInterfaceKernelTempl<T>::ADInterfaceKernelTempl(const InputParameters & parame
     _grad_u(_var.adGradSlnFace()),
     _ad_JxW(_assembly.adJxWFace()),
     _ad_coord(_assembly.adCoordTransformation()),
-    _ad_q_point(_assembly.adQPoints()),
+    _ad_q_point(_assembly.adQPointsFace()),
     _phi(_assembly.phiFace(_var)),
     _test(_var.phiFace()),
     _grad_test(_var.adGradPhiFace()),
