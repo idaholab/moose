@@ -139,6 +139,8 @@ WeightedVelocitiesUserObject::computeQpProperties()
   // Geometry is averaged and used at the nodes for constraint enforcement.
   _qp_real_tangential_velocity_nodal = relative_velocity;
   _qp_tangential_velocity_nodal = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
+  if (_ad_segment_geometry)
+    _qp_tangential_velocity_nodal = relative_velocity * _ad_qp_factor;
 }
 
 void
@@ -151,7 +153,18 @@ WeightedVelocitiesUserObject::computeQpIProperties()
       _is_weighted_gap_nodal ? cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                              : cast_ptr<const DofObject *>(_lower_secondary_elem);
 
-  if (shouldRecordNodalNormalDerivatives())
+  if (_ad_segment_geometry && shouldRecordNodalNormalDerivatives())
+  {
+    const auto & tangents = contactTangents(*_lower_secondary_elem, _i);
+    for (const auto direction : make_range(_3d ? 2 : 1))
+    {
+      _dof_to_weighted_tangential_velocity[dof][direction] +=
+          (*_ad_test)[_i][_qp] * _qp_tangential_velocity_nodal * tangents[direction];
+      _dof_to_real_tangential_velocity[dof][direction] +=
+          (*_ad_test)[_i][_qp] * _qp_real_tangential_velocity_nodal * tangents[direction];
+    }
+  }
+  else if (shouldRecordNodalNormalDerivatives())
   {
     const auto & tangents = contactTangents(*_lower_secondary_elem, _i);
     for (const auto direction : make_range(_3d ? 2 : 1))

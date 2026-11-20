@@ -38,6 +38,13 @@ protected:
 
   void computeResidualAndJacobian() override;
 
+  /**
+   * @return The AD mortar segment JxW times the coordinate transformation at the current
+   * quadrature point, which carries the motion of the mortar segment geometry. Only valid when
+   * \p _ad_segment_geometry is true.
+   */
+  ADReal adJxWCoord() const;
+
 private:
   /// A dummy object useful for constructing _lambda when not using Lagrange multipliers
   const ADVariableValue _lambda_dummy;
@@ -63,4 +70,42 @@ protected:
   /// The primal solution gradient on the primary side. Empty unless the private parameter
   /// _compute_primal_gradients is true.
   const ADVariableGradient & _grad_u_primary;
+
+  /**
+   * The Lagrange multiplier, secondary, and primary test functions at the current _i and _qp that
+   * carry the motion of the mortar segment quadrature points. Only valid when
+   * \p _ad_segment_geometry is true; otherwise use _test, _test_secondary, and _test_primary.
+   * Derived classes that support segment_geometry_derivatives use these and set the private
+   * parameter _supports_segment_geometry_derivatives to true.
+   */
+  const ADReal & adTest() const;
+  const ADReal & adTestSecondary() const;
+  const ADReal & adTestPrimary() const;
+
+private:
+  /// The AD test functions filled by Assembly at the mortar segment quadrature points
+  const MooseArray<std::vector<ADReal>> * _ad_test = nullptr;
+  const MooseArray<std::vector<ADReal>> * _ad_test_secondary = nullptr;
+  const MooseArray<std::vector<ADReal>> * _ad_test_primary = nullptr;
 };
+
+inline const ADReal &
+ADMortarConstraint::adTest() const
+{
+  mooseAssert(_ad_segment_geometry && _ad_test, "The AD test functions are not set");
+  return (*_ad_test)[_i][_qp];
+}
+
+inline const ADReal &
+ADMortarConstraint::adTestSecondary() const
+{
+  mooseAssert(_ad_segment_geometry, "The AD test functions are not set");
+  return (*_ad_test_secondary)[_i][_qp];
+}
+
+inline const ADReal &
+ADMortarConstraint::adTestPrimary() const
+{
+  mooseAssert(_ad_segment_geometry, "The AD test functions are not set");
+  return (*_ad_test_primary)[_i][_qp];
+}

@@ -615,6 +615,7 @@ MortarSegmentHelper::triangulatePoly(std::vector<Point> & poly_nodes,
 
     if (std::abs(double_area) <= TOLERANCE)
     {
+      centroid = 0;
       for (const auto & node : polygon_nodes)
         centroid += node;
       centroid /= polygon_nodes.size();
@@ -966,9 +967,10 @@ MortarSegmentHelper::triangulatePoly(std::vector<Point> & poly_nodes,
 void
 MortarSegmentHelper::getMortarSegments(const std::vector<Point> & primary_nodes,
                                        std::vector<Point> & nodes,
-                                       std::vector<std::vector<unsigned int>> & elem_to_nodes)
+                                       std::vector<std::vector<unsigned int>> & elem_to_nodes,
+                                       std::vector<MortarSegmentNodeOrigins> * const node_origins)
 {
-  getMortarSegmentsImpl(primary_nodes, nodes, elem_to_nodes, nullptr);
+  getMortarSegmentsImpl(primary_nodes, nodes, elem_to_nodes, nullptr, node_origins);
 }
 
 void
@@ -979,20 +981,23 @@ MortarSegmentHelper::getMortarSegments(
     std::vector<std::vector<unsigned int>> & elem_to_nodes,
     std::vector<std::array<Point, 3>> & elem_to_secondary_reference_points,
     std::vector<std::array<Point, 3>> & elem_to_primary_reference_points,
-    const Real minimum_segment_area)
+    const Real minimum_segment_area,
+    std::vector<MortarSegmentNodeOrigins> * const node_origins)
 {
   ReferenceMappingData reference_mapping{primary_reference_points,
                                          elem_to_secondary_reference_points,
                                          elem_to_primary_reference_points,
                                          minimum_segment_area};
-  getMortarSegmentsImpl(primary_nodes, nodes, elem_to_nodes, &reference_mapping);
+  getMortarSegmentsImpl(primary_nodes, nodes, elem_to_nodes, &reference_mapping, node_origins);
 }
 
 void
-MortarSegmentHelper::getMortarSegmentsImpl(const std::vector<Point> & primary_nodes,
-                                           std::vector<Point> & nodes,
-                                           std::vector<std::vector<unsigned int>> & elem_to_nodes,
-                                           ReferenceMappingData * const reference_mapping)
+MortarSegmentHelper::getMortarSegmentsImpl(
+    const std::vector<Point> & primary_nodes,
+    std::vector<Point> & nodes,
+    std::vector<std::vector<unsigned int>> & elem_to_nodes,
+    ReferenceMappingData * const reference_mapping,
+    std::vector<MortarSegmentNodeOrigins> * const node_origins)
 {
   std::vector<Point> primary_poly;
   std::vector<Point> primary_poly_reference_points;
@@ -1102,6 +1107,13 @@ MortarSegmentHelper::getMortarSegmentsImpl(const std::vector<Point> & primary_no
     }
   }
 
+  if (node_origins)
+  {
+    const auto polygon_origins = nodeOrigins(primary_nodes, clipped_poly);
+    for (const auto & tri : tri_map)
+      node_origins->push_back({polygon_origins, {{tri[0], tri[1], tri[2]}}});
+  }
+
   // Transform clipped poly back to (linearized) 3d and append to list
   const auto offset = cast_int<unsigned int>(nodes.size());
   for (const auto & point : clipped_poly)
@@ -1132,6 +1144,146 @@ MortarSegmentHelper::getMortarSegmentsImpl(const std::vector<Point> & primary_no
       reference_mapping->elem_to_primary_reference_points.push_back(elem_primary_reference_points);
     }
   }
+}
+
+std::vector<MortarSegmentNodeOrigin>
+MortarSegmentHelper::nodeOrigins(const std::vector<Point> & primary_nodes,
+                                 const std::vector<Point> & poly_nodes) const
+{
+  using Type = MortarSegmentNodeOrigin::Type;
+
+  // The primary nodes in the plane, in the order of primary_nodes
+  std::vector<Point> primary_poly;
+  primary_poly.reserve(primary_nodes.size());
+  for (const auto & node : primary_nodes)
+  {
+    const Point pt = node - _center;
+    primary_poly.emplace_back(pt * _u, pt * _v, 0);
+  }
+
+  // Distance from point to the line through q1 and q2
+  const auto line_distance = [](const Point & point, const Point & q1, const Point & q2)
+  {
+    const Point edge = q2 - q1;
+    return std::abs(edge(0) * (point(1) - q1(1)) - edge(1) * (point(0) - q1(0))) / edge.norm();
+  };
+
+  std::vector<MortarSegmentNodeOrigin> origins;
+  origins.reserve(poly_nodes.size());
+  bool has_fixed = false;
+  for (const auto node_index : index_range(poly_nodes))
+  {
+    const auto & point = poly_nodes[node_index];
+
+    // Clipping copies the secondary nodes and recomputes the primary nodes from the primary edges,
+    // both within roundoff. Secondary nodes take precedence where the two coincide.
+    const auto find_node = [this, &point](const std::vector<Point> & poly)
+    {
+      for (const auto i : index_range(poly))
+        if ((point - poly[i]).norm() <= _length_tol)
+          return cast_int<unsigned int>(i);
+      return libMesh::invalid_uint;
+    };
+    if (const auto i = find_node(_secondary_poly); i != libMesh::invalid_uint)
+    {
+      origins.push_back({Type::SecondaryNode, {{i, 0, 0, 0}}});
+      continue;
+    }
+    if (const auto i = find_node(primary_poly); i != libMesh::invalid_uint)
+    {
+      origins.push_back({Type::PrimaryNode, {{i, 0, 0, 0}}});
+      continue;
+    }
+
+    // The remaining boundary nodes lie on a secondary edge and on the line of a primary edge, the
+    // half plane that clipped it. Near a primary node two primary lines pass through the point; the
+    // intersection with the line most transverse to the secondary edge is the best conditioned.
+    Real best_sine = 0;
+    std::array<unsigned int, 4> best_edges;
+    for (const auto i : index_range(_secondary_poly))
+    {
+      const auto i_next = cast_int<unsigned int>((i + 1) % _secondary_poly.size());
+      const Point & s1 = _secondary_poly[i];
+      const Point ds = _secondary_poly[i_next] - s1;
+      const Real s = (point - s1) * ds / (ds * ds);
+      if (s < -_tolerance || s > 1 + _tolerance ||
+          line_distance(point, s1, _secondary_poly[i_next]) > _length_tol)
+        continue;
+      for (const auto j : index_range(primary_poly))
+      {
+        const auto j_next = cast_int<unsigned int>((j + 1) % primary_poly.size());
+        if (line_distance(point, primary_poly[j], primary_poly[j_next]) > _length_tol)
+          continue;
+        const Point dp = primary_poly[j_next] - primary_poly[j];
+        const Real sine = std::abs(ds(0) * dp(1) - ds(1) * dp(0)) / (ds.norm() * dp.norm());
+        if (sine > best_sine)
+        {
+          best_sine = sine;
+          best_edges = {{cast_int<unsigned int>(i), i_next, cast_int<unsigned int>(j), j_next}};
+        }
+      }
+    }
+    if (best_sine > 0)
+    {
+      origins.push_back({Type::EdgeIntersection, best_edges});
+      continue;
+    }
+
+    // An interior node is the center the triangulation appended to the boundary nodes before it.
+    // The mean and the area-weighted centroid can coincide in value but not in their derivatives,
+    // so the center type follows triangulatePoly() rather than the node position.
+    const auto n_boundary = cast_int<unsigned int>(node_index);
+    if (node_index + 1 == poly_nodes.size() && n_boundary >= 3)
+    {
+      Real double_area = 0;
+      for (const auto i : make_range(n_boundary))
+      {
+        const auto & a = poly_nodes[i];
+        const auto & b = poly_nodes[(i + 1) % n_boundary];
+        double_area += a(0) * b(1) - b(0) * a(1);
+      }
+      const bool mean_center = (_triangulation_mode == MortarSegmentTriangulationMode::Centroid &&
+                                !_triangulate_triangles) ||
+                               std::abs(double_area) <= TOLERANCE;
+      Point center;
+      if (mean_center)
+      {
+        for (const auto i : make_range(n_boundary))
+          center += poly_nodes[i];
+        center /= n_boundary;
+      }
+      else
+      {
+        for (const auto i : make_range(n_boundary))
+        {
+          const auto & a = poly_nodes[i];
+          const auto & b = poly_nodes[(i + 1) % n_boundary];
+          center += (a + b) * (a(0) * b(1) - b(0) * a(1));
+        }
+        center /= 3. * double_area;
+      }
+      // The area-weighted centroid depends on the boundary node positions, which a fixed node
+      // does not have
+      if ((point - center).norm() <= _length_tol && (mean_center || !has_fixed))
+      {
+        origins.push_back(
+            {mean_center ? Type::MeanCenter : Type::AreaCenter, {{0, n_boundary, 0, 0}}});
+        continue;
+      }
+    }
+
+    // The segment geometry derivatives only improve the Jacobian, so a node that cannot be
+    // identified, such as an interior node added by a Delaunay triangulator, is kept fixed
+    mooseDoOnce(mooseWarning("A 3D mortar segment node at ",
+                             point,
+                             " in the subpatch plane is neither a secondary or primary node, an "
+                             "intersection of their edges, nor a polygon center. Its dependence on "
+                             "the displacements is neglected in the Jacobian."));
+    origins.push_back({Type::Fixed, {{0, 0, 0, 0}}});
+    has_fixed = true;
+  }
+
+  return origins;
 }
 
 std::optional<Point>

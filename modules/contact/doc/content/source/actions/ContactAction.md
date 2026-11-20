@@ -14,6 +14,13 @@ objects. See [AutomaticMortarGeneration.md#quadrature-point-mapping] for the two
 The parameter has no effect in 2D, and every mortar consumer on the same primary-secondary boundary
 pair must use the same mapping mode.
 
+For the `mortar` and `mortar_penalty` formulations,
+[!param](/Contact/ContactAction/segment_geometry_derivatives) is forwarded to every generated
+mortar constraint and user object. It adds the dependence of the mortar segment geometry on the
+displacements to the contact Jacobian, see
+[AutomaticMortarGeneration.md#segment-geometry-derivatives]. It requires `use_dual = false`,
+because ContactAction uses dual bases by default.
+
 For the `mortar` formulation, [!param](/Contact/ContactAction/use_nodal_scaling) is forwarded to the
 generated Lagrange-multiplier user object to improve the conditioning of partially covered
 (secondary edge dropping) interfaces; it requires

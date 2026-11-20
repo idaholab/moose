@@ -104,6 +104,12 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
   if (_has_disp_z)
     check_type(*_disp_z_var, "disp_z");
 
+  // The auxiliary penalty traction is not an unknown in the nonlinear system. Its dual
+  // interpolation introduces displacement derivatives without corresponding residual columns.
+  if (getParam<bool>("segment_geometry_derivatives") && _aux_lm_var && _aux_lm_var->useDual())
+    paramError("segment_geometry_derivatives",
+               "Segment geometry derivatives are not available with dual penalty traction bases.");
+
   if (!_augmented_lagrange_problem == isParamValid("penetration_tolerance"))
     paramError("penetration_tolerance",
                "This parameter must be supplied if and only if an augmented Lagrange problem "
@@ -119,6 +125,12 @@ PenaltyWeightedGapUserObject::PenaltyWeightedGapUserObject(const InputParameters
                             std::make_pair(_primary_subdomain_id, _secondary_subdomain_id),
                             getParam<bool>("use_displaced_mesh"))
         .requestNonlocalSecondaryCouplings();
+}
+
+const FEType &
+PenaltyWeightedGapUserObject::testFEType() const
+{
+  return _aux_lm_var ? _aux_lm_var->feType() : _disp_x_var->feType();
 }
 
 const VariableTestValue &
@@ -168,7 +180,8 @@ PenaltyWeightedGapUserObject::selfFinalize()
         _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[dof_object->id()] : 0.0;
 
     // keep the negative normal pressure (compressive per convention here)
-    auto normal_pressure = min(0.0, penaltyPressure(wgap, penalty) + lagrange_multiplier);
+    auto normal_pressure =
+        min(0.0, penaltyPressure(dof_object, wgap, penalty) + lagrange_multiplier);
 
     // we switch conventins here and consider positive normal pressure as compressive
     _dof_to_normal_pressure[dof_object] = -normal_pressure;
@@ -341,7 +354,8 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
     auto & lagrange_multiplier = _dof_to_lagrange_multiplier[dof_object->id()];
 
     // Increment the multiplier by the penalty pressure computed in selfFinalize
-    const Real penalty_pressure = MetaPhysicL::raw_value(penaltyPressure(wgap, penalty));
+    const Real penalty_pressure =
+        MetaPhysicL::raw_value(penaltyPressure(dof_object, wgap, penalty));
 
     // Update penalty (the factor of 1/4 is suggested in the literature, the limit on AL iteration
     // caps the penalty increase)

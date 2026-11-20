@@ -98,15 +98,19 @@ public:
    * @param primary_nodes List of primary element 3D nodes
    * @return nodes List of 3D mortar segment nodes
    * @return tri_map List of integer arrays defining which nodes belong to each mortar segment
+   * @param node_origins If not null, the node origins of each mortar segment are appended in the
+   * same order as the mortar segment connectivity
    */
   void getMortarSegments(const std::vector<Point> & primary_nodes,
                          std::vector<Point> & nodes,
-                         std::vector<std::vector<unsigned int>> & elem_to_nodes);
+                         std::vector<std::vector<unsigned int>> & elem_to_nodes,
+                         std::vector<MortarSegmentNodeOrigins> * node_origins = nullptr);
 
   /**
    * Get mortar segments and aligned parent-reference coordinates by appending to the output
    * containers. Segments below \p minimum_segment_area are removed before mapping; retained
-   * vertices must map uniquely.
+   * vertices must map uniquely. If \p node_origins is not null, the node origins of each retained
+   * mortar segment are appended in the same order as the mortar segment connectivity.
    */
   void getMortarSegments(const std::vector<Point> & primary_nodes,
                          const std::vector<Point> & primary_reference_points,
@@ -114,7 +118,8 @@ public:
                          std::vector<std::vector<unsigned int>> & elem_to_nodes,
                          std::vector<std::array<Point, 3>> & elem_to_secondary_reference_points,
                          std::vector<std::array<Point, 3>> & elem_to_primary_reference_points,
-                         Real minimum_segment_area = 0.);
+                         Real minimum_segment_area = 0.,
+                         std::vector<MortarSegmentNodeOrigins> * node_origins = nullptr);
 
   /**
    * Compute area of polygon
@@ -159,7 +164,8 @@ private:
   void getMortarSegmentsImpl(const std::vector<Point> & primary_nodes,
                              std::vector<Point> & nodes,
                              std::vector<std::vector<unsigned int>> & elem_to_nodes,
-                             ReferenceMappingData * reference_mapping);
+                             ReferenceMappingData * reference_mapping,
+                             std::vector<MortarSegmentNodeOrigins> * node_origins);
 
   /**
    * Clip an already projected primary polygon against the secondary polygon. Keeping projection
@@ -175,6 +181,16 @@ private:
                                       const std::vector<Point> & poly,
                                       const std::vector<Point> & reference_points,
                                       std::string * failure_reason = nullptr) const;
+
+  /**
+   * Classify the nodes of a triangulated overlap polygon by the secondary and primary sub-element
+   * nodes they are built from
+   * @param primary_nodes The primary sub-element nodes passed to \p getMortarSegments
+   * @param poly_nodes The 2D overlap polygon nodes, including any interior node added by the
+   * triangulation
+   */
+  std::vector<MortarSegmentNodeOrigin> nodeOrigins(const std::vector<Point> & primary_nodes,
+                                                   const std::vector<Point> & poly_nodes) const;
 
 #ifdef MOOSE_UNIT_TEST
   friend class MortarSegmentHelperTest;
