@@ -886,7 +886,9 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto Si = (*_S_flow_soln)(node_in_i);
           auto Sj = (*_S_flow_soln)(node_in_j);
           Real u_star = 0.0;
-          // figure out donor axial velocity
+          // figure out donor axial velocity. This term enters crossflow_term below only
+          // multiplied by the same Wij that selects the donor, so the discontinuity of the
+          // switch cancels in the product and the residual stays continuous at Wij = 0
           if (_Wij(i_gap, iz) > 0.0)
             u_star = (*_mdot_soln)(node_out_i) / Si / rho_i;
           else
@@ -1088,7 +1090,9 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto S_j =
               computeInterpolatedValue((*_S_flow_soln)(node_out_j), (*_S_flow_soln)(node_in_j), Pe);
           auto u_star = 0.0;
-          // figure out donor axial velocity
+          // figure out donor axial velocity. Every entry added below is proportional to the same
+          // Wij that selects the donor, so the discontinuity of the switch cancels in the
+          // product and the assembled matrix stays continuous at Wij = 0
           if (_Wij(i_gap, cross_index) > 0.0)
           {
             if (iz == first_node)
@@ -1118,7 +1122,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
             LibmeshPetscCall(MatSetValues(
                 _amc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES));
           }
-          else if (_Wij(i_gap, cross_index) < 0.0) // _Wij=0 operations not necessary
+          else if (_Wij(i_gap, cross_index) < 0.0) // Wij = 0 operations not necessary
           {
             if (iz == first_node)
             {
@@ -1573,14 +1577,13 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         // total local form loss in the ij direction
         auto friction_term = _kij * _Wij(i_gap, iz) * std::abs(_Wij(i_gap, iz));
         auto DPij = (*_P_soln)(node_in_i) - (*_P_soln)(node_in_j);
-        // Figure out donor cell density
-        auto rho_star = 0.0;
-        if (_Wij(i_gap, iz) > 0.0)
-          rho_star = rho_i;
-        else if (_Wij(i_gap, iz) < 0.0)
-          rho_star = rho_j;
-        else
-          rho_star = (rho_i + rho_j) / 2.0;
+        // rho_star is the density of the lateral friction closure K*Wij*|Wij|/(Sij*rho_star),
+        // which this residual carries multiplied through by Sij*rho_star. A donor-cell density
+        // jumps at Wij = 0 and makes the residual discontinuous there, so the finite-difference
+        // Jacobian action of the matrix-free solve is not a fixed linear map; the mean of the two
+        // channel densities keeps the residual continuous and differs from the donor value by half
+        // the density difference across the gap
+        auto rho_star = (rho_i + rho_j) / 2.0;
         auto mass_term_out =
             (*_mdot_soln)(node_out_i) / (*_S_flow_soln)(node_out_i) / (*_rho_soln)(node_out_i) +
             (*_mdot_soln)(node_out_j) / (*_S_flow_soln)(node_out_j) / (*_rho_soln)(node_out_j);
@@ -1644,14 +1647,9 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
         auto Lij = pitch;
 
-        // Figure out donor cell density
-        auto rho_star = 0.0;
-        if (_Wij(i_gap, iz) > 0.0)
-          rho_star = rho_i_interp;
-        else if (_Wij(i_gap, iz) < 0.0)
-          rho_star = rho_j_interp;
-        else
-          rho_star = (rho_i_interp + rho_j_interp) / 2.0;
+        // rho_star is the mean of the two channel densities for consistency with the explicit
+        // branch above; see the comment there
+        auto rho_star = (rho_i_interp + rho_j_interp) / 2.0;
 
         // Assembling time derivative
         PetscScalar time_factor = _TR * Lij * Sij * rho_star / _dt;
@@ -2054,6 +2052,17 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   LibmeshPetscCall(KSPGetPC(ksp, &pc));
   LibmeshPetscCall(PCSetType(pc, PCNONE));
   LibmeshPetscCall(KSPSetTolerances(ksp, _rtol, _atol, _dtol, _maxit));
+  // The crossflow Jacobian's coupling is dense and lower-block-triangular across axial levels,
+  // and GMRES stagnates at the PETSc default restart of 30. The unknown count (_block_size *
+  // _n_gaps) is at most a few hundred in the regression tests, so 1000 is effectively unrestarted
+  // GMRES rather than a tuned restart cycle; a restarted GMRES below the unknown count still
+  // fails to converge the hardest of these cases
+  LibmeshPetscCall(KSPSetType(ksp, KSPGMRES));
+  LibmeshPetscCall(KSPGMRESSetRestart(ksp, 1000));
+  // Absolute tolerance so that an already-converged crossflow is not reported as a failed line
+  // search; the PETSc default of 1e-50 is never reached and the line search fails at round-off
+  LibmeshPetscCall(
+      SNESSetTolerances(snes, 1e-10, PETSC_CURRENT, PETSC_CURRENT, PETSC_CURRENT, PETSC_CURRENT));
   LibmeshPetscCall(SNESSetFromOptions(snes));
   LibmeshPetscCall(VecGetArray(x, &xx));
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
@@ -2063,9 +2072,6 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   LibmeshPetscCall(VecRestoreArray(x, &xx));
 
   LibmeshPetscCall(SNESSolve(snes, NULL, x));
-  // A diverged solve leaves x at its initial guess, which is then used as the crossflow of this
-  // iteration. Report it rather than stopping, since the unpreconditioned linear solve can break
-  // down near convergence
   SNESConvergedReason reason;
   LibmeshPetscCall(SNESGetConvergedReason(snes, &reason));
   if (reason < 0)
@@ -2074,15 +2080,16 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
     PetscReal residual_norm;
     LibmeshPetscCall(SNESGetIterationNumber(snes, &iterations));
     LibmeshPetscCall(SNESGetFunctionNorm(snes, &residual_norm));
-    mooseWarning("Crossflow nonlinear solve did not converge: ",
-                 SNESConvergedReasons[reason],
-                 " (",
-                 static_cast<int>(reason),
-                 ") after ",
-                 iterations,
-                 " iterations; residual norm = ",
-                 residual_norm,
-                 ". The crossflow of this iteration is not updated.");
+    mooseError(name(),
+               ": Crossflow nonlinear solve did not converge: ",
+               SNESConvergedReasons[reason],
+               " (",
+               static_cast<int>(reason),
+               ") after ",
+               iterations,
+               " iterations; residual norm = ",
+               residual_norm,
+               ".");
   }
   LibmeshPetscCall(VecGetArray(x, &xx));
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
