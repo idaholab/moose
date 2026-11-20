@@ -19,6 +19,39 @@
     recover = false
     min_slots = 2 # memory heavy, needs extra slot for --n-threads=2 coverage builds
   []
+  [MFEMCurlCurlLORPartial]
+    type = CSVDiff
+    input = ../kernels/curlcurl.i
+    csvdiff = 'OutputData/CurlCurlLORPartial/curlcurllor_line_sample_db_dt_field_0001.csv '
+              'OutputData/CurlCurlLORPartial/curlcurllor_line_sample_e_field_0001.csv'
+    cli_args = 'FESpaces/HCurlFESpace/fec_order=THIRD '
+               'FESpaces/HCurlFESpace/closed_basis=GaussLobatto '
+               'FESpaces/HCurlFESpace/open_basis=IntegratedGLL '
+               'Solvers/gmres/type=MFEMGMRESSolver Solvers/gmres/l_tol=1e-14 '
+               'Solvers/ams/low_order_refined=true '
+               'Executioner/assembly_level=partial '
+               'Outputs/CSV/file_base=OutputData/CurlCurlLORPartial/curlcurllor'
+    requirement = 'The system shall have the ability to precondition a partially assembled definite Maxwell problem with Nedelec elements of the first kind by a LOR AMS solver using MFEM.'
+    capabilities = 'mfem & method!=dbg'
+    compute_devices = 'cpu cuda'
+    valgrind = heavy
+    recover = false
+    min_slots = 2 # memory heavy, needs extra slot for --n-threads=2 coverage builds
+  []
+  [MFEMDiffusionLORPartial]
+    type = CSVDiff
+    input = ../kernels/diffusion.i
+    csvdiff = 'OutputData/DiffusionLORPartial_line_sample_0001.csv'
+    cli_args = 'FESpaces/H1FESpace/fec_order=SECOND '
+               'Solvers/main/type=MFEMCGSolver '
+               'Solvers/boomeramg/low_order_refined=true '
+               'Executioner/assembly_level=partial '
+               'Outputs/CSV/file_base=OutputData/DiffusionLORPartial'
+    requirement = 'The system shall have the ability to precondition a partially assembled diffusion problem by a LOR BoomerAMG solver using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
   [MFEMDiffusionLOR]
     type = CSVDiff
     input = ../kernels/diffusion.i
