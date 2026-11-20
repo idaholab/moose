@@ -43,4 +43,7 @@ protected:
   /// For HughesWinget kinematics
   MaterialProperty<RankTwoTensor> * _def_grad_mid;
   MaterialProperty<RankTwoTensor> * _f_bar;
+
+  /// Incremental deformation gradient before the volumetric locking correction
+  MaterialProperty<RankTwoTensor> * _unlocked_Fhat;
 };

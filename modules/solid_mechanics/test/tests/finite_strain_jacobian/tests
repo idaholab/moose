@@ -41,4 +41,19 @@
                    tensile test simulation in 3D using a volumetric locking correction'
     capabilities = 'method!=dbg'
   [../]
+  [./bending_Bbar_jacobian]
+    type = PetscJacobianTester
+    input = 'bending_jacobian.i'
+    cli_args = 'Mesh/generated_mesh/nx=2 Mesh/generated_mesh/ny=1 Executioner/num_steps=1 '
+               'Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true '
+               'Physics/SolidMechanics/QuasiStatic/all/planar_formulation=PLANE_STRAIN'
+    # The finite deformation Jacobian linearizes the Taylor-expanded increments only to ~1e-3 here
+    ratio_tol = 1e-3
+    difference_tol = 1e10
+    issues = '#34320'
+    design = '/ComputePlaneFiniteStrain.md /StressDivergenceTensors.md'
+    requirement = 'The system shall include the volumetric locking correction of the stress '
+                  'divergence kernel and of the plane strain finite strain calculator in the finite '
+                  'deformation Jacobian.'
+  [../]
 []

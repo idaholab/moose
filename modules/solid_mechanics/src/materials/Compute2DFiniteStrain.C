@@ -100,6 +100,9 @@ Compute2DFiniteStrain::computeProperties()
 
     if (_volumetric_locking_correction)
     {
+      if (_unlocked_Fhat)
+        (*_unlocked_Fhat)[_qp] = _Fhat[_qp];
+
       // Calculate average _Fhat for volumetric locking correction
       ave_Fhat += _Fhat[_qp] * _JxW[_qp] * _coord[_qp];
 
