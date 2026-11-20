@@ -858,7 +858,7 @@ Assembly::reinitFE(const Elem * elem)
   if (_subproblem.haveADObjects() && (_need_ad_volume_map || _need_ad_grad_phi))
   {
     auto n_qp = _current_qrule->n_points();
-    resizeADMappingObjects(n_qp, dim, _ad_map);
+    resizeADMappingObjects(n_qp, dim, _calculate_xyz, _ad_map);
     if (_displaced)
     {
       const auto & qw = _current_qrule->get_weights();
@@ -866,7 +866,8 @@ Assembly::reinitFE(const Elem * elem)
           *elem, ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum());
       const auto & fe_map = _holder_fe_helper[dim]->get_fe_map();
       for (unsigned int qp = 0; qp != n_qp; qp++)
-        computeSinglePointMapAD(*elem, _ad_elem_node_points, fe_map, qw, qp, _ad_map);
+        computeSinglePointMapAD(
+            *elem, _ad_elem_node_points, fe_map, qw, qp, _calculate_xyz, _ad_map);
     }
     else
     {
@@ -1017,7 +1018,10 @@ Assembly::computeGradPhiAD(const Elem * elem,
 }
 
 void
-Assembly::resizeADMappingObjects(unsigned int n_qp, unsigned int dim, ADMapData & map)
+Assembly::resizeADMappingObjects(const unsigned int n_qp,
+                                 const unsigned int dim,
+                                 const bool compute_points,
+                                 ADMapData & map)
 {
   map.dxyzdxi.resize(n_qp);
   map.dxidx.resize(n_qp);
@@ -1042,7 +1046,7 @@ Assembly::resizeADMappingObjects(unsigned int n_qp, unsigned int dim, ADMapData 
 
   map.jac.resize(n_qp);
   map.JxW.resize(n_qp);
-  if (_calculate_xyz)
+  if (compute_points)
     map.q_points.resize(n_qp);
 }
 
@@ -1103,6 +1107,7 @@ Assembly::computeSinglePointMapAD(const Elem & elem,
                                   const FEMap & fe_map,
                                   const std::vector<Real> & qw,
                                   unsigned p,
+                                  const bool compute_points,
                                   ADMapData & map)
 {
   // This function relies on the fact that FE::reinit has already been called. FE::reinit will
@@ -1158,14 +1163,15 @@ Assembly::computeSinglePointMapAD(const Elem & elem,
     {
       map.jac[p] = 1.0;
       map.JxW[p] = qw[p];
-      if (_calculate_xyz)
+      // A point element does not move with the displacements
+      if (compute_points)
         map.q_points[p] = elem.point(0);
       break;
     }
 
     case 1:
     {
-      if (_calculate_xyz)
+      if (compute_points)
         map.q_points[p].zero();
 
       map.dxyzdxi[p].zero();
@@ -1176,7 +1182,7 @@ Assembly::computeSinglePointMapAD(const Elem & elem,
 
         map.dxyzdxi[p].add_scaled(elem_point, dphidxi_map[i][p]);
 
-        if (_calculate_xyz)
+        if (compute_points)
           map.q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
 
@@ -1208,7 +1214,7 @@ Assembly::computeSinglePointMapAD(const Elem & elem,
 
     case 2:
     {
-      if (_calculate_xyz)
+      if (compute_points)
         map.q_points[p].zero();
       map.dxyzdxi[p].zero();
       map.dxyzdeta[p].zero();
@@ -1220,7 +1226,7 @@ Assembly::computeSinglePointMapAD(const Elem & elem,
         map.dxyzdxi[p].add_scaled(elem_point, dphidxi_map[i][p]);
         map.dxyzdeta[p].add_scaled(elem_point, dphideta_map[i][p]);
 
-        if (_calculate_xyz)
+        if (compute_points)
           map.q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
 
@@ -1278,7 +1284,7 @@ Assembly::computeSinglePointMapAD(const Elem & elem,
 
     case 3:
     {
-      if (_calculate_xyz)
+      if (compute_points)
         map.q_points[p].zero();
       map.dxyzdxi[p].zero();
       map.dxyzdeta[p].zero();
@@ -1292,7 +1298,7 @@ Assembly::computeSinglePointMapAD(const Elem & elem,
         map.dxyzdeta[p].add_scaled(elem_point, dphideta_map[i][p]);
         map.dxyzdzeta[p].add_scaled(elem_point, dphidzeta_map[i][p]);
 
-        if (_calculate_xyz)
+        if (compute_points)
           map.q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
 
@@ -1425,29 +1431,28 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
 }
 
 void
-Assembly::computeFaceMap(const Elem & elem,
-                         const unsigned int side,
-                         const std::vector<VectorValue<ADReal>> & elem_node_points,
-                         const FEMap & fe_map,
-                         const std::vector<Real> & qw,
-                         ADMapData & map)
+Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::vector<Real> & qw)
 {
+  auto & map = _ad_face_map;
+
   // Important quantities calculated by this method:
-  //   - map.JxW
-  //   - map.q_points
-  //   - map.normals
-  //   - map.curvatures
+  //   - _ad_face_map.JxW
+  //   - _ad_face_map.q_points
+  //   - _ad_face_map.normals
+  //   - _ad_face_map.curvatures
 
   const Elem & side_elem = _compute_face_map_side_elem_builder(elem, side);
   const auto dim = elem.dim();
   const auto n_qp = qw.size();
+  const auto & fe_map = _holder_fe_face_helper[dim]->get_fe_map();
   const auto & dpsidxi_map = fe_map.get_dpsidxi();
   const auto & dpsideta_map = fe_map.get_dpsideta();
   const auto & psi_map = fe_map.get_psi();
   std::vector<std::vector<Real>> const * d2psidxi2_map = nullptr;
   std::vector<std::vector<Real>> const * d2psidxideta_map = nullptr;
   std::vector<std::vector<Real>> const * d2psideta2_map = nullptr;
-  mooseAssert(elem_node_points.size() == elem.n_nodes(), "Every element node needs a position");
+  mooseAssert(_ad_elem_node_points.size() == elem.n_nodes(),
+              "computeADElemNodePoints must be called for this element first");
 
   if (_calculate_curvatures)
   {
@@ -1470,7 +1475,7 @@ Assembly::computeFaceMap(const Elem & elem,
 
       VectorValue<ADReal> side_point;
       if (_calculate_face_xyz)
-        side_point = elem_node_points[elem.local_side_node(side, 0)];
+        side_point = _ad_elem_node_points[elem.local_side_node(side, 0)];
 
       for (const auto p : make_range(n_qp))
       {
@@ -1507,7 +1512,7 @@ Assembly::computeFaceMap(const Elem & elem,
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
-        const auto & side_point = elem_node_points[elem.local_side_node(side, i)];
+        const auto & side_point = _ad_elem_node_points[elem.local_side_node(side, i)];
 
         for (const auto p : make_range(n_qp))
           map.dxyzdxi[p].add_scaled(side_point, dpsidxi_map[i][p]);
@@ -1568,7 +1573,7 @@ Assembly::computeFaceMap(const Elem & elem,
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
-        const auto & side_point = elem_node_points[elem.local_side_node(side, i)];
+        const auto & side_point = _ad_elem_node_points[elem.local_side_node(side, i)];
 
         for (const auto p : make_range(n_qp))
         {
@@ -2187,7 +2192,7 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
   if (_subproblem.haveADObjects())
   {
     auto n_qp = _current_qrule_face->n_points();
-    resizeADMappingObjects(n_qp, dim, _ad_face_elem_map);
+    resizeADMappingObjects(n_qp, dim, false, _ad_face_elem_map);
     _ad_face_map.normals.resize(n_qp);
     _ad_face_map.JxW.resize(n_qp);
     if (_calculate_face_xyz)
@@ -2203,18 +2208,19 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
             elem, ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum());
       // computeFaceMap supplies the AD face JxW, normals and points; the single-point map only adds
       // the inverse map that computeGradPhiAD needs
-      const auto & fe_map = _holder_fe_face_helper[dim]->get_fe_map();
       if (_need_ad_face_map)
-        computeFaceMap(elem, side, _ad_elem_node_points, fe_map, qw, _ad_face_map);
+        computeFaceMap(elem, side, qw);
       if (_need_ad_grad_phi_face)
       {
+        const auto & fe_map = _holder_fe_face_helper[dim]->get_fe_map();
         // Faces can have different numbers of quadrature points, so grow the weights as needed
         static thread_local std::vector<Real> dummy_qw;
         dummy_qw.resize(n_qp, 1.);
 
+        // Only the inverse map is needed, so the points are not computed
         for (unsigned int qp = 0; qp != n_qp; qp++)
           computeSinglePointMapAD(
-              elem, _ad_elem_node_points, fe_map, dummy_qw, qp, _ad_face_elem_map);
+              elem, _ad_elem_node_points, fe_map, dummy_qw, qp, false, _ad_face_elem_map);
       }
     }
     else

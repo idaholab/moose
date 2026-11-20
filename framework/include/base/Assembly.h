@@ -2026,22 +2026,7 @@ private:
    */
   void reinitFEFace(const Elem * elem, unsigned int side);
 
-  /**
-   * Compute the AD face JxW, normals, quadrature points and curvatures of a side of an element
-   * @param elem The element
-   * @param side The side of \p elem
-   * @param elem_node_points The positions of the nodes of \p elem
-   * @param fe_map The side map of \p elem, reinitialized at the quadrature points
-   * @param qw The quadrature weights
-   * @param map The AD face map to fill. Its JxW, normals and, when requested, quadrature points and
-   * curvatures must already be sized to the number of quadrature points.
-   */
-  void computeFaceMap(const Elem & elem,
-                      const unsigned int side,
-                      const std::vector<VectorValue<ADReal>> & elem_node_points,
-                      const libMesh::FEMap & fe_map,
-                      const std::vector<Real> & qw,
-                      ADMapData & map);
+  void computeFaceMap(const Elem & elem, const unsigned int side, const std::vector<Real> & qw);
 
   void reinitFEFaceNeighbor(const Elem * neighbor, const std::vector<Point> & reference_points);
 
@@ -2088,7 +2073,8 @@ private:
   /**
    * resize any objects that contribute to automatic differentiation-related mapping calculations
    */
-  void resizeADMappingObjects(unsigned int n_qp, unsigned int dim, ADMapData & map);
+  void
+  resizeADMappingObjects(unsigned int n_qp, unsigned int dim, bool compute_points, ADMapData & map);
 
   /**
    * compute the finite element reference-physical mapping quantities (such as JxW) with possible
@@ -2098,6 +2084,7 @@ private:
    * @param fe_map The map of \p elem, reinitialized at the quadrature points
    * @param qw The quadrature weights
    * @param p The quadrature point index
+   * @param compute_points Whether to compute the physical quadrature point
    * @param map The AD map to fill at \p p, resized by resizeADMappingObjects
    */
   void computeSinglePointMapAD(const Elem & elem,
@@ -2105,6 +2092,7 @@ private:
                                const libMesh::FEMap & fe_map,
                                const std::vector<Real> & qw,
                                unsigned p,
+                               bool compute_points,
                                ADMapData & map);
 
   /**
