@@ -144,6 +144,21 @@
     requirement = 'The system shall be able to extrude a mesh and linearly increase its radial extent as it is being extruded.'
     issues = '#3554 #31112'
   []
+  [radial_growth_specified_start]
+    type = 'Exodiff'
+    input = 'gen_extrude.i'
+    # sqrt(0.5) is the extent the generator measures from the input mesh: the distance from the
+    # centroid of the unit square to a corner. Specifying it reproduces the computed result
+    cli_args = "Mesh/extrude/end_radial_extent='${fparse 2 * sqrt(2)}'
+                Mesh/extrude/start_radial_extent='${fparse sqrt(0.5)}'
+                --mesh-only straight_radial_growth_in.e"
+    exodiff = 'straight_radial_growth_in.e'
+    exodiff_opts = '-pedantic'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a mesh and increase its radial extent from a starting extent specified in the input rather than measured from the mesh.'
+    issues = '#34317'
+  []
   [polygons]
     type = CSVDiff
     input = 'polygons.i'
