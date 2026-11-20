@@ -869,7 +869,10 @@ WCNSLinearFVFlowPhysics::addRhieChowUserObjects()
 std::vector<UserObjectName>
 WCNSLinearFVFlowPhysics::getSuppliedUserObjects() const
 {
-  return {rhieChowUOName()};
+  std::vector<UserObjectName> supplied = {rhieChowUOName()};
+  if (_has_baffles)
+    supplied.push_back(prefix() + "pressure_jump");
+  return supplied;
 }
 
 void

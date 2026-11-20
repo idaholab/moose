@@ -35,12 +35,12 @@
     requirement = 'The system shall use the solid thermal conductivity of a porous medium as an effective conductivity in the linear finite volume solid energy equation, so that the steady conduction temperature rise in a heated porous solid does not depend on the porosity, for a porosity of'
     design = 'PNSLinearFVSolidHeatTransferPhysics.md'
     issues = '#31995 #34448'
-    max_threads = 1 # see libmesh issue #3808
     [low-porosity]
       type = 'CSVDiff'
       input = solid_conduction_porosity_linear.i
       csvdiff = 'solid_conduction_porosity_linear_out.csv'
       detail = '0.25 and'
+      max_threads = 1 # see libmesh issue #3808
     []
     [high-porosity]
       type = 'CSVDiff'
@@ -49,18 +49,19 @@
       cli_args = 'porosity=0.75'
       prereq = 'linear-solid-conductivity/low-porosity'
       detail = '0.75.'
+      max_threads = 1 # see libmesh issue #3808
     []
   []
   [linear-solid-anisotropic-conductivity]
     requirement = 'The system shall support an anisotropic effective solid thermal conductivity in the linear finite volume solid energy equation of a porous medium'
     design = 'PNSLinearFVSolidHeatTransferPhysics.md LinearFVAnisotropicDiffusion.md'
     issues = '#31995'
-    max_threads = 1 # see libmesh issue #3808
     [conduction]
       type = 'CSVDiff'
       input = solid_conduction_anisotropic_linear.i
       csvdiff = 'solid_conduction_anisotropic_linear_out.csv'
       detail = 'matching the analytical temperature rise of a heated slab conducting along its high-conductivity direction, and'
+      max_threads = 1 # see libmesh issue #3808
     []
     [heat-flux]
       type = 'CSVDiff'
@@ -70,6 +71,7 @@
                  "Physics/NavierStokes/SolidHeatTransferSegregated/solid/boundary_heat_fluxes='100' "
                  "Outputs/file_base=solid_conduction_anisotropic_linear_heat_flux"
       detail = 'matching the analytical temperature rise when a heat flux is also imposed on the boundary opposite the fixed temperature.'
+      max_threads = 1 # see libmesh issue #3808
     []
   []
   [linear-solid-variable-cp]
