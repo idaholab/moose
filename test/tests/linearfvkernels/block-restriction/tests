@@ -19,7 +19,7 @@
     type = CSVDiff
     input = block-restricted-diffusion-react.i
     csvdiff = block-restricted-diffusion-react_csv.csv
-    requirement = 'The system should be able to exactly solve a problem with a constant source and diffusion and reaction kernels restricted to two different subdomains.'
+    requirement = 'The system shall be able to exactly solve a problem with a constant source and diffusion and reaction kernels restricted to two different subdomains.'
     max_threads = 1 # see libmesh issue #3808
   []
   [diffusion-variable-functor-bc]

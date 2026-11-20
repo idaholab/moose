@@ -5,7 +5,7 @@
     input = 'adaptivity.i'
     exodiff = 'adaptivity_out.e adaptivity_out.e-s002'
     abs_zero = 1e-8
-    requirement = "Adaptivity shall work with interface kernels as long as stateful properties are not used."
+    requirement = "The system shall support adaptivity with interface kernels as long as stateful properties are not used."
     design = "/InterfaceKernels/index.md"
     issues = '#10977'
   [../]

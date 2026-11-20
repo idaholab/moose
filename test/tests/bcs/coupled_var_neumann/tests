@@ -17,7 +17,7 @@
   [../]
 
   [nonlinear]
-    requirement = 'When coupling nonlinear variables into a Neumann type boundary condition, the system shall'
+    requirement = 'The system shall, when coupling nonlinear variables into a Neumann type boundary condition,'
     [exo]
       type = Exodiff
       input = 'coupled_var_neumann_nl.i'
