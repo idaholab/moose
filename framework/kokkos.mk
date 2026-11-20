@@ -87,6 +87,10 @@ ifeq ($(PETSC_HAVE_SYCL),1)
   endif
 endif
 
+# libmesh_CXX can carry flags after the compiler, such as the C++ standard flag. The device
+# compilers take the compiler as the host compiler and need those flags too.
+LIBMESH_CXX_FLAGS := $(wordlist 2, $(words $(libmesh_CXX)), $(libmesh_CXX))
+
 ifneq ($(PETSC_HAVE_CUDA),)
   KOKKOS_DEVICE     := CUDA
   KOKKOS_ARCH       := $(KOKKOS_CUDA_ARCH_$(CUDA_ARCH))
@@ -94,6 +98,7 @@ ifneq ($(PETSC_HAVE_CUDA),)
   KOKKOS_CXX         = $(CUDA_COMPILER)
   KOKKOS_CXXFLAGS    = -arch=sm_$(CUDA_ARCH) --extended-lambda
   KOKKOS_CXXFLAGS   += --forward-unknown-to-host-compiler --disable-warnings -x cu -ccbin $(word 1, $(libmesh_CXX))
+  KOKKOS_CXXFLAGS   += $(LIBMESH_CXX_FLAGS)
   KOKKOS_CXXFLAGS   += $(filter-out -Werror=return-type,$(CXXFLAGS) $(libmesh_CXXFLAGS)) # Incompatible with NVCC
   KOKKOS_CPPFLAGS    = $(subst -Werror,-Werror=all-warnings,$(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS})
   KOKKOS_LDFLAGS     = --forward-unknown-to-host-compiler -arch=sm_$(CUDA_ARCH)
@@ -102,7 +107,7 @@ else ifneq ($(PETSC_HAVE_HIP),)
   KOKKOS_ARCH       := $(KOKKOS_HIP_ARCH_$(HIP_ARCH))
   KOKKOS_COMPILER   := HIPCC
   KOKKOS_CXX         = $(HIP_COMPILER)
-  KOKKOS_CXXFLAGS    = --offload-arch=$(HIP_ARCH) -x hip $(CXXFLAGS) $(libmesh_CXXFLAGS)
+  KOKKOS_CXXFLAGS    = --offload-arch=$(HIP_ARCH) -x hip $(LIBMESH_CXX_FLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS)
   KOKKOS_CPPFLAGS    = $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS}
   KOKKOS_LDFLAGS     = --offload-arch=$(HIP_ARCH)
 else ifneq ($(PETSC_HAVE_SYCL),)
@@ -110,7 +115,7 @@ else ifneq ($(PETSC_HAVE_SYCL),)
   KOKKOS_ARCH       := $(KOKKOS_SYCL_ARCH_$(SYCL_ARCH))
   KOKKOS_COMPILER   := ICPX
   KOKKOS_CXX         = $(SYCL_COMPILER)
-  KOKKOS_CXXFLAGS    = -fsycl -fno-sycl-rdc -x c++ $(CXXFLAGS) $(libmesh_CXXFLAGS)
+  KOKKOS_CXXFLAGS    = -fsycl -fno-sycl-rdc -x c++ $(LIBMESH_CXX_FLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS)
   KOKKOS_CXXFLAGS   += -Wno-deprecated-declarations -Wno-macro-redefined
   KOKKOS_CPPFLAGS    = $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS}
   KOKKOS_LDFLAGS     = -fsycl
