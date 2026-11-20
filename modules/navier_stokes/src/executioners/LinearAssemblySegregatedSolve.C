@@ -934,6 +934,7 @@ LinearAssemblySegregatedSolve::solve()
     }
 
     _problem.execute(EXEC_NONLINEAR);
+    _problem.execute(EXEC_MULTISYSTEM_FIXED_POINT_ITERATION_END);
 
     converged = NS::FV::converged(ns_residuals, ns_abs_tols);
   }

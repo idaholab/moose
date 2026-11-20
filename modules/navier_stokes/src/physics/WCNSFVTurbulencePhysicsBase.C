@@ -380,6 +380,12 @@ WCNSFVTurbulencePhysicsBase::addAuxiliaryKernels()
   const std::string u_names[3] = {"u", "v", "w"};
   // Not future-proof
   const bool is_linear = dynamic_cast<WCNSLinearFVTurbulencePhysics *>(this);
+  // The linear segregated solvers assemble every system with EXEC_NONLINEAR, so the turbulent
+  // quantities are only refreshed once per outer iteration there
+  const auto aux_execute_on =
+      is_linear ? std::vector<std::string>{EXEC_TIMESTEP_BEGIN,
+                                           EXEC_MULTISYSTEM_FIXED_POINT_ITERATION_END}
+                : std::vector<std::string>{EXEC_NONLINEAR};
 
   if (_turbulence_model == "k-epsilon" && getParam<bool>("mu_t_as_aux_variable"))
   {
@@ -398,7 +404,7 @@ WCNSFVTurbulencePhysicsBase::addAuxiliaryKernels()
 
     params.set<bool>("newton_solve") = !is_linear;
     params.applySpecificParameters(parameters(), {"C_mu", "bulk_wall_treatment", "mu_t_ratio_max"});
-    params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
+    params.set<ExecFlagEnum>("execute_on") = aux_execute_on;
 
     getProblem().addAuxKernel("kEpsilonViscosityAux", name() + "_viscosity_aux", params);
   }
@@ -410,7 +416,7 @@ WCNSFVTurbulencePhysicsBase::addAuxiliaryKernels()
     params.set<AuxVariableName>("variable") = NS::k_eff_t;
     params.set<MooseFunctorName>(NS::cp) = _fluid_energy_physics->getSpecificHeatName();
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
-    params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
+    params.set<ExecFlagEnum>("execute_on") = aux_execute_on;
 
     const auto & k_names = _fluid_energy_physics->getThermalConductivityName();
     if (k_names.size() != 1)

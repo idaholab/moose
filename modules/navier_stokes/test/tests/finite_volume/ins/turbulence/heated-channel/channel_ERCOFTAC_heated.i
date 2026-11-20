@@ -427,7 +427,7 @@ Pr_t = 0.7
     bulk_wall_treatment = ${bulk_wall_treatment}
     walls = ${walls}
     wall_treatment = ${wall_treatment}
-    execute_on = 'NONLINEAR'
+    execute_on = 'TIMESTEP_BEGIN MULTISYSTEM_FIXED_POINT_ITERATION_END'
     mu_t_ratio_max = 1e20
   []
   [compute_k_eff]
@@ -437,7 +437,7 @@ Pr_t = 0.7
     cp = ${cp}
     k = ${k}
     mu_t = 'mu_t'
-    execute_on = 'NONLINEAR'
+    execute_on = 'TIMESTEP_BEGIN MULTISYSTEM_FIXED_POINT_ITERATION_END'
   []
   [compute_y_plus]
     type = RANSYPlusAux
@@ -449,14 +449,14 @@ Pr_t = 0.7
     v = vel_y
     walls = ${walls}
     wall_treatment = ${wall_treatment}
-    execute_on = 'NONLINEAR'
+    execute_on = 'TIMESTEP_BEGIN MULTISYSTEM_FIXED_POINT_ITERATION_END'
   []
   [compute_mu_eff]
     type = ParsedAux
     variable = 'mu_eff'
     coupled_variables = 'mu_t'
     expression = 'mu_t + ${mu}'
-    execute_on = 'NONLINEAR'
+    execute_on = 'TIMESTEP_BEGIN MULTISYSTEM_FIXED_POINT_ITERATION_END'
   []
 []
 

@@ -397,7 +397,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     bulk_wall_treatment = ${bulk_wall_treatment}
     walls = ${walls}
     wall_treatment = ${wall_treatment}
-    execute_on = 'NONLINEAR'
+    execute_on = 'TIMESTEP_BEGIN MULTISYSTEM_FIXED_POINT_ITERATION_END'
     mu_t_ratio_max = 1e20
   []
   [compute_y_plus]
@@ -410,14 +410,14 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     v = vel_y
     walls = ${walls}
     wall_treatment = ${wall_treatment}
-    execute_on = 'NONLINEAR'
+    execute_on = 'TIMESTEP_BEGIN MULTISYSTEM_FIXED_POINT_ITERATION_END'
   []
   [compute_mu_eff]
     type = ParsedAux
     variable = 'mu_eff'
     coupled_variables = 'mu_t'
     expression = 'mu_t + ${mu}'
-    execute_on = 'NONLINEAR'
+    execute_on = 'TIMESTEP_BEGIN MULTISYSTEM_FIXED_POINT_ITERATION_END'
   []
 []
 
