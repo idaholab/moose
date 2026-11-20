@@ -137,4 +137,9 @@ protected:
 
   /// Damage values (pair of current and old) on CZM interface
   std::unordered_map<dof_id_type, std::pair<ADReal, Real>> & _dof_to_damage;
+
+  /// The timestep index at which the damage, slip and tangential traction history were last
+  /// advanced. Used to detect a retried timestep (e.g. from --test-restep or a rejected step),
+  /// since timestepSetup() runs once per time step attempt rather than once per accepted step.
+  int & _t_step_old_czm;
 };
