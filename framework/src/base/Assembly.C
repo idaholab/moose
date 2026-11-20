@@ -244,13 +244,15 @@ Assembly::~Assembly()
   _coord_neighbor.release();
   _coord_msm.release();
 
-  _ad_JxW.release();
-  _ad_q_points.release();
-  _ad_JxW_face.release();
-  _ad_normals.release();
-  _ad_q_points_face.release();
+  _ad_map.JxW.release();
+  _ad_map.q_points.release();
+  _ad_face_map.JxW.release();
+  _ad_face_map.q_points.release();
+  _ad_face_map.normals.release();
+  _ad_face_elem_map.JxW.release();
+  _ad_face_elem_map.q_points.release();
   _curvatures.release();
-  _ad_curvatures.release();
+  _ad_face_map.curvatures.release();
   _ad_coord.release();
 
   delete _qrule_msm;
@@ -856,22 +858,23 @@ Assembly::reinitFE(const Elem * elem)
   if (_subproblem.haveADObjects() && (_need_ad_volume_map || _need_ad_grad_phi))
   {
     auto n_qp = _current_qrule->n_points();
-    resizeADMappingObjects(n_qp, dim);
+    resizeADMappingObjects(n_qp, dim, _ad_map);
     if (_displaced)
     {
       const auto & qw = _current_qrule->get_weights();
       computeADElemNodePoints(
           *elem, ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum());
+      const auto & fe_map = _holder_fe_helper[dim]->get_fe_map();
       for (unsigned int qp = 0; qp != n_qp; qp++)
-        computeSinglePointMapAD(elem, qw, qp, _holder_fe_helper[dim]);
+        computeSinglePointMapAD(*elem, _ad_elem_node_points, fe_map, qw, qp, _ad_map);
     }
     else
     {
       for (unsigned qp = 0; qp < n_qp; ++qp)
-        _ad_JxW[qp] = _current_JxW[qp];
+        _ad_map.JxW[qp] = _current_JxW[qp];
       if (_calculate_xyz)
         for (unsigned qp = 0; qp < n_qp; ++qp)
-          _ad_q_points[qp] = _current_q_points[qp];
+          _ad_map.q_points[qp] = _current_q_points[qp];
     }
 
     for (const auto & it : _fe[dim])
@@ -888,7 +891,7 @@ Assembly::reinitFE(const Elem * elem)
         grad_phi[i].resize(n_qp);
 
       if (_displaced)
-        computeGradPhiAD(elem, n_qp, grad_phi, &fe);
+        computeGradPhiAD(elem, n_qp, grad_phi, &fe, _ad_map);
       else
       {
         const auto & regular_grad_phi = _fe_shape_data[fe_type]->_grad_phi;
@@ -911,7 +914,7 @@ Assembly::reinitFE(const Elem * elem)
         grad_phi[i].resize(n_qp);
 
       if (_displaced)
-        computeGradPhiAD(elem, n_qp, grad_phi, &fe);
+        computeGradPhiAD(elem, n_qp, grad_phi, &fe, _ad_map);
       else
       {
         const auto & regular_grad_phi = _vector_fe_shape_data[fe_type]->_grad_phi;
@@ -936,7 +939,8 @@ void
 Assembly::computeGradPhiAD(const Elem * elem,
                            unsigned int n_qp,
                            ADTemplateVariablePhiGradient<OutputType> & grad_phi,
-                           FEGenericBase<OutputType> * fe)
+                           FEGenericBase<OutputType> * fe,
+                           const ADMapData & map)
 {
   // This function relies on the fact that FE::reinit has already been called. FE::reinit will
   // importantly have already called FEMap::init_shape_functions which will have computed
@@ -970,9 +974,9 @@ Assembly::computeGradPhiAD(const Elem * elem,
       for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
         for (unsigned qp = 0; qp < n_qp; ++qp)
         {
-          grad_phi[i][qp].slice(0) = dphidxi[i][qp] * _ad_dxidx_map[qp];
-          grad_phi[i][qp].slice(1) = dphidxi[i][qp] * _ad_dxidy_map[qp];
-          grad_phi[i][qp].slice(2) = dphidxi[i][qp] * _ad_dxidz_map[qp];
+          grad_phi[i][qp].slice(0) = dphidxi[i][qp] * map.dxidx[qp];
+          grad_phi[i][qp].slice(1) = dphidxi[i][qp] * map.dxidy[qp];
+          grad_phi[i][qp].slice(2) = dphidxi[i][qp] * map.dxidz[qp];
         }
       break;
     }
@@ -983,11 +987,11 @@ Assembly::computeGradPhiAD(const Elem * elem,
         for (unsigned qp = 0; qp < n_qp; ++qp)
         {
           grad_phi[i][qp].slice(0) =
-              dphidxi[i][qp] * _ad_dxidx_map[qp] + dphideta[i][qp] * _ad_detadx_map[qp];
+              dphidxi[i][qp] * map.dxidx[qp] + dphideta[i][qp] * map.detadx[qp];
           grad_phi[i][qp].slice(1) =
-              dphidxi[i][qp] * _ad_dxidy_map[qp] + dphideta[i][qp] * _ad_detady_map[qp];
+              dphidxi[i][qp] * map.dxidy[qp] + dphideta[i][qp] * map.detady[qp];
           grad_phi[i][qp].slice(2) =
-              dphidxi[i][qp] * _ad_dxidz_map[qp] + dphideta[i][qp] * _ad_detadz_map[qp];
+              dphidxi[i][qp] * map.dxidz[qp] + dphideta[i][qp] * map.detadz[qp];
         }
       break;
     }
@@ -997,15 +1001,15 @@ Assembly::computeGradPhiAD(const Elem * elem,
       for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
         for (unsigned qp = 0; qp < n_qp; ++qp)
         {
-          grad_phi[i][qp].slice(0) = dphidxi[i][qp] * _ad_dxidx_map[qp] +
-                                     dphideta[i][qp] * _ad_detadx_map[qp] +
-                                     dphidzeta[i][qp] * _ad_dzetadx_map[qp];
-          grad_phi[i][qp].slice(1) = dphidxi[i][qp] * _ad_dxidy_map[qp] +
-                                     dphideta[i][qp] * _ad_detady_map[qp] +
-                                     dphidzeta[i][qp] * _ad_dzetady_map[qp];
-          grad_phi[i][qp].slice(2) = dphidxi[i][qp] * _ad_dxidz_map[qp] +
-                                     dphideta[i][qp] * _ad_detadz_map[qp] +
-                                     dphidzeta[i][qp] * _ad_dzetadz_map[qp];
+          grad_phi[i][qp].slice(0) = dphidxi[i][qp] * map.dxidx[qp] +
+                                     dphideta[i][qp] * map.detadx[qp] +
+                                     dphidzeta[i][qp] * map.dzetadx[qp];
+          grad_phi[i][qp].slice(1) = dphidxi[i][qp] * map.dxidy[qp] +
+                                     dphideta[i][qp] * map.detady[qp] +
+                                     dphidzeta[i][qp] * map.dzetady[qp];
+          grad_phi[i][qp].slice(2) = dphidxi[i][qp] * map.dxidz[qp] +
+                                     dphideta[i][qp] * map.detadz[qp] +
+                                     dphidzeta[i][qp] * map.dzetadz[qp];
         }
       break;
     }
@@ -1013,33 +1017,33 @@ Assembly::computeGradPhiAD(const Elem * elem,
 }
 
 void
-Assembly::resizeADMappingObjects(unsigned int n_qp, unsigned int dim)
+Assembly::resizeADMappingObjects(unsigned int n_qp, unsigned int dim, ADMapData & map)
 {
-  _ad_dxyzdxi_map.resize(n_qp);
-  _ad_dxidx_map.resize(n_qp);
-  _ad_dxidy_map.resize(n_qp); // 1D element may live in 2D ...
-  _ad_dxidz_map.resize(n_qp); // ... or 3D
+  map.dxyzdxi.resize(n_qp);
+  map.dxidx.resize(n_qp);
+  map.dxidy.resize(n_qp); // 1D element may live in 2D ...
+  map.dxidz.resize(n_qp); // ... or 3D
 
   if (dim > 1)
   {
-    _ad_dxyzdeta_map.resize(n_qp);
-    _ad_detadx_map.resize(n_qp);
-    _ad_detady_map.resize(n_qp);
-    _ad_detadz_map.resize(n_qp);
+    map.dxyzdeta.resize(n_qp);
+    map.detadx.resize(n_qp);
+    map.detady.resize(n_qp);
+    map.detadz.resize(n_qp);
 
     if (dim > 2)
     {
-      _ad_dxyzdzeta_map.resize(n_qp);
-      _ad_dzetadx_map.resize(n_qp);
-      _ad_dzetady_map.resize(n_qp);
-      _ad_dzetadz_map.resize(n_qp);
+      map.dxyzdzeta.resize(n_qp);
+      map.dzetadx.resize(n_qp);
+      map.dzetady.resize(n_qp);
+      map.dzetadz.resize(n_qp);
     }
   }
 
-  _ad_jac.resize(n_qp);
-  _ad_JxW.resize(n_qp);
+  map.jac.resize(n_qp);
+  map.JxW.resize(n_qp);
   if (_calculate_xyz)
-    _ad_q_points.resize(n_qp);
+    map.q_points.resize(n_qp);
 }
 
 void
@@ -1094,10 +1098,12 @@ Assembly::computeADElemNodePoints(const Elem & elem, const bool do_derivatives)
 }
 
 void
-Assembly::computeSinglePointMapAD(const Elem * elem,
+Assembly::computeSinglePointMapAD(const Elem & elem,
+                                  const std::vector<VectorValue<ADReal>> & node_points,
+                                  const FEMap & fe_map,
                                   const std::vector<Real> & qw,
                                   unsigned p,
-                                  FEBase * fe)
+                                  ADMapData & map)
 {
   // This function relies on the fact that FE::reinit has already been called. FE::reinit will
   // importantly have already called FEMap::init_reference_to_physical_map which will have computed
@@ -1114,90 +1120,88 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
   // missing that derivative information in the calculations below
   //
   // Important quantities calculated by this method:
-  //   - _ad_JxW;
-  //   - _ad_q_points;
+  //   - map.JxW;
+  //   - map.q_points;
   // And the following quantities are important because they are used in the computeGradPhiAD method
   // to calculate the shape function gradients with respect to the physical coordinates
   // dphi/dphys = dphi/dref * dref/dphys:
-  //   - _ad_dxidx_map;
-  //   - _ad_dxidy_map;
-  //   - _ad_dxidz_map;
-  //   - _ad_detadx_map;
-  //   - _ad_detady_map;
-  //   - _ad_detadz_map;
-  //   - _ad_dzetadx_map;
-  //   - _ad_dzetady_map;
-  //   - _ad_dzetadz_map;
+  //   - map.dxidx;
+  //   - map.dxidy;
+  //   - map.dxidz;
+  //   - map.detadx;
+  //   - map.detady;
+  //   - map.detadz;
+  //   - map.dzetadx;
+  //   - map.dzetady;
+  //   - map.dzetadz;
   //
   // Some final notes. This method will be called both when we are reinit'ing in the volume and on
-  // faces. When reinit'ing on faces, computation of _ad_JxW will be garbage because we will be
-  // using dummy quadrature weights. _ad_q_points computation is also currently extraneous during
-  // face reinit because we compute _ad_q_points_face in the computeFaceMap method. However,
+  // faces. When reinit'ing on faces, computation of map.JxW will be garbage because we will be
+  // using dummy quadrature weights. map.q_points computation is also currently extraneous during
+  // face reinit because the computeFaceMap method computes the face quadrature points. However,
   // computation of dref/dphys is absolutely necessary (and the reason we call this method for the
   // face case) for both volume and face reinit
 
-  auto dim = elem->dim();
-  const auto & elem_nodes = elem->get_nodes();
-  const auto & phi_map = fe->get_fe_map().get_phi_map();
+  auto dim = elem.dim();
+  const auto & phi_map = fe_map.get_phi_map();
   // The mapping basis includes every mapping node, including enriched nodes on elements such as
   // TET14.
   const auto num_shapes = phi_map.size();
-  const auto & dphidxi_map = fe->get_fe_map().get_dphidxi_map();
-  const auto & dphideta_map = fe->get_fe_map().get_dphideta_map();
-  const auto & dphidzeta_map = fe->get_fe_map().get_dphidzeta_map();
-  mooseAssert(_ad_elem_node_points.size() == elem->n_nodes(),
-              "computeADElemNodePoints must be called for this element first");
+  const auto & dphidxi_map = fe_map.get_dphidxi_map();
+  const auto & dphideta_map = fe_map.get_dphideta_map();
+  const auto & dphidzeta_map = fe_map.get_dphidzeta_map();
+  mooseAssert(node_points.size() == num_shapes, "Every mapping shape function needs a node point");
 
   switch (dim)
   {
     case 0:
     {
-      _ad_jac[p] = 1.0;
-      _ad_JxW[p] = qw[p];
+      map.jac[p] = 1.0;
+      map.JxW[p] = qw[p];
       if (_calculate_xyz)
-        _ad_q_points[p] = *elem_nodes[0];
+        map.q_points[p] = elem.point(0);
       break;
     }
 
     case 1:
     {
       if (_calculate_xyz)
-        _ad_q_points[p].zero();
+        map.q_points[p].zero();
 
-      _ad_dxyzdxi_map[p].zero();
+      map.dxyzdxi[p].zero();
 
       for (std::size_t i = 0; i < num_shapes; i++)
       {
-        const auto & elem_point = _ad_elem_node_points[i];
+        const auto & elem_point = node_points[i];
 
-        _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
+        map.dxyzdxi[p].add_scaled(elem_point, dphidxi_map[i][p]);
 
         if (_calculate_xyz)
-          _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
+          map.q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
 
-      _ad_jac[p] = _ad_dxyzdxi_map[p].norm();
+      map.jac[p] = map.dxyzdxi[p].norm();
 
-      if (_ad_jac[p].value() <= -TOLERANCE * TOLERANCE)
+      if (map.jac[p].value() <= -TOLERANCE * TOLERANCE)
       {
         static bool failing = false;
         if (!failing)
         {
           failing = true;
-          elem->print_info(libMesh::err);
-          libmesh_error_msg("ERROR: negative Jacobian " << _ad_jac[p].value() << " at point index "
-                                                        << p << " in element " << elem->id());
+          elem.print_info(libMesh::err);
+          libmesh_error_msg("ERROR: negative Jacobian " << map.jac[p].value() << " at point index "
+                                                        << p << " in element " << elem.id());
         }
         else
           return;
       }
 
-      const auto jacm2 = 1. / _ad_jac[p] / _ad_jac[p];
-      _ad_dxidx_map[p] = jacm2 * _ad_dxyzdxi_map[p](0);
-      _ad_dxidy_map[p] = jacm2 * _ad_dxyzdxi_map[p](1);
-      _ad_dxidz_map[p] = jacm2 * _ad_dxyzdxi_map[p](2);
+      const auto jacm2 = 1. / map.jac[p] / map.jac[p];
+      map.dxidx[p] = jacm2 * map.dxyzdxi[p](0);
+      map.dxidy[p] = jacm2 * map.dxyzdxi[p](1);
+      map.dxidz[p] = jacm2 * map.dxyzdxi[p](2);
 
-      _ad_JxW[p] = _ad_jac[p] * qw[p];
+      map.JxW[p] = map.jac[p] * qw[p];
 
       break;
     }
@@ -1205,24 +1209,24 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
     case 2:
     {
       if (_calculate_xyz)
-        _ad_q_points[p].zero();
-      _ad_dxyzdxi_map[p].zero();
-      _ad_dxyzdeta_map[p].zero();
+        map.q_points[p].zero();
+      map.dxyzdxi[p].zero();
+      map.dxyzdeta[p].zero();
 
       for (std::size_t i = 0; i < num_shapes; i++)
       {
-        const auto & elem_point = _ad_elem_node_points[i];
+        const auto & elem_point = node_points[i];
 
-        _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
-        _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
+        map.dxyzdxi[p].add_scaled(elem_point, dphidxi_map[i][p]);
+        map.dxyzdeta[p].add_scaled(elem_point, dphideta_map[i][p]);
 
         if (_calculate_xyz)
-          _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
+          map.q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
 
-      const auto &dx_dxi = _ad_dxyzdxi_map[p](0), &dx_deta = _ad_dxyzdeta_map[p](0),
-                 &dy_dxi = _ad_dxyzdxi_map[p](1), &dy_deta = _ad_dxyzdeta_map[p](1),
-                 &dz_dxi = _ad_dxyzdxi_map[p](2), &dz_deta = _ad_dxyzdeta_map[p](2);
+      const auto &dx_dxi = map.dxyzdxi[p](0), &dx_deta = map.dxyzdeta[p](0),
+                 &dy_dxi = map.dxyzdxi[p](1), &dy_deta = map.dxyzdeta[p](1),
+                 &dz_dxi = map.dxyzdxi[p](2), &dz_deta = map.dxyzdeta[p](2);
 
       const auto g11 = (dx_dxi * dx_dxi + dy_dxi * dy_dxi + dz_dxi * dz_dxi);
 
@@ -1240,9 +1244,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         if (!failing)
         {
           failing = true;
-          elem->print_info(libMesh::err);
+          elem.print_info(libMesh::err);
           libmesh_error_msg("ERROR: negative Jacobian " << det << " at point index " << p
-                                                        << " in element " << elem->id());
+                                                        << " in element " << elem.id());
         }
         else
           return;
@@ -1252,22 +1256,22 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
 
       const auto inv_det = 1. / det;
       using std::sqrt;
-      _ad_jac[p] = sqrt(det);
+      map.jac[p] = sqrt(det);
 
-      _ad_JxW[p] = _ad_jac[p] * qw[p];
+      map.JxW[p] = map.jac[p] * qw[p];
 
       const auto g11inv = g22 * inv_det;
       const auto g12inv = -g12 * inv_det;
       const auto g21inv = -g21 * inv_det;
       const auto g22inv = g11 * inv_det;
 
-      _ad_dxidx_map[p] = g11inv * dx_dxi + g12inv * dx_deta;
-      _ad_dxidy_map[p] = g11inv * dy_dxi + g12inv * dy_deta;
-      _ad_dxidz_map[p] = g11inv * dz_dxi + g12inv * dz_deta;
+      map.dxidx[p] = g11inv * dx_dxi + g12inv * dx_deta;
+      map.dxidy[p] = g11inv * dy_dxi + g12inv * dy_deta;
+      map.dxidz[p] = g11inv * dz_dxi + g12inv * dz_deta;
 
-      _ad_detadx_map[p] = g21inv * dx_dxi + g22inv * dx_deta;
-      _ad_detady_map[p] = g21inv * dy_dxi + g22inv * dy_deta;
-      _ad_detadz_map[p] = g21inv * dz_dxi + g22inv * dz_deta;
+      map.detadx[p] = g21inv * dx_dxi + g22inv * dx_deta;
+      map.detady[p] = g21inv * dy_dxi + g22inv * dy_deta;
+      map.detadz[p] = g21inv * dz_dxi + g22inv * dz_deta;
 
       break;
     }
@@ -1275,62 +1279,62 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
     case 3:
     {
       if (_calculate_xyz)
-        _ad_q_points[p].zero();
-      _ad_dxyzdxi_map[p].zero();
-      _ad_dxyzdeta_map[p].zero();
-      _ad_dxyzdzeta_map[p].zero();
+        map.q_points[p].zero();
+      map.dxyzdxi[p].zero();
+      map.dxyzdeta[p].zero();
+      map.dxyzdzeta[p].zero();
 
       for (std::size_t i = 0; i < num_shapes; i++)
       {
-        const auto & elem_point = _ad_elem_node_points[i];
+        const auto & elem_point = node_points[i];
 
-        _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
-        _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
-        _ad_dxyzdzeta_map[p].add_scaled(elem_point, dphidzeta_map[i][p]);
+        map.dxyzdxi[p].add_scaled(elem_point, dphidxi_map[i][p]);
+        map.dxyzdeta[p].add_scaled(elem_point, dphideta_map[i][p]);
+        map.dxyzdzeta[p].add_scaled(elem_point, dphidzeta_map[i][p]);
 
         if (_calculate_xyz)
-          _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
+          map.q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
 
-      const auto &dx_dxi = _ad_dxyzdxi_map[p](0), &dy_dxi = _ad_dxyzdxi_map[p](1),
-                 &dz_dxi = _ad_dxyzdxi_map[p](2), &dx_deta = _ad_dxyzdeta_map[p](0),
-                 &dy_deta = _ad_dxyzdeta_map[p](1), &dz_deta = _ad_dxyzdeta_map[p](2),
-                 &dx_dzeta = _ad_dxyzdzeta_map[p](0), &dy_dzeta = _ad_dxyzdzeta_map[p](1),
-                 &dz_dzeta = _ad_dxyzdzeta_map[p](2);
+      const auto &dx_dxi = map.dxyzdxi[p](0), &dy_dxi = map.dxyzdxi[p](1),
+                 &dz_dxi = map.dxyzdxi[p](2), &dx_deta = map.dxyzdeta[p](0),
+                 &dy_deta = map.dxyzdeta[p](1), &dz_deta = map.dxyzdeta[p](2),
+                 &dx_dzeta = map.dxyzdzeta[p](0), &dy_dzeta = map.dxyzdzeta[p](1),
+                 &dz_dzeta = map.dxyzdzeta[p](2);
 
-      _ad_jac[p] = (dx_dxi * (dy_deta * dz_dzeta - dz_deta * dy_dzeta) +
+      map.jac[p] = (dx_dxi * (dy_deta * dz_dzeta - dz_deta * dy_dzeta) +
                     dy_dxi * (dz_deta * dx_dzeta - dx_deta * dz_dzeta) +
                     dz_dxi * (dx_deta * dy_dzeta - dy_deta * dx_dzeta));
 
-      if (_ad_jac[p].value() <= -TOLERANCE * TOLERANCE)
+      if (map.jac[p].value() <= -TOLERANCE * TOLERANCE)
       {
         static bool failing = false;
         if (!failing)
         {
           failing = true;
-          elem->print_info(libMesh::err);
-          libmesh_error_msg("ERROR: negative Jacobian " << _ad_jac[p].value() << " at point index "
-                                                        << p << " in element " << elem->id());
+          elem.print_info(libMesh::err);
+          libmesh_error_msg("ERROR: negative Jacobian " << map.jac[p].value() << " at point index "
+                                                        << p << " in element " << elem.id());
         }
         else
           return;
       }
 
-      _ad_JxW[p] = _ad_jac[p] * qw[p];
+      map.JxW[p] = map.jac[p] * qw[p];
 
-      const auto inv_jac = 1. / _ad_jac[p];
+      const auto inv_jac = 1. / map.jac[p];
 
-      _ad_dxidx_map[p] = (dy_deta * dz_dzeta - dz_deta * dy_dzeta) * inv_jac;
-      _ad_dxidy_map[p] = (dz_deta * dx_dzeta - dx_deta * dz_dzeta) * inv_jac;
-      _ad_dxidz_map[p] = (dx_deta * dy_dzeta - dy_deta * dx_dzeta) * inv_jac;
+      map.dxidx[p] = (dy_deta * dz_dzeta - dz_deta * dy_dzeta) * inv_jac;
+      map.dxidy[p] = (dz_deta * dx_dzeta - dx_deta * dz_dzeta) * inv_jac;
+      map.dxidz[p] = (dx_deta * dy_dzeta - dy_deta * dx_dzeta) * inv_jac;
 
-      _ad_detadx_map[p] = (dz_dxi * dy_dzeta - dy_dxi * dz_dzeta) * inv_jac;
-      _ad_detady_map[p] = (dx_dxi * dz_dzeta - dz_dxi * dx_dzeta) * inv_jac;
-      _ad_detadz_map[p] = (dy_dxi * dx_dzeta - dx_dxi * dy_dzeta) * inv_jac;
+      map.detadx[p] = (dz_dxi * dy_dzeta - dy_dxi * dz_dzeta) * inv_jac;
+      map.detady[p] = (dx_dxi * dz_dzeta - dz_dxi * dx_dzeta) * inv_jac;
+      map.detadz[p] = (dy_dxi * dx_dzeta - dx_dxi * dy_dzeta) * inv_jac;
 
-      _ad_dzetadx_map[p] = (dy_dxi * dz_deta - dz_dxi * dy_deta) * inv_jac;
-      _ad_dzetady_map[p] = (dz_dxi * dx_deta - dx_dxi * dz_deta) * inv_jac;
-      _ad_dzetadz_map[p] = (dx_dxi * dy_deta - dy_dxi * dx_deta) * inv_jac;
+      map.dzetadx[p] = (dy_dxi * dz_deta - dz_dxi * dy_deta) * inv_jac;
+      map.dzetady[p] = (dz_dxi * dx_deta - dx_dxi * dz_deta) * inv_jac;
+      map.dzetadz[p] = (dx_dxi * dy_deta - dy_dxi * dx_deta) * inv_jac;
 
       break;
     }
@@ -1421,31 +1425,35 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
 }
 
 void
-Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::vector<Real> & qw)
+Assembly::computeFaceMap(const Elem & elem,
+                         const unsigned int side,
+                         const std::vector<VectorValue<ADReal>> & elem_node_points,
+                         const FEMap & fe_map,
+                         const std::vector<Real> & qw,
+                         ADMapData & map)
 {
   // Important quantities calculated by this method:
-  //   - _ad_JxW_face
-  //   - _ad_q_points_face
-  //   - _ad_normals
-  //   - _ad_curvatures
+  //   - map.JxW
+  //   - map.q_points
+  //   - map.normals
+  //   - map.curvatures
 
   const Elem & side_elem = _compute_face_map_side_elem_builder(elem, side);
   const auto dim = elem.dim();
   const auto n_qp = qw.size();
-  const auto & dpsidxi_map = _holder_fe_face_helper[dim]->get_fe_map().get_dpsidxi();
-  const auto & dpsideta_map = _holder_fe_face_helper[dim]->get_fe_map().get_dpsideta();
-  const auto & psi_map = _holder_fe_face_helper[dim]->get_fe_map().get_psi();
+  const auto & dpsidxi_map = fe_map.get_dpsidxi();
+  const auto & dpsideta_map = fe_map.get_dpsideta();
+  const auto & psi_map = fe_map.get_psi();
   std::vector<std::vector<Real>> const * d2psidxi2_map = nullptr;
   std::vector<std::vector<Real>> const * d2psidxideta_map = nullptr;
   std::vector<std::vector<Real>> const * d2psideta2_map = nullptr;
-  mooseAssert(_ad_elem_node_points.size() == elem.n_nodes(),
-              "computeADElemNodePoints must be called for this element first");
+  mooseAssert(elem_node_points.size() == elem.n_nodes(), "Every element node needs a position");
 
   if (_calculate_curvatures)
   {
-    d2psidxi2_map = &_holder_fe_face_helper[dim]->get_fe_map().get_d2psidxi2();
-    d2psidxideta_map = &_holder_fe_face_helper[dim]->get_fe_map().get_d2psidxideta();
-    d2psideta2_map = &_holder_fe_face_helper[dim]->get_fe_map().get_d2psideta2();
+    d2psidxi2_map = &fe_map.get_d2psidxi2();
+    d2psidxideta_map = &fe_map.get_d2psidxideta();
+    d2psideta2_map = &fe_map.get_d2psideta2();
   }
 
   switch (dim)
@@ -1456,24 +1464,24 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         break;
 
       if (side_elem.node_id(0) == elem.node_id(0))
-        _ad_normals[0] = Point(-1.);
+        map.normals[0] = Point(-1.);
       else
-        _ad_normals[0] = Point(1.);
+        map.normals[0] = Point(1.);
 
       VectorValue<ADReal> side_point;
       if (_calculate_face_xyz)
-        side_point = _ad_elem_node_points[elem.local_side_node(side, 0)];
+        side_point = elem_node_points[elem.local_side_node(side, 0)];
 
       for (const auto p : make_range(n_qp))
       {
         if (_calculate_face_xyz)
         {
-          _ad_q_points_face[p].zero();
-          _ad_q_points_face[p].add_scaled(side_point, psi_map[0][p]);
+          map.q_points[p].zero();
+          map.q_points[p].add_scaled(side_point, psi_map[0][p]);
         }
 
-        _ad_normals[p] = _ad_normals[0];
-        _ad_JxW_face[p] = 1.0 * qw[p];
+        map.normals[p] = map.normals[0];
+        map.JxW[p] = 1.0 * qw[p];
       }
 
       break;
@@ -1481,48 +1489,47 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
     case 2:
     {
-      _ad_dxyzdxi_map.resize(n_qp);
+      map.dxyzdxi.resize(n_qp);
       if (_calculate_curvatures)
-        _ad_d2xyzdxi2_map.resize(n_qp);
+        map.d2xyzdxi2.resize(n_qp);
 
       for (const auto p : make_range(n_qp))
-        _ad_dxyzdxi_map[p].zero();
+        map.dxyzdxi[p].zero();
       if (_calculate_face_xyz)
         for (const auto p : make_range(n_qp))
-          _ad_q_points_face[p].zero();
+          map.q_points[p].zero();
       if (_calculate_curvatures)
         for (const auto p : make_range(n_qp))
-          _ad_d2xyzdxi2_map[p].zero();
+          map.d2xyzdxi2[p].zero();
 
       const auto n_mapping_shape_functions =
           libMesh::FE<2, LAGRANGE>::n_dofs(&side_elem, side_elem.default_order());
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
-        const auto & side_point = _ad_elem_node_points[elem.local_side_node(side, i)];
+        const auto & side_point = elem_node_points[elem.local_side_node(side, i)];
 
         for (const auto p : make_range(n_qp))
-          _ad_dxyzdxi_map[p].add_scaled(side_point, dpsidxi_map[i][p]);
+          map.dxyzdxi[p].add_scaled(side_point, dpsidxi_map[i][p]);
         if (_calculate_face_xyz)
           for (const auto p : make_range(n_qp))
-            _ad_q_points_face[p].add_scaled(side_point, psi_map[i][p]);
+            map.q_points[p].add_scaled(side_point, psi_map[i][p]);
         if (_calculate_curvatures)
           for (const auto p : make_range(n_qp))
-            _ad_d2xyzdxi2_map[p].add_scaled(side_point, (*d2psidxi2_map)[i][p]);
+            map.d2xyzdxi2[p].add_scaled(side_point, (*d2psidxi2_map)[i][p]);
       }
 
       for (const auto p : make_range(n_qp))
       {
-        _ad_normals[p] =
-            (VectorValue<ADReal>(_ad_dxyzdxi_map[p](1), -_ad_dxyzdxi_map[p](0), 0.)).unit();
-        const auto the_jac = _ad_dxyzdxi_map[p].norm();
-        _ad_JxW_face[p] = the_jac * qw[p];
+        map.normals[p] = (VectorValue<ADReal>(map.dxyzdxi[p](1), -map.dxyzdxi[p](0), 0.)).unit();
+        const auto the_jac = map.dxyzdxi[p].norm();
+        map.JxW[p] = the_jac * qw[p];
         if (_calculate_curvatures)
         {
-          const auto numerator = _ad_d2xyzdxi2_map[p] * _ad_normals[p];
-          const auto denominator = _ad_dxyzdxi_map[p].norm_sq();
+          const auto numerator = map.d2xyzdxi2[p] * map.normals[p];
+          const auto denominator = map.dxyzdxi[p].norm_sq();
           libmesh_assert_not_equal_to(denominator, 0);
-          _ad_curvatures[p] = numerator / denominator;
+          map.curvatures[p] = numerator / denominator;
         }
       }
 
@@ -1531,29 +1538,29 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
     case 3:
     {
-      _ad_dxyzdxi_map.resize(n_qp);
-      _ad_dxyzdeta_map.resize(n_qp);
+      map.dxyzdxi.resize(n_qp);
+      map.dxyzdeta.resize(n_qp);
       if (_calculate_curvatures)
       {
-        _ad_d2xyzdxi2_map.resize(n_qp);
-        _ad_d2xyzdxideta_map.resize(n_qp);
-        _ad_d2xyzdeta2_map.resize(n_qp);
+        map.d2xyzdxi2.resize(n_qp);
+        map.d2xyzdxideta.resize(n_qp);
+        map.d2xyzdeta2.resize(n_qp);
       }
 
       for (const auto p : make_range(n_qp))
       {
-        _ad_dxyzdxi_map[p].zero();
-        _ad_dxyzdeta_map[p].zero();
+        map.dxyzdxi[p].zero();
+        map.dxyzdeta[p].zero();
       }
       if (_calculate_face_xyz)
         for (const auto p : make_range(n_qp))
-          _ad_q_points_face[p].zero();
+          map.q_points[p].zero();
       if (_calculate_curvatures)
         for (const auto p : make_range(n_qp))
         {
-          _ad_d2xyzdxi2_map[p].zero();
-          _ad_d2xyzdxideta_map[p].zero();
-          _ad_d2xyzdeta2_map[p].zero();
+          map.d2xyzdxi2[p].zero();
+          map.d2xyzdxideta[p].zero();
+          map.d2xyzdeta2[p].zero();
         }
 
       const unsigned int n_mapping_shape_functions =
@@ -1561,32 +1568,32 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
-        const auto & side_point = _ad_elem_node_points[elem.local_side_node(side, i)];
+        const auto & side_point = elem_node_points[elem.local_side_node(side, i)];
 
         for (const auto p : make_range(n_qp))
         {
-          _ad_dxyzdxi_map[p].add_scaled(side_point, dpsidxi_map[i][p]);
-          _ad_dxyzdeta_map[p].add_scaled(side_point, dpsideta_map[i][p]);
+          map.dxyzdxi[p].add_scaled(side_point, dpsidxi_map[i][p]);
+          map.dxyzdeta[p].add_scaled(side_point, dpsideta_map[i][p]);
         }
         if (_calculate_face_xyz)
           for (const auto p : make_range(n_qp))
-            _ad_q_points_face[p].add_scaled(side_point, psi_map[i][p]);
+            map.q_points[p].add_scaled(side_point, psi_map[i][p]);
         if (_calculate_curvatures)
           for (const auto p : make_range(n_qp))
           {
-            _ad_d2xyzdxi2_map[p].add_scaled(side_point, (*d2psidxi2_map)[i][p]);
-            _ad_d2xyzdxideta_map[p].add_scaled(side_point, (*d2psidxideta_map)[i][p]);
-            _ad_d2xyzdeta2_map[p].add_scaled(side_point, (*d2psideta2_map)[i][p]);
+            map.d2xyzdxi2[p].add_scaled(side_point, (*d2psidxi2_map)[i][p]);
+            map.d2xyzdxideta[p].add_scaled(side_point, (*d2psidxideta_map)[i][p]);
+            map.d2xyzdeta2[p].add_scaled(side_point, (*d2psideta2_map)[i][p]);
           }
       }
 
       for (const auto p : make_range(n_qp))
       {
-        _ad_normals[p] = _ad_dxyzdxi_map[p].cross(_ad_dxyzdeta_map[p]).unit();
+        map.normals[p] = map.dxyzdxi[p].cross(map.dxyzdeta[p]).unit();
 
-        const auto &dxdxi = _ad_dxyzdxi_map[p](0), &dxdeta = _ad_dxyzdeta_map[p](0),
-                   &dydxi = _ad_dxyzdxi_map[p](1), &dydeta = _ad_dxyzdeta_map[p](1),
-                   &dzdxi = _ad_dxyzdxi_map[p](2), &dzdeta = _ad_dxyzdeta_map[p](2);
+        const auto &dxdxi = map.dxyzdxi[p](0), &dxdeta = map.dxyzdeta[p](0),
+                   &dydxi = map.dxyzdxi[p](1), &dydeta = map.dxyzdeta[p](1),
+                   &dzdxi = map.dxyzdxi[p](2), &dzdeta = map.dxyzdeta[p](2);
 
         const auto g11 = (dxdxi * dxdxi + dydxi * dydxi + dzdxi * dzdxi);
 
@@ -1599,21 +1606,21 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         using std::sqrt;
         const auto the_jac = sqrt(g11 * g22 - g12 * g21);
 
-        _ad_JxW_face[p] = the_jac * qw[p];
+        map.JxW[p] = the_jac * qw[p];
 
         if (_calculate_curvatures)
         {
-          const auto L = -_ad_d2xyzdxi2_map[p] * _ad_normals[p];
-          const auto M = -_ad_d2xyzdxideta_map[p] * _ad_normals[p];
-          const auto N = -_ad_d2xyzdeta2_map[p] * _ad_normals[p];
-          const auto E = _ad_dxyzdxi_map[p].norm_sq();
-          const auto F = _ad_dxyzdxi_map[p] * _ad_dxyzdeta_map[p];
-          const auto G = _ad_dxyzdeta_map[p].norm_sq();
+          const auto L = -map.d2xyzdxi2[p] * map.normals[p];
+          const auto M = -map.d2xyzdxideta[p] * map.normals[p];
+          const auto N = -map.d2xyzdeta2[p] * map.normals[p];
+          const auto E = map.dxyzdxi[p].norm_sq();
+          const auto F = map.dxyzdxi[p] * map.dxyzdeta[p];
+          const auto G = map.dxyzdeta[p].norm_sq();
 
           const auto numerator = E * N - 2. * F * M + G * L;
           const auto denominator = E * G - F * F;
           libmesh_assert_not_equal_to(denominator, 0.);
-          _ad_curvatures[p] = 0.5 * numerator / denominator;
+          map.curvatures[p] = 0.5 * numerator / denominator;
         }
       }
 
@@ -1816,7 +1823,7 @@ Assembly::computeCurrentElemVolume()
       _current_qrule, _current_q_points, _coord, _current_elem->subdomain_id());
   if (_calculate_ad_coord)
     setCoordinateTransformation(
-        _current_qrule, _ad_q_points, _ad_coord, _current_elem->subdomain_id());
+        _current_qrule, _ad_map.q_points, _ad_coord, _current_elem->subdomain_id());
 
   _current_elem_volume = 0.;
   for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
@@ -1835,7 +1842,7 @@ Assembly::computeCurrentFaceVolume()
       _current_qrule_face, _current_q_points_face, _coord, _current_elem->subdomain_id());
   if (_calculate_ad_coord)
     setCoordinateTransformation(
-        _current_qrule_face, _ad_q_points_face, _ad_coord, _current_elem->subdomain_id());
+        _current_qrule_face, _ad_face_map.q_points, _ad_coord, _current_elem->subdomain_id());
 
   _current_side_volume = 0.;
   for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
@@ -2180,13 +2187,13 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
   if (_subproblem.haveADObjects())
   {
     auto n_qp = _current_qrule_face->n_points();
-    resizeADMappingObjects(n_qp, dim);
-    _ad_normals.resize(n_qp);
-    _ad_JxW_face.resize(n_qp);
+    resizeADMappingObjects(n_qp, dim, _ad_face_elem_map);
+    _ad_face_map.normals.resize(n_qp);
+    _ad_face_map.JxW.resize(n_qp);
     if (_calculate_face_xyz)
-      _ad_q_points_face.resize(n_qp);
+      _ad_face_map.q_points.resize(n_qp);
     if (_calculate_curvatures)
-      _ad_curvatures.resize(n_qp);
+      _ad_face_map.curvatures.resize(n_qp);
 
     if (_displaced)
     {
@@ -2196,8 +2203,9 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
             elem, ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum());
       // computeFaceMap supplies the AD face JxW, normals and points; the single-point map only adds
       // the inverse map that computeGradPhiAD needs
+      const auto & fe_map = _holder_fe_face_helper[dim]->get_fe_map();
       if (_need_ad_face_map)
-        computeFaceMap(elem, side, qw);
+        computeFaceMap(elem, side, _ad_elem_node_points, fe_map, qw, _ad_face_map);
       if (_need_ad_grad_phi_face)
       {
         // Faces can have different numbers of quadrature points, so grow the weights as needed
@@ -2205,22 +2213,23 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
         dummy_qw.resize(n_qp, 1.);
 
         for (unsigned int qp = 0; qp != n_qp; qp++)
-          computeSinglePointMapAD(&elem, dummy_qw, qp, _holder_fe_face_helper[dim]);
+          computeSinglePointMapAD(
+              elem, _ad_elem_node_points, fe_map, dummy_qw, qp, _ad_face_elem_map);
       }
     }
     else
     {
       for (unsigned qp = 0; qp < n_qp; ++qp)
       {
-        _ad_JxW_face[qp] = _current_JxW_face[qp];
-        _ad_normals[qp] = _current_normals[qp];
+        _ad_face_map.JxW[qp] = _current_JxW_face[qp];
+        _ad_face_map.normals[qp] = _current_normals[qp];
       }
       if (_calculate_face_xyz)
         for (unsigned qp = 0; qp < n_qp; ++qp)
-          _ad_q_points_face[qp] = _current_q_points_face[qp];
+          _ad_face_map.q_points[qp] = _current_q_points_face[qp];
       if (_calculate_curvatures)
         for (unsigned qp = 0; qp < n_qp; ++qp)
-          _ad_curvatures[qp] = _curvatures[qp];
+          _ad_face_map.curvatures[qp] = _curvatures[qp];
     }
 
     if (_need_ad_grad_phi_face)
@@ -2239,7 +2248,7 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
         const auto & regular_grad_phi = _fe_shape_data_face[fe_type]->_grad_phi;
 
         if (_displaced)
-          computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
+          computeGradPhiAD(&elem, n_qp, grad_phi, &fe, _ad_face_elem_map);
         else
           for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
             for (unsigned qp = 0; qp < n_qp; ++qp)
@@ -2259,7 +2268,7 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
         const auto & regular_grad_phi = _vector_fe_shape_data_face[fe_type]->_grad_phi;
 
         if (_displaced)
-          computeGradPhiAD(&elem, n_qp, grad_phi, &fe);
+          computeGradPhiAD(&elem, n_qp, grad_phi, &fe, _ad_face_elem_map);
         else
           for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
             for (unsigned qp = 0; qp < n_qp; ++qp)
@@ -4876,7 +4885,7 @@ Assembly::adCurvatures() const
   // _need_second_derivative map for both volumetric and face FE objects we must request both here
   feSecondPhi<Real>(_helper_type);
   feSecondPhiFace<Real>(_helper_type);
-  return _ad_curvatures;
+  return _ad_face_map.curvatures;
 }
 
 void
