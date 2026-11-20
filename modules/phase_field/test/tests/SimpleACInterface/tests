@@ -16,4 +16,11 @@
     design = 'SimpleCoupledACInterface.md'
     requirement = 'The system shall provide a simplified Allen-Cahn interface energy kernel coupled to a second order parameter, for novice users.'
   [../]
+
+  [ADSimpleCoupledACInterface]
+    type = 'Exodiff'
+    input = 'ADSimpleCoupledACInterface.i'
+    exodiff = 'ADSimpleCoupledACInterface_out.e'
+    issues = '#33647'
+  []
 []
