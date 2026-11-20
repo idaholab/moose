@@ -51,6 +51,28 @@
     capabilities = 'ad_size>=150'
     requirement = 'The system shall weight the gap of dynamic mortar contact with the piecewise-linear '
                   'basis of second-order secondary faces when requested in the contact action.'
+    # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
+    recover = false
+  []
+  [dynamics_standard]
+    type = CSVDiff
+    input = 'tilted_gap.i'
+    csvdiff = 'tilted_gap_dynamics_standard.csv'
+    cli_args = 'Contact/mortar/mortar_dynamics=true Contact/mortar/petrov_galerkin_test=STANDARD '
+               'Executioner/type=Transient Executioner/num_steps=2 Executioner/dt=0.1 '
+               'Executioner/TimeIntegrator/type=NewmarkBeta BCs/fix_y/boundary=bottom_bottom '
+               'BCs/push/type=FunctionDirichletBC BCs/push/variable=disp_y '
+               'BCs/push/boundary=top_top BCs/push/function=-0.2*t '
+               'Postprocessors/pressure_max/type=NodalExtremeValue '
+               'Postprocessors/pressure_max/variable=mortar_normal_lm '
+               'Postprocessors/pressure_max/block=mortar_secondary_subdomain '
+               'VectorPostprocessors/active= Outputs/execute_on=TIMESTEP_END '
+               'Outputs/file_base=tilted_gap_dynamics_standard'
+    requirement = 'The system shall weight the gap of dynamic mortar contact with the standard basis '
+                  'of the auxiliary Lagrange multiplier when the Petrov-Galerkin approach is requested '
+                  'in the contact action.'
+    # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
+    recover = false
   []
   [errors]
     requirement = 'The system shall report errors for invalid piecewise-linear mortar test-basis configurations.'
@@ -65,8 +87,15 @@
       type = RunException
       input = 'tilted_gap_3d.i'
       cli_args = 'Mesh/bottom/elem_type=HEX8 Mesh/top/elem_type=HEX8 --check-input'
-      expect_err = 'The piecewise-linear basis requires a SECOND order LAGRANGE auxiliary variable'
-      detail = 'The piecewise-linear basis requires a second-order variable.'
+      expect_err = "'petrov_galerkin_test = PIECEWISE_LINEAR' requires a SECOND order Lagrange"
+      detail = 'The piecewise-linear basis requires second-order displacements.'
+    []
+    [linear_lm_space]
+      type = RunException
+      input = 'tilted_gap_3d.i'
+      cli_args = 'Contact/mortar/lm_space=LINEAR --check-input'
+      expect_err = "'petrov_galerkin_test = PIECEWISE_LINEAR' requires a SECOND order Lagrange"
+      detail = 'The piecewise-linear basis requires a second-order Lagrange multiplier space.'
     []
     [unsupported_face]
       type = RunException

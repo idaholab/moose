@@ -97,7 +97,9 @@ MortarInterfaceWarehouse::createMortarInterface(
     if (existing.mortar_3d_qp_mapping != mortar_3d_qp_mapping)
       mooseError("We do not currently support multiple values of 'mortar_3d_qp_mapping' on the "
                  "same boundary primary-secondary surface pair.");
-    if (existing.split_segments_at_sub_elements != split_segments_at_sub_elements)
+    // Only 2D mortar segment meshes are split at sub-elements
+    if (mesh.mesh_dimension() == 2 &&
+        existing.split_segments_at_sub_elements != split_segments_at_sub_elements)
       mooseError("Mortar objects sharing the same primary/secondary mortar interface must use the "
                  "same 'split_segments_at_sub_elements' value.");
   }

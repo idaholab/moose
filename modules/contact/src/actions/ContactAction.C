@@ -1030,6 +1030,16 @@ ContactAction::addMortarContact()
 
   if (_current_task == "add_mortar_variable" && _formulation == ContactFormulation::MORTAR)
   {
+    if (getParam<MooseEnum>("petrov_galerkin_test") == "PIECEWISE_LINEAR" &&
+        (_lm_space == ContactLMSpace::LINEAR || _problem->systemBaseNonlinear(/*nl_sys_num=*/0)
+                                                        .system()
+                                                        .variable_type(displacements[0])
+                                                        .order != SECOND))
+      paramError(
+          "petrov_galerkin_test",
+          "'petrov_galerkin_test = PIECEWISE_LINEAR' requires a SECOND order Lagrange "
+          "multiplier, i.e. SECOND order displacements and 'lm_space = MATCH_DISPLACEMENT'.");
+
     for (const auto & contact_pair : _boundary_pairs)
     {
       const std::string suffix = pairSuffix(contact_pair);

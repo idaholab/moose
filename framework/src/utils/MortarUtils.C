@@ -170,8 +170,8 @@ piecewiseLinearShapes(const Elem & parent_elem,
   // Every sub-element is a triangle or a parallelogram in the parent reference coordinates, so the
   // map from its own reference coordinates is affine: x = origin + local(0) * e0 + local(1) * e1.
   // Points on a shared sub-element edge get the same values from either sub-element, so the first
-  // sub-element containing the point is used. Quadrature points lie inside the face, so the
-  // fallback to the least violated sub-element only absorbs roundoff.
+  // sub-element containing the point is used. A point outside every sub-element, e.g. one projected
+  // onto a curved face, is evaluated on the least violated sub-element.
   std::vector<unsigned int> best_nodes;
   Point best_local;
   Real best_violation = std::numeric_limits<Real>::max();
