@@ -12,11 +12,13 @@ kernels, [ADPipeInnerWallTemperatureScalarKernel.md] and
 `heat_transfer_coefficient` parameter, which lets a single definition of the correlation
 serve both the primary and secondary sides of a segment.
 
-The Reynolds number is formed from the segment's mass flux, $G = \dot{m} / A$, so no
-density evaluation is needed. Fluid properties are evaluated at the segment's bulk film
+The Reynolds number is formed from the segment's mass flux, $G = (|\dot{m}| / A)(\rho / \rho_{\text{ref}})$,
+where $\rho_{\text{ref}}$ is the density of the optional [!param](/FunctorMaterials/ADDittusBoelterHTCFunctorMaterial/reference_fp)
+liquid, and $\rho_{\text{ref}} = \rho$ otherwise. The Nusselt number is bounded below by 4, the approximate
+laminar limit. Fluid properties are evaluated at the segment's film
 temperature, the mean of the segment fluid temperature $T_f$ and its upwinded inlet value
-$T_{in}$, taken from the nominal inlet or outlet neighbor according to the sign of
-$\dot{m}$.
+$T_{\text{in}}$, taken from the nominal inlet or outlet neighbor according to the sign of
+$\dot{m}$. This is independent of the `use_fluid_node_temp` setting of the consuming kernels.
 
 ## Evaluation
 

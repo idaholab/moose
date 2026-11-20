@@ -20,7 +20,7 @@ where
 - $f$ is an optional functor by which to scale the term,
 - $\varepsilon$ is the surface emissivity,
 - $F$ is the view factor for the portion of the outer wall surface exposed to the radiative environment at the ambient temperature,
-- $P_{o,w}$ is the total perimeter of this wall node,
+- $P_{o,w}$ is the perimeter of this wall node exposed to the radiative environment,
 - $T_\infty$ is the ambient/surrounding temperature,
 - $T_{o,w}$ is this node's own temperature,
 - $A_{o,w}$ is the cross-sectional area of this wall layer, and
