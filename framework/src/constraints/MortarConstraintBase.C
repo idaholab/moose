@@ -177,8 +177,16 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
                "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
                "false`.");
 
-  if (_use_petrov_galerkin)
+  if (_use_petrov_galerkin && !_aux_lm_var->usePiecewiseLinearBasis())
     checkPetrovGalerkinQuadraticFaces(*this, *_var);
+  if (_aux_lm_var && _aux_lm_var->usePiecewiseLinearBasis())
+  {
+    if (!_var)
+      paramError("aux_lm",
+                 "An auxiliary variable with the piecewise-linear basis requires a Lagrange "
+                 "multiplier 'variable'.");
+    checkPiecewiseLinearBasis(*this, _use_petrov_galerkin, *_var, *_aux_lm_var);
+  }
 
   if (isParamSetByUser("quadrature") && isParamSetByUser("segment_quadrature"))
     paramError("quadrature", "Only one of 'quadrature' and 'segment_quadrature' should be set.");
