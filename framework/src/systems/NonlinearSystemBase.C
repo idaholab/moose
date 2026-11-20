@@ -171,6 +171,9 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _element_dampers(numThreads()),
     _nodal_dampers(numThreads()),
     _general_dampers(/*num_threads=*/1),
+    _predictor_element_dampers(numThreads()),
+    _predictor_nodal_dampers(numThreads()),
+    _predictor_general_dampers(/*num_threads=*/1),
     _nodal_kernels(numThreads()),
     _splits(/*num_threads=*/1),
     _increment_vec(NULL),
@@ -299,6 +302,8 @@ NonlinearSystemBase::initialSetup()
 
       _element_dampers.initialSetup(tid);
       _nodal_dampers.initialSetup(tid);
+      _predictor_element_dampers.initialSetup(tid);
+      _predictor_nodal_dampers.initialSetup(tid);
       _integrated_bcs.initialSetup(tid);
 
       if (_fe_problem.haveFV())
@@ -309,6 +314,7 @@ NonlinearSystemBase::initialSetup()
     _scalar_kernels.initialSetup();
     _constraints.initialSetup();
     _general_dampers.initialSetup();
+    _predictor_general_dampers.initialSetup();
     _nodal_bcs.initialSetup();
     _preset_nodal_bcs.residualSetup();
     _ad_preset_nodal_bcs.residualSetup();
@@ -369,6 +375,26 @@ NonlinearSystemBase::initialSetup()
 }
 
 void
+NonlinearSystemBase::checkPredictorDampers() const
+{
+  if (!_predictor)
+    return;
+
+  std::set<std::string> predictor_dampers;
+  const auto add_names = [&predictor_dampers](const auto & warehouse)
+  {
+    for (const auto & damper : warehouse.getObjects())
+      predictor_dampers.insert(damper->name());
+  };
+  add_names(_predictor_element_dampers);
+  add_names(_predictor_nodal_dampers);
+  add_names(_predictor_general_dampers);
+  for (const auto & name : _predictor->damperNames())
+    if (!predictor_dampers.count(name))
+      _predictor->paramError("dampers", "The damper '", name, "' does not exist.");
+}
+
+void
 NonlinearSystemBase::timestepSetup()
 {
   SolverSystem::timestepSetup();
@@ -383,6 +409,8 @@ NonlinearSystemBase::timestepSetup()
     _interface_kernels.timestepSetup(tid);
     _element_dampers.timestepSetup(tid);
     _nodal_dampers.timestepSetup(tid);
+    _predictor_element_dampers.timestepSetup(tid);
+    _predictor_nodal_dampers.timestepSetup(tid);
     _integrated_bcs.timestepSetup(tid);
 
     if (_fe_problem.haveFV())
@@ -392,6 +420,7 @@ NonlinearSystemBase::timestepSetup()
   _scalar_kernels.timestepSetup();
   _constraints.timestepSetup();
   _general_dampers.timestepSetup();
+  _predictor_general_dampers.timestepSetup();
   _nodal_bcs.timestepSetup();
   _preset_nodal_bcs.timestepSetup();
   _ad_preset_nodal_bcs.timestepSetup();
@@ -419,6 +448,8 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
     _interface_kernels.customSetup(exec_type, tid);
     _element_dampers.customSetup(exec_type, tid);
     _nodal_dampers.customSetup(exec_type, tid);
+    _predictor_element_dampers.customSetup(exec_type, tid);
+    _predictor_nodal_dampers.customSetup(exec_type, tid);
     _integrated_bcs.customSetup(exec_type, tid);
 
     if (_fe_problem.haveFV())
@@ -428,6 +459,7 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
   _scalar_kernels.customSetup(exec_type);
   _constraints.customSetup(exec_type);
   _general_dampers.customSetup(exec_type);
+  _predictor_general_dampers.customSetup(exec_type);
   _nodal_bcs.customSetup(exec_type);
   _preset_nodal_bcs.customSetup(exec_type);
   _ad_preset_nodal_bcs.customSetup(exec_type);
@@ -694,6 +726,9 @@ NonlinearSystemBase::addDamper(const std::string & damper_name,
   {
     std::shared_ptr<Damper> damper = _factory.create<Damper>(damper_name, name, parameters, tid);
 
+    // A damper listed in the predictor limits only the change of the prediction
+    const bool predictor = _predictor && _predictor->usesDamper(name);
+
     // Attempt to cast to the damper types
     std::shared_ptr<ElementDamper> ed = std::dynamic_pointer_cast<ElementDamper>(damper);
     std::shared_ptr<NodalDamper> nd = std::dynamic_pointer_cast<NodalDamper>(damper);
@@ -701,13 +736,13 @@ NonlinearSystemBase::addDamper(const std::string & damper_name,
 
     if (gd)
     {
-      _general_dampers.addObject(gd);
+      (predictor ? _predictor_general_dampers : _general_dampers).addObject(gd);
       break; // not threaded
     }
     else if (ed)
-      _element_dampers.addObject(ed, tid);
+      (predictor ? _predictor_element_dampers : _element_dampers).addObject(ed, tid);
     else if (nd)
-      _nodal_dampers.addObject(nd, tid);
+      (predictor ? _predictor_nodal_dampers : _nodal_dampers).addObject(nd, tid);
     else
       mooseError("Invalid damper type");
   }
@@ -936,7 +971,7 @@ NonlinearSystemBase::onTimestepBegin()
     _predictor->timestepSetup();
 }
 
-void
+bool
 NonlinearSystemBase::setInitialSolution()
 {
   deactivateAllMatrixTags();
@@ -948,7 +983,8 @@ NonlinearSystemBase::setInitialSolution()
     {
       TIME_SECTION("applyPredictor", 2, "Applying Predictor");
 
-      _predictor->apply(initial_solution);
+      if (!_predictor->applyDamped(initial_solution))
+        return false;
       _fe_problem.predictorCleanup(initial_solution);
     }
     else
@@ -1003,6 +1039,8 @@ NonlinearSystemBase::setInitialSolution()
 
   if (_fe_problem.getDisplacedProblem())
     setConstraintSecondaryValues(initial_solution, true);
+
+  return true;
 }
 
 void
@@ -1020,6 +1058,8 @@ NonlinearSystemBase::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
   _nodal_kernels.subdomainSetup(subdomain, tid);
   _element_dampers.subdomainSetup(subdomain, tid);
   _nodal_dampers.subdomainSetup(subdomain, tid);
+  _predictor_element_dampers.subdomainSetup(subdomain, tid);
+  _predictor_nodal_dampers.subdomainSetup(subdomain, tid);
 }
 
 NumericVector<Number> &
@@ -1725,11 +1765,14 @@ NonlinearSystemBase::residualSetup()
     _interface_kernels.residualSetup(tid);
     _element_dampers.residualSetup(tid);
     _nodal_dampers.residualSetup(tid);
+    _predictor_element_dampers.residualSetup(tid);
+    _predictor_nodal_dampers.residualSetup(tid);
     _integrated_bcs.residualSetup(tid);
   }
   _scalar_kernels.residualSetup();
   _constraints.residualSetup();
   _general_dampers.residualSetup();
+  _predictor_general_dampers.residualSetup();
   _nodal_bcs.residualSetup();
   _preset_nodal_bcs.residualSetup();
   _ad_preset_nodal_bcs.residualSetup();
@@ -2987,11 +3030,14 @@ NonlinearSystemBase::jacobianSetup()
     _interface_kernels.jacobianSetup(tid);
     _element_dampers.jacobianSetup(tid);
     _nodal_dampers.jacobianSetup(tid);
+    _predictor_element_dampers.jacobianSetup(tid);
+    _predictor_nodal_dampers.jacobianSetup(tid);
     _integrated_bcs.jacobianSetup(tid);
   }
   _scalar_kernels.jacobianSetup();
   _constraints.jacobianSetup();
   _general_dampers.jacobianSetup();
+  _predictor_general_dampers.jacobianSetup();
   _nodal_bcs.jacobianSetup();
   _preset_nodal_bcs.jacobianSetup();
   _ad_preset_nodal_bcs.jacobianSetup();
@@ -3432,6 +3478,8 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
 {
   _element_dampers.updateActive(tid);
   _nodal_dampers.updateActive(tid);
+  _predictor_element_dampers.updateActive(tid);
+  _predictor_nodal_dampers.updateActive(tid);
   _integrated_bcs.updateActive(tid);
   _dg_kernels.updateActive(tid);
   _interface_kernels.updateActive(tid);
@@ -3442,6 +3490,7 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
   if (tid == 0)
   {
     _general_dampers.updateActive();
+    _predictor_general_dampers.updateActive();
     _nodal_bcs.updateActive();
     _preset_nodal_bcs.updateActive();
     _ad_preset_nodal_bcs.updateActive();
@@ -3463,20 +3512,44 @@ Real
 NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
                                     const NumericVector<Number> & update)
 {
+  const auto damping =
+      computeDamperWarehouses(solution, update, _element_dampers, _nodal_dampers, _general_dampers);
+  if (damping < 1.0)
+    _console << " Damping factor: " << damping << std::endl;
+  return damping;
+}
+
+Real
+NonlinearSystemBase::computePredictorDamping(const NumericVector<Number> & solution,
+                                             const NumericVector<Number> & update)
+{
+  return computeDamperWarehouses(solution,
+                                 update,
+                                 _predictor_element_dampers,
+                                 _predictor_nodal_dampers,
+                                 _predictor_general_dampers);
+}
+
+Real
+NonlinearSystemBase::computeDamperWarehouses(
+    const NumericVector<Number> & solution,
+    const NumericVector<Number> & update,
+    const MooseObjectWarehouse<ElementDamper> & element_dampers,
+    const MooseObjectWarehouse<NodalDamper> & nodal_dampers,
+    const MooseObjectWarehouse<GeneralDamper> & general_dampers)
+{
   // Default to no damping
   Real damping = 1.0;
-  bool has_active_dampers = false;
 
   try
   {
-    if (_element_dampers.hasActiveObjects())
+    if (element_dampers.hasActiveObjects())
     {
       PARALLEL_TRY
       {
         TIME_SECTION("computeDampers", 3, "Computing Dampers");
-        has_active_dampers = true;
         *_increment_vec = update;
-        ComputeElemDampingThread cid(_fe_problem, *this);
+        ComputeElemDampingThread cid(_fe_problem, *this, element_dampers);
         Threads::parallel_reduce(
             _fe_problem.getCurrentAlgebraicElementRange(), cid, this->numThreads());
         damping = std::min(cid.damping(), damping);
@@ -3484,15 +3557,14 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
       PARALLEL_CATCH;
     }
 
-    if (_nodal_dampers.hasActiveObjects())
+    if (nodal_dampers.hasActiveObjects())
     {
       PARALLEL_TRY
       {
         TIME_SECTION("computeDamping::element", 3, "Computing Element Damping");
 
-        has_active_dampers = true;
         *_increment_vec = update;
-        ComputeNodalDampingThread cndt(_fe_problem, *this);
+        ComputeNodalDampingThread cndt(_fe_problem, *this, nodal_dampers);
         Threads::parallel_reduce(
             _fe_problem.getCurrentAlgebraicNodeRange(), cndt, this->numThreads());
         damping = std::min(cndt.damping(), damping);
@@ -3500,14 +3572,13 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
       PARALLEL_CATCH;
     }
 
-    if (_general_dampers.hasActiveObjects())
+    if (general_dampers.hasActiveObjects())
     {
       PARALLEL_TRY
       {
         TIME_SECTION("computeDamping::general", 3, "Computing General Damping");
 
-        has_active_dampers = true;
-        const auto & gdampers = _general_dampers.getActiveObjects();
+        const auto & gdampers = general_dampers.getActiveObjects();
         for (const auto & damper : gdampers)
         {
           Real gd_damping = damper->computeDamping(solution, update);
@@ -3540,9 +3611,6 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
   }
 
   _communicator.min(damping);
-
-  if (has_active_dampers && damping < 1.0)
-    _console << " Damping factor: " << damping << std::endl;
 
   return damping;
 }
@@ -4280,7 +4348,8 @@ NonlinearSystemBase::preSolve()
   _current_nl_its = 0;
 
   // Initialize the solution vector using a predictor and known values from nodal bcs
-  setInitialSolution();
+  if (!setInitialSolution())
+    return false;
 
   // Now that the initial solution has ben set, potentially perform a residual/Jacobian evaluation
   // to determine variable scaling factors

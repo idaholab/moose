@@ -15,12 +15,14 @@
 
 #include "libmesh/threads.h"
 
-ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblemBase & feproblem,
-                                                     NonlinearSystemBase & nl)
+ComputeNodalDampingThread::ComputeNodalDampingThread(
+    FEProblemBase & feproblem,
+    NonlinearSystemBase & nl,
+    const MooseObjectWarehouse<NodalDamper> & dampers)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(feproblem),
     _damping(1.0),
     _nl(nl),
-    _nodal_dampers(_nl.getNodalDamperWarehouse())
+    _nodal_dampers(dampers)
 {
 }
 
@@ -80,7 +82,7 @@ ComputeNodalDampingThread::join(const ComputeNodalDampingThread & y)
 void
 ComputeNodalDampingThread::printGeneralExecutionInformation() const
 {
-  const auto & damper_wh = _nl.getNodalDamperWarehouse();
+  const auto & damper_wh = _nodal_dampers;
   if (!_fe_problem.shouldPrintExecution(_tid) || !damper_wh.hasActiveObjects())
     return;
 
