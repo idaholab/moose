@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADMortarConstraint.h"
+#include "ModularGapConductanceConstraint.h"
 
 /**
  * This Constraint implements thermal contact using a "gap
@@ -46,29 +46,23 @@
  * variable. Likewise, the term "primal variable" refers to the
  * temperature variable.
  */
-class GapConductanceConstraint : public ADMortarConstraint
+class GapConductanceConstraint : public ModularGapConductanceConstraint
 {
 public:
   static InputParameters validParams();
 
   GapConductanceConstraint(const InputParameters & parameters);
 
+  /// The plate gap width needs no gap geometry setup, in any coordinate system
+  void initialSetup() override {}
+
 protected:
-  /**
-   * Computes the residual for the LM equation, lambda = (k/l)*(T^(1) - PT^(2)).
-   */
-  virtual ADReal computeQpResidual(Moose::MortarType mortar_type) override;
+  /// @return The gap heat flux (k/l)*(T^(1) - PT^(2)) at the current quadrature point
+  ADReal computeGapFlux() override;
 
   /// Thermal conductivity of the gap medium (e.g. air).
   const Real _k;
 
   /// Minimum gap distance allowed
   const Real _min_gap;
-
-  ///@{ Displacement variables
-  const std::vector<std::string> _disp_name;
-  const unsigned int _n_disp;
-  std::vector<const ADVariableValue *> _disp_secondary;
-  std::vector<const ADVariableValue *> _disp_primary;
-  ///@}
 };
