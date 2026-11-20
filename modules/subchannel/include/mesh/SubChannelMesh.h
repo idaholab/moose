@@ -37,9 +37,9 @@ public:
 
   /**
    * Get the axial cell containing height z and the linear interpolation weight within it.
-   * Heights above the outlet are clamped to the outlet. Valid on every processor.
+   * Heights outside the mesh are clamped to the inlet or outlet. Valid on every processor.
    * @return pair of the cell index iz and the weight w in [0, 1], such that a nodal value at z is
-   * v(iz) + (v(iz + 1) - v(iz)) * w
+   * (1 - w) * v(iz) + w * v(iz + 1)
    */
   std::pair<unsigned int, Real> getAxialInterpolation(Real z) const;
 

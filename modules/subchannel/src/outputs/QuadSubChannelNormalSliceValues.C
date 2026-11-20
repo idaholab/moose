@@ -36,7 +36,8 @@ QuadSubChannelNormalSliceValues::QuadSubChannelNormalSliceValues(const InputPara
     _height(getParam<Real>("height"))
 {
   if (MooseUtils::absoluteFuzzyLessThan(_height, _mesh.getZGrid().front()))
-    paramError("height", "is below the inlet of the mesh at ", _mesh.getZGrid().front(), ".");
+    paramError(
+        "height", _height, " is below the inlet of the mesh at ", _mesh.getZGrid().front(), ".");
   std::tie(_iz, _weight) = _mesh.getAxialInterpolation(_height);
   _exit_value.resize(_mesh.getNy(), _mesh.getNx());
 }
@@ -55,7 +56,7 @@ QuadSubChannelNormalSliceValues::output()
     const auto * node_out = _mesh.getChannelNode(i_ch, _iz + 1);
     const unsigned int i = i_ch / nx;     // row
     const unsigned int j = i_ch - i * nx; // column
-    _exit_value(i, j) = val_soln(node_in) + (val_soln(node_out) - val_soln(node_in)) * _weight;
+    _exit_value(i, j) = val_soln.interpolate(node_in, node_out, _weight);
   }
 
   std::ofstream myfile;

@@ -11,7 +11,7 @@
   [subchannel_height]
     type = 'RunException'
     input = 'test_error.i'
-    expect_err = "height: is outside the axial extent of the mesh, 0 to 1."
+    expect_err = "height: 5 is outside the axial extent of the mesh, 0 to 1."
     issues = '#29226 #29486 #34499'
     requirement = 'The system shall test the user provided height'
   []
@@ -24,6 +24,20 @@
     recover = False
     issues = '#34499'
     requirement = 'The system shall print an elemental variable on a specific subchannel and height in quadrilateral assemblies'
+  []
+  [planar_mean_elemental_variable]
+    type = CSVDiff
+    input = 'test.i'
+    cli_args = 'AuxVariables/T/family=MONOMIAL AuxVariables/T/order=CONSTANT AuxVariables/mdot/family=LAGRANGE '
+               'ICs/mdot_ic/type=ConstantIC ICs/mdot_ic/variable=mdot ICs/mdot_ic/value=0.1 '
+               'Postprocessors/mean/type=SCMPlanarMean Postprocessors/mean/variable=T '
+               'Postprocessors/mean/height=0.55 Executioner/end_time=1 '
+               'Outputs/file_base=planar_mean_elemental_out'
+    csvdiff = 'planar_mean_elemental_out.csv'
+    recover = False
+    design = 'SCMPlanarMean.md'
+    issues = '#34499'
+    requirement = 'The system shall compute the planar mean of an elemental variable in quadrilateral assemblies'
   []
   [outlet_height_roundoff]
     type = RunApp

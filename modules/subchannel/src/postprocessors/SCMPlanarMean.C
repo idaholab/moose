@@ -38,7 +38,8 @@ SCMPlanarMean::SCMPlanarMean(const InputParameters & parameters)
     _mean_value(0)
 {
   if (MooseUtils::absoluteFuzzyLessThan(_height, _mesh.getZGrid().front()))
-    paramError("height", "is below the inlet of the mesh at ", _mesh.getZGrid().front(), ".");
+    paramError(
+        "height", _height, " is below the inlet of the mesh at ", _mesh.getZGrid().front(), ".");
   std::tie(_iz, _weight) = _mesh.getAxialInterpolation(_height);
 }
 
@@ -58,8 +59,8 @@ SCMPlanarMean::execute()
   {
     const auto * node_in = _mesh.getChannelNode(i_ch, _iz);
     const auto * node_out = _mesh.getChannelNode(i_ch, _iz + 1);
-    const auto solution = Soln(node_in) + (Soln(node_out) - Soln(node_in)) * _weight;
-    const auto mdot = mdot_soln(node_in) + (mdot_soln(node_out) - mdot_soln(node_in)) * _weight;
+    const auto solution = Soln.interpolate(node_in, node_out, _weight);
+    const auto mdot = mdot_soln.interpolate(node_in, node_out, _weight);
     mass_flow += mdot;
     sum_sol_mass_flow += solution * mdot;
   }

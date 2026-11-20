@@ -49,40 +49,25 @@ SubChannelPointValue::SubChannelPointValue(const InputParameters & parameters)
   if (MooseUtils::absoluteFuzzyLessThan(_height, z_grid.front()) ||
       MooseUtils::absoluteFuzzyGreaterThan(_height, z_grid.back()))
     paramError("height",
-               "is outside the axial extent of the mesh, ",
+               _height,
+               " is outside the axial extent of the mesh, ",
                z_grid.front(),
                " to ",
                z_grid.back(),
                ".");
   std::tie(_iz, _weight) = _mesh.getAxialInterpolation(_height);
-
-  const auto & fe_type = _fe_problem.getVariable(0, _variable).feType();
-  _nodal = fe_type.family == LAGRANGE && fe_type.order == FIRST;
-  _point =
-      Point(_mesh._subchannel_position[_i_ch][0], _mesh._subchannel_position[_i_ch][1], _height);
 }
 
 void
 SubChannelPointValue::execute()
 {
-  // Variables without nodal values, such as elemental fields, are evaluated at the point.
-  // Evaluation is collective, so it happens on every processor. The height is checked against
-  // the mesh in the constructor, so failing to locate the point is an error rather than a zero.
-  if (!_nodal)
-  {
-    const auto & var = _fe_problem.getVariable(0, _variable);
-    _value = var.sys().system().point_value(var.number(), _point, /*insist_on_success=*/true);
-    return;
-  }
-
   // Creating a solution handle is collective, so it must happen on every processor
   const auto soln = SolutionHandle(_fe_problem.getVariable(0, _variable));
   // The subchannel solution is only available on processor 0
   if (processor_id() != 0)
     return;
-  const auto value_in = soln(_mesh.getChannelNode(_i_ch, _iz));
-  const auto value_out = soln(_mesh.getChannelNode(_i_ch, _iz + 1));
-  _value = value_in + (value_out - value_in) * _weight;
+  _value = soln.interpolate(
+      _mesh.getChannelNode(_i_ch, _iz), _mesh.getChannelNode(_i_ch, _iz + 1), _weight);
 }
 
 void

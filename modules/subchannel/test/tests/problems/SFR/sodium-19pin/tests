@@ -95,7 +95,7 @@
     type = RunException
     input = test19_implicit.i
     cli_args = 'Postprocessors/Mean_Temp/height=-0.1'
-    expect_err = "height: is below the inlet of the mesh at 0."
+    expect_err = "height: -0.1 is below the inlet of the mesh at 0."
     design = 'SCMPlanarMean.md'
     issues = '#34499'
     requirement = 'The system shall report an error if the height of a planar mean is below the inlet'

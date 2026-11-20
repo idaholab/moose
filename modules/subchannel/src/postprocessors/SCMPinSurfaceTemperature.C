@@ -49,7 +49,8 @@ SCMPinSurfaceTemperature::SCMPinSurfaceTemperature(const InputParameters & param
   if (_i_pin >= n_pins)
     paramError("index", "is out of range; valid pin indices are 0 to ", n_pins - 1, ".");
   if (MooseUtils::absoluteFuzzyLessThan(_height, _mesh.getZGrid().front()))
-    paramError("height", "is below the inlet of the mesh at ", _mesh.getZGrid().front(), ".");
+    paramError(
+        "height", _height, " is below the inlet of the mesh at ", _mesh.getZGrid().front(), ".");
   std::tie(_iz, _weight) = _mesh.getAxialInterpolation(_height);
 }
 
@@ -61,9 +62,8 @@ SCMPinSurfaceTemperature::execute()
   // No data on other ranks
   if (processor_id() != 0)
     return;
-  const auto T_in = Tpin_soln(_mesh.getPinNode(_i_pin, _iz));
-  const auto T_out = Tpin_soln(_mesh.getPinNode(_i_pin, _iz + 1));
-  _value = T_in + (T_out - T_in) * _weight;
+  _value = Tpin_soln.interpolate(
+      _mesh.getPinNode(_i_pin, _iz), _mesh.getPinNode(_i_pin, _iz + 1), _weight);
 }
 
 void

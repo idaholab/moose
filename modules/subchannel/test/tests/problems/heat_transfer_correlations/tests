@@ -157,7 +157,7 @@
       input = 'XX09_SCM_SS17.i'
       allow_test_objects = true
       cli_args = 'SubChannel/pin_HTC_closure=gnielinski SubChannel/duct_HTC_closure=gnielinski Postprocessors/Pin_Temp_0_Inlet/height=-0.1'
-      expect_err = "height: is below the inlet of the mesh at 0."
+      expect_err = "height: -0.1 is below the inlet of the mesh at 0."
       detail = 'a height below the inlet.'
     []
   []

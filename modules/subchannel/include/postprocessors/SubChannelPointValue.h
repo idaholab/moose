@@ -34,10 +34,6 @@ protected:
   const unsigned int & _i_ch;
   /// name of variable
   const VariableName & _variable;
-  /// whether the variable is first-order Lagrange, so it can be interpolated between nodes
-  bool _nodal;
-  /// subchannel centroid at the requested height, for variables that are not nodal
-  Point _point;
   /// axial cell containing the height
   unsigned int _iz;
   /// linear interpolation weight of the height within the axial cell
