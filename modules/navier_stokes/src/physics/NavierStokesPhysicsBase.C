@@ -52,6 +52,41 @@ NavierStokesPhysicsBase::addFVAdvectedInterpolationMethod(const MooseEnum & inte
   getProblem().addFVInterpolationMethod(method_type, method_name, params);
 }
 
+MooseFunctorName
+NavierStokesPhysicsBase::addPorosityScaledFunctor(const MooseFunctorName & porosity,
+                                                  const MooseFunctorName & functor)
+{
+  const MooseFunctorName product_name = prefix() + porosity + "_times_" + functor;
+  if (getProblem().hasFunctor(product_name, /*thread_id=*/0))
+    return product_name;
+
+  // Numbers go directly in the expression. Functors get symbols because their names, such as
+  // the turbulent diffusivity 'mu_t/Sc_t', need not be valid parser identifiers.
+  std::vector<std::string> functor_names;
+  std::vector<std::string> functor_symbols;
+  std::vector<std::string> factors;
+  for (const auto & name : {porosity, functor})
+    if (MooseUtils::parsesToReal(name))
+      factors.push_back(name);
+    else
+    {
+      functor_names.push_back(name);
+      functor_symbols.push_back("f" + std::to_string(functor_symbols.size()));
+      factors.push_back(functor_symbols.back());
+    }
+
+  const std::string object_type = "ParsedFunctorMaterial";
+  InputParameters params = getFactory().getValidParams(object_type);
+  assignBlocks(params, _blocks);
+  params.set<std::string>("expression") = factors[0] + " * " + factors[1];
+  params.set<std::vector<std::string>>("functor_names") = functor_names;
+  params.set<std::vector<std::string>>("functor_symbols") = functor_symbols;
+  params.set<std::string>("property_name") = product_name;
+  getProblem().addMaterial(object_type, product_name + "_material", params);
+
+  return product_name;
+}
+
 InputParameters
 NavierStokesPhysicsBase::getAdditionalRMParams() const
 {

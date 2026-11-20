@@ -22,6 +22,13 @@ public:
 
   WCNSLinearFVScalarTransportPhysics(const InputParameters & parameters);
 
+protected:
+  /**
+   * Return the functor scaled by the porosity for porous flow, the functor itself otherwise
+   * @param functor functor or number to scale
+   */
+  MooseFunctorName fluidFractionScaled(const MooseFunctorName & functor);
+
 private:
   virtual void addSolverVariables() override;
   virtual void addFVInterpolationMethods() override;
