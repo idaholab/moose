@@ -48,7 +48,7 @@ SCMPinSurfaceTemperature::SCMPinSurfaceTemperature(const InputParameters & param
   _communicator.broadcast(n_pins);
   if (_i_pin >= n_pins)
     paramError("index", "is out of range; valid pin indices are 0 to ", n_pins - 1, ".");
-  if (_height < _mesh.getZGrid().front())
+  if (MooseUtils::absoluteFuzzyLessThan(_height, _mesh.getZGrid().front()))
     paramError("height", "is below the inlet of the mesh at ", _mesh.getZGrid().front(), ".");
   std::tie(_iz, _weight) = _mesh.getAxialInterpolation(_height);
 }

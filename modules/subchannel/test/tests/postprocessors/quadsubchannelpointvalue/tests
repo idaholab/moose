@@ -12,7 +12,27 @@
     type = 'RunException'
     input = 'test_error.i'
     expect_err = "height: is outside the axial extent of the mesh, 0 to 1."
+    issues = '#29226 #29486 #34499'
     requirement = 'The system shall test the user provided height'
+  []
+  [elemental_variable]
+    type = CSVDiff
+    input = 'test.i'
+    cli_args = 'AuxVariables/T/family=MONOMIAL AuxVariables/T/order=CONSTANT'
+    csvdiff = 'test_out.csv'
+    prereq = test
+    recover = False
+    issues = '#34499'
+    requirement = 'The system shall print an elemental variable on a specific subchannel and height in quadrilateral assemblies'
+  []
+  [outlet_height_roundoff]
+    type = RunApp
+    input = 'test.i'
+    # The outlet of this grid is (1 / 49) * 49, which is below 1 in floating point
+    cli_args = 'QuadSubChannelMesh/sub_channel/n_cells=49 Postprocessors/T/height=1 Outputs/csv=false'
+    recover = False
+    issues = '#34499'
+    requirement = 'The system shall accept a point value height at the outlet when the axial grid accumulates roundoff'
   []
   [subchannel_index]
     type = 'RunException'

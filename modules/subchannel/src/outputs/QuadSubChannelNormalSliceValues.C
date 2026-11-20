@@ -35,7 +35,7 @@ QuadSubChannelNormalSliceValues::QuadSubChannelNormalSliceValues(const InputPara
     _variable(getParam<VariableName>("variable")),
     _height(getParam<Real>("height"))
 {
-  if (_height < _mesh.getZGrid().front())
+  if (MooseUtils::absoluteFuzzyLessThan(_height, _mesh.getZGrid().front()))
     paramError("height", "is below the inlet of the mesh at ", _mesh.getZGrid().front(), ".");
   std::tie(_iz, _weight) = _mesh.getAxialInterpolation(_height);
   _exit_value.resize(_mesh.getNy(), _mesh.getNx());

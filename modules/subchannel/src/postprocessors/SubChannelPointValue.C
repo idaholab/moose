@@ -43,8 +43,11 @@ SubChannelPointValue::SubChannelPointValue(const InputParameters & parameters)
   _communicator.broadcast(n_channels);
   if (_i_ch >= n_channels)
     paramError("index", "is out of range; valid subchannel indices are 0 to ", n_channels - 1, ".");
+  // The last grid point is accumulated from cell widths, so it can differ from the configured
+  // outlet height by roundoff
   const auto & z_grid = _mesh.getZGrid();
-  if (_height < z_grid.front() || _height > z_grid.back())
+  if (MooseUtils::absoluteFuzzyLessThan(_height, z_grid.front()) ||
+      MooseUtils::absoluteFuzzyGreaterThan(_height, z_grid.back()))
     paramError("height",
                "is outside the axial extent of the mesh, ",
                z_grid.front(),
@@ -52,11 +55,26 @@ SubChannelPointValue::SubChannelPointValue(const InputParameters & parameters)
                z_grid.back(),
                ".");
   std::tie(_iz, _weight) = _mesh.getAxialInterpolation(_height);
+
+  const auto & fe_type = _fe_problem.getVariable(0, _variable).feType();
+  _nodal = fe_type.family == LAGRANGE && fe_type.order == FIRST;
+  _point =
+      Point(_mesh._subchannel_position[_i_ch][0], _mesh._subchannel_position[_i_ch][1], _height);
 }
 
 void
 SubChannelPointValue::execute()
 {
+  // Variables without nodal values, such as elemental fields, are evaluated at the point.
+  // Evaluation is collective, so it happens on every processor. The height is checked against
+  // the mesh in the constructor, so failing to locate the point is an error rather than a zero.
+  if (!_nodal)
+  {
+    const auto & var = _fe_problem.getVariable(0, _variable);
+    _value = var.sys().system().point_value(var.number(), _point, /*insist_on_success=*/true);
+    return;
+  }
+
   // Creating a solution handle is collective, so it must happen on every processor
   const auto soln = SolutionHandle(_fe_problem.getVariable(0, _variable));
   // The subchannel solution is only available on processor 0
