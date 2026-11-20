@@ -22,6 +22,8 @@
 #include "libmesh/elem.h"
 #include "libmesh/int_range.h"
 #include "libmesh/vector_value.h"
+#include "libmesh/fe_base.h"
+#include "libmesh/quadrature_nodal.h"
 
 #include "metaphysicl/raw_type.h"
 
@@ -29,6 +31,7 @@
 #include <array>
 #include <cmath>
 #include <functional>
+#include <map>
 #include <optional>
 #include <set>
 #include <memory>
@@ -297,6 +300,43 @@ public:
    */
   std::array<MooseUtils::SemidynamicVector<Point, 9>, 2>
   getNodalTangents(const Elem & secondary_elem) const;
+
+  /// The AD geometry of one secondary face at one of its nodes
+  struct ADFaceNodalAreaVector
+  {
+    /// The secondary node
+    const Node * node = nullptr;
+    /// The covariant face tangents at the node; the second is zero in 2D
+    std::array<ADRealVectorValue, 2> tangents;
+    /// The face area vector at the node, oriented outward from the interior parent (inward on a
+    /// periodic interface) and multiplied by the nodal quadrature weight
+    ADRealVectorValue weighted_area_vector;
+    /// The norm of the face area vector at the node, without the quadrature weight
+    Real area = 0;
+    /// The norm of \p weighted_area_vector
+    Real weighted_area = 0;
+  };
+
+  /// Face FE objects, one per face order, and the nodal quadrature rule they share
+  struct ADFaceAreaVectorCache
+  {
+    explicit ADFaceAreaVectorCache(unsigned int dim);
+    libMesh::QNodal qface;
+    std::map<libMesh::Order, std::unique_ptr<libMesh::FEBase>> fe_faces;
+  };
+
+  /**
+   * Compute the AD geometry of \p secondary_elem at each of its nodes. Summing the weighted area
+   * vectors of the faces around a node and normalizing gives the nodal normal.
+   * @param secondary_elem A lower-dimensional secondary element of this interface
+   * @param coordinate The position of a node of the interior parent's side, with derivatives; it
+   * may be the position in another configuration than this interface's mesh
+   * @param cache The face FE objects to reuse across calls
+   */
+  std::vector<ADFaceNodalAreaVector>
+  secondaryFaceNodalAreaVectors(const Elem & secondary_elem,
+                                const std::function<ADPoint(const Node &)> & coordinate,
+                                ADFaceAreaVectorCache & cache) const;
 
   /**
    * Build the normalized JxW-weighted secondary nodal normals from AD nodal coordinates.
