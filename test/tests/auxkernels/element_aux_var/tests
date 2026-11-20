@@ -5,7 +5,7 @@
     input = 'element_aux_var_test.i'
     exodiff = 'out.e'
     issues = '#502'
-    requirement = "The system shall allow Kernel objects to couple to an auxiliary variable."
+    requirement = "The system shall allow kernel objects to couple to an auxiliary variable."
   [../]
 
   [./sort_test]

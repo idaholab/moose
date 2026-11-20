@@ -2,7 +2,7 @@
   design = 'DerivativeSumMaterial.md'
   issues = '#14914 #5039'
   [random_ic]
-    requirement = 'The system shall provide a method for summing multiple derivative'
+    requirement = 'The system shall provide a method for summing multiple derivative '
                   'parsed materials and compare exact to a single derivative parsed material '
     [validating]
       type = 'Exodiff'

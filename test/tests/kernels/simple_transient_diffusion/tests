@@ -14,7 +14,7 @@
     cli_args = 'Outputs/exodus=false Problem/error_on_jacobian_nonzero_reallocation=true'
     issues = '#13736'
     design = 'TimeDerivative.md'
-    requirement = 'The system shall not do any mallocs in MatSetValues for simple kernels'
+    requirement = 'The system shall not perform any memory allocation during matrix assembly for simple kernels'
     prereq = 'test' # for no checkpoint clobber potential during recover testing
   [../]
   [cant-solve-poorly-scaled]

@@ -29,7 +29,7 @@
   [stateful_props]
     type = 'RunApp'
     input = 'dg_stateful.i'
-    requirement = 'The system shall allow DGKernels to coexist with stateful material properties'
+    requirement = 'The system shall allow discontinuous Galerkin kernels to coexist with stateful material properties'
     issues = '#11766'
     design = 'DGKernels/index.md'
   []
@@ -49,7 +49,7 @@
     exodiff = 'no_mallocs_with_action_out.e'
     issues = '#13736'
     design = 'RelationshipManager.md'
-    requirement = 'The system shall ensure, when objects that need one layer of coupling (like DGKernels) are added via action, that a proper relationship manager is added and no mallocs occur during calls to MatSetValues, without applying algebraic ghosting or reinitializing system vectors in serial but reinitializing the matrix sparsity.'
+    requirement = 'The system shall ensure, when objects that need one layer of coupling (like discontinuous Galerkin kernels) are added via action, that a proper relationship manager is added and no memory allocation occurs during matrix assembly, without applying algebraic ghosting or reinitializing system vectors in serial but reinitializing the matrix sparsity.'
     mesh_mode = replicated
     max_parallel = 1
   []
@@ -59,7 +59,7 @@
     exodiff = 'no_mallocs_with_action_parallel.e'
     issues = '#13736'
     design = 'RelationshipManager.md'
-    requirement = 'The system shall ensure, when objects that need one layer of coupling (like DGKernels) are added via action, that a proper relationship manager is added and no mallocs occur during calls to MatSetValues, applying algebraic ghosting in parallel and therefore reinitializing both the system vectors and the sparsity pattern.'
+    requirement = 'The system shall ensure, when objects that need one layer of coupling (like discontinuous Galerkin kernels) are added via action, that a proper relationship manager is added and no memory allocation occurs during matrix assembly, applying algebraic ghosting in parallel and therefore reinitializing both the system vectors and the sparsity pattern.'
     mesh_mode = replicated
     min_parallel = 2
     cli_args = 'Outputs/file_base=no_mallocs_with_action_parallel'
@@ -70,7 +70,7 @@
     exodiff = 'no_functor_additions_out.e'
     issues = '#13736'
     design = 'RelationshipManager.md'
-    requirement = 'The system shall not add any relationship managers through the CouplingFunctorCheck action if a RelationshipManager with sufficient coverage has already been added through a MooseObjectAction, avoiding reinitialization of system vectors and the system matrix'
+    requirement = 'The system shall not add any default coupling relationship managers if a relationship manager with sufficient coverage has already been added for an object, avoiding reinitialization of system vectors and the system matrix'
     mesh_mode = replicated
   []
   [proper_ghosting_with_action_serial_distributed]
@@ -80,7 +80,7 @@
     cli_args = 'Outputs/file_base=no_mallocs_with_action_distributed'
     issues = '#13736'
     design = 'RelationshipManager.md'
-    requirement = 'The system shall add, with a distributed mesh in serial, one more relationship manager than with a replicated mesh because of the geometric-only GhostPointNeighbors relationship manager, incur no mallocs, and reinitialize the sparsity pattern but not the vectors.'
+    requirement = 'The system shall add, with a distributed mesh in serial, one more relationship manager than with a replicated mesh because of the geometric-only point neighbor ghosting relationship manager, perform no memory allocation during matrix assembly, and reinitialize the sparsity pattern but not the vectors.'
     mesh_mode = distributed
     max_parallel = 1
   []
@@ -91,7 +91,7 @@
     cli_args = 'Outputs/file_base=no_mallocs_with_action_parallel_distributed'
     issues = '#13736'
     design = 'RelationshipManager.md'
-    requirement = 'The system shall add, with a distributed mesh in parallel, one more relationship manager than with a replicated mesh because of the geometric-only GhostPointNeighbors relationship manager, incur no mallocs, and reinitialize both the sparsity pattern and the vectors.'
+    requirement = 'The system shall add, with a distributed mesh in parallel, one more relationship manager than with a replicated mesh because of the geometric-only point neighbor ghosting relationship manager, perform no memory allocation during matrix assembly, and reinitialize both the sparsity pattern and the vectors.'
     mesh_mode = distributed
     min_parallel = 2
   []
@@ -102,7 +102,7 @@
     cli_args = 'Outputs/file_base=no_functor_additions_distributed'
     issues = '#13736'
     design = 'RelationshipManager.md'
-    requirement = 'The system shall add, with a distributed mesh, one more relationship manager than with a replicated mesh because of the geometric-only GhostPointNeighbors relationship manager, with no relationship managers added by the CouplingFunctorCheckAction.'
+    requirement = 'The system shall add, with a distributed mesh, one more relationship manager than with a replicated mesh because of the geometric-only point neighbor ghosting relationship manager, with no default coupling relationship managers added.'
     mesh_mode = distributed
   []
 []

@@ -21,7 +21,7 @@
     exodiff = time_derivative_nl_out.e
     cli_args = 'Executioner/solve_type=linear'
     issues = '#27233'
-    requirement = 'The system shall allow auxiliary kernels to couple to the time'
+    requirement = 'The system shall allow auxiliary kernels to couple to the time '
                   'derivative of a nonlinear variable even if the problem is '
                   'in fact linear and solved as such.'
   []
