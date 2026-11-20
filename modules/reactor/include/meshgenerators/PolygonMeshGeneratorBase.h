@@ -25,6 +25,8 @@
 #include "libmesh/boundary_info.h"
 #include "libmesh/utility.h"
 
+#include <functional>
+
 /**
  * A base class that contains common members for Reactor module mesh generators.
  */
