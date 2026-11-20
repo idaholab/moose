@@ -75,6 +75,12 @@ private:
   static std::unique_ptr<NEML2ModelHandle> makeModelHandle(const InputParameters & params,
                                                            NEML2ModelInterface<T> & self)
   {
+    // The action owns the handle while introspecting it, then transfers that single ownership to
+    // the executor through a pointer because InputParameters itself must remain copyable.
+    if (params.isParamValid("_neml2_model_handle"))
+      if (auto * model = params.get<std::unique_ptr<NEML2ModelHandle> *>("_neml2_model_handle"))
+        return std::move(*model);
+
     // Route NEML2's log output to MOOSE's console before the model is built/evaluated.
     NEML2Utils::redirectLogsToConsole(self._console);
 
@@ -146,6 +152,9 @@ InputParameters
 NEML2ModelInterface<T>::validParams()
 {
   InputParameters params = T::validParams();
+#ifdef NEML2_ENABLED
+  params.addPrivateParam<std::unique_ptr<NEML2ModelHandle> *>("_neml2_model_handle", nullptr);
+#endif
   params.addParam<bool>(
       "eager",
       false,

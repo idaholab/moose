@@ -9,6 +9,9 @@
 
 #include "NEML2ToMOOSEMaterialProperty.h"
 #include "NEML2ModelExecutor.h"
+#include "FEProblemBase.h"
+#include "MaterialPropertyInterface.h"
+#include "BoundaryRestrictable.h"
 
 #define registerNEML2ToMOOSEMaterialProperty(alias)                                                \
   registerMooseObject("MooseApp", NEML2ToMOOSE##alias##MaterialProperty)
@@ -35,6 +38,10 @@ NEML2ToMOOSEMaterialProperty<T>::validParams()
       "to_moose",
       "MOOSE material property used to store the NEML2 output variable (or its derivative)");
   params.addRequiredParam<std::string>("from_neml2", "NEML2 output variable to read from");
+  params.addParam<std::vector<BoundaryName>>(
+      "evaluated_boundaries",
+      {},
+      "Boundaries where this NEML2 output is also evaluated at side quadrature points");
   params.addParam<std::string>(
       "neml2_input_derivative",
 
@@ -69,13 +76,51 @@ NEML2ToMOOSEMaterialProperty<T>::NEML2ToMOOSEMaterialProperty(const InputParamet
                       ? _execute_neml2_model.getOutputParameterDerivative(
                             getParam<std::string>("from_neml2"),
                             getParam<std::string>("neml2_parameter_derivative"))
-                      : _execute_neml2_model.getOutput(getParam<std::string>("from_neml2"))))
+                      : _execute_neml2_model.getOutput(getParam<std::string>("from_neml2")))),
+    _evaluated_boundaries(getParam<std::vector<BoundaryName>>("evaluated_boundaries"))
 #endif
 {
   NEML2Utils::assertNEML2Enabled();
 }
 
 #ifdef NEML2_ENABLED
+template <typename T>
+void
+NEML2ToMOOSEMaterialProperty<T>::initialSetup()
+{
+  const auto evaluated_boundary_ids = _mesh.getBoundaryIDs(_evaluated_boundaries);
+  const std::set<BoundaryID> evaluated_boundaries(evaluated_boundary_ids.begin(),
+                                                  evaluated_boundary_ids.end());
+
+  const auto & property_name = getParam<MaterialPropertyName>("to_moose");
+  for (const auto data_type :
+       {Moose::BOUNDARY_MATERIAL_DATA, Moose::FACE_MATERIAL_DATA, Moose::INTERFACE_MATERIAL_DATA})
+  {
+    const auto & material_data = _fe_problem.getMaterialData(data_type, _tid, this);
+    if (!material_data.hasProperty(property_name))
+      continue;
+
+    const auto property_id = material_data.getPropertyId(property_name);
+    for (const auto * consumer : _fe_problem.getMaterialPropertyStorageConsumers(data_type))
+    {
+      const auto * material_property_consumer =
+          dynamic_cast<const MaterialPropertyInterface *>(consumer);
+      if (!material_property_consumer ||
+          !material_property_consumer->getMatPropDependencies().count(property_id))
+        continue;
+
+      const auto * boundary_consumer = dynamic_cast<const BoundaryRestrictable *>(consumer);
+      if (boundary_consumer && boundary_consumer->boundaryRestricted() &&
+          (evaluated_boundaries.empty() ||
+           !boundary_consumer->isBoundarySubset(evaluated_boundaries)))
+        mooseError("NEML2 material property '",
+                   property_name,
+                   "' was requested at side quadrature points outside the NEML2 model's selected "
+                   "boundaries.");
+    }
+  }
+}
+
 template <typename T>
 void
 NEML2ToMOOSEMaterialProperty<T>::computeProperties()
@@ -91,6 +136,30 @@ NEML2ToMOOSEMaterialProperty<T>::computeProperties()
   if (!_execute_neml2_model.outputReady())
     return;
 
+  const auto elem_side = NEML2BatchIndexGenerator::ElemSide(_current_elem->id(), _current_side);
+  // MOOSE may reinitialize block materials as face material data without a property consumer.
+  // NEML2 only creates batch entries for selected evaluation domains, so tolerate a missing entry
+  // for such incidental reinitialization. This does not validate unrestricted face consumers.
+  if ((_bnd && !_execute_neml2_model.hasSideBatchSpan(elem_side)) ||
+      (!_bnd && !_execute_neml2_model.hasBatchSpan(_current_elem->id())))
+    return;
+
+  const auto span = _bnd ? _execute_neml2_model.getSideBatchSpan(elem_side)
+                         : _execute_neml2_model.getBatchSpan(_current_elem->id());
+  if (span.size != _qrule->n_points())
+    mooseError("NEML2 material property '",
+               getParam<MaterialPropertyName>("to_moose"),
+               "' has a ",
+               _bnd ? "side" : "volume",
+               " batch span of ",
+               span.size,
+               " quadrature points for element ",
+               _current_elem->id(),
+               _bnd ? ", side " + std::to_string(_current_side) : std::string(),
+               ", but the current quadrature rule has ",
+               _qrule->n_points(),
+               ".");
+
   // A derivative retriever's tensor is produced only on passes that compute the derivative (see
   // NEML2ModelExecutor::solve). If it has not been computed (e.g. an input derivative on a step
   // where no Jacobian was assembled), report the derivative as zero.
@@ -101,8 +170,7 @@ NEML2ToMOOSEMaterialProperty<T>::computeProperties()
     return;
   }
 
-  // look up start index for current element
-  const auto i = _execute_neml2_model.getBatchIndex(_current_elem->id());
+  const auto i = span.begin;
   // The NEML2 output/derivative tensor is (batch, *base_shape) when batched; a leading batch
   // axis is present iff the tensor has more dims than the base shape of the MOOSE type T.
   const auto base_ndim = static_cast<int64_t>(NEML2Utils::Layout<T>::shape.size());
