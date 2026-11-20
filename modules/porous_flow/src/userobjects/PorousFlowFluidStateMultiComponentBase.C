@@ -13,9 +13,19 @@ InputParameters
 PorousFlowFluidStateMultiComponentBase::validParams()
 {
   InputParameters params = PorousFlowFluidStateFlash::validParams();
-  params.addParam<unsigned int>(
-      "liquid_fluid_component", 0, "The fluid component number of the primary liquid component");
-  params.addParam<unsigned int>("salt_component", 2, "The component number of salt");
+  // The fluid component indices are fixed by each derived fluid state class. These deprecated
+  // parameters are retained so that existing input that sets them to their defaults still runs.
+  const std::string deprecate_msg =
+      "The fluid component indices are now fixed by each fluid state class, so this parameter can "
+      "only take its default value. It is deprecated and will be removed on 2027-04-26; see the "
+      "fluid state documentation for details.";
+  params.addDeprecatedParam<unsigned int>(
+      "liquid_fluid_component",
+      0,
+      "The fluid component number of the primary liquid component",
+      deprecate_msg);
+  params.addDeprecatedParam<unsigned int>(
+      "salt_component", 2, "The component number of salt", deprecate_msg);
   params.addParam<bool>("compute_internal_energy", true, "Compute the fluid internal energy");
   params.addParam<bool>("compute_enthalpy", true, "Compute the fluid enthalpy");
   params.addClassDescription("Base class for multiple component fluid state classes");
@@ -25,15 +35,17 @@ PorousFlowFluidStateMultiComponentBase::validParams()
 PorousFlowFluidStateMultiComponentBase::PorousFlowFluidStateMultiComponentBase(
     const InputParameters & parameters)
   : PorousFlowFluidStateFlash(parameters),
-    _aqueous_fluid_component(getParam<unsigned int>("liquid_fluid_component")),
-    _salt_component(getParam<unsigned int>("salt_component")),
+    _aqueous_fluid_component(0),
+    _salt_component(libMesh::invalid_uint),
     _compute_internal_energy(getParam<bool>("compute_internal_energy")),
-    _compute_enthalpy(getParam<bool>("compute_enthalpy")),
-    _pidx(0),
-    _Zidx(1),
-    _Tidx(2),
-    _Xidx(3)
+    _compute_enthalpy(getParam<bool>("compute_enthalpy"))
 {
+  // The component numbering is fixed, so reject any other value rather than silently ignore it
+  if (getParam<unsigned int>("liquid_fluid_component") != _aqueous_fluid_component)
+    paramError(
+        "liquid_fluid_component",
+        "Water is now always fluid component 0. Remove this parameter and renumber the fluid "
+        "components in the rest of the input file to match");
 }
 
 void
