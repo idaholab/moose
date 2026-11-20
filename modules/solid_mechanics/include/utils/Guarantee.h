@@ -18,7 +18,9 @@ enum class Guarantee
   ISOTROPIC,        // applicable to RankTwo and RankFour tensors that are always isotropic
   CONSTANT_IN_TIME, // applicable to material properties that do not change over time
   UNIFORM_IN_SPACE, // applicable to material properties that have constant values in space
-  LARGE_KINEMATICS  // the Lagrangian deformation gradient is computed with large-kinematics
+  LARGE_KINEMATICS, // the Lagrangian deformation gradient is computed with large-kinematics
                     // (finite-strain) kinematics; consumed by the Lagrangian stress calculators
                     // and stress-divergence kernels to derive their own large_kinematics setting
+  F_BAR,            // the Lagrangian deformation gradient is F-bar stabilized
+  F_BAR_INCREMENTAL // the F-bar stabilization averages the incremental deformation gradient
 };
