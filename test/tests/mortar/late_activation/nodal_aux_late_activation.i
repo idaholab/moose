@@ -3,7 +3,7 @@
 #
 # SETUP: same idea as mortar_late_activation.i - the right block starts offset in y so the facing
 # sidesets (lb_right, rb_left) do NOT overlap laterally at t=0. Every mortar segment is pruned at
-# initialization, so amg.secondaryIPSubIDs()/primaryIPSubIDs() are EMPTY and
+# initialization, so amg.secondaryIPSubIDs()/primaryInternalSubIDs() are EMPTY and
 # Moose::Mortar::setupMortarMaterials, called once from MortarNodalAuxKernelTempl::initialSetup(),
 # inserts no key for either interior-parent subdomain.
 #

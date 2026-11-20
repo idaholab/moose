@@ -42,4 +42,11 @@ void findContactPoint(PenetrationInfo & p_info,
 void restrictPointToFace(libMesh::Point & p,
                          const libMesh::Elem * side,
                          std::vector<const libMesh::Node *> & off_edge_nodes);
+
+/**
+ * @return The unit normal of the plane of a two-dimensional problem: the normal of a planar
+ * primary element computed from its first three nodes, or the z-axis for a primary edge element
+ * that is its own contact face
+ */
+libMesh::Point outOfPlaneNormal(const libMesh::Elem & primary_elem);
 }
