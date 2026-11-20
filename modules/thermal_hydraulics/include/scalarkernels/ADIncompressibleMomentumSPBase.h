@@ -54,7 +54,7 @@ protected:
   /// Length of each segment
   std::vector<const Moose::Functor<ADReal> *> _lengths;
   /// Height change inlet to outlet of each segment
-  std::vector<const Moose::Functor<ADReal> *> _dHs;
+  std::vector<const Moose::Functor<ADReal> *> _dZs;
   /// Forms loss coefficients of each segment
   std::vector<const Moose::Functor<ADReal> *> _forms_losses;
   /// Pump pressure gains of each segment
