@@ -461,6 +461,12 @@ MooseApp::validParams()
                                    false,
                                    "Disables the output of the application header.");
   params.setGlobalCommandLineParam("suppress_header");
+  params.addCommandLineParam<bool>(
+      "suppress_info",
+      "--suppress-info",
+      false,
+      "Disables informational messages from Actions and MooseObjects.");
+  params.setGlobalCommandLineParam("suppress_info");
 
   params.addCommandLineParam<bool>(
       "test_checkpoint_half_transient",
@@ -699,6 +705,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _test_checkpoint_half_transient(parameters.get<bool>("test_checkpoint_half_transient")),
     _test_restep(parameters.get<bool>("test_restep")),
     _check_input(getParam<bool>("check_input")),
+    _suppress_info(getParam<bool>("suppress_info")),
     _multiapp_level(isParamValid("_multiapp_level") ? getParam<unsigned int>("_multiapp_level")
                                                     : 0),
     _multiapp_number(isParamValid("_multiapp_number") ? getParam<unsigned int>("_multiapp_number")
