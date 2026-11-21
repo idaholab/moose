@@ -134,7 +134,7 @@ assembly, i.e. several times per outer iteration. Objects with
 `execute_on = MULTISYSTEM_FIXED_POINT_ITERATION_END` are instead executed once at the end of every
 outer iteration. Add `TIMESTEP_BEGIN` to also compute them before the first outer iteration.
 
-!listing modules/navier_stokes/test/tests/finite_volume/ins/turbulence/channel/linear-segregated/channel_ERCOFTAC_symmetric.i block='AuxKernels'
+!listing modules/navier_stokes/test/tests/finite_volume/ins/turbulence/channel/linear-segregated/channel_ERCOFTAC_symmetric.i block=AuxKernels
 
 ## Example Input Syntax
 
