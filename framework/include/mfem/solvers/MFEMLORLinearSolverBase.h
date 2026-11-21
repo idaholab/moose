@@ -16,6 +16,49 @@
 namespace Moose::MFEM
 {
 /**
+ * An mfem::LORSolver<T> that keeps the low-order-refined operator it was built with.
+ *
+ * mfem::LORSolver<T>::SetOperator() passes the operator on to the wrapped solver, which then
+ * solves with it instead of the LOR operator. A Krylov solver calls SetOperator() on its
+ * preconditioner with the operator it solves, which is the high-order one, so an LOR
+ * preconditioner would silently stop being LOR; and if the high-order operator is not a
+ * HypreParMatrix, as with partial assembly, a hypre preconditioner fails. Here SetOperator() only
+ * checks the size of the operator, and the LOR operator is rebuilt from the bilinear form by
+ * LORLinearSolverBase instead.
+ */
+template <class MFEMSolverType>
+class LORSolver : public mfem::LORSolver<MFEMSolverType>
+{
+public:
+  using mfem::LORSolver<MFEMSolverType>::LORSolver;
+
+  /// Build the solver on the LOR operator of @a lor, taking ownership of @a lor. @a args are
+  /// passed to the constructor of the wrapped solver.
+  template <typename... Args>
+  LORSolver(std::unique_ptr<mfem::ParLORDiscretization> lor, Args &&... args)
+    : mfem::LORSolver<MFEMSolverType>(*lor, std::forward<Args>(args)...)
+  {
+    this->own_lor = true;
+    lor.release();
+  }
+
+  /// Keeps the LOR operator; @a op only has to match its size
+  void SetOperator(const mfem::Operator & op) override
+  {
+    if (op.Height() != this->Height() || op.Width() != this->Width())
+      mooseError("The operator given to a low-order-refined solver has size ",
+                 op.Height(),
+                 " x ",
+                 op.Width(),
+                 ", but its LOR operator has size ",
+                 this->Height(),
+                 " x ",
+                 this->Width(),
+                 ".");
+  }
+};
+
+/**
  * Base class for LOR compatible linear MFEM solvers and preconditioners.
  * Any LOR-capable MFEM solver T must inherit from LORLinearSolverBase<T>.
  * The user is free to specialize LORLinearSolverBase<T>::UpdateEquationSystemContext()
@@ -140,14 +183,19 @@ template <class MFEMSolverType>
 void
 LORLinearSolverBase<MFEMSolverType>::SetLORSolver()
 {
-  mfem::LORSolver<MFEMSolverType> * lor_solver;
-  if constexpr (is_any_of_v<MFEMSolverType, mfem::HypreGMRES, mfem::HypreFGMRES, mfem::HyprePCG>)
-  {
-    mfem::ParLORDiscretization lor_disc(*_a, _ess_tdofs);
-    lor_solver = new mfem::LORSolver<MFEMSolverType>(lor_disc, _a->ParFESpace()->GetComm());
-  }
+  LORSolver<MFEMSolverType> * lor_solver;
+  // Krylov solvers are given the communicator, without which mfem::CGSolver and
+  // mfem::GMRESSolver compute rank-local inner products, and the hypre ones cannot be built
+  if constexpr (is_any_of_v<MFEMSolverType,
+                            mfem::HypreGMRES,
+                            mfem::HypreFGMRES,
+                            mfem::HyprePCG,
+                            mfem::CGSolver,
+                            mfem::GMRESSolver>)
+    lor_solver = new LORSolver<MFEMSolverType>(
+        std::make_unique<mfem::ParLORDiscretization>(*_a, _ess_tdofs), _a->ParFESpace()->GetComm());
   else
-    lor_solver = new mfem::LORSolver<MFEMSolverType>(*_a, _ess_tdofs);
+    lor_solver = new LORSolver<MFEMSolverType>(*_a, _ess_tdofs);
   SetSolverParameters(lor_solver->GetSolver());
   SetSolver(lor_solver);
 }
