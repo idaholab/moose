@@ -10,8 +10,6 @@
 #include "RankTwoSphericalComponent.h"
 #include "RankTwoScalarTools.h"
 
-#include "metaphysicl/raw_type.h"
-
 registerMooseObject("SolidMechanicsApp", RankTwoSphericalComponent);
 registerMooseObject("SolidMechanicsApp", ADRankTwoSphericalComponent);
 
@@ -60,11 +58,8 @@ RankTwoSphericalComponentTempl<is_ad>::computeQpProperties()
 {
   Point dummy_direction;
 
-  _property[_qp] = RankTwoScalarTools::getSphericalComponent(MetaPhysicL::raw_value(_tensor[_qp]),
-                                                             _spherical_component,
-                                                             _center,
-                                                             _q_point[_qp],
-                                                             dummy_direction);
+  _property[_qp] = RankTwoScalarTools::getSphericalComponent(
+      _tensor[_qp], _spherical_component, _center, _q_point[_qp], dummy_direction);
 }
 
 template class RankTwoSphericalComponentTempl<false>;

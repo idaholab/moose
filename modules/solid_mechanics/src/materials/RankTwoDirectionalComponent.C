@@ -10,8 +10,6 @@
 #include "RankTwoDirectionalComponent.h"
 #include "RankTwoScalarTools.h"
 
-#include "metaphysicl/raw_type.h"
-
 registerMooseObject("SolidMechanicsApp", RankTwoDirectionalComponent);
 registerMooseObject("SolidMechanicsApp", ADRankTwoDirectionalComponent);
 
@@ -50,8 +48,7 @@ template <bool is_ad>
 void
 RankTwoDirectionalComponentTempl<is_ad>::computeQpProperties()
 {
-  _property[_qp] =
-      RankTwoScalarTools::getDirectionalComponent(MetaPhysicL::raw_value(_tensor[_qp]), _direction);
+  _property[_qp] = RankTwoScalarTools::getDirectionalComponent(_tensor[_qp], _direction);
 }
 
 template class RankTwoDirectionalComponentTempl<false>;

@@ -10,8 +10,6 @@
 #include "RankTwoCylindricalComponent.h"
 #include "RankTwoScalarTools.h"
 
-#include "metaphysicl/raw_type.h"
-
 registerMooseObject("SolidMechanicsApp", RankTwoCylindricalComponent);
 registerMooseObject("SolidMechanicsApp", ADRankTwoCylindricalComponent);
 
@@ -68,7 +66,7 @@ RankTwoCylindricalComponentTempl<is_ad>::computeQpProperties()
 {
   Point dummy_direction;
 
-  _property[_qp] = RankTwoScalarTools::getCylindricalComponent(MetaPhysicL::raw_value(_tensor[_qp]),
+  _property[_qp] = RankTwoScalarTools::getCylindricalComponent(_tensor[_qp],
                                                                _cylindrical_component,
                                                                _cylindrical_axis_point1,
                                                                _cylindrical_axis_point2,

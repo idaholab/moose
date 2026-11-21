@@ -10,8 +10,6 @@
 #include "RankTwoInvariant.h"
 #include "RankTwoScalarTools.h"
 
-#include "metaphysicl/raw_type.h"
-
 registerMooseObject("SolidMechanicsApp", RankTwoInvariant);
 registerMooseObject("SolidMechanicsApp", ADRankTwoInvariant);
 
@@ -66,8 +64,8 @@ RankTwoInvariantTempl<is_ad>::computeQpProperties()
     case RankTwoScalarTools::InvariantType::MinPrincipal:
     {
       Point dummy_direction;
-      _property[_qp] = RankTwoScalarTools::getPrincipalComponent(
-          MetaPhysicL::raw_value(_tensor[_qp]), _invariant, dummy_direction);
+      _property[_qp] =
+          RankTwoScalarTools::getPrincipalComponent(_tensor[_qp], _invariant, dummy_direction);
       break;
     }
 
@@ -82,8 +80,7 @@ RankTwoInvariantTempl<is_ad>::computeQpProperties()
     case RankTwoScalarTools::InvariantType::MaxShear:
     case RankTwoScalarTools::InvariantType::StressIntensity:
     {
-      _property[_qp] =
-          RankTwoScalarTools::getInvariant(MetaPhysicL::raw_value(_tensor[_qp]), _invariant);
+      _property[_qp] = RankTwoScalarTools::getInvariant(_tensor[_qp], _invariant);
       break;
     }
 
@@ -92,9 +89,8 @@ RankTwoInvariantTempl<is_ad>::computeQpProperties()
       mooseAssert(_tensor_old, "The selected invariant requires the input material to be stateful");
       mooseAssert(_property_old,
                   "The selected invariant requires the output material to be stateful");
-      _property[_qp] = (*_property_old)[_qp] + RankTwoScalarTools::effectiveStrain(
-                                                   MetaPhysicL::raw_value(_tensor[_qp]) -
-                                                   MetaPhysicL::raw_value((*_tensor_old)[_qp]));
+      _property[_qp] = (*_property_old)[_qp] +
+                       RankTwoScalarTools::effectiveStrain(_tensor[_qp] - (*_tensor_old)[_qp]);
       break;
     }
 
