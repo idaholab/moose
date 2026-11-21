@@ -95,6 +95,24 @@ WeightedVelocitiesUserObject::contactTangents(const Elem & lower_secondary_elem,
   return it->second;
 }
 
+template <bool is_ad>
+std::array<GenericRealVectorValue<is_ad>, 2>
+WeightedVelocitiesUserObject::genericContactTangents(const Elem & lower_secondary_elem,
+                                                     const unsigned int nodal_index) const
+{
+  if constexpr (is_ad)
+    if (shouldRecordNodalNormalDerivatives())
+      return contactTangents(lower_secondary_elem, nodal_index);
+
+  const auto tangents = amg().getNodalTangents(lower_secondary_elem);
+  return {tangents[0][nodal_index], tangents[1][nodal_index]};
+}
+
+template std::array<GenericRealVectorValue<false>, 2>
+WeightedVelocitiesUserObject::genericContactTangents<false>(const Elem &, unsigned int) const;
+template std::array<GenericRealVectorValue<true>, 2>
+WeightedVelocitiesUserObject::genericContactTangents<true>(const Elem &, unsigned int) const;
+
 void
 WeightedVelocitiesUserObject::computeQpProperties()
 {

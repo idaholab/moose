@@ -511,6 +511,100 @@
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
   []
+  [frictional-mortar-3d-objectivity]
+    requirement = 'The system shall produce orientation-independent contact pressure for 3D '
+                  'frictional mortar contact using'
+    design = 'PenaltyFrictionUserObject.md'
+    issues = '#34427'
+    [penalty]
+      type = 'CSVDiff'
+      input = 'frictional-mortar-3d-objectivity.i'
+      csvdiff = 'frictional-mortar-3d-objectivity-penalty.csv'
+      capabilities = 'ad_size>=200 & mumps'
+      cli_args = 'Mesh/top_block/nx=2 Mesh/top_block/ny=2 Mesh/top_block/nz=1 '
+                 'Mesh/bottom_block/nx=5 Mesh/bottom_block/ny=5 Mesh/bottom_block/nz=1 '
+                 'BCs/topx/type=FunctionDirichletBC BCs/topx/function=0 '
+                 'BCs/topy/type=FunctionDirichletBC BCs/topy/function="0.1*t" '
+                 'Executioner/end_time=0.25 Executioner/dt=0.025 Executioner/nl_max_its=300 '
+                 'Executioner/nl_abs_tol=1e-9 Executioner/petsc_options_value="lu mumps" '
+                 'Outputs/exodus=false '
+                 'Outputs/file_base=frictional-mortar-3d-objectivity-penalty'
+      allow_unused = true
+      detail = 'the penalty formulation,'
+      rel_err = 1.0e-10
+      abs_zero = 1.0e-10
+    []
+    [penalty-rotated]
+      type = 'CSVDiff'
+      input = 'frictional-mortar-3d-objectivity.i'
+      csvdiff = 'frictional-mortar-3d-objectivity-penalty-rotated.csv'
+      capabilities = 'ad_size>=200 & mumps'
+      cli_args = 'Mesh/top_block/nx=2 Mesh/top_block/ny=2 Mesh/top_block/nz=1 '
+                 'Mesh/bottom_block/nx=5 Mesh/bottom_block/ny=5 Mesh/bottom_block/nz=1 '
+                 'Mesh/rotate_all/rotation_matrix="0 0 1 0 1 0 -1 0 0" '
+                 'BCs/topx/type=FunctionDirichletBC '
+                 'BCs/topx/function="-0.25*sin(2*pi/40*t)" '
+                 'BCs/topy/type=FunctionDirichletBC BCs/topy/function="0.1*t" '
+                 'BCs/topz/type=FunctionDirichletBC BCs/topz/function=0 '
+                 'Executioner/end_time=0.25 Executioner/dt=0.025 Executioner/nl_max_its=300 '
+                 'Executioner/nl_abs_tol=1e-9 Executioner/petsc_options_value="lu mumps" '
+                 'Outputs/exodus=false '
+                 'Outputs/file_base=frictional-mortar-3d-objectivity-penalty-rotated'
+      allow_unused = true
+      detail = 'the penalty formulation after rotating the model,'
+      rel_err = 1.0e-10
+      abs_zero = 1.0e-10
+    []
+    [augmented-lagrange]
+      type = 'CSVDiff'
+      input = 'frictional-mortar-3d-objectivity.i'
+      csvdiff = 'frictional-mortar-3d-objectivity-augmented-lagrange.csv'
+      capabilities = 'ad_size>=200 & mumps'
+      cli_args = 'Mesh/top_block/nx=2 Mesh/top_block/ny=2 Mesh/top_block/nz=1 '
+                 'Mesh/bottom_block/nx=5 Mesh/bottom_block/ny=5 Mesh/bottom_block/nz=1 '
+                 'BCs/topx/type=FunctionDirichletBC BCs/topx/function=0 '
+                 'BCs/topy/type=FunctionDirichletBC BCs/topy/function="0.1*t" '
+                 'Problem/type=AugmentedLagrangianContactFEProblem '
+                 'UserObjects/friction_uo/slip_tolerance=0.001 '
+                 'UserObjects/friction_uo/penetration_tolerance=0.001 '
+                 'UserObjects/friction_uo/penalty_multiplier=10 '
+                 'UserObjects/friction_uo/penalty_multiplier_friction=5 '
+                 'Executioner/end_time=0.25 Executioner/dt=0.025 Executioner/nl_max_its=300 '
+                 'Executioner/nl_abs_tol=1e-9 Executioner/petsc_options_value="lu mumps" '
+                 'Outputs/exodus=false '
+                 'Outputs/file_base=frictional-mortar-3d-objectivity-augmented-lagrange'
+      allow_unused = true
+      detail = 'the augmented Lagrange formulation, and'
+      rel_err = 1.0e-10
+      abs_zero = 1.0e-10
+    []
+    [augmented-lagrange-rotated]
+      type = 'CSVDiff'
+      input = 'frictional-mortar-3d-objectivity.i'
+      csvdiff = 'frictional-mortar-3d-objectivity-augmented-lagrange-rotated.csv'
+      capabilities = 'ad_size>=200 & mumps'
+      cli_args = 'Mesh/top_block/nx=2 Mesh/top_block/ny=2 Mesh/top_block/nz=1 '
+                 'Mesh/bottom_block/nx=5 Mesh/bottom_block/ny=5 Mesh/bottom_block/nz=1 '
+                 'Mesh/rotate_all/rotation_matrix="0 0 1 0 1 0 -1 0 0" '
+                 'BCs/topx/type=FunctionDirichletBC '
+                 'BCs/topx/function="-0.25*sin(2*pi/40*t)" '
+                 'BCs/topy/type=FunctionDirichletBC BCs/topy/function="0.1*t" '
+                 'BCs/topz/type=FunctionDirichletBC BCs/topz/function=0 '
+                 'Problem/type=AugmentedLagrangianContactFEProblem '
+                 'UserObjects/friction_uo/slip_tolerance=0.001 '
+                 'UserObjects/friction_uo/penetration_tolerance=0.001 '
+                 'UserObjects/friction_uo/penalty_multiplier=10 '
+                 'UserObjects/friction_uo/penalty_multiplier_friction=5 '
+                 'Executioner/end_time=0.25 Executioner/dt=0.025 Executioner/nl_max_its=300 '
+                 'Executioner/nl_abs_tol=1e-9 Executioner/petsc_options_value="lu mumps" '
+                 'Outputs/exodus=false '
+                 'Outputs/file_base=frictional-mortar-3d-objectivity-augmented-lagrange-rotated'
+      allow_unused = true
+      detail = 'the augmented Lagrange formulation after rotating the model.'
+      rel_err = 1.0e-10
+      abs_zero = 1.0e-10
+    []
+  []
   [frictionless-mortar-3d-penalty]
     type = 'Exodiff'
     input = 'frictionless-mortar-3d-penalty.i'
