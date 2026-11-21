@@ -82,8 +82,8 @@ ComputeSimoHughesJ2PlasticityStress::computeQpPK1Stress()
   const Real G = ElasticityTensorTools::getIsotropicShearModulus(_elasticity_tensor[_qp]);
   const Real K = ElasticityTensorTools::getIsotropicBulkModulus(_elasticity_tensor[_qp]);
   const auto I = RankTwoTensor::Identity();
-  const auto Fit = _F[_qp].inverse().transpose();
-  const auto detJ = _F[_qp].det();
+  const auto Fit = _stabilized_deformation_gradient[_qp].inverse().transpose();
+  const auto detJ = _stabilized_deformation_gradient[_qp].det();
 
   // Update configuration
   RankTwoTensor f = _inv_df[_qp].inverse();

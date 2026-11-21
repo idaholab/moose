@@ -92,4 +92,55 @@
     design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
     requirement = 'Correct Jacobian for elastoplasticity with power-law hardening with relative error less than 1e-6'
   []
+  [elastoplastic_fbar]
+    type = PetscJacobianTester
+    input = hyperelastic_J2_plastic.i
+    cli_args = "Materials/flow_stress/expression='320+688*effective_plastic_strain' "
+               "GlobalParams/stabilize_strain=true"
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    run_sim = true
+    design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
+    issues = '#34324'
+    requirement = 'Correct Jacobian for elastoplasticity, a first Piola-Kirchhoff stress update, '
+                  'with F-bar stabilization, to a relative error below 1e-6.'
+  []
+  [elastoplastic_updated_fbar]
+    type = PetscJacobianTester
+    input = hyperelastic_J2_plastic.i
+    cli_args = "Materials/flow_stress/expression='320+688*effective_plastic_strain' "
+               "GlobalParams/stabilize_strain=true GlobalParams/displacements='disp_x disp_y disp_z' "
+               "Kernels/sdx/type=UpdatedLagrangianStressDivergence "
+               "Kernels/sdy/type=UpdatedLagrangianStressDivergence "
+               "Kernels/sdz/type=UpdatedLagrangianStressDivergence "
+               "Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true "
+               "Kernels/sdz/use_displaced_mesh=true"
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    run_sim = true
+    design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md '
+             'source/kernels/lagrangian/UpdatedLagrangianStressDivergence.md'
+    issues = '#34324'
+    requirement = 'Correct Jacobian for elastoplasticity, a first Piola-Kirchhoff stress update, '
+                  'with the updated Lagrangian kernels and F-bar stabilization, to a relative error '
+                  'below 1e-6.'
+  []
+  [neohookean_updated_fbar]
+    type = PetscJacobianTester
+    input = 'neohookean.i'
+    cli_args = 'GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true '
+               'Kernels/sdx/type=UpdatedLagrangianStressDivergence '
+               'Kernels/sdy/type=UpdatedLagrangianStressDivergence '
+               'Kernels/sdz/type=UpdatedLagrangianStressDivergence '
+               'Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true '
+               'Kernels/sdz/use_displaced_mesh=true'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    design = 'source/materials/lagrangian/ComputeNeoHookeanStress.md '
+             'source/kernels/lagrangian/UpdatedLagrangianStressDivergence.md'
+    issues = '#34324'
+    requirement = 'Correct Jacobian coming from the Neo-Hookean material model, a second '
+                  'Piola-Kirchhoff stress update, with the updated Lagrangian kernels and F-bar '
+                  'stabilization, to a relative error below 1e-6.'
+  []
 []

@@ -200,8 +200,8 @@ void
 ComputeLagrangianStrainBase<G>::computeQpProperties()
 {
   // Add in the macroscale gradient contribution to both the stabilized `_F` (used by the
-  // strain chain via `_f_inv`) AND the unstabilized `_F_ust` (used by the new F_ust-wrap
-  // architecture in the stress materials). The homogenization gradient is a real
+  // strain chain via `_f_inv`) AND the unstabilized `_F_ust` (used by the stress materials to
+  // pull the Cauchy stress back to PK1). The homogenization gradient is a real
   // deformation imposed via the scalar constraint, not a stabilization -- it must appear
   // in F_ust too or PK1 = det(F_ust) sigma F_ust^{-T} will be missing its contribution.
   for (auto contribution : _homogenization_contributions)
