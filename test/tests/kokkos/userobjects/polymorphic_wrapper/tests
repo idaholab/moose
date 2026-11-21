@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#30655'
+  design = 'syntax/KokkosUserObjects/index.md'
+
+  [polymorphic_wrapper]
+    type = 'CSVDiff'
+    input = 'polymorphic_wrapper.i'
+    csvdiff = 'polymorphic_wrapper_out.csv'
+    requirement = 'The Kokkos system shall support dynamic polymorphism for user objects with user-defined hook signatures and multiple registered base classes.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu'
+  []
+[]

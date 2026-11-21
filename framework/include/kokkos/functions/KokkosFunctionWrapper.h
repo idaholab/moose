@@ -165,9 +165,8 @@ public:
 };
 
 /**
- * Host function wrapper class that allocates a function on device and creates its device wrapper.
- * This class holds the actual device instance of the function and manages its allocation and
- * deallocation, and the device wrapper simply keeps a pointer to it.
+ * Host function wrapper class that allocates a function and its wrapper on device. This class owns
+ * both device allocations, and the device wrapper simply keeps a pointer to the function.
  * @tparam Object The function class type
  */
 template <typename Object>
@@ -204,6 +203,10 @@ private:
    * Copy of the function on device
    */
   Object * _function_device = nullptr;
+  /**
+   * Function wrapper on device
+   */
+  FunctionWrapperDevice<Object> * _wrapper_device = nullptr;
 };
 
 template <typename Object>
@@ -211,10 +214,11 @@ FunctionWrapperDeviceBase *
 FunctionWrapperHost<Object>::allocate()
 {
   // Allocate storage for device wrapper on device
-  auto wrapper_device = static_cast<FunctionWrapperDevice<Object> *>(
+  _wrapper_device = static_cast<FunctionWrapperDevice<Object> *>(
       ::Kokkos::kokkos_malloc<ExecSpace::memory_space>(sizeof(FunctionWrapperDevice<Object>)));
 
   // Allocate device wrapper on device using placement new to populate vtable with device pointers
+  auto wrapper_device = _wrapper_device;
   ::Kokkos::parallel_for(
       1, KOKKOS_LAMBDA(const int) { new (wrapper_device) FunctionWrapperDevice<Object>(); });
 
@@ -226,7 +230,7 @@ FunctionWrapperHost<Object>::allocate()
   ::Kokkos::Impl::DeepCopy<MemSpace, ::Kokkos::HostSpace>(
       &(wrapper_device->_function), &_function_device, sizeof(Object *));
 
-  return wrapper_device;
+  return _wrapper_device;
 }
 
 template <typename Object>
@@ -251,6 +255,7 @@ FunctionWrapperHost<Object>::freeFunction()
 template <typename Object>
 FunctionWrapperHost<Object>::~FunctionWrapperHost()
 {
+  ::Kokkos::kokkos_free<ExecSpace::memory_space>(_wrapper_device);
   ::Kokkos::kokkos_free<ExecSpace::memory_space>(_function_device);
 }
 

@@ -12,7 +12,7 @@
 void
 KokkosFunctionTest::SetUp()
 {
-  Moose::Kokkos::FunctorRegistry::addFunction<KokkosDummyFunction>("KokkosDummyFunction");
+  Moose::Kokkos::FunctorWrapperRegistry::addFunction<KokkosDummyFunction>("KokkosDummyFunction");
 }
 
 TEST_F(KokkosFunctionTest, virtualFunctionCall)
@@ -20,7 +20,7 @@ TEST_F(KokkosFunctionTest, virtualFunctionCall)
   Moose::Kokkos::Array<int> array(3);
   KokkosDummyFunction dummy_function;
   Moose::Kokkos::Function function(
-      Moose::Kokkos::FunctorRegistry::buildFunction(&dummy_function, "KokkosDummyFunction"));
+      Moose::Kokkos::FunctorWrapperRegistry::buildFunction(&dummy_function, "KokkosDummyFunction"));
   KokkosFunctionTestObject object(array, function);
 
   Kokkos::parallel_for(3, object);
