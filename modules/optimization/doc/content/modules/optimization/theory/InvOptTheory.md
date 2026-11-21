@@ -1,10 +1,10 @@
 # Inverse Optimization id=sec:invOpt
 
-This page provides a practical overview of the theory and equations needed to solve inverse optimization problems for users/developers of the optimization module.  This overview focuses on optimization problems constrained by the solution to a partial differentiation equation, i.e. PDE constrained optimization, and how to efficiently compute the various gradients needed to accelerate the convergence of the optimization solver.  See citations throughout this overview for a more in depth and rigorous overview of inverse optimization.  This overview on inverse optimization in the optimization module is split up into the following sections:
+This page provides a practical overview of the theory and equations needed to solve inverse optimization problems for users/developers of the optimization module.  This overview focuses on optimization problems constrained by the solution to a partial differential equation, i.e. PDE constrained optimization, and how to efficiently compute the various gradients needed to accelerate the convergence of the optimization solver.  See citations throughout this overview for a more in depth and rigorous overview of inverse optimization.  This overview on inverse optimization in the optimization module is split up into the following sections:
 
-- [PDE constrained Optimization Theory:](#sec:invOptTheory) Describes the theory for partial differential equation (PDE) constrained optimization
-- [Adjoint Equation and Boundary Conditions:](#sec:adjoint) Derivation of the Adjoint equation using Lagrange multipliers and its boundary conditions.
-- [Parameter Derivatives of PDE:](#sec:PDEDerivs) Derivatives of the PDE with respect to the optimization parameters for force and material inversion.  Force inversion examples where PDE constrained optimization is used to parameterize boundary conditions and body loads is provided in this [section](#sec:forceInvExample).  Material inversion examples are provided in this [section](#sec:forceInvExample) where PDE constrained optimization is used to control material properties.
+- [PDE Constrained Optimization Theory:](#sec:invOptTheory) Derives the gradient of the objective from its total derivative, compares the tangent linear and adjoint methods for computing it, and relates the adjoint method to the Lagrange multiplier derivation.
+- [Steady State Heat Conduction:](#sec:adjoint) The heat conduction problem, its discrete residual, and the resulting adjoint problem and boundary conditions.
+- [Parameter Derivatives of PDE:](#sec:PDEDerivs) Derivatives of the PDE with respect to the optimization parameters for [force inversion](#sec:forceInv), [convective boundary conditions](#sec:robinInv), and [thermal conductivity](#sec:material_inversion).  Force inversion examples, where PDE constrained optimization is used to parameterize boundary conditions and body loads, are provided on the [Force Inversion Examples page](forceInv_main.md).  Material inversion examples, where PDE constrained optimization is used to control material properties, are provided on the [Material Inversion Examples page](materialInv_main.md).
 
 The overall flow of the optimization algorithm implemented in the MOOSE optimization module is shown in [fig:optCycle].  In this example, the internal heat source, $q_v$, is being parameterized to match the simulated and experimental steady state temperature fields, $T$ and $\widetilde{T}$, respectively.  Step one of the optimization cycle consists of adjusting the internal heat source, $q_v$.  In step two, the physics model is solved with the current $q_v$ to obtain a simulated temperature field, $T$.  Step two is often referred to as the forward solve.  In step three, the simulated and experimental temperature fields are compared via the objective function, $f$.  If $f$ is below the user defined threshold, the optimization cycle stops and the best fit parameterization of $q_v$ is found.  If $f$ is above the user defined threshold, the optimization algorithm determines a new $q_v$ and the process is repeated.  In the next section, methods for determining the next iteration of the parameterized value, in this case $q_v$, will be presented.  Problems solved using the optimization module are available on the [Examples page](optimization/examples/index.md).
 
@@ -25,349 +25,334 @@ where $f(\mathbf{u},\mathbf{p})$ is our objective function which provides a scal
 
 Optimization problems can be solved using either global (gradient-free) or local (gradient-based) approaches [!citet](aster2018parameter). Global approaches require a large number of iterations compared to gradient-based approaches (e.g. conjugate gradient or Newton-type methods), making the latter more suitable to problems with a large parameter space and computationally expensive models.  The [PETSc TAO](https://www.mcs.anl.gov/petsc/documentation/taosolvertable.html) optimization library [!citet](balay2019petsc) is used to solve [eq:optimization].  Optimization libraries like TAO require access to functions for computing the objective ($f$), gradient $\left(\mathrm{d}f/\mathrm{d}\mathbf{p}\right)$ and Hessian $\left(\mathrm{d}^2f/\mathrm{d}\mathbf{p}^2\right)$ or a function to take the action of the Hessian on a vector.  An objective function measuring the misfit or distance between the simulation and experimental data usually has the form
 \begin{equation}\label{eq:objective}
-f(\mathbf{u}, \mathbf{p}) = \frac{1}{2}\sum^N_i \left(u_i - \tilde u_i\right)^2 + \frac{\rho}{2}\sum^M_j p_jp_j ,
+f(\mathbf{u}, \mathbf{p}) = \frac{1}{2}\sum^N_i \left(u_i - \tilde u_i\right)^2 + \frac{\rho}{2}\sum^{n_p}_j p_jp_j ,
 \end{equation}
-where the first summation over $(i=1..N)$ is an L$_2$ norm or euclidean distance between experimental measurement points, $\mathbf{\tilde  u}$, and the simulated solution, $\mathbf{u}$.  The second summation over $(j=1..M)$ provides Tikhonov regularization of the design variables, $\mathbf{p}$, for ill-posed problems where $\rho$ controls the amount of regularization.  Other types of regularization may also be used.
+where the first summation over $(i=1..N)$ is an L$_2$ norm or euclidean distance between experimental measurement points, $\mathbf{\tilde  u}$, and the simulated solution, $\mathbf{u}$.  The second summation over $(j=1..n_p)$ provides Tikhonov regularization of the design variables, $\mathbf{p}$, for ill-posed problems where $\rho$ controls the amount of regularization.  Other types of regularization may also be used.
 
 Gradient-free optimization solvers only require a function to solve for the objective given in [eq:objective].  Solving for the objective only requires solving a forward problem to determine $\mathbf{u}$ and then plugging that into [eq:objective] to determine $f$.  The forward problem is defined as the FEM model of the experiment which the analyst should have already made before attempting to perform optimization.  The parameters that go into the forward problem (e.g. pressure distributions on sidesets or material properties) are adjusted by the optimization solver and the forward problem is recomputed.  This process continues until $f$ is below some user defined threshold. The basic gradient-free solver available in TAO is the simplex or Nelder-Mead method.  Gradient-free optimization solvers are robust and straight-forward to use.  Unfortunately, their computational cost scales exponentially with the number of parameters.  When the forward model is a computationally expensive FEM model, gradient-free approaches quickly become computationally expensive.
 
 Gradient-based optimization algorithms require fewer iterations but require functions to solve for the gradient vector and sometimes Hessians matrix.  TAO has `petsc_options` to evaluate finite difference based gradients and Hessians by solving the objective function multiple times with perturbed parameters, which also requires multiple solves of the forward problem.  Finite difference gradients and Hessians are good for testing an optimization approach but become too expensive for realistic problems.
 
-Given the large parameter space, we resort to the adjoint method for gradient computation; unlike finite difference approaches, the computational cost of adjoint methods is independent of the number of parameters [!citet](plessix2006review).  In the adjoint method, the gradient, i.e. the total derivative $\mathrm{d}f/\mathrm{d}\mathbf{p}$, is computed as,
-\begin{equation}\label{eq:adjointGrad}
-\frac{\mathrm{d}f}{\mathrm{d}\mathbf{p}} = \frac{\partial f}{\partial\mathbf{p}}+\mathbf{\lambda}^\top\frac{\partial\mathcal{R}}{\partial\mathbf{p}} ,
-\end{equation}
-where $\partial f/\partial\mathbf{p}$ accounts for the regularization in [eq:objective] and $\mathbf{\lambda}$ is the adjoint variable solved for from the adjoint equation
-\begin{equation}\label{eq:adjoint}
-\left(\frac{\partial\mathcal{R}}{\partial\mathbf{u}}\right)^\top \mathbf{\lambda}= -\left(\frac{\partial f}{\partial\mathbf{u}}\right)^\top ,
-\end{equation}
-where $\left(\partial\mathcal{R}/\partial\mathbf{u}\right)^\top$ is the adjoint of the Jacobian from the residual vector of the forward problem, $\mathcal{R}$, and $\left(\partial f/\partial\mathbf{u}\right)^\top$ is a body force like term that accounts for the misfit between the computed and experimental data.  Thus, the solution to [eq:adjoint] has the same complexity as the solution to the forward problem.
+Given the large parameter space, we resort to the adjoint method for gradient computation; unlike finite difference approaches, the computational cost of adjoint methods is independent of the number of parameters [!citep](plessix2006review).  The derivation below introduces the adjoint method from the total derivative of the objective, following [!citet](martins2013review), Section 4.1 of [!citet](kenway2019effective), and the dolfin-adjoint lecture by [!citet](funke2017dolfinadjoint).  The size of each derivative is written beneath it, where $n_u$ is the number of degrees of freedom in the discretized state vector $\mathbf{u}$ and $n_p$ is the number of design parameters in $\mathbf{p}$.  The residual vector $\mathcal{R}$ has one entry per degree of freedom, $\mathcal{R}\in\mathbb{R}^{n_u}$, and the objective $f$ is a scalar.
 
-The remaining step for evaluating the derivative of the PDE in [eq:adjointGrad] is to compute $\partial\mathcal{R}/\partial\mathbf{p}$, the derivative of the PDE with respect to the parameter vector.  The form this term takes is dependent on the physics (e.g. mechanics or heat conduction) and the parameter being optimized (e.g. force inversion versus material inversion).  In what follows, we will derive the adjoint equation for steady state heat conduction and the gradient term for both force and material inversion.
+### Total Derivative of the Objective id=sec:totalDerivative
 
-In the following, the adjoint method given in [eq:adjointGrad] and [eq:adjoint] is derived from [eq:objective] following the derivation given by [!citet](bradley2013pde).  Neglecting the regularization in [eq:objective] the total derivative of $f$ with respect to $\mathbf{p}$ using the chain rule is given by
+The forward solve defines the state as an implicit function of the parameters, $\mathbf{u}=\mathbf{u}(\mathbf{p})$, so the objective depends on $\mathbf{p}$ both directly and through $\mathbf{u}$.  Applying the chain rule gives the gradient,
 \begin{equation}\label{eq:objectiveGrad}
-\frac{\mathrm{d}f(\mathbf{u},\mathbf{p})}{\mathrm{d}\mathbf{p}} = \frac{\partial f}{\partial \mathbf{u}}\frac{\partial \mathbf{u}}{\partial\mathbf{p}}.
+\underset{1\times n_p}{\frac{\mathrm{d}f}{\mathrm{d}\mathbf{p}}} =
+\underset{1\times n_p}{\frac{\partial f}{\partial\mathbf{p}}} +
+\underset{1\times n_u}{\frac{\partial f}{\partial\mathbf{u}}}\,
+\underset{n_u\times n_p}{\frac{\mathrm{d}\mathbf{u}}{\mathrm{d}\mathbf{p}}} .
 \end{equation}
-We can solve easily compute  $\frac{\partial \mathbf{u}}{\partial\mathbf{p}}$ and so we need to rearrange  The physics constraint of the PDE from [eq:optimization], $\mathcal{R}\left(\mathbf{u},\mathbf{p}\right)=\mathbf{0}$, implies that
-\begin{equation} \label{eq:gradZero}
-	\begin{aligned}
-	\frac{\mathrm{d}\mathcal{R}(\mathbf{u},\mathbf{p})}{\mathrm{d}\mathbf{p}} & = 0  \\
-	\frac{\mathrm{d}\mathcal{R}(\mathbf{u},\mathbf{p})}{\mathrm{d}\mathbf{p}} & = \frac{\partial \mathcal{R}}{\partial \mathbf{u}}\frac{\partial \mathbf{u}}{\partial\mathbf{p}} + \frac{\partial \mathcal{R}}{\partial \mathbf{p}}= 0 \\
-\end{aligned}
+The partial derivatives $\partial f/\partial\mathbf{p}$ and $\partial f/\partial\mathbf{u}$ are explicit and cheap to evaluate.  For [eq:objective], $\partial f/\partial\mathbf{p}=\rho\,\mathbf{p}^\top$ is the regularization term and $\partial f/\partial\mathbf{u}$ is the misfit $u_i-\tilde u_i$ at the measurement points, mapped onto the degrees of freedom by the shape functions evaluated at those points.  The total derivative $\mathrm{d}\mathbf{u}/\mathrm{d}\mathbf{p}$ is expensive because $\mathbf{u}$ is only known implicitly through $\mathcal{R}(\mathbf{u},\mathbf{p})=\mathbf{0}$.
+
+The residual must remain zero as the parameters change, so its total derivative with respect to $\mathbf{p}$ also vanishes.  Applying the chain rule to $\mathcal{R}(\mathbf{u}(\mathbf{p}),\mathbf{p})$ gives
+\begin{equation}\label{eq:gradZero}
+\underset{n_u\times n_p}{\frac{\mathrm{d}\mathcal{R}}{\mathrm{d}\mathbf{p}}} =
+\underset{n_u\times n_p}{\frac{\partial\mathcal{R}}{\partial\mathbf{p}}} +
+\underset{n_u\times n_u}{\frac{\partial\mathcal{R}}{\partial\mathbf{u}}}\,
+\underset{n_u\times n_p}{\frac{\mathrm{d}\mathbf{u}}{\mathrm{d}\mathbf{p}}} = \mathbf{0} .
 \end{equation}
-Rearranging the last part of [eq:gradZero] gives
+The matrix $\partial\mathcal{R}/\partial\mathbf{u}$ is the Jacobian of the forward problem, the same matrix used in its Newton iterations.  Moving $\partial\mathcal{R}/\partial\mathbf{p}$ in [eq:gradZero] to the right-hand side gives a linear system for $\mathrm{d}\mathbf{u}/\mathrm{d}\mathbf{p}$,
 \begin{equation}\label{eq:gradZeroArrange}
-\frac{\partial \mathbf{u}}{\partial\mathbf{p}}=-\left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)^{-1}\frac{\partial \mathcal{R}}{\partial \mathbf{p}}
+\underset{n_u\times n_u}{\frac{\partial\mathcal{R}}{\partial\mathbf{u}}}\,
+\underset{n_u\times n_p}{\frac{\mathrm{d}\mathbf{u}}{\mathrm{d}\mathbf{p}}} =
+-\underset{n_u\times n_p}{\frac{\partial\mathcal{R}}{\partial\mathbf{p}}} ,
 \end{equation}
-which can be substituted into [eq:objectiveGrad] to give
+and multiplying [eq:gradZeroArrange] on the left by the inverse Jacobian gives
+\begin{equation}\label{eq:dudp}
+\underset{n_u\times n_p}{\frac{\mathrm{d}\mathbf{u}}{\mathrm{d}\mathbf{p}}} =
+-\underset{n_u\times n_u}{\left(\frac{\partial\mathcal{R}}{\partial\mathbf{u}}\right)^{-1}}\,
+\underset{n_u\times n_p}{\frac{\partial\mathcal{R}}{\partial\mathbf{p}}} .
+\end{equation}
+Substituting [eq:dudp] into [eq:objectiveGrad] gives the gradient in terms of quantities that can be computed:
 \begin{equation}\label{eq:objectiveGrad2}
-\frac{\mathrm{d}f(\mathbf{u},\mathbf{p})}{\mathrm{d}\mathbf{p}} = -\frac{\partial f}{\partial \mathbf{u}}\left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)^{-1}\frac{\partial \mathcal{R}}{\partial \mathbf{p}}.
+\underset{1\times n_p}{\frac{\mathrm{d}f}{\mathrm{d}\mathbf{p}}} =
+\underset{1\times n_p}{\frac{\partial f}{\partial\mathbf{p}}} -
+\underset{1\times n_u}{\frac{\partial f}{\partial\mathbf{u}}}\,
+\underset{n_u\times n_u}{\left(\frac{\partial\mathcal{R}}{\partial\mathbf{u}}\right)^{-1}}\,
+\underset{n_u\times n_p}{\frac{\partial\mathcal{R}}{\partial\mathbf{p}}} .
 \end{equation}
-The terms in [eq:objectiveGrad2] are all terms we can compute.  The derivative of the objective with respect to the degree of freedom, $\frac{\partial f}{\partial \mathbf{u}}$, is dependent on the data being fit and will be discussed in the section discussing the [adjoint method](#sec:adjoint) for discrete data points.  The term, $\frac{\partial \mathcal{R}}{\partial \mathbf{p}}$, requires differentiation of our PDE with respect to each parameter being inverted for and is derived for simple cases in the following [section](#sec:PDEDerivs) for force inversion and material identification.  The middle term, $\frac{\partial \mathcal{R}}{\partial \mathbf{u}}$, is the Jacobian matrix of the forward problem.  [eq:objectiveGrad2] requires the inverse of the Jacobian matrix which is not how we actually solve this system of equations.
+The inverse Jacobian is never formed explicitly.  The triple product in [eq:objectiveGrad2] is associative, so it can be evaluated from the right or from the left, and each order replaces the inverse with a different linear solve.  Evaluating from the right gives the tangent linear (direct) method; evaluating from the left gives the adjoint method.
 
-We have two options for dealing with the inverse of the Jacobian.  In the first, we could perform one linear solve per parameter, $p_i$, being fit by solving $\left[\left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)^{-1}\frac{\partial \mathcal{R}}{\partial p_i}\right]$.  This algorithm scales with the number of parameters which makes it computationally expensive for tens of parameters.
+#### Tangent Linear Method
 
-The alternative that we will use is the adjoint method which scales independently to the number of optimization parameters.   The adjoint method requires one additional solve of the same complexity as the original forward problem.  The adjoint equation given in [eq:adjoint] is found by setting the adjoint variable, $\lambda$, equal to the first two terms of [eq:objectiveGrad2] and then rearranging terms to give
-\begin{equation} \label{eq:AdjEqn}
-	\begin{aligned}
-	&\lambda^\top= \frac{\partial f}{\partial \mathbf{u}}\left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)^{-1}  \\
-	&\rightarrow \lambda^\top \left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)= -\frac{\partial f}{\partial \mathbf{u}}\left[\left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)^{-1} \left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)\right] \\
-	&\rightarrow \lambda^\top \left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)= -\frac{\partial f}{\partial \mathbf{u}} \\
-	&\rightarrow \left[\lambda^\top \left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)\right]^\top= -\left(\frac{\partial f}{\partial \mathbf{u}}\right)^\top \\
-	&\rightarrow \left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)^\top \lambda = -\left(\frac{\partial f}{\partial \mathbf{u}}\right)^\top \\
-\end{aligned}
+The tangent linear method groups the last two factors of [eq:objectiveGrad2], $\left(\partial\mathcal{R}/\partial\mathbf{u}\right)^{-1}\partial\mathcal{R}/\partial\mathbf{p}$, which by [eq:dudp] equals $-\mathrm{d}\mathbf{u}/\mathrm{d}\mathbf{p}$.  Instead of inverting the Jacobian, [eq:gradZeroArrange] is solved directly.  Writing its $n_p$ columns side by side shows that each parameter adds one right-hand side:
+\begin{equation}\label{eq:tangentLinearBlock}
+\frac{\partial\mathcal{R}}{\partial\mathbf{u}}
+\begin{bmatrix}
+\dfrac{\mathrm{d}\mathbf{u}}{\mathrm{d}p_1} & \dfrac{\mathrm{d}\mathbf{u}}{\mathrm{d}p_2} & \cdots & \dfrac{\mathrm{d}\mathbf{u}}{\mathrm{d}p_{n_p}}
+\end{bmatrix}
+= -
+\begin{bmatrix}
+\dfrac{\partial\mathcal{R}}{\partial p_1} & \dfrac{\partial\mathcal{R}}{\partial p_2} & \cdots & \dfrac{\partial\mathcal{R}}{\partial p_{n_p}}
+\end{bmatrix} .
 \end{equation}
-where each step of the derivation has been included as a reminder of how [eq:adjoint] is obtained.  The next [section](#sec:adjoint) uses an alternative approach to determine the adjoint equation based on Lagrange multipliers [!citet](walsh2013source).
+Column $j$ of [eq:tangentLinearBlock] is the tangent linear equation for parameter $p_j$,
+\begin{equation}\label{eq:tangentLinear}
+\underset{n_u\times n_u}{\frac{\partial\mathcal{R}}{\partial\mathbf{u}}}\,
+\underset{n_u\times 1}{\frac{\mathrm{d}\mathbf{u}}{\mathrm{d}p_j}} =
+-\underset{n_u\times 1}{\frac{\partial\mathcal{R}}{\partial p_j}} ,
+\qquad j=1,\dots,n_p .
+\end{equation}
+Its solution $\mathrm{d}\mathbf{u}/\mathrm{d}p_j$ is the linearized response of the whole state field to a unit change in $p_j$.  Substituting each solution into column $j$ of [eq:objectiveGrad] gives one entry of the gradient,
+\begin{equation}\label{eq:tangentLinearGrad}
+\underset{1\times 1}{\frac{\mathrm{d}f}{\mathrm{d}p_j}} =
+\underset{1\times 1}{\frac{\partial f}{\partial p_j}} +
+\underset{1\times n_u}{\frac{\partial f}{\partial\mathbf{u}}}\,
+\underset{n_u\times 1}{\frac{\mathrm{d}\mathbf{u}}{\mathrm{d}p_j}} .
+\end{equation}
+The tangent linear method needs $n_p$ solves of [eq:tangentLinear], one per parameter, all with the forward Jacobian.  Its cost grows with the number of parameters but does not depend on the number of objectives, because [eq:tangentLinear] does not involve $f$.
+
+#### Adjoint Method
+
+The adjoint method groups the first two factors of [eq:objectiveGrad2] and names their product the adjoint variable,
+\begin{equation}\label{eq:lambdaDef}
+\underset{1\times n_u}{\lambda^\top} \equiv
+\underset{1\times n_u}{\frac{\partial f}{\partial\mathbf{u}}}\,
+\underset{n_u\times n_u}{\left(\frac{\partial\mathcal{R}}{\partial\mathbf{u}}\right)^{-1}} .
+\end{equation}
+To remove the inverse, multiply both sides of [eq:lambdaDef] on the right by $\partial\mathcal{R}/\partial\mathbf{u}$.  Since $\left(\partial\mathcal{R}/\partial\mathbf{u}\right)^{-1}\partial\mathcal{R}/\partial\mathbf{u}=\mathbf{I}$, this gives
+\begin{equation}\label{eq:adjointRow}
+\underset{1\times n_u}{\lambda^\top}\,
+\underset{n_u\times n_u}{\frac{\partial\mathcal{R}}{\partial\mathbf{u}}} =
+\underset{1\times n_u}{\frac{\partial f}{\partial\mathbf{u}}} .
+\end{equation}
+[eq:adjointRow] is a linear system for the row vector $\lambda^\top$.  Transposing both sides with $(\mathbf{A}\mathbf{B})^\top=\mathbf{B}^\top\mathbf{A}^\top$ puts it in the standard column form, the adjoint equation:
+\begin{equation}\label{eq:adjoint}
+\underset{n_u\times n_u}{\left(\frac{\partial\mathcal{R}}{\partial\mathbf{u}}\right)^\top}\,
+\underset{n_u\times 1}{\lambda} =
+\underset{n_u\times 1}{\left(\frac{\partial f}{\partial\mathbf{u}}\right)^\top} .
+\end{equation}
+Replacing the first two factors of [eq:objectiveGrad2] with $\lambda^\top$ from [eq:lambdaDef] gives the gradient,
+\begin{equation}\label{eq:adjointGrad}
+\underset{1\times n_p}{\frac{\mathrm{d}f}{\mathrm{d}\mathbf{p}}} =
+\underset{1\times n_p}{\frac{\partial f}{\partial\mathbf{p}}} -
+\underset{1\times n_u}{\lambda^\top}\,
+\underset{n_u\times n_p}{\frac{\partial\mathcal{R}}{\partial\mathbf{p}}} .
+\end{equation}
+The parameters do not appear in [eq:adjoint], so one adjoint solve per objective gives the gradient with respect to all $n_p$ parameters.  [tab:directVsAdjoint] compares the two methods.
+
+!table id=tab:directVsAdjoint caption=Cost of the tangent linear and adjoint methods for one objective and $n_p$ parameters.
+| | Tangent linear method | Adjoint method |
+| :- | :- | :- |
+| Linear system | [eq:tangentLinear]: $\frac{\partial\mathcal{R}}{\partial\mathbf{u}}\frac{\mathrm{d}\mathbf{u}}{\mathrm{d}p_j}=-\frac{\partial\mathcal{R}}{\partial p_j}$ | [eq:adjoint]: $\left(\frac{\partial\mathcal{R}}{\partial\mathbf{u}}\right)^\top\lambda=\left(\frac{\partial f}{\partial\mathbf{u}}\right)^\top$ |
+| Matrix | $\frac{\partial\mathcal{R}}{\partial\mathbf{u}}$ | $\left(\frac{\partial\mathcal{R}}{\partial\mathbf{u}}\right)^\top$ |
+| Gradient | [eq:tangentLinearGrad] | [eq:adjointGrad] |
+| Linear solves | $n_p$, one per parameter | 1 per objective |
+
+For a transient problem with $n_t$ time steps, $\mathbf{u}$ and $\mathcal{R}$ stack the states and residuals of every step, so $\partial\mathcal{R}/\partial\mathbf{u}$ is the Jacobian of the entire time history, not of a single step.  Each step depends only on earlier steps, so this matrix is block lower triangular, with the single-step Jacobians on its diagonal.  The tangent linear method solves it by forward substitution, one step at a time alongside the forward solve, for a cost of $n_p\,n_t$ single-step linear solves and no stored history.  The transpose in the adjoint method is block upper triangular, so it is solved by backward substitution from the final time to the initial time, for a cost of $n_t$ single-step linear solves.  Each backward step needs the forward solution at that step, so the forward history must be stored or recomputed, as [TransientAndAdjoint.md] does.  Both methods remain possible for transient problems; the adjoint is still cheaper for many parameters but requires this storage.
+
+The adjoint system has the same size and sparsity as the forward Jacobian, so it costs about as much as one Newton step of the forward problem.  It is linear even when the forward problem is nonlinear, with the Jacobian evaluated at the converged forward solution.  For a symmetric operator such as steady heat conduction, $\left(\partial\mathcal{R}/\partial\mathbf{u}\right)^\top=\partial\mathcal{R}/\partial\mathbf{u}$, and the adjoint problem is the forward operator loaded by the misfit at the measurement points.  The gradient is only as accurate as the Jacobian, so [SteadyAndAdjoint.md] requires the forward kernels to provide an exact Jacobian.
+
+In summary, the adjoint gradient computation consists of four steps:
+
+1. Solve the forward problem $\mathcal{R}(\mathbf{u},\mathbf{p})=\mathbf{0}$ for $\mathbf{u}$.
+1. Evaluate the objective $f$ and the adjoint load $\left(\partial f/\partial\mathbf{u}\right)^\top$, i.e. the misfit at the measurement points.
+1. Solve the adjoint equation [eq:adjoint] for $\lambda$.
+1. Evaluate $\lambda^\top\partial\mathcal{R}/\partial\mathbf{p}$ and $\partial f/\partial\mathbf{p}$ and assemble the gradient with [eq:adjointGrad].
+
+### Comparison with the Lagrange Multiplier Derivation id=sec:lagrangeComparison
+
+The same equations follow from a Lagrangian [!citep](bradley2013pde,walsh2013source), where the adjoint variable plays the role of a Lagrange multiplier enforcing the PDE constraint:
+\begin{equation}\label{eq:discreteLagrangian}
+\mathcal{L}(\mathbf{u},\mathbf{p},\lambda) = f(\mathbf{u},\mathbf{p}) - \lambda^\top\mathcal{R}(\mathbf{u},\mathbf{p}) .
+\end{equation}
+At the forward solution $\mathcal{R}=\mathbf{0}$, so $\mathcal{L}=f$ for any $\lambda$ and $\mathrm{d}f/\mathrm{d}\mathbf{p}=\mathrm{d}\mathcal{L}/\mathrm{d}\mathbf{p}$:
+\begin{equation}\label{eq:lagrangianGrad}
+\frac{\mathrm{d}\mathcal{L}}{\mathrm{d}\mathbf{p}} =
+\frac{\partial f}{\partial\mathbf{p}} - \lambda^\top\frac{\partial\mathcal{R}}{\partial\mathbf{p}} +
+\left(\frac{\partial f}{\partial\mathbf{u}} - \lambda^\top\frac{\partial\mathcal{R}}{\partial\mathbf{u}}\right)\frac{\mathrm{d}\mathbf{u}}{\mathrm{d}\mathbf{p}} .
+\end{equation}
+Since $\lambda$ is arbitrary, we can choose it so that the term in parentheses in [eq:lagrangianGrad] vanishes, which removes the expensive $\mathrm{d}\mathbf{u}/\mathrm{d}\mathbf{p}$.  Setting that term to zero is [eq:adjointRow], and transposing it gives the adjoint equation [eq:adjoint].  The terms that remain in [eq:lagrangianGrad] are the gradient [eq:adjointGrad].  Equivalently, requiring $\mathcal{L}$ to be stationary with respect to $\lambda$, $\mathbf{u}$, and $\mathbf{p}$ gives the forward problem, the adjoint problem, and the first-order optimality condition $\mathrm{d}f/\mathrm{d}\mathbf{p}=\mathbf{0}$.  The minus sign in [eq:discreteLagrangian] is a convention.  Choosing a plus sign flips the sign of $\lambda$ and of the $\lambda^\top\partial\mathcal{R}/\partial\mathbf{p}$ term in [eq:adjointGrad], but leaves the gradient unchanged.
+
+The two derivations give the same result.  The total derivative shows where the efficiency comes from: the tangent linear and adjoint methods evaluate the same matrix product, [eq:objectiveGrad2], in opposite orders.  The Lagrangian is convenient when working with the continuous PDE, because integrating the constraint term by parts directly yields the adjoint PDE and its boundary conditions.  The [next section](#sec:adjoint) instead works with the discrete residual, which matches the MOOSE implementation.  Transposing the discrete forward Jacobian, as [SteadyAndAdjoint.md] does, gives the exact gradient of the discretized objective.  Discretizing the continuous adjoint PDE gives the same result for self-adjoint operators with a Galerkin discretization, such as steady heat conduction; in general the two differ by discretization error.
 
 [comment1]: <> (% ----------------------------------------------------------------------------------------------------------%)
 
-## Adjoint Problem for Steady State Heat Conduction id=sec:adjoint
+## Steady State Heat Conduction id=sec:adjoint
 
-In this section, we are interested in solving the following PDE-constrained optimization problem from [eq:optimization] for steady state heat conduction:
+The rest of this page applies the adjoint method to steady state heat conduction.  The PDE-constrained optimization problem from [eq:optimization] is
 \begin{equation} \label{eqn:optimization_problem}
 	\begin{aligned}
 	& \min_{\mathbf{p}}
 	& & f\left(T,\mathbf{p}\right) = \frac{1}{2} \sum_{i=1}^{N} \left( T_i - \widetilde {T}_i \right)^2 , \\
 	& \text{subject to}
-	& & \mathcal{R}\left(T,\mathbf{p}\right)=\nabla \cdot \kappa \nabla T + g_b =0, & \text{in}~\Omega , \\
+	& & \nabla \cdot \kappa \nabla T + g_b =0, & \text{in}~\Omega , \\
 \end{aligned}
 \end{equation}
-where $f$ is the objective function from [eq:objective] without regularization, $g_b$ is the distributed heat flux, $\widetilde{T}$ is the experimental temperature being compared to our simulation temperature field at discrete locations, $T_i$.  Other forms for the objective function are possible such as different norms or different types of measurements that may require integration over a line or volume.
+where $f$ is the objective function from [eq:objective] without regularization, $g_b$ is the body heat source, and $\widetilde{T}_i$ is the measured temperature compared with the simulated temperature $T_i$ at measurement location $x_i$.  Other forms for the objective function are possible such as different norms or different types of measurements that may require integration over a line or volume.
 
-We also have the following boundary conditions for our PDE,
+The PDE has the boundary conditions
 \begin{equation} \label{eqn:optimization_bcs}
 	\begin{aligned}
 	& & & T = T_D, &\text{on}~\Gamma_D, \\
 	& & & \left( \kappa \nabla T \right) \cdot \boldsymbol{n} = G\left(T\right), &\text{on}~\Gamma_R , \\
 \end{aligned}
 \end{equation}
-where $\boldsymbol{n}$ is the normal vector, $\Gamma_D$ is the Dirichlet boundary, and $\Gamma_R$ is the Robin or mixed boundary. Common  cases for $G\left(T\right)$ are:
+where $\boldsymbol{n}$ is the outward normal vector, $\Gamma_D$ is the Dirichlet boundary, $\Gamma_R$ is the Robin or mixed boundary, and $G$ is the heat flux into the body.  Common cases for $G\left(T\right)$ are:
 \begin{equation}
 \begin{aligned}\label{eq:robin_bc_types}
    &\text{Neumann:     }~G\left(T\right) = g_n , \\
-   &\text{Convection:  }~G\left(T\right) = h (T - T_{\infty}) , \\
+   &\text{Convection:  }~G\left(T\right) = h (T_{\infty} - T) , \\
 \end{aligned}
 \end{equation}
-where $h$ is the heat transfer coefficient and $g_n$ is independent of $T$.
-The objective function can also be expressed in a integral form for the case of $N$ point measurements as follows
+where $g_n$ is a prescribed flux, $h$ is the heat transfer coefficient, and $T_\infty$ is the ambient temperature.  For $N$ point measurements, the objective function can also be written as an integral,
 \begin{equation}  \label{eqn:objective_integral}
 	f = \frac{1}{2} \sum_{i=1}^{N} \int \delta(x - x_i) \left( T - \widetilde{T}_i \right)^2\text{d}\Omega.
 \end{equation}
 
-We take the equivalent, variational approach to derive the adjoint. Thus, the Lagrangian of this problem is
-\begin{equation} \label{eqn:lagrangian}
-\begin{aligned}
-	\mathcal{L}(T, \mathbf{p}, \lambda) & = f + \int \left(  \nabla \cdot \kappa \nabla T + g_b  \right) \lambda~\text{d}\Omega \\
-					        		& = f +  \int  \left(  g_b \lambda \right) ~\text{d}\Omega
-								+\int  \left(  \nabla \cdot \kappa \nabla T \right) \lambda~\text{d}\Omega.
-\end{aligned}
-\end{equation}
-The divergence theorem is applied to the last term in [eqn:lagrangian] giving
-\begin{equation}
-\begin{aligned}
-	 \int  \left(  \nabla \cdot \kappa \nabla T \right) \lambda~\text{d}\Omega
-	 & = \int \lambda \left( \kappa \nabla T  \right)\cdot \boldsymbol{n}~\text{d}\Gamma
-	 	-\int \left(  \kappa\nabla \lambda \right)\cdot \nabla T~\text{d}\Omega\\
-	 & = \int\left[ \lambda \left( \kappa \nabla T \right)\cdot \boldsymbol{n}
-	 	- T\left( \kappa \nabla \lambda  \right) \cdot \boldsymbol{n}\right]~\text{d}\Gamma
-	 	+ \int \left(\nabla\cdot \kappa \nabla \lambda \right)T ~\text{d}\Omega.
-\end{aligned}
-\end{equation}
-By substituting the above and [eqn:objective_integral] into [eqn:lagrangian], we have
-\begin{equation} \label{eqn:lagrangian_fn}
-\begin{aligned}
-	\mathcal{L}(T, \mathbf{p}, \lambda) =& \mathcal{A}(T, \mathbf{p}, \lambda) +\mathcal{B}(T, \mathbf{p}, \lambda), \\
-	 \mathcal{A}(T, \mathbf{p}, \lambda)=&\frac{1}{2} \sum_{i=1}^{N} \int \delta(x - x_i) \left( T - \widetilde{T} \right)^2\text{d}\Omega
-	 	+ \int \left(  g_b \lambda \right) ~\text{d}\Omega
-	 	+ \int \left(\nabla\cdot \kappa \nabla \lambda\right)T ~\text{d}\Omega,\\
-	 \mathcal{B}(T, \mathbf{p}, \lambda)=&  \int\left[ \lambda \left( \kappa \nabla T \right)\cdot \boldsymbol{n}
-	   	- T\left( \kappa \nabla \lambda  \right) \cdot \boldsymbol{n}\right]~\text{d}\Gamma,
-\end{aligned}
-\end{equation}
-where $\lambda$ is the Lagrange multiplier field known as the adjoint state or costate variable.  The Lagrangian has been broken up into terms integrated over the body, $\mathcal{A}$, and boundary terms, $\mathcal{B}$.  In order to determine the boundary conditions for the adjoint equation, the boundary integral terms, $\mathcal{B}$, in [eqn:lagrangian_fn] are further broken up into their separate domains, $\Gamma_D$ and $\Gamma_R$, given in [eqn:optimization_bcs] resulting in
-\begin{equation}\label{eqn:bcLagrangian}
-\begin{aligned}
-\mathcal{B}=&\int\left[ \lambda \left( \kappa \nabla T \right)\cdot \boldsymbol{n}
-                     	- T\left( \kappa \nabla \lambda  \right) \cdot \boldsymbol{n}\right]~\text{d}\Gamma\\
-                  =&\int_{\Gamma_R}\lambda G(T)~\text{d}\Gamma
-                    	+\int_{\Gamma_D}\lambda\kappa\nabla T\cdot\boldsymbol{n}~\text{d}\Gamma
-    			-\int _{\Gamma_R}T\kappa\nabla\lambda\cdot\boldsymbol{n}~\text{d}\Gamma
-    			-\int_{\Gamma_D} T_{o}\kappa\nabla\lambda\cdot\boldsymbol{n}~\text{d}\Gamma,\\
-\end{aligned}
-\end{equation}
-where $T_o$ is the prescribed temperature on the Dirichlet boundary, $\Gamma_D$.  The variation of $\mathcal{L}$ with respect to $T$ is then given by $\delta\mathcal{L}=\delta\mathcal{A}+\delta\mathcal{B}$ where the variation of the body terms with respect to $T$ are given by
-\begin{equation}\label{eqn:delta_bodyLagrangian}
-\begin{aligned}
-\delta\mathcal{A}=& \sum_{i=1}^{N} \int \delta(x - x_i) \left( T - \widetilde{T} \right)\delta T\text{d}\Omega + \int \left(\nabla\cdot \kappa \nabla \lambda \right) \delta T ~\text{d}\Omega\\
-				=&\int \left(\left(\nabla\cdot \kappa \nabla \lambda \right) +  \sum_{i=1}^{N} \delta(x - x_i) \left( T - \widetilde{T} \right) \right)\delta T ~\text{d}\Omega,
-\end{aligned}
-\end{equation}
-and the variation of $\mathcal{B}$ with respect to $T$ is given as
-\begin{equation}\label{eqn:delta_bcLagrangian}
-\begin{aligned}
-\delta\mathcal{B}=&\int_{\Gamma_R}\lambda\frac{\text{d}G(T)}{\text{d}T}\delta T \text{d}\Gamma
-                    		-\int_{\Gamma_R}\left(\kappa\nabla\lambda\cdot\boldsymbol{n}\right)\delta T\text{d}\Gamma
-                           	+\int_{\Gamma_D}\lambda\left(\kappa\nabla\delta T\cdot\boldsymbol{n}\right)~\text{d}\Gamma\\
-=&\int_{\Gamma_R}\left(\lambda h -\left(\kappa\nabla\lambda\cdot\boldsymbol{n}\right)\right)\delta T\text{d}\Gamma
-    				+\int_{\Gamma_D}\lambda\left(\kappa\nabla\delta T\cdot\boldsymbol{n}\right)~\text{d}\Gamma,
-\end{aligned}
-\end{equation}
-where $\text{d}G(T)/\text{d}T=h$ for the convection BC given in [eq:robin_bc_types].
-Combining [eqn:delta_bodyLagrangian] and [eqn:delta_bcLagrangian] to get $\delta\mathcal{L}$ results in
-\begin{equation}\label{eqn:delta_Lagrangian}
-\begin{aligned}
-\delta\mathcal{L}=&\delta\mathcal{A}+\delta\mathcal{B}\\
-=&\int \left(\left(\nabla\cdot \kappa \nabla \lambda \right)
-	+  \sum_{i=1}^{N} \delta(x - x_i) \left( T - \widetilde{T} \right) \right)\delta T ~\text{d}\Omega\\
-    &+\int_{\Gamma_R}\left(\lambda h -\left(\kappa\nabla\lambda\cdot\boldsymbol{n}\right)\right)\delta T\text{d}\Gamma
-    	+\int_{\Gamma_D}\lambda\left(\kappa\nabla\delta T\cdot\boldsymbol{n}\right)~\text{d}\Gamma.
-\end{aligned}
-\end{equation}
+### Discrete Residual id=sec:discreteResidual
 
-Stationarity of $\mathcal{L}$ would require $\delta\mathcal{L} = 0$ for all admissible $\delta T$. Setting each of the integrals in [eqn:delta_Lagrangian] results in the adjoint problem and its boundary conditions
-\begin{equation} \label{eqn:adjoint_problem}
-\boxed{
-\begin{aligned}
-\nabla\cdot \kappa \nabla \lambda +  \sum_{i=1}^{N} \delta (x - x_i)(T - \widetilde{T}) &=0, ~\text{in}~\Omega,\\
-\lambda  &= 0, ~\text{on}~\Gamma_D, \\
-\kappa \nabla \lambda \cdot \boldsymbol{n} & = \lambda h, ~\text{on}~{\Gamma_R}. \\
-\end{aligned}
-}
+The state vector $\mathbf{u}$ holds the nodal temperatures, so $T(x)\approx\sum_\beta\phi_\beta(x)u_\beta$, where $\phi_\beta$ is the continuous Lagrange shape function of node $\beta$.  With the Galerkin method, the residual for the test function $\phi_\alpha$ is
+\begin{equation}\label{eq:discretePDE}
+\mathcal{R}_\alpha = \int_\Omega\nabla\phi_\alpha\cdot\kappa\nabla T~\text{d}\Omega - \int_\Omega\phi_\alpha g_b~\text{d}\Omega - \int_{\Gamma_R}\phi_\alpha G~\text{d}\Gamma .
 \end{equation}
-Solving [eqn:adjoint_problem] comes down to adjusting the boundary conditions and load vector from the forward problem and re-solving.
+Rows of $\mathcal{R}$ for nodes on $\Gamma_D$ are replaced by $u_\alpha-T_D$, which is how MOOSE imposes Dirichlet conditions.  When $\kappa$ does not depend on $T$, [eq:discretePDE] is $\mathcal{R}=\mathbf{K}\mathbf{u}-\mathbf{g}$, with
+\begin{equation} \label{eq:elementwise_discretized_terms}
+\begin{aligned}
+    K_{\alpha\beta}&=\int_\Omega\nabla\phi_\alpha\cdot\kappa\nabla\phi_\beta~\text{d}\Omega + \int_{\Gamma_R}\phi_\alpha h\,\phi_\beta~\text{d}\Gamma,\\
+    g_\alpha & = \int_\Omega \phi_\alpha g_b~\text{d}\Omega + \int_{\Gamma_R} \phi_\alpha \left(g_n + hT_\infty\right)~\text{d}\Gamma ,
+\end{aligned}
+\end{equation}
+where $\mathbf{K}=\partial\mathcal{R}/\partial\mathbf{u}$ is the symmetric stiffness matrix and $\mathbf{g}$ is the load vector.  The convection term splits between them: $hT$ multiplies the state and goes into $\mathbf{K}$, while $hT_\infty$ is a load and goes into $\mathbf{g}$.
+
+### Adjoint Problem id=sec:adjointProblem
+
+The adjoint equation [eq:adjoint] for this residual is $\mathbf{K}^\top\lambda=\left(\partial f/\partial\mathbf{u}\right)^\top$.  The heat conduction operator is symmetric, so $\mathbf{K}^\top=\mathbf{K}$ and the adjoint problem uses the same conduction kernels as the forward problem.  Its only load is the derivative of [eqn:objective_integral], $\partial f/\partial u_\alpha=\sum_i(T_i-\widetilde{T}_i)\,\phi_\alpha(x_i)$, which is a point source at each measurement location with magnitude equal to the misfit.
+
+The adjoint boundary conditions follow from one rule.  The adjoint operator is the Jacobian $\partial\mathcal{R}/\partial\mathbf{u}$, so a term of [eq:discretePDE] appears in the adjoint problem only if it depends on the temperature.  Prescribed data, such as $g_b$, $g_n$, $T_\infty$, and $T_D$, are constant in $\mathbf{u}$.  Their derivatives vanish, so they do not appear in the adjoint problem.  Terms that multiply the temperature, such as $hT$ in the convective boundary condition, remain with $T$ replaced by $\lambda$.  [tab:adjointBCs] applies this rule to each forward boundary condition.
+
+!table id=tab:adjointBCs caption=Adjoint boundary conditions for steady state heat conduction.  Only the parts of each forward boundary term that depend on $T$ remain in the adjoint problem.
+| Forward boundary condition | Term in $\mathcal{R}$ | Depends on $T$ | Adjoint boundary condition |
+| :- | :- | :- | :- |
+| Dirichlet, $T=T_D$ | $u_\alpha-T_D$ | $u_\alpha$ | $\lambda=0$ |
+| Neumann, $\kappa\nabla T\cdot\boldsymbol{n}=g_n$ | $-\int_{\Gamma_R}\phi_\alpha g_n~\text{d}\Gamma$ | none | $\kappa\nabla\lambda\cdot\boldsymbol{n}=0$ |
+| Convection, $\kappa\nabla T\cdot\boldsymbol{n}=h(T_\infty-T)$ | $\int_{\Gamma_R}\phi_\alpha h(T-T_\infty)~\text{d}\Gamma$ | $hT$ | $\kappa\nabla\lambda\cdot\boldsymbol{n}=-h\lambda$ |
+
+The Dirichlet condition needs one more step.  The Dirichlet row $u_\alpha-T_D$ has unit derivative with respect to $u_\alpha$ and does not depend on $\mathbf{p}$, so it contributes nothing to $\lambda^\top\partial\mathcal{R}/\partial\mathbf{p}$.  The integrals in [#sec:PDEDerivs] are evaluated over the whole adjoint field, including the Dirichlet nodes, so they equal $\lambda^\top\partial\mathcal{R}/\partial\mathbf{p}$ only when $\lambda=0$ at those nodes.  [SteadyAndAdjoint.md] enforces this by zeroing the Dirichlet rows and columns of the adjoint system.
+
+The forward data affect $\lambda$ only through the forward temperature $T$, which sets the misfit and, for nonlinear problems, the Jacobian.  In strong form, the adjoint problem is
+\begin{equation} \label{eqn:adjoint_problem}
+\begin{aligned}
+\nabla\cdot \kappa \nabla \lambda +  \sum_{i=1}^{N} \delta (x - x_i)(T_i - \widetilde{T}_i) &=0, ~\text{in}~\Omega,\\
+\lambda  &= 0, ~\text{on}~\Gamma_D, \\
+\kappa \nabla \lambda \cdot \boldsymbol{n} & = -h\lambda, ~\text{on}~{\Gamma_R}, \\
+\end{aligned}
+\end{equation}
+with $h=0$ on Neumann boundaries.  When the adjoint is solved as a separate sub-app rather than with [SteadyAndAdjoint.md], the input file is the forward input with the body loads and Neumann fluxes removed, the Dirichlet values set to zero, convective boundary conditions kept with $T_\infty=0$, and a [ReporterPointSource.md] applying the misfit.
 
 [comment2]: <> (% ----------------------------------------------------------------------------------------------------------%)
 
 ## PDE Derivatives for Inversion id=sec:PDEDerivs
 
-In this section we will present derivatives for steady state heat conduction [eqn:optimization_problem] with respect to the force or material parameters.  For all of these examples, measurement data is taken at specific locations where the objective function can be represented by [eqn:objective_integral].  We will present the discrete forms of our PDE and its derivative which most closely matches the implementation that will be used in MOOSE.
+The last term needed for the gradient [eq:adjointGrad] is $\lambda^\top\partial\mathcal{R}/\partial\mathbf{p}$.  The adjoint field is interpolated with the same shape functions as the temperature, $\lambda(x)=\sum_\alpha\phi_\alpha(x)\lambda_\alpha$.  Multiplying $\partial\mathcal{R}_\alpha/\partial p_j$ by $\lambda_\alpha$ and summing over $\alpha$ therefore replaces $\phi_\alpha$ with $\lambda$, and $\nabla\phi_\alpha$ with $\nabla\lambda$, inside each integral of [eq:discretePDE].  The result is an integral of known fields that is evaluated at quadrature points without forming the matrix $\partial\mathcal{R}/\partial\mathbf{p}$.
 
-The discrete form of the PDE constraint for steady state heat conduction in [eqn:optimization_problem] is given by the residual, $\hat{\text R}$, as
+The derivatives are grouped by which term of [eq:discretePDE] contains the parameters:
 
-\begin{equation}\label{eq:discretePDE}
-\hat{\text R}=\textbf{J}\hat{\text T} - \hat{\text g}=0,
-\end{equation}
-where $\textbf{J}$ is the Jacobian matrix, $\hat{\text T}$ and $\hat{\text g}$ are the discretized temperature and source vectors. Element-wise definitions of the terms are
-\begin{equation} \label{eq:elementwise_discretized_terms}
-\begin{aligned}
-    \textbf{J}^{\alpha\beta}&=\sum_{e}\int\nabla^\top \phi^{\alpha} \cdot \kappa\cdot\nabla\phi^{\beta}~\text{d}\Omega,\\
-    \hat{\text f}^{\alpha} & = \sum_{e} \int \phi^{\alpha} g_b \text{d}\Omega + \sum_{e} \int \phi^{\alpha}G(T) ~\text{d}\Gamma_R,
-\end{aligned}
-\end{equation}
-where $\phi^{\alpha}$ denotes the continuous Lagrange finite element shape function at node $\alpha$. The solution can be expressed as $T(x)\approx \sum_{\alpha} \phi^{\alpha}\hat{\text T}^{\alpha} = \phi \hat{\text T}$. Note here the $\hat{\text g}$ includes the contribution from both the body load term ($g_b$ in [eqn:optimization_problem]) and flux boundary conditions (see [eqn:optimization_bcs]). We are assuming a Galerkin form for our discretized PDE by making our test and trial functions identical (both are $\phi^{\alpha}$). Note in the rest of this document, we omit the superscript of the shape function (i.e., $(\cdot)^{\alpha}$) and the summation over all the elements (i.e., $\sum_e$) for simplicity.
+- +Force inversion+ ([#sec:forceInv]): the parameters appear only in the load $g_b$ or $g_n$.  The stiffness matrix does not change with $\mathbf{p}$, so if the load is linear in $\mathbf{p}$, the temperature is too.  The misfit $\frac{1}{2}\sum_i(T_i-\widetilde{T}_i)^2$ is then a quadratic function of $\mathbf{p}$ with a single minimum, and a gradient-based solver reaches it from any initial guess.
+- +Material inversion+ ([#sec:robinInv], [#sec:material_inversion]): the parameters appear in a coefficient that multiplies $T$, the convection coefficient $h$ or the conductivity $\kappa$.  The temperature depends nonlinearly on these parameters, the objective can have several local minima, and convergence depends on the initial guess and parameter bounds.
 
-To compute the derivative of PDE with respect to the design parameters, i.e., $\partial \mathcal{R} /\partial \boldsymbol{p}$, it can be seen from [eq:elementwise_discretized_terms] that the derivatives can come from either $\textbf{J}$ or $\hat{\text f}$. For problems that have design parameters that are embedded in $g_b$ and/or the Neumann boundary condition in $G(T)$, we call them +force inversion+ problems, since the derivative only depends on the body load. For design parameters that are embedded in $\textbf{J}$ and/or the convection boundary condition in $G(T)$, indicating dependence on the material property, we call them +material inversion+ problems. Derivative calculation of different force inversion and material inversion problems are included in the following subsections:
+### Force Inversion id=sec:forceInv
 
-- [#sec:forceInv]
-- [#sec:robinInv]
-- [#sec:material_inversion]
-
-Examples for force and material inversion are given on the following pages:
-
-
-[comment3]: <> (% ----------------------------------------------------------------------------------------------------------%)
-
-## PDE Derivatives for Force Inversion id=sec:forceInv
-
-We will first consider the simple case of load parameterization for body loads, $g_b$ (in [eqn:optimization_problem]), where the gradient is given as
+For a parameterized body load $g_b(x;\mathbf{p})$, only the source term of [eq:discretePDE] depends on $\mathbf{p}$:
 \begin{equation}\label{eq:bodyLoads}
-\begin{aligned}
-\frac{\partial\hat{\text{R}}}{\partial \boldsymbol{p}} & =  \frac{\partial\hat{\text{R}}}{\partial \hat{g}} \frac{\partial\hat{g}}{\partial g_b} \frac{\partial g_b}{\partial \boldsymbol{p}}\\
-& = \frac{\partial\hat{g}}{\partial g_b} \frac{\partial g_b}{\partial \boldsymbol{p}} \\
-& = \int \phi\cdot\frac{\partial g_b(x)}{\partial\mathbf{p}}~\text{d}\Omega,\\
-\end{aligned}
+\frac{\partial\mathcal{R}_\alpha}{\partial p_j} = -\int_\Omega \phi_\alpha\frac{\partial g_b}{\partial p_j}~\text{d}\Omega,
+\qquad
+\lambda^\top\frac{\partial\mathcal{R}}{\partial p_j} = -\int_\Omega \lambda\frac{\partial g_b}{\partial p_j}~\text{d}\Omega .
 \end{equation}
-by taking the chain rule from [eq:discretePDE] and [eq:elementwise_discretized_terms].
-The gradient term requires the derivative of $g_b$ to be integrated over the volume $\Omega$.
+Substituting into [eq:adjointGrad] gives $\mathrm{d}f/\mathrm{d}p_j=\int_\Omega\lambda\,\partial g_b/\partial p_j~\text{d}\Omega$ without regularization, which is what [ElementOptimizationSourceFunctionInnerProduct.md] computes.
 
-For the first case, we will consider a volumetric heat source that varies linearly across the body, which is given by
+For a volumetric heat source that varies linearly across the body,
 \begin{equation}
 g_b(x)=p_0+p_1x,
 \end{equation}
-with $p_0$ and $p_1$ the design parameters. Therefore, the derivative can be calculated as
+with design parameters $p_0$ and $p_1$, [eq:bodyLoads] gives
 \begin{equation}\label{eq:bodyLoad_example}
-\begin{aligned}
-\frac{\partial \hat{\text{R}}}{\partial\mathbf{p}} &= \int \phi\cdot\frac{\partial g_b(x)}{\partial\mathbf{p}}~\text{d}\Omega\\
-&=
-	\left[\int \phi\cdot \frac{\partial g_b}{\partial{p_0}}~\text{d}\Omega
-	, \int \phi\cdot \frac{\partial g_b}{\partial{p_1}}~\text{d}\Omega\right]^\top\\
-&= \left[\int\phi\cdot \left(1\right)~\text{d}\Omega
-    ,\int\phi\cdot \left(x\right)~\text{d}\Omega\right]^\top.\\
-\end{aligned}
+\lambda^\top\frac{\partial\mathcal{R}}{\partial\mathbf{p}} =
+-\left[\int_\Omega\lambda~\text{d}\Omega ,\ \int_\Omega\lambda\,x~\text{d}\Omega\right] .
 \end{equation}
-An example using the derivative given in [eq:bodyLoad_example] is given in the [Distributed Body Load Example ](forceInv_BodyLoad.md).
+An example using the derivative given in [eq:bodyLoad_example] is given in the [Distributed Body Load Example](forceInv_BodyLoad.md).
 
-In the next force inversion case, we parameterize the intensity of $N$ point heat sources, where the heat source takes the form
+For $M$ point heat sources at known locations $x_j$ with unknown intensities $p_j$,
 \begin{equation}
-g_b(x)=\sum_{i=1}^{np}\delta\left(x-x_i \right)p_i  \quad \text{for}~i=1 \dots N.
+g_b(x)=\sum_{j=1}^{M}\delta\left(x-x_j \right)p_j ,
 \end{equation}
-The corresponding gradient term is given by
+the delta function evaluates the integrand of [eq:bodyLoads] at the source location:
 \begin{equation}\label{eq:pointLoad}
-\begin{aligned}
- \\
-\frac{\partial \hat{\text{R}}}{\partial p_i} &= \int \phi\cdot\frac{\partial g_b(x)}{\partial{p}_i}~\text{d}\Omega\\
-& = \int \phi\cdot\delta\left(x-x_i \right)d\Omega \quad \text{for}~i=1 \dots N,
-\end{aligned}
+\frac{\partial\mathcal{R}_\alpha}{\partial p_j} = -\phi_\alpha(x_j),
+\qquad
+\lambda^\top\frac{\partial\mathcal{R}}{\partial p_j} = -\lambda(x_j) .
 \end{equation}
-which makes the gradient equal to one at the locations of the point loads.  This PDE derivative is used in the [Point Loads Example](forceInv_pointLoads.md).
+The gradient with respect to each point source intensity is the adjoint field sampled at that source.  This PDE derivative is used in the [Point Loads Example](forceInv_pointLoads.md).
 
-Next, we will use force inversion to parameterize a Neumann boundary condition with the heat flux on the boundary being a function of the coordinates, $G(x)$, given by
+For a parameterized Neumann flux $g_n(x;\mathbf{p})$ on $\Gamma_R$, the same derivation applies to the boundary term of [eq:discretePDE]:
 \begin{equation}\label{eq:bcLoad}
-\begin{aligned}
-\frac{\partial\hat{\text{R}}}{\partial \boldsymbol{p}} & =  \frac{\partial\hat{\text{R}}}{\partial \hat{g}} \frac{\partial\hat{g}}{\partial G(x)} \frac{\partial G(x)}{\partial \boldsymbol{p}}\\
-& = \frac{\partial\hat{g}}{\partial G(x)} \frac{\partial G(x)}{\partial \boldsymbol{p}} \\
-& = \int_{\Gamma_R} \phi\cdot\frac{\partial G(x)}{\partial\mathbf{p}}~\text{d}\Gamma,\\
-\end{aligned}
+\frac{\partial\mathcal{R}_\alpha}{\partial p_j} = -\int_{\Gamma_R} \phi_\alpha\frac{\partial g_n}{\partial p_j}~\text{d}\Gamma,
+\qquad
+\lambda^\top\frac{\partial\mathcal{R}}{\partial p_j} = -\int_{\Gamma_R} \lambda\frac{\partial g_n}{\partial p_j}~\text{d}\Gamma ,
 \end{equation}
-where the derivative of $G(x)$ is now integrated over the boundary $\Gamma_R$. For instance, if we have a linearly varying heat flux
+which [SideOptimizationNeumannFunctionInnerProduct.md] computes.  For a linearly varying heat flux
 \begin{equation}
-G(x)=p_0 + p_1x,
+g_n(x)=p_0 + p_1x,
 \end{equation}
-with $p_0$ and $p_1$ the design parameters, then
+with design parameters $p_0$ and $p_1$, [eq:bcLoad] gives
 \begin{equation}\label{eq:neumannBC}
-\begin{aligned}
-\frac{\partial\hat{\text{R}}}{\partial \boldsymbol{p}} &= \left[ \frac{\partial\hat{\text{R}}}{\partial {p}_0}, \frac{\partial\hat{\text{R}}}{\partial {p}_1} \right]^\top  \\
- &=   \left[\int_{\Gamma_R} \phi\cdot \frac{\partial G(x)}{\partial p_0} ~\text{d}\Gamma
-    ,\int_{\Gamma_R} \phi\cdot \frac{\partial G(x)}{\partial p_1} ~\text{d}\Gamma\right]^\top \\
-&= \left[\int_{\Gamma_R} \phi~\text{d}\Gamma
-    ,\int_{\Gamma_R} \phi x~\text{d}\Gamma\right]^\top.\\
-\end{aligned}
+\lambda^\top\frac{\partial\mathcal{R}}{\partial\mathbf{p}} =
+-\left[\int_{\Gamma_R}\lambda~\text{d}\Gamma ,\ \int_{\Gamma_R}\lambda\,x~\text{d}\Gamma\right] .
 \end{equation}
 The derivative given in [eq:neumannBC] is used in the [Neumann Boundary Condition Example](forceInv_NeumannBC.md).
 
-The above force inversion examples, [eq:bodyLoads] and [eq:neumannBC], are all linear optimization problems where the parameter being optimized does not show up in the derivative term.  Linear optimization problems are not overly sensitive to the location of measurement points or the initial guesses for the parameter being optimized, making them easy to solve.  In the following we parameterize a Gaussian body force given by
+A load that is nonlinear in its parameters makes even force inversion nonlinear.  For example, a Gaussian body source
 \begin{equation}\label{eq:gaussOpt}
-\begin{aligned}
-g_b(x) = a \cdot \exp{\left( -\frac{(x-b)^2}{2c^2} \right)},
-\end{aligned}
+g_b(x) = a \exp{\left( -\frac{(x-b)^2}{2c^2} \right)}
 \end{equation}
-where $a$ is the height or intensity of the Gaussian curve, $b$ is the location of the peak of the curve, and $c$ is the standard deviation of the curve or its width.  Parameterizing a Gaussian curve can result in a linear or nonlinear optimization problem depending on which parameter is being optimized.  Parameterizing this function for the height, $a$, results in the following linear optimization problem derivative
+has peak intensity $a$, peak location $b$, and width $c$.  The source is linear in $a$, so the derivative
 \begin{equation}\label{eq:gaussOpt_a}
-\begin{aligned}
-\frac{\partial\hat{\text{R}}}{\partial \boldsymbol{p}}
-& = \frac{\partial\hat{\text{R}}}{\partial a}  = \int \phi\cdot\frac{\partial g_b(x)}{\partial a}~\text{d}\Omega\\
- &= \int \phi\cdot  \exp{\left( -\frac{(x-b)^2}{2c^2} \right)}~\text{d}\Omega,
-\end{aligned}
+\lambda^\top\frac{\partial\mathcal{R}}{\partial a}
+= -\int_\Omega \lambda \exp{\left( -\frac{(x-b)^2}{2c^2} \right)}~\text{d}\Omega
 \end{equation}
-where the parameter $a$ being optimized does not show up in the derivative term.
-However, if we try to parameterize for the location of the peak of the Gaussian curve, $b$, we get the following nonlinear optimization problem derivative
+does not depend on $a$, and fitting $a$ alone has a single minimum.  The source is nonlinear in $b$, so the derivative
 \begin{equation}\label{eq:gaussOpt_b}
-\begin{aligned}
-\frac{\partial\hat{\text{R}}}{\partial \boldsymbol{p}} & = \frac{\partial\hat{\text{R}}}{\partial b} = \int \phi\cdot\frac{\partial g_b(x)}{\partial b}~\text{d}\Omega\\
-&=\int \phi\cdot \frac{a(x-b)}{c^2} \exp{\left( -\frac{(x-b)^2}{2c^2} \right)}~\text{d}\Omega,
-\end{aligned}
+\lambda^\top\frac{\partial\mathcal{R}}{\partial b}
+= -\int_\Omega \lambda \frac{a(x-b)}{c^2} \exp{\left( -\frac{(x-b)^2}{2c^2} \right)}~\text{d}\Omega
 \end{equation}
-where the parameter $b$ remains in the derivative term.  Optimizing for the peak location of a Gaussian heat source, [eq:gaussOpt_b],  will be a much more difficult problem to solve than [eq:gaussOpt_a] and convergence will be dependent on the initial guesses given for $b$ and the locations where measurement data is taken.
+depends on $b$.  Fitting the peak location is a nonlinear problem whose convergence depends on the initial guess for $b$ and on the measurement locations.
 
-[comment4]: <> (% ----------------------------------------------------------------------------------------------------------%)
+### Convective Boundary Conditions id=sec:robinInv
 
-## PDE Derivative for Convective Boundary Conditions id=sec:robinInv
-
-In this section, the convective heat transfer coefficient, $h$, is considered as a parameter for the convection boundary condition given in [eq:robin_bc_types].  This is a material inversion problem with integral limited to the boundary, $\Gamma_R$.  The boundary condition is given by $G(T)=h \left(T - T_{\infty}\right)$ on $\Gamma_R$.  The PDE derivative term is given by
+For the convection coefficient $h$ in [eq:robin_bc_types], the boundary term of [eq:discretePDE] is $\int_{\Gamma_R}\phi_\alpha h\left(T-T_\infty\right)\text{d}\Gamma$, so
 \begin{equation}\label{eq:convectiveBC}
-\begin{aligned}
-\frac{\partial\hat{\text{R}}}{\partial \boldsymbol{p}} &= \frac{\partial\hat{\text{R}}}{\partial h}
-= \int_{\Gamma_R} \phi\cdot\frac{\partial G(x)}{\partial h}~\text{d}\Gamma\\
- &= \int_{\Gamma_R} \phi\cdot \left(T-T_{\infty} \right)~\text{d}\Gamma.
-\end{aligned}
+\frac{\partial\mathcal{R}_\alpha}{\partial h} = \int_{\Gamma_R} \phi_\alpha \left(T-T_{\infty} \right)~\text{d}\Gamma,
+\qquad
+\lambda^\top\frac{\partial\mathcal{R}}{\partial h} = \int_{\Gamma_R} \lambda \left(T-T_{\infty} \right)~\text{d}\Gamma .
 \end{equation}
-This derivative requires the solution from the forward problem $T$ to be included in the integral over the boundary $\Gamma_R$ making this a nonlinear optimization problem.  This derivative is used in the [Convective Boundary Condition Example](materialInv_ConvectiveBC.md).
+Substituting into [eq:adjointGrad] gives $\mathrm{d}f/\mathrm{d}h=\int_{\Gamma_R}\lambda\left(T_\infty-T\right)~\text{d}\Gamma$ without regularization.  The derivative contains the forward temperature $T$, which must be transferred to the adjoint app.  This derivative is used in the [Convective Boundary Condition Example](materialInv_ConvectiveBC.md).
 
-[comment5]: <> (% ----------------------------------------------------------------------------------------------------------%)
+### Thermal Conductivity id=sec:material_inversion
 
-## PDE Derivative for Material Inversion id=sec:material_inversion
-
-In [force inversion](#sec:forceInv) and [convective heat transfer inversion](#sec:robinInv), the design parameters only exist in the load terms. For force inversion problems, the derivatives of the residual, $\mathcal{R}$, with respect to the design parameters only required differentiation of the load functions, not the Jacobian.  In this section, we consider material inversion where the design parameters exist in the Jacobian term requiring it to be differentiated.  In the below derivatives, we treat the thermal conductivity ($\kappa$) as the design parameter by matching experimentally measured temperature data points. The derivative of $\mathcal{R}$ is taken with respect to $\kappa$. This requires the derivative of $\textbf{J}$ in [eq:discretePDE] leading to
+For a parameterized conductivity $\kappa(x;\mathbf{p})$, the stiffness term of [eq:discretePDE] depends on $\mathbf{p}$.  Differentiating it with respect to $p_j$ at fixed $T$ gives
 \begin{equation}\label{eq:kappa}
-\begin{aligned}
-\frac{\partial \hat{\text{R}}}{\partial\mathbf{p}} &=  \int\nabla\phi^{\top} \cdot \frac{\partial \kappa}{{\partial\mathbf{p}}}\cdot\nabla\phi~\text{d}\Omega \cdot\hat{\text T}\\
-    &=  \int\nabla\phi^{\top} \cdot \frac{\partial \kappa}{{\partial\mathbf{p}}}\cdot\nabla T~\text{d}\Omega,
-\end{aligned}
+\frac{\partial\mathcal{R}_\alpha}{\partial p_j} = \int_\Omega\nabla\phi_\alpha\cdot\frac{\partial \kappa}{\partial p_j}\nabla T~\text{d}\Omega ,
 \end{equation}
-where $\nabla\phi\hat{T}=\nabla T$ was used in the last line.  The gradient term given by [eq:kappa] is multiplied by the adjoint variable $\lambda$ in [eq:adjointGrad], giving
-
+and contracting with the adjoint replaces $\nabla\phi_\alpha$ with $\nabla\lambda$:
 \begin{equation}\label{eq:kappaLambda}
-\begin{aligned}
-\lambda^\top\frac{\partial \hat{\text{R}}}{\partial\mathbf{p}} &=  \hat{\lambda}^{\top}\cdot\int\nabla\phi^{\top} \cdot \frac{\partial \kappa}{{\partial\mathbf{p}}}\cdot\nabla\phi~\text{d}\Omega \cdot\hat{\text T}\\
-    &=  \int\nabla\lambda^{\top} \cdot \frac{\partial \kappa}{{\partial\mathbf{p}}}\cdot\nabla T~\text{d}\Omega,
-\end{aligned}
+\lambda^\top\frac{\partial\mathcal{R}}{\partial p_j} = \sum_\alpha\lambda_\alpha\int_\Omega\nabla\phi_\alpha\cdot\frac{\partial \kappa}{\partial p_j}\nabla T~\text{d}\Omega
+= \int_\Omega\nabla\lambda\cdot\frac{\partial \kappa}{\partial p_j}\nabla T~\text{d}\Omega .
 \end{equation}
-where  $\hat{\lambda}^{\top}\cdot\nabla\phi^{\top}=\left[\nabla\phi\cdot\hat{\lambda}\right]^{\top}=\left[\nabla\lambda\right]^{\top}=\nabla\lambda^{\top}$ is used in the last line.  Computing the integral in [eq:kappaLambda] requires an inner product of the gradients of the adjoint and forward variables. This is much simpler to compute in MOOSE than the integral in [eq:kappa] which requires the multiplication of nodal variables with elemental shape function gradients.  Material inversion is a nonlinear optimization problem since $T$ shows up in the derivative, making the derivative dependent on the solution to the forward problem.  The derivative given in [eq:kappaLambda] is used in this [example](materialInv_ConstK.md) where the thermal conductivity of a block is found.
+The derivative given in [eq:kappaLambda] is used in this [example](materialInv_ConstK.md) where the thermal conductivity of a block is found.
 
-This same procedure is used to a temperature dependent thermal conductivity given by
+Substituting [eq:kappaLambda] into [eq:adjointGrad] and neglecting regularization gives each gradient component as $\mathrm{d}f/\mathrm{d}p_j=\int_\Omega s_\kappa\,\partial\kappa/\partial p_j~\text{d}\Omega$, where $s_\kappa=-\nabla\lambda\cdot\nabla T$ is the +sensitivity density+, the change in $f$ per unit change in $\kappa$ at each point.  The density depends only on the forward and adjoint solutions; the parameterization of $\kappa$ enters only through the weight $\partial\kappa/\partial p_j$.  A single conductivity for the whole domain integrates $s_\kappa$ over $\Omega$, one conductivity per subdomain integrates it over each subdomain, and a conductivity interpolated from a parameter mesh, as in [ParameterMeshFunction.md], projects it onto the parameter mesh shape functions.  [ElementOptimizationDiffusionCoefFunctionInnerProduct.md] evaluates this integral with quadrature, using the $\partial\kappa/\partial p_j$ supplied by the optimization function.
+
+The same procedure applies to a temperature dependent thermal conductivity,
 \begin{equation}
 \kappa\left(T\right)=\alpha T^2+\beta T,
 \end{equation}
-where $\alpha$ and $\beta$ are the design parameters. The resultant derivative is then
+with design parameters $\alpha$ and $\beta$.  Since $\partial\kappa/\partial\alpha=T^2$ and $\partial\kappa/\partial\beta=T$, [eq:kappaLambda] gives
 \begin{equation}\label{eq:TdependentKappa}
-\begin{aligned}
-\lambda\frac{\partial \hat{\text{R}}}{\partial\mathbf{p}}=
-    \lambda\left[ \frac{\partial \hat{\text{R}}}{\partial\alpha},\frac{\partial \hat{\text{R}}}{\partial\beta}\right]^\top
-    &= \left[\int\nabla\lambda^{\top} \cdot \frac{\partial \kappa}{\partial\alpha}\cdot\nabla T~\text{d}\Omega
-        ,\int\nabla\lambda^{\top} \cdot \frac{\partial \kappa}{\partial\beta}\cdot\nabla T~\text{d}\Omega\right]^\top\\
-    &= \left[\int\nabla\lambda^{\top} \cdot \left(T^2\right) \cdot\nabla T~\text{d}\Omega,\int\nabla\lambda^{\top} \cdot \left(T\right) \cdot\nabla T~\text{d}\Omega\right]^\top.
-\end{aligned}
+\lambda^\top\frac{\partial\mathcal{R}}{\partial\mathbf{p}} =
+\left[\int_\Omega T^2\,\nabla\lambda\cdot\nabla T~\text{d}\Omega ,\ \int_\Omega T\,\nabla\lambda\cdot\nabla T~\text{d}\Omega\right] .
 \end{equation}
+When $\kappa$ depends on $T$, the Jacobian $\partial\mathcal{R}/\partial\mathbf{u}$ includes a $\mathrm{d}\kappa/\mathrm{d}T$ term and is no longer symmetric, so the adjoint problem [eq:adjoint] must use its transpose rather than the forward operator in [eqn:adjoint_problem].  [SteadyAndAdjoint.md] forms this transpose automatically.
 
 !bibtex bibliography
