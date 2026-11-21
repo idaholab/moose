@@ -69,6 +69,16 @@ protected:
 
   /**
    * Determines whether the given element's side satisfies the following parameters:
+   * include_only_external_sides, included_boundaries, excluded_boundaries and
+   * included_neighbors. This does not need the side normal, so it is cheap to evaluate before
+   * the face FE object is reinitialized.
+   */
+  bool elemSideSatisfiesNonNormalRequirements(const Elem * const elem,
+                                              const unsigned int side,
+                                              const MeshBase & mesh) const;
+
+  /**
+   * Determines whether the given element's side satisfies the following parameters:
    * include_only_external_sides, included_boundaries, included_neighbor_subdomains and normal
    */
   bool elemSideSatisfiesRequirements(const Elem * const elem,

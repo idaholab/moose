@@ -91,11 +91,16 @@ SideSetsBetweenSubdomainsGenerator::generate()
       }
       else if (neighbor != NULL)
       {
-        _fe_face->reinit(elem, side);
-        // We'll just use the normal of the first qp
-        const Point & face_normal = face_normals[0];
+        // Cheap checks first: reinitializing the FE object for every side is expensive
+        bool satisfied = elemSideSatisfiesNonNormalRequirements(elem, side, *mesh);
+        if (satisfied && _using_normal)
+        {
+          _fe_face->reinit(elem, side);
+          // We'll just use the normal of the first qp
+          satisfied = MeshTraversingUtils::normalsWithinTol(_normal, face_normals[0], _normal_tol);
+        }
         // Add the boundaries, if appropriate
-        if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
+        if (satisfied)
         {
           // Add the boundaries
           if (_replace)
@@ -147,11 +152,16 @@ SideSetsBetweenSubdomainsGenerator::generate()
 
         if (neighbor != NULL)
         {
-          _fe_face->reinit(elem, side);
-          // We'll just use the normal of the first qp
-          const Point & face_normal = _fe_face->get_normals()[0];
+          bool satisfied = elemSideSatisfiesNonNormalRequirements(elem, side, *mesh);
+          if (satisfied && _using_normal)
+          {
+            _fe_face->reinit(elem, side);
+            // We'll just use the normal of the first qp
+            satisfied = MeshTraversingUtils::normalsWithinTol(
+                _normal, _fe_face->get_normals()[0], _normal_tol);
+          }
           // Add the boundaries, if appropriate
-          if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
+          if (satisfied)
             responses[p - 1].push_back(std::make_pair(elem->id(), side));
         }
       }

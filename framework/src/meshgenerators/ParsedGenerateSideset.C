@@ -96,12 +96,18 @@ ParsedGenerateSideset::generate()
 
     for (const auto side : make_range(elem->n_sides()))
     {
-      _fe_face->reinit(elem, side);
-      // We'll just use the normal of the first qp
-      const Point & face_normal = _fe_face->get_normals()[0];
-
-      if (!elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
+      // Cheap checks first: reinitializing the FE object for every side of the mesh is expensive
+      if (!elemSideSatisfiesNonNormalRequirements(elem, side, *mesh))
         continue;
+
+      if (_using_normal)
+      {
+        _fe_face->reinit(elem, side);
+        // We'll just use the normal of the first qp
+        const Point & face_normal = _fe_face->get_normals()[0];
+        if (!MeshTraversingUtils::normalsWithinTol(_normal, face_normal, _normal_tol))
+          continue;
+      }
 
       // check expression
       std::unique_ptr<Elem> curr_side = elem->side_ptr(side);

@@ -310,11 +310,9 @@ SideSetsGeneratorBase::elementSideInExcludedBoundaries(const Elem * const elem,
 }
 
 bool
-SideSetsGeneratorBase::elemSideSatisfiesRequirements(const Elem * const elem,
-                                                     const unsigned int side,
-                                                     const MeshBase & mesh,
-                                                     const Point & desired_normal,
-                                                     const Point & face_normal)
+SideSetsGeneratorBase::elemSideSatisfiesNonNormalRequirements(const Elem * const elem,
+                                                              const unsigned int side,
+                                                              const MeshBase & mesh) const
 {
   // Skip if side has neighbor and we only want external sides
   if ((elem->neighbor_ptr(side) && _include_only_external_sides))
@@ -337,6 +335,19 @@ SideSetsGeneratorBase::elemSideSatisfiesRequirements(const Elem * const elem,
                           neighbor, _included_neighbor_subdomain_ids)))
       return false;
   }
+
+  return true;
+}
+
+bool
+SideSetsGeneratorBase::elemSideSatisfiesRequirements(const Elem * const elem,
+                                                     const unsigned int side,
+                                                     const MeshBase & mesh,
+                                                     const Point & desired_normal,
+                                                     const Point & face_normal)
+{
+  if (!elemSideSatisfiesNonNormalRequirements(elem, side, mesh))
+    return false;
 
   if (_using_normal &&
       !MeshTraversingUtils::normalsWithinTol(desired_normal, face_normal, _normal_tol))
