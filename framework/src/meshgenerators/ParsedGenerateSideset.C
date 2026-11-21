@@ -87,41 +87,56 @@ ParsedGenerateSideset::generate()
       MooseMeshUtils::getBoundaryIDs(*mesh, _boundary_names, true);
   mooseAssert(boundary_ids.size() == 1, "Length of boundary_ids should be one");
 
-  for (const auto & elem : mesh->active_element_ptr_range())
+  // Adds the side to the new sideset if it satisfies all of the requirements
+  const auto process_side = [&](const Elem * const elem, const unsigned int side)
   {
-    // check if the element is included
-    if (_check_subdomains &&
-        !MeshTraversingUtils::elementSubdomainIdInList(elem, _included_subdomain_ids))
-      continue;
+    // Cheap checks first: reinitializing the FE object for every side of the mesh is expensive
+    if (!elemSideSatisfiesNonNormalRequirements(elem, side, *mesh))
+      return;
 
-    for (const auto side : make_range(elem->n_sides()))
+    if (_using_normal)
     {
-      // Cheap checks first: reinitializing the FE object for every side of the mesh is expensive
-      if (!elemSideSatisfiesNonNormalRequirements(elem, side, *mesh))
+      _fe_face->reinit(elem, side);
+      // We'll just use the normal of the first qp
+      const Point & face_normal = _fe_face->get_normals()[0];
+      if (!MeshTraversingUtils::normalsWithinTol(_normal, face_normal, _normal_tol))
+        return;
+    }
+
+    // check expression
+    const auto curr_side = elem->side_ptr(side);
+    _func_params[0] = curr_side->vertex_average()(0);
+    _func_params[1] = curr_side->vertex_average()(1);
+    _func_params[2] = curr_side->vertex_average()(2);
+    if (evaluate(_func_F))
+    {
+      if (_replace)
+        boundary_info.remove_side(elem, side);
+      boundary_info.add_side(elem, side, boundary_ids[0]);
+    }
+  };
+
+  // The candidate sides are all collected before any of them is modified, as that may change the
+  // boundaries that they are collected from
+  if (const auto included_boundary_sides = getIncludedBoundarySides(*mesh))
+  {
+    for (const auto & [elem, side] : *included_boundary_sides)
+      // check if the element is included
+      if (!_check_subdomains ||
+          MeshTraversingUtils::elementSubdomainIdInList(elem, _included_subdomain_ids))
+        process_side(elem, side);
+  }
+  else
+    for (const auto & elem : mesh->active_element_ptr_range())
+    {
+      // check if the element is included
+      if (_check_subdomains &&
+          !MeshTraversingUtils::elementSubdomainIdInList(elem, _included_subdomain_ids))
         continue;
 
-      if (_using_normal)
-      {
-        _fe_face->reinit(elem, side);
-        // We'll just use the normal of the first qp
-        const Point & face_normal = _fe_face->get_normals()[0];
-        if (!MeshTraversingUtils::normalsWithinTol(_normal, face_normal, _normal_tol))
-          continue;
-      }
-
-      // check expression
-      std::unique_ptr<Elem> curr_side = elem->side_ptr(side);
-      _func_params[0] = curr_side->vertex_average()(0);
-      _func_params[1] = curr_side->vertex_average()(1);
-      _func_params[2] = curr_side->vertex_average()(2);
-      if (evaluate(_func_F))
-      {
-        if (_replace)
-          boundary_info.remove_side(elem, side);
-        boundary_info.add_side(elem, side, boundary_ids[0]);
-      }
+      for (const auto side : make_range(elem->n_sides()))
+        process_side(elem, side);
     }
-  }
   finalize();
   boundary_info.sideset_name(boundary_ids[0]) = _boundary_names[0];
 

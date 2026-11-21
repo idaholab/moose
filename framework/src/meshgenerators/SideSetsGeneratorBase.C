@@ -316,6 +316,34 @@ SideSetsGeneratorBase::elementSideInExcludedBoundaries(const Elem * const elem,
   return false;
 }
 
+std::optional<std::vector<std::pair<const Elem *, unsigned int>>>
+SideSetsGeneratorBase::getIncludedBoundarySides(const MeshBase & mesh) const
+{
+  // Refined elements also belong to the boundaries of their ancestors, which are not stored with
+  // them, so every side has to be visited
+  if (!_check_included_boundaries || mesh.n_active_elem() != mesh.n_elem())
+    return std::nullopt;
+
+  std::vector<std::pair<const Elem *, unsigned int>> sides;
+  for (const auto & [elem, side_and_id] : mesh.get_boundary_info().get_sideset_map())
+    if (elem->active() && std::find(_included_boundary_ids.begin(),
+                                    _included_boundary_ids.end(),
+                                    side_and_id.second) != _included_boundary_ids.end())
+      sides.emplace_back(elem, side_and_id.first);
+
+  // A side may be in more than one of the included boundaries. Visit sides in the order of the
+  // elements of the mesh, not of their memory addresses, so that the result does not depend on it.
+  std::sort(sides.begin(),
+            sides.end(),
+            [](const auto & a, const auto & b)
+            {
+              return a.first->id() != b.first->id() ? a.first->id() < b.first->id()
+                                                    : a.second < b.second;
+            });
+  sides.erase(std::unique(sides.begin(), sides.end()), sides.end());
+  return sides;
+}
+
 bool
 SideSetsGeneratorBase::elemSideSatisfiesNonNormalRequirements(const Elem * const elem,
                                                               const unsigned int side,
