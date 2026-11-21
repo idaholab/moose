@@ -239,3 +239,102 @@ $u_{\text{J},i,n} \equiv \mathbf{u}_\text{J} \cdot \mathbf{n}_{\text{J},i}$ and
 \min\left(\frac{\left|u_{i,n} - u_{\text{J},i,n}\right|}{c_{\text{J},i}}, 1\right) \eqc
 
 with $c_{\text{J},i} \equiv \max(c_i, c_\text{J})$, where $c$ is sound speed.
+
+### Hydrostatic correction id=hydrostatic_correction
+
+The numerical flux takes the two states $\mathbf{U}_{\text{J},i}$ and $\mathbf{U}_i$ as if
+both were at the face $i$. By default they are not: the channel state is the cell average of the
+element next to the junction, which is the solution at the cell center $\mathbf{x}_{c,i}$, half
+a cell away from the face $\mathbf{x}_i$, and the junction state is the solution at the junction
+center $\mathbf{x}_\text{J}$. For a fluid at rest under gravity, the pressure changes with the
+elevation, $\nabla p = \rho \mathbf{g}$, so the pressure at the cell center differs from the
+pressure at the face by $\rho_i \mathbf{g} \cdot (\mathbf{x}_{c,i} - \mathbf{x}_i)$, that is,
+$\rho g \Delta z / 2$ for a vertical element of height $\Delta z$. The numerical flux sees this
+difference as a pressure jump between the two sides and splits it, so the pressure at the face is
+off by $\rho g \Delta z / 4$, and the fluid moves until the momentum flux of the spurious
+velocity balances this error. The error is proportional to the cell height, so it is small in
+absolute terms, but it has the same order as the buoyancy that drives natural circulation at
+low velocities, and no choice of mesh removes it.
+
+With the parameter `use_hydrostatic_correction`, the two states are moved to the face before the
+numerical flux is computed, and the wall pressure term is changed in the same way.
+
+The channel state at the face is the slope reconstruction of the element next to the junction,
+with the scheme of the flow channel. The slopes of the primitive variables $(p, u, T)$ are
+computed from the two neighbors of the element and limited. This element has only one neighbor in
+the channel, so the junction is used as the other one: it is placed at the mirror point of the
+cell center across the face,
+
+!equation
+\mathbf{x}'_{\text{J},i} = 2 \mathbf{x}_i - \mathbf{x}_{c,i} \eqc
+
+and its solution is moved to that point along the hydrostatic balance, with the density and the
+velocity of the junction kept:
+
+!equation
+p'_{\text{J},i} = p_\text{J} + \rho_\text{J} \, \mathbf{g} \cdot (\mathbf{x}'_{\text{J},i} - \mathbf{x}_\text{J}) \eqc
+\qquad
+e'_{\text{J},i} = e(p'_{\text{J},i}, \rho_\text{J}) \eqc
+\qquad
+T'_{\text{J},i} = T(\rho_\text{J}, e'_{\text{J},i}) \eqp
+
+For a fluid at rest, the two one-sided slopes of the pressure are then the same, and the limiter
+keeps them. The reconstructed primitive state at the face is converted to the conservative state
+$\mathbf{U}^\text{f}_i$ with the flow area of the channel at the face.
+
+The junction state at the face $i$ is the junction solution moved to the face in the same way:
+
+!equation
+p_{\text{J},i} = p_\text{J} + \rho_\text{J} \, \mathbf{g} \cdot (\mathbf{x}_i - \mathbf{x}_\text{J}) \eqc
+\qquad
+\rho_{\text{J},i} = \rho_\text{J} \eqc
+\qquad
+\mathbf{u}_{\text{J},i} = \mathbf{u}_\text{J} \eqc
+
+!equation
+e_{\text{J},i} = e(p_{\text{J},i}, \rho_\text{J}) \eqc
+\qquad
+E_{\text{J},i} = e_{\text{J},i} + \frac{1}{2} |\mathbf{u}_\text{J}|^2 \eqc
+
+where $e(p, \rho)$ is given by the equation of state. This is the same construction as the ghost
+cell of the pressure boundary condition. The numerical flux is then evaluated with the two face
+states, $\mathcal{F}(\mathbf{U}^\text{f}_{\text{J},i}, \mathbf{U}^\text{f}_i, \mathbf{n}_{\text{J},i}, \mathbf{t}_{1,i}, \mathbf{t}_{2,i})$,
+and the modification of the normal velocity described above is applied in the same way.
+
+The wall pressure term changes because the pressure on the wall is no longer the average pressure
+$p_\text{J}$ but the hydrostatic pressure
+$p(\mathbf{x}) = p_\text{J} + \rho_\text{J} \, \mathbf{g} \cdot (\mathbf{x} - \mathbf{x}_\text{J})$.
+By the Gauss divergence theorem,
+
+!equation
+\int\limits_{\Gamma} p \mathbf{n} \, d\Gamma = \int\limits_{\Omega} \nabla p \, d\Omega = \rho_\text{J} \mathbf{g} V \eqc
+
+so
+
+!equation
+\int\limits_{\Gamma_{\text{wall}}} p \mathbf{n} \, d\Gamma
+    = \rho_\text{J} \mathbf{g} V - \sum\limits_{i=1}^N p_{\text{J},i} \mathbf{n}_{\text{J},i} A_i \eqp
+
+The first term is the opposite of the gravity force on the junction volume, so the two cancel
+exactly, and the momentum equations with the correction are
+
+!equation
+\ddt{\pr{\rho u V}_J} =
+    -\sum\limits_{i=1}^N \mathbf{f}^{\text{mom},x}_i \cdot \mathbf{n}_{J,i} A_i
+      - \sum\limits_{i=1}^N p_{\text{J},i} n_{i,x} A_i \eqc
+
+!equation
+\ddt{\pr{\rho v V}_J} =
+    -\sum\limits_{i=1}^N \mathbf{f}^{\text{mom},y}_i \cdot \mathbf{n}_{J,i} A_i
+      - \sum\limits_{i=1}^N p_{\text{J},i} n_{i,y} A_i \eqc
+
+!equation
+\ddt{\pr{\rho w V}_J} =
+    -\sum\limits_{i=1}^N \mathbf{f}^{\text{mom},z}_i \cdot \mathbf{n}_{J,i} A_i
+      - \sum\limits_{i=1}^N p_{\text{J},i} n_{i,z} A_i \eqc
+
+with the face pressures $p_{\text{J},i}$ in place of $p_\text{J}$ and no gravity source term.
+The mass and energy equations do not change. With this correction, a fluid at rest with a linear
+pressure profile in each element stays at rest, for any position of the faces relative to the
+junction center. If the flow channels use no slope reconstruction, the channel state at the face
+is the cell average, as at the flow channel boundaries, and only the junction side is corrected.

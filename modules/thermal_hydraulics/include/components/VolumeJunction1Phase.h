@@ -10,11 +10,12 @@
 #pragma once
 
 #include "FlowJunction1Phase.h"
+#include "GravityInterface.h"
 
 /**
  * Junction between 1-phase flow channels that has a non-zero volume
  */
-class VolumeJunction1Phase : public FlowJunction1Phase
+class VolumeJunction1Phase : public FlowJunction1Phase, public GravityInterface
 {
 public:
   VolumeJunction1Phase(const InputParameters & params);
@@ -39,6 +40,7 @@ public:
 
 protected:
   virtual void setupMesh() override;
+  virtual void init() override;
   virtual void check() const override;
 
   /**
@@ -116,6 +118,12 @@ protected:
   const Real & _K;
   /// Reference area
   const Real & _A_ref;
+
+  /// Use the hydrostatic correction at the junction faces?
+  const bool _use_hydrostatic_correction;
+  /// Slope reconstruction scheme of the connected flow channels, used by the hydrostatic
+  /// correction
+  MooseEnum _slope_reconstruction;
 
 public:
   static InputParameters validParams();
