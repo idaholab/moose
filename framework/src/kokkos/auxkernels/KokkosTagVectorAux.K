@@ -34,7 +34,7 @@ KokkosTagVectorAux::KokkosTagVectorAux(const InputParameters & parameters)
     _v(isNodal() ? kokkosCoupledVectorTagNodalValue("v", "vector_tag")
                  : kokkosCoupledVectorTagValue("v", "vector_tag")),
     _v_var(*getFieldVar("v", 0)),
-    _scaling_factor(_v_var.scalingFactor())
+    _scaling_factor(_v_var.arrayScalingFactor()[0])
 {
   checkCoupledVariable(&_v_var, &_var);
 
