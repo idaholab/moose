@@ -37,58 +37,34 @@ SCMPlanarMean::SCMPlanarMean(const InputParameters & parameters)
     _height(getParam<Real>("height")),
     _mean_value(0)
 {
+  if (MooseUtils::absoluteFuzzyLessThan(_height, _mesh.getZGrid().front()))
+    paramError(
+        "height", _height, " is below the inlet of the mesh at ", _mesh.getZGrid().front(), ".");
+  std::tie(_iz, _weight) = _mesh.getAxialInterpolation(_height);
 }
 
 void
 SCMPlanarMean::execute()
 {
-  auto nz = _mesh.getNumOfAxialCells();
-  auto n_channels = _mesh.getNumOfChannels();
-  auto Soln = SolutionHandle(_fe_problem.getVariable(0, _variable));
-  auto mdot_soln = SolutionHandle(_fe_problem.getVariable(0, "mdot"));
-  auto z_grid = _mesh.getZGrid();
-  auto total_length =
-      _mesh.getHeatedLength() + _mesh.getHeatedLengthEntry() + _mesh.getHeatedLengthExit();
+  // Creating a solution handle is collective, so it must happen on every processor
+  const auto Soln = SolutionHandle(_fe_problem.getVariable(0, _variable));
+  const auto mdot_soln = SolutionHandle(_fe_problem.getVariable(0, "mdot"));
+  // The subchannel solution is only available on processor 0
+  if (processor_id() != 0)
+    return;
 
-  auto mass_flow = 0.0;
-  auto sum_sol_mass_flow = 0.0;
-
-  // Use outlet mass flow rate for weighting. Print value at the exit of the assembly.
-  if (_height >= total_length)
+  Real mass_flow = 0.0;
+  Real sum_sol_mass_flow = 0.0;
+  for (const auto i_ch : make_range(_mesh.getNumOfChannels()))
   {
-    for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
-    {
-      auto * node_out = _mesh.getChannelNode(i_ch, nz);
-      mass_flow += mdot_soln(node_out);
-      sum_sol_mass_flow += Soln(node_out) * mdot_soln(node_out);
-    }
-    _mean_value = sum_sol_mass_flow / mass_flow;
+    const auto * node_in = _mesh.getChannelNode(i_ch, _iz);
+    const auto * node_out = _mesh.getChannelNode(i_ch, _iz + 1);
+    const auto solution = Soln.interpolate(node_in, node_out, _weight);
+    const auto mdot = mdot_soln.interpolate(node_in, node_out, _weight);
+    mass_flow += mdot;
+    sum_sol_mass_flow += solution * mdot;
   }
-  else
-  {
-    // Locally average over each axial location in each channel
-    for (unsigned int iz = 0; iz < nz; iz++)
-    {
-      if (_height >= z_grid[iz] && _height < z_grid[iz + 1])
-      {
-        for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
-        {
-          auto * node_out = _mesh.getChannelNode(i_ch, iz + 1);
-          auto * node_in = _mesh.getChannelNode(i_ch, iz);
-          auto average_solution = Soln(node_in) + (Soln(node_out) - Soln(node_in)) *
-                                                      (_height - z_grid[iz]) /
-                                                      (z_grid[iz + 1] - z_grid[iz]);
-          auto average_mass_flow = mdot_soln(node_in) + (mdot_soln(node_out) - mdot_soln(node_in)) *
-                                                            (_height - z_grid[iz]) /
-                                                            (z_grid[iz + 1] - z_grid[iz]);
-          mass_flow += average_mass_flow;
-          sum_sol_mass_flow += average_solution * average_mass_flow;
-        }
-        _mean_value = sum_sol_mass_flow / mass_flow;
-        break;
-      }
-    }
-  }
+  _mean_value = sum_sol_mass_flow / mass_flow;
 }
 
 void

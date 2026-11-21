@@ -31,7 +31,11 @@ protected:
   /// axial location [m]
   const Real & _height;
   /// pin index
-  const int & _i_pin;
+  const unsigned int & _i_pin;
+  /// axial cell containing the height
+  unsigned int _iz;
+  /// linear interpolation weight of the height within the axial cell
+  Real _weight;
   /// value we want to calculate
   Real _value;
 };

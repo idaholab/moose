@@ -31,19 +31,16 @@ SCMTHPowerPostprocessor::SCMTHPowerPostprocessor(const InputParameters & paramet
     _mesh(SCM::getConstMesh<SubChannelMesh>(_fe_problem.mesh())),
     _value(0)
 {
+  SCM::getConstProblem<SubChannel1PhaseProblem>(_fe_problem);
 }
 
 void
 SCMTHPowerPostprocessor::execute()
 {
-  const auto scm_problem = dynamic_cast<SubChannel1PhaseProblem *>(&_fe_problem);
   const auto n_channels = _mesh.getNumOfChannels();
   auto n_cells = _mesh.getNumOfAxialCells();
   auto mdot_soln = SolutionHandle(_fe_problem.getVariable(0, "mdot"));
   auto h_soln = SolutionHandle(_fe_problem.getVariable(0, "h"));
-
-  if (!scm_problem)
-    mooseError("SCMTHPowerPostprocessor can only be used within a subchannel 1phase problem.");
 
   Real power_in = 0.0;
   Real power_out = 0.0;

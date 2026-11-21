@@ -91,4 +91,13 @@
     issues = '#33608'
     requirement = 'The system shall examine the relaxed subchannel monolithic solver for a 19-pin liquid sodium cooled assembly with the Pacio-Chen-Todreas friction and mixing parameterizations'
   []
+  [planar_mean_height_below_inlet]
+    type = RunException
+    input = test19_implicit.i
+    cli_args = 'Postprocessors/Mean_Temp/height=-0.1'
+    expect_err = "height: -0.1 is below the inlet of the mesh at 0."
+    design = 'SCMPlanarMean.md'
+    issues = '#34499'
+    requirement = 'The system shall report an error if the height of a planar mean is below the inlet'
+  []
 []

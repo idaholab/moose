@@ -8,4 +8,22 @@
     recover = False
     requirement = 'The system shall print a variable on a plane in a quadrilateral assembly'
   []
+  [elemental_variable]
+    type = CSVDiff
+    input = 'test.i'
+    cli_args = 'Variables/T/family=MONOMIAL Variables/T/order=CONSTANT '
+               'Outputs/Temp_Out_MATRIX/file_base=Temp_out_matrix_elemental.csv'
+    csvdiff = 'Temp_out_matrix_elemental.csv'
+    recover = False
+    issues = '#34499'
+    requirement = 'The system shall print an elemental variable on a plane in a quadrilateral assembly'
+  []
+  [height_below_inlet]
+    type = RunException
+    input = 'test.i'
+    cli_args = 'Outputs/Temp_Out_MATRIX/height=-0.1'
+    expect_err = "height: -0.1 is below the inlet of the mesh at 0."
+    issues = '#34499'
+    requirement = 'The system shall report an error if the height of a normal slice is below the inlet'
+  []
 []
