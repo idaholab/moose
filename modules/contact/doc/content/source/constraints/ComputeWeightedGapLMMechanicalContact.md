@@ -80,8 +80,8 @@ and Cartesian-LM contact
 ([ComputeWeightedGapCartesianLMMechanicalContact](/ComputeWeightedGapCartesianLMMechanicalContact.md))
 use the same linearized directions in their weighted-gap, weighted-velocity, and Cartesian
 multiplier projections. The thermal mortar gap constraints of the heat transfer module
-differentiate the interpolated normal in their gap width. Cohesive-zone and nonmortar contact do
-not include displacement derivatives of normal and tangent vectors in their Jacobians.
+differentiate the interpolated normal in their gap width. Nonmortar contact does not include
+displacement derivatives of normal and tangent vectors in its Jacobian.
 Quadrature-point normal interpolation is not supported for the standard-basis, dynamic, or
 Cartesian-LM mechanical contact constraints. The displacement variables must be nodal nonlinear
 variables in the system assembled by the contact objects.

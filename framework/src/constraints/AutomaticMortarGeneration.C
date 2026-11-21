@@ -502,12 +502,19 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
         std::distance(_mesh.bid_nodes_begin(primary_bnd_id), _mesh.bid_nodes_end(primary_bnd_id));
     const auto num_secondary_nodes = std::distance(_mesh.bid_nodes_begin(secondary_bnd_id),
                                                    _mesh.bid_nodes_end(secondary_bnd_id));
-    mooseAssert(num_primary_nodes,
+#ifndef NDEBUG
+    // A process of a distributed mesh may hold no node of either boundary, so count them globally
+    std::size_t num_global_primary_nodes = num_primary_nodes;
+    std::size_t num_global_secondary_nodes = num_secondary_nodes;
+    _mesh.comm().sum(num_global_primary_nodes);
+    _mesh.comm().sum(num_global_secondary_nodes);
+    mooseAssert(num_global_primary_nodes,
                 "There are no primary nodes on boundary ID "
                     << primary_bnd_id << ". Does that bondary ID even exist on the mesh?");
-    mooseAssert(num_secondary_nodes,
+    mooseAssert(num_global_secondary_nodes,
                 "There are no secondary nodes on boundary ID "
                     << secondary_bnd_id << ". Does that bondary ID even exist on the mesh?");
+#endif
 
     node_unique_id_offset += num_primary_nodes + 2 * num_secondary_nodes;
   }
@@ -2085,119 +2092,146 @@ AutomaticMortarGeneration::computeNodalGeometry()
   }
 }
 
+AutomaticMortarGeneration::ADFaceAreaVectorCache::ADFaceAreaVectorCache(const unsigned int dim)
+  : qface(dim - 1)
+{
+}
+
+std::vector<AutomaticMortarGeneration::ADFaceNodalAreaVector>
+AutomaticMortarGeneration::secondaryFaceNodalAreaVectors(
+    const Elem & secondary_elem,
+    const std::function<ADPoint(const Node &)> & coordinate,
+    ADFaceAreaVectorCache & cache) const
+{
+  const auto dim = _mesh.mesh_dimension();
+  mooseAssert(dim == 2 || dim == 3, "AD nodal normals are only valid for 2D or 3D mortar.");
+  const auto & qweights = cache.qface.get_weights();
+
+  const Elem * const interior_parent = secondary_elem.interior_parent();
+  mooseAssert(interior_parent,
+              "No interior parent exists for element "
+                  << secondary_elem.id() << ". There may be a problem with your sideset set-up.");
+
+  const auto side = interior_parent->which_side_am_i(&secondary_elem);
+  auto & fe_face = cache.fe_faces[secondary_elem.default_order()];
+  if (!fe_face)
+  {
+    fe_face = FEBase::build(dim, FEType(secondary_elem.default_order(), LAGRANGE));
+    fe_face->attach_quadrature_rule(&cache.qface);
+  }
+
+  const auto & face_points = fe_face->get_xyz();
+  const auto & map_dpsidxi = fe_face->get_fe_map().get_dpsidxi();
+  const auto * const map_dpsideta = dim == 3 ? &fe_face->get_fe_map().get_dpsideta() : nullptr;
+
+  fe_face->reinit(interior_parent, side);
+
+  const auto qpoint_to_secondary_node =
+      MooseMeshUtils::nodalQuadraturePointToNodeMap(secondary_elem, face_points);
+
+  mooseAssert(qweights.size() == face_points.size(),
+              "Face nodal geometry vectors and quadrature weights must have the same size.");
+
+  // The parent-side map includes enriched face mappings such as TET14-to-TRI7.
+  auto parent_side_elem = interior_parent->build_side_ptr(side);
+  const unsigned int n_mapping_shape_functions =
+      dim == 2 ? libMesh::FE<2, LAGRANGE>::n_dofs(parent_side_elem.get(),
+                                                  parent_side_elem->default_order())
+               : libMesh::FE<3, LAGRANGE>::n_dofs(parent_side_elem.get(),
+                                                  parent_side_elem->default_order());
+  if (map_dpsidxi.size() != n_mapping_shape_functions ||
+      (map_dpsideta && map_dpsideta->size() != n_mapping_shape_functions))
+    mooseError("The parent-side geometric map for secondary mortar element ",
+               secondary_elem.id(),
+               " of type ",
+               libMesh::Utility::enum_to_string<ElemType>(secondary_elem.type()),
+               " does not have one mapping shape function per element node.");
+  mooseAssert(n_mapping_shape_functions <= parent_side_elem->n_nodes(),
+              "The mapping basis must not index past the side element's nodes.");
+
+  std::vector<ADPoint> side_points;
+  side_points.reserve(n_mapping_shape_functions);
+  for (const auto side_node_index : make_range(n_mapping_shape_functions))
+    side_points.push_back(coordinate(parent_side_elem->node_ref(side_node_index)));
+
+  const Real sign = _periodic ? -1 : 1;
+  std::vector<ADFaceNodalAreaVector> nodal_area_vectors;
+  nodal_area_vectors.reserve(face_points.size());
+  for (const auto qp : index_range(face_points))
+  {
+    ADFaceNodalAreaVector nodal_area_vector;
+    nodal_area_vector.node = secondary_elem.node_ptr(qpoint_to_secondary_node[qp]);
+
+    auto & [tangent_xi, tangent_eta] = nodal_area_vector.tangents;
+    RealVectorValue real_tangent_xi;
+    RealVectorValue real_tangent_eta;
+    for (const auto side_node_index : make_range(n_mapping_shape_functions))
+    {
+      const auto & side_node = parent_side_elem->node_ref(side_node_index);
+      tangent_xi.add_scaled(side_points[side_node_index], map_dpsidxi[side_node_index][qp]);
+      real_tangent_xi.add_scaled(side_node, map_dpsidxi[side_node_index][qp]);
+      if (dim == 3)
+      {
+        tangent_eta.add_scaled(side_points[side_node_index], (*map_dpsideta)[side_node_index][qp]);
+        real_tangent_eta.add_scaled(side_node, (*map_dpsideta)[side_node_index][qp]);
+      }
+    }
+
+    auto area_vector = dim == 2 ? ADRealVectorValue(tangent_xi(1), -tangent_xi(0), 0)
+                                : tangent_xi.cross(tangent_eta);
+    const Real area = MetaPhysicL::raw_value(area_vector.norm());
+
+    // qweight * area_vector is equivalent to JxW * face_normal. Orient it by the area vector of
+    // this mesh's own node positions, the outward normal of the interior parent, because the
+    // incident-face set and orientation are not differentiated. The given coordinates may be
+    // those of another configuration.
+    const auto real_area_vector = dim == 2
+                                      ? RealVectorValue(real_tangent_xi(1), -real_tangent_xi(0), 0)
+                                      : real_tangent_xi.cross(real_tangent_eta);
+    const Real orientation = real_area_vector * fe_face->get_normals()[qp] < 0 ? -1 : 1;
+
+    nodal_area_vector.weighted_area_vector = sign * orientation * qweights[qp] * area_vector;
+    nodal_area_vector.area = area;
+    nodal_area_vector.weighted_area = std::abs(qweights[qp]) * area;
+    nodal_area_vectors.push_back(std::move(nodal_area_vector));
+  }
+
+  return nodal_area_vectors;
+}
+
 void
 AutomaticMortarGeneration::computeADNodalNormals(
     const std::function<ADPoint(const Node &)> & coordinate,
     std::unordered_map<const Node *, ADRealVectorValue> & nodal_normals) const
 {
-  const auto dim = _mesh.mesh_dimension();
-  mooseAssert(dim == 2 || dim == 3, "AD nodal normals are only valid for 2D or 3D mortar.");
-
-  libMesh::QNodal qface(dim - 1);
-  const auto & qweights = qface.get_weights();
-  const Real sign = _periodic ? -1 : 1;
-
   std::unordered_map<const Node *, ADRealVectorValue> weighted_area_vectors;
   std::unordered_map<const Node *, Real> weighted_area_magnitudes;
 
-  // One face FE object per secondary element order, reused across elements of that order
-  std::map<Order, std::unique_ptr<FEBase>> fe_faces;
-
   // AD propagates coordinate derivatives through the parent-side area vectors and normalization.
+  ADFaceAreaVectorCache cache(_mesh.mesh_dimension());
   for (const auto secondary_subdomain_id : _secondary_boundary_subdomain_ids)
     for (const Elem * const secondary_elem :
          as_range(_mesh.active_subdomain_elements_begin(secondary_subdomain_id),
                   _mesh.active_subdomain_elements_end(secondary_subdomain_id)))
     {
-      const Elem * const interior_parent = secondary_elem->interior_parent();
-      mooseAssert(interior_parent,
-                  "No interior parent exists for element "
-                      << secondary_elem->id()
-                      << ". There may be a problem with your sideset set-up.");
-
       const Real element_size = secondary_elem->hmax();
       if (element_size <= 0)
         mooseError("Cannot compute an AD nodal normal for secondary mortar element ",
                    secondary_elem->id(),
                    " because it has a non-positive characteristic length.");
+      const Real degeneracy_tolerance = _mesh.mesh_dimension() == 2
+                                            ? TOLERANCE * element_size
+                                            : TOLERANCE * element_size * element_size;
 
-      const auto side = interior_parent->which_side_am_i(secondary_elem);
-      auto & fe_face = fe_faces[secondary_elem->default_order()];
-      if (!fe_face)
+      for (const auto & nodal_area_vector :
+           secondaryFaceNodalAreaVectors(*secondary_elem, coordinate, cache))
       {
-        fe_face = FEBase::build(dim, FEType(secondary_elem->default_order(), LAGRANGE));
-        fe_face->attach_quadrature_rule(&qface);
-      }
-
-      const auto & face_normals = fe_face->get_normals();
-      const auto & face_points = fe_face->get_xyz();
-      const auto & map_dpsidxi = fe_face->get_fe_map().get_dpsidxi();
-      const auto * const map_dpsideta = dim == 3 ? &fe_face->get_fe_map().get_dpsideta() : nullptr;
-
-      fe_face->reinit(interior_parent, side);
-
-      const auto qpoint_to_secondary_node =
-          MooseMeshUtils::nodalQuadraturePointToNodeMap(*secondary_elem, face_points);
-
-      mooseAssert(face_normals.size() == face_points.size() &&
-                      qweights.size() == face_points.size(),
-                  "Face nodal geometry vectors and quadrature weights must have the same size.");
-
-      // The parent-side map includes enriched face mappings such as TET14-to-TRI7.
-      auto parent_side_elem = interior_parent->build_side_ptr(side);
-      const unsigned int n_mapping_shape_functions =
-          dim == 2 ? libMesh::FE<2, LAGRANGE>::n_dofs(parent_side_elem.get(),
-                                                      parent_side_elem->default_order())
-                   : libMesh::FE<3, LAGRANGE>::n_dofs(parent_side_elem.get(),
-                                                      parent_side_elem->default_order());
-      if (map_dpsidxi.size() != n_mapping_shape_functions ||
-          (map_dpsideta && map_dpsideta->size() != n_mapping_shape_functions))
-        mooseError("The parent-side geometric map for secondary mortar element ",
-                   secondary_elem->id(),
-                   " of type ",
-                   libMesh::Utility::enum_to_string<ElemType>(secondary_elem->type()),
-                   " does not have one mapping shape function per element node.");
-      mooseAssert(n_mapping_shape_functions <= parent_side_elem->n_nodes(),
-                  "The mapping basis must not index past the side element's nodes.");
-
-      std::vector<ADPoint> side_points;
-      side_points.reserve(n_mapping_shape_functions);
-      for (const auto side_node_index : make_range(n_mapping_shape_functions))
-        side_points.push_back(coordinate(parent_side_elem->node_ref(side_node_index)));
-
-      for (const auto qp : index_range(face_points))
-      {
-        const auto secondary_node_index = qpoint_to_secondary_node[qp];
-        const Node * const secondary_node = secondary_elem->node_ptr(secondary_node_index);
-
-        ADRealVectorValue tangent_xi;
-        ADRealVectorValue tangent_eta;
-        for (const auto side_node_index : make_range(n_mapping_shape_functions))
-        {
-          tangent_xi.add_scaled(side_points[side_node_index], map_dpsidxi[side_node_index][qp]);
-          if (dim == 3)
-            tangent_eta.add_scaled(side_points[side_node_index],
-                                   (*map_dpsideta)[side_node_index][qp]);
-        }
-
-        auto area_vector = dim == 2 ? ADRealVectorValue(tangent_xi(1), -tangent_xi(0), 0)
-                                    : tangent_xi.cross(tangent_eta);
-        const Real area = MetaPhysicL::raw_value(area_vector.norm());
-        const Real degeneracy_tolerance =
-            dim == 2 ? TOLERANCE * element_size : TOLERANCE * element_size * element_size;
-        if (area <= degeneracy_tolerance)
+        if (nodal_area_vector.area <= degeneracy_tolerance)
           mooseError("Cannot compute an AD nodal normal on degenerate secondary mortar element ",
                      secondary_elem->id(),
                      ".");
-
-        // qweight * area_vector is equivalent to JxW * face_normal. Fix its orientation to the
-        // Real-valued face normal because the incident-face set and orientation are not
-        // differentiated.
-        const Real orientation =
-            MetaPhysicL::raw_value(area_vector) * face_normals[qp] < 0 ? -1 : 1;
-
-        weighted_area_vectors[secondary_node] += sign * orientation * qweights[qp] * area_vector;
-        weighted_area_magnitudes[secondary_node] += std::abs(qweights[qp]) * area;
+        weighted_area_vectors[nodal_area_vector.node] += nodal_area_vector.weighted_area_vector;
+        weighted_area_magnitudes[nodal_area_vector.node] += nodal_area_vector.weighted_area;
       }
     }
 

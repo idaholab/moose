@@ -196,11 +196,6 @@
 
     disp_x = disp_x
     disp_y = disp_y
-    friction_coefficient = 0.0 # with 2.0 works
-    secondary_variable = disp_x
-    penalty = 0e6
-    penalty_friction = 0e4
-    use_physical_gap = true
 
     # bilinear parameters
     normal_strength = 1e4
@@ -210,7 +205,6 @@
     viscosity = 1.0e-3
     GI_c = 1e3
     GII_c = 1e2
-    displacements = 'disp_x disp_y'
   []
 []
 
@@ -223,7 +217,6 @@
     secondary_subdomain = 10001
     secondary_variable = disp_x
     component = x
-    use_displaced_mesh = true
     compute_lm_residuals = false
     cohesive_zone_uo = czm_uo
   []
@@ -235,7 +228,6 @@
     secondary_subdomain = 10001
     secondary_variable = disp_y
     component = y
-    use_displaced_mesh = true
     compute_lm_residuals = false
     cohesive_zone_uo = czm_uo
   []

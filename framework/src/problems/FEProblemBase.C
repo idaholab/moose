@@ -9123,9 +9123,15 @@ FEProblemBase::updateMortarMesh()
   // follows. Guard on _initialized: this is also called from init() itself, before es().init() has
   // run for the first time, and reinit()ing an EquationSystems that has never been init()ed is not
   // meaningful (init() immediately after will pick up whatever _mortar_data->update() just built).
-  if (_mortar_data->update() && _initialized && !currentlyComputingResidual() &&
-      !currentlyComputingJacobian())
-    reinitBecauseOfGhostingOrNewGeomObjects(/*mortar_changed=*/true);
+  bool coverage_changed = _mortar_data->update();
+  if (_initialized && !currentlyComputingResidual() && !currentlyComputingJacobian())
+  {
+    // Each process compares the coverage of its own mortar segments, so a process that owns none
+    // can see no change while others do. Agree before the collective reinit.
+    _communicator.max(coverage_changed);
+    if (coverage_changed)
+      reinitBecauseOfGhostingOrNewGeomObjects(/*mortar_changed=*/true);
+  }
 }
 
 void
