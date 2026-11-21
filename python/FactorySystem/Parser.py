@@ -44,6 +44,7 @@ class Parser:
         self.root = None
         self.errors = []
         self.fname = ""
+        self._defaults_node = None
 
     def parse(self, filename, default_values=None):
 
@@ -58,7 +59,20 @@ class Parser:
         self.root = root(0)  # make the [Tests] block the root
 
         self.check()
-        self._parseNode(filename, self.root, default_values)
+
+        # Convert any provided default values (from the testroot file) into a
+        # simple dictionary so that we can merge values without relying on
+        # pyhit.Node's type conversion rules.
+        if default_values is not None:
+            if isinstance(default_values, dict):
+                defaults = default_values
+            else:
+                self._defaults_node = default_values
+                defaults = {k: v for k, v in default_values.params()}
+        else:
+            defaults = {}
+
+        self._parseNode(filename, self.root, defaults)
 
     def check(self):
         """Perform error checking on the loaded hit tree"""
@@ -157,6 +171,19 @@ class Parser:
     # private:
     def _parseNode(self, filename, node, default_values):
 
+        # Build a new set of default values for any child blocks by combining
+        # the inherited defaults with parameters defined on this node. This
+        # allows values supplied in the [Tests] block to propagate to every
+        # test contained within it.
+        child_defaults = dict(default_values) if default_values is not None else {}
+        for key, value in node.params():
+            if key == "type":
+                continue
+            if key == "cli_args" and key in child_defaults:
+                child_defaults[key] = child_defaults[key] + " " + value
+            else:
+                child_defaults[key] = value
+
         if "type" in node:
             moose_type = node["type"]
 
@@ -167,16 +194,27 @@ class Parser:
             params.addParam("hit_path", node.fullpath, "HIT path to test in spec file")
 
             # Apply any new defaults
-            for key, value in default_values.params():
+            for key, value in default_values.items():
                 if key in params.keys():
                     if key == "cli_args":
                         params[key].append(value)
+                    elif params.type(key) == list:
+                        if isinstance(value, str):
+                            value = value.replace("\n", " ")
+                            params[key] = re.split(r"\s+", value)
+                        elif isinstance(value, (list, tuple)):
+                            params[key] = list(value)
+                        else:
+                            params[key] = [str(value)]
                     else:
                         params[key] = value
                 elif key == "allow_override":
-                    print(
-                        f'WARNING: {default_values.filename()}:{default_values.line(key)}: unused parameter "{key}"'
-                    )
+                    source = self._defaults_node
+                    if source is not None and key in source:
+                        location = f"{source.filename(key)}:{source.line(key)}"
+                    else:
+                        location = self.fname
+                    print(f'WARNING: {location}: unused parameter "{key}"')
 
             # Extract the parameters from the hit node
             self.extractParams(params, node)
@@ -226,9 +264,11 @@ class Parser:
                 node=node,
             )
 
-        # Loop over the section names and parse them
+        # Loop over the section names and parse them using the newly
+        # constructed defaults which include any parameters defined at this
+        # level.
         for child in node:
-            self._parseNode(filename, child, default_values)
+            self._parseNode(filename, child, child_defaults)
 
     # This routine returns a Boolean indicating whether a given block
     # looks like a valid subblock. In the Testing system, a valid subblock

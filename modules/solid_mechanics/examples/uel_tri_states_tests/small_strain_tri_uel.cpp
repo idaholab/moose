@@ -86,16 +86,13 @@ uel_(double RHS[],
      int * /*NJPROP*/,
      double * /*PERIOD*/)
 {
-  // solution at the beginning of the increment
+  // solution at the end of the increment
   Eigen::Matrix<double, 6, 1> u;
   u << U_[0], U_[1], U_[2], U_[3], U_[4], U_[5];
 
   // current solution increment
   Eigen::Matrix<double, 6, 1> du;
   du << DU_[0], DU_[1], DU_[2], DU_[3], DU_[4], DU_[5];
-
-  // current solution
-  u += du;
 
   const auto x1 = COORDS[0];
   const auto y1 = COORDS[1];
@@ -139,9 +136,13 @@ uel_(double RHS[],
   // Young's Modulus
   auto Y = PROPS[0];
 
-  // Coarse interpolation for testing spatially varying external fields
-  const double temperature = 1.0 / 3.0 * (PREDEF[0] + PREDEF[4] + PREDEF[8]);
-  const double voltage = 1.0 / 3.0 * (PREDEF[2] + PREDEF[6] + PREDEF[10]);
+  // Coarse interpolation for testing spatially varying external fields. PREDEF holds the value at
+  // the end of the increment and the increment; the UMAT this element mirrors sees the value at the
+  // start of the increment, which is their difference.
+  const double temperature =
+      1.0 / 3.0 * ((PREDEF[0] - PREDEF[1]) + (PREDEF[4] - PREDEF[5]) + (PREDEF[8] - PREDEF[9]));
+  const double voltage =
+      1.0 / 3.0 * ((PREDEF[2] - PREDEF[3]) + (PREDEF[6] - PREDEF[7]) + (PREDEF[10] - PREDEF[11]));
 
   Y *= (temperature + voltage) / 1000;
 
@@ -269,7 +270,7 @@ uel_(double RHS[],
   {
     RHS[i] = -re(i);
     for (const auto j : range)
-      AMATRX[i * 6 + j] = -ke(i, j);
+      AMATRX[i * 6 + j] = ke(i, j);
   }
 
   SVARS[6] += std::fabs(dstran[0]) + std::fabs(dstran[1]);
@@ -296,7 +297,7 @@ uel_(double RHS[],
     {
       RHS[i] = -re(i);
       for (const auto j : range)
-        AMATRX[i * 6 + j] = -ke(i, j);
+        AMATRX[i * 6 + j] = ke(i, j);
     }
   }
 }
