@@ -16,6 +16,75 @@
 TEST_F(PorousFlowBrineCO2Test, name) { EXPECT_EQ("brine-co2", _fs->fluidStateName()); }
 
 /**
+ * Verify that the absent phase in a single-phase state is given the equilibrium composition
+ * and the properties it would have at the current pressure and temperature (continuity of
+ * the properties across the phase boundary, #34412)
+ */
+TEST_F(PorousFlowBrineCO2Test, absentPhaseProperties)
+{
+  ADReal p = 20.0e6;
+  Moose::derivInsert(p.derivatives(), _pidx, 1.0);
+
+  ADReal T = 350.0;
+  Moose::derivInsert(T.derivatives(), _Tidx, 1.0);
+
+  ADReal Xnacl = 0.1;
+  Moose::derivInsert(Xnacl.derivatives(), _Xidx, 1.0);
+
+  const unsigned int np = _fs->numPhases();
+  const unsigned int nc = _fs->numComponents();
+  std::vector<FluidStateProperties> fsp(np, FluidStateProperties(nc));
+
+  // Equilibrium composition at (p, T)
+  ADReal Xeq, Yh2o;
+  _fs->equilibriumMassFractions(p, T, Xnacl, Xeq, Yh2o);
+
+  // Liquid region: the gas phase is absent
+  ADReal Z = 0.5 * Xeq;
+  Moose::derivInsert(Z.derivatives(), _Zidx, 1.0);
+
+  _fs->thermophysicalProperties(p, T, Xnacl, Z, 0, fsp);
+  ABS_TEST(fsp[1].saturation.value(), 0.0, 1.0e-12);
+  REL_TEST(fsp[0].mass_fraction[1].value(), Z.value(), 1.0e-12);
+
+  // Absent gas: equilibrium composition, pure CO2 density and viscosity at (p, T)
+  REL_TEST(fsp[1].mass_fraction[0].value(), Yh2o.value(), 1.0e-12);
+  REL_TEST(fsp[1].mass_fraction[1].value(), 1.0 - Yh2o.value(), 1.0e-12);
+  REL_TEST(fsp[1].density.value(), _co2_fp->rho_from_p_T(p.value(), T.value()), 1.0e-12);
+  REL_TEST(fsp[1].viscosity.value(), _co2_fp->mu_from_p_T(p.value(), T.value()), 1.0e-12);
+  REL_TEST(fsp[1].enthalpy.value(), _co2_fp->h_from_p_T(p.value(), T.value()), 1.0e-12);
+
+  // The absent gas has the same properties as the gas that appears at Z slightly above Xeq
+  std::vector<FluidStateProperties> fsp2(np, FluidStateProperties(nc));
+  Z = Xeq * (1.0 + 1.0e-8);
+  _fs->thermophysicalProperties(p, T, Xnacl, Z, 0, fsp2);
+  EXPECT_GT(fsp2[1].saturation.value(), 0.0);
+  REL_TEST(fsp2[1].density.value(), fsp[1].density.value(), 1.0e-8);
+  REL_TEST(fsp2[1].viscosity.value(), fsp[1].viscosity.value(), 1.0e-8);
+  REL_TEST(fsp2[1].mass_fraction[1].value(), fsp[1].mass_fraction[1].value(), 1.0e-8);
+
+  // Gas region: the liquid phase is absent
+  Z = 1.0 - 0.5 * Yh2o;
+  _fs->thermophysicalProperties(p, T, Xnacl, Z, 0, fsp);
+  ABS_TEST(fsp[0].saturation.value(), 0.0, 1.0e-12);
+  REL_TEST(fsp[1].mass_fraction[1].value(), Z.value(), 1.0e-12);
+
+  // Absent liquid: CO2-saturated brine at the gas pressure
+  REL_TEST(fsp[0].mass_fraction[0].value(), 1.0 - Xeq.value(), 1.0e-12);
+  REL_TEST(fsp[0].mass_fraction[1].value(), Xeq.value(), 1.0e-12);
+  REL_TEST(fsp[0].mass_fraction[2].value(), Xnacl.value(), 1.0e-12);
+
+  std::vector<FluidStateProperties> fsp3(np, FluidStateProperties(nc));
+  fsp3[0].mass_fraction[0] = 1.0 - Xeq;
+  fsp3[0].mass_fraction[1] = Xeq;
+  fsp3[0].mass_fraction[2] = Xnacl;
+  _fs->liquidProperties(p, T, Xnacl, fsp3);
+  REL_TEST(fsp[0].density.value(), fsp3[0].density.value(), 1.0e-12);
+  REL_TEST(fsp[0].viscosity.value(), fsp3[0].viscosity.value(), 1.0e-12);
+  REL_TEST(fsp[0].enthalpy.value(), fsp3[0].enthalpy.value(), 1.0e-12);
+}
+
+/**
  * Verify that the correct values for the fluid phase and component indices are supplied
  */
 TEST_F(PorousFlowBrineCO2Test, indices)
@@ -311,6 +380,11 @@ TEST_F(PorousFlowBrineCO2Test, MassFraction)
   const unsigned int nc = _fs->numComponents();
   std::vector<FluidStateProperties> fsp(np, FluidStateProperties(nc));
 
+  // Equilibrium mass fractions: the composition of the absent phase in the single-phase
+  // regions (verified in the equilibriumMassFraction test above)
+  ADReal Xco2_eq, Yh2o_eq;
+  _fs->equilibriumMassFractions(p, T, Xnacl, Xco2_eq, Yh2o_eq);
+
   // Liquid region
   ADReal Z = 0.0001;
   Moose::derivInsert(Z.derivatives(), _Zidx, 1.0);
@@ -318,16 +392,17 @@ TEST_F(PorousFlowBrineCO2Test, MassFraction)
   _fs->massFractions(p, T, Xnacl, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::LIQUID);
 
-  // Verfify mass fraction values
+  // Verfify mass fraction values. The liquid composition is given by Z; the absent gas phase
+  // has the equilibrium composition (comparing ADReals verifies the derivatives as well)
   ADReal Xco2 = fsp[0].mass_fraction[1];
   ADReal Yco2 = fsp[1].mass_fraction[1];
   ADReal Xh2o = fsp[0].mass_fraction[0];
   ADReal Yh2o = fsp[1].mass_fraction[0];
   ADReal Xnacl2 = fsp[0].mass_fraction[2];
   ABS_TEST(Xco2.value(), Z.value(), 1.0e-8);
-  ABS_TEST(Yco2.value(), 0.0, 1.0e-8);
+  ABS_TEST(Yco2, 1.0 - Yh2o_eq, 1.0e-8);
   ABS_TEST(Xh2o.value(), 1.0 - Z.value(), 1.0e-8);
-  ABS_TEST(Yh2o.value(), 0.0, 1.0e-8);
+  ABS_TEST(Yh2o, Yh2o_eq, 1.0e-8);
   ABS_TEST(Xnacl2.value(), Xnacl.value(), 1.0e-8);
 
   // Verify derivatives
@@ -335,9 +410,6 @@ TEST_F(PorousFlowBrineCO2Test, MassFraction)
   ABS_TEST(Xco2.derivatives()[_Tidx], 0.0, 1.0e-8);
   ABS_TEST(Xco2.derivatives()[_Xidx], 0.0, 1.0e-8);
   ABS_TEST(Xco2.derivatives()[_Zidx], 1.0, 1.0e-8);
-  ABS_TEST(Yco2.derivatives()[_pidx], 0.0, 1.0e-8);
-  ABS_TEST(Yco2.derivatives()[_Tidx], 0.0, 1.0e-8);
-  ABS_TEST(Yco2.derivatives()[_Xidx], 0.0, 1.0e-8);
   ABS_TEST(Yco2.derivatives()[_Zidx], 0.0, 1.0e-8);
   ABS_TEST(Xnacl.derivatives()[_Xidx], 1.0, 1.0e-8);
 
@@ -348,22 +420,20 @@ TEST_F(PorousFlowBrineCO2Test, MassFraction)
   _fs->massFractions(p, T, Xnacl, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::GAS);
 
-  // Verfify mass fraction values
+  // Verfify mass fraction values. The gas composition is given by Z; the absent liquid phase
+  // has the equilibrium composition
   Xco2 = fsp[0].mass_fraction[1];
   Yco2 = fsp[1].mass_fraction[1];
   Xh2o = fsp[0].mass_fraction[0];
   Yh2o = fsp[1].mass_fraction[0];
   ADReal Ynacl = fsp[1].mass_fraction[2];
-  ABS_TEST(Xco2.value(), 0.0, 1.0e-8);
+  ABS_TEST(Xco2, Xco2_eq, 1.0e-8);
   ABS_TEST(Yco2.value(), Z.value(), 1.0e-8);
-  ABS_TEST(Xh2o.value(), 0.0, 1.0e-8);
+  ABS_TEST(Xh2o, 1.0 - Xco2_eq, 1.0e-8);
   ABS_TEST(Yh2o.value(), 1.0 - Z.value(), 1.0e-8);
   ABS_TEST(Ynacl.value(), 0.0, 1.0e-8);
 
   // Verify derivatives
-  ABS_TEST(Xco2.derivatives()[_pidx], 0.0, 1.0e-8);
-  ABS_TEST(Xco2.derivatives()[_Tidx], 0.0, 1.0e-8);
-  ABS_TEST(Xco2.derivatives()[_Xidx], 0.0, 1.0e-8);
   ABS_TEST(Xco2.derivatives()[_Zidx], 0.0, 1.0e-8);
   ABS_TEST(Yco2.derivatives()[_pidx], 0.0, 1.0e-8);
   ABS_TEST(Yco2.derivatives()[_Tidx], 0.0, 1.0e-8);
@@ -380,9 +450,7 @@ TEST_F(PorousFlowBrineCO2Test, MassFraction)
   _fs->massFractions(p, T, Xnacl, Z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::TWOPHASE);
 
-  // Equilibrium mass fractions and derivatives
-  ADReal Xco2_eq, Yh2o_eq;
-  _fs->equilibriumMassFractions(p, T, Xnacl, Xco2_eq, Yh2o_eq);
+  // Equilibrium mass fractions and derivatives (computed above)
 
   // Verfify mass fraction values - comparing ADReals verifies that derivatives
   // are also identical

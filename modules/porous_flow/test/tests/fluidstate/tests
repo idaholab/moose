@@ -96,6 +96,26 @@
     design = 'PorousFlowBrineCO2.md'
     issues = '#33348'
   []
+  [brineco2_liquid]
+    type = 'CSVDiff'
+    input = 'brineco2.i'
+    csvdiff = 'brineco2_liquid.csv'
+    prereq = brineco2_no_enthalpy
+    cli_args = 'Variables/z/initial_condition=0.01 Outputs/file_base=brineco2_liquid'
+    requirement = 'The system shall calculate the properties of the liquid phase in a single-phase liquid brine and CO2 system, and give the absent gas phase the density, viscosity and composition it has in equilibrium at the same pressure and temperature.'
+    design = 'PorousFlowBrineCO2.md'
+    issues = '#8818 #34412'
+  []
+  [brineco2_gas]
+    type = 'CSVDiff'
+    input = 'brineco2.i'
+    csvdiff = 'brineco2_gas.csv'
+    prereq = brineco2_liquid
+    cli_args = 'Variables/z/initial_condition=0.999 Outputs/file_base=brineco2_gas'
+    requirement = 'The system shall calculate the properties of the gas phase in a single-phase gas brine and CO2 system, and give the absent liquid phase the density, viscosity and composition it has in equilibrium at the same pressure and temperature.'
+    design = 'PorousFlowBrineCO2.md'
+    issues = '#8818 #34412'
+  []
   [brineco2_2]
     type = 'CSVDiff'
     input = 'brineco2_2.i'
