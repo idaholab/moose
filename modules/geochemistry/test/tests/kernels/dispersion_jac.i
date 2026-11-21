@@ -37,7 +37,7 @@
   [check]
     type = SMP
     full = true
-    petsc_options = '-snes_test_jacobian -snes_force_iteration'
+    petsc_options = '-snes_test_jacobian'
     petsc_options_iname = '-snes_type -ksp_type -pc_type -snes_convergence_test'
     petsc_options_value = ' ksponly    preonly   none     skip'
   []

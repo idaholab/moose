@@ -9,33 +9,15 @@
 
 #pragma once
 
-#include "InputParameters.h"
-#include "AugmentedLagrangianContactConvergenceBase.h"
-
-class FEProblemBase;
-
 /**
- *  Class to provide an interface for parameters and routines required to check
- *  convergence for the augmented Lagrangian contact problem.
+ *  Interface of the augmented Lagrangian contact problems that gives the contact constraints,
+ *  user objects and postprocessors access to the augmented Lagrangian iteration number.
  */
 class AugmentedLagrangianContactProblemInterface
 {
 public:
-  static InputParameters validParams();
+  virtual ~AugmentedLagrangianContactProblemInterface() = default;
 
-  AugmentedLagrangianContactProblemInterface(const InputParameters & params,
-                                             FEProblemBase & problem);
-
-  /// @return the augmented Lagrangian contact convergence object of the problem's nonlinear solve
-  virtual const AugmentedLagrangianContactConvergenceBase &
-  getAugmentedLagrangianContactConvergence() const;
-
-  virtual const unsigned int & getLagrangianIterationNumber() const
-  {
-    return getAugmentedLagrangianContactConvergence().getLagrangianIterationNumber();
-  }
-
-private:
-  /// The problem that owns this interface, used to look up the convergence object
-  FEProblemBase & _problem;
+  /// @return the current augmented Lagrangian iteration number
+  virtual const unsigned int & getLagrangianIterationNumber() const = 0;
 };

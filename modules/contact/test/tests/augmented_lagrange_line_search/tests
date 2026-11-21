@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#34078'
+  design = 'AugmentedLagrangianContactProblem.md'
+  [bt_line_search]
+    type = CSVDiff
+    input = bt_line_search.i
+    csvdiff = bt_line_search_out.csv
+    requirement = 'The system shall solve augmented Lagrangian contact problems with a backtracking '
+                  'line search by repeating the nonlinear solve after each update of the contact '
+                  'multipliers.'
+  []
+[]

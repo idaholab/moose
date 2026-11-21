@@ -12,9 +12,9 @@
     type = 'Exodiff'
     input = 'dirichletbc.i'
     exodiff = 'dirichletbc_out.e'
-    cli_args = 'Executioner/nl_abs_tol=1e+1 Executioner/petsc_options_iname=-snes_force_iteration Executioner/petsc_options_value=1'
+    cli_args = 'Executioner/nl_abs_tol=1e+1 Executioner/nl_forced_its=1'
     prereq = dirichletbc/nonad
-    requirement = 'The system shall force the solver to take at least one iteration regardless of the initial residual norm when the snes_force_iteration option is specified.'
+    requirement = 'The system shall force the solver to take at least one iteration regardless of the initial residual norm when one forced nonlinear iteration is requested.'
     issues = '#10594'
     design = 'Transient.md'
   []

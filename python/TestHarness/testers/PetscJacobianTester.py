@@ -75,7 +75,12 @@ class PetscJacobianTester(RunApp):
         if self.specs["turn_off_exodus_output"]:
             self.specs["cli_args"][:0] = ["Outputs/exodus=false"]
 
-        self.specs["cli_args"].extend(["-snes_test_jacobian", "-snes_force_iteration"])
+        if self.specs["run_sim"]:
+            # Take a Newton step, and so compute a Jacobian, even if the solve starts converged.
+            # It goes first because PETSc reads an argument that follows one of its options and is
+            # not itself an option as that option's value.
+            self.specs["cli_args"][:0] = ["Executioner/nl_forced_its=1"]
+        self.specs["cli_args"].append("-snes_test_jacobian")
         if not self.specs["run_sim"]:
             self.specs["cli_args"].extend(
                 [
