@@ -208,28 +208,27 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
     }
   }
 
-  // Get the boundary ids from the names
-  if (parameters().isParamValid("included_subdomains"))
+  // Check that the subdomains exist in the mesh and get their ids. The mesh is prepared at this
+  // point, so its cached subdomain ids (across all processors) are current and no loop over the
+  // elements is needed.
+  const auto get_subdomain_ids = [&](const std::string & param_name)
   {
-    // check that the subdomains exist in the mesh
-    const auto subdomains = getParam<std::vector<SubdomainName>>("included_subdomains");
+    const auto & mesh_subdomain_ids = mesh.get_mesh_subdomains();
+    const auto subdomains = getParam<std::vector<SubdomainName>>(param_name);
     for (const auto & name : subdomains)
-      if (!MooseMeshUtils::hasSubdomainName(mesh, name))
-        paramError("included_subdomains", "The block '", name, "' was not found in the mesh");
+    {
+      const auto id = MooseMeshUtils::getSubdomainID(name, mesh);
+      if (id == Moose::INVALID_BLOCK_ID || !mesh_subdomain_ids.count(id))
+        paramError(param_name, "The block '", name, "' was not found in the mesh");
+    }
+    return MooseMeshUtils::getSubdomainIDs(mesh, subdomains);
+  };
 
-    _included_subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, subdomains);
-  }
+  if (parameters().isParamValid("included_subdomains"))
+    _included_subdomain_ids = get_subdomain_ids("included_subdomains");
 
   if (parameters().isParamValid("included_neighbors"))
-  {
-    // check that the subdomains exist in the mesh
-    const auto subdomains = getParam<std::vector<SubdomainName>>("included_neighbors");
-    for (const auto & name : subdomains)
-      if (!MooseMeshUtils::hasSubdomainName(mesh, name))
-        paramError("included_neighbors", "The block '", name, "' was not found in the mesh");
-
-    _included_neighbor_subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, subdomains);
-  }
+    _included_neighbor_subdomain_ids = get_subdomain_ids("included_neighbors");
 
   // We need neighbors per #15823. complete_preparation() above finds them only if they are not
   // already known, as tracked by the mesh's preparation state.
@@ -292,8 +291,12 @@ SideSetsGeneratorBase::elementSideInIncludedBoundaries(const Elem * const elem,
                                                        const unsigned int side,
                                                        const MeshBase & mesh) const
 {
+  // Query the boundary ids of the side once; has_boundary_id() does so for every id
+  std::vector<boundary_id_type> side_boundary_ids;
+  mesh.get_boundary_info().boundary_ids(elem, side, side_boundary_ids);
   for (const auto & bid : _included_boundary_ids)
-    if (mesh.get_boundary_info().has_boundary_id(elem, side, bid))
+    if (std::find(side_boundary_ids.begin(), side_boundary_ids.end(), bid) !=
+        side_boundary_ids.end())
       return true;
   return false;
 }
@@ -303,8 +306,12 @@ SideSetsGeneratorBase::elementSideInExcludedBoundaries(const Elem * const elem,
                                                        const unsigned int side,
                                                        const MeshBase & mesh) const
 {
+  // Query the boundary ids of the side once; has_boundary_id() does so for every id
+  std::vector<boundary_id_type> side_boundary_ids;
+  mesh.get_boundary_info().boundary_ids(elem, side, side_boundary_ids);
   for (const auto bid : _excluded_boundary_ids)
-    if (mesh.get_boundary_info().has_boundary_id(elem, side, bid))
+    if (std::find(side_boundary_ids.begin(), side_boundary_ids.end(), bid) !=
+        side_boundary_ids.end())
       return true;
   return false;
 }
