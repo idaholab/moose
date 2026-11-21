@@ -9,6 +9,15 @@
     recover = false
     requirement = 'The system shall have the ability to remove elements based on their vertex average position.'
   []
+  [after_break_mesh_by_block]
+    type = 'Exodiff'
+    input = 'delete_after_break.i'
+    cli_args = '--mesh-only'
+    exodiff = 'delete_after_break_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall have the ability to remove elements from a mesh with split block interfaces and to find the exterior sides that remain.'
+  []
   [volume_too_small]
     type = 'JSONDiff'
     input = 'cut_the_small.i'

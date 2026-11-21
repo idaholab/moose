@@ -42,12 +42,16 @@ ElementDeletionGeneratorBase::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
-  // Make sure that the mesh is prepared.  We'll just do a full
-  // prepare_for_use() here, since we expect to be able to use
-  // neighbor pointers, multiple caches, *and* on distributed meshes a
-  // load-balanced partitioning.
+  // Make sure that the mesh is prepared.  We expect to be able to use
+  // neighbor pointers and multiple caches. On distributed meshes we also expect a
+  // load-balanced partitioning, so we do a full prepare_for_use() there.
   if (!mesh->is_prepared())
-    mesh->prepare_for_use();
+  {
+    if (neighborsStayValid(*mesh))
+      mesh->complete_preparation();
+    else
+      mesh->prepare_for_use();
+  }
 
   // Elements that the deleter will remove
   std::set<Elem *> deleteable_elems;
@@ -260,7 +264,39 @@ ElementDeletionGeneratorBase::generate()
    * Action that we need to re-prepare the mesh.
    */
   mesh->contract();
-  mesh->prepare_for_use();
+  if (neighborsStayValid(*mesh))
+  {
+    // The neighbor pointers were kept up to date while deleting above, so they do not need to be
+    // found again, which is the most expensive part of preparing a large mesh. Everything else that
+    // deleting elements invalidates is prepared again, including the partitioning, as the nodes
+    // that are used by the elements of a processor may have changed.
+    mesh->unset_is_partitioned();
+    mesh->unset_has_synched_id_counts();
+    mesh->unset_has_removed_orphaned_nodes();
+    mesh->unset_has_cached_elem_data();
+    mesh->unset_has_boundary_id_sets();
+    mesh->unset_has_reinit_ghosting_functors();
+    mesh->complete_preparation();
+  }
+  else
+    mesh->prepare_for_use();
 
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+bool
+ElementDeletionGeneratorBase::neighborsStayValid(const MeshBase & mesh) const
+{
+  // Distributed meshes rely on the full preparation for load balancing the partitioning and for
+  // the remote elements that are linked to deleted elements
+  if (!mesh.is_replicated())
+    return false;
+
+#ifdef LIBMESH_ENABLE_PERIODIC
+  // Neighbors across disjoint boundary pairs are only determined when neighbors are found
+  if (mesh.get_disjoint_neighbor_boundary_pairs())
+    return false;
+#endif
+
+  return true;
 }

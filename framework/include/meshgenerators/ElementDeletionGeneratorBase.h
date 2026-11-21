@@ -36,6 +36,13 @@ protected:
    */
   virtual bool shouldDelete(const Elem * elem) = 0;
 
+  /**
+   * Whether the neighbor pointers of the mesh are kept valid by the deletion itself, so that they
+   * do not have to be found again afterwards. This is not the case on distributed meshes or on
+   * meshes with disjoint neighbor boundary pairs.
+   */
+  bool neighborsStayValid(const MeshBase & mesh) const;
+
   ///  Assign a boundary name to the cut surface?
   const bool _assign_boundary;
 
