@@ -104,6 +104,35 @@ public:
   void scaleEigenvector(const Real scaling_factor);
 
   /**
+   * Request that the quadratic form phi^T B phi of the eigenvector phi in the solution be computed
+   * after each solve and on each loadEigenvector(), with the B operator the solve assembled. Eigen
+   * solves that never request it do not compute it.
+   */
+  void needEigenvectorBNorm() { _need_eigenvector_b_norm = true; }
+
+  /**
+   * @return The B-norm sqrt(phi^T B phi) of the eigenvector in the solution, as stored after the
+   * last solve or loadEigenvector() and rescaled by scaleEigenvector(). It is zero until the first
+   * solve and when needEigenvectorBNorm() was never called
+   */
+  Real eigenvectorBNorm() const;
+
+  /**
+   * Copy the converged eigenvector \p i into the solution of the eigen system, give the constrained
+   * degrees of freedom their constrained values, and store its quadratic form phi^T B phi when
+   * requested by needEigenvectorBNorm(). Neither the objects executing on linear nor the
+   * normalization postprocessor are evaluated.
+   */
+  void loadEigenvector(unsigned int i);
+
+  /**
+   * Evaluate the objects executing on linear where the solve does not leave them up to date with
+   * the eigenvector in the solution, and normalize it with postScaleEigenVector(), which is what a
+   * solve does with the active eigenvector after the eigen solver returns
+   */
+  void finalizeEigenvector(const unsigned int nl_sys_num);
+
+  /**
    * Set eigen problem type. Don't need to use this if we use Newton eigenvalue solver.
    */
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
@@ -287,6 +316,19 @@ private:
   /// The name of the Postprocessor providing the Bx norm. This may be empty in which case the
   /// default L2 norm of Bx will be used as the Bx norm
   std::optional<PostprocessorName> _bx_norm_name;
+
+  /**
+   * Compute and store the quadratic form phi^T B phi of the eigenvector phi in the solution, with
+   * the B operator the last solve assembled, when requested by needEigenvectorBNorm(). This is a
+   * collective operation.
+   */
+  void storeEigenvectorBNorm();
+
+  /// Whether phi^T B phi of the eigenvector in the solution is computed after solves and loads
+  bool _need_eigenvector_b_norm;
+
+  /// The quadratic form phi^T B phi of the eigenvector phi in the solution
+  Real _eigenvector_b_norm_squared;
 
 #endif
 

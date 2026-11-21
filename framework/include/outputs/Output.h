@@ -67,8 +67,8 @@ public:
    * Get the output time.
    * @return The output time, which may be different than the simulation time
    *
-   * When the Executioner is steady this utilizes the time_step and when Transient the actual time
-   * is used.
+   * The executioner chooses between the simulation time and the time step number, see
+   * Executioner::getOutputTime().
    */
   virtual Real time();
 

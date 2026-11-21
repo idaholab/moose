@@ -130,6 +130,18 @@ public:
   const bool & verbose() const { return _verbose; }
 
   /**
+   * Get the time that outputs write for the current step
+   * @return The simulation time if outputsUseSimulationTime(), the time step number otherwise
+   */
+  Real getOutputTime() const;
+
+  /**
+   * Whether outputs take their time, old time, and time step sizes from the simulation time rather
+   * than from the time step number
+   */
+  bool outputsUseSimulationTime() const { return _outputs_use_simulation_time; }
+
+  /**
    * Return supported iteration methods that can work with MultiApps on timestep_begin and
    * timestep_end
    */
@@ -176,6 +188,10 @@ protected:
 
   /// True if printing out additional information
   const bool & _verbose;
+
+  /// Whether outputs take their time from the simulation time rather than from the time step
+  /// number, set by the constructor of an executioner that writes outputs along a time axis
+  bool _outputs_use_simulation_time = false;
 
 private:
   /// All solve objects built by this executioner

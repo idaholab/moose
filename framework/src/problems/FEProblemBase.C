@@ -7995,6 +7995,24 @@ FEProblemBase::getTimeFromStateArg(const Moose::StateArg & state) const
   }
 }
 
+Real
+FEProblemBase::getOutputTime() const
+{
+  if (const auto * const executioner = _app.getExecutioner())
+    return executioner->getOutputTime();
+  return outputsUseSimulationTime() ? time() : timeStep();
+}
+
+bool
+FEProblemBase::outputsUseSimulationTime() const
+{
+  if (const auto * const executioner = _app.getExecutioner())
+    return executioner->outputsUseSimulationTime();
+  // Without an executioner or executor, e.g. for outputs an application builds and writes outside
+  // of the usual task order, outputs follow the transient flag of the problem
+  return isTransient();
+}
+
 void
 FEProblemBase::addTimeIntegrator(const std::string & type,
                                  const std::string & name,
