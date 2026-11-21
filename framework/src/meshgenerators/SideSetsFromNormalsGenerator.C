@@ -121,6 +121,7 @@ SideSetsFromNormalsGenerator::generate()
     _boundary_to_normal_map[boundary_ids[i]] = _normals[i];
   }
 
-  mesh->unset_is_prepared();
+  // Only boundary information was modified
+  mesh->unset_has_boundary_id_sets();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

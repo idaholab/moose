@@ -112,9 +112,32 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
 {
   mooseAssert(_fe_face == nullptr, "FE Face has already been initialized");
 
-  // To know the dimension of the mesh
+  // To know the dimension of the mesh. Only the steps that are marked as needed are performed, so
+  // that a chain of sideset generators does not rebuild the neighbors of the whole mesh each time.
   if (!mesh.is_prepared())
-    mesh.prepare_for_use();
+  {
+    // After a sideset generator, only the cached boundary id sets are usually stale. Regenerating
+    // them is all that is needed; complete_preparation() would also count the unpartitioned
+    // elements and nodes of the whole mesh just to set a flag that is already set.
+    auto only_boundary_id_sets_stale = mesh.preparation();
+    only_boundary_id_sets_stale.has_boundary_id_sets = true;
+    if (only_boundary_id_sets_stale)
+    {
+      mesh.get_boundary_info().regenerate_id_sets();
+      mooseAssert(mesh.is_prepared(), "Regenerating the boundary id sets should prepare the mesh");
+    }
+    else
+    {
+      // Sideset generators do not change element or node ids, so the renumbering that
+      // complete_preparation() would otherwise always do at its end is not needed. Renumbering
+      // that is needed after elements or nodes were removed is still done, as it is tracked by
+      // flags.
+      const bool allow_renumbering = mesh.allow_renumbering();
+      mesh.allow_renumbering(false);
+      mesh.complete_preparation();
+      mesh.allow_renumbering(allow_renumbering);
+    }
+  }
   const auto dim = mesh.mesh_dimension();
 
   // Setup the FE Object so we can calculate normals
@@ -208,13 +231,8 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
     _included_neighbor_subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, subdomains);
   }
 
-  // We will want to Change the below code when we have more fine-grained control over advertising
-  // what we need and how we satisfy those needs. For now we know we need to have neighbors per
-  // #15823...and we do have an explicit `find_neighbors` call...but we don't have a
-  // `neighbors_found` API and it seems off to do:
-  //
-  // if (!mesh.is_prepared())
-  //   mesh.find_neighbors()
+  // We need neighbors per #15823. complete_preparation() above finds them only if they are not
+  // already known, as tracked by the mesh's preparation state.
 }
 
 void
