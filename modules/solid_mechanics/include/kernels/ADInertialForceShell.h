@@ -11,7 +11,6 @@
 
 #include "ADTimeKernel.h"
 #include "Material.h"
-#include "RankTwoTensor.h"
 #include "libmesh/dense_vector.h"
 
 namespace libMesh
@@ -65,44 +64,32 @@ private:
   /// Variable numbers corresponding to rotational acceleration aux variables
   std::vector<unsigned int> _rot_accel_num;
 
-  /**
-   * Rotational transformation from global to initial shell local
-   * coordinate system
-   */
-  ADRankTwoTensor _original_local_config;
-
   /// Direction along which residual is calculated
   const unsigned int _component;
 
-  /// Current shell nodal velocities in the global frame of reference
+  /**
+   * Current shell nodal velocities: translations in global components, rotations about the
+   * in-plane local axes of the shell
+   */
   PosRotVectors _vel;
 
-  /// Old shell nodal velocities in the global frame of reference
+  /**
+   * Old shell nodal velocities: translations in global components, rotations about the in-plane
+   * local axes of the shell
+   */
   PosRotVectors _old_vel;
 
-  /// Current shell nodal accelerations in the global frame of reference
+  /**
+   * Current shell nodal accelerations: translations in global components, rotations about the
+   * in-plane local axes of the shell
+   */
   PosRotVectors _accel;
 
-  /// Current shell nodal velocities in the local frame of reference
-  PosRotVectors _local_vel;
-
-  /// Old shell nodal velocities in the local frame of reference
-  PosRotVectors _local_old_vel;
-
-  /// Current shell nodal accelerations in the local frame of reference
-  PosRotVectors _local_accel;
-
   /**
-   * Forces and moments at the four nodes in the initial
-   * local configuration
+   * Inertial and damping forces (global components, per unit thickness) and moments (about the
+   * in-plane local axes of the shell) at the four nodes
    */
-  std::array<ADRealVectorValue, 4> _local_force, _local_moment;
-
-  /**
-   * Forces and moments at the four nodes in the global
-   * coordinate system
-   */
-  std::array<ADRealVectorValue, 4> _global_force, _global_moment;
+  std::array<ADRealVectorValue, 4> _nodal_force, _nodal_moment;
 
   /// Derivatives of shape functions w.r.t isoparametric coordinates xi
   std::vector<std::vector<Real>> _dphidxi_map;
@@ -137,25 +124,22 @@ private:
   /// Normal to the element at the 4 nodes.
   std::vector<ADRealVectorValue> _node_normal;
 
-  /// Node 1 g vectors
+  /// Columns of the G matrix of the first node, (h/2) [-v2, v1], with h the thickness
   std::array<ADRealVectorValue, 2> _0g1_vectors;
 
-  /// Node 2 g vectors
+  /// Columns of the G matrix of the second node
   std::array<ADRealVectorValue, 2> _0g2_vectors;
 
-  /// Node 3 g vectors
+  /// Columns of the G matrix of the third node
   std::array<ADRealVectorValue, 2> _0g3_vectors;
 
-  /// Node 4 g vectors
+  /// Columns of the G matrix of the fourth node
   std::array<ADRealVectorValue, 2> _0g4_vectors;
 
   /// Mass proportional Rayleigh damping parameter
   const MaterialProperty<Real> & _eta;
 
-  /// Rotation matrix material property
-  const ADMaterialProperty<RankTwoTensor> & _transformation_matrix;
-
-  /// Rotation matrix material property
+  /// Jacobian of the mapping at the first through-thickness quadrature point
   const ADMaterialProperty<Real> & _J_map;
 
   /// Coupled variable for the shell thickness

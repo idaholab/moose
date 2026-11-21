@@ -41,4 +41,92 @@
     issues = "#15067"
     capabilities = 'method!=dbg'
   []
+
+  [shell_mass_probe]
+    design = 'ADInertialForceShell.md'
+    issues = '#34434'
+    requirement = 'The system shall compute the inertia residual of a four-node shell element as '
+                  'the consistent mass matrix, scaled by the density times the thickness for the '
+                  'displacements and by the density times the thickness cubed over twelve for the '
+                  'rotations, '
+    [flat_h05]
+      type = 'CSVDiff'
+      input = 'shell_mass_probe.i'
+      cli_args = 'h=0.5 Outputs/file_base=shell_mass_probe_flat_h05'
+      csvdiff = 'shell_mass_probe_flat_h05_nodes_0001.csv'
+      detail = 'for a flat square element of thickness 0.5.'
+    []
+    [flat_h2]
+      type = 'CSVDiff'
+      input = 'shell_mass_probe.i'
+      cli_args = 'h=2 Outputs/file_base=shell_mass_probe_flat_h2'
+      csvdiff = 'shell_mass_probe_flat_h2_nodes_0001.csv'
+      detail = 'for a flat square element of thickness 2.'
+    []
+    [inclined_h05]
+      type = 'CSVDiff'
+      input = 'shell_mass_probe.i'
+      cli_args = 'h=0.5 tilt=45 Outputs/file_base=shell_mass_probe_inclined_h05'
+      csvdiff = 'shell_mass_probe_inclined_h05_nodes_0001.csv'
+      detail = 'for a square element of thickness 0.5 inclined at 45 degrees to the XY plane.'
+    []
+    [inclined_h2]
+      type = 'CSVDiff'
+      input = 'shell_mass_probe.i'
+      cli_args = 'h=2 tilt=45 Outputs/file_base=shell_mass_probe_inclined_h2'
+      csvdiff = 'shell_mass_probe_inclined_h2_nodes_0001.csv'
+      detail = 'for a square element of thickness 2 inclined at 45 degrees to the XY plane.'
+    []
+    [skewed_h05]
+      type = 'CSVDiff'
+      input = 'shell_mass_probe.i'
+      cli_args = 'h=0.5 skew=0.5 Outputs/file_base=shell_mass_probe_skewed_h05'
+      csvdiff = 'shell_mass_probe_skewed_h05_nodes_0001.csv'
+      detail = 'for a flat parallelogram element of thickness 0.5.'
+    []
+  []
+
+  [thickness_shear]
+    design = 'ADInertialForceShell.md'
+    issues = '#34434'
+    requirement = 'The system shall reproduce the analytic thickness-shear response of a shell '
+                  'element, with angular frequency sqrt(12 G / (rho h^2)), '
+    [m]
+      type = 'CSVDiff'
+      input = 'thickness_shear.i'
+      csvdiff = 'thickness_shear_out.csv'
+      detail = 'in metre-kilogram-second units.'
+    []
+    [mm]
+      type = 'CSVDiff'
+      input = 'thickness_shear.i'
+      cli_args = 'L=1000 h=100 E=2e5 rho=7.85e-9 moment_rate=2e12'
+      csvdiff = 'thickness_shear_out.csv'
+      prereq = 'thickness_shear/m'
+      detail = 'in millimetre-tonne-second units, with the same rotation history as in '
+               'metre-kilogram-second units.'
+    []
+  []
+
+  [shell_inertia_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'shell_inertia_jacobian.i'
+    design = 'ADInertialForceShell.md'
+    issues = '#34434'
+    requirement = 'The system shall compute a Jacobian of the shell inertia residual that '
+                  'matches a finite-difference Jacobian, including the mass-proportional Rayleigh '
+                  'damping and HHT terms.'
+  []
+
+  [shell_damping_probe]
+    type = 'CSVDiff'
+    input = 'shell_mass_probe.i'
+    cli_args = 'h=0.5 eta=0.1 alpha=-0.3 Executioner/num_steps=2 Outputs/file_base=shell_damping_probe'
+    csvdiff = 'shell_damping_probe_nodes_0002.csv'
+    design = 'ADInertialForceShell.md'
+    issues = '#34434'
+    requirement = 'The system shall compute the mass-proportional Rayleigh damping residual of a '
+                  'shell element with the HHT-weighted velocity (1 + alpha) v - alpha v_old, where '
+                  'alpha is the HHT parameter and v_old is the old velocity.'
+  []
 []
