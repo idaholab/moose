@@ -48,6 +48,16 @@
       detail = 'between two subdomains in an unprepared mesh.'
     []
 
+    [normal]
+      type = 'Exodiff'
+      input = 'sideset_between_subdomains_normal.i'
+      cli_args = '--mesh-only'
+      exodiff = 'sideset_between_subdomains_normal_in.e'
+      recover = false
+
+      detail = 'restricted to the sides with a given normal.'
+    []
+
     [invalid_primary_block]
       type = RunException
       input = sideset_between_subdomains.i
