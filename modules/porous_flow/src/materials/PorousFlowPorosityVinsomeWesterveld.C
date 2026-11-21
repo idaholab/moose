@@ -9,11 +9,51 @@
 
 #include "PorousFlowPorosityVinsomeWesterveld.h"
 #include "libmesh/utility.h"
+#include "libmesh/dense_matrix.h"
+#include "libmesh/dense_vector.h"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 
 registerMooseObject("PorousFlowApp", PorousFlowPorosityVinsomeWesterveld);
+
+namespace
+{
+/**
+ * The moments mu_k = int_0^s x^k exp(-x) dx, for k = 0, 1, 2.  For s > 1 the closed forms are used.
+ * For s <= 1 the closed forms lose precision through cancellation (mu_1 ~ s^2 / 2 and
+ * mu_2 ~ s^3 / 3 as s -> 0), so the series
+ * mu_k = exp(-s) s^(k+1) sum_n s^n / ((k+1)(k+2)...(k+1+n)), whose terms are all positive, is used
+ */
+void
+expMoments(const Real s, std::array<Real, 3> & mu)
+{
+  if (s > 1.0)
+  {
+    const Real e = std::exp(-s);
+    mu[0] = -std::expm1(-s);
+    mu[1] = 1.0 - e * (1.0 + s);
+    mu[2] = 2.0 - e * (2.0 + s * (2.0 + s));
+  }
+  else
+  {
+    Real s_power = 1.0;
+    for (unsigned int k = 0; k < 3; ++k)
+    {
+      s_power *= s;
+      Real term = s_power / (k + 1.0);
+      Real sum = term;
+      for (unsigned int n = 1; n < 30 && term > 1.0E-17 * sum; ++n)
+      {
+        term *= s / (k + 1.0 + n);
+        sum += term;
+      }
+      mu[k] = std::exp(-s) * sum;
+    }
+  }
+}
+}
 
 InputParameters
 PorousFlowPorosityVinsomeWesterveld::validParams()
@@ -45,6 +85,12 @@ PorousFlowPorosityVinsomeWesterveld::validParams()
       "(for instance, when injection begins).  The matrix adjacent to the fracture "
       "is at matrix_reference_temperature at this time, and the thermal-opening "
       "term is zero before it");
+  params.addRangeCheckedParam<Real>(
+      "matrix_thickness",
+      "matrix_thickness > 0",
+      "Thickness of the matrix layer next to the fracture, for instance half the spacing between "
+      "parallel fractures.  If given, the far side of the layer is insulated, so the heat content, "
+      "and hence the thermal opening, is bounded.  If not given, the matrix is semi-infinite");
   params.addClassDescription(
       "This Material calculates porosity (usually the aperture of a lower-dimensional fracture) "
       "using the PorousFlowPorosityLinear relationship plus a thermal-opening term proportional to "
@@ -60,6 +106,8 @@ PorousFlowPorosityVinsomeWesterveld::PorousFlowPorosityVinsomeWesterveld(
     _kappa(getParam<Real>("matrix_thermal_diffusivity")),
     _T_matrix_ref(nodalOrQpValue("matrix_reference_temperature")),
     _start_time(getParam<Real>("vw_start_time")),
+    _finite_thickness(isParamValid("matrix_thickness")),
+    _matrix_thickness(_finite_thickness ? getParam<Real>("matrix_thickness") : 0.0),
     _theta(_nodal_material ? declareProperty<Real>("PorousFlow_vw_theta_nodal")
                            : declareProperty<Real>("PorousFlow_vw_theta_qp")),
     _theta_old(_nodal_material ? getMaterialPropertyOld<Real>("PorousFlow_vw_theta_nodal")
@@ -68,7 +116,12 @@ PorousFlowPorosityVinsomeWesterveld::PorousFlowPorosityVinsomeWesterveld(
                                   : declareProperty<Real>("PorousFlow_vw_heat_content_qp")),
     _heat_content_old(_nodal_material
                           ? getMaterialPropertyOld<Real>("PorousFlow_vw_heat_content_nodal")
-                          : getMaterialPropertyOld<Real>("PorousFlow_vw_heat_content_qp"))
+                          : getMaterialPropertyOld<Real>("PorousFlow_vw_heat_content_qp")),
+    _profile_matrix(3, 3),
+    _profile_rhs(3),
+    _profile_drhs(3),
+    _profile_sol(3),
+    _profile_dsol(3)
 {
 }
 
@@ -108,8 +161,10 @@ PorousFlowPorosityVinsomeWesterveld::computeUnboundedPorosityQp()
     _theta[_qp] = 0.0;
     _heat_content[_qp] = 0.0;
   }
-  else
+  else if (!_finite_thickness || _matrix_thickness > 12.5 * std::sqrt(_kappa * time))
   {
+    // If matrix_thickness is not given, or s = 2L / d > 50 (see below), so that exp(-s) < 2E-22
+    // and the insulated end has no effect, the semi-infinite formulae are used
     const Real a = _kappa * std::min(_dt, time);
     // Vinsome and Westerveld (1980): the profile is
     // (theta + p z + q z^2) exp(-z / d), with d = sqrt(kappa t) / 2.
@@ -124,6 +179,67 @@ PorousFlowPorosityVinsomeWesterveld::computeUnboundedPorosityQp()
 
     const Real dp_dT = (a / d - Utility::pow<3>(d) / a) / denom;
     dI_dT = a * (1.0 / d - dp_dT);
+  }
+  else
+  {
+    // Matrix layer 0 <= z <= L with an insulated end at z = L.  The profile is
+    // P(z) exp(-z / d) + P(2L - z) exp(-(2L - z) / d), with P(z) = A + B z + C z^2 and
+    // d = sqrt(kappa t) / 2, which is symmetric about z = L, so dT/dz = 0 there.  With b = B d,
+    // c = C d^2, s = 2L / d and e = exp(-s), the heat content of the layer is
+    // I = d (mu0 A + mu1 b + mu2 c), where mu_k = int_0^s x^k exp(-x) dx.  (A, b, c) solve a 3x3
+    // linear system, discretised in time using backward Euler, whose rows are:
+    //   row 0: the fracture-face temperature, T(0, t) - T_ref = theta
+    //   row 1: the heat-conduction equation at z = 0, kappa d^2T/dz^2 = (theta - theta_old) / dt,
+    //          multiplied by d^2 / kappa
+    //   row 2: energy conservation, I - I_old = -kappa dt dT/dz at z = 0, divided by d
+    // Here ap = kappa dt / d^2 = 4 dt / t
+    const Real d = 0.5 * std::sqrt(_kappa * time);
+    const Real s = 2.0 * _matrix_thickness / d;
+    const Real time_step = std::min(_dt, time);
+    if (s < 1.0E-5)
+    {
+      // The layer is much thinner than d, so its temperature is almost uniform and the three
+      // terms of P become indistinguishable, making the linear system singular.  The thin-layer
+      // limit, I = L theta - L^3 (theta - theta_old) / (3 kappa dt), is used instead
+      const Real c3 = Utility::pow<3>(_matrix_thickness) / (3.0 * _kappa * time_step);
+      _heat_content[_qp] = _matrix_thickness * theta - c3 * (theta - _theta_old[_qp]);
+      dI_dT = _matrix_thickness - c3;
+    }
+    else
+    {
+      const Real ap = 4.0 * time_step / time;
+      const Real e = std::exp(-s);
+      expMoments(s, _mu);
+      const std::array<Real, 3> & mu = _mu;
+      // resize zeroes the matrix and clears the LU decomposition from the previous quadpoint
+      DenseMatrix<Real> & m = _profile_matrix;
+      m.resize(3, 3);
+      m(0, 0) = 1.0 + e;
+      m(0, 1) = s * e;
+      m(0, 2) = s * s * e;
+      m(1, 0) = 1.0 + e;
+      m(1, 1) = -2.0 + e * (s - 2.0);
+      m(1, 2) = 2.0 + e * (2.0 + s * (s - 4.0));
+      // Row 2 is written in a form that avoids cancellation when s is small
+      m(2, 0) = mu[0] * (1.0 - ap);
+      m(2, 1) = mu[1] + ap * (mu[0] + s * e);
+      m(2, 2) = mu[2] - ap * s * e * (2.0 - s);
+      DenseVector<Real> & rhs = _profile_rhs;
+      rhs(0) = theta;
+      rhs(1) = (theta - _theta_old[_qp]) / ap;
+      rhs(2) = _heat_content_old[_qp] / d;
+      DenseVector<Real> & drhs = _profile_drhs;
+      drhs(0) = 1.0;
+      drhs(1) = 1.0 / ap;
+      drhs(2) = 0.0;
+      DenseVector<Real> & x = _profile_sol;
+      DenseVector<Real> & dx = _profile_dsol;
+      // lu_solve uses partial pivoting, and the second call reuses the LU decomposition
+      m.lu_solve(rhs, x);
+      m.lu_solve(drhs, dx);
+      _heat_content[_qp] = d * (mu[0] * x(0) + mu[1] * x(1) + mu[2] * x(2));
+      dI_dT = d * (mu[0] * dx(0) + mu[1] * dx(1) + mu[2] * dx(2));
+    }
   }
 
   _porosity[_qp] -= _thermal_opening_coeff * _heat_content[_qp];
