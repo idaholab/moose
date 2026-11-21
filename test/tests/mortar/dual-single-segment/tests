@@ -1,0 +1,22 @@
+[Tests]
+  design = 'Constraints/index.md'
+  issues = '#34491'
+  [single_segment]
+    requirement = 'The system shall, for second-order dual Lagrange multipliers on 3D quadrilateral '
+                  'faces whose covered part has fewer mortar quadrature points than shape functions,'
+    [dropped]
+      type = CSVDiff
+      input = single_segment.i
+      csvdiff = single_segment_out.csv
+      detail = 'compute a dual basis on these faces when partially covered faces are dropped, and'
+    []
+    [error]
+      type = RunException
+      input = single_segment.i
+      cli_args = 'Constraints/mortar/correct_edge_dropping=true'
+      expect_err = 'The dual basis on secondary element \d+ cannot be computed: 7 mortar quadrature '
+                   'points cover it, fewer than its 8 shape functions'
+      detail = 'report an error when partially covered faces are kept.'
+    []
+  []
+[]
