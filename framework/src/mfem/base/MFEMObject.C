@@ -55,21 +55,21 @@ MFEMObject::getMatrixCoefficientByName(const MFEMMatrixCoefficientName & name)
 }
 
 mfem::Coefficient &
-MFEMObject::getScalarCoefficient(const std::string & name)
+MFEMObject::getScalarCoefficient(const std::string & param_name)
 {
-  return getScalarCoefficientByName(getParam<MFEMScalarCoefficientName>(name));
+  return getScalarCoefficientByName(getParam<MFEMScalarCoefficientName>(param_name));
 }
 
 mfem::VectorCoefficient &
-MFEMObject::getVectorCoefficient(const std::string & name)
+MFEMObject::getVectorCoefficient(const std::string & param_name)
 {
-  return getVectorCoefficientByName(getParam<MFEMVectorCoefficientName>(name));
+  return getVectorCoefficientByName(getParam<MFEMVectorCoefficientName>(param_name));
 }
 
 mfem::MatrixCoefficient &
-MFEMObject::getMatrixCoefficient(const std::string & name)
+MFEMObject::getMatrixCoefficient(const std::string & param_name)
 {
-  return getMatrixCoefficientByName(getParam<MFEMMatrixCoefficientName>(name));
+  return getMatrixCoefficientByName(getParam<MFEMMatrixCoefficientName>(param_name));
 }
 
 #endif

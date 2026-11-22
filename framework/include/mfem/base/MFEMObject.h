@@ -63,15 +63,15 @@ public:
   /**
    * Retrieve a scalar MFEM coefficient using the value of an input parameter.
    */
-  mfem::Coefficient & getScalarCoefficient(const std::string & name);
+  mfem::Coefficient & getScalarCoefficient(const std::string & param_name);
   /**
    * Retrieve a vector MFEM coefficient using the value of an input parameter.
    */
-  mfem::VectorCoefficient & getVectorCoefficient(const std::string & name);
+  mfem::VectorCoefficient & getVectorCoefficient(const std::string & param_name);
   /**
    * Retrieve a matrix MFEM coefficient using the value of an input parameter.
    */
-  mfem::MatrixCoefficient & getMatrixCoefficient(const std::string & name);
+  mfem::MatrixCoefficient & getMatrixCoefficient(const std::string & param_name);
 
 private:
   /// Owning MFEM problem for this object.
