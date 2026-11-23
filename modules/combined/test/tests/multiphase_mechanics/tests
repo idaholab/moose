@@ -72,4 +72,9 @@
     design = 'GradientComponent.md'
     issues = '#5631'
   [../]
+  [ADComputeVariableEigenstrain]
+    type = 'Exodiff'
+    input = 'ADComputeVariableEigenstrain.i'
+    exodiff = 'ADComputeVariableEigenstrain_out.e'
+  []
 []
