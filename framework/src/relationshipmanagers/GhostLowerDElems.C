@@ -15,6 +15,7 @@
 
 // libMesh includes
 #include "libmesh/elem.h"
+#include "libmesh/remote_elem.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/boundary_info.h"
 
@@ -56,13 +57,12 @@ GhostLowerDElems::operator()(const MeshBase::const_element_iterator & range_begi
   for (const Elem * const elem : as_range(range_begin, range_end))
     for (const auto s : elem->side_index_range())
     {
+      // The lower-d element of an interior face is attached to only one of its two sides; on a
+      // coarse/fine face it is the coarse side, whatever the element ids
+      const Elem * lower_d_elem = _moose_mesh->getLowerDElem(elem, s);
       const Elem * const neighbor = elem->neighbor_ptr(s);
-      const bool elem_owns_lowerd = !neighbor || elem->id() < neighbor->id();
-
-      const Elem * const lower_d_elem =
-          elem_owns_lowerd
-              ? _moose_mesh->getLowerDElem(elem, s)
-              : _moose_mesh->getLowerDElem(neighbor, neighbor->which_neighbor_am_i(elem));
+      if (!lower_d_elem && neighbor && neighbor != remote_elem && neighbor->active())
+        lower_d_elem = _moose_mesh->getLowerDElem(neighbor, neighbor->which_neighbor_am_i(elem));
 
       if (lower_d_elem && lower_d_elem->processor_id() != p)
         coupled_elements.emplace(lower_d_elem, null_mat);

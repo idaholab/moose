@@ -29,6 +29,10 @@ ArrayDGLowerDKernel::validParams()
 {
   InputParameters params = ArrayDGKernel::validParams();
   params.addRequiredCoupledVar("lowerd_variable", "Lagrange multiplier");
+  // The lower-d element of a face assembled here may belong to the neighbor's process
+  params.addRelationshipManager("GhostLowerDElems",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC);
   return params;
 }
 
