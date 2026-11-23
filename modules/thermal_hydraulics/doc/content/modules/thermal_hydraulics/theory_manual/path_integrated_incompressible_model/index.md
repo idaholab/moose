@@ -124,7 +124,7 @@ The heat transfer coefficient is computed using the Dittus-Boelter correlation [
 !equation id=dittus_boelter
 h = \max\left(0.023 \text{Re}^{0.8} Pr^{0.4},\, 4\right) \frac{k_f}{D_h} \,
 
-where $Pr = c_p \mu / k_f$, $k_f$ is the fluid thermal conductivity. The lower bound of 4 on the Nusselt number is the approximate laminar limit, which keeps the heat transfer coefficient finite and physically reasonable at low flow. The fluid properties are evaluated at the segment film temperature, the mean of the segment fluid temperature and its upwinded inlet value, independent of the bulk temperature option $T_m$ used in the wall term of [!eqref](discretized_energy). For
+where $Pr = c_p \mu / k_f$ and $k_f$ is the fluid thermal conductivity. The lower bound of 4 on the Nusselt number is the approximate laminar limit, which keeps the heat transfer coefficient finite and physically reasonable at low flow. The fluid properties are evaluated at the segment film temperature, the mean of the segment fluid temperature and its upwinded inlet value, independent of the bulk temperature option $T_m$ used in the wall term of [!eqref](discretized_energy). For
 the conjugate heat transfer kernels below, this coefficient is supplied by
 [ADDittusBoelterHTCFunctorMaterial.md].
 
