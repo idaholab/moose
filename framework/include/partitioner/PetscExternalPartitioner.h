@@ -50,6 +50,13 @@ public:
                              std::vector<dof_id_type> & partition);
 
   /**
+   * Linearly partition the mesh across its processors so that a parallel partitioner sees a
+   * distributed graph. It should be used if the mesh is unpartitioned or the number of parts
+   * does not equal the number of processors.
+   */
+  static void preLinearPartition(MeshBase & mesh);
+
+  /**
    * Called immediately before partitioning
    */
   virtual void initialize(MeshBase & /* mesh */) {}
@@ -58,13 +65,6 @@ protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n) override;
 
 private:
-  /*
-   * Do a partition before we call the partitioner
-   * It should be used if the mesh is unpartitioned or the number of parts
-   * does not equal to the number of processors
-   */
-  void preLinearPartition(MeshBase & mesh);
-
   std::string _part_package;
   bool _apply_element_weight;
   bool _apply_side_weight;

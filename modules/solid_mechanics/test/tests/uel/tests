@@ -1,6 +1,8 @@
 [Tests]
   issues = '#25163'
   design = 'AbaqusUserElement.md'
+  # the inputs pin a nodeset by node id, and a distributed mesh renumbers the nodes
+  mesh_mode = REPLICATED
 
   [build_uel_tri_tests]
     type = RunCommand
@@ -111,7 +113,7 @@
     # Testing output
     max_parallel = 1
     errors = 'StringThatWillNotBePresentInOutput'
-    expect_out = 'Number of predefined variables:            2\n External field number            1  for node            1  is:    1500.0000000000000     \n External field number            1  for node            2  is:    1500.0000000000000     \n External field number            1  for node            3  is:    1500.0000000000000     \n External field number            1  for node            4  is:    1500.0000000000000     \n External field number            1  for node            5  is:    1500.0000000000000     \n External field number            1  for node            6  is:    1500.0000000000000     \n External field number            1  for node            7  is:    1500.0000000000000     \n External field number            1  for node            8  is:    1500.0000000000000     \n External field number            2  for node            1  is:    210.00000000000000     \n External field number            2  for node            2  is:    210.00000000000000     \n External field number            2  for node            3  is:    210.00000000000000     \n External field number            2  for node            4  is:    210.00000000000000     \n External field number            2  for node            5  is:    210.00000000000000     \n External field number            2  for node            6  is:    210.00000000000000     \n External field number            2  for node            7  is:    210.00000000000000     \n External field number            2  for node            8  is:    210.00000000000000     \n Time increment is:    10.000000000000000     \n Coordinates for node            1  are:   0.66666666666666663      ,   0.33333333333333331      ,   0.66666666666666663     \n Coordinates for node            2  are:    1.0000000000000000      ,   0.33333333333333331      ,   0.66666666666666663     \n Coordinates for node            3  are:    1.0000000000000000      ,   0.66666666666666663      ,   0.66666666666666663     \n Coordinates for node            4  are:   0.66666666666666663      ,   0.66666666666666663      ,   0.66666666666666663     \n Coordinates for node            5  are:   0.66666666666666663      ,   0.33333333333333331      ,    1.0000000000000000     \n Coordinates for node            6  are:    1.0000000000000000      ,   0.33333333333333331      ,    1.0000000000000000     \n Coordinates for node            7  are:    1.0000000000000000      ,   0.66666666666666663      ,    1.0000000000000000     \n Coordinates for node            8  are:   0.66666666666666663      ,   0.66666666666666663      ,    1.0000000000000000     \n Element number is:           25\n Number of coordinates at a node:            3\n Element type is:           10\n Number of UEL properties is:            5\n Property            1  is:    2.0000000000000000     \n Property            2  is:    1.0000000000000000     \n Property            3  is:    2.0000000000000000     \n Property            4  is:    210000.00000000000     \n Property            5  is:   0.29999999999999999     \n Number of nodes in this element:            8\n Number of state variables is:           96\n State variable            1  is:    0.0000000000000000     \n State variable            2  is:    0.0000000000000000     \n State variable            3  is:    0.0000000000000000     \n'
+    expect_out = 'Number of predefined variables:            2\n External field number            1  for node            1  is:    1430.0000000000000     \n External field number            1  for node            2  is:    1430.0000000000000     \n External field number            1  for node            3  is:    1430.0000000000000     \n External field number            1  for node            4  is:    1430.0000000000000     \n External field number            1  for node            5  is:    1430.0000000000000     \n External field number            1  for node            6  is:    1430.0000000000000     \n External field number            1  for node            7  is:    1430.0000000000000     \n External field number            1  for node            8  is:    1430.0000000000000     \n External field number            2  for node            1  is:    234.00000000000000     \n External field number            2  for node            2  is:    234.00000000000000     \n External field number            2  for node            3  is:    234.00000000000000     \n External field number            2  for node            4  is:    234.00000000000000     \n External field number            2  for node            5  is:    234.00000000000000     \n External field number            2  for node            6  is:    234.00000000000000     \n External field number            2  for node            7  is:    234.00000000000000     \n External field number            2  for node            8  is:    234.00000000000000     \n Time increment is:    10.000000000000000     \n Coordinates for node            1  are:   0.66666666666666663      ,   0.33333333333333331      ,   0.66666666666666663     \n Coordinates for node            2  are:    1.0000000000000000      ,   0.33333333333333331      ,   0.66666666666666663     \n Coordinates for node            3  are:    1.0000000000000000      ,   0.66666666666666663      ,   0.66666666666666663     \n Coordinates for node            4  are:   0.66666666666666663      ,   0.66666666666666663      ,   0.66666666666666663     \n Coordinates for node            5  are:   0.66666666666666663      ,   0.33333333333333331      ,    1.0000000000000000     \n Coordinates for node            6  are:    1.0000000000000000      ,   0.33333333333333331      ,    1.0000000000000000     \n Coordinates for node            7  are:    1.0000000000000000      ,   0.66666666666666663      ,    1.0000000000000000     \n Coordinates for node            8  are:   0.66666666666666663      ,   0.66666666666666663      ,    1.0000000000000000     \n Element number is:           25\n Number of coordinates at a node:            3\n Element type is:           10\n Number of UEL properties is:            5\n Property            1  is:    2.0000000000000000     \n Property            2  is:    1.0000000000000000     \n Property            3  is:    2.0000000000000000     \n Property            4  is:    210000.00000000000     \n Property            5  is:   0.29999999999999999     \n Number of nodes in this element:            8\n Number of state variables is:           96\n State variable            1  is:    0.0000000000000000     \n State variable            2  is:    0.0000000000000000     \n State variable            3  is:    0.0000000000000000     \n'
     requirement = 'The Abaqus UEL interface shall be able to pass initial correct values of coordinates into a user-defined UEL routine for a hexahedral element and a non-trivial setup.'
     # method: only test plugins in dbg and opt.
     # installation_type=in_tree: see #25279
@@ -198,5 +200,26 @@
     # method: only test plugins in dbg and opt.
     # installation_type=in_tree: see #25279
     capabilities = 'method=dbg & installation_type=in_tree'
+  []
+
+  [uel_energy]
+    type = CSVDiff
+    input = uel_energy.i
+    csvdiff = uel_energy_out.csv
+    design = 'AbaqusTotalUELEnergy.md'
+    issues = '#29382'
+    requirement = 'The system shall sum the element energies that a UEL plugin computes, and the strain energy of a linear elastic body under a traction load shall equal half the work of that traction.'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
+  []
+
+  [predef_values]
+    type = CSVDiff
+    input = predef_values.i
+    csvdiff = predef_values_out.csv
+    issues = '#29382'
+    requirement = 'The system shall pass to a UEL plugin the current value and the increment over the time step of each external field, also when the field is only set at the start of the time step.'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
 []

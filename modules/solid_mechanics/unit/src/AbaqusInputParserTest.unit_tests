@@ -1,0 +1,125 @@
+[Tests]
+  design = 'AbaqusUELMesh.md'
+  issues = '#29382'
+
+  [header_map_parsing]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.HeaderMapParsing
+    requirement = 'The system shall parse Abaqus keyword header parameters case-insensitively, as presence-only flags or as typed values, and return a default for a missing parameter.'
+  []
+  [unknown_keyword_throws]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.UnknownKeywordThrows
+    requirement = 'The system shall report an error when an Abaqus input file contains an unknown keyword.'
+  []
+  [continuation_eof_throws]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.ContinuationEOFThrows
+    requirement = 'The system shall report an error when an Abaqus data line ends with a continuation comma at the end of the file.'
+  []
+  [option_data_and_continuation_join]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.OptionDataAndContinuationJoin
+    requirement = 'The system shall join an Abaqus data line that ends with a comma with the next line before it splits the line into fields.'
+  []
+  [option_data_multiple_lines]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.OptionDataMultipleLines
+    requirement = 'The system shall read each Abaqus data line of an option as a separate row of trimmed fields.'
+  []
+  [nset_multiple_lines]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.NsetMultipleLines
+    requirement = 'The system shall read the header parameters and every data line of an assembly-level Abaqus node set.'
+  []
+  [nset_continuation_and_multiple_lines]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.NsetContinuationAndMultipleLines
+    requirement = 'The system shall read an Abaqus node set whose data mixes continued lines and separate lines as the correct number of logical rows.'
+  []
+  [square_inp_tree_and_assembly]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.SquareInpTreeAndAssembly
+    requirement = 'The system shall read an Abaqus input file with parts and an assembly into a tree of part, assembly, instance, and option nodes.'
+  []
+  [flat_file_detection]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.FlatFileDetection
+    requirement = 'The system shall identify an Abaqus input file without an assembly block as a flat input file.'
+  []
+  [assembly_scoped_sets_and_indices]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.AssemblyScopedSetsAndIndices
+    requirement = 'The system shall resolve Abaqus node and element ids to the same indices whether the instance is given in the set header or inline in each entry.'
+  []
+  [assembly_scoped_sets_ambiguity_error]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.AssemblyScopedSetsAmbiguityError
+    requirement = 'The system shall report an error when an Abaqus set entry is qualified by both a header instance and an inline instance.'
+  []
+  [assembly_elset_to_nset_copy_with_instance]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.AssemblyElsetToNsetCopyWithInstance
+    requirement = 'The system shall build an assembly-level Abaqus node set from the nodes of an element set of an instance.'
+  []
+  [assembly_nset_requires_instance]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.AssemblyNsetRequiresInstance
+    requirement = 'The system shall report an error when an assembly-level Abaqus node set lists plain node ids without an instance.'
+  []
+  [multiple_instances_assembly_level_sets]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.MultipleInstances_AssemblyLevelSets
+    requirement = 'The system shall resolve assembly-level Abaqus node and element sets that combine entries from two instances of the same part.'
+  []
+  [multiple_instances_part_level_sets_merged]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.MultipleInstances_PartLevelSetsMerged
+    requirement = 'The system shall merge the part-level Abaqus sets of every instance of a part into one model-level set with the correct node indices.'
+  []
+  [multiple_instances_part_level_elset_numeric_merged]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.MultipleInstances_PartLevelElsetNumericMerged
+    requirement = 'The system shall merge a part-level Abaqus element set that is defined with GENERATE across every instance of the part.'
+  []
+  [part_level_elset_numeric_bare_line]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.PartLevelElsetNumericBareLine
+    requirement = 'The system shall resolve a part-level Abaqus element set that lists element ids on a data line to the part-local element indices.'
+  []
+  [boundary_instance_scoped_single_node]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.BoundaryInstanceScopedSingleNode
+    requirement = 'The system shall apply an Abaqus boundary condition on an instance-qualified node to the value at the resolved node index.'
+  []
+  [amplitude_and_field_parsing]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.AmplitudeAndFieldParsing
+    requirement = 'The system shall read Abaqus amplitude tables and predefined field assignments, with or without an amplitude, and keep the field assignments in later steps that do not change them.'
+  []
+  [field_undefined_amplitude_errors]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.FieldUndefinedAmplitudeErrors
+    requirement = 'The system shall report an error when an Abaqus predefined field refers to an amplitude that is not defined.'
+  []
+  [duplicate_amplitude_name_errors]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.DuplicateAmplitudeNameErrors
+    requirement = 'The system shall report an error when two Abaqus amplitude tables have the same name.'
+  []
+  [amplitude_step_time_unsupported]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.AmplitudeStepTimeUnsupported
+    requirement = 'The system shall report an error when an Abaqus amplitude uses a time definition other than total time.'
+  []
+  [instance_translation_and_rotation]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.InstanceTranslationAndRotation
+    requirement = 'The system shall translate the nodes of an Abaqus instance and then rotate them about the axis through two given points.'
+  []
+  [empty_positional_fields]
+    type = GoogleTest
+    unit_test = AbaqusInputParserTest.EmptyPositionalFields
+    requirement = 'The system shall keep an empty field in an Abaqus data line in its position and apply the Abaqus default value for that field.'
+  []
+[]

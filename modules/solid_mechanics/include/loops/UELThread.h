@@ -22,9 +22,13 @@ public:
   // Splitting Constructor
   UELThread(UELThread & x, Threads::split split);
 
-  void join(const UELThread &) {}
+  void join(const UELThread & other);
+
+  /// recommended time increment ratio (minimum over all elements)
+  Real minPNewDt() const { return _min_pnewdt; }
 
 protected:
+  virtual void pre() override;
   virtual void subdomainChanged() override final;
   virtual void onElement(const Elem * elem) override final;
 
@@ -52,6 +56,7 @@ private:
 
   DenseVector<Real> _local_re;
   DenseMatrix<Real> _local_ke;
+  DenseMatrix<Real> _local_ke_T;
 
   const std::vector<const MooseVariableFieldBase *> & _variables;
 
@@ -69,4 +74,13 @@ private:
 
   /// state variable copy
   std::vector<Real> _statev_copy;
+
+  /// energy copy
+  std::array<Real, 8> _energy_copy;
+
+  /// arguments for the UEL plugin call on the current element
+  Abaqus::UELArguments _uel_args;
+
+  /// recommended time increment ratio (minimum over all elements)
+  Real _min_pnewdt;
 };
