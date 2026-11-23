@@ -545,6 +545,13 @@ class Versioner:
         print(f"ERROR: {message}")
         sys.exit(1)
 
+    @staticmethod
+    def warn(message: str):
+        """
+        Helper for printing a non-fatal warning message
+        """
+        print(colorText(f"WARNING: {message}", "YELLOW"), file=sys.stderr)
+
     @classmethod
     def get_packages(cls, ref: str) -> dict[str, Package]:
         """
@@ -568,6 +575,11 @@ class Versioner:
 
         all_packages: list[str] = []
         packages: dict[str, Package] = {}
+        # Packages whose own construction (below) or a dependency's raised;
+        # tracked separately so one bad package doesn't take down the whole
+        # catalog -- everything that doesn't depend on a failed package
+        # still resolves normally.
+        failed_packages: dict[str, str] = {}
         for name, values in config.items():
             if old_influential:
                 # Originally, the values were just a list and not
@@ -579,46 +591,82 @@ class Versioner:
                 # based on the ordering in the config
                 values["dependencies"] = all_packages.copy()
 
-            package = {
-                "name": Versioner.get_app_info().name if name == "app" else name,
-                "config": values,
-                "version": values.get("version"),
-                "build_number": values.get("build_number"),
-                "full_version": None,
-                "hash": None,
-                "influential": None,
-                "all_influential": values.get("influential", []),
-                "dependencies": values.get("dependencies", []),
-                "templates": values.get("templates", {}),
-                "apptainer": None,
-                "conda": values.get("conda"),
-                "is_app": name == "app",
-            }
+            try:
+                # get_app_info() returns None when not run from within a git
+                # repository (e.g. a build tree that only mirrors the
+                # source, without its own .git); fall back to "unknown"
+                # rather than failing this whole package catalog build over
+                # it. "unknown" (not the generic "app" package key) so it
+                # can't be mistaken for a real app name in any report/diff
+                # output this later feeds into.
+                if name == "app":
+                    app_info = Versioner.get_app_info()
+                    package_name = app_info.name if app_info else "unknown"
+                else:
+                    package_name = name
+                package = {
+                    "name": package_name,
+                    "config": values,
+                    "version": values.get("version"),
+                    "build_number": values.get("build_number"),
+                    "full_version": None,
+                    "hash": None,
+                    "influential": None,
+                    "all_influential": values.get("influential", []),
+                    "dependencies": values.get("dependencies", []),
+                    "templates": values.get("templates", {}),
+                    "apptainer": None,
+                    "conda": values.get("conda"),
+                    "is_app": name == "app",
+                }
 
-            # Append conda folder as influential and the specifically
-            # tracked files (which need to be augumented because
-            # they have templated variables)
-            conda_dir = package["conda"]
-            if conda_dir:
-                # meta.yaml, required
-                package["all_influential"].append(cls.conda_meta_path(conda_dir))
-                # conda_build_config.yaml, not required
-                build_config_path = cls.conda_build_config_path(conda_dir)
-                if (
-                    cls.git_file(build_config_path, commit, allow_missing=True)
-                    is not None
-                ):
-                    package["all_influential"].append(build_config_path)
+                # Append conda folder as influential and the specifically
+                # tracked files (which need to be augumented because
+                # they have templated variables)
+                conda_dir = package["conda"]
+                if conda_dir:
+                    # meta.yaml, required
+                    package["all_influential"].append(cls.conda_meta_path(conda_dir))
+                    # conda_build_config.yaml, not required
+                    build_config_path = cls.conda_build_config_path(conda_dir)
+                    if (
+                        cls.git_file(build_config_path, commit, allow_missing=True)
+                        is not None
+                    ):
+                        package["all_influential"].append(build_config_path)
 
-            # Make sure dependencies exist
-            for dep in package["dependencies"]:
-                if dep == name:
-                    Versioner.error(f"{name} depends on itself")
-                if dep not in config:
-                    Versioner.error(f"{name} missing dependency {dep}")
+                # Make sure dependencies exist
+                for dep in package["dependencies"]:
+                    if dep == name:
+                        Versioner.error(f"{name} depends on itself")
+                    if dep not in config:
+                        Versioner.error(f"{name} missing dependency {dep}")
 
-            packages[name] = Package(**package)
-            all_packages.append(name)
+                packages[name] = Package(**package)
+                all_packages.append(name)
+            except Exception as e:
+                failed_packages[name] = str(e)
+                cls.warn(f"Failed to build package info for '{name}': {e}")
+
+        # Cascade failures onto anything that depends (even transitively) on
+        # a failed package -- repeat until stable, since removing a
+        # dependent package can itself have further dependents.
+        changed = True
+        while changed:
+            changed = False
+            for name, package in list(packages.items()):
+                failed_dep = next(
+                    (dep for dep in package.dependencies if dep in failed_packages),
+                    None,
+                )
+                if failed_dep is not None:
+                    del packages[name]
+                    all_packages.remove(name)
+                    failed_packages[name] = f"depends on failed package '{failed_dep}'"
+                    cls.warn(
+                        f"Skipping package '{name}': depends on failed package '{failed_dep}'"
+                    )
+                    changed = True
 
         # Sort the packages in dependency order
         graph = {k: v.dependencies for k, v in packages.items()}
@@ -1175,7 +1223,10 @@ class Versioner:
         Gets the version hash for the given package
         """
         if package.is_app:
-            return Versioner.get_app_info().hash
+            # See the same get_app_info() fallback in get_packages() above:
+            # no git repo means no real commit hash to report.
+            app_info = Versioner.get_app_info()
+            return app_info.hash if app_info else "unknown"
 
         combined = "".join(package.all_influential.values()).encode("utf-8")
         return hashlib.md5(combined).hexdigest()[:7]
