@@ -2,7 +2,7 @@
   design = 'modules/fsi/index.md'
   issues = '#12462'
   [fsi]
-    requirement = 'We shall be able to combine navier-stokes and tensor-mechanics simulation capabilities to do some basic fluid-structure interaction simulations and produce equivalent results when the Navier-Stokes equations are implemented using'
+    requirement = 'The system shall be able to combine Navier-Stokes and solid mechanics simulation capabilities to do some basic fluid-structure interaction simulations and produce equivalent results when the Navier-Stokes equations are implemented using'
     [INS]
       type = 'Exodiff'
       input = 'fsi_flat_channel.i'
