@@ -61,7 +61,18 @@
       mesh_mode = 'REPLICATED'
       recover = false
       detail = 'and retaining the extra element integers and every boundary, interior ones '
-               'included, of a preserved primal subdomain.'
+               'included, of a preserved primal subdomain,'
+    []
+    [preserve_subdomain_flat_interface]
+      type = 'Exodiff'
+      input = 'dual_mesh_generator_subdomain_preserve_flat.i'
+      cli_args = '--mesh-only'
+      exodiff = 'dual_mesh_generator_subdomain_preserve_flat_in.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'and conforming to a preserved primal subdomain whose interface runs straight '
+               'through a primal node.'
     []
   []
 

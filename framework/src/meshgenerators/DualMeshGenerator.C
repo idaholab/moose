@@ -295,8 +295,13 @@ DualMeshGenerator::generate()
     /// primal node id
     std::unordered_map<dof_id_type, std::vector<std::size_t>> boundary_node_to_segments;
     /// Ids of the primal nodes the dual mesh has to reproduce as nodes: corners, where the two
-    /// adjacent preserved sides are not collinear, and the end points of open boundary chains
+    /// adjacent preserved sides are not collinear, the end points of open boundary chains, and
+    /// every node on an interface with a preserved primal subdomain
     std::unordered_set<dof_id_type> boundary_vertex_nodes;
+    /// Ids of the primal nodes lying on a side shared with a preserved primal element. Those
+    /// elements are copied with their nodes intact, so the dual cells have to stop at these nodes
+    /// even where the boundary runs straight through them.
+    std::unordered_set<dof_id_type> preserved_primal_interface_nodes;
     /// The preserved sides gathered into connected loops of points, used for inside/outside tests
     std::vector<std::vector<Point>> boundary_point_loops;
     /// The boundary loops split at the boundary vertices, i.e. the straight pieces of boundary the
@@ -381,6 +386,15 @@ DualMeshGenerator::generate()
           boundary_region.boundary_node_midpoints[node0].push_back(midpoint);
           boundary_region.boundary_node_midpoints[node1].push_back(midpoint);
 
+          // A preserved primal neighbor keeps this side's nodes, so the dual cells must too
+          const auto * const neighbor = elem->neighbor_ptr(side);
+
+          if (neighbor != nullptr && preservePrimalSubdomain(neighbor->subdomain_id()))
+          {
+            boundary_region.preserved_primal_interface_nodes.insert(node0);
+            boundary_region.preserved_primal_interface_nodes.insert(node1);
+          }
+
           // Record the boundary ids of this side so they can be put back on the dual mesh
           std::vector<boundary_id_type> side_ids;
           input_boundary_info.boundary_ids(elem, side, side_ids);
@@ -432,9 +446,18 @@ DualMeshGenerator::generate()
 
     // Flag the boundary nodes the dual mesh has to keep as nodes. A node with anything other than
     // two preserved sides is an end point or a junction, so it is always kept; a node with exactly
-    // two is kept only if those sides turn, i.e. the boundary has a corner there.
+    // two is kept only if those sides turn, i.e. the boundary has a corner there. The dual mesh is
+    // otherwise free to run straight past a node interior to a flat stretch of boundary.
     for (const auto & [node_id, segment_ids] : boundary_region.boundary_node_to_segments)
     {
+      // Unless a preserved primal element on the other side keeps that node, in which case running
+      // past it would leave the node hanging
+      if (boundary_region.preserved_primal_interface_nodes.count(node_id))
+      {
+        boundary_region.boundary_vertex_nodes.insert(node_id);
+        continue;
+      }
+
       if (segment_ids.size() != 2)
       {
         boundary_region.boundary_vertex_nodes.insert(node_id);
@@ -772,6 +795,34 @@ DualMeshGenerator::generate()
                                               : dualMesh->add_elem_integer(name));
   }
 
+  // A C0Polygon is triangulated by fanning from its first vertex, so that vertex must not be
+  // collinear with any edge the fan spans, or the triangle on that edge is degenerate. Both the
+  // dual cells and the preserved primal elements gain collinear vertices from the side midpoints
+  // the construction inserts, so both need an apex whose fan is sound. Returns the offset to rotate
+  // the vertices by, or 0 if no rotation helps.
+  const auto fanApexOffset = [&area_tol](const std::vector<Point> & points)
+  {
+    const auto n_points = points.size();
+    const auto n_degenerate_triangles = [&](const std::size_t apex)
+    {
+      unsigned int n_degenerate = 0;
+
+      for (const auto i : make_range(std::size_t(1), n_points - 1))
+        if (std::abs(geom_utils::signedArea2D(points[apex],
+                                              points[(apex + i) % n_points],
+                                              points[(apex + i + 1) % n_points])) <= area_tol)
+          ++n_degenerate;
+
+      return n_degenerate;
+    };
+
+    for (const auto apex : index_range(points))
+      if (n_degenerate_triangles(apex) == 0)
+        return apex;
+
+    return std::size_t(0);
+  };
+
   // Ordered map because std::array has no std::hash specialization
   std::map<RoundedPointKey2D, std::vector<Node *>> dual_nodes_by_key;
   const Real dual_node_tol = std::max(length_tol, Real(1e-12));
@@ -903,34 +954,17 @@ DualMeshGenerator::generate()
           }
         }
 
-        // A C0Polygon is triangulated by fanning from its first vertex, so that vertex must not be
-        // collinear with any edge the fan spans, or the triangle on that edge is degenerate. The
-        // inserted midpoints make this the normal case rather than a corner case: a primal corner
-        // at the start of a flat run of sides is collinear with the rest of that run. Rotate the
-        // vertices onto an apex whose fan has no degenerate triangle.
+        // Rotate the vertices onto an apex whose fan has no degenerate triangle. The inserted
+        // midpoints make this the normal case rather than a corner case: a primal corner at the
+        // start of a flat run of sides is collinear with the rest of that run.
         const auto n_polygon_nodes = polygon_nodes.size();
-        const auto degenerateFanTriangles = [&](const std::size_t apex)
-        {
-          unsigned int n_degenerate = 0;
+        std::vector<Point> polygon_points;
+        polygon_points.reserve(n_polygon_nodes);
 
-          for (const auto i : make_range(std::size_t(1), n_polygon_nodes - 1))
-            if (std::abs(geom_utils::signedArea2D(
-                    *polygon_nodes[apex],
-                    *polygon_nodes[(apex + i) % n_polygon_nodes],
-                    *polygon_nodes[(apex + i + 1) % n_polygon_nodes])) <= area_tol)
-              ++n_degenerate;
+        for (auto * const node : polygon_nodes)
+          polygon_points.push_back(*node);
 
-          return n_degenerate;
-        };
-
-        std::size_t fan_apex = 0;
-
-        for (const auto apex : index_range(polygon_nodes))
-          if (degenerateFanTriangles(apex) == 0)
-          {
-            fan_apex = apex;
-            break;
-          }
+        const auto fan_apex = fanApexOffset(polygon_points);
 
         if (fan_apex != 0)
         {
@@ -940,8 +974,8 @@ DualMeshGenerator::generate()
           // the vertices
           for (auto & [_, sides] : edge_to_polygon_sides)
             for (auto & polygon_side : sides)
-              polygon_side = cast_int<unsigned short>(
-                  (polygon_side + n_polygon_nodes - fan_apex) % n_polygon_nodes);
+              polygon_side = cast_int<unsigned short>((polygon_side + n_polygon_nodes - fan_apex) %
+                                                      n_polygon_nodes);
         }
 
         // Still the preserved primal element, not a dual cell: only its representation changes,
@@ -1290,10 +1324,14 @@ DualMeshGenerator::generate()
 
       return dual_elem;
     };
+    // Rotate onto an apex that fans into non-degenerate triangles. A cell along a preserved
+    // boundary can have three collinear vertices, the two side midpoints and the primal node
+    // between them, when that node has to be kept.
+    const auto fan_apex = fanApexOffset(points);
     std::vector<Node *> dual_nodes(points.size());
 
     for (const auto i : index_range(points))
-      dual_nodes[i] = getDualNode(points[i]);
+      dual_nodes[i] = getDualNode(points[(i + fan_apex) % points.size()]);
 
     auto dual_elem = buildDualElement(dual_nodes);
 
