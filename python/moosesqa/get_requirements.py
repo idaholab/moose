@@ -153,11 +153,9 @@ def get_requirements_from_file(
         if req.testable or include_non_testable:
             requirements.append(req)
 
-        # TODO: better behavior
-        # this will remove duplicate listing
-        # really we should error or warn on duplicates so the user doesn't
-        # provide them but there is a lot of duplicates due to previous behavior
-        # so error on duplicate is likely to break not only framework but other codes
+        # this will remove duplicate listings for example if a spec has
+        # Tests/issuse="#1234" and then Tests/test1/issues="#1234"
+        # this ensures that we only list #1234 once.
         if req.issues is not None:
             req.issues = list(dict.fromkeys(req.issues))
 

@@ -10,7 +10,6 @@
 import collections
 import itertools
 import logging
-import pdb
 import unittest
 
 import mock
@@ -85,11 +84,15 @@ class TestSQARequirementsAST(MooseDocsTestCase):
         self.assertToken(ast(0)(8)(2), "SQARequirementDesign", design=["katex.md"])
 
     def testASTIssuesLink(self):
+        # This test reads the test spec located at
+        # moose/python/moosesqa/test/test_get_requirements_spec0
         text = "!sqa requirements category=Demo link=True link-spec=False link-design=False link-issues=True link-prerequisites=False link-collections=False link-types=False"
         ast = self.tokenize(text)
 
         self._assertAST_common(ast(0))
-
+        # Since issue 1234 is listed at the top level of the spec i.e.
+        # Tests/issues='#1234' all of the subsequent sub tests also carry
+        # the 1234 issue number within their requirements
         self.assertToken(ast(0)(1)(1), "SQARequirementIssues", issues=["#1234"])
         self.assertToken(
             ast(0)(2)(1), "SQARequirementIssues", issues=["#1234", "#3456"]

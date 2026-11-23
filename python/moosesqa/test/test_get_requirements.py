@@ -368,9 +368,9 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         INDEX_TEST_1 = 1
         INDEX_TEST_2 = 2
 
-        self.assertEqual(req[INDEX_TEST_0].issues, ["#1234"])
-        self.assertEqual(req[INDEX_TEST_1].issues, ["#2345", "#3456"])
-        self.assertEqual(req[INDEX_TEST_2].issues, ["#4567", "#5678"])
+        self.assertEqual(req[INDEX_TEST_0].issues, ["#4321"])
+        self.assertEqual(req[INDEX_TEST_1].issues, ["#5432", "#6543"])
+        self.assertEqual(req[INDEX_TEST_2].issues, ["#7654", "#8765"])
 
 
 class TestRequirementCollections(unittest.TestCase):
