@@ -52,7 +52,7 @@ PorousFlowLineSink::validParams()
   params.addParam<bool>("use_enthalpy", false, "Multiply the flux by the fluid enthalpy");
   params.addParam<bool>(
       "use_internal_energy", false, "Multiply the flux by the fluid internal energy");
-  params.addCoupledVar("multiplying_var", 1.0, "Fluxes will be moultiplied by this variable");
+  params.addCoupledVar("multiplying_var", 1.0, "Fluxes will be multiplied by this variable");
   params.addClassDescription("Approximates a line sink in the mesh by a sequence of weighted Dirac "
                              "points whose positions are read from a file");
   return params;
@@ -249,12 +249,17 @@ PorousFlowLineSink::computeQpResidual()
 
   outflow *= _multiplying_var[_qp];
 
+  // The direction of flow is that of the flux the point actually carries, after multiplying_var,
+  // which may reverse it.  outflow already includes the test function, which is negative over part
+  // of a higher-order element, so its own sign would reverse at some nodes; multiplying by the test
+  // function again gives flux * test^2, whose sign is that of the flux itself
+  const bool injecting = (outflow * _test[_i][_qp] < 0.0);
+
   if (_use_relative_permeability)
     outflow *= (*_relative_permeability)[_i][_ph];
 
   if (_use_mobility)
-    outflow *= (*_relative_permeability)[_i][_ph] * (*_fluid_density_node)[_i][_ph] /
-               (*_fluid_viscosity)[_i][_ph];
+    outflow *= mobility(injecting);
 
   if (_use_mass_fraction)
     outflow *= (*_mass_fractions)[_i][_ph][_sp];
@@ -302,6 +307,10 @@ PorousFlowLineSink::jac(unsigned int jvar)
   outflow *= _multiplying_var[_qp];
   outflowp *= _multiplying_var[_qp];
 
+  // Read exactly as in computeQpResidual, so that the residual and Jacobian always weight the flux
+  // by the same mobility
+  const bool injecting = (outflow * _test[_i][_qp] < 0.0);
+
   if (_use_relative_permeability)
   {
     const Real relperm_prime = (_i != _j ? 0.0 : (*_drelative_permeability_dvar)[_i][_ph][pvar]);
@@ -311,18 +320,8 @@ PorousFlowLineSink::jac(unsigned int jvar)
 
   if (_use_mobility)
   {
-    const Real mob = (*_relative_permeability)[_i][_ph] * (*_fluid_density_node)[_i][_ph] /
-                     (*_fluid_viscosity)[_i][_ph];
-    const Real mob_prime =
-        (_i != _j
-             ? 0.0
-             : (*_drelative_permeability_dvar)[_i][_ph][pvar] * (*_fluid_density_node)[_i][_ph] /
-                       (*_fluid_viscosity)[_i][_ph] +
-                   (*_relative_permeability)[_i][_ph] *
-                       (*_dfluid_density_node_dvar)[_i][_ph][pvar] / (*_fluid_viscosity)[_i][_ph] -
-                   (*_relative_permeability)[_i][_ph] * (*_fluid_density_node)[_i][_ph] *
-                       (*_dfluid_viscosity_dvar)[_i][_ph][pvar] /
-                       Utility::pow<2>((*_fluid_viscosity)[_i][_ph]));
+    const Real mob = mobility(injecting);
+    const Real mob_prime = (_i != _j ? 0.0 : dmobility(pvar, injecting));
     outflowp = mob * outflowp + mob_prime * outflow;
     outflow *= mob;
   }
@@ -351,6 +350,25 @@ PorousFlowLineSink::jac(unsigned int jvar)
   }
 
   return outflowp;
+}
+
+Real
+PorousFlowLineSink::mobility(const bool /*injecting*/) const
+{
+  return (*_relative_permeability)[_i][_ph] * (*_fluid_density_node)[_i][_ph] /
+         (*_fluid_viscosity)[_i][_ph];
+}
+
+Real
+PorousFlowLineSink::dmobility(const unsigned pvar, const bool /*injecting*/) const
+{
+  return (*_drelative_permeability_dvar)[_i][_ph][pvar] * (*_fluid_density_node)[_i][_ph] /
+             (*_fluid_viscosity)[_i][_ph] +
+         (*_relative_permeability)[_i][_ph] * (*_dfluid_density_node_dvar)[_i][_ph][pvar] /
+             (*_fluid_viscosity)[_i][_ph] -
+         (*_relative_permeability)[_i][_ph] * (*_fluid_density_node)[_i][_ph] *
+             (*_dfluid_viscosity_dvar)[_i][_ph][pvar] /
+             Utility::pow<2>((*_fluid_viscosity)[_i][_ph]);
 }
 
 Real
