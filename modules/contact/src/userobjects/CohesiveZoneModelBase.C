@@ -79,7 +79,8 @@ CohesiveZoneModelBase::CohesiveZoneModelBase(const InputParameters & parameters)
             std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>>{})),
     _epsilon_tolerance(1.0e-40),
     _dof_to_damage(declareRestartableData<std::unordered_map<dof_id_type, std::pair<ADReal, Real>>>(
-        "dof_do_damage", std::unordered_map<dof_id_type, std::pair<ADReal, Real>>{}))
+        "dof_do_damage", std::unordered_map<dof_id_type, std::pair<ADReal, Real>>{})),
+    _t_step_old_czm(declareRestartableData<int>("t_step_old_czm", 0))
 {
   _czm_interpolated_traction.resize(_ndisp);
 
@@ -188,6 +189,12 @@ CohesiveZoneModelBase::timestepSetup()
   // instead we call it explicitly here
   WeightedGapUserObject::timestepSetup();
 
+  // timestepSetup() runs once per time step attempt. On a retried timestep (e.g. --test-restep or a
+  // rejected step) the old values below already hold the last accepted step, so they are not
+  // advanced again; only the current values are reset.
+  const bool retried_timestep = _fe_problem.timeStep() == _t_step_old_czm;
+  _t_step_old_czm = _fe_problem.timeStep();
+
   // Clear step slip (values used in between AL iterations for penalty adaptivity)
   for (auto & map_pr : _dof_to_step_slip)
   {
@@ -200,7 +207,9 @@ CohesiveZoneModelBase::timestepSetup()
   for (auto & map_pr : _dof_to_accumulated_slip)
   {
     auto & [accumulated_slip, old_accumulated_slip] = map_pr.second;
-    old_accumulated_slip = MetaPhysicL::raw_value(accumulated_slip);
+    if (!retried_timestep)
+      old_accumulated_slip = MetaPhysicL::raw_value(accumulated_slip);
+    accumulated_slip = old_accumulated_slip;
   }
 
   for (auto & dof_lp : _dof_to_local_penalty_friction)
@@ -210,8 +219,9 @@ CohesiveZoneModelBase::timestepSetup()
   for (auto & map_pr : _dof_to_tangential_traction)
   {
     auto & [tangential_traction, old_tangential_traction] = map_pr.second;
-    old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
-                               MetaPhysicL::raw_value(tangential_traction(1))};
+    if (!retried_timestep)
+      old_tangential_traction = {MetaPhysicL::raw_value(tangential_traction(0)),
+                                 MetaPhysicL::raw_value(tangential_traction(1))};
     tangential_traction = {0.0, 0.0};
   }
 
@@ -222,7 +232,8 @@ CohesiveZoneModelBase::timestepSetup()
   for (auto & map_pr : _dof_to_damage)
   {
     auto & [damage, old_damage] = map_pr.second;
-    old_damage = {MetaPhysicL::raw_value(damage)};
+    if (!retried_timestep)
+      old_damage = {MetaPhysicL::raw_value(damage)};
     damage = old_damage;
   }
 }
