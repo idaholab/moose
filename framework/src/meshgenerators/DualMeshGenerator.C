@@ -903,6 +903,47 @@ DualMeshGenerator::generate()
           }
         }
 
+        // A C0Polygon is triangulated by fanning from its first vertex, so that vertex must not be
+        // collinear with any edge the fan spans, or the triangle on that edge is degenerate. The
+        // inserted midpoints make this the normal case rather than a corner case: a primal corner
+        // at the start of a flat run of sides is collinear with the rest of that run. Rotate the
+        // vertices onto an apex whose fan has no degenerate triangle.
+        const auto n_polygon_nodes = polygon_nodes.size();
+        const auto degenerateFanTriangles = [&](const std::size_t apex)
+        {
+          unsigned int n_degenerate = 0;
+
+          for (const auto i : make_range(std::size_t(1), n_polygon_nodes - 1))
+            if (std::abs(geom_utils::signedArea2D(
+                    *polygon_nodes[apex],
+                    *polygon_nodes[(apex + i) % n_polygon_nodes],
+                    *polygon_nodes[(apex + i + 1) % n_polygon_nodes])) <= area_tol)
+              ++n_degenerate;
+
+          return n_degenerate;
+        };
+
+        std::size_t fan_apex = 0;
+
+        for (const auto apex : index_range(polygon_nodes))
+          if (degenerateFanTriangles(apex) == 0)
+          {
+            fan_apex = apex;
+            break;
+          }
+
+        if (fan_apex != 0)
+        {
+          std::rotate(polygon_nodes.begin(), polygon_nodes.begin() + fan_apex, polygon_nodes.end());
+
+          // A side is identified by the index of its first node, so the recorded indices shift with
+          // the vertices
+          for (auto & [_, sides] : edge_to_polygon_sides)
+            for (auto & polygon_side : sides)
+              polygon_side = cast_int<unsigned short>(
+                  (polygon_side + n_polygon_nodes - fan_apex) % n_polygon_nodes);
+        }
+
         // Still the preserved primal element, not a dual cell: only its representation changes,
         // from its original type to a polygon with the interface midpoints as extra vertices
         auto primal_elem = std::make_unique<libMesh::C0Polygon>(polygon_nodes.size());

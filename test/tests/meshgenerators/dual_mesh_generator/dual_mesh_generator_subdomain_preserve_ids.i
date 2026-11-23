@@ -40,6 +40,21 @@
     minimum_element_volumes = 0
     examine_non_conformality = ERROR
   []
+
+  # Also check that the polygons split into non-degenerate triangles
+  [convert]
+    type = ElementsToSimplicesConverter
+    input = myDiagnosticGenerator
+  []
+
+  [checkConverted]
+    type = MeshDiagnosticsGenerator
+    input = convert
+    examine_element_volumes = ERROR
+    minimum_element_volumes = 0
+    examine_non_conformality = ERROR
+    examine_sidesets_orientation = ERROR
+  []
 []
 
 [AuxVariables]
