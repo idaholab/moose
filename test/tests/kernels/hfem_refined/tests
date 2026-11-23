@@ -10,4 +10,14 @@
                   'calculations in parallel on meshes with faces between coarse and refined elements.'
     capabilities = 'mumps'
   []
+  [refined_parallel_array]
+    type = 'CSVDiff'
+    input = 'refined_array.i'
+    csvdiff = 'refined_array_out.csv'
+    min_parallel = 2
+    requirement = 'The system shall give the serial result for hybrid finite element method (HFEM) '
+                  'calculations with array variables in parallel on meshes with faces between coarse '
+                  'and refined elements.'
+    capabilities = 'mumps'
+  []
 []
