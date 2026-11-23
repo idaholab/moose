@@ -4,7 +4,7 @@
     input = 'num_vars.i'
     csvdiff = 'num_vars_out.csv'
 
-    requirement = 'The NumVars Postprocessor shall report the number of variables from
+    requirement = 'The system shall report, using the NumVars Postprocessor, the number of variables from
                    one or more equation systems in the simulation.'
     design = '/NumVars.md'
     issues = '#2094'
