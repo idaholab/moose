@@ -20,7 +20,7 @@
     []
   []
   [condensed_ns_asymmetric]
-    requirement = "The condensed matrix shall be asymmetric due to the presence of advection"
+    requirement = "The system shall produce an asymmetric condensed matrix due to the presence of advection"
     type = CSVDiff
     input = 'sc-lid-driven.i'
     csvdiff = 'sc-lid-driven_csv.csv'
@@ -28,7 +28,7 @@
     prereq = 'lid-driven/condensed'
   []
   [condensed_stokes_symmetric]
-    requirement = "The condensed matrix shall be symmetric when the nonlinear advection term in the momentum equation is not taken into consideration."
+    requirement = "The system shall produce a symmetric condensed matrix when the nonlinear advection term in the momentum equation is not taken into consideration."
     type = CSVDiff
     input = 'sc-lid-driven.i'
     csvdiff = 'stokes-symmetric.csv'
@@ -56,7 +56,7 @@
     type = CSVDiff
     input = stokes-lid-driven.i
     csvdiff = stokes-lid-driven_out.csv
-    requirement = 'The interior penalty hybridizable discontinuous Galerkin discretization of Stokes flow shall be symmetric.'
+    requirement = 'The system shall produce a symmetric interior penalty hybridizable discontinuous Galerkin discretization of Stokes flow.'
   []
   [matrix_testing]
     requirement = 'The system shall show that for an interior penalty based hybridizable discontinuous Galerkin method, 1) a grad-div finite element weak form is equivalent to the matrix product B_up M_p^-1 B_pu, where u denotes volumetric velocity degrees of freedom and p denotes volumetric pressure degrees of freedom, 2) a jump finite element weak form is equivalent to the matrix product B_upb M_pb^-1 B_pbu where pb denotes pressure degrees of freedom on the facets, 3) the matrix product B_pu M_u^-1 B_up is nonsingular, and 4) the matrix product B_pbu M_u^-1 B_upb is nonsingular for'

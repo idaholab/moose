@@ -21,6 +21,6 @@
     input = test.py
     test_case = TestRZViscousSourcePhysics
     min_parallel = 2
-    requirement = 'Physics system syntax shall recover the manufactured axisymmetric solution when the automatic RZ viscous source term is enabled.'
+    requirement = 'The system shall recover, using Physics system syntax, the manufactured axisymmetric solution when the automatic RZ viscous source term is enabled.'
   []
 []

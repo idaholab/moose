@@ -28,7 +28,7 @@
     type = 'CSVDiff'
     input = 'pipe_solidification.i'
     csvdiff = 'pipe_solidification_csv_sat_0003.csv'
-    requirement = 'The system must be able to obtain the correct temperature profile over the center line in a solidification problem.'
+    requirement = 'The system shall be able to obtain the correct temperature profile over the center line in a solidification problem.'
     rel_err = 1.0E-7
     mesh_mode = REPLICATED # because the parsed sideset generator doesn't work with distributed
   []

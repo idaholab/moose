@@ -35,7 +35,7 @@
     abs_zero = 1e-6
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
-    requirement = 'For the same Reynolds number but scaled density over viscosity ratio, the system shall be able to yield the same results than a benchmark case for a channel flow.'
+    requirement = 'The system shall be able to yield the same results as a benchmark case for a channel flow, for the same Reynolds number but scaled density over viscosity ratio.'
   []
   [channel_ERCOFTAC_linear_turbulence_advection_vanleer]
     design = 'LinearFVTurbulentAdvection.md'

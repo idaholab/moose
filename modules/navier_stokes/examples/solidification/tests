@@ -26,7 +26,7 @@
   [stefan_phasechange_problem]
     type = RunApp
     input = '1d_stefan_T.i'
-    requirement = 'Stefan melting analytical problem for the LinearFV phase change model.'
+    requirement = 'The system shall solve the Stefan melting analytical problem for the LinearFV phase change model.'
     heavy = true
     max_threads = 1
     max_time = 500 # Saw ta timeout on one of the heavy tests at some point and it is very close to 5 mins by default

@@ -41,7 +41,7 @@
     csvdiff = conservation_LinearFV_reconstructed.csv
     cli_args = 'pressure_gradient_method=reconstructed Executioner/num_iterations=400 Outputs/file_base=conservation_LinearFV_reconstructed'
     abs_zero = 1e-8
-    requirement = 'The reconstructed pressure-gradient method shall preserve equal and opposite Rhie-Chow face mass fluxes at the inlet and outlet of a linear finite volume channel.'
+    requirement = 'The system shall preserve equal and opposite Rhie-Chow face mass fluxes at the inlet and outlet of a linear finite volume channel with the reconstructed pressure-gradient method.'
     max_threads = 1 # see libmesh issue #3808
     recover = false # SIMPLE is a steady solver
     issues = '#32995'

@@ -63,7 +63,7 @@
     input = boussinesq-action.i
     cli_args = "Modules/NavierStokesFV/density='rho_error'"
     expect_err = 'rho: The density in the boussinesq term is not constant!'
-    requirement = 'The system should throw an error if the density is not a constant functor in case of Boussinesq treatment.'
+    requirement = 'The system shall throw an error if the density is not a constant functor in case of Boussinesq treatment.'
     valgrind = 'none'
     issues = '#19742'
     # New physics cannot support this because we want properties forwarded from fluid properties to work
