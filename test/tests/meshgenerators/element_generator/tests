@@ -93,5 +93,14 @@
       recover = false
       detail = 'and comparing their connectivity in file order.'
     []
+    [many_sides]
+      type = Exodiff
+      input = 'polygons_many_sides.i'
+      cli_args = '--mesh-only'
+      exodiff = 'polygons_many_sides_in.e'
+      exodiff_opts = '-pedantic'
+      recover = false
+      detail = 'including the sidesets of polygons with more than eight sides.'
+    []
   []
 []
