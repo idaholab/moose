@@ -352,6 +352,9 @@ consumeUnquotedString(Lexer * l)
   return l->pos() - l->start();
 }
 
+/// Consumes a ${...} token. Only the token bounds are needed here; the expression itself is
+/// parsed and evaluated by parseBraceTemplate/BraceExpander, which match nested '${' and '}' the
+/// same way parseBraceNode does, so both agree on where an expression ends.
 void
 consumeBraceExpression(Lexer * l)
 {
