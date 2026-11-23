@@ -14,9 +14,4 @@
     dual_mesh_type = voronoi
     preserve_primal_subdomains = '3'
   []
-
-  [convert]
-    type = ElementsToSimplicesConverter
-    input = myDualGen
-  []
 []

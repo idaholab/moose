@@ -34,10 +34,6 @@
         examine_element_overlap = ERROR
         examine_element_volumes = ERROR
         minimum_element_volumes = 0
-    []
-
-    [convert]
-        type = ElementsToSimplicesConverter
-        input = myDiagnosticGenerator
+        examine_non_conformality = ERROR
     []
 []

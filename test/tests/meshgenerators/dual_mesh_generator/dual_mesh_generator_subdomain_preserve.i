@@ -15,8 +15,12 @@
     preserve_primal_subdomains = '3'
   []
 
-  [convert]
-    type = ElementsToSimplicesConverter
-    input = myDualGen
+  [myDiagnosticGenerator]
+      type = MeshDiagnosticsGenerator
+      input = myDualGen
+      examine_element_overlap = ERROR
+      examine_element_volumes = ERROR
+      minimum_element_volumes = 0
+      examine_non_conformality = ERROR
   []
 []
