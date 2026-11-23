@@ -343,6 +343,49 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMThermalExpansion]
+    type = CSVDiff
+    input = thermal_expansion.i
+    csvdiff = 'OutputData/ThermalExpansion_centreline_0001.csv'
+    design = 'MFEMVectorDivergenceKernel.md MFEMVectorDomainLFGradKernel.md'
+    requirement = 'The system shall have the ability to solve a coupled thermomechanical problem for '
+                  'the thermal bending of a cantilever beam in three dimensions using MFEM.'
+    capabilities = 'mfem'
+    recover = false
+  []
+  [MFEMVectorDomainLFGrad]
+    design = 'MFEMVectorDomainLFGradKernel.md'
+    requirement = 'The system shall be able to add the linear form for the inner product of a matrix '
+                  'coefficient with the gradient of a vector test function to an MFEM problem'
+    [matrix_coefficient]
+      type = CSVDiff
+      input = vector_domain_lf_grad.i
+      csvdiff = 'OutputData/VectorDomainLFGrad_samples_0001.csv'
+      capabilities = 'mfem'
+      recover = false
+      detail = 'from a constant non-symmetric matrix coefficient,'
+    []
+    [boundary_traction]
+      type = CSVDiff
+      input = vector_domain_lf_grad.i
+      csvdiff = 'OutputData/VectorDomainLFGrad_samples_0001.csv'
+      cli_args = 'Kernels/active=elasticity '
+                 'BCs/active="clamped right_traction back_traction front_traction top_traction '
+                 'bottom_traction"'
+      prereq = 'MFEMVectorDomainLFGrad/matrix_coefficient'
+      capabilities = 'mfem'
+      recover = false
+      detail = 'giving the same solution as the equivalent boundary tractions, and'
+    []
+    [both_coefficients]
+      type = RunException
+      input = vector_domain_lf_grad.i
+      cli_args = 'Kernels/tensor_source/coefficient=2'
+      expect_err = "Only one of 'coefficient' and 'matrix_coefficient' may be set by the user."
+      capabilities = 'mfem'
+      detail = 'reporting an error if both a scalar and a matrix coefficient are provided.'
+    []
+  []
   [MFEMDiffusionEigenproblem]
     type = CSVDiff
     input = diffusion_eigenproblem.i
