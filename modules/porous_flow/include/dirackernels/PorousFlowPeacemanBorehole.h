@@ -116,6 +116,14 @@ protected:
   /// Well constant
   const Real _well_constant;
 
+  /**
+   * Optional per-point well constant, one entry per point in point_file (empty if the
+   * 'well_constants' parameter was not supplied).  Takes precedence over both _well_constant and
+   * the internal geometric calculation, at whichever points have a positive entry - see
+   * wellConstant().
+   */
+  const std::vector<Real> _well_constants;
+
   /// Whether there is a quadpoint permeability material (for error checking)
   const bool _has_permeability;
 
@@ -140,7 +148,8 @@ protected:
                     const RealTensorValue & rot,
                     const Real & half_len,
                     const Elem * ele,
-                    const Real & rad) const;
+                    const Real & rad,
+                    unsigned current_dirac_ptid) const;
 
   Real computeQpBaseOutflow(unsigned current_dirac_ptid) const override;
   void computeQpBaseOutflowJacobian(unsigned jvar,
