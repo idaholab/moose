@@ -154,7 +154,15 @@ class CodeBlock(components.ReaderComponent):
     @staticmethod
     def defaultSettings():
         settings = components.ReaderComponent.defaultSettings()
-        settings["language"] = ("text", "The code language to use for highlighting.")
+
+        def validation_language(setting: str) -> str:
+            return setting
+
+        settings["language"] = (
+            "text",
+            "The code language to use for highlighting.",
+            validation_language,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -261,7 +269,8 @@ class UnorderedListBlock(ListBlock):
     RE = re.compile(
         r"(?:\A|\n{2,})"  # start of string or empty line
         r"(?P<items>(?P<marker>^- ).*?)"  # all items
-        r"(?=\n{3,}|\n*\Z|\n{2}^[^-\s])",  # stop with 2 empty or 1 not with marker
+        # stop with 2 empty or 1 not with marker
+        r"(?=\n{3,}|\n*\Z|\n{2}^[^-\s])",
         flags=re.MULTILINE | re.DOTALL | re.UNICODE,
     )
     ITEM_RE = re.compile(
@@ -276,7 +285,8 @@ class OrderedListBlock(ListBlock):
     RE = re.compile(
         r"(?:\A|\n{2,})"  # start of string or empty line
         r"(?P<items>(?P<marker>^[0-9]+\. ).*?)"  # all items
-        r"(?=\n{3,}|\n*\Z|\n{2}^[^[0-9\s])",  # stop with 2 empty or 1 not with marker
+        # stop with 2 empty or 1 not with marker
+        r"(?=\n{3,}|\n*\Z|\n{2}^[^[0-9\s])",
         flags=re.MULTILINE | re.DOTALL | re.UNICODE,
     )
     ITEM_RE = re.compile(
@@ -292,7 +302,11 @@ class OrderedListBlock(ListBlock):
     @staticmethod
     def defaultSettings():
         settings = ListBlock.defaultSettings()
-        settings["type"] = ("1", "The list type (1, A, a, i, or I).")
+
+        def validation_type(setting: str) -> str:
+            return setting
+
+        settings["type"] = ("1", "The list type (1, A, a, i, or I).", validation_type)
         return settings
 
     def createToken(self, parent, info, page, settings):

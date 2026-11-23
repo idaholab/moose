@@ -14,7 +14,7 @@ mesh in a consistent manner, as detailed in the [Adaptivity system](syntax/Adapt
 The four possible `MarkerValue` states are defined in `Marker.h` as
 follows:
 
-!listing framework/include/markers/Marker.h include-end= start=enum MarkerValue end=};
+!listing framework/include/markers/Marker.h include-end=false start=enum MarkerValue end=};
 
 The purpose of each value of the `MarkerValue` is define in the
 following table.

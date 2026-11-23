@@ -16,6 +16,7 @@ import MooseDocs
 from ..base import components, HTMLRenderer
 from ..tree import tokens, html, latex, pages
 from ..common import exceptions
+from ..common import setting_validation as validation
 
 from . import command, core
 
@@ -230,17 +231,32 @@ class CivetCommandBase(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_remote(setting: str) -> str:
+            return setting
+
         settings["remote"] = (
             None,
             "The category to utilize for remote result lookup, see CivetExtension.",
+            validation_remote,
         )
+
+        def validation_url(setting: str) -> str:
+            return setting
+
         settings["url"] = (
             None,
             "Override for the repository url provided in the 'category' option, e.g. 'https://civet.inl.gov'.",
+            validation_url,
         )
+
+        def validation_repo(setting: str) -> str:
+            return setting
+
         settings["repo"] = (
             None,
             "Override for the repository name provided in the 'category' option, e.g. 'idaholab/moose'.",
+            validation_repo,
         )
         return settings
 
@@ -267,6 +283,7 @@ class CivetMergeResultsCommand(CivetCommandBase):
         settings["use_current_hash"] = (
             True,
             "Use the hash for the current version of the documentation build, otherwise use the most up-to-date hash from the git remote.",
+            validation.boolean,
         )
         return settings
 
@@ -310,7 +327,11 @@ class CivetTestBadgesCommand(CivetCommandBase):
     @staticmethod
     def defaultSettings():
         config = CivetCommandBase.defaultSettings()
-        config["tests"] = (None, "The name of the test(s) to report.")
+
+        def validation_tests(setting: str) -> str:
+            return setting
+
+        config["tests"] = (None, "The name of the test(s) to report.", validation_tests)
         return config
 
     def createToken(self, parent, info, page, settings):
@@ -323,7 +344,11 @@ class CivetTestReportCommand(CivetCommandBase):
     @staticmethod
     def defaultSettings():
         config = CivetCommandBase.defaultSettings()
-        config["tests"] = (None, "The name of the test(s) to report.")
+
+        def validation_tests(setting: str) -> str:
+            return setting
+
+        config["tests"] = (None, "The name of the test(s) to report.", validation_tests)
         return config
 
     def createToken(self, parent, info, page, settings):

@@ -19,6 +19,7 @@ from ..common import exceptions
 from ..base import components, renderers, LatexRenderer
 from ..tree import pages, tokens, html, latex
 from . import core, command, heading
+from ..common import setting_validation as validation
 
 LOG = logging.getLogger(__name__)
 
@@ -100,7 +101,10 @@ class ContentExtension(command.CommandExtension):
         """
 
         location = location
-        func = lambda p: p.local.startswith(location) and isinstance(p, pages.Source)
+
+        def func(p):
+            return p.local.startswith(location) and isinstance(p, pages.Source)
+
         nodes = self.translator.findPages(func)
         nodes.sort(key=lambda n: n.local)
 
@@ -140,8 +144,21 @@ class ContentCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["location"] = ("", "The markdown content directory to build contents.")
-        settings["level"] = (2, "Heading level for top-level headings.")
+
+        def validation_location(setting: str) -> str:
+            return setting
+
+        settings["location"] = (
+            "",
+            "The markdown content directory to build contents.",
+            validation_location,
+        )
+
+        settings["level"] = (
+            2,
+            "Heading level for top-level headings.",
+            validation.unsigned_integer,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -156,11 +173,25 @@ class AtoZCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["location"] = ("", "The markdown content directory to build contents.")
-        settings["level"] = (2, "Heading level for A, B,... headings.")
+
+        def validation_location(setting: str) -> str:
+            return setting
+
+        settings["location"] = (
+            "",
+            "The markdown content directory to build contents.",
+            validation_location,
+        )
+
+        settings["level"] = (
+            2,
+            "Heading level for A, B,... headings.",
+            validation.unsigned_integer,
+        )
         settings["buttons"] = (
             True,
             "Display buttons linking to the A, B,... headings.",
+            validation.boolean,
         )
         return settings
 
@@ -181,9 +212,22 @@ class TableOfContentsCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["levels"] = ([1], "Heading level(s) to display.")
-        settings["columns"] = (1, "The number of columns to display.")
-        settings["hide"] = ("", "A list of heading ids to hide.")
+
+        def validation_levels(setting: str) -> str:
+            return setting
+
+        settings["levels"] = ([1], "Heading level(s) to display.", validation_levels)
+
+        settings["columns"] = (
+            1,
+            "The number of columns to display.",
+            validation.unsigned_integer,
+        )
+
+        def validation_hide(setting: str) -> str:
+            return setting
+
+        settings["hide"] = ("", "A list of heading ids to hide.", validation_hide)
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -206,27 +250,57 @@ class ContentOutlineCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_location(setting: str) -> str:
+            return setting
+
         settings["location"] = (
             None,
             "The markdown content directory to build outline.",
+            validation_location,
         )
         settings["recursive"] = (
             False,
             "Include content from the location subdirectories recursively.",
+            validation.boolean,
         )
+
+        def validation_pages(setting: str) -> str:
+            return setting
+
         settings["pages"] = (
             "",
             "The pages to include in outline in desired order of appearance.",
+            validation_pages,
         )
-        settings["max_level"] = (1, "Maximum heading level to display.")
-        settings["hide"] = ("", "A list of heading ids to hide.")
+
+        settings["max_level"] = (
+            1,
+            "Maximum heading level to display.",
+            validation.unsigned_integer,
+        )
+
+        def validation_hide(setting: str) -> str:
+            return setting
+
+        settings["hide"] = ("", "A list of heading ids to hide.", validation_hide)
+
+        def validation_no_prefix(setting: str) -> str:
+            return setting
+
         settings["no_prefix"] = (
             "",
             "A list of heading levels and/or ids to not show the prefixes for.",
+            validation_no_prefix,
         )
+
+        def validation_no_count(setting: str) -> str:
+            return setting
+
         settings["no_count"] = (
             "",
             "A list of heading levels and/or ids to not count the indices for.",
+            validation_no_count,
         )
         return settings
 
@@ -276,14 +350,47 @@ class PaginationCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings["previous"] = (None, "The previous markdown page to navigate to.")
-        settings["next"] = (None, "The next markdown page to navigate to.")
+
+        def validation_previous(setting: str) -> str:
+            return setting
+
+        settings["previous"] = (
+            None,
+            "The previous markdown page to navigate to.",
+            validation_previous,
+        )
+
+        def validation_next(setting: str) -> str:
+            return setting
+
+        settings["next"] = (
+            None,
+            "The next markdown page to navigate to.",
+            validation_next,
+        )
         settings["use_title"] = (
             False,
             "Use the title of the page for the hyperlink text.",
+            validation.boolean,
         )
-        settings["margin-top"] = ("24px", "The top margin of the buttons.")
-        settings["margin-bottom"] = ("24px", "The bottom margin of the buttons.")
+
+        def validation_margin_top(setting: str) -> str:
+            return setting
+
+        settings["margin-top"] = (
+            "24px",
+            "The top margin of the buttons.",
+            validation_margin_top,
+        )
+
+        def validation_margin_bottom(setting: str) -> str:
+            return setting
+
+        settings["margin-bottom"] = (
+            "24px",
+            "The bottom margin of the buttons.",
+            validation_margin_bottom,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -457,14 +564,20 @@ class RenderContentOutline(components.RenderComponent):
     def createHTMLHelper(self, parent, token, page):
         if token["location"] is not None and not token["pages"]:
             if token["recursive"]:
-                func = lambda p: p.local.startswith(token["location"]) and isinstance(
-                    p, pages.Source
-                )
+
+                def func(p):
+                    return p.local.startswith(token["location"]) and isinstance(
+                        p, pages.Source
+                    )
+
             else:
                 location = token["location"].rstrip("/")
-                func = lambda p: os.path.dirname(p.local) == location and isinstance(
-                    p, pages.Source
-                )
+
+                def func(p):
+                    return os.path.dirname(p.local) == location and isinstance(
+                        p, pages.Source
+                    )
+
             nodes = self.translator.findPages(func)
         elif token["pages"] and token["location"] is None:
             nodes = [self.translator.findPage(p) for p in token["pages"]]

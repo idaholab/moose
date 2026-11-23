@@ -7,7 +7,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, re
+import os
+import re
 import logging
 from ..tree import tokens
 from ..common import __init__
@@ -245,16 +246,42 @@ class TaggingCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+
+        def validation_name(setting: str) -> str:
+            return setting
+
         settings["name"] = (
             None,
             "ID name for page and associated key:value category:label pairs.",
+            validation_name,
         )
+
+        def validation_pairs(setting: str) -> str:
+            return setting
+
         settings["pairs"] = (
             None,
             "Key:value pairs representing categories and page-specific labels for each category.",
+            validation_pairs,
         )
-        settings["image"] = (None, "Link to an image to display for this entry")
-        settings["description"] = (None, "Description of the entry")
+
+        def validation_image(setting: str) -> str:
+            return setting
+
+        settings["image"] = (
+            None,
+            "Link to an image to display for this entry",
+            validation_image,
+        )
+
+        def validation_description(setting: str) -> str:
+            return setting
+
+        settings["description"] = (
+            None,
+            "Description of the entry",
+            validation_description,
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):

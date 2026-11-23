@@ -212,7 +212,7 @@ T = t\sin(\pi x)\cdot\sin(5\pi y)
 The `mms` package can compute the necessary forcing function and output the input file syntax
 for both the forcing function and the assumed solution.
 
-!listing tutorial03_verification/app/test/tests/step04_mms/step04_function.py link=false start=MooseDocs:start:spatial end=MooseDocs:end:spatial include-start=0
+!listing tutorial03_verification/app/test/tests/step04_mms/step04_function.py link=false start=MooseDocs:start:spatial end=MooseDocs:end:spatial include-start=false
 
 !---
 
@@ -321,7 +321,7 @@ T = x\cdot y\cdot\textrm{exp}(-1/32400 t)
 The `mms` package can compute the necessary forcing function and output the input file syntax
 for both the forcing function and the assumed solution.
 
-!listing tutorial03_verification/app/test/tests/step04_mms/step04_function.py link=false start=MooseDocs:start:temporal end=MooseDocs:end:temporal include-start=0
+!listing tutorial03_verification/app/test/tests/step04_mms/step04_function.py link=false start=MooseDocs:start:temporal end=MooseDocs:end:temporal include-start=false
 
 !---
 

@@ -23,6 +23,7 @@ from ..common import exceptions
 from ..base import components, LatexRenderer, MarkdownReader
 from ..tree import tokens, html, latex
 from . import core, command
+from ..common import setting_validation as validation
 
 LOG = logging.getLogger("MooseDocs.extensions.bibtex")
 
@@ -193,7 +194,8 @@ class BibtexExtension(command.CommandExtension):
         self.__bib_file_database = dict()
 
     def preExecute(self):
-        set_strict_mode(False)  # allow incorrectly formatted author/editor names
+        # allow incorrectly formatted author/editor names
+        set_strict_mode(False)
 
         # If this is invoked during a live serve, we need to recompile the list of '.bib' files and
         # read them again, otherwise there's no way to distinguish existing entries from duplicates
@@ -293,14 +295,29 @@ class BibtexCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
+
+        def validation_style(setting: str) -> str:
+            return setting
+
         config["style"] = (
             "plain",
             "The BibTeX style (plain, unsrt, alpha, unsrtalpha).",
+            validation_style,
         )
-        config["title"] = ("References", "The section title for the references.")
+
+        def validation_title(setting: str) -> str:
+            return setting
+
+        config["title"] = (
+            "References",
+            "The section title for the references.",
+            validation_title,
+        )
+
         config["title-level"] = (
             2,
             "The heading level for the section title for the references.",
+            validation.unsigned_integer,
         )
         return config
 
@@ -319,9 +336,14 @@ class BibtexListCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
+
+        def validation_bib_files(setting: str) -> str:
+            return setting
+
         config["bib_files"] = (
             None,
             "The list of *.bib files to use for a complete citation list.",
+            validation_bib_files,
         )
         return config
 
