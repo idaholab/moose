@@ -38,6 +38,14 @@ SetupRecoverFileBaseAction::act()
   if (_current_task == "recover_meta_data")
     _app.checkMetaDataIntegrity();
 
+  // A restart that reads its mesh from the checkpoint restores the mesh meta-data like recovery.
+  // The restart file base was already set when setting up the mesh.
+  if (_current_task == "recover_meta_data" && _app.isRestartingFromCheckpointMesh())
+  {
+    _app.loadRestartableMetaData(_app.getRestartRecoverFileBase() + _app.checkpointSuffix());
+    return;
+  }
+
   // Do nothing if the App is not recovering
   // Don't look for a checkpoint file unless we're the ultimate master app
   if (!_app.isRecovering() || !_app.isUltimateMaster())
