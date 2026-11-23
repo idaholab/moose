@@ -64,38 +64,24 @@ protected:
   const unsigned int _gas_porepressure_varnum;
   /// PorousFlow variable number of the gas porepressure
   const unsigned int _pvar;
-  /// Total mass fraction(s) of the gas component(s) summed over all phases
-  std::vector<const GenericVariableValue<is_ad> *> _Z;
-  /// Gradient(s) of total mass fraction(s) of the gas component(s) (only defined at the qps)
-  std::vector<const GenericVariableGradient<is_ad> *> _gradZ_qp;
-  /// Moose variable number of Z
-  std::vector<unsigned int> _Z_varnum;
-  /// PorousFlow variable number of Z
-  std::vector<unsigned int> _Zvar;
-  /// Number of coupled total mass fractions. Should be _num_phases - 1
+  /// Composition passed to the fluid state: the total mass fraction(s) summed over all phases,
+  /// followed by the salt mass fraction if the fluid state has salt
+  std::vector<const GenericVariableValue<is_ad> *> _composition;
+  /// Gradient(s) of the composition variables (only defined at the qps)
+  std::vector<const GenericVariableGradient<is_ad> *> _grad_composition_qp;
+  /// Moose variable numbers of the composition variables
+  std::vector<unsigned int> _composition_varnum;
+  /// PorousFlow variable numbers of the composition variables
+  std::vector<unsigned int> _composition_var;
+  /// Number of coupled total mass fractions: one fewer than the number of fluid components, not
+  /// counting salt
   const unsigned int _num_Z_vars;
-  /// Flag for nodal NaCl mass fraction
-  const bool _is_Xnacl_nodal;
-  /// Salt mass fraction (kg/kg)
-  const GenericVariableValue<is_ad> & _Xnacl;
-  /// Gradient of salt mass fraction (only defined at the qps)
-  const GenericVariableGradient<is_ad> & _grad_Xnacl_qp;
-  /// Salt mass fraction variable number
-  const unsigned int _Xnacl_varnum;
-  /// Salt mass fraction PorousFlow variable number
-  const unsigned int _Xvar;
   /// FluidState UserObject
   const PorousFlowFluidStateMultiComponentBase & _fs;
   /// Phase number of the aqueous phase
   const unsigned int _aqueous_phase_number;
   /// Phase number of the gas phase
   const unsigned int _gas_phase_number;
-  /// Fluid component number of the aqueous component
-  const unsigned int _aqueous_fluid_component;
-  /// Fluid component number of the gas phase
-  const unsigned int _gas_fluid_component;
-  /// Salt component index
-  const unsigned int _salt_component;
   /// Temperature
   const GenericMaterialProperty<Real, is_ad> & _temperature;
   /// Gradient of temperature (only defined at the qps)
@@ -110,10 +96,6 @@ protected:
   const unsigned int _pidx;
   /// Index of derivative wrt temperature
   const unsigned int _Tidx;
-  /// Index of derivative wrt total mass fraction Z
-  const unsigned int _Zidx;
-  /// Index of derivative wrt salt mass fraction X
-  const unsigned int _Xidx;
 
 #if (is_ad)
   usingPorousFlowFluidStateBaseMaterialMembers;

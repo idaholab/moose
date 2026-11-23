@@ -37,15 +37,13 @@ public:
 
   void thermophysicalProperties(Real pressure,
                                 Real temperature,
-                                Real Xnacl,
-                                Real Z,
+                                const std::vector<Real> & composition,
                                 unsigned int qp,
                                 std::vector<FluidStateProperties> & fsp) const override;
 
   void thermophysicalProperties(const ADReal & pressure,
                                 const ADReal & temperature,
-                                const ADReal & Xnacl,
-                                const ADReal & Z,
+                                const std::vector<ADReal> & composition,
                                 unsigned int qp,
                                 std::vector<FluidStateProperties> & fsp) const override;
   /**

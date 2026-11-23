@@ -56,22 +56,22 @@ public:
    *
    * @param pressure gas phase pressure (Pa)
    * @param temperature fluid temperature (K)
-   * @param Xnacl mass fraction of NaCl
-   * @param Z total mass fraction of fluid component
+   * @param composition the numTotalMassFractions() independent total mass fractions z_0 ... z_{N-2}
+   *          summed over all phases, followed by the NaCl mass fraction if hasSalt() is true. z_m
+   *          is the total mass fraction of fluid component m + 1; the total mass fraction of
+   *          component 0 (the aqueous component) is one minus their sum
    * @param qp quadpoint index
    * @param[out] fsp the FluidStateProperties struct containing all properties
    */
   virtual void thermophysicalProperties(Real pressure,
                                         Real temperature,
-                                        Real Xnacl,
-                                        Real Z,
+                                        const std::vector<Real> & composition,
                                         unsigned int qp,
                                         std::vector<FluidStateProperties> & fsp) const = 0;
 
   virtual void thermophysicalProperties(const ADReal & pressure,
                                         const ADReal & temperature,
-                                        const ADReal & Xnacl,
-                                        const ADReal & Z,
+                                        const std::vector<ADReal> & composition,
                                         unsigned int qp,
                                         std::vector<FluidStateProperties> & fsp) const = 0;
 
@@ -89,28 +89,34 @@ public:
   virtual Real totalMassFraction(
       Real pressure, Real temperature, Real Xnacl, Real saturation, unsigned int qp) const = 0;
 
-  unsigned int getPressureIndex() const { return _pidx; };
-  unsigned int getTemperatureIndex() const { return _Tidx; };
-  unsigned int getZIndex() const { return _Zidx; };
-  unsigned int getXIndex() const { return _Xidx; };
+  /// Whether the NaCl mass fraction is part of the composition passed to thermophysicalProperties()
+  virtual bool hasSalt() const { return false; }
+
+  /// Number of independent total mass fractions: one fewer than the number of fluid components,
+  /// not counting salt
+  unsigned int numTotalMassFractions() const { return _num_components - 1 - (hasSalt() ? 1 : 0); }
+
+  ///@{ AD derivative indices of the primary variables, in the fixed layout
+  /// pressure, temperature, {Z-block}, [Xnacl]. getXIndex() returns an invalid index if the fluid
+  /// state has no salt
+  unsigned int getPressureIndex() const { return 0; }
+  unsigned int getTemperatureIndex() const { return 1; }
+  unsigned int getZIndex(unsigned int m = 0) const { return 2 + m; }
+  unsigned int getXIndex() const
+  {
+    return hasSalt() ? getZIndex(numTotalMassFractions()) : libMesh::invalid_uint;
+  }
+  ///@}
 
 protected:
-  /// Fluid component number of the aqueous component
+  /// Fluid component number of the aqueous component (always 0)
   const unsigned int _aqueous_fluid_component;
-  /// Fluid component number of the gas phase
+  /// Fluid component number of the gas phase (fixed by the derived class)
   unsigned int _gas_fluid_component;
-  /// Salt component index
-  const unsigned int _salt_component;
+  /// Salt component index (fixed by the derived class; invalid if the fluid state has no salt)
+  unsigned int _salt_component;
   /// Whether to compute the internal energy of each phase
   const bool _compute_internal_energy;
   /// Whether to compute the enthalpy of each phase
   const bool _compute_enthalpy;
-  /// Index of derivative wrt pressure
-  const unsigned int _pidx;
-  /// Index of derivative wrt total mass fraction Z
-  const unsigned int _Zidx;
-  /// Index of derivative wrt temperature
-  const unsigned int _Tidx;
-  /// Index of derivative wrt salt mass fraction X
-  const unsigned int _Xidx;
 };

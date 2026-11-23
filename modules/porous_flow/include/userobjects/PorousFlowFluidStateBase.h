@@ -100,10 +100,10 @@ protected:
   unsigned int _num_phases;
   /// Number of components
   unsigned int _num_components;
-  /// Phase number of the aqueous phase
+  /// Phase number of the aqueous phase (the liquid phase is always phase 0)
   const unsigned int _aqueous_phase_number;
-  /// Phase number of the gas phase
-  unsigned int _gas_phase_number;
+  /// Phase number of the gas phase (the gas phase is always phase 1)
+  const unsigned int _gas_phase_number;
   /// Universal gas constant (J/mol/K)
   const Real _R;
   /// Conversion from C to K
