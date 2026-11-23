@@ -10,7 +10,7 @@ The governing flow equations for incompressible flow within a 1D flow path are a
 \pd{\dot{m}}{x} = 0 \,
 
 !equation id=momentum_conservation
-\frac{1}{A} \pd{\dot{m}}{t} = -\pd{P}{x} - \frac{f}{D_h} \frac{\dot{m}|\dot{m}|}{2\rho A^2} - \sum_{j} K_j \delta(x-x_j) \frac{\dot{m}|\dot{m}|}{2 \rho A^2} + \rho \bar{g} \dot \hat{u} + \pd{P_p}{x} \,
+\frac{1}{A} \pd{\dot{m}}{t} = -\pd{P}{x} - \frac{f}{D_h} \frac{\dot{m}|\dot{m}|}{2\rho A^2} - \sum_{j} K_j \delta(x-x_j) \frac{\dot{m}|\dot{m}|}{2 \rho A^2} + \rho \bar{g} \cdot \hat{u} + \sum_{j} \Delta P_{p,j} \delta(x-x_j) \,
 
 !equation id=energy_conservation
 A \rho c_p \pd{T}{t} + \dot{m} c_p \pd{T}{x} = q_w^{''} P_w \,
@@ -30,7 +30,7 @@ where
 - $\bar{g}$ is the gravitational acceleration vector,
 - $\hat{u}$ is the unit vector in the direction of flow,
 - $\alpha$ is the angle of the flow path with respect to horizontal,
-- $P_p$ is the pump pressure in the flow path, so $\pd{P_p}{x}$ is the pump pressure gain per unit length,
+- $\Delta P_{p,j}$ is the $j^{th}$ pump pressure gain,
 - $c_p$ is the specific isobaric heat capacity of the fluid,
 - $T$ is the bulk fluid temperature,
 - $q_w^{''}$ is the heat flux through the bounding surface(s), and
@@ -41,15 +41,15 @@ where
 Integrating the above momentum equation along a 1D flow path consisting of $N$ segments results in the following equations, ignoring conservation of mass since it has been substituted in the conservation of momentum and energy equations already:
 
 !equation id=discretized_momentum
-\sum_{i=1}^{N} \frac{L_i}{A_i} \pd{\dot{m}}{t} = - \Delta P_c - \sum_{i=1}^{N} \frac{f_i L_i}{D_{h,i}} \frac{\dot{m}|\dot{m}|}{2 \rho_i A_i^2} - \sum_{i=1}^{N} K_i \frac{\dot{m}|\dot{m}|}{2 \rho_i A_i^2} - \sum_{i=1}^{N} \rho_i |\bar{g}| \Delta z_i + \Delta P_p \,
+\sum_{i=1}^{N} \frac{L_i}{A_i} \pd{\dot{m}}{t} = - \Delta P_c - \sum_{i=1}^{N} \frac{f_i L_i}{D_{h,i}} \frac{\dot{m}|\dot{m}|}{2 \rho_i A_i^2} - \sum_{i=1}^{N} K_i \frac{\dot{m}|\dot{m}|}{2 \rho_i A_i^2} - \sum_{i=1}^{N} \rho_i |\bar{g}| \Delta z_i + \sum_{i=1}^{N} \Delta P_{p,i} \,
 
 where
 
 - $L_i$ is the length of segment $i$,
-- $\Delta P_c$ is the characteristic pressure drop from inlet to outlet, $\Delta P_c = \int_x^{L_i} \pd{P}{x}\,dx$,
-- $K_i$ is the sum of forms loss coefficients on this segment, $K_i \frac{\dot{m}|\dot{m}|}{2 \rho_i A_i^2} = \int_x^{L_i} \sum_{j} K_j \delta(x-x_j)\frac{\dot{m}|\dot{m}|}{2 \rho A^2}\,dx$,
-- $\Delta z_i$ is the height difference between the inlet and the outlet of a segment, $\rho_i |\bar{g}| \Delta z_i = \int_x^{L_i} \rho \bar{g} \dot \hat{u}\,dx$, and
-- $\Delta P_p$ is the total pump pressure increase over the flow path, $\Delta P_p = \int_x^{L_i} \pd{P_p}{x}\,dx$,
+- $\Delta P_c$ is the characteristic pressure drop over the total length of the flow path, $\Delta P_c = \int_0^{L_{\text{total}}} \pd{P}{x}\,dx$,
+- $K_i$ is the sum of forms loss coefficients on this segment, $K_i \frac{\dot{m}|\dot{m}|}{2 \rho_i A_i^2} = \int_0^{L_i} \sum_{j} K_j \delta(x-x_j)\frac{\dot{m}|\dot{m}|}{2 \rho A^2}\,dx$,
+- $\Delta z_i$ is the height difference between the inlet and the outlet of a segment, $\rho_i |\bar{g}| \Delta z_i = \int_0^{L_i} \rho \bar{g} \cdot \hat{u}\,dx$, and
+- $\Delta P_{p,i}$ is the total pump pressure increase over the segment, $\Delta P_{p,i} = \int_0^{L_i} \sum_{j} \Delta P_{p,j} \delta(x-x_j) \,dx$,
 
 A core assumption of this model is that the flow path consists of N segments, that the segments may have different cross sections, but within each segment, the cross section is assumed to be approximately constant. For example, a segment may have elbows, support structures, etc. within it but the overall cross section shouldn't change significantly over the length of the segment. Other properties are permitted to be unique to each segment as well, including viscosity, surface roughness, height change, and length.
 
@@ -110,9 +110,7 @@ For $\text{Re} > 4000$ the flow is deemed turbulent and the Swamee-Jain approxim
 !equation id=swamee_jain_friction
 f = f_{\text{turb}}(\text{Re}) = \frac{0.25}{\left( \log_{10} \left( \frac{\epsilon}{3.7 D_{h,i}} + \frac{5.74}{\text{Re}^{0.9}} \right) \right)^2} \,
 
-where
-
-- $\epsilon$ is the surface roughness.
+where $\epsilon$ is the surface roughness.
 
 For $2300 < \text{Re} < 4000$ the flow is deemed to be transitioning and a linear interpolation between the laminar prediction at $\text{Re} = 2300$ and the turbulent prediction at $\text{Re} = 4000$ is used:
 
@@ -124,8 +122,7 @@ The heat transfer coefficient is computed using the Dittus-Boelter correlation [
 !equation id=dittus_boelter
 h = \max\left(0.023 \text{Re}^{0.8} Pr^{0.4},\, 4\right) \frac{k_f}{D_h} \,
 
-where $Pr = c_p \mu / k_f$ and $k_f$ is the fluid thermal conductivity. The lower bound of 4 on the Nusselt number is the approximate laminar limit, which keeps the heat transfer coefficient finite and physically reasonable at low flow. The fluid properties are evaluated at the segment film temperature, the mean of the segment fluid temperature and its upwinded inlet value, independent of the bulk temperature option $T_m$ used in the wall term of [!eqref](discretized_energy). For
-the conjugate heat transfer kernels below, this coefficient is supplied by
+where $Pr = c_p \mu / k_f$ and $k_f$ is the fluid thermal conductivity. The lower bound of 4 on the Nusselt number is the approximate laminar limit, which keeps the heat transfer coefficient finite and physically reasonable at low flow. The fluid properties are evaluated at the segment mean temperature, IE the mean of the segment fluid temperature and its upwinded inlet value, independent of the bulk temperature option $T_m$ used in the wall term of [!eqref](discretized_energy). For the conjugate heat transfer kernels below, this coefficient is supplied by
 [ADDittusBoelterHTCFunctorMaterial.md].
 
 ## Junctions
