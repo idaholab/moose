@@ -3,7 +3,7 @@
   issues = '#30655'
 
   [nodal_extreme]
-    requirement = 'The Kokkos system shall compute the value of a nodal field variable at the point where'
+    requirement = 'The system shall, using Kokkos, compute the value of a nodal field variable at the point where'
     [value]
       type = 'Exodiff'
       input = 'kokkos_nodal_extreme_pps_test.i'
@@ -23,7 +23,7 @@
   []
 
   [nodal_max]
-    requirement = 'The Kokkos system shall compute the maximum value of a field variable by sampling nodes'
+    requirement = 'The system shall, using Kokkos, compute the maximum value of a field variable by sampling nodes'
     [whole_domain]
       type = 'Exodiff'
       input = 'kokkos_nodal_max_value_test.i'

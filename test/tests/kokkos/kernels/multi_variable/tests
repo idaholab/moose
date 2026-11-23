@@ -3,7 +3,7 @@
   design = 'syntax/KokkosKernels/index.md'
 
   [multi_variable]
-    requirement = 'The Kokkos system shall provide an ability to apply residual objects to multiple variables at once'
+    requirement = 'The system shall, using Kokkos, provide an ability to apply residual objects to multiple variables at once'
 
     [standard]
       type = Exodiff

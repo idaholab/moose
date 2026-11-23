@@ -3,7 +3,7 @@
   design = 'KokkosMaterials/index.md'
 
   [constant_on]
-    requirement = 'The Kokkos system shall support declaring, computing, and retrieving material properties that are constant on'
+    requirement = 'The system shall, using Kokkos, support declaring, computing, and retrieving material properties that are constant on'
     [none]
       type = 'Exodiff'
       input = 'kokkos_constant_on_test.i'

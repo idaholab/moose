@@ -3,7 +3,7 @@
   design = 'interfaces/TaggingInterface.md'
 
   [general]
-    requirement = 'The Kokkos system shall support the ability for a specific calculation to fill a labeled '
+    requirement = 'The system shall, using Kokkos, support the ability for a specific calculation to fill a labeled '
                   'or "tagged"'
 
     [tag_vector]
@@ -43,13 +43,13 @@
   [call_residual]
     type = RunApp
     input = 'kokkos_tag_residual_call.i'
-    requirement = 'The Kokkos system shall be able to accumulate tagged vectors individually with multiple residual computations.'
+    requirement = 'The system shall, using Kokkos, be able to accumulate tagged vectors individually with multiple residual computations.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
 
   [systems]
-    requirement = 'The Kokkos system shall support filling in labeled or "tagged" vectors or matrices from:'
+    requirement = 'The system shall, using Kokkos, support filling in labeled or "tagged" vectors or matrices from:'
 
     [test_tag_itegratedBCs]
       type = 'Exodiff'

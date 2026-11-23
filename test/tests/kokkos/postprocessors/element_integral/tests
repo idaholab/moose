@@ -3,7 +3,7 @@
   issues = '#30655'
 
   [element_integral]
-    requirement = 'The Kokkos system shall compute the element integral of a variable'
+    requirement = 'The system shall, using Kokkos, compute the element integral of a variable'
 
     [test]
       type = 'CSVDiff'
@@ -39,7 +39,7 @@
     type = 'CSVDiff'
     input = 'kokkos_element_block_average_test.i'
     csvdiff = 'kokkos_element_block_average_test_out.csv'
-    requirement = 'The Kokkos system shall compute the element average of a variable.'
+    requirement = 'The system shall, using Kokkos, compute the element average of a variable.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []

@@ -6,7 +6,7 @@
     type = 'Exodiff'
     input = 'kokkos_transient_vector_diffusion.i'
     exodiff = 'kokkos_transient_vector_diffusion_out.e'
-    requirement = 'A time derivative Kokkos vector kernel shall be provided.'
+    requirement = 'The system shall provide a time derivative Kokkos vector kernel.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
@@ -17,7 +17,7 @@
     run_sim = True
     ratio_tol = 1e-7
     difference_tol = 1e-6
-    requirement = 'The Jacobian from time derivative Kokkos vector kernel shall be perfect.'
+    requirement = 'The system shall compute a perfect Jacobian for the time derivative Kokkos vector kernel.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda xpu'
   []
