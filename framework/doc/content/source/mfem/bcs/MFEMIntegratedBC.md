@@ -15,6 +15,12 @@ boundary integrators to the weak form on the set of user-specified boundaries.
 according to the test variable name returned from `getTestVariableName()`, similar to
 [MFEMKernel.md] for domain integrators.
 
+A discontinuous (L2) space has no degrees of freedom on boundary elements, so on such a test
+variable the integrators are applied on the boundary faces of the elements next to the boundary
+instead, as DG methods require. This lets boundary conditions such as
+[MFEMBoundaryIntegratedBC.md] and [MFEMConvectiveHeatFluxBC.md] impose Neumann and Robin
+conditions in DG problems.
+
 !if-end!
 
 !else
