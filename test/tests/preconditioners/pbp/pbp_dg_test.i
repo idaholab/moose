@@ -94,7 +94,7 @@
 
   [./exact_fn]
     type = ParsedGradFunction
-    value = pow(e,-x-(y*y))
+    expression = pow(e,-x-(y*y))
     grad_x = -pow(e,-x-(y*y))
     grad_y = -2*y*pow(e,-x-(y*y))
   [../]

@@ -90,18 +90,18 @@
 
 [Functions]
   [./u_func]
-    type   = ParsedGradFunction
-    value  = 'exp(-c*(x^2+y^2))'
-    grad_x = '-2*c*exp(-c*(x^2+y^2))*x'
-    grad_y = '-2*c*exp(-c*(x^2+y^2))*y'
+    type       = ParsedGradFunction
+    expression = 'exp(-c*(x^2+y^2))'
+    grad_x     = '-2*c*exp(-c*(x^2+y^2))*x'
+    grad_y     = '-2*c*exp(-c*(x^2+y^2))*y'
   [../]
   [./lapu_func]
-    type   = ParsedFunction
-    expression  = '4*c*(c*(x^2+y^2) - 1)*exp(-c*(x^2+y^2))'
+    type       = ParsedFunction
+    expression = '4*c*(c*(x^2+y^2) - 1)*exp(-c*(x^2+y^2))'
   [../]
   [./forcing_func]
-    type   = ParsedFunction
-    expression  = '16*c^2*(c^2*(x^2+y^2)^2 - 4*c*(x^2+y^2) + 2)*exp(-c*(x^2+y^2))'
+    type       = ParsedFunction
+    expression = '16*c^2*(c^2*(x^2+y^2)^2 - 4*c*(x^2+y^2) + 2)*exp(-c*(x^2+y^2))'
   [../]
 []
 
