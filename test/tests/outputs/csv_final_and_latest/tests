@@ -5,8 +5,8 @@
     type = CSVDiff
     input = final.i
     csvdiff = final_out_line_sample_FINAL.csv
-    requirement = "The CSV output object shall create a symlink to the final output with "
-                  "a '_FINAL' suffix for VectorPostprocessor data when there are execute flags "
+    requirement = "The system shall create, using the CSV output object, a symlink to the final output with "
+                  "a '_FINAL' suffix for vector postprocessor data when there are execute flags "
                   "in addition to FINAL."
   []
   [final_only]
@@ -15,8 +15,8 @@
     cli_args = Outputs/out/execute_on=FINAL
     check_not_exists = 'final_out_line_sample_0009.csv'
     check_files = 'final_out_line_sample_0011.csv final_out_line_sample_FINAL.csv'
-    requirement = "The CSV output object shall create a symlink to the final output with "
-                  "a '_FINAL' suffix for VectorPostprocessor data when the execute flag is "
+    requirement = "The system shall create, using the CSV output object, a symlink to the final output with "
+                  "a '_FINAL' suffix for vector postprocessor data when the execute flag is "
                   "set to FINAL."
     prereq = final
   []
@@ -26,7 +26,7 @@
     cli_args = Outputs/out/create_final_symlink=false
     delete_output_before_running = false
     check_not_exists = 'final_out_line_sample_FINAL.csv'
-    requirement = "The CSV output object 'create_final_symlink' parameter shall be able to disable "
+    requirement = "The system shall be able to disable, using the CSV output object 'create_final_symlink' parameter, "
                   "the creation of the final symlink."
     prereq = final_only
   []
@@ -34,8 +34,8 @@
     type = CSVDiff
     input = latest.i
     csvdiff = latest_out_line_sample_LATEST.csv
-    requirement = "The CSV output object shall create a symlink to the most recent output with "
-                  "a '_LATEST' suffix for VectorPostprocessor data."
+    requirement = "The system shall create, using the CSV output object, a symlink to the most recent output with "
+                  "a '_LATEST' suffix for vector postprocessor data."
   []
   [no_latest]
     type = CheckFiles
@@ -43,7 +43,7 @@
     delete_output_before_running = false
     cli_args = Outputs/out/create_latest_symlink=false
     check_not_exists = 'latest_out_line_sample_LATEST.csv'
-    requirement = "The CSV output object 'create_latest_symlink' parameter shall be able to disable "
+    requirement = "The system shall be able to disable, using the CSV output object 'create_latest_symlink' parameter, "
                   "the creation of the latest symlink."
     prereq = latest
   []

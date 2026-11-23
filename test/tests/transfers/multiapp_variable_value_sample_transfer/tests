@@ -103,8 +103,8 @@
     type = Exodiff
     input = full_domain_primary.i
     exodiff = full_domain_primary_out.e
-    requirement = "The system shall guarantee that constant monomial variables transferred via MultiAppVariableValueSamplePostprocessorTransfer to the subapp are retrieved "
-                  " unchanged when transferred back using MultiAppVariableValueSamplePostprocessorTransfer in case the CentroidMultiApp is used."
+    requirement = "The system shall guarantee that constant monomial variables transferred via a variable value sample postprocessor transfer "
+                  "to the subapp are retrieved unchanged when transferred back the same way, with a centroid MultiApp."
   []
 
   [same_distance_error]
@@ -113,7 +113,7 @@
     cli_args = 'MultiApps/sub/block=1
                 Outputs/file_base=multiapp_block_restricted_primary_error_out'
     expect_err = 'The distances of an element to more than one sub-applications are too close'
-    requirement = "The systen shall error out if more than one sub-applications are in the same distance from an element."
+    requirement = "The system shall error out if more than one sub-applications are in the same distance from an element."
   []
 
   [from_multiapp_set_primary_var_error]
@@ -124,11 +124,11 @@
                 Transfers/primary_average/source_variable=to_subapp
                 Outputs/file_base=set_primary_var_error_out'
     expect_err = 'Variable must be an auxiliary variable'
-    requirement = "The systen shall error out if the MultiAppVariableValueSamplePostprocessorTransfer transfers postprocessor values on sub-applications to a primary variable on the main application."
+    requirement = "The system shall error out if a variable value sample postprocessor transfer transfers postprocessor values on sub-applications to a primary variable on the main application."
   []
 
   [block_restricted_primary]
-    requirement = "The systen shall allow transferring CONSTANT MONOMIAL variables from the sub-applications"
+    requirement = "The system shall allow transferring CONSTANT MONOMIAL variables from the sub-applications"
     [multiapp]
       type = Exodiff
       input = full_domain_primary.i

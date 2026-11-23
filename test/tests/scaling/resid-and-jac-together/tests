@@ -2,7 +2,7 @@
   design = FVIntegralValueConstraint.md
   issues = '#19444'
   [scaling]
-    requirement = 'When using scaling, the system shall'
+    requirement = 'The system shall, when using scaling,'
     [resid_separate]
       type = Exodiff
       input = test.i

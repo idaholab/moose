@@ -100,7 +100,7 @@
   []
 
   [clone_type]
-    requirement = 'If processors do not contain a sub-application and reporter clone transfer is requested, the system shall '
+    requirement = 'The system shall, if processors do not contain a sub-application and reporter clone transfer is requested, '
     [type_specified]
       type = JSONDiff
       input = clone_type.i
