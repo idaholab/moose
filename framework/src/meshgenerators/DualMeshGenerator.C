@@ -21,6 +21,8 @@
 #include "libmesh/poly2tri_triangulator.h"
 #include "libmesh/type_vector.h"
 #include "libmesh/elem.h"
+#include "libmesh/face_quad4.h"
+#include "libmesh/face_c0polygon.h"
 
 #include <algorithm>
 #include <array>
