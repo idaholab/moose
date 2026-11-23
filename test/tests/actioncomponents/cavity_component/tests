@@ -1,0 +1,94 @@
+[Tests]
+  issues = '#34317'
+  design = 'CavityComponent.md'
+  [3D]
+    requirement = 'The system shall be able to mesh a 3D cavity around a component,'
+    [around_component]
+      type = Exodiff
+      input = '3D_cavity.i'
+      exodiff = '3D_cavity_in.e'
+      cli_args = '--mesh-only 3D_cavity_in.e'
+      detail = 'stitching the cavity mesh directly onto the component mesh,'
+      capabilities = 'netgen'
+      recover = false
+    []
+    [target_element_volume]
+      type = Exodiff
+      input = '3D_cavity.i'
+      exodiff = '3D_cavity_refined_in.e'
+      cli_args = 'ActionComponents/cavity/target_element_volume=1 --mesh-only 3D_cavity_refined_in.e'
+      detail = 'with a target element volume for the cavity elements,'
+      capabilities = 'netgen'
+      recover = false
+    []
+    [boundary_layer]
+      type = Exodiff
+      input = '3D_cavity.i'
+      exodiff = '3D_cavity_boundary_layer_in.e'
+      cli_args = 'ActionComponents/cavity/n_boundary_layers=2
+                  ActionComponents/cavity/boundary_layer_width=0.5
+                  --mesh-only 3D_cavity_boundary_layer_in.e'
+      detail = 'with extruded boundary layers between the component and the bulk cavity mesh,'
+      capabilities = 'netgen'
+      recover = false
+    []
+    [two_components]
+      type = Exodiff
+      input = '3D_cavity_two_components.i'
+      exodiff = '3D_cavity_two_components_in.e'
+      cli_args = '--mesh-only 3D_cavity_two_components_in.e'
+      detail = 'and around two disconnected components at once.'
+      capabilities = 'netgen'
+      recover = false
+    []
+  []
+  [2D]
+    requirement = 'The system shall be able to mesh a 2D cavity around a component, with the enclosing surface mesh provided by mesh generators,'
+    [around_component]
+      type = Exodiff
+      input = '2D_cavity.i'
+      exodiff = '2D_cavity_in.e'
+      cli_args = '--mesh-only 2D_cavity_in.e'
+      detail = 'using the enclosing surface mesh as-is,'
+      recover = false
+    []
+    [recenter_enclosure]
+      type = Exodiff
+      input = '2D_cavity.i'
+      exodiff = '2D_cavity_recentered_in.e'
+      # The enclosure is centered on (2, 0, 0); moving its center to (3, 0.5, 0)
+      # keeps the cylinder inside it
+      cli_args = "ActionComponents/cavity/recenter_surface_mesh_to='3 0.5 0'
+                  --mesh-only 2D_cavity_recentered_in.e"
+      detail = 're-centering the enclosing surface mesh on a specified point,'
+      recover = false
+    []
+    [boundary_layer]
+      type = Exodiff
+      input = '2D_cavity.i'
+      exodiff = '2D_cavity_boundary_layer_in.e'
+      # With a boundary layer the cavity stitches the cylinder mesh into its own, so there is
+      # nothing left for the combiner to add
+      cli_args = 'ActionComponents/cavity/n_boundary_layers=2
+                  ActionComponents/cavity/boundary_layer_width=0.5
+                  ActionComponents/combine_component_meshes=false
+                  Mesh/final_generator=cavity_stitched
+                  --mesh-only 2D_cavity_boundary_layer_in.e'
+      detail = 'and with extruded boundary layers between the component and the bulk cavity mesh.'
+      recover = false
+    []
+  []
+  [errors]
+    requirement = 'The system shall report an error when meshing a cavity'
+    [boundary_layers_disconnected]
+      type = RunException
+      input = '3D_cavity_two_components.i'
+      cli_args = 'ActionComponents/cavity/n_boundary_layers=1
+                  ActionComponents/cavity/boundary_layer_width=0.5 --mesh-only'
+      expect_err = 'Disconnected components not supported for boundary layers at this time'
+      detail = 'with boundary layers around components that are not connected to each other.'
+      capabilities = 'netgen'
+      recover = false
+    []
+  []
+[]

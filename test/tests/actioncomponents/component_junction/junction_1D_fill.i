@@ -26,8 +26,8 @@
     type = ComponentJunction
     first_component = cyl1
     second_component = cyl2
-    first_boundary = 'cyl1_right'
-    second_boundary = 'cyl2_left'
+    first_boundary = 'cyl1_top_boundary'
+    second_boundary = 'cyl2_bottom_boundary'
     block = '2'
     n_elem_normal = 6
     verbose = true

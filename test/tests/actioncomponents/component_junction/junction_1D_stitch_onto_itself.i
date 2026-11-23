@@ -28,8 +28,8 @@
     type = ComponentJunction
     first_component = cyl1
     second_component = cyl2
-    first_boundary = 'cyl1_right'
-    second_boundary = 'cyl2_left'
+    first_boundary = 'cyl1_top_boundary'
+    second_boundary = 'cyl2_bottom_boundary'
     junction_method = stitch_meshes
   []
   [cyl3]
@@ -50,8 +50,8 @@
     # and write down the name of the last component with the others as inputs
     first_component = cyl2
     second_component = cyl3
-    first_boundary = 'cyl2_right'
-    second_boundary = 'cyl3_left'
+    first_boundary = 'cyl2_top_boundary'
+    second_boundary = 'cyl3_bottom_boundary'
     junction_method = stitch_meshes
   []
   [cyl4]
@@ -72,8 +72,8 @@
     # and write down the name of the last component with the others as inputs
     first_component = cyl3
     second_component = cyl4
-    first_boundary = 'cyl3_right'
-    second_boundary = 'cyl4_left'
+    first_boundary = 'cyl3_top_boundary'
+    second_boundary = 'cyl4_bottom_boundary'
     junction_method = stitch_meshes
   []
   [junction_bottom_left]
@@ -82,8 +82,8 @@
     # and write down the name of the last component with the others as inputs
     first_component = cyl4
     second_component = cyl1
-    first_boundary = 'cyl4_right'
-    second_boundary = 'cyl1_left'
+    first_boundary = 'cyl4_top_boundary'
+    second_boundary = 'cyl1_bottom_boundary'
     junction_method = stitch_meshes
   []
 []

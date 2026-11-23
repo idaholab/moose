@@ -55,7 +55,7 @@
     initial_condition_values = '1.1'
 
     fixed_value_bc_variables = 'u'
-    fixed_value_bc_boundaries = 'cylinder_1_left'
+    fixed_value_bc_boundaries = 'cylinder_1_bottom_boundary'
     fixed_value_bc_values = '3'
 
     property_names = 'diff'
@@ -80,11 +80,11 @@
     initial_condition_values = '1.2 1.3'
 
     fixed_value_bc_variables = 'v u'
-    fixed_value_bc_boundaries = 'cylinder_2_right; cylinder_2_left'
+    fixed_value_bc_boundaries = 'cylinder_2_top_boundary; cylinder_2_bottom_boundary'
     fixed_value_bc_values = '2; 1'
 
     flux_bc_variables = 'u'
-    flux_bc_boundaries = 'cylinder_2_right'
+    flux_bc_boundaries = 'cylinder_2_top_boundary'
     flux_bc_values = '4'
 
     property_names = 'diff'

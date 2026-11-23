@@ -1,0 +1,134 @@
+[Tests]
+  issues = '#34317'
+
+  [cylinder]
+    design = 'CylinderComponent.md'
+    requirement = 'The system shall report an error when a cylinder component'
+    [dimension]
+      type = GoogleTest
+      unit_test = ActionComponentTest.cylinderDimension
+      detail = 'is requested in 0D,'
+    []
+    [radial_discretization]
+      type = GoogleTest
+      unit_test = ActionComponentTest.cylinderRadialDiscretization
+      detail = 'specifies a radial discretization in 1D,'
+    []
+    [3D_discretization]
+      type = GoogleTest
+      unit_test = ActionComponentTest.cylinder3DDiscretization
+      detail = 'does not specify the number of azimuthal sectors in 3D,'
+    []
+    [rotation_and_direction]
+      type = GoogleTest
+      unit_test = ActionComponentTest.rotationAndDirection
+      detail = 'specifies both a rotation and a direction to orient its mesh,'
+    []
+    [rz_block]
+      type = GoogleTest
+      unit_test = ActionComponentTest.cylinderRZBlock
+      detail = 'uses RZ coordinates without a named subdomain,'
+    []
+    [rotation_rz]
+      type = GoogleTest
+      unit_test = ActionComponentTest.cylinderRotationRZ
+      detail = 'or uses RZ coordinates with a rotation.'
+    []
+  []
+  [cylinder_rz_coordinates]
+    type = GoogleTest
+    unit_test = ActionComponentTest.cylinderRZCoordinates
+    design = 'CylinderComponent.md'
+    requirement = 'The system shall apply RZ coordinates only to the subdomains of a 2D cylinder component, with an axis through the cylinder position along its direction.'
+  []
+
+  [cavity]
+    design = 'CavityComponent.md'
+    requirement = 'The system shall report an error when a cavity component'
+    [dimension]
+      type = GoogleTest
+      unit_test = ActionComponentTest.cavityDimension
+      detail = 'is requested in 0D or 1D,'
+    []
+    [boundary_layer_width]
+      type = GoogleTest
+      unit_test = ActionComponentTest.cavityBoundaryLayerWidth
+      detail = 'or requests boundary layers without specifying their width.'
+    []
+  []
+
+  [surface_extrusion]
+    design = 'SurfaceExtrusionComponent.md'
+    requirement = 'The system shall report an error when a surface extrusion component'
+    [radial_extent]
+      type = GoogleTest
+      unit_test = ActionComponentTest.surfaceExtrusionRadialExtent
+      detail = 'specifies a starting radial extent without an ending radial extent,'
+    []
+    [growth_method]
+      type = GoogleTest
+      unit_test = ActionComponentTest.surfaceExtrusionGrowthMethod
+      detail = 'specifies a radial growth method without an ending radial extent,'
+    []
+    [growth_rates]
+      type = GoogleTest
+      unit_test = ActionComponentTest.surfaceExtrusionGrowthRates
+      detail = 'or specifies radial growth rates without using cubic radial growth.'
+    []
+  []
+  [surface_extrusion_1D_radial_expansion]
+    type = GoogleTest
+    unit_test = ActionComponentTest.surfaceExtrusion1DRadialExpansion
+    design = 'SurfaceExtrusionComponent.md'
+    requirement = 'The system shall warn that radial expansion is not supported when extruding the boundary of a 1D component.'
+  []
+
+  [junction]
+    design = 'ComponentJunction.md'
+    requirement = 'The system shall report an error when a component junction'
+    [stitching_parameters]
+      type = GoogleTest
+      unit_test = ActionComponentTest.junctionStitchingParameters
+      detail = 'that stitches the component meshes specifies extrusion parameters,'
+    []
+    [extrusion_number_elements]
+      type = GoogleTest
+      unit_test = ActionComponentTest.junctionExtrusionNumberElements
+      detail = 'that extrudes a boundary does not specify the number of elements in the normal direction,'
+    []
+    [stitch_different_dimensions]
+      type = GoogleTest
+      unit_test = ActionComponentTest.junctionStitchDifferentDimensions
+      detail = 'or is requested to stitch components of different dimensions.'
+    []
+  []
+
+  [mesh_generator_component_saved_mesh]
+    type = GoogleTest
+    unit_test = ActionComponentTest.meshGeneratorComponentSavedMesh
+    design = 'MeshGeneratorComponent.md'
+    requirement = 'The system shall report an error when a component uses a saved mesh without specifying the name of the saved mesh.'
+  []
+
+  [boundary_conditions]
+    design = 'ComponentBoundaryConditionInterface.md'
+    requirement = 'The system shall report an error when the boundary conditions specified on a component'
+    [input_sizes]
+      type = GoogleTest
+      unit_test = ActionComponentTest.boundaryConditionInputSizes
+      detail = 'have inconsistently sized variables, boundaries and values,'
+    []
+    [repeated_variable]
+      type = GoogleTest
+      unit_test = ActionComponentTest.boundaryConditionRepeatedVariable
+      detail = 'or repeat a variable.'
+    []
+  []
+  [initial_condition_repeated_variable]
+    type = GoogleTest
+    unit_test = ActionComponentTest.initialConditionRepeatedVariable
+    design = 'ComponentInitialConditionInterface.md'
+    requirement = 'The system shall report an error when a variable is repeated in the initial conditions specified on a component.'
+  []
+[]
+

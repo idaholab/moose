@@ -338,7 +338,17 @@
       exodiff = 'extrude_along_normals_1d_curved.e'
       cli_args = 'Mesh/gmg/elem_type=EDGE3 --mesh-only extrude_along_normals_1d_curved.e'
       recover = false
-      detail = 'second-order elements.'
+      detail = 'second-order elements, and'
+      mesh_mode = 'REPLICATED'
+    []
+    [closed_loop]
+      type = Exodiff
+      input = 'extrude_along_normals_1d_loop.i'
+      exodiff = 'extrude_along_normals_1d_loop_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      issues = '#34317'
+      detail = 'a closed loop, extruded backwards along the node normals with a negative height.'
       mesh_mode = 'REPLICATED'
     []
   []

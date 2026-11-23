@@ -448,6 +448,13 @@ finalizeTriangulation(MeshGenerator & mg,
       }
       mooseAssert(found_inner_sides == np, "Failed to find full boundary around meshed hole");
 
+      // Hole meshes are generated independently, so two of them routinely use the same subdomain
+      // ID for different subdomains. Renumber the hole's subdomains so that the names of every
+      // hole survive the stitching instead of being merged onto the first hole's names.
+      // Subdomains sharing a name across different IDs are left to the conflict check below
+      MooseMeshUtils::remapSecondarySubdomainIDsForStitching(
+          mesh, hole_mesh, /*merge_same_name_across_ids=*/false);
+
       // Retrieve subdomain name map from the mesh to be stitched and insert it into the main
       // subdomain map
       const auto & increment_subdomain_map = hole_mesh.get_subdomain_name_map();
