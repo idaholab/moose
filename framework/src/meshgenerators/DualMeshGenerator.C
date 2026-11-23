@@ -12,6 +12,7 @@
 #include "CastUniquePointer.h"
 #include "GeometryUtils.h"
 #include "LineSegment.h"
+#include "MooseHashing.h"
 #include "MooseMeshUtils.h"
 #include "MooseUtils.h"
 #include "libmesh/boundary_info.h"
@@ -147,12 +148,6 @@ pointOnSegment2D(const Point & point, const Point & a, const Point & b)
   return LineSegment(a, b).contains_point(point);
 }
 
-static bool
-pointOnSegment2D(const Point & point, const Point & a, const Point & b, const Real, const Real)
-{
-  return pointOnSegment2D(point, a, b);
-}
-
 // We use intersections when we clip a mesh back to the primal boundary. Those intersection points
 // are necessary to keep the elements being reasonable within the boundary
 static void
@@ -161,9 +156,7 @@ addSegmentIntersections2D(std::vector<Point> & points,
                           const Point & p1,
                           const Point & q0,
                           const Point & q1,
-                          const Real length_tol,
-                          const Real,
-                          const Real)
+                          const Real length_tol)
 {
   if (p0.absolute_fuzzy_equals(p1))
   {
@@ -231,12 +224,6 @@ pointInPolygon2D(const Point & point, const std::vector<Point> & polygon)
   return inside;
 }
 
-static bool
-pointInPolygon2D(const Point & point, const std::vector<Point> & polygon, const Real, const Real)
-{
-  return pointInPolygon2D(point, polygon);
-}
-
 static Real
 polygonSignedArea2D(const std::vector<Point> & polygon)
 {
@@ -264,7 +251,7 @@ struct BoundarySegment
 
 // Helps maps treat an edge the same regardless of direction
 static std::pair<dof_id_type, dof_id_type>
-edgeKey(const dof_id_type node0, const dof_id_type node1)
+dualEdgeKey(const dof_id_type node0, const dof_id_type node1)
 {
   return {std::min(node0, node1), std::max(node0, node1)};
 }
@@ -274,11 +261,21 @@ DualMeshGenerator::generate()
 {
   auto input_mesh = std::move(_input);
 
-  if (!input_mesh->is_prepared())
+  // The dual construction only needs the neighbor links, not a fully prepared mesh
+  if (!input_mesh->preparation().has_neighbor_ptrs)
     input_mesh->find_neighbors();
 
   if (input_mesh->mesh_dimension() != 2)
     mooseError("DualMeshGenerator currently only supports 2D Meshes");
+
+  // All the geometric predicates below (orientations, segment intersections, point-in-polygon)
+  // work with the first two coordinates only, so the mesh has to lie in the xy plane
+  for (const auto & node : input_mesh->node_ptr_range())
+    if (!MooseUtils::absoluteFuzzyEqual((*node)(2), 0))
+      mooseError("DualMeshGenerator requires the input mesh to lie in the xy plane, but node ",
+                 node->id(),
+                 " is at z = ",
+                 (*node)(2));
 
   const bool use_voronoi = _dual_mesh_type == "voronoi";
 
@@ -303,16 +300,36 @@ DualMeshGenerator::generate()
   const auto preserve_primal_subdomain_ids = preservedPrimalSubdomainIDs(*input_mesh);
 
   // More subdomain helpers
+  /// Identifies one dual cell: the primal node it surrounds and the subdomain it belongs to. With
+  /// interfaces preserved a node on an interface carries one cell per adjacent subdomain, so the
+  /// node id alone is not enough.
   using NodeSubdomainKey = std::pair<dof_id_type, SubdomainID>;
+  /// In-plane position quantized to the dual node tolerance, used to bucket candidate dual nodes
+  /// so that coincident points found by different constructions become one node
   using RoundedPointKey2D = std::array<long long, 2>;
+  /// Geometry of the primal sides that must survive dualization,
+  /// stored for one subdomain of primal elements:
+  /// the exterior sides of the group, its sides against preserved primal subdomains and, when
+  /// requested, its sides against other subdomains. One boundary region is built per subdomain key.
   struct BoundaryRegion2D
   {
-    std::map<dof_id_type, Point> boundary_node_points;
-    std::map<dof_id_type, std::vector<Point>> boundary_node_midpoints;
+    /// Position of every primal node lying on a preserved side, keyed by primal node id
+    std::unordered_map<dof_id_type, Point> boundary_node_points;
+    /// Midpoints of the preserved sides adjacent to each primal boundary node, keyed by primal
+    /// node id
+    std::unordered_map<dof_id_type, std::vector<Point>> boundary_node_midpoints;
+    /// The preserved sides themselves, as a node pair and the two end points
     std::vector<BoundarySegment> preserved_boundary_segments;
+    /// Indices into preserved_boundary_segments of the sides touching each boundary node, keyed by
+    /// primal node id
     std::unordered_map<dof_id_type, std::vector<std::size_t>> boundary_node_to_segments;
+    /// Ids of the primal nodes the dual mesh has to reproduce as nodes: corners, where the two
+    /// adjacent preserved sides are not collinear, and the end points of open boundary chains
     std::unordered_set<dof_id_type> boundary_vertex_nodes;
+    /// The preserved sides gathered into connected loops of points, used for inside/outside tests
     std::vector<std::vector<Point>> boundary_point_loops;
+    /// The boundary loops split at the boundary vertices, i.e. the straight pieces of boundary the
+    /// dual cells are clipped against
     std::vector<std::pair<Point, Point>> boundary_clip_segments;
   };
   const SubdomainID merged_subdomain_key = Elem::invalid_subdomain_id;
@@ -339,11 +356,11 @@ DualMeshGenerator::generate()
                                    std::numeric_limits<Real>::min());
   const Real length_tol = _geometry_relative_tol * mesh_scale;
   const Real area_tol = _geometry_relative_tol * mesh_scale * mesh_scale;
-  const Real parameter_tol = _geometry_relative_tol;
 
   std::map<SubdomainID, BoundaryRegion2D> boundary_regions;
 
-  // Looping through primal elements
+  // Collect the preserved sides of the elements being dualized, grouped by subdomain key, along
+  // with their nodes and midpoints. These are the sides the dual cells must be clipped against.
   for (const auto & elem : input_mesh->element_ptr_range())
   {
     if (!dualizeElem(*elem))
@@ -396,11 +413,11 @@ DualMeshGenerator::generate()
           .push_back(i);
     }
 
-    for (const auto & node_segments : boundary_region.boundary_node_to_segments)
+    // Flag the boundary nodes the dual mesh has to keep as nodes. A node with anything other than
+    // two preserved sides is an end point or a junction, so it is always kept; a node with exactly
+    // two is kept only if those sides turn, i.e. the boundary has a corner there.
+    for (const auto & [node_id, segment_ids] : boundary_region.boundary_node_to_segments)
     {
-      const dof_id_type node_id = node_segments.first;
-      const auto & segment_ids = node_segments.second;
-
       if (segment_ids.size() != 2)
       {
         boundary_region.boundary_vertex_nodes.insert(node_id);
@@ -434,6 +451,10 @@ DualMeshGenerator::generate()
     std::vector<bool> used_boundary_segments(boundary_region.preserved_boundary_segments.size(),
                                              false);
     // We have a collection of boundary nodes, etc... We need to get them into a uniform order:
+    // walk the preserved sides from one starting side, hopping to an unused side at each node,
+    // and return the nodes in the order they are met. Each side is consumed at most once over all
+    // calls, and each node has a bounded number of sides, so tracing every loop of a region costs
+    // O(number of preserved sides).
     const auto traceBoundaryLoop = [&](const std::size_t start_segment_id)
     {
       std::vector<dof_id_type> ordered_boundary_nodes;
@@ -441,6 +462,8 @@ DualMeshGenerator::generate()
       dof_id_type current_node =
           boundary_region.preserved_boundary_segments[start_segment_id].node0;
 
+      // The walk stops once it runs off the end of a chain or comes back to an already-consumed
+      // side, which is how a closed loop terminates
       while (current_segment_id < boundary_region.preserved_boundary_segments.size() &&
              !used_boundary_segments[current_segment_id])
       {
@@ -453,12 +476,14 @@ DualMeshGenerator::generate()
 
         const auto node_segment_it = boundary_region.boundary_node_to_segments.find(next_node);
 
+        // Dead end: nothing else is attached to the node we just reached
         if (node_segment_it == boundary_region.boundary_node_to_segments.end())
         {
           ordered_boundary_nodes.push_back(next_node);
           break;
         }
 
+        // An out-of-range id marks "no continuation found" and ends the loop above
         std::size_t next_segment_id = boundary_region.preserved_boundary_segments.size();
 
         for (const auto candidate_segment_id : node_segment_it->second)
@@ -472,6 +497,7 @@ DualMeshGenerator::generate()
         current_segment_id = next_segment_id;
       }
 
+      // Close the chain with the node the walk ended on, unless it is where it started
       if (!ordered_boundary_nodes.empty() && ordered_boundary_nodes.front() != current_node)
         ordered_boundary_nodes.push_back(current_node);
 
@@ -543,7 +569,11 @@ DualMeshGenerator::generate()
       std::size_t clip_start_i = start_i;
       std::size_t current_i = start_i;
 
-      while (true)
+      // Each iteration advances one point along the loop, so the walk is back at start_i, a
+      // boundary vertex, after at most boundary_point_loop.size() iterations and breaks there
+      [[maybe_unused]] bool closed_clip_loop = false;
+
+      for ([[maybe_unused]] const auto walk_step : index_range(boundary_point_loop))
       {
         const std::size_t next_i = (current_i + 1) % boundary_point_loop.size();
         bool reached_break = next_i == clip_start_i;
@@ -570,13 +600,19 @@ DualMeshGenerator::generate()
               {boundary_point_loop[clip_start_i], boundary_point_loop[next_i]});
 
           if (next_i == start_i)
+          {
+            closed_clip_loop = true;
             break;
+          }
 
           clip_start_i = next_i;
         }
 
         current_i = next_i;
       }
+
+      mooseAssert(closed_clip_loop,
+                  "Boundary clip segment walk failed to return to its starting vertex");
     }
   }
 
@@ -588,20 +624,24 @@ DualMeshGenerator::generate()
 
     bool inside = false;
 
+    // A region may have several boundary loops, an outer one plus loops around holes, so a point
+    // is inside the region only when it is inside an odd number of them
     for (const auto & boundary_point_loop : boundary_region.boundary_point_loops)
-      if (pointInPolygon2D(point, boundary_point_loop, length_tol, area_tol))
+      if (pointInPolygon2D(point, boundary_point_loop))
         inside = !inside;
 
     return inside;
   };
 
-  // Now for actually finding the dual
   std::vector<Point> dual_centers;
   std::unordered_map<dof_id_type, dof_id_type> source_elem_to_center_id;
+  // Ordered map: this is iterated to emit the dual elements, so its order sets the output element
+  // numbering and must not depend on the hash implementation
   std::map<NodeSubdomainKey, std::vector<const Elem *>> source_node_to_elems;
-  std::map<dof_id_type, std::set<SubdomainID>> source_node_to_subdomains;
+  std::unordered_map<dof_id_type, std::set<SubdomainID>> source_node_to_subdomains;
   std::unique_ptr<ReplicatedMesh> tri_mesh;
 
+  // Record all nodes from primal elements and associate them with a subdomain
   for (const auto & elem : input_mesh->element_ptr_range())
   {
     if (!dualizeElem(*elem))
@@ -612,11 +652,15 @@ DualMeshGenerator::generate()
       source_node_to_subdomains[elem->node_id(n)].insert(elem->subdomain_id());
   }
 
+  // Build Delaunay triangulation around the primal
   if (use_voronoi)
   {
-    std::map<dof_id_type, std::vector<const Elem *>> source_node_to_tri_elems;
+    std::unordered_map<dof_id_type, std::vector<const Elem *>> source_node_to_tri_elems;
 
-    // tri_mesh input is the pure primal mesh, which we pass to the Delaunay poly2Tri triangualtor
+    // tri_mesh input is the pure primal mesh, which we pass to the Delaunay poly2Tri triangulator.
+    // The Voronoi dual is the dual of the Delaunay triangulation of the primal nodes, which is not
+    // in general the primal connectivity, so we triangulate a separate mesh holding only the primal
+    // node positions rather than modifying the input mesh.
     tri_mesh = buildReplicatedMesh(2);
 
     for (const auto & node : input_mesh->node_ptr_range())
@@ -624,7 +668,7 @@ DualMeshGenerator::generate()
       // Copy over all the nodes and elems from the primal
       Node * new_node = tri_mesh->add_point(*node);
 
-      auto node_elem = std::make_unique<NodeElem>();
+      auto node_elem = std::make_unique<libMesh::NodeElem>();
       node_elem->set_node(0) = new_node;
       tri_mesh->add_elem(std::move(node_elem));
     }
@@ -680,6 +724,10 @@ DualMeshGenerator::generate()
         source_node_to_tri_elems[tri_elem->node_id(n)].push_back(tri_elem);
     }
 
+    // The triangulation knows nothing about subdomains, so a node on a subdomain interface sees the
+    // same triangles from either side. With interfaces preserved, one dual cell is built per
+    // (node, subdomain) pair, each from that full triangle list and then clipped to its own
+    // subdomain's boundary region; otherwise a single cell per node is enough.
     if (_preserve_subdomain_interfaces)
     {
       for (const auto & node_subdomains : source_node_to_subdomains)
@@ -719,10 +767,14 @@ DualMeshGenerator::generate()
 
   // Now we've gathered our centers and boundary info, we can now build the dual
   auto dualMesh = buildReplicatedMesh(2);
+  // Ordered map because std::array has no std::hash specialization
   std::map<RoundedPointKey2D, std::vector<Node *>> dual_nodes_by_key;
   const Real dual_node_tol = std::max(length_tol, Real(1e-12));
   const auto roundedPointKey = [&](const Point & point)
   {
+    // Only the in-plane coordinates are hashed, which the xy-plane check at the top of generate()
+    // makes sufficient to separate distinct dual nodes
+    mooseAssert(std::abs(point(2)) <= length_tol, "Dual node point is out of the xy plane");
     return RoundedPointKey2D{{static_cast<long long>(std::llround(point(0) / dual_node_tol)),
                               static_cast<long long>(std::llround(point(1) / dual_node_tol))}};
   };
@@ -745,7 +797,7 @@ DualMeshGenerator::generate()
 
     const BoundaryInfo & input_boundary_info = input_mesh->get_boundary_info();
     BoundaryInfo & boundary_info = dualMesh->get_boundary_info();
-    std::map<dof_id_type, Node *> copied_nodes;
+    std::unordered_map<dof_id_type, Node *> copied_nodes;
 
     const auto & input_sideset_map = input_boundary_info.get_sideset_name_map();
     const auto & input_nodeset_map = input_boundary_info.get_nodeset_name_map();
@@ -782,13 +834,16 @@ DualMeshGenerator::generate()
         boundary_info.add_side(target_elem, target_side, ids_to_copy);
     };
 
-    // Copies preserved subdomain elements into the output mesh
+    // Copies preserved subdomain elements into the output mesh, keeping their subdomain id and
+    // their node and side boundary ids, and conforming them to the dual cells next to them
     for (const auto & elem : input_mesh->element_ptr_range())
     {
       if (dualizeElem(*elem))
         continue;
 
-      std::map<std::pair<dof_id_type, dof_id_type>, Point> interface_edge_midpoints;
+      // Edges shared with a dualized element. The dual cells on the other side each stop at the
+      // edge midpoint, so the preserved element needs a node there to stay conforming.
+      std::unordered_map<std::pair<dof_id_type, dof_id_type>, Point> interface_edge_midpoints;
 
       for (const auto side : elem->side_index_range())
       {
@@ -800,10 +855,12 @@ DualMeshGenerator::generate()
         auto side_elem = elem->build_side_ptr(side);
 
         if (side_elem->n_nodes() == 2)
-          interface_edge_midpoints[edgeKey(side_elem->node_id(0), side_elem->node_id(1))] =
+          interface_edge_midpoints[dualEdgeKey(side_elem->node_id(0), side_elem->node_id(1))] =
               0.5 * (side_elem->point(0) + side_elem->point(1));
       }
 
+      // Returns the output node for a primal node, adding it on first use so that preserved
+      // elements sharing a primal node also share the output node
       const auto getPreservedPrimalNode = [&](const dof_id_type source_node_id, const Point & point)
       {
         const auto copied_node_it = copied_nodes.find(source_node_id);
@@ -817,17 +874,19 @@ DualMeshGenerator::generate()
         return node;
       };
 
+      // The element touches dualized elements, so it cannot be copied as is: rebuild it as a
+      // polygon whose sides carry the extra midpoint nodes the neighboring dual cells need
       if (!interface_edge_midpoints.empty())
       {
         std::vector<Node *> polygon_nodes;
-        std::map<std::pair<dof_id_type, dof_id_type>, std::vector<unsigned short>>
+        std::unordered_map<std::pair<dof_id_type, dof_id_type>, std::vector<unsigned short>>
             edge_to_polygon_sides;
 
         for (const auto n : make_range(elem->n_vertices()))
         {
           const dof_id_type source_node_id = elem->node_id(n);
           const auto next_n = (n + 1) % elem->n_vertices();
-          const auto edge = edgeKey(source_node_id, elem->node_id(next_n));
+          const auto edge = dualEdgeKey(source_node_id, elem->node_id(next_n));
 
           polygon_nodes.push_back(getPreservedPrimalNode(source_node_id, elem->point(n)));
           edge_to_polygon_sides[edge].push_back(cast_int<unsigned short>(polygon_nodes.size() - 1));
@@ -842,6 +901,8 @@ DualMeshGenerator::generate()
           }
         }
 
+        // Still the preserved primal element, not a dual cell: only its representation changes,
+        // from its original type to a polygon with the interface midpoints as extra vertices
         auto primal_elem = std::make_unique<libMesh::C0Polygon>(polygon_nodes.size());
 
         for (const auto n : index_range(polygon_nodes))
@@ -858,7 +919,7 @@ DualMeshGenerator::generate()
             continue;
 
           const auto side_it =
-              edge_to_polygon_sides.find(edgeKey(side_elem->node_id(0), side_elem->node_id(1)));
+              edge_to_polygon_sides.find(dualEdgeKey(side_elem->node_id(0), side_elem->node_id(1)));
 
           if (side_it != edge_to_polygon_sides.end())
             copySideBoundaryIDs(elem, side, added_elem, side_it->second);
@@ -897,6 +958,10 @@ DualMeshGenerator::generate()
     if (dual_points.size() < 3)
       return clipped_points;
 
+    // The clipped cell is the intersection of the dual cell with the boundary region. Its vertices
+    // come from three places; the first is the dual cell's own vertices that are inside the region.
+    // Points are added uniquely throughout, since the same geometric point is reached from several
+    // of these constructions, e.g. a dual vertex sitting exactly on the boundary.
     for (const auto & point : dual_points)
       if (pointInsideBoundary(boundary_region, point))
         addUniquePoint(clipped_points, point, length_tol);
@@ -906,44 +971,48 @@ DualMeshGenerator::generate()
       const Point & p0 = dual_points[i];
       const Point & p1 = dual_points[(i + 1) % dual_points.size()];
 
+      // Second, where a dual cell side crosses the boundary, the crossing point is where the
+      // clipped cell turns and so has to become one of its vertices
       for (const auto & boundary_segment : boundary_region.boundary_clip_segments)
         addSegmentIntersections2D(clipped_points,
                                   p0,
                                   p1,
                                   boundary_segment.first,
                                   boundary_segment.second,
-                                  length_tol,
-                                  area_tol,
-                                  parameter_tol);
+                                  length_tol);
     }
 
+    // Third, a boundary vertex falling inside the dual cell is a corner of the boundary the clipped
+    // cell has to follow, and no dual side passes through it, so it is not caught above
     for (const auto & boundary_segment : boundary_region.boundary_clip_segments)
     {
-      if (pointInPolygon2D(boundary_segment.first, dual_points, length_tol, area_tol))
+      if (pointInPolygon2D(boundary_segment.first, dual_points))
         addUniquePoint(clipped_points, boundary_segment.first, length_tol);
 
-      if (pointInPolygon2D(boundary_segment.second, dual_points, length_tol, area_tol))
+      if (pointInPolygon2D(boundary_segment.second, dual_points))
         addUniquePoint(clipped_points, boundary_segment.second, length_tol);
     }
 
     if (clipped_points.size() < 3)
       return clipped_points;
 
-    std::vector<Point> unique_clipped_points;
+    // A closed boundary loop reports its first point again as its last, which would leave the
+    // clipped cell with a duplicated vertex
+    if (clipped_points.size() > 1 &&
+        MooseUtils::absoluteFuzzyEqual(clipped_points.front(), clipped_points.back(), length_tol))
+      clipped_points.pop_back();
 
-    for (const auto & point : clipped_points)
-      addUniquePoint(unique_clipped_points, point, length_tol);
+    if (clipped_points.size() < 3)
+      return clipped_points;
 
-    if (unique_clipped_points.size() > 1 &&
-        MooseUtils::absoluteFuzzyEqual(
-            unique_clipped_points.front(), unique_clipped_points.back(), length_tol))
-      unique_clipped_points.pop_back();
+    // The vertices above are in no particular order, so the cell's connectivity is recovered by
+    // linking vertices that lie consecutively along a dual side or a boundary segment, then walking
+    // the resulting adjacency graph into a closed cycle
+    std::vector<std::vector<std::size_t>> adjacency(clipped_points.size());
 
-    if (unique_clipped_points.size() < 3)
-      return unique_clipped_points;
-
-    std::vector<std::vector<std::size_t>> adjacency(unique_clipped_points.size());
-
+    // Records that two clipped vertices are joined by a side of the clipped cell. The graph is
+    // undirected, hence both directions, and an edge may be found twice when a dual side and a
+    // boundary segment overlap.
     const auto addAdjacencyEdge = [&](const std::size_t point0_id, const std::size_t point1_id)
     {
       if (point0_id == point1_id)
@@ -958,6 +1027,9 @@ DualMeshGenerator::generate()
         adjacency[point1_id].push_back(point0_id);
     };
 
+    // Position of a point along a segment, 0 at its start and 1 at its end, used to order the
+    // clipped vertices that share a segment. Degenerate segments cannot order anything, so they
+    // report 0 for every point.
     const auto segmentParameter =
         [&](const Point & point, const Point & segment_start, const Point & segment_end)
     {
@@ -970,33 +1042,36 @@ DualMeshGenerator::generate()
       return ((point - segment_start) * segment_direction) / segment_length_sq;
     };
 
+    // Joins the clipped vertices lying on one segment, in order along it, but only where the piece
+    // between two consecutive vertices is part of the clipped cell's boundary, which the caller
+    // tests on that piece's midpoint. A dual side, for instance, contributes only the pieces of it
+    // that are inside the boundary region.
     const auto connectSegmentPoints = [&](const Point & segment_start,
                                           const Point & segment_end,
                                           const auto & midpointInsidePredicate)
     {
       std::vector<std::size_t> segment_point_ids;
 
-      for (const auto point_id : index_range(unique_clipped_points))
+      for (const auto point_id : index_range(clipped_points))
         if (pointOnSegment2D(
-                unique_clipped_points[point_id], segment_start, segment_end, length_tol, area_tol))
+                clipped_points[point_id], segment_start, segment_end))
           segment_point_ids.push_back(point_id);
 
       if (segment_point_ids.size() < 2)
         return;
 
-      std::sort(
-          segment_point_ids.begin(),
-          segment_point_ids.end(),
-          [&](const std::size_t point0_id, const std::size_t point1_id)
-          {
-            return segmentParameter(unique_clipped_points[point0_id], segment_start, segment_end) <
-                   segmentParameter(unique_clipped_points[point1_id], segment_start, segment_end);
-          });
+      std::sort(segment_point_ids.begin(),
+                segment_point_ids.end(),
+                [&](const std::size_t point0_id, const std::size_t point1_id)
+                {
+                  return segmentParameter(clipped_points[point0_id], segment_start, segment_end) <
+                         segmentParameter(clipped_points[point1_id], segment_start, segment_end);
+                });
 
       for (const auto i : make_range(segment_point_ids.size() - 1))
       {
-        const Point midpoint = 0.5 * (unique_clipped_points[segment_point_ids[i]] +
-                                      unique_clipped_points[segment_point_ids[i + 1]]);
+        const Point midpoint =
+            0.5 * (clipped_points[segment_point_ids[i]] + clipped_points[segment_point_ids[i + 1]]);
 
         if (midpointInsidePredicate(midpoint))
           addAdjacencyEdge(segment_point_ids[i], segment_point_ids[i + 1]);
@@ -1014,21 +1089,23 @@ DualMeshGenerator::generate()
           boundary_segment.first,
           boundary_segment.second,
           [&](const Point & midpoint)
-          { return pointInPolygon2D(midpoint, dual_points, length_tol, area_tol); });
+          { return pointInPolygon2D(midpoint, dual_points); });
 
-    std::size_t start_point_id = unique_clipped_points.size();
+    // Walk the graph into a cycle starting from the lexicographically smallest vertex that has at
+    // least two neighbors, so the ordering does not depend on the order the vertices were found
+    std::size_t start_point_id = clipped_points.size();
 
-    for (const auto point_id : index_range(unique_clipped_points))
+    for (const auto point_id : index_range(clipped_points))
       if (adjacency[point_id].size() >= 2 &&
-          (start_point_id == unique_clipped_points.size() ||
-           unique_clipped_points[point_id](0) < unique_clipped_points[start_point_id](0) ||
-           (std::abs(unique_clipped_points[point_id](0) -
-                     unique_clipped_points[start_point_id](0)) <= length_tol &&
-            unique_clipped_points[point_id](1) < unique_clipped_points[start_point_id](1))))
+          (start_point_id == clipped_points.size() ||
+           clipped_points[point_id](0) < clipped_points[start_point_id](0) ||
+           (std::abs(clipped_points[point_id](0) - clipped_points[start_point_id](0)) <=
+                length_tol &&
+            clipped_points[point_id](1) < clipped_points[start_point_id](1))))
         start_point_id = point_id;
 
-    if (start_point_id == unique_clipped_points.size())
-      return unique_clipped_points;
+    if (start_point_id == clipped_points.size())
+      return clipped_points;
 
     std::vector<Point> best_ordered_points;
 
@@ -1039,12 +1116,12 @@ DualMeshGenerator::generate()
       std::size_t current_point_id = start_neighbor_id;
       bool closed_cycle = false;
 
-      while (ordered_point_ids.size() <= unique_clipped_points.size())
+      while (ordered_point_ids.size() <= clipped_points.size())
       {
         ordered_point_ids.push_back(current_point_id);
 
         const auto & current_adjacency = adjacency[current_point_id];
-        std::size_t next_point_id = unique_clipped_points.size();
+        std::size_t next_point_id = clipped_points.size();
 
         for (const auto adjacent_point_id : current_adjacency)
           if (adjacent_point_id != previous_point_id)
@@ -1059,7 +1136,7 @@ DualMeshGenerator::generate()
           break;
         }
 
-        if (next_point_id == unique_clipped_points.size())
+        if (next_point_id == clipped_points.size())
           break;
 
         previous_point_id = current_point_id;
@@ -1073,7 +1150,7 @@ DualMeshGenerator::generate()
       ordered_points.reserve(ordered_point_ids.size());
 
       for (const auto point_id : ordered_point_ids)
-        ordered_points.push_back(unique_clipped_points[point_id]);
+        ordered_points.push_back(clipped_points[point_id]);
 
       if (best_ordered_points.empty() || ordered_points.size() > best_ordered_points.size())
         best_ordered_points = std::move(ordered_points);
@@ -1084,20 +1161,20 @@ DualMeshGenerator::generate()
 
     Point center;
 
-    for (const auto & point : unique_clipped_points)
+    for (const auto & point : clipped_points)
       center += point;
 
-    center /= unique_clipped_points.size();
+    center /= clipped_points.size();
 
-    std::sort(unique_clipped_points.begin(),
-              unique_clipped_points.end(),
+    std::sort(clipped_points.begin(),
+              clipped_points.end(),
               [&center](const Point & a, const Point & b)
               {
                 return std::atan2(a(1) - center(1), a(0) - center(0)) <
                        std::atan2(b(1) - center(1), b(0) - center(0));
               });
 
-    return unique_clipped_points;
+    return clipped_points;
   };
 
   // Helper for finding if a node is a boundary vertex
@@ -1122,7 +1199,7 @@ DualMeshGenerator::generate()
   {
     for (const auto & boundary_segment : boundary_region.boundary_clip_segments)
       if (pointOnSegment2D(
-              point, boundary_segment.first, boundary_segment.second, length_tol, area_tol))
+              point, boundary_segment.first, boundary_segment.second))
         return true;
 
     return false;
@@ -1186,12 +1263,19 @@ DualMeshGenerator::generate()
       dual_elem = buildDualElement(reversed_nodes);
     }
 
-    if (!dual_elem->is_flipped())
-    {
-      if (output_subdomain_id != Elem::invalid_subdomain_id)
-        dual_elem->subdomain_id() = output_subdomain_id;
-      dualMesh->add_elem(std::move(dual_elem));
-    }
+    // Reversing a simple polygon always fixes its orientation, so a cell still reported as flipped
+    // is self-intersecting or degenerate. Dropping it would leave a hole in the output mesh.
+    if (dual_elem->is_flipped())
+      mooseError("Failed to build a valid dual element with ",
+                 points.size(),
+                 " vertices around the point ",
+                 points.front(),
+                 ": the polygon is degenerate or self-intersecting.");
+
+    if (output_subdomain_id != Elem::invalid_subdomain_id)
+      dual_elem->subdomain_id() = output_subdomain_id;
+
+    dualMesh->add_elem(std::move(dual_elem));
   };
 
   // Build one dual element around each source node.
@@ -1232,11 +1316,14 @@ DualMeshGenerator::generate()
     std::vector<bool> used(incident_elems.size(), false);
     std::vector<dof_id_type> ordered_center_ids;
 
+    // Indices into incident_elems, i.e. primal elements, not nodes
     unsigned int current = start;
     unsigned int previous = libMesh::invalid_uint;
 
-    // Walk element adjacency to collect dual centers in connected order.
-    while (true)
+    // Walk element adjacency to collect dual centers in connected order. Each iteration marks its
+    // element used and only moves to unused ones, so the walk ends within incident_elems.size()
+    // iterations.
+    for ([[maybe_unused]] const auto walk_step : index_range(incident_elems))
     {
       const Elem * elem = incident_elems[current];
 
@@ -1250,10 +1337,9 @@ DualMeshGenerator::generate()
           ordered_center_ids.push_back(center_id);
       }
 
+      // Select the next candidate
       used[current] = true;
-
       unsigned int next = libMesh::invalid_uint;
-
       for (const auto candidate : adjacency[current])
         if (candidate != previous && !used[candidate])
         {
@@ -1277,6 +1363,10 @@ DualMeshGenerator::generate()
       source_center_points.push_back(dual_centers[center_id]);
     }
 
+    // For a node on a preserved boundary, the centers alone do not reach the boundary, so the cell
+    // is completed with the midpoints of the adjacent preserved sides and, at a boundary corner,
+    // the primal node itself. Voronoi cells without preserved interfaces instead get their
+    // boundary vertices from clipping, since their centers already extend past the boundary.
     if (!use_voronoi || _preserve_subdomain_interfaces)
     {
       if (boundary_region != nullptr)
@@ -1323,8 +1413,8 @@ DualMeshGenerator::generate()
       }
     }
 
+    // Clip the dual element vertices back to the primal boundary
     if (boundary_region != nullptr && dual_points.size() >= 3)
-      // Finally, clipping back to boundary.
       dual_points = clipDualPolygonToBoundary(*boundary_region, dual_points);
 
     if (dual_points.size() < 3)
@@ -1334,6 +1424,8 @@ DualMeshGenerator::generate()
         boundary_region != nullptr ? concaveBoundaryVertexIndex(*boundary_region, dual_points)
                                    : dual_points.size();
 
+    // Handle a concave dual element by fanning triangles from the vertex introducing
+    // concavity
     if (concave_vertex_index < dual_points.size())
     {
       const Point corner_point = dual_points[concave_vertex_index];
