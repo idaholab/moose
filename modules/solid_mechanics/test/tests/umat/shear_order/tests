@@ -11,9 +11,9 @@
     capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     rel_err = 2.0e-4
-    requirement = 'UMAT shall generate the correct shear deformation and stress when a single '
+    requirement = 'The system shall, through UMAT, generate the correct shear deformation and stress when a single '
                   'element is sheared via a Dirichlet boundary condition on the XY plane with '
-                  'anisotropic shear stiffness; results must coincide with those of MOOSE.'
+                  'anisotropic shear stiffness; results shall coincide with those of MOOSE.'
   []
   [shear_order_umat_umat_z]
     type = 'Exodiff'
@@ -25,9 +25,9 @@
     capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     rel_err = 2.0e-4
-    requirement = 'UMAT shall generate the correct shear deformation and stress when a single '
+    requirement = 'The system shall, through UMAT, generate the correct shear deformation and stress when a single '
                   'element is sheared via a Dirichlet boundary condition on the YZ plane with '
-                  'anisotropic shear stiffness; results must coincide with those of MOOSE.'
+                  'anisotropic shear stiffness; results shall coincide with those of MOOSE.'
   []
 
   [shear_order_umat_moose_x]

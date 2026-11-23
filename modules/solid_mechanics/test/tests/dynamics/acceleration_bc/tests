@@ -5,7 +5,7 @@
     exodiff = 'AccelerationBC_test_out.e'
     abs_zero = 1e-08
 
-    requirement = "The PresetAcceleration class shall accurately prescribe the"
+    requirement = "The system shall accurately prescribe, using the PresetAcceleration class, the"
                   " acceleration at the given boundary."
     design = "Dynamics.md PresetAcceleration.md"
     issues = "#7642"
@@ -17,7 +17,7 @@
     exodiff = 'AccelerationBC_test_out.e'
     abs_zero = 1e-08
 
-    requirement = "The PresetAcceleration class shall accurately prescribe the"
+    requirement = "The system shall accurately prescribe, using the PresetAcceleration class, the"
                   " acceleration at the given boundary when the Newmark-Beta time"
                   " integrator is used to calculate the velocity and acceleration."
     design = "Dynamics.md PresetAcceleration.md"

@@ -7,6 +7,6 @@
     exodiff = 'modal_out.e'
     exodiff_opts = '-eigen_relative'
     abs_zero = 1e-10
-    requirement = "The module shall be able to perform modal analysis with the Eigenvalue Executioner."
+    requirement = "The system shall be able to perform modal analysis with the Eigenvalue Executioner."
   []
 []

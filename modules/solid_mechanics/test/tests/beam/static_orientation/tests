@@ -2,7 +2,7 @@
   design = "C0TimoshenkoBeam.md"
   issues = "#14772"
   [euler_small_strain]
-    requirement = "The mechanics system shall accurately predict the"
+    requirement = "The system shall accurately predict the"
                   " static bending response of an Euler beam modeled using"
                   " beam elements under small deformation when the beam is"
     [./orientation_z]

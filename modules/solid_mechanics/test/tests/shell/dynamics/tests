@@ -2,7 +2,7 @@
   [verification_tests]
     design = "ShellElements.md"
     issues = "#15067"
-    requirement = "The mechanics system shall accurately predict the dynamic behavior of a shell "
+    requirement = "The system shall accurately predict the dynamic behavior of a shell "
                   "element with clamped-free-free-free conditions when "
     [shell_dynamics_bending_moment_free]
       type = 'CSVDiff'
@@ -36,7 +36,7 @@
     cli_args = 'Executioner/num_steps=5'
     csvdiff = 'shell_dynamics_bending_moment_out.csv'
     design = "ADInertialForceShell.md"
-    requirement = "The mechanics system shall accurately predict the dynamic behavior of a shell "
+    requirement = "The system shall accurately predict the dynamic behavior of a shell "
                   "element."
     issues = "#15067"
     capabilities = 'method!=dbg'

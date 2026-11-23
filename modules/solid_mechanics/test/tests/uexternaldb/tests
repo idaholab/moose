@@ -3,7 +3,7 @@
   design = 'AbaqusUExternalDB.md'
 
   [execution]
-    requirement = 'The Abaqus UEXTERNALDB interface shall execute the UEXTERNALDB routine at the '
+    requirement = 'The system shall, through the Abaqus UEXTERNALDB interface, execute the UEXTERNALDB routine at the '
     [initial]
       type = 'RunApp'
       input = 'utility_functions.i'
@@ -53,7 +53,7 @@
     capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     expect_out = 'Loading step is           1'
-    requirement = 'The Abaqus UEXTERNALDB interface shall interface with a general user object to '
+    requirement = 'The system shall, through the Abaqus UEXTERNALDB interface, interface with a general user object to '
                   'obtain the proper loading step and pass it to the user routine.'
   []
 
@@ -65,7 +65,7 @@
     valgrind = 'NONE'
     cli_args = 'UserObjects/uexternaldb/execute_on=INITIAL'
     expect_out = 'getoutdir           1 \. '
-    requirement = 'The Abaqus UEXTERNALDB interface shall provide the Abaqus API to obtain the '
+    requirement = 'The system shall, through the Abaqus UEXTERNALDB interface, provide the Abaqus API to obtain the '
                   'simulation output directory.'
   []
 
@@ -77,12 +77,12 @@
     valgrind = 'NONE'
     cli_args = 'UserObjects/uexternaldb/execute_on=INITIAL'
     expect_out = 'getjobname          17 utility_functions '
-    requirement = 'The Abaqus UEXTERNALDB interface shall provide the Abaqus API to obtain the '
+    requirement = 'The system shall, through the Abaqus UEXTERNALDB interface, provide the Abaqus API to obtain the '
                   'simulation job name.'
   []
 
   [messages]
-    requirement = 'The Abaqus UEXTERNALDB interface shall provide Abaqus compatible message routine '
+    requirement = 'The system shall, through the Abaqus UEXTERNALDB interface, provide Abaqus compatible message routine '
                   'supporting the '
     [info]
       type = 'RunApp'
@@ -134,7 +134,7 @@
   []
 
   [mutex]
-    requirement = 'The Abaqus UEXTERNALDB interface shall provide Abaqus compatible mutex management '
+    requirement = 'The system shall, through the Abaqus UEXTERNALDB interface, provide Abaqus compatible mutex management '
     [single_thread]
       type = 'RunApp'
       input = 'mutex_test.i'
@@ -171,7 +171,7 @@
   []
 
   [sma_memory]
-    requirement = 'The Abaqus UEXTERNALDB interface shall provide the Abaqus API for accessing '
+    requirement = 'The system shall, through the Abaqus UEXTERNALDB interface, provide the Abaqus API for accessing '
                   'shared memory objects '
     [single_thread]
       type = 'RunApp'

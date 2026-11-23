@@ -7,7 +7,7 @@
     exodiff = 'wave_hht_out.e'
     abs_zero = 1e-09
 
-    requirement = "The mechanics system shall correctly predict 1D wave propagation in a linear "
+    requirement = "The system shall correctly predict 1D wave propagation in a linear "
                   "elastic material with numerical damping resulting from Hilber-Hughes-Taylor (HHT) "
                   "time integration."
     capabilities = 'method!=dbg'
@@ -18,7 +18,7 @@
     exodiff = 'wave_newmark_out.e'
     abs_zero = 1e-09
 
-    requirement = "The mechanics system shall correctly predict 1D wave propagation in a linear "
+    requirement = "The system shall correctly predict 1D wave propagation in a linear "
                   "elastic material with no numerical or structural damping."
     capabilities = 'method!=dbg'
   []
@@ -28,7 +28,7 @@
     exodiff = 'wave_rayleigh_hht_out.e'
     abs_zero = 1e-09
 
-    requirement = "The mechanics system shall correctly predict 1D wave propagation in a linear "
+    requirement = "The system shall correctly predict 1D wave propagation in a linear "
                   "elastic material with both Rayleigh damping and numerical damping resulting from "
                   "Hilber-Hughes-Taylor (HHT) time integration."
     capabilities = 'method!=dbg'
@@ -39,7 +39,7 @@
     exodiff = 'wave_rayleigh_hht_out.e'
     abs_zero = 1e-09
 
-    requirement = "The mechanics system shall correctly predict 1D wave propagation in a linear "
+    requirement = "The system shall correctly predict 1D wave propagation in a linear "
                   "elastic material with both Rayleigh damping and numerical damping resulting from "
                   "Hilber-Hughes-Taylor (HHT) time integration when automatic differentiation is "
                   "used."
@@ -50,7 +50,7 @@
     type = 'PetscJacobianTester'
     input = 'wave_rayleigh_hht_AD.i'
 
-    requirement = "The mechanics system shall correctly compute the Jacobian for 1D wave propagation "
+    requirement = "The system shall correctly compute the Jacobian for 1D wave propagation "
                   "in a linear elastic material with both Rayleigh damping and numerical damping "
                   "resulting from Hilber-Hughes-Taylor (HHT) time integration when automatic "
                   "differentiation is used."
@@ -62,7 +62,7 @@
     abs_zero = 1e-09
 
     allow_warnings = True
-    requirement = "The mechanics system shall correctly predict 1D wave propagation in a linear "
+    requirement = "The system shall correctly predict 1D wave propagation in a linear "
                   "elastic material with both Rayleigh damping and numerical damping resulting from "
                   "Hilber-Hughes-Taylor (HHT) time integration when using the velocity and "
                   "acceleration computed using the Newmark-Beta time integrator."
@@ -76,7 +76,7 @@
     exodiff = 'wave_rayleigh_newmark_out.e'
     abs_zero = 1e-09
 
-    requirement = "The mechanics system shall correctly predict 1D wave propagation in a linear "
+    requirement = "The system shall correctly predict 1D wave propagation in a linear "
                   "elastic material with Rayleigh damping."
     capabilities = 'method!=dbg'
   []
@@ -86,8 +86,8 @@
     exodiff = 'wave_rayleigh_newmark_action_out.e'
     abs_zero = 1e-09
 
-    requirement = "The mechanics system shall correctly predict 1D wave propagation in a linear "
-                  "elastic material with Rayleigh damping when using the dynamic tensor mechanics "
+    requirement = "The system shall correctly predict 1D wave propagation in a linear "
+                  "elastic material with Rayleigh damping when using the dynamic solid mechanics "
                   "parent action."
     capabilities = 'method!=dbg'
   []
