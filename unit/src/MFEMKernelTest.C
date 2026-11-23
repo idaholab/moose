@@ -455,7 +455,7 @@ TEST_F(MFEMKernelTest, RejectsGetGradientForModernAssemblyWhenGradientIsRequired
   {
     const std::string message(error.what());
     EXPECT_TRUE(message.find("require GetGradient()") != std::string::npos);
-    EXPECT_TRUE(message.find("require legacy assembly") != std::string::npos);
+    EXPECT_TRUE(message.find("require legacy or partial assembly") != std::string::npos);
   }
 }
 /**

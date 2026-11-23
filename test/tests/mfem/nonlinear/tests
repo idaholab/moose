@@ -147,4 +147,71 @@
     recover = false
     restep = false
   []
+  [MFEMNonLinearCurlCurlLinearCoeff]
+    type = CSVDiff
+    issues = '#33579'
+    input = nlcurlcurl_lcoef.i
+    design = 'syntax/Problem/index.md MFEMNLCurlCurlKernel.md'
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
+    requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind, using the nonlinear execution path and linear coefficients'
+    capabilities = 'mfem'
+    gold_dir = '../kernels/gold'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMNonLinearCurlCurlLinearCoeffPartial]
+    type = CSVDiff
+    issues = '#33579'
+    input = nlcurlcurl_lcoef.i
+    design = 'syntax/Problem/index.md MFEMNLCurlCurlKernel.md'
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
+    requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind, using the nonlinear execution path and linear coefficients with the linear kernel.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    gold_dir = '../kernels/gold'
+    cli_args = 'Executioner/assembly_level=partial Kernels/curlcurl/type=MFEMCurlCurlKernel'
+    recover = false
+  []
+  [MFEMNonLinearCurlCurlLinearKernelPartial]
+    type = CSVDiff
+    issues = '#33579'
+    input = nlcurlcurl_lcoef.i
+    design = 'syntax/Problem/index.md MFEMNLCurlCurlKernel.md'
+    csvdiff = 'OutputData/CurlCurl/curlcurl_line_sample_e_field_0001.csv'
+    requirement = 'The system shall have the ability to solve a partially assembled definite Maxwell problem with Nedelec elements of the first kind, using the nonlinear execution path and linear coefficients'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    gold_dir = '../kernels/gold'
+    cli_args = 'Executioner/assembly_level=partial'
+    recover = false
+  []
+  [MFEMNonLinearCurlCurl]
+    type = CSVDiff
+    input = nlcurlcurl_nlcoef.i
+    csvdiff = 'OutputData/MFEMNonLinearCurlCurl.csv '
+              'OutputData/MFEMNonLinearCurlCurl_line_sample_h_field_0001.csv'
+    design = 'syntax/Problem/index.md MFEMNLCurlCurlKernel.md'
+    issues = '#33579'
+    requirement = 'The system shall converge to a manufactured solution of a nonlinear definite '
+                  'Maxwell problem using a nonlinear curl-curl kernel, as measured by the L2 error '
+                  'against the exact solution.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+  []
+  [MFEMNonLinearCurlCurlPartial]
+    type = CSVDiff
+    input = nlcurlcurl_nlcoef.i
+    csvdiff = 'OutputData/MFEMNonLinearCurlCurl.csv '
+              'OutputData/MFEMNonLinearCurlCurl_line_sample_h_field_0001.csv'
+    design = 'syntax/Problem/index.md MFEMNLCurlCurlKernel.md'
+    issues = '#33579'
+    requirement = 'The system shall converge to a manufactured solution of a nonlinear definite '
+                  'Maxwell problem using a nonlinear curl-curl kernel with partial assembly, as '
+                  'measured by the L2 error against the exact solution.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    cli_args = 'Executioner/assembly_level=partial'
+    recover = false
+  []
 []

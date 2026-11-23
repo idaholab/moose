@@ -122,7 +122,6 @@ unit:
   - CheckCoefficientMap.HasVecCoefficient
   - CheckCoefficientMap.OverwriteBlocks
   - CheckCoefficientMap.OverwriteCoefficient
-  - CheckData.NLCurlCurlIntegratorJacobianMatchesAnalyticLinearization
   - CheckData.NLDiffusionIntegratorJacobianMatchesAnalyticLinearization
   - CheckData.NLDiffusionTest
   - CheckData.NonlinearIntegratorTest
