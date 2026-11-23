@@ -54,9 +54,6 @@ RandomCorrosion::RandomCorrosion(const InputParameters & parameters)
   // This class only works with Nodal aux variables
   if (!isNodal())
     mooseError("RandomCorrosion only operates using nodal aux variables.");
-
-  // Setup the random number generation
-  setRandomResetFrequency(EXEC_TIMESTEP_BEGIN);
 }
 
 void
@@ -66,6 +63,11 @@ RandomCorrosion::timestepSetup()
   Real factor = 1;
   if (_temperature > _ref_temperature)
     factor = 1 + (_temperature - _ref_temperature) * 0.1;
+
+  // Seed from the master seed and time step so that every processor (and a recovered run)
+  // generates the same set of points. The per-node generators of RandomInterface cannot be used
+  // here because no node is current during timestepSetup().
+  _generator.seed(0, getMasterSeed() + _t_step);
 
   // Generater the random points to apply "corrosion"
   _points.clear();
@@ -93,9 +95,9 @@ RandomCorrosion::getRandomPoint()
   const Point & min = _box.min();
   const Point & max = _box.max();
 
-  Real x = getRandomReal() * (max(0) - min(0)) + min(0);
-  Real y = getRandomReal() * (max(1) - min(1)) + min(1);
-  Real z = getRandomReal() * (max(2) - min(2)) + min(2);
+  Real x = _generator.rand(0) * (max(0) - min(0)) + min(0);
+  Real y = _generator.rand(0) * (max(1) - min(1)) + min(1);
+  Real z = _generator.rand(0) * (max(2) - min(2)) + min(2);
 
   return Point(x, y, z);
 }
