@@ -755,6 +755,23 @@ DualMeshGenerator::generate()
 
   // Now we've gathered our centers and boundary info, we can now build the dual
   auto dualMesh = buildReplicatedMesh(2);
+
+  // Declare the input's extra element integers on the output mesh so the preserved primal elements
+  // can carry their values over. Dual elements have no primal element to inherit from, so they keep
+  // the default value.
+  std::vector<unsigned int> input_elem_integer_indices;
+  std::vector<unsigned int> output_elem_integer_indices;
+
+  for (const auto i : make_range(input_mesh->n_elem_integers()))
+  {
+    const auto & name = input_mesh->get_elem_integer_name(i);
+
+    input_elem_integer_indices.push_back(i);
+    output_elem_integer_indices.push_back(dualMesh->has_elem_integer(name)
+                                              ? dualMesh->get_elem_integer_index(name)
+                                              : dualMesh->add_elem_integer(name));
+  }
+
   // Ordered map because std::array has no std::hash specialization
   std::map<RoundedPointKey2D, std::vector<Node *>> dual_nodes_by_key;
   const Real dual_node_tol = std::max(length_tol, Real(1e-12));
@@ -810,6 +827,13 @@ DualMeshGenerator::generate()
 
       for (const auto target_side : target_sides)
         boundary_info.add_side(target_elem, target_side, ids_to_copy);
+    };
+
+    const auto copyElemIntegers = [&](const Elem & source_elem, Elem & target_elem)
+    {
+      for (const auto i : index_range(input_elem_integer_indices))
+        target_elem.set_extra_integer(output_elem_integer_indices[i],
+                                      source_elem.get_extra_integer(input_elem_integer_indices[i]));
     };
 
     // Copies preserved subdomain elements into the output mesh, keeping their subdomain id and
@@ -888,6 +912,7 @@ DualMeshGenerator::generate()
 
         primal_elem->subdomain_id() = elem->subdomain_id();
         Elem * const added_elem = dualMesh->add_elem(std::move(primal_elem));
+        copyElemIntegers(*elem, *added_elem);
 
         for (const auto side : elem->side_index_range())
         {
@@ -913,6 +938,7 @@ DualMeshGenerator::generate()
 
       primal_elem->subdomain_id() = elem->subdomain_id();
       Elem * const added_elem = dualMesh->add_elem(std::move(primal_elem));
+      copyElemIntegers(*elem, *added_elem);
 
       for (const auto side : elem->side_index_range())
         copySideBoundaryIDs(elem, side, added_elem, {cast_int<unsigned short>(side)});

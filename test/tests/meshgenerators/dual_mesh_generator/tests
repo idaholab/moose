@@ -52,7 +52,16 @@
       mesh_mode = 'REPLICATED'
       recover = false
       detail = 'while transferring the external and subdomain-interface sidesets and nodesets of '
-               'the primal mesh onto the dual mesh.'
+               'the primal mesh onto the dual mesh,'
+    []
+    [preserve_subdomain_ids_and_boundaries]
+      type = 'CSVDiff'
+      input = 'dual_mesh_generator_subdomain_preserve_ids.i'
+      csvdiff = 'dual_mesh_generator_subdomain_preserve_ids_out.csv'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'and retaining the extra element integers and every boundary, interior ones '
+               'included, of a preserved primal subdomain.'
     []
   []
 

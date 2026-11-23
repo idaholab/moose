@@ -15,7 +15,7 @@ This mesh generator currently only supports 2D input.
 
 The [!param](/Mesh/DualMeshGenerator/preserve_subdomain_interfaces) parameter treats interfaces between primal subdomains like preserved external boundaries. This creates separate dual cells on each side of an interface instead of merging the cells across subdomain boundaries. This option is only supported for barycentric duals.
 
-The [!param](/Mesh/DualMeshGenerator/preserve_primal_subdomains) parameter copies selected primal subdomains to the output mesh while dualizing the rest of the mesh. Preserved primal subdomains are only supported for barycentric duals, and the associated nodesets and sidesets are copied to the output mesh.
+The [!param](/Mesh/DualMeshGenerator/preserve_primal_subdomains) parameter copies selected primal subdomains to the output mesh while dualizing the rest of the mesh. Preserved primal subdomains are only supported for barycentric duals. Because their elements are copied rather than dualized, they keep all of their boundary ids, interior sidesets included, and the values of every extra element integer of the input mesh. Dual elements have no primal element to inherit from, so their extra element integers are left unset.
 
 Sidesets and nodesets on the external boundary of the primal mesh are transferred to the dual mesh.
 Each dual element side takes the boundary ids of the primal side containing it, and a nodeset that
