@@ -108,7 +108,7 @@ f = f_{\text{lam}}(\text{Re}) = \frac{64}{\text{Re}} \,
 For $\text{Re} > 4000$ the flow is deemed turbulent and the Swamee-Jain approximation of the Colebrook-White equation is used [!citep](swamee_jain1976):
 
 !equation id=swamee_jain_friction
-f = f_{\text{turb}} = \frac{0.25}{\left( \log_{10} \left( \frac{\epsilon}{3.7 D_{h,i}} + \frac{5.74}{\text{Re}^{0.9}} \right) \right)^2} \,
+f = f_{\text{turb}}(\text{Re}) = \frac{0.25}{\left( \log_{10} \left( \frac{\epsilon}{3.7 D_{h,i}} + \frac{5.74}{\text{Re}^{0.9}} \right) \right)^2} \,
 
 where
 
