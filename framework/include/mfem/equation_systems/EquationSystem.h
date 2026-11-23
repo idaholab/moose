@@ -21,6 +21,7 @@
 #include "MFEMMixedBilinearFormKernel.h"
 #include "ScaleIntegrator.h"
 #include "NLScaleIntegrator.h"
+#include "JacobianSumOperator.h"
 
 namespace Moose::MFEM
 {
@@ -214,6 +215,8 @@ protected:
   virtual void FormSystemMatrix(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS);
+  /// Get partially-assembled Jacobian
+  void FormJacobianOperator(const mfem::Vector & u) const;
   /// Compute Jacobian matrix at the provided vector of true DoFs of trial variables
   void FormJacobianMatrix(const mfem::Vector & u);
 
