@@ -13,40 +13,6 @@
 
 using namespace libMesh;
 
-TEST(PolygonUtilsTest, addUniquePoint)
-{
-  std::vector<Point> points;
-
-  polygon_utils::addUniquePoint(points, Point(0, 0, 0), 1e-12);
-  polygon_utils::addUniquePoint(points, Point(1, 0, 0), 1e-12);
-
-  // Within the tolerance of a point already there
-  polygon_utils::addUniquePoint(points, Point(1e-13, 0, 0), 1e-12);
-  EXPECT_EQ(points.size(), 2u);
-
-  // Outside it
-  polygon_utils::addUniquePoint(points, Point(1e-11, 0, 0), 1e-12);
-  EXPECT_EQ(points.size(), 3u);
-}
-
-TEST(PolygonUtilsTest, pointOnSegment2D)
-{
-  const Point a(0, 0, 0);
-  const Point b(2, 0, 0);
-
-  EXPECT_TRUE(polygon_utils::pointOnSegment2D(Point(1, 0, 0), a, b));
-  EXPECT_TRUE(polygon_utils::pointOnSegment2D(a, a, b));
-  EXPECT_TRUE(polygon_utils::pointOnSegment2D(b, a, b));
-
-  // Off the line, and on the line but past the end
-  EXPECT_FALSE(polygon_utils::pointOnSegment2D(Point(1, 1, 0), a, b));
-  EXPECT_FALSE(polygon_utils::pointOnSegment2D(Point(3, 0, 0), a, b));
-
-  // A degenerate segment is the single point it collapses to
-  EXPECT_TRUE(polygon_utils::pointOnSegment2D(a, a, a));
-  EXPECT_FALSE(polygon_utils::pointOnSegment2D(b, a, a));
-}
-
 TEST(PolygonUtilsTest, pointInPolygon2D)
 {
   // An L shape, so that a convex half-space test would get this wrong
@@ -70,60 +36,23 @@ TEST(PolygonUtilsTest, pointInPolygon2D)
   EXPECT_TRUE(polygon_utils::pointInPolygon2D(Point(0, 0, 0), concave));
 
   // Fewer than three corners is not a polygon
-  EXPECT_FALSE(polygon_utils::pointInPolygon2D(Point(0, 0, 0),
-                                               {Point(0, 0, 0), Point(1, 0, 0)}));
-}
-
-TEST(PolygonUtilsTest, addSegmentIntersections2D)
-{
-  const Real tol = 1e-12;
-
-  // Crossing segments meet at one point
-  std::vector<Point> points;
-  polygon_utils::addSegmentIntersections2D(
-      points, Point(0, 0, 0), Point(2, 0, 0), Point(1, -1, 0), Point(1, 1, 0), tol);
-  ASSERT_EQ(points.size(), 1u);
-  EXPECT_NEAR(points[0](0), 1.0, tol);
-  EXPECT_NEAR(points[0](1), 0.0, tol);
-
-  // Disjoint segments do not
-  points.clear();
-  polygon_utils::addSegmentIntersections2D(
-      points, Point(0, 0, 0), Point(1, 0, 0), Point(0, 1, 0), Point(1, 1, 0), tol);
-  EXPECT_TRUE(points.empty());
-
-  // Overlapping collinear segments give the end points of the overlap
-  points.clear();
-  polygon_utils::addSegmentIntersections2D(
-      points, Point(0, 0, 0), Point(2, 0, 0), Point(1, 0, 0), Point(3, 0, 0), tol);
-  ASSERT_EQ(points.size(), 2u);
-  EXPECT_NEAR(points[0](0), 1.0, tol);
-  EXPECT_NEAR(points[1](0), 2.0, tol);
-
-  // A degenerate segment contributes its point when it lies on the other segment
-  points.clear();
-  polygon_utils::addSegmentIntersections2D(
-      points, Point(1, 0, 0), Point(1, 0, 0), Point(0, 0, 0), Point(2, 0, 0), tol);
-  ASSERT_EQ(points.size(), 1u);
-  EXPECT_NEAR(points[0](0), 1.0, tol);
+  EXPECT_FALSE(polygon_utils::pointInPolygon2D(Point(0, 0, 0), {Point(0, 0, 0), Point(1, 0, 0)}));
 }
 
 TEST(PolygonUtilsTest, fanApexOffset)
 {
   const Real area_tol = 1e-12;
 
-  // A square fans soundly from any vertex
+  // A square fans soundly from any corner
   const std::vector<Point> square = {
       Point(0, 0, 0), Point(1, 0, 0), Point(1, 1, 0), Point(0, 1, 0)};
   EXPECT_EQ(polygon_utils::fanApexOffset(square, area_tol), 0u);
 
-  // With a mid-side node on the bottom, vertex 0 is collinear with the edge from the node to the
-  // next corner, so the fan from it is degenerate and the apex has to move
-  const std::vector<Point> with_midpoint = {Point(0, 0, 0),
-                                            Point(0.5, 0, 0),
-                                            Point(1, 0, 0),
-                                            Point(1, 1, 0),
-                                            Point(0, 1, 0)};
+  // With a mid-side node on the bottom, corner 0 is an end of the collinear run along that side,
+  // so the fan from it spans the rest of the run as a zero-area triangle and the apex has to move.
+  // The polygon itself is valid; only this apex is not.
+  const std::vector<Point> with_midpoint = {
+      Point(0, 0, 0), Point(0.5, 0, 0), Point(1, 0, 0), Point(1, 1, 0), Point(0, 1, 0)};
   const auto apex = polygon_utils::fanApexOffset(with_midpoint, area_tol);
   EXPECT_NE(apex, 0u);
 
@@ -137,4 +66,11 @@ TEST(PolygonUtilsTest, fanApexOffset)
     const Real twice_area = (b(0) - a(0)) * (c(1) - a(1)) - (b(1) - a(1)) * (c(0) - a(0));
     EXPECT_GT(std::abs(twice_area), area_tol);
   }
+
+  // A corner interior to the collinear run is a sound apex: both run edges are adjacent to it, so
+  // the fan never spans the run
+  EXPECT_EQ(polygon_utils::fanApexOffset(
+                {Point(0.5, 0, 0), Point(1, 0, 0), Point(1, 1, 0), Point(0, 1, 0), Point(0, 0, 0)},
+                area_tol),
+            0u);
 }

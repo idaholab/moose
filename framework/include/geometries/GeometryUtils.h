@@ -210,6 +210,43 @@ bool arePointsColinear(const Point & p1, const Point & p2, const Point & p3);
 bool segmentsIntersect(const Point & p1, const Point & p2, const Point & p3, const Point & p4);
 
 /**
+ * Whether a point lies on the segment between two points, treating a degenerate segment as the
+ * single point it collapses to (only working in 2D (x-y plane)).
+ * @param[in] point point of interest
+ * @param[in] a first end point of the segment
+ * @param[in] b second end point of the segment
+ * @return whether the point lies on the segment
+ */
+bool pointOnSegment2D(const Point & point, const Point & a, const Point & b);
+
+/**
+ * Append a point to a list unless the list already holds one at the same position. Used wherever
+ * points are gathered from several constructions that can reach the same point.
+ * @param[in,out] points the points gathered so far
+ * @param[in] point the candidate point
+ * @param[in] length_tol distance within which two points are considered the same
+ */
+void addUniquePoint(std::vector<Point> & points, const Point & point, const Real length_tol);
+
+/**
+ * Add the points where the segment p0-p1 meets the segment q0-q1, which may be none, one, or, for
+ * overlapping collinear segments, the end points of the overlap. Degenerate segments are handled
+ * as the single point they collapse to (only working in 2D (x-y plane)).
+ * @param[in,out] points the points gathered so far, appended to uniquely
+ * @param[in] p0 first end point of the first segment
+ * @param[in] p1 second end point of the first segment
+ * @param[in] q0 first end point of the second segment
+ * @param[in] q1 second end point of the second segment
+ * @param[in] length_tol distance within which two points are considered the same
+ */
+void addSegmentIntersections2D(std::vector<Point> & points,
+                               const Point & p0,
+                               const Point & p1,
+                               const Point & q0,
+                               const Point & q1,
+                               const Real length_tol);
+
+/**
  * Compute the squared distance from a point to a 3-D line segment.
  * @param[in] point point of interest
  * @param[in] a first segment endpoint

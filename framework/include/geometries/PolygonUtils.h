@@ -15,53 +15,11 @@
 #include <vector>
 
 /**
- * Utilities for building polygons in the xy plane from points, as a mesh generator producing
- * libMesh::C0Polygon elements has to. Every routine here uses only the first two coordinates.
+ * Utilities for polygons in the xy plane given by their corners, as a mesh generator producing
+ * libMesh::C0Polygon elements works with. Every routine here uses only the first two coordinates.
  */
 namespace polygon_utils
 {
-
-/**
- * Append a point to a list unless the list already holds one at the same position. Used wherever a
- * polygon's vertices are gathered from several constructions that can reach the same point.
- * @param[in,out] points the points gathered so far
- * @param[in] point the candidate point
- * @param[in] length_tol distance within which two points are considered the same
- */
-void addUniquePoint(std::vector<libMesh::Point> & points,
-                    const libMesh::Point & point,
-                    const Real length_tol);
-
-/**
- * Whether a point lies on the segment between two points, treating a degenerate segment as the
- * single point it collapses to.
- * @param[in] point point of interest
- * @param[in] a first end point of the segment
- * @param[in] b second end point of the segment
- * @return whether the point lies on the segment
- */
-bool pointOnSegment2D(const libMesh::Point & point,
-                      const libMesh::Point & a,
-                      const libMesh::Point & b);
-
-/**
- * Add the points where the segment p0-p1 meets the segment q0-q1, which may be none, one, or, for
- * overlapping collinear segments, the end points of the overlap. Degenerate segments are handled as
- * the single point they collapse to. These points are the ones a polygon needs when it is clipped
- * against another.
- * @param[in,out] points the points gathered so far, appended to uniquely
- * @param[in] p0 first end point of the first segment
- * @param[in] p1 second end point of the first segment
- * @param[in] q0 first end point of the second segment
- * @param[in] q1 second end point of the second segment
- * @param[in] length_tol distance within which two points are considered the same
- */
-void addSegmentIntersections2D(std::vector<libMesh::Point> & points,
-                               const libMesh::Point & p0,
-                               const libMesh::Point & p1,
-                               const libMesh::Point & q0,
-                               const libMesh::Point & q1,
-                               const Real length_tol);
 
 /**
  * Whether a point is inside a polygon, by ray casting, with a point on the boundary counting as
@@ -73,10 +31,11 @@ void addSegmentIntersections2D(std::vector<libMesh::Point> & points,
 bool pointInPolygon2D(const libMesh::Point & point, const std::vector<libMesh::Point> & polygon);
 
 /**
- * The offset to rotate a polygon's vertices by so that it triangulates into non-degenerate
- * triangles. A libMesh::C0Polygon is triangulated by fanning from its first vertex, so that vertex
- * must not be collinear with any edge the fan spans; a polygon with three or more collinear
- * vertices, as mid-side nodes produce, can otherwise yield a zero-area triangle.
+ * The offset to rotate a polygon's corners by so that it triangulates into non-degenerate
+ * triangles. A libMesh::C0Polygon is triangulated by fanning from its first corner, so a polygon
+ * with three or more collinear corners, as mid-side nodes produce, yields a zero-area triangle
+ * whenever that corner is an end of a collinear run. Such a polygon is otherwise perfectly valid;
+ * only the choice of fan apex has to avoid the run.
  * @param[in] points the corners of the polygon, in order around it
  * @param[in] area_tol twice the area below which a triangle is considered degenerate
  * @return the offset of a sound fan apex, or 0 if no rotation avoids a degenerate triangle

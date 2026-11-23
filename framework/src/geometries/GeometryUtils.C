@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GeometryUtils.h"
+#include "LineSegment.h"
 #include "MooseUtils.h"
 
 #include <algorithm>
@@ -363,6 +364,74 @@ segmentsIntersect(const Point & p1, const Point & p2, const Point & p3, const Po
     return true;
   else
     return false;
+}
+
+bool
+pointOnSegment2D(const Point & point, const Point & a, const Point & b)
+{
+  if (a.absolute_fuzzy_equals(b))
+    return a.absolute_fuzzy_equals(point);
+
+  return LineSegment(a, b).contains_point(point);
+}
+
+void
+addUniquePoint(std::vector<Point> & points, const Point & point, const Real length_tol)
+{
+  for (const auto & existing_point : points)
+    if (MooseUtils::absoluteFuzzyEqual(existing_point, point, length_tol))
+      return;
+
+  points.push_back(point);
+}
+
+void
+addSegmentIntersections2D(std::vector<Point> & points,
+                          const Point & p0,
+                          const Point & p1,
+                          const Point & q0,
+                          const Point & q1,
+                          const Real length_tol)
+{
+  if (p0.absolute_fuzzy_equals(p1))
+  {
+    if (pointOnSegment2D(p0, q0, q1))
+      addUniquePoint(points, p0, length_tol);
+
+    return;
+  }
+
+  if (q0.absolute_fuzzy_equals(q1))
+  {
+    if (pointOnSegment2D(q0, p0, p1))
+      addUniquePoint(points, q0, length_tol);
+
+    return;
+  }
+
+  // Collinear segments meet along a whole stretch rather than at a point, so the end points of the
+  // overlap are what the caller needs
+  if (arePointsColinear(p0, p1, q0) && arePointsColinear(p0, p1, q1))
+  {
+    if (pointOnSegment2D(q0, p0, p1))
+      addUniquePoint(points, q0, length_tol);
+    if (pointOnSegment2D(q1, p0, p1))
+      addUniquePoint(points, q1, length_tol);
+    if (pointOnSegment2D(p0, q0, q1))
+      addUniquePoint(points, p0, length_tol);
+    if (pointOnSegment2D(p1, q0, q1))
+      addUniquePoint(points, p1, length_tol);
+
+    return;
+  }
+
+  Point intersection = p0;
+
+  // LineSegment::intersect() works with the infinite lines, so the result still has to be checked
+  // against both segments
+  if (LineSegment(p0, p1).intersect(LineSegment(q0, q1), intersection) &&
+      pointOnSegment2D(intersection, p0, p1) && pointOnSegment2D(intersection, q0, q1))
+    addUniquePoint(points, intersection, length_tol);
 }
 
 Real

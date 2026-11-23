@@ -923,7 +923,7 @@ DualMeshGenerator::generate()
     // of these constructions, e.g. a dual vertex sitting exactly on the boundary.
     for (const auto & point : dual_points)
       if (pointInsideBoundary(boundary_region, point))
-        polygon_utils::addUniquePoint(clipped_points, point, length_tol);
+        geom_utils::addUniquePoint(clipped_points, point, length_tol);
 
     for (const auto i : index_range(dual_points))
     {
@@ -933,12 +933,8 @@ DualMeshGenerator::generate()
       // Second, where a dual cell side crosses the boundary, the crossing point is where the
       // clipped cell turns and so has to become one of its vertices
       for (const auto & boundary_segment : boundary_region.boundary_clip_segments)
-        polygon_utils::addSegmentIntersections2D(clipped_points,
-                                  p0,
-                                  p1,
-                                  boundary_segment.first,
-                                  boundary_segment.second,
-                                  length_tol);
+        geom_utils::addSegmentIntersections2D(
+            clipped_points, p0, p1, boundary_segment.first, boundary_segment.second, length_tol);
     }
 
     // Third, a boundary vertex falling inside the dual cell is a corner of the boundary the clipped
@@ -946,10 +942,10 @@ DualMeshGenerator::generate()
     for (const auto & boundary_segment : boundary_region.boundary_clip_segments)
     {
       if (polygon_utils::pointInPolygon2D(boundary_segment.first, dual_points))
-        polygon_utils::addUniquePoint(clipped_points, boundary_segment.first, length_tol);
+        geom_utils::addUniquePoint(clipped_points, boundary_segment.first, length_tol);
 
       if (polygon_utils::pointInPolygon2D(boundary_segment.second, dual_points))
-        polygon_utils::addUniquePoint(clipped_points, boundary_segment.second, length_tol);
+        geom_utils::addUniquePoint(clipped_points, boundary_segment.second, length_tol);
     }
 
     if (clipped_points.size() < 3)
@@ -1012,8 +1008,7 @@ DualMeshGenerator::generate()
       std::vector<std::size_t> segment_point_ids;
 
       for (const auto point_id : index_range(clipped_points))
-        if (polygon_utils::pointOnSegment2D(
-                clipped_points[point_id], segment_start, segment_end))
+        if (geom_utils::pointOnSegment2D(clipped_points[point_id], segment_start, segment_end))
           segment_point_ids.push_back(point_id);
 
       if (segment_point_ids.size() < 2)
@@ -1044,11 +1039,10 @@ DualMeshGenerator::generate()
                            { return pointInsideBoundary(boundary_region, midpoint); });
 
     for (const auto & boundary_segment : boundary_region.boundary_clip_segments)
-      connectSegmentPoints(
-          boundary_segment.first,
-          boundary_segment.second,
-          [&](const Point & midpoint)
-          { return polygon_utils::pointInPolygon2D(midpoint, dual_points); });
+      connectSegmentPoints(boundary_segment.first,
+                           boundary_segment.second,
+                           [&](const Point & midpoint)
+                           { return polygon_utils::pointInPolygon2D(midpoint, dual_points); });
 
     // Walk the graph into a cycle starting from the lexicographically smallest vertex that has at
     // least two neighbors, so the ordering does not depend on the order the vertices were found
@@ -1157,8 +1151,7 @@ DualMeshGenerator::generate()
       [&](const BoundaryRegion2D & boundary_region, const Point & point)
   {
     for (const auto & boundary_segment : boundary_region.boundary_clip_segments)
-      if (polygon_utils::pointOnSegment2D(
-              point, boundary_segment.first, boundary_segment.second))
+      if (geom_utils::pointOnSegment2D(point, boundary_segment.first, boundary_segment.second))
         return true;
 
     return false;
@@ -1323,7 +1316,7 @@ DualMeshGenerator::generate()
 
     for (const auto center_id : ordered_center_ids)
     {
-      polygon_utils::addUniquePoint(dual_points, dual_centers[center_id], length_tol);
+      geom_utils::addUniquePoint(dual_points, dual_centers[center_id], length_tol);
       source_center_points.push_back(dual_centers[center_id]);
     }
 
@@ -1344,11 +1337,11 @@ DualMeshGenerator::generate()
 
           if (boundary_region->boundary_vertex_nodes.count(source_node_id) &&
               boundary_point_it != boundary_region->boundary_node_points.end())
-            polygon_utils::addUniquePoint(
+            geom_utils::addUniquePoint(
                 dual_points, boundary_point_it->second, length_tol); // Add primal vertices
 
           for (const auto & midpoint : boundary_midpoint_it->second)
-            polygon_utils::addUniquePoint(dual_points, midpoint, length_tol);
+            geom_utils::addUniquePoint(dual_points, midpoint, length_tol);
 
           if (boundary_point_it != boundary_region->boundary_node_points.end() &&
               !source_center_points.empty())
@@ -1487,7 +1480,7 @@ DualMeshGenerator::generate()
       const Point side_midpoint = 0.5 * (side_elem->point(0) + side_elem->point(1));
 
       for (const auto & preserved_side : preserved_side_boundaries)
-        if (polygon_utils::pointOnSegment2D(side_midpoint, preserved_side.p0, preserved_side.p1))
+        if (geom_utils::pointOnSegment2D(side_midpoint, preserved_side.p0, preserved_side.p1))
         {
           // An interface side is shared by a dual cell on either side of it, so only the element
           // with the lower id contributes it, which keeps a one-sided sideset one-sided
