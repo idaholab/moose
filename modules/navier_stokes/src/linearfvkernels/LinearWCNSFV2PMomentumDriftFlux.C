@@ -28,11 +28,6 @@ LinearWCNSFV2PMomentumDriftFlux ::validParams()
   // The stress is assembled on every face this kernel visits; whether it should be withheld on
   // impermeable walls, as the phase and energy drift fluxes are, is left as it was.
   params.suppressParameter<std::vector<BoundaryName>>("slip_boundaries");
-  // Nothing in this kernel reads the Rhie-Chow object: the flux it assembles is carried by the
-  // slip velocity, not by the mixture mass flux. The parameter is kept so that existing inputs and
-  // the Physics, which set it on every momentum flux kernel alike, keep parsing.
-  params.addParam<UserObjectName>("rhie_chow_user_object",
-                                  "Unused by this kernel, accepted for input compatibility.");
   params.addRequiredParam<MooseFunctorName>("rho_c", "Continuous phase density.");
 
   params.addParam<bool>(

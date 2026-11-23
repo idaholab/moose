@@ -742,7 +742,6 @@ WCNSLinearFVTwoPhaseMixturePhysics::addPhaseDriftFluxTerm()
     setRelativeVelocityParams(params);
     params.set<MooseEnum>("momentum_component") = NS::directions[dim];
     params.set<MooseEnum>("density_interp_method") = getParam<MooseEnum>("density_interp_method");
-    params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
     getProblem().addLinearFVKernel(
         object_type, prefix() + "drift_flux_" + NS::directions[dim], params);
   }

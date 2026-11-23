@@ -127,7 +127,7 @@ protected:
   const RealVectorValue _force_direction;
 
   /// Prescribed linear drag function. Null when the drag is computed internally from the
-  /// Schiller and Naumann correlation, see NS::solveSlipSpeed
+  /// Schiller and Naumann correlation
   const Moose::Functor<GenericReal<is_ad>> * const _linear_friction;
 
   /// Continuous phase density, used to form the particle Reynolds number

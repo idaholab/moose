@@ -198,7 +198,7 @@ checkSlipVelocityComponents(const MooseObject & object, unsigned int dim, bool h
 /**
  * Schiller and Naumann's branch of the linear drag function, valid below the transition. Offered
  * separately from dragFunction for a solver that has already established which branch its root
- * lies on; see solveSlipSpeed.
+ * lies on, as the slip speed solve of WCNSFV2PSlipVelocityFunctorMaterial does.
  */
 template <typename T>
 T
@@ -208,20 +208,6 @@ schillerNaumannDragFunction(const T & Re_p)
   mooseAssert(MetaPhysicL::raw_value(Re_p) >= 0,
               "The particle Reynolds number is formed from a magnitude");
   return 1.0 + 0.15 * pow(Re_p, 0.687);
-}
-
-/**
- * Re_p times the derivative of schillerNaumannDragFunction with respect to Re_p, written as the
- * product because \f$ Re_p \, f'(Re_p) \f$ is finite at the origin while \f$ f' \f$ alone is not.
- */
-template <typename T>
-T
-schillerNaumannDragDerivative(const T & Re_p)
-{
-  using std::pow;
-  mooseAssert(MetaPhysicL::raw_value(Re_p) >= 0,
-              "The particle Reynolds number is formed from a magnitude");
-  return 0.15 * 0.687 * pow(Re_p, 0.687);
 }
 
 /**
@@ -283,59 +269,6 @@ bracketedNewton(const Function & residual_and_derivative, T lower, T upper, T x,
 }
 
 /**
- * Solves Manninen's force balance together with the drag correlation for the slip speed:
- * \f$ s \, f(R s) = s_0 \f$, where \f$ s_0 \f$ is the slip speed in the Stokes limit and
- * \f$ R \f$ converts a speed into a particle Reynolds number. The left hand side is zero at
- * \f$ s = 0 \f$ and strictly increasing, so the root is unique, and since \f$ f \ge 1 \f$ it is
- * bracketed by \f$ [0, s_0] \f$. Solved by a Newton iteration safeguarded by that bracket, and
- * templated so that both slip closures can call it.
- */
-template <typename T>
-T
-solveSlipSpeed(const T & stokes_speed, const T & reynolds_per_speed)
-{
-  using std::sqrt;
-  // f(0) = 1, so a vanishing acceleration gives a vanishing slip and the drag never enters
-  if (MetaPhysicL::raw_value(stokes_speed) <= 0.0 ||
-      MetaPhysicL::raw_value(reynolds_per_speed) <= 0.0)
-    return stokes_speed;
-
-  // Solve in Reynolds number rather than in speed: multiplying s f(R s) = s0 through by R gives
-  // Re f(Re) = B, with B = R s0 formed entirely from inputs, so the branch of f is chosen before
-  // iterating rather than re-tested on every pass.
-  const T driving_group = reynolds_per_speed * stokes_speed;
-
-  // Below this the drag correction 0.15 Re^0.687 is 3e-13, smaller than the relative tolerance the
-  // loop would converge to, so the Stokes answer is already the converged one.
-  constexpr Real negligible_driving_group = 1e-17;
-  if (MetaPhysicL::raw_value(driving_group) < negligible_driving_group)
-    return stokes_speed;
-
-  // In Newton's regime f = 0.0183 Re, so the balance becomes 0.0183 Re^2 = B and is exact. The
-  // branches of dragFunction change over at Re = 1000, which is this value of B.
-  constexpr Real newton_regime_driving_group = 0.0183 * 1000.0 * 1000.0;
-  if (MetaPhysicL::raw_value(driving_group) >= newton_regime_driving_group)
-    return sqrt(driving_group / 0.0183) / reynolds_per_speed;
-
-  // g(Re) = Re f(Re) is zero at the origin and strictly increasing, and f >= 1 puts the root in
-  // [0, B]. The iteration starts from one Picard step off the Stokes guess Re = B.
-  const T reynolds = NS::bracketedNewton(
-      [&driving_group](const T & re)
-      {
-        // d/dRe [Re f(Re)] = f(Re) + Re f'(Re), the second term written as the finite product
-        const T drag = NS::schillerNaumannDragFunction(re);
-        return std::pair<T, T>(re * drag - driving_group,
-                               drag + NS::schillerNaumannDragDerivative(re));
-      },
-      T(0.0),
-      driving_group,
-      driving_group / NS::schillerNaumannDragFunction(driving_group),
-      MetaPhysicL::raw_value(driving_group));
-
-  return reynolds / reynolds_per_speed;
-}
-
-/**
  * The bubble interaction sources of the one-group interfacial area transport equation in the
  * closure of Hibiki and Ishii, Int. J. Heat Mass Transfer 43 (2000) 2711: coalescence by random
  * collision and breakage by turbulent impact. There is no wake entrainment term in this closure.
@@ -389,36 +322,6 @@ hibikiIshiiAreaSources(const T & f_d,
   const T s_ti = prefactor * gamma_b * f_d * (1.0 - f_d) *
                  exp(-k_b * sigma / (rho_f * pow(d_b, 5. / 3.) * Utility::pow<2>(u_t)));
   return {s_rc, s_ti};
-}
-
-/**
- * The linear drag function of a distorted fluid particle, the deformed-bubble regime in which the
- * drag coefficient grows with size rather than falling with Reynolds number. Substituted into the
- * closure it gives Ishii's terminal velocity for bubbly flow, independent of the particle size; the
- * derivation is on the LinearWCNSFV2PSlipVelocityFunctorMaterial documentation page.
- *
- * Unlike dragFunction this one is linear in the slip speed, so it is returned per unit speed: the
- * caller multiplies by \f$ \left|u_s\right| \f$.
- *
- * @param particle_diameter diameter of the particles of the dispersed phase
- * @param rho_c continuous phase density
- * @param mu_c continuous phase dynamic viscosity
- * @param delta_rho magnitude of the density difference between the phases
- * @param sigma surface tension between the phases
- * @param gravity_magnitude magnitude of the gravity vector
- */
-template <typename T>
-inline T
-distortedDragFunctionPerSpeed(const T & particle_diameter,
-                              const T & rho_c,
-                              const T & mu_c,
-                              const T & delta_rho,
-                              const T & sigma,
-                              const Real gravity_magnitude)
-{
-  using std::sqrt;
-  return Utility::pow<2>(particle_diameter) * rho_c / (36.0 * mu_c) *
-         sqrt(gravity_magnitude * delta_rho / sigma);
 }
 
 /**

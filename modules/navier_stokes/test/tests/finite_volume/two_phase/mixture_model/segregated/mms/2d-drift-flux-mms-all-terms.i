@@ -165,22 +165,11 @@ advected_interp_method = 'average'
     prop_values = 'phase_2'
   []
   [mixture_props]
-    type = ParsedFunctorMaterial
-    property_name = 'rho_mixture'
-    expression = 'phase_2 * rho_d_t + (1 - phase_2) * rho_c_t'
-    functor_names = 'phase_2 rho_d_t rho_c_t'
-  []
-  [mu_mixture]
-    type = ParsedFunctorMaterial
-    property_name = 'mu_mixture'
-    expression = 'phase_2 * ${mu_d} + (1 - phase_2) * ${mu_c}'
-    functor_names = 'phase_2'
-  []
-  [k_mixture]
-    type = ParsedFunctorMaterial
-    property_name = 'k_mixture'
-    expression = 'phase_2 * ${k_d} + (1 - phase_2) * ${k_c}'
-    functor_names = 'phase_2'
+    type = WCNSLinearFVMixtureFunctorMaterial
+    prop_names = 'rho_mixture mu_mixture k_mixture'
+    phase_1_names = 'rho_d_t ${mu_d} ${k_d}'
+    phase_2_names = 'rho_c_t ${mu_c} ${k_c}'
+    phase_1_fraction = 'phase_2'
   []
   # mass weighted, as the energy split requires
   [cp_mixture]
@@ -284,7 +273,6 @@ advected_interp_method = 'average'
     rho_c = rho_c_t
     fraction_dispersed = phase_2
     density_interp_method = 'average'
-    rhie_chow_user_object = 'rc'
   []
   [v_drift_flux]
     type = LinearWCNSFV2PMomentumDriftFlux
@@ -296,7 +284,6 @@ advected_interp_method = 'average'
     rho_c = rho_c_t
     fraction_dispersed = phase_2
     density_interp_method = 'average'
-    rhie_chow_user_object = 'rc'
   []
   [u_gravity]
     type = LinearFVSource
