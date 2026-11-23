@@ -13,7 +13,7 @@ For a Voronoi dual, the primal mesh is first enclosed in a mesh-scaled square an
 !alert note
 This mesh generator currently only supports 2D input.
 
-The [!param](/Mesh/DualMeshGenerator/preserve_subdomain_interfaces) parameter treats interfaces between primal subdomains like preserved external boundaries. This creates separate dual cells on each side of an interface instead of merging the cells across subdomain boundaries. This option is not supported for Voronoi duals with multiple subdomains.
+The [!param](/Mesh/DualMeshGenerator/preserve_subdomain_interfaces) parameter treats interfaces between primal subdomains like preserved external boundaries. This creates separate dual cells on each side of an interface instead of merging the cells across subdomain boundaries. This option is only supported for barycentric duals.
 
 The [!param](/Mesh/DualMeshGenerator/preserve_primal_subdomains) parameter copies selected primal subdomains to the output mesh while dualizing the rest of the mesh. Preserved primal subdomains are only supported for barycentric duals, and the associated nodesets and sidesets are copied to the output mesh.
 

@@ -74,7 +74,7 @@
       cli_args = '--mesh-only'
       mesh_mode = 'REPLICATED'
       recover = false
-      expect_err = 'DualMeshGenerator does not support preserving subdomain interfaces with Voronoi duals for meshes with multiple subdomains'
+      expect_err = 'Preserving subdomain interfaces is currently only implemented for barycentric 2D duals'
       detail = 'from an unsupported preserved-interface Voronoi configuration.'
     []
   []

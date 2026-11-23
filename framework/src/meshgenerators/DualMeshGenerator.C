@@ -83,6 +83,9 @@ DualMeshGenerator::DualMeshGenerator(const InputParameters & parameters)
     _preserve_subdomain_interfaces(getParam<bool>("preserve_subdomain_interfaces")),
     _preserve_primal_subdomains(getParam<std::vector<SubdomainName>>("preserve_primal_subdomains"))
 {
+  if (_dual_mesh_type == "barycentric" && !_preserve_subdomain_interfaces)
+    paramInfo("preserve_subdomain_interfaces",
+              "Preserving subdomain interfaces is recommended to avoid deforming subdomains");
 }
 
 std::set<SubdomainID>
@@ -256,17 +259,9 @@ DualMeshGenerator::generate()
   const bool use_voronoi = _dual_mesh_type == "voronoi";
 
   if (use_voronoi && _preserve_subdomain_interfaces)
-  {
-    std::set<SubdomainID> subdomain_ids;
-
-    for (const auto & elem : input_mesh->element_ptr_range())
-      subdomain_ids.insert(elem->subdomain_id());
-
-    if (subdomain_ids.size() > 1)
-      paramError("preserve_subdomain_interfaces",
-                 "DualMeshGenerator does not support preserving subdomain interfaces with "
-                 "Voronoi duals for meshes with multiple subdomains.");
-  }
+    paramError("preserve_subdomain_interfaces",
+               "Preserving subdomain interfaces is currently only implemented for barycentric 2D "
+               "duals.");
 
   if (use_voronoi && !_preserve_primal_subdomains.empty())
     paramError("preserve_primal_subdomains",
@@ -614,19 +609,7 @@ DualMeshGenerator::generate()
   // Ordered map: this is iterated to emit the dual elements, so its order sets the output element
   // numbering and must not depend on the hash implementation
   std::map<NodeSubdomainKey, std::vector<const Elem *>> source_node_to_elems;
-  std::unordered_map<dof_id_type, std::set<SubdomainID>> source_node_to_subdomains;
   std::unique_ptr<ReplicatedMesh> tri_mesh;
-
-  // Record all nodes from primal elements and associate them with a subdomain
-  for (const auto & elem : input_mesh->element_ptr_range())
-  {
-    if (!dualizeElem(*elem))
-      continue;
-
-    // Walk through the nodes and record them
-    for (const auto n : make_range(elem->n_nodes()))
-      source_node_to_subdomains[elem->node_id(n)].insert(elem->subdomain_id());
-  }
 
   // Build Delaunay triangulation around the primal
   if (use_voronoi)
@@ -700,28 +683,11 @@ DualMeshGenerator::generate()
         source_node_to_tri_elems[tri_elem->node_id(n)].push_back(tri_elem);
     }
 
-    // The triangulation knows nothing about subdomains, so a node on a subdomain interface sees the
-    // same triangles from either side. With interfaces preserved, one dual cell is built per
-    // (node, subdomain) pair, each from that full triangle list and then clipped to its own
-    // subdomain's boundary region; otherwise a single cell per node is enough.
-    if (_preserve_subdomain_interfaces)
-    {
-      for (const auto & node_subdomains : source_node_to_subdomains)
-      {
-        const auto tri_elem_it = source_node_to_tri_elems.find(node_subdomains.first);
-
-        if (tri_elem_it == source_node_to_tri_elems.end())
-          continue;
-
-        for (const auto subdomain_id : node_subdomains.second)
-          source_node_to_elems[nodeSubdomainKey(node_subdomains.first, subdomain_id)] =
-              tri_elem_it->second;
-      }
-    }
-    else
-      for (const auto & node_tri_elems : source_node_to_tri_elems)
-        source_node_to_elems[nodeSubdomainKey(node_tri_elems.first, merged_subdomain_key)] =
-            node_tri_elems.second;
+    // Interface preservation is rejected above for Voronoi duals, so every dual cell here covers a
+    // whole primal node and the subdomain part of the key is unused
+    for (const auto & node_tri_elems : source_node_to_tri_elems)
+      source_node_to_elems[nodeSubdomainKey(node_tri_elems.first, merged_subdomain_key)] =
+          node_tri_elems.second;
   }
   else // For barycentric, loop over elements and get centroids
   {
@@ -1340,11 +1306,11 @@ DualMeshGenerator::generate()
       source_center_points.push_back(dual_centers[center_id]);
     }
 
-    // For a node on a preserved boundary, the centers alone do not reach the boundary, so the cell
-    // is completed with the midpoints of the adjacent preserved sides and, at a boundary corner,
-    // the primal node itself. Voronoi cells without preserved interfaces instead get their
-    // boundary vertices from clipping, since their centers already extend past the boundary.
-    if (!use_voronoi || _preserve_subdomain_interfaces)
+    // For a node on a preserved boundary, the centroids alone do not reach the boundary, so the
+    // cell is completed with the midpoints of the adjacent preserved sides and, at a boundary
+    // corner, the primal node itself. Voronoi cells instead get their boundary vertices from
+    // clipping, since their circumcenters already extend past the boundary.
+    if (!use_voronoi)
     {
       if (boundary_region != nullptr)
       {
