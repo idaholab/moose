@@ -10,16 +10,12 @@
 #include "BilinearMixedModeCohesiveZoneModel.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
-#include "MortarUtils.h"
-#include "MooseUtils.h"
 #include "MathUtils.h"
 
 #include "MortarContactUtils.h"
-#include "FactorizedRankTwoTensor.h"
 
 #include "ADReal.h"
 #include "CohesiveZoneModelTools.h"
-#include <Eigen/Core>
 #include <cmath>
 
 registerMooseObject("ContactApp", BilinearMixedModeCohesiveZoneModel);
@@ -70,10 +66,7 @@ BilinearMixedModeCohesiveZoneModel::validParams()
 
 BilinearMixedModeCohesiveZoneModel::BilinearMixedModeCohesiveZoneModel(
     const InputParameters & parameters)
-  : WeightedGapUserObject(parameters),
-    PenaltyWeightedGapUserObject(parameters),
-    WeightedVelocitiesUserObject(parameters),
-    CohesiveZoneModelBase(parameters),
+  : CohesiveZoneModelBase(parameters),
     _set_compressive_traction_to_zero(getParam<bool>("set_compressive_traction_to_zero")),
     _normal_strength(getMaterialProperty<Real>("normal_strength")),
     _shear_strength(getMaterialProperty<Real>("shear_strength")),
@@ -112,10 +105,8 @@ BilinearMixedModeCohesiveZoneModel::computeQpIProperties()
 {
   CohesiveZoneModelBase::computeQpIProperties();
 
-  // Get the _dof_to_weighted_gap map
   const auto * const dof = cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
-  // TODO: Probably better to interpolate the deformation gradients.
   _dof_to_normal_strength[dof] += (*_test)[_i][_qp] * _normal_strength_interpolation;
   _dof_to_shear_strength[dof] += (*_test)[_i][_qp] * _shear_strength_interpolation;
 
@@ -126,7 +117,6 @@ BilinearMixedModeCohesiveZoneModel::computeQpIProperties()
 void
 BilinearMixedModeCohesiveZoneModel::initialize()
 {
-  // instead we call it explicitly here
   CohesiveZoneModelBase::initialize();
 
   // Avoid accumulating interpolation over the time step
@@ -145,11 +135,6 @@ void
 BilinearMixedModeCohesiveZoneModel::computeCZMTraction(const Node * const node)
 {
   using std::max, std::min;
-
-  // First call does not have maps available
-  const bool return_boolean = _dof_to_weighted_gap.find(node) == _dof_to_weighted_gap.end();
-  if (return_boolean)
-    return;
 
   computeModeMixity(node);
   computeCriticalDisplacementJump(node);
@@ -172,7 +157,6 @@ BilinearMixedModeCohesiveZoneModel::computeCZMTraction(const Node * const node)
           delta_active -
       _penalty_stiffness_czm * (_set_compressive_traction_to_zero ? 0.0 : delta_inactive);
 
-  // Save local-frame traction before the base class overwrites this map with global traction.
   // Raw values only: this map feeds auxiliary output, so derivatives are not needed.
   _dof_to_local_czm_traction[node] = MetaPhysicL::raw_value(_dof_to_czm_traction[node]);
 }
@@ -309,19 +293,10 @@ BilinearMixedModeCohesiveZoneModel::finalize()
 {
   CohesiveZoneModelBase::finalize();
 
-  const bool send_data_back = !constrainedByOwner();
-
-  Moose::Mortar::Contact::communicateRealObject(
-      _dof_to_normal_strength, _subproblem.mesh(), _nodal, _communicator, send_data_back);
-
-  Moose::Mortar::Contact::communicateRealObject(
-      _dof_to_shear_strength, _subproblem.mesh(), _nodal, _communicator, send_data_back);
-
-  Moose::Mortar::Contact::communicateRealObject(
-      _dof_to_GI_c, _subproblem.mesh(), _nodal, _communicator, send_data_back);
-
-  Moose::Mortar::Contact::communicateRealObject(
-      _dof_to_GII_c, _subproblem.mesh(), _nodal, _communicator, send_data_back);
+  for (auto * const map :
+       {&_dof_to_normal_strength, &_dof_to_shear_strength, &_dof_to_GI_c, &_dof_to_GII_c})
+    Moose::Mortar::Contact::communicateRealObject(
+        *map, _subproblem.mesh(), /*nodal=*/true, _communicator, /*send_data_back=*/true);
 }
 
 Real
@@ -350,10 +325,10 @@ Real
 BilinearMixedModeCohesiveZoneModel::getLocalDisplacementNormal(const Node * const node) const
 {
   const auto it = _dof_to_interface_displacement_jump.find(_subproblem.mesh().nodePtr(node->id()));
-  const auto it2 = _dof_to_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it2 = _dof_to_normalization.find(_subproblem.mesh().nodePtr(node->id()));
 
-  if (it != _dof_to_interface_displacement_jump.end() && it2 != _dof_to_weighted_gap.end())
-    return MetaPhysicL::raw_value(it->second(0) / it2->second.second);
+  if (it != _dof_to_interface_displacement_jump.end() && it2 != _dof_to_normalization.end())
+    return MetaPhysicL::raw_value(it->second(0) / it2->second);
   else
     return 0.0;
 }
@@ -368,10 +343,10 @@ Real
 BilinearMixedModeCohesiveZoneModel::getLocalDisplacementTangentialOne(const Node * const node) const
 {
   const auto it = _dof_to_interface_displacement_jump.find(_subproblem.mesh().nodePtr(node->id()));
-  const auto it2 = _dof_to_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it2 = _dof_to_normalization.find(_subproblem.mesh().nodePtr(node->id()));
 
-  if (it != _dof_to_interface_displacement_jump.end() && it2 != _dof_to_weighted_gap.end())
-    return MetaPhysicL::raw_value(it->second(1) / it2->second.second);
+  if (it != _dof_to_interface_displacement_jump.end() && it2 != _dof_to_normalization.end())
+    return MetaPhysicL::raw_value(it->second(1) / it2->second);
   else
     return 0.0;
 }
@@ -380,10 +355,10 @@ Real
 BilinearMixedModeCohesiveZoneModel::getLocalDisplacementTangentialTwo(const Node * const node) const
 {
   const auto it = _dof_to_interface_displacement_jump.find(_subproblem.mesh().nodePtr(node->id()));
-  const auto it2 = _dof_to_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it2 = _dof_to_normalization.find(_subproblem.mesh().nodePtr(node->id()));
 
-  if (it != _dof_to_interface_displacement_jump.end() && it2 != _dof_to_weighted_gap.end())
-    return MetaPhysicL::raw_value(it->second(2) / it2->second.second);
+  if (it != _dof_to_interface_displacement_jump.end() && it2 != _dof_to_normalization.end())
+    return MetaPhysicL::raw_value(it->second(2) / it2->second);
   else
     return 0.0;
 }
@@ -395,14 +370,14 @@ BilinearMixedModeCohesiveZoneModel::getLocalDisplacementTangentialEffective(
   using std::sqrt;
 
   const auto it = _dof_to_interface_displacement_jump.find(_subproblem.mesh().nodePtr(node->id()));
-  const auto it2 = _dof_to_weighted_gap.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it2 = _dof_to_normalization.find(_subproblem.mesh().nodePtr(node->id()));
 
-  if (it != _dof_to_interface_displacement_jump.end() && it2 != _dof_to_weighted_gap.end())
+  if (it != _dof_to_interface_displacement_jump.end() && it2 != _dof_to_normalization.end())
   {
     // Take raw values before the sqrt: the AD derivative of sqrt divides by zero
     // when the tangential jump is exactly zero (e.g. pure mode I or post-debond).
-    const auto tangential_one = MetaPhysicL::raw_value(it->second(1) / it2->second.second);
-    const auto tangential_two = MetaPhysicL::raw_value(it->second(2) / it2->second.second);
+    const auto tangential_one = MetaPhysicL::raw_value(it->second(1) / it2->second);
+    const auto tangential_two = MetaPhysicL::raw_value(it->second(2) / it2->second);
     return sqrt(tangential_one * tangential_one + tangential_two * tangential_two);
   }
   else

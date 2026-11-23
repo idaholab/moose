@@ -23,13 +23,14 @@ MortarGenericTraction::validParams()
   params.addRequiredParam<MooseEnum>(
       "component", component, "The force component constraint that this object is supplying");
   params.addClassDescription(
-      "Used to apply tangential stresses from frictional contact using lagrange multipliers");
+      "Applies the traction of a mortar cohesive zone user object to the secondary and primary "
+      "sides of the interface.");
   params.addRequiredParam<UserObjectName>("cohesive_zone_uo", "The cohesive zone user object.");
   params.set<bool>("interpolate_normals") = false;
   params.set<bool>("compute_lm_residual") = false;
-  // The cohesive zone user object runs on the displaced mesh and is only reinitialized for
+  // The cohesive zone user object runs on the undisplaced mesh and is only reinitialized for
   // constraints that also run there.
-  params.set<bool>("use_displaced_mesh") = true;
+  params.set<bool>("use_displaced_mesh") = false;
   return params;
 }
 
@@ -39,9 +40,18 @@ MortarGenericTraction::MortarGenericTraction(const InputParameters & parameters)
     _cohesize_zone_uo(const_cast<CohesiveZoneModelBase &>(
         getUserObject<CohesiveZoneModelBase>("cohesive_zone_uo")))
 {
-  if (!getParam<bool>("use_displaced_mesh"))
+  if (getParam<bool>("use_displaced_mesh") !=
+      _cohesize_zone_uo.getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh",
-               "'use_displaced_mesh' must be true for the MortarGenericTraction object");
+               "'use_displaced_mesh' must match that of the cohesive zone user object, which is "
+               "only reinitialized on its own mortar interface.");
+
+  // The traction is interpolated on the mortar segments of the user object's interface
+  if (secondarySubdomain() != _cohesize_zone_uo.secondarySubdomain() ||
+      primarySubdomain() != _cohesize_zone_uo.primarySubdomain())
+    paramError("cohesive_zone_uo",
+               "'cohesive_zone_uo' must be defined on the same secondary/primary subdomain pair as "
+               "this constraint.");
 }
 
 ADReal

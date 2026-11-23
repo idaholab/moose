@@ -216,8 +216,6 @@ gas_rate = 2700
     secondary_subdomain = secondary_lower
     disp_x = disp_x
     disp_y = disp_y
-    secondary_variable = disp_x
-    use_physical_gap = true
     correct_edge_dropping = true
     normal_strength = normal_strength
     shear_strength = shear_strength
@@ -232,30 +230,6 @@ gas_rate = 2700
 []
 
 [Constraints]
-  [x]
-    type = NormalMortarMechanicalContact
-    primary_boundary = upper_bottom
-    secondary_boundary = lower_top
-    primary_subdomain = primary_lower
-    secondary_subdomain = secondary_lower
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    weighted_gap_uo = czm_uo
-  []
-  [y]
-    type = NormalMortarMechanicalContact
-    primary_boundary = upper_bottom
-    secondary_boundary = lower_top
-    primary_subdomain = primary_lower
-    secondary_subdomain = secondary_lower
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    weighted_gap_uo = czm_uo
-  []
   [c_x]
     type = MortarGenericTraction
     primary_boundary = upper_bottom
@@ -264,7 +238,6 @@ gas_rate = 2700
     secondary_subdomain = secondary_lower
     secondary_variable = disp_x
     component = x
-    use_displaced_mesh = true
     compute_lm_residuals = false
     cohesive_zone_uo = czm_uo
   []
@@ -276,7 +249,6 @@ gas_rate = 2700
     secondary_subdomain = secondary_lower
     secondary_variable = disp_y
     component = y
-    use_displaced_mesh = true
     compute_lm_residuals = false
     cohesive_zone_uo = czm_uo
   []
