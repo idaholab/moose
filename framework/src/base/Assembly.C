@@ -2369,9 +2369,7 @@ Assembly::reinitDual(const Elem * elem,
                      pts.size(),
                      " mortar quadrature points cover it, fewer than its ",
                      FEInterface::n_shape_functions(fe_type, elem),
-                     " shape functions. Increase 'segment_quadrature', or use "
-                     "'correct_edge_dropping = false' so that partially covered elements are "
-                     "dropped.");
+                     " shape functions. Increase 'segment_quadrature'.");
     }
 
     // We use customized quadrature rule for integration along the mortar segment elements
