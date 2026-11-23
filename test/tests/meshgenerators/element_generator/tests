@@ -103,4 +103,22 @@
       detail = 'including the sidesets of polygons with more than eight sides.'
     []
   []
+  [polygons_variables]
+    issues = '#32159'
+    requirement = 'The system shall be able to compare nodal and elemental variables on a polygon mesh,'
+    [same_order]
+      type = Exodiff
+      input = 'polygons_variables.i'
+      exodiff = 'polygons_variables_out.e'
+      detail = 'with the elements in the same order in both files,'
+    []
+    [reordered]
+      type = Exodiff
+      input = 'polygons_variables_reordered.i'
+      exodiff = 'polygons_variables_out.e'
+      cli_args = 'Outputs/file_base=polygons_variables_out'
+      prereq = 'polygons_variables/same_order'
+      detail = 'and with elements of differing node counts written in a different order, matching them by location.'
+    []
+  []
 []
