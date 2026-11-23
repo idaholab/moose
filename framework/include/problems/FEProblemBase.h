@@ -1999,6 +1999,21 @@ public:
   void appendConstantModes(const std::vector<VariableName> & vars,
                            const std::string & prefix,
                            std::vector<NumericVector<libMesh::Number> *> & sp);
+  /**
+   * Append the rigid body modes of the displacements in rigid_body_near_null_space_displacements
+   * to \p sp if \p nl holds them. The modes are the nodal values of the translations along and the
+   * rotations about the coordinate axes in the reference configuration, and are zero on the
+   * degrees of freedom of other variables. They are not orthonormalized.
+   * @param nl The nonlinear system whose vectors store the modes
+   * @param sp The basis vectors of a subspace, such as the near nullspace of the Jacobian
+   */
+  void appendRigidBodyModes(NonlinearSystemBase & nl,
+                            std::vector<NumericVector<libMesh::Number> *> & sp);
+  /// The displacement variables whose rigid body modes span part of the near nullspace
+  const std::vector<VariableName> & rigidBodyNearNullSpaceDisplacements() const
+  {
+    return _rigid_body_displacements;
+  }
   virtual void computePostCheck(libMesh::NonlinearImplicitSystem & sys,
                                 const NumericVector<libMesh::Number> & old_soln,
                                 NumericVector<libMesh::Number> & search_direction,
@@ -3613,6 +3628,9 @@ protected:
   const std::vector<VariableName> _constant_null_space_vars;
   /// Variables whose constant fields span part of the Jacobian transpose nullspace
   const std::vector<VariableName> _constant_transpose_null_space_vars;
+  /// Displacement variables, in coordinate order, whose rigid body modes span part of the near
+  /// nullspace of the Jacobian
+  const std::vector<VariableName> _rigid_body_displacements;
 
   /// Whether to assemble matrices using hash tables instead of preallocating matrix memory. This
   /// can be a good option if the sparsity pattern changes throughout the course of the simulation
