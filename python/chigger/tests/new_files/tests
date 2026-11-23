@@ -23,6 +23,6 @@
     expect_out = "[0.0, 0.5, 1.0, 2.0, 3.5, 4.5]"
     match_literal = True
     display_required = true
-    requirement = "The mesh shall be able to ignore older simulation files when plotting results with adaptivity."
+    requirement = "The system shall be able to ignore older simulation files when plotting mesh results with adaptivity."
   []
 []
