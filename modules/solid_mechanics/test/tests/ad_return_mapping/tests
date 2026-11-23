@@ -5,9 +5,9 @@
     exodiff = 'reference.e'
     issues = '#20407'
     design = 'materials/RadialReturnStressUpdate.md'
-    requirement = "The return mapping algorithm shall use automatic differentiation to compute the "
+    requirement = "The system shall use automatic differentiation in the return mapping algorithm to compute the "
                   "derivative of the yield function with respect to the internal variable, and the "
-                  "solution should be the same as existing hand coded derivative."
+                  "solution shall be the same as existing hand coded derivative."
     heavy = true
   []
 []

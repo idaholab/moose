@@ -5,7 +5,7 @@
     exodiff = 'pressure_test_out.e'
     issues = '#4781 #13260'
     design = 'syntax/BCs/Pressure/index.md'
-    requirement = 'The Pressure boundary condition action shall create the objects needed to apply
+    requirement = 'The system shall create, using the Pressure boundary condition action, the objects needed to apply
                    automatic differentiation pressure boundary conditions on a 3D model as
                    demonstrated by correctly computing the response of an elastic small-strain
                    isotropic unit cube with pressure applied on three faces to create a hydrostatic
@@ -19,7 +19,7 @@
     prereq = '3D'
     issues = '#4781 #8235 #13260'
     design = 'syntax/BCs/Pressure/index.md'
-    requirement = 'The Pressure boundary condition action shall create the objects needed to apply
+    requirement = 'The system shall create, using the Pressure boundary condition action, the objects needed to apply
                    automatic differentiation pressure boundary conditions on a 3D model as
                    demonstrated by correctly computing the response of an elastic small-strain
                    isotropic unit cube with pressure applied on three faces to create a hydrostatic
@@ -36,7 +36,7 @@
     cli_args = "Outputs/active=''"
     issues = '#4781 #13260'
     design = 'syntax/BCs/Pressure/index.md'
-    requirement = 'The Pressure boundary condition action shall create the objects needed to apply
+    requirement = 'The system shall create, using the Pressure boundary condition action, the objects needed to apply
                    automatic differentiation pressure boundary conditions on a 3D model as
                    demonstrated by correctly computing the response of an elastic small-strain
                    isotropic unit cube with pressure applied on three faces to create a hydrostatic
@@ -51,7 +51,7 @@
     cli_args = "GlobalParams/volumetric_locking_correction=true Outputs/active=''"
     issues = '#4781 #8235 #13260'
     design = 'syntax/BCs/Pressure/index.md'
-    requirement = 'The Pressure boundary condition action shall create the objects needed to apply
+    requirement = 'The system shall create, using the Pressure boundary condition action, the objects needed to apply
                    automatic differentiation pressure boundary conditions on a 3D model as
                    demonstrated by correctly computing the response of an elastic small-strain
                    isotropic unit cube with pressure applied on three faces to create a hydrostatic

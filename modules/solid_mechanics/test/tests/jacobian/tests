@@ -2,7 +2,7 @@
   issues = '#5677 #7028 #8200 #10134 #11219 #19570 #19627 #20879'
   design = 'syntax/Physics/SolidMechanics/QuasiStatic/index.md'
   [jacobian]
-    requirement = 'The module shall pass Jacobian tests with the PetscJacobianTester for test case '
+    requirement = 'The system shall pass Jacobian tests with the PetscJacobianTester for test case '
     [cosserat01]
       type = 'PetscJacobianTester'
       input = 'cosserat01.i'

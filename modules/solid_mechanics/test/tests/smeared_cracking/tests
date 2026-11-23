@@ -7,21 +7,21 @@
     allow_warnings = true #Ignore warning about missing cracked_elasticity_type
     exodiff = cracking_out.e
     custom_cmp = cracking.cmp
-    requirement = 'The MOOSE SolidMechanics module shall simulate cracking on a specimen under tension in cartesian coordinates.'
+    requirement = 'The system shall simulate cracking on a specimen under tension in cartesian coordinates.'
   []
   [cracking_rz]
     type = Exodiff
     input = cracking_rz.i
     exodiff = cracking_rz_out.e
     custom_cmp = cracking_rz.cmp
-    requirement = 'The MOOSE SolidMechanics module shall simulate cracking on a specimen under tension in rz coordinates.'
+    requirement = 'The system shall simulate cracking on a specimen under tension in rz coordinates.'
   []
   [cracking_function]
     type = Exodiff
     input = cracking_function.i
     exodiff = cracking_function_out.e
     custom_cmp = cracking_function.cmp
-    requirement = 'The MOOSE SolidMechanics module shall simulate cracking while the cracking strength is prescribed by an elemental AuxVariable.'
+    requirement = 'The system shall simulate cracking while the cracking strength is prescribed by an elemental AuxVariable.'
     capabilities = 'method!=dbg'
   []
   [exponential]
@@ -30,7 +30,7 @@
     exodiff = cracking_exponential_out.e
     custom_cmp = cracking_exponential.cmp
     use_old_floor = true
-    requirement = 'The MOOSE SolidMechanics module shall simulate exponential stress release.'
+    requirement = 'The system shall simulate exponential stress release.'
     capabilities = 'method!=dbg'
   []
   [energybased_exponential]
@@ -39,7 +39,7 @@
     exodiff = cracking_energybased_exponential_out.e
     custom_cmp = cracking_exponential.cmp
     use_old_floor = true
-    requirement = 'The MOOSE SolidMechanics module shall simulate exponential stress release with a prescribed fracture toughness.'
+    requirement = 'The system shall simulate exponential stress release with a prescribed fracture toughness.'
     capabilities = 'method!=dbg'
   []
   [rz_exponential]
@@ -48,20 +48,20 @@
     exodiff = cracking_rz_exponential_out.e
     custom_cmp = cracking_rz_exp.cmp
     exodiff_opts = '-steps 0:1200:1'
-    requirement = 'The MOOSE SolidMechanics module shall simulate exponential stress relase while using the rz coordinate system.'
+    requirement = 'The system shall simulate exponential stress relase while using the rz coordinate system.'
     capabilities = 'method!=dbg'
   []
   [power]
     type = Exodiff
     input = cracking_power.i
     exodiff = cracking_power_out.e
-    requirement = 'The MOOSE SolidMechanics module shall demonstrate softening using the power law for smeared cracking.'
+    requirement = 'The system shall demonstrate softening using the power law for smeared cracking.'
   []
   [multiple_softening]
     type = Exodiff
     input = cracking_multiple_softening.i
     exodiff = cracking_multiple_softening_out.e
-    requirement = 'The MOOSE SolidMechanics module shall demonstrate the prescribed softening laws in three directions, power law (x), exponential (y), and abrupt (z).'
+    requirement = 'The system shall demonstrate the prescribed softening laws in three directions, power law (x), exponential (y), and abrupt (z).'
     capabilities = 'method!=dbg'
   []
   [xyz]
@@ -70,7 +70,7 @@
     exodiff = cracking_xyz_out.e
     use_old_floor = true
     custom_cmp = cracking_xyz.cmp
-    requirement = 'The MOOSE SolidMechanics module shall simulate smeared cracking in the x y and z directions.'
+    requirement = 'The system shall simulate smeared cracking in the x y and z directions.'
     capabilities = 'method!=dbg'
   []
   [plane_stress]
@@ -79,7 +79,7 @@
     exodiff = cracking_plane_stress_out.e
     use_old_floor = true
     custom_cmp = cracking_pln_str.cmp
-    requirement = 'The MOOSE SolidMechanics module shall simulate smeared cracking under plane stress conditions.'
+    requirement = 'The system shall simulate smeared cracking under plane stress conditions.'
   []
   [cracking_rotation]
     type = Exodiff
@@ -88,7 +88,7 @@
     use_old_floor = true
     custom_cmp = cracking_rotation.cmp
     max_parallel = 1
-    requirement = 'The MOOSE SolidMechanics module shall demonstrate that the smeared cracking model correctly handles finite rotation of cracked elements.'
+    requirement = 'The system shall demonstrate that the smeared cracking model correctly handles finite rotation of cracked elements.'
     capabilities = 'method!=dbg'
   []
   [cracking_rotation_pres_dir_x]
@@ -101,7 +101,7 @@
     cli_args = 'Materials/cracking_stress/prescribed_crack_directions=x AuxKernels/crack_flags3/component=1 AuxKernels/crack_flags2/component=2'
     max_parallel = 1
     prereq = cracking_rotation
-    requirement = 'The MOOSE SolidMechanics module shall demonstrate the finite rotation of cracked elements where the crack is prescribed in x.'
+    requirement = 'The system shall demonstrate the finite rotation of cracked elements where the crack is prescribed in x.'
   []
   [cracking_rotation_pres_dir_z]
     type = Exodiff
@@ -113,7 +113,7 @@
     cli_args = 'Materials/cracking_stress/prescribed_crack_directions=z AuxKernels/crack_flags3/component=1 AuxKernels/crack_flags2/component=2'
     max_parallel = 1
     prereq = cracking_rotation_pres_dir_x
-    requirement = 'The MOOSE SolidMechanics module shall demonstrate the finite rotation of cracked elements where the crack is prescribed in z.'
+    requirement = 'The system shall demonstrate the finite rotation of cracked elements where the crack is prescribed in z.'
   []
   [cracking_rotation_pres_dir_xz]
     type = Exodiff
@@ -127,14 +127,14 @@
                "AuxKernels/crack_flags1/component=2"
     max_parallel = 1
     prereq = cracking_rotation_pres_dir_z
-    requirement = 'The MOOSE SolidMechanics module shall demonstrate the finite rotation of cracked elements where two cracks are prescribed in x and z.'
+    requirement = 'The system shall demonstrate the finite rotation of cracked elements where two cracks are prescribed in x and z.'
   []
   [cracking_err_diagonal]
     prereq = cracking
     type = RunException
     input = cracking.i
     expect_err = "Defaulting to the legacy option of 'DIAGONAL', but the 'FULL' option is preferred"
-    requirement = "The ComputeSmearedCrackingStress model shall generate a warning if "
+    requirement = "The system shall generate a warning in the ComputeSmearedCrackingStress model if "
                   "'cracked_elasticity_type' is not specified"
   []
   [cracking_err_softening]
@@ -144,7 +144,7 @@
     input = cracking.i
     cli_args = "Materials/elastic_stress/softening_models='abrupt_softening abrupt_softening'"
     expect_err = "Either 1 or 3 softening models must be specified"
-    requirement = "The ComputeSmearedCrackingStress model shall generate an error if an invalid "
+    requirement = "The system shall generate an error in the ComputeSmearedCrackingStress model if an invalid "
                   "number of softening models is specified"
   []
 []

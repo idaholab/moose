@@ -6,7 +6,7 @@
     exodiff = "two_block_base_name_out.e"
     issues = "#13860"
     design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
-    requirement = "The QuasiStatic SolidMechanics Physics shall support changing the base name when "
+    requirement = "The system shall support changing the base name in the QuasiStatic SolidMechanics Physics when "
                   "creating a consistent strain calculator material and stress divergence kernel and "
                   "shall generate different sets of outputs for different mesh subblocks with the "
                   "appropriate base name."
@@ -17,7 +17,7 @@
     input = "two_block_new.i"
     exodiff = "two_block_new_out.e"
     design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
-    requirement = "The QuasiStatic SolidMechanics Physics shall create a consistent strain "
+    requirement = "The system shall create, using the QuasiStatic SolidMechanics Physics, a consistent strain "
                   "calculator material and stress divergence kernel and shall generate different "
                   "sets of outputs for different mesh subblocks."
   []
@@ -28,7 +28,7 @@
     exodiff = "two_block_out.e"
     cli_args = "Physics/SolidMechanics/QuasiStatic/block1/block=1"
     design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
-    requirement = "The QuasiStatic SolidMechanics Physics shall create different sets of consistent "
+    requirement = "The system shall create, using the QuasiStatic SolidMechanics Physics, different sets of consistent "
                   "strain calculator material and stress divergence kernel pairs for different mesh "
                   "subblocks requesting different strain formulations."
   []
@@ -39,7 +39,7 @@
     exodiff = "two_block_lagrangian_out.e"
     cli_args = "Physics/SolidMechanics/QuasiStatic/block1/block=1"
     design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
-    requirement = "The QuasiStatic SolidMechanics Physics shall create different sets of consistent "
+    requirement = "The system shall create, using the QuasiStatic SolidMechanics Physics, different sets of consistent "
                   "strain calculator material and stress divergence kernel pairs for different mesh "
                   "subblocks requesting different strain formulations with the new kernel system."
   []
@@ -51,7 +51,7 @@
     expect_err = "belongs to the new Lagrangian kernel system"
     design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
     issues = "#33006"
-    requirement = "The QuasiStatic SolidMechanics Physics shall error if a parameter exclusive to "
+    requirement = "The system shall error in the QuasiStatic SolidMechanics Physics if a parameter exclusive to "
                   "the new Lagrangian kernel system is supplied while the legacy kernel system is "
                   "active."
   []
@@ -63,7 +63,7 @@
     expect_err = "belongs to the legacy StressDivergenceTensors kernel system"
     design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
     issues = "#33006"
-    requirement = "The QuasiStatic SolidMechanics Physics shall error if a parameter exclusive to "
+    requirement = "The system shall error in the QuasiStatic SolidMechanics Physics if a parameter exclusive to "
                   "the legacy kernel system is supplied while the new Lagrangian kernel system is "
                   "active."
   []
@@ -74,7 +74,7 @@
     expect_err = "No SolidMechanics/QuasiStatic action can be block unrestricted if more than one "
                  "SolidMechanics/QuasiStatic action is specified."
     design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
-    requirement = "The QuasiStatic SolidMechanics Physics shall error if an input file does not "
+    requirement = "The system shall error in the QuasiStatic SolidMechanics Physics if an input file does not "
                   "specify block restrictions for the MasterAction in input files with more than one "
                   "instance of the MasterAction block."
   []
@@ -86,7 +86,7 @@
     expect_err = "The block restrictions in the SolidMechanics/QuasiStatic actions must be "
                  "non-overlapping."
     design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
-    requirement = "The QuasiStatic SolidMechanics Physics shall error if an input file specifies "
+    requirement = "The system shall error in the QuasiStatic SolidMechanics Physics if an input file specifies "
                   "overlapping block restrictions for the MasterAction in input files with more than "
                   "one instance of the MasterAction block."
   []
@@ -97,7 +97,7 @@
     cli_args = "--error"
     expect_err = "Common parameters are supplied, but not used in"
     design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
-    requirement = "The QuasiStatic SolidMechanics Physics shall warn if global Master action "
+    requirement = "The system shall warn in the QuasiStatic SolidMechanics Physics if global Master action "
                   "parameters are supplied but no Master action subblock have been added."
   []
 
@@ -106,7 +106,7 @@
     input = "two_coord.i"
     exodiff = "two_coord_out.e"
     design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
-    requirement = "The QuasiStatic SolidMechanics Physics shall create different sets of consistent "
+    requirement = "The system shall create, using the QuasiStatic SolidMechanics Physics, different sets of consistent "
                   "strain calculator material and stress divergence kernel pairs for different mesh "
                   "subblocks using different coordinate systems."
   []
@@ -118,14 +118,14 @@
     expect_err = "The SolidMechanics action requires all subdomains to have the same coordinate "
                  "system."
     design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
-    requirement = "The QuasiStatic SolidMechanics Physics shall error if an input file assigns the "
+    requirement = "The system shall error in the QuasiStatic SolidMechanics Physics if an input file assigns the "
                   "same QuasiStatic SolidMechanics Physics block to mesh blocks with different "
                   "coordinate systems."
   []
 
   [eigenstrain]
     design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
-    requirement = "The QuasiStatic SolidMechanics Physics shall extract eigenstrain names from "
+    requirement = "The system shall extract, using the QuasiStatic SolidMechanics Physics, eigenstrain names from "
                   "material classes and correctly output these names to the console"
     [action_eigenstrain]
       type = RunApp
@@ -170,7 +170,7 @@
 
   [material_output]
     design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
-    requirement = "The QuasiStatic SolidMechanics Physics shall determine the necessary orders and "
+    requirement = "The system shall determine, using the QuasiStatic SolidMechanics Physics, the necessary orders and "
                   "families to apply to material outputs"
     [material_output_order.empty]
       type = RunApp
@@ -231,7 +231,7 @@
     input = "custom_output.i"
     exodiff = "custom_output_out.e"
     design = "syntax/Physics/SolidMechanics/QuasiStatic/index.md"
-    requirement = "The QuasiStatic SolidMechanics Physics shall permit scalar quantity output from "
-                  "arbitrary tensors."
+    requirement = "The system shall permit scalar quantity output from "
+                  "arbitrary tensors using the QuasiStatic SolidMechanics Physics."
   []
 []

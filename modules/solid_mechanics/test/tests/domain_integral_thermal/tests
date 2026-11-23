@@ -5,7 +5,7 @@
     input = 'j_integral_2d.i'
     exodiff = 'j_integral_2d_out.e'
     custom_cmp = 'j_integral_2d.cmp'
-    requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 2D coupled with thermal effects.'
+    requirement = 'The system shall compute, using the domain integral action, all of the fracture domain integrals including the J integral for problems in 2D coupled with thermal effects.'
     issues = '#3807 #10232'
     capabilities = 'method!=dbg'
   []
@@ -14,7 +14,7 @@
     input = 'c_integral_2d.i'
     exodiff = 'c_integral_2d_out.e'
     custom_cmp = 'c_integral_2d.cmp'
-    requirement = 'The domain integral action shall compute all of the fracture domain integrals including the C integral for problems in 2D coupled with thermal effects.'
+    requirement = 'The system shall compute, using the domain integral action, all of the fracture domain integrals including the C integral for problems in 2D coupled with thermal effects.'
     issues = '#3807 #10232'
     capabilities = 'method!=dbg'
   []
@@ -22,7 +22,7 @@
     type = 'CSVDiff'
     input = 'interaction_integral_2d.i'
     csvdiff = 'interaction_integral_2d_out.csv'
-    requirement = 'The domain integral action shall compute all of the fracture domain integrals including the interaction integral for problems in 2D coupled with thermal effects.'
+    requirement = 'The system shall compute, using the domain integral action, all of the fracture domain integrals including the interaction integral for problems in 2D coupled with thermal effects.'
     issues = '#7527 #9966'
     capabilities = 'method!=dbg'
   []
@@ -30,7 +30,7 @@
     type = 'CSVDiff'
     input = 'interaction_integral_2d_thermal_generic.i'
     csvdiff = 'interaction_integral_2d_thermal_generic_out.csv'
-    requirement = 'The domain integral action shall compute the stress intensity factor using the interaction integral approach for a problem dominated by thermal strains using an approach that integrates eigenstrain gradients in a general manner.'
+    requirement = 'The system shall compute, using the domain integral action, the stress intensity factor using the interaction integral approach for a problem dominated by thermal strains using an approach that integrates eigenstrain gradients in a general manner.'
     issues = '#26452'
     capabilities = 'method!=dbg'
   []
@@ -38,7 +38,7 @@
     type = 'CSVDiff'
     input = 'interaction_integral_2d_eig_grad.i'
     csvdiff = 'interaction_integral_2d_eig_grad_out.csv'
-    requirement = 'The interaction integral shall account for the contributions of the gradients of arbitrary eigenstrains in 2D'
+    requirement = 'The system shall, in the interaction integral, account for the contributions of the gradients of arbitrary eigenstrains in 2D'
     allow_test_objects = true
     issues = '#18804'
   []
@@ -49,7 +49,7 @@
     cli_args = "DomainIntegral/integrals='JIntegral InteractionIntegralKI'"
     expect_err = "'eigenstrain_gradient' cannot be specified when the computed integrals include "
                  "JIntegral, CIntegral, or KFromJIntegral"
-    requirement = 'The DomainIntegralAction shall generate an error if a user specifies the eigenstrain gradient and also request the J integral'
+    requirement = 'The system shall generate an error in the DomainIntegralAction if a user specifies the eigenstrain gradient and also request the J integral'
     allow_test_objects = true
     issues = '#18804'
   []
@@ -61,7 +61,7 @@
     expect_err = "'eigenstrain_gradient' cannot be specified together with 'temperature' or "
                  "'eigenstrain_names'. These are for separate, mutually exclusive systems for "
                  "including the effect of eigenstrains"
-    requirement = 'The DomainIntegralAction shall generate an error if a user specifies the temperature and also provides the eigenstrain_gradient'
+    requirement = 'The system shall generate an error in the DomainIntegralAction if a user specifies the temperature and also provides the eigenstrain_gradient'
     allow_test_objects = true
     issues = '#18804'
   []
@@ -69,7 +69,7 @@
     type = 'CSVDiff'
     input = 'interaction_integral_2d_bf.i'
     csvdiff = 'interaction_integral_2d_bf_out.csv'
-    requirement = 'The interaction integral shall account for the contributions of body forces in 2D'
+    requirement = 'The system shall, in the interaction integral, account for the contributions of body forces in 2D'
     issues = '#18804'
   []
   [test_ii_bf_err_jint]
@@ -79,14 +79,14 @@
     cli_args = "DomainIntegral/integrals='JIntegral InteractionIntegralKI'"
     expect_err = "'body_force' cannot be specified when the computed integrals include JIntegral, "
                  "CIntegral, or KFromJIntegral"
-    requirement = 'The DomainIntegralAction shall generate an error if a user specifies the body force and also request the J integral'
+    requirement = 'The system shall generate an error in the DomainIntegralAction if a user specifies the body force and also request the J integral'
     issues = '#18804'
   []
   [test_iithermal_rot]
     type = 'CSVDiff'
     input = 'interaction_integral_2d_rot.i'
     csvdiff = 'interaction_integral_2d_rot_out.csv'
-    requirement = 'The domain integral action shall compute all of the fracture domain integrals including the interaction integral for problems in any plane for 2D.'
+    requirement = 'The system shall compute, using the domain integral action, all of the fracture domain integrals including the interaction integral for problems in any plane for 2D.'
     issues = '#7527 #9966'
     capabilities = 'method!=dbg'
   []
@@ -95,7 +95,7 @@
     input = 'interaction_integral_2d_c.i'
     exodiff = 'interaction_integral_2d_c_out.e'
     custom_cmp = 'interaction_integral_2d_c.cmp'
-    requirement = 'The domain integral action shall compute all of the fracture domain integrals including the C(t) integral for problems in 2D.'
+    requirement = 'The system shall compute, using the domain integral action, all of the fracture domain integrals including the C(t) integral for problems in 2D.'
     issues = '#7527 #9966'
     capabilities = 'method!=dbg'
   []
@@ -103,7 +103,7 @@
     type = 'CSVDiff'
     input = 'j_integral_2d_ctefunc.i'
     csvdiff = 'j_integral_2d_ctefunc_out.csv'
-    requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 2D using the thermal expansion function eigenstrain.'
+    requirement = 'The system shall compute, using the domain integral action, all of the fracture domain integrals including the J integral for problems in 2D using the thermal expansion function eigenstrain.'
     issues = '#3807 #10232'
     capabilities = 'method!=dbg'
   []
@@ -111,7 +111,7 @@
     type = 'CSVDiff'
     input = 'j_integral_2d_mean_ctefunc.i'
     csvdiff = 'j_integral_2d_mean_ctefunc_out.csv'
-    requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 2D using the mean thermal expansion function eigenstrain.'
+    requirement = 'The system shall compute, using the domain integral action, all of the fracture domain integrals including the J integral for problems in 2D using the mean thermal expansion function eigenstrain.'
     issues = '#3807 #10232'
     capabilities = 'method!=dbg'
   []
@@ -119,7 +119,7 @@
     type = 'CSVDiff'
     input = 'j_integral_2d_inst_ctefunc.i'
     csvdiff = 'j_integral_2d_inst_ctefunc_out.csv'
-    requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 2D using the instantaneous thermal expansion function eigenstrain.'
+    requirement = 'The system shall compute, using the domain integral action, all of the fracture domain integrals including the J integral for problems in 2D using the instantaneous thermal expansion function eigenstrain.'
     issues = '#3807 #10232'
     capabilities = 'method!=dbg'
   []

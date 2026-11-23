@@ -5,7 +5,7 @@
     type = CSVDiff
     input = convergence.i
     csvdiff = base_case.csv
-    requirement = 'Convergence matches previous version of MOOSE without the '
+    requirement = 'The system shall match the convergence of the previous version of MOOSE without the '
                   'preconditioner reuse system'
     capabilities = 'method!=dbg'
   []
@@ -14,7 +14,7 @@
     input = convergence.i
     cli_args = "Executioner/reuse_preconditioner=true Outputs/csv/file_base=reuse_case"
     csvdiff = reuse_case.csv
-    requirement = 'Preconditioner is reused until the linear iterations exceed '
+    requirement = 'The system shall reuse the preconditioner until the linear iterations exceed '
                   'the value of reuse_preconditioner_max_its upon which the '
                   'system recalculates the preconditioner'
     capabilities = 'method!=dbg'

@@ -9,7 +9,7 @@
   [confined_uniaxial]
     issues = '#13766'
     design = 'ComputeMultiPlasticityStress.md ComputeMultipleInelasticStress.md'
-    requirement = 'SolidMechanics shall be able to simulate the confined, uniaxial extension of a notched block which has constitutive law described by:'
+    requirement = 'The system shall be able to use SolidMechanics to simulate the confined, uniaxial extension of a notched block which has constitutive law described by:'
     [cmc_smooth]
       type = 'CSVDiff'
       input = 'cmc_smooth.i'

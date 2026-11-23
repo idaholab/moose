@@ -5,7 +5,7 @@
     exodiff = 'pressure_test_out.e'
     issues = '#4781'
     design = 'syntax/BCs/Pressure/index.md'
-    requirement = 'The Pressure boundary condition action shall create the objects needed to apply pressure boundary conditions on a 3D model as demonstrated by correctly computing the response of an elastic small-strain isotropic unit cube with pressure applied on three faces to create a hydrostatic pressure.'
+    requirement = 'The system shall use the Pressure boundary condition action to create the objects needed to apply pressure boundary conditions on a 3D model as demonstrated by correctly computing the response of an elastic small-strain isotropic unit cube with pressure applied on three faces to create a hydrostatic pressure.'
   []
   [3D_Bbar]
     type = Exodiff
@@ -15,7 +15,7 @@
     prereq = '3D'
     issues = '#4781 #8235'
     design = 'syntax/BCs/Pressure/index.md'
-    requirement = 'The Pressure boundary condition action shall create the objects needed to apply pressure boundary conditions on a 3D model as demonstrated by correctly computing the response of an elastic small-strain isotropic unit cube with pressure applied on three faces to create a hydrostatic pressure using the volumetric locking correction b-bar formulation.'
+    requirement = 'The system shall use the Pressure boundary condition action to create the objects needed to apply pressure boundary conditions on a 3D model as demonstrated by correctly computing the response of an elastic small-strain isotropic unit cube with pressure applied on three faces to create a hydrostatic pressure using the volumetric locking correction b-bar formulation.'
   []
   [controls]
     type = Exodiff
@@ -32,7 +32,7 @@
     difference_tol = 5e-3
     issues = '#19657'
     design = 'Pressure.md'
-    requirement = "The Pressure boundary condition shall compute the correct Jacobian for a problem in 3D space using hex8 elements."
+    requirement = "The system shall compute the correct Jacobian of the Pressure boundary condition for a problem in 3D space using hex8 elements."
   []
   [jacobian_3D_hex20]
     type = 'PetscJacobianTester'
@@ -42,7 +42,7 @@
     difference_tol = 0.5
     issues = '#19657'
     design = 'Pressure.md'
-    requirement = "The Pressure boundary condition shall compute the correct Jacobian for a problem in 3D space using hex20 elements."
+    requirement = "The system shall compute the correct Jacobian of the Pressure boundary condition for a problem in 3D space using hex20 elements."
   []
   [jacobian_RZ]
     type = 'PetscJacobianTester'
@@ -51,7 +51,7 @@
     difference_tol = 5e-3
     issues = '#19657'
     design = 'Pressure.md'
-    requirement = "The Pressure boundary condition shall compute the correct Jacobian for a problem in RZ coordinates with quad4 elements."
+    requirement = "The system shall compute the correct Jacobian of the Pressure boundary condition for a problem in RZ coordinates with quad4 elements."
   []
   [jacobian_RZ_quad8]
     type = 'PetscJacobianTester'
@@ -61,7 +61,7 @@
     difference_tol = 0.5
     issues = '#19657'
     design = 'Pressure.md'
-    requirement = "The Pressure boundary condition shall compute the correct Jacobian for a problem in RZ coordinates with quad8 elements."
+    requirement = "The system shall compute the correct Jacobian of the Pressure boundary condition for a problem in RZ coordinates with quad8 elements."
   []
   [predeclared_boundaries]
     type = Exodiff
@@ -70,7 +70,7 @@
     issues = '#30611'
     design = 'syntax/BCs/Pressure/index.md'
     allow_warnings = true
-    requirement = 'The Pressure boundary condition action shall allow a predeclared boundary to work, bypassing what is considered to be a block_ids.size() = 0'
+    requirement = 'The system shall allow a predeclared boundary to work with the Pressure boundary condition action, bypassing what is considered to be a block_ids.size() = 0'
   []
   [predeclared_boundary_warning]
     type = RunApp
@@ -78,6 +78,6 @@
     issues = '#30611'
     design = 'syntax/BCs/Pressure/index.md'
     expect_out = "No connected blocks were found, the coordinate system type is obtained from the mesh."
-    requirement = 'The Pressure boundary condition action shall inform the user when retrieving the coordinate system type from the mesh.'
+    requirement = 'The system shall inform the user when the Pressure boundary condition action retrieves the coordinate system type from the mesh.'
   []
 []
