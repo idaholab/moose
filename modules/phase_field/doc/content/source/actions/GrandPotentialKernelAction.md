@@ -77,9 +77,15 @@ This optional formulation is enforcing a strict mass conservation by generating 
 and coupled it with chemical potential from the Grand Potential model.
 
 - 'mass_conservation' : set this to "true" to choose strict mass conservation formulation
-- 'concentrations' : Vector of concentration variables used in the model.
-- 'h_c_min' : Vector of coefficients for the BodyForce kernel in concentration-chemical potential coupling which indicates the minima of the parabolic free energy functions
-- 'h_over_kVa' : Vector of coefficients for the MatReaction kernel in concentration-chemical potential coupling which is related to the coefficients of the parabolic free energy functions
+- 'concentrations' : Vector of concentration variables used in the model, one for each entry in 'chemical_potentials'.
+- 'hj_c_min' : Vector of coefficients for the BodyForce kernel in concentration-chemical potential coupling which indicates the minima of the parabolic free energy functions
+- 'hj_over_kVa' : Vector of coefficients for the MatReaction kernel in concentration-chemical potential coupling which is related to the coefficients of the parabolic free energy functions
+
+Each species has its own coefficient in each phase, so 'hj_c_min' and 'hj_over_kVa' have one entry
+per phase for each chemical potential, i.e. the length of 'chemical_potentials' times the length
+of 'switching_function_names'. They are ordered like 'free_energies_w': all phases of the first
+chemical potential in the order of 'switching_function_names', then all phases of the second, and
+so on.
 
 The following kernels are generated for each concentration variables:
 
@@ -93,6 +99,7 @@ The coupling between concentration and chemical potential is generated using the
 - ['BodyForce'](/BodyForce.md) (multiple kernels: one that corresponds with each order parameter)
 
 The materials associated with strict mass conservation can be created automatically using [GrandPotentialSinteringMaterial.md]
+for a single chemical potential. Additional species need their own coefficient materials.
 
 ## Example Input File Syntax
 
