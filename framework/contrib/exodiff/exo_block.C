@@ -35,18 +35,21 @@
 #include "exo_block.h"
 #include "libmesh/exodusII.h" // for ex_block, etc
 #include "smart_assert.h"     // for SMART_ASSERT
+#include "stringx.h"          // for no_case_equals
 #include <cstdlib>            // for exit, nullptr
 #include <iostream>           // for operator<<, endl, ostream, etc
+#include <numeric>            // for partial_sum
 #include <string>             // for string, char_traits
+#include <vector>
 
 template <typename INT>
-Exo_Block<INT>::Exo_Block() : Exo_Entity(), num_nodes_per_elmt(-1), conn(nullptr)
+Exo_Block<INT>::Exo_Block() : Exo_Entity(), num_nodes_per_elmt(-1), is_nsided(false), conn(nullptr)
 {
 }
 
 template <typename INT>
 Exo_Block<INT>::Exo_Block(int file_id, size_t exo_block_id)
-  : Exo_Entity(file_id, exo_block_id), num_nodes_per_elmt(-1), conn(nullptr)
+  : Exo_Entity(file_id, exo_block_id), num_nodes_per_elmt(-1), is_nsided(false), conn(nullptr)
 {
   SMART_ASSERT(file_id >= 0);
   SMART_ASSERT((int)exo_block_id > EX_INVALID_ID);
@@ -56,7 +59,11 @@ Exo_Block<INT>::Exo_Block(int file_id, size_t exo_block_id)
 
 template <typename INT>
 Exo_Block<INT>::Exo_Block(int file_id, size_t id, const char * type, size_t num_e, size_t num_npe)
-  : Exo_Entity(file_id, id, num_e), elmt_type(type), num_nodes_per_elmt(num_npe), conn(nullptr)
+  : Exo_Entity(file_id, id, num_e),
+    elmt_type(type),
+    num_nodes_per_elmt(num_npe),
+    is_nsided(no_case_equals(elmt_type, "nsided")),
+    conn(nullptr)
 {
   SMART_ASSERT(id > 0);
   SMART_ASSERT(elmt_type != "");
@@ -100,6 +107,9 @@ Exo_Block<INT>::entity_load_params()
   num_nodes_per_elmt = block.num_nodes_per_entry;
   num_attr = block.num_attribute;
   elmt_type = block.topology;
+  // For an "NSIDED" block, num_nodes_per_entry above is the total over the block rather than a
+  // per-element stride; the per-element counts come from ex_get_entity_count_per_polyhedra().
+  is_nsided = no_case_equals(elmt_type, "nsided");
 
   if (num_nodes_per_elmt < 0 || num_attr < 0)
   {
@@ -132,10 +142,13 @@ Exo_Block<INT>::Load_Connectivity()
     delete[] conn;
   }
   conn = nullptr;
+  conn_offset.clear();
 
   if (numEntity && num_nodes_per_elmt)
   {
-    conn = new INT[numEntity * num_nodes_per_elmt];
+    // For an "NSIDED" block num_nodes_per_elmt is already the total over the block, so it is the
+    // full connectivity length; for a regular block it is the per-element stride.
+    conn = new INT[is_nsided ? num_nodes_per_elmt : numEntity * num_nodes_per_elmt];
     SMART_ASSERT(conn != nullptr);
 
     int err = ex_get_conn(fileId, EX_ELEM_BLOCK, id_, conn, nullptr, nullptr);
@@ -152,6 +165,37 @@ Exo_Block<INT>::Load_Connectivity()
       oss << "WARNING:  Number " << err << " returned from call to ex_get_conn()";
       return oss.str();
     }
+
+    if (is_nsided)
+    {
+      std::vector<int> node_counts(numEntity);
+      err = ex_get_entity_count_per_polyhedra(fileId, EX_ELEM_BLOCK, id_, node_counts.data());
+      if (err < 0)
+      {
+        ERROR("Exo_Block<INT>::Load_Connectivity(): Call to"
+              << " ex_get_entity_count_per_polyhedra returned error value!  Block id = " << id_
+              << '\n'
+              << "Aborting...\n");
+        exit(1);
+      }
+
+      // Exclusive prefix sum of the per-element node counts, with a trailing total.
+      conn_offset.resize(numEntity + 1);
+      conn_offset[0] = 0;
+      std::partial_sum(node_counts.begin(), node_counts.end(), conn_offset.begin() + 1);
+
+      // The per-element counts and the block total come from separate Exodus arrays, and every
+      // access below indexes conn through the offsets derived from the former, so a disagreement
+      // would silently read out of bounds.
+      if (conn_offset[numEntity] != static_cast<size_t>(num_nodes_per_elmt))
+      {
+        ERROR("Exo_Block<INT>::Load_Connectivity(): Block id = "
+              << id_ << " node counts sum to " << conn_offset[numEntity]
+              << ", but the block declares " << num_nodes_per_elmt << " nodes!\n"
+              << "Aborting...\n");
+        exit(1);
+      }
+    }
   }
 
   return "";
@@ -167,6 +211,7 @@ Exo_Block<INT>::Free_Connectivity()
     delete[] conn;
   }
   conn = nullptr;
+  conn_offset.clear();
   return "";
 }
 
@@ -181,7 +226,25 @@ Exo_Block<INT>::Connectivity(size_t elmt_index) const
     return nullptr;
   }
 
-  return &conn[elmt_index * num_nodes_per_elmt];
+  return &conn[is_nsided ? conn_offset[elmt_index] : elmt_index * num_nodes_per_elmt];
+}
+
+template <typename INT>
+size_t
+Exo_Block<INT>::Num_Nodes_per_Elmt(size_t elmt_index) const
+{
+  SMART_ASSERT(Check_State());
+  SMART_ASSERT(elmt_index < numEntity);
+
+  if (!is_nsided)
+  {
+    return num_nodes_per_elmt;
+  }
+
+  // The offsets are only built by Load_Connectivity(), so the per-element counts of a polygon
+  // block are not known until its connectivity has been read.
+  SMART_ASSERT(!conn_offset.empty());
+  return conn_offset[elmt_index + 1] - conn_offset[elmt_index];
 }
 
 template <typename INT>
@@ -242,7 +305,6 @@ Exo_Block<INT>::Display(std::ostream & s) const
 
   if (conn)
   {
-    size_t index = 0;
     s << "       connectivity = ";
     for (size_t e = 0; e < numEntity; ++e)
     {
@@ -251,9 +313,10 @@ Exo_Block<INT>::Display(std::ostream & s) const
         s << "                      ";
       }
       s << "(" << (e + 1) << ") ";
-      for (int n = 0; n < num_nodes_per_elmt; ++n)
+      const INT * elmt_conn = Connectivity(e);
+      for (size_t n = 0; n < Num_Nodes_per_Elmt(e); ++n)
       {
-        s << conn[index++] << " ";
+        s << elmt_conn[n] << " ";
       }
       s << '\n';
     }

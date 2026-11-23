@@ -128,10 +128,10 @@ namespace {
       {
         const Exo_Block<INT> * block = file2.Get_Elmt_Block_by_Index(b);
         num_elmts_in_block = block->Size();
-        num_nodes_per_elmt = block->Num_Nodes_per_Elmt();
         for (size_t i = 0; i < num_elmts_in_block; ++i)
         {
           const INT * conn = block->Connectivity(i); // Connectivity for element i.
+          num_nodes_per_elmt = block->Num_Nodes_per_Elmt(i);
           sum_x = 0.0;
           sum_y = 0.0;
           sum_z = 0.0;
@@ -202,11 +202,11 @@ namespace {
     const Exo_Block<INT> * block1 = file1.Get_Elmt_Block_by_Index(b);
     file1.Load_Elmt_Block_Description(b);
     num_elmts_in_block = block1->Size();
-    num_nodes_per_elmt = block1->Num_Nodes_per_Elmt();
     for (size_t i = 0; i < num_elmts_in_block; ++i)
     {
       // Connectivity for element i.
       const INT * conn1 = block1->Connectivity(i);
+      num_nodes_per_elmt = block1->Num_Nodes_per_Elmt(i);
 
       // Compute midpoint.
       mid_x = 0.0;
@@ -260,18 +260,19 @@ namespace {
         SMART_ASSERT(block2 != nullptr);
 
         // Check that the element types are the same.
-        if (num_nodes_per_elmt != block2->Num_Nodes_per_Elmt())
+        if (num_nodes_per_elmt != block2->Num_Nodes_per_Elmt(l2))
         {
           ERROR("Files are different.\n"
                 << " In File 1: Element " << (i + 1) << " in Block " << file1.Block_Id(b) << " has "
                 << num_nodes_per_elmt << " and\n"
                 << " In File 2: Element " << (l2 + 1) << " in Block " << file2.Block_Id(b2)
-                << " has " << block2->Num_Nodes_per_Elmt() << '\n');
+                << " has " << block2->Num_Nodes_per_Elmt(l2) << '\n');
           exit(1);
         }
 
         // Get connectivity for file2 element.
         const INT * conn2 = block2->Connectivity(l2);
+        size_t num_nodes_per_elmt2 = block2->Num_Nodes_per_Elmt(l2);
 
         // Match each node in the first elmt with a node in the second
         // and assign node_map.
@@ -283,7 +284,7 @@ namespace {
           double z1_val = dim > 2 ? z1_f[conn1[ln1] - 1] : 0.0;
 
           size_t found = 0;
-          for (size_t ln2 = 0; ln2 < num_nodes_per_elmt; ++ln2)
+          for (size_t ln2 = 0; ln2 < num_nodes_per_elmt2; ++ln2)
           {
             // Grab coordinate of node in second file.
             double x2_val = x2_f[conn2[ln2] - 1];
@@ -496,10 +497,10 @@ Compute_Partial_Maps(INT *& node_map,
     {
       const Exo_Block<INT> * block = file2.Get_Elmt_Block_by_Index(b);
       num_elmts_in_block = block->Size();
-      num_nodes_per_elmt = block->Num_Nodes_per_Elmt();
       for (size_t i = 0; i < num_elmts_in_block; ++i)
       {
         const INT * conn = block->Connectivity(i); // Connectivity for element i.
+        num_nodes_per_elmt = block->Num_Nodes_per_Elmt(i);
         sum_x = 0.0;
         sum_y = 0.0;
         sum_z = 0.0;
@@ -572,11 +573,11 @@ Compute_Partial_Maps(INT *& node_map,
     const Exo_Block<INT> * block1 = file1.Get_Elmt_Block_by_Index(b);
     file1.Load_Elmt_Block_Description(b);
     num_elmts_in_block = block1->Size();
-    num_nodes_per_elmt = block1->Num_Nodes_per_Elmt();
     for (size_t i = 0; i < num_elmts_in_block; ++i)
     {
       // Connectivity for element i.
       const INT * conn1 = block1->Connectivity(i);
+      num_nodes_per_elmt = block1->Num_Nodes_per_Elmt(i);
 
       // Compute midpoint.
       mid_x = 0.0;
@@ -635,18 +636,19 @@ Compute_Partial_Maps(INT *& node_map,
         SMART_ASSERT(block2 != nullptr);
 
         // Check that the element types are the same.
-        if (num_nodes_per_elmt != block2->Num_Nodes_per_Elmt())
+        if (num_nodes_per_elmt != block2->Num_Nodes_per_Elmt(l2))
         {
           ERROR("Files are different.\n"
                 << " In File 1: Element " << (i + 1) << " in Block " << file1.Block_Id(b) << " has "
                 << num_nodes_per_elmt << " and\n"
                 << " In File 2: Element " << (l2 + 1) << " in Block " << file2.Block_Id(b2)
-                << " has " << block2->Num_Nodes_per_Elmt() << '\n');
+                << " has " << block2->Num_Nodes_per_Elmt(l2) << '\n');
           exit(1);
         }
 
         // Get connectivity for file2 element.
         const INT * conn2 = block2->Connectivity(l2);
+        size_t num_nodes_per_elmt2 = block2->Num_Nodes_per_Elmt(l2);
 
         // Match each node in the first elmt with a node in the second
         // and assign node_map.
@@ -657,7 +659,7 @@ Compute_Partial_Maps(INT *& node_map,
           double y1_val = dim > 1 ? y1_f[conn1[ln1] - 1] : 0.0;
           double z1_val = dim > 2 ? z1_f[conn1[ln1] - 1] : 0.0;
           size_t found = 0;
-          for (size_t ln2 = 0; ln2 < num_nodes_per_elmt; ++ln2)
+          for (size_t ln2 = 0; ln2 < num_nodes_per_elmt2; ++ln2)
           {
             // Grab coordinate of node in second file.
             double x2_val = x2_f[conn2[ln2] - 1];
