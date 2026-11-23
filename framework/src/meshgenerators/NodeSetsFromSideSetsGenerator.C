@@ -33,7 +33,13 @@ NodeSetsFromSideSetsGenerator::NodeSetsFromSideSetsGenerator(const InputParamete
 std::unique_ptr<MeshBase>
 NodeSetsFromSideSetsGenerator::generate()
 {
-  _input->get_boundary_info().build_node_list_from_side_list();
+  auto & binfo = _input->get_boundary_info();
+  binfo.build_node_list_from_side_list();
+
+  // Move over names
+  const auto & input_bdy = binfo.get_side_boundary_ids();
+  for (auto id : input_bdy)
+    binfo.nodeset_name(id) = binfo.sideset_name(id);
 
   return dynamic_pointer_cast<MeshBase>(_input);
 }
