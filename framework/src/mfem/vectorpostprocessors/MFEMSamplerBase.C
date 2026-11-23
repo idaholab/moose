@@ -35,7 +35,7 @@ MFEMSamplerBase::MFEMSamplerBase(const InputParameters & parameters,
     _points(Moose::MFEM::libMeshPointsToMFEMVector(
         points, _mesh.SpaceDimension(), mfem::Ordering::byVDIM))
 {
-  if (getMFEMProblem().mesh().shouldDisplace())
+  if (getMFEMProblem().shouldDisplaceMesh())
     mooseError("MFEMSamplerBase does not yet support problems with displacement.");
 
   _finder.SetDistanceToleranceForPointsFoundOnBoundary(getParam<double>("mesh_boundary_tolerance"));

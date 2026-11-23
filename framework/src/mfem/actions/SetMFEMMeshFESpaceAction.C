@@ -33,8 +33,8 @@ SetMFEMMeshFESpaceAction::act()
   if (_problem->feBackend() == Moose::FEBackend::MFEM)
   {
     auto & mfem_problem = cast_ref<MFEMProblem &>(*_problem);
-    if (mfem_problem.mesh().shouldDisplace())
-      mfem_problem.mesh().getMFEMParMesh().SetNodalFESpace(
+    if (mfem_problem.shouldDisplaceMesh())
+      mfem_problem.mfemParMesh().SetNodalFESpace(
           mfem_problem.getMeshDisplacementGridFunction().ParFESpace());
   }
 }

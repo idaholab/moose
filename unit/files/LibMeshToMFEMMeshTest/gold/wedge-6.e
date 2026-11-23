@@ -1,0 +1,1 @@
+../../../../test/tests/mfem/mesh/wedge-6.e
