@@ -17,9 +17,17 @@ The [!param](/Mesh/DualMeshGenerator/preserve_subdomain_interfaces) parameter tr
 
 The [!param](/Mesh/DualMeshGenerator/preserve_primal_subdomains) parameter copies selected primal subdomains to the output mesh while dualizing the rest of the mesh. Preserved primal subdomains are only supported for barycentric duals, and the associated nodesets and sidesets are copied to the output mesh.
 
+Sidesets and nodesets on the external boundary of the primal mesh are transferred to the dual mesh.
+Each dual element side takes the boundary ids of the primal side containing it, and a nodeset that
+covers a whole primal side is extended to the dual nodes introduced along that side. Sidesets on a
+subdomain interface are transferred in the same way when
+[!param](/Mesh/DualMeshGenerator/preserve_subdomain_interfaces) is set, since the dual elements then
+stop at the interface; on an interface the ids are placed on one side of the pair, as in the primal
+mesh.
+
 !alert warning
-This mesh generator does not preserve boundaries, sidesets or nodesets, that are not either
-external to the mesh or interfaces between subdomains.
+Sidesets and nodesets interior to a subdomain are not preserved, because the dual elements do not
+in general have sides along them.
 
 ## Example Syntax
 

@@ -41,7 +41,18 @@
       exodiff_opts = '-pedantic'
       mesh_mode = 'REPLICATED'
       recover = false
-      detail = 'while treating primal subdomain interfaces as preserved boundaries.'
+      detail = 'while treating primal subdomain interfaces as preserved boundaries,'
+    []
+    [preserve_boundaries]
+      type = 'Exodiff'
+      input = 'dual_mesh_generator_boundary_preserve.i'
+      cli_args = '--mesh-only'
+      exodiff = 'dual_mesh_generator_boundary_preserve_in.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'while transferring the external and subdomain-interface sidesets and nodesets of '
+               'the primal mesh onto the dual mesh.'
     []
   []
 

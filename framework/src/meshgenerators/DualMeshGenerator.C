@@ -330,6 +330,26 @@ DualMeshGenerator::generate()
 
   std::map<SubdomainID, BoundaryRegion2D> boundary_regions;
 
+  const BoundaryInfo & input_boundary_info = input_mesh->get_boundary_info();
+
+  /// A preserved primal side together with the boundary ids it carries. The dual construction cuts
+  /// each such side at its midpoint, so the ids have to be transferred to whichever dual element
+  /// sides end up covering it rather than to a single side of the output mesh.
+  struct PreservedSideBoundary
+  {
+    Point p0;
+    Point p1;
+    /// Sideset ids on the primal side
+    std::vector<boundary_id_type> side_ids;
+    /// Nodeset ids carried by both of the side's end nodes, i.e. the ones that cover the whole side
+    /// and so also apply to the dual nodes the construction introduces along it
+    std::vector<boundary_id_type> shared_node_ids;
+  };
+  std::vector<PreservedSideBoundary> preserved_side_boundaries;
+  // Nodeset ids of each primal node lying on a preserved side, for the dual nodes that coincide
+  // with a primal node
+  std::unordered_map<dof_id_type, std::vector<boundary_id_type>> primal_node_nodesets;
+
   // Collect the preserved sides of the elements being dualized, grouped by subdomain key, along
   // with their nodes and midpoints. These are the sides the dual cells must be clipped against.
   for (const auto & elem : input_mesh->element_ptr_range())
@@ -360,6 +380,32 @@ DualMeshGenerator::generate()
           const Point midpoint = 0.5 * (side_elem->point(0) + side_elem->point(1));
           boundary_region.boundary_node_midpoints[node0].push_back(midpoint);
           boundary_region.boundary_node_midpoints[node1].push_back(midpoint);
+
+          // Record the boundary ids of this side so they can be put back on the dual mesh
+          std::vector<boundary_id_type> side_ids;
+          input_boundary_info.boundary_ids(elem, side, side_ids);
+
+          std::vector<boundary_id_type> node0_ids;
+          std::vector<boundary_id_type> node1_ids;
+          input_boundary_info.boundary_ids(side_elem->node_ptr(0), node0_ids);
+          input_boundary_info.boundary_ids(side_elem->node_ptr(1), node1_ids);
+
+          primal_node_nodesets[node0] = node0_ids;
+          primal_node_nodesets[node1] = node1_ids;
+
+          std::sort(node0_ids.begin(), node0_ids.end());
+          std::sort(node1_ids.begin(), node1_ids.end());
+
+          std::vector<boundary_id_type> shared_node_ids;
+          std::set_intersection(node0_ids.begin(),
+                                node0_ids.end(),
+                                node1_ids.begin(),
+                                node1_ids.end(),
+                                std::back_inserter(shared_node_ids));
+
+          if (!side_ids.empty() || !shared_node_ids.empty())
+            preserved_side_boundaries.push_back(
+                {side_elem->point(0), side_elem->point(1), side_ids, shared_node_ids});
         }
       }
     }
@@ -737,20 +783,10 @@ DualMeshGenerator::generate()
     if (preserve_primal_subdomain_ids.empty())
       return;
 
-    const BoundaryInfo & input_boundary_info = input_mesh->get_boundary_info();
+    // The sideset and nodeset name maps are copied once for the whole mesh after the dual elements
+    // are built
     BoundaryInfo & boundary_info = dualMesh->get_boundary_info();
     std::unordered_map<dof_id_type, Node *> copied_nodes;
-
-    const auto & input_sideset_map = input_boundary_info.get_sideset_name_map();
-    const auto & input_nodeset_map = input_boundary_info.get_nodeset_name_map();
-
-    // Nodeset preservation
-    if (!input_sideset_map.empty())
-      boundary_info.set_sideset_name_map().insert(input_sideset_map.begin(),
-                                                  input_sideset_map.end());
-    if (!input_nodeset_map.empty())
-      boundary_info.set_nodeset_name_map().insert(input_nodeset_map.begin(),
-                                                  input_nodeset_map.end());
 
     const auto copyNodeBoundaryIDs = [&](Node * const target_node, const dof_id_type source_node_id)
     {
@@ -1443,6 +1479,75 @@ DualMeshGenerator::generate()
 
     addDualElement(dual_points, source_subdomain_id);
   }
+
+  // Transfer the boundary ids of the preserved primal sides onto the dual mesh. A dual side takes
+  // a primal side's ids when its midpoint lies on that primal side: a dual side can span two
+  // primal sides, because the dual cell around a primal boundary node reaches the midpoint of the
+  // side on either side of it, so testing both end points would miss those sides. The midpoint
+  // identifies a unique primal side except where it coincides with a primal node, which only
+  // happens for a degenerate dual side.
+  BoundaryInfo & boundary_info = dualMesh->get_boundary_info();
+
+  // The neighbor links decide which of the two elements along an interface carries the sideset
+  dualMesh->find_neighbors();
+
+  for (const auto & elem : dualMesh->element_ptr_range())
+    for (const auto side : elem->side_index_range())
+    {
+      const auto side_elem = elem->build_side_ptr(side);
+
+      if (side_elem->n_nodes() < 2)
+        continue;
+
+      const Point side_midpoint = 0.5 * (side_elem->point(0) + side_elem->point(1));
+
+      for (const auto & preserved_side : preserved_side_boundaries)
+        if (pointOnSegment2D(side_midpoint, preserved_side.p0, preserved_side.p1))
+        {
+          // An interface side is shared by a dual cell on either side of it, so only the element
+          // with the lower id contributes it, which keeps a one-sided sideset one-sided
+          const auto * const neighbor = elem->neighbor_ptr(side);
+
+          if (!preserved_side.side_ids.empty() &&
+              (neighbor == nullptr || elem->id() < neighbor->id()))
+            boundary_info.add_side(elem, side, preserved_side.side_ids);
+
+          // A nodeset covering the whole primal side also covers the dual nodes along it
+          if (!preserved_side.shared_node_ids.empty())
+            for (const auto n : make_range(side_elem->n_nodes()))
+              boundary_info.add_node(side_elem->node_ptr(n), preserved_side.shared_node_ids);
+
+          break;
+        }
+    }
+
+  // Dual nodes that coincide with a primal node keep that node's nodesets, including ids that only
+  // touch the primal node rather than a whole side
+  for (const auto & [source_node_id, nodeset_ids] : primal_node_nodesets)
+  {
+    if (nodeset_ids.empty())
+      continue;
+
+    const auto node_it = dual_nodes_by_key.find(roundedPointKey(input_mesh->point(source_node_id)));
+
+    if (node_it == dual_nodes_by_key.end())
+      continue;
+
+    for (auto * const node : node_it->second)
+      if (MooseUtils::absoluteFuzzyEqual(*node, input_mesh->point(source_node_id), dual_node_tol))
+        boundary_info.add_node(node, nodeset_ids);
+  }
+
+  // Keep the sideset and nodeset names so the output refers to the boundaries the way the input did
+  const auto & input_sideset_names = input_boundary_info.get_sideset_name_map();
+  const auto & input_nodeset_names = input_boundary_info.get_nodeset_name_map();
+
+  if (!input_sideset_names.empty())
+    boundary_info.set_sideset_name_map().insert(input_sideset_names.begin(),
+                                                input_sideset_names.end());
+  if (!input_nodeset_names.empty())
+    boundary_info.set_nodeset_name_map().insert(input_nodeset_names.begin(),
+                                                input_nodeset_names.end());
 
   dualMesh->unset_is_prepared();
 
