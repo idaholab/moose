@@ -6,7 +6,7 @@
     map = false
     capabilities = 'unique_id'
     allow_test_objects = True
-    requirement = 'The XFEM module shall accurately solve 1D, xy problems with homogeneous material properties with a moving interface determined by a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
+    requirement = 'The system shall accurately solve 1D, xy problems with homogeneous material properties with a moving interface determined by a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
     issues = '#12833'
   [../]
@@ -17,7 +17,7 @@
     map = false
     capabilities = 'unique_id'
     allow_test_objects = True
-    requirement = 'The XFEM module shall accurately solve 1D, xy problems with material properties and a moving interface dependent on a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
+    requirement = 'The system shall accurately solve 1D, xy problems with material properties and a moving interface dependent on a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
     issues = '#12833'
   [../]
@@ -28,7 +28,7 @@
     map = false
     capabilities = 'unique_id'
     allow_test_objects = True
-    requirement = 'The XFEM module shall accurately solve 1D, xy problems with a moving interface separating two discrete materials prescribed by a user defined level set function with problem results verified using the Method of Manufactured Solutions.'
+    requirement = 'The system shall accurately solve 1D, xy problems with a moving interface separating two discrete materials prescribed by a user defined level set function with problem results verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md XFEMSingleVariableConstraint.md'
     issues = '#13756'
   [../]
@@ -39,7 +39,7 @@
     map = false
     capabilities = 'unique_id'
     allow_test_objects = True
-    requirement = 'The XFEM module shall accurately solve 1D, rz problems with homogeneous material properties with a moving interface determined by a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
+    requirement = 'The system shall accurately solve 1D, rz problems with homogeneous material properties with a moving interface determined by a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
     issues = '#12833'
   [../]
@@ -50,7 +50,7 @@
     map = false
     capabilities = 'unique_id'
     allow_test_objects = True
-    requirement = 'The XFEM module shall accurately solve 1D, rz problems with material properties and a moving interface dependent on a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
+    requirement = 'The system shall accurately solve 1D, rz problems with material properties and a moving interface dependent on a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
     issues = '#12833'
   [../]
@@ -61,7 +61,7 @@
     map = false
     capabilities = 'unique_id'
     allow_test_objects = True
-    requirement = 'The XFEM module shall accurately solve 2D, xy problems with homogeneous material properties with a moving interface determined by a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
+    requirement = 'The system shall accurately solve 2D, xy problems with homogeneous material properties with a moving interface determined by a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
     issues = '#12833'
   [../]
@@ -72,7 +72,7 @@
     map = false
     capabilities = 'unique_id'
     allow_test_objects = True
-    requirement = 'The XFEM module shall accurately solve 2D, xy problems with material properties and a moving interface dependent on a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
+    requirement = 'The system shall accurately solve 2D, xy problems with material properties and a moving interface dependent on a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
     issues = '#12833'
   [../]
@@ -83,7 +83,7 @@
     map = false
     capabilities = 'unique_id'
     allow_test_objects = True
-    requirement = 'The XFEM module shall accurately solve 2D, rz problems with homogeneous material properties with a moving interface determined by a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
+    requirement = 'The system shall accurately solve 2D, rz problems with homogeneous material properties with a moving interface determined by a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
     issues = '#12833'
   [../]
@@ -94,7 +94,7 @@
     map = false
     capabilities = 'unique_id'
     allow_test_objects = True
-    requirement = 'The XFEM module shall accurately solve 2D, rz problems with material properties and a moving interface dependent on a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
+    requirement = 'The system shall accurately solve 2D, rz problems with material properties and a moving interface dependent on a user prescribed level set function, and problem results are verified using the Method of Manufactured Solutions.'
     design = 'LevelSetCutUserObject.md'
     issues = '#12833'
   [../]

@@ -12,7 +12,7 @@
                   checkpoint_out_cp/0002-mesh.cpa.gz/1/split-1-0.gz
                   checkpoint_out_cp/0002-restart-0.rd/data
                   checkpoint_out_cp/0002-restart-0.rd/header'
-   requirement = 'The XFEM module shall support outputting of checkpoint files.'
+   requirement = 'The system shall support outputting of checkpoint files for XFEM simulations.'
    design = 'outputs/Checkpoint.md'
    issues = '#17063'
   []
