@@ -120,13 +120,6 @@ elementsShareTwoNodes(const Elem * a, const Elem * b)
   return shared_nodes == 2;
 }
 
-// Cross product, but includes sign for orientation
-static Real
-cross2D(const Point & a, const Point & b, const Point & c)
-{
-  return (b(0) - a(0)) * (c(1) - a(1)) - (b(1) - a(1)) * (c(0) - a(0));
-}
-
 // Adds points but prevents adding duplicates
 static void
 addUniquePoint(std::vector<Point> & points, const Point & point, const Real length_tol = 1e-12)
@@ -222,23 +215,6 @@ pointInPolygon2D(const Point & point, const std::vector<Point> & polygon)
   }
 
   return inside;
-}
-
-static Real
-polygonSignedArea2D(const std::vector<Point> & polygon)
-{
-  if (polygon.size() < 3)
-    return 0.0;
-
-  Real area = 0.0;
-
-  for (const auto i : index_range(polygon))
-  {
-    const auto j = (i + polygon.size() - 1) % polygon.size();
-    area += polygon[j](0) * polygon[i](1) - polygon[i](0) * polygon[j](1);
-  }
-
-  return 0.5 * area;
 }
 
 struct BoundarySegment
@@ -1211,7 +1187,8 @@ DualMeshGenerator::generate()
     if (points.size() < 4)
       return points.size();
 
-    const Real signed_area = polygonSignedArea2D(points);
+    // geom_utils::signedArea2D returns twice the signed area
+    const Real signed_area = 0.5 * geom_utils::signedArea2D(points);
 
     if (std::abs(signed_area) < area_tol)
       return points.size();
@@ -1225,7 +1202,7 @@ DualMeshGenerator::generate()
       const Point & next = points[(i + 1) % points.size()];
 
       if (isBoundaryVertexPoint(boundary_region, current) &&
-          orientation * cross2D(previous, current, next) < -area_tol)
+          orientation * geom_utils::signedArea2D(previous, current, next) < -area_tol)
         return i;
     }
 
@@ -1495,8 +1472,8 @@ DualMeshGenerator::generate()
           const std::vector<Point> triangle_points = {
               fan_points[0], fan_points[i], fan_points[i + 1]};
 
-          if (std::abs(cross2D(triangle_points[0], triangle_points[1], triangle_points[2])) >
-              area_tol)
+          if (std::abs(geom_utils::signedArea2D(
+                  triangle_points[0], triangle_points[1], triangle_points[2])) > area_tol)
             addDualElement(triangle_points, source_subdomain_id);
         }
       }
