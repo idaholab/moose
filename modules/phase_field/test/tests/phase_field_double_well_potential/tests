@@ -5,6 +5,6 @@
     type = CSVDiff
     input = DoubleWellPotential.i 
     csvdiff = DoubleWellPotential_csv.csv
-    requirement = "The ADPhaseFieldCoupledDoubleWellPotential kernel can correctly implement the source term for phase field equation."
+    requirement = "The system shall correctly implement the source term for the phase field equation using the ADPhaseFieldCoupledDoubleWellPotential kernel."
   []
 []

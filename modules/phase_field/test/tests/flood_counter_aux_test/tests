@@ -7,8 +7,8 @@
     max_parallel = 1 # See #9886
     issues = '#5077'
     design = 'FeatureFloodCount.md'
-    requirement = "The feature flood counter system shall be able to track contiguous regions in a "
-                  "simulation domain, based on a vaiable value"
+    requirement = "The system shall be able to track, using the feature flood counter, contiguous regions in a "
+                  "simulation domain, based on a variable value"
   []
 
   [test_elemental]
@@ -18,7 +18,7 @@
     allow_test_objects = true
     issues = '#5077'
     design = 'FeatureFloodCount.md'
-    requirement = "The feature flood counter system shall be able to track multiple variables at "
+    requirement = "The system shall be able to track, using the feature flood counter, multiple variables at "
                   "once, with features being sets of elements."
   []
 
@@ -30,7 +30,7 @@
     max_parallel = 1 # See #9886
     issues = '#5077'
     design = 'FeatureFloodCount.md'
-    requirement = "The feature flood counter system shall be able to track multiple variables at "
+    requirement = "The system shall be able to track, using the feature flood counter, multiple variables at "
                   "once, with features being sets of nodes."
   []
 
@@ -43,7 +43,7 @@
     max_parallel = 1 # See #9886
     issues = '#5077'
     design = 'FeatureFloodCountAux.md'
-    requirement = "The feature flood counter aux kernel shall throw an error when acting on a "
+    requirement = "The system shall report an error when the feature flood counter aux kernel acts on a "
                   "variable that is incompatible with the flood counter mode."
   []
 
@@ -55,7 +55,7 @@
     max_parallel = 1 # See #9886
     issues = '#5077'
     design = 'FeatureFloodCount.md'
-    requirement = "The feature flood counter system shall be able to track multiple variables at "
+    requirement = "The system shall be able to track, using the feature flood counter, multiple variables at "
                   "once with periodic boundary conditions."
   []
 
@@ -67,7 +67,7 @@
     allow_test_objects = true
     issues = '#11813'
     design = 'FeatureFloodCount.md'
-    requirement = "The feature flood counter system shall be restrictable to a boundary."
+    requirement = "The system shall allow the feature flood counter to be restricted to a boundary."
   []
 
   [bound_restrict_all]
@@ -78,7 +78,7 @@
     allow_test_objects = true
     issues = '#11813'
     design = 'FeatureFloodCount.md'
-    requirement = "The feature flood counter system shall be restrictable to multiple boundaries."
+    requirement = "The system shall allow the feature flood counter to be restricted to multiple boundaries."
   []
 
   [boundary_intersection]

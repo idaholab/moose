@@ -4,7 +4,7 @@
     input = 'SmoothCircleIC_tanh.i'
     exodiff = 'SmoothCircleIC_tanh_out.e'
     scale_refine = 1
-    requirement = 'A smooth circle initial condition with a hyperbolic tangent profile shall be provided'
+    requirement = 'The system shall provide a smooth circle initial condition with a hyperbolic tangent profile'
     design = 'ics/SmoothCircleIC.md'
     issues = '#12143'
     # uses exodus oversampling see #2295
@@ -15,7 +15,7 @@
   [./prepare_mesh]
     type = RunApp
     input = 'prepare_mesh.i'
-    requirement = 'A capability to initialize polycrystal phase field variables from a file mesh shall be provided'
+    requirement = 'The system shall provide a capability to initialize polycrystal phase field variables from a file mesh'
     design = 'actions/PolycrystalVariablesAction.md'
     issues = '#12294'
   [../]
@@ -25,7 +25,7 @@
     input = 'PolycrystalVariables_initial_from_file.i'
     exodiff = 'PolycrystalVariables_initial_from_file_out.e'
     prereq = prepare_mesh
-    requirement = 'A capability to initialize polycrystal phase field variables from a file mesh shall be provided through the PolycrystalVariables action'
+    requirement = 'The system shall provide a capability to initialize polycrystal phase field variables from a file mesh through the PolycrystalVariables action'
     design = 'actions/PolycrystalVariablesAction.md'
     issues = '#12294'
   [../]
@@ -35,7 +35,7 @@
     input = 'GrainGrowth_initial_from_file.i'
     exodiff = 'GrainGrowth_initial_from_file_out.e'
     prereq = prepare_mesh
-    requirement = 'A capability to initialize polycrystal phase field variables from a file mesh shall be provided through the GrainGrowth action'
+    requirement = 'The system shall provide a capability to initialize polycrystal phase field variables from a file mesh through the GrainGrowth action'
     design = 'actions/GrainGrowthAction.md'
     issues = '#13624'
   [../]
