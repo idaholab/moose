@@ -109,6 +109,17 @@ in order to perform variable restart.
 
 Additional documentation about restarting from Exodus may be found in the [restart-recovery page](restart_recover.md optional=True).
 
+## Checkpoint restart
+
+This generator can also seed variable initial conditions from a MOOSE `Checkpoint` file. When the
+`file` is a checkpoint (e.g. `foo_cp/LATEST` or `foo_cp/0010`) and at least one variable sets
+`initial_from_file_var`, the requested variables are copied from that checkpoint's stored solution
+automatically; no additional parameter (such as `use_for_exodus_restart`) is required. Unlike the
+Exodus restart above, this supports distributed meshes and high-order elemental variables. Because
+a checkpoint holds a single state, `initial_from_file_timestep` must be `LATEST` (its default); the
+state is selected by the `file` path itself. See [MooseVariableBase.md#restart] for the full set of
+constraints.
+
 ## Loading a split mesh
 
 [Mesh splits](syntax/Mesh/splitting.md) usually do not require a `FileMeshGenerator`, they can be performed and loaded from the command line. The only use case for loading a split mesh using a `FileMeshGenerator` is to perform additional mesh generation on the split. For example, a 2D split mesh can be pre-split before extrusion to avoid ever having to load the full 3D mesh in serial.
