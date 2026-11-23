@@ -16,12 +16,14 @@
 
 #include "libmesh/threads.h"
 
-ComputeElemDampingThread::ComputeElemDampingThread(FEProblemBase & feproblem,
-                                                   NonlinearSystemBase & nl)
+ComputeElemDampingThread::ComputeElemDampingThread(
+    FEProblemBase & feproblem,
+    NonlinearSystemBase & nl,
+    const MooseObjectWarehouse<ElementDamper> & dampers)
   : ThreadedElementLoop<ConstElemRange>(feproblem),
     _damping(1.0),
     _nl(nl),
-    _element_dampers(_nl.getElementDamperWarehouse())
+    _element_dampers(dampers)
 {
 }
 
@@ -81,7 +83,7 @@ ComputeElemDampingThread::join(const ComputeElemDampingThread & y)
 void
 ComputeElemDampingThread::printGeneralExecutionInformation() const
 {
-  const auto & damper_wh = _nl.getElementDamperWarehouse();
+  const auto & damper_wh = _element_dampers;
   if (!_fe_problem.shouldPrintExecution(_tid) || !damper_wh.hasActiveObjects())
     return;
 

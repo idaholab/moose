@@ -24,7 +24,9 @@ class ComputeNodalDampingThread
   : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalDampingThread(FEProblemBase & feproblem, NonlinearSystemBase & nl);
+  ComputeNodalDampingThread(FEProblemBase & feproblem,
+                            NonlinearSystemBase & nl,
+                            const MooseObjectWarehouse<NodalDamper> & dampers);
 
   // Splitting Constructor
   ComputeNodalDampingThread(ComputeNodalDampingThread & x, Threads::split split);

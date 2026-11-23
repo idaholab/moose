@@ -53,6 +53,62 @@
     csvdiff = 'predictor_test_pre_smo_out.csv'
   []
 
+  [damping]
+    requirement = "The system shall limit the change of the initial guess made by a predictor with "
+                  "the dampers listed in the predictor, by"
+    design = 'SimplePredictor.md syntax/Dampers/index.md'
+    issues = '#34453'
+    [damped]
+      type = 'CSVDiff'
+      input = 'predictor_damped_test.i'
+      csvdiff = 'predictor_damped_out.csv'
+      expect_out = 'Predictor damping factor'
+      absent_out = ' Damping factor:'
+      detail = "scaling the change by their damping factor, without damping the nonlinear updates,"
+    []
+    [trial_value]
+      type = 'RunApp'
+      input = 'predictor_test.i'
+      cli_args = 'Dampers/bound/type=BoundingValueNodalDamper Dampers/bound/variable=u '
+                 'Dampers/bound/max_value=0.8 Executioner/Predictor/dampers=bound'
+      expect_out = 'Predictor damping factor: 0\.6\n'
+      detail = "evaluating the dampers at the predicted solution,"
+    []
+    [separate]
+      type = 'RunApp'
+      input = 'predictor_damped_test.i'
+      cli_args = 'Dampers/constant/type=ConstantDamper Dampers/constant/damping=0.25 '
+                 'Executioner/Predictor/dampers=constant'
+      expect_out = 'Predictor damping factor: 0\.25\n.* Damping factor:'
+      detail = "with dampers of any type that are separate from those that damp the nonlinear "
+               "updates,"
+    []
+    [skip]
+      type = 'CSVDiff'
+      input = 'predictor_damped_test.i'
+      cli_args = 'Dampers/cap/min_damping=0.5 Outputs/file_base=predictor_damping_skip_out'
+      csvdiff = 'predictor_damping_skip_out.csv'
+      detail = "skipping the prediction when a damper fails, or"
+    []
+    [cut_timestep]
+      type = 'RunApp'
+      input = 'predictor_damped_test.i'
+      cli_args = 'Dampers/cap/min_damping=0.5 Executioner/Predictor/damping_failure=cut_timestep'
+      expect_out = 'Cutting the time step.*Time Step 2, time = 0\.75'
+      detail = "cutting the time step when a damper fails and the predictor is set to do so."
+    []
+  []
+  [damper_not_found]
+    type = 'RunException'
+    input = 'predictor_damped_test.i'
+    cli_args = 'Executioner/Predictor/dampers=missing --check-input'
+    expect_err = "The damper 'missing' does not exist"
+    requirement = "The system shall report an error when checking the input of a predictor that "
+                  "lists a damper that does not exist."
+    design = 'SimplePredictor.md'
+    issues = '#34453'
+  []
+
   [timestep_tolerance]
     requirement = "The system shall support the ability to use the Execitioner timestep tolerance to "
                   "determine if a prediction should be peformed."

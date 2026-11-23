@@ -1954,6 +1954,17 @@ public:
                               const NumericVector<libMesh::Number> & update);
 
   /**
+   * Damping of the change made by the predictor, by the dampers it lists. Collective on MPI.
+   * @param soln The predicted solution (ghosted)
+   * @param update The change as a search direction: soln = current - update (ghosted)
+   * @param failure Set to the message of a failed damper
+   * @return The damping factor, or nothing if a damper failed
+   */
+  std::optional<Real> computePredictorDamping(const NumericVector<libMesh::Number> & soln,
+                                              const NumericVector<libMesh::Number> & update,
+                                              std::string & failure);
+
+  /**
    * Check to see whether the problem should update the solution
    * @return true if the problem should update the solution, false otherwise
    */

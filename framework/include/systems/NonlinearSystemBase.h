@@ -303,7 +303,12 @@ public:
 
   void zeroVectorForResidual(const std::string & vector_name);
 
-  void setInitialSolution();
+  /**
+   * Set the initial guess of the solve: apply the predictor and the preset boundary conditions
+   * @return Whether the time step can be solved, false if a damper of the predictor failed and the
+   * predictor is set to cut the time step
+   */
+  bool setInitialSolution();
 
 #ifdef MOOSE_KOKKOS_ENABLED
   void setKokkosInitialSolution();
@@ -413,6 +418,18 @@ public:
    * @return returns The damping factor
    */
   Real computeDamping(const NumericVector<Number> & solution, const NumericVector<Number> & update);
+
+  /**
+   * Compute the damping of the dampers listed in the predictor
+   * @param solution The predicted solution vector
+   * @param update The change of the prediction, as a search direction: solution = old - update
+   * @return returns The damping factor
+   */
+  Real computePredictorDamping(const NumericVector<Number> & solution,
+                               const NumericVector<Number> & update);
+
+  /// Check that the dampers listed in the predictor exist
+  void checkPredictorDampers() const;
 
   /**
    * Called at the beginning of the time step
@@ -989,6 +1006,13 @@ protected:
   /// General Dampers
   MooseObjectWarehouse<GeneralDamper> _general_dampers;
 
+  /// Dampers listed in the predictor, which limit only the change of the prediction
+  ///@{
+  MooseObjectWarehouse<ElementDamper> _predictor_element_dampers;
+  MooseObjectWarehouse<NodalDamper> _predictor_nodal_dampers;
+  MooseObjectWarehouse<GeneralDamper> _predictor_general_dampers;
+  ///@}
+
   /// NodalKernels for each thread
   MooseObjectTagWarehouse<NodalKernelBase> _nodal_kernels;
 
@@ -1114,6 +1138,13 @@ private:
    * Setup group scaling containers
    */
   void setupScalingData();
+
+  /// Compute the damping of the dampers in the given warehouses, see computeDamping()
+  Real computeDamperWarehouses(const NumericVector<Number> & solution,
+                               const NumericVector<Number> & update,
+                               const MooseObjectWarehouse<ElementDamper> & element_dampers,
+                               const MooseObjectWarehouse<NodalDamper> & nodal_dampers,
+                               const MooseObjectWarehouse<GeneralDamper> & general_dampers);
 
   /// Functors for computing undisplaced mortar constraints
   std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>
