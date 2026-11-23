@@ -102,6 +102,11 @@
   [matrix_free_ams]
     type = MFEMMatrixFreeAMS
   []
+  [jacobi]
+    type = MFEMOperatorJacobiSmoother
+    # Matches the default MFEMMatrixFreeAMS smoother, so the solve reproduces the default gold
+    damping = 0.25
+  []
   [gmres]
     type = MFEMHypreGMRES
     preconditioner = ams
