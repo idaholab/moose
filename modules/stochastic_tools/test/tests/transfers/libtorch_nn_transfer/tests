@@ -13,4 +13,22 @@
                   "trainer object and a control object residing on different apps."
     capabilities = 'libtorch'
   []
+  [torch-parameters-all-subapps]
+    type = JSONDiff
+    input = libtorch_drl_control_trainer.i
+    cli_args = "Samplers/dummy/linear_space_items='0 0.01 4' Outputs/file_base=train_out_all"
+    # Every runner gold is a symlink to the trainer gold. With 4 sub-apps on 2 processors, the
+    # sub-apps 2 and 3 live on a processor that does not own sub-app 0.
+    jsondiff = 'train_out_all.json train_out_all_runner0_json_out.json '
+               'train_out_all_runner1_json_out.json train_out_all_runner2_json_out.json '
+               'train_out_all_runner3_json_out.json'
+    ignored_regex_items = "reporters/nn_parameters/type time_steps.*\['time(_step)?"
+    issues = '#34131'
+    min_parallel = 2
+    max_parallel = 2
+    requirement = "The system shall transfer an artificial neural network from a trainer object to "
+                  "the control objects of all sub-apps, also if they are distributed over multiple "
+                  "processors."
+    capabilities = 'libtorch'
+  []
 []
