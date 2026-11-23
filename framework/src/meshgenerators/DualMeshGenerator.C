@@ -1455,16 +1455,10 @@ DualMeshGenerator::generate()
         }
       }
 
-      if (!use_voronoi)
-      {
-        // Barycentric dual cells can be added as concave polygons, so only Voronoi dual cells need
-        // the triangle fan below.
-        if (fan_points.size() >= 3)
-          addDualElement(fan_points, source_subdomain_id);
-
-        continue;
-      }
-
+      // A C0Polygon must be convex, and it is fanned from vertex 0, so a reflex vertex cannot be
+      // emitted as one element: the fan would leave the polygon. Split it into triangles about the
+      // reflex vertex instead, which tiles the cell exactly because every other vertex is visible
+      // from it.
       if (fan_points.size() >= 3)
       {
         for (const auto i : make_range(std::size_t(1), fan_points.size() - 1))
