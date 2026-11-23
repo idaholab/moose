@@ -63,8 +63,6 @@ P_out = 2.0e5 # Pa
   crossflow_equation_relaxation = 0.5
   implicit = true
   segregated = false
-  # An exact factorization of the coupled matrix is faster for this case
-  coupled_preconditioner = lu
   verbose_subchannel = true
   interpolation_scheme = exponential
   pin_HTC_closure = 'Dittus-Boelter'

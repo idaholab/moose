@@ -31,8 +31,6 @@ mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
   P_out = ${P_out}
   implicit = true
   segregated = false
-  # An exact factorization of the coupled matrix is faster for this case
-  coupled_preconditioner = lu
   friction_closure = 'MATRA'
   mixing_closure = 'constant_beta'
   pin_HTC_closure = 'Dittus-Boelter'

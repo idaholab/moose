@@ -42,8 +42,6 @@ P_out = 1.0e5 # Pa
   T_tol = 1.0e-6
   implicit = true
   segregated = false
-  # An exact factorization of the coupled matrix is faster for this case
-  coupled_preconditioner = lu
   verbose_subchannel = true
   interpolation_scheme = upwind
   pin_HTC_closure = 'Dittus-Boelter'

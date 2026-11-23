@@ -166,19 +166,19 @@ protected:
   PetscErrorCode implicitPetscSolve(int iblock);
 
   /**
-   * Add the pseudo-time damping K_ij (Wij - Wij_iter) to the cross-momentum equation of the coupled
-   * solve, M_ww Wij + M_wp P + K_ij (Wij - Wij_iter) = b_w, where Wij is the crossflow the coupled
-   * solve computes and Wij_iter the crossflow of the current outer iterate. Each gap is damped by
-   * its crossflow inertia over a pseudo-time step, K_ij = L_ij S_ij rho* / dtau, which makes each
-   * coupled solve a step of pseudo-transient continuation: it keeps the coupled linear solve well
-   * conditioned, and the term vanishes at the fixed point Wij = Wij_iter, so it does not change the
-   * converged solution. The step grows from crossflow_pseudo_time_step as the cross-momentum
-   * residual decreases (switched evolution relaxation), so the damping vanishes as the outer
-   * iteration converges.
-   * @param M_ww          cross-momentum block acting on the crossflow; K_ij is added to its
+   * Add the pseudo-time damping added_K_ij (Wij - Wij_iter) to the cross-momentum equation of the
+   * monolithic solve, M_ww Wij + M_wp P + added_K_ij (Wij - Wij_iter) = b_w, where Wij is the
+   * crossflow the monolithic solve computes and Wij_iter the crossflow of the current outer
+   * iterate. Each gap is damped by its crossflow inertia over a pseudo-time step, added_K_ij = L_ij
+   * S_ij rho* / dtau, which makes each monolithic solve a step of pseudo-transient continuation: it
+   * keeps the monolithic linear solve well conditioned, and the term vanishes at the fixed point
+   * Wij = Wij_iter, so it does not change the converged solution. The step grows from
+   * crossflow_pseudo_time_step as the cross-momentum residual decreases (switched evolution
+   * relaxation), so the damping vanishes as the outer iteration converges.
+   * @param M_ww          cross-momentum block acting on the crossflow; added_K_ij is added to its
    *                      diagonal
    * @param M_wp          cross-momentum block acting on the pressure
-   * @param b_w           cross-momentum right-hand side; K_ij Wij_iter is added to it
+   * @param b_w           cross-momentum right-hand side; added_K_ij Wij_iter is added to it
    * @param Wij_iter      crossflow at the current outer iterate
    * @param iblock        axial block
    * @param inv_dtau      inverse of the pseudo-time step applied
@@ -298,17 +298,17 @@ protected:
   const Real & _T_relaxation;
   /// Number of enthalpy, temperature, and property updates performed per flow solve
   const unsigned int & _enthalpy_subcycles;
-  /// Equation relaxation factor for mass flow rate in the coupled implicit solve
+  /// Equation relaxation factor for mass flow rate in the monolithic solve
   const Real & _mass_flow_equation_relaxation;
-  /// Equation relaxation factor for pressure in the coupled implicit solve
+  /// Equation relaxation factor for pressure in the monolithic solve
   const Real & _pressure_equation_relaxation;
-  /// Equation relaxation factor for crossflow in the coupled implicit solve
+  /// Equation relaxation factor for crossflow in the monolithic solve
   const Real & _crossflow_equation_relaxation;
-  /// Relaxation factor for mass flow rate updates in the coupled implicit solve
+  /// Relaxation factor for mass flow rate updates in the monolithic solve
   const Real & _mass_flow_relaxation;
-  /// Relaxation factor for pressure updates in the coupled implicit solve
+  /// Relaxation factor for pressure updates in the monolithic solve
   const Real & _pressure_relaxation;
-  /// Relaxation factor for crossflow updates in the coupled implicit solve
+  /// Relaxation factor for crossflow updates in the monolithic solve
   const Real & _crossflow_relaxation;
   /// The relative convergence tolerance, (relative decrease) for the ksp linear solver
   const PetscReal & _rtol;
@@ -318,14 +318,16 @@ protected:
   const PetscReal & _dtol;
   /// The maximum number of iterations to use for the ksp linear solver
   const PetscInt _maxit;
-  /// Restart length of the FGMRES solver of the coupled monolithic flow system
-  const PetscInt _coupled_gmres_restart;
+  /// Restart length of the FGMRES solver of the monolithic flow system
+  const PetscInt _monolithic_gmres_restart;
+  /// Largest number of FGMRES iterations of a monolithic solve before it is retried with more damping
+  const PetscInt _monolithic_retry_maxit;
   /// Initial pseudo-time step of the crossflow damping
   const Real & _crossflow_pseudo_time_step;
-  /// Whether the crossflow of the coupled solve is damped with a pseudo-time derivative
+  /// Whether the crossflow of the monolithic solve is damped with a pseudo-time derivative
   const bool _crossflow_pseudo_time_damping;
-  /// Preconditioner of the coupled monolithic flow system
-  const MooseEnum _coupled_preconditioner;
+  /// Preconditioner of the monolithic flow system
+  const MooseEnum _monolithic_preconditioner;
   /// The interpolation method used in constructing the systems
   const MooseEnum _interpolation_scheme;
   /// The direction of gravity
@@ -496,14 +498,14 @@ protected:
   /// Maximum pressure fixed-point update before solution relaxation over the blocks
   Real _pressure_fixed_point_error = 1.0;
   /// Per-block largest cross-momentum residual norm of the solve, which scales the crossflow
-  /// damping in the coupled solve
+  /// damping in the monolithic solve
   std::vector<Real> _crossflow_residual_ref;
-  /// Per-block factor, raised after coupled linear-solve failures, that divides the crossflow
+  /// Per-block factor, raised after monolithic linear-solve failures, that divides the crossflow
   /// pseudo-time step and so delays its growth
   std::vector<Real> _crossflow_pseudo_time_step_reduction;
-  /// Number of coupled linear-solve retries, each halving the crossflow pseudo-time step
+  /// Number of monolithic linear-solve retries, each halving the crossflow pseudo-time step
   static constexpr unsigned int _max_crossflow_retries = 8;
-  /// Cap on the pseudo-time step reduction: the reduction one fully retried coupled solve provides
+  /// Cap on the pseudo-time step reduction: the reduction one fully retried monolithic solve provides
   static constexpr Real _max_crossflow_pseudo_time_step_reduction = 1 << _max_crossflow_retries;
 
 public:

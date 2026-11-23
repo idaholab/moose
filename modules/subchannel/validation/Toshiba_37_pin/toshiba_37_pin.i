@@ -80,9 +80,6 @@ P_out = 2.0e5 # Pa
   T_tol = 1.0e-5
   implicit = true
   segregated = false
-  # An exact factorization of the coupled matrix is faster for this case
-  coupled_preconditioner = lu
-  crossflow_pseudo_time_damping = true
   verbose_multiapps = true
   verbose_subchannel = false
   pin_HTC_closure = 'Dittus-Boelter'

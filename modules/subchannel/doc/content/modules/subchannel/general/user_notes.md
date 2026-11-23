@@ -43,48 +43,45 @@ SCM's solver is designed to solve for relative pressure: $P_{relative} = P_{abso
 
 !! Intentional comment to provide extra spacing
 
+### Monolithic solver
+
+!! Intentional comment to provide extra spacing
+
 The monolithic solver solves the coupled mass flow, pressure, and crossflow equations of a block
-together, by default with a field-split preconditioner and no crossflow damping
+together, by default with a field-split preconditioner and crossflow damping
 ([Monolithic](subchannel_theory.md#monolithic)). If its solve fails or converges slowly:
 
-- +The outer iteration does not converge, or the enthalpy becomes negative.+ Turn on the crossflow
-  damping with [!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_time_damping). Flow
-  blockage cases, square lattices, and some sodium cases need it; the converged solution does not
-  depend on it.
 - +Choosing the preconditioner.+ The default
-  [!param](/Problem/TriSubChannel1PhaseProblem/coupled_preconditioner) `fieldsplit_ilu` scales best
-  with the axial and lateral size and with the number of time steps. `lu` factors the coupled
-  matrix exactly and needs no retries; it is faster for small cases and converges some that the
-  field split does not, such as THORS FFM-3A without damping. A field split retries a coupled
-  solve that does not converge with more damping.
-- +Coupled solves stagnate with tight tolerances.+ With a field split and tight
+  [!param](/Problem/TriSubChannel1PhaseProblem/monolithic_preconditioner) `fieldsplit_ilu` scales
+  best with the axial and lateral size and with the number of time steps. `lu` factors the monolithic
+  matrix exactly and needs no retries, which makes it faster for small cases, but its cost grows
+  faster than the system size. A field split retries a monolithic solve that does not converge with
+  more damping.
+- +Turning off the damping.+ The crossflow damping vanishes at convergence and does not change the
+  converged solution. It can be turned off with
+  [!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_time_damping), but then the field
+  split cannot factor the crossflow block of a solve that starts from zero crossflow, so only `lu`
+  is suitable without it.
+- +Monolithic solves stagnate with tight tolerances.+ With a field split and tight
   [!param](/Problem/TriSubChannel1PhaseProblem/P_tol) and
   [!param](/Problem/TriSubChannel1PhaseProblem/T_tol), once the crossflow damping has decayed, the
   default FGMRES restart of 30 can discard the Krylov space before it resolves the coupled
-  crossflow-pressure modes. Raising
-  [!param](/Problem/TriSubChannel1PhaseProblem/coupled_gmres_restart) to 100 to 300 avoids this. A
-  longer restart also removes the linear-solve failures that raise the damping, which can
-  destabilize the outer iteration of flow blockage cases, so it is not the default.
-- +Choosing the crossflow pseudo-time step.+ The crossflow damping is a pseudo-time derivative
-  whose initial step is set by
+  crossflow-pressure modes. A longer
+  [!param](/Problem/TriSubChannel1PhaseProblem/monolithic_gmres_restart) avoids this. It also removes
+  the linear-solve failures that raise the damping, which can destabilize the outer iteration, so it
+  is not the default.
+- +Choosing the crossflow pseudo-time step.+ The initial step of the damping is set by
   [!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_time_step). The converged solution
-  does not depend on it; only the cost and the robustness of the iteration do. The default of
-  $5\times10^{-4}$ s works for the SCM tests. A larger step needs fewer outer iterations when the
-  iteration is well behaved; a smaller one damps more strongly, which can help when the outer
-  iteration diverges or reaches its iteration limit, at the cost of more iterations. Because the
-  convergence can be sensitive to it, as in flow blockage cases, try values a factor of two to five
-  either side of the default rather than a single value.
-  [Crossflow damping on EBR-II SHRT-17](crossflow_damping_study.md) reports the iteration counts
-  over five orders of magnitude of the step.
+  does not depend on it; only the cost and the robustness of the iteration do. A smaller step damps
+  more strongly, at the cost of more iterations. [The crossflow damping study](crossflow_damping_study.md)
+  shows how the iteration count depends on it.
 - +The outer iteration diverges on a coarse axial mesh.+ With the
   `upwind` or `exponential` [!param](/Problem/TriSubChannel1PhaseProblem/interpolation_scheme),
   the discrete flow equations of a coarse axial mesh can have no solution close to the
   `central_difference` one; the solve then diverges, often with a negative enthalpy or a growing
   pressure error. Refining the axial mesh or using `central_difference` restores a converging solve.
-  The EBR-II SHRT-17 test with 20 axial cells and upwind interpolation is one such case; it converges
-  with 25 or more cells, or with `central_difference` at 20 cells.
-- +Other options+ of the coupled solve can be set on the command line with the `scm_coupled_` PETSc
-  prefix, for example `-scm_coupled_ksp_monitor` to follow its convergence.
+- +Other options+ of the monolithic solve can be passed as PETSc options prefixed with
+  `-scm_monolithic_`, for example `-scm_monolithic_ksp_monitor` to follow its convergence.
 
 ## The displacement variable
 

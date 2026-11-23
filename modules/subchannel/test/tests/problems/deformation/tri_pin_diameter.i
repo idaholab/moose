@@ -33,8 +33,6 @@ mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
   compute_power = false
   implicit = true
   segregated = false
-  # Without damping the crossflow block has a zero diagonal in the first coupled solve
-  crossflow_pseudo_time_damping = true
   interpolation_scheme = central_difference
   friction_closure = 'Chen'
   mixing_closure = 'Chen_Todreas'

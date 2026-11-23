@@ -71,7 +71,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   T_tol = 1.0e-4
   implicit = true
   segregated = false
-  crossflow_pseudo_time_damping = true
   interpolation_scheme = 'upwind'
   pin_HTC_closure = 'gnielinski'
   friction_closure = 'Chen'

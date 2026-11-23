@@ -61,8 +61,6 @@ P_out = 2.0e5 # Pa
   crossflow_equation_relaxation = 0.5
   implicit = true
   segregated = false
-  # The undamped coupled solve does not converge this case
-  crossflow_pseudo_time_damping = true
   verbose_subchannel = true
   # The monolithic solve diverges for this case with the exponential and upwind schemes, while
   # central differencing converges

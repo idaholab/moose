@@ -65,7 +65,7 @@ SubChannel1PhaseProblem::validParams()
   // Enumerations
   MooseEnum schemes("upwind downwind central_difference exponential", "central_difference");
   MooseEnum gravity_direction("counter_flow co_flow none", "counter_flow");
-  MooseEnum coupled_preconditioners("lu fieldsplit_lu fieldsplit_ilu", "fieldsplit_ilu");
+  MooseEnum monolithic_preconditioners("lu fieldsplit_lu fieldsplit_ilu", "fieldsplit_ilu");
 
   // Inputs
   InputParameters params = ExternalProblem::validParams();
@@ -128,30 +128,38 @@ SubChannel1PhaseProblem::validParams()
   // 64-bit-index PETSc builds and has no input parser
   params.addParam<unsigned int>("maxit", 1e4, "Maximum number of iterations for ksp solver");
   params.addRangeCheckedParam<unsigned int>(
-      "coupled_gmres_restart",
+      "monolithic_gmres_restart",
       30,
-      "coupled_gmres_restart > 0",
-      "Restart length of the FGMRES solver of the coupled monolithic flow system. Values of 100 to "
+      "monolithic_gmres_restart > 0",
+      "Restart length of the FGMRES solver of the monolithic flow system. Values of 100 to "
       "300 speed up solves with tight P_tol and T_tol, where the default stagnates once the "
       "crossflow damping is small, but can destabilize the outer iteration of flow blockage cases");
+  params.addRangeCheckedParam<unsigned int>(
+      "monolithic_retry_maxit",
+      1000,
+      "monolithic_retry_maxit > 0",
+      "Largest number of FGMRES iterations of a monolithic linear solve before it is retried "
+      "with a smaller crossflow pseudo-time step. The last retry uses maxit. Only used with "
+      "crossflow_pseudo_time_damping.");
   params.addRangeCheckedParam<Real>(
       "crossflow_pseudo_time_step",
       5e-4,
       "crossflow_pseudo_time_step > 0",
-      "Initial pseudo-time step of the crossflow damping of the coupled monolithic flow system "
+      "Initial pseudo-time step of the crossflow damping of the monolithic flow system "
       "[s]. Each gap is damped by its crossflow inertia over a pseudo-time step that grows from "
       "this value as the cross-momentum residual decreases. Smaller values damp more strongly "
       "and need more outer iterations; the converged solution does not depend on it.");
   params.addParam<bool>(
       "crossflow_pseudo_time_damping",
-      false,
-      "Whether to damp the crossflow of the coupled monolithic flow system with a pseudo-time "
-      "derivative. Without it the coupled system is solved undamped, and a coupled linear solve "
-      "that does not converge is an error.");
+      true,
+      "Whether to damp the crossflow of the monolithic flow system with a pseudo-time "
+      "derivative. The damping vanishes at convergence and does not change the converged "
+      "solution. Without it the monolithic system is solved undamped, and a monolithic linear "
+      "solve that does not converge is an error.");
   params.addParam<MooseEnum>(
-      "coupled_preconditioner",
-      coupled_preconditioners,
-      "Preconditioner of the coupled monolithic flow system: 'lu' factors the coupled matrix "
+      "monolithic_preconditioner",
+      monolithic_preconditioners,
+      "Preconditioner of the monolithic flow system: 'lu' factors the monolithic matrix "
       "exactly with MUMPS; 'fieldsplit_lu' and 'fieldsplit_ilu' use a multiplicative field split "
       "with one split per field, factored exactly or with ILU(0). 'fieldsplit_ilu' is the "
       "cheapest per iteration and scales best to large assemblies.");
@@ -211,8 +219,9 @@ SubChannel1PhaseProblem::validParams()
                               "Solver tolerances and iterations");
   params.addParamNamesToGroup(
       "mass_flow_equation_relaxation pressure_equation_relaxation crossflow_equation_relaxation "
-      "mass_flow_relaxation pressure_relaxation crossflow_relaxation coupled_gmres_restart "
-      "crossflow_pseudo_time_step crossflow_pseudo_time_damping coupled_preconditioner",
+      "mass_flow_relaxation pressure_relaxation crossflow_relaxation monolithic_gmres_restart "
+      "monolithic_retry_maxit crossflow_pseudo_time_step crossflow_pseudo_time_damping "
+      "monolithic_preconditioner",
       "Monolithic solver");
   params.addParamNamesToGroup("implicit segregated interpolation_scheme", "Solution method");
   params.addParamNamesToGroup("fp friction_closure mixing_closure pin_HTC_closure duct_HTC_closure",
@@ -262,10 +271,11 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _atol(getParam<PetscReal>("atol")),
     _dtol(getParam<PetscReal>("dtol")),
     _maxit(getParam<unsigned int>("maxit")),
-    _coupled_gmres_restart(getParam<unsigned int>("coupled_gmres_restart")),
+    _monolithic_gmres_restart(getParam<unsigned int>("monolithic_gmres_restart")),
+    _monolithic_retry_maxit(getParam<unsigned int>("monolithic_retry_maxit")),
     _crossflow_pseudo_time_step(getParam<Real>("crossflow_pseudo_time_step")),
     _crossflow_pseudo_time_damping(getParam<bool>("crossflow_pseudo_time_damping")),
-    _coupled_preconditioner(getParam<MooseEnum>("coupled_preconditioner")),
+    _monolithic_preconditioner(getParam<MooseEnum>("monolithic_preconditioner")),
     _interpolation_scheme(getParam<MooseEnum>("interpolation_scheme")),
     _gravity_direction(getParam<MooseEnum>("gravity")),
     _dir_grav(computeGravityDir(_gravity_direction)),
@@ -299,17 +309,21 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
                                           "crossflow_relaxation",
                                           "crossflow_pseudo_time_step",
                                           "crossflow_pseudo_time_damping",
-                                          "coupled_preconditioner"})
+                                          "monolithic_retry_maxit",
+                                          "monolithic_preconditioner"})
       if (params.isParamSetByUser(relaxation_param))
         paramError(relaxation_param,
                    "The '",
                    relaxation_param,
                    "' parameter is only used by the implicit non-segregated solve. Set "
                    "'implicit = true' and 'segregated = false' to use it.");
-  if (!_crossflow_pseudo_time_damping && params.isParamSetByUser("crossflow_pseudo_time_step"))
-    paramError("crossflow_pseudo_time_step",
-               "The 'crossflow_pseudo_time_step' parameter is only used with "
-               "'crossflow_pseudo_time_damping = true'.");
+  if (!_crossflow_pseudo_time_damping)
+    for (const auto * damping_param : {"crossflow_pseudo_time_step", "monolithic_retry_maxit"})
+      if (params.isParamSetByUser(damping_param))
+        paramError(damping_param,
+                   "The '",
+                   damping_param,
+                   "' parameter is only used with 'crossflow_pseudo_time_damping = true'.");
   // NOTE: The four quantities below are 0 for processor_id != 0
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
   _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
@@ -1707,7 +1721,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         PetscScalar value_td_rhs = time_factor * _Wij_old(i_gap, iz);
         // A closed gap, where the pins touch and the mesh sets the gap width to zero, carries no
         // crossflow. Every coefficient of its row scales with Sij or with |Wij|, so the row is
-        // otherwise empty and the coupled system singular. The identity row Wij = 0 enforces the
+        // otherwise empty and the monolithic system singular. The identity row Wij = 0 enforces the
         // physical answer; the remaining terms add nothing to it because they are zero.
         if (Sij == 0.0)
         {
@@ -2245,15 +2259,15 @@ SubChannel1PhaseProblem::shiftCrossflowDamping(Mat M_ww,
                                                PetscScalar inv_dtau)
 {
   PetscFunctionBegin;
-  // damping = K_ij = L_ij S_ij rho* / dtau, the crossflow inertia of each gap of the block over the
-  // pseudo-time step
+  // damping = added_K_ij = L_ij S_ij rho* / dtau, the crossflow inertia of each gap of the block
+  // over the pseudo-time step
   Vec damping;
   LibmeshPetscCall(VecDuplicate(_cmc_pseudo_time_inertia, &damping));
   LibmeshPetscCall(VecCopy(_cmc_pseudo_time_inertia, damping));
   LibmeshPetscCall(VecScale(damping, inv_dtau));
-  // M_ww diagonal += K_ij, which damps the crossflow the coupled solve computes
+  // M_ww diagonal += added_K_ij, which damps the crossflow the monolithic solve computes
   LibmeshPetscCall(MatDiagonalSet(M_ww, damping, ADD_VALUES));
-  // b_w += K_ij Wij_iter, the compensation that makes the term vanish at Wij = Wij_iter. The
+  // b_w += added_K_ij Wij_iter, the compensation that makes the term vanish at Wij = Wij_iter. The
   // damping vector is no longer needed, so it holds the right-hand-side contribution.
   LibmeshPetscCall(VecPointwiseMult(damping, damping, Wij_iter));
   LibmeshPetscCall(VecAXPY(b_w, 1.0, damping));
@@ -2290,9 +2304,9 @@ SubChannel1PhaseProblem::addCrossflowDamping(
 
   // Pseudo-transient continuation with switched evolution relaxation: the pseudo-time step grows
   // from its initial value as the residual decreases, dtau = dtau_0 / (residual ratio * reduction),
-  // and each gap is damped by its crossflow inertia over it, K_ij = L_ij S_ij rho* / dtau. The
-  // reduction raised by failed coupled linear solves delays, but does not prevent, the growth of
-  // the step.
+  // and each gap is damped by its crossflow inertia over it, added_K_ij = L_ij S_ij rho* / dtau.
+  // The reduction raised by failed monolithic linear solves delays, but does not prevent, the
+  // growth of the step.
   const PetscScalar max_inv_dtau = 1.0 / _crossflow_pseudo_time_step;
   inv_dtau = std::min(
       max_inv_dtau, max_inv_dtau * residual_ratio * _crossflow_pseudo_time_step_reduction[iblock]);
@@ -2521,15 +2535,15 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   KSP ksp;
   PC pc;
   LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksp));
-  LibmeshPetscCall(KSPSetOptionsPrefix(ksp, "scm_coupled_"));
+  LibmeshPetscCall(KSPSetOptionsPrefix(ksp, "scm_monolithic_"));
   LibmeshPetscCall(KSPSetType(ksp, KSPFGMRES));
-  LibmeshPetscCall(KSPGMRESSetRestart(ksp, _coupled_gmres_restart));
+  LibmeshPetscCall(KSPGMRESSetRestart(ksp, _monolithic_gmres_restart));
   LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));
   LibmeshPetscCall(KSPGetPC(ksp, &pc));
   LibmeshPetscCall(KSPSetTolerances(ksp, _rtol, _atol, _dtol, _maxit));
-  if (_coupled_preconditioner == "lu")
+  if (_monolithic_preconditioner == "lu")
   {
-    // An exact factorization of the coupled matrix; MUMPS factors the nested matrix directly.
+    // An exact factorization of the monolithic matrix; MUMPS factors the nested matrix directly.
     // FGMRES is kept so the solve can start from the current iterate, and converges in one
     // iteration.
     LibmeshPetscCall(PCSetType(pc, PCLU));
@@ -2543,7 +2557,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
       LibmeshPetscCall(PCFieldSplitSetIS(pc, NULL, field_is[f]));
   }
   LibmeshPetscCall(KSPSetFromOptions(ksp));
-  if (_coupled_preconditioner == "fieldsplit_lu")
+  if (_monolithic_preconditioner == "fieldsplit_lu")
   {
     // Each split is factored exactly; the default of each split is ILU(0)
     LibmeshPetscCall(KSPSetUp(ksp));
@@ -2569,15 +2583,15 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   for (const auto f : make_range(Q))
     LibmeshPetscCall(VecISCopy(b_vec, field_is[f], SCATTER_FORWARD, vec_array[f]));
   // Start from the current iterate. As the crossflow damping vanishes near convergence, this keeps
-  // the coupled linear solve short. rtol is applied to the residual of the initial iterate rather
-  // than to the right-hand side.
+  // the monolithic linear solve short. rtol is applied to the residual of the initial iterate
+  // rather than to the right-hand side.
   LibmeshPetscCall(KSPSetInitialGuessNonzero(ksp, PETSC_TRUE));
   LibmeshPetscCall(KSPConvergedDefaultSetUIRNorm(ksp));
   PetscReal rtol, atol, dtol;
   PetscInt maxit;
   LibmeshPetscCall(KSPGetTolerances(ksp, &rtol, &atol, &dtol, &maxit));
 
-  // As the pseudo-time step grows, the coupled system can become too poorly conditioned for the
+  // As the pseudo-time step grows, the monolithic system can become too poorly conditioned for the
   // field-split preconditioner. A solve that has not converged within a limited number of
   // iterations is then repeated with a smaller step. Halving the step per retry with eight retries
   // spans the range between the residual-scaled step and the initial step. A per-attempt cap of
@@ -2585,13 +2599,13 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // step far more than necessary. The crossflow equation relaxation has scaled the damping of the
   // first attempt by 1/crossflow_equation_relaxation but does not scale the retry increments, so
   // with relaxation a retry raises the damping by less than a halving of the step would. The
-  // reduction applies in the next coupled solve of the block before the relaxation and takes full
-  // effect.
-  const PetscInt retry_maxit = 1000;
-  // The reduction is kept for the remaining coupled solves of the block in this SCM solve so that a
-  // failure is not repeated every iteration. Capping it at the reduction one fully retried solve
-  // provides keeps the damping bounded by a multiple of the residual ratio, so it still vanishes at
-  // convergence. Every attempt starts from the current outer iterate
+  // reduction applies in the next monolithic solve of the block before the relaxation and takes
+  // full effect.
+  const PetscInt retry_maxit = _monolithic_retry_maxit;
+  // The reduction is kept for the remaining monolithic solves of the block in this SCM solve so
+  // that a failure is not repeated every iteration. Capping it at the reduction one fully retried
+  // solve provides keeps the damping bounded by a multiple of the residual ratio, so it still
+  // vanishes at convergence. Every attempt starts from the current outer iterate
   auto setInitialGuess = [&]()
   {
     std::vector<Vec> x_sub(Q);
@@ -2626,7 +2640,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     inv_dtau += delta_inv_dtau;
     auto & reduction = _crossflow_pseudo_time_step_reduction[iblock];
     reduction = std::min(_max_crossflow_pseudo_time_step_reduction, 2.0 * reduction);
-    V("Coupled linear solve did not converge; retrying with nominal crossflow pseudo-time step "
+    V("Monolithic linear solve did not converge; retrying with nominal crossflow pseudo-time step "
       "(before crossflow equation relaxation): " +
       std::to_string(1.0 / inv_dtau));
 
@@ -2636,8 +2650,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecRestoreSubVector(b_vec, field_is[2], &b_w));
     // The shift changes the cross-momentum block in place. The field split uses that block itself
     // as its sub-operator, so the increased object state of the block makes the next solve
-    // rebuild the split preconditioner; resetting the operators also marks the coupled solver for
-    // a new setup.
+    // rebuild the split preconditioner; resetting the operators also marks the monolithic solver
+    // for a new setup.
     LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));
   }
   LibmeshPetscCall(VecDestroy(&Wij_iter));
@@ -2648,7 +2662,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(KSPGetIterationNumber(ksp, &iterations));
     LibmeshPetscCall(KSPGetResidualNorm(ksp, &residual_norm));
     mooseError(name(),
-               ": coupled mass/momentum linear solve failed: ",
+               ": monolithic linear solve failed: ",
                KSPConvergedReasons[reason],
                " (",
                static_cast<int>(reason),
@@ -2678,7 +2692,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(VecISCopy(x_vec, field_is[1], SCATTER_REVERSE, sol_p));
   LibmeshPetscCall(VecDuplicate(_cmc_sys_Wij_rhs, &sol_Wij));
   LibmeshPetscCall(VecISCopy(x_vec, field_is[2], SCATTER_REVERSE, sol_Wij));
-  V("Solution from coupled solver copied to solution vectors");
+  V("Solution from monolithic solver copied to solution vectors");
 
   // Apply independent post-solve relaxation to the fixed-point solution update.
   auto relaxSolution = [&](Vec solution, Vec old_solution, const Real relaxation)

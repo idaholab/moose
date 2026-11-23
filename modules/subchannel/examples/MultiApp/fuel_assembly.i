@@ -78,10 +78,6 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   n_blocks = 1
   implicit = true
   segregated = false
-  # An exact factorization of the coupled matrix is faster for this case
-  coupled_preconditioner = lu
-  # The damping makes the coupled solve faster here (70 s against 104 s without it)
-  crossflow_pseudo_time_damping = true
 
   # Tolerances
   # Tight enough that the outer iteration reaches the converged solution: tightening further to

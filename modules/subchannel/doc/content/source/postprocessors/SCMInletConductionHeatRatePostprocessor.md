@@ -10,8 +10,8 @@ The user needs to specify a subchannel problem, either a [QuadSubChannel1PhasePr
 [TriSubChannel1PhaseProblem.md]. The postprocessor calculates the surface-integrated heat flux that
 axial conduction carries out of the assembly through the inlet, against the flow, [inlet_conduction], where $i$ is
 the subchannel index, $k$ the thermal conductivity, $c_p$ the specific heat, $S$ the flow area and
-$\Delta z$ the height of the first axial cell. Face values are the average of the two nodes, as in
-the enthalpy equation.
+$\Delta z$ the height of the first axial cell. Face values use the weight of the interpolation scheme at $Pe = 0$, as
+in the enthalpy equation.
 
 \begin{equation}
 \label{inlet_conduction}
@@ -19,9 +19,20 @@ the enthalpy equation.
 \frac{h_i(1) - h_i(0)}{\Delta z}
 \end{equation}
 
-The inlet enthalpy is prescribed, so when the first axial cell is heated the enthalpy gradient
-across the inlet face drives a conduction flux out of the domain. A positive value leaves the
-assembly. This term closes the assembly energy balance, as described in
+The inlet enthalpy is prescribed with the inlet temperature. Where the first axial cell is heated,
+which happens when `unheated_length_entry` is zero, the enthalpy gradient across the inlet face is as
+steep as the gradient the heating produces, and conduction carries heat down that gradient out of the
+domain, against the flow. The flux is physical, not a discretization error: it converges under axial
+refinement rather than growing, because refining the mesh resolves the inlet gradient instead of
+changing it. An unheated entry length removes it, since the first cell then sits at the inlet
+temperature and the boundary gradient vanishes. A positive value leaves the assembly.
+
+The outlet needs no matching term: the conduction stencil of the last cell couples it only to the
+cell below, so the outlet face is adiabatic. This neglects conduction into an outlet plenum, which is
+not part of the domain, and the enthalpy the flow carries out of the outlet is already in the
+advective term.
+
+The inlet conduction closes the assembly energy balance, as described in
 [Energy balance](subchannel_theory.md#energy_balance): the pin and duct heat rates equal the
 enthalpy flow rate rise of [SCMTHPowerPostprocessor.md] plus this conduction loss.
 

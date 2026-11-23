@@ -46,8 +46,6 @@ P_out = 2.0e5 # Pa
   T_tol = 1.0e-4
   implicit = true
   segregated = false
-  # An exact factorization of the coupled matrix is faster for this case
-  coupled_preconditioner = lu
   verbose_multiapps = true
   verbose_subchannel = true
   interpolation_scheme = upwind
