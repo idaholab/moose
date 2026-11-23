@@ -11,7 +11,7 @@
 #include "Conversion.h"
 #include "CastUniquePointer.h"
 #include "GeometryUtils.h"
-#include "LineSegment.h"
+#include "PolygonUtils.h"
 #include "MooseHashing.h"
 #include "MooseMeshUtils.h"
 #include "MooseUtils.h"
@@ -121,103 +121,6 @@ elementsShareTwoNodes(const Elem * a, const Elem * b)
       "Detected elements sharing > 3 nodes."); // This is typically a sign of intertwined elements
 
   return shared_nodes == 2;
-}
-
-// Adds points but prevents adding duplicates
-static void
-addUniquePoint(std::vector<Point> & points, const Point & point, const Real length_tol = 1e-12)
-{
-  for (const auto & existing_point : points)
-    if (MooseUtils::absoluteFuzzyEqual(existing_point, point, length_tol))
-      return;
-
-  points.push_back(point);
-}
-
-// Detemines if `point` lies on the line segment from a to b
-static bool
-pointOnSegment2D(const Point & point, const Point & a, const Point & b)
-{
-  if (a.absolute_fuzzy_equals(b))
-    return a.absolute_fuzzy_equals(point);
-
-  return LineSegment(a, b).contains_point(point);
-}
-
-// We use intersections when we clip a mesh back to the primal boundary. Those intersection points
-// are necessary to keep the elements being reasonable within the boundary
-static void
-addSegmentIntersections2D(std::vector<Point> & points,
-                          const Point & p0,
-                          const Point & p1,
-                          const Point & q0,
-                          const Point & q1,
-                          const Real length_tol)
-{
-  if (p0.absolute_fuzzy_equals(p1))
-  {
-    if (pointOnSegment2D(p0, q0, q1))
-      addUniquePoint(points, p0, length_tol);
-
-    return;
-  }
-
-  if (q0.absolute_fuzzy_equals(q1))
-  {
-    if (pointOnSegment2D(q0, p0, p1))
-      addUniquePoint(points, q0, length_tol);
-
-    return;
-  }
-
-  const LineSegment segment0(p0, p1);
-  const LineSegment segment1(q0, q1);
-
-  if (geom_utils::arePointsColinear(p0, p1, q0) && geom_utils::arePointsColinear(p0, p1, q1))
-  {
-    if (pointOnSegment2D(q0, p0, p1))
-      addUniquePoint(points, q0, length_tol);
-    if (pointOnSegment2D(q1, p0, p1))
-      addUniquePoint(points, q1, length_tol);
-    if (pointOnSegment2D(p0, q0, q1))
-      addUniquePoint(points, p0, length_tol);
-    if (pointOnSegment2D(p1, q0, q1))
-      addUniquePoint(points, p1, length_tol);
-
-    return;
-  }
-
-  Point intersection = p0;
-
-  if (segment0.intersect(segment1, intersection) && pointOnSegment2D(intersection, p0, p1) &&
-      pointOnSegment2D(intersection, q0, q1))
-    addUniquePoint(points, intersection, length_tol);
-}
-
-// Ray casting test to see if points are inside a polygon -- libmesh util is more limited
-static bool
-pointInPolygon2D(const Point & point, const std::vector<Point> & polygon)
-{
-  if (polygon.size() < 3)
-    return false;
-
-  bool inside = false;
-
-  for (const auto i : index_range(polygon))
-  {
-    const auto j = (i + polygon.size() - 1) % polygon.size();
-    const Point & pi = polygon[i];
-    const Point & pj = polygon[j];
-
-    if (pointOnSegment2D(point, pj, pi))
-      return true;
-
-    if ((pi(1) > point(1)) != (pj(1) > point(1)) &&
-        point(0) < (pj(0) - pi(0)) * (point(1) - pi(1)) / (pj(1) - pi(1)) + pi(0))
-      inside = !inside;
-  }
-
-  return inside;
 }
 
 struct BoundarySegment
@@ -667,7 +570,7 @@ DualMeshGenerator::generate()
     // A region may have several boundary loops, an outer one plus loops around holes, so a point
     // is inside the region only when it is inside an odd number of them
     for (const auto & boundary_point_loop : boundary_region.boundary_point_loops)
-      if (pointInPolygon2D(point, boundary_point_loop))
+      if (polygon_utils::pointInPolygon2D(point, boundary_point_loop))
         inside = !inside;
 
     return inside;
@@ -795,33 +698,10 @@ DualMeshGenerator::generate()
                                               : dualMesh->add_elem_integer(name));
   }
 
-  // A C0Polygon is triangulated by fanning from its first vertex, so that vertex must not be
-  // collinear with any edge the fan spans, or the triangle on that edge is degenerate. Both the
-  // dual cells and the preserved primal elements gain collinear vertices from the side midpoints
-  // the construction inserts, so both need an apex whose fan is sound. Returns the offset to rotate
-  // the vertices by, or 0 if no rotation helps.
+  // Both the dual cells and the preserved primal elements gain collinear vertices from the side
+  // midpoints the construction inserts, so both need an apex whose fan is sound
   const auto fanApexOffset = [&area_tol](const std::vector<Point> & points)
-  {
-    const auto n_points = points.size();
-    const auto n_degenerate_triangles = [&](const std::size_t apex)
-    {
-      unsigned int n_degenerate = 0;
-
-      for (const auto i : make_range(std::size_t(1), n_points - 1))
-        if (std::abs(geom_utils::signedArea2D(points[apex],
-                                              points[(apex + i) % n_points],
-                                              points[(apex + i + 1) % n_points])) <= area_tol)
-          ++n_degenerate;
-
-      return n_degenerate;
-    };
-
-    for (const auto apex : index_range(points))
-      if (n_degenerate_triangles(apex) == 0)
-        return apex;
-
-    return std::size_t(0);
-  };
+  { return polygon_utils::fanApexOffset(points, area_tol); };
 
   // Ordered map because std::array has no std::hash specialization
   std::map<RoundedPointKey2D, std::vector<Node *>> dual_nodes_by_key;
@@ -1043,7 +923,7 @@ DualMeshGenerator::generate()
     // of these constructions, e.g. a dual vertex sitting exactly on the boundary.
     for (const auto & point : dual_points)
       if (pointInsideBoundary(boundary_region, point))
-        addUniquePoint(clipped_points, point, length_tol);
+        polygon_utils::addUniquePoint(clipped_points, point, length_tol);
 
     for (const auto i : index_range(dual_points))
     {
@@ -1053,7 +933,7 @@ DualMeshGenerator::generate()
       // Second, where a dual cell side crosses the boundary, the crossing point is where the
       // clipped cell turns and so has to become one of its vertices
       for (const auto & boundary_segment : boundary_region.boundary_clip_segments)
-        addSegmentIntersections2D(clipped_points,
+        polygon_utils::addSegmentIntersections2D(clipped_points,
                                   p0,
                                   p1,
                                   boundary_segment.first,
@@ -1065,11 +945,11 @@ DualMeshGenerator::generate()
     // cell has to follow, and no dual side passes through it, so it is not caught above
     for (const auto & boundary_segment : boundary_region.boundary_clip_segments)
     {
-      if (pointInPolygon2D(boundary_segment.first, dual_points))
-        addUniquePoint(clipped_points, boundary_segment.first, length_tol);
+      if (polygon_utils::pointInPolygon2D(boundary_segment.first, dual_points))
+        polygon_utils::addUniquePoint(clipped_points, boundary_segment.first, length_tol);
 
-      if (pointInPolygon2D(boundary_segment.second, dual_points))
-        addUniquePoint(clipped_points, boundary_segment.second, length_tol);
+      if (polygon_utils::pointInPolygon2D(boundary_segment.second, dual_points))
+        polygon_utils::addUniquePoint(clipped_points, boundary_segment.second, length_tol);
     }
 
     if (clipped_points.size() < 3)
@@ -1132,7 +1012,7 @@ DualMeshGenerator::generate()
       std::vector<std::size_t> segment_point_ids;
 
       for (const auto point_id : index_range(clipped_points))
-        if (pointOnSegment2D(
+        if (polygon_utils::pointOnSegment2D(
                 clipped_points[point_id], segment_start, segment_end))
           segment_point_ids.push_back(point_id);
 
@@ -1168,7 +1048,7 @@ DualMeshGenerator::generate()
           boundary_segment.first,
           boundary_segment.second,
           [&](const Point & midpoint)
-          { return pointInPolygon2D(midpoint, dual_points); });
+          { return polygon_utils::pointInPolygon2D(midpoint, dual_points); });
 
     // Walk the graph into a cycle starting from the lexicographically smallest vertex that has at
     // least two neighbors, so the ordering does not depend on the order the vertices were found
@@ -1277,7 +1157,7 @@ DualMeshGenerator::generate()
       [&](const BoundaryRegion2D & boundary_region, const Point & point)
   {
     for (const auto & boundary_segment : boundary_region.boundary_clip_segments)
-      if (pointOnSegment2D(
+      if (polygon_utils::pointOnSegment2D(
               point, boundary_segment.first, boundary_segment.second))
         return true;
 
@@ -1443,7 +1323,7 @@ DualMeshGenerator::generate()
 
     for (const auto center_id : ordered_center_ids)
     {
-      addUniquePoint(dual_points, dual_centers[center_id], length_tol);
+      polygon_utils::addUniquePoint(dual_points, dual_centers[center_id], length_tol);
       source_center_points.push_back(dual_centers[center_id]);
     }
 
@@ -1464,11 +1344,11 @@ DualMeshGenerator::generate()
 
           if (boundary_region->boundary_vertex_nodes.count(source_node_id) &&
               boundary_point_it != boundary_region->boundary_node_points.end())
-            addUniquePoint(
+            polygon_utils::addUniquePoint(
                 dual_points, boundary_point_it->second, length_tol); // Add primal vertices
 
           for (const auto & midpoint : boundary_midpoint_it->second)
-            addUniquePoint(dual_points, midpoint, length_tol);
+            polygon_utils::addUniquePoint(dual_points, midpoint, length_tol);
 
           if (boundary_point_it != boundary_region->boundary_node_points.end() &&
               !source_center_points.empty())
@@ -1607,7 +1487,7 @@ DualMeshGenerator::generate()
       const Point side_midpoint = 0.5 * (side_elem->point(0) + side_elem->point(1));
 
       for (const auto & preserved_side : preserved_side_boundaries)
-        if (pointOnSegment2D(side_midpoint, preserved_side.p0, preserved_side.p1))
+        if (polygon_utils::pointOnSegment2D(side_midpoint, preserved_side.p0, preserved_side.p1))
         {
           // An interface side is shared by a dual cell on either side of it, so only the element
           // with the lower id contributes it, which keeps a one-sided sideset one-sided

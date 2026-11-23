@@ -1,0 +1,30 @@
+[Tests]
+  design = 'meshgenerators/DualMeshGenerator.md'
+  issues = '#33143'
+
+  [add_unique_point]
+    type = GoogleTest
+    unit_test = PolygonUtilsTest.addUniquePoint
+    requirement = 'The system shall gather polygon points without duplicating a point that is already present within a given distance tolerance.'
+  []
+  [point_on_segment]
+    type = GoogleTest
+    unit_test = PolygonUtilsTest.pointOnSegment2D
+    requirement = 'The system shall determine whether a point lies on a two-dimensional segment, including its end points, and shall treat a degenerate segment as the single point it collapses to.'
+  []
+  [point_in_polygon]
+    type = GoogleTest
+    unit_test = PolygonUtilsTest.pointInPolygon2D
+    requirement = 'The system shall determine whether a point lies inside a two-dimensional polygon for non-convex polygons, counting points on the boundary as inside.'
+  []
+  [segment_intersections]
+    type = GoogleTest
+    unit_test = PolygonUtilsTest.addSegmentIntersections2D
+    requirement = 'The system shall compute the intersection of two two-dimensional segments, returning the crossing point for segments that cross, the end points of the overlap for overlapping collinear segments, and nothing for disjoint segments.'
+  []
+  [fan_apex]
+    type = GoogleTest
+    unit_test = PolygonUtilsTest.fanApexOffset
+    requirement = 'The system shall select a polygon vertex from which a triangle fan contains no degenerate triangle, so that a polygon carrying collinear vertices can be triangulated.'
+  []
+[]
