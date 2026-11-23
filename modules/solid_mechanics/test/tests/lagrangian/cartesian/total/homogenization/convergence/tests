@@ -7,7 +7,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = 'GlobalParams/stabilize_strain=false'
-    requirement = 'Jacobian is exact with rtol 1e-7 for small deformations, imposed strains, and no '
+    requirement = 'The system shall compute an exact Jacobian, with rtol 1e-7, for small deformations, imposed strains, and no '
                   'stabilization'
   []
   [sd-stress_no_stab]
@@ -16,7 +16,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = 'GlobalParams/stabilize_strain=false'
-    requirement = 'Jacobian is exact with rtol 1e-7 for small deformations, imposed stresses, and no '
+    requirement = 'The system shall compute an exact Jacobian, with rtol 1e-7, for small deformations, imposed stresses, and no '
                   'stabilization'
   []
   [ld-strain_no_stab]
@@ -25,7 +25,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = 'GlobalParams/stabilize_strain=false'
-    requirement = 'Jacobian is exact with rtol 1e-7 for large deformations, imposed strains, and no '
+    requirement = 'The system shall compute an exact Jacobian, with rtol 1e-7, for large deformations, imposed strains, and no '
                   'stabilization'
   []
   [ld-stress_no_stab]
@@ -34,7 +34,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = 'GlobalParams/stabilize_strain=false'
-    requirement = 'Jacobian is exact with rtol 1e-7 for large deformations, imposed stresses, and no '
+    requirement = 'The system shall compute an exact Jacobian, with rtol 1e-7, for large deformations, imposed stresses, and no '
                   'stabilization'
   []
   [sd-strain_right_stab]
@@ -43,7 +43,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = 'GlobalParams/stabilize_strain=true'
-    requirement = 'Jacobian is exact with rtol 1e-7 for small deformations, imposed strains, and '
+    requirement = 'The system shall compute an exact Jacobian, with rtol 1e-7, for small deformations, imposed strains, and '
                   'stabilization on'
   []
   [sd-stress_right_stab]
@@ -52,7 +52,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = 'GlobalParams/stabilize_strain=true'
-    requirement = 'Jacobian is exact with rtol 1e-7 for small deformations, imposed stresses, and '
+    requirement = 'The system shall compute an exact Jacobian, with rtol 1e-7, for small deformations, imposed stresses, and '
                   'stabilization on'
   []
   [ld-strain_right_stab]
@@ -61,7 +61,7 @@
     ratio_tol = 1E-6 # For some reason this one is 1.01e-7...
     difference_tol = 1E10
     cli_args = 'GlobalParams/stabilize_strain=true'
-    requirement = 'Jacobian is exact with rtol 1e-6 for large deformations, imposed strains, and '
+    requirement = 'The system shall compute an exact Jacobian, with rtol 1e-6, for large deformations, imposed strains, and '
                   'stabilization on'
   []
   [ld-stress_right_stab]
@@ -70,7 +70,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = 'GlobalParams/stabilize_strain=true'
-    requirement = 'Jacobian is exact with rtol 1e-7 for large deformations, imposed stresses, and '
+    requirement = 'The system shall compute an exact Jacobian, with rtol 1e-7, for large deformations, imposed stresses, and '
                   'stabilization on'
   []
 []

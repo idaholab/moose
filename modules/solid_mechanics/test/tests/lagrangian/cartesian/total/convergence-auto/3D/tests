@@ -2,7 +2,7 @@
   design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
   issues = '#17472 #33005'
   [jacobian]
-    requirement = 'Jacobian is exact with relative tolerance of 1e-7 with the total Lagrangian formulation in 3D'
+    requirement = 'The system shall compute an exact Jacobian, to a relative tolerance of 1e-7, with the total Lagrangian formulation in 3D'
     [dirichlet_small_neither]
       type = PetscJacobianTester
       input = 'dirichlet.i'

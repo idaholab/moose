@@ -7,7 +7,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/stabilize_strain=false"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'without stabilization (default alpha = 1.0).'
   []
   [jacobian_large_with_stab]
@@ -15,7 +15,7 @@
     input = 'jactest.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'with F-bar stabilization (default alpha = 1.0). Exercises the new explicit '
                   'F-bar tangent path that replaced the self-consistent f^{-1} * grad_trial '
                   'approximation.'
@@ -26,7 +26,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/stabilize_strain=false GlobalParams/alpha=0.5"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'without stabilization and the generalized midpoint rule (alpha = 0.5).'
   []
   [jacobian_large_with_stab_alpha05]
@@ -35,7 +35,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/alpha=0.5"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'with F-bar stabilization and the generalized midpoint rule (alpha = 0.5). '
                   'This case specifically exercises the combined F-bar + alpha != 1 chain that '
                   'the explicit F-bar tangent and removed kernel-side alpha parameter together '
@@ -47,7 +47,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/stabilize_strain=false GlobalParams/kinematic_approximation=quadratic"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'without stabilization with the quadratic kinematic approximation.'
   []
   [jacobian_large_with_stab_quadratic]
@@ -56,7 +56,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/kinematic_approximation=quadratic"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'with F-bar stabilization and the quadratic kinematic approximation.'
   []
   [jacobian_large_no_stab_alpha05_quadratic]
@@ -66,7 +66,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/stabilize_strain=false GlobalParams/alpha=0.5 "
                "GlobalParams/kinematic_approximation=quadratic"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'without stabilization, the generalized midpoint rule (alpha = 0.5), and the '
                   'quadratic kinematic approximation.'
   []
@@ -76,7 +76,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=quadratic"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'with F-bar stabilization, the generalized midpoint rule (alpha = 0.5), and '
                   'the quadratic kinematic approximation.'
   []
@@ -87,7 +87,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/stabilize_strain=false "
                "GlobalParams/kinematic_approximation=rashid_approximate"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'without stabilization with the Rashid approximate kinematic formulas.'
   []
   [jacobian_large_with_stab_rashid_approximate]
@@ -96,7 +96,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/kinematic_approximation=rashid_approximate"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'with F-bar stabilization and the Rashid approximate kinematic formulas.'
   []
   [jacobian_large_no_stab_alpha05_rashid_approximate]
@@ -106,7 +106,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/stabilize_strain=false GlobalParams/alpha=0.5 "
                "GlobalParams/kinematic_approximation=rashid_approximate"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'without stabilization, the generalized midpoint rule (alpha = 0.5), and '
                   'the Rashid approximate kinematic formulas.'
   []
@@ -116,7 +116,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_approximate"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'with F-bar stabilization, the generalized midpoint rule (alpha = 0.5), and '
                   'the Rashid approximate kinematic formulas.'
   []
@@ -127,7 +127,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/stabilize_strain=false "
                "GlobalParams/kinematic_approximation=rashid_eigen"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'without stabilization with the Rashid eigen (polar-decomposition + matrix log) '
                   'kinematic approximation.'
   []
@@ -137,7 +137,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/kinematic_approximation=rashid_eigen"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'with F-bar stabilization and the Rashid eigen kinematic approximation.'
   []
   [jacobian_large_no_stab_alpha05_rashid_eigen]
@@ -147,7 +147,7 @@
     difference_tol = 1E10
     cli_args = "GlobalParams/stabilize_strain=false GlobalParams/alpha=0.5 "
                "GlobalParams/kinematic_approximation=rashid_eigen"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'without stabilization, the generalized midpoint rule (alpha = 0.5), and '
                   'the Rashid eigen kinematic approximation.'
   []
@@ -157,7 +157,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     cli_args = "GlobalParams/alpha=0.5 GlobalParams/kinematic_approximation=rashid_eigen"
-    requirement = 'UL Jacobian is exact with relative tolerance of 1e-7 for large displacements '
+    requirement = 'The system shall compute an exact UL Jacobian, to a relative tolerance of 1e-7, for large displacements '
                   'with F-bar stabilization, the generalized midpoint rule (alpha = 0.5), and '
                   'the Rashid eigen kinematic approximation.'
   []

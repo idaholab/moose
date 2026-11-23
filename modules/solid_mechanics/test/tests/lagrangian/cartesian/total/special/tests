@@ -3,7 +3,7 @@
     type = CSVDiff
     input = 'area.i'
     csvdiff = 'area_out.csv'
-    requirement = "Stresses are being computed on the deformed volume with the total Lagrangian "
+    requirement = "The system shall compute stresses on the deformed volume with the total Lagrangian "
                   "formulation"
     issues = '#17472'
     design = 'source/materials/lagrangian/ComputeLagrangianObjectiveStress.md'
@@ -12,7 +12,7 @@
     type = CSVDiff
     input = 'rotate.i'
     csvdiff = 'rotate_out.csv'
-    requirement = "Stress state correctly rotates from step 10 to the final step"
+    requirement = "The system shall correctly rotate the stress state from step 10 to the final step"
     issues = '#17472'
     design = 'source/materials/lagrangian/ComputeLagrangianObjectiveStress.md'
     capabilities = 'method!=dbg'
@@ -21,7 +21,7 @@
     type = Exodiff
     input = 'objective_shear.i'
     exodiff = 'objective_shear_out.e'
-    requirement = "Classical demonstration that the shear stress/strain response remains linear for "
+    requirement = "The system shall reproduce the classical demonstration that the shear stress/strain response remains linear for "
                   "a Truesdell rate."
     issues = '#17472'
     design = 'source/materials/lagrangian/ComputeLagrangianObjectiveStress.md'
@@ -30,7 +30,7 @@
     type = Exodiff
     input = 'patch.i'
     exodiff = 'patch_out.e'
-    requirement = "System still functions if you supply a base_name"
+    requirement = "The system shall still function if you supply a base_name"
     abs_zero = 1e-6
     issues = '#17472'
     design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'

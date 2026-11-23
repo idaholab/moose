@@ -5,7 +5,7 @@
     type = Exodiff
     input = 'small.i'
     exodiff = 'small_out.e'
-    requirement = "Small strain solution in 1D centrosymmetric spherical coordinates matches "
+    requirement = "The system shall compute a small strain solution in 1D centrosymmetric spherical coordinates that matches "
                   "analytical solution"
     abs_zero = 1e-6
   []

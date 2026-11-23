@@ -5,14 +5,14 @@
     type = CSVDiff
     input = 'dirichlet.i'
     csvdiff = 'dirichlet_out.csv'
-    requirement = "Quadratic convergence in 2D for DirichletBCs with the updated Lagrangian "
+    requirement = "The system shall achieve quadratic convergence in 2D for DirichletBCs with the updated Lagrangian "
                   "formulation, SMP matches FDP."
   []
   [neumann]
     type = CSVDiff
     input = 'neumann.i'
     csvdiff = 'neumann_out.csv'
-    requirement = "Quadratic convergence in 2D for NeumannBCs with the updated Lagrangian "
+    requirement = "The system shall achieve quadratic convergence in 2D for NeumannBCs with the updated Lagrangian "
                   "formulation, SMP matches FDP."
   []
 []
