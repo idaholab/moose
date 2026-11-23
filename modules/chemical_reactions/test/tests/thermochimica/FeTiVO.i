@@ -10,20 +10,19 @@
   elements = 'O Ti V Fe'
   output_phases = 'gas_ideal SlagBsoln Hemasoln'
   output_species = 'gas_ideal:O2 SlagBsoln:Fe2O3'
-  output_element_potentials = 'mu:O mu:Ti mu:Fe'
-  output_vapor_pressures = 'vp:gas_ideal:O2'
+  output_element_potentials = 'O Ti Fe'
+  output_vapor_pressures = 'gas_ideal:O2'
 []
 
 [ChemicalComposition]
   [thermo]
-    thermofile = FeTiVO.dat
-    tunit = K
-    punit = atm
-    munit = moles
+    thermodynamic_database = FeTiVO.dat
+    temperature_unit = K
+    pressure_unit = atm
+    composition_unit = moles
     temperature = T
-    uo_name = Thermochimica
-    output_species_unit = mole_fraction
-    reinitialization_type = none
+    species_output_unit = mole_fraction
+    warm_start = none
   []
 []
 

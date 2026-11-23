@@ -1,0 +1,12 @@
+[Tests]
+  [phase_restricted_gibbs]
+    type = CSVDiff
+    input = phase_restricted_gibbs.i
+    csvdiff = phase_restricted_gibbs_out.csv
+    rel_err = 1e-6
+    capabilities = 'thermochimica'
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'The system shall couple a phase-restricted Thermochimica Gibbs-energy output into an Allen-Cahn free energy.'
+  []
+[]

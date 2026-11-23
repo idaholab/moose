@@ -1,0 +1,44 @@
+[Tests]
+  issues = '#22711'
+  design = 'ChemicalCompositionAction.md'
+
+  [interface_anatomy]
+    type = Exodiff
+    input = 01_interface_anatomy.i
+    exodiff = 01_interface_anatomy_out.e
+    requirement = 'The system shall set up a ChemicalComposition anatomy example covering the published flat output selectors and their typed-output equivalents.'
+    capabilities = 'thermochimica'
+  []
+
+  [redox_sweep]
+    type = CSVDiff
+    input = 02_redox_sweep.i
+    csvdiff = 02_redox_sweep_out_line_0001.csv
+    requirement = 'The system shall compute a spatial fluorine-potential and uranium-oxidation-state redox profile across a mesh in a single Thermochimica-coupled solve.'
+    capabilities = 'thermochimica'
+  []
+
+  [offgas]
+    type = CSVDiff
+    input = 03_offgas.i
+    csvdiff = 03_offgas_out.csv
+    requirement = 'The system shall report an off-gas phase amount and vapor pressures at a pressure below the salt bubble point, with a pressure set on a named ChemicalComposition subblock.'
+    capabilities = 'thermochimica'
+  []
+
+  [performance]
+    type = RunApp
+    input = 04_performance.i
+    expect_out = 'states=41, batches=2, exact_solves=41, warm_starts=41'
+    requirement = 'The system shall warm-start a batched spatial Thermochimica sweep and report exact solve, batch, and warm-start counters.'
+    capabilities = 'thermochimica'
+  []
+
+  [coupled_bc]
+    type = CSVDiff
+    input = 05_coupled_bc.i
+    csvdiff = 05_coupled_bc_out.csv
+    requirement = 'The system shall couple a Thermochimica element-potential output directly into a finite-element boundary condition.'
+    capabilities = 'thermochimica'
+  []
+[]
