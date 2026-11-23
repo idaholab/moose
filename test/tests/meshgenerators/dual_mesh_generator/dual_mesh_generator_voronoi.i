@@ -36,4 +36,10 @@
         minimum_element_volumes = 0
         examine_non_conformality = ERROR
     []
+
+    # exodiff cannot read NSIDED blocks, so the polygons are split for the comparison
+    [convert]
+        type = ElementsToSimplicesConverter
+        input = myDiagnosticGenerator
+    []
 []
