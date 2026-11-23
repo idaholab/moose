@@ -72,4 +72,26 @@
       detail = 'the archimedean polyhedra from user-specified nodes and faces.'
     []
   []
+  [polygons_exodus]
+    issues = '#32159'
+    requirement = 'The system shall be able to compare Exodus files holding polygons, whose elements have differing node counts within a single element block,'
+    [mapped]
+      type = Exodiff
+      input = 'polygons_exodus.i'
+      cli_args = '--mesh-only'
+      exodiff = 'polygons_exodus_in.e'
+      recover = false
+      detail = 'matching elements by their location,'
+    []
+    [file_order]
+      type = Exodiff
+      input = 'polygons_exodus.i'
+      cli_args = '--mesh-only'
+      exodiff = 'polygons_exodus_in.e'
+      map = false
+      exodiff_opts = '-pedantic'
+      recover = false
+      detail = 'and comparing their connectivity in file order.'
+    []
+  []
 []
