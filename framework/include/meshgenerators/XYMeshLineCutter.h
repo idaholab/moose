@@ -29,7 +29,7 @@ public:
 
 protected:
   /// Method to cut the input mesh
-  const enum class CutType { CUT_ELEM_TRI, MOV_NODE } _cutting_type;
+  const enum class CutType { CUT_ELEM_TRI, MOV_NODE, CUT_ELEM_POLY } _cutting_type;
   /// Name of the input mesh
   const MeshGeneratorName _input_name;
   /// Cutting line parameters, which are a, b, and c in line equation a*x+b*y+c=0. Note that a*x+b*y+c>0 part is being removed.
@@ -42,6 +42,8 @@ protected:
   const std::vector<boundary_id_type> _other_boundaries_to_conform;
   /// SubdomainName suffix used to rename the converted triangular elements
   const SubdomainName _tri_elem_subdomain_name_suffix;
+  /// SubdomainName suffix used to rename the converted C0Polygon (polygonal) cut elements
+  const SubdomainName _poly_elem_subdomain_name_suffix;
   /// Customized id shift to define subdomain ids of the converted triangular elements
   const subdomain_id_type _tri_elem_subdomain_shift;
   /// Whether to improve TRI3 elements after CUT_ELEM_TRI method
