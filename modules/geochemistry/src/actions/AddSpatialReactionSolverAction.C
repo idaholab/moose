@@ -62,13 +62,10 @@ AddSpatialReactionSolverAction::act()
     auto params = _factory.getValidParams(class_name);
     // Only pass parameters that were supplied to this action
 
-    // Block and Boundary params
+    // Block params
     if (isParamValid("block"))
       params.set<std::vector<SubdomainName>>("block") =
           getParam<std::vector<SubdomainName>>("block");
-    if (isParamValid("boundary"))
-      params.set<std::vector<BoundaryName>>("boundary") =
-          getParam<std::vector<BoundaryName>>("boundary");
 
     // GeochemistryReactorBase::sharedParams
     if (isParamValid("swap_out_of_basis"))

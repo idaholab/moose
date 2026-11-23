@@ -155,6 +155,10 @@ GeochemistryReactorBase::validParams()
 {
   InputParameters params = NodalUserObject::validParams();
   params += GeochemistryReactorBase::sharedParams();
+  // each execute() time-steps the chemistry at the node, so a node shared between blocks must not
+  // be visited once per block
+  params.set<bool>("unique_node_execute") = true;
+  params.suppressParameter<bool>("unique_node_execute");
 
   params.addRequiredParam<UserObjectName>(
       "model_definition", "The name of the GeochemicalModelDefinition user object.");
@@ -166,13 +170,17 @@ GeochemistryReactorBase::validParams()
       "process: (1) if abs(singular value) < stoi_tol * L1norm(singular values), then the "
       "matrix is deemed singular (so the basis swap is deemed invalid); (2) if abs(any "
       "stoichiometric coefficient) < stoi_tol then it is set to zero.");
+  // MOOSE would execute a boundary-restricted reactor only at the boundary nodes, while its
+  // per-node state and any AuxVariables querying it span the whole mesh.  Features such as
+  // lower-dimensional fractures are blocks, so restrict the reactor using "block" instead
+  params.suppressParameter<std::vector<BoundaryName>>("boundary");
   params.addClassDescription("Base class for UserObject to solve geochemistry reactions");
   return params;
 }
 
 GeochemistryReactorBase::GeochemistryReactorBase(const InputParameters & parameters)
   : NodalUserObject(parameters),
-    _num_my_nodes(_subproblem.mesh().getMesh().n_local_nodes()),
+    _num_my_nodes(countMyNodes()),
     _mgd(getUserObject<GeochemicalModelDefinition>("model_definition").getDatabase()),
     _pgs(getUserObject<GeochemicalModelDefinition>("model_definition")
              .getPertinentGeochemicalSystem()),
@@ -193,4 +201,29 @@ GeochemistryReactorBase::GeochemistryReactorBase(const InputParameters & paramet
     _tot_iter(_num_my_nodes, 0),
     _abs_residual(_num_my_nodes, 0.0)
 {
+}
+
+bool
+GeochemistryReactorBase::actsOnNode(const Node & node) const
+{
+  if (!blockRestricted())
+    return true;
+  // the same predicate MOOSE uses to decide whether a NodalUserObject fires at a node
+  for (const auto & id : _subproblem.mesh().getNodeBlockIds(node))
+    if (hasBlocks(id))
+      return true;
+  return false;
+}
+
+unsigned
+GeochemistryReactorBase::countMyNodes() const
+{
+  const MeshBase & msh = _subproblem.mesh().getMesh();
+  if (!blockRestricted())
+    return msh.n_local_nodes();
+  unsigned num_nodes = 0;
+  for (const auto & node : as_range(msh.local_nodes_begin(), msh.local_nodes_end()))
+    if (actsOnNode(*node))
+      num_nodes += 1;
+  return num_nodes;
 }
