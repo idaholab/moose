@@ -21,7 +21,9 @@ class Elem;
 #include "libmesh/libmesh_common.h" // not possible to forward declare typedef Real.
 
 // C++ includes
+#include <array>
 #include <utility>
+#include <vector>
 
 enum class MortarSegmentTriangulationMode : unsigned char
 {
@@ -75,4 +77,42 @@ struct MortarSegmentInfo
   // A magic number to let us determine when xi values have not been
   // initialized yet.
   static const Real invalid_xi;
+};
+
+/**
+ * How a 3D mortar segment node depends on the nodes of the secondary and primary sub-elements
+ * whose projected overlap polygon it belongs to. All points are projected onto the secondary
+ * subpatch plane.
+ */
+struct MortarSegmentNodeOrigin
+{
+  enum class Type : unsigned char
+  {
+    /// A secondary sub-element node: indices[0] is its sub-element node index
+    SecondaryNode,
+    /// A primary sub-element node: indices[0] is its sub-element node index
+    PrimaryNode,
+    /// The intersection of the secondary edge (indices[0], indices[1]) and the primary edge
+    /// (indices[2], indices[3]), given by sub-element node indices
+    EdgeIntersection,
+    /// The arithmetic mean of the polygon nodes indices[0], ..., indices[0] + indices[1] - 1
+    MeanCenter,
+    /// The area-weighted centroid of the polygon nodes indices[0], ..., indices[0] + indices[1] - 1
+    AreaCenter,
+    /// A node of unknown origin, whose displacement dependence is neglected
+    Fixed
+  };
+
+  Type type;
+  std::array<unsigned int, 4> indices;
+};
+
+/**
+ * The origins of the nodes of the overlap polygon that a 3D mortar segment was triangulated from,
+ * and which of those nodes are the mortar segment nodes
+ */
+struct MortarSegmentNodeOrigins
+{
+  std::vector<MortarSegmentNodeOrigin> polygon;
+  std::array<unsigned int, 3> nodes;
 };
