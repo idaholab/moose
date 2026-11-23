@@ -20,6 +20,8 @@ namespace Moose::MFEM
  * Steady-state ProblemOperator that prepares and solves a single EquationSystem.
  *
  * On each call to Solve() this class:
+ *   0. Sets the time of the coefficients to the problem time, which is the end of the time step
+ *      under a transient executioner.
  *   1. Forms equation-system data (kernels -> weak forms -> constrained linear part and
  *      nonlinear action forms).
  *   2. Calls SolveWithOperator() to pass either the EquationSystem itself or

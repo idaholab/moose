@@ -57,12 +57,12 @@ MFEMTransient::takeStep(Real input_dt)
 
   _time_stepper->preSolve();
 
-  // Unfortunately, time needs to be temporarily incremented so we get
-  // meaningful console output in timestepSetup(). We decrement it back
-  // immediately after so step() below behaves as expected.
-  _time += _dt;
+  // Advance time to the end of the step, as TransientBase does, so that everything executed during
+  // the step, including MultiApps and objects run at TIMESTEP_BEGIN, sees the same time
+  _time = _time_old + _dt;
+  // Coefficients evaluated before the solve, such as by auxkernels at TIMESTEP_BEGIN, see it too
+  _mfem_problem.getProblemData().coefficients.setTime(_time);
   _problem.timestepSetup();
-  _time -= _dt;
 
   _problem.onTimestepBegin();
   if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, true))
@@ -72,9 +72,7 @@ MFEMTransient::takeStep(Real input_dt)
   }
   _problem.execute(EXEC_TIMESTEP_BEGIN);
 
-  // Advance time step of the MFEM problem. Time is also updated here, and
-  // _problem_operator->SetTime is called inside the ode_solver->Step method to
-  // update the time used by time dependent (function) coefficients.
+  // Advance time step of the MFEM problem.
   _time_stepper->step();
 
   // Continue with usual TransientBase::takeStep() finalisation
