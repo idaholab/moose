@@ -204,10 +204,12 @@ pressure, and energy solves:
 ## Ordering of the active scalar equations
 
 By default the active scalar equations are solved after the flow has been corrected within each
-outer iteration. Setting
-[!param](/Executioner/SIMPLE/solve_active_scalars_before_flow) moves them to the start of the outer
+outer iteration. The systems listed in
+[!param](/Executioner/SIMPLE/active_scalar_systems_before_flow) are moved to the start of the outer
 iteration instead, ahead of the momentum predictor, so that they are advanced against the flux left
-by the previous outer iteration.
+by the previous outer iteration. The other active scalar systems stay after the flow, so that, for
+example, a phase fraction that sets the mixture density can be solved ahead of the flow while a
+scalar only carried by it is solved after.
 
 This does not change the converged answer. It alters the path taken to the fixed point, not the
 fixed point itself.

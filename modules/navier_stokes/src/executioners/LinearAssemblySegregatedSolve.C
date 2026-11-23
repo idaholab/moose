@@ -87,13 +87,13 @@ LinearAssemblySegregatedSolve::validParams()
       "should_solve_passive_scalars", true, "Whether we should solve passive scalar equations.");
   params.addParam<bool>(
       "should_solve_active_scalars", true, "Whether we should solve active scalar equations.");
-  params.addParam<bool>(
-      "solve_active_scalars_before_flow",
-      false,
-      "Whether the active scalar equations are solved at the start of each outer iteration, ahead "
-      "of the momentum predictor, against the flux left by the previous outer iteration, rather "
-      "than after the flow has been corrected.");
-  params.addParamNamesToGroup("solve_active_scalars_before_flow", "Active scalars");
+  params.addParam<std::vector<SolverSystemName>>(
+      "active_scalar_systems_before_flow",
+      {},
+      "The active scalar systems, among 'active_scalar_systems', solved at the start of each outer "
+      "iteration, ahead of the momentum predictor, against the flux left by the previous outer "
+      "iteration. The other active scalar systems are solved after the flow has been corrected.");
+  params.addParamNamesToGroup("active_scalar_systems_before_flow", "Active scalars");
   params.addParam<bool>("should_solve_pm_radiation",
                         true,
                         "Whether we should solve participating media radiation equations.");
@@ -210,7 +210,6 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
     _should_solve_passive_scalars(getParam<bool>("should_solve_passive_scalars")),
     _should_solve_active_scalars(getParam<bool>("should_solve_active_scalars")),
     _should_solve_pm_radiation(getParam<bool>("should_solve_pm_radiation")),
-    _solve_active_scalars_before_flow(getParam<bool>("solve_active_scalars_before_flow")),
     _active_scalar_system_names(getParam<std::vector<SolverSystemName>>("active_scalar_systems")),
     _has_active_scalar_systems(!_active_scalar_system_names.empty()),
     _active_scalar_equation_relaxation(
@@ -317,6 +316,22 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
   if (_active_scalar_equation_relaxation.size() != _active_scalar_system_names.size())
     paramError("active_scalar_equation_relaxation",
                "Should be the same size as the number of systems");
+
+  const auto & before_flow =
+      getParam<std::vector<SolverSystemName>>("active_scalar_systems_before_flow");
+  for (const auto & name : before_flow)
+    if (std::find(_active_scalar_system_names.begin(), _active_scalar_system_names.end(), name) ==
+        _active_scalar_system_names.end())
+      paramError("active_scalar_systems_before_flow",
+                 "System '",
+                 name,
+                 "' is not one of the 'active_scalar_systems'.");
+  for (const auto i : index_range(_active_scalar_systems))
+    if (std::find(before_flow.begin(), before_flow.end(), _active_scalar_system_names[i]) !=
+        before_flow.end())
+      _active_scalars_before_flow.push_back(i);
+    else
+      _active_scalars_after_flow.push_back(i);
 
   // We disable the prefix here for the time being, the segregated solvers use a different approach
   // for setting the petsc parameters
@@ -748,27 +763,27 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
   return residuals;
 }
 
-std::vector<std::pair<unsigned int, Real>>
-LinearAssemblySegregatedSolve::solveActiveScalarSystems(const SolverParams & solver_params)
+void
+LinearAssemblySegregatedSolve::solveActiveScalarSystems(const SolverParams & solver_params,
+                                                        const std::vector<std::size_t> & systems,
+                                                        ResidualStorage & residual_storage)
 {
-  std::vector<std::pair<unsigned int, Real>> residuals;
+  if (systems.empty())
+    return;
 
   _problem.execute(EXEC_NONLINEAR);
 
   // We set the preconditioner/controllable parameters through petsc options. Linear
   // tolerances will be overridden within the solver.
   Moose::PetscSupport::petscSetOptions(_active_scalar_petsc_options, solver_params);
-  for (const auto i : index_range(_active_scalar_system_names))
-    residuals.push_back(solveAdvectedSystem(
+  for (const auto i : systems)
+    residual_storage.ns_residuals[residual_storage.active_scalar_indices[i]] = solveAdvectedSystem(
         _active_scalar_system_numbers[i],
         *_active_scalar_systems[i],
         _active_scalar_equation_relaxation[i],
         _active_scalar_linear_control,
         _active_scalar_l_abs_tol,
-        (_active_scalar_pc_solve_counter % _active_scalar_pc_recompute_frequency) != 0));
-  ++_active_scalar_pc_solve_counter;
-
-  return residuals;
+        (_active_scalar_pc_solve_counter % _active_scalar_pc_recompute_frequency) != 0);
 }
 
 bool
@@ -805,7 +820,6 @@ LinearAssemblySegregatedSolve::solve()
   const auto pressure_index = residual_storage.pressure_index;
   const auto energy_index = residual_storage.energy_index;
   const auto solid_energy_index = residual_storage.solid_energy_index;
-  const auto & active_scalar_indices = residual_storage.active_scalar_indices;
   const auto & turbulence_indices = residual_storage.turbulence_indices;
   const auto & pm_radiation_indices = residual_storage.pm_radiation_indices;
 
@@ -836,15 +850,9 @@ LinearAssemblySegregatedSolve::solve()
 
     _console << "Iteration " << simple_iteration_counter << " Initial residual norms:" << std::endl;
 
-    // The active scalars may be solved ahead of the flow, against the flux left by the previous
+    // Some active scalars may be solved ahead of the flow, against the flux left by the previous
     // outer iteration
-    if (_has_active_scalar_systems && _should_solve_active_scalars &&
-        _solve_active_scalars_before_flow)
-    {
-      const auto active_scalar_residuals = solveActiveScalarSystems(solver_params);
-      for (const auto i : index_range(_active_scalar_system_names))
-        ns_residuals[active_scalar_indices[i]] = active_scalar_residuals[i];
-    }
+    solveActiveScalarSystems(solver_params, _active_scalars_before_flow, residual_storage);
 
     // Solve the momentum predictor step
     if (_should_solve_momentum)
@@ -934,24 +942,10 @@ LinearAssemblySegregatedSolve::solve()
     // If we have active scalar equations, solve them here in case they depend on temperature
     // or they affect the fluid properties such that they must be solved concurrently with
     // pressure and velocity
-    if (_has_active_scalar_systems && _should_solve_active_scalars &&
-        !_solve_active_scalars_before_flow)
-    {
-      _problem.execute(EXEC_NONLINEAR);
-
-      // We set the preconditioner/controllable parameters through petsc options. Linear
-      // tolerances will be overridden within the solver.
-      Moose::PetscSupport::petscSetOptions(_active_scalar_petsc_options, solver_params);
-      for (const auto i : index_range(_active_scalar_system_names))
-        ns_residuals[active_scalar_indices[i]] = solveAdvectedSystem(
-            _active_scalar_system_numbers[i],
-            *_active_scalar_systems[i],
-            _active_scalar_equation_relaxation[i],
-            _active_scalar_linear_control,
-            _active_scalar_l_abs_tol,
-            (_active_scalar_pc_solve_counter % _active_scalar_pc_recompute_frequency) != 0);
+    solveActiveScalarSystems(solver_params, _active_scalars_after_flow, residual_storage);
+    // Every active scalar system has been solved once in this outer iteration
+    if (_has_active_scalar_systems && _should_solve_active_scalars)
       ++_active_scalar_pc_solve_counter;
-    }
 
     // If we have turbulence equations, solve them here.
     // The turbulent viscosity depends on the value of the turbulence surrogate variables

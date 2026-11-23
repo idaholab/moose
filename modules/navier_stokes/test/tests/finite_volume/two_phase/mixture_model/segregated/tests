@@ -180,12 +180,24 @@
   [active_scalars_before_flow]
     type = CSVDiff
     input = 'channel-drift-flux-physics.i'
-    cli_args = "Executioner/solve_active_scalars_before_flow=true Outputs/file_base=active-scalars-before-flow"
+    cli_args = "Executioner/active_scalar_systems_before_flow=phi_system Outputs/file_base=active-scalars-before-flow"
     # The gold is a link to the default ordering's gold: moving the scalars ahead of the flow
     # changes the path to the fixed point, not the fixed point
     csvdiff = 'active-scalars-before-flow.csv'
     design = 'SIMPLE.md'
     requirement = 'The system shall reach the same converged solution when the active scalar equations are solved ahead of the flow within each outer iteration as when they are solved after it.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [active_scalars_split_around_flow]
+    type = CSVDiff
+    input = 'interfacial-mass-transfer-prescribed.i'
+    cli_args = "Executioner/active_scalar_systems_before_flow=phase_system Outputs/file_base=active-scalars-split-around-flow"
+    # The gold is a link to the default ordering's gold: every time step is converged, so where
+    # each scalar is solved within the outer iteration does not change the answer
+    csvdiff = 'active-scalars-split-around-flow.csv'
+    abs_zero = 1e-8
+    design = 'SIMPLE.md'
+    requirement = 'The system shall reach the same converged solution when one active scalar equation is solved ahead of the flow and another after it within each outer iteration as when both are solved after it.'
     max_threads = 1 # see libmesh issue #3808
   []
 
@@ -313,6 +325,14 @@
 
   [errors]
     requirement = "The system shall return an error if"
+    [active_scalar_before_flow_not_active_scalar]
+      type = RunException
+      input = 'channel-drift-flux-physics.i'
+      cli_args = "Executioner/active_scalar_systems_before_flow=u_system"
+      expect_err = "System 'u_system' is not one of the 'active_scalar_systems'."
+      detail = 'a system to be solved ahead of the flow is not one of the active scalar systems.'
+      max_threads = 1 # see libmesh issue #3808
+    []
     [drag_model_with_prescribed_slip_friction]
       type = RunException
       input = 'channel-drift-flux-physics.i'

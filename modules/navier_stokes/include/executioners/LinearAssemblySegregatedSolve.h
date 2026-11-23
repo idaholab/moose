@@ -200,16 +200,20 @@ protected:
   // ******************** Ordering of the active scalars ******************** //
 
   /**
-   * Solve every active scalar system once, against the current transporting flux.
+   * Solve the given active scalar systems once each, against the current transporting flux.
    * @param solver_params solver parameters forwarded to the individual solves
-   * @return the residual of each active scalar system
+   * @param systems indices into the active scalar systems of the systems to solve
+   * @param residual_storage storage whose entries for these systems receive their residuals
    */
-  std::vector<std::pair<unsigned int, Real>>
-  solveActiveScalarSystems(const SolverParams & solver_params);
+  void solveActiveScalarSystems(const SolverParams & solver_params,
+                                const std::vector<std::size_t> & systems,
+                                ResidualStorage & residual_storage);
 
-  /// Whether the active scalar equations are solved ahead of the momentum predictor, against the
-  /// flux left by the previous outer iteration
-  const bool _solve_active_scalars_before_flow;
+  /// Indices into the active scalar systems of those solved ahead of the momentum predictor,
+  /// against the flux left by the previous outer iteration
+  std::vector<std::size_t> _active_scalars_before_flow;
+  /// Indices into the active scalar systems of those solved after the flow has been corrected
+  std::vector<std::size_t> _active_scalars_after_flow;
 
   // ************************ Active Scalar Variables ************************ //
 
