@@ -2888,12 +2888,13 @@ protected:
   /// Temporary work data for reinitAtPhysical()
   std::vector<Point> _temp_reference_points;
 
-  /// The AD map of the current element. A face reinit overwrites it: it is evaluated at the face
-  /// quadrature points for the AD face shape function gradients, and computeFaceMap stores the
-  /// face tangents in it.
+  /// The AD map of the current element. A face reinit evaluates it at the face quadrature points
+  /// for the AD face shape function gradients.
   ADElemMap _ad_elem_map;
 
-  /// AD face second derivatives, used by computeFaceMap for the curvatures
+  /// AD face tangents and second derivatives, used by computeFaceMap
+  std::vector<VectorValue<ADReal>> _ad_face_dxyzdxi_map;
+  std::vector<VectorValue<ADReal>> _ad_face_dxyzdeta_map;
   std::vector<VectorValue<ADReal>> _ad_d2xyzdxi2_map;
   std::vector<VectorValue<ADReal>> _ad_d2xyzdxideta_map;
   std::vector<VectorValue<ADReal>> _ad_d2xyzdeta2_map;

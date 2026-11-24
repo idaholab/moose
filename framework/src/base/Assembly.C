@@ -1489,12 +1489,12 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
     case 2:
     {
-      _ad_elem_map.dxyzdxi.resize(n_qp);
+      _ad_face_dxyzdxi_map.resize(n_qp);
       if (_calculate_curvatures)
         _ad_d2xyzdxi2_map.resize(n_qp);
 
       for (const auto p : make_range(n_qp))
-        _ad_elem_map.dxyzdxi[p].zero();
+        _ad_face_dxyzdxi_map[p].zero();
       if (_calculate_face_xyz)
         for (const auto p : make_range(n_qp))
           _ad_q_points_face[p].zero();
@@ -1510,7 +1510,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         const auto & side_point = _ad_elem_node_points[elem.local_side_node(side, i)];
 
         for (const auto p : make_range(n_qp))
-          _ad_elem_map.dxyzdxi[p].add_scaled(side_point, dpsidxi_map[i][p]);
+          _ad_face_dxyzdxi_map[p].add_scaled(side_point, dpsidxi_map[i][p]);
         if (_calculate_face_xyz)
           for (const auto p : make_range(n_qp))
             _ad_q_points_face[p].add_scaled(side_point, psi_map[i][p]);
@@ -1522,14 +1522,14 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
       for (const auto p : make_range(n_qp))
       {
         _ad_normals[p] =
-            (VectorValue<ADReal>(_ad_elem_map.dxyzdxi[p](1), -_ad_elem_map.dxyzdxi[p](0), 0.))
+            (VectorValue<ADReal>(_ad_face_dxyzdxi_map[p](1), -_ad_face_dxyzdxi_map[p](0), 0.))
                 .unit();
-        const auto the_jac = _ad_elem_map.dxyzdxi[p].norm();
+        const auto the_jac = _ad_face_dxyzdxi_map[p].norm();
         _ad_JxW_face[p] = the_jac * qw[p];
         if (_calculate_curvatures)
         {
           const auto numerator = _ad_d2xyzdxi2_map[p] * _ad_normals[p];
-          const auto denominator = _ad_elem_map.dxyzdxi[p].norm_sq();
+          const auto denominator = _ad_face_dxyzdxi_map[p].norm_sq();
           libmesh_assert_not_equal_to(denominator, 0);
           _ad_curvatures[p] = numerator / denominator;
         }
@@ -1540,8 +1540,8 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
     case 3:
     {
-      _ad_elem_map.dxyzdxi.resize(n_qp);
-      _ad_elem_map.dxyzdeta.resize(n_qp);
+      _ad_face_dxyzdxi_map.resize(n_qp);
+      _ad_face_dxyzdeta_map.resize(n_qp);
       if (_calculate_curvatures)
       {
         _ad_d2xyzdxi2_map.resize(n_qp);
@@ -1551,8 +1551,8 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
       for (const auto p : make_range(n_qp))
       {
-        _ad_elem_map.dxyzdxi[p].zero();
-        _ad_elem_map.dxyzdeta[p].zero();
+        _ad_face_dxyzdxi_map[p].zero();
+        _ad_face_dxyzdeta_map[p].zero();
       }
       if (_calculate_face_xyz)
         for (const auto p : make_range(n_qp))
@@ -1574,8 +1574,8 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
         for (const auto p : make_range(n_qp))
         {
-          _ad_elem_map.dxyzdxi[p].add_scaled(side_point, dpsidxi_map[i][p]);
-          _ad_elem_map.dxyzdeta[p].add_scaled(side_point, dpsideta_map[i][p]);
+          _ad_face_dxyzdxi_map[p].add_scaled(side_point, dpsidxi_map[i][p]);
+          _ad_face_dxyzdeta_map[p].add_scaled(side_point, dpsideta_map[i][p]);
         }
         if (_calculate_face_xyz)
           for (const auto p : make_range(n_qp))
@@ -1591,11 +1591,11 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
       for (const auto p : make_range(n_qp))
       {
-        _ad_normals[p] = _ad_elem_map.dxyzdxi[p].cross(_ad_elem_map.dxyzdeta[p]).unit();
+        _ad_normals[p] = _ad_face_dxyzdxi_map[p].cross(_ad_face_dxyzdeta_map[p]).unit();
 
-        const auto &dxdxi = _ad_elem_map.dxyzdxi[p](0), &dxdeta = _ad_elem_map.dxyzdeta[p](0),
-                   &dydxi = _ad_elem_map.dxyzdxi[p](1), &dydeta = _ad_elem_map.dxyzdeta[p](1),
-                   &dzdxi = _ad_elem_map.dxyzdxi[p](2), &dzdeta = _ad_elem_map.dxyzdeta[p](2);
+        const auto &dxdxi = _ad_face_dxyzdxi_map[p](0), &dxdeta = _ad_face_dxyzdeta_map[p](0),
+                   &dydxi = _ad_face_dxyzdxi_map[p](1), &dydeta = _ad_face_dxyzdeta_map[p](1),
+                   &dzdxi = _ad_face_dxyzdxi_map[p](2), &dzdeta = _ad_face_dxyzdeta_map[p](2);
 
         const auto g11 = (dxdxi * dxdxi + dydxi * dydxi + dzdxi * dzdxi);
 
@@ -1615,9 +1615,9 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
           const auto L = -_ad_d2xyzdxi2_map[p] * _ad_normals[p];
           const auto M = -_ad_d2xyzdxideta_map[p] * _ad_normals[p];
           const auto N = -_ad_d2xyzdeta2_map[p] * _ad_normals[p];
-          const auto E = _ad_elem_map.dxyzdxi[p].norm_sq();
-          const auto F = _ad_elem_map.dxyzdxi[p] * _ad_elem_map.dxyzdeta[p];
-          const auto G = _ad_elem_map.dxyzdeta[p].norm_sq();
+          const auto E = _ad_face_dxyzdxi_map[p].norm_sq();
+          const auto F = _ad_face_dxyzdxi_map[p] * _ad_face_dxyzdeta_map[p];
+          const auto G = _ad_face_dxyzdeta_map[p].norm_sq();
 
           const auto numerator = E * N - 2. * F * M + G * L;
           const auto denominator = E * G - F * F;
