@@ -381,20 +381,19 @@ WCNSLinearFVTwoPhaseMixturePhysics::scalarConservativeDensity(const VariableName
 }
 
 void
-WCNSLinearFVTwoPhaseMixturePhysics::setSlipVelocityParams(InputParameters & params) const
+WCNSLinearFVTwoPhaseMixturePhysics::setDriftVelocityParams(InputParameters & params) const
 {
   // Only the phase advection kernel interpolates the drift separately; the momentum and energy
   // drift terms are kernels of their own already.
-  if (isParamValid("phase_drift_advection_interpolation") &&
-      params.have_parameter<InterpolationMethodName>("slip_advected_interp_method_name"))
-    params.set<InterpolationMethodName>("slip_advected_interp_method_name") =
+  if (isParamValid("phase_drift_advection_interpolation"))
+    params.set<InterpolationMethodName>("drift_advected_interp_method_name") =
         getParam<InterpolationMethodName>("phase_drift_advection_interpolation");
 
-  params.set<MooseFunctorName>("u_slip") = "vel_drift_x";
+  params.set<MooseFunctorName>("u_drift") = "vel_drift_x";
   if (dimension() >= 2)
-    params.set<MooseFunctorName>("v_slip") = "vel_drift_y";
+    params.set<MooseFunctorName>("v_drift") = "vel_drift_y";
   if (dimension() >= 3)
-    params.set<MooseFunctorName>("w_slip") = "vel_drift_z";
+    params.set<MooseFunctorName>("w_drift") = "vel_drift_z";
 }
 
 void
@@ -550,7 +549,11 @@ WCNSLinearFVTwoPhaseMixturePhysics::addInterfacialMassTransferRateMaterial()
   params.set<MooseFunctorName>("rho_c") = _phase_1_density;
   params.set<MooseFunctorName>("mu_c") = _phase_1_viscosity;
   params.set<MooseFunctorName>("k_c") = _phase_1_thermal_conductivity;
-  setSlipVelocityParams(params);
+  params.set<MooseFunctorName>("u_slip") = "vel_drift_x";
+  if (dimension() >= 2)
+    params.set<MooseFunctorName>("v_slip") = "vel_drift_y";
+  if (dimension() >= 3)
+    params.set<MooseFunctorName>("w_slip") = "vel_drift_z";
   params.set<MooseFunctorName>("interfacial_mass_transfer_name") = _interfacial_mass_transfer;
   getProblem().addMaterial("WCNSFV2PInterfacialMassTransferFunctorMaterial",
                            _interfacial_mass_transfer + "_mat",

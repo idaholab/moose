@@ -33,38 +33,41 @@ public:
   virtual void setupFaceData(const FaceInfo * face_info) override;
 
 protected:
-  virtual Real boundaryFaceFlux() const override { return _volumetric_face_flux + _slip_face_flux; }
+  virtual Real boundaryFaceFlux() const override
+  {
+    return _volumetric_face_flux + _drift_face_flux;
+  }
 
 private:
   /// Scheme the drift flux is interpolated against. The split is unconditional; this only chooses
   /// which scheme the drift half uses, and defaults to the mixture flux's own. Giving the drift a
   /// scheme of its own is what allows it to be limited independently of the mixture flux.
-  const FVAdvectedInterpolationMethod & _slip_adv_interp_method;
+  const FVAdvectedInterpolationMethod & _drift_adv_interp_method;
 
   /// Gradient field used by the drift interpolation when it requires gradients.
-  const LinearFVGradientReader * const _slip_gradient_field;
+  const LinearFVGradientReader * const _drift_gradient_field;
 
   /// Cached weights/correction for the drift flux on the current face
-  FVAdvectedInterpolationMethod::AdvectedSystemContribution _slip_interp_result;
+  FVAdvectedInterpolationMethod::AdvectedSystemContribution _drift_interp_result;
 
   /// The gradient storage for the drift half, kept apart from the mixture half because the two
   /// schemes may differ
-  VectorValue<Real> _slip_elem_grad_storage;
-  VectorValue<Real> _slip_neighbor_grad_storage;
+  VectorValue<Real> _drift_elem_grad_storage;
+  VectorValue<Real> _drift_neighbor_grad_storage;
 
   /// The drift contribution to the face flux. The total flux carried across the face is always
   /// the sum of this and the mixture flux.
-  Real _slip_face_flux;
+  Real _drift_face_flux;
 
-  /// slip velocity in direction x
-  const Moose::Functor<ADReal> & _u_slip;
-  /// slip velocity in direction y
-  const Moose::Functor<ADReal> * const _v_slip;
-  /// slip velocity in direction z
-  const Moose::Functor<ADReal> * const _w_slip;
+  /// drift velocity in direction x
+  const Moose::Functor<ADReal> & _u_drift;
+  /// drift velocity in direction y
+  const Moose::Functor<ADReal> * const _v_drift;
+  /// drift velocity in direction z
+  const Moose::Functor<ADReal> * const _w_drift;
 
-  /// Boundaries on which the slip velocity is allowed to contribute to the advective flux. The
-  /// dispersed phase cannot cross an impermeable boundary, so the slip is only applied where the
+  /// Boundaries on which the drift velocity is allowed to contribute to the advective flux. The
+  /// dispersed phase cannot cross an impermeable boundary, so the drift is only applied where the
   /// mixture itself can cross, that is on inlets and outlets.
   std::set<BoundaryID> _slip_boundaries;
 };

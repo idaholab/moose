@@ -155,8 +155,8 @@ outlet_pressure = 1e5
   [phase_2_advection]
     type = INSFVScalarFieldAdvection
     variable = phase_2
-    u_slip = 'vel_x'
-    v_slip = 'vel_y'
+    u_drift = 'vel_x'
+    v_drift = 'vel_y'
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = 'upwind'
   []

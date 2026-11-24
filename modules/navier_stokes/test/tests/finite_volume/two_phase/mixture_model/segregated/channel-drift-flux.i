@@ -156,8 +156,8 @@ k_d = 1
     type = LinearWCNSFV2PScalarAdvection
     advected_interp_method_name = upwind
     rhie_chow_user_object = ins_rhie_chow_interpolator
-    u_slip = vel_drift_x
-    v_slip = vel_drift_y
+    u_drift = vel_drift_x
+    v_drift = vel_drift_y
     # The dispersed phase crosses the inlet and the outlet, but not the walls. The Physics based
     # counterpart of this input sets this automatically from the flow inlets and outlets.
     slip_boundaries = 'left right'

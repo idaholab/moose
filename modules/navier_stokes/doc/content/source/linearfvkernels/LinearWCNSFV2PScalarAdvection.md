@@ -12,7 +12,7 @@ The advecting velocity is the dispersed phase velocity
 $\vec{u}_m + \vec{u}_{Md}$ rather than the mixture velocity alone, and the face flux acquires a
 drift contribution. The mixture flux and the drift flux are interpolated separately, each against
 its own scheme and each upwinding in its own direction. The drift uses the scheme named by
-[!param](/LinearFVKernels/LinearWCNSFV2PScalarAdvection/slip_advected_interp_method_name), which
+[!param](/LinearFVKernels/LinearWCNSFV2PScalarAdvection/drift_advected_interp_method_name), which
 defaults to the mixture flux's
 [!param](/LinearFVKernels/LinearWCNSFV2PScalarAdvection/advected_interp_method_name):
 
@@ -43,12 +43,12 @@ way through the transient.
 
 The price is that the scheme is more diffusive, each part upwinding independently.
 
-The slip contributes on every face the variable is defined on from both sides, and on a boundary
+The drift contributes on every face the variable is defined on from both sides, and on a boundary
 face only where that boundary is listed in
 [!param](/LinearFVKernels/LinearWCNSFV2PScalarAdvection/slip_boundaries). This includes boundaries
 internal to the mesh, such as the interface with a block the variable is not defined on. The dispersed phase
 cannot cross an impermeable wall, and the mixture flux returned by the Rhie-Chow object is already
-zero there, so adding a gravity driven slip would advect the phase straight through it.
+zero there, so adding a gravity driven drift would advect the phase straight through it.
 
 When [!param](/LinearFVKernels/LinearWCNSFV2PScalarAdvection/density) is supplied, the drift flux
 is multiplied by the same density as the mixture flux, so that the density multiplies the whole

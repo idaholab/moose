@@ -136,8 +136,8 @@ g = -9.81
   [phase_2_advection]
     type = INSFVScalarFieldAdvection
     variable = phase_2
-    u_slip = 'vel_drift_x'
-    v_slip = 'vel_drift_y'
+    u_drift = 'vel_drift_x'
+    v_drift = 'vel_drift_y'
   []
   [phase_2_diffusion]
     type = FVDiffusion

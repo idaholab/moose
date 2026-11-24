@@ -297,16 +297,16 @@ WCNSFVTwoPhaseMixturePhysics::addFVKernels()
 }
 
 void
-WCNSFVTwoPhaseMixturePhysics::setSlipVelocityParams(InputParameters & params) const
+WCNSFVTwoPhaseMixturePhysics::setDriftVelocityParams(InputParameters & params) const
 {
   // The phase fraction is advected at u_m + u_Md: the drift velocity, measured against the centre
   // of mass, not the slip velocity; see Manninen, Taivassalo and Kallio, "On the mixture model for
   // multiphase flow", VTT Publications 288 (1996)
-  params.set<MooseFunctorName>("u_slip") = "vel_drift_x";
+  params.set<MooseFunctorName>("u_drift") = "vel_drift_x";
   if (dimension() >= 2)
-    params.set<MooseFunctorName>("v_slip") = "vel_drift_y";
+    params.set<MooseFunctorName>("v_drift") = "vel_drift_y";
   if (dimension() >= 3)
-    params.set<MooseFunctorName>("w_slip") = "vel_drift_z";
+    params.set<MooseFunctorName>("w_drift") = "vel_drift_z";
 }
 
 void
@@ -493,9 +493,10 @@ WCNSFVTwoPhaseMixturePhysics::addFunctorMaterials()
           params.set<MooseFunctorName>("linear_coef_name") = "0";
       }
       else
-        paramError("slip_linear_friction_name",
-                   "ADWCNSFV2PSlipVelocityFunctorMaterial created by this Physics required a scalar "
-                   "field linear friction factor.");
+        paramError(
+            "slip_linear_friction_name",
+            "ADWCNSFV2PSlipVelocityFunctorMaterial created by this Physics required a scalar "
+            "field linear friction factor.");
       params.set<MooseFunctorName>("particle_diameter") =
           getParam<MooseFunctorName>("particle_diameter");
       if (getParam<bool>("output_all_properties"))

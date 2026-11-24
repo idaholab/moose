@@ -23,26 +23,30 @@ INSFVScalarFieldAdvection::validParams()
       "this is the drift velocity of the dispersed phase, not its slip velocity.");
   params.addParam<MooseFunctorName>("v_slip", "The y component of that relative velocity.");
   params.addParam<MooseFunctorName>("w_slip", "The z component of that relative velocity.");
+  params.deprecateParam("u_slip", "u_drift", "06/30/2027");
+  params.deprecateParam("v_slip", "v_drift", "06/30/2027");
+  params.deprecateParam("w_slip", "w_drift", "06/30/2027");
   return params;
 }
 
 INSFVScalarFieldAdvection::INSFVScalarFieldAdvection(const InputParameters & params)
   : INSFVAdvectionKernel(params),
     _dim(_subproblem.mesh().dimension()),
-    _u_slip(isParamValid("u_slip") ? &getFunctor<ADReal>("u_slip") : nullptr),
-    _v_slip(isParamValid("v_slip") ? &getFunctor<ADReal>("v_slip") : nullptr),
-    _w_slip(isParamValid("w_slip") ? &getFunctor<ADReal>("w_slip") : nullptr),
-    _add_slip_model(isParamValid("u_slip") ? true : false)
+    _u_slip(isParamValid("u_drift") ? &getFunctor<ADReal>("u_drift") : nullptr),
+    _v_slip(isParamValid("v_drift") ? &getFunctor<ADReal>("v_drift") : nullptr),
+    _w_slip(isParamValid("w_drift") ? &getFunctor<ADReal>("w_drift") : nullptr),
+    _add_slip_model(isParamValid("u_drift") ? true : false)
 {
   if (_add_slip_model)
   {
     if (_dim >= 2 && !_v_slip)
       mooseError(
-          "In two or more dimensions, the v_slip velocity must be supplied using the 'v_slip' "
-          "parameter");
+          "In two or more dimensions, the y component of the drift velocity must be supplied using "
+          "the 'v_drift' parameter");
     if (_dim >= 3 && !_w_slip)
       mooseError(
-          "In three dimensions, the w_slip velocity must be supplied using the 'w_slip' parameter");
+          "In three dimensions, the z component of the drift velocity must be supplied using the "
+          "'w_drift' parameter");
   }
 }
 

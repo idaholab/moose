@@ -9,7 +9,7 @@ consistency with other INSFV naming conventions, can be of type
 ## Advection relative to the mixture
 
 The scalar may also be carried at a velocity of its own relative to the mixture. Supplying that
-relative velocity under [!param](/FVKernels/INSFVScalarFieldAdvection/u_slip), and its other
+relative velocity under [!param](/FVKernels/INSFVScalarFieldAdvection/u_drift), and its other
 components, adds
 
 \begin{equation}
@@ -25,8 +25,7 @@ centre of mass of the mixture and is what its transport equation is advected at.
 slip velocity $\bm{u}_{slip,d} = \bm{u}_d - \bm{u}_c$, which is measured against the continuous
 phase; the two differ by the dispersed phase mass fraction and agree only in the dilute limit.
 [ADWCNSFV2PSlipVelocityFunctorMaterial.md] declares both, the drift velocity under
-[!param](/FunctorMaterials/ADWCNSFV2PSlipVelocityFunctorMaterial/drift_velocity_name). The parameter
-name here is historical.
+[!param](/FunctorMaterials/ADWCNSFV2PSlipVelocityFunctorMaterial/drift_velocity_name).
 
 The two halves of the flux are interpolated separately, each upwinded on the sign of its own
 velocity, so a face whose flux is carried by the relative velocity takes its value from the right

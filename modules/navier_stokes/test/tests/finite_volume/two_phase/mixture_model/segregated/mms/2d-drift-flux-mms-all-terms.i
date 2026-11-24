@@ -347,8 +347,8 @@ advected_interp_method = 'average'
     advected_interp_method_name = ${advected_interp_method}
     rhie_chow_user_object = 'rc'
     density = rho_d_t
-    u_slip = ${a}
-    v_slip = ${b}
+    u_drift = ${a}
+    v_drift = ${b}
     slip_boundaries = 'left right top bottom'
   []
   [phase_diffusion]

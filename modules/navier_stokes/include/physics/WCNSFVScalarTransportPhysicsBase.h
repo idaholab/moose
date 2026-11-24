@@ -53,7 +53,8 @@ protected:
   virtual void actOnAdditionalTasks() override;
   virtual void addFVKernels() override;
   virtual void addFVBCs() override;
-  virtual void setSlipVelocityParams(InputParameters & /* params */) const {}
+  /// Sets the velocity the advected scalars carry relative to the mixture velocity, if any
+  virtual void setDriftVelocityParams(InputParameters & /* params */) const {}
 
   /**
    * The boundaries a dispersed phase may cross: the inlets and the outlets of the flow Physics,

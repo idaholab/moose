@@ -37,7 +37,7 @@ private:
    * WCNSFV2PSlipVelocityFunctorMaterial for the distinction. The base class calls this when
    * building the scalar advection kernel of the phase transport equation.
    */
-  virtual void setSlipVelocityParams(InputParameters & params) const override;
+  virtual void setDriftVelocityParams(InputParameters & params) const override;
 
   /// The phase fraction is advected by the mixture flux and by the drift of the dispersed phase
   virtual std::string scalarAdvectionKernelType() const override

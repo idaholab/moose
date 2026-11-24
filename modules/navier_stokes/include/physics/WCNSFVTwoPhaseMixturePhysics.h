@@ -31,8 +31,8 @@ private:
   virtual void addFVKernels() override;
   virtual void addFunctorMaterials() override;
 
-  /// Adds the slip velocity parameters
-  virtual void setSlipVelocityParams(InputParameters & params) const override;
+  /// Sets the drift velocity the phase fraction is advected with, relative to the mixture
+  virtual void setDriftVelocityParams(InputParameters & params) const override;
 
   /**
    * Functions adding kernels for the other physics

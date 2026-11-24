@@ -127,7 +127,7 @@ WCNSLinearFVScalarTransportPhysics::addScalarAdvectionKernels()
   assignBlocks(params, _blocks);
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
   params.set<InterpolationMethodName>("advected_interp_method_name") = method_name;
-  setSlipVelocityParams(params);
+  setDriftVelocityParams(params);
 
   if (params.have_parameter<std::vector<BoundaryName>>("slip_boundaries"))
     params.set<std::vector<BoundaryName>>("slip_boundaries") = slipBoundaries();

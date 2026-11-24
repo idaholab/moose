@@ -142,8 +142,8 @@ cp_d = 1
     variable = phase_2
     advected_interp_method_name = upwind
     rhie_chow_user_object = ins_rhie_chow_interpolator
-    u_slip = 0
-    v_slip = ${slip}
+    u_drift = 0
+    v_drift = ${slip}
   []
 []
 
