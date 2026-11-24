@@ -141,8 +141,8 @@ def get_requirements_from_file(
                 if req.issues is None:
                     req.issues = []
                 req.issues.extend(grandchild.get("issues").split())
-                # following the pattern within _create_requirement to set the
-                # issues line to whatever the most nested occurance is
+                # Here, we follow the pattern within _create_requirement to set the
+                # issues line to whatever the most nested occurrence is.
                 req.issues_line = grandchild.line("issues", issues_line)
 
         if not req.details:
@@ -153,8 +153,8 @@ def get_requirements_from_file(
         if req.testable or include_non_testable:
             requirements.append(req)
 
-        # this will remove duplicate listings for example if a spec has
-        # Tests/issuse="#1234" and then Tests/test1/issues="#1234"
+        # This will remove duplicate listings; for example, if a spec has
+        # Tests/issues="#1234" and then Tests/test1/issues="#1234"
         # this ensures that we only list #1234 once.
         if req.issues is not None:
             req.issues = list(dict.fromkeys(req.issues))

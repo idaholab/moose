@@ -90,9 +90,9 @@ class TestSQARequirementsAST(MooseDocsTestCase):
         ast = self.tokenize(text)
 
         self._assertAST_common(ast(0))
-        # Since issue 1234 is listed at the top level of the spec i.e.
-        # Tests/issues='#1234' all of the subsequent sub tests also carry
-        # the 1234 issue number within their requirements
+        # Since issue 1234 is listed at the top level of the spec (i.e.,
+        # Tests/issues='#1234'), all of the subsequent sub-tests also carry
+        # the 1234 issue number within their requirements.
         self.assertToken(ast(0)(1)(1), "SQARequirementIssues", issues=["#1234"])
         self.assertToken(
             ast(0)(2)(1), "SQARequirementIssues", issues=["#1234", "#3456"]
