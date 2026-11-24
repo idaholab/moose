@@ -99,6 +99,7 @@ These applications require a license. Many of them can be obtained through the [
 - [SAM](https://www.anl.gov/nse/system-analysis-module) - Advanced nuclear reactor system analysis code (weakly-compressible flow), developed at ANL
 - [Sockeye](https://inlsoftware.inl.gov/product/sockeye) - Multi-fidelity studies of heat pipes for nuclear applications
 - SWIFT - A thermo-chemistry tool for metal hydride moderators, developed at LANL
+- TitanBird - Integration of Shift with Griffin for group cross section generation and reference solution calculations
 
 Combined applications
 
