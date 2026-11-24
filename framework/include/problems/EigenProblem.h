@@ -13,6 +13,8 @@
 #include "FEProblemBase.h"
 #include "Eigenvalue.h"
 
+#include <functional>
+
 class NonlinearEigenSystem;
 
 /**
@@ -131,6 +133,21 @@ public:
    * solve does with the active eigenvector after the eigen solver returns
    */
   void finalizeEigenvector(const unsigned int nl_sys_num);
+
+  /**
+   * Request that each eigenvector loaded for output be normalized with normalizeOutputEigenvector()
+   * @param dependencies Postprocessors executed by name, in this order, before the normalization
+   * postprocessor. Each must execute on linear.
+   */
+  void setOutputEigenvectorNormalization(const std::vector<PostprocessorName> & dependencies);
+
+  /**
+   * Scale the converged eigenvector \p i, loaded into the solution with loadEigenvector(), so that
+   * the normalization postprocessor equals the normalization factor, or the inverse of the
+   * magnitude of eigenvalue \p i when no factor is set. Only the normalization postprocessor and
+   * the dependencies given to setOutputEigenvectorNormalization() are executed, by name.
+   */
+  void normalizeOutputEigenvector(unsigned int i);
 
   /**
    * Set eigen problem type. Don't need to use this if we use Newton eigenvalue solver.
@@ -312,6 +329,18 @@ private:
    * The operations are applied for only eigen variables
    */
   void adjustEigenVector(const Real value, bool scaling);
+
+  /**
+   * Scale the eigenvector in the solution until the normalization postprocessor equals the
+   * normalization factor, or the inverse of the magnitude of eigenvalue \p eigen_index when no
+   * factor is set. The postprocessor is read as is first.
+   * @param evaluate Brings the normalization postprocessor up to date after each scaling
+   */
+  void scaleToNormalization(unsigned int eigen_index, const std::function<void()> & evaluate);
+
+  /// Postprocessors executed by name before the normalization postprocessor for each eigenvector
+  /// loaded for output, set only when the output eigenvectors are normalized
+  std::optional<std::vector<PostprocessorName>> _output_normalization_dependencies;
 
   /// The name of the Postprocessor providing the Bx norm. This may be empty in which case the
   /// default L2 norm of Bx will be used as the Bx norm

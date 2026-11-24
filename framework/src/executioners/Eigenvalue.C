@@ -12,8 +12,12 @@
 #include "EigenProblem.h"
 #include "Factory.h"
 #include "MooseApp.h"
+#include "MooseVariableDependencyInterface.h"
+#include "MooseVariableFieldBase.h"
 #include "NonlinearEigenSystem.h"
+#include "UserObject.h"
 
+#include <algorithm>
 #include <cmath>
 #include <optional>
 
@@ -42,13 +46,13 @@ Eigenvalue::validParams()
                              "real part of its eigenvalue, or the square root of the real part "
                              "of its eigenvalue. This parameter "
                              "requires 'output_all_eigenvectors' to be true.");
-  params.addParam<MooseEnum>(
-      "eigenvector_normalization",
-      MooseEnum("none b_norm", "none"),
-      "How each output eigenvector is scaled: not at all, or so that phi^T B phi equals 1, with "
-      "B the operator of the eigen solve. The b_norm option requires 'output_all_eigenvectors' "
-      "to be true.");
-  params.addParamNamesToGroup("output_all_eigenvectors eigenvector_time eigenvector_normalization",
+  params.addParam<std::vector<PostprocessorName>>(
+      "normalization_dependencies",
+      std::vector<PostprocessorName>(),
+      "Postprocessors the 'normalization' postprocessor depends on, which are executed by name in "
+      "the given order before it for each output eigenvector. They must execute on linear. This "
+      "parameter requires 'normalization' to be set and 'output_all_eigenvectors' to be true.");
+  params.addParamNamesToGroup("output_all_eigenvectors eigenvector_time normalization_dependencies",
                               "Eigenvector output");
 
   return params;
@@ -64,8 +68,7 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     _time(_eigen_problem.time()),
     _final_timer(registerTimedSection("final", 1)),
     _output_all_eigenvectors(getParam<bool>("output_all_eigenvectors")),
-    _eigenvector_time(getParam<MooseEnum>("eigenvector_time")),
-    _b_normalize_eigenvectors(getParam<MooseEnum>("eigenvector_normalization") == "b_norm")
+    _eigenvector_time(getParam<MooseEnum>("eigenvector_time"))
 {
   _fixed_point_solve->setInnerSolve(_eigen_problem_solve);
   _time = _system_time;
@@ -74,15 +77,17 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     paramError("eigenvector_time",
                "'eigenvector_time' requires 'output_all_eigenvectors' to be true, as a single "
                "eigenvector is written at a single output time otherwise.");
-  if (!_output_all_eigenvectors && _b_normalize_eigenvectors)
-    paramError("eigenvector_normalization",
-               "'eigenvector_normalization' requires 'output_all_eigenvectors' to be true, as only "
-               "the eigenvector the solve leaves in the solution is written otherwise.");
-
-#ifdef LIBMESH_HAVE_SLEPC
-  if (_b_normalize_eigenvectors)
-    _eigen_problem.needEigenvectorBNorm();
-#endif
+  if (isParamSetByUser("normalization_dependencies"))
+  {
+    if (!isParamValid("normalization"))
+      paramError("normalization_dependencies",
+                 "'normalization_dependencies' requires the 'normalization' postprocessor to be "
+                 "set, as they are executed for it only.");
+    if (!_output_all_eigenvectors)
+      paramError("normalization_dependencies",
+                 "'normalization_dependencies' requires 'output_all_eigenvectors' to be true, as "
+                 "they are executed for each output eigenvector only.");
+  }
 
   // Each eigenvector step is written at the eigenvector time execute() sets
   _outputs_use_simulation_time = _output_all_eigenvectors;
@@ -94,6 +99,9 @@ Eigenvalue::init()
 {
   // Does not allow time kernels
   checkIntegrity();
+
+  if (_output_all_eigenvectors && isParamValid("normalization"))
+    setupEigenvectorNormalization();
 
   // Provide vector of ones to solver
   // "auto_initialization" is on by default and we init the vector values associated
@@ -121,17 +129,63 @@ Eigenvalue::checkIntegrity()
 }
 
 void
+Eigenvalue::setupEigenvectorNormalization()
+{
+  const auto & normalization = getParam<PostprocessorName>("normalization");
+  const auto & dependencies =
+      getParam<std::vector<PostprocessorName>>("normalization_dependencies");
+
+  // The postprocessors executed for each output eigenvector, with the parameter that lists them
+  std::vector<std::pair<PostprocessorName, std::string>> executed = {
+      {normalization, "normalization"}};
+  for (const auto & dependency : dependencies)
+  {
+    if (!_eigen_problem.hasPostprocessorValueByName(dependency))
+      paramError(
+          "normalization_dependencies", "A postprocessor named '", dependency, "' does not exist.");
+    executed.emplace_back(dependency, "normalization_dependencies");
+  }
+
+  for (const auto & [name, param] : executed)
+  {
+    const auto & pp = _eigen_problem.getUserObjectBase(name);
+
+    // The auxiliary kernels are not executed before an output eigenvector is normalized, so an
+    // auxiliary variable still holds values computed from another eigenvector at that point
+    if (const auto * const var_dependencies =
+            dynamic_cast<const MooseVariableDependencyInterface *>(&pp))
+      for (const auto * const var : var_dependencies->getMooseVariableDependencies())
+        if (var->kind() == Moose::VAR_AUXILIARY)
+          paramError(param,
+                     "The postprocessor '",
+                     name,
+                     "' couples the auxiliary variable '",
+                     var->name(),
+                     "', but auxiliary variables are not recomputed for each output eigenvector "
+                     "before it is normalized.");
+
+    // Only the listed postprocessors are executed for each output eigenvector
+    for (const auto & depend : pp.getDependObjects())
+      if (depend != normalization &&
+          std::find(dependencies.begin(), dependencies.end(), depend) == dependencies.end())
+        paramWarning("normalization_dependencies",
+                     "The postprocessor '",
+                     name,
+                     "' depends on the object '",
+                     depend,
+                     "', which is not listed in 'normalization_dependencies' and is therefore not "
+                     "executed for each output eigenvector.");
+  }
+
+  _eigen_problem.setOutputEigenvectorNormalization(dependencies);
+}
+
+void
 Eigenvalue::loadEigenvector(dof_id_type i)
 {
   _eigen_problem.loadEigenvector(i);
-  if (_b_normalize_eigenvectors)
-  {
-    const Real b_norm = _eigen_problem.eigenvectorBNorm();
-    if (b_norm == 0)
-      paramError(
-          "eigenvector_normalization", "Cannot normalize mode ", i + 1, " as its B-norm is zero.");
-    _eigen_problem.scaleEigenvector(1 / b_norm);
-  }
+  if (isParamValid("normalization"))
+    _eigen_problem.normalizeOutputEigenvector(i);
   // Let the objects executing at the end of a time step see the eigenvector. This does not run
   // multiapps or transfers.
   _eigen_problem.execute(EXEC_TIMESTEP_END);

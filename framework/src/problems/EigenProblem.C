@@ -558,51 +558,91 @@ void
 EigenProblem::postScaleEigenVector()
 {
   if (_has_normalization)
+    // update all aux variables and user objects on linear
+    scaleToNormalization(_active_eigen_index, [this]() { execute(EXEC_LINEAR); });
+}
+
+void
+EigenProblem::setOutputEigenvectorNormalization(const std::vector<PostprocessorName> & dependencies)
+{
+  for (const auto & dependency : dependencies)
+    if (const auto & pp = getUserObjectBase(dependency);
+        !pp.getExecuteOnEnum().contains(EXEC_LINEAR))
+      pp.paramError(
+          "execute_on",
+          "A postprocessor listed in 'normalization_dependencies' must execute on linear, "
+          "as it is executed on linear by name for each output eigenvector");
+
+  _output_normalization_dependencies = dependencies;
+}
+
+void
+EigenProblem::normalizeOutputEigenvector(const unsigned int i)
+{
+  mooseAssert(_has_normalization && _output_normalization_dependencies,
+              "The output eigenvectors are not normalized");
+
+  // Executing on linear would recompute every object executing on linear, auxiliary kernels
+  // included, for each output eigenvector, so only the normalization postprocessor and its listed
+  // dependencies are executed. The pre- and post-auxiliary groups are both covered by Moose::ALL.
+  const auto evaluate = [this]()
   {
-    Real v;
-    if (_normal_factor == std::numeric_limits<Real>::max())
-    {
-      if (_active_eigen_index >= _nl_eigen->getNumConvergedEigenvalues())
-        mooseError("Number of converged eigenvalues ",
-                   _nl_eigen->getNumConvergedEigenvalues(),
-                   " but you required eigenvalue ",
-                   _active_eigen_index);
+    for (const auto & dependency : *_output_normalization_dependencies)
+      computeUserObjectByName(EXEC_LINEAR, Moose::ALL, dependency);
+    computeUserObjectByName(EXEC_LINEAR, Moose::ALL, _normalization);
+  };
 
-      // when normal factor is not provided, we use the inverse of the norm of
-      // the active eigenvalue for normalization
-      auto eig = _nl_eigen->getAllConvergedEigenvalues()[_active_eigen_index];
-      v = 1 / std::sqrt(eig.first * eig.first + eig.second * eig.second);
-    }
-    else
-      v = _normal_factor;
+  // Loading the eigenvector evaluates no postprocessor
+  evaluate();
+  scaleToNormalization(i, evaluate);
+}
 
-    Real c = getPostprocessorValueByName(_normalization);
+void
+EigenProblem::scaleToNormalization(const unsigned int eigen_index,
+                                   const std::function<void()> & evaluate)
+{
+  Real v;
+  if (_normal_factor == std::numeric_limits<Real>::max())
+  {
+    if (eigen_index >= _nl_eigen->getNumConvergedEigenvalues())
+      mooseError("Number of converged eigenvalues ",
+                 _nl_eigen->getNumConvergedEigenvalues(),
+                 " but you required eigenvalue ",
+                 eigen_index);
 
-    // We scale SLEPc eigen vector here, so we need to scale it back for optimal
-    // convergence if we call EPS solver again
-    mooseAssert(v != 0., "normal factor can not be zero");
+    // when normal factor is not provided, we use the inverse of the norm of
+    // the eigenvalue for normalization
+    auto eig = _nl_eigen->getAllConvergedEigenvalues()[eigen_index];
+    v = 1 / std::sqrt(eig.first * eig.first + eig.second * eig.second);
+  }
+  else
+    v = _normal_factor;
 
-    unsigned int itr = 0;
+  Real c = getPostprocessorValueByName(_normalization);
 
-    while (!MooseUtils::relativeFuzzyEqual(v, c))
-    {
-      // If postprocessor is not defined on eigen variables, scaling might not work
-      if (itr > 10)
-        mooseError("Can not scale eigenvector to the required factor ",
-                   v,
-                   " please check if postprocessor is defined on only eigen variables");
+  // We scale SLEPc eigen vector here, so we need to scale it back for optimal
+  // convergence if we call EPS solver again
+  mooseAssert(v != 0., "normal factor can not be zero");
 
-      mooseAssert(c != 0., "postprocessor value used for scaling can not be zero");
+  unsigned int itr = 0;
 
-      scaleEigenvector(v / c);
+  while (!MooseUtils::relativeFuzzyEqual(v, c))
+  {
+    // If postprocessor is not defined on eigen variables, scaling might not work
+    if (itr > 10)
+      mooseError("Can not scale eigenvector to the required factor ",
+                 v,
+                 " please check if postprocessor is defined on only eigen variables");
 
-      // update all aux variables and user objects on linear
-      execute(EXEC_LINEAR);
+    mooseAssert(c != 0., "postprocessor value used for scaling can not be zero");
 
-      c = getPostprocessorValueByName(_normalization);
+    scaleEigenvector(v / c);
 
-      itr++;
-    }
+    evaluate();
+
+    c = getPostprocessorValueByName(_normalization);
+
+    itr++;
   }
 }
 

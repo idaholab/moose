@@ -60,7 +60,8 @@
   solve_type = jacobi_davidson
   eigen_tol = 1e-7
   output_all_eigenvectors = true
-  eigenvector_normalization = b_norm
+  normalization = bnorm
+  normal_factor = 1
 []
 
 [Postprocessors]

@@ -71,9 +71,15 @@ protected:
 private:
 #ifdef LIBMESH_HAVE_SLEPC
   /**
-   * Copy the converged eigenvector \p i into the solution of the eigen system, scale it to the
-   * requested B-norm when 'eigenvector_normalization' is b_norm, and execute the objects that
-   * execute at the end of a time step.
+   * Check the 'normalization' postprocessor and the 'normalization_dependencies' that are executed
+   * by name for each output eigenvector, and pass the dependencies to the eigen problem
+   */
+  void setupEigenvectorNormalization();
+
+  /**
+   * Copy the converged eigenvector \p i into the solution of the eigen system, normalize it with
+   * the 'normalization' postprocessor when one is set, and execute the objects that execute at
+   * the end of a time step.
    */
   void loadEigenvector(dof_id_type i);
 
@@ -90,9 +96,6 @@ private:
 
   /// What the output time of each eigenvector step is
   const MooseEnum _eigenvector_time;
-
-  /// Whether each output eigenvector is scaled to a unit B-norm sqrt(phi^T B phi)
-  const bool _b_normalize_eigenvectors;
 
   bool _last_solve_converged = true;
 };

@@ -17,16 +17,16 @@ eigen solve assembled. This object does not compute the quadratic form itself. T
 of the stored value. The value is zero before the first solve.
 
 The eigen problem computes the quadratic form only when an input needs it: when an `EigenvectorBNorm`
-exists, or when [!param](/Executioner/Eigenvalue/eigenvector_normalization) is `b_norm`. It computes
-the value right after each solve, before the [!param](/Executioner/Eigenvalue/normalization) hook
-scales the active eigenvector, and each time the executioner loads an eigenvector for output. When
-the eigenvector is scaled by a factor $\alpha$, the stored value is multiplied by $\alpha^2$, so the
-reported value stays current without a new matrix-vector product.
+exists. It computes the value right after each solve, before the
+[!param](/Executioner/Eigenvalue/normalization) hook scales the active eigenvector, and each time
+the executioner loads an eigenvector for output. When the eigenvector is scaled by a factor
+$\alpha$, the stored value is multiplied by $\alpha^2$, so the reported value stays current without
+a new matrix-vector product.
 
 The quadratic form accounts for the sign that
 [!param](/Problem/EigenProblem/negative_sign_eigen_kernel) applies to the eigen-tagged kernels, also
-with `PJFNKMO`, whose assembled $B$ does not carry that sign. For the conventional input, a
-[CoefReaction.md] with `coefficient = -1` and `extra_vector_tags = 'eigen'` and the default
+with `PJFNKMO`, whose assembled $B$ does not carry that sign. As an example, with a
+[CoefReaction.md] that has `coefficient = -1` and `extra_vector_tags = 'eigen'`, and with the default
 `negative_sign_eigen_kernel = true`, $B$ is the positive-definite mass matrix and $c(\phi)$ is the
 mass norm of the mode. For a standard eigenproblem SLEPc holds no $B$ operator, $B = I$, and the value
 is the Euclidean norm $\|\phi\|_2$. A condensed solve, for example with hanging-node constraints, is
@@ -51,25 +51,22 @@ $c(\phi)$ is a norm only when $B$ is symmetric positive definite. The eigen kern
 negative definite $B$. A negative $\phi^{\top} B \phi$ has no square root, and the eigen problem
 reports an error.
 
-The default [!param](/Postprocessors/EigenvectorBNorm/execute_on) is `timestep_end`, which puts the
-value in the output. To use this post-processor as the
-[!param](/Executioner/Eigenvalue/normalization) post-processor, add `linear` to its
-[!param](/Postprocessors/EigenvectorBNorm/execute_on): the executioner requires that post-processor
-to execute on `linear`, and the normalization hook reads it again after each `linear` execution.
+The default [!param](/Postprocessors/EigenvectorBNorm/execute_on) is `linear timestep_end`. This
+post-processor is meant to be used as the [!param](/Executioner/Eigenvalue/normalization)
+post-processor, which the executioner requires to execute on `linear`, and `timestep_end` puts the
+value in the output.
 
 To mass-normalize every output mode, set
-[!param](/Executioner/Eigenvalue/output_all_eigenvectors) to `true` and
-[!param](/Executioner/Eigenvalue/eigenvector_normalization) to `b_norm`. Each mode written then
-satisfies $\phi_i^{\top} B \phi_i = 1$; see [Eigenvalue.md#output-all-eigenvectors]. That option uses the stored quadratic form directly and
-does not need this post-processor. Add this post-processor to report the $B$-norm of each mode, or
-to normalize the active eigenvector through the
-[!param](/Executioner/Eigenvalue/normalization) hook.
+[!param](/Executioner/Eigenvalue/output_all_eigenvectors) to `true`,
+[!param](/Executioner/Eigenvalue/normalization) to this post-processor, and
+[!param](/Executioner/Eigenvalue/normal_factor) to 1. Each mode written then satisfies
+$\phi_i^{\top} B \phi_i = 1$; see [Eigenvalue.md#eigenvector-normalization].
 
 ## Example Input File Syntax
 
 In this example, the five smallest modes of a diffusion-reaction eigenproblem are written with a unit
-$B$-norm. `bnorm` reports the $B$-norm of each mode, and `umax` reports the peak magnitude of each
-mode.
+$B$-norm. `bnorm` is the normalization post-processor and reports the $B$-norm of each mode, and
+`umax` reports the peak magnitude of each mode.
 
 !listing test/tests/problems/eigen_problem/output_all_eigenvectors/all_modes.i block=Postprocessors
 

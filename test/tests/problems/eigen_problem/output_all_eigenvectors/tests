@@ -44,7 +44,7 @@
   [active_index_matches_step]
     type = CSVDiff
     input = all_modes.i
-    cli_args = 'Executioner/output_all_eigenvectors=false Executioner/eigenvector_normalization=none Executioner/normalization=bnorm Executioner/normal_factor=1 Postprocessors/bnorm/execute_on="linear timestep_end" Problem/active_eigen_index=2 Outputs/file_base=active_2'
+    cli_args = 'Executioner/output_all_eigenvectors=false Problem/active_eigen_index=2 Outputs/file_base=active_2'
     csvdiff = active_2.csv
     capabilities = 'slepc'
     requirement = 'The system shall output the eigenvector selected by the active eigen index when the per-eigenvector output is disabled.'
@@ -75,15 +75,6 @@
     expect_err = 'eigenvector_time.*requires.*output_all_eigenvectors'
     capabilities = 'slepc'
     requirement = 'The system shall report an error when an eigenvector time axis is requested without enabling the per-eigenvector output.'
-  []
-
-  [normalization_requires_flag]
-    type = RunException
-    input = all_modes.i
-    cli_args = 'Executioner/output_all_eigenvectors=false Outputs/file_base=normalization_requires_flag'
-    expect_err = 'eigenvector_normalization.*requires.*output_all_eigenvectors'
-    capabilities = 'slepc'
-    requirement = 'The system shall report an error when the per-eigenvector normalization is requested without enabling the per-eigenvector output.'
   []
 
   [bnorm_shell_matrix_error]
@@ -129,5 +120,41 @@
     expect_err = 'B is not positive definite for this eigenvector'
     capabilities = 'slepc'
     requirement = 'The system shall report an error when the B operator gives a negative quadratic form for an eigenvector in the B-norm postprocessor.'
+  []
+
+  [normalization_aux_variable_error]
+    type = RunException
+    input = all_modes.i
+    cli_args = 'AuxVariables/v/family=LAGRANGE Postprocessors/v_integral/type=ElementIntegralVariablePostprocessor Postprocessors/v_integral/variable=v Postprocessors/v_integral/execute_on=linear Executioner/normalization=v_integral Outputs/file_base=normalization_aux_variable'
+    expect_err = 'couples the auxiliary variable'
+    capabilities = 'slepc'
+    requirement = 'The system shall report an error when the postprocessor that normalizes every output eigenvector couples an auxiliary variable, which is not recomputed for each eigenvector.'
+  []
+
+  [normalization_with_dependency]
+    type = CSVDiff
+    input = all_modes.i
+    cli_args = 'Postprocessors/bnorm_scaled/type=ParsedPostprocessor Postprocessors/bnorm_scaled/expression=2*bnorm Postprocessors/bnorm_scaled/pp_names=bnorm Postprocessors/bnorm_scaled/execute_on="linear timestep_end" Executioner/normalization=bnorm_scaled Executioner/normal_factor=2 Executioner/normalization_dependencies=bnorm Outputs/file_base=normalization_with_dependency'
+    csvdiff = normalization_with_dependency.csv
+    capabilities = 'slepc'
+    requirement = 'The system shall execute the listed dependencies of the normalization postprocessor for each output eigenvector so that every eigenvector is normalized with a postprocessor that depends on other postprocessors.'
+  []
+
+  [normalization_dependency_warning]
+    type = RunException
+    input = all_modes.i
+    cli_args = 'Postprocessors/bnorm_scaled/type=ParsedPostprocessor Postprocessors/bnorm_scaled/expression=2*bnorm Postprocessors/bnorm_scaled/pp_names=bnorm Postprocessors/bnorm_scaled/execute_on="linear timestep_end" Executioner/normalization=bnorm_scaled Executioner/normal_factor=2 Outputs/file_base=normalization_dependency_warning'
+    expect_err = "is not listed in 'normalization_dependencies'"
+    capabilities = 'slepc'
+    requirement = 'The system shall warn when the postprocessor that normalizes every output eigenvector depends on an object that is not listed as a normalization dependency.'
+  []
+
+  [normalization_dependencies_requires_flag]
+    type = RunException
+    input = all_modes.i
+    cli_args = 'Executioner/output_all_eigenvectors=false Executioner/normalization_dependencies=bnorm Outputs/file_base=normalization_dependencies_requires_flag'
+    expect_err = 'normalization_dependencies.*requires.*output_all_eigenvectors'
+    capabilities = 'slepc'
+    requirement = 'The system shall report an error when normalization dependencies are given without enabling the per-eigenvector output.'
   []
 []
