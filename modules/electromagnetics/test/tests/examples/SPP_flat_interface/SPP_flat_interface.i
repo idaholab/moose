@@ -1,5 +1,5 @@
-# This example case describes the two-dimensional surface plasmon polariton (SPP) benchmark and verification test 
-#for a flat metal--dielectric interface. An SPP is a transverse-magnetic (TM) wave bound to the interface, 
+# This example case describes the two-dimensional surface plasmon polariton (SPP) benchmark and verification test
+#for a flat metal--dielectric interface. An SPP is a transverse-magnetic (TM) wave bound to the interface,
 #oscillating along it and decaying evanescently into both media. Because the metal permittivity is negative, the squared
 #wavenumber changes sign across the interface, which makes this case a useful check
 #of the interface conditions and of the Robin port conditions in [EMRobinBC.md].
