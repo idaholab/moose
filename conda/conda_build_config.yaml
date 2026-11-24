@@ -61,14 +61,14 @@ c_compiler:
   - clang                                                   # [osx]
 c_compiler_version:
   - 15                                                      # [linux]
-  - 21                                                      # [osx]
+  - 22                                                      # [osx]
 
 cxx_compiler:
   - gxx                                                     # [linux]
   - clangxx                                                 # [osx]
 cxx_compiler_version:
   - 15                                                      # [linux]
-  - 21                                                      # [osx]
+  - 22                                                      # [osx]
 
 fortran_compiler:
   - gfortran
@@ -97,7 +97,7 @@ libcap:
 libcurl:
   - 8
 libffi:
-  - '3.5'
+  - '3.7'
 libhwloc:
   - 2.13.0
 libiconv:
