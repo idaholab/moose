@@ -10,7 +10,7 @@ The governing flow equations for incompressible flow within a 1D flow path are a
 \pd{\dot{m}}{x} = 0 \,
 
 !equation id=momentum_conservation
-\frac{1}{A} \pd{\dot{m}}{t} = -\pd{P}{x} - \frac{f}{D_h} \frac{\dot{m}|\dot{m}|}{2\rho A^2} - \sum_{j} K_j \delta(x-x_j) \frac{\dot{m}|\dot{m}|}{2 \rho A^2} + \rho \bar{g} \cdot \hat{u} + \sum_{j} \Delta P_{p,j} \delta(x-x_j) \,
+\frac{1}{A} \pd{\dot{m}}{t} = -\pd{P}{x} - \frac{f}{D_h} \frac{\dot{m}|\dot{m}|}{2\rho A^2} - \sum_{j} K_j \delta(x-x_{K,j}) \frac{\dot{m}|\dot{m}|}{2 \rho A^2} + \rho \bar{g} \cdot \hat{u} + \sum_{j} \Delta P_{p,j} \delta(x-x_{p,j}) \,
 
 !equation id=energy_conservation
 A \rho c_p \pd{T}{t} + \dot{m} c_p \pd{T}{x} = q_w^{''} P_w \,
@@ -27,10 +27,12 @@ where
 - $\rho$ is the density,
 - $K_j$ is the $j^{th}$ minor loss coefficient,
 - $\delta$ is the dirac delta function,
+- $x_{K,j}$ is the location associated with the $j^{th}$ forms loss,
 - $\bar{g}$ is the gravitational acceleration vector,
 - $\hat{u}$ is the unit vector in the direction of flow,
 - $\alpha$ is the angle of the flow path with respect to horizontal,
 - $\Delta P_{p,j}$ is the $j^{th}$ pump pressure gain,
+- $x_{p,j}$ is the location associated with the $j^{th}$ pump gain,
 - $c_p$ is the specific isobaric heat capacity of the fluid,
 - $T$ is the bulk fluid temperature,
 - $q_w^{''}$ is the heat flux through the bounding surface(s), and
@@ -46,7 +48,7 @@ Integrating the above momentum equation along a 1D flow path consisting of $N$ s
 where
 
 - $L_i$ is the length of segment $i$,
-- $\Delta P_c$ is the characteristic pressure drop over the total length of the flow path, $\Delta P_c = \int_0^{L_{\text{total}}} \pd{P}{x}\,dx$,
+- $\Delta P_c$ is the characteristic pressure drop over the total length, $L_{\text{total}} = \sum_{i=1}^{N} L_i$, giving $\Delta P_c = \int_0^{L_{\text{total}}} \pd{P}{x}\,dx$,
 - $K_i$ is the sum of forms loss coefficients on this segment, $K_i \frac{\dot{m}|\dot{m}|}{2 \rho_i A_i^2} = \int_0^{L_i} \sum_{j} K_j \delta(x-x_j)\frac{\dot{m}|\dot{m}|}{2 \rho A^2}\,dx$,
 - $\Delta z_i$ is the height difference between the inlet and the outlet of a segment, $\rho_i |\bar{g}| \Delta z_i = \int_0^{L_i} \rho \bar{g} \cdot \hat{u}\,dx$, and
 - $\Delta P_{p,i}$ is the total pump pressure increase over the segment, $\Delta P_{p,i} = \int_0^{L_i} \sum_{j} \Delta P_{p,j} \delta(x-x_j) \,dx$,
