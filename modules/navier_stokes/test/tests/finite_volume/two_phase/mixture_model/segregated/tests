@@ -313,6 +313,21 @@
     requirement = 'The system shall close the interfacial mass transfer rate on the transported interfacial area concentration, drive the phase, energy and interfacial area equations with that one rate, and give the same rate whether the closure is built by the Physics or declared in the input.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [interfacial_mass_transfer_slip_velocity]
+    type = CSVDiff
+    input = 'interfacial-mass-transfer-verification.i'
+    # Unequal phase densities and gravity give the particles a slip velocity that differs from the
+    # drift velocity. Only the initial state is evaluated: the closed box of the case cannot hold a
+    # transfer between phases of different density, so it is not advanced in time.
+    cli_args = "rho_d=500 Physics/NavierStokes/FlowSegregated/flow/gravity='0 -9.81 0'
+                Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/add_gravity_term_in_slip_velocity=true
+                Executioner/num_steps=0 Outputs/show='gamma_closure_mismatch gamma_rate'
+                Outputs/file_base=interfacial-mass-transfer-slip-velocity"
+    csvdiff = 'interfacial-mass-transfer-slip-velocity.csv'
+    design = 'WCNSFV2PInterfacialMassTransferFunctorMaterial.md'
+    requirement = 'The system shall form the particle Reynolds number of the interfacial mass transfer closure built by the Physics from the slip velocity of the dispersed phase, giving the same rate as the closure declared in the input with the slip velocity.'
+    max_threads = 1 # see libmesh issue #3808
+  []
   [interfacial_mass_transfer_prescribed]
     type = CSVDiff
     input = 'interfacial-mass-transfer-prescribed.i'

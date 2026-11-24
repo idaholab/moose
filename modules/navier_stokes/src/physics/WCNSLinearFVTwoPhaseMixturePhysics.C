@@ -549,11 +549,13 @@ WCNSLinearFVTwoPhaseMixturePhysics::addInterfacialMassTransferRateMaterial()
   params.set<MooseFunctorName>("rho_c") = _phase_1_density;
   params.set<MooseFunctorName>("mu_c") = _phase_1_viscosity;
   params.set<MooseFunctorName>("k_c") = _phase_1_thermal_conductivity;
-  params.set<MooseFunctorName>("u_slip") = "vel_drift_x";
+  // The particle Reynolds number of the heat transfer correlation is formed from the velocity of the
+  // particles relative to the continuous phase, the slip velocity, not the drift velocity
+  params.set<MooseFunctorName>("u_slip") = "vel_slip_x";
   if (dimension() >= 2)
-    params.set<MooseFunctorName>("v_slip") = "vel_drift_y";
+    params.set<MooseFunctorName>("v_slip") = "vel_slip_y";
   if (dimension() >= 3)
-    params.set<MooseFunctorName>("w_slip") = "vel_drift_z";
+    params.set<MooseFunctorName>("w_slip") = "vel_slip_z";
   params.set<MooseFunctorName>("interfacial_mass_transfer_name") = _interfacial_mass_transfer;
   getProblem().addMaterial("WCNSFV2PInterfacialMassTransferFunctorMaterial",
                            _interfacial_mass_transfer + "_mat",
