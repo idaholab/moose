@@ -1551,7 +1551,6 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
   // Cross flow residual
   if (!_implicit_bool)
   {
-    const Real & pitch = _subchannel_mesh.getPitch();
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
     {
       auto dz = _z_grid[iz] - _z_grid[iz - 1];
@@ -1569,7 +1568,8 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         auto Si = (*_S_flow_soln)(node_in_i);
         auto Sj = (*_S_flow_soln)(node_in_j);
         auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
-        auto Lij = pitch;
+        // Distance between the subchannel centers
+        const auto Lij = _subchannel_mesh.getGapCenterDistance(i_gap);
         // total local form loss in the ij direction
         auto friction_term = _kij * _Wij(i_gap, iz) * std::abs(_Wij(i_gap, iz));
         auto DPij = (*_P_soln)(node_in_i) - (*_P_soln)(node_in_j);
@@ -1611,7 +1611,6 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
     LibmeshPetscCall(VecZeroEntries(_cmc_pressure_force_rhs));
     LibmeshPetscCall(MatZeroEntries(_cmc_sys_Wij_mat));
     LibmeshPetscCall(VecZeroEntries(_cmc_sys_Wij_rhs));
-    const Real & pitch = _subchannel_mesh.getPitch();
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
     {
       auto dz = _z_grid[iz] - _z_grid[iz - 1];
@@ -1642,7 +1641,8 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
 
         // Cross-sectional gap area
         auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
-        auto Lij = pitch;
+        // Distance between the subchannel centers
+        const auto Lij = _subchannel_mesh.getGapCenterDistance(i_gap);
 
         // Figure out donor cell density
         auto rho_star = 0.0;

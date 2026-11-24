@@ -446,21 +446,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           }
 
           // compute the radial heat conduction through the gaps
-          Real dist_ij = pitch;
-
-          if (subch_type_i == EChannelType::EDGE && subch_type_j == EChannelType::EDGE)
-          {
-            dist_ij = pitch;
-          }
-          else if ((subch_type_i == EChannelType::CORNER && subch_type_j == EChannelType::EDGE) ||
-                   (subch_type_i == EChannelType::EDGE && subch_type_j == EChannelType::CORNER))
-          {
-            dist_ij = pitch;
-          }
-          else
-          {
-            dist_ij = pitch / std::sqrt(3);
-          }
+          // Distance between the subchannel centers
+          const auto dist_ij = _subchannel_mesh.getGapCenterDistance(i_gap);
 
           auto thcon_i = _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
           auto thcon_j = _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
@@ -859,23 +846,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
               _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_right_ct, ADD_VALUES));
 
           // Radial heat conduction
-          auto subch_type_i = _subchannel_mesh.getSubchannelType(ii_ch);
-          auto subch_type_j = _subchannel_mesh.getSubchannelType(jj_ch);
-          Real dist_ij = pitch;
-
-          if (subch_type_i == EChannelType::EDGE && subch_type_j == EChannelType::EDGE)
-          {
-            dist_ij = pitch;
-          }
-          else if ((subch_type_i == EChannelType::CORNER && subch_type_j == EChannelType::EDGE) ||
-                   (subch_type_i == EChannelType::EDGE && subch_type_j == EChannelType::CORNER))
-          {
-            dist_ij = pitch;
-          }
-          else
-          {
-            dist_ij = pitch / std::sqrt(3);
-          }
+          // Distance between the subchannel centers
+          const auto dist_ij = _subchannel_mesh.getGapCenterDistance(i_gap);
 
           auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
           auto K_i = _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));

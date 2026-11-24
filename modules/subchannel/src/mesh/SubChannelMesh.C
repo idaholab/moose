@@ -51,7 +51,8 @@ SubChannelMesh::SubChannelMesh(const SubChannelMesh & other_mesh)
     _assembly_flow_area(other_mesh._assembly_flow_area),
     _assembly_wetted_perimeter(other_mesh._assembly_wetted_perimeter),
     _assembly_hydraulic_diameter(other_mesh._assembly_hydraulic_diameter),
-    _n_cells(other_mesh._n_cells)
+    _n_cells(other_mesh._n_cells),
+    _gap_center_distance(other_mesh._gap_center_distance)
 {
   _subchannel_position = other_mesh._subchannel_position;
 }
@@ -122,6 +123,20 @@ SubChannelMesh::getChannelNodeFromDuct(Node * duct_node) const
 {
   auto it = _duct_node_to_chan_map.find(duct_node);
   return (it == _duct_node_to_chan_map.end()) ? nullptr : it->second;
+}
+
+void
+SubChannelMesh::computeGapCenterDistances()
+{
+  const auto n_gaps = getNumOfGapsPerLayer();
+  _gap_center_distance.resize(n_gaps);
+  for (const auto i_gap : make_range(n_gaps))
+  {
+    const auto & [i_ch, j_ch] = getGapChannels(i_gap);
+    const auto & pos_i = _subchannel_position[i_ch];
+    const auto & pos_j = _subchannel_position[j_ch];
+    _gap_center_distance[i_gap] = std::hypot(pos_i[0] - pos_j[0], pos_i[1] - pos_j[1]);
+  }
 }
 
 void

@@ -145,6 +145,17 @@ public:
   virtual const std::vector<unsigned int> & getChannelPins(unsigned int i_chan) const = 0;
 
   /**
+   * Return the undeformed distance between the centers of the two subchannels of a gap
+   */
+  Real getGapCenterDistance(unsigned int i_gap) const { return _gap_center_distance[i_gap]; }
+
+  /**
+   * Compute the distance between the centers of the two subchannels of each gap from the
+   * subchannel positions
+   */
+  void computeGapCenterDistances();
+
+  /**
    * Return the undeformed pitch between 2 subchannels
    */
   virtual const Real & getPitch() const { return _pitch; }
@@ -286,6 +297,9 @@ protected:
 
   /// number of axial cells
   unsigned int _n_cells;
+
+  /// Undeformed distance between the centers of the two subchannels of each gap
+  std::vector<Real> _gap_center_distance;
 
 public:
   /// x,y coordinates of the subchannel centroids
