@@ -12,8 +12,9 @@ k * w_ij * F_ij * dz / d_ij * (T_i - T_j), with F_ij = 0.66 (p / D) (w_ij / D)^-
 w_ij is p - D for gaps between pins and the duct-to-pin gap for gaps facing the duct, and the
 centroid distance d_ij is p / sqrt(3) for gaps involving an interior channel and p otherwise. The
 duct adds q'' times the peripheral duct width of each edge or corner channel. The network is
-marched in z with the solver's face mass flow rates, implicitly in the conduction term, which is
-the discrete model the solver assembles. Only the channel positions, flow areas and mass flow
+marched in z with the solver's face mass flow rates and conducts with the cell-center enthalpy,
+the mean of the two faces of each cell, which is the discrete model the solver assembles with the
+default central_difference scheme. Only the channel positions, flow areas and mass flow
 rates are taken from the solver output; the gap connectivity is rebuilt from the lattice.
 """
 
@@ -158,8 +159,11 @@ class TestRadialConductionVerification(unittest.TestCase):
                     for i in range(n)
                 ]
             )
+            # Conduction acts on the cell-center enthalpy, the mean of the two faces for the
+            # default central_difference scheme
+            C = 0.5 * G * dz / self.cp
             h = np.linalg.solve(
-                np.diag(mdot(zs[iz])) + G * dz / self.cp, mdot(zs[iz - 1]) * h + q
+                np.diag(mdot(zs[iz])) + C, mdot(zs[iz - 1]) * h - C @ h + q
             )
 
         T_solver = np.array([float(nodes[c][zs[-1]]["T"]) for c in positions])

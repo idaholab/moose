@@ -216,8 +216,20 @@ where $\alpha$ is set by [!param](/Problem/TriSubChannel1PhaseProblem/interpolat
 $\alpha = 1$ for `upwind`, $\alpha = 0.5$ for `central_difference`, $\alpha = 0$ for `downwind`,
 and a cell Peclet number dependent value for `exponential`. The same weight interpolates the
 cell-center crossflow to the faces in the axial transport of lateral momentum. The interpolation
-scheme does not change the axial mass and enthalpy fluxes. Radial heat conduction is evaluated
-with the enthalpies of the top face, which keeps it implicit in the axial direction.
+scheme does not change the axial mass and enthalpy fluxes. Radial heat conduction through gap
+$ij$ is also a cell-center term,
+
+\begin{equation}
+\left(\frac{k}{c_p}\right)_{ij,k-1/2} \frac{S_{ij,k} \eta_{ij}}{L_{ij}} \left(h_{i,k-1/2} - h_{j,k-1/2}\right),
+\end{equation}
+
+where $(k/c_p)_{ij,k-1/2}$ is the harmonic mean of the cell-center $k/c_p$ of the two
+subchannels, $\eta_{ij}$ is the conduction shape factor, and $L_{ij}$ is the centroid distance.
+The enthalpy and $k/c_p$ of each subchannel are interpolated with the weight $\alpha$ of that
+subchannel, so the heat leaving one subchannel enters the other. Axial heat conduction is written
+in enthalpy, with $k/c_p$ and the flow area interpolated to the faces of the cell. The explicit
+solver marches the enthalpy upward from the inlet and always uses the upwind weight, $\alpha = 1$,
+for these terms.
 
 - Conservation of mass:
 

@@ -28,6 +28,9 @@ protected:
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) const override;
   virtual Real getSubChannelPeripheralDuctWidth(unsigned int i_ch) const override;
   virtual void computeh(int iblock) override;
+  /// Conduction diffusivity k / cp at a node, which turns the conductive heat flux into an
+  /// enthalpy gradient
+  Real computeConductionDiffusivity(const Node * node) const;
   PetscErrorCode cleanUp();
   TriSubChannelMesh & _tri_sch_mesh;
   // Extra objects for heat conduction, which is important with metal coolants
