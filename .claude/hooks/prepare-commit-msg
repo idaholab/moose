@@ -1,0 +1,63 @@
+#!/bin/bash
+# Mark commits whose quiz was overridden rather than passed.
+#
+# When quiz-pass.sh was run without --graded, the unlock was an override: nobody
+# demonstrated they understood the change. Record that in the commit message
+# itself, so the fact survives in history where a reviewer will see it, rather
+# than only in a local log file that travels nowhere.
+#
+# prepare-commit-msg is the only hook that may edit the message, and git runs it
+# for every commit path, including the editor's Source Control panel.
+
+set -uo pipefail
+
+msg_file="$1"
+source="${2:-}"
+
+# Leave messages alone when git is replaying or reusing an existing commit:
+# merge, squash, and `-c/-C <commit>` are not new content the quiz covered.
+case "$source" in
+  merge|squash|commit) exit 0 ;;
+esac
+
+git_dir=$(git rev-parse --git-dir 2>/dev/null) || exit 0
+token="$git_dir/claude-commit-quiz-pass"
+[[ -f "$token" ]] || exit 0
+
+read -r _ _ tok_kind < "$token" || exit 0
+[[ "$tok_kind" == "override" ]] || exit 0
+
+mark="Knowledge verification quiz was skipped"
+
+# Idempotent: amending an already-marked commit must not stack the line.
+grep -qF "$mark" "$msg_file" && exit 0
+
+# Insert before the trailer block if there is one, so the mark stays part of the
+# body and does not break trailer parsing. Otherwise append at the end.
+python3 -I - "$msg_file" "$mark" <<'PY'
+import re, sys
+
+path, mark = sys.argv[1], sys.argv[2]
+with open(path) as fh:
+    lines = fh.read().split("\n")
+
+# Split off the comment block git appends, which must stay last.
+body, comments = [], []
+for line in lines:
+    (comments if line.startswith("#") or comments else body).append(line)
+
+while body and not body[-1].strip():
+    body.pop()
+
+TRAILER = re.compile(r"^[A-Za-z][A-Za-z-]*:\s|^Co-Authored-By:", re.I)
+cut = len(body)
+while cut > 0 and (TRAILER.match(body[cut - 1]) or not body[cut - 1].strip()):
+    cut -= 1
+
+insert = [""] if cut > 0 else []
+body[cut:cut] = insert + [mark] + ([""] if cut < len(body) else [])
+
+out = "\n".join(body + ([""] if comments else []) + comments)
+with open(path, "w") as fh:
+    fh.write(out if out.endswith("\n") else out + "\n")
+PY
