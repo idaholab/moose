@@ -42,12 +42,12 @@ $S_{WE} = 0$. With $\Pi$ the prefactor the two terms share,
 
 \begin{equation}
 S_{RC} = -\Pi \Gamma_C \alpha_g^2
-  \exp\left(-K_C \frac{d_b^{5/6}\rho_f^{1/2}\epsilon^{1/3}}{\sigma^{1/2}}\right)
+  \exp\left(-K_C \frac{d_b^{5/6}\rho_c^{1/2}\epsilon^{1/3}}{\sigma^{1/2}}\right)
 \end{equation}
 
 \begin{equation}
 S_{TI} = \Pi \Gamma_B \alpha_g \left(1-\alpha_g\right)
-  \exp\left(-K_B \frac{\sigma}{\rho_f d_b^{5/3}\epsilon^{2/3}}\right)
+  \exp\left(-K_B \frac{\sigma}{\rho_c d_b^{5/3}\epsilon^{2/3}}\right)
 \end{equation}
 
 with $\Gamma_C = 0.188$, $K_C = 0.129$, $\Gamma_B = 0.264$ and $K_B = 1.37$, the values given by the
@@ -57,7 +57,7 @@ bound as the dispersed phase approaches its maximum.
 ## Ishii and Kim
 
 From [!cite](ishiikim2001micro). With the mean bubble fluctuating velocity
-$u_t = \epsilon^{1/3} d_b^{1/3}$ and the Weber number $We = \rho_f u_t^2 d_b / \sigma$:
+$u_t = \epsilon^{1/3} d_b^{1/3}$ and the Weber number $We = \rho_c u_t^2 d_b / \sigma$:
 
 \begin{equation}
 S_{RC} = -\frac{1}{3\pi} C_{RC} u_t \xi^2
@@ -78,13 +78,13 @@ $\alpha_{g,max} = 0.75$. As the reference specifies, the breakage rate is zero b
 Weber number.
 
 The terminal velocity and the drag coefficient are mutually
-implicit: $u_r$ depends on $C_D$, and $C_D$ on $Re_D = \rho_f u_r d_b (1-\alpha_g)/\mu_f$.
+implicit: $u_r$ depends on $C_D$, and $C_D$ on $Re_D = \rho_c u_r d_b (1-\alpha_g)/\mu_c$.
 Eliminating $C_D$ leaves the scalar equation
 
 !equation
 u_r \left(1 + \frac{1}{10}\left(B u_r\right)^{3/4}\right) = T,
-\qquad B = \frac{\rho_f d_b (1-\alpha_g)}{\mu_f},
-\qquad T = \frac{B}{24}\frac{d_b g \left|\rho_f - \rho_g\right|}{3\rho_f}
+\qquad B = \frac{\rho_c d_b (1-\alpha_g)}{\mu_c},
+\qquad T = \frac{B}{24}\frac{d_b g \left|\rho_c - \rho_g\right|}{3\rho_c}
 
 whose left hand side is zero at the origin and strictly increasing, so the root is unique and lies
 in $[0, T]$ because the bracket factor is at least one. It is solved by a Newton iteration

@@ -51,8 +51,8 @@ public:
    *
    * \f[
    *   u_r \left(1 + 0.1 \left(B u_r\right)^{3/4}\right) = T ,
-   *   \qquad B = \frac{\rho_f d_b (1-\alpha_g)}{\mu_f} ,
-   *   \qquad T = \frac{B}{24}\,\frac{d_b g \Delta\rho}{3 \rho_f} ,
+   *   \qquad B = \frac{\rho_c d_b (1-\alpha_g)}{\mu_c} ,
+   *   \qquad T = \frac{B}{24}\,\frac{d_b g \Delta\rho}{3 \rho_c} ,
    * \f]
    *
    * by Newton's method.
@@ -83,10 +83,10 @@ protected:
 
   /// Density of the dispersed phase, rho_g
   const Moose::Functor<Real> & _rho_d;
-  /// Density of the continuous phase, rho_f
-  const Moose::Functor<Real> & _rho_f;
+  /// Density of the continuous phase, rho_c
+  const Moose::Functor<Real> & _rho_c;
   /// Dynamic viscosity of the continuous phase, only needed by the Ishii and Kim drag coefficient
-  const Moose::Functor<Real> * const _mu_f;
+  const Moose::Functor<Real> * const _mu_c;
   /// Volume fraction of the dispersed phase, alpha_g
   const Moose::Functor<Real> & _f_d;
   /// Surface tension between the phases

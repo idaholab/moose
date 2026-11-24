@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearWCNSFV2PDriftFluxBase.h"
+#include "NS.h"
 
 InputParameters
 LinearWCNSFV2PDriftFluxBase::validParams()
@@ -16,7 +17,8 @@ LinearWCNSFV2PDriftFluxBase::validParams()
   params.addRequiredParam<MooseFunctorName>("u_slip", "The slip velocity in the x direction.");
   params.addParam<MooseFunctorName>("v_slip", "The slip velocity in the y direction.");
   params.addParam<MooseFunctorName>("w_slip", "The slip velocity in the z direction.");
-  params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
+  params.addRequiredParam<MooseFunctorName>(NS::dispersed_phase_density,
+                                            "Dispersed phase density.");
   params.addParam<MooseFunctorName>(
       "fraction_dispersed", 0.0, "Volume fraction of the dispersed phase.");
   params.addParam<std::vector<BoundaryName>>(
@@ -33,7 +35,7 @@ LinearWCNSFV2PDriftFluxBase::LinearWCNSFV2PDriftFluxBase(const InputParameters &
   : LinearFVFluxKernel(params),
     _dim(_subproblem.mesh().dimension()),
     _f_d(getFunctor<Real>("fraction_dispersed")),
-    _rho_d(getFunctor<Real>("rho_d")),
+    _rho_d(getFunctor<Real>(NS::dispersed_phase_density)),
     _u_slip(getFunctor<Real>("u_slip")),
     _v_slip(isParamValid("v_slip") ? &getFunctor<Real>("v_slip") : nullptr),
     _w_slip(isParamValid("w_slip") ? &getFunctor<Real>("w_slip") : nullptr),

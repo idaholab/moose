@@ -150,6 +150,9 @@ static const std::string speed = "speed";
 static const std::string sound_speed = "sound_speed";
 
 // Two phase mixture materials
+static const std::string continuous_phase_density = "rho_c";
+static const std::string dispersed_phase_density = "rho_d";
+static const std::string continuous_phase_viscosity = "mu_c";
 static const std::string latent_heat = "latent_heat";
 static const std::string T_liquidus = "T_liquidus";
 static const std::string T_solidus = "T_solidus";

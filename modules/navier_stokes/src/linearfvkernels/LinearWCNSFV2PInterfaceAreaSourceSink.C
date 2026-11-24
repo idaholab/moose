@@ -35,10 +35,12 @@ LinearWCNSFV2PInterfaceAreaSourceSink::validParams()
   params.addParam<MooseFunctorName>("v", "The dispersed phase velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The dispersed phase velocity in the z direction.");
 
-  params.addRequiredParam<MooseFunctorName>("rho_d", "Density of the dispersed phase, rho_g.");
-  params.addRequiredParam<MooseFunctorName>("rho_f", "Density of the continuous phase, rho_f.");
+  params.addRequiredParam<MooseFunctorName>(NS::dispersed_phase_density,
+                                            "Density of the dispersed phase, rho_g.");
+  params.addRequiredParam<MooseFunctorName>(NS::continuous_phase_density,
+                                            "Density of the continuous phase.");
   params.addParam<MooseFunctorName>(
-      "mu_f",
+      NS::continuous_phase_viscosity,
       "Dynamic viscosity of the continuous phase. Required by the Ishii and Kim model, which "
       "forms a particle Reynolds number for its drag coefficient.");
   params.addParam<MooseFunctorName>(
@@ -86,9 +88,11 @@ LinearWCNSFV2PInterfaceAreaSourceSink::LinearWCNSFV2PInterfaceAreaSourceSink(
     _u_var(getFunctor<Real>("u")),
     _v_var(isParamValid("v") ? &getFunctor<Real>("v") : nullptr),
     _w_var(isParamValid("w") ? &getFunctor<Real>("w") : nullptr),
-    _rho_d(getFunctor<Real>("rho_d")),
-    _rho_f(getFunctor<Real>("rho_f")),
-    _mu_f(isParamValid("mu_f") ? &getFunctor<Real>("mu_f") : nullptr),
+    _rho_d(getFunctor<Real>(NS::dispersed_phase_density)),
+    _rho_c(getFunctor<Real>(NS::continuous_phase_density)),
+    _mu_c(isParamValid(NS::continuous_phase_viscosity)
+              ? &getFunctor<Real>(NS::continuous_phase_viscosity)
+              : nullptr),
     _f_d(getFunctor<Real>("fraction_dispersed")),
     _sigma(getFunctor<Real>("sigma")),
     _epsilon(getFunctor<Real>("epsilon")),
@@ -112,8 +116,8 @@ LinearWCNSFV2PInterfaceAreaSourceSink::LinearWCNSFV2PInterfaceAreaSourceSink(
     paramError("v", "In two or more dimensions, the v velocity must be supplied.");
   if (_dim >= 3 && !_w_var)
     paramError("w", "In three dimensions, the w velocity must be supplied.");
-  if (_model == ModelEnum::ISHII_KIM && !_mu_f)
-    paramError("mu_f",
+  if (_model == ModelEnum::ISHII_KIM && !_mu_c)
+    paramError(NS::continuous_phase_viscosity,
                "The Ishii and Kim model needs the continuous phase viscosity to form the particle "
                "Reynolds number of its drag coefficient.");
   if (_model == ModelEnum::ISHII_KIM && _gravity.norm() == 0)
@@ -162,7 +166,7 @@ LinearWCNSFV2PInterfaceAreaSourceSink::computeCoefficients()
   const auto state = determineState();
 
   const auto rho_d = _rho_d(elem_arg, state);
-  const auto rho_f = _rho_f(elem_arg, state);
+  const auto rho_c = _rho_c(elem_arg, state);
   const auto sigma = _sigma(elem_arg, state);
   const auto epsilon = _epsilon(elem_arg, state);
   const auto f_d = std::clamp(_f_d(elem_arg, state), 0.0, _f_d_max);
@@ -202,7 +206,7 @@ LinearWCNSFV2PInterfaceAreaSourceSink::computeCoefficients()
     // terms grow without bound as the dispersed phase approaches its maximum.
     const auto packing = std::max(_f_d_max - f_d, libMesh::TOLERANCE);
     const auto sources = NS::hibikiIshiiAreaSources(
-        f_d, f_d / xi, db, cbrt(epsilon), packing, rho_f, sigma, _gamma_c, _kc, _gamma_b, _kb);
+        f_d, f_d / xi, db, cbrt(epsilon), packing, rho_c, sigma, _gamma_c, _kc, _gamma_b, _kb);
     s_rc = sources.first;
     s_ti = sources.second;
     // No wake entrainment model in this formulation
@@ -222,10 +226,10 @@ LinearWCNSFV2PInterfaceAreaSourceSink::computeCoefficients()
 
     // Wake entrainment. The terminal velocity and the drag coefficient are
     // mutually implicit and are solved together.
-    const auto delta_rho = std::abs(rho_f - rho_d);
-    const auto reynolds_per_velocity = rho_f * db * (1.0 - f_d) / (*_mu_f)(elem_arg, state);
+    const auto delta_rho = std::abs(rho_c - rho_d);
+    const auto reynolds_per_velocity = rho_c * db * (1.0 - f_d) / (*_mu_c)(elem_arg, state);
     const auto stokes_velocity =
-        reynolds_per_velocity / 24.0 * db * _gravity.norm() * delta_rho / (3.0 * rho_f);
+        reynolds_per_velocity / 24.0 * db * _gravity.norm() * delta_rho / (3.0 * rho_c);
     const auto u_r = solveTerminalVelocity(stokes_velocity, reynolds_per_velocity);
     const auto reynolds = reynolds_per_velocity * u_r;
     const auto drag_coefficient =
@@ -233,7 +237,7 @@ LinearWCNSFV2PInterfaceAreaSourceSink::computeCoefficients()
     s_we = -1.0 / (3.0 * libMesh::pi) * _c_we * u_r * Utility::pow<2>(xi) * cbrt(drag_coefficient);
 
     // Turbulent impact. Below the critical Weber number the breakage rate is zero.
-    const auto weber = rho_f * Utility::pow<2>(u_t) * db / sigma;
+    const auto weber = rho_c * Utility::pow<2>(u_t) * db / sigma;
     if (weber > _we_cr)
       s_ti = 1.0 / 18.0 * _c_ti * u_t * Utility::pow<2>(xi) / f_d * sqrt(1.0 - _we_cr / weber) *
              exp(-_we_cr / weber);

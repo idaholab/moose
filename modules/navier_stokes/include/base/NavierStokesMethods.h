@@ -250,7 +250,7 @@ dragFunction(const T & Re_p)
  * @param d_b averaged particle size
  * @param u_t turbulent velocity scale
  * @param packing the margin to the maximum packing fraction, floored by the caller
- * @param rho_f continuous phase density
+ * @param rho_c continuous phase density
  * @param sigma surface tension
  * @param gamma_c, k_c coalescence coefficients
  * @param gamma_b, k_b breakage coefficients
@@ -264,7 +264,7 @@ hibikiIshiiAreaSources(const T & f_d,
                        const T & d_b,
                        const T & u_t,
                        const T & packing,
-                       const T & rho_f,
+                       const T & rho_c,
                        const T & sigma,
                        const Real gamma_c,
                        const Real k_c,
@@ -277,9 +277,9 @@ hibikiIshiiAreaSources(const T & f_d,
 
   const T prefactor = Utility::pow<2>(f_d_over_xi) * u_t / (pow(d_b, 11. / 3.) * packing);
   const T s_rc = -prefactor * gamma_c * Utility::pow<2>(f_d) *
-                 exp(-k_c * pow(d_b, 5. / 6.) * sqrt(rho_f / sigma) * u_t);
+                 exp(-k_c * pow(d_b, 5. / 6.) * sqrt(rho_c / sigma) * u_t);
   const T s_ti = prefactor * gamma_b * f_d * (1.0 - f_d) *
-                 exp(-k_b * sigma / (rho_f * pow(d_b, 5. / 3.) * Utility::pow<2>(u_t)));
+                 exp(-k_b * sigma / (rho_c * pow(d_b, 5. / 3.) * Utility::pow<2>(u_t)));
   return {s_rc, s_ti};
 }
 

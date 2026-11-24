@@ -404,8 +404,8 @@ WCNSLinearFVTwoPhaseMixturePhysics::setRelativeVelocityParams(InputParameters & 
     params.set<MooseFunctorName>("v_slip") = "vel_slip_y";
   if (dimension() >= 3)
     params.set<MooseFunctorName>("w_slip") = "vel_slip_z";
-  params.set<MooseFunctorName>("rho_d") = _phase_2_density;
-  params.set<MooseFunctorName>("rho_c") = _phase_1_density;
+  params.set<MooseFunctorName>(NS::dispersed_phase_density) = _phase_2_density;
+  params.set<MooseFunctorName>(NS::continuous_phase_density) = _phase_1_density;
   params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
 }
 
@@ -546,11 +546,11 @@ WCNSLinearFVTwoPhaseMixturePhysics::addInterfacialMassTransferRateMaterial()
   params.set<MooseFunctorName>("T_saturation") = getParam<MooseFunctorName>("T_saturation");
   params.set<MooseFunctorName>("latent_heat") =
       getParam<MooseFunctorName>("interfacial_latent_heat");
-  params.set<MooseFunctorName>("rho_c") = _phase_1_density;
-  params.set<MooseFunctorName>("mu_c") = _phase_1_viscosity;
+  params.set<MooseFunctorName>(NS::continuous_phase_density) = _phase_1_density;
+  params.set<MooseFunctorName>(NS::continuous_phase_viscosity) = _phase_1_viscosity;
   params.set<MooseFunctorName>("k_c") = _phase_1_thermal_conductivity;
-  // The particle Reynolds number of the heat transfer correlation is formed from the velocity of the
-  // particles relative to the continuous phase, the slip velocity, not the drift velocity
+  // The particle Reynolds number of the heat transfer correlation is formed from the velocity of
+  // the particles relative to the continuous phase, the slip velocity, not the drift velocity
   params.set<MooseFunctorName>("u_slip") = "vel_slip_x";
   if (dimension() >= 2)
     params.set<MooseFunctorName>("v_slip") = "vel_slip_y";
@@ -888,7 +888,7 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
       // The slip closure forms both the relaxation time and the particle Reynolds number
       // from the continuous phase viscosity, not from the mixture viscosity
       params.set<MooseFunctorName>(NS::mu) = _phase_1_viscosity;
-      params.set<MooseFunctorName>("rho_d") = _phase_2_density;
+      params.set<MooseFunctorName>(NS::dispersed_phase_density) = _phase_2_density;
       params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
       // The phase equation is advected with the diffusion velocity, which this object derives
       // from the slip velocity it computes
@@ -902,7 +902,7 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
       if (getParam<bool>("use_dispersed_phase_drag_model"))
       {
         params.set<bool>("use_dispersed_phase_drag_model") = true;
-        params.set<MooseFunctorName>("rho_c") = _phase_1_density;
+        params.set<MooseFunctorName>(NS::continuous_phase_density) = _phase_1_density;
         params.set<MooseEnum>("drag_model") = getParam<MooseEnum>("slip_drag_model");
         params.set<Real>("swarm_exponent") = getParam<Real>("slip_swarm_exponent");
         params.set<MooseFunctorName>("friction_pressure_gradient") =

@@ -351,8 +351,8 @@ WCNSFVTwoPhaseMixturePhysics::addPhaseDriftFluxTerm()
       params.set<MooseFunctorName>("v_slip") = "vel_slip_y";
     if (dimension() >= 3)
       params.set<MooseFunctorName>("w_slip") = "vel_slip_z";
-    params.set<MooseFunctorName>("rho_d") = _phase_2_density;
-    params.set<MooseFunctorName>("rho_c") = _phase_1_density;
+    params.set<MooseFunctorName>(NS::dispersed_phase_density) = _phase_2_density;
+    params.set<MooseFunctorName>(NS::continuous_phase_density) = _phase_1_density;
     params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
     params.set<MooseEnum>("momentum_component") = components[dim];
     params.set<MooseEnum>("density_interp_method") = getParam<MooseEnum>("density_interp_method");
@@ -378,7 +378,7 @@ WCNSFVTwoPhaseMixturePhysics::addAdvectionSlipTerm()
     if (dimension() >= 3)
       params.set<MooseFunctorName>("w_slip") = "vel_slip_z";
     params.set<MooseFunctorName>(NS::density) = _phase_1_density;
-    params.set<MooseFunctorName>("rho_d") = _phase_2_density;
+    params.set<MooseFunctorName>(NS::dispersed_phase_density) = _phase_2_density;
     params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
     params.set<MooseEnum>("momentum_component") = components[dim];
     params.set<MooseEnum>("advected_interp_method") =
@@ -467,7 +467,7 @@ WCNSFVTwoPhaseMixturePhysics::addFunctorMaterials()
       // continuous phase viscosity, Stokes drag being exerted by the fluid the particle moves in
       params.set<MooseFunctorName>(NS::density) = "rho_mixture";
       params.set<MooseFunctorName>(NS::mu) = _phase_1_viscosity;
-      params.set<MooseFunctorName>("rho_d") = _phase_2_density;
+      params.set<MooseFunctorName>(NS::dispersed_phase_density) = _phase_2_density;
       params.set<MooseFunctorName>("fraction_dispersed") = _phase_2_fraction_name;
       // The phase equation is advected with the drift velocity, which this object derives from
       // the slip velocity it computes
@@ -479,7 +479,7 @@ WCNSFVTwoPhaseMixturePhysics::addFunctorMaterials()
       if (getParam<bool>("use_dispersed_phase_drag_model"))
       {
         params.set<bool>("use_dispersed_phase_drag_model") = true;
-        params.set<MooseFunctorName>("rho_c") = _phase_1_density;
+        params.set<MooseFunctorName>(NS::continuous_phase_density) = _phase_1_density;
       }
       else if (isParamValid("slip_linear_friction_name"))
         params.set<MooseFunctorName>("linear_coef_name") =

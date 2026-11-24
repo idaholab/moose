@@ -31,8 +31,10 @@ WCNSFV2PInterfacialMassTransferFunctorMaterial::validParams()
       "T_saturation", "Saturation temperature of the transition the transfer represents.");
   params.addRequiredParam<MooseFunctorName>("latent_heat",
                                             "Latent heat of that transition, per unit mass.");
-  params.addRequiredParam<MooseFunctorName>("rho_c", "Continuous phase density.");
-  params.addRequiredParam<MooseFunctorName>("mu_c", "Continuous phase dynamic viscosity.");
+  params.addRequiredParam<MooseFunctorName>(NS::continuous_phase_density,
+                                            "Continuous phase density.");
+  params.addRequiredParam<MooseFunctorName>(NS::continuous_phase_viscosity,
+                                            "Continuous phase dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>("k_c", "Continuous phase thermal conductivity.");
   params.addRequiredParam<MooseFunctorName>("u_slip", "The slip velocity in the x direction.");
   params.addParam<MooseFunctorName>("v_slip", "The slip velocity in the y direction.");
@@ -59,8 +61,8 @@ WCNSFV2PInterfacialMassTransferFunctorMaterial::WCNSFV2PInterfacialMassTransferF
     _temperature(getFunctor<Real>(NS::T_fluid)),
     _T_saturation(getFunctor<Real>("T_saturation")),
     _latent_heat(getFunctor<Real>("latent_heat")),
-    _rho_c(getFunctor<Real>("rho_c")),
-    _mu_c(getFunctor<Real>("mu_c")),
+    _rho_c(getFunctor<Real>(NS::continuous_phase_density)),
+    _mu_c(getFunctor<Real>(NS::continuous_phase_viscosity)),
     _k_c(getFunctor<Real>("k_c")),
     _u_slip(getFunctor<Real>("u_slip")),
     _v_slip(isParamValid("v_slip") ? &getFunctor<Real>("v_slip") : nullptr),

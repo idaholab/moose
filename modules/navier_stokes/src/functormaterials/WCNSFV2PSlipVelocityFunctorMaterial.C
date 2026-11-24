@@ -145,7 +145,8 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::validParams()
       NS::density,
       "Mixture density. This is the density that appears in the buoyancy factor "
       "(rho_d - rho_m) / rho_d of the algebraic slip closure.");
-  params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
+  params.addRequiredParam<MooseFunctorName>(NS::dispersed_phase_density,
+                                            "Dispersed phase density.");
   params.addRequiredParam<MooseFunctorName>(
       NS::mu,
       "Continuous phase dynamic viscosity. Both the particle relaxation time and the particle "
@@ -171,7 +172,8 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::validParams()
       "self-consistently with the slip velocity so that the particle Reynolds number is formed "
       "from the slip velocity as its definition requires.");
   params.addParam<MooseFunctorName>(
-      "rho_c", "Continuous phase density, used to form the particle Reynolds number.");
+      NS::continuous_phase_density,
+      "Continuous phase density, used to form the particle Reynolds number.");
   MooseEnum drag_model("schiller-naumann distorted-particle automatic ishii-zuber",
                        "schiller-naumann");
   params.addParam<MooseEnum>(
@@ -276,7 +278,7 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::WCNSFV2PSlipVelocityFunctorMate
     _v_var(_dim > 1 && isParamValid("v") ? &getVelocityVariable("v") : nullptr),
     _w_var(_dim > 2 && isParamValid("w") ? &getVelocityVariable("w") : nullptr),
     _rho_mixture(this->template getFunctor<GenericReal<is_ad>>(NS::density)),
-    _rho_d(this->template getFunctor<GenericReal<is_ad>>("rho_d")),
+    _rho_d(this->template getFunctor<GenericReal<is_ad>>(NS::dispersed_phase_density)),
     _mu_c(this->template getFunctor<GenericReal<is_ad>>(NS::mu)),
     _f_d(this->template getFunctor<GenericReal<is_ad>>("fraction_dispersed")),
     _gravity(getParam<RealVectorValue>("gravity")),
@@ -287,8 +289,9 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::WCNSFV2PSlipVelocityFunctorMate
     _linear_friction(isParamValid("linear_coef_name")
                          ? &this->template getFunctor<GenericReal<is_ad>>("linear_coef_name")
                          : nullptr),
-    _rho_c(isParamValid("rho_c") ? &this->template getFunctor<GenericReal<is_ad>>("rho_c")
-                                 : nullptr),
+    _rho_c(isParamValid(NS::continuous_phase_density)
+               ? &this->template getFunctor<GenericReal<is_ad>>(NS::continuous_phase_density)
+               : nullptr),
     _drag_model(getParam<MooseEnum>("drag_model").template getEnum<DragModelEnum>()),
     _sigma(isParamValid("surface_tension")
                ? &this->template getFunctor<GenericReal<is_ad>>("surface_tension")

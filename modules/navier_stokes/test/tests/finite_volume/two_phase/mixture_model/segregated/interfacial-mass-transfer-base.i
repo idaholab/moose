@@ -160,7 +160,7 @@ t_end = 2.0
     v = vel_y
 
     rho_d = ${rho_d}
-    rho_f = ${rho}
+    rho_c = ${rho}
     fraction_dispersed = 'phase_2'
     sigma = 0.059
     epsilon = 1e-6

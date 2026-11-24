@@ -21,7 +21,8 @@ LinearWCNSFV2PEnergyDriftFlux::validParams()
       "Implements the enthalpy carried by the relative motion of the phases in the two-phase "
       "mixture model, div(beta_d beta_c / rho_m * (cp_d - cp_c) * T * u_slip), on the left hand "
       "side of the mixture energy equation.");
-  params.addRequiredParam<MooseFunctorName>("rho_c", "Continuous phase density.");
+  params.addRequiredParam<MooseFunctorName>(NS::continuous_phase_density,
+                                            "Continuous phase density.");
   params.addRequiredParam<MooseFunctorName>("cp_d", "Dispersed phase specific heat.");
   params.addRequiredParam<MooseFunctorName>("cp_c", "Continuous phase specific heat.");
   // This term advects the temperature, so it needs a boundary value to act on and must only run
@@ -41,7 +42,7 @@ LinearWCNSFV2PEnergyDriftFlux::validParams()
 
 LinearWCNSFV2PEnergyDriftFlux::LinearWCNSFV2PEnergyDriftFlux(const InputParameters & params)
   : LinearWCNSFV2PDriftFluxBase(params),
-    _rho_c(getFunctor<Real>("rho_c")),
+    _rho_c(getFunctor<Real>(NS::continuous_phase_density)),
     _cp_d(getFunctor<Real>("cp_d")),
     _cp_c(getFunctor<Real>("cp_c")),
     _coeff_interp_method(

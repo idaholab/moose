@@ -25,7 +25,8 @@ WCNSFV2PMomentumAdvectionSlip::validParams()
   params.addRequiredParam<MooseFunctorName>("u_slip", "The slip velocity in the x direction.");
   params.addParam<MooseFunctorName>("v_slip", "The slip velocity in the y direction.");
   params.addParam<MooseFunctorName>("w_slip", "The slip velocity in the z direction.");
-  params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
+  params.addRequiredParam<MooseFunctorName>(NS::dispersed_phase_density,
+                                            "Dispersed phase density.");
   params.addParam<MooseFunctorName>("fd", 0.0, "Fraction dispersed phase.");
   params.renameParam("fd", "fraction_dispersed", "");
   params.setDocString(NS::density, "Main phase (not dispersed) density functor");
@@ -35,7 +36,7 @@ WCNSFV2PMomentumAdvectionSlip::validParams()
 
 WCNSFV2PMomentumAdvectionSlip::WCNSFV2PMomentumAdvectionSlip(const InputParameters & params)
   : INSFVMomentumAdvection(params),
-    _rho_d(getFunctor<ADReal>("rho_d")),
+    _rho_d(getFunctor<ADReal>(NS::dispersed_phase_density)),
     _dim(_subproblem.mesh().dimension()),
     _u_slip(getFunctor<ADReal>("u_slip")),
     _v_slip(isParamValid("v_slip") ? &getFunctor<ADReal>("v_slip") : nullptr),

@@ -28,7 +28,8 @@ LinearWCNSFV2PMomentumDriftFlux ::validParams()
   // The stress is assembled on every face this kernel visits; whether it should be withheld on
   // impermeable walls, as the phase and energy drift fluxes are, is left as it was.
   params.suppressParameter<std::vector<BoundaryName>>("slip_boundaries");
-  params.addRequiredParam<MooseFunctorName>("rho_c", "Continuous phase density.");
+  params.addRequiredParam<MooseFunctorName>(NS::continuous_phase_density,
+                                            "Continuous phase density.");
 
   params.addParam<bool>(
       "force_boundary_execution", true, "This kernel should execute on boundaries by default");
@@ -48,7 +49,7 @@ LinearWCNSFV2PMomentumDriftFlux ::validParams()
 
 LinearWCNSFV2PMomentumDriftFlux ::LinearWCNSFV2PMomentumDriftFlux(const InputParameters & params)
   : LinearWCNSFV2PDriftFluxBase(params),
-    _rho_c(getFunctor<Real>("rho_c")),
+    _rho_c(getFunctor<Real>(NS::continuous_phase_density)),
     _index(getParam<MooseEnum>("momentum_component")),
     _density_interp_method(
         Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("density_interp_method"))),
