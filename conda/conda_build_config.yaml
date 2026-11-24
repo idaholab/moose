@@ -61,14 +61,14 @@ c_compiler:
   - clang                                                   # [osx]
 c_compiler_version:
   - 15                                                      # [linux]
-  - 22                                                      # [osx]
+  - 21                                                      # [osx]
 
 cxx_compiler:
   - gxx                                                     # [linux]
   - clangxx                                                 # [osx]
 cxx_compiler_version:
   - 15                                                      # [linux]
-  - 22                                                      # [osx]
+  - 21                                                      # [osx]
 
 fortran_compiler:
   - gfortran
