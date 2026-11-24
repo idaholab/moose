@@ -9,7 +9,7 @@
 
 [Mesh]
   [assembly]
-    type = SCMDetailedQuadAssemblyMeshGenerator
+    type = SCMQuadVisualizationAssemblyMeshGenerator
     side_gap = 0.1
   []
 []

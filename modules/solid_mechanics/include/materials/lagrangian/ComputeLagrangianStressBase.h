@@ -65,6 +65,13 @@ protected:
   virtual void initQpStatefulProperties() override;
   /// Update all properties (here just the stress/derivatives)
   virtual void computeQpProperties() override;
+  /// Pull the Cauchy stress back to the 1st PK stress with the unstabilized deformation gradient,
+  /// P = det(F_ust) sigma F_ust^{-T}
+  void pullBackCauchyStress();
+  /// Set pk1_jacobian and pk1_jacobian_bypass_fbar of P = det(F_ust) sigma F_ust^{-T} from
+  /// dsigma/d(F_stab), the derivative of the Cauchy stress wrt the stabilized deformation gradient.
+  /// Taken by value because callers may pass pk1_jacobian itself, which this overwrites.
+  void pullBackCauchyJacobian(const RankFourTensor dsigma_dF_stab);
   /// Provide for the actual stress updates
   virtual void computeQpStressUpdate() = 0;
 
@@ -104,19 +111,20 @@ protected:
   /// d(F)/d(grad u_{n+1}) (= alpha * IdentityFour for the generalized midpoint rule)
   const MaterialProperty<RankFourTensor> & _d_F_d_grad_u;
 
-  /// Unstabilized deformation gradient (= F_actual at alpha = 1). Used by the stress
-  /// materials as F in the kinematic stress-measure wraps (sigma <-> PK1 <-> PK2) so that the
-  /// residual matches OLD's `StressDivergenceTensors`-on-displaced-mesh form. F-bar
-  /// enters only through the constitutive stress via the strain calc's F-bar'd `_f_inv`.
-  const MaterialProperty<RankTwoTensor> & _F_ust;
+  /// Inverse and determinant of the unstabilized deformation gradient (= F_actual at alpha = 1),
+  /// published by the strain calculator. Used to pull the Cauchy stress back to the 1st PK
+  /// stress, so that the residual is the equilibrium of sigma on the deformed mesh. F-bar enters
+  /// only through sigma, which the constitutive model evaluates at the F-bar-stabilized
+  /// deformation gradient.
+  const MaterialProperty<RankTwoTensor> & _inverse_unstabilized_deformation_gradient;
+  const MaterialProperty<Real> & _det_unstabilized_deformation_gradient;
 
   /// d(spatial velocity gradient increment)/d(F_stab). Used in the sigma-via-dL chain to
   /// build pk1_jacobian / cauchy_jacobian.
   const MaterialProperty<RankFourTensor> & _d_deformation_gradient_increment_d_F;
 
   /// d(F_stab)/d(F_ust). Multiplied into the sigma chain so pk1_jacobian = dPK1/d(F_ust)
-  /// (and cauchy_jacobian = dsigma/d(dL)) gets the local F-bar contribution. Equals
-  /// IdentityFour when F-bar is off.
+  /// gets the local F-bar contribution. Equals IdentityFour when F-bar is off.
   const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_ust;
 
   /// d(F_stab)/d(F_avg), the non-local F-bar partial. Read to compose `_d_nl_fbar`.

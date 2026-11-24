@@ -10,6 +10,7 @@
 #include "QuadSubChannelNormalSliceValues.h"
 #include "SolutionHandle.h"
 #include "FEProblemBase.h"
+#include "SCM.h"
 
 registerMooseObject("SubChannelApp", QuadSubChannelNormalSliceValues);
 
@@ -30,10 +31,14 @@ QuadSubChannelNormalSliceValues::validParams()
 
 QuadSubChannelNormalSliceValues::QuadSubChannelNormalSliceValues(const InputParameters & parameters)
   : FileOutput(parameters),
-    _mesh(dynamic_cast<QuadSubChannelMesh &>(*_mesh_ptr)),
+    _mesh(SCM::getConstMesh<QuadSubChannelMesh>(*_mesh_ptr)),
     _variable(getParam<VariableName>("variable")),
     _height(getParam<Real>("height"))
 {
+  if (MooseUtils::absoluteFuzzyLessThan(_height, _mesh.getZGrid().front()))
+    paramError(
+        "height", _height, " is below the inlet of the mesh at ", _mesh.getZGrid().front(), ".");
+  std::tie(_iz, _weight) = _mesh.getAxialInterpolation(_height);
   _exit_value.resize(_mesh.getNy(), _mesh.getNx());
 }
 
@@ -44,41 +49,14 @@ QuadSubChannelNormalSliceValues::output()
   auto val_soln = SolutionHandle(_problem_ptr->getVariable(0, _variable));
   if (processor_id() > 0)
     return;
-  auto nz = _mesh.getNumOfAxialCells();
-  auto z_grid = _mesh.getZGrid();
-  auto n_channels = _mesh.getNumOfChannels();
-  auto total_length =
-      _mesh.getHeatedLength() + _mesh.getHeatedLengthEntry() + _mesh.getHeatedLengthExit();
-
-  if (_height >= total_length)
+  const auto nx = _mesh.getNx();
+  for (const auto i_ch : make_range(_mesh.getNumOfChannels()))
   {
-    for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
-    {
-      auto * node = _mesh.getChannelNode(i_ch, nz);
-      unsigned int i = (i_ch / _mesh.getNx());   // row
-      unsigned int j = i_ch - i * _mesh.getNx(); // column
-      _exit_value(i, j) = val_soln(node);
-    }
-  }
-  else
-  {
-    for (unsigned int iz = 0; iz < nz; iz++)
-    {
-      if (_height >= z_grid[iz] && _height < z_grid[iz + 1])
-      {
-        for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
-        {
-          auto * node_out = _mesh.getChannelNode(i_ch, iz + 1);
-          auto * node_in = _mesh.getChannelNode(i_ch, iz);
-          unsigned int i = (i_ch / _mesh.getNx());   // row
-          unsigned int j = i_ch - i * _mesh.getNx(); // column
-          _exit_value(i, j) = val_soln(node_in) + (val_soln(node_out) - val_soln(node_in)) *
-                                                      (_height - z_grid[iz]) /
-                                                      (z_grid[iz + 1] - z_grid[iz]);
-        }
-        break;
-      }
-    }
+    const auto * node_in = _mesh.getChannelNode(i_ch, _iz);
+    const auto * node_out = _mesh.getChannelNode(i_ch, _iz + 1);
+    const unsigned int i = i_ch / nx;     // row
+    const unsigned int j = i_ch - i * nx; // column
+    _exit_value(i, j) = val_soln.interpolate(node_in, node_out, _weight);
   }
 
   std::ofstream myfile;

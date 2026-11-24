@@ -43,8 +43,12 @@ SubChannelDelta::execute()
 {
   auto nz = _mesh.getNumOfAxialCells();
   auto n_channels = _mesh.getNumOfChannels();
+  // Creating a solution handle is collective, so it must happen on every processor
   auto Soln = SolutionHandle(_fe_problem.getVariable(/*tid*/ 0, _variable));
   auto mdot_soln = SolutionHandle(_fe_problem.getVariable(/*tid*/ 0, "mdot"));
+  // The subchannel solution is only available on processor 0
+  if (processor_id() != 0)
+    return;
 
   auto mass_flow_in = 0.0;
   auto sum_Delta_mass_flow_in = 0.0;
@@ -53,7 +57,7 @@ SubChannelDelta::execute()
     auto * node_in = _mesh.getChannelNode(i_ch, 0);
     auto * node_out = _mesh.getChannelNode(i_ch, nz);
     mass_flow_in += mdot_soln(node_in);
-    auto Delta = abs(Soln(node_in) - Soln(node_out));
+    auto Delta = std::abs(Soln(node_in) - Soln(node_out));
     sum_Delta_mass_flow_in += Delta * mdot_soln(node_in);
   }
 

@@ -860,6 +860,8 @@ Assembly::reinitFE(const Elem * elem)
     if (_displaced)
     {
       const auto & qw = _current_qrule->get_weights();
+      computeADElemNodePoints(
+          *elem, ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum());
       for (unsigned int qp = 0; qp != n_qp; qp++)
         computeSinglePointMapAD(elem, qw, qp, _holder_fe_helper[dim]);
     }
@@ -1041,6 +1043,57 @@ Assembly::resizeADMappingObjects(unsigned int n_qp, unsigned int dim)
 }
 
 void
+Assembly::computeADElemNodePoints(const Elem & elem, const bool do_derivatives)
+{
+  _ad_elem_node_points.resize(elem.n_nodes());
+  for (const auto n : elem.node_index_range())
+    _ad_elem_node_points[n] = elem.point(n);
+
+  if (!do_derivatives)
+    return;
+
+  const auto sys_num = _sys.number();
+  const auto & dof_map = _sys.dofMap();
+  for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
+  {
+    bool has_nodes_without_dofs = false;
+    for (const auto n : elem.node_index_range())
+    {
+      const Node & node = elem.node_ref(n);
+      if (node.n_dofs(sys_num, disp_num))
+        Moose::derivInsert(_ad_elem_node_points[n](direction).derivatives(),
+                           node.dof_number(sys_num, disp_num, 0),
+                           1.);
+      else
+        has_nodes_without_dofs = true;
+    }
+
+    const auto & var = dof_map.variable(disp_num);
+    if (!has_nodes_without_dofs || var.type().family != LAGRANGE ||
+        !var.active_on_subdomain(elem.subdomain_id()))
+      continue;
+
+    // DisplacedProblem displaces the nodes without degrees of freedom with the nodal_soln of the
+    // element degrees of freedom, which is linear in them, so evaluating it for each unit degree of
+    // freedom gives the derivatives of the node positions
+    dof_map.dof_indices(&elem, _ad_elem_disp_dof_indices, disp_num);
+    _ad_elem_disp_unit_soln.assign(_ad_elem_disp_dof_indices.size(), 0);
+    for (const auto j : index_range(_ad_elem_disp_dof_indices))
+    {
+      _ad_elem_disp_unit_soln[j] = 1;
+      FEInterface::nodal_soln(
+          elem.dim(), var.type(), &elem, _ad_elem_disp_unit_soln, _ad_elem_disp_nodal_soln);
+      _ad_elem_disp_unit_soln[j] = 0;
+      for (const auto n : elem.node_index_range())
+        if (!elem.node_ref(n).n_dofs(sys_num, disp_num) && _ad_elem_disp_nodal_soln[n] != 0)
+          Moose::derivInsert(_ad_elem_node_points[n](direction).derivatives(),
+                             _ad_elem_disp_dof_indices[j],
+                             _ad_elem_disp_nodal_soln[n]);
+    }
+  }
+}
+
+void
 Assembly::computeSinglePointMapAD(const Elem * elem,
                                   const std::vector<Real> & qw,
                                   unsigned p,
@@ -1092,9 +1145,8 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
   const auto & dphidxi_map = fe->get_fe_map().get_dphidxi_map();
   const auto & dphideta_map = fe->get_fe_map().get_dphideta_map();
   const auto & dphidzeta_map = fe->get_fe_map().get_dphidzeta_map();
-  const auto sys_num = _sys.number();
-  const bool do_derivatives =
-      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
+  mooseAssert(_ad_elem_node_points.size() == elem->n_nodes(),
+              "computeADElemNodePoints must be called for this element first");
 
   switch (dim)
   {
@@ -1116,14 +1168,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
 
       for (std::size_t i = 0; i < num_shapes; i++)
       {
-        libmesh_assert(elem_nodes[i]);
-        const Node & node = *elem_nodes[i];
-        libMesh::VectorValue<ADReal> elem_point = node;
-        if (do_derivatives)
-          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
-            if (node.n_dofs(sys_num, disp_num))
-              Moose::derivInsert(
-                  elem_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
+        const auto & elem_point = _ad_elem_node_points[i];
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
 
@@ -1166,14 +1211,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
 
       for (std::size_t i = 0; i < num_shapes; i++)
       {
-        libmesh_assert(elem_nodes[i]);
-        const Node & node = *elem_nodes[i];
-        libMesh::VectorValue<ADReal> elem_point = node;
-        if (do_derivatives)
-          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
-            if (node.n_dofs(sys_num, disp_num))
-              Moose::derivInsert(
-                  elem_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
+        const auto & elem_point = _ad_elem_node_points[i];
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
         _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
@@ -1244,14 +1282,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
 
       for (std::size_t i = 0; i < num_shapes; i++)
       {
-        libmesh_assert(elem_nodes[i]);
-        const Node & node = *elem_nodes[i];
-        libMesh::VectorValue<ADReal> elem_point = node;
-        if (do_derivatives)
-          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
-            if (node.n_dofs(sys_num, disp_num))
-              Moose::derivInsert(
-                  elem_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
+        const auto & elem_point = _ad_elem_node_points[i];
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
         _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
@@ -1407,8 +1438,8 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
   std::vector<std::vector<Real>> const * d2psidxi2_map = nullptr;
   std::vector<std::vector<Real>> const * d2psidxideta_map = nullptr;
   std::vector<std::vector<Real>> const * d2psideta2_map = nullptr;
-  const auto sys_num = _sys.number();
-  const bool do_derivatives = ADReal::do_derivatives && sys_num == _subproblem.currentNlSysNum();
+  mooseAssert(_ad_elem_node_points.size() == elem.n_nodes(),
+              "computeADElemNodePoints must be called for this element first");
 
   if (_calculate_curvatures)
   {
@@ -1431,15 +1462,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
       VectorValue<ADReal> side_point;
       if (_calculate_face_xyz)
-      {
-        const Node & node = side_elem.node_ref(0);
-        side_point = node;
-
-        if (do_derivatives)
-          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
-            Moose::derivInsert(
-                side_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
-      }
+        side_point = _ad_elem_node_points[elem.local_side_node(side, 0)];
 
       for (const auto p : make_range(n_qp))
       {
@@ -1476,13 +1499,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
-        const Node & node = side_elem.node_ref(i);
-        VectorValue<ADReal> side_point = node;
-
-        if (do_derivatives)
-          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
-            Moose::derivInsert(
-                side_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
+        const auto & side_point = _ad_elem_node_points[elem.local_side_node(side, i)];
 
         for (const auto p : make_range(n_qp))
           _ad_dxyzdxi_map[p].add_scaled(side_point, dpsidxi_map[i][p]);
@@ -1544,13 +1561,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
-        const Node & node = side_elem.node_ref(i);
-        VectorValue<ADReal> side_point = node;
-
-        if (do_derivatives)
-          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
-            Moose::derivInsert(
-                side_point(direction).derivatives(), node.dof_number(sys_num, disp_num, 0), 1.);
+        const auto & side_point = _ad_elem_node_points[elem.local_side_node(side, i)];
 
         for (const auto p : make_range(n_qp))
         {
@@ -2180,6 +2191,9 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
     if (_displaced)
     {
       const auto & qw = _current_qrule_face->get_weights();
+      if (_need_ad_face_map || _need_ad_grad_phi_face)
+        computeADElemNodePoints(
+            elem, ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum());
       // computeFaceMap supplies the AD face JxW, normals and points; the single-point map only adds
       // the inverse map that computeGradPhiAD needs
       if (_need_ad_face_map)

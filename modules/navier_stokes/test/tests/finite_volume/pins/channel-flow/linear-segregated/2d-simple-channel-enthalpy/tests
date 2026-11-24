@@ -31,4 +31,14 @@
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
   []
+  [fluid-solid-physics]
+    type = 'CSVDiff'
+    input = porous-baffle-2d-enthalpy-physics.i
+    csvdiff = 'porous-baffle-2d-enthalpy-physics_out.csv porous-baffle-2d-enthalpy-physics_out_centerline_0002.csv'
+    requirement = 'The system shall provide a Physics syntax for linear finite volume porous medium flow with fluid enthalpy and solid temperature equations coupled by volumetric heat exchange, reproducing the explicit object setup through a porous baffle.'
+    design = 'WCNSLinearFVFlowPhysics.md WCNSLinearFVFluidHeatTransferPhysics.md PNSLinearFVSolidHeatTransferPhysics.md'
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    abs_zero = 1e-4
+  []
 []

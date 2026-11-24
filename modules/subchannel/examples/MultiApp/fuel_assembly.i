@@ -211,6 +211,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     type = TransientMultiApp
     input_files = "3d.i"
     execute_on = "final"
+    max_procs_per_app = 1
   []
 []
 

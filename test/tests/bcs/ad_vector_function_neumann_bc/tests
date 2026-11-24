@@ -16,4 +16,17 @@
       detail = 'be able to produce the exact Jacobian.'
     []
   []
+  [displaced]
+    type = 'PetscJacobianTester'
+    input = '../ad_function_neumann_bc/displaced.i'
+    cli_args = "Variables/u/family=LAGRANGE_VEC Kernels/diff_u/type=ADVectorDiffusion "
+               "BCs/inactive=right BCs/vector/type=ADVectorFunctionNeumannBC BCs/vector/variable=u "
+               "BCs/vector/boundary='right top' BCs/vector/function_x='1 + x + y' "
+               "BCs/vector/function_y='x * y' BCs/vector/use_displaced_mesh=true"
+    run_sim = False
+    issues = '#34483'
+    requirement = 'The system shall compute the exact Jacobian of a vector Neumann boundary '
+                  'condition defined by position-dependent functions on the displaced mesh, '
+                  'including its dependence on the displacements.'
+  []
 []

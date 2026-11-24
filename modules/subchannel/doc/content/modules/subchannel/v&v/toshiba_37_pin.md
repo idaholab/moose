@@ -129,7 +129,7 @@ The tolerances are not used in the SCM problem.
 
 !! Intentional comment to provide extra spacing
 
-A *MultiApp* is used for transfering the SCM solution into a detailed mesh.
+A *MultiApp* is used for transfering the SCM solution into a 3D visualization mesh.
 
 !listing /validation/Toshiba_37_pin/toshiba_37_pin.i block=MultiApps language=moose
 
@@ -137,7 +137,7 @@ A custom transfer, *MultiAppDetailedSolutionTransfer*, is used for this purpose.
 
 !listing /validation/Toshiba_37_pin/toshiba_37_pin.i block=Transfers language=moose
 
-The detailed mesh uses a *SCMDetailedTriAssemblyMeshGenerator* and the solution variables are populated by the transfer.
+The visualization mesh uses a *SCMTriVisualizationAssemblyMeshGenerator* and the solution variables are populated by the transfer.
 
 !listing /validation/Toshiba_37_pin/toshiba_37_pin.i block=viz language=moose
 

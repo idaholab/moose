@@ -66,6 +66,8 @@ NavierStokesApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   registerSyntax("WCNSFVTurbulencePhysics", "Physics/NavierStokes/Turbulence/*");
   registerSyntax("WCNSLinearFVTurbulencePhysics", "Physics/NavierStokes/TurbulenceSegregated/*");
   registerSyntax("PNSFVSolidHeatTransferPhysics", "Physics/NavierStokes/SolidHeatTransfer/*");
+  registerSyntax("PNSLinearFVSolidHeatTransferPhysics",
+                 "Physics/NavierStokes/SolidHeatTransferSegregated/*");
   registerSyntax("WCNSFVTwoPhaseMixturePhysics", "Physics/NavierStokes/TwoPhaseMixture/*");
   registerSyntax("WCNSLinearFVTwoPhaseMixturePhysics",
                  "Physics/NavierStokes/TwoPhaseMixtureSegregated/*");

@@ -35,4 +35,23 @@
     requirement = "The Lagrangian stress calculator shall error if its deprecated large_kinematics "
                   "parameter disagrees with the value derived from the strain calculator's guarantee."
   []
+  [fbar_mismatch]
+    requirement = "The Lagrangian stress divergence kernels shall error if their F-bar settings "
+                  "disagree with the strain calculator's"
+    issues = '#34471'
+    [stabilize_strain]
+      type = RunException
+      input = 'large_patch.i'
+      cli_args = 'Materials/compute_strain/stabilize_strain=true'
+      expect_err = "stabilize_strain disagrees with the ComputeLagrangianStrain calculator"
+      detail = "for stabilize_strain, and"
+    []
+    [F_bar_mode]
+      type = RunException
+      input = 'large_patch.i'
+      cli_args = 'GlobalParams/stabilize_strain=true Materials/compute_strain/F_bar_mode=incremental'
+      expect_err = "F_bar_mode disagrees with the ComputeLagrangianStrain calculator"
+      detail = "for F_bar_mode."
+    []
+  []
 []

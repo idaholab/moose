@@ -34,6 +34,66 @@ The kernels created for free flow for the pressure correction equation:
 - [LinearFVPressureCorrectionDiffusion.md] for the pressure diffusion term
 - [LinearFVDivergence.md] for the divergence of $A^{-1}H$. For more information, see [SIMPLE.md].
 
+## Porous medium flow
+
+With [!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/porous_medium_treatment)
+set to `true`, the Physics solves for the superficial velocity
+$\mathbf{U} = \epsilon \mathbf{v}$, where $\epsilon$ is the
+[!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/porosity):
+
+!equation
+\nabla \cdot \rho \mathbf{U} = 0
+
+!equation
+\nabla \cdot \left(\dfrac{\rho}{\epsilon} \mathbf{U} \otimes \mathbf{U}\right) = \nabla \cdot \left(\mu \left[\nabla \mathbf{v}+\nabla \mathbf{v}^T\right]\right) - \epsilon \nabla p - \mathbf{W}\mathbf{U} + \epsilon \mathbf{F}_g
+
+where $\mathbf{W}$ is the friction tensor of the Darcy and Forchheimer terms. The objects created
+in place of their free-flow counterparts are:
+
+- [PorousRhieChowMassFlux.md] for the face mass fluxes
+- [LinearPWCNSFVMomentumFlux.md] for the momentum advection and diffusion terms
+- [LinearPWCNSFVMomentumPressure.md] for the porosity-weighted pressure gradient
+- [LinearFVMomentumFriction.md] for the Darcy and Forchheimer friction, listed in
+  [!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/friction_types)
+- [LinearFVPressureFluxBC.md] for the pressure on the walls, which uses the wall velocity and the
+  $A^{-1}H$ flux. Its two-term boundary pressure reconstruction is controlled by
+  [!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/pressure_two_term_bc_expansion).
+
+The gravity term, the [LinearFVMomentumBoussinesq.md] term and the friction terms are weighted by
+the same porosity.
+
+### Pressure-jump baffles
+
+A sharp porosity change is best represented by a pressure-jump baffle on an internal sideset.
+Setting
+[!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/porosity_interface_pressure_treatment)
+to `bernoulli` places a [BernoulliFormLossPressureJump.md] model on the sidesets listed in
+[!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/pressure_drop_sidesets).
+The optional irreversible form loss of each sideset is given by
+[!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/pressure_drop_form_factors),
+and the side of the baffle providing its reference velocity by
+[!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/pressure_drop_reference_velocity_side).
+When pressure baffles are present, the Physics also creates the following to set up their numerical
+treatment:
+
+- [LinearFVPressureCorrectionDiffusionJump.md] for the pressure correction diffusion term
+- [FVPressureJumpGreenGaussGradient.md] as the gradient method of the pressure variable
+- [FVVelocityJumpGreenGaussGradient.md] as the gradient method of the velocity variables
+- [FVReconstructedPressureGradient.md] for the pressure gradient of the momentum equations, unless
+  [!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/use_reconstructed_pressure_gradient)
+  is `false`. Its relaxation is set by
+  [!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/pressure_gradient_relaxation).
+
+The pressure jumps are relaxed with
+[!param](/Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics/pressure_jump_relaxation).
+The Rhie-Chow user object is named `pins_rhie_chow_interpolator` by default for porous flow, which
+the [SIMPLE.md] executioner must reference.
+
+The following input defines a one-dimensional porous channel with two baffles and Forchheimer
+friction in the porous block:
+
+!listing test/tests/finite_volume/pins/channel-flow/linear-segregated/1d-simple-channel/porous-baffle-1d-physics.i block=Physics
+
 ## Selecting interpolation methods
 
 The linear finite volume Physics syntax provides shortcut parameters for the interpolation methods
@@ -68,6 +128,10 @@ commonly used in the action syntax is presented below:
 
   !listing include/base/NS.h start=std::string velocity_x end=std::string velocity_z include-end=true
 
+- Velocities for porous medium simulations:
+
+  !listing include/base/NS.h start=std::string superficial_velocity_x end=std::string superficial_velocity_z include-end=true
+
 - Pressure:
 
   !listing include/base/NS.h line=pressure
@@ -77,8 +141,11 @@ For the default names of other variables used in this action, visit [!file text=
 
 ## Coupling with other Physics
 
-Coupling with other Physics has not been implemented for `WCNSLinearFVFlowPhysics`.
-Coupling can only be performed at the moment by leveraging [MultiApps](syntax/MultiApps/index.md).
+The [WCNSLinearFVFluidHeatTransferPhysics.md], [WCNSLinearFVScalarTransportPhysics.md],
+[WCNSLinearFVTurbulencePhysics.md] and [WCNSLinearFVTwoPhaseMixturePhysics.md] couple to the face
+mass fluxes of the `WCNSLinearFVFlowPhysics`. For porous medium flow, the solid phase energy
+equation is added by the [PNSLinearFVSolidHeatTransferPhysics.md]. The turbulence and two-phase
+mixture Physics do not support the porous medium treatment.
 
 !syntax parameters /Physics/NavierStokes/FlowSegregated/WCNSLinearFVFlowPhysics
 

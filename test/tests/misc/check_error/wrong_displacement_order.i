@@ -1,7 +1,6 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  # Mesh uses second-order elements
   elem_type = QUAD8
   displacements = 'disp_x disp_y'
   block_name = pore
@@ -18,9 +17,11 @@
   [../]
 []
 
-# We are *not* allowed to use FIRST-order displacement vars!
+# A MONOMIAL displacement has no degrees of freedom on the mesh nodes
 [AuxVariables]
   [./disp_x]
+    family = MONOMIAL
+    order = CONSTANT
   [../]
 
   [./disp_y]

@@ -379,9 +379,12 @@ FixedPointSolve::solve()
 
   // Save postprocessors after the solve and their potential timestep_end execution
   // The postprocessors could be overwritten at timestep_begin, which is why they are saved
-  // after the solve. They could also be saved right after the transfers.
-  if (_old_entering_time == _problem.time())
-    savePostprocessorValues(false);
+  // after the solve, and after the transformation that relaxes them: the value saved has to be
+  // the relaxed iterate the solve actually used, not the value the transfers delivered.
+  // Every solve must save, including the first one of a time step, as it provides the previous
+  // iterate for the transformation at the next iteration. Only that transformation is restricted
+  // to iterations within the same time step.
+  savePostprocessorValues(false);
 
   if (converged)
   {

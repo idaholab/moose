@@ -98,7 +98,7 @@ The input file to run the central blockage case is presented below:
 
 !listing /validation/Blockage/THORS/FFM-3A.i language=moose
 
-The file that creates the detailed mesh that subchannel solution gets projected on is presented below:
+The file that creates the 3D visualization mesh that the subchannel solution gets projected on is presented below:
 
 !listing /validation/Blockage/THORS/FFM-3A_viz.i language=moose
 

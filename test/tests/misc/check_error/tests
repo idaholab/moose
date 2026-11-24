@@ -888,11 +888,10 @@
   [wrong_displacement_order]
     type = 'RunException'
     input = wrong_displacement_order.i
-    expect_err = "Error: mesh has SECOND order elements, so all displacement variables must be "
-                 "SECOND order."
+    expect_err = "The displacement variable 'disp_x' has no degrees of freedom on some mesh nodes"
 
-    requirement = 'The system shall report an error when the variables representing displacement are of a lower order than the mesh.'
-    issues = '#6561'
+    requirement = 'The system shall report an error when a variable representing displacement cannot displace every node of the mesh.'
+    issues = '#6561 #34039'
   []
 
   [function_conflict]

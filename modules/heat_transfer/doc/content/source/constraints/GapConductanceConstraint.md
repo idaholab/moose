@@ -8,6 +8,9 @@ conductance, $l$ is the gap distance, $u_m$ is the temperature on the primary
 side of the mortar interface, and $u_s$ is the temperature on the secondary
 side. Constraint enforcement is done using lagrange multipliers.
 
+It is [ModularGapConductanceConstraint](ModularGapConductanceConstraint.md) with this flux and a
+plate gap in every coordinate system, so it computes the gap distance and its Jacobian the same way.
+
 !syntax parameters /Constraints/GapConductanceConstraint
 
 !syntax inputs /Constraints/GapConductanceConstraint

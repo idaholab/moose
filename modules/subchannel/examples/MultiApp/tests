@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#29237'
+  issues = '#29237 #34503'
   design = 'SCMSolutionTransfer.md'
   [check]
     type = CSVDiff

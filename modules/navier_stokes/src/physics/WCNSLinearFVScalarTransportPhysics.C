@@ -49,10 +49,17 @@ WCNSLinearFVScalarTransportPhysics::WCNSLinearFVScalarTransportPhysics(
   : WCNSFVScalarTransportPhysicsBase(parameters)
 {
   addRequiredPhysicsTask("add_interpolation_method_physics");
+}
 
-  if (_porous_medium_treatment)
-    _flow_equations_physics->paramError("porous_medium_treatment",
-                                        "Porous media scalar advection is currently unimplemented");
+MooseFunctorName
+WCNSLinearFVScalarTransportPhysics::fluidFractionScaled(const MooseFunctorName & functor)
+{
+  // The scalars are concentrations per unit fluid volume, so storage, diffusion and sources act on
+  // the fluid fraction of the volume. Advection uses the superficial face flux unscaled.
+  return _porous_medium_treatment
+             ? addPorosityScaledFunctor(
+                   _flow_equations_physics->getPorosityFunctorName(/*smoothed=*/false), functor)
+             : functor;
 }
 
 void
@@ -97,6 +104,8 @@ WCNSLinearFVScalarTransportPhysics::addScalarTimeKernels()
   std::string kernel_type = "LinearFVTimeDerivative";
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
+  if (_porous_medium_treatment)
+    params.set<MooseFunctorName>("factor") = fluidFractionScaled("1");
 
   for (const auto & vname : _passive_scalar_names)
   {
@@ -147,8 +156,8 @@ WCNSLinearFVScalarTransportPhysics::addScalarDiffusionKernels()
     for (const auto name_i : index_range(_passive_scalar_names))
     {
       params.set<LinearVariableName>("variable") = _passive_scalar_names[name_i];
-      params.set<MooseFunctorName>("diffusion_coeff") =
-          passive_scalar_diffusivities[name_i] + (_has_turbulence_model ? "_plus_mut/Sc_t" : "");
+      params.set<MooseFunctorName>("diffusion_coeff") = fluidFractionScaled(
+          passive_scalar_diffusivities[name_i] + (_has_turbulence_model ? "_plus_mut/Sc_t" : ""));
       getProblem().addLinearFVKernel(
           kernel_type, prefix() + "ins_" + _passive_scalar_names[name_i] + "_diffusion", params);
     }
@@ -161,6 +170,7 @@ WCNSLinearFVScalarTransportPhysics::addScalarSourceKernels()
   const std::string kernel_type = "LinearFVSource";
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
+  const auto source_scaling = fluidFractionScaled("1");
 
   for (const auto scalar_i : index_range(_passive_scalar_names))
   {
@@ -170,6 +180,7 @@ WCNSLinearFVScalarTransportPhysics::addScalarSourceKernels()
     {
       // Added for backward compatibility with former Modules/NavierStokesFV syntax
       params.set<MooseFunctorName>("source_density") = _passive_scalar_sources[scalar_i];
+      params.set<MooseFunctorName>("scaling_factor") = source_scaling;
       getProblem().addLinearFVKernel(
           kernel_type, prefix() + "ins_" + _passive_scalar_names[scalar_i] + "_source", params);
     }
@@ -179,8 +190,11 @@ WCNSLinearFVScalarTransportPhysics::addScalarSourceKernels()
       {
         params.set<MooseFunctorName>("source_density") =
             _passive_scalar_coupled_sources[scalar_i][i];
-        if (_passive_scalar_coupled_sources_coef.size())
-          params.set<Real>("scaling_factor") = _passive_scalar_coupled_sources_coef[scalar_i][i];
+        params.set<MooseFunctorName>("scaling_factor") =
+            _passive_scalar_coupled_sources_coef.size()
+                ? fluidFractionScaled(
+                      Moose::stringify(_passive_scalar_coupled_sources_coef[scalar_i][i]))
+                : source_scaling;
         if (_passive_scalar_coupled_sources_blocks.size())
           params.set<std::vector<SubdomainName>>("block") =
               _passive_scalar_coupled_sources_blocks[scalar_i][i];

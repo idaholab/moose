@@ -11,9 +11,6 @@ For free flow in a non-porous media:
 !equation
 \dfrac{\partial \rho h}{\partial t} + \nabla \cdot (\rho h \mathbf{v}) - \nabla \cdot (k_f \nabla T_f) - Q + \alpha (T_f - T_{ambient}) = 0
 
-!alert note
-Porous medium treatment is not implemented for the linear finite volume discretization yet.
-
 where:
 
 - $h$ is the fluid specific enthalpy
@@ -30,7 +27,29 @@ The kernels created for flow in a non-porous medium are:
 - [LinearFVEnergyAdvection.md] for advection
 - [LinearFVDiffusion.md] for diffusion
 - [LinearFVSource.md] for the energy source term
-- [LinearFVVolumetricHeatTransfer.md] for the volumetric ambient convection term, if present
+- [LinearFVVolumetricHeatTransfer.md] for the volumetric ambient convection term, if present.
+  When solving for enthalpy, [LinearFVEnthalpyVolumetricHeatTransfer.md] is used instead, which
+  linearizes the fluid temperature with $dT/dh = 1/c_p$.
+
+## Porous medium flow
+
+When the coupled [WCNSLinearFVFlowPhysics.md] uses the porous medium treatment, the energy
+equation becomes
+
+!equation
+\dfrac{\partial \epsilon \rho h}{\partial t} + \nabla \cdot (\rho h \mathbf{U}) - \nabla \cdot (\kappa_f \nabla T_f) - Q + \alpha (T_f - T_{ambient}) = 0
+
+where $\mathbf{U}$ is the superficial velocity, so the advection term uses the face mass flux of
+the [PorousRhieChowMassFlux.md] without a porosity factor. The effective fluid conductivity
+$\kappa_f$ is the
+[!param](/Physics/NavierStokes/FluidHeatTransferSegregated/WCNSLinearFVFluidHeatTransferPhysics/thermal_conductivity)
+by default, and $\epsilon k_f$ if
+[!param](/Physics/NavierStokes/FluidHeatTransferSegregated/WCNSLinearFVFluidHeatTransferPhysics/effective_conductivity)
+is `false`. The source $Q$ and the heat transfer coefficient $\alpha$ are given per unit total
+volume. The solid phase is coupled through the ambient convection term with the
+[PNSLinearFVSolidHeatTransferPhysics.md].
+
+!listing test/tests/finite_volume/pins/channel-flow/linear-segregated/2d-simple-channel-enthalpy/porous-baffle-2d-enthalpy-physics.i block=Physics
 
 
 ## Automatically defined variables

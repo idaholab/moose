@@ -132,19 +132,22 @@ ComputeFrictionalForceCartesianLMMechanicalContact::computeQpIProperties()
 {
   ComputeWeightedGapCartesianLMMechanicalContact::computeQpIProperties();
 
-  const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
+  const auto & nodal_tangents = _nodal_frames.tangents(amg(),
+                                                       _lower_secondary_elem->node_ref(_i),
+                                                       _normals[_i],
+                                                       Moose::doDerivatives(_subproblem, _sys));
   // Get the _dof_to_weighted_tangential_velocity map
   const DofObject * const dof =
       _lm_vars[0]->isNodal() ? cast_ptr<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                              : cast_ptr<const DofObject *>(_lower_secondary_elem);
 
   _dof_to_weighted_tangential_velocity[dof][0] +=
-      _test[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[0][_i];
+      _test[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[0];
 
   // Get the _dof_to_weighted_tangential_velocity map for a second direction
   if (_has_disp_z)
     _dof_to_weighted_tangential_velocity[dof][1] +=
-        _test[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[1][_i];
+        _test[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[1];
 }
 
 void
@@ -244,20 +247,20 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
     scaling_factor_z = _lm_vars[2]->scalingFactor();
   }
 
-  ADReal normal_pressure_value =
-      lm_x * _dof_to_normal_vector[dof](0) + lm_y * _dof_to_normal_vector[dof](1);
-  ADReal tangential_pressure_value =
-      lm_x * _dof_to_tangent_vectors[dof][0](0) + lm_y * _dof_to_tangent_vectors[dof][0](1);
+  const auto & normal = dofNormal(dof);
+  const auto & tangents = dofTangents(dof);
+
+  ADReal normal_pressure_value = lm_x * normal(0) + lm_y * normal(1);
+  ADReal tangential_pressure_value = lm_x * tangents[0](0) + lm_y * tangents[0](1);
 
   ADReal tangential_pressure_value_dir;
 
   if (_has_disp_z)
   {
-    normal_pressure_value += lm_z * _dof_to_normal_vector[dof](2);
-    tangential_pressure_value += lm_z * _dof_to_tangent_vectors[dof][0](2);
-    tangential_pressure_value_dir = lm_x * _dof_to_tangent_vectors[dof][1](0) +
-                                    lm_y * _dof_to_tangent_vectors[dof][1](1) +
-                                    lm_z * _dof_to_tangent_vectors[dof][1](2);
+    normal_pressure_value += lm_z * normal(2);
+    tangential_pressure_value += lm_z * tangents[0](2);
+    tangential_pressure_value_dir =
+        lm_x * tangents[1](0) + lm_y * tangents[1](1) + lm_z * tangents[1](2);
   }
 
   ADReal normal_dof_residual = min(normal_pressure_value, weighted_gap * c);
@@ -311,8 +314,8 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
   // Intially, use the current normal vector
   if (_dof_to_old_normal_vector[dof].norm() < TOLERANCE)
   {
-    ny = _dof_to_normal_vector[dof](1);
-    nz = _dof_to_normal_vector[dof](2);
+    ny = MetaPhysicL::raw_value(normal(1));
+    nz = MetaPhysicL::raw_value(normal(2));
   }
   else
   {

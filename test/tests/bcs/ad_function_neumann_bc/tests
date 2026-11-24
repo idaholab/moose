@@ -18,4 +18,25 @@
       detail = 'using automatic differentiation and shall be able to produce the exact Jacobian.'
     [../]
   [../]
+  [displaced]
+    type = 'PetscJacobianTester'
+    input = 'displaced.i'
+    run_sim = False
+    issues = '#34483'
+    requirement = 'The system shall compute the exact Jacobian of a Neumann boundary condition '
+                  'defined by a position-dependent function on the displaced mesh, including its '
+                  'dependence on the displacements.'
+  []
+  [displaced_no_time_derivative]
+    type = 'PetscJacobianTester'
+    input = 'displaced.i'
+    cli_args = "Functions/fn/type=ParsedGradFunction Functions/fn/value='1 + x + y' "
+               "Functions/fn/grad_x=1 Functions/fn/grad_y=1 BCs/right/function=fn"
+    run_sim = False
+    issues = '#34483'
+    design = 'ADFunctionNeumannBC.md syntax/Functions/index.md'
+    requirement = 'The system shall compute the exact Jacobian of a Neumann boundary condition on '
+                  'the displaced mesh defined by a function that provides a spatial gradient but no '
+                  'time derivative.'
+  []
 []

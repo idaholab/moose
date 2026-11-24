@@ -12,7 +12,7 @@ unheated_length_exit = 0.855 #m
 
 [TriSubChannelMesh]
   [subchannel]
-    type = SCMDetailedTriAssemblyMeshGenerator
+    type = SCMTriVisualizationAssemblyMeshGenerator
     nrings = '${n_rings}'
     n_cells = 65
     flat_to_flat = '${inner_duct_in}'

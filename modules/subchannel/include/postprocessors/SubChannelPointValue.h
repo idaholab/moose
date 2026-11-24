@@ -22,7 +22,7 @@ public:
   SubChannelPointValue(const InputParameters & params);
   virtual void initialize() override {}
   virtual void execute() override;
-  virtual void finalize() override {}
+  virtual void finalize() override;
   virtual Real getValue() const override;
 
 protected:
@@ -31,10 +31,13 @@ protected:
   /// axial location [m]
   const Real & _height;
   /// subchannel index
-  const int & _i_ch;
-  Point _point;
-  const unsigned int _var_number;
-  const System & _system;
+  const unsigned int & _i_ch;
+  /// name of variable
+  const VariableName & _variable;
+  /// axial cell containing the height
+  unsigned int _iz;
+  /// linear interpolation weight of the height within the axial cell
+  Real _weight;
   /// value we want to calculate
   Real _value;
 };

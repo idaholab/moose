@@ -11,7 +11,49 @@
   [subchannel_height]
     type = 'RunException'
     input = 'test_error.i'
-    expect_err = ": No element located at given height."
+    expect_err = "height: 5 is outside the axial extent of the mesh, 0 to 1."
+    issues = '#29226 #29486 #34499'
     requirement = 'The system shall test the user provided height'
+  []
+  [elemental_variable]
+    type = CSVDiff
+    input = 'test.i'
+    cli_args = 'AuxVariables/T/family=MONOMIAL AuxVariables/T/order=CONSTANT'
+    csvdiff = 'test_out.csv'
+    prereq = test
+    recover = False
+    issues = '#34499'
+    requirement = 'The system shall print an elemental variable on a specific subchannel and height in quadrilateral assemblies'
+  []
+  [planar_mean_elemental_variable]
+    type = CSVDiff
+    input = 'test.i'
+    cli_args = 'AuxVariables/T/family=MONOMIAL AuxVariables/T/order=CONSTANT AuxVariables/mdot/family=LAGRANGE '
+               'ICs/mdot_ic/type=ConstantIC ICs/mdot_ic/variable=mdot ICs/mdot_ic/value=0.1 '
+               'Postprocessors/mean/type=SCMPlanarMean Postprocessors/mean/variable=T '
+               'Postprocessors/mean/height=0.55 Executioner/end_time=1 '
+               'Outputs/file_base=planar_mean_elemental_out'
+    csvdiff = 'planar_mean_elemental_out.csv'
+    recover = False
+    design = 'SCMPlanarMean.md'
+    issues = '#34499'
+    requirement = 'The system shall compute the planar mean of an elemental variable in quadrilateral assemblies'
+  []
+  [outlet_height_roundoff]
+    type = RunApp
+    input = 'test.i'
+    # The outlet of this grid is (1 / 49) * 49, which is below 1 in floating point
+    cli_args = 'QuadSubChannelMesh/sub_channel/n_cells=49 Postprocessors/T/height=1 Outputs/csv=false'
+    recover = False
+    issues = '#34499'
+    requirement = 'The system shall accept a point value height at the outlet when the axial grid accumulates roundoff'
+  []
+  [subchannel_index]
+    type = 'RunException'
+    input = 'test.i'
+    cli_args = 'Postprocessors/T/index=9'
+    expect_err = "index: is out of range; valid subchannel indices are 0 to 8."
+    issues = '#34499'
+    requirement = 'The system shall report an error if the subchannel index of a point value is out of range'
   []
 []

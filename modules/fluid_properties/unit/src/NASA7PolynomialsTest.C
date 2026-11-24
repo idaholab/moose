@@ -83,14 +83,19 @@ TEST(NASA7PolynomialsTest, canteraAboveMidpoint)
 
 TEST(NASA7PolynomialsTest, molarMass)
 {
-  // Molecular weights reported by Cantera 3.2.0 for gri30.yaml [g/mol]
-  const std::array<std::pair<std::string, Real>, 7> molecular_weights = {{{"H2", 2.016},
-                                                                          {"O2", 31.998},
-                                                                          {"H2O", 18.015},
-                                                                          {"CH4", 16.043},
-                                                                          {"CO", 28.010},
-                                                                          {"CO2", 44.009},
-                                                                          {"N2", 28.014}}};
+  // Molecular weights reported by Cantera 3.2.0 for gri30.yaml and, for He, Kr, and Xe,
+  // nasa_gas.yaml [g/mol]
+  const std::array<std::pair<std::string, Real>, 11> molecular_weights = {{{"H2", 2.016},
+                                                                           {"O2", 31.998},
+                                                                           {"H2O", 18.015},
+                                                                           {"CH4", 16.043},
+                                                                           {"CO", 28.010},
+                                                                           {"CO2", 44.009},
+                                                                           {"N2", 28.014},
+                                                                           {"He", 4.002602},
+                                                                           {"Ar", 39.95},
+                                                                           {"Kr", 83.798},
+                                                                           {"Xe", 131.293}}};
 
   // The tolerance [kg/mol] only absorbs roundoff in the conversion from g/mol; it is far below the
   // 1e-6 kg/mol resolution of the reported values
@@ -106,7 +111,8 @@ TEST(NASA7PolynomialsTest, consistentDerivatives)
   DNDerivativeType dTdT;
   Moose::derivInsert(dTdT, 0, 1);
 
-  for (const std::string species : {"H2", "O2", "H2O", "CH4", "CO", "CO2", "N2"})
+  for (const std::string species :
+       {"H2", "O2", "H2O", "CH4", "CO", "CO2", "N2", "He", "Ar", "Kr", "Xe"})
     for (const Real T_value : {600.0, 2000.0})
     {
       const auto & data = NASA7::speciesData(species);

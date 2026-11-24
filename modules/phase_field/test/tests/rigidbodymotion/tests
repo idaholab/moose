@@ -68,6 +68,23 @@
     requirement = 'The system shall be able to sum multiple grain force and torque contributions.'
   [../]
 
+  [./grain_forcesum_initial]
+    type = 'RunException'
+    input = 'grain_forcesum.i'
+    cli_args = "UserObjects/grain_force_dns/execute_on='initial linear nonlinear' "
+               "UserObjects/grain_force_const/execute_on='initial linear nonlinear' "
+               "UserObjects/grain_force/execute_on='initial linear nonlinear' "
+               "VectorPostprocessors/forces_dns/execute_on=initial "
+               "VectorPostprocessors/forces_cosnt/execute_on=initial "
+               "VectorPostprocessors/forces_total/execute_on=initial"
+    allow_warnings = true
+    expect_err = "must have one entry per grain"
+    requirement = 'The system shall report an error when grain force and torque sums execute '
+                  'before the summed force data is available.'
+    design = 'GrainForceAndTorqueSum.md'
+    issues = '#24527'
+  [../]
+
   [./grain_forcemasked]
     type = 'Exodiff'
     input = 'grain_maskedforce.i'

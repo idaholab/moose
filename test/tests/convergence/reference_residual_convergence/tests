@@ -50,6 +50,15 @@
     requirement = 'The system shall require all grouped variables to be included in the convergence '
                   'check, using a convergence object.'
   []
+  [group_unknown_variable]
+    type = RunException
+    input = 'reference_residual.i'
+    expect_err = "Variable 'w' is not a variable of the nonlinear system"
+    cli_args = 'Convergence/conv/group_variables="u v w x"'
+    requirement = 'The system shall report an error when a grouped variable is not a variable of the '
+                  'nonlinear system, using a convergence object.'
+    issues = '#34444'
+  []
   [wildcard]
     type = RunApp
     input = 'reference_residual.i'

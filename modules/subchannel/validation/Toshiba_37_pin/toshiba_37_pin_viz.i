@@ -1,6 +1,6 @@
 [Mesh]
   [subchannel]
-    type = SCMDetailedTriAssemblyMeshGenerator
+    type = SCMTriVisualizationAssemblyMeshGenerator
     nrings = 4
     n_cells = 20
     flat_to_flat = 0.085
