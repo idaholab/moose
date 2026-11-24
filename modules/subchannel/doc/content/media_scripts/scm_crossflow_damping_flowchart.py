@@ -61,9 +61,9 @@ def create_flowchart(output_path: str | Path) -> Path:
     ax.text(
         x,
         16.0,
-        "Crossflow residual $\\|r_w\\|$ of the current iterate;\n"
-        "reference $\\|r_w^0\\|$: the largest residual\n"
-        "of the SCM solve so far",
+        "Crossflow residual $\\|r_w^\\ell\\|$ of the current iterate $\\ell$;\n"
+        "reference $\\|r_w^0\\|$: the largest residual of the\n"
+        "block in the current SCM solve",
         ha="center",
         va="center",
         fontsize=11.3,
@@ -77,8 +77,8 @@ def create_flowchart(output_path: str | Path) -> Path:
         (0.68, "Pseudo-time step"),
         (
             0.0,
-            "$\\Delta\\tau = \\max\\left(\\Delta\\tau_0,\\ \\Delta\\tau_0\\,"
-            "\\dfrac{\\|r_w^0\\|}{\\|r_w\\|}\\,\\dfrac{1}{\\gamma}\\right)$",
+            "$\\Delta\\tau^\\ell = \\max\\left(\\Delta\\tau_0,\\ \\Delta\\tau_0\\,"
+            "\\dfrac{\\|r_w^0\\|}{\\|r_w^\\ell\\|}\\,\\dfrac{1}{\\gamma}\\right)$",
         ),
         (-0.68, "with the block factor $\\gamma$, raised by the retries"),
     ]:
@@ -98,11 +98,11 @@ def create_flowchart(output_path: str | Path) -> Path:
     ax.text(
         x,
         10.95,
-        "Add the damping $\\mathrm{added\\_K}_{ij} = m_{ij}\\,/\\,\\Delta\\tau$, "
+        "Add the damping $\\mathrm{added\\_K}^\\ell_{ij} = m_{ij}\\,/\\,\\Delta\\tau^\\ell$, "
         "$m_{ij} = L_{ij}\\,S_{ij}\\,\\rho^*_{ij}$,\n"
         "to the crossflow diagonal and\n"
-        "$\\mathrm{added\\_K}_{ij}\\,W_{ij}^{it}$ to the right-hand side,\n"
-        "with $W_{ij}^{it}$ the current iterate",
+        "$\\mathrm{added\\_K}^\\ell_{ij}\\,W_{ij}^\\ell$ to the right-hand side,\n"
+        "with $W_{ij}^\\ell$ the current iterate",
         ha="center",
         va="center",
         fontsize=11.3,
@@ -140,7 +140,7 @@ def create_flowchart(output_path: str | Path) -> Path:
             "by $\\delta_r = \\max(1/\\Delta\\tau^{\\ell,r-1},\\ 0.05/\\Delta\\tau_0)$,",
         ),
         (-0.05, "add $m_{ij}\\,\\delta_r$ to the diagonal"),
-        (-0.5, "and $m_{ij}\\,\\delta_r\\,W_{ij}^{it}$ to the right-hand side,"),
+        (-0.5, "and $m_{ij}\\,\\delta_r\\,W_{ij}^\\ell$ to the right-hand side,"),
         (-0.95, "double $\\gamma$, and retry"),
     ]:
         ax.text(
@@ -187,8 +187,7 @@ def create_flowchart(output_path: str | Path) -> Path:
         (x, 0.1),
         w,
         1.45,
-        "$\\gamma$ and the reference residual reset at the start of every SCM solve. With lu "
-        "the solve converges in one iteration and is not retried.",
+        "$\\gamma$ and the reference residual reset at the start of every SCM solve.",
     )
 
     fig.savefig(

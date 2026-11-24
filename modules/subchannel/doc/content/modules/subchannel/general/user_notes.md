@@ -59,9 +59,10 @@ together, by default with a field-split preconditioner and crossflow damping
   more damping.
 - +Turning off the damping.+ The crossflow damping vanishes at convergence and does not change the
   converged solution. It can be turned off with
-  [!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_time_damping), but then the field
-  split cannot factor the crossflow block of a solve that starts from zero crossflow, so only `lu`
-  is suitable without it.
+  [!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_time_damping). Without it, the
+  crossflow block of a steady solve that starts from zero crossflow can have a zero diagonal, where
+  its time and friction terms vanish and its advection terms cancel, which a field split with ILU(0)
+  cannot factor; `lu` does not have this limitation.
 - +Monolithic solves stagnate with tight tolerances.+ With a field split and tight
   [!param](/Problem/TriSubChannel1PhaseProblem/P_tol) and
   [!param](/Problem/TriSubChannel1PhaseProblem/T_tol), once the crossflow damping has decayed, the

@@ -484,11 +484,9 @@ form,
  \boldsymbol{M_{hh}}(\vec{\dot{m}}, \vec{w}) \vec{h} = \vec{b_h}.
 \end{equation}
 
-The explicit-segregated algorithm evaluates the same balances cell by cell from lagged values,
-without the interpolation to the cell center, taking inlet-node values in its place: its axial
-momentum equation gives the cell pressure drop with the inlet flow area, its crossflow residual is
-twice [lateral-momentum-dis] with the crossflow of each face taken as $w_{ij,k}$ and $w_{ij,k-1}$ and
-the pressure difference at the inlet node, and its conduction terms are written in temperature.
+The explicit-segregated algorithm evaluates the same balances cell by cell from lagged values: its
+axial momentum equation gives the cell pressure drop with the inlet flow area and evaluates the
+friction at the cell center, and its crossflow residual uses the inlet-node values of each cell.
 
 ### Energy balance id=energy_balance
 
@@ -624,7 +622,7 @@ update $\dot{m}$ and $P$ inside the residual function.
 
 !! Intentional comment to provide extra spacing
 
-This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations. The variables are updated sequentially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet. It takes inlet-node values in place of the interpolation to the cell center, so [!param](/Problem/TriSubChannel1PhaseProblem/interpolation_scheme) applies to the implicit algorithms only. Of the stabilization
+This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations. The variables are updated sequentially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet. Of the stabilization
 methods, only the temperature relaxation [!param](/Problem/TriSubChannel1PhaseProblem/T_relaxation) applies; the crossflow damping
 and the equation and solution relaxations described under [#monolithic] are specific to the
 monolithic algorithm.
@@ -719,10 +717,10 @@ above applies to all algorithms.
 
 !! Intentional comment to provide extra spacing
 
-The damping is controlled by
-[!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_time_damping), which is on by default.
-A pseudo-time derivative is added to the crossflow equation, which makes each monolithic solve a
-step of pseudo-transient continuation [!cite](kelley1998convergence) in the crossflow:
+The damping, controlled by
+[!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_time_damping) and on by default, adds a
+pseudo-time derivative to the crossflow equation, which makes each monolithic solve a step of
+pseudo-transient continuation [!cite](kelley1998convergence) in the crossflow:
 
 \begin{equation}
 M_{wp}\,\mathbf P^{\ell+1} + M_{ww}\,\mathbf W^{\ell+1} +
@@ -734,31 +732,23 @@ m_{ij} = L_{ij}\,S_{ij}\,\rho^{*},
 \end{equation}
 
 i.e. the diagonal matrix $\mathbf{added\_K}^{\ell}$ is added to $M_{ww}$ and
-$\mathbf{added\_K}^{\ell}\,\mathbf W^{\ell}$ to $\mathbf b_w$. Here $L_{ij}$ is the pitch, as in
-[lateral-momentum-dis], $S_{ij}$ the lateral flow area of their gap, $\rho^{*}$ the donor density of
-the gap, as in [lateral-momentum-dis], and $\Delta\tau^{\ell}$ the pseudo-time step of the current
-outer iteration $\ell$, defined below. Each gap is damped by its crossflow inertia $m_{ij}$, the
-coefficient of the time derivative in [lateral-momentum-dis], over the pseudo-time step, so the
-damping acts as an added crossflow resistance on the scale of the transient term. The damping
-improves the conditioning of the monolithic linear system. The two parts of the term play different
-roles:
+$\mathbf{added\_K}^{\ell}\,\mathbf W^{\ell}$ to $\mathbf b_w$. $m_{ij}$ is the crossflow inertia of
+gap $ij$, the coefficient of the time derivative in [lateral-momentum-dis], with $L_{ij}$, $S_{ij}$,
+and $\rho^{*}$ as defined there, and $\Delta\tau^{\ell}$ is the pseudo-time step of monolithic solve
+$\ell$, one per temperature iteration of the block. The damping thus acts as an added crossflow resistance on the scale of the transient term,
+and improves the conditioning of the monolithic system. Its two parts play different roles:
 
 - +The right-hand-side compensation+ $\mathbf{added\_K}^{\ell}\,\mathbf W^{\ell}$ makes the converged
-  solution independent of the damping: the term vanishes when $\mathbf W^{\ell+1}=\mathbf W^{\ell}$,
-  for any $\mathbf{added\_K}$. Without it, the added resistance $\mathbf{added\_K}\,\mathbf W$ remains at
-  convergence and pulls the crossflow toward zero. Because it acts in every axial cell, the
-  resulting error grows with axial refinement instead of vanishing.
-- +The growth of the pseudo-time step+ described below keeps the iteration fast. A small step keeps
-  the monolithic solves well conditioned far from the solution, but near convergence it slows the outer
-  iteration; letting the step grow, so that $\mathbf{added\_K}$ tends to zero, recovers the convergence rate
-  of the undamped system.
+  solution independent of the damping, since the term vanishes at $\mathbf W^{\ell+1}=\mathbf W^{\ell}$.
+  Without it, the added resistance remains at convergence and pulls the crossflow toward zero, with
+  an error that grows with axial refinement.
+- +The growth of the pseudo-time step+ recovers the convergence rate of the undamped system: a small
+  step keeps the solves well conditioned far from the solution but slows the outer iteration near
+  it.
 
-Both are needed. A damping that decays without the compensation still biases the solution wherever
-it has not fully vanished when the outer iteration stops. A fixed damping with the compensation is
-unbiased in principle, but converges slowly and can stop at the outer tolerance before it reaches
-the converged solution.
-
-The pseudo-time step uses a switched evolution relaxation [!cite](mulder1985experiments),
+A decaying damping without the compensation biases the solution wherever it has not vanished when
+the outer iteration stops; a fixed damping with it converges slowly. The pseudo-time step uses a
+switched evolution relaxation [!cite](mulder1985experiments),
 
 \begin{equation}
 \Delta\tau^{\ell} = \max\left(\Delta\tau_0,\;\Delta\tau_0\,
@@ -768,24 +758,18 @@ The pseudo-time step uses a switched evolution relaxation [!cite](mulder1985expe
 \end{equation}
 
 where $\Delta\tau_0$ is set by
-[!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_time_step) and $\mathbf r_w^{\ell}$ is
-the residual of the crossflow equation at the current iterate, before the damping is added. The step
-grows without bound, so the damping vanishes at convergence. The reference
-$\left\|\mathbf r_w^{0}\right\|_2$ is the largest crossflow residual norm of the block in the
-current solve so far, so the ratio
-$\left\|\mathbf r_w^{0}\right\|_2 / \left\|\mathbf r_w^{\ell}\right\|_2$ is at least one. The
-initial state can have a crossflow residual that is zero up to round-off; using the first residual
-as the reference would then hold the step at $\Delta\tau_0$ for the whole solve. The monolithic
-linear solve starts from the current iterate. Its convergence tolerance
-[!param](/Problem/TriSubChannel1PhaseProblem/rtol) is applied to the residual of that initial
-iterate rather than to the right-hand side.
+[!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_time_step), $\mathbf r_w^{\ell}$ is the
+crossflow residual at the current iterate before the damping is added, and the reference
+$\left\|\mathbf r_w^{0}\right\|_2$ is the largest residual norm of the block in the current solve so
+far, rather than the first, which can be zero up to round-off for a uniform initial state. The step
+grows without bound as the residual falls, so the damping vanishes at convergence. The monolithic
+linear solve starts from the current iterate, and its tolerance
+[!param](/Problem/TriSubChannel1PhaseProblem/rtol) applies to the residual of that iterate.
 
-As the step grows, the monolithic system can become too poorly conditioned for a field-split
-preconditioner; with `lu` the monolithic solve does not fail this way and is not retried. Each
-monolithic solve is therefore attempted with at most
+As the step grows, the system can become too poorly conditioned for a field-split preconditioner.
+Each monolithic solve is therefore attempted with at most
 [!param](/Problem/TriSubChannel1PhaseProblem/monolithic_retry_maxit) Krylov iterations, 1000 by
-default. If it does not converge, it is retried: for retry $r = 1, \ldots, 8$, the inverse step of
-the previous attempt is increased by $\delta_r$,
+default, and retried from the same iterate if it does not converge: for retry $r = 1, \ldots, 8$,
 
 \begin{equation}
 \frac{1}{\Delta\tau^{\ell,r}} = \frac{1}{\Delta\tau^{\ell,r-1}} + \delta_r,
@@ -795,53 +779,32 @@ the previous attempt is increased by $\delta_r$,
 \Delta\tau^{\ell,0} = \Delta\tau^{\ell},
 \end{equation}
 
-and the matching increment of the damping is added,
-$M_{ww} \leftarrow M_{ww} + \operatorname{diag}(m_{ij}\,\delta_r)$ and
-$\mathbf b_w \leftarrow \mathbf b_w + \operatorname{diag}(m_{ij}\,\delta_r)\,\mathbf W^{\ell}$. The solve is repeated from
-the same iterate, the last attempt with the full
-[!param](/Problem/TriSubChannel1PhaseProblem/maxit). The increment halves a step up to
-$20\,\Delta\tau_0$ and cuts a larger one to below $20\,\Delta\tau_0$. This is the
-step rejection of pseudo-transient continuation; like the damping, the increment vanishes at
-$\mathbf W = \mathbf W^{\ell}$.
+with the matching increment $\operatorname{diag}(m_{ij}\,\delta_r)$ added to $M_{ww}$ and
+$\operatorname{diag}(m_{ij}\,\delta_r)\,\mathbf W^{\ell}$ to $\mathbf b_w$. The increment halves a
+step up to $20\,\Delta\tau_0$ and cuts a larger one to below $20\,\Delta\tau_0$; this is the step
+rejection of pseudo-transient continuation. The last attempt uses the full
+[!param](/Problem/TriSubChannel1PhaseProblem/maxit), and if it fails SCM stops with an error. The
+increments are added after the crossflow equation relaxation described below, so unlike the damping
+of the first attempt they are not scaled by $1/\alpha_W$: after $n$ retries the damping is
+$\left(1/\alpha_W + 2^n - 1\right)\mathbf{added\_K}^{\ell}$ rather than
+$2^n\,\mathbf{added\_K}^{\ell}/\alpha_W$, for increments of $1/\Delta\tau$.
 
-Each retry also doubles the block factor $\gamma$, which keeps the step at the size the
-preconditioner needs for the later monolithic solves of the block. $\gamma$ is not reset between the
-monolithic solves of a block: it starts at one, doubles with every retry of any of its monolithic
-solves, and is capped at $2^8$, the value after eight retries. $\gamma$ and the reference residual
-are reset at the start of each SCM solve, that is each time step and, under a MultiApp fixed-point
-iteration, each fixed-point iteration. If the last attempt fails, SCM stops with an error. The
-damped monolithic solve is summarized in [scm-damping-flowchart].
+The step is fixed during a monolithic solve and recomputed at the next one, so the increments apply
+only to the failed solve. Each retry also doubles the block factor $\gamma$, which persists over the
+later monolithic solves of the block, capped at $2^8$, and resets with the reference residual at the
+start of each SCM solve; the step then still grows as the residual falls, from a level $\gamma$
+times lower. With $\mathbf{added\_K}_0$ the damping at $\Delta\tau_0$, a solve and its retries damp
+by at most $\mathbf{added\_K}_0/\alpha_W + (2^8-1)\,\mathbf{added\_K}_0$. The damped monolithic solve
+is summarized in [scm-damping-flowchart].
 
 !media media_scripts/scm_crossflow_damping_flowchart.py
     style=width:60%;margin-bottom:2%;margin:auto;
     id=scm-damping-flowchart
     caption=One damped monolithic solve of a block in the monolithic algorithm
 
-Because $\gamma$ is bounded, the step still grows as the residual decreases. Where the
-preconditioner cannot solve the undamped system, the step instead settles at the largest value it
-can handle; the converged solution is unaffected because the damping term vanishes at the fixed
-point.
-
-The crossflow equation relaxation described below is applied after the damping is added, so the
-first attempt of a solve is damped by $\mathbf{added\_K}^{\ell}/\alpha_W$, while the increment of a
-retry is added to the already relaxed equation and is not scaled by $1/\alpha_W$. When each
-increment is $1/\Delta\tau$, the damping of the solve after $n$ retries is therefore
-$\left(1/\alpha_W + 2^n - 1\right)\mathbf{added\_K}^{\ell}$, compared with
-$2^n\,\mathbf{added\_K}^{\ell}/\alpha_W$ for a true halving of the step on every retry. The two
-agree only without crossflow equation relaxation, $\alpha_W = 1$. With the default
-$\alpha_W = 0.1$, the first retry raises the damping by 10% and eight retries by a factor of about
-26 rather than $2^8$. The doubled $\gamma$ enters the damping before the relaxation, so from the
-next monolithic solve of the block on, the damping is raised by the full factor $\gamma$, until the
-step reaches its lower bound $\Delta\tau_0$.
-
-Although $\gamma$ accumulates over the retries of an SCM solve, the step never falls below
-$\Delta\tau_0$ at the start of a monolithic solve, so every monolithic solve starts with a damping
-of at most $\mathbf{added\_K}_0/\alpha_W$, where $\mathbf{added\_K}_0$ is the damping at
-$\Delta\tau = \Delta\tau_0$. Its retries can raise it to at most
-$\mathbf{added\_K}_0/\alpha_W + (2^8-1)\,\mathbf{added\_K}_0$.
-
 The converged solution does not depend on $\Delta\tau_0$; only the cost and the robustness of the
-iteration do. [Troubleshooting failed solves](user_notes.md#troubleshooting) gives the guidance for choosing it.
+iteration do. [Troubleshooting failed solves](user_notes.md#troubleshooting) gives guidance for
+choosing it.
 
 #### 2. Equation under-relaxation
 
