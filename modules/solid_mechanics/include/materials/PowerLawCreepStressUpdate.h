@@ -62,7 +62,7 @@ protected:
   const GenericVariableValue<is_ad> * const _temperature;
 
   /// Leading coefficient
-  const Real _coefficient;
+  const Function & _coefficient;
 
   /// Exponent on the effective stress
   const Real _n_exponent;
