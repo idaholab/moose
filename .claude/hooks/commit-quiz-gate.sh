@@ -81,16 +81,32 @@ background shell. Instead, do the following in order:
    your reply text. Not a summary of it.
 
 2. Ask the user three multiple-choice questions in ONE AskUserQuestion call.
-   The questions must be answerable only by someone who actually understands
-   this change. Draw them from the real content of the diff, for example:
-     - which function or behavior changes, and in which direction
-     - what observably breaks, or what wrong result appears, without this change
-     - why a specific choice in the diff was made over the obvious alternative
-     - what the test added here would catch that the pre-existing tests did not
-   Each question gets one correct option and plausible wrong ones taken from
-   nearby real code, not filler. Do NOT hint at the answer in the phrasing, do
-   NOT mark the correct option, and do NOT order the options so the correct one
-   is always first. Never put "(Recommended)" on a quiz option.
+
+   Ask about CONSEQUENCES, not about code trivia. Every question must describe a
+   situation the user could actually hit and ask what this change does about it.
+   The reader should be able to answer from understanding the change, without
+   re-reading the diff line by line. Good shapes:
+     - a concrete scenario: "You do X, then Y happens -- what does the code do?"
+     - blast radius: "If this is wrong at run time, what breaks, and for whom?"
+     - recovery: "After this fails, what is lost and what do you still have?"
+     - honest limits: "What does this NOT protect against, as built?"
+
+   Do NOT ask the user to simulate an edit to the source. No "if line N said
+   `||` instead of `&&`", no "if this set were deleted", no predicting the
+   behavior of code that is not in the diff. That tests whether someone can
+   hand-execute a mutation, not whether they understood the change, and it is
+   unfair even when the mutated line is visible in the diff.
+
+   Prefer the questions whose wrong answer would cost the user something real.
+   If a question's answer would not change how the user reviews, uses, or
+   trusts this change, cut it and ask a better one.
+
+   Each question gets one correct option and plausible wrong ones describing
+   outcomes that genuinely could have been the design. Do NOT hint at the answer
+   in the phrasing, do NOT mark the correct option, and do NOT order the options
+   so the correct one is always first. Never put "(Recommended)" on a quiz
+   option. Keep every option about the same length -- a conspicuously detailed
+   option gives the answer away.
 
 3. Grade the answers.
 
