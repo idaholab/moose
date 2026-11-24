@@ -12,8 +12,7 @@
 // MOOSE includes
 #include "Constraint.h"
 #include "Coupleable.h"
-
-class MooseVariableFieldBase;
+#include "MooseVariableFE.h"
 
 /**
  * Base class for constraints that tie a dependent degree of freedom to a linear combination of
@@ -52,6 +51,16 @@ protected:
   };
 
   /**
+   * Get the variables of a coupled variable parameter whose degrees of freedom this constraint
+   * ties. Raises an error for an entry that is a constant, and for a variable that is not in the
+   * nonlinear system of this constraint. Coupleable::getVar() raises the error for a vector, array
+   * or finite volume variable.
+   * @param param_name The name of the coupled variable parameter
+   * @return The variables, in the order of the input
+   */
+  std::vector<const MooseVariable *> getConstrainedVars(const std::string & param_name);
+
+  /**
    * @param boundary The node set or side set holding the nodes
    * @return The ids of the nodes of the boundary that this rank owns
    */
@@ -60,21 +69,12 @@ protected:
   /**
    * Gather every node of a boundary on every rank, sorted by id. Every rank must call this.
    * @param boundary The node set or side set holding the nodes
-   * @param var_numbers The system numbers of the variables to gather the dofs of
+   * @param variables The variables to gather the dofs of
    * @return The gathered nodes
    */
   std::vector<ConstraintNode>
   gatherBoundaryNodes(const BoundaryName & boundary,
-                      const std::vector<unsigned int> & var_numbers) const;
-
-  /**
-   * Gather the single node of a boundary on every rank. Every rank must call this.
-   * @param boundary The node set or side set holding the node
-   * @param var_numbers The system numbers of the variables to gather the dofs of
-   * @return The gathered node
-   */
-  ConstraintNode gatherSingleNode(const BoundaryName & boundary,
-                                  const std::vector<unsigned int> & var_numbers) const;
+                      const std::vector<const MooseVariable *> & variables) const;
 
   /**
    * Gather the single node of a boundary on every rank and check that every variable has a dof
@@ -83,7 +83,6 @@ protected:
    * @param variables The variables to gather the dofs of
    * @return The gathered node
    */
-  ConstraintNode
-  gatherSingleNode(const BoundaryName & boundary,
-                   const std::vector<const MooseVariableFieldBase *> & variables) const;
+  ConstraintNode gatherSingleNode(const BoundaryName & boundary,
+                                  const std::vector<const MooseVariable *> & variables) const;
 };

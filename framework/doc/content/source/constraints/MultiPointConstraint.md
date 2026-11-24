@@ -42,8 +42,8 @@ matrix, the mass matrix, and the residual:
 \tilde{\mathbf{R}} = C^{\top} \mathbf{R} .
 \end{equation}
 
-The reduction uses only $C$. libMesh applies $\mathbf{h}$ when it sets the dependent degrees of
-freedom of the solution.
+The reduction uses only $C$. libMesh uses $\mathbf{h}$ in the constraint equations that it adds
+to the nonlinear system, and when it enforces the exact constraints on the solution vector.
 
 The transpose $C^{\top}$ moves a force on a dependent degree of freedom to the independent degrees
 of freedom, with the same coefficients. A multipoint constraint adds no stiffness and no mass. It
@@ -51,7 +51,9 @@ uses no penalty parameter and no Lagrange multiplier.
 
 libMesh accepts a non-zero right-hand side $\mathbf{h}$ in `DofMap::add_constraint_row()`. The
 current objects built on this class all use $\mathbf{h} = \mathbf{0}$. To prescribe a
-motion with these objects, apply a [DirichletBC.md] to the independent degrees of freedom.
+motion with these objects, apply a [DirichletBC.md] to the independent degrees of freedom. An
+eigenvalue problem is homogeneous, so a non-zero $\mathbf{h}$ has no meaning in an eigenvalue
+solve.
 
 Each dependent degree of freedom has one exact constraint. If libMesh already constrains a degree
 of freedom, for example a hanging node of an adapted mesh, libMesh raises an error. The objects
@@ -118,9 +120,9 @@ the executioner settings that a constrained `DofMap` needs.
 - `addExactConstraints(libMesh::DofMap &) const` adds the exact constraints. It is pure virtual on
   `MultiPointConstraint`.
 - `exactConstraintsChanged()` reports a coefficient change, as the section above describes.
-- By default, `addCouplingEntriesToJacobian()` returns the opposite of `usesExactConstraints()`.
-  MOOSE does not add coupling entries for an exact constraint. libMesh adds the sparsity entries
-  that connect a dependent degree of freedom to its independent degrees of freedom.
+- MOOSE does not add coupling entries to the Jacobian sparsity for a constraint that uses exact
+  constraints, whatever its `addCouplingEntriesToJacobian()` returns. libMesh adds the sparsity
+  entries that connect a dependent degree of freedom to its independent degrees of freedom.
 
 `MultiPointConstraint` also derives from `Coupleable` as a nodal object, so a derived class can
 get its coupled variables directly.
@@ -133,31 +135,28 @@ A derived class must implement `addExactConstraints(libMesh::DofMap & dof_map) c
 constraints. Each rank adds the exact constraints of the dependent nodes that it owns. libMesh then
 sends each exact constraint to the other ranks that need it.
 
-The class has three protected helpers. `gatherBoundaryNodes` and `gatherSingleNode` are
+The class has four protected helpers. `gatherBoundaryNodes` and `gatherSingleNode` are
 collective, so each rank must call them the same number of times and in the same order.
-`ownedNodes` is local.
+`getConstrainedVars` and `ownedNodes` are local.
 
+- `getConstrainedVars(param_name)` returns the variables of a coupled variable parameter. It raises
+  an error when an entry is a constant, or when a variable is not in the nonlinear system of the
+  constraint. `Coupleable::getVar()` raises the error for a vector, array, or finite volume
+  variable.
 - `ownedNodes(boundary)` returns the IDs of the nodes of a node set or side set that this rank
   owns. This rank adds the exact constraints of these nodes.
-- `gatherBoundaryNodes(boundary, var_numbers)` returns three items for each node of the boundary:
+- `gatherBoundaryNodes(boundary, variables)` returns three items for each node of the boundary:
   the ID, the undisplaced coordinates, and the degree of freedom of each requested variable. The
   rank that owns a node sends it, and all ranks get the full result, sorted by node ID. All ranks
   then compute the same coefficients in the same order. An entry is
   `libMesh::DofObject::invalid_id` when the variable has no degree of freedom at the node.
-- `gatherSingleNode(boundary, var_numbers)` does the same gather for a boundary with exactly one
-  node. It raises an error when the boundary has a different number of nodes.
-- `gatherSingleNode(boundary, variables)` takes variables instead of variable numbers. It also
-  raises an error when a variable has no degree of freedom at the node.
-
-An error that only some ranks find in a collective method must go through
-`Constraint::CollectiveError`. A rank that finds an error records the message with `record()`.
-Each rank then calls `raise()`, and `raise()` raises the first recorded message on all ranks. If
-only some ranks raise an error, the other ranks wait forever.
-[RBE2Constraint](source/constraints/RBE2Constraint.md optional=True) uses `CollectiveError` for the
-errors that it finds at the dependent nodes.
+- `gatherSingleNode(boundary, variables)` does the same gather for a boundary with exactly one
+  node. It raises an error when the boundary has a different number of nodes, or when a variable
+  has no degree of freedom at the node.
 
 `MultiPointConstraint::validParams()` suppresses `variable` and the tag parameters `vector_tags`,
 `matrix_tags`, `extra_vector_tags`, `extra_matrix_tags`, and `absolute_value_vector_tags`. The
 object assembles nothing, and it does not necessarily act on a single variable. A derived class
-declares its constrained variables with `addRequiredCoupledVar` or `addCoupledVar`. Its
-`variable()` returns one of them.
+declares its constrained variables with `addRequiredCoupledVar` or `addCoupledVar`, and gets them
+with `getConstrainedVars`. All of them must be in one nonlinear system. Its `variable()` returns
+one of them.

@@ -45,7 +45,16 @@
       cli_args = 'Constraints/splice/dependent_boundary=splice_independent'
       expect_err = "is the independent node of boundary 'splice_independent'. A node cannot be "
                    "tied rigidly to itself."
-      detail = 'when a dependent node of an RBE2 constraint is its independent node, and'
+      detail = 'when a dependent node of an RBE2 constraint is its independent node,'
+    []
+    [variable_in_other_system]
+      type = RunException
+      input = 'rbe2_rigid_rotation.i'
+      cli_args = "AuxVariables/rot_aux/block=stub
+                  Constraints/rbe2/rotations='rot_aux rot_y rot_z'"
+      expect_err = "The variable 'rot_aux' is not in the nonlinear system 'nl0' of this constraint."
+      detail = 'when an RBE2 constraint is given a variable that is not in its nonlinear system, '
+               'and'
     []
     [missing_rotation_dof]
       type = RunException

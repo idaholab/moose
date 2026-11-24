@@ -10,7 +10,6 @@
 #include "RBE2Constraint.h"
 
 #include "MooseMesh.h"
-#include "Conversion.h"
 #include "MooseVariable.h"
 #include "SystemBase.h"
 
@@ -64,25 +63,8 @@ RBE2Constraint::RBE2Constraint(const InputParameters & parameters)
                "Three rotation variables are required: this constraint is only implemented in "
                "three dimensions.");
 
-  // getVar() returns null for a constant entry such as rotations = '0 0 0'
-  for (const auto i : make_range(3u))
-  {
-    _displacements.push_back(getVar("displacements", i));
-    if (!_displacements.back())
-      paramError("displacements",
-                 "Entry ",
-                 i,
-                 " is not a variable. This constraint ties degrees of freedom, so each entry must "
-                 "name a solver variable.");
-
-    _rotations.push_back(getVar("rotations", i));
-    if (!_rotations.back())
-      paramError("rotations",
-                 "Entry ",
-                 i,
-                 " is not a variable. This constraint ties degrees of freedom, so each entry must "
-                 "name a solver variable.");
-  }
+  _displacements = getConstrainedVars("displacements");
+  _rotations = getConstrainedVars("rotations");
 
   _variables = _displacements;
   _variables.insert(_variables.end(), _rotations.begin(), _rotations.end());
@@ -95,56 +77,44 @@ RBE2Constraint::addExactConstraints(libMesh::DofMap & dof_map) const
 
   const ConstraintNode independent = gatherSingleNode(_independent_boundary, _variables);
 
-  // Only the ranks with a dependent node can check it, so the error is raised collectively
-  auto check_dependent_node = [&](const Node & node, std::string & param_name) -> std::string
-  {
-    if (node.id() == independent.id)
-    {
-      param_name = "dependent_boundary";
-      return "The node " + Moose::stringify(node.id()) + " of boundary '" + _dependent_boundary +
-             "' is the independent node of boundary '" + _independent_boundary +
-             "'. A node cannot be tied rigidly to itself.";
-    }
-
-    for (const auto i : make_range(3u))
-      if (node.n_comp(sys_num, _displacements[i]->number()) == 0)
-      {
-        param_name = "displacements";
-        return "The displacement variable '" + _displacements[i]->name() +
-               "' has no degree of freedom at the dependent node " + Moose::stringify(node.id()) +
-               " of boundary '" + _dependent_boundary +
-               "'. Every dependent node of an RBE2 constraint must solve the three displacement "
-               "variables.";
-      }
-
-    if (_tie_rotations)
-      for (const auto i : make_range(3u))
-        if (node.n_comp(sys_num, _rotations[i]->number()) == 0)
-        {
-          param_name = "dependent_dofs";
-          return "The rotation variable '" + _rotations[i]->name() +
-                 "' has no degree of freedom at the dependent node " + Moose::stringify(node.id()) +
-                 " of boundary '" + _dependent_boundary +
-                 "'. Use 'dependent_dofs = translations' when the dependent nodes carry "
-                 "translations only, as continuum nodes do.";
-        }
-
-    return std::string("");
-  };
-
-  CollectiveError error(*this);
-
   for (const auto node_id : ownedNodes(_dependent_boundary))
   {
     const Node & node = _mesh.nodeRef(node_id);
 
-    std::string param_name;
-    const auto message = check_dependent_node(node, param_name);
-    if (!message.empty())
-    {
-      error.record(message, param_name);
-      break;
-    }
+    if (node.id() == independent.id)
+      paramError("dependent_boundary",
+                 "The node ",
+                 node.id(),
+                 " of boundary '",
+                 _dependent_boundary,
+                 "' is the independent node of boundary '",
+                 _independent_boundary,
+                 "'. A node cannot be tied rigidly to itself.");
+
+    for (const auto * const displacement : _displacements)
+      if (node.n_comp(sys_num, displacement->number()) == 0)
+        paramError("displacements",
+                   "The displacement variable '",
+                   displacement->name(),
+                   "' has no degree of freedom at the dependent node ",
+                   node.id(),
+                   " of boundary '",
+                   _dependent_boundary,
+                   "'. Every dependent node of an RBE2 constraint must solve the three "
+                   "displacement variables.");
+
+    if (_tie_rotations)
+      for (const auto * const rotation : _rotations)
+        if (node.n_comp(sys_num, rotation->number()) == 0)
+          paramError("dependent_dofs",
+                     "The rotation variable '",
+                     rotation->name(),
+                     "' has no degree of freedom at the dependent node ",
+                     node.id(),
+                     " of boundary '",
+                     _dependent_boundary,
+                     "'. Use 'dependent_dofs = translations' when the dependent nodes carry "
+                     "translations only, as continuum nodes do.");
 
     // The lever arm on the undisplaced mesh; zero for a splice, where u_k = u_0
     const Point r = node - independent.point;
@@ -177,6 +147,4 @@ RBE2Constraint::addExactConstraints(libMesh::DofMap & dof_map) const
                                    /*forbid_constraint_overwrite=*/true);
       }
   }
-
-  error.raise();
 }

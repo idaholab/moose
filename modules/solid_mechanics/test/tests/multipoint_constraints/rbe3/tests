@@ -60,7 +60,16 @@
       cli_args = "Constraints/rbe3/independent_boundaries='ref_node corner2 corner3 corner4'"
       expect_err = "is the reference node of this constraint. The reference node cannot be one of "
                    "the independent nodes it is constrained to."
-      detail = 'when the reference node of an RBE3 constraint is in its independent set, and'
+      detail = 'when the reference node of an RBE3 constraint is in its independent set,'
+    []
+    [vector_variable]
+      type = RunException
+      input = 'rbe3_force_split_equal.i'
+      cli_args = "Variables/rot_vec/family=LAGRANGE_VEC
+                  Variables/rot_vec/block=stub
+                  Constraints/rbe3/rotations='rot_vec rot_vec rot_vec'"
+      expect_err = "The named variable is a vector variable"
+      detail = 'when an RBE3 constraint is given a vector variable, and'
     []
     [weights_size]
       type = RunException

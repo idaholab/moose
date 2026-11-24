@@ -644,12 +644,13 @@ NonlinearSystemBase::addConstraint(const std::string & c_name,
     // The displaced DofMap reduces the element matrices of objects on the displaced mesh. It shares
     // the dof numbering of this system, so it gets the same exact constraints
     if (auto displaced_problem = _fe_problem.getDisplacedProblem())
-      attach_functor(displaced_problem->solverSys(_fe_problem.nlSysNum(this->name())),
-                     _displaced_exact_constraint_functor);
+      attach_functor(displaced_problem->solverSys(number()), _displaced_exact_constraint_functor);
   }
 
+  // libMesh adds the sparsity entries of an exact constraint when it builds the sparsity pattern
   if (!_fe_problem.useHashTableMatrixAssembly())
-    if (constraint && constraint->addCouplingEntriesToJacobian())
+    if (constraint && !constraint->usesExactConstraints() &&
+        constraint->addCouplingEntriesToJacobian())
       addImplicitGeometricCouplingEntriesToJacobian(true);
 }
 
@@ -1123,9 +1124,6 @@ NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & res
     const auto & ncs = _constraints.getActiveNodalConstraints();
     for (const auto & nc : ncs)
     {
-      if (nc->usesExactConstraints())
-        continue;
-
       std::vector<dof_id_type> & secondary_node_ids = nc->getSecondaryNodeId();
       std::vector<dof_id_type> & primary_node_ids = nc->getPrimaryNodeId();
 
@@ -1153,9 +1151,6 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian(const SparseMatrix<Number> 
     const auto & ncs = _constraints.getActiveNodalConstraints();
     for (const auto & nc : ncs)
     {
-      if (nc->usesExactConstraints())
-        continue;
-
       std::vector<dof_id_type> & secondary_node_ids = nc->getSecondaryNodeId();
       std::vector<dof_id_type> & primary_node_ids = nc->getPrimaryNodeId();
 
@@ -1355,9 +1350,6 @@ NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & soluti
 
             for (const auto & nec : constraints)
             {
-              if (nec->usesExactConstraints())
-                continue;
-
               if (nec->shouldApply())
               {
                 constraints_applied = true;
@@ -1633,9 +1625,6 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
             for (const auto & nec : constraints)
             {
-              if (nec->usesExactConstraints())
-                continue;
-
               if (nec->shouldApply())
               {
                 constraints_applied = true;
@@ -2857,9 +2846,6 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
 
             for (const auto & nec : constraints)
             {
-              if (nec->usesExactConstraints())
-                continue;
-
               if (nec->shouldApply())
               {
                 constraints_applied = true;
@@ -4332,9 +4318,18 @@ NonlinearSystemBase::updateExactConstraints()
 
   // Every constraint is asked, because asking is how it records the coefficients it emitted
   bool changed = false;
+  std::vector<const Constraint *> active_constraints;
   for (const auto & constraint : _constraints.getActiveObjects())
-    if (constraint->usesExactConstraints() && constraint->exactConstraintsChanged())
-      changed = true;
+    if (constraint->usesExactConstraints())
+    {
+      active_constraints.push_back(constraint.get());
+      if (constraint->exactConstraintsChanged())
+        changed = true;
+    }
+
+  // A Control that enables or disables a constraint adds or removes its exact constraints
+  if (active_constraints != _exact_constraint_functor->appliedConstraints())
+    changed = true;
 
   // The rebuild is collective
   _communicator.max(changed);

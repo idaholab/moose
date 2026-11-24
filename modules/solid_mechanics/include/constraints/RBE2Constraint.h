@@ -37,11 +37,11 @@ protected:
   const bool _tie_rotations;
 
   /// The three displacement variables, in the x, y, z order of the input
-  std::vector<const MooseVariableFieldBase *> _displacements;
+  std::vector<const MooseVariable *> _displacements;
 
   /// The three rotation variables of the independent node, in the x, y, z order of the input
-  std::vector<const MooseVariableFieldBase *> _rotations;
+  std::vector<const MooseVariable *> _rotations;
 
   /// The displacement then rotation variables, in the gather order of the independent node
-  std::vector<const MooseVariableFieldBase *> _variables;
+  std::vector<const MooseVariable *> _variables;
 };

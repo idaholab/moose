@@ -10,7 +10,6 @@
 #include "MultiPointConstraint.h"
 
 #include "MooseMesh.h"
-#include "MooseVariableFieldBase.h"
 #include "SystemBase.h"
 
 #include "libmesh/node.h"
@@ -46,6 +45,36 @@ MultiPointConstraint::MultiPointConstraint(const InputParameters & parameters)
                "undisplaced mesh, so this object does not support the displaced mesh.");
 }
 
+std::vector<const MooseVariable *>
+MultiPointConstraint::getConstrainedVars(const std::string & param_name)
+{
+  std::vector<const MooseVariable *> variables;
+  for (const auto i : make_range(coupledComponents(param_name)))
+  {
+    // getVar() returns null for a constant entry such as rotations = '0 0 0'
+    const MooseVariable * const var = getVar(param_name, i);
+    if (!var)
+      paramError(param_name,
+                 "Entry ",
+                 i,
+                 " is not a variable. This constraint ties degrees of freedom, so each entry must "
+                 "name a solver variable.");
+
+    if (&var->sys() != &_sys)
+      paramError(param_name,
+                 "The variable '",
+                 var->name(),
+                 "' is not in the nonlinear system '",
+                 _sys.name(),
+                 "' of this constraint. An exact constraint ties degrees of freedom of one "
+                 "nonlinear system.");
+
+    variables.push_back(var);
+  }
+
+  return variables;
+}
+
 std::vector<dof_id_type>
 MultiPointConstraint::ownedNodes(const BoundaryName & boundary) const
 {
@@ -61,11 +90,11 @@ MultiPointConstraint::ownedNodes(const BoundaryName & boundary) const
 }
 
 std::vector<MultiPointConstraint::ConstraintNode>
-MultiPointConstraint::gatherBoundaryNodes(const BoundaryName & boundary,
-                                          const std::vector<unsigned int> & var_numbers) const
+MultiPointConstraint::gatherBoundaryNodes(
+    const BoundaryName & boundary, const std::vector<const MooseVariable *> & variables) const
 {
   const auto sys_num = _sys.number();
-  const auto n_vars = var_numbers.size();
+  const auto n_vars = variables.size();
 
   // Each node is contributed by its owner
   std::vector<dof_id_type> ids;
@@ -77,9 +106,10 @@ MultiPointConstraint::gatherBoundaryNodes(const BoundaryName & boundary,
     ids.push_back(node_id);
     for (const auto d : make_range(Moose::dim))
       coordinates.push_back(node(d));
-    for (const auto var_number : var_numbers)
-      dofs.push_back(node.n_comp(sys_num, var_number) > 0 ? node.dof_number(sys_num, var_number, 0)
-                                                          : libMesh::DofObject::invalid_id);
+    for (const auto * const var : variables)
+      dofs.push_back(node.n_comp(sys_num, var->number()) > 0
+                         ? node.dof_number(sys_num, var->number(), 0)
+                         : libMesh::DofObject::invalid_id);
   }
 
   _communicator.allgather(ids);
@@ -104,9 +134,9 @@ MultiPointConstraint::gatherBoundaryNodes(const BoundaryName & boundary,
 
 MultiPointConstraint::ConstraintNode
 MultiPointConstraint::gatherSingleNode(const BoundaryName & boundary,
-                                       const std::vector<unsigned int> & var_numbers) const
+                                       const std::vector<const MooseVariable *> & variables) const
 {
-  const auto nodes = gatherBoundaryNodes(boundary, var_numbers);
+  const auto nodes = gatherBoundaryNodes(boundary, variables);
   if (nodes.size() != 1)
     mooseError("The boundary '",
                boundary,
@@ -114,21 +144,7 @@ MultiPointConstraint::gatherSingleNode(const BoundaryName & boundary,
                nodes.size(),
                " nodes, but exactly one node is required.");
 
-  return nodes.front();
-}
-
-MultiPointConstraint::ConstraintNode
-MultiPointConstraint::gatherSingleNode(
-    const BoundaryName & boundary,
-    const std::vector<const MooseVariableFieldBase *> & variables) const
-{
-  std::vector<unsigned int> var_numbers;
-  var_numbers.reserve(variables.size());
-  for (const auto * const variable : variables)
-    var_numbers.push_back(variable->number());
-
-  const auto node = gatherSingleNode(boundary, var_numbers);
-
+  const auto & node = nodes.front();
   for (const auto v : index_range(variables))
     if (node.dofs[v] == libMesh::DofObject::invalid_id)
       mooseError("The variable '",

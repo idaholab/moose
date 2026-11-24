@@ -47,9 +47,9 @@ where $A(\cdot)$ and $B(\cdot)$ are nonlinear functions. In the EigenProblem
 system, the kernels of $A(\cdot)$ are referred to as "noneigen,"
 and the kernels of $B(\cdot)$ are referred to as "eigen."
 
-Of the constraint objects, only those with exact constraints, for example a
+Of [Constraint](syntax/Constraints/index.md) objects, only those with exact constraints, for example a
 [MultiPointConstraint.md], remove degrees of freedom from the system that SLEPc receives. libMesh
-removes the dependent degree of freedom of each exact constraint. Most constraints assemble a
+removes the dependent degree of freedom of each exact constraint. Other constraints assemble a
 residual and act on degrees of freedom that stay in the matrices that MOOSE passes to SLEPc.
 [The eigen tag section of the Constraints syntax page](syntax/Constraints/index.md#eigen-tag)
 gives the executioner settings for exact constraints.

@@ -97,7 +97,7 @@ RBE3Constraint::RBE3Constraint(const InputParameters & parameters)
     paramError("displacements",
                "Exactly three displacement variables are required: this constraint supports "
                "three-dimensional models only.");
-  _displacement_vars = getFieldVars("displacements");
+  _displacement_vars = getConstrainedVars("displacements");
 
   if (isCoupled("rotations"))
   {
@@ -105,11 +105,9 @@ RBE3Constraint::RBE3Constraint(const InputParameters & parameters)
       paramError("rotations",
                  "Exactly three rotation variables are required: this constraint supports "
                  "three-dimensional models only.");
-    _rotation_vars = getFieldVars("rotations");
+    _rotation_vars = getConstrainedVars("rotations");
   }
 
-  for (const auto * const var : _displacement_vars)
-    _displacement_var_numbers.push_back(var->number());
   _reference_vars = _displacement_vars;
   _reference_vars.insert(_reference_vars.end(), _rotation_vars.begin(), _rotation_vars.end());
 }
@@ -129,8 +127,7 @@ RBE3Constraint::addExactConstraints(libMesh::DofMap & dof_map) const
   std::vector<Real> weights;
   std::set<dof_id_type> collected_ids;
   for (const auto b : index_range(_independent_boundaries))
-    for (const auto & node :
-         gatherBoundaryNodes(_independent_boundaries[b], _displacement_var_numbers))
+    for (const auto & node : gatherBoundaryNodes(_independent_boundaries[b], _displacement_vars))
     {
       if (node.id == reference.id)
         mooseError("Node ",

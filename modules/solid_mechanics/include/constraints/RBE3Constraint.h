@@ -45,14 +45,11 @@ protected:
   std::vector<Real> _weights;
 
   /// The three displacement variables
-  std::vector<const MooseVariableFieldBase *> _displacement_vars;
+  std::vector<const MooseVariable *> _displacement_vars;
 
   /// The three rotation variables of the reference node, empty when the input does not set 'rotations'
-  std::vector<const MooseVariableFieldBase *> _rotation_vars;
-
-  /// The system numbers of the displacement variables
-  std::vector<unsigned int> _displacement_var_numbers;
+  std::vector<const MooseVariable *> _rotation_vars;
 
   /// The variables constrained at the reference node, displacements then rotations
-  std::vector<const MooseVariableFieldBase *> _reference_vars;
+  std::vector<const MooseVariable *> _reference_vars;
 };
