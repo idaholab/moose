@@ -192,8 +192,7 @@
     type = 'RunException'
     input = 'solution_aux_multi_err.i'
     expect_err = 'The SolutionUserObject contains multiple variables, \w+'
-    requirement = "The system shall produce an error if the 'from_variable' parameter is not set "
-                  "and the supplied solution user object has multiple variables."
+    requirement = 'The system shall produce an error if the variable to read is not specified and the solution being read contains multiple variables.'
 
   []
 

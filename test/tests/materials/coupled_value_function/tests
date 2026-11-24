@@ -41,7 +41,6 @@
     ratio_tol = 1e-7
     difference_tol = 1e-7
     issues = '#20193'
-    requirement = "The system shall return, using the ADCoupledValueFunctionMaterial, correct derivatives for coupled "
-                  "AD variables."
+    requirement = 'The system shall return correct derivatives for coupled variables when a coupled value function material is computed with automatic differentiation.'
   []
 []

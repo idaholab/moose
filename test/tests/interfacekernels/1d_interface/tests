@@ -85,8 +85,7 @@
     input = 'ik_save_in_test.i'
     exodiff = 'ik_save_in_test_out.e'
     issues = '#9854'
-    requirement = "The system shall record, with save-in, the correct residuals and Jacobians representing the interface kernel. "
-                  "This applies the DirichletBC to side a (block 0) of the interface."
+    requirement = 'The system shall record, with save-in, the correct residuals and Jacobians representing the interface kernel, with the Dirichlet boundary condition applied to side a (block 0) of the interface.'
     design = 'InterfaceKernels/index.md'
   []
   [ik_save_in_other_side]
@@ -95,8 +94,7 @@
     exodiff = 'ik_save_in_other_side_out.e'
     cli_args = 'BCs/middle/variable=u BCs/middle/v=v BCs/middle/save_in=primary_resid Outputs/file_base=ik_save_in_other_side_out'
     issues = '#13232'
-    requirement = "The system shall record, with save-in, the correct residuals and Jacobians representing the interface kernel. "
-                  "This applies the DirichletBC to side b (block 1) of the interface."
+    requirement = 'The system shall record, with save-in, the correct residuals and Jacobians representing the interface kernel, with the Dirichlet boundary condition applied to side b (block 1) of the interface.'
     design = 'InterfaceKernels/index.md'
   []
 
@@ -134,7 +132,7 @@
     input = 'ADMatreaction_1D_transient.i'
     exodiff = 'ADMatreaction_1D_transient_out.e'
     issues = '#27736'
-    requirement = "The system shall compute an interface reaction kernel result using automatic differentiation that is consistent with the results of the non-AD transient interface reaction test."
+    requirement = 'The system shall compute an interface reaction kernel result using automatic differentiation that is consistent with the results of the transient interface reaction test without automatic differentiation.'
     design = 'ADMatInterfaceReaction.md'
   []
   [reaction_1D_transient]

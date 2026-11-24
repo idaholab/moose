@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'time_derivative.i'
     exodiff = 'time_derivative_out.e'
-    requirement = "The system shall allow Kernel objects to couple to the time derivative of an auxiliary variable."
+    requirement = 'The system shall allow kernels to couple to the time derivative of an auxiliary variable.'
   [../]
 
   [./time_derivative_nl]

@@ -6,7 +6,7 @@
     input = 'simple_diffusion.i'
     exodiff = 'simple_diffusion_out.e'
     expect_out = "0 of 11"
-    requirement = 'The system shall compute a non-singular SMP Jacobian for a problem with a hanging-node'
+    requirement = 'The system shall compute a non-singular Jacobian for the full single matrix preconditioner for a problem with a hanging node.'
   [../]
   [./test_fd_coloring]
     type = 'Exodiff'
@@ -41,7 +41,7 @@
     input = 'simple_diffusion.i'
     run_sim = True
     cli_args = '-snes_test_jacobian_view'
-    requirement = 'The system shall compute a perfect SMP Jacobian for the hanging-node problem'
+    requirement = 'The system shall compute a numerically accurate Jacobian for the full single matrix preconditioner for the hanging-node problem.'
   [../]
   [test_ad_smp_jacobian]
     type = PetscJacobianTester

@@ -6,7 +6,7 @@
     exodiff = 'ad_material_out.e'
     absent_out = '7 Nonlinear'
     allow_warnings = true
-    requirement = "The system shall compute an accurate Jacobian from a material property declared as AD and gotten as AD"
+    requirement = 'The system shall compute an accurate Jacobian from a material property declared and retrieved with automatic differentiation.'
     issues = "#5658"
   [../]
   [./test_regreg]
@@ -27,7 +27,7 @@
     difference_tol = 1e-5
     run_sim = True
     turn_off_exodus_output = False
-    requirement = 'The system shall support AD with stateful material properties and compute an exact Jacobian'
+    requirement = 'The system shall support automatic differentiation with stateful material properties and compute a numerically accurate Jacobian.'
     issues = "#5658"
   [../]
   [./stateful_residual]
@@ -37,7 +37,7 @@
     should_execute = false
     delete_output_before_running = false
     prereq = 'stateful_jacobian'
-    requirement = 'The system shall show, through the time evolution of the stateful diffusivity property, that AD works with stateful material properties'
+    requirement = 'The system shall show, through the time evolution of the stateful diffusivity property, that automatic differentiation works with stateful material properties.'
     issues = "#5658"
   [../]
   [default_material_value]
@@ -45,7 +45,7 @@
     exodiff = 'default_ad_material_out.e'
     input = 'ad_material.i'
     cli_args = 'Kernels/diff/ad_mat_prop=1 Kernels/diff/regular_mat_prop=1 Outputs/file_base=default_ad_material_out'
-    requirement = 'The system shall be able to set default values for AD material properties'
+    requirement = 'The system shall be able to set default values for material properties computed with automatic differentiation.'
     issues = "#5658"
   [../]
   [default_material_value_jac]
@@ -53,7 +53,7 @@
     input = 'ad_material.i'
     cli_args = 'Kernels/diff/ad_mat_prop=1 Kernels/diff/regular_mat_prop=1 Outputs/exodus=false'
     run_sim = True
-    requirement = 'The system shall compute a numerically accurate Jacobian when using default values for an AD material property'
+    requirement = 'The system shall compute a numerically accurate Jacobian when using default values for a material property computed with automatic differentiation.'
     issues = '#5658'
     ratio_tol = 1e-7
     difference_tol = 1e-5

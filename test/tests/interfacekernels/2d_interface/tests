@@ -62,7 +62,7 @@
     mesh_mode = REPLICATED
     issues = "#13354"
     design = "InterfaceKernels/index.md"
-    requirement = "The system shall support Vector Finite Elements in 2D for interface kernels."
+    requirement = 'The system shall support vector finite elements in 2D for interface kernels.'
     [../]
 
   [no_mallocs_during_scaling]

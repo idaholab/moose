@@ -6,7 +6,7 @@
     exodiff = 'piecewise_linear_interpolation_material_out.e'
     custom_cmp = custom.cmp
     issues = "#8265"
-    requirement = 'The system shall create an AD material with a linear interpolation of a variable'
+    requirement = 'The system shall create a material computed with automatic differentiation with a linear interpolation of a variable.'
   [../]
   [./test_scale_factor]
     type = 'Exodiff'
@@ -27,7 +27,7 @@
     issues = "#15379"
     custom_cmp = custom.cmp
     design = "ADPiecewiseLinearInterpolationMaterial.md"
-    requirement = 'The system shall create an AD material with a linear interpolation and extrapolation of a variable'
+    requirement = 'The system shall create a material computed with automatic differentiation with a linear interpolation and extrapolation of a variable.'
   [../]
   [./test_err1]
     type = 'RunException'
@@ -36,7 +36,7 @@
     cli_args = "Materials/m2/xy_data='1 2'"
     expect_err = "Cannot specify 'x', 'y', and 'xy_data' together."
     issues = "#8265"
-    requirement = 'The system shall throw an error if, for an AD piecewise linear interpolation material, x, y, and xy_data are all specified'
+    requirement = 'The system shall throw an error if, for a piecewise linear interpolation material computed with automatic differentiation, the x values, the y values, and the paired x-y data are all specified.'
   [../]
   [./test_err2]
     type = 'RunException'
@@ -45,7 +45,7 @@
     cli_args = "Materials/m1/x='1 2 3'"
     expect_err = "Both 'x' and 'y' must be specified if either one is specified."
     issues = "#8265"
-    requirement = 'The system shall throw an error if, for an AD piecewise linear interpolation material, x and xy_data are both specified'
+    requirement = 'The system shall throw an error if, for a piecewise linear interpolation material computed with automatic differentiation, both the x values and the paired x-y data are specified.'
   [../]
   [./test_err3]
     type = 'RunException'
@@ -54,7 +54,7 @@
     cli_args = "Materials/m2/x='1 2 3'"
     expect_err = "Vectors are not the same length"
     issues = "#8265"
-    requirement = 'The system shall throw an error if, for an AD piecewise linear interpolation material, x and y vectors are different lengths'
+    requirement = 'The system shall throw an error if, for a piecewise linear interpolation material computed with automatic differentiation, the x and y vectors are different lengths.'
   [../]
   [./test_err4]
     type = 'RunException'
@@ -63,7 +63,7 @@
     cli_args = "Materials/m1/xy_data='1 2 3'"
     expect_err = "Length of data provided in 'xy_data' must be a multiple of 2."
     issues = "#8265"
-    requirement = 'The system shall throw an error if, for an AD piecewise linear interpolation material, xy_data vector is not a multiple of two'
+    requirement = 'The system shall throw an error if, for a piecewise linear interpolation material computed with automatic differentiation, the paired x-y data does not have an even number of entries.'
   [../]
   [./test-jac]
     type = 'PetscJacobianTester'
@@ -71,7 +71,7 @@
     ratio_tol = 1e-7
     difference_tol = 1e-5
     run_sim = True
-    requirement = 'The system shall calculate numerically accurate Jacobians for an AD piecewise linear interpolation material'
+    requirement = 'The system shall calculate numerically accurate Jacobians for a piecewise linear interpolation material computed with automatic differentiation.'
     issues = "#5658"
   [../]
 []
