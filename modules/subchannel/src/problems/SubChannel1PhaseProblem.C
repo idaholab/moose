@@ -2862,8 +2862,6 @@ SubChannel1PhaseProblem::externalSolve()
     _console << "Reached maximum number of axial pressure iterations" << std::endl;
   }
   _converged = pressure_converged && temperature_converged;
-  // update old crossflow matrix
-  _Wij_old = _Wij;
   _console << "Finished executing subchannel solver\n";
 
   // set SumWij at the inlet equal to the one on the first axial level  (for visualization purposes)
@@ -3029,6 +3027,17 @@ SubChannel1PhaseProblem::externalSolve()
     mooseWarning(
         "Energy conservation equation might not be solved correctly, Power added to coolant:  " +
         std::to_string(power_out - power_in) + " Watt ");
+}
+
+void
+SubChannel1PhaseProblem::advanceState()
+{
+  ExternalProblem::advanceState();
+  // Commit the lateral momentum time derivative's reference state only once a timestep is
+  // accepted. advanceState() is not called for a solve that --test-restep or a rejected timestep
+  // discards, so a retried timestep sees the same Wij_old a fresh attempt would, rather than the
+  // discarded attempt's own converged crossflow.
+  _Wij_old = _Wij;
 }
 
 void
