@@ -86,8 +86,6 @@ private:
   /// Adds the latent heat absorbed or released by the interfacial mass transfer
   void addLatentHeatTransferTerm();
   void addPhaseChangeEnergySource();
-  /// Adds the functor material holding the coefficient of the phase change energy term
-  void addPhaseChangeCoefficientMaterial();
   void addPhaseDriftFluxTerm();
   /// Adds the enthalpy carried by the relative motion of the phases to the energy equation
   void addPhaseEnergyDriftFluxTerm();

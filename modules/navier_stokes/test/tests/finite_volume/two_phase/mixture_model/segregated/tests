@@ -328,6 +328,23 @@
     requirement = 'The system shall form the particle Reynolds number of the interfacial mass transfer closure built by the Physics from the slip velocity of the dispersed phase, giving the same rate as the closure declared in the input with the slip velocity.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [phase_change_energy]
+    type = CSVDiff
+    input = 'interfacial-mass-transfer-prescribed.i'
+    # The mixture starts at 375 K inside a 370 K to 380 K mushy zone and cools, so the phase change
+    # term slows the cooling; 'temperature_error' measures it against the analytic temperature of
+    # the case without that term
+    cli_args = "Physics/NavierStokes/TwoPhaseMixtureSegregated/mixture/add_phase_change_energy_term=true
+                FunctorMaterials/pc_props/type=GenericFunctorMaterial
+                FunctorMaterials/pc_props/prop_names='T_solidus T_liquidus latent_heat'
+                FunctorMaterials/pc_props/prop_values='370 380 2e3'
+                Outputs/file_base=phase-change-energy"
+    csvdiff = 'phase-change-energy.csv'
+    abs_zero = 1e-8
+    design = 'WCNSLinearFVTwoPhaseMixturePhysics.md LinearFVPhaseChangeSource.md'
+    requirement = 'The system shall add the latent heat of solidification and melting to the mixture energy equation, slowing the change of temperature inside the mushy zone.'
+    max_threads = 1 # see libmesh issue #3808
+  []
   [interfacial_mass_transfer_prescribed]
     type = CSVDiff
     input = 'interfacial-mass-transfer-prescribed.i'
