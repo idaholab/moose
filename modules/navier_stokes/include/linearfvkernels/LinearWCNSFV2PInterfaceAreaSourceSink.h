@@ -31,9 +31,12 @@
  * \f$ S_{TI} \f$ the random collision and wake entrainment sinks and the turbulent impact source.
  * This object assembles everything but the time derivative and the advection.
  *
- * Two closure sets are offered, Hibiki and Ishii and Ishii and Kim, selected by 'model' and sharing
- * the averaged particle size \f$ d_b = \psi \alpha_g / \chi_p \f$. Their correlations are given
- * in the documentation page.
+ * Two closure sets are offered, selected by 'model' and sharing the averaged particle size
+ * \f$ d_b = \psi \alpha_g / \chi_p \f$: T. Hibiki and M. Ishii, "One-group interfacial area
+ * transport of bubbly flows in vertical round tubes", International Journal of Heat and Mass
+ * Transfer 43 (2000) 2711-2726, and M. Ishii and S. Kim, "Micro four-sensor probe measurement of
+ * interfacial area transport for bubbly flow in round pipes", Nuclear Engineering and Design 205
+ * (2001) 123-131. Their correlations are given in the documentation page.
  */
 class LinearWCNSFV2PInterfaceAreaSourceSink : public LinearFVElementalKernel
 {

@@ -328,10 +328,8 @@ WCNSLinearFVTwoPhaseMixturePhysics::addFVKernels()
 {
   WCNSLinearFVScalarTransportPhysics::addFVKernels();
 
-  // The phase fraction equation is an advection equation whose boundedness rests on the time
-  // derivative. Solved steady, the discrete operator loses the property that each cell value is a
-  // convex combination of its neighbours wherever the dispersed phase velocity is compressive, and
-  // the phase fraction can leave [0, 1].
+  // Solved steady, the phase fraction equation loses the boundedness that rests on its time
+  // derivative, and the phase fraction can leave [0, 1].
   if (_add_phase_equation && !isTransient())
     mooseInfoRepeated(
         "The phase transport equation is being solved without a time derivative. Its boundedness "
@@ -412,13 +410,10 @@ WCNSLinearFVTwoPhaseMixturePhysics::setRelativeVelocityParams(InputParameters & 
 void
 WCNSLinearFVTwoPhaseMixturePhysics::addLatentHeatTransferTerm()
 {
-  // Generating the dispersed phase absorbs its latent heat from the mixture, so the energy equation
-  // takes a sink of Gamma * h_lat, and a source of the same size when the transfer runs the other
-  // way. Wu et al., "Development of a two-phase flow solver with drift-flux model based on
-  // OpenFOAM: Validation against single/two-phase and boiling flow", Annals of Nuclear Energy 213
-  // (2025) 111179, carry this as -h'_l Gamma_g in a liquid phase enthalpy equation. This is a
-  // single energy equation for the mixture, so what the term supports is a transfer at, or close
-  // to, thermal equilibrium.
+  // Generating the dispersed phase absorbs its latent heat from the mixture energy equation, as in
+  // Wu et al., "Development of a two-phase flow solver with drift-flux model based on OpenFOAM:
+  // Validation against single/two-phase and boiling flow", Annals of Nuclear Energy 213 (2025)
+  // 111179. A single mixture energy equation supports a transfer at or near thermal equilibrium.
   const auto latent_source = prefix() + "latent_heat_source";
   addParsedFunctorMaterial(
       latent_source + "_mat",
@@ -430,10 +425,8 @@ WCNSLinearFVTwoPhaseMixturePhysics::addLatentHeatTransferTerm()
   {
     auto params = getFactory().getValidParams("LinearFVSource");
     assignBlocks(params, _blocks);
-    // The solved energy variable, not the temperature: with 'solve_for_enthalpy' the temperature
-    // is not a solver variable, and a source placed on it would target the wrong equation. The
-    // term itself is the same either way, a power per unit volume, because both forms of the
-    // energy equation carry their sources in those units.
+    // The solved energy variable, the enthalpy with 'solve_for_enthalpy'. The source is a power per
+    // unit volume in either form.
     params.set<LinearVariableName>("variable") =
         _fluid_energy_physics->getFluidEnergyVariableName();
     params.set<MooseFunctorName>("source_density") = latent_source;
@@ -446,15 +439,10 @@ WCNSLinearFVTwoPhaseMixturePhysics::addLatentHeatTransferTerm()
 MooseFunctorName
 WCNSLinearFVTwoPhaseMixturePhysics::buildMixtureDensityTimeDerivative()
 {
-  // Differentiating rho_m = alpha rho_d + (1 - alpha) rho_c,
-  //
-  //   d(rho_m)/dt = (rho_d - rho_c) d(alpha)/dt + alpha d(rho_d)/dt + (1 - alpha) d(rho_c)/dt ,
-  //
-  // which assumes nothing about either phase density. The phase fraction derivative comes from the
-  // variable's own dot(), which MooseLinearVariableFV builds from the time integrator's
-  // coefficients: it is therefore the same discrete operator LinearFVTimeDerivative assembles in
-  // the phase equation, so the two cannot disagree. The density derivatives are supplied by the
-  // user and default to zero.
+  // d(rho_m)/dt = (rho_d - rho_c) d(alpha)/dt + alpha d(rho_d)/dt + (1 - alpha) d(rho_c)/dt. The
+  // phase fraction derivative is the variable's dot(), the same discrete operator as the time
+  // derivative of the phase equation. The density derivatives are user supplied and default to
+  // zero.
   const auto drho_m_dt = prefix() + "drho_m_dt";
   if (_built_drho_m_dt)
     return drho_m_dt;
@@ -491,23 +479,10 @@ WCNSLinearFVTwoPhaseMixturePhysics::buildMixtureDensityTimeDerivative()
 MooseFunctorName
 WCNSLinearFVTwoPhaseMixturePhysics::buildMixtureDensityPressureDerivative()
 {
-  // How the mixture density responds to pressure, the coefficient the pressure driven part of the
-  // storage term carries onto the matrix diagonal. Not d(rho_m)/dp at fixed phase fraction: the
-  // phase equation is assembled in conservative form and holds the dispersed phase mass
-  // m_d = rho_d alpha, so raising the pressure compresses the dispersed phase and
-  //
-  //   d(alpha)/dp = -(alpha / rho_d) d(rho_d)/dp ,
-  //
-  // which substituted into rho_m = m_d + (1 - alpha) rho_c, the first group held fixed, leaves
-  //
-  //   d(rho_m)/dp = (alpha rho_c / rho_d) d(rho_d)/dp + (1 - alpha) d(rho_c)/dp .
-  //
-  // The ratio rho_c/rho_d is over eight hundred for air in water, so the coefficient reaches two
-  // hundred at a void fraction of a quarter. The same quantity is subtracted from the explicit
-  // source, so it cancels at convergence and cannot change the converged answer.
-  //
-  // The phase compressibilities are supplied rather than differentiated, the densities reaching
-  // this Physics as opaque functors.
+  // The response of the mixture density to pressure at fixed dispersed phase mass, which the phase
+  // equation conserves: d(rho_m)/dp = (alpha rho_c / rho_d) d(rho_d)/dp + (1 - alpha) d(rho_c)/dp.
+  // It goes on the matrix diagonal and is subtracted from the explicit source, so it does not
+  // change the converged answer.
   const auto drho_m_dp = prefix() + "drho_m_dp";
   if (_built_drho_m_dp)
     return drho_m_dp;
@@ -534,10 +509,8 @@ WCNSLinearFVTwoPhaseMixturePhysics::buildMixtureDensityPressureDerivative()
 void
 WCNSLinearFVTwoPhaseMixturePhysics::addInterfacialMassTransferRateMaterial()
 {
-  // The rate is declared once, here, and read by every equation that needs it: the phase equation
-  // source below, the latent heat sink on the energy equation, and the phase change term of the
-  // interfacial area transport equation. Those three cannot disagree about it because there is one
-  // functor rather than one parameter per consumer.
+  // Declared once and read by the phase equation, the latent heat sink and the interfacial area
+  // equation, so that they cannot disagree on the rate.
   auto params = getFactory().getValidParams("WCNSFV2PInterfacialMassTransferFunctorMaterial");
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>("interfacial_area") = getParam<MooseFunctorName>("interfacial_area");
@@ -565,13 +538,9 @@ WCNSLinearFVTwoPhaseMixturePhysics::addInterfacialMassTransferRateMaterial()
 void
 WCNSLinearFVTwoPhaseMixturePhysics::addInterfacialMassTransferTerm()
 {
-  // The dispersed phase mass balance is
-  //
-  //   d(rho_d alpha)/dt + div(rho_d alpha u_d) - div(rho_d D grad(alpha)) = Gamma ,
-  //
-  // so the transfer enters as a source on that equation and nowhere else in the mass or momentum
-  // equations. The volume the exchange creates reaches the pressure equation through d(rho_m)/dt,
-  // which is why 'add_mass_density_transient' is a prerequisite in a flowing case.
+  // The transfer is a source of the dispersed phase mass balance only. The volume it creates
+  // reaches the pressure equation through d(rho_m)/dt, so a flowing case needs
+  // 'add_mass_density_transient'.
   auto params = getFactory().getValidParams("LinearFVSource");
   assignBlocks(params, _blocks);
   params.set<LinearVariableName>("variable") = _phase_2_fraction_name;
@@ -588,10 +557,9 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMassDensityTransientTerm()
   // buildMixtureDensityTimeDerivative().
   const auto drho_m_dt = buildMixtureDensityTimeDerivative();
 
-  // When a phase density depends on pressure, the (d(rho_m)/dp) dp/dt part of the storage term is
-  // put on the matrix through a non-conservative LinearFVTimeDerivative, since lagging it stalls
-  // the outer iteration when that compressibility is large. The remainder stays an explicit source.
-  // Without a supplied density pressure derivative, the whole term is explicit.
+  // With a supplied phase density pressure derivative, the (d(rho_m)/dp) dp/dt part of the storage
+  // term goes on the matrix, since lagging it stalls the outer iteration at a large
+  // compressibility. The remainder stays an explicit source.
   const bool implicit_pressure_part = isParamValid("phase_2_density_pressure_derivative") ||
                                       isParamValid("phase_1_density_pressure_derivative");
   MooseFunctorName source_density = drho_m_dt;
@@ -636,11 +604,8 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMassDensityTransientTerm()
   }
 
   {
-    // Sign. LinearFVDivergence and LinearFVSource do not share a sign convention on the right hand
-    // side, so the factor is negative although
-    //   div(rho_m Ainv grad p) = div(rho_m HbyA) + d(rho_m)/dt
-    // suggests otherwise. A positive factor doubles the mass imbalance instead of closing it; see
-    // mass-balance-transient.i.
+    // The factor is negative: LinearFVDivergence and LinearFVSource use opposite right hand side
+    // sign conventions, and a positive factor doubles the mass imbalance instead of closing it.
     auto params = getFactory().getValidParams("LinearFVSource");
     assignBlocks(params, _blocks);
     params.set<LinearVariableName>("variable") = _flow_equations_physics->getPressureName();
@@ -684,11 +649,9 @@ WCNSLinearFVTwoPhaseMixturePhysics::addPhaseInterfaceTerm()
 void
 WCNSLinearFVTwoPhaseMixturePhysics::addPhaseChangeEnergySource()
 {
-  // The term is a coefficient times dT/dt, as for the nonlinear NSFVPhaseChangeSource. The
-  // coefficient is lagged to the previous fixed point iterate rather than differentiated, so the
-  // mushy zone may need tighter fixed point tolerances than the Newton implementation. Assembled
-  // against a specific enthalpy it would evaluate c dh/dt, a different quantity, so an enthalpy
-  // formulation is refused.
+  // The coefficient is lagged to the previous fixed point iterate, so the mushy zone may need
+  // tighter fixed point tolerances than the Newton implementation. The term multiplies dT/dt, so an
+  // enthalpy formulation is refused.
   if (_fluid_energy_physics->solveForEnthalpy())
     paramError("add_phase_change_energy_term",
                "The phase change energy source is a coefficient multiplying the time derivative of "
@@ -755,11 +718,8 @@ WCNSLinearFVTwoPhaseMixturePhysics::addPhaseEnergyDriftFluxTerm()
 void
 WCNSLinearFVTwoPhaseMixturePhysics::addMixtureSpecificHeatMaterial()
 {
-  // The mixture energy density is the sum over the phases of each phase's own enthalpy density,
-  // rho_m e_m = sum_k a_k rho_k cp_k T, so the specific heat that reproduces it when multiplied by
-  // the mixture density is the mass-weighted average, not the volume-weighted average used for the
-  // density, the viscosity and the conductivity. The phase fraction is clamped to match the
-  // mixture property material.
+  // Mass weighted, so that rho_m cp_m T is the mixture enthalpy density. The phase fraction is
+  // clamped to match the mixture property material.
   addParsedFunctorMaterial(
       prefix() + "mixture_specific_heat",
       "cp_mixture",
@@ -814,10 +774,8 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
   {
     auto params = getFactory().getValidParams("WCNSLinearFVMixtureFunctorMaterial");
     assignBlocks(params, _blocks);
-    // The specific heat is deliberately absent from this list. This object forms a volume-weighted
-    // average, which is correct for the density, the viscosity and the conductivity, but the
-    // specific heat has to be mass-weighted for rho_m cp_m T to be the mixture enthalpy density.
-    // It is added by addMixtureSpecificHeatMaterial below.
+    // The specific heat is mass weighted rather than volume weighted, so it is added by
+    // addMixtureSpecificHeatMaterial instead.
     params.set<std::vector<MooseFunctorName>>("prop_names") = {
         "rho_mixture", "mu_mixture", "k_mixture"};
     // The phase_1 and phase_2 assignments are only local to this object.
@@ -867,10 +825,8 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
       params.set<MooseFunctorName>("drift_velocity_name") = "vel_drift_" + NS::directions[dim];
       if (getParam<bool>("add_gravity_term_in_slip_velocity"))
         params.set<RealVectorValue>("gravity") = _flow_equations_physics->gravityVector();
-      // The drag model is solved inside the slip closure rather than read from the drag material.
-      // The particle Reynolds number of the correlation is formed from the slip velocity, so a
-      // drag functor built the correct way depends on the slip velocity and cannot also be an
-      // input to it; solving the correlation and the force balance together breaks that loop.
+      // Solved inside the closure: the drag depends on the slip velocity through the particle
+      // Reynolds number, so a drag functor cannot also be an input to it.
       if (getParam<bool>("use_dispersed_phase_drag_model"))
       {
         params.set<bool>("use_dispersed_phase_drag_model") = true;

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVScalarFieldAdvection.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("NavierStokesApp", INSFVScalarFieldAdvection);
 
@@ -38,16 +39,7 @@ INSFVScalarFieldAdvection::INSFVScalarFieldAdvection(const InputParameters & par
     _add_slip_model(isParamValid("u_drift") ? true : false)
 {
   if (_add_slip_model)
-  {
-    if (_dim >= 2 && !_v_slip)
-      mooseError(
-          "In two or more dimensions, the y component of the drift velocity must be supplied using "
-          "the 'v_drift' parameter");
-    if (_dim >= 3 && !_w_slip)
-      mooseError(
-          "In three dimensions, the z component of the drift velocity must be supplied using the "
-          "'w_drift' parameter");
-  }
+    NS::checkVectorComponents(*this, _dim, _v_slip, _w_slip, "v_drift", "w_drift");
 }
 
 ADReal

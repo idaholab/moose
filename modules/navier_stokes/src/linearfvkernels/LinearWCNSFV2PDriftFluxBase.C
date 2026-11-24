@@ -41,7 +41,7 @@ LinearWCNSFV2PDriftFluxBase::LinearWCNSFV2PDriftFluxBase(const InputParameters &
     _w_slip(isParamValid("w_slip") ? &getFunctor<Real>("w_slip") : nullptr),
     _boundary_normal_factor(1.0)
 {
-  NS::checkSlipVelocityComponents(*this, _dim, _v_slip, _w_slip);
+  NS::checkVectorComponents(*this, _dim, _v_slip, _w_slip, "v_slip", "w_slip");
 
   const auto slip_ids =
       _mesh.getBoundaryIDs(getParam<std::vector<BoundaryName>>("slip_boundaries"));

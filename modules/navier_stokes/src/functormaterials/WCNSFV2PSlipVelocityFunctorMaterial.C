@@ -349,10 +349,7 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::WCNSFV2PSlipVelocityFunctorMate
                  "supplied. Without it the model returns the isolated particle result.");
   }
 
-  if (_dim > 1 && !isParamValid("v"))
-    paramError("v", "In two or more dimensions, the v velocity must be supplied.");
-  if (_dim > 2 && !isParamValid("w"))
-    paramError("w", "In three dimensions, the w velocity must be supplied.");
+  NS::checkVectorComponents(*this, _dim, isParamValid("v"), isParamValid("w"), "v", "w");
 
   // The advective part of the particle acceleration needs the velocity gradients
   // Cell gradients are a linear finite volume notion; the nonlinear variables build the

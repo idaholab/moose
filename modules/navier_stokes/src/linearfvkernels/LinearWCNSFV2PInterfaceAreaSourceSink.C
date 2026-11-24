@@ -112,10 +112,7 @@ LinearWCNSFV2PInterfaceAreaSourceSink::LinearWCNSFV2PInterfaceAreaSourceSink(
     _implicit_coefficient(0.0),
     _lagged_source(0.0)
 {
-  if (_dim >= 2 && !_v_var)
-    paramError("v", "In two or more dimensions, the v velocity must be supplied.");
-  if (_dim >= 3 && !_w_var)
-    paramError("w", "In three dimensions, the w velocity must be supplied.");
+  NS::checkVectorComponents(*this, _dim, _v_var, _w_var, "v", "w");
   if (_model == ModelEnum::ISHII_KIM && !_mu_c)
     paramError(NS::continuous_phase_viscosity,
                "The Ishii and Kim model needs the continuous phase viscosity to form the particle "

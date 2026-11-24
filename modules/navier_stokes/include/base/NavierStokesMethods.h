@@ -183,16 +183,23 @@ slipVelocityVector(const Moose::Functor<T> & u_slip,
 }
 
 /**
- * Checks that a slip velocity was given a component for every dimension of the mesh, the
- * u component being required by the parameters of every object taking one.
+ * Checks that a vector supplied component by component has a component for every dimension of the
+ * mesh, the x component being a required parameter of every object taking one.
+ * @param has_v, has_w whether the y and z components were supplied
+ * @param v_param, w_param the names of the parameters holding the y and z components
  */
 inline void
-checkSlipVelocityComponents(const MooseObject & object, unsigned int dim, bool has_v, bool has_w)
+checkVectorComponents(const MooseObject & object,
+                      unsigned int dim,
+                      bool has_v,
+                      bool has_w,
+                      const std::string & v_param,
+                      const std::string & w_param)
 {
   if (dim >= 2 && !has_v)
-    object.paramError("v_slip", "In two or more dimensions, the v_slip velocity must be supplied");
+    object.paramError(v_param, "In two or more dimensions, '", v_param, "' must be supplied.");
   if (dim >= 3 && !has_w)
-    object.paramError("w_slip", "In three dimensions, the w_slip velocity must be supplied");
+    object.paramError(w_param, "In three dimensions, '", w_param, "' must be supplied.");
 }
 
 /**

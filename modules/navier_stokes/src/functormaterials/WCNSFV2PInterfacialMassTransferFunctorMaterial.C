@@ -68,7 +68,7 @@ WCNSFV2PInterfacialMassTransferFunctorMaterial::WCNSFV2PInterfacialMassTransferF
     _v_slip(isParamValid("v_slip") ? &getFunctor<Real>("v_slip") : nullptr),
     _w_slip(isParamValid("w_slip") ? &getFunctor<Real>("w_slip") : nullptr)
 {
-  NS::checkSlipVelocityComponents(*this, _dim, _v_slip, _w_slip);
+  NS::checkVectorComponents(*this, _dim, _v_slip, _w_slip, "v_slip", "w_slip");
 
   const auto mass_transfer = [this](const auto & r, const auto & t) -> Real
   {
