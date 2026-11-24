@@ -2838,6 +2838,10 @@ public:
                                      const std::vector<Real> * const weights = nullptr,
                                      const THREAD_ID tid = 0) override;
 
+  virtual void reinitNeighborSurfaceElemRef(const Elem * neighbor_elem,
+                                            const std::vector<Point> & pts,
+                                            const THREAD_ID tid = 0) override;
+
   /**
    * @return whether to perform a boundary condition integrity check for finite volume
    */
