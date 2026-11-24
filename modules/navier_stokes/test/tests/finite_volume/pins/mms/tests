@@ -24,6 +24,6 @@
     input = test.py
     test_case = TestRC_2D
     requirement = 'The system shall be able to solve the incompressible porous flow Navier-Stokes equations in a 2D channel using a Rhie-Chow interpolation scheme and produce second order convergence for all variables.'
-    min_parallel = 16
+    min_parallel = 8
   []
 []
