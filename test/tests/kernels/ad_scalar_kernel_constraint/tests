@@ -2,7 +2,7 @@
   issues = '#22174'
   design = 'source/kernels/ADScalarLMKernel.md'
   [kernel_dirichlet]
-    requirement = 'The system will produce a harmonic function with a prescribed average value,'
+    requirement = 'The system shall produce a harmonic function with a prescribed average value,'
     [physics_separate]
       type = 'Exodiff'
       input = 'scalar_constraint_kernel_RJ.i'

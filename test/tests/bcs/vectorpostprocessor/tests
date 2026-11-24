@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'vectorpostprocessor.i'
     exodiff = 'vectorpostprocessor_out.e'
-    requirement = "BoundaryCondition objects shall support retrieval of VectorPostprocessor data."
+    requirement = "The system shall allow boundary conditions to retrieve vector postprocessor data."
   [../]
 []

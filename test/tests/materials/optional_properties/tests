@@ -37,11 +37,11 @@
     type = RunApp
     input = material.i
     cli_args = "Materials/active='before' Materials/before/expect=false Materials/before/adexpect=false"
-    requirement = "Optional material property objects that cannot be resolved shall evaluate to false"
+    requirement = "The system shall evaluate optional material property objects that cannot be resolved to false"
   []
 
   [material_error]
-    requirement = "The optional material property system use from a material object shall return"
+    requirement = "The system shall, when the optional material property system is used from a material object, return"
     [ad_expected]
       type = RunException
       input = material.i
