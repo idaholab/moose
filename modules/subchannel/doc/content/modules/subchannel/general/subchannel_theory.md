@@ -88,7 +88,7 @@ where $K_{i} = [\frac{f_w}{Dhy_i} \Delta Z + k_i]$ is an overall axial loss coef
 Friction_{ij}  =  -\frac{1}{2} g_{ij} \Delta Z K_{ij} \rho_{} |u_{ij}| u_{ij} = - \frac{1}{2}K_{ij} \frac{w_{ij}|w_{ij}|}{S_{ij} \rho^\star}.
 \end{equation}
 
-where $K_{ij}$ is an overall loss coefficient encompassing lateral concentrated form and friction losses and $S_{ij}$ the lateral flow area between subchannel *i* and subchannel *j*: $S_{ij} = \Delta Z g_{ij}$. Unlike the other starred quantities, $\rho^*$ is not a donor-cell value but the mean of the two subchannel densities, $\rho^* = (\rho_i + \rho_j)/2$. A donor-cell density would make the lateral momentum residual discontinuous at $w_{ij} = 0$, which breaks the finite-difference Jacobian of the Newton-Krylov crossflow solve.
+where $K_{ij}$ is an overall loss coefficient encompassing lateral concentrated form and friction losses and $S_{ij}$ the lateral flow area between subchannel *i* and subchannel *j*: $S_{ij} = \Delta Z g_{ij}$. Unlike the other starred quantities, $\rho^*$ is evaluated at the gap, the interface shared by subchannels *i* and *j*, rather than taken from the upstream subchannel; it is the mean of the two subchannel densities, $\rho^* = (\rho_i + \rho_j)/2$.
 
 ### Friction factor
 

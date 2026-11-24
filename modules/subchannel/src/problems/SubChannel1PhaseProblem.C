@@ -1577,12 +1577,14 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         // total local form loss in the ij direction
         auto friction_term = _kij * _Wij(i_gap, iz) * std::abs(_Wij(i_gap, iz));
         auto DPij = (*_P_soln)(node_in_i) - (*_P_soln)(node_in_j);
-        // rho_star is the density of the lateral friction closure K*Wij*|Wij|/(Sij*rho_star),
-        // which this residual carries multiplied through by Sij*rho_star. A donor-cell density
-        // jumps at Wij = 0 and makes the residual discontinuous there, so the finite-difference
-        // Jacobian action of the matrix-free solve is not a fixed linear map; the mean of the two
-        // channel densities keeps the residual continuous and differs from the donor value by half
-        // the density difference across the gap
+        // rho_star is the density at the gap itself, the interface shared by channels i and j,
+        // not a donor-cell value carried by the crossflow. It is the density of the lateral
+        // friction closure K*Wij*|Wij|/(Sij*rho_star), which this residual carries multiplied
+        // through by Sij*rho_star. A donor-cell density would jump at Wij = 0 and make the
+        // residual discontinuous there, so the finite-difference Jacobian action of the
+        // matrix-free solve would not be a fixed linear map; the mean of the two channel
+        // densities keeps the residual continuous and differs from the donor value by half the
+        // density difference across the gap
         auto rho_star = (rho_i + rho_j) / 2.0;
         auto mass_term_out =
             (*_mdot_soln)(node_out_i) / (*_S_flow_soln)(node_out_i) / (*_rho_soln)(node_out_i) +
