@@ -15,4 +15,43 @@
     requirement = "Stabilized solution matches Cook's solution for stabilized Q4 elements for large "
                   "deformations with the updated Lagrangian formulation."
   []
+  [twist_fbar]
+    requirement = "The total and updated Lagrangian formulations shall give the same displacements "
+                  "and Cauchy stress for a large twist and stretch with F-bar stabilization"
+    issues = '#34324'
+    design = 'source/kernels/lagrangian/UpdatedLagrangianStressDivergence.md '
+             'source/kernels/lagrangian/TotalLagrangianStressDivergence.md Stabilization.md'
+    [pk1_updated]
+      type = CSVDiff
+      input = 'twist_fbar.i'
+      csvdiff = 'twist_fbar_pk1.csv'
+      cli_args = 'Outputs/file_base=twist_fbar_pk1'
+      detail = "for a first Piola-Kirchhoff stress update with the updated formulation,"
+    []
+    [pk1_total]
+      type = CSVDiff
+      input = 'twist_fbar.i'
+      csvdiff = 'twist_fbar_pk1.csv'
+      cli_args = 'Physics/SolidMechanics/QuasiStatic/all/formulation=TOTAL '
+                 'Outputs/file_base=twist_fbar_pk1'
+      prereq = 'twist_fbar/pk1_updated'
+      detail = "for a first Piola-Kirchhoff stress update with the total formulation,"
+    []
+    [pk2_updated]
+      type = CSVDiff
+      input = 'twist_fbar.i'
+      csvdiff = 'twist_fbar_pk2.csv'
+      cli_args = "Materials/active='neohookean s_zz' Outputs/file_base=twist_fbar_pk2"
+      detail = "for a second Piola-Kirchhoff stress update with the updated formulation, and"
+    []
+    [pk2_total]
+      type = CSVDiff
+      input = 'twist_fbar.i'
+      csvdiff = 'twist_fbar_pk2.csv'
+      cli_args = "Physics/SolidMechanics/QuasiStatic/all/formulation=TOTAL "
+                 "Materials/active='neohookean s_zz' Outputs/file_base=twist_fbar_pk2"
+      prereq = 'twist_fbar/pk2_updated'
+      detail = "for a second Piola-Kirchhoff stress update with the total formulation."
+    []
+  []
 []

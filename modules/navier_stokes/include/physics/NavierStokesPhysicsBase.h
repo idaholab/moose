@@ -41,6 +41,16 @@ protected:
   /// Add the FVInterpolationMethod object for an advected interpolation method if absent
   void addFVAdvectedInterpolationMethod(const MooseEnum & interpolation_method);
 
+  /**
+   * Add, if absent, a non-AD functor material defining the product of a porosity and another
+   * functor on the blocks of this Physics
+   * @param porosity the porosity functor or number
+   * @param functor the functor or number multiplied by the porosity
+   * @return the name of the product functor
+   */
+  MooseFunctorName addPorosityScaledFunctor(const MooseFunctorName & porosity,
+                                            const MooseFunctorName & functor);
+
   /// Return the number of ghosting layers needed
   virtual unsigned short getNumberAlgebraicGhostingLayersNeeded() const = 0;
 

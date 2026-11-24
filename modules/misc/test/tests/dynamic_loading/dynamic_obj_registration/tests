@@ -12,7 +12,7 @@
     executable_pattern = 'misc-\w+$'
     allow_warnings = true
     issues = '#4712'
-    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+    requirement = "The system shall be able to dynamically load a module or application "
                   "and use objects registered therein, with the library name inferred from the "
                   "module or application name."
   []
@@ -27,7 +27,7 @@
     executable_pattern = 'misc-\w+$'
     allow_warnings = true
     issues = '#24299'
-    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+    requirement = "The system shall be able to dynamically load a module or application "
                   "and properly register the provided objects."
   []
 
@@ -44,7 +44,7 @@
     executable_pattern = 'misc-\w+$'
     allow_warnings = true
     issues = '#10911'
-    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+    requirement = "The system shall be able to dynamically load a module or application "
                   "and use objects registered therein, with the library specified."
   []
 
@@ -59,7 +59,7 @@
     executable_pattern = 'misc-\w+$'
     allow_warnings = true
     issues = '#4712'
-    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+    requirement = "The system shall be able to dynamically load a module or application "
                   "and properly register module or application specific syntax, with the library "
                   "name inferred from the module or application name."
   []
@@ -77,7 +77,7 @@
     executable_pattern = 'misc-\w+$'
     allow_warnings = true
     issues = '#10911'
-    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+    requirement = "The system shall be able to dynamically load a module or application "
                   "and properly register module or application specific syntax, with the library "
                   "specified."
   []
@@ -96,8 +96,8 @@
     executable_pattern = 'misc-\w+$'
     allow_warnings = true
     issues = '#4712'
-    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
-                  "and register only select objects form the module or application."
+    requirement = "The system shall be able to dynamically load a module or application "
+                  "and register only select objects from the module or application."
   []
 
   [dynamic_object_restrict_bad]
@@ -114,7 +114,7 @@
     executable_pattern = 'misc-\w+$'
     allow_warnings = true
     issues = '#4712'
-    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+    requirement = "The system shall be able to dynamically load a module or application "
                   "and throw an error if an object is used that is not among selected objects for "
                   "registration."
   []
@@ -129,7 +129,7 @@
     # Test must be run with the misc app to test dynamic loading
     executable_pattern = 'misc-\w+$'
     issues = '#4712'
-    requirement = "Any MOOSE application shall be able to dynamically load a module or application "
+    requirement = "The system shall be able to dynamically load a module or application "
                   "and throw an error if an object is used that is not provided by the module or "
                   "application."
   []

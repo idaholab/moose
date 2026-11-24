@@ -15,7 +15,7 @@
 ///
 /// This class *implements* the 2nd PK stress update, providing:
 ///   1) The 2nd PK stress
-///   2) The derivative of the 2nd PK stress wrt the Cauchy-Green strain
+///   2) The derivative of the 2nd PK stress wrt the Green-Lagrange strain
 ///
 /// and wraps these to provide:
 ///   1) The 1st PK stress
@@ -30,18 +30,14 @@ public:
 protected:
   /// Wrap PK2 -> PK1
   virtual void computeQpPK1Stress() override;
-  /// Wrap PK1 -> sigma. Overridden here because PK2's PK1 = F_ust * S has a direct F_ust
-  /// dependence (Term A in dPK1/d(F_ust)) that PK1 base's sigma-chain (which assumes
-  /// pk1_jacobian = constitutive dPK1/dF_stab) doesn't handle.
-  virtual void computeQpCauchyStress() override;
-  /// Provide the PK2 stress and dPK2/dC
+  /// Provide the PK2 stress and dS/dE
   virtual void computeQpPK2Stress() = 0;
 
 protected:
   /// Green-Lagrange strain
   MaterialProperty<RankTwoTensor> & _E;
   /// 2nd PK stress
-  MaterialProperty<RankTwoTensor> & _S;
-  /// 2nd PK tangent (dS/dF)
-  MaterialProperty<RankFourTensor> & _C;
+  MaterialProperty<RankTwoTensor> & _pk2_stress;
+  /// 2nd PK tangent (dS/dE)
+  MaterialProperty<RankFourTensor> & _pk2_jacobian;
 };

@@ -17,10 +17,17 @@
 ///   1) The 1st PK stress
 ///   2) The derivative of the 1st PK stress wrt the deformation gradient
 ///
+/// both at the F-bar-stabilized deformation gradient when stabilization is on
+///
 /// and wraps these to provide:
 ///   1) The Cauchy stress
 ///   2) The derivative of the increment in the Cauchy stress wrt the
 ///      increment in the spatial velocity gradient
+///
+/// computeQpPK1Stress() writes the constitutive Pbar and dPbar/dFbar into `_pk1_stress` and
+/// `_pk1_jacobian`. computeQpCauchyStress() then overwrites both in place with the PK1 stress
+/// of the unstabilized deformation gradient and its derivative wrt that gradient, which the
+/// kernels use.
 ///
 class ComputeLagrangianStressPK1 : public ComputeLagrangianStressBase
 {
@@ -36,17 +43,14 @@ protected:
   virtual void computeQpPK1Stress() = 0;
 
 protected:
-  /// Wrap the PK stress to get the Cauchy stress. Protected so PK2 (which has its own
-  /// wrap structure PK1 = F_ust * S with direct F_ust dependence) can override it.
+  /// Wrap the PK stress to get the Cauchy stress
   virtual void computeQpCauchyStress();
 
   /// Inverse incremental deformation gradient
   const MaterialProperty<RankTwoTensor> & _inv_df;
-  /// Inverse F-bar-stabilized deformation gradient (= _F^{-1}). Kept for any internal
-  /// consumer that still needs it; the kinematic stress-measure wrap uses _F_ust below.
+  /// Inverse F-bar-stabilized deformation gradient (= `_stabilized_deformation_gradient`^{-1})
   const MaterialProperty<RankTwoTensor> & _inv_def_grad;
-  /// F-bar-stabilized deformation gradient (= the strain calc's published `_F`). Drives
-  /// the constitutive update via the strain calc's F-bar'd `_f_inv`; NOT used for the
-  /// kinematic PK1 -> sigma wrap (that's `_F_ust`, declared on the base).
-  const MaterialProperty<RankTwoTensor> & _F;
+  /// F-bar-stabilized deformation gradient (= the strain calc's published `_F`). The
+  /// constitutive PK1 stress is a function of it, and the PK1 -> sigma push-forward uses it.
+  const MaterialProperty<RankTwoTensor> & _stabilized_deformation_gradient;
 };

@@ -617,8 +617,8 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool recompute_face_mass_fl
   // Solve the pressure corrector
   const auto residuals = solvePressureCorrector();
 
-  // Compute the face velocity which is used in the advection terms. In certain
-  // segregated solver algorithms (like PISO) this is only done on the last iteration.
+  // Update face fluxes using the pressure-correction solution (before pressure relaxation). In
+  // certain segregated solver algorithms (like PISO) this is only done on the last iteration.
   if (recompute_face_mass_flux)
     _rc_uo->computeFaceMassFlux();
 
@@ -934,6 +934,7 @@ LinearAssemblySegregatedSolve::solve()
     }
 
     _problem.execute(EXEC_NONLINEAR);
+    _problem.execute(EXEC_MULTISYSTEM_FIXED_POINT_ITERATION_END);
 
     converged = NS::FV::converged(ns_residuals, ns_abs_tols);
   }

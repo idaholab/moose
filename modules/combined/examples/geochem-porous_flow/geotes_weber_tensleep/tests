@@ -19,7 +19,7 @@ Celestite = 1*SO4-- + 1*Sr++;  log10K = -6.4427;  SI = -0.62617
 Anhydrite = 1*SO4-- + 1*Ca++;  log10K = -4.2739;  SI = -1.1179
 Goethite = 1.5*H2O - 1.875*H+ + 0.125*SO4-- + 1*Fe++ - 0.125*HS-;  log10K = 9.3083;  SI = -1.2487'
     match_literal = true
-    requirement = "The geochemistry model shall be able to report the saturation indices of minerals"
+    requirement = "The system shall be able to report the saturation indices of minerals using the geochemistry model"
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
   [../]
@@ -47,7 +47,7 @@ Barite;  bulk_moles = 0.0001866mol;  bulk_conc = 39.73mg/kg(soln);  free_moles =
 Sr++;  bulk_moles = 0.0001598mol;  bulk_conc = 12.77mg/kg(soln);  molality = 0.0001312mol/kg(solvent water);  free_conc = 10.46mg/kg(soln);  act_coeff = 0.1356;  log10(a) = -4.75
 NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e-07mol/kg(solvent water);  free_conc = 0.004904mg/kg(soln);  act_coeff = 1;  log10(a) = -6.5'
     match_literal = true
-    requirement = "It shall be possible to change temperature in a geochemistry model"
+    requirement = "The system shall be able to change temperature in a geochemistry model"
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
   [../]
@@ -56,7 +56,7 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     input = 'scaling.i'
     csvdiff = 'scaling_out.csv'
     heavy = true
-    requirement = "It shall be possible to study scaling using a geochemistry model"
+    requirement = "The system shall be able to study scaling using a geochemistry model"
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
   [../]
@@ -66,7 +66,7 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     csvdiff = 'aquifer_geochemistry_out.csv'
     cli_args = 'Outputs/exodus=false Executioner/end_time=1E4'
     heavy = true
-    requirement = "The system shall be able to model spatially-dependent aquifer geochemical models."
+    requirement = "The system shall be able to model spatially-dependent aquifer geochemical models in 3D."
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
   [../]
@@ -77,7 +77,7 @@ NH3;  bulk_moles = 0.001937mol;  bulk_conc = 30.1mg/kg(soln);  molality = 3.163e
     cli_args = 'Executioner/end_time=1E4'
     prereq = 'aquifer_geochemistry_only'
     heavy = true
-    requirement = "The system should be able to couple porous-flow simulations to spatially-dependent geochemical models to simulate reactive transport for spatially-dependent aquifer models."
+    requirement = "The system shall be able to couple porous-flow simulations to spatially-dependent geochemical models to simulate reactive transport for spatially-dependent aquifer models."
     issues = '#15693'
     design = 'geotes_weber_tensleep.md'
   [../]

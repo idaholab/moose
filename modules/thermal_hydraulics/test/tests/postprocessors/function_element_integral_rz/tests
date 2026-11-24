@@ -8,6 +8,6 @@
     recover = false
     issues = '#215'
     design = 'RZSymmetry.md'
-    requirement = 'The system should report an error when users set subdomain-restricted RZ-symmtrical THM-specific objects on RZ-subdomains.'
+    requirement = 'The system shall report an error when users set subdomain-restricted RZ-symmetrical THM-specific objects on RZ-subdomains.'
   []
 []

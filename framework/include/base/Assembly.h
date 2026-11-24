@@ -273,7 +273,11 @@ public:
     return _ad_JxW;
   }
 
-  const MooseArray<ADReal> & adJxWFace() const { return _ad_JxW_face; }
+  const MooseArray<ADReal> & adJxWFace() const
+  {
+    _need_ad_face_map = true;
+    return _ad_JxW_face;
+  }
 
   const MooseArray<ADReal> & adCurvatures() const;
 
@@ -376,7 +380,11 @@ public:
     return _neighbor_extra_elem_ids[id];
   }
 
-  const MooseArray<ADPoint> & adNormals() const { return _ad_normals; }
+  const MooseArray<ADPoint> & adNormals() const
+  {
+    _need_ad_face_map = true;
+    return _ad_normals;
+  }
 
   const MooseArray<ADPoint> & adQPoints() const
   {
@@ -388,6 +396,7 @@ public:
   const MooseArray<ADPoint> & adQPointsFace() const
   {
     _calculate_face_xyz = true;
+    _need_ad_face_map = true;
     return _ad_q_points_face;
   }
 
@@ -665,6 +674,12 @@ public:
                              Real tolerance,
                              const std::vector<Point> * const pts,
                              const std::vector<Real> * const weights = nullptr);
+
+  /**
+   * Reinitialize FE data for a neighbor element that is itself the face, i.e. a surface element
+   * without an interior parent, with a given set of reference points on that element
+   */
+  void reinitNeighborSurfaceElemRef(const Elem * neighbor_elem, const std::vector<Point> & pts);
 
   /**
    * Reintialize dual basis coefficients based on a customized quadrature rule
@@ -2037,6 +2052,15 @@ private:
   computeSinglePointMapAD(const Elem * elem, const std::vector<Real> & qw, unsigned p, FEBase * fe);
 
   /**
+   * Fill _ad_elem_node_points with the positions of the nodes of \p elem, with derivatives with
+   * respect to the displacement degrees of freedom when \p do_derivatives is true. A node without
+   * degrees of freedom of a displacement variable, such as a TET14 face node with SECOND order
+   * displacements, is displaced by interpolating the displacement from the other element nodes, so
+   * its position depends on their degrees of freedom.
+   */
+  void computeADElemNodePoints(const Elem & elem, bool do_derivatives);
+
+  /**
    * Add local residuals of all field variables for a tag onto the tag's residual vector
    */
   void addResidual(const VectorTag & vector_tag);
@@ -2783,6 +2807,9 @@ protected:
   /// costs time even when no object reads them, and it needs an AD derivative size of at least the
   /// element's displacement dofs (81 on a HEX27).
   mutable bool _need_ad_volume_map = false;
+  /// Whether any object needs the AD face JxW, normals, quadrature points, curvatures or coordinate
+  /// transformation, which computeFaceMap provides on displaced meshes
+  mutable bool _need_ad_face_map = false;
 
   /**
    * The residual vector tags that Assembly could possibly contribute to.
@@ -2855,6 +2882,13 @@ protected:
    */
   std::vector<std::pair<unsigned int, unsigned short>> _disp_numbers_and_directions;
 
+  /// The positions of the nodes of the element passed to computeADElemNodePoints
+  std::vector<VectorValue<ADReal>> _ad_elem_node_points;
+  /// Working vectors for computeADElemNodePoints
+  std::vector<dof_id_type> _ad_elem_disp_dof_indices;
+  std::vector<Number> _ad_elem_disp_unit_soln;
+  std::vector<Number> _ad_elem_disp_nodal_soln;
+
   mutable bool _calculate_xyz;
   mutable bool _calculate_face_xyz;
   mutable bool _calculate_curvatures;
@@ -2911,6 +2945,7 @@ Assembly::adCoordTransformation() const
   _calculate_xyz = true;
   _calculate_face_xyz = true;
   _need_ad_volume_map = true;
+  _need_ad_face_map = true;
 
   _calculate_ad_coord = true;
   return _ad_coord;

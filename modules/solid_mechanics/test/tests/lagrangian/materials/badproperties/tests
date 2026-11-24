@@ -7,4 +7,13 @@
     issues = '#17472'
     design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress.md'
   [../]
+  [./simo_hughes_j2_small_kinematics]
+    type = RunException
+    input = '../correctness/hyperelastic_J2_plastic.i'
+    cli_args = 'GlobalParams/large_kinematics=false'
+    expect_err = 'ComputeSimoHughesJ2PlasticityStress requires large kinematics'
+    requirement = 'The system shall report an error if the Simo-Hughes J2 plasticity model is used with small kinematics.'
+    issues = '#34489'
+    design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
+  [../]
 []

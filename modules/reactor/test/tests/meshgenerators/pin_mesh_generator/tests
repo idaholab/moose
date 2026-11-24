@@ -363,7 +363,7 @@
       type = JSONDiff
       input = pin_hex.i
       cli_args = 'Outputs/file_base=pin_hex_2d_engunit
-                  Mesh/rmp/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only'
       recover = false
       jsondiff = pin_hex_2d_engunit_csg.json
@@ -385,7 +385,7 @@
                   Mesh/pin1/mesh_intervals='1 1 1'
                   Mesh/pin1/extrude=true
                   Outputs/file_base=pin_hex_3d_engunit
-                  Mesh/rmp/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       recover = false
       jsondiff = pin_hex_3d_engunit_csg.json
@@ -407,7 +407,7 @@
                   Mesh/pin1/mesh_intervals='1 1 1 1'
                   Mesh/pin1/extrude=true
                   Outputs/file_base=pin_hex_3d_multiple_duct_engunit
-                  Mesh/rmp/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       recover = false
       jsondiff = pin_hex_3d_multiple_duct_engunit_csg.json
@@ -422,7 +422,7 @@
                   Mesh/pin1/region_ids='1 2 3 4'
                   Mesh/pin1/num_sectors='4'
                   Outputs/file_base=pin_square_2d_engunit
-                  Mesh/rmp/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       recover = false
       jsondiff = pin_square_2d_engunit_csg.json
@@ -442,7 +442,7 @@
                   Mesh/pin1/mesh_intervals='1 1 1 1'
                   Mesh/pin1/extrude=true
                   Outputs/file_base=pin_square_3d_engunit
-                  Mesh/rmp/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       recover = false
       jsondiff = pin_square_3d_engunit_csg.json
@@ -453,7 +453,7 @@
       type = JSONDiff
       input = pin_homogenized.i
       cli_args = "Outputs/file_base=pin_hex_homogenized_2d_engunit
-                  Mesh/rmp/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = pin_hex_homogenized_2d_engunit_csg.json
       recover = false
@@ -470,7 +470,7 @@
                   Mesh/rmp/axial_mesh_intervals='1'
                   Mesh/pin1/extrude=true
                   Outputs/file_base=pin_hex_homogenized_3d_engunit
-                  Mesh/rmp/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = pin_hex_homogenized_3d_engunit_csg.json
       recover = false
@@ -487,7 +487,7 @@
                   Mesh/pin1/duct_halfpitch='3.0'
                   Mesh/pin1/mesh_intervals='1 1 1'
                   Outputs/file_base=pin_hex_single_assembly_engunit
-                  Mesh/rmp/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = pin_hex_single_assembly_engunit_csg.json
       recover = false
@@ -510,7 +510,7 @@
                   Mesh/pin1/duct_halfpitch='3.0'
                   Mesh/pin1/mesh_intervals='1 1 1'
                   Outputs/file_base=pin_hex_single_assembly_3d_engunit
-                  Mesh/rmp/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = pin_hex_single_assembly_3d_engunit_csg.json
       recover = false
@@ -528,7 +528,7 @@
                   Mesh/pin1/duct_halfpitch='3.0'
                   Mesh/pin1/mesh_intervals='1 1 1'
                   Outputs/file_base=pin_square_single_assembly_engunit
-                  Mesh/rmp/expand_units=false
+                  ConstructiveSolidGeometry/expand_units=false
                   --csg-only"
       jsondiff = pin_square_single_assembly_engunit_csg.json
       recover = false

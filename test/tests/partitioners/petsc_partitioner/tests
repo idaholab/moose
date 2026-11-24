@@ -6,7 +6,7 @@
   # Hopefully these measurements are good enough and also platform independent
 
   [./ptscotch]
-    requirement = 'Make MOOSE support ptscotch via PETSc'
+    requirement = 'The system shall support ptscotch via PETSc'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_ptscotch_out.csv'
@@ -23,7 +23,7 @@
   [../]
 
   [./ptscotch_weight_element]
-    requirement = 'ptscotch shall support element-weighted graphs for balancing workload'
+    requirement = 'The system shall support, using ptscotch, element-weighted graphs for balancing workload'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_ptscotch_weight_element_out.csv'
@@ -40,7 +40,7 @@
   [../]
 
   [./ptscotch_weight_side]
-    requirement = 'ptscotch shall support side-weighted graphs for minimizing communication'
+    requirement = 'The system shall support, using ptscotch, side-weighted graphs for minimizing communication'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_ptscotch_weight_side_out.csv'
@@ -57,7 +57,7 @@
   [../]
 
   [./ptscotch_weight_both]
-    requirement = 'ptscotch shall take both side weights and element weights into consideration'
+    requirement = 'The system shall, using ptscotch, take both side weights and element weights into consideration'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_ptscotch_weight_both_out.csv'
@@ -75,7 +75,7 @@
 
   [ptscotch_weight_both_empty_partition]
     issues = '#33835'
-    requirement = 'ptscotch shall take both side weights and element weights into consideration '
+    requirement = 'The system shall, using ptscotch, take both side weights and element weights into consideration '
                   'when there are fewer mesh elements than partitions, leaving some partitions empty.'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -105,7 +105,7 @@
   []
 
   [./parmetis]
-    requirement = 'Make MOOSE support parmetis via PETSc'
+    requirement = 'The system shall support parmetis via PETSc'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_parmetis_out.csv'
@@ -124,7 +124,7 @@
   [../]
 
   [./parmetis_weight_element]
-    requirement = 'Parmetis shall support element-weighted graphs for balancing workload'
+    requirement = 'The system shall support, using Parmetis, element-weighted graphs for balancing workload'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_parmetis_weight_element_out.csv'
@@ -139,7 +139,7 @@
   [../]
 
   [./parmetis_weight_side]
-    requirement = 'Parmetis shall support side-weighted graphs for minimizing communication'
+    requirement = 'The system shall support, using Parmetis, side-weighted graphs for minimizing communication'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_parmetis_weight_side_out.csv'
@@ -154,7 +154,7 @@
   [../]
 
   [./parmetis_weight_both]
-    requirement = 'Parmetis shall take side weights and element weights into consideration'
+    requirement = 'The system shall, using Parmetis, take side weights and element weights into consideration'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
     csvdiff = 'petsc_partitioner_parmetis_weight_both_out.csv'
@@ -169,7 +169,7 @@
   [../]
 
   [./parmetis_presplit_mesh]
-    requirement = 'Parmetis shall support presplit'
+    requirement = 'The system shall support presplit using Parmetis'
     type = 'CheckFiles'
     input = 'petsc_partitioner.i'
     cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Mesh/parallel_type=replicated --split-file petsc_partitioner_parmetis_presplit --split-mesh 4,8'

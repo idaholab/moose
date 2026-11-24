@@ -24,6 +24,22 @@ The kernels created are:
 - [LinearFVDiffusion.md] for the scalar diffusion term
 - [LinearFVSource.md] for the source terms
 
+## Porous medium flow
+
+When the coupled [WCNSLinearFVFlowPhysics.md] uses the porous medium treatment, each scalar variable $\phi_i$ is a
+concentration per unit fluid volume:
+
+!equation
+\dfrac{\partial \epsilon \phi_i}{\partial t} + \nabla \cdot (\phi_i \mathbf{U}) - \nabla \cdot (\epsilon k_i \nabla \phi_i) - \epsilon Q_i - \epsilon \lambda_i \phi_i = 0
+
+where $\mathbf{U}$ is the superficial velocity. The advection term uses the face flux of the
+[PorousRhieChowMassFlux.md], which is continuous across porosity jumps and pressure baffles, so
+$\phi_i$ is continuous there while the amount per unit total volume $\epsilon \phi_i$ jumps with
+the porosity. The sources and reaction coefficients are given per unit fluid volume. The following
+input advects a scalar with a uniform source through two baffles:
+
+!listing test/tests/finite_volume/pins/channel-flow/linear-segregated/1d-simple-channel/porous-scalar-1d-physics.i block=Physics
+
 ## Selecting interpolation methods
 
 The

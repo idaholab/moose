@@ -10,7 +10,7 @@ heated_length = 1.0
 ###################################################
 [TriSubChannelMesh]
   [subchannel]
-    type = SCMDetailedTriAssemblyMeshGenerator
+    type = SCMTriVisualizationAssemblyMeshGenerator
     nrings = ${n_rings}
     n_cells = ${n_cells}
     flat_to_flat = ${inner_duct_in}

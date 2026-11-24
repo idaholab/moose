@@ -10,7 +10,7 @@
 
   [Mesh]
     [assembly]
-      type = SCMDetailedQuadAssemblyMeshGenerator
+      type = SCMQuadVisualizationAssemblyMeshGenerator
     []
   []
 

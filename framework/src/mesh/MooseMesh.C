@@ -618,6 +618,16 @@ MooseMesh::possiblyRebuildNodeToElemMap()
   _node_to_elem_map.clear();
   _node_to_elem_map_built = false;
   internalNodeToElemMap();
+
+  // Quadrature nodes are not part of the libMesh mesh, so the rebuild above drops the entries
+  // addQuadratureNode() made for them. Restore them: geometric search relies on them to decide
+  // which processor tracks a quadrature node.
+  for (const auto & [elem_id, side_map] : _elem_to_side_to_qp_to_quadrature_nodes)
+    if (getMesh().elem_ptr(elem_id)->active())
+      for (const auto & side_qps : side_map)
+        for (const auto & qp_qnode : side_qps.second)
+          _node_to_elem_map[qp_qnode.second->id()].push_back(elem_id);
+
   return true;
 }
 
@@ -1374,11 +1384,17 @@ MooseMesh::isBoundaryFullyExternalToSubdomains(BoundaryID bid,
 {
   mooseAssert(_bnd_elem_range, "Boundary element range is not initialized");
 
+  // On a distributed mesh the boundary element range only holds the local and ghosted sides, so
+  // each process checks the sides of the elements it owns and the answers are combined. The
+  // owner always has the neighbor across the side, while a ghosted element may not. The loop
+  // therefore must not return early: every process has to reach the reduction.
+  bool crosses_subdomains = false;
+
   // Loop over all side elements of the mesh, select those on the boundary
   for (const auto & bnd_elem : *_bnd_elem_range)
   {
     const auto & [elem_ptr, elem_side, elem_bid] = *bnd_elem;
-    if (elem_bid == bid)
+    if (elem_bid == bid && elem_ptr->processor_id() == processor_id())
     {
       // If an element is internal to the group of subdomain, check the neighbor
       if (blk_group.find(elem_ptr->subdomain_id()) != blk_group.end())
@@ -1395,11 +1411,16 @@ MooseMesh::isBoundaryFullyExternalToSubdomains(BoundaryID bid,
         // If the neighbor is also in the group of subdomain,
         // then the boundary cuts the subdomains
         if (blk_group.find(neighbor->subdomain_id()) != blk_group.end())
-          return false;
+        {
+          crosses_subdomains = true;
+          break;
+        }
       }
     }
   }
-  return true;
+
+  comm().max(crosses_subdomains);
+  return !crosses_subdomains;
 }
 
 void
@@ -3461,6 +3482,31 @@ MooseMesh::ghostGhostedBoundaries()
     }
   }
 
+  // Surface elements on a ghosted nodeset are their own faces on that boundary. A mesh with a
+  // single element dimension has no surface elements
+  std::vector<BoundaryID> ghosted_nodesets;
+  if (!mesh.preparation().has_cached_elem_data || mesh.elem_dimensions().size() > 1)
+    for (const auto bc_id : _ghosted_boundaries)
+      if (!_mesh_sideset_ids.count(bc_id))
+        ghosted_nodesets.push_back(bc_id);
+  if (!ghosted_nodesets.empty())
+  {
+    const auto mesh_dim = dimension();
+    for (const auto & elem : mesh.active_local_element_ptr_range())
+    {
+      if (elem->dim() + 1u != mesh_dim || elem->interior_parent())
+        continue;
+      for (const auto bc_id : ghosted_nodesets)
+        if (isSurfaceElemOnNodeset(*elem, bc_id))
+        {
+          boundary_elems_to_ghost.insert(elem);
+          for (auto & node : elem->node_ref_range())
+            connected_nodes_to_ghost.insert(&node);
+          break;
+        }
+    }
+  }
+
   // We really do want to store this by value instead of by reference
   const auto prior_ghost_elems = mesh.extra_ghost_elems();
 
@@ -3672,6 +3718,19 @@ MooseMesh::isBoundaryNode(dof_id_type node_id, BoundaryID bnd_id) const
     if (it->second.find(node_id) != it->second.end())
       found_node = true;
   return found_node;
+}
+
+bool
+MooseMesh::isSurfaceElemOnNodeset(const Elem & elem, const BoundaryID bnd_id) const
+{
+  if (elem.dim() == 0 || elem.dim() + 1u != dimension() || elem.interior_parent() ||
+      _mesh_sideset_ids.count(bnd_id))
+    return false;
+  const auto & binfo = getMesh().get_boundary_info();
+  for (const auto & node : elem.node_ref_range())
+    if (!binfo.has_boundary_id(&node, bnd_id))
+      return false;
+  return true;
 }
 
 bool

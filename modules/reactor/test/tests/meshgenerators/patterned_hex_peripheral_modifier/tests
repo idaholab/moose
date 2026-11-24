@@ -11,6 +11,7 @@
   []
   [single_hex_quatratic]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'single_hex.i'
     exodiff = 'single_hex_quadratic_in.e'
     cli_args = 'Mesh/hex/quad_element_type=QUAD8

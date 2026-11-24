@@ -30,6 +30,10 @@ protected:
   const VariableName & _variable;
   /// The axial location where the plane is
   const Real & _height;
+  /// axial cell containing the height
+  unsigned int _iz;
+  /// linear interpolation weight of the height within the axial cell
+  Real _weight;
 
 public:
   static InputParameters validParams();

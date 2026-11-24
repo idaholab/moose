@@ -26,7 +26,7 @@ UpdatedLagrangianStressDivergenceBase<G>::UpdatedLagrangianStressDivergenceBase(
     _q_point_undisplaced(_assembly_undisplaced.qPoints())
 {
   // The use_displaced_mesh <-> large_kinematics consistency check lives in initialSetup(), since
-  // large_kinematics is now derived from the strain calculator's guarantee (not available in the
+  // large_kinematics is derived from the strain calculator's guarantee (not available in the
   // constructor).
 
   // TODO: add weak plane stress support

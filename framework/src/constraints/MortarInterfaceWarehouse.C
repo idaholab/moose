@@ -148,11 +148,12 @@ MortarInterfaceWarehouse::createMortarInterface(
     for (const Elem * lower_d_elem : as_range(mesh.active_local_subdomain_elements_begin(pr.first),
                                               mesh.active_local_subdomain_elements_end(pr.first)))
     {
-      const Elem * ip = lower_d_elem->interior_parent();
-      mooseAssert(
-          ip,
-          "Lower dimensional elements should always have an interior parent set when using mortar");
-      pr.second->insert(ip->subdomain_id());
+      // A primary surface element may have no interior parent
+      mooseAssert(lower_d_elem->interior_parent() || pr.first == key1,
+                  "Secondary lower dimensional elements should always have an interior parent "
+                  "set when using mortar");
+      pr.second->insert(
+          AutomaticMortarGeneration::primaryInteriorParentOrSelf(*lower_d_elem).subdomain_id());
     }
 
     // Make sure that we get this right in parallel
@@ -219,7 +220,7 @@ MortarInterfaceWarehouse::update(AutomaticMortarGeneration & amg)
   // these sets (see Moose::Mortar::setupMortarMaterials), so a change here is what they need to
   // be notified of.
   const auto secondary_ip_sub_ids_before = amg.secondaryIPSubIDs();
-  const auto primary_ip_sub_ids_before = amg.primaryIPSubIDs();
+  const auto primary_ip_sub_ids_before = amg.primaryInternalSubIDs();
 
   // Clear exiting data
   amg.clear();
@@ -261,7 +262,7 @@ MortarInterfaceWarehouse::update(AutomaticMortarGeneration & amg)
   // every residual/Jacobian evaluation.
   const bool coverage_changed = !_mortar_initd ||
                                 secondary_ip_sub_ids_before != amg.secondaryIPSubIDs() ||
-                                primary_ip_sub_ids_before != amg.primaryIPSubIDs();
+                                primary_ip_sub_ids_before != amg.primaryInternalSubIDs();
 
   if (coverage_changed)
     for (const auto mei : _mei_objs)

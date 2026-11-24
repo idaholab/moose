@@ -2017,6 +2017,113 @@ TEST(CSGBaseTest, testExpandAllMulti)
   ASSERT_NO_THROW(csg_obj->expandAllEngUnits());
 }
 
+/// tests that expanding a surface engineering unit reuses an existing surface identical to one it
+/// creates, and that the expanded region refers to the surface stored in the base
+TEST(CSGBaseTest, testSurfEngUnitExpandSharedSurface)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  const auto & existing = csg_obj->addSurface(std::make_unique<CSGSphere>("shared_sphere", 2.0));
+  const auto & unit =
+      csg_obj->addEngUnit(std::make_unique<TestSharedSurfEngUnit>("surf_unit", 2.0));
+  csg_obj->createCell("cell", -unit);
+
+  csg_obj->expandEngUnit(unit);
+
+  // the existing surface is reused, so only the unit's own surface is added
+  ASSERT_EQ(2, csg_obj->getAllSurfaces().size());
+  ASSERT_TRUE(&existing == &csg_obj->getSurfaceByName("shared_sphere"));
+  for (const CSGSurface & surf : csg_obj->getCellByName("cell").getRegion().getSurfaces())
+    ASSERT_TRUE(&surf == &csg_obj->getSurfaceByName(surf.getName()));
+}
+
+/// tests that expanding a surface engineering unit errors when it creates a surface with the name
+/// of an existing surface that has a different definition
+TEST(CSGBaseTest, testSurfEngUnitExpandConflictingSurface)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  csg_obj->addSurface(std::make_unique<CSGSphere>("shared_sphere", 5.0));
+  const auto & unit =
+      csg_obj->addEngUnit(std::make_unique<TestSharedSurfEngUnit>("surf_unit", 2.0));
+
+  Moose::UnitUtils::assertThrows([&csg_obj, &unit]() { csg_obj->expandEngUnit(unit); },
+                                 "cannot be discarded as it is not an identical surface");
+}
+
+/// tests that a transformation on a surface engineering unit is included when comparing the
+/// surfaces it creates with existing surfaces
+TEST(CSGBaseTest, testSurfEngUnitExpandTransformedSharedSurface)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  csg_obj->addSurface(std::make_unique<CSGSphere>("shared_sphere", 2.0));
+  const auto & unit =
+      csg_obj->addEngUnit(std::make_unique<TestSharedSurfEngUnit>("surf_unit", 2.0));
+  csg_obj->applyAxisRotation(unit, RotationAxisType::Z, 30.0);
+
+  // the expanded "shared_sphere" carries the unit's rotation, so it differs from the existing one
+  Moose::UnitUtils::assertThrows([&csg_obj, &unit]() { csg_obj->expandEngUnit(unit); },
+                                 "cannot be discarded as it is not an identical surface");
+}
+
+/// tests that expanding a cell engineering unit reuses an existing surface identical to one it
+/// creates, and that the expanded cell refers to the surface stored in the base
+TEST(CSGBaseTest, testCellEngUnitExpandSharedSurface)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  const auto & existing = csg_obj->addSurface(std::make_unique<CSGSphere>("shared_sphere", 2.0));
+  const auto & unit =
+      csg_obj->addEngUnit(std::make_unique<TestSharedCellEngUnit>("cell_unit", 2.0));
+
+  const auto & expanded_cell = csg_obj->expandEngUnit(unit);
+
+  ASSERT_EQ(1, csg_obj->getAllSurfaces().size());
+  ASSERT_TRUE(&expanded_cell == &csg_obj->getCellByName("cell_unit_expanded_cell"));
+  for (const CSGSurface & surf : expanded_cell.getRegion().getSurfaces())
+    ASSERT_TRUE(&surf == &existing);
+  ASSERT_TRUE(csg_obj->getRootUniverse().hasCell("cell_unit_expanded_cell"));
+}
+
+/// tests that expanding a cell engineering unit errors when it creates a surface with the name of
+/// an existing surface that has a different definition
+TEST(CSGBaseTest, testCellEngUnitExpandConflictingSurface)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  csg_obj->addSurface(std::make_unique<CSGSphere>("shared_sphere", 5.0));
+  const auto & unit =
+      csg_obj->addEngUnit(std::make_unique<TestSharedCellEngUnit>("cell_unit", 2.0));
+
+  Moose::UnitUtils::assertThrows([&csg_obj, &unit]() { csg_obj->expandEngUnit(unit); },
+                                 "cannot be discarded as it is not an identical surface");
+}
+
+/// tests that universe engineering units whose expansions create the same surface share a single
+/// surface after expansion, as with axial planes shared by several units
+TEST(CSGBaseTest, testUnivEngUnitExpandSharedSurface)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  csg_obj->addEngUnit(std::make_unique<TestSharedUnivEngUnit>("u1", 2.0));
+  csg_obj->addEngUnit(std::make_unique<TestSharedUnivEngUnit>("u2", 2.0));
+
+  csg_obj->expandAllEngUnits();
+
+  ASSERT_EQ(1, csg_obj->getAllSurfaces().size());
+  const auto & shared = csg_obj->getSurfaceByName("shared_sphere");
+  for (const std::string cell_name : {"u1_cell", "u2_cell"})
+    for (const CSGSurface & surf : csg_obj->getCellByName(cell_name).getRegion().getSurfaces())
+      ASSERT_TRUE(&surf == &shared);
+}
+
+/// tests that expanding universe engineering units errors when they create surfaces with the same
+/// name but different definitions
+TEST(CSGBaseTest, testUnivEngUnitExpandConflictingSurface)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  csg_obj->addEngUnit(std::make_unique<TestSharedUnivEngUnit>("u1", 2.0));
+  csg_obj->addEngUnit(std::make_unique<TestSharedUnivEngUnit>("u2", 3.0));
+
+  Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->expandAllEngUnits(); },
+                                 "cannot be discarded as it is not an identical surface");
+}
+
 /// tests that expanding a surface engineering unit that incorrectly creates cells or universes
 /// raises an error
 TEST(CSGBaseTest, testSurfBadExpansion)

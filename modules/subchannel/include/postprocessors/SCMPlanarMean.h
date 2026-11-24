@@ -32,6 +32,10 @@ protected:
   AuxVariableName const & _variable;
   /// axial location [m]
   const Real & _height;
+  /// axial cell containing the height
+  unsigned int _iz;
+  /// linear interpolation weight of the height within the axial cell
+  Real _weight;
   /// average value we want to calculate
   Real _mean_value;
 };

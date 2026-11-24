@@ -24,6 +24,7 @@ AuxKernelBase::validParams()
   params += BoundaryRestrictable::validParams();
   params += RandomInterface::validParams();
   params += MeshChangedInterface::validParams();
+  params += MeshDisplacedInterface::validParams();
   params += MaterialPropertyInterface::validParams();
   params += FunctorInterface::validParams();
   params += GeometricSearchInterface::validParams();
@@ -34,6 +35,15 @@ AuxKernelBase::validParams()
   exec_enum.addAvailableFlags(EXEC_PRE_DISPLACE);
   exec_enum = {EXEC_LINEAR, EXEC_TIMESTEP_END};
   params.setDocString("execute_on", exec_enum.getDocString());
+  params.addParam<int>(
+      "execution_order_group",
+      0,
+      "Execution order groups are executed in increasing order (e.g., the lowest "
+      "number is executed first). Note that negative group numbers may be used to execute groups "
+      "before the default (0) group. Please refer to the auxkernel documentation "
+      "for ordering of auxkernel execution within a group for example elemental vs nodal or "
+      "between scalar, regular, vector and array auxkernels.");
+  params.addParamNamesToGroup("execute_on execution_order_group", "Execution scheduling");
 
   params.addRequiredParam<AuxVariableName>("variable",
                                            "The name of the variable that this object applies to");
@@ -86,11 +96,13 @@ AuxKernelBase::AuxKernelBase(const InputParameters & parameters)
     GeometricSearchInterface(this),
     Restartable(this, "AuxKernels"),
     MeshChangedInterface(parameters),
+    MeshDisplacedInterface(parameters),
     VectorPostprocessorInterface(this),
     ElementIDInterface(this),
     NonADFunctorInterface(this),
 
     _var(getVariableHelper(parameters)),
+    _is_nodal_kernel(_var.isNodal()),
     _bnd(boundaryRestricted()),
     _check_boundary_restricted(getParam<bool>("check_boundary_restricted")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
@@ -105,10 +117,14 @@ AuxKernelBase::AuxKernelBase(const InputParameters & parameters)
   // MooseArray that is only properfly sized for FV variables if we're doing "qp" calculations. I'm
   // quoting "qp" because it's a briefer metaphorical representation (perhaps not a good one) of the
   // more precise requirement that variable data be pre-sized/operator[] indexable
-  _var.requireQpComputations();
+  for (const auto & name : getVariableNamesHelper(parameters))
+  {
+    auto & var = _sys.getVariable(_tid, name);
 
-  addMooseVariableDependency(&_var);
-  _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
+    var.requireQpComputations();
+    addMooseVariableDependency(&var);
+    _supplied_vars.insert(name);
+  }
 
   // Check for supported variable types
   // Any 'nodal' family that actually has DoFs outside of nodes, or gradient dofs at nodes is
@@ -139,11 +155,13 @@ AuxKernelBase::AuxKernelBase(const AuxKernelBase & object, const Moose::Kokkos::
     GeometricSearchInterface(object, key),
     Restartable(object, key),
     MeshChangedInterface(object, key),
+    MeshDisplacedInterface(object, key),
     VectorPostprocessorInterface(object, key),
     ElementIDInterface(object, key),
     NonADFunctorInterface(object, key),
 
     _var(object._var),
+    _is_nodal_kernel(object._is_nodal_kernel),
     _bnd(object._bnd),
     _check_boundary_restricted(object._check_boundary_restricted),
     _subproblem(object._subproblem),
@@ -234,5 +252,19 @@ MooseVariableFieldBase &
 AuxKernelBase::getVariableHelper(const InputParameters & parameters)
 {
   return parameters.getCheckedPointerParam<SystemBase *>("_sys")->getVariable(
-      parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable"));
+      parameters.get<THREAD_ID>("_tid"), getVariableNamesHelper(parameters)[0]);
+}
+
+std::vector<AuxVariableName>
+AuxKernelBase::getVariableNamesHelper(const InputParameters & parameters)
+{
+  if (parameters.varParamName() == "variable")
+    return {parameters.get<AuxVariableName>("variable")};
+
+  const auto & names = parameters.get<std::vector<AuxVariableName>>("variables");
+
+  if (names.empty())
+    ::mooseError("'variables' should not be empty.");
+
+  return names;
 }

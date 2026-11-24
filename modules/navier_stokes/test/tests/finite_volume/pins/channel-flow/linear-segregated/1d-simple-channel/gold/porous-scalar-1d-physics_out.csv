@@ -1,0 +1,2 @@
+time,c_baffle_1_left,c_baffle_1_right,c_baffle_2_left,c_baffle_2_right,c_out,conservation_error,outflow,porous_source
+2,1.5,1.52,2.5,2.51,3,1.6653345369377e-16,0.2,0.2

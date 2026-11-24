@@ -1,4 +1,4 @@
-time,heat_content,heat_content_exact,porosity
+time,heat_content,heat_content_semi_infinite_exact,porosity
 0,0,0,0
 3150000,-40000,-300.4011530156,0.5
 6300000,-40000,-424.83138474718,0.5

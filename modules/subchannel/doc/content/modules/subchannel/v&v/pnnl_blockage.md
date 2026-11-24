@@ -61,6 +61,6 @@ The input file to run the 70% blockage case with the `improved` parameters is pr
 
 !listing /validation/Blockage/PNNL_7x7/7X7blockage70.i language=moose
 
-The file that creates the detailed mesh that subchannel solution gets projected on is presented below:
+The file that creates the 3D visualization mesh that the subchannel solution gets projected on is presented below:
 
 !listing /validation/Blockage/PNNL_7x7/detailedMesh.i language=moose

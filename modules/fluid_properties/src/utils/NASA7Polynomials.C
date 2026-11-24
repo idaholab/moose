@@ -16,7 +16,13 @@ namespace
 // GRI-Mech 3.0 data as distributed with Cantera 3.2.0 (gri30.yaml), with the source precision and
 // temperature ranges. The molar masses are the ones Cantera computes from its atomic weights
 // (H 1.008, C 12.011, N 14.007, O 15.999 g/mol).
-const std::array<NASA7::SpeciesData, 7> species_data = {{
+//
+// GRI-Mech 3.0 has no He, Kr, or Xe, so the noble gases take the data of McBride et al. (1993) as
+// distributed with Cantera 3.2.0 (nasa_gas.yaml), with Cantera's atomic weights as molar masses.
+// Their heat capacity is cp/R = 5/2, except for small corrections for Xe. He, Ar, and Kr have a
+// single polynomial, given here for both ranges. That data has a reference pressure of 1 bar, so
+// ln(1.01325) is subtracted from the entropy constants to refer them to reference_pressure.
+const std::array<NASA7::SpeciesData, 11> species_data = {{
     {"H2",
      2.016e-3,
      200.0,
@@ -150,6 +156,40 @@ const std::array<NASA7::SpeciesData, 7> species_data = {{
       -6.75335100e-15,
       -9.22797700e2,
       5.98052800}},
+    {"He",
+     4.002602e-3,
+     200.0,
+     1000.0,
+     6000.0,
+     {2.5, 0.0, 0.0, 0.0, 0.0, -745.375, 0.915561737},
+     {2.5, 0.0, 0.0, 0.0, 0.0, -745.375, 0.915561737}},
+    {"Ar",
+     39.95e-3,
+     200.0,
+     1000.0,
+     6000.0,
+     {2.5, 0.0, 0.0, 0.0, 0.0, -745.375, 4.36651192},
+     {2.5, 0.0, 0.0, 0.0, 0.0, -745.375, 4.36651192}},
+    {"Kr",
+     83.798e-3,
+     200.0,
+     1000.0,
+     6000.0,
+     {2.5, 0.0, 0.0, 0.0, 0.0, -745.375, 5.47779352},
+     {2.5, 0.0, 0.0, 0.0, 0.0, -745.375, 5.47779352}},
+    {"Xe",
+     131.293e-3,
+     200.0,
+     1000.0,
+     6000.0,
+     {2.5, -8.9914133e-14, 2.5219686e-16, -2.92186662e-19, 1.18949218e-22, -745.375, 6.15125694},
+     {2.50005322,
+      -1.05136544e-7,
+      6.75326897e-11,
+      -1.70944909e-14,
+      1.47681049e-18,
+      -745.394186,
+      6.15096599}},
 }};
 }
 

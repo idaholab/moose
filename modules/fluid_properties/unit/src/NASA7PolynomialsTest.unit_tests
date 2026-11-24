@@ -23,7 +23,8 @@
   [molar_mass]
     type = GoogleTest
     unit_test = NASA7PolynomialsTest.molarMass
-    requirement = 'The system shall provide the molar masses of the built-in NASA 7-coefficient species, matching the values Cantera computes for GRI-Mech 3.0.'
+    requirement = 'The system shall provide the molar masses of the built-in NASA 7-coefficient species, matching the values Cantera computes for GRI-Mech 3.0 and, for the noble gases, the NASA thermodynamic database.'
+    issues = '#34116 #34322'
   []
   [consistent_derivatives]
     type = GoogleTest

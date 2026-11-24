@@ -104,7 +104,7 @@
     []
   []
   [mortar_segment_mesh]
-    requirement = 'When requested through a mortar constraint, the system shall be able to write out a spatially'
+    requirement = 'The system shall, when requested through a mortar constraint, be able to write out a spatially'
     [2d]
       type = Exodiff
       input = mortar_stats_reporter.i

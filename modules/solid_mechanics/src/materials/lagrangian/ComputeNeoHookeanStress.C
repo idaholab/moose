@@ -49,19 +49,23 @@ ComputeNeoHookeanStress::computeQpPK2Stress()
   if (_large_kinematics)
   {
     RankTwoTensor Cinv = (2 * _E[_qp] + RankTwoTensor::Identity()).inverse();
-    _S[_qp] = (_lambda[_qp] * log(_F[_qp].det()) - _mu[_qp]) * Cinv +
-              _mu[_qp] * RankTwoTensor::Identity();
-    _C[_qp] =
-        -2 * (_lambda[_qp] * log(_F[_qp].det()) - _mu[_qp]) * Cinv.times<i_, k_, l_, j_>(Cinv) +
+    _pk2_stress[_qp] =
+        (_lambda[_qp] * log(_stabilized_deformation_gradient[_qp].det()) - _mu[_qp]) * Cinv +
+        _mu[_qp] * RankTwoTensor::Identity();
+    _pk2_jacobian[_qp] =
+        -2 * (_lambda[_qp] * log(_stabilized_deformation_gradient[_qp].det()) - _mu[_qp]) *
+            Cinv.times<i_, k_, l_, j_>(Cinv) +
         _lambda[_qp] * Cinv.times<i_, j_, k_, l_>(Cinv);
   }
   // Small deformations = linear strain
   else
   {
     const auto I = RankTwoTensor::Identity();
-    RankTwoTensor strain = 0.5 * (_F[_qp] + _F[_qp].transpose()) - I;
-    _C[_qp] = _lambda[_qp] * I.times<i_, j_, k_, l_>(I) +
-              2.0 * _mu[_qp] * RankFourTensor(RankFourTensor::initIdentitySymmetricFour);
-    _S[_qp] = _C[_qp] * strain;
+    RankTwoTensor strain = 0.5 * (_stabilized_deformation_gradient[_qp] +
+                                  _stabilized_deformation_gradient[_qp].transpose()) -
+                           I;
+    _pk2_jacobian[_qp] = _lambda[_qp] * I.times<i_, j_, k_, l_>(I) +
+                         2.0 * _mu[_qp] * RankFourTensor(RankFourTensor::initIdentitySymmetricFour);
+    _pk2_stress[_qp] = _pk2_jacobian[_qp] * strain;
   }
 }

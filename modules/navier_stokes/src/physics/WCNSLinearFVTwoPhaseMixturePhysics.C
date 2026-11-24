@@ -64,6 +64,10 @@ WCNSLinearFVTwoPhaseMixturePhysics::WCNSLinearFVTwoPhaseMixturePhysics(
     _use_drift_flux(getParam<bool>("add_drift_flux_momentum_terms")),
     _use_advection_slip(getParam<bool>("add_advection_slip_term"))
 {
+  if (_porous_medium_treatment)
+    _flow_equations_physics->paramError(
+        "porous_medium_treatment",
+        "The porous medium treatment is not implemented for the linear two-phase mixture physics");
   // Check that only one scalar was passed, as we are using vector parameters
   if (_passive_scalar_names.size() > 1)
     paramError("phase_fraction_name", "Only one phase fraction currently supported.");

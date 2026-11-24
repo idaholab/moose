@@ -14,6 +14,7 @@ please refer to the below pages:
 - [Weakly Compressible Finite Volume](wcnsfv.md)
 - [Weakly compressible finite volume using a linear discretization and a segregated solvealgorithm (SIMPLE/PIMPLE)](linear_wcnsfv.md)
 - [Porous media Incompressible Finite Volume](pinsfv.md)
+- [Porous Media Weakly Compressible Linear Finite Volume](porous_rhie_chow_baffle.md)
 - [Continuous Galerkin Finite Element](navier_stokes/cgfe.md)
 - [Discontinuous Galerkin Finite Element](navier_stokes/dgfe.md)
 - [Hybridized Discontinuous Galerkin (HDG) Finite Element](inshdg.md)
@@ -86,7 +87,7 @@ As Navier-Stokes Finite Volume solvers continue to evolve in MOOSE, many new sol
 |                    | $k-\omega$ SST            |            |                                                              | in [PR #28151](https://github.com/idaholab/moose/pull/28151) |                        |
 | Two-phase          | Mixture model             | Yes        | Yes                                                          | Yes                                                          | Yes |
 |                    | Eulerian-Eulerian         |            |                                                              | Yes                                                          |                        |
-| Porous Flow        |       --                  | Yes        | Yes                                                          | Yes                                                          |                        |
+| Porous Flow        |       --                  | Yes        | Yes                                                          | Yes                                                          | Yes                    |
 | Compressibility    | Incompressible            | Yes        | Yes                                                          | Yes                                                          | Yes                    |
 |                    | Weakly compressible       |            | Yes                                                          | Yes                                                          | Yes                    |
 |                    | Compressible              |            | Yes                                                          |                                                              |                        |

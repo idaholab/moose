@@ -45,7 +45,7 @@ MFEML2ZienkiewiczZhuIndicator::createEstimator()
   _integ = std::unique_ptr<mfem::BilinearFormIntegrator>(kernel.createBFIntegrator());
 
   // Next, we need to check that this integrator is supported by mfem::L2ZienkiewiczZhuEstimator
-  [[maybe_unused]] bool is_supported = false;
+  bool is_supported = false;
 
   // Check it correctly casts into DiffusionIntegrator
   is_supported |= (dynamic_cast<mfem::DiffusionIntegrator *>(_integ.get()) != nullptr);
@@ -61,20 +61,39 @@ MFEML2ZienkiewiczZhuIndicator::createEstimator()
   int order = getFESpace().GetMaxElementOrder();
   int dim = getParMesh().Dimension();
   int sdim = getParMesh().SpaceDimension();
+  int tdim = dim * (dim + 1) / 2;
+
+  // Number of space copies for the default flux vector spaces
+  int vdim = 0;
+
+  if (dynamic_cast<mfem::DiffusionIntegrator *>(_integ.get()))
+    vdim = sdim;
+  else if (dynamic_cast<mfem::CurlCurlIntegrator *>(_integ.get()))
+    vdim = 1;
+  else if (dynamic_cast<mfem::ElasticityIntegrator *>(_integ.get()))
+    vdim = tdim;
 
   if (!_flux_fes)
   {
-    // not supplied by the user - default to L2
-    _flux_fec = std::make_unique<mfem::L2_FECollection>(order, dim);
-    _flux_fes = std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _flux_fec.get(), sdim);
+    // not supplied by the user - default to RT for 3d curl-curl, L2 otherwise
+    if (dynamic_cast<mfem::CurlCurlIntegrator *>(_integ.get()) && dim == 3)
+      _flux_fec = std::make_unique<mfem::RT_FECollection>(order - 1, dim);
+    else
+      _flux_fec = std::make_unique<mfem::L2_FECollection>(order, dim);
+
+    _flux_fes = std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _flux_fec.get(), vdim);
   }
 
   if (!_smooth_flux_fes)
   {
-    // not supplied by the user - default to H1
-    _smooth_flux_fec = std::make_unique<mfem::H1_FECollection>(order, dim);
+    // not supplied by the user - default to ND for 3d curl-curl, H1 otherwise
+    if (dynamic_cast<mfem::CurlCurlIntegrator *>(_integ.get()) && dim == 3)
+      _smooth_flux_fec = std::make_unique<mfem::ND_FECollection>(order, dim);
+    else
+      _smooth_flux_fec = std::make_unique<mfem::H1_FECollection>(order, dim);
+
     _smooth_flux_fes =
-        std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _smooth_flux_fec.get(), sdim);
+        std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _smooth_flux_fec.get(), vdim);
   }
 
   // fetch the grid function we need

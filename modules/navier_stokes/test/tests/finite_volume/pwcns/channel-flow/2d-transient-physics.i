@@ -1,10 +1,8 @@
 # Solid properties
 cp_s = 2
 rho_s = 4
-k_s = '${fparse 1e-2 / 0.5}'
+k_s = 1e-2
 h_fs = 10
-
-# thermal diffusivity is divided by 0.5 to match the reference using the action
 
 # Operating conditions
 u_inlet = 1

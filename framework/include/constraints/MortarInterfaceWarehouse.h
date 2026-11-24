@@ -150,7 +150,8 @@ public:
 
   /**
    * Returns the higher dimensional subdomain ids of the interior parents of the given lower-d
-   * subdomain id
+   * subdomain id. For a primary subdomain whose elements have no interior parent, this is the
+   * lower-d subdomain id itself.
    */
   const std::set<SubdomainID> & getHigherDimSubdomainIDs(SubdomainID lower_d_subdomain_id) const;
 
@@ -199,7 +200,8 @@ private:
   std::set<BoundaryID> _mortar_boundary_coverage;
 
   /// Map from lower dimensional subdomain ids to corresponding higher simensional subdomain ids
-  /// (e.g. the ids of the interior parents)
+  /// (e.g. the ids of the interior parents). A primary lower dimensional subdomain whose elements
+  /// have no interior parent maps to itself.
   std::unordered_map<SubdomainID, std::set<SubdomainID>> _lower_d_sub_to_higher_d_subs;
 
   /// A container of objects for whom the \p mortarSetup method will be called whenever a mortar
