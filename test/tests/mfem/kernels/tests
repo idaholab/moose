@@ -88,6 +88,7 @@
       capabilities = 'mfem'
       compute_devices = 'cpu cuda'
       recover = false
+      max_parallel = 7 # mfem/mfem#5797
       detail = 'the stress of a linear elasticity kernel in 3D,'
     []
     [curlcurl]
