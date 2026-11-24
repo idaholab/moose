@@ -6,3 +6,4 @@ from .nodes import (
     ObjectNodeBase,
 )
 from .get_moose_syntax_tree import get_moose_syntax_tree
+from .may_have_unit import may_have_unit

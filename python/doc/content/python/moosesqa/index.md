@@ -36,7 +36,13 @@ There exists three types of report objects:
   specifications, including checks for duplicates and missing information.
 - +`SQAMooseAppReport`+\\
   Collects data regarding the inclusion of source and syntax design documentation based on
-  MOOSE-based application registered syntax.
+  MOOSE-based application registered syntax. It also lists, for each object, the input
+  parameters of a type likely to carry a unit (e.g., `Real`, `FunctionName`, `VariableName`)
+  that do not have a unit set with `InputParameters::setDocUnit`. This check is controlled by
+  `log_missing_doc_unit`, which defaults to `none`: the count is reported but does not affect
+  the report status. Set it to `WARNING` or `ERROR` in the application entry of
+  `sqa_reports.yml` to enable it; the messages are shown with
+  `./moosedocs.py check --show-warnings`.
 
 The SQA software reports may be retrieved by using the `get_sqa_reports` function. This function
 requires one argument, the name of a report configuration YAML file. This is comprised of
