@@ -40,6 +40,18 @@ public:
   static std::string deduceCheckpointPath(const MooseObject & object,
                                           const std::string & file_name);
 
+  /**
+   * Helper for determining whether or not the mesh file \p file_name
+   * should be read with the ExodusII reader.
+   *
+   * Only the file name itself (not its parent directories) is considered,
+   * which matches the name-based format detection in libMesh. Tetgen
+   * (*.ele) files are not considered to be Exodus files.
+   *
+   * This is a static method because FileMesh and TiledMesh need the same thing.
+   */
+  static bool isExodusFile(const std::string & file_name);
+
 protected:
   /// the path/name of the file containing the mesh
   const MeshFileName & _file_name;

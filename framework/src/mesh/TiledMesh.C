@@ -11,6 +11,7 @@
 #include "Parser.h"
 #include "InputParameters.h"
 #include "MooseApp.h"
+#include "FileMeshGenerator.h"
 
 #include "libmesh/mesh_modification.h"
 #include "libmesh/serial_mesh.h"
@@ -102,7 +103,7 @@ TiledMesh::buildMesh()
   {
     std::string mesh_file(getParam<MeshFileName>("file"));
 
-    if (mesh_file.rfind(".exo") < mesh_file.size() || mesh_file.rfind(".e") < mesh_file.size())
+    if (FileMeshGenerator::isExodusFile(mesh_file))
     {
       libMesh::ExodusII_IO ex(*this);
       ex.read(mesh_file);
