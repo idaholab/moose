@@ -2,7 +2,7 @@
 ################### MOOSE Application Standard Makefile #######################
 ###############################################################################
 #
-# Optional Environment variables
+#  Optional Environment variables
 # MOOSE_DIR     - Root directory of the MOOSE project
 # FRAMEWORK_DIR - Location of the MOOSE framework
 #
