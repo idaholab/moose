@@ -39,7 +39,12 @@ ComputeFiniteStrain::ComputeFiniteStrain(const InputParameters & parameters)
     _decomposition_method(getParam<MooseEnum>("decomposition_method").getEnum<DecompMethod>()),
     _use_hw(_decomposition_method == DecompMethod::HughesWinget),
     _def_grad_mid(_use_hw ? &declareProperty<RankTwoTensor>(_base_name + "def_grad_mid") : nullptr),
-    _f_bar(_use_hw ? &declareProperty<RankTwoTensor>(_base_name + "f_bar") : nullptr)
+    _f_bar(_use_hw ? &declareProperty<RankTwoTensor>(_base_name + "f_bar") : nullptr),
+    // HughesWinget does not use _Fhat
+    _unlocked_Fhat(_volumetric_locking_correction && !_use_hw
+                       ? &declareProperty<RankTwoTensor>(
+                             _base_name + "unlocked_incremental_deformation_gradient")
+                       : nullptr)
 {
 }
 
@@ -85,6 +90,9 @@ ComputeFiniteStrain::computeProperties()
 
     if (_volumetric_locking_correction)
     {
+      if (_unlocked_Fhat)
+        (*_unlocked_Fhat)[_qp] = _Fhat[_qp];
+
       // Calculate average _Fhat for volumetric locking correction
       ave_Fhat += _Fhat[_qp] * _JxW[_qp] * _coord[_qp];
 
