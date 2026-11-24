@@ -19,17 +19,17 @@ build:
   run_exports:
     # things that depend on this moose-dev must use the
     # exact moose-* packages that this was built with
-    - moose-build 2026.11.09 {{ mpi }}
+    - moose-build 2026.11.24 {{ mpi }}
     - moose-libmesh 2026.10.21_69c4f84 {{ mpi }}_1
-    - moose-wasp 2026.10.22_4eb02a2 build_0
-    - moose-tools 2026.11.09
+    - moose-wasp 2026.10.22_4eb02a2 build_1
+    - moose-tools 2026.11.24
 
 requirements:
   run:
-    - moose-build 2026.11.09 {{ mpi }}
+    - moose-build 2026.11.24 {{ mpi }}
     - moose-libmesh 2026.10.21_69c4f84 {{ mpi }}_1
-    - moose-wasp 2026.10.22_4eb02a2 build_0
-    - moose-tools 2026.11.09
+    - moose-wasp 2026.10.22_4eb02a2 build_1
+    - moose-tools 2026.11.24
     # Python dependencies of the optional NEML2 build (update_and_rebuild_neml2.sh)
     # that moose-tools does not provide. nmhit, pyzag and pyro-ppl are built from
     # the framework/contrib submodules instead, because conda-forge does not ship
