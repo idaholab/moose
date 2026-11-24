@@ -153,8 +153,8 @@ def file_is_stub(filename):
     with open(filename, "r") as fid:
         content = fid.read()
 
-    # Empty is considered a stub
-    if not content:
+    # Empty, or containing only whitespace, is considered a stub
+    if not content.strip():
         return True
 
     # Whole page is a load of a canonical stub template. Require this to be the

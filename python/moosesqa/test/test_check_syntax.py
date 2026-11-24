@@ -173,6 +173,12 @@ class TestCheckSyntax(unittest.TestCase):
         path = self._writeTmpMarkdown("")
         self.assertTrue(TestCheckSyntax.file_is_stub(path))
 
+    def testFileIsStubWhitespaceOnly(self):
+        # A page with no content other than whitespace is as undocumented as an
+        # empty one.
+        path = self._writeTmpMarkdown("\n\n")
+        self.assertTrue(TestCheckSyntax.file_is_stub(path))
+
     def testFileIsStubWholePageTemplateLoad(self):
         # Whole page is just a load of a canonical stub template.
         path = self._writeTmpMarkdown(
