@@ -943,6 +943,7 @@ SCMTriAssemblyMeshGenerator::generate()
   sch_mesh._pin_to_chan_map = _pin_to_chan_map;
   sch_mesh._pin_nodes = _pin_nodes;
   sch_mesh._pin_mesh_exist = (_npins > 0);
+  sch_mesh.computeGapCenterDistances();
   sch_mesh.computeAssemblyHydraulicParameters();
 
   return mesh_base;
