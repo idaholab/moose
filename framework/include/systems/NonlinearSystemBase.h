@@ -786,10 +786,10 @@ public:
 
 protected:
   /**
-   * Rebuild the exact constraints when a constraint reports changed coefficients, for example from
-   * a Control. Only NonlinearSystem::solve() and NonlinearEigenSystem::solve() call this. They
-   * call it before the first residual evaluation of the solve, the pre-SMO residual included. All
-   * residuals and Jacobians of a solve then use the same constraints.
+   * Rebuild the exact constraints when a constraint reports changed coefficients, or when a
+   * constraint was enabled or disabled, for example by a Control. Only NonlinearSystem::solve()
+   * and NonlinearEigenSystem::solve() call this, as their first step, so all residuals and
+   * Jacobians of a solve use the same constraints.
    */
   void updateExactConstraints();
 

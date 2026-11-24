@@ -22,9 +22,13 @@ void
 ExactConstraintFunctor::constrain()
 {
   libMesh::DofMap & dof_map = _constrained_sys.dofMap();
+  _applied_constraints.clear();
   for (const auto & constraint : _sys.getConstraintWarehouse().getActiveObjects())
     if (constraint->usesExactConstraints())
+    {
       constraint->addExactConstraints(dof_map);
+      _applied_constraints.push_back(constraint.get());
+    }
 }
 
 void

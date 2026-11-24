@@ -11,6 +11,9 @@
 
 #include "libmesh/system.h"
 
+#include <vector>
+
+class Constraint;
 class NonlinearSystemBase;
 class SystemBase;
 
@@ -36,10 +39,21 @@ public:
    */
   void reinit();
 
+  /**
+   * @return The constraints whose exact constraints the last call to constrain() added
+   */
+  const std::vector<const ::Constraint *> & appliedConstraints() const
+  {
+    return _applied_constraints;
+  }
+
 private:
   /// The nonlinear system whose constraints this functor applies
   NonlinearSystemBase & _sys;
 
   /// The system whose DofMap receives the exact constraints
   SystemBase & _constrained_sys;
+
+  /// The constraints whose exact constraints the last call to constrain() added
+  std::vector<const ::Constraint *> _applied_constraints;
 };

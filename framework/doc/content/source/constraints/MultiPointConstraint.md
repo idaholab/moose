@@ -84,22 +84,25 @@ libMesh calls the functor after mesh refinement, coarsening, and repartitioning,
 adds the exact constraints again. The new nodes that refinement adds to a dependent boundary
 get their exact constraints at the same time.
 
-## Coefficients that change
+## Exact constraints that change
 
-An exact constraint whose coefficients depend on a controllable parameter overrides
-`virtual bool exactConstraintsChanged()`. The override compares the parameter with the
-value that the object last used, records the new value, and returns true when they differ.
+The exact constraints of a system change in two cases:
 
-At the start of each solve, before the first residual evaluation (the pre-SMO residual included),
-MOOSE asks each active constraint that uses exact constraints if its coefficients changed. When an
-object on any rank reports a change, MOOSE rebuilds the exact constraints on all ranks. MOOSE checks
-for a coefficient change only at the start of a solve, so all residuals and Jacobians of a solve use
-the same constraints. A coefficient change during a solve, for example from a `Control`, takes
-effect at the next solve.
+- A `Control` enables or disables a constraint that uses exact constraints.
+- The coefficients of an exact constraint depend on a controllable parameter. Such an object
+  overrides `virtual bool exactConstraintsChanged()`. The override compares the parameter with the
+  value that the object last used, records the new value, and returns true when they differ.
 
-Rebuilding the exact constraints does not rebuild the sparsity pattern. A rebuild can change the
-coefficients of an exact constraint. It cannot change the degrees of freedom that the exact
-constraint connects, because that change needs a sparsity rebuild.
+At the start of each solve, MOOSE compares the active constraints that use exact constraints with
+the constraints that it last applied, and asks each of them if its coefficients changed. When any
+rank finds a change, MOOSE rebuilds the exact constraints on all ranks. MOOSE does this check only
+at the start of a solve, so all residuals and Jacobians of a solve use the same constraints. A
+change during a solve takes effect at the next solve.
+
+Rebuilding the exact constraints does not rebuild the sparsity pattern. A rebuild can remove an
+exact constraint, add it again, or change its coefficients. It cannot connect degrees of freedom
+that the first build did not connect, because that change needs a sparsity rebuild. For example, a
+constraint that is disabled in the input file cannot be enabled later.
 
 ## Behavior in an eigenvalue solve
 
