@@ -1,5 +1,4 @@
 [Mesh]
-  allow_renumbering = false
   [truss1]
     type = ElementGenerator
     nodal_positions = '0 0 -1

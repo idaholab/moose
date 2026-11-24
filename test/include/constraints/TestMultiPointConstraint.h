@@ -12,8 +12,8 @@
 #include "MultiPointConstraint.h"
 
 /**
- * Ties the value of a variable at one node to a weighted sum of its values at other nodes, given
- * by id, with a single exact constraint.
+ * Ties the value of a variable at each node of a boundary to its value at the coincident node of
+ * another boundary, with one exact constraint per node.
  */
 class TestMultiPointConstraint : public MultiPointConstraint
 {
@@ -24,30 +24,15 @@ public:
 
   virtual void addExactConstraints(libMesh::DofMap & dof_map) const override;
 
-  virtual const MooseVariableBase & variable() const override;
+  virtual const MooseVariableBase & variable() const override { return *_variables[0]; }
 
 protected:
-  /**
-   * @return The variable coupled to 'secondary_variable', with an error when it is a constant
-   */
-  const MooseVariable & coupledSecondaryVariable();
-
-  /**
-   * Gather the dof of the constrained variable at the dependent node and at every primary node,
-   * from the ranks that own them. Every rank must call this.
-   * @return The dof of each of those nodes, keyed by node id
-   */
-  std::map<dof_id_type, dof_id_type> gatherNodeDofs() const;
-
   /// The variable whose degrees of freedom this constraint ties together
-  const MooseVariable & _var;
+  const std::vector<const MooseVariable *> _variables;
 
-  /// The id of the node holding the dependent degree of freedom
-  const dof_id_type _secondary_node;
+  /// The boundary whose nodes hold the dependent degrees of freedom
+  const BoundaryName & _secondary_boundary;
 
-  /// The ids of the nodes whose degrees of freedom the dependent degree of freedom depends on
-  const std::vector<dof_id_type> & _primary_nodes;
-
-  /// The coefficient of each entry of _primary_nodes in the exact constraint
-  const std::vector<Real> & _weights;
+  /// The boundary whose nodes hold the degrees of freedom that the dependent ones are tied to
+  const BoundaryName & _primary_boundary;
 };

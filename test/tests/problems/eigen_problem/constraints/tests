@@ -18,7 +18,7 @@
     input = 'multipoint_tie_eigen.i'
     cli_args = 'UserObjects/dummy/type=AttachDummySystemConstraint'
     expect_err = "Another constraint object is already attached to the libMesh system 'nl0', so "
-                 "the exact constraints of 'tie_0' cannot be applied."
+                 "the exact constraints of 'tie' cannot be applied."
     capabilities = 'slepc'
     requirement = 'The system shall report an error when another libMesh constraint object is '
                   'already attached to the system that receives exact constraints.'

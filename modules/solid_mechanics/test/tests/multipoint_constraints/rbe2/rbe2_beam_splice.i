@@ -1,5 +1,4 @@
 [Mesh]
-  allow_renumbering = false
   [segment_a]
     type = GeneratedMeshGenerator
     dim = 1

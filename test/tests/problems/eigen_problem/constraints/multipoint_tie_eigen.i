@@ -26,11 +26,24 @@
     boundary_name_prefix = right_half
     boundary_id_offset = 10
   []
+  # The coincident mid-height interface node of each half, for the postprocessors. The node sets
+  # are made before the halves are combined, because the coordinate names two nodes afterwards.
+  [primary_mid]
+    type = ExtraNodesetGenerator
+    input = left_half
+    coord = '0.375 0.5'
+    new_boundary = primary_mid
+  []
+  [secondary_mid]
+    type = ExtraNodesetGenerator
+    input = right_half
+    coord = '0.375 0.5'
+    new_boundary = secondary_mid
+  []
   [split]
     type = CombinerGenerator
-    inputs = 'left_half right_half'
+    inputs = 'primary_mid secondary_mid'
   []
-  allow_renumbering = false
 []
 
 [Variables]
@@ -46,9 +59,9 @@
     variable = u
   []
   [rhs]
-    type = CoefReaction
+    type = Reaction
     variable = u
-    coefficient = -1.0
+    rate = -1.0
     extra_vector_tags = 'eigen'
   []
 []
@@ -68,68 +81,11 @@
 []
 
 [Constraints]
-  [tie_0]
+  [tie]
     type = TestMultiPointConstraint
     secondary_variable = u
-    secondary_node = 36
-    primary_nodes = '3'
-    weights = '1'
-  []
-  [tie_1]
-    type = TestMultiPointConstraint
-    secondary_variable = u
-    secondary_node = 42
-    primary_nodes = '7'
-    weights = '1'
-  []
-  [tie_2]
-    type = TestMultiPointConstraint
-    secondary_variable = u
-    secondary_node = 48
-    primary_nodes = '11'
-    weights = '1'
-  []
-  [tie_3]
-    type = TestMultiPointConstraint
-    secondary_variable = u
-    secondary_node = 54
-    primary_nodes = '15'
-    weights = '1'
-  []
-  [tie_4]
-    type = TestMultiPointConstraint
-    secondary_variable = u
-    secondary_node = 60
-    primary_nodes = '19'
-    weights = '1'
-  []
-  [tie_5]
-    type = TestMultiPointConstraint
-    secondary_variable = u
-    secondary_node = 66
-    primary_nodes = '23'
-    weights = '1'
-  []
-  [tie_6]
-    type = TestMultiPointConstraint
-    secondary_variable = u
-    secondary_node = 72
-    primary_nodes = '27'
-    weights = '1'
-  []
-  [tie_7]
-    type = TestMultiPointConstraint
-    secondary_variable = u
-    secondary_node = 78
-    primary_nodes = '31'
-    weights = '1'
-  []
-  [tie_8]
-    type = TestMultiPointConstraint
-    secondary_variable = u
-    secondary_node = 84
-    primary_nodes = '35'
-    weights = '1'
+    secondary_boundary = right_half_left
+    primary_boundary = left_half_right
   []
 []
 
@@ -138,7 +94,6 @@
   eigen_problem_type = gen_non_hermitian
   which_eigen_pairs = smallest_magnitude
   n_eigen_pairs = 1
-  n_basis_vectors = 20
   solve_type = newton
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
   petsc_options_value = 'lu mumps'
@@ -146,15 +101,15 @@
 
 [Postprocessors]
   [u_secondary]
-    type = NodalVariableValue
+    type = AverageNodalVariableValue
     variable = u
-    nodeid = 60
+    boundary = secondary_mid
     outputs = none
   []
   [u_primary]
-    type = NodalVariableValue
+    type = AverageNodalVariableValue
     variable = u
-    nodeid = 19
+    boundary = primary_mid
     outputs = none
   []
   [tie_error]

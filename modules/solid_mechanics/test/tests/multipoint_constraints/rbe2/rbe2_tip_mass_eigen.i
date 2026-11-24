@@ -1,5 +1,4 @@
 [Mesh]
-  allow_renumbering = false
   [solid]
     type = GeneratedMeshGenerator
     dim = 3
