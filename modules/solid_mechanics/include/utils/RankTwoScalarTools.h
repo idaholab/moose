@@ -100,8 +100,12 @@ T
 vonMisesStress(const RankTwoTensorTempl<T> & stress)
 {
   RankTwoTensorTempl<T> dev_stress = stress.deviatoric();
+  const T dev_stress_squared = dev_stress.doubleContraction(dev_stress);
 
-  return std::sqrt(1.5 * dev_stress.doubleContraction(dev_stress));
+  // The derivative of sqrt is infinite at zero, which a hydrostatic or vanishing stress reaches,
+  // so return zero with zero derivatives there
+  using std::sqrt;
+  return dev_stress_squared == 0.0 ? 0.0 : sqrt(1.5 * dev_stress_squared);
 }
 
 /*
@@ -112,7 +116,12 @@ template <typename T>
 T
 effectiveStrain(const RankTwoTensorTempl<T> & strain)
 {
-  return std::sqrt(2.0 / 3.0 * strain.doubleContraction(strain));
+  const T strain_squared = strain.doubleContraction(strain);
+
+  // The derivative of sqrt is infinite at zero, which a vanishing strain increment reaches, so
+  // return zero with zero derivatives there
+  using std::sqrt;
+  return strain_squared == 0.0 ? 0.0 : sqrt(2.0 / 3.0 * strain_squared);
 }
 
 /*
@@ -163,7 +172,8 @@ template <typename T>
 T
 volumetricStrain(const RankTwoTensorTempl<T> & strain)
 {
-  return std::exp(strain(0, 0)) * std::exp(strain(1, 1)) * std::exp(strain(2, 2)) - 1.0;
+  using std::exp;
+  return exp(strain(0, 0)) * exp(strain(1, 1)) * exp(strain(2, 2)) - 1.0;
 }
 
 /*
@@ -230,7 +240,7 @@ template <typename T>
 T
 calcEigenValuesEigenVectors(const RankTwoTensorTempl<T> & r2tensor,
                             unsigned int index,
-                            Point & eigenvec)
+                            libMesh::TypeVector<T> & eigenvec)
 {
   std::vector<T> eigenval(LIBMESH_DIM);
   RankTwoTensorTempl<T> eigvecs;
@@ -250,7 +260,7 @@ calcEigenValuesEigenVectors(const RankTwoTensorTempl<T> & r2tensor,
  */
 template <typename T>
 T
-maxPrincipal(const RankTwoTensorTempl<T> & r2tensor, Point & direction)
+maxPrincipal(const RankTwoTensorTempl<T> & r2tensor, libMesh::TypeVector<T> & direction)
 {
   return calcEigenValuesEigenVectors(r2tensor, (LIBMESH_DIM - 1), direction);
 }
@@ -263,7 +273,7 @@ maxPrincipal(const RankTwoTensorTempl<T> & r2tensor, Point & direction)
  */
 template <typename T>
 T
-midPrincipal(const RankTwoTensorTempl<T> & r2tensor, Point & direction)
+midPrincipal(const RankTwoTensorTempl<T> & r2tensor, libMesh::TypeVector<T> & direction)
 {
   return calcEigenValuesEigenVectors(r2tensor, 1, direction);
 }
@@ -276,7 +286,7 @@ midPrincipal(const RankTwoTensorTempl<T> & r2tensor, Point & direction)
  */
 template <typename T>
 T
-minPrincipal(const RankTwoTensorTempl<T> & r2tensor, Point & direction)
+minPrincipal(const RankTwoTensorTempl<T> & r2tensor, libMesh::TypeVector<T> & direction)
 {
   return calcEigenValuesEigenVectors(r2tensor, 0, direction);
 }
@@ -498,7 +508,7 @@ template <typename T>
 T
 maxShear(const RankTwoTensorTempl<T> & stress)
 {
-  Point dummy;
+  libMesh::VectorValue<T> dummy;
   return (maxPrincipal(stress, dummy) - minPrincipal(stress, dummy)) / 2.;
 }
 /*
@@ -620,7 +630,7 @@ template <typename T>
 T
 getPrincipalComponent(const RankTwoTensorTempl<T> & tensor,
                       const InvariantType & scalar_type,
-                      Point & direction)
+                      libMesh::TypeVector<T> & direction)
 {
   switch (scalar_type)
   {
