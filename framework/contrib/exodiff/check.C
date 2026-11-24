@@ -358,8 +358,8 @@ Check_Elmt_Block_Connectivity(Exo_Block<INT> * block1, Exo_Block<INT> * block2)
     const INT * conn1 = block1->Connectivity(elem);
     const INT * conn2 = block2->Connectivity(elem);
 
-    // Two polygon blocks can agree on their total node count, which is all
-    // Check_Elmt_Block_Params() can compare, while their individual elements disagree.
+    // Polygon blocks pass Check_Elmt_Block_Params() when their *total* node counts match,
+    // so we more strictly compare each element's count here.
     if (block1->Num_Nodes_per_Elmt(elem) != block2->Num_Nodes_per_Elmt(elem))
     {
       ERROR(".. Block " << block1->Id() << ": number of nodes in local element " << elem + 1
