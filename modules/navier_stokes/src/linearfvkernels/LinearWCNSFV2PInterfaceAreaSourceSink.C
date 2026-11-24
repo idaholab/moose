@@ -9,6 +9,7 @@
 
 #include "LinearWCNSFV2PInterfaceAreaSourceSink.h"
 #include "NavierStokesMethods.h"
+#include "NewtonInversion.h"
 #include "NS.h"
 
 #include <algorithm>
@@ -118,7 +119,7 @@ LinearWCNSFV2PInterfaceAreaSourceSink::LinearWCNSFV2PInterfaceAreaSourceSink(
   if (_model == ModelEnum::ISHII_KIM && _gravity.norm() == 0)
     paramError("gravity",
                "The Ishii and Kim wake entrainment sink is driven by the terminal velocity of "
-               "terminal velocity, which vanishes without gravity.");
+               "particles, which vanishes without gravity.");
 }
 
 Real
@@ -128,17 +129,28 @@ LinearWCNSFV2PInterfaceAreaSourceSink::solveTerminalVelocity(const Real stokes_v
   if (stokes_velocity <= 0.0 || reynolds_per_velocity <= 0.0)
     return stokes_velocity;
 
-  return NS::bracketedNewton(
-      [=](const Real u)
-      {
-        const Real correction = 0.1 * std::pow(reynolds_per_velocity * u, 0.75);
-        // d/du [u (1 + 0.1 (B u)^{3/4})] = 1 + 0.175 (B u)^{3/4}
-        return std::make_pair(u * (1.0 + correction) - stokes_velocity, 1.0 + 1.75 * correction);
-      },
-      0.0,
-      stokes_velocity,
-      stokes_velocity,
-      stokes_velocity);
+  // g(u) = u (1 + 0.1 (B u)^{3/4}) is increasing and convex on [0, inf), so the tangent lies below
+  // it and every Newton step from a positive iterate lands at or beyond the root, from where the
+  // iterates decrease monotonically onto it. Plain Newton therefore converges without leaving
+  // [0, T] and never forms a fractional power of a negative number.
+  // Near round-off, so that the terminal velocity carries no iteration error, and reached in a
+  // handful of iterations from the Stokes velocity
+  constexpr Real rel_tol = 1e-12;
+  return FluidPropertiesUtils::NewtonSolve(
+             reynolds_per_velocity,
+             stokes_velocity,
+             stokes_velocity,
+             rel_tol,
+             [](const Real B, const Real u, Real & g, Real & dg_dB, Real & dg_du)
+             {
+               const Real correction = 0.1 * std::pow(B * u, 0.75);
+               g = u * (1.0 + correction);
+               dg_dB = 0.75 * u * correction / B;
+               // d/du [u (1 + 0.1 (B u)^{3/4})] = 1 + 0.175 (B u)^{3/4}
+               dg_du = 1.0 + 1.75 * correction;
+             },
+             "LinearWCNSFV2PInterfaceAreaSourceSink")
+      .first;
 }
 
 void

@@ -228,47 +228,6 @@ dragFunction(const T & Re_p)
 }
 
 /**
- * Solves g(x) = 0 for a strictly increasing g whose root is known to lie in [lower, upper]. Newton
- * steps are taken from the initial iterate x while they stay inside the bracket, which the sign of
- * the residual shrinks around the root; a step that would leave it is replaced by bisection. The
- * comparisons use raw values, so that an automatic differentiation type carries its derivatives
- * through the arithmetic.
- * @param residual_and_derivative callable returning the pair (g(x), g'(x))
- * @param scale the magnitude the residual is measured against for convergence
- */
-template <typename T, typename Function>
-T
-bracketedNewton(const Function & residual_and_derivative, T lower, T upper, T x, const Real scale)
-{
-  // The residual falls below this relative tolerance in a handful of iterations; the cap is a
-  // backstop, not the expected exit
-  constexpr Real rel_tol = 1e-12;
-  constexpr unsigned int max_its = 50;
-
-  for ([[maybe_unused]] const auto it : make_range(max_its))
-  {
-    const auto [residual, derivative] = residual_and_derivative(x);
-
-    if (std::abs(MetaPhysicL::raw_value(residual)) <= rel_tol * scale)
-      break;
-
-    if (MetaPhysicL::raw_value(residual) > 0.0)
-      upper = x;
-    else
-      lower = x;
-
-    // Fall back on bisection if Newton steps outside the bracket
-    const T candidate = x - residual / derivative;
-    x = (MetaPhysicL::raw_value(candidate) > MetaPhysicL::raw_value(lower) &&
-         MetaPhysicL::raw_value(candidate) < MetaPhysicL::raw_value(upper))
-            ? candidate
-            : T(0.5 * (lower + upper));
-  }
-
-  return x;
-}
-
-/**
  * The bubble interaction sources of the one-group interfacial area transport equation in the
  * closure of Hibiki and Ishii, Int. J. Heat Mass Transfer 43 (2000) 2711: coalescence by random
  * collision and breakage by turbulent impact. There is no wake entrainment term in this closure.

@@ -18,6 +18,7 @@
 
 #include <limits>
 #include "HeatTransferUtils.h"
+#include "NewtonInversion.h"
 
 namespace
 {
@@ -38,9 +39,8 @@ schillerNaumannDragDerivative(const T & Re_p)
  * Solves Manninen's force balance together with the drag correlation for the slip speed:
  * \f$ s \, f(R s) = s_0 \f$, where \f$ s_0 \f$ is the slip speed in the Stokes limit and
  * \f$ R \f$ converts a speed into a particle Reynolds number. The left hand side is zero at
- * \f$ s = 0 \f$ and strictly increasing, so the root is unique, and since \f$ f \ge 1 \f$ it is
- * bracketed by \f$ [0, s_0] \f$. Solved by a Newton iteration safeguarded by that bracket, and
- * templated so that both slip closures can call it.
+ * \f$ s = 0 \f$ and strictly increasing, so the root is unique, and since \f$ f \ge 1 \f$ it
+ * lies in \f$ [0, s_0] \f$. Templated so that both slip closures can call it.
  */
 template <typename T>
 T
@@ -69,19 +69,30 @@ solveSlipSpeed(const T & stokes_speed, const T & reynolds_per_speed)
   if (MetaPhysicL::raw_value(driving_group) >= newton_regime_driving_group)
     return sqrt(driving_group / 0.0183) / reynolds_per_speed;
 
-  // g(Re) = Re f(Re) is zero at the origin and strictly increasing, and f >= 1 puts the root in
-  // [0, B]. The iteration starts from one Picard step off the Stokes guess Re = B.
-  const T reynolds = NS::bracketedNewton(
-      [&driving_group](const T & re)
-      {
-        // d/dRe [Re f(Re)] = f(Re) + Re f'(Re), the second term written as the finite product
-        const T drag = NS::schillerNaumannDragFunction(re);
-        return std::pair<T, T>(re * drag - driving_group, drag + schillerNaumannDragDerivative(re));
-      },
-      T(0.0),
-      driving_group,
-      driving_group / NS::schillerNaumannDragFunction(driving_group),
-      MetaPhysicL::raw_value(driving_group));
+  // g(Re) = Re f(Re) = Re + 0.15 Re^1.687 is increasing and convex on [0, inf), so the tangent lies
+  // below it and every Newton step from a positive iterate lands at or beyond the root, from where
+  // the iterates decrease monotonically onto it. Plain Newton therefore converges without leaving
+  // [0, B] and never forms a fractional power of a negative number. The iteration starts from one
+  // Picard step off the Stokes guess Re = B.
+  // Near round-off, so that the slip speed carries no iteration error, and reached in a handful of
+  // iterations from this starting point
+  constexpr Real rel_tol = 1e-12;
+  const T reynolds =
+      FluidPropertiesUtils::NewtonSolve(
+          driving_group,
+          driving_group,
+          MetaPhysicL::raw_value(driving_group / NS::schillerNaumannDragFunction(driving_group)),
+          rel_tol,
+          [](const T & /*B*/, const T & re, T & g, T & dg_dB, T & dg_dre)
+          {
+            // d/dRe [Re f(Re)] = f(Re) + Re f'(Re), the second term written as the finite product
+            const T drag = NS::schillerNaumannDragFunction(re);
+            g = re * drag;
+            dg_dB = 0;
+            dg_dre = drag + schillerNaumannDragDerivative(re);
+          },
+          "WCNSFV2PSlipVelocityFunctorMaterial")
+          .first;
 
   return reynolds / reynolds_per_speed;
 }

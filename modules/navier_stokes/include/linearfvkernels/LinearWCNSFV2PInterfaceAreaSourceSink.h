@@ -55,7 +55,7 @@ public:
    *   \qquad T = \frac{B}{24}\,\frac{d_b g \Delta\rho}{3 \rho_f} ,
    * \f]
    *
-   * by a Newton iteration safeguarded by the bracket \f$ [0, T] \f$.
+   * by Newton's method.
    *
    * @param stokes_velocity the velocity \f$ T \f$ obtained by ignoring the Reynolds correction
    * @param reynolds_per_velocity the factor \f$ B \f$ converting a velocity into \f$ Re_D \f$
