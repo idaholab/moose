@@ -326,7 +326,7 @@ outlet_pressure = 1e5
     outputs = 'out'
   []
   [populate_u_slip]
-    type = WCNSFV2PSlipVelocityFunctorMaterial
+    type = ADWCNSFV2PSlipVelocityFunctorMaterial
     slip_velocity_name = 'vel_slip_x'
     momentum_component = 'x'
     u = 'vel_x'
@@ -338,7 +338,7 @@ outlet_pressure = 1e5
     linear_coef_name = 'Darcy_coefficient'
   []
   [populate_v_slip]
-    type = WCNSFV2PSlipVelocityFunctorMaterial
+    type = ADWCNSFV2PSlipVelocityFunctorMaterial
     slip_velocity_name = 'vel_slip_y'
     momentum_component = 'y'
     u = 'vel_x'

@@ -37,7 +37,7 @@ $\bm{u}_{Md} = \bm{u}_d - \bm{u}_m$, the velocity relative to the centre of mass
 and not at the mixture velocity plus its slip velocity
 $\bm{u}_{slip,d} = \bm{u}_d - \bm{u}_c$, which is measured against the continuous phase. The two
 differ by the dispersed phase mass fraction and agree only in the dilute limit. Where a slip
-velocity is requested this Physics therefore has [WCNSFV2PSlipVelocityFunctorMaterial.md] declare
+velocity is requested this Physics therefore has [ADWCNSFV2PSlipVelocityFunctorMaterial.md] declare
 both and hands the drift velocity to [INSFVScalarFieldAdvection.md], while
 [WCNSFV2PMomentumDriftFlux.md] takes the slip velocity.
 

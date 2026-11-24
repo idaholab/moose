@@ -100,7 +100,7 @@ solveSlipSpeed(const T & stokes_speed, const T & reynolds_per_speed)
  * The linear drag function of a distorted fluid particle, the deformed-bubble regime in which the
  * drag coefficient grows with size rather than falling with Reynolds number. Substituted into the
  * closure it gives Ishii's terminal velocity for bubbly flow, independent of the particle size; the
- * derivation is on the LinearWCNSFV2PSlipVelocityFunctorMaterial documentation page.
+ * derivation is on the WCNSFV2PSlipVelocityFunctorMaterial documentation page.
  *
  * Unlike dragFunction this one is linear in the slip speed, so it is returned per unit speed: the
  * caller multiplies by \f$ \left|u_s\right| \f$.
@@ -127,8 +127,8 @@ distortedDragFunctionPerSpeed(const T & particle_diameter,
 }
 }
 
-registerMooseObject("NavierStokesApp", LinearWCNSFV2PSlipVelocityFunctorMaterial);
 registerMooseObject("NavierStokesApp", WCNSFV2PSlipVelocityFunctorMaterial);
+registerMooseObject("NavierStokesApp", ADWCNSFV2PSlipVelocityFunctorMaterial);
 
 template <bool is_ad>
 InputParameters
@@ -250,7 +250,9 @@ WCNSFV2PSlipVelocityFunctorMaterialTempl<is_ad>::getVelocityVariable(const std::
   if (!var)
     paramError(param_name,
                is_ad ? "The velocity must be a finite volume field variable."
-                     : "The velocity must be a MooseLinearVariableFVReal.");
+                     : "The velocity must be a MooseLinearVariableFVReal. Use "
+                       "ADWCNSFV2PSlipVelocityFunctorMaterial for a nonlinear finite volume "
+                       "velocity.");
 
   // The closure reads a gradient and, in a transient, a time derivative of the velocity. On the
   // nonlinear side both come from the functor interface; on the linear side the cell gradients

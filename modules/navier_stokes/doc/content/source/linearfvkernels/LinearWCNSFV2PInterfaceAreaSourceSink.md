@@ -89,7 +89,7 @@ u_r \left(1 + \frac{1}{10}\left(B u_r\right)^{3/4}\right) = T,
 whose left hand side is zero at the origin and strictly increasing, so the root is unique and lies
 in $[0, T]$ because the bracket factor is at least one. It is solved by a Newton iteration
 safeguarded by that bracket, in the same way as the algebraic slip closure of
-[LinearWCNSFV2PSlipVelocityFunctorMaterial.md].
+[WCNSFV2PSlipVelocityFunctorMaterial.md].
 
 ## Treatment of the nonlinearity
 

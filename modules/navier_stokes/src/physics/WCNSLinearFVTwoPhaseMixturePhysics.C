@@ -45,7 +45,7 @@ WCNSLinearFVTwoPhaseMixturePhysics::validParams()
       "slip_drag_model",
       drag_model,
       "Drag law closing the slip velocity when 'use_dispersed_phase_drag_model' is set. See "
-      "LinearWCNSFV2PSlipVelocityFunctorMaterial. The distorted particle law reproduces Ishii's "
+      "WCNSFV2PSlipVelocityFunctorMaterial. The distorted particle law reproduces Ishii's "
       "drift velocity correlation and is the appropriate one for bubbles large enough to deform.");
   params.addParam<MooseFunctorName>(
       "surface_tension",
@@ -868,7 +868,7 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
     mooseAssert(_flow_equations_physics, "We must have coupled to this");
     for (const auto dim : make_range(dimension()))
     {
-      const auto object_type = "LinearWCNSFV2PSlipVelocityFunctorMaterial";
+      const auto object_type = "WCNSFV2PSlipVelocityFunctorMaterial";
       auto params = getFactory().getValidParams(object_type);
       assignBlocks(params, _blocks);
       params.set<MooseFunctorName>("slip_velocity_name") = "vel_slip_" + NS::directions[dim];
@@ -921,7 +921,7 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
       }
       else
         paramError("slip_linear_friction_name",
-                   "LinearWCNSFV2PSlipVelocityFunctorMaterial created by this Physics required a "
+                   "WCNSFV2PSlipVelocityFunctorMaterial created by this Physics required a "
                    "scalar field linear friction factor.");
       params.set<MooseFunctorName>("particle_diameter") =
           getParam<MooseFunctorName>("particle_diameter");

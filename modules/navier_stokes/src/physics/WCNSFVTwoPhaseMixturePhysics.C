@@ -454,7 +454,7 @@ WCNSFVTwoPhaseMixturePhysics::addFunctorMaterials()
     const std::vector<std::string> components = {"x", "y", "z"};
     for (const auto dim : make_range(dimension()))
     {
-      auto params = getFactory().getValidParams("WCNSFV2PSlipVelocityFunctorMaterial");
+      auto params = getFactory().getValidParams("ADWCNSFV2PSlipVelocityFunctorMaterial");
       assignBlocks(params, _blocks);
       params.set<MooseFunctorName>("slip_velocity_name") = "vel_slip_" + components[dim];
       params.set<MooseEnum>("momentum_component") = components[dim];
@@ -494,7 +494,7 @@ WCNSFVTwoPhaseMixturePhysics::addFunctorMaterials()
       }
       else
         paramError("slip_linear_friction_name",
-                   "WCNSFV2PSlipVelocityFunctorMaterial created by this Physics required a scalar "
+                   "ADWCNSFV2PSlipVelocityFunctorMaterial created by this Physics required a scalar "
                    "field linear friction factor.");
       params.set<MooseFunctorName>("particle_diameter") =
           getParam<MooseFunctorName>("particle_diameter");
@@ -508,7 +508,7 @@ WCNSFVTwoPhaseMixturePhysics::addFunctorMaterials()
                     "in transient conditions.");
       }
       getProblem().addMaterial(
-          "WCNSFV2PSlipVelocityFunctorMaterial", prefix() + "slip_" + components[dim], params);
+          "ADWCNSFV2PSlipVelocityFunctorMaterial", prefix() + "slip_" + components[dim], params);
     }
   }
 

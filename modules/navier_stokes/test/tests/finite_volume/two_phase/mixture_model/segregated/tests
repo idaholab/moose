@@ -87,7 +87,7 @@
 
   [slip_closure_verification]
     requirement = 'The system shall compute the algebraic slip velocity of a two phase mixture and the drift velocity derived from it, in agreement with their analytic values,'
-    design = 'LinearWCNSFV2PSlipVelocityFunctorMaterial.md'
+    design = 'WCNSFV2PSlipVelocityFunctorMaterial.md'
     # Each branch activates only its own materials and postprocessors, so a failure names the
     # branch that broke
     [prescribed_drag]

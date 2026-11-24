@@ -289,7 +289,7 @@ k_d = 1
     prop_names = 'rho_mixture mu_mixture cp_mixture k_mixture'
   []
   [mixture_slip_x]
-    type = LinearWCNSFV2PSlipVelocityFunctorMaterial
+    type = WCNSFV2PSlipVelocityFunctorMaterial
     execute_on = ALWAYS
     gravity = '0 0 0'
     use_dispersed_phase_drag_model = true
@@ -307,7 +307,7 @@ k_d = 1
     v = vel_y
   []
   [mixture_slip_y]
-    type = LinearWCNSFV2PSlipVelocityFunctorMaterial
+    type = WCNSFV2PSlipVelocityFunctorMaterial
     execute_on = ALWAYS
     gravity = '0 0 0'
     use_dispersed_phase_drag_model = true

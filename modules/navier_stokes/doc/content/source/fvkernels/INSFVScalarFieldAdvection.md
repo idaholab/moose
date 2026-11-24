@@ -24,8 +24,8 @@ phase, $\bm{u}_{Md} = \bm{u}_d - \bm{u}_m$, which is the velocity of that phase 
 centre of mass of the mixture and is what its transport equation is advected at. It is not the
 slip velocity $\bm{u}_{slip,d} = \bm{u}_d - \bm{u}_c$, which is measured against the continuous
 phase; the two differ by the dispersed phase mass fraction and agree only in the dilute limit.
-[WCNSFV2PSlipVelocityFunctorMaterial.md] declares both, the drift velocity under
-[!param](/FunctorMaterials/WCNSFV2PSlipVelocityFunctorMaterial/drift_velocity_name). The parameter
+[ADWCNSFV2PSlipVelocityFunctorMaterial.md] declares both, the drift velocity under
+[!param](/FunctorMaterials/ADWCNSFV2PSlipVelocityFunctorMaterial/drift_velocity_name). The parameter
 name here is historical.
 
 The two halves of the flux are interpolated separately, each upwinded on the sign of its own

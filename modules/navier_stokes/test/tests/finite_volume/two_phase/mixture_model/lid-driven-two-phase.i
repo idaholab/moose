@@ -228,7 +228,7 @@ g = -9.81
 
 [FunctorMaterials]
   [populate_u_slip]
-    type = WCNSFV2PSlipVelocityFunctorMaterial
+    type = ADWCNSFV2PSlipVelocityFunctorMaterial
     slip_velocity_name = 'vel_slip_x'
     momentum_component = 'x'
     u = 'vel_x'
@@ -244,7 +244,7 @@ g = -9.81
     gravity = '0 ${g} 0'
   []
   [populate_v_slip]
-    type = WCNSFV2PSlipVelocityFunctorMaterial
+    type = ADWCNSFV2PSlipVelocityFunctorMaterial
     slip_velocity_name = 'vel_slip_y'
     momentum_component = 'y'
     u = 'vel_x'

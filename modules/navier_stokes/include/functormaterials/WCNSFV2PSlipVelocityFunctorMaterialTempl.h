@@ -180,5 +180,5 @@ protected:
   const unsigned int _index;
 };
 
-typedef WCNSFV2PSlipVelocityFunctorMaterialTempl<false> LinearWCNSFV2PSlipVelocityFunctorMaterial;
-typedef WCNSFV2PSlipVelocityFunctorMaterialTempl<true> WCNSFV2PSlipVelocityFunctorMaterial;
+typedef WCNSFV2PSlipVelocityFunctorMaterialTempl<false> WCNSFV2PSlipVelocityFunctorMaterial;
+typedef WCNSFV2PSlipVelocityFunctorMaterialTempl<true> ADWCNSFV2PSlipVelocityFunctorMaterial;

@@ -58,7 +58,7 @@ minus the surrogate, so the two cancel at convergence and the converged solution
 the surrogate.
 
 The user can set the slip velocity from their own calculations. However, we recommend the usage of
-[LinearWCNSFV2PSlipVelocityFunctorMaterial.md] for computing it, which also supplies the diffusion
+[WCNSFV2PSlipVelocityFunctorMaterial.md] for computing it, which also supplies the diffusion
 velocity that the phase transport equation requires.
 
 !alert note

@@ -34,7 +34,7 @@ private:
   /**
    * Sets the velocity at which the phase fraction travels relative to the mixture. This is the
    * diffusion (drift) velocity, not the slip velocity: see
-   * LinearWCNSFV2PSlipVelocityFunctorMaterial for the distinction. The base class calls this when
+   * WCNSFV2PSlipVelocityFunctorMaterial for the distinction. The base class calls this when
    * building the scalar advection kernel of the phase transport equation.
    */
   virtual void setSlipVelocityParams(InputParameters & params) const override;

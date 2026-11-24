@@ -284,7 +284,7 @@ mass_exchange_coeff = 0.01
 
 [FunctorMaterials]
   [populate_u_slip]
-    type = WCNSFV2PSlipVelocityFunctorMaterial
+    type = ADWCNSFV2PSlipVelocityFunctorMaterial
     slip_velocity_name = 'vel_slip_x'
     momentum_component = 'x'
     u = 'vel_x'
@@ -299,7 +299,7 @@ mass_exchange_coeff = 0.01
     drift_velocity_name = 'vel_drift_x'
   []
   [populate_v_slip]
-    type = WCNSFV2PSlipVelocityFunctorMaterial
+    type = ADWCNSFV2PSlipVelocityFunctorMaterial
     slip_velocity_name = 'vel_slip_y'
     momentum_component = 'y'
     u = 'vel_x'

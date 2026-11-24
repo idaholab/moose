@@ -235,7 +235,7 @@ velocity_interp_method = 'rc'
 
 [FunctorMaterials]
   [populate_u_slip]
-    type = WCNSFV2PSlipVelocityFunctorMaterial
+    type = ADWCNSFV2PSlipVelocityFunctorMaterial
     slip_velocity_name = 'vel_slip_x'
     momentum_component = 'x'
     u = 'vel_x'
@@ -253,7 +253,7 @@ velocity_interp_method = 'rc'
     ghost_layers = 5
   []
   [populate_v_slip]
-    type = WCNSFV2PSlipVelocityFunctorMaterial
+    type = ADWCNSFV2PSlipVelocityFunctorMaterial
     slip_velocity_name = 'vel_slip_y'
     momentum_component = 'y'
     u = 'vel_x'

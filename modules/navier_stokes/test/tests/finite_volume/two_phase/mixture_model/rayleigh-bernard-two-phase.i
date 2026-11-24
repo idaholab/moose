@@ -250,7 +250,7 @@ g = -9.81
     phase_1_fraction = 'phase_2'
   []
   [populate_u_slip]
-    type = WCNSFV2PSlipVelocityFunctorMaterial
+    type = ADWCNSFV2PSlipVelocityFunctorMaterial
     slip_velocity_name = 'vel_slip_x'
     momentum_component = 'x'
     u = 'vel_x'
@@ -265,7 +265,7 @@ g = -9.81
     drift_velocity_name = 'vel_drift_x'
   []
   [populate_v_slip]
-    type = WCNSFV2PSlipVelocityFunctorMaterial
+    type = ADWCNSFV2PSlipVelocityFunctorMaterial
     slip_velocity_name = 'vel_slip_y'
     momentum_component = 'y'
     u = 'vel_x'

@@ -117,7 +117,7 @@ g = -9.81
     prop_names = 'rho_mixture mu_mixture'
   []
   [slip_x]
-    type = LinearWCNSFV2PSlipVelocityFunctorMaterial
+    type = WCNSFV2PSlipVelocityFunctorMaterial
     momentum_component = x
     u = vel_x
     v = vel_y
@@ -132,7 +132,7 @@ g = -9.81
     drift_velocity_name = vel_drift_x
   []
   [slip_y]
-    type = LinearWCNSFV2PSlipVelocityFunctorMaterial
+    type = WCNSFV2PSlipVelocityFunctorMaterial
     momentum_component = y
     u = vel_x
     v = vel_y
@@ -149,7 +149,7 @@ g = -9.81
 
   # The same closure with the drag correlation solved together with the force balance
   [slip_drag_x]
-    type = LinearWCNSFV2PSlipVelocityFunctorMaterial
+    type = WCNSFV2PSlipVelocityFunctorMaterial
     momentum_component = x
     u = vel_x
     v = vel_y
@@ -165,7 +165,7 @@ g = -9.81
     drift_velocity_name = vel_driftdrag_x
   []
   [slip_drag_y]
-    type = LinearWCNSFV2PSlipVelocityFunctorMaterial
+    type = WCNSFV2PSlipVelocityFunctorMaterial
     momentum_component = y
     u = vel_x
     v = vel_y
@@ -185,7 +185,7 @@ g = -9.81
   # material is instantiated twice at diameters a factor of two apart and must return the same
   # speed; that is the property the closure is being checked for, not merely a value.
   [slip_dist_y]
-    type = LinearWCNSFV2PSlipVelocityFunctorMaterial
+    type = WCNSFV2PSlipVelocityFunctorMaterial
     momentum_component = y
     u = vel_x
     v = vel_y
@@ -203,7 +203,7 @@ g = -9.81
     drift_velocity_name = vel_driftdist_y
   []
   [slip_dist_half_y]
-    type = LinearWCNSFV2PSlipVelocityFunctorMaterial
+    type = WCNSFV2PSlipVelocityFunctorMaterial
     momentum_component = y
     u = vel_x
     v = vel_y
@@ -225,7 +225,7 @@ g = -9.81
   # conditions it must return the rigid sphere result and not the deformed one. The two differ by a
   # factor of six here, so a wrong selection cannot pass.
   [slip_auto_y]
-    type = LinearWCNSFV2PSlipVelocityFunctorMaterial
+    type = WCNSFV2PSlipVelocityFunctorMaterial
     momentum_component = y
     u = vel_x
     v = vel_y
@@ -245,7 +245,7 @@ g = -9.81
 
   # The Ishii and Zuber multi-bubble relation, see the header for its closed form here
   [slip_iz_y]
-    type = LinearWCNSFV2PSlipVelocityFunctorMaterial
+    type = WCNSFV2PSlipVelocityFunctorMaterial
     momentum_component = y
     u = vel_x
     v = vel_y

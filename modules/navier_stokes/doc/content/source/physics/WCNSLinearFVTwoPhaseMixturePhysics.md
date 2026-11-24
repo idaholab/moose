@@ -30,7 +30,7 @@ The kernels created are:
 - [LinearWCNSFV2PScalarAdvection.md] for the scalar advection term, advected at the dispersed phase
   velocity $\bm{u}_d = \bm{u}_m + \bm{u}_{Md}$, where $\bm{u}_{Md} = (1 - c_d)
   \bm{u}_{slip,d}$ is the diffusion velocity and $c_d$ the dispersed phase mass fraction. The
-  diffusion velocity is supplied by [LinearWCNSFV2PSlipVelocityFunctorMaterial.md], which derives
+  diffusion velocity is supplied by [WCNSFV2PSlipVelocityFunctorMaterial.md], which derives
   it from the slip velocity it computes
 - [LinearFVDiffusion.md] for the scalar diffusion term
 
