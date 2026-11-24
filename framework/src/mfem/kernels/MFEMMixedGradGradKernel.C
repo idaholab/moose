@@ -22,15 +22,21 @@ MFEMMixedGradGradKernel::validParams()
       "$(k\\vec\\nabla u, \\vec\\nabla v)_\\Omega$.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of scalar coefficient for property k.");
-  params.addParam<MFEMMatrixCoefficientName>("matrix_coefficient",
-                                             "Name of matrix coefficient for property k. Mutually "
-                                             "exclusive with parameter 'coefficient'.");
+  params.addParam<MFEMVectorCoefficientName>(
+      "diagonal_coefficient",
+      "Name of diagonal coefficient for property k. Mutually exclusive with parameters "
+      "'coefficient' and 'matrix_coefficient'.");
+  params.addParam<MFEMMatrixCoefficientName>(
+      "matrix_coefficient",
+      "Name of matrix coefficient for property k. Mutually exclusive with parameters 'coefficient' "
+      "and 'diagonal_coefficient'.");
   return params;
 }
 
 MFEMMixedGradGradKernel::MFEMMixedGradGradKernel(const InputParameters & parameters)
   : MFEMMixedBilinearFormKernel(parameters),
-    _variant_coef(getVariantCoefficient("coefficient", "vector_coefficient", "matrix_coefficient"))
+    _variant_coef(
+        getVariantCoefficient("coefficient", "diagonal_coefficient", "matrix_coefficient"))
 {
 }
 

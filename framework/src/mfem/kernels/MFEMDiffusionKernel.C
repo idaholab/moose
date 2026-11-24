@@ -23,15 +23,21 @@ MFEMDiffusionKernel::validParams()
                              "$- \\vec\\nabla \\cdot \\left( k \\vec \\nabla u \\right)$.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of property for diffusion coefficient k.");
-  params.addParam<MFEMMatrixCoefficientName>("matrix_coefficient",
-                                             "Name of matrix coefficient for property k. Mutually "
-                                             "exclusive with parameter 'coefficient'.");
+  params.addParam<MFEMVectorCoefficientName>(
+      "diagonal_coefficient",
+      "Name of diagonal coefficient for property k. Mutually exclusive with parameters "
+      "'coefficient' and 'matrix_coefficient'.");
+  params.addParam<MFEMMatrixCoefficientName>(
+      "matrix_coefficient",
+      "Name of matrix coefficient for property k. Mutually exclusive with parameters 'coefficient' "
+      "and 'diagonal_coefficient'.");
   return params;
 }
 
 MFEMDiffusionKernel::MFEMDiffusionKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
-    _variant_coef(getVariantCoefficient("coefficient", "vector_coefficient", "matrix_coefficient"))
+    _variant_coef(
+        getVariantCoefficient("coefficient", "diagonal_coefficient", "matrix_coefficient"))
 {
 }
 
