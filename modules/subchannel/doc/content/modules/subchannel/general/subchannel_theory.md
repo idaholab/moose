@@ -526,8 +526,8 @@ space discretization is converged.
 !table id=scm-algorithms caption=Algorithms for the flow equations of a block.
 | Algorithm | [!param](/Problem/TriSubChannel1PhaseProblem/implicit) | [!param](/Problem/TriSubChannel1PhaseProblem/segregated) | Crossflow $w_{ij}$ | Mass flow $\dot{m}$ and pressure $P$ |
 | - | - | - | - | - |
-| [Explicit-Segregated](#segregated) | `false` | `true` | PETSc SNES (JFNK), matrix-free, no preconditioner, on the residual [lateral1] | Updated explicitly, cell by cell, inside the residual function |
-| [Implicit-Segregated](#segregated) | `true` | `true` | PETSc SNES (JFNK), matrix-free, no preconditioner, on the residual [lateral1] | Each solved as a linear system with a PETSc Krylov solver and a Jacobi preconditioner inside the residual function; the pressure drop is evaluated from the axial momentum system |
+| [Explicit-Segregated](#segregated) | `false` | `true` | PETSc SNES (JFNK), matrix-free, no preconditioner, on the residual [lateral1] | Marched cell by cell inside the crossflow residual function: $\dot{m}$ from the block inlet up, $P$ from the block outlet down |
+| [Implicit-Segregated](#segregated) | `true` | `true` | PETSc SNES (JFNK), matrix-free, no preconditioner, on the residual [lateral1] | Each solved as a linear system with a PETSc Krylov solver and a Jacobi preconditioner, nested inside the crossflow residual function; the pressure drop is evaluated from the axial momentum system |
 | [Monolithic](#monolithic) | `true` | `false` | Solved together with $\dot{m}$ and $P$ as one linear system per block, PETSc FGMRES with [!param](/Problem/TriSubChannel1PhaseProblem/monolithic_preconditioner) | Solved together with $w_{ij}$ |
 
 In all three algorithms the enthalpy is solved separately, after the flow solve of a block.
@@ -622,7 +622,7 @@ update $\dot{m}$ and $P$ inside the residual function.
 
 !! Intentional comment to provide extra spacing
 
-This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations. The variables are updated sequentially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet. Of the stabilization
+This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations. The variables are updated sequentially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet. Explicit refers to space: the flow variables are computed directly, cell by cell, inside the crossflow residual function, rather than by solving a system for the block; in time the algorithm is backward Euler, as are the others. Of the stabilization
 methods, only the temperature relaxation [!param](/Problem/TriSubChannel1PhaseProblem/T_relaxation) applies; the crossflow damping
 and the equation and solution relaxations described under [#monolithic] are specific to the
 monolithic algorithm.
@@ -789,11 +789,13 @@ of the first attempt they are not scaled by $1/\alpha_W$: after $n$ retries the 
 $\left(1/\alpha_W + 2^n - 1\right)\mathbf{added\_K}^{\ell}$ rather than
 $2^n\,\mathbf{added\_K}^{\ell}/\alpha_W$, for increments of $1/\Delta\tau$.
 
-The step is fixed during a monolithic solve and recomputed at the next one, so the increments apply
-only to the failed solve. Each retry also doubles the block factor $\gamma$, which persists over the
-later monolithic solves of the block, capped at $2^8$, and resets with the reference residual at the
-start of each SCM solve; the step then still grows as the residual falls, from a level $\gamma$
-times lower. With $\mathbf{added\_K}_0$ the damping at $\Delta\tau_0$, a solve and its retries damp
+The step is fixed for all Krylov iterations of a monolithic solve and recomputed at the next
+monolithic solve of the block, in its next temperature iteration, so it can grow between solves and
+the retry increments apply only to the failed solve. Each retry also doubles the block factor
+$\gamma$, which persists over the later monolithic solves of the block, capped at $2^8$. $\gamma$ and
+the reference residual reset at the start of each SCM solve, that is each time step and, under a
+MultiApp fixed-point iteration, each fixed-point iteration; the step then still grows as the residual
+falls, from a level $\gamma$ times lower. With $\mathbf{added\_K}_0$ the damping at $\Delta\tau_0$, a solve and its retries damp
 by at most $\mathbf{added\_K}_0/\alpha_W + (2^8-1)\,\mathbf{added\_K}_0$. The damped monolithic solve
 is summarized in [scm-damping-flowchart].
 
