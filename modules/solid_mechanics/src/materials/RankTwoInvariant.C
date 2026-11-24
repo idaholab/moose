@@ -63,7 +63,7 @@ RankTwoInvariantTempl<is_ad>::computeQpProperties()
     case RankTwoScalarTools::InvariantType::MidPrincipal:
     case RankTwoScalarTools::InvariantType::MinPrincipal:
     {
-      Point dummy_direction;
+      GenericRealVectorValue<is_ad> dummy_direction;
       _property[_qp] =
           RankTwoScalarTools::getPrincipalComponent(_tensor[_qp], _invariant, dummy_direction);
       break;

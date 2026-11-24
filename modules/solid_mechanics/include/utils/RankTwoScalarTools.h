@@ -17,8 +17,6 @@
 #include "MooseError.h"
 #include "MooseUtils.h"
 
-#include "metaphysicl/raw_type.h"
-
 namespace RankTwoScalarTools
 {
 /*
@@ -242,15 +240,14 @@ template <typename T>
 T
 calcEigenValuesEigenVectors(const RankTwoTensorTempl<T> & r2tensor,
                             unsigned int index,
-                            Point & eigenvec)
+                            libMesh::TypeVector<T> & eigenvec)
 {
   std::vector<T> eigenval(LIBMESH_DIM);
   RankTwoTensorTempl<T> eigvecs;
   r2tensor.symmetricEigenvaluesEigenvectors(eigenval, eigvecs);
 
   T val = eigenval[index];
-  // A Point cannot hold derivatives, so only the eigenvalue carries them
-  eigenvec = MetaPhysicL::raw_value(eigvecs.column(index));
+  eigenvec = eigvecs.column(index);
 
   return val;
 }
@@ -263,7 +260,7 @@ calcEigenValuesEigenVectors(const RankTwoTensorTempl<T> & r2tensor,
  */
 template <typename T>
 T
-maxPrincipal(const RankTwoTensorTempl<T> & r2tensor, Point & direction)
+maxPrincipal(const RankTwoTensorTempl<T> & r2tensor, libMesh::TypeVector<T> & direction)
 {
   return calcEigenValuesEigenVectors(r2tensor, (LIBMESH_DIM - 1), direction);
 }
@@ -276,7 +273,7 @@ maxPrincipal(const RankTwoTensorTempl<T> & r2tensor, Point & direction)
  */
 template <typename T>
 T
-midPrincipal(const RankTwoTensorTempl<T> & r2tensor, Point & direction)
+midPrincipal(const RankTwoTensorTempl<T> & r2tensor, libMesh::TypeVector<T> & direction)
 {
   return calcEigenValuesEigenVectors(r2tensor, 1, direction);
 }
@@ -289,7 +286,7 @@ midPrincipal(const RankTwoTensorTempl<T> & r2tensor, Point & direction)
  */
 template <typename T>
 T
-minPrincipal(const RankTwoTensorTempl<T> & r2tensor, Point & direction)
+minPrincipal(const RankTwoTensorTempl<T> & r2tensor, libMesh::TypeVector<T> & direction)
 {
   return calcEigenValuesEigenVectors(r2tensor, 0, direction);
 }
@@ -511,7 +508,7 @@ template <typename T>
 T
 maxShear(const RankTwoTensorTempl<T> & stress)
 {
-  Point dummy;
+  libMesh::VectorValue<T> dummy;
   return (maxPrincipal(stress, dummy) - minPrincipal(stress, dummy)) / 2.;
 }
 /*
@@ -633,7 +630,7 @@ template <typename T>
 T
 getPrincipalComponent(const RankTwoTensorTempl<T> & tensor,
                       const InvariantType & scalar_type,
-                      Point & direction)
+                      libMesh::TypeVector<T> & direction)
 {
   switch (scalar_type)
   {
