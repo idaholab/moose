@@ -2078,7 +2078,7 @@ private:
    * @param qw The quadrature weights
    * @param p The quadrature point index
    * @param compute_points Whether to compute the physical quadrature point
-   * @param map The AD map to fill at \p p, resized by resizeADMappingObjects
+   * @param map The AD map to fill at \p p, previously resized by resizeADMappingObjects
    */
   void computeSinglePointMapAD(const Elem & elem,
                                const std::vector<VectorValue<ADReal>> & node_points,
@@ -2888,8 +2888,9 @@ protected:
   /// Temporary work data for reinitAtPhysical()
   std::vector<Point> _temp_reference_points;
 
-  /// The AD map of the current element. A face reinit evaluates it at the face quadrature points
-  /// for the AD face shape function gradients, and computeFaceMap uses its tangents.
+  /// The AD map of the current element. A face reinit overwrites it: it is evaluated at the face
+  /// quadrature points for the AD face shape function gradients, and computeFaceMap stores the
+  /// face tangents in it.
   ADElemMap _ad_elem_map;
 
   /// AD face second derivatives, used by computeFaceMap for the curvatures
