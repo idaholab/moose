@@ -342,7 +342,7 @@ advected_interp_method = 'average'
     factor = rho_d_t
   []
   [phase_advection]
-    type = LinearFVScalarAdvection
+    type = LinearWCNSFV2PScalarAdvection
     variable = phase_2
     advected_interp_method_name = ${advected_interp_method}
     rhie_chow_user_object = 'rc'

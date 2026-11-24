@@ -1,6 +1,6 @@
 [Tests]
   issues = '#22637 #29175'
-  design = 'LinearWCNSFV2PMomentumDriftFlux.md LinearFVScalarAdvection.md'
+  design = 'LinearWCNSFV2PMomentumDriftFlux.md LinearWCNSFV2PScalarAdvection.md'
 
   # Every term of the model runs at once here, with every density moving in time and every
   # transient in the conservative form the kernel assembles by default, so what is verified is the

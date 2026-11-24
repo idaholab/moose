@@ -22,6 +22,10 @@ public:
 
   WCNSLinearFVScalarTransportPhysics(const InputParameters & parameters);
 
+protected:
+  /// The type of the kernel advecting the scalars
+  virtual std::string scalarAdvectionKernelType() const { return "LinearFVScalarAdvection"; }
+
 private:
   virtual void addSolverVariables() override;
   virtual void addFVInterpolationMethods() override;

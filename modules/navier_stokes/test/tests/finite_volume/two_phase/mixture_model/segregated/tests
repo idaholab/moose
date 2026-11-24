@@ -206,7 +206,7 @@
     input = 'phase-slip-wall-conservation.i'
     csvdiff = 'phase-slip-wall-conservation_out.csv'
     abs_zero = 1e-6
-    design = 'LinearFVScalarAdvection.md'
+    design = 'LinearWCNSFV2PScalarAdvection.md'
     requirement = 'The system shall conserve the dispersed phase in a closed cavity when a slip velocity is present, by not transporting the phase across impermeable boundaries, even when those boundaries constrain the phase fraction.'
     max_threads = 1 # see libmesh issue #3808
   []
@@ -215,7 +215,7 @@
     input = 'phase-slip-internal-wall-conservation.i'
     csvdiff = 'phase-slip-internal-wall-conservation_out.csv'
     abs_zero = 1e-6
-    design = 'LinearFVScalarAdvection.md'
+    design = 'LinearWCNSFV2PScalarAdvection.md'
     requirement = 'The system shall conserve the dispersed phase in a closed cavity when a slip velocity is present, by not transporting the phase across an impermeable boundary internal to the mesh, the interface with a block the phase fraction is not defined on.'
     max_threads = 1 # see libmesh issue #3808
   []

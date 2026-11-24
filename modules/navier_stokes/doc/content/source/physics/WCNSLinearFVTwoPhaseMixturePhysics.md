@@ -27,7 +27,7 @@ where:
 The kernels created are:
 
 - [LinearFVTimeDerivative.md] for the time derivative for a transient solve
-- [LinearFVScalarAdvection.md] for the scalar advection term, advected at the dispersed phase
+- [LinearWCNSFV2PScalarAdvection.md] for the scalar advection term, advected at the dispersed phase
   velocity $\bm{u}_d = \bm{u}_m + \bm{u}_{Md}$, where $\bm{u}_{Md} = (1 - c_d)
   \bm{u}_{slip,d}$ is the diffusion velocity and $c_d$ the dispersed phase mass fraction. The
   diffusion velocity is supplied by [LinearWCNSFV2PSlipVelocityFunctorMaterial.md], which derives
@@ -70,7 +70,7 @@ The advection slip momentum term is currently not supported in the linear finite
 
 !alert note
 This Physics does not create the interfacial area transport equation. The equation can be assembled
-in the input from [LinearFVTimeDerivative.md], [LinearFVScalarAdvection.md] and
+in the input from [LinearFVTimeDerivative.md], [LinearWCNSFV2PScalarAdvection.md] and
 [LinearWCNSFV2PInterfaceAreaSourceSink.md], and its variable passed to
 [!param](/Physics/NavierStokes/TwoPhaseMixtureSegregated/WCNSLinearFVTwoPhaseMixturePhysics/interfacial_area)
 to close the interfacial mass transfer on it.
@@ -93,7 +93,7 @@ The mixture flux takes the scheme named by
 and so does the drift unless
 [!param](/Physics/NavierStokes/TwoPhaseMixtureSegregated/WCNSLinearFVTwoPhaseMixturePhysics/phase_drift_advection_interpolation)
 names one for it alone. That is the prerequisite for treating the drift flux differently from the
-mixture flux, for instance by limiting it on its own. See [LinearFVScalarAdvection.md] for the
+mixture flux, for instance by limiting it on its own. See [LinearWCNSFV2PScalarAdvection.md] for the
 assembled form.
 
 ## Mixture fluid properties id=materials

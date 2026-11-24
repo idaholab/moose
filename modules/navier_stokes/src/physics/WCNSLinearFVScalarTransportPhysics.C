@@ -121,7 +121,7 @@ WCNSLinearFVScalarTransportPhysics::addScalarAdvectionKernels()
           : InterpolationMethodName(
                 std::string(getParam<MooseEnum>("passive_scalar_advection_interpolation")));
 
-  const std::string kernel_type = "LinearFVScalarAdvection";
+  const std::string kernel_type = scalarAdvectionKernelType();
   InputParameters params = getFactory().getValidParams(kernel_type);
 
   assignBlocks(params, _blocks);
@@ -129,7 +129,8 @@ WCNSLinearFVScalarTransportPhysics::addScalarAdvectionKernels()
   params.set<InterpolationMethodName>("advected_interp_method_name") = method_name;
   setSlipVelocityParams(params);
 
-  params.set<std::vector<BoundaryName>>("slip_boundaries") = slipBoundaries();
+  if (params.have_parameter<std::vector<BoundaryName>>("slip_boundaries"))
+    params.set<std::vector<BoundaryName>>("slip_boundaries") = slipBoundaries();
 
   for (const auto & vname : _passive_scalar_names)
   {
@@ -164,9 +165,8 @@ WCNSLinearFVScalarTransportPhysics::addScalarDiffusionKernels()
       params.set<LinearVariableName>("variable") = vname;
       // With a turbulence model, the turbulence Physics provides the sum of the molecular and the
       // turbulent diffusivities under this name
-      MooseFunctorName diffusivity = _has_turbulence_model
-                                         ? effectiveDiffusivityName(vname)
-                                         : passive_scalar_diffusivities[name_i];
+      MooseFunctorName diffusivity = _has_turbulence_model ? effectiveDiffusivityName(vname)
+                                                           : passive_scalar_diffusivities[name_i];
 
       // In conservative form the diffusive flux is a mass flux too, so the density multiplies the
       // diffusivity along with every other term of the equation. Leaving it out would change the

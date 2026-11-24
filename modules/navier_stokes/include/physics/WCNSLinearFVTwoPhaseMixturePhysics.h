@@ -39,6 +39,12 @@ private:
    */
   virtual void setSlipVelocityParams(InputParameters & params) const override;
 
+  /// The phase fraction is advected by the mixture flux and by the drift of the dispersed phase
+  virtual std::string scalarAdvectionKernelType() const override
+  {
+    return "LinearWCNSFV2PScalarAdvection";
+  }
+
   /// The phase transport equation is assembled as the dispersed phase mass equation, so every
   /// term carries the dispersed phase density.
   virtual MooseFunctorName scalarConservativeDensity(const VariableName & vname) const override;

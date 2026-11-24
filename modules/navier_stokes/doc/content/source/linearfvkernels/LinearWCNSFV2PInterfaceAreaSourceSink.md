@@ -21,8 +21,8 @@ volume:
 
 This object assembles the right hand side only. The two terms on the left are the business of
 [LinearFVTimeDerivative.md], given a [!param](/LinearFVKernels/LinearFVTimeDerivative/factor) of
-$\rho_g$, and of [LinearFVScalarAdvection.md], given a
-[!param](/LinearFVKernels/LinearFVScalarAdvection/density) of $\rho_g$ and the dispersed phase
+$\rho_g$, and of [LinearWCNSFV2PScalarAdvection.md], given a
+[!param](/LinearFVKernels/LinearWCNSFV2PScalarAdvection/density) of $\rho_g$ and the dispersed phase
 velocity
 $\bm{u}_g = \bm{u}_m + \bm{u}_{Md}$. Assembling the equation in any other form, in particular
 without the density on both, is inconsistent with the sources computed here.

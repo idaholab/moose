@@ -113,7 +113,7 @@ cp_d = 1
     variable = phase_2
   []
   [phase_advection]
-    type = LinearFVScalarAdvection
+    type = LinearWCNSFV2PScalarAdvection
     variable = phase_2
     advected_interp_method_name = upwind
     rhie_chow_user_object = ins_rhie_chow_interpolator
