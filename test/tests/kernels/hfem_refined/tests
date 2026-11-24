@@ -8,7 +8,10 @@
     min_parallel = 2
     requirement = 'The system shall give the serial result for hybrid finite element method (HFEM) '
                   'calculations in parallel on meshes with faces between coarse and refined elements.'
-    capabilities = 'mumps'
+    # The lower-dimensional elements built by build_all_side_lowerd_mesh are not refined, so their
+    # interior parents on the refined block fail a libMesh assertion, which only opt builds skip
+    # (#34531)
+    capabilities = 'mumps & method=opt'
   []
   [refined_parallel_array]
     type = 'CSVDiff'
@@ -18,6 +21,7 @@
     requirement = 'The system shall give the serial result for hybrid finite element method (HFEM) '
                   'calculations with array variables in parallel on meshes with faces between coarse '
                   'and refined elements.'
-    capabilities = 'mumps'
+    # See refined_parallel (#34531)
+    capabilities = 'mumps & method=opt'
   []
 []
