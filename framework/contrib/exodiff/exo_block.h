@@ -38,6 +38,7 @@
 #include <iostream>
 
 #include <string>
+#include <vector>
 
 template <typename INT>
 class ExoII_Read;
@@ -57,7 +58,16 @@ public:
   // Access functions:
 
   const std::string & Elmt_Type() const { return elmt_type; }
+
+  /**
+   * For a regular block, the number of nodes in each of its elements. For an "NSIDED" (polygon)
+   * block, Exodus instead reports the total node count summed over the whole block, since the
+   * elements have differing node counts; use Num_Nodes_per_Elmt(elmt_index) for those.
+   */
   size_t Num_Nodes_per_Elmt() const { return num_nodes_per_elmt; }
+
+  //! The number of nodes in element \p elmt_index, valid for polygon and regular blocks alike
+  size_t Num_Nodes_per_Elmt(size_t elmt_index) const;
 
   // Block description access functions:
 
@@ -87,8 +97,14 @@ private:
 
   std::string elmt_type;
   int         num_nodes_per_elmt;
+  bool        is_nsided;
 
   INT * conn; // Array; holds a matrix, num_elmts by num_nodes_per_elmt.
+
+  // Index into conn of the first node of each element, plus a trailing total, so that element e
+  // occupies conn[conn_offset[e], conn_offset[e+1]). Only filled in for "NSIDED" blocks, whose
+  // elements have differing node counts; a regular block indexes conn by a fixed stride instead.
+  std::vector<size_t> conn_offset;
 
   friend class ExoII_Read<INT>;
 };

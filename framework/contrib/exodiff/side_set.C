@@ -33,9 +33,9 @@
 
 #include "ED_SystemInterface.h" // for ERROR, SystemInterface, etc
 #include "libmesh/exodusII.h"   // for ex_set, etc
-#include "iqsort.h"             // for index_qsort
 #include "side_set.h"
 #include "smart_assert.h" // for SMART_ASSERT
+#include <algorithm>      // for stable_sort
 #include <cstdlib>        // for exit
 #include <iostream>       // for operator<<, basic_ostream, etc
 #include <vector>         // for vector
@@ -172,16 +172,22 @@ Side_Set<INT>::load_sides(const INT * elmt_map) const
       for (size_t i = 0; i < numEntity; i++)
       {
         sideIndex[i] = i;
-        elmts[i] = elmts[i] * 8 + sides[i];
       }
 
-      index_qsort(elmts, sideIndex, numEntity);
-
-      // Recover elmts...
-      for (size_t i = 0; i < numEntity; i++)
-      {
-        elmts[i] = elmts[i] / 8;
-      }
+      // Order the sides by (element, side). Sorting the index array against a comparator keeps
+      // elmts and sides intact; packing the two into one sortable key as "elmts[i] * 8 + sides[i]"
+      // would both limit an element to 8 sides and, for a polygon with more than that, recover a
+      // wrong element id when the key was divided back out.
+      std::stable_sort(sideIndex,
+                       sideIndex + numEntity,
+                       [this](INT a, INT b)
+                       {
+                         if (elmts[a] != elmts[b])
+                         {
+                           return elmts[a] < elmts[b];
+                         }
+                         return sides[a] < sides[b];
+                       });
     }
     else
     {
