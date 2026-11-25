@@ -10,7 +10,9 @@
 #include "PolygonUtils.h"
 
 #include "GeometryUtils.h"
+#include "predicates.h"
 
+#include <algorithm>
 #include <cmath>
 
 using namespace libMesh;
@@ -66,6 +68,42 @@ fanApexOffset(const std::vector<Point> & points, const Real area_tol)
       return apex;
 
   return 0;
+}
+
+void
+sortPointsCounterClockwise(std::vector<Point> & points, const Point & center)
+{
+  Moose::initPredicates();
+
+  // Which side of the horizontal line through the center a point lies on. Points on the line count
+  // as upper when they are to the right of the center, which puts the start of the sweep at the
+  // positive x axis and keeps the two halves disjoint.
+  const auto isUpperHalf = [&center](const Point & p)
+  { return p(1) > center(1) || (p(1) == center(1) && p(0) >= center(0)); };
+
+  std::sort(points.begin(),
+            points.end(),
+            [&center, &isUpperHalf](const Point & a, const Point & b)
+            {
+              const bool a_upper = isUpperHalf(a);
+
+              if (a_upper != isUpperHalf(b))
+                return a_upper;
+
+              // Within one half plane the sweep spans less than pi, so b is further along it
+              // exactly when it lies clockwise of a
+              const double center_xy[2] = {center(0), center(1)};
+              const double a_xy[2] = {a(0), a(1)};
+              const double b_xy[2] = {b(0), b(1)};
+              const auto orientation = moose_orient2d(center_xy, a_xy, b_xy);
+
+              if (orientation != 0.0)
+                return orientation > 0.0;
+
+              // Collinear with the center, so order by position to keep this a strict weak
+              // ordering. Two points at the same position compare equal, as they must.
+              return std::make_pair(a(0), a(1)) < std::make_pair(b(0), b(1));
+            });
 }
 
 } // end of namespace polygon_utils

@@ -1121,13 +1121,7 @@ DualMeshGenerator::generate()
 
     center /= clipped_points.size();
 
-    std::sort(clipped_points.begin(),
-              clipped_points.end(),
-              [&center](const Point & a, const Point & b)
-              {
-                return std::atan2(a(1) - center(1), a(0) - center(0)) <
-                       std::atan2(b(1) - center(1), b(0) - center(0));
-              });
+    polygon_utils::sortPointsCounterClockwise(clipped_points, center);
 
     return clipped_points;
   };
@@ -1360,13 +1354,7 @@ DualMeshGenerator::generate()
 
             // Sorting is necessary, as the centroid ordering is jumbled after adding vertices and
             // midpoints.
-            std::sort(dual_points.begin(),
-                      dual_points.end(),
-                      [&sort_center](const Point & a, const Point & b)
-                      {
-                        return std::atan2(a(1) - sort_center(1), a(0) - sort_center(0)) <
-                               std::atan2(b(1) - sort_center(1), b(0) - sort_center(0));
-                      });
+            polygon_utils::sortPointsCounterClockwise(dual_points, sort_center);
           }
         }
       }
@@ -1388,30 +1376,22 @@ DualMeshGenerator::generate()
     if (concave_vertex_index < dual_points.size())
     {
       const Point corner_point = dual_points[concave_vertex_index];
-      std::vector<std::pair<Point, Real>> sorted_points;
+      std::vector<Point> sorted_points;
 
-      // We use phi sorting only for concave dual elements, since the id's are always too jumbled to
-      // sort by adjacency
+      // We sort about the concave corner only for concave dual elements, since the ids are always
+      // too jumbled to sort by adjacency
       for (const auto i : index_range(dual_points))
-      {
-        if (i == concave_vertex_index)
-          continue;
+        if (i != concave_vertex_index)
+          sorted_points.push_back(dual_points[i]);
 
-        const Real phi =
-            std::atan2(dual_points[i](1) - corner_point(1), dual_points[i](0) - corner_point(0));
-        sorted_points.push_back({dual_points[i], phi});
-      }
-
-      std::sort(sorted_points.begin(),
-                sorted_points.end(),
-                [](const auto & a, const auto & b) { return a.second < b.second; });
+      polygon_utils::sortPointsCounterClockwise(sorted_points, corner_point);
 
       std::vector<Point> fan_points = {corner_point};
 
       for (const auto i : index_range(sorted_points))
       {
         if (boundary_region == nullptr ||
-            !isBoundarySegmentPoint(*boundary_region, sorted_points[i].first))
+            !isBoundarySegmentPoint(*boundary_region, sorted_points[i]))
           continue;
 
         const std::size_t next_i = (i + 1) % sorted_points.size();
@@ -1419,19 +1399,19 @@ DualMeshGenerator::generate()
 
         // Pick the direction of the fan ordering so no triangle formed from the concave corner
         // bridges across a boundary.
-        if (!isBoundarySegmentPoint(*boundary_region, sorted_points[next_i].first))
+        if (!isBoundarySegmentPoint(*boundary_region, sorted_points[next_i]))
         {
           for (const auto k : index_range(sorted_points))
-            fan_points.push_back(sorted_points[(i + k) % sorted_points.size()].first);
+            fan_points.push_back(sorted_points[(i + k) % sorted_points.size()]);
 
           break;
         }
 
-        if (!isBoundarySegmentPoint(*boundary_region, sorted_points[prev_i].first))
+        if (!isBoundarySegmentPoint(*boundary_region, sorted_points[prev_i]))
         {
           for (const auto k : index_range(sorted_points))
             fan_points.push_back(
-                sorted_points[(i + sorted_points.size() - k) % sorted_points.size()].first);
+                sorted_points[(i + sorted_points.size() - k) % sorted_points.size()]);
 
           break;
         }

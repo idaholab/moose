@@ -12,4 +12,9 @@
     unit_test = PolygonUtilsTest.fanApexOffset
     requirement = 'The system shall select a polygon corner from which a triangle fan contains no degenerate triangle, so that a polygon carrying collinear corners can be triangulated.'
   []
+  [sort_points_counter_clockwise]
+    type = GoogleTest
+    unit_test = PolygonUtilsTest.sortPointsCounterClockwise
+    requirement = 'The system shall order points counter-clockwise about a center using only the signs of exact arithmetic, so that the result does not depend on the sign of a zero offset, on the order the points are supplied in, or on how points collinear with the center are tied.'
+  []
 []

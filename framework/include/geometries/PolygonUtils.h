@@ -42,4 +42,23 @@ bool pointInPolygon2D(const libMesh::Point & point, const std::vector<libMesh::P
  */
 std::size_t fanApexOffset(const std::vector<libMesh::Point> & points, const Real area_tol);
 
+/**
+ * Order points counter-clockwise about a center, in place.
+ *
+ * Sorting by std::atan2() of the offset from the center is not reproducible across platforms: a
+ * point lying along -x from the center gives +pi or -pi depending on whether its y offset rounds to
+ * +0.0 or -0.0, which moves it between the first and last position, and exactly equal angles are
+ * left to std::sort() to break. Either rotates the resulting corner list, and so renumbers the
+ * sides of the element built from it, without changing its shape.
+ *
+ * This instead compares two points by the half plane of the center they lie in and then by the
+ * exact orientation predicate, falling back on their coordinates when they are collinear with the
+ * center, which is a strict weak ordering decided entirely by the sign of exact arithmetic.
+ *
+ * @param[in,out] points the points to order
+ * @param[in] center the point to order them about, which does not have to be inside their hull
+ */
+void sortPointsCounterClockwise(std::vector<libMesh::Point> & points,
+                                const libMesh::Point & center);
+
 } // end of namespace polygon_utils

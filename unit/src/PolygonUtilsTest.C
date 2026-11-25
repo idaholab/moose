@@ -74,3 +74,52 @@ TEST(PolygonUtilsTest, fanApexOffset)
                 area_tol),
             0u);
 }
+
+TEST(PolygonUtilsTest, sortPointsCounterClockwise)
+{
+  const Point center(0, 0, 0);
+
+  // A point directly along -x is the case std::atan2() cannot order reproducibly: its angle is
+  // +pi or -pi depending on whether the y offset rounds to +0.0 or -0.0. Both spellings have to
+  // land in the same place.
+  std::vector<Point> plus_zero = {
+      Point(1, 0, 0), Point(0, 1, 0), Point(-1, 0.0, 0), Point(0, -1, 0)};
+  std::vector<Point> minus_zero = {
+      Point(1, 0, 0), Point(0, 1, 0), Point(-1, -0.0, 0), Point(0, -1, 0)};
+
+  polygon_utils::sortPointsCounterClockwise(plus_zero, center);
+  polygon_utils::sortPointsCounterClockwise(minus_zero, center);
+
+  for (const auto i : index_range(plus_zero))
+  {
+    EXPECT_EQ(plus_zero[i](0), minus_zero[i](0));
+    EXPECT_EQ(plus_zero[i](1), minus_zero[i](1));
+  }
+
+  // The order is counter-clockwise starting from the positive x axis
+  EXPECT_EQ(plus_zero[0], Point(1, 0, 0));
+  EXPECT_EQ(plus_zero[1], Point(0, 1, 0));
+  EXPECT_EQ(plus_zero[2](0), -1.0);
+  EXPECT_EQ(plus_zero[3], Point(0, -1, 0));
+
+  // The result must not depend on the order the points arrive in, which is what makes it
+  // reproducible where a non-stable sort over equal keys is not
+  std::vector<Point> shuffled = {Point(0, -1, 0), Point(-1, 0, 0), Point(0, 1, 0), Point(1, 0, 0)};
+  polygon_utils::sortPointsCounterClockwise(shuffled, center);
+
+  for (const auto i : index_range(plus_zero))
+  {
+    EXPECT_EQ(shuffled[i](0), plus_zero[i](0));
+    EXPECT_EQ(shuffled[i](1), plus_zero[i](1));
+  }
+
+  // Points collinear with the center, here on top of each other along +x, are ordered by position
+  // rather than left to the sort, so the result is still unique
+  std::vector<Point> collinear = {Point(2, 0, 0), Point(1, 0, 0), Point(0, 1, 0)};
+  std::vector<Point> collinear_reversed = {Point(1, 0, 0), Point(2, 0, 0), Point(0, 1, 0)};
+  polygon_utils::sortPointsCounterClockwise(collinear, center);
+  polygon_utils::sortPointsCounterClockwise(collinear_reversed, center);
+
+  for (const auto i : index_range(collinear))
+    EXPECT_EQ(collinear[i](0), collinear_reversed[i](0));
+}
