@@ -556,8 +556,7 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
   if (_need_ad_u_dotdot)
     assignForAllQps(_ad_zero, _ad_u_dotdot, nqp);
 
-  const bool do_derivatives =
-      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
+  const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
 
   for (unsigned int i = 0; i < num_dofs; i++)
   {
@@ -750,8 +749,7 @@ MooseVariableDataFV<OutputType>::fetchADDofValues()
   libmesh_assert(n);
   _ad_dof_values.resize(n);
 
-  const bool do_derivatives =
-      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
+  const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
 
   for (decltype(n) i = 0; i < n; ++i)
   {

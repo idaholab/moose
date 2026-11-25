@@ -861,7 +861,7 @@ Assembly::reinitFE(const Elem * elem)
     {
       const auto & qw = _current_qrule->get_weights();
       computeADElemNodePoints(
-          *elem, ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum());
+          *elem, ADReal::do_derivatives && _sys.number() == _subproblem.currentNlJSysNum());
       for (unsigned int qp = 0; qp != n_qp; qp++)
         computeSinglePointMapAD(elem, qw, qp, _holder_fe_helper[dim]);
     }
@@ -2193,7 +2193,7 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
       const auto & qw = _current_qrule_face->get_weights();
       if (_need_ad_face_map || _need_ad_grad_phi_face)
         computeADElemNodePoints(
-            elem, ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum());
+            elem, ADReal::do_derivatives && _sys.number() == _subproblem.currentNlJSysNum());
       // computeFaceMap supplies the AD face JxW, normals and points; the single-point map only adds
       // the inverse map that computeGradPhiAD needs
       if (_need_ad_face_map)

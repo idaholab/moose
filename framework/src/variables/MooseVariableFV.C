@@ -17,6 +17,7 @@
 #include "MathFVUtils.h"
 #include "FVUtils.h"
 #include "FVFluxBC.h"
+#include "ADUtils.h"
 #include "FVDirichletBCBase.h"
 #include "GreenGaussGradient.h"
 
@@ -464,8 +465,7 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem, const StateAr
 
   ADReal value = global_soln(index);
 
-  if (ADReal::do_derivatives && state.state == 0 &&
-      this->_sys.number() == this->_subproblem.currentNlSysNum())
+  if (state.state == 0 && Moose::doDerivatives(this->_subproblem, this->_sys))
     Moose::derivInsert(value.derivatives(), index, 1.);
 
   return value;
@@ -812,8 +812,7 @@ MooseVariableFV<Real>::evaluateDot(const ElemArg & elem_arg, const StateArg & st
   if (_var_kind == Moose::VAR_SOLVER)
   {
     ADReal dot = (*_solution)(dof_index);
-    if (ADReal::do_derivatives && state.state == 0 &&
-        _sys.number() == _subproblem.currentNlSysNum())
+    if (state.state == 0 && Moose::doDerivatives(_subproblem, _sys))
       Moose::derivInsert(dot.derivatives(), dof_index, 1.);
     _time_integrator->computeADTimeDerivatives(dot, dof_index, _ad_real_dummy);
     return dot;

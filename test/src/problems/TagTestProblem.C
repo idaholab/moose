@@ -144,5 +144,5 @@ TagTestProblem::computeLinearSystemSys(LinearImplicitSystem & sys,
   selectMatrixTagsFromSystem(linear_sys, matrix_tags, selected_mtags);
 
   computeLinearSystemTags(
-      *(_current_linear_sys->currentSolution()), selected_vtags, selected_mtags, compute_gradients);
+      *currentLinearSystem().currentSolution(), selected_vtags, selected_mtags, compute_gradients);
 }
