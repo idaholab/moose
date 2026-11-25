@@ -45,6 +45,7 @@ public:
   virtual void syncSolutions(Direction direction) override;
   virtual bool solverSystemConverged(const unsigned int) override;
   virtual void initialSetup() override;
+  virtual void advanceState() override;
 
   const SCMHTCClosureBase * getDuctHTCClosure() const { return _duct_HTC_closure; }
   const SCMHTCClosureBase * getPinHTCClosure() const { return _pin_HTC_closure; } // optional

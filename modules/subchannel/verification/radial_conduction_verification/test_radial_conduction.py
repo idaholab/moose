@@ -187,13 +187,16 @@ class TestRadialConductionVerification(unittest.TestCase):
             for (x, y), a, b in sorted(zip(positions, T_solver, T_network)):
                 fh.write(f"{x:.6f},{y:.6f},{a:.6f},{b:.6f}\n")
 
-        # The heated and cooled sides span about 25 K; the solver and the network agree to a few
-        # 1e-3 K, the remainder being the diversion crossflow over the hydrodynamic development
-        # length, which the network does not model. 0.004 K is less than a thousandth of the
-        # spread, so a doubled or halved gap conductance (about 4 K) fails
+        # The heated and cooled sides span about 25 K; the solver and the network agree to about
+        # 1e-3 K. The remainder is the small diversion crossflow that the converged solver
+        # develops over the hydrodynamic development length and the network does not model; it
+        # decreases as Kij^-0.5 and is the same for the segregated and monolithic solvers. Kij is
+        # set near the largest value this solve still converges at, to make that remainder as
+        # small as possible. 1e-3 K is under a hundredth of a percent of the spread, so a doubled
+        # or halved gap conductance (about 4 K) fails
         self.assertGreater(spread, 20.0)
         self.assertLess(
-            error, 0.004, f"Largest difference from the network: {error:.3e} K"
+            error, 1e-3, f"Largest difference from the network: {error:.3e} K"
         )
 
 
