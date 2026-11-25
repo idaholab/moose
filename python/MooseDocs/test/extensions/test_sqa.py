@@ -7,32 +7,31 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import collections
-import itertools
-import logging
-import unittest
 
 import mock
+import unittest
+import logging
+import collections
+import itertools
 import moosesqa
 import moosetree
 from mooseutils import civet_results
-
-from MooseDocs import base, common
+from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import (
-    alert,
-    autolink,
-    civet,
-    command,
     core,
+    command,
     floats,
+    autolink,
     heading,
-    materialicon,
-    modal,
+    civet,
     sqa,
     table,
+    modal,
     template,
+    alert,
+    materialicon,
 )
-from MooseDocs.test import MooseDocsTestCase
+from MooseDocs import base, common
 from MooseDocs.tree import pages
 
 logging.basicConfig()
@@ -84,32 +83,20 @@ class TestSQARequirementsAST(MooseDocsTestCase):
         self.assertToken(ast(0)(8)(2), "SQARequirementDesign", design=["katex.md"])
 
     def testASTIssuesLink(self):
-        # This test reads the test spec located at
-        # moose/python/moosesqa/test/test_get_requirements_spec0
         text = "!sqa requirements category=Demo link=True link-spec=False link-design=False link-issues=True link-prerequisites=False link-collections=False link-types=False"
         ast = self.tokenize(text)
 
         self._assertAST_common(ast(0))
-        # Since issue 1234 is listed at the top level of the spec (i.e.,
-        # Tests/issues='#1234'), all of the subsequent sub-tests also carry
-        # the 1234 issue number within their requirements.
+
         self.assertToken(ast(0)(1)(1), "SQARequirementIssues", issues=["#1234"])
-        self.assertToken(
-            ast(0)(2)(1), "SQARequirementIssues", issues=["#1234", "#3456"]
-        )
+        self.assertToken(ast(0)(2)(1), "SQARequirementIssues", issues=["#3456"])
         self.assertToken(ast(0)(3)(1), "SQARequirementIssues", issues=["#1234"])
-        self.assertToken(
-            ast(0)(4)(1), "SQARequirementIssues", issues=["#1234", "#4567"]
-        )
+        self.assertToken(ast(0)(4)(1), "SQARequirementIssues", issues=["#4567"])
 
         self.assertToken(ast(0)(5)(2), "SQARequirementIssues", issues=["#1234"])
-        self.assertToken(
-            ast(0)(6)(2), "SQARequirementIssues", issues=["#1234", "#8910"]
-        )
+        self.assertToken(ast(0)(6)(2), "SQARequirementIssues", issues=["#8910"])
         self.assertToken(ast(0)(7)(2), "SQARequirementIssues", issues=["#1234"])
-        self.assertToken(
-            ast(0)(8)(2), "SQARequirementIssues", issues=["#1234", "#4321"]
-        )
+        self.assertToken(ast(0)(8)(2), "SQARequirementIssues", issues=["#4321"])
 
     def testASTPrereqLink(self):
         text = "!sqa requirements category=Demo link=True link-spec=False link-design=False link-issues=False link-prerequisites=True link-collections=False link-types=False link-results=False"

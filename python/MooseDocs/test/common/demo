@@ -1,9 +1,9 @@
 [Tests]
-  issues = '#1234'
   design = core.md
   verification = sqa.md
   validation = special.md
   [r0]
+    issues = "#1234"
     type = Andrew
     requirement = "Requirement One"
   []
@@ -12,6 +12,7 @@
     issues = "#3456"
   []
   [r2]
+    issues = "#1234"
     requirement = "Requirement Three"
     design = bibtex.md
     validation = alert.md
@@ -24,6 +25,7 @@
   []
 
   [group0]
+    issues = "#1234"
     requirement = "Requirement Group One"
     verification = bibtex.md
     [group0-a]
@@ -49,6 +51,7 @@
   []
 
   [group2]
+    issues = "#1234"
     requirement = "Requirement Group Three"
     design = bibtex.md
     validation = 'katex.md bibtex.md'

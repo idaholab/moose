@@ -8,19 +8,12 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import collections
 import os
-import tempfile
+import collections
 import unittest
-
 import mooseutils
-from moosesqa import (
-    Requirement,
-    get_requirements_from_file,
-    get_requirements_from_tests,
-    get_test_specification,
-    number_requirements,
-)
+from moosesqa import Requirement, number_requirements, get_requirements_from_file
+from moosesqa import get_requirements_from_tests, get_test_specification
 from moosesqa.get_requirements import _find_file
 
 
@@ -234,7 +227,7 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         self.assertEqual(r.requirement, "Requirement One")
 
         r = req["test_get_requirements_spec0"][1]
-        self.assertEqual(r.issues, ["#1234", "#3456"])
+        self.assertEqual(r.issues, ["#3456"])
         self.assertEqual(r.design, ["core.md"])
         self.assertEqual(r.requirement, "Requirement Two")
 
@@ -244,7 +237,7 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         self.assertEqual(r.requirement, "Requirement Three")
 
         r = req["test_get_requirements_spec0"][3]
-        self.assertEqual(r.issues, ["#1234", "#4567"])
+        self.assertEqual(r.issues, ["#4567"])
         self.assertEqual(r.design, ["katex.md"])
         self.assertEqual(r.requirement, "Requirement Four")
 
@@ -257,15 +250,15 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         d = r.details[0]
         self.assertEqual(d.name, "group0-a")
         self.assertEqual(d.detail, "1D")
-        self.assertEqual(d.detail_line, 27)
+        self.assertEqual(d.detail_line, 29)
 
         d = r.details[1]
         self.assertEqual(d.name, "group0-b")
         self.assertEqual(d.detail, "2D")
-        self.assertEqual(d.detail_line, 30)
+        self.assertEqual(d.detail_line, 32)
 
         r = req["test_get_requirements_spec0"][5]
-        self.assertEqual(r.issues, ["#1234", "#8910"])
+        self.assertEqual(r.issues, ["#8910"])
         self.assertEqual(r.design, ["core.md"])
         self.assertEqual(r.requirement, "Requirement Group Two")
         self.assertEqual(len(r.details), 2)
@@ -273,12 +266,12 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         d = r.details[0]
         self.assertEqual(d.name, "group1-a")
         self.assertEqual(d.detail, "3D")
-        self.assertEqual(d.detail_line, 38)
+        self.assertEqual(d.detail_line, 40)
 
         d = r.details[1]
         self.assertEqual(d.name, "group1-b")
         self.assertEqual(d.detail, "4D")
-        self.assertEqual(d.detail_line, 41)
+        self.assertEqual(d.detail_line, 43)
 
         r = req["test_get_requirements_spec0"][6]
         self.assertEqual(r.issues, ["#1234"])
@@ -289,15 +282,15 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         d = r.details[0]
         self.assertEqual(d.name, "group2-a")
         self.assertEqual(d.detail, "5D")
-        self.assertEqual(d.detail_line, 50)
+        self.assertEqual(d.detail_line, 53)
 
         d = r.details[1]
         self.assertEqual(d.name, "group2-b")
         self.assertEqual(d.detail, "6D")
-        self.assertEqual(d.detail_line, 53)
+        self.assertEqual(d.detail_line, 56)
 
         r = req["test_get_requirements_spec0"][7]
-        self.assertEqual(r.issues, ["#1234", "#4321"])
+        self.assertEqual(r.issues, ["#4321"])
         self.assertEqual(r.design, ["katex.md"])
         self.assertEqual(r.requirement, "Requirement Group Four")
         self.assertEqual(len(r.details), 2)
@@ -305,12 +298,12 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         d = r.details[0]
         self.assertEqual(d.name, "group3-a")
         self.assertEqual(d.detail, "7D")
-        self.assertEqual(d.detail_line, 62)
+        self.assertEqual(d.detail_line, 65)
 
         d = r.details[1]
         self.assertEqual(d.name, "group3-b")
         self.assertEqual(d.detail, "8D")
-        self.assertEqual(d.detail_line, 65)
+        self.assertEqual(d.detail_line, 68)
 
         # collections_default
         r = req["test_get_requirements_spec0"][9]

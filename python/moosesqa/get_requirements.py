@@ -6,18 +6,15 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
+import os
 import collections
 import fnmatch
 import logging
-import os
-
-import moosetree
-import mooseutils
 import pyhit
-
+import mooseutils
+import moosetree
 import moosesqa
-
-from .Requirement import Detail, Requirement, TestSpecification
+from .Requirement import TestSpecification, Requirement, Detail
 
 
 def get_requirements_from_tests(directories, specs, include_non_testable=False):
