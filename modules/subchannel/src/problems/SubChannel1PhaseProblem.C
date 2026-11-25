@@ -2095,6 +2095,10 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   LibmeshPetscCall(KSPGetPC(ksp, &pc));
   LibmeshPetscCall(PCSetType(pc, PCNONE));
   LibmeshPetscCall(KSPSetTolerances(ksp, _rtol, _atol, _dtol, _maxit));
+  // Absolute tolerance so that an already-converged crossflow is not reported as a failed line
+  // search; the PETSc default of 1e-50 is never reached and the line search fails at round-off
+  LibmeshPetscCall(
+      SNESSetTolerances(snes, 1e-10, PETSC_CURRENT, PETSC_CURRENT, PETSC_CURRENT, PETSC_CURRENT));
   LibmeshPetscCall(SNESSetFromOptions(snes));
   LibmeshPetscCall(VecGetArray(x, &xx));
   for (unsigned int i = 0; i < _block_size * _n_gaps; i++)
