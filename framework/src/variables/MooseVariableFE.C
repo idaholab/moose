@@ -433,6 +433,19 @@ MooseVariableFE<OutputType>::computeLowerDValues()
 }
 
 template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiGradient &
+MooseVariableFE<OutputType>::gradPhiLower() const
+{
+  // Assembly leaves the gradients of the piecewise-linear basis empty
+  if (this->usePiecewiseLinearBasis())
+    mooseError("Lower-dimensional shape function gradients of variable '",
+               this->name(),
+               "' are not available, because it uses the piecewise-linear basis "
+               "('use_piecewise_linear_basis = true').");
+  return _lower_data->gradPhi();
+}
+
+template <typename OutputType>
 void
 MooseVariableFE<OutputType>::computeIncrementAtQps(const NumericVector<Number> & increment_vec)
 {

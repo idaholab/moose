@@ -113,7 +113,7 @@
       cli_args = 'Contact/mortar/petrov_galerkin_test=STANDARD AuxVariables/mortar_aux_lm/order=SECOND '
                  'AuxVariables/mortar_aux_lm/block=mortar_secondary_subdomain '
                  'AuxVariables/mortar_aux_lm/use_piecewise_linear_basis=true --check-input'
-      expect_err = "requires 'split_segments_at_sub_elements = true' in two dimensions"
+      expect_err = "requires 'split_segments_at_sub_elements = true' on two-dimensional meshes"
       detail = 'The piecewise-linear basis requires two-dimensional mortar segments to be split at '
                'the sub-elements of the secondary faces.'
     []

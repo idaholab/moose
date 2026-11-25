@@ -283,10 +283,11 @@ public:
   void meshChanged() { _msm_node_id_start = std::nullopt; }
 
   /**
-   * @return Whether 2D mortar segments of EDGE3 secondary faces are split at the mid node, so that
-   * every segment lies on one of the two EDGE2 sub-elements of its secondary face, as 3D mortar
-   * segments always lie on one sub-element. Integrands built from the piecewise-linear basis are
-   * then polynomial on each segment.
+   * @return Whether mortar segments on two-dimensional meshes, whose secondary faces are EDGE3
+   * elements, are split at the mid node, so that every segment lies on one of the two EDGE2
+   * sub-elements of its secondary face, as mortar segments on three-dimensional meshes always lie
+   * on one sub-element. Integrands built from the piecewise-linear basis are then polynomial on
+   * each segment.
    */
   bool splitsSegmentsAtSubElements() const { return _split_segments_at_sub_elements; }
 
@@ -697,7 +698,8 @@ private:
   /// Method used to map 3D mortar segment quadrature points to primary and secondary faces.
   const Mortar3DQuadraturePointMapping _mortar_3d_qp_mapping;
 
-  /// Whether 2D mortar segments are split at the sub-elements of their secondary faces
+  /// Whether mortar segments on two-dimensional meshes are split at the sub-elements of their
+  /// secondary faces
   const bool _split_segments_at_sub_elements;
 
   /// Reference-coordinate data used only by the reference-interpolation mapping mode.

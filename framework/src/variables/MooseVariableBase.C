@@ -124,7 +124,9 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     paramError("p_refinement", "finite volume (fv=true) variables do not support p-refinement");
   if (_use_piecewise_linear_basis)
   {
-    // The basis has no gradients, which only the Jacobians of nonlinear variables would read
+    // Only mortar objects read the basis, as the test functions of the auxiliary variable passed as
+    // 'aux_lm'. The basis has no gradients, which the mortar Jacobians read for the
+    // lower-dimensional shape functions of every coupled nonlinear variable.
     if (_var_kind != Moose::VAR_AUXILIARY || _count != 1 || _use_dual ||
         _fe_type.family != LAGRANGE || _fe_type.order != SECOND || _fe_type.p_refinement)
       paramError("use_piecewise_linear_basis",
@@ -136,7 +138,7 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     bool supported = true;
     for (const auto * const elem :
          _mesh.getMesh().active_subdomain_set_elements_ptr_range(blockIDs()))
-      if (!Moose::Mortar::hasPiecewiseLinearShapes(elem->type()))
+      if (!Moose::Mortar::hasSubElementLinearShapes(elem->type()))
       {
         supported = false;
         break;

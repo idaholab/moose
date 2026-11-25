@@ -112,9 +112,9 @@ are:
 | QUAD8 | $1/6$  | $5/6$    |        |
 | QUAD9 | $1/4$  | $1/2$    | $1$    |
 
-In three dimensions, mortar segments lie within single sub-elements of flat faces. In two
-dimensions, mortar segments of EDGE3 faces are split at the mid node. On each segment the basis is
-then polynomial and the weighted gap is integrated exactly. On curved TRI6 and QUAD8 faces, a
+On three-dimensional meshes, mortar segments lie within single sub-elements of flat faces. On
+two-dimensional meshes, whose secondary faces are EDGE3 elements, mortar segments are split at the
+mid node. On each segment the basis is then polynomial and the weighted gap is integrated exactly. On curved TRI6 and QUAD8 faces, a
 projected segment can cross a sub-element edge, where the basis is continuous but has a kink, so
 the integration is not exact there.
 
@@ -124,9 +124,9 @@ In the [Contact](Contact/index.md optional=True) action, set `petrov_galerkin_te
 
 !listing modules/contact/test/tests/petrov_galerkin_piecewise_linear/tilted_gap_3d.i block=Contact
 
-In `Constraints` based input, set `use_piecewise_linear_basis = true` on the SECOND order
-auxiliary variable that is passed as `aux_lm`. In two dimensions, every mortar object on the
-interface must also set `split_segments_at_sub_elements = true`.
+In `Constraints` based input, set `use_piecewise_linear_basis = true` on a SECOND order
+auxiliary variable that is passed as `aux_lm`. On two-dimensional meshes, every mortar object on
+the interface must also set `split_segments_at_sub_elements = true`.
 
 The piecewise-linear basis is available on EDGE3, TRI6, QUAD8 and QUAD9 secondary faces with
 Lagrange multiplier mortar contact. It applies only to the lower-dimensional shape functions of the

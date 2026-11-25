@@ -443,19 +443,20 @@ Assembly::computePiecewiseLinearLowerDShapes(const Elem & elem)
   const auto & ref_points = _current_qrule_lower->get_points();
   // Lower-dimensional elements of other blocks, which the requesting variables do not live on, get
   // no functions
-  const auto n_shapes = Moose::Mortar::hasPiecewiseLinearShapes(elem.type()) ? elem.n_nodes() : 0;
+  const auto n_pw_shapes_to_compute =
+      Moose::Mortar::hasSubElementLinearShapes(elem.type()) ? elem.n_nodes() : 0;
   std::vector<Real> phi;
 
   for (auto & [_, fesd] : _fe_shape_data_piecewise_linear_lower)
   {
-    fesd->_phi.resize(n_shapes);
-    for (const auto i : make_range(n_shapes))
+    fesd->_phi.resize(n_pw_shapes_to_compute);
+    for (const auto i : make_range(n_pw_shapes_to_compute))
       fesd->_phi[i].resize(ref_points.size());
 
-    for (const auto qp : make_range(n_shapes ? ref_points.size() : 0))
+    for (const auto qp : make_range(n_pw_shapes_to_compute ? ref_points.size() : 0))
     {
-      Moose::Mortar::piecewiseLinearShapes(elem, ref_points[qp], phi);
-      for (const auto i : make_range(n_shapes))
+      Moose::Mortar::subElementLinearShapes(elem, ref_points[qp], phi);
+      for (const auto i : make_range(n_pw_shapes_to_compute))
         fesd->_phi[i][qp] = phi[i];
     }
   }

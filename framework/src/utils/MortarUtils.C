@@ -139,17 +139,17 @@ getMortarSubElementNodeIndices(const Elem & parent_elem, const unsigned int sub_
 }
 
 bool
-hasPiecewiseLinearShapes(const ElemType type)
+hasSubElementLinearShapes(const ElemType type)
 {
   return type == EDGE3 || type == TRI6 || type == QUAD8 || type == QUAD9;
 }
 
 void
-piecewiseLinearShapes(const Elem & parent_elem,
-                      const Point & reference_point,
-                      std::vector<Real> & phi)
+subElementLinearShapes(const Elem & parent_elem,
+                       const Point & reference_point,
+                       std::vector<Real> & phi)
 {
-  if (!hasPiecewiseLinearShapes(parent_elem.type()))
+  if (!hasSubElementLinearShapes(parent_elem.type()))
     mooseError("Piecewise-linear shape functions are not available for face element ",
                parent_elem.id(),
                " of type ",

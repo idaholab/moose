@@ -46,14 +46,14 @@ TEST(MortarPiecewiseLinearShapesTest, InterpolatesNodesAndPartitionsUnity)
 
     for (const auto node : make_range(elem->n_nodes()))
     {
-      Moose::Mortar::piecewiseLinearShapes(*elem, elem->master_point(node), phi);
+      Moose::Mortar::subElementLinearShapes(*elem, elem->master_point(node), phi);
       for (const auto i : index_range(phi))
         EXPECT_NEAR(phi[i], i == node ? 1 : 0, tol) << "type " << type << " node " << node;
     }
 
     for (const auto & point : samplePoints(type))
     {
-      Moose::Mortar::piecewiseLinearShapes(*elem, point, phi);
+      Moose::Mortar::subElementLinearShapes(*elem, point, phi);
       Real sum = 0;
       for (const auto i : index_range(phi))
       {
@@ -81,7 +81,7 @@ TEST(MortarPiecewiseLinearShapesTest, IntegratesBasisFunctions)
       for (const Real center : {-0.5, 0.5})
         for (const auto qp : make_range(qrule.n_points()))
         {
-          Moose::Mortar::piecewiseLinearShapes(*elem, Point(center + 0.5 * qrule.qp(qp)(0)), phi);
+          Moose::Mortar::subElementLinearShapes(*elem, Point(center + 0.5 * qrule.qp(qp)(0)), phi);
           for (const auto i : index_range(phi))
             integrals[i] += 0.5 * qrule.w(qp) * phi[i];
         }
@@ -105,7 +105,7 @@ TEST(MortarPiecewiseLinearShapesTest, IntegratesBasisFunctions)
         for (const auto qp : make_range(qrule.n_points()))
         {
           const Point point = origin + qrule.qp(qp)(0) * e0 + qrule.qp(qp)(1) * e1;
-          Moose::Mortar::piecewiseLinearShapes(*elem, point, phi);
+          Moose::Mortar::subElementLinearShapes(*elem, point, phi);
           for (const auto i : index_range(phi))
             integrals[i] += determinant * qrule.w(qp) * phi[i];
         }

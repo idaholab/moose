@@ -119,8 +119,9 @@ MortarConsumerInterface::validParams()
   params.addParam<bool>(
       "split_segments_at_sub_elements",
       false,
-      "Whether to split 2D mortar segments of EDGE3 secondary faces at the mid node, so that every "
-      "segment lies on one of the two linear sub-elements of its face, as 3D mortar segments do. "
+      "Whether to split mortar segments on two-dimensional meshes, whose secondary faces are EDGE3 "
+      "elements, at the mid node, so that every segment lies on one of the two linear sub-elements "
+      "of its face, as mortar segments on three-dimensional meshes do. "
       "Required for exact integration with a Lagrange multiplier test basis that sets "
       "'use_piecewise_linear_basis = true'. All objects on a mortar interface must agree.");
 
@@ -296,7 +297,7 @@ MortarConsumerInterface::checkPiecewiseLinearBasis(const MooseObject & moose_obj
   if (_mci_mesh.dimension() == 2 && !amg().splitsSegmentsAtSubElements())
     moose_object.paramError("aux_lm",
                             "An auxiliary variable with the piecewise-linear basis requires "
-                            "'split_segments_at_sub_elements = true' in two dimensions.");
+                            "'split_segments_at_sub_elements = true' on two-dimensional meshes.");
 }
 
 void

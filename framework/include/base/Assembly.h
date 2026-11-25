@@ -1661,8 +1661,11 @@ public:
 
   /**
    * Piecewise-linear basis of a quadratic lower-dimensional face, see
-   * Moose::Mortar::piecewiseLinearShapes(). The basis serves as the mortar test basis of auxiliary
-   * variables, whose gradients no object reads, so the gradients are left empty.
+   * Moose::Mortar::subElementLinearShapes(). The only use of the basis is as the Petrov-Galerkin
+   * mortar test basis of the auxiliary variable passed as 'aux_lm'
+   * ('use_piecewise_linear_basis = true'). Every lower-dimensional MooseVariableData binds a
+   * gradient, so the gradient accessor exists, but the gradients are left empty, and
+   * MooseVariableFE::gradPhiLower() reports an error for such a variable.
    */
   ///@{
   const VariablePhiValue & fePiecewiseLinearPhiLower(FEType type) const;

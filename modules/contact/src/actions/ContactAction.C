@@ -969,9 +969,9 @@ void
 ContactAction::addMortarContact()
 {
   std::string action_name = MooseUtils::shortName(name());
-  // Every mortar object on a pair shares one mortar interface, so all of them split 2D segments at
-  // the sub-elements of the secondary faces when the gap is weighted with the piecewise-linear
-  // basis
+  // Every mortar object on a pair shares one mortar interface, so on two-dimensional meshes all of
+  // them split mortar segments at the sub-elements of the secondary faces when the gap is weighted
+  // with the piecewise-linear basis
   const bool split_segments_at_sub_elements =
       getParam<MooseEnum>("petrov_galerkin_test") == "PIECEWISE_LINEAR";
 
