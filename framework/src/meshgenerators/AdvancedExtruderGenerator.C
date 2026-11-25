@@ -163,7 +163,7 @@ AdvancedExtruderGenerator::validParams()
       "If modifying the radial extent of the extruded geometry, radial "
       "extent at the beginning of the extrusion process. This can be "
       "specified manually to avoid computing it from the surface, which can "
-      "be undesirable if the starting shape is approximated by polygonazition");
+      "be undesirable if the starting shape is approximated by polygonization");
   params.addParam<Real>("end_radial_extent",
                         0,
                         "If modifying the radial extent of the extruded geometry, final radial "

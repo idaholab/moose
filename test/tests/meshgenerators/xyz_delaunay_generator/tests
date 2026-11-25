@@ -163,7 +163,7 @@
       input = 'xyzdelaunay_unprepared_hole.i'
       csvdiff = 'xyzdelaunay_unprepared_hole_out.csv'
       recover = false
-      detail = "converting an unprepared hole mesh with non-TRI3 surface sides."
+      detail = "converting to triangles an unprepared hole mesh with non-TRI3 surface sides."
       valgrind = none # see #31360
       capabilities = 'netgen'
       mesh_mode = 'replicated'
