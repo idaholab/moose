@@ -179,6 +179,7 @@ public:
   };
 
   virtual libMesh::EquationSystems & es() override { return _req.set().es(); }
+  const libMesh::EquationSystems & es() const { return _req.get().es(); }
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
   const MooseMesh & mesh(bool use_displaced) const override;
