@@ -27,7 +27,7 @@ duct_flux = 2.0e4 # W/m2
     hwire = 0.0
     spacer_z = '0'
     spacer_k = '0'
-    Kij = 1e8
+    Kij = 5e11
   []
   [duct]
     type = SCMTriDuctMeshGenerator
