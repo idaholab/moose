@@ -27,9 +27,11 @@ class NonlinearSystemBase;
 class CommandLine;
 class InputParameters;
 class ParallelParamObject;
+class MooseBase;
 
 namespace libMesh
 {
+class EquationSystems;
 class DofMapBase;
 }
 
@@ -226,13 +228,20 @@ void addPetscPairsToPetscOptions(
 std::set<std::string> getPetscValidLineSearches();
 
 /**
- * Returns the PETSc options that are common between Executioners and Preconditioners
- * @return InputParameters object containing the PETSc related parameters
- *
- * The output of this function should be added to the the parameters object of the overarching class
- * @see CreateExecutionerAction
+ * @returns The parameters for PETSc flags and name/value pairs
  */
-InputParameters getPetscValidParams();
+InputParameters flagAndPairOptions();
+
+/**
+ * @returns The parameters of a Newton-Krylov nonlinear solve: solve type, finite differencing
+ * type, and line search
+ */
+InputParameters newtonKrylovParams();
+
+/**
+ * @returns The tolerance and iteration limit parameters of a linear (Krylov) solve
+ */
+InputParameters kspRelatedParams();
 
 /// A helper function to produce a MultiMooseEnum with commonly used PETSc single options (flags)
 MultiMooseEnum getCommonPetscFlags();
@@ -362,6 +371,12 @@ createMatrixFromFile(const libMesh::Parallel::Communicator & comm,
                      Mat & petsc_mat,
                      const std::string & binary_mat_file,
                      unsigned int mat_number_to_load = 1);
+
+/**
+ * Sets the linear solve tolerances and iteration limit in \p es from the kspRelatedParams()
+ * parameters of \p solver_object
+ */
+void setESLinearSolverParams(libMesh::EquationSystems & es, const MooseBase & solver_object);
 
 #define SNESGETLINESEARCH SNESGetLineSearch
 }

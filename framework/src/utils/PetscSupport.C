@@ -26,6 +26,7 @@
 #include "MultiMooseEnum.h"
 #include "Conversion.h"
 #include "Executioner.h"
+#include "FEProblemSolve.h"
 #include "MooseMesh.h"
 #include "ComputeLineSearchObjectWrapper.h"
 #include "Convergence.h"
@@ -1052,7 +1053,22 @@ getPetscValidLineSearches()
 }
 
 InputParameters
-getPetscValidParams()
+flagAndPairOptions()
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<MultiMooseEnum>(
+      "petsc_options", getCommonPetscFlags(), "Singleton PETSc options");
+  params.addParam<MultiMooseEnum>(
+      "petsc_options_iname", getCommonPetscKeys(), "Names of PETSc name/value pairs");
+  params.addParam<std::vector<std::string>>(
+      "petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
+  params.addParamNamesToGroup("petsc_options petsc_options_iname petsc_options_value", "PETSc");
+  return params;
+}
+
+InputParameters
+newtonKrylovParams()
 {
   InputParameters params = emptyInputParameters();
 
@@ -1072,17 +1088,30 @@ getPetscValidParams()
                              "Jacobian-free solve types. Note that the "
                              "default is wp (for Walker and Pernice).");
 
-  params.addParam<MultiMooseEnum>(
-      "petsc_options", getCommonPetscFlags(), "Singleton PETSc options");
-  params.addParam<MultiMooseEnum>(
-      "petsc_options_iname", getCommonPetscKeys(), "Names of PETSc name/value pairs");
-  params.addParam<std::vector<std::string>>(
-      "petsc_options_value",
-      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
-  params.addParamNamesToGroup("solve_type petsc_options petsc_options_iname petsc_options_value "
-                              "mffd_type",
-                              "PETSc");
+  std::set<std::string> line_searches = FEProblemSolve::mooseLineSearches();
+  line_searches.insert({"default", "none", "basic"});
+  const auto petsc_line_searches = getPetscValidLineSearches();
+  line_searches.insert(petsc_line_searches.begin(), petsc_line_searches.end());
+  MooseEnum line_search(Moose::stringify(line_searches, " "), "default");
+  params.addParam<MooseEnum>(
+      "line_search", line_search, "Specifies the line search type (Note: none = basic)");
+  MooseEnum line_search_package("petsc moose", "petsc");
+  params.addParam<MooseEnum>("line_search_package",
+                             line_search_package,
+                             "The solver package to use to conduct the line-search");
 
+  params.addParamNamesToGroup("solve_type mffd_type", "PETSc");
+  params.addParamNamesToGroup("line_search line_search_package", "Solver line search");
+  return params;
+}
+
+InputParameters
+kspRelatedParams()
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
+  params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
+  params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
   return params;
 }
 
@@ -1376,6 +1405,16 @@ registerPetscCitation(const std::string & bibtex)
   // separated. A null "set" flag registers unconditionally; callers deduplicate by citation key.
   const std::string entry = (!bibtex.empty() && bibtex.back() == '\n') ? bibtex : bibtex + "\n";
   LibmeshPetscCallA(PETSC_COMM_WORLD, PetscCitationsRegister(entry.c_str(), nullptr));
+}
+
+void
+setESLinearSolverParams(libMesh::EquationSystems & es, const MooseBase & solver_object)
+{
+  es.parameters.set<Real>("linear solver tolerance") = solver_object.getParam<Real>("l_tol");
+  es.parameters.set<Real>("linear solver absolute tolerance") =
+      solver_object.getParam<Real>("l_abs_tol");
+  es.parameters.set<unsigned int>("linear solver maximum iterations") =
+      solver_object.getParam<unsigned int>("l_max_its");
 }
 
 } // Namespace PetscSupport
