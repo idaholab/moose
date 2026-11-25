@@ -352,6 +352,48 @@ TEST_F(MFEMKernelTest, MFEMMixedScalarCurlKernel)
   delete integrator;
 }
 
+/**
+ * Test supported kernels accept diagonal coefficients.
+ */
+TEST_F(MFEMKernelTest, DiagonalCoefficients)
+{
+  for (const auto & type : {"MFEMCurlCurlKernel",
+                            "MFEMDiffusionKernel",
+                            "MFEMMixedGradGradKernel",
+                            "MFEMMixedVectorGradientKernel",
+                            "MFEMMixedVectorMassKernel",
+                            "MFEMVectorFEMassKernel"})
+  {
+    InputParameters kernel_params = _factory.getValidParams(type);
+    kernel_params.set<VariableName>("variable") = "test_variable_name";
+    kernel_params.set<MFEMVectorCoefficientName>("diagonal_coefficient") = "1. 2. 3.";
+    auto & kernel = addObject<MFEMKernel>(type, type, kernel_params);
+    auto integrator = std::unique_ptr<mfem::BilinearFormIntegrator>(kernel.createBFIntegrator());
+    ASSERT_NE(integrator.get(), nullptr);
+  }
+}
+
+/**
+ * Test supported kernels accept matrix coefficients.
+ */
+TEST_F(MFEMKernelTest, MatrixCoefficients)
+{
+  for (const auto & type : {"MFEMCurlCurlKernel",
+                            "MFEMDiffusionKernel",
+                            "MFEMMixedGradGradKernel",
+                            "MFEMMixedVectorGradientKernel",
+                            "MFEMMixedVectorMassKernel",
+                            "MFEMVectorFEMassKernel"})
+  {
+    InputParameters kernel_params = _factory.getValidParams(type);
+    kernel_params.set<VariableName>("variable") = "test_variable_name";
+    kernel_params.set<MFEMMatrixCoefficientName>("matrix_coefficient") = "1 2 3; 2 5 0; 3 0 10";
+    auto & kernel = addObject<MFEMKernel>(type, type, kernel_params);
+    auto integrator = std::unique_ptr<mfem::BilinearFormIntegrator>(kernel.createBFIntegrator());
+    ASSERT_NE(integrator.get(), nullptr);
+  }
+}
+
 TEST_F(MFEMKernelTest, RejectsOffDiagonalNonlinearKernelWhenBuildingEquationSystem)
 {
   InputParameters diag_test_params = _factory.getValidParams("MFEMDiffusionKernel");
