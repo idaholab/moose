@@ -1,0 +1,6 @@
+[Tests]
+  issues = '#1'
+  [t1]
+    issues = '#321'
+  []
+[]

@@ -350,7 +350,7 @@ class TestGetRequirementsFromTests(unittest.TestCase):
             os.path.join(os.path.dirname(__file__), "..", "..", "..")
         )
         filename = os.path.join(
-            MOOSE_DIR, "python", "moosesqa", "test", "specs", "spec_issues_listing"
+            MOOSE_DIR, "python", "moosesqa", "test", "specs", "spec_issues_listing_0"
         )
 
         req = get_requirements_from_file(filename)
@@ -364,6 +364,17 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         self.assertEqual(req[INDEX_TEST_0].issues, ["#4321"])
         self.assertEqual(req[INDEX_TEST_1].issues, ["#5432", "#6543"])
         self.assertEqual(req[INDEX_TEST_2].issues, ["#7654", "#8765"])
+
+        filename = os.path.join(
+            MOOSE_DIR, "python", "moosesqa", "test", "specs", "spec_issues_listing_1"
+        )
+
+        req = get_requirements_from_file(filename)
+
+        self.assertEqual(1, len(req))
+
+        INDEX_TEST_0 = 0
+        self.assertEqual(req[INDEX_TEST_0].issues, ["#1", "#321"])
 
 
 class TestRequirementCollections(unittest.TestCase):
