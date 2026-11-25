@@ -193,49 +193,14 @@ StitchMeshGenerator::generate()
     // for performance.
     if (getParam<bool>("subdomain_remapping"))
     {
-      const auto secondary_subdomains = MooseMeshUtils::getAllSubdomainNamesAndIDs(*meshes[i]);
-      // the free id must be present in neither mesh
-      auto next_free_id = std::max(MooseMeshUtils::getNextFreeSubdomainID(*mesh),
-                                   MooseMeshUtils::getNextFreeSubdomainID(*meshes[i]));
+      const auto id_remapping =
+          MooseMeshUtils::remapSecondarySubdomainIDsForStitching(*mesh, *meshes[i]);
 
-      // Check subdomains in the secondary mesh for the remapping criteria. The remapping is
-      // gathered first then applied in a single pass, so that swapped IDs are not remapped twice
-      std::unordered_map<subdomain_id_type, subdomain_id_type> id_remapping;
-      for (const auto & [bl_name, bl_id] : secondary_subdomains)
-      {
-        subdomain_id_type new_id = bl_id;
-        // If first mesh has the same-name subdomain, we'll use its subdomainID to merge
-        if (!bl_name.empty() && MooseMeshUtils::hasSubdomainName(*mesh, bl_name))
-          new_id = MooseMeshUtils::getSubdomainID(bl_name, *mesh);
-        // If first mesh has the same ID BUT different name, change the subdomainID to avoid merging
-        else if (MooseMeshUtils::hasSubdomainID(*mesh, bl_id) &&
-                 std::as_const(*mesh).subdomain_name(bl_id) != bl_name)
-        {
-          new_id = next_free_id++;
-          // the name is pre-positioned, the ID will be added to mesh after stitching with meshes[i]
-          mesh->set_subdomain_name(new_id, bl_name, true);
-        }
-
-        if (new_id != bl_id)
-        {
-          if (verbose_remapping)
-            _console << "Remapping in input mesh " << _input_names[i + 1] << " subdomain "
-                     << bl_name << " (" << bl_id << ") to ID " << new_id << std::endl;
-          id_remapping[bl_id] = new_id;
-        }
-      }
-
-      if (!id_remapping.empty())
-      {
-        for (auto * const elem : meshes[i]->element_ptr_range())
-          if (const auto it = id_remapping.find(elem->subdomain_id()); it != id_remapping.end())
-            elem->subdomain_id() = it->second;
-        // The names of the remapped subdomains are already in the first mesh, under the new IDs
-        auto & secondary_name_map = meshes[i]->set_subdomain_name_map();
-        for (const auto & [old_id, _] : id_remapping)
-          secondary_name_map.erase(old_id);
-        meshes[i]->unset_has_synched_subdomain_name_map();
-      }
+      if (verbose_remapping)
+        for (const auto & [old_id, new_id] : id_remapping)
+          _console << "Remapping in input mesh " << _input_names[i + 1] << " subdomain "
+                   << std::as_const(*mesh).subdomain_name(new_id) << " (" << old_id << ") to ID "
+                   << new_id << std::endl;
     }
 
     mesh->stitch_meshes(*meshes[i],

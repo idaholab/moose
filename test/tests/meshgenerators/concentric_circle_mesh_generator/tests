@@ -37,6 +37,19 @@
     design = 'meshgenerators/ConcentricCircleMeshGenerator.md'
     issues = '#20976'
   []
+  [single_ring]
+    type = 'Exodiff'
+    input = 'single_ring.i'
+    cli_args = '--mesh-only single_ring_in.e'
+    exodiff = 'single_ring_in.e'
+    exodiff_opts = '-pedantic'
+    mesh_mode = 'REPLICATED'
+    recover = false
+
+    requirement = 'The system shall create the outer boundary of a concentric circle mesh that has a single ring of elements and no enclosing square.'
+    design = 'meshgenerators/ConcentricCircleMeshGenerator.md'
+    issues = '#34317'
+  []
   [subdomain_names_wrong_size]
     type = RunException
     input = 'concentric_circle_mesh_generator.i'

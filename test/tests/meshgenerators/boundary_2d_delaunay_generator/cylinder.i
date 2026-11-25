@@ -19,6 +19,9 @@
     heights = '2'
     num_layers = '3'
     direction = '0 0 1'
+    # Name the flat caps so the boundaries below do not depend on generated boundary IDs
+    bottom_boundary = 'bottom_cap'
+    top_boundary = 'top_cap'
   []
   [side_1]
     type = ParsedGenerateSideset
@@ -75,13 +78,13 @@
   [bd_bot]
     type = Boundary2DDelaunayGenerator
     input = extrude
-    boundary_names = '2'
+    boundary_names = 'bottom_cap'
     use_auto_area_func = true
   []
   [bd_top]
     type = Boundary2DDelaunayGenerator
     input = extrude
-    boundary_names = '3'
+    boundary_names = 'top_cap'
     use_auto_area_func = true
   []
   [smg]
