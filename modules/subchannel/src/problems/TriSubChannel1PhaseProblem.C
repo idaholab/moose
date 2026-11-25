@@ -382,7 +382,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
       // Radial conduction through a gap needs both for the two channels of the gap
       std::vector<PetscScalar> alpha_ch(_n_channels);
       std::vector<Real> diff_c(_n_channels);
-      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+      for (const auto i_ch : make_range(_n_channels))
       {
         auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
@@ -572,7 +572,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
       // Radial conduction through a gap needs both for the two channels of the gap
       std::vector<PetscScalar> alpha_ch(_n_channels);
       std::vector<Real> diff_c(_n_channels);
-      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+      for (const auto i_ch : make_range(_n_channels))
       {
         auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
