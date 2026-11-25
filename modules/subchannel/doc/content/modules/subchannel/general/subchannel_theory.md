@@ -228,7 +228,7 @@ subchannels, $\eta_{ij}$ is the conduction shape factor, and $L_{ij}$ is the cen
 The enthalpy and $k/c_p$ of each subchannel are interpolated with the weight $\alpha$ of that
 subchannel, so the heat leaving one subchannel enters the other. Axial heat conduction is written
 in enthalpy, with $k/c_p$ and the flow area interpolated to the faces of the cell. The explicit
-and implicit solvers use the same cell-center values for every scheme.
+and implicit solvers use the same weight $\alpha$ for these terms.
 
 - Conservation of mass:
 
@@ -481,7 +481,7 @@ There are three variations [!cite](kyriakopoulos2026numerical) of the algorithm 
 
 This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations. The variables are updated sequantially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet.
 
-The explicit solver discretizes the equations as the implicit solver does and honors [!param](/Problem/TriSubChannel1PhaseProblem/interpolation_scheme). Each cell-center term takes the inlet part, weighted by $\alpha$, from the node below and the outlet part, weighted by $1 - \alpha$, from the outlet node of the current iterate; in the enthalpy equation the outlet coefficients of the subchannel being updated are kept on the left-hand side. The temperature and pressure iterations converge this to the solution of the implicit solver. With `upwind` the cell-center values are the inlet values and the solver is the traditional marching scheme. Weights that put more of the cell-center values on the outlet node strengthen the coupling to the current iterate, and the explicit crossflow solve may then need more iterations or fail to converge.
+The explicit solver discretizes the equations as the implicit solver does and honors [!param](/Problem/TriSubChannel1PhaseProblem/interpolation_scheme). Each cell-center term takes the inlet part, weighted by $\alpha$, from the node below and the outlet part, weighted by $1 - \alpha$, from the outlet node of the current iterate; in the enthalpy equation the outlet coefficients of the subchannel being updated are kept on the left-hand side. With `upwind` the cell-center values are the inlet values and the solver is the traditional marching scheme. Weights that put more of the cell-center values on the outlet node strengthen the coupling to the current iterate, and the explicit crossflow solve may then need more iterations or fail to converge.
 
 #### Implicit-Segregated
 

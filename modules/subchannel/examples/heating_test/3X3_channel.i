@@ -32,8 +32,8 @@ n_cells = 20
 
 [SubChannel]
   type = QuadSubChannel1PhaseProblem
-  # The explicit solve follows the interpolation scheme. With upwind, the cell-center mixing
-  # velocities leave the explicit crossflow solve undamped and it does not converge here
+  # The explicit solve follows the interpolation scheme; its crossflow solve does not converge
+  # for this case with upwind
   interpolation_scheme = central_difference
   fp = water
   n_blocks = 1
