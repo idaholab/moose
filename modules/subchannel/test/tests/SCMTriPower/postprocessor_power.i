@@ -32,6 +32,8 @@ power = 7000.0 # W
 
 [SubChannel]
   type = TriSubChannel1PhaseProblem
+  # The explicit solve follows the interpolation scheme; upwind is the marching solve
+  interpolation_scheme = upwind
   fp = sodium
   n_blocks = 1
   P_out = 1.01325e5 # Pa

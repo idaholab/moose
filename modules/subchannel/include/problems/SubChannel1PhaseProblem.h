@@ -166,6 +166,9 @@ protected:
   PetscScalar computeInterpolationCoefficients(PetscScalar Peclet = 0.0);
   PetscScalar
   computeInterpolatedValue(PetscScalar topValue, PetscScalar botValue, PetscScalar Peclet = 0.0);
+  /// Cell-center interpolation weight of the enthalpy equation in cell iz of channel i_ch, from
+  /// the cell Peclet number mdot Dh cp / (k S) for the exponential scheme
+  PetscScalar computeEnthalpyInterpolationWeight(unsigned int i_ch, unsigned int iz);
 
   /// inline function that is used to define the gravity direction
   Real computeGravityDir(const MooseEnum & dir) const

@@ -270,12 +270,29 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
         auto mdot_in = (*_mdot_soln)(node_in);
         auto h_in = (*_h_soln)(node_in); // J/kg
-        auto volume = dz * (*_S_flow_soln)(node_in);
+        // Cell volume of the storage term, with the flow area interpolated as in the implicit
+        // branch
+        auto volume =
+            dz * computeInterpolatedValue((*_S_flow_soln)(node_out), (*_S_flow_soln)(node_in), 0.5);
         auto mdot_out = (*_mdot_soln)(node_out);
-        auto h_out = 0.0;
-        Real sumWijh = 0.0;
-        Real sumWijPrimeDhij = 0.0;
-        Real added_enthalpy = computeAddedHeatPin(i_ch, iz);
+        // Weight of the inlet node in the cell-center values
+        const auto alpha = computeEnthalpyInterpolationWeight(i_ch, iz);
+
+        // The march solves the row of the implicit system for the outlet enthalpy of this
+        // channel. Its own outlet-node coefficients go to the diagonal; the outlet-node enthalpies
+        // of the other channels are taken from the current iterate
+        Real diagonal = mdot_out + _TR * (*_rho_soln)(node_out)*volume / _dt;
+        Real rhs = mdot_in * h_in + computeAddedHeatPin(i_ch, iz) +
+                   _TR * _rho_soln->old(node_out) * _h_soln->old(node_out) * volume / _dt;
+        // Moves coef times the cell-center enthalpy of channel ch to the left-hand side
+        const auto add_lhs = [&](Real coef, unsigned int ch)
+        {
+          rhs -= coef * alpha * (*_h_soln)(_subchannel_mesh.getChannelNode(ch, iz - 1));
+          if (ch == i_ch)
+            diagonal += coef * (1.0 - alpha);
+          else
+            rhs -= coef * (1.0 - alpha) * (*_h_soln)(_subchannel_mesh.getChannelNode(ch, iz));
+        };
         // Calculate sum of crossflow into channel i from channels j around i
         unsigned int counter = 0;
         for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
@@ -284,23 +301,19 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
           unsigned int ii_ch = chans.first;
           // i is always the smallest and first index in the mapping
           unsigned int jj_ch = chans.second;
-          auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
-          auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
-          // Define donor enthalpy
-          Real h_star = 0.0;
-          if (_Wij(i_gap, iz) > 0.0)
-            h_star = (*_h_soln)(node_in_i);
-          else if (_Wij(i_gap, iz) < 0.0)
-            h_star = (*_h_soln)(node_in_j);
+          // Diversion crossflow with the donor enthalpy
           // take care of the sign by applying the map, use donor cell
-          sumWijh += _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * h_star;
-          sumWijPrimeDhij += _WijPrime(i_gap, iz) * (2 * (*_h_soln)(node_in) -
-                                                     (*_h_soln)(node_in_j) - (*_h_soln)(node_in_i));
+          if (_Wij(i_gap, iz) > 0.0)
+            add_lhs(_subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz), ii_ch);
+          else if (_Wij(i_gap, iz) < 0.0)
+            add_lhs(_subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz), jj_ch);
+          // Turbulent mixing
+          add_lhs(2.0 * _WijPrime(i_gap, iz), i_ch);
+          add_lhs(-_WijPrime(i_gap, iz), jj_ch);
+          add_lhs(-_WijPrime(i_gap, iz), ii_ch);
           counter++;
         }
-        h_out = (mdot_in * h_in - sumWijh - sumWijPrimeDhij + added_enthalpy +
-                 _TR * _rho_soln->old(node_out) * _h_soln->old(node_out) * volume / _dt) /
-                (mdot_out + _TR * (*_rho_soln)(node_out)*volume / _dt);
+        const auto h_out = rhs / diagonal;
         if (h_out < 0)
         {
           mooseError(name(),
@@ -338,30 +351,11 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
         auto volume = dz * S_interp;
 
         // interpolation weight coefficient
-        PetscScalar Pe = 0.5;
-        if (_interpolation_scheme == 3)
-        {
-          // Compute the cell Peclet number
-          auto w_perim_in = (*_w_perim_soln)(node_in);
-          auto w_perim_out = (*_w_perim_soln)(node_out);
-          auto w_perim_interp = this->computeInterpolatedValue(w_perim_out, w_perim_in, 0.5);
-          auto K_in = _fp->k_from_p_T((*_P_soln)(node_in) + _P_out, (*_T_soln)(node_in));
-          auto K_out = _fp->k_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out));
-          auto K = this->computeInterpolatedValue(K_out, K_in, 0.5);
-          auto cp_in = _fp->cp_from_p_T((*_P_soln)(node_in) + _P_out, (*_T_soln)(node_in));
-          auto cp_out = _fp->cp_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out));
-          auto cp = this->computeInterpolatedValue(cp_out, cp_in, 0.5);
-          auto mdot_loc =
-              this->computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), 0.5);
-          // hydraulic diameter in the i direction
-          auto Dh_i = 4.0 * S_interp / w_perim_interp;
-          Pe = mdot_loc * Dh_i * cp / (K * S_interp) * (mdot_loc / std::abs(mdot_loc));
-        }
-        auto alpha = computeInterpolationCoefficients(Pe);
+        auto alpha = computeEnthalpyInterpolationWeight(i_ch, iz);
 
-        // Keep temporal storage independent of the spatial interpolation scheme. Applying the
-        // upwind coefficient to this term puts the storage on the upstream node and makes the
-        // small-timestep matrix singular in the upwind limit.
+        // The storage rho h stays at the outlet node for every interpolation scheme, and only the
+        // cell volume follows the scheme. Applying the upwind coefficient to rho h puts the storage
+        // on the upstream node and makes the small-timestep matrix singular in the upwind limit.
         PetscInt row_tt = i_ch + _n_channels * iz_ind;
         PetscInt col_tt = i_ch + _n_channels * iz_ind;
         PetscScalar value_tt = _TR * (*_rho_soln)(node_out)*volume / _dt;

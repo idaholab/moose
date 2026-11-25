@@ -601,6 +601,34 @@ SubChannel1PhaseProblem::computeInterpolatedValue(PetscScalar topValue,
   return alpha * botValue + (1.0 - alpha) * topValue;
 }
 
+PetscScalar
+SubChannel1PhaseProblem::computeEnthalpyInterpolationWeight(unsigned int i_ch, unsigned int iz)
+{
+  PetscScalar Pe = 0.5;
+  if (_interpolation_scheme == 3)
+  {
+    // Compute the cell Peclet number
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+    auto S_interp =
+        computeInterpolatedValue((*_S_flow_soln)(node_out), (*_S_flow_soln)(node_in), 0.5);
+    auto w_perim_in = (*_w_perim_soln)(node_in);
+    auto w_perim_out = (*_w_perim_soln)(node_out);
+    auto w_perim_interp = computeInterpolatedValue(w_perim_out, w_perim_in, 0.5);
+    auto K_in = _fp->k_from_p_T((*_P_soln)(node_in) + _P_out, (*_T_soln)(node_in));
+    auto K_out = _fp->k_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out));
+    auto K = computeInterpolatedValue(K_out, K_in, 0.5);
+    auto cp_in = _fp->cp_from_p_T((*_P_soln)(node_in) + _P_out, (*_T_soln)(node_in));
+    auto cp_out = _fp->cp_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out));
+    auto cp = computeInterpolatedValue(cp_out, cp_in, 0.5);
+    auto mdot_loc = computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), 0.5);
+    // hydraulic diameter in the i direction
+    auto Dh_i = 4.0 * S_interp / w_perim_interp;
+    Pe = mdot_loc * Dh_i * cp / (K * S_interp) * (mdot_loc / std::abs(mdot_loc));
+  }
+  return computeInterpolationCoefficients(Pe);
+}
+
 void
 SubChannel1PhaseProblem::computeWijFromSolve(int iblock)
 {
@@ -863,44 +891,12 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         auto mu_in = (*_mu_soln)(node_in);
         auto S = (*_S_flow_soln)(node_in);
         auto w_perim = (*_w_perim_soln)(node_in);
-        auto time_term = _TR * ((*_mdot_soln)(node_out)-_mdot_soln->old(node_out)) * dz / _dt -
-                         dz * 2.0 * (*_mdot_soln)(node_out) * (rho_out - _rho_soln->old(node_out)) /
-                             rho_in / _dt;
-        auto mass_term1 =
-            Utility::pow<2>((*_mdot_soln)(node_out)) * (1.0 / S / rho_out - 1.0 / S / rho_in);
-        auto mass_term2 = -2.0 * (*_mdot_soln)(node_out) * (*_SumWij_soln)(node_out) / S / rho_in;
-        auto crossflow_term = 0.0;
-        auto turbulent_term = 0.0;
-        unsigned int counter = 0;
-        for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
-        {
-          auto chans = _subchannel_mesh.getGapChannels(i_gap);
-          unsigned int ii_ch = chans.first;
-          unsigned int jj_ch = chans.second;
-          auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
-          auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
-          auto * node_out_i = _subchannel_mesh.getChannelNode(ii_ch, iz);
-          auto * node_out_j = _subchannel_mesh.getChannelNode(jj_ch, iz);
-          auto rho_i = (*_rho_soln)(node_in_i);
-          auto rho_j = (*_rho_soln)(node_in_j);
-          auto Si = (*_S_flow_soln)(node_in_i);
-          auto Sj = (*_S_flow_soln)(node_in_j);
-          Real u_star = 0.0;
-          // figure out donor axial velocity
-          if (_Wij(i_gap, iz) > 0.0)
-            u_star = (*_mdot_soln)(node_out_i) / Si / rho_i;
-          else
-            u_star = (*_mdot_soln)(node_out_j) / Sj / rho_j;
-
-          crossflow_term +=
-              _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * u_star;
-
-          turbulent_term += _WijPrime(i_gap, iz) * (2 * (*_mdot_soln)(node_out) / rho_in / S -
-                                                    (*_mdot_soln)(node_out_j) / Sj / rho_j -
-                                                    (*_mdot_soln)(node_out_i) / Si / rho_i);
-          counter++;
-        }
-        turbulent_term *= _CT;
+        // Time derivative at the outlet node and advection as the difference of the face momentum
+        // fluxes mdot^2 / (S rho), as in the implicit branch
+        auto time_term = _TR * ((*_mdot_soln)(node_out)-_mdot_soln->old(node_out)) * dz / _dt;
+        auto advection_term =
+            Utility::pow<2>((*_mdot_soln)(node_out)) / ((*_S_flow_soln)(node_out)*rho_out) -
+            Utility::pow<2>((*_mdot_soln)(node_in)) / ((*_S_flow_soln)(node_in)*rho_in);
         /// Upwind local form loss
         auto ki = 0.0;
         if ((*_mdot_soln)(node_out) >= 0)
@@ -924,6 +920,43 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           const Real ff_mid = _friction_closure->computeFrictionFactor(_friction_args);
           Pe = 1.0 / ((ff_mid * dz / Dh_mid + ki) * 0.5) * mdot_mid / std::abs(mdot_mid);
         }
+        auto crossflow_term = 0.0;
+        auto turbulent_term = 0.0;
+        unsigned int counter = 0;
+        for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
+        {
+          auto chans = _subchannel_mesh.getGapChannels(i_gap);
+          unsigned int ii_ch = chans.first;
+          unsigned int jj_ch = chans.second;
+          auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
+          auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
+          auto * node_out_i = _subchannel_mesh.getChannelNode(ii_ch, iz);
+          auto * node_out_j = _subchannel_mesh.getChannelNode(jj_ch, iz);
+          // Donor axial velocity at the cell center, as in the implicit branch
+          const auto * node_in_d = (_Wij(i_gap, iz) > 0.0) ? node_in_i : node_in_j;
+          const auto * node_out_d = (_Wij(i_gap, iz) > 0.0) ? node_out_i : node_out_j;
+          const auto u_star =
+              computeInterpolatedValue((*_mdot_soln)(node_out_d), (*_mdot_soln)(node_in_d), Pe) /
+              computeInterpolatedValue(
+                  (*_S_flow_soln)(node_out_d), (*_S_flow_soln)(node_in_d), Pe) /
+              computeInterpolatedValue((*_rho_soln)(node_out_d), (*_rho_soln)(node_in_d), Pe);
+
+          crossflow_term +=
+              _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * u_star;
+
+          // Turbulent mixing with the cell-center axial velocities, as in the implicit branch
+          const auto velocity_c = [&](const Node * n_in, const Node * n_out)
+          {
+            return computeInterpolatedValue((*_mdot_soln)(n_out), (*_mdot_soln)(n_in), Pe) /
+                   computeInterpolatedValue((*_S_flow_soln)(n_out), (*_S_flow_soln)(n_in), Pe) /
+                   computeInterpolatedValue((*_rho_soln)(n_out), (*_rho_soln)(n_in), Pe);
+          };
+          turbulent_term += _WijPrime(i_gap, iz) *
+                            (2.0 * velocity_c(node_in, node_out) -
+                             velocity_c(node_in_j, node_out_j) - velocity_c(node_in_i, node_out_i));
+          counter++;
+        }
+        turbulent_term *= _CT;
         // The friction factor and the friction force are cell-center quantities
         const auto S_c = computeInterpolatedValue((*_S_flow_soln)(node_out), S, Pe);
         const auto w_perim_c = computeInterpolatedValue((*_w_perim_soln)(node_out), w_perim, Pe);
@@ -939,9 +972,13 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           _ff_soln->set(node_out, ff);
         auto friction_term =
             (ff * dz / Dh_c + ki) * 0.5 * mdot_c * std::abs(mdot_c) / (S_c * rho_c);
-        auto gravity_term = _dir_grav * _g_grav * (*_rho_soln)(node_out)*dz * S;
-        auto DP = (1 / S) * (time_term + mass_term1 + mass_term2 + crossflow_term + turbulent_term +
-                             friction_term + gravity_term); // Pa
+        // Gravity acts over the cell, with the cell-center density and flow area as in the
+        // implicit branch
+        auto gravity_term = _dir_grav * _g_grav * rho_c * dz * S_c;
+        // The pressure force is S (P_out - P_in) with the flow area interpolated as in computeP
+        const auto S_p = computeInterpolatedValue((*_S_flow_soln)(node_out), S, 0.5);
+        auto DP = (1 / S_p) * (time_term + advection_term + crossflow_term + turbulent_term +
+                               friction_term + gravity_term); // Pa
         _DP(i_ch, iz) = DP;
         if (_DP_soln)
           _DP_soln->set(node_out, DP);
@@ -1572,22 +1609,36 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         auto Lij = pitch;
         // total local form loss in the ij direction
         auto friction_term = _kij * _Wij(i_gap, iz) * std::abs(_Wij(i_gap, iz));
-        auto DPij = (*_P_soln)(node_in_i) - (*_P_soln)(node_in_j);
-        // Figure out donor cell density
-        auto rho_star = 0.0;
-        if (_Wij(i_gap, iz) > 0.0)
-          rho_star = rho_i;
-        else if (_Wij(i_gap, iz) < 0.0)
-          rho_star = rho_j;
-        else
-          rho_star = (rho_i + rho_j) / 2.0;
+        // Weight of the inlet node in the cell-center values of the lateral momentum equation, as
+        // in the implicit branch. The argument is the cell Peclet number, fixed at 0.5 as in the
+        // implicit lateral momentum equation; only the exponential scheme uses it (#34528 replaces
+        // it with the local Peclet number)
+        const auto alpha_p = computeInterpolationCoefficients(0.5);
+        // Pressure difference across the gap at the cell center. The pressures of the whole block
+        // are known here
+        auto DPij = alpha_p * ((*_P_soln)(node_in_i) - (*_P_soln)(node_in_j)) +
+                    (1.0 - alpha_p) * ((*_P_soln)(node_out_i) - (*_P_soln)(node_out_j));
+        // rho_star is the density of the lateral friction closure K*Wij*|Wij|/(Sij*rho_star),
+        // which this residual carries multiplied through by Sij*rho_star. A donor-cell density
+        // jumps at Wij = 0 and makes the residual discontinuous there, so the finite-difference
+        // Jacobian action of the matrix-free solve is not a fixed linear map; the mean of the two
+        // cell-center channel densities, as in the implicit branch, keeps the residual continuous
+        const auto rho_i_c = computeInterpolatedValue((*_rho_soln)(node_out_i), rho_i, 0.5);
+        const auto rho_j_c = computeInterpolatedValue((*_rho_soln)(node_out_j), rho_j, 0.5);
+        auto rho_star = (rho_i_c + rho_j_c) / 2.0;
         auto mass_term_out =
             (*_mdot_soln)(node_out_i) / (*_S_flow_soln)(node_out_i) / (*_rho_soln)(node_out_i) +
             (*_mdot_soln)(node_out_j) / (*_S_flow_soln)(node_out_j) / (*_rho_soln)(node_out_j);
         auto mass_term_in =
             (*_mdot_soln)(node_in_i) / Si / rho_i + (*_mdot_soln)(node_in_j) / Sj / rho_j;
-        auto term_out = Sij * rho_star * (Lij / dz) * mass_term_out * _Wij(i_gap, iz);
-        auto term_in = Sij * rho_star * (Lij / dz) * mass_term_in * _Wij(i_gap, iz - 1);
+        // The crossflow at the cell faces is interpolated from the cell-center crossflows of the
+        // neighboring cells with the weight of the implicit branch. Above the last cell of the
+        // block the crossflow of the cell itself is used, as in the implicit branch
+        const auto W_above = (iz < last_node) ? _Wij(i_gap, iz + 1) : _Wij(i_gap, iz);
+        const auto W_face_out = alpha_p * _Wij(i_gap, iz) + (1.0 - alpha_p) * W_above;
+        const auto W_face_in = alpha_p * _Wij(i_gap, iz - 1) + (1.0 - alpha_p) * _Wij(i_gap, iz);
+        auto term_out = Sij * rho_star * (Lij / dz) * mass_term_out * W_face_out;
+        auto term_in = Sij * rho_star * (Lij / dz) * mass_term_in * W_face_in;
         auto inertia_term = term_out - term_in;
         auto pressure_term = 2 * Utility::pow<2>(Sij) * DPij * rho_star;
         auto time_term =
@@ -1644,14 +1695,9 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
         auto Lij = pitch;
 
-        // Figure out donor cell density
-        auto rho_star = 0.0;
-        if (_Wij(i_gap, iz) > 0.0)
-          rho_star = rho_i_interp;
-        else if (_Wij(i_gap, iz) < 0.0)
-          rho_star = rho_j_interp;
-        else
-          rho_star = (rho_i_interp + rho_j_interp) / 2.0;
+        // rho_star is the mean of the two channel densities for consistency with the explicit
+        // branch above; see the comment there
+        auto rho_star = (rho_i_interp + rho_j_interp) / 2.0;
 
         // Assembling time derivative
         PetscScalar time_factor = _TR * Lij * Sij * rho_star / _dt;
