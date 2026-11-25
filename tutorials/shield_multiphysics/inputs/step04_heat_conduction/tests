@@ -6,7 +6,7 @@
     input = '../step03_boundary_conditions/mesh.i step4.i'
     # Make sure to generate the mesh
     cli_args = "Mesh/inactive='fmg'"
-    requirement = "The shield multiphysics tutorial shall include a demonstration of creating "
+    requirement = "The system shall include, as part of the shield multiphysics tutorial, a demonstration of creating "
                   "material properties."
   []
 []

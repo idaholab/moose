@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'outflow.i'
     exodiff = 'outflow_out.e'
-    requirement = "The Darcy-Thermomechanics tutorial shall include an implementation of an outflow boundary condition."
+    requirement = "The system shall include, as part of the Darcy-Thermomechanics tutorial, an implementation of an outflow boundary condition."
   []
 []

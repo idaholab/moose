@@ -2,7 +2,7 @@
   issues = '#32759'
   design = 'examples_and_tutorials/index.md'
   [check_input]
-    requirement = "The user short workshop shall generate the correct mesh for the input file"
+    requirement = "The system shall generate the correct mesh for the user short workshop input file"
     [basic]
       type = Exodiff
       input = 'basic.i'

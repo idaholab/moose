@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'simple_diffusion.i'
     exodiff = 'simple_diffusion_out.e'
-    requirement = "The Darcy-Thermomechanics tutorial shall include the default 'simple diffusion' test created with every application."
+    requirement = "The system shall include, as part of the Darcy-Thermomechanics tutorial, the default 'simple diffusion' test created with every application."
   []
 []
