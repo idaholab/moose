@@ -59,7 +59,7 @@
     variable = E_real
     coupled_field = E_imag
     component = real
-    admittance = 795774.7154594767 # 1/mu_0
+    admittance_real = 795774.7154594767 # 1/mu_0
     boundary = 'left right top bottom'
   []
   [absorb_imag]
@@ -67,7 +67,7 @@
     variable = E_imag
     coupled_field = E_real
     component = imaginary
-    admittance = 795774.7154594767 # 1/mu_0
+    admittance_real = 795774.7154594767 # 1/mu_0
     boundary = 'left right top bottom'
   []
 []

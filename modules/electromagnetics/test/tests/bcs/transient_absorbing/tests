@@ -7,4 +7,13 @@
     design = 'VectorTransientAbsorbingBC.md'
     issues = '#34235'
   []
+  [jacobian_complex_admittance]
+    type = PetscJacobianTester
+    input = 'transient_absorbing.i'
+    run_sim = false
+    cli_args = 'BCs/absorb_real/admittance_imag=397887.35772973836 BCs/absorb_imag/admittance_imag=397887.35772973836'
+    requirement = 'The system shall use the correct jacobian contribution for a first order transient absorbing boundary condition for vector field variables with a complex admittance.'
+    design = 'VectorTransientAbsorbingBC.md'
+    issues = '#34235'
+  []
 []

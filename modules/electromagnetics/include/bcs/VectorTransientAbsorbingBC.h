@@ -25,15 +25,21 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  /// Intrinsic impedance of the infinite medium (default is the admittance of free space)
-  const Function & _admittance;
+  /// Real component of the intrinsic admittance of the infinite medium
+  const Function & _admittance_real;
+
+  /// Imaginary component of the intrinsic admittance of the infinite medium
+  const Function & _admittance_imag;
 
   /// Variable field component (real or imaginary)
   const MooseEnum _component;
 
   /// Coupled field vector variable
   const VectorVariableValue & _coupled_val;
+  /// Coupled field vector variable id
+  const unsigned int _coupled_var_num;
 
   /// Vector field variable time derivative
   const VectorVariableValue & _u_dot;
@@ -43,4 +49,7 @@ protected:
 
   /// Vector field variable dot du
   const VariableValue & _du_dot_du;
+
+  /// Coupled vector field variable dot du
+  const VariableValue & _coupled_dot_du;
 };

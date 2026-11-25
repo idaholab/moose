@@ -23,9 +23,14 @@ VectorTransientAbsorbingBC::validParams()
       "First order transient absorbing boundary condition for vector variables.");
   params.addParam<FunctionName>("admittance",
                                 1 / (EM::mu_0 * EM::c),
-                                "Intrinsic admittance of the infinite medium (default is "
-                                "$\\sqrt{\\frac{\\epsilon_0}{\\mu_0}} = \\frac{1}{\\mu_0 c}$, or "
-                                "the admittance of free space).");
+                                "Real component of the intrinsic admittance of the infinite medium "
+                                "(default is $\\sqrt{\\frac{\\epsilon_0}{\\mu_0}} = "
+                                "\\frac{1}{\\mu_0 c}$, or the admittance of free space).");
+  params.deprecateParam("admittance", "admittance_real", "06/01/2027");
+  params.addParam<FunctionName>(
+      "admittance_imag",
+      "0",
+      "Imaginary component of the intrinsic admittance of the infinite medium.");
   MooseEnum component("real imaginary");
   params.addParam<MooseEnum>(
       "component", component, "Variable field component (real or imaginary).");
@@ -36,15 +41,18 @@ VectorTransientAbsorbingBC::validParams()
 VectorTransientAbsorbingBC::VectorTransientAbsorbingBC(const InputParameters & parameters)
   : VectorIntegratedBC(parameters),
 
-    _admittance(getFunction("admittance")),
+    _admittance_real(getFunction("admittance_real")),
+    _admittance_imag(getFunction("admittance_imag")),
 
     _component(getParam<MooseEnum>("component")),
 
     _coupled_val(coupledVectorValue("coupled_field")),
+    _coupled_var_num(coupled("coupled_field")),
 
     _u_dot(dot()),
     _coupled_dot(coupledVectorDot("coupled_field")),
-    _du_dot_du(dotDu())
+    _du_dot_du(dotDu()),
+    _coupled_dot_du(coupledVectorDotDu("coupled_field"))
 {
 }
 
@@ -81,10 +89,14 @@ VectorTransientAbsorbingBC::computeQpResidual()
   }
   VectorValue<std::complex<double>> field_dot(field_dot_0, field_dot_1, field_dot_2);
 
+  // Complex admittance of the infinite medium
+  const std::complex<double> admittance(_admittance_real.value(_t, _q_point[_qp]),
+                                        _admittance_imag.value(_t, _q_point[_qp]));
+
   // Calculate solution field contribution to BC residual
-  std::complex<double> p_dot_test = EM::mu_0 * _admittance.value(_t, _q_point[_qp]) *
-                                    _test[_i][_qp].cross(_normals[_qp]) *
-                                    _normals[_qp].cross(field_dot);
+  std::complex<double> p_dot_test =
+      EM::mu_0 * admittance *
+      (_test[_i][_qp].cross(_normals[_qp]) * _normals[_qp].cross(field_dot));
 
   std::complex<double> res = -p_dot_test;
 
@@ -98,7 +110,24 @@ Real
 VectorTransientAbsorbingBC::computeQpJacobian()
 {
   RealVectorValue prefix =
-      EM::mu_0 * _admittance.value(_t, _q_point[_qp]) * _test[_i][_qp].cross(_normals[_qp]);
+      EM::mu_0 * _admittance_real.value(_t, _q_point[_qp]) * _test[_i][_qp].cross(_normals[_qp]);
 
   return -prefix * _normals[_qp].cross(_du_dot_du[_qp] * _phi[_j][_qp]);
+}
+
+Real
+VectorTransientAbsorbingBC::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  if (jvar == _coupled_var_num)
+  {
+    // The coupled field enters through the imaginary part of the admittance, with a positive
+    // sign in the real component of the residual and a negative sign in the imaginary component
+    const Real sign = (_component == EM::REAL) ? 1.0 : -1.0;
+    RealVectorValue prefix = sign * EM::mu_0 * _admittance_imag.value(_t, _q_point[_qp]) *
+                             _test[_i][_qp].cross(_normals[_qp]);
+
+    return prefix * _normals[_qp].cross(_coupled_dot_du[_qp] * _phi[_j][_qp]);
+  }
+  else
+    return 0.0;
 }
