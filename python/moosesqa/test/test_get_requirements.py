@@ -250,12 +250,12 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         d = r.details[0]
         self.assertEqual(d.name, "group0-a")
         self.assertEqual(d.detail, "1D")
-        self.assertEqual(d.detail_line, 27)
+        self.assertEqual(d.detail_line, 29)
 
         d = r.details[1]
         self.assertEqual(d.name, "group0-b")
         self.assertEqual(d.detail, "2D")
-        self.assertEqual(d.detail_line, 30)
+        self.assertEqual(d.detail_line, 32)
 
         r = req["test_get_requirements_spec0"][5]
         self.assertEqual(r.issues, ["#8910"])
@@ -266,12 +266,12 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         d = r.details[0]
         self.assertEqual(d.name, "group1-a")
         self.assertEqual(d.detail, "3D")
-        self.assertEqual(d.detail_line, 38)
+        self.assertEqual(d.detail_line, 40)
 
         d = r.details[1]
         self.assertEqual(d.name, "group1-b")
         self.assertEqual(d.detail, "4D")
-        self.assertEqual(d.detail_line, 41)
+        self.assertEqual(d.detail_line, 43)
 
         r = req["test_get_requirements_spec0"][6]
         self.assertEqual(r.issues, ["#1234"])
@@ -282,12 +282,12 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         d = r.details[0]
         self.assertEqual(d.name, "group2-a")
         self.assertEqual(d.detail, "5D")
-        self.assertEqual(d.detail_line, 50)
+        self.assertEqual(d.detail_line, 53)
 
         d = r.details[1]
         self.assertEqual(d.name, "group2-b")
         self.assertEqual(d.detail, "6D")
-        self.assertEqual(d.detail_line, 53)
+        self.assertEqual(d.detail_line, 56)
 
         r = req["test_get_requirements_spec0"][7]
         self.assertEqual(r.issues, ["#4321"])
@@ -298,12 +298,12 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         d = r.details[0]
         self.assertEqual(d.name, "group3-a")
         self.assertEqual(d.detail, "7D")
-        self.assertEqual(d.detail_line, 62)
+        self.assertEqual(d.detail_line, 65)
 
         d = r.details[1]
         self.assertEqual(d.name, "group3-b")
         self.assertEqual(d.detail, "8D")
-        self.assertEqual(d.detail_line, 65)
+        self.assertEqual(d.detail_line, 68)
 
         # collections_default
         r = req["test_get_requirements_spec0"][9]
@@ -344,6 +344,37 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         # prereq_group
         r = req["test_get_requirements_spec0"][18]
         self.assertEqual(r.prerequisites, {"prereq_first", "prereq_group/a"})
+
+    def testNestingIssues(self):
+        MOOSE_DIR = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "..")
+        )
+        filename = os.path.join(
+            MOOSE_DIR, "python", "moosesqa", "test", "specs", "spec_issues_listing_0"
+        )
+
+        req = get_requirements_from_file(filename)
+
+        self.assertEqual(3, len(req))
+
+        INDEX_TEST_0 = 0
+        INDEX_TEST_1 = 1
+        INDEX_TEST_2 = 2
+
+        self.assertEqual(req[INDEX_TEST_0].issues, ["#4321"])
+        self.assertEqual(req[INDEX_TEST_1].issues, ["#5432", "#6543"])
+        self.assertEqual(req[INDEX_TEST_2].issues, ["#7654", "#8765"])
+
+        filename = os.path.join(
+            MOOSE_DIR, "python", "moosesqa", "test", "specs", "spec_issues_listing_1"
+        )
+
+        req = get_requirements_from_file(filename)
+
+        self.assertEqual(1, len(req))
+
+        INDEX_TEST_0 = 0
+        self.assertEqual(req[INDEX_TEST_0].issues, ["#1", "#321"])
 
 
 class TestRequirementCollections(unittest.TestCase):
