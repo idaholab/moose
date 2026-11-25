@@ -920,6 +920,13 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           const Real ff_mid = _friction_closure->computeFrictionFactor(_friction_args);
           Pe = 1.0 / ((ff_mid * dz / Dh_mid + ki) * 0.5) * mdot_mid / std::abs(mdot_mid);
         }
+        // Axial velocity of a channel at the cell center, as in the implicit branch
+        const auto velocity_c = [&](const Node * n_in, const Node * n_out)
+        {
+          return computeInterpolatedValue((*_mdot_soln)(n_out), (*_mdot_soln)(n_in), Pe) /
+                 computeInterpolatedValue((*_S_flow_soln)(n_out), (*_S_flow_soln)(n_in), Pe) /
+                 computeInterpolatedValue((*_rho_soln)(n_out), (*_rho_soln)(n_in), Pe);
+        };
         auto crossflow_term = 0.0;
         auto turbulent_term = 0.0;
         unsigned int counter = 0;
@@ -932,25 +939,13 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
           auto * node_out_i = _subchannel_mesh.getChannelNode(ii_ch, iz);
           auto * node_out_j = _subchannel_mesh.getChannelNode(jj_ch, iz);
-          // Donor axial velocity at the cell center, as in the implicit branch
-          const auto * node_in_d = (_Wij(i_gap, iz) > 0.0) ? node_in_i : node_in_j;
-          const auto * node_out_d = (_Wij(i_gap, iz) > 0.0) ? node_out_i : node_out_j;
-          const auto u_star =
-              computeInterpolatedValue((*_mdot_soln)(node_out_d), (*_mdot_soln)(node_in_d), Pe) /
-              computeInterpolatedValue(
-                  (*_S_flow_soln)(node_out_d), (*_S_flow_soln)(node_in_d), Pe) /
-              computeInterpolatedValue((*_rho_soln)(node_out_d), (*_rho_soln)(node_in_d), Pe);
-
+          // Diversion crossflow with the donor axial velocity
+          const auto u_star = (_Wij(i_gap, iz) > 0.0) ? velocity_c(node_in_i, node_out_i)
+                                                      : velocity_c(node_in_j, node_out_j);
           crossflow_term +=
               _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * u_star;
 
-          // Turbulent mixing with the cell-center axial velocities, as in the implicit branch
-          const auto velocity_c = [&](const Node * n_in, const Node * n_out)
-          {
-            return computeInterpolatedValue((*_mdot_soln)(n_out), (*_mdot_soln)(n_in), Pe) /
-                   computeInterpolatedValue((*_S_flow_soln)(n_out), (*_S_flow_soln)(n_in), Pe) /
-                   computeInterpolatedValue((*_rho_soln)(n_out), (*_rho_soln)(n_in), Pe);
-          };
+          // Turbulent mixing
           turbulent_term += _WijPrime(i_gap, iz) *
                             (2.0 * velocity_c(node_in, node_out) -
                              velocity_c(node_in_j, node_out_j) - velocity_c(node_in_i, node_out_i));
