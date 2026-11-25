@@ -307,6 +307,37 @@ TEST_F(LineSegmentTest, containsPointTest)
   EXPECT_FALSE(_neg3diag.contains_point(Point(0, .1, .1)));
 }
 
+TEST_F(LineSegmentTest, containsPointToleranceTest)
+{
+  // A point coinciding with an end point has a parametric coordinate of exactly 0 or 1 in exact
+  // arithmetic, but rounding can place it just outside, so the end points have to be reported as
+  // contained even when the parametric coordinate lands an ulp out of [0, 1].
+  EXPECT_TRUE(_posx.contains_point(Point(0, 0)));
+  EXPECT_TRUE(_posx.contains_point(Point(5, 0)));
+
+  // Perturbing an end point along the segment by less than the tolerance keeps it contained. The
+  // tolerance is on the parametric coordinate, so it scales with the segment length: here the
+  // segment is 5 long, so a parametric tolerance of 1e-6 admits 5e-6 in distance.
+  const Real tol = 1e-6;
+  EXPECT_TRUE(_posx.contains_point(Point(-4.0e-6, 0), tol));
+  EXPECT_TRUE(_posx.contains_point(Point(5 + 4.0e-6, 0), tol));
+
+  // Beyond the tolerance the point is off the segment
+  EXPECT_FALSE(_posx.contains_point(Point(-6.0e-6, 0), tol));
+  EXPECT_FALSE(_posx.contains_point(Point(5 + 6.0e-6, 0), tol));
+
+  // A tighter tolerance rejects what a looser one accepts
+  EXPECT_FALSE(_posx.contains_point(Point(-4.0e-6, 0), 1e-9));
+
+  // The tolerance applies along the segment, not away from it: a point off to the side stays out
+  EXPECT_FALSE(_posx.contains_point(Point(2, 1.0e-3), tol));
+
+  // closest_normal_point takes the same tolerance and agrees at the end points
+  Point result;
+  EXPECT_TRUE(_posx.closest_normal_point(Point(5 + 4.0e-6, 0), result, tol));
+  EXPECT_FALSE(_posx.closest_normal_point(Point(5 + 6.0e-6, 0), result, tol));
+}
+
 TEST_F(LineSegmentTest, planeIntersectTest)
 {
   Point result;
