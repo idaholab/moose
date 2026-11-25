@@ -463,14 +463,11 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             else
               add_lhs(wsweep, i_ch, alpha);
           }
-          // Inner gap
-          // Turbulent Diffusion
-          else
-          {
-            add_lhs(2.0 * _WijPrime(i_gap, iz), i_ch, alpha);
-            add_lhs(-_WijPrime(i_gap, iz), jj_ch, alpha);
-            add_lhs(-_WijPrime(i_gap, iz), ii_ch, alpha);
-          }
+          // Turbulent Diffusion, in every gap as in the implicit branch. The mixing closure sets
+          // beta, and so W', to zero in gaps without turbulent exchange
+          add_lhs(2.0 * _WijPrime(i_gap, iz), i_ch, alpha);
+          add_lhs(-_WijPrime(i_gap, iz), jj_ch, alpha);
+          add_lhs(-_WijPrime(i_gap, iz), ii_ch, alpha);
 
           // compute the radial heat conduction through the gaps
           Real dist_ij = pitch;
