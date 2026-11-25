@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BinaryTestExecutor.h"
+#include "SteadyExecutor.h"
 
 registerMooseObject("MooseTestApp", BinaryTestExecutor);
 
@@ -24,6 +25,9 @@ BinaryTestExecutor::validParams()
   params.addParam<bool>("return_early_inner_fail",
                         false,
                         "true to cause executor to return early after inner executor failures");
+  params.addParam<ExecutorName>(
+      "steady_inner",
+      "A SteadyExecutor to retrieve by type at construction, which tests the type check");
   return params;
 }
 
@@ -32,6 +36,8 @@ BinaryTestExecutor::BinaryTestExecutor(const InputParameters & parameters)
     _inner1(isParamValid("inner1") ? &getExecutor<Executor>("inner1") : nullptr),
     _inner2(isParamValid("inner2") ? &getExecutor<Executor>("inner2") : nullptr)
 {
+  if (isParamValid("steady_inner"))
+    getExecutor<SteadyExecutor>("steady_inner");
 }
 
 Executor::Result
