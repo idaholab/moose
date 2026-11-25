@@ -17,6 +17,8 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/sparse_matrix.h"
 
+#include <filesystem>
+
 registerMooseObject("MooseApp", FileMeshGenerator);
 
 InputParameters
@@ -98,10 +100,8 @@ FileMeshGenerator::generate()
   if (!_matrix_file_name.empty())
     mesh->allow_renumbering(false);
 
-  // Figure out if we are reading an Exodus file, but not Tetgen (*.ele)
-  bool exodus = (_file_name.rfind(".exo") < _file_name.size() ||
-                 _file_name.rfind(".e") < _file_name.size()) &&
-                _file_name.rfind(".ele") == std::string::npos;
+  // Figure out if we are reading an Exodus file
+  bool exodus = isExodusFile(_file_name);
   bool has_exodus_integers = isParamValid("exodus_extra_element_integers");
   bool restart_exodus = (getParam<bool>("use_for_exodus_restart") && _app.getExodusFileRestart());
   if (exodus)
@@ -189,4 +189,14 @@ FileMeshGenerator::deduceCheckpointPath(const MooseObject & object, const std::s
 
   // LATEST
   return MooseUtils::convertLatestCheckpoint(file_name) + object.getMooseApp().checkpointSuffix();
+}
+
+bool
+FileMeshGenerator::isExodusFile(const std::string & file_name)
+{
+  // Only consider the file name, so that a ".e" in a parent
+  // directory doesn't trigger the Exodus reader
+  const std::string base = std::filesystem::path(file_name).filename().string();
+  return (base.find(".exo") != std::string::npos || base.find(".e") != std::string::npos) &&
+         base.find(".ele") == std::string::npos;
 }

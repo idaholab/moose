@@ -108,8 +108,7 @@ FileMesh::buildMesh()
     // the mesh with the exodus reader instead of using mesh.read().  This will read the mesh on
     // every processor
 
-    if (_app.getExodusFileRestart() && (_file_name.rfind(".exo") < _file_name.size() ||
-                                        _file_name.rfind(".e") < _file_name.size()))
+    if (_app.getExodusFileRestart() && FileMeshGenerator::isExodusFile(_file_name))
     {
       MooseUtils::checkFileReadable(_file_name);
 

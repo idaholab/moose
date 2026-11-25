@@ -11,6 +11,16 @@
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#11640 #32487'
   [../]
+  [non_exodus_in_exodus_like_dir]
+    type = RunApp
+    input = 'gmsh_in_exodus_like_dir.i'
+    cli_args = '--mesh-only'
+    recover = false
+
+    requirement = 'The system shall determine the mesh file format from the file name alone, ignoring the names of parent directories.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#34542'
+  []
   [./extra_integer_test]
     type = 'Exodiff'
     input = 'exodus_file_mesh_with_id.i'
