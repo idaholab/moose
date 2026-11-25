@@ -1,0 +1,10 @@
+[Tests]
+  design = 'meshgenerators/DualMeshGenerator.md'
+  issues = '#33143'
+
+  [contains_point_tolerance]
+    type = GoogleTest
+    unit_test = LineSegmentTest.containsPointToleranceTest
+    requirement = 'The system shall report a point as contained in a line segment when its parametric coordinate along the segment lies within a given tolerance of the unit interval, so that a point coinciding with an end point is contained regardless of rounding, and shall apply that tolerance only along the segment and not away from it.'
+  []
+[]
