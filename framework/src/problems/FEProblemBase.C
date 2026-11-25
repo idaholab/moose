@@ -8564,11 +8564,12 @@ FEProblemBase::computeJacobianTag(const NumericVector<Number> & soln,
 }
 
 void
-FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian,
-                               const unsigned int nl_sys_num)
+FEProblemBase::computeJacobian(const NumericVector<libMesh::Number> & soln,
+                               libMesh::SparseMatrix<libMesh::Number> & jacobian,
+                               const unsigned int nl_sys_i_num,
+                               const unsigned int nl_sys_j_num)
 {
-  setCurrentNonlinearSystem(nl_sys_num);
+  setJacobianBlockContext(nl_sys_i_num, nl_sys_j_num);
 
   _fe_matrix_tags.clear();
 
@@ -8577,6 +8578,14 @@ FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
     _fe_matrix_tags.insert(tag.second);
 
   computeJacobianInternal(soln, jacobian, _fe_matrix_tags);
+}
+
+void
+FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
+                               SparseMatrix<Number> & jacobian,
+                               const unsigned int nl_sys_num)
+{
+  computeJacobian(soln, jacobian, nl_sys_num, nl_sys_num);
 }
 
 void
@@ -8616,9 +8625,10 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
               matrix.restore_original_nonzero_pattern();
             else
               matrix.zero();
-            if (haveADObjects() && !currentNonlinearSystem().system().has_static_condensation())
-              // PETSc algorithms require diagonal allocations regardless of whether there is
-              // non-zero diagonal dependence. With global AD indexing we only add non-zero
+            if (haveADObjects() && !currentNonlinearSystem().system().has_static_condensation() &&
+                currentNlISysNum() == currentNlJSysNum())
+              // Preconditioning algorithms often require diagonal allocations regardless of whether
+              // there is non-zero diagonal dependence. With global AD indexing we only add non-zero
               // dependence, so PETSc will scream at us unless we artificially add the diagonals.
               for (auto index : make_range(matrix.row_start(), matrix.row_stop()))
                 matrix.add(index, index, 0);

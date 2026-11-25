@@ -1876,6 +1876,14 @@ public:
                                const unsigned int nl_sys_num);
 
   /**
+   * Form a Jacobian matrix for the ij system pair with the default i-system tag
+   */
+  void computeJacobian(const NumericVector<libMesh::Number> & soln,
+                       libMesh::SparseMatrix<libMesh::Number> & jacobian,
+                       const unsigned int nl_sys_i_num,
+                       const unsigned int nl_sys_j_num);
+
+  /**
    * Form a Jacobian matrix for a given tag.
    */
   virtual void computeJacobianTag(const NumericVector<libMesh::Number> & soln,
