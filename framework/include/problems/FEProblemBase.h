@@ -453,10 +453,8 @@ public:
   /**
    * Build and solve a linear system
    * @param linear_sys_num The number of the linear system (1,..,num. of lin. systems)
-   * @param po The petsc options for the solve, if not supplied, the defaults are used
    */
-  virtual void solveLinearSystem(const unsigned int linear_sys_num,
-                                 const Moose::PetscSupport::PetscOptions * po = nullptr);
+  virtual void solveLinearSystem(const unsigned int linear_sys_num);
 
   ///@{
   /**
@@ -2705,6 +2703,14 @@ public:
    * If PETSc options are already inserted
    */
   bool & petscOptionsInserted() { return _is_petsc_options_inserted; }
+
+  /**
+   * Inserts the stored PETSc options of all solver systems into the PETSc options database,
+   * unless they were inserted before. A solver object calls this before the first
+   * FooSetFromOptions() call. The consumers then mark the options as used, so PETSc does not
+   * report them as unused at the end of the simulation.
+   */
+  void insertPetscOptionsIfNeeded();
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   PetscOptions & petscOptionsDatabase() { return _petsc_option_data_base; }
