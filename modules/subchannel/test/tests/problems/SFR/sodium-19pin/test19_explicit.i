@@ -33,6 +33,9 @@ P_out = 2.0e5 # Pa
 
 [SubChannel]
   type = TriSubChannel1PhaseProblem
+  # The explicit solve follows the interpolation scheme; its crossflow solve does not converge
+  # for this case with upwind
+  interpolation_scheme = central_difference
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5

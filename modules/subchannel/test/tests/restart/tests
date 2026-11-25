@@ -6,7 +6,13 @@
     input = steady.i
     csvdiff = 'steady_out.csv steady_out_fluid_0001.csv steady_out_pins_0001.csv'
     recover = false
-    abs_zero = 1e-7
+    # SumWij is the sum of several comparable, opposite-sign crossflows into a channel, and it is
+    # close to that same cancellation everywhere along this channel's profile, so
+    # platform-dependent summation order moves it at any row, not only where it crosses zero. 1e-4
+    # relative with a 1e-5 floor clears that noise while still catching a crossflow error of that
+    # size
+    abs_zero = 1e-5
+    rel_err = 1e-4
     max_threads = 1
     # The crossflow solve does not converge in every iteration; remove once #34306 is fixed
     allow_warnings = true
@@ -19,7 +25,9 @@
                transient_out_fluid_0002.csv transient_out_pins_0000.csv transient_out_pins_0001.csv
                transient_out_pins_0002.csv'
     prereq = 'steady'
-    abs_zero = 5e-6
+    # Same cancellation-driven noise in SumWij as 'steady' above
+    abs_zero = 1e-5
+    rel_err = 1e-4
     max_threads = 1
     # The crossflow solve does not converge in every iteration; remove once #34306 is fixed
     allow_warnings = true

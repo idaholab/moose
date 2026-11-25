@@ -321,6 +321,14 @@ TriSubChannel1PhaseProblem::getSubChannelPeripheralDuctWidth(unsigned int i_ch) 
     mooseError("Channel is not a perimetric subchannel ");
 }
 
+Real
+TriSubChannel1PhaseProblem::computeConductionDiffusivity(const Node * node) const
+{
+  const auto P = (*_P_soln)(node) + _P_out;
+  const auto T = (*_T_soln)(node);
+  return _fp->k_from_p_T(P, T) / _fp->cp_from_p_T(P, T);
+}
+
 void
 TriSubChannel1PhaseProblem::computeh(int iblock)
 {
@@ -370,23 +378,50 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
       }
       edge_flux_ave = mdot_sum / si_sum;
 
+      // Cell-center interpolation weight and conduction diffusivity k / cp of every channel.
+      // Radial conduction through a gap needs both for the two channels of the gap
+      std::vector<PetscScalar> alpha_ch(_n_channels);
+      std::vector<Real> diff_c(_n_channels);
+      for (const auto i_ch : make_range(_n_channels))
+      {
+        auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+        auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+        alpha_ch[i_ch] = computeEnthalpyInterpolationWeight(i_ch, iz);
+        diff_c[i_ch] = alpha_ch[i_ch] * computeConductionDiffusivity(node_in) +
+                       (1.0 - alpha_ch[i_ch]) * computeConductionDiffusivity(node_out);
+      }
+
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
         auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
         auto mdot_in = (*_mdot_soln)(node_in);
         auto h_in = (*_h_soln)(node_in); // J/kg
-        auto volume = dz * (*_S_flow_soln)(node_in);
+        // Cell volume of the storage term, with the flow area interpolated as in the implicit
+        // branch
+        auto volume =
+            dz * computeInterpolatedValue((*_S_flow_soln)(node_out), (*_S_flow_soln)(node_in), 0.5);
         auto mdot_out = (*_mdot_soln)(node_out);
-        auto h_out = 0.0;
-        Real sumWijh = 0.0;
-        Real sumWijPrimeDhij = 0.0;
-        Real sweep_enthalpy = 0.0;
-        Real e_cond = 0.0;
+        // Weight of the inlet node in the cell-center values
+        const auto alpha = alpha_ch[i_ch];
 
+        // The march solves the row of the implicit system for the outlet enthalpy of this
+        // channel. Its own outlet-node coefficients go to the diagonal; the outlet-node enthalpies
+        // of the other channels are taken from the current iterate
+        Real diagonal = mdot_out + _TR * (*_rho_soln)(node_out)*volume / _dt;
         // Calculate added enthalpy from heatflux (Pin, Duct)
-        Real added_enthalpy = computeAddedHeatPin(i_ch, iz);
-        added_enthalpy += computeAddedHeatDuct(i_ch, iz);
+        Real rhs = mdot_in * h_in + computeAddedHeatPin(i_ch, iz) + computeAddedHeatDuct(i_ch, iz) +
+                   _TR * _rho_soln->old(node_out) * _h_soln->old(node_out) * volume / _dt;
+        // Moves coef times the cell-center enthalpy of channel ch, interpolated with weight a, to
+        // the left-hand side
+        const auto add_lhs = [&](Real coef, unsigned int ch, PetscScalar a)
+        {
+          rhs -= coef * a * (*_h_soln)(_subchannel_mesh.getChannelNode(ch, iz - 1));
+          if (ch == i_ch)
+            diagonal += coef * (1.0 - a);
+          else
+            rhs -= coef * (1.0 - a) * (*_h_soln)(_subchannel_mesh.getChannelNode(ch, iz));
+        };
 
         // Calculate net sum of enthalpy into/out-of channel i from channels j around i
         // (Turbulent diffusion, Diversion Crossflow, Sweep flow Enthalpy, Radial heat conduction)
@@ -398,19 +433,16 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           auto Sij = dz * gap;
           unsigned int ii_ch = chans.first;  // the first subchannel next to gap i_gap
           unsigned int jj_ch = chans.second; // the second subchannel next to gap i_gap
-          auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
-          auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
           auto subch_type_i = _subchannel_mesh.getSubchannelType(ii_ch);
           auto subch_type_j = _subchannel_mesh.getSubchannelType(jj_ch);
-          // Define donor enthalpy
-          auto h_star = 0.0;
-          if (_Wij(i_gap, iz) > 0.0)
-            h_star = (*_h_soln)(node_in_i);
-          else if (_Wij(i_gap, iz) < 0.0)
-            h_star = (*_h_soln)(node_in_j);
-          // Diversion crossflow
+          // Diversion crossflow with the donor enthalpy
           // take care of the sign by applying the map, use donor cell
-          sumWijh += _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * h_star;
+          if (_Wij(i_gap, iz) > 0.0)
+            add_lhs(
+                _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz), ii_ch, alpha);
+          else if (_Wij(i_gap, iz) < 0.0)
+            add_lhs(
+                _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz), jj_ch, alpha);
           counter++;
           // SWEEP FLOW is calculated if i_gap is located in the periphery
           // and we have a wire-wrap (if i_gap is in the periphery then i_ch is in the periphery)
@@ -422,28 +454,20 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             // donor subchannel and node of sweep flow. The donor subchannel is the subchannel next
             // to i_ch that sweep flow, flows from and into i_ch
             auto sweep_donor = _tri_sch_mesh.getSweepFlowChans(i_ch).first;
-            auto * node_sweep_donor = _subchannel_mesh.getChannelNode(sweep_donor, iz - 1);
+            const auto wsweep = computeSweepFlowMixingParameter(i_gap, iz) * edge_flux_ave * Sij;
             // if one of the neighbor subchannels of the periphery gap is the donor subchannel
             //(the other would be the i_ch) sweep enthalpy flows into i_ch
             if ((ii_ch == sweep_donor) || (jj_ch == sweep_donor))
-            {
-              sweep_enthalpy += computeSweepFlowMixingParameter(i_gap, iz) * edge_flux_ave * Sij *
-                                (*_h_soln)(node_sweep_donor);
-            }
+              add_lhs(-wsweep, sweep_donor, alpha);
             // else sweep enthalpy flows out of i_ch
             else
-            {
-              sweep_enthalpy -= computeSweepFlowMixingParameter(i_gap, iz) * edge_flux_ave * Sij *
-                                (*_h_soln)(node_in);
-            }
+              add_lhs(wsweep, i_ch, alpha);
           }
-          // Inner gap
-          // Turbulent Diffusion
-          else
-          {
-            sumWijPrimeDhij +=
-                _WijPrime(i_gap, iz) * (2 * h_in - (*_h_soln)(node_in_j) - (*_h_soln)(node_in_i));
-          }
+          // Turbulent Diffusion, in every gap as in the implicit branch. The mixing closure sets
+          // beta, and so W', to zero in gaps without turbulent exchange
+          add_lhs(2.0 * _WijPrime(i_gap, iz), i_ch, alpha);
+          add_lhs(-_WijPrime(i_gap, iz), jj_ch, alpha);
+          add_lhs(-_WijPrime(i_gap, iz), ii_ch, alpha);
 
           // compute the radial heat conduction through the gaps
           Real dist_ij = pitch;
@@ -462,53 +486,46 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             dist_ij = pitch / std::sqrt(3);
           }
 
-          auto thcon_i = _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
-          auto thcon_j = _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
+          // Radial conduction at the cell center, as in the implicit branch: the harmonic mean of
+          // the cell-center diffusivities of the two channels, and each channel interpolated with
+          // its own weight, so the heat leaving one channel enters the other
+          const auto other_ch = (i_ch == ii_ch) ? jj_ch : ii_ch;
+          const auto A_i = diff_c[i_ch];
+          const auto A_j = diff_c[other_ch];
+          const auto harm_A = 2.0 * A_i * A_j / (A_i + A_j);
           auto shape_factor =
               0.66 * (pitch / pin_diameter) *
               std::pow((_subchannel_mesh.getGapWidth(iz, i_gap) / pin_diameter), -0.3);
-          if (ii_ch == i_ch)
-          {
-            e_cond += 0.5 * (thcon_i + thcon_j) * Sij * shape_factor *
-                      ((*_T_soln)(node_in_j) - (*_T_soln)(node_in_i)) / dist_ij;
-          }
-          else
-          {
-            e_cond += -0.5 * (thcon_i + thcon_j) * Sij * shape_factor *
-                      ((*_T_soln)(node_in_j) - (*_T_soln)(node_in_i)) / dist_ij;
-          }
+          const auto conductance = harm_A * Sij * shape_factor / dist_ij;
+          add_lhs(conductance, i_ch, alpha);
+          add_lhs(-conductance, other_ch, alpha_ch[other_ch]);
         }
 
-        // compute the axial heat conduction between current and lower axial node
-        auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz);
-        auto * node_in_j = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-        auto thcon_i = _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
-        auto thcon_j = _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
-        auto Si = (*_S_flow_soln)(node_in_i);
-        auto dist_ij = z_grid[iz] - z_grid[iz - 1];
-
-        e_cond += 0.5 * (thcon_i + thcon_j) * Si * ((*_T_soln)(node_in_j) - (*_T_soln)(node_in_i)) /
-                  dist_ij;
+        // Axial heat conduction, with the stencil of the implicit solve: the diffusivity and the
+        // flow area are interpolated to the faces below and above the outlet node, whose enthalpy
+        // is the unknown of this row
+        const auto diff_out = computeConductionDiffusivity(node_out);
+        const auto cond_down =
+            computeInterpolatedValue(diff_out, computeConductionDiffusivity(node_in)) *
+            computeInterpolatedValue((*_S_flow_soln)(node_out), (*_S_flow_soln)(node_in)) / dz;
+        diagonal += cond_down;
+        rhs += cond_down * h_in;
 
         unsigned int nz = _subchannel_mesh.getNumOfAxialCells();
         // compute the axial heat conduction between current and upper axial node
         if (iz < nz)
         {
-          auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz);
-          auto * node_in_j = _subchannel_mesh.getChannelNode(i_ch, iz + 1);
-          auto thcon_i = _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
-          auto thcon_j = _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
-          auto Si = (*_S_flow_soln)(node_in_i);
-          auto dist_ij = z_grid[iz + 1] - z_grid[iz];
-          e_cond += 0.5 * (thcon_i + thcon_j) * Si *
-                    ((*_T_soln)(node_in_j) - (*_T_soln)(node_in_i)) / dist_ij;
+          auto * node_top = _subchannel_mesh.getChannelNode(i_ch, iz + 1);
+          auto dz_up = z_grid[iz + 1] - z_grid[iz];
+          const auto cond_up =
+              computeInterpolatedValue(computeConductionDiffusivity(node_top), diff_out) *
+              computeInterpolatedValue((*_S_flow_soln)(node_top), (*_S_flow_soln)(node_out)) /
+              dz_up;
+          diagonal += cond_up;
+          rhs += cond_up * (*_h_soln)(node_top);
         }
 
-        // end of radial heat conduction calc.
-        h_out =
-            (mdot_in * h_in - sumWijh - sumWijPrimeDhij + added_enthalpy + e_cond + sweep_enthalpy +
-             _TR * _rho_soln->old(node_out) * _h_soln->old(node_out) * volume / _dt) /
-            (mdot_out + _TR * (*_rho_soln)(node_out)*volume / _dt);
+        const auto h_out = rhs / diagonal;
         if (h_out < 0)
         {
           mooseError(name(),
@@ -548,6 +565,19 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
       auto pin_diameter = _subchannel_mesh.getPinDiameter();
       auto iz_ind = iz - first_node;
 
+      // Cell-center interpolation weight and conduction diffusivity k / cp of every channel.
+      // Radial conduction through a gap needs both for the two channels of the gap
+      std::vector<PetscScalar> alpha_ch(_n_channels);
+      std::vector<Real> diff_c(_n_channels);
+      for (const auto i_ch : make_range(_n_channels))
+      {
+        auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+        auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+        alpha_ch[i_ch] = computeEnthalpyInterpolationWeight(i_ch, iz);
+        diff_c[i_ch] = alpha_ch[i_ch] * computeConductionDiffusivity(node_in) +
+                       (1.0 - alpha_ch[i_ch]) * computeConductionDiffusivity(node_out);
+      }
+
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
         auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
@@ -556,31 +586,11 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         auto S_out = (*_S_flow_soln)(node_out);
         auto S_interp = computeInterpolatedValue(S_out, S_in, 0.5);
         auto volume = dz * S_interp;
+        const auto alpha = alpha_ch[i_ch];
 
-        PetscScalar Pe = 0.5;
-        if (_interpolation_scheme == 3)
-        {
-          // Compute the cell Peclet number
-          auto w_perim_in = (*_w_perim_soln)(node_in);
-          auto w_perim_out = (*_w_perim_soln)(node_out);
-          auto w_perim_interp = this->computeInterpolatedValue(w_perim_out, w_perim_in, 0.5);
-          auto K_in = _fp->k_from_p_T((*_P_soln)(node_in) + _P_out, (*_T_soln)(node_in));
-          auto K_out = _fp->k_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out));
-          auto K = this->computeInterpolatedValue(K_out, K_in, 0.5);
-          auto cp_in = _fp->cp_from_p_T((*_P_soln)(node_in) + _P_out, (*_T_soln)(node_in));
-          auto cp_out = _fp->cp_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out));
-          auto cp = this->computeInterpolatedValue(cp_out, cp_in, 0.5);
-          auto mdot_loc =
-              this->computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), 0.5);
-          // hydraulic diameter in the i direction
-          auto Dh_i = 4.0 * S_interp / w_perim_interp;
-          Pe = mdot_loc * Dh_i * cp / (K * S_interp) * (mdot_loc / std::abs(mdot_loc));
-        }
-        auto alpha = computeInterpolationCoefficients(Pe);
-
-        // Keep temporal storage independent of the spatial interpolation scheme. Applying the
-        // upwind coefficient to this term puts the storage on the upstream node and makes the
-        // small-timestep matrix singular in the upwind limit.
+        // The storage rho h stays at the outlet node for every interpolation scheme, and only the
+        // cell volume follows the scheme. Applying the upwind coefficient to rho h puts the storage
+        // on the upstream node and makes the small-timestep matrix singular in the upwind limit.
         PetscInt row_tt = i_ch + _n_channels * iz_ind;
         PetscInt col_tt = i_ch + _n_channels * iz_ind;
         PetscScalar value_tt = _TR * (*_rho_soln)(node_out)*volume / _dt;
@@ -877,32 +887,51 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             dist_ij = pitch / std::sqrt(3);
           }
 
+          // Radial conduction acts over the cell: the harmonic mean of the cell-center
+          // diffusivities of the two channels, times the difference of their cell-center
+          // enthalpies. Each channel is interpolated with its own weight, so the flux leaving one
+          // channel enters the other
           auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
-          auto K_i = _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
-          auto K_j = _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
-          auto cp_i = _fp->cp_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
-          auto cp_j = _fp->cp_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
-          auto A_i = K_i / cp_i;
-          auto A_j = K_j / cp_j;
+          const auto other_ch = (i_ch == ii_ch) ? jj_ch : ii_ch;
+          const auto A_i = diff_c[i_ch];
+          const auto A_j = diff_c[other_ch];
           auto harm_A = 2.0 * A_i * A_j / (A_i + A_j);
           auto shape_factor =
               0.66 * (pitch / pin_diameter) *
               std::pow((_subchannel_mesh.getGapWidth(iz, i_gap) / pin_diameter), -0.3);
-          // auto base_value =  0.5 * (A_i + A_j) * Sij * shape_factor / dist_ij;
-          auto base_value = harm_A * shape_factor * Sij / dist_ij;
-          auto neg_base_value = -1.0 * base_value;
+          const auto base_value = harm_A * shape_factor * Sij / dist_ij;
+          const auto alpha_other = alpha_ch[other_ch];
 
           // Each gap is visited once from each of its two channels, so only the row of the
           // current channel is written here
-          const auto other_ch = (i_ch == ii_ch) ? jj_ch : ii_ch;
           row_ct = i_ch + _n_channels * iz_ind;
+          if (iz == first_node)
+          {
+            auto * node_in_other = _subchannel_mesh.getChannelNode(other_ch, iz - 1);
+            PetscScalar value_vec_rc =
+                -base_value * (alpha * (*_h_soln)(node_in)-alpha_other * (*_h_soln)(node_in_other));
+            LibmeshPetscCall(VecSetValues(
+                _hc_radial_heat_conduction_rhs, 1, &row_ct, &value_vec_rc, ADD_VALUES));
+          }
+          else
+          {
+            PetscScalar value_rc = base_value * alpha;
+            col_ct = i_ch + _n_channels * (iz_ind - 1);
+            LibmeshPetscCall(MatSetValues(
+                _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &value_rc, ADD_VALUES));
+            value_rc = -base_value * alpha_other;
+            col_ct = other_ch + _n_channels * (iz_ind - 1);
+            LibmeshPetscCall(MatSetValues(
+                _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &value_rc, ADD_VALUES));
+          }
+          PetscScalar value_rc = base_value * (1.0 - alpha);
           col_ct = i_ch + _n_channels * iz_ind;
           LibmeshPetscCall(MatSetValues(
-              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &base_value, ADD_VALUES));
-
+              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &value_rc, ADD_VALUES));
+          value_rc = -base_value * (1.0 - alpha_other);
           col_ct = other_ch + _n_channels * iz_ind;
           LibmeshPetscCall(MatSetValues(
-              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &neg_base_value, ADD_VALUES));
+              _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &value_rc, ADD_VALUES));
           counter++;
         }
 

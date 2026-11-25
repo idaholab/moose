@@ -32,6 +32,8 @@ P_out = 155e+5 # Pa
 
 [SubChannel]
   type = QuadSubChannel1PhaseProblem
+  # The explicit solve follows the interpolation scheme; upwind is the marching solve
+  interpolation_scheme = upwind
   fp = water
   n_blocks = 1
   P_tol = 1e-6

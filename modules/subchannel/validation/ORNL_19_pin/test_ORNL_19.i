@@ -48,7 +48,6 @@ P_out = 2.0e5 # Pa
   segregated = false
   verbose_multiapps = true
   verbose_subchannel = true
-  interpolation_scheme = upwind
   pin_HTC_closure = 'Dittus-Boelter'
   # friction model
   friction_closure = 'Chen'

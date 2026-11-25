@@ -216,8 +216,19 @@ where $\alpha$ is set by [!param](/Problem/TriSubChannel1PhaseProblem/interpolat
 $\alpha = 1$ for `upwind`, $\alpha = 0.5$ for `central_difference`, $\alpha = 0$ for `downwind`,
 and a cell Peclet number dependent value for `exponential`. The same weight interpolates the
 cell-center crossflow to the faces in the axial transport of lateral momentum. The interpolation
-scheme does not change the axial mass and enthalpy fluxes. Radial heat conduction is evaluated
-with the enthalpies of the top face, which keeps it implicit in the axial direction.
+scheme does not change the axial mass and enthalpy fluxes. Radial heat conduction through gap
+$ij$ is also a cell-center term,
+
+\begin{equation}
+\left(\frac{k}{c_p}\right)_{ij,k-1/2} \frac{S_{ij,k} \eta_{ij}}{L_{ij}} \left(h_{i,k-1/2} - h_{j,k-1/2}\right),
+\end{equation}
+
+where $(k/c_p)_{ij,k-1/2}$ is the harmonic mean of the cell-center $k/c_p$ of the two
+subchannels, $\eta_{ij}$ is the conduction shape factor, and $L_{ij}$ is the centroid distance.
+The enthalpy and $k/c_p$ of each subchannel are interpolated with the weight $\alpha$ of that
+subchannel, so the heat leaving one subchannel enters the other. Axial heat conduction is written
+in enthalpy, with $k/c_p$ and the flow area interpolated to the faces of the cell. The explicit
+and implicit solvers use the same weight $\alpha$ for these terms.
 
 - Conservation of mass:
 
@@ -469,6 +480,8 @@ There are three variations [!cite](kyriakopoulos2026numerical) of the algorithm 
 !! Intentional comment to provide extra spacing
 
 This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations. The variables are updated sequantially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet.
+
+The explicit solver discretizes the equations as the implicit solver does and honors [!param](/Problem/TriSubChannel1PhaseProblem/interpolation_scheme). Each cell-center term takes the inlet part, weighted by $\alpha$, from the node below and the outlet part, weighted by $1 - \alpha$, from the outlet node of the current iterate; in the enthalpy equation the outlet coefficients of the subchannel being updated are kept on the left-hand side. With `upwind` the cell-center values are the inlet values and the solver is the traditional marching scheme. Weights that put more of the cell-center values on the outlet node strengthen the coupling to the current iterate, and the explicit crossflow solve may then need more iterations or fail to converge.
 
 #### Implicit-Segregated
 
