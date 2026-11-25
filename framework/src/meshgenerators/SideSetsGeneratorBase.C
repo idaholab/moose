@@ -112,9 +112,32 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
 {
   mooseAssert(_fe_face == nullptr, "FE Face has already been initialized");
 
-  // To know the dimension of the mesh
+  // To know the dimension of the mesh. Only the steps that are marked as needed are performed, so
+  // that a chain of sideset generators does not rebuild the neighbors of the whole mesh each time.
   if (!mesh.is_prepared())
-    mesh.prepare_for_use();
+  {
+    // After a sideset generator, only the cached boundary id sets are usually stale. Regenerating
+    // them is all that is needed; complete_preparation() would also count the unpartitioned
+    // elements and nodes of the whole mesh just to set a flag that is already set.
+    auto only_boundary_id_sets_stale = mesh.preparation();
+    only_boundary_id_sets_stale.has_boundary_id_sets = true;
+    if (only_boundary_id_sets_stale)
+    {
+      mesh.get_boundary_info().regenerate_id_sets();
+      mooseAssert(mesh.is_prepared(), "Regenerating the boundary id sets should prepare the mesh");
+    }
+    else
+    {
+      // Sideset generators do not change element or node ids, so the renumbering that
+      // complete_preparation() would otherwise always do at its end is not needed. Renumbering
+      // that is needed after elements or nodes were removed is still done, as it is tracked by
+      // flags.
+      const bool allow_renumbering = mesh.allow_renumbering();
+      mesh.allow_renumbering(false);
+      mesh.complete_preparation();
+      mesh.allow_renumbering(allow_renumbering);
+    }
+  }
   const auto dim = mesh.mesh_dimension();
 
   // Setup the FE Object so we can calculate normals
@@ -185,36 +208,30 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
     }
   }
 
-  // Get the boundary ids from the names
-  if (parameters().isParamValid("included_subdomains"))
+  // Check that the subdomains exist in the mesh and get their ids. The mesh is prepared at this
+  // point, so its cached subdomain ids (across all processors) are current and no loop over the
+  // elements is needed.
+  const auto get_subdomain_ids = [&](const std::string & param_name)
   {
-    // check that the subdomains exist in the mesh
-    const auto subdomains = getParam<std::vector<SubdomainName>>("included_subdomains");
+    const auto & mesh_subdomain_ids = mesh.get_mesh_subdomains();
+    const auto subdomains = getParam<std::vector<SubdomainName>>(param_name);
     for (const auto & name : subdomains)
-      if (!MooseMeshUtils::hasSubdomainName(mesh, name))
-        paramError("included_subdomains", "The block '", name, "' was not found in the mesh");
+    {
+      const auto id = MooseMeshUtils::getSubdomainID(name, mesh);
+      if (id == Moose::INVALID_BLOCK_ID || !mesh_subdomain_ids.count(id))
+        paramError(param_name, "The block '", name, "' was not found in the mesh");
+    }
+    return MooseMeshUtils::getSubdomainIDs(mesh, subdomains);
+  };
 
-    _included_subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, subdomains);
-  }
+  if (parameters().isParamValid("included_subdomains"))
+    _included_subdomain_ids = get_subdomain_ids("included_subdomains");
 
   if (parameters().isParamValid("included_neighbors"))
-  {
-    // check that the subdomains exist in the mesh
-    const auto subdomains = getParam<std::vector<SubdomainName>>("included_neighbors");
-    for (const auto & name : subdomains)
-      if (!MooseMeshUtils::hasSubdomainName(mesh, name))
-        paramError("included_neighbors", "The block '", name, "' was not found in the mesh");
+    _included_neighbor_subdomain_ids = get_subdomain_ids("included_neighbors");
 
-    _included_neighbor_subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, subdomains);
-  }
-
-  // We will want to Change the below code when we have more fine-grained control over advertising
-  // what we need and how we satisfy those needs. For now we know we need to have neighbors per
-  // #15823...and we do have an explicit `find_neighbors` call...but we don't have a
-  // `neighbors_found` API and it seems off to do:
-  //
-  // if (!mesh.is_prepared())
-  //   mesh.find_neighbors()
+  // We need neighbors per #15823. complete_preparation() above finds them only if they are not
+  // already known, as tracked by the mesh's preparation state.
 }
 
 void
@@ -274,8 +291,12 @@ SideSetsGeneratorBase::elementSideInIncludedBoundaries(const Elem * const elem,
                                                        const unsigned int side,
                                                        const MeshBase & mesh) const
 {
+  // Query the boundary ids of the side once; has_boundary_id() does so for every id
+  std::vector<boundary_id_type> side_boundary_ids;
+  mesh.get_boundary_info().boundary_ids(elem, side, side_boundary_ids);
   for (const auto & bid : _included_boundary_ids)
-    if (mesh.get_boundary_info().has_boundary_id(elem, side, bid))
+    if (std::find(side_boundary_ids.begin(), side_boundary_ids.end(), bid) !=
+        side_boundary_ids.end())
       return true;
   return false;
 }
@@ -285,18 +306,48 @@ SideSetsGeneratorBase::elementSideInExcludedBoundaries(const Elem * const elem,
                                                        const unsigned int side,
                                                        const MeshBase & mesh) const
 {
+  // Query the boundary ids of the side once; has_boundary_id() does so for every id
+  std::vector<boundary_id_type> side_boundary_ids;
+  mesh.get_boundary_info().boundary_ids(elem, side, side_boundary_ids);
   for (const auto bid : _excluded_boundary_ids)
-    if (mesh.get_boundary_info().has_boundary_id(elem, side, bid))
+    if (std::find(side_boundary_ids.begin(), side_boundary_ids.end(), bid) !=
+        side_boundary_ids.end())
       return true;
   return false;
 }
 
+std::optional<std::vector<std::pair<const Elem *, unsigned int>>>
+SideSetsGeneratorBase::getIncludedBoundarySides(const MeshBase & mesh) const
+{
+  // Refined elements also belong to the boundaries of their ancestors, which are not stored with
+  // them, so every side has to be visited
+  if (!_check_included_boundaries || mesh.n_active_elem() != mesh.n_elem())
+    return std::nullopt;
+
+  std::vector<std::pair<const Elem *, unsigned int>> sides;
+  for (const auto & [elem, side_and_id] : mesh.get_boundary_info().get_sideset_map())
+    if (elem->active() && std::find(_included_boundary_ids.begin(),
+                                    _included_boundary_ids.end(),
+                                    side_and_id.second) != _included_boundary_ids.end())
+      sides.emplace_back(elem, side_and_id.first);
+
+  // A side may be in more than one of the included boundaries. Visit sides in the order of the
+  // elements of the mesh, not of their memory addresses, so that the result does not depend on it.
+  std::sort(sides.begin(),
+            sides.end(),
+            [](const auto & a, const auto & b)
+            {
+              return a.first->id() != b.first->id() ? a.first->id() < b.first->id()
+                                                    : a.second < b.second;
+            });
+  sides.erase(std::unique(sides.begin(), sides.end()), sides.end());
+  return sides;
+}
+
 bool
-SideSetsGeneratorBase::elemSideSatisfiesRequirements(const Elem * const elem,
-                                                     const unsigned int side,
-                                                     const MeshBase & mesh,
-                                                     const Point & desired_normal,
-                                                     const Point & face_normal)
+SideSetsGeneratorBase::elemSideSatisfiesNonNormalRequirements(const Elem * const elem,
+                                                              const unsigned int side,
+                                                              const MeshBase & mesh) const
 {
   // Skip if side has neighbor and we only want external sides
   if ((elem->neighbor_ptr(side) && _include_only_external_sides))
@@ -319,6 +370,19 @@ SideSetsGeneratorBase::elemSideSatisfiesRequirements(const Elem * const elem,
                           neighbor, _included_neighbor_subdomain_ids)))
       return false;
   }
+
+  return true;
+}
+
+bool
+SideSetsGeneratorBase::elemSideSatisfiesRequirements(const Elem * const elem,
+                                                     const unsigned int side,
+                                                     const MeshBase & mesh,
+                                                     const Point & desired_normal,
+                                                     const Point & face_normal)
+{
+  if (!elemSideSatisfiesNonNormalRequirements(elem, side, mesh))
+    return false;
 
   if (_using_normal &&
       !MeshTraversingUtils::normalsWithinTol(desired_normal, face_normal, _normal_tol))

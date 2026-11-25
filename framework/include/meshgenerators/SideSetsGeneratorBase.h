@@ -12,6 +12,8 @@
 #include "MeshGenerator.h"
 #include "libmesh/fe_base.h"
 
+#include <optional>
+
 // libMesh forward declarations
 namespace libMesh
 {
@@ -66,6 +68,27 @@ protected:
   bool elementSideInExcludedBoundaries(const Elem * const elem,
                                        const unsigned int side,
                                        const MeshBase & mesh) const;
+
+  /**
+   * Gets the sides that are candidates for the new sideset when included_boundaries is set, which
+   * are the sides of those boundaries, ordered by element id and side. This avoids visiting every
+   * side of every element.
+   * @return The sides, or nothing if all of the sides need to be visited: if included_boundaries
+   * is not set, or the mesh has refined elements, whose sides may be part of the boundaries of
+   * their ancestors.
+   */
+  std::optional<std::vector<std::pair<const Elem *, unsigned int>>>
+  getIncludedBoundarySides(const MeshBase & mesh) const;
+
+  /**
+   * Determines whether the given element's side satisfies the following parameters:
+   * include_only_external_sides, included_boundaries, excluded_boundaries and
+   * included_neighbors. This does not need the side normal, so it is cheap to evaluate before
+   * the face FE object is reinitialized.
+   */
+  bool elemSideSatisfiesNonNormalRequirements(const Elem * const elem,
+                                              const unsigned int side,
+                                              const MeshBase & mesh) const;
 
   /**
    * Determines whether the given element's side satisfies the following parameters:

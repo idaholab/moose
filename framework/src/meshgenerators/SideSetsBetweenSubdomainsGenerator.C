@@ -91,11 +91,16 @@ SideSetsBetweenSubdomainsGenerator::generate()
       }
       else if (neighbor != NULL)
       {
-        _fe_face->reinit(elem, side);
-        // We'll just use the normal of the first qp
-        const Point & face_normal = face_normals[0];
+        // Cheap checks first: reinitializing the FE object for every side is expensive
+        bool satisfied = elemSideSatisfiesNonNormalRequirements(elem, side, *mesh);
+        if (satisfied && _using_normal)
+        {
+          _fe_face->reinit(elem, side);
+          // We'll just use the normal of the first qp
+          satisfied = MeshTraversingUtils::normalsWithinTol(_normal, face_normals[0], _normal_tol);
+        }
         // Add the boundaries, if appropriate
-        if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
+        if (satisfied)
         {
           // Add the boundaries
           if (_replace)
@@ -147,11 +152,16 @@ SideSetsBetweenSubdomainsGenerator::generate()
 
         if (neighbor != NULL)
         {
-          _fe_face->reinit(elem, side);
-          // We'll just use the normal of the first qp
-          const Point & face_normal = _fe_face->get_normals()[0];
+          bool satisfied = elemSideSatisfiesNonNormalRequirements(elem, side, *mesh);
+          if (satisfied && _using_normal)
+          {
+            _fe_face->reinit(elem, side);
+            // We'll just use the normal of the first qp
+            satisfied = MeshTraversingUtils::normalsWithinTol(
+                _normal, _fe_face->get_normals()[0], _normal_tol);
+          }
           // Add the boundaries, if appropriate
-          if (elemSideSatisfiesRequirements(elem, side, *mesh, _normal, face_normal))
+          if (satisfied)
             responses[p - 1].push_back(std::make_pair(elem->id(), side));
         }
       }
@@ -188,6 +198,7 @@ SideSetsBetweenSubdomainsGenerator::generate()
   for (const auto & i : make_range(boundary_ids.size()))
     boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
 
-  mesh->unset_is_prepared();
+  // Only boundary information was modified
+  mesh->unset_has_boundary_id_sets();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

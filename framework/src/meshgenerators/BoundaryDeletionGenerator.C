@@ -71,6 +71,7 @@ BoundaryDeletionGenerator::generate()
   for (const auto & id : ids_to_remove)
     mesh->get_boundary_info().remove_id(id);
 
-  mesh->unset_is_prepared();
+  // Only boundary information was modified
+  mesh->unset_has_boundary_id_sets();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

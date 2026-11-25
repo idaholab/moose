@@ -297,6 +297,8 @@ RenameBlockGenerator::generate()
   for (const auto & pair : new_names)
     mesh->set_subdomain_name(pair.first, pair.second);
 
-  mesh->unset_is_prepared();
+  // Only the subdomain ids of the elements and the subdomain names were modified
+  mesh->unset_has_cached_elem_data();
+  mesh->unset_has_synched_subdomain_name_map();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

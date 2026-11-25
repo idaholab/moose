@@ -49,6 +49,54 @@
     issues = '#28551'
   []
 
+  [chained_after_sidesets_between_subdomains]
+    type = 'Exodiff'
+    input = 'parsed_generate_sideset_chained.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_generate_sideset_chained_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall have the ability to assign mesh side sets based on parsed spatial functions on a mesh that was just modified by a sideset generator, using its neighbors and the sidesets it created.'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
+    issues = '#11640'
+  []
+
+  [replace_included_boundary]
+    type = 'Exodiff'
+    input = 'parsed_generate_sideset_replace_included.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_generate_sideset_replace_included_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall have the ability to assign mesh side sets based on parsed spatial functions, replacing the existing sidesets of the sides that are added and restricting the candidate sides to those of an existing sideset.'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
+    issues = '#24354'
+  []
+
+  [included_boundary_refined_mesh]
+    type = 'Exodiff'
+    input = 'parsed_generate_sideset_included_refined.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_generate_sideset_included_refined_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall have the ability to assign mesh side sets based on parsed spatial functions, with a restriction on sides that are also part of another sideset, on a mesh with refined elements.'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
+    issues = '#24354'
+  []
+
+  [after_element_deletions]
+    type = 'Exodiff'
+    input = 'parsed_generate_sideset_after_deletions.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_generate_sideset_after_deletions_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall have the ability to assign mesh side sets on the exterior created by deleting elements, including when a sideset generator and another element deletion follow the deletion.'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
+    issues = '#11640'
+  []
+
   [limit_to_external_sides]
     type = 'Exodiff'
     input = 'parsed_generate_sideset.i parsed_generate_sideset_exterior_limited.i'
