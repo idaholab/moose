@@ -1,0 +1,22 @@
+[Tests]
+  design = 'diffuse_interface_dam_break_algorithm.md'
+  issues = '#34465'
+  [tanh_interface_single_phase]
+    type = MMSTest
+    input = test.py
+    test_case = TestSinglePhase
+    min_parallel = 4
+    max_threads = 1
+    heavy = true
+    requirement = 'The system shall converge at second order in space and time, refined together with BDF2, for the velocity, reduced pressure and volume fraction of the diffuse-interface solve on a manufactured tanh interface with interface compression and equal phase properties.'
+  []
+  [tanh_interface_two_phase]
+    type = MMSTest
+    input = test.py
+    test_case = TestTwoPhase
+    min_parallel = 4
+    max_threads = 1
+    heavy = true
+    requirement = 'The system shall converge at second order in space and time, refined together with BDF2, for the velocity, reduced pressure and volume fraction of the diffuse-interface solve on a manufactured tanh interface at a density ratio of 1000 under gravity.'
+  []
+[]

@@ -13,6 +13,10 @@
 #include "LinearSystem.h"
 #include "Executioner.h"
 
+#include <limits>
+
+using namespace libMesh;
+
 InputParameters
 LinearAssemblySegregatedSolve::validParams()
 {
@@ -337,7 +341,7 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
 void
 LinearAssemblySegregatedSolve::linkRhieChowUserObject()
 {
-  if (!_should_solve_momentum)
+  if (_momentum_systems.empty())
     return;
 
   _rc_uo =
@@ -369,7 +373,9 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   // BCs for example) separately, it is enough to construct one matrix.
   for (const auto system_i : index_range(_momentum_systems))
   {
-    _problem.setCurrentLinearSystem(_momentum_system_numbers[system_i]);
+    // Assemble and relax through the shared routine, so that a split predictor operator also
+    // receives its explicit pressure and body-force sources here.
+    assembleMomentumPredictorOperator(system_i);
 
     // We will need the right hand side and the solution of the next component
     LinearImplicitSystem & momentum_system =
@@ -378,15 +384,6 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
     NumericVector<Number> & solution = *(momentum_system.solution);
     NumericVector<Number> & rhs = *(momentum_system.rhs);
     SparseMatrix<Number> & mmat = *(momentum_system.matrix);
-
-    auto diff_diagonal = solution.zero_clone();
-
-    // We assemble the matrix and the right hand side
-    _problem.computeLinearSystemSys(momentum_system, mmat, rhs, /*compute_grads*/ true);
-
-    // Still need to relax the right hand side with the same vector
-    NS::FV::relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
-    NS::FV::relaxRightHandSide(rhs, solution, *diff_diagonal);
 
     // The normalization factor depends on the right hand side so we need to recompute it for this
     // component
@@ -454,6 +451,51 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   ++_momentum_pc_solve_counter;
 
   return its_normalized_residuals;
+}
+
+void
+LinearAssemblySegregatedSolve::assembleMomentumPredictorOperator(const unsigned int system_i,
+                                                                 const bool prepare_without_solve)
+{
+  _problem.setCurrentLinearSystem(_momentum_system_numbers[system_i]);
+
+  auto & momentum_system =
+      libMesh::cast_ref<LinearImplicitSystem &>(_momentum_systems[system_i]->system());
+  auto & solution = *(momentum_system.solution);
+  auto & rhs = *(momentum_system.rhs);
+  auto & mmat = *(momentum_system.matrix);
+
+  auto diff_diagonal = solution.zero_clone();
+
+  if (prepare_without_solve)
+  {
+    momentum_system.update();
+    momentum_system.current_local_solution->close();
+    solution.close();
+    _momentum_systems[system_i]->solutionOld().close();
+    if (auto * previous_newton = _momentum_systems[system_i]->solutionPreviousNewton())
+      previous_newton->close();
+    rhs.close();
+  }
+
+  if (_rc_uo)
+    _rc_uo->beginMomentumPredictorAssembly(system_i);
+
+  _problem.computeLinearSystemSys(momentum_system, mmat, rhs, /*compute_grads*/ true);
+
+  if (prepare_without_solve)
+    rhs.close();
+
+  // The provider sees the operator as assembled, before relaxation alters its diagonal
+  if (_rc_uo)
+    _rc_uo->momentumPredictorAssembled(system_i, mmat, rhs, _momentum_equation_relaxation);
+
+  // Still need to relax the right hand side with the same vector
+  NS::FV::relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
+  NS::FV::relaxRightHandSide(rhs, solution, *diff_diagonal);
+
+  if (_rc_uo)
+    _rc_uo->addMomentumPredictorExplicitForcing(system_i, rhs);
 }
 
 void
@@ -526,6 +568,9 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
   }
 
   _pressure_system.setSolution(current_local_solution);
+
+  if (_rc_uo)
+    _rc_uo->cachePressureEquationFlux();
 
   const auto residuals =
       std::make_pair(its_res_pair.first, pressure_solver.get_initial_residual() / norm_factor);
@@ -606,33 +651,45 @@ std::pair<unsigned int, Real>
 LinearAssemblySegregatedSolve::correctVelocity(const bool recompute_face_mass_flux,
                                                const SolverParams & solver_params)
 {
-  // Compute the coupling fields between the momentum and pressure equations using the pressure
+  // One pressure corrector, as an ordered sequence of named stages. Everything that differs
+  // between the segregated algorithms is either a loop count that defaults to zero or a stage a
+  // derived solve overrides, so with the defaults this is exactly the plain SIMPLE corrector.
+
+  // 1. The coupling fields between the momentum and pressure equations, built from the pressure
   // gradient captured before the current momentum predictor was assembled.
   _rc_uo->computeHbyA(_print_fields);
+
+  // 2. Whatever pressure-equation sources a derived solve owns, refreshed against the H/A just
+  // computed. Without this the pressure corrector is assembled without them.
+  postPreparePressureCorrectorState();
 
   // We set the preconditioner/controllable parameters for the pressure equations through
   // petsc options. Linear tolerances will be overridden within the solver.
   Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
 
-  // Solve the pressure corrector
+  // 3. Solve the pressure equation.
   const auto residuals = solvePressureCorrector();
 
-  // Update face fluxes using the pressure-correction solution (before pressure relaxation). In
-  // certain segregated solver algorithms (like PISO) this is only done on the last iteration.
+  // 4. The corrected face mass flux, which the advection terms consume. Some algorithms (PISO)
+  // only need it on the last corrector.
   if (recompute_face_mass_flux)
     _rc_uo->computeFaceMassFlux();
 
-  // Reconstructed gradients use the unrelaxed pressure and its conservative face flux to form
-  // the candidate pressure gradient that corrects cell velocity exactly. Relaxed feedback is
-  // published below after the relaxed pressure solution has been computed. Here,
+  // 5. Reconstructed gradients use the unrelaxed pressure and its conservative face flux to form
+  // the candidate pressure gradient that corrects cell velocity exactly. Here,
   // mdot = [(rhoHbyA)_f - (rho/A)_f grad(p)_face] dot normal * S. Only the unrelaxed pressure
-  // makes div(mdot) = 0; using a relaxed pressure would leave a continuity residual.
+  // makes div(mdot) = 0; using a relaxed pressure would leave a continuity residual. This is why
+  // the relaxation below sits between two provider stages rather than before both.
   _rc_uo->preparePressureRelaxation();
 
+  // 6. Relax the pressure for the next momentum predictor. With one corrector per outer iteration
+  // the previous Newton solution *is* the previous outer iterate, so relaxing against it is the
+  // outer-iteration relaxation. An algorithm that runs several correctors per outer iteration has
+  // to keep its own reference state instead, because relaxation is an outer-iteration device
+  // rather than a per-corrector one.
   auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
   auto & pressure_old_solution = *(_pressure_system.solutionPreviousNewton());
 
-  // Relax the pressure update for the next momentum predictor
   NS::FV::relaxSolutionUpdate(
       pressure_current_solution, pressure_old_solution, _pressure_variable_relaxation);
 
@@ -640,10 +697,13 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool recompute_face_mass_fl
   pressure_old_solution = pressure_current_solution;
   _pressure_system.setSolution(pressure_current_solution);
 
-  // Refresh other registered pressure gradients from the relaxed pressure, then publish relaxed
-  // reconstructed coupling feedback for the next momentum predictor. Without reconstruction,
-  // preserve the existing update of cell velocity from the relaxed pressure gradient.
+  // 7. Refresh other registered pressure gradients from the relaxed pressure, publish relaxed
+  // reconstructed coupling feedback for the next momentum predictor, and write the corrected cell
+  // velocity.
   _rc_uo->finalizePressureCorrector();
+
+  // 8. Any provider state that depends on the published corrected velocity.
+  postPublishPressureCorrectedState();
 
   return residuals;
 }
@@ -784,9 +844,13 @@ LinearAssemblySegregatedSolve::solve()
   if (_cht.enabled() && _should_solve_energy)
     _cht.initializeCHTCouplingFields();
 
+  initializeSolveLoop(solver_params);
+
   while (simple_iteration_counter < _num_iterations && !converged)
   {
     simple_iteration_counter++;
+
+    preMomentumPressureIteration(residual_storage, solver_params);
 
     // We set the preconditioner/controllable parameters through petsc options. Linear
     // tolerances will be overridden within the solver. In case of a segregated momentum
@@ -893,7 +957,8 @@ LinearAssemblySegregatedSolve::solve()
     // If we have active scalar equations, solve them here in case they depend on temperature
     // or they affect the fluid properties such that they must be solved concurrently with
     // pressure and velocity
-    if (_has_active_scalar_systems && _should_solve_active_scalars)
+    if (_has_active_scalar_systems && _should_solve_active_scalars &&
+        shouldSolveActiveScalarsAfterFlowLoop())
     {
       _problem.execute(EXEC_NONLINEAR);
 

@@ -204,8 +204,11 @@ WCNSLinearFVFlowPhysics::initializePhysicsAdditional()
   getProblem().needSolutionState(2, Moose::SolutionIterationType::Nonlinear);
   // TODO Ban all other nonlinear Physics for now
 
-  // Fix the default system names if using a different dimension
-  if (!isParamSetByUser("system_name"))
+  // Fix the default system names if using a different dimension. The default is the 3D list, and
+  // a default set in validParams counts as set by the user, so it is recognised by value too.
+  const std::vector<SolverSystemName> default_system_names = {
+      "u_system", "v_system", "w_system", "pressure_system"};
+  if (!isParamSetByUser("system_names") || _system_names == default_system_names)
   {
     if (dimension() == 1)
       _system_names = {"u_system", "pressure_system"};
@@ -289,6 +292,7 @@ WCNSLinearFVFlowPhysics::addFVKernels()
 
   // Momentum equation: flux terms
   addMomentumFluxKernels();
+  addAxisymmetricViscousSource();
 
   // Momentum equation: pressure term
   addMomentumPressureKernels();
@@ -320,7 +324,7 @@ WCNSLinearFVFlowPhysics::addPressureCorrectionKernels()
     if (_has_baffles)
       params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
     else
-      params.set<MooseFunctorName>("diffusion_tensor") = "Ainv";
+      params.set<MooseFunctorName>("diffusion_tensor") = pressureDiffusionCoefficientName();
     params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
 
     getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
@@ -332,7 +336,11 @@ WCNSLinearFVFlowPhysics::addPressureCorrectionKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<LinearVariableName>("variable") = _pressure_name;
-    params.set<MooseFunctorName>("face_flux") = "HbyA";
+    params.set<MooseFunctorName>("face_flux") = predictorFaceFluxName();
+    // Whether that flux carries the face area is the Rhie-Chow object's convention, which it also
+    // uses for its own boundary bookkeeping, so the pressure equation asks rather than assumes
+    params.set<bool>("face_flux_is_integrated") =
+        pressureCorrectionProvider().pressureCorrectionFluxIsIntegrated();
     params.set<bool>("force_boundary_execution") = true;
 
     getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
@@ -395,6 +403,27 @@ WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
 
     getProblem().addLinearFVKernel(kernel_type, kernel_name + NS::directions[d], params);
   }
+}
+
+void
+WCNSLinearFVFlowPhysics::addAxisymmetricViscousSourceKernel(
+    const std::vector<SubdomainName> & rz_blocks, const unsigned int radial_index)
+{
+  const std::string u_names[2] = {"u", "v"};
+  InputParameters params = getFactory().getValidParams("LinearFVRZViscousSource");
+  assignBlocks(params, rz_blocks);
+  // The same viscosity and stress form as the momentum flux kernels
+  params.set<MooseFunctorName>(NS::mu) = _turbulence_physics ? NS::mu_eff : _dynamic_viscosity_name;
+  params.set<bool>("use_deviatoric_terms") = includeSymmetrizedViscousStress();
+  for (const auto i : make_range(dimension()))
+    params.set<SolverVariableName>(u_names[i]) = _velocity_names[i];
+  params.set<LinearVariableName>("variable") = _velocity_names[radial_index];
+  params.set<MooseEnum>("momentum_component") = NS::directions[radial_index];
+
+  getProblem().addLinearFVKernel("LinearFVRZViscousSource",
+                                 prefix() + "ins_momentum_viscous_source_rz_" +
+                                     NS::directions[radial_index],
+                                 params);
 }
 
 void
@@ -784,6 +813,26 @@ WCNSLinearFVFlowPhysics::addUserObjects()
     addPressureJumpModel();
   // Rhie Chow user object for interpolation velocities
   addRhieChowUserObjects();
+}
+
+const RhieChowMassFlux &
+WCNSLinearFVFlowPhysics::pressureCorrectionProvider() const
+{
+  std::vector<UserObject *> objs;
+  getProblem()
+      .theWarehouse()
+      .query()
+      .condition<AttribSystem>("UserObject")
+      .condition<AttribThread>(0)
+      .queryInto(objs);
+
+  for (const auto & obj : objs)
+    if (const auto rc_obj = dynamic_cast<RhieChowMassFlux *>(obj))
+      if (rc_obj->blocks() == _blocks || rc_obj->blocks().empty() || _blocks.empty())
+        return *rc_obj;
+
+  mooseError("No Rhie-Chow mass flux user object is available to this flow physics. User objects "
+             "are created before flux kernels, so one should exist by now.");
 }
 
 void

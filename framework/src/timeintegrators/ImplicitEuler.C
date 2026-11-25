@@ -96,3 +96,9 @@ ImplicitEuler::timeDerivativeMatrixContribution(const Real factor) const
 {
   return factor / _dt;
 }
+
+std::vector<Real>
+ImplicitEuler::timeDerivativeRHSWeights() const
+{
+  return {1.0 / _dt};
+}
