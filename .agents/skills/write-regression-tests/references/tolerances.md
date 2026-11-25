@@ -20,23 +20,28 @@ line, so the spec values are what the tool sees:
 
 `CSVDiff` offers two ways to give a column its own tolerance.
 
-`override_columns`/`override_rel_err`/`override_abs_zero` map to `csvdiff.py`'s
-`--custom-columns`/`--custom-rel-err`/`--custom-abs-zero` and give named columns their own
-tolerance while the rest of the file stays at the spec values. Prefer these for a column or two.
-All three lists must be the same length, or `CSVDiff.checkRunnable` fails the test with "Override
-inputs not the same length". Widening `rel_err` for one column therefore also requires that
-column's `override_abs_zero`.
+A value passes when either its relative difference is within `rel_err` or its absolute difference
+is within `abs_err` (default 0, so only the relative test applies unless set).
+
+`override_columns` plus any of `override_rel_err`/`override_abs_err`/`override_abs_zero` map to
+`csvdiff.py`'s `--custom-columns` plus `--custom-rel-err`/`--custom-abs-err`/`--custom-abs-zero`
+and give named columns their own tolerance while the rest of the file stays at the spec values.
+Prefer these for a column or two. At least one tolerance list must accompany `override_columns`,
+and each list given must have the same length as `override_columns`; otherwise
+`CSVDiff.checkRunnable` fails the test. A tolerance without its own list keeps the spec value for
+those columns.
 
 `comparison_file` names a file, resolved relative to the test directory, that the tester hands to
 `csvdiff.py --comparison-file`. It uses the exodiff command-file syntax: an unindented header line
-carrying `relative`/`floor`, then one indented line per column, optionally with its own
-`relative`/`floor`.
+carrying `absolute`/`relative`/`floor`, then one indented line per column, optionally with its own
+`absolute`/`relative`/`floor`.
 
 - The file restricts the diff to the columns it lists, so every unlisted column goes unchecked.
   Generate it with `csvdiff.py --summary gold/<file>.csv`, which lists every column, and then edit
   only the affected column's line.
-- The header's `relative`/`floor` replace the spec's `rel_err`/`abs_zero`. Without them, the listed
-  columns are compared with a relative tolerance and floor of zero, which demands an exact match.
+- The header's `absolute`/`relative`/`floor` replace the spec's `abs_err`/`rel_err`/`abs_zero`.
+  Without them, the listed columns are compared with an absolute tolerance, relative tolerance, and
+  floor of zero, which demands an exact match.
 - `csvdiff.py` rejects a comparison file combined with the `override_*` parameters.
 
 With either mechanism, `csvdiff.py` reports the first mismatching row per column and then stops, so

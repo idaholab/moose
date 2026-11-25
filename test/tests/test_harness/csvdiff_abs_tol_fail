@@ -1,0 +1,14 @@
+[Tests]
+  design = 'CSVDiff.md'
+  issues = '#32561'
+  [test_csvdiff_abs_tol_fail]
+    type = CSVDiff
+    input = csvdiff_abs_tol.i
+    csvdiff = csvdiff_abs_tol_out.csv
+    # val2 has a relative error of ~0.0099 and an absolute error of 1e-8, so both tolerances are
+    # exceeded and the diff must fail. val1 (absolute error 1e-11) passes through abs_err alone.
+    rel_err = 1e-6
+    abs_err = 1e-9
+    requirement = 'The system shall report a failure when a CSV value exceeds both the relative and absolute error tolerances.'
+  []
+[]

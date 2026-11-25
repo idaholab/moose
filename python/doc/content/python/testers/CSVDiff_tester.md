@@ -11,12 +11,15 @@ More documentation for the `CSVDiff` utility may be found [here](CSVDiff.md).
 
 Test configuration options are added to the `tests` file.
 
-- `abs_zero`: Sets an absolute tolerance, defaults to 1e-10. Both absolute and relative tolerances must
-  be met for a test to pass.
+- `abs_zero`: Sets an absolute zero cutoff, defaults to 1e-10. A comparison passes if both values are within the cutoff.
+
+- `abs_err`: Sets an absolute tolerance, defaults to 0. If either the absolute or the relative tolerance is met, the test passes.
 
 - `rel_err`: Sets a relative tolerance, defaults to 5.5e-6.
 
 - `override_columns`: A list of variable names to customize the `CSVDiff` tolerances
+
+- `override_abs_err`: A list of customized absolute error tolerances.
 
 - `override_rel_err`: A list of customized relative error tolerances.
 
@@ -25,6 +28,51 @@ Test configuration options are added to the `tests` file.
 - `comparison_file`: Use supplied custom comparison config file.
 
 - `ignore_columns`: Exclude columns in csv file from csv diff comparison.
+
+## Comparison criteria id=comparison
+
+Each column not present in `ignored_columns` is compared.
+Columns are matched by header, so their order does not matter, but every compared column must be present
+in both files with the same number of rows. For each row of each compared column, the gold value
+$a$ and the test value $b$ are checked with the absolute zero $z$ (`abs_zero`), the absolute
+tolerance $\tau_\mathrm{abs}$ (`abs_err`), and the relative tolerance $\tau_\mathrm{rel}$
+(`rel_err`).
+
+The pair passes without further checks if both values are within the absolute zero:
+
+!equation id=eq-csvdiff-floor
+\lvert a \rvert \le z \quad \text{and} \quad \lvert b \rvert \le z
+
+Otherwise, the pair passes if either tolerance is met:
+
+!equation id=eq-csvdiff-pass
+\lvert a - b \rvert \le \tau_\mathrm{abs}
+\quad \text{or} \quad
+\lvert a - b \rvert \le \tau_\mathrm{rel} \max\left( \lvert a \rvert, \lvert b \rvert \right)
+
+- The values are never modified by the absolute zero. If only one value is within the absolute zero value, the
+  original values are compared with [eq-csvdiff-pass], so a very small value can still be
+  compared with a much larger one. This is the same definition of the floor that
+  [Exodiff](Exodiff.md#comparison) uses.
+- Because the relative difference is normalized by the larger magnitude, it is symmetric in $a$
+  and $b$. It is at most 1 when the values have the same sign and at most 2 when they differ in
+  sign.
+- With the default $\tau_\mathrm{abs} = 0$, the absolute criterion is met only when $a = b$, so
+  only the relative tolerance matters. The absolute tolerance is useful for values that are
+  noisy around a small but nonzero level: for $a = 10^{-6}$ and $b = 1.01 \times 10^{-6}$, the
+  relative difference is about 0.0099 and fails the default `rel_err`, but `abs_err = 1e-7`
+  accepts the absolute difference of $10^{-8}$.
+- A NaN or infinite value in either file is a failure.
+- Only the first value that fails in a column is reported. The remaining rows of that column
+  are not checked.
+
+`override_columns` selects columns that get their own tolerances. `override_abs_zero`,
+`override_abs_err`, and `override_rel_err` replace $z$, $\tau_\mathrm{abs}$, and
+$\tau_\mathrm{rel}$ for those columns, in the same order, and any of them that is not given
+keeps the global value. In a `comparison_file`, the `floor`, `absolute`, and `relative` keywords
+on the header line set the defaults for the listed columns, and the same keywords on a column
+line override them. A keyword that is not given is treated as zero, and
+columns that are not listed are not compared.
 
 
 

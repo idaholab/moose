@@ -22,6 +22,30 @@ Test configuration options are added to the `tests` file.
 
 Other test commands & restrictions may be found in the [TestHarness documentation](TestHarness.md).
 
+## Comparison criteria id=comparison
+
+The images must have the same dimensions. Their pixel values, on a scale from 0 to 1, are compared
+with the mean structural similarity index (SSIM) computed by `skimage.metrics.structural_similarity`.
+In a window of pixels, the similarity between the gold image $x$ and the test image $y$ is
+
+!equation id=eq-ssim
+\mathrm{SSIM}(x, y) =
+\frac{\left(2 \mu_x \mu_y + C_1\right)\left(2 \sigma_{xy} + C_2\right)}
+{\left(\mu_x^2 + \mu_y^2 + C_1\right)\left(\sigma_x^2 + \sigma_y^2 + C_2\right)}
+
+where $\mu$ and $\sigma^2$ are the mean and variance of the pixel values in the window,
+$\sigma_{xy}$ is their covariance, and $C_1 = (K_1 L)^2$ and $C_2 = (K_2 L)^2$ keep the ratio
+finite. The `scikit-image` defaults are used: a uniform $7 \times 7$ window, $K_1 = 0.01$,
+$K_2 = 0.03$, and a data range $L = 1$. The index is averaged over all windows, excluding a
+border of 3 pixels where the window does not fit, and over the color channels of a color image.
+The test passes if the mean index $\overline{\mathrm{SSIM}}$ is at least the `allowed` value:
+
+!equation id=eq-ssim-pass
+\overline{\mathrm{SSIM}}(x, y) \ge s_\mathrm{allowed}
+
+The index is 1 for identical images and decreases as they differ. The parameters `abs_zero` and
+`rel_err` are not used by this tester.
+
 ## Example test configuration in the MOOSE test suite
 
 In this example, the `ImageDiff` tester is used to check that the plots of the spatial distributions
