@@ -6,7 +6,6 @@
 # Common wave numbers (shared by the functions below)
 ky_p = 0.444288293816
 ky_m = ${fparse 2*ky_p}
-kx   = ${fparse sqrt(2)*ky_p}
 
 # Magnitude of the real part of the interface coefficient (sign is set where it is used)
 coeff_real_mag = 0.628318530718
