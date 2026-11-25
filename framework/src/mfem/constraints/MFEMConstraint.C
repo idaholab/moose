@@ -63,7 +63,7 @@ MFEMConstraint::checkDisjointSubdomains(MFEMConstraint & other)
 }
 
 const mfem::Array<int> &
-MFEMConstraint::getSubdomainTrueDofs(mfem::ParFiniteElementSpace & pfes)
+MFEMConstraint::getSubdomainTDofs(mfem::ParFiniteElementSpace & pfes)
 {
   updateSubdomainTDofs(pfes);
   return _subdomain_tdofs;

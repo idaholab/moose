@@ -12,6 +12,7 @@
 #include "MFEMTreeCotreeGauge.h"
 #include "MFEMDistributedGraph.h"
 #include "MFEMConstraint.h"
+#include "MFEMConstraintUtils.h"
 #include "MooseError.h"
 #include "libMeshReducedNamespace.h"
 
@@ -103,31 +104,6 @@ vertexCoord(const mfem::ParMesh & pmesh, int v)
   Coord3 p{0.0, 0.0, 0.0};
   pmesh.GetNode(v, p.data());
   return p;
-}
-
-// Local dof marker: 1 if the dof belongs to an element whose attribute is NOT
-// set in the attribute marker array gauge_markers, i.e. a dof of a region the gauge
-// must not reach because some other term of the weak form already removes the
-// gradient null space there. Edges carrying such dofs seed the spanning forest, and
-// no dof of such an edge, face or element is ever gauged. Dofs of a gauged region
-// that merely touch such a region are NOT flagged, so the gauge still reaches the
-// vertices next to it. Consistent across ranks for shared dofs.
-mfem::Array<int>
-excludedLDofMarker(mfem::ParFiniteElementSpace & pfes, const mfem::Array<int> & gauge_markers)
-{
-  mfem::ParMesh & pmesh = *pfes.GetParMesh();
-  mfem::Array<int> marker(pfes.GetVSize());
-  marker = 0;
-  mfem::Array<int> ldofs;
-  for (const auto el : make_range(pmesh.GetNE()))
-    if (!gauge_markers[pmesh.GetAttribute(el) - 1])
-    {
-      pfes.GetElementDofs(el, ldofs);
-      for (const auto d : ldofs)
-        marker[mfem::FiniteElementSpace::DecodeDof(d)] = 1;
-    }
-  pfes.Synchronize(marker); // boolean-OR over shared dofs
-  return marker;
 }
 
 // ---------------------------------------------------------------------
@@ -733,8 +709,18 @@ TreeCotreeGauge::trueDofs(const MFEMConstraint & constraint,
   if (_fespace_sequence == pfes.GetSequence() && _essential_tdofs == essential_tdofs)
     return _tdofs;
 
-  // Dofs of subdomains that are not gauged.
-  mfem::Array<int> excluded = excludedLDofMarker(pfes, gauge_block_markers);
+  // Local dof marker of the dofs of every element outside the gauged subdomains, the
+  // regions the gauge must not reach because some other term of the weak form already
+  // removes the gradient null space there. Edges carrying such dofs seed the spanning
+  // forest, and no dof of such an edge, face or element is ever gauged. The boundary
+  // of these regions is included, but dofs of a gauged region that merely touch them
+  // are not, so the gauge still reaches the vertices next to them.
+  mfem::Array<int> excluded_markers(gauge_block_markers.Size());
+  for (const auto i : make_range(gauge_block_markers.Size()))
+    excluded_markers[i] = !gauge_block_markers[i];
+  mfem::Array<int> excluded, excluded_tdofs;
+  Moose::MFEM::subdomainTDofs(
+      pfes, excluded_markers, /*include_boundary=*/true, excluded, excluded_tdofs);
 
   _tdofs = buildTreeCotreeGaugeTDofs(pfes, essential_tdofs, excluded);
 

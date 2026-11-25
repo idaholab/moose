@@ -40,7 +40,7 @@ MFEMScalarEssentialConstraint::ApplyConstraint(mfem::ParGridFunction & gridfunc,
   mfem::ParFiniteElementSpace & pfes = *gridfunc.ParFESpace();
   Moose::MFEM::projectCoefficientOnSubdomains(
       gridfunc, _coef, getSubdomainMarkers(), getSubdomainLDofMarker(pfes));
-  ess_tdofs.Append(getSubdomainTrueDofs(pfes));
+  ess_tdofs.Append(getSubdomainTDofs(pfes));
 }
 
 #endif

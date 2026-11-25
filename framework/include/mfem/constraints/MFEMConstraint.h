@@ -50,9 +50,9 @@ protected:
   /// less the subdomain boundary unless 'constrain_subdomain_boundary' is set (see
   /// Moose::MFEM::subdomainTDofs). They depend only on the mesh and the space, so
   /// they are cached and only recomputed when the space is updated.
-  const mfem::Array<int> & getSubdomainTrueDofs(mfem::ParFiniteElementSpace & pfes);
+  const mfem::Array<int> & getSubdomainTDofs(mfem::ParFiniteElementSpace & pfes);
   /// Local dof marker of the dofs of @p pfes the constraint fixes, matching
-  /// getSubdomainTrueDofs() and cached alongside it.
+  /// getSubdomainTDofs() and cached alongside it.
   const mfem::Array<int> & getSubdomainLDofMarker(mfem::ParFiniteElementSpace & pfes);
 
   /// Name of the trial variable the constraint is applied to.

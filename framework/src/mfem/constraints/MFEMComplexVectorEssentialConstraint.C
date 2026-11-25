@@ -59,7 +59,7 @@ MFEMComplexVectorEssentialConstraint::ApplyConstraint(mfem::ParComplexGridFuncti
   Moose::MFEM::projectCoefficientOnSubdomains(
       gridfunc.imag(), _vec_coef_imag, markers, ldof_marker);
   gridfunc.SyncAlias();
-  ess_tdofs.Append(getSubdomainTrueDofs(pfes));
+  ess_tdofs.Append(getSubdomainTDofs(pfes));
 }
 
 #endif

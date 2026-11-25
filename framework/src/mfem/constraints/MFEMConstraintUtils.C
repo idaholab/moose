@@ -67,12 +67,14 @@ distributeSubdomainProjection(mfem::ParGridFunction & gf,
                               mfem::Array<int> & counter,
                               const mfem::Array<int> & ldof_marker)
 {
-  // Sum the contributions and their multiplicity across the ranks sharing a dof,
-  // then broadcast both back so every rank forms the same average. Without this a
-  // dof on the subdomain boundary owned by a rank that holds no element of the
-  // subdomain would keep its unprojected value, and that is the value
-  // ParBilinearForm::FormLinearSystem eliminates against. This mirrors the idiom
-  // used by mfem::ParGridFunction::ProjectBdrCoefficientTangent.
+  // Sum the contributions and their counts onto the master of each group of ranks
+  // sharing a dof. Only the master ends up with the totals; on the other ranks
+  // values and counter keep their local partial results. The master forms the
+  // average and the final Bcast copies it to the rest of the group. Without this, a
+  // shared dof owned by a rank that holds no element of the subdomain would keep its
+  // unprojected value, and that is the value ParBilinearForm::FormLinearSystem
+  // eliminates against. This mirrors the idiom used by
+  // mfem::ParGridFunction::ProjectBdrCoefficientTangent.
   mfem::GroupCommunicator & gcomm = gf.ParFESpace()->GroupComm();
   gcomm.Reduce<int>(counter.HostReadWrite(), mfem::GroupCommunicator::Sum);
   gcomm.Reduce<mfem::real_t>(values.HostReadWrite(), mfem::GroupCommunicator::Sum);
@@ -82,7 +84,9 @@ distributeSubdomainProjection(mfem::ParGridFunction & gf,
 
   // Unmarked dofs on the subdomain boundary still received a contribution, but they
   // are not constrained and must keep their values, which may come from an essential
-  // boundary condition.
+  // boundary condition. On a non-master rank a marked shared dof can have a local
+  // count of zero, so counter is checked to avoid dividing by it; the Bcast below
+  // replaces whatever is written there anyway.
   for (const auto i : make_range(gf.Size()))
     if (counter[i] && ldof_marker[i])
       gf(i) = values(i) / counter[i];
@@ -129,10 +133,7 @@ subdomainTDofs(mfem::ParFiniteElementSpace & pfes,
   ldof_marker = 0;
   mfem::Array<int> outside_marker;
   if (!include_boundary)
-  {
-    outside_marker.SetSize(pfes.GetVSize());
-    outside_marker = 0;
-  }
+    outside_marker.SetSize(pfes.GetVSize(), 0);
   mfem::Array<int> ldofs;
   for (const auto e : make_range(pmesh.GetNE()))
   {
