@@ -76,7 +76,7 @@ omega=10.0
   []
   [mixed_grad_V]
     type = MFEMMixedSesquilinearFormKernel
-    trial_variable = V
+    coupled_variable = V
     variable = A
     [RealComponent]
       type = MFEMMixedVectorGradientKernel
@@ -101,7 +101,7 @@ omega=10.0
   []
   [mixed_mass_A]
     type = MFEMMixedSesquilinearFormKernel
-    trial_variable = A
+    coupled_variable = A
     variable = V
     [ImagComponent]
       type = MFEMMixedVectorWeakDivergenceKernel

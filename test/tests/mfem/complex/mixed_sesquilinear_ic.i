@@ -92,7 +92,7 @@ omega=10.0
   []
   [mass_A]
     type = MFEMMixedSesquilinearFormKernel
-    trial_variable = A
+    coupled_variable = A
     variable = V
     [ImagComponent]
       type = MFEMMixedVectorWeakDivergenceKernel

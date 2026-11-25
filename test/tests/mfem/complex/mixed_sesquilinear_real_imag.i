@@ -107,7 +107,7 @@ beta=0.5
   []
   [mixed_grad_V]
     type = MFEMMixedSesquilinearFormKernel
-    trial_variable = V
+    coupled_variable = V
     variable = A
     [RealComponent]
       type = MFEMMixedVectorGradientKernel

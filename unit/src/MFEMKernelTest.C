@@ -336,7 +336,7 @@ TEST_F(MFEMKernelTest, MFEMMixedScalarCurlKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMMixedScalarCurlKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<VariableName>("trial_variable") = "trial_variable_name";
+  kernel_params.set<VariableName>("coupled_variable") = "trial_variable_name";
   kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
   MFEMMixedScalarCurlKernel & kernel =
       addObject<MFEMMixedScalarCurlKernel>("MFEMMixedScalarCurlKernel", "kernel1", kernel_params);
@@ -359,7 +359,7 @@ TEST_F(MFEMKernelTest, RejectsOffDiagonalNonlinearKernelWhenBuildingEquationSyst
 
   InputParameters nonlinear_params = _factory.getValidParams("TestOffDiagonalNonlinearKernel");
   nonlinear_params.set<VariableName>("variable") = "test_variable_name";
-  nonlinear_params.set<VariableName>("trial_variable") = "trial_variable_name";
+  nonlinear_params.set<VariableName>("coupled_variable") = "trial_variable_name";
 
   auto diag_test =
       addSharedObject<MFEMDiffusionKernel>("MFEMDiffusionKernel", "diag_test", diag_test_params);
@@ -397,7 +397,7 @@ TEST_F(MFEMKernelTest, AcceptsLinearOffDiagonalKernelWhenBuildingEquationSystem)
 
   InputParameters linear_params = _factory.getValidParams("TestOffDiagonalLinearKernel");
   linear_params.set<VariableName>("variable") = "test_variable_name";
-  linear_params.set<VariableName>("trial_variable") = "trial_variable_name";
+  linear_params.set<VariableName>("coupled_variable") = "trial_variable_name";
 
   auto diag_test =
       addSharedObject<MFEMDiffusionKernel>("MFEMDiffusionKernel", "diag_test", diag_test_params);
@@ -466,7 +466,7 @@ TEST_F(MFEMKernelTest, MFEMMixedGradGradKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMMixedGradGradKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<VariableName>("trial_variable") = "trial_variable_name";
+  kernel_params.set<VariableName>("coupled_variable") = "trial_variable_name";
   kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
   MFEMMixedGradGradKernel & kernel =
       addObject<MFEMMixedGradGradKernel>("MFEMMixedGradGradKernel", "kernel1", kernel_params);
@@ -490,7 +490,7 @@ TEST_F(MFEMKernelTest, MFEMMixedScalarWeakCurlKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMMixedScalarWeakCurlKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<VariableName>("trial_variable") = "trial_variable_name";
+  kernel_params.set<VariableName>("coupled_variable") = "trial_variable_name";
   kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
   MFEMMixedScalarWeakCurlKernel & kernel = addObject<MFEMMixedScalarWeakCurlKernel>(
       "MFEMMixedScalarWeakCurlKernel", "kernel1", kernel_params);
@@ -515,7 +515,7 @@ TEST_F(MFEMKernelTest, MFEMMixedVectorMassKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMMixedVectorMassKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<VariableName>("trial_variable") = "trial_variable_name";
+  kernel_params.set<VariableName>("coupled_variable") = "trial_variable_name";
   kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
   MFEMMixedVectorMassKernel & kernel =
       addObject<MFEMMixedVectorMassKernel>("MFEMMixedVectorMassKernel", "kernel1", kernel_params);
@@ -540,7 +540,7 @@ TEST_F(MFEMKernelTest, MFEMMixedVectorWeakDivergenceKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMMixedVectorWeakDivergenceKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<VariableName>("trial_variable") = "trial_variable_name";
+  kernel_params.set<VariableName>("coupled_variable") = "trial_variable_name";
   kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
   MFEMMixedVectorWeakDivergenceKernel & kernel = addObject<MFEMMixedVectorWeakDivergenceKernel>(
       "MFEMMixedVectorWeakDivergenceKernel", "kernel1", kernel_params);
