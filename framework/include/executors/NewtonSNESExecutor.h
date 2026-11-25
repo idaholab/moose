@@ -17,6 +17,8 @@
 #include <memory>
 #include <utility>
 
+class NonlinearSystem;
+
 namespace libMesh
 {
 template <typename>
@@ -41,6 +43,11 @@ public:
    * @returns the libMesh system corresponding to the index \p i
    */
   libMesh::System & getSystem();
+
+  /**
+   * @returns the nonlinear system of this executor. Only valid for an executor of one system
+   */
+  NonlinearSystem & getNonlinearSystem();
 
 protected:
   virtual void setupSNES() override;

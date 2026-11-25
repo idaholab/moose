@@ -420,8 +420,14 @@ NewtonSNESExecutor::getSNES()
 System &
 NewtonSNESExecutor::getSystem()
 {
-  if (_nl_sys_nums.size() != 1)
-    mooseError("Ambiguous call to getSystem()");
+  return getNonlinearSystem().system();
+}
 
-  return _fe_problem.getNonlinearSystem(_nl_sys_nums[0]).system();
+NonlinearSystem &
+NewtonSNESExecutor::getNonlinearSystem()
+{
+  if (_nl_sys_nums.size() != 1)
+    mooseError("Ambiguous call to getNonlinearSystem()");
+
+  return _fe_problem.getNonlinearSystem(_nl_sys_nums[0]);
 }
