@@ -52,7 +52,7 @@ AugmentedLagrangianContactProblemTempl<T>::AugmentedLagrangianContactProblemTemp
 template <>
 void
 AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>::addDefaultNonlinearConvergence(
-    const InputParameters & params_to_apply)
+    const InputParameters & params_to_apply, const std::vector<ConvergenceName> & conv_names)
 {
   std::string class_name = "AugmentedLagrangianContactReferenceConvergence";
   InputParameters params = this->_factory.getValidParams(class_name);
@@ -62,13 +62,14 @@ AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>::addDefaultNonl
   // TODO: Add multi-nonlinear system support
   if (this->numNonlinearSystems() > 1)
     mooseError("Multi-system not currently implemented");
-  this->addConvergence(class_name, this->getNonlinearConvergenceNames()[0], params);
+  for (const auto & conv_name : conv_names)
+    this->addConvergence(class_name, conv_name, params);
 }
 
 template <>
 void
 AugmentedLagrangianContactProblemTempl<FEProblem>::addDefaultNonlinearConvergence(
-    const InputParameters & params_to_apply)
+    const InputParameters & params_to_apply, const std::vector<ConvergenceName> & conv_names)
 {
   std::string class_name = "AugmentedLagrangianContactFEProblemConvergence";
   InputParameters params = _factory.getValidParams(class_name);
@@ -78,7 +79,8 @@ AugmentedLagrangianContactProblemTempl<FEProblem>::addDefaultNonlinearConvergenc
   // TODO: Add multi-nonlinear system support
   if (this->numNonlinearSystems() > 1)
     mooseError("Multi-system not currently implemented");
-  this->addConvergence(class_name, this->getNonlinearConvergenceNames()[0], params);
+  for (const auto & conv_name : conv_names)
+    this->addConvergence(class_name, conv_name, params);
 }
 
 template class AugmentedLagrangianContactProblemTempl<ReferenceResidualProblem>;

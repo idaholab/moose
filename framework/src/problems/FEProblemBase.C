@@ -2941,14 +2941,15 @@ FEProblemBase::addConvergence(const std::string & type,
 }
 
 void
-FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_apply)
+FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_apply,
+                                              const std::vector<ConvergenceName> & conv_names)
 {
   const std::string class_name = "DefaultNonlinearConvergence";
   InputParameters params = _factory.getValidParams(class_name);
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
-  for (const auto & conv_name : getNonlinearConvergenceNames())
+  for (const auto & conv_name : conv_names)
     addConvergence(class_name, conv_name, params);
 }
 
@@ -10540,6 +10541,33 @@ FEProblemBase::setNonlinearConvergenceNames(const std::vector<ConvergenceName> &
 
   for (const auto i : make_range(numNonlinearSystems()))
     _nl[i]->setConvergenceName(convergence_names[i]);
+}
+
+void
+FEProblemBase::setNonlinearConvergence(const NonlinearSystemName & nl_sys_name,
+                                       const ConvergenceName & convergence_name)
+{
+  if (!_nonlinear_convergence_names)
+    _nonlinear_convergence_names.emplace(numNonlinearSystems());
+  const auto sys_num = nlSysNum(nl_sys_name);
+  auto & slot = (*_nonlinear_convergence_names)[sys_num];
+  if (!slot.empty())
+    mooseError("A convergence object has already been set for nonlinear system '",
+               nl_sys_name,
+               "': '",
+               slot,
+               "'");
+  slot = convergence_name;
+  _nl[sys_num]->setConvergenceName(convergence_name);
+}
+
+bool
+FEProblemBase::hasNonlinearConvergenceName(const NonlinearSystemName & nl_sys_name) const
+{
+  if (!_nonlinear_convergence_names)
+    return false;
+  const auto sys_num = nlSysNum(nl_sys_name);
+  return !(*_nonlinear_convergence_names)[sys_num].empty();
 }
 
 void

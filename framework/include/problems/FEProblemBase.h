@@ -799,13 +799,15 @@ public:
     return _steady_state_convergence_name.has_value();
   }
   /**
-   * Adds the default nonlinear Convergence associated with the problem
+   * Adds the default nonlinear Convergence objects associated with the problem
    *
    * This is called if the user does not supply 'nonlinear_convergence'.
    *
-   * @param[in] params   Parameters to apply to Convergence parameters
+   * @param[in] params        Parameters to apply to Convergence parameters
+   * @param[in] conv_names    Names of the default Convergence objects to add
    */
-  virtual void addDefaultNonlinearConvergence(const InputParameters & params);
+  virtual void addDefaultNonlinearConvergence(const InputParameters & params,
+                                              const std::vector<ConvergenceName> & conv_names);
   /**
    * Returns true if an error will result if the user supplies 'nonlinear_convergence'
    *
@@ -2897,6 +2899,16 @@ public:
    * Sets the nonlinear convergence object name(s) if there is one
    */
   void setNonlinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names);
+  /**
+   * Sets the convergence object name for a single nonlinear system.
+   * Errors if a name has already been set for that system.
+   */
+  void setNonlinearConvergence(const NonlinearSystemName & nl_sys_name,
+                               const ConvergenceName & convergence_name);
+  /**
+   * Returns true if a convergence name has been explicitly set for the given nonlinear system.
+   */
+  bool hasNonlinearConvergenceName(const NonlinearSystemName & nl_sys_name) const;
   /**
    * Sets the linear convergence object name(s) if there is one
    */
