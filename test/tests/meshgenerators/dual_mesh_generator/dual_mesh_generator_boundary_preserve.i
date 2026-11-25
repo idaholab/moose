@@ -30,18 +30,6 @@
     examine_element_volumes = ERROR
     minimum_element_volumes = 0
     examine_non_conformality = ERROR
-  []
-
-  # exodiff cannot read NSIDED blocks, so the polygons are split for the comparison
-  [convert]
-    type = ElementsToSimplicesConverter
-    input = myDiagnosticGenerator
-  []
-
-  # The sideset orientation check does not support polygons, so it runs on the split mesh
-  [checkSidesets]
-    type = MeshDiagnosticsGenerator
-    input = convert
     examine_sidesets_orientation = ERROR
   []
 []
