@@ -26,6 +26,10 @@ if building an `mfem::LORSolver<T>` object is unnecessary), the developer is fre
 variant set to false (the default), the wrapped MFEM solver will be of type `T` and LOR functionality
 will be disabled.
 
+An LOR solver always solves with the LOR operator assembled from its equation system's bilinear
+form, never with the high-order operator. It is therefore best used to precondition a Krylov solver
+on the high-order system, which then works at any assembly level, including `partial`.
+
 !alert note Solving a problem with vector variables with the LOR method requires a specific choice
 of basis for the low-order and the high-order systems to be spectrally equivalent. Therefore, if
 you are solving (a) an H1 problem or (b) an H(Curl) or H(Div) problem with an LOR solver, you must

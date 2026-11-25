@@ -26,6 +26,15 @@
 #include "MFEMOperatorJacobiSmoother.h"
 #include "MFEMVectorFESpace.h"
 
+template <typename T>
+struct IsLORSolver : std::false_type
+{
+};
+template <typename T>
+struct IsLORSolver<mfem::LORSolver<T>> : std::true_type
+{
+};
+
 class MFEMSolverTest : public MFEMObjectUnitTest
 {
 public:
@@ -133,8 +142,15 @@ public:
     solver_ptr->Mult(B, X);
 
     mfem::Vector Y(X.Size());
-    mfem::OperatorHandle A = equation_system.GetLinearOperator();
-    A->Mult(X, Y);
+    // An LOR solver solves the LOR system, so its residual is that of the LOR operator. The
+    // high-order operator must not replace the LOR one when it is set on the solver.
+    if constexpr (IsLORSolver<SolverType>::value)
+      solver_ptr->GetLOR().GetAssembledSystem()->Mult(X, Y);
+    else
+    {
+      mfem::OperatorHandle A = equation_system.GetLinearOperator();
+      A->Mult(X, Y);
+    }
     Y -= B;
     ASSERT_LE(Y.Norml2(), tol);
     ASSERT_GE(B.Norml2(), tol);
