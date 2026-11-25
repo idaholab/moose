@@ -602,7 +602,7 @@ DualMeshGenerator::generate()
       Node * new_node = tri_mesh->add_point(*node);
 
       auto node_elem = std::make_unique<libMesh::NodeElem>();
-      node_elem->set_node(0) = new_node;
+      node_elem->set_node(0, new_node);
       tri_mesh->add_elem(std::move(node_elem));
     }
 
@@ -623,10 +623,10 @@ DualMeshGenerator::generate()
 
     auto big_square = std::make_unique<Quad4>();
 
-    big_square->set_node(0) = p0;
-    big_square->set_node(1) = p1;
-    big_square->set_node(2) = p2;
-    big_square->set_node(3) = p3;
+    big_square->set_node(0, p0);
+    big_square->set_node(1, p1);
+    big_square->set_node(2, p2);
+    big_square->set_node(3, p3);
 
     tri_mesh->add_elem(std::move(big_square));
 
@@ -865,7 +865,7 @@ DualMeshGenerator::generate()
         auto primal_elem = std::make_unique<libMesh::C0Polygon>(polygon_nodes.size());
 
         for (const auto n : index_range(polygon_nodes))
-          primal_elem->set_node(n) = polygon_nodes[n];
+          primal_elem->set_node(n, polygon_nodes[n]);
 
         primal_elem->subdomain_id() = elem->subdomain_id();
         Elem * const added_elem = dualMesh->add_elem(std::move(primal_elem));
@@ -891,7 +891,7 @@ DualMeshGenerator::generate()
       auto primal_elem = elem->build(elem->type());
 
       for (const auto n : elem->node_index_range())
-        primal_elem->set_node(n) = getPreservedPrimalNode(elem->node_id(n), elem->point(n));
+        primal_elem->set_node(n, getPreservedPrimalNode(elem->node_id(n), elem->point(n)));
 
       primal_elem->subdomain_id() = elem->subdomain_id();
       Elem * const added_elem = dualMesh->add_elem(std::move(primal_elem));
