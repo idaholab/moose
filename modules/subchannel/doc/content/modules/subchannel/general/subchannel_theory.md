@@ -484,7 +484,7 @@ form,
  \boldsymbol{M_{hh}}(\vec{\dot{m}}, \vec{w}) \vec{h} = \vec{b_h}.
 \end{equation}
 
-The explicit-segregated algorithm evaluates the same balances cell by cell from lagged values: its
+The axial-sweep segregated algorithm evaluates the same balances cell by cell from lagged values: its
 axial momentum equation gives the cell pressure drop with the inlet flow area and evaluates the
 friction at the cell center, and its crossflow residual uses the inlet-node values of each cell.
 
@@ -526,7 +526,7 @@ space discretization is converged.
 !table id=scm-algorithms caption=Algorithms for the flow equations of a block.
 | Algorithm | [!param](/Problem/TriSubChannel1PhaseProblem/implicit) | [!param](/Problem/TriSubChannel1PhaseProblem/segregated) | Crossflow $w_{ij}$ | Mass flow $\dot{m}$ and pressure $P$ |
 | - | - | - | - | - |
-| [Explicit-Segregated](#segregated) | `false` | `true` | PETSc SNES (JFNK), matrix-free, no preconditioner, on the residual [lateral1] | Marched cell by cell inside the crossflow residual function: $\dot{m}$ from the block inlet up, $P$ from the block outlet down |
+| [Axial-sweep segregated](#segregated) | `false` | `true` | PETSc SNES (JFNK), matrix-free, no preconditioner, on the residual [lateral1] | Marched cell by cell inside the crossflow residual function: $\dot{m}$ from the block inlet up, $P$ from the block outlet down |
 | [Implicit-Segregated](#segregated) | `true` | `true` | PETSc SNES (JFNK), matrix-free, no preconditioner, on the residual [lateral1] | Each solved as a linear system with a PETSc Krylov solver and a Jacobi preconditioner, nested inside the crossflow residual function; the pressure drop is evaluated from the axial momentum system |
 | [Monolithic](#monolithic) | `true` | `false` | Solved together with $\dot{m}$ and $P$ as one linear system per block, PETSc FGMRES with [!param](/Problem/TriSubChannel1PhaseProblem/monolithic_preconditioner) | Solved together with $w_{ij}$ |
 
@@ -614,15 +614,15 @@ such as the mass flow $\dot{m}_i$, the turbulent crossflow $w'_{ij}$, the pressu
 $\Delta P_i$, and the pressure $P_i$, from the current $w_{ij}$, so all flow variables of the block
 are solved for at the same time. $P_i$ is the local pressure minus the exit pressure,
 $P_i (z) - P_{exit}$, so at the exit $P_{i}$ is zero. [lateral1] is the residual of the
-explicit-segregated algorithm; the implicit-segregated algorithm evaluates it as the residual of
+axial-sweep segregated algorithm; the implicit-segregated algorithm evaluates it as the residual of
 [lateral-momentum-dis2] at the current crossflow. The two segregated algorithms differ in how they
 update $\dot{m}$ and $P$ inside the residual function.
 
-#### Explicit-Segregated
+#### Axial-sweep segregated
 
 !! Intentional comment to provide extra spacing
 
-This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations. The variables are updated sequentially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet. Explicit refers to space: the flow variables are computed directly, cell by cell, inside the crossflow residual function, rather than by solving a system for the block; in time the algorithm is backward Euler, as are the others. Of the stabilization
+This is the default algorithm, selected with `implicit = false` and historically called explicit-segregated, where the unknown flow variables are calculated directly through their governing equations by an axial sweep. The variables are updated sequentially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet. The sweep runs cell by cell inside the crossflow residual function, rather than solving a system for the block; in time the algorithm is backward Euler, as are the others. Of the stabilization
 methods, only the temperature relaxation [!param](/Problem/TriSubChannel1PhaseProblem/T_relaxation) applies; the crossflow damping
 and the equation and solution relaxations described under [#monolithic] are specific to the
 monolithic algorithm.
@@ -631,7 +631,7 @@ monolithic algorithm.
 
 !! Intentional comment to provide extra spacing
 
-In this case, the governing mass, axial momentum and crossflow momentum equations are recast in matrix form and the flow variables are calculated by solving the corresponding system. This means that variables are solved for concurrently for the whole block. Inside the crossflow residual function, the mass flow [mass-dis] and the pressure are each solved as a linear system with a PETSc Krylov solver and a Jacobi preconditioner, and the cell pressure drop is evaluated from the axial momentum system [axial-momentum-dis3] at the current mass flow. Otherwise, the solution algorithm is the same as in the default explicit method, including which
+In this case, the governing mass, axial momentum and crossflow momentum equations are recast in matrix form and the flow variables are calculated by solving the corresponding system. This means that variables are solved for concurrently for the whole block. Inside the crossflow residual function, the mass flow [mass-dis] and the pressure are each solved as a linear system with a PETSc Krylov solver and a Jacobi preconditioner, and the cell pressure drop is evaluated from the axial momentum system [axial-momentum-dis3] at the current mass flow. Otherwise, the solution algorithm is the same as in the default axial-sweep algorithm, including which
 stabilization methods apply.
 
 ### Monolithic algorithm id=monolithic
