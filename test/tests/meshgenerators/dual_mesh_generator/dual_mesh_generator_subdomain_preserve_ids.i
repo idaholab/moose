@@ -4,17 +4,19 @@
     dim = 2
     dx = '3 3'
     dy = '4 4'
-    subdomain_id = '1 2
-                    3 4'
+  []
+  [add_subdomains]
+    type = SubdomainPerElementGenerator
+    input = mycart
   []
 
   # A sideset interior to the preserved subdomain, which only survives because the elements
   # carrying it are copied rather than dualized
   [inner]
     type = ParsedGenerateSideset
-    input = mycart
+    input = add_subdomains
     combinatorial_geometry = 'y > 3.9 & y < 4.1'
-    included_subdomains = '3'
+    included_subdomains = '2'
     new_sideset_name = 'inner_b3'
   []
 
@@ -29,7 +31,7 @@
     type = DualMeshGenerator
     input = my_id
     dual_mesh_type = barycentric
-    preserve_primal_subdomains = '3'
+    preserve_primal_subdomains = '2'
   []
 
   [myDiagnosticGenerator]

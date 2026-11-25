@@ -47,6 +47,11 @@ SubdomainPerElementGenerator::generate()
   else
   {
     bids.resize(mesh->n_elem());
+    if (mesh->n_elem() > std::numeric_limits<SubdomainID>::max())
+      paramError("subdomain_ids",
+                 "Assigning a subdomain for each element would overflow with the mesh containing " +
+                     std::to_string(mesh->n_elem()) +
+                     " elements. Please find an alternative subdomain assignment strategy");
     for (const auto i : make_range(mesh->n_elem()))
       bids[i] = i;
   }

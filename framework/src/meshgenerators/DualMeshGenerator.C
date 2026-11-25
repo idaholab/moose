@@ -50,7 +50,7 @@ DualMeshGenerator::validParams()
                              "Delaunay triangulation of the primal mesh.");
   params.addRangeCheckedParam<Real>(
       "boundary_node_angular_tol",
-      1e-8,
+      libMesh::TOLERANCE,
       "boundary_node_angular_tol>=0",
       "Angular tolerance, in radians, used to decide whether a primal boundary node is collinear "
       "with its two adjacent boundary edges. Nodes whose boundary angle differs from pi by more "
