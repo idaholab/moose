@@ -1,4 +1,89 @@
 [Tests]
+  [MatrixCoefficientFunction]
+    design = 'MFEMMatrixCoefficientFunction.md'
+    issues = '#33986'
+    requirement = 'The system shall assemble named matrix coefficients from scalar names and literals'
+    [valid]
+      type = RunApp
+      input = matrix_coefficient_function.i
+      detail = 'valid forward references without unidentified-function warnings,'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+    []
+    [empty]
+      type = RunException
+      input = matrix_coefficient_function.i
+      cli_args = 'Functions/tensor/matrix=""'
+      expect_err = 'matrix:.*Matrix must not be empty'
+      detail = 'empty matrices,'
+      capabilities = 'mfem'
+    []
+    [empty_interior_row]
+      type = RunException
+      input = matrix_coefficient_function.i
+      cli_args = 'Functions/tensor/matrix="1 0;;0 1"'
+      expect_err = 'matrix:.*Row 2 has 0 entries'
+      detail = 'empty interior rows with one-based row indices,'
+      capabilities = 'mfem'
+    []
+    [trailing_separator]
+      type = RunException
+      input = matrix_coefficient_function.i
+      cli_args = 'Functions/tensor/matrix="1 0;0 1;"'
+      expect_err = 'matrix:.*Row 3 has 0 entries'
+      detail = 'empty trailing rows,'
+      capabilities = 'mfem'
+    []
+    [unequal_rows]
+      type = RunException
+      input = matrix_coefficient_function.i
+      cli_args = 'Functions/tensor/matrix="1 0;1;3 3 3"'
+      expect_err = 'matrix:.*Not all rows have equal size.*{2, 1, 3}'
+      detail = 'inconsistent row lengths,'
+      capabilities = 'mfem'
+    []
+    [rectangular]
+      type = RunException
+      input = matrix_coefficient_function.i
+      cli_args = 'Functions/tensor/matrix="1 0 0;0 1 0"'
+      expect_err = 'matrix:.*Matrix must be square'
+      detail = 'nonsquare matrices,'
+      capabilities = 'mfem'
+    []
+    [unknown]
+      type = RunException
+      input = matrix_coefficient_function.i
+      cli_args = 'Functions/tensor/matrix="missing"'
+      expect_err = "Scalar coefficient with name 'missing' has not been declared"
+      detail = 'undeclared entries,'
+      capabilities = 'mfem'
+    []
+    [vector_entry]
+      type = RunException
+      input = matrix_coefficient_function.i
+      cli_args = 'Functions/tensor/matrix="vector_only"'
+      expect_err = "Scalar coefficient with name 'vector_only' has not been declared"
+      detail = 'vector-only entries,'
+      capabilities = 'mfem'
+    []
+    [matrix_entry]
+      type = RunException
+      input = matrix_coefficient_function.i
+      cli_args = 'Functions/tensor/matrix="matrix_only"'
+      expect_err = "Scalar coefficient with name 'matrix_only' has not been declared"
+      detail = 'matrix-only entries, and'
+      capabilities = 'mfem'
+    []
+    [malformed_number]
+      type = RunException
+      input = matrix_coefficient_function.i
+      cli_args = 'Functions/tensor/matrix="1.2bad"'
+      expect_err = "Scalar coefficient with name '1.2bad' has not been declared"
+      detail = 'malformed numeric entries.'
+      capabilities = 'mfem'
+    []
+  []
   [MFEMParsedFunction]
     type = CSVDiff
     input = parsed_function_source.i
@@ -16,8 +101,7 @@
     csvdiff = OutputData/ParsedFunctionSource.csv
     design = 'MFEMScalarQuadratureFunction.md'
     issues = '#33291'
-    requirement = 'The system shall have the ability to precompute a coefficient at quadrature '
-                  'points and reuse the stored values in place of the original coefficient.'
+    requirement = 'The system shall have the ability to precompute a coefficient at quadrature points and reuse the stored values in place of the original coefficient.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
@@ -29,9 +113,7 @@
     expect_err = "Set 'order = 2'"
     design = 'MFEMScalarQuadratureFunction.md'
     issues = '#33291'
-    requirement = 'The system shall report an error, naming the required quadrature order, when a '
-                  'quadrature function coefficient is evaluated by an integrator using a different '
-                  'integration rule.'
+    requirement = 'The system shall report an error, naming the required quadrature order, when a quadrature function coefficient is evaluated by an integrator using a different integration rule.'
     capabilities = 'mfem'
   []
   [CylindricalCoefficients]

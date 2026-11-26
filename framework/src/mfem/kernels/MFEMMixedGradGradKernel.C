@@ -20,21 +20,30 @@ MFEMMixedGradGradKernel::validParams()
   params.addClassDescription(
       "Adds the domain integrator to an MFEM problem for the mixed bilinear form "
       "$(k\\vec\\nabla u, \\vec\\nabla v)_\\Omega$.");
-  params.addParam<MFEMScalarCoefficientName>("coefficient", "1.", "Name of property k to use.");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient", "1.", "Name of scalar coefficient for property k.");
+  params.addParam<MFEMVectorCoefficientName>(
+      "diagonal_coefficient",
+      "Name of diagonal coefficient for property k. Mutually exclusive with parameters "
+      "'coefficient' and 'matrix_coefficient'.");
+  params.addParam<MFEMMatrixCoefficientName>(
+      "matrix_coefficient",
+      "Name of matrix coefficient for property k. Mutually exclusive with parameters 'coefficient' "
+      "and 'diagonal_coefficient'.");
   return params;
 }
 
 MFEMMixedGradGradKernel::MFEMMixedGradGradKernel(const InputParameters & parameters)
-  : MFEMMixedBilinearFormKernel(parameters), _coef(getScalarCoefficient("coefficient"))
-// FIXME: The MFEM bilinear form can also handle vector and matrix
-// coefficients, so ideally we'd handle all three too.
+  : MFEMMixedBilinearFormKernel(parameters),
+    _variant_coef(
+        getVariantCoefficient("coefficient", "diagonal_coefficient", "matrix_coefficient"))
 {
 }
 
 mfem::BilinearFormIntegrator *
 MFEMMixedGradGradKernel::createMBFIntegrator()
 {
-  return new mfem::MixedGradGradIntegrator(_coef);
+  return std::visit([](auto & c) { return new mfem::MixedGradGradIntegrator(c); }, _variant_coef);
 }
 
 #endif

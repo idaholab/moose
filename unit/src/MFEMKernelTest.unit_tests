@@ -1,0 +1,16 @@
+[Tests]
+  design = 'MFEMKernel.md'
+  issues = '#33986'
+
+  [diagonal_coefficients]
+    type = GoogleTest
+    unit_test = MFEMKernelTest.DiagonalCoefficients
+    requirement = 'The system shall construct supported MFEM kernel integrators with diagonal coefficients.'
+  []
+
+  [matrix_coefficients]
+    type = GoogleTest
+    unit_test = MFEMKernelTest.MatrixCoefficients
+    requirement = 'The system shall construct supported MFEM kernel integrators with matrix coefficients.'
+  []
+[]
