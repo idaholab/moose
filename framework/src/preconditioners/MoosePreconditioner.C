@@ -25,8 +25,11 @@ MoosePreconditioner::validParams()
   MooseEnum pc_side("left right symmetric default", "default");
   params.addParam<MooseEnum>("pc_side", pc_side, "Preconditioning side");
   MooseEnum ksp_norm("none preconditioned unpreconditioned natural default", "unpreconditioned");
-  params.addParam<MooseEnum>(
-      "ksp_norm", ksp_norm, "Sets the norm that is used for convergence testing");
+  params.addParam<MooseEnum>("ksp_norm",
+                             ksp_norm,
+                             "Sets the norm that is used for convergence testing. If this is not "
+                             "set, the default applies only if the Krylov method supports it on "
+                             "the requested preconditioning side.");
   params.registerBase("MoosePreconditioner");
 
   params.addParam<std::vector<NonlinearVariableName>>(
@@ -65,7 +68,8 @@ MoosePreconditioner::MoosePreconditioner(const InputParameters & params)
 {
   _nl.setPCSide(getParam<MooseEnum>("pc_side"));
 
-  _nl.setMooseKSPNormType(getParam<MooseEnum>("ksp_norm"));
+  if (isParamSetByUser("ksp_norm"))
+    _nl.setMooseKSPNormType(getParam<MooseEnum>("ksp_norm"));
 
   bool full = getParam<bool>("full");
 

@@ -98,6 +98,13 @@ public:
    */
   Moose::MooseKSPNormType getMooseKSPNormType() const { return _ksp_norm; }
 
+  /**
+   * Whether the norm type was set with setMooseKSPNormType. Otherwise the norm type is the MOOSE
+   * default, which applies only where the user requests neither a norm type nor a
+   * preconditioning side.
+   */
+  bool kspNormSetByUser() const { return _ksp_norm_set_by_user; }
+
   virtual const NumericVector<Number> * const & currentSolution() const override final;
 
   virtual void compute(ExecFlagType type) override;
@@ -120,6 +127,8 @@ protected:
   Moose::PCSideType _pc_side;
   /// KSP norm type
   Moose::MooseKSPNormType _ksp_norm;
+  /// Whether the KSP norm type was set with setMooseKSPNormType
+  bool _ksp_norm_set_by_user;
 
   /// Boolean to see if solution is invalid
   bool _solution_is_invalid;

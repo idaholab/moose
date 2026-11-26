@@ -52,6 +52,7 @@
 #include <petscis.h>
 #include <petscdm.h>
 #include <petscoptions.h>
+#include <petsc/private/kspimpl.h>
 
 // PetscDMMoose include
 #include "PetscDMMoose.h"
@@ -566,13 +567,77 @@ getPetscKSPNormType(Moose::MooseKSPNormType kspnorm)
   }
 }
 
+namespace
+{
+/**
+ * Set the default norm type of \p ksp unless the options database requests a norm type for it.
+ * The default is the norm type of \p solver_system if the Krylov method supports it on the
+ * requested preconditioning side. Otherwise PETSc selects a norm type for that side.
+ */
+PetscErrorCode
+setDefaultKSPNormTypeIfNotRequested(KSP ksp, const SolverSystem & solver_system)
+{
+  ::PetscOptions options;
+  const char * prefix;
+  PetscBool requested;
+
+  PetscFunctionBegin;
+  PetscCall(PetscObjectGetOptions((PetscObject)ksp, &options));
+  PetscCall(KSPGetOptionsPrefix(ksp, &prefix));
+  PetscCall(PetscOptionsHasName(options, prefix, "-ksp_norm_type", &requested));
+  if (requested)
+    PetscFunctionReturn(PETSC_SUCCESS);
+
+  // pc_side_set holds the requested side, for example from the pc_side parameter or -ksp_pc_side.
+  // The norm support table is empty until the Krylov method is set. KSPSetFromOptions sets the
+  // method before it calls the options handler, which checks the support again.
+  const auto norm = getPetscKSPNormType(solver_system.getMooseKSPNormType());
+  bool supported = !((PetscObject)ksp)->type_name;
+  for (PetscInt side = 0; side < PC_SIDE_MAX; ++side)
+    if (ksp->pc_side_set == PC_SIDE_DEFAULT || ksp->pc_side_set == side)
+      supported = supported || ksp->normsupporttable[norm][side] > 0;
+  PetscCall(KSPSetNormType(ksp, supported ? norm : KSP_NORM_DEFAULT));
+  PetscFunctionReturn(PETSC_SUCCESS);
+}
+
+/// Sets the default norm type after KSPSetFromOptions processes the options of the KSP
+PetscErrorCode
+#if PETSC_VERSION_LESS_THAN(3, 23, 0)
+defaultKSPNormTypeOptionsHandler(PetscObject ksp, PetscOptionItems *, void * solver_system)
+#else
+defaultKSPNormTypeOptionsHandler(PetscObject ksp, PetscOptionItems, void * solver_system)
+#endif
+{
+  PetscFunctionBegin;
+  PetscCall(setDefaultKSPNormTypeIfNotRequested((KSP)ksp,
+                                                *static_cast<const SolverSystem *>(solver_system)));
+  PetscFunctionReturn(PETSC_SUCCESS);
+}
+}
+
 void
 petscSetDefaultKSPNormType(const FEProblemBase & problem,
                            const SolverSystem & solver_system,
                            KSP ksp)
 {
+  // The user requested this norm type. PETSc reports an error if the Krylov method does not
+  // support it on the requested side.
+  if (solver_system.kspNormSetByUser())
+  {
+    LibmeshPetscCallA(
+        problem.comm().get(),
+        KSPSetNormType(ksp, getPetscKSPNormType(solver_system.getMooseKSPNormType())));
+    return;
+  }
+
+  // The options database can request a norm type or a side. The options handler checks these
+  // requests in KSPSetFromOptions, after all options are inserted.
+  LibmeshPetscCallA(problem.comm().get(), setDefaultKSPNormTypeIfNotRequested(ksp, solver_system));
   LibmeshPetscCallA(problem.comm().get(),
-                    KSPSetNormType(ksp, getPetscKSPNormType(solver_system.getMooseKSPNormType())));
+                    PetscObjectAddOptionsHandler((PetscObject)ksp,
+                                                 defaultKSPNormTypeOptionsHandler,
+                                                 LIBMESH_PETSC_NULLPTR,
+                                                 const_cast<SolverSystem *>(&solver_system)));
 }
 
 void
