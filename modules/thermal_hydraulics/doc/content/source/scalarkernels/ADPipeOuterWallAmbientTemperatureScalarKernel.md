@@ -19,7 +19,7 @@ functions, variables, materials, or postprocessors); this kernel does not comput
 
 Note, use of this kernel with transient problems also necessitates the use of a
 [ODETimeDerivative.md] (or its AD equivalent) with `coefficient = 1` on the same scalar
-variable, which contributes the time derivative term, $\frac{dT_{i,w}}{dt}$, so the two kernels
+variable, which contributes the time derivative term, $\frac{dT_{o,w}}{dt}$, so the two kernels
 together form the complete transient equation.
 
 This kernel derives from [ADPipeWallTemperatureScalarKernelBase.md], which implements the

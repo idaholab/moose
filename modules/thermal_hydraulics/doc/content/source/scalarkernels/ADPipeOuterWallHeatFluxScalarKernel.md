@@ -22,7 +22,7 @@ flow or radiation correlation, and $q_o^{''}$ does not depend on this node's own
 
 Note, use of this kernel with transient problems also necessitates the use of a
 [ODETimeDerivative.md] (or its AD equivalent) with `coefficient = 1` on the same scalar
-variable, which contributes the time derivative term, $\frac{dT_{i,w}}{dt}$, so the two kernels together form the complete transient equation.
+variable, which contributes the time derivative term, $\frac{dT_{o,w}}{dt}$, so the two kernels together form the complete transient equation.
 
 This kernel derives from [ADPipeWallTemperatureScalarKernelBase.md], which implements the
 axial and radial conduction terms shared by every radial node of the wall; this class adds
