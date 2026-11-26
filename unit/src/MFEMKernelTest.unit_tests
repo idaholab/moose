@@ -1,0 +1,326 @@
+[Tests]
+  issues = '#33884'
+
+  [linear_forms]
+    requirement = 'The system shall provide MFEM kernels that add domain integrators for linear forms involving'
+    design = 'MFEMDomainLFGradKernel.md MFEMVectorDomainLFGradKernel.md
+              MFEMVectorFEDomainLFCurlKernel.md MFEMVectorFEDomainLFDivKernel.md
+              MFEMWhiteGaussianNoiseDomainLFKernel.md'
+    [domain_lf_grad]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMDomainLFGradKernel
+      detail = 'a vector source tested against the gradient of a scalar test function,'
+    []
+    [vector_domain_lf_grad]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMVectorDomainLFGradKernel
+      detail = 'a source tested against the gradient of each component of a vector test function,'
+    []
+    [vector_fe_domain_lf_curl]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMVectorFEDomainLFCurlKernel
+      detail = 'a vector source tested against the curl of an H(curl) test function,'
+    []
+    [vector_fe_domain_lf_div]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMVectorFEDomainLFDivKernel
+      detail = 'a scalar source tested against the divergence of an H(div) test function, and'
+    []
+    [white_gaussian_noise]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMWhiteGaussianNoiseDomainLFKernel
+      detail = 'spatial white Gaussian noise with a seeded random number generator.'
+    []
+  []
+
+  [bilinear_forms]
+    requirement = 'The system shall provide MFEM kernels that add domain integrators for bilinear forms involving'
+    design = 'MFEMConvectionKernel.md MFEMConservativeConvectionKernel.md
+              MFEMGroupConvectionKernel.md MFEMVectorCurlCurlKernel.md MFEMVectorMassKernel.md
+              MFEMVectorDiffusionKernel.md'
+    [convection]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMConvectionKernel
+      detail = 'the derivative of a scalar variable along a velocity field,'
+    []
+    [conservative_convection]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMConservativeConvectionKernel
+      detail = 'the conservative form of the advection of a scalar variable by a velocity field,'
+    []
+    [group_convection]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMGroupConvectionKernel
+      detail = 'the derivative of a scalar variable along a velocity field discretized with the group finite element formulation,'
+    []
+    [vector_curl_curl]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMVectorCurlCurlKernel
+      detail = 'the curl of a vector variable with H1 components, weighted by a scalar coefficient,'
+    []
+    [vector_mass]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMVectorMassKernel
+      detail = 'the mass of a vector variable with scalar components, weighted by a scalar coefficient,'
+    []
+    [vector_mass_vector_coefficient]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMVectorMassKernelVectorCoefficient
+      detail = 'the mass of a vector variable with scalar components, weighted by a diagonal matrix coefficient given as a vector coefficient, and rejecting a scalar coefficient set alongside it,'
+    []
+    [vector_diffusion]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMVectorDiffusionKernel
+      detail = 'the diffusion of each component of a vector variable, weighted by a scalar coefficient, and'
+    []
+    [vector_diffusion_vector_coefficient]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMVectorDiffusionKernelVectorCoefficient
+      detail = 'the diffusion of each component of a vector variable, weighted by one coefficient per component given as a vector coefficient, and rejecting a scalar coefficient set alongside it.'
+    []
+  []
+
+  [dg_interior_faces]
+    requirement = 'The system shall provide MFEM kernels that add interior face integrators for discontinuous Galerkin discretizations of'
+    design = 'MFEMDGTraceKernel.md MFEMNonconservativeDGTraceKernel.md MFEMDGDiffusionBR2Kernel.md
+              MFEMDGElasticityKernel.md'
+    [dg_trace]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMDGTraceKernel
+      detail = 'the conservative form of convection,'
+    []
+    [nonconservative_dg_trace]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMNonconservativeDGTraceKernel
+      detail = 'the non-conservative form of convection,'
+    []
+    [dg_diffusion_br2]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMDGDiffusionBR2Kernel
+      detail = 'diffusion with the stabilization of the second method of Bassi and Rebay, and'
+    []
+    [dg_elasticity]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMDGElasticityKernel
+      detail = 'isotropic linear elasticity.'
+    []
+  []
+
+  [mixed_scalar_coefficient]
+    requirement = 'The system shall provide MFEM kernels that add domain integrators for mixed bilinear forms, acting on a trial variable other than the test variable and weighted by a scalar coefficient, involving'
+    design = 'MFEMGradientKernel.md MFEMVectorFECurlKernel.md MFEMDerivativeKernel.md
+              MFEMMixedCurlKernel.md MFEMVectorDivergenceKernel.md MFEMMixedScalarMassKernel.md
+              MFEMMixedScalarDerivativeKernel.md MFEMMixedScalarWeakDerivativeKernel.md
+              MFEMMixedScalarDivergenceKernel.md MFEMMixedScalarWeakGradientKernel.md'
+    [gradient]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMGradientKernel
+      detail = 'the gradient of an H1 variable tested against a vector test function with H1 or L2 components,'
+    []
+    [vector_fe_curl]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMVectorFECurlKernel
+      detail = 'the curl of an H(curl) variable tested against an H(curl) or H(div) test function,'
+    []
+    [derivative]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMDerivativeKernel
+      detail = 'the partial derivative of a scalar variable along a chosen spatial direction,'
+    []
+    [mixed_curl]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedCurlKernel
+      detail = 'the curl of a variable tested against a test function with H1 or L2 components,'
+    []
+    [vector_divergence]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMVectorDivergenceKernel
+      detail = 'the divergence of a vector variable with H1 components tested against a scalar test function,'
+    []
+    [mixed_scalar_mass]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedScalarMassKernel
+      detail = 'a scalar variable tested against a scalar test function,'
+    []
+    [mixed_scalar_derivative]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedScalarDerivativeKernel
+      detail = 'the derivative of a one-dimensional H1 variable,'
+    []
+    [mixed_scalar_weak_derivative]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedScalarWeakDerivativeKernel
+      detail = 'a one-dimensional scalar variable tested against the derivative of an H1 test function,'
+    []
+    [mixed_scalar_divergence]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedScalarDivergenceKernel
+      detail = 'the divergence of an H(div) variable tested against a scalar test function, and'
+    []
+    [mixed_scalar_weak_gradient]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedScalarWeakGradientKernel
+      detail = 'a scalar variable tested against the divergence of an H(div) test function.'
+    []
+  []
+
+  [mixed_vector_coefficient]
+    requirement = 'The system shall provide MFEM kernels that add domain integrators for mixed bilinear forms, acting on a trial variable other than the test variable, involving a vector coefficient and'
+    design = 'MFEMMixedVectorProductKernel.md MFEMMixedVectorDivergenceKernel.md
+              MFEMMixedCrossProductKernel.md MFEMMixedDotProductKernel.md
+              MFEMMixedWeakGradDotKernel.md MFEMMixedWeakDivCrossKernel.md
+              MFEMMixedCrossGradGradKernel.md MFEMMixedCrossCurlCurlKernel.md
+              MFEMMixedCrossCurlGradKernel.md MFEMMixedCrossGradCurlKernel.md
+              MFEMMixedWeakCurlCrossKernel.md MFEMMixedScalarWeakCurlCrossKernel.md
+              MFEMMixedCrossGradKernel.md MFEMMixedCrossCurlKernel.md
+              MFEMMixedScalarCrossCurlKernel.md MFEMMixedScalarCrossGradKernel.md
+              MFEMMixedScalarCrossProductKernel.md MFEMMixedScalarWeakCrossProductKernel.md
+              MFEMMixedDirectionalDerivativeKernel.md MFEMMixedGradDivKernel.md
+              MFEMMixedDivGradKernel.md MFEMMixedScalarWeakDivergenceKernel.md'
+    [mixed_vector_product]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedVectorProductKernel
+      detail = 'a scalar variable tested against an H(curl) or H(div) test function,'
+    []
+    [mixed_vector_divergence]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedVectorDivergenceKernel
+      detail = 'the divergence of an H(div) variable tested against an H(curl) or H(div) test function,'
+    []
+    [mixed_cross_product]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedCrossProductKernel
+      detail = 'the cross product with an H(curl) or H(div) variable in 3D,'
+    []
+    [mixed_dot_product]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedDotProductKernel
+      detail = 'the dot product with an H(curl) or H(div) variable,'
+    []
+    [mixed_weak_grad_dot]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedWeakGradDotKernel
+      detail = 'the dot product with a vector variable, tested against the divergence of an H(div) test function,'
+    []
+    [mixed_weak_div_cross]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedWeakDivCrossKernel
+      detail = 'the cross product with a vector variable, tested against the gradient of an H1 test function,'
+    []
+    [mixed_cross_grad_grad]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedCrossGradGradKernel
+      detail = 'the cross product with the gradient of an H1 variable, tested against the gradient of an H1 test function,'
+    []
+    [mixed_cross_curl_curl]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedCrossCurlCurlKernel
+      detail = 'the cross product with the curl of an H(curl) variable, tested against the curl of an H(curl) test function,'
+    []
+    [mixed_cross_curl_grad]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedCrossCurlGradKernel
+      detail = 'the cross product with the curl of an H(curl) variable, tested against the gradient of an H1 test function,'
+    []
+    [mixed_cross_grad_curl]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedCrossGradCurlKernel
+      detail = 'the cross product with the gradient of an H1 variable, tested against the curl of an H(curl) test function,'
+    []
+    [mixed_weak_curl_cross]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedWeakCurlCrossKernel
+      detail = 'the cross product with a vector variable in 3D, tested against the curl of an H(curl) test function,'
+    []
+    [mixed_scalar_weak_curl_cross]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedScalarWeakCurlCrossKernel
+      detail = 'the scalar cross product with a vector variable in 2D, tested against the curl of an H(curl) test function,'
+    []
+    [mixed_cross_grad]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedCrossGradKernel
+      detail = 'the cross product with the gradient of an H1 variable in 3D,'
+    []
+    [mixed_cross_curl]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedCrossCurlKernel
+      detail = 'the cross product with the curl of an H(curl) variable in 3D,'
+    []
+    [mixed_scalar_cross_curl]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedScalarCrossCurlKernel
+      detail = 'the cross product with the out-of-plane curl of an H(curl) variable in 2D,'
+    []
+    [mixed_scalar_cross_grad]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedScalarCrossGradKernel
+      detail = 'the scalar cross product with the gradient of an H1 variable in 2D,'
+    []
+    [mixed_scalar_cross_product]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedScalarCrossProductKernel
+      detail = 'the scalar cross product with an H(curl) or H(div) variable in 2D,'
+    []
+    [mixed_scalar_weak_cross_product]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedScalarWeakCrossProductKernel
+      detail = 'the cross product with the out-of-plane unit vector scaled by a scalar variable in 2D,'
+    []
+    [mixed_directional_derivative]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedDirectionalDerivativeKernel
+      detail = 'the derivative of an H1 variable along the vector coefficient,'
+    []
+    [mixed_grad_div]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedGradDivKernel
+      detail = 'the derivative of an H1 variable along the vector coefficient, tested against the divergence of an H(div) test function,'
+    []
+    [mixed_div_grad]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedDivGradKernel
+      detail = 'the divergence of an H(div) variable, tested against the gradient of an H1 test function, and'
+    []
+    [mixed_scalar_weak_divergence]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedScalarWeakDivergenceKernel
+      detail = 'a scalar variable tested against the gradient of an H1 test function.'
+    []
+  []
+
+  [mixed_curl_scalar_or_vector_coefficient]
+    requirement = 'The system shall provide MFEM kernels that add domain integrators for mixed bilinear forms in 3D, acting on a trial variable other than the test variable, involving'
+    design = 'MFEMMixedCurlCurlKernel.md MFEMMixedVectorCurlKernel.md MFEMMixedVectorWeakCurlKernel.md'
+    [mixed_curl_curl]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedCurlCurlKernel
+      detail = 'the curls of H(curl) trial and test variables weighted by a scalar coefficient,'
+    []
+    [mixed_curl_curl_vector_coefficient]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedCurlCurlKernelVectorCoefficient
+      detail = 'the curls of H(curl) trial and test variables weighted by a diagonal matrix coefficient given as a vector coefficient, rejecting a scalar coefficient set alongside it,'
+    []
+    [mixed_vector_curl]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedVectorCurlKernel
+      detail = 'the curl of an H(curl) variable weighted by a scalar coefficient,'
+    []
+    [mixed_vector_curl_vector_coefficient]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedVectorCurlKernelVectorCoefficient
+      detail = 'the curl of an H(curl) variable weighted by a diagonal matrix coefficient given as a vector coefficient, rejecting a scalar coefficient set alongside it,'
+    []
+    [mixed_vector_weak_curl]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedVectorWeakCurlKernel
+      detail = 'a vector variable weighted by a scalar coefficient and tested against the curl of an H(curl) test function, and'
+    []
+    [mixed_vector_weak_curl_vector_coefficient]
+      type = GoogleTest
+      unit_test = MFEMKernelTest.MFEMMixedVectorWeakCurlKernelVectorCoefficient
+      detail = 'a vector variable weighted by a diagonal matrix coefficient given as a vector coefficient and tested against the curl of an H(curl) test function, rejecting a scalar coefficient set alongside it.'
+    []
+  []
+[]
