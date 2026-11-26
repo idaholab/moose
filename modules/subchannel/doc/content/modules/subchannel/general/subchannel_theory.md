@@ -151,7 +151,14 @@ h_{ij}' = \sum_{j} w_{ij}'\Delta h_{ij} = \sum_{j} w'_{ij}\big[ h_i - h_j  \big]
 w_{ij}' = \beta S_{ij} \bar{G}, ~\frac{dw_{ij}'}{dz} = \frac{w_{ij}'}{\Delta Z}=\beta g_{ij} \bar{G}.
 \end{equation}
 
-where $\beta$ is the turbulent mixing parameter or thermal transfer coefficient and $\bar{G}$ is the average mass flux of the adjacent subchannels. The $\beta$ term is the tuning parameter for the mixing model. Physically, it is a non-dimensional coefficient that represents the ratio of the lateral mass flux due to mixing to the axial mass flux. It is used to model the effect of the unresolved scales of motion that are produced through the averaging process. In single-phase flow no net mass exchange occurs, both momentum and energy are exchanged between subchannels, and their rates of exchange are characterized in terms of hypothetical turbulent interchange flow rates ($w_{ij}^{'H},w_{ij}^{'M}$) [!cite](todreas2021nuclear2), for enthalpy and momentum respectively. For this unresolved turbulent interchange model, the approximation that the rate of turbulent exchange for energy and momentum are related as follows is adopted: $w'_{ij} = w_{ij}^{'H} = w_{ij}^{'M} / C_T$.
+where $\beta$ is the turbulent mixing parameter or thermal transfer coefficient and $\bar{G}$ is the average mass flux of the adjacent subchannels, the total mass flow rate of the two subchannels over their total flow area, averaged over the inlet and outlet faces of the cell:
+
+\begin{equation}
+\label{mixing-mass-flux}
+\bar{G}_{ij,k} = \frac{1}{2}\left[\frac{\dot{m}_{i,k-1} + \dot{m}_{j,k-1}}{S_{i,k-1} + S_{j,k-1}} + \frac{\dot{m}_{i,k} + \dot{m}_{j,k}}{S_{i,k} + S_{j,k}}\right].
+\end{equation}
+
+The $\beta$ term is the tuning parameter for the mixing model. Physically, it is a non-dimensional coefficient that represents the ratio of the lateral mass flux due to mixing to the axial mass flux. It is used to model the effect of the unresolved scales of motion that are produced through the averaging process. In single-phase flow no net mass exchange occurs, both momentum and energy are exchanged between subchannels, and their rates of exchange are characterized in terms of hypothetical turbulent interchange flow rates ($w_{ij}^{'H},w_{ij}^{'M}$) [!cite](todreas2021nuclear2), for enthalpy and momentum respectively. For this unresolved turbulent interchange model, the approximation that the rate of turbulent exchange for energy and momentum are related as follows is adopted: $w'_{ij} = w_{ij}^{'H} = w_{ij}^{'M} / C_T$.
 
 The mixing closure provides only this unresolved turbulent interchange coefficient. Friction closures enter the axial and lateral momentum equations through the pressure-drop terms, and heat-transfer closures enter the energy equation through pin/duct heat addition. When a mixing closure requires local flow information such as a friction factor, the selected friction closure is used internally by that empirical mixing correlation; otherwise $\beta$ is coupled to the governing equations only through $w'_{ij}$ and the optional $C_T$ momentum scaling above.
 
@@ -212,12 +219,34 @@ and gravity, use face quantities interpolated to the cell center,
 \phi_{i,k-1/2} = \alpha \phi_{i,k-1} + (1 - \alpha) \phi_{i,k},
 \end{equation}
 
-where $\alpha$ is set by [!param](/Problem/TriSubChannel1PhaseProblem/interpolation_scheme):
-$\alpha = 1$ for `upwind`, $\alpha = 0.5$ for `central_difference`, $\alpha = 0$ for `downwind`,
-and a cell Peclet number dependent value for `exponential`. The same weight interpolates the
-cell-center crossflow to the faces in the axial transport of lateral momentum. The interpolation
-scheme does not change the axial mass and enthalpy fluxes. Radial heat conduction is evaluated
-with the enthalpies of the top face, which keeps it implicit in the axial direction.
+where $\alpha$ is the weight of the bottom face, set by
+[!param](/Problem/TriSubChannel1PhaseProblem/interpolation_scheme), `central_difference` by default:
+
+\begin{equation}
+\label{interpolation-weight}
+\alpha =
+\begin{cases}
+1, & \texttt{upwind}\\
+0, & \texttt{downwind}\\
+0.5, & \texttt{central\_difference}\\
+1 - \dfrac{1}{Pe} + \dfrac{e^{-Pe}}{1 - e^{-Pe}}, & \texttt{exponential},\ Pe > 0
+\end{cases}
+\end{equation}
+
+The `exponential` weight follows from the exponential profile of steady one-dimensional
+advection-diffusion. For $Pe < 0$ it is $1 - \alpha(|Pe|)$, and for $|Pe| < 10^{-6}$ the series
+limit $0.5 + Pe/12$ is used. The cell Peclet number depends on the equation:
+
+- axial momentum: $Pe = \operatorname{sign}(\dot{m}) / \left[\frac{1}{2}\left(f_w \Delta Z/Dhy + k_i\right)\right]$, from the friction and form loss of the cell;
+- enthalpy: $Pe = \operatorname{sign}(\dot{m})\, \dot{m}\, Dhy\, c_p / (k\, S)$;
+- lateral momentum, the inlet-to-outlet interpolation of the donor density $\rho^{*}$, the flow area
+  of the axial pressure force, and the storage volume of the enthalpy equation: the fixed value
+  $Pe = 0.5$, so $\alpha \approx 0.54$ for `exponential`;
+- axial heat conduction, for $k/c_p$ and the flow area of each face: $Pe = 0$, so $\alpha = 0.5$ for `exponential`.
+
+The quantities used to evaluate these Peclet numbers are themselves interpolated with $Pe = 0.5$.
+The interpolation scheme does not change the axial mass and enthalpy fluxes. Radial heat conduction
+is evaluated with the enthalpies of the top face, which keeps it implicit in the axial direction.
 
 - Conservation of mass:
 
@@ -342,74 +371,166 @@ would otherwise remain in the outer fixed-point iteration. In the current
 [PBSodiumFluidProperties.md] model, both $(\partial \rho / \partial p)_T$ and
 $(\partial h / \partial p)_T$ are zero, so $\boldsymbol{M_{mp}}=0$.
 
-Similarly for the other equations,
+In [mass-dis], $V_{i,k} = S_{i,k-1}\,\Delta Z$ is evaluated with the flow area of the inlet face of
+the cell.
+
+The other equations are given below in the form the implicit algorithms assemble them, with
+$\phi_{k-1/2}$ the cell-center interpolation above and $\ell$ the current flow-linearization
+iterate. In each sum over the neighbors $j$ of subchannel $i$, $w_{ij}$ is positive out of $i$.
 
 - Conservation of linear momentum in the axial direction:
 
 \begin{equation}
 \label{axial-momentum-dis}
-\Delta P_{i,k} = P_{i,k-1} - P_{i,k} = \frac{1}{S_{i,k-1}} \bigg[ \frac{\dot{m}_{i,k}^{n+1}  -  \dot{m}_{i,k}^{n}}{\Delta t} \Delta Z +
- \frac{\dot{m}_{i,k}^2}{S_{i,k} \rho_{i,k}} -  \frac{\dot{m}_{i,k-1}^2}{S_{i,k-1} \rho_{i,k-1}}
-    + \sum_{j}w_{ij,k} U^\star  + C_{T}\sum_{j} w_{ij,k}' \big[ \frac{\dot{m}_{i,k}}{\rho_{i,k-1}S_{i,k}} - \frac{\dot{m_{j,k}}}{\rho_{jk-1} S_{j,k}}\big]
-+\frac{1}{2} K_i \frac{\dot{m}_{i,k} |\dot{m}_{i,k}|}{S_{i,k} \rho_{i,k}} -g  \rho_{i,k} S_{i,k} \Delta Z \bigg]
+\begin{aligned}
+&\frac{\Delta Z}{\Delta t}\left(\dot{m}_{i,k} - \dot{m}_{i,k}^{n}\right)
++ \frac{\dot{m}_{i,k}^{\ell}}{S_{i,k}\rho_{i,k}}\,\dot{m}_{i,k}
+- \frac{\dot{m}_{i,k-1}^{\ell}}{S_{i,k-1}\rho_{i,k-1}}\,\dot{m}_{i,k-1}
++ \sum_{j} w_{ij,k}^{\ell}\,\frac{\dot{m}_{d,k-1/2}}{S_{d,k-1/2}\,\rho_{d,k-1/2}} \\
+&+ C_{T}\sum_{j} w_{ij,k}'^{\,\ell}\left(\frac{\dot{m}_{i,k-1/2}}{S_{i,k-1/2}\,\rho_{i,k-1/2}}
+- \frac{\dot{m}_{j,k-1/2}}{S_{j,k-1/2}\,\rho_{j,k-1/2}}\right)
++ \frac{1}{2} K_{i,k}\,\frac{\left|\dot{m}_{i,k-1/2}^{\ell}\right|}{S_{i,k-1/2}\,\rho_{i,k-1/2}}\,
+\dot{m}_{i,k-1/2} \\
+&+ \bar{S}_{i,k}\left(P_{i,k} - P_{i,k-1}\right)
++ g_{dir}\, g\, \rho_{i,k-1/2}\, S_{i,k-1/2}\, \Delta Z = 0,
+\end{aligned}
 \end{equation}
-and in matrix form,
+
+where $d$ is the donor subchannel of gap $ij$ ($i$ if $w_{ij,k}^{\ell} > 0$, $j$ if
+$w_{ij,k}^{\ell} < 0$, and no term if it is zero), $\bar{S}_{i,k}$ is the flow area interpolated to
+the cell center with the weight of $Pe = 0.5$, and $K_{i,k} = f_w \Delta Z / Dhy_{i,k-1/2} + k_i$
+with the form loss $k_i$ taken from the upstream node for the sign of $\dot{m}_{i,k}$. In the first
+cell of a block, the terms in the known $\dot{m}_{i,k-1}$ go to the right-hand side. The momentum
+flux $\dot{m}^2/(S\rho)$ and the friction are linearized about the iterate $\ell$. $g_{dir}$ is set
+by [!param](/Problem/TriSubChannel1PhaseProblem/gravity): $+1$ for `counter_flow`, the default, in
+which the flow goes up against gravity, $-1$ for `co_flow`, and $0$ for `none`. The time-derivative
+term uses $\dot{m}_{i,k}$ at the downstream node for both the new and old time levels. In matrix
+form,
+
 \begin{equation}
-\boldsymbol{M_{pm}}(\vec{w}, \vec{\dot{m}})\vec{\dot{m}} =
-\boldsymbol{S}\vec{\Delta P} + \vec{b_{P}} \\
 \label{axial-momentum-dis3}
-\boldsymbol{S}\vec{\Delta P} = -\boldsymbol{M_{pp}} \vec{P},
+\boldsymbol{M_{pm}}(\vec{w}^{\ell}, \vec{\dot{m}}^{\ell})\,\vec{\dot{m}} + \boldsymbol{M_{pp}}\vec{P}
+= \vec{b_{p}},
 \end{equation}
 
-where the matrix $\boldsymbol{M_{pm}}$ is calculated using the lagged values of the unknown variables
-$\vec{w}, \vec{\dot{m}}$. The time-derivative term in the axial-momentum equation uses
-$\dot{m}_{i,k}$ at the downstream node for both the new and old time levels.
+where the matrices are calculated using the lagged values $\vec{w}^{\ell}$, $\vec{\dot{m}}^{\ell}$.
+The pressure unknown of row $k$ is the inlet pressure $P_{i,k-1}$; the pressure at the top node of a
+block is known (the outlet condition or the solution of the block above) and goes to
+$\vec{b_{p}}$.
 
-- Conservation of linear momentum in the lateral direction:
+- Conservation of linear momentum in the lateral direction, multiplied by $S_{ij,k}\,\rho^{*}$:
 
 \begin{equation}
 \label{lateral-momentum-dis}
-2S_{ij,k} L_{ij}\rho^*\frac{w_{ij,k}^{n+1} - w_{ij,k}^{n}}{\Delta t} + \frac{S_{ij,k} \rho^* L_{ij}}{\Delta Z} \bigg( \frac{\dot{m}_{i,k}}{S_{i,k-1} \rho_{i,k-1}} +  \frac{\dot{m_{j,k}}}{S_{j,k-1} \rho_{j,k-1}} \bigg) w_{ij,k}
-    - \frac{S_{ij,k} \rho^*L_{ij}}{\Delta Z} \bigg( \frac{\dot{m}_{i,k-1}}{S_{i,k-1} \rho_{i,k-1}} +  \frac{\dot{m_{j,k-1}}}{S_{j,k-1} \rho_{j,k-1}} \bigg) w_{ij,k-1}  + K_{ij} w_{ij,k}|w_{ik,k}| - 2 S_{ij,k}^2 \rho^* \big[ P_{i,k-1} - P_{j,k-1}\big] = 0
+\begin{aligned}
+&\frac{L_{ij}\,S_{ij,k}\,\rho^{*}}{\Delta t}\left(w_{ij,k} - w_{ij,k}^{n}\right)
++ \frac{L_{ij}\,S_{ij,k}\,\rho^{*}}{\Delta Z}\left(\bar{U}_{ij,k}\,\hat{w}_{ij,k}
+- \bar{U}_{ij,k-1}\,\hat{w}_{ij,k-1}\right)
++ \frac{1}{2} K_{ij}\left|w_{ij,k}^{\ell}\right| w_{ij,k} \\
+&- S_{ij,k}^{2}\,\rho^{*}\left(P_{i} - P_{j}\right)_{k-1/2} = 0,
+\end{aligned}
 \end{equation}
 
-The above equation can be written in matrix form as follows:
+where $\bar{U}_{ij,k} = \frac{1}{2}\left(\frac{\dot{m}_{i,k}^{\ell}}{S_{i,k}\rho_{i,k}} +
+\frac{\dot{m}_{j,k}^{\ell}}{S_{j,k}\rho_{j,k}}\right)$ is the mean axial velocity of the two
+subchannels at node $k$, $\hat{w}_{ij,k} = \alpha\, w_{ij,k} + (1-\alpha)\, w_{ij,k+1}$ is the
+crossflow interpolated to node $k$, and $\rho^{*}$ is the density of the donor subchannel
+interpolated to the cell center, or the mean of those of both subchannels if $w_{ij,k}^{\ell} = 0$.
+This equation uses the weight of $Pe = 0.5$. The crossflow below the block is known. The momentum
+equations take $L_{ij}$ as the pitch $p$, the center distance of a quadrilateral lattice; see
+[#34535](https://github.com/idaholab/moose/issues/34535) for triangular assemblies.
+In the top cell of a block, the lagged $w_{ij,k}^{\ell}$ takes the place of $w_{ij,k+1}$, so the
+crossflow of the block above does not enter. A closed gap, where the pins touch and $S_{ij,k} = 0$,
+has the row $w_{ij,k} = 0$. In matrix form,
+
 \begin{equation}
 \label{lateral-momentum-dis2}
-\boldsymbol{M_{wp}}\vec{P} + \boldsymbol{M_{ww}}(\vec{\dot{m}}, \vec{w})\vec{w}= \vec{b_{w}}
+\boldsymbol{M_{wp}}\vec{P} + \boldsymbol{M_{ww}}(\vec{\dot{m}}^{\ell}, \vec{w}^{\ell})\,\vec{w} = \vec{b_{w}}.
 \end{equation}
-where the matrix $\boldsymbol{M_{ww}}$ is calculated using the lagged values of the unknown variables $\vec{w}, \vec{\dot{m}}$.
 
 - Conservation of enthalpy:
 
 \begin{equation}
 \label{enthalpy-dis}
-\frac{\rho_{i,k}^{n+1} h_{i,k}^{n+1} -  \rho_{i,k}^{n} h_{i,k}^{n}}{\Delta t}V_{i,k} + \dot{m}_{i,k}h_{i,k} - \dot{m}_{i,k-1}h_{i,k-1}
-    + \sum_{j} w_{ij,k} h_k^\star
-+\sum_{j} w_{ij,k}'\big[ h_{i,k-1} - h_{j,k-1}  \big] = \left\langle q' \right\rangle_{i,k} \Delta z_k -\sum_{j} Y_{ij,k} \frac{S_{ij,k} \eta_{ij,k}}{L_{ij,k}} (T_{i,k} - T_{j,k}) + \frac{Y_{i,k} S_{i,k} T_{i,k} - Y_{i,k-1} S_{i,k-1} T_{i,k-1}}{\Delta z_k}
+\begin{aligned}
+&\frac{\rho_{i,k}^{\ell} h_{i,k} - \rho_{i,k}^{n} h_{i,k}^{n}}{\Delta t}\,\bar{V}_{i,k}
++ \dot{m}_{i,k}h_{i,k} - \dot{m}_{i,k-1}h_{i,k-1}
++ \sum_{j} w_{ij,k}\, h_{d,k-1/2}
++ \sum_{j} w_{ij,k}'\left(h_{i} - h_{j}\right)_{k-1/2} \\
+&= \left\langle q' \right\rangle_{i,k} \Delta Z
+- \sum_{j} \left(\frac{k}{c_p}\right)_{ij} \frac{S_{ij,k}\, \eta_{ij}}{L_{ij}} \left(h_{i,k} - h_{j,k}\right)
++ \left(\frac{k}{c_p}\,S\right)_{i,k+1/2} \frac{h_{i,k+1} - h_{i,k}}{\Delta Z_{k+1}}
+- \left(\frac{k}{c_p}\,S\right)_{i,k-1/2} \frac{h_{i,k} - h_{i,k-1}}{\Delta Z_{k}},
+\end{aligned}
 \end{equation}
 
-The above equation can be written in matrix form as follows:
+where $\bar{V}_{i,k} = \bar{S}_{i,k}\,\Delta Z$ with $\bar{S}_{i,k}$ as in [axial-momentum-dis], $d$
+is the donor subchannel, and $\dot{m}$, $w$, and $w'$ are those of the latest flow solve. The pin
+heat of the cell is
+$\left\langle q' \right\rangle_{i,k} \Delta Z = \sum_{pins} \phi_i\,\frac{1}{2}\left(q'_{k-1} + q'_{k}\right)\Delta Z$
+over the pins that touch subchannel $i$, inside the heated length only, where $q'$ is the pin linear
+heat rate and $\phi_i$ the fraction of the pin perimeter facing the subchannel: $1/4$ in a
+quadrilateral assembly, and $1/6$ for center and corner and $1/4$ for edge subchannels in a
+triangular assembly. The radial and axial conduction terms on the right are assembled for the
+triangular assembly only. The radial term uses the harmonic mean of $k/c_p$ at the inlet nodes of
+the two subchannels, the shape factor $\eta_{ij} = 0.66\,(p/D)\,(g_{ij}/D)^{-0.3}$, and the distance
+$L_{ij}$ between the subchannel centers. The axial term has no upper part in the top cell of a
+block, so that face is adiabatic. The triangular assembly also adds the duct heat and, for
+wire-wrapped pins, the sweep flow of the peripheral subchannels to the right-hand side. In matrix
+form,
 
 \begin{equation}
 \label{enthalpy-dis2}
- \boldsymbol{M_{hh}}(\vec{\dot{m}}, \vec{w}) \vec{h} = \vec{b_h}
+ \boldsymbol{M_{hh}}(\vec{\dot{m}}, \vec{w}) \vec{h} = \vec{b_h}.
 \end{equation}
-where the matrix $\boldsymbol{M_{hh}}$ is calculated using the lagged values of the unknown variables $\vec{w}, \vec{\dot{m}}$.
+
+The axial-sweep segregated algorithm evaluates the same balances cell by cell from lagged values: its
+axial momentum equation gives the cell pressure drop with the inlet flow area and evaluates the
+friction at the cell center, and its crossflow residual uses the inlet-node values of each cell.
+
+### Energy balance id=energy_balance
+
+!! Intentional comment to provide extra spacing
+
+The heat added by the pins and the duct leaves the assembly through two paths:
+
+\begin{equation}
+\label{energy-balance}
+\underbrace{Q_{pins} + Q_{duct}}_\text{heat added}
+= \underbrace{\sum_{i} \dot{m}_i(out)\,h_i(out) - \sum_{i} \dot{m}_i(in)\,h_i(in)}_\text{enthalpy flow rate rise}
++ \underbrace{\sum_{i} \left(\frac{k}{c_p}\right)_{i} S_{i} \frac{h_i(1) - h_i(0)}{\Delta z_1}}_\text{axial conduction out of the inlet}
+\end{equation}
+
+The first term on the right is the enthalpy the flow carries out of the outlet, computed by
+[SCMTHPowerPostprocessor.md]. The second is the axial conduction term of [enthalpy-dis] evaluated at
+the inlet face, computed by [SCMInletConductionHeatRatePostprocessor.md]. Both are needed to close
+the balance, and only the triangular assembly assembles axial conduction, so the conduction term is
+zero for a quadrilateral assembly.
+
+The inlet enthalpy is a boundary condition, prescribed with the inlet temperature. Where the
+first axial cell is heated, heat conducts out of the domain through the inlet face. The outlet face
+is adiabatic.
 
 ## Algorithm
 
 !! Intentional comment to provide extra spacing
 
-A hybrid numerical method of solving the subchannel equations was developed. Hybrid in this context means that the user has the option of solving each portion of the problem at a time, by dividing the domain into blocks. Each block is solved sequentially from inlet to outlet. The mass flow at the outlet of the previous block and the pressure at the inlet of the next block provide the needed boundary conditions. The essence of the algorithm hinges on the construction of a combined residual function based on the lateral momentum equation. To solve this equation a Jacobian Free Newton-Krylov type Method (JFNKM) was used. The workhorse of the code is the non linear equation solvers (SNES) found in the Portable, Extensible Toolkit for Scientific Computation [PETSc](https://petsc.org/release/).
+The domain can be divided into axial blocks, which are solved sequentially from the assembly inlet
+to the outlet. The mass flow at the outlet of the previous block and the pressure at the inlet of
+the next block provide the boundary conditions of each block. The implicit algorithms need more than
+one axial cell per block. [QuadSubChannel1PhaseProblem.md] and [TriSubChannel1PhaseProblem.md] offer
+three algorithms [!cite](kyriakopoulos2026numerical) for the flow equations of a block, listed in
+[scm-algorithms]. There should be no appreciable differences between their results when the time and
+space discretization is converged.
 
-\begin{equation}
-\label{lateral1}
-f(w_{ij}) = \frac{dw_{ij}}{dt} L_{ij} + \frac{L_{ij} }{\Delta z} \Delta (w_{ij} \bar{U })  - S_{ij} \Delta P_{ij} + \frac{1}{2} K_{ij}
-\frac{w_{ij}|w_{ij}|}{\rho^*}= 0.
-\end{equation}
+!table id=scm-algorithms caption=Algorithms for the flow equations of a block.
+| Algorithm | [!param](/Problem/TriSubChannel1PhaseProblem/implicit) | [!param](/Problem/TriSubChannel1PhaseProblem/segregated) | Crossflow $w_{ij}$ | Mass flow $\dot{m}$ and pressure $P$ |
+| - | - | - | - | - |
+| [Axial-sweep segregated](#segregated) | `false` | `true` | PETSc SNES (JFNK), matrix-free, no preconditioner, on the residual [lateral1] | Marched cell by cell inside the crossflow residual function: $\dot{m}$ from the block inlet up, $P$ from the block outlet down |
+| [Implicit-Segregated](#segregated) | `true` | `true` | PETSc SNES (JFNK), matrix-free, no preconditioner, on the residual [lateral1] | Each solved as a linear system with a PETSc Krylov solver and a Jacobi preconditioner, nested inside the crossflow residual function; the pressure drop is evaluated from the axial momentum system |
+| [Monolithic](#monolithic) | `true` | `false` | Solved together with $\dot{m}$ and $P$ as one linear system per block, PETSc FGMRES with [!param](/Problem/TriSubChannel1PhaseProblem/monolithic_preconditioner) | Solved together with $w_{ij}$ |
 
-The main unknown variable in this non linear residual is the crossflow $w_{ij}$. The combined residual function calculates the non linear residual $f(w_{ij})$ after it updates the other main flow variables, such as mass flow $\dot{m}_i$,  turbulent crossflow $w'_{ij}$, pressure drop  $\Delta P_i$ and pressure $P_i$, using the current $w_{ij}$ as needed. So every time this function is called by the Newton solver the flow variables get updated. This affords the solution of all flow variables at the same time. $P_i$ is the local pressure minus the exit pressure, $P_i (z) - P_{exit}$, so at the exit $P_{i}$ is zero. The hybrid algorithm is presented in [scm-solver-flowchart].
+In all three algorithms the enthalpy is solved separately, after the flow solve of a block.
 
 !media media_scripts/scm_solver_flowchart.py
     style=width:60%;margin-bottom:2%;margin:auto;
@@ -432,8 +553,8 @@ The temperature recovered from the equation of state can be relaxed independentl
 \alpha_T\left[\vec{T}(\vec{p},\vec{h})-\vec{T}^{\,\ell}\right],
 \end{equation}
 
-where $\alpha_T$ is set by `T_relaxation` and defaults to one. The temperature convergence measure
-uses the unrelaxed equation-of-state update,
+where $\alpha_T$ is set by [!param](/Problem/TriSubChannel1PhaseProblem/T_relaxation) and defaults
+to one. The temperature convergence measure uses the unrelaxed equation-of-state update,
 
 \begin{equation}
 \epsilon_T =
@@ -453,30 +574,67 @@ use the relative field change
 \end{equation}
 
 whereas the monolithic algorithm uses the largest unrelaxed pressure fixed-point update among the
-blocks. Measuring the monolithic update before post-solve relaxation keeps the meaning of `P_tol`
-independent of `pressure_relaxation`. The maximum errors are synchronized across processes. If the
-pressure field has not converged, the block sweep starts again at the inlet; pressure information
-therefore requires multiple outer iterations to propagate upstream when several blocks are used.
-`P_maxit` and `T_maxit` limit the outer and thermal iterations, respectively; `P_maxit = 0` selects
-the solver's automatic outer-iteration limit.
+blocks,
 
-### Algorithm variations
+\begin{equation}
+\epsilon_P = \max_{\text{blocks}}
+\frac{\left\|\vec{P}^{\,\star}-\vec{P}^{\,\ell}\right\|_2}
+{\left\|\vec{P}^{\,\ell}+P_{\mathrm{out}}\mathbf{1}\right\|_2+10^{-14}},
+\end{equation}
 
-There are three variations [!cite](kyriakopoulos2026numerical) of the algorithm presented above in SCM: The Explicit-Segregated, Implicit-Segregated and Monolithic. There are also two subchannel geometries that SCM can solve, one with fuel pins in a quadrilateral lattice (Quadsolver) and one with fuel pins in a triangular lattice (Trisolver). There should be no appreciable differences between the results of the algorithms when the time/spacial discretization scheme is converged.
+where $\vec{P}^{\,\star}$ is the pressure of the monolithic linear solve of the block, over its
+nodes $k-1$ of each cell. Measuring the monolithic update before post-solve relaxation keeps the
+meaning of [!param](/Problem/TriSubChannel1PhaseProblem/P_tol) independent of
+[!param](/Problem/TriSubChannel1PhaseProblem/pressure_relaxation). If the pressure field has not
+converged, the block sweep starts again at the inlet; pressure information therefore requires
+multiple outer iterations to propagate upstream when several blocks are used.
+[!param](/Problem/TriSubChannel1PhaseProblem/P_maxit) and
+[!param](/Problem/TriSubChannel1PhaseProblem/T_maxit) limit the outer and thermal iterations,
+respectively. `P_maxit = 0` selects an automatic outer-iteration limit: 20 times the number of
+blocks for the segregated algorithms, five for a single block, and 100 for the monolithic algorithm.
 
-#### Explicit-Segregated
+### Segregated algorithms id=segregated
 
 !! Intentional comment to provide extra spacing
 
-This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations. The variables are updated sequantially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet.
+The segregated algorithms solve the crossflow of a block as the root of a combined residual function
+based on the lateral momentum equation,
+
+\begin{equation}
+\label{lateral1}
+f(w_{ij}) = \frac{dw_{ij}}{dt} L_{ij} + \frac{L_{ij} }{\Delta z} \Delta (w_{ij} \bar{U })  - S_{ij} \Delta P_{ij} + \frac{1}{2} K_{ij}
+\frac{w_{ij}|w_{ij}|}{\rho^*}= 0,
+\end{equation}
+
+with the Jacobian-free Newton-Krylov method of the nonlinear equation solver (SNES) of the Portable,
+Extensible Toolkit for Scientific Computation [PETSc](https://petsc.org/release/), without a
+preconditioner. The main unknown of this nonlinear residual is the crossflow $w_{ij}$. Each time the
+Newton solver evaluates $f(w_{ij})$, the residual function first updates the other flow variables,
+such as the mass flow $\dot{m}_i$, the turbulent crossflow $w'_{ij}$, the pressure drop
+$\Delta P_i$, and the pressure $P_i$, from the current $w_{ij}$, so all flow variables of the block
+are solved for at the same time. $P_i$ is the local pressure minus the exit pressure,
+$P_i (z) - P_{exit}$, so at the exit $P_{i}$ is zero. [lateral1] is the residual of the
+axial-sweep segregated algorithm; the implicit-segregated algorithm evaluates it as the residual of
+[lateral-momentum-dis2] at the current crossflow. The two segregated algorithms differ in how they
+update $\dot{m}$ and $P$ inside the residual function.
+
+#### Axial-sweep segregated
+
+!! Intentional comment to provide extra spacing
+
+This is the default algorithm, selected with `implicit = false` and historically called explicit-segregated, where the unknown flow variables are calculated directly through their governing equations by an axial sweep. The variables are updated sequentially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet. The sweep runs cell by cell inside the crossflow residual function, rather than solving a system for the block; in time the algorithm is backward Euler, as are the others. Of the stabilization
+methods, only the temperature relaxation [!param](/Problem/TriSubChannel1PhaseProblem/T_relaxation) applies; the crossflow damping
+and the equation and solution relaxations described under [#monolithic] are specific to the
+monolithic algorithm.
 
 #### Implicit-Segregated
 
 !! Intentional comment to provide extra spacing
 
-In this case, the governing mass, axial momentum and crossflow momentum, equations are recast in matrix form and the flow variables are calculated by solving the corresponding system. This means that variables are retrieved concurrently for the whole block. Otherwise, the solution algorithm is the same as in the default explicit method.
+In this case, the governing mass, axial momentum and crossflow momentum equations are recast in matrix form and the flow variables are calculated by solving the corresponding system. This means that variables are solved for concurrently for the whole block. Inside the crossflow residual function, the mass flow [mass-dis] and the pressure are each solved as a linear system with a PETSc Krylov solver and a Jacobi preconditioner, and the cell pressure drop is evaluated from the axial momentum system [axial-momentum-dis3] at the current mass flow. Otherwise, the solution algorithm is the same as in the default axial-sweep algorithm, including which
+stabilization methods apply.
 
-#### Monolithic
+### Monolithic algorithm id=monolithic
 
 !! Intentional comment to provide extra spacing
 
@@ -509,100 +667,155 @@ The first block row is [mass-dis-monolithic], with $\boldsymbol{M_{mp}}$ defined
 are uncoupled from the other equations in this otherwise monolithic system (enthalpy is coupled to
 the flow equations through the fluid-property update), enthalpy is lagged and solved separately.
 The flow system retrieves $\vec{\dot{m}}$, $\vec{P}$, and $\vec{w}$ concurrently at every node in a
-block; $\vec{\Delta P}$ is not explicitly calculated. The coupled flow system is solved with PETSc
-FGMRES and a field-split preconditioner. SCM checks the PETSc convergence reason for both the
-coupled flow and enthalpy linear solves and reports the reason, iteration count, and residual norm
-instead of accepting a diverged solution.
+block; $\vec{\Delta P}$ is not explicitly calculated. The monolithic flow system is solved with PETSc
+FGMRES and the preconditioner set by
+[!param](/Problem/TriSubChannel1PhaseProblem/monolithic_preconditioner):
 
-As soon as the big matrix is constructed, the solver will calculate cross-flow resistances to maintain realizability. A distinctive feature of this method is the introduction of a *weak relaxation* logic that stabilizes and accelerates convergence of the coupled $mass flow: (\dot{\mathbf{m}})$, $pressure: (\mathbf{P})$, and $crossflow:(\mathbf{w}_{ij})$ fields in a $Q{=}3$ block-nested linear system with matrix blocks $M_{ij}$ and right-hand-side blocks $\mathbf{b}_i$ that represent the individual governing equations. Note that the solution is influenced by the stabilization method and its coefficients.
+- `fieldsplit_ilu`, the default, and `fieldsplit_lu` use a multiplicative field split with one
+  split per field, each factored with ILU(0) or exactly;
+- `lu` factors the monolithic matrix exactly with MUMPS, so each monolithic solve converges in one FGMRES
+  iteration.
 
-#### 1. Fast scale estimates
+The exact factorization is never retried, but its cost grows faster than the system size. The
+tolerances are [!param](/Problem/TriSubChannel1PhaseProblem/rtol) and
+[!param](/Problem/TriSubChannel1PhaseProblem/atol), both $10^{-6}$ by default, and
+[!param](/Problem/TriSubChannel1PhaseProblem/maxit), $10^4$ by default. The FGMRES restart length is
+set by [!param](/Problem/TriSubChannel1PhaseProblem/monolithic_gmres_restart), and other PETSc
+options of the monolithic solve can be passed with the `-scm_monolithic_` prefix; see
+[Troubleshooting failed solves](user_notes.md#troubleshooting) for choosing them. SCM checks the
+PETSc convergence reason for both the monolithic flow and enthalpy linear solves and reports the
+reason, iteration count, and residual norm instead of accepting a diverged solution.
 
-!! Intentional comment to provide extra spacing
+The monolithic system does not couple all fields implicitly. The axial momentum equation sees the crossflow only through its
+lagged coefficients, so $\boldsymbol{M_{pw}} = 0$, and the lateral momentum equation sees the mass
+flow only through its lagged coefficients, so $\boldsymbol{M_{wm}} = 0$. Each temperature iteration
+of a block performs one monolithic solve, which is one Picard step on these coefficients:
 
-From the axial- and cross-momentum rows, the code forms a quick pressure estimate and a provisional
-cross-momentum imbalance:
-\begin{equation}
-\begin{aligned}
-\hat{\mathbf m} &= M_{pm}\,\mathbf m, \\
-\hat{\mathbf p} &= \frac{\hat{\mathbf m}}{\operatorname{diag}(M_{pp}) + \varepsilon_p\mathbf 1},\\
-\hat{\mathbf r}_w &= M_{wp}\,\hat{\mathbf p} - \mathbf b_{w,p},
-\end{aligned}
-\end{equation}
-where $\mathbf b_{w,p}$ is the pressure-force right-hand side and
-$\varepsilon_p=10^{-10}$ avoids division by zero. The signed gap contributions in
-$\hat{\mathbf r}_w$ are accumulated per channel into
-$\mathrm{sumw_{ij}}_{\mathrm{loc}}$.
+1. The turbulent crossflow $w'_{ij}$ is evaluated from the current mass flow with
+   [mixing-mass-flux], and the three flow equations are assembled about the current iterate $\ell$:
+   [mass-dis-monolithic], [axial-momentum-dis3], and [lateral-momentum-dis2].
+2. The crossflow damping and the equation relaxation are applied, and the system is solved.
+3. The pressure error is measured, the post-solve relaxation is applied, and $\vec{\dot{m}}$,
+   $\vec{P}$, $\vec{w}$, and the net crossflow are stored. $w'_{ij}$ is reevaluated from the new
+   mass flow.
+4. The enthalpy, temperature, density, and viscosity of the block are updated.
 
-#### 2. Adaptive resistance multiplier
+The outer iteration stops when the largest unrelaxed pressure update of the blocks falls below
+[!param](/Problem/TriSubChannel1PhaseProblem/P_tol) and every block has met [!param](/Problem/TriSubChannel1PhaseProblem/T_tol) in that iteration. The
+crossflow is not tested separately. An iteration limit that is reached marks the solve as not
+converged; it is not an error.
 
-!! Intentional comment to provide extra spacing
+Before the monolithic system is solved, SCM adds a damping term to the crossflow equation, unless it
+is turned off, and then applies the optional equation and solution relaxation described below. These
+steps stabilize the iteration on the coupled $\dot{\mathbf m}$, $\mathbf P$, and $\mathbf W$ fields
+of the monolithic system, where $\mathbf W$ is the vector of crossflows $w_{ij}$. They do not change
+the converged solution but can add outer iterations. They apply to the monolithic algorithm only;
+the temperature relaxation [!param](/Problem/TriSubChannel1PhaseProblem/T_relaxation) described
+above applies to all algorithms.
 
-Two scales are computed:
-
-\begin{equation}
-\begin{aligned}
-m_{\min} &= \min |\mathbf m|,\\
-S_{\max} &= \max\Big(\max |\mathrm{sumw_{ijloc}}|,\; 10^{-10}\Big)
-\end{aligned}
-\end{equation}
-
-Additionally, a mean inter-iteration change for crossflow is formed
-\begin{equation}
-r_{\mathrm{base}} = \operatorname{mean}\big(\big|\mathbf W^{(k)}| - |\mathbf W^{(k-1)}\big|\big),
-\end{equation}
-leading to an adaptive resistance multiplier
-\begin{equation}
-r = \frac{r_{\mathrm{base}}}{\max(S_{\max}, \varepsilon)} + 0.5,\qquad \varepsilon\sim10^{-10}.
-\end{equation}
-The +0.5 offset supplies a baseline contribution to the added resistance.
-
-#### 3. Crossflow resistance inflation
+#### 1. Crossflow damping
 
 !! Intentional comment to provide extra spacing
 
-A cross-coupling resistance is estimated and smoothed:
-\begin{equation}
-\begin{aligned}
-\tilde K   &= \frac{S_{\max}}{m_{\min}}, &
-K^\star &= 0.9\,\tilde K + 0.1\,K_{\text{old}}, &
-K       &= r\,K^\star.
-\end{aligned}
-\end{equation}
-After smoothing, the provisional crossflow resistance $K$ is mapped through a piecewise lower-bound function that enforces minimum safe damping levels in specific ranges.
+The damping, controlled by
+[!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_time_damping) and on by default, adds a
+pseudo-time derivative to the crossflow equation, which makes each monolithic solve a step of
+pseudo-transient continuation [!cite](kelley1998convergence) in the crossflow:
 
 \begin{equation}
-K \rightarrow
-\begin{cases}
-K , & K >= 10, \\
-1.0, & 1 \leq K < 10, \\
-0.5, & 0.1 \leq K < 1, \\
-\frac{1}{3}, & 0.01 \leq K < 0.1, \\
-0.1, & 0.001 \leq K < 0.01, \\
-K, & K < 10^{-3}.
-\end{cases}
+M_{wp}\,\mathbf P^{\ell+1} + M_{ww}\,\mathbf W^{\ell+1} +
+\mathbf{added\_K}^{\ell}\left(\mathbf W^{\ell+1}-\mathbf W^{\ell}\right) = \mathbf b_w,
+\qquad
+\mathrm{added\_K}_{ij}^{\ell} = \frac{m_{ij}}{\Delta\tau^{\ell}},
+\qquad
+m_{ij} = L_{ij}\,S_{ij}\,\rho^{*},
 \end{equation}
 
-This mapping acts as a {snap-up} rule for the crossflow resistance $K$ over the range $[10^{-3}, 10]$:
-it raises $K$ out of weak-damping intervals but leaves very small and very large
-values unchanged. The purpose is to maintain numerical stability and adequate
-diagonal dominance in the cross-momentum equations without introducing full quantization or "bucketing".
+i.e. the diagonal matrix $\mathbf{added\_K}^{\ell}$ is added to $M_{ww}$ and
+$\mathbf{added\_K}^{\ell}\,\mathbf W^{\ell}$ to $\mathbf b_w$. $m_{ij}$ is the crossflow inertia of
+gap $ij$, the coefficient of the time derivative in [lateral-momentum-dis], with $L_{ij}$, $S_{ij}$,
+and $\rho^{*}$ as defined there, and $\Delta\tau^{\ell}$ is the pseudo-time step of monolithic solve
+$\ell$, one per temperature iteration of the block. The damping thus acts as an added crossflow resistance on the scale of the transient term,
+and improves the conditioning of the monolithic system. Its two parts play different roles:
 
-Finally, $K$ is added to the diagonal of the cross-momentum block,
+- +The right-hand-side compensation+ $\mathbf{added\_K}^{\ell}\,\mathbf W^{\ell}$ makes the converged
+  solution independent of the damping, since the term vanishes at $\mathbf W^{\ell+1}=\mathbf W^{\ell}$.
+  Without it, the added resistance remains at convergence and pulls the crossflow toward zero, with
+  an error that grows with axial refinement.
+- +The growth of the pseudo-time step+ recovers the convergence rate of the undamped system: a small
+  step keeps the solves well conditioned far from the solution but slows the outer iteration near
+  it.
+
+A decaying damping without the compensation biases the solution wherever it has not vanished when
+the outer iteration stops; a fixed damping with it converges slowly. The pseudo-time step uses a
+switched evolution relaxation [!cite](mulder1985experiments),
+
 \begin{equation}
-M_{ww} \;\leftarrow\; M_{ww} + K\,I,
+\Delta\tau^{\ell} = \max\left(\Delta\tau_0,\;\Delta\tau_0\,
+\frac{\left\|\mathbf r_w^{0}\right\|_2}{\left\|\mathbf r_w^{\ell}\right\|_2}\,\frac{1}{\gamma}\right),
+\qquad
+\mathbf r_w^{\ell} = M_{wp}\,\mathbf P^{\ell} + M_{ww}\,\mathbf W^{\ell} - \mathbf b_w,
 \end{equation}
-thereby increasing diagonal dominance and improving conditioning for the crossflow equations. Note
-that this treatment does influence the crossflow distribution solution.
 
-#### 4. Equation under-relaxation
+where $\Delta\tau_0$ is set by
+[!param](/Problem/TriSubChannel1PhaseProblem/crossflow_pseudo_time_step), $\mathbf r_w^{\ell}$ is the
+crossflow residual at the current iterate before the damping is added, and the reference
+$\left\|\mathbf r_w^{0}\right\|_2$ is the largest residual norm of the block in the current solve so
+far, rather than the first, which can be zero up to round-off for a uniform initial state. The step
+grows without bound as the residual falls, so the damping vanishes at convergence. The monolithic
+linear solve starts from the current iterate, and its tolerance
+[!param](/Problem/TriSubChannel1PhaseProblem/rtol) applies to the residual of that iterate.
+
+As the step grows, the system can become too poorly conditioned for a field-split preconditioner.
+Each monolithic solve is therefore attempted with at most
+[!param](/Problem/TriSubChannel1PhaseProblem/monolithic_retry_maxit) Krylov iterations, 1000 by
+default, and retried from the same iterate if it does not converge: for retry $r = 1, \ldots, 8$,
+
+\begin{equation}
+\frac{1}{\Delta\tau^{\ell,r}} = \frac{1}{\Delta\tau^{\ell,r-1}} + \delta_r,
+\qquad
+\delta_r = \max\left(\frac{1}{\Delta\tau^{\ell,r-1}},\;\frac{0.05}{\Delta\tau_0}\right),
+\qquad
+\Delta\tau^{\ell,0} = \Delta\tau^{\ell},
+\end{equation}
+
+with the matching increment $\operatorname{diag}(m_{ij}\,\delta_r)$ added to $M_{ww}$ and
+$\operatorname{diag}(m_{ij}\,\delta_r)\,\mathbf W^{\ell}$ to $\mathbf b_w$. The increment halves a
+step up to $20\,\Delta\tau_0$ and cuts a larger one to below $20\,\Delta\tau_0$; this is the step
+rejection of pseudo-transient continuation. The last attempt uses the full
+[!param](/Problem/TriSubChannel1PhaseProblem/maxit), and if it fails SCM stops with an error. The
+increments are added after the crossflow equation relaxation described below, so unlike the damping
+of the first attempt they are not scaled by $1/\alpha_W$: after $n$ retries the damping is
+$\left(1/\alpha_W + 2^n - 1\right)\mathbf{added\_K}^{\ell}$ rather than
+$2^n\,\mathbf{added\_K}^{\ell}/\alpha_W$, for increments of $1/\Delta\tau$.
+
+The step is fixed for all Krylov iterations of a monolithic solve and recomputed at the next
+monolithic solve of the block, in its next temperature iteration, so it can grow between solves and
+the retry increments apply only to the failed solve. Each retry also doubles the block factor
+$\gamma$, which persists over the later monolithic solves of the block, capped at $2^8$. $\gamma$ and
+the reference residual reset at the start of each SCM solve, that is each time step and, under a
+MultiApp fixed-point iteration, each fixed-point iteration; the step then still grows as the residual
+falls, from a level $\gamma$ times lower. With $\mathbf{added\_K}_0$ the damping at $\Delta\tau_0$, a solve and its retries damp
+by at most $\mathbf{added\_K}_0/\alpha_W + (2^8-1)\,\mathbf{added\_K}_0$. The damped monolithic solve
+is summarized in [scm-damping-flowchart].
+
+!media media_scripts/scm_crossflow_damping_flowchart.py
+    style=width:60%;margin-bottom:2%;margin:auto;
+    id=scm-damping-flowchart
+    caption=One damped monolithic solve of a block in the monolithic algorithm
+
+The converged solution does not depend on $\Delta\tau_0$; only the cost and the robustness of the
+iteration do. [Troubleshooting failed solves](user_notes.md#troubleshooting) gives guidance for
+choosing it.
+
+#### 2. Equation under-relaxation
 
 !! Intentional comment to provide extra spacing
 
 Classical linear under-relaxation is applied separately to each equation
 $f\in\{\mathbf m,\mathbf p,\mathbf W\}$. The factors are user-selectable through
-`mass_flow_equation_relaxation`, `pressure_equation_relaxation`, and
-`crossflow_equation_relaxation`; their defaults are
+[!param](/Problem/TriSubChannel1PhaseProblem/mass_flow_equation_relaxation), [!param](/Problem/TriSubChannel1PhaseProblem/pressure_equation_relaxation), and
+[!param](/Problem/TriSubChannel1PhaseProblem/crossflow_equation_relaxation); their defaults are
 \begin{equation}
 \alpha_m=1.0,\qquad \alpha_p=1.0,\qquad \alpha_W=0.1.
 \end{equation}
@@ -618,13 +831,27 @@ M_{ff} &\leftarrow M_{ff} +
 \end{equation}
 The off-diagonal entries are unchanged. A factor of one bypasses relaxation, while a factor below
 one increases the diagonal magnitude and damps the update toward the previous iterate without
-changing the fixed point. With the defaults, only the crossflow equation is under-relaxed.
+changing the fixed point. With the defaults, only the crossflow equation is under-relaxed. Because
+$D_W$ includes the crossflow damping added before it, $D_W = \mathbf d + \mathbf{added\_K}^{\ell}$, where
+the vector $\mathbf d$ is the diagonal of $M_{ww}$ without the damping: the time, self-advection,
+and friction coefficients of each gap in [lateral-momentum-dis]. The crossflow equation the monolithic
+solve satisfies is therefore
 
-#### 5. Post-solve solution relaxation
+\begin{equation}
+\label{relaxed-crossflow}
+M_{wp}\,\mathbf P + M_{ww}\,\mathbf W - \mathbf b_w =
+-\left[\frac{\mathbf{added\_K}^{\ell}}{\alpha_W} + \frac{1-\alpha_W}{\alpha_W}\operatorname{diag}(\mathbf d)\right]
+\left(\mathbf W - \mathbf W^{\ell}\right),
+\end{equation}
+
+the damping scaled by $1/\alpha_W$ plus the classical under-relaxation of the undamped equation. Both
+terms vanish at $\mathbf W = \mathbf W^{\ell}$.
+
+#### 3. Post-solve solution relaxation
 
 !! Intentional comment to provide extra spacing
 
-After the coupled system is solved, each solution field can be relaxed independently:
+After the monolithic system is solved, each solution field can be relaxed independently:
 
 \begin{equation}
 \mathbf x_f^{\,\ell+1} =
@@ -632,18 +859,16 @@ After the coupled system is solved, each solution field can be relaxed independe
 \end{equation}
 
 where $\mathbf x_f^\star$ is the raw linear solution. The factors are set with
-`mass_flow_relaxation`, `pressure_relaxation`, and `crossflow_relaxation`; all three default to
+[!param](/Problem/TriSubChannel1PhaseProblem/mass_flow_relaxation), [!param](/Problem/TriSubChannel1PhaseProblem/pressure_relaxation), and [!param](/Problem/TriSubChannel1PhaseProblem/crossflow_relaxation); all three default to
 one. Equation relaxation and post-solve relaxation are independent and may be used together. Both
 preserve the fixed point: equation relaxation modifies the matrix and right-hand side before the
 linear solve, while post-solve relaxation damps the fixed-point update after that solve.
 
-#### 6. Net effect
+#### 4. Net effect
 
 !! Intentional comment to provide extra spacing
 
-The combination of (i) scale estimation, (ii) adaptive, iteration-smoothed, and piecewise snapped
-added crossflow resistance, and (iii) independently configurable equation and solution relaxation
-improves robustness of the nested solve during rapid crossflow changes. Added resistance and
-equation relaxation both increase entries on the crossflow diagonal, but neither guarantees strict
-diagonal dominance for every geometry and flow state. Post-solve relaxation does not alter matrix
-conditioning. Users can retain the default behavior or tune the two relaxation layers separately.
+Crossflow damping and equation relaxation both increase the crossflow diagonal, but neither
+guarantees strict diagonal dominance for every geometry and flow state; post-solve relaxation does
+not change the conditioning. All three preserve the fixed point, so the converged solution does not
+depend on them, up to the outer-iteration tolerance [!param](/Problem/TriSubChannel1PhaseProblem/P_tol).

@@ -445,6 +445,7 @@ def create_flowchart(output_path: str | Path) -> Path:
             (power_bypass_x, property_merge[1]),
             property_merge,
         ],
+        arrow=True,
     )
     add_branch_label(ax, (2.12, 12.12), "No", is_yes=False)
     add_arrow(ax, property_merge, properties["top"])
@@ -488,14 +489,26 @@ def create_flowchart(output_path: str | Path) -> Path:
 
     # Temperature loop is not complete: repeat the flow solve in this block.
     add_polyline(
-        ax, [temperature_loop["left"], (block_rail_x, temperature_loop["left"][1])]
+        ax,
+        [temperature_loop["left"], (block_rail_x, temperature_loop["left"][1])],
+        arrow=True,
     )
     add_branch_label(ax, (-2.82, 6.20), "No", is_yes=False)
 
     # Continue the downstream block sweep.
     add_arrow(ax, last_block["left"], next_block["right"])
     add_branch_label(ax, (-2.18, 4.52), "No", is_yes=False)
-    add_polyline(ax, [next_block["top"], (block_rail_x, left_return_y)])
+    # The block loop enters the flow solve from the left, separate from the timestep return on the
+    # top rail
+    add_polyline(
+        ax,
+        [
+            next_block["top"],
+            (block_rail_x, flow_solve["left"][1]),
+            flow_solve["left"],
+        ],
+        arrow=True,
+    )
 
     # At the next timestep the outer return bends at the top. The block rail
     # joins its horizontal segment vertically from below, as requested.
@@ -503,6 +516,7 @@ def create_flowchart(output_path: str | Path) -> Path:
     add_polyline(
         ax,
         [next_timestep["top"], (timestep_rail_x, left_return_y), solver_merge],
+        arrow=True,
     )
 
     # ------------------------------------------------------------------

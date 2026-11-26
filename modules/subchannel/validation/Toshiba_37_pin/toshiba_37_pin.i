@@ -75,7 +75,9 @@ P_out = 2.0e5 # Pa
   compute_viscosity = true
   compute_power = true
   P_tol = 1.0e-6
-  T_tol = 1.0e-3
+  # The undamped temperature iteration stalls near 2e-4. With the damping it converges, and
+  # tightening to 1e-7 moves the result by 2e-7, while the previous 1e-3 stopped 8e-5 away from it
+  T_tol = 1.0e-5
   implicit = true
   segregated = false
   verbose_multiapps = true

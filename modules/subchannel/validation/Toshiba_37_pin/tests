@@ -10,6 +10,9 @@
         valgrind = NONE
         recover = false
         abs_zero = 1e-5
+        # The outer iteration stops at T_tol = 1e-5, so the pressure drop differs by up to 6e-5
+        # between compilers
+        rel_err = 1e-4
         max_threads = 1
         requirement = 'The system shall examine the subchannel solver for the Toshiba 37-pin case'
     []
