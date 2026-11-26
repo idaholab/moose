@@ -1,0 +1,77 @@
+#!/bin/bash
+# Commit quiz gate, enforced by git itself.
+#
+# Unlike the PreToolUse(Bash) hook, git runs this no matter who invokes the
+# commit: a shell, the VS Code Source Control panel, an editor, another agent,
+# or an MCP server. It is the enforcement layer; the Bash hook remains as a
+# second layer because it can also refuse `--no-verify`, which defeats this one.
+#
+# A commit is allowed when quiz-pass.sh has recorded a token matching the
+# content being committed:
+#   token = "<staged tree> <HEAD at time of pass>"
+# The staged tree must match, so no unreviewed content can ride along. HEAD may
+# be either the recorded one (the authorized commit) or its child (amending
+# that commit). This hook receives no arguments and so cannot see --amend, but
+# it does not need to: the two cases differ in where HEAD points.
+
+set -uo pipefail
+
+git_dir=$(git rev-parse --git-dir 2>/dev/null) || exit 0
+token="$git_dir/claude-commit-quiz-pass"
+
+# Exempt only multi-step operations that git drives itself. Blocking a commit
+# partway through a rebase or a conflicted merge resolution leaves the
+# repository stuck in a state the user cannot quiz their way out of, and the
+# content was reviewed when it was first written.
+#
+# Deliberately NOT exempt: a plain `git cherry-pick <sha>` or `git revert <sha>`
+# that applies cleanly. Those are single-shot ways to land arbitrary content and
+# are exactly the bypass this hook exists to close. Git sets CHERRY_PICK_HEAD
+# and REVERT_HEAD even for the clean case, so those markers alone cannot be
+# used to detect "mid-operation" -- the sequencer directory is what distinguishes
+# a multi-commit sequence, and MERGE_HEAD with unmerged paths distinguishes a
+# conflict the user is resolving by hand.
+for marker in rebase-merge rebase-apply sequencer BISECT_LOG; do
+  [[ -e "$git_dir/$marker" ]] && exit 0
+done
+
+# A merge being finished by hand. MERGE_HEAD alone is the right test: by the
+# time pre-commit runs the user has staged their resolution, so the index no
+# longer reports unmerged paths and `git ls-files -u` is empty.
+if [[ -e "$git_dir/MERGE_HEAD" ]]; then
+  exit 0
+fi
+
+staged_tree=$(git write-tree 2>/dev/null) || exit 0
+head_now=$(git rev-parse HEAD 2>/dev/null) || head_now="unborn"
+head_parent=$(git rev-parse HEAD^ 2>/dev/null) || head_parent="root"
+
+if [[ -f "$token" ]]; then
+  read -r tok_tree tok_head _ < "$token"
+  if [[ "$tok_tree" == "$staged_tree" ]] &&
+     { [[ "$tok_head" == "$head_now" ]] || [[ "$tok_head" == "$head_parent" ]]; }; then
+    exit 0
+  fi
+fi
+
+cat >&2 <<EOF
+
+Commit blocked: the commit quiz gate has no pass recorded for this content.
+
+This repository requires that a human be shown the commit message and answer a
+few questions about the change before it lands. See .claude/hooks/ for the
+agent-facing instructions.
+
+If you are committing by hand and want this change in, record a pass yourself:
+
+    $(git rev-parse --show-toplevel)/.claude/hooks/quiz-pass.sh "manual" "manual" "manual"
+
+then re-run your commit. Passes are logged to:
+
+    $git_dir/claude-commit-quiz.log
+
+To commit without the gate once, use: git commit --no-verify
+To stop gating this worktree, remove: $(git rev-parse --git-path hooks)/pre-commit
+
+EOF
+exit 1
