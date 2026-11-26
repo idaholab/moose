@@ -683,8 +683,12 @@ public:
 
   /**
    * Reintialize dual basis coefficients based on a customized quadrature rule
+   * @param lm_inactive Whether all Lagrange multiplier dofs of \p elem are set to zero
    */
-  void reinitDual(const Elem * elem, const std::vector<Point> & pts, const std::vector<Real> & JxW);
+  void reinitDual(const Elem * elem,
+                  const std::vector<Point> & pts,
+                  const std::vector<Real> & JxW,
+                  bool lm_inactive);
 
   /**
    * Reinitialize FE data for a lower dimenesional element with a given set of reference points

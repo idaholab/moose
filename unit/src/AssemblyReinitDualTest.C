@@ -10,6 +10,7 @@
 
 #include "Assembly.h"
 #include "FEProblem.h"
+#include "MooseException.h"
 #include "MooseMain.h"
 #include "MooseMesh.h"
 
@@ -59,7 +60,7 @@ TEST_F(AssemblyReinitDualTest, ReinitOnlyRequestedTypes)
   // The endpoint rule leaves the quadratic midpoint shape unsupported, so recomputing dual
   // coefficients for the unrequested SECOND LAGRANGE helper would fail. Only the requested FIRST
   // LAGRANGE coefficients should be recomputed, giving the endpoint Kronecker values checked below.
-  EXPECT_NO_THROW(assembly.reinitDual(side.get(), points, weights));
+  EXPECT_NO_THROW(assembly.reinitDual(side.get(), points, weights, false));
   assembly.reinitLowerDElem(side.get(), &points, &weights);
 
   ASSERT_EQ(dual_phi.size(), 2);
@@ -67,7 +68,8 @@ TEST_F(AssemblyReinitDualTest, ReinitOnlyRequestedTypes)
     for (const auto qp : make_range(points.size()))
       EXPECT_NEAR(dual_phi[i][qp], i == qp, libMesh::TOLERANCE);
 
-  // Requesting SECOND LAGRANGE dual shapes adds its singular Gram matrix diag(1, 1, 0)
+  // Requesting SECOND LAGRANGE dual shapes adds its singular Gram matrix diag(1, 1, 0): two
+  // quadrature points for three shape functions
   assembly.feDualPhiLower<Real>(libMesh::FEType(libMesh::SECOND, libMesh::LAGRANGE));
-  EXPECT_THROW(assembly.reinitDual(side.get(), points, weights), libMesh::LogicError);
+  EXPECT_THROW(assembly.reinitDual(side.get(), points, weights, false), MooseException);
 }

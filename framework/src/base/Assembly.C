@@ -2367,7 +2367,8 @@ Assembly::reinitNeighborSurfaceElemRef(const Elem * neighbor, const std::vector<
 void
 Assembly::reinitDual(const Elem * elem,
                      const std::vector<Point> & pts,
-                     const std::vector<Real> & JxW)
+                     const std::vector<Real> & JxW,
+                     const bool lm_inactive)
 {
   const unsigned int elem_dim = elem->dim();
   mooseAssert(elem_dim == _mesh_dimension - 1,
@@ -2379,8 +2380,30 @@ Assembly::reinitDual(const Elem * elem,
     if (dual_shape_data == _fe_shape_data_dual_lower.end() || !dual_shape_data->second)
       continue;
 
-    // We use customized quadrature rule for integration along the mortar segment elements
     fe_lower->set_calculate_default_dual_coeff(false);
+
+    // The dual coefficients solve a mass matrix assembled from the covered quadrature points, which
+    // is singular when there are fewer points than shape functions
+    if (pts.size() < FEInterface::n_shape_functions(fe_type, elem))
+    {
+      // All Lagrange multiplier dofs of this face are constrained to zero, so the covered-region
+      // biorthogonality is not needed; use the well-defined dual basis of the full face
+      if (lm_inactive)
+      {
+        fe_lower->reinit_default_dual_shape_coeffs(elem);
+        continue;
+      }
+
+      mooseException("The dual basis on secondary element ",
+                     elem->id(),
+                     " cannot be computed: ",
+                     pts.size(),
+                     " mortar quadrature points cover it, fewer than its ",
+                     FEInterface::n_shape_functions(fe_type, elem),
+                     " shape functions. Increase 'segment_quadrature'.");
+    }
+
+    // We use customized quadrature rule for integration along the mortar segment elements
     fe_lower->reinit_dual_shape_coeffs(elem, pts, JxW);
   }
 }
