@@ -294,16 +294,9 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
         continue;
       const auto & elem_ptr = mesh->elem_ptr(elem_id);
 
-      // Get side normal
-      const std::unique_ptr<const Elem> face = elem_ptr->build_side_ptr(side_id);
-      std::unique_ptr<libMesh::FEBase> fe(
-          libMesh::FEBase::build(elem_ptr->dim(), libMesh::FEType(elem_ptr->default_order())));
-      libMesh::QGauss qface(elem_ptr->dim() - 1, CONSTANT);
-      fe->attach_quadrature_rule(&qface);
-      const auto & normals = fe->get_normals();
-      fe->reinit(elem_ptr, side_id);
-      mooseAssert(normals.size() == 1, "We expected only one normal here");
-      const auto & side_normal = normals[0];
+      // Get side normal. We use the vertex-average normal rather than an FE normal because
+      // polygons and polyhedra have no reference element, so no FE can be reinitialized on them
+      const auto side_normal = elem_ptr->side_vertex_average_normal(side_id);
 
       // Compare to the sideset normals of neighbor sides in that sideset
       for (const auto neighbor : elem_ptr->neighbor_ptr_range())
@@ -314,15 +307,7 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
             if (!boundary_info.has_boundary_id(neighbor, neigh_side_index, bid))
               continue;
 
-            // We re-init everything for the neighbor in case it's a different dimension
-            std::unique_ptr<libMesh::FEBase> fe_neighbor(libMesh::FEBase::build(
-                neighbor->dim(), libMesh::FEType(neighbor->default_order())));
-            libMesh::QGauss qface(neighbor->dim() - 1, CONSTANT);
-            fe_neighbor->attach_quadrature_rule(&qface);
-            const auto & neigh_normals = fe_neighbor->get_normals();
-            fe_neighbor->reinit(neighbor, neigh_side_index);
-            mooseAssert(neigh_normals.size() == 1, "We expected only one normal here");
-            const auto & neigh_side_normal = neigh_normals[0];
+            const auto neigh_side_normal = neighbor->side_vertex_average_normal(neigh_side_index);
 
             // Check the angle by computing the dot product
             if (neigh_side_normal * side_normal <= 0)

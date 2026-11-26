@@ -302,3 +302,71 @@ TEST_F(GeometryUtilityTest, boxCorners)
   EXPECT_DOUBLE_EQ(c[7](1), 0.425);
   EXPECT_DOUBLE_EQ(c[7](2), 5.85);
 }
+
+TEST_F(GeometryUtilityTest, add_unique_point)
+{
+  std::vector<Point> points;
+
+  geom_utils::addUniquePoint(points, Point(0, 0, 0), 1e-12);
+  geom_utils::addUniquePoint(points, Point(1, 0, 0), 1e-12);
+
+  // Within the tolerance of a point already there
+  geom_utils::addUniquePoint(points, Point(1e-13, 0, 0), 1e-12);
+  EXPECT_EQ(points.size(), 2u);
+
+  // Outside it
+  geom_utils::addUniquePoint(points, Point(1e-11, 0, 0), 1e-12);
+  EXPECT_EQ(points.size(), 3u);
+}
+
+TEST_F(GeometryUtilityTest, point_on_segment_2d)
+{
+  const Point a(0, 0, 0);
+  const Point b(2, 0, 0);
+
+  EXPECT_TRUE(geom_utils::pointOnSegment2D(Point(1, 0, 0), a, b));
+  EXPECT_TRUE(geom_utils::pointOnSegment2D(a, a, b));
+  EXPECT_TRUE(geom_utils::pointOnSegment2D(b, a, b));
+
+  // Off the line, and on the line but past the end
+  EXPECT_FALSE(geom_utils::pointOnSegment2D(Point(1, 1, 0), a, b));
+  EXPECT_FALSE(geom_utils::pointOnSegment2D(Point(3, 0, 0), a, b));
+
+  // A degenerate segment is the single point it collapses to
+  EXPECT_TRUE(geom_utils::pointOnSegment2D(a, a, a));
+  EXPECT_FALSE(geom_utils::pointOnSegment2D(b, a, a));
+}
+
+TEST_F(GeometryUtilityTest, add_segment_intersections_2d)
+{
+  const Real tol = 1e-12;
+
+  // Crossing segments meet at one point
+  std::vector<Point> points;
+  geom_utils::addSegmentIntersections2D(
+      points, Point(0, 0, 0), Point(2, 0, 0), Point(1, -1, 0), Point(1, 1, 0), tol);
+  ASSERT_EQ(points.size(), 1u);
+  EXPECT_NEAR(points[0](0), 1.0, tol);
+  EXPECT_NEAR(points[0](1), 0.0, tol);
+
+  // Disjoint segments do not
+  points.clear();
+  geom_utils::addSegmentIntersections2D(
+      points, Point(0, 0, 0), Point(1, 0, 0), Point(0, 1, 0), Point(1, 1, 0), tol);
+  EXPECT_TRUE(points.empty());
+
+  // Overlapping collinear segments give the end points of the overlap
+  points.clear();
+  geom_utils::addSegmentIntersections2D(
+      points, Point(0, 0, 0), Point(2, 0, 0), Point(1, 0, 0), Point(3, 0, 0), tol);
+  ASSERT_EQ(points.size(), 2u);
+  EXPECT_NEAR(points[0](0), 1.0, tol);
+  EXPECT_NEAR(points[1](0), 2.0, tol);
+
+  // A degenerate segment contributes its point when it lies on the other segment
+  points.clear();
+  geom_utils::addSegmentIntersections2D(
+      points, Point(1, 0, 0), Point(1, 0, 0), Point(0, 0, 0), Point(2, 0, 0), tol);
+  ASSERT_EQ(points.size(), 1u);
+  EXPECT_NEAR(points[0](0), 1.0, tol);
+}

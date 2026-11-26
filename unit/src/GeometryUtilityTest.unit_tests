@@ -1,0 +1,20 @@
+[Tests]
+  design = 'meshgenerators/DualMeshGenerator.md'
+  issues = '#33143'
+
+  [add_unique_point]
+    type = GoogleTest
+    unit_test = GeometryUtilityTest.add_unique_point
+    requirement = 'The system shall gather points without duplicating a point that is already present within a given distance tolerance.'
+  []
+  [point_on_segment_2d]
+    type = GoogleTest
+    unit_test = GeometryUtilityTest.point_on_segment_2d
+    requirement = 'The system shall determine whether a point lies on a two-dimensional segment, including its end points, and shall treat a degenerate segment as the single point it collapses to.'
+  []
+  [add_segment_intersections_2d]
+    type = GoogleTest
+    unit_test = GeometryUtilityTest.add_segment_intersections_2d
+    requirement = 'The system shall compute the intersection of two two-dimensional segments, returning the crossing point for segments that cross, the end points of the overlap for overlapping collinear segments, and nothing for disjoint segments.'
+  []
+[]

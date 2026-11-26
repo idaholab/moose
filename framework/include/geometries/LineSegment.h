@@ -46,13 +46,18 @@ public:
    * Finds the closest point on the Line determined by the
    * Line Segments.  Returns a boolean indicating whether
    * that normal point is within the LineSegment or not
+   * @param tol tolerance on the parametric coordinate along the segment, see the private
+   * closest_point() overload
    */
-  bool closest_normal_point(const Point & p, Point & closest_p) const;
+  bool
+  closest_normal_point(const Point & p, Point & closest_p, Real tol = libMesh::TOLERANCE) const;
 
   /**
    * Determines whether a point is in a line segment or not
+   * @param tol tolerance on the parametric coordinate along the segment, see the private
+   * closest_point() overload
    */
-  bool contains_point(const Point & p) const;
+  bool contains_point(const Point & p, Real tol = libMesh::TOLERANCE) const;
 
   /**
    * Check if a line segment intersects a plane, and if so, return the intersection point.
@@ -117,7 +122,22 @@ public:
   Point normal() const;
 
 private:
-  bool closest_point(const Point & p, bool clamp_to_segment, Point & closest_p) const;
+  /**
+   * Finds the point on the infinite line through the segment that is closest to p.
+   * @param p the point to project onto the line
+   * @param clamp_to_segment whether to clamp the projection to the segment's end points
+   * @param closest_p the projected point
+   * @param tol tolerance on the parametric coordinate along the segment, used to decide whether
+   * the projection falls within the segment. A point coinciding with an end point has a parametric
+   * coordinate of exactly 0 or 1 in exact arithmetic, but rounding can place it just outside, so
+   * an untoleranced test reports such a point as off the segment depending on how the compiler
+   * contracts the arithmetic.
+   * @return whether the projection lies within the segment
+   */
+  bool closest_point(const Point & p,
+                     bool clamp_to_segment,
+                     Point & closest_p,
+                     Real tol = libMesh::TOLERANCE) const;
 
   Point _p0, _p1;
 };

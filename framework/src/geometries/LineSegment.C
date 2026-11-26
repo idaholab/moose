@@ -18,7 +18,10 @@
 LineSegment::LineSegment(const Point & p0, const Point & p1) : _p0(p0), _p1(p1) {}
 
 bool
-LineSegment::closest_point(const Point & p, bool clamp_to_segment, Point & closest_p) const
+LineSegment::closest_point(const Point & p,
+                           bool clamp_to_segment,
+                           Point & closest_p,
+                           Real tol) const
 {
   Point p0_p = p - _p0;
   Point p0_p1 = _p1 - _p0;
@@ -27,7 +30,7 @@ LineSegment::closest_point(const Point & p, bool clamp_to_segment, Point & close
   Real t = perp / p0_p1_2;
   bool on_segment = true;
 
-  if (t < 0.0 || t > 1.0)
+  if (t < -tol || t > 1.0 + tol)
     on_segment = false;
 
   if (clamp_to_segment)
@@ -51,16 +54,16 @@ LineSegment::closest_point(const Point & p) const
 }
 
 bool
-LineSegment::closest_normal_point(const Point & p, Point & closest_p) const
+LineSegment::closest_normal_point(const Point & p, Point & closest_p, Real tol) const
 {
-  return closest_point(p, false, closest_p);
+  return closest_point(p, false, closest_p, tol);
 }
 
 bool
-LineSegment::contains_point(const Point & p) const
+LineSegment::contains_point(const Point & p, Real tol) const
 {
   Point closest_p;
-  return closest_point(p, false, closest_p) && closest_p.absolute_fuzzy_equals(p);
+  return closest_point(p, false, closest_p, tol) && closest_p.absolute_fuzzy_equals(p, tol);
 }
 
 bool
