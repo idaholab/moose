@@ -316,6 +316,62 @@ class TestCheckSyntax(unittest.TestCase):
             )
         self.assertIn("missing a markdown file", cm.output[0])
 
+    def testMissingDocUnit(self):
+        root = self.createSyntaxTree()
+
+        def param(cpp_type, doc_unit="", deprecated=False):
+            return {
+                "cpp_type": cpp_type,
+                "doc_unit": doc_unit,
+                "deprecated": deprecated,
+            }
+
+        root(0, 0).parameters = {
+            "coef": param("double"),
+            "variable": param("NonlinearVariableName"),
+            "temperature": param("double", doc_unit="K"),
+            "old_coef": param("double", deprecated=True),
+            "count": param("unsigned int"),
+            "block": param("std::vector<SubdomainName>"),
+        }
+
+        # Disabled by default, even when 'log_default' is set, but still counted
+        with self.assertNoLogs(level="WARNING"):
+            logger = check_syntax(
+                root,
+                ["MooseApp"],
+                self._cache,
+                object_prefix="source",
+                syntax_prefix="syntax",
+                log_default=logging.WARNING,
+                log_duplicate_files=None,
+            )
+        self.assertIsNone(logger.modes["log_missing_doc_unit"])
+        self.assertEqual(logger.counts["log_missing_doc_unit"], 1)
+        msg = logger.text("log_missing_doc_unit")[0]
+        self.assertIn(
+            "Diffusion in {} has 2 parameter(s)".format(root(0, 0).source), msg
+        )
+        self.assertIn("coef (double)", msg)
+        self.assertIn("variable (NonlinearVariableName)", msg)
+        for name in ["temperature", "old_coef", "count", "block"]:
+            self.assertNotIn(name, msg)
+
+        # Can be enabled as a warning or an error
+        for level in [logging.WARNING, logging.ERROR]:
+            with self.assertLogs(level=level) as cm:
+                check_syntax(
+                    root,
+                    ["MooseApp"],
+                    self._cache,
+                    object_prefix="source",
+                    syntax_prefix="syntax",
+                    log_missing_doc_unit=level,
+                )
+            self.assertIn(
+                "without a unit set via InputParameters::setDocUnit", cm.output[0]
+            )
+
     def testGiantIfStatement(self):
         root = moosesyntax.SyntaxNode(None, "")
         syn = moosesyntax.SyntaxNode(root, "Block")

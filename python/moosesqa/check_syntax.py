@@ -32,6 +32,7 @@ def check_syntax(
     kwargs.setdefault("log_missing_markdown", log_default)
     kwargs.setdefault("log_duplicate_files", log_default)
     kwargs.setdefault("log_deprecated_stub_marker", log_default)
+    kwargs.setdefault("log_missing_doc_unit", None)
     logger = LogHelper(__name__, **kwargs)
 
     for node in app_syntax.descendants:
@@ -119,6 +120,23 @@ def _check_node(node, file_cache, object_prefix, syntax_prefix, logger):
     if (not node.removed) and is_missing_description:
         msg = "{} is missing a class description.".format(node.fullpath())
         logger.log("log_missing_description", msg)
+
+    # WARNING: parameters of a type likely to carry a unit lack a documentation unit
+    if is_object and (not node.removed) and node.parameters:
+        missing = [
+            "{} ({})".format(name, param["cpp_type"])
+            for name, param in node.parameters.items()
+            if (not param["doc_unit"])
+            and (not param["deprecated"])
+            and moosesyntax.may_have_unit(param["cpp_type"])
+        ]
+        if missing:
+            msg = "{} in {} has {} parameter(s) without a unit set via InputParameters::setDocUnit "
+            msg += "(set the unit in validParams(); inherited parameters may be set in the base "
+            msg += "class or overridden in this class):\n  "
+            msg = msg.format(node.fullpath(), node.source, len(missing))
+            msg += "\n  ".join(missing)
+            logger.log("log_missing_doc_unit", msg)
 
     # Store attributes for stub page generation
     node["_md_file"] = md_file
