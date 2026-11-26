@@ -27,8 +27,11 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  /// Intrinsic impedance of the infinite medium (default is the admittance of free space)
-  const Function & _admittance;
+  /// Real component of the intrinsic admittance of the infinite medium
+  const Function & _admittance_real;
+
+  /// Imaginary component of the intrinsic admittance of the infinite medium
+  const Function & _admittance_imag;
 
   /// Variable field component (real or imaginary)
   const MooseEnum _component;

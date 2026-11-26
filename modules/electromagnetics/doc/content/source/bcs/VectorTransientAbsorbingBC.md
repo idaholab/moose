@@ -32,6 +32,10 @@ where
 - $\mu_0$ is the vacuum magnetic permeability, and
 - $c$ is the speed of light.
 
+The admittance may also be complex, with its real and imaginary components set by
+[!param](/BCs/VectorTransientAbsorbingBC/admittance_real) and
+[!param](/BCs/VectorTransientAbsorbingBC/admittance_imag). The imaginary component defaults to zero.
+
 ## Example Input File Syntax
 
 !listing dipole_transient.i block=BCs/radiation_condition_real
