@@ -178,6 +178,13 @@ DefaultNonlinearConvergence::checkPetscToleranceOverrides()
                  "convergence check using its own cached tolerances, these PETSc-level settings "
                  "have no effect:\n",
                  oss.str());
+
+  PetscBool force_iteration;
+  LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetForceIteration(snes, &force_iteration));
+  if (force_iteration)
+    mooseWarning("The PETSc option -snes_force_iteration is set, but this Convergence object "
+                 "performs its own convergence check and does not read it, so it has no effect. "
+                 "Use the 'nl_forced_its' parameter to force a number of nonlinear iterations.");
 }
 
 Convergence::MooseConvergenceStatus
@@ -207,21 +214,6 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int n_iter)
   // Get current number of function evaluations done by SNES
   PetscInt nfuncs;
   LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetNumberFunctionEvals(snes, &nfuncs));
-
-#if !PETSC_VERSION_LESS_THAN(3, 8, 4)
-  PetscBool force_iteration = PETSC_FALSE;
-  LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetForceIteration(snes, &force_iteration));
-
-  // if PETSc says to force iteration, then force at least one iteration
-  if (force_iteration && !(_nl_forced_its))
-    _nl_forced_its = 1;
-
-  // if specified here to force iteration, but PETSc doesn't know, tell it
-  if (!force_iteration && (_nl_forced_its))
-  {
-    LibmeshPetscCallA(_fe_problem.comm().get(), SNESSetForceIteration(snes, PETSC_TRUE));
-  }
-#endif
 
   // See if SNESSetFunctionDomainError() has been called.
   // Note: SNESSetFunctionDomainError() and SNESGetFunctionDomainError() were added

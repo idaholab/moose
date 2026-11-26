@@ -330,6 +330,12 @@ MechanicalContactConstraint::updateAugmentedLagrangianMultiplier(bool beginning_
 }
 
 bool
+MechanicalContactConstraint::isAugmentedLagrangian() const
+{
+  return _formulation == ContactFormulation::AUGMENTED_LAGRANGE;
+}
+
+bool
 MechanicalContactConstraint::AugmentedLagrangianContactConverged()
 {
   Real contactResidual = 0.0;
