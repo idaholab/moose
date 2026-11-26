@@ -1,0 +1,27 @@
+[Tests]
+  issues = '#34534'
+  design = '/DGKernels/index.md'
+  [refined_parallel]
+    type = 'CSVDiff'
+    input = 'refined.i'
+    csvdiff = 'refined_out.csv'
+    min_parallel = 2
+    requirement = 'The system shall give the serial result for hybrid finite element method (HFEM) '
+                  'calculations in parallel on meshes with faces between coarse and refined elements.'
+    # The lower-dimensional elements built by build_all_side_lowerd_mesh are not refined, so their
+    # interior parents on the refined block fail a libMesh assertion, which only opt builds skip
+    # (#34531)
+    capabilities = 'mumps & method=opt'
+  []
+  [refined_parallel_array]
+    type = 'CSVDiff'
+    input = 'refined_array.i'
+    csvdiff = 'refined_array_out.csv'
+    min_parallel = 2
+    requirement = 'The system shall give the serial result for hybrid finite element method (HFEM) '
+                  'calculations with array variables in parallel on meshes with faces between coarse '
+                  'and refined elements.'
+    # See refined_parallel (#34531)
+    capabilities = 'mumps & method=opt'
+  []
+[]
