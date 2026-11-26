@@ -49,6 +49,51 @@ public:
   virtual void updateAugmentedLagrangianMultipliers() override;
 
 protected:
+  /**
+   * Find a lower-dimensional secondary element containing a node
+   * @param node Secondary node
+   * @return The element and the node's local index in it
+   */
+  std::pair<const Elem *, unsigned int> secondaryElemAndNode(const Node & node) const;
+
+  /**
+   * Component of a Cartesian vector along one of a secondary node's tangent directions. With
+   * \p is_ad, the tangent carries the nodal-normal derivatives when they are being recorded.
+   * @param elem Lower-dimensional secondary element containing the node
+   * @param node_index Local index of the node in \p elem
+   * @param vector Cartesian vector
+   * @param direction Tangent direction, 0 or 1
+   */
+  template <bool is_ad>
+  GenericReal<is_ad> tangentialComponent(const Elem & elem,
+                                         unsigned int node_index,
+                                         const GenericRealVectorValue<is_ad> & vector,
+                                         unsigned int direction) const;
+
+  /**
+   * Cartesian vector from its components along a secondary node's two tangent directions
+   * @param elem Lower-dimensional secondary element containing the node
+   * @param node_index Local index of the node in \p elem
+   * @param components Components along the first and second tangent directions
+   */
+  template <bool is_ad>
+  GenericRealVectorValue<is_ad>
+  tangentialVector(const Elem & elem,
+                   unsigned int node_index,
+                   const GenericTwoVector<GenericReal<is_ad>> & components) const;
+
+  /**
+   * Projection of a Cartesian vector onto a secondary node's current tangent plane
+   * @param elem Lower-dimensional secondary element containing the node
+   * @param node_index Local index of the node in \p elem
+   * @param vector Cartesian vector
+   */
+  template <bool is_ad>
+  GenericRealVectorValue<is_ad>
+  tangentialProjection(const Elem & elem,
+                       unsigned int node_index,
+                       const GenericRealVectorValue<is_ad> & vector) const;
+
   virtual const VariableTestValue & test() const override;
   virtual bool constrainedByOwner() const override { return false; }
 
@@ -68,14 +113,15 @@ protected:
   // must restore their keys as well as their values: the augmented Lagrange updates loop over every
   // node a map holds, including nodes that were in contact only in earlier timesteps.
 
-  /// Map from node id to current and old step slip
-  std::unordered_map<dof_id_type, std::pair<TwoVector, TwoVector>> & _dof_to_step_slip;
+  /// Map from node id to current and old Cartesian step slip
+  std::unordered_map<dof_id_type, std::pair<RealVectorValue, RealVectorValue>> & _dof_to_step_slip;
 
   /// Map from node id to current and old accumulated slip
   std::unordered_map<dof_id_type, std::pair<TwoVector, TwoVector>> & _dof_to_accumulated_slip;
 
-  /// Map from node id to current and old tangential traction
-  std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>> & _dof_to_tangential_traction;
+  /// Map from node id to current and old Cartesian tangential traction
+  std::unordered_map<dof_id_type, std::pair<ADRealVectorValue, RealVectorValue>> &
+      _dof_to_tangential_traction;
 
   /// The first frictional contact pressure on the mortar segment quadrature points
   ADVariableValue _frictional_contact_traction_one;
@@ -83,8 +129,12 @@ protected:
   /// The second frictional contact pressure on the mortar segment quadrature points
   ADVariableValue _frictional_contact_traction_two;
 
-  /// Map from node id to augmented lagrange multiplier
-  std::unordered_map<dof_id_type, TwoVector> & _dof_to_frictional_lagrange_multipliers;
+  /// Map from node id to the tangential traction components in the nodal tangent frame, set by
+  /// reinit() for the nodes of the current mortar segment
+  std::unordered_map<dof_id_type, std::array<ADReal, 2>> _dof_to_local_tangential_traction;
+
+  /// Map from node id to Cartesian augmented Lagrange multiplier increment
+  std::unordered_map<dof_id_type, RealVectorValue> & _dof_to_frictional_lagrange_multipliers;
 
   /// Map from node id to local friction penalty value
   std::unordered_map<dof_id_type, Real> & _dof_to_local_penalty_friction;
@@ -101,11 +151,12 @@ protected:
   int & _t_step_old_friction;
 
   ///@{ Frictional state at the start of the current timestep, restored when it is retried
-  std::unordered_map<dof_id_type, std::pair<TwoVector, TwoVector>> _dof_to_step_slip_start;
+  std::unordered_map<dof_id_type, std::pair<RealVectorValue, RealVectorValue>>
+      _dof_to_step_slip_start;
   std::unordered_map<dof_id_type, std::pair<TwoVector, TwoVector>> _dof_to_accumulated_slip_start;
-  std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>>
+  std::unordered_map<dof_id_type, std::pair<ADRealVectorValue, RealVectorValue>>
       _dof_to_tangential_traction_start;
-  std::unordered_map<dof_id_type, TwoVector> _dof_to_frictional_lagrange_multipliers_start;
+  std::unordered_map<dof_id_type, RealVectorValue> _dof_to_frictional_lagrange_multipliers_start;
   std::unordered_map<dof_id_type, Real> _dof_to_local_penalty_friction_start;
   ///@}
 };

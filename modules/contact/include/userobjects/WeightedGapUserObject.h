@@ -95,6 +95,16 @@ public:
                                           unsigned int nodal_index) const;
 
   /**
+   * Contact normal for the supplied lower-dimensional secondary element node: contactNormal()
+   * with \p is_ad while nodal-normal derivatives are recorded, the stored nodal normal otherwise.
+   * It returns a copy, so quadrature-point loops that only run while derivatives are recorded
+   * should call contactNormal() instead.
+   */
+  template <bool is_ad>
+  GenericRealVectorValue<is_ad> genericContactNormal(const Elem & lower_secondary_elem,
+                                                     unsigned int nodal_index) const;
+
+  /**
    * Compute physical gap from integration gap quantity
    */
   Real physicalGap(const std::pair<ADReal, Real> & gap) const
