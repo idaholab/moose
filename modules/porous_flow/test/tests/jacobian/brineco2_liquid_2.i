@@ -100,8 +100,20 @@
 []
 
 [FluidProperties]
-  [co2]
+  [co2sw]
     type = CO2FluidProperties
+  []
+  # Tabulated CO2 properties avoid the iterative Span-Wagner density solve at every evaluation
+  [co2]
+    type = TabulatedBicubicFluidProperties
+    input_fp = co2sw
+    interpolated_properties = 'density enthalpy viscosity'
+    pressure_min = 4e6
+    pressure_max = 9e6
+    num_p = 51
+    temperature_min = 300
+    temperature_max = 350
+    num_T = 26
   []
   [brine]
     type = BrineFluidProperties
