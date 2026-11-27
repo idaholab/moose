@@ -99,6 +99,11 @@ public:
   bool useDual() const { return _use_dual; }
 
   /**
+   * Whether lower-dimensional shape functions are the piecewise-linear basis of a quadratic face
+   */
+  bool usePiecewiseLinearBasis() const { return _use_piecewise_linear_basis; }
+
+  /**
    * Get all global dofindices for the variable
    */
   const std::vector<dof_id_type> & allDofIndices() const;
@@ -278,6 +283,9 @@ protected:
 
   /// If dual mortar approach is used
   bool _use_dual;
+
+  /// Whether lower-dimensional shape functions are the piecewise-linear basis of a quadratic face
+  const bool _use_piecewise_linear_basis;
 
   /// Whether this variable lives on lower dimensional blocks
   bool _is_lower_d;

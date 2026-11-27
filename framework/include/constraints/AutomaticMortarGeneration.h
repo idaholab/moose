@@ -156,7 +156,8 @@ public:
                             const MortarSegmentTriangulationMode triangulation_mode,
                             const bool triangulate_triangles,
                             const Mortar3DQuadraturePointMapping mortar_3d_qp_mapping =
-                                Mortar3DQuadraturePointMapping::NORMAL_PROJECTION);
+                                Mortar3DQuadraturePointMapping::NORMAL_PROJECTION,
+                            const bool split_segments_at_sub_elements = false);
 
   /**
    * Once the secondary_requested_boundary_ids and
@@ -280,6 +281,15 @@ public:
    * buildMortarSegmentMesh3d() recomputes it via allgather. Call this when mesh topology changes.
    */
   void meshChanged() { _msm_node_id_start = std::nullopt; }
+
+  /**
+   * @return Whether mortar segments on two-dimensional meshes, whose secondary faces are EDGE3
+   * elements, are split at the mid node, so that every segment lies on one of the two EDGE2
+   * sub-elements of its secondary face, as mortar segments on three-dimensional meshes always lie
+   * on one sub-element. Integrands built from the piecewise-linear basis are then polynomial on
+   * each segment.
+   */
+  bool splitsSegmentsAtSubElements() const { return _split_segments_at_sub_elements; }
 
   /**
    * returns whether this object is on the displaced mesh
@@ -687,6 +697,10 @@ private:
 
   /// Method used to map 3D mortar segment quadrature points to primary and secondary faces.
   const Mortar3DQuadraturePointMapping _mortar_3d_qp_mapping;
+
+  /// Whether mortar segments on two-dimensional meshes are split at the sub-elements of their
+  /// secondary faces
+  const bool _split_segments_at_sub_elements;
 
   /// Reference-coordinate data used only by the reference-interpolation mapping mode.
   std::unordered_map<const Elem *, MortarSegmentReferencePoints> _msm_elem_to_reference_points;

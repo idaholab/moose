@@ -30,6 +30,26 @@ std::vector<unsigned int> getMortarSubElementNodeIndices(const Elem & parent_ele
                                                          unsigned int sub_elem);
 
 /**
+ * Whether subElementLinearShapes() supports faces of this type.
+ */
+bool hasSubElementLinearShapes(ElemType type);
+
+/**
+ * Evaluate the piecewise-linear basis of a quadratic face (Carvalho et al. 2023, eq. 43), built
+ * from the first-order sub-elements used for mortar segmentation. An EDGE3 is split at its mid node
+ * into two EDGE2, and a TRI6, QUAD8 or QUAD9 face into the sub-elements whose parent node indices
+ * getMortarSubElementNodeIndices() returns. The function of each parent node is the first-order
+ * Lagrange function of that node on every sub-element containing it. The functions are
+ * non-negative and form a partition of unity.
+ * @param parent_elem The quadratic face
+ * @param reference_point The evaluation point in the reference coordinates of \p parent_elem
+ * @param phi The function values, one per node of \p parent_elem
+ */
+void subElementLinearShapes(const Elem & parent_elem,
+                            const Point & reference_point,
+                            std::vector<Real> & phi);
+
+/**
  * 3D projection operator for mapping qpoints on mortar segments to secondary or primary elements
  * @param msm_elem The mortar segment element that we will be mapping quadrature points from
  * @param primal_elem The "persistent" mesh element (e.g. it exists on the simulation's MooseMesh)

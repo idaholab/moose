@@ -302,6 +302,16 @@ ContactAction::validParams()
       "Whether to use the Petrov-Galerkin approach for the mortar-based constraints. If set to "
       "true, we use the standard basis as the test function and dual basis as "
       "the shape function for the interpolation of the Lagrange multiplier variable.");
+  MooseEnum petrov_galerkin_test(getPetrovGalerkinTestOptions(), "STANDARD");
+  petrov_galerkin_test.addDocumentation(
+      "STANDARD", "Weight the gap with the standard basis of the Lagrange multiplier space.");
+  petrov_galerkin_test.addDocumentation(
+      "PIECEWISE_LINEAR",
+      "Weight the gap with the first-order basis of the linear sub-elements of quadratic "
+      "secondary faces, which is non-negative on QUAD8 and TRI6 faces.");
+  params.addParam<MooseEnum>("petrov_galerkin_test",
+                             petrov_galerkin_test,
+                             "Basis that weights the gap when 'use_petrov_galerkin = true'.");
   params.addParam<bool>(
       "debug_mesh",
       false,
@@ -339,6 +349,7 @@ ContactAction::validParams()
   params.addParamNamesToGroup("c_normal c_tangential normal_lm_scaling tangential_lm_scaling "
                               "lm_space "
                               "use_dual correct_edge_dropping normalize_c use_petrov_galerkin "
+                              "petrov_galerkin_test "
                               "use_nodal_scaling "
                               "generate_mortar_mesh segment_quadrature minimum_projection_angle "
                               "mortar_3d_subpatch_plane mortar_3d_qp_mapping wear_depth debug_mesh",
@@ -473,6 +484,12 @@ ContactAction::ContactAction(const InputParameters & params)
                  "The 'penalty' parameter is not used for the 'mortar' formulation which instead "
                  "uses Lagrange multipliers");
 
+    if (getParam<MooseEnum>("petrov_galerkin_test") == "PIECEWISE_LINEAR" &&
+        !getParam<bool>("use_petrov_galerkin"))
+      paramError("petrov_galerkin_test",
+                 "'petrov_galerkin_test = PIECEWISE_LINEAR' requires 'use_petrov_galerkin = "
+                 "true'.");
+
     if (isParamSetByUser("friction_projection_degree") && _model != ContactModel::COULOMB)
       paramError("friction_projection_degree",
                  "'friction_projection_degree' is only valid for Coulomb friction mortar "
@@ -534,6 +551,10 @@ ContactAction::ContactAction(const InputParameters & params)
     else if (params.isParamSetByUser("lm_space"))
       paramError("lm_space",
                  "The 'lm_space' option can only be used with the 'mortar' formulation.");
+    else if (params.isParamSetByUser("petrov_galerkin_test"))
+      paramError("petrov_galerkin_test",
+                 "The 'petrov_galerkin_test' option can only be used with the 'mortar' "
+                 "formulation.");
   }
 
   if (_formulation == ContactFormulation::RANFS)
@@ -948,6 +969,11 @@ void
 ContactAction::addMortarContact()
 {
   std::string action_name = MooseUtils::shortName(name());
+  // Every mortar object on a pair shares one mortar interface, so on two-dimensional meshes all of
+  // them split mortar segments at the sub-elements of the secondary faces when the gap is weighted
+  // with the piecewise-linear basis
+  const bool split_segments_at_sub_elements =
+      getParam<MooseEnum>("petrov_galerkin_test") == "PIECEWISE_LINEAR";
 
   std::vector<VariableName> displacements = getParam<std::vector<VariableName>>("displacements");
   const unsigned int ndisp = displacements.size();
@@ -966,6 +992,8 @@ ContactAction::addMortarContact()
     // this combination isn't recommended
     if (!add_aux_lm || penalty_traction)
       params.set<bool>("use_dual") = _use_dual;
+    else if (getParam<MooseEnum>("petrov_galerkin_test") == "PIECEWISE_LINEAR")
+      params.set<bool>("use_piecewise_linear_basis") = true;
 
     mooseAssert(_problem->systemBaseNonlinear(/*nl_sys_num=*/0).hasVariable(displacements[0]),
                 "Displacement variable is missing");
@@ -1036,6 +1064,16 @@ ContactAction::addMortarContact()
 
   if (_current_task == "add_mortar_variable" && _formulation == ContactFormulation::MORTAR)
   {
+    if (getParam<MooseEnum>("petrov_galerkin_test") == "PIECEWISE_LINEAR" &&
+        (_lm_space == ContactLMSpace::LINEAR || _problem->systemBaseNonlinear(/*nl_sys_num=*/0)
+                                                        .system()
+                                                        .variable_type(displacements[0])
+                                                        .order != SECOND))
+      paramError(
+          "petrov_galerkin_test",
+          "'petrov_galerkin_test = PIECEWISE_LINEAR' requires a SECOND order Lagrange "
+          "multiplier, i.e. SECOND order displacements and 'lm_space = MATCH_DISPLACEMENT'.");
+
     for (const auto & contact_pair : _boundary_pairs)
     {
       const std::string suffix = pairSuffix(contact_pair);
@@ -1154,6 +1192,7 @@ ContactAction::addMortarContact()
                                            "mortar_3d_qp_mapping",
                                            "use_petrov_galerkin",
                                            "debug_mesh"});
+        uo_params.set<bool>("split_segments_at_sub_elements") = split_segments_at_sub_elements;
         if (getParam<bool>("use_petrov_galerkin"))
           uo_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
@@ -1194,6 +1233,7 @@ ContactAction::addMortarContact()
                                            "mortar_3d_qp_mapping",
                                            "use_petrov_galerkin",
                                            "debug_mesh"});
+        uo_params.set<bool>("split_segments_at_sub_elements") = split_segments_at_sub_elements;
         if (getParam<bool>("use_petrov_galerkin"))
           uo_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
@@ -1227,6 +1267,7 @@ ContactAction::addMortarContact()
                                            "debug_mesh",
                                            "max_penalty_multiplier",
                                            "adaptivity_penalty_normal"});
+        uo_params.set<bool>("split_segments_at_sub_elements") = split_segments_at_sub_elements;
 
         if (isParamValid("al_penetration_tolerance"))
           uo_params.set<Real>("penetration_tolerance") = getParam<Real>("al_penetration_tolerance");
@@ -1302,6 +1343,7 @@ ContactAction::addMortarContact()
                                            "friction_coefficient",
                                            "penalty",
                                            "penalty_friction"});
+        uo_params.set<bool>("split_segments_at_sub_elements") = split_segments_at_sub_elements;
 
         _problem->addUserObject(
             "PenaltyFrictionUserObject",
@@ -1327,6 +1369,7 @@ ContactAction::addMortarContact()
           action_name + "_tangential_lm" + suffix;
       const std::string tangential_lagrange_multiplier_3d_name =
           action_name + "_tangential_3d_lm" + suffix;
+      const std::string auxiliary_lagrange_multiplier_name = action_name + "_aux_lm" + suffix;
 
       // Prepare problem for enforcement with Lagrange multipliers
       if (_model != ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR)
@@ -1340,9 +1383,17 @@ ContactAction::addMortarContact()
 
         InputParameters params = _factory.getValidParams(mortar_constraint_name);
         if (_mortar_dynamics)
+        {
           params.applySpecificParameters(
               parameters(), {"newmark_beta", "newmark_gamma", "capture_tolerance", "wear_depth"});
-
+          // The dynamic constraint computes its weighted gap itself, so it weights the gap with
+          // aux_lm directly
+          if (getParam<bool>("use_petrov_galerkin"))
+          {
+            params.set<bool>("use_petrov_galerkin") = true;
+            params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
+          }
+        }
         else // We need user objects for quasistatic constraints
           params.set<UserObjectName>("weighted_gap_uo") =
               "lm_weightedgap_object_" + name() + suffix;
@@ -1373,6 +1424,7 @@ ContactAction::addMortarContact()
                                         "extra_vector_tags",
                                         "absolute_value_vector_tags",
                                         "debug_mesh"});
+        params.set<bool>("split_segments_at_sub_elements") = split_segments_at_sub_elements;
 
         _problem->addConstraint(
             mortar_constraint_name, action_name + "_normal_lm_weighted_gap" + suffix, params);
@@ -1390,8 +1442,17 @@ ContactAction::addMortarContact()
 
         InputParameters params = _factory.getValidParams(mortar_constraint_name);
         if (_mortar_dynamics)
+        {
           params.applySpecificParameters(
               parameters(), {"newmark_beta", "newmark_gamma", "capture_tolerance", "wear_depth"});
+          // The dynamic constraint computes its weighted gap and slip itself, so it weights them
+          // with aux_lm directly
+          if (getParam<bool>("use_petrov_galerkin"))
+          {
+            params.set<bool>("use_petrov_galerkin") = true;
+            params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
+          }
+        }
         else
         { // We need user objects for quasistatic constraints
           params.set<UserObjectName>("weighted_gap_uo") =
@@ -1440,6 +1501,7 @@ ContactAction::addMortarContact()
                                         "extra_vector_tags",
                                         "absolute_value_vector_tags",
                                         "debug_mesh"});
+        params.set<bool>("split_segments_at_sub_elements") = split_segments_at_sub_elements;
 
         _problem->addConstraint(
             mortar_constraint_name, action_name + "_tangential_lm" + suffix, params);
@@ -1453,11 +1515,12 @@ ContactAction::addMortarContact()
            &suffix,
            &primary_subdomain_name,
            &secondary_subdomain_name,
-           &displacements](const std::string & variable_name,
-                           const std::string & constraint_prefix,
-                           const std::string & constraint_type,
-                           const bool is_additional_frictional_constraint,
-                           const bool is_normal_constraint)
+           &displacements,
+           split_segments_at_sub_elements](const std::string & variable_name,
+                                           const std::string & constraint_prefix,
+                                           const std::string & constraint_type,
+                                           const bool is_additional_frictional_constraint,
+                                           const bool is_normal_constraint)
       {
         InputParameters params = _factory.getValidParams(constraint_type);
 
@@ -1487,6 +1550,7 @@ ContactAction::addMortarContact()
                                         "extra_vector_tags",
                                         "absolute_value_vector_tags",
                                         "debug_mesh"});
+        params.set<bool>("split_segments_at_sub_elements") = split_segments_at_sub_elements;
 
         for (const auto i : index_range(displacements))
         {

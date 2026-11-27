@@ -88,6 +88,22 @@
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with displaced meshes.'
     capabilities = 'mumps'
   []
+  [robin_displaced_refined]
+    type = 'CSVDiff'
+    input = 'robin_displaced_refined.i'
+    csvdiff = 'robin_displaced_refined_out.csv'
+    requirement = 'The system shall evaluate the lower-dimensional variables of hybrid finite element '
+                  'method (HFEM) calculations on displaced meshes at the correct points when the '
+                  'interior lower-dimensional element belongs to the neighbor of the current element.'
+    issues = '#34510'
+    # The lower-dimensional elements built by build_all_side_lowerd_mesh are not refined, so their
+    # interior parents on the refined block fail a libMesh assertion, which only opt builds skip
+    # (#34531)
+    capabilities = 'mumps & method=opt'
+    # HFEMDiffusion on coarse/fine faces crashes on more than one process, with or without
+    # displacements
+    max_parallel = 1
+  []
   [robin_adpatation]
     type = 'RunException'
     input = 'robin_adapt.i'

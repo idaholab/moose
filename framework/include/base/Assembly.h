@@ -1659,6 +1659,19 @@ public:
   const typename OutputTools<OutputType>::VariablePhiGradient &
   feGradDualPhiLower(FEType type) const;
 
+  /**
+   * Piecewise-linear basis of a quadratic lower-dimensional face, see
+   * Moose::Mortar::subElementLinearShapes(). The only use of the basis is as the Petrov-Galerkin
+   * mortar test basis of the auxiliary variable passed as 'aux_lm'
+   * ('use_piecewise_linear_basis = true'). Every lower-dimensional MooseVariableData binds a
+   * gradient, so the gradient accessor exists, but the gradients are left empty, and
+   * MooseVariableFE::gradPhiLower() reports an error for such a variable.
+   */
+  ///@{
+  const VariablePhiValue & fePiecewiseLinearPhiLower(FEType type) const;
+  const VariablePhiGradient & feGradPiecewiseLinearPhiLower(FEType type) const;
+  ///@}
+
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiValue & fePhiFace(FEType type) const
   {
@@ -2214,6 +2227,12 @@ private:
   void buildLowerDFE(FEType type) const;
 
   void buildLowerDDualFE(FEType type) const;
+
+  /**
+   * Evaluate the piecewise-linear basis on the current lower-dimensional element at the reference
+   * points of the current lower-dimensional quadrature rule
+   */
+  void computePiecewiseLinearLowerDShapes(const Elem & elem);
 
   /**
    * Build Vector FEs with a type
@@ -2782,6 +2801,9 @@ protected:
   mutable std::map<FEType, std::unique_ptr<FEShapeData>> _fe_shape_data_face_neighbor;
   mutable std::map<FEType, std::unique_ptr<FEShapeData>> _fe_shape_data_lower;
   mutable std::map<FEType, std::unique_ptr<FEShapeData>> _fe_shape_data_dual_lower;
+  /// Piecewise-linear lower-dimensional shape data; these own their storage instead of aliasing
+  /// libMesh FE data
+  mutable std::map<FEType, std::unique_ptr<FEShapeData>> _fe_shape_data_piecewise_linear_lower;
 
   /// Shape function values, gradients, second derivatives for each vector FE type
   mutable std::map<FEType, std::unique_ptr<VectorFEShapeData>> _vector_fe_shape_data;
