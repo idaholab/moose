@@ -12,7 +12,6 @@
 #pragma once
 
 #include "MFEMObject.h"
-#include "MFEMContainers.h"
 #include "MFEMBlockRestrictable.h"
 
 /**

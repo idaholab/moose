@@ -19,6 +19,10 @@
 
 class MFEMProblem;
 
+using MFEMCoefficientVariant = std::variant<std::reference_wrapper<mfem::Coefficient>,
+                                            std::reference_wrapper<mfem::DiagonalMatrixCoefficient>,
+                                            std::reference_wrapper<mfem::MatrixCoefficient>>;
+
 /**
  * Thin base for MFEM objects backed directly by MooseObject instead of UserObject.
  */
@@ -72,6 +76,16 @@ public:
    * Retrieve a matrix MFEM coefficient using the value of an input parameter.
    */
   mfem::MatrixCoefficient & getMatrixCoefficient(const std::string & name);
+  /**
+   * Retrieve a variant type MFEM coefficient using the value of an input parameter.
+   *
+   * Defaults to the scalar coefficient's default if no user inputs are given,
+   * and throws a `mooseError` if no such default exists.
+   * Throws a `paramError` if a user specifies more than one coefficient type.
+   */
+  MFEMCoefficientVariant getVariantCoefficient(const std::string & scalar_param_name,
+                                               const std::string & diagonal_param_name,
+                                               const std::string & matrix_param_name);
 
 private:
   /// Owning MFEM problem for this object.

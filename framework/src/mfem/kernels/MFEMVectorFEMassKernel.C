@@ -10,7 +10,6 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMVectorFEMassKernel.h"
-#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMVectorFEMassKernel);
 
@@ -23,21 +22,29 @@ MFEMVectorFEMassKernel::validParams()
                              "arising from the weak form of the mass operator "
                              "$k \\vec u$.");
   params.addParam<MFEMScalarCoefficientName>(
-      "coefficient", "1.", "Name of property k to multiply the integrator by");
+      "coefficient", "1.", "Name of scalar coefficient k to multiply the integrator by.");
+  params.addParam<MFEMVectorCoefficientName>(
+      "diagonal_coefficient",
+      "Name of diagonal coefficient for property k. Mutually exclusive with parameters "
+      "'coefficient' and 'matrix_coefficient'.");
+  params.addParam<MFEMMatrixCoefficientName>(
+      "matrix_coefficient",
+      "Name of matrix coefficient for property k. Mutually exclusive with parameters 'coefficient' "
+      "and 'diagonal_coefficient'.");
   return params;
 }
 
 MFEMVectorFEMassKernel::MFEMVectorFEMassKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
-// FIXME: The MFEM bilinear form can also handle vector and matrix
-// coefficients, so ideally we'd handle all three too.
+  : MFEMKernel(parameters),
+    _variant_coef(
+        getVariantCoefficient("coefficient", "diagonal_coefficient", "matrix_coefficient"))
 {
 }
 
 mfem::BilinearFormIntegrator *
 MFEMVectorFEMassKernel::createBFIntegrator()
 {
-  return new mfem::VectorFEMassIntegrator(_coef);
+  return std::visit([](auto & c) { return new mfem::VectorFEMassIntegrator(c); }, _variant_coef);
 }
 
 #endif
