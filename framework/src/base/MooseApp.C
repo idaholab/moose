@@ -1909,6 +1909,13 @@ MooseApp::addExecutor(const std::string & type,
 }
 
 void
+MooseApp::initialSetupExecutors()
+{
+  for (auto & [_, executor] : _executors)
+    executor->initialSetup();
+}
+
+void
 MooseApp::addExecutorParams(const std::string & type,
                             const std::string & name,
                             const InputParameters & params)

@@ -9,6 +9,7 @@
 
 #include "SteadyExecutor.h"
 #include "FEProblemBase.h"
+#include "MooseApp.h"
 
 registerMooseObject("MooseApp", SteadyExecutor);
 
@@ -34,6 +35,7 @@ SteadyExecutor::init()
 {
   _fe_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _fe_problem.initialSetup();
+  _app.initialSetupExecutors();
 }
 
 Executor::Result

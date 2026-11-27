@@ -373,6 +373,11 @@ public:
   void createExecutors();
 
   /**
+   * Calls Executor::initialSetup on every executor
+   */
+  void initialSetupExecutors();
+
+  /**
    * Get an Executor
    *
    * @tparam T The type to cast the Executor to; errors if the Executor is not of this type

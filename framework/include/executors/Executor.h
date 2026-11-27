@@ -105,6 +105,12 @@ public:
 
   virtual void execute() override final {}
 
+  /**
+   * Setup that needs objects created after the executors, for example Convergence objects.
+   * MooseApp::initialSetupExecutors calls this for every executor after the problem initial setup.
+   */
+  virtual void initialSetup() {}
+
   /// Executors need to return a Result object describing how execution went -
   /// rather than constructing Result objects directly, the newResult function
   /// should be called to generate new objects.  *DO NOT* catch the result by

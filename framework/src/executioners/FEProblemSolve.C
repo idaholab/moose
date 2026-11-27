@@ -27,6 +27,24 @@ FEProblemSolve::mooseLineSearches()
 }
 
 InputParameters
+FEProblemSolve::mooseLineSearchParams()
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<unsigned>("contact_line_search_allowed_lambda_cuts",
+                            2,
+                            "The number of times lambda is allowed to be cut in half in the "
+                            "contact line search. We recommend this number be roughly bounded by 0 "
+                            "<= allowed_lambda_cuts <= 3");
+  params.addParam<Real>("contact_line_search_ltol",
+                        "The linear relative tolerance to be used while the contact state is "
+                        "changing between non-linear iterations. We recommend that this tolerance "
+                        "be looser than the standard linear tolerance");
+  params.addParamNamesToGroup("contact_line_search_ltol contact_line_search_allowed_lambda_cuts",
+                              "Solver line search");
+  return params;
+}
+
+InputParameters
 FEProblemSolve::feProblemDefaultConvergenceParams()
 {
   InputParameters params = emptyInputParameters();
@@ -66,15 +84,7 @@ FEProblemSolve::validParams()
   InputParameters params = MultiSystemSolveObject::validParams();
   params += FEProblemSolve::feProblemDefaultConvergenceParams();
 
-  params.addParam<unsigned>("contact_line_search_allowed_lambda_cuts",
-                            2,
-                            "The number of times lambda is allowed to be cut in half in the "
-                            "contact line search. We recommend this number be roughly bounded by 0 "
-                            "<= allowed_lambda_cuts <= 3");
-  params.addParam<Real>("contact_line_search_ltol",
-                        "The linear relative tolerance to be used while the contact state is "
-                        "changing between non-linear iterations. We recommend that this tolerance "
-                        "be looser than the standard linear tolerance");
+  params += FEProblemSolve::mooseLineSearchParams();
 
   params += Moose::PetscSupport::flagAndPairOptions();
   params += Moose::PetscSupport::kspRelatedParams();
@@ -168,8 +178,6 @@ FEProblemSolve::validParams()
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
       "scaling_group_variables resid_vs_jac_scaling_param ignore_variables_for_autoscaling",
       "Solver variable scaling");
-  params.addParamNamesToGroup("contact_line_search_ltol contact_line_search_allowed_lambda_cuts",
-                              "Solver line search");
   params.addParamNamesToGroup("skip_exception_check", "Advanced");
 
   return params;

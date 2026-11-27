@@ -153,6 +153,15 @@ void processSingletonMooseWrappedOptions(FEProblemBase & fe_problem,
                                          const InputParameters & params);
 
 /**
+ * Process the MOOSE-wrapped PETSc options of \p params for \p solver_system only. Linear systems
+ * have none of these options. For an EigenProblem the solve type is skipped, because
+ * EigenProblemSolve stores the eigenvalue solve type itself.
+ */
+void processSingletonMooseWrappedOptions(FEProblemBase & fe_problem,
+                                         const InputParameters & params,
+                                         const SolverSystem & solver_system);
+
+/**
  * Stores the PETSc options supplied from the parameter object on the problem
  * @param fe_problem The problem on which we will store the parameters
  * @param prefix A prefix to apply to all the parameter object's PETSc options. This should either
@@ -162,6 +171,15 @@ void processSingletonMooseWrappedOptions(FEProblemBase & fe_problem,
  */
 void storePetscOptions(FEProblemBase & fe_problem,
                        const std::string & prefix,
+                       const ParallelParamObject & param_object);
+
+/**
+ * Stores the PETSc options supplied from the parameter object on the problem for one solver
+ * system. The options get the prefix of \p solver_system, and the MOOSE-wrapped options apply to
+ * \p solver_system only.
+ */
+void storePetscOptions(FEProblemBase & fe_problem,
+                       const SolverSystem & solver_system,
                        const ParallelParamObject & param_object);
 
 /**

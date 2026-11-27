@@ -23,6 +23,9 @@ public:
 
   static const std::set<std::string> & mooseLineSearches();
 
+  /// The parameters of the line searches in mooseLineSearches()
+  static InputParameters mooseLineSearchParams();
+
   virtual void initialSetup() override;
 
   /**

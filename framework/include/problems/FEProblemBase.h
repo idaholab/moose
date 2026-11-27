@@ -2893,8 +2893,6 @@ public:
 
   bool haveDisplaced() const override final { return _displaced_problem.get(); }
 
-  /// Whether we have linear convergence objects
-  bool hasLinearConvergenceObjects() const;
   /**
    * Sets the nonlinear convergence object name(s) if there is one
    */
@@ -2913,6 +2911,16 @@ public:
    * Sets the linear convergence object name(s) if there is one
    */
   void setLinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names);
+  /**
+   * Sets the convergence object name for a single linear system.
+   * Errors if a name has already been set for that system.
+   */
+  void setLinearConvergence(const LinearSystemName & linear_sys_name,
+                            const ConvergenceName & convergence_name);
+  /**
+   * Returns true if a convergence name has been set for the given linear system.
+   */
+  bool hasLinearConvergenceName(const LinearSystemName & linear_sys_name) const;
   /**
    * Sets the MultiApp fixed point convergence object name if there is one
    */
