@@ -19,6 +19,10 @@ The settings of the executor apply to its system only:
   object of the system. Without it, a nonlinear system uses the default nonlinear Convergence
   object, and a linear system uses the linear solver tolerances.
 
+[!param](/Executors/SystemSolveExecutor/relaxation_factor) relaxes a converged solution with the
+solution of the previous multi-system fixed point iteration. A relaxation factor other than 1
+requires a [FixedPointExecutor.md] with this executor in its inner executors.
+
 After the solve, the executor prints whether the system converged. The executor fails if the
 system does not converge. After the solve of a linear system, the executor computes the gradients
 of its variables.

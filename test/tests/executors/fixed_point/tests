@@ -1,0 +1,67 @@
+[Tests]
+  design = 'FixedPointExecutor.md'
+  issues = '#20123 #32860'
+
+  [fixed_point]
+    requirement = 'The system shall provide an executor for multi-system fixed point iterations that'
+    [mixed_systems]
+      type = Exodiff
+      input = mixed_systems.i
+      cli_args = '--executor'
+      exodiff = same_input_out.e
+      gold_dir = '../../multisystem/picard/linearfv_nonlinearfv/gold'
+      absent_out = 'Option left'
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'iterates between a nonlinear and a linear system with the solution of the multi-system fixed point solve of the steady executioner,'
+    []
+    [relaxation]
+      type = CSVDiff
+      input = relaxation.i
+      cli_args = '--executor'
+      csvdiff = minmod_diag_sample_0001.csv
+      gold_dir = '../../linearfvkernels/advection/gold'
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'relaxes the solution of a system with the solution of the relaxed multi-system fixed point solve of the steady executioner,'
+    []
+    [one_sweep]
+      type = CSVDiff
+      input = sweep.i
+      cli_args = '--executor'
+      csvdiff = system_solve_out.csv
+      gold_dir = '../system_solve/gold'
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'runs its inner executors once without a Convergence object,'
+    []
+    [symmetric]
+      type = RunApp
+      input = sweep.i
+      cli_args = '--executor Executors/fixed_point/sweep_type=symmetric_multiplicative '
+                 'Executors/fixed_point/convergence=two_iterations Outputs/csv=false'
+      expect_out = 'iteration 0:.*?System v_sys: Solve Converged.*?System u_sys: Solve Converged.*?'
+                   'System w_sys: Solve Converged.*?System u_sys: Solve Converged.*?'
+                   'System v_sys: Solve Converged.*?iteration 1:.*?'
+                   'Multisystem iteration converged at iteration 2'
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'runs a symmetric sweep over its inner executors,'
+    []
+    [stop_on_failure]
+      type = RunException
+      input = sweep.i
+      cli_args = '--executor Executors/fixed_point/convergence=two_iterations '
+                 'Executors/solve_v/petsc_options_value=none Executors/solve_v/l_max_its=2'
+      expect_err = "solve_v:solve_v\(FAIL\): system 'v_sys' did not converge"
+      absent_out = 'System u_sys: Solve|iteration 1:'
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'stops at the first inner executor that fails, and'
+    []
+    [diverged]
+      type = RunException
+      input = sweep.i
+      cli_args = '--executor Executors/fixed_point/convergence=two_iterations '
+                 'Convergence/two_iterations/converge_at_max_iterations=false'
+      expect_err = 'Multisystem iteration diverged at iteration 2.*?fixed_point\(FAIL\): diverged at iteration 2'
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'fails if its Convergence object reports divergence.'
+    []
+  []
+[]

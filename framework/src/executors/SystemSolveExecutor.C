@@ -110,16 +110,21 @@ SystemSolveExecutor::SystemSolveExecutor(const InputParameters & parameters)
   else if (isParamValid("convergence"))
     _fe_problem.setLinearConvergence(_sys.name(), getParam<ConvergenceName>("convergence"));
 
-  // Relaxation needs the solution of the previous multi-system fixed point iteration, which only
-  // a multi-system fixed point iteration stores
+  // Relaxation needs the solution of the previous multi-system fixed point iteration
   if (!MooseUtils::absoluteFuzzyEqual(_relaxation_factor, 1.0))
-    paramError("relaxation_factor",
-               "Relaxation requires a multi-system fixed point iteration over this executor");
+    _fe_problem.needsPreviousMultiSystemFixedPointIterationSolution(true, _sys.number());
 }
 
 void
 SystemSolveExecutor::initialSetup()
 {
+  // Only a multi-system fixed point iteration stores the solution that relaxation needs. All
+  // executors are constructed at this point, so every FixedPointExecutor has marked its inner
+  // executors.
+  if (!MooseUtils::absoluteFuzzyEqual(_relaxation_factor, 1.0) && !_in_fixed_point_iteration)
+    paramError("relaxation_factor",
+               "Relaxation requires a multi-system fixed point iteration over this executor");
+
   // Convergence objects exist only after the executors
   if (isParamValid("convergence"))
     _fe_problem.getConvergence(getParam<ConvergenceName>("convergence"))

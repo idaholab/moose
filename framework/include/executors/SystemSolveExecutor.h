@@ -26,6 +26,9 @@ public:
 
   virtual void initialSetup() override;
 
+  /// Records that a multi-system fixed point iteration runs this executor
+  void setInFixedPointIteration() { _in_fixed_point_iteration = true; }
+
 protected:
   virtual Result run() override;
 
@@ -37,4 +40,6 @@ protected:
   const Real _relaxation_factor;
   /// The label of the convergence status line
   const std::string _solve_name;
+  /// Whether a multi-system fixed point iteration runs this executor
+  bool _in_fixed_point_iteration = false;
 };
