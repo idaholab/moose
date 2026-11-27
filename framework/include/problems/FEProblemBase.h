@@ -591,6 +591,21 @@ public:
   virtual void transient(bool trans) { _transient = trans; }
   virtual bool isTransient() const override { return _transient; }
 
+  /**
+   * Get the time that outputs write for the current step, as chosen by the executioner
+   * @return The output time from Executioner::getOutputTime(), or, without an executioner, the
+   * time when the problem is transient and the time step number otherwise
+   */
+  Real getOutputTime() const;
+
+  /**
+   * Whether outputs take their time, old time, and time step sizes from the simulation time rather
+   * than from the time step number, as chosen by the executioner
+   * @return Executioner::outputsUseSimulationTime(), or, without an executioner, whether the
+   * problem is transient
+   */
+  bool outputsUseSimulationTime() const;
+
   virtual void addTimeIntegrator(const std::string & type,
                                  const std::string & name,
                                  InputParameters & parameters);

@@ -12,7 +12,14 @@
 #include "EigenProblem.h"
 #include "Factory.h"
 #include "MooseApp.h"
+#include "MooseVariableDependencyInterface.h"
+#include "MooseVariableFieldBase.h"
 #include "NonlinearEigenSystem.h"
+#include "UserObject.h"
+
+#include <algorithm>
+#include <cmath>
+#include <optional>
 
 registerMooseObject("MooseApp", Eigenvalue);
 
@@ -27,6 +34,27 @@ Eigenvalue::validParams()
   params += EigenProblemSolve::validParams();
   params.addParam<Real>("time", 0.0, "System time");
 
+  params.addParam<bool>("output_all_eigenvectors",
+                        false,
+                        "Whether to write one output step per converged eigenvector instead of "
+                        "writing the active eigenvector only");
+  params.addParam<MooseEnum>("eigenvector_time",
+                             MooseEnum("index eigenvalue sqrt_eigenvalue", "index"),
+                             "What the output time of each eigenvector step is: the time step "
+                             "number, which is the one-based index of the eigenvector in the "
+                             "first solve and keeps increasing over mesh adaptivity cycles, the "
+                             "real part of its eigenvalue, or the square root of the real part "
+                             "of its eigenvalue. This parameter "
+                             "requires 'output_all_eigenvectors' to be true.");
+  params.addParam<std::vector<PostprocessorName>>(
+      "normalization_dependencies",
+      std::vector<PostprocessorName>(),
+      "Postprocessors the 'normalization' postprocessor depends on, which are executed by name in "
+      "the given order before it for each output eigenvector. They must execute on linear. This "
+      "parameter requires 'normalization' to be set and 'output_all_eigenvectors' to be true.");
+  params.addParamNamesToGroup("output_all_eigenvectors eigenvector_time normalization_dependencies",
+                              "Eigenvector output");
+
   return params;
 }
 
@@ -38,10 +66,31 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     _system_time(getParam<Real>("time")),
     _time_step(_eigen_problem.timeStep()),
     _time(_eigen_problem.time()),
-    _final_timer(registerTimedSection("final", 1))
+    _final_timer(registerTimedSection("final", 1)),
+    _output_all_eigenvectors(getParam<bool>("output_all_eigenvectors")),
+    _eigenvector_time(getParam<MooseEnum>("eigenvector_time"))
 {
   _fixed_point_solve->setInnerSolve(_eigen_problem_solve);
   _time = _system_time;
+
+  if (!_output_all_eigenvectors && isParamSetByUser("eigenvector_time"))
+    paramError("eigenvector_time",
+               "'eigenvector_time' requires 'output_all_eigenvectors' to be true, as a single "
+               "eigenvector is written at a single output time otherwise.");
+  if (isParamSetByUser("normalization_dependencies"))
+  {
+    if (!isParamValid("normalization"))
+      paramError("normalization_dependencies",
+                 "'normalization_dependencies' requires the 'normalization' postprocessor to be "
+                 "set, as they are executed for it only.");
+    if (!_output_all_eigenvectors)
+      paramError("normalization_dependencies",
+                 "'normalization_dependencies' requires 'output_all_eigenvectors' to be true, as "
+                 "they are executed for each output eigenvector only.");
+  }
+
+  // Each eigenvector step is written at the eigenvector time execute() sets
+  _outputs_use_simulation_time = _output_all_eigenvectors;
 }
 
 #ifdef LIBMESH_HAVE_SLEPC
@@ -50,6 +99,9 @@ Eigenvalue::init()
 {
   // Does not allow time kernels
   checkIntegrity();
+
+  if (_output_all_eigenvectors && isParamValid("normalization"))
+    setupEigenvectorNormalization();
 
   // Provide vector of ones to solver
   // "auto_initialization" is on by default and we init the vector values associated
@@ -74,6 +126,94 @@ Eigenvalue::checkIntegrity()
   // check to make sure that we don't have any time kernels in eigenvalue simulation
   if (_eigen_problem.getNonlinearSystemBase(/*nl_sys=*/0).containsTimeKernel())
     mooseError("You have specified time kernels in your eigenvalue simulation");
+}
+
+void
+Eigenvalue::setupEigenvectorNormalization()
+{
+  const auto & normalization = getParam<PostprocessorName>("normalization");
+  const auto & dependencies =
+      getParam<std::vector<PostprocessorName>>("normalization_dependencies");
+
+  // The postprocessors executed for each output eigenvector, with the parameter that lists them
+  std::vector<std::pair<PostprocessorName, std::string>> executed = {
+      {normalization, "normalization"}};
+  for (const auto & dependency : dependencies)
+  {
+    if (!_eigen_problem.hasPostprocessorValueByName(dependency))
+      paramError(
+          "normalization_dependencies", "A postprocessor named '", dependency, "' does not exist.");
+    executed.emplace_back(dependency, "normalization_dependencies");
+  }
+
+  for (const auto & [name, param] : executed)
+  {
+    const auto & pp = _eigen_problem.getUserObjectBase(name);
+
+    // The auxiliary kernels are not executed before an output eigenvector is normalized, so an
+    // auxiliary variable still holds values computed from another eigenvector at that point
+    if (const auto * const var_dependencies =
+            dynamic_cast<const MooseVariableDependencyInterface *>(&pp))
+      for (const auto * const var : var_dependencies->getMooseVariableDependencies())
+        if (var->kind() == Moose::VAR_AUXILIARY)
+          paramError(param,
+                     "The postprocessor '",
+                     name,
+                     "' couples the auxiliary variable '",
+                     var->name(),
+                     "', but auxiliary variables are not recomputed for each output eigenvector "
+                     "before it is normalized.");
+
+    // Only the listed postprocessors are executed for each output eigenvector
+    for (const auto & depend : pp.getDependObjects())
+      if (depend != normalization &&
+          std::find(dependencies.begin(), dependencies.end(), depend) == dependencies.end())
+        paramWarning("normalization_dependencies",
+                     "The postprocessor '",
+                     name,
+                     "' depends on the object '",
+                     depend,
+                     "', which is not listed in 'normalization_dependencies' and is therefore not "
+                     "executed for each output eigenvector.");
+  }
+
+  _eigen_problem.setOutputEigenvectorNormalization(dependencies);
+}
+
+void
+Eigenvalue::loadEigenvector(dof_id_type i)
+{
+  _eigen_problem.loadEigenvector(i);
+  if (isParamValid("normalization"))
+    _eigen_problem.normalizeOutputEigenvector(i);
+  // Let the objects executing at the end of a time step see the eigenvector. This does not run
+  // multiapps or transfers.
+  _eigen_problem.execute(EXEC_TIMESTEP_END);
+}
+
+Real
+Eigenvalue::eigenvectorTime(dof_id_type i, const std::pair<Real, Real> & eig) const
+{
+  // The time of an eigenvector step is based on the real part of its eigenvalue only
+  if (_eigenvector_time == "index")
+    // The time equals the time step as it does for a single output step, which keeps the time
+    // increasing over the eigenvector steps of every adaptivity cycle
+    return _time_step;
+
+  if (_eigenvector_time == "eigenvalue")
+    return eig.first;
+
+  // sqrt_eigenvalue
+  if (eig.first < 0)
+    paramError("eigenvector_time",
+               "Cannot take the square root of the negative eigenvalue ",
+               eig.first,
+               " of mode ",
+               i + 1,
+               " to form an output time. Use 'eigenvector_time = eigenvalue' or 'eigenvector_time "
+               "= index' instead.");
+
+  return std::sqrt(eig.first);
 }
 #endif
 
@@ -107,6 +247,10 @@ Eigenvalue::execute()
   // First step in any eigenvalue state solve is always 1 (preserving backwards compatibility)
   _time_step = 1;
 
+  // Output time of the step holding the active eigenvector in the last solve, set only when one
+  // output step per converged eigenvector is written
+  std::optional<Real> active_eigenvector_time;
+
 #ifdef LIBMESH_ENABLE_AMR
 
   // Define the refinement loop
@@ -116,6 +260,7 @@ Eigenvalue::execute()
 #endif // LIBMESH_ENABLE_AMR
     _eigen_problem.timestepSetup();
 
+    active_eigenvector_time.reset();
     _last_solve_converged = _fixed_point_solve->solve();
     if (!lastSolveConverged())
     {
@@ -129,9 +274,46 @@ Eigenvalue::execute()
       _eigen_problem.computeIndicators();
       _eigen_problem.computeMarkers();
     }
-    // need to keep _time in sync with _time_step to get correct output
-    _time = _time_step;
-    _eigen_problem.outputStep(EXEC_TIMESTEP_END);
+    // Write one output step per eigenvector index: every converged one when requested, the active
+    // one otherwise. After the solve the solution already holds the active eigenvector, scaled, so
+    // it is written as is, as is the solution when no eigenpair converged, e.g. when the solve is
+    // skipped
+    const auto & eigenvalues =
+        _eigen_problem.getNonlinearEigenSystem(/*nl_sys=*/0).getAllConvergedEigenvalues();
+    const auto active_index = _eigen_problem.activeEigenvalueIndex();
+    const bool load_eigenvectors = _output_all_eigenvectors && !eigenvalues.empty();
+    std::vector<dof_id_type> eigenvector_indices;
+    if (load_eigenvectors)
+      for (const auto i : index_range(eigenvalues))
+        eigenvector_indices.push_back(i);
+    else
+      eigenvector_indices.push_back(active_index);
+
+    const int first_step = _time_step;
+    for (const auto s : index_range(eigenvector_indices))
+    {
+      const auto i = eigenvector_indices[s];
+      _time_step = first_step + cast_int<int>(s);
+      if (load_eigenvectors)
+      {
+        loadEigenvector(i);
+        _time = eigenvectorTime(i, eigenvalues[i]);
+        if (i == active_index)
+          active_eigenvector_time = _time;
+      }
+      else
+        // need to keep _time in sync with _time_step to get correct output
+        _time = _time_step;
+      _eigen_problem.outputStep(EXEC_TIMESTEP_END);
+    }
+    // Restore the eigenvector the rest of the simulation expects in the solution, in the state the
+    // solve left it in
+    if (load_eigenvectors)
+    {
+      _eigen_problem.loadEigenvector(active_index);
+      _eigen_problem.finalizeEigenvector(/*nl_sys_num=*/0);
+      _eigen_problem.execute(EXEC_TIMESTEP_END);
+    }
     _time = _system_time;
 
 #ifdef LIBMESH_ENABLE_AMR
@@ -150,7 +332,12 @@ Eigenvalue::execute()
     _eigen_problem.finalizeMultiApps();
     _eigen_problem.postExecute();
     _eigen_problem.execute(EXEC_FINAL);
-    _time = _time_step;
+    // Keep the final step on the requested time axis, at the time of the step holding the active
+    // eigenvector in the last solve, which is the one restored into the solution after that step
+    if (active_eigenvector_time)
+      _time = *active_eigenvector_time;
+    else
+      _time = _time_step;
     _eigen_problem.outputStep(EXEC_FINAL);
     _time = _system_time;
   }

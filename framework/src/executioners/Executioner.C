@@ -122,6 +122,12 @@ Executioner::feProblem()
   return _fe_problem;
 }
 
+Real
+Executioner::getOutputTime() const
+{
+  return _outputs_use_simulation_time ? _fe_problem.time() : _fe_problem.timeStep();
+}
+
 PostprocessorValue &
 Executioner::addAttributeReporter(const std::string & name, Real initial_value)
 {

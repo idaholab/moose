@@ -26,7 +26,21 @@
 #include "libmesh/eigen_solver.h"
 #include "libmesh/enum_eigen_solver_type.h"
 
+#ifdef LIBMESH_HAVE_SLEPC
+#include "libmesh/petsc_matrix.h"
+#endif
+
 registerMooseObject("MooseApp", EigenProblem);
+
+#ifdef LIBMESH_HAVE_SLEPC
+namespace
+{
+/// Remedy shared by the errors about an eigenvalue solve that provides no assembled B matrix
+const char * const assembled_b_remedy =
+    "Use a solve type that assembles B, i.e. a linear eigen solve type such as KRYLOVSCHUR or "
+    "JACOBI_DAVIDSON, or PJFNKMO.";
+}
+#endif
 
 InputParameters
 EigenProblem::validParams()
@@ -70,7 +84,9 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _first_solve(declareRestartableData<bool>("first_solve", true)),
     _bx_norm_name(isParamValid("bx_norm")
                       ? std::make_optional(getParam<PostprocessorName>("bx_norm"))
-                      : std::nullopt)
+                      : std::nullopt),
+    _need_eigenvector_b_norm(false),
+    _eigenvector_b_norm_squared(0)
 #endif
 {
 #ifdef LIBMESH_HAVE_SLEPC
@@ -412,6 +428,102 @@ void
 EigenProblem::scaleEigenvector(const Real scaling_factor)
 {
   adjustEigenVector(scaling_factor, true);
+  // The quadratic form is homogeneous of degree two in the eigenvector
+  _eigenvector_b_norm_squared *= scaling_factor * scaling_factor;
+}
+
+Real
+EigenProblem::eigenvectorBNorm() const
+{
+  return std::sqrt(_eigenvector_b_norm_squared);
+}
+
+void
+EigenProblem::loadEigenvector(const unsigned int i)
+{
+  _nl_eigen->getConvergedEigenpair(i);
+  // A condensed eigen solve sets the non-condensed entries of the solution only, so give the
+  // constrained degrees of freedom, e.g. of hanging nodes, their constrained values
+  _nl_eigen->dofMap().enforce_constraints_exactly(_nl_eigen->system());
+  _nl_eigen->update();
+  storeEigenvectorBNorm();
+}
+
+void
+EigenProblem::finalizeEigenvector(const unsigned int nl_sys_num)
+{
+  // with PJFNKMO solve type, we need to evaluate the linear objects to bring them up-to-date
+  // With the linear eigen solvers no object executes on linear during the solve, so the same is
+  // needed before the normalization postprocessor is read
+  if (solverParams(nl_sys_num)._eigen_solve_type == Moose::EST_PJFNKMO ||
+      (_has_normalization && !isNonlinearEigenvalueSolver(nl_sys_num)))
+    execute(EXEC_LINEAR);
+
+  // Scale eigen vector if users ask
+  postScaleEigenVector();
+}
+
+void
+EigenProblem::storeEigenvectorBNorm()
+{
+  if (!_need_eigenvector_b_norm)
+    return;
+
+  // The nonlinear eigen solvers modify the operators during the solve, after which SLEPc refuses to
+  // hand them out unless their state is reset, as the SLEPc callbacks of MOOSE do before they
+  // retrieve the operators as well
+  const EPS eps = _nl_eigen->getEPS();
+  ST st;
+  LibmeshPetscCall(EPSGetST(eps, &st));
+  LibmeshPetscCall(STResetMatrixState(st));
+  Mat A, B;
+  LibmeshPetscCall(EPSGetOperators(eps, &A, &B));
+
+  PetscBool b_is_shell = PETSC_FALSE;
+  if (B)
+    LibmeshPetscCall(PetscObjectTypeCompare((PetscObject)B, MATSHELL, &b_is_shell));
+  if (b_is_shell)
+    mooseError("EigenvectorBNorm requires an assembled B matrix, but this eigenvalue solve forms B "
+               "matrix-free. ",
+               assembled_b_remedy);
+
+  // A condensed operator is posed on the non-condensed degrees of freedom only, so the eigenvector
+  // has to be viewed through the same layout before it is multiplied by the operator
+  auto & phi = _nl_eigen->solution();
+  auto & eigen_sys = _nl_eigen->sys();
+  std::unique_ptr<NumericVector<Number>> condensed_phi;
+  if (_nl_eigen->dofMap().n_constrained_dofs())
+    condensed_phi = phi.get_subvector(eigen_sys.local_non_condensed_dofs_vector);
+  const NumericVector<Number> & eigen_phi = condensed_phi ? *condensed_phi : phi;
+
+  Real b_norm_squared;
+  // A standard eigenproblem has no B operator, i.e. B is the identity and the B-norm is the l2 norm
+  if (!B)
+  {
+    const Real l2_norm = eigen_phi.l2_norm();
+    b_norm_squared = l2_norm * l2_norm;
+  }
+  else
+  {
+    const libMesh::PetscMatrix<Number> b_operator(B, comm());
+    auto b_phi = eigen_phi.zero_clone();
+    b_operator.vector_mult(*b_phi, eigen_phi);
+    b_norm_squared = eigen_phi.dot(*b_phi);
+
+    // PJFNKMO assembles B without the sign flip of 'negative_sign_eigen_kernel' and flips the
+    // product B phi instead, whereas the other solve types flip B itself
+    if (solverParams(_nl_eigen->number())._eigen_matrix_vector_mult && _negative_sign_eigen_kernel)
+      b_norm_squared = -b_norm_squared;
+  }
+
+  if (condensed_phi)
+    phi.restore_subvector(std::move(condensed_phi), eigen_sys.local_non_condensed_dofs_vector);
+
+  if (b_norm_squared < 0)
+    mooseError("B is not positive definite for this eigenvector; check "
+               "`negative_sign_eigen_kernel` and the sign of the eigen kernels");
+
+  _eigenvector_b_norm_squared = b_norm_squared;
 }
 
 void
@@ -446,51 +558,91 @@ void
 EigenProblem::postScaleEigenVector()
 {
   if (_has_normalization)
+    // update all aux variables and user objects on linear
+    scaleToNormalization(_active_eigen_index, [this]() { execute(EXEC_LINEAR); });
+}
+
+void
+EigenProblem::setOutputEigenvectorNormalization(const std::vector<PostprocessorName> & dependencies)
+{
+  for (const auto & dependency : dependencies)
+    if (const auto & pp = getUserObjectBase(dependency);
+        !pp.getExecuteOnEnum().contains(EXEC_LINEAR))
+      pp.paramError(
+          "execute_on",
+          "A postprocessor listed in 'normalization_dependencies' must execute on linear, "
+          "as it is executed on linear by name for each output eigenvector");
+
+  _output_normalization_dependencies = dependencies;
+}
+
+void
+EigenProblem::normalizeOutputEigenvector(const unsigned int i)
+{
+  mooseAssert(_has_normalization && _output_normalization_dependencies,
+              "The output eigenvectors are not normalized");
+
+  // Executing on linear would recompute every object executing on linear, auxiliary kernels
+  // included, for each output eigenvector, so only the normalization postprocessor and its listed
+  // dependencies are executed. The pre- and post-auxiliary groups are both covered by Moose::ALL.
+  const auto evaluate = [this]()
   {
-    Real v;
-    if (_normal_factor == std::numeric_limits<Real>::max())
-    {
-      if (_active_eigen_index >= _nl_eigen->getNumConvergedEigenvalues())
-        mooseError("Number of converged eigenvalues ",
-                   _nl_eigen->getNumConvergedEigenvalues(),
-                   " but you required eigenvalue ",
-                   _active_eigen_index);
+    for (const auto & dependency : *_output_normalization_dependencies)
+      computeUserObjectByName(EXEC_LINEAR, Moose::ALL, dependency);
+    computeUserObjectByName(EXEC_LINEAR, Moose::ALL, _normalization);
+  };
 
-      // when normal factor is not provided, we use the inverse of the norm of
-      // the active eigenvalue for normalization
-      auto eig = _nl_eigen->getAllConvergedEigenvalues()[_active_eigen_index];
-      v = 1 / std::sqrt(eig.first * eig.first + eig.second * eig.second);
-    }
-    else
-      v = _normal_factor;
+  // Loading the eigenvector evaluates no postprocessor
+  evaluate();
+  scaleToNormalization(i, evaluate);
+}
 
-    Real c = getPostprocessorValueByName(_normalization);
+void
+EigenProblem::scaleToNormalization(const unsigned int eigen_index,
+                                   const std::function<void()> & evaluate)
+{
+  Real v;
+  if (_normal_factor == std::numeric_limits<Real>::max())
+  {
+    if (eigen_index >= _nl_eigen->getNumConvergedEigenvalues())
+      mooseError("Number of converged eigenvalues ",
+                 _nl_eigen->getNumConvergedEigenvalues(),
+                 " but you required eigenvalue ",
+                 eigen_index);
 
-    // We scale SLEPc eigen vector here, so we need to scale it back for optimal
-    // convergence if we call EPS solver again
-    mooseAssert(v != 0., "normal factor can not be zero");
+    // when normal factor is not provided, we use the inverse of the norm of
+    // the eigenvalue for normalization
+    auto eig = _nl_eigen->getAllConvergedEigenvalues()[eigen_index];
+    v = 1 / std::sqrt(eig.first * eig.first + eig.second * eig.second);
+  }
+  else
+    v = _normal_factor;
 
-    unsigned int itr = 0;
+  Real c = getPostprocessorValueByName(_normalization);
 
-    while (!MooseUtils::relativeFuzzyEqual(v, c))
-    {
-      // If postprocessor is not defined on eigen variables, scaling might not work
-      if (itr > 10)
-        mooseError("Can not scale eigenvector to the required factor ",
-                   v,
-                   " please check if postprocessor is defined on only eigen variables");
+  // We scale SLEPc eigen vector here, so we need to scale it back for optimal
+  // convergence if we call EPS solver again
+  mooseAssert(v != 0., "normal factor can not be zero");
 
-      mooseAssert(c != 0., "postprocessor value used for scaling can not be zero");
+  unsigned int itr = 0;
 
-      scaleEigenvector(v / c);
+  while (!MooseUtils::relativeFuzzyEqual(v, c))
+  {
+    // If postprocessor is not defined on eigen variables, scaling might not work
+    if (itr > 10)
+      mooseError("Can not scale eigenvector to the required factor ",
+                 v,
+                 " please check if postprocessor is defined on only eigen variables");
 
-      // update all aux variables and user objects on linear
-      execute(EXEC_LINEAR);
+    mooseAssert(c != 0., "postprocessor value used for scaling can not be zero");
 
-      c = getPostprocessorValueByName(_normalization);
+    scaleEigenvector(v / c);
 
-      itr++;
-    }
+    evaluate();
+
+    c = getPostprocessorValueByName(_normalization);
+
+    itr++;
   }
 }
 
@@ -499,6 +651,12 @@ EigenProblem::checkProblemIntegrity()
 {
   FEProblemBase::checkProblemIntegrity();
   _nl_eigen->checkIntegrity();
+  // NEWTON evaluates the products with B as residuals and never assembles B, which only PJFNKMO
+  // and the linear solve types do
+  if (_need_eigenvector_b_norm && solverParams(0)._eigen_solve_type == Moose::EST_NEWTON)
+    mooseError("EigenvectorBNorm requires an assembled B matrix, but the NEWTON eigenvalue solve "
+               "never assembles B. ",
+               assembled_b_remedy);
   if (_bx_norm_name)
   {
     if (!isNonlinearEigenvalueSolver(0))
@@ -602,12 +760,9 @@ EigenProblem::solve(const unsigned int nl_sys_num)
     _current_nl_sys->solve();
     _current_nl_sys->update();
 
-    // with PJFNKMO solve type, we need to evaluate the linear objects to bring them up-to-date
-    if (solverParams(nl_sys_num)._eigen_solve_type == Moose::EST_PJFNKMO)
-      execute(EXEC_LINEAR);
-
-    // Scale eigen vector if users ask
-    postScaleEigenVector();
+    // Store the B-norm before the normalization postprocessor may read it
+    storeEigenvectorBNorm();
+    finalizeEigenvector(nl_sys_num);
   }
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)

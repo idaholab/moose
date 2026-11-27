@@ -68,6 +68,7 @@ EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters)
   // FIXME: currently we have to use old and older solution vectors for power iteration.
   //       We will need 'step' in the future.
   _problem.transient(true);
+  _outputs_use_simulation_time = true;
   _eigen_sys.needSolutionState(2);
   _fe_problem.getAuxiliarySystem().needSolutionState(2);
 
