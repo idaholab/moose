@@ -5,19 +5,18 @@
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "KokkosFunctorRegistry.h"
+#include "KokkosFunctorWrapperRegistry.h"
 
 namespace Moose::Kokkos
 {
 
-FunctorRegistry &
-FunctorRegistry::getRegistry()
+FunctorWrapperRegistry &
+FunctorWrapperRegistry::getRegistry()
 {
-  static FunctorRegistry * registry = nullptr;
+  static FunctorWrapperRegistry * registry = nullptr;
   if (!registry)
-    registry = new FunctorRegistry();
+    registry = new FunctorWrapperRegistry();
   return *registry;
 }
 
