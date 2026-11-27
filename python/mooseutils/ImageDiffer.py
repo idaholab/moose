@@ -87,22 +87,6 @@ class ImageDiffer(object):
 
         # Return the text, as a single string
         return "\n".join(output)
-        # Errors
-        cnt = 0
-        for e in self.__errors:
-            cnt += 1
-            output.append("")
-            output.append("ERROR " + str(cnt) + ":")
-            output.append("  " + e[0])
-            if e[1]:
-                output.append("    " + e[1])
-
-        # Print the output
-        if kwargs.pop("output", False):
-            print("\n".join(output))
-
-        # Return the text, as a single string
-        return "\n".join(output)
 
     def __compare(self):
         """
