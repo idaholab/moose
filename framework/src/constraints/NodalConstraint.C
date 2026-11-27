@@ -200,8 +200,8 @@ NodalConstraint::computeResidual(const NumericVector<Number> & residual)
           // Transfer the current residual of the secondary node to the primary nodes
           Real res = residual(secondarydof[_i]);
           re(_j) += res * _weights[_j];
-          neighbor_re(_i) +=
-              -res / _primary_node_vector.size() + computeQpResidual(Moose::Secondary);
+          neighbor_re(_i) += -res / _primary_node_vector.size() +
+                             computeQpResidual(Moose::Secondary) * _var_secondary.scalingFactor();
           break;
       }
     }
@@ -243,14 +243,43 @@ NodalConstraint::computeJacobian(const SparseMatrix<Number> & jacobian)
           Kne(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
           break;
         case Moose::Kinematic:
-          Kee(_j, _j) = 0.;
-          Ken(_j, _i) += jacobian(secondarydof[_i], primarydof[_j]) * _weights[_j];
-          Kne(_i, _j) += -jacobian(secondarydof[_i], primarydof[_j]) / primarydof.size() +
-                         computeQpJacobian(Moose::SecondaryPrimary);
+          Kne(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
           break;
       }
     }
   }
+  if (_formulation == Moose::Kinematic)
+  {
+    // The residual of a secondary node is shared among its primary nodes by weight and replaced
+    // by the constraint (see computeResidual). The Jacobian follows the same two steps: every
+    // entry of the secondary row is added to each primary row, times the weight, and removed
+    // from the secondary row, which is then left with the constraint alone.
+    std::vector<numeric_index_type> row_columns;
+    std::vector<Number> row_values;
+    for (_i = 0; _i < secondarydof.size(); ++_i)
+    {
+      jacobian.get_row(secondarydof[_i], row_columns, row_values);
+      for (std::size_t entry = 0; entry < row_columns.size(); ++entry)
+      {
+        // Entries that are only reserved in the sparsity pattern have nothing to transfer
+        if (row_values[entry] == 0)
+          continue;
+
+        for (_j = 0; _j < primarydof.size(); ++_j)
+          addJacobianElement(_assembly,
+                             row_values[entry] * _weights[_j],
+                             primarydof[_j],
+                             row_columns[entry],
+                             /*scaling_factor=*/1);
+        addJacobianElement(_assembly,
+                           -row_values[entry],
+                           secondarydof[_i],
+                           row_columns[entry],
+                           /*scaling_factor=*/1);
+      }
+    }
+  }
+
   addJacobian(_assembly, Kee, primarydof, primarydof, _var.scalingFactor());
   addJacobian(_assembly, Ken, primarydof, secondarydof, _var.scalingFactor());
   addJacobian(_assembly, Kne, secondarydof, primarydof, _var_secondary.scalingFactor());
@@ -265,8 +294,7 @@ NodalConstraint::computeJacobian(const SparseMatrix<Number> & jacobian)
         value = computeQpJacobian(Moose::SecondarySecondary);
         break;
       case Moose::Kinematic:
-        value = -jacobian(secondarydof[_i], secondarydof[_i]) / primarydof.size() +
-                computeQpJacobian(Moose::SecondarySecondary);
+        value = computeQpJacobian(Moose::SecondarySecondary);
         break;
     }
     addJacobianElement(
