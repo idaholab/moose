@@ -218,6 +218,9 @@ Output::Output(const InputParameters & parameters)
       // we must ensure that we set the `_sync_times` in the constructor
       _sync_times = _sync_times_object->getUniqueTimes();
   }
+
+  // The declared object supplies itself
+  _supplied_obj.insert(name());
 }
 
 void
