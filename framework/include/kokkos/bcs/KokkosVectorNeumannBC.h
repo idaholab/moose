@@ -20,18 +20,15 @@ public:
   static InputParameters validParams();
 
   KokkosVectorNeumannBC(const InputParameters & parameters);
-  KokkosVectorNeumannBC(const KokkosVectorNeumannBC & object);
 
   template <typename Derived>
   KOKKOS_FUNCTION Moose::Kokkos::Real3 precomputeQpResidual(const unsigned int,
                                                             AssemblyDatum &) const
   {
-    return -_values;
+    return -*_values;
   }
 
 protected:
-  /// Components of the prescribed flux on the boundary, on the host
-  const RealVectorValue & _values_host;
   /// Components of the prescribed flux on the boundary
-  const Moose::Kokkos::Real3 _values;
+  const Moose::Kokkos::ReferenceWrapper<const RealVectorValue> _values;
 };

@@ -46,7 +46,7 @@ public:
   KOKKOS_FUNCTION Real3 computeQpJacobian(const unsigned int /* qp */,
                                           AssemblyDatum & /* datum */) const
   {
-    return Real3(1);
+    return Real3(1, 1, 1);
   }
   template <typename Derived>
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int /* jvar */,

@@ -11,6 +11,8 @@
 
 #include "KokkosReferenceWrapper.h"
 
+#include "libmesh/compare_types.h"
+
 #include <type_traits>
 #include <utility>
 
@@ -37,6 +39,10 @@ public:
    * @param value The writeable reference of the arithmetic scalar variable to store
    */
   Scalar(T & value) : ReferenceWrapper<T>(value) {}
+  /**
+   * Binding a temporary is rejected
+   */
+  Scalar(std::remove_const_t<T> && value) = delete;
   /**
    * Copy constructor
    */
@@ -308,3 +314,30 @@ struct ArrayDeepCopy<Scalar<T>>
 using PostprocessorValue = Scalar<const PostprocessorValue>;
 
 } // namespace Moose::Kokkos
+
+namespace libMesh
+{
+/**
+ * A Kokkos scalar converts to the value it wraps, so the libMesh scalar operators of TypeVector and
+ * TypeTensor accept it as that value
+ */
+///@{
+template <typename T, typename Enable>
+struct ScalarTraits<Moose::Kokkos::Scalar<T, Enable>>
+{
+  static const bool value = ScalarTraits<std::remove_const_t<T>>::value;
+};
+
+template <typename T, typename T2, typename Enable>
+struct CompareTypes<T, Moose::Kokkos::Scalar<T2, Enable>>
+{
+  typedef typename CompareTypes<T, std::remove_const_t<T2>>::supertype supertype;
+};
+
+template <typename T, typename Enable, typename T2>
+struct CompareTypes<Moose::Kokkos::Scalar<T, Enable>, T2>
+{
+  typedef typename CompareTypes<std::remove_const_t<T>, T2>::supertype supertype;
+};
+///@}
+} // namespace libMesh
