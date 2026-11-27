@@ -1,4 +1,4 @@
-# Archard wear from a constant normal contact pressure given as a number
+# Frictional-work wear from a constant normal contact pressure given as a number
 
 !include block-dynamics-aux-wear.i
 
@@ -10,7 +10,7 @@
 
 [AuxKernels]
   [worn_depth_constant]
-    type = MortarArchardsLawAux
+    type = MortarFrictionalWorkWearAux
     variable = worn_depth_constant
     primary_boundary = 20
     secondary_boundary = 10

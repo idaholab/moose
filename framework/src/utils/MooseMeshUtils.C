@@ -308,6 +308,10 @@ changeSubdomainId(MeshBase & mesh, const subdomain_id_type old_id, const subdoma
 Point
 meshCentroidCalculator(const MeshBase & mesh)
 {
+  // The is_partitioned flag is not checked, as unset_is_prepared() clears it even when every
+  // element keeps a valid processor id
+  mooseAssert(!mesh.n_unpartitioned_elem(),
+              "Mesh must be partitioned: the centroid is summed over local elements");
   Point centroid_pt = Point(0.0, 0.0, 0.0);
   Real vol_tmp = 0.0;
   for (const auto & elem : mesh.active_local_element_ptr_range())
@@ -547,6 +551,95 @@ getNextFreeSubdomainID(MeshBase & input_mesh)
                 "A SubdomainID with max possible value was found");
     return highest_subdomain_id + 1;
   }
+}
+
+std::unordered_map<subdomain_id_type, subdomain_id_type>
+remapSecondarySubdomainIDsForStitching(MeshBase & mesh,
+                                       MeshBase & secondary_mesh,
+                                       const bool merge_same_name_across_ids)
+{
+  const auto secondary_subdomains = getAllSubdomainNamesAndIDs(secondary_mesh);
+  // the free id must be present in neither mesh
+  auto next_free_id =
+      std::max(getNextFreeSubdomainID(mesh), getNextFreeSubdomainID(secondary_mesh));
+
+  // Check subdomains in the secondary mesh for the remapping criteria. The remapping is
+  // gathered first then applied in a single pass, so that swapped IDs are not remapped twice
+  std::unordered_map<subdomain_id_type, subdomain_id_type> id_remapping;
+  for (const auto & [bl_name, bl_id] : secondary_subdomains)
+  {
+    subdomain_id_type new_id = bl_id;
+    // If first mesh has the same-name subdomain, we'll use its subdomainID to merge
+    if (merge_same_name_across_ids && !bl_name.empty() && hasSubdomainName(mesh, bl_name))
+      new_id = getSubdomainID(bl_name, mesh);
+    // If first mesh has the same ID BUT different name, change the subdomainID to avoid merging.
+    // A subdomain sharing both its name and ID needs no remapping: it merges as it is
+    else if (hasSubdomainID(mesh, bl_id) && std::as_const(mesh).subdomain_name(bl_id) != bl_name)
+    {
+      new_id = next_free_id++;
+      // the name is pre-positioned, the ID will be added to mesh after stitching
+      mesh.set_subdomain_name(new_id, bl_name, true);
+    }
+
+    if (new_id != bl_id)
+      id_remapping[bl_id] = new_id;
+  }
+
+  if (!id_remapping.empty())
+  {
+    for (auto * const elem : secondary_mesh.element_ptr_range())
+      if (const auto it = id_remapping.find(elem->subdomain_id()); it != id_remapping.end())
+        elem->subdomain_id() = it->second;
+    // The names of the remapped subdomains are already in the first mesh, under the new IDs
+    auto & secondary_name_map = secondary_mesh.set_subdomain_name_map();
+    for (const auto & [old_id, _] : id_remapping)
+      secondary_name_map.erase(old_id);
+  }
+
+  return id_remapping;
+}
+
+std::unordered_map<boundary_id_type, boundary_id_type>
+remapSecondaryBoundaryIDsForStitching(MeshBase & mesh,
+                                      MeshBase & secondary_mesh,
+                                      const std::set<boundary_id_type> & ids_to_preserve)
+{
+  // We compare the ids of both meshes, so they need to be synchronized
+  if (!mesh.preparation().has_boundary_id_sets)
+    mesh.get_boundary_info().synchronize_global_id_set();
+  if (!secondary_mesh.preparation().has_boundary_id_sets)
+    secondary_mesh.get_boundary_info().synchronize_global_id_set();
+
+  auto & secondary_boundary_info = secondary_mesh.get_boundary_info();
+  const auto & boundary_info = mesh.get_boundary_info();
+  const auto & mesh_bids = boundary_info.get_global_boundary_ids();
+  const auto secondary_bids = secondary_boundary_info.get_global_boundary_ids();
+
+  auto next_free_id = std::max(getNextFreeBoundaryID(mesh), getNextFreeBoundaryID(secondary_mesh));
+
+  // Only move a boundary that would otherwise inherit another boundary's name. Boundaries that
+  // share a name are left alone so that stitching still merges them
+  std::unordered_map<boundary_id_type, boundary_id_type> id_remapping;
+  for (const auto bid : secondary_bids)
+    if (!ids_to_preserve.count(bid) && mesh_bids.count(bid) &&
+        boundary_info.get_sideset_name(bid) != secondary_boundary_info.get_sideset_name(bid))
+      id_remapping[bid] = next_free_id++;
+
+  for (const auto & [old_id, new_id] : id_remapping)
+  {
+    const auto name = secondary_boundary_info.get_sideset_name(old_id);
+    const auto nodeset_name = secondary_boundary_info.get_nodeset_name(old_id);
+    secondary_boundary_info.renumber_id(old_id, new_id);
+    // renumber_id() does not carry the names over to the new ID
+    secondary_boundary_info.sideset_name(new_id) = name;
+    secondary_boundary_info.nodeset_name(new_id) = nodeset_name;
+  }
+
+  // renumber_id() only operates locally, so the global ids must be synchronized again
+  if (!id_remapping.empty())
+    secondary_boundary_info.synchronize_global_id_set();
+
+  return id_remapping;
 }
 
 BoundaryID
@@ -1248,7 +1341,8 @@ copyIntoMesh(MeshGenerator & mg,
              const UnstructuredMesh & source,
              const bool avoid_merging_subdomains,
              const bool avoid_merging_boundaries,
-             const Parallel::Communicator & communicator)
+             const Parallel::Communicator & communicator,
+             const bool skip_preparation)
 {
   dof_id_type node_delta = destination.max_node_id();
   dof_id_type elem_delta = destination.max_elem_id();
@@ -1299,7 +1393,8 @@ copyIntoMesh(MeshGenerator & mg,
                                       elem_delta,
                                       node_delta,
                                       unique_delta,
-                                      avoid_merging_subdomains ? &id_remapping : nullptr);
+                                      avoid_merging_subdomains ? &id_remapping : nullptr,
+                                      skip_preparation);
 
   // Get an offset to prevent overlaps / wild merging between boundaries
   BoundaryInfo & boundary = destination.get_boundary_info();
@@ -1711,5 +1806,38 @@ nodalQuadraturePointToNodeMap(const Elem & elem, const std::vector<Point> & q_po
 #endif
 
   return qpoint_to_node;
+}
+
+std::unique_ptr<ReplicatedMesh>
+stitchMeshesPairwise(std::vector<std::unique_ptr<ReplicatedMesh>> meshes,
+                     const std::function<BoundaryID(const MeshBase &)> & left_boundary_id,
+                     const std::function<BoundaryID(const MeshBase &)> & right_boundary_id,
+                     const bool clear_stitched_boundary_ids,
+                     const bool verbose)
+{
+  mooseAssert(!meshes.empty(), "No meshes to stitch");
+  while (meshes.size() > 1)
+  {
+    const auto n = meshes.size();
+    for (const auto k : make_range(n / 2))
+    {
+      auto & left = meshes[2 * k];
+      auto & right = meshes[2 * k + 1];
+      left->stitch_meshes(*right,
+                          left_boundary_id(*left),
+                          right_boundary_id(*right),
+                          TOLERANCE,
+                          clear_stitched_boundary_ids,
+                          verbose);
+      // Free the absorbed mesh now and compact the list in place; k <= 2k, so this never
+      // overwrites a mesh that is still needed
+      right.reset();
+      meshes[k] = std::move(left);
+    }
+    if (n % 2)
+      meshes[n / 2] = std::move(meshes[n - 1]);
+    meshes.resize((n + 1) / 2);
+  }
+  return std::move(meshes.front());
 }
 }

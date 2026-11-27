@@ -345,6 +345,11 @@ ConcentricCircleMeshGenerator::generate()
   index = (_num_sectors / 2 + 1) * (_num_sectors / 2);
   limit = (_num_sectors / 2) * (_num_sectors / 2 + 2);
 
+  // These elements bridge the inner square to the first circle, so their outward side lies on
+  // the outer boundary whenever that first circle is also the last one. With more ring layers,
+  // the outer boundary is added by the concentric circle loop below instead.
+  const bool first_circle_is_outer = !_has_outer_square && radii_all_circles.size() == 1;
+
   // adding elements in one outer layer of the square (right side)
   while (index < limit)
   {
@@ -358,6 +363,8 @@ ConcentricCircleMeshGenerator::generate()
 
     if (index == (standard / 2 + 1) * (standard / 2))
       boundary_info.add_side(elem, 0, 2);
+    if (first_circle_is_outer)
+      boundary_info.add_side(elem, 1, 3);
 
     ++index;
   }
@@ -376,6 +383,8 @@ ConcentricCircleMeshGenerator::generate()
 
     if (index == standard + 1)
       boundary_info.add_side(elem, 2, 1);
+    if (first_circle_is_outer)
+      boundary_info.add_side(elem, 1, 3);
 
     index = index - _num_sectors / 2 - 1;
     ++counter;

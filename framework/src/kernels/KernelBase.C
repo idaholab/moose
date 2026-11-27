@@ -26,18 +26,22 @@ KernelBase::validParams()
   params += GeometricSearchInterface::validParams();
   params.registerSystemAttributeName("Kernel");
 
-  params.addParam<std::vector<AuxVariableName>>(
+  params.addDeprecatedParam<std::vector<AuxVariableName>>(
       "save_in",
       {},
       "The name of auxiliary variables to save this Kernel's residual contributions to. "
       " Everything about that variable must match everything about this variable (the "
-      "type, what blocks it's on, etc.)");
-  params.addParam<std::vector<AuxVariableName>>(
+      "type, what blocks it's on, etc.)",
+      "Add this object's residual to a tagged vector with 'extra_vector_tags', then transfer that "
+      "vector into an auxiliary variable with a TagVectorAux");
+  params.addDeprecatedParam<std::vector<AuxVariableName>>(
       "diag_save_in",
       {},
       "The name of auxiliary variables to save this Kernel's diagonal Jacobian "
       "contributions to. Everything about that variable must match everything "
-      "about this variable (the type, what blocks it's on, etc.)");
+      "about this variable (the type, what blocks it's on, etc.)",
+      "Add this object's Jacobian to a tagged matrix with 'extra_matrix_tags', then transfer that "
+      "matrix diagonal into an auxiliary variable with a TagMatrixAux");
 
   params.addParam<bool>("use_displaced_mesh",
                         false,

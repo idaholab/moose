@@ -38,9 +38,12 @@ ADVectorFunctionNeumannBC::ADVectorFunctionNeumannBC(const InputParameters & par
 ADReal
 ADVectorFunctionNeumannBC::computeQpResidual()
 {
-  ADRealVectorValue func_u = {_function_x.value(_t, _q_point[_qp]),
-                              _function_y.value(_t, _q_point[_qp]),
-                              _function_z.value(_t, _q_point[_qp])};
+  const auto func = [this](const auto & p) -> ADRealVectorValue
+  { return {_function_x.value(_t, p), _function_y.value(_t, p), _function_z.value(_t, p)}; };
+
+  // On the displaced mesh the quadrature points move with the displacements, so the function
+  // values depend on them
+  const auto func_u = _use_displaced_mesh ? func(_ad_q_points[_qp]) : func(_q_point[_qp]);
 
   return -_test[_i][_qp] * func_u;
 }

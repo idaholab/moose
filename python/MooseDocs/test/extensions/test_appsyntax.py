@@ -149,7 +149,7 @@ class TestParameters(AppSyntaxTestCase):
         self.assertEqual(res(7)["data-details-open"], "close")
         self.assertEqual(res(7).text(), "Advanced Parameters")
 
-        self.assertHTMLTag(res(8), "ul", size=8)
+        self.assertHTMLTag(res(8), "ul", size=6)
 
     def testMaterialize(self):
         _, res = self.execute(self.TEXT, renderer=base.MaterializeRenderer())
@@ -206,7 +206,7 @@ class TestParameters(AppSyntaxTestCase):
         self.assertEqual(res(7)["data-details-open"], "close")
         self.assertEqual(res(7).text(), "Advanced Parameters")
 
-        self.assertHTMLTag(res(8), "ul", size=8, class_="collapsible")
+        self.assertHTMLTag(res(8), "ul", size=6, class_="collapsible")
 
     def testMaterializeRange(self):
         _, res = self.execute(self.TEXT_RANGE, renderer=base.MaterializeRenderer())
@@ -231,7 +231,7 @@ class TestParameters(AppSyntaxTestCase):
         # This size should correspond to the total number of parameters for
         # Diffusion (Required + Optional + Advanced + Tagging) + 1
         # (corresponding to 'type')
-        self.assertSize(res, 20)
+        self.assertSize(res, 18)
         self.assertLatexCommand(res(0), "chapter", size=4)
         self.assertLatexCommand(res(0, 0), "label", string="input-parameters")
         self.assertLatexString(res(0, 1), content="Input")

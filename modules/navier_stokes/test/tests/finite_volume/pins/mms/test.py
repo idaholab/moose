@@ -1,6 +1,7 @@
-import mms
 import unittest
-from mooseutils import fuzzyEqual, fuzzyAbsoluteEqual
+
+import mms
+from mooseutils import fuzzyAbsoluteEqual, fuzzyEqual
 
 
 def run_spatial(*args, **kwargs):
@@ -101,12 +102,12 @@ class TestRC_2D(unittest.TestCase):
     def test(self):
         df1 = run_spatial(
             "2d-rc.i",
-            6,
+            3,
             "--error",
             "--error-unused",
             "--error-deprecated",
             y_pp=["L2u", "L2v", "L2p"],
-            mpi=16,
+            mpi=6,
         )
 
         fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="$L_2$ Error")

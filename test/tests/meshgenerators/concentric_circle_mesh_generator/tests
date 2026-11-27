@@ -18,7 +18,7 @@
     mesh_mode = 'REPLICATED'
     recover = false
 
-    requirement = 'The winding order of the elements created by the mesh generator shall be uniform.'
+    requirement = 'The system shall create elements with a uniform winding order in the mesh generator.'
     design = 'meshgenerators/ConcentricCircleMeshGenerator.md'
     issues = '#17533'
   [../]
@@ -36,6 +36,19 @@
     requirement = 'The system shall be able to generate a mesh of concentric circles contained within a square with one named subdomain per circle and for the square, and with prefixed boundary names.'
     design = 'meshgenerators/ConcentricCircleMeshGenerator.md'
     issues = '#20976'
+  []
+  [single_ring]
+    type = 'Exodiff'
+    input = 'single_ring.i'
+    cli_args = '--mesh-only single_ring_in.e'
+    exodiff = 'single_ring_in.e'
+    exodiff_opts = '-pedantic'
+    mesh_mode = 'REPLICATED'
+    recover = false
+
+    requirement = 'The system shall create the outer boundary of a concentric circle mesh that has a single ring of elements and no enclosing square.'
+    design = 'meshgenerators/ConcentricCircleMeshGenerator.md'
+    issues = '#34317'
   []
   [subdomain_names_wrong_size]
     type = RunException

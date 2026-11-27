@@ -36,6 +36,14 @@ public:
   virtual unsigned int getZIndex(const Point & point) const;
 
   /**
+   * Get the axial cell containing height z and the linear interpolation weight within it.
+   * Heights outside the mesh are clamped to the inlet or outlet. Valid on every processor.
+   * @return pair of the cell index iz and the weight w in [0, 1], such that a nodal value at z is
+   * (1 - w) * v(iz) + w * v(iz + 1)
+   */
+  std::pair<unsigned int, Real> getAxialInterpolation(Real z) const;
+
+  /**
    * Get axial cell location and value of loss coefficient
    */
   virtual const std::vector<std::vector<Real>> & getKGrid() const { return _k_grid; }

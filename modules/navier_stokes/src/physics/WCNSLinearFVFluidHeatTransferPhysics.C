@@ -33,8 +33,6 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
   // We could split between discretization and solver here.
   params.addParamNamesToGroup("use_nonorthogonal_correction", "Numerical scheme");
 
-  // Not implemented
-  params.suppressParameter<bool>("effective_conductivity");
   // Not needed
   params.suppressParameter<bool>("add_energy_equation");
   params.suppressParameter<MooseEnum>("preconditioning");
@@ -46,9 +44,10 @@ WCNSLinearFVFluidHeatTransferPhysics::WCNSLinearFVFluidHeatTransferPhysics(
     const InputParameters & parameters)
   : WCNSFVFluidHeatTransferPhysicsBase(parameters)
 {
-  if (_porous_medium_treatment)
-    paramError("porous_medium_treatment", "Porous media not supported at this time");
   checkSecondParamSetOnlyIfFirstOneTrue("solve_for_enthalpy", NS::fluid);
+  if (!_porous_medium_treatment && isParamSetByUser("effective_conductivity"))
+    paramError("effective_conductivity",
+               "Only applies with the porous medium treatment of the flow physics");
 }
 
 void
@@ -85,10 +84,13 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyTimeKernels()
   params.set<LinearVariableName>("variable") =
       _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
   assignBlocks(params, _blocks);
-  if (!_solve_for_enthalpy)
-    params.set<MooseFunctorName>("factor") = "rho_cp";
-  else
-    params.set<MooseFunctorName>("factor") = _density_name;
+  const MooseFunctorName factor = _solve_for_enthalpy ? _density_name : "rho_cp";
+  // Only the fluid fraction of the volume stores energy
+  params.set<MooseFunctorName>("factor") =
+      _porous_medium_treatment
+          ? addPorosityScaledFunctor(
+                _flow_equations_physics->getPorosityFunctorName(/*smoothed=*/false), factor)
+          : factor;
 
   getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
 }
@@ -134,21 +136,18 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
 
     const std::string kernel_type = "LinearFVDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
-    if (!_solve_for_enthalpy)
-    {
-      params.set<LinearVariableName>("variable") = _fluid_temperature_name;
-      if (!_has_turbulence_model)
-        params.set<MooseFunctorName>("diffusion_coeff") = _thermal_conductivity_name[block_i];
-      else
-        params.set<MooseFunctorName>("diffusion_coeff") = NS::k_eff_t;
-    }
-    else
-    {
-      params.set<LinearVariableName>("variable") = _fluid_enthalpy_name;
-      const auto th_cond_name =
-          _has_turbulence_model ? NS::k_eff_t : _thermal_conductivity_name[block_i];
-      params.set<MooseFunctorName>("diffusion_coeff") = th_cond_name + "_by_cp";
-    }
+    const auto th_cond_name =
+        _has_turbulence_model ? NS::k_eff_t : _thermal_conductivity_name[block_i];
+    params.set<LinearVariableName>("variable") =
+        _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
+    const MooseFunctorName diffusion_coeff = th_cond_name + (_solve_for_enthalpy ? "_by_cp" : "");
+    // Unless the conductivity is an effective one, only the fluid fraction conducts
+    params.set<MooseFunctorName>("diffusion_coeff") =
+        (_porous_medium_treatment && !getParam<bool>("effective_conductivity"))
+            ? addPorosityScaledFunctor(
+                  _flow_equations_physics->getPorosityFunctorName(/*smoothed=*/false),
+                  diffusion_coeff)
+            : diffusion_coeff;
     std::vector<SubdomainName> block_names =
         num_blocks ? _thermal_conductivity_blocks[block_i] : _blocks;
     assignBlocks(params, block_names);
@@ -173,12 +172,17 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyAmbientConvection()
   unsigned int num_convection_blocks = _ambient_convection_blocks.size();
   unsigned int num_used_blocks = num_convection_blocks ? num_convection_blocks : 1;
 
-  const std::string kernel_type = "LinearFVVolumetricHeatTransfer";
+  // When solving for enthalpy, the fluid temperature in the exchange term is linearized with
+  // dT/dh = 1/cp so the term stays implicit in the solved variable
+  const std::string kernel_type = _solve_for_enthalpy ? "LinearFVEnthalpyVolumetricHeatTransfer"
+                                                      : "LinearFVVolumetricHeatTransfer";
   InputParameters params = getFactory().getValidParams(kernel_type);
   params.set<LinearVariableName>("variable") =
       _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
   params.set<VariableName>(NS::T_fluid) = _fluid_temperature_name;
   params.set<bool>("is_solid") = false;
+  if (_solve_for_enthalpy)
+    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
 
   for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
   {

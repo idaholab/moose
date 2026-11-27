@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ADMortarConstraint.h"
+#include "MortarNodalFrames.h"
 
 class GapFluxModelBase;
 
@@ -26,12 +27,40 @@ public:
   ModularGapConductanceConstraint(const InputParameters & parameters);
 
   virtual void initialSetup() override;
+  virtual void residualSetup() override;
+  virtual void jacobianSetup() override;
+
+  /**
+   * @param problem The problem holding the variables
+   * @param temperature The temperature variable
+   * @param displacements The displacement variables
+   * @return Whether every displacement variable is a solver variable of the temperature's system,
+   * so that the displacement derivatives of the gap normal enter the Jacobian
+   */
+  static bool displacementsShareSystem(const FEProblemBase & problem,
+                                       const VariableName & temperature,
+                                       const std::vector<std::string> & displacements);
 
 protected:
   /**
    * Computes the residual for the LM equation, lambda = (k/l)*(T^(1) - PT^(2)).
    */
   virtual ADReal computeQpResidual(Moose::MortarType mortar_type) override;
+
+  /**
+   * @return The normal at the current quadrature point. Its displacement derivatives are included
+   * while assembling the Jacobian when the displacements are in the same nonlinear system.
+   */
+  const ADRealVectorValue & qpNormal();
+
+  /**
+   * @return The gap heat flux at the current quadrature point, the sum of the gap flux model
+   * contributions
+   */
+  virtual ADReal computeGapFlux();
+
+  /// Gap width at the current quadrature point
+  const ADReal & gapWidth() const { return _gap_width; }
 
   /// Gap flux model names
   std::vector<UserObjectName> _gap_flux_model_names;
@@ -103,6 +132,19 @@ private:
 
   /// Cached contact pressure for use by UserObjects
   ADReal _normal_pressure;
+
+  /// Secondary nodal normals with their displacement derivatives
+  Moose::Mortar::ADNodalFrames _nodal_frames;
+
+  /// Whether the displacement derivatives of the normals can be included, i.e. whether the
+  /// displacements are nodal variables of this constraint's nonlinear system
+  const bool _normal_derivatives;
+
+  /// The mortar segment whose quadrature points \p _qp_normals belong to
+  const Elem * _qp_normals_msm_elem = nullptr;
+
+  /// The normals at the quadrature points of \p _qp_normals_msm_elem
+  std::vector<ADRealVectorValue> _qp_normals;
 
   friend class GapFluxModelBase;
 };

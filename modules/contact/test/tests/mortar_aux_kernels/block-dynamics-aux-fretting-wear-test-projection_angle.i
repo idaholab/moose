@@ -140,7 +140,7 @@ offset = -0.045
     minimum_projection_angle = 0.0
   []
   [worn_depth]
-    type = MortarArchardsLawAux
+    type = MortarFrictionalWorkWearAux
     variable = worn_depth
     primary_boundary = 20
     secondary_boundary = 10

@@ -103,6 +103,10 @@ For large displacements the strain calculator modifies the deformation gradient 
 
 From here the stress update proceeds the same as with stabilization off, except the stress is now based on the modified
 strain value.
+The modified deformation gradient replaces $F$ only in the constitutive model [!cite](de1996design): the
+Cauchy stress is $\sigma = \hat{\sigma}(F^{\prime})$, so a model defined by a Piola-Kirchhoff stress is pushed forward
+with $F^{\prime}$, and the kernel pulls $\sigma$ back with the actual deformation gradient,
+$P = \det(F)\, \sigma F^{-T}$.
 The $\bar{F}$ approach does not alter the weak form residual in the kernel.  However, this change in the definition 
 of the strain does affect the Jacobian calculated in the
 [total Lagrangian](kernels/lagrangian/TotalLagrangianStressDivergence.md) and

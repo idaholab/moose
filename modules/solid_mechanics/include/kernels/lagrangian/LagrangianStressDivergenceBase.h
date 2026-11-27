@@ -183,9 +183,8 @@ protected:
   /// the F-bar Jacobian contribution. For F-bar off, _d_F_stab_d_F_ust = I^(4) and
   /// _d_F_stab_d_F_avg = 0, so the kernel chain reduces to the unstabilized case. TL also
   /// uses `_d_F_stab_d_F_avg` directly for the non-local F-bar Jacobian contribution to PK1
-  /// (since after the F_ust-wrap architectural change PK1 = det(F_ust) sigma F_ust^{-T} no
-  /// longer contains the non-local F-bar effect -- it has to enter through the sigma-via-dL
-  /// chain explicitly).
+  /// (pk1_jacobian = dPK1/d(F_ust) of PK1 = det(F_ust) sigma F_ust^{-T} contains only the local
+  /// F-bar effect, so the non-local one enters through the sigma-via-dL chain explicitly).
   const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_ust;
   const MaterialProperty<RankFourTensor> & _d_F_stab_d_F_avg;
 

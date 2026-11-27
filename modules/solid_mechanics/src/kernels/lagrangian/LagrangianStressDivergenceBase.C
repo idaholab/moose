@@ -25,7 +25,10 @@ LagrangianStressDivergenceBase::validParams()
       "large_kinematics is no longer set on the stress-divergence kernel; it is derived from the "
       "ComputeLagrangianStrain calculator (the single source of truth) via the LARGE_KINEMATICS "
       "guarantee. Remove it here and set it only on the strain calculator.");
-  params.addParam<bool>("stabilize_strain", false, "Average the volumetric strains");
+  params.addParam<bool>(
+      "stabilize_strain",
+      false,
+      "Average the volumetric strains (must match the strain calculator's setting)");
   MooseEnum F_bar_mode("total incremental", "total");
   params.addParam<MooseEnum>(
       "F_bar_mode",
@@ -155,6 +158,19 @@ LagrangianStressDivergenceBase::initialSetup()
                _large_kinematics ? "large" : "small",
                " kinematics). large_kinematics is deprecated here; set it only on the strain "
                "calculator.");
+
+  // The kernel builds its F-bar Jacobian (and, for incremental F-bar, a B-bar residual term) for
+  // its own settings, so they must match the F-bar that the strain calculator applies
+  const std::string F_name = _base_name + "deformation_gradient";
+  if (_stabilize_strain != hasGuaranteedMaterialProperty(F_name, Guarantee::F_BAR))
+    paramError("stabilize_strain",
+               "stabilize_strain disagrees with the ComputeLagrangianStrain calculator. Set it to "
+               "the same value on both, e.g. in GlobalParams.");
+  if (_stabilize_strain && (_F_bar_mode == FBarMode::Incremental) !=
+                               hasGuaranteedMaterialProperty(F_name, Guarantee::F_BAR_INCREMENTAL))
+    paramError("F_bar_mode",
+               "F_bar_mode disagrees with the ComputeLagrangianStrain calculator. Set it to the "
+               "same value on both, e.g. in GlobalParams.");
 }
 
 void

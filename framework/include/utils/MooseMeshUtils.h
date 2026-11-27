@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/boundary_info.h"
 
@@ -163,7 +165,8 @@ getAllSubdomainNamesAndIDs(const libMesh::MeshBase & mesh);
 
 /**
  * Calculates the centroid of a MeshBase.
- * @param mesh input mesh whose centroid needs to be calculated
+ * @param mesh input mesh whose centroid needs to be calculated. It must be partitioned, as
+ * the centroid is summed over the local elements
  * @return a Point corresponding to the mesh centroid
  */
 Point meshCentroidCalculator(const MeshBase & mesh);
@@ -321,6 +324,38 @@ bool isCoPlanar(const std::vector<Point> & vec_pts);
  * @param input mesh over which to compute the next free block id
  */
 SubdomainID getNextFreeSubdomainID(MeshBase & input_mesh);
+
+/**
+ * Renumber the subdomains of a mesh about to be stitched into another so that the subdomain names
+ * of both meshes survive the stitching. Subdomains sharing a name are merged onto the primary
+ * mesh's ID, while a subdomain whose ID is already used for a different name in the primary mesh
+ * is moved to a free ID. Both meshes are modified: the secondary mesh's elements are renumbered,
+ * and the names of the moved subdomains are added to the primary mesh.
+ * @param mesh the primary mesh, which the secondary mesh will be stitched into
+ * @param secondary_mesh the mesh to be stitched in, whose subdomains are renumbered
+ * @param merge_same_name_across_ids whether to merge subdomains that share a name but not an ID.
+ *                                   If false, such a pair is left for the caller to handle, which
+ *                                   lets a caller that considers it an error keep reporting one
+ * @return the remapping applied to the secondary mesh, from old to new subdomain ID
+ */
+std::unordered_map<subdomain_id_type, subdomain_id_type> remapSecondarySubdomainIDsForStitching(
+    MeshBase & mesh, MeshBase & secondary_mesh, bool merge_same_name_across_ids = true);
+
+/**
+ * Renumber the boundaries of a mesh about to be stitched into another so that the boundary names
+ * of both meshes survive the stitching. A boundary whose ID is already used for a different name
+ * in the primary mesh is moved to a free ID; boundaries sharing a name keep their ID so that they
+ * still merge. Only the secondary mesh is modified.
+ * @param mesh the primary mesh, which the secondary mesh will be stitched into
+ * @param secondary_mesh the mesh to be stitched in, whose boundaries are renumbered
+ * @param ids_to_preserve boundary IDs to leave alone, such as the temporary IDs identifying the
+ *                        surfaces being stitched together
+ * @return the remapping applied to the secondary mesh, from old to new boundary ID
+ */
+std::unordered_map<boundary_id_type, boundary_id_type>
+remapSecondaryBoundaryIDsForStitching(MeshBase & mesh,
+                                      MeshBase & secondary_mesh,
+                                      const std::set<boundary_id_type> & ids_to_preserve = {});
 
 /**
  * Checks input mesh and returns the largest boundary ID in the mesh plus one, which is
@@ -563,13 +598,17 @@ void convertBlockToMesh(MeshBase & source_mesh,
  * @param avoid_merging_boundaries If true, boundary IDs in the source mesh will
  * be offset to avoid merging with boundary IDs in the destination mesh
  * @param communicator The communicator for parallel operations
+ * @param skip_preparation If true, the destination mesh is not prepared after the copy. A caller
+ * that copies many meshes in a row should set this and prepare the destination once at the end,
+ * since preparing it after every copy makes the total cost quadratic in the number of copies.
  */
 void copyIntoMesh(MeshGenerator & mg,
                   UnstructuredMesh & destination,
                   const UnstructuredMesh & source,
                   const bool avoid_merging_subdomains,
                   const bool avoid_merging_boundaries,
-                  const Parallel::Communicator & communicator);
+                  const Parallel::Communicator & communicator,
+                  const bool skip_preparation = false);
 
 /**
  * Generates meshes from edges connecting a list of points.
@@ -656,4 +695,28 @@ void addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & ha
  */
 std::vector<unsigned int> nodalQuadraturePointToNodeMap(const Elem & elem,
                                                         const std::vector<Point> & q_points);
+
+/**
+ * Stitch a list of meshes into one by repeatedly stitching neighboring pairs, so that the cost
+ * is O(N log N) in the number of meshes N instead of the O(N^2) of stitching each mesh onto one
+ * growing mesh. The left mesh of each pair absorbs the right one, and a stitch appends the
+ * elements of the right mesh after those of the left, so the elements of the result are those of
+ * meshes[0], then meshes[1], and so on. A node shared by several meshes keeps the copy of the
+ * lowest-index mesh. The element and node order is therefore the same as stitching the list one
+ * mesh after another onto meshes[0]; reporting id assignment depends on this order.
+ * @param meshes meshes to stitch, in the order their elements must appear; must not be empty
+ * @param left_boundary_id returns the id of the boundary of a given mesh that is stitched to the
+ * mesh on its right
+ * @param right_boundary_id returns the id of the boundary of a given mesh that is stitched to the
+ * mesh on its left
+ * @param clear_stitched_boundary_ids whether to clear the stitched boundary ids
+ * @param verbose whether libMesh prints stitching information
+ * @return the stitched mesh
+ */
+std::unique_ptr<ReplicatedMesh>
+stitchMeshesPairwise(std::vector<std::unique_ptr<ReplicatedMesh>> meshes,
+                     const std::function<BoundaryID(const MeshBase &)> & left_boundary_id,
+                     const std::function<BoundaryID(const MeshBase &)> & right_boundary_id,
+                     const bool clear_stitched_boundary_ids,
+                     const bool verbose);
 }

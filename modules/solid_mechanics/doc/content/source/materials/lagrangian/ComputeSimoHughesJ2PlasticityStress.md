@@ -5,6 +5,7 @@
 ## Overview
 
 This class provides a hyperelastic Neo-Hookean stress update with J2 plasticity [!cite](simo2006computational), [!cite](borden2016phase).
+It requires [!param](/Materials/ComputeLagrangianStrain/large_kinematics) set to `true` on the [`ComputeLagrangianStrain`](ComputeLagrangianStrain.md) calculator.
 
 Following a multiplicative decomposition of the deformation gradient
 \begin{equation}

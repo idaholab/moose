@@ -58,6 +58,10 @@ Cartesian Lagrange multipliers is recommended when condensing Lagrange multiplie
 The user can also employ locally oriented Lagrange multipliers [ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md),
 which minimizes the number of contact constraints for frictionless problems.
 
+The Jacobian includes the displacement derivatives of the nodal normals and tangents used in the
+weighted gap, the tangential velocities, and the projections of the Cartesian Lagrange multipliers,
+as described in [ComputeWeightedGapLMMechanicalContact](/ComputeWeightedGapLMMechanicalContact.md).
+
 !syntax description /Constraints/ComputeWeightedGapCartesianLMMechanicalContact
 
 !syntax parameters /Constraints/ComputeWeightedGapCartesianLMMechanicalContact

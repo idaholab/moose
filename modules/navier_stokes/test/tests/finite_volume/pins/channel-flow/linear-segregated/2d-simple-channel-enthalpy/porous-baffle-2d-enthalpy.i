@@ -317,6 +317,7 @@ T_initial = 300
     rho = ${rho}
     u = superficial_u
     v = superficial_v
+    use_two_term_expansion = false
   []
 
   [outlet_p]

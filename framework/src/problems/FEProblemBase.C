@@ -9775,53 +9775,60 @@ FEProblemBase::checkProblemIntegrity()
                "desired mesh modification.\n\n",
                Moose::stringify(MooseAppCoordTransform::validParams()));
 
-  // If using displacements, verify that the order of the displacement
-  // variables matches the order of the elements in the displaced
-  // mesh.
-  checkDisplacementOrders();
+  // If using displacements, verify that the displaced mesh update can move every mesh node
+  checkDisplacementNodes();
 
   // Check for postprocessor names with same name as a scalar variable
   checkDuplicatePostprocessorVariableNames();
 }
 
 void
-FEProblemBase::checkDisplacementOrders()
+FEProblemBase::checkDisplacementNodes()
 {
-  if (_displaced_problem)
+  if (!_displaced_problem)
+    return;
+
+  // The displaced mesh update moves a node with the displacement degree of freedom on it, or,
+  // for a Lagrange variable, with the nodal_soln of the element degrees of freedom. A node
+  // with neither would keep its reference position.
+  for (const auto & var_name : _displaced_problem->getDisplacementVarNames())
   {
-    bool mesh_has_second_order_elements = false;
-    for (const auto & elem : as_range(_displaced_mesh->activeLocalElementsBegin(),
-                                      _displaced_mesh->activeLocalElementsEnd()))
+    const auto & var = getVariable(
+        /*tid=*/0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+    const bool lagrange = var.feType().family == LAGRANGE;
+    const auto sys_num = var.sys().number();
+    const auto & dof_map_var = var.sys().dofMap().variable(var.number());
+    bool has_nodes_without_dofs = false;
+    bool has_first_order_prism21 = false;
+    for (const auto & elem :
+         as_range(_mesh.activeLocalElementsBegin(), _mesh.activeLocalElementsEnd()))
     {
-      if (elem->default_order() == SECOND)
-      {
-        mesh_has_second_order_elements = true;
+      if (!dof_map_var.active_on_subdomain(elem->subdomain_id()))
+        continue;
+      // libMesh's nodal_soln for Lagrange variables below SECOND order does not compute the
+      // interior node of a PRISM21 from the element degrees of freedom
+      if (lagrange && var.order() < SECOND && elem->type() == PRISM21)
+        has_first_order_prism21 = true;
+      else if (!lagrange)
+        for (const auto & node : elem->node_ref_range())
+          if (!node.n_dofs(sys_num, var.number()))
+            has_nodes_without_dofs = true;
+      if (has_nodes_without_dofs || has_first_order_prism21)
         break;
-      }
     }
 
     // We checked our local elements, so take the max over all processors.
-    _displaced_mesh->comm().max(mesh_has_second_order_elements);
-
-    // If the Mesh has second order elements, make sure the
-    // displacement variables are second-order.
-    if (mesh_has_second_order_elements)
-    {
-      const std::vector<std::string> & displacement_variables =
-          _displaced_problem->getDisplacementVarNames();
-
-      for (const auto & var_name : displacement_variables)
-      {
-        MooseVariableFEBase & mv =
-            _displaced_problem->getVariable(/*tid=*/0,
-                                            var_name,
-                                            Moose::VarKindType::VAR_ANY,
-                                            Moose::VarFieldType::VAR_FIELD_STANDARD);
-        if (mv.order() != SECOND)
-          mooseError("Error: mesh has SECOND order elements, so all displacement variables must be "
-                     "SECOND order.");
-      }
-    }
+    _mesh.comm().max(has_nodes_without_dofs);
+    _mesh.comm().max(has_first_order_prism21);
+    if (has_nodes_without_dofs)
+      mooseError("The displacement variable '",
+                 var_name,
+                 "' has no degrees of freedom on some mesh nodes, so the displaced mesh cannot be "
+                 "updated at those nodes. Use a LAGRANGE displacement variable.");
+    if (has_first_order_prism21)
+      mooseError("The displacement variable '",
+                 var_name,
+                 "' must be at least SECOND order on PRISM21 elements.");
   }
 }
 
@@ -10461,6 +10468,18 @@ FEProblemBase::reinitNeighborFaceRef(const Elem * neighbor_elem,
   if (_displaced_problem)
     _displaced_problem->reinitNeighborFaceRef(
         _displaced_mesh->elemPtr(neighbor_elem->id()), neighbor_side, tolerance, pts, weights, tid);
+}
+
+void
+FEProblemBase::reinitNeighborSurfaceElemRef(const Elem * neighbor_elem,
+                                            const std::vector<Point> & pts,
+                                            const THREAD_ID tid)
+{
+  SubProblem::reinitNeighborSurfaceElemRef(neighbor_elem, pts, tid);
+
+  if (_displaced_problem)
+    _displaced_problem->reinitNeighborSurfaceElemRef(
+        _displaced_mesh->elemPtr(neighbor_elem->id()), pts, tid);
 }
 
 void

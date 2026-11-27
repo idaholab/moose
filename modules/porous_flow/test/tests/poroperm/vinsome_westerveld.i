@@ -4,7 +4,10 @@
 # porosity = porosity_ref - thermal_opening_coeff * I
 # where I is the Vinsome-Westerveld approximation to the matrix heat content.
 # The exact heat content for a step change is I = 2 * theta * sqrt(kappa * t / pi), which is
-# also output for comparison.
+# also output for comparison, as heat_content_semi_infinite_exact.  It is exact only for a
+# semi-infinite matrix, so it differs from heat_content in the tests that set matrix_thickness.
+# Even for a semi-infinite matrix, heat_content differs from it by the error of the
+# Vinsome-Westerveld profile, which is -17.7% after the first time step (see below).
 # With dt = 3.15E6 the error at t = 3.15E7 is -5.1%.  The error decreases approximately linearly
 # as dt decreases (-3.5% with dt = 3.15E5, -3.3% with dt = 3.15E3), but it does not go to zero:
 # for a step change, the Vinsome-Westerveld profile itself gives I = (12/11) * theta * sqrt(kappa * t),
@@ -21,6 +24,20 @@
 #     = (4 - 1/4) * theta / 7 = 15 * theta / 28 = -80.357142857
 #   I = I_old + a * (theta / d - p) = 4 * (theta - 15 * theta / 28) = 13 * theta / 7 = -278.57142857
 #   porosity = 0.1 - 1E-5 * I = 0.10278571429
+#
+# The same step with matrix_thickness = L = 1 (vinsome_westerveld_thickness_one_step test):
+#   s = 2 L / d = 2,  e = exp(-s) = 0.135335283,  ap = kappa dt / d^2 = 4
+#   mu0 = 1 - e = 0.864664717,  mu1 = 1 - e (1 + s) = 0.593994150,
+#   mu2 = 2 - e (s^2 + 2 s + 2) = 0.646647168
+#   Unknowns (A, b, c) = (A, B d, C d^2) satisfy
+#     [ 1.135335283  0.270670566   0.541341133 ] [A]   [ theta = -150             ]
+#     [ 1.135335283 -2.000000000   1.729329434 ] [b] = [ theta / ap = -37.5       ]
+#     [-2.593994150  5.135335283   0.646647168 ] [c]   [ I_old / d = 0            ]
+#   so (A, b, c) = (-113.2216751, -55.7079362, -11.7798897), and
+#   I = d (mu0 A + mu1 b + mu2 c) = -138.6064081,  porosity = 0.1 - 1E-5 * I = 0.1013860641
+# With matrix_thickness = 1E6 (vinsome_westerveld_large_thickness) the results equal those without
+# it, and with matrix_thickness = 0.01 (vinsome_westerveld_small_thickness) the thin layer reaches
+# the fracture-face temperature at once, so I = theta * L = -1.5.
 [GlobalParams]
   PorousFlowDictator = dictator
 []
@@ -87,7 +104,7 @@
     pp_names = porosity
     expression = '(0.1 - porosity) / 1E-5'
   []
-  [heat_content_exact]
+  [heat_content_semi_infinite_exact]
     type = ParsedPostprocessor
     expression = '2 * (-150) * sqrt(1E-6 * t / pi)'
     constant_names = pi

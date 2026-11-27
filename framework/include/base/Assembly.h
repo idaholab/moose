@@ -676,6 +676,12 @@ public:
                              const std::vector<Real> * const weights = nullptr);
 
   /**
+   * Reinitialize FE data for a neighbor element that is itself the face, i.e. a surface element
+   * without an interior parent, with a given set of reference points on that element
+   */
+  void reinitNeighborSurfaceElemRef(const Elem * neighbor_elem, const std::vector<Point> & pts);
+
+  /**
    * Reintialize dual basis coefficients based on a customized quadrature rule
    */
   void reinitDual(const Elem * elem, const std::vector<Point> & pts, const std::vector<Real> & JxW);
@@ -2046,6 +2052,15 @@ private:
   computeSinglePointMapAD(const Elem * elem, const std::vector<Real> & qw, unsigned p, FEBase * fe);
 
   /**
+   * Fill _ad_elem_node_points with the positions of the nodes of \p elem, with derivatives with
+   * respect to the displacement degrees of freedom when \p do_derivatives is true. A node without
+   * degrees of freedom of a displacement variable, such as a TET14 face node with SECOND order
+   * displacements, is displaced by interpolating the displacement from the other element nodes, so
+   * its position depends on their degrees of freedom.
+   */
+  void computeADElemNodePoints(const Elem & elem, bool do_derivatives);
+
+  /**
    * Add local residuals of all field variables for a tag onto the tag's residual vector
    */
   void addResidual(const VectorTag & vector_tag);
@@ -2866,6 +2881,13 @@ protected:
    * Container of displacement numbers and directions
    */
   std::vector<std::pair<unsigned int, unsigned short>> _disp_numbers_and_directions;
+
+  /// The positions of the nodes of the element passed to computeADElemNodePoints
+  std::vector<VectorValue<ADReal>> _ad_elem_node_points;
+  /// Working vectors for computeADElemNodePoints
+  std::vector<dof_id_type> _ad_elem_disp_dof_indices;
+  std::vector<Number> _ad_elem_disp_unit_soln;
+  std::vector<Number> _ad_elem_disp_nodal_soln;
 
   mutable bool _calculate_xyz;
   mutable bool _calculate_face_xyz;

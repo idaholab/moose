@@ -13,7 +13,7 @@ The `SolidMechanics` system provides a cohesive zone modeling capability that ca
 5. `CZMInterfaceKernel`
 
 
-The [BreakMeshByBlockGenerator](BreakMeshByBlockGenerator.md) is utilized to create the cohesive zone interface  by splitting a monolithic mesh into blocks by adding the required nodes and boundaries between each block pair. The split mesh allows to compute a displacement jump $\llbracket u \rrbracket$ at each quadrature point on the interface. The schematic below is an example of using `BreakMeshByBlockGenerator` on a 3-blocks, 2-dimensional mesh. The generated interfaces are highlighted in yellow.
+The [BreakMeshByBlockGenerator](BreakMeshByBlockGenerator.md) is utilized to create the cohesive zone interface  by splitting a monolithic mesh into blocks by adding the required nodes and boundaries between each block pair. The split mesh allows to compute a displacement jump $\llbracket u \rrbracket$ at each quadrature point on the interface. The elements on the two sides of the interface share no nodes and are paired as [disjoint neighbors](syntax/Mesh/index.md#disjoint-neighbors). The schematic below is an example of using `BreakMeshByBlockGenerator` on a 3-blocks, 2-dimensional mesh. The generated interfaces are highlighted in yellow.
 
 !media media/solid_mechanics/BreakMeshByBlock.png
        style=width:100%;

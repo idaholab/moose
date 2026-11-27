@@ -36,32 +36,40 @@ InterfaceKernelBase::validParams()
   params.addRequiredCoupledVar("neighbor_var", "The variable on the other side of the interface.");
   params.registerBase("InterfaceKernel");
   params.registerSystemAttributeName("InterfaceKernel");
-  params.addParam<std::vector<AuxVariableName>>(
+  params.addDeprecatedParam<std::vector<AuxVariableName>>(
       "save_in",
       {},
       "The name of auxiliary variables to save this Kernel's residual contributions to. "
       " Everything about that variable must match everything about this variable (the "
-      "type, what blocks it's on, etc.)");
-  params.addParam<std::vector<AuxVariableName>>(
+      "type, what blocks it's on, etc.)",
+      "Add this object's residual to a tagged vector with 'extra_vector_tags', then transfer that "
+      "vector into an auxiliary variable with a TagVectorAux");
+  params.addDeprecatedParam<std::vector<AuxVariableName>>(
       "diag_save_in",
       {},
       "The name of auxiliary variables to save this Kernel's diagonal Jacobian "
       "contributions to. Everything about that variable must match everything "
-      "about this variable (the type, what blocks it's on, etc.)");
+      "about this variable (the type, what blocks it's on, etc.)",
+      "Add this object's Jacobian to a tagged matrix with 'extra_matrix_tags', then transfer that "
+      "matrix diagonal into an auxiliary variable with a TagMatrixAux");
 
   MultiMooseEnum save_in_var_side("m s");
-  params.addParam<MultiMooseEnum>(
+  params.addDeprecatedParam<MultiMooseEnum>(
       "save_in_var_side",
       save_in_var_side,
       "This parameter must exist if save_in variables are specified and must have the same length "
       "as save_in. This vector specifies whether the corresponding aux_var should save-in "
-      "residual contributions from the primary ('p') or secondary side ('s').");
-  params.addParam<MultiMooseEnum>(
+      "residual contributions from the primary ('p') or secondary side ('s').",
+      "Add this object's residual to a tagged vector with 'extra_vector_tags', then transfer that "
+      "vector into an auxiliary variable with a TagVectorAux");
+  params.addDeprecatedParam<MultiMooseEnum>(
       "diag_save_in_var_side",
       save_in_var_side,
       "This parameter must exist if diag_save_in variables are specified and must have the same "
       "length as diag_save_in. This vector specifies whether the corresponding aux_var should "
-      "save-in jacobian contributions from the primary ('p') or secondary side ('s').");
+      "save-in jacobian contributions from the primary ('p') or secondary side ('s').",
+      "Add this object's Jacobian to a tagged matrix with 'extra_matrix_tags', then transfer that "
+      "matrix diagonal into an auxiliary variable with a TagMatrixAux");
   params.addParamNamesToGroup("diag_save_in save_in save_in_var_side diag_save_in_var_side",
                               "Residual and Jacobian debug output");
 

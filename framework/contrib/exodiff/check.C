@@ -343,27 +343,43 @@ Check_Elmt_Block_Connectivity(Exo_Block<INT> * block1, Exo_Block<INT> * block2)
 
   block1->Load_Connectivity();
   block2->Load_Connectivity();
-  const INT * conn1 = block1->Connectivity();
-  const INT * conn2 = block2->Connectivity();
 
-  SMART_ASSERT(block1->Size() == 0 || block1->Num_Nodes_per_Elmt() == 0 || conn1 != nullptr);
-  SMART_ASSERT(block2->Size() == 0 || block2->Num_Nodes_per_Elmt() == 0 || conn2 != nullptr);
+  SMART_ASSERT(block1->Size() == 0 || block1->Num_Nodes_per_Elmt() == 0 ||
+               block1->Connectivity() != nullptr);
+  SMART_ASSERT(block2->Size() == 0 || block2->Num_Nodes_per_Elmt() == 0 ||
+               block2->Connectivity() != nullptr);
 
-  size_t node_count = block1->Size() * block1->Num_Nodes_per_Elmt();
-  SMART_ASSERT(node_count == block2->Size() * block2->Num_Nodes_per_Elmt());
+  SMART_ASSERT(block1->Size() == block2->Size());
 
-  for (size_t e = 0; e < node_count; ++e)
+  // Walk element by element rather than over the flattened connectivity, since the elements of a
+  // polygon block have differing node counts.
+  for (size_t elem = 0; elem < block1->Size() && is_same; ++elem)
   {
-    if (conn1[e] != conn2[e])
+    const INT * conn1 = block1->Connectivity(elem);
+    const INT * conn2 = block2->Connectivity(elem);
+
+    // Polygon blocks pass Check_Elmt_Block_Params() when their *total* node counts match,
+    // so we more strictly compare each element's count here.
+    if (block1->Num_Nodes_per_Elmt(elem) != block2->Num_Nodes_per_Elmt(elem))
     {
-      size_t elem = e / block2->Num_Nodes_per_Elmt();
-      size_t node = e % block2->Num_Nodes_per_Elmt();
-      ERROR(".. Connectivities in block id " << block1->Id() << " are not the same.\n"
-                                             << "                  First difference is node "
-                                             << node + 1 << " of local element " << elem + 1
-                                             << '\n');
+      ERROR(".. Block " << block1->Id() << ": number of nodes in local element " << elem + 1
+                        << " doesn't agree (" << block1->Num_Nodes_per_Elmt(elem) << " != "
+                        << block2->Num_Nodes_per_Elmt(elem) << ").\n");
       is_same = false;
       break;
+    }
+
+    for (size_t node = 0; node < block1->Num_Nodes_per_Elmt(elem); ++node)
+    {
+      if (conn1[node] != conn2[node])
+      {
+        ERROR(".. Connectivities in block id " << block1->Id() << " are not the same.\n"
+                                               << "                  First difference is node "
+                                               << node + 1 << " of local element " << elem + 1
+                                               << '\n');
+        is_same = false;
+        break;
+      }
     }
   }
   block2->Free_Connectivity();

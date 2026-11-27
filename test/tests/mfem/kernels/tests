@@ -76,6 +76,53 @@
       detail = 'and p-refinement.'
     []
   []
+  [MFEML2ZZDefaultFluxSpaces]
+    design = 'MFEML2ZienkiewiczZhuIndicator.md'
+    issues = '#34195'
+    requirement = 'The system shall refine an MFEM mesh with the L2 Zienkiewicz-Zhu indicator using '
+                  'default flux spaces compatible with'
+    [elasticity]
+      type = CSVDiff
+      input = elasticity_amr.i
+      csvdiff = 'OutputData/ElasticityAMR.csv'
+      capabilities = 'mfem'
+      compute_devices = 'cpu cuda'
+      recover = false
+      max_parallel = 7 # mfem/mfem#5797
+      detail = 'the stress of a linear elasticity kernel in 3D,'
+    []
+    [curlcurl]
+      type = CSVDiff
+      input = curlcurl_amr.i
+      csvdiff = 'OutputData/CurlCurlAMR.csv'
+      capabilities = 'mfem'
+      compute_devices = 'cpu cuda'
+      recover = false
+      detail = 'the curl of a curl-curl kernel in 2D,'
+    []
+    [curlcurl_3d]
+      type = CSVDiff
+      input = curlcurl.i
+      cli_args = 'Mesh/nonconforming=true '
+                 'Adaptivity/Indicators/l2zz/type=MFEML2ZienkiewiczZhuIndicator '
+                 'Adaptivity/Indicators/l2zz/variable=e_field '
+                 'Adaptivity/Indicators/l2zz/kernel=curlcurl '
+                 'Adaptivity/Markers/ref/type=MFEMRefinementMarker '
+                 'Adaptivity/Markers/ref/indicator=l2zz '
+                 'Adaptivity/Markers/ref/threshold=0.7 '
+                 'Adaptivity/Markers/ref/max_h_level=1 '
+                 'VectorPostprocessors/active="" '
+                 'Postprocessors/l2_error/type=MFEMVectorL2Error '
+                 'Postprocessors/l2_error/variable=e_field '
+                 'Postprocessors/l2_error/function=exact_e_field '
+                 'Outputs/CSV/file_base=OutputData/CurlCurl3DAMR'
+      csvdiff = 'OutputData/CurlCurl3DAMR.csv'
+      capabilities = 'mfem'
+      compute_devices = 'cpu cuda'
+      recover = false
+      detail = 'and the curl of a curl-curl kernel in 3D.'
+    []
+  []
   [MFEMDiffusionPartial]
     type = CSVDiff
     input = diffusion.i

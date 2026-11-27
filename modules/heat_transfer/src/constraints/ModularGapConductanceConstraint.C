@@ -10,6 +10,7 @@
 #include "ModularGapConductanceConstraint.h"
 #include "GapFluxModelBase.h"
 #include "GapFluxModelPressureDependentConduction.h"
+#include "ADUtils.h"
 #include "AutomaticMortarGeneration.h"
 
 #include "MooseError.h"
@@ -29,6 +30,42 @@ ModularGapConductanceConstraint::validParams()
   params.addParam<std::vector<UserObjectName>>("gap_flux_models",
                                                "List of GapFluxModel user objects");
   params.addCoupledVar("displacements", "Displacement variables");
+
+  // The nodal normal at a secondary node depends on every face incident to it. When the
+  // displacements are solved with the temperature, the Jacobian therefore couples the secondary
+  // face point neighbors. The variables exist by the time the coupling functors are added.
+  params.addRelationshipManager(
+      "AugmentSparsityOnInterface",
+      Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
+        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+        rm_params.set<BoundaryName>("secondary_boundary") =
+            obj_params.get<BoundaryName>("secondary_boundary");
+        rm_params.set<BoundaryName>("primary_boundary") =
+            obj_params.get<BoundaryName>("primary_boundary");
+        rm_params.set<SubdomainName>("secondary_subdomain") =
+            obj_params.get<SubdomainName>("secondary_subdomain");
+        rm_params.set<SubdomainName>("primary_subdomain") =
+            obj_params.get<SubdomainName>("primary_subdomain");
+        rm_params.set<bool>("ghost_higher_d_neighbors") =
+            obj_params.get<bool>("ghost_higher_d_neighbors");
+        // Relationship manager callbacks also run before the problem and its variables exist
+        const auto & problem =
+            obj_params.get<MooseApp *>(MooseBase::app_param)->actionWarehouse().problemBase();
+        if (!problem || !obj_params.isParamValid("displacements") ||
+            !obj_params.isParamValid("secondary_variable"))
+          return;
+        const auto & temperature = obj_params.get<VariableName>("secondary_variable");
+        const auto displacements = obj_params.getVecMooseType("displacements");
+        if (!problem->hasVariable(temperature))
+          return;
+        for (const auto & disp : displacements)
+          if (!problem->hasVariable(disp))
+            return;
+        rm_params.set<bool>("ghost_point_neighbors") =
+            displacementsShareSystem(*problem, temperature, displacements);
+      });
 
   MooseEnum gap_geometry_type("AUTO PLATE CYLINDER SPHERE", "AUTO");
   params.addParam<MooseEnum>(
@@ -76,8 +113,19 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     _adjusted_length(0.0),
     _disp_x_var(getVar("displacements", 0)),
     _disp_y_var(getVar("displacements", 1)),
-    _disp_z_var(_n_disp == 3 ? getVar("displacements", 2) : nullptr)
+    _disp_z_var(_n_disp == 3 ? getVar("displacements", 2) : nullptr),
+    _nodal_frames(std::array<const MooseVariable *, 3>{{_disp_x_var, _disp_y_var, _disp_z_var}}),
+    // Displacements solved in another system or as auxiliary variables enter the gap width with
+    // the stored normals only
+    _normal_derivatives(_displaced && _n_disp &&
+                        Moose::Mortar::supportsNodalNormalDerivatives(
+                            {{_disp_x_var, _disp_y_var, _disp_z_var}}, _sys))
 {
+  if (!interpolateNormals())
+    paramError("interpolate_normals",
+               "The gap width is evaluated at quadrature points and requires interpolated "
+               "normals.");
+
   if (_n_disp && !getParam<bool>("use_displaced_mesh"))
     paramWarning("displacements",
                  "You are coupling displacement variables but are evaluating the gap width on the "
@@ -126,6 +174,36 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     // add gap model to list
     _gap_flux_models.push_back(&gap_model);
   }
+}
+
+void
+ModularGapConductanceConstraint::residualSetup()
+{
+  ADMortarConstraint::residualSetup();
+  _nodal_frames.clear();
+  _qp_normals_msm_elem = nullptr;
+}
+
+void
+ModularGapConductanceConstraint::jacobianSetup()
+{
+  ADMortarConstraint::jacobianSetup();
+  _nodal_frames.clear();
+  _qp_normals_msm_elem = nullptr;
+}
+
+const ADRealVectorValue &
+ModularGapConductanceConstraint::qpNormal()
+{
+  // The secondary face quadrature points are those of the current mortar segment
+  if (_qp_normals_msm_elem != _msm_elem)
+  {
+    const bool do_derivatives = _normal_derivatives && Moose::doDerivatives(_subproblem, _sys);
+    _qp_normals = _nodal_frames.interpolatedNormals(
+        amg(), *_lower_secondary_elem, _qrule_face->get_points(), _normals, do_derivatives);
+    _qp_normals_msm_elem = _msm_elem;
+  }
+  return _qp_normals[_qp];
 }
 
 void
@@ -371,11 +449,13 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
 
       // ...which uses the derivative vector of the primary and secondary displacements as
       // an approximation of the true phys points derivatives when the mesh is displacing
-      if (_displaced)
+      if (_displaced && _n_disp)
       {
         // Trim interior node variable derivatives
         const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
-            *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
+            *_lower_primary_elem,
+            AutomaticMortarGeneration::primaryInteriorParentOrSelf(*_lower_primary_elem),
+            *_lower_secondary_elem);
         const auto & secondary_ip_lowerd_map =
             amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
 
@@ -401,7 +481,7 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
       }
 
       // compute an ADReal gap width to pass to each gap flux model
-      _gap_width = (ad_phys_points_primary - ad_phys_points_secondary) * _normals[_qp];
+      _gap_width = (ad_phys_points_primary - ad_phys_points_secondary) * qpNormal();
 
       // First, compute radii with _gap_width
       computeGapRadii(_gap_width);
@@ -412,18 +492,36 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
       // Ensure energy balance for non-flat (non-PLATE) general geometries when using radiation
       _surface_integration_factor = computeSurfaceIntegrationFactor();
 
-      // Sum up all flux contributions from all supplied gap flux models
-      ADReal flux = 0.0;
-      for (const auto & model : _gap_flux_models)
-        flux += model->computeFluxInternal(*this);
-
       // The Lagrange multiplier _is_ the gap flux
-      return (_lambda[_qp] - flux) * _test[_i][_qp];
+      return (_lambda[_qp] - computeGapFlux()) * _test[_i][_qp];
     }
 
     default:
       return 0;
   }
+}
+
+bool
+ModularGapConductanceConstraint::displacementsShareSystem(
+    const FEProblemBase & problem,
+    const VariableName & temperature,
+    const std::vector<std::string> & displacements)
+{
+  const auto temperature_sys = problem.systemNumForVariable(temperature);
+  for (const auto & disp : displacements)
+    if (problem.systemNumForVariable(disp) != temperature_sys)
+      return false;
+  return true;
+}
+
+ADReal
+ModularGapConductanceConstraint::computeGapFlux()
+{
+  // Sum up all flux contributions from all supplied gap flux models
+  ADReal flux = 0.0;
+  for (const auto & model : _gap_flux_models)
+    flux += model->computeFluxInternal(*this);
+  return flux;
 }
 
 void

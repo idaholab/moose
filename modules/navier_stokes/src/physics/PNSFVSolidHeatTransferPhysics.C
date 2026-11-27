@@ -9,8 +9,8 @@
 
 #include "PNSFVSolidHeatTransferPhysics.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
-#include "WCNSFVFlowPhysics.h"
-#include "WCNSFVFluidHeatTransferPhysics.h"
+#include "WCNSFVFlowPhysicsBase.h"
+#include "WCNSFVFluidHeatTransferPhysicsBase.h"
 #include "NSFVBase.h"
 
 registerPhysicsBaseTasks("NavierStokesApp", PNSFVSolidHeatTransferPhysics);
@@ -260,15 +260,7 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyAmbientConvection()
 {
   const auto num_convection_blocks = _ambient_convection_blocks.size();
   const auto num_used_blocks = num_convection_blocks ? num_convection_blocks : 1;
-
-  // Check parameter. Late check in case the block was added by a Component
-  if (num_used_blocks != _ambient_convection_alpha.size())
-    paramError("ambient_convection_alpha",
-               "Number of ambient convection heat transfer coefficients (" +
-                   std::to_string(_ambient_convection_alpha.size()) +
-                   ") should match the number of "
-                   "blocks (" +
-                   std::to_string(num_convection_blocks) + ") each HTC is defined on.");
+  checkAmbientConvectionParameters();
 
   const auto kernel_type = "PINSFVEnergyAmbientConvection";
   InputParameters params = getFactory().getValidParams(kernel_type);
@@ -315,6 +307,22 @@ PNSFVSolidHeatTransferPhysics::addPINSSolidEnergyExternalHeatSource()
   params.set<Real>("coef") = getParam<Real>("external_heat_source_coeff");
 
   getProblem().addFVKernel(kernel_type, prefix() + "external_heat_source", params);
+}
+
+void
+PNSFVSolidHeatTransferPhysics::checkAmbientConvectionParameters() const
+{
+  const auto num_convection_blocks = _ambient_convection_blocks.size();
+  const auto num_used_blocks = num_convection_blocks ? num_convection_blocks : 1;
+
+  // Check parameter. Late check in case the block was added by a Component
+  if (num_used_blocks != _ambient_convection_alpha.size())
+    paramError("ambient_convection_alpha",
+               "Number of ambient convection heat transfer coefficients (" +
+                   std::to_string(_ambient_convection_alpha.size()) +
+                   ") should match the number of "
+                   "blocks (" +
+                   std::to_string(num_convection_blocks) + ") each HTC is defined on.");
 }
 
 bool
@@ -427,9 +435,9 @@ void
 PNSFVSolidHeatTransferPhysics::checkFluidAndSolidHeatTransferPhysicsParameters() const
 {
   // Get a pointer to a flow physics and a heat transfer physics on the same blocks, if it exists
-  const WCNSFVFlowPhysics * flow_physics = nullptr;
-  const WCNSFVFluidHeatTransferPhysics * fluid_energy_physics = nullptr;
-  const auto all_flow_physics = getCoupledPhysics<const WCNSFVFlowPhysics>(/*allow_fail=*/true);
+  const WCNSFVFlowPhysicsBase * flow_physics = nullptr;
+  const WCNSFVFluidHeatTransferPhysicsBase * fluid_energy_physics = nullptr;
+  const auto all_flow_physics = getCoupledPhysics<const WCNSFVFlowPhysicsBase>(/*allow_fail=*/true);
   for (const auto physics : all_flow_physics)
     if (checkBlockRestrictionIdentical(
             physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
@@ -440,7 +448,7 @@ PNSFVSolidHeatTransferPhysics::checkFluidAndSolidHeatTransferPhysicsParameters()
       flow_physics = physics;
     }
   const auto all_fluid_energy_physics =
-      getCoupledPhysics<const WCNSFVFluidHeatTransferPhysics>(/*allow_fail=*/true);
+      getCoupledPhysics<const WCNSFVFluidHeatTransferPhysicsBase>(/*allow_fail=*/true);
   for (const auto physics : all_fluid_energy_physics)
     if (checkBlockRestrictionIdentical(
             physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
