@@ -1,0 +1,50 @@
+Content:
+    kokkos_workshop:
+        root_dir: ${MOOSE_DIR}/tutorials/kokkos_workshop/doc/content
+        content:
+            - kokkos_workshop/**
+            - index.md
+    moose:
+        root_dir: ${MOOSE_DIR}/framework/doc/content
+        content:
+            - large_media/tutorials/INL_logo.png
+            - syntax/Kokkos/kokkos_separate_compile.png
+            - contrib/**
+            - css/**
+            - js/**
+
+Executioner:
+    type: MooseDocs.base.Serial
+
+Renderer:
+    type: MooseDocs.base.RevealRenderer
+    theme: simple
+
+Extensions:
+    disable_defaults: True
+    MooseDocs.extensions.alert: default
+    MooseDocs.extensions.comment: default
+    MooseDocs.extensions.command: default
+    MooseDocs.extensions.core: default
+    MooseDocs.extensions.config: default
+    MooseDocs.extensions.media: default
+    MooseDocs.extensions.floats: default
+    MooseDocs.extensions.include: default
+    MooseDocs.extensions.katex: default
+    MooseDocs.extensions.style: default
+    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.materialicon: default
+    MooseDocs.extensions.heading: default
+    MooseDocs.extensions.shortcut: default
+    MooseDocs.extensions.table: default
+    MooseDocs.extensions.layout: default
+    MooseDocs.extensions.content: default
+    MooseDocs.extensions.modal: default
+    MooseDocs.extensions.listing:
+        modal-link: False
+    MooseDocs.extensions.reveal:
+        translate: kokkos_workshop/index.md
+        background_image: tutorials/INL_logo.png
+        background_position: bottom 30px center
+        background_size: auto 4%
+    MooseDocs.extensions.datetime: default

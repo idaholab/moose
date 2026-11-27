@@ -1,0 +1,44 @@
+[Tests]
+  issues = '#30655'
+  design = 'syntax/KokkosKernels/index.md'
+
+  [ex3]
+    requirement = 'The Kokkos-MOOSE workshop solutions shall solve nonlinear diffusion with a linearly solution-dependent conductivity, matching the exact solution, with a Kokkos kernel'
+    [kernel]
+      type = CSVDiff
+      input = 'ex3.i'
+      csvdiff = 'ex3_out.csv'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'derived from the general kernel base class,'
+    []
+    [kernel_grad]
+      type = CSVDiff
+      input = 'ex3.i'
+      cli_args = 'Kernels/diff/type=KokkosNonlinearDiffusionGrad'
+      csvdiff = 'ex3_out.csv'
+      prereq = 'ex3/kernel'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'derived from the optimized kernel base class for gradient test functions,'
+    []
+    [jacobian]
+      type = PetscJacobianTester
+      input = 'ex3.i'
+      cli_args = 'Mesh/gen/nx=3 Mesh/gen/ny=3 Outputs/csv=false'
+      recover = false
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'with an exact Jacobian for the general kernel, and'
+    []
+    [jacobian_grad]
+      type = PetscJacobianTester
+      input = 'ex3.i'
+      cli_args = 'Kernels/diff/type=KokkosNonlinearDiffusionGrad Mesh/gen/nx=3 Mesh/gen/ny=3 Outputs/csv=false'
+      recover = false
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda xpu'
+      detail = 'with an exact Jacobian for the optimized kernel.'
+    []
+  []
+[]
