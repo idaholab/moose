@@ -2,7 +2,7 @@
 # REMEMBER TO UPDATE the .yaml files for the following packages:
 #   moose/conda_build_config.yaml
 # As well as any directions pertaining to modifying those files.
-{% set version = "2026.11.12" %}
+{% set version = "2026.11.26" %}
 
 package:
   name: moose-dev
@@ -20,14 +20,14 @@ build:
     # things that depend on this moose-dev must use the
     # exact moose-* packages that this was built with
     - moose-build 2026.11.24 {{ mpi }}
-    - moose-libmesh 2026.10.21_69c4f84 {{ mpi }}_1
+    - moose-libmesh 2026.11.25_0be1b9d {{ mpi }}_0
     - moose-wasp 2026.10.22_4eb02a2 build_1
     - moose-tools 2026.11.24
 
 requirements:
   run:
     - moose-build 2026.11.24 {{ mpi }}
-    - moose-libmesh 2026.10.21_69c4f84 {{ mpi }}_1
+    - moose-libmesh 2026.11.25_0be1b9d {{ mpi }}_0
     - moose-wasp 2026.10.22_4eb02a2 build_1
     - moose-tools 2026.11.24
     # Python dependencies of the optional NEML2 build (update_and_rebuild_neml2.sh)
