@@ -1,0 +1,28 @@
+[Tests]
+  design = 'Axisymmetric2D3DSolutionFunction.md'
+  issues = '#32880'
+
+  [step1_simple_rz]
+    type = Exodiff
+    input = 'simple_2d.i'
+    exodiff = 'simple_2d_out.e'
+    recover = false
+    restep = false
+    requirement = 'The system shall accumulate plastic eigenstrains in a 2D RZ plasticity '
+                  'simulation and write the four cylindrical eigenstrain components to an '
+                  'Exodus file for use in a 3D restart.'
+  []
+
+  [step2_restart_3d]
+    type = Exodiff
+    input = 'restart_3d.i'
+    exodiff = 'restart_3d_out.e'
+    prereq = step1_simple_rz
+    recover = false
+    restep = false
+    requirement = 'The system shall read cylindrical eigenstrain components from a 2D RZ '
+                  'solution, rotate them to 3D Cartesian coordinates using '
+                  'Axisymmetric2D3DSolutionFunction tensor mode, and produce an equilibrated '
+                  'stress field in a 3D elastic solve.'
+  []
+[]
