@@ -147,6 +147,8 @@ NonlinearSystem::solve()
       _fe_problem.needsPreviousNewtonIteration())
     _nl_implicit_sys.nonlinear_solver->postcheck = Moose::compute_postcheck;
 
+  updateExactConstraints();
+
   if (shouldEvaluatePreSMOResidual())
   {
     TIME_SECTION("nlPreSMOResidual", 3, "Computing Pre-SMO Residual");

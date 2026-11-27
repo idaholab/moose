@@ -80,6 +80,17 @@
     requirement = 'The system shall be able to solve nonlinear eigenvalue problems with hanging node constraints.'
   []
 
+  [newton_hanging_nodes]
+    type = CSVDiff
+    input = 'ne.i'
+    cli_args = "Mesh/refine/refinement='1 0' Executioner/solve_type=NEWTON
+                Outputs/file_base=newton_hanging_nodes"
+    csvdiff = 'newton_hanging_nodes_eigenvalues_0001.csv'
+    capabilities = 'slepc>=3.8.0'
+    requirement = 'The system shall be able to solve nonlinear eigenvalue problems with hanging '
+                  'node constraints using Newton with assembled matrices.'
+  []
+
   [./ne_deficient]
     type = 'CSVDiff'
     input = 'ne_deficient_b.i'

@@ -50,6 +50,8 @@
 #include "NodeElemConstraintBase.h"
 #include "MortarConstraint.h"
 #include "ElemElemConstraint.h"
+#include "MultiPointConstraint.h"
+#include "ExactConstraintFunctor.h"
 #include "ScalarKernelBase.h"
 #include "Parser.h"
 #include "Split.h"
@@ -620,8 +622,35 @@ NonlinearSystemBase::addConstraint(const std::string & c_name,
   _constraints.addObject(constraint);
   postAddResidualObject(*constraint);
 
+  // Exact constraints are applied by the DofMap through one libMesh constraint object per system
+  if (constraint->usesExactConstraints() && !_exact_constraint_functor)
+  {
+    auto attach_functor = [this, &name](SystemBase & constrained_sys,
+                                        std::unique_ptr<ExactConstraintFunctor> & functor)
+    {
+      if (constrained_sys.system().has_constraint_object())
+        mooseError("Another constraint object is already attached to the libMesh system '",
+                   constrained_sys.system().name(),
+                   "', so the exact constraints of '",
+                   name,
+                   "' cannot be applied.");
+
+      functor = std::make_unique<ExactConstraintFunctor>(*this, constrained_sys);
+      constrained_sys.system().attach_constraint_object(*functor);
+    };
+
+    attach_functor(*this, _exact_constraint_functor);
+
+    // The displaced DofMap reduces the element matrices of objects on the displaced mesh. It shares
+    // the dof numbering of this system, so it gets the same exact constraints
+    if (auto displaced_problem = _fe_problem.getDisplacedProblem())
+      attach_functor(displaced_problem->solverSys(number()), _displaced_exact_constraint_functor);
+  }
+
+  // libMesh adds the sparsity entries of an exact constraint when it builds the sparsity pattern
   if (!_fe_problem.useHashTableMatrixAssembly())
-    if (constraint && constraint->addCouplingEntriesToJacobian())
+    if (constraint && !constraint->usesExactConstraints() &&
+        constraint->addCouplingEntriesToJacobian())
       addImplicitGeometricCouplingEntriesToJacobian(true);
 }
 
@@ -4270,6 +4299,43 @@ NonlinearSystemBase::computeScaling()
 
   _computed_scaling = true;
   return true;
+}
+
+void
+NonlinearSystemBase::reinitExactConstraints()
+{
+  if (_exact_constraint_functor)
+    _exact_constraint_functor->reinit();
+  if (_displaced_exact_constraint_functor)
+    _displaced_exact_constraint_functor->reinit();
+}
+
+void
+NonlinearSystemBase::updateExactConstraints()
+{
+  if (!_exact_constraint_functor)
+    return;
+
+  // Every constraint is asked, because asking is how it records the coefficients it emitted
+  bool changed = false;
+  std::vector<const Constraint *> active_constraints;
+  for (const auto & constraint : _constraints.getActiveObjects())
+    if (constraint->usesExactConstraints())
+    {
+      active_constraints.push_back(constraint.get());
+      if (constraint->exactConstraintsChanged())
+        changed = true;
+    }
+
+  // A Control that enables or disables a constraint adds or removes its exact constraints
+  if (active_constraints != _exact_constraint_functor->appliedConstraints())
+    changed = true;
+
+  // The rebuild is collective
+  _communicator.max(changed);
+
+  if (changed)
+    reinitExactConstraints();
 }
 
 bool

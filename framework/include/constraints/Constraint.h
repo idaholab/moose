@@ -13,6 +13,11 @@
 #include "NeighborResidualObject.h"
 #include "GeometricSearchInterface.h"
 
+namespace libMesh
+{
+class DofMap;
+}
+
 /**
  * Base class for all Constraint types
  */
@@ -22,6 +27,25 @@ public:
   static InputParameters validParams();
 
   Constraint(const InputParameters & parameters);
+
+  /**
+   * @return Whether this constraint adds exact constraints instead of a residual
+   */
+  virtual bool usesExactConstraints() const { return false; }
+
+  /**
+   * Add the exact constraints of this object. Every rank must call this. Each rank adds the rows
+   * of the dependent nodes that it owns, and libMesh sends each row to the other ranks that need
+   * it.
+   * @param dof_map The DofMap that receives the exact constraints
+   */
+  virtual void addExactConstraints(libMesh::DofMap & /*dof_map*/) const {}
+
+  /**
+   * @return Whether the coefficients of the exact constraints changed since the last call. This
+   * method is not const, because an implementation can record the coefficients that it compares.
+   */
+  virtual bool exactConstraintsChanged() { return false; }
 
   virtual bool addCouplingEntriesToJacobian() { return true; }
   virtual void subdomainSetup() override final
