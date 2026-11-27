@@ -1,0 +1,217 @@
+[Tests]
+  issues = '#30655'
+
+  [aqueous_equilibrium]
+    type = 'Exodiff'
+    input = 'kokkos_aqueous_equilibrium.i'
+    exodiff = 'kokkos_aqueous_equilibrium_out.e'
+    rel_err = 1e-5
+    requirement = 'The Kokkos system shall compute the transport of primary species by diffusion and convection with equilibrium reactions, together with the secondary equilibrium species concentrations.'
+    design = 'KokkosPrimaryTimeDerivative.md KokkosPrimaryDiffusion.md KokkosPrimaryConvection.md KokkosChemicalOutFlowBC.md KokkosCoupledBEEquilibriumSub.md KokkosCoupledDiffusionReactionSub.md KokkosCoupledConvectionReactionSub.md KokkosAqueousEquilibriumRxnAux.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu'
+  []
+
+  [aqueous_equilibrium_physics]
+    type = 'Exodiff'
+    input = 'kokkos_aqueous_equilibrium_physics.i'
+    exodiff = 'kokkos_aqueous_equilibrium_physics_out.e'
+    rel_err = 1e-5
+    requirement = 'The system shall be able to use a shorthand physics syntax to create a two-species aqueous equilibrium reactions simulation with Kokkos objects.'
+    design = 'AqueousReactionsEquilibriumPhysics.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu'
+  []
+
+  [co2_h2o]
+    type = 'CSVDiff'
+    input = 'kokkos_reaction_network_co2_h2o.i'
+    csvdiff = 'kokkos_reaction_network_co2_h2o_out.csv'
+    requirement = 'The system shall be able to use the shorthand reaction network syntax with Kokkos objects to solve for the aqueous equilibrium of the dissolution of carbon dioxide in water together with the pH and the total primary species concentrations.'
+    design = 'ReactionNetwork/AqueousEquilibriumReactions/index.md KokkosPHAux.md KokkosTotalConcentrationAux.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu'
+  []
+
+  [reaction_network]
+    requirement = 'The system shall be able to use the shorthand reaction network syntax with Kokkos objects to solve for'
+    design = 'ReactionNetwork/AqueousEquilibriumReactions/index.md ReactionNetwork/SolidKineticReactions/index.md KokkosPHAux.md'
+    [equilibrium]
+      type = 'Exodiff'
+      input = 'kokkos_reaction_network_equilibrium.i'
+      exodiff = 'kokkos_reaction_network_equilibrium_out.e'
+      detail = 'aqueous equilibrium reactions coupled with advection using the Darcy equation,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [water_dissociation]
+      type = 'CSVDiff'
+      input = 'kokkos_reaction_network_water_dissociation.i'
+      csvdiff = 'kokkos_reaction_network_water_dissociation_out.csv'
+      detail = 'aqueous equilibrium reactions without advection together with the pH,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [kinetic]
+      type = 'Exodiff'
+      input = 'kokkos_reaction_network_kinetic.i'
+      exodiff = 'kokkos_reaction_network_kinetic_out.e'
+      max_parallel = 1
+      detail = 'solid kinetic reactions, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [jacobian]
+      type = 'PetscJacobianTester'
+      input = 'kokkos_reaction_network_jacobian.i'
+      ratio_tol = 1e-7
+      difference_tol = 1e-6
+      detail = 'aqueous equilibrium reactions with a perfect Jacobian.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+  []
+
+  [kinetic_rate]
+    type = 'Exodiff'
+    input = 'kokkos_kinetic_rate.i'
+    exodiff = 'kokkos_kinetic_rate_out.e'
+    requirement = 'The Kokkos system shall compute the temperature-dependent kinetic rates and concentrations of secondary kinetic species.'
+    design = 'KokkosCoupledBEKinetic.md KokkosKineticDisPreRateAux.md KokkosKineticDisPreConcAux.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu'
+  []
+
+  [equilibrium_constant]
+    requirement = 'The Kokkos system shall compute the equilibrium constant of an equilibrium species from'
+    design = 'KokkosEquilibriumConstantAux.md'
+    [maier_kelley]
+      type = 'Exodiff'
+      input = 'kokkos_equilibrium_constant.i'
+      exodiff = 'kokkos_equilibrium_constant_out.e'
+      detail = 'a Maier-Kelley fit of eight or more data points,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [linear]
+      type = 'Exodiff'
+      input = 'kokkos_equilibrium_constant_linear.i'
+      exodiff = 'kokkos_equilibrium_constant_linear_out.e'
+      detail = 'a linear fit of two to four data points, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [constant]
+      type = 'Exodiff'
+      input = 'kokkos_equilibrium_constant_constant.i'
+      exodiff = 'kokkos_equilibrium_constant_constant_out.e'
+      detail = 'a single data point.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+  []
+
+  [langmuir_desorption]
+    requirement = 'The Kokkos system shall compute the desorption from the matrix to the porespace'
+    design = 'KokkosDesorptionFromMatrix.md KokkosDesorptionToPorespace.md KokkosLangmuirMaterial.md KokkosMollifiedLangmuirMaterial.md'
+    [langmuir]
+      type = 'CSVDiff'
+      input = 'kokkos_langmuir_desorption.i'
+      csvdiff = 'kokkos_langmuir_desorption_out.csv'
+      rel_err = 1.0E-5
+      detail = 'with a Langmuir model,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [mollified]
+      type = 'CSVDiff'
+      input = 'kokkos_mollified_langmuir_desorption.i'
+      csvdiff = 'kokkos_mollified_langmuir_desorption_out.csv'
+      rel_err = 1.0E-5
+      detail = 'with a mollified Langmuir model,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [adsorption_jacobian]
+      type = 'PetscJacobianTester'
+      input = 'kokkos_langmuir_jacobian.i'
+      ratio_tol = 1E-6
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'with a perfect Jacobian for adsorption with the Langmuir model,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [desorption_jacobian]
+      type = 'PetscJacobianTester'
+      input = 'kokkos_langmuir_desorption_jacobian.i'
+      ratio_tol = 1E-6
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'with a perfect Jacobian for desorption with the Langmuir model, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [mollified_jacobian]
+      type = 'PetscJacobianTester'
+      input = 'kokkos_mollified_langmuir_jacobian.i'
+      ratio_tol = 1E-6
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1'
+      detail = 'with a perfect Jacobian for the mollified Langmuir model.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+  []
+
+  [mineral_volume_fraction]
+    type = 'CSVDiff'
+    input = 'kokkos_mineral_volume_fraction.i'
+    csvdiff = 'kokkos_mineral_volume_fraction_out.csv'
+    requirement = 'The Kokkos system shall compute the total volume fraction of a mineral species.'
+    design = 'KokkosTotalMineralVolumeFraction.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu'
+  []
+
+  [jacobian]
+    requirement = 'The Kokkos system shall compute perfect Jacobians'
+    design = 'KokkosPrimaryTimeDerivative.md KokkosPrimaryDiffusion.md KokkosPrimaryConvection.md KokkosDarcyFluxPressure.md KokkosCoupledConvectionReactionSub.md KokkosCoupledDiffusionReactionSub.md KokkosCoupledBEEquilibriumSub.md'
+    [primary]
+      type = 'PetscJacobianTester'
+      input = 'kokkos_primary_jacobian.i'
+      ratio_tol = 1e-7
+      difference_tol = 1e-7
+      detail = 'for the primary species transport,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [convection_reaction]
+      type = 'PetscJacobianTester'
+      input = 'kokkos_equilibrium_jacobian.i'
+      ratio_tol = 1e-7
+      difference_tol = 1e-7
+      detail = 'for the convection of an equilibrium species,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [diffusion_reaction]
+      type = 'PetscJacobianTester'
+      input = 'kokkos_diffusion_reaction_jacobian.i'
+      ratio_tol = 1e-7
+      difference_tol = 1e-7
+      detail = 'for the diffusion of an equilibrium species, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+    [equilibrium_time_derivative]
+      type = 'PetscJacobianTester'
+      input = 'kokkos_equilibrium_sub_jacobian.i'
+      ratio_tol = 1e-6
+      difference_tol = 1e-5
+      detail = 'for the time derivative of an equilibrium species.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+    []
+  []
+[]

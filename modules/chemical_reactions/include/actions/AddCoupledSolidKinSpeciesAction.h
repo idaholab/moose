@@ -55,4 +55,6 @@ private:
   const std::vector<Real> _ref_temp;
   /// Actual system temperature
   const std::vector<VariableName> _sys_temp;
+  /// Prefix prepended to the object types, which selects the Kokkos versions when requested
+  const std::string _kokkos_prefix;
 };
