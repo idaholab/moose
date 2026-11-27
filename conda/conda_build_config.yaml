@@ -27,7 +27,7 @@ mpi:
 
 mpi_version:
   - 5.0.2
-  - 5.0.10                                                  # [linux or (osx and arm64)]
+  - 5.0.11                                                  # [linux or (osx and arm64)]
 
 mpi_friendly_name:
   - MPICH
@@ -97,7 +97,7 @@ libcap:
 libcurl:
   - 8
 libffi:
-  - '3.5'
+  - '3.7'
 libhwloc:
   - 2.13.0
 libiconv:

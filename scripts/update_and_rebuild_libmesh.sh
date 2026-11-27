@@ -153,13 +153,14 @@ if [ -z "$PETSC_DIR" ]; then
   fi
 fi
 
+if [[ -n "$LIBMESH_BUILD_DIR" ]]; then
+  echo "INFO: LIBMESH_BUILD_DIR set - overriding default build path"
+else
+  export LIBMESH_BUILD_DIR=${LIBMESH_SRC_DIR}/build
+fi
+
 # If we're not going fast, remove the build directory and reconfigure
 if [ -z "$go_fast" ]; then
-  if [[ -n "$LIBMESH_BUILD_DIR" ]]; then
-    echo "INFO: LIBMESH_BUILD_DIR set - overriding default build path"
-  else
-    export LIBMESH_BUILD_DIR=${LIBMESH_SRC_DIR}/build
-  fi
   rm -rf $LIBMESH_BUILD_DIR
   mkdir -p $LIBMESH_BUILD_DIR
   cd $LIBMESH_BUILD_DIR
@@ -171,13 +172,13 @@ if [ -z "$go_fast" ]; then
 else
   # The build directory must already exist: you can't do --fast for
   # an initial build.
-  if [ ! -d build ]; then
+  if [ ! -d "$LIBMESH_BUILD_DIR" ]; then
     echo "Error: You have no pre-existing build directory, so you can't use --fast."
     echo "Try running the script again without this flag."
     exit 1;
   fi
 
-  cd build
+  cd "$LIBMESH_BUILD_DIR"
 fi
 
 if [[ -n "$quiet_build" ]]; then

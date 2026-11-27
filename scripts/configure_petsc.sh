@@ -127,6 +127,7 @@ function configure_petsc()
       --download-metis=1 \
       --download-mumps=1 \
       --download-ptscotch=1 \
+      --download-ptscotch-commit=v7.0.18 \
       --download-parmetis=1 \
       --download-scalapack=1 \
       --download-slepc=1 \

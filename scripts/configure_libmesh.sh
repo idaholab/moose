@@ -8,7 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-# Configure libMesh with the default MOOSE configuration options
+# Configure libMesh with the default MOOSE configuration options in the current directory
 #
 # Separated so that it can be used across all libMesh build scripts:
 # - scripts/update_and_rebuild_libmesh.sh
@@ -42,10 +42,9 @@ function configure_libmesh()
   # Allow unbound variable for when EXTRA_ARGS is empty
   set +u
 
-  cd "${SRC_DIR}/build" || exit 1
   # shellcheck disable=SC2086  # we want wordsplitting
   # shellcheck disable=SC2048  # we want to not handle whitspaces
-  ../configure --enable-silent-rules \
+  "${SRC_DIR}/configure" --enable-silent-rules \
                --enable-unique-id \
                --disable-warnings \
                --with-thread-model=openmp \

@@ -51,5 +51,8 @@ ImageSubdomainGenerator::generate()
     elem->subdomain_id() = id;
   }
 
+  // Subdomain IDs changed, so cached element data such as the set of mesh subdomains is stale
+  mesh->unset_is_prepared();
+
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
