@@ -238,6 +238,14 @@ FEProblemBase::validParams()
       "Jacobian. The linear solver removes the component of the residual along this vector. A "
       "sum that is nonzero beyond round-off means that the nonlinear system has no solution "
       "without projection.");
+  params.addParam<std::vector<VariableName>>(
+      "rigid_body_near_null_space_displacements",
+      {},
+      "Lagrange displacement variables of one nonlinear system, one per mesh dimension in "
+      "coordinate order. Their rigid body modes span part of the near nullspace of the Jacobian, "
+      "which algebraic multigrid preconditioners such as GAMG use to build their coarse spaces. A "
+      "field split whose variables are exactly these displacements also receives the modes, and "
+      "the block size of one node's displacements.");
   params.addParam<bool>("solve",
                         true,
                         "Whether or not to actually solve the Nonlinear system.  "
@@ -483,7 +491,8 @@ FEProblemBase::validParams()
       "verbose_setup verbose_multiapps verbose_restore parallel_barrier_messaging", "Verbosity");
   params.addParamNamesToGroup(
       "null_space_dimension transpose_null_space_dimension near_null_space_dimension "
-      "constant_null_space_variables constant_transpose_null_space_variables",
+      "constant_null_space_variables constant_transpose_null_space_variables "
+      "rigid_body_near_null_space_displacements",
       "Null space removal");
   params.addParamNamesToGroup(
       "extra_tag_vectors extra_tag_matrices extra_tag_solutions not_zeroed_tag_vectors",
@@ -639,6 +648,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _constant_null_space_vars(getParam<std::vector<VariableName>>("constant_null_space_variables")),
     _constant_transpose_null_space_vars(
         getParam<std::vector<VariableName>>("constant_transpose_null_space_variables")),
+    _rigid_body_displacements(
+        getParam<std::vector<VariableName>>("rigid_body_near_null_space_displacements")),
     _use_hash_table_matrix_assembly(getParam<bool>("use_hash_table_matrix_assembly")),
     _error_on_jacobian_nonzero_reallocation(
         isParamValid("error_on_jacobian_nonzero_reallocation")
@@ -7428,6 +7439,29 @@ FEProblemBase::init()
                        { return nl->hasVariable(var) || nl->hasScalarVariable(var); }))
         paramError(param, "Variable '", var, "' is not in any nonlinear system.");
 
+  if (!_rigid_body_displacements.empty())
+  {
+    const auto param = "rigid_body_near_null_space_displacements";
+    if (_rigid_body_displacements.size() != _mesh.dimension())
+      paramError(param,
+                 "The number of displacement variables must equal the mesh dimension, ",
+                 _mesh.dimension(),
+                 ".");
+    const auto nl = std::find_if(_nl.begin(),
+                                 _nl.end(),
+                                 [this](const auto & sys)
+                                 { return sys->hasVariable(_rigid_body_displacements[0]); });
+    for (const auto & var : _rigid_body_displacements)
+    {
+      if (nl == _nl.end() || !(*nl)->hasVariable(var))
+        paramError(param,
+                   "The displacement variables must be field variables of one nonlinear system.");
+      // Lagrange nodal values interpolate the affine rigid body modes exactly
+      if ((*nl)->getVariable(0, var).feType().family != LAGRANGE)
+        paramError(param, "Variable '", var, "' must be a Lagrange variable.");
+    }
+  }
+
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
 
   // We may have added element/nodes to the mesh in ghostGhostedBoundaries so we need to update
@@ -8900,6 +8934,7 @@ FEProblemBase::computeNearNullSpace(NonlinearImplicitSystem & libmesh_dbg_var(sy
     std::string modename = "NearNullSpace" + postfix.str();
     sp.push_back(&_current_nl_sys->getVector(modename));
   }
+  appendRigidBodyModes(*_current_nl_sys, sp);
 }
 
 void
@@ -8956,6 +8991,59 @@ FEProblemBase::appendConstantModes(const std::vector<VariableName> & vars,
       mode.set(dof, 1);
     mode.close();
     sp.push_back(&mode);
+  }
+}
+
+void
+FEProblemBase::appendRigidBodyModes(NonlinearSystemBase & nl,
+                                    std::vector<NumericVector<Number> *> & sp)
+{
+  if (_rigid_body_displacements.empty() || !nl.hasVariable(_rigid_body_displacements[0]))
+    return;
+
+  const auto & sys = nl.system();
+  const auto sys_num = sys.number();
+  const unsigned int dim = _rigid_body_displacements.size();
+  std::vector<unsigned int> var_nums;
+  for (const auto & var : _rigid_body_displacements)
+    var_nums.push_back(sys.variable_number(var));
+
+  // One translation along each axis and one rotation in each coordinate plane. The modes are
+  // rebuilt on every request so that they stay valid after the dof distribution changes.
+  std::vector<NumericVector<Number> *> modes;
+  for (const auto i : make_range(dim * (dim + 1) / 2))
+  {
+    modes.push_back(
+        &nl.addVector("RigidBodyNearNullSpace_" + std::to_string(i), false, libMesh::PARALLEL));
+    modes.back()->zero();
+  }
+
+  // The displacement variables may be restricted to different blocks, so a node can lack some
+  // components
+  for (const auto & node : _mesh.getMesh().local_node_ptr_range())
+  {
+    const auto set = [&](const unsigned int mode, const unsigned int component, const Real value)
+    {
+      if (node->n_comp(sys_num, var_nums[component]))
+        modes[mode]->set(node->dof_number(sys_num, var_nums[component], 0), value);
+    };
+    for (const auto a : make_range(dim))
+      set(a, a, 1);
+    // The rotation in the a-b plane displaces the point x by (-x_b, x_a) in that plane
+    auto mode = dim;
+    for (const auto a : make_range(dim))
+      for (const auto b : make_range(a + 1, dim))
+      {
+        set(mode, a, -(*node)(b));
+        set(mode, b, (*node)(a));
+        ++mode;
+      }
+  }
+
+  for (auto * const mode : modes)
+  {
+    mode->close();
+    sp.push_back(mode);
   }
 }
 

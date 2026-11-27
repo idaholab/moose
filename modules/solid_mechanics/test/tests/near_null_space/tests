@@ -1,0 +1,57 @@
+[Tests]
+  design = 'FEProblemBase.md FieldSplitPreconditioner.md'
+  issues = '#34529'
+  [rigid_body_modes]
+    requirement = 'The system shall pass the rigid body modes of the displacements to the linear '
+                  'solver as the near nullspace'
+    [monolithic]
+      type = 'RunApp'
+      input = 'monolithic.i'
+      expect_out = 'rows=\d+, cols=\d+, bs=2\n([^\n]*\n){0,3}\s*has attached near null space'
+      detail = 'of the whole Jacobian, and'
+    []
+    [field_split]
+      type = 'RunApp'
+      input = 'field_split.i'
+      expect_out = 'Mat Object: \(fieldsplit_disp_\)[^\n]*\n\s*type: \w+\n\s*rows=\d+, cols=\d+, '
+                   'bs=3\n([^\n]*\n){0,3}\s*has attached near null space'
+      detail = 'of the field split block of exactly the displacements, together with the block size '
+               'of the displacements of one node.'
+    []
+  []
+  [unordered_dofs]
+    type = 'RunException'
+    input = 'field_split.i'
+    cli_args = 'Mesh/elem_type=HEX27 Variables/disp_y/order=SECOND'
+    expect_err = "The displacement degrees of freedom of split 'disp' are not ordered node by node"
+    requirement = 'The system shall warn if the rigid body near nullspace is passed to a field split '
+                  'whose displacement degrees of freedom are not numbered node by node, so the '
+                  'split gets no block size.'
+  []
+  [errors]
+    requirement = 'The system shall report an error if the displacements whose rigid body modes span '
+                  'the near nullspace'
+    [count]
+      type = 'RunException'
+      input = 'field_split.i'
+      cli_args = "Problem/rigid_body_near_null_space_displacements='disp_x disp_y'"
+      expect_err = 'The number of displacement variables must equal the mesh dimension, 3.'
+      detail = 'do not match the mesh dimension,'
+    []
+    [system]
+      type = 'RunException'
+      input = 'field_split.i'
+      cli_args = "Problem/rigid_body_near_null_space_displacements='disp_x disp_y missing'"
+      expect_err = 'The displacement variables must be field variables of one nonlinear system.'
+      detail = 'are not field variables of one nonlinear system, or'
+    []
+    [family]
+      type = 'RunException'
+      input = 'field_split.i'
+      cli_args = "Variables/T/family=MONOMIAL Variables/T/order=CONSTANT "
+                 "Problem/rigid_body_near_null_space_displacements='disp_x disp_y T'"
+      expect_err = "Variable 'T' must be a Lagrange variable."
+      detail = 'are not Lagrange variables.'
+    []
+  []
+[]

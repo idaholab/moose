@@ -32,6 +32,8 @@
 #include "libmesh/preconditioner.h"
 #include "libmesh/elem_side_builder.h"
 
+#include <unordered_set>
+
 template <typename I1, typename I2>
 void
 checkSize(const std::string & split_name, const I1 split_size, const I2 size_expected_by_parent)
@@ -843,6 +845,117 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
+/**
+ * Compose the rigid body near nullspace of the problem on the index set \p rembedding of the
+ * split \p dm, if the split's variables are exactly the displacements that span it. PCFIELDSPLIT
+ * attaches a near nullspace composed on a split's index set to the split's matrix. Also give the
+ * index set the block size of one node's displacements, which PETSc passes on to the split's
+ * matrix, if the split's degrees of freedom are ordered node by node.
+ */
+static PetscErrorCode
+DMMooseSetRigidBodyNearNullSpace_Private(DM dm, IS rembedding)
+{
+  DM_Moose * dmm = (DM_Moose *)dm->data;
+
+  PetscFunctionBegin;
+  auto & problem = dmm->_nl->feProblem();
+  const auto & displacements = problem.rigidBodyNearNullSpaceDisplacements();
+  std::set<std::string> split_vars;
+  for (const auto & [var, _] : *dmm->_var_ids)
+    split_vars.insert(var);
+  if (displacements.empty() ||
+      split_vars != std::set<std::string>(displacements.begin(), displacements.end()))
+    PetscFunctionReturn(PETSC_SUCCESS);
+
+  // The split's index set in the numbering of the whole system
+  IS embedding;
+  LibmeshPetscCallQ(DMMooseGetEmbedding_Private(dm, &embedding));
+
+  // Restrict the modes to the split. Restricting changes their inner products if the split is
+  // restricted to a part of the mesh, so orthonormalize them again.
+  std::vector<NumericVector<Number> *> modes;
+  problem.appendRigidBodyModes(*dmm->_nl, modes);
+  std::vector<Vec> split_modes(modes.size());
+  std::vector<PetscScalar> dots(modes.size());
+  for (const auto i : index_range(modes))
+  {
+    Vec mode = cast_ptr<PetscVector<Number> *>(modes[i])->vec();
+    Vec restricted;
+    LibmeshPetscCallQ(VecGetSubVector(mode, embedding, &restricted));
+    LibmeshPetscCallQ(VecDuplicate(restricted, &split_modes[i]));
+    LibmeshPetscCallQ(VecCopy(restricted, split_modes[i]));
+    LibmeshPetscCallQ(VecRestoreSubVector(mode, embedding, &restricted));
+
+    if (i)
+    {
+      LibmeshPetscCallQ(VecMDot(split_modes[i], i, split_modes.data(), dots.data()));
+      for (const auto j : make_range(i))
+        dots[j] *= -1;
+      LibmeshPetscCallQ(VecMAXPY(split_modes[i], i, dots.data(), split_modes.data()));
+    }
+    LibmeshPetscCallQ(VecNormalize(split_modes[i], nullptr));
+  }
+  MatNullSpace near_null_space;
+  LibmeshPetscCallQ(MatNullSpaceCreate(((PetscObject)dm)->comm,
+                                       PETSC_FALSE,
+                                       split_modes.size(),
+                                       split_modes.data(),
+                                       &near_null_space));
+  LibmeshPetscCallQ(
+      PetscObjectCompose((PetscObject)rembedding, "nearnullspace", (PetscObject)near_null_space));
+  LibmeshPetscCallQ(MatNullSpaceDestroy(&near_null_space));
+  for (auto & split_mode : split_modes)
+    LibmeshPetscCallQ(VecDestroy(&split_mode));
+
+  // Algebraic multigrid needs the block size to coarsen the displacements of a node together.
+  // Find the nodes whose displacement dofs are consecutive in coordinate order. libMesh numbers
+  // them so if the displacements form one variable group.
+  const auto sys_num = dmm->_system->number();
+  const auto dim = displacements.size();
+  std::vector<unsigned int> var_nums;
+  for (const auto & var : displacements)
+    var_nums.push_back(libmesh_map_find(*dmm->_var_ids, var));
+  std::unordered_set<dof_id_type> block_starts;
+  for (const auto & node : dmm->_system->get_mesh().local_node_ptr_range())
+  {
+    bool consecutive = true;
+    for (const auto d : index_range(var_nums))
+      consecutive = consecutive && node->n_comp(sys_num, var_nums[d]) &&
+                    node->dof_number(sys_num, var_nums[d], 0) ==
+                        node->dof_number(sys_num, var_nums[0], 0) + d;
+    if (consecutive)
+      block_starts.insert(node->dof_number(sys_num, var_nums[0], 0));
+  }
+
+  // The split is blocked if each run of dim of its local dofs is one such node's displacements
+  const PetscInt * indices;
+  PetscInt n;
+  LibmeshPetscCallQ(ISGetLocalSize(embedding, &n));
+  LibmeshPetscCallQ(ISGetIndices(embedding, &indices));
+  bool blocked = n % dim == 0;
+  for (PetscInt i = 0; blocked && i < n; i += dim)
+  {
+    blocked = block_starts.count(indices[i]);
+    for (const auto d : make_range(PetscInt(1), PetscInt(dim)))
+      blocked = blocked && indices[i + d] == indices[i] + d;
+  }
+  LibmeshPetscCallQ(ISRestoreIndices(embedding, &indices));
+  LibmeshPetscCallQ(ISDestroy(&embedding));
+
+  dmm->_nl->comm().min(blocked);
+  if (blocked)
+    LibmeshPetscCallQ(ISSetBlockSize(rembedding, dim));
+  else
+    mooseWarning("The displacement degrees of freedom of split '",
+                 *dmm->_name,
+                 "' are not ordered node by node, so the split gets the rigid body near nullspace "
+                 "but no block size. Declare the displacement variables consecutively, in "
+                 "coordinate order, and with the same finite element type and block restriction to "
+                 "number them node by node.");
+
+  PetscFunctionReturn(PETSC_SUCCESS);
+}
+
 static PetscErrorCode
 DMCreateFieldDecomposition_Moose(
     DM dm, PetscInt * len, char *** namelist, IS ** islist, DM ** dmlist)
@@ -930,6 +1043,7 @@ DMCreateFieldDecomposition_Moose(
         {
           dinfo._rembedding = dembedding;
         }
+        LibmeshPetscCallQ(DMMooseSetRigidBodyNearNullSpace_Private(dinfo._dm, dinfo._rembedding));
       }
       LibmeshPetscCallQ(PetscObjectReference((PetscObject)(dinfo._rembedding)));
       (*islist)[d] = dinfo._rembedding;

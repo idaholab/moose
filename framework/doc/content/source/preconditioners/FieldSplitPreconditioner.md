@@ -24,6 +24,12 @@ the Schur decomposition preconditioning of the main numerical system.
 
 !listing test/tests/preconditioners/fsp/fsp_test.i block=Preconditioning
 
+A split whose variables are exactly the displacements listed in
+[!param](/Problem/FEProblem/rigid_body_near_null_space_displacements) receives their rigid body
+modes as its near nullspace and, if possible, the block size of one node's displacements, so that
+algebraic multigrid on that split coarsens the elasticity problem efficiently, as described in
+[FEProblemBase.md].
+
 An example of setting the [!param](/Preconditioning/FSP/off_diag_row) and
 [!param](/Preconditioning/FSP/off_diag_column) parameters to create a custom
 coupling matrix may be found in the

@@ -31,6 +31,19 @@ optional coupling may be implemented with these zeros.
   return _test[_i][_qp] * (_velocity_vector[_qp] * _grad_u[_qp]);
 ```
 
+## Rigid Body Near Nullspace
+
+Algebraic multigrid preconditioners for elasticity, such as PETSc's GAMG, build much better coarse
+spaces when they know the rigid body modes: the translations along and the rotations about the
+coordinate axes, which produce no strain. Listing the Lagrange displacement variables in coordinate
+order in [!param](/Problem/FEProblem/rigid_body_near_null_space_displacements) attaches these
+modes, evaluated at the nodes of the reference configuration, to the Jacobian as its near
+nullspace. A field split ([FieldSplitPreconditioner.md]) whose variables are exactly these
+displacements receives the modes restricted to its degrees of freedom. It also receives the
+number of displacements as its block size if the displacements of each node are numbered
+consecutively, which libMesh does when the displacements are declared consecutively with the
+same finite element type and block restriction.
+
 ## Selective Reinit
 
 The system automatically determines which variables should be made available for use on the
