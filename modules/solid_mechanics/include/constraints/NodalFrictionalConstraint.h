@@ -18,7 +18,10 @@ public:
 
   static InputParameters validParams();
 
-  virtual void meshChanged() override;
+  /**
+   * Update the sets of nodes with constrained DOFs
+   */
+  virtual void updateConnectivity() override;
 
   virtual void computeResidual(const NumericVector<Number> & residual) override;
   virtual void computeJacobian(const SparseMatrix<Number> & jacobian) override;
@@ -26,11 +29,6 @@ public:
   using NodalConstraint::computeResidual;
 
 protected:
-  /**
-   * Update the sets of nodes with constrained DOFs
-   */
-  void updateConstrainedNodes();
-
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 

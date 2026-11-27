@@ -40,9 +40,29 @@ public:
   std::vector<dof_id_type> & getSecondaryNodeId() { return _connected_nodes; }
 
   /**
-   * Built the connectivity for this constraint
+   * Fill _primary_node_vector and _connected_nodes for this constraint.
+   *
+   * updateConstrainedNodes() clears both lists, calls this method, and then ghosts what the
+   * lists require, so an implementation only has to fill them. Every process must put every
+   * primary node in _primary_node_vector, in the same order, because per-primary data such as
+   * weights is indexed by position in that list. Only the process that owns a secondary node may
+   * put it in _connected_nodes; localSecondaryNodes() applies that filter.
    */
   virtual void updateConnectivity();
+
+  /**
+   * Rebuild the constrained node lists and the ghosting they require.
+   *
+   * Call this from the constructor of a derived class. It is called again on every mesh change,
+   * since node ownership and the locally available elements both change under adaptivity and
+   * repartitioning.
+   */
+  void updateConstrainedNodes();
+
+  /**
+   * Rebuilds the constrained nodes, which the mesh change may have redistributed.
+   */
+  virtual void meshChanged() override { updateConstrainedNodes(); }
 
   /**
    * Reinitialize the primary and secondary nodes on the SubProblem that owns this constraint's
@@ -83,6 +103,18 @@ protected:
    */
   std::vector<dof_id_type> gatherAndRetainConnectedElems(MooseMesh & mesh,
                                                          const std::vector<dof_id_type> & node_ids);
+
+  /**
+   * Gather and retain one element per node on the reference mesh, and on the displaced mesh when
+   * one exists, and mark them ghosted on the SubProblem.
+   */
+  void ghostConnectedElems(const std::vector<dof_id_type> & node_ids);
+
+  /**
+   * Select the nodes of 'node_ids' that this process owns, which are the secondary nodes it is
+   * responsible for assembling.
+   */
+  std::vector<dof_id_type> localSecondaryNodes(const std::vector<dof_id_type> & node_ids) const;
 
   /// Elements this constraint retained on each distributed mesh during the previous mesh update.
   std::map<MooseMesh *, std::set<Elem *>> _retained_elems;

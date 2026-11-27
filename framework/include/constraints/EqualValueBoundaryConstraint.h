@@ -19,16 +19,11 @@ public:
   EqualValueBoundaryConstraint(const InputParameters & parameters);
 
   /**
-   * Called on this object when the mesh changes
-   */
-  virtual void meshChanged() override;
-
-protected:
-  /**
    * Update the sets of nodes with constrained DOFs
    */
-  void updateConstrainedNodes();
+  virtual void updateConnectivity() override;
 
+protected:
   /**
    * Computes the residual for the current secondary node
    */
@@ -52,11 +47,6 @@ private:
    * Pick the primary node from user input or from the secondary node set
    */
   void pickPrimaryNode();
-
-  /**
-   * Ghost elements and nodes connected to the primary node
-   */
-  void ghostPrimary();
 
   /**
    * Get the primary node ID by searching for the node with coordinates
