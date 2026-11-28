@@ -65,12 +65,27 @@ area is clear; list existing labels with `gh label list -R idaholab/moose --limi
 ## Step 4 - Approval, then publication
 
 Show the title, labels, and body, and wait for explicit approval before creating the issue. Then
-create it with every label from the template plus the component label:
+create it with every label the chosen template declares, plus the component label. `gh issue
+create` applies no labels of its own, so an issue filed without these `--label` flags lands
+untyped; never create one that way.
+
+Feature or enhancement request:
 
 ```bash
 gh issue create -R idaholab/moose --title '<title>' --label 'T: task' --label 'C: <Area>' \
   --body-file <file>
 ```
+
+Bug report:
+
+```bash
+gh issue create -R idaholab/moose --title '<title>' --label 'T: defect' --label 'P: normal' \
+  --label 'C: <Area>' --body-file <file>
+```
+
+Choose a different `P:` priority than `normal` only when the severity warrants it and say why.
+A 'P: safety related' label requires an explicit human signoff, and the issue must tag @idaholab/moose-ccb
+in its body.
 
 Return the issue URL. When the issue backs a commit or pull request, reference it as `Refs #<n>`
 or `Closes #<n>` there.
