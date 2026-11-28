@@ -270,7 +270,7 @@ public:
   const MooseArray<ADReal> & adJxW() const
   {
     _need_ad_volume_map = true;
-    return _ad_JxW;
+    return _ad_elem_map.JxW;
   }
 
   const MooseArray<ADReal> & adJxWFace() const
@@ -390,7 +390,7 @@ public:
   {
     _calculate_xyz = true;
     _need_ad_volume_map = true;
-    return _ad_q_points;
+    return _ad_elem_map.q_points;
   }
 
   const MooseArray<ADPoint> & adQPointsFace() const
@@ -1982,6 +1982,35 @@ public:
 
 private:
   /**
+   * The reference-to-physical map of an element at quadrature points with possible dependence on
+   * the nonlinear displacement variables. computeSinglePointMapAD fills every member that the
+   * element dimension uses; the physical points only when requested.
+   */
+  struct ADElemMap
+  {
+    /// Physical derivatives with respect to the reference coordinates
+    std::vector<VectorValue<ADReal>> dxyzdxi;
+    std::vector<VectorValue<ADReal>> dxyzdeta;
+    std::vector<VectorValue<ADReal>> dxyzdzeta;
+    /// Jacobian determinant
+    std::vector<ADReal> jac;
+    /// Jacobian determinant times the quadrature weight
+    MooseArray<ADReal> JxW;
+    /// Physical quadrature points
+    MooseArray<VectorValue<ADReal>> q_points;
+    /// Inverse map: reference derivatives with respect to the physical coordinates
+    std::vector<ADReal> dxidx;
+    std::vector<ADReal> dxidy;
+    std::vector<ADReal> dxidz;
+    std::vector<ADReal> detadx;
+    std::vector<ADReal> detady;
+    std::vector<ADReal> detadz;
+    std::vector<ADReal> dzetadx;
+    std::vector<ADReal> dzetady;
+    std::vector<ADReal> dzetadz;
+  };
+
+  /**
    * Just an internal helper function to reinit the volume FE objects.
    *
    * @param elem The element we are using to reinit
@@ -2037,19 +2066,33 @@ private:
   void computeGradPhiAD(const Elem * elem,
                         unsigned int n_qp,
                         ADTemplateVariablePhiGradient<OutputType> & grad_phi,
-                        libMesh::FEGenericBase<OutputType> * fe);
+                        libMesh::FEGenericBase<OutputType> * fe,
+                        const ADElemMap & map);
 
   /**
    * resize any objects that contribute to automatic differentiation-related mapping calculations
    */
-  void resizeADMappingObjects(unsigned int n_qp, unsigned int dim);
+  void
+  resizeADMappingObjects(unsigned int n_qp, unsigned int dim, bool compute_points, ADElemMap & map);
 
   /**
    * compute the finite element reference-physical mapping quantities (such as JxW) with possible
    * dependence on nonlinear displacement variables at a single quadrature point
+   * @param elem The element, which supplies the dimension and the error output
+   * @param node_points The positions of the mapping nodes
+   * @param fe_map The map of \p elem, reinitialized at the quadrature points
+   * @param qw The quadrature weights
+   * @param p The quadrature point index
+   * @param compute_points Whether to compute the physical quadrature point
+   * @param map The AD map to fill at \p p, previously resized by resizeADMappingObjects
    */
-  void
-  computeSinglePointMapAD(const Elem * elem, const std::vector<Real> & qw, unsigned p, FEBase * fe);
+  void computeSinglePointMapAD(const Elem & elem,
+                               const std::vector<VectorValue<ADReal>> & node_points,
+                               const libMesh::FEMap & fe_map,
+                               const std::vector<Real> & qw,
+                               unsigned p,
+                               bool compute_points,
+                               ADElemMap & map);
 
   /**
    * Fill _ad_elem_node_points with the positions of the nodes of \p elem, with derivatives with
@@ -2851,25 +2894,16 @@ protected:
   /// Temporary work data for reinitAtPhysical()
   std::vector<Point> _temp_reference_points;
 
-  /// AD quantities
-  std::vector<VectorValue<ADReal>> _ad_dxyzdxi_map;
-  std::vector<VectorValue<ADReal>> _ad_dxyzdeta_map;
-  std::vector<VectorValue<ADReal>> _ad_dxyzdzeta_map;
+  /// The AD map of the current element. A face reinit evaluates it at the face quadrature points
+  /// for the AD face shape function gradients.
+  ADElemMap _ad_elem_map;
+
+  /// AD face tangents and second derivatives, used by computeFaceMap
+  std::vector<VectorValue<ADReal>> _ad_face_dxyzdxi_map;
+  std::vector<VectorValue<ADReal>> _ad_face_dxyzdeta_map;
   std::vector<VectorValue<ADReal>> _ad_d2xyzdxi2_map;
   std::vector<VectorValue<ADReal>> _ad_d2xyzdxideta_map;
   std::vector<VectorValue<ADReal>> _ad_d2xyzdeta2_map;
-  std::vector<ADReal> _ad_jac;
-  MooseArray<ADReal> _ad_JxW;
-  MooseArray<VectorValue<ADReal>> _ad_q_points;
-  std::vector<ADReal> _ad_dxidx_map;
-  std::vector<ADReal> _ad_dxidy_map;
-  std::vector<ADReal> _ad_dxidz_map;
-  std::vector<ADReal> _ad_detadx_map;
-  std::vector<ADReal> _ad_detady_map;
-  std::vector<ADReal> _ad_detadz_map;
-  std::vector<ADReal> _ad_dzetadx_map;
-  std::vector<ADReal> _ad_dzetady_map;
-  std::vector<ADReal> _ad_dzetadz_map;
 
   MooseArray<ADReal> _ad_JxW_face;
   MooseArray<VectorValue<ADReal>> _ad_normals;
