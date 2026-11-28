@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#1737 #16099 #20816 #20913'
+  issues = '#1737 #16099 #20816 #20913 #34552'
   design = 'MultiAppVariableValueSampleTransfer.md'
 
   [to_multiapp_test]
@@ -105,6 +105,20 @@
     exodiff = full_domain_primary_out.e
     requirement = "The system shall guarantee that constant monomial variables transferred via MultiAppVariableValueSamplePostprocessorTransfer to the subapp are retrieved "
                   " unchanged when transferred back using MultiAppVariableValueSamplePostprocessorTransfer in case the CentroidMultiApp is used."
+  []
+
+  [initial_adaptivity]
+    type = Exodiff
+    input = initial_adaptivity.i
+    exodiff = initial_adaptivity_out.e
+    cli_args = 'Adaptivity/initial_marker=uniform
+                Adaptivity/initial_steps=1
+                Adaptivity/Markers/uniform/type=UniformMarker
+                Adaptivity/Markers/uniform/mark=refine'
+    requirement = "The system shall transfer postprocessor values from sub-applications to a "
+                  "constant monomial variable on a main application mesh that was refined by "
+                  "initial adaptivity."
+    recover = false # see #5690
   []
 
   [same_distance_error]

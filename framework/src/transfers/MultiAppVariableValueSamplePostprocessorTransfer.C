@@ -132,6 +132,15 @@ MultiAppVariableValueSamplePostprocessorTransfer::cacheElemToPostprocessorData()
   if (!_directions.isValueSet("from_multiapp"))
     return;
 
+  // Mesh changes can occur before this transfer's initialSetup(), notably during initial
+  // adaptivity. '_apps_per_component' is not known yet in that case; the cache is built on the
+  // adapted mesh by initialSetup() anyway.
+  if (!_apps_per_component)
+    return;
+
+  _cached_multiapp_pos_ids.clear();
+  _needed_postprocessors.clear();
+
   // Cache the Multiapp position ID for every element.
   auto & mesh = _fe_problem.mesh().getMesh();
   unsigned int multiapp_pos_id = 0;

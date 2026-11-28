@@ -64,8 +64,9 @@ protected:
   MooseVariableFieldBase & _var;
   /// Whether or not to map groups of child applications to each component of an array variable
   const bool _map_comp_to_child;
-  /// The number of applications associated with a component of the variable when doing array variable sampling
-  unsigned int _apps_per_component;
+  /// The number of applications associated with a component of the variable when doing array
+  /// variable sampling. Zero until initialSetup() has run.
+  unsigned int _apps_per_component = 0;
   /// Sub-application ids of all local active elements in the main-application
   /// When _map_comp_to_child == true, this vector has an entry for each component of the array variable:
   ///  sub_app_index = _cached_multiapp_pos_ids[elem_id * n_comp + comp]
