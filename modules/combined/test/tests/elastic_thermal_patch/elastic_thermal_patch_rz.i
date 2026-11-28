@@ -45,33 +45,33 @@
 []
 
 [Functions]
-  [./ur]
+  [ur]
     type = ParsedFunction
     expression = '1e-3*x'
-  [../]
-  [./uz]
+  []
+  [uz]
     type = ParsedFunction
     expression = '1e-3*(x+y)'
-  [../]
-  [./body]
+  []
+  [body]
     type = ParsedFunction
     expression = '-400/x'
-  [../]
-  [./temp]
+  []
+  [temp]
     type = ParsedFunction
     expression = '117.56+100*t'
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 
-  [./temp]
+  [temp]
     initial_condition = 117.56
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic/All]
@@ -83,67 +83,67 @@
 []
 
 [Kernels]
-  [./body]
+  [body]
     type = BodyForce
     variable = disp_y
     value = 1
     function = body
-  [../]
+  []
 
-  [./heat]
+  [heat]
     type = HeatConduction
     variable = temp
-  [../]
+  []
 []
 
 [BCs]
-  [./ur]
+  [ur]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 10
     function = ur
-  [../]
-  [./uz]
+  []
+  [uz]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 10
     function = uz
-  [../]
+  []
 
-  [./temp]
+  [temp]
     type = FunctionDirichletBC
     variable = temp
     boundary = 10
     function = temp
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     lambda = 400000.0
     poissons_ratio = 0.25
-  [../]
-  [./thermal_strain]
+  []
+  [thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-6
     stress_free_temperature = 117.56
     eigenstrain_name = eigenstrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeStrainIncrementBasedStress
-  [../]
+  []
 
-  [./heat]
+  [heat]
     type = HeatConductionMaterial
     specific_heat = 0.116
     thermal_conductivity = 4.85e-4
-  [../]
+  []
 
-  [./density]
+  [density]
     type = Density
     density = 0.283
-  [../]
+  []
 []
 
 [Executioner]

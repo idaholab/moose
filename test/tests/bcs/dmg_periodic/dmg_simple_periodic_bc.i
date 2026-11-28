@@ -12,34 +12,34 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
   [forcing]
     type = BodyForce
     variable = u
   []
-  [./dot]
+  [dot]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = u
       auto_direction = 'x y z'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

@@ -6,70 +6,70 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./feature]
+  [feature]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./proc_id]
+  []
+  [proc_id]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./feature_ghost]
+  []
+  [feature_ghost]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./nodal_flood_aux]
+  [nodal_flood_aux]
     type = FeatureFloodCountAux
     variable = feature
     flood_counter = flood_count_pp
     execute_on = 'initial timestep_end'
-  [../]
-  [./proc_id]
+  []
+  [proc_id]
     type = ProcessorIDAux
     variable = proc_id
     execute_on = 'initial timestep_end'
-  [../]
-  [./ghost]
+  []
+  [ghost]
     type = FeatureFloodCountAux
     variable = feature_ghost
     field_display = GHOSTED_ENTITIES
     flood_counter = flood_count_pp
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Functions]
-  [./tif]
+  [tif]
     type = ImageFunction
     component = 0
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     function = tif
     variable = u
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./flood_count_pp]
+  [flood_count_pp]
     type = FeatureFloodCount
     variable = u
     threshold = 1.0
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Problem]

@@ -1,6 +1,6 @@
 [Tests]
-  [./long_running]
+  [long_running]
     type = RunCommand
     command = 'python -c "import time; time.sleep(15)"'
-  [../]
+  []
 []

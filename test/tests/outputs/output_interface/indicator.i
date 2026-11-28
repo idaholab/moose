@@ -6,30 +6,30 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -40,25 +40,25 @@
 []
 
 [Adaptivity]
-  [./Indicators]
-    [./indicator_0]
+  [Indicators]
+    [indicator_0]
       type = GradientJumpIndicator
       variable = u
       outputs = indicators
-    [../]
-    [./indicator_1]
+    []
+    [indicator_1]
       type = GradientJumpIndicator
       variable = u
       outputs = indicators
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]
-  [./indicators]
+  [indicators]
     type = Exodus
-  [../]
-  [./no_indicators]
+  []
+  [no_indicators]
     type = Exodus
-  [../]
+  []
 []

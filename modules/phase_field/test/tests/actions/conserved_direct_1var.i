@@ -12,36 +12,36 @@
 []
 
 [Modules]
-  [./PhaseField]
-    [./Conserved]
-      [./cv]
+  [PhaseField]
+    [Conserved]
+      [cv]
         solve_type = direct
         free_energy = F
         kappa = 2.0
         mobility = 1.0
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [ICs]
-  [./InitialCondition]
+  [InitialCondition]
     type = CrossIC
     x1 = 5.0
     y1 = 5.0
     x2 = 45.0
     y2 = 45.0
     variable = cv
-  [../]
+  []
 []
 
 [Materials]
-  [./free_energy]
+  [free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'cv'
     expression = '(1-cv)^2 * (1+cv)^2'
-  [../]
+  []
 []
 
 [Executioner]
@@ -61,8 +61,8 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     refinements = 2
-  [../]
+  []
 []

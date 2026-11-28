@@ -1,15 +1,15 @@
 [Tests]
   design = "CentralDifference.md"
   issues = '#13964 #9726 #18178'
-  [./central_difference]
+  [central_difference]
     type = 'CSVDiff'
     input = 'central_difference.i'
     csvdiff = 'central_difference_out.csv'
 
     requirement = "The CentralDifference time integrator shall correctly compute the first"
                   " and second time derivatives."
-  [../]
-  [./central_difference_constant_mass]
+  []
+  [central_difference_constant_mass]
     type = 'CSVDiff'
     input = 'central_difference_constant_mass.i'
     csvdiff = 'central_difference_constant_mass_out.csv'
@@ -18,13 +18,13 @@
     requirement = "The central difference time integrator shall correctly compute the first"
                   " and second time derivatives when using a constant mass matrix, including"
                   " after the simulation has been recovered from a checkpoint."
-  [../]
-  [./ad_central_difference_dotdot]
+  []
+  [ad_central_difference_dotdot]
     type = 'CSVDiff'
     input = 'ad_central_difference_dotdot.i'
     csvdiff = 'ad_central_difference_dotdot_out.csv'
 
     requirement = "A central differencing time integrator shall correctly compute the second"
                   " time derivative of an automatic differentiation variable."
-  [../]
+  []
 []

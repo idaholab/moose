@@ -2,20 +2,20 @@
   design = 'LinearCombinationPostprocessor.md'
   issues = '#10145'
 
-  [./linear_combination]
+  [linear_combination]
     type = 'CSVDiff'
     input = 'linear_combination.i'
     csvdiff = 'linear_combination_out.csv'
 
     requirement = 'The system shall support the ability to compute a linear combination of scalar values (Postprocessors).'
-  [../]
+  []
 
-  [./linear_combination_defaulted_pps]
+  [linear_combination_defaulted_pps]
     type = 'CSVDiff'
     input = 'linear_combination.i'
     csvdiff = 'linear_combination_defaulted_pps.csv'
     cli_args = 'Outputs/file_base=linear_combination_defaulted_pps
                 Postprocessors/linear_combination/pp_names="pp1 120"'
     requirement = 'The system shall allow a mix of postprocessor names and real numbers to be provided to PostprocessorName parameters.'
-  [../]
+  []
 []

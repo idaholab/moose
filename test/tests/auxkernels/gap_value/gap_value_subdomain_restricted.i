@@ -8,47 +8,47 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     block = 'left right'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./gap_value]
+  [gap_value]
     block = left
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = u
     boundary = 'leftbottom rightbottom'
     value = 0
-  [../]
-  [./top]
+  []
+  [top]
     type = DirichletBC
     variable = u
     boundary = 'lefttop righttop'
     value = 1
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./gap_value_aux]
+  [gap_value_aux]
     type = GapValueAux
     variable = gap_value
     boundary = leftright
     paired_variable = u
     paired_boundary = rightleft
-  [../]
+  []
 []
 
 [Executioner]

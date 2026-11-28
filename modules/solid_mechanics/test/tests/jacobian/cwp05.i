@@ -11,63 +11,63 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = small
     incremental = true
     eigenstrain_names = ini_stress
-  [../]
+  []
 []
 
 
 [UserObjects]
-  [./coh]
+  [coh]
     type = SolidMechanicsHardeningExponential
     value_0 = 1
     value_residual = 1
     rate = 1
-  [../]
-  [./tanphi]
+  []
+  [tanphi]
     type = SolidMechanicsHardeningExponential
     value_0 = 1.0
     value_residual = 1.0
     rate = 2
-  [../]
-  [./tanpsi]
+  []
+  [tanpsi]
     type = SolidMechanicsHardeningExponential
     value_0 = 0.1
     value_residual = 0.1
     rate = 1
-  [../]
-  [./t_strength]
+  []
+  [t_strength]
     type = SolidMechanicsHardeningExponential
     value_0 = 100
     value_residual = 100
     rate = 1
-  [../]
-  [./c_strength]
+  []
+  [c_strength]
     type = SolidMechanicsHardeningConstant
     value = 100
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     lambda = 1.0
     shear_modulus = 2.0
-  [../]
-  [./ini_stress]
+  []
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '0 0 1  0 0 10  1 10 0'
     eigenstrain_name = ini_stress
-  [../]
-  [./admissible]
+  []
+  [admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = mc
     tangent_operator = nonlinear
-  [../]
-  [./mc]
+  []
+  [mc]
     type = CappedWeakPlaneStressUpdate
     cohesion = coh
     tan_friction_angle = tanphi
@@ -78,17 +78,17 @@
     tip_smoother = 0
     smoothing_tol = 2
     yield_function_tol = 1E-10
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

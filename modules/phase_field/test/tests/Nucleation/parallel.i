@@ -15,59 +15,59 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./c]
+  [c]
     type = Diffusion
     variable = c
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
-  [./nucleation]
+  [nucleation]
     type = DiscreteNucleation
     op_names  = c
     op_values = 1
     map = map
-  [../]
+  []
 []
 
 [UserObjects]
-  [./inserter]
+  [inserter]
     type = DiscreteNucleationInserter
     hold_time = 1
     probability = 0.01
     radius = 4
-  [../]
-  [./map]
+  []
+  [map]
     type = DiscreteNucleationMap
     periodic = c
     inserter = inserter
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./sum]
+  [sum]
     type = ElementIntegralMaterialProperty
     mat_prop = F
-  [../]
+  []
 []
 
 [Executioner]
@@ -79,7 +79,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./out]
+  [out]
     type = CSV
-  [../]
+  []
 []

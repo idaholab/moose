@@ -9,83 +9,83 @@
 [Variables]
   active = 'u v'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   active = 'udiff uconv uie vdiff vconv vie'
 
-  [./udiff]
+  [udiff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./uconv]
+  [uconv]
     type = Convection
     variable = u
     velocity = '10 1 0'
-  [../]
+  []
 
-  [./uie]
+  [uie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./vdiff]
+  [vdiff]
     type = Diffusion
     variable = v
-  [../]
+  []
 
-  [./vconv]
+  [vconv]
     type = Convection
     variable = v
     velocity = '-10 1 0'
-  [../]
+  []
 
-  [./vie]
+  [vie]
     type = TimeDerivative
     variable = v
-  [../]
+  []
 []
 
 [BCs]
   active = 'uleft uright vleft vright'
 
-  [./uleft]
+  [uleft]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./uright]
+  [uright]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
-  [./vleft]
+  [vleft]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 1
-  [../]
+  []
 
-  [./vright]
+  [vright]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -97,12 +97,12 @@
   num_steps = 4
   dt = .1
 
-  [./Adaptivity]
+  [Adaptivity]
     interval = 2
     refine_fraction = 0.2
     coarsen_fraction = 0.3
     max_h_level = 4
-  [../]
+  []
 []
 
 [Outputs]

@@ -6,37 +6,37 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
     boundary = 'left'
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     preset = false
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -45,10 +45,10 @@
   dt = 0.0001
   l_tol = 1e-12
 
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = ActuallyExplicitEuler
     solve_type = lump_preconditioned
-  [../]
+  []
 []
 
 [Outputs]

@@ -6,30 +6,30 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -40,41 +40,41 @@
 []
 
 [Adaptivity]
-  [./Indicators]
-    [./indicator_0]
+  [Indicators]
+    [indicator_0]
       type = GradientJumpIndicator
       variable = u
       outputs = none
-    [../]
-    [./indicator_1]
+    []
+    [indicator_1]
       type = GradientJumpIndicator
       variable = u
       outputs = none
-    [../]
-  [../]
-  [./Markers]
-    [./marker_0]
+    []
+  []
+  [Markers]
+    [marker_0]
       type = ValueThresholdMarker
       outputs = markers
       refine = 0.5
       variable = u
-    [../]
-    [./marker_1]
+    []
+    [marker_1]
       type = BoxMarker
       bottom_left = '0.25 0.25 0'
       top_right = '0.75 0.75 0'
       inside = REFINE
       outside = DONT_MARK
       outputs = markers
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]
-  [./markers]
+  [markers]
     type = Exodus
-  [../]
-  [./no_markers]
+  []
+  [no_markers]
     type = Exodus
-  [../]
+  []
 []

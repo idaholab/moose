@@ -12,20 +12,20 @@
 []
 
 [Variables]
-  [./A]
+  [A]
     family = LAGRANGE_VEC
     order = FIRST
-  [../]
+  []
 []
 
 [ICs]
-  [./A]
+  [A]
     type = VectorConstantIC
     variable = A
     x_value = 2
     y_value = 3
     z_value = 4
-  [../]
+  []
 []
 
 [Executioner]

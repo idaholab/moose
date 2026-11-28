@@ -8,43 +8,43 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [AuxVariables]
-  [./T]
-  [../]
-  [./flux_n]
+  [T]
+  []
+  [flux_n]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./T]
+  [T]
     type = ParsedFunction
     expression = 'x*x*y*y+1'
-  [../]
+  []
 []
 
 [ICs]
-  [./T]
+  [T]
     type = FunctionIC
     variable = T
     function = T
-  [../]
+  []
 []
 
 [Kernels]
-  [./dummy]
+  [dummy]
     type = Diffusion
     variable = dummy
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./flux_n]
+  [flux_n]
     type = DiffusionFluxAux
     diffusivity = 'thermal_conductivity'
     variable = flux_n
@@ -52,15 +52,15 @@
     component = normal
     boundary = 'left right'
     check_boundary_restricted = false
-  [../]
+  []
 []
 
 [Materials]
-  [./k]
+  [k]
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '10'
-  [../]
+  []
 []
 
 [Postprocessors]

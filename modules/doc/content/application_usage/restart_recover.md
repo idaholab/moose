@@ -24,21 +24,21 @@
 []
 
 [Variables]
-  [./nodal]
+  [nodal]
      family = LAGRANGE
      order = FIRST
      initial_from_file_var = nodal
      initial_from_file_timestep = 10
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./elemental]
+  [elemental]
      family = MONOMIAL
      order = CONSTANT
      initial_from_file_var = elemental
      initial_from_file_timestep = 10
-  [../]
+  []
 []
 ```
 
@@ -62,11 +62,11 @@ You should always set [!param](/Outputs/Checkpoint/num_files) to at least 2 to m
 
 ```puppet
 [Outputs]
-  [./my_checkpoint]
+  [my_checkpoint]
     type = Checkpoint
     num_files = 4
     interval = 5
-  [../]
+  []
 []
 ```
 
@@ -77,10 +77,10 @@ This wall time interval length may be modified by defining a checkpoint block an
 
 ```puppet
 [Outputs]
-  [./my_checkpoint]
+  [my_checkpoint]
     type = Checkpoint
     wall_time_interval = 3600 # interval length in seconds
-  [../]
+  []
 []
 ```
 

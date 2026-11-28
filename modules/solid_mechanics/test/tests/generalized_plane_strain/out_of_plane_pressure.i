@@ -5,43 +5,43 @@
 []
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 2
     ny = 2
-  [../]
+  []
 []
 
 [Variables]
-  [./scalar_strain_zz]
+  [scalar_strain_zz]
     order = FIRST
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./saved_x]
+  [saved_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./saved_y]
+  []
+  [saved_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./react_z]
+  [react_z]
     type = MaterialTensorIntegral
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./gps]
+  [gps]
     add_variables = true
     strain = small
     incremental = false
@@ -51,48 +51,48 @@
     pressure_factor = 1e5
     generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy strain_zz'
     save_in = 'saved_x saved_y'
-  [../]
+  []
 []
 
 [Functions]
-  [./traction_function]
+  [traction_function]
     type = PiecewiseLinear
     x = '0  2'
     y = '0  1'
-  [../]
+  []
 []
 
 [BCs]
-  [./leftx]
+  [leftx]
     type = DirichletBC
     boundary = 3
     variable = disp_x
     value = 0.0
-  [../]
-  [./bottomy]
+  []
+  [bottomy]
     type = DirichletBC
     boundary = 0
     variable = disp_y
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e6
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
   # This material is not used for anything in the base verison of this test,
   # but is used in a variant of the test with cli_args
-  [./traction_material]
+  [traction_material]
     type = GenericFunctionMaterial
     prop_names = traction_material
     prop_values = traction_function
-  [../]
+  []
 []
 
 [Executioner]

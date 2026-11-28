@@ -6,39 +6,39 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./transferred_u]
-  [../]
-  [./elemental_transferred_u]
+  [transferred_u]
+  []
+  [elemental_transferred_u]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -55,16 +55,16 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     positions = '.099 .099 0 .599 .599 0 0.599 0.099 0'
     type = TransientMultiApp
     app_type = MooseTestApp
     input_files = fromsub_sub.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./from_sub]
+  [from_sub]
     source_variable = sub_u
     variable = transferred_u
     type = MultiAppGeneralFieldShapeEvaluationTransfer
@@ -72,8 +72,8 @@
     displaced_source_mesh = true
     # Test features non-overlapping meshes
     error_on_miss = false
-  [../]
-  [./elemental_from_sub]
+  []
+  [elemental_from_sub]
     source_variable = sub_u
     variable = elemental_transferred_u
     type = MultiAppGeneralFieldShapeEvaluationTransfer
@@ -81,5 +81,5 @@
     displaced_source_mesh = true
     # Test features non-overlapping meshes
     error_on_miss = false
-  [../]
+  []
 []

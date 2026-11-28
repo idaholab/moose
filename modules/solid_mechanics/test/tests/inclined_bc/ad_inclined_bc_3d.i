@@ -32,44 +32,44 @@
 []
 
 [BCs]
-  [./Pressure]
-    [./top]
+  [Pressure]
+    [top]
       boundary = top
       function = '-1000*t'
       use_automatic_differentiation = true
-    [../]
-  [../]
-  [./InclinedNoDisplacementBC]
-    [./right]
+    []
+  []
+  [InclinedNoDisplacementBC]
+    [right]
       boundary = right
       penalty = 1.0e8
       displacements = 'disp_x disp_y disp_z'
       use_automatic_differentiation = true
-    [../]
-    [./bottom]
+    []
+    [bottom]
       boundary = bottom
       penalty = 1.0e8
       displacements = 'disp_x disp_y disp_z'
       use_automatic_differentiation = true
-    [../]
-    [./back]
+    []
+    [back]
       boundary = back
       penalty = 1.0e8
       displacements = 'disp_x disp_y disp_z'
       use_automatic_differentiation = true
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -96,10 +96,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

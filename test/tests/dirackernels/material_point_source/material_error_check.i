@@ -14,54 +14,54 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./material_source]
+  [material_source]
     type = MaterialPointSource
     variable = u
     point = '0.2 0.3 0.0'
     material_prop = 'diffusivity'
     prop_state = 'old'
-  [../]
+  []
 []
 
 
 [Materials]
-  [./stateful]
+  [stateful]
     type = StatefulMaterial
-  [../]
+  []
 []
 
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

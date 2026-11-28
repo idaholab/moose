@@ -12,85 +12,85 @@
 []
 
 [Variables]
-  [./u1]
-  [../]
-  [./u2]
-  [../]
-  [./u3]
-  [../]
+  [u1]
+  []
+  [u2]
+  []
+  [u3]
+  []
 []
 
 [Kernels]
-  [./diff1]
+  [diff1]
     type = Diffusion
     variable = u1
-  [../]
-  [./diff2]
+  []
+  [diff2]
     type = Diffusion
     variable = u2
-  [../]
-  [./diff3]
+  []
+  [diff3]
     type = Diffusion
     variable = u3
-  [../]
+  []
 
-  [./dt1]
+  [dt1]
     type = TimeDerivative
     variable = u1
-  [../]
-  [./dt2]
+  []
+  [dt2]
     type = TimeDerivative
     variable = u2
-  [../]
-  [./dt3]
+  []
+  [dt3]
     type = TimeDerivative
     variable = u3
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./material_source1]
+  [material_source1]
     type = MaterialMultiPointSource
     variable = u1
     points = '0.2 0.3 0.0
               0.7 0.5 0.0'
-  [../]
-  [./material_source2]
+  []
+  [material_source2]
     type = MaterialMultiPointSource
     variable = u2
     points = '0.2 0.3 0.0
               0.2 0.3 0.0'
-  [../]
-  [./material_source3]
+  []
+  [material_source3]
     type = MaterialMultiPointSource
     variable = u3
     drop_duplicate_points = false
     points = '0.2 0.3 0.0
               0.2 0.3 0.0'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./u1]
+  [u1]
     type = ElementIntegralVariablePostprocessor
     variable = u1
-  [../]
-  [./u2]
+  []
+  [u2]
     type = ElementIntegralVariablePostprocessor
     variable = u2
-  [../]
-  [./u3]
+  []
+  [u3]
     type = ElementIntegralVariablePostprocessor
     variable = u3
-  [../]
+  []
 []
 
 [Materials]
-  [./const]
+  [const]
     type = GenericConstantMaterial
     prop_names = matp
     prop_values = 1.0
-  [../]
+  []
 []
 
 [Executioner]

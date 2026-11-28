@@ -26,89 +26,89 @@
 
 [Variables]
   # Variable block, where all variables in the simulation are declared
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [UserObjects]
-  [./voronoi]
+  [voronoi]
     type = PolycrystalVoronoi
     coloring_algorithm = bt
-  [../]
-  [./grain_tracker]
+  []
+  [grain_tracker]
     type = GrainTracker
     threshold = 0.2
     connecting_threshold = 0.08
-  [../]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
   # Dependent variables
-  [./bnds]
+  [bnds]
     # Variable used to visualize the grain boundaries in the simulation
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./unique_grains]
+  []
+  [unique_grains]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./var_indices]
+  []
+  [var_indices]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
   # Kernel block, where the kernels defining the residual equations are set up.
-  [./PolycrystalKernel]
+  [PolycrystalKernel]
     # Custom action creating all necessary kernels for grain growth.  All input parameters are up in GlobalParams
-  [../]
+  []
 []
 
 [AuxKernels]
   # AuxKernel block, defining the equations used to calculate the auxvars
-  [./bnds_aux]
+  [bnds_aux]
     # AuxKernel that calculates the GB term
     type = BndsCalcAux
     variable = bnds
     execute_on = timestep_end
-  [../]
-  [./unique_grains]
+  []
+  [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = timestep_end
     flood_counter = grain_tracker
     field_display = UNIQUE_REGION
-  [../]
-  [./var_indices]
+  []
+  [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     execute_on = timestep_end
     flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
-  [../]
+  []
 []
 
 [BCs]
   # Boundary Condition block
-  [./Periodic]
-    [./top_bottom]
+  [Periodic]
+    [top_bottom]
       auto_direction = 'x y' # Makes problem periodic in the x and y directions
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./CuGrGr]
+  [CuGrGr]
     # Material properties
     type = GBEvolution # Quantitative material properties for copper grain growth.  Dimensions are nm and ns
     block = 0 # Block ID (only one block in this problem)
@@ -118,23 +118,23 @@
     T = 450 # K   #Constant temperature of the simulation (for mobility calculation)
     wGB = 14 # nm    #Width of the diffuse GB
     outputs = exodus
-  [../]
+  []
 []
 
 [UserObjects]
-  [./euler_angle_file]
+  [euler_angle_file]
     type = EulerAngleFileReader
     file_name = grn_8_rand_2D.tex
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./gbInfo]
+  [gbInfo]
     type = GrainTextureVectorPostprocessor
     unique_grains = unique_grains
     euler_angle_provider = euler_angle_file
     sort_by = id # sort output by elem id
-  [../]
+  []
 []
 
 [Executioner]
@@ -153,11 +153,11 @@
   nl_rel_tol = 1e-10 # Absolute tolerance for nonlinear solves
   start_time = 0.0
   num_steps = 50
-  [./TimeStepper]
+  [TimeStepper]
     type = IterationAdaptiveDT
     dt = 25 # Initial time step.  In this simulation it changes.
     optimal_iterations = 6 # Time step will adapt to maintain this number of nonlinear iterations
-  [../]
+  []
 []
 
 [Outputs]
@@ -165,8 +165,8 @@
   exodus = true
   csv = true
   perf_graph = true
-  [./console]
+  [console]
     type = Console
     max_rows = 20
-  [../]
+  []
 []

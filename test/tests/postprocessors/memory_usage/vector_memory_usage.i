@@ -11,20 +11,20 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Adaptivity]
-  [./Markers]
-    [./box]
+  [Markers]
+    [box]
       type = BoxMarker
       bottom_left = '0.6 0.7 0'
       top_right = '0.9 0.9 0'
       inside = refine
       outside = do_nothing
-    [../]
-  [../]
+    []
+  []
   marker = box
 []
 
@@ -34,12 +34,12 @@
 []
 
 [VectorPostprocessors]
-  [./mem]
+  [mem]
     type = VectorMemoryUsage
     execute_on = 'INITIAL TIMESTEP_END NONLINEAR LINEAR'
     report_peak_value = true
     mem_units = kilobytes # or bytes, megabytes, gigabytes
-  [../]
+  []
 []
 
 [Executioner]

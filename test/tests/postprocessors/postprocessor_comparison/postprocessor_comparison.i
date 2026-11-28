@@ -10,19 +10,19 @@
 []
 
 [Postprocessors]
-  [./pp_to_compare]
+  [pp_to_compare]
     type = LinearCombinationPostprocessor
     pp_names = ''
     pp_coefs = ''
     b = 1
-  [../]
-  [./pp_comparison]
+  []
+  [pp_comparison]
     type = PostprocessorComparison
     value_a = pp_to_compare
     value_b = 2
     comparison_type = greater_than
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Problem]

@@ -6,8 +6,8 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Problem]
@@ -24,20 +24,20 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = FullSolveMultiApp
     input_files = sub.i
     execute_on = initial
-  [../]
+  []
 []
 
 [Transfers]
-  [./from_sub]
+  [from_sub]
     type = MultiAppCopyTransfer
     source_variable = u
     variable = u
     from_multi_app = sub
-  [../]
+  []
 []
 
 [Outputs]

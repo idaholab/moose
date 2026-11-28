@@ -19,91 +19,91 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./prop1]
+  [prop1]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./prop2]
+  []
+  [prop2]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./prop1_output]
+  [prop1_output]
     type = MaterialRealAux
     variable = prop1
     property = s1
-  [../]
-  [./prop2_output]
+  []
+  [prop2_output]
     type = MaterialRealAux
     variable = prop2
     property = s2
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1.0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 1.0
-  [../]
+  []
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = GenericConstantMaterial
     prop_names = 'a'
     prop_values = '.42'
-  [../]
-  [./stateful1]
+  []
+  [stateful1]
     type = ImplicitStateful
     prop_name = 's1'
     coupled_prop_name = 'a'
     add_time = true
     older = false
-  [../]
-  [./stateful2]
+  []
+  [stateful2]
     type = ImplicitStateful
     prop_name = 's2'
     coupled_prop_name = 's1'
     add_time = false
     older = false
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./integ1]
+  [integ1]
     type = ElementAverageValue
     variable = prop1
     execute_on = 'initial timestep_end'
-  [../]
-  [./integ2]
+  []
+  [integ2]
     type = ElementAverageValue
     variable = prop2
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

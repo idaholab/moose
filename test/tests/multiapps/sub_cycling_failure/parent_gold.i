@@ -7,42 +7,42 @@
 
 [Functions]
   # These mimic the behavior of the failing solve
-  [./dts]
+  [dts]
     type = PiecewiseLinear
     x = '0    0.1   0.15'
     y = '0.1  0.05  0.1'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./td]
+  []
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -50,10 +50,10 @@
   num_steps = 4
   dt = 0.1
 
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     function = dts
-  [../]
+  []
 
   solve_type = 'PJFNK'
 
@@ -66,12 +66,12 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     execute_on = timestep_end
     positions = '0 0 0'
     input_files = sub_gold.i
     sub_cycling = true
-  [../]
+  []
 []

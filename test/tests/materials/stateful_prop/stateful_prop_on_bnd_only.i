@@ -10,54 +10,54 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat]
+  [heat]
     type = MatDiffusionTest
     variable = u
     prop_name = thermal_conductivity
-  [../]
+  []
 
-  [./ie]
+  [ie]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0.0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = MTBC
     variable = u
     boundary = right
     grad = 1.0
     prop_name = thermal_conductivity
-  [../]
+  []
 []
 
 [Materials]
-  [./volatile]
+  [volatile]
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = 10
     block = 0
-  [../]
+  []
 
-  [./stateful_on_boundary]
+  [stateful_on_boundary]
     type = StatefulSpatialTest
     boundary = right
-  [../]
+  []
 []
 
 [Executioner]

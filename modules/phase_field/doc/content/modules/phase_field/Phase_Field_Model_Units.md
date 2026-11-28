@@ -77,7 +77,7 @@ There is no inherent unit system in MOOSE. Thus, the units of the phase field eq
 One useful practice is to create your material objects to take SI units as input parameters. Then use `length_scale`, `time_scale`, and `energy_scale` input parameters to convert the actual units of the problem. As an example of this, see the [PFParamsPolyFreeEnergy](/PFParamsPolyFreeEnergy.md) material, where the input file block looks like
 
 ```yaml
-[./Copper]
+[Copper]
   type = PFParamsPolyFreeEnergy
   block = 0
   c = c
@@ -89,7 +89,7 @@ One useful practice is to create your material objects to take SI units as input
   Em = 0.71 # in eV, from Balluffi1978 Table 2
   Ef = 1.28 # in eV, from Balluffi1978 Table 2
   surface_energy = 0.7 # J/m^2
-[../]
+[]
 ```
 
 *Taken from `phase_field/tests/PolynomialFreeEnergy/split_order4_test.i`*

@@ -1,5 +1,5 @@
 [Tests]
-  [./simpleeigenstrain]
+  [simpleeigenstrain]
     type = 'Exodiff'
     input = 'simpleeigenstrain.i'
     exodiff = 'simpleeigenstrain_out.e'
@@ -7,8 +7,8 @@
                   'coupled concentration variable in a single-phase mechanics model.'
     design = 'ComputeVariableEigenstrain.md'
     issues = '#4373'
-  [../]
-  [./elasticenergymaterial]
+  []
+  [elasticenergymaterial]
     type = 'Exodiff'
     input = 'elasticenergymaterial.i'
     exodiff = 'elasticenergymaterial_out.e'
@@ -17,8 +17,8 @@
                   'variable.'
     design = 'ElasticEnergyMaterial.md'
     issues = '#4269'
-  [../]
-  [./twophasestress]
+  []
+  [twophasestress]
     type = 'Exodiff'
     input = 'twophasestress.i'
     exodiff = 'twophasestress_out.e'
@@ -27,8 +27,8 @@
                   'tensor and eigenstrain.'
     design = 'TwoPhaseStressMaterial.md'
     issues = '#4269'
-  [../]
-  [./multiphasestress]
+  []
+  [multiphasestress]
     type = 'Exodiff'
     input = 'multiphasestress.i'
     exodiff = 'multiphasestress_out.e'
@@ -37,8 +37,8 @@
                   'own elasticity tensor and eigenstrain.'
     design = 'MultiPhaseStressMaterial.md'
     issues = '#4886'
-  [../]
-  [./nonsplit_gradderiv]
+  []
+  [nonsplit_gradderiv]
     type = 'Exodiff'
     input = 'nonsplit_gradderiv.i'
     exodiff = 'nonsplit_gradderiv_out.e'
@@ -49,8 +49,8 @@
                   'variables.'
     design = 'GradientComponent.md StrainGradDispDerivatives.md ComputeConcentrationDependentElasticityTensor.md'
     issues = '#5631'
-  [../]
-  [./nonsplit_gradderiv_action]
+  []
+  [nonsplit_gradderiv_action]
     type = 'Exodiff'
     input = 'nonsplit_gradderiv_action.i'
     exodiff = 'nonsplit_gradderiv_out.e'
@@ -62,8 +62,8 @@
                   'up automatically by an action.'
     design = 'DisplacementGradientsAction.md'
     issues = '#5631'
-  [../]
-  [./gradientcomponent]
+  []
+  [gradientcomponent]
     type = 'Exodiff'
     input = 'gradientcomponent.i'
     exodiff = 'gradientcomponent_out.e'
@@ -71,5 +71,5 @@
                   'as an auxiliary variable.'
     design = 'GradientComponent.md'
     issues = '#5631'
-  [../]
+  []
 []

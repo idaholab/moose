@@ -23,92 +23,92 @@
 []
 
 [Variables]
-  [./c]
-    [./InitialCondition]
+  [c]
+    [InitialCondition]
       type = FunctionIC
       function = x
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./dummy1]
+  [dummy1]
     type = Diffusion
     variable = c
-  [../]
-  [./dummy2]
+  []
+  [dummy2]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [Materials]
   # derivatives used both before and after being declared
-  [./sum_a_1]
+  [sum_a_1]
     type = DerivativeSumMaterial
     property_name = Fa1
     sum_materials = 'Fa'
     coupled_variables = 'c'
     outputs = exodus
-  [../]
-  [./free_energy_a]
+  []
+  [free_energy_a]
     type = DerivativeParsedMaterial
     property_name = Fa
     coupled_variables = 'c'
     expression = 'c^4'
-  [../]
-  [./sum_a_2]
+  []
+  [sum_a_2]
     type = DerivativeSumMaterial
     property_name = Fa2
     sum_materials = 'Fa'
     coupled_variables = 'c'
     outputs = exodus
-  [../]
+  []
 
   # derivatives declared after being used
-  [./sum_b_1]
+  [sum_b_1]
     type = DerivativeSumMaterial
     property_name = Fb1
     sum_materials = 'Fb'
     coupled_variables = 'c'
     outputs = exodus
-  [../]
-  [./free_energy_b]
+  []
+  [free_energy_b]
     type = DerivativeParsedMaterial
     property_name = Fb
     coupled_variables = 'c'
     expression = 'c^4'
-  [../]
+  []
 
   # derivatives declared before being used
-  [./free_energy_c]
+  [free_energy_c]
     type = DerivativeParsedMaterial
     property_name = Fc
     coupled_variables = 'c'
     expression = 'c^4'
-  [../]
-  [./sum_c_2]
+  []
+  [sum_c_2]
     type = DerivativeSumMaterial
     property_name = Fc2
     sum_materials = 'Fc'
     coupled_variables = 'c'
     outputs = exodus
-  [../]
+  []
 
   # non-existing derivatives
-  [./free_energy_d]
+  [free_energy_d]
     type = ParsedMaterial
     property_name = Fd
     coupled_variables = 'c'
     expression = 'c^4'
-  [../]
-  [./sum_d_1]
+  []
+  [sum_d_1]
     type = DerivativeSumMaterial
     property_name = Fd1
     sum_materials = 'Fd'
     coupled_variables = 'c'
     outputs = exodus
-  [../]
+  []
 []
 
 [Executioner]

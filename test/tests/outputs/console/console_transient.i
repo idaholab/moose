@@ -6,35 +6,35 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -51,10 +51,10 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./screen]
+  [screen]
     type = Console
     verbose = true
     time_precision = 6
     execute_on = 'failed nonlinear linear timestep_begin timestep_end'
-  [../]
+  []
 []

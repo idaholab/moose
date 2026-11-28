@@ -4,23 +4,23 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusion
     variable = dummy
     diffusivity = dummy_prop
-  [../]
+  []
 []
 
 [Materials]
-  [./matprop]
+  [matprop]
     type = TemplateStateful
     property_name = dummy_prop
-  [../]
+  []
 []
 
 [Executioner]

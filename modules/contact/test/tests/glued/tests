@@ -1,12 +1,12 @@
 [Tests]
   issues = '#716'
   design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
-  [./glued_contact_mechanical_constraint]
+  [glued_contact_mechanical_constraint]
     type = 'Exodiff'
     input = 'glued_contact_mechanical_constraint_test.i'
     exodiff = 'mechanical_constraint_out.e'
     abs_zero = 5e-05
     max_parallel = 1
     requirement = 'The contact system shall enforce a glued contact constraint that ties together two blocks that are separated by an initial gap when the come in contact with each other so that the blocks move together.'
-  [../]
+  []
 []

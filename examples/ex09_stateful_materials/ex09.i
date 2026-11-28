@@ -4,83 +4,83 @@
 []
 
 [Variables]
-  [./convected]
+  [convected]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./diffused]
+  [diffused]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./convected_ie]
+  [convected_ie]
     type = TimeDerivative
     variable = convected
-  [../]
+  []
 
-  [./example_diff]
+  [example_diff]
     # This Kernel uses "diffusivity" from the active material
     type = ExampleDiffusion
     variable = convected
-  [../]
+  []
 
-  [./conv]
+  [conv]
     type = ExampleConvection
     variable = convected
     some_variable = diffused
-  [../]
+  []
 
-  [./diffused_ie]
+  [diffused_ie]
     type = TimeDerivative
     variable = diffused
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 []
 
 [BCs]
-  [./left_convected]
+  [left_convected]
     type = DirichletBC
     variable = convected
     boundary = 'left'
     value = 0
-  [../]
+  []
 
-  [./right_convected]
+  [right_convected]
     type = DirichletBC
     variable = convected
     boundary = 'right'
     value = 1
-  [../]
+  []
 
-  [./left_diffused]
+  [left_diffused]
     type = DirichletBC
     variable = diffused
     boundary = 'left'
     value = 0
-  [../]
+  []
 
-  [./right_diffused]
+  [right_diffused]
     type = DirichletBC
     variable = diffused
     boundary = 'right'
     value = 1
-  [../]
+  []
 
 []
 
 [Materials]
-  [./example_material]
+  [example_material]
     type = ExampleMaterial
     block = 1
     initial_diffusivity = 0.05
-  [../]
+  []
 []
 
 [Executioner]

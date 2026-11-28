@@ -27,7 +27,7 @@ happens to be `v` as well.
 
 ## Example Input Syntax
 
-!listing test/tests/interfacekernels/ad_coupled_vector_value/coupled.i start=[./middle] end=[../] include-end=true
+!listing test/tests/interfacekernels/ad_coupled_vector_value/coupled.i start=[middle] end=[] include-end=true
 
 !syntax parameters /BCs/ADVectorMatchedValueBC
 

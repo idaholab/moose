@@ -13,28 +13,28 @@
 []
 
 [Variables]
-  [./ghost]
+  [ghost]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [ICs]
-  [./ghost_ic]
+  [ghost_ic]
     type = ElementUOIC
     variable = ghost
     element_user_object = ghost_uo
     field_name = "ghosted"
     field_type = long
-  [../]
+  []
 []
 
 [UserObjects]
-  [./ghost_uo]
+  [ghost_uo]
     type = ElemSideNeighborLayersTester
     execute_on = initial
     element_side_neighbor_layers = 1
-  [../]
+  []
 []
 
 [Executioner]

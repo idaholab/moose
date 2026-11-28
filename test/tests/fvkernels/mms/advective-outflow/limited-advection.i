@@ -5,13 +5,13 @@ a=1.1
 []
 
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = GeneratedMeshGenerator
     dim = 1
     xmin = 0.1
     xmax = 1.1
     nx = 2
-  [../]
+  []
 []
 
 [ICs]
@@ -23,20 +23,20 @@ a=1.1
 []
 
 [Variables]
-  [./u]
+  [u]
     two_term_boundary_expansion = true
     type = MooseVariableFVReal
-  [../]
+  []
 []
 
 [FVKernels]
-  [./advection_u]
+  [advection_u]
     type = FVLimitedAdvection
     variable = u
     velocity = '${a} 0 0'
     boundaries_to_force = 'right'
     limiter = 'vanLeer'
-  [../]
+  []
   [body_u]
     type = FVBodyForce
     variable = u
@@ -80,13 +80,13 @@ a=1.1
 []
 
 [Postprocessors]
-  [./L2u]
+  [L2u]
     type = ElementL2Error
     variable = u
     function = exact
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'

@@ -5,16 +5,16 @@
 []
 
 [Physics/SolidMechanics/Dynamic]
-  [./all]
+  [all]
     add_variables = true
     strain = SMALL
     incremental = true
-  [../]
+  []
 []
 
 
 [Mesh]
-  [./generated_mesh]
+  [generated_mesh]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 1
@@ -26,19 +26,19 @@
     ymax = 1
     zmin = 0.0
     zmax = 2
-  [../]
-  [./all_nodes]
+  []
+  [all_nodes]
     type = BoundingBoxNodeSetGenerator
     new_boundary = 'all'
     input = 'generated_mesh'
     top_right = '1 1 2'
     bottom_left = '0 0 0'
-  [../]
+  []
 []
 
 
 [BCs]
-  [./x_bot]
+  [x_bot]
     type = PresetDisplacement
     boundary = 'back'
     variable = disp_x
@@ -46,8 +46,8 @@
     velocity = vel_x
     acceleration = accel_x
     function = dispx
-  [../]
-  [./y_bot]
+  []
+  [y_bot]
     type = PresetDisplacement
     boundary = 'back'
     variable = disp_y
@@ -55,8 +55,8 @@
     velocity = vel_y
     acceleration = accel_y
     function = dispy
-  [../]
-  [./z_bot]
+  []
+  [z_bot]
     type = PresetDisplacement
     boundary = 'back'
     variable = disp_z
@@ -64,70 +64,70 @@
     velocity = vel_z
     acceleration = accel_z
     function = dispz
-  [../]
+  []
 []
 
 [Functions]
-  [./dispx]
+  [dispx]
     type = PiecewiseLinear
     x = '0.0 1.0 2.0 3.0 4.0' # time
     y = '0.0 1.0 0.0 -1.0 0.0'  # displacement
-  [../]
-  [./dispy]
+  []
+  [dispy]
     type = ParsedFunction
     expression = 0.1*t*t*sin(10*t)
-  [../]
-  [./dispz]
+  []
+  [dispz]
     type = ParsedFunction
     expression = 0.1*t*t*sin(20*t)
-  [../]
+  []
 []
 
 [NodalKernels]
-  [./nodal_mass_x]
+  [nodal_mass_x]
     type = NodalTranslationalInertia
     boundary = 'all'
     nodal_mass_file = 'nodal_mass_file.csv'
     variable = 'disp_x'
-  [../]
-  [./nodal_mass_y]
+  []
+  [nodal_mass_y]
     type = NodalTranslationalInertia
     boundary = 'all'
     nodal_mass_file = 'nodal_mass_file.csv'
     variable = 'disp_y'
-  [../]
-  [./nodal_mass_z]
+  []
+  [nodal_mass_z]
     type = NodalTranslationalInertia
     boundary = 'all'
     nodal_mass_file = 'nodal_mass_file.csv'
     variable = 'disp_z'
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor_block]
+  [elasticity_tensor_block]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.25
     block = 0
-  [../]
-  [./stress_block]
+  []
+  [stress_block]
     type = ComputeFiniteStrainElasticStress
     block = 0
-  [../]
-  [./density]
+  []
+  [density]
     type = GenericConstantMaterial
     block = 0
     prop_names = density
     prop_values = 0
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -139,19 +139,19 @@
   start_time = -0.01
   end_time = 0.1
   dt = 0.005
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = NewmarkBeta
     beta = 0.25
     gamma = 0.5
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./accel_10x]
+  [accel_10x]
     type = NodalVariableValue
     nodeid = 10
     variable = accel_x
-  [../]
+  []
 []
 
 [Outputs]

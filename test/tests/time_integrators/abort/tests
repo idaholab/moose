@@ -1,7 +1,7 @@
 [Tests]
   design = 'Transient.md'
   issues = '02ae277ceb83dcd5'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'abort.i'
     exodiff = 'out.e'
@@ -10,5 +10,5 @@
     expect_exit_code = 1
 
     requirement = "The system shall include an option that aborts the solve immediately if a solve fails."
-  [../]
+  []
 []

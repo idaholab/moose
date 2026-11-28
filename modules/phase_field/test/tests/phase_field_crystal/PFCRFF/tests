@@ -1,5 +1,5 @@
 [Tests]
-  [./tolerance_test]
+  [tolerance_test]
     type = 'Exodiff'
     input = 'PFCRFF_tolerance_test.i'
     exodiff = 'PFCRFF_tolerance_test_out.e'
@@ -7,9 +7,9 @@
     requirement = "The system shall support a tolerance approach to handing the natural log when using the Cahn-Hilliard RFF kernel"
     issues = "#5338"
     design = "CHPFCRFF.md"
-  [../]
+  []
 
-  [./cancelation_test]
+  [cancelation_test]
     type = 'Exodiff'
     input = 'PFCRFF_cancelation_test.i'
     exodiff = 'PFCRFF_cancelation_test_out.e'
@@ -17,9 +17,9 @@
     requirement = "The system shall support a cancelation approach to handing the natural log when using the Cahn-Hilliard RFF kernel"
     issues = "#5338"
     design = "CHPFCRFF.md"
-  [../]
+  []
 
-  [./expansion_test]
+  [expansion_test]
     type = 'Exodiff'
     input = 'PFCRFF_expansion_test.i'
     exodiff = 'PFCRFF_expansion_test_out.e'
@@ -27,5 +27,5 @@
     requirement = "The system shall support an expansion approach to handing the natural log when using the Cahn-Hilliard RFF kernel"
     issues = "#5338"
     design = "CHPFCRFF.md"
-  [../]
+  []
 []

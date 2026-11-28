@@ -51,10 +51,10 @@
 []
 
 [Postprocessors]
-  [./from_postprocessor]
+  [from_postprocessor]
     type = ElementIntegralVariablePostprocessor
     variable = power_density
-  [../]
+  []
 []
 
 [MultiApps]

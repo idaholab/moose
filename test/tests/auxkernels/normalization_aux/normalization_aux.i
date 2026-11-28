@@ -6,52 +6,52 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_condition = 1.0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./u_normalized]
+  [u_normalized]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./normalization_auxkernel]
+  [normalization_auxkernel]
     type = NormalizationAux
     variable = u_normalized
     source_variable = u
     normal_factor = 2.0
     execute_on = timestep_end
     # Note: 'normalization' or 'shift' are provided as CLI args
-  [../]
+  []
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = left
     value = 1
-  [../]
+  []
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = right
     value = 2
-  [../]
+  []
 []
 
 [Executioner]
@@ -59,22 +59,22 @@
 []
 
 [Postprocessors]
-  [./unorm]
+  [unorm]
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = 'initial timestep_end'
-  [../]
-  [./u_normalized_norm]
+  []
+  [u_normalized_norm]
     type = ElementIntegralVariablePostprocessor
     variable = u_normalized
     execute_on = 'initial timestep_end'
-  [../]
-  [./u0]
+  []
+  [u0]
     type = PointValue
     variable = u
     point = '0 0 0'
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

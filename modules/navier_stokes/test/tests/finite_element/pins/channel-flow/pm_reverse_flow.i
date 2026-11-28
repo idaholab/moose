@@ -126,7 +126,7 @@
   [temperature_time]
     type = PINSFEFluidTemperatureTimeDerivative
     variable = T
-  [../]
+  []
   [temperature_space]
     type = INSFEFluidEnergyKernel
     variable = T
@@ -154,12 +154,12 @@
     v_fn = v_in
   []
   # Outlet
-  [./pressure_out]
+  [pressure_out]
     type = DirichletBC
     variable = p
     boundary = 'right'
     value = 1e5
-  [../]
+  []
 
   # BCs for x-momentum equation
   # Inlet

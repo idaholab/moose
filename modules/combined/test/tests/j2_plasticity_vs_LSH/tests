@@ -1,5 +1,5 @@
 [Tests]
-  [./j2_hard1_mod]
+  [j2_hard1_mod]
     type = 'CSVDiff'
     input = 'j2_hard1_mod.i'
     csvdiff = 'j2_hard1_mod_out.csv'
@@ -8,5 +8,5 @@
                   'return-mapping plasticity user object formulation.'
     design = 'SolidMechanicsPlasticJ2.md'
     issues = '#5628'
-  [../]
+  []
 []

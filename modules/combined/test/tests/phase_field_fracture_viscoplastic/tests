@@ -1,5 +1,5 @@
 [Tests]
-  [./crack2d]
+  [crack2d]
     type = 'Exodiff'
     input = 'crack2d.i'
     exodiff = 'crack2d_out.e'
@@ -11,5 +11,5 @@
                   'isotropic phase-field damage to propagate a crack.'
     design = 'HyperElasticPhaseFieldIsoDamage.md'
     issues = '#6049'
-  [../]
-[../]
+  []
+[]

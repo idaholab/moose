@@ -1,5 +1,5 @@
 [Tests]
-  [./ates]
+  [ates]
     type = CSVDiff
     input = 'ates.i'
     csvdiff = 'ates_csv.csv'
@@ -8,5 +8,5 @@
     issues = '#17966'
     design = 'ates.md'
     requirement = 'The system shall demonstrate an example of an ATES simulation in PorousFlow'
-  [../]
+  []
 []

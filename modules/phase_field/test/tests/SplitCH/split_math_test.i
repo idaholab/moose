@@ -12,90 +12,90 @@
 
 [Variables]
 
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = CrossIC
       x1 = 0.0
       x2 = 30.0
       y1 = 0.0
       y2 = 30.0
-    [../]
-  [../]
+    []
+  []
 
-  [./w]
+  [w]
     order = FIRST
     family = LAGRANGE
 
-  [../]
+  []
 
 
 []
 
 [Preconditioning]
 active = 'SMP'
-  [./PBP]
+  [PBP]
    type = PBP
    solve_order = 'w c'
    preconditioner = 'AMG ASM'
    off_diag_row = 'c '
    off_diag_column = 'w '
-  [../]
+  []
 
-  [./SMP]
+  [SMP]
    type = SMP
    coupled_groups = 'c,w'
-  [../]
+  []
 []
 
 [Kernels]
 
-  [./cres]
+  [cres]
     type = SplitCHMath
     variable = c
     kappa_name = kappa_c
     w = w
-  [../]
+  []
 
-  [./wres]
+  [wres]
     type = SplitCHWRes
     variable = w
     mob_name = M
-  [../]
+  []
 
-  [./time]
+  [time]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
+  []
 
 []
 
 [BCs]
-  [./Periodic]
-    [./top_bottom]
+  [Periodic]
+    [top_bottom]
       primary = 0
       secondary = 2
       translation = '0 30.0 0'
-    [../]
+    []
 
-    [./left_right]
+    [left_right]
       primary = 1
       secondary = 3
       translation = '-30.0 0 0'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
 
-  [./constant]
+  [constant]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1.0 2.0'
     block = 0
-  [../]
+  []
 []
 
 [Executioner]

@@ -15,52 +15,52 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [AuxVariables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = sin(x)*0.1
-    [../]
-  [../]
-  [./disp_y]
+    []
+  []
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       function = cos(y)*0.05
-    [../]
-  [../]
-  [./E]
+    []
+  []
+  [E]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./elastic_energy]
+  [elastic_energy]
     type = ElasticEnergyAux
     variable = E
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ComputeElasticityTensor
     fill_method = symmetric9
     C_ijkl = '1 2 4 3 2 5 1 3 1'
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeSmallStrain
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]

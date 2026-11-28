@@ -12,46 +12,46 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-  [../]
+  [u]
+  []
+  [v]
+  []
 []
 
 [Kernels]
-  [./time_u]
+  [time_u]
     type = TimeDerivative
     variable = u
-  [../]
-  [./fn_u]
+  []
+  [fn_u]
     type = BodyForce
     variable = u
     function = 1
-  [../]
-  [./time_v]
+  []
+  [time_v]
     type = CoupledTimeDerivative
     variable = v
     v = u
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = v
     boundary = 'left'
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = v
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

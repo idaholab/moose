@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'displaced_mesh.i'
     exodiff = 'displaced_mesh_in.e'
@@ -9,5 +9,5 @@
     requirement = "The system shall support the generation of meshes for both reference and displaced mesh configurations."
     design = 'Mesh/index.md'
     issues = '#12712'
-  [../]
+  []
 []

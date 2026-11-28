@@ -1,31 +1,31 @@
 [Tests]
   design = 'syntax/Outputs/index.md Console.md'
   issues = '#2173'
-  [./basic]
+  [basic]
     type = RunApp
     input = 'system_info.i'
     expect_out = 'Framework\sInformation:.*?Mesh:.*?Nonlinear\sSystem:.*?Auxiliary\sSystem:.*?Execution\sInformation:'
     requirement = 'The system shall print the various components of the simulation information header to the screen'
-  [../]
+  []
 
-  [./mesh]
+  [mesh]
     type = RunApp
     input = 'system_info_mesh.i'
     expect_out = 'time\s=\s0.1.*?Nodes:.*?time\s=\s0.2.*?Nodes:'
     requirement = 'The system shall print the mesh information to the screen when the mesh changes'
-  [../]
+  []
 
-  [./aux]
+  [aux]
     type = RunApp
     input = 'system_info_mesh.i'
     expect_out = 'Num DOFs:\s*1892'
     requirement = 'The system shall print the auxiliary system information to the screen when the mesh changes'
-  [../]
+  []
 
-  [./nonlinear]
+  [nonlinear]
     type = RunApp
     input = 'system_info_mesh.i'
     expect_out = 'Num DOFs:\s*672'
     requirement = 'The system shall print the nonlinear system information to the screen when the mesh changes'
-  [../]
+  []
 []

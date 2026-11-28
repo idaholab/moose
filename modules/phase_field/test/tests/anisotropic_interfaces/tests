@@ -1,13 +1,13 @@
 [Tests]
   design = 'ACInterfaceKobayashi1.md ACInterfaceKobayashi2.md'
-  [./kobayashi]
+  [kobayashi]
     type = 'Exodiff'
     input = 'kobayashi.i'
     exodiff = 'kobayashi_out.e'
     issues = '#5669'
     requirement = 'The system shall be able to solve the Kobayashi dendritic solidification model with an anisotropic interface energy.'
-  [../]
-  [./adkobayashi]
+  []
+  [adkobayashi]
     type = 'Exodiff'
     input = 'adkobayashi.i'
     exodiff = 'adkobayashi_out.e'
@@ -15,7 +15,7 @@
     valgrind = HEAVY
     issues = '#15508'
     requirement = 'The system shall be able to solve the Kobayashi dendritic solidification model with an anisotropic interface energy using automatic differentiation.'
-  [../]
+  []
 
   [kobayashi_variable_mobility_jacobian]
     type = 'PetscJacobianTester'

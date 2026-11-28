@@ -10,24 +10,24 @@
 []
 
 [AuxVariables]
-  [./x]
+  [x]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [AuxScalarKernels]
-  [./const_x]
+  [const_x]
     type = ConstantScalarAux
     variable = x
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./stateful]
+  [stateful]
     type = StatefulMaterial
-  [../]
+  []
 []
 
 [Executioner]
@@ -35,12 +35,12 @@
 []
 
 [Postprocessors]
-  [./matl_integral]
+  [matl_integral]
     type = ElementIntegralMaterialProperty
     mat_prop = diffusivity
     execute_on = timestep_end
     outputs = 'console csv'
-  [../]
+  []
 []
 
 [Outputs]

@@ -21,58 +21,58 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./disp_x]
+  [disp_x]
     initial_condition = 0.4
-  [../]
-  [./disp_y]
-  [../]
-  [./elemental]
+  []
+  [disp_y]
+  []
+  [elemental]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./x_func]
+  [x_func]
     type = ParsedFunction
     expression = x
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./x_func_aux]
+  [x_func_aux]
     type = FunctionAux
     variable = elemental
     function = x_func
     execute_on = initial
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -91,66 +91,66 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     execute_on = timestep_end
     positions = '0.2 0 0'
     input_files = tosub_sub.i
-  [../]
+  []
 []
 
 [Transfers]
-  [./tosub]
+  [tosub]
     type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = u
     variable = from_parent
-  [../]
-  [./elemental_tosub]
+  []
+  [elemental_tosub]
     type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = u
     variable = elemental_from_parent
-  [../]
-  [./radial_tosub]
+  []
+  [radial_tosub]
     type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = u
     variable = radial_from_parent
     interp_type = radial_basis
-  [../]
-  [./radial_elemental_tosub]
+  []
+  [radial_elemental_tosub]
     type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = u
     variable = radial_elemental_from_parent
     interp_type = radial_basis
-  [../]
-  [./displaced_target_tosub]
+  []
+  [displaced_target_tosub]
     type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = u
     variable = displaced_target_from_parent
     displaced_target_mesh = true
-  [../]
-  [./displaced_source_tosub]
+  []
+  [displaced_source_tosub]
     type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = u
     variable = displaced_source_from_parent
     displaced_source_mesh = true
-  [../]
-  [./elemental_to_sub_elemental]
+  []
+  [elemental_to_sub_elemental]
     type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = elemental
     variable = elemental_from_parent_elemental
-  [../]
-  [./elemental_to_sub_nodal]
+  []
+  [elemental_to_sub_nodal]
     type = MultiAppGeometricInterpolationTransfer
     to_multi_app = sub
     source_variable = elemental
     variable = nodal_from_parent_elemental
-  [../]
+  []
 []

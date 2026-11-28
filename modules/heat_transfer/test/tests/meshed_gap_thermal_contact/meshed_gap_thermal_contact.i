@@ -13,37 +13,37 @@
 []
 
 [Variables]
-  [./temp]
+  [temp]
     block = '1 3'
     initial_condition = 1.0
-  [../]
+  []
 []
 
 [Kernels]
-  [./hc]
+  [hc]
     type = HeatConduction
     variable = temp
     block = '1 3'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = temp
     boundary = 1
     value = 1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = temp
     boundary = 4
     value = 2
-  [../]
+  []
 []
 
 [ThermalContact]
-  [./gap_conductivity]
+  [gap_conductivity]
     type = GapHeatTransfer
     variable = temp
     primary = 2
@@ -51,16 +51,16 @@
     emissivity_primary = 0
     emissivity_secondary = 0
     gap_conductivity = 0.5
-  [../]
+  []
 []
 
 [Materials]
-  [./hcm]
+  [hcm]
     type = HeatConductionMaterial
     block = '1 3'
     temp = temp
     thermal_conductivity = 1
-  [../]
+  []
 []
 
 [Problem]
@@ -77,7 +77,7 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
-  [../]
+  []
 []

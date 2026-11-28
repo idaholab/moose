@@ -20,7 +20,7 @@ do support automatic differentiation, to auxiliary variables, the derivatives wi
 In this example, the `MaterialStdVectorRealGradientAux` is used to examine gradients of the
 force densities between particles in a phase field simulation.
 
-!listing modules/phase_field/test/tests/rigidbodymotion/grain_motion_fauxGT.i block=AuxKernels start=[./df01] end=[./unique_grains]
+!listing modules/phase_field/test/tests/rigidbodymotion/grain_motion_fauxGT.i block=AuxKernels start=[df01] end=[unique_grains]
 
 !syntax parameters /AuxKernels/MaterialStdVectorRealGradientAux
 

@@ -6,16 +6,16 @@
 []
 
 [Materials]
-  [./provider]
+  [provider]
     type = DerivativeMaterialInterfaceTestProvider
     block = 0
     outputs = exodus
     output_properties = 'dprop/db dprop/da d^2prop/dadb d^2prop/dadc d^3prop/dadbdc'
-  [../]
-  [./client]
+  []
+  [client]
     type = DerivativeMaterialInterfaceTestClient
     block = 0
-  [../]
+  []
 []
 
 [Executioner]

@@ -35,14 +35,14 @@
 []
 
 [FluidProperties]
-  [./eos]
+  [eos]
     type = SimpleFluidProperties
     density0 = 100              # kg/m^3
     thermal_expansion = 0       # K^{-1}
     cp =  100
     viscosity = 0.1             # Pa-s, Re=rho*u*L/mu = 100*1*0.1/0.1 = 100
     thermal_conductivity = 0.1
-  [../]
+  []
 []
 
 [Functions]
@@ -129,7 +129,7 @@
   [temperature_time]
     type = PINSFEFluidTemperatureTimeDerivative
     variable = T
-  [../]
+  []
   [temperature_space]
     type = INSFEFluidEnergyKernel
     variable = T
@@ -157,12 +157,12 @@
     v_fn = v_in
   []
   # Outlet
-  [./pressure_out]
+  [pressure_out]
     type = DirichletBC
     variable = p
     boundary = 'right'
     value = 1e5
-  [../]
+  []
 
   # BCs for x-momentum equation
   # Inlet

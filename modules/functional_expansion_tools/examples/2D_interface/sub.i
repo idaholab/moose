@@ -14,83 +14,83 @@
 []
 
 [Variables]
-  [./s]
-  [../]
+  [s]
+  []
 []
 
 [Kernels]
-  [./diff_s]
+  [diff_s]
     type = HeatConduction
     variable = s
-  [../]
-  [./time_diff_s]
+  []
+  [time_diff_s]
     type = HeatConductionTimeDerivative
     variable = s
-  [../]
+  []
 []
 
 [Materials]
-  [./Unobtanium]
+  [Unobtanium]
     type = GenericConstantMaterial
     prop_names =  'thermal_conductivity specific_heat density'
     prop_values = '1.0                  1.0           1.0' # W/(cm K), J/(g K), g/cm^3
-  [../]
+  []
 []
 
 [ICs]
-  [./start_s]
+  [start_s]
     type = ConstantIC
     value = 2
     variable = s
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = DirichletBC
     variable = s
     boundary = bottom
     value = 0.1
-  [../]
-  [./interface_flux]
+  []
+  [interface_flux]
     type = FXFluxBC
     boundary = left
     variable = s
     function = FX_Basis_Flux_Sub
-  [../]
+  []
 []
 
 [Functions]
-  [./FX_Basis_Value_Sub]
+  [FX_Basis_Value_Sub]
     type = FunctionSeries
     series_type = Cartesian
     orders = '4'
     physical_bounds = '0.0 10'
     y = Legendre
-  [../]
-  [./FX_Basis_Flux_Sub]
+  []
+  [FX_Basis_Flux_Sub]
     type = FunctionSeries
     series_type = Cartesian
     orders = '5'
     physical_bounds = '0.0 10'
     y = Legendre
-  [../]
+  []
 []
 
 [UserObjects]
-  [./FX_Value_UserObject_Sub]
+  [FX_Value_UserObject_Sub]
     type = FXBoundaryValueUserObject
     function = FX_Basis_Value_Sub
     variable = s
     boundary = left
-  [../]
-  [./FX_Flux_UserObject_Sub]
+  []
+  [FX_Flux_UserObject_Sub]
     type = FXBoundaryFluxUserObject
     function = FX_Basis_Flux_Sub
     variable = s
     boundary = left
     diffusivity = thermal_conductivity
-  [../]
+  []
 []
 
 [Executioner]

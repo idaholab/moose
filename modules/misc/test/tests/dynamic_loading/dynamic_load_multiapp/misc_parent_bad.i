@@ -6,34 +6,34 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./td]
+  []
+  [td]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -52,7 +52,7 @@
 []
 
 [MultiApps]
-  [./sub_app]
+  [sub_app]
     positions = '0 0 0  0.5 0.5 0  0.6 0.6 0  0.7 0.7 0'
     type = TransientMultiApp
     input_files = 'phase_field_sub.i'
@@ -62,5 +62,5 @@
 
     # Here we set an input file specific relative library path instead of using MOOSE_LIBRARY_PATH
     library_path = '../../../../../phase_field/lib'
-  [../]
+  []
 []

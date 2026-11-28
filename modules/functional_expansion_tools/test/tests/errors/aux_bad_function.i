@@ -4,23 +4,23 @@
 []
 
 [AuxVariables]
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [AuxKernels]
-  [./this_could_be_bad]
+  [this_could_be_bad]
     type = FunctionSeriesToAux
     function = const
     variable = v
-  [../]
+  []
 []
 
 [Functions]
-  [./const]
+  [const]
     type = ConstantFunction
     value = -1
-  [../]
+  []
 []
 
 [Executioner]

@@ -1,8 +1,8 @@
 [Mesh]
-  [./square]
+  [square]
     type = FileMeshGenerator
     file = cube.e
-  [../]
+  []
 []
 
 [Variables]
@@ -48,9 +48,9 @@
 
 [Executioner]
   type = Steady
-  [./Quadrature]
+  [Quadrature]
     allow_negative_qweights = false
-  [../]
+  []
   solve_type = 'NEWTON'
   petsc_options_iname = "-pc_type"
   petsc_options_value = "hypre"

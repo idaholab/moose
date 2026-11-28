@@ -18,114 +18,114 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./distance]
+  [distance]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./disp_z]
+  [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff u_time'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./u_time]
+  [u_time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./x]
+  [x]
     type = FunctionAux
     variable = disp_x
     function = 0
     block = 1
-  [../]
+  []
 
-  [./y]
+  [y]
     type = FunctionAux
     variable = disp_y
     function = 0
     block = 1
-  [../]
+  []
 
-  [./z]
+  [z]
     type = FunctionAux
     variable = disp_z
     function = t
     block = 1
-  [../]
-  [./gap_distance]
+  []
+  [gap_distance]
     type = NearestNodeDistanceAux
     variable = distance
     boundary = 2
     paired_boundary = 3
-  [../]
+  []
 
-  [./gap_distance2]
+  [gap_distance2]
     type = NearestNodeDistanceAux
     variable = distance
     boundary = 3
     paired_boundary = 2
-  [../]
+  []
 []
 
 [BCs]
   active = 'block1_left block1_right block2_left block2_right'
 
-  [./block1_left]
+  [block1_left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./block1_right]
+  [block1_right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 
-  [./block2_left]
+  [block2_left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./block2_right]
+  [block2_right]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

@@ -6,35 +6,35 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./from_sub]
-  [../]
+  [from_sub]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -53,21 +53,21 @@
 []
 
 [MultiApps]
-  [./sub]
+  [sub]
     positions = '0.2 0.2 0 0.7 0.7 0'
     type = TransientMultiApp
     app_type = MooseTestApp
     input_files = 'sub0.i sub1.i'
-  [../]
+  []
 []
 
 [Transfers]
-  [./pp_transfer]
+  [pp_transfer]
     type = MultiAppPostprocessorInterpolationTransfer
     postprocessor = average
     variable = from_sub
     from_multi_app = sub
     interp_type = radial_basis
     radius = 1.5
-  [../]
+  []
 []

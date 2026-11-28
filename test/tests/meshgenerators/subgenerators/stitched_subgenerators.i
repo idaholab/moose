@@ -1,5 +1,5 @@
 [Mesh]
-  [./smg]
+  [smg]
     type = TestSubgenerators
     input_files = 'left.e center.e right.e'
     clear_stitched_boundary_ids = true

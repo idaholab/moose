@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'PFCTrad_test.i'
     exodiff = 'PFCTrad_test_out.e'
@@ -9,5 +9,5 @@
     issues = '#5336'
     design = 'PFCTradMaterial.md CHBulkPFCTrad.md'
     requirement = 'The system shall be able to solve the traditional phase field crystal model.'
-  [../]
+  []
 []

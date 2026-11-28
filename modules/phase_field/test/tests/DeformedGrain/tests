@@ -1,5 +1,5 @@
 [Tests]
-  [./DeformedGrain]
+  [DeformedGrain]
     capabilities = 'method!=dbg'
     type = 'Exodiff'
     input = 'DeformedGrain.i'
@@ -7,5 +7,5 @@
     issues = '#7499'
     design = 'DeformedGrainMaterial.md'
     requirement = 'The system shall be able to compute the stored energy of deformed grains in a Voronoi polycrystal, tracked by the GrainTracker.'
-  [../]
+  []
 []

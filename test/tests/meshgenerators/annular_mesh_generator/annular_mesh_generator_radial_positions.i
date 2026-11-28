@@ -1,5 +1,5 @@
 [Mesh]
-  [./amg]
+  [amg]
     type = AnnularMeshGenerator
     nt = 12
     rmin = 1

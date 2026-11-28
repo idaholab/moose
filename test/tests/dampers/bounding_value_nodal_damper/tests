@@ -1,14 +1,14 @@
 [Tests]
   design = 'source/dampers/BoundingValueNodalDamper.md'
-  [./bounding_value_max]
+  [bounding_value_max]
     issues = '#7856'
     type = 'RunException'
     input = 'bounding_value_max_test.i'
     expect_out = 'Damping factor: 0.3333'
     expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
     requirement = "The system shall include the ability to reduce the change in nonlinear residual based on a maximum value on nodes."
-  [../]
-  [./bounding_value_min]
+  []
+  [bounding_value_min]
     issues = '#7856'
     type = 'RunException'
     input = 'bounding_value_max_test.i'
@@ -16,12 +16,12 @@
     expect_out = 'Damping factor: 0.3333'
     expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
     requirement = "The system shall include the ability to reduce the change in nonlinear residual based on a minimum value on nodes."
-  [../]
-  [./bounding_value_block_restricted]
+  []
+  [bounding_value_block_restricted]
     issues = '#32058'
     type = 'RunApp'
     input = 'bounding_value_block_restricted_test.i'
     cli_args = '--n-threads=2'
     requirement = "The system shall not evaluate a nodal bounding-value damper on nodes where a block-restricted variable to damp is undefined."
-  [../]
+  []
 []

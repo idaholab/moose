@@ -1,10 +1,10 @@
 [Tests]
   issues = '#6699'
   design = 'MooseDocs/index.md'
-  [./spec]
+  [spec]
     type = PythonUnitTest
     input = test_spec_files.py
     min_slots = 2 # uses threads
     requirement = "The system shall include a test that ensures that all python files within the tests directories have an associated test specification."
-  [../]
+  []
 []

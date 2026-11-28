@@ -9,14 +9,14 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [ICs]
-  [./c_IC]
+  [c_IC]
     type = SmoothCircleIC
     x1 = 15
     y1 = 15
@@ -25,42 +25,42 @@
     int_width = 3
     invalue = 1
     outvalue = -1
-  [../]
+  []
 []
 
 [Kernels]
-  [./ie_c]
+  [ie_c]
     type = TimeDerivative
     variable = c
-  [../]
-  [./CHSolid]
+  []
+  [CHSolid]
     type = CHMath
     variable = c
     mob_name = M
-  [../]
-  [./CHInterface]
+  []
+  [CHInterface]
     type = CHInterface
     variable = c
     kappa_name = kappa_c
     mob_name = M
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./kappa]
+  [kappa]
     type = GenericConstantMaterial
     prop_names = 'kappa_c'
     prop_values = '2.0'
-  [../]
-  [./mob]
+  []
+  [mob]
     type = DerivativeParsedMaterial
     property_name = M
     coupled_variables = c
@@ -68,7 +68,7 @@
     epsilon = 1e-12
     outputs = exodus
     derivative_order = 2
-  [../]
+  []
 []
 
 [Executioner]

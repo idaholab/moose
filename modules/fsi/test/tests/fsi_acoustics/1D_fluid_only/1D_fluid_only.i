@@ -27,51 +27,51 @@
 []
 
 [Variables]
-  [./p]
-  [../]
+  [p]
+  []
 []
 
 [Kernels]
-  [./diffusion]
+  [diffusion]
     type = Diffusion
     variable = 'p'
-  [../]
-  [./inertia]
+  []
+  [inertia]
     type = AcousticInertia
     variable = p
-  [../]
+  []
 []
 
 [BCs]
-  [./leftright_pressure]
+  [leftright_pressure]
     type = DirichletBC
     variable = p
     boundary = 'left right'
     value = 0
-  [../]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = FunctionIC
     variable = 'p'
     function = initial_cond
-  [../]
+  []
 []
 
 [Functions]
-  [./initial_cond]
+  [initial_cond]
     type = ParsedFunction
     expression = 'sin(pi*x) + sin(3*pi*x) + sin(5*3.141*x) + sin(7*pi*x) + sin(9*pi*x)'
-  [../]
+  []
 []
 
 [Materials]
-  [./co_sq]
+  [co_sq]
     type = GenericConstantMaterial
     prop_names = inv_co_sq
     prop_values = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -95,11 +95,11 @@
 []
 
 [Postprocessors]
-  [./p1]
+  [p1]
     type = PointValue
     point = '0.5 0.0 0.0'
     variable = p
-  [../]
+  []
 []
 
 [Outputs]

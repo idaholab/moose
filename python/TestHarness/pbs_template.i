@@ -1,4 +1,4 @@
-  [./<JOB_NAME>]
+  [<JOB_NAME>]
     test_name = <TEST_NAME>
     type = PBSJob
     chunks = 1
@@ -15,4 +15,4 @@
     copy_files = gold
     combine_streams = True
     cli_args = <CLI_ARGS>
-  [../]
+  []

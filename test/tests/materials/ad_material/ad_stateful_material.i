@@ -6,54 +6,54 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADMatDiffusionTest
     variable = u
     prop_to_use = 'AdAd'
     ad_mat_prop = 'diffusivity'
     regular_mat_prop = 'unused_diffusivity'
-  [../]
+  []
 []
 
 [Kernels]
-  [./force]
+  [force]
     type = BodyForce
     variable = u
     value = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./constant_material]
+  [constant_material]
     type = GenericConstantMaterial
     prop_names = 'unused_diffusivity'
     prop_values = '0'
-  [../]
-  [./ad_stateful]
+  []
+  [ad_stateful]
     type = ADStatefulMaterial
     u = u
-  [../]
+  []
 []
 
 [Executioner]
@@ -71,8 +71,8 @@
 []
 
 [Outputs]
-  [./exodus]
+  [exodus]
     type = Exodus
     show_material_properties = 'diffusivity'
-  [../]
+  []
 []

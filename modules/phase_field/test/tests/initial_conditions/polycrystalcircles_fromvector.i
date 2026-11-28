@@ -18,17 +18,17 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [AuxVariables]
-  [./bnds]
-  [../]
+  [bnds]
+  []
 []
 
 [UserObjects]
-  [./circle_IC]
+  [circle_IC]
     type = PolycrystalCircles
     radii =       '22  22  30  22  22  22  22  22 '
     x_positions = '34  78  122 166 34  78  122 166'
@@ -38,50 +38,50 @@
     threshold = 0.2
     connecting_threshold = 0.08
     int_width = 8
-  [../]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = circle_IC
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./dt_gr0]
+  [dt_gr0]
     type = TimeDerivative
     variable = gr0
-  [../]
-  [./dt_gr1]
+  []
+  [dt_gr1]
     type = TimeDerivative
     variable = gr1
-  [../]
-  [./dt_gr2]
+  []
+  [dt_gr2]
     type = TimeDerivative
     variable = gr2
-  [../]
-  [./dt_gr3]
+  []
+  [dt_gr3]
     type = TimeDerivative
     variable = gr3
-  [../]
-  [./dt_gr4]
+  []
+  [dt_gr4]
     type = TimeDerivative
     variable = gr4
-  [../]
-  [./dt_gr5]
+  []
+  [dt_gr5]
     type = TimeDerivative
     variable = gr5
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./bnds_aux]
+  [bnds_aux]
     type = BndsCalcAux
     variable = bnds
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

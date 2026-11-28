@@ -3,65 +3,65 @@
 []
 
 [Variables]
-  [./convected]
+  [convected]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./diffused]
+  [diffused]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_convected]
+  [diff_convected]
     type = Diffusion
     variable = convected
-  [../]
+  []
 
-  [./conv]
+  [conv]
     type = ExampleConvection
     variable = convected
 
     # Couple a variable into the convection kernel using local_name = simulation_name syntax
     some_variable = diffused
-  [../]
+  []
 
-  [./diff_diffused]
+  [diff_diffused]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 []
 
 [BCs]
-  [./bottom_convected]
+  [bottom_convected]
     type = DirichletBC
     variable = convected
     boundary = 'bottom'
     value = 1
-  [../]
+  []
 
-  [./top_convected]
+  [top_convected]
     type = DirichletBC
     variable = convected
     boundary = 'top'
     value = 0
-  [../]
+  []
 
-  [./bottom_diffused]
+  [bottom_diffused]
     type = DirichletBC
     variable = diffused
     boundary = 'bottom'
     value = 2
-  [../]
+  []
 
-  [./top_diffused]
+  [top_diffused]
     type = DirichletBC
     variable = diffused
     boundary = 'top'
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

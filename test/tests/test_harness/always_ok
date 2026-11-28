@@ -1,7 +1,7 @@
 [Tests]
-  [./always_ok]
+  [always_ok]
     type = RunApp
     input = good.i
     unique_test_id = foo
-  [../]
+  []
 []

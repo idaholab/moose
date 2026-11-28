@@ -46,8 +46,8 @@
   # 1 since the end time from
   # the steady executioner is 1
   start_time = 0
-  [./TimeStepper]
+  [TimeStepper]
     type = TimeSequenceStepper
     time_sequence  = '0 1 2'
-  [../]
+  []
 []

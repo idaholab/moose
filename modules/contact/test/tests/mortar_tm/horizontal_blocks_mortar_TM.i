@@ -6,7 +6,7 @@ offset = 0.01
 []
 
 [Mesh]
-  [./left_block]
+  [left_block]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = -1.0
@@ -17,14 +17,14 @@ offset = 0.01
     ny = 1
     elem_type = QUAD4
     boundary_name_prefix = lb
-  [../]
-  [./left_block_id]
+  []
+  [left_block_id]
     type = SubdomainIDGenerator
     input = left_block
     subdomain_id = 1
-  [../]
+  []
 
-  [./right_block]
+  [right_block]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0.0
@@ -36,126 +36,126 @@ offset = 0.01
     elem_type = QUAD4
     boundary_name_prefix = rb
     boundary_id_offset = 10
-  [../]
-  [./right_block_id]
+  []
+  [right_block_id]
     type = SubdomainIDGenerator
     input = right_block
     subdomain_id = 2
-  [../]
+  []
 
-  [./combined]
+  [combined]
     type = MeshCollectionGenerator
     inputs = 'left_block_id right_block_id'
-  [../]
-  [./block_rename]
+  []
+  [block_rename]
     type = RenameBlockGenerator
     input = combined
     old_block = '1 2'
     new_block = 'left_block right_block'
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     incremental = true
     add_variables = true
     block = '1 2'
-  [../]
+  []
 []
 
 [Functions]
-  [./horizontal_movement]
+  [horizontal_movement]
     type = ParsedFunction
     expression = t/10.0
-  [../]
+  []
 []
 
 [BCs]
-  [./push_x]
+  [push_x]
     type = FunctionDirichletBC
     preset = true
     variable = disp_x
     boundary = lb_left
     function = horizontal_movement
-  [../]
-  [./fix_x]
+  []
+  [fix_x]
     type = DirichletBC
     preset = true
     variable = disp_x
     boundary = rb_right
     value = 0.0
-  [../]
-  [./fix_y]
+  []
+  [fix_y]
     type = DirichletBC
     preset = true
     variable = disp_y
     boundary = rb_right
     value = 0.0
-  [../]
-  [./fix_y_offset]
+  []
+  [fix_y_offset]
     type = DirichletBC
     preset = true
     variable = disp_y
     boundary = lb_left
     value = ${offset}
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor_left]
+  [elasticity_tensor_left]
     type = ComputeIsotropicElasticityTensor
     block = left_block
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-  [../]
-  [./stress_left]
+  []
+  [stress_left]
     type = ComputeFiniteStrainElasticStress
     block = 1
-  [../]
+  []
 
-  [./elasticity_tensor_right]
+  [elasticity_tensor_right]
     type = ComputeIsotropicElasticityTensor
     block = right_block
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
-  [../]
-  [./stress_right]
+  []
+  [stress_right]
     type = ComputeFiniteStrainElasticStress
     block = right_block
-  [../]
+  []
 []
 
 [Contact]
-  [./leftright]
+  [leftright]
     secondary = lb_right
     primary = rb_left
 
     model = frictionless
     formulation = mortar
-  [../]
+  []
 []
 
 [ICs]
-  [./disp_x]
+  [disp_x]
     type = ConstantIC
     block = left_block
     variable = disp_x
     value = -${offset}
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     block = left_block
     variable = disp_y
     value = ${offset}
     type = ConstantIC
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

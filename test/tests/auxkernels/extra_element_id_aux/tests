@@ -1,5 +1,5 @@
 [Tests]
-  [./element_extra_integer_aux_test]
+  [element_extra_integer_aux_test]
     type = 'Exodiff'
     input = 'extra_element_integer_aux.i'
     exodiff = 'extra_element_integer_aux_out.e'
@@ -8,5 +8,5 @@
     issues = '#18665 #19297'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 []

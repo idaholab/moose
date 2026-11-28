@@ -1,5 +1,5 @@
 [Tests]
- [./test]
+ [test]
    type = 'CSVDiff'
    input = 'input.i'
    csvdiff = '360degree_model_out.csv'
@@ -8,5 +8,5 @@
    issues = '#3705'
    design = 'syntax/DomainIntegral/index.md'
    requirement = 'The system shall compute mixed-mode fracture integrals that match values of K fields applied at the boundary of a 3D disk cut on one side by a slit'
- [../]
+ []
 []

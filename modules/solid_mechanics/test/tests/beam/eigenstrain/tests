@@ -1,5 +1,5 @@
 [Tests]
-  [./thermal_eigenstrain]
+  [thermal_eigenstrain]
     type = 'Exodiff'
     input = 'thermal_expansion_small.i'
     exodiff = 'thermal_expansion_small_out.e'
@@ -8,8 +8,8 @@
                   " due to changes in temperature."
     design = "ComputeThermalExpansionEigenstrainBeam.md"
     issues = "#10313"
-  [../]
-  [./eigenstrain_from_var]
+  []
+  [eigenstrain_from_var]
     type = 'Exodiff'
     input = 'eigenstrain_from_var.i'
     exodiff = 'eigenstrain_from_var_out.e'
@@ -18,8 +18,8 @@
                   " auxvariables into eigenstrain material property."
     design = "ComputeEigenstrainBeamFromVariable.md"
     issues = "#10313"
-  [../]
-  [./eigenstrain_from_var_test1]
+  []
+  [eigenstrain_from_var_test1]
     type = 'RunException'
     input = 'eigenstrain_from_var.i'
     cli_args = "Materials/thermal/displacement_eigenstrain_variables='thermal_eig zero1' Outputs/csv=false Outputs/exodus=false"
@@ -29,5 +29,5 @@
                   " displacement or rotational eigenstrains are provided by the user."
     design = "ComputeEigenstrainBeamFromVariable.md"
     issues = "#10313"
-  [../]
+  []
 []

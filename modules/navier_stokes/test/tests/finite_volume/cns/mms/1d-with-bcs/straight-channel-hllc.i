@@ -3,12 +3,12 @@
 []
 
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = CartesianMeshGenerator
     dim = 1
     dx = '.1 .1 .1 .1 .1 .5 .1 .1 .1 .1 .1'
     # dx = '.1 .1 .1 .1 .1 .1 .1 .1 .1 .1 .1 .1 .1 .1 .1'
-  [../]
+  []
 []
 
 [FluidProperties]

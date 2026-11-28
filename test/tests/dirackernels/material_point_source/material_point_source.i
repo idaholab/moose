@@ -14,58 +14,58 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./material_source]
+  [material_source]
     type = MaterialPointSource
     variable = u
     point = '0.2 0.3 0.0'
     material_prop = 'matp'
     prop_state = 'current'
-  [../]
+  []
 []
 
 
 [Materials]
-  [./xmat]
+  [xmat]
     # MTMaterial provides 'matp', value is the 'shift' added to the x-coordinate
     # when computing the Material property value.
     type = MTMaterial
     block = '0'
     value = 0.
-  [../]
+  []
 []
 
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

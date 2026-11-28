@@ -8,64 +8,64 @@
     ymax = 2
     elem_type = QUAD9
   []
-  [./subdomain1]
+  [subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
     top_right = '1 1 0'
     block_id = 1
-  [../]
-  [./break_boundary]
+  []
+  [break_boundary]
     type = BreakBoundaryOnSubdomainGenerator
     input = subdomain1
-  [../]
-  [./interface]
+  []
+  [interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = break_boundary
     primary_block = '0'
     paired_block = '1'
     new_boundary = 'primary0_interface'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = NEDELEC_ONE
     block = 0
-  [../]
+  []
 
-  [./v]
+  [v]
     order = FIRST
     family = NEDELEC_ONE
     block = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./curl_u_plus_u]
+  [curl_u_plus_u]
     type = VectorFEWave
     variable = u
     x_forcing_func = 1
     y_forcing_func = 1
     z_forcing_func = 1
     block = 0
-  [../]
-  [./curl_v_plus_v]
+  []
+  [curl_v_plus_v]
     type = VectorFEWave
     variable = v
     block = 1
-  [../]
+  []
 []
 
 [InterfaceKernels]
-  [./parallel]
+  [parallel]
     type = VectorPenaltyInterfaceDiffusion
     variable = u
     neighbor_var = v
     boundary = primary0_interface
     penalty = 1e6
-  [../]
+  []
 []
 
 [BCs]
@@ -73,10 +73,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

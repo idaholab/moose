@@ -13,56 +13,56 @@
 []
 
 [Variables]
-  [./PFCRFFVariables]
-  [../]
-  [./n]
-    [./InitialCondition]
+  [PFCRFFVariables]
+  []
+  [n]
+    [InitialCondition]
       type = RandomIC
       max = 1.00187734619
       min = -1.00187734619
       seed = 12345
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./PFCRFFKernel]
+  [PFCRFFKernel]
     n_name = n
     log_approach = expansion
     n_exp_terms = 5
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./PFC]
+  [PFC]
     type = PFCRFFMaterial
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Preconditioning]
   active = 'SMP'
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
-  [./FDP]
+  []
+  [FDP]
     type = FDP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

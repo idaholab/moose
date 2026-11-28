@@ -1,5 +1,5 @@
 [Mesh]
-  [./samg]
+  [samg]
     type = SpiralAnnularMeshGenerator
     input = eg
     use_tri6 = false
@@ -9,7 +9,7 @@
     num_rings = 5
   []
 
-  [./eg2]
+  [eg2]
     type = ElementGenerator
     input = samg
     nodal_positions = '0 0 0

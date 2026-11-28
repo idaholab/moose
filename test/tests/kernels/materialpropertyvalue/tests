@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = Exodiff
     input = materialpropertyvalue.i
     exodiff = materialpropertyvalue_out.e
@@ -7,5 +7,5 @@
     design = 'MaterialPropertyValue.md'
     requirement = 'The system shall have the ability to verify individual Jacobian contributions before they are scaled by other finite element factors in the system.'
     abs_zero = 1e-9
-  [../]
+  []
 []

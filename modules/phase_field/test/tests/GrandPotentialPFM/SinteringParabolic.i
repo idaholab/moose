@@ -18,33 +18,33 @@
 []
 
 [Variables]
-  [./w]
-    [./InitialCondition]
+  [w]
+    [InitialCondition]
       type = FunctionIC
       variable = w
       function = f_w
-    [../]
-  [../]
-  [./phi]
-  [../]
-  [./PolycrystalVariables]
-  [../]
+    []
+  []
+  [phi]
+  []
+  [PolycrystalVariables]
+  []
 []
 
 [AuxVariables]
-  [./T]
+  [T]
     order = CONSTANT
     family = MONOMIAL
-    [./InitialCondition]
+    [InitialCondition]
       type = FunctionIC
       variable = T
       function = f_T
-    [../]
-  [../]
+    []
+  []
 []
 
 [ICs]
-  [./phi_IC]
+  [phi_IC]
     type = SpecifiedSmoothCircleIC
     variable = phi
     x_positions = '190 470'
@@ -53,8 +53,8 @@
     radii = '150 150'
     invalue = 0
     outvalue = 1
-  [../]
-  [./gr0_IC]
+  []
+  [gr0_IC]
     type = SmoothCircleIC
     variable = gr0
     x1 = 190
@@ -63,8 +63,8 @@
     radius = 150
     invalue = 1
     outvalue = 0
-  [../]
-  [./gr1_IC]
+  []
+  [gr1_IC]
     type = SmoothCircleIC
     variable = gr1
     x1 = 470
@@ -73,38 +73,38 @@
     radius = 150
     invalue = 1
     outvalue = 0
-  [../]
+  []
 []
 
 [Functions]
-  [./f_T]
+  [f_T]
     type = ConstantFunction
     value = 1600
-  [../]
-  [./f_w]
+  []
+  [f_w]
     type = ParsedFunction
     expression = '1.515e-7 * x'
-  [../]
+  []
 []
 
 [Materials]
   # Free energy coefficients for parabolic curve
-  [./ks]
+  [ks]
     type = ParsedMaterial
     property_name = ks
     coupled_variables = 'T'
     constant_names = 'a b'
     constant_expressions = '-0.0025 157.16'
     expression = 'a*T + b'
-  [../]
-  [./kv]
+  []
+  [kv]
     type = ParsedMaterial
     property_name = kv
     material_property_names = 'ks'
     expression = '10 * ks'
-  [../]
+  []
   # Diffusivity and mobilities
-  [./chiD]
+  [chiD]
     type = GrandPotentialTensorMaterial
     f_name = chiD
     solid_mobility = L
@@ -120,9 +120,9 @@
     bulkindex = 1
     gbindex = 20
     surfindex = 100
-  [../]
+  []
   # Equilibrium vacancy concentration
-  [./cs_eq]
+  [cs_eq]
     type = DerivativeParsedMaterial
     property_name = cs_eq
     coupled_variables = 'gr0 gr1 T'
@@ -130,9 +130,9 @@
     constant_expressions = '2.69 2.1 8.617343e-5'
     expression = 'bnds:=gr0^2 + gr1^2; cb:=exp(-Ef/kB/T); cgb:=exp(-(Ef-Egb)/kB/T);
                 cb + 4.0*(cgb-cb)*(1.0 - bnds)^2'
-  [../]
+  []
   # Everything else
-  [./sintering]
+  [sintering]
     type = GrandPotentialSinteringMaterial
     chemical_potential = w
     void_op = phi
@@ -143,10 +143,10 @@
     equilibrium_vacancy_concentration = cs_eq
     solid_energy_model = PARABOLIC
     outputs = exodus
-  [../]
+  []
 
   # Concentration is only meant for output
-  [./c]
+  [c]
     type = ParsedMaterial
     property_name = c
     material_property_names = 'hs rhos hv rhov'
@@ -154,34 +154,34 @@
     constant_expressions = '0.04092'
     expression = 'Va*(hs*rhos + hv*rhov)'
     outputs = exodus
-  [../]
+  []
 []
 
 [Kernels]
-  [./dt_gr0]
+  [dt_gr0]
     type = TimeDerivative
     variable = gr0
-  [../]
-  [./dt_gr1]
+  []
+  [dt_gr1]
     type = TimeDerivative
     variable = gr1
-  [../]
-  [./dt_phi]
+  []
+  [dt_phi]
     type = TimeDerivative
     variable = phi
-  [../]
-  [./dt_w]
+  []
+  [dt_w]
     type = TimeDerivative
     variable = w
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./T_aux]
+  [T_aux]
     type = FunctionAux
     variable = T
     function = f_T
-  [../]
+  []
 []
 
 [Executioner]

@@ -4,7 +4,7 @@
 []
 
 [Materials]
-  [./vecrangecheck]
+  [vecrangecheck]
     type = VecRangeCheckMaterial
     block = 0
     rv3 = '1.1 2.2 3.3'
@@ -16,7 +16,7 @@
     rvg = '2.0 1.0'
     rvl = '0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3'
     rve = ''
-  [../]
+  []
 []
 
 [Problem]

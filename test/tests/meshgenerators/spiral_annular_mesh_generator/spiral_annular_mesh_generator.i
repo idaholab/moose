@@ -1,5 +1,5 @@
 [Mesh]
-  [./samg]
+  [samg]
     type = SpiralAnnularMeshGenerator
     use_tri6 = true
     inner_radius = 1

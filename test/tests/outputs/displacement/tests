@@ -1,30 +1,30 @@
 [Tests]
   issues = '#1927'
   design = 'syntax/Outputs/index.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'displacement_test.i'
     exodiff = 'out_displaced.e-s002'
     group = 'adaptive'
     max_parallel = 1
     requirement = "The Output system shall be capable of applying displacements directly to the outputted mesh for steady problems."
-  [../]
+  []
 
-  [./displaced_eq_test]
+  [displaced_eq_test]
     type = 'Exodiff'
     input = 'displaced_eq_transient_test.i'
     exodiff = 'displaced_eq_transient_test_out_displaced.e-s011'
     group = 'adaptive'
     max_parallel = 1
     requirement = "The Output system shall be capable of applying displacements directly to the outputted mesh for transient problems with Kernels using the displaced configuration."
-  [../]
+  []
 
-  [./displacement_transient_test]
+  [displacement_transient_test]
     type = 'Exodiff'
     input = 'displacement_transient_test.i'
     exodiff = 'displacement_transient_test_out_displaced.e-s011'
     group = 'adaptive'
     max_parallel = 1
     requirement = "The Output system shall be capable of applying displacements directly to the outputted mesh for transient problems."
-  [../]
+  []
 []

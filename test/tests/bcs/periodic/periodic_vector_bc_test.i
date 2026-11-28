@@ -11,47 +11,47 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE_VEC
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = VectorDiffusion
     variable = u
-  [../]
+  []
 
-  [./forcing]
+  [forcing]
     type = VectorBodyForce
     variable = u
     function_x = 'exp(-((x-5)^2+(y-5)^2))'
     function_y = 'exp(-((x-35)^2+(y-35)^2))'
-  [../]
+  []
 
-  [./dot]
+  [dot]
     type = VectorTimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./x]
+  [Periodic]
+    [x]
       variable = u
       primary = 3
       secondary = 1
       translation = '40 0 0'
-    [../]
+    []
 
-    [./y]
+    [y]
       variable = u
       primary = 0
       secondary = 2
       translation = '0 40 0'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Executioner]

@@ -17,30 +17,30 @@ my_xmax = 1.2
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -51,28 +51,28 @@ my_xmax = 1.2
 []
 
 [Materials]
-  [./my_mat]
+  [my_mat]
     type = GenericConstantMaterial
     prop_names = 'my_prop'
     prop_values = 5
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./my_vpp]
+  [my_vpp]
     type = LineMaterialRealSampler
     property = my_prop
     start = '0 0 0'
     end = '${my_xmax} 0 0'
     sort_by = x
-  [../]
+  []
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = CSV
     execute_vector_postprocessors_on = 'timestep_end'
     show = 'my_vpp'
     precision = 5
-  [../]
+  []
 []

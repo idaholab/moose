@@ -86,14 +86,14 @@
     boundary = '4'
     value = -0.01
   []
-  #  [./Pressure]
-  #    [./normal_pressure]
+  #  [Pressure]
+  #    [normal_pressure]
   #      disp_x = disp_x
   #      disp_y = disp_y
   #      factor = 100.0
   #      boundary = 4
-  #    [../]
-  #  [../]
+  #    []
+  #  []
 []
 
 [Functions]

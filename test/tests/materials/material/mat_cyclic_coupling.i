@@ -10,59 +10,59 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MatDiffusionTest
     variable = u
     prop_name = some_prop
-  [../]
+  []
 
-  [./conv]
+  [conv]
     type = MatConvection
     variable = u
     x = 1
     y = 0
     mat_prop = some_other_prop
-  [../]
+  []
 []
 
 [BCs]
-  [./right]
+  [right]
     type = NeumannBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 []
 
 [Materials]
   # order is switched intentionally, so we won't get lucky and dep-resolver has to do its job
-  [./mat2]
+  [mat2]
     type = CoupledMaterial
     block = 0
     mat_prop = 'some_prop'
     coupled_mat_prop = 'some_other_prop'
-  [../]
+  []
 
-  [./mat1]
+  [mat1]
     type = CoupledMaterial
     block = 0
     mat_prop = 'some_other_prop'
     coupled_mat_prop = 'some_prop'
-  [../]
+  []
 []
 
 [Executioner]

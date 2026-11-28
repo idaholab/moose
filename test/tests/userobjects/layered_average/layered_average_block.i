@@ -19,86 +19,86 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./restricted]
+  [restricted]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./unrestricted]
+  []
+  [unrestricted]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./restricted]
+  [restricted]
     type = SpatialUserObjectAux
     variable = restricted
     execute_on = timestep_end
     user_object = restricted
-  [../]
-  [./unrestricted]
+  []
+  [unrestricted]
     type = SpatialUserObjectAux
     variable = unrestricted
     execute_on = timestep_end
     user_object = unrestricted
-  [../]
+  []
 []
 
 [BCs]
-  [./ll]
+  [ll]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
-  [./lu]
+  []
+  [lu]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 8
-  [../]
-  [./ul]
+  []
+  [ul]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 12
-  [../]
-  [./uu]
+  []
+  [uu]
     type = DirichletBC
     variable = u
     boundary = 4
     value = 16
-  [../]
+  []
 []
 
 [UserObjects]
-  [./restricted]
+  [restricted]
     type = LayeredAverage
     direction = y
     num_layers = 4
     variable = u
     execute_on = linear
     block = 1
-  [../]
-  [./unrestricted]
+  []
+  [unrestricted]
     type = LayeredAverage
     direction = y
     num_layers = 4
     variable = u
     execute_on = linear
-  [../]
+  []
 []
 
 [Executioner]

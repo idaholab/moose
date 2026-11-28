@@ -11,42 +11,42 @@
 []
 
 [Variables]
-  [./side_var]
+  [side_var]
     order = CONSTANT
     family = SIDE_HIERARCHIC
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./aux_side_var]
+  [aux_side_var]
     order = FIRST
     family = SIDE_HIERARCHIC
-  [../]
+  []
 []
 
 
 [Functions]
-  [./nl_var]
+  [nl_var]
     type = ParsedFunction
     expression = 'x+y+1'
-  [../]
-  [./aux_var]
+  []
+  [aux_var]
     type = ParsedFunction
     expression = 'x-y+10'
-  [../]
+  []
 []
 
 [ICs]
-  [./side_nl]
+  [side_nl]
     type = FunctionIC
     variable = side_var
     function = nl_var
-  [../]
-  [./side_aux]
+  []
+  [side_aux]
     type = FunctionIC
     variable = aux_side_var
     function = aux_var
-  [../]
+  []
 []
 
 [Outputs]

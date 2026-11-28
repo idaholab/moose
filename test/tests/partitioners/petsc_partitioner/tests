@@ -5,7 +5,7 @@
   # At this point, we test against min, max, average, sum
   # Hopefully these measurements are good enough and also platform independent
 
-  [./ptscotch]
+  [ptscotch]
     requirement = 'The system shall support ptscotch via PETSc'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -20,9 +20,9 @@
     valgrind = none
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1e-1'
-  [../]
+  []
 
-  [./ptscotch_weight_element]
+  [ptscotch_weight_element]
     requirement = 'The system shall support, using ptscotch, element-weighted graphs for balancing workload'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -37,9 +37,9 @@
     valgrind = none
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1e-1'
-  [../]
+  []
 
-  [./ptscotch_weight_side]
+  [ptscotch_weight_side]
     requirement = 'The system shall support, using ptscotch, side-weighted graphs for minimizing communication'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -54,9 +54,9 @@
     valgrind = none
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1e-1'
-  [../]
+  []
 
-  [./ptscotch_weight_both]
+  [ptscotch_weight_both]
     requirement = 'The system shall, using ptscotch, take both side weights and element weights into consideration'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -71,7 +71,7 @@
     valgrind = none
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1.5e-1'
-  [../]
+  []
 
   [ptscotch_weight_both_empty_partition]
     issues = '#33835'
@@ -104,7 +104,7 @@
     rel_err = '1.5e-1'
   []
 
-  [./parmetis]
+  [parmetis]
     requirement = 'The system shall support parmetis via PETSc'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -121,9 +121,9 @@
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1e-1'
-  [../]
+  []
 
-  [./parmetis_weight_element]
+  [parmetis_weight_element]
     requirement = 'The system shall support, using Parmetis, element-weighted graphs for balancing workload'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -136,9 +136,9 @@
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1e-1'
-  [../]
+  []
 
-  [./parmetis_weight_side]
+  [parmetis_weight_side]
     requirement = 'The system shall support, using Parmetis, side-weighted graphs for minimizing communication'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -151,9 +151,9 @@
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '1e-1'
-  [../]
+  []
 
-  [./parmetis_weight_both]
+  [parmetis_weight_both]
     requirement = 'The system shall, using Parmetis, take side weights and element weights into consideration'
     type = 'CSVDiff'
     input = 'petsc_partitioner.i'
@@ -166,9 +166,9 @@
     max_parallel = 4
     # Do not need a high tolerance because mesh is small and parititioner is not accurate
     rel_err = '2e-1'
-  [../]
+  []
 
-  [./parmetis_presplit_mesh]
+  [parmetis_presplit_mesh]
     requirement = 'The system shall support presplit using Parmetis'
     type = 'CheckFiles'
     input = 'petsc_partitioner.i'
@@ -178,9 +178,9 @@
     capabilities = 'petsc>=3.9.3 & parmetis'
     min_parallel = 2
     max_parallel = 2
-  [../]
+  []
 
-  [./chaco]
+  [chaco]
     requirement = 'The system shall support a serial partitioner Chaco'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
@@ -190,9 +190,9 @@
     capabilities = 'petsc>=3.9.0 & chaco & dof_id_bytes=4 & platform=darwin'
     min_parallel = 4
     max_parallel = 4
-  [../]
+  []
 
-  [./party]
+  [party]
     requirement = 'The system shall support a serial partitioner party'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
@@ -201,7 +201,7 @@
     capabilities = 'petsc>=3.9.3 & party'
     min_parallel = 4
     max_parallel = 4
-  [../]
+  []
 
   [lower_d_block]
     issues = '#34002'

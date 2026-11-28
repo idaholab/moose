@@ -19,35 +19,35 @@
 []
 
 [Variables]
-  [./dummy]
-  [../]
+  [dummy]
+  []
 []
 
 [Kernels]
-  [./dummy_kernel]
+  [dummy_kernel]
     type = TimeDerivative
     variable = dummy
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./f]
-  [../]
+  [f]
+  []
 []
 
 [AuxKernels]
-  [./f_AuxK]
+  [f_AuxK]
     type = FunctionAux
     function = fourDa
     variable = f
-  [../]
+  []
 []
 
 [Functions]
-  [./fourDa]
+  [fourDa]
     type = PiecewiseMultilinear
     data_file = fourDa.txt
-  [../]
+  []
 []
 
 

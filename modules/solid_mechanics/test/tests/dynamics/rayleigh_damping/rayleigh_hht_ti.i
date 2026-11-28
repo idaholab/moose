@@ -30,13 +30,13 @@
 []
 
 [Physics/SolidMechanics/Dynamic]
-  [./all]
+  [all]
     add_variables = true
     strain = SMALL
     incremental = false
     stiffness_damping_coefficient = 0.1
     hht_alpha = 0.11
-  [../]
+  []
 []
 
 

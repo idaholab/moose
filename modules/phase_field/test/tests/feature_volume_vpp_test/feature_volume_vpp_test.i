@@ -33,7 +33,7 @@
 []
 
 [Postprocessors]
-  [./flood_count]
+  [flood_count]
     type = FeatureFloodCount
     variable = c
 
@@ -42,18 +42,18 @@
     threshold = 0.5
     outputs = none
     execute_on = INITIAL
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./features]
+  [features]
     type = FeatureVolumeVectorPostprocessor
     flood_counter = flood_count
 
     # Turn on centroid output
     output_centroids = true
     execute_on = INITIAL
-  [../]
+  []
 []
 
 [Kernels]

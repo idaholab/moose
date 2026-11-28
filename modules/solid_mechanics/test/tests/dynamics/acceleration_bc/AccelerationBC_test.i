@@ -29,40 +29,40 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [AuxVariables]
-  [./vel_x]
-  [../]
-  [./accel_x]
-  [../]
-  [./vel_y]
-  [../]
-  [./accel_y]
-  [../]
-  [./vel_z]
-  [../]
-  [./accel_z]
-  [../]
-  [./stress_yy]
+  [vel_x]
+  []
+  [accel_x]
+  []
+  [vel_y]
+  []
+  [accel_y]
+  []
+  [vel_z]
+  []
+  [accel_z]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
 []
 
 [Physics/SolidMechanics/Dynamic]
-  [./all]
+  [all]
     add_variables = false
     strain = small
     incremental = false
@@ -70,62 +70,62 @@
     newmark_gamma = 0.5
     velocities = 'vel_x vel_y vel_z'
     accelerations = 'accel_x accel_y accel_z'
-  [../]
+  []
 []
 
 
 [AuxKernels]
-  [./stress_yy]
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 0
     index_j = 1
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = strain_yy
     index_i = 0
     index_j = 1
-  [../]
+  []
 
 []
 
 [Functions]
-  [./acceleration_bottom]
+  [acceleration_bottom]
     type = PiecewiseLinear
     data_file = acceleration.csv
     format = columns
-  [../]
+  []
 []
 
 [BCs]
-  [./top_y]
+  [top_y]
     type = DirichletBC
     variable = disp_y
     boundary = top
     value=0.0
-  [../]
-  [./top_z]
+  []
+  [top_z]
     type = DirichletBC
     variable = disp_z
     boundary = top
     value=0.0
-  [../]
-  [./bottom_y]
+  []
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value=0.0
-  [../]
-  [./bottom_z]
+  []
+  [bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = bottom
     value=0.0
-  [../]
-  [./preset_accelertion]
+  []
+  [preset_accelertion]
     type = PresetAcceleration
     boundary = bottom
     function = acceleration_bottom
@@ -133,25 +133,25 @@
     beta = 0.25
     acceleration = accel_x
     velocity = vel_x
-   [../]
+   []
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '210e9 0'
-  [../]
+  []
 
 
-  [./stress]
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./density]
+  []
+  [density]
     type = GenericConstantMaterial
     prop_names = 'density'
     prop_values = '7750'
-  [../]
+  []
 
 []
 
@@ -171,24 +171,24 @@
 []
 
 [Postprocessors]
-  [./_dt]
+  [_dt]
     type = TimestepSize
-  [../]
-  [./disp]
+  []
+  [disp]
     type = NodalVariableValue
     variable = disp_x
     nodeid = 1
-  [../]
-  [./vel]
+  []
+  [vel]
     type = NodalVariableValue
     variable = vel_x
     nodeid = 1
-  [../]
-  [./accel]
+  []
+  [accel]
     type = NodalVariableValue
     variable = accel_x
     nodeid = 1
-  [../]
+  []
 []
 
 [Outputs]

@@ -12,38 +12,38 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = ADDiffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
   active = 'left right'
 
   # We will use preset BCs
-  [./left]
+  [left]
     type = ADDirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = ADDirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

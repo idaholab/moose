@@ -1,5 +1,5 @@
 [Tests]
-  [./error]
+  [error]
     # Test error when a property is declared on multiple blocks by different matrials.
     type = RunException
     input = error.i
@@ -8,5 +8,5 @@
     issues = '#6533'
     design = 'syntax/Materials/index.md'
     requirement = 'The system shall issue an error when multiple materials properties with the same name are declared on the same block.'
-  [../]
+  []
 []

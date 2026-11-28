@@ -1,5 +1,5 @@
 [Tests]
-  [./Conserved]
+  [Conserved]
     type = RunApp
     input = 'Conserved.i'
     check_input = True
@@ -9,8 +9,8 @@
                    'in which an oversized precipitate deforms under uniaxial compressive stress.'
     design = 'SplitCHParsed.md ElasticEnergyMaterial.md ComputeVariableEigenstrain.md'
     issues = '#4502'
-  [../]
-  [./EBSD_reconstruction_grain_growth_mech]
+  []
+  [EBSD_reconstruction_grain_growth_mech]
     type = RunApp
     input = 'EBSD_reconstruction_grain_growth_mech.i'
     check_input = True
@@ -21,8 +21,8 @@
                    'grain orientations.'
     design = 'EBSDReader.md ComputePolycrystalElasticityTensor.md'
     issues = '#5519'
-  [../]
-  [./Nonconserved]
+  []
+  [Nonconserved]
     type = RunApp
     input = 'Nonconserved.i'
     check_input = True
@@ -31,8 +31,8 @@
                    'in which an oversized phase inclusion grows under uniaxial tensile stress.'
     design = 'AllenCahn.md TwoPhaseStressMaterial.md ElasticEnergyMaterial.md'
     issues = '#4502'
-  [../]
-  [./Pattern1]
+  []
+  [Pattern1]
     type = RunApp
     input = 'Pattern1.i'
     # Note: we use a smaller mesh, as this does not affect the
@@ -47,8 +47,8 @@
                    'expansion and contraction.'
     design = 'DerivativeMultiPhaseMaterial.md MultiPhaseStressMaterial.md'
     issues = '#4886'
-  [../]
-  [./grain_texture]
+  []
+  [grain_texture]
     type = RunApp
     input = 'grain_texture.i'
     capabilities = 'method!=dbg'
@@ -58,8 +58,8 @@
                    'texture (Euler angles) of each tracked grain during polycrystalline grain '
                    'growth.'
     design = 'GrainTextureVectorPostprocessor.md'
-  [../]
-  [./hex_grain_growth_2D_eldrforce]
+  []
+  [hex_grain_growth_2D_eldrforce]
     type = RunApp
     input = 'hex_grain_growth_2D_eldrforce.i'
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
@@ -70,8 +70,8 @@
                    'microstructure under applied compression.'
     design = 'PolycrystalElasticDrivingForceAction.md PolycrystalHex.md'
     issues = '#5335'
-  [../]
-  [./poly_grain_growth_2D_eldrforce]
+  []
+  [poly_grain_growth_2D_eldrforce]
     type = RunApp
     input = 'poly_grain_growth_2D_eldrforce.i'
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
@@ -82,5 +82,5 @@
                    'polycrystal microstructure under applied compression.'
     design = 'PolycrystalElasticDrivingForceAction.md PolycrystalVoronoi.md'
     issues = '#5335'
-  [../]
+  []
 []

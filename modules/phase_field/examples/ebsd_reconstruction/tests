@@ -1,5 +1,5 @@
 [Tests]
-  [./IN100-111grn]
+  [IN100-111grn]
     type = RunApp
     input = 'IN100-111grn.i'
     cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
@@ -8,5 +8,5 @@
     issues = '#5067'
     design = 'PolycrystalEBSD.md'
     requirement = 'The system shall syntax check an example reconstructing a polycrystal grain structure from an EBSD scan.'
-  [../]
+  []
 []

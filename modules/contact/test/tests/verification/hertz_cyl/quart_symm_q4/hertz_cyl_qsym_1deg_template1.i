@@ -14,268 +14,268 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./saved_x]
-  [../]
-  [./saved_y]
-  [../]
-  [./diag_saved_x]
-  [../]
-  [./diag_saved_y]
-  [../]
-  [./inc_slip_x]
-  [../]
-  [./inc_slip_y]
-  [../]
-  [./accum_slip_x]
-  [../]
-  [./accum_slip_y]
-  [../]
-  [./tang_force_x]
-  [../]
-  [./tang_force_y]
-  [../]
+  []
+  [saved_x]
+  []
+  [saved_y]
+  []
+  [diag_saved_x]
+  []
+  [diag_saved_y]
+  []
+  [inc_slip_x]
+  []
+  [inc_slip_y]
+  []
+  [accum_slip_x]
+  []
+  [accum_slip_y]
+  []
+  [tang_force_x]
+  []
+  [tang_force_y]
+  []
 []
 
 [Functions]
-  [./disp_ramp_vert]
+  [disp_ramp_vert]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. -0.0020 -0.0020'
-  [../]
-  [./disp_ramp_zero]
+  []
+  [disp_ramp_zero]
     type = PiecewiseLinear
     x = '0. 1. 2.'
     y = '0. 0.0 0.0'
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     use_displaced_mesh = true
     save_in = 'saved_x saved_y'
     extra_vector_tags = 'ref'
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./inc_slip_x]
+  []
+  [inc_slip_x]
     type = PenetrationAux
     variable = inc_slip_x
     execute_on = timestep_end
     boundary = 4
     paired_boundary = 3
-  [../]
-  [./inc_slip_y]
+  []
+  [inc_slip_y]
     type = PenetrationAux
     variable = inc_slip_y
     execute_on = timestep_end
     boundary = 4
     paired_boundary = 3
-  [../]
-  [./accum_slip_x]
+  []
+  [accum_slip_x]
     type = PenetrationAux
     variable = accum_slip_x
     execute_on = timestep_end
     boundary = 4
     paired_boundary = 3
-  [../]
-  [./accum_slip_y]
+  []
+  [accum_slip_y]
     type = PenetrationAux
     variable = accum_slip_y
     execute_on = timestep_end
     boundary = 4
     paired_boundary = 3
-  [../]
-  [./penetration]
+  []
+  [penetration]
     type = PenetrationAux
     variable = penetration
     boundary = 4
     paired_boundary = 3
-  [../]
-  [./tang_force_x]
+  []
+  [tang_force_x]
     type = PenetrationAux
     variable = tang_force_x
     quantity = tangential_force_x
     boundary = 4
     paired_boundary = 3
-  [../]
-  [./tang_force_y]
+  []
+  [tang_force_y]
     type = PenetrationAux
     variable = tang_force_y
     quantity = tangential_force_y
     boundary = 4
     paired_boundary = 3
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./bot_react_x]
+  [bot_react_x]
     type = NodalSum
     variable = saved_x
     boundary = 1
-  [../]
-  [./bot_react_y]
+  []
+  [bot_react_y]
     type = NodalSum
     variable = saved_y
     boundary = 1
-  [../]
-  [./top_react_x]
+  []
+  [top_react_x]
     type = NodalSum
     variable = saved_x
     boundary = 5
-  [../]
-  [./top_react_y]
+  []
+  [top_react_y]
     type = NodalSum
     variable = saved_y
     boundary = 5
-  [../]
-  [./ref_resid_x]
+  []
+  [ref_resid_x]
     type = NodalL2Norm
     execute_on = timestep_end
     variable = saved_x
-  [../]
-  [./ref_resid_y]
+  []
+  [ref_resid_y]
     type = NodalL2Norm
     execute_on = timestep_end
     variable = saved_y
-  [../]
-  [./disp_x281]
+  []
+  [disp_x281]
     type = NodalVariableValue
     nodeid = 280
     variable = disp_x
-  [../]
-  [./_dt]
+  []
+  [_dt]
     type = TimestepSize
-  [../]
-  [./num_lin_it]
+  []
+  [num_lin_it]
     type = NumLinearIterations
-  [../]
-  [./num_nonlin_it]
+  []
+  [num_nonlin_it]
     type = NumNonlinearIterations
-  [../]
+  []
 []
 
 [BCs]
-  [./side_x]
+  [side_x]
     type = DirichletBC
     variable = disp_y
     boundary = '1 3'
     value = 0.0
-  [../]
-  [./bot_y]
+  []
+  [bot_y]
     type = DirichletBC
     variable = disp_x
     boundary = '1 2 3'
     value = 0.0
-  [../]
-  [./top_y_disp]
+  []
+  [top_y_disp]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 5
     function = disp_ramp_vert
-  [../]
+  []
 []
 
 [Materials]
-  [./stuff1_elas_tens]
+  [stuff1_elas_tens]
     type = ComputeIsotropicElasticityTensor
     block = '1'
     youngs_modulus = 1e10
     poissons_ratio = 0.0
-  [../]
-  [./stuff1_strain]
+  []
+  [stuff1_strain]
     type = ComputeFiniteStrain
     block = '1'
-  [../]
-  [./stuff1_stress]
+  []
+  [stuff1_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1'
-  [../]
-  [./stuff2_elas_tens]
+  []
+  [stuff2_elas_tens]
     type = ComputeIsotropicElasticityTensor
     block = '2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./stuff2_strain]
+  []
+  [stuff2_strain]
     type = ComputeFiniteStrain
     block = '2'
-  [../]
-  [./stuff2_stress]
+  []
+  [stuff2_stress]
     type = ComputeFiniteStrainElasticStress
     block = '2'
-  [../]
-  [./stuff3_elas_tens]
+  []
+  [stuff3_elas_tens]
     type = ComputeIsotropicElasticityTensor
     block = '3'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./stuff3_strain]
+  []
+  [stuff3_strain]
     type = ComputeFiniteStrain
     block = '3'
-  [../]
-  [./stuff3_stress]
+  []
+  [stuff3_stress]
     type = ComputeFiniteStrainElasticStress
     block = '3'
-  [../]
-  [./stuff4_elas_tens]
+  []
+  [stuff4_elas_tens]
     type = ComputeIsotropicElasticityTensor
     block = '4'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./stuff4_strain]
+  []
+  [stuff4_strain]
     type = ComputeFiniteStrain
     block = '4'
-  [../]
-  [./stuff4_stress]
+  []
+  [stuff4_stress]
     type = ComputeFiniteStrainElasticStress
     block = '4'
-  [../]
+  []
 []
 
 [Executioner]
@@ -301,52 +301,52 @@
 []
 
 [VectorPostprocessors]
-  [./x_disp]
+  [x_disp]
     type = NodalValueSampler
     variable = disp_x
     boundary = '3 4 5'
     sort_by = id
-  [../]
-  [./y_disp]
+  []
+  [y_disp]
     type = NodalValueSampler
     variable = disp_y
     boundary = '3 4 5'
     sort_by = id
-  [../]
-  [./cont_press]
+  []
+  [cont_press]
     type = NodalValueSampler
     variable = contact_pressure
     boundary = '4'
     sort_by = id
-  [../]
+  []
 []
 
 [Outputs]
   print_linear_residuals = true
   perf_graph = true
-  [./exodus]
+  [exodus]
     type = Exodus
     elemental_as_nodal = true
-  [../]
-  [./console]
+  []
+  [console]
     type = Console
     max_rows = 5
-  [../]
-  [./chkfile]
+  []
+  [chkfile]
     type = CSV
     show = 'bot_react_x bot_react_y disp_x281 top_react_x top_react_y x_disp y_disp cont_press'
     start_time = 0.9
     execute_vector_postprocessors_on = timestep_end
-  [../]
-  [./outfile]
+  []
+  [outfile]
     type = CSV
     delimiter = ' '
     execute_vector_postprocessors_on = none
-  [../]
+  []
 []
 
 [Contact]
-  [./interface]
+  [interface]
     primary = 3
     secondary = 4
     model = glued
@@ -354,5 +354,5 @@
     normalize_penalty = true
     tangential_tolerance = 1e-3
     penalty = 1e+9
-  [../]
+  []
 []

@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'CSVDiff'
     input = 'area_pp.i'
     csvdiff = 'area_pp_out.csv'
@@ -9,5 +9,5 @@
     design = '/AreaPostprocessor.md'
 
     max_parallel = 16 # 16 element test
-  [../]
+  []
 []

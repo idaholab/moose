@@ -7,46 +7,46 @@
 []
 
 [Variables]
-  [./f1]
+  [f1]
     family = SCALAR
     order = FIRST
     initial_condition = 1
-  [../]
-  [./f2]
+  []
+  [f2]
     family = SCALAR
     order = FIRST
     initial_condition = 1
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./row1]
+  [row1]
     type = ParsedODEKernel
     variable = f1
     expression = '5*f1 + 2*f2'
     coupled_variables = 'f2'
-  [../]
+  []
 
-  [./row2]
+  [row2]
     type = ParsedODEKernel
     variable = f2
     expression = '2*f1 + 5*f2'
     coupled_variables = 'f1'
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./eigenvalues]
+  [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

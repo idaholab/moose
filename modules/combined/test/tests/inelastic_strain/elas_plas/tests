@@ -1,6 +1,6 @@
 [Tests]
   issues = '#8905'
-  [./elastic_plastic]
+  [elastic_plastic]
     type = 'Exodiff'
     input = 'elas_plas_nl1.i'
     exodiff = 'elas_plas_nl1_6e-5_out.e'
@@ -8,8 +8,8 @@
     abs_zero = 6e-5
     design = 'IsotropicPlasticityStressUpdate.md'
     requirement = 'The system shall compute and output the effective plastic strain.'
-  [../]
-  [./elastic_plastic_cycle]
+  []
+  [elastic_plastic_cycle]
     type = 'Exodiff'
     input = 'elas_plas_nl1_cycle.i'
     exodiff = 'elas_plas_nl1_cycle_8e-5_out.e'
@@ -17,5 +17,5 @@
     abs_zero = 8e-5
     design = 'IsotropicPlasticityStressUpdate.md'
     requirement = 'The system shall compute and output the effective plastic strain under cyclic loading.'
-  [../]
+  []
 []

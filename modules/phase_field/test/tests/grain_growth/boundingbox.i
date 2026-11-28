@@ -20,63 +20,63 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./BicrystalBoundingBoxIC]
+  [PolycrystalICs]
+    [BicrystalBoundingBoxIC]
       x1 = 0
       y1 = 0
       x2 = 500
       y2 = 1000
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./PolycrystalKernel]
-  [../]
+  [PolycrystalKernel]
+  []
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
-  [../]
+  []
 []
 
 [Materials]
-  [./Copper]
+  [Copper]
     type = GBEvolution
     T = 500 # K
     wGB = 60 # nm
     GBmob0 = 2.5e-6 # m^4/(Js) from Schoenfelder 1997
     Q = 0.23 # Migration energy in eV
     GBenergy = 0.708 # GB energy in J/m^2
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./gr1area]
+  [gr1area]
     type = ElementIntegralVariablePostprocessor
     variable = gr1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -94,12 +94,12 @@
   start_time = 0.0
   num_steps = 10
   dt = 80.0
-  [./Adaptivity]
+  [Adaptivity]
     initial_adaptivity = 2
     refine_fraction = 0.8
     coarsen_fraction = 0.05
     max_h_level = 2
-  [../]
+  []
 []
 
 [Outputs]

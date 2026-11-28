@@ -1,13 +1,13 @@
 [Tests]
-  [./stvenantkirchhoff]
+  [stvenantkirchhoff]
     type = RunException
     input = stvenantkirchhoff.i
     expect_err = 'ComputeStVenantKirchhoffStress requires an isotropic elasticity'
     requirement = 'Throw an error if you do not provide an isotropic tensor to ComputeStVenantKirchhoffStress'
     issues = '#17472'
     design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress.md'
-  [../]
-  [./simo_hughes_j2_small_kinematics]
+  []
+  [simo_hughes_j2_small_kinematics]
     type = RunException
     input = '../correctness/hyperelastic_J2_plastic.i'
     cli_args = 'GlobalParams/large_kinematics=false'
@@ -15,5 +15,5 @@
     requirement = 'The system shall report an error if the Simo-Hughes J2 plasticity model is used with small kinematics.'
     issues = '#34489'
     design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
-  [../]
+  []
 []

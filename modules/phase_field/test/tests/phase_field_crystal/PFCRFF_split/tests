@@ -1,5 +1,5 @@
 [Tests]
-  [./PFCRFF_split_test]
+  [PFCRFF_split_test]
     type = 'Exodiff'
     input = 'PFCRFF_split_test_parent.i'
     exodiff = 'PFCRFF_split_test_parent_out.e'
@@ -9,5 +9,5 @@
     issues = '#5336'
     design = 'PFCRFFMaterial.md'
     requirement = 'The system shall be able to solve the rational-function-fit phase field crystal model split across a parent and sub-application.'
-  [../]
+  []
 []

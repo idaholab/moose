@@ -1,30 +1,30 @@
 [Tests]
   design = 'Gravity.md'
   issues = '#4781'
-  [./xyz_hex8]
+  [xyz_hex8]
     type = 'Exodiff'
     input = 'gravity.i'
     exodiff = 'gravity_out.e'
     abs_zero = 1e-09
     use_old_floor = True
     requirement = 'The system shall compute a gravity body force'
-  [../]
-  [./rz_quad8]
+  []
+  [rz_quad8]
     type = 'Exodiff'
     input = 'gravity_rz_quad8.i'
     exodiff = 'gravity_rz_quad8_out.e'
     custom_cmp = gravity_rz_quad8.cmp
     requirement = 'The system shall compute a gravity body force in axisymmetric coordinates with quad8 elements'
-  [../]
-  [./rz_quad4]
+  []
+  [rz_quad4]
     type = 'Exodiff'
     input = 'gravity_rz.i'
     exodiff = 'gravity_rz_out.e'
     abs_zero = 1e-07
     use_old_floor = True
     requirement = 'The system shall compute a gravity body force in axisymmetric coordinates'
-  [../]
-  [./xyz_hex20]
+  []
+  [xyz_hex20]
     type = 'Exodiff'
     input = 'gravity_hex20.i'
     exodiff = 'gravity_hex20_out.e'
@@ -32,8 +32,8 @@
     use_old_floor = True
     max_parallel = 1
     requirement = 'The system shall compute a gravity body force with hex20 elements'
-  [../]
-  [./xyz_quad4_qp_select]
+  []
+  [xyz_quad4_qp_select]
     type = 'Exodiff'
     input = 'gravity_qp_select.i'
     exodiff = 'gravity_qp_select_out.e'
@@ -43,5 +43,5 @@
     issues = '#4011'
     design = 'RankTwoAux.md'
     requirement = 'The system shall report material properties at integration points'
-  [../]
+  []
 []

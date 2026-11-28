@@ -2,12 +2,12 @@
   design = 'FileMeshGenerator.md'
   issues = '#11640'
 
-  [./gmsh_bc_test]
+  [gmsh_bc_test]
     type = 'Exodiff'
     input = 'gmsh_bcs.i'
     exodiff = 'gmsh_bcs_out.e'
     mesh_mode = 'REPLICATED'
 
     requirement = 'The system shall have the ability to read boundary information from Gmsh formatted mesh files.'
-  [../]
+  []
 []

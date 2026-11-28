@@ -8,56 +8,56 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = THIRD
     family = HERMITE
-    [./InitialCondition]
+    [InitialCondition]
       type = RandomIC
       min = -0.1
       max =  0.1
-    [../]
-  [../]
+    []
+  []
 []
 
 [Kernels]
-  [./c_dot]
+  [c_dot]
     type = TimeDerivative
     variable = c
-  [../]
-  [./CHbulk]
+  []
+  [CHbulk]
     type = CHMath
     variable = c
-  [../]
-  [./CHint]
+  []
+  [CHint]
     type = CHInterface
     variable = c
     mob_name = M
     kappa_name = kappa_c
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = GenericConstantMaterial
     prop_names  = 'M   kappa_c'
     prop_values = '1.0 0.5'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./top]
+  [top]
     type = SideIntegralVariablePostprocessor
     variable = c
     boundary = top
-  [../]
+  []
 []
 
 [Executioner]

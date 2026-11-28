@@ -8,37 +8,37 @@
 []
 
 [Variables]
-  [./dummy]
+  [dummy]
   []
 []
 
 [AuxVariables]
-  [./c]
+  [c]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./c]
+  [c]
     type = DiscreteNucleationAux
     variable = c
     map = map
-  [../]
+  []
 []
 
 [UserObjects]
-  [./inserter]
+  [inserter]
     type = DiscreteNucleationFromFile
     hold_time = 1
     file = nuclei.csv
     radius = 2
-  [../]
-  [./map]
+  []
+  [map]
     type = DiscreteNucleationMap
     int_width = 1
     inserter = inserter
-  [../]
+  []
 []
 
 [Executioner]

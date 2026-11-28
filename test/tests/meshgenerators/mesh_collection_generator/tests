@@ -1,5 +1,5 @@
 [Tests]
-  [./mesh_collection_generator_test]
+  [mesh_collection_generator_test]
     type = 'Exodiff'
     input = 'mesh_collection_generator.i'
     cli_args = '--mesh-only'
@@ -11,5 +11,5 @@
     requirement = 'The system shall be able to combine multiple meshes into a single unconnected mesh.'
     design = 'meshgenerators/MeshCollectionGenerator.md'
     issues = '#13221'
-  [../]
+  []
 []

@@ -19,302 +19,302 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./temp]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [temp]
     initial_condition = 600.0
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./vonmises]
+  []
+  [vonmises]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./pressure]
+  []
+  [pressure]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./elastic_strain_xx]
+  []
+  [elastic_strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./elastic_strain_yy]
+  []
+  [elastic_strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./elastic_strain_zz]
+  []
+  [elastic_strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./creep_strain_xx]
+  []
+  [creep_strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./creep_strain_yy]
+  []
+  [creep_strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./creep_strain_zz]
+  []
+  [creep_strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./tot_strain_xx]
+  []
+  [tot_strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./tot_strain_yy]
+  []
+  [tot_strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./tot_strain_zz]
+  []
+  [tot_strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./eff_creep_strain]
+  []
+  [eff_creep_strain]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     use_displaced_mesh = true
     decomposition_method = EigenSolution
-  [../]
-  [./heat]
+  []
+  [heat]
     type = HeatConduction
     variable = temp
-  [../]
-  [./heat_ie]
+  []
+  [heat_ie]
     type = HeatConductionTimeDerivative
     variable = temp
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./vonmises]
+  []
+  [vonmises]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = vonmises
     scalar_type = VonMisesStress
     execute_on = timestep_end
-  [../]
-  [./pressure]
+  []
+  [pressure]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = pressure
     scalar_type = Hydrostatic
     execute_on = timestep_end
-  [../]
-  [./elastic_strain_xx]
+  []
+  [elastic_strain_xx]
     type = RankTwoAux
     rank_two_tensor = elastic_strain
     variable = elastic_strain_xx
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./elastic_strain_yy]
+  []
+  [elastic_strain_yy]
     type = RankTwoAux
     rank_two_tensor = elastic_strain
     variable = elastic_strain_yy
     index_i = 1
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./elastic_strain_zz]
+  []
+  [elastic_strain_zz]
     type = RankTwoAux
     rank_two_tensor = elastic_strain
     variable = elastic_strain_zz
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./creep_strain_xx]
+  []
+  [creep_strain_xx]
     type = RankTwoAux
     rank_two_tensor = creep_strain
     variable = creep_strain_xx
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./creep_strain_yy]
+  []
+  [creep_strain_yy]
     type = RankTwoAux
     rank_two_tensor = creep_strain
     variable = creep_strain_yy
     index_i = 1
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./creep_strain_zz]
+  []
+  [creep_strain_zz]
     type = RankTwoAux
     rank_two_tensor = creep_strain
     variable = creep_strain_zz
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./tot_strain_xx]
+  []
+  [tot_strain_xx]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = tot_strain_xx
     index_i = 0
     index_j = 0
-  [../]
-  [./tot_strain_yy]
+  []
+  [tot_strain_yy]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = tot_strain_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./tot_strain_zz]
+  []
+  [tot_strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
     variable = tot_strain_zz
     index_i = 2
     index_j = 2
-  [../]
-  [./eff_creep_strain]
+  []
+  [eff_creep_strain]
     type = MaterialRealAux
     property = effective_creep_strain
     variable = eff_creep_strain
-  [../]
+  []
 []
 
 [Functions]
-  [./appl_dispy]
+  [appl_dispy]
     type = PiecewiseLinear
     x = '0     1.0     2.0'
     y = '0.0 0.25e-4 0.50e-4'
-  [../]
+  []
 []
 
 [BCs]
-  [./side_x]
+  [side_x]
     type = DirichletBC
     variable = disp_x
     boundary = 101
     value = 0.0
-  [../]
-  [./origin_x]
+  []
+  [origin_x]
     type = DirichletBC
     variable = disp_x
     boundary = 103
     value = 0.0
-  [../]
-  [./bot_y]
+  []
+  [bot_y]
     type = DirichletBC
     variable = disp_y
     boundary = 102
     value = 0.0
-  [../]
-  [./origin_y]
+  []
+  [origin_y]
     type = DirichletBC
     variable = disp_y
     boundary = 103
     value = 0.0
-  [../]
-  [./top_y]
+  []
+  [top_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 1
     function = appl_dispy
-  [../]
-  [./temp_fix]
+  []
+  [temp_fix]
     type = DirichletBC
     variable = temp
     boundary = '1 2'
     value = 600.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 1
     youngs_modulus = 250e9
     poissons_ratio = 0.25
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputePlaneFiniteStrain
     block = 1
-  [../]
-  [./radial_return_stress]
+  []
+  [radial_return_stress]
     type = ComputeMultipleInelasticStress
     block = 1
     inelastic_models = 'powerlawcrp'
-  [../]
-  [./powerlawcrp]
+  []
+  [powerlawcrp]
     type = PowerLawCreepStressUpdate
     block = 1
     coefficient = 3.125e-14
     n_exponent = 5.0
     m_exponent = 0.0
     activation_energy = 0.0
-  [../]
-  [./thermal]
+  []
+  [thermal]
     type = HeatConductionMaterial
     block = 1
     specific_heat = 1.0
     thermal_conductivity = 100.
-  [../]
-  [./density]
+  []
+  [density]
     type = Density
     block = 1
     density = 1.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -334,99 +334,99 @@
 []
 
 [Postprocessors]
-  [./stress_xx]
+  [stress_xx]
     type = ElementAverageValue
     variable = stress_xx
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = ElementAverageValue
     variable = stress_yy
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = ElementAverageValue
     variable = stress_zz
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = ElementAverageValue
     variable = stress_xy
-  [../]
-  [./vonmises]
+  []
+  [vonmises]
     type = ElementAverageValue
     variable = vonmises
-  [../]
-  [./pressure]
+  []
+  [pressure]
     type = ElementAverageValue
     variable = pressure
-  [../]
-  [./el_strain_xx]
+  []
+  [el_strain_xx]
     type = ElementAverageValue
     variable = elastic_strain_xx
-  [../]
-  [./el_strain_yy]
+  []
+  [el_strain_yy]
     type = ElementAverageValue
     variable = elastic_strain_yy
-  [../]
-  [./el_strain_zz]
+  []
+  [el_strain_zz]
     type = ElementAverageValue
     variable = elastic_strain_zz
-  [../]
-  [./crp_strain_xx]
+  []
+  [crp_strain_xx]
     type = ElementAverageValue
     variable = creep_strain_xx
-  [../]
-  [./crp_strain_yy]
+  []
+  [crp_strain_yy]
     type = ElementAverageValue
     variable = creep_strain_yy
-  [../]
-  [./crp_strain_zz]
+  []
+  [crp_strain_zz]
     type = ElementAverageValue
     variable = creep_strain_zz
-  [../]
-  [./eff_creep_strain]
+  []
+  [eff_creep_strain]
     type = ElementAverageValue
     variable = eff_creep_strain
-  [../]
-  [./tot_strain_xx]
+  []
+  [tot_strain_xx]
     type = ElementAverageValue
     variable = tot_strain_xx
-  [../]
-  [./tot_strain_yy]
+  []
+  [tot_strain_yy]
     type = ElementAverageValue
     variable = tot_strain_yy
-  [../]
-  [./tot_strain_zz]
+  []
+  [tot_strain_zz]
     type = ElementAverageValue
     variable = tot_strain_zz
-  [../]
-  [./disp_x1]
+  []
+  [disp_x1]
     type = NodalVariableValue
     nodeid = 0
     variable = disp_x
-  [../]
-  [./disp_x4]
+  []
+  [disp_x4]
     type = NodalVariableValue
     nodeid = 3
     variable = disp_x
-  [../]
-  [./disp_y1]
+  []
+  [disp_y1]
     type = NodalVariableValue
     nodeid = 0
     variable = disp_y
-  [../]
-  [./disp_y4]
+  []
+  [disp_y4]
     type = NodalVariableValue
     nodeid = 3
     variable = disp_y
-  [../]
-  [./_dt]
+  []
+  [_dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Outputs]
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

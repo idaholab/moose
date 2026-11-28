@@ -94,7 +94,7 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     strain = FINITE
     generate_output = 'elastic_strain_xy stress_xy'
     use_automatic_differentiation = true

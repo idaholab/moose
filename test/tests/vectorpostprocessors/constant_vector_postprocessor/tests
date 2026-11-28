@@ -1,5 +1,5 @@
 [Tests]
-  [./constant_vector_postprocessor]
+  [constant_vector_postprocessor]
     type = 'CSVDiff'
     input = 'constant_vector_postprocessor.i'
     csvdiff = 'constant_vector_postprocessor_out_constant_0001.csv'
@@ -7,9 +7,9 @@
     issues = '#3087'
     design = 'syntax/VectorPostprocessors/index.md'
     requirement = 'The system shall be able to produce arbitrary vectors of values for use in other calculations.'
-  [../]
+  []
 
-  [./constant_vector_postprocessor_multcol]
+  [constant_vector_postprocessor_multcol]
     type = 'CSVDiff'
     input = 'constant_vector_postprocessor.i'
     csvdiff = 'constant_vector_postprocessor_two_columns_out_constant_0001.csv'
@@ -19,5 +19,5 @@
     issues = '#14569'
     design = 'syntax/VectorPostprocessors/index.md'
     requirement = 'The system shall be able to produce multiple arbitrary vectors of values for use in other calculations.'
-  [../]
+  []
 []

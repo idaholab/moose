@@ -2,7 +2,7 @@ a=1.1
 diff=1.1
 
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 2
@@ -12,7 +12,7 @@ diff=1.1
     nx = 2
     ny = 2
     elem_type = TRI3
-  [../]
+  []
 []
 
 [Variables]

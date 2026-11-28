@@ -8,70 +8,70 @@
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     scaling = 2
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     scaling = 3
-  [../]
+  []
 []
 
 [Kernels]
-  [./disp_x]
+  [disp_x]
     type = MatDiffusion
     variable = disp_x
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = MatDiffusion
     variable = disp_y
-  [../]
+  []
 []
 
 
 [Constraints]
-  [./disp_x]
+  [disp_x]
     type = RANFSTieNode
     secondary = 10
     primary = 20
     variable = disp_x
     primary_variable = disp_x
     component = x
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = RANFSTieNode
     secondary = 10
     primary = 20
     variable = disp_y
     primary_variable = disp_y
     component = y
-  [../]
+  []
 []
 
 [BCs]
-  [./botx]
+  [botx]
     type = DirichletBC
     variable = disp_x
     boundary = 40
     value = 0.0
-  [../]
-  [./boty]
+  []
+  [boty]
     type = DirichletBC
     variable = disp_y
     boundary = 40
     value = 0.0
-  [../]
-  [./topy]
+  []
+  [topy]
     type = DirichletBC
     variable = disp_y
     boundary = 30
     value = 0
-  [../]
-  [./topx]
+  []
+  [topx]
     type = DirichletBC
     variable = disp_x
     boundary = 30
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -98,18 +98,18 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./num_nl]
+  [num_nl]
     type = NumNonlinearIterations
-  [../]
-  [./cumulative]
+  []
+  [cumulative]
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
-  [../]
+  []
 []

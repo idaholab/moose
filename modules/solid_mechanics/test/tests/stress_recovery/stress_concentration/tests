@@ -1,5 +1,5 @@
 [Tests]
-  [./stress_concentration]
+  [stress_concentration]
     type = 'Exodiff'
     input = 'stress_concentration.i'
     exodiff = 'stress_concentration_out.e'
@@ -8,5 +8,5 @@
     requirement = "In areas of high concentration gradients, the Zienkiewicz-Zhu implementation shall recover the specified material property."
     design = 'nodal_patch_recovery.md'
     issues = '#11880'
-  [../]
+  []
 []

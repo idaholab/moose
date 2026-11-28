@@ -9,32 +9,32 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -44,16 +44,16 @@
 []
 
 [Adaptivity]
-  [./Markers]
-    [./marker]
+  [Markers]
+    [marker]
       type = ValueRangeMarker
       lower_bound = 0.3
       upper_bound = 0.6
       buffer_size = 0.1
       variable = u
       third_state = DO_NOTHING
-    [../]
-    [./inverted_marker]
+    []
+    [inverted_marker]
       type = ValueRangeMarker
       invert = true
       lower_bound = 0.3
@@ -61,8 +61,8 @@
       buffer_size = 0.1
       variable = u
       third_state = DO_NOTHING
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

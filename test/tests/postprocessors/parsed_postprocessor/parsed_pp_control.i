@@ -5,47 +5,47 @@
   []
 
   [Variables]
-    [./u]
-    [../]
+    [u]
+    []
   []
 
   [Kernels]
-    [./diff]
+    [diff]
       type = Diffusion
       variable = u
-    [../]
+    []
   []
 
   [BCs]
-    [./left]
+    [left]
       type = DirichletBC
       variable = u
       boundary = left
       value = 0
-    [../]
-    [./right]
+    []
+    [right]
       type = DirichletBC
       variable = u
       boundary = right
       value = 1
-    [../]
+    []
   []
 
   [Postprocessors]
     # A controllable constant Real; used by the ParsedPostprocessor
-    [./c]
+    [c]
       type = ConstantPostprocessor
       value = 1.0
-    [../]
+    []
 
     # ParsedPostprocessor whose expression is now controllable.
     # It uses the constant postprocessor 'c' and time 't'.
-    [./parsed]
+    [parsed]
       type = ParsedPostprocessor
       expression = 'c + t'
       pp_names = 'c'
       use_t = true
-    [../]
+    []
   []
 
   [Controls/web_server]

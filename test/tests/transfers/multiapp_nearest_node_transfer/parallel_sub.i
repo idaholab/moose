@@ -6,43 +6,43 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 1.0
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./pid]
+  [pid]
     order = constant
     family = monomial
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -61,8 +61,8 @@
 []
 
 [AuxKernels]
-  [./pid]
+  [pid]
     type = ProcessorIDAux
     variable = pid
-  [../]
+  []
 []

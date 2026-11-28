@@ -15,108 +15,108 @@
 []
 
 [AuxVariables]
-  [./a]
-  [../]
+  [a]
+  []
 
-  [./b]
-  [../]
+  [b]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 
-  [./v]
-  [../]
+  [v]
+  []
 []
 
 [ICs]
-  [./u_ic]
+  [u_ic]
     type = ConstantIC
     variable = u
     value = -1
-  [../]
+  []
 
-  [./v_ic]
+  [v_ic]
     type = MTICSum
     variable = v
     var1 = u
     var2 = a
-  [../]
+  []
 
-  [./a_ic]
+  [a_ic]
     type = ConstantIC
     variable = a
     value = 10
-  [../]
+  []
 
-  [./b_ic]
+  [b_ic]
     type = MTICMult
     variable = b
     var1 = v
     factor = 2
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./a_ak]
+  [a_ak]
     type = ConstantAux
     variable = a
     value = 256
-  [../]
+  []
 
-  [./b_ak]
+  [b_ak]
     type = ConstantAux
     variable = b
     value = 42
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = PenaltyDirichletBC
     variable = u
     boundary = left
     value = 0
     penalty = 1000
-  [../]
+  []
 
-  [./right_u]
+  [right_u]
     type = PenaltyDirichletBC
     variable = u
     boundary = right
     value = 1
     penalty = 1000
-  [../]
+  []
 
 
-  [./left_v]
+  [left_v]
     type = PenaltyDirichletBC
     variable = v
     boundary = left
     value = 2
     penalty = 1000
-  [../]
+  []
 
-  [./right_v]
+  [right_v]
     type = PenaltyDirichletBC
     variable = v
     boundary = right
     value = 1
     penalty = 1000
-  [../]
+  []
 []
 
 [Problem]

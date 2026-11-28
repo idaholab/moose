@@ -16,79 +16,79 @@
 []
 
 [Variables]
-  [./PolycrystalVariables]
-  [../]
+  [PolycrystalVariables]
+  []
 []
 
 [UserObjects]
-  [./voronoi]
+  [voronoi]
     type = PolycrystalVoronoi
     grain_num = 12 # Number of grains
     coloring_algorithm = bt # bt will assign one grain to each op if they are the same
     rand_seed = 8675
-  [../]
-  [./grain_tracker]
+  []
+  [grain_tracker]
     type = GrainTracker
-  [../]
+  []
 []
 
 [ICs]
-  [./PolycrystalICs]
-    [./PolycrystalColoringIC]
+  [PolycrystalICs]
+    [PolycrystalColoringIC]
       polycrystal_ic_uo = voronoi
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./bnds]
+  [bnds]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./unique_grains]
+  []
+  [unique_grains]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./var_indices]
+  []
+  [var_indices]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Kernels]
-  [./PolycrystalKernel]
-  [../]
+  [PolycrystalKernel]
+  []
 []
 
 [AuxKernels]
-  [./BndsCalc]
+  [BndsCalc]
     type = BndsCalcAux
     variable = bnds
-  [../]
-  [./unique_grains]
+  []
+  [unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     flood_counter = grain_tracker
     field_display = UNIQUE_REGION
-  [../]
-  [./var_indices]
+  []
+  [var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./CuGrGr]
+  [CuGrGr]
     type = GBEvolution
     T = 500 # K
     wGB = 100 # nm
@@ -96,13 +96,13 @@
     Q = 0.23
     GBenergy = 0.708
     molar_volume = 7.11e-6
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./DOFs]
+  [DOFs]
     type = NumDOFs
-  [../]
+  []
 []
 
 [Executioner]
@@ -123,29 +123,29 @@
 [Adaptivity]
   marker = error_marker
   max_h_level = 1
-  [./Markers]
+  [Markers]
     active = 'error_marker'
-    [./bnds_marker]
+    [bnds_marker]
       type = ValueThresholdMarker
       invert = true
       refine = 0.85
       coarsen = 0.975
       third_state = DO_NOTHING
       variable = bnds
-    [../]
-    [./error_marker]
+    []
+    [error_marker]
       type = ErrorFractionMarker
       coarsen = 0.1
       indicator = bnds_error
       refine = 0.7
-    [../]
-  [../]
-  [./Indicators]
-    [./bnds_error]
+    []
+  []
+  [Indicators]
+    [bnds_error]
       type = GradientJumpIndicator
       variable = bnds
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]

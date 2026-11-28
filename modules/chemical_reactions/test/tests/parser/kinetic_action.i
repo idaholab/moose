@@ -6,22 +6,22 @@
 []
 
 [Variables]
-  [./a]
+  [a]
     initial_condition = 0.1
-  [../]
-  [./b]
+  []
+  [b]
     initial_condition = 0.1
-  [../]
-  [./c]
+  []
+  [c]
     initial_condition = 0.1
-  [../]
-  [./d]
+  []
+  [d]
     initial_condition = 0.1
-  [../]
+  []
 []
 
 [ReactionNetwork]
-  [./SolidKineticReactions]
+  [SolidKineticReactions]
     primary_species = 'a b c d'
     secondary_species = 'm1 m2 m3'
     kin_reactions = '(1.0)a + (1.0)b = m1,
@@ -34,34 +34,34 @@
     gas_constant = 8.314
     reference_temperature = '298.15 298.15 298.15'
     system_temperature = '298.15 298.15 298.15'
-  [../]
+  []
 []
 
 [Kernels]
-  [./a_ie]
+  [a_ie]
     type = PrimaryTimeDerivative
     variable = a
-  [../]
-  [./b_ie]
+  []
+  [b_ie]
     type = PrimaryTimeDerivative
     variable = b
-  [../]
-  [./c_ie]
+  []
+  [c_ie]
     type = PrimaryTimeDerivative
     variable = c
-  [../]
-  [./d_ie]
+  []
+  [d_ie]
     type = PrimaryTimeDerivative
     variable = d
-  [../]
+  []
 []
 
 [Materials]
-  [./porous]
+  [porous]
     type = GenericConstantMaterial
     prop_names = porosity
     prop_values = 0.1
-  [../]
+  []
 []
 
 [Executioner]
@@ -73,10 +73,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]

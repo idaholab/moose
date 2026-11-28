@@ -11,89 +11,89 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-  [../]
-  [./w]
+  [u]
+  []
+  [v]
+  []
+  [w]
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
-  [./diff_w]
+  []
+  [diff_w]
     type = Diffusion
     variable = w
-  [../]
-  [./ad_coupled_value]
+  []
+  [ad_coupled_value]
     type = ADCoupledValueTest
     variable = u
     v = v
-  [../]
-  [./ad_coupled_value_w]
+  []
+  [ad_coupled_value_w]
     type = ADCoupledValueTest
     variable = u
     v = w
-  [../]
-  [./ad_coupled_value_x]
+  []
+  [ad_coupled_value_x]
     type = ADCoupledValueTest
     variable = u
     # v = 2.0 (Using the default value)
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-  [./left_v]
+  []
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = left
     value = 0
-  [../]
-  [./right_v]
+  []
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = right
     value = 1
-  [../]
-  [./left_w]
+  []
+  [left_w]
     type = DirichletBC
     variable = w
     boundary = left
     value = 0
-  [../]
-  [./right_w]
+  []
+  [right_w]
     type = DirichletBC
     variable = w
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Preconditioning]
   active = ''
-  [./smp]
+  [smp]
     type = SMP
-  [../]
+  []
 []
 
 

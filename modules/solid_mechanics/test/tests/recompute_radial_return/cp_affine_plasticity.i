@@ -129,104 +129,104 @@
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./vonmises]
+  []
+  [vonmises]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
-  [./plastic_strain_xx]
+  [plastic_strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./plastic_strain_yy]
+  []
+  [plastic_strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./plastic_strain_zz]
+  []
+  [plastic_strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = small
     incremental = true
-  [../]
+  []
 []
 
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
     index_j = 0
     execute_on = 'timestep_end'
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
     execute_on = 'timestep_end'
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
     execute_on = 'timestep_end'
-  [../]
-  [./vonmises]
+  []
+  [vonmises]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = vonmises
     scalar_type = vonmisesStress
     execute_on = 'timestep_end'
-  [../]
+  []
 
-  [./plastic_strain_xx]
+  [plastic_strain_xx]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = plastic_strain_xx
     index_i = 0
     index_j = 0
     execute_on = 'timestep_end'
-  [../]
-  [./plastic_strain_yy]
+  []
+  [plastic_strain_yy]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = plastic_strain_yy
     index_i = 1
     index_j = 1
     execute_on = 'timestep_end'
-  [../]
-  [./plastic_strain_zz]
+  []
+  [plastic_strain_zz]
     type = RankTwoAux
     rank_two_tensor = plastic_strain
     variable = plastic_strain_zz
     index_i = 2
     index_j = 2
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [BCs]
@@ -274,7 +274,7 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 210666666666.666667
     poissons_ratio = 0.3333333333333333
-  [../]
+  []
 
 
   [creep]

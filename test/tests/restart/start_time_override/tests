@@ -7,7 +7,7 @@
 
     issues = "#563"
     requirement = "The system shall support outputting a mesh to checkpoint format for restart testing with \"start_time\"."
-  [../]
+  []
 
   [default_start_timestart]
     type = 'CSVDiff'

@@ -2,13 +2,13 @@
   issues = '#7215'
   design = 'framework_stp.md'
 
-  [./execute]
+  [execute]
     type = 'RunApp'
     input = 'should_execute.i'
 
     requirement = 'The test system shall have the ability to execute a specific input file.'
-  [../]
-  [./dont]
+  []
+  [dont]
     type = 'Exodiff'
     input = 'should_execute.i'
     exodiff = 'should_execute_out.e'
@@ -28,5 +28,5 @@
 
     requirement = 'The test system shall have the ability to run a test that neither clears expected outputs or runs '
                   'the expected executeable for multiple output testing.'
-  [../]
+  []
 []

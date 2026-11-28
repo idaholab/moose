@@ -21,64 +21,64 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
     initial_condition = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./time]
+  [time]
     type = TimePostprocessor
-  [../]
+  []
 []
 
 [UserObjects]
-  [./arnold1]
+  [arnold1]
     type = Terminator
     expression = 'time = 1'
     execute_on = TIMESTEP_END
     message = "This is an info"
     fail_mode = SOFT
     error_level = INFO
-  [../]
-  [./arnold2]
+  []
+  [arnold2]
     type = Terminator
     expression = 'time = 0.5'
     execute_on = TIMESTEP_END
     message = "This is a warning!"
     fail_mode = SOFT
     error_level = WARNING
-  [../]
-  [./arnold3]
+  []
+  [arnold3]
     type = Terminator
     expression = 'time = 0.25'
     execute_on = TIMESTEP_END
     message = "This is an error!"
     error_level = ERROR
-  [../]
+  []
 []
 
 [Kernels]
-  [./cres]
+  [cres]
     type = Diffusion
     variable = c
-  [../]
+  []
 
-  [./time]
+  [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [BCs]
-  [./c]
+  [c]
     type = DirichletBC
     variable = c
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

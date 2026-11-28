@@ -1,7 +1,7 @@
 [Mesh]
   allow_renumbering=false
   inactive = 'missingNode mismatchSize'
-  [./eg]
+  [eg]
     type = CartesianMeshGenerator
     dim = 3
     dx = '1'

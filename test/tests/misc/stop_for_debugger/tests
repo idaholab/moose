@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'RunApp'
     input = 'stop_for_debugger.i'
     cli_args = '--stop-for-debugger=2'
@@ -8,5 +8,5 @@
     requirement = 'The system shall support pausing execution for the purpose of attaching a debugger after launch.'
     issues = '#11166'
     design = 'MooseApp.md'
-  [../]
+  []
 []

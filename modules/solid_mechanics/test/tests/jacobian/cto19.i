@@ -20,30 +20,30 @@
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = small
     incremental = true
     eigenstrain_names = ini_stress
-  [../]
+  []
 []
 
 
 
 [UserObjects]
-  [./mc_coh]
+  [mc_coh]
     type = SolidMechanicsHardeningConstant
     value = 10
-  [../]
-  [./phi]
+  []
+  [phi]
     type = SolidMechanicsHardeningConstant
     value = 0.8
-  [../]
-  [./psi]
+  []
+  [psi]
     type = SolidMechanicsHardeningConstant
     value = 0.4
-  [../]
-  [./dp]
+  []
+  [dp]
     type = SolidMechanicsPlasticDruckerPragerHyperbolic
     mc_cohesion = mc_coh
     mc_friction_angle = phi
@@ -51,37 +51,37 @@
     smoother = 1
     yield_function_tolerance = 1E-11
     internal_constraint_tolerance = 1E-9
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0.7 1'
-  [../]
-  [./ini_stress]
+  []
+  [ini_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '10 0 0  0 10 0  0 0 10'
     eigenstrain_name = ini_stress
-  [../]
-  [./mc]
+  []
+  [mc]
     type = ComputeMultiPlasticityStress
     ep_plastic_tolerance = 1E-11
     plastic_models = dp
     tangent_operator = nonlinear
     min_stepsize = 1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
-  [../]
+  []
 []
 
 [Executioner]

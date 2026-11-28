@@ -12,22 +12,22 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = MONOMIAL
-  [../]
-  [./v]
+  []
+  [v]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
 []
 
 [DGKernels]
-  [./dg_diff]
+  [dg_diff]
     type = DGCoupledDiffusion
     variable = u
     v = v
-  [../]
+  []
 []
 
 [Executioner]
@@ -36,10 +36,10 @@
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Problem]
@@ -47,16 +47,16 @@
 []
 
 [ICs]
-  [./u]
+  [u]
     type = RandomIC
     min = 0.1
     max = 0.9
     variable = u
-  [../]
-  [./v]
+  []
+  [v]
     type = RandomIC
     min = 0.1
     max = 0.9
     variable = v
-  [../]
+  []
 []

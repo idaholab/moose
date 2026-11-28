@@ -18,7 +18,7 @@
 [Modules]
   [PhaseField]
     [Conserved]
-      [./c]
+      [c]
         solve_type = direct
         free_energy = F
         kappa = 2.0

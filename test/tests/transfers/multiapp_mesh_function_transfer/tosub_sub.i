@@ -9,44 +9,44 @@
 []
 
 [Variables]
-  [./sub_u]
-  [../]
+  [sub_u]
+  []
 []
 
 [AuxVariables]
-  [./transferred_u]
-  [../]
-  [./elemental_transferred_u]
+  [transferred_u]
+  []
+  [elemental_transferred_u]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./x_disp]
+  []
+  [x_disp]
     initial_condition = .2
-  [../]
-  [./y_disp]
-  [../]
+  []
+  [y_disp]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = sub_u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = sub_u
     boundary = left
     value = 1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = sub_u
     boundary = right
     value = 4
-  [../]
+  []
 []
 
 [Executioner]

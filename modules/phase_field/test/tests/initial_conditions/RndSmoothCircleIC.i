@@ -9,14 +9,14 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 []
 
 [ICs]
-  [./c]
+  [c]
     variable = c
     type = RndSmoothCircleIC
     x1 = 25.0
@@ -27,41 +27,41 @@
     outvalue = -0.8
     variation_outvalue = 0.2
     int_width = 5
-  [../]
+  []
 []
 
 [Kernels]
-  [./ie_c]
+  [ie_c]
     type = TimeDerivative
     variable = c
-  [../]
-  [./CHSolid]
+  []
+  [CHSolid]
     type = CHMath
     variable = c
     mob_name = M
-  [../]
-  [./CHInterface]
+  []
+  [CHInterface]
     type = CHInterface
     variable = c
     kappa_name = kappa_c
     mob_name = M
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./All]
+  [Periodic]
+    [All]
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./constant]
+  [constant]
     type = GenericConstantMaterial
     prop_names  = 'M kappa_c'
     prop_values = '1.0 1.0'
-  [../]
+  []
 []
 
 [Executioner]

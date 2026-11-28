@@ -12,90 +12,90 @@
 []
 
 [Functions]
-  [./rampConstant]
+  [rampConstant]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 1.'
     scale_factor = 1e-6
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./vonmises]
+  [vonmises]
     order = CONSTANT
     family = MONOMIAL
- [../]
- [./stress_xx]
+ []
+ [stress_xx]
     order = CONSTANT
     family = MONOMIAL
- [../]
+ []
 []
 
 [AuxKernels]
-  [./vonmises]
+  [vonmises]
     type = RankTwoScalarAux
     rank_two_tensor = stress
     variable = vonmises
     scalar_type = VonMisesStress
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./vonmises]
+  [vonmises]
     type = LineMaterialRankTwoScalarSampler
     start = '0.1667 0.4 0.45'
     end   = '0.8333 0.6 0.55'
     property = stress
     scalar_type = VonMisesStress
     sort_by = id
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]
-  [./all]
+  [all]
     add_variables = true
     strain = small
     incremental = false
-  [../]
+  []
 []
 
 
 [BCs]
-  [./front]
+  [front]
     type = FunctionDirichletBC
     variable = z_disp
     boundary = 5
     function = rampConstant
-  [../]
-  [./back_x]
+  []
+  [back_x]
     type = DirichletBC
     variable = x_disp
     boundary = 0
     value = 0.0
-  [../]
-  [./back_y]
+  []
+  [back_y]
     type = DirichletBC
     variable = y_disp
     boundary = 0
     value = 0.0
-  [../]
-  [./back_z]
+  []
+  [back_z]
     type = DirichletBC
     variable = z_disp
     boundary = 0
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elast_tensor]
+  [elast_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = .3
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Executioner]

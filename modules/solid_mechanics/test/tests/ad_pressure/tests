@@ -1,5 +1,5 @@
 [Tests]
-  [./3D]
+  [3D]
     type = Exodiff
     input = 'pressure_test.i'
     exodiff = 'pressure_test_out.e'
@@ -10,8 +10,8 @@
                    demonstrated by correctly computing the response of an elastic small-strain
                    isotropic unit cube with pressure applied on three faces to create a hydrostatic
                    pressure and match non-AD methods.'
-  [../]
-  [./3D_Bbar]
+  []
+  [3D_Bbar]
     type = Exodiff
     input = 'pressure_test.i'
     exodiff = 'pressure_test_out.e'
@@ -25,9 +25,9 @@
                    isotropic unit cube with pressure applied on three faces to create a hydrostatic
                    pressure using the volumetric locking correction b-bar formulation and match
                    non-AD methods.'
-  [../]
+  []
 
-  [./3D-jac]
+  [3D-jac]
     type = PetscJacobianTester
     input = 'pressure_test.i'
     run_sim = 'True'
@@ -41,8 +41,8 @@
                    demonstrated by correctly computing the response of an elastic small-strain
                    isotropic unit cube with pressure applied on three faces to create a hydrostatic
                    pressure and calculate a perfect Jacobian.'
-  [../]
-  [./3D_Bbar-jac]
+  []
+  [3D_Bbar-jac]
     type = PetscJacobianTester
     input = 'pressure_test.i'
     run_sim = 'True'
@@ -57,5 +57,5 @@
                    isotropic unit cube with pressure applied on three faces to create a hydrostatic
                    pressure using the volumetric locking correction b-bar formulation and calculate
                    a perfect Jacobian.'
-  [../]
+  []
 []
