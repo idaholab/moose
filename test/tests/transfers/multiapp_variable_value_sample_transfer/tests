@@ -109,16 +109,16 @@
 
   [initial_adaptivity]
     type = Exodiff
-    input = full_domain_primary.i
+    input = initial_adaptivity.i
     exodiff = initial_adaptivity_out.e
     cli_args = 'Adaptivity/initial_marker=uniform
                 Adaptivity/initial_steps=1
                 Adaptivity/Markers/uniform/type=UniformMarker
-                Adaptivity/Markers/uniform/mark=refine
-                Outputs/file_base=initial_adaptivity_out'
+                Adaptivity/Markers/uniform/mark=refine'
     requirement = "The system shall transfer postprocessor values from sub-applications to a "
                   "constant monomial variable on a main application mesh that was refined by "
                   "initial adaptivity."
+    recover = false # see #5690
   []
 
   [same_distance_error]
