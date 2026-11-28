@@ -64,7 +64,7 @@ NewtonSNESExecutor::NewtonSNESExecutor(const InputParameters & params) : SNESExe
   {
     const auto sys_num = _nl_sys_nums[0];
     const auto & sys = _fe_problem.getNonlinearSystemBase(sys_num);
-    Moose::PetscSupport::storePetscOptions(_fe_problem, sys.prefix(), *this);
+    Moose::PetscSupport::storePetscOptions(_fe_problem, sys, *this);
     auto & solver_params = _fe_problem.solverParams(sys_num);
     solver_params._prefix = sys.prefix();
     solver_params._solver_sys_num = sys_num;

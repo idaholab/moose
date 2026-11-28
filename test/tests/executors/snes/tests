@@ -20,6 +20,14 @@
     []
   []
 
+  [per_system_solve_type]
+    type = RunApp
+    input = 'mspin.i'
+    cli_args = '--executor Executors/sub0/solve_type=NEWTON Executors/sub1/solve_type=PJFNK'
+    expect_out = 'Solver Mode:\s+\[nl0\]: NEWTON \[nl1\]: Preconditioned JFNK'
+    requirement = 'The system shall apply the solve type of a single-system Newton executor to the nonlinear system of that executor only.'
+  []
+
   [mspin_block_solve]
     requirement = 'The system shall configure the linear solves of the diagonal blocks of a multiplicative Schwarz preconditioner with the options of the block nonlinear system'
     [user_side]
