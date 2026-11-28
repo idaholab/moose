@@ -1,0 +1,9 @@
+[Tests]
+  [blocks_match_fd]
+    type = GoogleTest
+    unit_test = MultiSystemJacobianBlockTest.BlocksMatchFiniteDifferences
+    requirement = 'The system shall compute the Jacobian of the residual of one nonlinear system with respect to the solution of another nonlinear system that matches a finite-difference approximation, including the rows of Dirichlet boundary conditions.'
+    design = 'FEProblemBase.md'
+    issues = '#32860'
+  []
+[]

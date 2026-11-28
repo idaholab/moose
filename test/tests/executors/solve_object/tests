@@ -1,0 +1,26 @@
+[Tests]
+  design = 'SolveObjectExecutor.md'
+  issues = '#20123 #32860'
+
+  [solve_object]
+    requirement = 'The system shall provide an executor that runs the solve of a solve object and'
+    [fixed_point]
+      type = CSVDiff
+      input = richardson.i
+      cli_args = '--executor'
+      csvdiff = system_solve_out.csv
+      gold_dir = '../system_solve/gold'
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'runs as an inner executor of a multi-system fixed point iteration with the solution of the steady executioner, and'
+    []
+    [failure]
+      type = RunException
+      input = richardson.i
+      cli_args = '--executor Executors/richardson_u/richardson_max_its=2'
+      expect_err = 'richardson_u:richardson_u\(FAIL\): the solve did not converge'
+      absent_out = 'System w_sys: Solve'
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'fails if the solve does not converge.'
+    []
+  []
+[]

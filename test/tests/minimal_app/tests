@@ -7,7 +7,7 @@
     type = RunApp
     cli_args = '--minimal --list-constructed-objects'
     # This list is tied to the execution order of the setup tasks
-    expect_out = "DefaultNonlinearConvergence\nDefaultSteadyStateConvergence\nFEProblem\nGeneratedMesh"
+    expect_out = "DefaultNonlinearConvergence\nDefaultSteadyStateConvergence\nFEProblem\nFixedPointExecutor\nGeneratedMesh"
     input = ''
     input_switch = ''
     display_required = True

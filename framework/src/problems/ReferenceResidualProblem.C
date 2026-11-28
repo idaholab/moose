@@ -31,13 +31,14 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
 }
 
 void
-ReferenceResidualProblem::addDefaultNonlinearConvergence(const InputParameters & params_to_apply)
+ReferenceResidualProblem::addDefaultNonlinearConvergence(
+    const InputParameters & params_to_apply, const std::vector<ConvergenceName> & conv_names)
 {
   const std::string class_name = "ReferenceResidualConvergence";
   InputParameters params = _factory.getValidParams(class_name);
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
-  for (const auto & conv_name : getNonlinearConvergenceNames())
+  for (const auto & conv_name : conv_names)
     addConvergence(class_name, conv_name, params);
 }

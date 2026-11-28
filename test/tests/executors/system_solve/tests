@@ -1,0 +1,96 @@
+[Tests]
+  design = 'SystemSolveExecutor.md'
+  issues = '#20123 #32860'
+
+  [system_solve]
+    requirement = 'The system shall provide an executor that solves one solver system and'
+    [steady]
+      type = CSVDiff
+      input = steady.i
+      csvdiff = system_solve_out.csv
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'whose reference solution of a linear and two nonlinear systems comes from the steady executioner,'
+    []
+    [executors]
+      type = CSVDiff
+      input = executors.i
+      cli_args = '--executor'
+      csvdiff = system_solve_out.csv
+      prereq = system_solve/steady
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'gives the same solution as the steady executioner,'
+    []
+    [solve_type]
+      type = RunApp
+      input = executors.i
+      cli_args = '--executor Executors/solve_w/solve_type=PJFNK Outputs/csv=false'
+      expect_out = '\[u_sys\]: NEWTON \[w_sys\]: Preconditioned JFNK'
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'applies its solve type to its system only,'
+    []
+    [linear_tolerance]
+      type = RunApp
+      input = executors.i
+      cli_args = "--executor Executors/solve_u/petsc_options_value=jacobi Executors/solve_u/l_tol=0.25 "
+                 "Executors/solve_u/petsc_options=-ksp_view Executors/solve_w/petsc_options=-ksp_view "
+                 "Outputs/csv=false"
+      expect_out = 'KSP Object: \(u_sys_\).*?relative=0\.25.*?KSP Object: \(w_sys_\).*?relative=1e-10'
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'applies its linear solver tolerances to its system only,'
+    []
+    [nonlinear_convergence]
+      type = CSVDiff
+      input = executors.i
+      cli_args = '--executor Executors/solve_u/convergence=no_iterations '
+                 'Outputs/file_base=nonlinear_convergence_out'
+      csvdiff = nonlinear_convergence_out.csv
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'applies its nonlinear Convergence object to its system only,'
+    []
+    [linear_convergence]
+      type = CSVDiff
+      input = executors.i
+      cli_args = '--executor Executors/solve_v/convergence=no_iterations '
+                 'Outputs/file_base=linear_convergence_out'
+      csvdiff = linear_convergence_out.csv
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'applies its linear Convergence object to its system only, and'
+    []
+    [failure]
+      type = RunException
+      input = executors.i
+      cli_args = '--executor Executors/solve_v/petsc_options_value=none Executors/solve_v/l_max_its=2'
+      expect_err = "solve_v\(FAIL\): system 'v_sys' did not converge"
+      absent_out = 'System u_sys: Solve'
+      max_threads = 1 # see libmesh issue #3808
+      detail = 'fails if its system does not converge.'
+    []
+  []
+
+  [errors]
+    requirement = 'The system shall report an error if an executor that solves one solver system'
+    [nonlinear_parameter]
+      type = RunException
+      input = executors.i
+      cli_args = '--executor Executors/solve_v/solve_type=NEWTON'
+      expect_err = 'Executors/solve_v/solve_type: This parameter applies only to nonlinear systems'
+      detail = 'gets a nonlinear solver parameter for a linear system, or'
+    []
+    [relaxation]
+      type = RunException
+      input = executors.i
+      cli_args = '--executor Executors/solve_u/relaxation_factor=0.5'
+      expect_err = 'Relaxation requires a multi-system fixed point iteration over this executor'
+      detail = 'gets a relaxation factor without a multi-system fixed point iteration.'
+    []
+  []
+
+  [reserved_name]
+    type = RunException
+    input = steady.i
+    cli_args = 'Executors/_moose_fixed_point/type=FixedPointExecutor '
+               'Executors/_moose_fixed_point/inner_executors=_moose_solve_u_sys'
+    expect_err = "an executor with name '_moose_fixed_point' already exists"
+    requirement = 'The system shall report an error if a user executor has the name of an executor that the executioner creates to solve the systems.'
+  []
+[]

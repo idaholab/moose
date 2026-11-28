@@ -861,7 +861,7 @@ Assembly::reinitFE(const Elem * elem)
     {
       const auto & qw = _current_qrule->get_weights();
       computeADElemNodePoints(
-          *elem, ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum());
+          *elem, ADReal::do_derivatives && _sys.number() == _subproblem.currentNlJSysNum());
       for (unsigned int qp = 0; qp != n_qp; qp++)
         computeSinglePointMapAD(elem, qw, qp, _holder_fe_helper[dim]);
     }
@@ -2193,7 +2193,7 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
       const auto & qw = _current_qrule_face->get_weights();
       if (_need_ad_face_map || _need_ad_grad_phi_face)
         computeADElemNodePoints(
-            elem, ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum());
+            elem, ADReal::do_derivatives && _sys.number() == _subproblem.currentNlJSysNum());
       // computeFaceMap supplies the AD face JxW, normals and points; the single-point map only adds
       // the inverse map that computeGradPhiAD needs
       if (_need_ad_face_map)
@@ -2671,6 +2671,7 @@ Assembly::init(const CouplingMatrix * cm)
   _cached_jacobian_values.resize(num_matrix_tags);
   _cached_jacobian_rows.resize(num_matrix_tags);
   _cached_jacobian_cols.resize(num_matrix_tags);
+  _constrained_jacobian_rows.resize(num_matrix_tags);
 
   // Element matrices
   _sub_Kee.resize(num_matrix_tags);
@@ -4336,11 +4337,18 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
 {
   if (dof_indices.size() == 0)
     return;
-  if (!(*_cm)(ivar, jvar))
+
+  const unsigned int j_sys_num = _subproblem.currentNlJSysNum();
+  const bool cross_system = j_sys_num != _sys.number();
+
+  // For same-system Jacobian, apply the coupling matrix check; skip it cross-system.
+  if (!cross_system && !(*_cm)(ivar, jvar))
     return;
 
   auto & iv = _sys.getVariable(_tid, ivar);
-  auto & jv = _sys.getVariable(_tid, jvar);
+  // For cross-system blocks, look up the column variable in JSys.
+  SystemBase & jsys = cross_system ? _subproblem.systemBaseNonlinear(j_sys_num) : _sys;
+  auto & jv = jsys.getVariable(_tid, jvar);
   auto & scaling_factor = iv.arrayScalingFactor();
 
   const unsigned int ivn = iv.number();
@@ -4356,9 +4364,9 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
   const unsigned int i = ivar - ivn;
   const unsigned int j = jvar - jvn;
 
-  // DoF indices are independently given
+  // For cross-system blocks, column DOF indices come from the JSys variable.
   auto di = dof_indices;
-  auto dj = dof_indices;
+  auto dj = cross_system ? jv.dofIndices() : dof_indices;
 
   auto indof = di.size();
   auto jndof = dj.size();
@@ -4574,14 +4582,27 @@ Assembly::cacheJacobian(numeric_index_type i,
 }
 
 void
+Assembly::constrainJacobianRow(dof_id_type row, LocalDataKey, const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    if (_sys.hasMatrix(tag))
+      _constrained_jacobian_rows[tag].push_back(row);
+}
+
+void
 Assembly::setCachedJacobian(GlobalDataKey)
 {
-  for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
+  for (MooseIndex(_constrained_jacobian_rows) tag = 0; tag < _constrained_jacobian_rows.size();
+       tag++)
     if (_sys.hasMatrix(tag))
     {
-      // First zero the rows (including the diagonals) to prepare for
-      // setting the cached values.
-      _sys.getMatrix(tag).zero_rows(_cached_jacobian_rows[tag], 0.0);
+      // A node on several boundaries registers its rows once per boundary, so remove duplicates
+      auto & rows = _constrained_jacobian_rows[tag];
+      std::sort(rows.begin(), rows.end());
+      rows.erase(std::unique(rows.begin(), rows.end()), rows.end());
+
+      // Zero the constrained rows to prepare for setting the cached BC values.
+      _sys.getMatrix(tag).zero_rows(rows, 0.0);
 
       // TODO: Use SparseMatrix::set_values() for efficiency
       for (MooseIndex(_cached_jacobian_values) i = 0; i < _cached_jacobian_values[tag].size(); ++i)
@@ -4594,16 +4615,6 @@ Assembly::setCachedJacobian(GlobalDataKey)
 }
 
 void
-Assembly::zeroCachedJacobian(GlobalDataKey)
-{
-  for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
-    if (_sys.hasMatrix(tag))
-      _sys.getMatrix(tag).zero_rows(_cached_jacobian_rows[tag], 0.0);
-
-  clearCachedJacobian();
-}
-
-void
 Assembly::clearCachedJacobian()
 {
   for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
@@ -4611,6 +4622,7 @@ Assembly::clearCachedJacobian()
     _cached_jacobian_rows[tag].clear();
     _cached_jacobian_cols[tag].clear();
     _cached_jacobian_values[tag].clear();
+    _constrained_jacobian_rows[tag].clear();
   }
 }
 

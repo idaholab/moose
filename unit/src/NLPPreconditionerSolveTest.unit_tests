@@ -1,0 +1,10 @@
+[Tests]
+  design = 'NMSMExecutor.md NewtonSNESExecutor.md'
+  issues = '#32860'
+
+  [solves_with_expected_physics]
+    type = GoogleTest
+    unit_test = NLPPreconditionerSolveTest.SolvesWithExpectedPhysicsAndOuterIterations
+    requirement = 'The system shall solve multiple nonlinear systems with an outer Newton solver that uses a nonlinear field split preconditioner, and reach the expected solution within a bounded number of outer iterations.'
+  []
+[]

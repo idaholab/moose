@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "MooseApp.h"
 #include "FEProblem.h"
+#include "EigenProblem.h"
 #include "DisplacedProblem.h"
 #include "NonlinearSystem.h"
 #include "LinearSystem.h"
@@ -26,6 +27,7 @@
 #include "MultiMooseEnum.h"
 #include "Conversion.h"
 #include "Executioner.h"
+#include "FEProblemSolve.h"
 #include "MooseMesh.h"
 #include "ComputeLineSearchObjectWrapper.h"
 #include "Convergence.h"
@@ -51,6 +53,7 @@
 #include <petscis.h>
 #include <petscdm.h>
 #include <petscoptions.h>
+#include <petsc/private/kspimpl.h>
 
 // PetscDMMoose include
 #include "PetscDMMoose.h"
@@ -498,8 +501,9 @@ petscLinearConverged(
   }
   else
   {
-    auto & convergence = problem.getConvergence(
-        problem.getLinearConvergenceNames()[problem.currentLinearSystem().number()]);
+    auto & convergence =
+        problem.getConvergence(problem.getLinearConvergenceNames()[problem.linearSysNum(
+            problem.currentLinearSystem().name())]);
     status = convergence.checkConvergence(it);
   }
 
@@ -565,50 +569,124 @@ getPetscKSPNormType(Moose::MooseKSPNormType kspnorm)
   }
 }
 
-void
-petscSetDefaultKSPNormType(FEProblemBase & problem, KSP ksp)
+namespace
 {
-  for (const auto i : make_range(problem.numSolverSystems()))
+/**
+ * Set the default norm type of \p ksp unless the options database requests a norm type for it.
+ * The default is the norm type of \p solver_system if the Krylov method supports it on the
+ * requested preconditioning side. Otherwise PETSc selects a norm type for that side.
+ */
+PetscErrorCode
+setDefaultKSPNormTypeIfNotRequested(KSP ksp, const SolverSystem & solver_system)
+{
+  ::PetscOptions options;
+  const char * prefix;
+  PetscBool requested;
+
+  PetscFunctionBegin;
+  PetscCall(PetscObjectGetOptions((PetscObject)ksp, &options));
+  PetscCall(KSPGetOptionsPrefix(ksp, &prefix));
+  PetscCall(PetscOptionsHasName(options, prefix, "-ksp_norm_type", &requested));
+  if (requested)
+    PetscFunctionReturn(PETSC_SUCCESS);
+
+  // pc_side_set holds the requested side, for example from the pc_side parameter or -ksp_pc_side.
+  // The norm support table is empty until the Krylov method is set. KSPSetFromOptions sets the
+  // method before it calls the options handler, which checks the support again.
+  const auto norm = getPetscKSPNormType(solver_system.getMooseKSPNormType());
+  bool supported = !((PetscObject)ksp)->type_name;
+  for (PetscInt side = 0; side < PC_SIDE_MAX; ++side)
+    if (ksp->pc_side_set == PC_SIDE_DEFAULT || ksp->pc_side_set == side)
+      supported = supported || ksp->normsupporttable[norm][side] > 0;
+  PetscCall(KSPSetNormType(ksp, supported ? norm : KSP_NORM_DEFAULT));
+  PetscFunctionReturn(PETSC_SUCCESS);
+}
+
+/// Sets the default norm type after KSPSetFromOptions processes the options of the KSP
+PetscErrorCode
+#if PETSC_VERSION_LESS_THAN(3, 23, 0)
+defaultKSPNormTypeOptionsHandler(PetscObject ksp, PetscOptionItems *, void * solver_system)
+#else
+defaultKSPNormTypeOptionsHandler(PetscObject ksp, PetscOptionItems, void * solver_system)
+#endif
+{
+  PetscFunctionBegin;
+  PetscCall(setDefaultKSPNormTypeIfNotRequested((KSP)ksp,
+                                                *static_cast<const SolverSystem *>(solver_system)));
+  PetscFunctionReturn(PETSC_SUCCESS);
+}
+}
+
+void
+petscSetDefaultKSPNormType(const FEProblemBase & problem,
+                           const SolverSystem & solver_system,
+                           KSP ksp)
+{
+  // The user requested this norm type. PETSc reports an error if the Krylov method does not
+  // support it on the requested side.
+  if (solver_system.kspNormSetByUser())
   {
-    SolverSystem & sys = problem.getSolverSystem(i);
+    LibmeshPetscCallA(
+        problem.comm().get(),
+        KSPSetNormType(ksp, getPetscKSPNormType(solver_system.getMooseKSPNormType())));
+    return;
+  }
+
+  // The options database can request a norm type or a side. The options handler checks these
+  // requests in KSPSetFromOptions, after all options are inserted.
+  LibmeshPetscCallA(problem.comm().get(), setDefaultKSPNormTypeIfNotRequested(ksp, solver_system));
+  LibmeshPetscCallA(problem.comm().get(),
+                    PetscObjectAddOptionsHandler((PetscObject)ksp,
+                                                 defaultKSPNormTypeOptionsHandler,
+                                                 LIBMESH_PETSC_NULLPTR,
+                                                 const_cast<SolverSystem *>(&solver_system)));
+}
+
+void
+petscSetDefaultPCSide(const FEProblemBase & problem, const SolverSystem & solver_system, KSP ksp)
+{
+  // PETSc 3.2.x+
+  if (solver_system.getPCSide() != Moose::PCS_DEFAULT)
     LibmeshPetscCallA(problem.comm().get(),
-                      KSPSetNormType(ksp, getPetscKSPNormType(sys.getMooseKSPNormType())));
-  }
+                      KSPSetPCSide(ksp, getPetscPCSide(solver_system.getPCSide())));
 }
 
 void
-petscSetDefaultPCSide(FEProblemBase & problem, KSP ksp)
+petscSetKSPDefaults(const FEProblemBase & problem, const SolverSystem & solver_system, KSP ksp)
 {
-  for (const auto i : make_range(problem.numSolverSystems()))
+  // A tolerance set on the system takes precedence over the EquationSystems one, as in
+  // libMesh::ImplicitSystem::get_linear_solve_parameters. Only setESLinearSolverParams sets the
+  // EquationSystems absolute tolerance, so the kspRelatedParams default applies without it.
+  const auto & sys_params = solver_system.system().parameters;
+  const auto & es_params = problem.es().parameters;
+  const auto get_param =
+      [&sys_params, &es_params](const std::string & name, const auto default_value)
   {
-    SolverSystem & sys = problem.getSolverSystem(i);
+    using T = std::decay_t<decltype(default_value)>;
+    if (sys_params.have_parameter<T>(name))
+      return sys_params.get<T>(name);
+    if (es_params.have_parameter<T>(name))
+      return es_params.get<T>(name);
+    return default_value;
+  };
+  const auto ksp_params = kspRelatedParams();
 
-    // PETSc 3.2.x+
-    if (sys.getPCSide() != Moose::PCS_DEFAULT)
-      LibmeshPetscCallA(problem.comm().get(), KSPSetPCSide(ksp, getPetscPCSide(sys.getPCSide())));
-  }
-}
-
-void
-petscSetKSPDefaults(FEProblemBase & problem, KSP ksp)
-{
-  auto & es = problem.es();
-
-  PetscReal rtol = es.parameters.get<Real>("linear solver tolerance");
-  PetscReal atol = es.parameters.get<Real>("linear solver absolute tolerance");
+  PetscReal rtol = get_param("linear solver tolerance", ksp_params.get<Real>("l_tol"));
+  PetscReal atol = get_param("linear solver absolute tolerance", ksp_params.get<Real>("l_abs_tol"));
 
   // MOOSE defaults this to -1 for some dumb reason
   if (atol < 0)
     atol = 1e-50;
 
-  PetscReal maxits = es.parameters.get<unsigned int>("linear solver maximum iterations");
+  PetscReal maxits =
+      get_param("linear solver maximum iterations", ksp_params.get<unsigned int>("l_max_its"));
 
   // 1e100 is because we don't use divtol currently
   LibmeshPetscCallA(problem.comm().get(), KSPSetTolerances(ksp, rtol, atol, 1e100, maxits));
 
-  petscSetDefaultPCSide(problem, ksp);
+  petscSetDefaultPCSide(problem, solver_system, ksp);
 
-  petscSetDefaultKSPNormType(problem, ksp);
+  petscSetDefaultKSPNormType(problem, solver_system, ksp);
 }
 
 void
@@ -647,7 +725,7 @@ petscSetDefaults(FEProblemBase & problem)
         nl.comm().get(),
         SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, LIBMESH_PETSC_NULLPTR));
 
-    petscSetKSPDefaults(problem, ksp);
+    petscSetKSPDefaults(problem, nl, ksp);
   }
 
   for (auto sys_index : make_range(problem.numLinearSystems()))
@@ -666,7 +744,7 @@ petscSetDefaults(FEProblemBase & problem)
     // initialization above
     KSP ksp = petsc_solver->ksp();
 
-    if (problem.hasLinearConvergenceObjects())
+    if (problem.hasLinearConvergenceName(lin_sys.name()))
       LibmeshPetscCallA(
           lin_sys.comm().get(),
           KSPSetConvergenceTest(ksp, petscLinearConverged, &problem, LIBMESH_PETSC_NULLPTR));
@@ -676,28 +754,63 @@ petscSetDefaults(FEProblemBase & problem)
   }
 }
 
-void
-processSingletonMooseWrappedOptions(FEProblemBase & fe_problem, const InputParameters & params)
+namespace
 {
-  setSolveTypeFromParams(fe_problem, params);
-  setLineSearchFromParams(fe_problem, params);
-  setMFFDTypeFromParams(fe_problem, params);
+void
+setSolveTypeFromParams(FEProblemBase & fe_problem,
+                       const InputParameters & params,
+                       const unsigned int nl_sys_num)
+{
+  const std::string & solve_type = params.get<MooseEnum>("solve_type");
+  fe_problem.solverParams(nl_sys_num)._type = Moose::stringToEnum<Moose::SolveType>(solve_type);
 }
 
-#define checkPrefix(prefix)                                                                        \
-  mooseAssert(prefix[0] == '-',                                                                    \
-              "Leading prefix character must be a '-'. Current prefix is '" << prefix << "'");     \
-  mooseAssert((prefix.size() == 1) || (prefix.back() == '_'),                                      \
-              "Terminating prefix character must be a '_'. Current prefix is '" << prefix << "'"); \
-  mooseAssert(MooseUtils::isAllLowercase(prefix), "PETSc prefixes should be all lower-case")
+void
+setLineSearchFromParams(FEProblemBase & fe_problem,
+                        const InputParameters & params,
+                        const unsigned int nl_sys_num)
+{
+  const auto & line_search = params.get<MooseEnum>("line_search");
+  if (fe_problem.solverParams(nl_sys_num)._line_search == Moose::LS_INVALID ||
+      line_search != "default")
+  {
+    Moose::LineSearchType enum_line_search =
+        Moose::stringToEnum<Moose::LineSearchType>(line_search);
+    fe_problem.solverParams(nl_sys_num)._line_search = enum_line_search;
+    if (enum_line_search == LS_CONTACT || enum_line_search == LS_PROJECT)
+    {
+      NonlinearImplicitSystem * nl_system = dynamic_cast<NonlinearImplicitSystem *>(
+          &fe_problem.getNonlinearSystemBase(nl_sys_num).system());
+      if (!nl_system)
+        mooseError("You've requested a line search but you must be solving an EigenProblem. "
+                   "These two things are not consistent.");
+      libMesh::PetscNonlinearSolver<Real> * petsc_nonlinear_solver =
+          dynamic_cast<libMesh::PetscNonlinearSolver<Real> *>(nl_system->nonlinear_solver.get());
+      if (!petsc_nonlinear_solver)
+        mooseError("Currently the MOOSE line searches all use Petsc, so you "
+                   "must use Petsc as your non-linear solver.");
+      petsc_nonlinear_solver->linesearch_object =
+          std::make_unique<ComputeLineSearchObjectWrapper>(fe_problem);
+    }
+  }
+}
 
 void
-storePetscOptions(FEProblemBase & fe_problem,
-                  const std::string & prefix,
-                  const ParallelParamObject & param_object)
+setMFFDTypeFromParams(FEProblemBase & fe_problem,
+                      const InputParameters & params,
+                      const unsigned int nl_sys_num)
+{
+  const auto & mffd_type = params.get<MooseEnum>("mffd_type");
+  fe_problem.solverParams(nl_sys_num)._mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
+}
+
+/// Stores the flags and the option-value pairs of \p param_object with \p prefix
+void
+storePetscFlagsAndPairs(FEProblemBase & fe_problem,
+                        const std::string & prefix,
+                        const ParallelParamObject & param_object)
 {
   const auto & params = param_object.parameters();
-  processSingletonMooseWrappedOptions(fe_problem, params);
 
   // The parameters contained in the Action
   const auto & petsc_options = params.get<MultiMooseEnum>("petsc_options");
@@ -715,18 +828,67 @@ storePetscOptions(FEProblemBase & fe_problem,
   addPetscPairsToPetscOptions(
       petsc_pair_options, fe_problem.mesh().dimension(), prefix, param_object, po);
 }
+}
+
+void
+processSingletonMooseWrappedOptions(FEProblemBase & fe_problem, const InputParameters & params)
+{
+  setSolveTypeFromParams(fe_problem, params);
+  setLineSearchFromParams(fe_problem, params);
+  setMFFDTypeFromParams(fe_problem, params);
+}
+
+void
+processSingletonMooseWrappedOptions(FEProblemBase & fe_problem,
+                                    const InputParameters & params,
+                                    const SolverSystem & solver_system)
+{
+  // Linear systems have no Newton-Krylov settings
+  if (!dynamic_cast<const NonlinearSystemBase *>(&solver_system))
+    return;
+  const auto nl_sys_num = fe_problem.nlSysNum(solver_system.name());
+
+  // EigenProblemSolve stores the eigenvalue solve type itself
+  if (params.isParamValid("solve_type") && !dynamic_cast<const EigenProblem *>(&fe_problem))
+    setSolveTypeFromParams(fe_problem, params, nl_sys_num);
+  if (params.isParamValid("line_search"))
+    setLineSearchFromParams(fe_problem, params, nl_sys_num);
+  if (params.isParamValid("mffd_type"))
+    setMFFDTypeFromParams(fe_problem, params, nl_sys_num);
+}
+
+#define checkPrefix(prefix)                                                                        \
+  mooseAssert(prefix[0] == '-',                                                                    \
+              "Leading prefix character must be a '-'. Current prefix is '" << prefix << "'");     \
+  mooseAssert((prefix.size() == 1) || (prefix.back() == '_'),                                      \
+              "Terminating prefix character must be a '_'. Current prefix is '" << prefix << "'"); \
+  mooseAssert(MooseUtils::isAllLowercase(prefix), "PETSc prefixes should be all lower-case")
+
+void
+storePetscOptions(FEProblemBase & fe_problem,
+                  const std::string & prefix,
+                  const ParallelParamObject & param_object)
+{
+  processSingletonMooseWrappedOptions(fe_problem, param_object.parameters());
+  storePetscFlagsAndPairs(fe_problem, prefix, param_object);
+}
+
+void
+storePetscOptions(FEProblemBase & fe_problem,
+                  const SolverSystem & solver_system,
+                  const ParallelParamObject & param_object)
+{
+  processSingletonMooseWrappedOptions(fe_problem, param_object.parameters(), solver_system);
+  storePetscFlagsAndPairs(fe_problem, solver_system.prefix(), param_object);
+}
 
 void
 setSolveTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params)
 {
   // Note: Options set in the Preconditioner block will override those set in the Executioner block
   if (params.isParamValid("solve_type") && !params.isParamValid("_use_eigen_value"))
-  {
-    // Extract the solve type
-    const std::string & solve_type = params.get<MooseEnum>("solve_type");
     for (const auto i : make_range(fe_problem.numNonlinearSystems()))
-      fe_problem.solverParams(i)._type = Moose::stringToEnum<Moose::SolveType>(solve_type);
-  }
+      setSolveTypeFromParams(fe_problem, params, i);
 }
 
 void
@@ -734,43 +896,16 @@ setLineSearchFromParams(FEProblemBase & fe_problem, const InputParameters & para
 {
   // Note: Options set in the Preconditioner block will override those set in the Executioner block
   if (params.isParamValid("line_search"))
-  {
-    const auto & line_search = params.get<MooseEnum>("line_search");
     for (const auto i : make_range(fe_problem.numNonlinearSystems()))
-      if (fe_problem.solverParams(i)._line_search == Moose::LS_INVALID || line_search != "default")
-      {
-        Moose::LineSearchType enum_line_search =
-            Moose::stringToEnum<Moose::LineSearchType>(line_search);
-        fe_problem.solverParams(i)._line_search = enum_line_search;
-        if (enum_line_search == LS_CONTACT || enum_line_search == LS_PROJECT)
-        {
-          NonlinearImplicitSystem * nl_system = dynamic_cast<NonlinearImplicitSystem *>(
-              &fe_problem.getNonlinearSystemBase(i).system());
-          if (!nl_system)
-            mooseError("You've requested a line search but you must be solving an EigenProblem. "
-                       "These two things are not consistent.");
-          libMesh::PetscNonlinearSolver<Real> * petsc_nonlinear_solver =
-              dynamic_cast<libMesh::PetscNonlinearSolver<Real> *>(
-                  nl_system->nonlinear_solver.get());
-          if (!petsc_nonlinear_solver)
-            mooseError("Currently the MOOSE line searches all use Petsc, so you "
-                       "must use Petsc as your non-linear solver.");
-          petsc_nonlinear_solver->linesearch_object =
-              std::make_unique<ComputeLineSearchObjectWrapper>(fe_problem);
-        }
-      }
-  }
+      setLineSearchFromParams(fe_problem, params, i);
 }
 
 void
 setMFFDTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params)
 {
   if (params.isParamValid("mffd_type"))
-  {
-    const auto & mffd_type = params.get<MooseEnum>("mffd_type");
     for (const auto i : make_range(fe_problem.numNonlinearSystems()))
-      fe_problem.solverParams(i)._mffd_type = Moose::stringToEnum<Moose::MffdType>(mffd_type);
-  }
+      setMFFDTypeFromParams(fe_problem, params, i);
 }
 
 template <typename T>
@@ -1052,7 +1187,22 @@ getPetscValidLineSearches()
 }
 
 InputParameters
-getPetscValidParams()
+flagAndPairOptions()
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<MultiMooseEnum>(
+      "petsc_options", getCommonPetscFlags(), "Singleton PETSc options");
+  params.addParam<MultiMooseEnum>(
+      "petsc_options_iname", getCommonPetscKeys(), "Names of PETSc name/value pairs");
+  params.addParam<std::vector<std::string>>(
+      "petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
+  params.addParamNamesToGroup("petsc_options petsc_options_iname petsc_options_value", "PETSc");
+  return params;
+}
+
+InputParameters
+newtonKrylovParams()
 {
   InputParameters params = emptyInputParameters();
 
@@ -1072,17 +1222,30 @@ getPetscValidParams()
                              "Jacobian-free solve types. Note that the "
                              "default is wp (for Walker and Pernice).");
 
-  params.addParam<MultiMooseEnum>(
-      "petsc_options", getCommonPetscFlags(), "Singleton PETSc options");
-  params.addParam<MultiMooseEnum>(
-      "petsc_options_iname", getCommonPetscKeys(), "Names of PETSc name/value pairs");
-  params.addParam<std::vector<std::string>>(
-      "petsc_options_value",
-      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
-  params.addParamNamesToGroup("solve_type petsc_options petsc_options_iname petsc_options_value "
-                              "mffd_type",
-                              "PETSc");
+  std::set<std::string> line_searches = FEProblemSolve::mooseLineSearches();
+  line_searches.insert({"default", "none", "basic"});
+  const auto petsc_line_searches = getPetscValidLineSearches();
+  line_searches.insert(petsc_line_searches.begin(), petsc_line_searches.end());
+  MooseEnum line_search(Moose::stringify(line_searches, " "), "default");
+  params.addParam<MooseEnum>(
+      "line_search", line_search, "Specifies the line search type (Note: none = basic)");
+  MooseEnum line_search_package("petsc moose", "petsc");
+  params.addParam<MooseEnum>("line_search_package",
+                             line_search_package,
+                             "The solver package to use to conduct the line-search");
 
+  params.addParamNamesToGroup("solve_type mffd_type", "PETSc");
+  params.addParamNamesToGroup("line_search line_search_package", "Solver line search");
+  return params;
+}
+
+InputParameters
+kspRelatedParams()
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
+  params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
+  params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
   return params;
 }
 
@@ -1376,6 +1539,16 @@ registerPetscCitation(const std::string & bibtex)
   // separated. A null "set" flag registers unconditionally; callers deduplicate by citation key.
   const std::string entry = (!bibtex.empty() && bibtex.back() == '\n') ? bibtex : bibtex + "\n";
   LibmeshPetscCallA(PETSC_COMM_WORLD, PetscCitationsRegister(entry.c_str(), nullptr));
+}
+
+void
+setESLinearSolverParams(libMesh::EquationSystems & es, const MooseBase & solver_object)
+{
+  es.parameters.set<Real>("linear solver tolerance") = solver_object.getParam<Real>("l_tol");
+  es.parameters.set<Real>("linear solver absolute tolerance") =
+      solver_object.getParam<Real>("l_abs_tol");
+  es.parameters.set<unsigned int>("linear solver maximum iterations") =
+      solver_object.getParam<unsigned int>("l_max_its");
 }
 
 } // Namespace PetscSupport

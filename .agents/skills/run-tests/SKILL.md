@@ -15,6 +15,9 @@ description: >-
   `moose/test/run_tests` (framework tests), `moose/modules/run_tests` (all modules),
   `moose/modules/<module>/run_tests` (one module), `moose/python/run_tests`, `moose/unit/run_tests`.
   They're all the same thin TestHarness wrapper, just rooted at different directories.
+- `moose/modules/run_tests` runs every module's tests with the `modules/combined` executable, so
+  build `modules/combined` first. `moose/modules/combined/run_tests` runs only the tests under
+  `modules/combined/`.
 
 Run from the directory the script lives in (repo root for an app; `test/`, `modules/`,
 `modules/<module>/`, etc. for MOOSE itself). The app/module must already be compiled (opt/dbg

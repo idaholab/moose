@@ -31,6 +31,7 @@ class EigenProblem;
 class InputParameters;
 class SolverParams;
 class MultiMooseEnum;
+class SolverSystem;
 
 namespace Moose
 {
@@ -182,7 +183,9 @@ PetscErrorCode mooseSlepcEPSSNESSetCustomizePC(EPS eps);
  * Allow users to specify PC side. By default, we apply PC from the right side.
  * It is consistent with the nonlinear solver.
  */
-PetscErrorCode mooseSlepcEPSSNESKSPSetPCSide(FEProblemBase & problem, EPS eps);
+PetscErrorCode mooseSlepcEPSSNESKSPSetPCSide(const FEProblemBase & problem,
+                                             const SolverSystem & solver_system,
+                                             EPS eps);
 
 /**
  * Attach call backs to mat. SLEPc solver will retrieve callbacks we attached here

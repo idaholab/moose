@@ -1,0 +1,48 @@
+[Tests]
+  design = 'NewtonSNESExecutor.md'
+  issues = '#32860'
+
+  [errors]
+    requirement = 'The system shall report an error for a Newton executor'
+    [convergence_names_size]
+      type = RunException
+      input = 'two_systems.i'
+      cli_args = "Executors/outer/convergence_names='c0' --executor"
+      expect_err = "Must have the same length as 'nonlinear_system_names'"
+      detail = 'if the number of convergence names differs from the number of nonlinear systems,'
+    []
+    [missing_npc]
+      type = RunException
+      input = 'two_systems.i'
+      cli_args = '--executor'
+      expect_err = 'multiple nonlinear systems currently require'
+      detail = 'or if it targets multiple nonlinear systems without a nonlinear preconditioner.'
+    []
+  []
+
+  [per_system_solve_type]
+    type = RunApp
+    input = 'mspin.i'
+    cli_args = '--executor Executors/sub0/solve_type=NEWTON Executors/sub1/solve_type=PJFNK'
+    expect_out = 'Solver Mode:\s+\[nl0\]: NEWTON \[nl1\]: Preconditioned JFNK'
+    requirement = 'The system shall apply the solve type of a single-system Newton executor to the nonlinear system of that executor only.'
+  []
+
+  [mspin_block_solve]
+    requirement = 'The system shall configure the linear solves of the diagonal blocks of a multiplicative Schwarz preconditioner with the options of the block nonlinear system'
+    [user_side]
+      type = RunApp
+      input = 'mspin.i'
+      cli_args = '--executor -outer_snes_monitor -nl0_ksp_view -nl0_ksp_pc_side left'
+      expect_out = 'SNES Function norm[^\n]*\n(?:(?!Nonlinear \|R\|).)*?KSP Object: \(nl0_\)(?:(?!Nonlinear \|R\|).)*?left preconditioning\s+using PRECONDITIONED norm type'
+      detail = 'including a preconditioning side that the user requests,'
+    []
+    [invalid_user_side_and_norm]
+      type = RunException
+      input = 'mspin.i'
+      cli_args = '--executor -nl0_ksp_pc_side left -nl0_ksp_norm_type unpreconditioned'
+      expect_err = 'KSP gmres does not support norm type UNPRECONDITIONED with preconditioner side LEFT'
+      detail = 'and report the error of the linear solver if the requested side and norm type are incompatible.'
+    []
+  []
+[]
