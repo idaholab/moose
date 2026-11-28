@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "EigenProblem.h"
+#include "Executor.h"
 #include "Factory.h"
 #include "MooseApp.h"
 #include "NonlinearEigenSystem.h"
@@ -177,4 +178,8 @@ EigenProblemSolve::initialSetup()
     _eigen_problem.petscOptionsInserted() = true;
   }
 #endif
+
+  // Convergence objects exist only after the executors
+  for (auto * const executor : _executors)
+    executor->initialSetup();
 }

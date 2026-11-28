@@ -27,9 +27,12 @@ class NonlinearSystemBase;
 class CommandLine;
 class InputParameters;
 class ParallelParamObject;
+class MooseBase;
+class SolverSystem;
 
 namespace libMesh
 {
+class EquationSystems;
 class DofMapBase;
 }
 
@@ -106,7 +109,8 @@ void petscSetOptions(const PetscOptions & po,
 /**
  * Set the default options for a KSP
  */
-void petscSetKSPDefaults(FEProblemBase & problem, KSP ksp);
+void
+petscSetKSPDefaults(const FEProblemBase & problem, const SolverSystem & solver_system, KSP ksp);
 
 /**
  * Set the defaults for a libMesh LinearSolver
@@ -115,9 +119,13 @@ void petscSetKSPDefaults(FEProblemBase & problem, KSP ksp);
  */
 template <typename T>
 void
-setLinearSolverDefaults(FEProblemBase & problem, libMesh::LinearSolver<T> & linear_solver)
+setLinearSolverDefaults(const FEProblemBase & problem,
+                        const SolverSystem & solver_system,
+                        libMesh::LinearSolver<T> & linear_solver)
 {
-  petscSetKSPDefaults(problem, cast_ref<libMesh::PetscLinearSolver<T> &>(linear_solver).ksp());
+  petscSetKSPDefaults(problem,
+                      solver_system,
+                      libMesh::cast_ref<libMesh::PetscLinearSolver<T> &>(linear_solver).ksp());
 }
 
 /**
@@ -145,6 +153,15 @@ void processSingletonMooseWrappedOptions(FEProblemBase & fe_problem,
                                          const InputParameters & params);
 
 /**
+ * Process the MOOSE-wrapped PETSc options of \p params for \p solver_system only. Linear systems
+ * have none of these options. For an EigenProblem the solve type is skipped, because
+ * EigenProblemSolve stores the eigenvalue solve type itself.
+ */
+void processSingletonMooseWrappedOptions(FEProblemBase & fe_problem,
+                                         const InputParameters & params,
+                                         const SolverSystem & solver_system);
+
+/**
  * Stores the PETSc options supplied from the parameter object on the problem
  * @param fe_problem The problem on which we will store the parameters
  * @param prefix A prefix to apply to all the parameter object's PETSc options. This should either
@@ -154,6 +171,15 @@ void processSingletonMooseWrappedOptions(FEProblemBase & fe_problem,
  */
 void storePetscOptions(FEProblemBase & fe_problem,
                        const std::string & prefix,
+                       const ParallelParamObject & param_object);
+
+/**
+ * Stores the PETSc options supplied from the parameter object on the problem for one solver
+ * system. The options get the prefix of \p solver_system, and the MOOSE-wrapped options apply to
+ * \p solver_system only.
+ */
+void storePetscOptions(FEProblemBase & fe_problem,
+                       const SolverSystem & solver_system,
                        const ParallelParamObject & param_object);
 
 /**
@@ -226,13 +252,20 @@ void addPetscPairsToPetscOptions(
 std::set<std::string> getPetscValidLineSearches();
 
 /**
- * Returns the PETSc options that are common between Executioners and Preconditioners
- * @return InputParameters object containing the PETSc related parameters
- *
- * The output of this function should be added to the the parameters object of the overarching class
- * @see CreateExecutionerAction
+ * @returns The parameters for PETSc flags and name/value pairs
  */
-InputParameters getPetscValidParams();
+InputParameters flagAndPairOptions();
+
+/**
+ * @returns The parameters of a Newton-Krylov nonlinear solve: solve type, finite differencing
+ * type, and line search
+ */
+InputParameters newtonKrylovParams();
+
+/**
+ * @returns The tolerance and iteration limit parameters of a linear (Krylov) solve
+ */
+InputParameters kspRelatedParams();
 
 /// A helper function to produce a MultiMooseEnum with commonly used PETSc single options (flags)
 MultiMooseEnum getCommonPetscFlags();
@@ -293,12 +326,15 @@ void addPetscOptionsFromCommandline(FEProblemBase * const problem = nullptr);
 /**
  * Setup which side we want to apply preconditioner
  */
-void petscSetDefaultPCSide(FEProblemBase & problem, KSP ksp);
+void
+petscSetDefaultPCSide(const FEProblemBase & problem, const SolverSystem & solver_system, KSP ksp);
 
 /**
  * Set norm type
  */
-void petscSetDefaultKSPNormType(FEProblemBase & problem, KSP ksp);
+void petscSetDefaultKSPNormType(const FEProblemBase & problem,
+                                const SolverSystem & solver_system,
+                                KSP ksp);
 
 /**
  * This method takes an adjacency matrix, and a desired number of colors and applies
@@ -362,6 +398,12 @@ createMatrixFromFile(const libMesh::Parallel::Communicator & comm,
                      Mat & petsc_mat,
                      const std::string & binary_mat_file,
                      unsigned int mat_number_to_load = 1);
+
+/**
+ * Sets the linear solve tolerances and iteration limit in \p es from the kspRelatedParams()
+ * parameters of \p solver_object
+ */
+void setESLinearSolverParams(libMesh::EquationSystems & es, const MooseBase & solver_object);
 
 #define SNESGETLINESEARCH SNESGetLineSearch
 }

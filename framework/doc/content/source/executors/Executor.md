@@ -129,14 +129,14 @@ Steady2::validParams()
 {
   InputParameters params = Executor::validParams();
   // create input parameters for our sub/internal solve executors
-  params.addRequiredParam<std::string>("solve1", "the first solve");
-  params.addRequiredParam<std::string>("solve2", "the second solve");
+  params.addRequiredParam<ExecutorName>("solve1", "the first solve");
+  params.addRequiredParam<ExecutorName>("solve2", "the second solve");
   return params;
 }
 
 FooExecutor::FooExecutor(InputParameters & params)
-  : _inner_solve1(&_fe_problem.getExecutor(getParam<std::string>("solve1"))), // retrieve inner executor objects
-    _inner_solve2(&_fe_problem.getExecutor(getParam<std::string>("solve2")))
+  : _inner_solve1(&getExecutor<Executor>("solve1")), // retrieve inner executor objects
+    _inner_solve2(&getExecutor<Executor>("solve2"))
 {
 }
 
