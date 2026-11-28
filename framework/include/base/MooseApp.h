@@ -58,7 +58,6 @@
 class AppFactory;
 class Executioner;
 class Executor;
-class NullExecutor;
 class FEProblemBase;
 class InputParameterWarehouse;
 class CommandLine;
@@ -340,8 +339,7 @@ public:
    * Retrieve the Executioner for this App
    */
   Executioner * getExecutioner() const;
-  Executor * getExecutor() const { return _executor.get(); }
-  NullExecutor * getNullExecutor() const { return _null_executor.get(); }
+  Executor * getExecutor() const { return _executor; }
   bool useExecutor() const { return _use_executor; }
   FEProblemBase & feProblem() const;
 
@@ -349,7 +347,6 @@ public:
    * Set the Executioner for this App
    */
   void setExecutioner(std::shared_ptr<Executioner> && executioner) { _executioner = executioner; }
-  void setExecutor(std::shared_ptr<Executor> && executor) { _executor = executor; }
   void
   addExecutor(const std::string & type, const std::string & name, const InputParameters & params);
 
@@ -376,13 +373,18 @@ public:
   void createExecutors();
 
   /**
+   * Calls Executor::initialSetup on every executor
+   */
+  void initialSetupExecutors();
+
+  /**
    * Get an Executor
    *
+   * @tparam T The type to cast the Executor to; errors if the Executor is not of this type
    * @param name The name of the Executor
-   * @param fail_if_not_found Whether or not to fail if the executor doesn't exist.  If this is
-   * false then this function will return a NullExecutor
    */
-  Executor & getExecutor(const std::string & name, bool fail_if_not_found = true);
+  template <typename T>
+  T & getExecutor(const std::string & name);
 
   /**
    * This info is stored here because we need a "globalish" place to put it in
@@ -1366,10 +1368,10 @@ protected:
   std::shared_ptr<Executioner> _executioner;
 
   /// Pointer to the Executor of this run
-  std::shared_ptr<Executor> _executor;
+  Executor * _executor = nullptr;
 
   /// Pointers to all of the Executors for this run
-  std::map<std::string, std::shared_ptr<Executor>> _executors;
+  std::map<std::string, std::unique_ptr<Executor>> _executors;
 
   /// Used in building the Executors
   /// Maps the name of the Executor block to the <type, params>
@@ -1383,9 +1385,6 @@ protected:
   /// Indicates whether we are operating in the new/experimental executor mode
   /// instead of using the legacy executioner system.
   const bool _use_executor;
-
-  /// Used to return an executor that does nothing
-  std::shared_ptr<NullExecutor> _null_executor;
 
   /// Boolean to indicate whether to use a Nonlinear or EigenSystem (inspected by actions)
   bool _use_nonlinear;
@@ -1493,6 +1492,12 @@ private:
    * in setupOptions(). See numThreads().
    */
   THREAD_ID determineNumThreads() const;
+
+  /**
+   * @returns The type of \p executor. The templated getExecutor uses this helper so that this
+   * header does not need the full Executor type.
+   */
+  static const std::string & executorType(const Executor & executor);
 
   /**
    * Internal function used to recursively create the executor objects.
@@ -1818,4 +1823,24 @@ MooseApp::getInterfaceObjects() const
     return cast_ptr<InterfaceRegistryObjects<T> *>(it->second.get())->_objects;
   const static std::vector<T *> empty;
   return empty;
+}
+
+template <typename T>
+T &
+MooseApp::getExecutor(const std::string & name)
+{
+  const auto it = _executors.find(name);
+  if (it == _executors.end())
+    mooseError("Executor not found: ", name);
+
+  if (auto * const ret = dynamic_cast<T *>(it->second.get()))
+    return *ret;
+
+  mooseError("Executor '",
+             name,
+             "' of type '",
+             executorType(*it->second),
+             "' is not of the requested type '",
+             MooseUtils::prettyCppType<T>(),
+             "'");
 }

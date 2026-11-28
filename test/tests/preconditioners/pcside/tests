@@ -9,4 +9,42 @@
 
     requirement = "The system shall support the ability to use the conjugate gradient method for preconditioning with PETSc."
   [../]
+
+  [user_side]
+    issues = '#8681 #32860'
+    requirement = 'The system shall apply a requested preconditioning side to the linear solver and select a norm type that the Krylov method supports on that side'
+    [option]
+      type = RunApp
+      input = 'gmres.i'
+      cli_args = '-ksp_pc_side left -ksp_view'
+      expect_out = 'left preconditioning\s+using PRECONDITIONED norm type'
+      detail = 'if the side is set in the PETSc options database,'
+    []
+    [param]
+      type = RunApp
+      input = 'gmres.i'
+      cli_args = 'Preconditioning/smp/pc_side=left -ksp_view'
+      expect_out = 'left preconditioning\s+using PRECONDITIONED norm type'
+      detail = 'or if the side is set with the preconditioner parameter.'
+    []
+  []
+
+  [invalid_user_side_and_norm]
+    issues = '#8681 #32860'
+    requirement = 'The system shall report the error of the linear solver if the requested preconditioning side and norm type are incompatible with the Krylov method'
+    [option]
+      type = RunException
+      input = 'gmres.i'
+      cli_args = '-ksp_pc_side left -ksp_norm_type unpreconditioned'
+      expect_err = 'KSP gmres does not support norm type UNPRECONDITIONED with preconditioner side LEFT'
+      detail = 'if they are set in the PETSc options database,'
+    []
+    [param]
+      type = RunException
+      input = 'gmres.i'
+      cli_args = 'Preconditioning/smp/pc_side=left Preconditioning/smp/ksp_norm=unpreconditioned'
+      expect_err = 'KSP gmres does not support norm type UNPRECONDITIONED with preconditioner side LEFT'
+      detail = 'or if they are set with the preconditioner parameters.'
+    []
+  []
 []

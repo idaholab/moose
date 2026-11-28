@@ -18,6 +18,12 @@ If the [!param](/Executioner/Steady/multi_system_fixed_point) parameter is set t
 The user must pass a convergence object to the [!param](/Executioner/Steady/multi_system_fixed_point_convergence)
 to let the `FEProblemSolve` know when to terminate the fixed point loop.
 
+The `FEProblemSolve` runs these loops with [executors](Executor.md). It creates one
+[SystemSolveExecutor.md] per solver system, named `_moose_solve_<system name>`, and one
+[FixedPointExecutor.md] over them, named `_moose_fixed_point`. The system solves get the PETSc
+options, the solve type and the relaxation factor of their system from the executioner
+parameters.
+
 !alert note
 Options are currently limited for setting a multi-system fixed point convergence. We do not recommend using the
 nonlinear residual with a [VariableResidual.md] postprocessor or a [DefaultNonlinearConvergence.md] as these

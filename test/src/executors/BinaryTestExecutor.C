@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BinaryTestExecutor.h"
+#include "SteadyExecutor.h"
 
 registerMooseObject("MooseTestApp", BinaryTestExecutor);
 
@@ -24,12 +25,19 @@ BinaryTestExecutor::validParams()
   params.addParam<bool>("return_early_inner_fail",
                         false,
                         "true to cause executor to return early after inner executor failures");
+  params.addParam<ExecutorName>(
+      "steady_inner",
+      "A SteadyExecutor to retrieve by type at construction, which tests the type check");
   return params;
 }
 
 BinaryTestExecutor::BinaryTestExecutor(const InputParameters & parameters)
-  : Executor(parameters), _inner1(getExecutor("inner1")), _inner2(getExecutor("inner2"))
+  : Executor(parameters),
+    _inner1(isParamValid("inner1") ? &getExecutor<Executor>("inner1") : nullptr),
+    _inner2(isParamValid("inner2") ? &getExecutor<Executor>("inner2") : nullptr)
 {
+  if (isParamValid("steady_inner"))
+    getExecutor<SteadyExecutor>("steady_inner");
 }
 
 Executor::Result
@@ -45,9 +53,9 @@ BinaryTestExecutor::run()
     return result;
   }
 
-  if (isParamValid("inner1"))
+  if (_inner1)
   {
-    bool converged = result.record("inner1", _inner1.exec());
+    bool converged = result.record("inner1", _inner1->exec());
     if (getParam<bool>("return_early_inner_fail") && !converged)
     {
       _console << "BinaryTestExecutor " << name() << " END EARLY\n" << std::flush;
@@ -55,8 +63,8 @@ BinaryTestExecutor::run()
     }
   }
 
-  if (isParamValid("inner2"))
-    result.record("inner2", _inner2.exec());
+  if (_inner2)
+    result.record("inner2", _inner2->exec());
 
   if (getParam<bool>("fail_late"))
     result.fail("manual late fail");

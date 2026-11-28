@@ -2941,14 +2941,15 @@ FEProblemBase::addConvergence(const std::string & type,
 }
 
 void
-FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_apply)
+FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_apply,
+                                              const std::vector<ConvergenceName> & conv_names)
 {
   const std::string class_name = "DefaultNonlinearConvergence";
   InputParameters params = _factory.getValidParams(class_name);
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
-  for (const auto & conv_name : getNonlinearConvergenceNames())
+  for (const auto & conv_name : conv_names)
     addConvergence(class_name, conv_name, params);
 }
 
@@ -7580,22 +7581,12 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // settings, including setting matrix prefixes. This must occur before petscSetOptions
   initPetscOutputAndSomeSolverSettings();
 
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  Moose::PetscSupport::petscSetOptions(
-      _petsc_options, _solver_params); // Make sure the PETSc options are setup for this app
-#else
   // Now this database will be the default
   // Each app should have only one database
   if (!_app.isUltimateMaster())
     LibmeshPetscCall(PetscOptionsPush(_petsc_option_data_base));
-  // We did not add PETSc options to database yet
-  if (!_is_petsc_options_inserted)
-  {
-    // Insert options for all systems all at once
-    Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params, this);
-    _is_petsc_options_inserted = true;
-  }
-#endif
+
+  insertPetscOptionsIfNeeded();
 
   // set up DM which is required if use a field split preconditioner
   // We need to setup DM every "solve()" because libMesh destroy SNES after solve()
@@ -7619,10 +7610,19 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
 
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
     LibmeshPetscCall(PetscOptionsPop());
-#endif
+}
+
+void
+FEProblemBase::insertPetscOptionsIfNeeded()
+{
+  if (_is_petsc_options_inserted)
+    return;
+
+  // Insert options for all systems all at once
+  Moose::PetscSupport::petscSetOptions(_petsc_options, _solver_params, this);
+  _is_petsc_options_inserted = true;
 }
 
 void
@@ -7721,43 +7721,27 @@ FEProblemBase::resetState()
 }
 
 void
-FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
-                                 const Moose::PetscSupport::PetscOptions * po)
+FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num)
 {
   TIME_SECTION("solve", 1, "Solving", false);
 
   setCurrentLinearSystem(linear_sys_num);
 
-  const Moose::PetscSupport::PetscOptions & options = po ? *po : _petsc_options;
-  auto & solver_params = _solver_params[numNonlinearSystems() + linear_sys_num];
-
   // Set custom convergence criteria
   Moose::PetscSupport::petscSetDefaults(*this);
 
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  LibmeshPetscCall(Moose::PetscSupport::petscSetOptions(
-      options, solver_params)); // Make sure the PETSc options are setup for this app
-#else
   // Now this database will be the default
   // Each app should have only one database
   if (!_app.isUltimateMaster())
     LibmeshPetscCall(PetscOptionsPush(_petsc_option_data_base));
 
-  // We did not add PETSc options to database yet
-  if (!_is_petsc_options_inserted)
-  {
-    Moose::PetscSupport::petscSetOptions(options, solver_params, this);
-    _is_petsc_options_inserted = true;
-  }
-#endif
+  insertPetscOptionsIfNeeded();
 
   if (_solve)
     _current_linear_sys->solve();
 
-#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
     LibmeshPetscCall(PetscOptionsPop());
-#endif
 }
 
 bool
@@ -10560,6 +10544,33 @@ FEProblemBase::setNonlinearConvergenceNames(const std::vector<ConvergenceName> &
 }
 
 void
+FEProblemBase::setNonlinearConvergence(const NonlinearSystemName & nl_sys_name,
+                                       const ConvergenceName & convergence_name)
+{
+  if (!_nonlinear_convergence_names)
+    _nonlinear_convergence_names.emplace(numNonlinearSystems());
+  const auto sys_num = nlSysNum(nl_sys_name);
+  auto & slot = (*_nonlinear_convergence_names)[sys_num];
+  if (!slot.empty())
+    mooseError("A convergence object has already been set for nonlinear system '",
+               nl_sys_name,
+               "': '",
+               slot,
+               "'");
+  slot = convergence_name;
+  _nl[sys_num]->setConvergenceName(convergence_name);
+}
+
+bool
+FEProblemBase::hasNonlinearConvergenceName(const NonlinearSystemName & nl_sys_name) const
+{
+  if (!_nonlinear_convergence_names)
+    return false;
+  const auto sys_num = nlSysNum(nl_sys_name);
+  return !(*_nonlinear_convergence_names)[sys_num].empty();
+}
+
+void
 FEProblemBase::setMultiAppFixedPointConvergenceName(const ConvergenceName & convergence_name)
 {
   _multiapp_fixed_point_convergence_name = convergence_name;
@@ -10579,20 +10590,35 @@ FEProblemBase::getNonlinearConvergenceNames() const
   mooseError("The nonlinear system convergence name(s) have not been set.");
 }
 
-bool
-FEProblemBase::hasLinearConvergenceObjects() const
-{
-  // If false,this means we have not set one, not that we are querying this too early
-  // TODO: once there is a default linear CV object, error on the 'not set' case
-  return _linear_convergence_names.has_value();
-}
-
 void
 FEProblemBase::setLinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names)
 {
   if (convergence_names.size() != numLinearSystems())
     paramError("linear_convergence", "There must be one convergence object per linear system");
   _linear_convergence_names = convergence_names;
+}
+
+void
+FEProblemBase::setLinearConvergence(const LinearSystemName & linear_sys_name,
+                                    const ConvergenceName & convergence_name)
+{
+  if (!_linear_convergence_names)
+    _linear_convergence_names.emplace(numLinearSystems());
+  auto & slot = (*_linear_convergence_names)[linearSysNum(linear_sys_name)];
+  if (!slot.empty())
+    mooseError("A convergence object has already been set for linear system '",
+               linear_sys_name,
+               "': '",
+               slot,
+               "'");
+  slot = convergence_name;
+}
+
+bool
+FEProblemBase::hasLinearConvergenceName(const LinearSystemName & linear_sys_name) const
+{
+  return _linear_convergence_names &&
+         !(*_linear_convergence_names)[linearSysNum(linear_sys_name)].empty();
 }
 
 const std::vector<ConvergenceName> &

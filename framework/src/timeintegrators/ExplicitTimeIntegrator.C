@@ -189,8 +189,10 @@ ExplicitTimeIntegrator::setupSolver()
     _linear_solver->init();
   }
 
+  // The auxiliary system also owns a time integrator, but only solver systems solve with it
   if (_solve_type == CONSISTENT || _solve_type == LUMP_PRECONDITIONED)
-    Moose::PetscSupport::setLinearSolverDefaults(_fe_problem, *_linear_solver);
+    if (const auto * const solver_sys = dynamic_cast<const SolverSystem *>(&_sys))
+      Moose::PetscSupport::setLinearSolverDefaults(_fe_problem, *solver_sys, *_linear_solver);
 }
 
 bool

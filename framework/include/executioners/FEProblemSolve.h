@@ -12,7 +12,12 @@
 #include "MultiSystemSolveObject.h"
 
 class Convergence;
+class Executor;
 
+/**
+ * Solves the FEProblem with executors: one SystemSolveExecutor per solver system and one
+ * FixedPointExecutor that sweeps over them. The executors are owned by the application.
+ */
 class FEProblemSolve : public MultiSystemSolveObject
 {
 public:
@@ -22,6 +27,9 @@ public:
   static InputParameters validParams();
 
   static const std::set<std::string> & mooseLineSearches();
+
+  /// The parameters of the line searches in mooseLineSearches()
+  static InputParameters mooseLineSearchParams();
 
   virtual void initialSetup() override;
 
@@ -65,4 +73,12 @@ protected:
 
   /// Performs setup related to Convergence objects
   void convergenceSetup();
+
+  /// Builds the executors that solve the systems, see the class description
+  void addExecutors();
+
+  /// The executors that this object builds, in the order of construction
+  std::vector<Executor *> _executors;
+  /// The executor that runs the multi-system fixed point iteration over the system solves
+  Executor * _fixed_point_executor = nullptr;
 };

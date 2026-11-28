@@ -179,6 +179,7 @@ public:
   };
 
   virtual libMesh::EquationSystems & es() override { return _req.set().es(); }
+  const libMesh::EquationSystems & es() const { return _req.get().es(); }
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
   const MooseMesh & mesh(bool use_displaced) const override;
@@ -453,10 +454,8 @@ public:
   /**
    * Build and solve a linear system
    * @param linear_sys_num The number of the linear system (1,..,num. of lin. systems)
-   * @param po The petsc options for the solve, if not supplied, the defaults are used
    */
-  virtual void solveLinearSystem(const unsigned int linear_sys_num,
-                                 const Moose::PetscSupport::PetscOptions * po = nullptr);
+  virtual void solveLinearSystem(const unsigned int linear_sys_num);
 
   ///@{
   /**
@@ -800,13 +799,15 @@ public:
     return _steady_state_convergence_name.has_value();
   }
   /**
-   * Adds the default nonlinear Convergence associated with the problem
+   * Adds the default nonlinear Convergence objects associated with the problem
    *
    * This is called if the user does not supply 'nonlinear_convergence'.
    *
-   * @param[in] params   Parameters to apply to Convergence parameters
+   * @param[in] params        Parameters to apply to Convergence parameters
+   * @param[in] conv_names    Names of the default Convergence objects to add
    */
-  virtual void addDefaultNonlinearConvergence(const InputParameters & params);
+  virtual void addDefaultNonlinearConvergence(const InputParameters & params,
+                                              const std::vector<ConvergenceName> & conv_names);
   /**
    * Returns true if an error will result if the user supplies 'nonlinear_convergence'
    *
@@ -2523,8 +2524,6 @@ public:
   virtual void execute(const ExecFlagType & exec_type);
   virtual void executeAllObjects(const ExecFlagType & exec_type);
 
-  virtual Executor & getExecutor(const std::string & name) { return _app.getExecutor(name); }
-
   /**
    * Call compute methods on UserObjects.
    */
@@ -2708,6 +2707,14 @@ public:
    */
   bool & petscOptionsInserted() { return _is_petsc_options_inserted; }
 
+  /**
+   * Inserts the stored PETSc options of all solver systems into the PETSc options database,
+   * unless they were inserted before. A solver object calls this before the first
+   * FooSetFromOptions() call. The consumers then mark the options as used, so PETSc does not
+   * report them as unused at the end of the simulation.
+   */
+  void insertPetscOptionsIfNeeded();
+
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   PetscOptions & petscOptionsDatabase() { return _petsc_option_data_base; }
 #endif
@@ -2886,16 +2893,34 @@ public:
 
   bool haveDisplaced() const override final { return _displaced_problem.get(); }
 
-  /// Whether we have linear convergence objects
-  bool hasLinearConvergenceObjects() const;
   /**
    * Sets the nonlinear convergence object name(s) if there is one
    */
   void setNonlinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names);
   /**
+   * Sets the convergence object name for a single nonlinear system.
+   * Errors if a name has already been set for that system.
+   */
+  void setNonlinearConvergence(const NonlinearSystemName & nl_sys_name,
+                               const ConvergenceName & convergence_name);
+  /**
+   * Returns true if a convergence name has been explicitly set for the given nonlinear system.
+   */
+  bool hasNonlinearConvergenceName(const NonlinearSystemName & nl_sys_name) const;
+  /**
    * Sets the linear convergence object name(s) if there is one
    */
   void setLinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names);
+  /**
+   * Sets the convergence object name for a single linear system.
+   * Errors if a name has already been set for that system.
+   */
+  void setLinearConvergence(const LinearSystemName & linear_sys_name,
+                            const ConvergenceName & convergence_name);
+  /**
+   * Returns true if a convergence name has been set for the given linear system.
+   */
+  bool hasLinearConvergenceName(const LinearSystemName & linear_sys_name) const;
   /**
    * Sets the MultiApp fixed point convergence object name if there is one
    */
