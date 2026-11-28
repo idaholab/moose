@@ -2000,6 +2000,11 @@ MooseApp::createExecutors()
   if (_executor_params.empty())
     return;
 
+  // The executors that exist now were built by objects, for example FEProblemSolve
+  for (const auto & [name, _] : _executor_params)
+    if (_executors.count(name))
+      mooseError("an executor with name '", name, "' already exists");
+
   // Holds the names of Executors that may be the root executor
   std::list<std::string> possibly_root;
 

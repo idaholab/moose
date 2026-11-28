@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Executor.h"
+#include "SolveObject.h"
 
 #include <vector>
 #include <set>
@@ -38,5 +39,5 @@ protected:
   /// The Convergence object of the iteration, or nullptr for one sweep
   Convergence * _convergence = nullptr;
   /// The systems whose solution of the previous iteration is stored before each iteration
-  std::set<SystemBase *> _systems_to_copy_back;
+  std::set<SystemBase *, SystemNumberLess> _systems_to_copy_back;
 };

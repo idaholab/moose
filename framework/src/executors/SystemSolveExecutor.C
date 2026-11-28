@@ -167,7 +167,9 @@ SystemSolveExecutor::run()
   else
     _console << COLOR_GREEN << _solve_name << " Skipped!" << COLOR_DEFAULT << "\n" << std::endl;
 
-  // This is for postprocessing purposes in case none of the objects request the gradients
+  // This is for postprocessing purposes in case none of the objects request the gradients.
+  // TODO: Somehow collect information if the postprocessors need gradients and if nothing
+  // needs this, just skip it
   if (!_is_nonlinear)
     static_cast<LinearSystem &>(_sys).computeGradients();
 

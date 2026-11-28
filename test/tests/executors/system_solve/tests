@@ -84,4 +84,13 @@
       detail = 'gets a relaxation factor without a multi-system fixed point iteration.'
     []
   []
+
+  [reserved_name]
+    type = RunException
+    input = steady.i
+    cli_args = 'Executors/_moose_fixed_point/type=FixedPointExecutor '
+               'Executors/_moose_fixed_point/inner_executors=_moose_solve_u_sys'
+    expect_err = "an executor with name '_moose_fixed_point' already exists"
+    requirement = 'The system shall report an error if a user executor has the name of an executor that the executioner creates to solve the systems.'
+  []
 []

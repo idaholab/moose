@@ -11,12 +11,12 @@
 
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
-#include "LinearSystem.h"
 #include "Convergence.h"
 #include "Executioner.h"
 #include "ConvergenceIterationTypes.h"
 #include "MooseUtils.h"
-#include "AuxiliarySystem.h"
+#include "Executor.h"
+#include "Factory.h"
 
 std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
 
@@ -191,24 +191,6 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
       _moose_line_searches.end())
     _problem.addLineSearch(_pars);
 
-  auto set_solver_params = [this, &ex](const SolverSystem & sys)
-  {
-    const auto prefix = sys.prefix();
-    if (dynamic_cast<const LinearSystem *>(&sys))
-      Moose::PetscSupport::dontAddCommonSNESOptions(_problem, prefix);
-    Moose::PetscSupport::storePetscOptions(_problem, prefix, ex);
-    Moose::PetscSupport::setConvergedReasonFlags(_problem, prefix);
-
-    // Set solver parameter prefix and system number
-    auto & solver_params = _problem.solverParams(sys.number());
-    solver_params._prefix = prefix;
-    solver_params._solver_sys_num = sys.number();
-  };
-
-  // Extract and store PETSc related settings on FEProblemBase
-  for (const auto * const sys : _systems)
-    set_solver_params(*sys);
-
   // Set linear solve parameters in the equation system
   // Nonlinear solve parameters are added in the DefaultNonlinearConvergence
   EquationSystems & es = _problem.es();
@@ -240,6 +222,10 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
     _problem.setLinearConvergenceNames(
         getParam<std::vector<ConvergenceName>>("linear_convergence"));
   }
+
+  // The executors store the PETSc options and the solve types, which the automatic scaling checks
+  // below read. They must come after the line search and the convergence names.
+  addExecutors();
 
   // Check whether the user has explicitly requested automatic scaling and is using a solve type
   // without a matrix. If so, then we warn them
@@ -366,6 +352,58 @@ FEProblemSolve::getParamFromNonlinearSystemVectorParam(const std::string & param
 }
 
 void
+FEProblemSolve::addExecutors()
+{
+  auto & factory = _app.getFactory();
+  // The executors run inside this object, so they register no execute flags and no test-restep
+  // notice of their own
+  const auto set_internal = [](InputParameters & params)
+  {
+    params.set<ExecFlagType>("begin_exec_flag") = EXEC_NONE;
+    params.set<ExecFlagType>("end_exec_flag") = EXEC_NONE;
+    params.set<bool>("_supports_test_restep") = true;
+  };
+
+  // The executor parameters that come from this object. The Newton-Krylov parameters apply to
+  // nonlinear systems only.
+  auto forwarded = Moose::PetscSupport::flagAndPairOptions().getParametersList();
+  std::vector<std::string> linear_forwarded(forwarded.begin(), forwarded.end());
+  forwarded.merge(Moose::PetscSupport::newtonKrylovParams().getParametersList());
+  const std::vector<std::string> nonlinear_forwarded(forwarded.begin(), forwarded.end());
+
+  std::vector<ExecutorName> system_executors;
+  for (const auto i : index_range(_systems))
+  {
+    const auto & sys = *_systems[i];
+    auto params = factory.getValidParams("SystemSolveExecutor");
+    params.applySpecificParameters(
+        _pars,
+        dynamic_cast<const NonlinearSystemBase *>(&sys) ? nonlinear_forwarded : linear_forwarded);
+    set_internal(params);
+    params.set<SolverSystemName>("system") = sys.name();
+    params.set<Real>("relaxation_factor") = _multi_sys_fp_relax_factors[i];
+    params.set<bool>("_print_system_name") = _systems.size() > 1;
+    // This object sets the linear solver tolerances on the EquationSystems
+    params.set<bool>("_problem_wide_linear_tolerances") = true;
+
+    system_executors.push_back("_moose_solve_" + sys.name());
+    _app.addExecutor("SystemSolveExecutor", system_executors.back(), params);
+    _executors.push_back(&_app.getExecutor<Executor>(system_executors.back()));
+  }
+
+  auto params = factory.getValidParams("FixedPointExecutor");
+  set_internal(params);
+  params.set<std::vector<ExecutorName>>("inner_executors") = system_executors;
+  if (_using_multi_sys_fp_iterations && isParamValid("multi_system_fixed_point_convergence"))
+    params.set<ConvergenceName>("convergence") =
+        getParam<ConvergenceName>("multi_system_fixed_point_convergence");
+  const ExecutorName fixed_point_name = "_moose_fixed_point";
+  _app.addExecutor("FixedPointExecutor", fixed_point_name, params);
+  _fixed_point_executor = &_app.getExecutor<Executor>(fixed_point_name);
+  _executors.push_back(_fixed_point_executor);
+}
+
+void
 FEProblemSolve::initialSetup()
 {
   MultiSystemSolveObject::initialSetup();
@@ -379,28 +417,9 @@ FEProblemSolve::initialSetup()
     _app.solutionInvalidity().accumulateTimeStepIntoTotalOccurences(0);
   }
 
-  // Solution and aux systems may require copying back states due to 2 reasons:
-  // 1. The need for an older state was indicated to the problem.
-  // 2. Fixed point relaxation is to be performed.
-  for (const auto i : index_range(_systems))
-  {
-    const auto sys_num = _systems[i]->number();
-    if (_perform_multi_sys_fp_relaxation[i])
-      _problem.needsPreviousMultiSystemFixedPointIterationSolution(true, sys_num);
-
-    if (_problem.needsPreviousMultiSystemFixedPointIterationSolution(sys_num))
-    {
-      _systems[i]->needSolutionState(
-          1, Moose::SolutionIterationType::MultiSystemFixedPoint, _systems[i]->solution().type());
-      _systems_to_copy_back_multi_sys_fp.insert(_systems[i]);
-    }
-  }
-  if (_problem.needsPreviousMultiSystemFixedPointIterationAuxiliary())
-  {
-    _aux.needSolutionState(
-        1, Moose::SolutionIterationType::MultiSystemFixedPoint, _aux.solution().type());
-    _systems_to_copy_back_multi_sys_fp.insert(&_aux);
-  }
+  // Convergence objects exist only after the executors
+  for (auto * const executor : _executors)
+    executor->initialSetup();
 }
 
 void
@@ -424,15 +443,6 @@ FEProblemSolve::convergenceSetup()
       conv.checkIterationType(ConvergenceIterationTypes::LINEAR);
     }
   }
-
-  // multisystem fixed point
-  if (isParamValid("multi_system_fixed_point_convergence"))
-  {
-    _multi_sys_fp_convergence =
-        &_problem.getConvergence(getParam<ConvergenceName>("multi_system_fixed_point_convergence"));
-    _multi_sys_fp_convergence->checkIterationType(
-        ConvergenceIterationTypes::MULTISYSTEM_FIXED_POINT);
-  }
 }
 
 bool
@@ -440,107 +450,14 @@ FEProblemSolve::solve()
 {
   // Outer loop for multi-grid convergence
   bool converged = false;
-  unsigned int fp_iter = 0;
-
   for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
   {
-    // Multi-system fixed point loop
-    fp_iter = 0;
-    converged = false;
-    while (!converged)
-    {
-      if (_using_multi_sys_fp_iterations)
-      {
-        _console << COLOR_MAGENTA << "Multi-system fixed point iteration " << fp_iter << ":"
-                 << COLOR_DEFAULT << "\n"
-                 << std::endl;
-        _multi_sys_fp_convergence->preIteration();
-      }
-
-      // Copy back systems as needed/requested
-      for (auto * sys : _systems_to_copy_back_multi_sys_fp)
-        sys->copyPreviousSolutions(Moose::SolutionIterationType::MultiSystemFixedPoint);
-
-      // Loop over each system
-      for (const auto sys_i : index_range(_systems))
-      {
-        auto * const sys = _systems[sys_i];
-        const bool is_nonlinear = (dynamic_cast<NonlinearSystemBase *>(sys) != nullptr);
-
-        // Call solve on the problem for that system
-        if (is_nonlinear)
-          _problem.solve(sys->number());
-        else
-        {
-          const auto linear_sys_number =
-              cast_int<unsigned int>(sys->number() - _problem.numNonlinearSystems());
-          _problem.solveLinearSystem(linear_sys_number);
-        }
-
-        // Check convergence
-        const auto solve_name =
-            _systems.size() == 1 ? " Solve" : "System " + sys->name() + ": Solve";
-        if (_problem.shouldSolve())
-        {
-          if (_problem.converged(sys->number()))
-          {
-            if (_perform_multi_sys_fp_relaxation[sys_i])
-              sys->applyFixedPointRelaxation(_multi_sys_fp_relax_factors[sys_i],
-                                             Moose::SolutionIterationType::MultiSystemFixedPoint);
-
-            // Store the accepted, possibly relaxed LinearFV solution for nonlinear lagging.
-            if (!is_nonlinear)
-              sys->copyPreviousSolutions(Moose::SolutionIterationType::Nonlinear);
-
-            _console << COLOR_GREEN << solve_name << " Converged!" << COLOR_DEFAULT << "\n"
-                     << std::endl;
-          }
-          else
-          {
-            _console << COLOR_RED << solve_name << " Did NOT Converge!" << COLOR_DEFAULT << "\n"
-                     << std::endl;
-            return false;
-          }
-        }
-        else
-          _console << COLOR_GREEN << solve_name << " Skipped!" << COLOR_DEFAULT << "\n"
-                   << std::endl;
-
-        if (!is_nonlinear)
-        {
-          const auto linear_sys_number =
-              cast_int<unsigned int>(sys->number() - _problem.numNonlinearSystems());
-          auto & linear_sys = _problem.getLinearSystem(linear_sys_number);
-
-          // This is for postprocessing purposes in case none of the objects request the gradients.
-          // TODO: Somehow collect information if the postprocessors need gradients and if nothing
-          // needs this, just skip it
-          linear_sys.computeGradients();
-        }
-      }
-
-      _problem.execute(EXEC_MULTISYSTEM_FIXED_POINT_ITERATION_END);
-      _problem.outputStep(EXEC_MULTISYSTEM_FIXED_POINT_ITERATION_END);
-
-      // Assess convergence of the multi-system fixed point iteration
-      if (!_using_multi_sys_fp_iterations)
-        converged = true;
-      else
-      {
-        // checkConvergence expects the number of iterations performed, not the iteration index:
-        const auto n_fp_iter = fp_iter + 1;
-        const auto convergence_status = _multi_sys_fp_convergence->checkConvergence(n_fp_iter);
-        converged = convergence_status == Convergence::MooseConvergenceStatus::CONVERGED;
-        if (convergence_status == Convergence::MooseConvergenceStatus::DIVERGED)
-        {
-          _console << "Multisystem iteration diverged at iteration " << n_fp_iter << std::endl;
-          break;
-        }
-        if (converged)
-          _console << "Multisystem iteration converged at iteration " << n_fp_iter << std::endl;
-      }
-      fp_iter++;
-    }
+    const auto result = _fixed_point_executor->exec();
+    // A failed system solve ends the solve. A fixed point iteration that does not converge ends
+    // only this grid step.
+    if (result.converged && !result.convergedAll())
+      return false;
+    converged = result.converged;
 
     if (grid_step != _num_grid_steps)
       _problem.uniformRefine();
