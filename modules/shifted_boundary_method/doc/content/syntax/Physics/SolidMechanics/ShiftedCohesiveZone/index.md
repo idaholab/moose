@@ -108,6 +108,19 @@ property name requires an explicit `tangent_definition`:
 The AD interface kernel differentiates its residual automatically and does not use `tangent` or
 `tangent_definition`; setting either parameter with AD enabled is an error.
 
+## Coupling with NEML2 material models
+
+When using NEML2 constitutive models alongside shifted cohesive zone physics, the continuum
+stresses and material tangents required for directional correction (`directional_correction = true`)
+are evaluated at quadrature points on the surrogate cohesive interface.
+
+Unlike native MOOSE materials which reinitialize on interface faces automatically, NEML2
+models evaluate only on explicitly declared domains. Therefore, if a `[NEML2]` block produces
+the continuum stress or tangent consumed by `[Physics/SolidMechanics/ShiftedCohesiveZone]`, its
+`interface` parameter must include the SCZM `boundary`. If `interface` is omitted or does
+not overlap the cohesive boundary, the action reports a validation error instructing the user to
+either configure `interface` on the NEML2 block or set `directional_correction = false`.
+
 !syntax parameters /Physics/SolidMechanics/ShiftedCohesiveZone/ShiftedCohesiveZoneAction
 
 ## Associated Actions

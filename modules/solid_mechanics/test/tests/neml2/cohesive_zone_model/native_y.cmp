@@ -1,0 +1,15 @@
+COORDINATES absolute 1.e-10
+
+TIME STEPS absolute 1.e-12
+
+NODAL VARIABLES relative 5.5e-6 floor 1.e-10
+	disp_x floor 1.e-9
+	disp_y floor 1.e-9
+	react_y floor 1.e-5
+
+ELEMENT VARIABLES relative 5.5e-6 floor 1.e-10
+	cauchy_stress_yy floor 1.e-5
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES

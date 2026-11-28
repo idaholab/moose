@@ -42,8 +42,18 @@ public:
 
   void initialSetup() override;
 
-  /// Get the batch index for the given element ID
-  std::size_t getBatchIndex(dof_id_type elem_id) const;
+  /// Whether a batch span exists for the given element ID
+  bool hasBatchSpan(dof_id_type elem_id) const;
+
+  /// Whether a batch span exists for the given element side
+  bool hasSideBatchSpan(const NEML2BatchIndexGenerator::ElemSide & elem_side) const;
+
+  /// Get the batch span for the given element ID
+  NEML2BatchIndexGenerator::BatchSpan getBatchSpan(dof_id_type elem_id) const;
+
+  /// Get the batch span for the given element side
+  NEML2BatchIndexGenerator::BatchSpan
+  getSideBatchSpan(const NEML2BatchIndexGenerator::ElemSide & elem_side) const;
 
   /// Get a reference(!) to the requested output view
   const at::Tensor & getOutput(const std::string & output_name) const;
@@ -127,7 +137,7 @@ protected:
   std::map<std::string, at::Tensor> _out;
 
   /// Cached stateful variables from the last successful step (for on-device advance)
-  std::map<std::string, at::Tensor> _state_vars;
+  std::map<std::string, at::Tensor> & _state_vars;
 
   /// Base-shaped zero tensors for cold-started in-place-updated unknowns (an order-0 NEML2 input
   /// that is also a model output and is not gathered; see initialSetup). Injected into _in on every

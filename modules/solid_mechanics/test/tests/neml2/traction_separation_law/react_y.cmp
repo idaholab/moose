@@ -1,0 +1,18 @@
+COORDINATES absolute 1.e-6
+
+TIME STEPS absolute 1.e-12
+
+GLOBAL VARIABLES relative 5.e-3 floor 1.e-5
+	react_y
+
+NODAL VARIABLES relative 1.e-6 floor 1.e-10
+	disp_x
+	disp_y
+	react_y relative 5.e-3 floor 1.e-5
+
+ELEMENT VARIABLES relative 1.e-4 floor 1.e-6
+	stress_yy
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES

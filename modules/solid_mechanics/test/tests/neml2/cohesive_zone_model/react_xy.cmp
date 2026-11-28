@@ -1,0 +1,22 @@
+COORDINATES absolute 1.e-6
+
+TIME STEPS absolute 1.e-12
+# MOOSE regularizes the positive normal-separation bracket with regularizedHeavyside,
+# while NEML2 MacaulaySplit uses the exact Macaulay bracket max(x, 0). Exclude the
+# steps affected by that formulation difference; where the brackets agree, the
+# MOOSE and NEML2 responses match exactly.
+EXCLUDE TIMES 1-6
+
+NODAL VARIABLES relative 1.e-6 floor 1.e-7
+	disp_x
+	disp_y
+	react_x relative 5.e-3 floor 1.e-5
+	react_y relative 5.e-3 floor 1.e-5
+
+ELEMENT VARIABLES relative 1.e-4 floor 1.e-6
+	cauchy_stress_xy
+	cauchy_stress_yy
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES

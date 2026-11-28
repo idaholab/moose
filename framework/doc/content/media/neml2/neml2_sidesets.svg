@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="400" viewBox="0 0 960 400" role="img" aria-labelledby="title desc">
+<title id="title">NEML2 sideset geometry and evaluation</title><desc id="desc">Blocks A and B are inside D, C is outside. Four colored sides illustrate external boundary, domain boundary, internal interface and reversed ownership. The internal interface inset compares owner-only and two-sided evaluation.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5 0 10z" fill="#475569"/></marker></defs>
+<rect x="1" y="1" width="958" height="398" rx="14" fill="#fff" stroke="#cbd5e1"/>
+<g font-family="system-ui, sans-serif" fill="#172b40">
+<text x="34" y="35" font-size="19" font-weight="700">Geometry and ownership</text><text x="34" y="60" font-size="14">NEML2 domain D = {A, B}</text>
+<rect x="76" y="88" width="478" height="190" rx="3" fill="#eff7fc" stroke="#1678b9" stroke-width="2" stroke-dasharray="7 5"/>
+<rect x="76" y="280" width="478" height="67" rx="4" fill="#f1f5f9"/>
+<path d="M315 88V278" stroke="#aab9c5" stroke-width="1.5"/>
+<g font-size="28" font-weight="700" text-anchor="middle"><text x="195" y="175">A</text><text x="433" y="175">B</text></g>
+<text x="315" y="335" font-size="16" text-anchor="middle">C · outside D</text>
+<g fill="none" stroke-width="7" stroke-linecap="round"><path d="M76 137V215" stroke="#1479bf"/><path d="M130 278H257" stroke="#ce7710"/><path d="M315 137V215" stroke="#258346"/><path d="M374 278H500" stroke="#934795"/></g>
+<g fill="#1479bf"><circle cx="90" cy="150" r="4"/><circle cx="90" cy="176" r="4"/><circle cx="90" cy="202" r="4"/></g>
+<g fill="#ce7710"><circle cx="147" cy="264" r="4"/><circle cx="194" cy="264" r="4"/><circle cx="240" cy="264" r="4"/></g>
+<g fill="#258346"><circle cx="301" cy="150" r="4"/><circle cx="301" cy="176" r="4"/><circle cx="301" cy="202" r="4"/><circle cx="329" cy="150" r="4"/><circle cx="329" cy="176" r="4"/><circle cx="329" cy="202" r="4"/></g>
+<g stroke="#475569" stroke-width="1.7" marker-end="url(#arrow)"><path d="M194 284V312"/><path d="M437 312V284"/></g>
+<g font-size="14" font-weight="700" fill="white" text-anchor="middle"><circle cx="49" cy="137" r="14" fill="#1479bf"/><text x="49" y="142">1</text><circle cx="141" cy="305" r="14" fill="#ce7710"/><text x="141" y="310">2</text><circle cx="315" cy="112" r="14" fill="#258346"/><text x="315" y="117">3</text><circle cx="490" cy="305" r="14" fill="#934795"/><text x="490" y="310">4</text></g>
+<path d="M586 25V375" stroke="#dbe3ea"/>
+<text x="610" y="35" font-size="19" font-weight="700">Case 3: evaluation modes</text>
+<g font-size="14" font-weight="600"><text x="610" y="68">boundary · owner only</text><text x="610" y="225">interface · both sides</text></g>
+<g fill="#eff7fc" stroke="#1678b9" stroke-width="1.5" stroke-dasharray="6 4"><rect x="610" y="82" width="317" height="96" rx="4"/><rect x="610" y="239" width="317" height="96" rx="4"/></g>
+<path d="M768 84V176" stroke="#1479bf" stroke-width="5"/><path d="M768 241V333" stroke="#258346" stroke-width="5"/>
+<g text-anchor="middle" font-size="14"><text x="680" y="135">Owner A</text><text x="854" y="135">Neighbor B</text><text x="680" y="292">Owner A</text><text x="854" y="292">Neighbor B</text></g>
+<g fill="#1479bf"><circle cx="754" cy="102" r="4"/><circle cx="754" cy="130" r="4"/><circle cx="754" cy="158" r="4"/></g><g fill="#258346"><circle cx="754" cy="259" r="4"/><circle cx="754" cy="287" r="4"/><circle cx="754" cy="315" r="4"/><circle cx="782" cy="259" r="4"/><circle cx="782" cy="287" r="4"/><circle cx="782" cy="315" r="4"/></g>
+<g font-size="12" fill="#475569"><text x="34" y="376">Dots: evaluation locations · Arrows: owner-to-neighbor orientation</text><text x="610" y="364">Explicit assignment determines the evaluation mode.</text></g>
+</g></svg>

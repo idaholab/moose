@@ -27,6 +27,7 @@ public:
   NEML2ToMOOSEMaterialProperty(const InputParameters & params);
 
 #ifdef NEML2_ENABLED
+  void initialSetup() override;
   void computeProperties() override;
 
 protected:
@@ -43,6 +44,9 @@ protected:
 
   /// Reference to the requested output (or its derivative) value
   const at::Tensor & _value;
+
+  /// Boundaries where another retriever for this output supplies side values
+  const std::vector<BoundaryName> & _evaluated_boundaries;
 #endif
 };
 

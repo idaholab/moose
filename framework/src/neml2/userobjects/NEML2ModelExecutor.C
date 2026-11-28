@@ -103,6 +103,7 @@ NEML2ModelExecutor::NEML2ModelExecutor(const InputParameters & params)
     // No derivative retained yet -> nothing stale; the retriever's undefined-derivative path (zero
     // fill) covers the first steps. Only an actual batch resize (meshChanged) makes it invalid.
     _derivative_valid(true),
+    _state_vars(declareRestartableData<std::map<std::string, at::Tensor>>("state_vars")),
     _error_message(""),
     _num_failed_dumps(0)
 #endif
@@ -192,15 +193,33 @@ NEML2ModelExecutor::initialSetup()
     const auto & in_shapes = model().input_base_shapes();
     const auto opts = at::TensorOptions().dtype(at::kDouble).device(device());
     for (const auto i : index_range(in_names))
-      if (parseLag(in_names[i]).second > 0)
+      if (parseLag(in_names[i]).second > 0 && !_state_vars.count(in_names[i]))
         _state_vars[in_names[i]] = at::zeros(in_shapes[i], opts);
   }
 }
 
-std::size_t
-NEML2ModelExecutor::getBatchIndex(dof_id_type elem_id) const
+bool
+NEML2ModelExecutor::hasBatchSpan(dof_id_type elem_id) const
 {
-  return _batch_index_generator.getBatchIndex(elem_id);
+  return _batch_index_generator.hasBatchSpan(elem_id);
+}
+
+bool
+NEML2ModelExecutor::hasSideBatchSpan(const NEML2BatchIndexGenerator::ElemSide & elem_side) const
+{
+  return _batch_index_generator.hasSideBatchSpan(elem_side);
+}
+
+NEML2BatchIndexGenerator::BatchSpan
+NEML2ModelExecutor::getBatchSpan(dof_id_type elem_id) const
+{
+  return _batch_index_generator.getBatchSpan(elem_id);
+}
+
+NEML2BatchIndexGenerator::BatchSpan
+NEML2ModelExecutor::getSideBatchSpan(const NEML2BatchIndexGenerator::ElemSide & elem_side) const
+{
+  return _batch_index_generator.getSideBatchSpan(elem_side);
 }
 
 void
@@ -256,6 +275,10 @@ NEML2ModelExecutor::meshChanged()
 void
 NEML2ModelExecutor::execute()
 {
+  // Ranks with no local batch have no inputs, outputs, or state to advance.
+  if (_batch_index_generator.isEmpty())
+    return;
+
   // Nothing to recompute at EXEC_TIMESTEP_END: the value, parameter derivatives, and input Jacobian
   // are all retained from the solve (see below), so output/coupling consumers read the retained
   // tensors. The only job here is the optional on-device state advance after a converged step.
@@ -265,10 +288,6 @@ NEML2ModelExecutor::execute()
       advanceState();
     return;
   }
-
-  // If the batch is empty, we do not need to do anything
-  if (_batch_index_generator.isEmpty())
-    return;
 
   // Pin libtorch's intra-op thread count to this model's setting for the duration of the
   // evaluation, then restore it. MOOSE runs its element loops with libMesh threads and sets
@@ -371,13 +390,14 @@ NEML2ModelExecutor::advanceState()
   {
     const auto [base_name, lag] = parseLag(name);
     mooseAssert(lag > 0, "Invalid lag for a stateful variable");
-    // cache the value from the current step (favor output over input); the value that feeds
-    // "base~lag" next step is the current "base~(lag-1)" (which is "base" itself for lag == 1).
+    // Save a separate copy because gathered input tensors are rewritten during later evaluations.
+    // Without clone(), the old state would share storage with the current value and be overwritten.
+    // Favor output over input when choosing the current value to save.
     const auto curr_name = lagName(base_name, lag - 1);
     if (_out.count(curr_name))
-      _state_vars[name] = _out.at(curr_name);
+      _state_vars[name] = _out.at(curr_name).clone();
     else if (_in.count(curr_name))
-      _state_vars[name] = _in.at(curr_name);
+      _state_vars[name] = _in.at(curr_name).clone();
     else
       mooseError("Failed to find cached value for old variable: ", name);
   }
@@ -524,6 +544,10 @@ NEML2ModelExecutor::extractOutputs(bool compute_derivative)
                e.what(),
                NEML2Utils::NEML2_help_message);
   }
+
+  // Mark outputs ready as soon as the tensors are populated so downstream material retrieval
+  // during the same execute phase can see the fresh values.
+  _output_ready = true;
 }
 
 void
